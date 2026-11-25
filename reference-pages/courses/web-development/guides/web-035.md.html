@@ -212,7 +212,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="syntax-anatomy-and-mechanism">Syntax anatomy and mechanism<a class="heading-anchor" href="#syntax-anatomy-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Use explicit string keys for records, such as subject and minutes. <code>array_filter</code> preserves keys, so <code>array_values</code> is useful when the intended result is a fresh list. <code>array_map</code> applies a function to values. PHP 8.4 adds <code>array_find</code>, which returns the first matching value or null, and <code>array_any</code> and <code>array_all</code>, which answer yes-or-no questions without building an intermediate array. A foreach by reference can leave a lingering reference to the last item; avoid it unless mutation is necessary and understood.</p>
 <h3 id="classroom-execution-and-offline-inputs">Classroom execution and offline inputs<a class="heading-anchor" href="#classroom-execution-and-offline-inputs" aria-label="Link to this section">#</a></h3>
-<p>Choose the <strong>PHP CLI</strong> worker and work in <code>courses/web-development/lessons/web-035.php</code>, which runs as <code>main.php</code> in a bounded Linux process with PDO SQLite. Every input is a small synthetic value, and CLI runs are fresh processes, not persistent HTTP requests. Save your attempt before comparing it with <code>courses/web-development/solutions/web-035_solution.php</code>. <strong>How to run lessons</strong> in the <a href="../README.md.html">subject README</a> lists what the pad does not provide.</p>
+<p>The worked examples read one named field from a record and filter a list down to the rows that pass. You filter and summarize study records with array functions, keeping the original rows unchanged and the result a true list.</p>
+<p>Run <code>courses/web-development/lessons/web-035.php</code> with <strong>PHP CLI</strong>: synthetic inputs, not persistent HTTP requests (<a href="../STUDY-GUIDE.md.html#php-cli">why</a>).</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1-a-small-record">Worked example 1: A small record<a class="heading-anchor" href="#worked-example-1-a-small-record" aria-label="Link to this section">#</a></h4>
 <p>Keys name the meaning of each value.</p>
@@ -232,7 +233,7 @@ echo json_encode($kept), &quot;\n&quot;;
 echo json_encode(array_values($kept)), &quot;\n&quot;;</code></pre>
 <p><code>array_filter</code> keeps the original keys, so <code>$kept</code> holds keys 1 and 2. Because the keys no longer start at 0 and run consecutively, <code>json_encode</code> cannot represent the array as a list and produces the object {&quot;1&quot;:50,&quot;2&quot;:45}. A JavaScript client that calls <code>.map</code> on that value then fails, since objects have no <code>map</code> method. After <code>array_values</code> the keys are 0 and 1 and the output is the list [50,45]. Filtering that keeps the first element would hide this bug, so test with data where an early item is removed.</p>
 <h3 id="six-progressive-exercises">Six progressive exercises<a class="heading-anchor" href="#six-progressive-exercises" aria-label="Link to this section">#</a></h3>
-<p>Exercises that ask you to predict, explain, compare or diagnose keep their answers in the solutions file. The others show the evidence to look for.</p>
+<p>Exercises 1, 4 and 6 keep their expected answers in the solutions file.</p>
 <h4 id="exercise-1-explain-how-a-list-differs-from-a-keyed-record">Exercise 1: Explain how a list differs from a keyed record.<a class="heading-anchor" href="#exercise-1-explain-how-a-list-differs-from-a-keyed-record" aria-label="Link to this section">#</a></h4>
 <p><strong>Progressive hint:</strong> Compare how you refer to an item: by position or by name.</p>
 <h4 id="exercise-2-add-a-second-validated-study-row">Exercise 2: Add a second validated study row.<a class="heading-anchor" href="#exercise-2-add-a-second-validated-study-row" aria-label="Link to this section">#</a></h4>
@@ -250,10 +251,11 @@ echo json_encode(array_values($kept)), &quot;\n&quot;;</code></pre>
 <p><strong>Progressive hint:</strong> Use foreach with <code>&amp;$item</code> and then reuse <code>$item</code> in a second loop.</p>
 <h3 id="debugging-and-common-mistakes">Debugging and common mistakes<a class="heading-anchor" href="#debugging-and-common-mistakes" aria-label="Link to this section">#</a></h3>
 <p>Do not assume every array is a list. Avoid weakly typed mixed records whose missing fields become warnings during rendering. Keep mutation deliberate and test the original data after transformations.</p>
-<p>Keep the failing source, its input and the exact output, then repair one cause at a time. PHP can produce correct-looking text while missing an invalid-input branch, so rerun the empty, wrong-type and boundary cases after every fix.</p>
+<p>When json_encode prints an object with numeric keys where you expected an array, the filter kept the original keys; wrap the result in array_values. When the source rows have changed after a transformation, look for a foreach by reference that was never unset.</p>
+<p>The shared <a href="../STUDY-GUIDE.md.html#debugging-php">debugging routine</a> covers what to record before each repair.</p>
 <h3 id="retrieval-transfer-and-next-steps">Retrieval, transfer and next steps<a class="heading-anchor" href="#retrieval-transfer-and-next-steps" aria-label="Link to this section">#</a></h3>
-<p>Close the worked answers and explain array, ordered map and key without using the terms as their own definitions. Rebuild worked example 1 (A small record) from a blank pad, then try one new value, one empty or missing case and one unusual boundary. State which result would disprove your explanation.</p>
-<p>If you can reproduce the output but cannot explain why it happens, revisit <code>web-034</code>. A saved completion marker records your own progress; it is not a certification.</p>
+<p>Without notes, explain how PHP uses one array type for both lists and keyed records and what array_is_list checks. Then predict what array_find, array_any and array_all return for the two study rows, and explain why a foreach reference left alive can silently modify the last element on a later loop.</p>
+<p>Revisit <code>web-034</code> when an output is predictable but unexplained (<a href="../STUDY-GUIDE.md.html#review-loop">review loop</a>).</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
 <ul>
 <li><a href="https://www.php.net/manual/en/language.types.array.php">Arrays</a></li>

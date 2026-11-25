@@ -195,6 +195,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="torch-003-explanatory-solutions">torch-003: explanatory solutions<a class="heading-anchor" href="#torch-003-explanatory-solutions" aria-label="Link to this section">#</a></h2>
 <p>Open these answers only after attempting Linear modules, parameters and matrix contracts yourself. They reuse the guide&#x27;s literal inputs, starting from Example A, Calculate a known affine layer, so a discrepancy points at one step. The executable companion runs the assertions; this page explains why each one tests Affine map, Parameter registration, Weight layout. After a pass, choose a new input for exercise 6, Reject wrong feature width, without looking.</p>
+<p>After comparing, follow the <a href="../STUDY-GUIDE.md.html#after-the-solutions">review steps</a>.</p>
 <h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
 <p>A linear layer computes an affine transformation from input features to output features. For a batch X shaped (B, I), PyTorch nn.Linear(I, O) stores weight shaped (O, I) and computes X@weight.T+bias. This storage orientation differs from the common mathematical W shaped (I, O) and from a Keras Dense kernel. The batch axis is not part of the parameter shape. Bias has one value per output feature and is shared across observations.</p>
 <p>An nn.Parameter assigned to an nn.Module is registered as trainable state. A plain tensor attribute is not automatically an optimizer parameter, even if it participates in arithmetic. Registration lets model.parameters(), state_dict and device/dtype conversion find the intended state. Shape inspection and a hand-calculated first row provide an independent check before any training occurs.</p>
@@ -305,9 +306,7 @@ proper<span class="syntax-operator">.</span>weight <span class="syntax-operator"
 <span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span>
     <span class="syntax-keyword">raise</span> AssertionError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">wrong feature width accepted</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> RuntimeError from incompatible matrix dimensions.</p>
-<p><strong>Verify:</strong> In a fresh process, the exercise checks confirm <code>layer(torch.ones((1, 2), dtype=torch.float64))</code> raises <code>RuntimeError</code>.</p>
-<h3 id="review-after-comparison">Review after comparison<a class="heading-anchor" href="#review-after-comparison" aria-label="Link to this section">#</a></h3>
-<p>Repeat exercise 4, Remove the intercept explicitly, with one changed fixture value and predict the difference before running it. Keep your failing attempt at exercise 5, Expose an unregistered tensor, beside the repaired result. A missing framework is not a failing assertion. These solutions use only local fixtures.</p></article>
+<p><strong>Verify:</strong> In a fresh process, the exercise checks confirm <code>layer(torch.ones((1, 2), dtype=torch.float64))</code> raises <code>RuntimeError</code>.</p></article>
   </main>
 </body>
 </html>

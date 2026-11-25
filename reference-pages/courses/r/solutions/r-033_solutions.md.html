@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/r/solutions/r-033_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="r-033-reference-reasoning">r-033: reference reasoning<a class="heading-anchor" href="#r-033-reference-reasoning" aria-label="Link to this section">#</a></h2>
-<p>Use the <a href="r-033_reference.R.html">complete reference</a> with the guide&#x27;s declared inputs and runtime. Every worked example is also a standalone script.</p>
+<p>Run the <a href="r-033_reference.R.html">complete reference</a> under the <a href="../STUDY-GUIDE.md.html#run-a-chapter">run rules</a>.</p>
 <h3 id="why-the-implementation-has-this-shape">Why the implementation has this shape<a class="heading-anchor" href="#why-the-implementation-has-this-shape" aria-label="Link to this section">#</a></h3>
 <p>The lookup adds exactly one category per fact and retains the original line order. Key validation makes the first-match behavior safe for this contract.</p>
 <p>The A fact appears twice. A duplicate-key guard would reject the dimension before the incorrect total becomes a report.</p>
@@ -242,7 +242,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Tempting mistake:</strong> Relying on a plain JOIN, which is an inner join in SQL. It drops C exactly as merge did, and the total check is the only signal.</p>
 <p><strong>Verify:</strong> A query that groups the dimension by product with <code>HAVING COUNT(*) &gt; 1</code> returns zero rows, and the joined amount total returns 60.</p>
 <h3 id="what-the-checks-establish">What the checks establish<a class="heading-anchor" href="#what-the-checks-establish" aria-label="Link to this section">#</a></h3>
-<p>The reference makes 5 <code>stopifnot()</code> checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.</p></article>
+<p>The assertions confirm that the dimension key is present and unique, that every fact found a match, that a fully matched lookup returns categories Home, Paper and Home while the amount total stays 60, that both an unmatched key and a duplicated dimension key are detected, and that an empty join keeps the <code>product</code>, <code>amount</code> and <code>category</code> columns. They do not test many-to-many joins.</p>
+<p>The reference makes 5 <code>stopifnot()</code> checks; see <a href="../STUDY-GUIDE.md.html#what-a-passing-run-proves">what a passing run proves</a>.</p></article>
   </main>
 </body>
 </html>

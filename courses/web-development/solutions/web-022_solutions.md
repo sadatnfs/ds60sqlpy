@@ -1,6 +1,6 @@
 # web-022: explanatory solutions
 
-Open this after your own attempt. Each answer explains the lesson's synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in `courses/web-development/guides/web-022.md`.
+Attempt each exercise before reading; the mechanism is in `courses/web-development/guides/web-022.md` ([using these answers](../STUDY-GUIDE.md#solutions)).
 
 ## Exercise 1: Predict the layer winner for normal declarations.
 
@@ -76,4 +76,6 @@ Open this after your own attempt. Each answer explains the lesson's synthetic fi
 
 ## Reference comparison
 
-Open `courses/web-development/solutions/web-022_solution.html` only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; its success message is not an accessibility audit or proof of responsive behavior at every size.
+The reference reads the computed color of the text-muted paragraph and requires rgb(71, 85, 105), so it catches a utility layer declared too early or a component rule that still wins. It does not test the hover rule, layer placement of every rule or what happens under a different parent, so inspect the cascade in the Styles pane.
+
+Open `courses/web-development/solutions/web-022_solution.html` after saving your attempt ([comparing with the reference](../STUDY-GUIDE.md#references)).

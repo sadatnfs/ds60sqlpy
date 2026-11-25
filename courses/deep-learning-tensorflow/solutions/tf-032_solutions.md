@@ -1,6 +1,6 @@
 # tf-032: explanatory solutions
 
-Open these answers for Saving, export and inference parity after your own attempt at Example A, Create a fixed inference model, or after an explicit reveal. Each answer reuses the guide's literal inputs, so a mismatch points to one step. The companion script runs the assertions; this page explains why they test Serialization, Export, Parity. After matching exercise 6, Remove only owned artifacts, invent a new input without looking here.
+Open these answers after an attempt; they reuse the guide's inputs ([comparison steps](../STUDY-GUIDE.md#after-the-solutions)).
 
 ## Mechanism review
 
@@ -14,7 +14,7 @@ Saving has two distinct purposes: preserving a trainable Keras model and exporti
 
 ## Reading the implementation
 
-Save the built model to a path ending.keras. Load it with tf.keras.models.load_model. Export to a different owned directory and load it with tf.saved_model.load; call its serve endpoint. TemporaryDirectory owns both outputs. The child process accepts only the two local artifact paths created by the parent and prints predictions as JSON. Compare using float32 tolerance 1e-6.
+Save the built model to a path ending in .keras. Load it with tf.keras.models.load_model. Export to a different owned directory and load it with tf.saved_model.load; call its serve endpoint. TemporaryDirectory owns both outputs. The child process accepts only the two local artifact paths created by the parent and prints predictions as JSON. Compare using float32 tolerance 1e-6.
 
 ## Exercise 1: Create a fixed inference model
 
@@ -141,6 +141,3 @@ assert not folder.exists()
 
 **Verify:** In a fresh process, the exercise checks confirm `not folder.exists()`.
 
-## Review after comparison
-
-Change one fixture value in exercise 4, Check both in a fresh process, and predict the new result before running it. Keep the failing version of exercise 5, Check a new batch length, next to its repair. A missing framework is an environment record, not a failed assertion. No solution downloads data, calls an online model, deploys a service or changes a database.

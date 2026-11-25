@@ -1,6 +1,6 @@
 # Day 51: Target Encoding and Leakage-Safe Features
 
-**Offline teaching data:** The [original synthetic fixtures](../../fixtures/README.md) replace first-run sample-data downloads. Their values are not historical or observational evidence. Keep numerical conclusions scoped to the declared teaching input.
+**Offline teaching data:** the `passenger-outcomes` [synthetic fixture](../../fixtures/README.md) is invented, so its numbers prove methods, not facts.
 
 
 **Lesson ID:** `python-51` · **Level:** advanced · **Dependencies:** `data` · **Network:** offline
@@ -21,13 +21,11 @@ By the end of the lesson, you can:
 
 ## Prerequisites
 
-The checked-in synthetic teaching fixtures load without network access.
-Their generated values demonstrate programming methods, not real-world population facts.
+The checked-in `passenger-outcomes` fixture loads offline; its generated values illustrate methods, not real populations.
 
 ## Dataset and offline contract
 
-The checked-in synthetic teaching fixtures load without network access.
-Their generated values demonstrate programming methods, not real-world population facts.
+The checked-in `passenger-outcomes` fixture loads offline; its generated values illustrate methods, not real populations.
 
 The reference solution uses deterministic synthetic categories, so it remains a
 useful fully local comparison with no external dataset cache.
@@ -77,31 +75,7 @@ to trust the category-specific value.
 
 ## How to run this lesson
 
-**Primary browser route:** run `./classroom` from the repository root and
-choose **Python and data science** on `/classroom`. Open this lesson in the shared workspace,
-read its capability notice, and use its supported coding or reading workflow.
-The [classroom guide](../../../docs/classroom-experience.md) explains saved work, runtimes and switching subjects.
-
-**Optional native notebook/editor route:** the instructions below describe
-separately prepared host tools. They are useful alternatives, not prerequisites
-for opening this lesson in the Docker classroom.
-
-1. Open the Day 51 learner notebook from this guide's **Next
-   step** section in VS Code or JupyterLab.
-2. Select the `Python (ds60sqlpy)` kernel. Start at the top and use
-   **Run All** only after making the written predictions; every added
-   worked example is bounded and offline after bootstrap.
-3. Keep experiments in new scratch cells. Do not edit the official
-   solution while attempting the numbered practice.
-4. Restart the kernel and run from the first cell before calling the
-   lesson complete. A clean run catches hidden state and stale
-   variables.
-
-Linux, macOS, or Ubuntu in Windows WSL 2:
-
-```bash
-.venv/bin/python -m jupyter lab
-```
+Open `python-51` in the classroom, or `python/ds-60day/notebooks/day51_advanced_feature_engineering_target_encoding.ipynb` on a host; the [Python study guide](../../STUDY-GUIDE.md) explains both.
 
 ## Concept deep dive: out-of-fold target encoding, smoothing, and transform-time unknowns
 
@@ -125,10 +99,6 @@ than ordinary shuffled folds.
 - **out-of-fold transform:** fits one map per training fold and writes values only to that fold's held-out rows.
 
 ### Focused example A: show why a one-row category leaks perfectly
-
-Before running the example, predict the shape, type, or direction of the
-result. Write the prediction down so that a surprise becomes evidence
-rather than something to overlook.
 
 ```python
 import pandas as pd
@@ -240,9 +210,6 @@ for tuning smoothing or split choices when reporting an outer CV score.
 
 Implement target-derived features with row-level lineage. Training encodings must be out-of-fold; validation, test, and future rows use mappings fitted only on prior data.
 
-Predict or plan before you run code. Use the hint only after an honest
-attempt, and record the evidence that would prove your result correct.
-
 4. **Out-of-fold invariant:** Create a unique category for every training row and show that a leaky full-data target mean reproduces each label. Then prove that your out-of-fold encoder falls back to the prior instead.
    **Progressive hint:** For a category absent from the fold's training partition, there is no valid category statistic; use the fold training prior.
 
@@ -294,8 +261,7 @@ based on cardinality, leakage risk, runtime, and validated evidence.
 
 ## Ask an AI tutor about this lesson
 
-The lesson is complete without an AI assistant. If you want optional
-coaching, copy this prompt into the AI tutor while the repository root is open:
+The lesson is complete without AI. For optional coaching, copy this prompt with the repository root open:
 
 ```text
 Tutor me through `python-51` ; Day 51 ; Target Encoding and Leakage-Safe Features.

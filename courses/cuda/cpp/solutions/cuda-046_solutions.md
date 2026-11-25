@@ -4,8 +4,6 @@
 
 GEMM computes scaled matrix multiplication plus an existing output contribution. In conventional notation, C becomes alpha times A*B plus beta times C. Classic cuBLAS uses column-major conventions, so leading dimensions and transpose flags must be interpreted accordingly. cuBLASLt provides more explicit layout and algorithm descriptors, with workspace and compute-type choices. A handle has lifecycle and stream configuration. Check library status separately from CUDA completion. A successful call with wrong dimensions can produce plausible but incorrect data, especially when symmetric inputs conceal transposition mistakes.
 
-The separate [CPU reference](../references/cuda-046_cpu.py) checks the chapter's bounded model. It does not execute CUDA or establish GPU timing. Compare after attempting the worksheet or explicitly choosing to reveal solutions.
-
 ## Exercise 1
 
 Use the rectangular A and B from cuda-018, whose product is \([[7,4],[16,13]]\). With \(\alpha=2\), \(\beta=3\) and initial C all ones, the result becomes \([[17,11],[35,29]]\). This catches implementations that ignore beta or assume the output is initially zero.
@@ -78,12 +76,16 @@ Match shape, layout, dtype, accumulation and alpha/beta semantics, include setup
 
 **How to verify:** Validate both outputs against an independent oracle before comparing repeated timings.
 
+## Self-check answers
+
+1. **What is the leading dimension of a column-major 3-by-4 matrix without padding?** 3, the number of rows.
+2. **Why does worked example 1 use beta equal to 3 with C initialized to ones?** It catches code that ignores beta or assumes C starts at zero.
+3. **What should beta equal to 0 mean?** The old C does not contribute, so even NaN values in C must not affect the result.
+
 ## Numerical reference and its limits
 
-The complete CPU model is [here](../references/cuda-046_cpu.py). Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It does not claim CUDA execution, concurrency safety or a performance measurement.
+The [CPU reference](../references/cuda-046_cpu.py) reproduces worked example 1 and prints `{'scaled_GEMM': [[17, 11], [35, 29]], 'column_major': [1, 4, 2, 5, 3, 6]}`.
 
 ## Transfer review
 
 Match shape, layout, dtype, accumulation and alpha/beta semantics, include setup/workspace costs as appropriate, and validate against an independent oracle.
-
-A complete explanation must name its inputs, the unchanged mathematical contract, the changed boundary or resource condition, and the evidence still needed on actual hardware. Preserve a CPU baseline even after a GPU path becomes available.

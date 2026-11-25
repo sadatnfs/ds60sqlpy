@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cuda/python/solutions/cuda-080_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="cuda-080-explained-solutions">cuda-080: explained solutions<a class="heading-anchor" href="#cuda-080-explained-solutions" aria-label="Link to this section">#</a></h2>
-<p>These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.</p>
+<p>Compare with your <a href="../lessons/cuda-080.md.html">worksheet</a> attempt.</p>
 <h3 id="exercise-1-classify-a-cpu-result">Exercise 1: Classify a CPU result<a class="heading-anchor" href="#exercise-1-classify-a-cpu-result" aria-label="Link to this section">#</a></h3>
 <p>Call it CPU model or simulator.</p>
 <p><strong>Approach.</strong> Label a passing CPU loop result as a CPU model or simulator result and state what it covered, such as index coverage for one size, without claiming GPU correctness.</p>
@@ -231,9 +231,19 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Why it is correct here.</strong> The label states exactly which executors produced which results, so a reader knows what remains unproven. That keeps a simulator success from being reported as hardware validation.</p>
 <p><strong>A plausible wrong approach.</strong> Writing only verified or tests pass gives no executor and invites the reader to assume GPU coverage.</p>
 <p><strong>How to verify.</strong> Check that every label names an executor and a status. A label that mentions a GPU must also cite device and driver details.</p>
+<h3 id="self-check-answers">Self-check answers<a class="heading-anchor" href="#self-check-answers" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>Name three behaviors a simulator usually does not reproduce.</strong> Warp scheduling, memory transactions and concurrent timing; occupancy and some synchronization defects are also typically absent.</li>
+</ol>
+<ol start="2">
+<li><strong>Why can a serialized run hide a race?</strong> Each update finishes before the next begins, so no two threads read the same old value. Real concurrent threads can interleave and lose a write.</li>
+</ol>
+<ol start="3">
+<li><strong>Where does the simulator belong in the validation ladder?</strong> Early, after the mathematical reference and CPU mapping model, for inspecting small inputs by hand. Real-device output and diagnostic tools come later.</li>
+</ol>
 <h3 id="reference-observation">Reference observation<a class="heading-anchor" href="#reference-observation" aria-label="Link to this section">#</a></h3>
 <p>Serial count 2 versus a possible lost-update count 1.</p>
-<p>The reference file is <code>courses/cuda/python/references/cuda-080_cpu.py</code>. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.</p></article>
+<p>Asserted by <code>courses/cuda/python/references/cuda-080_cpu.py</code>.</p></article>
   </main>
 </body>
 </html>

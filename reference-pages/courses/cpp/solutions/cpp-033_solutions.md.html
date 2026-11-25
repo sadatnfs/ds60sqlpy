@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cpp/solutions/cpp-033_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="cpp-033-explanations-and-reference-observations">cpp-033: explanations and reference observations<a class="heading-anchor" href="#cpp-033-explanations-and-reference-observations" aria-label="Link to this section">#</a></h2>
-<p>Attempt the learner tasks before opening this document. The executable reference checks the bounded normal and boundary examples; the six explanations below cover the deliberate changes and manual checks.</p>
+<p>The <a href="cpp-033_solution.cpp.html">executable reference</a> adds a baseline in which the atomic counter stays 0 when no thread increments it. The explanations cover promise ordering, repetition and keeping a deliberate race inside a scratch test. How to compare: <a href="../STUDY-GUIDE.md.html#compare-with-the-solutions">study guide</a>.</p>
 <h3 id="mechanism">Mechanism<a class="heading-anchor" href="#mechanism" aria-label="Link to this section">#</a></h3>
 <p>A concurrent test must check results across meaningful interleavings. A schedule is an ordering of thread operations. Stress repeats a scenario but does not enumerate all schedules. ThreadSanitizer can detect many data races in an instrumented host run; it is a different tool from AddressSanitizer and usually requires a separate build.</p>
 <h3 id="detailed-reasoning">Detailed reasoning<a class="heading-anchor" href="#detailed-reasoning" aria-label="Link to this section">#</a></h3>

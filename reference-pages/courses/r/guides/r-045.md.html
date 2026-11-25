@@ -196,7 +196,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <article class="document"><h2 id="r-045-structured-validation-and-training-only-preprocessing">r-045: Structured validation and training-only preprocessing<a class="heading-anchor" href="#r-045-structured-validation-and-training-only-preprocessing" aria-label="Link to this section">#</a></h2>
 <p><strong>Level:</strong> intermediate. <strong>Direct prerequisites:</strong> <code>r-044</code></p>
 <h3 id="run-and-retain-your-work">Run and retain your work<a class="heading-anchor" href="#run-and-retain-your-work" aria-label="Link to this section">#</a></h3>
-<p>Open <code>r-045</code> in <code>/classroom</code> and use the prepared <code>r-statistics</code> profile. Each Run evaluates one <code>main.R</code> script in a fresh offline R process, so define every input in the script; an earlier Run leaves no variables behind. Work in the <a href="../lessons/r-045.R.html">starter</a>. The <a href="../solutions/r-045_reference.R.html">complete reference</a> ends by printing <code>r-045 reference checks passed</code>, and the <a href="../solutions/r-045_solutions.md.html">explained answers</a> are there for deliberate comparison after your own attempt. This chapter prints values only; when a chapter draws figures, the classroom keeps at most two figures per run. The <a href="../README.md.html">course overview</a> describes saved work, figure capture and the prepared package versions.</p>
+<p>The starter holds eight rows with ids 1 to 8, four groups A to D of two rows each, and x values 0 to 7, and an empty results list. Run it and list which groups would appear on both sides of an alternating row split: all four would. Splitting by group instead keeps every group on one side, which is the partition a claim about new groups requires. Compute any centering constant from the training rows only.</p>
+<p>Work in the <a href="../lessons/r-045.R.html">starter</a> under the <a href="../STUDY-GUIDE.md.html#run-a-chapter">run rules</a>.</p>
+<p>The <a href="../solutions/r-045_reference.R.html">complete reference</a> ends by printing <code>r-045 reference checks passed</code>.</p>
 <h3 id="outcome-and-mechanism">Outcome and mechanism<a class="heading-anchor" href="#outcome-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Construct validation procedures whose partitions and preprocessing match the intended transfer claim.</p>
 <p>A validation split defines what kind of new information the assessment represents. Randomly splitting rows can be appropriate for some independent-observation questions, but it can leak information when several rows belong to the same person, document family, device or time-linked episode. A new row from a known family is not the same transfer question as a new family.</p>
@@ -282,7 +284,28 @@ leaked_center <span class="syntax-operator">&lt;-</span> <span class="syntax-fun
 <li><a href="https://stat.ethz.ch/R-manual/R-devel/library/stats/html/model.frame.html">R model frames</a></li>
 </ul>
 <h3 id="continue">Continue<a class="heading-anchor" href="#continue" aria-label="Link to this section">#</a></h3>
-<p>Chapters that list <code>r-045</code> as a direct prerequisite: <a href="r-046.md.html"><code>r-046</code></a>, <a href="r-047.md.html"><code>r-047</code></a>, <a href="r-049.md.html"><code>r-049</code></a>, <a href="r-050.md.html"><code>r-050</code></a>. For the modeling assumptions behind these examples, read the <a href="../../statistics-ml/README.md.html">statistics tutorial</a> alongside the R code.</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Next chapter</th>
+<th>Title</th>
+</tr></thead><tbody>
+<tr>
+<td><a href="r-046.md.html"><code>r-046</code></a></td>
+<td>PCA, scaling and reconstruction</td>
+</tr>
+<tr>
+<td><a href="r-047.md.html"><code>r-047</code></a></td>
+<td>Decision trees, complexity and held-out decisions</td>
+</tr>
+<tr>
+<td><a href="r-049.md.html"><code>r-049</code></a></td>
+<td>Time series, ARIMA and rolling-origin evidence</td>
+</tr>
+<tr>
+<td><a href="r-050.md.html"><code>r-050</code></a></td>
+<td>Scientific synthesis and reproducible model comparison</td>
+</tr>
+</tbody></table></div>
+<p>Modeling assumptions behind these examples are in the <a href="../../statistics-ml/README.md.html">statistics tutorial</a>.</p>
 <h3 id="ask-an-ai-tutor">Ask an AI tutor<a class="heading-anchor" href="#ask-an-ai-tutor" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for r-045 (Structured validation and training-only preprocessing).
 Read the guide and my saved attempt. Explain the relevant R mechanism,

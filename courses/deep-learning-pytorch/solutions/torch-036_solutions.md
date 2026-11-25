@@ -2,6 +2,8 @@
 
 Open these answers only after attempting Capstone: release a small reproducible PyTorch model yourself. They reuse the guide's literal inputs, starting from Example A, Freeze the scalar experiment, so a discrepancy points at one step. The executable companion runs the assertions; this page explains why each one tests Release bundle, Integrity gate, Fresh-process inference. After a pass, choose a new input for exercise 6, Record a bounded decision and cleanup, without looking.
 
+After comparing, follow the [review steps](../STUDY-GUIDE.md#after-the-solutions).
+
 ## Mechanism review
 
 A reproducible model release is a bundle of state, schema, data identity, execution evidence and limitations. A valid artifact must reconstruct the intended model and produce checked predictions in a fresh process. A hash detects changed bytes but does not prove that the bytes contain a useful or honestly evaluated model. Release gates should fail on missing or incorrect evidence rather than silently treat unknown checks as passed.
@@ -197,6 +199,3 @@ assert receipt["local_contracts_pass"] and not receipt["production_go"] and not 
 
 **Verify:** In a fresh process, the exercise checks confirm `receipt['local_contracts_pass']`, `not receipt['production_go']` and `not folder.exists()`.
 
-## Review after comparison
-
-Repeat exercise 4, Verify fresh-process prediction parity, with one changed fixture value and predict the difference before running it. Keep your failing attempt at exercise 5, Make a corrupted artifact fail, beside the repaired result. A missing framework is not a failing assertion. These solutions use only local fixtures.

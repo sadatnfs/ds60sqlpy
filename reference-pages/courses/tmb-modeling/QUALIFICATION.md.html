@@ -213,7 +213,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <tr>
 <td>Native C++ preparation</td>
 <td>Passed</td>
-<td>All nine templates compiled under R4.6.1/TMB1.9.25/Matrix1.7.6/RcppEigen0.3.4.0.2, CppAD, Linux ARM64.</td>
+<td>All nine templates compiled under R 4.6.1/TMB 1.9.25/Matrix 1.7.6/RcppEigen 0.3.4.0.2, CppAD, Linux ARM64.</td>
 </tr>
 <tr>
 <td>Native numerical acceptance</td>
@@ -223,12 +223,12 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <tr>
 <td>Base-R companions</td>
 <td>Passed</td>
-<td>All 48 final formatted companion scripts executed successfully under native Linux ARM64 R4.6.1.</td>
+<td>All 48 final formatted companion scripts executed successfully under native Linux ARM64 R 4.6.1.</td>
 </tr>
 <tr>
 <td>Python/rpy2 bridge</td>
 <td>Passed on native ARM64</td>
-<td>Actual pandas/rpy2/TMB regression and invalid-frame rejection passed in the separately prepared combined runtime with Python3.12, NumPy2.2.6, pandas2.2.3, rpy2 meta3.6.9/rinterface3.6.7/robjects3.6.6.</td>
+<td>Actual pandas/rpy2/TMB regression and invalid-frame rejection passed in the separately prepared combined runtime with Python 3.12, NumPy 2.2.6, pandas 2.2.3, rpy2 meta 3.6.9/rinterface 3.6.7/robjects 3.6.6.</td>
 </tr>
 <tr>
 <td>Spark/TMB integration</td>
@@ -243,7 +243,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <tr>
 <td>C++ authoring families</td>
 <td>Passed on native ARM64</td>
-<td>Five original templates compiled under TMB1.9.25/CppAD and passed dense/precision/scale/separable oracles, extreme-logit mixture checks, conditional branch crossings and custom atomic value/gradient/Hessian checks.</td>
+<td>Five original templates compiled under TMB 1.9.25/CppAD and passed dense/precision/scale/separable oracles, extreme-logit mixture checks, conditional branch crossings and custom atomic value/gradient/Hessian checks.</td>
 </tr>
 <tr>
 <td>Public API probe</td>
@@ -264,7 +264,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The first panel acceptance correctly failed: nlminb reported relative convergence but the absolute gradient was 1.99456e-4, above the unchanged 1e-4 requirement. Curvature was positive definite, with eigenvalues about 8 to 308754. A bounded small Newton refinement reduced the maximum gradient to about 2.01e-9 while preserving the raw optimizer status and initial diagnostic. Tightening nlminb&#x27;s relative tolerance alone did not repair the residual gradient and was not used as a substitute for diagnosis. The source now retains refinement metadata.</p>
 <p>Do not present prepared-but-unexecuted surfaces as passing. Keep the exact source hashes and logs with release evidence. Subsequent code changes need appropriate new checks; a historical green row does not qualify modified code automatically.</p>
 <p>The additional public API probe initially rejected a diagonal Matrix Hessian representation in the raw Newton helper. The corrected test constructs a genuine symmetric compressed sparse matrix and verifies the known quadratic optimum. This is a helper representation requirement, not a change to a statistical model. The native probe verifies all 30 exports against the actual installed namespace; the maintained reference additionally covers nine registered S3 methods and the explicitly non-exported documented GK helper.</p>
-<p>The C++ family probes used a native aarch64 Linux GNU C++20 compiler, TMB1.9.25, CppAD, serial compilation and <code>-O1 -g0</code>. The exact tested source lives in <code>projects/tmb-cpp-api/models</code>; the numerical driver is <code>check.R</code>. No source changes were needed after the first five-template compile. This qualifies the small stated operations, not every private density/AD helper or higher-order combination.</p>
+<p>The C++ family probes used a native aarch64 Linux GNU C++20 compiler, TMB 1.9.25, CppAD, serial compilation and <code>-O1 -g0</code>. The exact tested source lives in <code>projects/tmb-cpp-api/models</code>; the numerical driver is <code>check.R</code>. No source changes were needed after the first five-template compile. This qualifies the small stated operations, not every private density/AD helper or higher-order combination.</p>
 <p>A peer review strengthened the C++ family acceptance without changing any C++ source: SEPARABLE now compares all state, correlation and log-scale derivative directions against an independent dense covariance oracle at two finite-difference step sizes. The mixture compares every logit, mean and log-scale derivative to an independent stable R likelihood at logits -1000, -3, 0, 2 and 1000, again at two step sizes. These checks passed using the exact retained compiled artifacts. The two profile/covariance teaching companions now print their promised contrasting interval and incorrect-precision outputs, and both revised scripts passed.</p></article>
   </main>
 </body>

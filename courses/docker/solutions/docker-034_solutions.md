@@ -1,6 +1,6 @@
 # docker-034: explanatory solutions
 
-Compare after your own attempt or an explicit reveal. These explain the supplied teaching fixtures; they are not engine results. The mechanism is explained in `courses/docker/guides/docker-034.md`.
+These answers explain teaching fixtures, not engine results; the mechanism is in [the guide](../guides/docker-034.md).
 
 ## Exercise 1: Predict whether image rollback reverses a schema change.
 
@@ -88,4 +88,4 @@ Compare after your own attempt or an explicit reveal. These explain the supplied
 
 ## Check your transfer
 
-A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.
+The v1 reader rejects the v2 record, so restarting it will keep failing. Options are rolling forward with a fixed v2 image, running a tested v2-to-v1 conversion as a one-off job, or restoring the pre-migration backup and accepting the loss of later increments. Rolling forward keeps every write; the conversion does too if it is lossless; the backup does not. Whichever you choose, `/counter` returning the expected value confirms it. If v1 still exits after a correct downgrade, the record holds another incompatibility you have not found.

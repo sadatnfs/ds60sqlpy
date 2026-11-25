@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/docker/solutions/docker-010_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="docker-010-explanatory-solutions">docker-010: explanatory solutions<a class="heading-anchor" href="#docker-010-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit reveal. These explain the supplied teaching fixtures; they are not engine results. The mechanism is explained in <code>courses/docker/guides/docker-010.md</code>.</p>
+<p>These answers explain teaching fixtures, not engine results; the mechanism is in <a href="../guides/docker-010.md.html">the guide</a>.</p>
 <h3 id="exercise-1-predict-the-streams-used-by-the-two-short-programs">Exercise 1: Predict the streams used by the two short programs.<a class="heading-anchor" href="#exercise-1-predict-the-streams-used-by-the-two-short-programs" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Success line on stdout, failure diagnostic on stderr.</p>
 <p><strong>Why:</strong> Stream conventions help tools separate normal output from diagnostics. They do not prevent an application from misusing a stream, so inspect its documented behavior.</p>
@@ -238,7 +238,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>A plausible wrong approach:</strong> Logging full request headers for convenience copies Authorization values into every place the log travels.</p>
 <p><strong>How to verify:</strong> Send a request with a dummy Authorization header and confirm the log line shows method, path and status but not the header value.</p>
 <h3 id="check-your-transfer">Check your transfer<a class="heading-anchor" href="#check-your-transfer" aria-label="Link to this section">#</a></h3>
-<p>A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.</p></article>
+<p>Capture the image identity, <code>docker compose ps -a</code> state, a bounded <code>logs --tail</code> sample and the status code from one failing request, with timestamps. <code>Up</code> only says the main process exists, so the evidence has to come from the application&#x27;s own responses. A restart may make the errors stop for a while, but it changes the conditions without explaining them, and the logs from the failing period become harder to find. If the same request still failed after a restart, that observation would rule out transient in-memory state as the cause.</p></article>
   </main>
 </body>
 </html>

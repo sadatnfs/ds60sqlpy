@@ -1,6 +1,6 @@
 # cuda-091: explained solutions
 
-These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.
+Compare with your [worksheet](../lessons/cuda-091.md) attempt.
 
 ## Exercise 1: State cross-correlation convention
 
@@ -74,8 +74,16 @@ Use a narrow and wider batch with unchanged semantics.
 
 **How to verify.** Verify outputs for both shapes against a reference, then report time per sample for each.
 
+## Self-check answers
+
+1. **How does a deep learning convolution usually differ from the textbook definition?** Frameworks typically compute cross-correlation, which does not flip the kernel. Flipping it changes the sign in worked example 1.
+
+2. **When does a layout conversion pay off?** When the converted data is reused across enough operations that the per-call savings exceed the one-time conversion cost.
+
+3. **Why might the fastest algorithm for one shape lose on another?** Library implementations choose algorithms by shape, dtype, workspace and determinism settings, and each choice has different strengths.
+
 ## Reference observation
 
 Valid cross-correlation [-1,-1,-1]; conversion amortization depends on reuse.
 
-The reference file is `courses/cuda/python/references/cuda-091_cpu.py`. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.
+Asserted by `courses/cuda/python/references/cuda-091_cpu.py`.

@@ -206,11 +206,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Unwrapping:</strong> Accessing a wrapped value after establishing presence.</p>
 <p><strong>Nil:</strong> The absent optional case.</p>
 <h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>The Linux Docker classroom compiles the saved pad as <code>main.swift</code> with Swift 6 language checking. An explicit <code>@main</code> type contains <code>static func main() async throws</code>; the fixed compiler uses <code>-parse-as-library -swift-version 6</code>. The examples use the standard library and portable Foundation. <code>precondition</code> makes a violated invariant fail the process. The fixed pad accepts one source file, without arbitrary command arguments, interactive input or dependency installation. SwiftUI, UIKit, Apple simulators and application signing belong to the separately prepared macOS/Xcode project labs, never the Linux pad.</p>
-<p>Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.</p>
+<p>Both examples compile only because every optional is unwrapped or compared before use; delete the <code>if let</code> and the compiler reports the missing unwrap. Task 4 fails at runtime instead: force-unwrapping the result of parsing forty-two stops the process with an unexpectedly-found-nil error, so keep that experiment in a separate pad.</p>
+<p>Compile contract, starter stop and success marker: <a href="../STUDY-GUIDE.md.html#running-a-lesson">running a lesson</a>.</p>
 <h3 id="syntax-anatomy-and-execution-trace">Syntax anatomy and execution trace<a class="heading-anchor" href="#syntax-anatomy-and-execution-trace" aria-label="Link to this section">#</a></h3>
 <p><code>Int?</code> abbreviates Optional&lt;Int&gt;. <code>if let value = optional</code> unwraps on the present branch. <code>guard let</code> requires an early exit on failure. <code>??</code> selects a fallback only when the optional is nil.</p>
-<p>Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.</p>
+<p>Each example ends with a trace; method: <a href="../STUDY-GUIDE.md.html#tracing-a-program">tracing a program</a>.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="example-a-preserve-zero-as-a-value">Example A: Preserve zero as a value<a class="heading-anchor" href="#example-a-preserve-zero-as-a-value" aria-label="Link to this section">#</a></h4>
 <p>The branch proves presence before the wrapped integer is used.</p>
@@ -233,6 +233,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> A present zero remains distinct from nil.</p>
+<p><strong>Trace.</strong> <code>measured</code> holds <code>Optional(0)</code> and <code>missing</code> holds nil; both have type <code>Int?</code>. The first check proves they are different states, even though a careless reading treats zero as nothing. The <code>if let</code> examines <code>measured</code>, finds a wrapped value, binds it to <code>value</code> of plain type <code>Int</code> and enters the first branch, where the check confirms 0. The else branch calls <code>preconditionFailure</code>, so a regression that turned a present zero into nil would stop the program with the message present zero.</p>
 <h4 id="example-b-parse-with-an-absence-policy">Example B: Parse with an absence policy<a class="heading-anchor" href="#example-b-parse-with-an-absence-policy" aria-label="Link to this section">#</a></h4>
 <p>The fallback is an explicit display sentinel in this fixture, not a valid quantity.</p>
 <pre class="highlighted-code"><code class="language-swift"><span class="syntax-keyword">import</span> <span class="syntax-class">Foundation</span>
@@ -250,6 +251,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> Parsing produces an optional and malformed text is absent.</p>
+<p><strong>Trace.</strong> <code>Int(&quot;42&quot;)</code> succeeds and returns <code>Optional(42)</code>. Parsing forty-two fails, and the initializer returns nil instead of throwing or trapping. The first check compares each optional directly with a value, which Swift allows because <code>Optional</code> is equatable when its wrapped type is. The <code>??</code> operator then examines <code>invalid</code>, finds nil and substitutes -1. That -1 is only a display marker in this fixture; adding it to a real quantity total would quietly corrupt the sum, which is why the lesson calls it a sentinel.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <ol>
 <li><strong>Predict and explain.</strong> Explain the difference between nil and a wrapped zero.</li>
@@ -269,10 +271,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <ol start="6">
 <li><strong>Transfer and justify.</strong> Model an optional measurement whose absence must survive serialization and reporting.</li>
 </ol>
-<p>For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.</p>
+<p>Log each task in the <a href="../STUDY-GUIDE.md.html#recording-exercise-evidence">evidence table</a> before opening the explanation.</p>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
 <p>Optional chaining preserves absence; it does not validate the remaining value. A default chosen too early can erase meaningful missingness. Never silence absence merely to satisfy a compiler diagnostic.</p>
-<p>A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.</p>
+<p>A parser for present nonnegative integers goes wrong subtly if it uses <code>Int(text) ?? 0</code>: malformed text and the input 0 both produce 0, and a caller can no longer tell them apart. The counterexample pair is therefore the text 0 and the text abc. Your version must return 0 for the first and nil for the second, and nil for -3, for empty text and for a value beyond <code>Int.max</code>.</p>
+<p>Repair routine: <a href="../STUDY-GUIDE.md.html#building-a-regression-case">building a regression case</a>.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <ol>
 <li>Reproduce Example A (Preserve zero as a value) before changing anything, and confirm its observation: A present zero remains distinct from nil.</li>
@@ -280,9 +283,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>Before opening the explanation, check your task 3 attempt (Write a parser accepting only present nonnegative integers) against each pitfall listed above, and add one input that would expose the tempting wrong rule.</li>
 </ol>
 <h3 id="self-check-and-next-step">Self-check and next step<a class="heading-anchor" href="#self-check-and-next-step" aria-label="Link to this section">#</a></h3>
-<p>Explain Optional, Unwrapping, Nil without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.</p>
+<p>Explain the difference between <code>Optional(0)</code> and nil to someone who expects them to be equal. Say when <code>guard let</code> fits better than <code>if let</code>, and what the compiler requires of a guard&#x27;s else branch. Describe one report where a missing measurement must stay visibly missing rather than become zero.</p>
+<p>Then follow the general <a href="../STUDY-GUIDE.md.html#self-check-routine">self-check routine</a> and save your pad.</p>
 <h3 id="sources-and-execution-boundary">Sources and execution boundary<a class="heading-anchor" href="#sources-and-execution-boundary" aria-label="Link to this section">#</a></h3>
-<p><a href="https://docs.swift.org/swift-book/documentation/the-swift-programming-language/">Official language or framework documentation</a>. The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.</p>
+<p><a href="https://docs.swift.org/swift-book/documentation/the-swift-programming-language/">Documentation</a>: The Swift book covers optionals and optional binding in The Basics, nil-coalescing in Basic Operators, and optional chaining in its own chapter.</p>
+<p>Provenance and limits: <a href="../STUDY-GUIDE.md.html#sources-and-execution-boundary">sources and execution boundary</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for swift-005: Optionals and honest absence.
 Read courses/swift/guides/swift-005.md and courses/swift/lessons/swift-005.swift. Prerequisites: swift-004.

@@ -196,7 +196,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <article class="document"><h2 id="r-025-object-interoperability-and-public-data-contracts">r-025: Object interoperability and public data contracts<a class="heading-anchor" href="#r-025-object-interoperability-and-public-data-contracts" aria-label="Link to this section">#</a></h2>
 <p><strong>Level:</strong> intermediate. <strong>Direct prerequisites:</strong> <code>r-022</code>, <code>r-023</code>, <code>r-024</code></p>
 <h3 id="run-and-retain-your-work">Run and retain your work<a class="heading-anchor" href="#run-and-retain-your-work" aria-label="Link to this section">#</a></h3>
-<p>Open <code>r-025</code> in <code>/classroom</code> and use the prepared <code>r-statistics</code> profile. Each Run evaluates one <code>main.R</code> script in a fresh offline R process, so define every input in the script; an earlier Run leaves no variables behind. Work in the <a href="../lessons/r-025.R.html">starter</a>. The <a href="../solutions/r-025_reference.R.html">complete reference</a> ends by printing <code>r-025 reference checks passed</code>, and the <a href="../solutions/r-025_solutions.md.html">explained answers</a> are there for deliberate comparison after your own attempt. This chapter prints values only; when a chapter draws figures, the classroom keeps at most two figures per run. The <a href="../README.md.html">course overview</a> describes saved work, figure capture and the prepared package versions.</p>
+<p>The starter supplies values 2 and 4 with unit ms and a small <code>plot_data</code> frame of three time and latency pairs. Run it, then write one adapter per object system that returns the same plain record. When you inspect the chart in exercise 5, read coordinates through <code>ggplot_build()</code>, because the internal layout of a ggplot object is not a public contract.</p>
+<p>Work in the <a href="../lessons/r-025.R.html">starter</a> under the <a href="../STUDY-GUIDE.md.html#run-a-chapter">run rules</a>.</p>
+<p>The <a href="../solutions/r-025_reference.R.html">complete reference</a> ends by printing <code>r-025 reference checks passed</code>.</p>
 <h3 id="outcome-and-mechanism">Outcome and mechanism<a class="heading-anchor" href="#outcome-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Convert S3, S4, R6 and S7 values through validated adapters and inspect ggplot2 through public build interfaces.</p>
 <p>Interoperability begins with a data contract, not a choice of class system. A consumer needs to know the type and shape of its inputs, their units and missingness policy, and whether reading them can mutate shared state. This lesson defines one ordinary record with a finite numeric vector and a unit string. Every adapter returns that contract, so the numerical summary does not need to know which object system produced it.</p>
@@ -307,7 +309,19 @@ layer <span class="syntax-operator">&lt;-</span> built<span class="syntax-operat
 <li><a href="https://ggplot2.tidyverse.org/news/index.html">ggplot2 release history</a></li>
 </ul>
 <h3 id="continue">Continue<a class="heading-anchor" href="#continue" aria-label="Link to this section">#</a></h3>
-<p>Chapters that list <code>r-025</code> as a direct prerequisite: <a href="r-026.md.html"><code>r-026</code></a>, <a href="r-030.md.html"><code>r-030</code></a>.</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Next chapter</th>
+<th>Title</th>
+</tr></thead><tbody>
+<tr>
+<td><a href="r-026.md.html"><code>r-026</code></a></td>
+<td>Namespaces, dependency declarations and package boundaries</td>
+</tr>
+<tr>
+<td><a href="r-030.md.html"><code>r-030</code></a></td>
+<td>Analytical-package capstone with explicit value and data contracts</td>
+</tr>
+</tbody></table></div>
 <h3 id="ask-an-ai-tutor">Ask an AI tutor<a class="heading-anchor" href="#ask-an-ai-tutor" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for r-025 (Object interoperability and public data contracts).
 Read the guide and my saved attempt. Explain the relevant R mechanism,

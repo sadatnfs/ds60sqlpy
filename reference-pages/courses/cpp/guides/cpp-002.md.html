@@ -213,7 +213,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li><strong>CTest:</strong> the CMake test runner; it must actually execute the registered test</li>
 </ul>
 <h3 id="compile-and-run-reference">Compile and run reference<a class="heading-anchor" href="#compile-and-run-reference" aria-label="Link to this section">#</a></h3>
-<p>Read <a href="../compile-and-run.md.html">the compile and run tutorial</a> for <code>main.cpp</code>, the Docker route, native compiler flags, paths, exit codes, compilation versus linking, stale binaries and single-file limits. Record the displayed build and run phases separately.</p>
+<p>Worked example 1 prints <code>hello, learner</code> and exits 0; Worked example 2 writes <code>fixture rejected</code> to stderr and exits 2. Capture stdout, stderr and the exit status separately, because a script that reads only stdout cannot tell these runs apart. A worker compile is not a CMake receipt: Exercise 6 needs the already-qualified project. Commands: <a href="../compile-and-run.md.html">compile and run tutorial</a>. Host work: <a href="../STUDY-GUIDE.md.html#host-projects">study guide</a>.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1-print-one-line">Worked example 1: Print one line<a class="heading-anchor" href="#worked-example-1-print-one-line" aria-label="Link to this section">#</a></h4>
 <p>The &lt;&lt; operator inserts text into the stream. The semicolon ends the statement and \n is the newline escape.</p>
@@ -301,11 +301,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 </ol>
 <h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
 <ul>
-<li>Can you reproduce each exact observation without reading the official answer?</li>
-<li>Can you explain a failed check using the lesson&#x27;s model, rather than changing an expected value?</li>
+<li>Which stream and which exit status distinguish Worked example 1 from Worked example 2?</li>
+<li>Why does a successful worker compile say nothing about whether the CMake and CTest greeting test passed?</li>
 </ul>
 <h3 id="retrieval-and-transfer">Retrieval and transfer<a class="heading-anchor" href="#retrieval-and-transfer" aria-label="Link to this section">#</a></h3>
-<p>Close the source. Explain the mechanism in your own words, name the boundary that a plausible wrong answer crosses, and predict a changed fixture before running again.</p>
+<p>Close the source. Explain why <code>fixture rejected</code> belongs on stderr with exit 2 rather than on stdout with exit 0, and what a caller that reads only stdout would miss. Then describe the evidence that the CMake and CTest exercise needs and that a browser Run cannot provide.</p>
 <h3 id="common-pitfalls">Common pitfalls<a class="heading-anchor" href="#common-pitfalls" aria-label="Link to this section">#</a></h3>
 <p>A worker compiler pass does not imply CMake was run. Do not mix Debug/Release generator directories. Exact diagnostic wording varies by compiler; preserve the source location and failure phase instead of requiring one vendor sentence.</p>
 <h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>

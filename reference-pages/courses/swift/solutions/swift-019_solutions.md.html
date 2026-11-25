@@ -194,7 +194,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/swift/solutions/swift-019_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="swift-019-explanation-and-comparison">swift-019: explanation and comparison<a class="heading-anchor" href="#swift-019-explanation-and-comparison" aria-label="Link to this section">#</a></h2>
-<p>Attempt the six guide tasks before opening this comparison. The executable reference is <a href="swift-019_solution.swift.html">swift-019_solution.swift</a>. It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.</p>
+<p>Reference program: <a href="swift-019_solution.swift.html">swift-019_solution.swift</a>, covering both examples and the executed answers.</p>
+<p>Attempt the tasks first; see <a href="../STUDY-GUIDE.md.html#comparing-with-the-explanation">comparing with the explanation</a>.</p>
 <h3 id="why-the-two-examples-differ">Why the two examples differ<a class="heading-anchor" href="#why-the-two-examples-differ" aria-label="Link to this section">#</a></h3>
 <p><strong>Retain a produced type:</strong> The associated type relationship survives through the generic function. The generic consumer knows the produced value is an Int.</p>
 <p><strong>Hide representation with an opaque result:</strong> The function selects one underlying result type while exposing its element relationship. The caller uses sequence behavior without naming the concrete array type.</p>
@@ -243,7 +244,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Callers use only Sequence behavior, so an empty array and a two-element array both work behind some Sequence&lt;String&gt; without exposing their type.</p>
 <h4 id="task-6-transfer-and-justify">Task 6: Transfer and justify<a class="heading-anchor" href="#task-6-transfer-and-justify" aria-label="Link to this section">#</a></h4>
 <p>Choose opaque output or existential storage for an API and document the preserved relationships.</p>
-<p>No single reference answer exists: several designs can satisfy this transfer task. Build yours from the task 3 answer above (Write a generic transformation preserving the producer item type) and the mechanism described below, and state one limitation of your choice.</p>
+<p>No single answer exists; extend task 3 using the <a href="../STUDY-GUIDE.md.html#open-transfer-tasks">open transfer routine</a>.</p>
 <h3 id="solution-reasoning">Solution reasoning<a class="heading-anchor" href="#solution-reasoning" aria-label="Link to this section">#</a></h3>
 <p><strong>Approach.</strong> The <code>Producer</code> protocol has an associated type <code>Item</code>, <code>IntegerSource</code> produces an Int, and the generic <code>read</code> function returns <code>P.Item</code>. Example A reads a 7 into a variable typed as Int. Example B returns <code>some Sequence&lt;String&gt;</code> from <code>makeLabels</code>. The task 3 answer transforms the produced value while preserving its type.</p>
 <p><strong>Why it is correct.</strong> When <code>read(source)</code> is called, <code>P</code> is inferred as <code>IntegerSource</code>, so <code>P.Item</code> is Int and assigning the result to <code>let value: Int</code> compiles without a cast. The opaque return hides the concrete array type but still promises String elements, so <code>Array(labels)</code> gives <code>[&quot;a&quot;, &quot;b&quot;]</code>. Adding one to the produced 7 in task 3 gives 8, still an Int.</p>
@@ -255,7 +256,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><code>associatedtype Item</code> names a conformer-selected type. <code>P.Item</code> refers to that relationship in generic code. <code>some Protocol</code> hides one concrete return type; <code>any Protocol</code> stores an existential value.</p>
 <p>Some does not mean any arbitrary type at each return. Existential containers can lose relationships needed by generic operations. Compiler diagnostics often point to a missing type relationship rather than a missing cast.</p>
 <h3 id="review-before-continuing">Review before continuing<a class="heading-anchor" href="#review-before-continuing" aria-label="Link to this section">#</a></h3>
-<p>Run the reference and confirm that it prints <code>swift-019: passed</code>, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.</p></article>
+<p>Run the reference and confirm it prints <code>swift-019: passed</code>, then rerun the guide&#x27;s counterexample.</p></article>
   </main>
 </body>
 </html>

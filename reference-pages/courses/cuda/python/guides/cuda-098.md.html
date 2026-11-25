@@ -194,9 +194,17 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cuda/python/guides/cuda-098.md</code></p>
     </header>
     <article class="document"><h2 id="cuda-098-backward-is-part-of-the-operator">cuda-098: Backward is part of the operator<a class="heading-anchor" href="#cuda-098-backward-is-part-of-the-operator" aria-label="Link to this section">#</a></h2>
-<p><strong>Route:</strong> CUDA Python and machine learning. <strong>Stage:</strong> advanced. <strong>Prerequisites:</strong> <code>cuda-097</code>. Allow several sessions when the hardware experiment is new; the chapter is not a deadline.</p>
-<h3 id="what-you-will-be-able-to-explain">What you will be able to explain<a class="heading-anchor" href="#what-you-will-be-able-to-explain" aria-label="Link to this section">#</a></h3>
-<p>By the end, you can <strong>derive the input VJP</strong>, <strong>explain a failed kink gradcheck</strong>, and <strong>compare each framework reference</strong> with evidence. Start with the two worked cases, then use the editable CPU model to make the quantities concrete.</p>
+<p><strong>Route:</strong> CUDA Python and machine learning. <strong>Stage:</strong> advanced. <strong>Prerequisites:</strong> <code>cuda-097</code>.</p>
+<p>Pacing, evidence labels and platform rules: <a href="../../STUDY-GUIDE.md.html">CUDA study guide</a>.</p>
+<h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
+<ul>
+<li>Derive the input VJP.</li>
+<li>Derive bias gradient.</li>
+<li>Run finite differences away from a kink.</li>
+<li>Explain a failed kink gradcheck.</li>
+<li>Specify higher-order support.</li>
+<li>Compare each framework reference.</li>
+</ul>
 <h3 id="mechanism-and-vocabulary">Mechanism and vocabulary<a class="heading-anchor" href="#mechanism-and-vocabulary" aria-label="Link to this section">#</a></h3>
 <p>A backward implementation computes a vector-Jacobian product: the upstream gradient weights each output&#x27;s contribution to each input. For an elementwise affine-ReLU <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>y</mi><mo>=</mo><mi>max</mi><mo>⁡</mo><mo stretchy="false">(</mo><mn>0</mn><mo separator="true">,</mo><mi>a</mi><mi>x</mi><mo>+</mo><mi>b</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">y=\max(0,ax+b)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.0359em;">y</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mop">max</span><span class="mopen">(</span><span class="mord">0</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal">a</span><span class="mord mathnormal">x</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal">b</span><span class="mclose">)</span></span></span></span>, the derivative with respect to x is a where ax+b is positive and the chosen boundary derivative elsewhere. The derivative with respect to shared a or b is a reduction over elements, not an elementwise output of the same shape.</p>
 <p>PyTorch autograd registration and TensorFlow custom-gradient or registered-gradient mechanisms differ, but both need mathematical tests. Finite differences approximate derivatives away from nondifferentiable boundaries; double precision and carefully chosen perturbations reduce numerical noise. Framework registration checks validate integration properties, not every derivative. State whether higher-order gradients and unusual layouts are supported.</p>
@@ -222,8 +230,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>At x=2 with <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>a</mi><mo>=</mo><mn>2</mn><mo separator="true">,</mo><mi>b</mi><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">a=2,b=1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal">a</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.8889em;vertical-align:-0.1944em;"></span><span class="mord">2</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord mathnormal">b</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">1</span></span></span></span>, y=5 and derivative <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>d</mi><mi>y</mi><mi mathvariant="normal">/</mi><mi>d</mi><mi>x</mi><mo>=</mo><mn>2</mn></mrow><annotation encoding="application/x-tex">dy/dx=2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal">d</span><span class="mord mathnormal" style="margin-right:0.0359em;">y</span><span class="mord">/</span><span class="mord mathnormal">d</span><span class="mord mathnormal">x</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">2</span></span></span></span>. A central finite difference around 2 agrees within numerical tolerance.</p>
 <h4 id="worked-example-2">Worked example 2<a class="heading-anchor" href="#worked-example-2" aria-label="Link to this section">#</a></h4>
 <p>At <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>x</mi><mo>=</mo><mo>−</mo><mn>0.5</mn></mrow><annotation encoding="application/x-tex">x=-0.5</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal">x</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">−</span><span class="mord">0.5</span></span></span></span>, the preactivation is zero. A central difference straddles the kink and need not equal the framework-selected subgradient, so test the documented boundary separately.</p>
-<h3 id="portable-executable-model">Portable executable model<a class="heading-anchor" href="#portable-executable-model" aria-label="Link to this section">#</a></h3>
-<p>The <strong>CPU reference model</strong> variant runs this bounded worked example using <code>python-core</code>. It uses only the Python standard library, small synthetic values and no network. Its purpose is to expose the arithmetic or contract behind the chapter. The separate reference includes assertions for the stated observations.</p>
+<h3 id="how-to-run-the-cpu-model">How to run the CPU model<a class="heading-anchor" href="#how-to-run-the-cpu-model" aria-label="Link to this section">#</a></h3>
+<p>Edit the copy; the <a href="../references/cuda-098_cpu.py.html">reference</a> adds assertions.</p>
+<pre class="highlighted-code"><code class="language-bash">python courses/cuda/python/lessons/cuda-098_cpu.py</code></pre>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">f</span><span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
     <span class="syntax-keyword">return</span> <span class="syntax-builtin">max</span><span class="syntax-punctuation">(</span><span class="syntax-number">0.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span> <span class="syntax-operator">*</span> x <span class="syntax-operator">+</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span>
 
@@ -267,58 +276,53 @@ bias_grad <span class="syntax-operator">=</span> <span class="syntax-builtin">su
 <td><code>3</code></td>
 </tr>
 </tbody></table></div>
-<p>Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.</p>
 <h3 id="equal-framework-lanes">Equal framework lanes<a class="heading-anchor" href="#equal-framework-lanes" aria-label="Link to this section">#</a></h3>
 <h4 id="pytorch">PyTorch<a class="heading-anchor" href="#pytorch" aria-label="Link to this section">#</a></h4>
 <p>Register a mathematically correct backward and test vector-Jacobian products with double-precision gradcheck away from kinks. An op registration check is not a substitute for derivative verification.</p>
 <h4 id="tensorflow">TensorFlow<a class="heading-anchor" href="#tensorflow" aria-label="Link to this section">#</a></h4>
 <p>Use the supported registered-gradient or custom_gradient mechanism. Compare GradientTape results with a native reference and finite differences, including documented nondifferentiable boundaries.</p>
-<p>Choose either lane first, then compare the other using identical mathematical inputs. Framework-specific shape, mode and optimizer rules must be checked separately. Both use offline synthetic examples; no model hub or dataset download is triggered.</p>
+<p>Lane rules: <a href="../../STUDY-GUIDE.md.html#python-gpu-and-framework-labs">framework labs</a>.</p>
 <h3 id="executable-framework-practice">Executable framework practice<a class="heading-anchor" href="#executable-framework-practice" aria-label="Link to this section">#</a></h3>
-<p>The variant chooser offers <strong>PyTorch on CPU</strong>, <strong>TensorFlow on CPU</strong>, and separate <strong>NVIDIA CUDA</strong> versions. CPU versions force CPU placement. CUDA versions require the named GPU profile and refuse to silently fall back. Each complete program uses the same tiny deterministic objective, bounded tensors and local synthetic data. Read its source before running; a framework pass establishes only that variant and environment.</p>
-<p>The checkpoint demonstration is in-memory. It teaches what state must be saved; it does not export a durable model artifact or preserve an in-flight device context. Advanced custom-op, distributed and engine-building projects remain separately prepared external workflows.</p>
+<p>Run the <strong>PyTorch</strong> and <strong>TensorFlow</strong> variants on CPU first; <a href="../../STUDY-GUIDE.md.html#python-gpu-and-framework-labs">lab rules</a>.</p>
 <h3 id="practice-and-transfer">Practice and transfer<a class="heading-anchor" href="#practice-and-transfer" aria-label="Link to this section">#</a></h3>
+<p>Record each attempt in the <a href="../lessons/cuda-098.md.html">worksheet</a> before opening hints.</p>
 <h4 id="exercise-1-derive-the-input-vjp">Exercise 1: Derive the input VJP<a class="heading-anchor" href="#exercise-1-derive-the-input-vjp" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Using the output <code>y</code> instead of a mask, <code>upstream * a * y</code>, scales gradients by activation values and is wrong for every positive input not equal to 1.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-2-derive-bias-gradient">Exercise 2: Derive bias gradient<a class="heading-anchor" href="#exercise-2-derive-bias-gradient" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Returning the upstream sum without masking gives 4, including a contribution from a position where the ReLU blocked gradient.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-3-run-finite-differences-away-from-a-kink">Exercise 3: Run finite differences away from a kink<a class="heading-anchor" href="#exercise-3-run-finite-differences-away-from-a-kink" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Running the check in float32 with a tiny epsilon loses precision to cancellation and fails even when the analytic gradient is right.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-4-explain-a-failed-kink-gradcheck">Exercise 4: Explain a failed kink gradcheck<a class="heading-anchor" href="#exercise-4-explain-a-failed-kink-gradcheck" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Changing the backward to return 1 at the kink so the check passes chooses a convention for the test&#x27;s sake.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-5-specify-higher-order-support">Exercise 5: Specify higher-order support<a class="heading-anchor" href="#exercise-5-specify-higher-order-support" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Assuming double backward works because first-order gradcheck passed leads to silent zero second derivatives.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-6-compare-each-framework-reference">Exercise 6: Compare each framework reference<a class="heading-anchor" href="#exercise-6-compare-each-framework-reference" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Comparing PyTorch&#x27;s custom op with TensorFlow&#x27;s custom op only checks they agree with each other.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
-<p>Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.</p>
+<p>Hint <em>k</em> belongs to exercise <em>k</em>; open one at a time.</p>
 <ol>
-<li>Start from worked example 1 and mark the quantities needed for the task &quot;Derive the input VJP&quot;.</li>
-<li>Change one assumption in worked example 2 while preserving the declared contract: derive bias gradient.</li>
-<li>Trace the CPU program&#x27;s variables before adding hardware behavior: run finite differences away from a kink.</li>
-<li>Draw producers, consumers and the exact operation boundary for the task &quot;Explain a failed kink gradcheck&quot;.</li>
-<li>Separate what the small fixture establishes from what the real runtime must show: specify higher-order support.</li>
-<li>Write a counterexample to an overbroad claim before you compare each framework reference.</li>
+<li>Multiply the upstream gradient by <code>a</code> wherever the preactivation is positive, and use the boundary rule elsewhere.</li>
+<li>The bias is shared by every element, so collect each element&#x27;s masked upstream contribution into one number.</li>
+<li>Perturb <code>x</code> by the same small step in both directions and divide the difference by twice the step.</li>
+<li>Evaluate the preactivation at the failing point and ask whether the derivative is unique there.</li>
+<li>Ask what a first-order check says about differentiating the gradient itself.</li>
+<li>Compare forward results first, then compare backward results separately against each framework&#x27;s native expression.</li>
 </ol>
-<h3 id="common-mistakes-and-self-review">Common mistakes and self-review<a class="heading-anchor" href="#common-mistakes-and-self-review" aria-label="Link to this section">#</a></h3>
-<p>Confusing a correct tiny example with a general implementation is the central review risk. For this chapter, challenge the assumption in worked example 2, then ask whether your change preserves the mechanism described above. If you change dtype, layout, ordering, batch size or backend, update the acceptance contract rather than silently reusing the old observation. Explain an unexpected result before trying random configuration changes.</p>
-<p>Keep a small evidence table with columns <strong>claim</strong>, <strong>input</strong>, <strong>expected observation</strong>, <strong>actual observation</strong> and <strong>limit</strong>. For the first claim use <code>Derive the input VJP</code>. For the final claim use <code>Compare each framework reference</code>. An unperformed GPU or cluster experiment remains pending even when the CPU model is correct.</p>
-<h3 id="platform-and-evidence-contract">Platform and evidence contract<a class="heading-anchor" href="#platform-and-evidence-contract" aria-label="Link to this section">#</a></h3>
-<p>The reading worksheet and CPU reference model work through the ordinary Linux Docker classroom on macOS, Linux and Windows using WSL 2. They do not require an NVIDIA GPU. Their results are labeled CPU models or semantic oracles, not simulated hardware performance.</p>
-<p>Real CUDA work needs supported NVIDIA hardware, a compatible host driver and an explicitly prepared GPU runtime. An Apple GPU does not execute CUDA kernels. PyTorch MPS on a supported native Mac, ROCm on supported AMD hardware, or other vendor backends can provide separate accelerator learning routes; they need their own package and operation qualification and are not CUDA evidence. The ordinary Linux Docker classroom does not expose native Mac MPS automatically.</p>
-<p>Do not download packages, models or data by opening this lesson. Do not attach an engine socket, ambient cluster credentials or an arbitrary remote endpoint. A CPU pass, imported package, successful compilation, real GPU result and measured performance are distinct observations. Record the actual backend, data shape/dtype, source revision, versions and pending checks. A saved completion marker records learning progress, not hardware certification.</p>
+<h3 id="common-mistakes-and-self-check">Common mistakes and self-check<a class="heading-anchor" href="#common-mistakes-and-self-check" aria-label="Link to this section">#</a></h3>
+<p>A common mistake is returning the gradient of a shared parameter with the shape of the input. The bias gradient is a sum of masked upstream values, a scalar here, not an elementwise array. Another mistake is running finite differences at the ReLU kink and treating the mismatch as a bug. Fix both by deriving each vector-Jacobian product by hand, reducing over elements for shared parameters and testing points away from the kink separately from the documented boundary behavior.</p>
+<p><strong>Evidence limit:</strong> The reference checks a finite-difference derivative near 2 and a bias VJP of 3 in double precision. It does not register a gradient in PyTorch or TensorFlow, so integration, higher-order gradients and unusual layouts remain untested.</p>
+<ol>
+<li>What does a backward function compute?</li>
+<li>Why can a central difference disagree at the kink?</li>
+<li>What do framework registration checks validate?</li>
+</ol>
+<p>Answers: <a href="../solutions/cuda-098_solutions.md.html#self-check-answers">self-check answers</a>.</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
 <ul>
 <li><a href="https://docs.pytorch.org/docs/2.9/notes/cuda.html">PyTorch CUDA semantics</a></li>
 <li><a href="https://www.tensorflow.org/guide/gpu">TensorFlow GPU guide</a></li>
 </ul>
-<p>Use the version-matched documentation of your prepared environment. These references describe interfaces and supported boundaries; the chapter&#x27;s synthetic examples and CPU models are original teaching material.</p>
+<p>Full lists: <a href="../../STUDY-GUIDE.md.html#documentation-and-sources">documentation and sources</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning skill for cuda-098: Backward is part of the operator.
 Read courses/cuda/python/guides/cuda-098.md and courses/cuda/python/lessons/cuda-098.md.

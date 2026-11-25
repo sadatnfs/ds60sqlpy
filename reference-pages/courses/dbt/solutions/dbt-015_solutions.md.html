@@ -195,7 +195,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="dbt-015-explained-reference">dbt-015: explained reference<a class="heading-anchor" href="#dbt-015-explained-reference" aria-label="Link to this section">#</a></h2>
 <p>Separate candidate computation from accepted publication.</p>
-<p>The executable reference contains the two complete worked cases with assertions. The changes below explain the independent practice and its limits.</p>
+<p>The reference builds a candidate model, reads every status in run_results.json, and writes the publication file only when the build succeeded and all statuses are pass or success. It shows a gate after materialization; it does not stop consumers who query the candidate relation directly. See <a href="../STUDY-GUIDE.md.html#answers-and-references">how these answers are laid out</a>.</p>
 <h3 id="1-change-the-failure-condition">1. Change the failure condition<a class="heading-anchor" href="#1-change-the-failure-condition" aria-label="Link to this section">#</a></h3>
 <p>Define the condition and verify a designed negative fixture. Do not treat every possible warning as equivalent to an accepted result.</p>
 <p><strong>Why it holds here:</strong> In this lesson ready is materialized from events before tests run. An accepted_range test with min_value 0 on value makes a negative row a meaningful failure that blocks publication.</p>

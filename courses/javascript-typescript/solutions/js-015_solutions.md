@@ -1,6 +1,6 @@
 # js-015: explanatory solutions
 
-Use these answers after an attempt or an explicit reveal. The reference uses the same literal fixtures as the guide and keeps the exercises in separate scopes. A successful run checks these examples; explaining a changed input is a separate learning goal.
+Open these after your own attempt; each exercise runs in its own scope in the reference.
 
 ## Mechanism review
 
@@ -24,7 +24,7 @@ import test from node:test declares tests, while node:assert/strict provides exa
 
 ## Exercise 1: Run a passing pure-function test: change one input
 
-Task: Copy Example A into a scratch `main.mjs` and change `assert.equal(2` to `assert.equal(3`. Before running it, predict which check fails and which value it now sees; then run it and restore the original line.
+Task: In a scratch copy of Example A, change `assert.equal(2` to `assert.equal(3`. Which check fails, and what value does it see?
 
 The child actually evaluates an assertion through the built-in runner. Process status supplies a machine-readable success signal; text is retained for diagnosis.
 
@@ -36,13 +36,13 @@ assert.equal(result.status, 0, result.stderr + result.stdout);
 assert.match(result.stdout, /# pass 1/u);
 ```
 
-**Expected:** The changed run fails with an `AssertionError` at `assert.equal(result.status, 0, result.stderr + result.stdout)`. Restoring `assert.equal(2` brings back: child exit status 0; one passing test.
+**Expected:** The edited run fails with an `AssertionError` at `assert.equal(result.status, 0, result.stderr + result.stdout)`. Restoring `assert.equal(2` brings back: child exit status 0; one passing test.
 
-**Verify:** Compare your written prediction with the reported `AssertionError`, including its actual and expected values, and name the value that made `assert.equal(result.status, 0, result.stderr + result.stdout)` fail. After restoring the line, the program prints its `{"checks":1,"status":"passed"}` receipt again.
+**Verify:** Compare the reported actual and expected values with your prediction, then restore `assert.equal(2`.
 
 ## Exercise 2: Prove a wrong result fails the runner: debug a regression
 
-Task: A regression changed one token in Example B, so one line now reads `assert.equal(3`. Run Example B with that line, use the failing check to locate the defect and repair it without changing the check.
+Task: A regression made one Example B line read `assert.equal(3`. Locate and repair it without editing the check.
 
 A test suite that never fails cannot establish that its checks are connected. This controlled mutation proves that the assertion reaches the runner and influences the exit result.
 
@@ -57,7 +57,7 @@ assert.match(result.stdout, /AssertionError/u);
 
 **Expected:** Before the repair the run fails with an `AssertionError` at `assert.notEqual(result.status, 0)`. Restoring `assert.equal(2` brings back: nonzero child exit; one failing test.
 
-**Verify:** Keep the failing and the repaired runs. Explain why the changed token alters the value tested by `assert.notEqual(result.status, 0)` for this input.
+**Verify:** Keep the failing and repaired runs and name the first value that differs between them.
 
 ## Exercise 3: Await an asynchronous test
 
@@ -74,7 +74,7 @@ assert.equal(result.status, 0, result.stderr + result.stdout);
 
 **Expected:** child exit status 0.
 
-**Verify:** Keep a check equivalent to `assert.equal(result.status, 0, result.stderr + result.stdout)`. As a control, change `Promise.resolve(7);` to `Promise.resolve(8);`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
+**Verify:** Keep `assert.equal(result.status, 0, result.stderr + result.stdout)`. Control: changing `Promise.resolve(7);` to `Promise.resolve(8);` must make that check fail; then restore it.
 
 ## Exercise 4: Check rejection with rejects
 
@@ -91,7 +91,7 @@ assert.equal(result.status, 0, result.stderr + result.stdout);
 
 **Expected:** child exit status 0.
 
-**Verify:** Keep a check equivalent to `assert.equal(result.status, 0, result.stderr + result.stdout)`. As a control, change `assert.equal(result.status, 0, result.stderr + result.stdout);` to `assert.equal(result.status, 1, result.stderr + result.stdout);` inside it: the run must fail with an `AssertionError`, which shows the check can fail. Restore it.
+**Verify:** Keep `assert.equal(result.status, 0, result.stderr + result.stdout)`. Control: editing it to `assert.equal(result.status, 1, result.stderr + result.stdout);` must make the check fail; then restore it.
 
 ## Exercise 5: Cover a table of boundary cases
 
@@ -110,7 +110,7 @@ assert.match(result.stdout, /# pass 3/u);
 
 **Expected:** three passing child tests.
 
-**Verify:** Keep a check equivalent to `assert.equal(result.status, 0, result.stderr + result.stdout)`. As a control, change `0` to `1`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
+**Verify:** Keep `assert.equal(result.status, 0, result.stderr + result.stdout)`. Control: changing `0` to `1` must make that check fail; then restore it.
 
 ## Exercise 6: Keep fixtures independent
 
@@ -128,8 +128,8 @@ assert.match(result.stdout, /# pass 2/u);
 
 **Expected:** two tests pass without shared mutable state.
 
-**Verify:** Keep a check equivalent to `assert.equal(result.status, 0, result.stderr + result.stdout)`. As a control, change `1` to `2`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
+**Verify:** Keep `assert.equal(result.status, 0, result.stderr + result.stdout)`. Control: changing `1` to `2` must make that check fail; then restore it.
 
 ## After comparison
 
-Return to your saved implementation and repeat a case with different values. Keep compiler diagnostics, process output and browser observations separate. Do not suppress a failing assertion or use a type assertion to declare an unvalidated value safe. Resource-owning examples must finish cleanup even when work fails. Describe each result with its actual host and fixture scope rather than as production acceptance.
+Fresh case: write tests for `average(values)` covering an empty array, a single value and negative numbers. Decide what the empty case should do, write that test first, and confirm it fails against an implementation that returns `NaN`. ([After comparing](../STUDY-GUIDE.md#after-comparing-with-the-solution).)

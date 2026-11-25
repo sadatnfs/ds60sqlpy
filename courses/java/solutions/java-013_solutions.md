@@ -1,6 +1,6 @@
 # java-013: explanatory solutions
 
-Open after an attempt or an explicit solution reveal. The executable reference runs the six exercise checks together as `Main.java`. The guide contains independent worked examples, while this file explains the choices and failure cases in the complete answer.
+Open this after an attempt; see [using the solutions](../STUDY-GUIDE.md#use-the-solutions).
 
 ## Mechanism review
 
@@ -18,7 +18,7 @@ Predicate<T> returns boolean, Function<T, R> maps a value to another value, and 
 
 ## Exercise 1: Use a predicate: predict an edited check
 
-Task: Copy Example A into a scratch `Main.java` and change `assert positive.test(3) && !positive.test(0) && !positive.test(-1);` to `assert positive.test(3) && !positive.test(1) && !positive.test(-1);` inside its assertion. Before running it with `java -ea Main`, predict whether the assertion still holds and explain why; then restore it.
+Task: Change Example A's assertion to `assert positive.test(3) && !positive.test(1) && !positive.test(-1);`, predict whether it holds, then run and restore it.
 
 The predicate has a single purpose and no side effects. Boundary zero is checked explicitly rather than inferred from a positive example.
 
@@ -29,13 +29,13 @@ java.util.function.Predicate<Integer> positive = value -> value > 0;
 assert positive.test(3) && !positive.test(0) && !positive.test(-1);
 ```
 
-**Expected:** The changed run fails with an `AssertionError` from the assertion on `positive.test(3) && !positive.test(0) && !positive.test(-1)`. Restoring the original line brings back the worked observation: true, false, false.
+**Expected:** The edited run fails with an `AssertionError` from the assertion on `positive.test(3) && !positive.test(0) && !positive.test(-1)`.
 
-**Verify:** Compare your written prediction with the reported `AssertionError` and its stack-trace line, and explain why the edited condition is false for the values that satisfy `positive.test(3) && !positive.test(0) && !positive.test(-1)`. After restoring the line, the program completes without an `AssertionError` again.
+**Verify:** Explain why the edited assertion is false for the values that satisfy `positive.test(3) && !positive.test(0) && !positive.test(-1)`.
 
 ## Exercise 2: Compose transformations: diagnose an edited check
 
-Task: A careless edit changed the assertion that Example B adds after Example A so that it reads `assert strip.andThen(upper).apply(" red !").equals("RED");`. Run Example B with that line, explain why the edited assertion now fails for the same program state, and restore it.
+Task: Example B's new assertion was edited to `assert strip.andThen(upper).apply(" red !").equals("RED");`. Explain why it fails for unchanged state and restore it.
 
 The composition order is explicit. For transformations that do not commute, reversing the order changes the result.
 
@@ -47,9 +47,9 @@ java.util.function.Function<String, String> upper = value -> value.toUpperCase(L
 assert strip.andThen(upper).apply(" red ").equals("RED");
 ```
 
-**Expected:** Before the repair the run fails with an `AssertionError` from the assertion on `strip.andThen(upper).apply(" red ").equals("RED")`; after it the line reads `assert strip.andThen(upper).apply(" red ").equals("RED");` again and input space red space becomes RED.
+**Expected:** The edited run fails with an `AssertionError` from the assertion on `strip.andThen(upper).apply(" red ").equals("RED")`; the restored assertion passes.
 
-**Verify:** Keep the failing and the repaired runs. Explain why the edited assertion rejects the same program state that `strip.andThen(upper).apply(" red ").equals("RED")` accepts.
+**Verify:** Explain why the edited assertion rejects the state that `strip.andThen(upper).apply(" red ").equals("RED")` accepts.
 
 ## Exercise 3: Distinguish composition order
 
@@ -66,7 +66,7 @@ assert addOne.compose(twice).apply(3) == 7;
 
 **Expected:** andThen gives 8; compose 7.
 
-**Verify:** Keep an assertion equivalent to `addOne.compose(twice).apply(3) == 7`. As a control, change `assert addOne.compose(twice).apply(3) == 7;` to `assert addOne.compose(twice).apply(4) == 7;` inside it: the run must fail with an `AssertionError`, which shows the assertion can fail. Restore it.
+**Verify:** Control: changing `assert addOne.compose(twice).apply(3) == 7;` to `assert addOne.compose(twice).apply(4) == 7;` inside the assertion must make it fail.
 
 ## Exercise 4: Capture a stable threshold
 
@@ -82,7 +82,7 @@ assert !enough.test(9) && enough.test(10) && enough.test(11);
 
 **Expected:** false, true, true under>=.
 
-**Verify:** Keep an assertion equivalent to `!enough.test(9) && enough.test(10) && enough.test(11)`. As a control, change `java.util.function.Predicate<Integer> enough = value -> value >= threshold;` to `java.util.function.Predicate<Integer> enough = value -> value > threshold;`: the run must fail with an `AssertionError` from the assertion on `!enough.test(9) && enough.test(10) && enough.test(11)`. Restore the line before continuing.
+**Verify:** Control: changing `java.util.function.Predicate<Integer> enough = value -> value >= threshold;` to `java.util.function.Predicate<Integer> enough = value -> value > threshold;` must fail the assertion on `!enough.test(9) && enough.test(10) && enough.test(11)`.
 
 ## Exercise 5: Expose mutable captured state
 
@@ -100,7 +100,7 @@ assert captured.equals(List.of("a", "b"));
 
 **Expected:** captured list becomes a, b.
 
-**Verify:** Keep an assertion equivalent to `captured.equals(List.of("a", "b"))`. As a control, change `append.accept("a");` to `append.accept("a!");`: the run must fail with an `AssertionError` from the assertion on `captured.equals(List.of("a", "b"))`. Restore the line before continuing.
+**Verify:** Control: changing `append.accept("a");` to `append.accept("a!");` must fail the assertion on `captured.equals(List.of("a", "b"))`.
 
 ## Exercise 6: Use a named function for a contract
 
@@ -122,8 +122,10 @@ assert blank;
 
 **Expected:** 7 accepted; blank rejected.
 
-**Verify:** Keep an assertion equivalent to `blank`. As a control, change `blank = true;` to `blank = false;`: the run must fail with an `AssertionError` from the assertion on `blank`. Restore the line before continuing.
+**Verify:** Control: changing `blank = true;` to `blank = false;` must fail the assertion on `blank`.
 
 ## After comparing the answer
 
-Run the complete reference with assertions enabled, then return to your own implementation. Recreate one check with different values and explain its expected result before execution. A compiler error, an expected domain exception and an assertion failure represent different stages and should be reported separately. Preserve ownership boundaries when adapting file, network or concurrency examples. The reference never authorizes access to a shared service or deletion of learner state. Use a fresh tiny fixture when you need to distinguish two interpretations of an API contract.
+Rewrite the threshold predicate in your copy as a method `static boolean enough(int value)` and pass it as `Main::enough`; confirm that the three checks still give false, true, true.
+
+Run the complete reference with `java -ea Main` first; the [review routine](../STUDY-GUIDE.md#use-the-solutions) covers the rest.

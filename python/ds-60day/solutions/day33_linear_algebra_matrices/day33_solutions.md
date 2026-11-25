@@ -69,9 +69,7 @@ Takeaways
 
 ## Solution reasoning lens
 
-A strong solution is not merely code that produces one plausible
-output. It establishes a chain from input contract to operation to
-verification:
+Each decision below links an input contract to an operation and its evidence:
 
 1. **`A.shape` and `B.shape`:** state the dimensional contract before multiplication; never infer it from a successful broadcast.
 2. **`A @ B`:** performs matrix multiplication, which is different from elementwise `A * B`.
@@ -88,29 +86,15 @@ verification:
 
 **Evidence of correctness:** Assert every intended shape, compare predictions and residuals, report rank/condition, and avoid coefficient interpretation when the design is not identifiable.
 
-When comparing your attempt with the reference, explain which of these
-decisions your code made explicitly. If the reference makes a different
-choice, compare the contracts and evidence before deciding that one
-version is universally better.
-
 <!-- END ADVANCED PYTHON CONCEPT ENRICHMENT -->
 
 ## Exercise-by-exercise reasoning map
-
-This map connects every learner prompt to a reasoning path. Read the
-explanation before copying code: the goal is to understand the assumptions,
-the evidence that validates the result, and the edge cases that can make an
-apparently correct implementation fail.
 
 ### Exercise 1: Original lesson practice
 
 **Prompt:** Add an intercept column of ones and recompute the coefficients.
 
 **How to reason about it:** Adding a ones column changes X from (rows, features) to (rows, features+1). Decide which coefficient is the intercept and verify predictions by multiplying the augmented matrix by the full coefficient vector.
-
-Use the worked reference earlier in this file, then change one boundary
-condition and rerun the stated checks. A copied output is not evidence
-unless you can explain why that output follows from the inputs.
 
 **Verify:** Assert the augmented design has one more column and its first column is all ones; print intercept, slopes, rank, and residual norm, then verify matrix predictions equal the fitted values within 1e-10.
 
@@ -120,10 +104,6 @@ unless you can explain why that output follows from the inputs.
 
 **How to reason about it:** scikit-learn stores intercept_ separately when fit_intercept=True. Compare both predictions and aligned coefficients on the same inputs; matching rounded coefficients alone can hide a column-order error.
 
-Use the worked reference earlier in this file, then change one boundary
-condition and rerun the stated checks. A copied output is not evidence
-unless you can explain why that output follows from the inputs.
-
 **Verify:** Fit both methods to identical X and y with matching intercept policy; print both coefficient vectors and maximum prediction difference, and require predictions to agree within 1e-10.
 
 ### Exercise 3: Original lesson practice
@@ -131,10 +111,6 @@ unless you can explain why that output follows from the inputs.
 **Prompt:** Explain when the normal equation becomes numerically unstable and why iterative methods are often used for larger problems.
 
 **How to reason about it:** The normal equation magnifies numerical problems when columns are nearly dependent and requires a costly inverse. Use condition number as a warning and `lstsq`/QR/SVD-based solvers as the default.
-
-Use the worked reference earlier in this file, then change one boundary
-condition and rerun the stated checks. A copied output is not evidence
-unless you can explain why that output follows from the inputs.
 
 **Verify:** Construct a duplicate or nearly duplicate column, report matrix rank and condition number, and show that a stable least-squares/SVD prediction remains usable while direct normal-equation coefficients become unstable.
 
@@ -152,10 +128,6 @@ to `(120, 120)`, a severe bug that can still produce numeric output.
 Use `assert prediction.shape == y.shape` at the modeling boundary. Reshape
 deliberately with `ravel()` only when a one-dimensional target is truly the
 contract.
-
-**Why this matters:** The result should survive a fresh-kernel rerun and
-a deliberately chosen boundary case. If it does not, revisit the
-assumption or data boundary rather than hiding the failure.
 
 **Verify:** Shape tracing; print X.T=(8,120), X.T@X=(8,8), X@beta=(120,), and residuals=(120,); with beta=(8,1), assert predictions/residuals are (120,1) only after y is reshaped consistently.
 
@@ -184,10 +156,6 @@ assert np.allclose(X @ coefficients, y, atol=1.0)
 The coefficient values are not uniquely identifiable. Remove redundant
 features, regularize with a documented purpose, or interpret predictions
 rather than inventing meaning for unstable individual coefficients.
-
-**Why this matters:** The result should survive a fresh-kernel rerun and
-a deliberately chosen boundary case. If it does not, revisit the
-assumption or data boundary rather than hiding the failure.
 
 **Verify:** Rank-deficiency debugging; use a seeded rank-2 matrix with three columns, print rank and condition number, capture solve's singular/unstable result, and assert lstsq predictions have finite values and residual norm matching the projected solution.
 
@@ -219,9 +187,5 @@ assert np.isclose(
 Clipping a computed result into `[-1, 1]` can protect a later `arccos` from
 tiny floating-point overshoot, but it must not conceal incorrect shapes or a
 zero denominator.
-
-**Why this matters:** The result should survive a fresh-kernel rerun and
-a deliberately chosen boundary case. If it does not, revisit the
-assumption or data boundary rather than hiding the failure.
 
 **Verify:** Robust vector operation; assert cosine([1,0],[0,1])=0 and cosine(v,v)=1 within 1e-12; reject unequal or non-1D shapes and either raise a documented zero-vector error or return a documented sentinel consistently.

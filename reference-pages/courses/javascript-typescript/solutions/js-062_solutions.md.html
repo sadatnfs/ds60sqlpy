@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/javascript-typescript/solutions/js-062_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="js-062-explanatory-solutions">js-062: explanatory solutions<a class="heading-anchor" href="#js-062-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit reveal. The separate .js reference is a complete offline browser program. These explanations discuss the six practice tasks; a visual resemblance alone is not a data or behavior check.</p>
+<p>Compare after your own attempt; the separate <code>.js</code> file is the complete reference program.</p>
 <h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
 <p>GeoJSON represents geographic features using geometry and properties. Geographic coordinates conventionally use longitude then latitude in degrees. Swapping them can produce plausible but incorrect locations. A map projection converts positions on the globe into a flat display, introducing distortion because a sphere cannot be flattened without tradeoffs.</p>
 <p>Different projections preserve different properties locally or globally. A map for comparing area should not casually use a projection that strongly distorts area. A map for route direction has another purpose. State the geographic scope and the projection’s relevance to the analytical question.</p>
@@ -218,7 +218,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Expected:</strong> A flat map cannot preserve every geographic property simultaneously.</p>
 <h3 id="exercise-6-plan-a-real-boundary-data-integration">Exercise 6: Plan a real boundary-data integration.<a class="heading-anchor" href="#exercise-6-plan-a-real-boundary-data-integration" aria-label="Link to this section">#</a></h3>
 <p>The map must be reproducible and legally distributable. Offline packaging needs deliberate acquisition and attribution, not a hidden runtime download. Record the boundary file&#x27;s license, date and id field, bundle it with the lesson rather than fetching at runtime, and test that every feature id matches the data.</p>
-<p><strong>Expected:</strong> Source/license, date, stable IDs, topology and projection checks.</p></article>
+<p><strong>Expected:</strong> Source/license, date, stable IDs, topology and projection checks.</p>
+<h3 id="after-comparison">After comparison<a class="heading-anchor" href="#after-comparison" aria-label="Link to this section">#</a></h3>
+<p>Replace the synthetic points with two small polygons, one near the equator and one near 60 degrees north, and draw them with Mercator and with <code>geoEqualEarth</code>. Compare their drawn areas in both projections and explain which suits an area comparison.</p></article>
   </main>
 </body>
 </html>

@@ -1,6 +1,8 @@
 # c-001: explained solutions
 
-Compare after an attempt or explicit reveal. The complete executable reference, `c-001_solution.c`, implements all six cases, from the "check a first value" case to the "transfer a receipt calculation" case, in one `main.c`.
+`c-001_solution.c` assembles the "check a first value" case through the "transfer a receipt calculation" case in one `main.c`.
+
+Compare only after an attempt: [Compare and transfer](../STUDY-GUIDE.md#compare-and-transfer).
 
 ## Mechanism and assumptions
 
@@ -10,7 +12,7 @@ C source is text describing declarations and operations. The preprocessor handle
 
 ## Exercise 1: Check a first value: change one input
 
-Copy worked example 1, the "check a first value" case, into a scratch pad and change `int total = 2 + 3;` to `int total = 3 + 3;`. Before running, predict which CHECK fails and which value it sees in place of the worked result (the stored value is 5); then run it and restore the original line.
+In worked example 1, change `int total = 2 + 3;` to `int total = 3 + 3;`. Predict which value the CHECK on `total == 5` sees, then run and restore.
 
 The unchanged code is worked example 1:
 
@@ -19,7 +21,7 @@ int total = 2 + 3;
 CHECK(total == 5);
 ```
 
-**Expected:** With `int total = 3 + 3;` the run stops with `Check failed` at the CHECK on `total == 5`, because the "check a first value" case no longer shows that the stored value is 5. Restoring `int total = 2 + 3;` brings that observation back.
+**Expected:** `Check failed` at `total == 5`; restoring `int total = 2 + 3;` passes again.
 
 The expectation is known independently of the program. A print statement alone would not reject a wrong calculation.
 
@@ -33,7 +35,7 @@ The expectation is known independently of the program. A print statement alone w
 
 ## Exercise 2: Format a checked result: debug a regression
 
-A regression changed one token in worked example 2, the "format a checked result" case, so one line now reads `int n = snprintf(out, sizeof out, "total=%d", 6);`. Run the example with that line, use the failing CHECK to find why the result length is 7 and text is total=5 no longer holds and repair the line without changing the CHECK.
+Worked example 2 now has a line reading `int n = snprintf(out, sizeof out, "total=%d", 6);`. Repair it so that the result length is 7 and text is total=5 again.
 
 The unchanged code is worked example 2:
 
@@ -44,7 +46,7 @@ CHECK(n == 7);
 CHECK(strcmp(out, "total=5") == 0);
 ```
 
-**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `strcmp(out, "total=5") == 0`. Once the line reads `int n = snprintf(out, sizeof out, "total=%d", 5);` again, the "format a checked result" case again shows that the result length is 7 and text is total=5.
+**Expected:** `Check failed` at `strcmp(out, "total=5") == 0` until the line reads `int n = snprintf(out, sizeof out, "total=%d", 5);` again.
 
 snprintf returns the length that would be required, excluding the terminating null byte. A caller must compare it with capacity before treating output as complete.
 

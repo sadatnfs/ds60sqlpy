@@ -4,18 +4,15 @@
 
 Intermediate; about 110 minutes, plus any optional hardware experiment. Direct prerequisites: `cuda-017`, `cuda-020`, `cuda-026`
 
-The order supports learning at your own pace. Reading and CPU reasoning remain
-available when NVIDIA hardware is absent. Advanced hardware features need their
-own capability checks and are not prerequisites for opening this chapter.
+Pacing, evidence labels and platform rules for every chapter are in the [CUDA study guide](../../STUDY-GUIDE.md).
 
 ## Learning objectives
 
 Implement a warp shuffle reduction that is correct for every tail size and state its participation invariant.
 
-Work through *Race reasoning, masks and warp cooperation* with the concrete cases below. Finish with this evidence:
-correct results across all tail sizes and a written participation invariant. Distinguish an algorithmic
-calculation, a compiled artifact and an actual device observation when explaining
-what your work establishes.
+**Scope:** Warp participation, active masks, collective operations, shuffle exchanges and explicit synchronization.
+
+**Evidence to produce:** Correct results across all tail sizes and a written participation invariant.
 
 ## Purpose, vocabulary and mental model
 
@@ -30,24 +27,15 @@ Warp collectives require agreement about participating lanes. A mask names lanes
 
 ## How to run and study this lesson
 
-Use the saved reading worksheet in `/classroom`; the reading pad does not execute
-CUDA. For the bounded calculation, select **CPU model (Python)**, whose
-answer-free starter supplies the literal fixtures and task contract. The
-[CUDA C++ study workflow](../README.md) covers platforms, optional GPU
-compilation and evidence labels. In a prepared Python environment you can also
-run the separate [CPU reference](../references/cuda-027_cpu.py) from the
-repository root:
+Trace worked example 1 by hand, then run the [CPU reference](../references/cuda-027_cpu.py) from the repository root:
 
 ```sh
 python courses/cuda/cpp/references/cuda-027_cpu.py
 ```
 
-Its assertions check the stated numerical result or model invariant; console
-text is evidence of this CPU model only, not of CUDA execution.
-
 ## CUDA C++ kernel listing
 
-This reduction keeps the chapter's participation invariant: one full warp executes every shuffle with the full mask, and lanes without data contribute 0. With values 1 through 8 in lanes 0-7, lane 0 ends with 36. Read it as CUDA C++ source; the classroom reading pad does not compile or run it.
+This reduction keeps the chapter's participation invariant: one full warp executes every shuffle with the full mask, and lanes without data contribute 0. With values 1 through 8 in lanes 0-7, lane 0 ends with 36.
 
 ```cpp
 // Sum up to 32 values with exactly one full warp: warp_sum<<<1, 32>>>.
@@ -67,9 +55,7 @@ __global__ void warp_sum(const int *values, int count, int *result) {
 
 Eight selected lanes among a full 32-thread warp contribute values 1 through 8; other lanes contribute zero. All 32 lanes execute the collective, giving sum 36. This is different from launching only eight threads and pretending the absent 24 lanes participate.
 
-The complete CPU model below intentionally models only the named arithmetic,
-layout, dependency or capability decision. It does not model GPU scheduling,
-caches, instruction timing or device memory visibility.
+**Why:** Values 1 through 8 sum to 36 and zeros add nothing, so the full-warp reduction is correct.
 
 ```python
 mask = sum(1 << lane for lane in (0, 2, 5))
@@ -79,41 +65,37 @@ assert sum(contributions) == 36
 print({"ballot_mask": mask, "count": mask.bit_count(), "sum": sum(contributions)})
 ```
 
-**Expected observation:** Every assertion succeeds. A representative CPU output is:
+**Expected observation:** every assertion succeeds, and the CPU model prints:
 
 ```text
 {'ballot_mask': 37, 'count': 3, 'sum': 36}
 ```
 
-Integers, shapes and ordering must match exactly; only assertions with an explicit
-tolerance accept small floating-point differences. A printed duration is a model
-output, not a measured GPU benchmark.
+**Check:** The reference asserts the 32-entry contributions sum to 36.
 
 ## Worked example 2: change a meaningful condition
 
 A ballot for predicates true at lanes 0,2 and 5 has bit mask 37: binary positions contribute \(1+4+32\). Population count is three. Reading a shuffled value from lane seven is not justified if lane seven is outside the participating group.
 
-Before applying this example to your own program, write down which inputs are
-read, which result is produced, and the condition that makes the comparison
-valid. Keep the original case as a regression check when changing a boundary.
+**Why:** Bits 1, 4 and 32 add to 37, and three bits are set.
+
+**Check:** The reference asserts mask == 37 and mask.bit_count() == 3.
 
 ## Six progressive exercises
 
-Exercises 1 and 2 are guided reconstructions of the worked examples; exercises
-3-6 change an input, diagnose a defect, test a boundary and transfer the idea.
-For each one, keep the calculation, output, diagram or failure policy you
-produce so another reader can compare it with the worked cases. If the hint is
-not enough, reread the mechanism paragraph and the bounded CPU assertion.
-
 ### Exercise 1
 
-Predict and trace the first worked example before running its CPU reference. Write every intermediate quantity that leads to the stated result, including units or ownership where applicable.
+Reconstruct worked example 1 on paper before running its CPU reference. Keep all 32 lanes in the collective and let the 24 unselected lanes contribute zero to the sum.
+
+**Trap to avoid:** Launching only eight threads and calling a full-mask shuffle names 24 lanes that never execute it.
 
 **Hint:** Start with the literal input and intermediate quantities in worked example 1.
 
 ### Exercise 2
 
-Reconstruct the second worked example without copying its conclusion. Identify the changed input or condition, show the resulting calculation or dependency, and explain why it differs from the first example.
+Rework worked example 2 without copying its conclusion. Set bit lane for lanes 0, 2 and 5 and count set bits.
+
+**Trap to avoid:** Shuffling from lane 7 assumes it participates, but it is outside the predicate set.
 
 **Hint:** Identify exactly which condition changes in worked example 2.
 
@@ -121,11 +103,15 @@ Reconstruct the second worked example without copying its conclusion. Identify t
 
 Construct a ballot mask for lanes 1,3 and 4.
 
+**Trap to avoid:** Writing the lane numbers as decimal digits 1 + 3 + 4 = 8 confuses indices with bit weights.
+
 **Hint:** Use the first worked example to establish the relevant quantities, then change only the requested input.
 
 ### Exercise 4
 
 A shuffle uses a full mask inside a branch reached by half the warp. Diagnose it.
+
+**Trap to avoid:** Adding __syncwarp before the shuffle in the branch still names absent lanes.
 
 **Hint:** Locate the failed phase or violated dependency before proposing a repair.
 
@@ -133,35 +119,33 @@ A shuffle uses a full mask inside a branch reached by half the warp. Diagnose it
 
 What happens for no selected values in a full participating warp?
 
+**Trap to avoid:** Skipping the collective when no value is selected makes participation depend on data.
+
 **Hint:** Check what the algorithm is allowed to read, write or assume at this boundary.
 
 ### Exercise 6
 
 Transfer warp cooperation to segmented data.
 
+**Trap to avoid:** Using the full-warp sum for each segment mixes values from neighboring segments.
+
 **Hint:** State the output contract and which observations are needed in the new application.
 
 ## Common mistakes and diagnosis
 
-A tempting but incorrect claim in this chapter is: **a full bit mask is automatically correct for a collective executed by only some lanes.**
-
-For the concrete failure exercise, a shuffle uses a full mask inside a branch reached by half the warp. Diagnose it.
-Preserve the original input and the stage where behavior diverged, and compare
-with the CPU model before changing hardware configuration.
+A tempting but incorrect claim: **A full bit mask is automatically correct for a collective executed by only some lanes.** The mask must name exactly the lanes that reach the collective. If a branch admits only half the warp, a full mask promises 16 lanes that never arrive, which is undefined behavior. Worked example 1 avoids this by letting all 32 lanes execute the collective while unselected lanes contribute zero.
 
 ## Self-check, retrieval and transfer
 
-Explain the first example without its code, then use the second example to state
-one assumption that matters. Complete Exercise 3 independently, use Exercise 4 to
-diagnose a plausible defect, check the boundary in Exercise 5, and retain the
-application contract from Exercise 6. Compare the [separate explanations](../solutions/cuda-027_solutions.md)
-only after your attempt or a deliberate reveal. A reading marker records your
-choice; it does not certify hardware qualification or expert mastery.
+1. What ballot mask do predicates true at lanes 0 and 3 produce?
+2. Why may a shuffle not read from lane seven in worked example 2?
+3. Why is source order not a synchronization guarantee within a warp?
+
+Short answers are in the [separate explanations](../solutions/cuda-027_solutions.md#self-check-answers); compare only after an attempt.
 
 ## Primary references
 
-Check the documentation that matches your prepared toolkit before optional
-hardware execution.
+Use the documentation that matches your prepared toolkit.
 
 - [CUDA Programming Guide](https://docs.nvidia.com/cuda/cuda-programming-guide/)
 

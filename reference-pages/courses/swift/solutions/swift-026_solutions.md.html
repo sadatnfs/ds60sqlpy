@@ -194,7 +194,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/swift/solutions/swift-026_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="swift-026-explanation-and-comparison">swift-026: explanation and comparison<a class="heading-anchor" href="#swift-026-explanation-and-comparison" aria-label="Link to this section">#</a></h2>
-<p>Attempt the six guide tasks before opening this comparison. The executable reference is <a href="swift-026_solution.swift.html">swift-026_solution.swift</a>. It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.</p>
+<p>Reference program: <a href="swift-026_solution.swift.html">swift-026_solution.swift</a>, covering both examples and the executed answers.</p>
+<p>Attempt the tasks first; see <a href="../STUDY-GUIDE.md.html#comparing-with-the-explanation">comparing with the explanation</a>.</p>
 <h3 id="why-the-two-examples-differ">Why the two examples differ<a class="heading-anchor" href="#why-the-two-examples-differ" aria-label="Link to this section">#</a></h3>
 <p><strong>Keep a pure core function:</strong> A portable contract can be shared by an executable, tests and a later app adapter. The pure kernel is suitable for a reusable library.</p>
 <p><strong>Separate presentation from calculation:</strong> Moving this function into another target requires a deliberate public interface rather than copying implementation text. Presentation is independently testable.</p>
@@ -223,7 +224,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Written answer.</strong> Inside the copied package run swift package clean, then swift build. Clean removes build products under that package&#x27;s .build directory and leaves sources alone; the rebuild recreates .build in the same place, which the reference run confirmed was the only output location. Never point cleanup at a directory you did not create.</p>
 <h4 id="task-6-transfer-and-justify">Task 6: Transfer and justify<a class="heading-anchor" href="#task-6-transfer-and-justify" aria-label="Link to this section">#</a></h4>
 <p>Add a new target only when it creates a useful dependency boundary and document that direction.</p>
-<p>No single reference answer exists: several designs can satisfy this transfer task. Build yours from the task 3 answer above (Run swift test and the journey-demo executable) and the mechanism described below, and state one limitation of your choice.</p>
+<p>No single answer exists; extend task 3 using the <a href="../STUDY-GUIDE.md.html#open-transfer-tasks">open transfer routine</a>.</p>
 <h3 id="solution-reasoning">Solution reasoning<a class="heading-anchor" href="#solution-reasoning" aria-label="Link to this section">#</a></h3>
 <p><strong>Approach.</strong> The portable part of this lesson splits a calculation, <code>total</code>, from presentation, <code>render</code>, so each can live in a different target of a Swift package. Example A checks the pure sum on <code>[2, 3]</code> and on an empty array. Example B checks that <code>render(5)</code> produces <code>total=5</code>. The package tasks then build and test JourneyCore outside the pad.</p>
 <p><strong>Why it is correct.</strong> <code>reduce(0, +)</code> starts from 0, so <code>[2, 3]</code> sums to 5 and an empty array returns 0 without special cases. <code>render</code> only formats a number it is given, so its output depends on nothing but its argument. Because neither function reads global state or files, both can move into a library target and be tested from a test target unchanged.</p>
@@ -235,7 +236,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Package.swift declares a tools-version header and target graph. import exposes another module public API. Internal is the usual default access level, while public members define cross-module contracts.</p>
 <p>A manifest is not executed by the classroom source pad. Do not assume adding a dependency is offline. Public API choices become compatibility obligations.</p>
 <h3 id="review-before-continuing">Review before continuing<a class="heading-anchor" href="#review-before-continuing" aria-label="Link to this section">#</a></h3>
-<p>Run the reference and confirm that it prints <code>swift-026: passed</code>, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.</p></article>
+<p>Run the reference and confirm it prints <code>swift-026: passed</code>, then rerun the guide&#x27;s counterexample.</p></article>
   </main>
 </body>
 </html>

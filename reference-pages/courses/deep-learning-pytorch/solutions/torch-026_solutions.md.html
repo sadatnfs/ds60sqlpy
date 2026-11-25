@@ -195,6 +195,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="torch-026-explanatory-solutions">torch-026: explanatory solutions<a class="heading-anchor" href="#torch-026-explanatory-solutions" aria-label="Link to this section">#</a></h2>
 <p>Open these answers only after attempting Custom modules, residual paths, buffers and autograd checks yourself. They reuse the guide&#x27;s literal inputs, starting from Example A, Build an identity residual, so a discrepancy points at one step. The executable companion runs the assertions; this page explains why each one tests Custom module, Buffer, Grad check. After a pass, choose a new input for exercise 6, Inspect the incoming-gradient factor, without looking.</p>
+<p>After comparing, follow the <a href="../STUDY-GUIDE.md.html#after-the-solutions">review steps</a>.</p>
 <h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
 <p>Custom modules should make state ownership and differentiation explicit. Parameters are optimized; buffers are tracked but normally fixed; temporary activations are rebuilt during forward. A residual branch adds a transformed input to the original, so feature dimensions must match or an explicit projection must reconcile them. Creating new parameters in forward would change model identity and invalidate optimizer membership.</p>
 <p>A custom differentiable function should be checked against independent derivatives before being trusted in a large network. PyTorch gradcheck uses finite differences, usually with float64 inputs, to compare a backward formula with the numerical behavior of forward. Passing a few checks is useful evidence under those inputs, not a proof for every branch or nondifferentiable point. This lesson combines a simple residual module with a tiny custom cube function so both registration and derivative contracts remain inspectable.</p>
@@ -270,9 +271,7 @@ xs <span class="syntax-operator">=</span> torch<span class="syntax-operator">.</
 <span class="syntax-punctuation">(</span><span class="syntax-number">2</span> <span class="syntax-operator">*</span> Cube<span class="syntax-operator">.</span>apply<span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>backward<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
 <span class="syntax-keyword">assert</span> value<span class="syntax-operator">.</span>grad<span class="syntax-operator">.</span>item<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">24</span></code></pre>
 <p><strong>Expected:</strong> gradient 24.</p>
-<p><strong>Verify:</strong> In a fresh process, the exercise checks confirm <code>value.grad.item() == 24</code>.</p>
-<h3 id="review-after-comparison">Review after comparison<a class="heading-anchor" href="#review-after-comparison" aria-label="Link to this section">#</a></h3>
-<p>Repeat exercise 4, Reject incompatible feature width, with one changed fixture value and predict the difference before running it. Keep your failing attempt at exercise 5, Validate a custom cube derivative, beside the repaired result. A missing framework is not a failing assertion. These solutions use only local fixtures.</p></article>
+<p><strong>Verify:</strong> In a fresh process, the exercise checks confirm <code>value.grad.item() == 24</code>.</p></article>
   </main>
 </body>
 </html>

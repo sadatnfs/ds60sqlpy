@@ -209,9 +209,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="syntax-anatomy-and-reasoning">Syntax anatomy and reasoning<a class="heading-anchor" href="#syntax-anatomy-and-reasoning" aria-label="Link to this section">#</a></h3>
 <p>log/slog builds records from key/value attributes. JSONHandler writes to an io.Writer. HandlerOptions.ReplaceAttr can remove timestamps in deterministic tests. Logger.With attaches common attributes to a derived logger. A logged status is a report, while the actual operation and durable receipt remain separate evidence.</p>
 <h3 id="run-this-lesson">Run this lesson<a class="heading-anchor" href="#run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>Choose Go in the unified Docker classroom. Save your own pad before experimenting. The prepared worker stages it as <code>main.go</code>, compiles it, and executes the resulting program with bounded time and output. The pad is one source file. It does not supply interactive input, arbitrary command-line arguments, package installation, Kubernetes credentials or a host Docker socket. Every ordinary reference here uses the standard library, synthetic local data and explicit checks. A failed <code>check</code> panics and produces a nonzero process result; do not remove it to make the run appear successful.</p>
-<p>The explanatory solution snippets belong inside <code>func main()</code> unless they declare a helper. <code>check</code> is a tiny teaching helper that panics when a condition is false. The separate reference supplies required imports and helpers and implements all six cases. Use that complete source only after an attempt or an explicit reveal. For an independently prepared Go project, the equivalent local build is <code>go build -o lesson main.go</code>, followed by <code>./lesson</code>; use Linux or WSL 2 for that optional workflow. Compiling proves syntax and type consistency, while the executed checks establish the stated example contracts.</p>
-<p>Each worked example below is a complete Go file. Copy one whole block into your saved pad and run it. Example 2 includes the first case as well as the second, so its setup is complete. Its supporting declarations may be reused in later investigations. The separate reference implements all six cases.</p>
+<p>Run each worked example as one complete file in your saved pad (<a href="../STUDY-GUIDE.md.html#run-a-lesson">run steps</a>).</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1-emit-a-structured-event">Worked example 1: Emit a structured event<a class="heading-anchor" href="#worked-example-1-emit-a-structured-event" aria-label="Link to this section">#</a></h4>
 <p>Log processed with count 3 and parse its JSON.</p>
@@ -306,77 +304,79 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Observe:</strong> The ID is retained exactly.</p>
 <p>A bounded synthetic ID is sufficient. Secrets and complete payloads are inappropriate correlation fields.</p>
 <h3 id="predict-before-running">Predict before running<a class="heading-anchor" href="#predict-before-running" aria-label="Link to this section">#</a></h3>
-<p>For each example, write the input values, the state that can change, and the expected observation. Explain which result would disprove your current interpretation. For concurrency, predict a guaranteed relationship rather than an arbitrary scheduling order. For an error case, identify whether it is rejected at compilation or returned during execution.</p>
+<p>Predict the type of the count field after the JSON record is parsed back into a map, and why the check compares it with float64(3). Predict whether the time key is present in the fixture output and why the helper removes it. Then decide which fields an operator could filter on in each example without parsing the message text.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-emit-a-structured-event-change-one-input">Exercise 1: Emit a structured event: change one input<a class="heading-anchor" href="#exercise-1-emit-a-structured-event-change-one-input" aria-label="Link to this section">#</a></h4>
-<p>Copy worked example 1 into a scratch pad and change <code>v := logRecord(&quot;processed&quot;, &quot;count&quot;, 3)</code> to <code>v := logRecord(&quot;processed&quot;, &quot;count&quot;, 4)</code>. Before running, predict which check fails and which value it now sees; then run it and restore the original line.</p>
-<p><strong>Expected:</strong> The changed run panics with <code>fields</code> because <code>v[&quot;msg&quot;] == &quot;processed&quot; &amp;&amp; v[&quot;count&quot;] == float64(3)</code> no longer holds. Restoring the original line brings back the worked observation: the record has message processed and numeric count 3.</p>
-<p><strong>Verify:</strong> Compare your written prediction with the panic message <code>fields</code> and name the value that made <code>v[&quot;msg&quot;] == &quot;processed&quot; &amp;&amp; v[&quot;count&quot;] == float64(3)</code> false. After restoring the input, the program must print its success line again.</p>
+<p>Copy worked example 1, change <code>v := logRecord(&quot;processed&quot;, &quot;count&quot;, 3)</code> to <code>v := logRecord(&quot;processed&quot;, &quot;count&quot;, 4)</code> and predict the failure before running; then restore the line.</p>
+<p><strong>Expected:</strong> The edited run panics with <code>fields</code> because <code>v[&quot;msg&quot;] == &quot;processed&quot; &amp;&amp; v[&quot;count&quot;] == float64(3)</code> no longer holds.</p>
+<p><strong>Verify:</strong> Restoring <code>v := logRecord(&quot;processed&quot;, &quot;count&quot;, 3)</code> makes the check pass again with the worked observation: the record has message processed and numeric count 3.</p>
 <h4 id="exercise-2-retain-correlation-debug-a-regression">Exercise 2: Retain correlation: debug a regression<a class="heading-anchor" href="#exercise-2-retain-correlation-debug-a-regression" aria-label="Link to this section">#</a></h4>
-<p>A regression changed one token in worked example 2, so one line now reads <code>v := logRecord(&quot;read&quot;, &quot;request_id!&quot;, &quot;lesson-7&quot;)</code>. Run worked example 2 with that line, use the failure to locate the defect and repair it without changing the check.</p>
-<p><strong>Expected:</strong> Before the repair the program panics with <code>correlation</code>; after it the line reads <code>v := logRecord(&quot;read&quot;, &quot;request_id&quot;, &quot;lesson-7&quot;)</code> again and the ID is retained exactly.</p>
-<p><strong>Verify:</strong> Keep the failing and the repaired runs. Explain why the changed token alters the value tested by <code>v[&quot;request_id&quot;] == &quot;lesson-7&quot;</code> for this input.</p>
+<p>A one-token regression in worked example 2 makes a line read <code>v := logRecord(&quot;read&quot;, &quot;request_id!&quot;, &quot;lesson-7&quot;)</code>. Repair it without changing the check.</p>
+<p><strong>Expected:</strong> The defective run panics with <code>correlation</code>; after restoring <code>v := logRecord(&quot;read&quot;, &quot;request_id&quot;, &quot;lesson-7&quot;)</code>, the ID is retained exactly.</p>
+<p><strong>Verify:</strong> The failing run shows message <code>correlation</code>; after the repair <code>v[&quot;request_id&quot;] == &quot;lesson-7&quot;</code> holds again.</p>
 <h4 id="exercise-3-control-variable-time">Exercise 3: Control variable time<a class="heading-anchor" href="#exercise-3-control-variable-time" aria-label="Link to this section">#</a></h4>
 <p>Inspect the deterministic fixture record.</p>
 <p><strong>Expected:</strong> The time attribute is absent.</p>
-<p><strong>Verify:</strong> Keep a check equivalent to <code>!present</code>. As a control, change <code>check(!present, &quot;time&quot;)</code> to <code>check(present, &quot;time&quot;)</code> inside that check: it must panic with <code>time</code>, which shows the check can fail. Restore it.</p>
+<p><strong>Verify:</strong> Your solution must keep <code>!present</code> true. Control: changing <code>check(!present, &quot;time&quot;)</code> to <code>check(present, &quot;time&quot;)</code> panics with message <code>time</code>; revert it.</p>
 <h4 id="exercise-4-keep-status-structured">Exercise 4: Keep status structured<a class="heading-anchor" href="#exercise-4-keep-status-structured" aria-label="Link to this section">#</a></h4>
 <p>Log a failed status separately from its message.</p>
 <p><strong>Expected:</strong> status equals failed.</p>
-<p><strong>Verify:</strong> Keep a check equivalent to <code>v[&quot;status&quot;] == &quot;failed&quot;</code>. As a control, change <code>v := logRecord(&quot;read finished&quot;, &quot;status&quot;, &quot;failed&quot;)</code> to <code>v := logRecord(&quot;read finished&quot;, &quot;status!&quot;, &quot;failed&quot;)</code>: the run must panic with <code>status</code>. Restore the line before continuing.</p>
+<p><strong>Verify:</strong> Your solution must keep <code>v[&quot;status&quot;] == &quot;failed&quot;</code> true. Control: changing <code>v := logRecord(&quot;read finished&quot;, &quot;status&quot;, &quot;failed&quot;)</code> to <code>v := logRecord(&quot;read finished&quot;, &quot;status!&quot;, &quot;failed&quot;)</code> panics with message <code>status</code>; revert it.</p>
 <h4 id="exercise-5-redact-before-logging">Exercise 5: Redact before logging<a class="heading-anchor" href="#exercise-5-redact-before-logging" aria-label="Link to this section">#</a></h4>
 <p>Replace a credential value with a fixed marker.</p>
 <p><strong>Expected:</strong> Only [redacted] is present.</p>
-<p><strong>Verify:</strong> Keep a check equivalent to <code>v[&quot;credential&quot;] == &quot;[redacted]&quot;</code>. As a control, change <code>v := logRecord(&quot;configuration&quot;, &quot;credential&quot;, &quot;[redacted]&quot;)</code> to <code>v := logRecord(&quot;configuration&quot;, &quot;credential!&quot;, &quot;[redacted]&quot;)</code>: the run must panic with <code>redaction</code>. Restore the line before continuing.</p>
+<p><strong>Verify:</strong> Your solution must keep <code>v[&quot;credential&quot;] == &quot;[redacted]&quot;</code> true. Control: changing <code>v := logRecord(&quot;configuration&quot;, &quot;credential&quot;, &quot;[redacted]&quot;)</code> to <code>v := logRecord(&quot;configuration&quot;, &quot;credential!&quot;, &quot;[redacted]&quot;)</code> panics with message <code>redaction</code>; revert it.</p>
 <h4 id="exercise-6-transfer-numeric-evidence">Exercise 6: Transfer numeric evidence<a class="heading-anchor" href="#exercise-6-transfer-numeric-evidence" aria-label="Link to this section">#</a></h4>
 <p>Log a byte count of 12.</p>
 <p><strong>Expected:</strong> The parsed field remains numeric 12.</p>
-<p><strong>Verify:</strong> Keep a check equivalent to <code>v[&quot;bytes&quot;] == float64(12)</code>. As a control, change <code>v := logRecord(&quot;read&quot;, &quot;bytes&quot;, 12)</code> to <code>v := logRecord(&quot;read&quot;, &quot;bytes&quot;, 13)</code>: the run must panic with <code>numeric</code>. Restore the line before continuing.</p>
-<p>Implement these in the answer-free learner source. Keep one independent check per claim. A task can require tracing, construction, a changed input or a deliberate safe failure. Do not run a data race, corrupt memory or contact a shared cluster merely to demonstrate why it would be wrong.</p>
+<p><strong>Verify:</strong> Your solution must keep <code>v[&quot;bytes&quot;] == float64(12)</code> true. Control: changing <code>v := logRecord(&quot;read&quot;, &quot;bytes&quot;, 12)</code> to <code>v := logRecord(&quot;read&quot;, &quot;bytes&quot;, 13)</code> panics with message <code>numeric</code>; revert it.</p>
+<p>Work in the answer-free learner source, <code>courses/go/lessons/go-031.go</code> (<a href="../STUDY-GUIDE.md.html#work-an-exercise">exercise contract</a>).</p>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
-<p>Read a compiler error from the first location in your source, then fix one cause at a time. Unused imports and variables are errors in Go; add an import when its use exists, rather than copying a large unused import list. A panic from <code>check</code> identifies a violated example contract. Compare the actual value with the expected value and inspect the state transition that produced it. A returned <code>error</code> is a value that the caller must handle; an ignored error can make later output look plausible while the original operation failed.</p>
-<p>The lesson-specific explanations in the two examples identify the important counterexamples. Extend that reasoning to every investigation: explain why a plausible alternative would fail, and preserve a tiny input that distinguishes it. Treat empty data, missing values and cancellation as domain cases with explicit policies. In concurrent work, replace sleeps used as synchronization with channels, mutexes or an explicit ownership protocol.</p>
+<p>Building messages with fmt.Sprintf, such as processed 3 items for lesson-7, hides the fields operators need and makes every line unique. Put values in attributes with stable keys. Never log credentials, tokens or whole request bodies; redact before the call, because handlers write exactly what they receive. Logging an error is not handling it: still return it or act on it.</p>
+<p>General compiler, panic and error diagnosis is in the <a href="../STUDY-GUIDE.md.html#diagnose-a-failure">study guide</a>.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <h4 id="hint-for-investigation-1-emit-a-structured-event-change-one-input">Hint for investigation 1: Emit a structured event: change one input<a class="heading-anchor" href="#hint-for-investigation-1-emit-a-structured-event-change-one-input" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The record has message processed and numeric count 3.</li>
-<li>The check <code>v[&quot;msg&quot;] == &quot;processed&quot; &amp;&amp; v[&quot;count&quot;] == float64(3)</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Compute the checked value with <code>v := logRecord(&quot;processed&quot;, &quot;count&quot;, 4)</code> in place before running, then compare it with the value <code>v[&quot;msg&quot;] == &quot;processed&quot; &amp;&amp; v[&quot;count&quot;] == float64(3)</code> expects.</li>
+<li>JSON numbers decode into float64 in a map. What do msg and count hold?</li>
+<li>The logged count is now 4, so the parsed field is float64(4) and the comparison with float64(3) fails. The handler is fine; the logged value changed.</li>
 </ol>
 <h4 id="hint-for-investigation-2-retain-correlation-debug-a-regression">Hint for investigation 2: Retain correlation: debug a regression<a class="heading-anchor" href="#hint-for-investigation-2-retain-correlation-debug-a-regression" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The ID is retained exactly.</li>
-<li>The check <code>v[&quot;request_id&quot;] == &quot;lesson-7&quot;</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Compare <code>v := logRecord(&quot;read&quot;, &quot;request_id!&quot;, &quot;lesson-7&quot;)</code> with the same line in worked example 2 and state the claim each version makes.</li>
+<li>The key is passed through as written. Which value does request_id carry?</li>
+<li>The key is now request_id!, so <code>v[&quot;request_id&quot;]</code> is nil and the comparison fails. Restore the exact key; field names are the contract operators query.</li>
 </ol>
 <h4 id="hint-for-investigation-3-control-variable-time">Hint for investigation 3: Control variable time<a class="heading-anchor" href="#hint-for-investigation-3-control-variable-time" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The time attribute is absent.</li>
-<li>The check <code>!present</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Name one input that would make <code>!present</code> false. A check that no input can falsify is not evidence.</li>
+<li>ReplaceAttr drops the time key. Is it present in the parsed record?</li>
+<li>Production logs generally need time.</li>
 </ol>
 <h4 id="hint-for-investigation-4-keep-status-structured">Hint for investigation 4: Keep status structured<a class="heading-anchor" href="#hint-for-investigation-4-keep-status-structured" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: status equals failed.</li>
-<li>The check <code>v[&quot;status&quot;] == &quot;failed&quot;</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Predict the effect of changing <code>v := logRecord(&quot;read finished&quot;, &quot;status&quot;, &quot;failed&quot;)</code> to <code>v := logRecord(&quot;read finished&quot;, &quot;status!&quot;, &quot;failed&quot;)</code> before running anything. If the prediction is hard, trace that line again with the original input.</li>
+<li>Status is its own attribute, apart from the message. What is its value?</li>
+<li>Filtering a structured status is more reliable than searching for a particular sentence.</li>
 </ol>
 <h4 id="hint-for-investigation-5-redact-before-logging">Hint for investigation 5: Redact before logging<a class="heading-anchor" href="#hint-for-investigation-5-redact-before-logging" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: Only [redacted] is present.</li>
-<li>The check <code>v[&quot;credential&quot;] == &quot;[redacted]&quot;</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Predict the effect of changing <code>v := logRecord(&quot;configuration&quot;, &quot;credential&quot;, &quot;[redacted]&quot;)</code> to <code>v := logRecord(&quot;configuration&quot;, &quot;credential!&quot;, &quot;[redacted]&quot;)</code> before running anything. If the prediction is hard, trace that line again with the original input.</li>
+<li>The caller replaced the secret before logging. What does credential contain?</li>
+<li>Redaction at the producer boundary is easier to review than attempting to remove secrets after serialization.</li>
 </ol>
 <h4 id="hint-for-investigation-6-transfer-numeric-evidence">Hint for investigation 6: Transfer numeric evidence<a class="heading-anchor" href="#hint-for-investigation-6-transfer-numeric-evidence" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The parsed field remains numeric 12.</li>
-<li>The check <code>v[&quot;bytes&quot;] == float64(12)</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Predict the effect of changing <code>v := logRecord(&quot;read&quot;, &quot;bytes&quot;, 12)</code> to <code>v := logRecord(&quot;read&quot;, &quot;bytes&quot;, 13)</code> before running anything. If the prediction is hard, trace that line again with the original input.</li>
+<li>The byte count is passed as an int. What type does the parsed field have?</li>
+<li>Numbers should remain numbers for aggregation.</li>
 </ol>
 <h3 id="self-check-and-retrieval">Self-check and retrieval<a class="heading-anchor" href="#self-check-and-retrieval" aria-label="Link to this section">#</a></h3>
-<p>Close the reference. Rebuild one normal case and one boundary case from a blank pad. Explain the role of structured attribute without using its name in the definition. Then change the domain while keeping the same invariant. Record the new input, your prediction and the observed output. If your program passes only because its input is hard-coded, explain which part would need a reusable function in a larger project.</p>
+<p>Write a helper that logs a request completion with slog using request_id, status, duration_ms and bytes attributes, writing JSON to a buffer. Parse the result and check each field and its type. Then add a token attribute, redact it before logging, and explain why redaction belongs before the handler rather than in a log viewer.</p>
+<p>The general <a href="../STUDY-GUIDE.md.html#self-check-and-retrieval">retrieval routine</a> still applies.</p>
 <h3 id="next-step-and-sources">Next step and sources<a class="heading-anchor" href="#next-step-and-sources" aria-label="Link to this section">#</a></h3>
-<p><a href="https://pkg.go.dev/log/slog">Primary language or library documentation</a>, reviewed 2026-10-23. The teaching explanations and synthetic fixtures are original. Continue with the next lesson when you can explain the six observations and diagnose a changed case without copying its answer.</p>
+<p>Source: <a href="https://pkg.go.dev/log/slog"><code>log/slog</code> package documentation</a>, reviewed 2026-10-23.</p>
+<p>Next: go-032, Security boundaries, escaping and input budgets (<a href="../STUDY-GUIDE.md.html#when-to-move-on">criteria</a>).</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for go-031: Structured logging and observable operations.
 Read courses/go/guides/go-031.md and my saved attempt based on courses/go/lessons/go-031.go.

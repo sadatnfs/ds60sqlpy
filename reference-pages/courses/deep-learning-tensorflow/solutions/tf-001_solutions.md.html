@@ -194,8 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/deep-learning-tensorflow/solutions/tf-001_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="tf-001-worked-solutions">tf-001: worked solutions<a class="heading-anchor" href="#tf-001-worked-solutions" aria-label="Link to this section">#</a></h2>
-<p>Open this reference after an attempt or an explicit reveal request. Preserve your own version beside it. The <a href="../guides/tf-001.md.html">learner guide</a> contains the public fixture and its independent Expected/Verify contracts. These six sections correspond to the same six learner actions, rather than six answer steps for one task. A different implementation is acceptable when it preserves the stated input policy, observations and evidence boundary.</p>
-<p>The <a href="tf-001_solution.py.html">executable reference</a> exposes a <code>verify()</code> helper for authors and later comparison. It uses only local literals and the declared Python/NumPy environment. An assertion failure should retain its actual input and smallest failing observation. A passing reference is evidence about these fixed cases; use a changed fixture and a closed-reference explanation before recommending progression. The reading worksheet remains a reading exercise, regardless of the optional arithmetic checker.</p>
+<p>Compare after an attempt with the <a href="../guides/tf-001.md.html">learner guide</a>. The worksheet stays a reading exercise; the <a href="tf-001_solution.py.html">arithmetic checker</a> is optional (<a href="../STUDY-GUIDE.md.html#after-the-solutions">comparison steps</a>).</p>
 <h3 id="exercise-1-name-the-units-and-roles">Exercise 1: Name the units and roles<a class="heading-anchor" href="#exercise-1-name-the-units-and-roles" aria-label="Link to this section">#</a></h3>
 <p>The three t-prefixed records are training examples and the four h-prefixed records are demonstration evaluation examples. The feature and target in one record belong together; treating every scalar as an independent sample would inflate the count. Label the group IDs explicitly. Their disjointness is part of the intended new-group claim, whereas the visible synthetic arithmetic is not an independent exam. An alternative table layout is acceptable when all seven identities and their roles remain inspectable.</p>
 <p><strong>Expected:</strong> Three training rows and four holdout rows; the row-ID and group-ID intersections are empty.</p>
@@ -221,7 +220,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Expected:</strong> The supported statement concerns those seven published points only; all-future accuracy or production-safety claims remain unsupported.</p>
 <p><strong>Verify:</strong> The evidence note names seven observations, the already visible rule, and a new source/time fixture that has not influenced selection.</p>
 <h3 id="inspectable-reference-functions">Inspectable reference functions<a class="heading-anchor" href="#inspectable-reference-functions" aria-label="Link to this section">#</a></h3>
-<p>The core functions below make the input and reduction policies explicit. The separate executable file adds all six exercise checks. Do not replace a failed assertion with a flattering default value or remove the invalid-input case.</p>
+<p><code>validate_split</code> rejects empty sets, duplicate or overlapping row IDs and a shared source group; <code>mse</code> refuses empty, unequal or nonfinite pairs.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> __future__ <span class="syntax-keyword">import</span> annotations
 <span class="syntax-keyword">import</span> math
 
@@ -255,7 +254,7 @@ HOLDOUT <span class="syntax-operator">=</span> <span class="syntax-punctuation">
     <span class="syntax-keyword">return</span> <span class="syntax-keyword">True</span></code></pre>
 <h3 id="retrieval-and-alternatives">Retrieval and alternatives<a class="heading-anchor" href="#retrieval-and-alternatives" aria-label="Link to this section">#</a></h3>
 <p>Close the table and explain why a holdout is a decision policy. Then change the training targets to [1,3] and the evaluation target to [5]. Derive the fixed training-mean prediction and its single squared error without looking at the reference.</p>
-<p>After revealing this file, choose another fixture before treating the answer as independent retrieval evidence. Explain why the rejected case is invalid, not merely which exception class appeared. Alternative notation, array layout or a direct calculation is welcome when its domain meaning and denominator remain explicit. Keep implementation correctness separate from broad claims about unseen model quality, reliability or safety.</p></article>
+<p>Then follow the <a href="../STUDY-GUIDE.md.html#after-the-solutions">after-solutions routine</a>.</p></article>
   </main>
 </body>
 </html>

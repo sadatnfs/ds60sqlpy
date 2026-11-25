@@ -1,6 +1,6 @@
 # r-034: reference reasoning
 
-Use the [complete reference](r-034_reference.R) with the guide's declared inputs and runtime. Every worked example is also a standalone script.
+Run the [complete reference](r-034_reference.R) under the [run rules](../STUDY-GUIDE.md#run-a-chapter).
 
 ## Why the implementation has this shape
 
@@ -96,4 +96,6 @@ Document the chosen observation grain and avoid treating reshaping as an implici
 
 ## What the checks establish
 
-The reference makes 4 `stopifnot()` checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.
+The checks confirm that id and visit form a unique key, that reshaping to wide and back restores the original long table apart from attributes, that a duplicated key is detected before reshaping, and that removing B's second visit produces an NA in its `value.2` cell rather than a dropped row. They do not decide whether such an NA should later be imputed.
+
+The reference makes 4 `stopifnot()` checks; see [what a passing run proves](../STUDY-GUIDE.md#what-a-passing-run-proves).

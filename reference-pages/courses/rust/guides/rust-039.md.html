@@ -206,11 +206,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>RecordBatch:</strong> Equal-length columns representing one batch of rows.</p>
 <p><strong>ArrayRef:</strong> Shared ownership of a type-erased Arrow array.</p>
 <h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>The Linux Docker classroom compiles the saved pad as <code>main.rs</code> with pinned Rust 1.99.1, edition 2024, and the prepared Arrow 60 library. <code>assert!</code> and <code>assert_eq!</code> remain active in normal builds. The fixed pad accepts one source file without arbitrary arguments, interactive input, Cargo manifests or package installation. The main function returns <code>Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt;</code> so later examples can propagate errors with <code>?</code>; the final <code>Ok(())</code> means this fixture completed successfully. Standard library and Arrow examples remain offline after image preparation. Multi-file Cargo and external ecosystem projects have separate explicit preparation workflows.</p>
-<p>Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.</p>
+<p>Beyond the prelude, this lesson&#x27;s programs use <code>arrow::array</code>, <code>arrow::datatypes</code>, <code>arrow::record_batch</code> and <code>std::sync</code>. A passing run prints <code>rust-039: passed</code>.</p>
+<p>Pad setup and limits: <a href="../STUDY-GUIDE.md.html#run-a-lesson">Run a lesson</a>.</p>
+<p>Before you run anything, follow <a href="../STUDY-GUIDE.md.html#attempt-a-lesson">Attempt a lesson</a>.</p>
 <h3 id="syntax-anatomy-and-execution-trace">Syntax anatomy and execution trace<a class="heading-anchor" href="#syntax-anatomy-and-execution-trace" aria-label="Link to this section">#</a></h3>
 <p>Field::new records name, DataType and nullable policy. Schema::new groups fields. RecordBatch::try_new validates arrays against an Arc&lt;Schema&gt;. ArrayRef stores different concrete arrays behind one shared interface.</p>
-<p>Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.</p>
+<p><strong>Reading Example A (Build an aligned batch, code below).</strong> <code>Field::new(&quot;name&quot;, DataType::Utf8, false)</code> declares one column: its name, its Arrow type and whether it may contain nulls. <code>Schema::new</code> collects the fields in order, and <code>Arc::new</code> wraps the schema so many batches can share it cheaply. The <code>columns</code> vector holds <code>ArrayRef</code> values, which are <code>Arc&lt;dyn Array&gt;</code>: each concrete array sits behind a shared trait object, so arrays of different types fit in one vector. <code>RecordBatch::try_new</code> validates the pairing of schema and columns and returns a <code>Result</code>, and <code>?</code> propagates a mismatch as an error. The last line reads the first column back: <code>as_any().downcast_ref::&lt;StringArray&gt;()</code> recovers the concrete type from the trait object and would return <code>None</code> if the type were wrong.</p>
+<p>Method for tracing your own variants: <a href="../STUDY-GUIDE.md.html#trace-a-program">Trace a program</a>.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="example-a-build-an-aligned-batch">Example A: Build an aligned batch<a class="heading-anchor" href="#example-a-build-an-aligned-batch" aria-label="Link to this section">#</a></h4>
 <p>Names and types are explicit rather than inferred from arbitrary array positions.</p>
@@ -265,20 +267,28 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <ol start="6">
 <li><strong>Transfer and justify.</strong> Design a schema evolution policy that preserves names, units and saved data meaning.</li>
 </ol>
-<p>For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.</p>
+<p>Record each task as in <a href="../STUDY-GUIDE.md.html#keep-evidence-for-each-task">Keep evidence for each task</a>.</p>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
 <p>A nullable field permits nulls; it does not require them. Schema validation does not establish unique keys or domain ranges. Do not infer whole-dataset row count from one batch.</p>
-<p>A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.</p>
+<p>To turn a pitfall into a test, see <a href="../STUDY-GUIDE.md.html#design-a-regression-case">Design a regression case</a>.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <ol>
 <li>Reproduce Example A (Build an aligned batch) before changing anything, and confirm its observation: Two aligned columns form a two-row, two-column batch.</li>
 <li>Compare Example B (Reject incompatible lengths) with Example A and name the first line whose behavior differs. Its observation is: Unequal column lengths are rejected.</li>
 <li>Before opening the explanation, test your task 3 attempt against this lesson&#x27;s main pitfall: A nullable field permits nulls; it does not require them.</li>
 </ol>
+<p>Tempting approaches to rule out before you compare:</p>
+<ul>
+<li><strong>Task 1.</strong> Calling this batch the inventory reads more into it than it says: it is one two-row chunk, and nothing in it proves that names are unique or that there are no other batches.</li>
+<li><strong>Task 2.</strong> Declaring <code>price</code> as non-nullable while the array contains a null fails <code>try_new</code> with an error that the column is declared non-nullable but contains a null.</li>
+<li><strong>Task 5.</strong> Treating the zero-row batch as an error, or skipping its schema, loses the column definitions a later empty result still needs.</li>
+</ul>
 <h3 id="self-check-and-next-step">Self-check and next step<a class="heading-anchor" href="#self-check-and-next-step" aria-label="Link to this section">#</a></h3>
-<p>Explain Schema, RecordBatch, ArrayRef without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.</p>
+<p>What <code>num_rows()</code> and <code>num_columns()</code> does Example A&#x27;s batch report, and where does &quot;pear&quot; appear? What error does <code>RecordBatch::try_new</code> return in Example B, and why is rejecting it better than padding the shorter column with nulls? Why does a field&#x27;s <code>nullable</code> flag belong in the schema rather than in a comment?</p>
+<p>Then work through <a href="../STUDY-GUIDE.md.html#self-check-and-review">Self-check and review</a>.</p>
 <h3 id="sources-and-execution-boundary">Sources and execution boundary<a class="heading-anchor" href="#sources-and-execution-boundary" aria-label="Link to this section">#</a></h3>
-<p><a href="https://docs.rs/arrow/60.0.0/arrow/record_batch/struct.RecordBatch.html">Official language or framework documentation</a>. The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.</p>
+<p>Read <a href="https://docs.rs/arrow/60.0.0/arrow/record_batch/struct.RecordBatch.html">the <code>RecordBatch</code> documentation</a> for the checks <code>try_new</code> performs.</p>
+<p>What the classroom does and does not prove: <a href="../STUDY-GUIDE.md.html#sources-and-execution-boundary">Sources and execution boundary</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for rust-039: Schemas, fields and RecordBatch invariants.
 Read courses/rust/guides/rust-039.md and courses/rust/lessons/rust-039.rs. Prerequisites: rust-038.

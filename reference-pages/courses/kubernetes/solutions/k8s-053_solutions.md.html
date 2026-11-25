@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/kubernetes/solutions/k8s-053_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="k8s-053-explanatory-solutions">k8s-053: explanatory solutions<a class="heading-anchor" href="#k8s-053-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit reveal. These explanations describe the synthetic topology and stated API contracts. They are not fabricated runtime receipts.</p>
+<p>Attempt each exercise first, then compare (<a href="../STUDY-GUIDE.md.html#solutions-and-the-ai-tutor">study guide</a>).</p>
 <h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
 <p>Ingress describes HTTP and HTTPS routing intent to Services. It requires an Ingress controller that interprets the resource and implements a proxy path. Creating an Ingress object without a controller does not create a web server or make a hostname reachable.</p>
 <p>A host rule matches the HTTP host name, while a path rule matches the URL path according to its pathType. Exact, Prefix and implementation-specific rules are not interchangeable. Prefix matching is based on path elements, not an arbitrary raw string startsWith rule. Rewriting paths is controller-specific behavior rather than a universal core Ingress feature.</p>

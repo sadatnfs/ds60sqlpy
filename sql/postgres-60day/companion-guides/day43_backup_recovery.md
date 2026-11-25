@@ -2,99 +2,69 @@
 
 ## How to run this lesson
 
-Start the Linux-container engine and run `./classroom` from the repository
-root. On Windows, use Ubuntu in WSL 2 or the thin
-`START_DOCKER_CLASSROOM.cmd` wrapper. Choose **PostgreSQL** on the shared
-`/classroom` home, then open **sql-43**. The
-[launcher guide](../../../docs/one-command-classroom.md) covers first preparation, strict resume and
-the saved project selection. No host Python or PostgreSQL installation is
-required for this browser route.
-
-1. Read the prerequisite and fixture notes before running the file. Use only
-   the local disposable `advanced_sql_training` database.
-2. Choose **Whole SQL lesson (psql)** for the cataloged learner script. This
-   preserves the lesson's reviewed psql directives, relative includes and
-   transaction behavior. **SQL snippet** is appropriate for ordinary SQL
-   statements, but is not a replacement for an entire script's setup.
-3. The **Course database** panel above the code shows whether the course
-   training tables are loaded. Missing tables load automatically before your
-   first run (or choose **Load course tables**) and stay loaded for later
-   lessons. **Reset training data** restores the original rows only when your
-   own changes made results differ; it keeps your saved code and notes.
-4. Edit the learner copy in the classroom and save your prediction before
-   running. Its whole-script workspace is
-   `.learning/sql/sql-43/lesson/workspace/sql/postgres-60day/day43_backup_recovery.sql`.
-   For browser work this path is inside the Docker learning volume, not a
-   newly created host folder beside your checkout. The checked-in source
-   remains the answer-free starting artifact.
-5. Run the whole script and inspect the full transcript. The runner uses
-   `psql -X -v ON_ERROR_STOP=1 -f`. SELECT output has columns, rows and a row
-   count; DDL/DML has command tags; intentional checks may produce NOTICE
-   messages. An unexpected ERROR or nonzero exit is a failure to diagnose,
-   even when an earlier query printed plausible values.
-6. Verify the lesson's expected grain, ordering, constraints and declared
-   transaction or cleanup outcome. Keep required ROLLBACK statements.
-   The warehouse sequence and other explicitly stateful exercises explain
-   when state is committed. Read saved output without rerunning it when
-   reviewing an earlier attempt.
-
-If a relation is missing, inspect the lesson's required fixture and predecessor
-rather than guessing a new table definition. If authentication or runtime
-readiness fails, use `./classroom status` and the setup guide. Keep credentials
-out of SQL, notebooks, screenshots and committed files. Repair the first error
-before trusting partial output, and reveal separate solutions only when you
-want to compare after an attempt.
-
-### Optional contributor notebook route
-
-For notebook work, deliberately prepare the Linux/WSL contributor environment
-from [CONTRIBUTING.md](../../../CONTRIBUTING.md), including a compatible psql client and
-the notebook dependencies. Generate this lesson's private workspace through
-the maintained CLI:
-
-```sh
-uv run --no-sync python scripts/course.py sql notebook sql-43
-```
-
-Open the printed notebook path in that environment's JupyterLab. It uses the
-same catalog-derived learner-copy layout in that contributor checkout and
-executes the complete script through psql. Its host-side state is separate
-from the Docker browser's named volume. Follow
-[guided SQL notebooks](../../../docs/guided-sql-notebooks.md) for explicit local connection
-selection and kernel setup. Notebook generation does not execute SQL or
-authorize a reset.
+In `./classroom`, choose PostgreSQL, open **sql-43** and run it with
+**Whole SQL lesson (psql)** against `advanced_sql_training`. The script opens
+`BEGIN`, creates an empty temporary `customers_stg` table shaped like
+`customers`, prints a two-row count comparison and ends with `ROLLBACK`, so
+nothing it builds outlives the run. Its file-copy lines are comments: a
+server-side `COPY ... TO '/path'` fails for the course role, and a `\copy`
+needs a path on the machine that runs `psql`. Your editable copy is
+`.learning/sql/sql-43/lesson/workspace/sql/postgres-60day/day43_backup_recovery.sql`
+in the Docker learning volume. In our private PostgreSQL 17 container the
+transcript was `BEGIN`, `SET`, `CREATE TABLE`, the rows `customers 500` and
+`customers_stg 0`, then `ROLLBACK`. Whole-lesson mode prints anything you add
+as `COPY (query) TO STDOUT` straight into that transcript, which is how this
+lesson exports without touching a file. It will not run an added `\copy`:
+the classroom rejects any change to the file's psql meta-commands, so practice
+that command in a `psql` terminal. Setup and resume live in the
+[classroom launch steps](../../STUDY-GUIDE.md#run-a-lesson-in-the-classroom);
+JupyterLab users can take the
+[contributor notebook path](../../STUDY-GUIDE.md#optional-contributor-notebook-route)
+instead.
 
 ## Level and prerequisites
 
 - **Level:** Advanced
-- **Prerequisites:** [Day 42; data quality and validation](day42_data_quality_validation.md)
+- **Prerequisites:** [Day 42; data quality and validation](day42_data_quality_validation.md) Day 42's normalized-email duplicate report returns here as the `lower(trim(email))` key that decides which staged row wins before a merge.
 - **Artifacts:** [learner SQL](../day43_backup_recovery.sql) ·
   [solution reasoning](../solutions/day43_solutions.md) ·
   [executable solution](../solutions/day43_solutions.sql)
 
 ## A beginner's mental model for this lesson
 
-A **table** stores facts in named columns. A **row** is one occurrence at the
-table's declared grain. A query creates a temporary **result set**: rows printed
-on screen are not automatically stored. The key vocabulary for this lesson is Logical backup, Staging table, Idempotent merge. Its worked SQL reads or creates `customers`.
+A restore has three stages, and this lesson gives each one a name. A
+**Logical backup** stores rows as data records rather than disk pages: here,
+the 63 US customers written as CSV lines with a header, one line per
+`customer_id`. A **Staging table** is where those records land first, a private
+copy you can count and inspect before any of it reaches `customers`. The
+learner's `customers_stg` copies the full definition of `customers`, while the
+solution's `customers_restore_stage` keeps six columns and drops
+`customer_id`. An **Idempotent merge** loads the stage with a rule for rows
+that already exist, so running it twice leaves the same table as running it
+once. The solution's rule is `ON CONFLICT (email) DO UPDATE`: our second run
+printed the same `INSERT 0 63`, and `customers` stayed at 500 rows.
 
-Before writing a query, complete this sentence: “One output row represents
-___.” Joins can multiply rows, filters can remove them, grouping can collapse
-many rows into one, and window functions can add calculations while preserving
-row count. For a normal analytical `SELECT`, use this logical reading order:
-`FROM`/`JOIN` (including `ON`) → `WHERE` → `GROUP BY`/aggregates → `HAVING` →
-window calculations → `SELECT` → `ORDER BY` → `LIMIT`. PostgreSQL may execute a
-different physical plan while preserving those semantics.
+Before writing anything, say what one row means at each stage: one customer in
+the CSV, one customer in the stage, one customer in `customers` matched by
+`email`. Every check in this lesson compares those three, by count first, then
+by keys, then by values.
 
-The worked walkthrough's lesson-specific task is: Use `\copy (SELECT ... WHERE ...) TO ...` from a path owned by the learner, import into a staging table, and compare count, keys, types, and sample rows. Only then merge inside `BEGIN`/`ROLLBACK` with an explicit email conflict policy.
-The learner script creates an empty staging table shaped like `customers` and
-compares the two row counts: 500 against 0 until an import fills the stage.
-That comparison is the first check of every restore; keys, types and sample
-rows come next.
+Read the queries inside the export and the checks in
+[logical clause order](../../STUDY-GUIDE.md#reading-any-query-in-logical-order).
+In `COPY (SELECT ... FROM customers WHERE country = 'US' ORDER BY
+customer_id) TO STDOUT`, the inner query runs first (`FROM`, then `WHERE`,
+then the seven selected columns, then `ORDER BY`), and `COPY` only formats the
+finished result as CSV. In the final comparison, `FROM ... JOIN ... USING
+(email)` pairs each staged row with its restored row (63 pairs) before `WHERE`
+keeps the pairs that differ.
 
 ## Two worked SQL examples
 
-These worked excerpts come from `sql/postgres-60day/day43_backup_recovery.sql`. Use **Whole SQL lesson (psql)** in the unified classroom for the complete file, including its fixture and transaction context. The optional contributor notebook and prepared `psql` routes are described above.
+Both excerpts come from `day43_backup_recovery.sql` and run between its
+`BEGIN` and `ROLLBACK`, after `SET search_path TO training, public`, so
+`customers` resolves to `training.customers` and the temporary stage lives in
+your session's own `pg_temp` schema. Example 1 builds the empty landing table;
+Example 2 is the first check to run after any import into it.
 
 ### Example 1: an empty stage with the target's shape
 
@@ -166,43 +136,59 @@ Complete these in the [learner SQL](../day43_backup_recovery.sql):
    **Inputs/evidence:** For sql-43 Exercise 1, export the US subset of `training.customers` with `COPY (SELECT customer_id, full_name, email, country, created_at, segment, attributes FROM customers WHERE country = 'US' ORDER BY customer_id) TO STDOUT WITH (FORMAT csv, HEADER true)`, then model the later `\copy ... FROM` import by creating the temporary table `customers_restore_stage` from the same rows.
    **Expected result/shape:** For sql-43 Exercise 1, expected output: one CSV header line and 63 data lines streamed to the client, ordered by `customer_id`, then `SELECT 63` for the staging table.
    **Verify:** For sql-43 Exercise 1, confirm that `SELECT COUNT(*) FROM training.customers WHERE country = 'US'` and `SELECT COUNT(*) FROM customers_restore_stage` both return 63; then confirm that `COPY customers TO STDOUT WHERE country = 'US'` fails with SQLSTATE `42601` (`WHERE clause not allowed with COPY TO`), because only the query form can filter an export.
+   **Data check:** In our container the export printed the header and 63 data lines for `customer_id` 1, 9, 17 and so on to 497, every eighth id. All 63 have segment `standard`, and the JSON in `attributes` arrives wrapped in double quotes with its inner quotes doubled, as in `"{""channel"": ""web"", ""referrer"": ""seo""}"`. The stage then reported `SELECT 63`, the tag `CREATE TABLE ... AS` prints. US is one of four countries with 63 customers (CA, DE and GB are the others; the remaining four have 62), so a count alone would not catch a wrong country. `COPY customers TO STDOUT WHERE country = 'US'` failed with `WHERE clause not allowed with COPY TO`.
 2. Restore staged customers with deterministic conflict handling.
    **Inputs/evidence:** For sql-43 Exercise 2, mark one staged row as changed (`full_name || ' [restored]'` for `customer1@example.com`), then load `customers_restore_stage` into `customers` with `INSERT ... SELECT ... ON CONFLICT (email) DO UPDATE` inside the lesson transaction.
    **Expected result/shape:** For sql-43 Exercise 2, expected output: `UPDATE 1` for the staged change, then `INSERT 0 63`, because all 63 staged emails already exist and each conflicting row is updated; the `staged_rows` check returns 63, and `customers` still has 500 rows.
-   **Verify:** For sql-43 Exercise 2, confirm that `SELECT full_name FROM customers WHERE email = 'customer1@example.com'` returns `Customer 1 [restored]` and `SELECT COUNT(*) FROM customers` returns 500 inside the transaction; rerun the same upsert and confirm that the row count and values do not change, which is the idempotency evidence.
+   **Verify:** For sql-43 Exercise 2, confirm that `SELECT full_name FROM customers WHERE email = 'customer1@example.com'` returns `Customer 1 [restored]` and `SELECT COUNT(*) FROM customers` returns 500 inside the transaction; rerun the same upsert and confirm it again reports `INSERT 0 63` with 500 rows and unchanged values, which is the idempotency evidence for the data, while `customers_customer_id_seq` still advances by 63 per run because each proposed row evaluates the `customer_id` default before the conflict is found.
+   **Data check:** Our run printed `UPDATE 1`, `INSERT 0 63` and a `staged_rows` value of 63, and a second identical upsert printed `INSERT 0 63` again with `customers` still at 500 rows. One thing did not repeat: each run advanced `customers_customer_id_seq` by 63. `INSERT` evaluates the `customer_id` default for every proposed row before it finds the email conflict, and `ROLLBACK` does not give sequence numbers back, so gaps in future ids are expected.
 3. Explain server-side `COPY` versus client-side `\copy`.
    **Inputs/evidence:** For sql-43 Exercise 3, compare server-side `COPY customers TO '/var/lib/postgresql/customers.csv'` with psql's `\copy customers TO 'customers.csv'`, using the course role's privileges and the classroom layout as evidence.
    **Expected result/shape:** For sql-43 Exercise 3, expected output: a short written answer: `COPY ... TO 'file'` runs in the database server process and writes on the server's file system, which needs superuser or `pg_write_server_files`; `\copy` streams the rows to the `psql` client, which writes the file. In the classroom, `psql` runs in a Linux container, so `\copy` writes into the learning volume, not onto your desktop.
-   **Verify:** For sql-43 Exercise 3, run the server-side `COPY customers TO '/var/lib/postgresql/customers.csv'` as the course role and confirm that it fails with SQLSTATE `42501` (`permission denied to COPY to a file`), while `COPY (SELECT 1) TO STDOUT` succeeds, because any role may copy to the client stream.
+   **Verify:** For sql-43 Exercise 3, run the server-side `COPY customers TO '/var/lib/postgresql/customers.csv'` as the course role (a non-superuser without `pg_write_server_files`) and confirm that it fails with SQLSTATE `42501` (`permission denied to COPY to a file`), while `COPY (SELECT 1) TO STDOUT` succeeds, because any role may copy to the client stream; a superuser session may be allowed to write the file, so it is not valid evidence.
+   **Data check:** In our container we created a non-superuser role inside a rolled-back transaction and switched to it. `pg_has_role(current_user, 'pg_write_server_files', 'MEMBER')` returned `f`, the server-side `COPY` failed with `permission denied to COPY to a file`, and the server's own hint read "Anyone can COPY to stdout or from stdin. psql's \copy command also works for anyone." `COPY (SELECT 1) TO STDOUT` printed `1`. Run this check as the course role; a superuser may be allowed to write the file.
 4. Build a deterministic row-count/key-range export manifest.
    **Inputs/evidence:** For sql-43 Exercise 4, summarize `customers` in one manifest row: `'training.customers' AS table_name`, `COUNT(*) AS row_count`, `MIN(customer_id) AS min_key`, `MAX(customer_id) AS max_key`, and `clock_timestamp() AS observed_at`.
    **Expected result/shape:** For sql-43 Exercise 4, expected output: exactly one row with columns `table_name`, `row_count`, `min_key`, `max_key`, and `observed_at`: `('training.customers', 500, 1, 500, <timestamp>)` on the course seed.
    **Verify:** For sql-43 Exercise 4, rerun the manifest and confirm that every column except `observed_at` is identical; then compare `row_count` with the number of data lines in an exported CSV of the same table (500).
+   **Data check:** Our manifest row was `training.customers`, 500, 1, 500 and an `observed_at` with microseconds, and a rerun changed only `observed_at`. `max_key` stayed at 500 even after the upserts had pushed the sequence past it, because the merge updated rows rather than inserting them: the manifest describes the data, not the sequence.
 5. Deduplicate staged emails with an explicit winner rule.
    **Inputs/evidence:** For sql-43 Exercise 5, rank `customers_restore_stage` rows with `ROW_NUMBER() OVER (PARTITION BY lower(trim(email)) ORDER BY created_at DESC, full_name, email)` and keep `winner_rank = 1`.
    **Expected result/shape:** For sql-43 Exercise 5, expected output: one row per normalized email with columns `full_name`, `email`, and `country`, ordered by `email`; the course stage has no duplicates, so all 63 rows survive.
    **Verify:** For sql-43 Exercise 5, add a second staged row for `customer1@example.com` with an older `created_at` and confirm that the result still has 63 rows and keeps the newer row; without this step, the Exercise 2 upsert fails with SQLSTATE `21000` (`ON CONFLICT DO UPDATE command cannot affect row a second time`).
+   **Data check:** Our run listed 63 rows. The `Customer 1 [restored]` row came 14th, between `customer193@example.com` and `customer201@example.com`, and `customer9@example.com` came last: the `en_US.utf8` collation passes over the `@` and puts digits before letters. With a second `customer1@example.com` row dated one year earlier, the stage held 64 rows, the result still had 63, and the kept row carried the newer `created_at` (2026-10-08 23:00 UTC). The same duplicate sent straight to the second exercise's upsert failed with `ON CONFLICT DO UPDATE command cannot affect row a second time`.
 6. Compare source/restored values with `IS DISTINCT FROM`.
    **Inputs/evidence:** For sql-43 Exercise 6, join `customers_restore_stage` to `customers` by `email` and keep rows where `full_name`, `country`, or `segment` differ according to `IS DISTINCT FROM`.
    **Expected result/shape:** For sql-43 Exercise 6, expected output: zero rows with columns `email`, `staged_name`, and `restored_name`, ordered by `s.email`, because the Exercise 2 upsert copied every staged value into `customers`.
    **Verify:** For sql-43 Exercise 6, after a savepoint, run `UPDATE customers SET segment = NULL WHERE email = 'customer9@example.com'`, rerun the comparison, and confirm that exactly one row appears; the same check written with `<>` returns no row, because a comparison with NULL is unknown.
+   **Data check:** Our run returned zero rows. After a savepoint and `UPDATE customers SET segment = NULL WHERE email = 'customer9@example.com'`, it returned one row: `customer9@example.com`, `Customer 9`, `Customer 9`. Both names match because the difference is in `segment`, which the three output columns do not show. The `<>` version counted 0 rows.
 
 Repeat the staged merge and prove it creates no duplicates.
 
 ## Common mistakes and how to recover
 
-- **Lesson-specific semantic mistake:** Do not skip this worked-model requirement: Use `\copy (SELECT ... WHERE ...) TO ...` from a path owned by the learner, import into a staging table, and compare count, keys, types, and sample rows. Only then merge inside `BEGIN`/`ROLLBACK` with an explicit email conflict policy.
-- **Unexpected row count:** display keys before aggregates, count rows after
-  each join/filter stage, and find the first stage whose grain differs from the
-  contract. Do not hide fanout with `DISTINCT`.
-- **Unexpected `NULL` or missing row:** decide whether the fact is unknown,
-  inapplicable, zero, or absent before using `COALESCE`; inspect outer-join
-  predicate placement and empty-input aggregate behavior.
-- **Unstable top/first/last output:** add `ORDER BY` with a unique final
-  tie-breaker before `LIMIT` or order-sensitive windows/aggregates.
-- **`psql` stops on an error:** fix the first error shown by
-  `ON_ERROR_STOP`, restore the declared transaction/setup state, and rerun the
-  complete file. A later successful statement does not validate a partial run.
+- **Lesson-specific semantic mistake:** reading `INSERT 0 63` as 63 new
+  customers. With `ON CONFLICT ... DO UPDATE` the tag counts rows inserted or
+  updated; here all 63 emails already existed, every row was updated and
+  `customers` stayed at 500. Check the table count, not the tag.
+- **`WHERE clause not allowed with COPY TO`:** `COPY table` exports the whole
+  table. Put the filter in a query, `COPY (SELECT ... WHERE country = 'US')
+  TO STDOUT`, or use `\copy` with the same query in a `psql` terminal.
+- **`permission denied to COPY to a file`:** a server-side path needs
+  `pg_write_server_files`. Export to `STDOUT` or with `\copy`; do not ask for
+  the role.
+- **`ON CONFLICT DO UPDATE command cannot affect row a second time`:** the
+  stage holds two rows for one email. Pick a winner with the fifth exercise's
+  `ROW_NUMBER()` rule and load only `winner_rank = 1`.
+- **A comparison that misses a `NULL`:** `<>` returns unknown when one side is
+  `NULL`, so a value restored as `NULL` slips through. Use `IS DISTINCT FROM`.
+- **Gaps in new `customer_id` values:** each upsert run consumed 63 sequence
+  numbers even though it inserted nothing, and a rollback keeps them consumed.
+  That is expected, not lost data.
+- **`psql` stopped partway:** fix the first error and rerun the whole file
+  from `BEGIN`; the
+  [failure recovery checklist](../../STUDY-GUIDE.md#recover-from-common-failures)
+  covers container and path problems.
 
 ## Self-check
 
@@ -246,7 +232,14 @@ skipped row as a `NOTICE`; count the skipped rows before trusting the load.
 
 ## Practice map
 
-Use the numbered **Exercises** section above as the single authoritative practice contract. Its prompts, expected shapes, and verification checks map one-for-one to the learner SQL and both solution companions.
+The six numbered exercises above are the practice set, and four of them share
+one stage. Build `customers_restore_stage` in the first exercise and keep it
+for the second, fifth and sixth, all inside one `BEGIN`/`ROLLBACK` as the
+solution does. The third is a written answer backed by two `COPY` statements,
+and the fourth reads only `customers`. Several checks change data on purpose:
+a duplicate staged email in the fifth, a `NULL` segment in the sixth. Put each
+one after a `SAVEPOINT` and `ROLLBACK TO` it afterwards, so the later checks
+still see 63 staged rows and an unchanged table.
 
 ## Environment and safety limits
 
@@ -276,9 +269,14 @@ different, exactly the behavior a reconciliation usually needs.
 
 ## Ask an AI tutor about this lesson
 
-An AI tutor is optional; the guide, learner SQL, PostgreSQL, and expected checks are
-enough to complete the lesson offline. If you want a patient tutor, copy this
-prompt after opening the repository in the AI tutor:
+A tutor is optional; this guide, the learner file and PostgreSQL are enough
+for Day 43. The
+[tutor section of the study guide](../../STUDY-GUIDE.md#use-an-ai-tutor-optional)
+lists what to share. The course data is clean, so the useful practice is with
+messy imports: ask for a short invented CSV of customers with a repeated email
+in different case, a missing email and a malformed date, and predict what the
+stage, the winner rule and the upsert do with each line before checking. Ask it
+this after your stage holds the 63 US rows:
 
 ```text
 Tutor me through sql-43: Logical Export, Staging, and Restore Checks.

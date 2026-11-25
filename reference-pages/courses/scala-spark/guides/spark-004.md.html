@@ -194,16 +194,19 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/scala-spark/guides/spark-004.md</code></p>
     </header>
     <article class="document"><h2 id="spark-004-immutable-collections-and-transformations">spark-004: Immutable collections and transformations<a class="heading-anchor" href="#spark-004-immutable-collections-and-transformations" aria-label="Link to this section">#</a></h2>
-<p>Authored tutorial and practice content. The prepared Scala/JVM worker executes a bounded program; process success and understanding remain distinct. No source file installs a tool or downloads a dependency.</p>
+<p>Five order amounts in cents, one negative and two equal, carry this lesson. You will split them into accepted and rejected collections, count and total the accepted bag, and keep the repeated 100 cents visible at every step instead of letting a set or a careless filter erase it.</p>
 <h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
-<p>Beginner; approximately 75 minutes. Direct prerequisites: <code>spark-003</code>. The lesson uses Scala 2.13 syntax and the prepared JDK 17 worker. The <a href="../execution-baseline.md.html">execution baseline</a> lists the exact Scala, JDK and Spark versions.</p>
+<p>Beginner; approximately 75 minutes. Direct prerequisites: <code>spark-003</code>. Pinned versions: <a href="../execution-baseline.md.html">execution baseline</a>.</p>
 <h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>Open <code>spark-004</code> in the classroom, select the Scala source, prepare the <code>scala-jvm</code> profile and run the saved pad. The worker stages the single source as <code>Main.scala</code> and invokes <code>object Main</code>. Read the terminal output and exact assertions. The <a href="../lessons/spark-004.scala.html">learner source</a> runs two complete demonstrations; its six task functions remain explicit stubs until you implement them. Preserve your saved attempt. The <a href="../solutions/spark-004_solution.scala.html">reference program</a> and <a href="../solutions/spark-004_solutions.md.html">explained solutions</a> are separate and should be opened after an attempt or an explicit worked-comparison request. If the profile is unavailable, reading and saving remain available; opening this guide does not prepare a runtime.</p>
+<p>Shared run steps and profile rules: <a href="../STUDY-GUIDE.md.html#run-a-language-lesson">study guide</a>.</p>
+<p>Learner pad: <a href="../lessons/spark-004.scala.html">spark-004.scala</a>.</p>
+<p>Open the <a href="../solutions/spark-004_solutions.md.html">explained solutions</a> after an attempt.</p>
+<p>Before you write anything, the pad prints <code>2,4,6</code> from the map example and <code>total=15 empty=0</code> from the fold example. Study the second line: <code>foldLeft</code> starts from the explicit zero you pass it, so an empty sequence totals 0, while <code>reduce</code> on an empty sequence would throw. The fold also uses <code>Math.addExact</code>, which is the same overflow guard Exercise 4 asks you to keep.</p>
 <h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
 <ul>
 <li>Use Seq and Map with map, filter and fold without mutating shared state.</li>
-<li>Explain the result of both worked examples before running them.</li>
-<li>Implement the six contracts, inspect normal and boundary evidence, and explain a counterexample in your own words.</li>
+<li>Predict why filtering <code>Seq(100L, -5L, 0L, 100L, 25L)</code> keeps both 100-cent entries and the zero, and show that the original sequence is unchanged afterwards.</li>
+<li>Prove conservation with a rejected ledger: accepted size plus rejected size equals the input size, even for an empty or all-negative input, and the multiplicity map sums to the accepted count.</li>
 </ul>
 <h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
 <ul>
@@ -276,9 +279,15 @@ println<span class="syntax-punctuation">(</span><span class="syntax-string">s&qu
 <h3 id="common-pitfalls">Common pitfalls<a class="heading-anchor" href="#common-pitfalls" aria-label="Link to this section">#</a></h3>
 <p>If the accepted count is three instead of four, inspect whether zero was dropped or duplicate amounts were collapsed. If grouped totals differ from the global accepted total, trace each input occurrence into its group before changing arithmetic. If an empty reduction fails, use an explicit identity with foldLeft. If a large total becomes negative, distinguish ordinary wrapping addition from checked Math.addExact. If a Map prints in a surprising order, compare keyed values or sort for presentation rather than changing the data structure&#x27;s meaning.</p>
 <h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
-<p>Explain one input-to-output trace without reading your code. Identify which function preserves repeated values, which condition distinguishes an invalid or missing input, and which assertion would fail for the tempting incorrect implementation. A printed success line alone is not the evidence; retain the exact values and the reasoning that connect them to the contract.</p>
+<ul>
+<li>Without running anything, give the accepted sequence, the rejected sequence and the <code>(count, total)</code> pair for <code>Seq(100L, -5L, 0L, 100L, 25L)</code>. Which of your answers would change if <code>accepted</code> returned <code>values.toSet.toSeq</code>?</li>
+<li>Why does <code>partitionAmounts(Seq(-2L, -1L))</code> return an empty accepted side rather than failing, and which assertion checks that the two sides still add up to the input size?</li>
+<li><code>fivePercent</code> maps 25 cents to 1 cent. State the rounding rule that produces that value and the input that <code>fivePercent</code> must reject.</li>
+<li><code>frequencies</code> returns <code>Map(100L -&gt; 2L, 0L -&gt; 1L, 25L -&gt; 1L)</code>. Explain why a <code>Map[Long, Long]</code> can hold the repeated 100 when a <code>Set[Long]</code> cannot.</li>
+<li>In <code>groupedSummary</code>, the row <code>C, -5</code> has a negative amount and contributes nothing to the report. Why does a blank label on a negative row still have to be rejected?</li>
+</ul>
 <h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
-<p>Continue to the next lesson only after you can explain the boundary behavior. The <a href="../README.md.html">course route</a> shows authored material and runtime evidence separately.</p>
+<p>Go on to <a href="spark-005.md.html">spark-005: Option, missing values, and total functions</a>. This lesson assumed every amount was present and well formed; the next one parses amount text that may be missing or malformed, and keeps &quot;missing&quot; and &quot;rejected&quot; as separate outcomes instead of turning both into zero.</p>
 <h3 id="primary-sources-and-official-apis">Primary sources and official APIs<a class="heading-anchor" href="#primary-sources-and-official-apis" aria-label="Link to this section">#</a></h3>
 <ul>
 <li><a href="https://docs.scala-lang.org/overviews/scala-book/collections-methods.html">Scala 2 collection transformations</a>.</li>

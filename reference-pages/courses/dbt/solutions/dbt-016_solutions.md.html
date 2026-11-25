@@ -195,7 +195,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="dbt-016-explained-reference">dbt-016: explained reference<a class="heading-anchor" href="#dbt-016-explained-reference" aria-label="Link to this section">#</a></h2>
 <p>Publish a metric with a complete numerator/denominator contract and an independent check.</p>
-<p>The executable reference contains the two complete worked cases with assertions. The changes below explain the independent practice and its limits.</p>
+<p>The reference sums successes and trials per cohort before dividing, uses nullif to guard a zero denominator, and checks the result against 10 of 100 and 1 of 2. The equal-row case shows that averaging ratios gives a rate more than 0.4 away from 0.1. Neither case tests uncertainty or sample-size rules. See <a href="../STUDY-GUIDE.md.html#answers-and-references">how these answers are laid out</a>.</p>
 <h3 id="1-write-the-population">1. Write the population<a class="heading-anchor" href="#1-write-the-population" aria-label="Link to this section">#</a></h3>
 <p>State eligibility, time, treatment of missingness and duplicate policy before writing the SQL. Keep those rules with the metric owner.</p>
 <p><strong>Expected:</strong> The inclusion and time rules are explicit.</p>

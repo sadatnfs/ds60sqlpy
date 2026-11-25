@@ -1,6 +1,6 @@
 # cuda-103: explained solutions
 
-These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.
+Compare with your [worksheet](../lessons/cuda-103.md) attempt.
 
 ## Exercise 1: Compute equal-replica average
 
@@ -74,8 +74,16 @@ Each framework needs its own integration test.
 
 **How to verify.** Write an integration test per framework that compares the two-rank gradient with a single-device reference on the same examples.
 
+## Self-check answers
+
+1. **What does data parallelism give each replica?** Different examples. Each replica computes gradients, and the gradients are combined before a consistent update.
+
+2. **Why does adding replicas change the optimization problem?** It changes the effective batch size, which changes gradient noise and can require different learning rates.
+
+3. **What is the usual PyTorch arrangement for DistributedDataParallel?** One process per device, each with its own rank, joined through a suitable collective backend.
+
 ## Reference observation
 
 Global example-weighted gradient 2.5.
 
-The reference file is `courses/cuda/python/references/cuda-103_cpu.py`. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.
+Asserted by `courses/cuda/python/references/cuda-103_cpu.py`.

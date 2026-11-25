@@ -32,11 +32,9 @@ Inspect the actual image after a representative build. A source manifest can ass
 
 ## How to use this lesson
 
-The classroom displays this guide and saves your worksheet, `courses/docker/lessons/docker-006.md`. Its Run button does not control your Docker engine. Docker engine access is powerful host access, so the classroom deliberately receives no engine socket. Work through the supplied examples without starting anything, then use the optional host lab only in your own disposable project. Reading a command, parsing YAML and actually running the project are different forms of evidence.
+The classroom saves `courses/docker/lessons/docker-006.md` and holds no engine socket ([host-lab setup](../STUDY-GUIDE.md#host-lab-setup)).
 
-Use Bash in Linux, macOS Terminal, or Ubuntu under WSL 2 on Windows. The supported engine runs Linux containers. The maintained fixture is `courses/docker/fixtures/compose-lab/`; its README explains copying it into a new ignored learner directory, checking the engine, building locally with visible logs, and using the fixed project name `ds60-docker-study`. The fixture uses port 18080 on host loopback. Stop if that project name or port belongs to unrelated work; choose a new project name consistently in your own copy. Never paste a command against a remote Docker context simply because it is currently selected.
-
-For Dockerfile examples, create a file named `Dockerfile` in a scratch project. YAML snippets describe a fragment unless explicitly called a complete file. Text transcripts are synthetic illustrations, not claims about your machine. Do not substitute a real password, token or private registry into a checked-in example. **How to use the lessons** in the [subject README](../README.md) collects these rules in one place.
+**Host lab.** Make a scratch copy of the fixture and add three decoys: `.env` containing a fake value, a nested `notes/debug.log`, and `cache/__pycache__/x.pyc`. Move the fixture's `.dockerignore` aside, build once, and read the transferred context size in the plain log. Put the ignore file back and build again; the context shrinks. To prove exclusion rather than guess it, write a two-line `ctx.Dockerfile` containing `FROM ds60-docker-study:local` and `COPY . /ctx`, build it with `-f ctx.Dockerfile -t ds60-ctx-check .`, and list the result with `docker run --rm ds60-ctx-check find /ctx`. Only the files you meant to send should appear. Remove the decoys, `ctx.Dockerfile` and the `ds60-ctx-check` image when you finish, and never put a real secret in a decoy.
 
 ## Worked example / walkthrough
 
@@ -67,7 +65,7 @@ COPY server.py /app/server.py
 
 ## Six progressive exercises
 
-For each exercise, name the object involved and the phase of its lifetime before changing anything, then vary only the condition the task names. Exercises that ask you to predict, explain, compare or diagnose keep their answers in the solutions file; the others show the evidence to look for.
+Answer-type prompts keep their answers in the solutions file ([exercise rules](../STUDY-GUIDE.md#exercise-rules)).
 
 ### Exercise 1: Predict whether .gitignore protects Docker context.
 
@@ -101,13 +99,19 @@ For each exercise, name the object involved and the phase of its lifetime before
 
 Writing `.env` or `*.log` and expecting nested files to be excluded; only `**/` patterns match at any depth. Assuming `.gitignore` controls the build context. Using `COPY . .` and deleting a secret in a later step.
 
-Exercise 4 is this chapter's boundary case: Explain why deleting a secret in a later layer is insufficient. Use `docker history` on the image to list every layer with its size; a later `rm` step does not remove the earlier `COPY` layer from that list. Preserve the original failure and the exact changed field before retrying. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
+Exercise 4 is this chapter's boundary case: Explain why deleting a secret in a later layer is insufficient. Use `docker history` on the image to list every layer with its size; a later `rm` step does not remove the earlier `COPY` layer from that list.
+
+Another misconception is that a build argument is a safe way to pass a token, as in `ARG NPM_TOKEN` followed by a RUN step that uses it. Build arguments are recorded in the image history, and `docker history --no-trunc` can show the value in the RUN line that consumed it. The correction is a BuildKit secret mount, `RUN --mount=type=secret,id=npm_token ...`, which exposes the value as a file only during that one step and keeps it out of every layer and the history. Rotating a credential that has already been built into a pushed image is still necessary, because removing it later does not recall copies already pulled.
+
+Never trade a safety control for a passing example ([safety rules](../STUDY-GUIDE.md#safety-rules)).
 
 ## Retrieval, transfer and next steps
 
-Close the explanations first. Name two files from the fixture directory that should never reach the build context, and the ignore rule that excludes each. Then reconstruct worked example 2 (Prefer explicit source copying) with one different value, predict what changes, and name which of build context, .dockerignore, ignore patterns, layer history and explicit COPY the change touches.
+**Retrieval.** Name two files from the fixture directory that should never reach the build context, and the ignore rule that excludes each.
 
-When a host session ends, run `docker compose -p ds60-docker-study down` from your fixture copy. It removes the project's containers and network but keeps named volumes; deleting a volume is a separate, deliberate reset described in the fixture README.
+**Transfer case.** A project's `.dockerignore` contains `node_modules` and `*.key`. The build still copies `config/tls/server.key` into the image. Explain why, write the corrected rule, and say how you would prove the fix worked without trusting the build's success message.
+
+Then run the [retrieval loop](../STUDY-GUIDE.md#retrieval-and-cleanup) and end any host session with its cleanup.
 
 ## Primary references
 

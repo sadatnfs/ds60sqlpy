@@ -4,79 +4,47 @@
 
 ## How to run this lesson
 
-Start the Linux-container engine and run `./classroom` from the repository
-root. On Windows, use Ubuntu in WSL 2 or the thin
-`START_DOCKER_CLASSROOM.cmd` wrapper. Choose **PostgreSQL** on the shared
-`/classroom` home, then open **sql-deep-03**. The
-[launcher guide](../../../docs/one-command-classroom.md) covers first preparation, strict resume and
-the saved project selection. No host Python or PostgreSQL installation is
-required for this browser route.
+Start **sql-deep-03** from `./classroom` using the shared [run steps](../../STUDY-GUIDE.md#run-a-lesson-in-the-classroom).
 
-1. Read the prerequisite and fixture notes before running the file. Use only
-   the local disposable `advanced_sql_training` database.
-2. Choose **Whole SQL lesson (psql)** for the cataloged learner script. This
-   preserves the lesson's reviewed psql directives, relative includes and
-   transaction behavior. **SQL snippet** is appropriate for ordinary SQL
-   statements, but is not a replacement for an entire script's setup.
-3. The **Course database** panel above the code shows whether the course
-   training tables are loaded. Missing tables load automatically before your
-   first run (or choose **Load course tables**) and stay loaded for later
-   lessons. **Reset training data** restores the original rows only when your
-   own changes made results differ; it keeps your saved code and notes.
-4. Edit the learner copy in the classroom and save your prediction before
-   running. Its whole-script workspace is
-   `.learning/sql/sql-deep-03/lesson/workspace/sql/professional/lessons/sql_deep_03.sql`.
-   For browser work this path is inside the Docker learning volume, not a
-   newly created host folder beside your checkout. The checked-in source
-   remains the answer-free starting artifact.
-5. Run the whole script and inspect the full transcript. The runner uses
-   `psql -X -v ON_ERROR_STOP=1 -f`. SELECT output has columns, rows and a row
-   count; DDL/DML has command tags; intentional checks may produce NOTICE
-   messages. An unexpected ERROR or nonzero exit is a failure to diagnose,
-   even when an earlier query printed plausible values.
-6. Verify the lesson's expected grain, ordering, constraints and declared
-   transaction or cleanup outcome. Keep required ROLLBACK statements.
-   The warehouse sequence and other explicitly stateful exercises explain
-   when state is committed. Read saved output without rerunning it when
-   reviewing an earlier attempt.
+Choose **Whole SQL lesson (psql)**. Inside one transaction on
+`advanced_sql_training` (any other database is refused), the script builds a
+single temporary table, `deep3_events`, with seven events: customer `a` has two
+events at exactly 10:00, then 10:10, 10:40 and 11:11, and customer `b` has
+events at 10:05 and 10:35. Those tied timestamps and 30- and 31-minute gaps are
+what the frame and session exercises test. Only the two worked examples print:
+running totals of 4, 10, 13 against peer totals of 10, 10, 13, then a
+`last_value` that changes from 3 to 9 under the default frame. No `NOTICE` is
+expected, and `ROLLBACK` drops the table. Save attempts in
+`.learning/sql/sql-deep-03/lesson/workspace/sql/professional/lessons/sql_deep_03.sql`.
 
-If a relation is missing, inspect the lesson's required fixture and predecessor
-rather than guessing a new table definition. If authentication or runtime
-readiness fails, use `./classroom status` and the setup guide. Keep credentials
-out of SQL, notebooks, screenshots and committed files. Repair the first error
-before trusting partial output, and reveal separate solutions only when you
-want to compare after an attempt.
-
-### Optional contributor notebook route
-
-For notebook work, deliberately prepare the Linux/WSL contributor environment
-from [CONTRIBUTING.md](../../../CONTRIBUTING.md), including a compatible psql client and
-the notebook dependencies. Generate this lesson's private workspace through
-the maintained CLI:
-
-```sh
-uv run --no-sync python scripts/course.py sql notebook sql-deep-03
-```
-
-Open the printed notebook path in that environment's JupyterLab. It uses the
-same catalog-derived learner-copy layout in that contributor checkout and
-executes the complete script through psql. Its host-side state is separate
-from the Docker browser's named volume. Follow
-[guided SQL notebooks](../../../docs/guided-sql-notebooks.md) for explicit local connection
-selection and kernel setup. Notebook generation does not execute SQL or
-authorize a reset.
+The optional notebook route starts with `uv run --no-sync python scripts/course.py sql notebook sql-deep-03`; see the [study guide](../../STUDY-GUIDE.md#optional-contributor-notebook-route).
 
 ## Level and prerequisites
 
-- **Level:** Advanced. The guide defines each new mechanism before relying on it.
-- **Prerequisites:** [`sql-22`](../../postgres-60day/companion-guides/day22_advanced_windows.md), [`sql-analytics-01`](sql_analytics_01_query_patterns.md).
-- **Artifacts:** [Learner SQL](../lessons/sql_deep_03.sql), [explained reference](../solutions/sql_deep_03_solutions.md), and [executable reference](../solutions/sql_deep_03_solutions.sql). Every fixture is local, deterministic and rolled back; no prior lesson state is required.
+- **Level:** Advanced. Partitions, peer groups, `ROWS`, `RANGE` and `GROUPS`
+  frames, exclusions and session boundaries are each defined before an exercise
+  relies on them.
+- **Prerequisites:**
+  [`sql-22`](../../postgres-60day/companion-guides/day22_advanced_windows.md),
+  [`sql-analytics-01`](sql_analytics_01_query_patterns.md): advanced window
+  functions, then the analytical query patterns that use them.
+- **Artifacts:** [Learner SQL](../lessons/sql_deep_03.sql), [explained
+  reference](../solutions/sql_deep_03_solutions.md), and [executable
+  reference](../solutions/sql_deep_03_solutions.sql). `deep3_events` is
+  temporary and disappears at the final `ROLLBACK`, so no earlier lesson state
+  is needed.
 
 ## Learning objectives
 
-- State the output grain and identity before writing a query, including the NULL and duplicate policies.
-- Explain the new SQL mechanism, produce each exact projected result and expose the listed counterexample.
-- Verify rollback-safe behavior from inspected result rows and assertions without relying on a final success message.
+- Predict how `ROWS`, `RANGE` and `GROUPS` treat the two 10:00 events for
+  customer `a`, and say which frame mode a running total should use when
+  timestamps tie.
+- Apply `EXCLUDE CURRENT ROW`, `EXCLUDE GROUP` and `EXCLUDE TIES`, and make
+  `last_value` cover the whole partition with an explicit frame instead of the
+  default prefix.
+- Build a strictly prior 30-minute `RANGE` feature and derive sessions in
+  separate lag, flag and cumulative-sum stages, where a gap of exactly 30
+  minutes stays in the session.
 
 ## Vocabulary and concepts
 
@@ -123,7 +91,7 @@ ORDER BY
   event_id;
 ```
 
-The output remains one row per event_id with row_total and peer_total. Row totals are 4,10,13 while peer totals are 10,10,13. The first frame advances one deterministic event at a time; the second includes the entire current tick peer group. The final ordering prints identities consistently without changing either frame.
+The output remains one row per event_id with row_total and peer_total. Row totals are 4, 10, 13 while peer totals are 10, 10, 13. The first frame advances one deterministic event at a time; the second includes the entire current tick peer group. The final ordering prints identities consistently without changing either frame.
 
 ### Example 2
 
@@ -144,7 +112,7 @@ ORDER BY
   event_id;
 ```
 
-One output row per event_id has default_last3 then 9, while partition_last is 9 for both. Explicit UNBOUNDED FOLLOWING makes the second frame cover the entire partition. The function name alone does not determine whether last means current prefix or complete sequence.
+One output row per event_id has `default_last` 3 then 9, while `partition_last` is 9 for both. Explicit UNBOUNDED FOLLOWING makes the second frame cover the entire partition. The function name alone does not determine whether last means current prefix or complete sequence.
 
 ## Exercises
 
@@ -152,7 +120,7 @@ One output row per event_id has default_last3 then 9, while partition_last is 9 
 
 **Inputs/evidence:** For sql-deep-03 Exercise 1, For customer a only, return event_id, row_total, peer_total. Use ROWS with occurred_at, event_id for row_total and RANGE with occurred_at alone for peer_total. Both frames start at UNBOUNDED PRECEDING and end at CURRENT ROW. Order final rows by event_id.
 
-**Expected result/shape:** For sql-deep-03 Exercise 1, IDs 1..5 have row_total[1,3,6,10,15] and peer_total[3,3,6,10,15]. The two 10:00 events share only the peer-aware total.
+**Expected result/shape:** For sql-deep-03 Exercise 1, IDs 1..5 have `row_total` values 1, 3, 6, 10, 15 and `peer_total` values 3, 3, 6, 10, 15. The two 10:00 events share only the peer-aware total.
 
 **Verify:** For sql-deep-03 Exercise 1, inspect the tied timestamp rows together: ROWS advances by the full ordering while RANGE includes all peers at the same timestamp.
 
@@ -160,7 +128,7 @@ One output row per event_id has default_last3 then 9, while partition_last is 9 
 
 **Inputs/evidence:** For sql-deep-03 Exercise 2, For customer a, return event_id, two_rows, two_groups. The first frame is ROWS BETWEEN 1 PRECEDING AND CURRENT ROW ordered by timestamp, event_id; the second is GROUPS BETWEEN 1 PRECEDING AND CURRENT ROW ordered by timestamp alone. Final order is event_id.
 
-**Expected result/shape:** For sql-deep-03 Exercise 2, two_rows is[1,3,5,7,9] and two_groups is[3,3,6,7,9]. At event 3 the previous peer group contains both events 1 and 2.
+**Expected result/shape:** For sql-deep-03 Exercise 2, `two_rows` is 1, 3, 5, 7, 9 and `two_groups` is 3, 3, 6, 7, 9. At event 3 the previous peer group contains both events 1 and 2.
 
 **Verify:** For sql-deep-03 Exercise 2, write each frame membership as a set of event IDs for the tied rows and boundary rows; sum amounts from those memberships independently.
 
@@ -168,7 +136,7 @@ One output row per event_id has default_last3 then 9, while partition_last is 9 
 
 **Inputs/evidence:** For sql-deep-03 Exercise 3, For customer a, return event_id, without_current, without_group, without_other_ties using a RANGE unbounded-preceding-to-current frame ordered by timestamp. Apply EXCLUDE CURRENT ROW, EXCLUDE GROUP and EXCLUDE TIES respectively. Preserve NULL for empty frames and order by event_id.
 
-**Expected result/shape:** For sql-deep-03 Exercise 3, ID 1 gives 2, NULL,1; ID 2 gives 1, NULL,2; ID 3 gives 3,3,6; ID 4 gives 6,6,10; ID 5 gives 10,10,15.
+**Expected result/shape:** For sql-deep-03 Exercise 3, ID 1 gives 2, NULL, 1; ID 2 gives 1, NULL, 2; ID 3 gives 3, 3, 6; ID 4 gives 6, 6, 10; ID 5 gives 10, 10, 15.
 
 **Verify:** For sql-deep-03 Exercise 3, compare CURRENT ROW, GROUP and TIES using the same base frame; confirm TIES retains the current row while removing its other peers.
 
@@ -176,7 +144,7 @@ One output row per event_id has default_last3 then 9, while partition_last is 9 
 
 **Inputs/evidence:** For sql-deep-03 Exercise 4, For customer a, return event_id, prefix_last, partition_last. Order both windows by timestamp, event_id. Use the default ordered frame for prefix_last and explicit ROWS UNBOUNDED PRECEDING TO UNBOUNDED FOLLOWING for partition_last. Final order is event_id.
 
-**Expected result/shape:** For sql-deep-03 Exercise 4, prefix_last is[1,2,3,4,5], while partition_last is 5 for every row. No row is removed or collapsed.
+**Expected result/shape:** For sql-deep-03 Exercise 4, `prefix_last` is 1, 2, 3, 4, 5, while `partition_last` is 5 for every row. No row is removed or collapsed.
 
 **Verify:** For sql-deep-03 Exercise 4, compare the default frame last value with a frame extending to UNBOUNDED FOLLOWING; check both peer groups and the final row.
 
@@ -184,7 +152,7 @@ One output row per event_id has default_last3 then 9, while partition_last is 9 
 
 **Inputs/evidence:** For sql-deep-03 Exercise 5, For all customers return event_id, prior_30m over [occurred_at-30minutes, occurred_at), excluding every event at the current timestamp. Use a timestamp RANGE frame plus EXCLUDE GROUP and partition by customer_id. Treat an empty complete-log window as zero. Order by event_id.
 
-**Expected result/shape:** For sql-deep-03 Exercise 5, IDs 1..7 yield prior_30m[0,0,3,3,0,0,10]. Event 4 includes the exact 10:10 lower boundary; event 5 excludes 10:40 because it is 31 minutes old.
+**Expected result/shape:** For sql-deep-03 Exercise 5, IDs 1..7 yield `prior_30m` values 0, 0, 3, 3, 0, 0, 10. Event 4 includes the exact 10:10 lower boundary; event 5 excludes 10:40 because it is 31 minutes old.
 
 **Verify:** For sql-deep-03 Exercise 5, enumerate timestamps inside the elapsed-time interval and exclude every event at the current timestamp; confirm a prior physical row with the same timestamp cannot leak.
 
@@ -192,7 +160,7 @@ One output row per event_id has default_last3 then 9, while partition_last is 9 
 
 **Inputs/evidence:** For sql-deep-03 Exercise 6, Define a new session for a customer's first event or a gap strictly greater than 30 minutes. Return customer_id, session_id, event_count, first_event_id, last_event_id, one row per customer/session, ordered by customer_id, session_id. Use deterministic timestamp, event_id ordering and separate lag, flag, cumulative stages.
 
-**Expected result/shape:** For sql-deep-03 Exercise 6, Rows are(a,1,4,1,4),(a,2,1,5,5),(b,1,2,6,7). Exact 30-minute gaps stay in the same session; the 31-minute a gap starts session 2.
+**Expected result/shape:** For sql-deep-03 Exercise 6, Rows are (a,1,4,1,4), (a,2,1,5,5), (b,1,2,6,7). Exact 30-minute gaps stay in the same session; the 31-minute a gap starts session 2.
 
 **Verify:** For sql-deep-03 Exercise 6, compute each lag gap, then the break flag, then its cumulative sum in separate stages; check exactly the threshold and the first event of each user.
 
@@ -202,12 +170,23 @@ If a running total jumps across tied timestamps, inspect RANGE peers before assu
 
 ## Self-check
 
-- Explain the row grain after each FROM, JOIN, filter, grouping or window step. Name the identity columns that prove rows were neither lost nor multiplied.
-- Reconstruct a boundary result by hand, then compare with the query output. Explain why the tempting wrong query fails even if it returns the same total on an easier fixture.
+- Events 1 and 2 share 10:00. Why does Exercise 1 give a `peer_total` of 3 for
+  both while `row_total` gives 1 and 3, and which column would change if
+  `event_id` joined the `RANGE` ordering?
+- In Exercise 5, event 4 at 10:40 counts event 3 from 10:10, but event 5 at
+  11:11 counts nothing. Which boundary is inclusive, and why must the current
+  timestamp group be excluded?
+- Why can the session flag not be computed and accumulated in the same window
+  call, and which two customer `a` events are 31 minutes apart?
 
 ## Next step
 
-Transfer the same reasoning to a new small fixture before using it on larger data, then continue with [the next deepening lesson](sql_deep_04.md). Keep the result columns, ordering, NULL policy and observation horizon explicit. The [professional SQL track](../README.md) provides the wider route.
+Before moving on, add an event for customer `b` at exactly 11:05 to a copy of
+`deep3_events` and predict its session and `prior_30m` value, then run both
+queries to check. [The next deepening lesson](sql_deep_04.md) moves from
+ordered windows to graphs: recursive reachability, path tracking, cycle
+detection and dependency order. The [professional SQL track](../README.md)
+lists the wider route.
 
 ## Primary sources and official APIs
 

@@ -242,9 +242,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="mistakes-diagnosis-and-interview-discussion">Mistakes, diagnosis and interview discussion<a class="heading-anchor" href="#mistakes-diagnosis-and-interview-discussion" aria-label="Link to this section">#</a></h3>
 <p>Inspect the released package&#x27;s API and dependency metadata instead of relying on a development-branch tutorial. Keep client package version, native server version, DataFusion version and wire interface together in a compatibility record. Prepare new dependencies outside lesson execution and never install packages merely when a learner opens the chapter.</p>
 <p><strong>Interview discussion: why can a client compile or import successfully and still fail at query execution?</strong> The local API can be valid while a remote codec, operator, path, authorization rule or server release is incompatible. These cases separate actual Python execution from the separately prepared Rust extension and explain which additional observation is required before either becomes a supported end-to-end language route.</p>
-<p>The <a href="../projects/ballista/README.md.html">complete Ballista workshop</a> provides the maintained files, preparation, lifecycle and exact qualification boundaries for these cases.</p>
+<p>The <code>clients</code> action in the <a href="../projects/ballista/README.md.html">Ballista workshop</a> repeats the read through the DataFrame API, selecting, sorting and limiting to three rows, so SQL and DataFrame calls can be compared on one cluster.</p>
 <h3 id="complete-worked-source">Complete worked source<a class="heading-anchor" href="#complete-worked-source" aria-label="Link to this section">#</a></h3>
-<p>This is a project-only command notebook. Read and edit it in the classroom; run its explicitly labeled commands from the copied owned Docker workshop. The classroom does not execute these service commands.</p>
+<p>The classroom does not execute these service commands. See the <a href="../STUDY-GUIDE.md.html#workshop-notebooks">workshop rules</a>.</p>
 <h2 id="language-and-api-boundaries">Language and API boundaries<a class="heading-anchor" href="#language-and-api-boundaries" aria-label="Link to this section">#</a></h2>
 <p>The prepared actual Python route:</p>
 <pre class="highlighted-code"><code class="language-bash">bash run.sh clients
@@ -255,7 +255,7 @@ bash run.sh evidence</code></pre>
 <ul>
 <li><a href="https://datafusion.apache.org/ballista/user-guide/python/quickstart.html">Ballista Python interface</a></li>
 <li><a href="https://datafusion.apache.org/ballista/user-guide/rust.html">Ballista Rust client</a></li>
-<li><a href="https://docs.rs/ballista/54.1.0/ballista/">Ballista54.1 crate</a></li>
+<li><a href="https://docs.rs/ballista/54.1.0/ballista/">Ballista 54.1 crate</a></li>
 </ul></article>
   </main>
 </body>

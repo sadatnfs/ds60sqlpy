@@ -247,7 +247,7 @@ prices <span class="syntax-operator">=</span> pa<span class="syntax-operator">.<
 [&#x27;001&#x27;, &#x27;1&#x27;]</code></pre>
 <p>Arrow refuses to store 123456.789 in a decimal with five digits of precision instead of silently truncating it, which is the behavior a contract wants at a boundary. The second line keeps the identifiers 001 and 1 as two distinct strings, a reminder that casting identifiers to integers merges keys that a source system treats as different. Treat a precision error as a schema decision to escalate, not a value to clip.</p>
 <h3 id="complete-worked-source">Complete worked source<a class="heading-anchor" href="#complete-worked-source" aria-label="Link to this section">#</a></h3>
-<p>This is a complete editable worked program for the declared prepared runtime. It uses bounded local fixtures and does not install packages or start distributed services.</p>
+<p>Run it as the <a href="../STUDY-GUIDE.md.html#worked-programs">worked program rules</a> describe.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> decimal <span class="syntax-keyword">import</span> Decimal
 
 <span class="syntax-keyword">import</span> pyarrow <span class="syntax-keyword">as</span> pa

@@ -1,6 +1,6 @@
 # js-002: explanatory solutions
 
-Use these answers after an attempt or an explicit reveal. The reference uses the same literal fixtures as the guide and keeps the exercises in separate scopes. A successful run checks these examples; explaining a changed input is a separate learning goal.
+Open these after your own attempt; each exercise runs in its own scope in the reference.
 
 ## Mechanism review
 
@@ -22,7 +22,7 @@ typeof reports primitive categories but typeof null is the historical string obj
 
 ## Exercise 1: Trace plus versus numeric conversion: predict an edited check
 
-Task: Copy Example A into a scratch `main.mjs` and change `assert.equal(Number('3') + 2, 5);` to `assert.equal(Number('3') + 3, 5);` inside its check. Before running it, predict whether the check still passes and explain why; then restore it.
+Task: In a scratch copy of Example A, change `assert.equal(Number('3') + 2, 5);` to `assert.equal(Number('3') + 3, 5);` inside its check. Does the check still pass?
 
 The same symbol has different behavior when a string participates. Explicit conversion makes the intended numeric operation visible.
 
@@ -34,13 +34,13 @@ assert.equal(2 + '3', '23');
 assert.equal(Number('3') + 2, 5);
 ```
 
-**Expected:** The changed run fails with an `AssertionError` at `assert.equal(Number('3') + 3, 5);`. Restoring `assert.equal(Number('3') + 2, 5);` brings back: 5, string 23, and 5.
+**Expected:** The edited run fails with an `AssertionError` at `assert.equal(Number('3') + 3, 5);`. Restoring `assert.equal(Number('3') + 2, 5);` brings back: 5, string 23, and 5.
 
-**Verify:** Compare your written prediction with the reported `AssertionError`, including its actual and expected values, and explain why the edited check rejects the values that `assert.equal(Number('3') + 2, 5)` accepts. After restoring the line, the program prints its `{"checks":1,"status":"passed"}` receipt again.
+**Verify:** Compare the reported actual and expected values with your prediction, then restore `assert.equal(Number('3') + 2, 5);`.
 
 ## Exercise 2: Inspect absence and NaN: diagnose an edited check
 
-Task: A careless edit changed a check in Example B so that it reads `assert.equal(Number.isNaN('not a number'), true);`. Run Example B with that line, explain why the edited check now fails for the same program state, and restore it.
+Task: Example B's check was edited to read `assert.equal(Number.isNaN('not a number'), true);`. Run it, explain the failure and restore the original.
 
 The typeof null result is a language legacy, not evidence that null has usable object properties. Number.isNaN avoids converting arbitrary text.
 
@@ -55,7 +55,7 @@ assert.equal(Number.isNaN('not a number'), false);
 
 **Expected:** Before the repair the run fails with an `AssertionError` at `assert.equal(Number.isNaN('not a number'), true);`. Restoring `assert.equal(Number.isNaN('not a number'), false);` brings back: null reports object; undefined reports undefined; only numeric NaN passes isNaN.
 
-**Verify:** Keep the failing and the repaired runs. Explain why the edited check rejects the same program state that `assert.equal(Number.isNaN('not a number'), false)` accepts.
+**Verify:** Keep the failing and repaired runs and name the first value that differs between them.
 
 ## Exercise 3: Compare equality contracts
 
@@ -72,7 +72,7 @@ assert.equal(Object.is(0, -0), false);
 
 **Expected:** NaN!==NaN; Object.is(NaN, NaN) is true; +0===-0; Object.is distinguishes zeros.
 
-**Verify:** Keep a check equivalent to `assert.equal(NaN === NaN, false)`. As a control, change `assert.equal(NaN === NaN, false);` to `assert.equal(NaN !== NaN, false);` inside it: the run must fail with an `AssertionError`, which shows the check can fail. Restore it.
+**Verify:** Keep `assert.equal(NaN === NaN, false)`. Control: editing it to `assert.equal(NaN !== NaN, false);` must make the check fail; then restore it.
 
 ## Exercise 4: Expose floating-point approximation
 
@@ -88,7 +88,7 @@ assert.ok(Math.abs(value - 0.3) < 1e-15);
 
 **Expected:** strict equality false; absolute error below 1e-15.
 
-**Verify:** Keep a check equivalent to `assert.ok(Math.abs(value - 0.3) < 1e-15)`. As a control, change `const value = 0.1 + 0.2;` to `const value = 0.1 - 0.2;`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
+**Verify:** Keep `assert.ok(Math.abs(value - 0.3) < 1e-15)`. Control: changing `const value = 0.1 + 0.2;` to `const value = 0.1 - 0.2;` must make that check fail; then restore it.
 
 ## Exercise 5: Protect integer identity
 
@@ -105,7 +105,7 @@ assert.notEqual(exact + 1n, exact + 2n);
 
 **Expected:** Number collapses a difference; BigInt preserves it.
 
-**Verify:** Keep a check equivalent to `assert.equal(max + 1, max + 2)`. As a control, change `assert.equal(max + 1, max + 2);` to `assert.equal(max - 1, max + 2);` inside it: the run must fail with an `AssertionError`, which shows the check can fail. Restore it.
+**Verify:** Keep `assert.equal(max + 1, max + 2)`. Control: editing it to `assert.equal(max - 1, max + 2);` must make the check fail; then restore it.
 
 ## Exercise 6: Reject ambiguous numeric input
 
@@ -122,8 +122,8 @@ assert.throws(() => 1n + 1, TypeError);
 
 **Expected:** valid 12 accepted; invalid cases throw.
 
-**Verify:** Keep a check equivalent to `assert.equal(parseFinite('12'), 12)`. As a control, change `assert.equal(parseFinite('12'), 12);` to `assert.equal(parseFinite('13'), 12);` inside it: the run must fail with an `AssertionError`, which shows the check can fail. Restore it.
+**Verify:** Keep `assert.equal(parseFinite('12'), 12)`. Control: editing it to `assert.equal(parseFinite('13'), 12);` must make the check fail; then restore it.
 
 ## After comparison
 
-Return to your saved implementation and repeat a case with different values. Keep compiler diagnostics, process output and browser observations separate. Do not suppress a failing assertion or use a type assertion to declare an unvalidated value safe. Resource-owning examples must finish cleanup even when work fails. Describe each result with its actual host and fixture scope rather than as production acceptance.
+Fresh case: run your numeric validator on `'1e3'` and `'0x10'`. `Number` accepts them as 1000 and 16, so decide whether your contract should accept exponent and hexadecimal spellings, and write the check that enforces that decision. ([After comparing](../STUDY-GUIDE.md#after-comparing-with-the-solution).)

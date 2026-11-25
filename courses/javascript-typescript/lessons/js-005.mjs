@@ -1,16 +1,14 @@
 // Answer-free learner source. Save your own copy before editing.
 // Exercise 1: Map and filter without changing input: change one input
-// Copy Example A into a scratch `main.mjs` and change `const original = [1, 2, 3, 4];` to
-// `const original = [2, 2, 3, 4];`. Before running it, predict which check fails and which
-// value it now sees; then run it and restore the original line.
-// Expected: The changed run fails with an `AssertionError` at `assert.deepEqual(original,
-// [1, 2, 3, 4])`. Restoring `const original = [1, 2, 3, 4];` brings back: 6, 8; original
-// array unchanged.
+// In a scratch copy of Example A, change `const original = [1, 2, 3, 4];` to `const original
+// = [2, 2, 3, 4];`. Which check fails, and what value does it see?
+// Expected: The edited run fails with an `AssertionError` at `assert.deepEqual(original, [1,
+// 2, 3, 4])`. Restoring `const original = [1, 2, 3, 4];` brings back: 6, 8; original array
+// unchanged.
 
 // Exercise 2: Supply a reduction identity: diagnose an edited check
-// A careless edit changed a check in Example B so that it reads `assert.equal([1, 2,
-// 3].reduce((sum, value) => sum - value, 0), 6);`. Run Example B with that line, explain why
-// the edited check now fails for the same program state, and restore it.
+// Example B's check was edited to read `assert.equal([1, 2, 3].reduce((sum, value) => sum -
+// value, 0), 6);`. Run it, explain the failure and restore the original.
 // Expected: Before the repair the run fails with an `AssertionError` at `assert.equal([1, 2,
 // 3].reduce((sum, value) => sum - value, 0), 6);`. Restoring `assert.equal([1, 2,
 // 3].reduce((sum, value) => sum + value, 0), 6);` brings back: 0 and 6.

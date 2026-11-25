@@ -42,5 +42,7 @@
       "wrong": "Copying a path printed by an earlier run into a later script. That file is gone, so the read fails, or it finds an unrelated file if paths happen to be reused.",
       "verify": "`file.exists(path)` returns FALSE after `unlink(path)`, and `tempdir()` shows a different directory in a new session."
     }
-  ]
+  ],
+  "run_note": "The starter holds two records with character ids \"001\" and \"002\" and one missing amount, and prints them. Run it and note both the leading zeros and the NA. Write to a path from `tempfile()`, read the file back and compare with `identical()`: a CSV reader that infers types will turn the ids into numbers unless you declare the column classes.",
+  "checks_note": "The assertions confirm that the CSV round trip with declared classes is identical to the original, including names and the NA amount, that `readRDS()` returns exactly the saved object before `unlink()` removes it, and that a JSON array read back as a list keeps 2 as its first element. They do not prove that other programs will read these files the same way."
 }

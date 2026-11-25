@@ -2,7 +2,7 @@
 
 Run a project against an explicitly identified owned target and verify its actual destination.
 
-The executable reference contains the two complete worked cases with assertions. The changes below explain the independent practice and its limits.
+The reference rewrites profiles.yml so the `dev` and `prod` outputs differ only in schema, builds into each, and reads the target name stored by the model. The unknown target leaves no run results. All schemas sit in one local DuckDB file, so this proves routing, not isolation between real environments. See [how these answers are laid out](../STUDY-GUIDE.md#answers-and-references).
 
 
 ## 1. Inspect the destination

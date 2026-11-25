@@ -83,31 +83,7 @@ curl -X POST http://127.0.0.1:8000/predict \
 
 ## How to run this lesson
 
-**Primary browser route:** run `./classroom` from the repository root and
-choose **Python and data science** on `/classroom`. Open this lesson in the shared workspace,
-read its capability notice, and use its supported coding or reading workflow.
-The [classroom guide](../../../docs/classroom-experience.md) explains saved work, runtimes and switching subjects.
-
-**Optional native notebook/editor route:** the instructions below describe
-separately prepared host tools. They are useful alternatives, not prerequisites
-for opening this lesson in the Docker classroom.
-
-1. Open the Day 55 learner notebook from this guide's **Next
-   step** section in VS Code or JupyterLab.
-2. Select the `Python (ds60sqlpy)` kernel. Start at the top and use
-   **Run All** only after making the written predictions; every added
-   worked example is bounded and offline after bootstrap.
-3. Keep experiments in new scratch cells. Do not edit the official
-   solution while attempting the numbered practice.
-4. Restart the kernel and run from the first cell before calling the
-   lesson complete. A clean run catches hidden state and stale
-   variables.
-
-Linux, macOS, or Ubuntu in Windows WSL 2:
-
-```bash
-.venv/bin/python -m jupyter lab
-```
+Open `python-55` in the classroom, or `python/ds-60day/notebooks/day55_apis_containerization_docker.ipynb` on a host; the [Python study guide](../../STUDY-GUIDE.md) explains both.
 
 ## Concept deep dive: container build boundaries, minimal images, and health semantics
 
@@ -131,10 +107,6 @@ automatically.
 - **`CMD` / `HEALTHCHECK`:** define the main process and probe command without replacing service-level readiness policy.
 
 ### Focused example A: audit build-context inclusion before Docker runs
-
-Before running the example, predict the shape, type, or direction of the
-result. Write the prediction down so that a surprise becomes evidence
-rather than something to overlook.
 
 ```python
 from fnmatch import fnmatch
@@ -231,9 +203,6 @@ assert during_dependency_outage == {"healthy": True, "ready": False}
 
 Containerize a minimal, testable service without embedding secrets or privileged assumptions. Build, readiness, and runtime health have distinct contracts.
 
-Predict or plan before you run code. Use the hint only after an honest
-attempt, and record the evidence that would prove your result correct.
-
 4. **Layer and secret audit:** Create a `.dockerignore`, inspect image history, and prove that `.env`, Git metadata, notebooks, caches, and local artifacts are absent.
    **Progressive hint:** The build context is the first boundary. Deleting a secret in a later layer does not remove it from earlier layers.
 
@@ -285,8 +254,7 @@ adding complexity.
 
 ## Ask an AI tutor about this lesson
 
-The lesson is complete without an AI assistant. If you want optional
-coaching, copy this prompt into the AI tutor while the repository root is open:
+The lesson is complete without AI. For optional coaching, copy this prompt with the repository root open:
 
 ```text
 Tutor me through `python-55` (Day 55: Containerizing a FastAPI Service).

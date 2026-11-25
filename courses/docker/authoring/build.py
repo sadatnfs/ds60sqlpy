@@ -21,6 +21,9 @@ KEY_TERMS = AUTHORED["KEY_TERMS"]
 BOUNDARY = AUTHORED["BOUNDARY"]
 RETRIEVAL = AUTHORED["RETRIEVAL"]
 REASONING = runpy.run_path(str(Path(__file__).with_name("reasoning.py")))["REASONING"]
+# Per-lesson host lab, extra misconception and transfer case; shared rules live in STUDY-GUIDE.md.
+LABS = runpy.run_path(str(Path(__file__).with_name("labs.py")))["LABS"]
+LAB_FIELDS = ("lab", "trap", "ask", "answer")
 REASONING_LABELS = (
     "Approach",
     "Why this is correct",
@@ -103,9 +106,15 @@ def write(path, text):
 
 def check_lesson_prose():
     keys = {f"docker-{n:03d}" for n in range(1, len(SPECS) + 1)}
-    for name, table in (("BOUNDARY", BOUNDARY), ("RETRIEVAL", RETRIEVAL)):
+    for name, table in (("BOUNDARY", BOUNDARY), ("RETRIEVAL", RETRIEVAL), ("LABS", LABS)):
         if set(table) != keys:
             raise ValueError(f"{name} needs exactly one entry per lesson")
+    for key, entry in LABS.items():
+        if set(entry) != set(LAB_FIELDS):
+            raise ValueError(f"{key}: LABS entry needs exactly {LAB_FIELDS}")
+        for field, value in entry.items():
+            if "\u2014" in value or "\u2013" in value:
+                raise ValueError(f"{key}: LABS {field} contains a dash")
 
 
 def build():
@@ -119,6 +128,7 @@ def build():
         prereq = [f"docker-{n - 1:03d}"] if n > 1 else []
         title, mental, anatomy, examples, tasks, refs = spec
         concepts = CONCEPTS[title]
+        notes = LABS[key]
         key_terms = "\n".join(
             f"- **{term}:** {definition}" for term, definition in KEY_TERMS[title]
         )
@@ -167,19 +177,17 @@ def build():
 
 ## How to use this lesson
 
-The classroom displays this guide and saves your worksheet, `{source}`. Its Run button does not control your Docker engine. Docker engine access is powerful host access, so the classroom deliberately receives no engine socket. Work through the supplied examples without starting anything, then use the optional host lab only in your own disposable project. Reading a command, parsing YAML and actually running the project are different forms of evidence.
+The classroom saves `{source}` and holds no engine socket ([host-lab setup](../STUDY-GUIDE.md#host-lab-setup)).
 
-Use Bash in Linux, macOS Terminal, or Ubuntu under WSL 2 on Windows. The supported engine runs Linux containers. The maintained fixture is `courses/docker/fixtures/compose-lab/`; its README explains copying it into a new ignored learner directory, checking the engine, building locally with visible logs, and using the fixed project name `ds60-docker-study`. The fixture uses port 18080 on host loopback. Stop if that project name or port belongs to unrelated work; choose a new project name consistently in your own copy. Never paste a command against a remote Docker context simply because it is currently selected.
-
-For Dockerfile examples, create a file named `Dockerfile` in a scratch project. YAML snippets describe a fragment unless explicitly called a complete file. Text transcripts are synthetic illustrations, not claims about your machine. Do not substitute a real password, token or private registry into a checked-in example. **How to use the lessons** in the [subject README](../README.md) collects these rules in one place.
+**Host lab.** {notes["lab"]}
 
 ## Worked example / walkthrough
 """
         for i, (heading, body, lang, code, expected) in enumerate(examples, 1):
             text += f"\n### Worked example {i}: {heading}\n\n{body}\n\n```{lang}\n{code}\n```\n\n**Expected observation:** {expected}\n"
-        text += "\n## Six progressive exercises\n\nFor each exercise, name the object involved and the phase of its lifetime before changing anything, then vary only the condition the task names. Exercises that ask you to predict, explain, compare or diagnose keep their answers in the solutions file; the others show the evidence to look for.\n"
+        text += "\n## Six progressive exercises\n\nAnswer-type prompts keep their answers in the solutions file ([exercise rules](../STUDY-GUIDE.md#exercise-rules)).\n"
         worksheet = f"# {key}: learner worksheet\n\nSave predictions before optional host execution. Keep exact project name, engine identity and timestamps with runtime observations. No exercise runs automatically.\n"
-        answer = f"# {key}: explanatory solutions\n\nCompare after your own attempt or an explicit reveal. These explain the supplied teaching fixtures; they are not engine results. The mechanism is explained in `{guide}`.\n"
+        answer = f"# {key}: explanatory solutions\n\nThese answers explain teaching fixtures, not engine results; the mechanism is in [the guide](../guides/{key}.md).\n"
         for i, (prompt, expected, reason, *extra) in enumerate(tasks, 1):
             text += f"\n### Exercise {i}: {prompt}\n"
             label = "Expected answer" if answer_task(prompt) else "Expected evidence"
@@ -194,9 +202,7 @@ For Dockerfile examples, create a file named `Dockerfile` in a scratch project. 
             for part_label, part in zip(REASONING_LABELS, REASONING[title][i - 1], strict=True):
                 answer += f"\n**{part_label}:** {part}\n"
         boundary = (
-            ""
-            if answer_task(tasks[3][0])
-            else f"Its expected observation is: {tasks[3][1]} Use it to avoid treating a successful command as proof of the wrong claim. "
+            "" if answer_task(tasks[3][0]) else f"Its expected observation is: {tasks[3][1]} "
         )
         text += (
             f"""
@@ -204,13 +210,19 @@ For Dockerfile examples, create a file named `Dockerfile` in a scratch project. 
 
 {MISTAKES[title]}
 
-Exercise 4 is this chapter's boundary case: {tasks[3][0]} {boundary}{BOUNDARY[key]} Preserve the original failure and the exact changed field before retrying. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
+Exercise 4 is this chapter's boundary case: {tasks[3][0]} {boundary}{BOUNDARY[key]}
+
+{notes["trap"]}
+
+Never trade a safety control for a passing example ([safety rules](../STUDY-GUIDE.md#safety-rules)).
 
 ## Retrieval, transfer and next steps
 
-Close the explanations first. {RETRIEVAL[key]} Then reconstruct worked example 2 ({examples[1][0]}) with one different value, predict what changes, and name which of {series(concepts)} the change touches.
+**Retrieval.** {RETRIEVAL[key]}
 
-When a host session ends, run `docker compose -p ds60-docker-study down` from your fixture copy. It removes the project's containers and network but keeps named volumes; deleting a volume is a separate, deliberate reset described in the fixture README.
+**Transfer case.** {notes["ask"]}
+
+Then run the [retrieval loop](../STUDY-GUIDE.md#retrieval-and-cleanup) and end any host session with its cleanup.
 
 ## Primary references
 
@@ -231,7 +243,7 @@ Finish with a fresh transfer case and ask which evidence would falsify my explan
 ```
 """
         )
-        answer += "\n## Check your transfer\n\nA useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.\n"
+        answer += f"\n## Check your transfer\n\n{notes['answer']}\n"
         write(ROOT / guide, text)
         write(ROOT / source, worksheet)
         write(ROOT / solution, answer)

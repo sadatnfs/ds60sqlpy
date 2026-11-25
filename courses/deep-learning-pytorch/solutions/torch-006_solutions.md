@@ -2,6 +2,8 @@
 
 Open these answers only after attempting Autograd graphs, the chain rule and in-place hazards yourself. They reuse the guide's literal inputs, starting from Example A, Trace the chain rule, so a discrepancy points at one step. The executable companion runs the assertions; this page explains why each one tests Autograd graph, Saved tensor, In-place hazard. After a pass, choose a new input for exercise 6, Recompute after an update, without looking.
 
+After comparing, follow the [review steps](../STUDY-GUIDE.md#after-the-solutions).
+
 ## Mechanism review
 
 Autograd follows the chain of tensor operations from a scalar objective back to its inputs. Forz=2w, \(a={z}^{2}\), \(\mathrm{loss}={\left(a-1\right)}^{2}\), the derivative multiplies the local sensitivities along that chain. PyTorch builds the graph dynamically during the forward pass and saves values needed for backward. An in-place mutation can invalidate those saved values, so the framework uses version checks and restricts some mutations. A failure is a signal to understand ownership and graph lifetime, not a reason to bypass checks with .data.
@@ -154,6 +156,3 @@ assert torch.autograd.grad(fresh, parameter)[0].item() == -1
 
 **Verify:** In a fresh process, the exercise checks confirm `torch.autograd.grad(fresh, parameter)[0].item() == -1`.
 
-## Review after comparison
-
-Repeat exercise 4, Expose saved-value invalidation, with one changed fixture value and predict the difference before running it. Keep your failing attempt at exercise 5, Inspect a ReLU convention, beside the repaired result. A missing framework is not a failing assertion. These solutions use only local fixtures.

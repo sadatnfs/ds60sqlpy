@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/web-development/solutions/web-039_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="web-039-explanatory-solutions">web-039: explanatory solutions<a class="heading-anchor" href="#web-039-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Open this after your own attempt. Each answer explains the lesson&#x27;s synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in <code>courses/web-development/guides/web-039.md</code>.</p>
+<p>Attempt each exercise before reading; the mechanism is in <code>courses/web-development/guides/web-039.md</code> (<a href="../STUDY-GUIDE.md.html#solutions">using these answers</a>).</p>
 <h3 id="exercise-1-trace-the-statements-executed-after-requirepositive-0">Exercise 1: Trace the statements executed after requirePositive(0).<a class="heading-anchor" href="#exercise-1-trace-the-statements-executed-after-requirepositive-0" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> The function throws, the matching catch runs and finally executes.</p>
 <p><strong>Approach:</strong> Follow control flow: the <code>throw</code> skips the <code>return</code>, PHP finds the matching catch, runs it, and then runs <code>finally</code> either way.</p>
@@ -232,7 +232,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Plausible wrong approach:</strong> Printing database credentials or file paths to the public page fails because attackers learn the internal layout.</p>
 <p><strong>How to verify:</strong> The public error text contains no path, query or secret, while the local log entry has the details. Comparing the two messages side by side shows that only the log entry contains the exception class and line number.</p>
 <h3 id="reference-comparison">Reference comparison<a class="heading-anchor" href="#reference-comparison" aria-label="Link to this section">#</a></h3>
-<p>Open <code>courses/web-development/solutions/web-039_solution.php</code> only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; server lifecycle, persistence, concurrency and security need their own integration evidence.</p></article>
+<p>The reference requires that the failure was caught and cleanup ran, then requires requirePositive(3) to return 3. That catches a missing finally and a guard that rejects valid input. It does not test your parser&#x27;s error text or a second exception type, so trigger each path yourself.</p>
+<p>Open <code>courses/web-development/solutions/web-039_solution.php</code> after saving your attempt (<a href="../STUDY-GUIDE.md.html#references">comparing with the reference</a>).</p></article>
   </main>
 </body>
 </html>

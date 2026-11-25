@@ -2,67 +2,21 @@
 
 ## How to run this lesson
 
-Start the Linux-container engine and run `./classroom` from the repository
-root. On Windows, use Ubuntu in WSL 2 or the thin
-`START_DOCKER_CLASSROOM.cmd` wrapper. Choose **PostgreSQL** on the shared
-`/classroom` home, then open **sql-ext-01**. The
-[launcher guide](../../../docs/one-command-classroom.md) covers first preparation, strict resume and
-the saved project selection. No host Python or PostgreSQL installation is
-required for this browser route.
+Start **sql-ext-01** from `./classroom` using the shared [run steps](../../STUDY-GUIDE.md#run-a-lesson-in-the-classroom).
 
-1. Read the prerequisite and fixture notes before running the file. Use only
-   the local disposable `advanced_sql_training` database.
-2. Choose **Whole SQL lesson (psql)** for the cataloged learner script. This
-   preserves the lesson's reviewed psql directives, relative includes and
-   transaction behavior. **SQL snippet** is appropriate for ordinary SQL
-   statements, but is not a replacement for an entire script's setup.
-3. The **Course database** panel above the code shows whether the course
-   training tables are loaded. Missing tables load automatically before your
-   first run (or choose **Load course tables**) and stay loaded for later
-   lessons. **Reset training data** restores the original rows only when your
-   own changes made results differ; it keeps your saved code and notes.
-4. Edit the learner copy in the classroom and save your prediction before
-   running. Its whole-script workspace is
-   `.learning/sql/sql-ext-01/lesson/workspace/sql/professional/lessons/sql_ext_01_extensions_spatial_vector.sql`.
-   For browser work this path is inside the Docker learning volume, not a
-   newly created host folder beside your checkout. The checked-in source
-   remains the answer-free starting artifact.
-5. Run the whole script and inspect the full transcript. The runner uses
-   `psql -X -v ON_ERROR_STOP=1 -f`. SELECT output has columns, rows and a row
-   count; DDL/DML has command tags; intentional checks may produce NOTICE
-   messages. An unexpected ERROR or nonzero exit is a failure to diagnose,
-   even when an earlier query printed plausible values.
-6. Verify the lesson's expected grain, ordering, constraints and declared
-   transaction or cleanup outcome. Keep required ROLLBACK statements.
-   The warehouse sequence and other explicitly stateful exercises explain
-   when state is committed. Read saved output without rerunning it when
-   reviewing an earlier attempt.
+Choose **Whole SQL lesson (psql)**. The script first reads
+`pg_available_extensions` for six requested extensions, outside any
+transaction, and never runs `CREATE EXTENSION`. It then opens a transaction on
+`advanced_sql_training` and builds built-in fallbacks: a `resources` table with
+a generated lower-case key, a point column with a GiST index, a three-number
+array with an exact L2 distance function, a generated SHA-256 digest and a
+local `remote_snapshot` table in place of a foreign server. One `NOTICE`
+beginning `Expected normalized-name rejection` is the intended result. The
+final check requires 3 resources and a distance of 5 between `[0,0,0]` and
+`[3,4,0]`, and `ROLLBACK` removes the schema. Save attempts in
+`.learning/sql/sql-ext-01/lesson/workspace/sql/professional/lessons/sql_ext_01_extensions_spatial_vector.sql`.
 
-If a relation is missing, inspect the lesson's required fixture and predecessor
-rather than guessing a new table definition. If authentication or runtime
-readiness fails, use `./classroom status` and the setup guide. Keep credentials
-out of SQL, notebooks, screenshots and committed files. Repair the first error
-before trusting partial output, and reveal separate solutions only when you
-want to compare after an attempt.
-
-### Optional contributor notebook route
-
-For notebook work, deliberately prepare the Linux/WSL contributor environment
-from [CONTRIBUTING.md](../../../CONTRIBUTING.md), including a compatible psql client and
-the notebook dependencies. Generate this lesson's private workspace through
-the maintained CLI:
-
-```sh
-uv run --no-sync python scripts/course.py sql notebook sql-ext-01
-```
-
-Open the printed notebook path in that environment's JupyterLab. It uses the
-same catalog-derived learner-copy layout in that contributor checkout and
-executes the complete script through psql. Its host-side state is separate
-from the Docker browser's named volume. Follow
-[guided SQL notebooks](../../../docs/guided-sql-notebooks.md) for explicit local connection
-selection and kernel setup. Notebook generation does not execute SQL or
-authorize a reset.
+The optional notebook route starts with `uv run --no-sync python scripts/course.py sql notebook sql-ext-01`; see the [study guide](../../STUDY-GUIDE.md#optional-contributor-notebook-route).
 
 ## Level and prerequisites
 
@@ -87,24 +41,30 @@ image.
 
 ## A beginner's mental model for this lesson
 
-A **table** stores facts in named columns. A **row** is one occurrence at the
-table's declared grain. A query creates a temporary **result set**: rows printed
-on screen are not automatically stored. The key vocabulary for this lesson is Extension, Available/installed, Capability boundary, SRID, Geometry/geography, Embedding. Its worked SQL reads or creates `pg_catalog.pg_available_extensions`, `pro_extensions_lab.resources`, `pro_extensions_lab.remote_snapshot`.
+An extension adds types, operators and index methods to PostgreSQL, but being
+listed on the server is not the same as being installed, approved or safe to
+upgrade. This lesson reads the catalog for that difference and then shows what
+built-in features can stand in until an extension is approved. The vocabulary
+below (available versus installed, capability boundary, SRID, geometry and
+geography, embedding) names those distinctions.
 
-Before writing a query, complete this sentence: “One output row represents
-___.” Joins can multiply rows, filters can remove them, grouping can collapse
-many rows into one, and window functions can add calculations while preserving
-row count. For a normal analytical `SELECT`, use this logical reading order:
-`FROM`/`JOIN` (including `ON`) → `WHERE` → `GROUP BY`/aggregates → `HAVING` →
-window calculations → `SELECT` → `ORDER BY` → `LIMIT`. PostgreSQL may execute a
-different physical plan while preserving those semantics.
+The capability query returns one row per requested extension name, six in all,
+whether or not the server knows it. Each fallback query returns one row per
+resource, three in all, ordered by its distance or id. The snapshot query uses
+`DISTINCT ON (source_system, source_key)` to return one row per remote key, the
+latest fetch, so `R-100` appears once with its 11:00 `current` payload.
 
-The worked walkthrough's lesson-specific task is: `pg_available_extensions` answers whether the server installation exposes a control file and its default version. `installed_version` answers whether this database has created it. Neither proves the connected role may install/upgrade it, that replicas carry compatible binaries, or that an application was tested against that exact version.
-The first runnable example has a concrete contract: Example 1 returns one row per `name`, `default_version`, and `installed_version` with columns `name`, `purpose`, `default_version`, `installed_version`, `available_on_server`, and `installed_in_database` from `requested`, and `pg_catalog.pg_available_extensions`. Compare the key set and row count with a simpler control over the same filter/window; inspect `NULL` versus zero/absent-row meaning and verify the final ordering/tie-breaker when present. Its final projection is `name`, `purpose`, `default_version`, `installed_version`, `available_on_server`, and `installed_in_database`. Reselect the returned key columns from `requested`, and `pg_catalog.pg_available_extensions`, reject duplicate keys when the grain is one row per entity, and check the stated row cap and sort direction only when this example includes them. For tied business values, inspect the final ordering expression and verify its last key makes the displayed order reproducible.
+`pg_available_extensions` says whether the server has a control file and what
+its default version is; `installed_version` says whether this database has run
+`CREATE EXTENSION`. Neither says that your role may install or upgrade it, that
+replicas carry the same binaries, or that the application was tested on that
+version. The fallbacks are honest about their limits too: point distance is
+planar, not geodesic, and SHA-256 detects payload drift but is not encryption.
 
 ## Two worked SQL examples
 
-These worked excerpts come from `sql/professional/lessons/sql_ext_01_extensions_spatial_vector.sql`. Use **Whole SQL lesson (psql)** in the unified classroom for the complete file, including its fixture and transaction context. The optional contributor notebook and prepared `psql` routes are described above.
+Example 1 is the read-only capability matrix and Example 2 is the table the
+fallbacks use.
 
 ### Example 1
 
@@ -133,9 +93,13 @@ ORDER BY
   requested.name;
 ```
 
-**How to read it:** Example 1: Start with `requested`, and `pg_catalog.pg_available_extensions` in `FROM`/`JOIN`. The final `SELECT` displays `name`, `purpose`, `default_version`, `installed_version`, `available_on_server`, and `installed_in_database`. `ORDER BY` determines presentation order. Before running, predict the row grain, row count, `NULL` positions, and first/last key; afterwards, compare each prediction with the transcript.
+**How to read it:** `requested` lists six names with a purpose. The `LEFT JOIN`
+keeps every requested name, so a missing extension still appears, with NULL
+versions. The two booleans separate "on the server" from "in this database".
 
-**Expected result/shape:** Example 1 returns one row per `name`, `default_version`, and `installed_version` with columns `name`, `purpose`, `default_version`, `installed_version`, `available_on_server`, and `installed_in_database` from `requested`, and `pg_catalog.pg_available_extensions`. Compare the key set and row count with a simpler control over the same filter/window; inspect `NULL` versus zero/absent-row meaning and verify the final ordering/tie-breaker when present.
+**Expected result/shape:** Six rows, one per requested name, sorted by `name`.
+Which rows show `true` depends on your server image; a `false` in
+`installed_in_database` is the normal result here.
 
 ### Example 2
 
@@ -152,9 +116,16 @@ CREATE TABLE pro_extensions_lab.resources (
 );
 ```
 
-**How to read it:** Example 2 is data definition language (DDL). `psql` prints a command tag when PostgreSQL accepts the definition; a later catalog or behavior check must prove that the intended rule exists.
+**How to read it:** `normalized_name` is generated from `lower(display_name)`
+and gets a unique index, a narrow stand-in for `citext`. `embedding` must have
+exactly three numbers, and `payload_sha256` is computed from `payload`, so
+neither can be set by hand.
 
-**Expected result/shape:** Example 2 must print the expected DDL command tag for `pro_extensions_lab.resources`. Verify the object in `pg_catalog.pg_class`, `pg_catalog.pg_available_extensions`, and `pg_catalog.pg_extension`, run one accepted behavior and one rejected boundary behavior, and confirm the lesson rollback/cleanup removes only course-owned state.
+**Expected result/shape:** `CREATE TABLE`, four indexes (unique lower-case
+name, prefix, GiST on `location`, GIN full text) and three rows. Inserting
+`postgresql guide` fails with `unique_violation`, which the lesson catches and
+reports as a `NOTICE`. From `point(1, 1)` the nearest resource is
+`PostgreSQL Guide` at about 1.41.
 
 ## Learning objectives
 
@@ -363,9 +334,8 @@ compatibility, and disaster-recovery evidence into every adoption decision.
 
 ## Ask an AI tutor about this lesson
 
-An AI tutor is optional; the guide, learner SQL, PostgreSQL, and expected checks are
-enough to complete the lesson offline. If you want a patient tutor, copy this
-prompt after opening the repository in the AI tutor:
+The lesson and expected observations are sufficient offline. For optional
+coaching, copy:
 
 ```text
 Tutor me through sql-ext-01: PostgreSQL Extensions, Spatial Data, and Vectors.

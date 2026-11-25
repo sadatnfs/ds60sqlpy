@@ -2,6 +2,8 @@
 
 Open these answers only after attempting A bounded PyTorch investigation and framework comparison yourself. They reuse the guide's literal inputs, starting from Example A, Define a prediction unit, so a discrepancy points at one step. The executable companion runs the assertions; this page explains why each one tests Prediction unit, Training, Holdout. After a pass, choose a new input for exercise 6, Bound the conclusion, without looking.
 
+After comparing, follow the [review steps](../STUDY-GUIDE.md#after-the-solutions).
+
 ## Mechanism review
 
 A deep-learning investigation asks a model to predict a defined target from available inputs, then tests what evidence supports using that prediction. Training adjusts parameters using exposed examples. Validation supports choices such as model size or learning rate. A final holdout estimates behavior on units excluded from those choices. A tiny fixture can establish arithmetic and software contracts while remaining far too small to establish population reliability. This course uses PyTorch to make those contracts visible rather than treating a framework import as proof of learning.
@@ -142,6 +144,3 @@ Next evidence: representative independent units and task-specific acceptance tes
 
 **Verify:** Your report contains one sentence on what the CPU run checked and one listing unestablished properties, and contains no production-quality claim.
 
-## Review after comparison
-
-Repeat exercise 4, Audit selection leakage, with one changed fixture value and predict the difference before running it. Keep your failing attempt at exercise 5, Align a framework comparison, beside the repaired result. A missing framework is not a failing assertion. These solutions use only local fixtures.

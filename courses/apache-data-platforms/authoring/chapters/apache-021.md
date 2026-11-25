@@ -86,4 +86,4 @@ failure surfaces. The two cases execute a real scheduled query and an embedded
 control, preserving an independent correctness oracle while leaving performance
 and multi-host claims to their own experiments.
 
-The [complete Ballista workshop](../../projects/ballista/README.md) provides the maintained files, preparation, lifecycle and exact qualification boundaries for these cases.
+To watch placement happen, run `start` and then `check` in the [Ballista workshop](../../projects/ballista/README.md). `check` compares the distributed answer with an embedded DataFusion control over the same `orders.parquet`.

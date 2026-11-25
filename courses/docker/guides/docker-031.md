@@ -32,11 +32,9 @@ For this project, images are built locally in CI for testing and are not pushed 
 
 ## How to use this lesson
 
-The classroom displays this guide and saves your worksheet, `courses/docker/lessons/docker-031.md`. Its Run button does not control your Docker engine. Docker engine access is powerful host access, so the classroom deliberately receives no engine socket. Work through the supplied examples without starting anything, then use the optional host lab only in your own disposable project. Reading a command, parsing YAML and actually running the project are different forms of evidence.
+The classroom saves `courses/docker/lessons/docker-031.md` and holds no engine socket ([host-lab setup](../STUDY-GUIDE.md#host-lab-setup)).
 
-Use Bash in Linux, macOS Terminal, or Ubuntu under WSL 2 on Windows. The supported engine runs Linux containers. The maintained fixture is `courses/docker/fixtures/compose-lab/`; its README explains copying it into a new ignored learner directory, checking the engine, building locally with visible logs, and using the fixed project name `ds60-docker-study`. The fixture uses port 18080 on host loopback. Stop if that project name or port belongs to unrelated work; choose a new project name consistently in your own copy. Never paste a command against a remote Docker context simply because it is currently selected.
-
-For Dockerfile examples, create a file named `Dockerfile` in a scratch project. YAML snippets describe a fragment unless explicitly called a complete file. Text transcripts are synthetic illustrations, not claims about your machine. Do not substitute a real password, token or private registry into a checked-in example. **How to use the lessons** in the [subject README](../README.md) collects these rules in one place.
+**Host lab.** Build a small receipt by hand. In your fixture copy run `shasum -a 256 Dockerfile server.py compose.yaml` and `docker image inspect --format '{{.Id}}' ds60-docker-study:local`, then perform one named check, such as the host request to `/healthz`, and write the hashes, the ID, the check and its result to `../ds60-receipt.json`. Now add a comment line to `server.py` and run `docker compose -p ds60-docker-study build app`: the source hash changes, the `COPY server.py` step rebuilds and the image ID differs, so the receipt no longer describes what you would ship. Remove the comment and build again; the original ID usually returns because the earlier layers are still cached, and the hashes match the receipt once more. Delete `../ds60-receipt.json` when you are done.
 
 ## Worked example / walkthrough
 
@@ -69,7 +67,7 @@ This is a schema sketch, not a completed test result.
 
 ## Six progressive exercises
 
-For each exercise, name the object involved and the phase of its lifetime before changing anything, then vary only the condition the task names. Exercises that ask you to predict, explain, compare or diagnose keep their answers in the solutions file; the others show the evidence to look for.
+Answer-type prompts keep their answers in the solutions file ([exercise rules](../STUDY-GUIDE.md#exercise-rules)).
 
 ### Exercise 1: Predict what a unit test cannot prove about packaging.
 
@@ -105,13 +103,19 @@ For each exercise, name the object involved and the phase of its lifetime before
 
 Rebuilding the image after tests and deploying an untested artifact. Letting parallel jobs share one fixture. Hiding skipped checks behind a green summary.
 
-Exercise 4 is this chapter's boundary case: Diagnose rebuilding between acceptance and deployment. Compare the digest that passed acceptance with the digest being deployed; if they differ, the acceptance result does not yet apply. Preserve the original failure and the exact changed field before retrying. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
+Exercise 4 is this chapter's boundary case: Diagnose rebuilding between acceptance and deployment. Compare the digest that passed acceptance with the digest being deployed; if they differ, the acceptance result does not yet apply.
+
+Teams often add a `test` stage to the Dockerfile and assume every build runs it. BuildKit builds only the stages the requested target depends on, so `docker build .` producing the final stage silently skips a `test` stage that nothing copies from, and the build log simply never mentions it. A green build then proves only that packaging succeeded. Either build the test stage explicitly with `--target test` as its own pipeline step, or make the final stage depend on it, for example by copying a small marker file the tests write, and look in the build log for the test command's own output rather than trusting the stage's presence in the file.
+
+Never trade a safety control for a passing example ([safety rules](../STUDY-GUIDE.md#safety-rules)).
 
 ## Retrieval, transfer and next steps
 
-Close the explanations first. Recall the receipt fields and say which one ties the test result to the exact artifact. Then reconstruct worked example 2 (Define a source-bound receipt) with one different value, predict what changes, and name which of continuous integration, test stage, artifact promotion and immutable digest the change touches.
+**Retrieval.** Recall the receipt fields and say which one ties the test result to the exact artifact.
 
-When a host session ends, run `docker compose -p ds60-docker-study down` from your fixture copy. It removes the project's containers and network but keeps named volumes; deleting a volume is a separate, deliberate reset described in the fixture README.
+**Transfer case.** Your pipeline builds on amd64 runners and the receipt passes, but production nodes are arm64 and pull a multi-platform index under the same tag. Which part of the receipt still applies to them?
+
+Then run the [retrieval loop](../STUDY-GUIDE.md#retrieval-and-cleanup) and end any host session with its cleanup.
 
 ## Primary references
 

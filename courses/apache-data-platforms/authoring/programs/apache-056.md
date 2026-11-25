@@ -20,6 +20,12 @@ targets are allowed. Export receipts before explicitly destroying synthetic stat
 Compare the same host UUID and retained orders at each lifecycle boundary.
 Read-only identity calls do not replay writes or recreate an empty fixture.
 
+Each `identity` call reads `host_id` and `cluster_name` from `system.local` and
+the order rows sorted by `order_id`. After `stop` and `resume` the containers are
+the same ones, so a changed `host_id` is a failure. After `down` and `start` the
+containers are new but the volume is kept, so the same `host_id` and orders show
+that state survived on disk rather than in the container.
+
 ```bash
 bash run.sh destroy --confirm-owned-data-loss
 ```

@@ -1,22 +1,26 @@
 # spark-028: Capstone: a skewed join with correctness and cost evidence
 
-Authored paired Scala/PySpark teaching content. The default fixtures are tiny, local and deterministic. Runtime acceptance, logical correctness and learner understanding remain separate evidence.
+The capstone joins 2,002 raw facts to a reviewed dimension in which key 0 holds 1,600 of the accepted rows. Two facts must be quarantined and a conflicting dimension row refused before a shuffle baseline and a broadcast candidate compete, and both must reproduce 2,000 rows, 1,800 known amounts, total 7,196 and weighted total 17,913.
 
 ## Level and prerequisites
 
-Intermediate; approximately 150 minutes. Direct prerequisites: `spark-027`. The prepared baseline is Spark 4.3.0, Scala binary 2.13, JDK 17 and Python 3.12. Read the [execution baseline](../execution-baseline.md).
+Intermediate; approximately 150 minutes. Direct prerequisites: `spark-027`. Pinned versions: [execution baseline](../execution-baseline.md).
 
 ## How to run this lesson
 
-Open `spark-028` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile, save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`; Python stages as `main.py` with a main guard. Each program creates its own `local[2]` session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.
+Shared run steps and profile rules: [study guide](../STUDY-GUIDE.md#run-a-paired-lesson).
 
-The [Scala learner](../lessons/spark-028.scala) and [PySpark learner](../lessons/spark-028.py) run two complete demonstrations and retain six explicit task stubs. Use the [explained solutions](../solutions/spark-028_solutions.md) only after an attempt or an explicit worked comparison; the [Scala reference](../solutions/spark-028_solution.scala) and [PySpark reference](../solutions/spark-028_solution.py) contain complete assertions. A bounded collect is used only for the declared tiny fixture; do not copy it onto an unbounded or large production table.
+Learner pads: [Scala](../lessons/spark-028.scala) and [PySpark](../lessons/spark-028.py).
+
+Open the [explained solutions](../solutions/spark-028_solutions.md) after an attempt.
+
+The first worked example counts raw dimension matches before any join: key 0 appears twice, so its 1,600 facts would become 3,200 pairs, and the line `Raw dimension multiplicity predicts 3600 pairs for 2000 accepted facts` warns about that fanout. The second computes the known amount total and the weighted total from the generation formulas and prints `Independent formula totals=` 7196 17913.
 
 ## Learning objectives
 
 - Deliver a defensible batch-optimization change backed by a reference result and bounded measurements.
-- State the input and output grain, schema, NULL policy and ordering before executing a transformation.
-- Compare each language implementation with independent literal expectations, not only with the other implementation.
+- Classify every raw fact as accepted or rejected with a reason, rejecting source 2001 as `missing_identity` and source 2002 as `negative_amount`, and keep only the approved dimension row so keys 0 to 5 each have exactly one factor.
+- Compare a shuffle baseline and a broadcast candidate on the same business metrics and per-key summary, print a receipt with AQE and automatic broadcasting off, and roll back to the baseline with a switch that leaves every quality rule in place.
 
 ## Vocabulary and concepts
 
@@ -40,7 +44,7 @@ The accepted key-frequency ledger has 1600 rows for key 0 and 100 for each key 1
 
 The baseline is an ordinary inner equality join with automatic broadcasting and AQE disabled. The candidate strategy broadcasts the reviewed six-row dimension. Broadcasting is a deliberate choice here because the build side is finite and tiny; the prior salting lesson provides an alternative when that condition does not hold. The candidate is not accepted on a timing comparison. It must preserve every projected fact occurrence and the exact per-key summary, including known-amount counts and nullable measures.
 
-The independent golden summary is derived from the fixture formula rather than from one of the Spark join implementations. Key 0 has 1600 rows,1440 known amounts, total 5755 and weighted total 11510. Keys 1 through 4 have 100 rows each and the listed known-count/measure totals. Across all keys, the product has 2000 unique fact IDs,1800 known amounts, total 7196 and weighted total 17913. These exact quantities are checked before interpreting the physical plans.
+The independent golden summary is derived from the fixture formula rather than from one of the Spark join implementations. Key 0 has 1600 rows, 1440 known amounts, total 5755 and weighted total 11510. Keys 1 through 4 have 100 rows each and the listed known-count/measure totals. Across all keys, the product has 2000 unique fact IDs,1800 known amounts, total 7196 and weighted total 17913. These exact quantities are checked before interpreting the physical plans.
 
 A duplicate-sensitive distributed comparison then checks both directions of the full projected relation. It avoids collecting the whole fact product on the driver. Only the five-row key summary and one-row metric summary are collected, with fixed schemas and bounded output. This preserves a realistic discipline even though the generated input itself is small enough to fit locally.
 
@@ -52,7 +56,7 @@ Finally, the strategy switch is set back to the baseline. The rolled-back produc
 
 ## Supplied local fixture
 
-The complete source creates the owned local session described above, then constructs this explicit fixture. The worked examples below run in that same main function; there is no hidden notebook state.
+Facts 1 to 2000 get key 0 up to fact 1600 and then cycle through keys 1 to 4; every tenth fact has an unknown amount and the rest have `i % 7 + 1`. Two extra rows are planted for quarantine: source 2001 has no `fact_id`, and source 2002 has key 99 and amount -3. The raw dimension lists key 0 twice, with factor 1 unapproved and factor 2 approved, then keys 1 to 5 with factor `key + 2`, so review is a required step.
 
 ```scala
 import org.apache.spark.sql.Row
@@ -209,7 +213,7 @@ Build the ordinary equality join over accepted facts and reviewed dimension, pro
 
 **Expected result/shape:** Key `0:(1600, 1440, 5755, 11510)`; `1:(100, 100, 401, 1203)`; `2:(100, 80, 321, 1284)`; `3:(100, 100, 398, 1990)`; `4:(100, 80, 321, 1926)`.
 
-**Verify:** Assert all five summary tuples and aggregate metrics 2000,2000,1800,7196,17913.
+**Verify:** Assert all five summary tuples and aggregate metrics 2000, 2000, 1800, 7196 and 17913.
 
 **Progressive hint:** COUNT(amount) and COUNT(*) answer different completeness questions.
 
@@ -249,11 +253,14 @@ Do not optimize a fanout error or replace NULL amounts with zero to simplify a c
 
 ## Self-check
 
-Explain the contract of `classifyFacts` / `classify_facts` without reading its solution. Then, from memory, state what Exercise 6 (Roll back execution policy without rolling back data quality) must produce: Both switch positions satisfy the same metric map and bag contract. The disabled position has no `BroadcastHashJoin` under the controlled configuration. Say which part of that result is evidence and what it still cannot show. Name the action in your trace that actually runs the plan.
+- The raw dimension has two rows for key 0. Which one does review keep, and what must happen when a second approved key-0 row is added?
+- Key 0 contributes 1,600 rows but only 1,440 known amounts. Where did the other 160 go, and why do they still count toward the 2,000 rows?
+- The receipt requires automatic broadcast `-1` and AQE `false`. Why would leaving either one on make the baseline-versus-candidate comparison harder to trust?
+- Exercise 6 rolls back with a boolean switch. Which checks must still pass afterward, and why would rerunning without quarantine not count as a rollback?
 
 ## Next step
 
-Use the [course route](../README.md) to continue. Paired-language agreement is useful only when both outputs also satisfy the independent fixture contract. A successful local run is not evidence of cluster performance or production recovery.
+Go on to [spark-029: Restartable batch writes and data-quality contracts](spark-029.md). This capstone produced a correct relation in memory; the next lesson writes such a product to storage so that a crash or a retry never leaves readers with a half-published result.
 
 ## Primary sources and official APIs
 

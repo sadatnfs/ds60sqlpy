@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/javascript-typescript/solutions/js-030_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="js-030-explanatory-solutions">js-030: explanatory solutions<a class="heading-anchor" href="#js-030-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Use these answers after an attempt or an explicit reveal. The reference uses the same literal fixtures as the guide and keeps the exercises in separate scopes. A successful run checks these examples; explaining a changed input is a separate learning goal.</p>
+<p>Open these after your own attempt; each exercise runs in its own scope in the reference.</p>
 <h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
 <p>A form is a structured input interface, not merely a collection of text boxes. Labels connect descriptions to controls, native constraints support immediate feedback, and submit represents the user&#x27;s request to process the whole form. Input values arrive as strings. Number conversion, whitespace handling, required fields and numeric bounds are explicit domain decisions. Client validation improves interaction but cannot replace validation at a server or other trust boundary.</p>
 <p>Separate the current application state from its visual rendering and its stored representation. A successful validation produces a new state; rendering then reflects it. localStorage stores strings scoped by origin and persists across page reloads subject to browser policy. JSON.stringify and JSON.parse provide serialization syntax, not a schema or migration strategy. A version field helps recognize whether stored data matches the code&#x27;s current contract.</p>
@@ -207,7 +207,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="reading-the-implementation">Reading the implementation<a class="heading-anchor" href="#reading-the-implementation" aria-label="Link to this section">#</a></h3>
 <p>Listen for submit on the form and preventDefault only because this local fixture handles the request itself. FormData reads named controls; disabled controls and unnamed controls have different submission behavior. Trim text under a stated policy, parse numeric input and check safe integer bounds. Persist an object containing version and validated fields. Loading requires parse and schema checks before rendering. Use removeItem with the owned key for reset, never clear unrelated browser storage.</p>
 <h3 id="exercise-1-validate-one-local-form-submission-change-one-input">Exercise 1: Validate one local form submission: change one input<a class="heading-anchor" href="#exercise-1-validate-one-local-form-submission-change-one-input" aria-label="Link to this section">#</a></h3>
-<p>Task: Rebuild Example A in your copy of the lesson&#x27;s browser fixture without looking at it. Then change one attribute, label or handler and write down the visible, focus or announcement change you expect before reloading.</p>
+<p>Task: Save the snippet as HTML and submit name Ada and quantity 2, then try an invalid quantity. Then change one attribute, label or handler in your copy and predict the visible difference before reloading.</p>
 <p>Native constraints stop many invalid user submissions before the submit handler. The explicit domain check still defines the accepted state and protects alternate invocation paths.</p>
 <p>The unchanged code is the exercise block of Example A:</p>
 <pre class="highlighted-code"><code class="language-html"><span class="syntax-comment">&lt;!doctype html&gt;</span>
@@ -233,10 +233,10 @@ form<span class="syntax-punctuation">.</span>addEventListener<span class="syntax
 <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
 <span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">script</span><span class="syntax-punctuation">&gt;</span><span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">html</span>
 <span class="syntax-punctuation">&gt;</span></code></pre>
-<p><strong>Expected:</strong> Your rebuild reproduces the worked observation (valid output Ada: 2; invalid input produces no accepted state), and the changed copy shows the difference you predicted.</p>
-<p><strong>Verify:</strong> Record the browser observation before and after your change, including where focus lands and any live-region text, and explain which line caused the difference.</p>
+<p><strong>Expected:</strong> The rebuild reproduces the observation: valid output Ada: 2; invalid input produces no accepted state. The changed copy differs as you predicted.</p>
+<p><strong>Verify:</strong> Record the browser observation, then explain it: Native constraints stop many invalid user submissions before the submit handler.</p>
 <h3 id="exercise-2-handle-storage-success-and-failure-explicitly-debug-a-regression">Exercise 2: Handle storage success and failure explicitly: debug a regression<a class="heading-anchor" href="#exercise-2-handle-storage-success-and-failure-explicitly-debug-a-regression" aria-label="Link to this section">#</a></h3>
-<p>Task: Introduce one deliberate defect into a copy of Example B, such as a wrong selector, a missing attribute or a handler on the wrong element. Predict which browser behavior will expose it, confirm that prediction, then repair it.</p>
+<p>Task: Run this standalone snippet on a loopback HTTP origin and activate Save. Then break one selector or attribute in a copy, predict which behavior exposes it, and repair it.</p>
 <p>A successful state update and a successful storage operation are separate observations. The interface reports the actual persistence outcome without hiding failure behind a local display update.</p>
 <p>The unchanged code is the exercise block of Example B:</p>
 <pre class="highlighted-code"><code class="language-html"><span class="syntax-comment">&lt;!doctype html&gt;</span>
@@ -256,8 +256,8 @@ form<span class="syntax-punctuation">.</span>addEventListener<span class="syntax
 <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
 <span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">script</span><span class="syntax-punctuation">&gt;</span><span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">html</span>
 <span class="syntax-punctuation">&gt;</span></code></pre>
-<p><strong>Expected:</strong> The defective copy no longer shows: either Saved or a visible Storage unavailable message, never an invented success. The repaired copy shows it again.</p>
-<p><strong>Verify:</strong> Keep notes on the failing and the repaired behavior and name the first browser observation that differed between them.</p>
+<p><strong>Expected:</strong> The broken copy no longer shows that either Saved or a visible Storage unavailable message, never an invented success. The repair restores it.</p>
+<p><strong>Verify:</strong> Record the first browser observation that differed, then explain the repair: A successful state update and a successful storage operation are separate observations.</p>
 <h3 id="exercise-3-load-only-a-recognized-stored-schema">Exercise 3: Load only a recognized stored schema<a class="heading-anchor" href="#exercise-3-load-only-a-recognized-stored-schema" aria-label="Link to this section">#</a></h3>
 <p>Task: Reject malformed JSON or a stored version other than 1 before rendering.</p>
 <p>Stored data is another external boundary. A version label makes incompatibility explicit, while field checks prevent syntax-valid but invalid data from entering the UI.</p>
@@ -267,14 +267,14 @@ if (value === null || value.version !== 1 || typeof value.name !== &#x27;string&
   throw new Error(&#x27;Unsupported saved draft&#x27;);
 }</code></pre>
 <p><strong>Expected:</strong> invalid saved state is diagnosed and does not become accepted application state.</p>
-<p><strong>Verify:</strong> In the browser fixture, record the observation that shows: invalid saved state is diagnosed and does not become accepted application state. Then change one input and record what changes, keeping keyboard and pointer results separate.</p>
+<p><strong>Verify:</strong> Record the browser observation that shows it, then explain why: Stored data is another external boundary.</p>
 <h3 id="exercise-4-distinguish-current-state-from-persisted-state">Exercise 4: Distinguish current state from persisted state<a class="heading-anchor" href="#exercise-4-distinguish-current-state-from-persisted-state" aria-label="Link to this section">#</a></h3>
 <p>Task: Change a form value after saving without submitting again, then reload the page.</p>
 <p>An editable control is a draft, not automatically committed application state. Keeping that distinction visible prevents misleading autosave expectations.</p>
 <pre class="highlighted-code"><code class="language-html">// Compare the visible form draft before submission with the last saved JSON.
 // Only a successful save operation changes the persistence receipt.</code></pre>
 <p><strong>Expected:</strong> the last saved value returns; the unsaved edit is not falsely described as persisted.</p>
-<p><strong>Verify:</strong> In the browser fixture, record the observation that shows: the last saved value returns; the unsaved edit is not falsely described as persisted. Then change one input and record what changes, keeping keyboard and pointer results separate.</p>
+<p><strong>Verify:</strong> Record the browser observation that shows it, then explain why: An editable control is a draft, not automatically committed application state.</p>
 <h3 id="exercise-5-observe-a-change-from-another-tab">Exercise 5: Observe a change from another tab<a class="heading-anchor" href="#exercise-5-observe-a-change-from-another-tab" aria-label="Link to this section">#</a></h3>
 <p>Task: Open the same loopback URL in two tabs, save in one, and observe the other.</p>
 <p>The event notifies other same-origin documents. It does not resolve concurrent editing or choose which draft should win; this fixture avoids overwriting an unsaved form automatically.</p>
@@ -282,16 +282,16 @@ if (value === null || value.version !== 1 || typeof value.name !== &#x27;string&
   if (event.key === key) status.textContent = &#x27;Saved draft changed in another tab; reload when ready&#x27;;
 });</code></pre>
 <p><strong>Expected:</strong> the other tab reports an external change; the writing tab does not receive its own storage event.</p>
-<p><strong>Verify:</strong> In the browser fixture, record the observation that shows: the other tab reports an external change; the writing tab does not receive its own storage event. Then change one input and record what changes, keeping keyboard and pointer results separate.</p>
+<p><strong>Verify:</strong> Record the browser observation that shows it, then explain why: The event notifies other same-origin documents.</p>
 <h3 id="exercise-6-reset-only-this-lesson-s-key">Exercise 6: Reset only this lesson&#x27;s key<a class="heading-anchor" href="#exercise-6-reset-only-this-lesson-s-key" aria-label="Link to this section">#</a></h3>
 <p>Task: Remove the owned draft and verify an unrelated storage key remains.</p>
 <p>A lesson owns its namespaced state, not the entire origin storage area. Scoped removal respects other lessons and applications sharing that origin.</p>
 <pre class="highlighted-code"><code class="language-html">localStorage.removeItem(key);
 // Do not use localStorage.clear(), which removes unrelated keys for the origin.</code></pre>
 <p><strong>Expected:</strong> owned key absent; unrelated key unchanged.</p>
-<p><strong>Verify:</strong> In the browser fixture, record the observation that shows: owned key absent; unrelated key unchanged. Then change one input and record what changes, keeping keyboard and pointer results separate.</p>
+<p><strong>Verify:</strong> Record the browser observation that shows it, then explain why: A lesson owns its namespaced state, not the entire origin storage area.</p>
 <h3 id="after-comparison">After comparison<a class="heading-anchor" href="#after-comparison" aria-label="Link to this section">#</a></h3>
-<p>Return to your saved implementation and repeat a case with different values. Keep compiler diagnostics, process output and browser observations separate. Do not suppress a failing assertion or use a type assertion to declare an unvalidated value safe. Resource-owning examples must finish cleanup even when work fails. Describe each result with its actual host and fixture scope rather than as production acceptance.</p></article>
+<p>Fresh case: move the stored schema to version 2 with a renamed field. Predict what your loader does with an existing version-1 draft, then write a migration that upgrades it once and saves the new shape. (<a href="../STUDY-GUIDE.md.html#after-comparing-with-the-solution">After comparing</a>.)</p></article>
   </main>
 </body>
 </html>

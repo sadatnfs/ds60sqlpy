@@ -258,7 +258,7 @@ db<span class="syntax-operator">.</span>commit<span class="syntax-punctuation">(
 [(&#x27;r-1&#x27;, 7)]</code></pre>
 <p>The conflicting insert fails on the primary key, and the context manager rolls back the whole transaction, so r-2 disappears along with the failed r-1 write. Only the original receipt remains. Partial application is the failure mode to watch for in consumers that commit per statement: they would keep r-2 and report an error, leaving the ledger in a state no single request produced.</p>
 <h3 id="complete-worked-source">Complete worked source<a class="heading-anchor" href="#complete-worked-source" aria-label="Link to this section">#</a></h3>
-<p>This is a complete editable worked program for the declared prepared runtime. It uses bounded local fixtures and does not install packages or start distributed services.</p>
+<p>Run it as the <a href="../STUDY-GUIDE.md.html#worked-programs">worked program rules</a> describe.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> hashlib
 <span class="syntax-keyword">import</span> json
 <span class="syntax-keyword">import</span> sqlite3

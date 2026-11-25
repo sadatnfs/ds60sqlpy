@@ -6,18 +6,15 @@ Advanced; about 130 minutes, plus any optional hardware experiment. Direct prere
 
 The framework-binding part of this capstone also uses `cuda-097` (a Python API over a CUDA C++ operator) and `cuda-098` (backward as part of the operator) from the Python branch. They come later in the subject order, so read them before that part rather than treating them as a gate for opening this chapter.
 
-The order supports learning at your own pace. Reading and CPU reasoning remain
-available when NVIDIA hardware is absent. Advanced hardware features need their
-own capability checks and are not prerequisites for opening this chapter.
+Pacing, evidence labels and platform rules for every chapter are in the [CUDA study guide](../../STUDY-GUIDE.md).
 
 ## Learning objectives
 
 Implement a custom ML operator with forward and backward tests, input validation and an end-to-end keep or reject decision.
 
-Work through *Capstone: a custom ML operator that earns its existence* with the concrete cases below. Finish with this evidence:
-supported-contract documentation, forward and backward tests, invalid-input behavior, end-to-end measurement and an honest decision to keep or reject the custom kernel. Distinguish an algorithmic
-calculation, a compiled artifact and an actual device observation when explaining
-what your work establishes.
+**Scope:** Custom kernels versus existing framework operations, forward/backward contracts, shapes, strides, dtypes, devices, stream semantics, error propagation, packaging and regression coverage.
+
+**Evidence to produce:** Supported-contract documentation, forward and backward tests, invalid-input behavior, end-to-end measurement and an honest decision to keep or reject the custom kernel.
 
 ## Purpose, vocabulary and mental model
 
@@ -40,28 +37,17 @@ This derivative assumes a and b are constant with respect to the input. Paramete
 
 ## How to run and study this lesson
 
-Use the saved reading worksheet in `/classroom`; the reading pad does not execute
-CUDA. For the bounded calculation, select **CPU model (Python)**, whose
-answer-free starter supplies the literal fixtures and task contract. The
-[CUDA C++ study workflow](../README.md) covers platforms, optional GPU
-compilation and evidence labels. In a prepared Python environment you can also
-run the separate [CPU reference](../references/cuda-064_cpu.py) from the
-repository root:
+Trace worked example 1 by hand, then run the [CPU reference](../references/cuda-064_cpu.py) from the repository root:
 
 ```sh
 python courses/cuda/cpp/references/cuda-064_cpu.py
 ```
 
-Its assertions check the stated numerical result or model invariant; console
-text is evidence of this CPU model only, not of CUDA execution.
-
 ## Worked example 1: trace the mechanism
 
 For affine \(y=ax+b\) with a=3, b=1 and x=\([-1,0,2]\), forward output is \([-2,1,7]\). If a scalar loss sums outputs, each input gradient is three. A custom forward that returns the right values but backward returns one is mathematically wrong despite passing the forward fixture.
 
-The complete CPU model below intentionally models only the named arithmetic,
-layout, dependency or capability decision. It does not model GPU scheduling,
-caches, instruction timing or device memory visibility.
+**Why:** Forward gives [-2, 1, 7], and each input gradient of sum(3x + 1) is the slope 3.
 
 ```python
 x, a, b = [-1.0, 0.0, 2.0], 3.0, 1.0
@@ -84,41 +70,37 @@ assert all(abs(g - a) < 1e-8 for g in gradients)
 print({"forward": forward, "CPU_finite_difference_gradients": gradients})
 ```
 
-**Expected observation:** Every assertion succeeds. A representative CPU output is:
+**Expected observation:** every assertion succeeds, and the CPU model prints:
 
 ```text
 {'forward': [-2.0, 1.0, 7.0], 'CPU_finite_difference_gradients': [3.000000000019653, 2.9999999999752442, 3.000000000064062]}
 ```
 
-Integers, shapes and ordering must match exactly; only assertions with an explicit
-tolerance accept small floating-point differences. A printed duration is a model
-output, not a measured GPU benchmark.
+**Check:** The reference asserts forward == [-2.0, 1.0, 7.0] and every finite-difference gradient within 1e-8 of 3.
 
 ## Worked example 2: change a meaningful condition
 
 For a fused bias-plus-ReLU, derivative at a nonzero preactivation is one when positive and zero when negative, multiplied by incoming gradient. The exact zero point needs the framework's chosen convention. A finite-difference check near a kink can be misleading, so test smooth points and the explicit boundary policy separately.
 
-Before applying this example to your own program, write down which inputs are
-read, which result is produced, and the condition that makes the comparison
-valid. Keep the original case as a regression check when changing a boundary.
+**Why:** ReLU's derivative is a step, so the mask selects which gradients pass.
+
+**Check:** Test points away from zero numerically, and check the zero convention against the framework.
 
 ## Six progressive exercises
 
-Exercises 1 and 2 are guided reconstructions of the worked examples; exercises
-3-6 change an input, diagnose a defect, test a boundary and transfer the idea.
-For each one, keep the calculation, output, diagram or failure policy you
-produce so another reader can compare it with the worked cases. If the hint is
-not enough, reread the mechanism paragraph and the bounded CPU assertion.
-
 ### Exercise 1
 
-Predict and trace the first worked example before running its CPU reference. Write every intermediate quantity that leads to the stated result, including units or ownership where applicable.
+Reconstruct worked example 1 on paper before running its CPU reference. Compute forward 3x + 1 on [-1, 0, 2], then check gradients of the summed loss with central finite differences.
+
+**Trap to avoid:** A backward pass returning 1 passes every forward test while giving wrong gradients to training.
 
 **Hint:** Start with the literal input and intermediate quantities in worked example 1.
 
 ### Exercise 2
 
-Reconstruct the second worked example without copying its conclusion. Identify the changed input or condition, show the resulting calculation or dependency, and explain why it differs from the first example.
+Rework worked example 2 without copying its conclusion. Multiply the incoming gradient by 1 for positive preactivations and 0 for negative ones.
+
+**Trap to avoid:** Finite-differencing exactly at zero straddles the kink and gives one half.
 
 **Hint:** Identify exactly which condition changes in worked example 2.
 
@@ -126,11 +108,15 @@ Reconstruct the second worked example without copying its conclusion. Identify t
 
 Compute input gradients for loss=sum(3*x+1).
 
+**Trap to avoid:** Returning the forward values as gradients confuses outputs with derivatives.
+
 **Hint:** Use the first worked example to establish the relevant quantities, then change only the requested input.
 
 ### Exercise 4
 
 A kernel assumes contiguous tensors but accepts transposed views. Diagnose it.
+
+**Trap to avoid:** Indexing as contiguous reads elements in the wrong order.
 
 **Hint:** Locate the failed phase or violated dependency before proposing a repair.
 
@@ -138,35 +124,33 @@ A kernel assumes contiguous tensors but accepts transposed views. Diagnose it.
 
 What should an unsupported dtype do?
 
+**Trap to avoid:** Silently casting can change precision and results.
+
 **Hint:** Check what the algorithm is allowed to read, write or assume at this boundary.
 
 ### Exercise 6
 
 Define final acceptance for the custom operator.
 
+**Trap to avoid:** Accepting it on speed alone ignores correctness and maintenance.
+
 **Hint:** State the output contract and which observations are needed in the new application.
 
 ## Common mistakes and diagnosis
 
-A tempting but incorrect claim in this chapter is: **faster forward execution alone proves the operator improves training or is safe for arbitrary framework tensors.**
-
-For the concrete failure exercise, a kernel assumes contiguous tensors but accepts transposed views. Diagnose it.
-Preserve the original input and the stage where behavior diverged, and compare
-with the CPU model before changing hardware configuration.
+A tempting but incorrect claim: **Faster forward execution alone proves the operator improves training or is safe for arbitrary framework tensors.** A faster forward pass says nothing about gradients, strides, dtypes or stream rules. Worked example 1 shows correct outputs paired with a wrong gradient of one. Accept the operator only after forward and backward checks pass and unsupported tensors are rejected.
 
 ## Self-check, retrieval and transfer
 
-Explain the first example without its code, then use the second example to state
-one assumption that matters. Complete Exercise 3 independently, use Exercise 4 to
-diagnose a plausible defect, check the boundary in Exercise 5, and retain the
-application contract from Exercise 6. Compare the [separate explanations](../solutions/cuda-064_solutions.md)
-only after your attempt or a deliberate reveal. A reading marker records your
-choice; it does not certify hardware qualification or expert mastery.
+1. What are the input gradients for loss = sum(3x+1)?
+2. A kernel assumes contiguous tensors but accepts transposed views. What is wrong?
+3. What should an unsupported dtype do?
+
+Short answers are in the [separate explanations](../solutions/cuda-064_solutions.md#self-check-answers); compare only after an attempt.
 
 ## Primary references
 
-Check the documentation that matches your prepared toolkit before optional
-hardware execution.
+Use the documentation that matches your prepared toolkit.
 
 - [CUDA Programming Guide](https://docs.nvidia.com/cuda/cuda-programming-guide/)
 

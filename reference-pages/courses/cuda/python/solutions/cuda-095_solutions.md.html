@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cuda/python/solutions/cuda-095_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="cuda-095-explained-solutions">cuda-095: explained solutions<a class="heading-anchor" href="#cuda-095-explained-solutions" aria-label="Link to this section">#</a></h2>
-<p>These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.</p>
+<p>Compare with your <a href="../lessons/cuda-095.md.html">worksheet</a> attempt.</p>
 <h3 id="exercise-1-compute-throughput">Exercise 1: Compute throughput<a class="heading-anchor" href="#exercise-1-compute-throughput" aria-label="Link to this section">#</a></h3>
 <p>Batch divided by completed seconds.</p>
 <p><strong>Approach.</strong> Compute throughput as items divided by completed seconds: 32 items in 0.008 s gives <code>32 / 0.008 = 4000</code> items per second.</p>
@@ -231,9 +231,19 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Why it is correct here.</strong> The exported model has a fixed contract. Explicit rejection is better than silent casting, which can change numerical behavior.</p>
 <p><strong>A plausible wrong approach.</strong> Letting the runtime cast silently makes accepted inputs ambiguous. A float64 request cast to float32 loses precision without anyone noticing.</p>
 <p><strong>How to verify.</strong> Write tests for one valid and two invalid inputs and assert the error messages name the expected signature.</p>
+<h3 id="self-check-answers">Self-check answers<a class="heading-anchor" href="#self-check-answers" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>Why can a larger batch hurt an interactive service?</strong> It raises throughput but makes each request wait for the whole batch, increasing latency.</li>
+</ol>
+<ol start="2">
+<li><strong>Why measure cold start separately?</strong> Loading and compiling the model happen once and would distort warm request timings if hidden in warmup.</li>
+</ol>
+<ol start="3">
+<li><strong>Why include output materialization in latency?</strong> A response for a CPU client is not finished until results are copied back and serialized.</li>
+</ol>
 <h3 id="reference-observation">Reference observation<a class="heading-anchor" href="#reference-observation" aria-label="Link to this section">#</a></h3>
 <p>4000 items/s with 8 ms batch latency, not 0.25 ms request latency.</p>
-<p>The reference file is <code>courses/cuda/python/references/cuda-095_cpu.py</code>. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.</p></article>
+<p>Asserted by <code>courses/cuda/python/references/cuda-095_cpu.py</code>.</p></article>
   </main>
 </body>
 </html>

@@ -196,7 +196,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <article class="document"><h2 id="r-014-functional-iteration-typed-results-and-the-base-pipe">r-014: Functional iteration, typed results and the base pipe<a class="heading-anchor" href="#r-014-functional-iteration-typed-results-and-the-base-pipe" aria-label="Link to this section">#</a></h2>
 <p><strong>Level:</strong> intermediate. <strong>Direct prerequisites:</strong> <code>r-009</code>, <code>r-012</code>, <code>r-013</code></p>
 <h3 id="run-and-retain-your-work">Run and retain your work<a class="heading-anchor" href="#run-and-retain-your-work" aria-label="Link to this section">#</a></h3>
-<p>Open <code>r-014</code> in <code>/classroom</code> and use the prepared <code>r-statistics</code> profile. Each Run evaluates one <code>main.R</code> script in a fresh offline R process, so define every input in the script; an earlier Run leaves no variables behind. Work in the <a href="../lessons/r-014.R.html">starter</a>. The <a href="../solutions/r-014_reference.R.html">complete reference</a> ends by printing <code>r-014 reference checks passed</code>, and the <a href="../solutions/r-014_solutions.md.html">explained answers</a> are there for deliberate comparison after your own attempt. This chapter prints values only; when a chapter draws figures, the classroom keeps at most two figures per run. The <a href="../README.md.html">course overview</a> describes saved work, figure capture and the prepared package versions.</p>
+<p>The starter holds three named groups, A with 1 and 2, B with 4 and 6, and <code>empty</code> with no values, and prints only the names. Run it, then predict what <code>sum()</code> and <code>mean()</code> return for the empty group before mapping. The empty group is the case that decides whether your declared <code>vapply()</code> result type actually holds.</p>
+<p>Work in the <a href="../lessons/r-014.R.html">starter</a> under the <a href="../STUDY-GUIDE.md.html#run-a-chapter">run rules</a>.</p>
+<p>The <a href="../solutions/r-014_reference.R.html">complete reference</a> ends by printing <code>r-014 reference checks passed</code>.</p>
 <h3 id="outcome-and-mechanism">Outcome and mechanism<a class="heading-anchor" href="#outcome-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Map a validated computation over records and retain predictable output types with readable data flow.</p>
 <p>Functional iteration separates the operation on one element from the traversal over a collection. lapply applies a function to each input element and returns a list, retaining heterogeneous results when necessary. This is useful when each group produces a structured summary rather than one number.</p>
@@ -305,7 +307,23 @@ $mean
 <li><a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/pipeOp.html">R base pipe</a></li>
 </ul>
 <h3 id="continue">Continue<a class="heading-anchor" href="#continue" aria-label="Link to this section">#</a></h3>
-<p>Chapters that list <code>r-014</code> as a direct prerequisite: <a href="r-027.md.html"><code>r-027</code></a>, <a href="r-032.md.html"><code>r-032</code></a>, <a href="r-036.md.html"><code>r-036</code></a>.</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Next chapter</th>
+<th>Title</th>
+</tr></thead><tbody>
+<tr>
+<td><a href="r-027.md.html"><code>r-027</code></a></td>
+<td>Profile equivalent work and account for allocations</td>
+</tr>
+<tr>
+<td><a href="r-032.md.html"><code>r-032</code></a></td>
+<td>Grouped summaries and sufficient aggregation state</td>
+</tr>
+<tr>
+<td><a href="r-036.md.html"><code>r-036</code></a></td>
+<td>Chunked aggregation and memory-aware data contracts</td>
+</tr>
+</tbody></table></div>
 <h3 id="ask-an-ai-tutor">Ask an AI tutor<a class="heading-anchor" href="#ask-an-ai-tutor" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for r-014 (Functional iteration, typed results and the base pipe).
 Read the guide and my saved attempt. Explain the relevant R mechanism,

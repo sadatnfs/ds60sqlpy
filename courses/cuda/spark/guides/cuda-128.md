@@ -1,10 +1,17 @@
 # cuda-128: When GPU Spark is the wrong tool
 
-**Route:** CUDA Python and machine learning / GPU Spark specialization. **Stage:** advanced. **Prerequisites:** `cuda-123`, `cuda-126`, `cuda-127`. Allow several sessions when the hardware experiment is new; the chapter is not a deadline.
+**Route:** CUDA Python and machine learning / GPU Spark specialization. **Stage:** advanced. **Prerequisites:** `cuda-123`, `cuda-126`, `cuda-127`.
 
-## What you will be able to explain
+Pacing, evidence labels and platform rules: [CUDA study guide](../../STUDY-GUIDE.md).
 
-By the end, you can **compute end-to-end tradeoff**, **include operational cost**, and **write an evidence-based recommendation** with evidence. Start with the two worked cases, then use the editable CPU model to make the quantities concrete.
+## Learning objectives
+
+- Compute end-to-end tradeoff.
+- Choose a tiny-data tool.
+- Separate setup and steady state.
+- Include operational cost.
+- Define a reevaluation trigger.
+- Write an evidence-based recommendation.
 
 ## Mechanism and vocabulary
 
@@ -31,9 +38,13 @@ A local CPU dataframe finishes a tiny analysis in 0.1 seconds while Spark startu
 
 A GPU query saves 30 seconds of compute but adds 40 seconds of transfers and conversions. The complete application loses 10 seconds despite faster arithmetic.
 
-## Portable executable model
+## How to run the CPU model
 
-The **CPU reference model** variant runs this bounded worked example using `python-core`. It uses only the Python standard library, small synthetic values and no network. Its purpose is to expose the arithmetic or contract behind the chapter. The separate reference includes assertions for the stated observations.
+Edit the copy; the [reference](../references/cuda-128_cpu.py) adds assertions.
+
+```sh
+python courses/cuda/spark/lessons/cuda-128_cpu.py
+```
 
 ```python
 saved_compute, added_transfer = 30, 40
@@ -55,81 +66,64 @@ print("CPU architecture decision: GPU candidate adds", net, "seconds")
 | `net` | `10` |
 | `candidates` | `{'local_cpu': 0.1, 'spark_startup_only': 3.0}` |
 
-Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.
-
 ## Practice and transfer
+
+Record each attempt in the [worksheet](../lessons/cuda-128.md) before opening hints.
 
 ### Exercise 1: Compute end-to-end tradeoff
 
 **Trap to avoid:** Reporting the 30-second compute saving alone recommends a change that makes the application slower overall.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 2: Choose a tiny-data tool
 
 **Trap to avoid:** Using GPU Spark for every analysis because it is available adds startup and operational overhead to jobs that never needed distribution.
-
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 3: Separate setup and steady state
 
 **Trap to avoid:** Reporting only steady-state throughput favors GPU Spark for interactive one-off use, where setup actually dominates.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 4: Include operational cost
 
 **Trap to avoid:** Comparing only query time ignores the work of keeping a GPU Spark stack compatible across upgrades. A Spark upgrade can be blocked until a matching plugin release exists, which delays security patches.
-
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 5: Define a reevaluation trigger
 
 **Trap to avoid:** Rejecting GPU Spark permanently ignores that the tradeoff can change, while revisiting constantly wastes effort. A trigger such as transfer time falling below compute savings ties the revisit to the exact term that decided the current outcome.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 6: Write an evidence-based recommendation
 
 **Trap to avoid:** Recommending the most powerful technology by default ignores the measured tradeoff and the operational cost. It also skips stating missing evidence, so the decision cannot be corrected when new data arrives.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ## Progressive hints
 
-Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.
+Hint *k* belongs to exercise *k*; open one at a time.
 
-1. Start from worked example 1 and mark the quantities needed for the task "Compute end-to-end tradeoff".
-2. Change one assumption in worked example 2 while preserving the declared contract: choose a tiny-data tool.
-3. Trace the CPU program's variables before adding hardware behavior: separate setup and steady state.
-4. Draw producers, consumers and the exact operation boundary for the task "Include operational cost".
-5. Separate what the small fixture establishes from what the real runtime must show: define a reevaluation trigger.
-6. Write a counterexample to an overbroad claim before you write an evidence-based recommendation.
+1. Add every cost that changes, including transfers and conversions, not only compute time.
+2. Compare the job's run time with the startup cost of a distributed engine.
+3. Ask how often a user pays startup and how much of the workflow is steady-state work.
+4. Include maintenance, compatibility tracking and resource ownership in the comparison.
+5. Name a data size or workload change that would make you repeat this evaluation.
+6. Recommend the simplest option that meets the constraints and say what evidence is still missing.
 
-## Common mistakes and self-review
+## Common mistakes and self-check
 
-Confusing a correct tiny example with a general implementation is the central review risk. For this chapter, challenge the assumption in worked example 2, then ask whether your change preserves the mechanism described above. If you change dtype, layout, ordering, batch size or backend, update the acceptance contract rather than silently reusing the old observation. Explain an unexpected result before trying random configuration changes.
+A common mistake is treating GPU acceleration as the goal instead of a candidate. In worked example 2 a GPU query saves 30 seconds of compute but adds 40 seconds of transfers and conversions, so the application loses 10 seconds. Another mistake is choosing Spark for tiny data where startup outweighs the work. Fix both by comparing total completion time, resource cost, operational complexity and quality, and by keeping a CPU fallback installation alongside any plugin deployment.
 
-Keep a small evidence table with columns **claim**, **input**, **expected observation**, **actual observation** and **limit**. For the first claim use `Compute end-to-end tradeoff`. For the final claim use `Write an evidence-based recommendation`. An unperformed GPU or cluster experiment remains pending even when the CPU model is correct.
+**Misconception:** If a cluster has GPUs, every Spark job on it should run with the plugin enabled. **Correction:** The hardware may already be paid for, but enabling the plugin for every job adds compatibility tracking, release upgrades, fallback diagnosis and memory tuning to all of them, and jobs with tiny data or unsupported operators can get slower. Enable it per workload where measured end-to-end results improve, and keep the remaining jobs on ordinary CPU Spark with a recorded reason.
 
-## Platform and evidence contract
+**Evidence limit:** The reference computes a 10-second end-to-end loss from modeled costs. It measures nothing, so a real recommendation needs timings, costs and quality checks under the actual data size, workload mix and hardware.
 
-The reading worksheet and CPU reference model work through the ordinary Linux Docker classroom on macOS, Linux and Windows using WSL 2. They do not require an NVIDIA GPU. Their results are labeled CPU models or semantic oracles, not simulated hardware performance.
+1. Name three conditions that can make GPU Spark the wrong choice.
+2. How does a CPU fallback installation differ from plugin operator fallback?
+3. Why is a no-change outcome a valid result?
 
-Real CUDA work needs supported NVIDIA hardware, a compatible host driver and an explicitly prepared GPU runtime. An Apple GPU does not execute CUDA kernels. PyTorch MPS on a supported native Mac, ROCm on supported AMD hardware, or other vendor backends can provide separate accelerator learning routes; they need their own package and operation qualification and are not CUDA evidence. The ordinary Linux Docker classroom does not expose native Mac MPS automatically.
-
-Do not download packages, models or data by opening this lesson. Do not attach an engine socket, ambient cluster credentials or an arbitrary remote endpoint. A CPU pass, imported package, successful compilation, real GPU result and measured performance are distinct observations. Record the actual backend, data shape/dtype, source revision, versions and pending checks. A saved completion marker records learning progress, not hardware certification.
-
-GPU Spark is a separate owned external workflow. The ordinary `spark-local-scala` and `spark-local-python` profiles are CPU Spark. Keep the GPU plugin disabled or absent for a CPU-only baseline. Per-operator CPU fallback inside a working GPU plugin environment is a different condition from having no compatible GPU. Never mount a host Docker socket or ambient kubeconfig into an ordinary lesson worker.
+Answers: [self-check answers](../solutions/cuda-128_solutions.md#self-check-answers).
 
 ## Primary references
 
-- [cuDF Spark plugin release and compatibility matrix](https://nvidia.github.io/cudf-spark/docs/download.html)
-- [Supported Spark operators and expression types](https://nvidia.github.io/cudf-spark/docs/supported_ops.html)
-- [GPU Spark tuning guide](https://docs.nvidia.com/cudf-spark/latest/tuning-guide.html)
 - [Apache Spark SQL performance tuning](https://spark.apache.org/docs/latest/sql-performance-tuning.html)
 
-Use the version-matched documentation of your prepared environment. These references describe interfaces and supported boundaries; the chapter's synthetic examples and CPU models are original teaching material.
+Full lists: [documentation and sources](../../STUDY-GUIDE.md#documentation-and-sources).
 
 ## Ask an AI tutor about this lesson
 

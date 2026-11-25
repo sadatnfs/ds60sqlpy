@@ -198,23 +198,16 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"></span>
 <span class="source-line">  <span class="syntax-keyword">public</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">void</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span>String<span class="syntax-operator">[</span><span class="syntax-operator">]</span> args<span class="syntax-punctuation">)</span> <span class="syntax-keyword">throws</span> Exception <span class="syntax-punctuation">{</span></span>
 <span class="source-line">    <span class="syntax-comment">// Exercise 1: Use a predicate: predict an edited check</span></span>
-<span class="source-line">    <span class="syntax-comment">// Copy Example A into a scratch `Main.java` and change `assert positive.test(3) &amp;&amp;</span></span>
-<span class="source-line">    <span class="syntax-comment">// !positive.test(0) &amp;&amp; !positive.test(-1);` to `assert positive.test(3) &amp;&amp; !positive.test(1)</span></span>
-<span class="source-line">    <span class="syntax-comment">// &amp;&amp; !positive.test(-1);` inside its assertion. Before running it with `java -ea Main`,</span></span>
-<span class="source-line">    <span class="syntax-comment">// predict whether the assertion still holds and explain why; then restore it.</span></span>
-<span class="source-line">    <span class="syntax-comment">// Expected: The changed run fails with an `AssertionError` from the assertion on</span></span>
-<span class="source-line">    <span class="syntax-comment">// `positive.test(3) &amp;&amp; !positive.test(0) &amp;&amp; !positive.test(-1)`. Restoring the original line</span></span>
-<span class="source-line">    <span class="syntax-comment">// brings back the worked observation: true, false, false.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Change Example A&#x27;s assertion to `assert positive.test(3) &amp;&amp; !positive.test(1) &amp;&amp;</span></span>
+<span class="source-line">    <span class="syntax-comment">// !positive.test(-1);`, predict whether it holds, then run and restore it.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Expected: The edited run fails with an `AssertionError` from the assertion on</span></span>
+<span class="source-line">    <span class="syntax-comment">// `positive.test(3) &amp;&amp; !positive.test(0) &amp;&amp; !positive.test(-1)`.</span></span>
 <span class="source-line"></span>
 <span class="source-line">    <span class="syntax-comment">// Exercise 2: Compose transformations: diagnose an edited check</span></span>
-<span class="source-line">    <span class="syntax-comment">// A careless edit changed the assertion that Example B adds after Example A so that it reads</span></span>
-<span class="source-line">    <span class="syntax-comment">// `assert strip.andThen(upper).apply(&quot; red !&quot;).equals(&quot;RED&quot;);`. Run Example B with that</span></span>
-<span class="source-line">    <span class="syntax-comment">// line, explain why the edited assertion now fails for the same program state, and restore</span></span>
-<span class="source-line">    <span class="syntax-comment">// it.</span></span>
-<span class="source-line">    <span class="syntax-comment">// Expected: Before the repair the run fails with an `AssertionError` from the assertion on</span></span>
-<span class="source-line">    <span class="syntax-comment">// `strip.andThen(upper).apply(&quot; red &quot;).equals(&quot;RED&quot;)`; after it the line reads `assert</span></span>
-<span class="source-line">    <span class="syntax-comment">// strip.andThen(upper).apply(&quot; red &quot;).equals(&quot;RED&quot;);` again and input space red space</span></span>
-<span class="source-line">    <span class="syntax-comment">// becomes RED.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Example B&#x27;s new assertion was edited to `assert strip.andThen(upper).apply(&quot; red</span></span>
+<span class="source-line">    <span class="syntax-comment">// !&quot;).equals(&quot;RED&quot;);`. Explain why it fails for unchanged state and restore it.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Expected: The edited run fails with an `AssertionError` from the assertion on</span></span>
+<span class="source-line">    <span class="syntax-comment">// `strip.andThen(upper).apply(&quot; red &quot;).equals(&quot;RED&quot;)`; the restored assertion passes.</span></span>
 <span class="source-line"></span>
 <span class="source-line">    <span class="syntax-comment">// Exercise 3: Distinguish composition order</span></span>
 <span class="source-line">    <span class="syntax-comment">// Compose add 1 and multiply 2 using andThen and compose on 3.</span></span>

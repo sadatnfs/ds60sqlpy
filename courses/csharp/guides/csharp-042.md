@@ -24,9 +24,9 @@ Authentication answers who the caller is; authorization answers what that caller
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles your saved pad as `Program.cs` in its fixed .NET 10 project. C# 14 is the matching language generation. This route uses the prepared framework libraries; it does not accept arbitrary project files, NuGet packages, command arguments or interactive input. The explicit `Program.Main` entrypoint makes compilation and execution visible. `Check` throws on a false condition in every build configuration, unlike conditional debugging assertions.
+Both examples are pure policy code with no network, file or credential store. The permission set uses `StringComparer.Ordinal`, so letter case is part of an action's identity. The value synthetic-secret is a made-up placeholder; never paste a real token into the pad, a test or a tutor prompt.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Compile contract, starter stop and success marker: [running a lesson](../STUDY-GUIDE.md#running-a-lesson).
 
 
 
@@ -34,7 +34,7 @@ Start with the answer-free learner artifact in your saved classroom pad. It deli
 
 Use exact identity comparisons and explicit permission mappings. A default-deny decision rejects absent policy entries. Parsing and authorization should remain separate methods with separately testable outcomes.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+Each example ends with a trace; method: [tracing a program](../STUDY-GUIDE.md#tracing-a-program).
 
 ## Worked example / walkthrough
 
@@ -79,6 +79,8 @@ internal static class Program {
 ```
 
 **Observe:** Read is allowed and delete is denied.
+
+**Trace.** `rights` holds the single string report:read, compared ordinally. `Contains("report:read")` finds that exact entry and returns true. `Contains("report:delete")` finds nothing, and because the code treats absence as refusal, delete is denied without any rule having to mention it. Report:Read with capital letters would also return false under the ordinal comparer, so case variants grant nothing.
 
 ### Example B: Redact before producing diagnostics
 
@@ -125,6 +127,8 @@ internal static class Program {
 
 **Observe:** The token is replaced while a status remains visible.
 
+**Trace.** `Redact` compares the key with token using `OrdinalIgnoreCase`. TOKEN matches, so the function returns the marker [redacted] instead of the secret. The key status does not match, so its value failed passes through unchanged and the log remains useful. The comparison is exact equality, which matters for keys that merely contain the word token.
+
 ## Exercises
 
 1. **Predict and explain.** Separate identity from permission in a request trace.
@@ -139,13 +143,15 @@ internal static class Program {
 
 6. **Transfer and justify.** Describe authorization checks for a resource owned by another user and the evidence each check needs.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Log each task in the [evidence table](../STUDY-GUIDE.md#recording-exercise-evidence) before opening the explanation.
 
 ## Common pitfalls and diagnosis
 
 This fixture is policy reasoning, not a complete authentication system. Do not invent cryptography or store passwords in reversible form. Parameter binding and destination-specific APIs are preferable to manual escaping.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+Task 4 is the classic bypass: a handler that reads `isAdmin` from the request body lets the caller grant itself rights, so derive roles from the authenticated identity instead. For task 3, notice that `Redact("access_token", value)` returns the secret unchanged, since only the exact key token is caught; an allowlist of safe fields avoids that denylist gap.
+
+Repair routine: [building a regression case](../STUDY-GUIDE.md#building-a-regression-case).
 
 ## Progressive hints
 
@@ -155,11 +161,15 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 ## Self-check and next step
 
-Explain Authentication, Authorization, Default deny without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+Explain why absence from `rights` must mean denial rather than permission. Predict what `Redact` returns for the keys Token, auth and access_token. For task 6, list the checks for reading another user's resource: who the caller is, who owns the resource, which permission applies, and which log entry records the decision.
+
+Then follow the general [self-check routine](../STUDY-GUIDE.md#self-check-routine) and save your pad.
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://learn.microsoft.com/en-us/dotnet/csharp/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+[Documentation](https://learn.microsoft.com/en-us/dotnet/csharp/): The .NET security articles and the C# guide's string comparison topics explain ordinal comparison, secret handling and validation boundaries.
+
+Provenance and limits: [sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

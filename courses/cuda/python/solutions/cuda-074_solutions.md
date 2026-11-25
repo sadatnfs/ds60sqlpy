@@ -1,6 +1,6 @@
 # cuda-074: explained solutions
 
-These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.
+Compare with your [worksheet](../lessons/cuda-074.md) attempt.
 
 ## Exercise 1: Compute launch size for n=17
 
@@ -74,8 +74,16 @@ Run real kernels under supported memory checking separately.
 
 **How to verify.** Run the sanitizer on a device with the guard removed to see it report invalid accesses, then with the guard restored to see a clean report. Without a device, mark this check as not attempted.
 
+## Self-check answers
+
+1. **How is the global index computed in one-dimensional indexing?** Block index times threads per block plus thread index.
+
+2. **Why does a grid-stride loop help with large arrays?** A bounded launch can cover any length: each thread processes index i, then advances by the total number of launched threads until it passes the end.
+
+3. **Which input sizes belong in an indexing test set?** Zero, one, block size minus one, block size, block size plus one and a nonmultiple of the block size, because each exercises a different tail case.
+
 ## Reference observation
 
 Every valid index appears exactly once.
 
-The reference file is `courses/cuda/python/references/cuda-074_cpu.py`. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.
+Asserted by `courses/cuda/python/references/cuda-074_cpu.py`.

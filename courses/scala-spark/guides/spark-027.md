@@ -1,22 +1,26 @@
 # spark-027: Persistence lifecycle and cross-language golden tests
 
-Authored paired Scala/PySpark teaching content. The default fixtures are tiny, local and deterministic. Runtime acceptance, logical correctness and learner understanding remain separate evidence.
+A golden test is only as good as what it refuses to accept. Eight source rows with two exact duplicate pairs, an unknown segment, an unknown amount and one negative amount become a seven-row golden result totaling 130, and you will watch a schema change, a forgotten cache and a `distinct` that quietly drops duplicates each get caught.
 
 ## Level and prerequisites
 
-Intermediate; approximately 105 minutes. Direct prerequisites: `spark-026`. The prepared baseline is Spark 4.3.0, Scala binary 2.13, JDK 17 and Python 3.12. Read the [execution baseline](../execution-baseline.md).
+Intermediate; approximately 105 minutes. Direct prerequisites: `spark-026`. Pinned versions: [execution baseline](../execution-baseline.md).
 
 ## How to run this lesson
 
-Open `spark-027` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile, save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`; Python stages as `main.py` with a main guard. Each program creates its own `local[2]` session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.
+Shared run steps and profile rules: [study guide](../STUDY-GUIDE.md#run-a-paired-lesson).
 
-The [Scala learner](../lessons/spark-027.scala) and [PySpark learner](../lessons/spark-027.py) run two complete demonstrations and retain six explicit task stubs. Use the [explained solutions](../solutions/spark-027_solutions.md) only after an attempt or an explicit worked comparison; the [Scala reference](../solutions/spark-027_solution.scala) and [PySpark reference](../solutions/spark-027_solution.py) contain complete assertions. A bounded collect is used only for the declared tiny fixture; do not copy it onto an unbounded or large production table.
+Learner pads: [Scala](../lessons/spark-027.scala) and [PySpark](../lessons/spark-027.py).
+
+Open the [explained solutions](../solutions/spark-027_solutions.md) after an attempt.
+
+The first worked example counts 8 source rows but only 6 distinct ones and prints `Golden bag contains duplicates and unknown values deliberately`. The second builds `CAST(1 AS BIGINT)` beside the string `1`, shows that both display the same digit while their types differ, and prints `Identical displayed digits can have different field types`.
 
 ## Learning objectives
 
 - Cache only reusable work and test Scala/PySpark results with schema and bag-aware comparisons.
-- State the input and output grain, schema, NULL policy and ordering before executing a transformation.
-- Compare each language implementation with independent literal expectations, not only with the other implementation.
+- Compare the ordered `(name, type)` contract `entity_id bigint, segment string, doubled bigint` before comparing values, so that a string identity with the same digits fails as a schema mismatch instead of passing as equal text.
+- Persist one relation, count and reuse it, and release it in a `finally` block so its storage level returns to `NONE` even when a consumer raises `injected_after_materialize` after filling the cache.
 
 ## Vocabulary and concepts
 
@@ -52,7 +56,7 @@ The lesson's cache boundary is limited to one owned SparkSession and no external
 
 ## Supplied local fixture
 
-The complete source creates the owned local session described above, then constructs this explicit fixture. The worked examples below run in that same main function; there is no hidden notebook state.
+The source rows are `(1, a, 10)` twice, `(2, a, NULL)`, `(3, b, 0)`, `(4, b, 20)` twice, `(5, NULL, 5)` and `(6, c, -5)`. The transform doubles each amount, keeps unknown amounts as NULL and drops the negative row, so the golden relation has 7 rows, 6 known doubled values and a total of 130. The duplicate pairs are separate real occurrences, which is why set comparison is not allowed here.
 
 ```scala
 import org.apache.spark.sql.Row
@@ -203,7 +207,7 @@ Keep rows whose amount is nonnegative or NULL, then return entity_id, segment, d
 
 **Verify:** Assert population, total and unknown count, then compare with the literal golden relation in later tasks.
 
-**Progressive hint:** Ordinary amount>=0 would filter unknowns unless the missingness branch is explicit.
+**Progressive hint:** Ordinary amount >= 0 would filter unknowns unless the missingness branch is explicit.
 
 ### Exercise 2: Define an ordered field/type contract
 
@@ -261,11 +265,14 @@ Do not interpret persist registration as completed materialization or a cache sc
 
 ## Self-check
 
-Explain the contract of `transform` / `transform` without reading its solution. Then, from memory, state what Exercise 6 (Demonstrate why set equality misses duplicate loss) must produce: Distinct has 5 rows; unexpected occurrences 0 and missing expected occurrences 2. The bag validator raises a named bag contract mismatch. Say which part of that result is evidence and what it still cannot show. Name the action in your trace that actually runs the plan.
+- The bag check compares schema contracts before any `exceptAll`. What would go wrong if a string `entity_id` reached `exceptAll` against the `bigint` golden column?
+- The cached summary returns a plan containing `InMemoryTableScan`, yet the test also requires the storage level to be `NONE` afterward. Why are both checks needed?
+- The failing consumer raises after `count` has filled the cache. Trace what the `finally` block does, and what later code in the same session would inherit without it.
+- `distinct` leaves 5 rows and the difference counts are `(0, 2)`. Explain both numbers and why a set-based comparison would have reported success.
 
 ## Next step
 
-Use the [course route](../README.md) to continue. Paired-language agreement is useful only when both outputs also satisfy the independent fixture contract. A successful local run is not evidence of cluster performance or production recovery.
+Go on to [spark-028: Capstone: a skewed join with correctness and cost evidence](spark-028.md). The capstone combines this section's tools: quarantine, a reviewed dimension, a skewed key, two join strategies and a receipt that keeps correctness evidence and cost evidence apart.
 
 ## Primary sources and official APIs
 

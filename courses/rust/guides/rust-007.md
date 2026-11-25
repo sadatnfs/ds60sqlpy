@@ -24,9 +24,11 @@ Rust makes ownership transfer part of an argument type. Passing an integer copie
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles the saved pad as `main.rs` with pinned Rust 1.99.1, edition 2024, and the prepared Arrow 60 library. `assert!` and `assert_eq!` remain active in normal builds. The fixed pad accepts one source file without arbitrary arguments, interactive input, Cargo manifests or package installation. The main function returns `Result<(), Box<dyn std::error::Error>>` so later examples can propagate errors with `?`; the final `Ok(())` means this fixture completed successfully. Standard library and Arrow examples remain offline after image preparation. Multi-file Cargo and external ecosystem projects have separate explicit preparation workflows.
+This lesson's programs need only the prelude and their own helpers. A passing run prints `rust-007: passed`.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Pad setup and limits: [Run a lesson](../STUDY-GUIDE.md#run-a-lesson).
+
+Before you run anything, follow [Attempt a lesson](../STUDY-GUIDE.md#attempt-a-lesson).
 
 
 
@@ -34,7 +36,9 @@ Start with the answer-free learner artifact in your saved classroom pad. It deli
 
 `fn double(value: i32) -> i32` declares input and output types. A final expression returns its value without a semicolon. `&str` accepts borrowed text, including literals and owned String views.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+**Reading Example A (Return a derived integer, code below).** `fn double(value: i32) -> i32 { value * 2 }` is an item declared inside the block, and an item is visible throughout its enclosing block, even on lines written before it. Its signature is the contract: one `i32` in by value, one `i32` out. The body is a block whose last expression, `value * 2`, becomes the return value, so no `return` keyword is needed. At the call `double(original)`, the argument is evaluated and bound to the parameter `value`. Because `i32` implements `Copy`, that binding duplicates the bits, and `original` keeps its own 7. The function cannot reach the caller's variable at all; it sees only its parameter. The first assertion checks the returned value, and the second checks that the caller's binding is unchanged after the call. Rust performs no implicit integer conversion at a call, so `double(7_i64)` is rejected with E0308, mismatched types, expected `i32`, found `i64`.
+
+Method for tracing your own variants: [Trace a program](../STUDY-GUIDE.md#trace-a-program).
 
 ## Worked example / walkthrough
 
@@ -95,13 +99,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 6. **Transfer and justify.** Choose owned or borrowed inputs for an API that stores data after the call.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Record each task as in [Keep evidence for each task](../STUDY-GUIDE.md#keep-evidence-for-each-task).
 
 ## Common pitfalls and diagnosis
 
 A reference is not permission to retain data beyond its lifetime. Pure-looking names can hide side effects. Do not clone an entire buffer when a borrow expresses the actual requirement.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+To turn a pitfall into a test, see [Design a regression case](../STUDY-GUIDE.md#design-a-regression-case).
 
 ## Progressive hints
 
@@ -109,13 +113,23 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 2. Compare Example B (Accept different text owners) with Example A and name the first line whose behavior differs. Its observation is: One borrowed interface accepts owned text and a literal.
 3. Before opening the explanation, test your task 3 attempt against this lesson's main pitfall: A reference is not permission to retain data beyond its lifetime.
 
+Tempting approaches to rule out before you compare:
+
+- **Task 1.** Saying `owned` is copied into the function would require a `.clone()` that the code does not contain. Saying `original` is borrowed misses that `double` has a value parameter `value: i32`.
+- **Task 2.** Labeling the result as characters while still calling `len` gives `note: 5 characters` for the four-letter café; the café fixture exposes the mismatch.
+- **Task 5.** Treating empty input as invalid with `assert!(!text.is_empty())` makes the function panic on a legitimate empty field instead of reporting length 0.
+
 ## Self-check and next step
 
-Explain Parameter, Return type, Borrowed interface without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+Which arguments in Example A and Example B are copied and which are borrowed? What does a function body produce if its last line ends with a semicolon, and why does an `i32` return type then fail to compile? When should a parameter be `String` rather than `&str`?
+
+Then work through [Self-check and review](../STUDY-GUIDE.md#self-check-and-review).
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://doc.rust-lang.org/book/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+Read [The Rust Book, 3.3 Functions](https://doc.rust-lang.org/book/ch03-03-how-functions-work.html) for statements versus a function's tail expression.
+
+What the classroom does and does not prove: [Sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

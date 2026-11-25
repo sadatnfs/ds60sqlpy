@@ -24,9 +24,11 @@ Automatic inference is useful exploration but should not silently become a produ
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles the saved pad as `main.rs` with pinned Rust 1.99.1, edition 2024, and the prepared Arrow 60 library. `assert!` and `assert_eq!` remain active in normal builds. The fixed pad accepts one source file without arbitrary arguments, interactive input, Cargo manifests or package installation. The main function returns `Result<(), Box<dyn std::error::Error>>` so later examples can propagate errors with `?`; the final `Ok(())` means this fixture completed successfully. Standard library and Arrow examples remain offline after image preparation. Multi-file Cargo and external ecosystem projects have separate explicit preparation workflows.
+Beyond the prelude, this lesson's programs use `arrow::array`, `arrow::csv`, `arrow::datatypes`, `arrow::json`, `std::io` and `std::sync`. A passing run prints `rust-043: passed`.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Pad setup and limits: [Run a lesson](../STUDY-GUIDE.md#run-a-lesson).
+
+Before you run anything, follow [Attempt a lesson](../STUDY-GUIDE.md#attempt-a-lesson).
 
 
 
@@ -34,7 +36,9 @@ Start with the answer-free learner artifact in your saved classroom pad. It deli
 
 CSV ReaderBuilder takes a schema and with_header policy. JSON ReaderBuilder consumes newline-delimited object records. Both readers yield fallible RecordBatch values, and batch size bounds one produced chunk.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+**Reading Example A (Read CSV through its real parser, code below).** The schema is built before any data is read: two non-nullable fields, `name` as `Utf8` and `quantity` as `Int32`. `ReaderBuilder::new(schema)` starts a reader configuration from that schema, so the parser does not infer types from the text. `with_header(true)` says the first line holds column names rather than data, and `with_batch_size(8)` caps each batch at eight rows. `build(Cursor::new(input))` accepts any `Read` source; the byte string literal `b"..."` has type `&[u8; N]`, and the `Cursor` makes it readable. Each call to `next` returns an `Option` wrapping a parse result, so `unwrap()` takes the first batch and `?` surfaces a parse failure.
+
+Method for tracing your own variants: [Trace a program](../STUDY-GUIDE.md#trace-a-program).
 
 ## Worked example / walkthrough
 
@@ -110,13 +114,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 6. **Transfer and justify.** Design an inference-to-reviewed-schema workflow with checks for later type and nullability drift.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Record each task as in [Keep evidence for each task](../STUDY-GUIDE.md#keep-evidence-for-each-task).
 
 ## Common pitfalls and diagnosis
 
 NDJSON is not a single enclosing JSON array. Reader success does not establish domain validity. Always handle each yielded batch error rather than counting only successful batches.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+To turn a pitfall into a test, see [Design a regression case](../STUDY-GUIDE.md#design-a-regression-case).
 
 ## Progressive hints
 
@@ -124,13 +128,23 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 2. Compare Example B (Read newline-delimited JSON) with Example A and name the first line whose behavior differs. Its observation is: JSON null becomes Arrow null under the declared nullable field.
 3. Before opening the explanation, test your task 3 attempt against this lesson's main pitfall: NDJSON is not a single enclosing JSON array.
 
+Tempting approaches to rule out before you compare:
+
+- **Task 1.** Passing a JSON array such as `[{"quantity":2}]` to the newline-delimited reader assumes the two JSON formats are interchangeable; it expects separate objects, not one enclosing array.
+- **Task 2.** Expecting three fields from the first record counts every comma, as a plain split would; the parser would instead report an error if a row truly had an extra field.
+- **Task 5.** Reading only the first batch and reporting 2 rows treats the first chunk as the whole file.
+
 ## Self-check and next step
 
-Explain Schema inference, NDJSON, Batch size without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+Why does Example A pass an explicit schema to the CSV reader rather than inferring one from two rows? In Example B, how does a JSON `null` become an Arrow null, and what would you expect if the field were declared non-nullable? How does newline-delimited JSON differ from a single JSON array?
+
+Then work through [Self-check and review](../STUDY-GUIDE.md#self-check-and-review).
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://docs.rs/arrow/60.0.0/arrow/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+Read [the Arrow 60 crate documentation](https://docs.rs/arrow/60.0.0/arrow/) for the CSV and JSON reader builders and `with_batch_size`.
+
+What the classroom does and does not prove: [Sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

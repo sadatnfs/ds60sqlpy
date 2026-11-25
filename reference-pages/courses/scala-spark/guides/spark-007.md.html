@@ -194,16 +194,19 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/scala-spark/guides/spark-007.md</code></p>
     </header>
     <article class="document"><h2 id="spark-007-either-and-validation-without-hidden-data-loss">spark-007: Either and validation without hidden data loss<a class="heading-anchor" href="#spark-007-either-and-validation-without-hidden-data-loss" aria-label="Link to this section">#</a></h2>
-<p>Authored tutorial and practice content. The prepared Scala/JVM worker executes a bounded program; process success and understanding remain distinct. No source file installs a tool or downloads a dependency.</p>
+<p>Six pipe-separated records arrive; three are valid and three are broken in different ways. This lesson validates ID, status and amount with <code>Either</code>, composes them in a <code>for</code> comprehension with a declared error order, and keeps every rejected line with its position and reason so nothing disappears between input and report.</p>
 <h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
-<p>Beginner; approximately 75 minutes. Direct prerequisites: <code>spark-006</code>. The lesson uses Scala 2.13 syntax and the prepared JDK 17 worker. The <a href="../execution-baseline.md.html">execution baseline</a> lists the exact Scala, JDK and Spark versions.</p>
+<p>Beginner; approximately 75 minutes. Direct prerequisites: <code>spark-006</code>. Pinned versions: <a href="../execution-baseline.md.html">execution baseline</a>.</p>
 <h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>Open <code>spark-007</code> in the classroom, select the Scala source, prepare the <code>scala-jvm</code> profile and run the saved pad. The worker stages the single source as <code>Main.scala</code> and invokes <code>object Main</code>. Read the terminal output and exact assertions. The <a href="../lessons/spark-007.scala.html">learner source</a> runs two complete demonstrations; its six task functions remain explicit stubs until you implement them. Preserve your saved attempt. The <a href="../solutions/spark-007_solution.scala.html">reference program</a> and <a href="../solutions/spark-007_solutions.md.html">explained solutions</a> are separate and should be opened after an attempt or an explicit worked-comparison request. If the profile is unavailable, reading and saving remain available; opening this guide does not prepare a runtime.</p>
+<p>Shared run steps and profile rules: <a href="../STUDY-GUIDE.md.html#run-a-language-lesson">study guide</a>.</p>
+<p>Learner pad: <a href="../lessons/spark-007.scala.html">spark-007.scala</a>.</p>
+<p>Open the <a href="../solutions/spark-007_solutions.md.html">explained solutions</a> after an attempt.</p>
+<p>The first worked example prints <code>Right(5)</code>, the result of <code>Right(25L).map(_ / 5L)</code>; mapping over a <code>Left</code> would have passed the error through untouched. The second prints <code>Right(25)</code> from a <code>for</code> comprehension that adds an amount and a fee. Its companion assertion shows that once the first step is <code>Left(&quot;invalid_amount&quot;)</code>, the comprehension stops there and returns that <code>Left</code>, which is the behavior Exercise 4 relies on.</p>
 <h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
 <ul>
 <li>Return accepted data or an explicit validation reason without throwing away invalid rows.</li>
-<li>Explain the result of both worked examples before running them.</li>
-<li>Implement the six contracts, inspect normal and boundary evidence, and explain a counterexample in your own words.</li>
+<li>Predict the first error reported for a record with several defects, using the declared order ID, then status, then amount, and explain why a short-circuiting <code>for</code> comprehension gives that order.</li>
+<li>Produce a rejection ledger for the six-line fixture (positions 3, 4 and 5 with <code>missing_id</code>, <code>invalid_amount</code> and <code>unknown_status</code>) whose accepted and rejected counts add up to six.</li>
 </ul>
 <h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
 <ul>
@@ -280,9 +283,15 @@ println<span class="syntax-punctuation">(</span>combined<span class="syntax-punc
 <h3 id="common-pitfalls">Common pitfalls<a class="heading-anchor" href="#common-pitfalls" aria-label="Link to this section">#</a></h3>
 <p>If rejected rows vanish, look for converting Either to Option and flatMapping only Right values without a separate ledger. If a trailing empty amount is misclassified as the wrong field count, inspect the split limit. If different errors appear after refactoring, review validation precedence. If void rows bypass amount validation, move source validation before business filtering. If a report total matches but accepted plus rejected count does not, trace every source position rather than inventing replacement zeros.</p>
 <h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
-<p>Explain one input-to-output trace without reading your code. Identify which function preserves repeated values, which condition distinguishes an invalid or missing input, and which assertion would fail for the tempting incorrect implementation. A printed success line alone is not the evidence; retain the exact values and the reasoning that connect them to the contract.</p>
+<ul>
+<li>What do <code>parseId(&quot; a1 &quot;)</code>, <code>parseId(null)</code> and <code>parseId(&quot;  &quot;)</code> return, and why is trimming done before the emptiness test?</li>
+<li><code>parseStatus</code> accepts &quot;paid&quot; and &quot;void&quot; but rejects &quot;PAID&quot;. Give one reason a strict, case-sensitive status rule is safer than lowercasing input you have not seen.</li>
+<li>Trace <code>parseRecord(&quot;|bogus|100&quot;)</code>. Which error appears, and which field&#x27;s defect is never reported because the comprehension stopped earlier?</li>
+<li>For the six-line fixture, list the rejected positions, raw lines and reasons. Why does the ledger store the original raw text rather than only the reason?</li>
+<li><code>paidTotal</code> returns count 2 and total 100 for the accepted records. Why is a void record with a malformed amount never seen by this function?</li>
+</ul>
 <h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
-<p>Continue to the next lesson only after you can explain the boundary behavior. The <a href="../README.md.html">course route</a> shows authored material and runtime evidence separately.</p>
+<p>Go on to <a href="spark-008.md.html">spark-008: Assertions, numeric boundaries, and independent oracles</a>. You have been reading assertions written for you; next you write the checking helpers yourself (bag equality, checked sums, overflow-safe promotion and tolerance rules) and test whether they reject real wrong answers.</p>
 <h3 id="primary-sources-and-official-apis">Primary sources and official APIs<a class="heading-anchor" href="#primary-sources-and-official-apis" aria-label="Link to this section">#</a></h3>
 <ul>
 <li><a href="https://www.scala-lang.org/api/2.13.16/scala/util/Either.html">Scala 2.13 Either API</a>.</li>

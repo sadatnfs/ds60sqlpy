@@ -175,7 +175,7 @@ BatchNorm can be useful when its batch/statistical assumptions fit the task and 
 
 Keras BatchNorm\'s trainable=False behavior is special: a direct call uses moving statistics even if training=True is supplied. For a compiled Keras training workflow, changing trainable after compilation requires recompilation for the changed setting to take effect as documented. These exercises use direct layer calls, so they do not claim a compiled-fit reconfiguration was tested. PyTorch separates parameter gradient flags from module mode, and its track_running_stats option introduces another distinct policy. Always name the state and mode contract being compared.
 
-Primary API references: [Keras BatchNormalization](https://www.tensorflow.org/api_docs/python/tf/keras/layers/BatchNormalization), [Keras LayerNormalization](https://www.tensorflow.org/api_docs/python/tf/keras/layers/LayerNormalization), and [PyTorch2.9 BatchNorm1d](https://docs.pytorch.org/docs/2.9/generated/torch.nn.BatchNorm1d.html). The formulas and fixtures here use small literal CPU arrays; they do not establish distributed synchronization or deployment behavior.
+Primary API references: [Keras BatchNormalization](https://www.tensorflow.org/api_docs/python/tf/keras/layers/BatchNormalization), [Keras LayerNormalization](https://www.tensorflow.org/api_docs/python/tf/keras/layers/LayerNormalization), and [PyTorch 2.9 BatchNorm1d](https://docs.pytorch.org/docs/2.9/generated/torch.nn.BatchNorm1d.html). The formulas and fixtures here use small literal CPU arrays; they do not establish distributed synchronization or deployment behavior.
 """
 spec[
     "diagnosis"

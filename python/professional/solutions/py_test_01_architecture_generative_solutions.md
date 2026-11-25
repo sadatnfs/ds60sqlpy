@@ -48,9 +48,6 @@ The architecture keeps policy pure and repeatable, while contract and generative
 
 ### Verification micro-example
 
-Run this small, deterministic case before adapting the reference to a
-larger system. It gives the reasoning above an executable anchor:
-
 ```python
 class FixedClock:
     def __init__(self, value):
@@ -74,31 +71,19 @@ assert not is_fresh(10.0, 3.0, clock)
 
 **Expected observation:** The exact expiration boundary is tested instantly and deterministically without sleeping.
 
-The reference implementation is one defensible contract, not a license
-to copy internal steps into every system. Preserve the observable
-guarantees and repeat the failure tests when adapting it.
-
 <!-- END PROFESSIONAL PYTHON CONCEPT ENRICHMENT -->
 
 ## Exercise-by-exercise reference
 
-Use this map after an honest attempt. The executable implementation remains
-[`py_test_01_architecture_generative_solution.py`](py_test_01_architecture_generative_solution.py); this section explains the
-contract, evidence, alternatives, and edge cases behind every numbered task.
+The runnable [`py_test_01_architecture_generative_solution.py`](py_test_01_architecture_generative_solution.py) implements every task below.
+
+**Principle behind every task:** Tests should target stable behavior with the narrowest useful boundary: pure examples/properties, stateful fakes, real local adapters, and sparse interaction mocks.
+
+**Trap behind every task:** Over-mocking, shared mutable fixtures, real waiting, nondeterministic generation, or snapshot updates without review can make tests fast but untrustworthy.
 
 ### Exercise 1: Choose fixture lifetime
 
 **Prompt recap:** For each resource, immutable input rows, mutable in-memory store, temporary JSON file, and database connection, choose function, class, module, or session scope. Prefer the narrowest lifetime that is fast enough and keeps tests independent.
-
-**Reference reasoning:** Tests should target stable behavior with the narrowest useful boundary: pure examples/properties, stateful fakes, real local adapters, and sparse interaction mocks. The executable module and
-the focused discussion earlier in this file implement this original
-exercise. Verify every acceptance condition from the prompt with a
-normal case, a boundary case, and the documented failure behavior.
-
-**Common trap:** Over-mocking, shared mutable fixtures, real waiting, nondeterministic generation, or snapshot updates without review can make tests fast but untrustworthy.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
 
 **Verify:** Choose fixture lifetime; run two tests that mutate the in-memory store and assert the second starts empty; assert a temporary JSON path differs between tests, immutable rows remain equal, and a database connection is rolled back/closed at the chosen scope.
 
@@ -106,31 +91,11 @@ and which input would make the policy reject or choose a different path.
 
 **Prompt recap:** Implement `merge_intervals`. Add examples for empty input, reversed endpoints, adjacent intervals, duplicates, and nesting. Then express properties: - output is sorted, - output intervals no longer touch, - every original integer point remains covered, and - no new point is created.
 
-**Reference reasoning:** Tests should target stable behavior with the narrowest useful boundary: pure examples/properties, stateful fakes, real local adapters, and sparse interaction mocks. The executable module and
-the focused discussion earlier in this file implement this original
-exercise. Verify every acceptance condition from the prompt with a
-normal case, a boundary case, and the documented failure behavior.
-
-**Common trap:** Over-mocking, shared mutable fixtures, real waiting, nondeterministic generation, or snapshot updates without review can make tests fast but untrustworthy.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
-
 **Verify:** Complete interval merging; assert merge_intervals([]) == [], merge_intervals([(3, 1)]) == [(1, 3)], adjacency [(1, 2), (2, 4)] becomes [(1, 4)], and duplicate/nested intervals collapse; property tests must prove sorted non-touching output with exactly the same covered integer points.
 
 ### Exercise 3: Use Hypothesis meaningfully
 
 **Prompt recap:** Generate lists of bounded integer endpoint pairs with 100 deterministic examples, no example database, and no deadline. Introduce an adjacency bug briefly, inspect the smallest counterexample, restore the implementation, and keep a useful named regression case.
-
-**Reference reasoning:** Tests should target stable behavior with the narrowest useful boundary: pure examples/properties, stateful fakes, real local adapters, and sparse interaction mocks. The executable module and
-the focused discussion earlier in this file implement this original
-exercise. Verify every acceptance condition from the prompt with a
-normal case, a boundary case, and the documented failure behavior.
-
-**Common trap:** Over-mocking, shared mutable fixtures, real waiting, nondeterministic generation, or snapshot updates without review can make tests fast but untrustworthy.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
 
 **Verify:** Use Hypothesis meaningfully; run the declared 100-example deterministic Hypothesis test with exit code 0; make the adjacency mutant fail, record its smallest counterexample, restore the implementation, and keep a named regression assertion for that case.
 
@@ -138,47 +103,17 @@ and which input would make the policy reject or choose a different path.
 
 **Prompt recap:** Complete `choose_double`. Use a fake for the stateful store, a mock only for one audit interaction, and a real temporary file for serialization behavior. Explain why mocking every store method couples tests to implementation steps.
 
-**Reference reasoning:** Tests should target stable behavior with the narrowest useful boundary: pure examples/properties, stateful fakes, real local adapters, and sparse interaction mocks. The executable module and
-the focused discussion earlier in this file implement this original
-exercise. Verify every acceptance condition from the prompt with a
-normal case, a boundary case, and the documented failure behavior.
-
-**Common trap:** Over-mocking, shared mutable fixtures, real waiting, nondeterministic generation, or snapshot updates without review can make tests fast but untrustworthy.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
-
 **Verify:** Compare test doubles; assert the fake store preserves put/get/overwrite state, the audit mock receives exactly one expected call, and a real temporary JSON file round-trips bytes/data; include a test that would survive if every store method were merely mocked.
 
 ### Exercise 5: Patch and restore process state
 
 **Prompt recap:** Use `patch.dict(os.environ, ..., clear=False)` or pytest's `monkeypatch` fixture to change cache settings for one test. Assert the original environment is restored afterward. Prefer passing a mapping directly when the API permits it.
 
-**Reference reasoning:** Tests should target stable behavior with the narrowest useful boundary: pure examples/properties, stateful fakes, real local adapters, and sparse interaction mocks. The executable module and
-the focused discussion earlier in this file implement this original
-exercise. Verify every acceptance condition from the prompt with a
-normal case, a boundary case, and the documented failure behavior.
-
-**Common trap:** Over-mocking, shared mutable fixtures, real waiting, nondeterministic generation, or snapshot updates without review can make tests fast but untrustworthy.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
-
 **Verify:** Patch and restore process state; in two tests, set and read the named cache environment variable with patch.dict or monkeypatch, then assert the original value/presence is restored after each test and after an injected exception.
 
 ### Exercise 6: Add a contract failure
 
 **Prompt recap:** Create a deliberately broken store that never overwrites values. Run the shared contract and locate the exact violated behavior. Contract tests complement, rather than replace, implementation-specific failure tests.
-
-**Reference reasoning:** Tests should target stable behavior with the narrowest useful boundary: pure examples/properties, stateful fakes, real local adapters, and sparse interaction mocks. The executable module and
-the focused discussion earlier in this file implement this original
-exercise. Verify every acceptance condition from the prompt with a
-normal case, a boundary case, and the documented failure behavior.
-
-**Common trap:** Over-mocking, shared mutable fixtures, real waiting, nondeterministic generation, or snapshot updates without review can make tests fast but untrustworthy.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
 
 **Verify:** Add a contract failure; run the shared store contract against the broken no-overwrite store and record the exact failing overwrite assertion; then run the same contract against the conforming fake with exit code 0.
 
@@ -198,11 +133,6 @@ Use deterministic Hypothesis settings and no example database. A failing
 sequence should shrink to a short reproducible command list suitable for a
 named regression test.
 
-**Common trap:** Over-mocking, shared mutable fixtures, real waiting, nondeterministic generation, or snapshot updates without review can make tests fast but untrustworthy.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
-
 **Verify:** model a state machine; execute a seeded ExpiringCache state machine containing put/get/delete/advance/overwrite actions; after every action assert cache output equals the simple model, expired keys are absent, and size never exceeds the model.
 
 ### Exercise 8: add metamorphic tests
@@ -219,11 +149,6 @@ outputs. Also retain the direct coverage/no-new-points properties.
 Metamorphic tests complement examples; a shared wrong assumption can still
 infect both relation and implementation, so review the mathematical contract.
 
-**Common trap:** Over-mocking, shared mutable fixtures, real waiting, nondeterministic generation, or snapshot updates without review can make tests fast but untrustworthy.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
-
 **Verify:** add metamorphic tests; assert interval results are unchanged by input permutation and duplicate insertion, translated by exactly k when every endpoint gains k, and idempotent under merge_intervals(merge_intervals(x)).
 
 ### Exercise 9: evaluate mutation-test survivors
@@ -239,11 +164,6 @@ focused test passes normally and fails under mutation.
 
 Do not chase a perfect mutation score: equivalent or unreachable mutations
 need review. The useful output is a concrete missing behavioral assertion.
-
-**Common trap:** Over-mocking, shared mutable fixtures, real waiting, nondeterministic generation, or snapshot updates without review can make tests fast but untrustworthy.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
 
 **Verify:** evaluate mutation-test survivors; run each of the <= expiry, no-adjacency-merge, and no-overwrite mutants separately; name the test that fails, and add a focused assertion if any mutant survives so all three finish killed.
 
@@ -262,11 +182,6 @@ For a synchronized wrapper, assert the entire compound operation is protected
 and invariants hold after both workers complete. Join with a generous timeout
 only to prevent a hung test, not as the correctness condition.
 
-**Common trap:** Over-mocking, shared mutable fixtures, real waiting, nondeterministic generation, or snapshot updates without review can make tests fast but untrustworthy.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
-
 **Verify:** test concurrency without timing races; use barriers/events, not sleep, to force the declared two-worker interleaving; assert final value/call count or the synchronization wrapper's result, both workers terminate before a fixed timeout, and no exception is lost.
 
 ### Exercise 11: triage a flaky test
@@ -283,11 +198,6 @@ order.
 
 Quarantine and retry can preserve CI temporarily but are not fixes; retain an
 owner and deadline if used.
-
-**Common trap:** Over-mocking, shared mutable fixtures, real waiting, nondeterministic generation, or snapshot updates without review can make tests fast but untrustworthy.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
 
 **Verify:** triage a flaky test; repeat the original flaky test enough times to record its failure rate and classify clock/random/file/order state; replace that boundary with a fake clock, seed, tmp_path, or sorted assertion and then obtain a clean repeated-test transcript without retries.
 
@@ -306,10 +216,5 @@ default.
 Avoid duplicating every assertion at every layer. Assign each risk to the
 cheapest boundary capable of exposing it, then retain one end-to-end path for
 wiring evidence.
-
-**Common trap:** Over-mocking, shared mutable fixtures, real waiting, nondeterministic generation, or snapshot updates without review can make tests fast but untrustworthy.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
 
 **Verify:** design a layered verification portfolio; deliver a matrix with unit/property, shared contract, temporary-file integration, CLI subprocess, and optional external rows; for each name its command/test ID, input fixture, expected output/failure, runtime budget, and the claim it cannot prove.

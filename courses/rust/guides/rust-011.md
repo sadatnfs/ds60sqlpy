@@ -24,9 +24,11 @@ Vector growth can reallocate storage, which explains why a borrow into a vector 
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles the saved pad as `main.rs` with pinned Rust 1.99.1, edition 2024, and the prepared Arrow 60 library. `assert!` and `assert_eq!` remain active in normal builds. The fixed pad accepts one source file without arbitrary arguments, interactive input, Cargo manifests or package installation. The main function returns `Result<(), Box<dyn std::error::Error>>` so later examples can propagate errors with `?`; the final `Ok(())` means this fixture completed successfully. Standard library and Arrow examples remain offline after image preparation. Multi-file Cargo and external ecosystem projects have separate explicit preparation workflows.
+This lesson's programs need only the prelude and their own helpers. A passing run prints `rust-011: passed`.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Pad setup and limits: [Run a lesson](../STUDY-GUIDE.md#run-a-lesson).
+
+Before you run anything, follow [Attempt a lesson](../STUDY-GUIDE.md#attempt-a-lesson).
 
 
 
@@ -34,7 +36,9 @@ Start with the answer-free learner artifact in your saved classroom pad. It deli
 
 `[i32; 3]` is an array of exactly three integers. `Vec<i32>` owns a variable-length sequence. `&[i32]` is a borrowed slice. len and capacity describe different properties.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+**Reading Example A (Accept arrays and vectors uniformly, code below).** `fn total(values: &[i32]) -> i32` takes a slice, a borrowed pointer and length over contiguous `i32` values, and never learns what owns them. `values.iter().sum()` walks the slice and adds the elements; the return type `i32` tells `sum` what to produce. The three calls pass three different owners. `&[2, 3, 4]` borrows a fixed-size array of type `[i32; 3]`, and the compiler coerces `&[i32; 3]` to `&[i32]`. `&vec![1, 2]` borrows a temporary `Vec<i32>`, and deref coercion turns `&Vec<i32>` into the same slice type. `&[]` borrows an empty array; the slice it produces has length 0, and summing nothing yields 0, the identity for addition, without a special case.
+
+Method for tracing your own variants: [Trace a program](../STUDY-GUIDE.md#trace-a-program).
 
 ## Worked example / walkthrough
 
@@ -94,13 +98,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 6. **Transfer and justify.** Choose an array, Vec or slice for stored state, function input and fixed-size coordinates.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Record each task as in [Keep evidence for each task](../STUDY-GUIDE.md#keep-evidence-for-each-task).
 
 ## Common pitfalls and diagnosis
 
 Capacity is not a valid index limit. A slice does not extend its owner's lifetime. Avoid accepting &Vec when a slice expresses the actual requirement.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+To turn a pitfall into a test, see [Design a regression case](../STUDY-GUIDE.md#design-a-regression-case).
 
 ## Progressive hints
 
@@ -108,13 +112,25 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 2. Compare Example B (Separate capacity from logical elements) with Example A and name the first line whose behavior differs. Its observation is: Reserved storage still contains zero logical elements until push.
 3. Before opening the explanation, test your task 3 attempt against this lesson's main pitfall: Capacity is not a valid index limit.
 
+Tempting approaches to rule out before you compare:
+
+- **Task 1.** Treating `with_capacity(10)` as length 10 predicts that `values[5]` is valid. It panics with `index out of bounds: the len is 1 but the index is 5`, because capacity is reserved space, not elements.
+- **Task 2.** Reading `1..3` as inclusive predicts 12, which is what `1..=3` gives. Extending the range to `&data[2..5]` panics, because the end 5 is past the length 4.
+- **Task 3.** Dropping `.copied()` returns `values.iter().max()`, an `Option<&i32>`, and the signature promising `Option<i32>` is rejected with E0308. Keeping a plain `i32` return with `unwrap_or(i32::MIN)` compiles but makes an empty slice look like a real minimum value.
+- **Task 5.** Probing with `one[1]` instead of `get` panics with `index out of bounds: the len is 1 but the index is 1`, which aborts the test rather than recording the out-of-range case.
+- **Task 6.** Declaring `fn total(values: &Vec<i32>)` rejects `total(&[2, 3, 4])` with E0308 and cannot take `&data[1..3]`. Storing a point as `Vec<i32>` lets a three-element point appear at run time.
+
 ## Self-check and next step
 
-Explain Array, Vector, Slice without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+Why can a vector push invalidate an element reference even when capacity seems large enough? After Example B's `Vec::with_capacity(10)`, what are `len()` and the smallest possible `capacity()`, and is index 0 valid before the push? After one push, what does `get(1)` return compared with indexing `[1]`? Why is `&[i32]` a better parameter than `&Vec<i32>`?
+
+Then work through [Self-check and review](../STUDY-GUIDE.md#self-check-and-review).
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://doc.rust-lang.org/book/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+Read [The Rust Book, 8.1 Vectors](https://doc.rust-lang.org/book/ch08-01-vectors.html) for why a push can invalidate an element reference.
+
+What the classroom does and does not prove: [Sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

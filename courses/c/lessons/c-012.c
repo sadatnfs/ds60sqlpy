@@ -2,23 +2,14 @@
 
 int main(void) {
   /* Exercise 1: Read through a const view: change one input
-     Copy worked example 1, the "read through a const view" case, into a scratch
-     pad and change `int value = 4;` to `int value = 5;`. Before running,
-     predict which CHECK fails and which value it sees in place of the worked
-     result (the read yields 4); then run it and restore the original line.
-     Expected: With `int value = 5;` the run stops with `Check failed` at the
-     CHECK on `*view == 4`, because the "read through a const view" case no
-     longer shows that the read yields 4. Restoring `int value = 4;` brings that
-     observation back. */
+     In worked example 1, change `int value = 4;` to `int value = 5;`. Predict
+     which value the CHECK on `*view == 4` sees, then run and restore. Expected:
+     `Check failed` at `*view == 4`; restoring `int value = 4;` passes again. */
 
   /* Exercise 2: Observe another valid mutation: debug a regression
-     A regression changed one token in worked example 2, the "observe another
-     valid mutation" case, so one line now reads `value = 8;`. Run the example
-     with that line, use the failing CHECK to find why the const view now reads
-     7 no longer holds and repair the line without changing the CHECK. Expected:
-     Before the repair the run stops with `Check failed` at the CHECK on `*view
-     == 7`. Once the line reads `value = 7;` again, the "observe another valid
-     mutation" case again shows that the const view now reads 7. */
+     Worked example 2 now has a line reading `value = 8;`. Repair it so that the
+     const view now reads 7 again. Expected: `Check failed` at `*view == 7`
+     until the line reads `value = 7;` again. */
 
   /* Exercise 3: Use a fixed pointer target
      Create an int pointer that cannot be reassigned, then update its target.

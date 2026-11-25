@@ -4,18 +4,15 @@
 
 Beginner; about 90 minutes, plus any optional hardware experiment. Direct prerequisites: `cuda-013`, `cuda-015`
 
-The order supports learning at your own pace. Reading and CPU reasoning remain
-available when NVIDIA hardware is absent. Advanced hardware features need their
-own capability checks and are not prerequisites for opening this chapter.
+Pacing, evidence labels and platform rules for every chapter are in the [CUDA study guide](../../STUDY-GUIDE.md).
 
 ## Learning objectives
 
 Justify a storage space for each kernel variable and verify the result on two input shapes.
 
-Work through *GPU memory spaces in one working program* with the concrete cases below. Finish with this evidence:
-a justified storage choice for each variable and a correct result across two input shapes. Distinguish an algorithmic
-calculation, a compiled artifact and an actual device observation when explaining
-what your work establishes.
+**Scope:** Registers, local memory, global memory, shared memory, constant memory and caches; storage scope and lifetime versus hardware location.
+
+**Evidence to produce:** A justified storage choice for each variable and a correct result across two input shapes.
 
 ## Purpose, vocabulary and mental model
 
@@ -31,28 +28,17 @@ Storage spaces describe accessibility and lifetime as well as likely performance
 
 ## How to run and study this lesson
 
-Use the saved reading worksheet in `/classroom`; the reading pad does not execute
-CUDA. For the bounded calculation, select **CPU model (Python)**, whose
-answer-free starter supplies the literal fixtures and task contract. The
-[CUDA C++ study workflow](../README.md) covers platforms, optional GPU
-compilation and evidence labels. In a prepared Python environment you can also
-run the separate [CPU reference](../references/cuda-016_cpu.py) from the
-repository root:
+Trace worked example 1 by hand, then run the [CPU reference](../references/cuda-016_cpu.py) from the repository root:
 
 ```sh
 python courses/cuda/cpp/references/cuda-016_cpu.py
 ```
 
-Its assertions check the stated numerical result or model invariant; console
-text is evidence of this CPU model only, not of CUDA execution.
-
 ## Worked example 1: trace the mechanism
 
 In a three-tap filter, the input and output images live in global allocations. A thread's running sum is a scalar candidate for a register. A cooperatively loaded tile belongs in shared memory. Three common coefficients may use read-only or constant storage. These are choices to validate, not declarations that force a faster program.
 
-The complete CPU model below intentionally models only the named arithmetic,
-layout, dependency or capability decision. It does not model GPU scheduling,
-caches, instruction timing or device memory visibility.
+**Why:** Each choice follows the scope and reuse of the data, not a speed promise.
 
 ```python
 bytes_per_thread = 1024 * 4
@@ -62,41 +48,37 @@ placements = {"image": "global", "cooperative_tile": "shared", "sum": "thread lo
 print({"logical_temporary_bytes": logical_bytes_per_block, "storage_roles": placements})
 ```
 
-**Expected observation:** Every assertion succeeds. A representative CPU output is:
+**Expected observation:** every assertion succeeds, and the CPU model prints:
 
 ```text
 {'logical_temporary_bytes': 524288, 'storage_roles': {'image': 'global', 'cooperative_tile': 'shared', 'sum': 'thread local'}}
 ```
 
-Integers, shapes and ordering must match exactly; only assertions with an explicit
-tolerance accept small floating-point differences. A printed duration is a model
-output, not a measured GPU benchmark.
+**Check:** Inspect compiler resource output and confirm the tile size matches the shared bytes reported.
 
 ## Worked example 2: change a meaningful condition
 
 A per-thread temporary array with 1,024 floats needs 4,096 bytes per thread. At 128 threads that is 524,288 bytes of logical temporary data, before other resources. Calling it 'local' does not make it inexpensive. Reduce live working state or choose a different algorithm, then inspect compiler and runtime evidence.
 
-Before applying this example to your own program, write down which inputs are
-read, which result is produced, and the condition that makes the comparison
-valid. Keep the original case as a regression check when changing a boundary.
+**Why:** 4,096 bytes per thread far exceeds register capacity, so it lives in device-backed local memory.
+
+**Check:** The reference asserts 4096 and 524288; compare with spill or stack size in compiler output.
 
 ## Six progressive exercises
 
-Exercises 1 and 2 are guided reconstructions of the worked examples; exercises
-3-6 change an input, diagnose a defect, test a boundary and transfer the idea.
-For each one, keep the calculation, output, diagram or failure policy you
-produce so another reader can compare it with the worked cases. If the hint is
-not enough, reread the mechanism paragraph and the bounded CPU assertion.
-
 ### Exercise 1
 
-Predict and trace the first worked example before running its CPU reference. Write every intermediate quantity that leads to the stated result, including units or ownership where applicable.
+Reconstruct worked example 1 on paper before running its CPU reference. Map each object to a space: images in global, sum in a register, tile in shared, taps in constant.
+
+**Trap to avoid:** Declaring every value __shared__ wastes shared capacity on per-thread sums and limits resident blocks.
 
 **Hint:** Start with the literal input and intermediate quantities in worked example 1.
 
 ### Exercise 2
 
-Reconstruct the second worked example without copying its conclusion. Identify the changed input or condition, show the resulting calculation or dependency, and explain why it differs from the first example.
+Rework worked example 2 without copying its conclusion. Multiply 1,024 floats by 4 bytes, then by 128 threads.
+
+**Trap to avoid:** Assuming 'local' means on-chip predicts fast access for 524,288 bytes that actually travel to DRAM.
 
 **Hint:** Identify exactly which condition changes in worked example 2.
 
@@ -104,11 +86,15 @@ Reconstruct the second worked example without copying its conclusion. Identify t
 
 Assign storage for a reused image, a block tile and a scalar sum.
 
+**Trap to avoid:** Putting the image tile in global memory and reloading it per thread forgoes the reuse that motivated tiling.
+
 **Hint:** Use the first worked example to establish the relevant quantities, then change only the requested input.
 
 ### Exercise 4
 
 An author says a local array is guaranteed to stay in registers. Correct the claim.
+
+**Trap to avoid:** Adding register keywords to force placement has no effect on modern CUDA compilers.
 
 **Hint:** Locate the failed phase or violated dependency before proposing a repair.
 
@@ -116,35 +102,33 @@ An author says a local array is guaranteed to stay in registers. Correct the cla
 
 Can one block read another block's ordinary shared array?
 
+**Trap to avoid:** Passing a shared array address to another block and reading it yields undefined results.
+
 **Hint:** Check what the algorithm is allowed to read, write or assume at this boundary.
 
 ### Exercise 6
 
 Decide whether to use constant storage for a 64-entry lookup table.
 
+**Trap to avoid:** Choosing constant storage for data-dependent lookups serializes divergent reads in the warp.
+
 **Hint:** State the output contract and which observations are needed in the new application.
 
 ## Common mistakes and diagnosis
 
-A tempting but incorrect claim in this chapter is: **every local variable stays in a register, or shared memory is shared across all blocks.**
-
-For the concrete failure exercise, an author says a local array is guaranteed to stay in registers. Correct the claim.
-Preserve the original input and the stage where behavior diverged, and compare
-with the CPU model before changing hardware configuration.
+A tempting but incorrect claim: **Every local variable stays in a register, or shared memory is shared across all blocks.** The compiler decides where locals live: large or dynamically indexed arrays and register pressure push values into local memory, which is backed by device memory. Shared memory is private to one block for that block's lifetime, so another block can never read it. Worked example 2 shows how quickly 'local' data grows.
 
 ## Self-check, retrieval and transfer
 
-Explain the first example without its code, then use the second example to state
-one assumption that matters. Complete Exercise 3 independently, use Exercise 4 to
-diagnose a plausible defect, check the boundary in Exercise 5, and retain the
-application contract from Exercise 6. Compare the [separate explanations](../solutions/cuda-016_solutions.md)
-only after your attempt or a deliberate reveal. A reading marker records your
-choice; it does not certify hardware qualification or expert mastery.
+1. Which storage would you choose for three filter coefficients that every thread reads?
+2. When does shared memory's content disappear?
+3. Why can a per-thread array of 1,024 floats hurt occupancy?
+
+Short answers are in the [separate explanations](../solutions/cuda-016_solutions.md#self-check-answers); compare only after an attempt.
 
 ## Primary references
 
-Check the documentation that matches your prepared toolkit before optional
-hardware execution.
+Use the documentation that matches your prepared toolkit.
 
 - [CUDA Programming Guide](https://docs.nvidia.com/cuda/cuda-programming-guide/)
 

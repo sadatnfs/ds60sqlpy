@@ -1,6 +1,10 @@
 # sql-deep-04: Explained reference solutions
 
-Read [Recursive Graph Reachability, Paths, Cycles, and Dependency Order](../companion-guides/sql_deep_04.md) and attempt its six queries before comparing. The [complete reference script](sql_deep_04_solutions.sql) recreates the same temporary fixture, runs every answer inside its own savepoint, compares exact JSON row sets with fail-fast assertions, then rolls back. No permanent table, role or service is changed.
+Attempt the six queries in [Recursive Graph Reachability, Paths, Cycles, and
+Dependency Order](../companion-guides/sql_deep_04.md) first. The [complete
+reference script](sql_deep_04_solutions.sql) rebuilds `deep4_vertices` and
+`deep4_edges` and answers each exercise inside its own savepoint. No exercise
+modifies the graph, so every traversal sees the same seven edges.
 
 ## Exercises and reasoning
 
@@ -42,7 +46,7 @@ Return path, total_cost, hops for every simple path from a to d. Carry vertex, p
 
 **Inputs/evidence:** For sql-deep-04 Exercise 2, Return path, total_cost, hops for every simple path from a to d. Carry vertex, path, cost in the recursive state, append targets and prevent revisiting any vertex already in the path. One output row represents a complete path; order by path.
 
-**Expected result/shape:** For sql-deep-04 Exercise 2, Paths[a, b, c, d] cost 3, hops 3 and [a, c, d] cost 5, hops 2 appear. The cheaper route has more hops, and no path repeats a vertex.
+**Expected result/shape:** For sql-deep-04 Exercise 2, Paths [a, b, c, d] cost 3, hops 3 and [a, c, d] cost 5, hops 2 appear. The cheaper route has more hops, and no path repeats a vertex.
 
 **Verify:** For sql-deep-04 Exercise 2, inspect every route array for repeated vertices and check each consecutive pair is an edge; sum edge weights independently and retain distinct valid routes.
 
@@ -83,7 +87,7 @@ Return cycle_path, repeated_vertex, cycle_cost for traversals from a that first 
 
 **Inputs/evidence:** For sql-deep-04 Exercise 3, Return cycle_path, repeated_vertex, cycle_cost for traversals from a that first revisit a vertex. Allow a closing edge to be emitted, mark it as a cycle and stop expanding marked states. Order by cycle_path and do not claim that the whole path prefix is itself a cycle.
 
-**Expected result/shape:** For sql-deep-04 Exercise 3, Paths[a, b, c, d, b] repeat b at cost 4 and [a, c, d, b, c] repeat c at cost 7. Both are emitted once and terminate.
+**Expected result/shape:** For sql-deep-04 Exercise 3, Paths [a, b, c, d, b] repeat b at cost 4 and [a, c, d, b, c] repeat c at cost 7. Both are emitted once and terminate.
 
 **Verify:** For sql-deep-04 Exercise 3, confirm the final step repeats a vertex already in the route, and that this closing row is emitted once without being expanded further.
 
@@ -127,7 +131,7 @@ Explore simple paths from a for at most two edges. Return vertex, min_hops, sear
 
 **Inputs/evidence:** For sql-deep-04 Exercise 4, Explore simple paths from a for at most two edges. Return vertex, min_hops, search_truncated for vertices reached within that budget, ordered by vertex. Set the global truncation flag true if any depth-two state has an outgoing target not already in its path.
 
-**Expected result/shape:** For sql-deep-04 Exercise 4, Vertices a, b, c, d, e have minimum hops 0,1,1,2,2 and search_truncated=true. Vertex g is absent because it requires more than two hops, so absence cannot be called unreachable.
+**Expected result/shape:** For sql-deep-04 Exercise 4, Vertices a, b, c, d, e have minimum hops 0, 1, 1, 2, 2 and `search_truncated` true. Vertex g is absent because it requires more than two hops, so absence cannot be called unreachable.
 
 **Verify:** For sql-deep-04 Exercise 4, find at least one admissible outgoing edge beyond a boundary-depth route; a nonempty frontier proves the result is truncated rather than complete.
 
@@ -184,7 +188,7 @@ Enumerate simple paths on this tiny nonnegative graph and choose the cheapest pe
 
 **Inputs/evidence:** For sql-deep-04 Exercise 5, Enumerate simple paths on this tiny nonnegative graph and choose the cheapest per vertex, breaking ties by fewer hops then lexicographic path. Left-join to all vertices and return vertex, total_cost, path ordered by vertex, preserving unreachable f with NULL cost/path.
 
-**Expected result/shape:** For sql-deep-04 Exercise 5, Costs a0, b1, c2, d3, e6, g4 have paths[a],[a, b],[a, b, c],[a, b, c, d],[a, b, e],[a, b, c, d, g]. Vertex f has NULL cost and path.
+**Expected result/shape:** For sql-deep-04 Exercise 5, Costs are a 0, b 1, c 2, d 3, e 6, g 4, with paths [a], [a, b], [a, b, c], [a, b, c, d], [a, b, e], [a, b, c, d, g]. Vertex f has NULL cost and path.
 
 **Verify:** For sql-deep-04 Exercise 5, compare candidate simple routes for each reachable vertex and independently sum the selected route weights; preserve the unreachable vertex as explicitly unreachable.
 
@@ -295,4 +299,12 @@ Every step appends one previously unprocessed eligible vertex, so at most the nu
 
 ## Verification and transaction boundary
 
-Every answer is materialized into a temporary answer table and compared with a literal expected row set, including column names, NULL values and deterministic order. The assertion function rejects both false and unknown Boolean results, so a NULL comparison cannot silently pass. Each exercise rolls back to its own savepoint, ensuring mutations used for one boundary case do not alter the next. The final ROLLBACK removes the full fixture. Read the first error if a contract fails; a later row count or command tag cannot repair an earlier failed assertion.
+`pg_temp.assert_true` compares each ordered answer, aggregated into `jsonb`,
+with a literal expected row set and raises unless the comparison is exactly
+true. Path arrays and Boolean flags are compared exactly, so a traversal that
+repeats a vertex, emits a cycle-closing path twice or drops `f` from the
+cheapest-path report fails immediately rather than producing a plausible
+table. Exercise 4 is a useful check on wording: `g` is missing because the two-edge
+budget stopped the search, which is why `search_truncated` must be true. The
+final `ROLLBACK` drops the fixture. Repair the first failing assertion before
+reading any later output.

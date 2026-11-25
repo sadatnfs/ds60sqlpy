@@ -1,6 +1,6 @@
 # cpp-018: explanations and reference observations
 
-Attempt the learner tasks before opening this document. The executable reference checks the bounded normal and boundary examples; the six explanations below cover the deliberate changes and manual checks.
+The [executable reference](cpp-018_solution.cpp) adds `slice_ok(size, offset, count)`, which rejects a 2-element slice at offset 2 of a 3-element buffer, accepts it at offset 1, and accepts the empty slice of an empty buffer. The explanations cover borrowing, owner lifetime and the dangling view in Exercise 6. How to compare: [study guide](../STUDY-GUIDE.md#compare-with-the-solutions).
 
 ## Mechanism
 

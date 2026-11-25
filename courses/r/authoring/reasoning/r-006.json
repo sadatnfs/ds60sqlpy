@@ -42,5 +42,7 @@
       "wrong": "Replacing every non-finite ratio with 0. That claims a measured zero rate for a case that had no denominator.",
       "verify": "The reference checks that `ratio(1, 0)` returns NA and `ratio(4, 2)` returns 2."
     }
-  ]
+  ],
+  "run_note": "The starter vector mixes 0, `NA_real_`, NaN, Inf and 4 and prints it unchanged. Run it and notice that R prints NA and NaN differently even though `is.na()` is TRUE for both. Your summary policy has to separate those two from Inf, which is a defined value, and from 0, which is a real measurement that must never be treated as missing.",
+  "checks_note": "The checks pin that `c(NULL, NA_real_)` has length one because NULL contributes nothing, that a vector with one known zero has an `na.rm` mean of 0, that `is.finite()` keeps 2 and 4, that `is.na()` is TRUE for NA and NaN while `is.nan()` is TRUE only for NaN, and that the guarded ratio returns NA for a zero denominator. They do not decide which missing values your report should count."
 }

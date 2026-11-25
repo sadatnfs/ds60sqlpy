@@ -24,9 +24,11 @@ Arrow slices often share underlying buffers instead of copying all data. This ma
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles the saved pad as `main.rs` with pinned Rust 1.99.1, edition 2024, and the prepared Arrow 60 library. `assert!` and `assert_eq!` remain active in normal builds. The fixed pad accepts one source file without arbitrary arguments, interactive input, Cargo manifests or package installation. The main function returns `Result<(), Box<dyn std::error::Error>>` so later examples can propagate errors with `?`; the final `Ok(())` means this fixture completed successfully. Standard library and Arrow examples remain offline after image preparation. Multi-file Cargo and external ecosystem projects have separate explicit preparation workflows.
+Beyond the prelude, this lesson's programs use `arrow::array`. A passing run prints `rust-041: passed`.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Pad setup and limits: [Run a lesson](../STUDY-GUIDE.md#run-a-lesson).
+
+Before you run anything, follow [Attempt a lesson](../STUDY-GUIDE.md#attempt-a-lesson).
 
 
 
@@ -34,7 +36,9 @@ Start with the answer-free learner artifact in your saved classroom pad. It deli
 
 ListBuilder<Int32Builder> appends child values, then append(true) closes a valid parent list. append(false) adds a null parent. Array::slice creates a logical view over a selected region.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+**Reading Example A (Distinguish nonempty, empty and null lists, code below).** `ListBuilder::new(Int32Builder::new())` creates a builder for a list column whose child values are 32-bit integers. Building a row takes two steps: push child values through `builder.values()`, which returns the inner `Int32Builder`, then close the row with `builder.append(valid)`. The first row appends a 2 and a null child before closing. The second `append(true)` closes a row with no children appended since the previous one. `append(false)` closes a row and marks the row itself null in the parent's validity bitmap. `finish()` produces a `ListArray`, which keeps one offsets buffer marking where each row's children start and end, so `value_length(i)` is the difference between two adjacent offsets.
+
+Method for tracing your own variants: [Trace a program](../STUDY-GUIDE.md#trace-a-program).
 
 ## Worked example / walkthrough
 
@@ -100,13 +104,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 6. **Transfer and justify.** Explain when retaining a tiny shared slice may retain excessive memory and when copying is justified.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Record each task as in [Keep evidence for each task](../STUDY-GUIDE.md#keep-evidence-for-each-task).
 
 ## Common pitfalls and diagnosis
 
 Nested nullability has several layers. Zero-copy views can extend buffer lifetime. Do not manually manipulate offset buffers without validating every format invariant.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+To turn a pitfall into a test, see [Design a regression case](../STUDY-GUIDE.md#design-a-regression-case).
 
 ## Progressive hints
 
@@ -114,13 +118,23 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 2. Compare Example B (Slice without confusing logical positions) with Example A and name the first line whose behavior differs. Its observation is: The sliced array exposes middle at its logical index zero.
 3. Before opening the explanation, test your task 3 attempt against this lesson's main pitfall: Nested nullability has several layers.
 
+Tempting approaches to rule out before you compare:
+
+- **Task 1.** Reading `value_length(2) == 0` as an empty list misses that row 2 is null; the length of a null row carries no meaning.
+- **Task 2.** Calling `append(true)` before appending 7 and 9 closes an empty row 3 and gives the next row the two children, so `value_length(3)` is 0.
+- **Task 5.** Indexing the slice with source positions, `typed.value(2)` for middle, reads last instead.
+
 ## Self-check and next step
 
-Explain Offset buffer, Nested validity, Zero-copy view without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+Example A's first list holds 2 and a null child: why is its `value_length` 2, and how does that null child differ from the null third row? Why is the empty second list not the same as a null list in a count of observations? After `values.slice(1, 1)`, why does "middle" appear at index 0, and which parent buffers does the slice still keep alive?
+
+Then work through [Self-check and review](../STUDY-GUIDE.md#self-check-and-review).
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://arrow.apache.org/docs/format/Columnar.html). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+Read [the Arrow columnar format specification](https://arrow.apache.org/docs/format/Columnar.html) for offset buffers and nested validity.
+
+What the classroom does and does not prove: [Sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

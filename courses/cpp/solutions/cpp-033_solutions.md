@@ -1,6 +1,6 @@
 # cpp-033: explanations and reference observations
 
-Attempt the learner tasks before opening this document. The executable reference checks the bounded normal and boundary examples; the six explanations below cover the deliberate changes and manual checks.
+The [executable reference](cpp-033_solution.cpp) adds a baseline in which the atomic counter stays 0 when no thread increments it. The explanations cover promise ordering, repetition and keeping a deliberate race inside a scratch test. How to compare: [study guide](../STUDY-GUIDE.md#compare-with-the-solutions).
 
 ## Mechanism
 

@@ -4,18 +4,15 @@
 
 Beginner; about 90 minutes, plus any optional hardware experiment. Direct prerequisites: `cuda-003`, `cuda-009`
 
-The order supports learning at your own pace. Reading and CPU reasoning remain
-available when NVIDIA hardware is absent. Advanced hardware features need their
-own capability checks and are not prerequisites for opening this chapter.
+Pacing, evidence labels and platform rules for every chapter are in the [CUDA study guide](../../STUDY-GUIDE.md).
 
 ## Learning objectives
 
 Compile one `main.cu` with a reviewed `nvcc` command and draw its source-to-executable artifact diagram.
 
-Work through *The `.cu` file, compiler driver and executable* with the concrete cases below. Finish with this evidence:
-preserved compiler output plus a source-to-executable diagram. Distinguish an algorithmic
-calculation, a compiled artifact and an actual device observation when explaining
-what your work establishes.
+**Scope:** Host and device compilation, `.cu`/`.cuh`, host compiler compatibility, runtime linking, PTX, cubin, fatbinary and just-in-time loading.
+
+**Evidence to produce:** Preserved compiler output plus a source-to-executable diagram.
 
 ## Purpose, vocabulary and mental model
 
@@ -31,28 +28,17 @@ A .cu translation unit can contain ordinary host functions and CUDA device funct
 
 ## How to run and study this lesson
 
-Use the saved reading worksheet in `/classroom`; the reading pad does not execute
-CUDA. For the bounded calculation, select **CPU model (Python)**, whose
-answer-free starter supplies the literal fixtures and task contract. The
-[CUDA C++ study workflow](../README.md) covers platforms, optional GPU
-compilation and evidence labels. In a prepared Python environment you can also
-run the separate [CPU reference](../references/cuda-011_cpu.py) from the
-repository root:
+Trace worked example 1 by hand, then run the [CPU reference](../references/cuda-011_cpu.py) from the repository root:
 
 ```sh
 python courses/cuda/cpp/references/cuda-011_cpu.py
 ```
 
-Its assertions check the stated numerical result or model invariant; console
-text is evidence of this CPU model only, not of CUDA execution.
-
 ## Worked example 1: trace the mechanism
 
 The manual lab command is `nvcc -std=c++17 -O2 -lineinfo main.cu -o main`. The input is main.cu; `-o main` names the executable. `./main` runs that file from the current directory. The toolkit's default target must support the actual device. A release build later needs deliberately selected architecture targets, not guessed values from a tutorial.
 
-The complete CPU model below intentionally models only the named arithmetic,
-layout, dependency or capability decision. It does not model GPU scheduling,
-caches, instruction timing or device memory visibility.
+**Why:** Each flag maps to a stage; -lineinfo keeps source mapping for later profiling without debug slowdown.
 
 ```python
 stages = ["source", "host/device compilation", "link", "load", "execute", "validate"]
@@ -61,41 +47,37 @@ assert stages.index("execute") < stages.index("validate")
 print(" -> ".join(stages))
 ```
 
-**Expected observation:** Every assertion succeeds. A representative CPU output is:
+**Expected observation:** every assertion succeeds, and the CPU model prints:
 
 ```text
 source -> host/device compilation -> link -> load -> execute -> validate
 ```
 
-Integers, shapes and ordering must match exactly; only assertions with an explicit
-tolerance accept small floating-point differences. A printed duration is a model
-output, not a measured GPU benchmark.
+**Check:** Run nvcc --version and the device query, then confirm the chosen target covers that compute capability.
 
 ## Worked example 2: change a meaningful condition
 
 A missing semicolon is a source diagnostic. An undefined host function is a host-link diagnostic. 'No kernel image is available for execution on the device' is a loading/target problem. Replacing arithmetic in the kernel is unlikely to solve the latter. Save the complete diagnostic and identify the stage before changing versions.
 
-Before applying this example to your own program, write down which inputs are
-read, which result is produced, and the condition that makes the comparison
-valid. Keep the original case as a regression check when changing a boundary.
+**Why:** Each stage has different causes, so the stage determines whether to edit source, link inputs or targets.
+
+**Check:** Save the full diagnostic text and confirm the fix targets the stage it names.
 
 ## Six progressive exercises
 
-Exercises 1 and 2 are guided reconstructions of the worked examples; exercises
-3-6 change an input, diagnose a defect, test a boundary and transfer the idea.
-For each one, keep the calculation, output, diagram or failure policy you
-produce so another reader can compare it with the worked cases. If the hint is
-not enough, reread the mechanism paragraph and the bounded CPU assertion.
-
 ### Exercise 1
 
-Predict and trace the first worked example before running its CPU reference. Write every intermediate quantity that leads to the stated result, including units or ownership where applicable.
+Reconstruct worked example 1 on paper before running its CPU reference. Read each part of the command: language standard, optimization, line info, input file and output name.
+
+**Trap to avoid:** Copying an -arch value from a tutorial can build code for a different architecture than the installed device.
 
 **Hint:** Start with the literal input and intermediate quantities in worked example 1.
 
 ### Exercise 2
 
-Reconstruct the second worked example without copying its conclusion. Identify the changed input or condition, show the resulting calculation or dependency, and explain why it differs from the first example.
+Rework worked example 2 without copying its conclusion. Classify each message by stage: compile, link or load, before changing anything.
+
+**Trap to avoid:** Editing kernel arithmetic to fix 'no kernel image' changes code that never ran on the device.
 
 **Hint:** Identify exactly which condition changes in worked example 2.
 
@@ -103,11 +85,15 @@ Reconstruct the second worked example without copying its conclusion. Identify t
 
 Distinguish a .cu source file, PTX file and host executable.
 
+**Trap to avoid:** Calling PTX machine code ignores that the driver may still translate it for the real device.
+
 **Hint:** Use the first worked example to establish the relevant quantities, then change only the requested input.
 
 ### Exercise 4
 
 Why is successful nvcc compilation not a GPU test?
+
+**Trap to avoid:** Reporting a GPU pass from a CI build job without a device claims execution that never occurred.
 
 **Hint:** Locate the failed phase or violated dependency before proposing a repair.
 
@@ -115,35 +101,33 @@ Why is successful nvcc compilation not a GPU test?
 
 What does an executable permission error say about the kernel?
 
+**Trap to avoid:** Rebuilding with a different -arch cannot fix a missing execute permission.
+
 **Hint:** Check what the algorithm is allowed to read, write or assume at this boundary.
 
 ### Exercise 6
 
 Design a release record for a compiled CUDA binary.
 
+**Trap to avoid:** Recording only the toolkit version leaves the supported architectures unknown.
+
 **Hint:** State the output contract and which observations are needed in the new application.
 
 ## Common mistakes and diagnosis
 
-A tempting but incorrect claim in this chapter is: **an executable containing device code proves the device can execute it. .**
-
-For the concrete failure exercise, why is successful nvcc compilation not a GPU test?
-Preserve the original input and the stage where behavior diverged, and compare
-with the CPU model before changing hardware configuration.
+A tempting but incorrect claim: **An executable containing device code proves the device can execute it.** Packaging device code shows only what targets were compiled. Worked example 2 lists the loading error 'no kernel image is available', which occurs when the executable lacks a cubin or compatible PTX for the actual GPU. Execution evidence requires a run on the target device.
 
 ## Self-check, retrieval and transfer
 
-Explain the first example without its code, then use the second example to state
-one assumption that matters. Complete Exercise 3 independently, use Exercise 4 to
-diagnose a plausible defect, check the boundary in Exercise 5, and retain the
-application contract from Exercise 6. Compare the [separate explanations](../solutions/cuda-011_solutions.md)
-only after your attempt or a deliberate reveal. A reading marker records your
-choice; it does not certify hardware qualification or expert mastery.
+1. What is the difference between PTX and a cubin?
+2. Which diagnostic class is an undefined host function?
+3. What should a release record include for a CUDA binary?
+
+Short answers are in the [separate explanations](../solutions/cuda-011_solutions.md#self-check-answers); compare only after an attempt.
 
 ## Primary references
 
-Check the documentation that matches your prepared toolkit before optional
-hardware execution.
+Use the documentation that matches your prepared toolkit.
 
 - [Compiler workflow](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/nvcc.html)
 

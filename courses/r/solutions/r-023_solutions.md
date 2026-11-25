@@ -1,6 +1,6 @@
 # r-023: reference reasoning
 
-Use the [complete reference](r-023_reference.R) with the guide's declared inputs and runtime. Every worked example is also a standalone script.
+Run the [complete reference](r-023_reference.R) under the [run rules](../STUDY-GUIDE.md#run-a-chapter).
 
 ## Why the implementation has this shape
 
@@ -108,4 +108,6 @@ Default deep cloning does not promise a full snapshot of arbitrary environments 
 
 ## What the checks establish
 
-The reference makes 6 `stopifnot()` checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.
+The assertions confirm that a rejected increment raises the expected message, that `a` and `b` are the same object reading 5, that a clone advanced to 9 leaves `a` at 5, that a failed add leaves the state unchanged, that a shallow clone shares its inner counter while a deep clone advances separately to 6, and that per-fold counters produce 2, 5 and 1. They do not cover environments that are not R6 objects.
+
+The reference makes 6 `stopifnot()` checks; see [what a passing run proves](../STUDY-GUIDE.md#what-a-passing-run-proves).

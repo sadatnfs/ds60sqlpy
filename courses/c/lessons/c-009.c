@@ -2,25 +2,16 @@
 
 int main(void) {
   /* Exercise 1: Relate indexing and arithmetic: change one input
-     Copy worked example 1, the "relate indexing and arithmetic" case, into a
-     scratch pad and change `int values[] = {2, 4, 6};` to `int values[] = {2,
-     5, 6};`. Before running, predict which CHECK fails and which value it sees
-     in place of the worked result (both yield 4); then run it and restore the
-     original line. Expected: With `int values[] = {2, 5, 6};` the run stops
-     with `Check failed` at the CHECK on `values[1] == *(values + 1) && *(values
-     + 1) == 4`, because the "relate indexing and arithmetic" case no longer
-     shows that both yield 4. Restoring `int values[] = {2, 4, 6};` brings that
-     observation back. */
+     In worked example 1, change `int values[] = {2, 4, 6};` to `int values[] =
+     {2, 5, 6};`. Predict which value the CHECK on `values[1] == *(values + 1)
+     && *(values + 1) == 4` sees, then run and restore. Expected: `Check failed`
+     at `values[1] == *(values + 1) && *(values + 1) == 4`; restoring `int
+     values[] = {2, 4, 6};` passes again. */
 
   /* Exercise 2: Measure an array interval: debug a regression
-     A regression changed one token in worked example 2, the "measure an array
-     interval" case, so one line now reads `int *end = values - 3;`. Run the
-     example with that line, use the failing CHECK to find why the difference is
-     3 elements no longer holds and repair the line without changing the CHECK.
-     Expected: Before the repair the run stops with `Check failed` at the CHECK
-     on `n == 3`. Once the line reads `int *end = values + 3;` again, the
-     "measure an array interval" case again shows that the difference is 3
-     elements. */
+     Worked example 2 now has a line reading `int *end = values - 3;`. Repair it
+     so that the difference is 3 elements again. Expected: `Check failed` at `n
+     == 3` until the line reads `int *end = values + 3;` again. */
 
   /* Exercise 3: Traverse before the boundary
      Sum through a begin/end pointer loop.

@@ -194,7 +194,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/scala-spark/solutions/spark-012_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="spark-012-explained-paired-reference-solutions">spark-012: Explained paired reference solutions<a class="heading-anchor" href="#spark-012-explained-paired-reference-solutions" aria-label="Link to this section">#</a></h2>
-<p>Read the <a href="../guides/spark-012.md.html">guide</a> and attempt one language first. The <a href="spark-012_solution.scala.html">Scala reference</a> and <a href="spark-012_solution.py.html">PySpark reference</a> are complete single-file programs with explicit local sessions and finally-based stop. Each compares with literal expectations; matching two implementations alone would not rule out a shared mistake.</p>
+<p>Attempt the <a href="../guides/spark-012.md.html">guide</a> exercises first.</p>
+<p>References: <a href="spark-012_solution.scala.html">Scala</a>, <a href="spark-012_solution.py.html">PySpark</a>.</p>
 <h3 id="exercises-and-reasoning">Exercises and reasoning<a class="heading-anchor" href="#exercises-and-reasoning" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-inspect-the-complete-schema-contract">Exercise 1: Inspect the complete schema contract<a class="heading-anchor" href="#exercise-1-inspect-the-complete-schema-contract" aria-label="Link to this section">#</a></h4>
 <p>Return ordered field triples (name, simpleString, nullable) for a DataFrame. Check the fixture rather than inferring correctness from a printed schema alone.</p>
@@ -301,8 +302,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Actual readback can detect an unexpected reused or differently configured session, while source builder text only states intent. The version assertion deliberately targets the prepared worker rather than the older design proposal. The finally block stops this owned session after checks or failures; process and descendant cleanup remain separately observed worker responsibilities. Matching settings does not replace any of the row and schema assertions.</p>
 <p><strong>Verification evidence:</strong> Assert the complete settings map; record actual version output and distinguish it from worker cleanup evidence.</p>
 <h3 id="execution-and-interpretation">Execution and interpretation<a class="heading-anchor" href="#execution-and-interpretation" aria-label="Link to this section">#</a></h3>
-<p>Run the complete reference in its prepared fixed worker. Its first check (Inspect the complete schema contract) is built inside the program, so opening the lesson fetches nothing; it expects: The triples are <code>(event_id, bigint, false)</code>, <code>(team, string, true)</code>, <code>(amount_cents, bigint, true)</code>. The final success line prints only after every reference assertion passes.</p>
-<p>Local plan, partition and resource evidence does not establish cluster-scale performance; session cleanup is explicit.</p></article>
+<p>The references compare every result with literals rather than with each other: the three schema triples, <code>[1, 3]</code> for team A, the budget cases (limit 4 accepted, limit 3 rejected, limit 0 on an empty filter accepted, limit 21 rejected before any job), the observed rows with total 65, and the canonical four-row relation after several repartition counts. The <code>settings</code> check reads the live session back instead of trusting the builder code: <code>local[2]</code>, UTC, two shuffle partitions, ANSI on, AQE off, UI off, both driver addresses <code>127.0.0.1</code> and Spark 4.3.0.</p>
+<p>Seeing <code>spark-012: six PySpark reference contracts passed; Spark=4.3.0</code> or the Scala equivalent tells you the session you created is the session you described. It does not tell you how a shared cluster session would be configured, which is exactly why Exercise 6 reads the settings from the running object.</p></article>
   </main>
 </body>
 </html>

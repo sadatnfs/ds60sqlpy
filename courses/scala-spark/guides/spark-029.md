@@ -1,22 +1,26 @@
 # spark-029: Restartable batch writes and data-quality contracts
 
-Authored paired Scala/PySpark teaching content. The default fixtures are tiny, local and deterministic. Runtime acceptance, logical correctness and learner understanding remain separate evidence.
+A batch job that crashes halfway must not leave readers looking at half a product, and a retry must not append a second copy. Thirty rows with `value = id * 2` are staged under a run ID, validated by a SHA-256 digest and published by replacing one small `current.json` file, which is the only moment readers can see a new result.
 
 ## Level and prerequisites
 
-Advanced; approximately 120 minutes. Direct prerequisites: `spark-028`. The prepared baseline is Spark 4.3.0, Scala binary 2.13, JDK 17 and Python 3.12. Read the [execution baseline](../execution-baseline.md).
+Advanced; approximately 120 minutes. Direct prerequisites: `spark-028`. Pinned versions: [execution baseline](../execution-baseline.md).
 
 ## How to run this lesson
 
-Open `spark-029` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile, save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`; Python stages as `main.py` with a main guard. Each program creates its own `local[2]` session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.
+Shared run steps and profile rules: [study guide](../STUDY-GUIDE.md#run-a-paired-lesson).
 
-The [Scala learner](../lessons/spark-029.scala) and [PySpark learner](../lessons/spark-029.py) run two complete demonstrations and retain six explicit task stubs. Use the [explained solutions](../solutions/spark-029_solutions.md) only after an attempt or an explicit worked comparison; the [Scala reference](../solutions/spark-029_solution.scala) and [PySpark reference](../solutions/spark-029_solution.py) contain complete assertions. A bounded collect is used only for the declared tiny fixture; do not copy it onto an unbounded or large production table.
+Learner pads: [Scala](../lessons/spark-029.scala) and [PySpark](../lessons/spark-029.py).
+
+Open the [explained solutions](../solutions/spark-029_solutions.md) after an attempt.
+
+The first worked example sums the declared 30 values and prints `Declared 30-row product total=870`. The second builds receipt text for `run-a` and `run-b`, checks that each points at its own `runs/<run-id>/data` path, and prints `A publication points to one run-specific product`, which is the idea behind publishing a manifest instead of overwriting data in place.
 
 ## Learning objectives
 
 - Make a bounded batch product repeatable without confusing overwrite, append and transactional publication.
-- State the input and output grain, schema, NULL policy and ordering before executing a transformation.
-- Compare each language implementation with independent literal expectations, not only with the other implementation.
+- Validate the schema, the population `(30, 30, 0, 29, 870)` and the value rule before hashing, so the 64-character lowercase digest stays the same after `repartition(3)` and a 31-row product is rejected instead of hashed.
+- Stage a run under `runs/<run-id>`, reject a run ID such as `../outside`, publish with a single replace of `current.json`, and show that an injected failure before the replace and a replay of `run-a` leave the manifest and data file count unchanged.
 
 ## Vocabulary and concepts
 
@@ -54,7 +58,7 @@ This design is more precise than treating overwrite as atomic publication or tre
 
 ## Supplied local fixture
 
-The complete source creates the owned local session described above, then constructs this explicit fixture. The worked examples below run in that same main function; there is no hidden notebook state.
+The program owns a fresh `.ds60-spark-029-` scratch root with a `runs/` directory inside it. The source is `spark.range(0, 30, 1, 2)` with `value = id * 2`, so the values sum to 870. Each run writes Parquet data and a `receipt.json` with the run ID, data path, row count, schema and digest, and the root-level `current.json` is the only file a reader trusts.
 
 ```scala prelude=../solutions/spark-029_solution.scala
 import org.apache.spark.sql.functions._
@@ -128,7 +132,7 @@ These synthetic receipt strings illustrate run identity without publishing anyth
 
 Require ordered fields id, value with bigint types, exactly 30 known unique IDs 0..29, known values equal to 2*id and total 870. Return SHA-256 of sorted Spark JSON lines joined by newline without a trailing newline.
 
-**Expected result/shape:** A64-character lowercase digest for the valid product. Wrong values, counts, types or identities are rejected before hashing.
+**Expected result/shape:** A 64-character lowercase digest for the valid product. Wrong values, counts, types or identities are rejected before hashing.
 
 **Verify:** Assert a 64-hex digest and equal digest after repartitioning; reject a 31-row source.
 
@@ -190,11 +194,14 @@ Do not call append an idempotent retry or assume overwrite is atomic publication
 
 ## Self-check
 
-Explain the contract of `productDigest` / `product_digest` without reading its solution. Then, from memory, state what Exercise 6 (Replay the same input without appending another product) must produce: Manifest bytes and data-file count are unchanged by valid `run-a` replay; published count remains 30. Invalid input fails before changing current.json. Say which part of that result is evidence and what it still cannot show. Name the action in your trace that actually runs the plan.
+- The digest function refuses a frame whose population is not `(30, 30, 0, 29, 870)`. Why check counts and values before hashing instead of hashing whatever arrives?
+- Run IDs may contain only 1 to 32 lowercase letters, digits and hyphens. Which directory would `../outside` escape, and why validate the ID before opening any file?
+- Exercise 5 injects a failure after the pending manifest is written but before `os.replace`. Which run does `current.json` still name, and what removes the pending file?
+- Replaying `run-a` with a repartitioned source returns the same digest without adding files. Which branch of the staging function makes that possible, and what happens if the replayed content differs?
 
 ## Next step
 
-Use the [course route](../README.md) to continue. Paired-language agreement is useful only when both outputs also satisfy the independent fixture contract. A successful local run is not evidence of cluster performance or production recovery.
+Go on to [spark-030: Deployment topology and dependency boundaries](spark-030.md). Everything so far ran on one machine in `local[2]`; the next lesson is a reading lesson about what changes when the driver, the executors and their dependencies live in different places.
 
 ## Primary sources and official APIs
 

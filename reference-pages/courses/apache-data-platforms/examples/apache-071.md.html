@@ -194,14 +194,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/apache-data-platforms/examples/apache-071.md</code></p>
     </header>
     <article class="document"><h2 id="atlas-apache-071-prepared-command-notebook">Atlas apache-071 prepared command notebook<a class="heading-anchor" href="#atlas-apache-071-prepared-command-notebook" aria-label="Link to this section">#</a></h2>
-<p>Copy the owned Atlas project and read PREPARATION.md. Default local server execution is omitted until a supported native Java 8 graph/index stack exists.</p>
+<p>The plan printed from the copied Atlas project attaches the owned <code>_reviewed</code> classification to the curated dataset only. Raw and unrecorded carry no label, so a correct classification search returns exactly one asset.</p>
 <pre class="highlighted-code"><code class="language-bash">bash run.sh prepare
 bash run.sh plan</code></pre>
-<p>These actions validate a portable native Docker client and print original payloads without contacting a server. For an explicitly prepared owned fixture server with untracked credentials, deliberate apply and read-only check are:</p>
+<p>Against a prepared owned server, <code>apply</code> sends the definition and entities, and <code>check</code> reads the curated entity back to confirm the attached label:</p>
 <pre class="highlighted-code"><code class="language-bash">bash run.sh apply
 bash run.sh check</code></pre>
 <p>The client reads the attached classification directly. A classification search, removal and bounded index catch-up experiment use the actual release API and need separate evidence; they do not prove data-engine enforcement.</p>
-<p>Prepared payloads are not actual Atlas observations. Never place credentials or Authorization headers in notebooks, source, command arguments or receipts.</p></article>
+<p>A classification is metadata about an asset. Neither the payload nor a server answer shows that a query engine enforces it, and search catch-up after removal needs its own bounded polling record.</p></article>
   </main>
 </body>
 </html>

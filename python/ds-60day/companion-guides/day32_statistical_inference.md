@@ -67,31 +67,7 @@ with the sample size and assumptions; a p-value alone hides the effect magnitude
 
 ## How to run this lesson
 
-**Primary browser route:** run `./classroom` from the repository root and
-choose **Python and data science** on `/classroom`. Open this lesson in the shared workspace,
-read its capability notice, and use its supported coding or reading workflow.
-The [classroom guide](../../../docs/classroom-experience.md) explains saved work, runtimes and switching subjects.
-
-**Optional native notebook/editor route:** the instructions below describe
-separately prepared host tools. They are useful alternatives, not prerequisites
-for opening this lesson in the Docker classroom.
-
-1. Open the Day 32 learner notebook from this guide's **Next
-   step** section in VS Code or JupyterLab.
-2. Select the `Python (ds60sqlpy)` kernel. Start at the top and use
-   **Run All** only after making the written predictions; every added
-   worked example is bounded and offline after bootstrap.
-3. Keep experiments in new scratch cells. Do not edit the official
-   solution while attempting the numbered practice.
-4. Restart the kernel and run from the first cell before calling the
-   lesson complete. A clean run catches hidden state and stale
-   variables.
-
-Linux, macOS, or Ubuntu in Windows WSL 2:
-
-```bash
-.venv/bin/python -m jupyter lab
-```
+Open `python-32` in the classroom, or `python/ds-60day/notebooks/day32_statistical_inference.ipynb` on a host; the [Python study guide](../../STUDY-GUIDE.md) explains both.
 
 ## Concept deep dive: sampling uncertainty, confidence intervals, and hypothesis-test evidence
 
@@ -116,10 +92,6 @@ true, and it does not measure whether an effect is useful.
 - **`estimate ± critical_value * standard_error`:** forms an interval only after choosing a confidence level and an appropriate sampling model.
 
 ### Focused example A: see interval width respond to sample size
-
-Before running the example, predict the shape, type, or direction of the
-result. Write the prediction down so that a surprise becomes evidence
-rather than something to overlook.
 
 ```python
 import numpy as np
@@ -215,9 +187,6 @@ assert abs(standardized_effect) < 0.05
 
 Separate effect estimation from decision thresholds. Report uncertainty, assumptions, and practical magnitude rather than treating a p-value as a verdict.
 
-Predict or plan before you run code. Use the hint only after an honest
-attempt, and record the evidence that would prove your result correct.
-
 4. **Prediction:** Hold the true mean difference and variance fixed, then predict how increasing each group's sample size from 20 to 200 affects standard error, confidence-interval width, power, and effect size.
    **Progressive hint:** Standard error shrinks approximately with \(\frac1{\sqrt n}\); the underlying standardized effect does not grow merely because more rows were collected.
 
@@ -268,8 +237,7 @@ the same shape and total count as the observed contingency table.
 
 ## Ask an AI tutor about this lesson
 
-The lesson is complete without an AI assistant. If you want optional
-coaching, copy this prompt into the AI tutor while the repository root is open:
+The lesson is complete without AI. For optional coaching, copy this prompt with the repository root open:
 
 ```text
 Tutor me through `python-32` (Day 32: Statistical Inference).

@@ -206,11 +206,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Receipt:</strong> A retained description of an operation outcome.</p>
 <p><strong>Conflict:</strong> A reused identity with incompatible meaning.</p>
 <h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>The Linux Docker classroom compiles the saved pad as <code>main.swift</code> with Swift 6 language checking. An explicit <code>@main</code> type contains <code>static func main() async throws</code>; the fixed compiler uses <code>-parse-as-library -swift-version 6</code>. The examples use the standard library and portable Foundation. <code>precondition</code> makes a violated invariant fail the process. The fixed pad accepts one source file, without arbitrary command arguments, interactive input or dependency installation. SwiftUI, UIKit, Apple simulators and application signing belong to the separately prepared macOS/Xcode project labs, never the Linux pad.</p>
-<p>Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.</p>
+<p>Both examples use <code>ImportLedger</code> and <code>LedgerError</code>, declared above <code>LessonMain</code>. Calls into the ledger are <code>try await</code>, because its method throws and lives on an actor. For task 5, launch two identical requests in a task group and check that the total grows once.</p>
+<p>Compile contract, starter stop and success marker: <a href="../STUDY-GUIDE.md.html#running-a-lesson">running a lesson</a>.</p>
 <h3 id="syntax-anatomy-and-execution-trace">Syntax anatomy and execution trace<a class="heading-anchor" href="#syntax-anatomy-and-execution-trace" aria-label="Link to this section">#</a></h3>
 <p>An actor dictionary records identity to payload/result. A synchronous actor method validates replay and applies new work without await between its check and update. Errors preserve conflicting requests as failures.</p>
-<p>Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.</p>
+<p>Each example ends with a trace; method: <a href="../STUDY-GUIDE.md.html#tracing-a-program">tracing a program</a>.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="example-a-replay-without-duplicate-effect">Example A: Replay without duplicate effect<a class="heading-anchor" href="#example-a-replay-without-duplicate-effect" aria-label="Link to this section">#</a></h4>
 <p>Identity lookup and state change occur under one actor-owned transition.</p>
@@ -249,6 +249,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> A repeated operation returns its receipt without applying again.</p>
+<p><strong>Trace.</strong> <code>ledger</code> starts with no records and a total of 0. The first <code>apply(id: &quot;one&quot;, amount: 3)</code> passes validation, finds no record, adds 3 to the total, stores the pair of amount 3 and receipt 3 under one and returns 3. The repeated call finds that record, confirms the stored amount equals 3 and returns the saved receipt 3 without touching the total. The final read shows a total of 3, so the replay had no second effect.</p>
 <h4 id="example-b-reject-conflicting-identity-reuse">Example B: Reject conflicting identity reuse<a class="heading-anchor" href="#example-b-reject-conflicting-identity-reuse" aria-label="Link to this section">#</a></h4>
 <p>Reconciliation needs payload identity as well as an operation key.</p>
 <pre class="highlighted-code"><code class="language-swift"><span class="syntax-keyword">import</span> <span class="syntax-class">Foundation</span>
@@ -289,6 +290,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> A changed payload is rejected and prior state remains intact.</p>
+<p><strong>Trace.</strong> After the first call stores one with amount 3, a second call reuses the identity with amount 4. The lookup finds the record, but the stored amount 3 differs, so the method throws <code>LedgerError.conflict</code> before any update. The catch sets <code>conflict</code>, and the total is still 3. A key alone is not enough: the stored payload lets the ledger tell an honest replay from a different operation that reused the key.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <ol>
 <li><strong>Predict and explain.</strong> Trace effect and receipt for the first and repeated calls.</li>
@@ -308,10 +310,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <ol start="6">
 <li><strong>Transfer and justify.</strong> Design a durable adapter and document what actor isolation alone cannot guarantee.</li>
 </ol>
-<p>For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.</p>
+<p>Log each task in the <a href="../STUDY-GUIDE.md.html#recording-exercise-evidence">evidence table</a> before opening the explanation.</p>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
 <p>An in-memory actor ledger loses its state after restart. Overflow and retention policy remain explicit production requirements. Do not claim exactly-once delivery from a local dictionary.</p>
-<p>A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.</p>
+<p>Task 4&#x27;s defect adds the amount to the total first and checks the identity afterward. A replayed request then increases the total to 6 even though it returns the old receipt. The counterexample is Example A&#x27;s own repeated call with a check on the total. For task 5, a negative amount must throw <code>invalid</code> before any record is stored, so a later valid call with that id still succeeds.</p>
+<p>Repair routine: <a href="../STUDY-GUIDE.md.html#building-a-regression-case">building a regression case</a>.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <ol>
 <li>Reproduce Example A (Replay without duplicate effect) before changing anything, and confirm its observation: A repeated operation returns its receipt without applying again.</li>
@@ -319,9 +322,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>Before opening the explanation, check your task 3 attempt (Add a read-only receipt lookup that never re-executes work) against each pitfall listed above, and add one input that would expose the tempting wrong rule.</li>
 </ol>
 <h3 id="self-check-and-next-step">Self-check and next step<a class="heading-anchor" href="#self-check-and-next-step" aria-label="Link to this section">#</a></h3>
-<p>Explain Idempotency, Receipt, Conflict without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.</p>
+<p>Explain what idempotent means for this ledger and why the receipt must be stored with the record. Say why the actor makes concurrent identical requests safe in memory but not across a process restart. List what a durable adapter must store so a replay after a crash still returns the original receipt.</p>
+<p>Then follow the general <a href="../STUDY-GUIDE.md.html#self-check-routine">self-check routine</a> and save your pad.</p>
 <h3 id="sources-and-execution-boundary">Sources and execution boundary<a class="heading-anchor" href="#sources-and-execution-boundary" aria-label="Link to this section">#</a></h3>
-<p><a href="https://docs.swift.org/swift-book/documentation/the-swift-programming-language/">Official language or framework documentation</a>. The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.</p>
+<p><a href="https://docs.swift.org/swift-book/documentation/the-swift-programming-language/">Documentation</a>: Actor isolation is covered in the book&#x27;s Concurrency chapter, and errors from throwing actor methods follow the ordinary Error Handling chapter.</p>
+<p>Provenance and limits: <a href="../STUDY-GUIDE.md.html#sources-and-execution-boundary">sources and execution boundary</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for swift-032: Composition project: an actor-owned import ledger.
 Read courses/swift/guides/swift-032.md and courses/swift/lessons/swift-032.swift. Prerequisites: swift-031.

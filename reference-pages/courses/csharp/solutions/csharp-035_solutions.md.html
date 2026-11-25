@@ -194,7 +194,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/csharp/solutions/csharp-035_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="csharp-035-explanation-and-comparison">csharp-035: explanation and comparison<a class="heading-anchor" href="#csharp-035-explanation-and-comparison" aria-label="Link to this section">#</a></h2>
-<p>Attempt the six guide tasks before opening this comparison. The executable reference is <a href="csharp-035_solution.cs.html">csharp-035_solution.cs</a>. It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.</p>
+<p>Reference program: <a href="csharp-035_solution.cs.html">csharp-035_solution.cs</a>, covering both examples and the executed answers.</p>
+<p>Attempt the tasks first; see <a href="../STUDY-GUIDE.md.html#comparing-with-the-explanation">comparing with the explanation</a>.</p>
 <h3 id="why-the-two-examples-differ">Why the two examples differ<a class="heading-anchor" href="#why-the-two-examples-differ" aria-label="Link to this section">#</a></h3>
 <p><strong>Mutate through a view:</strong> A span slice is a view, not a copy of the selected element. Only the middle element changes.</p>
 <p><strong>Parse without allocating substrings:</strong> The helper reads directly from the character view and validates each admitted character. The digit total is 6 and empty input totals zero.</p>
@@ -253,7 +254,7 @@ Check<span class="syntax-punctuation">(</span>CountSeparators<span class="syntax
 <p><code>array.AsSpan(start, length)</code> creates a view. <code>Slice</code> changes the viewed interval. <code>ReadOnlySpan&lt;T&gt;</code> narrows write capability. Keep synchronous span logic in a helper separate from async orchestration.</p>
 <p>ReadOnlySpan restricts this view, not every alias. A rented buffer must not be returned while a view is still in use. Bounds checking protects indices, not logical parsing rules.</p>
 <h3 id="review-before-continuing">Review before continuing<a class="heading-anchor" href="#review-before-continuing" aria-label="Link to this section">#</a></h3>
-<p>Run the reference and confirm that it prints <code>csharp-035: passed</code>, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.</p></article>
+<p>Run the reference and confirm it prints <code>csharp-035: passed</code>, then rerun the guide&#x27;s counterexample.</p></article>
   </main>
 </body>
 </html>

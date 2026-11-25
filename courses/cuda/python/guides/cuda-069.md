@@ -1,10 +1,17 @@
 # cuda-069: Randomness and reproducible experiments
 
-**Route:** CUDA Python and machine learning. **Stage:** beginner. **Prerequisites:** `cuda-006`, `cuda-068`. Allow several sessions when the hardware experiment is new; the chapter is not a deadline.
+**Route:** CUDA Python and machine learning. **Stage:** beginner. **Prerequisites:** `cuda-006`, `cuda-068`.
 
-## What you will be able to explain
+Pacing, evidence labels and platform rules: [CUDA study guide](../../STUDY-GUIDE.md).
 
-By the end, you can **predict repeated seeding**, **design a distribution check**, and **list checkpoint randomness** with evidence. Start with the two worked cases, then use the editable CPU model to make the quantities concrete.
+## Learning objectives
+
+- Predict repeated seeding.
+- Continue a stream.
+- Restore generator state.
+- Design a distribution check.
+- Separate backend equality from exact bytes.
+- List checkpoint randomness.
 
 ## Mechanism and vocabulary
 
@@ -31,9 +38,13 @@ Two fresh Python Random objects seeded with 7 produce the same first four draws.
 
 Saving getstate before a batch and restoring it later reproduces that batch in the same Python implementation. This does not promise CuPy or TensorFlow will generate those values.
 
-## Portable executable model
+## How to run the CPU model
 
-The **CPU reference model** variant runs this bounded worked example using `python-core`. It uses only the Python standard library, small synthetic values and no network. Its purpose is to expose the arithmetic or contract behind the chapter. The separate reference includes assertions for the stated observations.
+Edit the copy; the [reference](../references/cuda-069_cpu.py) adds assertions.
+
+```sh
+python courses/cuda/python/lessons/cuda-069_cpu.py
+```
 
 ```python
 import random
@@ -50,76 +61,64 @@ print("CPU RNG reference: restored batch matches; continued batch differs")
 
 **Expected observation:** Restored batch matches and continued batch differs.
 
-Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.
-
 ## Practice and transfer
+
+Record each attempt in the [worksheet](../lessons/cuda-069.md) before opening hints.
 
 ### Exercise 1: Predict repeated seeding
 
 **Trap to avoid:** Reseeding inside a training loop each step to get reproducibility makes every step see the same random numbers, so dropout masks or shuffles repeat and the experiment loses its randomness.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 2: Continue a stream
 
 **Trap to avoid:** Creating a new generator per batch with the same seed makes each batch identical. Creating one per batch with `seed + batch` gives distinct but correlated-by-construction streams that are harder to reason about.
-
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 3: Restore generator state
 
 **Trap to avoid:** Saving state after drawing the batch captures the position for the next batch. Restoring it replays `second`, not `first`, which is an off-by-one in time.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 4: Design a distribution check
 
 **Trap to avoid:** Requiring exact equality between CuPy and Python random draws fails even when both are correct, because their algorithms differ. Using a tolerance tighter than sampling error also fails randomly.
-
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 5: Separate backend equality from exact bytes
 
 **Trap to avoid:** Hashing the output bytes of a CPU run and a GPU run and calling the mismatch a bug wastes debugging time on something that is not a defect.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 6: List checkpoint randomness
 
 **Trap to avoid:** Saving only the initial seed and reseeding on resume restarts the streams at the beginning, so the resumed run repeats the first epoch's shuffles instead of continuing.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ## Progressive hints
 
-Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.
+Hint *k* belongs to exercise *k*; open one at a time.
 
-1. Start from worked example 1 and mark the quantities needed for the task "Predict repeated seeding".
-2. Change one assumption in worked example 2 while preserving the declared contract: continue a stream.
-3. Trace the CPU program's variables before adding hardware behavior: restore generator state.
-4. Draw producers, consumers and the exact operation boundary for the task "Design a distribution check".
-5. Separate what the small fixture establishes from what the real runtime must show: separate backend equality from exact bytes.
-6. Write a counterexample to an overbroad claim before you list checkpoint randomness.
+1. Create a generator with seed 7 inside a loop body and compare the first draw of each batch.
+2. Keep one generator object alive across both batches and ask where its fifth draw continues from.
+3. Call `getstate` before the batch you want to replay, draw it, then restore that state and draw again.
+4. Choose statistics whose expected values you know for the distribution, and fix a tolerance before you sample.
+5. List what a CPU generator and a GPU generator would have to share for byte equality, and what a statistical contract needs instead.
+6. Walk through one training step and name every component that draws random numbers, including the data sampler and device generators.
 
-## Common mistakes and self-review
+## Common mistakes and self-check
 
-Confusing a correct tiny example with a general implementation is the central review risk. For this chapter, challenge the assumption in worked example 2, then ask whether your change preserves the mechanism described above. If you change dtype, layout, ordering, batch size or backend, update the acceptance contract rather than silently reusing the old observation. Explain an unexpected result before trying random configuration changes.
+The classic mistake is calling the seed function at the start of every batch. Each call restarts the generator, so every batch repeats the same samples and the model sees far less variety than intended. A related mistake is assuming that one seed makes Python, NumPy, CuPy and TensorFlow emit the same numbers. Fix the first by creating one generator per stream and keeping it between batches. Fix the second by stating the reproducibility scope and using a statistical or tolerance contract across backends.
 
-Keep a small evidence table with columns **claim**, **input**, **expected observation**, **actual observation** and **limit**. For the first claim use `Predict repeated seeding`. For the final claim use `List checkpoint randomness`. An unperformed GPU or cluster experiment remains pending even when the CPU model is correct.
+**Misconception:** Setting the same seed in two runs guarantees the same results everywhere. **Correction:** A seed fixes one generator's starting state in one implementation. Parallel stream partitioning, nondeterministic GPU reductions and library revisions can still change results, so state the scope of reproducibility, such as the same code, environment and backend, and test it at that scope.
 
-## Platform and evidence contract
+**Evidence limit:** The reference replays a batch with Python's own `Random` state in one interpreter. It proves save and restore within that library; it says nothing about stream equality across libraries, devices, parallel stream partitioning or a different library revision.
 
-The reading worksheet and CPU reference model work through the ordinary Linux Docker classroom on macOS, Linux and Windows using WSL 2. They do not require an NVIDIA GPU. Their results are labeled CPU models or semantic oracles, not simulated hardware performance.
+1. Why does a shared seed not guarantee identical numbers across CPU and GPU libraries?
+2. What is the difference between restoring saved state and reseeding?
+3. Name three scopes of reproducibility a report should distinguish.
 
-Real CUDA work needs supported NVIDIA hardware, a compatible host driver and an explicitly prepared GPU runtime. An Apple GPU does not execute CUDA kernels. PyTorch MPS on a supported native Mac, ROCm on supported AMD hardware, or other vendor backends can provide separate accelerator learning routes; they need their own package and operation qualification and are not CUDA evidence. The ordinary Linux Docker classroom does not expose native Mac MPS automatically.
-
-Do not download packages, models or data by opening this lesson. Do not attach an engine socket, ambient cluster credentials or an arbitrary remote endpoint. A CPU pass, imported package, successful compilation, real GPU result and measured performance are distinct observations. Record the actual backend, data shape/dtype, source revision, versions and pending checks. A saved completion marker records learning progress, not hardware certification.
+Answers: [self-check answers](../solutions/cuda-069_solutions.md#self-check-answers).
 
 ## Primary references
 
 - [CuPy array and installation documentation](https://docs.cupy.dev/en/v13.6.0/)
 
-Use the version-matched documentation of your prepared environment. These references describe interfaces and supported boundaries; the chapter's synthetic examples and CPU models are original teaching material.
+Full lists: [documentation and sources](../../STUDY-GUIDE.md#documentation-and-sources).
 
 ## Ask an AI tutor about this lesson
 

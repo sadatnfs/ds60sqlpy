@@ -1,6 +1,6 @@
 # web-024: explanatory solutions
 
-Open this after your own attempt. Each answer explains the lesson's synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in `courses/web-development/guides/web-024.md`.
+Attempt each exercise before reading; the mechanism is in `courses/web-development/guides/web-024.md` ([using these answers](../STUDY-GUIDE.md#solutions)).
 
 ## Exercise 1: Write three learner tasks before drawing the interface.
 
@@ -76,4 +76,6 @@ Open this after your own attempt. Each answer explains the lesson's synthetic fi
 
 ## Reference comparison
 
-Open `courses/web-development/solutions/web-024_solution.html` only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; its success message is not an accessibility audit or proof of responsive behavior at every size.
+The reference counts the articles inside .topics and requires three, then follows every link and requires its hash to find a target. That catches a missing path and the broken #phpp fragment. It does not judge link wording, tokens, zoom or print behavior, so compare your audit notes rather than the reference's colors.
+
+Open `courses/web-development/solutions/web-024_solution.html` after saving your attempt ([comparing with the reference](../STUDY-GUIDE.md#references)).

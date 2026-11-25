@@ -1,6 +1,6 @@
 # docker-024: explanatory solutions
 
-Compare after your own attempt or an explicit reveal. These explain the supplied teaching fixtures; they are not engine results. The mechanism is explained in `courses/docker/guides/docker-024.md`.
+These answers explain teaching fixtures, not engine results; the mechanism is in [the guide](../guides/docker-024.md).
 
 ## Exercise 1: Distinguish rootless mode from a non-root app USER.
 
@@ -88,4 +88,4 @@ Compare after your own attempt or an explicit reveal. These explain the supplied
 
 ## Check your transfer
 
-A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.
+The job gains full control of the host engine, which in practice means root on that host: it can start a privileged container that mounts `/`, read other jobs' containers and volumes, and change images that later deployments use. Alternatives include a rootless BuildKit builder, a remote buildx builder dedicated to CI, or a disposable virtual machine per job. Acceptance should show the job can build and push its image yet cannot list unrelated containers. If the job could not list containers through the socket, the socket would not be the real engine endpoint.

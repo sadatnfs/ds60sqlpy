@@ -1,6 +1,8 @@
 # spark-033: Explained paired reference solutions
 
-Read the [guide](../guides/spark-033.md) and attempt one language first. The [Scala reference](spark-033_solution.scala) and [PySpark reference](spark-033_solution.py) are complete single-file programs with explicit local sessions and finally-based stop. Each compares with literal expectations; matching two implementations alone would not rule out a shared mistake.
+Attempt the [guide](../guides/spark-033.md) exercises first.
+
+References: [Scala](spark-033_solution.scala), [PySpark](spark-033_solution.py).
 
 ## Exercises and reasoning
 
@@ -179,6 +181,7 @@ The ledger connects physical delivery occurrences to business decisions without 
 
 ## Execution and interpretation
 
-Run the complete reference in its prepared fixed worker. Its first check (Classify missing event identity before deduplication) is built inside the program, so opening the lesson fetches nothing; it expects: Delivery 3 is quarantined; known IDs are eligible for the separate deduplication policy. The final success line prints only after every reference assertion passes.
+After the first file, the classified stream must carry a `reason` column, the deduplicated stream must keep `delivery_id`, `event_id`, `amount` and `event_time`, the raw source must have 3 rows, the accepted branch must read 2 and the quarantine branch 1. The accepted sink must be `(e1, 1, 10)` and `(e2, 2, 10)`, and quarantine must be exactly `(3, None, missing_event_id)`. After the second file, the accepted branch reads 2 more rows, quarantine reads none, and the business rows become `e1`, `e2` and `e3`, still from deliveries 1, 2 and 5, with total 30.
 
-Local plan, partition and resource evidence does not establish cluster-scale performance; session cleanup is explicit.
+The advancer run must report at least 3 removed state rows while the business rows stay unchanged and exactly one `__advance__` row appears. The final ledger must be `(6, 5, 1, 4, 30)`: deliveries, known IDs, quarantined, accepted rows and business total. The program prints the per-branch input counts and `removed_dedup_state=`, then `spark-033: six PySpark reference contracts passed; Spark=` and the version (Scala prints its own line). The guarantee holds only inside the watermark horizon; once state for an ID is removed, a very late replay would be accepted again.
+

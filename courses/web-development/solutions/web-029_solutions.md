@@ -1,6 +1,6 @@
 # web-029: explanatory solutions
 
-Open this after your own attempt. Each answer explains the lesson's synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in `courses/web-development/guides/web-029.md`.
+Attempt each exercise before reading; the mechanism is in `courses/web-development/guides/web-029.md` ([using these answers](../STUDY-GUIDE.md#solutions)).
 
 ## Exercise 1: Compare origins for the same host on two different ports.
 
@@ -76,4 +76,6 @@ Open this after your own attempt. Each answer explains the lesson's synthetic fi
 
 ## Reference comparison
 
-Open `courses/web-development/solutions/web-029_solution.html` only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; its success message is not an accessibility audit or proof of responsive behavior at every size.
+The reference requires the untrusted pre to have no child elements and the document to contain no img elements, so it catches the string being parsed as markup. It does not test the URL policy text, CSP headers or sandbox limits, so read your URL decision and explain which schemes it rejects.
+
+Open `courses/web-development/solutions/web-029_solution.html` after saving your attempt ([comparing with the reference](../STUDY-GUIDE.md#references)).

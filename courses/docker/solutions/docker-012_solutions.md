@@ -1,6 +1,6 @@
 # docker-012: explanatory solutions
 
-Compare after your own attempt or an explicit reveal. These explain the supplied teaching fixtures; they are not engine results. The mechanism is explained in `courses/docker/guides/docker-012.md`.
+These answers explain teaching fixtures, not engine results; the mechanism is in [the guide](../guides/docker-012.md).
 
 ## Exercise 1: Compare running and healthy.
 
@@ -88,4 +88,4 @@ Compare after your own attempt or an explicit reveal. These explain the supplied
 
 ## Check your transfer
 
-A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.
+`depends_on` only orders startup; it does not watch the dependency afterwards, so no extra condition can cover a restart an hour later. The web service itself must handle a temporarily unavailable database, with bounded retries, timeouts and clear error responses while the database is down, and its own health check should report that state if traffic should stop. The expected result is a short period of controlled errors followed by recovery without a restart of the web container. Needing to restart the web service after every database restart would show that its reconnect logic is still missing.

@@ -75,31 +75,7 @@ reused repository constant.
 
 ## How to run this lesson
 
-**Primary browser route:** run `./classroom` from the repository root and
-choose **Python and data science** on `/classroom`. Open this lesson in the shared workspace,
-read its capability notice, and use its supported coding or reading workflow.
-The [classroom guide](../../../docs/classroom-experience.md) explains saved work, runtimes and switching subjects.
-
-**Optional native notebook/editor route:** the instructions below describe
-separately prepared host tools. They are useful alternatives, not prerequisites
-for opening this lesson in the Docker classroom.
-
-1. Open the Day 57 learner notebook from this guide's **Next
-   step** section in VS Code or JupyterLab.
-2. Select the `Python (ds60sqlpy)` kernel. Start at the top and use
-   **Run All** only after making the written predictions; every added
-   worked example is bounded and offline after bootstrap.
-3. Keep experiments in new scratch cells. Do not edit the official
-   solution while attempting the numbered practice.
-4. Restart the kernel and run from the first cell before calling the
-   lesson complete. A clean run catches hidden state and stale
-   variables.
-
-Linux, macOS, or Ubuntu in Windows WSL 2:
-
-```bash
-.venv/bin/python -m jupyter lab
-```
+Open `python-57` in the classroom, or `python/ds-60day/notebooks/day57_security_privacy_ethics.ipynb` on a host; the [Python study guide](../../STUDY-GUIDE.md) explains both.
 
 ## Concept deep dive: data minimization, privacy boundaries, fairness evidence, and accountable controls
 
@@ -123,10 +99,6 @@ uncertainty, and harm analysis, not a single parity number.
 - **group metric + support:** reports numerator/denominator and uncertainty so tiny groups do not create confident-looking claims.
 
 ### Focused example A: minimize a record through an allowlist
-
-Before running the example, predict the shape, type, or direction of the
-result. Write the prediction down so that a surprise becomes evidence
-rather than something to overlook.
 
 ```python
 raw_record = {
@@ -221,9 +193,6 @@ assert report["group_b"]["support"] == 5
 
 Combine data minimization, access control, threat modeling, privacy limits, fairness uncertainty, and incident response. Detection or masking alone is not protection.
 
-Predict or plan before you run code. Use the hint only after an honest
-attempt, and record the evidence that would prove your result correct.
-
 5. **Threat modeling:** Create a data-flow diagram for collection, notebook, artifacts, API, logs, and backups. For each boundary, identify asset, actor, threat, control, residual risk, and owner.
    **Progressive hint:** Include accidental exposure and insider misuse, not only external attackers. Trace data copies and retention through every stage.
 
@@ -283,8 +252,7 @@ appropriate experts rather than maximizing collection.
 
 ## Ask an AI tutor about this lesson
 
-The lesson is complete without an AI assistant. If you want optional
-coaching, copy this prompt into the AI tutor while the repository root is open:
+The lesson is complete without AI. For optional coaching, copy this prompt with the repository root open:
 
 ```text
 Tutor me through `python-57` (Day 57: Security, Privacy, and Ethics).

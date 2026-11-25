@@ -194,16 +194,19 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/scala-spark/guides/spark-010.md</code></p>
     </header>
     <article class="document"><h2 id="spark-010-laziness-iterators-and-safe-side-effects">spark-010: Laziness, iterators, and safe side effects<a class="heading-anchor" href="#spark-010-laziness-iterators-and-safe-side-effects" aria-label="Link to this section">#</a></h2>
-<p>Authored tutorial and practice content. The prepared Scala/JVM worker executes a bounded program; process success and understanding remain distinct. No source file installs a tool or downloads a dependency.</p>
+<p>An <code>Iterator</code> does no work until something pulls from it, and it can be read only once. This lesson traces exactly when a lazy filter and map run, separates a one-shot iterator from a factory that builds a fresh one, and shows how a retried side effect turns 150 logical cents into 500 counted cents.</p>
 <h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
-<p>Beginner; approximately 75 minutes. Direct prerequisites: <code>spark-009</code>. The lesson uses Scala 2.13 syntax and the prepared JDK 17 worker. The <a href="../execution-baseline.md.html">execution baseline</a> lists the exact Scala, JDK and Spark versions.</p>
+<p>Beginner; approximately 75 minutes. Direct prerequisites: <code>spark-009</code>. Pinned versions: <a href="../execution-baseline.md.html">execution baseline</a>.</p>
 <h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>Open <code>spark-010</code> in the classroom, select the Scala source, prepare the <code>scala-jvm</code> profile and run the saved pad. The worker stages the single source as <code>Main.scala</code> and invokes <code>object Main</code>. Read the terminal output and exact assertions. The <a href="../lessons/spark-010.scala.html">learner source</a> runs two complete demonstrations; its six task functions remain explicit stubs until you implement them. Preserve your saved attempt. The <a href="../solutions/spark-010_solution.scala.html">reference program</a> and <a href="../solutions/spark-010_solutions.md.html">explained solutions</a> are separate and should be opened after an attempt or an explicit worked-comparison request. If the profile is unavailable, reading and saving remain available; opening this guide does not prepare a runtime.</p>
+<p>Shared run steps and profile rules: <a href="../STUDY-GUIDE.md.html#run-a-language-lesson">study guide</a>.</p>
+<p>Learner pad: <a href="../lessons/spark-010.scala.html">spark-010.scala</a>.</p>
+<p>Open the <a href="../solutions/spark-010_solutions.md.html">explained solutions</a> after an attempt.</p>
+<p>The pad prints <code>visits=3 after complete consumption</code>. The assertions above that line show <code>visits == 0</code> right after building the mapped iterator, 1 after one <code>next()</code>, and 3 after <code>toVector</code>; a second <code>toVector</code> returns an empty vector because the iterator is spent. The second example prints <code>A factory creates a new traversal each time</code>: calling <code>fresh()</code> twice gives <code>Vector(4, 8)</code> both times because each call builds a new iterator from the unchanged source.</p>
 <h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
 <ul>
 <li>Predict when local lazy transformations run and explain why retryable distributed work must not hide side effects.</li>
-<li>Explain the result of both worked examples before running them.</li>
-<li>Implement the six contracts, inspect normal and boundary evidence, and explain a counterexample in your own words.</li>
+<li>Predict the trace <code>filter:1, filter:2, map:2</code> when one value is taken from a lazy pipeline over 1, 2, 3, 4, and predict what consuming the rest appends.</li>
+<li>Separate repeated delivery from logical identity: two attempts over records <code>a, b, a</code> give a naive total of 500 but a logical total of 150, and the same ID with two different amounts is rejected.</li>
 </ul>
 <h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
 <ul>
@@ -277,9 +280,15 @@ println<span class="syntax-punctuation">(</span><span class="syntax-string">&quo
 <h3 id="common-pitfalls">Common pitfalls<a class="heading-anchor" href="#common-pitfalls" aria-label="Link to this section">#</a></h3>
 <p>If a trace appears before consumption, find an eager collection operation or side effect outside the iterator body. If the second traversal is empty, check whether a cursor rather than a factory was reused. If retry totals grow, move external effects out of pure transformations and define a durable idempotency boundary instead of trusting a local counter. If an infinite iterator hangs, inspect for an unbounded terminal collection. If a prefix limit appears safe but a rare filter scans indefinitely, distinguish output count from source-work budget.</p>
 <h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
-<p>Without opening the reference, trace the listed boundary case through <code>strictPipeline</code>. Then explain why <code>boundedTake</code> needs its declared invariant or input restriction. Name the exact assertion that would reject one tempting wrong implementation. Retain the observed values and explain how they support the lesson outcome: Predict when local lazy transformations run and explain why retryable distributed work must not hide side effects.</p>
+<ul>
+<li><code>strictPipeline(Seq(1, 2, 3, 4))</code> returns <code>Seq(4, 8)</code>. When does each <code>filter</code> and <code>map</code> call happen for a <code>Seq</code>, and how does that differ for the iterator in Exercise 2?</li>
+<li>Write the full trace after taking one value and then consuming the rest of <code>tracedIterator(Seq(1, 2, 3, 4), trace)</code>.</li>
+<li>Why does <code>consumeTwice</code> on a fresh iterator over 1, 2, 3 return <code>(Vector(1, 2, 3), Vector())</code>? What does that predict for a Spark job that reruns a lineage built on a one-shot source?</li>
+<li>In <code>retryTotals</code>, why is the naive total 500 for two attempts over <code>(a, 100)</code>, <code>(b, 50)</code>, <code>(a, 100)</code>, while the logical total is 150? Why must <code>a</code> with 100 and <code>a</code> with 101 be rejected?</li>
+<li><code>boundedTake(Iterator.from(1), 3)</code> leaves 4 as the next value. Why is a declared limit necessary before reading from an unbounded source, and why is a limit above 1000 rejected?</li>
+</ul>
 <h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
-<p>Continue to the next lesson only after you can explain the boundary behavior. The <a href="../README.md.html">course route</a> shows authored material and runtime evidence separately.</p>
+<p>Go on to <a href="spark-012.md.html">spark-012: SparkSession, explicit schemas, and bounded actions</a>; <a href="spark-011.md.html">spark-011</a> is the bridge for learners arriving from Python and covers ground you already have. Spark DataFrames are lazy in the same way as these iterators, and spark-012 shows which call is the action that finally runs the plan.</p>
 <h3 id="primary-sources-and-official-apis">Primary sources and official APIs<a class="heading-anchor" href="#primary-sources-and-official-apis" aria-label="Link to this section">#</a></h3>
 <ul>
 <li><a href="https://docs.scala-lang.org/overviews/collections-2.13/iterators.html">Scala 2.13 iterator semantics</a>.</li>

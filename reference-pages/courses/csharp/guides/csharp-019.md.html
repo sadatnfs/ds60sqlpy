@@ -206,11 +206,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Closure:</strong> A function together with captured surrounding variables.</p>
 <p><strong>Subscription:</strong> A registered callback relationship.</p>
 <h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>The Linux Docker classroom compiles your saved pad as <code>Program.cs</code> in its fixed .NET 10 project. C# 14 is the matching language generation. This route uses the prepared framework libraries; it does not accept arbitrary project files, NuGet packages, command arguments or interactive input. The explicit <code>Program.Main</code> entrypoint makes compilation and execution visible. <code>Check</code> throws on a false condition in every build configuration, unlike conditional debugging assertions.</p>
-<p>Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.</p>
+<p><code>Signal</code> is the only helper; it raises its event with <code>Raised?.Invoke</code>, so emitting with no subscribers does nothing rather than throwing. For task 4, unsubscribe with a freshly written lambda that has the same text and run it: the handler stays attached and <code>calls</code> ends at 2.</p>
+<p>Compile contract, starter stop and success marker: <a href="../STUDY-GUIDE.md.html#running-a-lesson">running a lesson</a>.</p>
 <h3 id="syntax-anatomy-and-execution-trace">Syntax anatomy and execution trace<a class="heading-anchor" href="#syntax-anatomy-and-execution-trace" aria-label="Link to this section">#</a></h3>
 <p><code>Func&lt;int,int&gt;</code> represents a callable taking int and returning int. <code>x =&gt; x * factor</code> is a lambda. An event uses <code>+=</code> to subscribe and <code>-=</code> to remove the same handler instance.</p>
-<p>Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.</p>
+<p>Each example ends with a trace; method: <a href="../STUDY-GUIDE.md.html#tracing-a-program">tracing a program</a>.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="example-a-a-closure-observes-its-captured-variable">Example A: A closure observes its captured variable<a class="heading-anchor" href="#example-a-a-closure-observes-its-captured-variable" aria-label="Link to this section">#</a></h4>
 <p>The closure refers to the variable, not a permanently copied value from creation time.</p>
@@ -254,6 +254,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> Changing factor changes later calls through the closure.</p>
+<p><strong>Trace.</strong> <code>factor</code> starts at 2. The lambda <code>value =&gt; value * factor</code> captures the variable <code>factor</code> itself, not its current value. <code>scale(3)</code> reads factor, finds 2 and returns 6. After <code>factor = 4</code>, the same delegate reads the variable again and <code>scale(3)</code> returns 12. Capturing a variable means later writes are visible.</p>
 <h4 id="example-b-manage-an-event-subscription">Example B: Manage an event subscription<a class="heading-anchor" href="#example-b-manage-an-event-subscription" aria-label="Link to this section">#</a></h4>
 <p>Keeping the handler reference makes unsubscription precise and prevents a lingering callback.</p>
 <pre class="highlighted-code"><code class="language-csharp"><span class="syntax-keyword">using</span> System<span class="syntax-punctuation">;</span>
@@ -299,6 +300,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> Only the first emission reaches the removed handler.</p>
+<p><strong>Trace.</strong> <code>handler</code> stores one delegate instance. <code>+=</code> adds it to the event&#x27;s invocation list, and <code>Emit</code> calls it, so <code>calls</code> becomes 1. <code>-=</code> with the same instance removes it, so the second <code>Emit</code> finds no subscribers and <code>Raised?.Invoke</code> skips the call. The count stays at 1 because removal matched the stored delegate.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <ol>
 <li><strong>Predict and explain.</strong> Predict both scale results before running.</li>
@@ -318,10 +320,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <ol start="6">
 <li><strong>Transfer and justify.</strong> Design ownership for subscriptions in a screen or service that can be disposed.</li>
 </ol>
-<p>For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.</p>
+<p>Log each task in the <a href="../STUDY-GUIDE.md.html#recording-exercise-evidence">evidence table</a> before opening the explanation.</p>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
 <p>Closure capture can retain large objects or unexpected mutable state. Event handlers should avoid hiding failures. A new lambda with similar source is not necessarily the same delegate needed for unsubscription.</p>
-<p>A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.</p>
+<p>Task 4&#x27;s version writes <code>source.Raised -= (_, _) =&gt; calls++;</code>, which creates a new delegate. It matches nothing in the invocation list, so removal silently fails and the second emission increments calls to 2. For task 5, two subscribers must each run once per emission, and a source with none must not throw.</p>
+<p>Repair routine: <a href="../STUDY-GUIDE.md.html#building-a-regression-case">building a regression case</a>.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <ol>
 <li>Reproduce Example A (A closure observes its captured variable) before changing anything, and confirm its observation: Changing factor changes later calls through the closure.</li>
@@ -329,9 +332,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>Before opening the explanation, test your task 3 attempt against this lesson&#x27;s main pitfall: Closure capture can retain large objects or unexpected mutable state.</li>
 </ol>
 <h3 id="self-check-and-next-step">Self-check and next step<a class="heading-anchor" href="#self-check-and-next-step" aria-label="Link to this section">#</a></h3>
-<p>Explain Delegate, Closure, Subscription without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.</p>
+<p>Predict <code>scale(3)</code> after <code>factor = 0</code>, and explain why. Describe what a local copy taken before the change, such as <code>int snapshot = factor;</code>, would capture instead. For task 6, say which object unsubscribes when a screen closes and what stays alive in memory if it never does.</p>
+<p>Then follow the general <a href="../STUDY-GUIDE.md.html#self-check-routine">self-check routine</a> and save your pad.</p>
 <h3 id="sources-and-execution-boundary">Sources and execution boundary<a class="heading-anchor" href="#sources-and-execution-boundary" aria-label="Link to this section">#</a></h3>
-<p><a href="https://learn.microsoft.com/en-us/dotnet/csharp/">Official language or framework documentation</a>. The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.</p>
+<p><a href="https://learn.microsoft.com/en-us/dotnet/csharp/">Documentation</a>: The C# programming guide&#x27;s articles on delegates, lambda expressions and events explain capture, invocation lists and subscription.</p>
+<p>Provenance and limits: <a href="../STUDY-GUIDE.md.html#sources-and-execution-boundary">sources and execution boundary</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for csharp-019: Delegates, closures and events.
 Read courses/csharp/guides/csharp-019.md and courses/csharp/lessons/csharp-019.cs. Prerequisites: csharp-018.

@@ -105,9 +105,7 @@ Takeaways
 
 ## Solution reasoning lens
 
-A strong solution is not merely code that produces one plausible
-output. It establishes a chain from input contract to operation to
-verification:
+Each decision below links an input contract to an operation and its evidence:
 
 1. **`confusion_matrix(y_true, y_pred)`:** returns outcome counts at the selected threshold; inspect label order before unpacking.
 2. **`cross_validate(estimator, X, y, cv=..., scoring=...)`:** fits a fresh estimator per fold and can report multiple metrics and timing.
@@ -124,29 +122,15 @@ verification:
 
 **Evidence of correctness:** Recompute metrics from outcome counts, prove split-unit disjointness, report every fold score plus variability, and preserve a separate final-evaluation boundary.
 
-When comparing your attempt with the reference, explain which of these
-decisions your code made explicitly. If the reference makes a different
-choice, compare the contracts and evidence before deciding that one
-version is universally better.
-
 <!-- END ADVANCED PYTHON CONCEPT ENRICHMENT -->
 
 ## Exercise-by-exercise reasoning map
-
-This map connects every learner prompt to a reasoning path. Read the
-explanation before copying code: the goal is to understand the assumptions,
-the evidence that validates the result, and the edge cases that can make an
-apparently correct implementation fail.
 
 ### Exercise 1: Original lesson practice
 
 **Prompt:** Evaluate the pipeline with `accuracy`, `f1`, and `roc_auc`.
 
 **How to reason about it:** Accuracy and F1 use thresholded labels, while ROC AUC uses ranking scores. Keep folds identical and report class prevalence so readers can understand why the metrics may disagree.
-
-Use the worked reference earlier in this file, then change one boundary
-condition and rerun the stated checks. A copied output is not evidence
-unless you can explain why that output follows from the inputs.
 
 **Verify:** On the same declared stratified folds, print every accuracy, F1, and ROC-AUC fold score plus mean and standard deviation; include positive-class support and use probability/decision scores, not hard labels, for ROC AUC.
 
@@ -156,10 +140,6 @@ unless you can explain why that output follows from the inputs.
 
 **How to reason about it:** Ten folds give each model more training rows and cost twice the fits, but each validation fold is half as large, so single fold scores are noisier. Judge the designs by how much their mean score moves across repeated shuffle seeds rather than announcing a universal winner from one split.
 
-Use the worked reference earlier in this file, then change one boundary
-condition and rerun the stated checks. A copied output is not evidence
-unless you can explain why that output follows from the inputs.
-
 **Verify:** Use identical data, estimator, scorer, and shuffle policy for 5 and 10 folds; print both score vectors with their means and fold standard deviations, and confirm every row appears in validation exactly once per run. Then rerun each design over at least ten shuffle seeds and compare how much the mean moves: the fold spread within one run is not the variance of the cross-validation estimate.
 
 ### Exercise 3: Original lesson practice
@@ -167,10 +147,6 @@ unless you can explain why that output follows from the inputs.
 **Prompt:** Explain leakage risks and how placing preprocessing in a pipeline helps.
 
 **How to reason about it:** Any transform learned before cross-validation leaks validation-fold information. A pipeline causes preprocessing to be cloned and refit inside every fold, but it cannot repair leakage already baked into features.
-
-Use the worked reference earlier in this file, then change one boundary
-condition and rerun the stated checks. A copied output is not evidence
-unless you can explain why that output follows from the inputs.
 
 **Verify:** Show fold indices or a fit counter proving preprocessing is fitted separately inside each training fold; contrast with one deliberately pre-fitted transformation and explain why its validation score is contaminated.
 
@@ -188,10 +164,6 @@ that frozen threshold once on the final holdout.
 ROC AUC is unchanged because it considers ranking across all possible
 thresholds. Precision, recall, F1, and the confusion matrix do change because
 they consume the thresholded labels.
-
-**Why this matters:** The result should survive a fresh-kernel rerun and
-a deliberately chosen boundary case. If it does not, revisit the
-assumption or data boundary rather than hiding the failure.
 
 **Verify:** Threshold analysis; for one fixed validation score vector, print TP/FP/TN/FN at 0.2, 0.5, and 0.8; assert predicted-positive count cannot rise with threshold and ROC AUC is identical because scores did not change.
 
@@ -222,10 +194,6 @@ for train_index, valid_index in splitter.split(X, y, groups=entity_ids):
 If deployment predicts future rows for already-known entities, a different
 split may be appropriate; align the split with that real decision explicitly.
 
-**Why this matters:** The result should survive a fresh-kernel rerun and
-a deliberately chosen boundary case. If it does not, revisit the
-assumption or data boundary rather than hiding the failure.
-
 **Verify:** Grouped resampling; print train/validation entity IDs for every grouped fold and assert their intersections are empty; also exhibit at least one ordinary StratifiedKFold split where the same entity appears on both sides.
 
 ### Exercise 6: Selection-bias debugging
@@ -244,9 +212,5 @@ selection favors candidates that benefited from sampling noise. In nested CV:
 `cross_val_predict` can generate out-of-fold predictions for a fixed estimator,
 but it is not automatically nested. Passing the entire search object to the
 outer loop is what repeats selection honestly.
-
-**Why this matters:** The result should survive a fresh-kernel rerun and
-a deliberately chosen boundary case. If it does not, revisit the
-assumption or data boundary rather than hiding the failure.
 
 **Verify:** Selection-bias debugging; print nested outer-fold scores plus mean/std and the inner best parameters per outer fold; contrast with best_score_ and state that one fixed model's out-of-fold predictions do not evaluate the selection procedure.

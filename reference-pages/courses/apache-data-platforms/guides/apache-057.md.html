@@ -246,15 +246,15 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="syntax-keyword">LIMIT</span> <span class="syntax-number">10</span></code></pre>
 <p>Sent to the broker at /query/sql, this should return east 11 and west 9 for the three fixture rows. The response metadata also reports numServersQueried and numSegmentsQueried, which tell you whether the broker reached the server holding the segment. A correct total from zero segments is impossible, so if those counts are zero while rows appear, you are reading a different table or cluster. The client checks the exact ID list before trusting the aggregate.</p>
 <h3 id="complete-worked-source">Complete worked source<a class="heading-anchor" href="#complete-worked-source" aria-label="Link to this section">#</a></h3>
-<p>This is a project-only command notebook. Read and edit it in the classroom; run its explicitly labeled commands from the copied owned Docker workshop. The classroom does not execute these service commands.</p>
+<p>The classroom does not execute these service commands. See the <a href="../STUDY-GUIDE.md.html#workshop-notebooks">workshop rules</a>.</p>
 <h2 id="pinot-apache-057-command-notebook">Pinot apache-057 command notebook<a class="heading-anchor" href="#pinot-apache-057-command-notebook" aria-label="Link to this section">#</a></h2>
-<p>Use these commands only from the copied owned Pinot project described in its README. The classroom Markdown pad does not execute Docker commands.</p>
+<p>Run these four actions in order from the copied Pinot project after reading its README. <code>prepare</code> records the pinned image, <code>start</code> brings up ZooKeeper, controller, broker and server, and <code>initialize</code> is the only step that loads the three order rows into a segment. The <a href="../STUDY-GUIDE.md.html#workshop-notebooks">workshop rules</a> explain why the pad only displays them.</p>
 <pre class="highlighted-code"><code class="language-bash">bash run.sh prepare
 bash run.sh start
 bash run.sh initialize
 bash run.sh check</code></pre>
 <p>The full source is in the copied project. Initialization is explicit. Require exact IDs and values before accepting aggregate totals.</p>
-<p>Native service acceptance and each advanced extension have distinct entries in <code>QUALIFICATION.md</code>. Source/configuration presence is not an observed service result.</p>
+<p>QUALIFICATION.md records this offline segment path as accepted on Linux ARM64: rows 1, 2 and 3, east 11 and west 9, and exactly one owned offline segment. Kafka, hybrid, upsert and multistage routes have their own entries there, so a passing <code>check</code> here says nothing about them.</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
 <ul>
 <li><a href="https://github.com/pinot-contrib/pinot-docs/blob/latest/basics/architecture.md">Pinot architecture</a></li>

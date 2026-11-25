@@ -79,4 +79,4 @@ executor scan, and the file can disappear or be invisible at that later boundary
 The two cases demonstrate both the valid shared-file contract and a real source-removal
 condition detected after planning, with explicit limits on the single-host topology's conclusions.
 
-The [complete Ballista workshop](../../projects/ballista/README.md) provides the maintained files, preparation, lifecycle and exact qualification boundaries for these cases.
+The `paths` action in the [Ballista workshop](../../projects/ballista/README.md) registers a temporary Parquet file, deletes it and then queries it, so you see whether the cluster rejects the missing file or returns rows it should not have.

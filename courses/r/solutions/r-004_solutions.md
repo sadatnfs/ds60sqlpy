@@ -1,6 +1,6 @@
 # r-004: reference reasoning
 
-Use the [complete reference](r-004_reference.R) with the guide's declared inputs and runtime. Every worked example is also a standalone script.
+Run the [complete reference](r-004_reference.R) under the [run rules](../STUDY-GUIDE.md#run-a-chapter).
 
 ## Why the implementation has this shape
 
@@ -96,4 +96,6 @@ Report missingness and state that the reduced claim concerns observed predicates
 
 ## What the checks establish
 
-The reference makes 6 `stopifnot()` checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.
+The assertions pin three-valued logic directly: `TRUE & NA` is NA while `FALSE & NA` is FALSE, a mask built with `!is.na()` keeps only the known 20 at or above 15, the inclusive mask selects 12 and 20, `&&` short-circuits safely on an empty vector, and `all()` returns NA unless `na.rm = TRUE`. They do not show that dropping unknown amounts is the right policy for a real report.
+
+The reference makes 6 `stopifnot()` checks; see [what a passing run proves](../STUDY-GUIDE.md#what-a-passing-run-proves).

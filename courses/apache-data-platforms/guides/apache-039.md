@@ -117,7 +117,7 @@ After two appends, a fresh catalog object should report two snapshots and three 
 
 ## Complete worked source
 
-This is a complete editable worked program for the declared prepared runtime. It uses bounded local fixtures and does not install packages or start distributed services.
+Run it as the [worked program rules](../STUDY-GUIDE.md#worked-programs) describe.
 
 ```python
 import tempfile

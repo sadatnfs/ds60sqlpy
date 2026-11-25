@@ -15,73 +15,65 @@
 BEGIN;
 SET search_path TO training, public;
 
--- Exercise 1: compare a correlated aggregate with pre-aggregation plus JOIN.
+-- Exercise 1: compare an EXISTS subquery with a DISTINCT join.
 EXPLAIN (
   ANALYZE,
   BUFFERS
 )
 SELECT
-  c.customer_id,
-  (
+  o.order_id,
+  o.order_date
+FROM
+  orders o
+WHERE
+  EXISTS (
     SELECT
-      COUNT(*)
+      1
     FROM
-      orders o
+      order_items oi
+      JOIN products p ON p.product_id = oi.product_id
     WHERE
-      o.customer_id = c.customer_id) AS order_count
-FROM
-  customers c;
+      oi.order_id = o.order_id
+      AND p.category = 'Electronics');
 
+-- DISTINCT is needed in the join form because one order could hold several
+-- Electronics lines.
 EXPLAIN (
   ANALYZE,
   BUFFERS
-) WITH order_counts AS (
-  SELECT
-    customer_id,
-    COUNT(*) AS order_count
-  FROM
-    orders
-  GROUP BY
-    customer_id
-)
-SELECT
-  c.customer_id,
-  COALESCE(oc.order_count, 0) AS order_count
+) SELECT DISTINCT
+  o.order_id,
+  o.order_date
 FROM
-  customers c
-  LEFT JOIN order_counts oc USING (customer_id);
+  orders o
+  JOIN order_items oi ON oi.order_id = o.order_id
+  JOIN products p ON p.product_id = oi.product_id
+WHERE
+  p.category = 'Electronics';
 
--- Exercise 2: compare aggregating every order before LIMIT...
+-- Exercise 2: compare joining every order before LIMIT...
 EXPLAIN (
   ANALYZE,
   BUFFERS
-) WITH all_order_units AS (
-  SELECT
-    o.order_id,
-    o.customer_id,
-    o.order_date,
-    SUM(oi.quantity) AS units
-  FROM
-    orders o
-    JOIN order_items oi USING (order_id)
-  GROUP BY
-    o.order_id, o.customer_id, o.order_date
 )
 SELECT
-  *
+  o.order_id,
+  o.order_date,
+  c.country
 FROM
-  all_order_units
+  orders o
+  JOIN customers c ON c.customer_id = o.customer_id
 ORDER BY
-  order_date DESC,
-  order_id DESC
+  o.order_date DESC,
+  o.order_id DESC
 LIMIT 100;
 
--- ...with finding the 100 newest orders before aggregating their lines.
--- Both return one row per selected order; the second version reduces work.
+-- ...with keeping the 100 newest orders before joining customers.
+-- Both return the same 100 rows; measure which one does less work.
 EXPLAIN (
   ANALYZE,
   BUFFERS
-) WITH recent_orders AS MATERIALIZED (
+) WITH top_orders AS MATERIALIZED (
   SELECT
     order_id,
     customer_id,
@@ -94,20 +86,15 @@ EXPLAIN (
   LIMIT 100
 )
 SELECT
-  ro.order_id,
-  ro.customer_id,
-  ro.order_date,
-  SUM(oi.quantity) AS units
+  t.order_id,
+  t.order_date,
+  c.country
 FROM
-  recent_orders ro
-  JOIN order_items oi USING (order_id)
-GROUP BY
-  ro.order_id,
-  ro.customer_id,
-  ro.order_date
+  top_orders t
+  JOIN customers c ON c.customer_id = t.customer_id
 ORDER BY
-  ro.order_date DESC,
-  ro.order_id DESC;
+  t.order_date DESC,
+  t.order_id DESC;
 
 -- Exercise 3: MATERIALIZED creates an optimization boundary; NOT MATERIALIZED
 -- permits the CTE to be folded into its single parent query.

@@ -1,20 +1,26 @@
 # spark-008: Assertions, numeric boundaries, and independent oracles
 
-Authored tutorial and practice content. The prepared Scala/JVM worker executes a bounded program; process success and understanding remain distinct. No source file installs a tool or downloads a dependency.
+A test is only as good as its ability to fail. This lesson builds the checking helpers used later in the course (order-free bag equality, a checked `Long` sum, promotion before arithmetic, an explicit floating tolerance) and then proves the helpers reject real misconceptions instead of passing everything.
 
 ## Level and prerequisites
 
-Beginner; approximately 75 minutes. Direct prerequisites: `spark-007`. The lesson uses Scala 2.13 syntax and the prepared JDK 17 worker. The [execution baseline](../execution-baseline.md) lists the exact Scala, JDK and Spark versions.
+Beginner; approximately 75 minutes. Direct prerequisites: `spark-007`. Pinned versions: [execution baseline](../execution-baseline.md).
 
 ## How to run this lesson
 
-Open `spark-008` in the classroom, select the Scala source, prepare the `scala-jvm` profile and run the saved pad. The worker stages the single source as `Main.scala` and invokes `object Main`. Read the terminal output and exact assertions. The [learner source](../lessons/spark-008.scala) runs two complete demonstrations; its six task functions remain explicit stubs until you implement them. Preserve your saved attempt. The [reference program](../solutions/spark-008_solution.scala) and [explained solutions](../solutions/spark-008_solutions.md) are separate and should be opened after an attempt or an explicit worked-comparison request. If the profile is unavailable, reading and saving remain available; opening this guide does not prepare a runtime.
+Shared run steps and profile rules: [study guide](../STUDY-GUIDE.md#run-a-language-lesson).
+
+Learner pad: [spark-008.scala](../lessons/spark-008.scala).
+
+Open the [explained solutions](../solutions/spark-008_solutions.md) after an attempt.
+
+The pad prints `Set equality loses a repeated occurrence` after asserting that `Seq(1L, 1L, 2L).toSet` equals `Seq(1L, 2L).toSet` while the sorted sequences differ. It then prints `promoted=2147483648 tooLate=-2147483648`: adding 1 to `Int.MaxValue` in `Int` wraps to `Int.MinValue` before the conversion to `Long`, so the conversion has to come first. Exercises 1 and 3 turn those two observations into reusable helpers.
 
 ## Learning objectives
 
 - Test functions with exact integer money values and recognize overflow and order-sensitive comparisons.
-- Explain the result of both worked examples before running them.
-- Implement the six contracts, inspect normal and boundary evidence, and explain a counterexample in your own words.
+- Show that `(1, 1, 2)` and `(1, 2)` are equal as sets but not as bags, and that equal count and sum still cannot tell `(1, 3)` from `(2, 2)`.
+- Demonstrate that `filterContract` accepts the correct `>= 0` filter and rejects a `> 0` filter, a filter that also removes duplicates, and a candidate that throws.
 
 ## Vocabulary and concepts
 
@@ -133,11 +139,15 @@ If a test passes despite a dropped duplicate, inspect whether the oracle compare
 
 ## Self-check
 
-Without opening the reference, trace the listed boundary case through `bagEqual`. Then explain why `filterContract` needs its declared invariant or input restriction. Name the exact assertion that would reject one tempting wrong implementation. Retain the observed values and explain how they support the lesson outcome: Test functions with exact integer money values and recognize overflow and order-sensitive comparisons.
+- Why does `bagEqual(Seq(1, 1, 2), Seq(2, 1, 1))` pass while `bagEqual(Seq(1, 1, 2), Seq(1, 2))` fails? Name a comparison that would wrongly pass the second pair.
+- `exactSum` must fail for `Long.MaxValue` plus 1. What value would a plain `+` produce, and why is a wrong total worse than an exception here?
+- `promotedIncrement(Int.MinValue)` is `-2147483647L`. Show the order of operations that produces it.
+- With `atol = 0` and `rtol = 1e-7`, why does `1e8 + 1` match `1e8`? Why must `closeEnough` return false whenever either side is NaN, and reject a negative tolerance?
+- `validPartition` fails when a zero is placed in the rejected side. Which part of the contract does that break: conservation or classification?
 
 ## Next step
 
-Continue to the next lesson only after you can explain the boundary behavior. The [course route](../README.md) shows authored material and runtime evidence separately.
+Go on to [spark-009: Packages, build inputs, and closure serialization](spark-009.md). Your helpers so far ran in one JVM; next you look at what Spark needs to ship your code elsewhere: a matching artifact family, a bounded master and closures that capture plain values rather than the objects that own them.
 
 ## Primary sources and official APIs
 

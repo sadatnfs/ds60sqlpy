@@ -196,7 +196,6 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <article class="document"><h2 id="cuda-059-explanatory-solutions">cuda-059: explanatory solutions<a class="heading-anchor" href="#cuda-059-explanatory-solutions" aria-label="Link to this section">#</a></h2>
 <h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
 <p>PTX is a virtual instruction language, while SASS describes machine instructions for a particular GPU architecture. The driver or toolchain can translate PTX differently across targets and versions. A fat binary can contain native device images and PTX fallback according to a deliberate policy. JIT can introduce cold-start cost and compatibility constraints. Inspect compiler resource reports and generated code to test a hypothesis, such as unexpected local-memory traffic, before attempting inline assembly. Counting PTX instructions does not directly count executed hardware operations or predict runtime.</p>
-<p>The separate <a href="../references/cuda-059_cpu.py.html">CPU reference</a> checks the chapter&#x27;s bounded model. It does not execute CUDA or establish GPU timing. Compare after attempting the worksheet or explicitly choosing to reveal solutions.</p>
 <h3 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h3>
 <p>A high-level multiply-plus-add may become a fused instruction depending on types, options and target. If generated code changes, retain the numerical test because one rounding differs from two. A shorter instruction sequence is useful evidence only in combination with the workload&#x27;s actual behavior.</p>
 <p><strong>Approach:</strong> Inspect generated code to see whether multiply and add became one fused instruction, and keep the numerical test either way.</p>
@@ -233,11 +232,16 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Why it is correct:</strong> Cold start includes compilation and module loading that warmed runs skip.</p>
 <p><strong>A plausible wrong approach:</strong> Averaging the first run with later runs hides the startup cost.</p>
 <p><strong>How to verify:</strong> Run fresh processes repeatedly and compare first-run times.</p>
+<h3 id="self-check-answers">Self-check answers<a class="heading-anchor" href="#self-check-answers" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>How do native image and PTX JIT compatibility differ?</strong> A native image runs only on matching architectures; PTX can be compiled by the driver for newer ones at startup.</li>
+<li><strong>What should a cold-start experiment measure?</strong> First launch time in a fresh process with and without a warm JIT cache, separate from steady state.</li>
+<li><strong>Why can removing spills in worked example 2 fail to speed things up?</strong> Shorter live ranges may add recomputation that costs more than the saved local memory traffic.</li>
+</ol>
 <h3 id="numerical-reference-and-its-limits">Numerical reference and its limits<a class="heading-anchor" href="#numerical-reference-and-its-limits" aria-label="Link to this section">#</a></h3>
-<p>The complete CPU model is <a href="../references/cuda-059_cpu.py.html">here</a>. Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It does not claim CUDA execution, concurrency safety or a performance measurement.</p>
+<p>The <a href="../references/cuda-059_cpu.py.html">CPU reference</a> reproduces worked example 1 and prints <code>{&#x27;source.cu&#x27;: &#x27;CUDA C++ source&#x27;, &#x27;kernel.ptx&#x27;: &#x27;virtual instructions&#x27;, &#x27;kernel.cubin&#x27;: &#x27;target machine code&#x27;, &#x27;main&#x27;: &#x27;host executable&#x27;}</code>.</p>
 <h3 id="transfer-review">Transfer review<a class="heading-anchor" href="#transfer-review" aria-label="Link to this section">#</a></h3>
-<p>Measure first load/JIT separately from warmed execution with source/target/driver identities and unchanged correctness fixtures.</p>
-<p>A complete explanation must name its inputs, the unchanged mathematical contract, the changed boundary or resource condition, and the evidence still needed on actual hardware. Preserve a CPU baseline even after a GPU path becomes available.</p></article>
+<p>Measure first load/JIT separately from warmed execution with source/target/driver identities and unchanged correctness fixtures.</p></article>
   </main>
 </body>
 </html>

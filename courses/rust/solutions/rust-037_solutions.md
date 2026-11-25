@@ -1,6 +1,8 @@
 # rust-037: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [rust-037_solution.rs](rust-037_solution.rs). It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.
+Executable reference: [rust-037_solution.rs](rust-037_solution.rs), which runs both examples and the coded answers.
+
+Open this only after [an attempt](../STUDY-GUIDE.md#attempt-a-lesson).
 
 ## Why the two examples differ
 
@@ -26,7 +28,7 @@ Identify logical length, type and null count.
 
 Add a fourth value and inspect its typed access.
 
-**Reference answer.** The same statements run as the `Task 2` block of the reference program; here they are wrapped in `main` as a complete file.
+**Reference answer**, wrapped in `main`; the reference runs it as its `Task 2` block.
 
 ```rust
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -53,7 +55,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 Construct paired integer and text columns with equal row counts.
 
-**Reference answer.** The same statements run as the `Task 3` block of the reference program; here they are wrapped in `main` as a complete file.
+**Reference answer**, wrapped in `main`; the reference runs it as its `Task 3` block.
 
 ```rust
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -87,7 +89,7 @@ Diagnose treating Arrow as an automatically installed SQL engine.
 
 Test an empty typed array and a non-ASCII string.
 
-**Reference answer.** The same statements run as the `Task 5` block of the reference program; here they are wrapped in `main` as a complete file.
+**Reference answer**, wrapped in `main`; the reference runs it as its `Task 5` block.
 
 ```rust
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -123,7 +125,7 @@ An empty array is a valid column with zero rows, not an error. For text, `value`
 
 Compare row-object and columnar representations for a repeated analytical scan.
 
-No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **Columnar layout**, and state one limitation of your choice.
+**Judging criteria.** A strong comparison describes the row form as a `Vec` of structs, where scanning one field still loads every field of each row, and the columnar form as Arrow arrays such as `Int32Array`, where one field's values and validity bitmap are contiguous. It names the workload, many scans of few columns, explains why columns win there in memory traffic and null handling, and says when rows win, such as frequent single-row updates. State one limitation: building Arrow arrays from row objects is itself a full copy.
 
 ## Mechanism and diagnostic reasoning
 
@@ -137,4 +139,6 @@ Value access at an invalid index still violates bounds. A library being linked d
 
 ## Review before continuing
 
-Run the reference and confirm that it prints `rust-037: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.
+Rebuild Example B (Use a variable-width text column) from a blank pad.
+
+Review routine: [Self-check and review](../STUDY-GUIDE.md#self-check-and-review).

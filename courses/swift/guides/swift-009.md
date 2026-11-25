@@ -24,9 +24,9 @@ An array of class references still contains references as its element values. Co
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles the saved pad as `main.swift` with Swift 6 language checking. An explicit `@main` type contains `static func main() async throws`; the fixed compiler uses `-parse-as-library -swift-version 6`. The examples use the standard library and portable Foundation. `precondition` makes a violated invariant fail the process. The fixed pad accepts one source file, without arbitrary command arguments, interactive input or dependency installation. SwiftUI, UIKit, Apple simulators and application signing belong to the separately prepared macOS/Xcode project labs, never the Linux pad.
+Example B's capacity call has no visible effect, which is the point. Print `values.capacity` in a scratch pad if you are curious, but never write a check that depends on the exact number, because the standard library may reserve more than requested. Task 4 traps at runtime with an index out of range.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Compile contract, starter stop and success marker: [running a lesson](../STUDY-GUIDE.md#running-a-lesson).
 
 
 
@@ -34,7 +34,7 @@ Start with the answer-free learner artifact in your saved classroom pad. It deli
 
 `[Int]` is an array type. append grows logical count; an index replaces an existing element. reserveCapacity prepares storage. ArraySlice may preserve original indices, so use its indices rather than assuming zero.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+Each example ends with a trace; method: [tracing a program](../STUDY-GUIDE.md#tracing-a-program).
 
 ## Worked example / walkthrough
 
@@ -62,6 +62,8 @@ struct LessonMain {
 
 **Observe:** Appending to the copy leaves the original unchanged.
 
+**Trace.** `original` is the array `[1, 2]`. Assigning it to `changed` copies the value; the two may share one buffer at first, an optimization the language permits. The `append` on `changed` is a mutation, so `changed` obtains its own unique buffer before writing 3. Afterward `original` still reads `[1, 2]` and `changed` reads `[1, 2, 3]`, which is all the checks examine. Whether storage was ever shared cannot be observed by these checks; only the values are part of the contract.
+
 ### Example B: Do not confuse capacity and count
 
 Capacity is a performance hint, not an index range.
@@ -86,6 +88,8 @@ struct LessonMain {
 
 **Observe:** Reserving twenty slots creates no logical elements.
 
+**Trace.** `values` starts empty. `reserveCapacity(20)` requests storage for at least twenty elements but adds none, so `count` stays 0 and `values[0]` would still trap. `append(7)` adds the first logical element, and the count becomes 1, which makes index 0 valid and lets the check read 7. Capacity says how many elements can be added before a reallocation; count says which indices exist, and only positions in `0..<count` may be subscripted.
+
 ## Exercises
 
 1. **Predict and explain.** Predict original and changed arrays after append.
@@ -100,13 +104,15 @@ struct LessonMain {
 
 6. **Transfer and justify.** Explain what changes when array elements are mutable class instances.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Log each task in the [evidence table](../STUDY-GUIDE.md#recording-exercise-evidence) before opening the explanation.
 
 ## Common pitfalls and diagnosis
 
 Array value semantics do not recursively clone objects. Never assume ArraySlice starts at index zero. Repeated insertions at the front can create quadratic work.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+For task 5, build `let slice = [10, 20, 30, 40][2...]`. Its `startIndex` is 2, not 0, so `slice[0]` traps even though the slice has two elements, and a loop over `0..<slice.count` reads the wrong positions. Write the traversal with `slice.indices` instead and check it on the empty slice `[1, 2][2...]`, where the loop must run zero times.
+
+Repair routine: [building a regression case](../STUDY-GUIDE.md#building-a-regression-case).
 
 ## Progressive hints
 
@@ -116,11 +122,15 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 ## Self-check and next step
 
-Explain Value semantics, Copy-on-write, Capacity without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+Explain what copy-on-write guarantees and what it does not promise about memory. Predict the result of copying an array of class instances and changing a property through the copy. Explain why inserting at index 0 inside a loop over n elements can take time proportional to n squared.
+
+Then follow the general [self-check routine](../STUDY-GUIDE.md#self-check-routine) and save your pad.
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://docs.swift.org/swift-book/documentation/the-swift-programming-language/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+[Documentation](https://docs.swift.org/swift-book/documentation/the-swift-programming-language/): The Collection Types chapter of the Swift book covers arrays and their mutating methods; Structures and Classes explains why arrays behave as values.
+
+Provenance and limits: [sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

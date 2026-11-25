@@ -197,24 +197,16 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">int</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">void</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span></span>
 <span class="source-line">  <span class="syntax-comment">/* Exercise 1: Compare length and storage: change one input</span></span>
-<span class="source-line"><span class="syntax-comment">     Copy worked example 1, the &quot;compare length and storage&quot; case, into a</span></span>
-<span class="source-line"><span class="syntax-comment">     scratch pad and change `char word[] = &quot;cat&quot;;` to `char word[] = &quot;cat!&quot;;`.</span></span>
-<span class="source-line"><span class="syntax-comment">     Before running, predict which CHECK fails and which value it sees in place</span></span>
-<span class="source-line"><span class="syntax-comment">     of the worked result (strlen is 3 while array size is 4); then run it and</span></span>
-<span class="source-line"><span class="syntax-comment">     restore the original line. Expected: With `char word[] = &quot;cat!&quot;;` the run</span></span>
-<span class="source-line"><span class="syntax-comment">     stops with `Check failed` at the CHECK on `strlen(word) == 3 &amp;&amp; sizeof word</span></span>
-<span class="source-line"><span class="syntax-comment">     == 4`, because the &quot;compare length and storage&quot; case no longer shows that</span></span>
-<span class="source-line"><span class="syntax-comment">     strlen is 3 while array size is 4. Restoring `char word[] = &quot;cat&quot;;` brings</span></span>
-<span class="source-line"><span class="syntax-comment">     that observation back. */</span></span>
+<span class="source-line"><span class="syntax-comment">     In worked example 1, change `char word[] = &quot;cat&quot;;` to `char word[] =</span></span>
+<span class="source-line"><span class="syntax-comment">     &quot;cat!&quot;;`. Predict which value the CHECK on `strlen(word) == 3 &amp;&amp; sizeof</span></span>
+<span class="source-line"><span class="syntax-comment">     word == 4` sees, then run and restore. Expected: `Check failed` at</span></span>
+<span class="source-line"><span class="syntax-comment">     `strlen(word) == 3 &amp;&amp; sizeof word == 4`; restoring `char word[] = &quot;cat&quot;;`</span></span>
+<span class="source-line"><span class="syntax-comment">     passes again. */</span></span>
 <span class="source-line"></span>
 <span class="source-line">  <span class="syntax-comment">/* Exercise 2: Modify owned text: debug a regression</span></span>
-<span class="source-line"><span class="syntax-comment">     A regression changed one token in worked example 2, the &quot;modify owned text&quot;</span></span>
-<span class="source-line"><span class="syntax-comment">     case, so one line now reads `word[1] = &#x27;b&#x27;;`. Run the example with that</span></span>
-<span class="source-line"><span class="syntax-comment">     line, use the failing CHECK to find why the result is bat no longer holds</span></span>
-<span class="source-line"><span class="syntax-comment">     and repair the line without changing the CHECK. Expected: Before the repair</span></span>
-<span class="source-line"><span class="syntax-comment">     the run stops with `Check failed` at the CHECK on `strcmp(word, &quot;bat&quot;) ==</span></span>
-<span class="source-line"><span class="syntax-comment">     0`. Once the line reads `word[0] = &#x27;b&#x27;;` again, the &quot;modify owned text&quot;</span></span>
-<span class="source-line"><span class="syntax-comment">     case again shows that the result is bat. */</span></span>
+<span class="source-line"><span class="syntax-comment">     Worked example 2 now has a line reading `word[1] = &#x27;b&#x27;;`. Repair it so that</span></span>
+<span class="source-line"><span class="syntax-comment">     the result is bat again. Expected: `Check failed` at `strcmp(word, &quot;bat&quot;)</span></span>
+<span class="source-line"><span class="syntax-comment">     == 0` until the line reads `word[0] = &#x27;b&#x27;;` again. */</span></span>
 <span class="source-line"></span>
 <span class="source-line">  <span class="syntax-comment">/* Exercise 3: Detect bounded truncation</span></span>
 <span class="source-line"><span class="syntax-comment">     Format hello into a four-character buffer.</span></span>

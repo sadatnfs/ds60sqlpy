@@ -4,8 +4,6 @@
 
 A CUDA Graph represents a dependency graph that can be instantiated and replayed. It can reduce repeated host submission overhead for suitable workflows, but graph creation and instantiation cost time. Resources referenced by nodes must remain valid across execution, and updates must obey the selected graph API's rules. Stream capture records supported operations in a defined capture context; it is not permission to capture arbitrary host control flow. A CUDA Graph differs from an autograd graph: one schedules execution dependencies, while the other tracks differentiation relationships. Graph replay does not automatically fuse kernels.
 
-The separate [CPU reference](../references/cuda-043_cpu.py) checks the chapter's bounded model. It does not execute CUDA or establish GPU timing. Compare after attempting the worksheet or explicitly choosing to reveal solutions.
-
 ## Exercise 1
 
 A synthetic pipeline spends 20 microseconds submitting each ordinary iteration. Graph replay reduces this to 5 microseconds, but setup costs 300 microseconds. Ignoring other equal costs, break-even is more than twenty repeats. At exactly twenty, the submission savings merely repay setup.
@@ -78,12 +76,16 @@ Fixed-shape repeated inference may benefit, but validate shapes, memory addresse
 
 **How to verify:** Validate outputs across several inputs of the captured shape against eager runs.
 
+## Self-check answers
+
+1. **Where is break-even in worked example 1?** Setup 300 microseconds divided by a 15 microsecond saving per replay is 20 replays; more than twenty gives a net gain.
+2. **What must stay valid across graph replays?** Every buffer and resource referenced by graph nodes.
+3. **Why can a graph lose for a pipeline that runs once?** Capture and instantiation cost more than the submission overhead saved.
+
 ## Numerical reference and its limits
 
-The complete CPU model is [here](../references/cuda-043_cpu.py). Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It does not claim CUDA execution, concurrency safety or a performance measurement.
+The [CPU reference](../references/cuda-043_cpu.py) reproduces worked example 1 and prints `{'synthetic_break_even_replays': 20.0}`.
 
 ## Transfer review
 
 Fixed-shape repeated inference may benefit, but validate shapes, memory addresses, dynamic operations and framework support before capture or replay.
-
-A complete explanation must name its inputs, the unchanged mathematical contract, the changed boundary or resource condition, and the evidence still needed on actual hardware. Preserve a CPU baseline even after a GPU path becomes available.

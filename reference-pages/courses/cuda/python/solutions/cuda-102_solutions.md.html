@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cuda/python/solutions/cuda-102_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="cuda-102-explained-solutions">cuda-102: explained solutions<a class="heading-anchor" href="#cuda-102-explained-solutions" aria-label="Link to this section">#</a></h2>
-<p>These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.</p>
+<p>Compare with your <a href="../lessons/cuda-102.md.html">worksheet</a> attempt.</p>
 <h3 id="exercise-1-derive-cache-bytes">Exercise 1: Derive cache bytes<a class="heading-anchor" href="#exercise-1-derive-cache-bytes" aria-label="Link to this section">#</a></h3>
 <p>Multiply two for keys and values then all dimensions and width.</p>
 <p><strong>Approach.</strong> Multiply two, for keys and values, by layers, batch, sequence, KV heads, head dimension and element width: <code>2*2*1*16*4*8*2 = 4096</code> bytes.</p>
@@ -231,9 +231,19 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Why it is correct here.</strong> Fake quantization estimates accuracy effects but does not reduce memory traffic or compute time.</p>
 <p><strong>A plausible wrong approach.</strong> Reporting speed or memory gains from a simulation claims benefits only a deployed kernel can show. Memory can even rise under simulation, because both the original float weights and rounding scales may be held.</p>
 <p><strong>How to verify.</strong> State in each result whether quantization was simulated or executed, and which kernel ran.</p>
+<h3 id="self-check-answers">Self-check answers<a class="heading-anchor" href="#self-check-answers" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>How do prefill and decode differ?</strong> Prefill processes the whole input sequence at once, while decode adds one token at a time and reuses cached keys and values.</li>
+</ol>
+<ol start="2">
+<li><strong>Which factors grow the KV cache?</strong> Layers, batch, sequence length, KV head count, head dimension and element width.</li>
+</ol>
+<ol start="3">
+<li><strong>Why state positional-encoding and mask conventions when testing cache equivalence?</strong> Cached and uncached paths must apply the same positions and masks, or matching logits cannot be expected.</li>
+</ol>
 <h3 id="reference-observation">Reference observation<a class="heading-anchor" href="#reference-observation" aria-label="Link to this section">#</a></h3>
 <p>4096 bytes, doubling to 8192 at twice the sequence length.</p>
-<p>The reference file is <code>courses/cuda/python/references/cuda-102_cpu.py</code>. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.</p></article>
+<p>Asserted by <code>courses/cuda/python/references/cuda-102_cpu.py</code>.</p></article>
   </main>
 </body>
 </html>

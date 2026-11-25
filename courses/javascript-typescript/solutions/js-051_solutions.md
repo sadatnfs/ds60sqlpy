@@ -1,6 +1,6 @@
 # js-051: explanatory solutions
 
-Compare after your own attempt or an explicit reveal. The separate .js reference is a complete offline browser program. These explanations discuss the six practice tasks; a visual resemblance alone is not a data or behavior check.
+Compare after your own attempt; the separate `.js` file is the complete reference program.
 
 ## Mechanism review
 
@@ -49,3 +49,7 @@ Raw counts with unequal widths can mislead visual comparisons. Normalize by widt
 Counts show workload magnitude; density compares shapes. State which claim the chart supports. For groups of 6 and 60 values, raw counts would dwarf the small group; switch to density when comparing shapes and say which you chose.
 
 **Expected:** Choose counts or normalized density according to the comparison question.
+
+## After comparison
+
+Draw two groups with 20 and 200 observations on the same thresholds, first as counts and then as densities. Check that each density histogram's bar areas sum to 1, and explain which version answers whether the two groups have different shapes.

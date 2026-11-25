@@ -217,7 +217,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="mistakes-diagnosis-and-interview-discussion">Mistakes, diagnosis and interview discussion<a class="heading-anchor" href="#mistakes-diagnosis-and-interview-discussion" aria-label="Link to this section">#</a></h3>
 <p>Preserve logs and state before repair, and keep a supported backup/restore plan for valuable installations. Do not run global Docker prune, remove unrelated volumes or clear all tasks to hide one issue. The confirmed destroy command checks every owned resource and deletes only this workshop&#x27;s disposable state. Ordinary stop, resume and down preserve it.</p>
 <p><strong>Interview discussion: what should an Airflow recovery report contain?</strong> State which components restarted, whether existing run identities survived, which data and logs were read back, what work remained failed or ambiguous, and whether the service was unavailable during interruption. These cases separate actual local persistence and task diagnosis from a broad unsupported claim of production resilience.</p>
-<p>The <a href="../projects/airflow/README.md.html">complete Airflow workshop</a> provides the maintained files, preparation, lifecycle and exact qualification boundaries for these cases.</p>
+<p>The <a href="../projects/airflow/README.md.html">Airflow workshop</a> actions <code>stop</code>, <code>resume</code>, <code>readback</code> and <code>health</code> let you compare saved runs, outputs and observations before and after a restart without triggering new work.</p>
 <h3 id="worked-examples">Worked examples<a class="heading-anchor" href="#worked-examples" aria-label="Link to this section">#</a></h3>
 <h4 id="read-component-health-instead-of-an-http-status">Read component health instead of an HTTP status<a class="heading-anchor" href="#read-component-health-instead-of-an-http-status" aria-label="Link to this section">#</a></h4>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> json
@@ -244,7 +244,7 @@ bash run.sh logs
 bash run.sh health</code></pre>
 <p>Status shows whether the airflow container is running and healthy, the bounded logs show the last 100 lines, and health names which component is unhealthy. A task stuck in queued with a healthy scheduler usually points to pool or concurrency limits, while a task that never leaves scheduled with an unhealthy scheduler points to the scheduler process itself. A failed task has a log with an exception and a retry count; treat that as an application problem and fix its inputs, not the platform.</p>
 <h3 id="complete-worked-source">Complete worked source<a class="heading-anchor" href="#complete-worked-source" aria-label="Link to this section">#</a></h3>
-<p>This is a project-only command notebook. Read and edit it in the classroom; run its explicitly labeled commands from the copied owned Docker workshop. The classroom does not execute these service commands.</p>
+<p>The classroom does not execute these service commands. See the <a href="../STUDY-GUIDE.md.html#workshop-notebooks">workshop rules</a>.</p>
 <h2 id="health-saved-history-and-exact-resume">Health, saved history and exact resume<a class="heading-anchor" href="#health-saved-history-and-exact-resume" aria-label="Link to this section">#</a></h2>
 <pre class="highlighted-code"><code class="language-bash">bash run.sh health
 bash run.sh readback

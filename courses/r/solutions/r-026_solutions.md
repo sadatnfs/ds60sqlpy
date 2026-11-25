@@ -1,6 +1,6 @@
 # r-026: reference reasoning
 
-Use the [complete reference](r-026_reference.R) with the guide's declared inputs and runtime. Every worked example is also a standalone script.
+Run the [complete reference](r-026_reference.R) under the [run rules](../STUDY-GUIDE.md#run-a-chapter).
 
 ## Why the implementation has this shape
 
@@ -108,4 +108,6 @@ Use a separate multi-file project to document, build, install and run R CMD chec
 
 ## What the checks establish
 
-The reference makes 10 `stopifnot()` checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.
+The assertions confirm that DESCRIPTION names measurekit, that NAMESPACE contains exactly `export(observed_mean)`, that the source parses into two expressions and computes a mean of 3, that a masking global median returns -999 while `stats::median()` returns 4, that an empty input returns NA, and that `dnorm(0)` matches its closed form. They do not install or check the package; parsing a tree is not `R CMD check`.
+
+The reference makes 10 `stopifnot()` checks; see [what a passing run proves](../STUDY-GUIDE.md#what-a-passing-run-proves).

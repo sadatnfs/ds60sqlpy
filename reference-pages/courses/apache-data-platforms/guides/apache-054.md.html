@@ -234,7 +234,7 @@ bash run.sh check
 bash run.sh check-backup</code></pre>
 <p>The check route inserts and deletes a probe key and requires that a read returns nothing, which proves logical absence for current readers. The backup check works with snapshots, which are hard links to SSTable files taken at a point in time; a snapshot taken before the delete still holds the old value on disk. That combination is the usual answer to a deletion request audit: the live table is correct, but erasure also needs snapshot expiry and compaction. Shortening gc_grace_seconds to speed things up risks resurrected data if a replica missed the delete and repair has not run.</p>
 <h3 id="complete-worked-source">Complete worked source<a class="heading-anchor" href="#complete-worked-source" aria-label="Link to this section">#</a></h3>
-<p>This is a project-only command notebook. Read and edit it in the classroom; run its explicitly labeled commands from the copied owned Docker workshop. The classroom does not execute these service commands.</p>
+<p>The classroom does not execute these service commands. See the <a href="../STUDY-GUIDE.md.html#workshop-notebooks">workshop rules</a>.</p>
 <h2 id="logical-expiry-and-deletion">Logical expiry and deletion<a class="heading-anchor" href="#logical-expiry-and-deletion" aria-label="Link to this section">#</a></h2>
 <pre class="highlighted-code"><code class="language-bash">bash run.sh check</code></pre>
 <p>The client observes a live TTL no greater than five seconds, then polls under a fifteen-second deadline until that known value disappears. It separately inserts and deletes a probe key and requires logical absence. Existing retained orders are not reset. A later empty result establishes visibility, not physical erasure.</p>

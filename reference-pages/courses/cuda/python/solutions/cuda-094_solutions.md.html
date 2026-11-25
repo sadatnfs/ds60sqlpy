@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cuda/python/solutions/cuda-094_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="cuda-094-explained-solutions">cuda-094: explained solutions<a class="heading-anchor" href="#cuda-094-explained-solutions" aria-label="Link to this section">#</a></h2>
-<p>These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.</p>
+<p>Compare with your <a href="../lessons/cuda-094.md.html">worksheet</a> attempt.</p>
 <h3 id="exercise-1-list-checkpoint-fields">Exercise 1: List checkpoint fields<a class="heading-anchor" href="#exercise-1-list-checkpoint-fields" aria-label="Link to this section">#</a></h3>
 <p>Include all state affecting the next update.</p>
 <p><strong>Approach.</strong> List every field that affects the next update: model weights, optimizer state such as the momentum buffer <code>v</code>, the learning-rate scheduler state, the gradient scaler state, the step counter, random generator states and the position of the data sampler.</p>
@@ -231,9 +231,19 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Why it is correct here.</strong> Different GPUs and libraries may choose different kernels and summation orders, so floating results differ slightly even with identical state.</p>
 <p><strong>A plausible wrong approach.</strong> Requiring byte-identical weights across hardware leads to false failures that obscure real restart bugs.</p>
 <p><strong>How to verify.</strong> Resume the same checkpoint on two machines and compare loss curves within the documented tolerance, recording both environments.</p>
+<h3 id="self-check-answers">Self-check answers<a class="heading-anchor" href="#self-check-answers" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>Why save at an update boundary?</strong> Partially accumulated gradients are ambiguous to restore unless the format explicitly handles them, while a completed step is consistent.</li>
+</ol>
+<ol start="2">
+<li><strong>Does a checkpoint restore a running GPU context?</strong> No. It restores numerical training state, not a live context, an in-flight stream or allocator contents.</li>
+</ol>
+<ol start="3">
+<li><strong>Why must checkpoint storage outlive the training process?</strong> The process is disposable; a restart can only continue if the saved state survives the process that wrote it.</li>
+</ol>
 <h3 id="reference-observation">Reference observation<a class="heading-anchor" href="#reference-observation" aria-label="Link to this section">#</a></h3>
 <p>Correct restored update 0.935 differs from weights-only 0.98.</p>
-<p>The reference file is <code>courses/cuda/python/references/cuda-094_cpu.py</code>. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.</p></article>
+<p>Asserted by <code>courses/cuda/python/references/cuda-094_cpu.py</code>.</p></article>
   </main>
 </body>
 </html>

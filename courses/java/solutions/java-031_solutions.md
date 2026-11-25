@@ -1,6 +1,6 @@
 # java-031: explanatory solutions
 
-Open after an attempt or an explicit solution reveal. The executable reference runs the six exercise checks together as `Main.java`. The guide contains independent worked examples, while this file explains the choices and failure cases in the complete answer.
+Open this after an attempt; see [using the solutions](../STUDY-GUIDE.md#use-the-solutions).
 
 ## Mechanism review
 
@@ -22,7 +22,7 @@ Use getAnnotation for a runtime-retained annotation and getMethod for a public m
 
 ## Exercise 1: Inspect a retained annotation: predict an edited check
 
-Task: Copy Example A into a scratch `Main.java` and change `assert version != null && version.value() == 2;` to `assert version != null && version.value() == 3;` inside its assertion. Before running it with `java -ea Main`, predict whether the assertion still holds and explain why; then restore it.
+Task: Change Example A's assertion to `assert version != null && version.value() == 3;`, predict whether it holds, then run and restore it.
 
 The annotation's retention policy makes it visible at runtime. Its value is information for a compatibility check, not automatic enforcement.
 
@@ -33,13 +33,13 @@ Version version = Friendly.class.getAnnotation(Version.class);
 assert version != null && version.value() == 2;
 ```
 
-**Expected:** The changed run fails with an `AssertionError` from the assertion on `version != null && version.value() == 2`. Restoring the original line brings back the worked observation: version 2.
+**Expected:** The edited run fails with an `AssertionError` from the assertion on `version != null && version.value() == 2`.
 
-**Verify:** Compare your written prediction with the reported `AssertionError` and its stack-trace line, and explain why the edited condition is false for the values that satisfy `version != null && version.value() == 2`. After restoring the line, the program completes without an `AssertionError` again.
+**Verify:** Explain why the edited assertion is false for the values that satisfy `version != null && version.value() == 2`.
 
 ## Exercise 2: Invoke a known public method reflectively: diagnose an edited check
 
-Task: A careless edit changed the assertion that Example B adds after Example A so that it reads `assert method.invoke(new Friendly(), "Ada!").equals("Hello, Ada");`. Run Example B with that line, explain why the edited assertion now fails for the same program state, and restore it.
+Task: Example B's new assertion was edited to `assert method.invoke(new Friendly(), "Ada!").equals("Hello, Ada");`. Explain why it fails for unchanged state and restore it.
 
 The method name and parameter types form an explicit signature. A wrong signature fails at lookup rather than silently selecting an unrelated overload.
 
@@ -50,9 +50,9 @@ var method = Friendly.class.getMethod("greet", String.class);
 assert method.invoke(new Friendly(), "Ada").equals("Hello, Ada");
 ```
 
-**Expected:** Before the repair the run fails with an `AssertionError` from the assertion on `method.invoke(new Friendly(), "Ada").equals("Hello, Ada")`; after it the line reads `assert method.invoke(new Friendly(), "Ada").equals("Hello, Ada");` again and hello, Ada.
+**Expected:** The edited run fails with an `AssertionError` from the assertion on `method.invoke(new Friendly(), "Ada").equals("Hello, Ada")`; the restored assertion passes.
 
-**Verify:** Keep the failing and the repaired runs. Explain why the edited assertion rejects the same program state that `method.invoke(new Friendly(), "Ada").equals("Hello, Ada")` accepts.
+**Verify:** Explain why the edited assertion rejects the state that `method.invoke(new Friendly(), "Ada").equals("Hello, Ada")` accepts.
 
 ## Exercise 3: Load a real local service descriptor
 
@@ -73,7 +73,7 @@ try (ServiceFixture fixture = new ServiceFixture()) {
 
 **Expected:** one Friendly provider with version 2 and working greet.
 
-**Verify:** Keep an assertion equivalent to `providers.get(0).greet("Lin").equals("Hello, Lin")`. As a control, change `assert providers.get(0).greet("Lin").equals("Hello, Lin");` to `assert providers.get(0).greet("Lin!").equals("Hello, Lin");` inside it: the run must fail with an `AssertionError`, which shows the assertion can fail. Restore it.
+**Verify:** Control: changing `assert providers.get(0).greet("Lin").equals("Hello, Lin");` to `assert providers.get(0).greet("Lin!").equals("Hello, Lin");` inside the assertion must make it fail.
 
 ## Exercise 4: Preserve a reflected target failure
 
@@ -93,7 +93,7 @@ assert targetFailure;
 
 **Expected:** cause IllegalArgumentException.
 
-**Verify:** Keep an assertion equivalent to `targetFailure`. As a control, change `method.invoke(new Friendly(), " ");` to `method.invoke(new Friendly(), " !");`: the run must fail with an `AssertionError` from the assertion on `targetFailure`. Restore the line before continuing.
+**Verify:** Control: changing `method.invoke(new Friendly(), " ");` to `method.invoke(new Friendly(), " !");` must fail the assertion on `targetFailure`.
 
 ## Exercise 5: Reject missing class and method contracts
 
@@ -119,7 +119,7 @@ assert missingClass && missingMethod;
 
 **Expected:** ClassNotFoundException and NoSuchMethodException.
 
-**Verify:** Keep an assertion equivalent to `missingClass && missingMethod`. As a control, change `missingClass = true;` to `missingClass = false;`: the run must fail with an `AssertionError` from the assertion on `missingClass && missingMethod`. Restore the line before continuing.
+**Verify:** Control: changing `missingClass = true;` to `missingClass = false;` must fail the assertion on `missingClass && missingMethod`.
 
 ## Exercise 6: Treat provider metadata as a policy input
 
@@ -135,8 +135,10 @@ assert 3 > supportedMaximum;
 
 **Expected:** version 2 accepted; version 3 rejected.
 
-**Verify:** Keep an assertion equivalent to `3 > supportedMaximum`. As a control, change `int supportedMaximum = 2;` to `int supportedMaximum = 3;`: the run must fail with an `AssertionError` from the assertion on `3 > supportedMaximum`. Restore the line before continuing.
+**Verify:** Control: changing `int supportedMaximum = 2;` to `int supportedMaximum = 3;` must fail the assertion on `3 > supportedMaximum`.
 
 ## After comparing the answer
 
-Run the complete reference with assertions enabled, then return to your own implementation. Recreate one check with different values and explain its expected result before execution. A compiler error, an expected domain exception and an assertion failure represent different stages and should be reported separately. Preserve ownership boundaries when adapting file, network or concurrency examples. The reference never authorizes access to a shared service or deletion of learner state. Use a fresh tiny fixture when you need to distinguish two interpretations of an API contract.
+Add a second provider class with `@Version(3)` to your copy's descriptor and change Exercise 6 so the consumer filters providers by the supported range and keeps only `Friendly`.
+
+Run the complete reference with `java -ea Main` first; the [review routine](../STUDY-GUIDE.md#use-the-solutions) covers the rest.

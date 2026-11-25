@@ -1,20 +1,26 @@
 # spark-005: Option, missing values, and total functions
 
-Authored tutorial and practice content. The prepared Scala/JVM worker executes a bounded program; process success and understanding remain distinct. No source file installs a tool or downloads a dependency.
+An amount can be present, absent or present but unreadable, and those are three different facts. This lesson parses optional amount text into `Option[Long]`, keeps a ledger with a separate count for each state, and refuses to turn a missing or rejected value into a zero that would quietly lower a total.
 
 ## Level and prerequisites
 
-Beginner; approximately 75 minutes. Direct prerequisites: `spark-004`. The lesson uses Scala 2.13 syntax and the prepared JDK 17 worker. The [execution baseline](../execution-baseline.md) lists the exact Scala, JDK and Spark versions.
+Beginner; approximately 75 minutes. Direct prerequisites: `spark-004`. Pinned versions: [execution baseline](../execution-baseline.md).
 
 ## How to run this lesson
 
-Open `spark-005` in the classroom, select the Scala source, prepare the `scala-jvm` profile and run the saved pad. The worker stages the single source as `Main.scala` and invokes `object Main`. Read the terminal output and exact assertions. The [learner source](../lessons/spark-005.scala) runs two complete demonstrations; its six task functions remain explicit stubs until you implement them. Preserve your saved attempt. The [reference program](../solutions/spark-005_solution.scala) and [explained solutions](../solutions/spark-005_solutions.md) are separate and should be opened after an attempt or an explicit worked-comparison request. If the profile is unavailable, reading and saving remain available; opening this guide does not prepare a runtime.
+Shared run steps and profile rules: [study guide](../STUDY-GUIDE.md#run-a-language-lesson).
+
+Learner pad: [spark-005.scala](../lessons/spark-005.scala).
+
+Open the [explained solutions](../solutions/spark-005_solutions.md) after an attempt.
+
+The first worked example prints `present=Some(0) absent=None`: a real zero is still a present value, and mapping `_ + 5L` over it gives `Some(5)` while the same map over `None` stays `None`. The second prints that `Option(null)` and `Some(null)` are distinct constructions, because `Option(null)` is `None` but `Some(null)` is defined and only `flatMap(Option(_))` exposes the hidden null. Exercises 1 and 2 depend on that difference.
 
 ## Learning objectives
 
 - Represent absence explicitly and distinguish None, zero, empty text and JVM null.
-- Explain the result of both worked examples before running them.
-- Implement the six contracts, inspect normal and boundary evidence, and explain a counterexample in your own words.
+- Classify `Some("0")`, `Some("25")`, `None`, `Some("bad")` and `Some(null)` as observed, observed, missing, rejected and rejected, and say why a supplied `null` is rejected rather than missing.
+- Reconcile every input token into exactly one of the three ledger keys, so the counts always sum to the input size and an empty input still reports all three keys at zero.
 
 ## Vocabulary and concepts
 
@@ -134,11 +140,15 @@ If observed zero disappears, inspect a value-based filter rather than blaming Op
 
 ## Self-check
 
-Explain one input-to-output trace without reading your code. Identify which function preserves repeated values, which condition distinguishes an invalid or missing input, and which assertion would fail for the tempting incorrect implementation. A printed success line alone is not the evidence; retain the exact values and the reasoning that connect them to the contract.
+- What does `parseAmount` return for `Some(" 25 ")`, `Some("-1")`, `Some("1.0")` and `Some("1000001")`, and which of those are bound violations rather than format violations?
+- Explain why `classify(Some(null))` must be "rejected" and not "missing". What would a ledger total of observed 2, missing 2, rejected 1 hide?
+- `observed` returns `Seq(0L, 25L)` for the five-token fixture. Why is `flatMap` the right operation here, and why must the zero stay in the result?
+- `displayAmount` prints "0", "missing" or "rejected". Why is this a presentation function only, and what goes wrong if a report sums the displayed text instead of the parsed values?
+- `feeOption(Some("100"))` is `Some(5L)`. Trace `feeOption(Some("bad"))` and show where the absence carries through without a `.get`.
 
 ## Next step
 
-Continue to the next lesson only after you can explain the boundary behavior. The [course route](../README.md) shows authored material and runtime evidence separately.
+Go on to [spark-006: Case classes, pattern matching, and domain states](spark-006.md). Here the value was the only question; next, each record carries an identity and one of several states (paid, voided, refunded), and a sealed type lets the compiler point out every place a new state must be handled.
 
 ## Primary sources and official APIs
 

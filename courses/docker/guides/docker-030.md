@@ -32,11 +32,9 @@ For this lesson, use a synthetic finding table and prepare an update plan withou
 
 ## How to use this lesson
 
-The classroom displays this guide and saves your worksheet, `courses/docker/lessons/docker-030.md`. Its Run button does not control your Docker engine. Docker engine access is powerful host access, so the classroom deliberately receives no engine socket. Work through the supplied examples without starting anything, then use the optional host lab only in your own disposable project. Reading a command, parsing YAML and actually running the project are different forms of evidence.
+The classroom saves `courses/docker/lessons/docker-030.md` and holds no engine socket ([host-lab setup](../STUDY-GUIDE.md#host-lab-setup)).
 
-Use Bash in Linux, macOS Terminal, or Ubuntu under WSL 2 on Windows. The supported engine runs Linux containers. The maintained fixture is `courses/docker/fixtures/compose-lab/`; its README explains copying it into a new ignored learner directory, checking the engine, building locally with visible logs, and using the fixed project name `ds60-docker-study`. The fixture uses port 18080 on host loopback. Stop if that project name or port belongs to unrelated work; choose a new project name consistently in your own copy. Never paste a command against a remote Docker context simply because it is currently selected.
-
-For Dockerfile examples, create a file named `Dockerfile` in a scratch project. YAML snippets describe a fragment unless explicitly called a complete file. Text transcripts are synthetic illustrations, not claims about your machine. Do not substitute a real password, token or private registry into a checked-in example. **How to use the lessons** in the [subject README](../README.md) collects these rules in one place.
+**Host lab.** With the app running, try the patch-in-place habit and watch the fixture refuse it: `docker compose -p ds60-docker-study exec app python -c "open('/app/patched', 'w')"` fails with a read-only file system error, because the service sets `read_only`, and even a writable root would stop UID 10001 from writing into root-owned `/app`. Now take the inventory a finding would be matched against: `docker compose -p ds60-docker-study exec app python -c "import platform, ssl; print(platform.python_version(), ssl.OPENSSL_VERSION); print(open('/etc/os-release').read())"`. Write the Python version, the OpenSSL version and the Debian release next to the output of `docker image inspect --format '{{.Id}}' ds60-docker-study:local`. That pair, inventory plus identity, is what a patch decision cites. Nothing was changed, so there is no cleanup.
 
 ## Worked example / walkthrough
 
@@ -68,7 +66,7 @@ update declared input -> build new image -> run tests -> inspect exact digest ->
 
 ## Six progressive exercises
 
-For each exercise, name the object involved and the phase of its lifetime before changing anything, then vary only the condition the task names. Exercises that ask you to predict, explain, compare or diagnose keep their answers in the solutions file; the others show the evidence to look for.
+Answer-type prompts keep their answers in the solutions file ([exercise rules](../STUDY-GUIDE.md#exercise-rules)).
 
 ### Exercise 1: Separate vulnerability presence and exploitability.
 
@@ -104,13 +102,19 @@ For each exercise, name the object involved and the phase of its lifetime before
 
 Patching inside a running container instead of rebuilding the image. Reading zero findings as proof of safety. Applying a scan result to a tag that now points elsewhere.
 
-Exercise 4 is this chapter's boundary case: Diagnose a scan report attached only to a mutable tag. Resolve the tag named in the scan report to a digest, compare it with the deployed digest, and note the scanner's database date. Preserve the original failure and the exact changed field before retrying. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
+Exercise 4 is this chapter's boundary case: Diagnose a scan report attached only to a mutable tag. Resolve the tag named in the scan report to a digest, compare it with the deployed digest, and note the scanner's database date.
+
+Running `docker compose build` again feels like patching, but with an unchanged Dockerfile and context every step is served from cache and the base comes from the local copy of the Python image, so the new image has the same ID as the old one and the same vulnerable packages. The build output gives it away with `CACHED` beside each step after `FROM`. A deliberate update refreshes the base, for example `docker compose -p ds60-docker-study build --pull app` where network access is allowed, or a new pinned base digest in the Dockerfile, and then compares image IDs: an unchanged ID means nothing was patched, whatever the command was called.
+
+Never trade a safety control for a passing example ([safety rules](../STUDY-GUIDE.md#safety-rules)).
 
 ## Retrieval, transfer and next steps
 
-Close the explanations first. Trace the patch steps and name the identity you would record before replacing the container. Then reconstruct worked example 2 (Trace a reproducible patch) with one different value, predict what changes, and name which of vulnerability finding, affected version, base image update and rebuild and retest the change touches.
+**Retrieval.** Trace the patch steps and name the identity you would record before replacing the container.
 
-When a host session ends, run `docker compose -p ds60-docker-study down` from your fixture copy. It removes the project's containers and network but keeps named volumes; deleting a volume is a separate, deliberate reset described in the fixture README.
+**Transfer case.** A scanner reports a finding in the base image's OpenSSL, but the fixture serves plain HTTP on loopback and never opens TLS itself. Do you patch now, defer, or accept the risk, and what goes in the record?
+
+Then run the [retrieval loop](../STUDY-GUIDE.md#retrieval-and-cleanup) and end any host session with its cleanup.
 
 ## Primary references
 

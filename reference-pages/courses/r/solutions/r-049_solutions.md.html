@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/r/solutions/r-049_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="r-049-reference-reasoning">r-049: reference reasoning<a class="heading-anchor" href="#r-049-reference-reasoning" aria-label="Link to this section">#</a></h2>
-<p>Use the <a href="r-049_reference.R.html">complete reference</a> with the guide&#x27;s declared inputs and runtime. Every worked example is also a standalone script.</p>
+<p>Run the <a href="r-049_reference.R.html">complete reference</a> under the <a href="../STUDY-GUIDE.md.html#run-a-chapter">run rules</a>.</p>
 <h3 id="why-the-implementation-has-this-shape">Why the implementation has this shape<a class="heading-anchor" href="#why-the-implementation-has-this-shape" aria-label="Link to this section">#</a></h3>
 <p>The fixed-coefficient model isolates forecast arithmetic from parameter estimation. The rolling-origin reference separately verifies that each forecast uses a historical prefix and is scored at the declared next time. This prevents a correct error formula from hiding an invalid information boundary.</p>
 <p>The differencing check retains both the new length and changed target. Forecast uncertainty is reported as a property of the fitted model, with its assumptions and omitted uncertainty sources named. No production forecasting claim follows from these synthetic controls.</p>
@@ -248,7 +248,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Tempting mistake:</strong> Reading forecast plus or minus 2 SE as covering all future error. Here phi was fixed rather than estimated, so the SE leaves out coefficient uncertainty entirely, along with any change in the process after time 8.</p>
 <p><strong>Verify:</strong> <code>all(is.finite(f$se))</code> and <code>all(f$se &gt;= 0)</code> return TRUE.</p>
 <h3 id="what-the-checks-establish">What the checks establish<a class="heading-anchor" href="#what-the-checks-establish" aria-label="Link to this section">#</a></h3>
-<p>The reference makes 6 <code>stopifnot()</code> checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.</p></article>
+<p>The assertions confirm forecasts of 0.2, 0.1 and 0.05 with finite, nonnegative standard errors, rolling-origin naive predictions on 1 to 8 whose errors are all 1 with mean squared error 1, a full-series mean that differs from the mean available at an early origin, five unit changes in a differenced trend, and origins that always precede their targets. They do not show that the series is stationary or that the model is well chosen.</p>
+<p>The reference makes 6 <code>stopifnot()</code> checks; see <a href="../STUDY-GUIDE.md.html#what-a-passing-run-proves">what a passing run proves</a>.</p></article>
   </main>
 </body>
 </html>

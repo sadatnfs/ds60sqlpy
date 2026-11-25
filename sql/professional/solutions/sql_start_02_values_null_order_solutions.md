@@ -1,22 +1,21 @@
 # SQL-START-02: solution reasoning
 
-Use this after an honest attempt at the [guide](../companion-guides/sql_start_02_values_null_order.md)
-and [learner script](../lessons/sql_start_02_values_null_order.sql). The separate
-[executable solution](sql_start_02_values_null_order_solutions.sql) runs all six answers and independent
-fail-fast checks with `psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/solutions/sql_start_02_values_null_order_solutions.sql`.
-It uses only temporary fixtures, starts a transaction, and ends in rollback.
-It must exit 0 with no contract failures. Each answer has a savepoint so an
-experiment cannot silently change a later exercise's starting conditions.
-The assertion helper treats false and unknown as failures, rather than allowing
-a NULL assertion to pass accidentally. Keep the original fixture unchanged
-when comparing your work so the stated identities remain a reliable oracle.
+Open this after attempting the
+[guide](../companion-guides/sql_start_02_values_null_order.md) and your
+[learner script](../lessons/sql_start_02_values_null_order.sql). The
+[executable solution](sql_start_02_values_null_order_solutions.sql) rebuilds
+the five `start_shipments` rows, isolates each answer in a savepoint, stores it
+as `solution_answer_N`, and checks the exact shipment IDs with
+`pg_temp.assert_true`. That helper fails on NULL as well as false, which
+matters here: a check written as `weight = NULL` would otherwise pass without
+testing anything. Run it as shown in the [study
+guide](../../STUDY-GUIDE.md#read-a-solution), with
+`-f sql/professional/solutions/sql_start_02_values_null_order_solutions.sql`.
 
-The code below is the answer for each numbered prompt, followed by its
-reasoning. Inspect the first discrepancy in your own transcript before reading
-a different answer. A solution is one defensible implementation of this contract;
-an alternative is valid if its identities, values, missingness, ordering, and
-transaction behavior match. Tests constrain the actual returned relation,
-rather than assuming a familiar-looking query must be right.
+Your answer is equally valid if it returns the same shipment IDs in the same
+order and keeps IDs 2 and 5 as NULL instead of turning them into zero. Pay most
+attention to Exercises 2 and 4: a missing `NULLS LAST` or a filter that quietly
+drops the unknown pair can still print plausible rows.
 
 ## Exercise solutions
 
@@ -157,4 +156,10 @@ The VALUES input names both versions explicitly and casts the initially unknown 
 
 ## Cleanup and evidence boundary
 
-The final rollback removes every temporary table, helper function, index, and modeled change. Running this file twice starts from the same fixture and should produce the same logical evidence. No extension, external dataset, current timestamp, or administrator capability is required. For the optional two-session concurrency lab, use its separate explicit cleanup because that fixture is deliberately committed; the default script never prepares that shared state. A static content check can validate contracts and file structure, while only a live PostgreSQL transcript validates SQL execution. Retain that distinction when reporting completion.
+Each `ROLLBACK TO SAVEPOINT` discards that exercise's `solution_answer_N`
+table, and the closing `ROLLBACK` drops `start_shipments` and the assertion
+helper. No stored weight or label is ever updated: the display fallback
+in Exercise 5 and the change detector in Exercise 6 only compute output columns,
+so rerunning the file gives the same five shipments and the same evidence.
+Passing it proves these answers, not your own; compare your transcript with
+each Expected line for that.

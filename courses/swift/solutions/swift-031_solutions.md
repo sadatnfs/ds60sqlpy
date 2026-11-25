@@ -1,6 +1,8 @@
 # swift-031: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [swift-031_solution.swift](swift-031_solution.swift). It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.
+Reference program: [swift-031_solution.swift](swift-031_solution.swift), covering both examples and the executed answers.
+
+Attempt the tasks first; see [comparing with the explanation](../STUDY-GUIDE.md#comparing-with-the-explanation).
 
 ## Why the two examples differ
 
@@ -127,7 +129,7 @@ The guard admits amounts from 0 through stock inclusive, so only the excess requ
 
 Design a reservation state machine for an operation requiring external I/O before commitment.
 
-No single reference answer exists: several designs can satisfy this transfer task. Build yours from the task 3 answer above (Implement a bounded actor-owned queue with explicit admission) and the mechanism described below, and state one limitation of your choice.
+No single answer exists; extend task 3 using the [open transfer routine](../STUDY-GUIDE.md#open-transfer-tasks).
 
 ## Solution reasoning
 
@@ -151,4 +153,4 @@ Actors do not make all multi-step workflows transactional. Await inside an invar
 
 ## Review before continuing
 
-Run the reference and confirm that it prints `swift-031: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.
+Run the reference and confirm it prints `swift-031: passed`, then rerun the guide's counterexample.

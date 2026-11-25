@@ -3,11 +3,11 @@ package main
 import "fmt"
 
 func main() {
-	// Exercise 1: Commit a valid change: change one input: Copy worked example 1 into a scratch pad and change `s := Balances{A: 5, B: 5}` to `s := Balances{A: 6, B: 5}`. Before running, predict which check fails and which value it now sees; then run it and restore the original line.
-	// Expected: The changed run panics with `commit` because `err == nil && s.A == 2 && s.B == 8` no longer holds. Restoring the original line brings back the worked observation: the committed balances are 2 and 8.
+	// Exercise 1: Commit a valid change: change one input: Copy worked example 1, change `s := Balances{A: 5, B: 5}` to `s := Balances{A: 6, B: 5}` and predict the failure before running; then restore the line.
+	// Expected: The edited run panics with `commit` because `err == nil && s.A == 2 && s.B == 8` no longer holds.
 
-	// Exercise 2: Rollback an explicit failure: debug a regression: A regression changed one token in worked example 2, so one line now reads `s := Balances{A: 6, B: 5}`. Run worked example 2 with that line, use the failure to locate the defect and repair it without changing the check.
-	// Expected: Before the repair the program panics with `rollback`; after it the line reads `s := Balances{A: 5, B: 5}` again and the outer balances remain unchanged.
+	// Exercise 2: Rollback an explicit failure: debug a regression: A one-token regression in worked example 2 makes a line read `s := Balances{A: 6, B: 5}`. Repair it without changing the check.
+	// Expected: The defective run panics with `rollback`; after restoring `s := Balances{A: 5, B: 5}`, the outer balances remain unchanged.
 
 	// Exercise 3: Reject invalid funds: Attempt a transfer larger than available balance.
 	// Expected: The state remains 5 and 5.

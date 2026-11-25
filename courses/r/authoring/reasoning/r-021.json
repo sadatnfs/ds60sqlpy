@@ -36,5 +36,7 @@
       "wrong": "Claiming value semantics for every measurement. Adding a cache environment field later would break the claim without any error.",
       "verify": "`x$values[[1]]` still returns 3 after the copy is set to 9, while for a list field holding an environment `identical(copy$env, x$env)` returns TRUE after copying."
     }
-  ]
+  ],
+  "run_note": "The starter supplies only the values 3 and 7 with the unit ms, plus one TODO comment per exercise, and prints a scaffold message. Run it to confirm the inputs, then write the `measurement()` constructor and validator before any generic. Exercise 4 builds an object with `structure()` directly, and only a validator you call explicitly will reject its infinite value.",
+  "checks_note": "The assertions confirm that malformed input raises a diagnostic matching the expected text, that the total of 3 and 7 is `c(ms = 10)`, that a new object with 5 added totals 15 and counts 3 through its own generic, that the empty measurement counts 0 and totals 0 ms, and that modifying a copy to 9 leaves the original 3 in place. They do not test what happens when someone bypasses the constructor and never calls the validator."
 }

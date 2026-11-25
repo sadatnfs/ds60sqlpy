@@ -112,7 +112,7 @@ The membership test prints False and the current ids remain 2 and 3. Expiration 
 
 ## Complete worked source
 
-This is a complete editable worked program for the declared prepared runtime. It uses bounded local fixtures and does not install packages or start distributed services.
+Run it as the [worked program rules](../STUDY-GUIDE.md#worked-programs) describe.
 
 ```python
 import tempfile

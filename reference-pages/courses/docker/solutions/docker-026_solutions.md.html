@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/docker/solutions/docker-026_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="docker-026-explanatory-solutions">docker-026: explanatory solutions<a class="heading-anchor" href="#docker-026-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit reveal. These explain the supplied teaching fixtures; they are not engine results. The mechanism is explained in <code>courses/docker/guides/docker-026.md</code>.</p>
+<p>These answers explain teaching fixtures, not engine results; the mechanism is in <a href="../guides/docker-026.md.html">the guide</a>.</p>
 <h3 id="exercise-1-distinguish-profiles-and-overrides">Exercise 1: Distinguish profiles and overrides.<a class="heading-anchor" href="#exercise-1-distinguish-profiles-and-overrides" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Service selection versus model composition.</p>
 <p><strong>Why:</strong> A profile determines which optional services participate; an override modifies service and resource definitions. They can be used together but answer different questions.</p>
@@ -238,7 +238,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>A plausible wrong approach:</strong> Pasting the full config output, including resolved secrets, into the launch record exposes them.</p>
 <p><strong>How to verify:</strong> Another person reruns config with the recorded flags and gets the same output apart from the redacted values.</p>
 <h3 id="check-your-transfer">Check your transfer<a class="heading-anchor" href="#check-your-transfer" aria-label="Link to this section">#</a></h3>
-<p>A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.</p></article>
+<p>An empty list merges into the inherited one and adds nothing, so <code>config</code> still shows <code>127.0.0.1:18080</code> and the port stays published. Compose provides the <code>!reset</code> YAML tag for this case: <code>ports: !reset []</code> in the override clears the inherited list, and the rendered <code>app</code> service then has no <code>ports</code> key at all. Accept the change only when <code>config</code> shows that and, after <code>up</code>, <code>docker compose port app 8080</code> reports no mapping. If <code>config</code> still lists 18080, the override was not included or your Compose release predates <code>!reset</code>.</p></article>
   </main>
 </body>
 </html>

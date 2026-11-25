@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/docker/solutions/docker-042_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="docker-042-explanatory-solutions">docker-042: explanatory solutions<a class="heading-anchor" href="#docker-042-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit reveal. These explain the supplied teaching fixtures; they are not engine results. The mechanism is explained in <code>courses/docker/guides/docker-042.md</code>.</p>
+<p>These answers explain teaching fixtures, not engine results; the mechanism is in <a href="../guides/docker-042.md.html">the guide</a>.</p>
 <h3 id="exercise-1-predict-all-outcomes-before-running-the-final-project">Exercise 1: Predict all outcomes before running the final project.<a class="heading-anchor" href="#exercise-1-predict-all-outcomes-before-running-the-final-project" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> A written normal, failure, replacement and recovery expectation.</p>
 <p><strong>Why:</strong> Predictions make the experiment falsifiable. Without them it is easy to reinterpret any output as success.</p>
@@ -238,7 +238,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>A plausible wrong approach:</strong> Presenting local success as production readiness sends the next learner into unsupported use.</p>
 <p><strong>How to verify:</strong> A new reader follows the handoff, gets the same results, and can name two limits it states.</p>
 <h3 id="check-your-transfer">Check your transfer<a class="heading-anchor" href="#check-your-transfer" aria-label="Link to this section">#</a></h3>
-<p>A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.</p></article>
+<p>Recreate. <code>APP_MESSAGE</code> is runtime environment that Compose sets, not something copied into the image, so <code>docker compose -p ds60-docker-study up -d --wait app</code> recreates the container with the new value and the image ID in the packet stays valid. A host request to <code>/</code> returning the new message, with <code>docker image inspect --format &#x27;{{.Id}}&#x27;</code> unchanged, proves it. Had you edited <code>server.py</code>, a rebuild would be required and the packet&#x27;s image identity would change. If <code>/</code> still shows the old message, the container was not recreated.</p></article>
   </main>
 </body>
 </html>

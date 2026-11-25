@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cpp/solutions/cpp-028_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="cpp-028-explanations-and-reference-observations">cpp-028: explanations and reference observations<a class="heading-anchor" href="#cpp-028-explanations-and-reference-observations" aria-label="Link to this section">#</a></h2>
-<p>Attempt the learner tasks before opening this document. The executable reference checks the bounded normal and boundary examples; the six explanations below cover the deliberate changes and manual checks.</p>
+<p>The <a href="cpp-028_solution.cpp.html">executable reference</a> runs a corpus of two good and two bad lines and checks that a parsed record keeps cents 250 after its temporary input string is gone. The explanations cover owned results and consumers of the public header. How to compare: <a href="../STUDY-GUIDE.md.html#compare-with-the-solutions">study guide</a>.</p>
 <h3 id="mechanism">Mechanism<a class="heading-anchor" href="#mechanism" aria-label="Link to this section">#</a></h3>
 <p>A reusable record library separates stable data contracts from user-interface code. Packaging declares headers and link targets. Compatibility tests protect callers from accidental changes. The capstone combines strict parsing, named errors, ownership and exact integer output with an auditable fixture ledger.</p>
 <h3 id="detailed-reasoning">Detailed reasoning<a class="heading-anchor" href="#detailed-reasoning" aria-label="Link to this section">#</a></h3>

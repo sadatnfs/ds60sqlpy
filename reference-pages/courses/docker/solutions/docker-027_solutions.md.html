@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/docker/solutions/docker-027_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="docker-027-explanatory-solutions">docker-027: explanatory solutions<a class="heading-anchor" href="#docker-027-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit reveal. These explain the supplied teaching fixtures; they are not engine results. The mechanism is explained in <code>courses/docker/guides/docker-027.md</code>.</p>
+<p>These answers explain teaching fixtures, not engine results; the mechanism is in <a href="../guides/docker-027.md.html">the guide</a>.</p>
 <h3 id="exercise-1-predict-which-resources-are-durable">Exercise 1: Predict which resources are durable.<a class="heading-anchor" href="#exercise-1-predict-which-resources-are-durable" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Only the intended named volume and explicit backup files.</p>
 <p><strong>Why:</strong> Containers, peer client instances and project networks are replaceable. Do not accidentally rely on writable-layer state when describing recovery.</p>
@@ -238,7 +238,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>A plausible wrong approach:</strong> Writing steps that rely on your shell history or already-built images fails for the next operator.</p>
 <p><strong>How to verify:</strong> Someone new follows the handoff on a clean engine and reaches the same health and restore results.</p>
 <h3 id="check-your-transfer">Check your transfer<a class="heading-anchor" href="#check-your-transfer" aria-label="Link to this section">#</a></h3>
-<p>A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.</p></article>
+<p>Not necessarily. The restore volume holds the snapshot taken at export time, while the source keeps accepting increments, so a later increment through <code>exec</code> or the browser explains a higher source value. Compare the restored value with the counter in <code>counter-backup.json</code>: if both say 4, export and restore are correct and the source simply moved on, which <code>docker compose logs app</code> confirms with a later <code>POST /increment</code> line. If the backup says 5 and the restore says 4, the restore step wrote something other than the export.</p></article>
   </main>
 </body>
 </html>

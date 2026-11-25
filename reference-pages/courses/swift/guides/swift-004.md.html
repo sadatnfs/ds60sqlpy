@@ -206,11 +206,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>String.Index:</strong> A valid position in a particular string.</p>
 <p><strong>Substring:</strong> A slice that may share storage with its source.</p>
 <h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>The Linux Docker classroom compiles the saved pad as <code>main.swift</code> with Swift 6 language checking. An explicit <code>@main</code> type contains <code>static func main() async throws</code>; the fixed compiler uses <code>-parse-as-library -swift-version 6</code>. The examples use the standard library and portable Foundation. <code>precondition</code> makes a violated invariant fail the process. The fixed pad accepts one source file, without arbitrary command arguments, interactive input or dependency installation. SwiftUI, UIKit, Apple simulators and application signing belong to the separately prepared macOS/Xcode project labs, never the Linux pad.</p>
-<p>Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.</p>
+<p>Unicode surprises show up as runtime values, not compile errors, so predict every count in task 1 on paper before pasting Example A. Task 4 asks you to misuse an integer position: <code>text[1]</code> does not compile, because <code>String</code> has no integer subscript, and that diagnostic belongs in your evidence.</p>
+<p>Compile contract, starter stop and success marker: <a href="../STUDY-GUIDE.md.html#running-a-lesson">running a lesson</a>.</p>
 <h3 id="syntax-anatomy-and-execution-trace">Syntax anatomy and execution trace<a class="heading-anchor" href="#syntax-anatomy-and-execution-trace" aria-label="Link to this section">#</a></h3>
 <p><code>text.count</code> counts Characters. <code>text.utf8.count</code> counts bytes. <code>index(after:)</code> advances a valid String.Index. Slices produce Substring values that may retain the original storage until converted to String.</p>
-<p>Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.</p>
+<p>Each example ends with a trace; method: <a href="../STUDY-GUIDE.md.html#tracing-a-program">tracing a program</a>.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="example-a-count-the-right-unit">Example A: Count the right unit<a class="heading-anchor" href="#example-a-count-the-right-unit" aria-label="Link to this section">#</a></h4>
 <p>Character count follows grapheme boundaries instead of byte storage.</p>
@@ -230,6 +230,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> Both spellings contain one Character but differ in UTF-8 bytes.</p>
+<p><strong>Trace.</strong> The first literal is the single precomposed scalar U+00E9. It forms one Character, and UTF-8 encodes it in two bytes, so the counts are 1 and 2. <code>combined</code> is the letter e followed by U+0301, the combining acute accent. Swift&#x27;s grapheme rules join the two scalars into one Character, so <code>count</code> is still 1, while UTF-8 needs one byte for the e and two for the accent: 3 in total. The glyph looks the same both times; <code>count</code> follows what a reader sees, and <code>utf8.count</code> follows storage.</p>
 <h4 id="example-b-slice-with-a-valid-index">Example B: Slice with a valid index<a class="heading-anchor" href="#example-b-slice-with-a-valid-index" aria-label="Link to this section">#</a></h4>
 <p>A valid index belongs to the source string and respects its representation boundaries.</p>
 <pre class="highlighted-code"><code class="language-swift"><span class="syntax-keyword">import</span> <span class="syntax-class">Foundation</span>
@@ -247,6 +248,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The split preserves the emoji as a complete Character.</p>
+<p><strong>Trace.</strong> <code>text</code> holds A, a grinning-face emoji (one scalar, four UTF-8 bytes) and B. <code>startIndex</code> points at A, and <code>index(after:)</code> moves past one whole Character, landing at the start of the emoji rather than one byte later. <code>text[..&lt;firstEnd]</code> is the Substring containing only A, and <code>String(...)</code> copies it into new storage. <code>text[firstEnd...]</code> runs from the emoji to the end. Because the index came from <code>text</code> itself, the slice boundary cannot split the emoji&#x27;s bytes.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <ol>
 <li><strong>Predict and explain.</strong> Predict Character and byte counts for both accent spellings.</li>
@@ -266,10 +268,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <ol start="6">
 <li><strong>Transfer and justify.</strong> Design a text-field limit and document whether it counts bytes or visible characters.</li>
 </ol>
-<p>For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.</p>
+<p>Log each task in the <a href="../STUDY-GUIDE.md.html#recording-exercise-evidence">evidence table</a> before opening the explanation.</p>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
 <p>Indices from one string are not arbitrary positions in another. Keeping a small Substring can retain a large source buffer. Case conversion and identity comparison require deliberate language or machine-key policies.</p>
-<p>A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.</p>
+<p>For the first-Character function in task 3, the decisive inputs are the empty string and a first Character built from several scalars. Empty text must return nil rather than trap on <code>text[text.startIndex]</code>. A flag emoji is two regional-indicator scalars forming one Character, so returning <code>text.unicodeScalars.first</code> gives only half of it. Compare both inputs against <code>text.first</code> before trusting your version.</p>
+<p>Repair routine: <a href="../STUDY-GUIDE.md.html#building-a-regression-case">building a regression case</a>.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <ol>
 <li>Reproduce Example A (Count the right unit) before changing anything, and confirm its observation: Both spellings contain one Character but differ in UTF-8 bytes.</li>
@@ -277,9 +280,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>Before opening the explanation, check your task 3 attempt (Write a function returning the first Character as an optional value) against each pitfall listed above, and add one input that would expose the tempting wrong rule.</li>
 </ol>
 <h3 id="self-check-and-next-step">Self-check and next step<a class="heading-anchor" href="#self-check-and-next-step" aria-label="Link to this section">#</a></h3>
-<p>Explain Grapheme cluster, String.Index, Substring without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.</p>
+<p>For the word naïve, state its Character count and explain why its UTF-8 byte count depends on how the ï was entered. Explain why an index taken from one string must not be used on another, and when you would convert a <code>Substring</code> back to <code>String</code> before storing it in a long-lived property.</p>
+<p>Then follow the general <a href="../STUDY-GUIDE.md.html#self-check-routine">self-check routine</a> and save your pad.</p>
 <h3 id="sources-and-execution-boundary">Sources and execution boundary<a class="heading-anchor" href="#sources-and-execution-boundary" aria-label="Link to this section">#</a></h3>
-<p><a href="https://docs.swift.org/swift-book/documentation/the-swift-programming-language/">Official language or framework documentation</a>. The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.</p>
+<p><a href="https://docs.swift.org/swift-book/documentation/the-swift-programming-language/">Documentation</a>: The Strings and Characters chapter of the Swift book covers extended grapheme clusters, counting characters, string indices and substrings.</p>
+<p>Provenance and limits: <a href="../STUDY-GUIDE.md.html#sources-and-execution-boundary">sources and execution boundary</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for swift-004: Strings, Unicode and collection indices.
 Read courses/swift/guides/swift-004.md and courses/swift/lessons/swift-004.swift. Prerequisites: swift-003.

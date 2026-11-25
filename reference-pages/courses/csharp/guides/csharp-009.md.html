@@ -206,11 +206,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Capacity:</strong> Allocated room available before growth.</p>
 <p><strong>Snapshot:</strong> A separately stored view captured at a moment.</p>
 <h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>The Linux Docker classroom compiles your saved pad as <code>Program.cs</code> in its fixed .NET 10 project. C# 14 is the matching language generation. This route uses the prepared framework libraries; it does not accept arbitrary project files, NuGet packages, command arguments or interactive input. The explicit <code>Program.Main</code> entrypoint makes compilation and execution visible. <code>Check</code> throws on a false condition in every build configuration, unlike conditional debugging assertions.</p>
-<p>Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.</p>
+<p><code>List&lt;T&gt;</code>, <code>ToArray</code> and <code>SequenceEqual</code> need no extra using directives in the classroom project. Task 4&#x27;s removal inside <code>foreach</code> throws <code>InvalidOperationException</code> saying the collection was modified, so wrap it in a <code>try</code> if you want the rest of your pad to keep running.</p>
+<p>Compile contract, starter stop and success marker: <a href="../STUDY-GUIDE.md.html#running-a-lesson">running a lesson</a>.</p>
 <h3 id="syntax-anatomy-and-execution-trace">Syntax anatomy and execution trace<a class="heading-anchor" href="#syntax-anatomy-and-execution-trace" aria-label="Link to this section">#</a></h3>
 <p><code>new List&lt;int&gt; { ... }</code> uses a collection initializer. <code>Add</code> changes Count; an indexer replaces an existing element. <code>RemoveAll(predicate)</code> expresses structural removal as one owned operation. <code>ToArray</code> creates a snapshot of the element references or values.</p>
-<p>Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.</p>
+<p>Each example ends with a trace; method: <a href="../STUDY-GUIDE.md.html#tracing-a-program">tracing a program</a>.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="example-a-separate-count-from-reserved-storage">Example A: Separate count from reserved storage<a class="heading-anchor" href="#example-a-separate-count-from-reserved-storage" aria-label="Link to this section">#</a></h4>
 <p>Capacity is an implementation resource, not a promise that ten logical entries exist.</p>
@@ -250,6 +250,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> Reserving ten slots leaves Count at zero; two appends produce Count two.</p>
+<p><strong>Trace.</strong> <code>new List&lt;int&gt;(10)</code> reserves an internal array of ten slots but holds no elements, so <code>Count</code> is 0 and <code>Capacity</code> is at least 10. Each <code>Add</code> writes the next slot and increments Count: after adding 3 and 5, Count is 2 and index 1 holds 5. Reading index 2 throws <code>ArgumentOutOfRangeException</code> even though storage exists, because the indexer checks Count, not Capacity.</p>
 <h4 id="example-b-remove-under-one-mutation-policy">Example B: Remove under one mutation policy<a class="heading-anchor" href="#example-b-remove-under-one-mutation-policy" aria-label="Link to this section">#</a></h4>
 <p>A bulk operation owns traversal and mutation, avoiding an invalidated external enumerator.</p>
 <pre class="highlighted-code"><code class="language-csharp"><span class="syntax-keyword">using</span> System<span class="syntax-punctuation">;</span>
@@ -288,6 +289,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> Two entries are removed while the earlier integer snapshot keeps four values.</p>
+<p><strong>Trace.</strong> <code>ToArray()</code> copies the four integers into a new array before anything changes. <code>RemoveAll</code> then visits every element once, keeps those for which the predicate is false and compacts them, so the list becomes 2 and 4. It returns 2, the number removed. The snapshot <code>before</code> is separate storage and still holds all four values.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <ol>
 <li><strong>Predict and explain.</strong> Predict Count and Capacity before and after appends.</li>
@@ -307,10 +309,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <ol start="6">
 <li><strong>Transfer and justify.</strong> Choose mutation or a new sequence for an undoable editor operation and explain who observes the change.</li>
 </ol>
-<p>For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.</p>
+<p>Log each task in the <a href="../STUDY-GUIDE.md.html#recording-exercise-evidence">evidence table</a> before opening the explanation.</p>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
 <p>Capacity is not an index boundary. A snapshot of objects still shares those objects. Repeated front insertion can turn an apparently simple loop into quadratic work.</p>
-<p>A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.</p>
+<p>Adding an eleventh element to a list created with capacity 10 grows Capacity to 20 in this runtime, but no contract promises that growth factor, so never test for it. For task 5, an all-negative input must leave an empty list and return its original count, and an empty list must return 0 without throwing.</p>
+<p>Repair routine: <a href="../STUDY-GUIDE.md.html#building-a-regression-case">building a regression case</a>.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <ol>
 <li>Reproduce Example A (Separate count from reserved storage) before changing anything, and confirm its observation: Reserving ten slots leaves Count at zero; two appends produce Count two.</li>
@@ -318,9 +321,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>Before opening the explanation, test your task 3 attempt against this lesson&#x27;s main pitfall: Capacity is not an index boundary.</li>
 </ol>
 <h3 id="self-check-and-next-step">Self-check and next step<a class="heading-anchor" href="#self-check-and-next-step" aria-label="Link to this section">#</a></h3>
-<p>Explain Count, Capacity, Snapshot without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.</p>
+<p>Predict Count and Capacity after constructing <code>new List&lt;int&gt;(4)</code> and adding five values, and say which of those two numbers your code may rely on. Explain why <code>RemoveAll</code> is safe where removing inside <code>foreach</code> is not. For task 6, say who observes an in-place change and who observes a new list.</p>
+<p>Then follow the general <a href="../STUDY-GUIDE.md.html#self-check-routine">self-check routine</a> and save your pad.</p>
 <h3 id="sources-and-execution-boundary">Sources and execution boundary<a class="heading-anchor" href="#sources-and-execution-boundary" aria-label="Link to this section">#</a></h3>
-<p><a href="https://learn.microsoft.com/en-us/dotnet/csharp/">Official language or framework documentation</a>. The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.</p>
+<p><a href="https://learn.microsoft.com/en-us/dotnet/csharp/">Documentation</a>: The <code>List&lt;T&gt;</code> API reference documents <code>Capacity</code>, <code>Count</code>, <code>RemoveAll</code> and how its enumerator reacts when the list changes.</p>
+<p>Provenance and limits: <a href="../STUDY-GUIDE.md.html#sources-and-execution-boundary">sources and execution boundary</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for csharp-009: Lists, capacity and safe mutation.
 Read courses/csharp/guides/csharp-009.md and courses/csharp/lessons/csharp-009.cs. Prerequisites: csharp-008.

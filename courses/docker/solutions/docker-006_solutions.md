@@ -1,6 +1,6 @@
 # docker-006: explanatory solutions
 
-Compare after your own attempt or an explicit reveal. These explain the supplied teaching fixtures; they are not engine results. The mechanism is explained in `courses/docker/guides/docker-006.md`.
+These answers explain teaching fixtures, not engine results; the mechanism is in [the guide](../guides/docker-006.md).
 
 ## Exercise 1: Predict whether .gitignore protects Docker context.
 
@@ -88,4 +88,4 @@ Compare after your own attempt or an explicit reveal. These explain the supplied
 
 ## Check your transfer
 
-A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.
+`*.key` in `.dockerignore` matches only at the root of the build context, unlike `.gitignore`, so a nested `config/tls/server.key` is still sent and copied. The corrected rule is `**/*.key`. To prove the fix, build a throwaway stage that copies the whole context and list it with `find`, or check that a `COPY config/tls/server.key` step now fails because the file is absent. The key must also be rotated, since earlier images already contain it. Seeing `server.key` in the listing after the change would show that the rule or the context path is still wrong.

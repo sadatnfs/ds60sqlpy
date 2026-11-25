@@ -1,6 +1,8 @@
 # rust-048: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [rust-048_solution.rs](rust-048_solution.rs). It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.
+Executable reference: [rust-048_solution.rs](rust-048_solution.rs), which runs both examples and the coded answers.
+
+Open this only after [an attempt](../STUDY-GUIDE.md#attempt-a-lesson).
 
 ## Why the two examples differ
 
@@ -26,7 +28,7 @@ Trace each value to accepted, null or rejected accounting.
 
 Add another valid value and independently derive the new report.
 
-**Reference answer.** The same statements run as the `Task 2` block of the reference program; here they are wrapped in `main` as a complete file.
+**Reference answer**, wrapped in `main`; the reference runs it as its `Task 2` block.
 
 ```rust
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -68,7 +70,7 @@ The derivation classifies the original Rust values with one `match`, without Arr
 
 Build a multi-column RecordBatch report and round-trip it through IPC.
 
-**Reference answer.** The same statements run as the `Task 3` block of the reference program; here they are wrapped in `main` as a complete file.
+**Reference answer**, wrapped in `main`; the reference runs it as its `Task 3` block.
 
 ```rust
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -112,7 +114,7 @@ Introduce and diagnose a null-as-zero, schema-order or duplicate-row defect.
 
 Test empty, all-null, all-rejected, overflow and malformed-input boundaries.
 
-**Reference answer.** The same statements run as the `Task 5` block of the reference program; here they are wrapped in `main` as a complete file.
+**Reference answer**, wrapped in `main`; the reference runs it as its `Task 5` block.
 
 ```rust
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -152,7 +154,7 @@ All three non-error cases have a sum of 0, so only the counts tell them apart. O
 
 Deliver a project README with schema, ownership, bounds, failure policies, actual runtime evidence and one independent Arrow extension.
 
-No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **Analytical contract**, and state one limitation of your choice.
+**Judging criteria.** A strong README states the schema with types and nullability, which function owns each buffer and when it is released, the bounds on memory and input size, and the failure policy for nulls, negatives and malformed rows. It shows actual output from a real run, not expected output, and describes one Arrow extension, such as a grouped total built with `take` or a filtered report, with its own acceptance check. State one limitation of the extension and the evidence that would show it works.
 
 ## Mechanism and diagnostic reasoning
 
@@ -166,4 +168,6 @@ A passing kernel does not prove external storage, authentication or every archit
 
 ## Review before continuing
 
-Run the reference and confirm that it prints `rust-048: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.
+Rebuild Example B (Keep empty and all-null data distinct) from a blank pad.
+
+Review routine: [Self-check and review](../STUDY-GUIDE.md#self-check-and-review).

@@ -2,67 +2,13 @@
 
 ## How to run this lesson
 
-Start the Linux-container engine and run `./classroom` from the repository
-root. On Windows, use Ubuntu in WSL 2 or the thin
-`START_DOCKER_CLASSROOM.cmd` wrapper. Choose **PostgreSQL** on the shared
-`/classroom` home, then open **sql-03**. The
-[launcher guide](../../../docs/one-command-classroom.md) covers first preparation, strict resume and
-the saved project selection. No host Python or PostgreSQL installation is
-required for this browser route.
+Launch `./classroom`, pick PostgreSQL, open **sql-03** and press **Whole SQL lesson (psql)**. Inside a `BEGIN`/`ROLLBACK` pair on `advanced_sql_training`, the file points `search_path` at `training` and prints two results: the 50 newest order lines with customer and product names attached, then the 20 orders holding the most units, with each buyer's country.
 
-1. Read the prerequisite and fixture notes before running the file. Use only
-   the local disposable `advanced_sql_training` database.
-2. Choose **Whole SQL lesson (psql)** for the cataloged learner script. This
-   preserves the lesson's reviewed psql directives, relative includes and
-   transaction behavior. **SQL snippet** is appropriate for ordinary SQL
-   statements, but is not a replacement for an entire script's setup.
-3. The **Course database** panel above the code shows whether the course
-   training tables are loaded. Missing tables load automatically before your
-   first run (or choose **Load course tables**) and stay loaded for later
-   lessons. **Reset training data** restores the original rows only when your
-   own changes made results differ; it keeps your saved code and notes.
-4. Edit the learner copy in the classroom and save your prediction before
-   running. Its whole-script workspace is
-   `.learning/sql/sql-03/lesson/workspace/sql/postgres-60day/day03_inner_joins.sql`.
-   For browser work this path is inside the Docker learning volume, not a
-   newly created host folder beside your checkout. The checked-in source
-   remains the answer-free starting artifact.
-5. Run the whole script and inspect the full transcript. The runner uses
-   `psql -X -v ON_ERROR_STOP=1 -f`. SELECT output has columns, rows and a row
-   count; DDL/DML has command tags; intentional checks may produce NOTICE
-   messages. An unexpected ERROR or nonzero exit is a failure to diagnose,
-   even when an earlier query printed plausible values.
-6. Verify the lesson's expected grain, ordering, constraints and declared
-   transaction or cleanup outcome. Keep required ROLLBACK statements.
-   The warehouse sequence and other explicitly stateful exercises explain
-   when state is committed. Read saved output without rerunning it when
-   reviewing an earlier attempt.
+The copy you edit is
+`.learning/sql/sql-03/lesson/workspace/sql/postgres-60day/day03_inner_joins.sql`.
+Two edits worth trying. Delete `LIMIT 50` and wrap the first query in `SELECT COUNT(*) FROM (...) AS s`: you get 13,085, exactly the number of rows in `order_items`, because every line has an order and a product. Then add `JOIN payments pay ON pay.order_id = o.order_id` to the second query and watch the unit totals for some orders double.
 
-If a relation is missing, inspect the lesson's required fixture and predecessor
-rather than guessing a new table definition. If authentication or runtime
-readiness fails, use `./classroom status` and the setup guide. Keep credentials
-out of SQL, notebooks, screenshots and committed files. Repair the first error
-before trusting partial output, and reveal separate solutions only when you
-want to compare after an attempt.
-
-### Optional contributor notebook route
-
-For notebook work, deliberately prepare the Linux/WSL contributor environment
-from [CONTRIBUTING.md](../../../CONTRIBUTING.md), including a compatible psql client and
-the notebook dependencies. Generate this lesson's private workspace through
-the maintained CLI:
-
-```sh
-uv run --no-sync python scripts/course.py sql notebook sql-03
-```
-
-Open the printed notebook path in that environment's JupyterLab. It uses the
-same catalog-derived learner-copy layout in that contributor checkout and
-executes the complete script through psql. Its host-side state is separate
-from the Docker browser's named volume. Follow
-[guided SQL notebooks](../../../docs/guided-sql-notebooks.md) for explicit local connection
-selection and kernel setup. Notebook generation does not execute SQL or
-authorize a reset.
+Classroom refusing to start, or `advanced_sql_training` missing? Work through the study guide's [classroom checklist](../../STUDY-GUIDE.md#run-a-lesson-in-the-classroom). Running lessons from Jupyter is a [contributor-only option](../../STUDY-GUIDE.md#optional-contributor-notebook-route) that learners can skip.
 
 ## Level and prerequisites
 
@@ -74,26 +20,13 @@ authorize a reset.
 
 ## A beginner's mental model for this lesson
 
-A **table** is stored data with named columns. A **row** is one occurrence of
-the table's subject. A query produces a temporary **result set**; seeing rows
-on screen does not mean the stored tables changed. The **grain** is what one
-result row represents. Here the inputs are training.customers, training.orders, training.order_items, and training.products, and the intended
-grain is one row per matched key combination before any final aggregation.
+An inner join glues a row from one table to a row from another whenever the `ON` condition is true for the pair. In this lesson every `ON` condition compares a **join key**: a foreign key such as `orders.customer_id` against the primary key it points to, `customers.customer_id`. A pair with no match is simply left out, which is what makes the join "inner". Here nothing is lost: all 4,362 orders have a customer and all 13,085 order lines have an order and a product. The 62 Brazilian customers do drop out, though, because they never ordered, so no order row exists to pair with them.
 
-Read the main query as a pipeline: FROM chooses a starting relation; each INNER JOIN matches declared keys in its ON condition; WHERE then filters the joined rows; GROUP BY can collapse the resulting detail to the requested report grain. For ordinary analytical
-queries, the useful logical reading order is `FROM/JOIN` → `WHERE` →
-`GROUP BY`/aggregates → `HAVING` → window calculations → `SELECT` →
-`ORDER BY` → `LIMIT`. This is a reasoning model, not a promise about the
-physical plan PostgreSQL chooses.
+Before writing a join, say how many rows on each side can match. That is the **cardinality** of the relationship. Many orders point to one customer, so joining customers onto orders keeps the order count: 4,362 rows in, 4,362 rows out. One order has one to five line items, so joining `order_items` onto `orders` turns 4,362 rows into 13,085. That growth is called **fanout**. It is correct when you want one row per line, as in Example 1, and wrong when a per-order number like `total_amount` rides along and gets added up once per line.
 
-Before running, write the expected column names and row grain in a comment.
-After running, display both join keys while debugging; compare joined row counts and monetary totals with simple controls before hiding keys. an INNER JOIN discards unmatched rows; one-to-many joins duplicate parent values by design; qualify columns and add a deterministic ORDER BY. A blank cell, SQL `NULL`, zero,
-and an absent row have different meanings; never substitute one for another
-without a stated rule.
+The habit that prevents most join bugs: name the grain you want, start from the table whose rows have that grain, and only join tables that sit on the "one" side of it. To bring in two tables that are both on the "many" side, such as line items and payments, total each of them per order first and then join the totals. Exercise 4 shows why.
 
 ## Two worked SQL examples
-
-These worked excerpts come from `sql/postgres-60day/day03_inner_joins.sql`. Use **Whole SQL lesson (psql)** in the unified classroom for the complete file, including its fixture and transaction context. The optional contributor notebook and prepared `psql` routes are described above.
 
 ### Example 1
 
@@ -117,9 +50,9 @@ ORDER BY
 LIMIT 50;
 ```
 
-**How to read it:** Example 1: Start with `orders`, `customers`, `order_items`, and `products` in `FROM`/`JOIN`. The final `SELECT` displays `order_id`, `order_date`, `full_name`, `product`, `quantity`, and `unit_price`. `ORDER BY` determines presentation order and the final `LIMIT 50` caps displayed rows. Before running, predict the row grain, row count, `NULL` positions, and first/last key; afterwards, compare each prediction with the transcript.
+**How to read it:** Three joins hang off `orders`: `customers` adds the buyer's name, `order_items` adds the line rows and `products` turns each `product_id` into a product name. Each `ON` follows one foreign key, and every column carries an alias (`o.`, `c.`, `oi.`, `p.`) so a reader can see which table it comes from. The `ORDER BY` puts the newest orders first and lists each order's lines by product ID; `LIMIT 50` stops after 50 lines.
 
-**Expected result/shape:** Example 1 returns one row per `order_id`, capped at 50 rows with columns `order_id`, `order_date`, `full_name`, `product`, `quantity`, and `unit_price` from `orders`, `customers`, `order_items`, and `products`. Use a direct count or grouped aggregate over those same source relations as the control; check ordering only when this query has an `ORDER BY`, and inspect `NULL` only for columns this example can produce.
+**Expected result/shape:** 50 rows, one per order line, so an order shows up once per line it holds. In our check the rows cover the 14 newest orders, starting with order 2258 (Customer 258, products 10, 192, 223 and 254) and ending exactly at the last line of order 3027. Without the limit the query returns 13,085 rows, the full size of `order_items`; an inner join here loses nothing, because no line points at a missing order or product.
 
 ### Example 2
 
@@ -141,9 +74,9 @@ ORDER BY
 LIMIT 20;
 ```
 
-**How to read it:** Example 2: Start with `orders`, `customers`, and `order_items` in `FROM`/`JOIN`; let `GROUP BY` collapse rows to its grouping keys. The final `SELECT` displays `order_id`, `country`, and `total_items`. `ORDER BY` determines presentation order and the final `LIMIT 20` caps displayed rows. Before running, predict the row grain, row count, `NULL` positions, and first/last key; afterwards, compare each prediction with the transcript.
+**How to read it:** The same chain, minus `products`, then collapsed with `GROUP BY o.order_id, c.country`. `SUM(oi.quantity)` adds up the units on each order's lines. Listing `c.country` in the `GROUP BY` costs nothing: each order has exactly one customer, so the country cannot split an order into two groups.
 
-**Expected result/shape:** Example 2 returns one grouped row per `order_id`, and `country`, capped at 20 rows with columns `order_id`, `country`, and `total_items` from `orders`, `customers`, and `order_items`. Use a direct count or grouped aggregate over those same source relations as the control; check ordering only when this query has an `ORDER BY`, and inspect `NULL` only for columns this example can produce.
+**Expected result/shape:** 20 rows, one per order, and every one of them shows 15 units: 872 orders tie at that maximum (five lines with quantities 1 to 5), so `o.order_id` decides which 20 print. They are orders 4, 9, 14 and so on up to 99, starting with order 4 from customer 1 in the US. Remove the limit and you get 4,362 rows, one for every order.
 
 ## Learning objectives
 
@@ -159,72 +92,67 @@ LIMIT 20;
 
 ## Worked example / walkthrough
 
-Follow one `orders` row through the `order_items` join. It becomes one row per
-line item, so summing `orders.total_amount` at that point repeats the order
-total. The learner query instead calculates value from each line and aggregates
-at the requested customer or category grain.
+Take order 2258, the newest order in our check. It belongs to Customer 258 in Canada, has a stored `total_amount` of 742.14 and four line items (products 10, 192, 223 and 254). After the join to `order_items` it occupies four rows of Example 1, and each of those rows still carries 742.14. Add `total_amount` across them and you report 2,968.56 for one order. Exercise 6 avoids the trap by measuring revenue from each line's own `unit_price * quantity * (1 - discount)`, which is meant to be summed per line, and only then grouping by country.
 
 ## Practice assumptions and review method
 
 - **Focus:** Use inner joins only when unmatched rows should disappear, and verify key cardinality before aggregating.
 - **Assumptions:** Foreign keys define expected many-to-one relationships. Net line revenue is `unit_price * quantity * (1 - discount)`.
 - **Failure to watch for:** A missing or incomplete `ON` condition creates row multiplication; joining two detail tables before aggregation can multiply measures.
-- **Review loop:** predict the row grain and NULL/order behavior, run the
-  query, inspect a bounded sample, and reconcile counts or totals before
-  accepting the result.
+- **Review loop:** after each new `JOIN`, run `COUNT(*)` next to `COUNT(DISTINCT ...)` of the key you expect one row per; if the two numbers part ways, a join has multiplied your rows.
 
 ## Exercises
 
 Use inner joins only when unmatched rows should disappear, and verify key cardinality before aggregating.
 
-Attempt each prompt in a scratch SQL file before opening the solution.
-For every result, write its row grain and expected shape first.
+For each exercise, first write the grain as a phrase ("one row per payment", "one row per country") and name the table whose rows already have that grain. That table goes first in `FROM`.
 
 1. **Query writing:** List orders with customer names and countries.
+   **Picture it:** 500 customers, 4,362 orders. How many rows come back, and which customers never appear?
    **Progressive hint:** Join the order foreign key to the customer primary key and qualify every selected column.
-   **Inputs/evidence:** For sql-03 Exercise 1, read from `orders`, and `customers`. Build the answer toward `order_id`, `order_date`, `total_amount`, `customer_id`, `full_name`, and `country`; keep `order_id` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-03 Exercise 1, expected output: One row per order. The final columns are `order_id`, `order_date`, `total_amount`, `customer_id`, `full_name`, and `country`. The final order is `o.order_date DESC, o.order_id DESC`.
-   **Verify:** For sql-03 Exercise 1, project `order_id` plus the raw source columns from `orders`, and `customers` at each join stage; record row count and distinct `order_id`, then assert the final `order_id`, `order_date`, `total_amount`, `customer_id`, `full_name`, and `country` values match those staged rows without unintended fanout or loss. Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
+   **Inputs/evidence:** For sql-03 Exercise 1, join the 4,362 `orders` rows to `customers` on the `customer_id` foreign key, which references the `customers` primary key, so each order finds exactly one customer. Return `order_id`, `order_date`, `total_amount`, `customer_id`, `full_name`, and `country`.
+   **Expected result/shape:** For sql-03 Exercise 1, return 4,362 rows, one per order, newest first; order 2258 for customer 258 (`CA`) leads. The 62 customers with no orders, all of them in `BR`, do not appear. The final columns are `order_id`, `order_date`, `total_amount`, `customer_id`, `full_name`, and `country`. The final order is `o.order_date DESC, o.order_id DESC`.
+   **Verify:** For sql-03 Exercise 1, confirm 4,362 rows and 4,362 distinct `order_id` values, matching `SELECT COUNT(*) FROM orders`, so the inner join neither lost nor repeated an order. Count `country = 'BR'` in the output: it must be 0, because all 62 `BR` customers have no orders.
 2. **Query writing:** Calculate each order item's net line revenue with the product name and category.
+   **Picture it:** order item 1 is three units at 27.76 with no discount. What should its `line_revenue` be?
    **Progressive hint:** Remain at one row per order item; do not aggregate until the desired grain changes.
-   **Inputs/evidence:** For sql-03 Exercise 2, read from `order_items`, and `products`. Build the answer toward `order_item_id`, `order_id`, `product_id`, `name`, `category`, `quantity`, and `line_revenue`; keep `order_item_id` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-03 Exercise 2, expected output: One row per order item. The final columns are `order_item_id`, `order_id`, `product_id`, `name`, `category`, `quantity`, and `line_revenue`. The final order is `oi.order_id, oi.order_item_id`.
-   **Verify:** For sql-03 Exercise 2, project `order_item_id` plus the raw source columns from `order_items`, and `products` at each join stage; record row count and distinct `order_item_id`, then assert the final `order_item_id`, `order_id`, `product_id`, `name`, `category`, `quantity`, and `line_revenue` values match those staged rows without unintended fanout or loss. Add one source row with a new `order_item_id`; verify the result gains exactly one row carrying that `order_item_id` value.
+   **Inputs/evidence:** For sql-03 Exercise 2, join the 13,085 `order_items` rows to `products` on `product_id`; the items use 275 of the 300 products and every item finds its product. Return `order_item_id`, `order_id`, `product_id`, `name`, `category`, `quantity`, and `line_revenue`.
+   **Expected result/shape:** For sql-03 Exercise 2, return 13,085 rows, one per order item, starting with item 1 (order 1, product 48, `Books`, quantity 3, `line_revenue` 83.28). The final columns are `order_item_id`, `order_id`, `product_id`, `name`, `category`, `quantity`, and `line_revenue`. The final order is `oi.order_id, oi.order_item_id`.
+   **Verify:** For sql-03 Exercise 2, confirm 13,085 rows and 13,085 distinct `order_item_id` values, and that the `line_revenue` column sums to 2355648.13, 1.01 above the unrounded 2355647.12 because each line is rounded before the sum. Item 1 has `unit_price` 27.76, `quantity` 3, and `discount` 0.00, so 27.76 * 3 must equal its 83.28.
 3. **Query writing:** List payments with order status and customer name.
+   **Picture it:** placed orders have never been paid. Which `status` value will be absent from your result?
    **Progressive hint:** Follow payments → orders → customers using each declared foreign key.
-   **Inputs/evidence:** For sql-03 Exercise 3, read from `payments`, `orders`, and `customers`. Build the answer toward `payment_id`, `payment_date`, `amount`, `method`, `order_id`, `status`, and `full_name`; keep `payment_id` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-03 Exercise 3, expected output: One row per payment. The final columns are `payment_id`, `payment_date`, `amount`, `method`, `order_id`, `status`, and `full_name`. The final order is `p.payment_date DESC, p.payment_id DESC`.
-   **Verify:** For sql-03 Exercise 3, project `payment_id` plus the raw source columns from `payments`, `orders`, and `customers` at each join stage; record row count and distinct `payment_id`, then assert the final `payment_id`, `payment_date`, `amount`, `method`, `order_id`, `status`, and `full_name` values match those staged rows without unintended fanout or loss. Add one source row with a new `payment_id`; verify the result gains exactly one row carrying that `payment_id` value.
+   **Inputs/evidence:** For sql-03 Exercise 3, join the 3,836 `payments` rows to `orders` and then to `customers`; the payments cover 3,489 orders, 347 of which have two payments. Return `payment_id`, `payment_date`, `amount`, `method`, `order_id`, `status`, and `full_name`.
+   **Expected result/shape:** For sql-03 Exercise 3, return 3,836 rows, one per payment, newest first; payment 654 (order 745, `paypal`, 54.04) leads. The final columns are `payment_id`, `payment_date`, `amount`, `method`, `order_id`, `status`, and `full_name`. The final order is `p.payment_date DESC, p.payment_id DESC`.
+   **Verify:** For sql-03 Exercise 3, confirm 3,836 rows and 3,836 distinct `payment_id` values, matching `SELECT COUNT(*) FROM payments`, and that `COUNT(DISTINCT order_id)` in the output is 3,489. Order 10 must appear twice, once per payment, which is the expected grain here rather than fan-out.
 4. **Prediction:** Predict the row count from joining one order with three items and two payments directly, then write a safe per-order reconciliation.
+   **Picture it:** order 10 has one line worth 143.43 and two payments, 71.72 and 71.71. What does a direct three-way join report as its item total?
    **Progressive hint:** Aggregate items and payments separately to one row per order before joining those aggregates.
-   **Inputs/evidence:** For sql-03 Exercise 4, read from `order_items`, `payments`, and `orders`. Build the answer toward `order_id`, `item_total`, and `paid_total`; keep `order_id` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-03 Exercise 4, expected output: One row per order; no six-row multiplication. The final columns are `order_id`, `item_total`, and `paid_total`. The final order is `o.order_id`.
-   **Verify:** For sql-03 Exercise 4, project `order_id` plus the raw source columns from `order_items`, `payments`, and `orders` at each join stage; record row count and distinct `order_id`, then assert the final `order_id`, `item_total`, and `paid_total` values match those staged rows without unintended fanout or loss. Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
+   **Inputs/evidence:** For sql-03 Exercise 4, aggregate the 13,085 `order_items` rows and the 3,836 `payments` rows to one row per `order_id` each, then join both to `orders`; 873 orders have no payment and 347 have two.
+   **Expected result/shape:** For sql-03 Exercise 4, return 4,362 rows, one per order, with `paid_total` 0.00 for the 873 unpaid orders and no doubled item totals for the 347 two-payment orders. The final columns are `order_id`, `item_total`, and `paid_total`. The final order is `o.order_id`.
+   **Verify:** For sql-03 Exercise 4, confirm 4,362 distinct `order_id` values; 3,290 orders show equal totals, 199 differ, and 873 show `paid_total` 0.00. Order 10 has one item and two payments: its `item_total` must be 143.43, while joining raw `order_items` to raw `payments` before summing reports 286.86.
 5. **Debugging:** Repair a customer/order join whose `ON` clause compares unrelated IDs.
+   **Picture it:** the broken query matches `c.customer_id = o.order_id`. Will it raise an error, and how many rows can it return at most?
    **Progressive hint:** Join `orders.customer_id` to `customers.customer_id`; verify output cannot exceed the order count for an inner many-to-one join.
-   **Inputs/evidence:** For sql-03 Exercise 5, read from `orders`, and `customers`. Build the answer toward `joined_rows`, and `distinct_orders`; keep `order_id` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-03 Exercise 5, expected output: Exactly one customer match per order. The final columns are `joined_rows`, and `distinct_orders`.
-   **Verify:** For sql-03 Exercise 5, project `order_id` plus the raw source columns from `orders`, and `customers` at each join stage; record row count and distinct `order_id`, then assert the final `joined_rows`, and `distinct_orders` values match those staged rows without unintended fanout or loss. Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
+   **Inputs/evidence:** For sql-03 Exercise 5, join the 4,362 `orders` rows to `customers` on `customer_id` and count the joined rows and the distinct orders; no row-level key is returned.
+   **Expected result/shape:** For sql-03 Exercise 5, return exactly one row with `joined_rows` 4,362 and `distinct_orders` 4,362, which shows every order matched exactly one customer. The final columns are `joined_rows`, and `distinct_orders`.
+   **Verify:** For sql-03 Exercise 5, confirm both values equal `SELECT COUNT(*) FROM orders`. Reverse the join into `customers LEFT JOIN orders` and the row count must become 4,424, because the 62 customers without orders each add one unmatched row.
 6. **Extension:** Calculate net line revenue by customer country without double-counting order totals.
+   **Picture it:** customers live in eight countries. How many rows will the report have?
    **Progressive hint:** Start from line items, join through orders and customers, then aggregate at country grain.
-   **Inputs/evidence:** For sql-03 Exercise 6, read from `order_items`, `orders`, and `customers`. Build the answer toward `country`, and `net_revenue`; keep `country` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-03 Exercise 6, expected output: One row per country represented by an order. The final columns are `country`, and `net_revenue`. The final order is `net_revenue DESC, c.country`.
-   **Verify:** For sql-03 Exercise 6, independently aggregate `order_items`, `orders`, and `customers` by `country`; require one output row for every distinct `country` tuple and compare `net_revenue` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `net_revenue` for the existing `country` tuple and verify the new tuple appears exactly once.
+   **Inputs/evidence:** For sql-03 Exercise 6, join the 13,085 `order_items` rows to `orders` and then to `customers`, and total net revenue by `country`; `BR` customers have no orders.
+   **Expected result/shape:** For sql-03 Exercise 6, return 7 rows, one per country with orders: `FR` first at 343290.13 and `IN` last at 329081.73, with no `BR` row. The final columns are `country`, and `net_revenue`. The final order is `net_revenue DESC, c.country`.
+   **Verify:** For sql-03 Exercise 6, confirm the 7 totals sum to 2355647.12, the same as `SUM(unit_price * quantity * (1 - discount))` over all of `order_items`. Starting the join from `customers` with `LEFT JOIN` must add an eighth `BR` row whose `net_revenue` is `NULL`.
 
 ## Common mistakes and how to recover
 
-- **Lesson-specific semantic mistake:** A missing or incomplete `ON` condition creates row multiplication; joining two detail tables before aggregation can multiply measures.
-- **Unexpected row count:** display keys before aggregates, count rows after
-  each join/filter stage, and find the first stage whose grain differs from the
-  contract. Do not hide fanout with `DISTINCT`.
-- **Unexpected `NULL` or missing row:** decide whether the fact is unknown,
-  inapplicable, zero, or absent before using `COALESCE`; inspect outer-join
-  predicate placement and empty-input aggregate behavior.
-- **Unstable top/first/last output:** add `ORDER BY` with a unique final
-  tie-breaker before `LIMIT` or order-sensitive windows/aggregates.
-- **`psql` stops on an error:** fix the first error shown by
-  `ON_ERROR_STOP`, restore the declared transaction/setup state, and rerun the
-  complete file. A later successful statement does not validate a partial run.
+- **Comparing the wrong keys:** `ON c.customer_id = o.order_id` runs without complaint and returns 500 rows, because order IDs 1 to 500 happen to match customer IDs. Order 2 belongs to customer 1, yet that join labels it Customer 2. A join between two integer columns always runs; only checking the row count against the 4,362 orders exposes it.
+- **An `ON` that tests nothing:** `ON c.customer_id = c.customer_id` is always true, so every order pairs with every customer: 2,181,000 rows. A row count far beyond any table in the query means a key comparison is missing.
+- **Summing a per-order value after a per-line join:** `SUM(o.total_amount)` over order lines reports 8,633,041.53 instead of 2,355,646.89, because each order total repeats once per line. Sum line values, or total the orders before joining.
+- **Joining two "many" tables at once:** orders joined to both `order_items` and `payments` produce 10,816 rows, and payments add up to 6,707,306.05 against a real 1,831,900.81. Every payment repeats once per line and every line once per payment.
+- **Patching duplicates with `DISTINCT`:** it can hide a bad join for a while, and it also removes legitimate rows that happen to look alike. Fix the join instead.
+
+If a run stops at an `ERROR`, the study guide's [notes on recovering from failures](../../STUDY-GUIDE.md#recover-from-common-failures) explain how to get back to a clean state.
 
 ## Self-check
 
@@ -275,9 +203,7 @@ Further reading
 
 ## Ask an AI tutor about this lesson
 
-An AI tutor is optional; the guide, learner SQL, PostgreSQL, and expected checks are
-enough to complete the lesson offline. If you want a patient tutor, copy this
-prompt after opening the repository in the AI tutor:
+A tutor is optional. If you use one, ask it to name a pair of tables from this schema and have you state the relationship (one-to-one, many-to-one or one-to-many) and the row count of their join before you run anything; then compare with `COUNT(*)`. The study guide's [section on AI tutors](../../STUDY-GUIDE.md#use-an-ai-tutor-optional) covers setup and limits.
 
 ```text
 Tutor me through sql-03: Inner Joins and Predicate Placement.

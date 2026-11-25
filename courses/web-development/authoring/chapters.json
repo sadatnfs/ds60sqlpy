@@ -132,7 +132,11 @@
         "lang": "html",
         "code": "<p>First idea\n<div>A block inside the paragraph</div>\n</p>",
         "reading": "A `div` cannot live inside a `p`, so the parser closes the paragraph as soon as it meets `<div>`. The tree then holds a paragraph containing only First idea, a sibling `div`, and a second, empty paragraph created from the stray `</p>`. View Source still shows one paragraph, which is why this lesson asks you to read the parsed tree. Replace the `div` with a `span` and the repair disappears: one paragraph with two text runs. The visible words barely change, so only the tree reveals the difference."
-      }
+      },
+      "workspace": "The starter is already a complete document with one heading and one paragraph inside main. Your edits change the body text, the title in head and the number of paragraphs, so you can watch which parts the browser shows and which it only stores.",
+      "debugging": "When text appears in the tab but not the page, it is in the title element inside head, which the browser never paints in the body. When a stray closing tag seems to do nothing, open the Elements panel: the parser has already rebuilt the tree, and that rebuilt tree, not your source, is what the page uses.",
+      "retrieval": "Without notes, say what the browser does with a tag it reads and what it does with the text between tags. Then explain why the page title and the main heading can disagree, why PHP source shows as plain text in this preview, and which request in your trace would happen only when a real server is involved.",
+      "reference_note": "The reference counts paragraphs inside main and requires exactly two, so it catches a missing or extra paragraph and a paragraph placed outside main. It does not read the title, check that the heading is an h1, or notice a misnested tag the parser silently repaired. Compare those parts by reading the rendered page and the Elements tree."
     },
     {
       "n": 2,
@@ -261,7 +265,11 @@
         "lang": "html",
         "code": "<p>Fish &chips &amp; peas</p>\n<p>Price &lt 5 and AT&T</p>",
         "reading": "The first paragraph shows Fish &chips & peas: `&chips` is not a named reference, so it stays literal, while `&amp;` becomes one ampersand. The second paragraph is riskier. Legacy parsing accepts `&lt` without its semicolon, so the reader sees Price < 5, and `&T` survives as text. The page looks fine, yet the source depends on parser error recovery. Writing `&lt;` and `AT&amp;T` gives the same display without relying on that recovery, which is the habit worth keeping."
-      }
+      },
+      "workspace": "The starter holds only a main element with the lesson heading. You add the notes paragraph yourself, so every nested element, attribute and character reference in your page is one you chose and can explain in the Elements tree.",
+      "debugging": "If an ampersand or angle bracket vanishes or turns into a tag, the parser read it as markup; replace it with the matching character reference and reload. If emphasis seems to leak across words, overlapping tags were repaired into a different tree, so draw the tree from the Elements panel and close the inner element first.",
+      "retrieval": "From memory, write the four character references this lesson used and say which raw character each protects. Explain why `lang` belongs on the html element, what the parser does with overlapping strong and em tags, and why escaping text for display is a different job from validating that a URL is acceptable.",
+      "reference_note": "The reference reads the text content of the element with id note and requires the literal string 2 < 3 & 3 > 2, so it fails if a character reference was left raw and parsed as markup or if the comparison was retyped. It does not check the lang attribute, unique ids or whether importance uses strong rather than b."
     },
     {
       "n": 3,
@@ -394,7 +402,11 @@
         "lang": "html",
         "code": "<!-- size-driven -->\n<h1>Study notes</h1>\n<h4>HTML</h4>\n<h2>Tip: save often</h2>\n\n<!-- rank-driven -->\n<h1>Study notes</h1>\n<h2>HTML</h2>\n<p class=\"tip\">Tip: save often</p>",
         "reading": "In the size-driven version, a heading list reads Study notes, then a level 4 HTML with no level 2 or 3 parent, then a tip promoted to level 2 as if it were a peer topic. The rank-driven version has one level 2 section under the level 1 title, and the tip becomes a styled paragraph that adds nothing to the outline. Adding a CSS section later is easy in the second version: it is another `h2`. In the first version you would have to guess which level a peer topic should use."
-      }
+      },
+      "workspace": "The starter has a section with an h2 and a stray h3 used as a reminder rather than a heading. You will add a skip link, landmarks and a correctly ranked sibling section, then judge the outline rather than the font sizes.",
+      "debugging": "Read the heading outline, not the visual sizes: list every heading with its rank and check that no level is skipped and no heading labels text that is not a section. If the skip link does nothing, its hash and the target id differ, or the target lives outside main.",
+      "retrieval": "Close the examples and sketch the outline of a page with one h1, two h2 sections and one h3. Explain what a landmark lets a screen reader user do, why a skip link should target main, and how you would decide between section and div for a wrapper that exists only for styling.",
+      "reference_note": "The reference asserts that the page has exactly one main element and that the first link's hash is #content. That catches a duplicated main and a skip link pointing at the wrong fragment. It cannot judge heading ranks, notice an h3 used for size, or confirm the target actually receives focus, so read the outline and press Tab yourself."
     },
     {
       "n": 4,
@@ -523,7 +535,11 @@
         "lang": "html",
         "code": "<nav aria-label=\"Contents\">\n  <a href=\"#method\">Methods</a>\n  <a href=\"#results\">Results</a>\n</nav>\n<section id=\"methods\"><h2>Methods</h2></section>\n<section id=\"results\"><h2>Results</h2></section>",
         "reading": "Activating Results scrolls to its section because `#results` equals the `id`. Activating Methods changes the URL fragment to `#method`, but no element has that `id`, so nothing scrolls and the page stays where it was. Fragment matching is exact, including case, so `#Results` would also miss. The fix is to make the `href` and the `id` identical, which `document.getElementById('method')` returning null confirms before and after the repair."
-      }
+      },
+      "workspace": "The starter contains a contents nav whose first link says Click here and whose second link points at #result while the section id is results. Your task is to repair both so every link names and reaches its destination.",
+      "debugging": "When a fragment link scrolls nowhere, compare the characters after the hash with the target id; one letter, a plural or a capital is enough to break it. When a relative path fails, resolve it by hand from the current document's folder, counting each `..` as one directory up.",
+      "retrieval": "Without the guide, resolve ../images/plot.svg from /notes/week1/page.html and say what the leading slash in /images/plot.svg changes. Explain why Click here fails for someone listing links out of context, and why a button, not a link with href set to a hash, should trigger an action that does not navigate.",
+      "reference_note": "The reference loops over the navigation links and requires that each hash finds an element in the document, so it catches a fragment like #result that does not match the section id. It does not judge link wording, test relative file paths or check that the destination section has a heading, so review the link text yourself."
     },
     {
       "n": 5,
@@ -656,7 +672,11 @@
         "lang": "html",
         "code": "<!-- broken -->\n<ul>\n  <li>Tools</li>\n  <ul\n    ><li>Editor</li></ul\n  >\n</ul>\n\n<!-- repaired -->\n<ul>\n  <li\n    >Tools\n    <ul\n      ><li>Editor</li></ul\n    >\n  </li>\n</ul>",
         "reading": "In the broken version, the inner `ul` is a direct child of the outer `ul`, which only permits `li` children. Browsers still draw it indented, so the defect hides on screen, but the outer list now has one item plus a stray list, and assistive technology reports one item instead of an item with a sublist. In the repaired version Editor belongs to Tools. The check is `document.querySelector('ul > ul')`, which returns an element for the broken markup and null for the repair."
-      }
+      },
+      "workspace": "The starter contains a tools list where the nested list sits beside its parent item instead of inside it. You will repair that structure, then add a glossary built from a description list and a short code example shown as text.",
+      "debugging": "If a sublist renders but screen readers report the wrong item count, open the Elements panel and confirm the inner ul is a child of an li, not a sibling. If code shows formatted output instead of tags, the angle brackets were not escaped inside the code element.",
+      "retrieval": "Without looking, choose ol, ul or dl for steps that must happen in order, a set of tools and a glossary, and justify each choice by what the list structure tells assistive technology. Then explain why pre keeps whitespace but adds no meaning, and why a nonbreaking space column breaks at narrow widths.",
+      "reference_note": "The reference counts dt elements inside a dl and requires two, so it catches a glossary written as paragraphs or a missing term. It does not verify that each dt has a dd, that the nested tools list sits inside its parent li or that code was escaped, so inspect the tree for those."
     },
     {
       "n": 6,
@@ -782,7 +802,11 @@
         "lang": "html",
         "code": "<!-- no accessible name -->\n<svg viewBox=\"0 0 100 30\">\n  <text x=\"0\" y=\"20\">3 of 5</text>\n  <rect x=\"40\" width=\"36\" height=\"20\" />\n</svg>\n\n<!-- named graphic -->\n<svg viewBox=\"0 0 100 30\" role=\"img\" aria-labelledby=\"done\">\n  <title id=\"done\">3 of 5 lessons completed</title>\n  <rect width=\"60\" height=\"20\" />\n</svg>",
         "reading": "The first SVG exposes its internal `text` node, so a screen reader may announce a fragment such as 3 of 5 with no subject, and the rectangle contributes nothing. The second is treated as one image whose name comes from the referenced `title`. If you delete the `id` from the `title`, `aria-labelledby` points at nothing and the name disappears even though the markup still contains the words. Keep a visible text equivalent nearby when the exact count matters."
-      }
+      },
+      "workspace": "The starter holds only the lesson heading inside main. You build the informative figure and the inline SVG progress illustration yourself, so every alternative text, title and dimension in the page is a decision you can defend.",
+      "debugging": "If an SVG has no accessible name, check that the svg element has role img and that aria-labelledby points to the id of its title; a title that nothing references is easy to miss. If the layout jumps as an image loads, the width and height attributes are missing or wrong.",
+      "retrieval": "From memory, write alternative text for a decorative divider and for a photo that shows where a building entrance is, and explain why one is empty. Then say what width and height attributes reserve before loading, how an SVG title becomes its name, and why a chart needs more than alt text that says chart.",
+      "reference_note": "The reference reads the text of the SVG title and requires the word Three, so it fails if the title is missing or describes a different progress value. It does not prove the title is referenced by aria-labelledby, that decorative images have empty alt text or that the figure keeps its aspect ratio at narrow widths."
     },
     {
       "n": 7,
@@ -911,7 +935,11 @@
         "lang": "html",
         "code": "<!-- styled only -->\n<table>\n  <tr\n    ><td><b>Subject</b></td\n    ><td><b>Minutes</b></td></tr\n  >\n  <tr><td>HTML</td><td>40</td></tr>\n</table>\n\n<!-- headed -->\n<table>\n  <caption>Study minutes, week 1</caption>\n  <tr><th scope=\"col\">Subject</th><th scope=\"col\">Minutes</th></tr>\n  <tr><th scope=\"row\">HTML</th><td>40</td></tr>\n</table>",
         "reading": "In the styled table, 40 has no header relationship; a screen reader moving into that cell can only say 40. In the headed table, the same cell is associated with the HTML row header and the Minutes column header, so 40 is announced with both labels, and the caption names the period. The bold appearance is identical, so the only reliable check is structural: count `th` elements and confirm each has the right `scope`."
-      }
+      },
+      "workspace": "The starter has a study table built only from td cells, with no caption or header cells, plus a second table used to lay out navigation. You will convert the first into a real data table and replace the layout table.",
+      "debugging": "If a value is announced without its row or column label, inspect the cell's headers: the label must be a th with the right scope, not a bold td. If a narrow viewport hides columns, wrap the table in a scrollable region rather than deleting data.",
+      "retrieval": "Without notes, explain what the cell 40 means using both its row header and its column header. Then say what scope row and scope col change for assistive technology, why a caption beats a nearby heading, and when a layout table should be replaced with CSS instead of being given header cells.",
+      "reference_note": "The reference requires three th elements with scope row inside tbody, so it catches a table whose first column is still plain td cells. It does not check the caption text, the column headers or the removal of the layout table, and it cannot prove how a screen reader announces a cell."
     },
     {
       "n": 8,
@@ -1041,7 +1069,11 @@
         "lang": "html",
         "code": "<form id=\"prefs\">\n  <label for=\"topic\">Topic</label>\n  <input id=\"topic\" name=\"topic\" value=\"HTML\" />\n  <label for=\"level\">Level</label>\n  <input id=\"level\" value=\"beginner\" />\n  <label for=\"week\">Week</label>\n  <input id=\"week\" name=\"week\" value=\"3\" disabled />\n</form>\n<script>\n  console.log([...new FormData(document.getElementById(\"prefs\"))]);\n</script>",
         "reading": "The console shows only one pair, topic with HTML. Level has an `id` and a label but no `name`, so it is not a successful control. Week has a name and a value, but `disabled` excludes it. All three fields look filled in the preview, which is why the visible form is weak evidence of the submitted data. Add `name=\"level\"` and remove `disabled`, and the same line lists three pairs."
-      }
+      },
+      "workspace": "The starter form has a topic input with a label, id and name, and a goal input with a label but no name. You will add a textarea and grouped choices and work out which values the form would actually submit.",
+      "debugging": "If a field is missing from the submitted values, check its name attribute first; id connects labels, while name is what the form sends. If clicking a label does not focus its control, the for value and the input id differ.",
+      "retrieval": "From memory, state what id does for a label and what name does for submission, using the goal field as the example. Explain why placeholder text is not a label, what a fieldset and legend add to a group of checkboxes and why the server must not trust a value just because the form displayed it.",
+      "reference_note": "The reference checks that the input with id topic has exactly one associated label. It catches a broken for and id pair on that one control, but it does not inspect the goal field's missing name, the textarea or the fieldset, so compare which values your form would submit against the expected answer."
     },
     {
       "n": 9,
@@ -1170,7 +1202,11 @@
         "lang": "js fragment",
         "code": "const field = document.getElementById(\"minutes\");\nfield.value = \"\";\nconsole.log(field.validity.valueMissing, field.checkValidity());\nfield.value = \"4\";\nconsole.log(field.validity.rangeUnderflow, field.checkValidity());\nfield.value = \"30\";\nconsole.log(field.checkValidity());",
         "reading": "The first line prints true false because the field is required and empty. The second prints true false because 4 is below `min=\"5\"`. The last prints true. These range and required checks respond to scripted values, but the alias field's `minlength` behaves differently: browsers apply `tooShort` only after a user edit, so setting `value = \"ab\"` from script can still report valid. That is why the lesson asks you to test real typing as well as console assignments."
-      }
+      },
+      "workspace": "The starter is a bounded number input labeled only Time, with min 5, max 120 and required. You will add the unit and range to the label, connect visible help and test each constraint with real input.",
+      "debugging": "If the browser reports a value as valid that you expected to fail, check whether a script set it; some constraints only fire on user edits. Read the validity object in the console, such as valueMissing or rangeUnderflow, to see which rule failed.",
+      "retrieval": "Predict the validity of empty, 4, 30 and 121 for this input and name the constraint each failing value breaks. Then explain why aria-describedby connects help text, why a red border alone does not communicate an error and why the server must repeat every check the browser performs.",
+      "reference_note": "The reference calls checkValidity on the minutes input and requires the starting value to pass, which catches an initial value outside 5 to 120 or a missing value. It does not test the failing values, the linked help or the error text, so try empty, 4 and 121 by hand."
     },
     {
       "n": 10,
@@ -1297,7 +1333,11 @@
         "lang": "html",
         "code": "<style>\n  #summary {\n    color: navy;\n  }\n  .note {\n    color: darkred;\n  }\n</style>\n<p id=\"summary\" class=\"note\">Weekly summary</p>\n<p class=\"note\">Second note</p>",
         "reading": "Weekly summary is navy even though the `.note` rule comes later, because an id selector has higher specificity than a class selector. Second note is dark red because only `.note` matches it. In the Computed view of the first paragraph, the `.note` declaration appears crossed out under the winning `#summary` rule. Swapping the rule order changes nothing for the first paragraph, which is the quickest way to prove specificity decided it rather than order."
-      }
+      },
+      "workspace": "The starter shows two paragraphs with class note and an empty style block. You write one low-specificity rule for both cards, then use developer tools to see which declaration wins when rules compete.",
+      "debugging": "When a style does not apply, open the Styles pane and look for the crossed-out declaration and the rule that beat it. Compare origin, importance, layer, specificity and source order in that order, instead of making your selector longer.",
+      "retrieval": "Without notes, predict the color of a note when a class rule and a later class rule of equal specificity disagree, then when an id rule competes. Explain why inheritance passes color but not padding, and why the cascade is more than specificity, using the order origin, importance, layers, specificity and order.",
+      "reference_note": "The reference reads the computed padding of the first note and requires 16px, so it catches a missing rule or a selector that does not match the class. It does not compare colors, test inheritance or show which declaration was overridden, so use the Styles pane to compare those decisions."
     },
     {
       "n": 11,
@@ -1348,7 +1388,7 @@
           "Calculate outer widths for the two examples.",
           "They are 244px and 200px, before margins.",
           "Add padding and border to width for content-box; for border-box, the declared width already includes them.",
-          "With content-box, 200px of content plus 2 × 20px padding plus 2 × 2px border gives 244px; with border-box, the padding and border fit inside the declared 200px."
+          "With content-box, 200px of content plus two 20px paddings plus two 2px borders gives 244px; with border-box, the padding and border fit inside the declared 200px."
         ],
         [
           "Add border-box sizing to a document and inspect one card.",
@@ -1430,7 +1470,11 @@
         "lang": "css",
         "code": ".message {\n  box-sizing: border-box;\n  height: 3rem;\n  padding: 0.5rem;\n  overflow: hidden;\n}\n/* repair */\n.message {\n  height: auto;\n  min-block-size: 3rem;\n}",
         "reading": "With `height: 3rem` and `overflow: hidden`, the box keeps its 3rem border box, and after 1rem of vertical padding only 2rem remain for text, so a second line of the message is cut off with no scrollbar and no warning. The repair keeps the minimum look of the original but lets the block grow, so a longer error such as Enter a whole number from 5 to 120 stays fully visible. Increase the root font size to see the difference grow: the fixed version loses more text, while the repaired version simply gets taller."
-      }
+      },
+      "workspace": "The starter has one card whose paragraph is a long identifier with no spaces. That single unbreakable string is the test case: your sizing and overflow choices must keep it inside the card without hiding any characters.",
+      "debugging": "When a card is wider than you set, open the box model diagram and add content, padding and border; under content-box sizing the width you wrote covers only the content. When text disappears at the edge, look for overflow hidden or a fixed height before shrinking anything.",
+      "retrieval": "Without notes, calculate the outer width of a 200px content-box card with 12px padding and 10px borders, then the same card with border-box. Explain where margin sits in that sum, why overflow-wrap anywhere keeps a long identifier readable, and why a fixed height can clip a validation message after text grows.",
+      "reference_note": "The reference reads the card's computed box-sizing and requires border-box, so it catches a missing sizing rule or one that never matched the card. It does not measure the long identifier, test enlarged text or detect clipped content, so narrow the preview and zoom in to compare overflow behavior."
     },
     {
       "n": 12,
@@ -1563,7 +1607,11 @@
         "lang": "css",
         "code": "/* viewport only */\nh1.a {\n  font-size: 4vw;\n}\n/* bounded and zoom-aware */\nh1.b {\n  font-size: clamp(1.75rem, 1.25rem + 2vw, 3rem);\n}",
         "reading": "`h1.a` depends only on viewport width. At a 400px viewport it computes to 16px, smaller than many body texts, and at 2000px it reaches 80px. Changing the default font size from 16px to 24px leaves it untouched, so a reader who needs larger text gets no help. `h1.b` stays between 1.75rem and 3rem, and both its bounds and its rem term grow with the reader's setting. The Computed panel shows the resolved pixel value for each rule after you resize."
-      }
+      },
+      "workspace": "The starter wraps two paragraphs of reading text in a main element with class prose. You set the measure, line height, font stack and a bounded heading size, then judge the result by zooming and narrowing rather than at one width.",
+      "debugging": "When text overlaps after zooming, look for a fixed line height in pixels or a container with a fixed height. When headings stop growing with the reader's font setting, check whether the size uses only viewport units; adding a rem term to clamp restores the user's control.",
+      "retrieval": "From memory, say what 1rem and 1em are each relative to and give one place each is the better unit. Explain why a measure of about 65ch is an approximation, why unitless line-height inherits more safely than a pixel value and why a system font stack keeps this page readable offline.",
+      "reference_note": "The reference checks that the prose container has a max-inline-size other than none, so it catches a page whose lines run the full width. It does not test the line height, the heading clamp or behavior at 200 percent zoom, so enlarge the text yourself and compare where lines wrap."
     },
     {
       "n": 13,
@@ -1692,7 +1740,11 @@
         "lang": "css",
         "code": "/* removes the only focus signal */\nbutton:focus {\n  outline: none;\n}\n\n/* keeps a keyboard signal */\nbutton:focus-visible {\n  outline: 3px solid #9c3200;\n  outline-offset: 3px;\n}",
         "reading": "With the first rule, pressing Tab still moves focus, but nothing on screen shows where it went, so a keyboard user loses their place. With the second rule, a mouse click usually shows no ring, while keyboard focus draws a 3px outline set 3px away from the border, so the border cannot hide it. The color #9c3200 on a white page is a dark orange-brown with a ratio well above the 3:1 floor for focus indicators. Press Tab through the page with each rule to see the difference directly."
-      }
+      },
+      "workspace": "The starter has two status paragraphs, one marked as a warning, and a Review lesson button. Both statuses already have a strong label; your work is to make focus visible and make the warning understandable without relying on color.",
+      "debugging": "If the focus ring vanishes, search for outline none and for overflow hidden on a parent, which can clip an outline drawn outside the box. If a status is only red or green, cover the color with your hand or use grayscale and check whether the words still carry the meaning.",
+      "retrieval": "Without notes, explain what focus-visible changes compared with focus, and why removing the default outline without a replacement fails keyboard users. Then compute or estimate whether slate gray #94a3b8 on white passes 4.5 to 1 for body text, and explain why one passing pair does not cover hover, disabled and error states.",
+      "reference_note": "The reference counts strong elements inside status paragraphs and requires two, so it catches a status that has lost its text label. It does not measure contrast, check the focus-visible style or test forced-colors mode, so tab to the button and review the page in a high-contrast setting."
     },
     {
       "n": 14,
@@ -1825,7 +1877,11 @@
         "lang": "html",
         "code": "<style>\n  .card { padding: 2rem; }\n  .badge {\n    position: absolute;\n    inset-block-start: 0.5rem;\n    inset-inline-end: 0.5rem;\n  }\n</style>\n<article class=\"card\">\n  <span class=\"badge\">New</span>\n  <p>Card text.</p>\n</article>",
         "reading": "Without a positioned ancestor, the badge's containing block is the initial containing block, so New jumps to the top right corner of the page instead of the card. Every card on the page would stack its badge in that same corner. Restoring `position: relative` on `.card` makes the card the containing block again, and the inset values are measured from its padding edge. The card's own text never moved in either case, because an absolutely positioned element is removed from flow and does not push siblings."
-      }
+      },
+      "workspace": "The starter has one card containing a New badge, a heading and a paragraph that stays in normal flow. You decide how the badge is positioned and confirm that adding text still grows the card instead of sliding under the badge.",
+      "debugging": "When an absolutely positioned badge jumps to a page corner, its nearest positioned ancestor is missing; set position relative on the card and check the result. When a label overlaps enlarged text, the positioned element has left normal flow, so reserve space with padding instead of raising its z-index.",
+      "retrieval": "Without the examples, predict whether position relative with top 10px frees the element's original space, and explain why. Then say which box an absolute element measures from, why sticky can fail inside a scrolling ancestor and why changing visual position should never change the reading order in the source.",
+      "reference_note": "The reference reads the card's computed position and requires relative, which catches a badge with no containing block on the card. It does not measure where the badge lands, test a long paragraph or check that the badge leaves the text readable, so narrow the preview and enlarge the text to compare."
     },
     {
       "n": 15,
@@ -1958,7 +2014,11 @@
         "lang": "css",
         "code": ".cards {\n  display: flex;\n  gap: 1rem;\n}\n.card {\n  flex: 1 1 12rem;\n}\n/* repair */\n.card {\n  min-inline-size: 0;\n  overflow-wrap: anywhere;\n}",
         "reading": "Flex items default to `min-width: auto`, which in practice means they cannot shrink below their longest unbreakable content. A 60-character identifier therefore forces its card wider than the shared space, and the row overflows the container even though `flex-shrink` is 1. Setting `min-inline-size: 0` removes that floor, and `overflow-wrap: anywhere` lets the identifier break so the card can actually use the narrower width. Remove only the first repair line and you will see the card still overflow, because the wrap rule alone cannot beat the automatic minimum."
-      }
+      },
+      "workspace": "The starter has a topic navigation list and a cards container with three articles. You turn the list into a wrapping flex row and the cards into flexible items, then stress them with a very long label and with one or many items.",
+      "debugging": "When a flex child refuses to shrink, its min-width defaults to auto, so a long word or wide image sets a floor; set min-width 0 on the item. When items overflow instead of wrapping, check that flex-wrap is wrap on the container, not on the children.",
+      "retrieval": "From memory, name the main and cross axes for flex-direction row and for column, and say which property aligns items on each. Explain what flex 1 1 12rem asks for, why gap is better than margins on each item and when a two-dimensional grid would fit better than Flexbox.",
+      "reference_note": "The reference reads the computed display of the cards container and requires flex, which catches a missing or misspelled container rule. It does not test wrapping, the long label or the navigation list, and it cannot tell whether visual order still matches keyboard order, so resize and tab through the page."
     },
     {
       "n": 16,
@@ -2088,7 +2148,11 @@
         "lang": "css",
         "code": ".grid-a {\n  display: grid;\n  grid-template-columns: 1fr 1fr;\n  gap: 1rem;\n}\n.grid-b {\n  display: grid;\n  grid-template-columns: repeat(2, minmax(0, 1fr));\n  gap: 1rem;\n}",
         "reading": "A plain `1fr` track has an automatic minimum equal to its min-content size, so a long unbroken URL makes the first column wider than the second and can push the grid past its container. In `.grid-b` the minimum is 0, so both columns stay equal and the URL overflows inside its own cell, where you can add `overflow-wrap: anywhere` to keep it readable. With short words both grids look identical, which is why this difference only appears when you test with long content."
-      }
+      },
+      "workspace": "The starter has a cards container with four topic articles and no grid rules. You define tracks that adapt to the available width, then test the same rule with empty, one card and seven card collections without adding placement rules.",
+      "debugging": "When one track grows wider than the others, a long unbreakable value has raised its min-content size; use minmax(0, 1fr) or let the text wrap. When cards overflow a narrow container, the minimum in your minmax track is wider than the container.",
+      "retrieval": "Without notes, explain why two 1fr tracks with a gap are not two 50 percent columns plus a gap. Then describe what repeat(auto-fit, minmax(12rem, 1fr)) does as the container narrows, how auto-fit differs from auto-fill when there are few items and why grid placement must not scramble the reading order.",
+      "reference_note": "The reference requires the cards container to compute to display grid, so it catches a missing grid rule or a selector that does not match. It does not count columns, test a narrow container or check that a long value leaves tracks balanced, so try the one card and seven card cases yourself."
     },
     {
       "n": 17,
@@ -2221,7 +2285,11 @@
         "lang": "html",
         "code": "<!-- A: no viewport metadata -->\n<head>\n  <meta charset=\"utf-8\" />\n  <title>Outline</title>\n</head>\n\n<!-- B: layout viewport follows the device -->\n<head>\n  <meta charset=\"utf-8\" />\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\" />\n  <title>Outline</title>\n</head>",
         "reading": "Mobile browsers render document A as if the screen were roughly 980 CSS pixels wide and then scale it down, so the `min-width: 48rem` query matches and readers see a tiny two-column desktop page. Document B sets the layout viewport to the device width, so a phone stays below 48rem and gets the single-column base layout. A desktop preview resized by hand may not show this difference, so use a device emulation preset when you test it."
-      }
+      },
+      "workspace": "The starter has a layout container with an outline nav and an article and, importantly, no viewport meta element. You add the viewport metadata, a one column base and one breakpoint chosen by resizing until the content needs it.",
+      "debugging": "When a phone view looks like a shrunken desktop page, the viewport meta element is missing, so the browser lays out at a wide default width. When a breakpoint triggers at an awkward width, resize slowly and move it to where the content actually breaks.",
+      "retrieval": "From memory, describe the base layout below your breakpoint and the change above it, and say why mobile first writes the narrow case without a media query. Explain what width equals device-width does, why min-width queries stack upward and why enlarged text at narrow width is a separate test from narrow width alone.",
+      "reference_note": "The reference only checks that a meta element named viewport exists, which catches the classic missing tag. It does not read its content, test your breakpoint, or check that sections stack below it, so compare the layout at a phone width, at your breakpoint and with text enlarged."
     },
     {
       "n": 18,
@@ -2347,7 +2415,11 @@
         "lang": "css",
         "code": ":root {\n  --space: blue;\n}\n.card {\n  padding: 2rem;\n  padding: var(--space);\n}",
         "reading": "Defining `--space: blue` is valid, because a custom property holds any token sequence. The problem appears at computed-value time: `padding: blue` is invalid, and because the declaration used `var()`, the browser cannot fall back to the earlier `padding: 2rem` line. Instead padding behaves as if it were unset, which for padding means 0. The Computed panel shows padding 0px while `--space` still appears as a defined variable, which is why checking that the token exists is not enough."
-      }
+      },
+      "workspace": "The starter has two cards with the same component markup, one also marked featured. You define tokens once, consume them in one card rule and change only the featured card by overriding a token in its scope.",
+      "debugging": "When a token seems ignored, check the computed value of the custom property on the element itself, since custom properties inherit and the nearest declaration wins. When a declaration using var() is dropped, the token holds a value of the wrong type, such as a color used as a length.",
+      "retrieval": "Without notes, predict which card shows the override when --surface is set on .featured, and explain why the standard card is unaffected. Then explain what a fallback in var(--space, 1rem) does when a token is missing, and why a name like --surface outlives a palette change better than --light-blue.",
+      "reference_note": "The reference reads the --surface custom property on the featured card and requires #e0f2fe, so it catches a token defined at the wrong scope or with another value. It does not check that the standard card keeps its default, that spacing uses tokens or that colors still contrast, so compare both cards side by side."
     },
     {
       "n": 19,
@@ -2480,7 +2552,11 @@
         "lang": "html",
         "code": "<style>\n  .hint-a::before {\n    content: \"Use your student number. \";\n  }\n</style>\n<p class=\"hint-a\"></p>\n\n<p id=\"hint-b\">Use your student number.</p>\n<input aria-describedby=\"hint-b\" />",
         "reading": "The first instruction is painted by `::before`, so it does not exist in the DOM text. Copying the page omits it, some assistive technology announces it inconsistently, and if the stylesheet fails to load the instruction disappears. The second is a real paragraph that also becomes the input's description through `aria-describedby`. Keep generated content for decoration such as icons or separators, and put anything a person must read into HTML."
-      }
+      },
+      "workspace": "The starter is a fieldset of two practice reminder checkboxes inside labels, with the first checked. You style the checked state, add focus-within feedback and make sure every instruction lives in HTML rather than in generated content.",
+      "debugging": "If a style for the checked state never appears, check the combinator; input:checked + span only reaches the span immediately after the input. If an instruction is missing for some users, look for text placed only in a ::before content value and move it into the HTML.",
+      "retrieval": "From memory, explain the difference between :checked, which selects by state, and ::before, which creates a box, using this lesson's preferences list. Then say why :user-invalid waits for interaction while :invalid does not, why focus-within helps a field group and why CSS state can never authorize a server action.",
+      "reference_note": "The reference counts checked inputs and requires exactly one, so it catches a starter whose initial selection changed. It does not test the visible checked style, focus-within feedback or keyboard operation, so tab through the reminders, toggle each with Space and compare what changes on screen."
     },
     {
       "n": 20,
@@ -2609,7 +2685,11 @@
         "lang": "css",
         "code": ".card-a {\n  transition: all 400ms ease;\n}\n.card-b {\n  transition: transform 120ms ease;\n}\n@media (min-width: 48rem) {\n  .card-a,\n  .card-b {\n    padding: 2rem;\n  }\n}",
         "reading": "When the viewport crosses 48rem, `.card-a` animates its padding over 400ms because `all` includes every animatable property, so text visibly slides and reflows while the reader is trying to look at it. `.card-b` jumps to the new padding at once and only animates `transform` for the hover cue. The same surprise happens with color, border or height changes added months later. Listing the intended property keeps future changes instant unless you choose to animate them."
-      }
+      },
+      "workspace": "The starter is a single card link to a notes section that stays usable without animation. You add a restrained transition limited to one property and a reduced-motion rule that removes the movement but keeps the link working.",
+      "debugging": "When an unrelated property animates, the rule uses transition all; name the single property instead. When the reduced-motion rule seems ignored, enable the preference in the operating system or devtools rendering panel and check whether a later rule overrides your media query.",
+      "retrieval": "Without notes, distinguish a transition, which animates between two states, from a keyframes animation, which runs its own timeline. Explain why transform is often cheaper than changing top or left, why prefers-reduced-motion should remove movement rather than the action, and why information must never wait for an animation to finish.",
+      "reference_note": "The reference checks that the card link still points to #notes, so it catches an interaction that replaced the destination with a script or animation. It does not test the transition, the reduced-motion rule or keyboard focus, so turn on the reduced-motion preference and compare the hover and focus states."
     },
     {
       "n": 21,
@@ -2738,7 +2818,11 @@
         "lang": "css",
         "code": ".card {\n  container-type: inline-size;\n  display: grid;\n  gap: 1rem;\n}\n@container (inline-size >= 28rem) {\n  .card {\n    grid-template-columns: 8rem minmax(0, 1fr);\n  }\n}",
         "reading": "A container query selects the nearest ancestor that is a query container, never the element being styled. Because `.card` is now the container and no ancestor is, the `@container` rule finds nothing to measure for `.card` and the card stays stacked at every width. Children of the card could respond to its size, but the card itself cannot. Put the declaration back on `.slot`, keep the card as a descendant, and the two slots from worked example 2 again choose their layouts independently. The Styles panel marks the container rule as not applied while it is broken."
-      }
+      },
+      "workspace": "The starter places the same card markup in a wide slot and a narrow slot. Because the viewport is identical for both, any layout difference you produce must come from a container query on the slot, not from a media query.",
+      "debugging": "When a container query never matches, check that an ancestor of the card, not the card itself, has container-type inline-size; an element cannot query its own size. When a slot collapses to zero width, size containment has removed its content-based width, so give the slot an explicit width or let its parent size it.",
+      "retrieval": "Without notes, explain why two copies of one card on the same page can choose different layouts, and which element must declare the container. Then say what inline-size containment changes about how the slot is sized, and when a sidebar card should still use a viewport media query instead of a container query.",
+      "reference_note": "The reference reads the computed container-type of the first slot and requires inline-size, so it catches a missing container declaration or one placed on the card itself. It does not measure either card's layout or confirm that the narrow slot keeps the stacked baseline, so resize the preview and compare both instances."
     },
     {
       "n": 22,
@@ -2871,7 +2955,11 @@
         "lang": "css",
         "code": "@layer base, components, utilities;\n@layer components {\n  .note {\n    color: #0753a4;\n  }\n}\n/* quick fix, added outside any layer */\np {\n  color: #172033;\n}",
         "reading": "For normal declarations, unlayered author styles rank above every named layer, and layer order is compared before specificity. The class selector `.note` is more specific than the type selector `p`, but that comparison never happens: the unlayered `p` rule wins, so note paragraphs turn #172033. Moving the quick fix into `@layer base` restores the intended outcome, because base is declared first and components now outranks it. The Styles panel lists the losing `.note` declaration as struck through, which is the evidence to look for."
-      }
+      },
+      "workspace": "The starter has one lesson card with a normal paragraph and a paragraph marked text-muted. You order base, component and utility layers so the muted utility wins on purpose, then test what an unlayered rule does to that order.",
+      "debugging": "When a layered rule loses unexpectedly, look for an unlayered declaration; normal unlayered styles beat every layer regardless of specificity. When the utility color loses, check the @layer order statement, because the layer declared last wins for normal declarations, not the rule written last in the file.",
+      "retrieval": "From memory, write the @layer statement that makes utilities beat components and components beat base, and explain why specificity only matters within one layer. Then explain what :where() does to specificity, how native nesting with & attaches a hover rule to its parent selector and why important declarations reverse the layer order.",
+      "reference_note": "The reference reads the computed color of the text-muted paragraph and requires rgb(71, 85, 105), so it catches a utility layer declared too early or a component rule that still wins. It does not test the hover rule, layer placement of every rule or what happens under a different parent, so inspect the cascade in the Styles pane."
     },
     {
       "n": 23,
@@ -3000,7 +3088,11 @@
         "lang": "css",
         "code": "/* too broad: .shell contains nav and main */\n@media print {\n  .shell {\n    display: none;\n  }\n}\n\n/* targeted */\n@media print {\n  .shell > nav,\n  .shell button {\n    display: none;\n  }\n}",
         "reading": "The first rule removes the wrapper, and `display: none` takes every descendant with it, so print preview shows a blank page or only the footer even though the screen view looks perfect. The second rule names the navigation and the buttons, leaving `main` and its headings in place. Screen rendering is identical for both versions, because neither rule applies outside print media. Only opening print preview reveals the difference, which is why the guide asks you to inspect preview pages rather than the screen."
-      }
+      },
+      "workspace": "The starter has a navigation link and an article of printable study notes with Principle and Evidence sections. You add a print stylesheet that removes the navigation but keeps every section, and an optional grid layout guarded by a feature query.",
+      "debugging": "When the print preview is blank, a print rule is hiding main or the article; search your @media print block for display none on a broad selector. When the enhanced layout breaks in some environments, check that the base styles still produce a readable single column without the @supports block.",
+      "retrieval": "Without notes, list which parts of this notes page must survive printing and which should be hidden, and explain why. Then say what @supports (display: grid) proves, what it does not prove about how well the browser lays out the grid, and why progressive enhancement starts from content that works with no CSS or script.",
+      "reference_note": "The reference checks that an h1 exists inside the article, so it catches a printable page that has lost its title. It does not open print preview, check that navigation is hidden in print or test the feature query fallback, so inspect several pages of print preview yourself and compare what remains."
     },
     {
       "n": 24,
@@ -3132,7 +3224,11 @@
         "lang": "html",
         "code": "<!-- vague -->\n<article><h2>HTML foundations</h2><a href=\"#html\">Read more</a></article>\n<article><h2>CSS layout</h2><a href=\"#css\">Read more</a></article>\n\n<!-- specific -->\n<article><h2>HTML foundations</h2><a href=\"#html\">Read HTML foundations</a></article>\n<article><h2>CSS layout</h2><a href=\"#css\">Read CSS layout</a></article>",
         "reading": "Screen reader users often navigate by a list of links pulled out of context. In the vague version that list contains Read more twice with nothing to tell the items apart, and voice control users cannot say which one to activate. In the specific version each accessible name names its destination. Sighted readers still see the heading next to each link, so this problem is invisible in a screenshot, which is one reason the guide keeps structural checks separate from visual ones."
-      }
+      },
+      "workspace": "The starter portal has three navigation links, one labeled only Read more and one pointing at #phpp, which matches no section. Repairing those two defects is part of the build, alongside tokens, cards and a review of the whole page.",
+      "debugging": "Audit the portal the way a learner meets it: list every link out of context, follow every fragment, then tab through the page and zoom to 200 percent. Record each failure with the exact element and width before fixing anything, so the audit shows evidence rather than impressions.",
+      "retrieval": "From memory, describe the three learner tasks your portal supports and how each card names its topic, entry requirement and next action. Then explain why three links that all say Read more fail a link list, why the portal cannot store progress without a backend and which review you would repeat after every change.",
+      "reference_note": "The reference counts the articles inside .topics and requires three, then follows every link and requires its hash to find a target. That catches a missing path and the broken #phpp fragment. It does not judge link wording, tokens, zoom or print behavior, so compare your audit notes rather than the reference's colors."
     },
     {
       "n": 25,
@@ -3263,7 +3359,11 @@
         "lang": "html",
         "code": "<!-- A: script in head -->\n<head>\n  <script>\n    const button = document.querySelector('#add');\n    button.addEventListener('click', () => {});\n  </script>\n</head>\n<body\n  ><button id=\"add\" type=\"button\">Add</button></body\n>\n\n<!-- B: deferred until parsing ends -->\n<head\n  ><script defer src=\"counter.js\"></script\n></head>",
         "reading": "A classic inline script runs the moment the parser reaches it. In document A the body has not been parsed yet, so `querySelector('#add')` returns null and the next line throws a TypeError, which stops the rest of that script. The button later appears but has no listener, so clicks do nothing. Document B uses `defer` on an external file, which waits until parsing finishes, so the query finds the button. Placing the inline script at the end of the body has the same effect."
-      }
+      },
+      "workspace": "The starter has an Add one practice step button, a live output showing 0 and an empty label paragraph, with the script still to write. You keep the count as a number in a variable and only write text to the page.",
+      "debugging": "When the counter throws on load, log the result of each querySelector; null means the script ran before the element existed or the id differs. When the handler runs once immediately, you passed handler() instead of handler to addEventListener.",
+      "retrieval": "Without notes, predict when the click callback runs and when the script itself runs, and say what defer changes. Then explain why textContent keeps a name with angle brackets as text while innerHTML would parse it, and why reading the count back from the formatted output text is a fragile way to keep state.",
+      "reference_note": "The reference clicks Add, requires the output to read 1, clicks reset and requires 0, then confirms the label has no child elements. That catches a broken increment, a missing reset and text inserted as markup. It does not test keyboard activation or the live region announcement, so use Tab and Space yourself."
     },
     {
       "n": 26,
@@ -3392,7 +3492,11 @@
         "lang": "html",
         "code": "<!-- imitation -->\n<div class=\"overlay\" style=\"position: fixed; inset: 0\">\n  <h2>Rules</h2>\n  <button type=\"button\">Close</button>\n</div>\n\n<!-- native -->\n<dialog id=\"rules\" aria-labelledby=\"rules-title\">\n  <h2 id=\"rules-title\">Rules</h2>\n  <button type=\"button\">Close</button>\n</dialog>",
         "reading": "The imitation only paints a box. Focus does not move into it, Tab continues into links hidden behind the overlay, Escape does nothing, and assistive technology hears a plain group with no dialog role or name. Calling `showModal()` on the native element puts it in the top layer, makes the rest of the page inert, and lets Escape cancel the dialog. The `aria-labelledby` link gives it the name Rules. You still need a close button and focus restoration to the opener."
-      }
+      },
+      "workspace": "The starter already has a native details element, a button to open study settings and a dialog element. You give the dialog a name, wire opening and closing through showModal and close, and make sure focus returns to the opening button.",
+      "debugging": "When focus lands somewhere unexpected after closing, note which element had focus before opening and check the close handler; the native dialog returns focus to the opener only when opened with showModal. When Escape does nothing, the dialog was opened with show, which is not modal.",
+      "retrieval": "From memory, decide whether an optional explanation belongs in a details disclosure or a modal dialog, and justify it. Explain what showModal adds that a positioned div cannot, how aria-labelledby names the dialog from its heading and why opening a modal automatically while someone reads is disruptive.",
+      "reference_note": "The reference checks that the details element has a summary and that the dialog's aria-labelledby is dialog-title. That catches an unnamed disclosure and an unnamed dialog. It does not open the dialog, press Escape or check where focus goes after closing, so test open, close and reopen with the keyboard."
     },
     {
       "n": 27,
@@ -3527,7 +3631,11 @@
         "lang": "js",
         "code": "function validateLoose(value) {\n  const minutes = Number(value);\n  if (Number.isNaN(minutes)) return 'Enter minutes.';\n  return minutes >= 5 && minutes <= 120 ? '' : 'Use 5 to 120 minutes.';\n}",
         "reading": "`Number('')` and `Number('   ')` are 0, so an empty field reports Use 5 to 120 minutes instead of Enter minutes, which tells the reader the wrong problem. `Number('0x1e')` is 30, `Number('1e2')` is 100 and `Number('7.5')` is 7.5, so all three pass even though the server rule accepts only whole decimal minutes. `Number('0b111')` is 7, which this rule also accepts while the strict rule rejects it for not being plain digits. Worked example 1 rejects all of these before converting."
-      }
+      },
+      "workspace": "The starter has a minutes input with a 5 to 120 label, a Check locally button and an empty status paragraph. You write validate as a pure function that returns an error string, then connect its result to the field without losing the learner's typed value.",
+      "debugging": "When a bad value passes, call validate directly in the console with that exact string; Number('') is 0 and Number('0x1e') is 30, so a check built on Number alone accepts them. When the message shows but is not announced or linked, check aria-invalid and aria-describedby on the input.",
+      "retrieval": "Without notes, predict validate for empty, three spaces, 121, 0x1e, 1e2, 7.5 and 30 with spaces around it, and say which rule rejects each. Then explain why a pure function is easier to test than a click handler and which of these rules the server must repeat because the browser can be bypassed.",
+      "reference_note": "The reference calls validate on empty, whitespace, 121, 0x1e, 1e2 and 7.5 and requires an error for each, then requires 30 with surrounding spaces to pass. That catches the Number coercion traps. It does not test the visible message, aria-invalid or focus movement, so submit bad values in the preview and listen for the status."
     },
     {
       "n": 28,
@@ -3653,7 +3761,11 @@
         "lang": "js",
         "code": "let rows = [\n  { subject: 'HTML', minutes: 45 },\n  { subject: 'CSS', minutes: 25 },\n];\nfunction applyLoose(threshold) {\n  rows = rows.filter((row) => row.minutes >= threshold);\n  render(rows);\n}",
         "reading": "After `applyLoose(40)` the array holds only HTML, because the CSS record was discarded rather than hidden. Calling `applyLoose(20)` then filters that shorter array, so CSS never returns, even though 25 is at least 20. Worked example 1 keeps `rows` intact and stores the result in `visible`, so every filter starts from the full data. Reloading the page restores CSS in both versions, which is exactly why this bug survives quick testing."
-      }
+      },
+      "workspace": "The starter has a threshold select with All, 40 and 100 minute options and a captioned table of synthetic study records. You write a render function that derives the visible rows from the source array without ever changing that array.",
+      "debugging": "When choosing All after a higher threshold shows fewer rows than at the start, the filter overwrote the source array; derive a new array with filter instead of reassigning the original. When a name renders as markup, the cell used innerHTML rather than textContent.",
+      "retrieval": "From memory, predict which records remain at a 40 minute threshold and what the page should say at 100. Explain why the filtered view is derived data, why a filtered record is still in client memory and not secret, and how a D3 chart from js-043 would encode the same rows without changing the claim.",
+      "reference_note": "The reference checks three initial rows, sets the threshold to 100 and requires zero rows, then resets to 0. That catches a broken render and a filter with no empty case. It does not check the empty state message, the result count or that the source array survived, so switch thresholds back and forth yourself."
     },
     {
       "n": 29,
@@ -3783,7 +3895,11 @@
         "lang": "js fragment",
         "code": "const value = '<img src=x onerror=alert(1)>';\noutput.innerHTML = value;\n// compare\noutput.textContent = value;",
         "reading": "With `innerHTML`, the browser parses the string as markup and creates an `img` element. Loading the relative URL x fails, so the `onerror` attribute runs as script in the page's context. Whether the alert box itself appears depends on the sandbox, since a sandbox without modals blocks it, but the handler code still runs. With `textContent` the Elements panel shows one text node containing the literal characters, and nothing executes. Do not run this against any real site."
-      }
+      },
+      "workspace": "The starter has a pre element for an untrusted value and an empty URL policy paragraph. You display a string containing an image tag as plain text and write an explicit decision about which URL schemes this page would accept.",
+      "debugging": "When an image appears where text was expected, the value was assigned with innerHTML and parsed; switch to textContent and confirm the pre has no child elements. When a feature fails in the preview, read the console for a policy or sandbox error before changing code, because the block may be deliberate.",
+      "retrieval": "Without notes, compare http://localhost:3000 and http://localhost:8080 and say whether they share an origin. Then explain why rendering text safely is a separate job from deciding which URL schemes are allowed, why CORS controls reading responses rather than authorization and what a Content Security Policy can block that escaping cannot.",
+      "reference_note": "The reference requires the untrusted pre to have no child elements and the document to contain no img elements, so it catches the string being parsed as markup. It does not test the URL policy text, CSP headers or sandbox limits, so read your URL decision and explain which schemes it rejects."
     },
     {
       "n": 30,
@@ -3915,7 +4031,11 @@
         "lang": "js fragment",
         "code": "// logs and continues\nconsole.assert(document.querySelectorAll('main').length === 1, 'Expected one main region');\nconsole.log('All checks done');\n\n// stops the run\nif (document.querySelectorAll('main').length !== 1) {\n  throw new Error('Expected one main region');\n}",
         "reading": "When its condition is false, `console.assert` writes an Assertion failed message to the console and then lets execution continue, so All checks done still prints and anyone reading only the last line believes the page passed. The `throw` version stops at the first broken invariant, and the uncaught Error is reported as a failure with its message. A test runner that inspects exceptions or exit status can detect only the second form. Keep `console.assert` for quick local hints, not for quality evidence."
-      }
+      },
+      "workspace": "The starter has a Check local structure button, a live output and a checklist of manual observations for keyboard, width and zoom. You write throwing assertions for the structural claims and leave the manual items as recorded observations, not automated passes.",
+      "debugging": "When a test passes but the page later throws, the check ran before the interaction; trigger the click or input first, then assert on the result. When a failure disappears on retry, keep the first transcript, because an intermittent failure is still evidence about timing or state.",
+      "retrieval": "From memory, map three claims about the portal from web-024, a label, an interaction and a layout, to the evidence each needs. Explain why console.assert is a weak test, what one performance.now measurement can and cannot tell you and why a pass in one browser does not prove production readiness.",
+      "reference_note": "The reference requires one main element and a non-empty button label, clicks the button, then requires the output to mention Manual. That catches missing structure and a status that claims more than it checked. It does not test keyboard use, resizing, zoom or performance, so record those observations separately as the checklist asks."
     },
     {
       "n": 31,
@@ -4036,7 +4156,11 @@
         "lang": "php",
         "code": "<?php\ndeclare(strict_types=1);\n\necho \"Hello, classroom.\\n\";\n?>\n\n\n",
         "reading": "PHP swallows a single newline directly after `?>`, but every character after that is template text, so this CLI run prints the greeting followed by extra blank lines. In a web response the same stray output is sent before any later `header()` call, which then fails because headers are already sent. Deleting the closing tag removes the risk, because a pure PHP file then has no template area at the end. The fixed file prints exactly one greeting line in the CLI worker."
-      }
+      },
+      "workspace": "The starter keeps both worked examples, the greeting and the labelled minutes value, as comments above a check() helper. You write a program that stores a topic and a computed duration in variables and echoes each on its own labelled line.",
+      "debugging": "When the run reports a parse error, read the line number and look one line above it; a missing semicolon is usually reported at the next statement. When output has unexpected blank lines, look for a closing ?> tag followed by whitespace, which PHP sends as output.",
+      "retrieval": "Without notes, predict exactly which characters of an echo statement reach the output and where the newline comes from. Then explain what the dot operator does, why a parse error means no statement ran at all and how running main.php once in the CLI differs from a server handling one HTTP request.",
+      "reference_note": "The reference checks that the computed minutes equal 30, then echoes the topic and minutes lines. That catches an arithmetic slip in the duration. It does not compare your label wording, test literal angle brackets or show a server lifecycle, so compare the printed lines with your own prediction."
     },
     {
       "n": 32,
@@ -4156,7 +4280,11 @@
         "lang": "php",
         "code": "var_export('1e1' == '10');  // two numeric strings\necho \"\\n\";\nvar_export('0' == false);\necho \"\\n\";\nvar_export('' == null);\necho \"\\n\";\nvar_export('1e1' === '10');",
         "reading": "Loose equality converts operands first. Two numeric strings are compared as numbers, so `'1e1'` and `'10'` are equal because both mean ten. The string `'0'` converts to false, and an empty string loosely equals null. With `===` all of these are false because the types or exact string contents differ, which is what the last line prints. If a role code or an identifier is checked with `==`, a different spelling can pass, so validation code in this course uses strict comparison after deliberate conversion."
-      }
+      },
+      "workspace": "The worked examples compare the string '0' with the integer 0 and read a note key whose value is null. You build a small record where zero minutes is a real value and a null note is distinct from a missing key, then report each type.",
+      "debugging": "When a comparison accepts the wrong value, print var_export and get_debug_type for both sides before changing the operator. When a present key reads as missing, check whether you used isset, which returns false for null, instead of array_key_exists.",
+      "retrieval": "From memory, predict '0' === 0, '0' == false and 0 === false, and say which comparisons are strict. Then explain the difference between a missing key, a key holding null and an empty string, what ?? returns in each case and why strict_types only affects scalar arguments in calls made from this file.",
+      "reference_note": "The reference requires zero minutes to stay the integer 0, requires the note key to exist while isset reports it unset and requires '0' !== 0. That catches lost zeros and isset confusion. It does not test your typed diagnostic or empty(), so check those outputs against your own predictions."
     },
     {
       "n": 33,
@@ -4200,7 +4328,7 @@
           "Predict 125 cents times three units.",
           "The result is 375 cents.",
           "Multiply the integer cents first and convert to a display format only at the end.",
-          "125 × 3 is 375 cents; keeping integer minor units avoids binary floating-point rounding."
+          "Three items at 125 cents each make 375 cents; keeping integer minor units avoids binary floating-point rounding."
         ],
         [
           "Add a fixed 50-cent fee with a named intermediate value.",
@@ -4276,7 +4404,11 @@
         "lang": "php",
         "code": "$total = 0.1 + 0.2;\necho $total, \"\\n\";\nvar_export($total === 0.3);\necho \"\\n\";\nvar_export($total);\n\n$cents = 10 + 20;\nvar_export($cents === 30);",
         "reading": "Binary floating point cannot represent 0.1 or 0.2 exactly, so their sum is slightly larger than 0.3. `echo` rounds to the configured display precision and shows 0.3, which makes the value look correct. The strict comparison with 0.3 is false, and `var_export` prints the full value 0.30000000000000004. Across many line items these tiny differences can change a rounded total or make an equality check fail. The integer version stores 10 and 20 cents, adds them to exactly 30, and the comparison is true. That is why this lesson keeps every amount in integer cents and only formats a decimal label at output time."
-      }
+      },
+      "workspace": "The worked examples store a price as 125 integer cents and format 375 cents for display. You write a totalCents function with a bounded quantity and a named fee, plus a formatter that never converts the money back to a float.",
+      "debugging": "When a total is wrong, print each intermediate value with its type; a string from formatting may have slipped back into arithmetic. When concatenation and arithmetic mix in one echo, wrap the arithmetic in parentheses, because the dot and plus operators have precedence rules that surprise many readers.",
+      "retrieval": "Without notes, compute 125 cents times three, add a 50 cent fee and format the result, showing each step. Then explain why integer cents avoid binary fraction errors, why intdiv and the remainder rebuild the display, what quantity bounds keep the integer range safe and when cents are still not enough.",
+      "reference_note": "The reference requires 125 cents times three to equal 375 and requires a zero quantity to give 0, then formats the total with intdiv and a padded remainder. That catches float money and a zero bug. It does not test the fee, negative rejection or the upper bound, so add those checks yourself."
     },
     {
       "n": 34,
@@ -4396,7 +4528,11 @@
         "lang": "php",
         "code": "$value = '0';\n\nswitch ($value) {\n  case false:\n    echo \"switch: false branch\\n\";\n    break;\n  default:\n    echo \"switch: default branch\\n\";\n}\n\necho match ($value) {\n  false => \"match: false arm\\n\",\n  '0' => \"match: string arm\\n\",\n};",
         "reading": "`switch` compares with loose equality, and the string '0' loosely equals false, so it prints switch: false branch even though the value is a string. `match` uses strict identity, so the false arm does not match and the string arm does, printing match: string arm. If the string arm were removed, `match` would throw an `UnhandledMatchError` instead of quietly choosing a branch, which surfaces the unexpected value. That strictness is why worked example 2 uses `match` for a mapping where each input should land in one deliberate case. With `switch`, remember also that a missing `break` lets execution fall through into the next case."
-      }
+      },
+      "workspace": "The worked examples add durations in a bounded loop to reach 65 and map a route string with match. You build a weekly summary that guards against negative durations, totals the week and labels it through a match expression.",
+      "debugging": "When a loop never ends, print the loop variable on each pass; a while condition whose inputs never change cannot become false. When match throws UnhandledMatchError, the input had a value you did not list, which is usually better than a switch silently falling through to the wrong arm.",
+      "retrieval": "From memory, trace the accumulator through each iteration of the 65 minute example and say what an empty collection produces. Then explain why a guard clause at the top of a function is easier to read than nested conditions, and why match compares strictly while switch compares loosely on a string zero.",
+      "reference_note": "The reference requires the accumulated total to equal 65 and prints the label with the minutes. That catches an accumulator reset inside the loop or a skipped element. It does not test the negative guard, the empty week or the unknown-label path, so run each of those inputs yourself."
     },
     {
       "n": 35,
@@ -4523,7 +4659,11 @@
         "lang": "php",
         "code": "$minutes = [10, 50, 45];\n$kept = array_filter($minutes, fn(int $m): bool => $m >= 40);\n\necho json_encode($kept), \"\\n\";\necho json_encode(array_values($kept)), \"\\n\";",
         "reading": "`array_filter` keeps the original keys, so `$kept` holds keys 1 and 2. Because the keys no longer start at 0 and run consecutively, `json_encode` cannot represent the array as a list and produces the object {\"1\":50,\"2\":45}. A JavaScript client that calls `.map` on that value then fails, since objects have no `map` method. After `array_values` the keys are 0 and 1 and the output is the list [50,45]. Filtering that keeps the first element would hide this bug, so test with data where an early item is removed."
-      }
+      },
+      "workspace": "The worked examples read one named field from a record and filter a list down to the rows that pass. You filter and summarize study records with array functions, keeping the original rows unchanged and the result a true list.",
+      "debugging": "When json_encode prints an object with numeric keys where you expected an array, the filter kept the original keys; wrap the result in array_values. When the source rows have changed after a transformation, look for a foreach by reference that was never unset.",
+      "retrieval": "Without notes, explain how PHP uses one array type for both lists and keyed records and what array_is_list checks. Then predict what array_find, array_any and array_all return for the two study rows, and explain why a foreach reference left alive can silently modify the last element on a later loop.",
+      "reference_note": "The reference requires one visible row that is a list, two untouched originals, the right record from array_find and correct array_any and array_all answers. That catches key leaks and mutation. It does not test a missing required field or the empty result, so add those cases yourself."
     },
     {
       "n": 36,
@@ -4650,7 +4790,11 @@
         "lang": "php",
         "code": "function label(int $minutes): void {\n  echo $minutes . ' minutes';\n}\n\n$text = 'Total: ' . label(30);\necho \"\\n\" . $text . \"\\n\";",
         "reading": "PHP must evaluate `label(30)` before it can finish the concatenation, so 30 minutes is printed at that moment, before anything else. The function is declared `void`, so it returns null, and concatenating null adds nothing. `$text` becomes Total: and the program prints that on the next line. The output therefore shows the duration and the label separated and in the wrong order. Changing the return type to `string` and returning the text lets the caller decide where it goes."
-      }
+      },
+      "workspace": "The worked examples double a typed integer and map a closure over a short list to get [20, 40]. You write a totalMinutes function that returns rather than echoes, rejects negative entries with an exception and stays independent of globals.",
+      "debugging": "When a function result is null or missing, check for an echo where a return belongs; echo prints and returns nothing to the caller. When results depend on when the function is called, look for a global or static variable the function reads without declaring it as a parameter.",
+      "retrieval": "From memory, explain what a function contract promises through parameter types, return type and thrown exceptions. Then predict totalMinutes for an empty array, [20, 30] and [-1], and explain when an arrow function's automatic capture of outer variables makes a transformation clearer than a named function.",
+      "reference_note": "The reference checks the empty total is 0, [20, 30] gives 50 and [-1] throws InvalidArgumentException. That catches a missing guard and a wrong starting value. It does not check your display function or closure, so compare the formatted line and mapping output against your own prediction."
     },
     {
       "n": 37,
@@ -4770,7 +4914,11 @@
         "lang": "php expect-error",
         "code": "$label = 'café';\n$bytes = substr($label, 0, 4);\n$chars = mb_substr($label, 0, 4, 'UTF-8');\n\necho json_encode(['label' => $chars], JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE), \"\\n\";\necho json_encode(['label' => $bytes], JSON_THROW_ON_ERROR), \"\\n\";",
         "reading": "In UTF-8 'café' is five bytes because é uses two. `substr` counts bytes, so `$bytes` keeps c, a, f and only the first byte of é, which is not valid UTF-8. `mb_substr` counts code points and keeps the full word. The first `json_encode` prints the label normally. The second throws a `JsonException` for malformed UTF-8 because JSON requires valid Unicode. Without the throw flag, it would return false instead, which is easy to miss."
-      }
+      },
+      "workspace": "The worked examples measure the bytes in é and encode a Unicode label as JSON. You build a text inspection report for a short label like café that states its byte length and code point count separately and survives a JSON round trip.",
+      "debugging": "When a substring ends in a broken character, the cut used byte offsets inside a multibyte sequence; use mb_substr for characters or mb_strcut for a byte budget. When json_encode returns false, add JSON_THROW_ON_ERROR so invalid UTF-8 raises an error instead of silently failing.",
+      "retrieval": "Without notes, predict strlen and mb_strlen for café and explain why they differ. Then explain what a code point is, why one visible character can still be several code points, what the //u regex check proves about validity and why validation, normalization and HTML escaping are three separate decisions.",
+      "reference_note": "The reference requires 5 bytes, 4 code points, a byte cut that stops at caf, valid UTF-8 and a lossless JSON round trip. That catches byte and character confusion. It does not test graphemes or normalization, so compare a precomposed and a decomposed é yourself."
     },
     {
       "n": 38,
@@ -4893,7 +5041,11 @@
         "lang": "php",
         "code": "var_dump(json_decode('{\"minutes\":30', true));\nvar_dump(json_decode('null', true));\n\ntry {\n  json_decode('{\"minutes\":30', true, 32, JSON_THROW_ON_ERROR);\n} catch (JsonException $error) {\n  echo 'Rejected: ', $error->getMessage(), \"\\n\";\n}",
         "reading": "In default mode both calls return NULL. The first input is malformed, while the second is valid JSON whose value really is null, and the return value cannot tell them apart. Code that continues with `$data['minutes'] ?? 0` would treat a broken upload as a zero minute record. With `JSON_THROW_ON_ERROR` the truncated input raises a `JsonException` and the catch block prints a rejection, while valid null still returns null for the field checks to reject. That separation is why worked example 1 parses with the flag before validating fields."
-      }
+      },
+      "workspace": "The worked examples decode a JSON record before validating its fields and write notes to a temporary stream. You parse a small study record with explicit errors and a depth limit, then round-trip the raw text through php://temp.",
+      "debugging": "When a stream read returns an empty string, the cursor is still at the end after writing; call rewind before reading. When json_decode returns null, pass JSON_THROW_ON_ERROR so you see the parse error instead of confusing invalid JSON with a JSON null value.",
+      "retrieval": "From memory, explain why a document can be valid JSON yet invalid application input, and give one field rule that catches it. Then explain what the depth argument bounds, why fwrite's return value must be checked, why the finally block closes the stream and why php://temp does not persist anything after the run.",
+      "reference_note": "The reference requires an array with integer minutes, a complete write, a stream round trip after rewind and a closed handle in finally. That catches unchecked decoding and a missing rewind. It does not test oversized input or a wrong field type, so feed those cases to your parser."
     },
     {
       "n": 39,
@@ -5016,7 +5168,11 @@
         "lang": "php",
         "code": "function minutesOrZero(string $text): int {\n  try {\n    return parseMinutes($text);\n  } catch (Throwable) {\n    return 0;\n  }\n}\n\necho minutesOrZero('0'), \"\\n\";\necho minutesOrZero('abc'), \"\\n\";",
         "reading": "Both calls print 0. The first is a real value, the second is a validation failure, and a typo or a TypeError inside `parseMinutes` would also print 0. Because `Throwable` catches errors as well as exceptions, even a programming mistake becomes a normal looking duration, and totals quietly undercount. Catching `InvalidArgumentException` only, and returning a result that carries the error message, keeps 0 meaningful and lets unexpected errors still stop the run where they can be diagnosed."
-      }
+      },
+      "workspace": "The worked examples throw from requirePositive on zero and show a finally step running after the error. You build a parser with a success path and a failure path, catching only the validation exception it expects and recording cleanup either way.",
+      "debugging": "When every failure turns into zero, find the catch-all that returns a default and narrow it to the specific exception class. When cleanup is skipped after an error, move it into finally; code after the try block does not run when an exception escapes.",
+      "retrieval": "Without notes, trace which statements run after requirePositive(0) throws, including the finally block. Then explain why catching Throwable to print success hides real defects, what a learner-facing message may include that a public production error must not and when a fallback value is honest.",
+      "reference_note": "The reference requires that the failure was caught and cleanup ran, then requires requirePositive(3) to return 3. That catches a missing finally and a guard that rejects valid input. It does not test your parser's error text or a second exception type, so trigger each path yourself."
     },
     {
       "n": 40,
@@ -5139,7 +5295,11 @@
         "lang": "php expect-error",
         "code": "final class Plan {\n  public function __construct(public readonly ArrayObject $topics) {}\n}\n\n$plan = new Plan(new ArrayObject(['HTML']));\n$plan->topics[] = 'SQL';\necho count($plan->topics), \"\\n\";\n\n$plan->topics = new ArrayObject();",
         "reading": "Appending SQL succeeds, because `readonly` stops reassignment of the property, not changes inside the object it points to, so the count prints 2. The final line tries to replace the property and throws an `Error` saying the readonly property cannot be modified. A class that promises an unchangeable topic list therefore needs to copy the input into an array, or keep the collection private, instead of exposing a mutable object."
-      }
+      },
+      "workspace": "The worked examples create a Duration that refuses negative minutes and derive a label from it. You build a StudySession value object whose constructor rejects an empty topic and invalid minutes, with readonly properties and a label method.",
+      "debugging": "When an object reaches an invalid state, look for a setter or public property written after construction; validate only in the constructor and remove the mutation path. When a readonly property still changes, check whether it holds an object whose own state is being modified.",
+      "retrieval": "From memory, state the invariant the StudySession constructor enforces and why checking it once is enough when no setter exists. Then explain what readonly prevents, why a readonly property holding an object is only shallowly immutable and why a value object is a better fit here than an inheritance tree.",
+      "reference_note": "The reference requires the label to read CSS: 45 minutes and requires an empty topic to throw InvalidArgumentException. That catches a wrong format and a missing guard. It does not test zero or negative minutes or attempt a mutation, so add those checks yourself."
     },
     {
       "n": 41,
@@ -5262,7 +5422,11 @@
         "lang": "php",
         "code": "final class SummaryFixed {\n  public function label(): string {\n    $pdo = new PDO('sqlite:/srv/app/progress.sqlite');\n    $count = (int) $pdo->query(\n      'SELECT COUNT(*) FROM progress WHERE done = 1'\n    )->fetchColumn();\n    return $count . ' complete';\n  }\n}",
         "reading": "The class decides on its own which database file to open, so a test can only run where that exact path exists, and the answer depends on whatever rows happen to be stored there today. There is no way to hand it a store that reports 0 or 3 on demand, so the empty state and the normal state cannot both be checked deterministically. In the CLI worker the file does not exist and the constructor of PDO fails before any summary logic runs. Worked example 2 moves that choice out: the caller passes any `ProgressStore`, a memory store in tests and a PDO store in the application. The label logic is identical in both cases, and only the source of the count changes."
-      }
+      },
+      "workspace": "The worked examples show a narrow progress interface and a summary built from a controlled store. You write a Summary service that receives its repository through the constructor and a MemoryProgress double for deterministic runs.",
+      "debugging": "When a test double makes the summary pass with impossible data, compare the double's values with what the real store could return, such as negative counts. When the service cannot be tested without a database, look for a new PDO or connection created inside the class instead of injected.",
+      "retrieval": "Without notes, name the dependency the progress interface hides and what the Summary service still knows about it. Then explain why constructor injection makes the zero-lesson case easy to test and what an in-memory repository cannot tell you about SQL, transactions or concurrent writers.",
+      "reference_note": "The reference requires an empty store to give 0 complete and two lesson ids to give 2 complete. That catches a summary that ignores its injected store. It does not exercise a real database or a malformed id, so state which evidence would show the production repository behaves the same."
     },
     {
       "n": 42,
@@ -5385,7 +5549,11 @@
         "lang": "php",
         "code": "// unsafe\n$page = $_GET['page'] ?? 'home';\ninclude __DIR__ . '/pages/' . $page . '.php';\n\n// allowlisted\n$file = match ($_GET['page'] ?? 'home') {\n  'home' => 'home.php',\n  'about' => 'about.php',\n  default => null,\n};",
         "reading": "In the first version a request with page set to ../config/secrets loads ../config/secrets.php relative to the pages folder, and any PHP file reachable that way is executed with the application's permissions. Namespaces and autoloading do not prevent this, because `include` runs whatever path it receives. The allowlisted version accepts only the two names it lists. Every other value maps to null, so the caller can return a 404 response without touching the file system. The same rule applies to autoloaders: class names map to paths through reviewed code, never through raw input."
-      }
+      },
+      "workspace": "The worked examples resolve a fully qualified class name and describe a namespace-to-directory mapping. You design a project layout with a public entrypoint, source, tests and Composer metadata, keeping dependency files out of the public directory.",
+      "debugging": "When a class is not found despite a correct namespace, check that the autoloader was generated and that the file path matches the namespace mapping and the case of the class name. When an include uses request input, stop and replace it with a fixed allow list.",
+      "retrieval": "From memory, explain what a namespace changes about class names and why it does not install or load any code. Then explain what Composer autoloading maps, why composer.lock records exact versions, why only public/ should be reachable from the web and why including a file chosen by request input is dangerous.",
+      "reference_note": "The reference resolves a qualified DateTimeImmutable and checks that composer.lock is not inside public, then prints the layout. That catches public dependency metadata. It is not an installed Composer project, so compare your layout's public boundary and autoload mapping rather than its file count."
     },
     {
       "n": 43,
@@ -5512,7 +5680,11 @@
         "lang": "php",
         "code": "$zone = new DateTimeZone('America/New_York');\n$start = new DateTimeImmutable('2024-03-09 12:00:00', $zone);\n\n$nextDay = $start->modify('+1 day');\n$plus86400 = $start->setTimestamp($start->getTimestamp() + 86400);\n\necho $nextDay->format('Y-m-d H:i T'), \"\\n\";\necho $plus86400->format('Y-m-d H:i T'), \"\\n\";",
         "reading": "The calendar step keeps the local wall clock reading, so it prints 2024-03-10 12:00 EDT, which is only 23 hours of elapsed time after the start. Adding 86400 seconds to the timestamp moves exactly one day of elapsed time, which lands on 2024-03-10 13:00 EDT. Neither result is wrong. A reminder for noon tomorrow needs the first, while a 24 hour lockout needs the second. A fixed offset such as -05:00 could not produce either answer correctly, because the region's offset changed in between."
-      }
+      },
+      "workspace": "The worked examples fix one instant at noon UTC and display it in a named time zone. You build a deterministic report that converts a fixed instant, adds a duration and shows that the zone change never moved the underlying timestamp.",
+      "debugging": "When a test fails only near midnight or in another location, find the call that reads the current clock and inject a fixed instant instead. When a conversion is off by an hour, check whether you used a numeric offset where a named zone with daylight rules was needed.",
+      "retrieval": "Without notes, explain the difference between an instant and a local clock reading, and predict noon UTC on 1 January in America/New_York. Then explain why adding 30 minutes is exact, why adding one calendar day can be 23 hours near a clock change and why a fixed offset cannot stand in for a region's rules.",
+      "reference_note": "The reference requires the converted time to keep the same timestamp, to read 07:00 -05:00 and to add exactly 1800 seconds for 30 minutes. That catches mutable dates and a wrong zone. It does not test a daylight saving transition, so compare a calendar day across one yourself."
     },
     {
       "n": 44,
@@ -5639,7 +5811,11 @@
         "lang": "php fragment",
         "code": "function totalMinutes(array $items): int {\n  throw new RuntimeException('Bug: storage not ready');\n}\n\n$rejected = false;\ntry {\n  totalMinutes([-1]);\n} catch (Exception) {\n  $rejected = true;\n}\ncheck($rejected, 'Negative input accepted');",
         "reading": "`RuntimeException` is a subclass of `Exception`, so the broad catch records `$rejected = true` and the check passes even though the function never looked at the input. The test now reports that negative minutes are rejected for a reason that has nothing to do with validation. Catching `InvalidArgumentException` narrowly, as in worked example 2, lets the unrelated `RuntimeException` escape and fail the run with its own message. A test should accept only the outcome it was written to prove."
-      }
+      },
+      "workspace": "The worked examples compare a result with an independently known answer and exercise a declared failure. You build a test table for a boundedMinutes function that lists valid boundaries, invalid boundaries and the exception each invalid case must raise.",
+      "debugging": "When a test passes but the function is wrong, check whether the expected value was computed by the same code under test; an expected value must come from elsewhere. When an exception test passes too easily, confirm it catches only InvalidArgumentException rather than any Throwable.",
+      "retrieval": "Without notes, sort a pure-function check and a real database transaction check into unit and integration evidence, and say why. Then list the boundary values for a 0 to 120 minute rule, explain why a deliberately introduced bug should make your table fail and why a passing reference never proves the absence of bugs.",
+      "reference_note": "The reference runs three valid values through boundedMinutes, requires -1 and 121 to throw InvalidArgumentException and prints a count. That catches off-by-one bounds and a missing guard. It does not show your empty-input case or a planted bug, so run your own table against a broken copy too."
     },
     {
       "n": 45,
@@ -5763,7 +5939,11 @@
         "lang": "php fragment",
         "code": "$value = 'x onfocus=alert(1) autofocus';\n\necho '<input value=' . e($value) . '>', \"\\n\";\necho '<input value=\"' . e($value) . '\">', \"\\n\";",
         "reading": "`htmlspecialchars` converts `<`, `>`, `&` and quotes, but this value contains none of them, so `e` returns it unchanged. In the first line the output is `<input value=x onfocus=alert(1) autofocus>`, which an HTML parser would read as three attributes, including an event handler. In the second line the same characters sit inside double quotes, so a parser treats them as one value. The helper's contract is HTML text and quoted attributes, and this case shows why the quotes are part of that contract."
-      }
+      },
+      "workspace": "The worked examples escape a name containing angle brackets and an ampersand and fill a fixed greeting template. You write an e() helper with an explicit UTF-8 contract and render a study card from synthetic labels that look like attacks.",
+      "debugging": "When the page shows &amp;lt; instead of a less-than sign, the text was escaped twice; escape once at output and nowhere else. When an attribute breaks, check that it is quoted and that quotes were escaped, because ENT_QUOTES protects quoted attribute values, not unquoted ones.",
+      "retrieval": "From memory, predict the escaped form of <Ada & Bea> and of a double quote. Then explain why htmlspecialchars output is safe in HTML text and quoted attributes but not inside a JavaScript string or URL, and why text that passed input validation still needs escaping when it is written into HTML.",
+      "reference_note": "The reference requires the rendered card to contain &lt;Ada &amp; Bea&gt;, forbids a raw <Ada tag and requires a double quote to become &quot;. That catches missing and partial escaping. It does not test a JavaScript or URL context, so explain which other helper those contexts would need."
     },
     {
       "n": 46,
@@ -5883,7 +6063,11 @@
         "lang": "php",
         "code": "function routeLoose(array $request): array {\n  if ($request['path'] === '/health') {\n    return ['status' => 200, 'body' => 'ok'];\n  }\n  return ['status' => 404, 'body' => 'Not found'];\n}\n\nvar_export(routeLoose(['method' => 'DELETE', 'path' => '/health']));",
         "reading": "The DELETE request receives status 200 with body ok, so a client that sent the wrong method is told it succeeded. HEAD also receives a body, which HTTP forbids for HEAD responses. The reference router checks both path and method, answers HEAD with the GET status and an empty body, and returns 405 with an `Allow: GET, HEAD` header for other methods. That header tells the client which methods exist. The printed array is a model; a real server would still need to send these values over the network."
-      }
+      },
+      "workspace": "The worked examples build a response as status, headers and body values and route a GET health request. You write a pure route function for health and lesson-summary paths that returns a response array and never echoes or calls header directly.",
+      "debugging": "When the wrong status comes back, print the full response array from route rather than only the body, and check that method and path are both matched. In a real adapter, a headers already sent warning means output reached the client before header(), often a stray echo or whitespace.",
+      "retrieval": "Without notes, name the three parts of the response model and give the status for a missing path, a wrong method and a HEAD request. Then explain why a 405 should include an Allow header, why GET must not change state and what a printed CLI response cannot prove about real headers on the wire.",
+      "reference_note": "The reference requires GET /health to return 200, POST to return 405 with Allow: GET, HEAD, HEAD to return 200 with an empty body and an unknown path to return 404. That catches method-blind routing. It does not run an HTTP server, so header delivery still needs the lab."
     },
     {
       "n": 47,
@@ -6007,7 +6191,11 @@
         "lang": "php expect-error",
         "code": "function validateLoose(array $input): array {\n  $topic = trim($input['topic'] ?? '');\n  $minutes = (int) ($input['minutes'] ?? 0);\n  return ['topic' => $topic, 'minutes' => $minutes];\n}\n\nvalidateLoose(['topic' => ['HTML'], 'minutes' => '12abc']);",
         "reading": "When `topic[]=HTML` arrives, `$input['topic']` is an array, and `trim` throws a `TypeError` because internal string functions do not accept arrays in PHP 8. The caller sees an uncaught error instead of a Choose a topic message. If the topic were a string, the `(int)` cast would turn '12abc' into 12 and accept it, and a missing value would become 0. The reference checks `is_string` first and matches the minutes text against a digits pattern before converting, so each case returns a field error."
-      }
+      },
+      "workspace": "The worked examples reject an array-shaped field and check decimal syntax before conversion. You write validatePlan that returns cleaned values or field errors for topic and minutes, checking each value's shape before trimming or converting it.",
+      "debugging": "When validation throws a TypeError, a field arrived as an array, as in topic[]=HTML, and reached trim or a string function; check is_string first. When the form loses the learner's input after an error, return the raw submitted strings alongside the errors so the template can redisplay them.",
+      "retrieval": "From memory, predict what validatePlan returns for an empty array, topic[]=HTML, an unsupported topic and 121 minutes. Then explain why an allow list is safer than a block list for topics, why browser required attributes do not replace server checks and what POST redirect GET does and does not prevent.",
+      "reference_note": "The reference requires a valid plan to give integer minutes 30 and requires array input, missing input and the lowercase topic html to be rejected. That catches shape errors and a case-insensitive allow list. It does not test field-specific error text or redisplay, so read the printed 121 minute result."
     },
     {
       "n": 48,
@@ -6130,7 +6318,11 @@
         "lang": "php",
         "code": "// trusts the client\n$userId = (int) ($_COOKIE['user_id'] ?? 0);\n\n// trusts server storage keyed by a session identifier\nsession_start();\n$userId = $_SESSION['user_id'] ?? null;",
         "reading": "A cookie value is whatever the client chooses to send. A request carrying `Cookie: user_id=1` makes the first version act as user 1, with no password and no server check. In the second version the cookie carries only a random session identifier, and `user_id` is stored on the server, set after a verified login. Guessing someone's identifier is impractical when it is long and random. The CLI reference does not run this code; it models the expiry rule on an array."
-      }
+      },
+      "workspace": "The worked examples state a cookie policy and an explicit inactivity expiry rule. You model session activity as a touchSession function that takes the session state and a fixed clock value and returns updated state or null when expired.",
+      "debugging": "When an expiry test passes at one boundary but fails at the next, print the elapsed seconds and compare them with the timeout using the exact operator your rule states. When time moving backwards is accepted, add an explicit check, because a clock that runs backwards is a separate failure.",
+      "retrieval": "Without notes, say which session data lives in the browser cookie and which lives on the server, and why. Then predict touchSession at exactly the timeout, one second later and with an earlier clock value, and explain why a user id sent in a plain cookie is a claim rather than a trusted identity.",
+      "reference_note": "The reference requires activity at 2800 to succeed, 2801 to expire and a backward clock at 999 to be rejected, then states that no HTTP session was created. That catches an off-by-one timeout. It does not set cookies or start a session, so describe the HTTP test that would."
     },
     {
       "n": 49,
@@ -6257,7 +6449,11 @@
         "lang": "php",
         "code": "$sessionToken = $_SESSION['csrf'] ?? null;\n$submitted = $_POST['csrf'] ?? null;\n\nif ($submitted == $sessionToken) {\n  // state change runs here\n}\n\n$valid = is_string($sessionToken) && $sessionToken !== ''\n  && is_string($submitted) && hash_equals($sessionToken, $submitted);",
         "reading": "Both variables are null, and `null == null` is true, so the loose version performs the state change for a request that carried no token at all. The strict version first requires both values to be nonempty strings, so the same request fails before any comparison. `hash_equals` then compares in time that does not depend on where the strings first differ. It requires two strings, which is another reason the type checks come first."
-      }
+      },
+      "workspace": "The worked examples generate a production token from 32 random bytes and compare a submitted token exactly. You build validCsrf and a mayChange decision that requires POST, a matching string token and an owner match before any state change.",
+      "debugging": "When a wrong token is accepted, check that both values are strings and that comparison uses hash_equals, since a loose comparison with a missing session token can pass. When a GET request reaches the mutation, the method check is missing or placed after the change.",
+      "retrieval": "From memory, explain why a hidden form field alone does not stop a cross-site request and what the attacker cannot read. Then predict validCsrf for a match, a different token, an array and two empty strings, and explain how SameSite cookies help and why an XSS flaw defeats CSRF tokens.",
+      "reference_note": "The reference accepts a matching token, rejects a wrong token, an array and empty tokens, then requires mayChange to refuse GET, a wrong token and another owner. That catches type confusion and ordering mistakes. It does not test a token placed in a URL or log, so explain why that leaks it."
     },
     {
       "n": 50,
@@ -6384,7 +6580,11 @@
         "lang": "php",
         "code": "$phrase = 'synthetic-demo-passphrase';\n\n$a = hash('sha256', $phrase);\n$b = hash('sha256', $phrase);\nvar_export($a === $b);\n\n$c = password_hash($phrase, PASSWORD_ARGON2ID);\n$d = password_hash($phrase, PASSWORD_ARGON2ID);\nvar_export($c === $d);\nvar_export(password_verify($phrase, $d));",
         "reading": "The SHA-256 digests are identical, so the first comparison is true. Anyone with the table can see that both learners share a password, and a precomputed list of common phrases matches them all at once. SHA-256 is also designed to be fast, so guessing is cheap. `password_hash` picks a new random salt for each call, so the two stored strings differ and the comparison is false. `password_verify` still accepts the correct phrase, because the salt and parameters are stored inside each string."
-      }
+      },
+      "workspace": "The worked examples hash a synthetic phrase with Argon2id, verify it and reject a wrong candidate. You build a verification demonstration that never prints the hash or phrase and reports whether an older bcrypt hash needs upgrading.",
+      "debugging": "When password_verify always fails, check that you are verifying against the stored hash string and not hashing the candidate again for comparison. When password_needs_rehash reports true for a fresh hash, compare the algorithm and options you passed to hash and to rehash.",
+      "retrieval": "Without notes, explain why passwords are hashed rather than encrypted and why the salt does not need to be stored separately. Then explain what password_needs_rehash detects, why a fast hash like SHA-256 is wrong for passwords and which login controls, such as rate limits, a stronger hash cannot replace.",
+      "reference_note": "The reference requires an Argon2id hash prefix, accepts the correct phrase, rejects a different one and confirms current parameters need no rehash, then shows a legacy bcrypt hash verifying but needing an upgrade. It does not test login rate limits, so list them separately."
     },
     {
       "n": 51,
@@ -6508,7 +6708,11 @@
         "lang": "php fragment",
         "code": "$q = \"x' OR '1'='1\";\n\n$rows = $db->query(\n  \"SELECT title FROM notes WHERE title = '\" . $q . \"'\"\n)->fetchAll();\n\n$stmt = $db->prepare('SELECT title FROM notes WHERE title = :title');\n$stmt->execute(['title' => $q]);\n$bound = $stmt->fetchAll();",
         "reading": "In the first query the quote inside the search text closes the string literal, and the rest becomes SQL, so the WHERE clause reads title = 'x' OR '1'='1'. That condition is true for every row, so both notes come back even though neither has that title. In the second query the whole value travels as one parameter, the database compares it with each title as text, and the result is empty. The prepared statement keeps the query structure fixed before any value arrives, which is exactly what concatenation gives up."
-      }
+      },
+      "workspace": "The worked examples bind a title with an apostrophe as a value parameter and allow only reviewed column names for sorting. You build a disposable SQLite note store with a prepared insert and lookup, plus an allow list for the one dynamic identifier.",
+      "debugging": "When a quote in the data breaks the query, a value was concatenated into the SQL string; replace it with a named placeholder. When a sort key from input fails or misbehaves, remember placeholders cannot bind identifiers, so map the requested key through an allow list.",
+      "retrieval": "From memory, explain what a prepared value parameter can replace and why it cannot replace a table name, column name or sort direction. Then predict what happens when a title containing an apostrophe and an attack-shaped string is inserted, and which checks you would repeat before moving this store to PostgreSQL.",
+      "reference_note": "The reference inserts and reads back a title through prepared statements, requires the stored value to round trip exactly and requires the table to hold one row. That catches concatenation and accidental extra statements. It does not test the sort allow list or an empty lookup, so add those cases."
     },
     {
       "n": 52,
@@ -6635,7 +6839,11 @@
         "lang": "php fragment",
         "code": "$sql = 'UPDATE plans SET minutes = :minutes, version = version + 1\n        WHERE id = :id AND version = :expected_version';\n$stmt = $db->prepare($sql);\n\n$stmt->execute(['minutes' => 30, 'id' => 1, 'expected_version' => 3]);\n$first = $stmt->rowCount();\n\n$stmt->execute(['minutes' => 45, 'id' => 1, 'expected_version' => 3]);\n$second = $stmt->rowCount();",
         "reading": "The first update matches the row, sets minutes to 30 and moves the version to 4, so `$first` is 1. The second update still expects version 3, which no longer exists, so it matches nothing and `$second` is 0. Without the version predicate the second editor's 45 would silently overwrite the 30. With it the application learns about the conflict, but only if it reads the affected row count and reports it. A zero count with no exception is the whole signal."
-      }
+      },
+      "workspace": "The worked examples update a row only when its version matches and roll back a transaction before rethrowing. You implement a version-checked update in a disposable database and add a constraint that keeps minutes nonnegative.",
+      "debugging": "When a stale update appears to succeed, check rowCount after the statement; zero affected rows means the version did not match and must be reported as a conflict. When a failed step leaves partial data, make sure rollBack runs in the catch block before the exception propagates.",
+      "retrieval": "Without notes, explain atomicity and why it does not make every transaction serializable. Then trace two updates that both start from version 1, say which one changes the row and what the other sees, and explain why a single SQLite connection cannot demonstrate real concurrent writers.",
+      "reference_note": "The reference requires the first versioned update to change one row, a stale update to change none and a rolled back write to leave minutes at 40. That catches ignored row counts and missing rollback. It does not test the nonnegative constraint, so insert a negative value and record the error."
     },
     {
       "n": 53,
@@ -6768,7 +6976,11 @@
         "lang": "php fragment",
         "code": "// id only\n$stmt = $db->prepare('SELECT title FROM notes WHERE id = :id');\n$stmt->execute(['id' => 11]);\n\n// id and owner\n$stmt = $db->prepare(\n  'SELECT title FROM notes WHERE id = :id AND owner_id = :actor_id'\n);\n$stmt->execute(['id' => 11, 'actor_id' => 7]);",
         "reading": "Both statements are prepared and immune to injection, yet the first returns actor 8's title to actor 7. Prepared statements protect query structure, not access policy. The second statement includes the trusted actor id in the predicate, so the database returns no row for a note owned by someone else. The application then answers as if the note does not exist, which avoids confirming that id 11 belongs to another account."
-      }
+      },
+      "workspace": "The worked examples scope a read by owner and keep the trusted actor separate from the requested id. You build loadOwnedNote, which takes the actor from a trusted parameter and the note id from input and returns null for anything the actor does not own.",
+      "debugging": "When another actor's note is returned, the query filters by id alone; add owner_id to the WHERE clause as a bound parameter. When owner_id comes from the submitted form, the client chose its own identity, so take it from the trusted session value instead.",
+      "retrieval": "From memory, explain why knowing or guessing a record id grants no permission. Then predict loadOwnedNote for the owner, another actor and a missing id, explain why the denied and missing cases should look the same to the caller and why hiding an edit button does nothing to protect the update path.",
+      "reference_note": "The reference requires owner 7 to read note 1, owner 8 to get null for it and a missing id to return null. That catches id-only lookups and leaks. It does not cover update or delete paths, so check that they apply the same owner scoping as reads."
     },
     {
       "n": 54,
@@ -6895,7 +7107,11 @@
         "lang": "php",
         "code": "$body = ['topic' => \"Caf\\xE9\", 'minutes' => 30];\n\n$quiet = json_encode($body);\nvar_export($quiet);\n\ntry {\n  json_encode($body, JSON_THROW_ON_ERROR);\n} catch (JsonException $e) {\n  echo \"\\nencode failed\\n\";\n}",
         "reading": "The byte E9 alone is valid Latin-1 for e with an acute accent but invalid UTF-8, so encoding cannot succeed. Without the flag `json_encode` returns false, and `var_export` prints false. An adapter that echoes that value would send an empty body with a success status. With the flag the same failure becomes a `JsonException`, which the boundary can catch and turn into a deliberate error response. The flag changes how failure is reported, not whether the data is valid."
-      }
+      },
+      "workspace": "The worked examples return minutes as a JSON number and complete as a boolean, and give validation errors a fixed shape. You build jsonResponse so success and failure share one structure, with JSON_THROW_ON_ERROR and no internal details in errors.",
+      "debugging": "When a client receives \"30\" instead of 30, the value was formatted as a string before encoding; keep domain types until json_encode. When a response contains a stack trace or extra text, look for debugging output or a raw exception message added around the JSON body.",
+      "retrieval": "Without notes, distinguish the JSON number 30 from the string \"30\" and say which one a client can sum safely. Then describe the error object your API returns for invalid minutes, explain why encoding without the throw flag can silently send false and classify adding a field versus renaming one as compatible or breaking.",
+      "reference_note": "The reference decodes a success body and requires integer minutes and boolean complete, then requires a validation error to carry status 422. That catches stringly typed fields. It does not check real Content-Type or status headers on a server, so the lab is still needed for that evidence."
     },
     {
       "n": 55,
@@ -7019,7 +7235,11 @@
         "lang": "php",
         "code": "$ids = [1, 2, 3, 4, 5];\n$page1 = array_slice($ids, 0, 2);\n\n$ids = [2, 3, 4, 5];\n$offsetPage2 = array_slice($ids, 2, 2);\n\n$after = end($page1);\n$cursorPage2 = array_slice(\n  array_values(array_filter($ids, fn ($id) => $id > $after)), 0, 2\n);",
         "reading": "The first page is [1, 2]. After the deletion, offset 2 skips the first two remaining records, 2 and 3, so the offset page is [4, 5] and record 3 is never shown. The cursor version asks for ids greater than the last seen id, 2, so it returns [3, 4] and the deletion does not shift anything. An insertion at the front would cause the opposite problem for offsets: a repeated record. The cursor depends on ids being unique and ordered, which is why the reference sorts by id."
-      }
+      },
+      "workspace": "The worked examples continue a page after the last seen id and build a cache key scoped by actor and data version. You implement pageAfter, a cursor slice over synthetic ordered rows with a maximum page size, and design a cache key that cannot leak between users.",
+      "debugging": "When a page repeats or skips a record, check that rows are sorted by a unique, stable key before slicing; ties make cursors unreliable. When one user sees another's cached data, the cache key is missing the actor id or the data version.",
+      "retrieval": "From memory, explain why pagination needs an explicit, stable order and why offset pages can skip a record when an earlier one is deleted. Then predict pageAfter for the first page, the page after id 2 and the page after id 4, and say what you would measure before claiming an endpoint is faster.",
+      "reference_note": "The reference requires ids 1 and 2 on the first page, 3 and 4 on the second and an empty page after id 4. That catches off-by-one cursors and unstable slicing. It does not test the page-size limit or cache keys, so add an oversized request and two actors yourself."
     },
     {
       "n": 56,
@@ -7149,7 +7369,11 @@
         "lang": "php",
         "code": "function createPlanEager(PDO $db, int $actorId, array $input): void {\n  $db->prepare('INSERT INTO plans (owner_id, topic) VALUES (?, ?)')\n     ->execute([$actorId, $input['topic']]);\n  $id = (int) $db->lastInsertId();\n\n  if ((int) $input['minutes'] > 120) {\n    throw new InvalidArgumentException('minutes');\n  }\n  $db->prepare('UPDATE plans SET minutes = ? WHERE id = ?')\n     ->execute([$input['minutes'], $id]);\n}",
         "reading": "The insert runs and commits on its own, then the minutes check throws. The caller sees a rejection, but the table now holds a plan row with a topic and no minutes, which the acceptance matrix says must never happen. Rerunning the request adds another orphan each time. The reference validates every field into a complete value first, then performs one insert, so a rejected request leaves the row count unchanged. If several writes were truly needed, one transaction with rollback would serve the same purpose."
-      }
+      },
+      "workspace": "The worked examples separate the trusted actor from form values and write acceptance cases before any template. You build a planner core that validates every field before a prepared insert and scopes every read by owner, with the acceptance matrix written first.",
+      "debugging": "When rejected input still leaves a row behind, the service wrote some fields before validating all of them; validate the whole plan first, then write once. When a cross-owner read returns data, check that the query binds both the plan id and the trusted owner.",
+      "retrieval": "Without notes, draw the trust boundary for the planner: which values come from the actor, which from the form and where each is validated. Then list the acceptance cases you wrote before coding and explain what work remains, such as HTTP handling, sessions and deployment, before this core is an application.",
+      "reference_note": "The reference requires an invalid plan to throw, the table to keep one row after the rejection and another owner's read to return nothing. That catches partial writes and cross-owner leaks. It does not cover HTTP or sessions, which the printed line states remain separate."
     },
     {
       "n": 57,
@@ -7286,7 +7510,11 @@
         "lang": "http",
         "code": "POST /notes HTTP/1.1\nHost: 127.0.0.1:18088\n\nHTTP/1.1 200 OK\nContent-Type: text/html; charset=utf-8\n\n(the notes page)\n\n---\n\nHTTP/1.1 303 See Other\nLocation: /",
         "reading": "With the 200 answer the page on screen is the result of the POST, so reloading it asks the browser to send the POST again, which would store a second copy of the note. With the 303 answer the browser follows the Location header with a new GET request, and reloading repeats only that GET. The lab uses the 303 form. You can confirm which one the server sends by reading the status in the network panel or with curl, rather than assuming it from the PHP source."
-      }
+      },
+      "workspace": "The worksheet asks you to draw the lifecycle from browser cookie to server session to stored note, then predict what the optional lab's health check, POST and redirect will show before you run any of them in your own learner copy.",
+      "debugging": "When the lab will not start, read the port error first; another process on 18088 needs stopping by you, not a prune of unrelated projects. When a note disappears after a restart, check whether the volume was removed, because stopping containers alone keeps the stored notes.",
+      "retrieval": "From memory, describe each request in the create-note journey: the form GET, the POST with its CSRF token, the 303 redirect and the follow-up GET. Then explain why a healthy response proves only that the process answered, and which properties, such as concurrency or TLS, this local server has not qualified.",
+      "reference_note": "Compare your lifecycle drawing with the solution's and check that each arrow names the request, the status and where state is stored. If you ran the optional lab, the health response, the 303 redirect and a rejected token are your evidence; record them with the exact command you ran."
     },
     {
       "n": 58,
@@ -7424,7 +7652,11 @@
         "lang": "php",
         "code": "// keeps the client name, inside the web root\n$name = $_FILES['doc']['name'];\nmove_uploaded_file($_FILES['doc']['tmp_name'], __DIR__ . '/public/uploads/' . $name);\n\n// generated name, outside the web root\n$stored = bin2hex(random_bytes(16)) . '.bin';\nmove_uploaded_file($_FILES['doc']['tmp_name'], $ownedUploadDirectory . '/' . $stored);",
         "reading": "With the first handler the file lands at public/uploads/notes.php. If the web server runs PHP files in that folder, requesting /uploads/notes.php executes whatever code the uploader wrote, with the application's permissions. The client also controls collisions: uploading a second file with the same name overwrites the first. The second handler stores bytes under a random name with a .bin suffix in a directory the server never executes, and a separate download handler can check ownership before sending the file."
-      }
+      },
+      "workspace": "The worksheet asks you to list every untrusted claim in an upload request, set a size limit and format allow list, and design separate validation, storage and retrieval boundaries, including a record of attempts for an outbound side effect.",
+      "debugging": "When a design lets the uploaded filename reach the storage path, trace what ../../ would do to the destination and replace the name with a random stored name. When a remote call times out, do not assume it failed; record the attempt as unknown and plan an idempotent retry or a status check.",
+      "retrieval": "Without notes, list the claims an upload request makes that the server must not trust: filename, extension, declared content type and size. Then explain why files should be stored outside the served directory under a generated name, and why a timeout after sending an email leaves the outcome ambiguous.",
+      "reference_note": "Compare your boundaries with the solution's: where size and type are checked, who chooses the stored name and how retrieval authorizes the reader. The optional lab does not accept uploads, so your evidence here is the design and the tests you list, not a running service."
     },
     {
       "n": 59,
@@ -7556,7 +7788,11 @@
         "lang": "text",
         "code": "FROM php:8.4-fpm\nCOPY .env /app/.env\nRUN php /app/bin/warm-cache.php\nRUN rm /app/.env\n\n# secret supplied at run time instead\n# docker run --env-file ./prod.env app:1.4.2",
         "reading": "Each instruction creates a layer, and the COPY layer still contains the file even though a later RUN removes it from the merged view. Anyone who can pull the image can extract that layer and read the secret. The fix is not another delete but a different flow: keep the secret out of the build entirely, supply it when the container starts through a controlled mechanism, and rotate any secret that was already pushed in an image."
-      }
+      },
+      "workspace": "The worksheet asks you to separate HTTP handling, PHP execution and durable storage in a deployment drawing, then write a release plan for the study planner that names its public document root, private directories, secrets handling and restore test.",
+      "debugging": "When a secret appears in an image even after a later layer deletes it, the earlier layer still contains it; pass secrets at runtime instead of copying them in. When a restore rehearsal fails, record which step broke before changing the plan, since the failure is evidence about recovery.",
+      "retrieval": "From memory, explain why PHP-FPM behind a web server replaces the built-in development server in production. Then describe which directory is public, where secrets come from, what a successful image build does and does not prove and why a restore test belongs in a separate disposable environment.",
+      "reference_note": "Compare your release plan with the solution's acceptance record and check that every claim names its evidence, such as a build log, a health check or a restore. Nothing in this lesson publishes or deploys, so mark any step you have not actually observed as planned rather than done."
     },
     {
       "n": 60,
@@ -7690,7 +7926,11 @@
         "lang": "yaml",
         "code": "review_a:\n  status: done\n  summary: Everything works and is secure.\n\nreview_b:\n  verified:\n    - invalid minutes return a field error and insert no row\n    - wrong CSRF token returns a rejection, list unchanged\n    - reload after stop and start still shows the saved plan\n  not_yet_qualified:\n    - production TLS\n    - account recovery\n    - multiple replicas",
         "reading": "Review A makes two broad claims and gives the reader no way to check either. Works on which inputs, and secure against what? Review B names each observation in a form someone else can repeat, and it lists what was not tested so a reader does not assume it. Review B is also more useful for planning, because the not yet qualified list becomes the next set of tasks. Shorter is not the problem with review A; unsupported is."
-      }
+      },
+      "workspace": "The worksheet asks you to define one learner journey with a finish condition, map each input and output to its validation or encoding boundary and plan a learner-owned extension of the local lab with a controlled invalid request and a restore rehearsal.",
+      "debugging": "When the review starts to read like a success banner, return to the threat model and find the boundary you have not tested yet. When an invalid request fails differently than predicted, keep the transcript and the exact input, because that mismatch is the most useful evidence in the capstone.",
+      "retrieval": "Without notes, walk through your journey from opening the page to reading the saved plan in a new session, naming the trust boundary at each step. Then explain what the observed journey qualifies, such as local session ownership, and what it does not, such as verified identity or production readiness.",
+      "reference_note": "Compare your release-readiness review with the solution's structure: journey, boundaries, evidence, limits and next actions. If you ran the optional lab, attach the invalid request transcript and the stop, resume and restore results; claims without that evidence belong under limits."
     }
   ]
 }

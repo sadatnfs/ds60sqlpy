@@ -1,6 +1,6 @@
 # web-052: explanatory solutions
 
-Open this after your own attempt. Each answer explains the lesson's synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in `courses/web-development/guides/web-052.md`.
+Attempt each exercise before reading; the mechanism is in `courses/web-development/guides/web-052.md` ([using these answers](../STUDY-GUIDE.md#solutions)).
 
 ## Exercise 1: Explain atomicity without claiming every transaction is serializable.
 
@@ -76,4 +76,6 @@ Open this after your own attempt. Each answer explains the lesson's synthetic fi
 
 ## Reference comparison
 
-Open `courses/web-development/solutions/web-052_solution.php` only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; server lifecycle, persistence, concurrency and security need their own integration evidence.
+The reference requires the first versioned update to change one row, a stale update to change none and a rolled back write to leave minutes at 40. That catches ignored row counts and missing rollback. It does not test the nonnegative constraint, so insert a negative value and record the error.
+
+Open `courses/web-development/solutions/web-052_solution.php` after saving your attempt ([comparing with the reference](../STUDY-GUIDE.md#references)).

@@ -206,12 +206,12 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Restore:</strong> Resolving dependency assets before build.</p>
 <p><strong>Publish:</strong> Producing a deployment-oriented application output.</p>
 <h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>The Linux Docker classroom compiles your saved pad as <code>Program.cs</code> in its fixed .NET 10 project. C# 14 is the matching language generation. This route uses the prepared framework libraries; it does not accept arbitrary project files, NuGet packages, command arguments or interactive input. The explicit <code>Program.Main</code> entrypoint makes compilation and execution visible. <code>Check</code> throws on a false condition in every build configuration, unlike conditional debugging assertions.</p>
-<p>Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.</p>
+<p>The pad checks only what a running program can report about itself. The project work happens in DomainLab, linked below, which needs a prepared .NET 10 SDK and runs <code>dotnet restore</code>, <code>dotnet build --no-restore</code> and <code>dotnet run --no-build</code> as separate steps. Nothing in the pad can prove that a restore or publish works.</p>
+<p>Compile contract, starter stop and success marker: <a href="../STUDY-GUIDE.md.html#running-a-lesson">running a lesson</a>.</p>
 <p>Use <a href="../fixtures/DomainLab/README.md.html">DomainLab</a> for the complete multi-project workflow. It has no third-party package dependencies.</p>
 <h3 id="syntax-anatomy-and-execution-trace">Syntax anatomy and execution trace<a class="heading-anchor" href="#syntax-anatomy-and-execution-trace" aria-label="Link to this section">#</a></h3>
 <p><code>TargetFramework</code> selects net10.0. Nullable and ImplicitUsings are compile policies. <code>dotnet restore</code>, <code>dotnet build --no-restore</code>, <code>dotnet run --no-build</code> and <code>dotnet publish</code> have distinct responsibilities.</p>
-<p>Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.</p>
+<p>Each example ends with a trace; method: <a href="../STUDY-GUIDE.md.html#tracing-a-program">tracing a program</a>.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="example-a-expose-environment-facts-without-overclaiming">Example A: Expose environment facts without overclaiming<a class="heading-anchor" href="#example-a-expose-environment-facts-without-overclaiming" aria-label="Link to this section">#</a></h4>
 <p>Runtime facts are useful diagnostics but do not replace a source and project review.</p>
@@ -248,6 +248,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The running framework generation is compatible with the declared classroom target.</p>
+<p><strong>Trace.</strong> <code>Environment.Version</code> reports the runtime executing the program; in the classroom worker it was 10.0.15, so <code>Major</code> is 10 and the first check passes. <code>typeof(List&lt;int&gt;).Assembly.GetName().Name</code> returns System.Private.CoreLib, the core library that holds <code>List&lt;T&gt;</code>. The check only asserts that a name exists, because the exact assembly layout is an implementation detail that can change.</p>
 <h4 id="example-b-read-the-compiled-target-framework">Example B: Read the compiled target framework<a class="heading-anchor" href="#example-b-read-the-compiled-target-framework" aria-label="Link to this section">#</a></h4>
 <p>Both values come from the build and the runtime rather than from a hand-written table, so the checks fail if the project targets another framework. A real multi-project fixture is still required to qualify restore and publish behavior.</p>
 <pre class="highlighted-code"><code class="language-csharp"><span class="syntax-keyword">using</span> System<span class="syntax-punctuation">;</span>
@@ -283,6 +284,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The compiled program reports .NETCoreApp,Version=v10.0, the framework its project targeted, and runs on a .NET 10 runtime.</p>
+<p><strong>Trace.</strong> <code>AppContext.TargetFrameworkName</code> comes from the compiled program, and the course project produced .NETCoreApp,Version=v10.0 because its project file says net10.0. <code>Environment.Version.Major</code> comes from the runtime, which is a separate fact: a later patch runtime keeps Major at 10. Changing the target in the project file would break the first check at run time.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <ol>
 <li><strong>Predict and explain.</strong> Explain the distinct purpose of restore, build, run and publish.</li>
@@ -302,10 +304,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <ol start="6">
 <li><strong>Transfer and justify.</strong> Design a dependency update review including lock changes, license checks and runtime evidence.</li>
 </ol>
-<p>For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.</p>
+<p>Log each task in the <a href="../STUDY-GUIDE.md.html#recording-exercise-evidence">evidence table</a> before opening the explanation.</p>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
 <p>An SDK version and target framework are related but different. A successful restore is not a successful build. Do not present self-contained deployment as architecture-independent.</p>
-<p>A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.</p>
+<p>For task 4, an API introduced in a newer framework fails to compile under an older <code>TargetFramework</code>, with an error saying the member or type cannot be found, even when the installed SDK is newer; read the project file before blaming the code. For task 5, delete only the bin and obj folders inside the lab, then rebuild and confirm restore runs again.</p>
+<p>Repair routine: <a href="../STUDY-GUIDE.md.html#building-a-regression-case">building a regression case</a>.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <ol>
 <li>Reproduce Example A (Expose environment facts without overclaiming) before changing anything, and confirm its observation: The running framework generation is compatible with the declared classroom target.</li>
@@ -313,9 +316,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>Before opening the explanation, test your task 3 attempt against this lesson&#x27;s main pitfall: An SDK version and target framework are related but different.</li>
 </ol>
 <h3 id="self-check-and-next-step">Self-check and next step<a class="heading-anchor" href="#self-check-and-next-step" aria-label="Link to this section">#</a></h3>
-<p>Explain Target framework, Restore, Publish without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.</p>
+<p>Say which command first downloads packages, which compiles, and which writes a deployable folder. Distinguish the SDK version from the target framework in your own build output. For task 6, list what a dependency update review records: the version diff, the license, the release notes, and a test run on the new version.</p>
+<p>Then follow the general <a href="../STUDY-GUIDE.md.html#self-check-routine">self-check routine</a> and save your pad.</p>
 <h3 id="sources-and-execution-boundary">Sources and execution boundary<a class="heading-anchor" href="#sources-and-execution-boundary" aria-label="Link to this section">#</a></h3>
-<p><a href="https://learn.microsoft.com/en-us/dotnet/csharp/">Official language or framework documentation</a>. The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.</p>
+<p><a href="https://learn.microsoft.com/en-us/dotnet/csharp/">Documentation</a>: The .NET project SDK and <code>dotnet</code> CLI articles describe target frameworks, restore, build, run and publish.</p>
+<p>Provenance and limits: <a href="../STUDY-GUIDE.md.html#sources-and-execution-boundary">sources and execution boundary</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for csharp-043: Projects, packages and reproducible builds.
 Read courses/csharp/guides/csharp-043.md and courses/csharp/lessons/csharp-043.cs. Prerequisites: csharp-042.

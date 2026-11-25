@@ -1,6 +1,6 @@
 # r-060: reference reasoning
 
-Use the [complete reference](r-060_reference.R) with the guide's declared inputs and runtime. Every worked example is also a standalone script.
+Run the [complete reference](r-060_reference.R) under the [run rules](../STUDY-GUIDE.md#run-a-chapter).
 
 ## Why the implementation has this shape
 
@@ -108,4 +108,6 @@ Report calculation and layer/trace checks, actual printed/captured figures, and 
 
 ## What the checks establish
 
-The reference makes 7 `stopifnot()` checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.
+The checks confirm ten records with eight unique observed ids and two missing, means of 2.5 and 4.5 with squared standard errors 5/12 and 17/12, a static display with eight raw points, two means and two intervals, an interactive figure with eight raw points carrying their ids and a summary trace whose error bars equal the half widths, and a mean difference of 2. They do not support a causal interpretation of that difference.
+
+The reference makes 7 `stopifnot()` checks; see [what a passing run proves](../STUDY-GUIDE.md#what-a-passing-run-proves).

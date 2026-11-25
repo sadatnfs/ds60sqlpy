@@ -195,7 +195,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="dbt-018-explained-reference">dbt-018: explained reference<a class="heading-anchor" href="#dbt-018-explained-reference" aria-label="Link to this section">#</a></h2>
 <p>Prepare and inspect a real reusable dbt dependency with an explicit source boundary.</p>
-<p>The executable reference contains the two complete worked cases with assertions. The changes below explain the independent practice and its limits.</p>
+<p>The reference declares a local package, runs <code>dbt deps</code>, and checks the manifest for <code>macro.classroom_utils.add_one</code>, the lock file and the value 42. It proves preparation of a local path dependency only; hub and git packages also involve network access and version resolution. See <a href="../STUDY-GUIDE.md.html#answers-and-references">how these answers are laid out</a>.</p>
 <h3 id="1-inspect-package-identity">1. Inspect package identity<a class="heading-anchor" href="#1-inspect-package-identity" aria-label="Link to this section">#</a></h3>
 <p>Keep names stable and avoid accidental collisions. A namespace is a source-resolution mechanism, not a guarantee that the macro is trustworthy.</p>
 <p><strong>Expected:</strong> They identify classroom_utils and add_one.</p>

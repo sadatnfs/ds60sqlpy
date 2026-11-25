@@ -1,6 +1,6 @@
 # cuda-085: explained solutions
 
-These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.
+Compare with your [worksheet](../lessons/cuda-085.md) attempt.
 
 ## Exercise 1: Compute complete latency
 
@@ -74,8 +74,16 @@ Keep the library unless measured benefits justify added obligations.
 
 **How to verify.** Include the totals, sizes, contract and the owner list in the decision record, so a later reviewer can repeat the decision if packing is removed or the library changes.
 
+## Self-check answers
+
+1. **When can a custom kernel be justified over a library call?** When it delivers a measured end-to-end benefit, such as fusing launches or handling an unusual layout, that survives correctness checks and outweighs its maintenance cost.
+
+2. **Why include tiny inputs in the comparison?** At tiny sizes launch overhead and first-call compilation dominate, so a fused or custom kernel that wins on large inputs can lose there.
+
+3. **What is an educational kernel's honest success claim?** It is learning evidence that the student understands the mechanism. It is not evidence of a production improvement unless measurements show one.
+
 ## Reference observation
 
 Library 10 and custom 11 modeled milliseconds.
 
-The reference file is `courses/cuda/python/references/cuda-085_cpu.py`. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.
+Asserted by `courses/cuda/python/references/cuda-085_cpu.py`.

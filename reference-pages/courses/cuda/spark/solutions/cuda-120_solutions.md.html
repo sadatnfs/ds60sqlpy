@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cuda/spark/solutions/cuda-120_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="cuda-120-explained-solutions">cuda-120: explained solutions<a class="heading-anchor" href="#cuda-120-explained-solutions" aria-label="Link to this section">#</a></h2>
-<p>These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.</p>
+<p>Compare with your <a href="../lessons/cuda-120.md.html">worksheet</a> attempt.</p>
 <h3 id="exercise-1-compute-concurrent-live-memory">Exercise 1: Compute concurrent live memory<a class="heading-anchor" href="#exercise-1-compute-concurrent-live-memory" aria-label="Link to this section">#</a></h3>
 <p>Add per-task live sets and shared state.</p>
 <p><strong>Approach.</strong> Compute concurrent live memory: three tasks at 2 GiB each plus 1 GiB shared workspace need <code>3*2 + 1 = 7</code> GiB, and four tasks need 9 GiB.</p>
@@ -231,9 +231,19 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Why it is correct here.</strong> Spilling trades speed for completion. Reporting it explains slowdowns and warns that larger data may spill more.</p>
 <p><strong>A plausible wrong approach.</strong> Comparing only kernel times between a spilling run and a non-spilling run misses the end-to-end slowdown.</p>
 <p><strong>How to verify.</strong> Include spill bytes and stage time in the report next to the correctness check. Also record the spill path and peak disk use, since a later run with more data may exceed that capacity.</p>
+<h3 id="self-check-answers">Self-check answers<a class="heading-anchor" href="#self-check-answers" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>What does a spill do?</strong> It moves data to a slower tier so the query can progress under memory pressure, adding serialization and I/O cost.</li>
+</ol>
+<ol start="2">
+<li><strong>Why is comparing only kernel time misleading when spills occur?</strong> Spills add end-to-end time outside the kernels, so the slowdown is invisible in kernel measurements.</li>
+</ol>
+<ol start="3">
+<li><strong>Why must memory experiments use bounded data?</strong> Deliberately filling a shared device or disk can disrupt other users, so limits are set before running.</li>
+</ol>
 <h3 id="reference-observation">Reference observation<a class="heading-anchor" href="#reference-observation" aria-label="Link to this section">#</a></h3>
 <p>One through three tasks fit the simplified budget; four do not.</p>
-<p>The reference file is <code>courses/cuda/spark/references/cuda-120_cpu.py</code>. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.</p></article>
+<p>Asserted by <code>courses/cuda/spark/references/cuda-120_cpu.py</code>.</p></article>
   </main>
 </body>
 </html>

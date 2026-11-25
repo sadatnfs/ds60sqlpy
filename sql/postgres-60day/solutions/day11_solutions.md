@@ -1,67 +1,23 @@
 # Day 11 solutions: CASE Expressions and Conditional Logic
 
-
 <!-- beginner-solution-enrichment -->
 ## How to study and run this solution
 
-Open this explanation only after making an honest attempt. The executable
-companion runs solely against the disposable `advanced_sql_training` database:
+These answers use `CASE` three ways: to label each row (Exercises 1 and 3), to count inside one aggregate row (Exercise 2) and to map codes to display names (Exercise 6). Exercises 4 and 5 run on tiny `VALUES` lists so you can see branch order and branch types without any table. Try them yourself first, then run:
 
 ```bash
-# Linux, macOS, or Windows through WSL 2, from the repository root
 psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
   -f sql/postgres-60day/solutions/day11_solutions.sql
 ```
 
-`psql` prints each result/command tag in the terminal. Stop at the first
-unexpected `ERROR`; later output cannot repair an earlier failed invariant.
-Compare your own SQL, row grain, column names, row counts, `NULL` policy, and
-ordering with the explanation before comparing syntax.
-
-## Clause-by-clause reading map
-
-The lesson's main concepts are Searched CASE, Simple CASE, Short-circuit ordering. Its worked-model focus is:
-Take a three-tier amount classification and test values just below, exactly at, and just above each boundary. Because `CASE` stops at the first match, place the most specific or highest-threshold conditions before broader ones.
-
-- Start at `FROM`/`JOIN` and state the intermediate row grain. Inspect join keys
-  before adding aggregates; a one-to-many join is allowed to multiply rows only
-  when the later contract accounts for it.
-- Apply `WHERE` to input rows, `GROUP BY` to form buckets, and `HAVING` to
-  completed groups. Window functions run over the surviving relation and
-  normally preserve its row count.
-- Read the `SELECT` list as the public result contract: keys establish grain,
-  measures state calculations, and aliases explain meaning. `ORDER BY` is the
-  only output-order guarantee; add a unique tie-breaker before `LIMIT`.
-- Trace every common table expression (CTE) as a temporary named relation.
-  Execute or inspect one stage at a time while debugging, but compare the final
-  result with an independent control rather than trusting stage names.
-- Keep SQL `NULL` as “missing/unknown/not applicable” until the metric contract
-  chooses another representation. Guard division with `NULLIF`; disclose
-  exclusions and distinguish zero from no row.
-- For DDL/DML, a command tag proves only that PostgreSQL accepted a statement.
-  Catalog checks, negative cases, row-count reconciliation, and the declared
-  transaction boundary prove behavior and cleanup.
-
-The exact final queries are not the only valid syntax. A join, subquery, CTE,
-window, or conditional aggregate can be an alternative when it preserves the
-same grain, `NULL` semantics, deterministic ordering, and safety. Prefer the
-form whose intermediate relations a reviewer can verify; optimize only after
-correctness is established with evidence.
-
-These answers align one-for-one with [day11_case_expressions.sql](../day11_case_expressions.sql).
-Run only against the disposable `advanced_sql_training` database.
-The executable companion wraps every answer in `BEGIN`/`ROLLBACK`.
-The snippets below assume the lesson's
-`SET search_path TO training, public;` statement. Run the complete
-executable companion when you want a self-contained check.
+The six results have 4,362, 1, 500, 3, 3 and 4 rows. The script only reads data and ends with `ROLLBACK`; the snippets below omit its `SET search_path` line. They match [the learner file](../day11_case_expressions.sql) exercise for exercise, and the study guide explains [how to learn from a finished answer](../../STUDY-GUIDE.md#read-a-solution).
 
 ## Reading contract
 
 - **Focus:** Use `CASE` to encode mutually exclusive business rules in deliberate order while preserving NULL as a distinct state when required.
 - **Assumptions:** Searched `CASE` uses first-match wins. Status/category labels are illustrative course rules, not universal business definitions.
 - **Primary pitfall:** Overlapping broad conditions placed first make later branches unreachable; an omitted `ELSE` produces NULL.
-- **Safety:** all writes are bounded and rollback-protected; read-only
-  queries still use deterministic ordering whenever row order is claimed.
+- **Safety:** read-only; four queries read `orders`, `customers` and `payments`, two read inline `VALUES`, and the transaction ends in `ROLLBACK`.
 
 ## Exercise 1: Query writing
 
@@ -71,10 +27,10 @@ executable companion when you want a self-contained check.
 
 **Clause-by-clause reading:**
 
-- `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
-- `FROM`: establishes the starting relation and therefore the initial row grain.
-- `CASE`: encodes ordered business conditions; the first true branch wins and `ELSE` defines the remainder.
-- `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
+- `FROM orders AS o`: 4,362 orders, one row each, no grouping.
+- `CASE WHEN o.total_amount >= 500 THEN 'large' WHEN o.total_amount >= 100 THEN 'medium' ELSE 'small' END`: tested top to bottom; an order of 503.35 stops at the first branch.
+- `AS order_size`: the label column added beside each order.
+- `ORDER BY o.order_id`: one row per order in ID order.
 
 ```sql
 SELECT
@@ -95,19 +51,15 @@ ORDER BY
 
 **Expected shape:** One row per order with exactly one size label.
 
-Check the result at the stated grain. An alternative formulation is
-valid only if it preserves the same NULL, ordering, time, money, and
-cardinality contract.
-
 ### Reasoning and verification
 
 - **Inputs/evidence:** For sql-11 Exercise 1, read from `orders` and label every order with a searched `CASE`: `large` when `total_amount >= 500`, `medium` when it is at least 100, otherwise `small`; no `GROUP BY` is needed.
-- **Expected result/shape:** For sql-11 Exercise 1, expected output: One row per order with exactly one size label. The final columns are `order_id`, `total_amount`, and `order_size`. The final order is `o.order_id`.
+- **Expected result/shape:** For sql-11 Exercise 1, return 4,362 rows, one per order, each with exactly one label; order 1 (240.20) is `medium`, order 3 (601.73) is `large`, and order 5 (105.84) is `medium`. The final columns are `order_id`, `total_amount`, and `order_size`. The final order is `o.order_id`.
 - **Independent verification:** For sql-11 Exercise 1, confirm 4362 rows, one per `order_id`, and that counting the labels gives 2410 `large`, 1603 `medium`, and 349 `small`; then evaluate the same `CASE` on `VALUES (99.99), (100), (499.99), (500)` and expect `small`, `medium`, `medium`, and `large`.
-- **Intermediate relation check:** For sql-11 Exercise 1, test the `CASE` on the four boundary values first; the highest threshold must come first because the first true branch wins.
-- **Clause check:** For sql-11 Exercise 1, the solution actually uses `FROM`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `orders`, preserve one row per order, and finish with `order_id`, `total_amount`, and `order_size` ordered by `o.order_id`.
-- **Alternative/trade-off:** For sql-11 Exercise 1, the chosen form is justified by this lesson-specific rationale: Validate boundaries and place the highest threshold first. Evaluate another form against the concrete expected result (One row per order with exactly one size label) and the verification above.
-- **Edge case:** If `total_amount` were NULL, every comparison would be unknown and `ELSE` would label the order `small`; a nullable measure needs its own `IS NULL` branch.
+- **Label counts:** 2,410 `large` (503.35 to 1,432.49), 1,603 `medium` (102.14 to 499.20) and 349 `small` (20.74 to 98.44). They add to 4,362.
+- **Boundaries the data never tests:** no order costs exactly 100 or 500, so `>` and `>=` give the same counts here. Only the four `VALUES` test values prove the rule is right.
+- **Why the order matters:** swap the first two branches and every order of 100 or more becomes `medium`; `large` would disappear.
+- **A `NULL` total:** every comparison would be unknown and the order would fall to `ELSE 'small'`. A nullable column needs its own `WHEN o.total_amount IS NULL` branch placed first.
 
 ## Exercise 2: Query writing
 
@@ -117,9 +69,10 @@ cardinality contract.
 
 **Clause-by-clause reading:**
 
-- `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
-- `FROM`: establishes the starting relation and therefore the initial row grain.
-- `FILTER (WHERE ...)`: limits one aggregate without removing rows needed by neighboring aggregates.
+- `COUNT(*) FILTER (WHERE o.status IN ('paid', 'shipped', 'delivered')) AS paid_like`: orders whose payment has gone through.
+- `COUNT(*) FILTER (WHERE o.status = 'placed') AS open_orders` and the `returned` count: one status each.
+- `COUNT(*) AS all_orders`: the denominator, with no filter.
+- No `GROUP BY`: the whole table is one group, so the result is one row.
 
 ```sql
 SELECT
@@ -133,19 +86,15 @@ FROM
 
 **Expected shape:** One summary row.
 
-Check the result at the stated grain. An alternative formulation is
-valid only if it preserves the same NULL, ordering, time, money, and
-cardinality contract.
-
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-11 Exercise 2, read from `orders`. Compute `paid_like`, `open_orders`, `returned_orders`, and `all_orders` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.
-- **Expected result/shape:** For sql-11 Exercise 2, expected output: One summary row. The final columns are `paid_like`, `open_orders`, `returned_orders`, and `all_orders`.
-- **Independent verification:** For sql-11 Exercise 2, evaluate each of `open_orders`, `returned_orders`, and `all_orders` in a separate control `SELECT` over `orders`; require one final row and compare every value. Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
-- **Intermediate relation check:** For sql-11 Exercise 2, count the input rows from `orders`, then run each aggregate `FILTER` predicate as its own count before combining the values into the one-row summary.
-- **Clause check:** For sql-11 Exercise 2, the solution actually uses `FROM`, `WHERE`, aggregate `FILTER`, and `SELECT`. Read only those operations: begin at `orders`, preserve exactly one summary row, and finish with `paid_like`, `open_orders`, `returned_orders`, and `all_orders`.
-- **Alternative/trade-off:** For sql-11 Exercise 2, the chosen form is justified by this lesson-specific rationale: Each `COUNT(*) FILTER` or `SUM(CASE...)` should state its denominator. Evaluate another form against the concrete expected result (One summary row) and the verification above.
-- **Edge case:** Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
+- **Inputs/evidence:** For sql-11 Exercise 2, count the 4,362 `orders` rows four ways in one pass with `COUNT(*) FILTER (WHERE ...)`: `paid`, `shipped`, or `delivered` as `paid_like`, `placed` as `open_orders`, `returned` as `returned_orders`, and all rows as `all_orders`.
+- **Expected result/shape:** For sql-11 Exercise 2, return one row: `paid_like` 2617, `open_orders` 873, `returned_orders` 872, and `all_orders` 4362. The final columns are `paid_like`, `open_orders`, `returned_orders`, and `all_orders`.
+- **Independent verification:** For sql-11 Exercise 2, confirm `GROUP BY status` returns shipped 873, paid 872, and delivered 872 (adding up to 2617), placed 873, and returned 872, and that the three filtered counts add up to `all_orders`. Inside a rolled-back transaction, set order 1 from `paid` to `cancelled`; `paid_like` must drop to 2616 while `all_orders` stays 4362.
+- **What prints:** one row: 2,617 paid-like, 873 open, 872 returned and 4,362 in all.
+- **The buckets are complete:** 2,617 + 873 + 872 = 4,362, so no status falls outside the three buckets. A future status such as `cancelled` would show up as a gap between the sum and `all_orders`.
+- **`FILTER` versus `SUM(CASE ...)`:** `SUM(CASE WHEN o.status = 'placed' THEN 1 ELSE 0 END)` gives the same 873. Dropping the `ELSE 0` still gives 873, because `SUM` skips `NULL`s, but a status with no orders would then show `NULL` instead of 0.
+- **One pass, several counts:** four `GROUP BY status` rows would carry the same information, but this layout puts the buckets side by side for a dashboard.
 
 ## Exercise 3: Query writing
 
@@ -155,10 +104,10 @@ cardinality contract.
 
 **Clause-by-clause reading:**
 
-- `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
-- `FROM`: establishes the starting relation and therefore the initial row grain.
-- `CASE`: encodes ordered business conditions; the first true branch wins and `ELSE` defines the remainder.
-- `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
+- `CASE WHEN c.segment IS NULL THEN 'missing'`: checked first, so a missing segment never reaches the text comparisons.
+- `WHEN c.segment IN ('gold', 'platinum') THEN 'premium'`: the two top tiers.
+- `ELSE 'core'`: everything else, which in this fixture means `silver` and `standard`.
+- `ORDER BY c.customer_id`: one row per customer.
 
 ```sql
 SELECT
@@ -179,19 +128,15 @@ ORDER BY
 
 **Expected shape:** One row per customer with an explicit segment label.
 
-Check the result at the stated grain. An alternative formulation is
-valid only if it preserves the same NULL, ordering, time, money, and
-cardinality contract.
-
 ### Reasoning and verification
 
 - **Inputs/evidence:** For sql-11 Exercise 3, read from `customers` and label each `segment` as `missing` when it is NULL, `premium` for `gold` or `platinum`, and `core` otherwise; return one row per customer.
-- **Expected result/shape:** For sql-11 Exercise 3, expected output: One row per customer with an explicit segment label. The final columns are `customer_id`, `segment`, and `segment_group`. The final order is `c.customer_id`.
+- **Expected result/shape:** For sql-11 Exercise 3, return 500 rows, one per customer: customer 1 (`standard`) and customer 2 (`silver`) map to `core`, customer 3 (`gold`) and customer 4 (`platinum`) map to `premium`. The final columns are `customer_id`, `segment`, and `segment_group`. The final order is `c.customer_id`.
 - **Independent verification:** For sql-11 Exercise 3, confirm 500 rows, one per `customer_id`; the seed gives 250 `premium` and 250 `core` rows and no `missing` row because every seeded customer has a segment. In a transaction you roll back, set one `segment` to NULL and confirm that customer becomes `missing`, not `core`.
-- **Intermediate relation check:** For sql-11 Exercise 3, put the `IS NULL` branch first; `segment IN ('gold', 'platinum')` is unknown for NULL, so without that branch a NULL segment falls through to `ELSE`.
-- **Clause check:** For sql-11 Exercise 3, the solution actually uses `FROM`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `customers`, preserve one row per customer, and finish with `customer_id`, `segment`, and `segment_group` ordered by `c.customer_id`.
-- **Alternative/trade-off:** For sql-11 Exercise 3, the chosen form is justified by this lesson-specific rationale: Test `IS NULL` before comparing text values. Evaluate another form against the concrete expected result (One row per customer with an explicit segment label) and the verification above.
-- **Edge case:** Comparing NULL with `=` or `IN` yields unknown, never true, so only `IS NULL` detects a missing segment.
+- **What prints:** 500 rows: 250 `premium` and 250 `core`. Each of the four segments has 125 customers, and none is `NULL`, so `missing` never appears.
+- **Why `IS NULL` comes first:** if `ELSE 'core'` caught a `NULL` segment, a customer with no recorded tier would be reported as a known core customer.
+- **Why not a simple CASE:** `CASE c.segment WHEN NULL THEN 'missing'` compares with `=` and never matches, so it would silently label missing segments `core`.
+- **Checking the test:** inside a transaction you roll back, set one customer's `segment` to `NULL`; one `missing` row appears and either `premium` or `core` drops to 249.
 
 ## Exercise 4: Prediction
 
@@ -201,11 +146,9 @@ cardinality contract.
 
 **Clause-by-clause reading:**
 
-- `VALUES`: constructs a small relation explicitly, which makes examples and expected cardinality inspectable.
-- `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
-- `FROM`: establishes the starting relation and therefore the initial row grain.
-- `CASE`: encodes ordered business conditions; the first true branch wins and `ELSE` defines the remainder.
-- `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
+- `FROM (VALUES (50::numeric), (100::numeric), (500::numeric)) AS sample (amount)`: three test amounts, one on each side of the thresholds.
+- `CASE WHEN amount >= 500 THEN 'high' WHEN amount >= 100 THEN 'medium' ELSE 'low' END`: the repaired order, highest threshold first.
+- `ORDER BY amount`: smallest test value first.
 
 ```sql
 SELECT
@@ -227,19 +170,17 @@ ORDER BY
 
 **Expected shape:** A value of 500 is labeled high.
 
-Check the result at the stated grain. An alternative formulation is
-valid only if it preserves the same NULL, ordering, time, money, and
-cardinality contract.
-
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-11 Exercise 4, read from the inline `VALUES` fixture. Build the answer toward `amount`, and `corrected_label`; keep `corrected_label` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-11 Exercise 4, expected output: A value of 500 is labeled high. The final columns are `amount`, and `corrected_label`. The final order is `amount`.
-- **Independent verification:** For sql-11 Exercise 4, reselect the returned keys directly from the source; require unique `corrected_label` where the expected grain is one row per key and confirm the projected `amount`, and `corrected_label` against the inline `VALUES` fixture. Add one source row with a new `corrected_label`; verify the result gains exactly one row carrying that `corrected_label` value.
-- **Intermediate relation check:** For sql-11 Exercise 4, check `amount` before applying the row cap.
-- **Clause check:** For sql-11 Exercise 4, the solution actually uses `FROM`, `SELECT`, and `ORDER BY`. Read only those operations: begin at the inline `VALUES` fixture, preserve one row per `corrected_label`, and finish with `amount`, and `corrected_label` ordered by `amount`.
-- **Alternative/trade-off:** For sql-11 Exercise 4, the chosen form is justified by this lesson-specific rationale: First-match wins, so specific/high thresholds must precede broader/lower ones. Evaluate another form against the concrete expected result (A value of 500 is labeled high) and the verification above.
-- **Edge case:** Add one source row with a new `corrected_label`; verify the result gains exactly one row carrying that `corrected_label` value.
+- **Inputs/evidence:** For sql-11 Exercise 4, label the three amounts in the inline `VALUES (50), (100), (500)` fixture with a searched `CASE` that tests `amount >= 500` before `amount >= 100`, so the first matching branch is the most specific.
+- **Expected result/shape:** For sql-11 Exercise 4, return 3 rows: 50 is `low`, 100 is `medium`, and 500 is `high`. The final columns are `amount`, and `corrected_label`. The final order is `amount`.
+- **Independent verification:** For sql-11 Exercise 4, confirm the 3 labels above, then swap the two `WHEN` branches so `amount >= 100` is tested first; 500 must come back as `medium`, which is the bug being corrected. Add `499.99` and `99.99` to the fixture; the corrected `CASE` must return `medium` and `low`.
+- **What prints:** 50 `low`, 100 `medium`, 500 `high`.
+- **The broken version:** with `>= 100` first, 500 matches that branch and prints `medium`; the `high` branch is unreachable for every input.
+- **Why these three values:** 100 and 500 sit exactly on the thresholds, which is where a branch-order or `>`/`>=` mistake shows; 50 checks the `ELSE`.
+- **No table needed:** `VALUES` builds the test rows in the query itself, so the check runs the same on any database.
+- **Closed ranges instead:** `WHEN amount >= 100 AND amount < 500 THEN 'medium'` works in any branch position, at the cost of writing each threshold twice; a typo in one copy leaves a gap or an overlap.
+- **On the real table:** the corrected rule over `orders.total_amount` gives 2,410 `high`, 1,603 `medium` and 349 `low`, the Exercise 1 counts under different names.
 
 ## Exercise 5: Debugging
 
@@ -249,11 +190,9 @@ cardinality contract.
 
 **Clause-by-clause reading:**
 
-- `VALUES`: constructs a small relation explicitly, which makes examples and expected cardinality inspectable.
-- `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
-- `FROM`: establishes the starting relation and therefore the initial row grain.
-- `CASE`: encodes ordered business conditions; the first true branch wins and `ELSE` defines the remainder.
-- `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
+- `FROM (VALUES (NULL::integer), (0), (2)) AS sample (value)`: a missing value, a zero and an ordinary number. The `::integer` on the first row sets the column type.
+- `CASE WHEN value IS NULL THEN 'missing' WHEN value = 0 THEN 'zero' ELSE 'nonzero' END`: every branch returns text.
+- `ORDER BY value NULLS FIRST`: the `NULL` row first, then 0 and 2.
 
 ```sql
 SELECT
@@ -275,19 +214,17 @@ ORDER BY
 
 **Expected shape:** Three rows with text labels.
 
-Check the result at the stated grain. An alternative formulation is
-valid only if it preserves the same NULL, ordering, time, money, and
-cardinality contract.
-
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-11 Exercise 5, read from the inline `VALUES` fixture. Build the answer toward `value`, and `value_state`; keep `value` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-11 Exercise 5, expected output: Three rows with text labels. The final columns are `value`, and `value_state`. The final order is `value NULLS FIRST`.
-- **Independent verification:** For sql-11 Exercise 5, reselect the returned keys directly from the source; require unique `value` where the expected grain is one row per key and confirm the projected `value`, and `value_state` against the inline `VALUES` fixture. Add one source row with a new `value`; verify the result gains exactly one row carrying that `value` value.
-- **Intermediate relation check:** For sql-11 Exercise 5, check `value NULLS FIRST` before applying the row cap.
-- **Clause check:** For sql-11 Exercise 5, the solution actually uses `FROM`, `SELECT`, and `ORDER BY`. Read only those operations: begin at the inline `VALUES` fixture, preserve one row per `value`, and finish with `value`, and `value_state` ordered by `value NULLS FIRST`.
-- **Alternative/trade-off:** For sql-11 Exercise 5, the chosen form is justified by this lesson-specific rationale: All result branches must resolve to a compatible PostgreSQL type. Evaluate another form against the concrete expected result (Three rows with text labels) and the verification above.
-- **Edge case:** Add one source row with a new `value`; verify the result gains exactly one row carrying that `value` value.
+- **Inputs/evidence:** For sql-11 Exercise 5, classify the three values in the inline `VALUES (NULL::integer), (0), (2)` fixture with a `CASE` whose first branch is `value IS NULL`.
+- **Expected result/shape:** For sql-11 Exercise 5, return 3 rows: `NULL` is `missing`, 0 is `zero`, and 2 is `nonzero`, with the `NULL` row first. The final columns are `value`, and `value_state`. The final order is `value NULLS FIRST`.
+- **Independent verification:** For sql-11 Exercise 5, confirm 3 rows with three different `value_state` labels. Remove the `IS NULL` branch and the `NULL` row must fall through to `ELSE` as `nonzero`, because `NULL = 0` is unknown rather than true; drop `NULLS FIRST` and the `NULL` row must sort last.
+- **What prints:** three rows: `missing` for the `NULL`, `zero` for 0 and `nonzero` for 2.
+- **The broken version:** mixing `'missing'` with an integer branch fails with `invalid input syntax for type integer: "missing"`, because PostgreSQL picks integer as the result type and tries to convert the text.
+- **Casting does not help:** `'missing'::text` alongside integers gives `CASE types integer and text cannot be matched`. Return text from every branch, or `value::text` if the number itself should show.
+- **Zero is not missing:** the `IS NULL` branch comes first and `value = 0` second, so 0 is never reported as absent.
+- **Why `NULLS FIRST`:** ascending order puts `NULL` last by default in PostgreSQL, so the clause lifts the `missing` row to the top where it is easy to spot.
+- **Showing the number:** `ELSE value::text` would print `2` instead of `nonzero`; the column stays text, so the branch types still agree.
 
 ## Exercise 6: Extension
 
@@ -297,11 +234,10 @@ cardinality contract.
 
 **Clause-by-clause reading:**
 
-- `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
-- `FROM`: establishes the starting relation and therefore the initial row grain.
-- `CASE`: encodes ordered business conditions; the first true branch wins and `ELSE` defines the remainder.
-- `GROUP BY`: collapses input rows to the listed key grain; every non-aggregated selected value must belong to that grain.
-- `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
+- `CASE p.method WHEN 'card' THEN 'Card' WHEN 'paypal' THEN 'PayPal' ... ELSE 'Other' END`: a simple CASE, one equality test per code.
+- `COUNT(*) AS payment_count` with `GROUP BY p.method`: payments per method.
+- `method_label` is not in `GROUP BY`, which is allowed because it depends only on the grouped `p.method`.
+- `ORDER BY p.method`: alphabetical by code.
 
 ```sql
 SELECT
@@ -329,24 +265,20 @@ ORDER BY
 
 **Expected shape:** One row per payment method and display label.
 
-Check the result at the stated grain. An alternative formulation is
-valid only if it preserves the same NULL, ordering, time, money, and
-cardinality contract.
-
 ### Reasoning and verification
 
 - **Inputs/evidence:** For sql-11 Exercise 6, read from `payments`, group by `method`, count payments per method, and map each method to a display label with a simple `CASE p.method WHEN ... END` that keeps an `ELSE 'Other'` fallback.
-- **Expected result/shape:** For sql-11 Exercise 6, expected output: One row per payment method and display label. The final columns are `method`, `method_label`, and `payment_count`. The final order is `p.method`.
+- **Expected result/shape:** For sql-11 Exercise 6, return 4 rows, one per payment method: `bank` as `Bank transfer` (886), `card` as `Card` (860), `credit` as `Store credit` (1050), and `paypal` as `PayPal` (1040). The final columns are `method`, `method_label`, and `payment_count`. The final order is `p.method`.
 - **Independent verification:** For sql-11 Exercise 6, confirm 4 rows (`bank` 886, `card` 860, `credit` 1050, `paypal` 1040) whose counts add up to `SELECT COUNT(*) FROM payments` (3836); then evaluate the same `CASE` on `VALUES ('crypto')` and confirm it returns `Other`, not NULL.
-- **Intermediate relation check:** For sql-11 Exercise 6, group by `method` and count first; add the label `CASE` only after the counts add up to 3836.
-- **Clause check:** For sql-11 Exercise 6, the solution actually uses `FROM`, `GROUP BY`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `payments`, preserve one row per `method`, and finish with `method`, `method_label`, and `payment_count` ordered by `p.method`.
-- **Alternative/trade-off:** For sql-11 Exercise 6, the chosen form is justified by this lesson-specific rationale: A simple CASE fits equality mapping; `ELSE` prevents silent NULL labels. Evaluate another form against the concrete expected result (One row per payment method and display label) and the verification above.
-- **Edge case:** The `CHECK` constraint on `payments.method` blocks unknown methods today, but the `ELSE 'Other'` branch keeps the report readable if that constraint ever changes.
+- **What prints:** four rows: `bank` (Bank transfer) 886, `card` (Card) 860, `credit` (Store credit) 1,050 and `paypal` (PayPal) 1,040.
+- **Totals:** 886 + 860 + 1,050 + 1,040 = 3,836, every payment counted once.
+- **The fallback:** `CASE 'crypto' WHEN 'card' THEN 'Card' ... ELSE 'Other' END` returns `Other`. Without the `ELSE`, a new method would display as a blank label.
+- **Simple or searched:** a lookup of exact codes reads best as a simple CASE; ranges or `NULL` tests need the searched form.
 
 ## Final self-check
 
-- Can you explain the logical grain before and after every aggregation?
-- Are missing values preserved or converted only by an explicit rule?
-- Does every ordered result have a deterministic final tie-breaker?
-- Are money and time assumptions visible beside the calculation?
-- Does the complete executable solution finish with `ROLLBACK`?
+- In Example 1, why are all 50 labels `XL`, and what happens if the `>= 300` branch moves to the top?
+- Why does Exercise 2's first three counts adding to 4,362 matter?
+- Why must the `IS NULL` test come first in Exercise 3?
+- Which two different errors can mixed branch types raise in Exercise 5?
+- What would Exercise 6 print for a new method if the `ELSE` were removed?

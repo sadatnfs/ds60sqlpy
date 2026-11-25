@@ -1,6 +1,6 @@
 # r-012: reference reasoning
 
-Use the [complete reference](r-012_reference.R) with the guide's declared inputs and runtime. Every worked example is also a standalone script.
+Run the [complete reference](r-012_reference.R) under the [run rules](../STUDY-GUIDE.md#run-a-chapter).
 
 ## Why the implementation has this shape
 
@@ -96,4 +96,6 @@ Treat the change as an interface change and test existing default callers.
 
 ## What the checks establish
 
-The reference makes 5 `stopifnot()` checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.
+The checks pin `after_fee(50)` at 45 with the default rate and 50 at rate 0, a summary list of count 2L and total 6, a rejected invalid rate, an empty input returning `numeric(0)`, a changed rate producing a different result, and a rejected non-numeric amount. They cannot show that the default rate is the right business rule, only that the function honors it.
+
+The reference makes 5 `stopifnot()` checks; see [what a passing run proves](../STUDY-GUIDE.md#what-a-passing-run-proves).

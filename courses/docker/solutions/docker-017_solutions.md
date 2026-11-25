@@ -1,6 +1,6 @@
 # docker-017: explanatory solutions
 
-Compare after your own attempt or an explicit reveal. These explain the supplied teaching fixtures; they are not engine results. The mechanism is explained in `courses/docker/guides/docker-017.md`.
+These answers explain teaching fixtures, not engine results; the mechanism is in [the guide](../guides/docker-017.md).
 
 ## Exercise 1: Predict whether Linux implies amd64.
 
@@ -88,4 +88,4 @@ Compare after your own attempt or an explicit reveal. These explain the supplied
 
 ## Check your transfer
 
-A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.
+The image has no arm64 entry, so the engine pulls the amd64 image. With emulation installed it starts and warns that the image platform does not match the host; it then runs translated, slower, and native extensions may behave differently. Without emulation it fails with `exec format error`. The publishing team should build and push an index with both `linux/amd64` and `linux/arm64`, then test each platform separately. If inspection on the laptop showed `linux/arm64` and the run still failed, the problem would be in the image contents, not platform selection.

@@ -24,9 +24,9 @@ HttpClient is intended for reuse under a deliberate lifetime policy. Repeatedly 
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles your saved pad as `Program.cs` in its fixed .NET 10 project. C# 14 is the matching language generation. This route uses the prepared framework libraries; it does not accept arbitrary project files, NuGet packages, command arguments or interactive input. The explicit `Program.Main` entrypoint makes compilation and execution visible. `Check` throws on a false condition in every build configuration, unlike conditional debugging assertions.
+The fake transport is `FixtureHandler`, declared after `Main`, and the run uses no network: example.invalid is a reserved name that never resolves, and the handler answers before any connection would be attempted. The worked examples already import `System.Net`, `System.Net.Http` and `System.Text.Json`, which supply the status codes, client and parser.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Compile contract, starter stop and success marker: [running a lesson](../STUDY-GUIDE.md#running-a-lesson).
 
 
 
@@ -34,7 +34,7 @@ Start with the answer-free learner artifact in your saved classroom pad. It deli
 
 A message handler is the transport boundary beneath HttpClient. A fake handler returns HttpResponseMessage deterministically. EnsureSuccessStatusCode throws for unsuccessful status; validate the body afterward.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+Each example ends with a trace; method: [tracing a program](../STUDY-GUIDE.md#tracing-a-program).
 
 ## Worked example / walkthrough
 
@@ -95,6 +95,8 @@ internal static class Program {
 
 **Observe:** The handler supplies count 3 without network access.
 
+**Trace.** `HttpClient` passes the GET request to `FixtureHandler`, which returns status 200 with the body `{"count":3}`. `EnsureSuccessStatusCode` returns normally because 200 is a success code. `ReadAsStringAsync` reads the body, `JsonDocument.Parse` builds a document, and `GetProperty("count").GetInt32()` returns 3. Each `using` disposes its response or document at the end of the scope, in reverse order.
+
 ### Example B: Preserve unsuccessful status
 
 Response arrival and application success are separate facts.
@@ -154,6 +156,8 @@ internal static class Program {
 
 **Observe:** 503 remains an observable failure rather than a default successful count.
 
+**Trace.** This time the handler returns 503 with the plain text unavailable. The response arrives normally, so `GetAsync` does not throw. `EnsureSuccessStatusCode` does, raising `HttpRequestException` whose `StatusCode` is `ServiceUnavailable` and whose message reads: Response status code does not indicate success: 503 (Service Unavailable). The catch sets `rejected`, and the body is never parsed.
+
 ## Exercises
 
 1. **Predict and explain.** Trace transport, status, decoding and schema validation boundaries.
@@ -168,13 +172,15 @@ internal static class Program {
 
 6. **Transfer and justify.** Design a retry policy that distinguishes safe reads from writes with unknown outcomes.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Log each task in the [evidence table](../STUDY-GUIDE.md#recording-exercise-evidence) before opening the explanation.
 
 ## Common pitfalls and diagnosis
 
 A fake transport does not validate certificates or server availability. Do not retry all status codes blindly. Bound request and response lifetimes and redact credentials from diagnostic logs.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+In task 4, an adapter that maps every non-2xx response to an empty success hides the 503 behind a count of 0. For task 2, valid JSON without count makes `GetProperty` throw `KeyNotFoundException`. For task 5, malformed text throws a `JsonException` subtype, and a count sent as the string 3 makes `GetInt32` throw `InvalidOperationException`.
+
+Repair routine: [building a regression case](../STUDY-GUIDE.md#building-a-regression-case).
 
 ## Progressive hints
 
@@ -184,11 +190,15 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 ## Self-check and next step
 
-Explain Transport, Status code, Test double without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+List the four boundaries a response crosses in Example A and say which call guards each one. Explain why the fake handler proves decoding but not certificate validation or server availability. For task 6, state which requests your policy retries automatically and why a POST with an unknown outcome needs an identity first.
+
+Then follow the general [self-check routine](../STUDY-GUIDE.md#self-check-routine) and save your pad.
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://learn.microsoft.com/en-us/dotnet/csharp/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+[Documentation](https://learn.microsoft.com/en-us/dotnet/csharp/): The `HttpClient` guidance and the `System.Text.Json` articles explain message handlers, status checks and document parsing.
+
+Provenance and limits: [sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

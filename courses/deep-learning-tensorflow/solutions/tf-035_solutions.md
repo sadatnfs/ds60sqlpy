@@ -1,6 +1,6 @@
 # tf-035: explanatory solutions
 
-Open these answers for Comparing models with uncertainty after your own attempt at Example A, Align by identity, or after an explicit reveal. Each answer reuses the guide's literal inputs, so a mismatch points to one step. The companion script runs the assertions; this page explains why they test Paired difference, Bootstrap, Selection leakage. After matching exercise 6, Keep selection and final evaluation separate, invent a new input without looking here.
+Open these answers after an attempt; they reuse the guide's inputs ([comparison steps](../STUDY-GUIDE.md#after-the-solutions)).
 
 ## Mechanism review
 
@@ -125,6 +125,3 @@ assert bad["partition"] != "validation"
 
 **Verify:** In a fresh process, the exercise checks confirm `all((row['partition'] == 'validation' for row in ledger if row['action'] == 'choose'))` and `bad['partition'] != 'validation'`.
 
-## Review after comparison
-
-Change one fixture value in exercise 4, Reproduce the resampling, and predict the new result before running it. Keep the failing version of exercise 5, Refuse mismatched IDs, next to its repair. A missing framework is an environment record, not a failed assertion. No solution downloads data, calls an online model, deploys a service or changes a database.

@@ -198,11 +198,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-keyword">import</span> <span class="syntax-string">&quot;fmt&quot;</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">func</span> main<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span></span>
-<span class="source-line">	<span class="syntax-comment">// Exercise 1: Count two units: change one input: Copy worked example 1 into a scratch pad and change `text := &quot;A🙂&quot;` to `text := &quot;A🙂!&quot;`. Before running, predict which check fails and which value it now sees; then run it and restore the original line.</span></span>
-<span class="source-line">	<span class="syntax-comment">// Expected: The changed run panics with `text units` because `len(text) == 5 &amp;&amp; utf8.RuneCountInString(text) == 2` no longer holds. Restoring the original line brings back the worked observation: there are 5 bytes and 2 runes.</span></span>
+<span class="source-line">	<span class="syntax-comment">// Exercise 1: Count two units: change one input: Copy worked example 1, change `text := &quot;A🙂&quot;` to `text := &quot;A🙂!&quot;` and predict the failure before running; then restore the line.</span></span>
+<span class="source-line">	<span class="syntax-comment">// Expected: The edited run panics with `text units` because `len(text) == 5 &amp;&amp; utf8.RuneCountInString(text) == 2` no longer holds.</span></span>
 <span class="source-line"></span>
-<span class="source-line">	<span class="syntax-comment">// Exercise 2: Edit a copied byte slice: debug a regression: A regression changed one token in worked example 2, so one line now reads `data[1] = &#x27;b&#x27;`. Run worked example 2 with that line, use the failure to locate the defect and repair it without changing the check.</span></span>
-<span class="source-line">	<span class="syntax-comment">// Expected: Before the repair the program panics with `copy edit`; after it the line reads `data[0] = &#x27;b&#x27;` again and the original is cat and the new string is bat.</span></span>
+<span class="source-line">	<span class="syntax-comment">// Exercise 2: Edit a copied byte slice: debug a regression: A one-token regression in worked example 2 makes a line read `data[1] = &#x27;b&#x27;`. Repair it without changing the check.</span></span>
+<span class="source-line">	<span class="syntax-comment">// Expected: The defective run panics with `copy edit`; after restoring `data[0] = &#x27;b&#x27;`, the original is cat and the new string is bat.</span></span>
 <span class="source-line"></span>
 <span class="source-line">	<span class="syntax-comment">// Exercise 3: Reject malformed encoding: Build a string from the single byte 0xff.</span></span>
 <span class="source-line">	<span class="syntax-comment">// Expected: UTF-8 validation returns false.</span></span>

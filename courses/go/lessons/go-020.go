@@ -3,11 +3,11 @@ package main
 import "fmt"
 
 func main() {
-	// Exercise 1: Parse a quoted comma: predict an edited check: Copy worked example 1 into a scratch pad and change `check(err == nil && len(v) == 2 && v[1] == "Springfield, West", "quoted comma")` to `check(err == nil && len(v) == 3 && v[1] == "Springfield, West", "quoted comma")` inside its check. Before running, predict whether the check still passes and explain why; then restore it.
-	// Expected: The changed run panics with `quoted comma` because the edited check no longer holds. Restoring the original line brings back the worked observation: the record contains two fields.
+	// Exercise 1: Parse a quoted comma: predict an edited check: Copy worked example 1, change `check(err == nil && len(v) == 2 && v[1] == "Springfield, West", "quoted comma")` to `check(err == nil && len(v) == 3 && v[1] == "Springfield, West", "quoted comma")` inside its check and predict whether it still passes; then restore it.
+	// Expected: The edited check panics with `quoted comma` even though `err == nil && len(v) == 2 && v[1] == "Springfield, West"` still holds.
 
-	// Exercise 2: Reject a ragged row: debug a regression: A regression changed one token in worked example 2, so one line now reads `r.FieldsPerRecord = 3`. Run worked example 2 with that line, use the failure to locate the defect and repair it without changing the check.
-	// Expected: Before the repair the program panics with `ragged row`; after it the line reads `r.FieldsPerRecord = 2` again and the reader reports a field-count error.
+	// Exercise 2: Reject a ragged row: debug a regression: A one-token regression in worked example 2 makes a line read `r.FieldsPerRecord = 3`. Repair it without changing the check.
+	// Expected: The defective run panics with `ragged row`; after restoring `r.FieldsPerRecord = 2`, the reader reports a field-count error.
 
 	// Exercise 3: Decode a numeric field: Parse the second field of item,12 as an integer.
 	// Expected: The numeric value is 12.

@@ -17,24 +17,15 @@ SET search_path TO training, public;
 
 -- Exercise 2: deadlocks are prevented when every writer locks shared keys in
 -- the same consistent order.
-WITH keys AS (
-  SELECT
-    order_id
-  FROM
-    orders
-  ORDER BY
-    order_id
-  LIMIT 2
-)
 SELECT
-  o.order_id
+  order_id
 FROM
-  orders o
-  JOIN keys k USING (order_id)
+  orders
+WHERE
+  order_id IN (1, 2)
 ORDER BY
-  o.order_id
-  FOR UPDATE
-    OF o;
+  order_id
+FOR UPDATE;
 
 -- Exercise 3: a runnable job-queue pattern.
 CREATE TEMP TABLE solution_jobs (
@@ -63,15 +54,11 @@ FOR UPDATE
   SKIP LOCKED
 LIMIT 2;
 
--- Transaction-scoped advisory locks release automatically at transaction end.
-SELECT
-  pg_try_advisory_xact_lock(3901) AS acquired_course_lock;
-
 -- Exercise 1: manual deadlock reproduction requires two concurrent sessions:
--- A: BEGIN; UPDATE orders SET status=status WHERE order_id=1;
--- B: BEGIN; UPDATE orders SET status=status WHERE order_id=2;
--- A: UPDATE orders SET status=status WHERE order_id=2;
--- B: UPDATE orders SET status=status WHERE order_id=1; -- deadlock detected
+-- A: BEGIN; SELECT order_id FROM orders WHERE order_id = 1 FOR UPDATE;
+-- B: BEGIN; SELECT order_id FROM orders WHERE order_id = 2 FOR UPDATE;
+-- A: UPDATE orders SET total_amount = total_amount WHERE order_id = 2;
+-- B: UPDATE orders SET total_amount = total_amount WHERE order_id = 1; -- deadlock detected
 -- Inspect pg_locks from a third session before issuing the final statement.
 -- Exercise 4: NOWAIT uses the same row-lock semantics but raises SQLSTATE 55P03
 -- immediately if another session owns a conflicting lock. EXPLAIN verifies the

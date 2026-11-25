@@ -1,6 +1,8 @@
 # c-023: explained solutions
 
-Compare after an attempt or explicit reveal. The complete executable reference, `c-023_solution.c`, implements all six cases, from the "insert and retrieve" case to the "transfer replacement while full" case, in one `main.c`.
+`c-023_solution.c` assembles the "insert and retrieve" case through the "transfer replacement while full" case in one `main.c`.
+
+Compare only after an attempt: [Compare and transfer](../STUDY-GUIDE.md#compare-and-transfer).
 
 ## Mechanism and assumptions
 
@@ -10,7 +12,7 @@ The fixture uses unsigned integer keys and linear probing across eight slots. Ev
 
 ## Exercise 1: Insert and retrieve: predict an edited check
 
-Copy worked example 1 into a scratch pad and change `CHECK(table_put(&t, 1, 7) && table_get(&t, 1, &out) && out == 7);` to `CHECK(table_put(&t, 2, 7) && table_get(&t, 1, &out) && out == 7);` inside its CHECK. Before running, predict whether the CHECK still holds and explain why; then restore it.
+In worked example 1, change `CHECK(table_put(&t, 1, 7) && table_get(&t, 1, &out) && out == 7);` to `CHECK(table_put(&t, 2, 7) && table_get(&t, 1, &out) && out == 7);`. Predict whether the CHECK still holds and why, then run and restore.
 
 The unchanged code is worked example 1:
 
@@ -20,13 +22,15 @@ int out = 0;
 CHECK(table_put(&t, 1, 7) && table_get(&t, 1, &out) && out == 7);
 ```
 
-**Expected:** With `CHECK(table_put(&t, 2, 7) && table_get(&t, 1, &out) && out == 7);` the run stops with `Check failed` at the CHECK on `table_put(&t, 1, 7) && table_get(&t, 1, &out) && out == 7`, because the "insert and retrieve" case no longer shows that lookup succeeds with 7. Restoring `CHECK(table_put(&t, 1, 7) && table_get(&t, 1, &out) && out == 7);` brings that observation back.
+**Expected:** `Check failed`: `CHECK(table_put(&t, 2, 7) && table_get(&t, 1, &out) && out == 7);` is false, although lookup succeeds with 7.
+
+**Verify:** Explain which claim `CHECK(table_put(&t, 2, 7) && table_get(&t, 1, &out) && out == 7);` makes that the state fails; restoring `CHECK(table_put(&t, 1, 7) && table_get(&t, 1, &out) && out == 7);` passes again.
 
 Lookup checks the actual key rather than trusting the initial slot alone.
 
 ## Exercise 2: Resolve a collision: diagnose an edited check
 
-A careless edit changed the CHECK in worked example 2, the "resolve a collision" case, so that it reads `CHECK(table_put(&t, 1, 10) && table_put(&t, 10, 90));`. Run the example with that line, explain why the edited CHECK now fails even though the program state still means both values remain retrievable, and restore it.
+Worked example 2's CHECK now reads `CHECK(table_put(&t, 1, 10) && table_put(&t, 10, 90));`. Explain why it fails although both values remain retrievable, then restore it.
 
 The unchanged code is worked example 2:
 
@@ -38,7 +42,9 @@ CHECK(table_get(&t, 1, &out) && out == 10);
 CHECK(table_get(&t, 9, &out) && out == 90);
 ```
 
-**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `table_get(&t, 9, &out) && out == 90`. Once the line reads `CHECK(table_put(&t, 1, 10) && table_put(&t, 9, 90));` again, the "resolve a collision" case again shows that both values remain retrievable.
+**Expected:** `Check failed` until the CHECK reads `CHECK(table_put(&t, 1, 10) && table_put(&t, 9, 90));` again, though both values remain retrievable.
+
+**Verify:** Explain why `CHECK(table_put(&t, 1, 10) && table_put(&t, 10, 90));` rejects a state that `table_get(&t, 9, &out) && out == 90` accepts, using your failing and repaired runs.
 
 Linear probing finds another free slot while preserving the key distinction.
 
@@ -54,6 +60,8 @@ CHECK(table_get(&t, 2, &out) && out == 8);
 ```
 
 **Expected:** The latest value is 8.
+
+**Verify:** Keep a CHECK equivalent to `table_get(&t, 2, &out) && out == 8`. Control edit: `CHECK(table_put(&t, 2, 3) && table_put(&t, 3, 8));` must fail; then restore it.
 
 Replacement does not create duplicate logical keys.
 
@@ -71,6 +79,8 @@ CHECK(!table_get(&t, 3, &out) && out == 9);
 
 **Expected:** The stored zero succeeds; the missing key fails.
 
+**Verify:** Keep a CHECK equivalent to `!table_get(&t, 3, &out) && out == 9`. Control edit: changing `out = 9;` to `out = 10;` must fail it; then restore it.
+
 Occupancy and return status preserve information that a zero sentinel would lose.
 
 ## Exercise 5: Reject a full-table insertion
@@ -85,6 +95,8 @@ CHECK(!table_put(&t, 99, 99));
 ```
 
 **Expected:** The operation returns false without looping forever.
+
+**Verify:** Keep a CHECK equivalent to `!table_put(&t, 99, 99)`. Control edit: changing `for (unsigned i = 0; i < 8; i++)` to `for (unsigned i = 1; i < 8; i++)` must fail it; then restore it.
 
 Every probe sequence is bounded by capacity. A resizing implementation would allocate before changing the old table.
 
@@ -102,8 +114,10 @@ CHECK(table_put(&t, 3, 30) && table_get(&t, 3, &out) && out == 30);
 
 **Expected:** Replacement still succeeds.
 
+**Verify:** Keep a CHECK equivalent to `table_put(&t, 3, 30) && table_get(&t, 3, &out) && out == 30`. Control edit: `CHECK(table_put(&t, 4, 30) && table_get(&t, 3, &out) && out == 30);` must fail; then restore it.
+
 Full storage prevents new keys, not an update to an already present key. This is a distinct edge condition.
 
 ## After comparison
 
-Add a fresh distinguishing input for the "transfer replacement while full" case to your own c-023 source. Explain why every access in `table_put` or `table_get` stays within a live object and each owned resource is released. An expected collision failure belongs in the test contract; undefined behavior does not. Keep diagnostics and sanitizer evidence for the "resolve a collision" case apart from ordinary output: the fixture proves its stated collision, probe sequence and load factor assumptions, not universal safety.
+Insert the keys 1, 9 and 17, which all hash to slot 1 in this eight-slot table, and CHECK that `table_get` finds 17 in slot 3. Then look up 25, which also hashes to slot 1 but was never inserted, and CHECK that it reports absent only after probing slots 1, 2 and 3 and reaching the empty slot 4. Explain why stopping at the first mismatched key would lose 9 and 17.

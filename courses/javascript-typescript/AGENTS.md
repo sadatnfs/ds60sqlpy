@@ -14,7 +14,8 @@ unless its trusted typed verifier is registered and tested. Content metadata
 cannot install tools or execute arbitrary commands. Preserve learner state,
 reviewed fixtures and private runtime credentials. Update durable authoring
 sources where present, then regenerate and run focused content/runtime checks.
-Do not use em dashes.
+Shared routine prose belongs once in `STUDY-GUIDE.md`; lesson-specific teaching
+paragraphs belong in `authoring/guidance.py`. Do not use em dashes.
 
 Keep Node and browser environments distinct. The Node worker stages `main.mjs`;
 TypeScript stages `main.mts`, performs strict NodeNext checking and compiles

@@ -1,6 +1,6 @@
 # web-059: explanatory solutions
 
-Open this after your own attempt. Each answer explains the lesson's synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in `courses/web-development/guides/web-059.md`.
+Attempt each exercise before reading; the mechanism is in `courses/web-development/guides/web-059.md` ([using these answers](../STUDY-GUIDE.md#solutions)).
 
 ## Exercise 1: Explain why PHP-FPM is not interchangeable with the development HTTP server.
 
@@ -76,4 +76,6 @@ Open this after your own attempt. Each answer explains the lesson's synthetic fi
 
 ## Comparing your worksheet
 
-This lesson has no executable reference. Compare your worksheet with the answers above. The optional lab in `courses/web-development/fixtures/php-http-lab/` gives real request evidence only when you deliberately run it.
+Compare your release plan with the solution's acceptance record and check that every claim names its evidence, such as a build log, a health check or a restore. Nothing in this lesson publishes or deploys, so mark any step you have not actually observed as planned rather than done.
+
+This lesson has no executable reference ([worksheet rules](../STUDY-GUIDE.md#worksheets)).

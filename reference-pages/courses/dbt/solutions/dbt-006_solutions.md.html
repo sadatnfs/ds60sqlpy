@@ -195,7 +195,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="dbt-006-explained-reference">dbt-006: explained reference<a class="heading-anchor" href="#dbt-006-explained-reference" aria-label="Link to this section">#</a></h2>
 <p>Use controlled fixtures to test transformation logic and real-data checks to test integration.</p>
-<p>The executable reference contains the two complete worked cases with assertions. The changes below explain the independent practice and its limits.</p>
+<p>The reference defines a YAML unit test on <code>totals</code> with its own <code>given</code> input for <code>ref(&#x27;raw_orders&#x27;)</code>, runs <code>dbt test --select test_type:unit</code>, and confirms the real seed still holds 100. It verifies transformation logic on controlled rows, not that production data meets the same contract. See <a href="../STUDY-GUIDE.md.html#answers-and-references">how these answers are laid out</a>.</p>
 <h3 id="1-add-a-second-customer">1. Add a second customer<a class="heading-anchor" href="#1-add-a-second-customer" aria-label="Link to this section">#</a></h3>
 <p>This catches a model that returns one global total. Verify row identities as well as amounts.</p>
 <p><strong>Why it holds here:</strong> The given rows for ref(&#x27;raw_orders&#x27;) currently hold only customer 1, so a model that drops group by customer and returns sum(amount) over everything still produces a single row with total 5. A second customer makes the grouping observable.</p>

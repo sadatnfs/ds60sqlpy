@@ -1,6 +1,6 @@
 # js-054: explanatory solutions
 
-Compare after your own attempt or an explicit reveal. The separate .js reference is a complete offline browser program. These explanations discuss the six practice tasks; a visual resemblance alone is not a data or behavior check.
+Compare after your own attempt; the separate `.js` file is the complete reference program.
 
 ## Mechanism review
 
@@ -49,3 +49,7 @@ Empty-state behavior must work on updates, not just initial load. Check both tra
 A scaled screenshot alone can conceal unreadable text. Inspect the actual interaction and label layout at the intended size. Shrink the viewport and check labels are readable and not clipped, then tab through any controls; the 180-pixel bar should still match its value. Use the browser's responsive mode at 320 pixels and record what you saw, including any label that overflowed.
 
 **Expected:** Readable labels, no clipping, keyboard access and stable data meaning.
+
+## After comparison
+
+Use your component twice on one page with different data and widths, and add a `ResizeObserver` that rerenders on container changes and disconnects on removal. Check that each instance owns exactly one root and that the two never share marks.

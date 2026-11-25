@@ -1,6 +1,6 @@
 # cuda-108: explained solutions
 
-These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.
+Compare with your [worksheet](../lessons/cuda-108.md) attempt.
 
 ## Exercise 1: Compute grouped sums
 
@@ -74,8 +74,16 @@ One is a dataframe library and the other integrates Spark physical execution.
 
 **How to verify.** For Spark, inspect the physical plan for GPU operators. For cuDF, check that the objects are cuDF dataframes.
 
+## Self-check answers
+
+1. **How does cuDF differ from the Spark RAPIDS plugin?** cuDF is a single-process GPU dataframe library; the plugin replaces supported Spark physical operators inside Spark's scheduler.
+
+2. **Why are counting rows and counting non-null values different?** Category A has two rows but only one non-null value, so the two counts answer different questions.
+
+3. **Why carry row identity through conversion to tensors?** Without a stable key you cannot join predictions back to inputs or verify that no rows were dropped or reordered.
+
 ## Reference observation
 
 Grouped sums A 2, B 5 and row count A 2.
 
-The reference file is `courses/cuda/python/references/cuda-108_cpu.py`. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.
+Asserted by `courses/cuda/python/references/cuda-108_cpu.py`.

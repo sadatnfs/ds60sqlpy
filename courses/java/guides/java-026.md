@@ -6,7 +6,16 @@ Advanced, approximately 120 minutes. Direct prerequisites: `java-025`
 
 ## Learning objectives
 
-Compile and run a two-module application and read its module descriptors, exports and dependency errors. Along the way, explain package, classpath, named module, export using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. Exercises 1 and 2 start from the worked examples; the authored investigations begin with this task: Create the owned greeting/application fixture and compile both with --module-source-path. The final exercise transfers the mechanism to reject a missing module dependency.
+Compile and run a two-module application and read its module descriptors, exports and dependency errors.
+
+The six exercises practice these steps:
+
+- Inspect a platform module.
+- Inspect the classroom classpath context.
+- Compile two real modules.
+- Inspect declared dependencies and exports.
+- Run the modular application.
+- Reject a missing module dependency.
 
 ## Purpose and mental model
 
@@ -26,16 +35,9 @@ This lesson includes a real two-module source fixture:a greeting library exports
 
 ## How to run this lesson
 
-Open the Docker classroom, choose the prepared Java 21 profile and save a learner pad. The pad is compiled as `Main.java` with `javac --release 21` and executed with `java -ea Main`. Assertions are enabled deliberately. A successful assertion has no output; a failed assertion throws `AssertionError` and the process should fail. Do not remove assertions to obtain a green result.
+`ModuleFixture` writes a two-module source tree into an owned temporary directory, compiles it with the in-process `javac` through `ToolProvider`, and runs the app in a child JVM with a five-second limit; `close` deletes everything.
 
-For a prepared native JDK, copy a worked example into your own `Main.java` under ignored `.learning/expansion/java-026/`. From that directory run the same two commands on PowerShell, macOS or Linux:
-
-```text
-javac --release 21 Main.java
-java -ea Main
-```
-
-The public class name and source filename must agree. Each worked example below is a complete file. Example B includes the setup it needs from Example A, so it can be compiled by itself. The six exercise reference blocks form one complete program in the separate solution. Keep your original prediction, source and diagnostic text together. Most examples use prepared JDK libraries and tiny local fixtures; any additional dependency is specified in the lesson notes below. Any lesson-specific library or additional file is named explicitly; do not download packages from inside a learner program. Resource examples close their owned files, executors or loopback servers.
+Classroom and native JDK steps, the exercise controls and the hint routine are in the [Java study guide](../STUDY-GUIDE.md).
 
 ## Manual module source tree
 
@@ -271,62 +273,62 @@ public class Main {
 
 ## Prediction before your attempt
 
-Read the source from the entry point and name each value before executing it. Identify which operations create new values, which mutate existing state and which can fail. Predict the first observable output or assertion result. For a compile-time failure, explain which source rule is violated before discussing runtime state: a program that did not compile never reached its main method. Keep normal, boundary and invalid inputs separate so each check has a clear purpose.
+Before running Example A, decide which module and package `String.class` belongs to. For Example B, predict whether `Main.class.getModule().isNamed()` is true when the classroom launches `Main.java` from the classpath. Before Exercise 6, predict whether compiling an app whose `module-info.java` requires `course.missing` fails at compile time or only later when the app runs.
 
 ## Exercises
 
-1. **Inspect a platform module: predict an edited check.** Copy Example A into a scratch `Main.java` and change `assert String.class.getPackageName().equals("java.lang");` to `assert String.class.getPackageName().equals("java.lang!");` inside its assertion. Before running it with `java -ea Main`, predict whether the assertion still holds and explain why; then restore it.
-   **Expected:** The changed run fails with an `AssertionError` from the assertion on `String.class.getPackageName().equals("java.lang")`. Restoring the original line brings back the worked observation: module `java.base`; package `java.lang`.
-   **Verify:** Compare your written prediction with the reported `AssertionError` and its stack-trace line, and explain why the edited condition is false for the values that satisfy `String.class.getPackageName().equals("java.lang")`. After restoring the line, the program completes without an `AssertionError` again.
+1. **Inspect a platform module: predict an edited check.** Change Example A's assertion to `assert String.class.getPackageName().equals("java.lang!");`, predict whether it holds, then run and restore it.
+   **Expected:** The edited run fails with an `AssertionError` from the assertion on `String.class.getPackageName().equals("java.lang")`.
+   **Verify:** Explain why the edited assertion is false for the values that satisfy `String.class.getPackageName().equals("java.lang")`.
 
-2. **Inspect the classroom classpath context: diagnose an edited check.** A careless edit changed the assertion that Example B adds after Example A so that it reads `assert Main.class.getModule().isNamed();`. Run Example B with that line, explain why the edited assertion now fails for the same program state, and restore it.
-   **Expected:** Before the repair the run fails with an `AssertionError` from the assertion on `!Main.class.getModule().isNamed()`; after it the line reads `assert !Main.class.getModule().isNamed();` again and main belongs to the unnamed module in the standard classpath launch.
-   **Verify:** Keep the failing and the repaired runs. Explain why the edited assertion rejects the same program state that `!Main.class.getModule().isNamed()` accepts.
+2. **Inspect the classroom classpath context: diagnose an edited check.** Example B's new assertion was edited to `assert Main.class.getModule().isNamed();`. Explain why it fails for unchanged state and restore it.
+   **Expected:** The edited run fails with an `AssertionError` from the assertion on `!Main.class.getModule().isNamed()`; the restored assertion passes.
+   **Verify:** Explain why the edited assertion rejects the state that `!Main.class.getModule().isNamed()` accepts.
 
 3. **Compile two real modules.** Create the owned greeting/application fixture and compile both with --module-source-path.
    **Expected:** compiler exit 0 and module-info.class files present.
-   **Verify:** Keep an assertion equivalent to `java.nio.file.Files.isRegularFile(fixture.output.resolve("course.app/module-info.class"))`. As a control, change `fixture.output.resolve("course.app/module-info.class")` to `fixture.output.resolve("course.app/module-info.class!")` inside it: the run must fail with an `AssertionError`, which shows the assertion can fail. Restore it.
+   **Verify:** Control: changing `fixture.output.resolve("course.app/module-info.class")` to `fixture.output.resolve("course.app/module-info.class!")` inside the assertion must make it fail.
 
 4. **Inspect declared dependencies and exports.** Read the compiled descriptors with ModuleFinder.
    **Expected:** app requires course.greeting; library exports edu.example.greeting.
-   **Verify:** Keep an assertion equivalent to `library.exports().stream().anyMatch(item -> item.source().equals("edu.example.greeting"))`. As a control, change `.anyMatch(item -> item.source().equals("edu.example.greeting"));` to `.anyMatch(item -> item.source().equals("edu.example.greeting!"));` inside it: the run must fail with an `AssertionError`, which shows the assertion can fail. Restore it.
+   **Verify:** Control: changing `.anyMatch(item -> item.source().equals("edu.example.greeting"));` to `.anyMatch(item -> item.source().equals("edu.example.greeting!"));` inside the assertion must make it fail.
 
 5. **Run the modular application.** Launch the compiled app in a fresh child JVM with the fixed module path.
    **Expected:** stdout Hello, modules! and exit 0.
-   **Verify:** Keep an assertion equivalent to `output.strip().equals("Hello, modules!")`. As a control, change `assert output.strip().equals("Hello, modules!");` to `assert output.strip().equals("Hello, modules!!");` inside it: the run must fail with an `AssertionError`, which shows the assertion can fail. Restore it.
+   **Verify:** Control: changing `assert output.strip().equals("Hello, modules!");` to `assert output.strip().equals("Hello, modules!!");` inside the assertion must make it fail.
 
 6. **Reject a missing module dependency.** Compile an app requiring course.missing instead of course.greeting.
    **Expected:** nonzero compiler exit and captured diagnostic.
-   **Verify:** Keep an assertion equivalent to `compiled != 0 && !fixture.diagnostics.isBlank()`. As a control, change `fixture.source.resolve("course.app/module-info.java"),` to `fixture.source.resolve("course.app/module-info.java!"),`: the run must fail with an `AssertionError` from the assertion on `compiled != 0 && !fixture.diagnostics.isBlank()`. Restore the line before continuing.
+   **Verify:** Control: changing `fixture.source.resolve("course.app/module-info.java"),` to `fixture.source.resolve("course.app/module-info.java!"),` must fail the assertion on `compiled != 0 && !fixture.diagnostics.isBlank()`.
 
 ## Common pitfalls and diagnosis
 
-When a check fails, keep the smallest source file that still demonstrates the failure. Read the first relevant compiler diagnostic before editing several lines; later diagnostics can be consequences of the same missing delimiter or wrong type. For a runtime exception, identify the first frame belonging to your code and compare its input with the method contract. For an assertion failure, inspect the actual value and the independent expected value. A passing process exit is weaker than a checked invariant, and a checked invariant applies only under its stated assumptions.
+`public` is not enough across named modules: a public class in a package that is not exported cannot be used from another module, which surprises developers coming from the classpath. Package names must match directory layout under `--module-source-path`, or `javac` rejects the tree. Mixing classpath and module path means classpath code lands in the unnamed module, which can read everything but cannot be required by name. And a missing `requires` fails at compile time, so read the diagnostic.
 
-Do not replace a precise exception with a catch-all that returns a plausible default. That can hide an invalid input or an unfinished operation. If an example owns a resource, verify its lifetime on both the success and failure paths. If an operation is concurrent, use ordering primitives to establish the relationship you need; an observed timing coincidence is not a synchronization guarantee. The solution explanations identify the specific alternative that would break each exercise.
+General compiler, runtime and assertion triage: [diagnose a failure](../STUDY-GUIDE.md#diagnose-a-failure).
 
 ## Progressive hints
 
-Read one hint at a time and attempt the exercise again before reading the next. Keep a small table of input, expected value, actual value and exception type. Ask for one hint about the first incorrect assumption before requesting the entire reference implementation.
+Read one rung at a time, as described in [using hints](../STUDY-GUIDE.md#use-hints-one-at-a-time).
 
-- **Exercise 1:** First restate the expected observation: module `java.base`; package `java.lang`. Then list the values read by `String.class.getPackageName().equals("java.lang")` and trace each one from its declaration. Finally, compute the asserted value with `assert String.class.getPackageName().equals("java.lang!");` in place before running.
-- **Exercise 2:** First restate the expected observation: main belongs to the unnamed module in the standard classpath launch. Then list the values read by `!Main.class.getModule().isNamed()` and trace each one from its declaration. Finally, compare `assert Main.class.getModule().isNamed();` with the same line in Example B and state the claim each version makes.
-- **Exercise 3:** First restate the expected observation: compiler exit 0 and module-info.class files present. Then list the values read by `java.nio.file.Files.isRegularFile(fixture.output.resolve("course.app/module-info.class"))` and trace each one from its declaration. Finally, name one input that would make `java.nio.file.Files.isRegularFile(fixture.output.resolve("course.app/module-info.class"))` false.
-- **Exercise 4:** First restate the expected observation: app requires course.greeting; library exports edu.example.greeting. Then list the values read by `library.exports().stream().anyMatch(item -> item.source().equals("edu.example.greeting"))` and trace each one from its declaration. Finally, name one input that would make `library.exports().stream().anyMatch(item -> item.source().equals("edu.example.greeting"))` false.
-- **Exercise 5:** First restate the expected observation: stdout Hello, modules! and exit 0. Then list the values read by `output.strip().equals("Hello, modules!")` and trace each one from its declaration. Finally, name one input that would make `output.strip().equals("Hello, modules!")` false.
-- **Exercise 6:** First restate the expected observation: nonzero compiler exit and captured diagnostic. Then list the values read by `compiled != 0 && !fixture.diagnostics.isBlank()` and trace each one from its declaration. Finally, predict the effect of changing `fixture.source.resolve("course.app/module-info.java"),` to `fixture.source.resolve("course.app/module-info.java!"),` before running anything.
+- **Exercise 1:** First note that the in-check edit compares the package with "java.lang!". Then read `String.class.getPackageName()`, which returns "java.lang". Finally, explain why the module check on the first line passed and only the package comparison fails.
+- **Exercise 2:** First note that the edit asserts `isNamed()` instead of its negation. Then recall that `Main.java` is compiled and launched from the classpath. Finally, explain why classpath classes belong to the unnamed module, which makes the edited assertion false.
+- **Exercise 3:** First create a `ModuleFixture`, which writes both module descriptors and their packages. Then call `compile()` and assert exit code 0. Finally, check that `course.app/module-info.class` exists in the output directory, and say why reading a source string would prove nothing.
+- **Exercise 4:** First compile the fixture and open the output with `ModuleFinder.of`. Then find `course.app` and `course.greeting` and read their descriptors. Finally, assert that the app requires the library and that the library exports `edu.example.greeting`.
+- **Exercise 5:** First compile the fixture and call `run()`, which starts a child JVM with `--module-path` and `-m course.app/edu.example.app.Main`. Then read its captured standard output. Finally, assert "Hello, modules!" and explain why a fresh process rules out classes already loaded in the parent.
+- **Exercise 6:** First overwrite the app descriptor with `requires course.missing`. Then call `compile()` and keep the exit code and the captured diagnostics. Finally, assert a nonzero exit code and nonblank diagnostics, and name the module the compiler could not find.
 
 ## Self-check and retrieval
 
-Close the solution and explain Package, Classpath, Named module in your own words. Reconstruct one example from a blank `Main.java`, then add a new boundary input. Explain why the new case should pass or fail before compiling it. Identify a situation where this technique is appropriate and one where a different data structure, lifetime policy or abstraction would be clearer. This is a reasoning check, not a memorization test for an API spelling.
+From memory, explain the difference between a package, a classpath entry and a named module. State what `requires` and `exports` each declare, why the classroom `Main` lives in the unnamed module, and what the child JVM in Exercise 5 proves that compiling alone does not.
 
 ## Next step
 
-Preserve the saved pad and the six exercise observations. Continue to the next lesson only when you can explain the invariants without reading the answer. Later chapters reuse these contracts in larger programs, so keep a failing counterexample as well as a repaired result. A reference implementation demonstrates one valid design under the stated assumptions; it is not a universal design rule.
+Continue with `java-027`: Builds and dependency reproducibility. Keep your six observations; see [moving on](../STUDY-GUIDE.md#move-to-the-next-lesson).
 
 ## Sources and verification status
 
-[Official Java 21 API or language reference](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/module/ModuleFinder.html), reviewed 2026-10-22. Examples and exercise fixtures are original course material. Use the [validation guide](../../../docs/validation.md) and CI artifacts for the exact revision and platform to inspect actual compile/run results. Authoring, parsing, compilation, execution and learner mastery are separate forms of evidence.
+[Official Java 21 API or language reference](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/module/ModuleFinder.html), reviewed 2026-10-22. Evidence levels: [sources and evidence](../STUDY-GUIDE.md#sources-and-evidence).
 
 ## Ask an AI tutor about this lesson
 

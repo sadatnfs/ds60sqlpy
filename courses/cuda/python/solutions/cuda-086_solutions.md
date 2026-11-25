@@ -1,6 +1,6 @@
 # cuda-086: explained solutions
 
-These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.
+Compare with your [worksheet](../lessons/cuda-086.md) attempt.
 
 ## Exercise 1: Derive fitted means
 
@@ -74,8 +74,16 @@ Report values tolerances timing boundaries and unsupported cases.
 
 **How to verify.** Check each report field against the pipeline tests. Mark device timings not attempted if no GPU ran.
 
+## Self-check answers
+
+1. **Why establish a CPU oracle before optimizing the pipeline?** It fixes the expected values, so every later backend or optimization can be checked against the same answers and tolerances.
+
+2. **How should a constant feature be handled?** Center it to zero and follow a declared scale policy instead of dividing by a zero standard deviation.
+
+3. **Why report preparation, transfer and computation separately?** Complete latency hides where time goes. Separate stages show whether an optimization helped the computation or merely moved cost elsewhere.
+
 ## Reference observation
 
 Fitted means [2,3] and scores [-1,1].
 
-The reference file is `courses/cuda/python/references/cuda-086_cpu.py`. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.
+Asserted by `courses/cuda/python/references/cuda-086_cpu.py`.

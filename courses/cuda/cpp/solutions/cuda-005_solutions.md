@@ -4,8 +4,6 @@
 
 A shape says how many logical coordinates exist. A stride says how far to move in storage when a coordinate increases by one. A row-major two-dimensional float array with row stride s elements places coordinate (r,c) at element offset r*s+c, then multiplies by the element size to obtain a byte offset. Padded rows use s greater than their logical width. A view can change shape and strides while borrowing the same allocation. Copying an address does not extend the allocation's lifetime or create independent data. Device and host pointers also carry an accessibility contract beyond their printed numeric value.
 
-The separate [CPU reference](../references/cuda-005_cpu.py) checks the chapter's bounded model. It does not execute CUDA or establish GPU timing. Compare after attempting the worksheet or explicitly choosing to reveal solutions.
-
 ## Exercise 1
 
 Take a 2-by-3 float32 matrix with five stored elements per row. Coordinate (1,2) has element offset \(1\times 5+2=7\) and byte offset 28. The logical six values occupy a padded allocation of ten floats, or 40 bytes. Multiplying by logical width would read element 5 instead, a different location.
@@ -78,12 +76,16 @@ An x-only kernel reads separated x fields in records versus neighboring x values
 
 **How to verify:** Count bytes touched for 32 x reads under each layout and list every kernel that would need updated indexing.
 
+## Self-check answers
+
+1. **Give the element offset of (1,1) in a 2-by-3 float32 matrix with row stride 4.** 1 times 4 plus 1, which is element 5, or byte offset 20.
+2. **Why must a kernel receive strides, not only a shape, for a view?** Without strides it assumes contiguous rows and reads the wrong storage locations for transposed or padded data.
+3. **What risk does aliasing add when one buffer is both input and output?** A write can change a value that another thread still needs to read, so results depend on execution order.
+
 ## Numerical reference and its limits
 
-The complete CPU model is [here](../references/cuda-005_cpu.py). Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It does not claim CUDA execution, concurrency safety or a performance measurement.
+The [CPU reference](../references/cuda-005_cpu.py) reproduces worked example 1 and prints `{'offset_bytes': 28, 'transpose_view_values': [[1, 4], [2, 5], [3, 6]]}`.
 
 ## Transfer review
 
 An x-only kernel reads separated x fields in records versus neighboring x values in a dedicated array. Include conversion and other consumers before choosing layout.
-
-A complete explanation must name its inputs, the unchanged mathematical contract, the changed boundary or resource condition, and the evidence still needed on actual hardware. Preserve a CPU baseline even after a GPU path becomes available.

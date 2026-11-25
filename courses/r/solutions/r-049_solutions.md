@@ -1,6 +1,6 @@
 # r-049: reference reasoning
 
-Use the [complete reference](r-049_reference.R) with the guide's declared inputs and runtime. Every worked example is also a standalone script.
+Run the [complete reference](r-049_reference.R) under the [run rules](../STUDY-GUIDE.md#run-a-chapter).
 
 ## Why the implementation has this shape
 
@@ -108,4 +108,6 @@ SEs belong to the fitted time-series model; misspecification, structural change 
 
 ## What the checks establish
 
-The reference makes 6 `stopifnot()` checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.
+The assertions confirm forecasts of 0.2, 0.1 and 0.05 with finite, nonnegative standard errors, rolling-origin naive predictions on 1 to 8 whose errors are all 1 with mean squared error 1, a full-series mean that differs from the mean available at an early origin, five unit changes in a differenced trend, and origins that always precede their targets. They do not show that the series is stationary or that the model is well chosen.
+
+The reference makes 6 `stopifnot()` checks; see [what a passing run proves](../STUDY-GUIDE.md#what-a-passing-run-proves).

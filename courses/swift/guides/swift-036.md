@@ -24,9 +24,9 @@ Use deterministic operation counts to explain algorithm growth, and use a prepar
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles the saved pad as `main.swift` with Swift 6 language checking. An explicit `@main` type contains `static func main() async throws`; the fixed compiler uses `-parse-as-library -swift-version 6`. The examples use the standard library and portable Foundation. `precondition` makes a violated invariant fail the process. The fixed pad accepts one source file, without arbitrary command arguments, interactive input or dependency installation. SwiftUI, UIKit, Apple simulators and application signing belong to the separately prepared macOS/Xcode project labs, never the Linux pad.
+Both examples count work instead of timing it, so they behave identically on any machine and any optimization level. For task 3, count comparisons for the array scans and count the Set insertions separately. Task 4 is about benchmark design; describe the missing cost and add it to your measurement rather than timing anything in the pad.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Compile contract, starter stop and success marker: [running a lesson](../STUDY-GUIDE.md#running-a-lesson).
 
 
 
@@ -34,7 +34,7 @@ Start with the answer-free learner artifact in your saved classroom pad. It deli
 
 Set membership can replace repeated linear searches when an equality index is appropriate. reserveCapacity can reduce reallocations but does not change the algorithmic complexity of shifting elements.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+Each example ends with a trace; method: [tracing a program](../STUDY-GUIDE.md#tracing-a-program).
 
 ## Worked example / walkthrough
 
@@ -64,6 +64,8 @@ struct LessonMain {
 
 **Observe:** The last-element search performs four comparisons.
 
+**Trace.** `comparisons` starts at 0. The loop visits 2 and increments to 1, finding no match; it visits 4 and increments to 2; 6 makes 3; then 8 makes 4 and matches, so `break` ends the loop. Searching for the last element costs one comparison per element. Searching for 2 would cost 1, and searching for an absent 9 would cost 4 without ever breaking. Counting operations makes these three cases exact.
+
 ### Example B: Build a reusable membership index
 
 Index construction and storage are costs that should be justified by repeated queries.
@@ -86,6 +88,8 @@ struct LessonMain {
 
 **Observe:** The index preserves four identities and answers membership.
 
+**Trace.** `Set([2, 4, 6, 8])` hashes each element once to build the index, which is the up-front cost. `contains(8)` hashes 8 and checks one bucket, so it does not scan the elements. `contains(9)` likewise returns false without visiting every element. `count` is 4 because the input had no duplicates; with `[2, 2, 4]`, the set would hold two elements. The index pays off only when many lookups share the construction cost.
+
 ## Exercises
 
 1. **Predict and explain.** Count comparisons for first, last and absent targets.
@@ -100,13 +104,15 @@ struct LessonMain {
 
 6. **Transfer and justify.** Write a measurement plan covering workload, correctness, optimization mode and allocation evidence.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Log each task in the [evidence table](../STUDY-GUIDE.md#recording-exercise-evidence) before opening the explanation.
 
 ## Common pitfalls and diagnosis
 
 Big-O is a growth model, not an elapsed-time promise. A single stopwatch observation is weak evidence. Avoid optimizing ownership complexity before measuring the real bottleneck.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+Task 4's benchmark times only `contains` after building the set outside the timed region. For a single query that hides the dominant cost: building the set touches every element once, the same as one linear scan, plus hashing and allocation. The counterexample workload is exactly one lookup, where the plain scan wins. For task 5, an empty workload must cost zero comparisons in both designs.
+
+Repair routine: [building a regression case](../STUDY-GUIDE.md#building-a-regression-case).
 
 ## Progressive hints
 
@@ -116,11 +122,15 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 ## Self-check and next step
 
-Explain Complexity, Allocation, Benchmark equivalence without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+State the comparison counts for first, last and absent targets in a four-element array, then for eight elements. Explain when building a Set is worth its cost. Describe why a release build and a debug build can disagree on timing but must agree on operation counts and results.
+
+Then follow the general [self-check routine](../STUDY-GUIDE.md#self-check-routine) and save your pad.
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://docs.swift.org/swift-book/documentation/the-swift-programming-language/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+[Documentation](https://docs.swift.org/swift-book/documentation/the-swift-programming-language/): Look up `Set` and `Array.contains` in the standard library reference, where each method states its complexity, and review sets under Collection Types.
+
+Provenance and limits: [sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

@@ -4,8 +4,6 @@
 
 A dim3 value holds three dimensions, though an image often uses only x and y. Map x to a column and y to a row, then calculate storage using the row stride. Logical width and stored leading dimension are different quantities. The grid must cover both axes, and each thread predicates both coordinate bounds before accessing storage. This is especially important for rectangular images because square examples can conceal a swapped width and height. If an allocation uses a byte pitch, convert coordinates using that byte quantity deliberately rather than treating it as an element stride.
 
-The separate [CPU reference](../references/cuda-015_cpu.py) checks the chapter's bounded model. It does not execute CUDA or establish GPU timing. Compare after attempting the worksheet or explicitly choosing to reveal solutions.
-
 ## Exercise 1
 
 Take a width-3, height-2 image stored as \([1,2,3,99,4,5,6,99]\) with stride four. Add ten to each real pixel. The expected storage is \([11,12,13,99,14,15,16,99]\). Both padding sentinels stay 99. Coordinate (1,2) means row one, column two, stored at index six.
@@ -78,12 +76,16 @@ Add a channel dimension or multiply pixel offsets by three, preserving row strid
 
 **How to verify:** Transform a 2-by-2 RGB fixture and confirm each channel changes once and padding stays fixed.
 
+## Self-check answers
+
+1. **For a width-3 image with stride 4, where is pixel (row 1, column 0) stored?** At index 1 times 4 plus 0, which is 4.
+2. **Why must a kernel check row and column separately rather than the flattened offset?** An invalid column can still produce an in-range flat offset that lands in the next row or in padding.
+3. **What should happen to padding sentinels after the transform?** They must stay unchanged, because padding is not image data.
+
 ## Numerical reference and its limits
 
-The complete CPU model is [here](../references/cuda-015_cpu.py). Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It does not claim CUDA execution, concurrency safety or a performance measurement.
+The [CPU reference](../references/cuda-015_cpu.py) reproduces worked example 1 and prints `[11, 12, 13, 99, 14, 15, 16, 99]`.
 
 ## Transfer review
 
 Add a channel dimension or multiply pixel offsets by three, preserving row stride and channel bounds. Document whether stride counts bytes, elements or pixels.
-
-A complete explanation must name its inputs, the unchanged mathematical contract, the changed boundary or resource condition, and the evidence still needed on actual hardware. Preserve a CPU baseline even after a GPU path becomes available.

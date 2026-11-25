@@ -24,9 +24,9 @@ Explicit cases prevent impossible combinations such as success=true with an erro
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles the saved pad as `main.swift` with Swift 6 language checking. An explicit `@main` type contains `static func main() async throws`; the fixed compiler uses `-parse-as-library -swift-version 6`. The examples use the standard library and portable Foundation. `precondition` makes a violated invariant fail the process. The fixed pad accepts one source file, without arbitrary command arguments, interactive input or dependency installation. SwiftUI, UIKit, Apple simulators and application signing belong to the separately prepared macOS/Xcode project labs, never the Linux pad.
+Example B depends on the `Outcome` enum declared above `LessonMain`; copy only the body and the compiler reports that it cannot find `Outcome` in scope. For task 5, add a case and leave the switch unchanged on purpose, so you read the exhaustiveness error before fixing it.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Compile contract, starter stop and success marker: [running a lesson](../STUDY-GUIDE.md#running-a-lesson).
 
 
 
@@ -34,7 +34,7 @@ Start with the answer-free learner artifact in your saved classroom pad. It deli
 
 `(count: Int, rejected: Int)` names tuple components. `enum Outcome { case value(Int); case invalid(String) }` binds case-specific payloads. `case .value(let count)` extracts only the matching payload.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+Each example ends with a trace; method: [tracing a program](../STUDY-GUIDE.md#tracing-a-program).
 
 ## Worked example / walkthrough
 
@@ -63,6 +63,8 @@ struct LessonMain {
 ```
 
 **Observe:** Named tuple fields expose the accounting relationship.
+
+**Trace.** `summary` is a tuple with two labeled `Int` components, accepted 3 and rejected 2. The labels let the check read `summary.accepted` and `summary.rejected` instead of `.0` and `.1`. The check adds them and compares the sum with 5, expressing the accounting rule that every item is accepted or rejected exactly once. Nothing about the tuple enforces that rule; it lives only in the check, which is a reason to promote the tuple to a struct once other code depends on it.
 
 ### Example B: Model distinct outcomes
 
@@ -96,6 +98,8 @@ struct LessonMain {
 
 **Observe:** Each outcome exposes only its own meaningful payload.
 
+**Trace.** `outcomes` is an array of two values: `.value(4)` and `.invalid("negative")`. `map` calls its closure once per element. For the first, the switch matches `case .value(let count)`, binds 4 and returns count:4. For the second, it matches `.invalid(let reason)`, binds negative and returns error:negative. Each case reaches only its own payload, so there is no way to read a count from an invalid outcome. The switch has no default, so a new case would fail to compile here.
+
 ## Exercises
 
 1. **Predict and explain.** Name the meaning of each tuple field.
@@ -110,13 +114,15 @@ struct LessonMain {
 
 6. **Transfer and justify.** Choose tuple or named enum/struct for a reusable public API and explain the tradeoff.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Log each task in the [evidence table](../STUDY-GUIDE.md#recording-exercise-evidence) before opening the explanation.
 
 ## Common pitfalls and diagnosis
 
 An enum raw value and an associated value solve different problems. A catch-all default can conceal a newly added state. Avoid using tuples so large that their positional relationship becomes obscure.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+Task 4's problem is easiest to see as a concrete contradictory value: a struct with `isLoading: Bool`, `data: [Int]?` and `error: String?` can be loading, loaded and failed at the same time, and it compiles. Build that value, then rewrite the type as an enum with loading, ready and failed cases and confirm the contradiction can no longer be written.
+
+Repair routine: [building a regression case](../STUDY-GUIDE.md#building-a-regression-case).
 
 ## Progressive hints
 
@@ -126,11 +132,15 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 ## Self-check and next step
 
-Explain Tuple, Enum, Associated value without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+Explain when an enum needs raw values and when it needs associated values, with one example of each. Say what the compiler does when a switch over your enum lacks a case and has no default. Give one sign that a tuple returned from a function should become a named struct.
+
+Then follow the general [self-check routine](../STUDY-GUIDE.md#self-check-routine) and save your pad.
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://docs.swift.org/swift-book/documentation/the-swift-programming-language/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+[Documentation](https://docs.swift.org/swift-book/documentation/the-swift-programming-language/): The Enumerations chapter of the Swift book covers associated values, raw values and matching enum cases; tuples are introduced in The Basics.
+
+Provenance and limits: [sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

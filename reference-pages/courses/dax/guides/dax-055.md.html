@@ -194,10 +194,10 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/dax/guides/dax-055.md</code></p>
     </header>
     <article class="document"><h2 id="dax-055-storage-modes-freshness-and-capability-boundaries">dax-055: Storage modes, freshness and capability boundaries<a class="heading-anchor" href="#dax-055-storage-modes-freshness-and-capability-boundaries" aria-label="Link to this section">#</a></h2>
-<p><strong>Stage 10: Security, delivery and integrated capstones.</strong> Level: advanced. Read the mechanisms, trace the worked cases and retain your own draft. <strong>Direct prerequisites:</strong> <code>dax-004</code>, <code>dax-031</code>, <code>dax-052</code></p>
+<p><strong>Stage 10: Security, delivery and integrated capstones.</strong> Level: advanced. <strong>Direct prerequisites:</strong> <code>dax-004</code>, <code>dax-031</code>, <code>dax-052</code></p>
 <h3 id="how-to-use-this-offline-lesson">How to use this offline lesson<a class="heading-anchor" href="#how-to-use-this-offline-lesson" aria-label="Link to this section">#</a></h3>
-<p>This is an offline DAX editing lesson. No DAX compiler, semantic-model engine, Power BI account or network connection is required. Worked tables describe the named reference and model, not execution of your draft. Save, compare and export source; do not interpret a comparison or completion marker as a passed program run.</p>
-<p>Open the <a href="../lessons/dax-055.dax.html">starter</a>. Compare the <a href="../solutions/dax-055_reference.dax.html">named reference</a> and <a href="../solutions/dax-055_solutions.md.html">reasoning</a> when ready. The <a href="../models/retail/model.json.html">model specification</a> identifies every fixture table, column type, key and relationship. The <a href="../models/README.md.html">fixture handbook</a> displays the original data and explains each table grain.</p>
+<p>The starter contrasts a fixed snapshot with a hypothetical later source. Predict both values from the checked-in Sales rows and the scenario&#x27;s extra 10 USD event, and write which number you could defend as observed. The <a href="../STUDY-GUIDE.md.html#offline-study-boundary">offline study boundary</a> explains what a worked table can show.</p>
+<p>Files: <a href="../lessons/dax-055.dax.html">starter</a>, <a href="../solutions/dax-055_reference.dax.html">reference</a> and <a href="../solutions/dax-055_solutions.md.html">reasoning</a>.</p>
 <h3 id="the-question-and-the-mechanism">The question and the mechanism<a class="heading-anchor" href="#the-question-and-the-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Separate a metric&#x27;s definition from data freshness, storage mode and external capability.</p>
 <p>Import stores a processed copy of data in the semantic model. DirectQuery leaves data in the source and issues queries through supported connectors at report time. Composite models combine storage choices and can introduce additional relationship and query constraints. Direct Lake is a Fabric-specific mode over supported lake data with its own framing, identity and fallback behavior. None of these modes is provided by the offline DAX classroom.</p>
@@ -207,14 +207,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The first query states a parity condition on one fixed fixture. The second models a clearly hypothetical new source event with an explicit added amount. It does not connect to an external source or claim that a particular storage mode was executed.</p>
 <p>Concepts to explain in your own words: <strong>Import</strong>, <strong>DirectQuery</strong>, <strong>composite model</strong>, <strong>Direct Lake</strong>, <strong>refresh</strong>.</p>
 <h3 id="model-and-context-contract">Model and context contract<a class="heading-anchor" href="#model-and-context-contract" aria-label="Link to this section">#</a></h3>
-<p>The ordinary star follows Product → Sales, Customer → Sales and Date → Sales through OrderDate. The ShipDate relationship is inactive unless a case explicitly activates it. Filters flow from the one side to the many side. Additional analytical tables have only the relationships declared in their named model; a similar column name does not create a relationship.</p>
+<p>The fixture&#x27;s eight Sales lines total 187 USD whether you call NetRevenue or iterate NetAmount directly. The later event in case B is scenario data only; it is not in the Sales CSV, and no source is connected. See the <a href="../models/retail/model.json.html">model specification</a> and the <a href="../STUDY-GUIDE.md.html#the-retail-star">shared star rules</a>.</p>
 <pre class="highlighted-code"><code class="language-text">Product (one)  --&gt; Sales (many) &lt;-- Customer (one)
                        ^
                        | active OrderDate
                     Date (one)
                        | inactive ShipDate
                        +------&gt; Sales</code></pre>
-<p>All amounts in ordinary Sales are USD after the line discount, before tax and returns. The Date fixture is complete for 2024 and 2025; a short result table is a selected slice, not the whole calendar. JSON <code>null</code> in the worked-results sidecar means DAX BLANK, not the text &quot;null&quot;.</p>
 <h3 id="worked-cases">Worked cases<a class="heading-anchor" href="#worked-cases" aria-label="Link to this section">#</a></h3>
 <p>The following query-local declarations are shared by these cases. They do not create persisted measures in this classroom.</p>
 <pre class="highlighted-code"><code class="language-dax"><span class="syntax-keyword">DEFINE</span>
@@ -261,8 +260,10 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 </tbody></table></div>
 <p>The additional event is scenario data, not evidence of a connected source or live DirectQuery result.</p>
 <p>Hand-derived freshness scenario only. No source connection, refresh, DirectQuery or Direct Lake operation occurred.</p>
+<h3 id="a-misconception-to-test">A misconception to test<a class="heading-anchor" href="#a-misconception-to-test" aria-label="Link to this section">#</a></h3>
+<p>When two reports disagree, storage mode is a frequent scapegoat: the DirectQuery report shows 197, the Import report shows 187, so Import must be wrong or stale in some mysterious way. In this lesson the measure is identical in both columns, and the 10 USD gap is entirely a refresh boundary: the snapshot was taken before the new event arrived. Calling DirectQuery real time truth makes the opposite mistake, because the source can itself be late, partially loaded or corrected. A third confusion is assuming every change adds an amount. If the later event corrected S8 from 36 to 30, the fresh figure would be 181, lower than the snapshot. Compare snapshot identity and timestamps before blaming the mode or the formula.</p>
 <h3 id="practice-prediction-construction-and-diagnosis">Practice: prediction, construction and diagnosis<a class="heading-anchor" href="#practice-prediction-construction-and-diagnosis" aria-label="Link to this section">#</a></h3>
-<p>Retain your formula or written reasoning, the stated context, contributing rows or values, and a conclusion with its unit. These notes are your own study record; they do not show that a formula ran.</p>
+<p>Record each answer as the <a href="../STUDY-GUIDE.md.html#practice-routine">practice routine</a> describes.</p>
 <h4 id="exercise-1-predict">Exercise 1: Predict<a class="heading-anchor" href="#exercise-1-predict" aria-label="Link to this section">#</a></h4>
 <p>State the observations needed to compare Import and DirectQuery fairly.</p>
 <h4 id="exercise-2-change-one-condition">Exercise 2: Change one condition<a class="heading-anchor" href="#exercise-2-change-one-condition" aria-label="Link to this section">#</a></h4>
@@ -285,7 +286,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>Stored data and source data can represent different versions.</li>
 </ol>
 <h3 id="self-check-and-next-step">Self-check and next step<a class="heading-anchor" href="#self-check-and-next-step" aria-label="Link to this section">#</a></h3>
-<p>Explain one changed result without quoting the formula alone. Identify which rows, filters, relationship or evaluation scope changed, then construct a counterexample to a plausible wrong interpretation. Keep your draft separate from the supplied reference. A small correct derivation does not certify performance, model security or broad expertise.</p>
+<p>Rewrite case B so the later source corrects S5 from 20 to 15 instead of adding a sale. Predict both columns, then list the metadata a report would need to show the reader why they differ. The <a href="../STUDY-GUIDE.md.html#self-check-routine">self-check routine</a> applies too.</p>
 <p>Continue to <a href="dax-056.md.html">dax-056</a> when its prerequisites make sense, or revisit this stage from the <a href="../README.md.html">course map</a>.</p>
 <h3 id="official-references-and-evidence-limits">Official references and evidence limits<a class="heading-anchor" href="#official-references-and-evidence-limits" aria-label="Link to this section">#</a></h3>
 <ul>
@@ -293,7 +294,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li><a href="https://learn.microsoft.com/en-us/fabric/fundamentals/direct-lake-overview">Fabric: Direct Lake</a></li>
 <li><a href="https://learn.microsoft.com/en-us/power-bi/transform-model/desktop-composite-models">Power BI: composite models</a></li>
 </ul>
-<p>Documentation was reviewed for this original course on 2026-10-25. Version-sensitive features have explicit notes. Source/model checks and independent fixture arithmetic are not a DAX parser, compiler, semantic engine, real RLS test or performance measurement.</p>
+<p>Review date and evidence limits: <a href="../STUDY-GUIDE.md.html#references-and-evidence-limits">study guide</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for dax-055. Read its guide and the named model.
 Review my draft and prediction. Ask me to enumerate the relevant rows and context.

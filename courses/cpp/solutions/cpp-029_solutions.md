@@ -1,6 +1,6 @@
 # cpp-029: explanations and reference observations
 
-Attempt the learner tasks before opening this document. The executable reference checks the bounded normal and boundary examples; the six explanations below cover the deliberate changes and manual checks.
+The [executable reference](cpp-029_solution.cpp) adds a `std::async` task that returns 7 through its future. The explanations cover joining on every path, including the early return in Exercise 6. How to compare: [study guide](../STUDY-GUIDE.md#compare-with-the-solutions).
 
 ## Mechanism
 

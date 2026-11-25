@@ -209,9 +209,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="syntax-anatomy-and-reasoning">Syntax anatomy and reasoning<a class="heading-anchor" href="#syntax-anatomy-and-reasoning" aria-label="Link to this section">#</a></h3>
 <p>RoundTrip(*http.Request) returns a response or a transport error. A function adapter can implement that interface for tests. NewRequestWithContext binds a request to cancellation. Client.Do follows client policy, including status-independent transport success. Read at most limit+1 bytes to detect oversized bodies. A response body must be closed even when its status is not accepted.</p>
 <h3 id="run-this-lesson">Run this lesson<a class="heading-anchor" href="#run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>Choose Go in the unified Docker classroom. Save your own pad before experimenting. The prepared worker stages it as <code>main.go</code>, compiles it, and executes the resulting program with bounded time and output. The pad is one source file. It does not supply interactive input, arbitrary command-line arguments, package installation, Kubernetes credentials or a host Docker socket. Every ordinary reference here uses the standard library, synthetic local data and explicit checks. A failed <code>check</code> panics and produces a nonzero process result; do not remove it to make the run appear successful.</p>
-<p>The explanatory solution snippets belong inside <code>func main()</code> unless they declare a helper. <code>check</code> is a tiny teaching helper that panics when a condition is false. The separate reference supplies required imports and helpers and implements all six cases. Use that complete source only after an attempt or an explicit reveal. For an independently prepared Go project, the equivalent local build is <code>go build -o lesson main.go</code>, followed by <code>./lesson</code>; use Linux or WSL 2 for that optional workflow. Compiling proves syntax and type consistency, while the executed checks establish the stated example contracts.</p>
-<p>Each worked example below is a complete Go file. Copy one whole block into your saved pad and run it. Example 2 includes the first case as well as the second, so its setup is complete. Its supporting declarations may be reused in later investigations. The separate reference implements all six cases.</p>
+<p>Run each worked example as one complete file in your saved pad (<a href="../STUDY-GUIDE.md.html#run-a-lesson">run steps</a>).</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1-read-a-successful-response">Worked example 1: Read a successful response<a class="heading-anchor" href="#worked-example-1-read-a-successful-response" aria-label="Link to this section">#</a></h4>
 <p>Use a fake transport returning status 200 and body ready.</p>
@@ -342,77 +340,79 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Observe:</strong> The helper returns an error despite transport success.</p>
 <p>Client.Do does not classify every non-2xx response as a transport failure. Application status policy belongs in the consuming code.</p>
 <h3 id="predict-before-running">Predict before running<a class="heading-anchor" href="#predict-before-running" aria-label="Link to this section">#</a></h3>
-<p>For each example, write the input values, the state that can change, and the expected observation. Explain which result would disprove your current interpretation. For concurrency, predict a guaranteed relationship rather than an arbitrary scheduling order. For an error case, identify whether it is rejected at compilation or returned during execution.</p>
+<p>Predict which of these is a transport error and which is an HTTP failure: a canceled context, a 404 response and a 500 response. For the body limit, decide why fetch reads limit plus one bytes and predict the result for exactly four bytes under a limit of four. Then predict what happens to the response body if the status check returns early.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-read-a-successful-response-change-one-input">Exercise 1: Read a successful response: change one input<a class="heading-anchor" href="#exercise-1-read-a-successful-response-change-one-input" aria-label="Link to this section">#</a></h4>
-<p>Copy worked example 1 into a scratch pad and change <code>v, err := fetch(context.Background(), 200, &quot;ready&quot;, 8)</code> to <code>v, err := fetch(context.Background(), 201, &quot;ready&quot;, 8)</code>. Before running, predict which check fails and which value it now sees; then run it and restore the original line.</p>
-<p><strong>Expected:</strong> The changed run panics with <code>client success</code> because <code>err == nil &amp;&amp; v == &quot;ready&quot;</code> no longer holds. Restoring the original line brings back the worked observation: the client helper returns ready without error.</p>
-<p><strong>Verify:</strong> Compare your written prediction with the panic message <code>client success</code> and name the value that made <code>err == nil &amp;&amp; v == &quot;ready&quot;</code> false. After restoring the input, the program must print its success line again.</p>
+<p>Copy worked example 1, change <code>v, err := fetch(context.Background(), 200, &quot;ready&quot;, 8)</code> to <code>v, err := fetch(context.Background(), 201, &quot;ready&quot;, 8)</code> and predict the failure before running; then restore the line.</p>
+<p><strong>Expected:</strong> The edited run panics with <code>client success</code> because <code>err == nil &amp;&amp; v == &quot;ready&quot;</code> no longer holds.</p>
+<p><strong>Verify:</strong> Restoring <code>v, err := fetch(context.Background(), 200, &quot;ready&quot;, 8)</code> makes the check pass again with the worked observation: the client helper returns ready without error.</p>
 <h4 id="exercise-2-reject-an-http-failure-status-diagnose-an-edited-check">Exercise 2: Reject an HTTP failure status: diagnose an edited check<a class="heading-anchor" href="#exercise-2-reject-an-http-failure-status-diagnose-an-edited-check" aria-label="Link to this section">#</a></h4>
-<p>A careless edit changed the check in worked example 2 so that it reads <code>check(err == nil, &quot;HTTP status&quot;)</code>. Run worked example 2 with that line, explain why the edited check now fails for the same program state, and restore it.</p>
-<p><strong>Expected:</strong> Before the repair the program panics with <code>HTTP status</code>; after it the line reads <code>check(err != nil, &quot;HTTP status&quot;)</code> again and the helper returns an error despite transport success.</p>
-<p><strong>Verify:</strong> Keep the failing and the repaired runs. Explain why the edited check rejects the same program state that <code>err != nil</code> accepts.</p>
+<p>A careless edit rewrote the check in worked example 2 as <code>check(err == nil, &quot;HTTP status&quot;)</code>. Explain the failure, then restore it.</p>
+<p><strong>Expected:</strong> The defective run panics with <code>HTTP status</code>; after restoring <code>check(err != nil, &quot;HTTP status&quot;)</code>, the helper returns an error despite transport success.</p>
+<p><strong>Verify:</strong> The edited check fails with message <code>HTTP status</code> for a state that <code>err != nil</code> accepts.</p>
 <h4 id="exercise-3-detect-an-oversized-body">Exercise 3: Detect an oversized body<a class="heading-anchor" href="#exercise-3-detect-an-oversized-body" aria-label="Link to this section">#</a></h4>
 <p>Return five bytes with a maximum of four.</p>
 <p><strong>Expected:</strong> The helper rejects the response.</p>
-<p><strong>Verify:</strong> Keep a check equivalent to <code>err != nil</code>. As a control, change <code>_, err := fetch(context.Background(), 200, &quot;abcde&quot;, 4)</code> to <code>_, err := fetch(context.Background(), 200, &quot;abcde&quot;, 5)</code>: the run must panic with <code>body limit</code>. Restore the line before continuing.</p>
+<p><strong>Verify:</strong> Your solution must keep <code>err != nil</code> true. Control: changing <code>_, err := fetch(context.Background(), 200, &quot;abcde&quot;, 4)</code> to <code>_, err := fetch(context.Background(), 200, &quot;abcde&quot;, 5)</code> panics with message <code>body limit</code>; revert it.</p>
 <h4 id="exercise-4-honor-cancellation">Exercise 4: Honor cancellation<a class="heading-anchor" href="#exercise-4-honor-cancellation" aria-label="Link to this section">#</a></h4>
 <p>Cancel the context before invoking the fake transport.</p>
 <p><strong>Expected:</strong> The returned error matches context.Canceled.</p>
-<p><strong>Verify:</strong> Keep a check equivalent to <code>errors.Is(err, context.Canceled)</code> and confirm the success line. Then name an input that would make it fail and the panic message (<code>cancellation</code>) you would expect.</p>
+<p><strong>Verify:</strong> Your solution must keep <code>errors.Is(err, context.Canceled)</code> true. Control: an input that falsifies it fails with message <code>cancellation</code>; revert it.</p>
 <h4 id="exercise-5-allow-exact-size">Exercise 5: Allow exact size<a class="heading-anchor" href="#exercise-5-allow-exact-size" aria-label="Link to this section">#</a></h4>
 <p>Return four bytes with a maximum of four.</p>
 <p><strong>Expected:</strong> The helper accepts all four bytes.</p>
-<p><strong>Verify:</strong> Keep a check equivalent to <code>err == nil &amp;&amp; v == &quot;abcd&quot;</code>. As a control, change <code>v, err := fetch(context.Background(), 200, &quot;abcd&quot;, 4)</code> to <code>v, err := fetch(context.Background(), 201, &quot;abcd&quot;, 4)</code>: the run must panic with <code>exact size</code>. Restore the line before continuing.</p>
+<p><strong>Verify:</strong> Your solution must keep <code>err == nil &amp;&amp; v == &quot;abcd&quot;</code> true. Control: changing <code>v, err := fetch(context.Background(), 200, &quot;abcd&quot;, 4)</code> to <code>v, err := fetch(context.Background(), 201, &quot;abcd&quot;, 4)</code> panics with message <code>exact size</code>; revert it.</p>
 <h4 id="exercise-6-transfer-an-empty-body">Exercise 6: Transfer an empty body<a class="heading-anchor" href="#exercise-6-transfer-an-empty-body" aria-label="Link to this section">#</a></h4>
 <p>Return 200 with an empty body under a positive budget.</p>
 <p><strong>Expected:</strong> The transport helper returns an empty string successfully.</p>
-<p><strong>Verify:</strong> Keep a check equivalent to <code>err == nil &amp;&amp; v == &quot;&quot;</code>. As a control, change <code>v, err := fetch(context.Background(), 200, &quot;&quot;, 4)</code> to <code>v, err := fetch(context.Background(), 201, &quot;&quot;, 4)</code>: the run must panic with <code>empty response</code>. Restore the line before continuing.</p>
-<p>Implement these in the answer-free learner source. Keep one independent check per claim. A task can require tracing, construction, a changed input or a deliberate safe failure. Do not run a data race, corrupt memory or contact a shared cluster merely to demonstrate why it would be wrong.</p>
+<p><strong>Verify:</strong> Your solution must keep <code>err == nil &amp;&amp; v == &quot;&quot;</code> true. Control: changing <code>v, err := fetch(context.Background(), 200, &quot;&quot;, 4)</code> to <code>v, err := fetch(context.Background(), 201, &quot;&quot;, 4)</code> panics with message <code>empty response</code>; revert it.</p>
+<p>Work in the answer-free learner source, <code>courses/go/lessons/go-023.go</code> (<a href="../STUDY-GUIDE.md.html#work-an-exercise">exercise contract</a>).</p>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
-<p>Read a compiler error from the first location in your source, then fix one cause at a time. Unused imports and variables are errors in Go; add an import when its use exists, rather than copying a large unused import list. A panic from <code>check</code> identifies a violated example contract. Compare the actual value with the expected value and inspect the state transition that produced it. A returned <code>error</code> is a value that the caller must handle; an ignored error can make later output look plausible while the original operation failed.</p>
-<p>The lesson-specific explanations in the two examples identify the important counterexamples. Extend that reasoning to every investigation: explain why a plausible alternative would fail, and preserve a tiny input that distinguishes it. Treat empty data, missing values and cancellation as domain cases with explicit policies. In concurrent work, replace sleeps used as synchronization with channels, mutexes or an explicit ownership protocol.</p>
+<p>The classic client bugs are treating any response without a transport error as success, so a 404 or 503 body is parsed as data, and forgetting to close the body, which leaks connections. Reading a body with io.ReadAll and no limit lets a misbehaving server exhaust memory. Note that fetch accepts only 200 here; a real client should state which statuses its caller treats as success.</p>
+<p>General compiler, panic and error diagnosis is in the <a href="../STUDY-GUIDE.md.html#diagnose-a-failure">study guide</a>.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <h4 id="hint-for-investigation-1-read-a-successful-response-change-one-input">Hint for investigation 1: Read a successful response: change one input<a class="heading-anchor" href="#hint-for-investigation-1-read-a-successful-response-change-one-input" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The client helper returns ready without error.</li>
-<li>The check <code>err == nil &amp;&amp; v == &quot;ready&quot;</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Compute the checked value with <code>v, err := fetch(context.Background(), 201, &quot;ready&quot;, 8)</code> in place before running, then compare it with the value <code>err == nil &amp;&amp; v == &quot;ready&quot;</code> expects.</li>
+<li>The fake transport returns the status you pass in. Which status does fetch accept?</li>
+<li>fetch accepts only status 200, so 201 returns a status error and <code>err==nil</code> fails. The transport succeeded; the helper&#x27;s success rule rejected the status.</li>
 </ol>
 <h4 id="hint-for-investigation-2-reject-an-http-failure-status-diagnose-an-edited-check">Hint for investigation 2: Reject an HTTP failure status: diagnose an edited check<a class="heading-anchor" href="#hint-for-investigation-2-reject-an-http-failure-status-diagnose-an-edited-check" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The helper returns an error despite transport success.</li>
-<li>The check <code>err != nil</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Compare <code>check(err == nil, &quot;HTTP status&quot;)</code> with the same line in worked example 2 and state the claim each version makes.</li>
+<li>A 404 is a valid HTTP response. Which line of fetch turns it into an error?</li>
+<li>The 404 path returns an error, so <code>err==nil</code> is false and the check panics. An HTTP failure status must surface as an error; restore <code>err!=nil</code>.</li>
 </ol>
 <h4 id="hint-for-investigation-3-detect-an-oversized-body">Hint for investigation 3: Detect an oversized body<a class="heading-anchor" href="#hint-for-investigation-3-detect-an-oversized-body" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The helper rejects the response.</li>
-<li>The check <code>err != nil</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Predict the effect of changing <code>_, err := fetch(context.Background(), 200, &quot;abcde&quot;, 4)</code> to <code>_, err := fetch(context.Background(), 200, &quot;abcde&quot;, 5)</code> before running anything. If the prediction is hard, trace that line again with the original input.</li>
+<li>fetch reads limit plus one bytes. What does a fifth byte prove when the limit is four?</li>
+<li>Reading one extra byte makes the limit observable.</li>
 </ol>
 <h4 id="hint-for-investigation-4-honor-cancellation">Hint for investigation 4: Honor cancellation<a class="heading-anchor" href="#hint-for-investigation-4-honor-cancellation" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The returned error matches context.Canceled.</li>
-<li>The check <code>errors.Is(err, context.Canceled)</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Name one input that would make <code>errors.Is(err, context.Canceled)</code> false. A check that no input can falsify is not evidence.</li>
+<li>The fake transport checks the request context first. Which error does a canceled context produce?</li>
+<li>The fake explicitly honors the request context.</li>
 </ol>
 <h4 id="hint-for-investigation-5-allow-exact-size">Hint for investigation 5: Allow exact size<a class="heading-anchor" href="#hint-for-investigation-5-allow-exact-size" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The helper accepts all four bytes.</li>
-<li>The check <code>err == nil &amp;&amp; v == &quot;abcd&quot;</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Predict the effect of changing <code>v, err := fetch(context.Background(), 200, &quot;abcd&quot;, 4)</code> to <code>v, err := fetch(context.Background(), 201, &quot;abcd&quot;, 4)</code> before running anything. If the prediction is hard, trace that line again with the original input.</li>
+<li>Exactly four bytes under a limit of four is not excess. Does <code>len(data)&gt;limit</code> hold?</li>
+<li>An inclusive byte budget should accept exactly its maximum.</li>
 </ol>
 <h4 id="hint-for-investigation-6-transfer-an-empty-body">Hint for investigation 6: Transfer an empty body<a class="heading-anchor" href="#hint-for-investigation-6-transfer-an-empty-body" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The transport helper returns an empty string successfully.</li>
-<li>The check <code>err == nil &amp;&amp; v == &quot;&quot;</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Predict the effect of changing <code>v, err := fetch(context.Background(), 200, &quot;&quot;, 4)</code> to <code>v, err := fetch(context.Background(), 201, &quot;&quot;, 4)</code> before running anything. If the prediction is hard, trace that line again with the original input.</li>
+<li>An empty body is a valid payload. What should the string and error be?</li>
+<li>Transport completion and domain validity are separate.</li>
 </ol>
 <h3 id="self-check-and-retrieval">Self-check and retrieval<a class="heading-anchor" href="#self-check-and-retrieval" aria-label="Link to this section">#</a></h3>
-<p>Close the reference. Rebuild one normal case and one boundary case from a blank pad. Explain the role of transport error without using its name in the definition. Then change the domain while keeping the same invariant. Record the new input, your prediction and the observed output. If your program passes only because its input is hard-coded, explain which part would need a reusable function in a larger project.</p>
+<p>Write <code>getJSONLength(ctx, client, url string, limit int64) (int, error)</code> that rejects non-2xx statuses with the status code in the error, closes the body on every path and rejects bodies over the limit. Test it with a fake RoundTripper for success, 404, an oversized body and a canceled context. Then explain who owns the response body and when ownership ends.</p>
+<p>The general <a href="../STUDY-GUIDE.md.html#self-check-and-retrieval">retrieval routine</a> still applies.</p>
 <h3 id="next-step-and-sources">Next step and sources<a class="heading-anchor" href="#next-step-and-sources" aria-label="Link to this section">#</a></h3>
-<p><a href="https://pkg.go.dev/net/http">Primary language or library documentation</a>, reviewed 2026-10-23. The teaching explanations and synthetic fixtures are original. Continue with the next lesson when you can explain the six observations and diagnose a changed case without copying its answer.</p>
+<p>Source: <a href="https://pkg.go.dev/net/http"><code>net/http</code> package documentation</a>, reviewed 2026-10-23.</p>
+<p>Next: go-024, Goroutines and explicit completion (<a href="../STUDY-GUIDE.md.html#when-to-move-on">criteria</a>).</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for go-023: HTTP clients, cancellation and response ownership.
 Read courses/go/guides/go-023.md and my saved attempt based on courses/go/lessons/go-023.go.

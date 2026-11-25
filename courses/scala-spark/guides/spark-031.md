@@ -1,22 +1,26 @@
 # spark-031: Structured Streaming with finite microbatches
 
-Authored paired Scala/PySpark teaching content. The default fixtures are tiny, local and deterministic. Runtime acceptance, logical correctness and learner understanding remain separate evidence.
+A stream is a table that keeps growing, but a lesson needs one that stops. Three small JSON files of three events each are published atomically into an input folder, and an `AvailableNow` query reads them one file per batch and then terminates, so its team totals can be compared with an ordinary batch read of the same folder.
 
 ## Level and prerequisites
 
-Advanced; approximately 105 minutes. Direct prerequisites: `spark-030`. The prepared baseline is Spark 4.3.0, Scala binary 2.13, JDK 17 and Python 3.12. Read the [execution baseline](../execution-baseline.md).
+Advanced; approximately 105 minutes. Direct prerequisites: `spark-030`. Pinned versions: [execution baseline](../execution-baseline.md).
 
 ## How to run this lesson
 
-Open `spark-031` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile, save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`; Python stages as `main.py` with a main guard. Each program creates its own `local[2]` session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.
+Shared run steps and profile rules: [study guide](../STUDY-GUIDE.md#run-a-paired-lesson).
 
-The [Scala learner](../lessons/spark-031.scala) and [PySpark learner](../lessons/spark-031.py) run two complete demonstrations and retain six explicit task stubs. Use the [explained solutions](../solutions/spark-031_solutions.md) only after an attempt or an explicit worked comparison; the [Scala reference](../solutions/spark-031_solution.scala) and [PySpark reference](../solutions/spark-031_solution.py) contain complete assertions. A bounded collect is used only for the declared tiny fixture; do not copy it onto an unbounded or large production table.
+Learner pads: [Scala](../lessons/spark-031.scala) and [PySpark](../lessons/spark-031.py).
+
+Open the [explained solutions](../solutions/spark-031_solutions.md) after an attempt.
+
+The first worked example counts the lines prepared for each file, three per file and nine in all, and prints `Three complete fixture files will contain exactly nine records`. The second pulls the amounts out of the raw JSON, keeps the seven that are not null and prints `Independent known-count/amount oracle=7/80`, a target computed without Spark.
 
 ## Learning objectives
 
 - Model an unbounded relation while running a finite, reproducible local streaming exercise.
-- State the input and output grain, schema, NULL policy and ordering before executing a transformation.
-- Compare each language implementation with independent literal expectations, not only with the other implementation.
+- Publish each input file through a staging directory and `os.replace`, reject reuse of `batch-0.json`, and build a streaming relation with the explicit schema `id bigint, team string, amount bigint` without starting a query.
+- Run a complete-mode memory sink with `AvailableNow` and a 30-second deadline, then reconcile `recentProgress` (three batches of 3 input rows, total 9) and the final rows with a batch read and with literal expectations.
 
 ## Vocabulary and concepts
 
@@ -52,7 +56,7 @@ This finite example does not establish an indefinitely bounded aggregate state. 
 
 ## Supplied local fixture
 
-The complete source creates the owned local session described above, then constructs this explicit fixture. The worked examples below run in that same main function; there is no hidden notebook state.
+The program creates a fresh `.ds60-spark-031-` scratch root with `input` and `staging` folders, a unique memory table name starting `ds60_s031_`, and a 10-second stream stop timeout. File 0 holds IDs 1 to 3, file 1 IDs 4 to 6 and file 2 IDs 7 to 9, across teams A, B and C. IDs 4 and 9 have NULL amounts and IDs 3 and 7 have amount 0, so a zero and an unknown value are never confused.
 
 ```scala
 import org.apache.spark.sql.functions._
@@ -226,11 +230,14 @@ Do not write partially completed files into the watched input directory or reuse
 
 ## Self-check
 
-Explain the contract of `publishFile` / `publish_file` without reading its solution. Then, from memory, state what Exercise 6 (Compare final streaming output with batch and literal oracles) must produce: exactly `A(4, 3, 15)`, `B(3, 2, 35)`, `C(2, 2, 30)`, whose record counts sum 9, known counts 7 and amounts 80. Say which part of that result is evidence and what it still cannot show. Name the action in your trace that actually runs the plan.
+- `publish_file` writes to `staging` and then calls `os.replace`. What could a streaming reader see if the file were written straight into `input` instead?
+- The reader sets `maxFilesPerTrigger` to 1. How does that setting produce three positive-input batches, and why might the progress list also include a batch with zero rows?
+- Team A has four rows but only three known amounts. Which aggregate in `team_summary` keeps those two counts apart, and what would `count("*")` alone hide?
+- After `AvailableNow` finishes, both `isActive` and `spark.streams.active` must be false. Why check both, and why is the checkpoint folder owned by this run only?
 
 ## Next step
 
-Use the [course route](../README.md) to continue. Paired-language agreement is useful only when both outputs also satisfy the independent fixture contract. A successful local run is not evidence of cluster performance or production recovery.
+Go on to [spark-032: Event time, watermarks and late-data policy](spark-032.md). This lesson grouped by team with no notion of time; the next one groups events into time windows and decides when a window is complete enough to emit.
 
 ## Primary sources and official APIs
 

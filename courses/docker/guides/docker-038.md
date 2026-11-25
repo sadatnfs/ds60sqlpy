@@ -32,11 +32,9 @@ Routine course cleanup uses Compose down without volume deletion. A full disposa
 
 ## How to use this lesson
 
-The classroom displays this guide and saves your worksheet, `courses/docker/lessons/docker-038.md`. Its Run button does not control your Docker engine. Docker engine access is powerful host access, so the classroom deliberately receives no engine socket. Work through the supplied examples without starting anything, then use the optional host lab only in your own disposable project. Reading a command, parsing YAML and actually running the project are different forms of evidence.
+The classroom saves `courses/docker/lessons/docker-038.md` and holds no engine socket ([host-lab setup](../STUDY-GUIDE.md#host-lab-setup)).
 
-Use Bash in Linux, macOS Terminal, or Ubuntu under WSL 2 on Windows. The supported engine runs Linux containers. The maintained fixture is `courses/docker/fixtures/compose-lab/`; its README explains copying it into a new ignored learner directory, checking the engine, building locally with visible logs, and using the fixed project name `ds60-docker-study`. The fixture uses port 18080 on host loopback. Stop if that project name or port belongs to unrelated work; choose a new project name consistently in your own copy. Never paste a command against a remote Docker context simply because it is currently selected.
-
-For Dockerfile examples, create a file named `Dockerfile` in a scratch project. YAML snippets describe a fragment unless explicitly called a complete file. Text transcripts are synthetic illustrations, not claims about your machine. Do not substitute a real password, token or private registry into a checked-in example. **How to use the lessons** in the [subject README](../README.md) collects these rules in one place.
+**Host lab.** Assemble an evidence packet before any cleanup. Run `docker system df` and copy its table, then `docker system df -v` for per-volume sizes and the number of containers using each image. List the project's resources with `docker compose -p ds60-docker-study ps -a` and the label filter from worked example 1, and capture recent logs with `docker compose -p ds60-docker-study logs --since 10m app > ../incident-logs.txt`. Add the time, the symptom and one sentence on what you will remove and what you will keep. Then run worked example 2 and confirm with `docker volume ls --filter label=com.docker.compose.project=ds60-docker-study` that `study-data` is still listed. Start the app again with `up -d --wait`, check that `/counter` kept its value, and only then delete `../incident-logs.txt`. The packet, not the deletion, is what this lab produces.
 
 ## Worked example / walkthrough
 
@@ -64,7 +62,7 @@ docker compose -p ds60-docker-study down
 
 ## Six progressive exercises
 
-For each exercise, name the object involved and the phase of its lifetime before changing anything, then vary only the condition the task names. Exercises that ask you to predict, explain, compare or diagnose keep their answers in the solutions file; the others show the evidence to look for.
+Answer-type prompts keep their answers in the solutions file ([exercise rules](../STUDY-GUIDE.md#exercise-rules)).
 
 ### Exercise 1: Classify disk usage by resource type.
 
@@ -98,13 +96,19 @@ For each exercise, name the object involved and the phase of its lifetime before
 
 Running `docker system prune -a --volumes` during an incident. Deleting a dangling volume without finding its owner. Cleaning up before recording evidence.
 
-Exercise 4 is this chapter's boundary case: Diagnose a detached volume labeled unused. Read the volume's labels and creating project, and ask who owns its data, before treating unattached as unwanted. Preserve the original failure and the exact changed field before retrying. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
+Exercise 4 is this chapter's boundary case: Diagnose a detached volume labeled unused. Read the volume's labels and creating project, and ask who owns its data, before treating unattached as unwanted.
+
+Container logs are a disk-pressure source that `docker system df` does not report at all. Its container size column measures writable layers, while each container's log file sits beside them in the engine's data directory, and with the `json-file` driver and no rotation options it grows without limit. A chatty service can fill the disk while images and volumes look modest. Check the logging settings with `docker inspect --format '{{json .HostConfig.LogConfig}}'` on the container, and when logs are the cause, set `max-size` and `max-file` for that service, or engine-wide in the daemon configuration, rather than deleting files under the engine's directories by hand.
+
+Never trade a safety control for a passing example ([safety rules](../STUDY-GUIDE.md#safety-rules)).
 
 ## Retrieval, transfer and next steps
 
-Close the explanations first. Say what `docker compose down` removes and what it leaves for a separate, deliberate decision. Then reconstruct worked example 2 (Stop only the study application) with one different value, predict what changes, and name which of incident response, disk pressure, docker system df and scoped cleanup the change touches.
+**Retrieval.** Say what `docker compose down` removes and what it leaves for a separate, deliberate decision.
 
-When a host session ends, run `docker compose -p ds60-docker-study down` from your fixture copy. It removes the project's containers and network but keeps named volumes; deleting a volume is a separate, deliberate reset described in the fixture README.
+**Transfer case.** During an incident on a shared host the disk is 95 percent full, and `docker system df` shows several gigabytes of reclaimable build cache. Is clearing it in scope, and how do you limit the effect on others?
+
+Then run the [retrieval loop](../STUDY-GUIDE.md#retrieval-and-cleanup) and end any host session with its cleanup.
 
 ## Primary references
 

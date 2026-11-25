@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/web-development/solutions/web-036_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="web-036-explanatory-solutions">web-036: explanatory solutions<a class="heading-anchor" href="#web-036-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Open this after your own attempt. Each answer explains the lesson&#x27;s synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in <code>courses/web-development/guides/web-036.md</code>.</p>
+<p>Attempt each exercise before reading; the mechanism is in <code>courses/web-development/guides/web-036.md</code> (<a href="../STUDY-GUIDE.md.html#solutions">using these answers</a>).</p>
 <h3 id="exercise-1-explain-the-difference-between-returning-and-echoing-a-value">Exercise 1: Explain the difference between returning and echoing a value.<a class="heading-anchor" href="#exercise-1-explain-the-difference-between-returning-and-echoing-a-value" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Returning supplies data to the caller; echo writes output as a side effect.</p>
 <p><strong>Approach:</strong> Ask where the value ends up: <code>return</code> hands it to the calling expression, while <code>echo</code> writes to output and the caller receives nothing.</p>
@@ -232,7 +232,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Plausible wrong approach:</strong> Writing a long closure that captures many outer variables fails because its real inputs are hidden and hard to test.</p>
 <p><strong>How to verify:</strong> The arrow function <code>fn(int $value): int =&gt; $value * 2</code> maps [10, 20] to [20, 40]. The original input array still holds [10, 20] after the call, because <code>array_map</code> returns a new array.</p>
 <h3 id="reference-comparison">Reference comparison<a class="heading-anchor" href="#reference-comparison" aria-label="Link to this section">#</a></h3>
-<p>Open <code>courses/web-development/solutions/web-036_solution.php</code> only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; server lifecycle, persistence, concurrency and security need their own integration evidence.</p></article>
+<p>The reference checks the empty total is 0, [20, 30] gives 50 and [-1] throws InvalidArgumentException. That catches a missing guard and a wrong starting value. It does not check your display function or closure, so compare the formatted line and mapping output against your own prediction.</p>
+<p>Open <code>courses/web-development/solutions/web-036_solution.php</code> after saving your attempt (<a href="../STUDY-GUIDE.md.html#references">comparing with the reference</a>).</p></article>
   </main>
 </body>
 </html>

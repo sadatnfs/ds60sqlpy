@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/kubernetes/solutions/k8s-058_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="k8s-058-explanatory-solutions">k8s-058: explanatory solutions<a class="heading-anchor" href="#k8s-058-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit reveal. These explanations describe the synthetic topology and stated API contracts. They are not fabricated runtime receipts.</p>
+<p>Attempt each exercise first, then compare (<a href="../STUDY-GUIDE.md.html#solutions-and-the-ai-tutor">study guide</a>).</p>
 <h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
 <p>NetworkPolicy describes allowed network relationships for selected Pods. It requires a network implementation that enforces the API. Creating the object on a cluster without enforcement does not prove isolation. The policy is primarily about supported network traffic, not HTTP user identity or arbitrary application authorization.</p>
 <p>Policies are additive. Once a Pod is isolated for a direction, the union of applicable allow rules determines permitted traffic for that direction. There is no general ordered deny rule that overrides a later allow in the ordinary API. A policy can select all Pods in one namespace with an empty podSelector, while namespace scope remains important.</p>

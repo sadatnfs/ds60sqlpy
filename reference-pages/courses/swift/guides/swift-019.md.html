@@ -206,11 +206,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Opaque type:</strong> A hidden but consistent concrete type.</p>
 <p><strong>Type erasure:</strong> Hiding concrete type information behind an interface.</p>
 <h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>The Linux Docker classroom compiles the saved pad as <code>main.swift</code> with Swift 6 language checking. An explicit <code>@main</code> type contains <code>static func main() async throws</code>; the fixed compiler uses <code>-parse-as-library -swift-version 6</code>. The examples use the standard library and portable Foundation. <code>precondition</code> makes a violated invariant fail the process. The fixed pad accepts one source file, without arbitrary command arguments, interactive input or dependency installation. SwiftUI, UIKit, Apple simulators and application signing belong to the separately prepared macOS/Xcode project labs, never the Linux pad.</p>
-<p>Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.</p>
+<p>Both examples share the <code>Producer</code> protocol, <code>IntegerSource</code>, <code>read</code> and <code>makeLabels</code>, all declared above <code>LessonMain</code>. Task 2 adds a conformer that produces a <code>String</code>. Task 4 asks you to return two different concrete types from one <code>some</code> function; the compiler rejects it because an opaque result must have a single underlying type.</p>
+<p>Compile contract, starter stop and success marker: <a href="../STUDY-GUIDE.md.html#running-a-lesson">running a lesson</a>.</p>
 <h3 id="syntax-anatomy-and-execution-trace">Syntax anatomy and execution trace<a class="heading-anchor" href="#syntax-anatomy-and-execution-trace" aria-label="Link to this section">#</a></h3>
 <p><code>associatedtype Item</code> names a conformer-selected type. <code>P.Item</code> refers to that relationship in generic code. <code>some Protocol</code> hides one concrete return type; <code>any Protocol</code> stores an existential value.</p>
-<p>Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.</p>
+<p>Each example ends with a trace; method: <a href="../STUDY-GUIDE.md.html#tracing-a-program">tracing a program</a>.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="example-a-retain-a-produced-type">Example A: Retain a produced type<a class="heading-anchor" href="#example-a-retain-a-produced-type" aria-label="Link to this section">#</a></h4>
 <p>The associated type relationship survives through the generic function.</p>
@@ -236,6 +236,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The generic consumer knows the produced value is an Int.</p>
+<p><strong>Trace.</strong> <code>IntegerSource</code> conforms to <code>Producer</code> by implementing <code>produce()</code> returning <code>Int</code>, so the compiler infers its associated <code>Item</code> as <code>Int</code>. Calling <code>read(source)</code> binds <code>P</code> to <code>IntegerSource</code>, so the return type <code>P.Item</code> resolves to <code>Int</code>. The annotation <code>let value: Int</code> therefore needs no cast. The body calls <code>produce()</code>, which returns 7, and the check confirms it. With an existential parameter instead of a generic one, the item type would be erased and the caller would no longer know it receives an <code>Int</code>.</p>
 <h4 id="example-b-hide-representation-with-an-opaque-result">Example B: Hide representation with an opaque result<a class="heading-anchor" href="#example-b-hide-representation-with-an-opaque-result" aria-label="Link to this section">#</a></h4>
 <p>The function selects one underlying result type while exposing its element relationship.</p>
 <pre class="highlighted-code"><code class="language-swift"><span class="syntax-keyword">import</span> <span class="syntax-class">Foundation</span>
@@ -259,6 +260,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The caller uses sequence behavior without naming the concrete array type.</p>
+<p><strong>Trace.</strong> <code>makeLabels()</code> declares an opaque result, <code>some Sequence&lt;String&gt;</code>. Inside, it returns an array literal, so the hidden underlying type is <code>[String]</code>, but callers see only a sequence whose elements are strings. The caller can iterate it or pass it to <code>Array(...)</code>, which collects a and b, but it cannot call array-only operations such as subscripting. Changing the body to return a <code>Set</code> later would not break callers, because they never relied on the concrete type.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <ol>
 <li><strong>Predict and explain.</strong> Trace the associated Item type through read.</li>
@@ -278,10 +280,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <ol start="6">
 <li><strong>Transfer and justify.</strong> Choose opaque output or existential storage for an API and document the preserved relationships.</li>
 </ol>
-<p>For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.</p>
+<p>Log each task in the <a href="../STUDY-GUIDE.md.html#recording-exercise-evidence">evidence table</a> before opening the explanation.</p>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
 <p>Some does not mean any arbitrary type at each return. Existential containers can lose relationships needed by generic operations. Compiler diagnostics often point to a missing type relationship rather than a missing cast.</p>
-<p>A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.</p>
+<p>Task 4&#x27;s invalid function has an if-else returning an array in one branch and a <code>Set</code> in the other. Keep the compiler error in your notes: it says the return statements do not have matching underlying types. For task 5, an opaque sequence of zero labels must still type-check and produce an empty array, so test <code>Array(labels).isEmpty</code> as well as the two-element case.</p>
+<p>Repair routine: <a href="../STUDY-GUIDE.md.html#building-a-regression-case">building a regression case</a>.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <ol>
 <li>Reproduce Example A (Retain a produced type) before changing anything, and confirm its observation: The generic consumer knows the produced value is an Int.</li>
@@ -289,9 +292,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>Before opening the explanation, check your task 3 attempt (Write a generic transformation preserving the producer item type) against each pitfall listed above, and add one input that would expose the tempting wrong rule.</li>
 </ol>
 <h3 id="self-check-and-next-step">Self-check and next step<a class="heading-anchor" href="#self-check-and-next-step" aria-label="Link to this section">#</a></h3>
-<p>Explain Associated type, Opaque type, Type erasure without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.</p>
+<p>Explain who chooses the concrete type for a generic parameter, an opaque result and an existential value. Say why <code>read</code> can return <code>P.Item</code> but a function taking <code>any Producer</code> cannot easily promise a specific item type. Name one API where hiding the concrete collection type is worth the restriction.</p>
+<p>Then follow the general <a href="../STUDY-GUIDE.md.html#self-check-routine">self-check routine</a> and save your pad.</p>
 <h3 id="sources-and-execution-boundary">Sources and execution boundary<a class="heading-anchor" href="#sources-and-execution-boundary" aria-label="Link to this section">#</a></h3>
-<p><a href="https://docs.swift.org/swift-book/documentation/the-swift-programming-language/">Official language or framework documentation</a>. The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.</p>
+<p><a href="https://docs.swift.org/swift-book/documentation/the-swift-programming-language/">Documentation</a>: The Swift book chapters Generics, on associated types, and Opaque and Boxed Protocol Types explain the relationship between <code>some</code> and <code>any</code>.</p>
+<p>Provenance and limits: <a href="../STUDY-GUIDE.md.html#sources-and-execution-boundary">sources and execution boundary</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for swift-019: Associated types, opaque results and existentials.
 Read courses/swift/guides/swift-019.md and courses/swift/lessons/swift-019.swift. Prerequisites: swift-018.

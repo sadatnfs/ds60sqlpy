@@ -1,6 +1,6 @@
 # cuda-097: explained solutions
 
-These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.
+Compare with your [worksheet](../lessons/cuda-097.md) attempt.
 
 ## Exercise 1: Write the operator schema
 
@@ -74,8 +74,16 @@ Record build ABI architecture and real forward tests.
 
 **How to verify.** Reload the built extension in a clean environment matching the record and rerun the forward tests.
 
+## Self-check answers
+
+1. **What belongs in an operator contract besides argument types?** Dtype, shape, device, layout, aliasing and mutation, plus how output structure is derived for compilation systems.
+
+2. **Why can a Python pad accepting a source string not stand in for a registered operator?** Framework registration needs a separately built project with a matching compiler, toolkit and framework ABI.
+
+3. **Why is backward treated as a separate contract?** A correct forward pass does not imply correct gradients; backward has its own mathematics and tests.
+
 ## Reference observation
 
 Fused affine-ReLU output [0,1,7].
 
-The reference file is `courses/cuda/python/references/cuda-097_cpu.py`. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.
+Asserted by `courses/cuda/python/references/cuda-097_cpu.py`.

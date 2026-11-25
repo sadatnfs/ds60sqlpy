@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cuda/python/solutions/cuda-065_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="cuda-065-explained-solutions">cuda-065: explained solutions<a class="heading-anchor" href="#cuda-065-explained-solutions" aria-label="Link to this section">#</a></h2>
-<p>These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.</p>
+<p>Compare with your <a href="../lessons/cuda-065.md.html">worksheet</a> attempt.</p>
 <h3 id="exercise-1-trace-the-five-events">Exercise 1: Trace the five events<a class="heading-anchor" href="#exercise-1-trace-the-five-events" aria-label="Link to this section">#</a></h3>
 <p>Construction and retrieval belong to the host.</p>
 <p><strong>Approach.</strong> Walk the GPU sum in time order and tag each step with the processor that does it: the Python list is built by the interpreter, a copy moves those three integers into a device allocation, a reduction kernel runs on the GPU, a completion point is reached, and a scalar copy brings the total back.</p>
@@ -231,9 +231,19 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Why it is correct here.</strong> The reference in this chapter prints <code>CPU reference: 6</code> and every ledger entry is CPU. That value is mathematically right, but it is evidence that the algorithm is correct, not that any CUDA device executed it.</p>
 <p><strong>A plausible wrong approach.</strong> Catching the CUDA error and silently computing with NumPy makes the program exit with status zero and the same answer. A dashboard reading only exit codes would then count a GPU lesson as qualified on a machine with no GPU.</p>
 <p><strong>How to verify.</strong> Run the reference on a CPU-only host and confirm the printed label starts with <code>CPU reference</code>. A correct fallback report contains the backend name, the reason, and the value, and a reviewer can see that the GPU stage was not attempted.</p>
+<h3 id="self-check-answers">Self-check answers<a class="heading-anchor" href="#self-check-answers" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>Why can a statement that creates a CuPy result return before the answer exists?</strong> The host only enqueues the kernel. The Python object holding shape and dtype exists immediately, while the device arithmetic finishes later; a synchronization or a transfer is what proves completion.</li>
+</ol>
+<ol start="2">
+<li><strong>Which events in the five-event GPU sum belong to the host?</strong> Constructing the input list and retrieving the scalar into a Python integer. The copy and the reduction happen in between, and the final value must land in host memory before Python can use it.</li>
+</ol>
+<ol start="3">
+<li><strong>Why can printing a device scalar change what you were trying to observe?</strong> Printing forces a device-to-host copy that waits for the producing kernel. That inserts a synchronization point, so timing or overlap measured around the print no longer reflects the unobserved program.</li>
+</ol>
 <h3 id="reference-observation">Reference observation<a class="heading-anchor" href="#reference-observation" aria-label="Link to this section">#</a></h3>
 <p>CPU reference: 6; every ledger event is CPU.</p>
-<p>The reference file is <code>courses/cuda/python/references/cuda-065_cpu.py</code>. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.</p></article>
+<p>Asserted by <code>courses/cuda/python/references/cuda-065_cpu.py</code>.</p></article>
   </main>
 </body>
 </html>

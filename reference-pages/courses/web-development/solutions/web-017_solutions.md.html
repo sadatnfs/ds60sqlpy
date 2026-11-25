@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/web-development/solutions/web-017_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="web-017-explanatory-solutions">web-017: explanatory solutions<a class="heading-anchor" href="#web-017-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Open this after your own attempt. Each answer explains the lesson&#x27;s synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in <code>courses/web-development/guides/web-017.md</code>.</p>
+<p>Attempt each exercise before reading; the mechanism is in <code>courses/web-development/guides/web-017.md</code> (<a href="../STUDY-GUIDE.md.html#solutions">using these answers</a>).</p>
 <h3 id="exercise-1-predict-the-base-layout-below-the-breakpoint">Exercise 1: Predict the base layout below the breakpoint.<a class="heading-anchor" href="#exercise-1-predict-the-base-layout-below-the-breakpoint" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> The layout stays in one column.</p>
 <p><strong>Approach:</strong> Read the base rule outside the media query: it sets grid with a gap but no columns, so one implicit column holds every section.</p>
@@ -232,7 +232,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Plausible wrong approach:</strong> Treating breakpoints as the whole design fails because between breakpoints the layout can still overflow when nothing else is intrinsic.</p>
 <p><strong>How to verify:</strong> Remove all media queries temporarily; the page still remains readable at narrow widths, only less polished.</p>
 <h3 id="reference-comparison">Reference comparison<a class="heading-anchor" href="#reference-comparison" aria-label="Link to this section">#</a></h3>
-<p>Open <code>courses/web-development/solutions/web-017_solution.html</code> only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; its success message is not an accessibility audit or proof of responsive behavior at every size.</p></article>
+<p>The reference only checks that a meta element named viewport exists, which catches the classic missing tag. It does not read its content, test your breakpoint, or check that sections stack below it, so compare the layout at a phone width, at your breakpoint and with text enlarged.</p>
+<p>Open <code>courses/web-development/solutions/web-017_solution.html</code> after saving your attempt (<a href="../STUDY-GUIDE.md.html#references">comparing with the reference</a>).</p></article>
   </main>
 </body>
 </html>

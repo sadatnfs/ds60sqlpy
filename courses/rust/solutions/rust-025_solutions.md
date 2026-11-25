@@ -1,6 +1,8 @@
 # rust-025: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [rust-025_solution.rs](rust-025_solution.rs). It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.
+Executable reference: [rust-025_solution.rs](rust-025_solution.rs), which runs both examples and the coded answers.
+
+Open this only after [an attempt](../STUDY-GUIDE.md#attempt-a-lesson).
 
 ## Why the two examples differ
 
@@ -26,7 +28,7 @@ Trace file-handle and pathname ownership separately.
 
 Write two lines with an explicit newline policy.
 
-**Reference answer.** The same statements run as the `Task 2` block of the reference program; here they are wrapped in `main` as a complete file.
+**Reference answer**, wrapped in `main`; the reference runs it as its `Task 2` block.
 
 ```rust
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -63,7 +65,7 @@ The policy is one `\n` after every line, including the last. `writeln!` writes `
 
 Create an owned temporary-file round trip for a report.
 
-**Reference answer.** The same statements run as the `Task 3` block of the reference program; here they are wrapped in `main` as a complete file.
+**Reference answer**, wrapped in `main`; the reference runs it as its `Task 3` block.
 
 ```rust
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -104,7 +106,7 @@ Diagnose assuming a relative path resolves against the repository root.
 
 Test empty bytes and invalid UTF-8.
 
-**Reference answer.** The same statements run as the `Task 5` block of the reference program; here they are wrapped in `main` as a complete file.
+**Reference answer**, wrapped in `main`; the reference runs it as its `Task 5` block.
 
 ```rust
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -139,7 +141,7 @@ Empty input is valid UTF-8, so it decodes cleanly. `0xc3` starts a two-byte char
 
 Design cleanup on every failure path using a small owned temporary-resource wrapper.
 
-No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **File handle**, and state one limitation of your choice.
+**Judging criteria.** A strong design wraps the temporary path in a struct whose `Drop` removes the file, so cleanup runs when `?` returns early, when a later step fails and when the happy path ends. The wrapper removes only the path it created, logs rather than panics when removal fails inside `drop`, and offers an explicit `keep` method for the success case. Test it by forcing a failure after creation and checking that the path is gone. State one limitation: `Drop` does not run if the process is killed or aborts.
 
 ## Mechanism and diagnostic reasoning
 
@@ -153,4 +155,6 @@ This small example removes its file on the normal path; the transfer task adds R
 
 ## Review before continuing
 
-Run the reference and confirm that it prints `rust-025: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.
+Rebuild Example B (Distinguish bytes from valid text) from a blank pad.
+
+Review routine: [Self-check and review](../STUDY-GUIDE.md#self-check-and-review).

@@ -246,19 +246,19 @@ bash run.sh metadata
 bash run.sh check</code></pre>
 <p>Down removes the containers but keeps the named volumes for PostgreSQL and the warehouse, so start brings up new processes over old state. The metadata probe then reads the table through a brand new Thrift client, which rules out a cached answer from the previous session. If metadata succeeds but check fails, the definitions survived while the warehouse volume did not; if both fail, inspect logs for a database connection or schema version error before trying anything else.</p>
 <h3 id="complete-worked-source">Complete worked source<a class="heading-anchor" href="#complete-worked-source" aria-label="Link to this section">#</a></h3>
-<p>This is a project-only command notebook. Read and edit it in the classroom; run its explicitly labeled commands from the copied owned Docker workshop. The classroom does not execute these service commands.</p>
+<p>The classroom does not execute these service commands. See the <a href="../STUDY-GUIDE.md.html#workshop-notebooks">workshop rules</a>.</p>
 <h2 id="hive-apache-065-command-notebook">Hive apache-065 command notebook<a class="heading-anchor" href="#hive-apache-065-command-notebook" aria-label="Link to this section">#</a></h2>
-<p>Run from the copied owned Hive project, following its README. Native service acceptance is separately recorded in QUALIFICATION.md.</p>
+<p>Start and end this lifecycle with <code>metadata</code> from the copied Hive project. The probe reads table type, partition key and both storage locations through Thrift, so matching output before <code>stop</code> and after <code>resume</code> shows the Metastore database kept its state.</p>
 <pre class="highlighted-code"><code class="language-bash">bash run.sh metadata
 bash run.sh stop
 bash run.sh resume
 bash run.sh metadata
 bash run.sh check</code></pre>
 <p>For replacement, use down/start then only check/metadata. Never initialize while testing retention. Compare database and warehouse ownership separately.</p>
-<p>The classroom does not execute these Docker commands. Retain source, schema, file identities, actual responses and failure scope in an independent receipt.</p>
+<p>QUALIFICATION.md records that stop and resume kept the three service containers, and that replacement changed all three while the database, warehouse and typed metadata stayed the same. No schema initialization ran during that readback.</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
 <ul>
-<li><a href="https://hive.apache.org/development/quickstart/">Hive4.2.1 preparation and components</a></li>
+<li><a href="https://hive.apache.org/development/quickstart/">Hive 4.2.1 preparation and components</a></li>
 <li><a href="https://hive.apache.org/docs/latest/language/languagemanual-ddl/">Hive DDL</a></li>
 <li><a href="https://hive.apache.org/docs/latest/admin/adminmanual-metastore-administration/">Hive Metastore administration</a></li>
 <li><a href="https://iceberg.apache.org/docs/latest/hive/">Hive/Iceberg integration</a></li>

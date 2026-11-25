@@ -6,7 +6,16 @@ Beginner, approximately 90 minutes. Direct prerequisites: `java-001`
 
 ## Learning objectives
 
-Predict integer and decimal arithmetic, widen before overflow, and use BigDecimal value and scale deliberately. Along the way, explain primitive, overflow, narrowing conversion using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. Exercises 1 and 2 start from the worked examples; the authored investigations begin with this task: Add 1 to Integer.MAX_VALUE with Math.addExact. The final exercise transfers the mechanism to reject an unsupported exact division.
+Predict integer and decimal arithmetic, widen before overflow, and use BigDecimal value and scale deliberately.
+
+The six exercises practice these steps:
+
+- Compare integer and decimal division.
+- Widen before multiplication.
+- Detect overflow explicitly.
+- Preserve decimal source meaning.
+- Distinguish value from scale.
+- Reject an unsupported exact division.
 
 ## Purpose and mental model
 
@@ -22,16 +31,9 @@ A numeric type defines both a range and a set of operations. Java int arithmetic
 
 ## How to run this lesson
 
-Open the Docker classroom, choose the prepared Java 21 profile and save a learner pad. The pad is compiled as `Main.java` with `javac --release 21` and executed with `java -ea Main`. Assertions are enabled deliberately. A successful assertion has no output; a failed assertion throws `AssertionError` and the process should fail. Do not remove assertions to obtain a green result.
+Every check here is arithmetic on literals, so any surprise you see comes from the types you chose and when conversions happen, never from input or the environment.
 
-For a prepared native JDK, copy a worked example into your own `Main.java` under ignored `.learning/expansion/java-002/`. From that directory run the same two commands on PowerShell, macOS or Linux:
-
-```text
-javac --release 21 Main.java
-java -ea Main
-```
-
-The public class name and source filename must agree. Each worked example below is a complete file. Example B includes the setup it needs from Example A, so it can be compiled by itself. The six exercise reference blocks form one complete program in the separate solution. Keep your original prediction, source and diagnostic text together. Most examples use prepared JDK libraries and tiny local fixtures; any additional dependency is specified in the lesson notes below. Any lesson-specific library or additional file is named explicitly; do not download packages from inside a learner program. Resource examples close their owned files, executors or loopback servers.
+Classroom and native JDK steps, the exercise controls and the hint routine are in the [Java study guide](../STUDY-GUIDE.md).
 
 
 
@@ -86,62 +88,62 @@ public class Main {
 
 ## Prediction before your attempt
 
-Read the source from the entry point and name each value before executing it. Identify which operations create new values, which mutate existing state and which can fail. Predict the first observable output or assertion result. For a compile-time failure, explain which source rule is violated before discussing runtime state: a program that did not compile never reached its main method. Keep normal, boundary and invalid inputs separate so each check has a clear purpose.
+Before running Example A, write the values of `7 / 2` and `7 / 2.0` and the type of each result. For Example B, predict what `50_000 * 50_000` gives as an `int` (it wraps to a negative number, because the true product exceeds `Integer.MAX_VALUE`) and whether casting that product to `long` afterward repairs it. Then predict whether `new BigDecimal("1.0").equals(new BigDecimal("1.00"))` is true before Exercise 5 shows you.
 
 ## Exercises
 
-1. **Compare integer and decimal division: change one input.** Copy Example A into a scratch `Main.java` and change `int whole = 7 / 2;` to `int whole = 8 / 2;`. Before running it with `java -ea Main`, predict which assertion fails and which value it now sees; then run it and restore the original line.
-   **Expected:** The changed run fails with an `AssertionError` from the assertion on `whole == 3 && fractional == 3.5`. Restoring the original line brings back the worked observation: integer 3 and double 3.5.
-   **Verify:** Compare your written prediction with the reported `AssertionError` and its stack-trace line, and name the value that made `whole == 3 && fractional == 3.5` false. After restoring the line, the program completes without an `AssertionError` again.
+1. **Compare integer and decimal division: change one input.** Change `int whole = 7 / 2;` to `int whole = 8 / 2;` in Example A and predict which assertion fails and why.
+   **Expected:** The edited run fails with an `AssertionError` from the assertion on `whole == 3 && fractional == 3.5`.
+   **Verify:** Name the value that makes `whole == 3 && fractional == 3.5` false, then restore the line.
 
-2. **Widen before multiplication: debug a regression.** A regression changed one token in the code that Example B adds after Example A, so one line now reads `long safe = (long) 50_000 + 50_000;`. Run Example B with that line, use the failing assertion to locate the defect and repair it without changing the assertion.
-   **Expected:** Before the repair the run fails with an `AssertionError` from the assertion on `safe == 2_500_000_000L`; after it the line reads `long safe = (long) 50_000 * 50_000;` again and 2500000000L; int product differs.
-   **Verify:** Keep the failing and the repaired runs. Explain why the changed token alters the value tested by `safe == 2_500_000_000L` for this input.
+2. **Widen before multiplication: debug a regression.** A regression in Example B's new code makes one line read `long safe = (long) 50_000 + 50_000;`. Repair it using the failing assertion.
+   **Expected:** The unrepaired run fails with an `AssertionError` from the assertion on `safe == 2_500_000_000L`; the repaired line reads `long safe = (long) 50_000 * 50_000;`.
+   **Verify:** Explain how the changed token alters the value that `safe == 2_500_000_000L` tests.
 
 3. **Detect overflow explicitly.** Add 1 to Integer.MAX_VALUE with Math.addExact.
    **Expected:** ArithmeticException.
-   **Verify:** Keep an assertion equivalent to `rejected`. As a control, change `rejected = true;` to `rejected = false;`: the run must fail with an `AssertionError` from the assertion on `rejected`. Restore the line before continuing.
+   **Verify:** Control: changing `rejected = true;` to `rejected = false;` must fail the assertion on `rejected`.
 
 4. **Preserve decimal source meaning.** Add BigDecimal values constructed from strings 0.10 and 0.20.
    **Expected:** exact decimal 0.30.
-   **Verify:** Keep an assertion equivalent to `amount.equals(new java.math.BigDecimal("0.30"))`. As a control, change `var amount = new java.math.BigDecimal("0.10").add(new java.math.BigDecimal("0.20"));` to `var amount = new java.math.BigDecimal("1.10").add(new java.math.BigDecimal("0.20"));`: the run must fail with an `AssertionError` from the assertion on `amount.equals(new java.math.BigDecimal("0.30"))`. Restore the line before continuing.
+   **Verify:** Control: changing `var amount = new java.math.BigDecimal("0.10").add(new java.math.BigDecimal("0.20"));` to `var amount = new java.math.BigDecimal("1.10").add(new java.math.BigDecimal("0.20"));` must fail the assertion on `amount.equals(new java.math.BigDecimal("0.30"))`.
 
 5. **Distinguish value from scale.** Compare BigDecimal 1.0 and 1.00 with compareTo and equals.
    **Expected:** compareTo 0; equals false.
-   **Verify:** Keep an assertion equivalent to `one.compareTo(scaled) == 0 && !one.equals(scaled)`. As a control, change `var one = new java.math.BigDecimal("1.0");` to `var one = new java.math.BigDecimal("2.0");`: the run must fail with an `AssertionError` from the assertion on `one.compareTo(scaled) == 0 && !one.equals(scaled)`. Restore the line before continuing.
+   **Verify:** Control: changing `var one = new java.math.BigDecimal("1.0");` to `var one = new java.math.BigDecimal("2.0");` must fail the assertion on `one.compareTo(scaled) == 0 && !one.equals(scaled)`.
 
 6. **Reject an unsupported exact division.** Divide decimal 1 by 3 without a rounding policy, then supply scale 2 and HALF_UP.
    **Expected:** exact division throws; rounded result 0.33.
-   **Verify:** Keep an assertion equivalent to `java.math.BigDecimal.ONE.divide(new java.math.BigDecimal("3"), 2, java.math.RoundingMode.HALF_UP).toPlainString().equals("0.33")`. As a control, change `2,` to `3,` inside it: the run must fail with an `AssertionError`, which shows the assertion can fail. Restore it.
+   **Verify:** Control: changing `2,` to `3,` inside the assertion must make it fail.
 
 ## Common pitfalls and diagnosis
 
-When a check fails, keep the smallest source file that still demonstrates the failure. Read the first relevant compiler diagnostic before editing several lines; later diagnostics can be consequences of the same missing delimiter or wrong type. For a runtime exception, identify the first frame belonging to your code and compare its input with the method contract. For an assertion failure, inspect the actual value and the independent expected value. A passing process exit is weaker than a checked invariant, and a checked invariant applies only under its stated assumptions.
+The most common mistake is converting too late. `(long) (a * b)` widens an `int` product that has already wrapped, while `(long) a * b` widens before the multiplication. The same timing error explains `double half = 7 / 2`, which stores 3.0 because the integer division ran first. With `BigDecimal`, constructing from a `double` such as `new BigDecimal(0.1)` copies the binary approximation into the decimal, and `equals` compares scale as well as numeric value, so `1.0` and `1.00` are different keys in a `HashMap`.
 
-Do not replace a precise exception with a catch-all that returns a plausible default. That can hide an invalid input or an unfinished operation. If an example owns a resource, verify its lifetime on both the success and failure paths. If an operation is concurrent, use ordering primitives to establish the relationship you need; an observed timing coincidence is not a synchronization guarantee. The solution explanations identify the specific alternative that would break each exercise.
+General compiler, runtime and assertion triage: [diagnose a failure](../STUDY-GUIDE.md#diagnose-a-failure).
 
 ## Progressive hints
 
-Read one hint at a time and attempt the exercise again before reading the next. Keep a small table of input, expected value, actual value and exception type. Ask for one hint about the first incorrect assumption before requesting the entire reference implementation.
+Read one rung at a time, as described in [using hints](../STUDY-GUIDE.md#use-hints-one-at-a-time).
 
-- **Exercise 1:** First restate the expected observation: integer 3 and double 3.5. Then list the values read by `whole == 3 && fractional == 3.5` and trace each one from its declaration. Finally, compute the asserted value with `int whole = 8 / 2;` in place before running.
-- **Exercise 2:** First restate the expected observation: 2500000000L; int product differs. Then list the values read by `safe == 2_500_000_000L` and trace each one from its declaration. Finally, compare `long safe = (long) 50_000 + 50_000;` with the same line in Example B and state the claim each version makes.
-- **Exercise 3:** First restate the expected observation: arithmeticException. Then list the values read by `rejected` and trace each one from its declaration. Finally, predict the effect of changing `rejected = true;` to `rejected = false;` before running anything.
-- **Exercise 4:** First restate the expected observation: exact decimal 0.30. Then list the values read by `amount.equals(new java.math.BigDecimal("0.30"))` and trace each one from its declaration. Finally, predict the effect of changing `var amount = new java.math.BigDecimal("0.10").add(new java.math.BigDecimal("0.20"));` to `var amount = new java.math.BigDecimal("1.10").add(new java.math.BigDecimal("0.20"));` before running anything.
-- **Exercise 5:** First restate the expected observation: compareTo 0; equals false. Then list the values read by `one.compareTo(scaled) == 0 && !one.equals(scaled)` and trace each one from its declaration. Finally, predict the effect of changing `var one = new java.math.BigDecimal("1.0");` to `var one = new java.math.BigDecimal("2.0");` before running anything.
-- **Exercise 6:** First restate the expected observation: exact division throws; rounded result 0.33. Then list the values read by `java.math.BigDecimal.ONE.divide(new java.math.BigDecimal("3"), 2, java.math.RoundingMode.HALF_UP).toPlainString().equals("0.33")` and trace each one from its declaration. Finally, name one input that would make `java.math.BigDecimal.ONE.divide(new java.math.BigDecimal("3"), 2, java.math.RoundingMode.HALF_UP).toPlainString().equals("0.33")` false.
+- **Exercise 1:** First evaluate `8 / 2` as integer division; it divides evenly, so nothing is truncated. Then compare that value with the 3 the assertion expects, remembering that `fractional` is unchanged. Finally, explain why the original `7 / 2` produced 3 rather than 3.5.
+- **Exercise 2:** First compute what the edited line stores in `safe`: the cast still widens the left operand, but the operator now adds. Then compare that sum with 2,500,000,000. Finally, restore the multiplication and explain why the cast must apply to an operand rather than to the finished product.
+- **Exercise 3:** First call `Math.addExact(Integer.MAX_VALUE, 1)` inside a `try` block. Then catch `ArithmeticException` and set `rejected` to true in the handler. Finally, compare with `Integer.MAX_VALUE + 1`, which silently wraps to `Integer.MIN_VALUE`, to see what the exact helper protects you from.
+- **Exercise 4:** First construct both operands from the strings `"0.10"` and `"0.20"` rather than from `double` literals. Then combine them with `add`, which keeps every decimal digit. Finally, compare the sum with a `BigDecimal` built from `"0.30"`; `equals` works here because both sides have scale 2.
+- **Exercise 5:** First write down the unscaled value and the scale of `1.0` and of `1.00`. Then call `compareTo`, which compares only numeric value, and `equals`, which also compares scale. Finally, decide which of the two methods a sorted set and a hash map would each rely on.
+- **Exercise 6:** First call `divide` with only the divisor and expect `ArithmeticException`, because one third has no finite decimal expansion. Then call the overload that takes a scale of 2 and `RoundingMode.HALF_UP`. Finally, compare `toPlainString()` of the result with `"0.33"` and explain why the rounding policy belongs to the calculation.
 
 ## Self-check and retrieval
 
-Close the solution and explain Primitive, Overflow, Narrowing conversion in your own words. Reconstruct one example from a blank `Main.java`, then add a new boundary input. Explain why the new case should pass or fail before compiling it. Identify a situation where this technique is appropriate and one where a different data structure, lifetime policy or abstraction would be clearer. This is a reasoning check, not a memorization test for an API spelling.
+From memory, explain why `7 / 2` is 3 but `7 / 2.0` is 3.5, where `int` overflow happens in `50_000 * 50_000` and how `Math.addExact` changes what you observe, and why `1.0` and `1.00` compare as equal with `compareTo` but not with `equals`.
 
 ## Next step
 
-Preserve the saved pad and the six exercise observations. Continue to the next lesson only when you can explain the invariants without reading the answer. Later chapters reuse these contracts in larger programs, so keep a failing counterexample as well as a repaired result. A reference implementation demonstrates one valid design under the stated assumptions; it is not a universal design rule.
+Continue with `java-003`: Decisions, loops and invariants. Keep your six observations; see [moving on](../STUDY-GUIDE.md#move-to-the-next-lesson).
 
 ## Sources and verification status
 
-[Official Java 21 API or language reference](https://docs.oracle.com/en/java/javase/21/docs/api/index.html), reviewed 2026-10-22. Examples and exercise fixtures are original course material. Use the [validation guide](../../../docs/validation.md) and CI artifacts for the exact revision and platform to inspect actual compile/run results. Authoring, parsing, compilation, execution and learner mastery are separate forms of evidence.
+[Official Java 21 API or language reference](https://docs.oracle.com/en/java/javase/21/docs/api/index.html), reviewed 2026-10-22. Evidence levels: [sources and evidence](../STUDY-GUIDE.md#sources-and-evidence).
 
 ## Ask an AI tutor about this lesson
 

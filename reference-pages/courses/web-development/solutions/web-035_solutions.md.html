@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/web-development/solutions/web-035_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="web-035-explanatory-solutions">web-035: explanatory solutions<a class="heading-anchor" href="#web-035-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Open this after your own attempt. Each answer explains the lesson&#x27;s synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in <code>courses/web-development/guides/web-035.md</code>.</p>
+<p>Attempt each exercise before reading; the mechanism is in <code>courses/web-development/guides/web-035.md</code> (<a href="../STUDY-GUIDE.md.html#solutions">using these answers</a>).</p>
 <h3 id="exercise-1-explain-how-a-list-differs-from-a-keyed-record">Exercise 1: Explain how a list differs from a keyed record.<a class="heading-anchor" href="#exercise-1-explain-how-a-list-differs-from-a-keyed-record" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> A list models ordered values; a record&#x27;s named keys identify fields.</p>
 <p><strong>Approach:</strong> Describe a list as positions 0, 1, 2 holding values of one kind, and a record as named keys each holding a different field.</p>
@@ -232,7 +232,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Plausible wrong approach:</strong> Reusing <code>$row</code> in a second plain <code>foreach</code> fails because each assignment then overwrites the last element of the array.</p>
 <p><strong>How to verify:</strong> Without <code>unset</code>, the last record ends up duplicated; with <code>unset</code>, all records keep their original values.</p>
 <h3 id="reference-comparison">Reference comparison<a class="heading-anchor" href="#reference-comparison" aria-label="Link to this section">#</a></h3>
-<p>Open <code>courses/web-development/solutions/web-035_solution.php</code> only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; server lifecycle, persistence, concurrency and security need their own integration evidence.</p></article>
+<p>The reference requires one visible row that is a list, two untouched originals, the right record from array_find and correct array_any and array_all answers. That catches key leaks and mutation. It does not test a missing required field or the empty result, so add those cases yourself.</p>
+<p>Open <code>courses/web-development/solutions/web-035_solution.php</code> after saving your attempt (<a href="../STUDY-GUIDE.md.html#references">comparing with the reference</a>).</p></article>
   </main>
 </body>
 </html>

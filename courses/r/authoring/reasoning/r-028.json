@@ -36,5 +36,7 @@
       "wrong": "Wrapping each task in tryCatch that returns 0 on error. The results look complete, and any average over them is wrong with no sign of the failure.",
       "verify": "The handler returns a message containing \"deliberate task failure\", which shows the error propagated instead of being replaced."
     }
-  ]
+  ],
+  "run_note": "The starter supplies three tasks, `1:3`, `4:6` and `c(2, 2)`, and a worker count of 2. Run it and compute the serial squared sums first, 14, 77 and 8, so the parallel result has an independent target. Close the cluster with `on.exit()` right after creating it, so a failing task cannot leave worker processes running.",
+  "checks_note": "The assertions confirm that a bad task produces the expected diagnostic, that the parallel results are identical to the serial ones, that the squared sums are 14, 77 and 8 with a count of 3 for the first task, that per-task random streams reproduce exactly across scheduling orders, and that different tasks still draw different values. They cannot prove cleanup after an external kill."
 }

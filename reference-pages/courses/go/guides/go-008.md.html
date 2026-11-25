@@ -209,9 +209,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="syntax-anatomy-and-reasoning">Syntax anatomy and reasoning<a class="heading-anchor" href="#syntax-anatomy-and-reasoning" aria-label="Link to this section">#</a></h3>
 <p>type Point struct { X, Y int } creates a named type with fields. Point{X:2,Y:3} uses keyed construction, so field meaning survives reordering. p.X selects a field. Comparable structs can be compared with == only if every field is comparable. A struct with a slice cannot be a map key. An anonymous embedded field promotes selectors but does not create class inheritance.</p>
 <h3 id="run-this-lesson">Run this lesson<a class="heading-anchor" href="#run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>Choose Go in the unified Docker classroom. Save your own pad before experimenting. The prepared worker stages it as <code>main.go</code>, compiles it, and executes the resulting program with bounded time and output. The pad is one source file. It does not supply interactive input, arbitrary command-line arguments, package installation, Kubernetes credentials or a host Docker socket. Every ordinary reference here uses the standard library, synthetic local data and explicit checks. A failed <code>check</code> panics and produces a nonzero process result; do not remove it to make the run appear successful.</p>
-<p>The explanatory solution snippets belong inside <code>func main()</code> unless they declare a helper. <code>check</code> is a tiny teaching helper that panics when a condition is false. The separate reference supplies required imports and helpers and implements all six cases. Use that complete source only after an attempt or an explicit reveal. For an independently prepared Go project, the equivalent local build is <code>go build -o lesson main.go</code>, followed by <code>./lesson</code>; use Linux or WSL 2 for that optional workflow. Compiling proves syntax and type consistency, while the executed checks establish the stated example contracts.</p>
-<p>Each worked example below is a complete Go file. Copy one whole block into your saved pad and run it. Example 2 includes the first case as well as the second, so its setup is complete. Its supporting declarations may be reused in later investigations. The separate reference implements all six cases.</p>
+<p>Run each worked example as one complete file in your saved pad (<a href="../STUDY-GUIDE.md.html#run-a-lesson">run steps</a>).</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1-model-a-coordinate">Worked example 1: Model a coordinate<a class="heading-anchor" href="#worked-example-1-model-a-coordinate" aria-label="Link to this section">#</a></h4>
 <p>Construct Point with X 2 and Y 3 and calculate Manhattan distance from the origin.</p>
@@ -294,77 +292,79 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Observe:</strong> The original X remains 2.</p>
 <p>Both fields contain scalar values, so assignment produces independent field storage.</p>
 <h3 id="predict-before-running">Predict before running<a class="heading-anchor" href="#predict-before-running" aria-label="Link to this section">#</a></h3>
-<p>For each example, write the input values, the state that can change, and the expected observation. Explain which result would disprove your current interpretation. For concurrency, predict a guaranteed relationship rather than an arbitrary scheduling order. For an error case, identify whether it is rejected at compilation or returned during execution.</p>
+<p>Predict which struct copies share state: copying a Point that holds two ints, and copying a Batch that holds a slice. Predict the zero value of a declared Point and whether Point can serve as a map key. For <code>newItem</code>, predict both return values for an empty name before reading the constructor.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-model-a-coordinate-change-one-input">Exercise 1: Model a coordinate: change one input<a class="heading-anchor" href="#exercise-1-model-a-coordinate-change-one-input" aria-label="Link to this section">#</a></h4>
-<p>Copy worked example 1 into a scratch pad and change <code>p := Point{X: 2, Y: 3}</code> to <code>p := Point{X: 3, Y: 3}</code>. Before running, predict which check fails and which value it now sees; then run it and restore the original line.</p>
-<p><strong>Expected:</strong> The changed run panics with <code>point</code> because <code>p.X+p.Y == 5</code> no longer holds. Restoring the original line brings back the worked observation: the distance is 5.</p>
-<p><strong>Verify:</strong> Compare your written prediction with the panic message <code>point</code> and name the value that made <code>p.X+p.Y == 5</code> false. After restoring the input, the program must print its success line again.</p>
+<p>Copy worked example 1, change <code>p := Point{X: 2, Y: 3}</code> to <code>p := Point{X: 3, Y: 3}</code> and predict the failure before running; then restore the line.</p>
+<p><strong>Expected:</strong> The edited run panics with <code>point</code> because <code>p.X+p.Y == 5</code> no longer holds.</p>
+<p><strong>Verify:</strong> Restoring <code>p := Point{X: 2, Y: 3}</code> makes the check pass again with the worked observation: the distance is 5.</p>
 <h4 id="exercise-2-observe-scalar-copy-debug-a-regression">Exercise 2: Observe scalar copy: debug a regression<a class="heading-anchor" href="#exercise-2-observe-scalar-copy-debug-a-regression" aria-label="Link to this section">#</a></h4>
-<p>A regression changed one token in worked example 2, so one line now reads <code>a := Point{X: 3, Y: 3}</code>. Run worked example 2 with that line, use the failure to locate the defect and repair it without changing the check.</p>
-<p><strong>Expected:</strong> Before the repair the program panics with <code>struct copy</code>; after it the line reads <code>a := Point{X: 2, Y: 3}</code> again and the original X remains 2.</p>
-<p><strong>Verify:</strong> Keep the failing and the repaired runs. Explain why the changed token alters the value tested by <code>a.X == 2 &amp;&amp; b.X == 9</code> for this input.</p>
+<p>A one-token regression in worked example 2 makes a line read <code>a := Point{X: 3, Y: 3}</code>. Repair it without changing the check.</p>
+<p><strong>Expected:</strong> The defective run panics with <code>struct copy</code>; after restoring <code>a := Point{X: 2, Y: 3}</code>, the original X remains 2.</p>
+<p><strong>Verify:</strong> The failing run shows message <code>struct copy</code>; after the repair <code>a.X == 2 &amp;&amp; b.X == 9</code> holds again.</p>
 <h4 id="exercise-3-expose-a-shallow-field">Exercise 3: Expose a shallow field<a class="heading-anchor" href="#exercise-3-expose-a-shallow-field" aria-label="Link to this section">#</a></h4>
 <p>Copy a Batch struct containing a slice and mutate its first item.</p>
 <p><strong>Expected:</strong> The original batch observes the mutation.</p>
-<p><strong>Verify:</strong> Keep a check equivalent to <code>a.Items[0] == 9</code>. As a control, change <code>b.Items[0] = 9</code> to <code>b.Items[1] = 9</code>: the run must panic with <code>shallow field</code>. Restore the line before continuing.</p>
+<p><strong>Verify:</strong> Your solution must keep <code>a.Items[0] == 9</code> true. Control: changing <code>b.Items[0] = 9</code> to <code>b.Items[1] = 9</code> panics with message <code>shallow field</code>; revert it.</p>
 <h4 id="exercise-4-inspect-zero-state">Exercise 4: Inspect zero state<a class="heading-anchor" href="#exercise-4-inspect-zero-state" aria-label="Link to this section">#</a></h4>
 <p>Declare a Point without a literal.</p>
 <p><strong>Expected:</strong> Both coordinates are 0.</p>
-<p><strong>Verify:</strong> Keep a check equivalent to <code>p == (Point{X: 0, Y: 0})</code>. As a control, change <code>check(p == (Point{X: 0, Y: 0}), &quot;struct zero&quot;)</code> to <code>check(p == (Point{X: 1, Y: 0}), &quot;struct zero&quot;)</code> inside that check: it must panic with <code>struct zero</code>, which shows the check can fail. Restore it.</p>
+<p><strong>Verify:</strong> Your solution must keep <code>p == (Point{X: 0, Y: 0})</code> true. Control: changing <code>check(p == (Point{X: 0, Y: 0}), &quot;struct zero&quot;)</code> to <code>check(p == (Point{X: 1, Y: 0}), &quot;struct zero&quot;)</code> panics with message <code>struct zero</code>; revert it.</p>
 <h4 id="exercise-5-use-a-comparable-key">Exercise 5: Use a comparable key<a class="heading-anchor" href="#exercise-5-use-a-comparable-key" aria-label="Link to this section">#</a></h4>
 <p>Store a label keyed by Point and retrieve it with an equal Point.</p>
 <p><strong>Expected:</strong> The equal coordinate finds origin.</p>
-<p><strong>Verify:</strong> Keep a check equivalent to <code>m[Point{}] == &quot;origin&quot;</code>. As a control, change <code>m := map[Point]string{{X: 0, Y: 0}: &quot;origin&quot;}</code> to <code>m := map[Point]string{{X: 1, Y: 0}: &quot;origin&quot;}</code>: the run must panic with <code>struct key</code>. Restore the line before continuing.</p>
+<p><strong>Verify:</strong> Your solution must keep <code>m[Point{}] == &quot;origin&quot;</code> true. Control: changing <code>m := map[Point]string{{X: 0, Y: 0}: &quot;origin&quot;}</code> to <code>m := map[Point]string{{X: 1, Y: 0}: &quot;origin&quot;}</code> panics with message <code>struct key</code>; revert it.</p>
 <h4 id="exercise-6-transfer-validation">Exercise 6: Transfer validation<a class="heading-anchor" href="#exercise-6-transfer-validation" aria-label="Link to this section">#</a></h4>
 <p>Construct a named item with an empty name and then a valid name.</p>
 <p><strong>Expected:</strong> The empty name is rejected; the valid name is retained.</p>
-<p><strong>Verify:</strong> Keep a check equivalent to <code>err == nil &amp;&amp; item.Name == &quot;sample&quot;</code>. As a control, change <code>item, err := newItem(&quot;sample&quot;)</code> to <code>item, err := newItem(&quot;sample!&quot;)</code>: the run must panic with <code>valid item</code>. Restore the line before continuing.</p>
-<p>Implement these in the answer-free learner source. Keep one independent check per claim. A task can require tracing, construction, a changed input or a deliberate safe failure. Do not run a data race, corrupt memory or contact a shared cluster merely to demonstrate why it would be wrong.</p>
+<p><strong>Verify:</strong> Your solution must keep <code>err == nil &amp;&amp; item.Name == &quot;sample&quot;</code> true. Control: changing <code>item, err := newItem(&quot;sample&quot;)</code> to <code>item, err := newItem(&quot;sample!&quot;)</code> panics with message <code>valid item</code>; revert it.</p>
+<p>Work in the answer-free learner source, <code>courses/go/lessons/go-008.go</code> (<a href="../STUDY-GUIDE.md.html#work-an-exercise">exercise contract</a>).</p>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
-<p>Read a compiler error from the first location in your source, then fix one cause at a time. Unused imports and variables are errors in Go; add an import when its use exists, rather than copying a large unused import list. A panic from <code>check</code> identifies a violated example contract. Compare the actual value with the expected value and inspect the state transition that produced it. A returned <code>error</code> is a value that the caller must handle; an ignored error can make later output look plausible while the original operation failed.</p>
-<p>The lesson-specific explanations in the two examples identify the important counterexamples. Extend that reasoning to every investigation: explain why a plausible alternative would fail, and preserve a tiny input that distinguishes it. Treat empty data, missing values and cancellation as domain cases with explicit policies. In concurrent work, replace sleeps used as synchronization with channels, mutexes or an explicit ownership protocol.</p>
+<p>Assuming that copying a struct copies everything inside it is the common mistake: scalar fields are copied, but a slice, map or pointer field still refers to the same storage. The other trap is trusting a constructor to guard an invariant while its fields remain exported, so any caller can later assign an invalid value. Keep invariant-bearing fields unexported if the constructor must be the only gate.</p>
+<p>General compiler, panic and error diagnosis is in the <a href="../STUDY-GUIDE.md.html#diagnose-a-failure">study guide</a>.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <h4 id="hint-for-investigation-1-model-a-coordinate-change-one-input">Hint for investigation 1: Model a coordinate: change one input<a class="heading-anchor" href="#hint-for-investigation-1-model-a-coordinate-change-one-input" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The distance is 5.</li>
-<li>The check <code>p.X+p.Y == 5</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Compute the checked value with <code>p := Point{X: 3, Y: 3}</code> in place before running, then compare it with the value <code>p.X+p.Y == 5</code> expects.</li>
+<li>Read the keyed literal: which value is X and which is Y? Their sum is the distance used here.</li>
+<li>With X at 3 the sum is 6, so <code>p.X+p.Y==5</code> fails. The struct works; the new coordinate is simply farther from the origin.</li>
 </ol>
 <h4 id="hint-for-investigation-2-observe-scalar-copy-debug-a-regression">Hint for investigation 2: Observe scalar copy: debug a regression<a class="heading-anchor" href="#hint-for-investigation-2-observe-scalar-copy-debug-a-regression" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The original X remains 2.</li>
-<li>The check <code>a.X == 2 &amp;&amp; b.X == 9</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Compare <code>a := Point{X: 3, Y: 3}</code> with the same line in worked example 2 and state the claim each version makes.</li>
+<li>Both fields are ints. Does <code>b := a</code> give b its own copies of X and Y?</li>
+<li><code>a.X</code> starts at 3, so <code>a.X==2</code> fails even though the copy stayed independent. Restore the literal; the independence of b is not the defect.</li>
 </ol>
 <h4 id="hint-for-investigation-3-expose-a-shallow-field">Hint for investigation 3: Expose a shallow field<a class="heading-anchor" href="#hint-for-investigation-3-expose-a-shallow-field" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The original batch observes the mutation.</li>
-<li>The check <code>a.Items[0] == 9</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Predict the effect of changing <code>b.Items[0] = 9</code> to <code>b.Items[1] = 9</code> before running anything. If the prediction is hard, trace that line again with the original input.</li>
+<li>Items is a slice descriptor. After the copy, which backing array does <code>b.Items</code> point to?</li>
+<li>The copied slice descriptor still points to the same backing array.</li>
 </ol>
 <h4 id="hint-for-investigation-4-inspect-zero-state">Hint for investigation 4: Inspect zero state<a class="heading-anchor" href="#hint-for-investigation-4-inspect-zero-state" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: Both coordinates are 0.</li>
-<li>The check <code>p == (Point{X: 0, Y: 0})</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Name one input that would make <code>p == (Point{X: 0, Y: 0})</code> false. A check that no input can falsify is not evidence.</li>
+<li>Each field takes its own zero value. What is the zero value of an int field?</li>
+<li>Field zero values compose into a deterministic struct zero value.</li>
 </ol>
 <h4 id="hint-for-investigation-5-use-a-comparable-key">Hint for investigation 5: Use a comparable key<a class="heading-anchor" href="#hint-for-investigation-5-use-a-comparable-key" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The equal coordinate finds origin.</li>
-<li>The check <code>m[Point{}] == &quot;origin&quot;</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Predict the effect of changing <code>m := map[Point]string{{X: 0, Y: 0}: &quot;origin&quot;}</code> to <code>m := map[Point]string{{X: 1, Y: 0}: &quot;origin&quot;}</code> before running anything. If the prediction is hard, trace that line again with the original input.</li>
+<li>Struct equality compares fields. Is <code>Point{}</code> equal to the key stored for the origin?</li>
+<li>Equality compares corresponding fields.</li>
 </ol>
 <h4 id="hint-for-investigation-6-transfer-validation">Hint for investigation 6: Transfer validation<a class="heading-anchor" href="#hint-for-investigation-6-transfer-validation" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The empty name is rejected; the valid name is retained.</li>
-<li>The check <code>err == nil &amp;&amp; item.Name == &quot;sample&quot;</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Predict the effect of changing <code>item, err := newItem(&quot;sample&quot;)</code> to <code>item, err := newItem(&quot;sample!&quot;)</code> before running anything. If the prediction is hard, trace that line again with the original input.</li>
+<li>newItem returns a value and an error. What should each be for an empty name, and for sample?</li>
+<li>Validation at construction reduces invalid states, but exported fields still allow later assignment.</li>
 </ol>
 <h3 id="self-check-and-retrieval">Self-check and retrieval<a class="heading-anchor" href="#self-check-and-retrieval" aria-label="Link to this section">#</a></h3>
-<p>Close the reference. Rebuild one normal case and one boundary case from a blank pad. Explain the role of struct without using its name in the definition. Then change the domain while keeping the same invariant. Record the new input, your prediction and the observed output. If your program passes only because its input is hard-coded, explain which part would need a reusable function in a larger project.</p>
+<p>Without the reference, define a Rectangle with Width and Height and a constructor that rejects nonpositive sizes; check one valid and one invalid construction. Then add a <code>Tags []string</code> field, copy a Rectangle, change <code>Tags[0]</code> through the copy and predict whether the original observes it before running.</p>
+<p>The general <a href="../STUDY-GUIDE.md.html#self-check-and-retrieval">retrieval routine</a> still applies.</p>
 <h3 id="next-step-and-sources">Next step and sources<a class="heading-anchor" href="#next-step-and-sources" aria-label="Link to this section">#</a></h3>
-<p><a href="https://go.dev/ref/spec">Primary language or library documentation</a>, reviewed 2026-10-23. The teaching explanations and synthetic fixtures are original. Continue with the next lesson when you can explain the six observations and diagnose a changed case without copying its answer.</p>
+<p>Source: <a href="https://go.dev/ref/spec">The Go Programming Language Specification</a>, reviewed 2026-10-23.</p>
+<p>Next: go-009, Pointers, mutation and allocation lifetimes (<a href="../STUDY-GUIDE.md.html#when-to-move-on">criteria</a>).</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for go-008: Structs and explicit domain models.
 Read courses/go/guides/go-008.md and my saved attempt based on courses/go/lessons/go-008.go.

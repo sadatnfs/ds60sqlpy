@@ -1,8 +1,6 @@
 # dax-025: explained reference and practice reasoning
 
-This is an offline DAX editing lesson. No DAX compiler, semantic-model engine, Power BI account or network connection is required. Worked tables describe the named reference and model, not execution of your draft. Save, compare and export source; do not interpret a comparison or completion marker as a passed program run.
-
-The complete [reference source](dax-025_reference.dax) and [named model](../models/unknown-member/model.json) belong together. The reference-results sidecar binds both exact files by SHA-256. Those hashes identify bytes; they do not certify DAX execution.
+In the reference, verify that the 5 and 4 counts come from VALUES and DISTINCT over the same column, and that ISBLANK selects the blank member for the 7 USD. Your reconciliation should read 187 plus 7 equals 194. Read it beside the [reference source](dax-025_reference.dax); the [study guide](../STUDY-GUIDE.md#answers-and-references) explains how the sidecar binds it to the model.
 
 ## Worked-case reconciliation
 

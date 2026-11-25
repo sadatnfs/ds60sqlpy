@@ -1,6 +1,8 @@
 # c-022: explained solutions
 
-Compare after an attempt or explicit reveal. The complete executable reference, `c-022_solution.c`, implements all six cases, from the "preserve FIFO order" case to the "transfer stack contrast" case, in one `main.c`.
+`c-022_solution.c` assembles the "preserve FIFO order" case through the "transfer stack contrast" case in one `main.c`.
+
+Compare only after an attempt: [Compare and transfer](../STUDY-GUIDE.md#compare-and-transfer).
 
 ## Mechanism and assumptions
 
@@ -10,7 +12,7 @@ The queue stores head and count. The next insertion index is (head+count)%capaci
 
 ## Exercise 1: Preserve FIFO order: predict an edited check
 
-Copy worked example 1 into a scratch pad and change `CHECK(enqueue(&q, 2) && enqueue(&q, 5));` to `CHECK(enqueue(&q, 2) && enqueue(&q, 6));` inside its CHECK. Before running, predict whether the CHECK still holds and explain why; then restore it.
+In worked example 1, change `CHECK(enqueue(&q, 2) && enqueue(&q, 5));` to `CHECK(enqueue(&q, 2) && enqueue(&q, 6));`. Predict whether the CHECK still holds and why, then run and restore.
 
 The unchanged code is worked example 1:
 
@@ -22,7 +24,7 @@ CHECK(dequeue(&q, &out) && out == 2);
 CHECK(dequeue(&q, &out) && out == 5);
 ```
 
-**Expected:** With `CHECK(enqueue(&q, 2) && enqueue(&q, 6));` the run stops with `Check failed` at the CHECK on `dequeue(&q, &out) && out == 5`, because the "preserve FIFO order" case no longer shows that the values arrive as 2 then 5. Restoring `CHECK(enqueue(&q, 2) && enqueue(&q, 5));` brings that observation back.
+**Expected:** `Check failed`: `CHECK(enqueue(&q, 2) && enqueue(&q, 6));` is false, although the values arrive as 2 then 5.
 
 The queue contract differs from a stack, which would return 5 first.
 
@@ -36,7 +38,7 @@ The queue contract differs from a stack, which would return 5 first.
 
 ## Exercise 2: Reject an empty read: debug a regression
 
-A regression changed one token in worked example 2, the "reject an empty read" case, so one line now reads `int out = 10;`. Run the example with that line, use the failing CHECK to find why the operation fails and output stays 9 no longer holds and repair the line without changing the CHECK.
+Worked example 2 now has a line reading `int out = 10;`. Repair it so that the operation fails and output stays 9 again.
 
 The unchanged code is worked example 2:
 
@@ -46,7 +48,7 @@ int out = 9;
 CHECK(!dequeue(&q, &out) && out == 9 && q.count == 0);
 ```
 
-**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `!dequeue(&q, &out) && out == 9 && q.count == 0`. Once the line reads `int out = 9;` again, the "reject an empty read" case again shows that the operation fails and output stays 9.
+**Expected:** `Check failed` at `!dequeue(&q, &out) && out == 9 && q.count == 0` until the line reads `int out = 9;` again.
 
 No element is read before the occupancy check. Zero cannot be used as an empty sentinel because zero may be a real item.
 

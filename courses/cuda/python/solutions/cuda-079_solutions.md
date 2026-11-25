@@ -1,6 +1,6 @@
 # cuda-079: explained solutions
 
-These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.
+Compare with your [worksheet](../lessons/cuda-079.md) attempt.
 
 ## Exercise 1: Count touched segments
 
@@ -74,8 +74,16 @@ Hold dtype shape and output fixed and inspect real counters.
 
 **How to verify.** Before reading counters, check both kernels produce the same output. Record GPU model, driver and profiler versions; without a GPU, report the experiment as designed but not run.
 
+## Self-check answers
+
+1. **Why can neighboring lanes reading neighboring elements be cheaper?** Their bytes fall in few aligned segments, so the hardware serves them with fewer memory transactions than widely strided accesses.
+
+2. **What problem does a tiled transpose address?** A naive transpose has contiguous reads but strided writes. Staging a tile in shared memory lets both the reads and the writes stay contiguous.
+
+3. **Why can padding a shared tile have a cost?** Padding may reduce bank conflicts for one layout, but it consumes shared capacity that could otherwise hold more data or more resident blocks.
+
 ## Reference observation
 
 Simplified segment counts 1 and 8, not hardware measurements.
 
-The reference file is `courses/cuda/python/references/cuda-079_cpu.py`. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.
+Asserted by `courses/cuda/python/references/cuda-079_cpu.py`.

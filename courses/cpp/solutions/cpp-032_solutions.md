@@ -1,6 +1,6 @@
 # cpp-032: explanations and reference observations
 
-Attempt the learner tasks before opening this document. The executable reference checks the bounded normal and boundary examples; the six explanations below cover the deliberate changes and manual checks.
+The [executable reference](cpp-032_solution.cpp) checks that an empty set of results sums to 0. The explanations cover futures, stored exceptions and the capacity-4 queue in Exercise 6. How to compare: [study guide](../STUDY-GUIDE.md#compare-with-the-solutions).
 
 ## Mechanism
 

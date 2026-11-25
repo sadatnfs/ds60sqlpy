@@ -6,7 +6,16 @@ Advanced, approximately 120 minutes. Direct prerequisites: `java-027`
 
 ## Learning objectives
 
-Serve and call an owned loopback HTTP endpoint and keep status, method and route errors distinct. Along the way, explain http status, loopback binding, request timeout, exchange lifetime using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. Exercises 1 and 2 start from the worked examples; the authored investigations begin with this task: POST to /health under a GET-only contract. The final exercise transfers the mechanism to verify local-only target and closure.
+Serve and call an owned loopback HTTP endpoint and keep status, method and route errors distinct.
+
+The six exercises practice these steps:
+
+- Call an owned loopback endpoint.
+- Inspect content metadata.
+- Reject an unsupported method.
+- Reject a prefix lookalike.
+- Keep error status separate from transport success.
+- Verify local-only target and closure.
 
 ## Purpose and mental model
 
@@ -26,16 +35,9 @@ This lesson starts one short-lived server bound only to 127.0.0.1 on an operatin
 
 ## How to run this lesson
 
-Open the Docker classroom, choose the prepared Java 21 profile and save a learner pad. The pad is compiled as `Main.java` with `javac --release 21` and executed with `java -ea Main`. Assertions are enabled deliberately. A successful assertion has no output; a failed assertion throws `AssertionError` and the process should fail. Do not remove assertions to obtain a green result.
+`LocalServer` binds the JDK `HttpServer` to 127.0.0.1 on a port the operating system picks, serves one `/health` handler, and stops in `close`; every request carries a two-second timeout and nothing leaves the machine.
 
-For a prepared native JDK, copy a worked example into your own `Main.java` under ignored `.learning/expansion/java-028/`. From that directory run the same two commands on PowerShell, macOS or Linux:
-
-```text
-javac --release 21 Main.java
-java -ea Main
-```
-
-The public class name and source filename must agree. Each worked example below is a complete file. Example B includes the setup it needs from Example A, so it can be compiled by itself. The six exercise reference blocks form one complete program in the separate solution. Keep your original prediction, source and diagnostic text together. Most examples use prepared JDK libraries and tiny local fixtures; any additional dependency is specified in the lesson notes below. Any lesson-specific library or additional file is named explicitly; do not download packages from inside a learner program. Resource examples close their owned files, executors or loopback servers.
+Classroom and native JDK steps, the exercise controls and the hint routine are in the [Java study guide](../STUDY-GUIDE.md).
 
 
 
@@ -217,62 +219,62 @@ public class Main {
 
 ## Prediction before your attempt
 
-Read the source from the entry point and name each value before executing it. Identify which operations create new values, which mutate existing state and which can fail. Predict the first observable output or assertion result. For a compile-time failure, explain which source rule is violated before discussing runtime state: a program that did not compile never reached its main method. Keep normal, boundary and invalid inputs separate so each check has a clear purpose.
+Before running Example A, decide what status and body a `GET /health` receives, and what the handler sends for `GET /health!` given that `createContext("/health", ...)` matches by prefix. For Example B, predict the exact `Content-Type` header value, including the charset. Before Exercise 3, decide whether a `POST` to the same path should reach the success branch or be rejected first.
 
 ## Exercises
 
-1. **Call an owned loopback endpoint: change one input.** Copy Example A into a scratch `Main.java` and change `java.net.http.HttpRequest.newBuilder(server.uri("/health"))` to `java.net.http.HttpRequest.newBuilder(server.uri("/health!"))`. Before running it with `java -ea Main`, predict which assertion fails and which value it now sees; then run it and restore the original line.
-   **Expected:** The changed run fails with an `AssertionError` from the assertion on `response.statusCode() == 200 && response.body().equals("ok")`. Restoring the original line brings back the worked observation: status 200 and body ok.
-   **Verify:** Compare your written prediction with the reported `AssertionError` and its stack-trace line, and name the value that made `response.statusCode() == 200 && response.body().equals("ok")` false. After restoring the line, the program completes without an `AssertionError` again.
+1. **Call an owned loopback endpoint: change one input.** Change `java.net.http.HttpRequest.newBuilder(server.uri("/health"))` to `java.net.http.HttpRequest.newBuilder(server.uri("/health!"))` in Example A and predict which assertion fails and why.
+   **Expected:** The edited run fails with an `AssertionError` from the assertion on `response.statusCode() == 200 && response.body().equals("ok")`.
+   **Verify:** Name the value that makes `response.statusCode() == 200 && response.body().equals("ok")` false, then restore the line.
 
-2. **Inspect content metadata: diagnose an edited check.** A careless edit changed the assertion that Example B adds after Example A so that it reads `.equals("text/plain; charset=utf-9");`. Run Example B with that line, explain why the edited assertion now fails for the same program state, and restore it.
-   **Expected:** Before the repair the run fails with an `AssertionError` from the assertion on `response.headers().firstValue("Content-Type").orElseThrow().equals("text/plain; charset=utf-8")`; after it the line reads `.equals("text/plain; charset=utf-8");` again and text/plain with UTF-8 charset.
-   **Verify:** Keep the failing and the repaired runs. Explain why the edited assertion rejects the same program state that `response.headers().firstValue("Content-Type").orElseThrow().equals("text/plain; charset=utf-8")` accepts.
+2. **Inspect content metadata: diagnose an edited check.** Example B's new assertion was edited to `.equals("text/plain; charset=utf-9");`. Explain why it fails for unchanged state and restore it.
+   **Expected:** The edited run fails with an `AssertionError` from the assertion on `response.headers().firstValue("Content-Type").orElseThrow().equals("text/plain; charset=utf-8")`; the restored assertion passes.
+   **Verify:** Explain why the edited assertion rejects the state that `response.headers().firstValue("Content-Type").orElseThrow().equals("text/plain; charset=utf-8")` accepts.
 
 3. **Reject an unsupported method.** POST to /health under a GET-only contract.
    **Expected:** status 405 and method not allowed body.
-   **Verify:** Keep an assertion equivalent to `response.statusCode() == 405 && response.body().equals("method not allowed")`. As a control, change `var request = java.net.http.HttpRequest.newBuilder(server.uri("/health"))` to `var request = java.net.http.HttpRequest.newBuilder(server.uri("/health!"))`: the run must fail with an `AssertionError` from the assertion on `response.statusCode() == 405 && response.body().equals("method not allowed")`. Restore the line before continuing.
+   **Verify:** Control: changing `var request = java.net.http.HttpRequest.newBuilder(server.uri("/health"))` to `var request = java.net.http.HttpRequest.newBuilder(server.uri("/health!"))` must fail the assertion on `response.statusCode() == 405 && response.body().equals("method not allowed")`.
 
 4. **Reject a prefix lookalike.** GET/health-extra, which matches the context prefix but not the declared exact path.
    **Expected:** status 404.
-   **Verify:** Keep an assertion equivalent to `response.statusCode() == 404`. As a control, change `assert response.statusCode() == 404;` to `assert response.statusCode() != 404;` inside it: the run must fail with an `AssertionError`, which shows the assertion can fail. Restore it.
+   **Verify:** Control: changing `assert response.statusCode() == 404;` to `assert response.statusCode() != 404;` inside the assertion must make it fail.
 
 5. **Keep error status separate from transport success.** GET an unknown path and inspect the completed response.
    **Expected:** HTTP exchange completes with 404 rather than a fabricated 200.
-   **Verify:** Keep an assertion equivalent to `response.statusCode() == 404`. As a control, change `assert response.statusCode() == 404;` to `assert response.statusCode() != 404;` inside it: the run must fail with an `AssertionError`, which shows the assertion can fail. Restore it.
+   **Verify:** Control: changing `assert response.statusCode() == 404;` to `assert response.statusCode() != 404;` inside the assertion must make it fail.
 
 6. **Verify local-only target and closure.** Inspect the bound host and positive ephemeral port, then close the wrapper.
    **Expected:** host 127.0.0.1; port positive; closed flag true.
-   **Verify:** Keep an assertion equivalent to `owned.closed` and confirm that `java -ea Main` completes. Then name an input that would make it fail and explain which value changes.
+   **Verify:** Name an input that would make `owned.closed` false and the value that changes.
 
 ## Common pitfalls and diagnosis
 
-When a check fails, keep the smallest source file that still demonstrates the failure. Read the first relevant compiler diagnostic before editing several lines; later diagnostics can be consequences of the same missing delimiter or wrong type. For a runtime exception, identify the first frame belonging to your code and compare its input with the method contract. For an assertion failure, inspect the actual value and the independent expected value. A passing process exit is weaker than a checked invariant, and a checked invariant applies only under its stated assumptions.
+The JDK `HttpClient` does not throw for a 404 or 500: the exchange succeeded, so code that reads the body without checking `statusCode()` parses an error page as data. `HttpServer.createContext` matches by prefix, so `/health-extra` reaches the same handler unless it checks the exact path. A handler that forgets to close the exchange leaks the connection. Binding to 0.0.0.0 exposes a test server to the network, and a request without a timeout can wait forever.
 
-Do not replace a precise exception with a catch-all that returns a plausible default. That can hide an invalid input or an unfinished operation. If an example owns a resource, verify its lifetime on both the success and failure paths. If an operation is concurrent, use ordering primitives to establish the relationship you need; an observed timing coincidence is not a synchronization guarantee. The solution explanations identify the specific alternative that would break each exercise.
+General compiler, runtime and assertion triage: [diagnose a failure](../STUDY-GUIDE.md#diagnose-a-failure).
 
 ## Progressive hints
 
-Read one hint at a time and attempt the exercise again before reading the next. Keep a small table of input, expected value, actual value and exception type. Ask for one hint about the first incorrect assumption before requesting the entire reference implementation.
+Read one rung at a time, as described in [using hints](../STUDY-GUIDE.md#use-hints-one-at-a-time).
 
-- **Exercise 1:** First restate the expected observation: status 200 and body ok. Then list the values read by `response.statusCode() == 200 && response.body().equals("ok")` and trace each one from its declaration. Finally, compute the asserted value with `java.net.http.HttpRequest.newBuilder(server.uri("/health!"))` in place before running.
-- **Exercise 2:** First restate the expected observation: text/plain with UTF-8 charset. Then list the values read by `response.headers().firstValue("Content-Type").orElseThrow().equals("text/plain; charset=utf-8")` and trace each one from its declaration. Finally, compare `.equals("text/plain; charset=utf-9");` with the same line in Example B and state the claim each version makes.
-- **Exercise 3:** First restate the expected observation: status 405 and method not allowed body. Then list the values read by `response.statusCode() == 405 && response.body().equals("method not allowed")` and trace each one from its declaration. Finally, predict the effect of changing `var request = java.net.http.HttpRequest.newBuilder(server.uri("/health"))` to `var request = java.net.http.HttpRequest.newBuilder(server.uri("/health!"))` before running anything.
-- **Exercise 4:** First restate the expected observation: status 404. Then list the values read by `response.statusCode() == 404` and trace each one from its declaration. Finally, name one input that would make `response.statusCode() == 404` false.
-- **Exercise 5:** First restate the expected observation: HTTP exchange completes with 404 rather than a fabricated 200. Then list the values read by `response.statusCode() == 404` and trace each one from its declaration. Finally, name one input that would make `response.statusCode() == 404` false.
-- **Exercise 6:** First restate the expected observation: host 127.0.0.1; port positive; closed flag true. Then list the values read by `owned.closed` and trace each one from its declaration. Finally, name one input that would make `owned.closed` false.
+- **Exercise 1:** First note that the edit requests `/health!`. Then follow it through the handler: the prefix context accepts it, but the exact path check fails. Finally, predict a 404 with body "not found" instead of 200 with "ok".
+- **Exercise 2:** First note that the in-check edit expects `charset=utf-9`. Then read the header the handler actually sets, `text/plain; charset=utf-8`. Finally, explain why the request succeeded and only the metadata comparison fails.
+- **Exercise 3:** First build a request to `/health` with `POST(HttpRequest.BodyPublishers.noBody())`. Then send it with a two-second timeout and read the status and body. Finally, assert 405 and "method not allowed", and say why validation must happen before any work.
+- **Exercise 4:** First request `/health-extra`, which the prefix context still routes to the handler. Then read the status the exact path check produces. Finally, assert 404 and explain what would happen if the handler trusted the context alone.
+- **Exercise 5:** First request an unknown path such as `/missing` on the same server. Then confirm that `client.send` returned normally with no exception. Finally, assert status 404 and explain why the caller, not the transport, decides that the request failed.
+- **Exercise 6:** First create a `LocalServer` without try-with-resources. Then read the host and port from `uri("/health")` and assert 127.0.0.1 and a positive port. Finally, call `close()` and assert the `closed` flag.
 
 ## Self-check and retrieval
 
-Close the solution and explain HTTP status, Loopback binding, Request timeout in your own words. Reconstruct one example from a blank `Main.java`, then add a new boundary input. Explain why the new case should pass or fail before compiling it. Identify a situation where this technique is appropriate and one where a different data structure, lifetime policy or abstraction would be clearer. This is a reasoning check, not a memorization test for an API spelling.
+From memory, explain why a completed HTTP exchange can still be a failure, how the handler distinguishes 200, 404 and 405, why the context needs an exact path check, and which two settings keep this fixture local and bounded.
 
 ## Next step
 
-Preserve the saved pad and the six exercise observations. Continue to the next lesson only when you can explain the invariants without reading the answer. Later chapters reuse these contracts in larger programs, so keep a failing counterexample as well as a repaired result. A reference implementation demonstrates one valid design under the stated assumptions; it is not a universal design rule.
+Continue with `java-029`: JDBC and transactions. Keep your six observations; see [moving on](../STUDY-GUIDE.md#move-to-the-next-lesson).
 
 ## Sources and verification status
 
-[Official Java 21 API or language reference](https://docs.oracle.com/en/java/javase/21/docs/api/jdk.httpserver/com/sun/net/httpserver/HttpServer.html), reviewed 2026-10-22. Examples and exercise fixtures are original course material. Use the [validation guide](../../../docs/validation.md) and CI artifacts for the exact revision and platform to inspect actual compile/run results. Authoring, parsing, compilation, execution and learner mastery are separate forms of evidence.
+[Official Java 21 API or language reference](https://docs.oracle.com/en/java/javase/21/docs/api/jdk.httpserver/com/sun/net/httpserver/HttpServer.html), reviewed 2026-10-22. Evidence levels: [sources and evidence](../STUDY-GUIDE.md#sources-and-evidence).
 
 ## Ask an AI tutor about this lesson
 

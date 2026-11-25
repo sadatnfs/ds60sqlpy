@@ -248,15 +248,15 @@ _<span class="syntax-punctuation">,</span> _<span class="syntax-punctuation">,</
 <p>Trace profile parsing, service origin, credential acceptance, share/schema/table identity, metadata response and data retrieval independently. Use verified TLS and reject credential-bearing redirects. Preserve sanitized status and logical identities, while leaving secrets and signed URLs out of notebooks and evidence.</p>
 <p><strong>Interview discussion: is Delta Sharing simply a Delta file reader?</strong> No. It adds discovery and recipient access through a service protocol, with a separate data-retrieval path. These cases establish a specific discovery contract and an actual rejected-recipient boundary before any claim about reading table rows.</p>
 <h3 id="complete-worked-source">Complete worked source<a class="heading-anchor" href="#complete-worked-source" aria-label="Link to this section">#</a></h3>
-<p>This is a project-only command notebook. Read and edit it in the classroom; run its explicitly labeled commands from the copied owned Docker workshop. The classroom does not execute these service commands.</p>
+<p>The classroom does not execute these service commands. See the <a href="../STUDY-GUIDE.md.html#workshop-notebooks">workshop rules</a>.</p>
 <h2 id="delta-sharing-apache-075-prepared-command-notebook">Delta Sharing apache-075 prepared command notebook<a class="heading-anchor" href="#delta-sharing-apache-075-prepared-command-notebook" aria-label="Link to this section">#</a></h2>
-<p>Copy the owned Delta Sharing project and follow PREPARATION.md. Delta Sharing belongs to Delta Lake/Linux Foundation. The offline preparation actions are:</p>
+<p>Copy the Delta Sharing project, a Delta Lake and Linux Foundation tool rather than an Apache one, and read PREPARATION.md. <code>prepare</code> only confirms the native client image, and the first <code>plan</code> creates the owned namespace and prints the expected rows with <code>server_contacted</code> false:</p>
 <pre class="highlighted-code"><code class="language-bash">bash run.sh prepare
 bash run.sh plan</code></pre>
-<p>For a separately prepared actual owned reference server and untracked recipient profile, the bounded native Docker protocol client runs with:</p>
+<p>The check needs a reference server you prepared yourself and a recipient profile kept under the untracked <code>.workshop/</code> directory:</p>
 <pre class="highlighted-code"><code class="language-bash">bash run.sh check</code></pre>
 <p>The actual check lists the exact owned share/schema/table and requires an invalid-recipient 401 or 403 before accepting its bounded row read.</p>
-<p>The classroom Markdown pad does not start a service. Source configuration and unit policy fixtures are not actual reference-server receipts. Keep credentials and signed URL query strings out of all published source and evidence.</p>
+<p>The pad never starts a server. Keep the bearer token and any signed URL query string out of the receipt; record the listed share, schema and table names and the 401 or 403 code instead.</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
 <ul>
 <li><a href="https://github.com/delta-io/delta-sharing/blob/v1.4.1/PROTOCOL.md">Delta Sharing protocol</a></li>

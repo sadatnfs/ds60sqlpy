@@ -4,18 +4,15 @@
 
 Advanced; about 130 minutes, plus any optional hardware experiment. Direct prerequisites: `cuda-019`, `cuda-046`, `cuda-053`, `cuda-056`
 
-The order supports learning at your own pace. Reading and CPU reasoning remain
-available when NVIDIA hardware is absent. Advanced hardware features need their
-own capability checks and are not prerequisites for opening this chapter.
+Pacing, evidence labels and platform rules for every chapter are in the [CUDA study guide](../../STUDY-GUIDE.md).
 
 ## Learning objectives
 
 Configure a CUTLASS or CuTe kernel with correct layouts and benchmark it against a library baseline.
 
-Work through *CUTLASS, CuTe and tile abstractions* with the concrete cases below. Finish with this evidence:
-correct layouts, supported feature declaration and benchmark against an appropriate library baseline. Distinguish an algorithmic
-calculation, a compiled artifact and an actual device observation when explaining
-what your work establishes.
+**Scope:** Layout composition, tile shapes, operation atoms, epilogues and policy choices.
+
+**Evidence to produce:** Correct layouts, supported feature declaration and benchmark against an appropriate library baseline.
 
 ## Purpose, vocabulary and mental model
 
@@ -30,28 +27,17 @@ CUTLASS supplies composable matrix-operation building blocks, while CuTe provide
 
 ## How to run and study this lesson
 
-Use the saved reading worksheet in `/classroom`; the reading pad does not execute
-CUDA. For the bounded calculation, select **CPU model (Python)**, whose
-answer-free starter supplies the literal fixtures and task contract. The
-[CUDA C++ study workflow](../README.md) covers platforms, optional GPU
-compilation and evidence labels. In a prepared Python environment you can also
-run the separate [CPU reference](../references/cuda-058_cpu.py) from the
-repository root:
+Trace worked example 1 by hand, then run the [CPU reference](../references/cuda-058_cpu.py) from the repository root:
 
 ```sh
 python courses/cuda/cpp/references/cuda-058_cpu.py
 ```
 
-Its assertions check the stated numerical result or model invariant; console
-text is evidence of this CPU model only, not of CUDA execution.
-
 ## Worked example 1: trace the mechanism
 
 A 2-by-3 logical tile with strides (3,1) maps coordinate (1,2) to offset five. A transposed view uses shape (3,2) and strides (1,3), mapping (2,1) to the same offset. Trace tiny layouts before interpreting a large template type.
 
-The complete CPU model below intentionally models only the named arithmetic,
-layout, dependency or capability decision. It does not model GPU scheduling,
-caches, instruction timing or device memory visibility.
+**Why:** Coordinate (1, 2) gives 3 + 2 = 5, and the transposed (2, 1) gives 2 + 3 = 5, so both name the same element.
 
 ```python
 assert 1 * 3 + 2 == 5
@@ -63,41 +49,37 @@ assert correct == [0, 2, 5] and wrong == [1, 2, 5]
 print({"correct_epilogue": correct, "changed_operation_order": wrong})
 ```
 
-**Expected observation:** Every assertion succeeds. A representative CPU output is:
+**Expected observation:** every assertion succeeds, and the CPU model prints:
 
 ```text
 {'correct_epilogue': [0, 2, 5], 'changed_operation_order': [1, 2, 5]}
 ```
 
-Integers, shapes and ordering must match exactly; only assertions with an explicit
-tolerance accept small floating-point differences. A printed duration is a model
-output, not a measured GPU benchmark.
+**Check:** The reference asserts 1 * 3 + 2 == 5 and 2 * 1 + 1 * 3 == 5.
 
 ## Worked example 2: change a meaningful condition
 
 An epilogue applies bias then ReLU to accumulated values \([-2,1,4]\) with bias one, producing \([0,2,5]\). Moving the bias after ReLU would produce \([1,2,5]\), changing semantics. A fused epilogue must match the reference order, type conversion and scaling contract.
 
-Before applying this example to your own program, write down which inputs are
-read, which result is produced, and the condition that makes the comparison
-valid. Keep the original case as a regression check when changing a boundary.
+**Why:** ReLU gives [0, 2, 5], matching the reference order of operations.
+
+**Check:** The reference asserts correct == [0, 2, 5] and wrong == [1, 2, 5].
 
 ## Six progressive exercises
 
-Exercises 1 and 2 are guided reconstructions of the worked examples; exercises
-3-6 change an input, diagnose a defect, test a boundary and transfer the idea.
-For each one, keep the calculation, output, diagram or failure policy you
-produce so another reader can compare it with the worked cases. If the hint is
-not enough, reread the mechanism paragraph and the bounded CPU assertion.
-
 ### Exercise 1
 
-Predict and trace the first worked example before running its CPU reference. Write every intermediate quantity that leads to the stated result, including units or ownership where applicable.
+Reconstruct worked example 1 on paper before running its CPU reference. Compute offset as row times stride 3 plus column times stride 1 for the 2-by-3 tile, then apply the transposed view's strides (1, 3).
+
+**Trap to avoid:** Swapping shape without swapping strides makes the transposed view index the wrong memory entirely.
 
 **Hint:** Start with the literal input and intermediate quantities in worked example 1.
 
 ### Exercise 2
 
-Reconstruct the second worked example without copying its conclusion. Identify the changed input or condition, show the resulting calculation or dependency, and explain why it differs from the first example.
+Rework worked example 2 without copying its conclusion. Add bias 1 to accumulators [-2, 1, 4] for [-1, 2, 5], then apply ReLU.
+
+**Trap to avoid:** Applying ReLU first and adding bias afterward gives [1, 2, 5], which changes the first element.
 
 **Hint:** Identify exactly which condition changes in worked example 2.
 
@@ -105,11 +87,15 @@ Reconstruct the second worked example without copying its conclusion. Identify t
 
 Compute offset (1,1) under shape (2,3), strides (3,1).
 
+**Trap to avoid:** Using shape (2, 3) as strides gives 1 * 2 + 1 * 3 = 5, the wrong element.
+
 **Hint:** Use the first worked example to establish the relevant quantities, then change only the requested input.
 
 ### Exercise 4
 
 A template instantiation compiles but fails on the target device. What is missing?
+
+**Trap to avoid:** Treating a clean compile as proof of support ignores runtime dispatch requirements.
 
 **Hint:** Locate the failed phase or violated dependency before proposing a repair.
 
@@ -117,35 +103,33 @@ A template instantiation compiles but fails on the target device. What is missin
 
 How should a non-tile-aligned matrix be handled?
 
+**Trap to avoid:** Assuming the padding is zero adds garbage into partial tiles.
+
 **Hint:** Check what the algorithm is allowed to read, write or assume at this boundary.
 
 ### Exercise 6
 
 When would you choose a library epilogue over a custom kernel?
 
+**Trap to avoid:** Writing a custom kernel before checking the library duplicates tested work.
+
 **Hint:** State the output contract and which observations are needed in the new application.
 
 ## Common mistakes and diagnosis
 
-A tempting but incorrect claim in this chapter is: **a template library removes the need to understand layout or architecture support. , .**
-
-For the concrete failure exercise, a template instantiation compiles but fails on the target device. What is missing?
-Preserve the original input and the stage where behavior diverged, and compare
-with the CPU model before changing hardware configuration.
+A tempting but incorrect claim: **A template library removes the need to understand layout or architecture support.** Templates encode tile and layout choices but do not check that they match your data or device. A wrong stride compiles and silently computes the wrong offsets, and an instantiation can target instructions the device lacks. Trace a tiny layout by hand, as worked example 1 does, and confirm architecture support.
 
 ## Self-check, retrieval and transfer
 
-Explain the first example without its code, then use the second example to state
-one assumption that matters. Complete Exercise 3 independently, use Exercise 4 to
-diagnose a plausible defect, check the boundary in Exercise 5, and retain the
-application contract from Exercise 6. Compare the [separate explanations](../solutions/cuda-058_solutions.md)
-only after your attempt or a deliberate reveal. A reading marker records your
-choice; it does not certify hardware qualification or expert mastery.
+1. What offset does (1,1) map to under shape (2,3) and strides (3,1)?
+2. What does worked example 2 produce when bias comes after ReLU?
+3. An instantiation compiles but fails on the device. What is missing?
+
+Short answers are in the [separate explanations](../solutions/cuda-058_solutions.md#self-check-answers); compare only after an attempt.
 
 ## Primary references
 
-Check the documentation that matches your prepared toolkit before optional
-hardware execution.
+Use the documentation that matches your prepared toolkit.
 
 - [CUTLASS](https://docs.nvidia.com/cutlass/latest/overview.html)
 - [CUDA Tile chapter](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/writing-tile-kernels.html)

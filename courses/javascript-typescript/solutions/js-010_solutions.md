@@ -1,6 +1,6 @@
 # js-010: explanatory solutions
 
-Use these answers after an attempt or an explicit reveal. The reference uses the same literal fixtures as the guide and keeps the exercises in separate scopes. A successful run checks these examples; explaining a changed input is a separate learning goal.
+Open these after your own attempt; each exercise runs in its own scope in the reference.
 
 ## Mechanism review
 
@@ -24,7 +24,7 @@ An export declaration exposes a binding. import() returns a Promise for the modu
 
 ## Exercise 1: Observe a live binding: change one input
 
-Task: Copy Example A into a scratch `main.mjs` and change `1;` to `2;`. Before running it, predict which check fails and which value it now sees; then run it and restore the original line.
+Task: In a scratch copy of Example A, change `1;` to `2;`. Which check fails, and what value does it see?
 
 The importer receives a binding view. Copying count into a local number would instead preserve the value read at that moment. The distinction becomes visible only after the exporter changes state.
 
@@ -42,13 +42,13 @@ await withModules(
 );
 ```
 
-**Expected:** The changed run fails with an `AssertionError` at `assert.equal(module.count, 1)`. Restoring `1;` brings back: count changes from 0 to 1 through the imported namespace.
+**Expected:** The edited run fails with an `AssertionError` at `assert.equal(module.count, 1)`. Restoring `1;` brings back: count changes from 0 to 1 through the imported namespace.
 
-**Verify:** Compare your written prediction with the reported `AssertionError`, including its actual and expected values, and name the value that made `assert.equal(module.count, 1)` fail. After restoring the line, the program prints its `{"checks":1,"status":"passed"}` receipt again.
+**Verify:** Compare the reported actual and expected values with your prediction, then restore `1;`.
 
 ## Exercise 2: Resolve a relative dependency: debug a regression
 
-Task: A regression changed one token in Example B, so one line now reads `3`. Run Example B with that line, use the failing check to locate the defect and repair it without changing the check.
+Task: A regression made one Example B line read `3`. Locate and repair it without editing the check.
 
 The relative path is resolved from the importing file, not from the process working directory. Naming the .mjs extension makes the loader contract explicit.
 
@@ -69,7 +69,7 @@ await withModules(
 
 **Expected:** Before the repair the run fails with an `AssertionError` at `assert.equal(module.answer, 8)`. Restoring `2` brings back: answer equals 8.
 
-**Verify:** Keep the failing and the repaired runs. Explain why the changed token alters the value tested by `assert.equal(module.answer, 8)` for this input.
+**Verify:** Keep the failing and repaired runs and name the first value that differs between them.
 
 ## Exercise 3: Prove cached module identity
 
@@ -89,7 +89,7 @@ await withModules({ 'state.mjs': 'export const state = { visits: 0 };' }, async 
 
 **Expected:** both namespace and object identities are shared.
 
-**Verify:** Keep a check equivalent to `assert.equal(first.state, second.state)` and confirm that the reference still passes. Then name an input that would make it fail and explain which value changes.
+**Verify:** Keep the check `assert.equal(first.state, second.state)`; name an input that would make it fail and the value that changes.
 
 ## Exercise 4: Inspect CommonJS interoperability
 
@@ -106,7 +106,7 @@ await withModules({ 'legacy.cjs': "module.exports = { label: 'legacy' };" }, asy
 
 **Expected:** default.label equals legacy.
 
-**Verify:** Keep a check equivalent to `assert.equal(module.default.label, 'legacy')`. As a control, change `assert.equal(module.default.label, 'legacy');` to `assert.equal(module.default.label, 'legacy!');` inside it: the run must fail with an `AssertionError`, which shows the check can fail. Restore it.
+**Verify:** Keep `assert.equal(module.default.label, 'legacy')`. Control: editing it to `assert.equal(module.default.label, 'legacy!');` must make the check fail; then restore it.
 
 ## Exercise 5: Reject a missing dependency
 
@@ -125,7 +125,7 @@ await withModules({ 'broken.mjs': "import './missing.mjs';" }, async (directory)
 
 **Expected:** ERR_MODULE_NOT_FOUND.
 
-**Verify:** Keep a check equivalent to `assert.rejects(import(pathToFileURL(join(directory, 'broken.mjs')).href), (error) => error.code === 'ERR_MODULE_NOT_FOUND')`. As a control, change `await withModules({ 'broken.mjs': "import './missing.mjs';" }, async (directory) => {` to `await withModules({ 'broken.mjs': "import './missing.mjs';!" }, async (directory) => {`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
+**Verify:** Keep `assert.rejects(import(pathToFileURL(join(directory, 'broken.mjs')).href), (error) => error.code === 'ERR_MODULE_NOT_FOUND')`. Control: changing `await withModules({ 'broken.mjs': "import './missing.mjs';" }, async (directory) => {` to `await withModules({ 'broken.mjs': "import './missing.mjs';!" }, async (directory) => {` must make that check fail; then restore it.
 
 ## Exercise 6: Respect namespace ownership
 
@@ -145,8 +145,8 @@ await withModules({ 'fixed.mjs': 'export let value = 3;' }, async (directory) =>
 
 **Expected:** TypeError; exported value remains 3.
 
-**Verify:** Keep a check equivalent to `assert.equal(module.value, 3)`. As a control, change `await withModules({ 'fixed.mjs': 'export let value = 3;' }, async (directory) => {` to `await withModules({ 'fixed.mjs': 'export let value = 4;' }, async (directory) => {`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
+**Verify:** Keep `assert.equal(module.value, 3)`. Control: changing `await withModules({ 'fixed.mjs': 'export let value = 3;' }, async (directory) => {` to `await withModules({ 'fixed.mjs': 'export let value = 4;' }, async (directory) => {` must make that check fail; then restore it.
 
 ## After comparison
 
-Return to your saved implementation and repeat a case with different values. Keep compiler diagnostics, process output and browser observations separate. Do not suppress a failing assertion or use a type assertion to declare an unvalidated value safe. Resource-owning examples must finish cleanup even when work fails. Describe each result with its actual host and fixture scope rather than as production acceptance.
+Fresh case: import one file as `./state.mjs` and again as `./state.mjs?copy`. Predict whether the two namespaces share state; the module cache is keyed by the full URL, so the query string creates a second instance. ([After comparing](../STUDY-GUIDE.md#after-comparing-with-the-solution).)

@@ -195,7 +195,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="dbt-003-explained-reference">dbt-003: explained reference<a class="heading-anchor" href="#dbt-003-explained-reference" aria-label="Link to this section">#</a></h2>
 <p>Choose a materialization using observed database behavior and a stated workload.</p>
-<p>The executable reference contains the two complete worked cases with assertions. The changes below explain the independent practice and its limits.</p>
+<p>The reference reads <code>depends_on</code> from the manifest, checks information_schema for a VIEW and a BASE TABLE, and confirms that an ephemeral model becomes the <code>__dbt__cte__base</code> CTE inside compiled SQL. It does not measure query speed, so it cannot settle which materialization is cheaper. See <a href="../STUDY-GUIDE.md.html#answers-and-references">how these answers are laid out</a>.</p>
 <h3 id="1-remove-a-declared-edge">1. Remove a declared edge<a class="heading-anchor" href="#1-remove-a-declared-edge" aria-label="Link to this section">#</a></h3>
 <p>The query may still run if the relation already exists, but build ordering and state selection lose the declared relationship.</p>
 <p><strong>Expected:</strong> The explicit dependency disappears.</p>

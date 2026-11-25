@@ -1,6 +1,8 @@
 # c-027: explained solutions
 
-Compare after an attempt or explicit reveal. The complete executable reference, `c-027_solution.c`, implements all six cases, from the "exercise successful allocation" case to the "transfer a distinguishing content check" case, in one `main.c`.
+`c-027_solution.c` assembles the "exercise successful allocation" case through the "transfer a distinguishing content check" case in one `main.c`.
+
+Compare only after an attempt: [Compare and transfer](../STUDY-GUIDE.md#compare-and-transfer).
 
 ## Mechanism and assumptions
 
@@ -10,7 +12,7 @@ A function pointer supplies allocation behavior. The fixture allocator either de
 
 ## Exercise 1: Exercise successful allocation: predict an edited check
 
-Copy worked example 1 into a scratch pad and change `CHECK(copy_with_allocator("abc", &out, controlled_alloc));` to `CHECK(copy_with_allocator("abc!", &out, controlled_alloc));` inside its CHECK. Before running, predict whether the CHECK still holds and explain why; then restore it.
+In worked example 1, change `CHECK(copy_with_allocator("abc", &out, controlled_alloc));` to `CHECK(copy_with_allocator("abc!", &out, controlled_alloc));`. Predict whether the CHECK still holds and why, then run and restore.
 
 The unchanged code is worked example 1:
 
@@ -22,13 +24,15 @@ CHECK(strcmp(out, "abc") == 0);
 free(out);
 ```
 
-**Expected:** With `CHECK(copy_with_allocator("abc!", &out, controlled_alloc));` the run stops with `Check failed` at the CHECK on `strcmp(out, "abc") == 0`, because the "exercise successful allocation" case no longer shows that the output owns an equal string. Restoring `CHECK(copy_with_allocator("abc", &out, controlled_alloc));` brings that observation back.
+**Expected:** `Check failed`: `CHECK(copy_with_allocator("abc!", &out, controlled_alloc));` is false, although the output owns an equal string.
+
+**Verify:** Explain which claim `CHECK(copy_with_allocator("abc!", &out, controlled_alloc));` makes that the state fails; restoring `CHECK(copy_with_allocator("abc", &out, controlled_alloc));` passes again.
 
 The test checks content and then releases the owned result.
 
 ## Exercise 2: Inject allocation failure: debug a regression
 
-A regression changed `fail_allocation = true;` to `fail_allocation = false;` in worked example 2, the "inject allocation failure" case. Run the example with that change, use the failing CHECK to explain why the copy fails and output remains NULL no longer holds and repair it without changing the CHECK.
+In worked example 2, `fail_allocation = true;` now reads `fail_allocation = false;`. Repair it so that the copy fails and output remains NULL again.
 
 The unchanged code is worked example 2:
 
@@ -40,7 +44,9 @@ CHECK(out == NULL);
 fail_allocation = false;
 ```
 
-**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `!copy_with_allocator("abc", &out, controlled_alloc)`. Once the line reads `fail_allocation = true;` again, the "inject allocation failure" case again shows that the copy fails and output remains NULL.
+**Expected:** `Check failed` at `!copy_with_allocator("abc", &out, controlled_alloc)` until the line reads `fail_allocation = true;` again.
+
+**Verify:** Explain how `fail_allocation = false;` changes the value `!copy_with_allocator("abc", &out, controlled_alloc)` tests, using your failing and repaired runs.
 
 No real memory pressure is required. The failure is reproducible and isolated to this operation.
 
@@ -59,6 +65,8 @@ fail_allocation = false;
 
 **Expected:** The output pointer remains unchanged.
 
+**Verify:** Keep a CHECK equivalent to `out == existing && strcmp(out, "old") == 0`. Control edit: changing `char existing[] = "old";` to `char existing[] = "old!";` must fail it; then restore it.
+
 The component does not erase caller state before it knows it can return a successful replacement.
 
 ## Exercise 4: Test an empty valid input
@@ -73,6 +81,8 @@ free(out);
 ```
 
 **Expected:** A valid empty owned string is returned.
+
+**Verify:** Keep a CHECK equivalent to `out != NULL && out[0] == '\0'`. Control edit: `CHECK(out == NULL && out[0] == '\0');` must fail; then restore it.
 
 The allocation includes the terminator even when payload length is zero.
 
@@ -92,6 +102,8 @@ free(out);
 
 **Expected:** The later call succeeds independently.
 
+**Verify:** Keep a CHECK equivalent to `strcmp(out, "x") == 0`. Control edit: `CHECK(copy_with_allocator("x!", &out, controlled_alloc));` must fail; then restore it.
+
 Failure must not leave hidden component state that poisons the next invocation.
 
 ## Exercise 6: Transfer a distinguishing content check
@@ -107,8 +119,10 @@ free(out);
 
 **Expected:** Red remains different from red.
 
+**Verify:** Keep a CHECK equivalent to `strcmp(out, "Red") == 0 && strcmp(out, "red") != 0`. Control edit: `CHECK(copy_with_allocator("Red!", &out, controlled_alloc));` must fail; then restore it.
+
 A weak length-only check would accept the wrong letters. Choose an oracle strong enough to reject the relevant defect.
 
 ## After comparison
 
-Add a fresh distinguishing input for the "transfer a distinguishing content check" case to your own c-027 source. Explain why every access in `controlled_alloc` or `copy_with_allocator` stays within a live object and each owned resource is released. An expected fault injection failure belongs in the test contract; undefined behavior does not. Keep diagnostics and sanitizer evidence for the "inject allocation failure" case apart from ordinary output: the fixture proves its stated fault injection, test oracle and failure-path coverage assumptions, not universal safety.
+Replace `controlled_alloc` with a counting allocator that increments a counter on every successful call. CHECK that one successful copy makes exactly one allocation and that an injected failure makes none. Then explain why this oracle rejects a helper that allocates twice per copy and leaks the first block, a defect that content checks with `strcmp` cannot see.

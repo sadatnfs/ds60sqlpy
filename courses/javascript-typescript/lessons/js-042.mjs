@@ -1,18 +1,15 @@
 // Answer-free learner source. Save your own copy before editing.
 // Exercise 1: Build, verify and execute a fresh bundle: change one input
-// Copy Example A into a scratch `main.mjs` and change `const result = runBundle(directory,
-// ['--self-test']);` to `const result = runBundle(directory, ['--self-test!']);`. Before
-// running it, predict which check fails and which value it now sees; then run it and restore
-// the original line.
-// Expected: The changed run fails with an `AssertionError` at `assert.equal(result.status,
-// 0, result.stderr)`. Restoring `const result = runBundle(directory, ['--self-test']);`
-// brings back: three checks passed; actual Node version reported.
+// In a scratch copy of Example A, change `const result = runBundle(directory, ['--self-
+// test']);` to `const result = runBundle(directory, ['--self-test!']);`. Which check fails,
+// and what value does it see?
+// Expected: The edited run fails with an `AssertionError` at `assert.equal(result.status, 0,
+// result.stderr)`. Restoring `const result = runBundle(directory, ['--self-test']);` brings
+// back: three checks passed; actual Node version reported.
 
 // Exercise 2: Reject altered application bytes before execution: debug a regression
-// A regression changed one token in Example B, so one line now reads `await
-// appendFile(join(directory, 'app.mjs!'), '\n// controlled tamper fixture\n');`. Run Example
-// B with that line, use the failing check to locate the defect and repair it without
-// changing the check.
+// A regression made one Example B line read `await appendFile(join(directory, 'app.mjs!'),
+// '\n// controlled tamper fixture\n');`. Locate and repair it without editing the check.
 // Expected: Before the repair the run fails with an `AssertionError` at
 // `assert.rejects(verifyBundle(directory), /digest mismatch/u)`. Restoring `await
 // appendFile(join(directory, 'app.mjs'), '\n// controlled tamper fixture\n');` brings back:

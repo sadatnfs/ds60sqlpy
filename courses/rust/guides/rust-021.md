@@ -24,9 +24,11 @@ A move closure takes ownership of captured values, useful when work outlives the
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles the saved pad as `main.rs` with pinned Rust 1.99.1, edition 2024, and the prepared Arrow 60 library. `assert!` and `assert_eq!` remain active in normal builds. The fixed pad accepts one source file without arbitrary arguments, interactive input, Cargo manifests or package installation. The main function returns `Result<(), Box<dyn std::error::Error>>` so later examples can propagate errors with `?`; the final `Ok(())` means this fixture completed successfully. Standard library and Arrow examples remain offline after image preparation. Multi-file Cargo and external ecosystem projects have separate explicit preparation workflows.
+This lesson's programs need only the prelude and their own helpers. A passing run prints `rust-021: passed`.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Pad setup and limits: [Run a lesson](../STUDY-GUIDE.md#run-a-lesson).
+
+Before you run anything, follow [Attempt a lesson](../STUDY-GUIDE.md#attempt-a-lesson).
 
 
 
@@ -34,7 +36,9 @@ Start with the answer-free learner artifact in your saved classroom pad. It deli
 
 `|value| value * factor` declares a closure. `move || ...` transfers captures into it. A closure mutating a captured accumulator needs mutable calling access. A function accepting FnOnce can invoke consuming behavior once.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+**Reading Example A (Observe mutable capture, code below).** `let mut count = 0;` is the captured variable. The closure `|value| { count += value; }` mentions `count` and modifies it, so the compiler captures it by mutable reference and gives the closure the `FnMut` capability: it may be called many times, but each call needs exclusive access. That is why the closure binding itself is `let mut add`. The parameter `value` has no annotation; the compiler infers `i32` from how the closure uses it and from the two calls. The extra `{ }` around the closure makes the end of its mutable borrow of `count` visible at the closing brace, after which `assert_eq!` may read `count` again. Without that block the code still compiles, because a borrow lasts only until its final use.
+
+Method for tracing your own variants: [Trace a program](../STUDY-GUIDE.md#trace-a-program).
 
 ## Worked example / walkthrough
 
@@ -95,13 +99,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 6. **Transfer and justify.** Choose capture ownership for work that will run on another thread.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Record each task as in [Keep evidence for each task](../STUDY-GUIDE.md#keep-evidence-for-each-task).
 
 ## Common pitfalls and diagnosis
 
 Move does not imply deep copy. A moved reference still has a borrowed lifetime. Avoid adding static bounds when the real solution is scoped execution or owned data.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+To turn a pitfall into a test, see [Design a regression case](../STUDY-GUIDE.md#design-a-regression-case).
 
 ## Progressive hints
 
@@ -109,13 +113,25 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 2. Compare Example B (Move owned data into a closure) with Example A and name the first line whose behavior differs. Its observation is: The closure transfers its captured String to the caller once.
 3. Before opening the explanation, test your task 3 attempt against this lesson's main pitfall: Move does not imply deep copy.
 
+Tempting approaches to rule out before you compare:
+
+- **Task 1.** Crediting the `move` keyword for Example B being `FnOnce` is wrong: `move || text.len()` also owns `text` yet is `Fn`, callable any number of times. Returning `text` is what makes it consuming.
+- **Task 2.** Adding a call counter, `calls += 1`, inside the closure makes it `FnMut`. It then needs `let mut scale`, and passing it where `Fn` is required fails with E0525.
+- **Task 3.** Dropping `mut` from the parameter `mut step` fails with E0596: calling an `FnMut` needs `&mut step`. Tightening the bound to `impl Fn()` fails too, because the closure assigns to `value`.
+- **Task 5.** Calling `drop(name)` before `greet()` assumes `move` gave the closure the `String`. It fails with E0505, cannot move out of `name` because it is borrowed, showing the moved reference still depends on its owner.
+- **Task 6.** Calling `std::thread::spawn(|| rows.iter().sum::<i32>())` without `move` fails with E0373: the closure may outlive the function but borrows `rows`. Leaking the vector to obtain a `'static` reference silences it at the cost of never freeing the memory.
+
 ## Self-check and next step
 
-Explain Capture, FnMut, FnOnce without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+In Example A, does the closure capture `count` by shared reference, mutable reference or value, and why can `count` not be read while the closure is still in use? Which of `Fn`, `FnMut` and `FnOnce` does each closure in the lesson implement? Why can Example B's closure, which hands its captured `String` back to the caller, run only once?
+
+Then work through [Self-check and review](../STUDY-GUIDE.md#self-check-and-review).
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://doc.rust-lang.org/book/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+Read [The Rust Book, 13.1 Closures](https://doc.rust-lang.org/book/ch13-01-closures.html) for how captures decide `Fn`, `FnMut` or `FnOnce`.
+
+What the classroom does and does not prove: [Sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

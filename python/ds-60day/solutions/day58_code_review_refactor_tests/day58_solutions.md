@@ -107,9 +107,7 @@ Notes
 
 ## Solution reasoning lens
 
-A strong solution is not merely code that produces one plausible
-output. It establishes a chain from input contract to operation to
-verification:
+Each decision below links an input contract to an operation and its evidence:
 
 1. **characterization test:** locks down important current behavior before extracting or renaming it.
 2. **pure core + impure shell:** isolates transformations from I/O so normal, boundary, and failure cases are deterministic.
@@ -126,29 +124,15 @@ verification:
 
 **Evidence of correctness:** Run old/new behavior on normal and boundary fixtures, test failure/side effects, check public types and deprecation, and pass formatter/linter/type/tests from a clean process.
 
-When comparing your attempt with the reference, explain which of these
-decisions your code made explicitly. If the reference makes a different
-choice, compare the contracts and evidence before deciding that one
-version is universally better.
-
 <!-- END ADVANCED PYTHON CONCEPT ENRICHMENT -->
 
 ## Exercise-by-exercise reasoning map
-
-This map connects every learner prompt to a reasoning path. Read the
-explanation before copying code: the goal is to understand the assumptions,
-the evidence that validates the result, and the edge cases that can make an
-apparently correct implementation fail.
 
 ### Exercise 1: Original lesson practice
 
 **Prompt:** Move at least two notebook functions into a `src/` package and add tests.
 
 **How to reason about it:** Extract deterministic transformation/model-building functions first and add tiny offline tests before changing behavior. Keep notebooks as reader-facing orchestration, not the only home of reusable logic.
-
-Use the worked reference earlier in this file, then change one boundary
-condition and rerun the stated checks. A copied output is not evidence
-unless you can explain why that output follows from the inputs.
 
 **Verify:** Import two moved functions from src in a fresh process and run focused normal/boundary/failure tests with exit code 0; prove the notebook now calls those imports and no copied implementation remains.
 
@@ -158,10 +142,6 @@ unless you can explain why that output follows from the inputs.
 
 **How to reason about it:** Type public boundaries and document inputs, outputs, assumptions, and failures. Run mypy on the real package; broad Any or unexplained ignores erase the value of the contract.
 
-Use the worked reference earlier in this file, then change one boundary
-condition and rerun the stated checks. A copied output is not evidence
-unless you can explain why that output follows from the inputs.
-
 **Verify:** Run mypy on the exact src/test paths with exit code 0 and save its transcript; include parameter/return annotations and docstrings that state errors/side effects, plus one negative typing fixture that fails as expected.
 
 ### Exercise 3: Original lesson practice
@@ -169,10 +149,6 @@ unless you can explain why that output follows from the inputs.
 **Prompt:** Write a short maintainer guide in the project root.
 
 **How to reason about it:** A maintainer guide should cover setup, architecture, tests, formatting, data contracts, artifacts, security, and acceptance gates with Windows and POSIX commands where they differ.
-
-Use the worked reference earlier in this file, then change one boundary
-condition and rerun the stated checks. A copied output is not evidence
-unless you can explain why that output follows from the inputs.
 
 **Verify:** Write a maintainer guide containing clean setup, test/lint/type commands, architecture/data flow, artifact locations, release/rollback, and troubleshooting; have another clean shell execute every command successfully.
 
@@ -190,10 +166,6 @@ For the known bug, first add a failing regression test that describes desired
 behavior, then implement the fix. Do not quietly update all snapshots to accept
 whatever the refactor produced.
 
-**Why this matters:** The result should survive a fresh-kernel rerun and
-a deliberately chosen boundary case. If it does not, revisit the
-assumption or data boundary rather than hiding the failure.
-
 **Verify:** Characterization testing; save characterization tests and outputs for normal, boundary, and known-bug fixtures before editing; after refactor, assert contract cases match byte/value-for-value and the intentional bug change has a separately approved expected result.
 
 ### Exercise 5: Risk-based review
@@ -209,10 +181,6 @@ source.
 
 Categorize comments by correctness/risk, maintainability, and optional style so
 the author can act on the most important issues first.
-
-**Why this matters:** The result should survive a fresh-kernel rerun and
-a deliberately chosen boundary case. If it does not, revisit the
-assumption or data boundary rather than hiding the failure.
 
 **Verify:** Risk-based review; complete a review matrix for security, data loss, leakage, schema, performance, errors, and Windows/POSIX paths; each row must cite changed lines, a test/measurement result, severity, owner, and disposition.
 
@@ -230,9 +198,5 @@ warning behavior.
 Search all repository references and update maintained examples. Remove the
 alias only in a declared breaking release or after the documented migration
 window.
-
-**Why this matters:** The result should survive a fresh-kernel rerun and
-a deliberately chosen boundary case. If it does not, revisit the
-assumption or data boundary rather than hiding the failure.
 
 **Verify:** Compatibility change; assert old keyword and new keyword produce identical results during the compatibility window, simultaneous/conflicting use raises an error, the old path emits the named deprecation warning, and the removal version/date is documented.

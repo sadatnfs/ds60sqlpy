@@ -1,6 +1,6 @@
 # cpp-019: explanations and reference observations
 
-Attempt the learner tasks before opening this document. The executable reference checks the bounded normal and boundary examples; the six explanations below cover the deliberate changes and manual checks.
+The [executable reference](cpp-019_solution.cpp) checks the Exercise 6 tie rule: sorting by points and then by ID yields IDs 2, 3 and 1. The explanations cover laziness, projections and why ties need a second key. How to compare: [study guide](../STUDY-GUIDE.md#compare-with-the-solutions).
 
 ## Mechanism
 

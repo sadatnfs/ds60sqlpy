@@ -2,7 +2,7 @@
 
 Publish a metric with a complete numerator/denominator contract and an independent check.
 
-The executable reference contains the two complete worked cases with assertions. The changes below explain the independent practice and its limits.
+The reference sums successes and trials per cohort before dividing, uses nullif to guard a zero denominator, and checks the result against 10 of 100 and 1 of 2. The equal-row case shows that averaging ratios gives a rate more than 0.4 away from 0.1. Neither case tests uncertainty or sample-size rules. See [how these answers are laid out](../STUDY-GUIDE.md#answers-and-references).
 
 
 ## 1. Write the population

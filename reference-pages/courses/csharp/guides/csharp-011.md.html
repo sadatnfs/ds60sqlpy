@@ -206,11 +206,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Flow analysis:</strong> Compiler reasoning about possible values on each path.</p>
 <p><strong>Fallback:</strong> A deliberate replacement for absence.</p>
 <h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>The Linux Docker classroom compiles your saved pad as <code>Program.cs</code> in its fixed .NET 10 project. C# 14 is the matching language generation. This route uses the prepared framework libraries; it does not accept arbitrary project files, NuGet packages, command arguments or interactive input. The explicit <code>Program.Main</code> entrypoint makes compilation and execution visible. <code>Check</code> throws on a false condition in every build configuration, unlike conditional debugging assertions.</p>
-<p>Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.</p>
+<p>This lesson relies on the project&#x27;s <code>&lt;Nullable&gt;enable&lt;/Nullable&gt;</code> setting, which makes <code>string?</code> a checked annotation. Task 4&#x27;s <code>label!.Length</code> on a null label compiles without any warning, because <code>!</code> suppresses it, and then throws <code>NullReferenceException</code> when it runs.</p>
+<p>Compile contract, starter stop and success marker: <a href="../STUDY-GUIDE.md.html#running-a-lesson">running a lesson</a>.</p>
 <h3 id="syntax-anatomy-and-execution-trace">Syntax anatomy and execution trace<a class="heading-anchor" href="#syntax-anatomy-and-execution-trace" aria-label="Link to this section">#</a></h3>
 <p><code>string?</code> permits null in static analysis; <code>int?</code> is Nullable&lt;int&gt;. <code>?.</code> conditionally accesses a member and preserves absence. <code>??</code> supplies a fallback. The null-forgiving operator <code>!</code> silences analysis but performs no check.</p>
-<p>Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.</p>
+<p>Each example ends with a trace; method: <a href="../STUDY-GUIDE.md.html#tracing-a-program">tracing a program</a>.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="example-a-carry-absence-through-a-computation">Example A: Carry absence through a computation<a class="heading-anchor" href="#example-a-carry-absence-through-a-computation" aria-label="Link to this section">#</a></h4>
 <p>Conditional access propagates missing information until a boundary deliberately chooses a display representation.</p>
@@ -248,6 +248,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The optional length is absent, not zero.</p>
+<p><strong>Trace.</strong> <code>label</code> is null. <code>label?.Length</code> tests the receiver first and, finding null, skips the member access and produces null of type <code>int?</code>. The first check confirms that <code>length</code> is null rather than 0. <code>length ?? -1</code> substitutes -1 only at this display boundary, and <code>length</code> itself still says absent, so later code can still tell the two cases apart.</p>
 <h4 id="example-b-distinguish-zero-from-missing">Example B: Distinguish zero from missing<a class="heading-anchor" href="#example-b-distinguish-zero-from-missing" aria-label="Link to this section">#</a></h4>
 <p>Pattern matching unwraps only the present case, giving a nonnullable variable inside that branch.</p>
 <pre class="highlighted-code"><code class="language-csharp"><span class="syntax-keyword">using</span> System<span class="syntax-punctuation">;</span>
@@ -288,6 +289,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> A measured zero and an unknown measurement produce distinct descriptions.</p>
+<p><strong>Trace.</strong> <code>measured</code> holds a present 0, so <code>HasValue</code> is true and <code>Value</code> is 0. <code>missing</code> has no value, so <code>HasValue</code> is false. In <code>Describe</code>, the pattern <code>value is int actual</code> matches only when a value is present and binds it to <code>actual</code>, an ordinary <code>int</code>. Zero becomes measured:0 and null becomes unknown, so the two cases never collapse into one string.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <ol>
 <li><strong>Predict and explain.</strong> Predict nullable length and its fallback for null and empty text.</li>
@@ -307,10 +309,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <ol start="6">
 <li><strong>Transfer and justify.</strong> Design an import field whose missing value has different meaning from an explicit zero or empty value.</li>
 </ol>
-<p>For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.</p>
+<p>Log each task in the <a href="../STUDY-GUIDE.md.html#recording-exercise-evidence">evidence table</a> before opening the explanation.</p>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
 <p>A warning suppression is not validation. Null, empty and whitespace-only text are different states. Returning a fallback too early can irreversibly discard useful information.</p>
-<p>A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.</p>
+<p>For task 5, use four inputs: null, empty text, three spaces and a real label. <code>string.IsNullOrEmpty</code> treats the first two alike, and <code>string.IsNullOrWhiteSpace</code> treats the first three alike, so pick the method that matches your contract. The tempting wrong fallback is <code>label?.Length ?? 0</code>, which reports a missing label as an empty one.</p>
+<p>Repair routine: <a href="../STUDY-GUIDE.md.html#building-a-regression-case">building a regression case</a>.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <ol>
 <li>Reproduce Example A (Carry absence through a computation) before changing anything, and confirm its observation: The optional length is absent, not zero.</li>
@@ -318,9 +321,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>Before opening the explanation, test your task 3 attempt against this lesson&#x27;s main pitfall: A warning suppression is not validation.</li>
 </ol>
 <h3 id="self-check-and-next-step">Self-check and next step<a class="heading-anchor" href="#self-check-and-next-step" aria-label="Link to this section">#</a></h3>
-<p>Explain Null, Flow analysis, Fallback without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.</p>
+<p>Give the type and value of <code>label?.Length</code> when label is null and when it is empty text. Explain what <code>!</code> does at compile time and what it does at runtime. For task 6, write one import row in which a missing field, an explicit zero and an empty string each mean something different.</p>
+<p>Then follow the general <a href="../STUDY-GUIDE.md.html#self-check-routine">self-check routine</a> and save your pad.</p>
 <h3 id="sources-and-execution-boundary">Sources and execution boundary<a class="heading-anchor" href="#sources-and-execution-boundary" aria-label="Link to this section">#</a></h3>
-<p><a href="https://learn.microsoft.com/en-us/dotnet/csharp/">Official language or framework documentation</a>. The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.</p>
+<p><a href="https://learn.microsoft.com/en-us/dotnet/csharp/">Documentation</a>: The C# guide&#x27;s articles on nullable reference types and nullable value types explain annotations, warnings and <code>Nullable&lt;T&gt;</code>.</p>
+<p>Provenance and limits: <a href="../STUDY-GUIDE.md.html#sources-and-execution-boundary">sources and execution boundary</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for csharp-011: Nullability and optional information.
 Read courses/csharp/guides/csharp-011.md and courses/csharp/lessons/csharp-011.cs. Prerequisites: csharp-010.

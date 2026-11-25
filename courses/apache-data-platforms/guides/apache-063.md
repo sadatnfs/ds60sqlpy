@@ -125,12 +125,11 @@ This simplified fragment from MetadataProbe.java talks directly to the metastore
 
 ## Complete worked source
 
-This is a project-only command notebook. Read and edit it in the classroom; run its explicitly labeled commands from the copied owned Docker workshop. The classroom does not execute these service commands.
+The classroom does not execute these service commands. See the [workshop rules](../STUDY-GUIDE.md#workshop-notebooks).
 
 # Hive apache-063 command notebook
 
-Run from the copied owned Hive project, following its README. Native service
-acceptance is separately recorded in QUALIFICATION.md.
+Run the seven Hive actions in this order from the copied project. PostgreSQL starts first because `initialize-schema` writes the Metastore tables into it, and only `initialize` registers the three-row Parquet fixture.
 
 ```bash
 bash run.sh prepare
@@ -144,12 +143,11 @@ bash run.sh metadata
 
 The metadata probe reads actual Thrift table/partition metadata independently from Beeline and data files.
 
-The classroom does not execute these Docker commands. Retain source, schema,
-file identities, actual responses and failure scope in an independent receipt.
+QUALIFICATION.md records this full path as accepted with Hive 4.2.1 and PostgreSQL 17.6 on Linux ARM64. Keep the Thrift metadata answer and the Beeline rows as two receipt entries, because the probe never reads the data files.
 
 ## Primary references
 
-- [Hive4.2.1 preparation and components](https://hive.apache.org/development/quickstart/)
+- [Hive 4.2.1 preparation and components](https://hive.apache.org/development/quickstart/)
 - [Hive DDL](https://hive.apache.org/docs/latest/language/languagemanual-ddl/)
 - [Hive Metastore administration](https://hive.apache.org/docs/latest/admin/adminmanual-metastore-administration/)
 - [Hive/Iceberg integration](https://iceberg.apache.org/docs/latest/hive/)

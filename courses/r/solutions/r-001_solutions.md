@@ -1,6 +1,6 @@
 # r-001: reference reasoning
 
-Use the [complete reference](r-001_reference.R) with the guide's declared inputs and runtime. Every worked example is also a standalone script.
+Run the [complete reference](r-001_reference.R) under the [run rules](../STUDY-GUIDE.md#run-a-chapter).
 
 ## Why the implementation has this shape
 
@@ -96,4 +96,6 @@ Saving retains source; running evaluates it; assertions check declared propertie
 
 ## What the checks establish
 
-The reference makes 5 `stopifnot()` checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.
+Five assertions pin arithmetic you can also do by hand: 4 * 7 is 28, the first total is 30, subtotal plus fee is 23, the stale `total` stays 30 after `quantity` is rebound so the new product is 48, and a measured zero quantity gives a zero line total. They do not tell you whether your printed labels match the values or whether you ran the file after your last edit.
+
+The reference makes 5 `stopifnot()` checks; see [what a passing run proves](../STUDY-GUIDE.md#what-a-passing-run-proves).

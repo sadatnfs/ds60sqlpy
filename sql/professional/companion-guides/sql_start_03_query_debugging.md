@@ -2,75 +2,26 @@
 
 ## How to run this lesson
 
-Start the Linux-container engine and run `./classroom` from the repository
-root. On Windows, use Ubuntu in WSL 2 or the thin
-`START_DOCKER_CLASSROOM.cmd` wrapper. Choose **PostgreSQL** on the shared
-`/classroom` home, then open **sql-start-03**. The
-[launcher guide](../../../docs/one-command-classroom.md) covers first preparation, strict resume and
-the saved project selection. No host Python or PostgreSQL installation is
-required for this browser route.
+Start **sql-start-03** from `./classroom` using the shared [run steps](../../STUDY-GUIDE.md#run-a-lesson-in-the-classroom).
 
-1. Read the prerequisite and fixture notes before running the file. Use only
-   the local disposable `advanced_sql_training` database.
-2. Choose **Whole SQL lesson (psql)** for the cataloged learner script. This
-   preserves the lesson's reviewed psql directives, relative includes and
-   transaction behavior. **SQL snippet** is appropriate for ordinary SQL
-   statements, but is not a replacement for an entire script's setup.
-3. The **Course database** panel above the code shows whether the course
-   training tables are loaded. Missing tables load automatically before your
-   first run (or choose **Load course tables**) and stay loaded for later
-   lessons. **Reset training data** restores the original rows only when your
-   own changes made results differ; it keeps your saved code and notes.
-4. Edit the learner copy in the classroom and save your prediction before
-   running. Its whole-script workspace is
-   `.learning/sql/sql-start-03/lesson/workspace/sql/professional/lessons/sql_start_03_query_debugging.sql`.
-   For browser work this path is inside the Docker learning volume, not a
-   newly created host folder beside your checkout. The checked-in source
-   remains the answer-free starting artifact.
-5. Run the whole script and inspect the full transcript. The runner uses
-   `psql -X -v ON_ERROR_STOP=1 -f`. SELECT output has columns, rows and a row
-   count; DDL/DML has command tags; intentional checks may produce NOTICE
-   messages. An unexpected ERROR or nonzero exit is a failure to diagnose,
-   even when an earlier query printed plausible values.
-6. Verify the lesson's expected grain, ordering, constraints and declared
-   transaction or cleanup outcome. Keep required ROLLBACK statements.
-   The warehouse sequence and other explicitly stateful exercises explain
-   when state is committed. Read saved output without rerunning it when
-   reviewing an earlier attempt.
+Choose **Whole SQL lesson (psql)**. The script needs no course tables: it
+guards `advanced_sql_training`, builds six `start_tasks` rows for the Red and
+Blue teams (task 3 has unknown effort, task 6 is the only `blocked` task), and
+ends with `ROLLBACK`. Save attempts in
+`.learning/sql/sql-start-03/lesson/workspace/sql/professional/lessons/sql_start_03_query_debugging.sql`.
+Two exercises ask you to see an error before fixing it. Because the runner
+stops at the first error, a broken query placed in the middle of the file ends
+the run there and later exercises print nothing. Run the faulty version once on
+its own, copy the `ERROR` line and its SQLSTATE 42703 into a comment, then
+replace it with the repaired query before moving on.
 
-If a relation is missing, inspect the lesson's required fixture and predecessor
-rather than guessing a new table definition. If authentication or runtime
-readiness fails, use `./classroom status` and the setup guide. Keep credentials
-out of SQL, notebooks, screenshots and committed files. Repair the first error
-before trusting partial output, and reveal separate solutions only when you
-want to compare after an attempt.
-
-### Optional contributor notebook route
-
-For notebook work, deliberately prepare the Linux/WSL contributor environment
-from [CONTRIBUTING.md](../../../CONTRIBUTING.md), including a compatible psql client and
-the notebook dependencies. Generate this lesson's private workspace through
-the maintained CLI:
-
-```sh
-uv run --no-sync python scripts/course.py sql notebook sql-start-03
-```
-
-Open the printed notebook path in that environment's JupyterLab. It uses the
-same catalog-derived learner-copy layout in that contributor checkout and
-executes the complete script through psql. Its host-side state is separate
-from the Docker browser's named volume. Follow
-[guided SQL notebooks](../../../docs/guided-sql-notebooks.md) for explicit local connection
-selection and kernel setup. Notebook generation does not execute SQL or
-authorize a reset.
+The optional notebook route starts with `uv run --no-sync python scripts/course.py sql notebook sql-start-03`; see the [study guide](../../STUDY-GUIDE.md#optional-contributor-notebook-route).
 
 ## Level and prerequisites
 
 - **Level:** foundation
 - **Direct catalog prerequisites:** [`sql-start-02`](sql_start_02_values_null_order.md)
 - **Artifacts:** [learner SQL](../lessons/sql_start_03_query_debugging.sql), [solution reasoning](../solutions/sql_start_03_query_debugging_solutions.md), [executable solution](../solutions/sql_start_03_query_debugging_solutions.sql).
-
-Direct prerequisites name the required boundary. The fixture setup is supplied; do not mistake its table-definition syntax for extra unstated prerequisite work.
 
 ## Learning objectives
 
@@ -144,7 +95,10 @@ comfortable normal case.
 
 ## Worked example / walkthrough
 
-Run these in the complete learner file so the temporary fixture and transaction are present. The fixture values are fixed; the examples never depend on the current clock. Predict each result before running it.
+Both examples work on the six `start_tasks` rows. For Example 1, list the IDs
+you expect `status = 'open'` to keep before you look; for Example 2, decide
+whether task 3, whose effort is NULL, can ever reach the `>= 6` threshold once
+it is doubled.
 
 ### Example 1: Watch a predicate narrow the identities
 
@@ -187,7 +141,12 @@ The filter repeats the arithmetic because doubled_effort is an output name unava
 
 ## Exercises
 
-Attempt these in order in the ignored working copy, before its final rollback. Write the output grain and a prediction before execution. Compare the actual identities and values with each contract. A query merely running is not sufficient evidence. Hints are optional and leave the answer construction to you.
+Every exercise here is a debugging exercise, so work in checkpoints: run the
+first filter alone, write down the task IDs it keeps, then add the next
+condition and name the ID that should disappear. Task 2 (closed Red) and task 6
+(Blue blocked) are the negative controls the faulty queries let through,
+and task 3 tests whether a NULL effort is handled on purpose. The contract lines
+are explained in the [study guide](../../STUDY-GUIDE.md#work-an-exercise).
 
 1. **Build a checkpoint.**
 
@@ -255,7 +214,10 @@ Attempt these in order in the ignored working copy, before its final rollback. W
 - Why can ORDER BY use doubled_effort while same-level WHERE cannot?
 - Which fixture row catches the missing parentheses, and which rows catch the wrong threshold?
 
-Keep your actual query and transcript. Explain one incorrect alternative and the exact fixture row that exposes it. A passing worked example does not prove an unattempted exercise. Revisit a failed prediction after taking a break, then answer the retrieval questions without looking at the code.
+For retrieval practice, predict without running which task IDs
+`WHERE NOT (effort > 3)` returns (1, 4, 5 and 6, because task 3's unknown
+effort makes both the test and its negation unknown), and write the one-line
+change that would make Exercise 3's faulty predicate stop returning task 6.
 
 ## Common pitfalls
 

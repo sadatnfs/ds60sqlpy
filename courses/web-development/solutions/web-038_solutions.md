@@ -1,6 +1,6 @@
 # web-038: explanatory solutions
 
-Open this after your own attempt. Each answer explains the lesson's synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in `courses/web-development/guides/web-038.md`.
+Attempt each exercise before reading; the mechanism is in `courses/web-development/guides/web-038.md` ([using these answers](../STUDY-GUIDE.md#solutions)).
 
 ## Exercise 1: Explain why valid JSON can still be invalid application input.
 
@@ -76,4 +76,6 @@ Open this after your own attempt. Each answer explains the lesson's synthetic fi
 
 ## Reference comparison
 
-Open `courses/web-development/solutions/web-038_solution.php` only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; server lifecycle, persistence, concurrency and security need their own integration evidence.
+The reference requires an array with integer minutes, a complete write, a stream round trip after rewind and a closed handle in finally. That catches unchecked decoding and a missing rewind. It does not test oversized input or a wrong field type, so feed those cases to your parser.
+
+Open `courses/web-development/solutions/web-038_solution.php` after saving your attempt ([comparing with the reference](../STUDY-GUIDE.md#references)).

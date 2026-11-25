@@ -86,7 +86,7 @@ the event. These two cases observe real owned process failures while refusing to
 infer in-flight retry, durable scheduler history or multi-host availability from
 a successful later query.
 
-The [complete Ballista workshop](../projects/ballista/README.md) provides the maintained files, preparation, lifecycle and exact qualification boundaries for these cases.
+`failure-check` in the [Ballista workshop](../projects/ballista/README.md) stops the executor, submits a request that must fail for lack of capacity, restarts the scheduler and checks again. It makes no claim about recovering a query that was in flight.
 
 ## Worked examples
 
@@ -114,7 +114,7 @@ This fragment from the project client stops before running anything when a recei
 
 ## Complete worked source
 
-This is a project-only command notebook. Read and edit it in the classroom; run its explicitly labeled commands from the copied owned Docker workshop. The classroom does not execute these service commands.
+The classroom does not execute these service commands. See the [workshop rules](../STUDY-GUIDE.md#workshop-notebooks).
 
 # Explicit owned fault experiments
 

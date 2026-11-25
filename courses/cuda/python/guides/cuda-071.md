@@ -1,10 +1,17 @@
 # cuda-071: A timing experiment that measures the right thing
 
-**Route:** CUDA Python and machine learning. **Stage:** beginner. **Prerequisites:** `cuda-007`, `cuda-008`, `cuda-067`, `cuda-070`. Allow several sessions when the hardware experiment is new; the chapter is not a deadline.
+**Route:** CUDA Python and machine learning. **Stage:** beginner. **Prerequisites:** `cuda-007`, `cuda-008`, `cuda-067`, `cuda-070`.
 
-## What you will be able to explain
+Pacing, evidence labels and platform rules: [CUDA study guide](../../STUDY-GUIDE.md).
 
-By the end, you can **identify the timing boundary**, **separate first-call compile time**, and **explain why CPU trace is not a benchmark** with evidence. Start with the two worked cases, then use the editable CPU model to make the quantities concrete.
+## Learning objectives
+
+- Identify the timing boundary.
+- Compute the median.
+- Add transfer cost.
+- Separate first-call compile time.
+- Design equal-work comparison.
+- Explain why CPU trace is not a benchmark.
 
 ## Mechanism and vocabulary
 
@@ -31,9 +38,13 @@ A launch returns at 2 microseconds but the output finishes at 102 microseconds. 
 
 For completed times [10,11,10,12,100] milliseconds, the median is 11 while the maximum is 100. Removing the last sample without explaining its cause hides tail behavior.
 
-## Portable executable model
+## How to run the CPU model
 
-The **CPU reference model** variant runs this bounded worked example using `python-core`. It uses only the Python standard library, small synthetic values and no network. Its purpose is to expose the arithmetic or contract behind the chapter. The separate reference includes assertions for the stated observations.
+Edit the copy; the [reference](../references/cuda-071_cpu.py) adds assertions.
+
+```sh
+python courses/cuda/python/lessons/cuda-071_cpu.py
+```
 
 ```python
 import statistics
@@ -55,11 +66,9 @@ print("CPU trace analysis: median", statistics.median(samples), "ms; tail", max(
 | `submit_us` | `2` |
 | `finish_us` | `102` |
 
-Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.
-
 ## Optional NVIDIA CUDA lab
 
-The **CuPy on NVIDIA CUDA** variant executes the actual operation with CuPy in the separately prepared `cuda-python` profile. It refuses a missing device instead of switching to CPU. Keep inputs bounded as supplied; inspect the device, synchronize and compare with the CPU reference. The profile must pass real host/device readiness checks. Successful syntax checking on a Mac is not GPU qualification.
+**CuPy on NVIDIA CUDA** needs the `cuda-python` profile; [lab rules](../../STUDY-GUIDE.md#python-gpu-and-framework-labs).
 
 ```python
 """Optional NVIDIA CUDA lab. No CPU fallback or external dataset."""
@@ -89,72 +98,60 @@ print(
 
 ## Practice and transfer
 
+Record each attempt in the [worksheet](../lessons/cuda-071.md) before opening hints.
+
 ### Exercise 1: Identify the timing boundary
 
 **Trap to avoid:** Stopping the timer at the return reports 2 microseconds and undercounts by the factor of 51 the reference computes.
-
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 2: Compute the median
 
 **Trap to avoid:** Reporting the mean, 28.6 ms, mixes the tail into the center and overstates the typical case by a factor of about 2.6.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 3: Add transfer cost
 
 **Trap to avoid:** Reporting only the kernel interval as latency makes a GPU path look faster than a CPU path that includes its own I/O.
-
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 4: Separate first-call compile time
 
 **Trap to avoid:** Discarding the first call without reporting it hides a cost a real user pays at process start.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 5: Design equal-work comparison
 
 **Trap to avoid:** Comparing a float32 GPU run with a float64 CPU run reports a speedup that is partly a precision change.
-
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 6: Explain why CPU trace is not a benchmark
 
 **Trap to avoid:** Copying the 11 ms median into a report as GPU latency misrepresents a CPU script's constant as a hardware result.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ## Progressive hints
 
-Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.
+Hint *k* belongs to exercise *k*; open one at a time.
 
-1. Start from worked example 1 and mark the quantities needed for the task "Identify the timing boundary".
-2. Change one assumption in worked example 2 while preserving the declared contract: compute the median.
-3. Trace the CPU program's variables before adding hardware behavior: add transfer cost.
-4. Draw producers, consumers and the exact operation boundary for the task "Separate first-call compile time".
-5. Separate what the small fixture establishes from what the real runtime must show: design equal-work comparison.
-6. Write a counterexample to an overbroad claim before you explain why CPU trace is not a benchmark.
+1. Mark the moment the launch call returns and the moment the output is ready. Which interval contains the arithmetic?
+2. Sort the five synthetic samples and pick the middle one.
+3. Draw the caller's timeline from host input to host output and place both copies on it.
+4. Separate the first call's context, compilation and allocator setup from the later repeated samples.
+5. List what must be identical on both sides before a ratio of times means anything: data, dtype, outputs and tolerance.
+6. Ask where the trace numbers came from. Were they measured on any device, or written into the program?
 
-## Common mistakes and self-review
+## Common mistakes and self-check
 
-Confusing a correct tiny example with a general implementation is the central review risk. For this chapter, challenge the assumption in worked example 2, then ask whether your change preserves the mechanism described above. If you change dtype, layout, ordering, batch size or backend, update the acceptance contract rather than silently reusing the old observation. Explain an unexpected result before trying random configuration changes.
+The mistake this chapter targets is stopping a host timer when an asynchronous launch returns. That measures enqueue latency, 2 microseconds in worked example 1, not the 102 microseconds until the output exists. Another is reporting only the fastest sample, or deleting the 100 ms outlier without explaining it. Fix the boundary with a synchronization or GPU events, report the median with a tail statistic and the sample count, and keep cold-start time in a separate row.
 
-Keep a small evidence table with columns **claim**, **input**, **expected observation**, **actual observation** and **limit**. For the first claim use `Identify the timing boundary`. For the final claim use `Explain why CPU trace is not a benchmark`. An unperformed GPU or cluster experiment remains pending even when the CPU model is correct.
+**Evidence limit:** Every value in this chapter's trace is invented for teaching. The median and maximum arithmetic is exact, but it cannot support any speedup claim; a real comparison needs measured, synchronized samples of equal work on named hardware.
 
-## Platform and evidence contract
+1. Why can a first call be much slower than later ones?
+2. What does the median hide that the maximum reveals?
+3. What makes two timings an equal-work comparison?
 
-The reading worksheet and CPU reference model work through the ordinary Linux Docker classroom on macOS, Linux and Windows using WSL 2. They do not require an NVIDIA GPU. Their results are labeled CPU models or semantic oracles, not simulated hardware performance.
-
-Real CUDA work needs supported NVIDIA hardware, a compatible host driver and an explicitly prepared GPU runtime. An Apple GPU does not execute CUDA kernels. PyTorch MPS on a supported native Mac, ROCm on supported AMD hardware, or other vendor backends can provide separate accelerator learning routes; they need their own package and operation qualification and are not CUDA evidence. The ordinary Linux Docker classroom does not expose native Mac MPS automatically.
-
-Do not download packages, models or data by opening this lesson. Do not attach an engine socket, ambient cluster credentials or an arbitrary remote endpoint. A CPU pass, imported package, successful compilation, real GPU result and measured performance are distinct observations. Record the actual backend, data shape/dtype, source revision, versions and pending checks. A saved completion marker records learning progress, not hardware certification.
+Answers: [self-check answers](../solutions/cuda-071_solutions.md#self-check-answers).
 
 ## Primary references
 
 - [CuPy array and installation documentation](https://docs.cupy.dev/en/v13.6.0/)
 
-Use the version-matched documentation of your prepared environment. These references describe interfaces and supported boundaries; the chapter's synthetic examples and CPU models are original teaching material.
+Full lists: [documentation and sources](../../STUDY-GUIDE.md#documentation-and-sources).
 
 ## Ask an AI tutor about this lesson
 

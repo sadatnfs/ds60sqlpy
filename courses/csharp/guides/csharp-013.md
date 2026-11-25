@@ -24,9 +24,9 @@ Model expected rejection distinctly from programming defects. A withdrawal large
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles your saved pad as `Program.cs` in its fixed .NET 10 project. C# 14 is the matching language generation. This route uses the prepared framework libraries; it does not accept arbitrary project files, NuGet packages, command arguments or interactive input. The explicit `Program.Main` entrypoint makes compilation and execution visible. `Check` throws on a false condition in every build configuration, unlike conditional debugging assertions.
+`Wallet` is declared after `Main` as a sealed helper class, and both examples construct their own instance, so neither one sees the other's balance. Example B's negative spend throws `ArgumentOutOfRangeException`, which the example catches; a passing run has therefore exercised the rejection path.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Compile contract, starter stop and success marker: [running a lesson](../STUDY-GUIDE.md#running-a-lesson).
 
 
 
@@ -34,7 +34,7 @@ Start with the answer-free learner artifact in your saved classroom pad. It deli
 
 A constructor has the class name and no return type. `private set` permits mutation inside the class. `sealed` prevents inheritance when extension is not part of the design. Guard clauses reject invalid inputs before state changes.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+Each example ends with a trace; method: [tracing a program](../STUDY-GUIDE.md#tracing-a-program).
 
 ## Worked example / walkthrough
 
@@ -96,6 +96,8 @@ internal static class Program {
 ```
 
 **Observe:** Spending 4 succeeds; spending 7 afterward fails without changing 6.
+
+**Trace.** The constructor checks that 10 is not negative and stores it in `Balance`. `TrySpend(4)` passes the negative-amount guard, sees that 4 does not exceed 10, subtracts and returns true, leaving 6. `TrySpend(7)` finds that 7 exceeds 6 and returns false before the subtraction line, so Balance still reads 6. The order of the checks protects the state.
 
 ### Example B: Reject malformed operations
 
@@ -161,6 +163,8 @@ internal static class Program {
 
 **Observe:** Negative spending is rejected and zero is an accepted no-op.
 
+**Trace.** The wallet starts with 5. `TrySpend(-1)` hits the first guard and throws before any comparison or subtraction, so the catch sets `rejected` while Balance remains 5. `TrySpend(0)` passes the guard, 0 does not exceed 5, and subtracting zero leaves 5, so the call returns true. A malformed request throws; a legal request that changes nothing succeeds.
+
 ## Exercises
 
 1. **Predict and explain.** Trace the wallet state through successful and rejected spending.
@@ -175,13 +179,15 @@ internal static class Program {
 
 6. **Transfer and justify.** Explain whether a shared wallet needs synchronization when several tasks may spend concurrently.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Log each task in the [evidence table](../STUDY-GUIDE.md#recording-exercise-evidence) before opening the explanation.
 
 ## Common pitfalls and diagnosis
 
 Private fields alone do not establish a correct contract. A partially mutated object after failure can poison later operations. This class is intentionally single-threaded; encapsulation does not itself provide synchronization.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+For task 4, move `Balance -= amount` above the affordability test: `TrySpend(7)` on a balance of 6 then returns false but leaves -1 behind, which is exactly the corruption the guard order prevents. For task 5, spending exactly the balance must succeed and leave 0, because the test is `amount > Balance`, not `>=`.
+
+Repair routine: [building a regression case](../STUDY-GUIDE.md#building-a-regression-case).
 
 ## Progressive hints
 
@@ -191,11 +197,15 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 ## Self-check and next step
 
-Explain Invariant, Encapsulation, Failure atomicity without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+Explain why `private set` alone does not guarantee a nonnegative balance. For a wallet holding 3, predict the return value and the final balance for spends of 3, 4, 0 and -2. For task 6, describe what can go wrong when two tasks pass the affordability check before either one subtracts.
+
+Then follow the general [self-check routine](../STUDY-GUIDE.md#self-check-routine) and save your pad.
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://learn.microsoft.com/en-us/dotnet/csharp/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+[Documentation](https://learn.microsoft.com/en-us/dotnet/csharp/): The C# programming guide's pages on classes, constructors and access modifiers explain how a type controls who may change its state.
+
+Provenance and limits: [sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

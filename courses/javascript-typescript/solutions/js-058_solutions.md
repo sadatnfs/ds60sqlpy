@@ -1,6 +1,6 @@
 # js-058: explanatory solutions
 
-Compare after your own attempt or an explicit reveal. The separate .js reference is a complete offline browser program. These explanations discuss the six practice tasks; a visual resemblance alone is not a data or behavior check.
+Compare after your own attempt; the separate `.js` file is the complete reference program.
 
 ## Mechanism review
 
@@ -49,3 +49,7 @@ Reset should use the stable base transform, not infer an inverse from partially 
 Navigation should help analysis without trapping scrolling or hiding context. Keep an overview or clear current-domain label when needed. With scaleExtent [1, 4], the narrowest view spans 2.5 units of 10; label the current domain so readers know which part of the sine they see. Add Reset zoom near the chart and keep a small overview that shows where the zoomed window sits in the full 0 to 10 range, so wheel scrolling does not strand the reader.
 
 **Expected:** Bounds, clipping, readable ticks and accessible alternate controls.
+
+## After comparison
+
+Apply zoom to the time series from js-049 with `scaleExtent([1, 8])` and a `translateExtent` that stops at the data's ends. Check that tick labels stay readable at every zoom level and that reset returns both the axis and the line to the original domain.

@@ -13,40 +13,37 @@ psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
   -f sql/professional/solutions/sql_prog_01_routines_triggers_solutions.sql
 ```
 
-`psql` prints each result/command tag in the terminal. Stop at the first
-unexpected `ERROR`; later output cannot repair an earlier failed invariant.
-Compare your own SQL, row grain, column names, row counts, `NULL` policy, and
-ordering with the explanation before comparing syntax.
+Each result block corresponds to one exercise. Several of them change
+`work_items` again, so compare audit counts in the order the file produces them
+rather than against the learner script's totals of three.
 
-## Clause-by-clause reading map
+## Reading map for this lesson
 
-The lesson's main concepts are Routine, Function, Procedure, Volatility, Security invoker/definer, Trigger. Its worked-model focus is:
-`open_item_count(text)` is a `STABLE`, `PARALLEL SAFE`, `SECURITY INVOKER` SQL function. It reads one statement snapshot and composes inside `SELECT`. Do not label a routine `IMMUTABLE` merely because its source text looks simple: a table-reading function changes when table data changes.
+Read each solution by asking which mechanism owns the rule and when it fires:
 
-- Start at `FROM`/`JOIN` and state the intermediate row grain. Inspect join keys
-  before adding aggregates; a one-to-many join is allowed to multiply rows only
-  when the later contract accounts for it.
-- Apply `WHERE` to input rows, `GROUP BY` to form buckets, and `HAVING` to
-  completed groups. Window functions run over the surviving relation and
-  normally preserve its row count.
-- Read the `SELECT` list as the public result contract: keys establish grain,
-  measures state calculations, and aliases explain meaning. `ORDER BY` is the
-  only output-order guarantee; add a unique tie-breaker before `LIMIT`.
-- Trace every common table expression (CTE) as a temporary named relation.
-  Execute or inspect one stage at a time while debugging, but compare the final
-  result with an independent control rather than trusting stage names.
-- Keep SQL `NULL` as “missing/unknown/not applicable” until the metric contract
-  chooses another representation. Guard division with `NULLIF`; disclose
-  exclusions and distinguish zero from no row.
-- For DDL/DML, a command tag proves only that PostgreSQL accepted a statement.
-  Catalog checks, negative cases, row-count reconciliation, and the declared
-  transaction boundary prove behavior and cleanup.
+- Functions: Exercise 1 counts audits with `COUNT(*)`, so a NULL or unknown
+  item returns zero, and Exercise 6 compares each declared volatility and
+  `PARALLEL` label with `pg_proc`.
+- Procedures: Exercise 2 is called with `CALL`, rejects a blank destination
+  with `check_violation` before touching any row, and moves only rows that are
+  not `closed`.
+- Triggers: Exercise 3 rejects a direct `closed` to `open` change in a
+  `BEFORE UPDATE` row trigger. Exercise 7 adds a statement trigger over
+  transition tables, which also fires for an `UPDATE ... WHERE false` that
+  touches no rows.
+- Exercise 4 is reconciled only after Exercise 7: one two-row status change
+  produces two row-level audit facts and one statement summary.
+- Exercise 5 returns a decision table rather than DDL: a `CHECK` constraint for
+  the status vocabulary, a row trigger for transitions, a function for
+  queryable logic, a procedure for multistep work.
+- Exercise 8 catches only `unique_violation` in an inner block, Exercise 9
+  inventories `pg_proc` because this lab creates no `SECURITY DEFINER` routine,
+  and Exercise 10 claims queue rows with `FOR UPDATE SKIP LOCKED`.
 
-The exact final queries are not the only valid syntax. A join, subquery, CTE,
-window, or conditional aggregate can be an alternative when it preserves the
-same grain, `NULL` semantics, deterministic ordering, and safety. Prefer the
-form whose intermediate relations a reviewer can verify; optimize only after
-correctness is established with evidence.
+Other designs are acceptable when the timing matches. A `CHECK` constraint
+cannot replace the reopen trigger, because it sees only the new row; a row
+trigger can replace the statement summary only if you also accept one audit row
+per item instead of one per statement.
 
 Run:
 

@@ -2,6 +2,8 @@
 
 Open these answers only after attempting Binary logits, BCEWithLogitsLoss and thresholds yourself. They reuse the guide's literal inputs, starting from Example A, Convert fixed logits, so a discrepancy points at one step. The executable companion runs the assertions; this page explains why each one tests Logit, BCEWithLogitsLoss, Decision threshold. After a pass, choose a new input for exercise 6, Count threshold errors, without looking.
 
+After comparing, follow the [review steps](../STUDY-GUIDE.md#after-the-solutions).
+
 ## Mechanism review
 
 A binary logit is an unrestricted score. Its sigmoid maps that score to a number between zero and one under the model's probability convention. BCEWithLogitsLoss combines the sigmoid and binary cross-entropy algebra in a numerically stable form, so its input should be logits rather than already-sigmoid-transformed probabilities. Applying sigmoid twice changes the objective while often producing finite values that look plausible.
@@ -148,6 +150,3 @@ assert (
 
 **Verify:** In a fresh process, the exercise checks confirm `int(((probabilities >= 0.5) != truth).sum()) == 0` and `int(((probabilities >= 0.8) != truth).sum()) == 1`.
 
-## Review after comparison
-
-Repeat exercise 4, Expose a double-sigmoid mistake, with one changed fixture value and predict the difference before running it. Keep your failing attempt at exercise 5, Test extreme finite scores, beside the repaired result. A missing framework is not a failing assertion. These solutions use only local fixtures.

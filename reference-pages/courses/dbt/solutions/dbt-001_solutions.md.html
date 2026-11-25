@@ -195,7 +195,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="dbt-001-explained-reference">dbt-001: explained reference<a class="heading-anchor" href="#dbt-001-explained-reference" aria-label="Link to this section">#</a></h2>
 <p>Build and inspect a local dbt project through its real adapter.</p>
-<p>The executable reference contains the two complete worked cases with assertions. The changes below explain the independent practice and its limits.</p>
+<p>The reference parses and builds the one-model project, then checks the manifest node <code>model.classroom.answer</code>, the stored row 42 and the run result status. Its second case proves only that compilation renders SQL without creating a relation; it says nothing about adapters other than the local DuckDB one. See <a href="../STUDY-GUIDE.md.html#answers-and-references">how these answers are laid out</a>.</p>
 <h3 id="1-locate-the-project">1. Locate the project<a class="heading-anchor" href="#1-locate-the-project" aria-label="Link to this section">#</a></h3>
 <p>The model states SQL logic, project configuration defines resource locations, and the profile chooses the database. Keeping these roles separate prevents accidental environment assumptions.</p>
 <p><strong>Expected:</strong> Each file has a distinct responsibility.</p>

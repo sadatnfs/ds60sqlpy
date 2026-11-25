@@ -194,7 +194,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/rust/solutions/rust-029_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="rust-029-explanation-and-comparison">rust-029: explanation and comparison<a class="heading-anchor" href="#rust-029-explanation-and-comparison" aria-label="Link to this section">#</a></h2>
-<p>Attempt the six guide tasks before opening this comparison. The executable reference is <a href="rust-029_solution.rs.html">rust-029_solution.rs</a>. It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.</p>
+<p>Executable reference: <a href="rust-029_solution.rs.html">rust-029_solution.rs</a>, which runs both examples and the coded answers.</p>
+<p>Open this only after <a href="../STUDY-GUIDE.md.html#attempt-a-lesson">an attempt</a>.</p>
 <h3 id="why-the-two-examples-differ">Why the two examples differ<a class="heading-anchor" href="#why-the-two-examples-differ" aria-label="Link to this section">#</a></h3>
 <p><strong>Make full capacity observable:</strong> The rejected value remains visible in the error instead of disappearing silently. One item is admitted and the next immediate send reports full capacity.</p>
 <p><strong>Drain before declaring completion:</strong> Producer lifetime and channel completion are explicitly connected. The receiver drains both values and ends after the sender is dropped.</p>
@@ -213,7 +214,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>How to verify.</strong> Assert the two <code>Ok</code> sends, <code>matches!(send.try_send(6), Err(TrySendError::Full(6)))</code> and the 4 then 5 order. Then <code>let (zero, _keep) = sync_channel::&lt;i32&gt;(0);</code> and assert <code>zero.try_send(1)</code> is <code>Full(1)</code>; the <code>_keep</code> binding holds the receiver alive.</p>
 <h4 id="task-3-independent-construction">Task 3: Independent construction<a class="heading-anchor" href="#task-3-independent-construction" aria-label="Link to this section">#</a></h4>
 <p>Build a bounded producer-consumer report pipeline.</p>
-<p><strong>Reference answer.</strong> The same statements run as the <code>Task 3</code> block of the reference program; here they are wrapped in <code>main</code> as a complete file.</p>
+<p><strong>Reference answer</strong>, wrapped in <code>main</code>; the reference runs it as its <code>Task 3</code> block.</p>
 <pre class="highlighted-code"><code class="language-rust"><span class="syntax-keyword">fn</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">-&gt;</span> <span class="syntax-builtin">Result</span><span class="syntax-operator">&lt;</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">Box</span><span class="syntax-operator">&lt;</span><span class="syntax-keyword">dyn</span> std<span class="syntax-punctuation">::</span>error<span class="syntax-punctuation">::</span>Error<span class="syntax-operator">&gt;</span><span class="syntax-operator">&gt;</span> <span class="syntax-punctuation">{</span>
     <span class="syntax-keyword">let</span> <span class="syntax-punctuation">(</span>send<span class="syntax-punctuation">,</span> receive<span class="syntax-punctuation">)</span> <span class="syntax-operator">=</span> std<span class="syntax-punctuation">::</span>sync<span class="syntax-punctuation">::</span>mpsc<span class="syntax-punctuation">::</span>sync_channel<span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-operator">&lt;</span><span class="syntax-keyword">u32</span><span class="syntax-operator">&gt;</span><span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
     <span class="syntax-keyword">let</span> producer <span class="syntax-operator">=</span> std<span class="syntax-punctuation">::</span>thread<span class="syntax-punctuation">::</span>spawn<span class="syntax-punctuation">(</span><span class="syntax-keyword">move</span> <span class="syntax-operator">|</span><span class="syntax-operator">|</span> <span class="syntax-punctuation">{</span>
@@ -257,7 +258,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>sync_channel creates bounded storage. try_send reports immediate full or disconnected states. send may block until capacity exists. Receiver iteration drains until sender ownership ends.</p>
 <p>Joining a producer before draining a full bounded channel can deadlock. Ignoring a failed send loses work. Channel capacity does not bound work already started outside the channel.</p>
 <h3 id="review-before-continuing">Review before continuing<a class="heading-anchor" href="#review-before-continuing" aria-label="Link to this section">#</a></h3>
-<p>Run the reference and confirm that it prints <code>rust-029: passed</code>, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.</p></article>
+<p>Rebuild Example B (Drain before declaring completion) from a blank pad.</p>
+<p>Review routine: <a href="../STUDY-GUIDE.md.html#self-check-and-review">Self-check and review</a>.</p></article>
   </main>
 </body>
 </html>

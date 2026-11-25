@@ -2,25 +2,18 @@
 
 int main(void) {
   /* Exercise 1: Append two fragments: predict an edited check
-     Copy worked example 1 into a scratch pad and change `CHECK(append_text(&b,
-     "red") && append_text(&b, " sky"));` to `CHECK(append_text(&b, "red!") &&
-     append_text(&b, " sky"));` inside its CHECK. Before running, predict
-     whether the CHECK still holds and explain why; then restore it. Expected:
-     With `CHECK(append_text(&b, "red!") && append_text(&b, " sky"));` the run
-     stops with `Check failed` at the CHECK on `b.len == 7 && strcmp(b.data,
-     "red sky") == 0`, because the "append two fragments" case no longer shows
-     that the result is red sky with length 7. Restoring `CHECK(append_text(&b,
-     "red") && append_text(&b, " sky"));` brings that observation back. */
+     In worked example 1, change `CHECK(append_text(&b, "red") &&
+     append_text(&b, " sky"));` to `CHECK(append_text(&b, "red!") &&
+     append_text(&b, " sky"));`. Predict whether the CHECK still holds and why,
+     then run and restore. Expected: `Check failed`: `CHECK(append_text(&b,
+     "red!") && append_text(&b, " sky"));` is false, although the result is red
+     sky with length 7. */
 
   /* Exercise 2: Append empty text: diagnose an edited check
-     A careless edit changed the CHECK in worked example 2, the "append empty
-     text" case, so that it reads `CHECK(append_text(&b, "abc!") &&
-     append_text(&b, ""));`. Run the example with that line, explain why the
-     edited CHECK now fails even though the program state still means length and
-     content remain unchanged, and restore it. Expected: Before the repair the
-     run stops with `Check failed` at the CHECK on `b.len == 3 && strcmp(b.data,
-     "abc") == 0`. Once the line reads `CHECK(append_text(&b, "abc") &&
-     append_text(&b, ""));` again, the "append empty text" case again shows that
+     Worked example 2's CHECK now reads `CHECK(append_text(&b, "abc!") &&
+     append_text(&b, ""));`. Explain why it fails although length and content
+     remain unchanged, then restore it. Expected: `Check failed` until the CHECK
+     reads `CHECK(append_text(&b, "abc") && append_text(&b, ""));` again, though
      length and content remain unchanged. */
 
   /* Exercise 3: Fill to exact payload capacity

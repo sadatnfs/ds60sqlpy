@@ -24,9 +24,11 @@ Type erasure means a kernel can return ArrayRef. Inspect or validate the logical
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles the saved pad as `main.rs` with pinned Rust 1.99.1, edition 2024, and the prepared Arrow 60 library. `assert!` and `assert_eq!` remain active in normal builds. The fixed pad accepts one source file without arbitrary arguments, interactive input, Cargo manifests or package installation. The main function returns `Result<(), Box<dyn std::error::Error>>` so later examples can propagate errors with `?`; the final `Ok(())` means this fixture completed successfully. Standard library and Arrow examples remain offline after image preparation. Multi-file Cargo and external ecosystem projects have separate explicit preparation workflows.
+Beyond the prelude, this lesson's programs use `arrow::array` and `arrow::compute`. A passing run prints `rust-040: passed`.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Pad setup and limits: [Run a lesson](../STUDY-GUIDE.md#run-a-lesson).
+
+Before you run anything, follow [Attempt a lesson](../STUDY-GUIDE.md#attempt-a-lesson).
 
 
 
@@ -34,7 +36,9 @@ Start with the answer-free learner artifact in your saved classroom pad. It deli
 
 compute::filter accepts an array and BooleanArray mask. compute::take selects by integer indices. as_any().downcast_ref recovers a known concrete array after the type contract has been established.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+**Reading Example A (Filter with an explicit mask, code below).** `BooleanArray::from(vec![true, false, true])` builds the selection mask, one entry per row of `values`. `arrow::compute::filter(&values, &mask)` is a kernel: it takes any array and a mask and returns a new array containing only the rows whose mask entry is true, in their original order. Because it accepts any array type, its return type is `ArrayRef`, the type-erased `Arc<dyn Array>`. The `?` propagates an `ArrowError` if the kernel rejects its inputs. To read the result as integers, `as_any().downcast_ref::<Int32Array>()` recovers the concrete type; `unwrap` is safe here because filtering an `Int32Array` always yields one. `iter()` then yields `Option<i32>`, which is why the expected values are wrapped in `Some`.
+
+Method for tracing your own variants: [Trace a program](../STUDY-GUIDE.md#trace-a-program).
 
 ## Worked example / walkthrough
 
@@ -94,13 +98,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 6. **Transfer and justify.** Choose filter or take for a sampling procedure and explain duplicate-row consequences.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Record each task as in [Keep evidence for each task](../STUDY-GUIDE.md#keep-evidence-for-each-task).
 
 ## Common pitfalls and diagnosis
 
 Downcast failure is possible in generic code. A mask and array must have compatible lengths. A kernel result does not establish a domain-level ordering guarantee unless the operation contract does.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+To turn a pitfall into a test, see [Design a regression case](../STUDY-GUIDE.md#design-a-regression-case).
 
 ## Progressive hints
 
@@ -108,13 +112,23 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 2. Compare Example B (Reorder and repeat with take) with Example A and name the first line whose behavior differs. Its observation is: Take repeats and reorders values according to the index sequence.
 3. Before opening the explanation, test your task 3 attempt against this lesson's main pitfall: Downcast failure is possible in generic code.
 
+Tempting approaches to rule out before you compare:
+
+- **Task 1.** Expecting `take` to deduplicate indices or to keep input order predicts [2, 6] for Example B and misses the repeated row that can double-count an aggregate.
+- **Task 2.** Changing only the expected vector and not the mask makes the test check your edit, not the kernel.
+- **Task 5.** Calling `take` with `None` options on indices from an untrusted source assumes they were already validated, so an out-of-range index is no longer reported as a handled error.
+
 ## Self-check and next step
 
-Explain Kernel, Filter mask, Take indices without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+Why does `filter` in Example A return [2, 6] in input order? In Example B, why does `take` return [6, 2, 6], and what would that repetition do to a sum? How should a sampling contract state each kernel's treatment of a null in the mask or the index array?
+
+Then work through [Self-check and review](../STUDY-GUIDE.md#self-check-and-review).
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://docs.rs/arrow/60.0.0/arrow/compute/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+Read [the `arrow::compute` documentation](https://docs.rs/arrow/60.0.0/arrow/compute/) for `filter`, `take` and their length rules.
+
+What the classroom does and does not prove: [Sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

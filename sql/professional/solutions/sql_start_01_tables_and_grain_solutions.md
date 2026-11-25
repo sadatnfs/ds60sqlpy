@@ -1,22 +1,23 @@
 # SQL-START-01: solution reasoning
 
-Use this after an honest attempt at the [guide](../companion-guides/sql_start_01_tables_and_grain.md)
-and [learner script](../lessons/sql_start_01_tables_and_grain.sql). The separate
-[executable solution](sql_start_01_tables_and_grain_solutions.sql) runs all six answers and independent
-fail-fast checks with `psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/solutions/sql_start_01_tables_and_grain_solutions.sql`.
-It uses only temporary fixtures, starts a transaction, and ends in rollback.
-It must exit 0 with no contract failures. Each answer has a savepoint so an
-experiment cannot silently change a later exercise's starting conditions.
-The assertion helper treats false and unknown as failures, rather than allowing
-a NULL assertion to pass accidentally. Keep the original fixture unchanged
-when comparing your work so the stated identities remain a reliable oracle.
+Open this after attempting the exercises in the
+[guide](../companion-guides/sql_start_01_tables_and_grain.md) and your
+[learner script](../lessons/sql_start_01_tables_and_grain.sql). The
+[executable solution](sql_start_01_tables_and_grain_solutions.sql) rebuilds the
+same six `start_readings` rows, runs each answer inside its own savepoint,
+copies the answer into a `solution_answer_N` temporary table, and calls
+`pg_temp.assert_true` on the exact `reading_id` list, count or value the
+contract promises. That helper raises unless its argument is exactly true, so
+a check that evaluates to NULL (for example a comparison against ID 4's missing
+temperature) fails instead of passing quietly. Run it as the
+[study guide](../../STUDY-GUIDE.md#read-a-solution) shows, with
+`-f sql/professional/solutions/sql_start_01_tables_and_grain_solutions.sql`.
 
-The code below is the answer for each numbered prompt, followed by its
-reasoning. Inspect the first discrepancy in your own transcript before reading
-a different answer. A solution is one defensible implementation of this contract;
-an alternative is valid if its identities, values, missingness, ordering, and
-transaction behavior match. Tests constrain the actual returned relation,
-rather than assuming a familiar-looking query must be right.
+Each query below is one valid answer. Yours is equally correct if it returns
+the same `reading_id` values in the same order, keeps ID 4's temperature as
+NULL rather than 0, and leaves the stored temperatures unchanged. Compare your
+transcript with the Expected line first; the first row that differs points to
+the clause to reread.
 
 ## Exercise solutions
 
@@ -158,4 +159,10 @@ VALUES supplies a tiny input collection directly inside the query. The alias tic
 
 ## Cleanup and evidence boundary
 
-The final rollback removes every temporary table, helper function, index, and modeled change. Running this file twice starts from the same fixture and should produce the same logical evidence. No extension, external dataset, current timestamp, or administrator capability is required. For the optional two-session concurrency lab, use its separate explicit cleanup because that fixture is deliberately committed; the default script never prepares that shared state. A static content check can validate contracts and file structure, while only a live PostgreSQL transcript validates SQL execution. Retain that distinction when reporting completion.
+Each `ROLLBACK TO SAVEPOINT` already discards that exercise's
+`solution_answer_N` table, and the final `ROLLBACK` drops `start_readings` and
+`pg_temp.assert_true`, because both were created inside the transaction.
+Running the file twice therefore starts from the same six observations, and
+nothing in it reads the clock, loads an extension or needs an administrator
+role. A clean run proves these answers against this fixture; it does not prove
+your own query, which only your own transcript can do.

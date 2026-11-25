@@ -4,7 +4,7 @@ Use this saved worksheet on any classroom platform. Optional CPU and NVIDIA obse
 
 ## Exercise 1
 
-Predict and trace the first worked example before running its CPU reference. Write every intermediate quantity that leads to the stated result, including units or ownership where applicable.
+Reconstruct worked example 1 on paper before running its CPU reference. Load tiles 0 and 1 into slots A and B, and reuse A for tile 2 only after tile 0's compute finishes.
 
 My prediction or design:
 
@@ -16,7 +16,7 @@ What this does not establish:
 
 ## Exercise 2
 
-Reconstruct the second worked example without copying its conclusion. Identify the changed input or condition, show the resulting calculation or dependency, and explain why it differs from the first example.
+Rework worked example 2 without copying its conclusion. Check the real address alignment before using a 16-byte transfer.
 
 My prediction or design:
 

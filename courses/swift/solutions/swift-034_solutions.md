@@ -1,6 +1,8 @@
 # swift-034: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [swift-034_solution.swift](swift-034_solution.swift). It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.
+Reference program: [swift-034_solution.swift](swift-034_solution.swift), covering both examples and the executed answers.
+
+Attempt the tasks first; see [comparing with the explanation](../STUDY-GUIDE.md#comparing-with-the-explanation).
 
 ## Why the two examples differ
 
@@ -128,7 +130,7 @@ The yield result makes the overflow policy observable at the producer, so droppe
 
 Choose lossless backpressure or deliberate dropping for a real event source and explain cleanup on cancellation.
 
-No single reference answer exists: several designs can satisfy this transfer task. Build yours from the task 3 answer above (Build a finite event stream with explicit completion ownership) and the mechanism described below, and state one limitation of your choice.
+No single answer exists; extend task 3 using the [open transfer routine](../STUDY-GUIDE.md#open-transfer-tasks).
 
 ## Solution reasoning
 
@@ -152,4 +154,4 @@ AsyncStream buffering is not automatically backpressure. Ignoring dropped values
 
 ## Review before continuing
 
-Run the reference and confirm that it prints `swift-034: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.
+Run the reference and confirm it prints `swift-034: passed`, then rerun the guide's counterexample.

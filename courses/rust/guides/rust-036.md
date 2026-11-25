@@ -26,9 +26,11 @@ The classroom compiles every pad with edition 2024, and editions change real lan
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles the saved pad as `main.rs` with pinned Rust 1.99.1, edition 2024, and the prepared Arrow 60 library. `assert!` and `assert_eq!` remain active in normal builds. The fixed pad accepts one source file without arbitrary arguments, interactive input, Cargo manifests or package installation. The main function returns `Result<(), Box<dyn std::error::Error>>` so later examples can propagate errors with `?`; the final `Ok(())` means this fixture completed successfully. Standard library and Arrow examples remain offline after image preparation. Multi-file Cargo and external ecosystem projects have separate explicit preparation workflows.
+Beyond the prelude, this lesson's programs use `std::cell`. A passing run prints `rust-036: passed`.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Pad setup and limits: [Run a lesson](../STUDY-GUIDE.md#run-a-lesson).
+
+Before you run anything, follow [Attempt a lesson](../STUDY-GUIDE.md#attempt-a-lesson).
 
 The complete [InventoryLab](../fixtures/InventoryLab/README.md) demonstrates Cargo without external dependencies. Arrow dependencies are prepared by the classroom image, not installed by learner source.
 
@@ -36,7 +38,9 @@ The complete [InventoryLab](../fixtures/InventoryLab/README.md) demonstrates Car
 
 Cargo.toml declares package and dependency intent, including edition = "2024". Cargo.lock records a resolved graph. cargo build --locked checks lock consistency; --offline requires cached dependencies. cargo test and cargo clippy are distinct verification tools. cargo fix --edition migrates code mechanically, but the migrated code still needs review.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+**Reading Example A (Observe an edition 2024 scope rule, code below).** `name_length` creates a `RefCell<String>` and ends with the tail expression `cell.borrow().len()`. `borrow()` returns a `Ref` guard, a temporary that must be dropped once the length is read. Under edition 2021, temporaries in a block's tail expression lived longer than the block's local variables, so the guard would outlive the `cell` it borrows, and the borrow checker reported E0597. Edition 2024 drops tail-expression temporaries before the block's locals, so the same source compiles. The edition is selected per crate in Cargo.toml, not by the compiler version, which is why one toolchain can build both.
+
+Method for tracing your own variants: [Trace a program](../STUDY-GUIDE.md#trace-a-program).
 
 ## Worked example / walkthrough
 
@@ -92,13 +96,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 6. **Transfer and justify.** Design a dependency upgrade review including lock diff, licenses, compile tests and runtime evidence.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Record each task as in [Keep evidence for each task](../STUDY-GUIDE.md#keep-evidence-for-each-task).
 
 ## Common pitfalls and diagnosis
 
 A successful dependency download is not successful compilation. Do not edit checksums manually to force a lockfile pass. A native binary is platform- and architecture-specific.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+To turn a pitfall into a test, see [Design a regression case](../STUDY-GUIDE.md#design-a-regression-case).
 
 ## Progressive hints
 
@@ -106,13 +110,24 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 2. Compare Example B (Iterate a boxed slice by value) with Example A and name the first line whose behavior differs. Its observation is: into_iter on a Box<[String]> yields owned Strings under edition 2024; under edition 2021 the same call yields &String and the collect fails with E0277.
 3. Before opening the explanation, test your task 3 attempt against this lesson's main pitfall: A successful dependency download is not successful compilation.
 
+Tempting approaches to rule out before you compare:
+
+- **Task 1.** Assuming that a newer rustc compiles code under the newest edition predicts that Example A would fail on an old manifest. A crate with `edition = "2021"` keeps 2021 rules on every newer compiler, which is exactly where Example A is rejected with E0597.
+- **Task 2.** Running a plain `cargo build` and committing whatever Cargo.lock it produces turns a verification step into an unreviewed dependency change.
+- **Task 3.** Counting the two zero-test targets as passing evidence inflates the result; only the four integration tests check behavior.
+- **Task 5.** Deleting `target` with `rm -rf` from a guessed path, or running `cargo clean` from a shared parent workspace, risks removing output or files you do not own.
+
 ## Self-check and next step
 
-Explain Edition, Lockfile, Offline build without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+Why does `name_length` compile under edition 2024 but fail with E0597 under edition 2021? Why does `into_iter` on a `Box<[String]>` yield owned `String`s in 2024 but `&String` in 2021? What does `Cargo.lock` pin that the `edition` key does not, and why does an upgrade review need both?
+
+Then work through [Self-check and review](../STUDY-GUIDE.md#self-check-and-review).
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://doc.rust-lang.org/cargo/guide/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+Read [the Edition Guide, tail expression temporary scope](https://doc.rust-lang.org/edition-guide/rust-2024/temporary-tail-expr-scope.html) for the 2024 rule behind Example A. The broader reference is [https://doc.rust-lang.org/cargo/guide/](https://doc.rust-lang.org/cargo/guide/).
+
+What the classroom does and does not prove: [Sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

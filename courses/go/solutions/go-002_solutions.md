@@ -1,6 +1,6 @@
 # go-002: explained solutions
 
-These are comparison material after an attempt or explicit reveal. The executable reference implements all six cases in one `main.go`.
+Compare after an attempt ([using solutions](../STUDY-GUIDE.md#use-the-solutions)). `courses/go/solutions/go-002_solution.go` implements all six cases.
 
 ## Mechanism
 
@@ -10,7 +10,7 @@ var n int64 fixes the variable's type. float64(n) converts the value; converting
 
 ## 1. Compare two divisions: change one input
 
-Copy worked example 1 into a scratch pad and change `a := 7 / 2` to `a := 8 / 2`. Before running, predict which check fails and which value it now sees; then run it and restore the original line.
+Copy worked example 1, change `a := 7 / 2` to `a := 8 / 2` and predict the failure before running; then restore the line.
 
 The unchanged code is worked example 1:
 
@@ -20,7 +20,9 @@ b := float64(7) / 2
 check(a == 3 && b == 3.5, "division")
 ```
 
-**Expected:** The changed run panics with `division` because `a == 3 && b == 3.5` no longer holds. Restoring the original line brings back the worked observation: the results are 3 and 3.5.
+**Expected:** The edited run panics with `division` because `a == 3 && b == 3.5` no longer holds.
+
+**Verify:** Restoring `a := 7 / 2` makes the check pass again with the worked observation: the results are 3 and 3.5.
 
 Converting before division selects floating arithmetic. float64(7/2) would instead be 3.0 because integer division has already occurred.
 
@@ -34,7 +36,7 @@ Converting before division selects floating arithmetic. float64(7/2) would inste
 
 ## 2. Expose narrowing: debug a regression
 
-A regression changed one token in worked example 2, so one line now reads `n := 261`. Run worked example 2 with that line, use the failure to locate the defect and repair it without changing the check.
+A one-token regression in worked example 2 makes a line read `n := 261`. Repair it without changing the check.
 
 The unchanged code is worked example 2:
 
@@ -44,7 +46,9 @@ small := uint8(n)
 check(small == 4, "narrowing")
 ```
 
-**Expected:** Before the repair the program panics with `narrowing`; after it the line reads `n := 260` again and the narrowed value is 4.
+**Expected:** The defective run panics with `narrowing`; after restoring `n := 260`, the narrowed value is 4.
+
+**Verify:** The failing run shows message `narrowing`; after the repair `small == 4` holds again.
 
 The eight-bit unsigned result retains the value modulo 256. A direct constant assignment of 260 to uint8 would be rejected instead of silently accepted.
 
@@ -67,6 +71,8 @@ check(a*b == 2500000000, "wide product")
 
 **Expected:** The product is 2500000000.
 
+**Verify:** Your solution must keep `a*b == 2500000000` true. Control: changing `check(a*b == 2500000000, "wide product")` to `check(a+b == 2500000000, "wide product")` panics with message `wide product`; revert it.
+
 Choose a width that can represent the result before the operation. Converting an already-overflowed result afterward cannot recover the mathematical value.
 
 **Approach.** Give both operands the type `int64` before multiplying, so the multiplication itself runs in 64 bits and `a*b` is 2500000000.
@@ -87,6 +93,8 @@ check(math.Abs((a+b)-0.3) < 1e-15, "rounding")
 ```
 
 **Expected:** The absolute difference from 0.3 is below 1e-15.
+
+**Verify:** Your solution must keep `math.Abs((a+b)-0.3) < 1e-15` true. Control: changing `check(math.Abs((a+b)-0.3) < 1e-15, "rounding")` to `check(math.Abs((a-b)-0.3) < 1e-15, "rounding")` panics with message `rounding`; revert it.
 
 The tolerance applies to this tiny calculation, not every numerical problem. Relative scale, accumulated error and NaN handling matter in larger algorithms.
 
@@ -109,6 +117,8 @@ check(err != nil, "invalid number")
 
 **Expected:** Parsing returns a non-nil error.
 
+**Verify:** Your solution must keep `err != nil` true. Control: changing `check(err != nil, "invalid number")` to `check(err == nil, "invalid number")` panics with message `invalid number`; revert it.
+
 Ignoring the error can turn malformed input into a misleading default or partial result. Validation belongs at the boundary where text becomes a numeric value.
 
 **Approach.** Call `strconv.ParseInt("12x", 10, 64)` and treat the returned `err` as the result that matters; the numeric value is discarded with `_`.
@@ -129,6 +139,8 @@ check(q == -3 && r == -1 && q*2+r == -7, "signed division")
 ```
 
 **Expected:** The quotient is -3 and the remainder is -1.
+
+**Verify:** Your solution must keep `q == -3 && r == -1 && q*2+r == -7` true. Control: changing `check(q == -3 && r == -1 && q*2+r == -7, "signed division")` to `check(q == -3 && r == -1 && q+2+r == -7, "signed division")` panics with message `signed division`; revert it.
 
 Truncation toward zero differs from floor division for negative operands. The reconstruction identity confirms the relationship between quotient and remainder.
 

@@ -32,11 +32,9 @@ Before changing platforms, write the failure model. What happens if a process ex
 
 ## How to use this lesson
 
-The classroom displays this guide and saves your worksheet, `courses/docker/lessons/docker-036.md`. Its Run button does not control your Docker engine. Docker engine access is powerful host access, so the classroom deliberately receives no engine socket. Work through the supplied examples without starting anything, then use the optional host lab only in your own disposable project. Reading a command, parsing YAML and actually running the project are different forms of evidence.
+The classroom saves `courses/docker/lessons/docker-036.md` and holds no engine socket ([host-lab setup](../STUDY-GUIDE.md#host-lab-setup)).
 
-Use Bash in Linux, macOS Terminal, or Ubuntu under WSL 2 on Windows. The supported engine runs Linux containers. The maintained fixture is `courses/docker/fixtures/compose-lab/`; its README explains copying it into a new ignored learner directory, checking the engine, building locally with visible logs, and using the fixed project name `ds60-docker-study`. The fixture uses port 18080 on host loopback. Stop if that project name or port belongs to unrelated work; choose a new project name consistently in your own copy. Never paste a command against a remote Docker context simply because it is currently selected.
-
-For Dockerfile examples, create a file named `Dockerfile` in a scratch project. YAML snippets describe a fragment unless explicitly called a complete file. Text transcripts are synthetic illustrations, not claims about your machine. Do not substitute a real password, token or private registry into a checked-in example. **How to use the lessons** in the [subject README](../README.md) collects these rules in one place.
+**Host lab.** Walk the failure domains with commands you already trust. Kill the app's process with `docker compose -p ds60-docker-study kill -s SIGKILL app` and note that it stays exited, since the service sets no restart policy. Recreate it with `up -d --wait` and read `/counter`: the value survived because `study-data` outlives containers. Then run `docker volume inspect ds60-docker-study_study-data --format '{{.Mountpoint}}'` and note that the path lives on this one engine's disk; on Docker Desktop it sits inside the Linux virtual machine, which is the same single failure domain. A lost host takes the only copy with it unless an export exists elsewhere. Write one row per domain, process, container, engine and host, naming the mechanism that covered it or writing none, and keep that table for the questions below.
 
 ## Worked example / walkthrough
 
@@ -68,7 +66,7 @@ published port -> explicit external traffic design
 
 ## Six progressive exercises
 
-For each exercise, name the object involved and the phase of its lifetime before changing anything, then vary only the condition the task names. Exercises that ask you to predict, explain, compare or diagnose keep their answers in the solutions file; the others show the evidence to look for.
+Answer-type prompts keep their answers in the solutions file ([exercise rules](../STUDY-GUIDE.md#exercise-rules)).
 
 ### Exercise 1: Predict whether Compose survives host loss automatically.
 
@@ -100,13 +98,19 @@ For each exercise, name the object involved and the phase of its lifetime before
 
 Treating Compose restart policies as host-failure recovery. Translating volumes to Kubernetes without a storage and backup design. Expecting a load balancer to replicate data.
 
-Exercise 4 is this chapter's boundary case: Diagnose a mechanical volume translation to Kubernetes. Name the storage class and provisioner the translated claim depends on, and check whether a restore procedure exists for its data. Preserve the original failure and the exact changed field before retrying. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
+Exercise 4 is this chapter's boundary case: Diagnose a mechanical volume translation to Kubernetes. Name the storage class and provisioner the translated claim depends on, and check whether a restore procedure exists for its data.
+
+A Compose file that starts the client only after the app is healthy leads people to expect the same ordering on a cluster. Kubernetes has no cross-workload start ordering: Pods for the client and the app start independently, and a client that runs before the app is ready simply fails its request. Translating `depends_on` therefore produces nothing, and a migrated client that never retries turns into intermittent failures after every rollout. The cluster equivalent is a readiness probe on the app, which keeps its Service from routing traffic until the probe passes, plus a client that retries with a bounded backoff until the Service has ready endpoints.
+
+Never trade a safety control for a passing example ([safety rules](../STUDY-GUIDE.md#safety-rules)).
 
 ## Retrieval, transfer and next steps
 
-Close the explanations first. Map each Compose concept to the requirement it becomes on a cluster without looking at the table. Then reconstruct worked example 2 (Map only what actually transfers) with one different value, predict what changes, and name which of single-host Compose, orchestration, scheduling and failure domain the change touches.
+**Retrieval.** Map each Compose concept to the requirement it becomes on a cluster without looking at the table.
 
-When a host session ends, run `docker compose -p ds60-docker-study down` from your fixture copy. It removes the project's containers and network but keeps named volumes; deleting a volume is a separate, deliberate reset described in the fixture README.
+**Transfer case.** Your manager asks whether the study app should move to Kubernetes now that two classes use it. Give a recommendation and the evidence that would change it.
+
+Then run the [retrieval loop](../STUDY-GUIDE.md#retrieval-and-cleanup) and end any host session with its cleanup.
 
 ## Primary references
 

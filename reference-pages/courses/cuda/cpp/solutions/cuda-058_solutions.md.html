@@ -196,7 +196,6 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <article class="document"><h2 id="cuda-058-explanatory-solutions">cuda-058: explanatory solutions<a class="heading-anchor" href="#cuda-058-explanatory-solutions" aria-label="Link to this section">#</a></h2>
 <h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
 <p>CUTLASS supplies composable matrix-operation building blocks, while CuTe provides abstractions for shapes, strides and layout composition used in tiled algorithms. An operation atom describes a small supported operation; larger tiles organize repeated work and data movement. Epilogues transform accumulated results, often adding scale, bias or activation. Templates encode choices at compile time, but they do not absolve the programmer from understanding coordinates, alignment, resource costs and architecture support. Pin dependencies and begin with a prepared supported example. A novel tile DSL is an elective comparison, not a universal prerequisite for basic CUDA.</p>
-<p>The separate <a href="../references/cuda-058_cpu.py.html">CPU reference</a> checks the chapter&#x27;s bounded model. It does not execute CUDA or establish GPU timing. Compare after attempting the worksheet or explicitly choosing to reveal solutions.</p>
 <h3 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h3>
 <p>A 2-by-3 logical tile with strides (3,1) maps coordinate (1,2) to offset five. A transposed view uses shape (3,2) and strides (1,3), mapping (2,1) to the same offset. Trace tiny layouts before interpreting a large template type.</p>
 <p><strong>Approach:</strong> Compute offset as row times stride 3 plus column times stride 1 for the 2-by-3 tile, then apply the transposed view&#x27;s strides (1, 3).</p>
@@ -233,11 +232,16 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Why it is correct:</strong> It reduces custom code to maintain.</p>
 <p><strong>A plausible wrong approach:</strong> Writing a custom kernel before checking the library duplicates tested work.</p>
 <p><strong>How to verify:</strong> Compare both against a reference and a library baseline.</p>
+<h3 id="self-check-answers">Self-check answers<a class="heading-anchor" href="#self-check-answers" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>What offset does (1,1) map to under shape (2,3) and strides (3,1)?</strong> 4, because 1 times 3 plus 1 times 1 is 4.</li>
+<li><strong>What does worked example 2 produce when bias comes after ReLU?</strong> [1,2,5] instead of [0,2,5], so the order changes semantics.</li>
+<li><strong>An instantiation compiles but fails on the device. What is missing?</strong> A check that the device supports the selected architecture target and instructions.</li>
+</ol>
 <h3 id="numerical-reference-and-its-limits">Numerical reference and its limits<a class="heading-anchor" href="#numerical-reference-and-its-limits" aria-label="Link to this section">#</a></h3>
-<p>The complete CPU model is <a href="../references/cuda-058_cpu.py.html">here</a>. Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It does not claim CUDA execution, concurrency safety or a performance measurement.</p>
+<p>The <a href="../references/cuda-058_cpu.py.html">CPU reference</a> reproduces worked example 1 and prints <code>{&#x27;correct_epilogue&#x27;: [0, 2, 5], &#x27;changed_operation_order&#x27;: [1, 2, 5]}</code>.</p>
 <h3 id="transfer-review">Transfer review<a class="heading-anchor" href="#transfer-review" aria-label="Link to this section">#</a></h3>
-<p>When it expresses the required semantics and passes accuracy/performance tests while reducing maintenance; compare against the relevant library baseline first.</p>
-<p>A complete explanation must name its inputs, the unchanged mathematical contract, the changed boundary or resource condition, and the evidence still needed on actual hardware. Preserve a CPU baseline even after a GPU path becomes available.</p></article>
+<p>When it expresses the required semantics and passes accuracy/performance tests while reducing maintenance; compare against the relevant library baseline first.</p></article>
   </main>
 </body>
 </html>

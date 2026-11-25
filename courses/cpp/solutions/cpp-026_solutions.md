@@ -1,6 +1,6 @@
 # cpp-026: explanations and reference observations
 
-Attempt the learner tasks before opening this document. The executable reference checks the bounded normal and boundary examples; the six explanations below cover the deliberate changes and manual checks.
+The [executable reference](cpp-026_solution.cpp) adds the oracle cases `total({}) == 0` and `total({-1, 0, 1}) == 0`. The explanations cover measurement hypotheses and why timing is observed rather than asserted. How to compare: [study guide](../STUDY-GUIDE.md#compare-with-the-solutions).
 
 ## Mechanism
 

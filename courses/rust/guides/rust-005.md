@@ -24,9 +24,11 @@ Match handles patterns and requires coverage of possibilities. A broad wildcard 
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles the saved pad as `main.rs` with pinned Rust 1.99.1, edition 2024, and the prepared Arrow 60 library. `assert!` and `assert_eq!` remain active in normal builds. The fixed pad accepts one source file without arbitrary arguments, interactive input, Cargo manifests or package installation. The main function returns `Result<(), Box<dyn std::error::Error>>` so later examples can propagate errors with `?`; the final `Ok(())` means this fixture completed successfully. Standard library and Arrow examples remain offline after image preparation. Multi-file Cargo and external ecosystem projects have separate explicit preparation workflows.
+This lesson's programs need only the prelude and their own helpers. A passing run prints `rust-005: passed`.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Pad setup and limits: [Run a lesson](../STUDY-GUIDE.md#run-a-lesson).
+
+Before you run anything, follow [Attempt a lesson](../STUDY-GUIDE.md#attempt-a-lesson).
 
 
 
@@ -34,7 +36,9 @@ Start with the answer-free learner artifact in your saved classroom pad. It deli
 
 `let label = if condition { "yes" } else { "no" };` uses a branch result. The final expression in a block has no semicolon when it supplies the value. `0..=59` is an inclusive pattern range.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+**Reading Example A (Choose a value with if, code below).** On line 2, `if count > 0 { "present" } else { "empty" }` is an expression, not a statement, and its value initializes `label`. The condition must have type `bool`; Rust never treats a number as true or false, so a bare `if count` is a type error. Each arm is a block whose final expression supplies the arm's value, and both arms must agree on one type, here `&str`, because `label` gets exactly one type at compile time. Only the arm whose condition holds is evaluated. Because the value is chosen during initialization, `label` needs no `mut` and never holds a placeholder that a later line overwrites. Removing the `else` arm is rejected with E0317, because an `if` without `else` can only produce `()`.
+
+Method for tracing your own variants: [Trace a program](../STUDY-GUIDE.md#trace-a-program).
 
 ## Worked example / walkthrough
 
@@ -93,13 +97,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 6. **Transfer and justify.** Choose explicit enum matches or a wildcard for a finite application state model.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Record each task as in [Keep evidence for each task](../STUDY-GUIDE.md#keep-evidence-for-each-task).
 
 ## Common pitfalls and diagnosis
 
 A semicolon can change a block value. Match arm order matters when patterns overlap. A wildcard that hides an unhandled domain state weakens maintenance feedback.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+To turn a pitfall into a test, see [Design a regression case](../STUDY-GUIDE.md#design-a-regression-case).
 
 ## Progressive hints
 
@@ -107,13 +111,25 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 2. Compare Example B (Classify explicit boundaries) with Example A and name the first line whose behavior differs. Its observation is: The transition at sixty and the invalid upper range are distinct.
 3. Before opening the explanation, test your task 3 attempt against this lesson's main pitfall: A semicolon can change a block value.
 
+Tempting approaches to rule out before you compare:
+
+- **Task 1.** Reading `0..=59` as exclusive predicts that 59 is not retry. With an exclusive pattern `0..59`, 59 would match neither range and fall to `_`, returning `"invalid"`, not `"pass"`.
+- **Task 2.** Editing only the second arm to `70..=100` leaves 60 through 69 unmatched by either range. The wildcard keeps the match exhaustive, so it compiles, and `classify(65)` silently returns `"invalid"`.
+- **Task 3.** Writing the first arm as `i32::MIN..=0` is an off-by-one: 0 matches it first and is classified negative. rustc warns that the later `0` arm is an unreachable pattern, and `assert_eq!(classify(0), "zero")` panics.
+- **Task 5.** Testing 1 and 99 instead of 0 and 100 passes a classifier written as `1..=59` and `60..=99`, which wrongly sends 0 and 100 to `"invalid"`.
+- **Task 6.** Writing `Order::Shipped => false, _ => true` is correct today, but when `Refunded` is added it silently becomes cancellable. The wildcard removes the compiler feedback the lesson's pitfall warns about.
+
 ## Self-check and next step
 
-Explain Expression, Pattern, Exhaustiveness without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+When `count` is 0, which string does `if count > 0 { "present" } else { "empty" }` bind, and what type error appears if a semicolon follows `"empty"`? What do `classify(59)`, `classify(60)` and `classify(101)` return, and which result changes if the first arm is written `0..59`? Why does a `_` arm stop the compiler from pointing at code that ignores a newly added enum variant?
+
+Then work through [Self-check and review](../STUDY-GUIDE.md#self-check-and-review).
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://doc.rust-lang.org/book/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+Read [The Rust Book, 6.2 The match Control Flow Construct](https://doc.rust-lang.org/book/ch06-02-match.html) for exhaustiveness and the catch-all arm.
+
+What the classroom does and does not prove: [Sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

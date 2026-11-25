@@ -4,57 +4,39 @@
 <!-- beginner-solution-enrichment -->
 ## How to study and run this solution
 
-Open this explanation only after making an honest attempt. The executable
-companion runs solely against the disposable `advanced_sql_training` database:
+Each answer is a plan, so your numbers will differ slightly in timing and
+sometimes in estimates. Compare node types and row counts first, timings
+last. The general approach is in
+[Read a solution](../../STUDY-GUIDE.md#read-a-solution).
 
 ```bash
-# Linux, macOS, or Windows through WSL 2, from the repository root
 psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
   -f sql/postgres-60day/solutions/day31_solutions.sql
 ```
 
-`psql` prints each result/command tag in the terminal. Stop at the first
-unexpected `ERROR`; later output cannot repair an earlier failed invariant.
-Compare your own SQL, row grain, column names, row counts, `NULL` policy, and
-ordering with the explanation before comparing syntax.
+## How these answers fit together
 
-## Clause-by-clause reading map
+The first and third answers stay on `orders` and change only the predicate,
+so the scan node and its `shared hit=65` stay fixed while row counts move.
+The second plans one country revenue join twice, once without running it
+and once with `ANALYZE`. The fourth adds a country filter and `VERBOSE`.
+The fifth applies `ANALYZE` to an `UPDATE` inside a savepoint, because
+`ANALYZE` executes whatever it plans.
+The sixth asks for rows that do not exist and shows that the planner still
+estimates one.
 
-The lesson's main concepts are Plan node, Cost estimate, Loop count. Its worked-model focus is:
-Run the same safe filter first with `EXPLAIN` and then with `EXPLAIN (ANALYZE, BUFFERS)`. Start at the scan leaf, compare estimated rows with `actual rows × loops`, note rows removed by the filter, and only then read the parent `LIMIT` or aggregate node.
-
-- Start at `FROM`/`JOIN` and state the intermediate row grain. Inspect join keys
-  before adding aggregates; a one-to-many join is allowed to multiply rows only
-  when the later contract accounts for it.
-- Apply `WHERE` to input rows, `GROUP BY` to form buckets, and `HAVING` to
-  completed groups. Window functions run over the surviving relation and
-  normally preserve its row count.
-- Read the `SELECT` list as the public result contract: keys establish grain,
-  measures state calculations, and aliases explain meaning. `ORDER BY` is the
-  only output-order guarantee; add a unique tie-breaker before `LIMIT`.
-- Trace every common table expression (CTE) as a temporary named relation.
-  Execute or inspect one stage at a time while debugging, but compare the final
-  result with an independent control rather than trusting stage names.
-- Keep SQL `NULL` as “missing/unknown/not applicable” until the metric contract
-  chooses another representation. Guard division with `NULLIF`; disclose
-  exclusions and distinguish zero from no row.
-- For DDL/DML, a command tag proves only that PostgreSQL accepted a statement.
-  Catalog checks, negative cases, row-count reconciliation, and the declared
-  transaction boundary prove behavior and cleanup.
-
-The exact final queries are not the only valid syntax. A join, subquery, CTE,
-window, or conditional aggregate can be an alternative when it preserves the
-same grain, `NULL` semantics, deterministic ordering, and safety. Prefer the
-form whose intermediate relations a reviewer can verify; optimize only after
-correctness is established with evidence.
-
-Execution plans are observations, not fixed expected text. PostgreSQL may choose
-different nodes after a version change, data refresh, or statistics update.
-Compare estimates, actuals, buffers, and timing rather than memorizing one plan.
+The learner file's own third plan, the 90-day join, is a good model for the
+fourth answer. Under `ANALYZE` it shows `orders` filtered to about 807
+recent rows, hashed, and probed by all 13,085 `order_items` rows, giving
+about 2,448 joined lines before a `HashAggregate` folds them into seven
+countries. The learner file is
+[day31_explain_analyze.sql](../day31_explain_analyze.sql).
 
 ## Exercise 1: Change predicates and observe selectivity
 
-These three queries ask for progressively smaller portions of `orders`.
+The two queries differ only in their `WHERE` clause: a three-year window that
+keeps most orders, and a seven-day window narrowed further by status and
+amount.
 
 ```sql
 SET search_path TO training, public;
@@ -64,35 +46,24 @@ EXPLAIN (
   BUFFERS
 )
 SELECT
-  order_id,
-  total_amount
+  *
 FROM
-  orders;
+  orders
+WHERE
+  order_date >= CURRENT_TIMESTAMP - interval '3 years';
 
 EXPLAIN (
   ANALYZE,
   BUFFERS
 )
 SELECT
-  order_id,
-  total_amount
+  *
 FROM
   orders
 WHERE
-  total_amount > 500;
-
-EXPLAIN (
-  ANALYZE,
-  BUFFERS
-)
-SELECT
-  order_id,
-  total_amount
-FROM
-  orders
-WHERE
-  total_amount > 500
-  AND order_date >= CURRENT_TIMESTAMP - interval '30 days';
+  order_date >= CURRENT_TIMESTAMP - interval '7 days'
+  AND status = 'returned'
+  AND total_amount >= 1000;
 ```
 
 Compare `rows=` on each plan node and the top-level actual row count. A more
@@ -121,13 +92,10 @@ SET search_path TO training, public;
 EXPLAIN
 SELECT
   c.country,
-  SUM(oi.quantity) AS units
+  SUM(o.total_amount) AS revenue
 FROM
-  orders o
-  JOIN customers c ON c.customer_id = o.customer_id
-  JOIN order_items oi ON oi.order_id = o.order_id
-WHERE
-  o.order_date >= CURRENT_TIMESTAMP - interval '90 days'
+  customers c
+  JOIN orders o ON o.customer_id = c.customer_id
 GROUP BY
   c.country;
 
@@ -137,13 +105,10 @@ EXPLAIN (
 )
 SELECT
   c.country,
-  SUM(oi.quantity) AS units
+  SUM(o.total_amount) AS revenue
 FROM
-  orders o
-  JOIN customers c ON c.customer_id = o.customer_id
-  JOIN order_items oi ON oi.order_id = o.order_id
-WHERE
-  o.order_date >= CURRENT_TIMESTAMP - interval '90 days'
+  customers c
+  JOIN orders o ON o.customer_id = c.customer_id
 GROUP BY
   c.country;
 ```
@@ -237,3 +202,15 @@ statistics are stale.
 - **Clause check:** For sql-31 Exercise 6, the solution uses one `EXPLAIN (ANALYZE, BUFFERS) SELECT order_id FROM orders WHERE total_amount < 0`.
 - **Alternative/trade-off:** For sql-31 Exercise 6, adding `CHECK (total_amount >= 0)` would make negative totals impossible for future writes, but the planner still would not skip the scan, because `constraint_exclusion = partition` applies constraints only to partitions and inheritance children.
 - **Edge case:** A predicate that is rare rather than impossible, such as `total_amount > 1400`, gets a small but nonzero estimate from the histogram and returns a few rows.
+
+## Final self-check
+
+1. Why does the scan in the `LIMIT 100` plan report 100 actual rows when
+   its estimate is 2,410, and what number would you use to judge the
+   estimate?
+2. In the 90-day join, which table does PostgreSQL hash, and why is that
+   the smaller input?
+3. A plan shows `rows=1` and `actual rows=0`. What two different situations
+   could explain it, and which query tells them apart?
+4. Why is `EXPLAIN ANALYZE UPDATE ...` unsafe outside a transaction even
+   when the `WHERE` clause seems harmless?

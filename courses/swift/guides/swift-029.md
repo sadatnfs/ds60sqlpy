@@ -24,9 +24,9 @@ A group is not automatically a concurrency limit. Adding a child for every eleme
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles the saved pad as `main.swift` with Swift 6 language checking. An explicit `@main` type contains `static func main() async throws`; the fixed compiler uses `-parse-as-library -swift-version 6`. The examples use the standard library and portable Foundation. `precondition` makes a violated invariant fail the process. The fixed pad accepts one source file, without arbitrary command arguments, interactive input or dependency installation. SwiftUI, UIKit, Apple simulators and application signing belong to the separately prepared macOS/Xcode project labs, never the Linux pad.
+Task groups produce results in completion order, which varies between runs. Run Example A several times and print the unsorted results in a scratch pad if you want to see the variation, but keep the sorted comparison in the check. Task 4's shared-array mutation is rejected at compile time under Swift 6 checking rather than producing a wrong answer at runtime.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Compile contract, starter stop and success marker: [running a lesson](../STUDY-GUIDE.md#running-a-lesson).
 
 
 
@@ -34,7 +34,7 @@ Start with the answer-free learner artifact in your saved classroom pad. It deli
 
 withTaskGroup creates a scoped group. addTask admits a child. for await consumes completed child results. A child captures only sendable data crossing the concurrency boundary.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+Each example ends with a trace; method: [tracing a program](../STUDY-GUIDE.md#tracing-a-program).
 
 ## Worked example / walkthrough
 
@@ -64,6 +64,8 @@ struct LessonMain {
 
 **Observe:** Sorted results are deterministic despite unspecified completion order.
 
+**Trace.** `withTaskGroup` creates a group whose children each return an `Int`. The loop adds three children, each capturing its own immutable `value` and returning it doubled. The parent then iterates `for await result in group`, receiving 2, 4 and 6 in whatever order the children finish, and appends each to its local `results` array. Only the parent touches that array. After the group is exhausted, `sorted()` gives `[2, 4, 6]` regardless of completion order.
+
 ### Example B: Handle an empty group
 
 The empty path needs no special background work or timer.
@@ -89,6 +91,8 @@ struct LessonMain {
 
 **Observe:** No admitted children produces the identity result zero.
 
+**Trace.** This group receives no children at all. The `for await` loop asks the group for its next result, the group reports that it has no pending children, and the loop ends without running its body. `total` stays at its initial 0 and the closure returns it. The empty case needs no timeout or special flag: an empty group completes as soon as it is iterated, and 0 is the natural identity for a sum.
+
 ## Exercises
 
 1. **Predict and explain.** Identify who owns each task and the result array.
@@ -103,13 +107,15 @@ struct LessonMain {
 
 6. **Transfer and justify.** Choose a concurrency bound for an I/O workload and explain its resource basis.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Log each task in the [evidence table](../STUDY-GUIDE.md#recording-exercise-evidence) before opening the explanation.
 
 ## Common pitfalls and diagnosis
 
 Group completion order is unspecified. Cancellation is cooperative and does not instantly kill children. Avoid unbounded child creation for large inputs.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+Task 4's version appends to a shared `var results` from inside each child closure. Swift 6 rejects it at compile time with a data-race diagnostic about the child closure; the exact wording varies between toolchain releases, so record the message you get as evidence. For task 2, tag each child result with its input index and rebuild the original order; the check must pass whatever order the children complete in.
+
+Repair routine: [building a regression case](../STUDY-GUIDE.md#building-a-regression-case).
 
 ## Progressive hints
 
@@ -119,11 +125,15 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 ## Self-check and next step
 
-Explain Child task, Completion order, Admission limit without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+Explain who owns the result array and why no child may modify it. Describe what `for await` does when the group has no pending children. For task 3, explain how waiting for one child before adding the next keeps at most two outstanding, and what resource such a bound protects in an I/O workload.
+
+Then follow the general [self-check routine](../STUDY-GUIDE.md#self-check-routine) and save your pad.
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://docs.swift.org/swift-book/documentation/the-swift-programming-language/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+[Documentation](https://docs.swift.org/swift-book/documentation/the-swift-programming-language/): Task groups and structured concurrency get their own section of the book's Concurrency chapter; the standard library documents `withTaskGroup(of:returning:body:)`.
+
+Provenance and limits: [sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

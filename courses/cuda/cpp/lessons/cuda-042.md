@@ -4,7 +4,7 @@ Use this saved worksheet on any classroom platform. Optional CPU and NVIDIA obse
 
 ## Exercise 1
 
-Predict and trace the first worked example before running its CPU reference. Write every intermediate quantity that leads to the stated result, including units or ownership where applicable.
+Reconstruct worked example 1 on paper before running its CPU reference. Time the first GPU pass over the CPU-initialized 64 MiB managed array separately from later passes.
 
 My prediction or design:
 
@@ -16,7 +16,7 @@ What this does not establish:
 
 ## Exercise 2
 
-Reconstruct the second worked example without copying its conclusion. Identify the changed input or condition, show the resulting calculation or dependency, and explain why it differs from the first example.
+Rework worked example 2 without copying its conclusion. Batch CPU and GPU passes so data changes owner once per side instead of every round.
 
 My prediction or design:
 

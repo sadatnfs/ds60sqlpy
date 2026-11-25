@@ -248,7 +248,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-keyword">AND</span> ordered_at <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-string">&#x27;2026-01-01 00:00:02&#x27;</span><span class="syntax-punctuation">;</span></code></pre>
 <p>The illustrative customer and day values follow the shape of the by_customer table, whose partition key is customer_id plus day_bucket and whose rows are ordered by ordered_at descending. The partition key routes the read to one replica set, and the clustering range then reads a contiguous slice inside that partition. Remove the partition key and Cassandra refuses the query unless ALLOW FILTERING is added, which turns a targeted read into a scan; that refusal is a design signal, not an error to suppress.</p>
 <h3 id="complete-worked-source">Complete worked source<a class="heading-anchor" href="#complete-worked-source" aria-label="Link to this section">#</a></h3>
-<p>This is a project-only command notebook. Read and edit it in the classroom; run its explicitly labeled commands from the copied owned Docker workshop. The classroom does not execute these service commands.</p>
+<p>The classroom does not execute these service commands. See the <a href="../STUDY-GUIDE.md.html#workshop-notebooks">workshop rules</a>.</p>
 <h2 id="storage-and-timestamp-observations">Storage and timestamp observations<a class="heading-anchor" href="#storage-and-timestamp-observations" aria-label="Link to this section">#</a></h2>
 <pre class="highlighted-code"><code class="language-bash">bash run.sh check
 bash run.sh identity

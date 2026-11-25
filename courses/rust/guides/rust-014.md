@@ -24,9 +24,11 @@ Unwrap asserts that absence is impossible and panics otherwise. Use it only when
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles the saved pad as `main.rs` with pinned Rust 1.99.1, edition 2024, and the prepared Arrow 60 library. `assert!` and `assert_eq!` remain active in normal builds. The fixed pad accepts one source file without arbitrary arguments, interactive input, Cargo manifests or package installation. The main function returns `Result<(), Box<dyn std::error::Error>>` so later examples can propagate errors with `?`; the final `Ok(())` means this fixture completed successfully. Standard library and Arrow examples remain offline after image preparation. Multi-file Cargo and external ecosystem projects have separate explicit preparation workflows.
+This lesson's programs need only the prelude and their own helpers. A passing run prints `rust-014: passed`.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Pad setup and limits: [Run a lesson](../STUDY-GUIDE.md#run-a-lesson).
+
+Before you run anything, follow [Attempt a lesson](../STUDY-GUIDE.md#attempt-a-lesson).
 
 
 
@@ -34,7 +36,9 @@ Start with the answer-free learner artifact in your saved classroom pad. It deli
 
 `Option<T>` carries a present T or absence. `if let Some(value)` handles the present case. map transforms a present value; and_then chains an operation already returning Option. unwrap_or supplies a deliberate fallback.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+**Reading Example A (Keep zero distinct from missing, code below).** `Some(0)` and `None` are the two variants of `Option<i32>`. The annotation on `missing` is required because a bare `None` says nothing about the type it would hold, while `measured` gets its type from the literal inside `Some`. `assert_ne!` passes when its arguments differ, and it can compare the two values because `Option<i32>` implements `PartialEq`, comparing the variant first and the payload second. `map` takes a closure, `|value| value + 1`, applies it to a `Some` payload and wraps the result in a new `Option`. `map` takes its receiver by value, but `Option<i32>` is `Copy`, so the call consumes a copy and `measured` would stay usable afterward.
+
+Method for tracing your own variants: [Trace a program](../STUDY-GUIDE.md#trace-a-program).
 
 ## Worked example / walkthrough
 
@@ -89,13 +93,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 6. **Transfer and justify.** Choose when absence should remain optional and when it should become a domain error.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Record each task as in [Keep evidence for each task](../STUDY-GUIDE.md#keep-evidence-for-each-task).
 
 ## Common pitfalls and diagnosis
 
 None does not explain a failure reason; use Result when a reason matters. A default can hide missing data. Avoid converting every optional to a panic merely to shorten control flow.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+To turn a pitfall into a test, see [Design a regression case](../STUDY-GUIDE.md#design-a-regression-case).
 
 ## Progressive hints
 
@@ -103,13 +107,25 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 2. Compare Example B (Propagate absence until a boundary) with Example A and name the first line whose behavior differs. Its observation is: An absent lookup stays absent until the explicit display fallback.
 3. Before opening the explanation, test your task 3 attempt against this lesson's main pitfall: None does not explain a failure reason; use Result when a reason matters.
 
+Tempting approaches to rule out before you compare:
+
+- **Task 1.** Treating `None` like 0 predicts `Some(1)` for both, and treating `Some(0)` as empty predicts `None` for both. Each erases the distinction Example A's `assert_ne!(measured, missing)` establishes.
+- **Task 2.** Keeping Example B's `unwrap_or(-1)` and printing the number is ambiguous wherever -1 is a valid reading, such as a temperature. `unwrap_or(0)` is worse here: a missing reading prints the same as the measured zero in Example A.
+- **Task 3.** Using `find(|value| *value > 0)` treats zero as invalid, so `first_valid(&[-2, 0, 5])` returns `Some(5)` and the first assertion panics. The reference uses `>= 0` because a valid zero must be found.
+- **Task 5.** Testing presence with `values.get(i).copied().unwrap_or(0) != 0` reports the stored zero as missing, collapsing the present-zero and absent cases this task separates.
+- **Task 6.** Returning `Option<u16>` for the port with `raw?.parse().ok()` collapses a missing field and `port=abc` into the same `None`, so the caller cannot tell the user which problem to fix.
+
 ## Self-check and next step
 
-Explain Option, Some, Fallback without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+What do `Some(0).map(|n| n + 1)` and `None.map(|n: i32| n + 1)` produce, and why is the first not a missing value? Where in Example B is the display fallback chosen, and what would be lost if it were chosen at the lookup? When should absence become a `Result` with a reason instead of staying `None`?
+
+Then work through [Self-check and review](../STUDY-GUIDE.md#self-check-and-review).
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://doc.rust-lang.org/book/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+Read [the `std::option` module documentation](https://doc.rust-lang.org/std/option/) for `map`, `and_then` and the `unwrap_or` family.
+
+What the classroom does and does not prove: [Sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

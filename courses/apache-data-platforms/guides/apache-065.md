@@ -130,12 +130,11 @@ Down removes the containers but keeps the named volumes for PostgreSQL and the w
 
 ## Complete worked source
 
-This is a project-only command notebook. Read and edit it in the classroom; run its explicitly labeled commands from the copied owned Docker workshop. The classroom does not execute these service commands.
+The classroom does not execute these service commands. See the [workshop rules](../STUDY-GUIDE.md#workshop-notebooks).
 
 # Hive apache-065 command notebook
 
-Run from the copied owned Hive project, following its README. Native service
-acceptance is separately recorded in QUALIFICATION.md.
+Start and end this lifecycle with `metadata` from the copied Hive project. The probe reads table type, partition key and both storage locations through Thrift, so matching output before `stop` and after `resume` shows the Metastore database kept its state.
 
 ```bash
 bash run.sh metadata
@@ -147,12 +146,11 @@ bash run.sh check
 
 For replacement, use down/start then only check/metadata. Never initialize while testing retention. Compare database and warehouse ownership separately.
 
-The classroom does not execute these Docker commands. Retain source, schema,
-file identities, actual responses and failure scope in an independent receipt.
+QUALIFICATION.md records that stop and resume kept the three service containers, and that replacement changed all three while the database, warehouse and typed metadata stayed the same. No schema initialization ran during that readback.
 
 ## Primary references
 
-- [Hive4.2.1 preparation and components](https://hive.apache.org/development/quickstart/)
+- [Hive 4.2.1 preparation and components](https://hive.apache.org/development/quickstart/)
 - [Hive DDL](https://hive.apache.org/docs/latest/language/languagemanual-ddl/)
 - [Hive Metastore administration](https://hive.apache.org/docs/latest/admin/adminmanual-metastore-administration/)
 - [Hive/Iceberg integration](https://iceberg.apache.org/docs/latest/hive/)

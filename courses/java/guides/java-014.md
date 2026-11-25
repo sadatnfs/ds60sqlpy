@@ -6,7 +6,16 @@ Intermediate, approximately 90 minutes. Direct prerequisites: `java-013`
 
 ## Learning objectives
 
-Build stream pipelines with collectors, explain laziness and single use, and choose a reduction identity that is safe. Along the way, explain lazy pipeline, terminal operation, associative reduction using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. Exercises 1 and 2 start from the worked examples; the authored investigations begin with this task: Count red, blue, red with groupingBy and counting. The final exercise transfers the mechanism to expose nonassociative subtraction.
+Build stream pipelines with collectors, explain laziness and single use, and choose a reduction identity that is safe.
+
+The six exercises practice these steps:
+
+- Filter and sum.
+- Observe laziness with an explicit terminal.
+- Group with a collector.
+- Reject stream reuse.
+- Check the reduction identity.
+- Expose nonassociative subtraction.
 
 ## Purpose and mental model
 
@@ -22,16 +31,9 @@ A stream is a single-use computation pipeline over a source. Intermediate operat
 
 ## How to run this lesson
 
-Open the Docker classroom, choose the prepared Java 21 profile and save a learner pad. The pad is compiled as `Main.java` with `javac --release 21` and executed with `java -ea Main`. Assertions are enabled deliberately. A successful assertion has no output; a failed assertion throws `AssertionError` and the process should fail. Do not remove assertions to obtain a green result.
+Exercise 2 counts mapper calls with an `AtomicInteger` purely as a teaching probe; the remaining checks are pure pipelines, and Exercise 6 runs one parallel sum, which returns the same total on any machine.
 
-For a prepared native JDK, copy a worked example into your own `Main.java` under ignored `.learning/expansion/java-014/`. From that directory run the same two commands on PowerShell, macOS or Linux:
-
-```text
-javac --release 21 Main.java
-java -ea Main
-```
-
-The public class name and source filename must agree. Each worked example below is a complete file. Example B includes the setup it needs from Example A, so it can be compiled by itself. The six exercise reference blocks form one complete program in the separate solution. Keep your original prediction, source and diagnostic text together. Most examples use prepared JDK libraries and tiny local fixtures; any additional dependency is specified in the lesson notes below. Any lesson-specific library or additional file is named explicitly; do not download packages from inside a learner program. Resource examples close their owned files, executors or loopback servers.
+Classroom and native JDK steps, the exercise controls and the hint routine are in the [Java study guide](../STUDY-GUIDE.md).
 
 
 
@@ -97,62 +99,62 @@ public class Main {
 
 ## Prediction before your attempt
 
-Read the source from the entry point and name each value before executing it. Identify which operations create new values, which mutate existing state and which can fail. Predict the first observable output or assertion result. For a compile-time failure, explain which source rule is violated before discussing runtime state: a program that did not compile never reached its main method. Keep normal, boundary and invalid inputs separate so each check has a clear purpose.
+Before running Example A, list the elements that survive the even filter, their squares and the final sum. For Example B, predict the counter value right after the pipeline is defined and after `toList()` runs, and explain why defining `map` alone does nothing. Then predict what a second terminal operation on the same stream object does (it throws `IllegalStateException`).
 
 ## Exercises
 
-1. **Filter and sum: change one input.** Copy Example A into a scratch `Main.java` and change `int total = List.of(1, 2, 3, 4)` to `int total = List.of(2, 2, 3, 4)`. Before running it with `java -ea Main`, predict which assertion fails and which value it now sees; then run it and restore the original line.
-   **Expected:** The changed run fails with an `AssertionError` from the assertion on `total == 20`. Restoring the original line brings back the worked observation: 20.
-   **Verify:** Compare your written prediction with the reported `AssertionError` and its stack-trace line, and name the value that made `total == 20` false. After restoring the line, the program completes without an `AssertionError` again.
+1. **Filter and sum: change one input.** Change `int total = List.of(1, 2, 3, 4)` to `int total = List.of(2, 2, 3, 4)` in Example A and predict which assertion fails and why.
+   **Expected:** The edited run fails with an `AssertionError` from the assertion on `total == 20`.
+   **Verify:** Name the value that makes `total == 20` false, then restore the line.
 
-2. **Observe laziness with an explicit terminal: debug a regression.** A regression changed one token in the code that Example B adds after Example A, so one line now reads `return value + 2;`. Run Example B with that line, use the failing assertion to locate the defect and repair it without changing the assertion.
-   **Expected:** Before the repair the run fails with an `AssertionError` from the assertion on `pipeline.toList().equals(List.of(2, 4, 6)) && calls.get() == 3`; after it the line reads `return value * 2;` again and counter 0 before terminal and 3 after.
-   **Verify:** Keep the failing and the repaired runs. Explain why the changed token alters the value tested by `pipeline.toList().equals(List.of(2, 4, 6)) && calls.get() == 3` for this input.
+2. **Observe laziness with an explicit terminal: debug a regression.** A regression in Example B's new code makes one line read `return value + 2;`. Repair it using the failing assertion.
+   **Expected:** The unrepaired run fails with an `AssertionError` from the assertion on `pipeline.toList().equals(List.of(2, 4, 6)) && calls.get() == 3`; the repaired line reads `return value * 2;`.
+   **Verify:** Explain how the changed token alters the value that `pipeline.toList().equals(List.of(2, 4, 6)) && calls.get() == 3` tests.
 
 3. **Group with a collector.** Count red, blue, red with groupingBy and counting.
    **Expected:** red 2L, blue 1L.
-   **Verify:** Keep an assertion equivalent to `counts.equals(Map.of("red", 2L, "blue", 1L))`. As a control, change `Map<String, Long> counts = List.of("red", "blue", "red")` to `Map<String, Long> counts = List.of("red!", "blue", "red")`: the run must fail with an `AssertionError` from the assertion on `counts.equals(Map.of("red", 2L, "blue", 1L))`. Restore the line before continuing.
+   **Verify:** Control: changing `Map<String, Long> counts = List.of("red", "blue", "red")` to `Map<String, Long> counts = List.of("red!", "blue", "red")` must fail the assertion on `counts.equals(Map.of("red", 2L, "blue", 1L))`.
 
 4. **Reject stream reuse.** Consume a stream once, then attempt another terminal operation.
    **Expected:** IllegalStateException.
-   **Verify:** Keep an assertion equivalent to `reused`. As a control, change `reused = true;` to `reused = false;`: the run must fail with an `AssertionError` from the assertion on `reused`. Restore the line before continuing.
+   **Verify:** Control: changing `reused = true;` to `reused = false;` must fail the assertion on `reused`.
 
 5. **Check the reduction identity.** Compare sum reduction with identity 0 against a deliberately wrong identity 10.
    **Expected:** correct 6; wrong 16 in the sequential fixture.
-   **Verify:** Keep an assertion equivalent to `correct == 6 && wrong == 16`. As a control, change `int correct = List.of(1, 2, 3).stream().reduce(0, Integer::sum);` to `int correct = List.of(2, 2, 3).stream().reduce(0, Integer::sum);`: the run must fail with an `AssertionError` from the assertion on `correct == 6 && wrong == 16`. Restore the line before continuing.
+   **Verify:** Control: changing `int correct = List.of(1, 2, 3).stream().reduce(0, Integer::sum);` to `int correct = List.of(2, 2, 3).stream().reduce(0, Integer::sum);` must fail the assertion on `correct == 6 && wrong == 16`.
 
 6. **Expose nonassociative subtraction.** Compare (10-3)-2 with 10-(3-2), then use an associative sum for a parallel fixture.
    **Expected:** 5 versus 9; parallel sum 5050.
-   **Verify:** Keep an assertion equivalent to `(10 - 3) - 2 == 5 && 10 - (3 - 2) == 9`. As a control, change `assert (10 - 3) - 2 == 5 && 10 - (3 - 2) == 9;` to `assert (10 + 3) - 2 == 5 && 10 - (3 - 2) == 9;` inside it: the run must fail with an `AssertionError`, which shows the assertion can fail. Restore it.
+   **Verify:** Control: changing `assert (10 - 3) - 2 == 5 && 10 - (3 - 2) == 9;` to `assert (10 + 3) - 2 == 5 && 10 - (3 - 2) == 9;` inside the assertion must make it fail.
 
 ## Common pitfalls and diagnosis
 
-When a check fails, keep the smallest source file that still demonstrates the failure. Read the first relevant compiler diagnostic before editing several lines; later diagnostics can be consequences of the same missing delimiter or wrong type. For a runtime exception, identify the first frame belonging to your code and compare its input with the method contract. For an assertion failure, inspect the actual value and the independent expected value. A passing process exit is weaker than a checked invariant, and a checked invariant applies only under its stated assumptions.
+Streams are single use, so storing one in a field and consuming it twice fails at run time. Laziness surprises people who put logging or counting inside `map` and see nothing until a terminal operation runs. A wrong reduction identity, such as 10 for addition, is added once per partition in a parallel run, and a nonassociative operator such as subtraction gives results that depend on how the work was split. Prefer `groupingBy` and `counting` over appending to an external list from `forEach`.
 
-Do not replace a precise exception with a catch-all that returns a plausible default. That can hide an invalid input or an unfinished operation. If an example owns a resource, verify its lifetime on both the success and failure paths. If an operation is concurrent, use ordering primitives to establish the relationship you need; an observed timing coincidence is not a synchronization guarantee. The solution explanations identify the specific alternative that would break each exercise.
+General compiler, runtime and assertion triage: [diagnose a failure](../STUDY-GUIDE.md#diagnose-a-failure).
 
 ## Progressive hints
 
-Read one hint at a time and attempt the exercise again before reading the next. Keep a small table of input, expected value, actual value and exception type. Ask for one hint about the first incorrect assumption before requesting the entire reference implementation.
+Read one rung at a time, as described in [using hints](../STUDY-GUIDE.md#use-hints-one-at-a-time).
 
-- **Exercise 1:** First restate the expected observation: 20. Then list the values read by `total == 20` and trace each one from its declaration. Finally, compute the asserted value with `int total = List.of(2, 2, 3, 4)` in place before running.
-- **Exercise 2:** First restate the expected observation: counter 0 before terminal and 3 after. Then list the values read by `pipeline.toList().equals(List.of(2, 4, 6)) && calls.get() == 3` and trace each one from its declaration. Finally, compare `return value + 2;` with the same line in Example B and state the claim each version makes.
-- **Exercise 3:** First restate the expected observation: red 2L, blue 1L. Then list the values read by `counts.equals(Map.of("red", 2L, "blue", 1L))` and trace each one from its declaration. Finally, predict the effect of changing `Map<String, Long> counts = List.of("red", "blue", "red")` to `Map<String, Long> counts = List.of("red!", "blue", "red")` before running anything.
-- **Exercise 4:** First restate the expected observation: illegalStateException. Then list the values read by `reused` and trace each one from its declaration. Finally, predict the effect of changing `reused = true;` to `reused = false;` before running anything.
-- **Exercise 5:** First restate the expected observation: correct 6; wrong 16 in the sequential fixture. Then list the values read by `correct == 6 && wrong == 16` and trace each one from its declaration. Finally, predict the effect of changing `int correct = List.of(1, 2, 3).stream().reduce(0, Integer::sum);` to `int correct = List.of(2, 2, 3).stream().reduce(0, Integer::sum);` before running anything.
-- **Exercise 6:** First restate the expected observation: 5 versus 9; parallel sum 5050. Then list the values read by `(10 - 3) - 2 == 5 && 10 - (3 - 2) == 9` and trace each one from its declaration. Finally, name one input that would make `(10 - 3) - 2 == 5 && 10 - (3 - 2) == 9` false.
+- **Exercise 1:** First apply the even filter to the edited source 2, 2, 3, 4. Then square the survivors and add them. Finally, compare the sum with 20 and explain which stage of the pipeline the edit affected.
+- **Exercise 2:** First write the values the edited mapper produces for 1, 2 and 3. Then compare them with 2, 4, 6 while noting that the call counter still reaches 3. Finally, restore the multiplication and explain why the counter alone could not catch this regression.
+- **Exercise 3:** First stream red, blue and red and collect with `Collectors.groupingBy(color -> color, Collectors.counting())`. Then compare the map with red 2L and blue 1L, using `Long` values. Finally, explain why no external map was mutated during the collection.
+- **Exercise 4:** First create a stream and consume it with one terminal operation. Then call a second terminal operation on the same object inside a `try` block and catch `IllegalStateException`. Finally, explain why you must create a new stream from the source instead.
+- **Exercise 5:** First reduce 1, 2 and 3 with identity 0 and `Integer::sum`. Then reduce the same list with identity 10. Finally, compare 6 and 16 and explain what a parallel run could add for each partition.
+- **Exercise 6:** First evaluate `(10 - 3) - 2` and `10 - (3 - 2)` and assert 5 and 9. Then sum 1 to 100 with a parallel `IntStream` and assert 5050. Finally, explain why addition is safe to regroup while subtraction is not.
 
 ## Self-check and retrieval
 
-Close the solution and explain Lazy pipeline, Terminal operation, Associative reduction in your own words. Reconstruct one example from a blank `Main.java`, then add a new boundary input. Explain why the new case should pass or fail before compiling it. Identify a situation where this technique is appropriate and one where a different data structure, lifetime policy or abstraction would be clearer. This is a reasoning check, not a memorization test for an API spelling.
+Without notes, explain the difference between an intermediate and a terminal operation, why the counter is 0 before `toList()`, what makes 0 the correct identity for an addition reduction, and why `(10 - 3) - 2` and `10 - (3 - 2)` show that subtraction is unsafe as a parallel reducer.
 
 ## Next step
 
-Preserve the saved pad and the six exercise observations. Continue to the next lesson only when you can explain the invariants without reading the answer. Later chapters reuse these contracts in larger programs, so keep a failing counterexample as well as a repaired result. A reference implementation demonstrates one valid design under the stated assumptions; it is not a universal design rule.
+Continue with `java-015`: Dates, time zones and formatting. Keep your six observations; see [moving on](../STUDY-GUIDE.md#move-to-the-next-lesson).
 
 ## Sources and verification status
 
-[Official Java 21 API or language reference](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/stream/Stream.html), reviewed 2026-10-22. Examples and exercise fixtures are original course material. Use the [validation guide](../../../docs/validation.md) and CI artifacts for the exact revision and platform to inspect actual compile/run results. Authoring, parsing, compilation, execution and learner mastery are separate forms of evidence.
+[Official Java 21 API or language reference](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/stream/Stream.html), reviewed 2026-10-22. Evidence levels: [sources and evidence](../STUDY-GUIDE.md#sources-and-evidence).
 
 ## Ask an AI tutor about this lesson
 

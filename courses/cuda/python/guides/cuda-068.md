@@ -1,10 +1,17 @@
 # cuda-068: Array operations before custom kernels
 
-**Route:** CUDA Python and machine learning. **Stage:** beginner. **Prerequisites:** `cuda-066`, `cuda-067`. Allow several sessions when the hardware experiment is new; the chapter is not a deadline.
+**Route:** CUDA Python and machine learning. **Stage:** beginner. **Prerequisites:** `cuda-066`, `cuda-067`.
 
-## What you will be able to explain
+Pacing, evidence labels and platform rules: [CUDA study guide](../../STUDY-GUIDE.md).
 
-By the end, you can **compute centered columns**, **explain expanded-form cancellation**, and **choose a library baseline** with evidence. Start with the two worked cases, then use the editable CPU model to make the quantities concrete.
+## Learning objectives
+
+- Compute centered columns.
+- Add a constant feature.
+- Implement distance directly.
+- Explain expanded-form cancellation.
+- Count a pairwise temporary.
+- Choose a library baseline.
 
 ## Mechanism and vocabulary
 
@@ -31,9 +38,13 @@ Center rows [[1,3],[3,7]] by column means [2,5], producing [[-1,-2],[1,2]]. Each
 
 Distance between [1,2] and [4,6] is 25. Both direct differences and the expanded identity yield 25 for this small exact case; cancellation needs an additional adversarial test.
 
-## Portable executable model
+## How to run the CPU model
 
-The **CPU reference model** variant runs this bounded worked example using `python-core`. It uses only the Python standard library, small synthetic values and no network. Its purpose is to expose the arithmetic or contract behind the chapter. The separate reference includes assertions for the stated observations.
+Edit the copy; the [reference](../references/cuda-068_cpu.py) adds assertions.
+
+```sh
+python courses/cuda/python/lessons/cuda-068_cpu.py
+```
 
 ```python
 rows = [[1.0, 3.0], [3.0, 7.0]]
@@ -59,11 +70,9 @@ print("CPU array reference:", centered, distance)
 | `y` | `[4, 6]` |
 | `distance` | `25` |
 
-Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.
-
 ## Optional NVIDIA CUDA lab
 
-The **CuPy on NVIDIA CUDA** variant executes the actual operation with CuPy in the separately prepared `cuda-python` profile. It refuses a missing device instead of switching to CPU. Keep inputs bounded as supplied; inspect the device, synchronize and compare with the CPU reference. The profile must pass real host/device readiness checks. Successful syntax checking on a Mac is not GPU qualification.
+**CuPy on NVIDIA CUDA** needs the `cuda-python` profile; [lab rules](../../STUDY-GUIDE.md#python-gpu-and-framework-labs).
 
 ```python
 """Optional NVIDIA CUDA lab. No CPU fallback or external dataset."""
@@ -83,72 +92,60 @@ print("CUDA centered features:", cp.asnumpy(centered).tolist())
 
 ## Practice and transfer
 
+Record each attempt in the [worksheet](../lessons/cuda-068.md) before opening hints.
+
 ### Exercise 1: Compute centered columns
 
 **Trap to avoid:** Subtracting row means instead is tempting because they are also 2 and 5 here, a coincidence of this data. Broadcasting them down the wrong axis gives `[[-1,1],[-2,2]]`; the shapes still match, so no error appears, and the columns no longer sum to zero.
-
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 2: Add a constant feature
 
 **Trap to avoid:** Dividing by the column standard deviation after centering, as in standardization, divides zero by zero for this column and produces NaN that spreads into later steps.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 3: Implement distance directly
 
 **Trap to avoid:** Taking a square root and reporting 5 answers a different question. The chapter defines squared distance, and mixing the two breaks comparisons against the reference.
-
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 4: Explain expanded-form cancellation
 
 **Trap to avoid:** Concluding that the expanded form is safe because the small worked example matches is the trap. Exact agreement on tiny integers says nothing about inputs where the squared norms dominate.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 5: Count a pairwise temporary
 
 **Trap to avoid:** Counting only the output `N*M` elements underestimates peak memory by a factor of D. The allocation fails or swaps even though the result itself would fit.
-
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 6: Choose a library baseline
 
 **Trap to avoid:** Starting with a raw kernel for centering means writing reduction, broadcasting and tail handling by hand, with no reference to tell whether a wrong column mean is a kernel bug or a math bug.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ## Progressive hints
 
-Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.
+Hint *k* belongs to exercise *k*; open one at a time.
 
-1. Start from worked example 1 and mark the quantities needed for the task "Compute centered columns".
-2. Change one assumption in worked example 2 while preserving the declared contract: add a constant feature.
-3. Trace the CPU program's variables before adding hardware behavior: implement distance directly.
-4. Draw producers, consumers and the exact operation boundary for the task "Explain expanded-form cancellation".
-5. Separate what the small fixture establishes from what the real runtime must show: count a pairwise temporary.
-6. Write a counterexample to an overbroad claim before you choose a library baseline.
+1. Average each column of `[[1,3],[3,7]]` first, then subtract that row vector from both rows.
+2. Append a column of identical values and compute its mean before subtracting anything.
+3. Subtract coordinates pairwise for `[1,2]` and `[4,6]`, square each difference, then add them.
+4. Repeat the expanded identity with two large, nearly equal vectors and count how many float32 digits survive the subtraction.
+5. Multiply N, M and D for the broadcast difference tensor, then multiply by the float32 itemsize.
+6. Before writing a kernel, list which library calls already compute the centering and the distance with tested edge handling.
 
-## Common mistakes and self-review
+## Common mistakes and self-check
 
-Confusing a correct tiny example with a general implementation is the central review risk. For this chapter, challenge the assumption in worked example 2, then ask whether your change preserves the mechanism described above. If you change dtype, layout, ordering, batch size or backend, update the acceptance contract rather than silently reusing the old observation. Explain an unexpected result before trying random configuration changes.
+A common mistake is trusting the expanded distance formula because it matches the direct form on small integers, as in worked example 2. The identity is exact algebra but not exact floating point: with large nearly equal vectors, subtracting squared norms cancels most significant digits. Fix it by keeping the direct difference form as the reference, and add an adversarial test with large close values before accepting the expanded or fused version.
 
-Keep a small evidence table with columns **claim**, **input**, **expected observation**, **actual observation** and **limit**. For the first claim use `Compute centered columns`. For the final claim use `Choose a library baseline`. An unperformed GPU or cluster experiment remains pending even when the CPU model is correct.
+**Evidence limit:** The reference verifies centering and one distance with small exact integers. It cannot reveal float32 cancellation, temporary memory pressure from broadcasting, or whether a fused kernel beats a library call; those need adversarial inputs and measured runs.
 
-## Platform and evidence contract
+1. How does broadcasting subtract column means without building a repeated matrix?
+2. What property of the centered result checks the computation?
+3. Why is a mature library baseline also a performance competitor?
 
-The reading worksheet and CPU reference model work through the ordinary Linux Docker classroom on macOS, Linux and Windows using WSL 2. They do not require an NVIDIA GPU. Their results are labeled CPU models or semantic oracles, not simulated hardware performance.
-
-Real CUDA work needs supported NVIDIA hardware, a compatible host driver and an explicitly prepared GPU runtime. An Apple GPU does not execute CUDA kernels. PyTorch MPS on a supported native Mac, ROCm on supported AMD hardware, or other vendor backends can provide separate accelerator learning routes; they need their own package and operation qualification and are not CUDA evidence. The ordinary Linux Docker classroom does not expose native Mac MPS automatically.
-
-Do not download packages, models or data by opening this lesson. Do not attach an engine socket, ambient cluster credentials or an arbitrary remote endpoint. A CPU pass, imported package, successful compilation, real GPU result and measured performance are distinct observations. Record the actual backend, data shape/dtype, source revision, versions and pending checks. A saved completion marker records learning progress, not hardware certification.
+Answers: [self-check answers](../solutions/cuda-068_solutions.md#self-check-answers).
 
 ## Primary references
 
 - [CuPy array and installation documentation](https://docs.cupy.dev/en/v13.6.0/)
 
-Use the version-matched documentation of your prepared environment. These references describe interfaces and supported boundaries; the chapter's synthetic examples and CPU models are original teaching material.
+Full lists: [documentation and sources](../../STUDY-GUIDE.md#documentation-and-sources).
 
 ## Ask an AI tutor about this lesson
 

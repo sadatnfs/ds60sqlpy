@@ -2,7 +2,7 @@
 
 Define and test a source freshness policy with an explicit clock and response.
 
-The executable reference contains the two complete worked cases with assertions. The changes below explain the independent practice and its limits.
+The reference declares a `landing.events` source with `loaded_at_field` and a one-hour `error_after`, seeds a single timestamp and runs `dbt source freshness`. It proves the policy compares that column with the current clock, not that the upstream system actually delivered on time. See [how these answers are laid out](../STUDY-GUIDE.md#answers-and-references).
 
 
 ## 1. Change the threshold

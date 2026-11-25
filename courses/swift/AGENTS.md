@@ -2,7 +2,7 @@
 
 Read the root AGENTS.md and the add-learning-path skill before changes. This subject has 48 stable IDs in three stages. Preserve IDs, prerequisite relationships, learner pads and solution paths.
 
-The durable specifications are in authoring/foundations.py, composition.py and advanced.py. Edit these before generated guides or solutions. Run `python courses/swift/authoring/build.py` from the repository root. The generator writes UTF-8 with LF and never touches another subject or generated HTML.
+The durable specifications are in authoring/foundations.py, composition.py and advanced.py. Edit these before generated guides or solutions. Lesson-specific teaching prose (run notes, example traces, regression cases, self-check questions and source notes) lives in authoring/teaching.py, and the shared lesson routine lives once in the hand-written STUDY-GUIDE.md. Do not move routine text back into generated guides; link to the study guide section instead, and keep its headings stable. Run `python courses/swift/authoring/build.py` from the repository root. The generator writes UTF-8 with LF and never touches another subject or generated HTML.
 
 The ordinary profile is `swift-linux`. Keep all reference programs deterministic, bounded and offline, with always-active failure checks. The classroom accepts one source file, not arbitrary project files, package installation, command arguments or stdin. External project fixtures have their own explicit preparation and platform boundaries.
 

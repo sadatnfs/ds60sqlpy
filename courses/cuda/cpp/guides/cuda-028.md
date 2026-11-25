@@ -4,18 +4,15 @@
 
 Intermediate; about 110 minutes, plus any optional hardware experiment. Direct prerequisites: `cuda-022`, `cuda-027`
 
-The order supports learning at your own pace. Reading and CPU reasoning remain
-available when NVIDIA hardware is absent. Advanced hardware features need their
-own capability checks and are not prerequisites for opening this chapter.
+Pacing, evidence labels and platform rules for every chapter are in the [CUDA study guide](../../STUDY-GUIDE.md).
 
 ## Learning objectives
 
 Explain what each fence, acquire and release operation establishes in a flag publication protocol and what it does not.
 
-Work through *Memory ordering and atomic scope* with the concrete cases below. Finish with this evidence:
-the learner can explain what each synchronization operation establishes and what it does not. Distinguish an algorithmic
-calculation, a compiled artifact and an actual device observation when explaining
-what your work establishes.
+**Scope:** Atomicity, visibility, ordering, acquire/release, memory fences and thread/block/device/system scope.
+
+**Evidence to produce:** The learner can explain what each synchronization operation establishes and what it does not.
 
 ## Purpose, vocabulary and mental model
 
@@ -31,28 +28,17 @@ Atomicity means one operation is indivisible with respect to competing operation
 
 ## How to run and study this lesson
 
-Use the saved reading worksheet in `/classroom`; the reading pad does not execute
-CUDA. For the bounded calculation, select **CPU model (Python)**, whose
-answer-free starter supplies the literal fixtures and task contract. The
-[CUDA C++ study workflow](../README.md) covers platforms, optional GPU
-compilation and evidence labels. In a prepared Python environment you can also
-run the separate [CPU reference](../references/cuda-028_cpu.py) from the
-repository root:
+Trace worked example 1 by hand, then run the [CPU reference](../references/cuda-028_cpu.py) from the repository root:
 
 ```sh
 python courses/cuda/cpp/references/cuda-028_cpu.py
 ```
 
-Its assertions check the stated numerical result or model invariant; console
-text is evidence of this CPU model only, not of CUDA execution.
-
 ## Worked example 1: trace the mechanism
 
 A producer writes payload 42, then releases a ready flag. A consumer acquires that publication before reading the payload. The happens-before chain connects payload write to payload read. This is a conceptual protocol; an actual CUDA implementation must use supported atomic types, scope and participating execution conditions.
 
-The complete CPU model below intentionally models only the named arithmetic,
-layout, dependency or capability decision. It does not model GPU scheduling,
-caches, instruction timing or device memory visibility.
+**Why:** A release store orders earlier writes before the flag, and an acquire load that sees it orders later reads after it.
 
 ```python
 events = ["payload_write", "release_flag", "acquire_flag", "payload_read"]
@@ -66,41 +52,37 @@ assert (
 print({"conceptual_happens_before": events, "GPU_memory_model_test": False})
 ```
 
-**Expected observation:** Every assertion succeeds. A representative CPU output is:
+**Expected observation:** every assertion succeeds, and the CPU model prints:
 
 ```text
 {'conceptual_happens_before': ['payload_write', 'release_flag', 'acquire_flag', 'payload_read'], 'GPU_memory_model_test': False}
 ```
 
-Integers, shapes and ordering must match exactly; only assertions with an explicit
-tolerance accept small floating-point differences. A printed duration is a model
-output, not a measured GPU benchmark.
+**Check:** The reference asserts the four positions are strictly increasing and prints GPU_memory_model_test False, so a device litmus test is still needed.
 
 ## Worked example 2: change a meaningful condition
 
 Two workers atomically increment a count, giving count two, while writing separate payloads without publication ordering. The count's arithmetic can be correct even though the payload protocol is incomplete. 'Atomic' describes the increment, not every access in the surrounding program.
 
-Before applying this example to your own program, write down which inputs are
-read, which result is produced, and the condition that makes the comparison
-valid. Keep the original case as a regression check when changing a boundary.
+**Why:** atomicAdd gives a correct count of two, but says nothing about when each worker's payload becomes visible.
+
+**Check:** Check that a consumer reading the count before the payloads would be guarded by an acquire on a published flag.
 
 ## Six progressive exercises
 
-Exercises 1 and 2 are guided reconstructions of the worked examples; exercises
-3-6 change an input, diagnose a defect, test a boundary and transfer the idea.
-For each one, keep the calculation, output, diagram or failure policy you
-produce so another reader can compare it with the worked cases. If the hint is
-not enough, reread the mechanism paragraph and the bounded CPU assertion.
-
 ### Exercise 1
 
-Predict and trace the first worked example before running its CPU reference. Write every intermediate quantity that leads to the stated result, including units or ownership where applicable.
+Reconstruct worked example 1 on paper before running its CPU reference. Order four events: write payload 42, release the ready flag, acquire the flag in the consumer, then read the payload.
+
+**Trap to avoid:** Using a plain volatile flag with no release or acquire semantics lets the consumer see ready before 42 is visible.
 
 **Hint:** Start with the literal input and intermediate quantities in worked example 1.
 
 ### Exercise 2
 
-Reconstruct the second worked example without copying its conclusion. Identify the changed input or condition, show the resulting calculation or dependency, and explain why it differs from the first example.
+Rework worked example 2 without copying its conclusion. Separate the atomic counter from the payload protocol and add release and acquire to the publication.
+
+**Trap to avoid:** Reasoning that the atomic increment also publishes the payload confuses arithmetic atomicity with ordering.
 
 **Hint:** Identify exactly which condition changes in worked example 2.
 
@@ -108,11 +90,15 @@ Reconstruct the second worked example without copying its conclusion. Identify t
 
 Name the four events in the publication chain.
 
+**Trap to avoid:** Listing only write and read assumes program order on one thread carries to another.
+
 **Hint:** Use the first worked example to establish the relevant quantities, then change only the requested input.
 
 ### Exercise 4
 
 Why does a memory fence not make a sleeping producer execute?
+
+**Trap to avoid:** Adding more fences in the waiting consumer still never schedules a non-resident producer.
 
 **Hint:** Locate the failed phase or violated dependency before proposing a repair.
 
@@ -120,35 +106,33 @@ Why does a memory fence not make a sleeping producer execute?
 
 When might block-scope synchronization be insufficient?
 
+**Trap to avoid:** Using block scope for a host observer leaves the host free to see a stale payload.
+
 **Hint:** Check what the algorithm is allowed to read, write or assume at this boundary.
 
 ### Exercise 6
 
 Apply the reasoning to a ring buffer slot.
 
+**Trap to avoid:** Indexing slots with head mod capacity but not tracking fullness overwrites unread data on wraparound.
+
 **Hint:** State the output contract and which observations are needed in the new application.
 
 ## Common mistakes and diagnosis
 
-A tempting but incorrect claim in this chapter is: **incrementing an atomic flag automatically publishes all other writes to every possible observer.**
-
-For the concrete failure exercise, why does a memory fence not make a sleeping producer execute?
-Preserve the original input and the stage where behavior diverged, and compare
-with the CPU model before changing hardware configuration.
+A tempting but incorrect claim: **Incrementing an atomic flag automatically publishes all other writes to every possible observer.** Atomicity covers one operation on one location. Publishing a payload needs ordering: the producer's payload write must happen before a release on the flag, and the consumer must acquire the flag before reading the payload, at a scope that covers both parties. Worked example 2 shows a correct atomic count alongside an incomplete payload protocol, which is exactly the gap this mistake ignores.
 
 ## Self-check, retrieval and transfer
 
-Explain the first example without its code, then use the second example to state
-one assumption that matters. Complete Exercise 3 independently, use Exercise 4 to
-diagnose a plausible defect, check the boundary in Exercise 5, and retain the
-application contract from Exercise 6. Compare the [separate explanations](../solutions/cuda-028_solutions.md)
-only after your attempt or a deliberate reveal. A reading marker records your
-choice; it does not certify hardware qualification or expert mastery.
+1. What are the four events in worked example 1's publication chain?
+2. Why can block scope be too narrow?
+3. What is the difference between visibility and atomicity?
+
+Short answers are in the [separate explanations](../solutions/cuda-028_solutions.md#self-check-answers); compare only after an attempt.
 
 ## Primary references
 
-Check the documentation that matches your prepared toolkit before optional
-hardware execution.
+Use the documentation that matches your prepared toolkit.
 
 - [CUDA Programming Guide](https://docs.nvidia.com/cuda/cuda-programming-guide/)
 

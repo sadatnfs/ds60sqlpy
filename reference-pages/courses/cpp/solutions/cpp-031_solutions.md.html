@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cpp/solutions/cpp-031_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="cpp-031-explanations-and-reference-observations">cpp-031: explanations and reference observations<a class="heading-anchor" href="#cpp-031-explanations-and-reference-observations" aria-label="Link to this section">#</a></h2>
-<p>Attempt the learner tasks before opening this document. The executable reference checks the bounded normal and boundary examples; the six explanations below cover the deliberate changes and manual checks.</p>
+<p>The <a href="cpp-031_solution.cpp.html">executable reference</a> checks that zero workers leave the counter at 0. The explanations cover atomicity, release and acquire ordering, and publishing two fields together. How to compare: <a href="../STUDY-GUIDE.md.html#compare-with-the-solutions">study guide</a>.</p>
 <h3 id="mechanism">Mechanism<a class="heading-anchor" href="#mechanism" aria-label="Link to this section">#</a></h3>
 <p>An atomic operation accesses one object without a data race. Memory ordering describes which other operations become visible across threads. A happens-before relation provides the reasoning chain for shared non-atomic data. Relaxed atomics are useful for independent counters but do not automatically publish surrounding objects.</p>
 <h3 id="detailed-reasoning">Detailed reasoning<a class="heading-anchor" href="#detailed-reasoning" aria-label="Link to this section">#</a></h3>

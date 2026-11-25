@@ -1,6 +1,6 @@
 # spark-002: explanatory solutions
 
-Compare after an attempt or an explicit reveal. The [guide](../guides/spark-002.md) defines the learner contract. An authored reference is not a platform acceptance receipt.
+Use these explanations after you have tried the six [guide](../guides/spark-002.md) exercises in the Scala pad. Each one names the value, its type and the assertion that proves it, so compare your reasoning as well as the numbers you printed.
 
 ## Vocabulary and concepts
 

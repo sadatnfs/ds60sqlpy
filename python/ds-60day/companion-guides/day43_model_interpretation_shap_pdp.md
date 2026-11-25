@@ -85,33 +85,13 @@ data and a small sample because SHAP can be computationally heavy.
 
 ## How to run this lesson
 
-**Default Docker classroom:** open `python-43` for its guide, notebook and capability notice. The default Core does not include the `ml` extra, so the complete legacy notebook is unavailable there until that app environment is deliberately prepared. Pressing Run or choosing a notebook kernel does not install packages.
+**Default Docker classroom:** SHAP and LIME cannot import in `python-43`; the default Core does not include `ml`. For attribution plots, prepare `ml` with the [contributor setup](../../../CONTRIBUTING.md) outside Docker. A host notebook environment and a Docker app image are separate.
 
-**Prepared browser alternative:** use the [ML engineering course](../../../courses/ml-engineering/guides/mle-001.md) in its declared runtime. Its supported examples have their own package and execution contract; this does not qualify every legacy optional extension.
-
-**Explicit legacy preparation:** retain the contributor extras in [CONTRIBUTING](../../../CONTRIBUTING.md) and add `ml` only when needed. See [dependency profiles](../../../docs/dependency-profiles.md) and [Docker app package options](../../../docs/docker-profiles.md) for deliberate preparation. A host notebook environment and a Docker app image are separate. Do not install packages inside a learner pad.
+**Prepared browser alternative:** Attributions explain a model's decision, and the [ML engineering course opener](../../../courses/ml-engineering/guides/mle-001.md) defines that decision, its population and its information boundary in a prepared runtime.
 
 The complete starter imports SHAP; the reference also uses LIME. The later scikit-learn sensitivity and permutation cells do not exercise either optional explanation package.
 
-**Optional native notebook/editor route:** the instructions below describe
-separately prepared host tools. They are useful alternatives, not prerequisites
-for opening this lesson in the Docker classroom.
-
-1. Open the Day 43 learner notebook from this guide's **Next
-   step** section in VS Code or JupyterLab.
-2. Select the `Python (ds60sqlpy)` kernel. Start at the top and use
-   **Run All** only after making the written predictions; the default data examples are offline once the declared packages are prepared. Optional services and model assets have separate requirements.
-3. Keep experiments in new scratch cells. Do not edit the official
-   solution while attempting the numbered practice.
-4. Restart the kernel and run from the first cell before calling the
-   lesson complete. A clean run catches hidden state and stale
-   variables.
-
-Linux, macOS, or Ubuntu in Windows WSL 2:
-
-```bash
-.venv/bin/python -m jupyter lab
-```
+The [Python study guide](../../STUDY-GUIDE.md) covers the notebook route and preparing optional extras.
 
 ## Concept deep dive: global versus local explanations, perturbation assumptions, and causal limits
 
@@ -135,10 +115,6 @@ missing-feature dependence and a background distribution.
 - **`shap.TreeExplainer(model, data=background, ...)`:** allocates model output under an explicit dependence/background convention; output shape is model/version dependent.
 
 ### Focused example A: measure one local prediction's sensitivity
-
-Before running the example, predict the shape, type, or direction of the
-result. Write the prediction down so that a surprise becomes evidence
-rather than something to overlook.
 
 ```python
 import numpy as np
@@ -230,9 +206,6 @@ second explanation library.
 
 Treat explanations as model diagnostics tied to a dataset and baseline. Distinguish global from local behavior and predictive association from causation.
 
-Predict or plan before you run code. Use the hint only after an honest
-attempt, and record the evidence that would prove your result correct.
-
 4. **Local-versus-global diagnosis:** Construct a case where a feature is globally important but contributes little to one prediction. Explain why those statements do not conflict.
    **Progressive hint:** Global importance aggregates across rows; a local explanation is conditioned on one row and its baseline.
 
@@ -285,8 +258,7 @@ reassuring; disagreement is a prompt to investigate assumptions.
 
 ## Ask an AI tutor about this lesson
 
-The lesson is complete without an AI assistant. If you want optional
-coaching, copy this prompt into the AI tutor while the repository root is open:
+The lesson is complete without AI. For optional coaching, copy this prompt with the repository root open:
 
 ```text
 Tutor me through `python-43` (Day 43: Model Interpretation with SHAP, PDP, and Permutation).

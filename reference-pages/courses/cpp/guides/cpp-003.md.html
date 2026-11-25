@@ -213,7 +213,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li><strong>literal suffix:</strong> LL requests long long arithmetic before multiplication</li>
 </ul>
 <h3 id="compile-and-run-reference">Compile and run reference<a class="heading-anchor" href="#compile-and-run-reference" aria-label="Link to this section">#</a></h3>
-<p>Read <a href="../compile-and-run.md.html">the compile and run tutorial</a> for <code>main.cpp</code>, the Docker route, native compiler flags, paths, exit codes, compilation versus linking, stale binaries and single-file limits. Record the displayed build and run phases separately.</p>
+<p>Both worked programs build as one translation unit with the tutorial&#x27;s <code>-Wall -Wextra -Wconversion</code> flags. Keep those flags on: comparing a signed <code>count</code> with a <code>std::size_t</code> limit can draw a sign-comparison warning, which is a hint that the order of checks in Worked example 2 matters. Record the printed quotients 3 and 3.5 as run observations, separate from any warning. Commands: <a href="../compile-and-run.md.html">compile and run tutorial</a>.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1-convert-before-division">Worked example 1: Convert before division<a class="heading-anchor" href="#worked-example-1-convert-before-division" aria-label="Link to this section">#</a></h4>
 <p>The cast belongs to an operand, so floating arithmetic occurs before the result is printed.</p>
@@ -302,11 +302,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 </ol>
 <h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
 <ul>
-<li>Can you reproduce each exact observation without reading the official answer?</li>
-<li>Can you explain a failed check using the lesson&#x27;s model, rather than changing an expected value?</li>
+<li>Why does <code>7 / 2</code> print 3 while <code>static_cast&lt;double&gt;(7) / 2</code> prints 3.5, and where exactly must the cast go?</li>
+<li>Why must count -1 be rejected while it is still signed, before any conversion to <code>std::size_t</code>?</li>
 </ul>
 <h3 id="retrieval-and-transfer">Retrieval and transfer<a class="heading-anchor" href="#retrieval-and-transfer" aria-label="Link to this section">#</a></h3>
-<p>Close the source. Explain the mechanism in your own words, name the boundary that a plausible wrong answer crosses, and predict a changed fixture before running again.</p>
+<p>Close the source. Explain how a count moves from a signed input to a validated <code>std::size_t</code>: which values pass (0 and 3), which fail (-1) and why the order of checks matters. Then predict what <code>static_cast&lt;double&gt;(7 / 2)</code> prints and explain why.</p>
 <h3 id="common-pitfalls">Common pitfalls<a class="heading-anchor" href="#common-pitfalls" aria-label="Link to this section">#</a></h3>
 <p>Avoid assuming every int is 32 bits. Converting after overflow or truncation preserves an already wrong result. Do not use a negative-to-unsigned comparison as a substitute for input validation, and state whether a value is cents, rows or bytes.</p>
 <p>Placement of the cast is the most common mistake in Worked example 1. Writing <code>static_cast&lt;double&gt;(7 / 2)</code> still prints 3, because the integer division finishes first and the cast only converts the truncated quotient. In Worked example 2 the matching mistake is comparing <code>count</code> against a <code>std::size_t</code> limit: the usual arithmetic conversions turn -1 into a very large unsigned value, so the negative count can slip past a check such as <code>count &gt; limit</code> unnoticed. Test the sign while the value is still signed.</p>

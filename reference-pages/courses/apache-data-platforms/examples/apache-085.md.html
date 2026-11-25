@@ -195,22 +195,21 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="integration-apache-085-complete-worked-notebook">Integration apache-085 complete worked notebook<a class="heading-anchor" href="#integration-apache-085-complete-worked-notebook" aria-label="Link to this section">#</a></h2>
 <p>Prepare the real reference server and supported table store. Read the fixed version with exact rows, reject invalid recipient credentials and measure revocation/issued-URL limits without saving capabilities.</p>
-<h3 id="receipt-fields-and-independent-oracle">Receipt fields and independent oracle<a class="heading-anchor" href="#receipt-fields-and-independent-oracle" aria-label="Link to this section">#</a></h3>
+<h3 id="what-this-sharing-receipt-must-hold">What this sharing receipt must hold<a class="heading-anchor" href="#what-this-sharing-receipt-must-hold" aria-label="Link to this section">#</a></h3>
 <ul>
-<li>Source revision/hashes and exact declared input IDs, values, schema and time units.</li>
-<li>Actual native platform, package/image identities and owned resource namespace.</li>
-<li>Selected table snapshot/version, source positions or process/lineage identity as appropriate.</li>
-<li>Positive result against an independent oracle and a typed negative observation.</li>
-<li>Read-only retained-state comparison after the selected lifecycle transition.</li>
-<li>Cleanup/evidence-storage result and any separate prepared or unavailable feature.</li>
+<li>The share, schema, table and version requested, matching <code>fixture-contract.json</code>.</li>
+<li>The Delta table version, protocol and metadata responses the server returned.</li>
+<li>The data file identities read through signed URLs, recorded without query strings.</li>
+<li>Rows 1/2/3 with amounts 4/9/7, and regional totals 11 and 9.</li>
+<li>The status code for an invalid or revoked fixture recipient, with its error body.</li>
+<li>The observed lifetime of a URL issued before revocation, with the signing policy.</li>
 </ul>
-<p>For the common three-order fixture, require IDs 1/2/3 with amounts 4/9/7, total 20, east 11 and west 9. A later fourth west order of 2 changes the current total to 22 and west to 11 while an earlier pinned snapshot remains unchanged. Do not use this simple oracle to claim correctness for a different pipeline without defining its deduplication, correction and visibility semantics.</p>
-<p>Read the selected project README and qualification ledger before commands. The classroom does not execute Docker commands in this Markdown pad. Prepared configuration, unit policy fixtures, successful compilation and actual service acceptance remain different observations. Never include credentials or signed URLs.</p>
+<p>Status codes carry the oracle for this route. A 200 with exact rows for the valid recipient and a 401 or 403 for the revoked one together show authorization at the server. A 404 or connection error for the revoked recipient shows nothing about authorization. An old signed URL that still returns bytes after revocation is the expected boundary, not a failure, as long as its expiry is recorded. The <a href="../STUDY-GUIDE.md.html#evidence-receipts">shared receipt rules</a> cover naming and storage.</p>
 <h3 id="concrete-source-inspection">Concrete source inspection<a class="heading-anchor" href="#concrete-source-inspection" aria-label="Link to this section">#</a></h3>
 <p>From the copied integration directory, with sibling project copies when selected:</p>
 <pre class="highlighted-code"><code class="language-bash">cat ../delta-sharing/fixture-contract.json
 cat ../delta-sharing/PREPARATION.md</code></pre>
-<p>These inspections do not start or qualify a service. Execute only the chosen project&#x27;s complete documented owned route and retain its actual receipt.</p></article>
+<p>The contract names share <code>ds60_fixture</code>, schema <code>tutorial</code>, table <code>orders</code> and version 0, so a version 0 request with any other name is a different product. <code>PREPARATION.md</code> explains why no local 1.4.1 server acceptance exists: the release ships source archives without a prebuilt server, so the server must be built from the pinned tag before any revocation test is meaningful.</p></article>
   </main>
 </body>
 </html>

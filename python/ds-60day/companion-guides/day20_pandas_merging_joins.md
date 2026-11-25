@@ -22,54 +22,7 @@ Complete Day 19 (`python-19`): table grain, grouping keys, and aggregation.
 <!-- BEGIN HOW TO RUN -->
 ## How to run this lesson
 
-**Primary browser route:** run `./classroom` from the repository root and
-choose **Python and data science** on `/classroom`. Open this lesson in the
-shared workspace, read its capability notice and use its supported coding or
-reading workflow. The [classroom guide](../../../docs/classroom-experience.md)
-explains saved work, runtimes and switching subjects. No host notebook setup
-is needed for this route.
-
-### Optional contributor notebook route
-
-Use a separately prepared POSIX environment on Linux/macOS or Ubuntu in
-Windows WSL 2. Complete [contributor setup](../../../CONTRIBUTING.md) once,
-including the notebook and data dependencies. Docker's Python worker does not
-install packages into this host interpreter. Run the following commands from
-the repository root using that prepared environment.
-
-1. Check the interpreter and register its notebook kernel. Registration is
-   needed once for this environment, or again after moving/replacing it:
-
-   ```bash
-   uv run --no-sync python scripts/course.py doctor --no-database
-   uv run --no-sync python -m ipykernel install --user --name ds60sqlpy --display-name "Python (ds60sqlpy)"
-   ```
-
-   `--no-database` keeps this Python setup check local and does not require
-   PostgreSQL. Do not install packages with `%pip` in a lesson. Use the
-   declared dependency group when an optional import needs preparation.
-2. Read `python/ds-60day/companion-guides/day20_pandas_merging_joins.md`, then launch the notebook directory:
-
-   ```bash
-   uv run --no-sync python -m jupyter lab python/ds-60day/notebooks
-   ```
-
-   Open `python/ds-60day/notebooks/day20_pandas_merging_joins.ipynb` and select **Python (ds60sqlpy)**. The friendly name alone
-   is insufficient if you use several checkouts: confirm that the kernel's
-   `sys.executable` points to this checkout's `.venv/bin/python`.
-   [VS Code guidance](../../../docs/vscode.md) explains the alternative editor
-   route; Windows users open that editor in WSL with the same Linux environment.
-3. Restart the kernel and run cells from the top. Notebook cells share kernel
-   state; each browser Run starts a fresh process. Before every example,
-   predict its result, then compare the actual value, type, shape or side effect.
-4. Attempt the numbered exercises in your own work cells and keep a backup of
-   your notebook edits. Follow each example's file and working-directory
-   instructions. Keep `solutions/` separate until you want reference comparison.
-
-Notebook files and contributor CLI progress belong to this host checkout.
-They are separate from the browser's saved pads, notes and progress in Docker
-volumes. Neither route automatically copies attempts or completion markers to
-the other; record progress in the interface you actually used.
+Open `python-20` in the classroom, or `python/ds-60day/notebooks/day20_pandas_merging_joins.ipynb` on a host; the [Python study guide](../../STUDY-GUIDE.md) explains both.
 
 **Outcome:** Join tables on keys and check row counts and unmatched records.
 <!-- END HOW TO RUN -->
@@ -147,19 +100,7 @@ When the output differs from your prediction, use this order:
 
 ### Practice ramp
 
-Work through the numbered exercises in five modes rather than treating all
-of them as blank-code prompts:
-
-1. **Prediction:** state the value, type, shape, rows, or side effect before
-   execution.
-2. **Guided modification:** change one part of a worked example and explain
-   which part of the result must change.
-3. **Independent application:** implement the same idea with a new input and
-   an explicit contract.
-4. **Debugging and edge cases:** reproduce a failure, identify the violated
-   assumption, and prove the repair at a boundary.
-5. **Retrieval:** close the guide and explain the core model from memory
-   before moving on.
+Work this lesson's exercises in the five practice modes from the [Python study guide](../../STUDY-GUIDE.md).
 
 **Useful alternative:** An index join can be concise when indexes are deliberate keys; explicit column merges are often easier for beginners to audit.
 
@@ -198,11 +139,6 @@ The contract says many item rows may refer to one product row. `indicator=True`
 makes missing matches visible during validation.
 
 ## Exercises and progressive hints
-
-Each item is a complete mini-contract. Before writing code, copy its input,
-expected behavior, constraints, and verification into your work cell. A
-result is not complete merely because it “looks right”; run the stated
-assertion or inspection and explain what it proves.
 
 1. Join product, order-item, and customer tables to compute revenue per customer. **Before code:** write each table's row grain and key uniqueness. **Sequence:** many order items to one product, calculate line revenue, aggregate to customer grain, then attach one customer record.
    **Expected behavior:** one output row per customer with orders.
@@ -272,9 +208,7 @@ identified rather than silently lost, and incorrect cardinality raises
 
 ## Ask an AI tutor about this lesson
 
-AI coaching is optional; the guide and notebook above contain the full
-lesson. If you want a patient tutor, copy this prompt from the repository
-root:
+AI coaching is optional. To use a tutor, copy this prompt from the repository root:
 
 ```text
 Use $guide-ds60sqlpy-learning to tutor me through `python-20`

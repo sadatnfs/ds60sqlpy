@@ -212,10 +212,10 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="syntax-and-data-contract">Syntax and data contract<a class="heading-anchor" href="#syntax-and-data-contract" aria-label="Link to this section">#</a></h3>
 <p>The join combines entity identity with event and availability cutoffs. row_number partitions by request identity and orders eligible versions by the declared version keys. Eligibility must be applied before selecting the latest row. The fixture uses integer time keys for transparent arithmetic; a real contract must define timezone and boundary semantics for timestamps.</p>
 <h3 id="run-the-lesson">Run the lesson<a class="heading-anchor" href="#run-the-lesson" aria-label="Link to this section">#</a></h3>
-<p>Open <code>dbt-017</code> in <code>/classroom</code>. Its starter <code>main.py</code> contains both worked cases, &quot;Select only known information&quot; and &quot;Observe a leaking historical model&quot;, and prints the dictionary each case returns. The prepared <code>data-engineering</code> worker runs it in a fresh temporary directory. An <code>AssertionError</code> means that an observation differs from the case&#x27;s stated contract. Each case writes its dbt project and DuckDB database into its own temporary directory, runs real dbt commands through dbt&#x27;s Python entry point and removes the directory when it returns. No account, warehouse, network request or package download is involved. Save source and notes before switching lessons.</p>
+<p>With availability checked, request 1 at cutoff 5 gets value 10 and request 2 at cutoff 9 gets 30. Without that check, request 1 gets 999 from an event at time 4 that was not known until time 7, which leaks future knowledge into a training row. See the <a href="../STUDY-GUIDE.md.html#run-a-lesson">run routine</a>.</p>
 <h3 id="worked-case-1-select-only-known-information">Worked case 1: Select only known information<a class="heading-anchor" href="#worked-case-1-select-only-known-information" aria-label="Link to this section">#</a></h3>
 <p>At request cutoff 5, the event at 4 is not known until 7, so the correct result uses the earlier value 10. At cutoff 9, value 30 is eligible. The ordering chooses among already eligible records.</p>
-<p><strong>Project files.</strong> The case writes these files before its first dbt command. YAML is shown in conventional key order; dbt reads the same mappings.</p>
+<p><strong>Project files</strong>, written before the first dbt command:</p>
 <p><code>models/training_features.sql</code></p>
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">select</span> request_id<span class="syntax-punctuation">,</span> value
 <span class="syntax-keyword">from</span>
@@ -243,10 +243,10 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 10,2,3,10
 10,4,7,999
 10,8,8,30</code></pre>
-<p><strong>Commands and changes, in order.</strong> Each <code>dbt</code> line is one <code>invoke(...)</code> call; the harness adds <code>--project-dir</code> and <code>--profiles-dir</code> for the temporary project.</p>
+<p><strong>Commands, in order.</strong> Each <code>dbt</code> line is one <code>invoke(...)</code> call.</p>
 <pre class="highlighted-code"><code class="language-bash">dbt build</code></pre>
 <p><strong>Expected evidence:</strong> The available feature values are [10, 30].</p>
-<p>The program below shows only this case&#x27;s own functions. They call the shared helpers <code>project</code>, <code>invoke</code> and <code>rows</code>, which write the files above, run dbt through <code>dbtRunner</code> and read the results; the helpers are explained in <a href="dbt-001.md.html">dbt-001</a> and appear in full at the top of this lesson&#x27;s <a href="../lessons/dbt-017.py.html">starter</a>.</p>
+<p>Helpers <code>project</code>, <code>invoke</code> and <code>rows</code>: see the <a href="../STUDY-GUIDE.md.html#case-harness">case harness</a>.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> tempfile
 
 
@@ -311,7 +311,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <span class="syntax-keyword">return</span> temporal_case<span class="syntax-punctuation">(</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></code></pre>
 <h3 id="worked-case-2-observe-a-leaking-historical-model">Worked case 2: Observe a leaking historical model<a class="heading-anchor" href="#worked-case-2-observe-a-leaking-historical-model" aria-label="Link to this section">#</a></h3>
 <p>The second case omits the known_at condition. It selects 999 for the first request, even though that information was unavailable at cutoff 5. Both models execute successfully, making the semantic failure visible.</p>
-<p><strong>Project files.</strong> The case writes these files before its first dbt command. YAML is shown in conventional key order; dbt reads the same mappings.</p>
+<p><strong>Project files</strong>, written before the first dbt command:</p>
 <p><code>models/training_features.sql</code></p>
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">select</span> request_id<span class="syntax-punctuation">,</span> value
 <span class="syntax-keyword">from</span>
@@ -335,10 +335,10 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 10,2,3,10
 10,4,7,999
 10,8,8,30</code></pre>
-<p><strong>Commands and changes, in order.</strong> Each <code>dbt</code> line is one <code>invoke(...)</code> call; the harness adds <code>--project-dir</code> and <code>--profiles-dir</code> for the temporary project.</p>
+<p><strong>Commands, in order.</strong> Each <code>dbt</code> line is one <code>invoke(...)</code> call.</p>
 <pre class="highlighted-code"><code class="language-bash">dbt build</code></pre>
 <p><strong>Expected evidence:</strong> The event-only model returns [999, 30].</p>
-<p>The program below shows only this case&#x27;s own functions. They call the shared helpers <code>project</code>, <code>invoke</code> and <code>rows</code>, which write the files above, run dbt through <code>dbtRunner</code> and read the results; the helpers are explained in <a href="dbt-001.md.html">dbt-001</a> and appear in full at the top of this lesson&#x27;s <a href="../lessons/dbt-017.py.html">starter</a>.</p>
+<p>Helpers <code>project</code>, <code>invoke</code> and <code>rows</code>: see the <a href="../STUDY-GUIDE.md.html#case-harness">case harness</a>.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> tempfile
 
 
@@ -402,7 +402,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="syntax-keyword">def</span> <span class="syntax-function">example_two</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
     <span class="syntax-keyword">return</span> temporal_case<span class="syntax-punctuation">(</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">)</span></code></pre>
 <h3 id="practice">Practice<a class="heading-anchor" href="#practice" aria-label="Link to this section">#</a></h3>
-<p>The starter contains both worked cases, so a task can change either one. Make each change in a saved copy, run it, and compare the printed result with the task&#x27;s check before opening the separate explained answers.</p>
+<p>Use the <a href="../STUDY-GUIDE.md.html#practice-routine">practice routine</a>.</p>
 <h4 id="1-add-an-unmatched-request">1. Add an unmatched request<a class="heading-anchor" href="#1-add-an-unmatched-request" aria-label="Link to this section">#</a></h4>
 <p>Create a cutoff before any eligible feature.</p>
 <p><strong>Check:</strong> The request is explicitly retained or counted as unmatched.</p>
@@ -437,7 +437,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li><a href="https://github.com/duckdb/dbt-duckdb">dbt-duckdb repository README</a></li>
 </ul>
 <h3 id="tutor-guidance">Tutor guidance<a class="heading-anchor" href="#tutor-guidance" aria-label="Link to this section">#</a></h3>
-<p>Use the repository&#x27;s <code>$guide-ds60sqlpy-learning</code> skill (<code>.agents/skills/guide-ds60sqlpy-learning/SKILL.md</code>) for <code>dbt-017</code>. Inspect the learner&#x27;s own source and printed output first. Ask for an explanation of event time, availability time, bitemporal selection, window and feature leakage in their own words, then give one focused hint at a time. Keep an assertion on this synthetic fixture separate from a claim about an external dataset or deployed service.</p></article>
+<p>Ask the learner to explain, for request 1, why the event at time 4 must be excluded even though it happened before the cutoff. Then ask what entity, event time and knowledge time mean in their own data, and how they would test a feature table for leakage. See the <a href="../STUDY-GUIDE.md.html#tutor-guidance">tutor routine</a>.</p></article>
   </main>
 </body>
 </html>

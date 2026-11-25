@@ -1,6 +1,6 @@
 # go-031: explained solutions
 
-These are comparison material after an attempt or explicit reveal. The executable reference implements all six cases in one `main.go`.
+Compare after an attempt ([using solutions](../STUDY-GUIDE.md#use-the-solutions)). `courses/go/solutions/go-031_solution.go` implements all six cases.
 
 ## Mechanism
 
@@ -10,7 +10,7 @@ log/slog builds records from key/value attributes. JSONHandler writes to an io.W
 
 ## 1. Emit a structured event: change one input
 
-Copy worked example 1 into a scratch pad and change `v := logRecord("processed", "count", 3)` to `v := logRecord("processed", "count", 4)`. Before running, predict which check fails and which value it now sees; then run it and restore the original line.
+Copy worked example 1, change `v := logRecord("processed", "count", 3)` to `v := logRecord("processed", "count", 4)` and predict the failure before running; then restore the line.
 
 The unchanged code is worked example 1:
 
@@ -19,7 +19,9 @@ v := logRecord("processed", "count", 3)
 check(v["msg"] == "processed" && v["count"] == float64(3), "fields")
 ```
 
-**Expected:** The changed run panics with `fields` because `v["msg"] == "processed" && v["count"] == float64(3)` no longer holds. Restoring the original line brings back the worked observation: the record has message processed and numeric count 3.
+**Expected:** The edited run panics with `fields` because `v["msg"] == "processed" && v["count"] == float64(3)` no longer holds.
+
+**Verify:** Restoring `v := logRecord("processed", "count", 3)` makes the check pass again with the worked observation: the record has message processed and numeric count 3.
 
 The check inspects meaning rather than serialized field order.
 
@@ -33,7 +35,7 @@ The check inspects meaning rather than serialized field order.
 
 ## 2. Retain correlation: debug a regression
 
-A regression changed one token in worked example 2, so one line now reads `v := logRecord("read", "request_id!", "lesson-7")`. Run worked example 2 with that line, use the failure to locate the defect and repair it without changing the check.
+A one-token regression in worked example 2 makes a line read `v := logRecord("read", "request_id!", "lesson-7")`. Repair it without changing the check.
 
 The unchanged code is worked example 2:
 
@@ -42,7 +44,9 @@ v := logRecord("read", "request_id", "lesson-7")
 check(v["request_id"] == "lesson-7", "correlation")
 ```
 
-**Expected:** Before the repair the program panics with `correlation`; after it the line reads `v := logRecord("read", "request_id", "lesson-7")` again and the ID is retained exactly.
+**Expected:** The defective run panics with `correlation`; after restoring `v := logRecord("read", "request_id", "lesson-7")`, the ID is retained exactly.
+
+**Verify:** The failing run shows message `correlation`; after the repair `v["request_id"] == "lesson-7"` holds again.
 
 A bounded synthetic ID is sufficient. Secrets and complete payloads are inappropriate correlation fields.
 
@@ -66,6 +70,8 @@ check(!present, "time")
 
 **Expected:** The time attribute is absent.
 
+**Verify:** Your solution must keep `!present` true. Control: changing `check(!present, "time")` to `check(present, "time")` panics with message `time`; revert it.
+
 Production logs generally need time. The fixture deliberately controls a variable field instead of asserting the current clock.
 
 **Approach.** Rely on the handler's `ReplaceAttr`, which returns an empty `slog.Attr` for `slog.TimeKey`; the handler omits empty attributes.
@@ -86,6 +92,8 @@ check(v["status"] == "failed", "status")
 ```
 
 **Expected:** status equals failed.
+
+**Verify:** Your solution must keep `v["status"] == "failed"` true. Control: changing `v := logRecord("read finished", "status", "failed")` to `v := logRecord("read finished", "status!", "failed")` panics with message `status`; revert it.
 
 Filtering a structured status is more reliable than searching for a particular sentence.
 
@@ -108,6 +116,8 @@ check(v["credential"] == "[redacted]", "redaction")
 
 **Expected:** Only [redacted] is present.
 
+**Verify:** Your solution must keep `v["credential"] == "[redacted]"` true. Control: changing `v := logRecord("configuration", "credential", "[redacted]")` to `v := logRecord("configuration", "credential!", "[redacted]")` panics with message `redaction`; revert it.
+
 Redaction at the producer boundary is easier to review than attempting to remove secrets after serialization.
 
 **Approach.** Replace the credential with the fixed marker before calling the logger, so the secret never reaches the handler or the buffer.
@@ -128,6 +138,8 @@ check(v["bytes"] == float64(12), "numeric")
 ```
 
 **Expected:** The parsed field remains numeric 12.
+
+**Verify:** Your solution must keep `v["bytes"] == float64(12)` true. Control: changing `v := logRecord("read", "bytes", 12)` to `v := logRecord("read", "bytes", 13)` panics with message `numeric`; revert it.
 
 Numbers should remain numbers for aggregation. The test decoder represents JSON numbers as float64 by default.
 

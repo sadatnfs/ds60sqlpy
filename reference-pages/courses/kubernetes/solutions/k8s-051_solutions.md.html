@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/kubernetes/solutions/k8s-051_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="k8s-051-explanatory-solutions">k8s-051: explanatory solutions<a class="heading-anchor" href="#k8s-051-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit reveal. These explanations describe the synthetic topology and stated API contracts. They are not fabricated runtime receipts.</p>
+<p>Attempt each exercise first, then compare (<a href="../STUDY-GUIDE.md.html#solutions-and-the-ai-tutor">study guide</a>).</p>
 <h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
 <p>A NodePort Service allocates a port from the cluster’s configured NodePort range and makes the Service available through relevant node addresses according to the data-plane configuration. It usually also has a ClusterIP. A client addresses nodeIP:nodePort, and traffic is directed to an eligible backend.</p>
 <p>A node address must actually be reachable from the client. Desktop cluster nodes may be containers or VMs behind additional network boundaries. A valid NodePort allocation does not automatically open a host firewall, publish a VM port or create an internet route. Local and cloud setups therefore have different external paths.</p>

@@ -24,9 +24,9 @@ Text comparison also has a policy. Machine identifiers usually need ordinal comp
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles your saved pad as `Program.cs` in its fixed .NET 10 project. C# 14 is the matching language generation. This route uses the prepared framework libraries; it does not accept arbitrary project files, NuGet packages, command arguments or interactive input. The explicit `Program.Main` entrypoint makes compilation and execution visible. `Check` throws on a false condition in every build configuration, unlike conditional debugging assertions.
+`EnumerateRunes` and `Encoding` live in `System.Text`, which the worked programs import explicitly because the project's implicit usings omit it. A terminal without a suitable font may draw a box for the emoji, but the checks count units in memory, so they pass whatever the display shows.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Compile contract, starter stop and success marker: [running a lesson](../STUDY-GUIDE.md#running-a-lesson).
 
 
 
@@ -34,7 +34,7 @@ Start with the answer-free learner artifact in your saved classroom pad. It deli
 
 `$"item {count}"` interpolates a value. `StringComparison.OrdinalIgnoreCase` makes a comparison policy explicit. `EnumerateRunes()` visits Unicode scalar values. `Encoding.UTF8.GetByteCount` measures an encoded representation.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+Each example ends with a trace; method: [tracing a program](../STUDY-GUIDE.md#tracing-a-program).
 
 ## Worked example / walkthrough
 
@@ -81,6 +81,8 @@ internal static class Program {
 
 **Observe:** The original remains data while the result is DATA.
 
+**Trace.** `original` refers to the string data. `ToUpperInvariant()` cannot change that string, because .NET strings are immutable; it builds a new string, DATA, and returns it, and the assignment stores that reference in `changed`. The first check confirms both values. `string.Equals` with `OrdinalIgnoreCase` compares KEY and key using a fixed, culture-free case mapping, so the result does not depend on the machine's language setting.
+
 ### Example B: Choose the counting unit
 
 The fixture disproves the assumption that Length is a universal character count.
@@ -123,6 +125,8 @@ internal static class Program {
 
 **Observe:** One scalar occupies two UTF-16 units and four UTF-8 bytes.
 
+**Trace.** The emoji lies outside the 16-bit range, so UTF-16 stores it as a surrogate pair and `symbol.Length` counts two `char` values. `EnumerateRunes()` decodes that pair back into one Unicode scalar, so its count is 1. `Encoding.UTF8.GetByteCount` measures the same scalar after encoding to UTF-8, which takes four bytes. Three questions about one symbol give three answers: 2, 1 and 4.
+
 ## Exercises
 
 1. **Predict and explain.** Predict both string values after ToUpperInvariant and explain ownership of the result.
@@ -137,13 +141,15 @@ internal static class Program {
 
 6. **Transfer and justify.** Design a text-field limit and explain whether its contract measures bytes, scalars or user-visible graphemes.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Log each task in the [evidence table](../STUDY-GUIDE.md#recording-exercise-evidence) before opening the explanation.
 
 ## Common pitfalls and diagnosis
 
 Indexing a string can split a surrogate pair. Invariant casing is useful for stable transformations but is not a universal user-language display rule. Normalization and comparison are separate policies.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+For task 4, `symbol[0]` is the high surrogate U+D83D, which `char.IsHighSurrogate` confirms: half of a symbol, not a complete one. For task 5, `"e\u0301"`, an e followed by a combining acute accent, has Length 2 and two runes, yet `StringInfo` counts one text element, so even runes overcount what a reader sees.
+
+Repair routine: [building a regression case](../STUDY-GUIDE.md#building-a-regression-case).
 
 ## Progressive hints
 
@@ -153,11 +159,15 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 ## Self-check and next step
 
-Explain Code unit, Unicode scalar, Encoding without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+Give the Length, rune count and UTF-8 byte count of the text a, precomposed é, then the emoji. Explain why the result of `ToUpperInvariant` must be assigned to be kept. Say which comparison policy suits a machine key and which suits text shown to a user, and explain why they differ.
+
+Then follow the general [self-check routine](../STUDY-GUIDE.md#self-check-routine) and save your pad.
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://learn.microsoft.com/en-us/dotnet/csharp/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+[Documentation](https://learn.microsoft.com/en-us/dotnet/csharp/): From the C# documentation, the .NET fundamentals article on character encoding explains UTF-16 code units, surrogate pairs, `Rune` and grapheme clusters.
+
+Provenance and limits: [sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

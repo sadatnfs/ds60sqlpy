@@ -32,11 +32,9 @@ An offline application can still contain code that attempts network requests. Im
 
 ## How to use this lesson
 
-The classroom displays this guide and saves your worksheet, `courses/docker/lessons/docker-025.md`. Its Run button does not control your Docker engine. Docker engine access is powerful host access, so the classroom deliberately receives no engine socket. Work through the supplied examples without starting anything, then use the optional host lab only in your own disposable project. Reading a command, parsing YAML and actually running the project are different forms of evidence.
+The classroom saves `courses/docker/lessons/docker-025.md` and holds no engine socket ([host-lab setup](../STUDY-GUIDE.md#host-lab-setup)).
 
-Use Bash in Linux, macOS Terminal, or Ubuntu under WSL 2 on Windows. The supported engine runs Linux containers. The maintained fixture is `courses/docker/fixtures/compose-lab/`; its README explains copying it into a new ignored learner directory, checking the engine, building locally with visible logs, and using the fixed project name `ds60-docker-study`. The fixture uses port 18080 on host loopback. Stop if that project name or port belongs to unrelated work; choose a new project name consistently in your own copy. Never paste a command against a remote Docker context simply because it is currently selected.
-
-For Dockerfile examples, create a file named `Dockerfile` in a scratch project. YAML snippets describe a fragment unless explicitly called a complete file. Text transcripts are synthetic illustrations, not claims about your machine. Do not substitute a real password, token or private registry into a checked-in example. **How to use the lessons** in the [subject README](../README.md) collects these rules in one place.
+**Host lab.** Stop the study project with `docker compose -p ds60-docker-study down` so no container holds the image, then record its identity with `docker image inspect --format '{{.Id}}' ds60-docker-study:local`. Save it outside your fixture copy with `docker image save -o ../study-image.tar ds60-docker-study:local` and record `shasum -a 256 ../study-image.tar` (`sha256sum` on Linux). Remove the name with `docker image rm ds60-docker-study:local`, then try the offline run from worked example 2: it fails at once with a no-such-image error, and nothing is downloaded. Load the archive with `docker image load -i ../study-image.tar`; the engine prints `Loaded image: ds60-docker-study:local`. Inspect the ID again, compare it with your first note, and rerun the offline command to see `offline ready`. Delete `../study-image.tar` when you finish. The volume was never touched, so `up -d --wait` brings the app back with its counter.
 
 ## Worked example / walkthrough
 
@@ -63,7 +61,7 @@ docker run --rm --pull never --network none ds60-docker-study:local python -c "p
 
 ## Six progressive exercises
 
-For each exercise, name the object involved and the phase of its lifetime before changing anything, then vary only the condition the task names. Exercises that ask you to predict, explain, compare or diagnose keep their answers in the solutions file; the others show the evidence to look for.
+Answer-type prompts keep their answers in the solutions file ([exercise rules](../STUDY-GUIDE.md#exercise-rules)).
 
 ### Exercise 1: Compare tag and digest identity.
 
@@ -97,13 +95,19 @@ For each exercise, name the object involved and the phase of its lifetime before
 
 Treating a tag as an immutable identity. Expecting a tagged build to be published. Trusting a checksum without knowing who supplied it.
 
-Exercise 4 is this chapter's boundary case: Diagnose a missing image with --pull never. Run `docker image ls` for the exact repository and tag before the run; with `--pull never` an absent image is reported as an error rather than downloaded. Preserve the original failure and the exact changed field before retrying. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
+Exercise 4 is this chapter's boundary case: Diagnose a missing image with --pull never. Run `docker image ls` for the exact repository and tag before the run; with `--pull never` an absent image is reported as an error rather than downloaded.
+
+Saving by image ID instead of by name looks equivalent, because the layers are the same. It is not: `docker image save -o handoff.tar <image-id>` writes an archive whose manifest carries no repository or tag, so on the receiving engine `docker image load` reports `Loaded image ID:` followed by a digest rather than `Loaded image: ds60-docker-study:local`, and `docker image ls` shows the image without a name. Every command that names `ds60-docker-study:local` with `--pull never` then fails as if the transfer never happened. Save by reference so the name travels with the bytes, or, on the receiving side, attach the name deliberately with `docker image tag <loaded-id> ds60-docker-study:local` after checking that the loaded ID matches your handoff record.
+
+Never trade a safety control for a passing example ([safety rules](../STUDY-GUIDE.md#safety-rules)).
 
 ## Retrieval, transfer and next steps
 
-Close the explanations first. Recall the commands that move an image offline and the flag that proves no download happened. Then reconstruct worked example 2 (Import and run deliberately offline) with one different value, predict what changes, and name which of image reference, tag, digest, docker image save and docker image load the change touches.
+**Retrieval.** Recall the commands that move an image offline and the flag that proves no download happened.
 
-When a host session ends, run `docker compose -p ds60-docker-study down` from your fixture copy. It removes the project's containers and network but keeps named volumes; deleting a volume is a separate, deliberate reset described in the fixture README.
+**Transfer case.** A colleague on an Apple silicon laptop loads your archive, which you built on an amd64 Linux host, and the offline run prints a platform warning or fails with `exec format error`. What happened, and which handoff field would have prevented the surprise?
+
+Then run the [retrieval loop](../STUDY-GUIDE.md#retrieval-and-cleanup) and end any host session with its cleanup.
 
 ## Primary references
 

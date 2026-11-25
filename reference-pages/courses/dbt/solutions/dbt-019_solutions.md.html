@@ -195,7 +195,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="dbt-019-explained-reference">dbt-019: explained reference<a class="heading-anchor" href="#dbt-019-explained-reference" aria-label="Link to this section">#</a></h2>
 <p>Run a project against an explicitly identified owned target and verify its actual destination.</p>
-<p>The executable reference contains the two complete worked cases with assertions. The changes below explain the independent practice and its limits.</p>
+<p>The reference rewrites profiles.yml so the <code>dev</code> and <code>prod</code> outputs differ only in schema, builds into each, and reads the target name stored by the model. The unknown target leaves no run results. All schemas sit in one local DuckDB file, so this proves routing, not isolation between real environments. See <a href="../STUDY-GUIDE.md.html#answers-and-references">how these answers are laid out</a>.</p>
 <h3 id="1-inspect-the-destination">1. Inspect the destination<a class="heading-anchor" href="#1-inspect-the-destination" aria-label="Link to this section">#</a></h3>
 <p>Record adapter type, database identity and schema. Names such as prod should not be assumed to point to real production or to be safe without inspection.</p>
 <p><strong>Why it holds here:</strong> Both targets use the same warehouse.duckdb file and differ only in schema, dev or prod.</p>

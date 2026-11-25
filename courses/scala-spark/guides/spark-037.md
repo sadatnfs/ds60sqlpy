@@ -1,22 +1,26 @@
 # spark-037: Deterministic streaming tests without sleep-based guesses
 
-Authored paired Scala/PySpark teaching content. The default fixtures are tiny, local and deterministic. Runtime acceptance, logical correctness and learner understanding remain separate evidence.
+A streaming test that sleeps for a few seconds and then looks at the output passes or fails depending on machine speed. This lesson replaces sleeps with four finite cases, each with its own input, checkpoint and output: a restart, a duplicate delivery, rows around a lateness cutoff and invalid records. Every case runs until the query stops by itself and ends with an exact bag comparison.
 
 ## Level and prerequisites
 
-Advanced; approximately 120 minutes. Direct prerequisites: `spark-036`. The prepared baseline is Spark 4.3.0, Scala binary 2.13, JDK 17 and Python 3.12. Read the [execution baseline](../execution-baseline.md).
+Advanced; approximately 120 minutes. Direct prerequisites: `spark-036`. Pinned versions: [execution baseline](../execution-baseline.md).
 
 ## How to run this lesson
 
-Open `spark-037` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile, save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`;Python stages as `main.py` with a main guard. Each program creates its own `local[2]` session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.
+Shared run steps and profile rules: [study guide](../STUDY-GUIDE.md#run-a-paired-lesson).
 
-The [Scala learner](../lessons/spark-037.scala) and [PySpark learner](../lessons/spark-037.py) run two complete demonstrations and retain six explicit task stubs. Use the [explained solutions](../solutions/spark-037_solutions.md) only after an attempt or an explicit worked comparison; the [Scala reference](../solutions/spark-037_solution.scala) and [PySpark reference](../solutions/spark-037_solution.py) contain complete assertions. A bounded collect is used only for the declared tiny fixture; do not copy it onto an unbounded or large production table.
+Learner pads: [Scala](../lessons/spark-037.scala) and [PySpark](../lessons/spark-037.py).
+
+Open the [explained solutions](../solutions/spark-037_solutions.md) after an attempt.
+
+The first worked example prepares a `demo` case with two copies of `{"id":1,"event_second":100,"cents":100}`, runs it in duplicates mode and requires 2 input rows with the bag `1:100`. The second filters the list `[80, 90, 110]` in plain Python with `>= 90` and gets `[90, 110]`, so the boundary is settled before any stream runs.
 
 ## Learning objectives
 
 - Test finite streaming scenarios with explicit batch progression and bounded cleanup.
-- State the input and output grain, schema, NULL policy and ordering before executing a transformation.
-- Compare each language implementation with independent literal expectations, not only with the other implementation.
+- Build each scenario with `prepare_case` so that it owns separate input, checkpoint and output folders, run it with `AvailableNow` until the query finishes, and compare the committed bag with a literal list instead of waiting a fixed time.
+- Explain why the late case may report fewer progress input rows than its 3 raw rows when the `event_second >= 90` filter is pushed into the JSON scan, and keep the boundary row at 90 in the expected bag.
 
 ## Vocabulary and concepts
 
@@ -44,7 +48,7 @@ The restart case has two valid rows. The first finite query writes them; the sec
 
 The duplicate case uses two exactly equal occurrences of one ID. It invokes native streaming dropDuplicates, so the output contains one row. There is no watermark eviction in this isolated case. The fixture has at most two input rows, so the demonstration is bounded, but an unbounded production stream would need a state-retention policy. Different payloads under the same ID would also require an explicit conflict rule rather than accepting an arbitrary retained row.
 
-The late case has event seconds 80,90,110 and uses>=90. It must retain the boundary 90. A total-only check could hide a mistaken row policy if zero-valued data were used, so this case compares identities and amounts as a bag. The invalid case has one NULL identity, one negative amount and one valid row. Input 3=invalid 2+accepted 1 is recorded explicitly. A malformed JSON document would be a source decoding failure under FAILFAST, which is a different test from rejecting a schema-valid row.
+The late case has event seconds 80, 90, 110 and uses `>= 90`. It must retain the boundary 90. A total-only check could hide a mistaken row policy if zero-valued data were used, so this case compares identities and amounts as a bag. The invalid case has one NULL identity, one negative amount and one valid row. Input 3=invalid 2+accepted 1 is recorded explicitly. A malformed JSON document would be a source decoding failure under FAILFAST, which is a different test from rejecting a schema-valid row.
 
 ## Observe completion and failures precisely
 
@@ -64,7 +68,7 @@ These are local classic Spark 4.3.0 tests. They qualify the finite semantics and
 
 ## Supplied local fixture
 
-The complete source creates the owned local session described above, then constructs this explicit fixture. The worked examples below run in that same main function; there is no hidden notebook state.
+Every case gets its own input, checkpoint and output folders under the owned scratch root, and rows carry `id`, `event_second` and `cents`. The restart case holds `(1, 100, 100)` and `(2, 110, 200)`, and its second run adds no file. The duplicates case repeats `(1, 100, 100)`. The late case has IDs 1 to 3 at seconds 80, 90 and 110. The invalid case has one row with a NULL ID, ID 2 with `-1` cents and a valid ID 3 with 300 cents.
 
 ```scala prelude=../solutions/spark-037_solution.scala
 import org.apache.spark.sql.functions._
@@ -192,7 +196,7 @@ This independent arithmetic oracle fixes the inclusive event-time policy before 
 
 Run the restart scenario with two supplied records and retain progress plus exact sink values.
 
-**Expected result/shape:** 2 input rows and bag 1:100,2:200.
+**Expected result/shape:** 2 input rows and bag `1:100, 2:200`.
 
 **Verify:** Assert the literal bag, input count 2 and inactive query.
 
@@ -212,7 +216,7 @@ Restart the compatible baseline with its existing checkpoint and no new file.
 
 Use native streaming dropDuplicates on the id key for two identical occurrences of 1:100.
 
-**Expected result/shape:** 2 source rows,1 committed row 1:100.
+**Expected result/shape:** 2 source rows, 1 committed row `1:100`.
 
 **Verify:** Compare input count 2 and the one-row bag.
 
@@ -220,9 +224,9 @@ Use native streaming dropDuplicates on the id key for two identical occurrences 
 
 ### Exercise 4: Test the exact event-time boundary
 
-Apply the explicitly declared admission cutoff event_second>=90 to rows at 80,90 and 110.
+Apply the explicitly declared admission cutoff `event_second >= 90` to rows at 80, 90 and 110.
 
-**Expected result/shape:** 3 source rows; accepted IDs 2,3 with cents 200,300.
+**Expected result/shape:** 3 source rows; accepted IDs 2, 3 with cents 200, 300.
 
 **Verify:** Compare exact two-row bag and explain why 90 is retained.
 
@@ -232,7 +236,7 @@ Apply the explicitly declared admission cutoff event_second>=90 to rows at 80,90
 
 Reject a NULL identity and a negative amount while retaining valid 3:300.
 
-**Expected result/shape:** 3 input occurrences,2 invalid,1 accepted.
+**Expected result/shape:** 3 input occurrences, 2 invalid, 1 accepted.
 
 **Verify:** Compare raw source count 3, actual progress, sink bag 3:300 and static predicate count 2.
 
@@ -254,11 +258,14 @@ Do not substitute sleeps for batch completion, compare unordered collections as 
 
 ## Self-check
 
-Explain the contract of `baseline` / `baseline` without reading its solution. Then, from memory, state what Exercise 6 (Prove the oracle rejects a plausible regression) must produce: Correct bag passes; duplicated bag raises an assertion-contract error; all owned queries are inactive. Say which part of that result is evidence and what it still cannot show. Name the action in your trace that actually runs the plan.
+- The restart case runs a second time with no new file. Which identifiers must stay the same, which must change, and why is 0 input rows the expected answer?
+- Two identical deliveries of ID 1 leave one committed row. Which operator removes the second, and what would the bag look like without it?
+- The late case keeps 90 and 110 but drops 80. Why is `>= 90` a row filter here rather than a watermark, and how could pushdown make the progress input count smaller than 3?
+- `require_bag` fails on `["1:100", "1:100"]`. Why compare full bags rather than counts or totals, and what does the final check on active queries protect?
 
 ## Next step
 
-Use the [course route](../README.md) to continue. Paired-language agreement is useful only when both outputs also satisfy the independent fixture contract. A successful local run is not evidence of cluster performance or production recovery.
+Go on to [spark-038: Observability: plans, progress, event logs and incidents](spark-038.md). These tests decided pass or fail from exact bags; the next lesson reads progress reports, state metrics and seeded incident data to explain why a query is slow or stuck.
 
 ## Primary sources and official APIs
 

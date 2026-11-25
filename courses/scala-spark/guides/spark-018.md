@@ -1,22 +1,26 @@
 # spark-018: Timestamp types, time zones and interval boundaries
 
-Authored paired Scala/PySpark teaching content. The default fixtures are tiny, local and deterministic. Runtime acceptance, logical correctness and learner understanding remain separate evidence.
+On 3 November 2024 clocks in Los Angeles fell back, so 01:30 happened twice. Six timestamp strings written with different offsets let you test what Spark compares (instants), what it displays (a zone-dependent rendering) and what a local clock label cannot tell you. The local day you filter is 25 hours long.
 
 ## Level and prerequisites
 
-Intermediate; approximately 105 minutes. Direct prerequisites: `spark-017`. The prepared baseline is Spark 4.3.0, Scala binary 2.13, JDK 17 and Python 3.12. Read the [execution baseline](../execution-baseline.md).
+Intermediate; approximately 105 minutes. Direct prerequisites: `spark-017`. Pinned versions: [execution baseline](../execution-baseline.md).
 
 ## How to run this lesson
 
-Open `spark-018` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile, save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`; Python stages as `main.py` with a main guard. Each program creates its own `local[2]` session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.
+Shared run steps and profile rules: [study guide](../STUDY-GUIDE.md#run-a-paired-lesson).
 
-The [Scala learner](../lessons/spark-018.scala) and [PySpark learner](../lessons/spark-018.py) run two complete demonstrations and retain six explicit task stubs. Use the [explained solutions](../solutions/spark-018_solutions.md) only after an attempt or an explicit worked comparison; the [Scala reference](../solutions/spark-018_solution.scala) and [PySpark reference](../solutions/spark-018_solution.py) contain complete assertions. A bounded collect is used only for the declared tiny fixture; do not copy it onto an unbounded or large production table.
+Learner pads: [Scala](../lessons/spark-018.scala) and [PySpark](../lessons/spark-018.py).
+
+Open the [explained solutions](../solutions/spark-018_solutions.md) after an attempt.
+
+The first worked example parses `2024-11-03T08:30:00Z` and `2024-11-03T01:30:00-07:00` in SQL, compares their epoch seconds and prints `Different text, same instant`. The second measures the hours between the two day boundaries with `timestampdiff`, gets 25 and prints `Declared Los Angeles day spans 25 elapsed hours`.
 
 ## Learning objectives
 
 - Distinguish an instant from a local timestamp and define event windows with explicit time-zone policy.
-- State the input and output grain, schema, NULL policy and ordering before executing a transformation.
-- Compare each language implementation with independent literal expectations, not only with the other implementation.
+- Parse offset-bearing strings into instants, show that `01:30-07:00` and `08:30Z` are the same instant and that `01:30-08:00` is one hour later, and render them under two zones without changing the stored value.
+- Filter the Los Angeles day with a half-open interval, from 07:00 UTC on 3 November up to but not including 08:00 UTC on 4 November, and explain why boundary event 1 is in and boundary event 4 is out.
 
 ## Vocabulary and concepts
 
@@ -48,7 +52,7 @@ The lesson uses exact historical fixtures, not a claim that every business zone 
 
 ## Supplied local fixture
 
-The complete source creates the owned local session described above, then constructs this explicit fixture. The worked examples below run in that same main function; there is no hidden notebook state.
+All six strings carry explicit offsets, so no parse depends on the session zone. Event 1 is the exact start of the Los Angeles day, event 4 the exact end, event 6 one second before the start, event 5 is in UTC, and events 2 and 3 are the two different instants that both show 01:30 on a Los Angeles clock. The session timestamp type is set to `TIMESTAMP_LTZ` before parsing.
 
 ```scala
 import org.apache.spark.sql.Row
@@ -209,11 +213,14 @@ Do not confuse a timestamp's displayed timezone with its original textual offset
 
 ## Self-check
 
-Explain the contract of `parseInstants` / `parse_instants` without reading its solution. Then, from memory, state what Exercise 6 (Quarantine invalid timestamps without confusing missingness) must produce: IDs 1, 2, 3 have those reasons respectively; only 1 is accepted while ANSI remains true. Say which part of that result is evidence and what it still cannot show. Name the action in your trace that actually runs the plan.
+- Events 2 and 3 both display 01:30 in Los Angeles. How many seconds apart are they, and which exercise would silently merge them if you grouped by the displayed time?
+- Why is the day filter written as `>= start AND < end` rather than with `BETWEEN`? Which event would `BETWEEN` wrongly include?
+- Exercise 2 changes the session zone to render times and must restore UTC afterwards. What could break in Exercise 3 if it forgot?
+- A `timestamp_ntz` value `2024-11-03 01:30:00` has no offset. What question can you no longer answer from it, and why does the lesson refuse to guess?
 
 ## Next step
 
-Use the [course route](../README.md) to continue. Paired-language agreement is useful only when both outputs also satisfy the independent fixture contract. A successful local run is not evidence of cluster performance or production recovery.
+Go on to [spark-019: Windows, ties and deterministic deduplication](spark-019.md). Now that you can trust the timestamps, the next lesson uses them to pick a newest row per entity and finds that two events with the same time need a tie-breaker.
 
 ## Primary sources and official APIs
 

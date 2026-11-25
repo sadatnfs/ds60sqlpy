@@ -157,7 +157,7 @@ ORDER BY
 -- 2. Report keyed mismatches in both directions.
 -- Inputs/evidence: For sql-quality-01 Exercise 2, Use FULL OUTER JOIN on invoice_id and NULL-safe amount comparison. Return invoice_id, source_amount, target_amount, difference_kind with missing_target, missing_source, or changed.
 -- Expected result/shape: For sql-quality-01 Exercise 2, Three invoice rows keyed by invoice_id, columns invoice_id, source_amount, target_amount, difference_kind; final ORDER BY invoice_id: 2 changed (50,40), 4 missing_target (80,NULL), 5 missing_source (NULL,90).
--- Verify: For sql-quality-01 Exercise 2, Compare exact diagnostics for invoices 2,4,5 with kinds changed,missing_target,missing_source and amounts (50,40),(80,NULL),(NULL,90). Matching keys 1 and 3 are absent.
+-- Verify: For sql-quality-01 Exercise 2, Compare exact diagnostics for invoices 2, 4, 5 with kinds `changed`, `missing_target`, `missing_source` and amounts (50,40), (80,NULL), (NULL,90). Matching keys 1 and 3 are absent.
 -- Hint: Use key presence to classify an absent row before comparing its amount.
 -- 3. Preserve duplicate multiplicity.
 -- Inputs/evidence: For sql-quality-01 Exercise 3, Compare quality_sent and quality_received as bags on invoice_id, amount using two EXCEPT ALL branches labeled sent_only and received_only. Explain why ordinary EXCEPT would miss this difference.
@@ -177,6 +177,6 @@ ORDER BY
 -- 6. Gate a keyed comparison on valid identity.
 -- Inputs/evidence: For sql-quality-01 Exercise 6, For quality_sent, return invoice_id, occurrences only for duplicate keys. Explain why a keyed reconciliation must stop before joining this fixture to another nonunique extract.
 -- Expected result/shape: For sql-quality-01 Exercise 6, One diagnostic row keyed by invoice_id, columns invoice_id, occurrences; final ORDER BY invoice_id: (1,2). No amount is used as an identity.
--- Verify: For sql-quality-01 Exercise 6, Require exactly duplicate-key diagnostic (invoice_id=1,occurrences=2). This nonempty result prevents interpreting a later keyed join as one diagnostic per invoice.
+-- Verify: For sql-quality-01 Exercise 6, Require exactly one duplicate-key diagnostic, `invoice_id` 1 with `occurrences` 2. This nonempty result prevents interpreting a later keyed join as one diagnostic per invoice.
 -- Hint: Validate the key at the incoming extract grain before validating its attributes.
 ROLLBACK;

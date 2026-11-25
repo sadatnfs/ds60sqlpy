@@ -196,7 +196,6 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <article class="document"><h2 id="cuda-030-explanatory-solutions">cuda-030: explanatory solutions<a class="heading-anchor" href="#cuda-030-explanatory-solutions" aria-label="Link to this section">#</a></h2>
 <h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
 <p>A minimal reproducer removes unrelated work while preserving the failure. For a shape-dependent bug, reduce dimensions and data complexity independently, then retain the smallest case that still fails. Add source line information and stage-specific checks before interpreting a large trace. Debug builds change optimization and resource usage; a disappearing failure is a clue, not proof of a fix. A device fault can make further operations in a context unreliable. Preserve source and diagnostics before restarting a process. Device reset and shared-engine recovery belong to the resource owner, not an automatic learner-code repair path.</p>
-<p>The separate <a href="../references/cuda-030_cpu.py.html">CPU reference</a> checks the chapter&#x27;s bounded model. It does not execute CUDA or establish GPU timing. Compare after attempting the worksheet or explicitly choosing to reveal solutions.</p>
 <h3 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h3>
 <p>A hypothetical bad predicate i&lt;=n fails at lengths 1,33 and 1,001. Reduce it to length one, where index one is already invalid. This gives a tiny regression fixture and a direct explanation. A giant dataset is unnecessary to show the underlying off-by-one error.</p>
 <p><strong>Approach:</strong> Shrink the failing inputs to length one, where i &lt;= n reaches index 1.</p>
@@ -233,11 +232,16 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Why it is correct:</strong> The control separates tail logic from general logic, and boundaries catch the edges.</p>
 <p><strong>A plausible wrong approach:</strong> Testing only the divisible size passes while the tail bug remains.</p>
 <p><strong>How to verify:</strong> Confirm the test fails on the old code and passes on the fix.</p>
+<h3 id="self-check-answers">Self-check answers<a class="heading-anchor" href="#self-check-answers" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>Why does length one expose the <code>i &lt;= n</code> bug in worked example 1?</strong> Index one is already out of range for a one-element buffer, so the extra iteration is the first write.</li>
+<li><strong>How should a timeout with no completion be classified?</strong> As incomplete execution; inspect boundedness and dependencies rather than reporting a result.</li>
+<li><strong>What does it mean if a bug disappears in a debug build?</strong> It is a clue that timing or optimization matters, not proof the defect is fixed.</li>
+</ol>
 <h3 id="numerical-reference-and-its-limits">Numerical reference and its limits<a class="heading-anchor" href="#numerical-reference-and-its-limits" aria-label="Link to this section">#</a></h3>
-<p>The complete CPU model is <a href="../references/cuda-030_cpu.py.html">here</a>. Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It does not claim CUDA execution, concurrency safety or a performance measurement.</p>
+<p>The <a href="../references/cuda-030_cpu.py.html">CPU reference</a> reproduces worked example 1 and prints <code>{&#x27;minimal_bounds_case&#x27;: [1], &#x27;timeout_receipt&#x27;: {&#x27;submitted&#x27;: True, &#x27;completed&#x27;: False, &#x27;validated&#x27;: False}}</code>.</p>
 <h3 id="transfer-review">Transfer review<a class="heading-anchor" href="#transfer-review" aria-label="Link to this section">#</a></h3>
-<p>Keep at least one exact failing tail shape, a nearby divisible control and an empty/singleton boundary, checking full outputs.</p>
-<p>A complete explanation must name its inputs, the unchanged mathematical contract, the changed boundary or resource condition, and the evidence still needed on actual hardware. Preserve a CPU baseline even after a GPU path becomes available.</p></article>
+<p>Keep at least one exact failing tail shape, a nearby divisible control and an empty/singleton boundary, checking full outputs.</p></article>
   </main>
 </body>
 </html>

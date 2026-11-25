@@ -4,8 +4,6 @@
 
 A minimal reproducer removes unrelated work while preserving the failure. For a shape-dependent bug, reduce dimensions and data complexity independently, then retain the smallest case that still fails. Add source line information and stage-specific checks before interpreting a large trace. Debug builds change optimization and resource usage; a disappearing failure is a clue, not proof of a fix. A device fault can make further operations in a context unreliable. Preserve source and diagnostics before restarting a process. Device reset and shared-engine recovery belong to the resource owner, not an automatic learner-code repair path.
 
-The separate [CPU reference](../references/cuda-030_cpu.py) checks the chapter's bounded model. It does not execute CUDA or establish GPU timing. Compare after attempting the worksheet or explicitly choosing to reveal solutions.
-
 ## Exercise 1
 
 A hypothetical bad predicate i<=n fails at lengths 1,33 and 1,001. Reduce it to length one, where index one is already invalid. This gives a tiny regression fixture and a direct explanation. A giant dataset is unnecessary to show the underlying off-by-one error.
@@ -78,12 +76,16 @@ Keep at least one exact failing tail shape, a nearby divisible control and an em
 
 **How to verify:** Confirm the test fails on the old code and passes on the fix.
 
+## Self-check answers
+
+1. **Why does length one expose the `i <= n` bug in worked example 1?** Index one is already out of range for a one-element buffer, so the extra iteration is the first write.
+2. **How should a timeout with no completion be classified?** As incomplete execution; inspect boundedness and dependencies rather than reporting a result.
+3. **What does it mean if a bug disappears in a debug build?** It is a clue that timing or optimization matters, not proof the defect is fixed.
+
 ## Numerical reference and its limits
 
-The complete CPU model is [here](../references/cuda-030_cpu.py). Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It does not claim CUDA execution, concurrency safety or a performance measurement.
+The [CPU reference](../references/cuda-030_cpu.py) reproduces worked example 1 and prints `{'minimal_bounds_case': [1], 'timeout_receipt': {'submitted': True, 'completed': False, 'validated': False}}`.
 
 ## Transfer review
 
 Keep at least one exact failing tail shape, a nearby divisible control and an empty/singleton boundary, checking full outputs.
-
-A complete explanation must name its inputs, the unchanged mathematical contract, the changed boundary or resource condition, and the evidence still needed on actual hardware. Preserve a CPU baseline even after a GPU path becomes available.

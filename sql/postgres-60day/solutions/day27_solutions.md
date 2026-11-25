@@ -4,56 +4,24 @@
 <!-- beginner-solution-enrichment -->
 ## How to study and run this solution
 
-Open this explanation only after making an honest attempt. The executable
-companion runs solely against the disposable `advanced_sql_training` database:
+The answers read `orders`, `customers`, `expenses`, `order_items` and
+`products`, and two of them use inline `VALUES` samples instead of tables.
+Nothing is written. See [Read a solution](../../STUDY-GUIDE.md#read-a-solution)
+for the general approach.
 
 ```bash
-# Linux, macOS, or Windows through WSL 2, from the repository root
 psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
   -f sql/postgres-60day/solutions/day27_solutions.sql
 ```
 
-`psql` prints each result/command tag in the terminal. Stop at the first
-unexpected `ERROR`; later output cannot repair an earlier failed invariant.
-Compare your own SQL, row grain, column names, row counts, `NULL` policy, and
-ordering with the explanation before comparing syntax.
+## How these answers fit together
 
-## Clause-by-clause reading map
-
-The lesson's main concepts are Pivot, Unpivot, Conditional aggregation. Its worked-model focus is:
-At one row per quarter, calculate `SUM(amount) FILTER (WHERE method = 'card')` and parallel columns for the other known methods. Reconcile the sum of pivot columns to the long-form payment total and decide whether absent combinations display as `NULL` or zero.
-
-- Start at `FROM`/`JOIN` and state the intermediate row grain. Inspect join keys
-  before adding aggregates; a one-to-many join is allowed to multiply rows only
-  when the later contract accounts for it.
-- Apply `WHERE` to input rows, `GROUP BY` to form buckets, and `HAVING` to
-  completed groups. Window functions run over the surviving relation and
-  normally preserve its row count.
-- Read the `SELECT` list as the public result contract: keys establish grain,
-  measures state calculations, and aliases explain meaning. `ORDER BY` is the
-  only output-order guarantee; add a unique tie-breaker before `LIMIT`.
-- Trace every common table expression (CTE) as a temporary named relation.
-  Execute or inspect one stage at a time while debugging, but compare the final
-  result with an independent control rather than trusting stage names.
-- Keep SQL `NULL` as “missing/unknown/not applicable” until the metric contract
-  chooses another representation. Guard division with `NULLIF`; disclose
-  exclusions and distinguish zero from no row.
-- For DDL/DML, a command tag proves only that PostgreSQL accepted a statement.
-  Catalog checks, negative cases, row-count reconciliation, and the declared
-  transaction boundary prove behavior and cleanup.
-
-The exact final queries are not the only valid syntax. A join, subquery, CTE,
-window, or conditional aggregate can be an alternative when it preserves the
-same grain, `NULL` semantics, deterministic ordering, and safety. Prefer the
-form whose intermediate relations a reviewer can verify; optimize only after
-correctness is established with evidence.
-
-These answers align one-for-one with [day27_pivot_unpivot.sql](../day27_pivot_unpivot.sql).
-Run only against the disposable `advanced_sql_training` database.
-The executable companion wraps every answer in `BEGIN`/`ROLLBACK`.
-The snippets below assume the lesson's
-`SET search_path TO training, public;` statement. Run the complete
-executable companion when you want a self-contained check.
+The first two answers pivot with `COUNT(*) FILTER`, the third and sixth
+unpivot with a lateral `VALUES` list, and the fourth compares a `NULL` cell
+with a zero. The fifth avoids a fixed column list by returning a JSON object
+per month. For every pivot, a total column or a direct aggregate tells you
+whether the fixed column list missed anything. The learner file is
+[day27_pivot_unpivot.sql](../day27_pivot_unpivot.sql).
 
 ## Reading contract
 
@@ -69,12 +37,6 @@ executable companion when you want a self-contained check.
 
 **Reasoning:** Use one filtered count per known status and keep an all-orders denominator.
 
-**Clause-by-clause reading:**
-
-- `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
-- `FROM`: establishes the starting relation and therefore the initial row grain.
-- `FILTER (WHERE ...)`: limits one aggregate without removing rows needed by neighboring aggregates.
-
 ```sql
 SELECT
   COUNT(*) FILTER (WHERE o.status = 'placed') AS placed_orders,
@@ -89,33 +51,21 @@ FROM
 
 **Expected shape:** Exactly one row.
 
-Check the result at the stated grain. An alternative formulation is
-valid only if it preserves the same NULL, ordering, time, money, and
-cardinality contract.
-
 ### Reasoning and verification
 
 - **Inputs/evidence:** For sql-27 Exercise 1, read from `orders` and pivot the status counts into one row, with one `COUNT(*) FILTER (WHERE status = ...)` column per known status plus `all_orders`.
 - **Expected result/shape:** For sql-27 Exercise 1, expected output: Exactly one row. The final columns are `placed_orders`, `paid_orders`, `shipped_orders`, `delivered_orders`, `returned_orders`, and `all_orders`.
 - **Independent verification:** For sql-27 Exercise 1, confirm one row with `placed_orders` 873, `paid_orders` 872, `shipped_orders` 873, `delivered_orders` 872, `returned_orders` 872, and `all_orders` 4362; the five status columns must add up to `all_orders`, or an unknown status exists.
-- **Intermediate relation check:** For sql-27 Exercise 1, run `SELECT status, COUNT(*) FROM orders GROUP BY status` first; each pivot column must match one of those counts.
-- **Clause check:** For sql-27 Exercise 1, the solution actually uses `FROM`, `WHERE`, aggregate `FILTER`, and `SELECT`. Read only those operations: begin at `orders`, preserve exactly one summary row, and finish with `placed_orders`, `paid_orders`, `shipped_orders`, `delivered_orders`, `returned_orders`, and `all_orders`.
-- **Alternative/trade-off:** For sql-27 Exercise 1, the chosen form is justified by this lesson-specific rationale: Use one filtered count per known status and keep an all-orders denominator. Evaluate another form against the concrete expected result (Exactly one row) and the verification above.
-- **Edge case:** A new status value would be counted in `all_orders` but in no status column, so compare the column sum with `all_orders` after every load.
+- **Intermediate relation check:** There is no `GROUP BY`, so all 4,362 orders form one group and the query returns one row. The five status columns are 873 placed, 872 paid, 873 shipped, 872 delivered and 872 returned.
+- **Clause check:** Each `FILTER` tests one status literal. The five counts add to 4,362, the same as `all_orders`, which proves that no order has a status outside the list. If a sixth status appeared, the sum would fall short.
+- **Alternative/trade-off:** `SUM(CASE WHEN o.status = 'placed' THEN 1 ELSE 0 END)` gives the same numbers and works in databases without `FILTER`. `FILTER` is shorter and makes the condition easier to see.
+- **Edge case:** A misspelled literal such as `'Paid'` silently returns 0, because `COUNT(*) FILTER` returns 0 for no matches rather than raising an error. Compare the sum of the columns with `all_orders` to catch it.
 
 ## Exercise 2: Query writing
 
 **Prompt:** Pivot customer counts for US, CA, GB, and DE by segment.
 
 **Reasoning:** Group at segment grain and use filtered counts for known country columns.
-
-**Clause-by-clause reading:**
-
-- `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
-- `FROM`: establishes the starting relation and therefore the initial row grain.
-- `GROUP BY`: collapses input rows to the listed key grain; every non-aggregated selected value must belong to that grain.
-- `FILTER (WHERE ...)`: limits one aggregate without removing rows needed by neighboring aggregates.
-- `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 
 ```sql
 SELECT
@@ -135,34 +85,21 @@ ORDER BY
 
 **Expected shape:** One row per segment.
 
-Check the result at the stated grain. An alternative formulation is
-valid only if it preserves the same NULL, ordering, time, money, and
-cardinality contract.
-
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-27 Exercise 2, read from `customers`. Build the answer toward `segment`, `us_customers`, `ca_customers`, `gb_customers`, `de_customers`, and `all_customers`; keep `segment` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-27 Exercise 2, expected output: One row per segment. The final columns are `segment`, `us_customers`, `ca_customers`, `gb_customers`, `de_customers`, and `all_customers`. The final order is `c.segment NULLS LAST`.
-- **Independent verification:** For sql-27 Exercise 2, independently aggregate `customers` by `segment`; require one output row for every distinct `segment` tuple and compare `us_customers`, `ca_customers`, `gb_customers`, `de_customers`, and `all_customers` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `us_customers`, `ca_customers`, and `gb_customers` for the existing `segment` tuple and verify the new tuple appears exactly once.
-- **Intermediate relation check:** For sql-27 Exercise 2, inspect the source keys that survive `WHERE`; then confirm the groups are `segment`; then check `c.segment NULLS LAST` before applying the row cap.
-- **Clause check:** For sql-27 Exercise 2, the solution actually uses `FROM`, `WHERE`, aggregate `FILTER`, `GROUP BY`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `customers`, preserve one row per `segment`, and finish with `segment`, `us_customers`, `ca_customers`, `gb_customers`, `de_customers`, and `all_customers` ordered by `c.segment NULLS LAST`.
-- **Alternative/trade-off:** For sql-27 Exercise 2, the chosen form is justified by this lesson-specific rationale: Group at segment grain and use filtered counts for known country columns. Evaluate another form against the concrete expected result (One row per segment) and the verification above.
-- **Edge case:** Add one row to an existing group and one row for a new group; recompute `us_customers`, `ca_customers`, and `gb_customers` for the existing `segment` tuple and verify the new tuple appears exactly once.
+- **Inputs/evidence:** For sql-27 Exercise 2, read the 500 rows of `customers`, group by `segment`, and turn four countries into columns with `COUNT(*) FILTER (WHERE country = ...)`; `all_customers` counts every row in the segment, including the 312 customers in AU, BR, FR, and IN.
+- **Expected result/shape:** For sql-27 Exercise 2, expected output: exactly 4 rows of 125 customers each, and every segment maps to one country in this seed: `gold` has 63 GB customers, `platinum` 63 DE, `silver` 63 CA, and `standard` 63 US, with 0 in the other three columns. The final columns are `segment`, `us_customers`, `ca_customers`, `gb_customers`, `de_customers`, and `all_customers`. The final order is `c.segment NULLS LAST`.
+- **Independent verification:** For sql-27 Exercise 2, confirm `all_customers` adds to 500 and that each country column adds to its `SELECT COUNT(*) FROM customers WHERE country = ...` count of 63; then, inside `BEGIN ... ROLLBACK`, run `UPDATE customers SET segment = NULL WHERE customer_id = 1` (a US customer) and confirm a fifth row with a NULL segment appears last with 1 US customer, while `standard` drops to 62 and 124.
+- **Intermediate relation check:** `GROUP BY c.segment` gives four rows, gold, platinum, silver and standard, each with 125 customers. No customer has a `NULL` segment, so `NULLS LAST` has nothing to move.
+- **Clause check:** In this fixture each segment holds exactly two countries, so each row has one nonzero column of 63 and three zeros. Gold has GB, platinum DE, silver CA and standard US; the other 62 customers in each segment are in AU, BR, IN or FR.
+- **Alternative/trade-off:** Grouping by `segment, country` gives the same facts as eight long rows with no zeros. The pivot is easier to scan but hides countries without a column unless `all_customers` is kept.
+- **Edge case:** The zeros here are real: they come from `COUNT`, which never returns `NULL`. A segment with no customers at all would have no row, not a row of zeros.
 
 ## Exercise 3: Query writing
 
 **Prompt:** Unpivot a wide quarterly sample into quarter/amount rows.
 
 **Reasoning:** Use a lateral `VALUES` relation with one output row per source column.
-
-**Clause-by-clause reading:**
-
-- `WITH`: names an intermediate relation so its grain can be checked before later joins or aggregation.
-- `VALUES`: constructs a small relation explicitly, which makes examples and expected cardinality inspectable.
-- `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
-- `FROM`: establishes the starting relation and therefore the initial row grain.
-- `JOIN ... ON`: combines relations and may multiply rows; the match predicate and each input's grain must agree.
-- `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 
 ```sql
 WITH wide (
@@ -189,35 +126,21 @@ ORDER BY
 
 **Expected shape:** Eight rows from two source rows and four quarters.
 
-Check the result at the stated grain. An alternative formulation is
-valid only if it preserves the same NULL, ordering, time, money, and
-cardinality contract.
-
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-27 Exercise 3, read from `wide`. Build the answer toward `company`, `quarter`, and `amount`; keep `company` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-27 Exercise 3, expected output: Eight rows from two source rows and four quarters. The final columns are `company`, `quarter`, and `amount`. The final order is `w.company, unpivoted.quarter`.
-- **Independent verification:** For sql-27 Exercise 3, project `company` plus the raw source columns from `wide` at each join stage; record row count and distinct `company`, then assert the final `company`, `quarter`, and `amount` values match those staged rows without unintended fanout or loss. Add one source row with a new `company`; verify the result gains exactly one row carrying that `company` value.
-- **Intermediate relation check:** For sql-27 Exercise 3, start with the first relation in `wide`; after each join, record total rows and distinct `company` so the exact fanout or loss is visible.
-- **Clause check:** For sql-27 Exercise 3, the solution actually uses `WITH`, `FROM`, `JOIN ... ON`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `wide`, preserve one row per `company`, and finish with `company`, `quarter`, and `amount` ordered by `w.company, unpivoted.quarter`.
-- **Alternative/trade-off:** For sql-27 Exercise 3, the chosen form is justified by this lesson-specific rationale: Use a lateral `VALUES` relation with one output row per source column. Evaluate another form against the concrete expected result (Eight rows from two source rows and four quarters) and the verification above.
-- **Edge case:** Add one source row with a new `company`; verify the result gains exactly one row carrying that `company` value.
+- **Inputs/evidence:** For sql-27 Exercise 3, no table is read: the `wide` CTE holds two `VALUES` rows, company A with 10, 20, 30, 40 and company B with 5, NULL, 15, 25, and `CROSS JOIN LATERAL (VALUES ...)` turns each row's four quarter columns into four `(quarter, amount)` rows.
+- **Expected result/shape:** For sql-27 Exercise 3, expected output: exactly 8 rows, four per company, with B `Q2` kept as a row whose `amount` is NULL. The final columns are `company`, `quarter`, and `amount`. The final order is `w.company, unpivoted.quarter`.
+- **Independent verification:** For sql-27 Exercise 3, confirm 8 rows, 4 per company, that `SUM(amount)` is 100 for A and 45 for B, and that exactly one row has `amount IS NULL`; adding `WHERE unpivoted.amount IS NOT NULL` would return 7 rows and lose the fact that B reported nothing for `Q2`.
+- **Intermediate relation check:** `wide` is two rows, A and B, with four quarter columns. B's `q2` is `NULL`.
+- **Clause check:** The lateral `VALUES` list has four entries, so each input row produces four rows: 2 times 4 is 8. B's `Q2` row is kept with a `NULL` amount, because `VALUES` emits every listed column whatever its value.
+- **Alternative/trade-off:** `unnest(ARRAY['Q1','Q2','Q3','Q4'], ARRAY[w.q1, w.q2, w.q3, w.q4])` unpivots the same way. The `VALUES` form keeps each label next to its column, which is harder to get out of step.
+- **Edge case:** Add `WHERE unpivoted.amount IS NOT NULL` only if the report should drop missing quarters; that gives 7 rows. Ordering by `quarter` works because `Q1` to `Q4` also sort correctly as text.
 
 ## Exercise 4: Prediction
 
 **Prompt:** Compare a missing pivot combination with a real zero and preserve the distinction.
 
 **Reasoning:** Filtered `SUM` returns NULL when no rows contribute; `COALESCE` should be used only when the report defines absence as zero.
-
-**Clause-by-clause reading:**
-
-- `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
-- `FROM`: establishes the starting relation and therefore the initial row grain.
-- `WHERE`: filters source rows before grouping and window calculation; SQL's unknown NULL comparisons do not pass.
-- `COALESCE`: replaces NULL only where the lesson explicitly defines a missing value as a concrete fallback.
-- `GROUP BY`: collapses input rows to the listed key grain; every non-aggregated selected value must belong to that grain.
-- `FILTER (WHERE ...)`: limits one aggregate without removing rows needed by neighboring aggregates.
-- `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 
 ```sql
 SELECT
@@ -234,35 +157,21 @@ ORDER BY
 
 **Expected shape:** One row per expense category with nullable/zero-aware columns.
 
-Check the result at the stated grain. An alternative formulation is
-valid only if it preserves the same NULL, ordering, time, money, and
-cardinality contract.
-
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-27 Exercise 4, read from `expenses`. Build the answer toward `category`, `january_observed_amount`, and `january_reported_zero_if_absent`; keep `category` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-27 Exercise 4, expected output: One row per expense category with nullable/zero-aware columns. The final columns are `category`, `january_observed_amount`, and `january_reported_zero_if_absent`. The final order is `e.category`.
-- **Independent verification:** For sql-27 Exercise 4, independently aggregate `expenses` by `category`; require one output row for every distinct `category` tuple and compare `january_observed_amount` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `january_observed_amount` for the existing `category` tuple and verify the new tuple appears exactly once.
-- **Intermediate relation check:** For sql-27 Exercise 4, inspect the source keys that survive `WHERE`; then confirm the groups are `category`; then check `e.category` before applying the row cap.
-- **Clause check:** For sql-27 Exercise 4, the solution actually uses `FROM`, `WHERE`, aggregate `FILTER`, `GROUP BY`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `expenses`, preserve one row per `category`, and finish with `category`, `january_observed_amount`, and `january_reported_zero_if_absent` ordered by `e.category`.
-- **Alternative/trade-off:** For sql-27 Exercise 4, the chosen form is justified by this lesson-specific rationale: Filtered `SUM` returns NULL when no rows contribute; `COALESCE` should be used only when the report defines absence as zero. Evaluate another form against the concrete expected result (One row per expense category with nullable/zero-aware columns) and the verification above.
-- **Edge case:** Add one row to an existing group and one row for a new group; recompute `january_observed_amount` for the existing `category` tuple and verify the new tuple appears exactly once.
+- **Inputs/evidence:** For sql-27 Exercise 4, read the 10000 `expenses` rows (5 categories, 2000 each, dated over the two years before the load), group by `category`, and sum only January rows with `FILTER (WHERE EXTRACT(MONTH FROM expense_date) = 1)`, once raw and once wrapped in `COALESCE(..., 0)`.
+- **Expected result/shape:** For sql-27 Exercise 4, expected output: exactly 5 rows; every category has January rows on this load (164 to 192 rows across two Januaries), so both columns match, for example COGS 856904.40 and Marketing 972676.11. The final columns are `category`, `january_observed_amount`, and `january_reported_zero_if_absent`. The final order is `e.category`.
+- **Independent verification:** For sql-27 Exercise 4, confirm each category's January row count with `SELECT category, COUNT(*) FROM expenses WHERE EXTRACT(MONTH FROM expense_date) = 1 GROUP BY category`; then, inside `BEGIN ... ROLLBACK`, insert `('Legal', 100, '2026-03-01')` and `('Travel', 0, '2026-01-15')` and confirm Legal returns NULL and 0 (no January rows) while Travel returns 0.00 and 0.00 (a real zero).
+- **Intermediate relation check:** `expenses` has 10,000 rows, 2,000 per category across COGS, G&A, Infrastructure, Marketing and Payroll, so the result has five rows.
+- **Clause check:** Every category has January expenses, so both columns hold the same numbers; a late-2026 load showed 856,904.40 for COGS. `EXTRACT(MONTH ...)` ignores the year, so a 730-day window can feed two Januaries into one figure.
+- **Alternative/trade-off:** To see the two columns differ, restrict the input so January is missing, for example `WHERE EXTRACT(MONTH FROM e.expense_date) <> 1`. Then `january_observed_amount` is `NULL` and the reported column shows 0.
+- **Edge case:** The expense dates count back 730 days from the day the fixture was loaded, so which Januaries are included depends on that date. A category with no January expense in the data would appear only if it had other rows.
 
 ## Exercise 5: Debugging
 
 **Prompt:** Produce a dynamic category report as a JSONB object instead of generating unstable SQL columns.
 
 **Reasoning:** Aggregate category/value pairs into data values so the result schema remains stable.
-
-**Clause-by-clause reading:**
-
-- `WITH`: names an intermediate relation so its grain can be checked before later joins or aggregation.
-- `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
-- `FROM`: establishes the starting relation and therefore the initial row grain.
-- `JOIN ... ON`: combines relations and may multiply rows; the match predicate and each input's grain must agree.
-- `GROUP BY`: collapses input rows to the listed key grain; every non-aggregated selected value must belong to that grain.
-- time normalization: makes reporting boundaries explicit; UTC is applied before deriving calendar buckets where required.
-- `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 
 ```sql
 WITH category_month AS (
@@ -291,36 +200,21 @@ ORDER BY
 
 **Expected shape:** One row per UTC month with a JSON object of category revenue.
 
-Check the result at the stated grain. An alternative formulation is
-valid only if it preserves the same NULL, ordering, time, money, and
-cardinality contract.
-
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-27 Exercise 5, read from `orders`, `order_items`, and `products`. Build the answer toward `month_start`, and `revenue_by_category`; keep `month_start` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-27 Exercise 5, expected output: One row per UTC month with a JSON object of category revenue. The final columns are `month_start`, and `revenue_by_category`. The final order is `month_start`.
-- **Independent verification:** For sql-27 Exercise 5, independently aggregate `orders`, `order_items`, and `products` by `month_start`; require one output row for every distinct `month_start` tuple and compare `revenue_by_category` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `revenue_by_category` for the existing `month_start` tuple and verify the new tuple appears exactly once.
-- **Intermediate relation check:** For sql-27 Exercise 5, run `category_month` one at a time. Record each CTE's row count and `month_start` uniqueness before the next stage uses it.
-- **Clause check:** For sql-27 Exercise 5, the solution actually uses `WITH`, `FROM`, `JOIN ... ON`, `GROUP BY`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `orders`, `order_items`, and `products`, preserve one row per `month_start`, and finish with `month_start`, and `revenue_by_category` ordered by `month_start`.
-- **Alternative/trade-off:** For sql-27 Exercise 5, the chosen form is justified by this lesson-specific rationale: Aggregate category/value pairs into data values so the result schema remains stable. Evaluate another form against the concrete expected result (One row per UTC month with a JSON object of category revenue) and the verification above.
-- **Edge case:** Add one row to an existing group and one row for a new group; recompute `revenue_by_category` for the existing `month_start` tuple and verify the new tuple appears exactly once.
+- **Inputs/evidence:** For sql-27 Exercise 5, read `orders`, `order_items`, and `products`, round net item revenue per UTC month and `category` in `category_month`, then fold each month's six rows into one JSONB value with `jsonb_object_agg(category, revenue ORDER BY category)`.
+- **Expected result/shape:** For sql-27 Exercise 5, expected output: one row per UTC month (46 on this load), each object holding all 6 category keys; the first month is `{"Home": 30.20, "Books": 279.76, "Beauty": 94.00, "Sports": 175.41, "Apparel": 407.05, "Electronics": 216.84}`, because JSONB stores keys shorter first, not in the `ORDER BY` order. The final columns are `month_start`, and `revenue_by_category`. The final order is `month_start`.
+- **Independent verification:** For sql-27 Exercise 5, confirm every object has 6 keys with `jsonb_object_keys`, and that summing `jsonb_each_text` values over all months gives 2355647.24, slightly above the unrounded 2355647.12 because each cell was rounded first; a missing key such as `revenue_by_category -> 'Toys'` returns NULL, and `jsonb_object_agg` over `VALUES ('a', 1), (NULL, 2)` fails with `field name must not be null`.
+- **Intermediate relation check:** `category_month` has one row per month and category, rounded to two decimals. In the checked data that was 46 months with all six categories each, 276 rows.
+- **Clause check:** `jsonb_object_agg(category, revenue ...)` folds the six rows of a month into one object, so the result has one row per month. On a late-2026 load the first month, February 2023, shows Apparel at 407.05 and Home at 30.20.
+- **Alternative/trade-off:** Six `FILTER` columns would also work today, but a seventh category would be silently dropped. The JSON object picks up new keys without changing the column list, at the cost of needing JSON functions to read it.
+- **Edge case:** Because each cell is rounded before it goes into the object, adding all the cells gives 2,355,647.24, while the unrounded item total is 2,355,647.12. Reconcile against the unrounded total and expect a few cents of rounding.
 
 ## Exercise 6: Extension
 
 **Prompt:** Round-trip a wide sample to long form and back, verifying values and NULLs.
 
 **Reasoning:** Unpivot with lateral values, then use conditional aggregation keyed by company.
-
-**Clause-by-clause reading:**
-
-- `WITH`: names an intermediate relation so its grain can be checked before later joins or aggregation.
-- `VALUES`: constructs a small relation explicitly, which makes examples and expected cardinality inspectable.
-- `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
-- `FROM`: establishes the starting relation and therefore the initial row grain.
-- `JOIN ... ON`: combines relations and may multiply rows; the match predicate and each input's grain must agree.
-- `GROUP BY`: collapses input rows to the listed key grain; every non-aggregated selected value must belong to that grain.
-- `FILTER (WHERE ...)`: limits one aggregate without removing rows needed by neighboring aggregates.
-- `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 
 ```sql
 WITH wide (
@@ -352,24 +246,22 @@ long AS (
 
 **Expected shape:** Two reconstructed rows matching the source.
 
-Check the result at the stated grain. An alternative formulation is
-valid only if it preserves the same NULL, ordering, time, money, and
-cardinality contract.
-
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-27 Exercise 6, read from `wide`. Build the answer toward `company`, `q1`, and `q2`; keep `company` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-27 Exercise 6, expected output: Two reconstructed rows matching the source. The final columns are `company`, `q1`, and `q2`. The final order is `company`.
-- **Independent verification:** For sql-27 Exercise 6, independently aggregate `wide` by `company`; require one output row for every distinct `company` tuple and compare `q1`, and `q2` tuple by tuple. Repeat with `NULL` in `company`, and `q1` and state whether the row is kept, rejected, or classified.
-- **Intermediate relation check:** For sql-27 Exercise 6, run `long` one at a time. Record each CTE's row count and `company` uniqueness before the next stage uses it.
-- **Clause check:** For sql-27 Exercise 6, the solution actually uses `WITH`, `FROM`, `JOIN ... ON`, `WHERE`, aggregate `FILTER`, `GROUP BY`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `wide`, preserve one row per `company`, and finish with `company`, `q1`, and `q2` ordered by `company`.
-- **Alternative/trade-off:** For sql-27 Exercise 6, the chosen form is justified by this lesson-specific rationale: Unpivot with lateral values, then use conditional aggregation keyed by company. Evaluate another form against the concrete expected result (Two reconstructed rows matching the source) and the verification above.
-- **Edge case:** Repeat with `NULL` in `company`, and `q1` and state whether the row is kept, rejected, or classified.
+- **Inputs/evidence:** For sql-27 Exercise 6, no table is read: the `wide` CTE holds A with 10 and 20 and B with NULL and 5; `long` unpivots it into four `(company, quarter, amount)` rows, and the outer query pivots back with `MAX(amount) FILTER (WHERE quarter = ...)` grouped by `company`.
+- **Expected result/shape:** For sql-27 Exercise 6, expected output: exactly 2 rows, A with 10 and 20 and B with NULL and 5, identical to `wide`. The final columns are `company`, `q1`, and `q2`. The final order is `company`.
+- **Independent verification:** For sql-27 Exercise 6, confirm `long` has 4 rows with one NULL `amount`, and that both `SELECT * FROM wide EXCEPT SELECT ...` and the reverse return 0 rows, since `EXCEPT` treats the two NULLs as equal; then pivot `VALUES ('A', 'Q1', 10), ('A', 'Q1', 99), ('A', 'Q2', 20)` and confirm `q1` shows 99, because `MAX` silently hides a duplicate quarter that a `COUNT(*)` of 3 would reveal.
+- **Intermediate relation check:** `long` has four rows, two quarters for each of A and B, including B's `Q1` row whose amount is `NULL`.
+- **Clause check:** `MAX(amount) FILTER (WHERE quarter = 'Q1')` picks the one value per company and quarter. For B it sees only a `NULL`, so it returns `NULL`, and the rebuilt rows are A 10 and 20, then B `NULL` and 5, matching `wide`.
+- **Alternative/trade-off:** `TABLE wide EXCEPT` the rebuilt query returns no rows, and it treats two `NULL` values as equal. A join on `q1 = q1` would wrongly report company B as a mismatch.
+- **Edge case:** `MAX` hides duplicates. If `long` held two `Q2` rows for A, the rebuild would keep only the larger one; check `COUNT(*)` per company and quarter if duplicates are possible.
 
 ## Final self-check
 
-- Can you explain the logical grain before and after every aggregation?
-- Are missing values preserved or converted only by an explicit rule?
-- Does every ordered result have a deterministic final tie-breaker?
-- Are money and time assumptions visible beside the calculation?
-- Does the complete executable solution finish with `ROLLBACK`?
+- Which answers need a total column to show that the fixed column list is
+  complete?
+- Why is the 0 in the segment pivot a real value while a `NULL` in the
+  expense pivot is a missing one?
+- How many rows does a lateral `VALUES` unpivot return for 3 input rows and
+  5 listed columns?
+- When would you choose a JSON object over fixed pivot columns?

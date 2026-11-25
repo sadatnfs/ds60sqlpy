@@ -32,11 +32,9 @@ Order instructions by dependency: runtime base, application directory, source co
 
 ## How to use this lesson
 
-The classroom displays this guide and saves your worksheet, `courses/docker/lessons/docker-005.md`. Its Run button does not control your Docker engine. Docker engine access is powerful host access, so the classroom deliberately receives no engine socket. Work through the supplied examples without starting anything, then use the optional host lab only in your own disposable project. Reading a command, parsing YAML and actually running the project are different forms of evidence.
+The classroom saves `courses/docker/lessons/docker-005.md` and holds no engine socket ([host-lab setup](../STUDY-GUIDE.md#host-lab-setup)).
 
-Use Bash in Linux, macOS Terminal, or Ubuntu under WSL 2 on Windows. The supported engine runs Linux containers. The maintained fixture is `courses/docker/fixtures/compose-lab/`; its README explains copying it into a new ignored learner directory, checking the engine, building locally with visible logs, and using the fixed project name `ds60-docker-study`. The fixture uses port 18080 on host loopback. Stop if that project name or port belongs to unrelated work; choose a new project name consistently in your own copy. Never paste a command against a remote Docker context simply because it is currently selected.
-
-For Dockerfile examples, create a file named `Dockerfile` in a scratch project. YAML snippets describe a fragment unless explicitly called a complete file. Text transcripts are synthetic illustrations, not claims about your machine. Do not substitute a real password, token or private registry into a checked-in example. **How to use the lessons** in the [subject README](../README.md) collects these rules in one place.
+**Host lab.** In a scratch directory, write the five-line Dockerfile from worked example 1 next to a copy of `server.py`, then build it with a distinct tag such as `ds60-docker-minimal:local` and `--progress=plain`. Read the log and match each numbered step to an instruction: FROM resolves a base, COPY transfers one file from the context, and CMD appears only as metadata because nothing runs at build time. Then run `docker image inspect ds60-docker-minimal:local --format '{{json .Config.Cmd}} {{json .Config.ExposedPorts}}'` to see the recorded command and the documented port, and `docker ps` to confirm that nothing is running yet. Start it with `docker run --rm -p 127.0.0.1:18081:8080 ds60-docker-minimal:local` and open the root URL. Stop it with Ctrl+C and remove the extra tag with `docker image rm` when you finish.
 
 ## Worked example / walkthrough
 
@@ -66,7 +64,7 @@ docker build --progress=plain -t ds60-docker-study:local .
 
 ## Six progressive exercises
 
-For each exercise, name the object involved and the phase of its lifetime before changing anything, then vary only the condition the task names. Exercises that ask you to predict, explain, compare or diagnose keep their answers in the solutions file; the others show the evidence to look for.
+Answer-type prompts keep their answers in the solutions file ([exercise rules](../STUDY-GUIDE.md#exercise-rules)).
 
 ### Exercise 1: Sort RUN and CMD into lifecycle phases.
 
@@ -102,13 +100,19 @@ For each exercise, name the object involved and the phase of its lifetime before
 
 Expecting `RUN` to start the server or `CMD` to run at build time. Copying from a path outside the build context. Treating `EXPOSE` as port publishing.
 
-Exercise 4 is this chapter's boundary case: Diagnose COPY failure when a file is outside context. Read the build log line that names the context size and the failing `COPY` source path before moving any file or widening the context directory. Preserve the original failure and the exact changed field before retrying. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
+Exercise 4 is this chapter's boundary case: Diagnose COPY failure when a file is outside context. Read the build log line that names the context size and the failing `COPY` source path before moving any file or widening the context directory.
+
+Learners also expect `docker build` to fail when the program is broken. A build only executes RUN steps; it never starts the program named by CMD. A `server.py` with a syntax error copies and builds perfectly, and the failure appears only when a container starts. If you want the build to reject broken source, add a deliberate RUN check such as `RUN python -m py_compile /app/server.py`, which runs at build time and fails the build on a syntax error. Keep in mind that this proves the file parses, not that the server answers requests, so runtime acceptance still needs its own check.
+
+Never trade a safety control for a passing example ([safety rules](../STUDY-GUIDE.md#safety-rules)).
 
 ## Retrieval, transfer and next steps
 
-Close the explanations first. List the Dockerfile instructions of the fixture in order and say which one changes when only the source file changes. Then reconstruct worked example 2 (Build from the copied fixture) with one different value, predict what changes, and name which of Dockerfile, FROM, COPY, RUN, CMD and image tag the change touches.
+**Retrieval.** List the Dockerfile instructions of the fixture in order and say which one changes when only the source file changes.
 
-When a host session ends, run `docker compose -p ds60-docker-study down` from your fixture copy. It removes the project's containers and network but keeps named volumes; deleting a volume is a separate, deliberate reset described in the fixture README.
+**Transfer case.** You add `RUN python -c "print('built')"` and `CMD ["python", "-c", "print('started')"]` to a Dockerfile, build it, and run one container. Which line appears in the build log, which appears in the container output, and how many times will each appear if you run three containers?
+
+Then run the [retrieval loop](../STUDY-GUIDE.md#retrieval-and-cleanup) and end any host session with its cleanup.
 
 ## Primary references
 

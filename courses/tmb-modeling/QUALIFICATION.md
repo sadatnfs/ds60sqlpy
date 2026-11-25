@@ -7,13 +7,13 @@ Evidence is from native Linux ARM64 only unless another architecture is named.
 | --- | --- | --- |
 | Original source | Implemented | 48 guides, 48 base-R companions, nine original C++ templates, fixed R API/JSON protocol, lazy Python bridge. |
 | Host algebra and input contract | Passed | Eight standard-library tests cover Gaussian gradients/ML, censored Weibull values, AR1 precision, Laplace normalization, coupling and row identity. |
-| Native C++ preparation | Passed | All nine templates compiled under R4.6.1/TMB1.9.25/Matrix1.7.6/RcppEigen0.3.4.0.2, CppAD, Linux ARM64. |
+| Native C++ preparation | Passed | All nine templates compiled under R 4.6.1/TMB 1.9.25/Matrix 1.7.6/RcppEigen 0.3.4.0.2, CppAD, Linux ARM64. |
 | Native numerical acceptance | Passed | Gaussian values/gradients/ML, regression oracle, Gaussian latent integration and gradient, AR1 dense oracle, count/censor terms, nonlinear/panel fits, Hessian/sdreport and actual OpenMP one/two-thread parity. |
-| Base-R companions | Passed | All 48 final formatted companion scripts executed successfully under native Linux ARM64 R4.6.1. |
-| Python/rpy2 bridge | Passed on native ARM64 | Actual pandas/rpy2/TMB regression and invalid-frame rejection passed in the separately prepared combined runtime with Python3.12, NumPy2.2.6, pandas2.2.3, rpy2 meta3.6.9/rinterface3.6.7/robjects3.6.6. |
+| Base-R companions | Passed | All 48 final formatted companion scripts executed successfully under native Linux ARM64 R 4.6.1. |
+| Python/rpy2 bridge | Passed on native ARM64 | Actual pandas/rpy2/TMB regression and invalid-frame rejection passed in the separately prepared combined runtime with Python 3.12, NumPy 2.2.6, pandas 2.2.3, rpy2 meta 3.6.9/rinterface 3.6.7/robjects 3.6.6. |
 | Spark/TMB integration | Separate project | R-only acceptance does not qualify Spark task decomposition, retries or distributed performance. |
 | Ordinary classroom pad | R companions only | The R statistics pad can run base-R companion scripts. Multi-file native TMB compilation is an owned project capability. |
-| C++ authoring families | Passed on native ARM64 | Five original templates compiled under TMB1.9.25/CppAD and passed dense/precision/scale/separable oracles, extreme-logit mixture checks, conditional branch crossings and custom atomic value/gradient/Hessian checks. |
+| C++ authoring families | Passed on native ARM64 | Five original templates compiled under TMB 1.9.25/CppAD and passed dense/precision/scale/separable oracles, extreme-logit mixture checks, conditional branch crossings and custom atomic value/gradient/Hessian checks. |
 | Public API probe | Passed on native ARM64 | Exact export inventory, map/report methods, version/config/lifetime, profile/interval oracles, simulation diagnostic, sparse Newton/options, SR descriptor, authoring/listing helpers and benchmark plotting exercised. |
 | Specialized API processes | Taught, not fully executed | normalize/OSA require template conventions; gdb, precompile, specialized symbolic analysis and TMBad/autopar require separate preparation. |
 | AMD64, multi-node, GPU | Not established here | No AMD64 emulation or GPU execution was performed on the ARM Mac. |
@@ -38,7 +38,7 @@ model. The native probe verifies all 30 exports against the actual installed
 namespace; the maintained reference additionally covers nine registered S3
 methods and the explicitly non-exported documented GK helper.
 
-The C++ family probes used a native aarch64 Linux GNU C++20 compiler, TMB1.9.25,
+The C++ family probes used a native aarch64 Linux GNU C++20 compiler, TMB 1.9.25,
 CppAD, serial compilation and `-O1 -g0`. The exact tested source lives in
 `projects/tmb-cpp-api/models`; the numerical driver is `check.R`. No source
 changes were needed after the first five-template compile. This qualifies the

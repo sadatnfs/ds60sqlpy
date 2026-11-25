@@ -242,7 +242,7 @@ right <span class="syntax-operator">=</span> pa<span class="syntax-operator">.</
 [&#x27;east&#x27;, &#x27;west&#x27;] [&#x27;west&#x27;, &#x27;east&#x27;]</code></pre>
 <p>Both columns store indices 0 and 1, but they decode to opposite region orders because each batch built its own dictionary. Comparing or joining on raw indices across batches would report a false match. Unify dictionaries or decode before comparison, and treat any pipeline that persists dictionary codes as stable identifiers as a defect waiting for a new batch.</p>
 <h3 id="complete-worked-source">Complete worked source<a class="heading-anchor" href="#complete-worked-source" aria-label="Link to this section">#</a></h3>
-<p>This is a complete editable worked program for the declared prepared runtime. It uses bounded local fixtures and does not install packages or start distributed services.</p>
+<p>Run it as the <a href="../STUDY-GUIDE.md.html#worked-programs">worked program rules</a> describe.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> pyarrow <span class="syntax-keyword">as</span> pa
 <span class="syntax-keyword">import</span> pyarrow.compute <span class="syntax-keyword">as</span> pc
 

@@ -197,26 +197,18 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">int</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">void</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span></span>
 <span class="source-line">  <span class="syntax-comment">/* Exercise 1: Install and restore a handler: predict an edited check</span></span>
-<span class="source-line"><span class="syntax-comment">     Copy worked example 1 into a scratch pad and change `CHECK(signal(SIGINT,</span></span>
-<span class="source-line"><span class="syntax-comment">     previous) != SIG_ERR);` to `CHECK(signal(SIGINT, previous) == SIG_ERR);`</span></span>
-<span class="source-line"><span class="syntax-comment">     inside its CHECK. Before running, predict whether the CHECK still holds and</span></span>
-<span class="source-line"><span class="syntax-comment">     explain why; then restore it. Expected: With `CHECK(signal(SIGINT,</span></span>
-<span class="source-line"><span class="syntax-comment">     previous) == SIG_ERR);` the run stops with `Check failed` at the CHECK on</span></span>
-<span class="source-line"><span class="syntax-comment">     `signal(SIGINT, previous) != SIG_ERR`, because the &quot;install and restore a</span></span>
-<span class="source-line"><span class="syntax-comment">     handler&quot; case no longer shows that both operations succeed. Restoring</span></span>
-<span class="source-line"><span class="syntax-comment">     `CHECK(signal(SIGINT, previous) != SIG_ERR);` brings that observation back.</span></span>
-<span class="source-line"><span class="syntax-comment">   */</span></span>
+<span class="source-line"><span class="syntax-comment">     In worked example 1, change `CHECK(signal(SIGINT, previous) != SIG_ERR);`</span></span>
+<span class="source-line"><span class="syntax-comment">     to `CHECK(signal(SIGINT, previous) == SIG_ERR);`. Predict whether the CHECK</span></span>
+<span class="source-line"><span class="syntax-comment">     still holds and why, then run and restore. Expected: `Check failed`:</span></span>
+<span class="source-line"><span class="syntax-comment">     `CHECK(signal(SIGINT, previous) == SIG_ERR);` is false, although both</span></span>
+<span class="source-line"><span class="syntax-comment">     operations succeed. */</span></span>
 <span class="source-line"></span>
 <span class="source-line">  <span class="syntax-comment">/* Exercise 2: Record a raised notification: diagnose an edited check</span></span>
-<span class="source-line"><span class="syntax-comment">     A careless edit changed the CHECK in worked example 2, the &quot;record a raised</span></span>
-<span class="source-line"><span class="syntax-comment">     notification&quot; case, so that it reads `CHECK(signal(SIGINT, previous) ==</span></span>
-<span class="source-line"><span class="syntax-comment">     SIG_ERR);`. Run the example with that line, explain why the edited CHECK</span></span>
-<span class="source-line"><span class="syntax-comment">     now fails even though the program state still means the signal flag becomes</span></span>
-<span class="source-line"><span class="syntax-comment">     one, and restore it. Expected: Before the repair the run stops with `Check</span></span>
-<span class="source-line"><span class="syntax-comment">     failed` at the CHECK on `signal(SIGINT, previous) != SIG_ERR`. Once the</span></span>
-<span class="source-line"><span class="syntax-comment">     line reads `CHECK(signal(SIGINT, previous) != SIG_ERR);` again, the &quot;record</span></span>
-<span class="source-line"><span class="syntax-comment">     a raised notification&quot; case again shows that the signal flag becomes one.</span></span>
-<span class="source-line"><span class="syntax-comment">   */</span></span>
+<span class="source-line"><span class="syntax-comment">     Worked example 2&#x27;s CHECK now reads `CHECK(signal(SIGINT, previous) ==</span></span>
+<span class="source-line"><span class="syntax-comment">     SIG_ERR);`. Explain why it fails although the signal flag becomes one, then</span></span>
+<span class="source-line"><span class="syntax-comment">     restore it. Expected: `Check failed` until the CHECK reads</span></span>
+<span class="source-line"><span class="syntax-comment">     `CHECK(signal(SIGINT, previous) != SIG_ERR);` again, though the signal flag</span></span>
+<span class="source-line"><span class="syntax-comment">     becomes one. */</span></span>
 <span class="source-line"></span>
 <span class="source-line">  <span class="syntax-comment">/* Exercise 3: Keep work outside the handler</span></span>
 <span class="source-line"><span class="syntax-comment">     Raise SIGINT with the lesson handler installed and let a normal-flow</span></span>

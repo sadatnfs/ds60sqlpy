@@ -32,11 +32,9 @@ For a small fixture, inspect image size and measure a bounded short process or r
 
 ## How to use this lesson
 
-The classroom displays this guide and saves your worksheet, `courses/docker/lessons/docker-035.md`. Its Run button does not control your Docker engine. Docker engine access is powerful host access, so the classroom deliberately receives no engine socket. Work through the supplied examples without starting anything, then use the optional host lab only in your own disposable project. Reading a command, parsing YAML and actually running the project are different forms of evidence.
+The classroom saves `courses/docker/lessons/docker-035.md` and holds no engine socket ([host-lab setup](../STUDY-GUIDE.md#host-lab-setup)).
 
-Use Bash in Linux, macOS Terminal, or Ubuntu under WSL 2 on Windows. The supported engine runs Linux containers. The maintained fixture is `courses/docker/fixtures/compose-lab/`; its README explains copying it into a new ignored learner directory, checking the engine, building locally with visible logs, and using the fixed project name `ds60-docker-study`. The fixture uses port 18080 on host loopback. Stop if that project name or port belongs to unrelated work; choose a new project name consistently in your own copy. Never paste a command against a remote Docker context simply because it is currently selected.
-
-For Dockerfile examples, create a file named `Dockerfile` in a scratch project. YAML snippets describe a fragment unless explicitly called a complete file. Text transcripts are synthetic illustrations, not claims about your machine. Do not substitute a real password, token or private registry into a checked-in example. **How to use the lessons** in the [subject README](../README.md) collects these rules in one place.
+**Host lab.** Measure before optimizing. Read the local size with worked example 1, then run `docker image history ds60-docker-study:local` and compare the fixture's own steps, the `COPY server.py` and the `RUN mkdir` layers, with the base layers below them: nearly all of the bytes come from the base, so trimming `server.py` could never matter. Next time readiness. Stop the app with `docker compose -p ds60-docker-study stop app`, then run `time docker compose -p ds60-docker-study up -d --wait app`, and repeat the stop and start three times. Note the spread. The healthcheck runs its first probe about one 5-second interval after the container starts, so `--wait` cannot finish sooner than that; the healthcheck settings, not the image, set the floor of this number. Leave the app running, since nothing was removed.
 
 ## Worked example / walkthrough
 
@@ -63,7 +61,7 @@ user request -> connect -> handler -> response
 
 ## Six progressive exercises
 
-For each exercise, name the object involved and the phase of its lifetime before changing anything, then vary only the condition the task names. Exercises that ask you to predict, explain, compare or diagnose keep their answers in the solutions file; the others show the evidence to look for.
+Answer-type prompts keep their answers in the solutions file ([exercise rules](../STUDY-GUIDE.md#exercise-rules)).
 
 ### Exercise 1: Compare total image size and incremental transfer.
 
@@ -97,13 +95,19 @@ For each exercise, name the object involved and the phase of its lifetime before
 
 Installing packages when the container starts. Removing CA certificates or other runtime assets to save space. Pruning the whole engine before a benchmark.
 
-Exercise 4 is this chapter's boundary case: Diagnose a size optimization that breaks HTTPS. Compare the file lists of the working and optimized images for certificate bundles and libraries before measuring size again. Preserve the original failure and the exact changed field before retrying. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
+Exercise 4 is this chapter's boundary case: Diagnose a size optimization that breaks HTTPS. Compare the file lists of the working and optimized images for certificate bundles and libraries before measuring size again.
+
+Sizes in `docker image ls` look additive, so five images at 150 MB each seem to cost 750 MB. Images built on the same base share those layers on disk and in transfer; the column reports each image's full size, not its unique share. Judging an optimization by the sum leads people to flatten or squash images, which destroys sharing: a squashed image can be smaller on its own yet cost more total disk and download than two images that reuse one base. Use `docker system df -v` to see shared and unique sizes per image, and judge a size change by what a target host would really have to transfer given the layers it already holds.
+
+Never trade a safety control for a passing example ([safety rules](../STUDY-GUIDE.md#safety-rules)).
 
 ## Retrieval, transfer and next steps
 
-Close the explanations first. List the startup phases and say which one an image size reduction can shorten. Then reconstruct worked example 2 (Separate startup phases) with one different value, predict what changes, and name which of image size, startup latency, layer reuse and measurement method the change touches.
+**Retrieval.** List the startup phases and say which one an image size reduction can shorten.
 
-When a host session ends, run `docker compose -p ds60-docker-study down` from your fixture copy. It removes the project's containers and network but keeps named volumes; deleting a volume is a separate, deliberate reset described in the fixture README.
+**Transfer case.** Someone proposes switching the fixture to an Alpine-based Python image to cut its size. Before agreeing, what would you measure, and which correctness checks would you rerun?
+
+Then run the [retrieval loop](../STUDY-GUIDE.md#retrieval-and-cleanup) and end any host session with its cleanup.
 
 ## Primary references
 

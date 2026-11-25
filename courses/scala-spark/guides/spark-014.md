@@ -1,22 +1,26 @@
 # spark-014: Capstone: a reconciled local revenue report
 
-Authored paired Scala/PySpark teaching content. The default fixtures are tiny, local and deterministic. Runtime acceptance, logical correctness and learner understanding remain separate evidence.
+This capstone closes the first Spark section with a report that has to balance. Twelve source rows contain an unknown status, a missing event ID, a zero amount, two unknown amounts and two separate events that both say team A paid 100 cents. Your job is to publish team totals only after every one of the twelve rows is accounted for.
 
 ## Level and prerequisites
 
-Beginner; approximately 120 minutes. Direct prerequisites: `spark-013`. The prepared baseline is Spark 4.3.0, Scala binary 2.13, JDK 17 and Python 3.12. Read the [execution baseline](../execution-baseline.md).
+Beginner; approximately 120 minutes. Direct prerequisites: `spark-013`. Pinned versions: [execution baseline](../execution-baseline.md).
 
 ## How to run this lesson
 
-Open `spark-014` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile, save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`; Python stages as `main.py` with a main guard. Each program creates its own `local[2]` session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.
+Shared run steps and profile rules: [study guide](../STUDY-GUIDE.md#run-a-paired-lesson).
 
-The [Scala learner](../lessons/spark-014.scala) and [PySpark learner](../lessons/spark-014.py) run two complete demonstrations and retain six explicit task stubs. Use the [explained solutions](../solutions/spark-014_solutions.md) only after an attempt or an explicit worked comparison; the [Scala reference](../solutions/spark-014_solution.scala) and [PySpark reference](../solutions/spark-014_solution.py) contain complete assertions. A bounded collect is used only for the declared tiny fixture; do not copy it onto an unbounded or large production table.
+Learner pads: [Scala](../lessons/spark-014.scala) and [PySpark](../lessons/spark-014.py).
+
+Open the [explained solutions](../solutions/spark-014_solutions.md) after an attempt.
+
+The first worked example counts 12 rows and 12 distinct `source_row` values, then finds that only source row 12 lacks an `event_id`; it prints `Source occurrence identity survives a missing business ID`. The second lists the events with NULL amounts (2 and 7) separately from those with zero (3 and 9) and prints `Unknown amounts and observed zeros have different identities`.
 
 ## Learning objectives
 
 - Build and explain a small revenue product whose input, rejected and reported rows reconcile.
-- State the input and output grain, schema, NULL policy and ordering before executing a transformation.
-- Compare each language implementation with independent literal expectations, not only with the other implementation.
+- Split the 12 source rows into 10 accepted events and 2 quarantined rows with the reasons `unknown_status` and `missing_id`, keeping `source_row` so that a row without a business ID still has an identity.
+- Publish the paid summary per team, including the NULL team and the all-unknown team C, and refuse to publish when an appended row repeats `event_id` 1.
 
 ## Vocabulary and concepts
 
@@ -44,7 +48,7 @@ The reference does not write a durable table or claim a transactional publicatio
 
 ## Supplied local fixture
 
-The complete source creates the owned local session described above, then constructs this explicit fixture. The worked examples below run in that same main function; there is no hidden notebook state.
+The twelve rows extend the spark-013 pilot. Row 5 is a void, row 11 has the status `mystery`, row 12 has no `event_id`, row 4 has no team, rows 2 and 7 have unknown amounts, rows 3 and 9 have observed zeros, and rows 1 and 6 are separate events with identical team and amount. Every defect is placed so that exactly one exercise exposes it.
 
 ```scala
 import org.apache.spark.sql.Row
@@ -237,11 +241,14 @@ If raw count becomes 11, check whether COUNT(event_id) was confused with COUNT(*
 
 ## Self-check
 
-Explain the contract of `classified` / `classified` without reading its solution. Then, from memory, state what Exercise 6 (Gate the SQL report on identity and conservation) must produce: The base 12-row batch passes and matches all six golden groups. Appending `source_row` 13 with a second `event_id` 1 rejects publication instead of choosing a winner. Say which part of that result is evidence and what it still cannot show. Name the action in your trace that actually runs the plan.
+- Why does the report need `source_row` at all when the data already has `event_id`? Point to the row that would vanish from the ledger without it.
+- Team C has one paid row and its amount is unknown. Explain why its summary is `(1, 0, NULL)` and why reporting `(1, 0, 0)` would be a different and wrong claim.
+- Exercise 5 compares a projection with and without `distinct`. Which two events collapse, and how much revenue disappears from the paid total?
+- When the appended row 13 repeats `event_id` 1, the SQL gate rejects the batch. Why is "keep the first one" not an acceptable fix here?
 
 ## Next step
 
-Use the [course route](../README.md) to continue. Paired-language agreement is useful only when both outputs also satisfy the independent fixture contract. A successful local run is not evidence of cluster performance or production recovery.
+Go on to [spark-015: SQL and DataFrame expressions with ANSI boundaries](spark-015.md). So far every amount arrived as a number or a NULL; next, amounts arrive as text, and you will decide which strings parse, which fail and which are numbers that the business still rejects.
 
 ## Primary sources and official APIs
 

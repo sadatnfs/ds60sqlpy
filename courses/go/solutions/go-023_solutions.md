@@ -1,6 +1,6 @@
 # go-023: explained solutions
 
-These are comparison material after an attempt or explicit reveal. The executable reference implements all six cases in one `main.go`.
+Compare after an attempt ([using solutions](../STUDY-GUIDE.md#use-the-solutions)). `courses/go/solutions/go-023_solution.go` implements all six cases.
 
 ## Mechanism
 
@@ -10,7 +10,7 @@ RoundTrip(*http.Request) returns a response or a transport error. A function ada
 
 ## 1. Read a successful response: change one input
 
-Copy worked example 1 into a scratch pad and change `v, err := fetch(context.Background(), 200, "ready", 8)` to `v, err := fetch(context.Background(), 201, "ready", 8)`. Before running, predict which check fails and which value it now sees; then run it and restore the original line.
+Copy worked example 1, change `v, err := fetch(context.Background(), 200, "ready", 8)` to `v, err := fetch(context.Background(), 201, "ready", 8)` and predict the failure before running; then restore the line.
 
 The unchanged code is worked example 1:
 
@@ -19,13 +19,15 @@ v, err := fetch(context.Background(), 200, "ready", 8)
 check(err == nil && v == "ready", "client success")
 ```
 
-**Expected:** The changed run panics with `client success` because `err == nil && v == "ready"` no longer holds. Restoring the original line brings back the worked observation: the client helper returns ready without error.
+**Expected:** The edited run panics with `client success` because `err == nil && v == "ready"` no longer holds.
+
+**Verify:** Restoring `v, err := fetch(context.Background(), 200, "ready", 8)` makes the check pass again with the worked observation: the client helper returns ready without error.
 
 The fake isolates policy from the network. A live connection test would establish additional behavior and requires a separate owned target.
 
 ## 2. Reject an HTTP failure status: diagnose an edited check
 
-A careless edit changed the check in worked example 2 so that it reads `check(err == nil, "HTTP status")`. Run worked example 2 with that line, explain why the edited check now fails for the same program state, and restore it.
+A careless edit rewrote the check in worked example 2 as `check(err == nil, "HTTP status")`. Explain the failure, then restore it.
 
 The unchanged code is worked example 2:
 
@@ -34,7 +36,9 @@ _, err := fetch(context.Background(), 404, "missing", 8)
 check(err != nil, "HTTP status")
 ```
 
-**Expected:** Before the repair the program panics with `HTTP status`; after it the line reads `check(err != nil, "HTTP status")` again and the helper returns an error despite transport success.
+**Expected:** The defective run panics with `HTTP status`; after restoring `check(err != nil, "HTTP status")`, the helper returns an error despite transport success.
+
+**Verify:** The edited check fails with message `HTTP status` for a state that `err != nil` accepts.
 
 Client.Do does not classify every non-2xx response as a transport failure. Application status policy belongs in the consuming code.
 
@@ -48,6 +52,8 @@ check(err != nil, "body limit")
 ```
 
 **Expected:** The helper rejects the response.
+
+**Verify:** Your solution must keep `err != nil` true. Control: changing `_, err := fetch(context.Background(), 200, "abcde", 4)` to `_, err := fetch(context.Background(), 200, "abcde", 5)` panics with message `body limit`; revert it.
 
 Reading one extra byte makes the limit observable. Silently truncating to four would make an oversized response look like valid short content.
 
@@ -64,6 +70,8 @@ check(errors.Is(err, context.Canceled), "cancellation")
 
 **Expected:** The returned error matches context.Canceled.
 
+**Verify:** Your solution must keep `errors.Is(err, context.Canceled)` true. Control: an input that falsifies it fails with message `cancellation`; revert it.
+
 The fake explicitly honors the request context. This demonstrates the contract required from a cooperating transport, not a universal guarantee for arbitrary blocking code.
 
 ## 5. Allow exact size
@@ -76,6 +84,8 @@ check(err == nil && v == "abcd", "exact size")
 ```
 
 **Expected:** The helper accepts all four bytes.
+
+**Verify:** Your solution must keep `err == nil && v == "abcd"` true. Control: changing `v, err := fetch(context.Background(), 200, "abcd", 4)` to `v, err := fetch(context.Background(), 201, "abcd", 4)` panics with message `exact size`; revert it.
 
 An inclusive byte budget should accept exactly its maximum. This case distinguishes a correct greater-than check from an off-by-one rejection.
 
@@ -90,8 +100,10 @@ check(err == nil && v == "", "empty response")
 
 **Expected:** The transport helper returns an empty string successfully.
 
+**Verify:** Your solution must keep `err == nil && v == ""` true. Control: changing `v, err := fetch(context.Background(), 200, "", 4)` to `v, err := fetch(context.Background(), 201, "", 4)` panics with message `empty response`; revert it.
+
 Transport completion and domain validity are separate. A caller that requires JSON or a nonempty document should validate that after the bounded read.
 
 ## Transfer after comparison
 
-Return to your own pad and reproduce one check with a new input. Explain why the check rejects a plausible wrong implementation. Keep the distinction between a pure model, an in-process fake, and a real external system visible in your notes.
+Every remote call in later lessons has three failure layers: the transport, the protocol status and the payload. The Kubernetes client wraps HTTP the same way, so an API conflict or a not-found object is a status, not a broken connection. Keep a context deadline on every call, bound what you read and make the caller decide which statuses count as success.

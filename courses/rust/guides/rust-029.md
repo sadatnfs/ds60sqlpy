@@ -24,9 +24,11 @@ A receiver can finish when all senders are dropped and buffered items are draine
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles the saved pad as `main.rs` with pinned Rust 1.99.1, edition 2024, and the prepared Arrow 60 library. `assert!` and `assert_eq!` remain active in normal builds. The fixed pad accepts one source file without arbitrary arguments, interactive input, Cargo manifests or package installation. The main function returns `Result<(), Box<dyn std::error::Error>>` so later examples can propagate errors with `?`; the final `Ok(())` means this fixture completed successfully. Standard library and Arrow examples remain offline after image preparation. Multi-file Cargo and external ecosystem projects have separate explicit preparation workflows.
+Beyond the prelude, this lesson's programs use `std::sync` and `std::thread`. A passing run prints `rust-029: passed`.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Pad setup and limits: [Run a lesson](../STUDY-GUIDE.md#run-a-lesson).
+
+Before you run anything, follow [Attempt a lesson](../STUDY-GUIDE.md#attempt-a-lesson).
 
 
 
@@ -34,7 +36,9 @@ Start with the answer-free learner artifact in your saved classroom pad. It deli
 
 sync_channel creates bounded storage. try_send reports immediate full or disconnected states. send may block until capacity exists. Receiver iteration drains until sender ownership ends.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+**Reading Example A (Make full capacity observable, code below).** `sync_channel(1)` creates a bounded channel and returns a pair, a `SyncSender` and a `Receiver`, destructured here as `send` and `receive`. The argument is the buffer capacity. `try_send` never blocks: it returns `Ok(())` when the value fits and an error otherwise, and the `?` on the first call propagates any error out of `main`. The `TrySendError` enum distinguishes `Full`, which hands the rejected value back inside the variant, from `Disconnected`, which means the receiver is gone. `matches!` with the pattern `Err(TrySendError::Full(5))` checks both the variant and the returned value. `recv` blocks until an item is available and returns `Result<T, RecvError>`; its `?` would surface a disconnection.
+
+Method for tracing your own variants: [Trace a program](../STUDY-GUIDE.md#trace-a-program).
 
 ## Worked example / walkthrough
 
@@ -95,13 +99,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 6. **Transfer and justify.** Choose blocking, rejection or intentional dropping for a workload and explain producer evidence.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Record each task as in [Keep evidence for each task](../STUDY-GUIDE.md#keep-evidence-for-each-task).
 
 ## Common pitfalls and diagnosis
 
 Joining a producer before draining a full bounded channel can deadlock. Ignoring a failed send loses work. Channel capacity does not bound work already started outside the channel.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+To turn a pitfall into a test, see [Design a regression case](../STUDY-GUIDE.md#design-a-regression-case).
 
 ## Progressive hints
 
@@ -109,13 +113,25 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 2. Compare Example B (Drain before declaring completion) with Example A and name the first line whose behavior differs. Its observation is: The receiver drains both values and ends after the sender is dropped.
 3. Before opening the explanation, test your task 3 attempt against this lesson's main pitfall: Joining a producer before draining a full bounded channel can deadlock.
 
+Tempting approaches to rule out before you compare:
+
+- **Task 1.** Expecting `try_send(5)` to wait for space, or to discard 5, misreads the API: `try_send` never blocks, and `Full` hands the value back so the caller decides what to do with it.
+- **Task 2.** Predicting capacity plus one, or that `sync_channel(0)` accepts a single item, is wrong: a zero-capacity channel is a rendezvous, so with no receiver blocked in `recv`, even the first `try_send` reports `Full`.
+- **Task 3.** Calling `producer.join().unwrap()` before the receiving loop deadlocks: the buffer holds 3 and 5, the producer blocks sending 2, and `join` waits for a producer that waits for a consumer, so the pad hangs until it times out.
+- **Task 5.** Writing `let _ = send.send(7);` in a producer discards that error, so work vanishes silently when the consumer has gone. Example B's `.unwrap()` at least panics, naming `SendError`.
+- **Task 6.** Switching to an unbounded `channel()` to avoid choosing removes backpressure: when the consumer is slower, the queue and its memory grow until the process fails.
+
 ## Self-check and next step
 
-Explain Channel, Backpressure, Disconnection without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+Why does the second immediate `try_send` in Example A return `Full(5)` instead of blocking, and what does the caller get back? What ends the receiving loop in Example B, and why would it wait forever if a sender clone were still alive? What should a consumer conclude when the channel disconnects before the expected number of messages?
+
+Then work through [Self-check and review](../STUDY-GUIDE.md#self-check-and-review).
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://doc.rust-lang.org/book/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+Read [The Rust Book, 16.2 Message Passing](https://doc.rust-lang.org/book/ch16-02-message-passing.html) for how dropping every sender ends the receiver loop.
+
+What the classroom does and does not prove: [Sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

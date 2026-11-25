@@ -42,5 +42,7 @@
       "wrong": "Averaging the group medians to get 50.25. The result lies in the gap between groups, where no observation exists.",
       "verify": "`median(c(0, 100, 101))` returns 100, while the mean of the group medians returns 50.25."
     }
-  ]
+  ],
+  "run_note": "The starter prints three groups: A with one value of 10, B with 20, 30 and 40, and C with no values. Run it and compare two answers by hand: the mean of the two group means is 20, while the pooled mean of all four observations is 25. Return sums and counts per group, because means alone cannot rebuild the pooled answer.",
+  "checks_note": "The checks pin the pooled mean of 25 from sums and counts, a summary of an all-missing group that reports zero observed values, an NA mean for an empty group, distinct counts that cannot be added across groups because a shared value is counted twice, and a median of medians that differs from the median of the pooled data. They do not cover weighted or trimmed summaries."
 }

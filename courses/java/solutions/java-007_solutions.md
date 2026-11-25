@@ -1,6 +1,6 @@
 # java-007: explanatory solutions
 
-Open after an attempt or an explicit solution reveal. The executable reference runs the six exercise checks together as `Main.java`. The guide contains independent worked examples, while this file explains the choices and failure cases in the complete answer.
+Open this after an attempt; see [using the solutions](../STUDY-GUIDE.md#use-the-solutions).
 
 ## Mechanism review
 
@@ -18,7 +18,7 @@ private fields are accessed by methods inside the class. this denotes the curren
 
 ## Exercise 1: Create independent accounts: change one input
 
-Task: Copy Example A into a scratch `Main.java` and change `Account first = new Account(100);` to `Account first = new Account(101);`. Before running it with `java -ea Main`, predict which assertion fails and which value it now sees; then run it and restore the original line.
+Task: Change `Account first = new Account(100);` to `Account first = new Account(101);` in Example A and predict which assertion fails and why.
 
 Equal initial values do not mean shared identity. Each new expression creates a separate object whose field can evolve independently.
 
@@ -31,13 +31,13 @@ first.deposit(50);
 assert first.balance() == 150 && second.balance() == 100;
 ```
 
-**Expected:** The changed run fails with an `AssertionError` from the assertion on `first.balance() == 150 && second.balance() == 100`. Restoring the original line brings back the worked observation: balances 150 and 100.
+**Expected:** The edited run fails with an `AssertionError` from the assertion on `first.balance() == 150 && second.balance() == 100`.
 
-**Verify:** Compare your written prediction with the reported `AssertionError` and its stack-trace line, and name the value that made `first.balance() == 150 && second.balance() == 100` false. After restoring the line, the program completes without an `AssertionError` again.
+**Verify:** Name the value that makes `first.balance() == 150 && second.balance() == 100` false, then restore the line.
 
 ## Exercise 2: Withdraw within the contract: debug a regression
 
-Task: A regression changed one token in the code that Example B adds after Example A, so one line now reads `first.withdraw(41);`. Run Example B with that line, use the failing assertion to locate the defect and repair it without changing the assertion.
+Task: A regression in Example B's new code makes one line read `first.withdraw(41);`. Repair it using the failing assertion.
 
 The method validates the amount against current state, then performs one state change. The caller does not calculate and assign a raw field.
 
@@ -48,9 +48,9 @@ first.withdraw(40);
 assert first.balance() == 110;
 ```
 
-**Expected:** Before the repair the run fails with an `AssertionError` from the assertion on `first.balance() == 110`; after it the line reads `first.withdraw(40);` again and balance 110.
+**Expected:** The unrepaired run fails with an `AssertionError` from the assertion on `first.balance() == 110`; the repaired line reads `first.withdraw(40);`.
 
-**Verify:** Keep the failing and the repaired runs. Explain why the changed token alters the value tested by `first.balance() == 110` for this input.
+**Verify:** Explain how the changed token alters the value that `first.balance() == 110` tests.
 
 ## Exercise 3: Reject overdraft atomically
 
@@ -70,7 +70,7 @@ assert overdraft && first.balance() == 110;
 
 **Expected:** IllegalArgumentException; balance still 110.
 
-**Verify:** Keep an assertion equivalent to `overdraft && first.balance() == 110`. As a control, change `overdraft = true;` to `overdraft = false;`: the run must fail with an `AssertionError` from the assertion on `overdraft && first.balance() == 110`. Restore the line before continuing.
+**Verify:** Control: changing `overdraft = true;` to `overdraft = false;` must fail the assertion on `overdraft && first.balance() == 110`.
 
 ## Exercise 4: Reject negative input
 
@@ -90,7 +90,7 @@ assert negative && first.balance() == 110;
 
 **Expected:** IllegalArgumentException; balance unchanged.
 
-**Verify:** Keep an assertion equivalent to `negative && first.balance() == 110`. As a control, change `negative = true;` to `negative = false;`: the run must fail with an `AssertionError` from the assertion on `negative && first.balance() == 110`. Restore the line before continuing.
+**Verify:** Control: changing `negative = true;` to `negative = false;` must fail the assertion on `negative && first.balance() == 110`.
 
 ## Exercise 5: Reject invalid construction
 
@@ -110,7 +110,7 @@ assert invalidStart;
 
 **Expected:** constructor throws IllegalArgumentException.
 
-**Verify:** Keep an assertion equivalent to `invalidStart`. As a control, change `invalidStart = true;` to `invalidStart = false;`: the run must fail with an `AssertionError` from the assertion on `invalidStart`. Restore the line before continuing.
+**Verify:** Control: changing `invalidStart = true;` to `invalidStart = false;` must fail the assertion on `invalidStart`.
 
 ## Exercise 6: Protect against overflow
 
@@ -131,8 +131,10 @@ assert overflow && full.balance() == Integer.MAX_VALUE;
 
 **Expected:** ArithmeticException; original maximum balance preserved.
 
-**Verify:** Keep an assertion equivalent to `overflow && full.balance() == Integer.MAX_VALUE`. As a control, change `overflow = true;` to `overflow = false;`: the run must fail with an `AssertionError` from the assertion on `overflow && full.balance() == Integer.MAX_VALUE`. Restore the line before continuing.
+**Verify:** Control: changing `overflow = true;` to `overflow = false;` must fail the assertion on `overflow && full.balance() == Integer.MAX_VALUE`.
 
 ## After comparing the answer
 
-Run the complete reference with assertions enabled, then return to your own implementation. Recreate one check with different values and explain its expected result before execution. A compiler error, an expected domain exception and an assertion failure represent different stages and should be reported separately. Preserve ownership boundaries when adapting file, network or concurrency examples. The reference never authorizes access to a shared service or deletion of learner state. Use a fresh tiny fixture when you need to distinguish two interpretations of an API contract.
+Add a `transferTo(Account other, int cents)` method to your copy and decide where validation must happen so that a failed transfer changes neither account.
+
+Run the complete reference with `java -ea Main` first; the [review routine](../STUDY-GUIDE.md#use-the-solutions) covers the rest.

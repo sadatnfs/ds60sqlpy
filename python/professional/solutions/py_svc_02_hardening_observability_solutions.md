@@ -53,9 +53,6 @@ A fixed admission sequence and injected policy components make overload, auth, t
 
 ### Verification micro-example
 
-Run this small, deterministic case before adapting the reference to a
-larger system. It gives the reasoning above an executable anchor:
-
 ```python
 def status(*, running, dependencies, artifact_verified, draining):
     return {
@@ -77,31 +74,19 @@ assert outage == {"healthy": True, "ready": False}
 
 **Expected observation:** A dependency outage removes traffic readiness while avoiding a harmful restart loop.
 
-The reference implementation is one defensible contract, not a license
-to copy internal steps into every system. Preserve the observable
-guarantees and repeat the failure tests when adapting it.
-
 <!-- END PROFESSIONAL PYTHON CONCEPT ENRICHMENT -->
 
 ## Exercise-by-exercise reference
 
-Use this map after an honest attempt. The executable implementation remains
-[`py_svc_02_hardening_observability_solution.py`](py_svc_02_hardening_observability_solution.py); this section explains the
-contract, evidence, alternatives, and edge cases behind every numbered task.
+The runnable [`py_svc_02_hardening_observability_solution.py`](py_svc_02_hardening_observability_solution.py) implements every task below.
+
+**Principle behind every task:** A hardened service validates startup, separates identity/policy, bounds work, trusts artifacts narrowly, and emits privacy-safe evidence for health and incidents.
+
+**Trap behind every task:** Liveness dependency checks, high-cardinality telemetry, in-process-only limits, logged secrets/bodies, or unverified artifacts can amplify the failure being diagnosed.
 
 ### Exercise 1: Validate startup configuration
 
 **Prompt recap:** Parse maximum concurrency, rate capacity, and refill rate. Reject zero, negative, blank, or nonnumeric values before constructing the service. Keep credential retrieval outside dataclass representations and logs.
-
-**Reference reasoning:** A hardened service validates startup, separates identity/policy, bounds work, trusts artifacts narrowly, and emits privacy-safe evidence for health and incidents. The executable module and
-the focused discussion earlier in this file implement this original
-exercise. Verify every acceptance condition from the prompt with a
-normal case, a boundary case, and the documented failure behavior.
-
-**Common trap:** Liveness dependency checks, high-cardinality telemetry, in-process-only limits, logged secrets/bodies, or unverified artifacts can amplify the failure being diagnosed.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
 
 **Verify:** Validate startup configuration; parse maximum concurrency, rate capacity, and refill rate; reject zero, negative, blank, or nonnumeric values before constructing the service; keep credential retrieval outside dataclass representations and logs.
 
@@ -109,31 +94,11 @@ and which input would make the policy reject or choose a different path.
 
 **Prompt recap:** Health remains true for a running process. Readiness requires at least one configured dependency, all probes ready, verified artifact, and no draining state. Return named reasons so an operator can diagnose 503 without exposing secrets. Do not make a liveness endpoint perform slow dependency calls; repeated restarts can amplify an external outage.
 
-**Reference reasoning:** A hardened service validates startup, separates identity/policy, bounds work, trusts artifacts narrowly, and emits privacy-safe evidence for health and incidents. The executable module and
-the focused discussion earlier in this file implement this original
-exercise. Verify every acceptance condition from the prompt with a
-normal case, a boundary case, and the documented failure behavior.
-
-**Common trap:** Liveness dependency checks, high-cardinality telemetry, in-process-only limits, logged secrets/bodies, or unverified artifacts can amplify the failure being diagnosed.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
-
 **Verify:** Complete health/readiness policy; health remains true for a running process; readiness requires at least one configured dependency, all probes ready, verified artifact, and no draining state; return named reasons so an operator can diagnose 503 without exposing secrets.
 
 ### Exercise 3: Design structured events
 
 **Prompt recap:** Emit request started/completed/failed/rejected with request ID, action, bounded reason, and error type. Redact token, authorization, password, secret, and API key fields case-insensitively. Do not log request bodies by default.
-
-**Reference reasoning:** A hardened service validates startup, separates identity/policy, bounds work, trusts artifacts narrowly, and emits privacy-safe evidence for health and incidents. The executable module and
-the focused discussion earlier in this file implement this original
-exercise. Verify every acceptance condition from the prompt with a
-normal case, a boundary case, and the documented failure behavior.
-
-**Common trap:** Liveness dependency checks, high-cardinality telemetry, in-process-only limits, logged secrets/bodies, or unverified artifacts can amplify the failure being diagnosed.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
 
 **Verify:** Design structured events; emit request started/completed/failed/rejected with request ID, action, bounded reason, and error type; redact token, authorization, password, secret, and API key fields case-insensitively; do not log request bodies by default.
 
@@ -141,31 +106,11 @@ and which input would make the policy reject or choose a different path.
 
 **Prompt recap:** Count success, failure, unauthenticated, forbidden, rate-limited, saturated, and not-ready outcomes. Observe duration values. Do not put user, token, request ID, or arbitrary URL into metric labels.
 
-**Reference reasoning:** A hardened service validates startup, separates identity/policy, bounds work, trusts artifacts narrowly, and emits privacy-safe evidence for health and incidents. The executable module and
-the focused discussion earlier in this file implement this original
-exercise. Verify every acceptance condition from the prompt with a
-normal case, a boundary case, and the documented failure behavior.
-
-**Common trap:** Liveness dependency checks, high-cardinality telemetry, in-process-only limits, logged secrets/bodies, or unverified artifacts can amplify the failure being diagnosed.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
-
 **Verify:** Design metrics; count success, failure, unauthenticated, forbidden, rate-limited, saturated, and not-ready outcomes; observe duration values; do not put user, token, request ID, or arbitrary URL into metric labels.
 
 ### Exercise 5: Bound concurrency
 
 **Prompt recap:** Acquire a `BoundedSemaphore` without blocking. Return a lease that always releases in `__exit__`, including exceptions. With capacity one, hold a lease and verify a second attempt returns busy immediately.
-
-**Reference reasoning:** A hardened service validates startup, separates identity/policy, bounds work, trusts artifacts narrowly, and emits privacy-safe evidence for health and incidents. The executable module and
-the focused discussion earlier in this file implement this original
-exercise. Verify every acceptance condition from the prompt with a
-normal case, a boundary case, and the documented failure behavior.
-
-**Common trap:** Liveness dependency checks, high-cardinality telemetry, in-process-only limits, logged secrets/bodies, or unverified artifacts can amplify the failure being diagnosed.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
 
 **Verify:** Bound concurrency; acquire a BoundedSemaphore without blocking; return a lease that always releases in exit , including exceptions; with capacity one, hold a lease and verify a second attempt returns busy immediately.
 
@@ -173,31 +118,11 @@ and which input would make the policy reject or choose a different path.
 
 **Prompt recap:** Consume two tokens, reject the third request, advance a fake clock one second, and accept one refill. State that this in-process bucket is not sufficient across multiple service instances.
 
-**Reference reasoning:** A hardened service validates startup, separates identity/policy, bounds work, trusts artifacts narrowly, and emits privacy-safe evidence for health and incidents. The executable module and
-the focused discussion earlier in this file implement this original
-exercise. Verify every acceptance condition from the prompt with a
-normal case, a boundary case, and the documented failure behavior.
-
-**Common trap:** Liveness dependency checks, high-cardinality telemetry, in-process-only limits, logged secrets/bodies, or unverified artifacts can amplify the failure being diagnosed.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
-
 **Verify:** Rate limit with injected time; consume two tokens, reject the third request, advance a fake clock one second, and accept one refill; state that this in-process bucket is not sufficient across multiple service instances.
 
 ### Exercise 7: Separate authentication and authorization
 
 **Prompt recap:** The local static authenticator maps placeholder test tokens to principals. Readers may predict; operators may predict and reload. Prove unknown identity returns 401 while an authenticated but unauthorized action returns 403. Production identity requires a reviewed provider, token verification/expiry, key rotation, transport security, and audit policy.
-
-**Reference reasoning:** A hardened service validates startup, separates identity/policy, bounds work, trusts artifacts narrowly, and emits privacy-safe evidence for health and incidents. The executable module and
-the focused discussion earlier in this file implement this original
-exercise. Verify every acceptance condition from the prompt with a
-normal case, a boundary case, and the documented failure behavior.
-
-**Common trap:** Liveness dependency checks, high-cardinality telemetry, in-process-only limits, logged secrets/bodies, or unverified artifacts can amplify the failure being diagnosed.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
 
 **Verify:** Separate authentication and authorization; the local static authenticator maps placeholder test tokens to principals; readers may predict; operators may predict and reload; prove unknown identity returns 401 while an authenticated but unauthorized action returns 403.
 
@@ -205,47 +130,17 @@ and which input would make the policy reject or choose a different path.
 
 **Prompt recap:** Compute expected SHA-256 before startup, verify exact bytes, then parse a flat JSON object. Tamper with the file and confirm verification fails. Do not use pickle for untrusted service artifacts.
 
-**Reference reasoning:** A hardened service validates startup, separates identity/policy, bounds work, trusts artifacts narrowly, and emits privacy-safe evidence for health and incidents. The executable module and
-the focused discussion earlier in this file implement this original
-exercise. Verify every acceptance condition from the prompt with a
-normal case, a boundary case, and the documented failure behavior.
-
-**Common trap:** Liveness dependency checks, high-cardinality telemetry, in-process-only limits, logged secrets/bodies, or unverified artifacts can amplify the failure being diagnosed.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
-
 **Verify:** Trust an artifact narrowly; compute expected SHA-256 before startup, verify exact bytes, then parse a flat JSON object; tamper with the file and confirm verification fails; do not use pickle for untrusted service artifacts.
 
 ### Exercise 9: Run the incident drill
 
 **Prompt recap:** Set a dependency probe false: 1. readiness reports its name, 2. health remains true, 3. new work receives 503, 4. the not-ready metric increments, and 5. a request-rejected log carries the request ID and bounded reason. Then restore the dependency and confirm readiness recovers.
 
-**Reference reasoning:** A hardened service validates startup, separates identity/policy, bounds work, trusts artifacts narrowly, and emits privacy-safe evidence for health and incidents. The executable module and
-the focused discussion earlier in this file implement this original
-exercise. Verify every acceptance condition from the prompt with a
-normal case, a boundary case, and the documented failure behavior.
-
-**Common trap:** Liveness dependency checks, high-cardinality telemetry, in-process-only limits, logged secrets/bodies, or unverified artifacts can amplify the failure being diagnosed.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
-
 **Verify:** Run the incident drill; set a dependency probe false: - readiness reports its name, - health remains true, - new work receives 503, - the not-ready metric increments, and - a request-rejected log carries the request ID and bounded reason; then restore the dependency and confirm readiness recovers.
 
 ### Exercise 10: Draw the Internet-facing boundary
 
 **Prompt recap:** List what this local example does not supply: TLS termination, real identity, secret management, distributed limits, reverse-proxy timeouts, network policy, WAF/abuse controls, autoscaling, durable telemetry, retention/privacy policy, artifact distribution, deployment rollback, and on-call response.
-
-**Reference reasoning:** A hardened service validates startup, separates identity/policy, bounds work, trusts artifacts narrowly, and emits privacy-safe evidence for health and incidents. The executable module and
-the focused discussion earlier in this file implement this original
-exercise. Verify every acceptance condition from the prompt with a
-normal case, a boundary case, and the documented failure behavior.
-
-**Common trap:** Liveness dependency checks, high-cardinality telemetry, in-process-only limits, logged secrets/bodies, or unverified artifacts can amplify the failure being diagnosed.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
 
 **Verify:** Draw the Internet-facing boundary; list what this local example does not supply: TLS termination, real identity, secret management, distributed limits, reverse-proxy timeouts, network policy, WAF/abuse controls, autoscaling, durable telemetry, retention/privacy policy, artifact distribution, deployment rollback, and on-call response.
 
@@ -263,11 +158,6 @@ force/exit policy. Health can remain true during drain for diagnostics.
 Do not release another request's lease or wait forever. Tests control worker
 completion explicitly and assert telemetry contains request counts, not bodies.
 
-**Common trap:** Liveness dependency checks, high-cardinality telemetry, in-process-only limits, logged secrets/bodies, or unverified artifacts can amplify the failure being diagnosed.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
-
 **Verify:** drain and shut down gracefully; add a draining transition that makes readiness false, rejects new work, allows active leases a bounded grace period, and records unfinished requests before shutdown; make repeated drain calls idempotent.
 
 ### Exercise 12: add a dependency circuit breaker
@@ -283,11 +173,6 @@ failure reopens. Concurrency ownership prevents a herd of probes.
 Keep liveness independent. Whether readiness becomes false depends on whether
 the dependency is required for all service actions; encode that policy
 explicitly rather than coupling it to breaker implementation.
-
-**Common trap:** Liveness dependency checks, high-cardinality telemetry, in-process-only limits, logged secrets/bodies, or unverified artifacts can amplify the failure being diagnosed.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
 
 **Verify:** add a dependency circuit breaker; wrap one dependency probe/call in a closed/open/half-open breaker with injected time; define which failures count, one bounded probe, readiness interaction, and recovery metrics.
 
@@ -305,11 +190,6 @@ whether unavailable limiting blocks security-sensitive actions or degrades.
 Document approximation and clock ownership for distributed algorithms. Local
 concurrency limits still protect each process even with a shared rate policy.
 
-**Common trap:** Liveness dependency checks, high-cardinality telemetry, in-process-only limits, logged secrets/bodies, or unverified artifacts can amplify the failure being diagnosed.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
-
 **Verify:** define distributed limiting semantics; explain how the local token bucket behaves with four service processes, then design a shared limiter contract covering atomicity, key, window/token semantics, timeout, fail-open/closed choice, and privacy.
 
 ### Exercise 14: bound telemetry backpressure
@@ -325,11 +205,6 @@ and emit a bounded fallback signal without recursion.
 
 Never enqueue request bodies or tokens. Shutdown drains within a deadline and
 reports unsent counts rather than hanging forever.
-
-**Common trap:** Liveness dependency checks, high-cardinality telemetry, in-process-only limits, logged secrets/bodies, or unverified artifacts can amplify the failure being diagnosed.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
 
 **Verify:** bound telemetry backpressure; make the log/metric exporter slow or unavailable; define a bounded queue, drop/coalesce policy, priority for security events, and counters that reveal lost telemetry without blocking request handling indefinitely.
 
@@ -347,11 +222,6 @@ IDs without exposing credentials.
 Metrics aggregate by bounded route/outcome, never request ID. Logging systems
 must escape values so an ID cannot inject fake lines or fields.
 
-**Common trap:** Liveness dependency checks, high-cardinality telemetry, in-process-only limits, logged secrets/bodies, or unverified artifacts can amplify the failure being diagnosed.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
-
 **Verify:** propagate trace context safely; accept or create a request/trace ID, validate its bounded format, carry it through local logs and an outbound fake client, and prove malformed or attacker-sized IDs are replaced rather than reflected.
 
 ### Exercise 16: rehearse credential rotation
@@ -367,11 +237,6 @@ event trail records version IDs and actor, not secret bytes.
 
 Rotation failure has a rollback/escalation policy. Tests use placeholder
 tokens and scan captured diagnostics for their absence.
-
-**Common trap:** Liveness dependency checks, high-cardinality telemetry, in-process-only limits, logged secrets/bodies, or unverified artifacts can amplify the failure being diagnosed.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
 
 **Verify:** rehearse credential rotation; model a credential provider accepting active and previous key versions during a bounded overlap; rotate, verify new requests use the active key, expire the old key, and ensure neither value reaches repr/log/metrics.
 
@@ -389,11 +254,6 @@ releases concurrency leases in `finally`.
 Return a typed bounded failure and metric category such as dependency-timeout
 without logging payloads. Fixed clocks make the policy deterministic in tests.
 
-**Common trap:** Liveness dependency checks, high-cardinality telemetry, in-process-only limits, logged secrets/bodies, or unverified artifacts can amplify the failure being diagnosed.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
-
 **Verify:** compose dependency timeout budgets; for a 750 ms request budget calling two dependencies, allocate local queue, dependency, retry, parsing, and response budgets; propagate a monotonic deadline and stop work when useful completion is impossible.
 
 ### Exercise 18: run a fault-injection matrix
@@ -409,11 +269,6 @@ reflects required dependency/artifact/drain policy.
 
 The matrix exposes missing observability and failure coupling. It does not
 claim production chaos readiness without deployed-system validation.
-
-**Common trap:** Liveness dependency checks, high-cardinality telemetry, in-process-only limits, logged secrets/bodies, or unverified artifacts can amplify the failure being diagnosed.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
 
 **Verify:** run a fault-injection matrix; inject dependency false/exception/latency, artifact tampering, auth outage, limiter saturation, log-export failure, handler exception, and drain; for each, predict status, readiness/health, cleanup, log, and metric evidence.
 
@@ -431,11 +286,6 @@ consumed bad-event budget over the window and compare short/long burn evidence.
 Targets are product policy, not universal constants. Missing telemetry and
 low volume are reported, not silently treated as success.
 
-**Common trap:** Liveness dependency checks, high-cardinality telemetry, in-process-only limits, logged secrets/bodies, or unverified artifacts can amplify the failure being diagnosed.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
-
 **Verify:** define an SLO and error budget; define one availability and one latency SLI over eligible requests, target/window, exclusions, minimum volume, burn-rate alerts, owner, and release action; use generated local events to compute a small example.
 
 ### Exercise 20: audit privacy, retention, and cardinality
@@ -451,10 +301,5 @@ deletion behavior for local files/exporters.
 
 Redaction is defense in depth, not permission to collect unnecessary data.
 Remove fields without a justified operational purpose.
-
-**Common trap:** Liveness dependency checks, high-cardinality telemetry, in-process-only limits, logged secrets/bodies, or unverified artifacts can amplify the failure being diagnosed.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
 
 **Verify:** audit privacy, retention, and cardinality; inventory every log field, metric label, trace attribute, and local artifact; classify sensitivity, cardinality, purpose, retention, access, redaction, deletion, and owner; then test representative forbidden values.

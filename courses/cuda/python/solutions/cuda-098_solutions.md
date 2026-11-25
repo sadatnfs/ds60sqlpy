@@ -1,6 +1,6 @@
 # cuda-098: explained solutions
 
-These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.
+Compare with your [worksheet](../lessons/cuda-098.md) attempt.
 
 ## Exercise 1: Derive the input VJP
 
@@ -74,8 +74,16 @@ Compare native forward and backward independently.
 
 **How to verify.** Use the same inputs and upstream values in both frameworks and compare forward and backward results within tolerance.
 
+## Self-check answers
+
+1. **What does a backward function compute?** A vector-Jacobian product: each output's upstream gradient weighted by how that output depends on each input.
+
+2. **Why can a central difference disagree at the kink?** It straddles the boundary, where the derivative is not unique, so it need not equal the framework's chosen subgradient.
+
+3. **What do framework registration checks validate?** Integration properties of the operator, not the correctness of every derivative formula.
+
 ## Reference observation
 
 Finite-difference derivative approximately 2 and bias VJP 3.
 
-The reference file is `courses/cuda/python/references/cuda-098_cpu.py`. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.
+Asserted by `courses/cuda/python/references/cuda-098_cpu.py`.

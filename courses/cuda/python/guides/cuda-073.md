@@ -1,10 +1,17 @@
 # cuda-073: A kernel is a restricted parallel program
 
-**Route:** CUDA Python and machine learning. **Stage:** intermediate. **Prerequisites:** `cuda-066`, `cuda-072`. Allow several sessions when the hardware experiment is new; the chapter is not a deadline.
+**Route:** CUDA Python and machine learning. **Stage:** intermediate. **Prerequisites:** `cuda-066`, `cuda-072`.
 
-## What you will be able to explain
+Pacing, evidence labels and platform rules: [CUDA study guide](../../STUDY-GUIDE.md).
 
-By the end, you can **separate host and device statements**, **move an allocation out of a kernel**, and **list a prepared toolchain ledger** with evidence. Start with the two worked cases, then use the editable CPU model to make the quantities concrete.
+## Learning objectives
+
+- Separate host and device statements.
+- Implement the CPU oracle.
+- Reject mismatched lengths.
+- Move an allocation out of a kernel.
+- Explain type specialization.
+- List a prepared toolchain ledger.
 
 ## Mechanism and vocabulary
 
@@ -31,9 +38,13 @@ A host wrapper allocates an output and checks equal input lengths. A device kern
 
 A kernel that tries to open a text file violates the execution model. Move file reading to the host, convert values into a numeric buffer, then copy explicitly.
 
-## Portable executable model
+## How to run the CPU model
 
-The **CPU reference model** variant runs this bounded worked example using `python-core`. It uses only the Python standard library, small synthetic values and no network. Its purpose is to expose the arithmetic or contract behind the chapter. The separate reference includes assertions for the stated observations.
+Edit the copy; the [reference](../references/cuda-073_cpu.py) adds assertions.
+
+```sh
+python courses/cuda/python/lessons/cuda-073_cpu.py
+```
 
 ```python
 def affine_reference(values, scale):
@@ -47,77 +58,62 @@ print("CPU kernel oracle:", affine_reference([1, -2, 3], 2))
 
 **Expected observation:** [2, -4, 6], with empty input accepted by the oracle.
 
-Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.
-
 ## Practice and transfer
+
+Record each attempt in the [worksheet](../lessons/cuda-073.md) before opening hints.
 
 ### Exercise 1: Separate host and device statements
 
 **Trap to avoid:** Moving the length check into the kernel, where each thread compares lengths and returns early, means a mismatch produces partial output instead of an error. The host never learns anything went wrong because a kernel cannot raise a Python exception.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 2: Implement the CPU oracle
 
 **Trap to avoid:** Writing the oracle with the same indexing code as the kernel, for example looping `i` over a launch-size range with the same guard, copies the kernel's bugs into the reference, so both can agree and still be wrong.
-
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 3: Reject mismatched lengths
 
 **Trap to avoid:** Using `n = min(len(x), len(y))` to avoid the overflow silently drops elements. The program then returns a result of the wrong length, and the mismatch surfaces far from the call that caused it.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 4: Move an allocation out of a kernel
 
 **Trap to avoid:** Creating a list or calling `numpy.zeros` inside a `@cuda.jit` function fails to compile because those objects do not exist in device code. Working around it with a fixed-size local array caps the problem size silently.
-
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 5: Explain type specialization
 
 **Trap to avoid:** Assuming the decorated function still behaves like ordinary Python leads to passing mixed types or calling unsupported library functions; the result is a typing error at compile time, or an unintended second specialization with different precision.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 6: List a prepared toolchain ledger
 
 **Trap to avoid:** Writing only the package name and the word CUDA tells a reader nothing about which runtime and driver were present, so a later failure on another machine cannot be compared with the original success.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ## Progressive hints
 
-Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.
+Hint *k* belongs to exercise *k*; open one at a time.
 
-1. Start from worked example 1 and mark the quantities needed for the task "Separate host and device statements".
-2. Change one assumption in worked example 2 while preserving the declared contract: implement the CPU oracle.
-3. Trace the CPU program's variables before adding hardware behavior: reject mismatched lengths.
-4. Draw producers, consumers and the exact operation boundary for the task "Move an allocation out of a kernel".
-5. Separate what the small fixture establishes from what the real runtime must show: explain type specialization.
-6. Write a counterexample to an overbroad claim before you list a prepared toolchain ledger.
+1. Go line by line through the wrapper and the kernel and ask which lines touch Python objects, files or new allocations.
+2. Write the plain Python loop the kernel replaces, element by element, and run it on the supplied input.
+3. Decide where the length comparison belongs so that no launch happens with mismatched buffers.
+4. Ask who should own the output buffer's lifetime: the host wrapper that launches, or each GPU thread.
+5. Compare what the compiler knows about argument types with what an interpreter learns only at run time.
+6. List every layer between your source and the device, from the Python package to the driver, and name what to record for each.
 
-## Common mistakes and self-review
+## Common mistakes and self-check
 
-Confusing a correct tiny example with a general implementation is the central review risk. For this chapter, challenge the assumption in worked example 2, then ask whether your change preserves the mechanism described above. If you change dtype, layout, ordering, batch size or backend, update the acceptance contract rather than silently reusing the old observation. Explain an unexpected result before trying random configuration changes.
+A common mistake is writing a device function as if each GPU thread ran a full Python interpreter, for example opening a file, building a list or calling an unsupported library inside the kernel. Those calls fail to compile or belong to the host. Fix it by splitting the work: the host wrapper validates lengths, reads files, allocates the output and copies data; the kernel computes one index, checks the bound and writes only its own element.
 
-Keep a small evidence table with columns **claim**, **input**, **expected observation**, **actual observation** and **limit**. For the first claim use `Separate host and device statements`. For the final claim use `List a prepared toolchain ledger`. An unperformed GPU or cluster experiment remains pending even when the CPU model is correct.
+**Evidence limit:** The CPU oracle doubles `[1, -2, 3]` and accepts an empty input, which defines the expected values. It does not compile anything, so it cannot show which constructs the numba-cuda compiler accepts or how a specialized kernel behaves on a device.
 
-## Platform and evidence contract
+1. Why can the same syntax be legal on the host and illegal in a device function?
+2. What does a host wrapper do before launching the kernel?
+3. Why does `numba.cuda` in an import line not identify the implementation?
 
-The reading worksheet and CPU reference model work through the ordinary Linux Docker classroom on macOS, Linux and Windows using WSL 2. They do not require an NVIDIA GPU. Their results are labeled CPU models or semantic oracles, not simulated hardware performance.
-
-Real CUDA work needs supported NVIDIA hardware, a compatible host driver and an explicitly prepared GPU runtime. An Apple GPU does not execute CUDA kernels. PyTorch MPS on a supported native Mac, ROCm on supported AMD hardware, or other vendor backends can provide separate accelerator learning routes; they need their own package and operation qualification and are not CUDA evidence. The ordinary Linux Docker classroom does not expose native Mac MPS automatically.
-
-Do not download packages, models or data by opening this lesson. Do not attach an engine socket, ambient cluster credentials or an arbitrary remote endpoint. A CPU pass, imported package, successful compilation, real GPU result and measured performance are distinct observations. Record the actual backend, data shape/dtype, source revision, versions and pending checks. A saved completion marker records learning progress, not hardware certification.
+Answers: [self-check answers](../solutions/cuda-073_solutions.md#self-check-answers).
 
 ## Primary references
 
 - [NVIDIA CUDA Python introduction](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/intro-to-cuda-python.html)
-- [Maintained numba-cuda project](https://github.com/NVIDIA/numba-cuda)
 
-Use the version-matched documentation of your prepared environment. These references describe interfaces and supported boundaries; the chapter's synthetic examples and CPU models are original teaching material.
+Full lists: [documentation and sources](../../STUDY-GUIDE.md#documentation-and-sources).
 
 ## Ask an AI tutor about this lesson
 

@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/docker/solutions/docker-040_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="docker-040-explanatory-solutions">docker-040: explanatory solutions<a class="heading-anchor" href="#docker-040-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit reveal. These explain the supplied teaching fixtures; they are not engine results. The mechanism is explained in <code>courses/docker/guides/docker-040.md</code>.</p>
+<p>These answers explain teaching fixtures, not engine results; the mechanism is in <a href="../guides/docker-040.md.html">the guide</a>.</p>
 <h3 id="exercise-1-compare-build-and-runtime-secrets">Exercise 1: Compare build and runtime secrets.<a class="heading-anchor" href="#exercise-1-compare-build-and-runtime-secrets" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Temporary build input versus application-time input.</p>
 <p><strong>Why:</strong> Their consumers and lifetimes differ. A build-only credential should not be copied into the final runtime image.</p>
@@ -238,7 +238,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>A plausible wrong approach:</strong> Reviewing only the secrets block misses an error message that prints the value.</p>
 <p><strong>How to verify:</strong> Each stage in the review has a named control and the check that confirmed it.</p>
 <h3 id="check-your-transfer">Check your transfer<a class="heading-anchor" href="#check-your-transfer" aria-label="Link to this section">#</a></h3>
-<p>A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.</p></article>
+<p><code>ENV</code> values become part of the image configuration, so anyone who can pull or inspect the image reads the password with <code>docker image inspect</code>, it travels to every registry and archive the image reaches, and rotating it requires a rebuild. Propose a runtime secret file granted only to the service, read from <code>/run/secrets</code> and validated without printing it. Acceptance is that <code>docker image inspect</code> and <code>docker inspect</code> show no password while the app connects. If the value still appears in either output, it enters through image or environment configuration.</p></article>
   </main>
 </body>
 </html>

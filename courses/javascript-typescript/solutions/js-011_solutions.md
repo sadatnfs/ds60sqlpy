@@ -1,6 +1,6 @@
 # js-011: explanatory solutions
 
-Use these answers after an attempt or an explicit reveal. The reference uses the same literal fixtures as the guide and keeps the exercises in separate scopes. A successful run checks these examples; explaining a changed input is a separate learning goal.
+Open these after your own attempt; each exercise runs in its own scope in the reference.
 
 ## Mechanism review
 
@@ -24,7 +24,7 @@ The star in function* declares a generator; yield produces a value and suspends 
 
 ## Exercise 1: Trace lazy execution: change one input
 
-Task: Copy Example A into a scratch `main.mjs` and change `trace.push('started');` to `trace.push('started!');`. Before running it, predict which check fails and which value it now sees; then run it and restore the original line.
+Task: In a scratch copy of Example A, change `trace.push('started');` to `trace.push('started!');`. Which check fails, and what value does it see?
 
 Creating the cursor and executing its body are separate events. The trace distinguishes laziness from eager construction of an array.
 
@@ -45,13 +45,13 @@ assert.deepEqual(trace, ['started']);
 cursor.return();
 ```
 
-**Expected:** The changed run fails with an `AssertionError` at `assert.deepEqual(trace, ['started'])`. Restoring `trace.push('started');` brings back: trace is empty before next; then started, with value 2.
+**Expected:** The edited run fails with an `AssertionError` at `assert.deepEqual(trace, ['started'])`. Restoring `trace.push('started');` brings back: trace is empty before next; then started, with value 2.
 
-**Verify:** Compare your written prediction with the reported `AssertionError`, including its actual and expected values, and name the value that made `assert.deepEqual(trace, ['started'])` fail. After restoring the line, the program prints its `{"checks":1,"status":"passed"}` receipt again.
+**Verify:** Compare the reported actual and expected values with your prediction, then restore `trace.push('started');`.
 
 ## Exercise 2: Close on an early break: debug a regression
 
-Task: A regression changed `yield 1;` to `yield 2;` in Example B. Run Example B with that change, use the failing check to explain the defect and repair it without changing the check.
+Task: A regression changed `yield 1;` to `yield 2;` in Example B. Repair it without editing the check.
 
 The loop performs iterator closing when control exits through break. Resource-owning iterators should place cleanup in finally instead of assuming every consumer reaches the end.
 
@@ -77,7 +77,7 @@ assert.deepEqual(trace, ['opened', 1, 'closed']);
 
 **Expected:** Before the repair the run fails with an `AssertionError` at `assert.deepEqual(trace, ['opened', 1, 'closed'])`. Restoring `yield 1;` brings back: trace records opened, value 1, closed.
 
-**Verify:** Keep the failing and the repaired runs. Explain why the changed token alters the value tested by `assert.deepEqual(trace, ['opened', 1, 'closed'])` for this input.
+**Verify:** Keep the failing and repaired runs and name the first value that differs between them.
 
 ## Exercise 3: Distinguish a cursor from a fresh iterable
 
@@ -94,7 +94,7 @@ assert.deepEqual([...range(3)], [0, 1, 2]);
 
 **Expected:** first pass is 0,1,2; second is empty; fresh pass repeats 0,1,2.
 
-**Verify:** Keep a check equivalent to `assert.deepEqual([...range(3)], [0, 1, 2])`. As a control, change `assert.deepEqual([...range(3)], [0, 1, 2]);` to `assert.deepEqual([...range(4)], [0, 1, 2]);` inside it: the run must fail with an `AssertionError`, which shows the check can fail. Restore it.
+**Verify:** Keep `assert.deepEqual([...range(3)], [0, 1, 2])`. Control: editing it to `assert.deepEqual([...range(4)], [0, 1, 2]);` must make the check fail; then restore it.
 
 ## Exercise 4: Inspect the final return value
 
@@ -115,7 +115,7 @@ assert.deepEqual([...sample()], [1]);
 
 **Expected:** next records value 1/done false then 9/done true; spread contains only 1.
 
-**Verify:** Keep a check equivalent to `assert.deepEqual(cursor.next(), { value: 1, done: false })`. As a control, change `yield 1;` to `yield 2;`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
+**Verify:** Keep `assert.deepEqual(cursor.next(), { value: 1, done: false })`. Control: changing `yield 1;` to `yield 2;` must make that check fail; then restore it.
 
 ## Exercise 5: Send a value into a suspended generator
 
@@ -136,7 +136,7 @@ cursor.return();
 
 **Expected:** request, then 8.
 
-**Verify:** Keep a check equivalent to `assert.equal(cursor.next(4).value, 8)`. As a control, change `yield answer * 2;` to `yield answer + 2;`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
+**Verify:** Keep `assert.equal(cursor.next(4).value, 8)`. Control: changing `yield answer * 2;` to `yield answer + 2;` must make that check fail; then restore it.
 
 ## Exercise 6: Bound the range and validate configuration
 
@@ -152,8 +152,8 @@ assert.throws(() => [...range(1.5)], RangeError);
 
 **Expected:** empty array for 0; RangeError for -1 and 1.5.
 
-**Verify:** Keep a check equivalent to `assert.deepEqual([...range(0)], [])`. As a control, change `assert.deepEqual([...range(0)], []);` to `assert.deepEqual([...range(1)], []);` inside it: the run must fail with an `AssertionError`, which shows the check can fail. Restore it.
+**Verify:** Keep `assert.deepEqual([...range(0)], [])`. Control: editing it to `assert.deepEqual([...range(1)], []);` must make the check fail; then restore it.
 
 ## After comparison
 
-Return to your saved implementation and repeat a case with different values. Keep compiler diagnostics, process output and browser observations separate. Do not suppress a failing assertion or use a type assertion to declare an unvalidated value safe. Resource-owning examples must finish cleanup even when work fails. Describe each result with its actual host and fixture scope rather than as production acceptance.
+Fresh case: write `take(iterable, n)` that stops after `n` values. Apply it to an infinite counter generator that has a `finally` block, and prove that the `finally` runs exactly once. ([After comparing](../STUDY-GUIDE.md#after-comparing-with-the-solution).)

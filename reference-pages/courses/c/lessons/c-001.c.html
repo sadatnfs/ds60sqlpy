@@ -197,25 +197,17 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">int</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">void</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span></span>
 <span class="source-line">  <span class="syntax-comment">/* Exercise 1: Check a first value: change one input</span></span>
-<span class="source-line"><span class="syntax-comment">     Copy worked example 1, the &quot;check a first value&quot; case, into a scratch pad</span></span>
-<span class="source-line"><span class="syntax-comment">     and change `int total = 2 + 3;` to `int total = 3 + 3;`. Before running,</span></span>
-<span class="source-line"><span class="syntax-comment">     predict which CHECK fails and which value it sees in place of the worked</span></span>
-<span class="source-line"><span class="syntax-comment">     result (the stored value is 5); then run it and restore the original line.</span></span>
-<span class="source-line"><span class="syntax-comment">     Expected: With `int total = 3 + 3;` the run stops with `Check failed` at</span></span>
-<span class="source-line"><span class="syntax-comment">     the CHECK on `total == 5`, because the &quot;check a first value&quot; case no longer</span></span>
-<span class="source-line"><span class="syntax-comment">     shows that the stored value is 5. Restoring `int total = 2 + 3;` brings</span></span>
-<span class="source-line"><span class="syntax-comment">     that observation back. */</span></span>
+<span class="source-line"><span class="syntax-comment">     In worked example 1, change `int total = 2 + 3;` to `int total = 3 + 3;`.</span></span>
+<span class="source-line"><span class="syntax-comment">     Predict which value the CHECK on `total == 5` sees, then run and restore.</span></span>
+<span class="source-line"><span class="syntax-comment">     Expected: `Check failed` at `total == 5`; restoring `int total = 2 + 3;`</span></span>
+<span class="source-line"><span class="syntax-comment">     passes again. */</span></span>
 <span class="source-line"></span>
 <span class="source-line">  <span class="syntax-comment">/* Exercise 2: Format a checked result: debug a regression</span></span>
-<span class="source-line"><span class="syntax-comment">     A regression changed one token in worked example 2, the &quot;format a checked</span></span>
-<span class="source-line"><span class="syntax-comment">     result&quot; case, so one line now reads `int n = snprintf(out, sizeof out,</span></span>
-<span class="source-line"><span class="syntax-comment">     &quot;total=%d&quot;, 6);`. Run the example with that line, use the failing CHECK to</span></span>
-<span class="source-line"><span class="syntax-comment">     find why the result length is 7 and text is total=5 no longer holds and</span></span>
-<span class="source-line"><span class="syntax-comment">     repair the line without changing the CHECK. Expected: Before the repair the</span></span>
-<span class="source-line"><span class="syntax-comment">     run stops with `Check failed` at the CHECK on `strcmp(out, &quot;total=5&quot;) ==</span></span>
-<span class="source-line"><span class="syntax-comment">     0`. Once the line reads `int n = snprintf(out, sizeof out, &quot;total=%d&quot;, 5);`</span></span>
-<span class="source-line"><span class="syntax-comment">     again, the &quot;format a checked result&quot; case again shows that the result</span></span>
-<span class="source-line"><span class="syntax-comment">     length is 7 and text is total=5. */</span></span>
+<span class="source-line"><span class="syntax-comment">     Worked example 2 now has a line reading `int n = snprintf(out, sizeof out,</span></span>
+<span class="source-line"><span class="syntax-comment">     &quot;total=%d&quot;, 6);`. Repair it so that the result length is 7 and text is</span></span>
+<span class="source-line"><span class="syntax-comment">     total=5 again. Expected: `Check failed` at `strcmp(out, &quot;total=5&quot;) == 0`</span></span>
+<span class="source-line"><span class="syntax-comment">     until the line reads `int n = snprintf(out, sizeof out, &quot;total=%d&quot;, 5);`</span></span>
+<span class="source-line"><span class="syntax-comment">     again. */</span></span>
 <span class="source-line"></span>
 <span class="source-line">  <span class="syntax-comment">/* Exercise 3: Trace statement order</span></span>
 <span class="source-line"><span class="syntax-comment">     Start at 1, increment, then multiply by 3.</span></span>

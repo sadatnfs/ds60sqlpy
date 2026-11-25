@@ -2,25 +2,17 @@
 
 int main(void) {
   /* Exercise 1: Swap integer objects: change one input
-     Copy worked example 1, the "swap integer objects" case, into a scratch pad
-     and change `int a = 2, b = 7;` to `int a = 3, b = 7;`. Before running,
-     predict which CHECK fails and which value it sees in place of the worked
-     result (the values become 7 and 2); then run it and restore the original
-     line. Expected: With `int a = 3, b = 7;` the run stops with `Check failed`
-     at the CHECK on `a == 7 && b == 2`, because the "swap integer objects" case
-     no longer shows that the values become 7 and 2. Restoring `int a = 2, b =
-     7;` brings that observation back. */
+     In worked example 1, change `int a = 2, b = 7;` to `int a = 3, b = 7;`.
+     Predict which value the CHECK on `a == 7 && b == 2` sees, then run and
+     restore. Expected: `Check failed` at `a == 7 && b == 2`; restoring `int a =
+     2, b = 7;` passes again. */
 
   /* Exercise 2: Swap fixed byte arrays: debug a regression
-     A regression changed one token in worked example 2, the "swap fixed byte
-     arrays" case, so one line now reads `unsigned char a[] = {2, 2, 3}, b[] =
-     {4, 5, 6};`. Run the example with that line, use the failing CHECK to find
-     why their byte contents exchange exactly no longer holds and repair the
-     line without changing the CHECK. Expected: Before the repair the run stops
-     with `Check failed` at the CHECK on `a[0] == 4 && a[2] == 6 && b[0] == 1 &&
-     b[2] == 3`. Once the line reads `unsigned char a[] = {1, 2, 3}, b[] = {4,
-     5, 6};` again, the "swap fixed byte arrays" case again shows that their
-     byte contents exchange exactly. */
+     Worked example 2 now has a line reading `unsigned char a[] = {2, 2, 3}, b[]
+     = {4, 5, 6};`. Repair it so that their byte contents exchange exactly
+     again. Expected: `Check failed` at `a[0] == 4 && a[2] == 6 && b[0] == 1 &&
+     b[2] == 3` until the line reads `unsigned char a[] = {1, 2, 3}, b[] = {4,
+     5, 6};` again. */
 
   /* Exercise 3: Use a zero-length operation
      Invoke the helper with size zero and valid object pointers.

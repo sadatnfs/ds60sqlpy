@@ -1,6 +1,6 @@
 # java-019: explanatory solutions
 
-Open after an attempt or an explicit solution reveal. The executable reference runs the six exercise checks together as `Main.java`. The guide contains independent worked examples, while this file explains the choices and failure cases in the complete answer.
+Open this after an attempt; see [using the solutions](../STUDY-GUIDE.md#use-the-solutions).
 
 ## Mechanism review
 
@@ -18,7 +18,7 @@ ArrayDeque.addLast/removeFirst implements a queue; push/pop implements a stack. 
 
 ## Exercise 1: Use a FIFO queue: change one input
 
-Task: Copy Example A into a scratch `Main.java` and change `queue.addLast("a");` to `queue.addLast("a!");`. Before running it with `java -ea Main`, predict which assertion fails and which value it now sees; then run it and restore the original line.
+Task: Change `queue.addLast("a");` to `queue.addLast("a!");` in Example A and predict which assertion fails and why.
 
 The queue preserves arrival order. Choosing removeLast instead would create a stack-like policy.
 
@@ -33,13 +33,13 @@ List<String> fifo = List.of(queue.removeFirst(), queue.removeFirst(), queue.remo
 assert fifo.equals(List.of("a", "b", "c"));
 ```
 
-**Expected:** The changed run fails with an `AssertionError` from the assertion on `fifo.equals(List.of("a", "b", "c"))`. Restoring the original line brings back the worked observation: a, b, c order.
+**Expected:** The edited run fails with an `AssertionError` from the assertion on `fifo.equals(List.of("a", "b", "c"))`.
 
-**Verify:** Compare your written prediction with the reported `AssertionError` and its stack-trace line, and name the value that made `fifo.equals(List.of("a", "b", "c"))` false. After restoring the line, the program completes without an `AssertionError` again.
+**Verify:** Name the value that makes `fifo.equals(List.of("a", "b", "c"))` false, then restore the line.
 
 ## Exercise 2: Use a LIFO stack: debug a regression
 
-Task: A regression changed `stack.push(1);` to `stack.push(2);` in the code that Example B adds after Example A. Run Example B with that change, use the failing assertion to explain the defect and repair it without changing the assertion.
+Task: A regression changed `stack.push(1);` to `stack.push(2);` in Example B's new code. Repair it using the failing assertion.
 
 The most recently pushed value is removed first. Stack behavior is useful for nested traversal or undo histories but differs from fair arrival-order processing.
 
@@ -54,9 +54,9 @@ List<Integer> lifo = List.of(stack.pop(), stack.pop(), stack.pop());
 assert lifo.equals(List.of(3, 2, 1));
 ```
 
-**Expected:** Before the repair the run fails with an `AssertionError` from the assertion on `lifo.equals(List.of(3, 2, 1))`; after it the line reads `stack.push(1);` again and 3, 2, 1.
+**Expected:** The unrepaired run fails with an `AssertionError` from the assertion on `lifo.equals(List.of(3, 2, 1))`; the repaired line reads `stack.push(1);`.
 
-**Verify:** Keep the failing and the repaired runs. Explain why the changed token alters the value tested by `lifo.equals(List.of(3, 2, 1))` for this input.
+**Verify:** Explain how the changed token alters the value that `lifo.equals(List.of(3, 2, 1))` tests.
 
 ## Exercise 3: Poll a priority queue
 
@@ -73,7 +73,7 @@ assert removed.equals(List.of(1, 2, 4, 5));
 
 **Expected:** 1, 2, 4, 5.
 
-**Verify:** Keep an assertion equivalent to `removed.equals(List.of(1, 2, 4, 5))`. As a control, change `while (!heap.isEmpty()) removed.add(heap.remove());` to `while (heap.isEmpty()) removed.add(heap.remove());`: the run must fail with an `AssertionError` from the assertion on `removed.equals(List.of(1, 2, 4, 5))`. Restore the line before continuing.
+**Verify:** Control: changing `while (!heap.isEmpty()) removed.add(heap.remove());` to `while (heap.isEmpty()) removed.add(heap.remove());` must fail the assertion on `removed.equals(List.of(1, 2, 4, 5))`.
 
 ## Exercise 4: Count linear-search work
 
@@ -88,7 +88,7 @@ assert comparisons(new int[] { 1, 2, 3, 4, 5, 6, 7, 8 }, 8) == 8;
 
 **Expected:** 4 and 8 comparisons.
 
-**Verify:** Keep an assertion equivalent to `comparisons(new int[] { 1, 2, 3, 4 }, 4) == 4`. As a control, change `assert comparisons(new int[] { 1, 2, 3, 4 }, 4) == 4;` to `assert comparisons(new int[] { 1, 2, 4, 4 }, 4) == 4;` inside it: the run must fail with an `AssertionError`, which shows the assertion can fail. Restore it.
+**Verify:** Control: changing `assert comparisons(new int[] { 1, 2, 3, 4 }, 4) == 4;` to `assert comparisons(new int[] { 1, 2, 4, 4 }, 4) == 4;` inside the assertion must make it fail.
 
 ## Exercise 5: Preserve duplicate priorities
 
@@ -108,7 +108,7 @@ assert firstName.equals("earlier");
 
 **Expected:** earlier sequence removed first.
 
-**Verify:** Keep an assertion equivalent to `firstName.equals("earlier")`. As a control, change `tasks.add(new Task(1, 1, "earlier"));` to `tasks.add(new Task(2, 1, "earlier"));`: the run must fail with an `AssertionError` from the assertion on `firstName.equals("earlier")`. Restore the line before continuing.
+**Verify:** Control: changing `tasks.add(new Task(1, 1, "earlier"));` to `tasks.add(new Task(2, 1, "earlier"));` must fail the assertion on `firstName.equals("earlier")`.
 
 ## Exercise 6: Handle empty removal explicitly
 
@@ -131,8 +131,10 @@ assert failed;
 
 **Expected:** poll returns null; remove throws NoSuchElementException.
 
-**Verify:** Keep an assertion equivalent to `failed`. As a control, change `failed = true;` to `failed = false;`: the run must fail with an `AssertionError` from the assertion on `failed`. Restore the line before continuing.
+**Verify:** Control: changing `failed = true;` to `failed = false;` must fail the assertion on `failed`.
 
 ## After comparing the answer
 
-Run the complete reference with assertions enabled, then return to your own implementation. Recreate one check with different values and explain its expected result before execution. A compiler error, an expected domain exception and an assertion failure represent different stages and should be reported separately. Preserve ownership boundaries when adapting file, network or concurrency examples. The reference never authorizes access to a shared service or deletion of learner state. Use a fresh tiny fixture when you need to distinguish two interpretations of an API contract.
+Add a second worst-case search over 16 elements to your copy and predict the count before running it; then search for the first element and explain why the best case is constant.
+
+Run the complete reference with `java -ea Main` first; the [review routine](../STUDY-GUIDE.md#use-the-solutions) covers the rest.

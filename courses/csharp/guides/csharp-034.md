@@ -24,9 +24,9 @@ Concurrent collections make their documented operations thread-safe. Delegates p
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles your saved pad as `Program.cs` in its fixed .NET 10 project. C# 14 is the matching language generation. This route uses the prepared framework libraries; it does not accept arbitrary project files, NuGet packages, command arguments or interactive input. The explicit `Program.Main` entrypoint makes compilation and execution visible. `Check` throws on a false condition in every build configuration, unlike conditional debugging assertions.
+Example A updates a local integer from four tasks with `Interlocked.Increment`, and Example B shares a `ConcurrentDictionary<string, int>` across twenty tasks. Neither example takes a lock. Reading a missing key through the dictionary's indexer still throws `KeyNotFoundException`, as it does for a plain dictionary, so use `TryGetValue` when absence is legal.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Compile contract, starter stop and success marker: [running a lesson](../STUDY-GUIDE.md#running-a-lesson).
 
 
 
@@ -34,7 +34,7 @@ Start with the answer-free learner artifact in your saved classroom pad. It deli
 
 `Interlocked.Increment(ref value)` atomically updates one location. ConcurrentDictionary manages concurrent lookup/update operations. A factory must tolerate repeated evaluation.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+Each example ends with a trace; method: [tracing a program](../STUDY-GUIDE.md#tracing-a-program).
 
 ## Worked example / walkthrough
 
@@ -83,6 +83,8 @@ internal static class Program {
 
 **Observe:** The atomic count is exactly 400.
 
+**Trace.** `count` starts at 0. Each task loops 100 times and calls `Interlocked.Increment(ref count)`, which reads, adds one and writes as a single indivisible step, so no other thread can slip in between. Four tasks complete 400 such steps. `Task.WhenAll` waits for all of them, and the check finds exactly 400.
+
 ### Example B: Update one key safely
 
 The update delegate is a pure calculation, so repeated evaluation cannot duplicate an external effect.
@@ -126,6 +128,8 @@ internal static class Program {
 
 **Observe:** Twenty admitted updates produce 20.
 
+**Trace.** The dictionary starts empty. The first task to reach key a stores 1, the add value. Every later task applies the update delegate, which receives the previous count and returns one more. Under contention, the dictionary retries an update whose input changed, so the delegate can run more than twenty times, yet each admitted update counts once and the final value is 20.
+
 ## Exercises
 
 1. **Predict and explain.** Compare count++ with Interlocked.Increment.
@@ -140,13 +144,15 @@ internal static class Program {
 
 6. **Transfer and justify.** Explain why atomically updating two separate balances does not preserve a transfer invariant.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Log each task in the [evidence table](../STUDY-GUIDE.md#recording-exercise-evidence) before opening the explanation.
 
 ## Common pitfalls and diagnosis
 
 Concurrent containers protect their own structure, not arbitrary objects stored inside them. Do not infer once-only callback execution. Use a higher-level lock or transaction for multi-location invariants.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+For task 4, sending a message inside the `AddOrUpdate` delegate can send duplicates, because a retried delegate runs again; keep the delegate a pure calculation and send after the call returns. For task 5, an absent key takes the add value, and a present one takes the update. `GetOrAdd` factories can also run more than once, though only one result is stored.
+
+Repair routine: [building a regression case](../STUDY-GUIDE.md#building-a-regression-case).
 
 ## Progressive hints
 
@@ -156,11 +162,15 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 ## Self-check and next step
 
-Explain Interlocked, Thread-safe operation, Factory purity without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+Explain why `count++` from four tasks can finish below 400 while `Interlocked.Increment` cannot. Describe why the `AddOrUpdate` delegate must be free of side effects. For task 6, show the window in which two separate atomic updates to balances A and B leave money missing from both, and name a tool that closes it.
+
+Then follow the general [self-check routine](../STUDY-GUIDE.md#self-check-routine) and save your pad.
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://learn.microsoft.com/en-us/dotnet/csharp/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+[Documentation](https://learn.microsoft.com/en-us/dotnet/csharp/): The `Interlocked` class reference and the guide to thread-safe collections explain atomic operations and the behavior of `ConcurrentDictionary`.
+
+Provenance and limits: [sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

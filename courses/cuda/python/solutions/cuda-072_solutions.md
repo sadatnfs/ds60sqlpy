@@ -1,6 +1,6 @@
 # cuda-072: explained solutions
 
-These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.
+Compare with your [worksheet](../lessons/cuda-072.md) attempt.
 
 ## Exercise 1: Order the evidence levels
 
@@ -74,8 +74,16 @@ Name CUDA, ROCm, MPS or CPU truthfully.
 
 **How to verify.** Check the device object's type string (for example `cuda:0` or `mps`) and record it beside every result.
 
+## Self-check answers
+
+1. **Why can a successful import not prove a device is usable?** Import only resolves the Python package. Device visibility, allocation, launch, completion and correctness are later claims that each need their own test.
+
+2. **How do you classify an unsupported architecture binary versus an allocation failure?** The first is a build issue: the compiled code does not target the device. The second is a workload budget issue: the request exceeds the memory available to the job.
+
+3. **Is MPS or ROCm a way to emulate CUDA?** No. They are separate accelerator backends with their own packages and supported operations, so their results must be labeled by name, not reported as CUDA evidence.
+
 ## Reference observation
 
 Fixture fails at correctness, not readiness success.
 
-The reference file is `courses/cuda/python/references/cuda-072_cpu.py`. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.
+Asserted by `courses/cuda/python/references/cuda-072_cpu.py`.

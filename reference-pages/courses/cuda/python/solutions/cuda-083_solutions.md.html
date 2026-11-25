@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cuda/python/solutions/cuda-083_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="cuda-083-explained-solutions">cuda-083: explained solutions<a class="heading-anchor" href="#cuda-083-explained-solutions" aria-label="Link to this section">#</a></h2>
-<p>These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.</p>
+<p>Compare with your <a href="../lessons/cuda-083.md.html">worksheet</a> attempt.</p>
 <h3 id="exercise-1-specify-the-kernel-signature">Exercise 1: Specify the kernel signature<a class="heading-anchor" href="#exercise-1-specify-the-kernel-signature" aria-label="Link to this section">#</a></h3>
 <p>Name pointer element types and scalar widths.</p>
 <p><strong>Approach.</strong> Write the kernel signature in full: <code>x</code> is a pointer to <code>float32</code>, <code>y</code> is a pointer to <code>float32</code>, and <code>n</code> is a 32-bit signed integer, then make the Python launcher pass exactly those types, for example <code>numpy.int32(n)</code>.</p>
@@ -231,9 +231,19 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Why it is correct here.</strong> A kernel&#x27;s behavior depends on how it was compiled and where it ran. Pinning those components lets someone reproduce or invalidate the result later.</p>
 <p><strong>A plausible wrong approach.</strong> Recording only the Python package version omits the toolkit, driver and architecture, which are the usual causes of cross-machine failures.</p>
 <p><strong>How to verify.</strong> Another engineer should rebuild from the recorded source and versions and get the same compiled-module hash.</p>
+<h3 id="self-check-answers">Self-check answers<a class="heading-anchor" href="#self-check-answers" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>Why must compile success be recorded separately from launch success?</strong> Code can compile for an architecture that the current device does not have, so it builds cleanly and still fails or misbehaves at launch.</li>
+</ol>
+<ol start="2">
+<li><strong>What does a launch need besides the compiled function?</strong> Arguments in the correct binary layout, grid and block geometry and a stream, all matched to the function signature.</li>
+</ol>
+<ol start="3">
+<li><strong>Why use release-matched examples for CUDA Python?</strong> Its components are versioned independently, so code copied from a moving development branch may use APIs your installed release does not have.</li>
+</ol>
 <h3 id="reference-observation">Reference observation<a class="heading-anchor" href="#reference-observation" aria-label="Link to this section">#</a></h3>
 <p>Insufficient storage for five float64 values is rejected.</p>
-<p>The reference file is <code>courses/cuda/python/references/cuda-083_cpu.py</code>. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.</p></article>
+<p>Asserted by <code>courses/cuda/python/references/cuda-083_cpu.py</code>.</p></article>
   </main>
 </body>
 </html>

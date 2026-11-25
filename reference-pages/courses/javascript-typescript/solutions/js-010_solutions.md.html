@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/javascript-typescript/solutions/js-010_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="js-010-explanatory-solutions">js-010: explanatory solutions<a class="heading-anchor" href="#js-010-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Use these answers after an attempt or an explicit reveal. The reference uses the same literal fixtures as the guide and keeps the exercises in separate scopes. A successful run checks these examples; explaining a changed input is a separate learning goal.</p>
+<p>Open these after your own attempt; each exercise runs in its own scope in the reference.</p>
 <h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
 <p>A module is both a namespace and a dependency boundary. An ES module declares imports and exports before its body executes. The loader resolves dependencies, links the bindings, then evaluates the graph. An imported binding observes the exporting module&#x27;s current binding; it is not a copied snapshot. Importing the same resolved module URL again normally returns the cached module namespace and does not repeat its initialization.</p>
 <p>Node uses .mjs to select ES module syntax explicitly. Relative imports require the intended filename extension. Bare package names use package resolution rules; node: names identify built-in modules. CommonJS uses a different export object and loading model. Interoperability is useful, but guessing that an arbitrary CommonJS property will become a named ES export is fragile. This lesson imports a CommonJS default export deliberately and keeps ESM bindings explicit.</p>
@@ -206,7 +206,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="reading-the-implementation">Reading the implementation<a class="heading-anchor" href="#reading-the-implementation" aria-label="Link to this section">#</a></h3>
 <p>An export declaration exposes a binding. import() returns a Promise for the module namespace, so asynchronous loading must be awaited. pathToFileURL converts a platform filesystem path to a correctly encoded file URL; concatenating file: with a raw path fails for spaces and reserved characters. A namespace property cannot be reassigned by the importer, although exported functions may update their own module state. finally runs cleanup after success and after an import rejection.</p>
 <h3 id="exercise-1-observe-a-live-binding-change-one-input">Exercise 1: Observe a live binding: change one input<a class="heading-anchor" href="#exercise-1-observe-a-live-binding-change-one-input" aria-label="Link to this section">#</a></h3>
-<p>Task: Copy Example A into a scratch <code>main.mjs</code> and change <code>1;</code> to <code>2;</code>. Before running it, predict which check fails and which value it now sees; then run it and restore the original line.</p>
+<p>Task: In a scratch copy of Example A, change <code>1;</code> to <code>2;</code>. Which check fails, and what value does it see?</p>
 <p>The importer receives a binding view. Copying count into a local number would instead preserve the value read at that moment. The distinction becomes visible only after the exporter changes state.</p>
 <p>The unchanged code is the exercise block of Example A:</p>
 <pre class="highlighted-code"><code class="language-javascript"><span class="syntax-keyword">await</span> withModules<span class="syntax-punctuation">(</span>
@@ -218,10 +218,10 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>module<span class="syntax-punctuation">.</span>count<span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
   <span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span>
 <span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
-<p><strong>Expected:</strong> The changed run fails with an <code>AssertionError</code> at <code>assert.equal(module.count, 1)</code>. Restoring <code>1;</code> brings back: count changes from 0 to 1 through the imported namespace.</p>
-<p><strong>Verify:</strong> Compare your written prediction with the reported <code>AssertionError</code>, including its actual and expected values, and name the value that made <code>assert.equal(module.count, 1)</code> fail. After restoring the line, the program prints its <code>{&quot;checks&quot;:1,&quot;status&quot;:&quot;passed&quot;}</code> receipt again.</p>
+<p><strong>Expected:</strong> The edited run fails with an <code>AssertionError</code> at <code>assert.equal(module.count, 1)</code>. Restoring <code>1;</code> brings back: count changes from 0 to 1 through the imported namespace.</p>
+<p><strong>Verify:</strong> Compare the reported actual and expected values with your prediction, then restore <code>1;</code>.</p>
 <h3 id="exercise-2-resolve-a-relative-dependency-debug-a-regression">Exercise 2: Resolve a relative dependency: debug a regression<a class="heading-anchor" href="#exercise-2-resolve-a-relative-dependency-debug-a-regression" aria-label="Link to this section">#</a></h3>
-<p>Task: A regression changed one token in Example B, so one line now reads <code>3</code>. Run Example B with that line, use the failing check to locate the defect and repair it without changing the check.</p>
+<p>Task: A regression made one Example B line read <code>3</code>. Locate and repair it without editing the check.</p>
 <p>The relative path is resolved from the importing file, not from the process working directory. Naming the .mjs extension makes the loader contract explicit.</p>
 <p>The unchanged code is the exercise block of Example B:</p>
 <pre class="highlighted-code"><code class="language-javascript"><span class="syntax-keyword">await</span> withModules<span class="syntax-punctuation">(</span>
@@ -235,7 +235,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span>
 <span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> Before the repair the run fails with an <code>AssertionError</code> at <code>assert.equal(module.answer, 8)</code>. Restoring <code>2</code> brings back: answer equals 8.</p>
-<p><strong>Verify:</strong> Keep the failing and the repaired runs. Explain why the changed token alters the value tested by <code>assert.equal(module.answer, 8)</code> for this input.</p>
+<p><strong>Verify:</strong> Keep the failing and repaired runs and name the first value that differs between them.</p>
 <h3 id="exercise-3-prove-cached-module-identity">Exercise 3: Prove cached module identity<a class="heading-anchor" href="#exercise-3-prove-cached-module-identity" aria-label="Link to this section">#</a></h3>
 <p>Task: Import one URL twice and compare the namespace and exported object.</p>
 <p>A module is not a factory that automatically resets on each import. For independent instances, export a factory function and call it explicitly.</p>
@@ -247,7 +247,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>first<span class="syntax-punctuation">.</span>state<span class="syntax-punctuation">,</span> second<span class="syntax-punctuation">.</span>state<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
 <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> both namespace and object identities are shared.</p>
-<p><strong>Verify:</strong> Keep a check equivalent to <code>assert.equal(first.state, second.state)</code> and confirm that the reference still passes. Then name an input that would make it fail and explain which value changes.</p>
+<p><strong>Verify:</strong> Keep the check <code>assert.equal(first.state, second.state)</code>; name an input that would make it fail and the value that changes.</p>
 <h3 id="exercise-4-inspect-commonjs-interoperability">Exercise 4: Inspect CommonJS interoperability<a class="heading-anchor" href="#exercise-4-inspect-commonjs-interoperability" aria-label="Link to this section">#</a></h3>
 <p>Task: Import a .cjs file exporting an object through its default binding.</p>
 <p>The default binding is the intentional CommonJS export-object boundary here. This example does not depend on heuristic named-export detection.</p>
@@ -256,7 +256,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>module<span class="syntax-punctuation">.</span><span class="syntax-keyword">default</span><span class="syntax-punctuation">.</span>label<span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;legacy&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
 <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> default.label equals legacy.</p>
-<p><strong>Verify:</strong> Keep a check equivalent to <code>assert.equal(module.default.label, &#x27;legacy&#x27;)</code>. As a control, change <code>assert.equal(module.default.label, &#x27;legacy&#x27;);</code> to <code>assert.equal(module.default.label, &#x27;legacy!&#x27;);</code> inside it: the run must fail with an <code>AssertionError</code>, which shows the check can fail. Restore it.</p>
+<p><strong>Verify:</strong> Keep <code>assert.equal(module.default.label, &#x27;legacy&#x27;)</code>. Control: editing it to <code>assert.equal(module.default.label, &#x27;legacy!&#x27;);</code> must make the check fail; then restore it.</p>
 <h3 id="exercise-5-reject-a-missing-dependency">Exercise 5: Reject a missing dependency<a class="heading-anchor" href="#exercise-5-reject-a-missing-dependency" aria-label="Link to this section">#</a></h3>
 <p>Task: Import a module with a nonexistent relative dependency and preserve the loader error code.</p>
 <p>Missing dependency resolution is a loader failure before useful module evaluation. Catching every import error and returning an empty object would disguise a broken dependency graph.</p>
@@ -267,7 +267,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
 <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> ERR_MODULE_NOT_FOUND.</p>
-<p><strong>Verify:</strong> Keep a check equivalent to <code>assert.rejects(import(pathToFileURL(join(directory, &#x27;broken.mjs&#x27;)).href), (error) =&gt; error.code === &#x27;ERR_MODULE_NOT_FOUND&#x27;)</code>. As a control, change <code>await withModules({ &#x27;broken.mjs&#x27;: &quot;import &#x27;./missing.mjs&#x27;;&quot; }, async (directory) =&gt; {</code> to <code>await withModules({ &#x27;broken.mjs&#x27;: &quot;import &#x27;./missing.mjs&#x27;;!&quot; }, async (directory) =&gt; {</code>: the run must fail with an <code>AssertionError</code> at that check. Restore the line before continuing.</p>
+<p><strong>Verify:</strong> Keep <code>assert.rejects(import(pathToFileURL(join(directory, &#x27;broken.mjs&#x27;)).href), (error) =&gt; error.code === &#x27;ERR_MODULE_NOT_FOUND&#x27;)</code>. Control: changing <code>await withModules({ &#x27;broken.mjs&#x27;: &quot;import &#x27;./missing.mjs&#x27;;&quot; }, async (directory) =&gt; {</code> to <code>await withModules({ &#x27;broken.mjs&#x27;: &quot;import &#x27;./missing.mjs&#x27;;!&quot; }, async (directory) =&gt; {</code> must make that check fail; then restore it.</p>
 <h3 id="exercise-6-respect-namespace-ownership">Exercise 6: Respect namespace ownership<a class="heading-anchor" href="#exercise-6-respect-namespace-ownership" aria-label="Link to this section">#</a></h3>
 <p>Task: Attempt to assign an exported binding from the importer.</p>
 <p>Live does not mean writable from every importer. The exporter owns assignment to its binding. Expose a deliberate operation when mutation is part of the public contract.</p>
@@ -279,9 +279,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>module<span class="syntax-punctuation">.</span>value<span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
 <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> TypeError; exported value remains 3.</p>
-<p><strong>Verify:</strong> Keep a check equivalent to <code>assert.equal(module.value, 3)</code>. As a control, change <code>await withModules({ &#x27;fixed.mjs&#x27;: &#x27;export let value = 3;&#x27; }, async (directory) =&gt; {</code> to <code>await withModules({ &#x27;fixed.mjs&#x27;: &#x27;export let value = 4;&#x27; }, async (directory) =&gt; {</code>: the run must fail with an <code>AssertionError</code> at that check. Restore the line before continuing.</p>
+<p><strong>Verify:</strong> Keep <code>assert.equal(module.value, 3)</code>. Control: changing <code>await withModules({ &#x27;fixed.mjs&#x27;: &#x27;export let value = 3;&#x27; }, async (directory) =&gt; {</code> to <code>await withModules({ &#x27;fixed.mjs&#x27;: &#x27;export let value = 4;&#x27; }, async (directory) =&gt; {</code> must make that check fail; then restore it.</p>
 <h3 id="after-comparison">After comparison<a class="heading-anchor" href="#after-comparison" aria-label="Link to this section">#</a></h3>
-<p>Return to your saved implementation and repeat a case with different values. Keep compiler diagnostics, process output and browser observations separate. Do not suppress a failing assertion or use a type assertion to declare an unvalidated value safe. Resource-owning examples must finish cleanup even when work fails. Describe each result with its actual host and fixture scope rather than as production acceptance.</p></article>
+<p>Fresh case: import one file as <code>./state.mjs</code> and again as <code>./state.mjs?copy</code>. Predict whether the two namespaces share state; the module cache is keyed by the full URL, so the query string creates a second instance. (<a href="../STUDY-GUIDE.md.html#after-comparing-with-the-solution">After comparing</a>.)</p></article>
   </main>
 </body>
 </html>

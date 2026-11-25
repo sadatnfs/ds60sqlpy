@@ -53,6 +53,10 @@ hardware. Compare supported input contracts and numerical tolerances before
 comparing performance. A library baseline is a useful engineering choice even
 when a handwritten kernel does not beat it.
 
+Pacing, evidence labels, platform and safety rules, exercise workflow and the
+complete reference lists shared by every chapter are in the
+[CUDA study guide](STUDY-GUIDE.md).
+
 The local fixtures are original, small and offline. External libraries and
 hardware-specific features are linked to their primary documentation, with
 release and platform limits explained in the corresponding guide.

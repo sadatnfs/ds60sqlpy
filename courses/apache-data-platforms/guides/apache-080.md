@@ -109,20 +109,18 @@ A connection error or 503 here means the server is down; recipient credentials a
 
 ## Complete worked source
 
-This is a project-only command notebook. Read and edit it in the classroom; run its explicitly labeled commands from the copied owned Docker workshop. The classroom does not execute these service commands.
+The classroom does not execute these service commands. See the [workshop rules](../STUDY-GUIDE.md#workshop-notebooks).
 
 # Delta Sharing apache-080 prepared command notebook
 
-Copy the owned Delta Sharing project and follow PREPARATION.md. Delta Sharing
-belongs to Delta Lake/Linux Foundation. The offline preparation actions are:
+Keep the `plan` output from the copied Delta Sharing project as your reference copy of the three expected rows:
 
 ```bash
 bash run.sh prepare
 bash run.sh plan
 ```
 
-For a separately prepared actual owned reference server and untracked recipient
-profile, the bounded native Docker protocol client runs with:
+After the owned server resumes or is replaced, run only `check`, and never rewrite the source table first:
 
 ```bash
 bash run.sh check
@@ -130,9 +128,7 @@ bash run.sh check
 
 After actual server resume/replacement, run check alone and compare the same table ID/version/rows. Never rewrite the source table during retention readback. Server outage and missing-file experiments are distinct.
 
-The classroom Markdown pad does not start a service. Source configuration and
-unit policy fixtures are not actual reference-server receipts. Keep credentials
-and signed URL query strings out of all published source and evidence.
+A server outage fails at the control endpoint, while a missing data file fails at storage. Record which call failed and its status so the two are never merged into one result.
 
 ## Primary references
 

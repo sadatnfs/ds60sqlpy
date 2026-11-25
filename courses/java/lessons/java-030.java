@@ -3,22 +3,18 @@ public class Main {
 
   public static void main(String[] args) throws Exception {
     // Exercise 1: Round-trip version 2 data: change one input
-    // Close Example A and rebuild it in a fresh `Main.java`, keeping the assertion on
-    // `decode(encoded).equals(record)`. Then propose one input change that would make that
-    // assertion fail and explain why before trying it.
-    // Expected: Your rebuild reproduces the worked observation (equal domain record and exact
-    // Unicode note), and your proposed change makes the assertion on
+    // Rebuild Example A from memory and propose one input change that makes the assertion on
     // `decode(encoded).equals(record)` fail.
+    // Expected: The rebuild passes and the changed copy fails as predicted.
 
     // Exercise 2: Apply a version 1 default: debug a regression
-    // A regression changed one token in the code that Example B adds after Example A, so one
-    // line now reads `Account legacy = decode(encode(new Account("a1", 126, "ignored by v1"),
-    // 1));`. Run Example B with that line, use the failing assertion to locate the defect and
-    // repair it without changing the assertion.
-    // Expected: Before the repair the run fails with an `AssertionError` from the assertion on
+    // A regression in Example B's new code makes one line read `Account legacy =
+    // decode(encode(new Account("a1", 126, "ignored by v1"), 1));`. Repair it using the failing
+    // assertion.
+    // Expected: The unrepaired run fails with an `AssertionError` from the assertion on
     // `legacy.id().equals("a1") && legacy.cents() == 125 && legacy.note().equals("unlabelled")`;
-    // after it the line reads `Account legacy = decode(encode(new Account("a1", 125, "ignored by
-    // v1"), 1));` again and decoded note unlabelled.
+    // the repaired line reads `Account legacy = decode(encode(new Account("a1", 125, "ignored by
+    // v1"), 1));`.
 
     // Exercise 3: Reject an unknown version
     // Change the version bytes to 99 and decode.

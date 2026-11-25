@@ -136,12 +136,11 @@ with analytical document counts.
 
 ## Complete worked source
 
-This is a project-only command notebook. Read and edit it in the classroom; run its explicitly labeled commands from the copied owned Docker workshop. The classroom does not execute these service commands.
+The classroom does not execute these service commands. See the [workshop rules](../STUDY-GUIDE.md#workshop-notebooks).
 
 # Pinot apache-058 command notebook
 
-Use these commands only from the copied owned Pinot project described in its README.
-The classroom Markdown pad does not execute Docker commands.
+Both `cat` commands only print files from the copied Pinot project; nothing connects to Kafka. In `realtime-table.json` find the topic `ds60-orders`, the broker list `kafka:9092` and the offset reset `smallest`, then match each decoded field against `schema.json`.
 
 ```bash
 cat realtime-table.json
@@ -150,8 +149,7 @@ cat schema.json
 
 This displays the released connector configuration only. Prepare a separately owned Kafka route, reconcile partition positions and exact decoded IDs, and record malformed-event handling before calling the streaming route qualified.
 
-Native service acceptance and each advanced extension have distinct entries in
-`QUALIFICATION.md`. Source/configuration presence is not an observed service result.
+QUALIFICATION.md lists Kafka ingestion as a prepared extension with no actual gate yet. Until a stream run records consumed offsets beside the decoded IDs, this lesson's evidence is a reviewed configuration, not an ingested table.
 
 ## Primary references
 

@@ -1,6 +1,6 @@
 # java-003: explanatory solutions
 
-Open after an attempt or an explicit solution reveal. The executable reference runs the six exercise checks together as `Main.java`. The guide contains independent worked examples, while this file explains the choices and failure cases in the complete answer.
+Open this after an attempt; see [using the solutions](../STUDY-GUIDE.md#use-the-solutions).
 
 ## Mechanism review
 
@@ -20,7 +20,7 @@ if selects a branch. && evaluates the right operand only when the left is true; 
 
 ## Exercise 1: Guard a nullable value: predict an edited check
 
-Task: Copy Example A into a scratch `Main.java` and change `assert !nonempty;` to `assert nonempty;` inside its assertion. Before running it with `java -ea Main`, predict whether the assertion still holds and explain why; then restore it.
+Task: Change Example A's assertion to `assert nonempty;`, predict whether it holds, then run and restore it.
 
 The right operand is not evaluated when the left is false. Reversing the operands would attempt the method call before the guard.
 
@@ -32,13 +32,13 @@ boolean nonempty = text != null && !text.isEmpty();
 assert !nonempty;
 ```
 
-**Expected:** The changed run fails with an `AssertionError` from the assertion on `!nonempty`. Restoring the original line brings back the worked observation: condition false with no NullPointerException.
+**Expected:** The edited run fails with an `AssertionError` from the assertion on `!nonempty`.
 
-**Verify:** Compare your written prediction with the reported `AssertionError` and its stack-trace line, and explain why the edited condition is false for the values that satisfy `!nonempty`. After restoring the line, the program completes without an `AssertionError` again.
+**Verify:** Explain why the edited assertion is false for the values that satisfy `!nonempty`.
 
 ## Exercise 2: Trace a prefix sum: debug a regression
 
-Task: A regression changed one token in the code that Example B adds after Example A, so one line now reads `sum -= values[i];`. Run Example B with that line, use the failing assertion to locate the defect and repair it without changing the assertion.
+Task: A regression in Example B's new code makes one line read `sum -= values[i];`. Repair it using the failing assertion.
 
 The accumulator begins at the additive identity 0. Each iteration adds one new element, so no record is skipped or counted twice.
 
@@ -55,9 +55,9 @@ for (int i = 0; i < values.length; i++) {
 assert prefixes.equals(List.of(2, 6, 12)) && sum == 12;
 ```
 
-**Expected:** Before the repair the run fails with an `AssertionError` from the assertion on `prefixes.equals(List.of(2, 6, 12)) && sum == 12`; after it the line reads `sum += values[i];` again and prefix sums 2, 6, 12; final 12.
+**Expected:** The unrepaired run fails with an `AssertionError` from the assertion on `prefixes.equals(List.of(2, 6, 12)) && sum == 12`; the repaired line reads `sum += values[i];`.
 
-**Verify:** Keep the failing and the repaired runs. Explain why the changed token alters the value tested by `prefixes.equals(List.of(2, 6, 12)) && sum == 12` for this input.
+**Verify:** Explain how the changed token alters the value that `prefixes.equals(List.of(2, 6, 12)) && sum == 12` tests.
 
 ## Exercise 3: Handle an empty loop
 
@@ -77,7 +77,7 @@ assert emptySum == 0 && iterations == 0;
 
 **Expected:** sum 0 and zero iterations.
 
-**Verify:** Keep an assertion equivalent to `emptySum == 0 && iterations == 0`. As a control, change `int emptySum = 0;` to `int emptySum = 1;`: the run must fail with an `AssertionError` from the assertion on `emptySum == 0 && iterations == 0`. Restore the line before continuing.
+**Verify:** Control: changing `int emptySum = 0;` to `int emptySum = 1;` must fail the assertion on `emptySum == 0 && iterations == 0`.
 
 ## Exercise 4: Choose a value with a switch expression
 
@@ -100,7 +100,7 @@ assert kinds.equals(List.of("weekend", "weekday"));
 
 **Expected:** weekend, then weekday.
 
-**Verify:** Keep an assertion equivalent to `kinds.equals(List.of("weekend", "weekday"))`. As a control, change `case SATURDAY, SUNDAY -> "weekend";` to `case SATURDAY, SUNDAY -> "weekend!";`: the run must fail with an `AssertionError` from the assertion on `kinds.equals(List.of("weekend", "weekday"))`. Restore the line before continuing.
+**Verify:** Control: changing `case SATURDAY, SUNDAY -> "weekend";` to `case SATURDAY, SUNDAY -> "weekend!";` must fail the assertion on `kinds.equals(List.of("weekend", "weekday"))`.
 
 ## Exercise 5: Stop at the first match
 
@@ -122,7 +122,7 @@ assert found == 1;
 
 **Expected:** index 1.
 
-**Verify:** Keep an assertion equivalent to `found == 1`. As a control, change `if (items[i] == 8) {` to `if (items[i] != 8) {`: the run must fail with an `AssertionError` from the assertion on `found == 1`. Restore the line before continuing.
+**Verify:** Control: changing `if (items[i] == 8) {` to `if (items[i] != 8) {` must fail the assertion on `found == 1`.
 
 ## Exercise 6: Expose a wrong boundary
 
@@ -145,8 +145,10 @@ assert failed;
 
 **Expected:** wrong loop raises ArrayIndexOutOfBoundsException.
 
-**Verify:** Keep an assertion equivalent to `failed`. As a control, change `for (int i = 0; i <= single.length; i++) {` to `for (int i = 0; i < single.length; i++) {`: the run must fail with an `AssertionError` from the assertion on `failed`. Restore the line before continuing.
+**Verify:** Control: changing `for (int i = 0; i <= single.length; i++) {` to `for (int i = 0; i < single.length; i++) {` must fail the assertion on `failed`.
 
 ## After comparing the answer
 
-Run the complete reference with assertions enabled, then return to your own implementation. Recreate one check with different values and explain its expected result before execution. A compiler error, an expected domain exception and an assertion failure represent different stages and should be reported separately. Preserve ownership boundaries when adapting file, network or concurrency examples. The reference never authorizes access to a shared service or deletion of learner state. Use a fresh tiny fixture when you need to distinguish two interpretations of an API contract.
+Rewrite the reference search loop without `break`, using a loop condition that stops at the first match, and confirm that the same assertion on index 1 still passes.
+
+Run the complete reference with `java -ea Main` first; the [review routine](../STUDY-GUIDE.md#use-the-solutions) covers the rest.

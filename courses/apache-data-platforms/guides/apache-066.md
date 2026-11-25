@@ -143,12 +143,11 @@ correctness.
 
 ## Complete worked source
 
-This is a project-only command notebook. Read and edit it in the classroom; run its explicitly labeled commands from the copied owned Docker workshop. The classroom does not execute these service commands.
+The classroom does not execute these service commands. See the [workshop rules](../STUDY-GUIDE.md#workshop-notebooks).
 
 # Hive apache-066 command notebook
 
-Run from the copied owned Hive project, following its README. Native service
-acceptance is separately recorded in QUALIFICATION.md.
+`explain.sql` is a plain SELECT over the fixture table, and `run.sh explain` sends it through the admin container of the copied Hive project. Save the full plan text, not a summary of it.
 
 ```bash
 cat explain.sql
@@ -157,12 +156,11 @@ bash run.sh explain
 
 Inspect actual partition and aggregate plan operators before claiming a specific engine optimization. Query result correctness and physical work are separate observations.
 
-The classroom does not execute these Docker commands. Retain source, schema,
-file identities, actual responses and failure scope in an independent receipt.
+The accepted Hive gate checked query answers and did not grade plan operators. A claim about partition pruning or aggregation needs the saved plan beside the matching row result.
 
 ## Primary references
 
-- [Hive4.2.1 preparation and components](https://hive.apache.org/development/quickstart/)
+- [Hive 4.2.1 preparation and components](https://hive.apache.org/development/quickstart/)
 - [Hive DDL](https://hive.apache.org/docs/latest/language/languagemanual-ddl/)
 - [Hive Metastore administration](https://hive.apache.org/docs/latest/admin/adminmanual-metastore-administration/)
 - [Hive/Iceberg integration](https://iceberg.apache.org/docs/latest/hive/)

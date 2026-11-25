@@ -1,6 +1,8 @@
 # rust-013: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [rust-013_solution.rs](rust-013_solution.rs). It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.
+Executable reference: [rust-013_solution.rs](rust-013_solution.rs), which runs both examples and the coded answers.
+
+Open this only after [an attempt](../STUDY-GUIDE.md#attempt-a-lesson).
 
 ## Why the two examples differ
 
@@ -26,7 +28,7 @@ Identify which payload is valid in each state.
 
 Add a Loading variant and update every exhaustive consumer.
 
-**Reference answer.** The same statements run as the `Task 2` block of the reference program; here they are wrapped in `main` as a complete file.
+**Reference answer**, wrapped in `main`; the reference runs it as its `Task 2` block.
 
 ```rust
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -64,7 +66,7 @@ The new variant has no payload because nothing is known yet. Adding it to the en
 
 Model an import as pending, completed or rejected with state-specific information.
 
-**Reference answer.** The same statements run as the `Task 3` block of the reference program; here they are wrapped in `main` as a complete file.
+**Reference answer**, wrapped in `main`; the reference runs it as its `Task 3` block.
 
 ```rust
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -110,7 +112,7 @@ Diagnose a collection of optional fields that permits contradictory states.
 
 Test every declared variant.
 
-**Reference answer.** The same statements run as the `Task 5` block of the reference program; here they are wrapped in `main` as a complete file. It uses `Outcome` and `render` from the lesson's helpers, defined in the reference program.
+**Reference answer**, wrapped in `main`; the reference runs it as its `Task 5` block. Helpers used: `Outcome` and `render`.
 
 ```rust
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -142,7 +144,7 @@ Both declared variants are covered, each with an ordinary and an edge payload. T
 
 Design valid transitions between states and explain which transitions should be rejected.
 
-No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **Enum variant**, and state one limitation of your choice.
+**Judging criteria.** List each state and the events that move it, for example `Pending` to `Completed { rows }` or `Rejected { reason }`, and make the transition function return `Result` so an illegal move such as `Completed` back to `Pending` is an explicit error. Terminal states should accept no further transitions. A strong answer matches on `(state, event)` pairs without a wildcard, so a new state forces review, and states one limitation, such as transitions that depend on time or outside data.
 
 ## Mechanism and diagnostic reasoning
 
@@ -156,4 +158,6 @@ Matching an owned enum can move its String payload. Use a borrowed match when re
 
 ## Review before continuing
 
-Run the reference and confirm that it prints `rust-013: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.
+Rebuild Example B (Render a distinct failure) from a blank pad.
+
+Review routine: [Self-check and review](../STUDY-GUIDE.md#self-check-and-review).

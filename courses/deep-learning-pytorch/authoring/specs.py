@@ -1517,7 +1517,7 @@ assert sum(p.numel() for p in layer.parameters())==8""",
         ),
     ],
     source=(
-        "PyTorch2.9 Conv2d",
+        "PyTorch 2.9 Conv2d",
         "https://docs.pytorch.org/docs/2.9/generated/torch.nn.Conv2d.html",
     ),
 )
@@ -1760,7 +1760,7 @@ torch.testing.assert_close(again,out,atol=0,rtol=0)""",
     return F.scaled_dot_product_attention(q,k,v,attn_mask=allowed,dropout_p=0.)
 """,
     source=(
-        "PyTorch2.9 scaled dot product attention",
+        "PyTorch 2.9 scaled dot product attention",
         "https://docs.pytorch.org/docs/2.9/generated/torch.nn.functional.scaled_dot_product_attention.html",
     ),
 )
@@ -2274,7 +2274,7 @@ def step(model,optimizer,noise):
 """,
     imports=IMPORTS + "\nimport tempfile,json,subprocess,sys,textwrap\nfrom pathlib import Path",
     source=(
-        "PyTorch2.9 serialization",
+        "PyTorch 2.9 serialization",
         "https://docs.pytorch.org/docs/2.9/notes/serialization.html",
     ),
 )
@@ -2515,7 +2515,7 @@ assert receipt['graph_capture_checked'] and not receipt['optimizing_native_backe
         ),
     ],
     source=(
-        "PyTorch2.9 torch.compile",
+        "PyTorch 2.9 torch.compile",
         "https://docs.pytorch.org/docs/2.9/generated/torch.compile.html",
     ),
 )
@@ -2612,7 +2612,7 @@ temporary.cleanup(); assert not folder.exists()""",
         ),
     ],
     imports=IMPORTS + "\nimport tempfile,json,subprocess,sys,textwrap\nfrom pathlib import Path",
-    source=("PyTorch2.9 export", "https://docs.pytorch.org/docs/2.9/export.html"),
+    source=("PyTorch 2.9 export", "https://docs.pytorch.org/docs/2.9/export.html"),
 )
 lesson(
     33,
@@ -2706,7 +2706,7 @@ def predict(x):
     return output.clone()
 """,
     source=(
-        "PyTorch2.9 inference mode",
+        "PyTorch 2.9 inference mode",
         "https://docs.pytorch.org/docs/2.9/generated/torch.autograd.grad_mode.inference_mode.html",
     ),
 )

@@ -1,6 +1,6 @@
 # web-057: explanatory solutions
 
-Open this after your own attempt. Each answer explains the lesson's synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in `courses/web-development/guides/web-057.md`.
+Attempt each exercise before reading; the mechanism is in `courses/web-development/guides/web-057.md` ([using these answers](../STUDY-GUIDE.md#solutions)).
 
 ## Exercise 1: Draw the lifecycle from browser cookie to server session to stored note.
 
@@ -76,4 +76,6 @@ Open this after your own attempt. Each answer explains the lesson's synthetic fi
 
 ## Comparing your worksheet
 
-This lesson has no executable reference. Compare your worksheet with the answers above. The optional lab in `courses/web-development/fixtures/php-http-lab/` gives real request evidence only when you deliberately run it.
+Compare your lifecycle drawing with the solution's and check that each arrow names the request, the status and where state is stored. If you ran the optional lab, the health response, the 303 redirect and a rejected token are your evidence; record them with the exact command you ran.
+
+This lesson has no executable reference ([worksheet rules](../STUDY-GUIDE.md#worksheets)).

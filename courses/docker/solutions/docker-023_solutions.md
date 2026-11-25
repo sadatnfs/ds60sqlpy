@@ -1,6 +1,6 @@
 # docker-023: explanatory solutions
 
-Compare after your own attempt or an explicit reveal. These explain the supplied teaching fixtures; they are not engine results. The mechanism is explained in `courses/docker/guides/docker-023.md`.
+These answers explain teaching fixtures, not engine results; the mechanism is in [the guide](../guides/docker-023.md).
 
 ## Exercise 1: Map each hardening setting to its mechanism.
 
@@ -88,4 +88,4 @@ Compare after your own attempt or an explicit reveal. These explain the supplied
 
 ## Check your transfer
 
-A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.
+Start from `cap_drop: [ALL]` and run the service's real acceptance check: start up, answer HTTP on 8080, and persist its data. If that passes, the capability is not needed for this deployment and stays denied. If startup fails, read the exact operation that was refused, often interface or firewall changes at boot, and prefer turning that feature off or doing it outside the container. Grant the capability only for a named, required operation, and record why. A passing acceptance run without it is the observation that disproves the vendor's claim for your use.

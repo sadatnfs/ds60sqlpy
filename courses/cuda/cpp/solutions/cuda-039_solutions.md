@@ -4,8 +4,6 @@
 
 A stream is an ordered queue of work. Operations in one stream respect that stream's ordering, while separate streams need explicit dependencies when sharing data. Record an event after a producer and make the consumer stream wait for it before reading the result. Two streams allow concurrency; they do not guarantee simultaneous execution or isolated memory. Default-stream semantics depend on the selected configuration, so educational code should use explicit streams rather than relying on invisible ordering. Buffer lifetimes must cover all queued consumers, and a host completion check is required before validating or releasing their outputs.
 
-The separate [CPU reference](../references/cuda-039_cpu.py) checks the chapter's bounded model. It does not execute CUDA or establish GPU timing. Compare after attempting the worksheet or explicitly choosing to reveal solutions.
-
 ## Exercise 1
 
 Stream A doubles \([1,2,3]\) to \([2,4,6]\), records an event, and stream B waits before adding one, producing \([3,5,7]\). The event creates the producer-consumer edge. Without that edge, B might read old or incomplete data even though both launches individually succeed.
@@ -78,12 +76,16 @@ Respect the producer framework's stream and consumer synchronization contract, i
 
 **How to verify:** Test with a delayed producer and confirm the consumer still sees final data.
 
+## Self-check answers
+
+1. **In worked example 1, what does stream B wait for?** The event recorded in stream A after the doubling kernel.
+2. **What is guaranteed about two operations in the same stream?** They run in issue order; the second starts after the first completes.
+3. **Why must correctness not depend on observed overlap?** Overlap is optional for the hardware, so a design that needs it can fail on another device or load.
+
 ## Numerical reference and its limits
 
-The complete CPU model is [here](../references/cuda-039_cpu.py). Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It does not claim CUDA execution, concurrency safety or a performance measurement.
+The [CPU reference](../references/cuda-039_cpu.py) reproduces worked example 1 and prints `{'reference': [3, 5, 7], 'required_order_edges': [('produce_A', 'record_event'), ('record_event', 'wait_B'), ('wait_B', 'consume_B')]}`.
 
 ## Transfer review
 
 Respect the producer framework's stream and consumer synchronization contract, including lifetime. Sharing a pointer alone is insufficient.
-
-A complete explanation must name its inputs, the unchanged mathematical contract, the changed boundary or resource condition, and the evidence still needed on actual hardware. Preserve a CPU baseline even after a GPU path becomes available.

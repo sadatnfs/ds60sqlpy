@@ -1,6 +1,6 @@
 # r-008: reference reasoning
 
-Use the [complete reference](r-008_reference.R) with the guide's declared inputs and runtime. Every worked example is also a standalone script.
+Run the [complete reference](r-008_reference.R) under the [run rules](../STUDY-GUIDE.md#run-a-chapter).
 
 ## Why the implementation has this shape
 
@@ -96,4 +96,6 @@ A small residual supports this numerical solution but does not by itself establi
 
 ## What the checks establish
 
-The reference makes 5 `stopifnot()` checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.
+The checks pin column-major filling with a first row of 1, 3 and 5, `byrow = TRUE` giving 1, 2 and 3, an intercept design that predicts 11 and 14 from intercept 2 and slope 3 at x of 3 and 4, `drop = FALSE` keeping a 2 by 1 shape, and a solved system whose residual stays below 1e-12. They do not test conditioning for larger or nearly singular matrices.
+
+The reference makes 5 `stopifnot()` checks; see [what a passing run proves](../STUDY-GUIDE.md#what-a-passing-run-proves).

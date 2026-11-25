@@ -1,8 +1,6 @@
 # dax-019: explained reference and practice reasoning
 
-This is an offline DAX editing lesson. No DAX compiler, semantic-model engine, Power BI account or network connection is required. Worked tables describe the named reference and model, not execution of your draft. Save, compare and export source; do not interpret a comparison or completion marker as a passed program run.
-
-The complete [reference source](dax-019_reference.dax) and [named model](../models/retail/model.json) belong together. The reference-results sidecar binds both exact files by SHA-256. Those hashes identify bytes; they do not certify DAX execution.
+In the reference, compare the plain Color filter in ForcedRed with the KEEPFILTERS wrapper beside it. Verify that the outer selection is the only thing that changes between cases and that 24, BLANK, 187 and 163 follow from it. Read it beside the [reference source](dax-019_reference.dax); the [study guide](../STUDY-GUIDE.md#answers-and-references) explains how the sidecar binds it to the model.
 
 ## Worked-case reconciliation
 

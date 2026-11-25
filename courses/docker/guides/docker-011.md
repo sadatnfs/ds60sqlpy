@@ -32,11 +32,9 @@ Use `docker compose -p ds60-docker-study ...` from the copied fixture directory.
 
 ## How to use this lesson
 
-The classroom displays this guide and saves your worksheet, `courses/docker/lessons/docker-011.md`. Its Run button does not control your Docker engine. Docker engine access is powerful host access, so the classroom deliberately receives no engine socket. Work through the supplied examples without starting anything, then use the optional host lab only in your own disposable project. Reading a command, parsing YAML and actually running the project are different forms of evidence.
+The classroom saves `courses/docker/lessons/docker-011.md` and holds no engine socket ([host-lab setup](../STUDY-GUIDE.md#host-lab-setup)).
 
-Use Bash in Linux, macOS Terminal, or Ubuntu under WSL 2 on Windows. The supported engine runs Linux containers. The maintained fixture is `courses/docker/fixtures/compose-lab/`; its README explains copying it into a new ignored learner directory, checking the engine, building locally with visible logs, and using the fixed project name `ds60-docker-study`. The fixture uses port 18080 on host loopback. Stop if that project name or port belongs to unrelated work; choose a new project name consistently in your own copy. Never paste a command against a remote Docker context simply because it is currently selected.
-
-For Dockerfile examples, create a file named `Dockerfile` in a scratch project. YAML snippets describe a fragment unless explicitly called a complete file. Text transcripts are synthetic illustrations, not claims about your machine. Do not substitute a real password, token or private registry into a checked-in example. **How to use the lessons** in the [subject README](../README.md) collects these rules in one place.
+**Host lab.** Follow worked example 1 and 2 from your fixture copy, then inventory what the project owns: `docker compose -p ds60-docker-study ps`, `docker network ls --filter label=com.docker.compose.project=ds60-docker-study` and the same label filter on `docker volume ls`. You should find one app container, one default network and one named volume, each with a project label. Now run `docker compose ps` in the same directory without `-p`: it lists nothing, because the fixture sets no top-level `name:`, so the project name defaults to the directory name, `docker-study`, and that project owns no containers. Then run `docker compose -p ds60-docker-study down` and repeat the inventory; the container and network are gone and the volume remains. That volume is your counter, so keep it unless a later lesson asks for a fresh one.
 
 ## Worked example / walkthrough
 
@@ -64,7 +62,7 @@ docker compose -p ds60-docker-study ps
 
 ## Six progressive exercises
 
-For each exercise, name the object involved and the phase of its lifetime before changing anything, then vary only the condition the task names. Exercises that ask you to predict, explain, compare or diagnose keep their answers in the solutions file; the others show the evidence to look for.
+Answer-type prompts keep their answers in the solutions file ([exercise rules](../STUDY-GUIDE.md#exercise-rules)).
 
 ### Exercise 1: Identify the project and service names.
 
@@ -98,13 +96,19 @@ For each exercise, name the object involved and the phase of its lifetime before
 
 Running Compose from another directory or without `-p`, so resources land in a different project. Adding `-v` to `docker compose down` as routine cleanup. Starting two copies that share a host port.
 
-Exercise 4 is this chapter's boundary case: Diagnose an unexpected resource collision. List the existing projects, containers and published ports with their labels before renaming or removing anything that might belong to another copy. Preserve the original failure and the exact changed field before retrying. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
+Exercise 4 is this chapter's boundary case: Diagnose an unexpected resource collision. List the existing projects, containers and published ports with their labels before renaming or removing anything that might belong to another copy.
+
+Learners also expect `docker compose up` to notice that the Dockerfile or `server.py` changed. For a service with a `build:` section, `up` builds the image only when it does not exist yet; an existing `ds60-docker-study:local` tag is reused even if the source is newer. The visible symptom is an edited message that never appears. Run `docker compose build` explicitly, or `up --build`, and confirm with `docker image inspect` that the image creation time changed before you look for a bug in the code.
+
+Never trade a safety control for a passing example ([safety rules](../STUDY-GUIDE.md#safety-rules)).
 
 ## Retrieval, transfer and next steps
 
-Close the explanations first. Name every resource the `ds60-docker-study` project creates and which of them `down` keeps. Then reconstruct worked example 2 (Start and inspect the project) with one different value, predict what changes, and name which of Compose service, Compose project, compose.yaml and project name the change touches.
+**Retrieval.** Name every resource the `ds60-docker-study` project creates and which of them `down` keeps.
 
-When a host session ends, run `docker compose -p ds60-docker-study down` from your fixture copy. It removes the project's containers and network but keeps named volumes; deleting a volume is a separate, deliberate reset described in the fixture README.
+**Transfer case.** Two learners share one laptop and both run the fixture from directories named `docker-study`, each with `-p ds60-docker-study`. The second `up` reports a port conflict and the first learner's counter changes. What went wrong, and how should the second copy be configured?
+
+Then run the [retrieval loop](../STUDY-GUIDE.md#retrieval-and-cleanup) and end any host session with its cleanup.
 
 ## Primary references
 

@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cpp/solutions/cpp-012_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="cpp-012-explanations-and-reference-observations">cpp-012: explanations and reference observations<a class="heading-anchor" href="#cpp-012-explanations-and-reference-observations" aria-label="Link to this section">#</a></h2>
-<p>Attempt the learner tasks before opening this document. The executable reference checks the bounded normal and boundary examples; the six explanations below cover the deliberate changes and manual checks.</p>
+<p>The <a href="cpp-012_solution.cpp.html">executable reference</a> keeps <code>add</code> declared and defined in one file and adds <code>subtract_example(5, 3) == 2</code> beside it, so it can only show behavior. The multi-file work cannot run there: a missing object file and a duplicate definition of <code>add</code> are explained below, each with the phase that reports it, the compiler or the linker. How to compare: <a href="../STUDY-GUIDE.md.html#compare-with-the-solutions">study guide</a>.</p>
 <h3 id="mechanism">Mechanism<a class="heading-anchor" href="#mechanism" aria-label="Link to this section">#</a></h3>
 <p>A translation unit is a source file after its includes are expanded. A header shares declarations across translation units. A declaration states a name and type; a definition supplies storage or a function body. The linker connects references to definitions. The one-definition rule prevents incompatible or multiply defined entities.</p>
 <h3 id="detailed-reasoning">Detailed reasoning<a class="heading-anchor" href="#detailed-reasoning" aria-label="Link to this section">#</a></h3>

@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/r/solutions/r-057_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="r-057-reference-reasoning">r-057: reference reasoning<a class="heading-anchor" href="#r-057-reference-reasoning" aria-label="Link to this section">#</a></h2>
-<p>Use the <a href="r-057_reference.R.html">complete reference</a> with the guide&#x27;s declared inputs and runtime. Every worked example is also a standalone script.</p>
+<p>Run the <a href="r-057_reference.R.html">complete reference</a> under the <a href="../STUDY-GUIDE.md.html#run-a-chapter">run rules</a>.</p>
 <h3 id="why-the-implementation-has-this-shape">Why the implementation has this shape<a class="heading-anchor" href="#why-the-implementation-has-this-shape" aria-label="Link to this section">#</a></h3>
 <p>The reference inspects resolved traces rather than only checking an object class. Observed data and a comparison rule have separate names, and the bar example preserves category identity with precomputed heights. A row-order control shows why line connections need an explicit sequence.</p>
 <p>Exactly two Plotly figures are printed. The prepared worker can capture their JSON specifications offline; browser delivery, zoom, hover and accessibility remain separate visual/interaction checks.</p>
@@ -248,7 +248,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Tempting mistake:</strong> Treating the closing cat line as proof that the interactive page works. The script reaches that line even when the widget later fails to load its JavaScript in the browser.</p>
 <p><strong>Verify:</strong> The reference prints r-057 reference checks passed, and a separate browser session shows both figures with working hover text.</p>
 <h3 id="what-the-checks-establish">What the checks establish<a class="heading-anchor" href="#what-the-checks-establish" aria-label="Link to this section">#</a></h3>
-<p>The reference makes 5 <code>stopifnot()</code> checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.</p></article>
+<p>The assertions confirm two traces with a scatter first, marker y values equal to the observed column, line y values equal to the rule column, an ordered trace with x 1, 2 and 3 and y 2, 4 and 6, and a bar figure whose categories and heights equal the supplied count table. They check the figure specification, not how a browser renders or animates it.</p>
+<p>The reference makes 5 <code>stopifnot()</code> checks; see <a href="../STUDY-GUIDE.md.html#what-a-passing-run-proves">what a passing run proves</a>.</p></article>
   </main>
 </body>
 </html>

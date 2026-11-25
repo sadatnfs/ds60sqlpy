@@ -32,11 +32,9 @@ Cache mounts, covered in the next stage, preserve download caches without baking
 
 ## How to use this lesson
 
-The classroom displays this guide and saves your worksheet, `courses/docker/lessons/docker-007.md`. Its Run button does not control your Docker engine. Docker engine access is powerful host access, so the classroom deliberately receives no engine socket. Work through the supplied examples without starting anything, then use the optional host lab only in your own disposable project. Reading a command, parsing YAML and actually running the project are different forms of evidence.
+The classroom saves `courses/docker/lessons/docker-007.md` and holds no engine socket ([host-lab setup](../STUDY-GUIDE.md#host-lab-setup)).
 
-Use Bash in Linux, macOS Terminal, or Ubuntu under WSL 2 on Windows. The supported engine runs Linux containers. The maintained fixture is `courses/docker/fixtures/compose-lab/`; its README explains copying it into a new ignored learner directory, checking the engine, building locally with visible logs, and using the fixed project name `ds60-docker-study`. The fixture uses port 18080 on host loopback. Stop if that project name or port belongs to unrelated work; choose a new project name consistently in your own copy. Never paste a command against a remote Docker context simply because it is currently selected.
-
-For Dockerfile examples, create a file named `Dockerfile` in a scratch project. YAML snippets describe a fragment unless explicitly called a complete file. Text transcripts are synthetic illustrations, not claims about your machine. Do not substitute a real password, token or private registry into a checked-in example. **How to use the lessons** in the [subject README](../README.md) collects these rules in one place.
+**Host lab.** Run worked example 1 twice and note which numbered steps say `CACHED` the second time. Then change one comment in `server.py` and build again: the base and WORKDIR steps stay cached, and the `COPY server.py` step and everything after it rerun. Next, add a harmless `RUN echo dependencies` line above the COPY and build twice more; it caches after its first run, and an edit to `server.py` no longer invalidates it. That ordering is the whole trick of dependency layers. Finish with worked example 2 and compare its total time with the cached build. Record each step label and its cache status rather than wall-clock durations, which vary with the engine. Delete the extra RUN line afterwards so your copy matches the fixture again.
 
 ## Worked example / walkthrough
 
@@ -63,7 +61,7 @@ docker build --no-cache --progress=plain -t ds60-docker-study:local .
 
 ## Six progressive exercises
 
-For each exercise, name the object involved and the phase of its lifetime before changing anything, then vary only the condition the task names. Exercises that ask you to predict, explain, compare or diagnose keep their answers in the solutions file; the others show the evidence to look for.
+Answer-type prompts keep their answers in the solutions file ([exercise rules](../STUDY-GUIDE.md#exercise-rules)).
 
 ### Exercise 1: Predict the first invalidated step after editing server.py.
 
@@ -99,13 +97,19 @@ For each exercise, name the object involved and the phase of its lifetime before
 
 Copying the whole source tree before installing dependencies, so every edit reinstalls them. Assuming a cached download step fetched fresh bytes. Using `--no-cache` when the stale part was the base image.
 
-Exercise 4 is this chapter's boundary case: Diagnose a cached step that downloads a mutable dependency. Compare the text of the cached `RUN` instruction with the bytes it downloads; an unchanged instruction can be served from cache even when the remote file changed. Preserve the original failure and the exact changed field before retrying. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
+Exercise 4 is this chapter's boundary case: Diagnose a cached step that downloads a mutable dependency. Compare the text of the cached `RUN` instruction with the bytes it downloads; an unchanged instruction can be served from cache even when the remote file changed.
+
+A further trap is believing that `docker build --pull` and `--no-cache` are the same refresh. `--pull` asks the engine to check the registry for a newer base image before building, while `--no-cache` reruns every instruction against whatever base is already local. A security fix in the base image therefore needs `--pull`, and a stale download inside a RUN step needs either a changed instruction or `--no-cache`. When you need both, use both, and record the resolved base digest from the build log so you can show which base the new image actually used.
+
+Never trade a safety control for a passing example ([safety rules](../STUDY-GUIDE.md#safety-rules)).
 
 ## Retrieval, transfer and next steps
 
-Close the explanations first. Predict which build steps rerun after editing only `server.py` with the dependency file copied first. Then reconstruct worked example 2 (Compare an explicit cache bypass) with one different value, predict what changes, and name which of build cache, cache invalidation, instruction order and dependency layer the change touches.
+**Retrieval.** Predict which build steps rerun after editing only `server.py` with the dependency file copied first.
 
-When a host session ends, run `docker compose -p ds60-docker-study down` from your fixture copy. It removes the project's containers and network but keeps named volumes; deleting a volume is a separate, deliberate reset described in the fixture README.
+**Transfer case.** A Dockerfile copies `requirements.txt`, runs `pip install`, and then copies the source tree. You edit only `app/views.py`. Then, separately, you add a new package to `requirements.txt`. Which steps rerun in each case, and why?
+
+Then run the [retrieval loop](../STUDY-GUIDE.md#retrieval-and-cleanup) and end any host session with its cleanup.
 
 ## Primary references
 

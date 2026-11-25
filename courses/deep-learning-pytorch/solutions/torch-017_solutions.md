@@ -2,6 +2,8 @@
 
 Open these answers only after attempting Dropout, regularization, train and eval modes yourself. They reuse the guide's literal inputs, starting from Example A, Calculate two penalties, so a discrepancy points at one step. The executable companion runs the assertions; this page explains why each one tests Regularization penalty, Dropout mode, Weight decay. After a pass, choose a new input for exercise 6, Keep mode separate from gradients, without looking.
 
+After comparing, follow the [review steps](../STUDY-GUIDE.md#after-the-solutions).
+
 ## Mechanism review
 
 Regularization and training mode affect different parts of the experiment. An explicit L1orL2penalty adds a term to the objective. Dropout randomly zeroes activations during training and rescales retained values; in evaluation it returns the unmodified input. model.train and model.eval recursively set module behavior, but neither changes whether autograd records operations. Optimizer weight decay and an explicit penalty can have different semantics, especially for adaptive optimizers, so their names do not establish equivalence.
@@ -146,6 +148,3 @@ assert observed.requires_grad and torch.equal(differentiable.grad, torch.ones(3)
 
 **Verify:** In a fresh process, the exercise checks confirm `observed.requires_grad` and `torch.equal(differentiable.grad, torch.ones(3))`.
 
-## Review after comparison
-
-Repeat exercise 4, Separate data and penalty terms, with one changed fixture value and predict the difference before running it. Keep your failing attempt at exercise 5, Differentiate the explicit penalty, beside the repaired result. A missing framework is not a failing assertion. These solutions use only local fixtures.

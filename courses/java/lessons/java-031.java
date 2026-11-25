@@ -3,22 +3,17 @@ public class Main {
 
   public static void main(String[] args) throws Exception {
     // Exercise 1: Inspect a retained annotation: predict an edited check
-    // Copy Example A into a scratch `Main.java` and change `assert version != null &&
-    // version.value() == 2;` to `assert version != null && version.value() == 3;` inside its
-    // assertion. Before running it with `java -ea Main`, predict whether the assertion still
-    // holds and explain why; then restore it.
-    // Expected: The changed run fails with an `AssertionError` from the assertion on `version !=
-    // null && version.value() == 2`. Restoring the original line brings back the worked
-    // observation: version 2.
+    // Change Example A's assertion to `assert version != null && version.value() == 3;`, predict
+    // whether it holds, then run and restore it.
+    // Expected: The edited run fails with an `AssertionError` from the assertion on `version !=
+    // null && version.value() == 2`.
 
     // Exercise 2: Invoke a known public method reflectively: diagnose an edited check
-    // A careless edit changed the assertion that Example B adds after Example A so that it reads
-    // `assert method.invoke(new Friendly(), "Ada!").equals("Hello, Ada");`. Run Example B with
-    // that line, explain why the edited assertion now fails for the same program state, and
-    // restore it.
-    // Expected: Before the repair the run fails with an `AssertionError` from the assertion on
-    // `method.invoke(new Friendly(), "Ada").equals("Hello, Ada")`; after it the line reads
-    // `assert method.invoke(new Friendly(), "Ada").equals("Hello, Ada");` again and hello, Ada.
+    // Example B's new assertion was edited to `assert method.invoke(new Friendly(),
+    // "Ada!").equals("Hello, Ada");`. Explain why it fails for unchanged state and restore it.
+    // Expected: The edited run fails with an `AssertionError` from the assertion on
+    // `method.invoke(new Friendly(), "Ada").equals("Hello, Ada")`; the restored assertion
+    // passes.
 
     // Exercise 3: Load a real local service descriptor
     // Create the temporaryMETA-INF/services entry and discover Greeting providers.

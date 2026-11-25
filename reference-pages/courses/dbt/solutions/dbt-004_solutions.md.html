@@ -195,7 +195,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="dbt-004-explained-reference">dbt-004: explained reference<a class="heading-anchor" href="#dbt-004-explained-reference" aria-label="Link to this section">#</a></h2>
 <p>Use data tests as explicit evidence for a declared contract.</p>
-<p>The executable reference contains the two complete worked cases with assertions. The changes below explain the independent practice and its limits.</p>
+<p>The reference declares not_null and unique on <code>orders.id</code>, counts the pass statuses in run_results.json, and checks that a duplicate key fails the build yet leaves the materialized table in place. It shows what a failed test reports, not that downstream consumers were protected from the duplicate. See <a href="../STUDY-GUIDE.md.html#answers-and-references">how these answers are laid out</a>.</p>
 <h3 id="1-create-a-null-key">1. Create a null key<a class="heading-anchor" href="#1-create-a-null-key" aria-label="Link to this section">#</a></h3>
 <p>Keep both tests when the contract requires a mandatory unique key. One cannot stand in for the other.</p>
 <p><strong>Expected:</strong> The not-null test fails.</p>

@@ -53,9 +53,6 @@ The reference makes the resampling unit and null/estimand explicit, then separat
 
 ### Verification micro-example
 
-Run this small, deterministic case before adapting the reference to a
-larger system. It gives the reasoning above an executable anchor:
-
 ```python
 import numpy as np
 
@@ -73,31 +70,19 @@ print({"estimate": treatment.mean() - control.mean(), "interval": interval})
 
 **Expected observation:** The resampled interval describes uncertainty under independent within-group resampling; the small sample makes it wide/discrete.
 
-The reference implementation is one defensible contract, not a license
-to copy internal steps into every system. Preserve the observable
-guarantees and repeat the failure tests when adapting it.
-
 <!-- END PROFESSIONAL PYTHON CONCEPT ENRICHMENT -->
 
 ## Exercise-by-exercise reference
 
-Use this map after an honest attempt. The executable implementation remains
-[`py_stats_01_resampling_experiments_solution.py`](py_stats_01_resampling_experiments_solution.py); this section explains the
-contract, evidence, alternatives, and edge cases behind every numbered task.
+The runnable [`py_stats_01_resampling_experiments_solution.py`](py_stats_01_resampling_experiments_solution.py) implements every task below.
+
+**Principle behind every task:** Resampling and tests quantify uncertainty under a design; they do not repair broken assignment, dependence, selective missingness, multiplicity, or causal assumptions.
+
+**Trap behind every task:** Resampling individual rows, choosing metrics/stopping after results, or reporting a narrow interval as causal certainty can produce precise but invalid conclusions.
 
 ### Exercise 1: Define the experiment before analysis
 
 **Prompt recap:** Write an `ExperimentPlan` containing: - assignment unit, - one primary metric and window, - minimum sample per arm, - alpha, - intended analysis, - planned stopping/looks, and - missing-outcome handling. Do this before computing outcomes.
-
-**Reference reasoning:** Resampling and tests quantify uncertainty under a design; they do not repair broken assignment, dependence, selective missingness, multiplicity, or causal assumptions. The executable module and
-the focused discussion earlier in this file implement this original
-exercise. Verify every acceptance condition from the prompt with a
-normal case, a boundary case, and the documented failure behavior.
-
-**Common trap:** Resampling individual rows, choosing metrics/stopping after results, or reporting a narrow interval as causal certainty can produce precise but invalid conclusions.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
 
 **Verify:** Define the experiment before analysis; write an ExperimentPlan containing: - assignment unit, - one primary metric and window, - minimum sample per arm, - alpha, - intended analysis, - planned stopping/looks, and - missing-outcome handling; do this before computing outcomes.
 
@@ -105,31 +90,11 @@ and which input would make the policy reject or choose a different path.
 
 **Prompt recap:** Use the pooled sample standard deviation. Reject groups smaller than two and zero pooled variance. Explain raw units and standardized units side by side.
 
-**Reference reasoning:** Resampling and tests quantify uncertainty under a design; they do not repair broken assignment, dependence, selective missingness, multiplicity, or causal assumptions. The executable module and
-the focused discussion earlier in this file implement this original
-exercise. Verify every acceptance condition from the prompt with a
-normal case, a boundary case, and the documented failure behavior.
-
-**Common trap:** Resampling individual rows, choosing metrics/stopping after results, or reporting a narrow interval as causal certainty can produce precise but invalid conclusions.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
-
 **Verify:** Complete standardized effect; assert the standardized-effect fixture equals the hand-computed pooled-SD value within 1e-12; groups of size <2 and zero pooled variance raise named errors, and the report includes raw-unit and standardized effects.
 
 ### Exercise 3: Bootstrap the difference
 
 **Prompt recap:** Resample each arm independently with replacement, compute 2,000 differences, sort them, and select percentile endpoints. Repeat with the same seed and verify equality. Change the seed and expect small endpoint variation, not a different conclusion guaranteed by design.
-
-**Reference reasoning:** Resampling and tests quantify uncertainty under a design; they do not repair broken assignment, dependence, selective missingness, multiplicity, or causal assumptions. The executable module and
-the focused discussion earlier in this file implement this original
-exercise. Verify every acceptance condition from the prompt with a
-normal case, a boundary case, and the documented failure behavior.
-
-**Common trap:** Resampling individual rows, choosing metrics/stopping after results, or reporting a narrow interval as causal certainty can produce precise but invalid conclusions.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
 
 **Verify:** Bootstrap the difference; resample each arm independently with replacement, compute 2,000 differences, sort them, and select percentile endpoints; repeat with the same seed and verify equality; change the seed and expect small endpoint variation, not a different conclusion guaranteed by design.
 
@@ -137,31 +102,11 @@ and which input would make the policy reject or choose a different path.
 
 **Prompt recap:** Pool outcomes and enumerate treatment-index combinations when feasible. Use a two-sided comparison to the observed absolute difference. For large data, use seeded Monte Carlo assignments and the plus-one p-value correction. State why permuting individual rows is invalid if assignment occurred by account or site.
 
-**Reference reasoning:** Resampling and tests quantify uncertainty under a design; they do not repair broken assignment, dependence, selective missingness, multiplicity, or causal assumptions. The executable module and
-the focused discussion earlier in this file implement this original
-exercise. Verify every acceptance condition from the prompt with a
-normal case, a boundary case, and the documented failure behavior.
-
-**Common trap:** Resampling individual rows, choosing metrics/stopping after results, or reporting a narrow interval as causal certainty can produce precise but invalid conclusions.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
-
 **Verify:** Permute assignments; pool outcomes and enumerate treatment-index combinations when feasible; use a two-sided comparison to the observed absolute difference; state why permuting individual rows is invalid if assignment occurred by account or site.
 
 ### Exercise 5: Plan sample size
 
 **Prompt recap:** Use the Normal approximation for standardized effects 0.2, 0.5, and 0.8. Explain why variance uncertainty, clustering, attrition, noncompliance, and a binary metric require a more specific planner.
-
-**Reference reasoning:** Resampling and tests quantify uncertainty under a design; they do not repair broken assignment, dependence, selective missingness, multiplicity, or causal assumptions. The executable module and
-the focused discussion earlier in this file implement this original
-exercise. Verify every acceptance condition from the prompt with a
-normal case, a boundary case, and the documented failure behavior.
-
-**Common trap:** Resampling individual rows, choosing metrics/stopping after results, or reporting a narrow interval as causal certainty can produce precise but invalid conclusions.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
 
 **Verify:** Plan sample size; use the Normal approximation for standardized effects 0.2, 0.5, and 0.8; explain why variance uncertainty, clustering, attrition, noncompliance, and a binary metric require a more specific planner.
 
@@ -169,31 +114,11 @@ and which input would make the policy reject or choose a different path.
 
 **Prompt recap:** Complete `holm_adjust` for three p-values. Preserve original order and enforce monotonic adjusted values after sorting. Identify the family before viewing results; splitting an inconvenient family after analysis defeats control.
 
-**Reference reasoning:** Resampling and tests quantify uncertainty under a design; they do not repair broken assignment, dependence, selective missingness, multiplicity, or causal assumptions. The executable module and
-the focused discussion earlier in this file implement this original
-exercise. Verify every acceptance condition from the prompt with a
-normal case, a boundary case, and the documented failure behavior.
-
-**Common trap:** Resampling individual rows, choosing metrics/stopping after results, or reporting a narrow interval as causal certainty can produce precise but invalid conclusions.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
-
 **Verify:** Control a comparison family; for the three fixture p-values, print sorted raw thresholds and adjusted values, restore original order, assert adjusted values are monotone in sorted order and within [0,1], and name the predeclared comparison family.
 
 ### Exercise 7: Check assignment and attrition
 
 **Prompt recap:** Compute baseline standardized difference by arm. Then remove outcomes selectively from one arm and explain how that affects causal credibility even if the remaining p-value is small.
-
-**Reference reasoning:** Resampling and tests quantify uncertainty under a design; they do not repair broken assignment, dependence, selective missingness, multiplicity, or causal assumptions. The executable module and
-the focused discussion earlier in this file implement this original
-exercise. Verify every acceptance condition from the prompt with a
-normal case, a boundary case, and the documented failure behavior.
-
-**Common trap:** Resampling individual rows, choosing metrics/stopping after results, or reporting a narrow interval as causal certainty can produce precise but invalid conclusions.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
 
 **Verify:** Check assignment and attrition; compute baseline standardized difference by arm; then remove outcomes selectively from one arm and explain how that affects causal credibility even if the remaining p-value is small.
 
@@ -201,31 +126,11 @@ and which input would make the policy reject or choose a different path.
 
 **Prompt recap:** Five ordinary looks each at alpha 0.05 are not one 0.05 decision. The lesson's simple Bonferroni per-look split illustrates the budget. Compare it with a single final look and research group-sequential designs before production use.
 
-**Reference reasoning:** Resampling and tests quantify uncertainty under a design; they do not repair broken assignment, dependence, selective missingness, multiplicity, or causal assumptions. The executable module and
-the focused discussion earlier in this file implement this original
-exercise. Verify every acceptance condition from the prompt with a
-normal case, a boundary case, and the documented failure behavior.
-
-**Common trap:** Resampling individual rows, choosing metrics/stopping after results, or reporting a narrow interval as causal certainty can produce precise but invalid conclusions.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
-
 **Verify:** Simulate peeking policy; with seed and run count declared, estimate the false-positive rate for five alpha=.05 looks, compare with one final look and the .01 Bonferroni-per-look rule, and report Monte Carlo standard errors.
 
 ### Exercise 9: Bound the claim
 
 **Prompt recap:** Complete `claim_scope`. Randomization, intact allocation, and no severe attrition permit a causal interpretation under additional assumptions. Observational grouping, compromised randomization, or severe differential attrition returns an associational scope.
-
-**Reference reasoning:** Resampling and tests quantify uncertainty under a design; they do not repair broken assignment, dependence, selective missingness, multiplicity, or causal assumptions. The executable module and
-the focused discussion earlier in this file implement this original
-exercise. Verify every acceptance condition from the prompt with a
-normal case, a boundary case, and the documented failure behavior.
-
-**Common trap:** Resampling individual rows, choosing metrics/stopping after results, or reporting a narrow interval as causal certainty can produce precise but invalid conclusions.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
 
 **Verify:** Bound the claim; complete claim scope; randomization, intact allocation, and no severe attrition permit a causal interpretation under additional assumptions; observational grouping, compromised randomization, or severe differential attrition returns an associational scope.
 
@@ -244,11 +149,6 @@ uncertainty.
 If assignment was by site, site is the resampling unit. A small number of
 clusters needs specialized methods and candid limitations.
 
-**Common trap:** Resampling individual rows, choosing metrics/stopping after results, or reporting a narrow interval as causal certainty can produce precise but invalid conclusions.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
-
 **Verify:** bootstrap clustered assignments; extend the experiment fixture with multiple rows per account; bootstrap accounts, not rows, within each arm and compare interval width with the incorrect row bootstrap.
 
 ### Exercise 11: bootstrap a ratio metric
@@ -264,11 +164,6 @@ inserting an arbitrary zero.
 
 Mean of individual ratios weights users equally and can be undefined or answer
 a different question. Report the exact formula and support with the interval.
-
-**Common trap:** Resampling individual rows, choosing metrics/stopping after results, or reporting a narrow interval as causal certainty can produce precise but invalid conclusions.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
 
 **Verify:** bootstrap a ratio metric; estimate treatment lift for revenue per active user, preserving each user's numerator and denominator; handle a resample with zero denominator and compare ratio-of-sums with mean-of-user-ratios.
 
@@ -287,11 +182,6 @@ Check balance/missingness and report both estimates. Selecting the covariate or
 formula after seeing favorable effects creates another analysis degree of
 freedom.
 
-**Common trap:** Resampling individual rows, choosing metrics/stopping after results, or reporting a narrow interval as causal certainty can produce precise but invalid conclusions.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
-
 **Verify:** apply covariate adjustment without leakage; use a pre-experiment outcome as a CUPED-style covariate; estimate its adjustment coefficient without post-treatment information and compare unadjusted/adjusted variance and mean effect.
 
 ### Exercise 13: separate intention-to-treat from treatment-on-treated
@@ -308,11 +198,6 @@ comparison loses randomization.
 Instrumental-variable/complier effects require additional exclusion,
 monotonicity, and relevance assumptions; state them before making that
 extension.
-
-**Common trap:** Resampling individual rows, choosing metrics/stopping after results, or reporting a narrow interval as causal certainty can produce precise but invalid conclusions.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
 
 **Verify:** separate intention-to-treat from treatment-on-treated; simulate assigned treatment with imperfect compliance; compute the intention-to-treat effect by assignment and explain why comparing actual takers with non-takers is generally confounded.
 
@@ -331,11 +216,6 @@ The resulting range is a sensitivity analysis, not a recovered truth. Severe
 differential attrition downgrades causal credibility even when observed
 p-values remain small.
 
-**Common trap:** Resampling individual rows, choosing metrics/stopping after results, or reporting a narrow interval as causal certainty can produce precise but invalid conclusions.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
-
 **Verify:** perform missing-outcome sensitivity; create differential attrition by arm; report complete-case results and bounded best/worst-case outcomes under a declared feasible outcome range.
 
 ### Exercise 15: simulate sequential false positives
@@ -353,11 +233,6 @@ control.
 Do not tune the simulation until a preferred policy wins. Production use
 requires a reviewed sequential design and operational stopping rules.
 
-**Common trap:** Resampling individual rows, choosing metrics/stopping after results, or reporting a narrow interval as causal certainty can produce precise but invalid conclusions.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
-
 **Verify:** simulate sequential false positives; under a true null, simulate repeated ordinary alpha=0.05 looks and estimate ever-reject probability; compare one final look, the lesson's simple alpha split, and a clearly labeled exploratory monitor.
 
 ### Exercise 16: pre-specify heterogeneous effects
@@ -373,11 +248,6 @@ difference-in-effects estimate. Sparse groups receive cautious or no claim.
 Data-mined segments are hypothesis generation and need independent
 confirmation. Avoid causal stories for a subgroup selected because its
 observed lift was largest.
-
-**Common trap:** Resampling individual rows, choosing metrics/stopping after results, or reporting a narrow interval as causal certainty can produce precise but invalid conclusions.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
 
 **Verify:** pre-specify heterogeneous effects; choose two domain-motivated subgroups before analysis, estimate effects with uncertainty and support, and adjust the planned comparison family; contrast this with mining many cuts for the largest lift.
 
@@ -395,11 +265,6 @@ extremeness under the sharp null and assignment mechanism.
 Row permutation fabricates assignments that could never occur and overstates
 independent information. Few sites limit resolution and power.
 
-**Common trap:** Resampling individual rows, choosing metrics/stopping after results, or reporting a narrow interval as causal certainty can produce precise but invalid conclusions.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
-
 **Verify:** run clustered randomization inference; for a site-randomized experiment, permute site assignments while keeping all rows within a site together; compare with invalid row-level permutation and state the sharp-null interpretation.
 
 ### Exercise 18: produce an auditable analysis packet
@@ -415,10 +280,5 @@ Rerunning with identical inputs and seed should reproduce the packet.
 
 Hashes identify bytes but do not prove legal use or study quality. Preserve
 review ownership and any deviations from the pre-analysis plan.
-
-**Common trap:** Resampling individual rows, choosing metrics/stopping after results, or reporting a narrow interval as causal certainty can produce precise but invalid conclusions.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
 
 **Verify:** produce an auditable analysis packet; write a deterministic JSON/Markdown packet containing plan hash, data fingerprint, exclusions, assignment checks, attrition, estimand, effect, interval, adjusted p-values, claim scope, code version, and limitations.

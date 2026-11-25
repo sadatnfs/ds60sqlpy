@@ -1,16 +1,14 @@
 // Answer-free learner source. Save your own copy before editing.
 // Exercise 1: Read a small UTF-8 file: change one input
-// Copy Example A into a scratch `main.mjs` and change `const text = 'A😀B\n';` to `const text
-// = 'A😀B\n!';`. Before running it, predict which check fails and which value it now sees;
-// then run it and restore the original line.
-// Expected: The changed run fails with an `AssertionError` at `assert.equal((await
+// In a scratch copy of Example A, change `const text = 'A😀B\n';` to `const text =
+// 'A😀B\n!';`. Which check fails, and what value does it see?
+// Expected: The edited run fails with an `AssertionError` at `assert.equal((await
 // handle.readFile()).length, 7)`. Restoring `const text = 'A😀B\n';` brings back: text round-
 // trips; 7 UTF-8 bytes versus 5 code units; the handle reports fd -1 after its block.
 
 // Exercise 2: Preserve characters and lines across chunks: debug a regression
-// A regression changed one token in Example B, so one line now reads `await writeFile(path,
-// 'A😀B\r\nsecond\n!', 'utf8');`. Run Example B with that line, use the failing check to
-// locate the defect and repair it without changing the check.
+// A regression made one Example B line read `await writeFile(path, 'A😀B\r\nsecond\n!',
+// 'utf8');`. Locate and repair it without editing the check.
 // Expected: Before the repair the run fails with an `AssertionError` at
 // `assert.deepEqual(await readLines(path), ['A😀B', 'second'])`. Restoring `await
 // writeFile(path, 'A😀B\r\nsecond\n', 'utf8');` brings back: lines are A😀B and second,

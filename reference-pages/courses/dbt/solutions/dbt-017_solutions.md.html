@@ -195,7 +195,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="dbt-017-explained-reference">dbt-017: explained reference<a class="heading-anchor" href="#dbt-017-explained-reference" aria-label="Link to this section">#</a></h2>
 <p>Produce a historical feature relation with explicit entity, time and version semantics.</p>
-<p>The executable reference contains the two complete worked cases with assertions. The changes below explain the independent practice and its limits.</p>
+<p>The reference joins requests to features where both <code>event_at</code> and <code>known_at</code> precede the cutoff and keeps the latest row per request. The event-time-only version returns 999 for request 1. The proof covers this ordering rule on three events, not clock skew or corrections that arrive later. See <a href="../STUDY-GUIDE.md.html#answers-and-references">how these answers are laid out</a>.</p>
 <h3 id="1-add-an-unmatched-request">1. Add an unmatched request<a class="heading-anchor" href="#1-add-an-unmatched-request" aria-label="Link to this section">#</a></h3>
 <p>Left-join selected results back to the request population and report missing-feature reasons. Do not drop difficult requests before evaluating a model.</p>
 <p><strong>Expected:</strong> The request is explicitly retained or counted as unmatched.</p>

@@ -195,7 +195,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="dbt-010-explained-reference">dbt-010: explained reference<a class="heading-anchor" href="#dbt-010-explained-reference" aria-label="Link to this section">#</a></h2>
 <p>Explain what a snapshot actually observed and what it cannot reconstruct.</p>
-<p>The executable reference contains the two complete worked cases with assertions. The changes below explain the independent practice and its limits.</p>
+<p>The reference snapshots the customer seed with the check strategy on <code>region</code>, reruns after a change, and reads current rows where <code>dbt_valid_to</code> is null. The history covers only the moments when dbt snapshot ran; a change that happened and reverted between runs is invisible to it. See <a href="../STUDY-GUIDE.md.html#answers-and-references">how these answers are laid out</a>.</p>
 <h3 id="1-inspect-a-closed-version">1. Inspect a closed version<a class="heading-anchor" href="#1-inspect-a-closed-version" aria-label="Link to this section">#</a></h3>
 <p>Retain both versions and their interval meaning. A current-only query is appropriate for a different question than a historical reconstruction.</p>
 <p><strong>Why it holds here:</strong> The check strategy compared region for customer 1, saw north change to west and closed the north row by setting dbt_valid_to. That is why the snapshot holds 3 rows for 2 customers after the second run.</p>

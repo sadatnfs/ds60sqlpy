@@ -521,10 +521,19 @@ def build_rows(catalog: Catalog, modules: ModuleCatalog) -> list[dict[str, Any]]
     for row in rows:
         row["unknown_prerequisites"] = [item for item in row["prerequisites"] if item not in known]
         row["gaps"] = _gaps(row)
-    templated = templated_word_counts({row["id"]: _lesson_prose(row) for row in rows})
+    prose = {row["id"]: _lesson_prose(row) for row in rows}
+    templated = templated_word_counts(prose)
     for row in rows:
+        row["metrics"]["prose_words"] = sum(map(len, prose_paragraphs(prose[row["id"]])))
         row["metrics"]["templated_words"] = templated[row["id"]]
     return rows
+
+
+def templated_share(row: Mapping[str, Any]) -> float:
+    """Return the share of a lesson's scored prose words that are templated."""
+
+    prose_words = int(row["metrics"]["prose_words"])
+    return int(row["metrics"]["templated_words"]) / prose_words if prose_words else 0.0
 
 
 def coverage_problems(
@@ -648,6 +657,7 @@ def render_report(rows: Sequence[Mapping[str, Any]], capstones: Mapping[str, int
         f" across {sum(len(row['variants']) > 1 for row in rows)} lessons",
         f"- Lessons with no recorded gap: {clean}",
         f"- Templated prose words: {sum(int(row['metrics']['templated_words']) for row in rows)}",
+        f"- Largest per-lesson templated share: {max(map(templated_share, rows), default=0.0):.2f}",
         "",
         "## Gap codes",
         "",
@@ -712,7 +722,10 @@ def render_report(rows: Sequence[Mapping[str, Any]], capstones: Mapping[str, int
         f"least {TEMPLATE_MIN_WORDS} words whose sampled {SHINGLE_SIZE}-word phrases mostly",
         f"also appear in {TEMPLATE_LESSONS} or more lessons. It measures generator",
         "boilerplate; the corpus total may not grow, so new explanations must be",
-        "specific to their lesson.",
+        "specific to their lesson. `prose_words` counts every word in those scored",
+        "paragraphs, and a lesson's templated share is `templated_words` divided",
+        "by `prose_words`; fenced code, headings, tables and paragraphs under",
+        f"{TEMPLATE_MIN_WORDS} words count toward neither.",
         "",
         "[Track qualification](track-qualification.md) reads these rows for rubric",
         "criteria R1 to R8 and records each track's result against the shared",

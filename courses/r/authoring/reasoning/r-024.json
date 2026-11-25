@@ -36,5 +36,7 @@
       "wrong": "Passing a Series to combine_measure because both objects answer `@values`. Dispatch fails, and if it did not, the S4 validity rules would never have been checked for this object.",
       "verify": "`S7::S7_inherits(x, Series)` returns TRUE, and `class(x)` shows \"Series\" and \"S7_object\", not FormalMeasure."
     }
-  ]
+  ],
+  "run_note": "The starter supplies values 3 and 7 with the unit ms and an empty results list. Run it, then declare the `Series` class with typed properties and a validator using the pinned S7 API. Remember the contract difference from S4 in exercise 4: an S7 validator returns NULL on success and a character message on failure, not TRUE.",
+  "checks_note": "The assertions confirm that an invalid replacement fails with the expected message, that the series totals `c(ms = 10)`, that joining a 5 ms series gives values 3, 7 and 5 and a total of 15, that the new count generic returns 3L, that the unit stays ms after a failed replacement, and that an empty series counts 0 and totals 0. They do not test dispatch on classes beyond `Series`."
 }

@@ -1,6 +1,6 @@
 # tf-029: explanatory solutions
 
-Open these answers for Precision, overflow and stable objectives after your own attempt at Example A, Expose naive overflow, or after an explicit reveal. Each answer reuses the guide's literal inputs, so a mismatch points to one step. The companion script runs the assertions; this page explains why they test Overflow, Log-sum-exp, Precision. After matching exercise 6, Validate input finiteness, invent a new input without looking here.
+Open these answers after an attempt; they reuse the guide's inputs ([comparison steps](../STUDY-GUIDE.md#after-the-solutions)).
 
 ## Mechanism review
 
@@ -130,6 +130,3 @@ np.testing.assert_allclose(stable(z).sum(), 1, atol=1e-12, rtol=0)
 
 **Verify:** In a fresh process, the exercise checks confirm `stable([0, np.nan])` raises `ValueError` and `stable(z).sum()` matches `1` within 1e-12.
 
-## Review after comparison
-
-Change one fixture value in exercise 4, Inspect gradients, and predict the new result before running it. Keep the failing version of exercise 5, Separate precision policies, next to its repair. A missing framework is an environment record, not a failed assertion. No solution downloads data, calls an online model, deploys a service or changes a database.

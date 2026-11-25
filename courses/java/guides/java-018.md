@@ -6,7 +6,16 @@ Intermediate, approximately 90 minutes. Direct prerequisites: `java-017`
 
 ## Learning objectives
 
-Write tests that fail on a broken implementation, including boundary, property and exception checks. Along the way, explain test oracle, property, mutation test using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. Exercises 1 and 2 start from the worked examples; the authored investigations begin with this task: For values -10 through 10, clamping an already clamped value leaves it unchanged. The final exercise transfers the mechanism to test a fresh transfer property.
+Write tests that fail on a broken implementation, including boundary, property and exception checks.
+
+The six exercises practice these steps:
+
+- Use independent table cases.
+- Check a boundary failure.
+- Test an idempotence property.
+- Detect a broken implementation.
+- Verify the exception checker itself.
+- Test a fresh transfer property.
 
 ## Purpose and mental model
 
@@ -22,16 +31,9 @@ A useful test distinguishes correct behavior from a plausible mistake. Repeating
 
 ## How to run this lesson
 
-Open the Docker classroom, choose the prepared Java 21 profile and save a learner pad. The pad is compiled as `Main.java` with `javac --release 21` and executed with `java -ea Main`. Assertions are enabled deliberately. A successful assertion has no output; a failed assertion throws `AssertionError` and the process should fail. Do not remove assertions to obtain a green result.
+`clamp`, `brokenClamp`, `expect` and `reverse` are helpers beside `main`; the deliberately broken `brokenClamp` exists only so Exercise 4 can prove that the case table detects it.
 
-For a prepared native JDK, copy a worked example into your own `Main.java` under ignored `.learning/expansion/java-018/`. From that directory run the same two commands on PowerShell, macOS or Linux:
-
-```text
-javac --release 21 Main.java
-java -ea Main
-```
-
-The public class name and source filename must agree. Each worked example below is a complete file. Example B includes the setup it needs from Example A, so it can be compiled by itself. The six exercise reference blocks form one complete program in the separate solution. Keep your original prediction, source and diagnostic text together. Most examples use prepared JDK libraries and tiny local fixtures; any additional dependency is specified in the lesson notes below. Any lesson-specific library or additional file is named explicitly; do not download packages from inside a learner program. Resource examples close their owned files, executors or loopback servers.
+Classroom and native JDK steps, the exercise controls and the hint routine are in the [Java study guide](../STUDY-GUIDE.md).
 
 
 
@@ -149,62 +151,62 @@ public class Main {
 
 ## Prediction before your attempt
 
-Read the source from the entry point and name each value before executing it. Identify which operations create new values, which mutate existing state and which can fail. Predict the first observable output or assertion result. For a compile-time failure, explain which source rule is violated before discussing runtime state: a program that did not compile never reached its main method. Keep normal, boundary and invalid inputs separate so each check has a clear purpose.
+Before running Example A, write `clamp` for -2, 0, 3 and 9 with bounds 0 and 5 by applying the contract, not the code. For Example B, predict what `clamp(1, 5, 2)` should do when the lower bound exceeds the upper bound. Then predict whether the idempotence property in Exercise 3 alone would catch a mutant that always returns 0 (it would not, which is why the table matters).
 
 ## Exercises
 
-1. **Use independent table cases: change one input.** Copy Example A into a scratch `Main.java` and change `int[][] cases = { { -2, 0 }, { 0, 0 }, { 3, 3 }, { 9, 5 } };` to `int[][] cases = { { -2, 1 }, { 0, 0 }, { 3, 3 }, { 9, 5 } };`. Before running it with `java -ea Main`, predict which assertion fails and which value it now sees; then run it and restore the original line.
-   **Expected:** The changed run fails with an `AssertionError` from the assertion on `clamp(row[0], 0, 5) == row[1]`. Restoring the original line brings back the worked observation: outputs 0, 0, 3, 5.
-   **Verify:** Compare your written prediction with the reported `AssertionError` and its stack-trace line, and name the value that made `clamp(row[0], 0, 5) == row[1]` false. After restoring the line, the program completes without an `AssertionError` again.
+1. **Use independent table cases: change one input.** Change `int[][] cases = { { -2, 0 }, { 0, 0 }, { 3, 3 }, { 9, 5 } };` to `int[][] cases = { { -2, 1 }, { 0, 0 }, { 3, 3 }, { 9, 5 } };` in Example A and predict which assertion fails and why.
+   **Expected:** The edited run fails with an `AssertionError` from the assertion on `clamp(row[0], 0, 5) == row[1]`.
+   **Verify:** Name the value that makes `clamp(row[0], 0, 5) == row[1]` false, then restore the line.
 
-2. **Check a boundary failure: debug a regression.** Introduce one deliberate defect into the code that Example B adds after Example A and explain which observation exposes it, then repair it.
-   **Expected:** The defective copy changes the observation; the repaired copy reproduces the worked observation: exception observed.
-   **Verify:** Keep the failing and the repaired runs and name the first statement whose value differs between them.
+2. **Check a boundary failure: debug a regression.** Add one defect to Example B's new code that changes its observation, then repair it.
+   **Expected:** The defective copy fails its assertion and the repaired copy passes.
+   **Verify:** Name the first statement whose value differs between the failing and repaired runs.
 
 3. **Test an idempotence property.** For values -10 through 10, clamping an already clamped value leaves it unchanged.
    **Expected:** all 21 cases satisfy idempotence.
-   **Verify:** Keep an assertion equivalent to `clamp(once, 0, 5) == once`. As a control, change `int once = clamp(value, 0, 5);` to `int once = clamp(value, 0, 6);`: the run must fail with an `AssertionError` from the assertion on `clamp(once, 0, 5) == once`. Restore the line before continuing.
+   **Verify:** Control: changing `int once = clamp(value, 0, 5);` to `int once = clamp(value, 0, 6);` must fail the assertion on `clamp(once, 0, 5) == once`.
 
 4. **Detect a broken implementation.** Use a mutant that returns upper for values below lower and show the table rejects it.
    **Expected:** at least one mismatch.
-   **Verify:** Keep an assertion equivalent to `caught`. As a control, change `for (int[] row : cases) if (brokenClamp(row[0], 0, 5) != row[1]) caught = true;` to `for (int[] row : cases) if (brokenClamp(row[1], 0, 5) != row[1]) caught = true;`: the run must fail with an `AssertionError` from the assertion on `caught`. Restore the line before continuing.
+   **Verify:** Control: changing `for (int[] row : cases) if (brokenClamp(row[0], 0, 5) != row[1]) caught = true;` to `for (int[] row : cases) if (brokenClamp(row[1], 0, 5) != row[1]) caught = true;` must fail the assertion on `caught`.
 
 5. **Verify the exception checker itself.** Ask the helper to expect an exception from a successful action and catch its AssertionError.
    **Expected:** checker fails when no exception is thrown.
-   **Verify:** Keep an assertion equivalent to `checkerFailed`. As a control, change `checkerFailed = true;` to `checkerFailed = false;`: the run must fail with an `AssertionError` from the assertion on `checkerFailed`. Restore the line before continuing.
+   **Verify:** Control: changing `checkerFailed = true;` to `checkerFailed = false;` must fail the assertion on `checkerFailed`.
 
 6. **Test a fresh transfer property.** Reverse arrays of length 0, 1, 3 twice using a separate copy and compare with originals.
    **Expected:** all originals restored; input arrays unchanged.
-   **Verify:** Keep an assertion equivalent to `first[0] == original[original.length - 1]`. As a control, change `if (original.length > 1) assert first[0] == original[original.length - 1];` to `if (original.length > 1) assert first[1] == original[original.length - 1];` inside it: the run must fail with an `AssertionError`, which shows the assertion can fail. Restore it.
+   **Verify:** Control: changing `if (original.length > 1) assert first[0] == original[original.length - 1];` to `if (original.length > 1) assert first[1] == original[original.length - 1];` inside the assertion must make it fail.
 
 ## Common pitfalls and diagnosis
 
-When a check fails, keep the smallest source file that still demonstrates the failure. Read the first relevant compiler diagnostic before editing several lines; later diagnostics can be consequences of the same missing delimiter or wrong type. For a runtime exception, identify the first frame belonging to your code and compare its input with the method contract. For an assertion failure, inspect the actual value and the independent expected value. A passing process exit is weaker than a checked invariant, and a checked invariant applies only under its stated assumptions.
+The weakest test computes its expected value with the same formula as the implementation, so a bug appears on both sides and the test still passes. Another common failure is a test helper that catches every exception and reports success, which turns every negative test green; Exercise 5 tests the helper itself. Watch for property tests that a trivial implementation also satisfies, and remember that plain `java Main` skips every `assert`, so a suite built on assertions must run with `-ea`.
 
-Do not replace a precise exception with a catch-all that returns a plausible default. That can hide an invalid input or an unfinished operation. If an example owns a resource, verify its lifetime on both the success and failure paths. If an operation is concurrent, use ordering primitives to establish the relationship you need; an observed timing coincidence is not a synchronization guarantee. The solution explanations identify the specific alternative that would break each exercise.
+General compiler, runtime and assertion triage: [diagnose a failure](../STUDY-GUIDE.md#diagnose-a-failure).
 
 ## Progressive hints
 
-Read one hint at a time and attempt the exercise again before reading the next. Keep a small table of input, expected value, actual value and exception type. Ask for one hint about the first incorrect assumption before requesting the entire reference implementation.
+Read one rung at a time, as described in [using hints](../STUDY-GUIDE.md#use-hints-one-at-a-time).
 
-- **Exercise 1:** First restate the expected observation: outputs 0, 0, 3, 5. Then list the values read by `clamp(row[0], 0, 5) == row[1]` and trace each one from its declaration. Finally, compute the asserted value with `int[][] cases = { { -2, 1 }, { 0, 0 }, { 3, 3 }, { 9, 5 } };` in place before running.
-- **Exercise 2:** First restate the expected observation: exception observed. Then trace each value from its declaration to the observation. Finally, name one input that would change the observation.
-- **Exercise 3:** First restate the expected observation: all 21 cases satisfy idempotence. Then list the values read by `clamp(once, 0, 5) == once` and trace each one from its declaration. Finally, predict the effect of changing `int once = clamp(value, 0, 5);` to `int once = clamp(value, 0, 6);` before running anything.
-- **Exercise 4:** First restate the expected observation: at least one mismatch. Then list the values read by `caught` and trace each one from its declaration. Finally, predict the effect of changing `for (int[] row : cases) if (brokenClamp(row[0], 0, 5) != row[1]) caught = true;` to `for (int[] row : cases) if (brokenClamp(row[1], 0, 5) != row[1]) caught = true;` before running anything.
-- **Exercise 5:** First restate the expected observation: checker fails when no exception is thrown. Then list the values read by `checkerFailed` and trace each one from its declaration. Finally, predict the effect of changing `checkerFailed = true;` to `checkerFailed = false;` before running anything.
-- **Exercise 6:** First restate the expected observation: all originals restored; input arrays unchanged. Then list the values read by `first[0] == original[original.length - 1]` and trace each one from its declaration. Finally, name one input that would make `first[0] == original[original.length - 1]` false.
+- **Exercise 1:** First note that the edit changes the expected output for -2 to 1. Then apply the contract by hand: clamping -2 into 0 to 5 gives 0. Finally, decide whether the implementation or the table row is wrong, and explain why a test can be the defect.
+- **Exercise 2:** First change `clamp(3, 5, 2)` to `clamp(3, 2, 5)` inside the `expect` call, which turns the reversed bounds into a valid interval. Then run it: `clamp` returns 3 instead of throwing, so `expect` raises `AssertionError` with the message "expected IllegalArgumentException". Finally, restore the reversed bounds and name the guard `lower > upper` as the first statement that behaves differently between the two runs.
+- **Exercise 3:** First loop over every value from -10 to 10. Then compute `once = clamp(value, 0, 5)` and assert that clamping `once` again returns the same value. Finally, name a broken implementation that would still pass this property.
+- **Exercise 4:** First run `brokenClamp` on every input in the case table and compare with the expected outputs. Then set a flag when any row differs. Finally, assert the flag and name the row that exposed the defect.
+- **Exercise 5:** First call `expect(IllegalArgumentException.class, () -> {})` with an action that succeeds. Then catch the `AssertionError` the helper should throw and record it. Finally, explain why a helper that returned quietly here would make every negative test pass.
+- **Exercise 6:** First reverse each array twice and compare the result with the original using `Arrays.equals`. Then assert, for arrays longer than one element, that the first reversal starts with the original's last element. Finally, explain why a `reverse` that returned its input unchanged would pass the round trip but not the second check.
 
 ## Self-check and retrieval
 
-Close the solution and explain Test oracle, Property, Mutation test in your own words. Reconstruct one example from a blank `Main.java`, then add a new boundary input. Explain why the new case should pass or fail before compiling it. Identify a situation where this technique is appropriate and one where a different data structure, lifetime policy or abstraction would be clearer. This is a reasoning check, not a memorization test for an API spelling.
+From memory, explain what makes a test oracle independent, why the table uses literal outputs, what idempotence of `clamp` means and which bug it cannot detect, and how a mutation such as `brokenClamp` shows that a suite is worth having.
 
 ## Next step
 
-Preserve the saved pad and the six exercise observations. Continue to the next lesson only when you can explain the invariants without reading the answer. Later chapters reuse these contracts in larger programs, so keep a failing counterexample as well as a repaired result. A reference implementation demonstrates one valid design under the stated assumptions; it is not a universal design rule.
+Continue with `java-019`: Data structures and complexity. Keep your six observations; see [moving on](../STUDY-GUIDE.md#move-to-the-next-lesson).
 
 ## Sources and verification status
 
-[Official Java 21 API or language reference](https://docs.oracle.com/en/java/javase/21/docs/api/index.html), reviewed 2026-10-22. Examples and exercise fixtures are original course material. Use the [validation guide](../../../docs/validation.md) and CI artifacts for the exact revision and platform to inspect actual compile/run results. Authoring, parsing, compilation, execution and learner mastery are separate forms of evidence.
+[Official Java 21 API or language reference](https://docs.oracle.com/en/java/javase/21/docs/api/index.html), reviewed 2026-10-22. Evidence levels: [sources and evidence](../STUDY-GUIDE.md#sources-and-evidence).
 
 ## Ask an AI tutor about this lesson
 

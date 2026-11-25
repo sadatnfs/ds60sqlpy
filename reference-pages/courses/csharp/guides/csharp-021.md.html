@@ -206,11 +206,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Cardinality:</strong> The number of records or matches.</p>
 <p><strong>Join key:</strong> The identity relating two datasets.</p>
 <h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>The Linux Docker classroom compiles your saved pad as <code>Program.cs</code> in its fixed .NET 10 project. C# 14 is the matching language generation. This route uses the prepared framework libraries; it does not accept arbitrary project files, NuGet packages, command arguments or interactive input. The explicit <code>Program.Main</code> entrypoint makes compilation and execution visible. <code>Check</code> throws on a false condition in every build configuration, unlike conditional debugging assertions.</p>
-<p>Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.</p>
+<p>Both examples use tuples with named elements, such as <code>Kind</code> and <code>Amount</code>, instead of declaring row classes. For task 4, <code>ToDictionary</code> over duplicate keys throws <code>ArgumentException</code> with the message that an item with the same key has already been added, which is usually the first sign of an unexpected duplicate.</p>
+<p>Compile contract, starter stop and success marker: <a href="../STUDY-GUIDE.md.html#running-a-lesson">running a lesson</a>.</p>
 <h3 id="syntax-anatomy-and-execution-trace">Syntax anatomy and execution trace<a class="heading-anchor" href="#syntax-anatomy-and-execution-trace" aria-label="Link to this section">#</a></h3>
 <p><code>GroupBy(keySelector)</code> returns groups with Key and enumerable members. <code>Join</code> uses one key selector per side. A grouped lookup such as ToLookup preserves all matches, while ToDictionary requires unique keys.</p>
-<p>Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.</p>
+<p>Each example ends with a trace; method: <a href="../STUDY-GUIDE.md.html#tracing-a-program">tracing a program</a>.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="example-a-aggregate-at-a-declared-grain">Example A: Aggregate at a declared grain<a class="heading-anchor" href="#example-a-aggregate-at-a-declared-grain" aria-label="Link to this section">#</a></h4>
 <p>Grouping changes grain while preserving the sum across all groups.</p>
@@ -250,6 +250,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> Three event rows become two category totals.</p>
+<p><strong>Trace.</strong> The input grain is one row per event: three rows. <code>GroupBy(row =&gt; row.Kind)</code> forms group a with amounts 2 and 3 and group b with 4. <code>ToDictionary</code> takes each group&#x27;s Key and the sum of its amounts, giving 5 for a and 4 for b. The output grain is one row per kind, and the grand total, 9, is unchanged.</p>
 <h4 id="example-b-expose-duplicate-key-multiplication">Example B: Expose duplicate-key multiplication<a class="heading-anchor" href="#example-b-expose-duplicate-key-multiplication" aria-label="Link to this section">#</a></h4>
 <p>A key relationship does not imply one-to-one cardinality. Validate uniqueness if the domain requires exactly one match.</p>
 <pre class="highlighted-code"><code class="language-csharp"><span class="syntax-keyword">using</span> System<span class="syntax-punctuation">;</span>
@@ -288,6 +289,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> One left row becomes two joined rows.</p>
+<p><strong>Trace.</strong> <code>left</code> has one row with key 1, and <code>right</code> has two rows with key 1. <code>Join</code> pairs each left row with every right row whose key matches, so it produces two results, Lx and Ly. The output has more rows than the left input, and summing a left-side amount after this join would count it twice.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <ol>
 <li><strong>Predict and explain.</strong> State the input and output grain for each example.</li>
@@ -307,10 +309,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <ol start="6">
 <li><strong>Transfer and justify.</strong> Design checks that distinguish one-to-one, one-to-many and many-to-many joins before aggregation.</li>
 </ol>
-<p>For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.</p>
+<p>Log each task in the <a href="../STUDY-GUIDE.md.html#recording-exercise-evidence">evidence table</a> before opening the explanation.</p>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
 <p>Aggregating after an unintended many-to-many join can inflate totals. ToDictionary throws on duplicate keys rather than choosing a winner. Sorting is needed when presentation order is part of the contract.</p>
-<p>A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.</p>
+<p>For task 4, duplicate metadata rows for one item turn a single total into two joined rows, so a sum after the join doubles. Check <code>GroupBy(key).Any(g =&gt; g.Count() &gt; 1)</code> on the side that should be unique. For task 5, <code>Join</code> drops an unmatched key silently, while <code>ToLookup</code> returns an empty group for a missing key instead of throwing.</p>
+<p>Repair routine: <a href="../STUDY-GUIDE.md.html#building-a-regression-case">building a regression case</a>.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <ol>
 <li>Reproduce Example A (Aggregate at a declared grain) before changing anything, and confirm its observation: Three event rows become two category totals.</li>
@@ -318,9 +321,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>Before opening the explanation, test your task 3 attempt against this lesson&#x27;s main pitfall: Aggregating after an unintended many-to-many join can inflate totals.</li>
 </ol>
 <h3 id="self-check-and-next-step">Self-check and next step<a class="heading-anchor" href="#self-check-and-next-step" aria-label="Link to this section">#</a></h3>
-<p>Explain Grain, Cardinality, Join key without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.</p>
+<p>State the input and output grain for both examples and the total that must be conserved in Example A. Explain why <code>Join</code> can return more rows than either input. For task 6, describe one check that tells a one-to-many relationship from a many-to-many one before you aggregate.</p>
+<p>Then follow the general <a href="../STUDY-GUIDE.md.html#self-check-routine">self-check routine</a> and save your pad.</p>
 <h3 id="sources-and-execution-boundary">Sources and execution boundary<a class="heading-anchor" href="#sources-and-execution-boundary" aria-label="Link to this section">#</a></h3>
-<p><a href="https://learn.microsoft.com/en-us/dotnet/csharp/">Official language or framework documentation</a>. The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.</p>
+<p><a href="https://learn.microsoft.com/en-us/dotnet/csharp/">Documentation</a>: LINQ&#x27;s grouping and join operations are covered in the standard query operator articles, including <code>GroupBy</code>, <code>Join</code> and <code>ToLookup</code>.</p>
+<p>Provenance and limits: <a href="../STUDY-GUIDE.md.html#sources-and-execution-boundary">sources and execution boundary</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for csharp-021: Grouping, joins and data grain.
 Read courses/csharp/guides/csharp-021.md and courses/csharp/lessons/csharp-021.cs. Prerequisites: csharp-020.

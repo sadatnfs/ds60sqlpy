@@ -1,6 +1,6 @@
 # cpp-038: explanations and reference observations
 
-Attempt the learner tasks before opening this document. The executable reference checks the bounded normal and boundary examples; the six explanations below cover the deliberate changes and manual checks.
+The [executable reference](cpp-038_solution.cpp) checks that `(0, 0)` is accepted, `(-1, 2)` is rejected by the nonnegative contract and the int maximum plus 0 is accepted. The explanations cover overflow guards and floating-point grouping. How to compare: [study guide](../STUDY-GUIDE.md#compare-with-the-solutions).
 
 ## Mechanism
 

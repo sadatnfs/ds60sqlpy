@@ -24,9 +24,9 @@ Correct ownership includes awaiting or otherwise accounting for admitted work af
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles your saved pad as `Program.cs` in its fixed .NET 10 project. C# 14 is the matching language generation. This route uses the prepared framework libraries; it does not accept arbitrary project files, NuGet packages, command arguments or interactive input. The explicit `Program.Main` entrypoint makes compilation and execution visible. `Check` throws on a false condition in every build configuration, unlike conditional debugging assertions.
+Both examples cancel their token before starting, so no timing is involved. Example B's wait ends with `TaskCanceledException`, which derives from `OperationCanceledException`, so the catch handles it. The `TaskCompletionSource` is created with `RunContinuationsAsynchronously`, so setting its result never runs awaiting code inline.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Compile contract, starter stop and success marker: [running a lesson](../STUDY-GUIDE.md#running-a-lesson).
 
 
 
@@ -34,7 +34,7 @@ Start with the answer-free learner artifact in your saved classroom pad. It deli
 
 `ThrowIfCancellationRequested` reports acknowledged cancellation. `WaitAsync(token)` cancels the wait without necessarily canceling the source task. TaskCompletionSource with RunContinuationsAsynchronously avoids executing arbitrary continuations inline inside a signal setter.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+Each example ends with a trace; method: [tracing a program](../STUDY-GUIDE.md#tracing-a-program).
 
 ## Worked example / walkthrough
 
@@ -84,6 +84,8 @@ internal static class Program {
 ```
 
 **Observe:** The token check acknowledges cancellation.
+
+**Trace.** `source` is created and immediately cancelled, which sets a flag on its token. Nothing stops on its own: cancellation is a request. `ThrowIfCancellationRequested` reads the flag, finds it set and throws `OperationCanceledException`. The catch sets `observed`. The operation changed course only at the point where it checked, so code before that check would already have run.
 
 ### Example B: Cancel waiting while work remains live
 
@@ -136,6 +138,8 @@ internal static class Program {
 
 **Observe:** The wait cancels, then the original task later completes with 9.
 
+**Trace.** `completion.Task` is pending. `WaitAsync(source.Token)` wraps it in a wait that can be cancelled; the token is already cancelled, so the wait throws and `cancelled` becomes true while the underlying task is still incomplete. `SetResult(9)` then completes the original, and awaiting it directly returns 9. Cancelling a wait did not cancel the work.
+
 ## Exercises
 
 1. **Predict and explain.** Identify the request, observation and completion events.
@@ -150,13 +154,15 @@ internal static class Program {
 
 6. **Transfer and justify.** Design an operation receipt distinguishing cancelled waiting, confirmed cancellation and unknown outcome.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Log each task in the [evidence table](../STUDY-GUIDE.md#recording-exercise-evidence) before opening the explanation.
 
 ## Common pitfalls and diagnosis
 
 A catch for OperationCanceledException should match the intended cancellation policy. Cancelling a waiter does not dispose all resources owned by the operation. Retain and observe tasks that may still complete.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+For task 5, `Task.FromResult(5).WaitAsync(cancelledToken)` returns 5: a task that already completed wins over a cancelled token. Task 4's automatic replay after a timed-out wait is the dangerous wrong version, because the first write may still finish and the replay would apply it twice.
+
+Repair routine: [building a regression case](../STUDY-GUIDE.md#building-a-regression-case).
 
 ## Progressive hints
 
@@ -166,11 +172,15 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 ## Self-check and next step
 
-Explain Cancellation token, Wait cancellation, Unknown result without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+Identify where Example B requests cancellation, where it observes it and where the work completes. Explain why `WaitAsync` cannot stop the operation it waits on. For task 6, describe the fields of a receipt that tells the caller whether work was confirmed cancelled or might still finish.
+
+Then follow the general [self-check routine](../STUDY-GUIDE.md#self-check-routine) and save your pad.
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://learn.microsoft.com/en-us/dotnet/standard/parallel-programming/task-cancellation). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+[Documentation](https://learn.microsoft.com/en-us/dotnet/standard/parallel-programming/task-cancellation): The task cancellation article explains `CancellationTokenSource`, token checks and how cancelled tasks report `OperationCanceledException`.
+
+Provenance and limits: [sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

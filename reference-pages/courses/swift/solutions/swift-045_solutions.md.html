@@ -194,7 +194,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/swift/solutions/swift-045_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="swift-045-explanation-and-comparison">swift-045: explanation and comparison<a class="heading-anchor" href="#swift-045-explanation-and-comparison" aria-label="Link to this section">#</a></h2>
-<p>Attempt the six guide tasks before opening this comparison. The executable reference is <a href="swift-045_solution.swift.html">swift-045_solution.swift</a>. It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.</p>
+<p>Reference program: <a href="swift-045_solution.swift.html">swift-045_solution.swift</a>, covering both examples and the executed answers.</p>
+<p>Attempt the tasks first; see <a href="../STUDY-GUIDE.md.html#comparing-with-the-explanation">comparing with the explanation</a>.</p>
 <h3 id="why-the-two-examples-differ">Why the two examples differ<a class="heading-anchor" href="#why-the-two-examples-differ" aria-label="Link to this section">#</a></h3>
 <p><strong>Avoid redundant imperative updates:</strong> A value comparison can prevent unnecessary callback or layout churn at the bridge boundary. The same value is not assigned twice.</p>
 <p><strong>Retain user changes as actions:</strong> The actual platform delegate must route its edit through the same single-source policy. The portable kernel exposes a deliberate state transition.</p>
@@ -251,7 +252,7 @@ bridge<span class="syntax-punctuation">.</span>update<span class="syntax-punctua
 <p>This checks the portable state rule. Scrolling, layout and memory with large text in the real UITextView or NSTextField still need the Apple project.</p>
 <h4 id="task-6-transfer-and-justify">Task 6: Transfer and justify<a class="heading-anchor" href="#task-6-transfer-and-justify" aria-label="Link to this section">#</a></h4>
 <p>Document coordinator ownership, delegate cleanup and platform-specific API availability.</p>
-<p>No single reference answer exists: several designs can satisfy this transfer task. Build yours from the task 3 answer above (Inspect and build SelectableText.swift in the Apple project) and the mechanism described below, and state one limitation of your choice.</p>
+<p>No single answer exists; extend task 3 using the <a href="../STUDY-GUIDE.md.html#open-transfer-tasks">open transfer routine</a>.</p>
 <h3 id="solution-reasoning">Solution reasoning<a class="heading-anchor" href="#solution-reasoning" aria-label="Link to this section">#</a></h3>
 <p><strong>Approach.</strong> <code>TextBridgeState</code> is a portable model of the boundary between a SwiftUI value and an imperative UIKit or AppKit text control. It stores the current <code>text</code> and counts <code>assignments</code>. Its <code>update</code> method returns early when the incoming text equals what is already stored, and otherwise stores the new text and increments the count. Example A sends the same new value twice; Example B sends one edit. The Apple project&#x27;s SelectableText.swift applies this rule in a real representable adapter with a coordinator.</p>
 <p><strong>Why it is correct.</strong> In Example A the first <code>update(&quot;new&quot;)</code> finds &quot;old&quot; stored, so it assigns and the count becomes 1. The second call finds &quot;new&quot; already stored, the guard returns, and the count stays 1. In Example B a single real change from &quot;start&quot; to &quot;edited&quot; assigns once. The equality guard is what breaks a potential loop: when the platform control reports an edit, SwiftUI updates its binding and calls the adapter&#x27;s update again with the same text, and the guard sees nothing to do. Counting assignments turns that otherwise invisible churn into a number a test can check.</p>
@@ -263,7 +264,7 @@ bridge<span class="syntax-punctuation">.</span>update<span class="syntax-punctua
 <p>UIViewRepresentable uses makeUIView and updateUIView. NSViewRepresentable has corresponding AppKit methods. A Coordinator bridges delegate callbacks. Compile-time canImport guards select the appropriate platform source.</p>
 <p>A canImport branch is not evidence that both platforms were tested. UIKit and AppKit lifecycles differ. Avoid retaining transient SwiftUI view values as permanent controller state.</p>
 <h3 id="review-before-continuing">Review before continuing<a class="heading-anchor" href="#review-before-continuing" aria-label="Link to this section">#</a></h3>
-<p>Run the reference and confirm that it prints <code>swift-045: passed</code>, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.</p></article>
+<p>Run the reference and confirm it prints <code>swift-045: passed</code>, then rerun the guide&#x27;s counterexample.</p></article>
   </main>
 </body>
 </html>

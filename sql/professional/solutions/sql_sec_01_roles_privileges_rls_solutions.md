@@ -13,40 +13,39 @@ psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
   -f sql/professional/solutions/sql_sec_01_roles_privileges_rls_solutions.sql
 ```
 
-`psql` prints each result/command tag in the terminal. Stop at the first
-unexpected `ERROR`; later output cannot repair an earlier failed invariant.
-Compare your own SQL, row grain, column names, row counts, `NULL` policy, and
-ordering with the explanation before comparing syntax.
+Read each result together with the role that produced it. The solution moves
+between `ds60_sec_north`, `ds60_sec_south`, `ds60_sec_auditor`,
+`ds60_sec_writer` and the owners with `SET LOCAL ROLE`, so a count copied
+without its role is not evidence. A `SAFE SKIP` line means the role lab did not
+run at all; restart with `./classroom` before comparing.
 
-## Clause-by-clause reading map
+## Reading map for this lesson
 
-The lesson's main concepts are Role, Owner, Privilege, Least privilege, Schema USAGE, Search path. Its worked-model focus is:
-The script first queries `pg_roles` and stores Booleans for `psql` `\if`: whether prepared course roles can be adopted with `SET ROLE`, and whether this login can administer roles. Restricted installations print a safe skip and current capability summary. No attempted `CREATE ROLE` is used as feature detection, so an expected denial does not leave a failed transaction or noisy partial setup.
+Read each solution as a claim about one role, then check it from that role's
+side:
 
-- Start at `FROM`/`JOIN` and state the intermediate row grain. Inspect join keys
-  before adding aggregates; a one-to-many join is allowed to multiply rows only
-  when the later contract accounts for it.
-- Apply `WHERE` to input rows, `GROUP BY` to form buckets, and `HAVING` to
-  completed groups. Window functions run over the surviving relation and
-  normally preserve its row count.
-- Read the `SELECT` list as the public result contract: keys establish grain,
-  measures state calculations, and aliases explain meaning. `ORDER BY` is the
-  only output-order guarantee; add a unique tie-breaker before `LIMIT`.
-- Trace every common table expression (CTE) as a temporary named relation.
-  Execute or inspect one stage at a time while debugging, but compare the final
-  result with an independent control rather than trusting stage names.
-- Keep SQL `NULL` as “missing/unknown/not applicable” until the metric contract
-  chooses another representation. Guard division with `NULLIF`; disclose
-  exclusions and distinguish zero from no row.
-- For DDL/DML, a command tag proves only that PostgreSQL accepted a statement.
-  Catalog checks, negative cases, row-count reconciliation, and the declared
-  transaction boundary prove behavior and cleanup.
+- Name the effective role first. Exercise 7 shows that `CURRENT_USER` follows
+  `SET ROLE` and a `SECURITY DEFINER` function, while `SESSION_USER` stays the
+  login.
+- Separate the privilege layers. Exercise 1 shows a table grant without schema
+  `USAGE`, then schema `USAGE` without table `SELECT`, and Exercise 6 reads
+  effective access from `has_*_privilege`.
+- Then the row policy. Exercises 2, 5 and 8 decide which rows survive once the
+  privileges pass: a deliberate read-all policy for the auditor, the owner and
+  `BYPASSRLS` exceptions, and unknown identities that map to a NULL tenant, so
+  the policy predicate is never true.
+- Then the definer boundary. Exercises 4 and 9 use `SECURITY DEFINER` functions
+  with `SET search_path = pg_catalog`, input checks and `EXECUTE` revoked from
+  `PUBLIC`, so the function rather than a table grant is the only path in.
+- Finally future and departing access. Exercise 3 shows default privileges
+  belong to the creating role, and Exercise 10 is a plan matrix rather than a
+  cluster-wide change.
 
-The exact final queries are not the only valid syntax. A join, subquery, CTE,
-window, or conditional aggregate can be an alternative when it preserves the
-same grain, `NULL` semantics, deterministic ordering, and safety. Prefer the
-form whose intermediate relations a reviewer can verify; optimize only after
-correctness is established with evidence.
+Equivalent forms are fine: a `GRANT` on each object instead of
+`ALTER DEFAULT PRIVILEGES`, or a policy written with `current_user` comparisons
+instead of a `CASE`, as long as the same role sees the same rows. Testing as a
+superuser or as the table owner is not equivalent, because both bypass the row
+policy and make every check look like a pass.
 
 Run the optional hands-on solution with:
 

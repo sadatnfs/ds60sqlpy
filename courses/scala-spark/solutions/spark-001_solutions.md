@@ -1,6 +1,6 @@
 # spark-001: explanatory solutions
 
-Compare after an attempt or an explicit reveal. The [guide](../guides/spark-001.md) defines the learner contract. An authored reference is not a platform acceptance receipt.
+Check these explanations after you have written your own labels, route choice and version notes for the [guide](../guides/spark-001.md) exercises. They give the reasoning behind each expected answer; they are not a receipt that any Spark profile ran on your machine.
 
 ## Vocabulary and concepts
 

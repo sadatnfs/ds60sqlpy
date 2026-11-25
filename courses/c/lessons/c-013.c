@@ -2,23 +2,16 @@
 
 int main(void) {
   /* Exercise 1: Use a parenthesized macro safely: predict an edited check
-     Copy worked example 1 into a scratch pad and change `CHECK(SQUARE(2 + 3) ==
-     25);` to `CHECK(SQUARE(3 + 3) == 25);` inside its CHECK. Before running,
-     predict whether the CHECK still holds and explain why; then restore it.
-     Expected: With `CHECK(SQUARE(3 + 3) == 25);` the run stops with `Check
-     failed` at the CHECK on `SQUARE(2 + 3) == 25`, because the "use a
-     parenthesized macro safely" case no longer shows that the result is 25.
-     Restoring `CHECK(SQUARE(2 + 3) == 25);` brings that observation back. */
+     In worked example 1, change `CHECK(SQUARE(2 + 3) == 25);` to
+     `CHECK(SQUARE(3 + 3) == 25);`. Predict whether the CHECK still holds and
+     why, then run and restore. Expected: `Check failed`: `CHECK(SQUARE(3 + 3)
+     == 25);` is false, although the result is 25. */
 
   /* Exercise 2: Prefer a typed helper for mutation: debug a regression
-     A regression changed one token in worked example 2, the "prefer a typed
-     helper for mutation" case, so one line now reads `int value = 4;`. Run the
-     example with that line, use the failing CHECK to find why the result is 9
-     and value increments once to 4 no longer holds and repair the line without
-     changing the CHECK. Expected: Before the repair the run stops with `Check
-     failed` at the CHECK on `result == 9 && value == 4`. Once the line reads
-     `int value = 3;` again, the "prefer a typed helper for mutation" case again
-     shows that the result is 9 and value increments once to 4. */
+     Worked example 2 now has a line reading `int value = 4;`. Repair it so that
+     the result is 9 and value increments once to 4 again. Expected: `Check
+     failed` at `result == 9 && value == 4` until the line reads `int value =
+     3;` again. */
 
   /* Exercise 3: Require a representation fact
      Check the language-required char size at translation time.

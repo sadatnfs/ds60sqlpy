@@ -1,6 +1,8 @@
 # swift-024: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [swift-024_solution.swift](swift-024_solution.swift). It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.
+Reference program: [swift-024_solution.swift](swift-024_solution.swift), covering both examples and the executed answers.
+
+Attempt the tasks first; see [comparing with the explanation](../STUDY-GUIDE.md#comparing-with-the-explanation).
 
 ## Why the two examples differ
 
@@ -125,7 +127,7 @@ An empty file exists and has no content; a missing file is a different outcome t
 
 Design a durable app save with atomic replacement and a recoverable previous version.
 
-No single reference answer exists: several designs can satisfy this transfer task. Build yours from the task 3 answer above (Persist a Codable value in a temporary file and validate after reading) and the mechanism described below, and state one limitation of your choice.
+No single answer exists; extend task 3 using the [open transfer routine](../STUDY-GUIDE.md#open-transfer-tasks).
 
 ## Solution reasoning
 
@@ -149,4 +151,4 @@ Never remove an arbitrary caller-provided directory. A normalized path does not 
 
 ## Review before continuing
 
-Run the reference and confirm that it prints `swift-024: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.
+Run the reference and confirm it prints `swift-024: passed`, then rerun the guide's counterexample.

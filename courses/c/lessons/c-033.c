@@ -2,27 +2,19 @@
 
 int main(void) {
   /* Exercise 1: Create a trailing payload: change one input
-     Copy worked example 1, the "create a trailing payload" case, into a scratch
-     pad and change `unsigned char data[] = {1, 2, 3};` to `unsigned char data[]
-     = {2, 2, 3};`. Before running, predict which CHECK fails and which value it
-     sees in place of the worked result (length and all three bytes are
-     retained); then run it and restore the original line. Expected: With
-     `unsigned char data[] = {2, 2, 3};` the run stops with `Check failed` at
-     the CHECK on `p != NULL && p->length == 3 && p->data[0] == 1 && p->data[2]
-     == 3`, because the "create a trailing payload" case no longer shows that
-     length and all three bytes are retained. Restoring `unsigned char data[] =
-     {1, 2, 3};` brings that observation back. */
+     In worked example 1, change `unsigned char data[] = {1, 2, 3};` to
+     `unsigned char data[] = {2, 2, 3};`. Predict which value the CHECK on `p !=
+     NULL && p->length == 3 && p->data[0] == 1 && p->data[2] == 3` sees, then
+     run and restore. Expected: `Check failed` at `p != NULL && p->length == 3
+     && p->data[0] == 1 && p->data[2] == 3`; restoring `unsigned char data[] =
+     {1, 2, 3};` passes again. */
 
   /* Exercise 2: Create an empty packet: debug a regression
-     A regression changed one token in worked example 2, the "create an empty
-     packet" case, so one line now reads `struct Packet *p = packet_create(NULL,
-     1);`. Run the example with that line, use the failing CHECK to find why the
-     header exists and records zero length no longer holds and repair the line
-     without changing the CHECK. Expected: Before the repair the run stops with
-     `Check failed` at the CHECK on `p != NULL && p->length == 0`. Once the line
-     reads `struct Packet *p = packet_create(NULL, 0);` again, the "create an
-     empty packet" case again shows that the header exists and records zero
-     length. */
+     Worked example 2 now has a line reading `struct Packet *p =
+     packet_create(NULL, 1);`. Repair it so that the header exists and records
+     zero length again. Expected: `Check failed` at `p != NULL && p->length ==
+     0` until the line reads `struct Packet *p = packet_create(NULL, 0);` again.
+   */
 
   /* Exercise 3: Reject total-size overflow
      Request SIZE_MAX payload bytes.

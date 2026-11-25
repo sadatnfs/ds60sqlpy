@@ -2,24 +2,15 @@
 
 int main(void) {
   /* Exercise 1: Change a caller-owned value: change one input
-     Copy worked example 1, the "change a caller-owned value" case, into a
-     scratch pad and change `int n = 4;` to `int n = 5;`. Before running,
-     predict which CHECK fails and which value it sees in place of the worked
-     result (the caller value becomes 5); then run it and restore the original
-     line. Expected: With `int n = 5;` the run stops with `Check failed` at the
-     CHECK on `n == 5`, because the "change a caller-owned value" case no longer
-     shows that the caller value becomes 5. Restoring `int n = 4;` brings that
-     observation back. */
+     In worked example 1, change `int n = 4;` to `int n = 5;`. Predict which
+     value the CHECK on `n == 5` sees, then run and restore. Expected: `Check
+     failed` at `n == 5`; restoring `int n = 4;` passes again. */
 
   /* Exercise 2: Read a target copy: debug a regression
-     A regression changed `int n = 3;` to `int n = 4;` in worked example 2, the
-     "read a target copy" case. Run the example with that change, use the
-     failing CHECK to explain why the copied value stays 3 and the target
-     becomes 9 no longer holds and repair it without changing the CHECK.
-     Expected: Before the repair the run stops with `Check failed` at the CHECK
-     on `copy == 3 && n == 9`. Once the line reads `int n = 3;` again, the "read
-     a target copy" case again shows that the copied value stays 3 and the
-     target becomes 9. */
+     In worked example 2, `int n = 3;` now reads `int n = 4;`. Repair it so that
+     the copied value stays 3 and the target becomes 9 again. Expected: `Check
+     failed` at `copy == 3 && n == 9` until the line reads `int n = 3;` again.
+   */
 
   /* Exercise 3: Reject an absent target
      Pass NULL to an optional update helper.

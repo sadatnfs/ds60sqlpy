@@ -2,24 +2,18 @@
 
 int main(void) {
   /* Exercise 1: Round-trip an owned stream: predict an edited check
-     Copy worked example 1 into a scratch pad and change `CHECK(fwrite("abc", 1,
-     3, f) == 3);` to `CHECK(fwrite("abc", 1, 4, f) == 3);` inside its CHECK.
-     Before running, predict whether the CHECK still holds and explain why; then
-     restore it. Expected: With `CHECK(fwrite("abc", 1, 4, f) == 3);` the run
-     stops with `Check failed` at the CHECK on `fwrite("abc", 1, 3, f) == 3`,
-     because the "round-trip an owned stream" case no longer shows that three
-     bytes return and match abc. Restoring `CHECK(fwrite("abc", 1, 3, f) == 3);`
-     brings that observation back. */
+     In worked example 1, change `CHECK(fwrite("abc", 1, 3, f) == 3);` to
+     `CHECK(fwrite("abc", 1, 4, f) == 3);`. Predict whether the CHECK still
+     holds and why, then run and restore. Expected: `Check failed`:
+     `CHECK(fwrite("abc", 1, 4, f) == 3);` is false, although three bytes return
+     and match abc. */
 
   /* Exercise 2: Observe a short read: diagnose an edited check
-     A careless edit changed the CHECK in worked example 2, the "observe a short
-     read" case, so that it reads `CHECK(fwrite("ab", 1, 3, f) == 2);`. Run the
-     example with that line, explain why the edited CHECK now fails even though
-     the program state still means two bytes return and EOF becomes set, and
-     restore it. Expected: Before the repair the run stops with `Check failed`
-     at the CHECK on `fwrite("ab", 1, 2, f) == 2`. Once the line reads
-     `CHECK(fwrite("ab", 1, 2, f) == 2);` again, the "observe a short read" case
-     again shows that two bytes return and EOF becomes set. */
+     Worked example 2's CHECK now reads `CHECK(fwrite("ab", 1, 3, f) == 2);`.
+     Explain why it fails although two bytes return and EOF becomes set, then
+     restore it. Expected: `Check failed` until the CHECK reads
+     `CHECK(fwrite("ab", 1, 2, f) == 2);` again, though two bytes return and EOF
+     becomes set. */
 
   /* Exercise 3: Avoid prechecking EOF
      Inspect an empty stream before and after a read.

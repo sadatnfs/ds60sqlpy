@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/r/solutions/r-003_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="r-003-reference-reasoning">r-003: reference reasoning<a class="heading-anchor" href="#r-003-reference-reasoning" aria-label="Link to this section">#</a></h2>
-<p>Use the <a href="r-003_reference.R.html">complete reference</a> with the guide&#x27;s declared inputs and runtime. Every worked example is also a standalone script.</p>
+<p>Run the <a href="r-003_reference.R.html">complete reference</a> under the <a href="../STUDY-GUIDE.md.html#run-a-chapter">run rules</a>.</p>
 <h3 id="why-the-implementation-has-this-shape">Why the implementation has this shape<a class="heading-anchor" href="#why-the-implementation-has-this-shape" aria-label="Link to this section">#</a></h3>
 <p>Length one is an intentional broadcast in this calculation. Each input receives the same fee.</p>
 <p>No warning is needed because four is a multiple of two. The separate per-row length rule still rejects the input.</p>
@@ -243,7 +243,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Tempting mistake:</strong> Calling <code>as.numeric()</code> on the combined vector to rescue the number. That produces NA for &quot;A&quot; with a coercion warning, so one value is lost to fix the other.</p>
 <p><strong>Verify:</strong> <code>is.double(c(1, 2))</code> returns TRUE for the separate measurement vector, and <code>c(&quot;A&quot;, 2)[2] + 1</code> fails with a non-numeric argument error.</p>
 <h3 id="what-the-checks-establish">What the checks establish<a class="heading-anchor" href="#what-the-checks-establish" aria-label="Link to this section">#</a></h3>
-<p>The reference makes 6 <code>stopifnot()</code> checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.</p></article>
+<p>The checks confirm scalar multiplication over <code>c(2, 4, 6)</code>, that the corrected fees match the amounts in length and give 11, 22 and 33, that the guard accepts one fee or one fee per amount but rejects two fees for three amounts, that adding to <code>numeric(0)</code> stays empty, and that mixing <code>&quot;A&quot;</code> with 2 coerces to character. They cannot catch recycling in a calculation the guard never sees.</p>
+<p>The reference makes 6 <code>stopifnot()</code> checks; see <a href="../STUDY-GUIDE.md.html#what-a-passing-run-proves">what a passing run proves</a>.</p></article>
   </main>
 </body>
 </html>

@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cpp/solutions/cpp-019_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="cpp-019-explanations-and-reference-observations">cpp-019: explanations and reference observations<a class="heading-anchor" href="#cpp-019-explanations-and-reference-observations" aria-label="Link to this section">#</a></h2>
-<p>Attempt the learner tasks before opening this document. The executable reference checks the bounded normal and boundary examples; the six explanations below cover the deliberate changes and manual checks.</p>
+<p>The <a href="cpp-019_solution.cpp.html">executable reference</a> checks the Exercise 6 tie rule: sorting by points and then by ID yields IDs 2, 3 and 1. The explanations cover laziness, projections and why ties need a second key. How to compare: <a href="../STUDY-GUIDE.md.html#compare-with-the-solutions">study guide</a>.</p>
 <h3 id="mechanism">Mechanism<a class="heading-anchor" href="#mechanism" aria-label="Link to this section">#</a></h3>
 <p>A range combines an iterable start and end. A view can lazily filter or transform a range without owning a new collection. Laziness means the work happens during traversal, so later owner changes can affect what is seen. A projection selects a member for an algorithm without changing the record.</p>
 <h3 id="detailed-reasoning">Detailed reasoning<a class="heading-anchor" href="#detailed-reasoning" aria-label="Link to this section">#</a></h3>

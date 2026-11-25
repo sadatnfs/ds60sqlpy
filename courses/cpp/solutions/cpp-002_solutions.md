@@ -1,6 +1,6 @@
 # cpp-002: explanatory solutions
 
-Compare after an attempt or an explicit reveal. The [guide](../guides/cpp-002.md) defines the learner contract. An authored reference is not a platform acceptance receipt.
+Compare after an attempt or an explicit reveal. The [executable reference](cpp-002_solution.cpp) checks both output streams and exit statuses; the explanations below add the CMake and CTest reasoning that a single file cannot run. The [guide](../guides/cpp-002.md) defines the learner contract. How to compare: [study guide](../STUDY-GUIDE.md#compare-with-the-solutions).
 
 ## Vocabulary and concepts
 

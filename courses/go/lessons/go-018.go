@@ -3,11 +3,11 @@ package main
 import "fmt"
 
 func main() {
-	// Exercise 1: Read an in-memory file: change one input: Copy worked example 1 into a scratch pad and change `files := fstest.MapFS{"data/input.txt": &fstest.MapFile{Data: []byte("red\n")}}` to `files := fstest.MapFS{"data/input.txt!": &fstest.MapFile{Data: []byte("red\n")}}`. Before running, predict which check fails and which value it now sees; then run it and restore the original line.
-	// Expected: The changed run panics with `file read` because `err == nil && string(v) == "red\n"` no longer holds. Restoring the original line brings back the worked observation: the bytes decode to red followed by a newline.
+	// Exercise 1: Read an in-memory file: change one input: Copy worked example 1, change `files := fstest.MapFS{"data/input.txt": &fstest.MapFile{Data: []byte("red\n")}}` to `files := fstest.MapFS{"data/input.txt!": &fstest.MapFile{Data: []byte("red\n")}}` and predict the failure before running; then restore the line.
+	// Expected: The edited run panics with `file read` because `err == nil && string(v) == "red\n"` no longer holds.
 
-	// Exercise 2: Observe a missing file: debug a regression: Introduce one deliberate defect into a copy of worked example 2 that makes `errors.Is(err, fs.ErrNotExist)` fail, then explain how the panic message leads back to the faulty line.
-	// Expected: The defective copy panics with `missing file`; the repaired copy reproduces the worked observation: the error matches fs.ErrNotExist.
+	// Exercise 2: Observe a missing file: debug a regression: Break one line of worked example 2 so `errors.Is(err, fs.ErrNotExist)` fails, then trace the panic back to it.
+	// Expected: Your defect panics with `missing file`; undoing it restores the worked observation: the error matches fs.ErrNotExist.
 
 	// Exercise 3: Reject traversal syntax: Validate ../private and data/input.txt.
 	// Expected: The traversal path is invalid and the relative data path is valid.

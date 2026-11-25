@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cuda/python/solutions/cuda-087_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="cuda-087-explained-solutions">cuda-087: explained solutions<a class="heading-anchor" href="#cuda-087-explained-solutions" aria-label="Link to this section">#</a></h2>
-<p>These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.</p>
+<p>Compare with your <a href="../lessons/cuda-087.md.html">worksheet</a> attempt.</p>
 <h3 id="exercise-1-derive-the-scalar-gradient">Exercise 1: Derive the scalar gradient<a class="heading-anchor" href="#exercise-1-derive-the-scalar-gradient" aria-label="Link to this section">#</a></h3>
 <p>The mean derivative is average of 2<em>x</em>(w*x-y).</p>
 <p><strong>Approach.</strong> Differentiate the mean squared error with respect to the scalar weight: the derivative is the average of <code>2*x*(w*x - y)</code>. At <code>w = 0</code> the two terms are <code>2*1*(0-2) = -4</code> and <code>2*2*(0-4) = -16</code>, so the mean gradient is -10.</p>
@@ -231,9 +231,19 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Why it is correct here.</strong> A fast step computing the wrong update is not an improvement. Timing results matter only after the numbers are known to be right.</p>
 <p><strong>A plausible wrong approach.</strong> Reporting a speedup from a run that silently used a sum loss, or ran partly on the CPU, compares different computations.</p>
 <p><strong>How to verify.</strong> Store correctness results next to each timing, and reject any timing whose correctness check is missing or failed.</p>
+<h3 id="self-check-answers">Self-check answers<a class="heading-anchor" href="#self-check-answers" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>Why derive the gradient by hand before trusting autograd?</strong> A hand derivation gives an independent expected value, so a wrong loss, shape or placement shows up as a mismatch instead of a plausible number.</li>
+</ol>
+<ol start="2">
+<li><strong>How do PyTorch and TensorFlow differ in placement idiom?</strong> PyTorch moves tensors and modules to a device explicitly. TensorFlow relies on device scopes, placement rules and tracked variables.</li>
+</ol>
+<ol start="3">
+<li><strong>What does a correct one-step update establish?</strong> Bounded correct behavior for that step. It says nothing about model quality or GPU performance.</li>
+</ol>
 <h3 id="reference-observation">Reference observation<a class="heading-anchor" href="#reference-observation" aria-label="Link to this section">#</a></h3>
-<p>Loss 10, gradient-10, new weight 1.</p>
-<p>The reference file is <code>courses/cuda/python/references/cuda-087_cpu.py</code>. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.</p></article>
+<p>Loss 10, gradient -10, new weight 1.</p>
+<p>Asserted by <code>courses/cuda/python/references/cuda-087_cpu.py</code>.</p></article>
   </main>
 </body>
 </html>

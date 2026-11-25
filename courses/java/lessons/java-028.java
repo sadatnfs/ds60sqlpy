@@ -3,23 +3,18 @@ public class Main {
 
   public static void main(String[] args) throws Exception {
     // Exercise 1: Call an owned loopback endpoint: change one input
-    // Copy Example A into a scratch `Main.java` and change
-    // `java.net.http.HttpRequest.newBuilder(server.uri("/health"))` to
-    // `java.net.http.HttpRequest.newBuilder(server.uri("/health!"))`. Before running it with
-    // `java -ea Main`, predict which assertion fails and which value it now sees; then run it
-    // and restore the original line.
-    // Expected: The changed run fails with an `AssertionError` from the assertion on
-    // `response.statusCode() == 200 && response.body().equals("ok")`. Restoring the original
-    // line brings back the worked observation: status 200 and body ok.
+    // Change `java.net.http.HttpRequest.newBuilder(server.uri("/health"))` to
+    // `java.net.http.HttpRequest.newBuilder(server.uri("/health!"))` in Example A and predict
+    // which assertion fails and why.
+    // Expected: The edited run fails with an `AssertionError` from the assertion on
+    // `response.statusCode() == 200 && response.body().equals("ok")`.
 
     // Exercise 2: Inspect content metadata: diagnose an edited check
-    // A careless edit changed the assertion that Example B adds after Example A so that it reads
-    // `.equals("text/plain; charset=utf-9");`. Run Example B with that line, explain why the
-    // edited assertion now fails for the same program state, and restore it.
-    // Expected: Before the repair the run fails with an `AssertionError` from the assertion on
+    // Example B's new assertion was edited to `.equals("text/plain; charset=utf-9");`. Explain
+    // why it fails for unchanged state and restore it.
+    // Expected: The edited run fails with an `AssertionError` from the assertion on
     // `response.headers().firstValue("Content-Type").orElseThrow().equals("text/plain;
-    // charset=utf-8")`; after it the line reads `.equals("text/plain; charset=utf-8");` again
-    // and text/plain with UTF-8 charset.
+    // charset=utf-8")`; the restored assertion passes.
 
     // Exercise 3: Reject an unsupported method
     // POST to /health under a GET-only contract.

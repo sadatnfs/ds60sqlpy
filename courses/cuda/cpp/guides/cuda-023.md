@@ -4,18 +4,15 @@
 
 Intermediate; about 110 minutes, plus any optional hardware experiment. Direct prerequisites: `cuda-015`, `cuda-017`
 
-The order supports learning at your own pace. Reading and CPU reasoning remain
-available when NVIDIA hardware is absent. Advanced hardware features need their
-own capability checks and are not prerequisites for opening this chapter.
+Pacing, evidence labels and platform rules for every chapter are in the [CUDA study guide](../../STUDY-GUIDE.md).
 
 ## Learning objectives
 
 Implement a stencil time step with a declared boundary condition and verify interior, boundary and conserved values.
 
-Work through *Stencils and boundary conditions* with the concrete cases below. Finish with this evidence:
-correct interior and boundary values plus a conserved or monotonic quantity appropriate to the chosen model. Distinguish an algorithmic
-calculation, a compiled artifact and an actual device observation when explaining
-what your work establishes.
+**Scope:** Neighborhood reuse, halo cells, read/write separation, time steps and physical versus computational boundaries.
+
+**Evidence to produce:** Correct interior and boundary values plus a conserved or monotonic quantity appropriate to the chosen model.
 
 ## Purpose, vocabulary and mental model
 
@@ -38,24 +35,15 @@ The formula requires a separately stated boundary policy for indices outside the
 
 ## How to run and study this lesson
 
-Use the saved reading worksheet in `/classroom`; the reading pad does not execute
-CUDA. For the bounded calculation, select **CPU model (Python)**, whose
-answer-free starter supplies the literal fixtures and task contract. The
-[CUDA C++ study workflow](../README.md) covers platforms, optional GPU
-compilation and evidence labels. In a prepared Python environment you can also
-run the separate [CPU reference](../references/cuda-023_cpu.py) from the
-repository root:
+Trace worked example 1 by hand, then run the [CPU reference](../references/cuda-023_cpu.py) from the repository root:
 
 ```sh
 python courses/cuda/cpp/references/cuda-023_cpu.py
 ```
 
-Its assertions check the stated numerical result or model invariant; console
-text is evidence of this CPU model only, not of CUDA execution.
-
 ## CUDA C++ kernel listing
 
-The kernel below is an excerpt from the chapter's complete [GPU reference](../references/cuda-023_gpu.cu). The full program adds device discovery, checked allocation and launch, completion checks and host validation. Read it as CUDA C++ source; the classroom reading pad does not compile or run it.
+An excerpt from the chapter's complete [GPU reference](../references/cuda-023_gpu.cu); the reading pad does not compile it.
 
 ```cpp
 __global__ void neighbor_sum(const int *input, int *output, std::size_t n) {
@@ -71,9 +59,7 @@ __global__ void neighbor_sum(const int *input, int *output, std::size_t n) {
 
 For \([2,4,8]\) with a three-point mean and fixed-zero outside values, one step gives \([2,\frac{14}{3},4]\). With clamped boundaries it gives \([\frac{8}{3},\frac{14}{3},\frac{20}{3}]\). Both are valid calculations, but they answer different questions. A reference must match the chosen policy.
 
-The complete CPU model below intentionally models only the named arithmetic,
-layout, dependency or capability decision. It does not model GPU scheduling,
-caches, instruction timing or device memory visibility.
+**Why:** Index 0 sees 0 + 2 + 4 = 6 for mean 2, index 2 sees 4 + 8 + 0 for mean 4, and the middle sees 14 / 3.
 
 ```python
 values = [2.0, 4.0, 8.0]
@@ -89,58 +75,44 @@ assert values == [2.0, 4.0, 8.0]
 print({"fixed_zero_mean": out, "original_preserved": values})
 ```
 
-**Expected observation:** Every assertion succeeds. A representative CPU output is:
+**Expected observation:** every assertion succeeds, and the CPU model prints:
 
 ```text
 {'fixed_zero_mean': [2.0, 4.666666666666667, 4.0], 'original_preserved': [2.0, 4.0, 8.0]}
 ```
 
-Integers, shapes and ordering must match exactly; only assertions with an explicit
-tolerance accept small floating-point differences. A printed duration is a model
-output, not a measured GPU benchmark.
+**Check:** The reference asserts out == [2.0, 14 / 3, 4.0] and that the input is still [2.0, 4.0, 8.0] afterward.
 
 ## Worked example 2: change a meaningful condition
 
 An in-place left-to-right update reads newly computed values for later neighbors, creating a directional bias. Two-buffer updates read only the original row and swap roles after completion. For multiple GPU steps, preserve the dependency between launches or streams before swapping logical roles.
 
-Before applying this example to your own program, write down which inputs are
-read, which result is produced, and the condition that makes the comparison
-valid. Keep the original case as a regression check when changing a boundary.
+**Why:** Each output then depends only on the previous state, which matches the mathematical update for every index at once.
+
+**Check:** Run one step both ways on [2, 4, 8] and confirm only the two-buffer version matches the reference values.
 
 ## Optional CUDA C++ laboratory
 
-A complete [GPU reference](../references/cuda-023_gpu.cu) and separate
-[GPU learner source](../lessons/cuda-023_gpu.cu) accompany this chapter.
-They are standalone files with bounded fixtures, checked runtime calls and host
-validation. The learner source intentionally reports incomplete implementation
-until you add the chapter's algorithm and assertions. It must never return a
-fake GPU success on a CPU machine. Follow the [manual GPU workflow](../README.md)
-for exact compilation and execution paths. If the classroom offers the optional
-CUDA C++ variant, its capability notice must confirm actual runtime readiness.
+- [GPU learner source](../lessons/cuda-023_gpu.cu)
+- [GPU reference](../references/cuda-023_gpu.cu)
 
-The reference contains an explicit no-device failure, launch and completion
-checks, and returned-value validation. Source review and CPU reference checks do
-not qualify this .cu file on your hardware. Preserve compilation, actual device
-execution and sanitizer evidence separately. Exercise 4 is a reasoning diagnosis;
-do not deliberately launch a hanging kernel or reset a shared GPU to reproduce it.
+Read the [laboratory rules](../../STUDY-GUIDE.md#optional-native-cuda-laboratories) before compiling.
 
 ## Six progressive exercises
 
-Exercises 1 and 2 are guided reconstructions of the worked examples; exercises
-3-6 change an input, diagnose a defect, test a boundary and transfer the idea.
-For each one, keep the calculation, output, diagram or failure policy you
-produce so another reader can compare it with the worked cases. If the hint is
-not enough, reread the mechanism paragraph and the bounded CPU assertion.
-
 ### Exercise 1
 
-Predict and trace the first worked example before running its CPU reference. Write every intermediate quantity that leads to the stated result, including units or ownership where applicable.
+Reconstruct worked example 1 on paper before running its CPU reference. Average each point with its two neighbors, substituting zero for indices -1 and 3 in [2, 4, 8].
+
+**Trap to avoid:** Clamping silently while the spec says fixed-zero gives [8/3, 14/3, 20/3], a correct answer to a different question.
 
 **Hint:** Start with the literal input and intermediate quantities in worked example 1.
 
 ### Exercise 2
 
-Reconstruct the second worked example without copying its conclusion. Identify the changed input or condition, show the resulting calculation or dependency, and explain why it differs from the first example.
+Rework worked example 2 without copying its conclusion. Read from the original buffer and write to a second one, swapping roles between steps or launches.
+
+**Trap to avoid:** Updating in place left to right means index 1 reads the already smoothed index 0, which biases the result toward one direction.
 
 **Hint:** Identify exactly which condition changes in worked example 2.
 
@@ -148,11 +120,15 @@ Reconstruct the second worked example without copying its conclusion. Identify t
 
 Compute the periodic neighbor mean for \([2,4,8]\).
 
+**Trap to avoid:** Applying the fixed-zero rule while calling it periodic gives 2 and 4 at the ends instead.
+
 **Hint:** Use the first worked example to establish the relevant quantities, then change only the requested input.
 
 ### Exercise 4
 
 An image looks smooth but differs near the edge. Investigate what first?
+
+**Trap to avoid:** Loosening the tolerance until the test passes hides a halo or padding bug that will grow with image size.
 
 **Hint:** Locate the failed phase or violated dependency before proposing a repair.
 
@@ -160,35 +136,33 @@ An image looks smooth but differs near the edge. Investigate what first?
 
 What is a radius-one fixed-zero stencil of singleton \([6]\)?
 
+**Trap to avoid:** Returning 6 because the array has no neighbors silently switches to the clamped rule.
+
 **Hint:** Check what the algorithm is allowed to read, write or assume at this boundary.
 
 ### Exercise 6
 
 Transfer the method to diffusion time stepping.
 
+**Trap to avoid:** Running many steps in place in one kernel without a grid-wide dependency lets blocks read neighbors from the wrong step.
+
 **Hint:** State the output contract and which observations are needed in the new application.
 
 ## Common mistakes and diagnosis
 
-A tempting but incorrect claim in this chapter is: **a visually plausible image proves the indexing and update ordering are correct.**
-
-For the concrete failure exercise, an image looks smooth but differs near the edge. Investigate what first?
-Preserve the original input and the stage where behavior diverged, and compare
-with the CPU model before changing hardware configuration.
+A tempting but incorrect claim: **A visually plausible image proves the indexing and update ordering are correct.** Smooth-looking output can hide wrong boundaries or in-place updates that read already-updated neighbors. Worked example 1 shows two valid boundary policies giving different numbers, and worked example 2 shows in-place updates adding bias. Compare exact values against a reference with the chosen policy instead.
 
 ## Self-check, retrieval and transfer
 
-Explain the first example without its code, then use the second example to state
-one assumption that matters. Complete Exercise 3 independently, use Exercise 4 to
-diagnose a plausible defect, check the boundary in Exercise 5, and retain the
-application contract from Exercise 6. Compare the [separate explanations](../solutions/cuda-023_solutions.md)
-only after your attempt or a deliberate reveal. A reading marker records your
-choice; it does not certify hardware qualification or expert mastery.
+1. What is the clamped three-point mean of the last element of [2,4,8]?
+2. Why use two buffers per time step?
+3. What is a halo in a tiled stencil?
+
+Short answers are in the [separate explanations](../solutions/cuda-023_solutions.md#self-check-answers); compare only after an attempt.
 
 ## Primary references
 
-Check the documentation that matches your prepared toolkit before optional
-hardware execution.
+Use the documentation that matches your prepared toolkit.
 
 - [CUDA Programming Guide](https://docs.nvidia.com/cuda/cuda-programming-guide/)
 

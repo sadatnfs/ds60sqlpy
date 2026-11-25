@@ -234,34 +234,31 @@ snapshot <span class="syntax-operator">=</span> table<span class="syntax-operato
 <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>snapshot<span class="syntax-operator">.</span>snapshot_id<span class="syntax-punctuation">,</span> snapshot<span class="syntax-operator">.</span>summary<span class="syntax-operator">.</span>operation<span class="syntax-punctuation">)</span></code></pre>
 <p>This PyIceberg fragment reads the current snapshot ID and its operation, such as append, from the same catalog that batch_snapshot.py uses. Compare it with the ID stored in Atlas: a mismatch means the table moved after lineage was registered. Catalog metadata says what the table is; governance metadata says what someone decided about it, and both need to name the same state.</p>
 <h3 id="complete-worked-source">Complete worked source<a class="heading-anchor" href="#complete-worked-source" aria-label="Link to this section">#</a></h3>
-<p>This is a project-only command notebook. Read and edit it in the classroom; run its explicitly labeled commands from the copied owned Docker workshop. The classroom does not execute these service commands.</p>
+<p>The classroom does not execute these service commands. See the <a href="../STUDY-GUIDE.md.html#workshop-notebooks">workshop rules</a>.</p>
 <h2 id="integration-apache-084-complete-worked-notebook">Integration apache-084 complete worked notebook<a class="heading-anchor" href="#integration-apache-084-complete-worked-notebook" aria-label="Link to this section">#</a></h2>
 <p>Read real catalog metadata, register explicitly sourced Atlas identities/lineage, then test the actual protected data operation separately. Metadata classification alone is not enforcement.</p>
-<h3 id="receipt-fields-and-independent-oracle">Receipt fields and independent oracle<a class="heading-anchor" href="#receipt-fields-and-independent-oracle" aria-label="Link to this section">#</a></h3>
+<h3 id="what-this-governance-receipt-must-hold">What this governance receipt must hold<a class="heading-anchor" href="#what-this-governance-receipt-must-hold" aria-label="Link to this section">#</a></h3>
 <ul>
-<li>Source revision/hashes and exact declared input IDs, values, schema and time units.</li>
-<li>Actual native platform, package/image identities and owned resource namespace.</li>
-<li>Selected table snapshot/version, source positions or process/lineage identity as appropriate.</li>
-<li>Positive result against an independent oracle and a typed negative observation.</li>
-<li>Read-only retained-state comparison after the selected lifecycle transition.</li>
-<li>Cleanup/evidence-storage result and any separate prepared or unavailable feature.</li>
+<li>The catalog, database and table names exactly as the Metastore client returned them.</li>
+<li>The table location, schema and selected snapshot or external table properties.</li>
+<li>The Atlas qualified names built from those fields, and the GUIDs Atlas assigned.</li>
+<li>The lineage edges read back from Atlas, with direction, input and output.</li>
+<li>The classification name, who attached it and when it was read back.</li>
+<li>Two engine requests under two fixture principals, with the enforcement point named.</li>
 </ul>
-<p>For the common three-order fixture, require IDs 1/2/3 with amounts 4/9/7, total 20, east 11 and west 9. A later fourth west order of 2 changes the current total to 22 and west to 11 while an earlier pinned snapshot remains unchanged. Do not use this simple oracle to claim correctness for a different pipeline without defining its deduplication, correction and visibility semantics.</p>
-<p>Read the selected project README and qualification ledger before commands. The classroom does not execute Docker commands in this Markdown pad. Prepared configuration, unit policy fixtures, successful compilation and actual service acceptance remain different observations. Never include credentials or signed URLs.</p>
+<p>The governance oracle has two halves that must not be merged. The metadata half passes when the qualified name read back from Atlas matches the observed catalog identity and the lineage edge points from source to result. The access half passes only when the allowed principal reads the three orders and the denied principal receives a typed refusal from the data engine itself. The <a href="../STUDY-GUIDE.md.html#evidence-receipts">shared receipt rules</a> cover naming and storage.</p>
 <h3 id="concrete-source-inspection">Concrete source inspection<a class="heading-anchor" href="#concrete-source-inspection" aria-label="Link to this section">#</a></h3>
 <p>From the copied integration directory, with sibling project copies when selected:</p>
 <pre class="highlighted-code"><code class="language-bash">cat ../hive/MetadataProbe.java
 cat ../atlas/README.md
 cat ../atlas/client.py</code></pre>
-<p>These inspections do not start or qualify a service. Execute only the chosen project&#x27;s complete documented owned route and retain its actual receipt.</p>
+<p><code>MetadataProbe.java</code> checks <code>ds60.orders</code> as an <code>EXTERNAL_TABLE</code> at <code>file:/warehouse/orders</code> with partition key <code>day</code>. Those observed fields, not a display name, are the source for the Atlas qualified name. In <code>client.py</code>, the <code>plan</code> action prints prepared payloads without contacting a server. A printed payload is the request you intend to send, not an entity that Atlas accepted, so record it separately from any server response.</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
 <ul>
-<li><a href="https://iceberg.apache.org/docs/latest/reliability/">Iceberg reliability and table state</a></li>
-<li><a href="https://arrow.apache.org/docs/format/Columnar.html">Arrow data format</a></li>
-<li><a href="https://nightlies.apache.org/flink/flink-docs-release-2.3/docs/concepts/stateful-stream-processing/">Flink stateful stream processing</a></li>
-<li><a href="https://kafka.apache.org/44/design/design/">Kafka delivery/transaction design</a></li>
-<li><a href="https://atlas.apache.org/api/v2/index.html">Atlas API and metadata boundaries</a></li>
-<li><a href="https://github.com/delta-io/delta-sharing/blob/v1.4.1/PROTOCOL.md">Delta Sharing protocol</a></li>
+<li><a href="https://hive.apache.org/docs/latest/admin/adminmanual-metastore-administration/">Hive Metastore administration</a></li>
+<li><a href="https://iceberg.apache.org/docs/latest/hive/">Hive and Iceberg catalog integration</a></li>
+<li><a href="https://atlas.apache.org/api/v2/index.html">Atlas REST entities and lineage</a></li>
+<li><a href="https://github.com/apache/atlas/blob/release-2.5.0/docs/src/documents/Security/AuthorizationModel.md">Atlas 2.5.0 authorization model</a></li>
 </ul></article>
   </main>
 </body>

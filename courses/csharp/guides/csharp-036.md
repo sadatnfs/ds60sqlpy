@@ -24,9 +24,9 @@ ArrayPool reuses buffers to reduce allocation pressure. A rented array may be la
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles your saved pad as `Program.cs` in its fixed .NET 10 project. C# 14 is the matching language generation. This route uses the prepared framework libraries; it does not accept arbitrary project files, NuGet packages, command arguments or interactive input. The explicit `Program.Main` entrypoint makes compilation and execution visible. `Check` throws on a false condition in every build configuration, unlike conditional debugging assertions.
+`ArrayPool<int>.Shared` comes from `System.Buffers`, which the worked examples import. In this runtime, `Rent(3)` returned an array of length 16 and `Rent(17)` returned 32, but only the minimum length is promised, so the example sums a span of exactly three elements rather than the whole array.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Compile contract, starter stop and success marker: [running a lesson](../STUDY-GUIDE.md#running-a-lesson).
 
 
 
@@ -34,7 +34,7 @@ Start with the answer-free learner artifact in your saved classroom pad. It deli
 
 `ArrayPool<T>.Shared.Rent(n)` grants temporary use of at least n elements. `Return` ends ownership. A try/finally protects return on failure; never expose a view after return.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+Each example ends with a trace; method: [tracing a program](../STUDY-GUIDE.md#tracing-a-program).
 
 ## Worked example / walkthrough
 
@@ -86,6 +86,8 @@ internal static class Program {
 
 **Observe:** Only three initialized elements contribute to the total.
 
+**Trace.** `Rent(3)` hands out an array with at least three elements, possibly reused and possibly holding old values. The code writes 2, 3 and 4 into the first three slots, views exactly that range and sums it to 9. The second check asserts only the minimum length. `finally` returns the array with `clearArray: true`, so the next renter sees zeros.
+
 ### Example B: Release retained references deliberately
 
 The test checks controllable ownership, avoiding a flaky assumption about when garbage collection occurs.
@@ -128,6 +130,8 @@ internal static class Program {
 
 **Observe:** Clearing removes the application references without promising collection timing.
 
+**Trace.** `retained` holds two 32-byte arrays, so the application keeps both alive. `Clear()` removes the references and Count becomes 0. The check makes no claim about when the garbage collector reclaims the arrays: once nothing refers to them they become eligible, and the timing belongs to the runtime, not to this program.
+
 ## Exercises
 
 1. **Predict and explain.** Separate logical length from rented array length.
@@ -142,13 +146,15 @@ internal static class Program {
 
 6. **Transfer and justify.** Decide whether pooling is justified using allocation measurements and a stated lifetime contract.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Log each task in the [evidence table](../STUDY-GUIDE.md#recording-exercise-evidence) before opening the explanation.
 
 ## Common pitfalls and diagnosis
 
 Never assert that a weak reference must disappear immediately after a collection request. Returning a buffer while asynchronous work still uses it causes data corruption. Pooling is not inherently a performance win.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+For task 4, summing the whole rented array instead of the initialized span reads whatever earlier renters left in slots 3 through 15. Returning the same array twice lets the pool hand it to two renters at once, which corrupts both silently. For task 5, the `finally` block must return the buffer even when the computation throws.
+
+Repair routine: [building a regression case](../STUDY-GUIDE.md#building-a-regression-case).
 
 ## Progressive hints
 
@@ -158,11 +164,15 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 ## Self-check and next step
 
-Explain Reachability, Pool, Logical length without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+State the logical length and the rented length in Example A, and which one your code may rely on. Explain why the example avoids asserting that memory has been collected. For task 6, name the allocation measurement that would justify pooling and the lifetime rule each borrower must follow.
+
+Then follow the general [self-check routine](../STUDY-GUIDE.md#self-check-routine) and save your pad.
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://learn.microsoft.com/en-us/dotnet/csharp/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+[Documentation](https://learn.microsoft.com/en-us/dotnet/csharp/): The .NET garbage collection fundamentals and the `ArrayPool<T>` reference describe generations, reachability and buffer renting.
+
+Provenance and limits: [sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

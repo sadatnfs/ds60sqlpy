@@ -6,7 +6,16 @@ Advanced, approximately 120 minutes. Direct prerequisites: `java-026`
 
 ## Learning objectives
 
-Build a runnable JAR reproducibly and detect when a changed source produces a different artifact. Along the way, explain build input, reproducible artifact, dependency pin, jar using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. Exercises 1 and 2 start from the worked examples; the authored investigations begin with this task: Package the same classes twice with the same timestamp. The final exercise transfers the mechanism to record an explicit dependency contract.
+Build a runnable JAR reproducibly and detect when a changed source produces a different artifact.
+
+The six exercises practice these steps:
+
+- Compile a literal application.
+- Create a runnable archive.
+- Compare two builds with fixed metadata.
+- Execute the packaged entrypoint.
+- Detect a changed source identity.
+- Record an explicit dependency contract.
 
 ## Purpose and mental model
 
@@ -26,16 +35,9 @@ The example compiles one small application, packages it twice with a fixed archi
 
 ## How to run this lesson
 
-Open the Docker classroom, choose the prepared Java 21 profile and save a learner pad. The pad is compiled as `Main.java` with `javac --release 21` and executed with `java -ea Main`. Assertions are enabled deliberately. A successful assertion has no output; a failed assertion throws `AssertionError` and the process should fail. Do not remove assertions to obtain a green result.
+`BuildFixture` writes `Hello.java` into an owned temporary directory, compiles it with the JDK's in-process compiler, packages it with the `jar` tool and a fixed `--date`, and runs the archive in a child JVM with a five-second limit.
 
-For a prepared native JDK, copy a worked example into your own `Main.java` under ignored `.learning/expansion/java-027/`. From that directory run the same two commands on PowerShell, macOS or Linux:
-
-```text
-javac --release 21 Main.java
-java -ea Main
-```
-
-The public class name and source filename must agree. Each worked example below is a complete file. Example B includes the setup it needs from Example A, so it can be compiled by itself. The six exercise reference blocks form one complete program in the separate solution. Keep your original prediction, source and diagnostic text together. Most examples use prepared JDK libraries and tiny local fixtures; any additional dependency is specified in the lesson notes below. Any lesson-specific library or additional file is named explicitly; do not download packages from inside a learner program. Resource examples close their owned files, executors or loopback servers.
+Classroom and native JDK steps, the exercise controls and the hint routine are in the [Java study guide](../STUDY-GUIDE.md).
 
 ## Manual build fixture
 
@@ -271,62 +273,62 @@ public class Main {
 
 ## Prediction before your attempt
 
-Read the source from the entry point and name each value before executing it. Identify which operations create new values, which mutate existing state and which can fail. Predict the first observable output or assertion result. For a compile-time failure, explain which source rule is violated before discussing runtime state: a program that did not compile never reached its main method. Keep normal, boundary and invalid inputs separate so each check has a clear purpose.
+Before running Example A, decide what proves that `Hello.java` compiled: the compiler exit code, the `.class` file, or both. For Example B, predict what `Main-Class` value the manifest holds after `jar --main-class Hello`. Before Exercise 3, decide whether two archives packed from the same class files with the same `--date` will have equal SHA-256 digests, and what would differ if each used the current time.
 
 ## Exercises
 
-1. **Compile a literal application: predict an edited check.** Copy Example A into a scratch `Main.java` and change `assert java.nio.file.Files.isRegularFile(fixture.classes.resolve("Hello.class"));` to `assert java.nio.file.Files.isRegularFile(fixture.classes.resolve("Hello.class!"));` inside its assertion. Before running it with `java -ea Main`, predict whether the assertion still holds and explain why; then restore it.
-   **Expected:** The changed run fails with an `AssertionError` from the assertion on `java.nio.file.Files.isRegularFile(fixture.classes.resolve("Hello.class"))`. Restoring the original line brings back the worked observation: compiler exit 0; Hello.class exists.
-   **Verify:** Compare your written prediction with the reported `AssertionError` and its stack-trace line, and explain why the edited condition is false for the values that satisfy `java.nio.file.Files.isRegularFile(fixture.classes.resolve("Hello.class"))`. After restoring the line, the program completes without an `AssertionError` again.
+1. **Compile a literal application: predict an edited check.** Change Example A's assertion to `assert java.nio.file.Files.isRegularFile(fixture.classes.resolve("Hello.class!"));`, predict whether it holds, then run and restore it.
+   **Expected:** The edited run fails with an `AssertionError` from the assertion on `java.nio.file.Files.isRegularFile(fixture.classes.resolve("Hello.class"))`.
+   **Verify:** Explain why the edited assertion is false for the values that satisfy `java.nio.file.Files.isRegularFile(fixture.classes.resolve("Hello.class"))`.
 
-2. **Create a runnable archive: diagnose an edited check.** A careless edit changed the assertion that Example B adds after Example A so that it reads `assert archive.getManifest().getMainAttributes().getValue("Main-Class").equals("Hello!");`. Run Example B with that line, explain why the edited assertion now fails for the same program state, and restore it.
-   **Expected:** Before the repair the run fails with an `AssertionError` from the assertion on `archive.getManifest().getMainAttributes().getValue("Main-Class").equals("Hello")`; after it the line reads `assert archive.getManifest().getMainAttributes().getValue("Main-Class").equals("Hello");` again and JAR exists and contains Hello.class.
-   **Verify:** Keep the failing and the repaired runs. Explain why the edited assertion rejects the same program state that `archive.getManifest().getMainAttributes().getValue("Main-Class").equals("Hello")` accepts.
+2. **Create a runnable archive: diagnose an edited check.** Example B's new assertion was edited to `assert archive.getManifest().getMainAttributes().getValue("Main-Class").equals("Hello!");`. Explain why it fails for unchanged state and restore it.
+   **Expected:** The edited run fails with an `AssertionError` from the assertion on `archive.getManifest().getMainAttributes().getValue("Main-Class").equals("Hello")`; the restored assertion passes.
+   **Verify:** Explain why the edited assertion rejects the state that `archive.getManifest().getMainAttributes().getValue("Main-Class").equals("Hello")` accepts.
 
 3. **Compare two builds with fixed metadata.** Package the same classes twice with the same timestamp.
    **Expected:** archive byte hashes equal in this prepared JDK.
-   **Verify:** Keep an assertion equivalent to `compiled == 0`. As a control, change `assert compiled == 0;` to `assert compiled != 0;` inside it: the run must fail with an `AssertionError`, which shows the assertion can fail. Restore it.
+   **Verify:** Control: changing `assert compiled == 0;` to `assert compiled != 0;` inside the assertion must make it fail.
 
 4. **Execute the packaged entrypoint.** Run the JAR in a bounded child JVM.
    **Expected:** stdout build-ok; exit 0.
-   **Verify:** Keep an assertion equivalent to `output.strip().equals("build-ok")`. As a control, change `assert output.strip().equals("build-ok");` to `assert output.strip().equals("build-ok!");` inside it: the run must fail with an `AssertionError`, which shows the assertion can fail. Restore it.
+   **Verify:** Control: changing `assert output.strip().equals("build-ok");` to `assert output.strip().equals("build-ok!");` inside the assertion must make it fail.
 
 5. **Detect a changed source identity.** Hash two source strings differing in their printed message.
    **Expected:** different SHA-256 digests.
-   **Verify:** Keep an assertion equivalent to `!Arrays.equals(first, second)`. As a control, change `"class A { int x=1; }".getBytes(java.nio.charset.StandardCharsets.UTF_8)` to `"class A { int x=2; }".getBytes(java.nio.charset.StandardCharsets.UTF_8)`: the run must fail with an `AssertionError` from the assertion on `!Arrays.equals(first, second)`. Restore the line before continuing.
+   **Verify:** Control: changing `"class A { int x=1; }".getBytes(java.nio.charset.StandardCharsets.UTF_8)` to `"class A { int x=2; }".getBytes(java.nio.charset.StandardCharsets.UTF_8)` must fail the assertion on `!Arrays.equals(first, second)`.
 
 6. **Record an explicit dependency contract.** Represent H2 as version 2.5.252 with a required verified hash field and reject a moving LATEST label.
    **Expected:** exact version accepted; LATEST not treated as a pin.
-   **Verify:** Keep an assertion equivalent to `dependency.get("version").equals("2.5.252") && !dependency.get("version").equals("LATEST")`. As a control, change `"2.5.252",` to `"3.5.252",`: the run must fail with an `AssertionError` from the assertion on `dependency.get("version").equals("2.5.252") && !dependency.get("version").equals("LATEST")`. Restore the line before continuing.
+   **Verify:** Control: changing `"2.5.252",` to `"3.5.252",` must fail the assertion on `dependency.get("version").equals("2.5.252") && !dependency.get("version").equals("LATEST")`.
 
 ## Common pitfalls and diagnosis
 
-When a check fails, keep the smallest source file that still demonstrates the failure. Read the first relevant compiler diagnostic before editing several lines; later diagnostics can be consequences of the same missing delimiter or wrong type. For a runtime exception, identify the first frame belonging to your code and compare its input with the method contract. For an assertion failure, inspect the actual value and the independent expected value. A passing process exit is weaker than a checked invariant, and a checked invariant applies only under its stated assumptions.
+Floating versions such as `LATEST` or open ranges make two builds of the same commit pull different code, so a pin names one exact version and a checksum confirms the bytes. Archive timestamps differ on every build unless they are fixed, so identical code yields different hashes. Matching hashes prove identity, not safety or correctness. And a JAR with the right classes but a missing `Main-Class` entry fails at startup, which is why Exercise 4 runs the artifact.
 
-Do not replace a precise exception with a catch-all that returns a plausible default. That can hide an invalid input or an unfinished operation. If an example owns a resource, verify its lifetime on both the success and failure paths. If an operation is concurrent, use ordering primitives to establish the relationship you need; an observed timing coincidence is not a synchronization guarantee. The solution explanations identify the specific alternative that would break each exercise.
+General compiler, runtime and assertion triage: [diagnose a failure](../STUDY-GUIDE.md#diagnose-a-failure).
 
 ## Progressive hints
 
-Read one hint at a time and attempt the exercise again before reading the next. Keep a small table of input, expected value, actual value and exception type. Ask for one hint about the first incorrect assumption before requesting the entire reference implementation.
+Read one rung at a time, as described in [using hints](../STUDY-GUIDE.md#use-hints-one-at-a-time).
 
-- **Exercise 1:** First restate the expected observation: compiler exit 0; Hello.class exists. Then list the values read by `java.nio.file.Files.isRegularFile(fixture.classes.resolve("Hello.class"))` and trace each one from its declaration. Finally, compute the asserted value with `assert java.nio.file.Files.isRegularFile(fixture.classes.resolve("Hello.class!"));` in place before running.
-- **Exercise 2:** First restate the expected observation: JAR exists and contains Hello.class. Then list the values read by `archive.getManifest().getMainAttributes().getValue("Main-Class").equals("Hello")` and trace each one from its declaration. Finally, compare `assert archive.getManifest().getMainAttributes().getValue("Main-Class").equals("Hello!");` with the same line in Example B and state the claim each version makes.
-- **Exercise 3:** First restate the expected observation: archive byte hashes equal in this prepared JDK. Then list the values read by `compiled == 0` and trace each one from its declaration. Finally, name one input that would make `compiled == 0` false.
-- **Exercise 4:** First restate the expected observation: stdout build-ok; exit 0. Then list the values read by `output.strip().equals("build-ok")` and trace each one from its declaration. Finally, name one input that would make `output.strip().equals("build-ok")` false.
-- **Exercise 5:** First restate the expected observation: different SHA-256 digests. Then list the values read by `!Arrays.equals(first, second)` and trace each one from its declaration. Finally, predict the effect of changing `"class A { int x=1; }".getBytes(java.nio.charset.StandardCharsets.UTF_8)` to `"class A { int x=2; }".getBytes(java.nio.charset.StandardCharsets.UTF_8)` before running anything.
-- **Exercise 6:** First restate the expected observation: exact version accepted; LATEST not treated as a pin. Then list the values read by `dependency.get("version").equals("2.5.252") && !dependency.get("version").equals("LATEST")` and trace each one from its declaration. Finally, predict the effect of changing `"2.5.252",` to `"3.5.252",` before running anything.
+- **Exercise 1:** First note that the in-check edit looks for "Hello.class!" in the classes directory. Then recall that the compiler writes `Hello.class` for the public class `Hello`. Finally, explain why the exit code check passed but the file lookup fails.
+- **Exercise 2:** First note that the in-check edit expects the manifest `Main-Class` to equal "Hello!". Then read what `pack` passed with `--main-class Hello`. Finally, explain why the `Hello.class` entry check passed and only the manifest comparison fails.
+- **Exercise 3:** First compile the fixture once and pack it twice with the same `--date`. Then hash both archives with `MessageDigest.getInstance("SHA-256")`. Finally, assert that the digests are equal with `Arrays.equals` and name the input you fixed to make that possible.
+- **Exercise 4:** First compile and pack the fixture. Then call `run(jar)`, which starts `java -jar` in a child process with a bound. Finally, assert that the trimmed standard output is "build-ok" and explain what a missing manifest entry would cause.
+- **Exercise 5:** First hash the source text `class A { int x=1; }` with SHA-256. Then hash the version where `x` is 2. Finally, assert that the two digests differ and explain why one changed character must produce a new artifact identity.
+- **Exercise 6:** First record the H2 coordinate, the exact version 2.5.252 and a hash policy in a map. Then assert that the version equals 2.5.252 and is not "LATEST". Finally, explain why the policy must point to a verified checksum rather than an invented one.
 
 ## Self-check and retrieval
 
-Close the solution and explain Build input, Reproducible artifact, Dependency pin in your own words. Reconstruct one example from a blank `Main.java`, then add a new boundary input. Explain why the new case should pass or fail before compiling it. Identify a situation where this technique is appropriate and one where a different data structure, lifetime policy or abstraction would be clearer. This is a reasoning check, not a memorization test for an API spelling.
+Without the guide, list the build inputs that must be fixed for two archives to match byte for byte. Explain what the `--date` option controls, why Exercise 4 runs the JAR after hashing it, and why a version pin plus a verified hash is stronger than a version name alone.
 
 ## Next step
 
-Preserve the saved pad and the six exercise observations. Continue to the next lesson only when you can explain the invariants without reading the answer. Later chapters reuse these contracts in larger programs, so keep a failing counterexample as well as a repaired result. A reference implementation demonstrates one valid design under the stated assumptions; it is not a universal design rule.
+Continue with `java-028`: HTTP services and clients. Keep your six observations; see [moving on](../STUDY-GUIDE.md#move-to-the-next-lesson).
 
 ## Sources and verification status
 
-[Official Java 21 API or language reference](https://docs.oracle.com/en/java/javase/21/docs/specs/man/jar.html), reviewed 2026-10-22. Examples and exercise fixtures are original course material. Use the [validation guide](../../../docs/validation.md) and CI artifacts for the exact revision and platform to inspect actual compile/run results. Authoring, parsing, compilation, execution and learner mastery are separate forms of evidence.
+[Official Java 21 API or language reference](https://docs.oracle.com/en/java/javase/21/docs/specs/man/jar.html), reviewed 2026-10-22. Evidence levels: [sources and evidence](../STUDY-GUIDE.md#sources-and-evidence).
 
 ## Ask an AI tutor about this lesson
 

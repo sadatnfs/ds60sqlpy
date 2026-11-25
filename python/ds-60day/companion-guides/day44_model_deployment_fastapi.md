@@ -95,31 +95,7 @@ curl -X POST http://127.0.0.1:8000/predict \
 
 ## How to run this lesson
 
-**Primary browser route:** run `./classroom` from the repository root and
-choose **Python and data science** on `/classroom`. Open this lesson in the shared workspace,
-read its capability notice, and use its supported coding or reading workflow.
-The [classroom guide](../../../docs/classroom-experience.md) explains saved work, runtimes and switching subjects.
-
-**Optional native notebook/editor route:** the instructions below describe
-separately prepared host tools. They are useful alternatives, not prerequisites
-for opening this lesson in the Docker classroom.
-
-1. Open the Day 44 learner notebook from this guide's **Next
-   step** section in VS Code or JupyterLab.
-2. Select the `Python (ds60sqlpy)` kernel. Start at the top and use
-   **Run All** only after making the written predictions; every added
-   worked example is bounded and offline after bootstrap.
-3. Keep experiments in new scratch cells. Do not edit the official
-   solution while attempting the numbered practice.
-4. Restart the kernel and run from the first cell before calling the
-   lesson complete. A clean run catches hidden state and stale
-   variables.
-
-Linux, macOS, or Ubuntu in Windows WSL 2:
-
-```bash
-.venv/bin/python -m jupyter lab
-```
+Open `python-44` in the classroom, or `python/ds-60day/notebooks/day44_model_deployment_fastapi.ipynb` on a host; the [Python study guide](../../STUDY-GUIDE.md) explains both.
 
 ## Concept deep dive: validated request contracts, trusted artifacts, and testable inference endpoints
 
@@ -142,10 +118,6 @@ must be verified before the service becomes ready.
 - **`TestClient(app).post(..., json=payload)`:** exercises serialization, routing, validation, and response behavior without starting a network server.
 
 ### Focused example A: make request validation fail before inference
-
-Before running the example, predict the shape, type, or direction of the
-result. Write the prediction down so that a surprise becomes evidence
-rather than something to overlook.
 
 ```python
 from pydantic import BaseModel, Field, ValidationError
@@ -234,9 +206,6 @@ print(model.predict_proba(request_features).tolist())
 
 Make an API boundary explicit: validate shape and meaning, map model outputs to a versioned schema, and test behavior without relying on a manually running server.
 
-Predict or plan before you run code. Use the hint only after an honest
-attempt, and record the evidence that would prove your result correct.
-
 4. **Boundary-case testing:** Write API tests for a missing feature, an extra feature, a string, NaN/infinity, wrong feature count, and one valid request. State the expected status-code family for each.
    **Progressive hint:** Use FastAPI TestClient so validation can be tested in-process. Malformed client input is 4xx; unexpected service failure is 5xx.
 
@@ -288,8 +257,7 @@ lesson and must be designed before Internet-facing deployment.
 
 ## Ask an AI tutor about this lesson
 
-The lesson is complete without an AI assistant. If you want optional
-coaching, copy this prompt into the AI tutor while the repository root is open:
+The lesson is complete without AI. For optional coaching, copy this prompt with the repository root open:
 
 ```text
 Tutor me through `python-44` (Day 44: Model Deployment with FastAPI).

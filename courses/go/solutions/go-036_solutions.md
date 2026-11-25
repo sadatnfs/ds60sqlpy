@@ -1,6 +1,6 @@
 # go-036: explained solutions
 
-These are comparison material after an attempt or explicit reveal. The executable reference implements all six cases in one `main.go`.
+Compare after an attempt ([using solutions](../STUDY-GUIDE.md#use-the-solutions)). `courses/go/solutions/go-036_solution.go` implements all six cases.
 
 ## Mechanism
 
@@ -10,7 +10,7 @@ A map of required label pairs represents an AND of equality tests in this small 
 
 ## 1. Match all required labels: predict an edited check
 
-Copy worked example 1 into a scratch pad and change `matches(map[string]string{"app": "web", "tier": "frontend"}, map[string]string{"app": "web", "tier": "frontend"})` to `matches(map[string]string{"app!": "web", "tier": "frontend"}, map[string]string{"app": "web", "tier": "frontend"})` inside its check. Before running, predict whether the check still passes and explain why; then restore it.
+Copy worked example 1, change `matches(map[string]string{"app": "web", "tier": "frontend"}, map[string]string{"app": "web", "tier": "frontend"})` to `matches(map[string]string{"app!": "web", "tier": "frontend"}, map[string]string{"app": "web", "tier": "frontend"})` inside its check and predict whether it still passes; then restore it.
 
 The unchanged code is worked example 1:
 
@@ -18,13 +18,15 @@ The unchanged code is worked example 1:
 check(matches(map[string]string{"app": "web", "tier": "frontend"}, map[string]string{"app": "web", "tier": "frontend"}), "match")
 ```
 
-**Expected:** The changed run panics with `match` because the edited check no longer holds. Restoring the original line brings back the worked observation: the selector matches.
+**Expected:** The edited check panics with `match` even though `matches(map[string]string{"app": "web", "tier": "frontend"}, map[string]string{"app": "web", "tier": "frontend"})` still holds.
+
+**Verify:** Restoring `matches(map[string]string{"app": "web", "tier": "frontend"}, map[string]string{"app": "web", "tier": "frontend"})` makes the check pass again with the worked observation: the selector matches.
 
 All selector pairs must match. Treating the requirements as OR would admit unintended workloads.
 
 ## 2. Reject a missing label: diagnose an edited check
 
-A careless edit changed the check in worked example 2 so that it reads `matches(map[string]string{"app": "web"}, map[string]string{"app": "web", "tier": "frontend"})`. Run worked example 2 with that line, explain why the edited check now fails for the same program state, and restore it.
+A careless edit rewrote the check in worked example 2 as `matches(map[string]string{"app": "web"}, map[string]string{"app": "web", "tier": "frontend"})`. Explain the failure, then restore it.
 
 The unchanged code is worked example 2:
 
@@ -32,7 +34,9 @@ The unchanged code is worked example 2:
 check(!matches(map[string]string{"app": "web"}, map[string]string{"app": "web", "tier": "frontend"}), "missing")
 ```
 
-**Expected:** Before the repair the program panics with `missing`; after it the line reads `!matches(map[string]string{"app": "web"}, map[string]string{"app": "web", "tier": "frontend"})` again and the selector does not match.
+**Expected:** The defective run panics with `missing`; after restoring `!matches(map[string]string{"app": "web"}, map[string]string{"app": "web", "tier": "frontend"})`, the selector does not match.
+
+**Verify:** The edited check fails with message `missing` for a state that `!matches(map[string]string{"app": "web"}, map[string]string{"app": "web", "tier": "frontend"})` accepts.
 
 A missing required key is not a wildcard. Presence is part of the equality contract.
 
@@ -46,6 +50,8 @@ check(!matches(map[string]string{}, map[string]string{"flag": ""}), "empty absen
 ```
 
 **Expected:** A present empty label matches; absence does not.
+
+**Verify:** Your solution must keep `matches(map[string]string{"flag": ""}, map[string]string{"flag": ""})` true. Control: changing `check(matches(map[string]string{"flag": ""}, map[string]string{"flag": ""}), "empty present")` to `check(matches(map[string]string{"flag!": ""}, map[string]string{"flag": ""}), "empty present")` panics with message `empty present`; revert it.
 
 Reading only the map zero value would collapse absence into empty text and incorrectly match the second case.
 
@@ -66,6 +72,8 @@ check(count == 1, "ready backends")
 
 **Expected:** Exactly one usable backend remains.
 
+**Verify:** Your solution must keep `count == 1` true. Control: changing `if matches(p.Labels, map[string]string{"app": "web"}) && p.Ready {` to `if matches(p.Labels, map[string]string{"app": "web"}) || p.Ready {` panics with message `ready backends`; revert it.
+
 Selection and readiness answer different questions. An object can belong to the workload without being eligible for traffic.
 
 ## 5. Inspect an overly broad selector
@@ -77,6 +85,8 @@ check(matches(map[string]string{"app": "web"}, nil) && matches(map[string]string
 ```
 
 **Expected:** Both match this mathematical predicate.
+
+**Verify:** Your solution must keep `matches(map[string]string{"app": "web"}, nil) && matches(map[string]string{"app": "db"}, nil)` true. Control: an input that falsifies it fails with message `broad selector`; revert it.
 
 This local predicate treats an empty conjunction as true. Real API semantics vary by resource and field, so consult the relevant API before using an empty selector.
 
@@ -91,8 +101,10 @@ check(matches(map[string]string{"app": "web", "revision": "a"}, selector) && mat
 
 **Expected:** Both versions match the stable app selector.
 
+**Verify:** Your solution must keep `matches(map[string]string{"app": "web", "revision": "a"}, selector) && matches(map[string]string{"app": "web", "revision": "b"}, selector)` true. Control: changing `selector := map[string]string{"app": "web"}` to `selector := map[string]string{"app!": "web"}` panics with message `rollout selector`; revert it.
+
 The stable selector allows replacement backends. Whether both should receive traffic depends on rollout and readiness policy, not just matching labels.
 
 ## Transfer after comparison
 
-Return to your own pad and reproduce one check with a new input. Explain why the check rejects a plausible wrong implementation. Keep the distinction between a pure model, an in-process fake, and a real external system visible in your notes.
+Service routing, Deployment ownership, NetworkPolicy and the controller watches in later lessons all depend on selectors. When a Service has no endpoints, check the namespace, the exact label keys and values, and readiness, in that order. When writing a controller, filter by owner reference too, so two workloads that share labels never claim each other's Pods.

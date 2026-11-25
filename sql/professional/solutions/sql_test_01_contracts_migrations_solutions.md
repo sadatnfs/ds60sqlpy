@@ -13,40 +13,30 @@ psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
   -f sql/professional/solutions/sql_test_01_contracts_migrations_solutions.sql
 ```
 
-`psql` prints each result/command tag in the terminal. Stop at the first
-unexpected `ERROR`; later output cannot repair an earlier failed invariant.
-Compare your own SQL, row grain, column names, row counts, `NULL` policy, and
-ordering with the explanation before comparing syntax.
+The solution reuses the `assert_true` pattern but builds its own fixture,
+creating `order_lines` only at Exercise 4, so compare which failures each test
+catches rather than matching table layouts.
 
-## Clause-by-clause reading map
+## Reading map for this lesson
 
-The lesson's main concepts are Assertion, Fixture, Negative control, Contract, Invariant test, Reconciliation. Its worked-model focus is:
-`assert_true(name, condition, detail)` treats both false and NULL as failure, raises an exception, and emits a PASS notice only after success. With `ON_ERROR_STOP=1`, an uncaught failed assertion gives the command a nonzero exit status, CI cannot mistake printed warnings for success.
+Read each solution as a test with a reason to fail:
 
-- Start at `FROM`/`JOIN` and state the intermediate row grain. Inspect join keys
-  before adding aggregates; a one-to-many join is allowed to multiply rows only
-  when the later contract accounts for it.
-- Apply `WHERE` to input rows, `GROUP BY` to form buckets, and `HAVING` to
-  completed groups. Window functions run over the surviving relation and
-  normally preserve its row count.
-- Read the `SELECT` list as the public result contract: keys establish grain,
-  measures state calculations, and aliases explain meaning. `ORDER BY` is the
-  only output-order guarantee; add a unique tie-breaker before `LIMIT`.
-- Trace every common table expression (CTE) as a temporary named relation.
-  Execute or inspect one stage at a time while debugging, but compare the final
-  result with an independent control rather than trusting stage names.
-- Keep SQL `NULL` as “missing/unknown/not applicable” until the metric contract
-  chooses another representation. Guard division with `NULLIF`; disclose
-  exclusions and distinguish zero from no row.
-- For DDL/DML, a command tag proves only that PostgreSQL accepted a statement.
-  Catalog checks, negative cases, row-count reconciliation, and the declared
-  transaction boundary prove behavior and cleanup.
+- Exercises 1 to 3 check the contract: the currency migration and its default,
+  duplicate producer keys in `raw_orders` caught before validation, and keys
+  and constraints read from catalog properties rather than generated names.
+- Exercise 4 uses `LEFT JOIN` and `COALESCE` so an order with zero lines
+  reconciles differently from one whose lines total zero.
+- Exercises 6 and 7 store expected outcomes as data: `negative_test_results`
+  records the intended SQLSTATE class, and `boundary_probe` with
+  `boundary_results` drives exact-boundary cases from a table.
+- Exercises 5 and 8 to 10 are reasoning: harness ownership, a two-session
+  concurrency test with named barriers, a schema fingerprint that ignores OIDs
+  and statistics, and a destructive migration rehearsed only on a restored
+  copy.
 
-The exact final queries are not the only valid syntax. A join, subquery, CTE,
-window, or conditional aggregate can be an alternative when it preserves the
-same grain, `NULL` semantics, deterministic ordering, and safety. Prefer the
-form whose intermediate relations a reviewer can verify; optimize only after
-correctness is established with evidence.
+Another test is acceptable when it fails for the bug it names and passes on the
+clean fixture. A test that cannot fail, or that fails for an unrelated reason,
+is not evidence.
 
 Run:
 

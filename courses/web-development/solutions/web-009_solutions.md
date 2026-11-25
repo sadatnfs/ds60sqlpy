@@ -1,6 +1,6 @@
 # web-009: explanatory solutions
 
-Open this after your own attempt. Each answer explains the lesson's synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in `courses/web-development/guides/web-009.md`.
+Attempt each exercise before reading; the mechanism is in `courses/web-development/guides/web-009.md` ([using these answers](../STUDY-GUIDE.md#solutions)).
 
 ## Exercise 1: Predict required, minimum and maximum outcomes for empty, 4, 30 and 121.
 
@@ -76,4 +76,6 @@ Open this after your own attempt. Each answer explains the lesson's synthetic fi
 
 ## Reference comparison
 
-Open `courses/web-development/solutions/web-009_solution.html` only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; its success message is not an accessibility audit or proof of responsive behavior at every size.
+The reference calls checkValidity on the minutes input and requires the starting value to pass, which catches an initial value outside 5 to 120 or a missing value. It does not test the failing values, the linked help or the error text, so try empty, 4 and 121 by hand.
+
+Open `courses/web-development/solutions/web-009_solution.html` after saving your attempt ([comparing with the reference](../STUDY-GUIDE.md#references)).

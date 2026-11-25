@@ -2,75 +2,27 @@
 
 ## How to run this lesson
 
-Start the Linux-container engine and run `./classroom` from the repository
-root. On Windows, use Ubuntu in WSL 2 or the thin
-`START_DOCKER_CLASSROOM.cmd` wrapper. Choose **PostgreSQL** on the shared
-`/classroom` home, then open **sql-scale-01**. The
-[launcher guide](../../../docs/one-command-classroom.md) covers first preparation, strict resume and
-the saved project selection. No host Python or PostgreSQL installation is
-required for this browser route.
+Start **sql-scale-01** from `./classroom` using the shared [run steps](../../STUDY-GUIDE.md#run-a-lesson-in-the-classroom).
 
-1. Read the prerequisite and fixture notes before running the file. Use only
-   the local disposable `advanced_sql_training` database.
-2. Choose **Whole SQL lesson (psql)** for the cataloged learner script. This
-   preserves the lesson's reviewed psql directives, relative includes and
-   transaction behavior. **SQL snippet** is appropriate for ordinary SQL
-   statements, but is not a replacement for an entire script's setup.
-3. The **Course database** panel above the code shows whether the course
-   training tables are loaded. Missing tables load automatically before your
-   first run (or choose **Load course tables**) and stay loaded for later
-   lessons. **Reset training data** restores the original rows only when your
-   own changes made results differ; it keeps your saved code and notes.
-4. Edit the learner copy in the classroom and save your prediction before
-   running. Its whole-script workspace is
-   `.learning/sql/sql-scale-01/lesson/workspace/sql/professional/lessons/sql_scale_01_cursors_and_batches.sql`.
-   For browser work this path is inside the Docker learning volume, not a
-   newly created host folder beside your checkout. The checked-in source
-   remains the answer-free starting artifact.
-5. Run the whole script and inspect the full transcript. The runner uses
-   `psql -X -v ON_ERROR_STOP=1 -f`. SELECT output has columns, rows and a row
-   count; DDL/DML has command tags; intentional checks may produce NOTICE
-   messages. An unexpected ERROR or nonzero exit is a failure to diagnose,
-   even when an earlier query printed plausible values.
-6. Verify the lesson's expected grain, ordering, constraints and declared
-   transaction or cleanup outcome. Keep required ROLLBACK statements.
-   The warehouse sequence and other explicitly stateful exercises explain
-   when state is committed. Read saved output without rerunning it when
-   reviewing an earlier attempt.
+Choose **Whole SQL lesson (psql)**. The script needs no course tables. It
+guards `advanced_sql_training`, builds the six-row `scale_events` temporary
+table and an index in the same order the pages use
+(`occurred_at DESC NULLS LAST, event_id DESC`), and ends with `ROLLBACK`. In
+that order the events run 6, 3, 2, 1, 5, 4: events 2 and 1 share 10:00 UTC, and
+event 4 has no timestamp at all, so every page boundary in the lesson meets
+either a tie or a NULL. Save attempts in
+`.learning/sql/sql-scale-01/lesson/workspace/sql/professional/lessons/sql_scale_01_cursors_and_batches.sql`.
+When Exercises 4 and 5 add event 7, model it inside the query (for example with
+`UNION ALL`) rather than inserting it, so the other exercises still see the
+original six events.
 
-If a relation is missing, inspect the lesson's required fixture and predecessor
-rather than guessing a new table definition. If authentication or runtime
-readiness fails, use `./classroom status` and the setup guide. Keep credentials
-out of SQL, notebooks, screenshots and committed files. Repair the first error
-before trusting partial output, and reveal separate solutions only when you
-want to compare after an attempt.
-
-### Optional contributor notebook route
-
-For notebook work, deliberately prepare the Linux/WSL contributor environment
-from [CONTRIBUTING.md](../../../CONTRIBUTING.md), including a compatible psql client and
-the notebook dependencies. Generate this lesson's private workspace through
-the maintained CLI:
-
-```sh
-uv run --no-sync python scripts/course.py sql notebook sql-scale-01
-```
-
-Open the printed notebook path in that environment's JupyterLab. It uses the
-same catalog-derived learner-copy layout in that contributor checkout and
-executes the complete script through psql. Its host-side state is separate
-from the Docker browser's named volume. Follow
-[guided SQL notebooks](../../../docs/guided-sql-notebooks.md) for explicit local connection
-selection and kernel setup. Notebook generation does not execute SQL or
-authorize a reset.
+The optional notebook route starts with `uv run --no-sync python scripts/course.py sql notebook sql-scale-01`; see the [study guide](../../STUDY-GUIDE.md#optional-contributor-notebook-route).
 
 ## Level and prerequisites
 
 - **Level:** advanced
 - **Direct catalog prerequisites:** [`sql-35`](../../postgres-60day/companion-guides/day35_avoiding_pitfalls.md), [`sql-38`](../../postgres-60day/companion-guides/day38_transactions_isolation.md), [`sql-test-01`](sql_test_01_contracts_migrations.md)
 - **Artifacts:** [learner SQL](../lessons/sql_scale_01_cursors_and_batches.sql), [solution reasoning](../solutions/sql_scale_01_cursors_and_batches_solutions.md), [executable solution](../solutions/sql_scale_01_cursors_and_batches_solutions.sql).
-
-Direct prerequisites name the required boundary. The fixture setup is supplied; do not mistake its table-definition syntax for extra unstated prerequisite work.
 
 ## Learning objectives
 
@@ -146,7 +98,10 @@ never an automatically exact snapshot of changing business data.
 
 ## Worked example / walkthrough
 
-Run these in the complete learner file so the temporary fixture and transaction are present. The fixture values are fixed; the examples never depend on the current clock. Predict each result before running it.
+Example 1 fetches the first page of two and Example 2 continues from its last
+row. Before running Example 2, write the cursor pair you would save from
+Example 1 and predict whether events 2 and 1, which share a timestamp, can both
+appear on the next page without one of them being skipped.
 
 ### Example 1: Save the whole boundary from the first page
 
@@ -187,7 +142,12 @@ The known-value comparison admits IDs 2,1,5, then the row cap returns 2 and 1. T
 
 ## Exercises
 
-Attempt these in order in the ignored working copy, before its final rollback. Write the output grain and a prediction before execution. Compare the actual identities and values with each contract. A query merely running is not sufficient evidence. Hints are optional and leave the answer construction to you.
+Exercises 1 to 3 walk one traversal page by page, so carry the last
+`(occurred_at, event_id)` pair forward by hand and write it next to each query.
+Exercises 4 and 5 change the input with a hypothetical event 7, and Exercise 6
+checks the whole traversal at once. For each page, name the event you expect
+last and the next one that must not be skipped. The contract lines are
+explained in the [study guide](../../STUDY-GUIDE.md#work-an-exercise).
 
 1. **Record an exact first-page boundary.**
 
@@ -255,7 +215,11 @@ Attempt these in order in the ignored working copy, before its final rollback. W
 - Why does a unique final ID belong in both the ordering and cursor?
 - What evidence makes a watermark a complete input boundary rather than a hopeful numeric cutoff?
 
-Keep your actual query and transcript. Explain one incorrect alternative and the exact fixture row that exposes it. A passing worked example does not prove an unattempted exercise. Revisit a failed prediction after taking a break, then answer the retrieval questions without looking at the code.
+For retrieval practice, suppose a page of three ends at event 2. Predict which
+events a timestamp-only continuation
+`WHERE occurred_at < '2024-01-01 10:00+00'` would lose (event 1, which shares
+10:00, and event 4, whose NULL timestamp fails every comparison), then write
+the two-phase predicate that keeps both.
 
 ## Common pitfalls
 

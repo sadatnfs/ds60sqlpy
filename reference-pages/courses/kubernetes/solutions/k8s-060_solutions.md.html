@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/kubernetes/solutions/k8s-060_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="k8s-060-explanatory-solutions">k8s-060: explanatory solutions<a class="heading-anchor" href="#k8s-060-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit reveal. These explanations describe the synthetic topology and stated API contracts. They are not fabricated runtime receipts.</p>
+<p>Attempt each exercise first, then compare (<a href="../STUDY-GUIDE.md.html#solutions-and-the-ai-tutor">study guide</a>).</p>
 <h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
 <p>Dual-stack networking supports IPv4 and IPv6 together. It requires compatible cluster configuration, node networking, CNI behavior and service allocation. Adding an IPv6 address to a manifest cannot supply a missing network family underneath it.</p>
 <p>A dual-stack Service can have addresses in both families. The order and primary family are meaningful in the API. A client may receive A and AAAA DNS records and choose or race connection attempts according to its library. A successful IPv4 request does not prove IPv6 reachability, and a timeout in one family can affect perceived latency.</p>

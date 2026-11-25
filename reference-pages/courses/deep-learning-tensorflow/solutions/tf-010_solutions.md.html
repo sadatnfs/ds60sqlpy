@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/deep-learning-tensorflow/solutions/tf-010_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="tf-010-explanatory-solutions">tf-010: explanatory solutions<a class="heading-anchor" href="#tf-010-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Open these answers for A split is part of the experiment after your own attempt at Example A, Partition accounts, or after an explicit reveal. Each answer reuses the guide&#x27;s literal inputs, so a mismatch points to one step. The companion script runs the assertions; this page explains why they test Split unit, Leakage, Fit statistic. After matching exercise 6, Transfer to unseen accounts, invent a new input without looking here.</p>
+<p>Open these answers after an attempt; they reuse the guide&#x27;s inputs (<a href="../STUDY-GUIDE.md.html#after-the-solutions">comparison steps</a>).</p>
 <h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
 <p>A split defines what is unseen. If two rows belong to one account, putting one in training and one in validation exposes part of the validation entity during fitting. Grouped splitting assigns the entity once, then carries all of its rows together. Preprocessing is also fitting: a mean inferred from validation values has already consumed validation information even if no label was used. Store the training statistic and apply it unchanged to validation. This lesson uses literal account records so every crossing can be enumerated. The tiny fixture teaches isolation and does not establish that an account model will generalize to a future deployment.</p>
 <p><strong>Split unit:</strong> Entity assigned wholly to one partition.</p>
@@ -255,9 +255,7 @@ validation_error <span class="syntax-operator">=</span> <span class="syntax-buil
 <pre class="highlighted-code"><code class="language-python">new_value <span class="syntax-operator">=</span> <span class="syntax-number">1000</span> <span class="syntax-operator">-</span> mean
 <span class="syntax-keyword">assert</span> new_value <span class="syntax-operator">==</span> <span class="syntax-number">996</span> <span class="syntax-operator">and</span> mean <span class="syntax-operator">==</span> <span class="syntax-number">4</span></code></pre>
 <p><strong>Expected:</strong> transformed value 996; fitted mean remains 4.</p>
-<p><strong>Verify:</strong> In a fresh process, the exercise checks confirm <code>new_value == 996</code> and <code>mean == 4</code>.</p>
-<h3 id="review-after-comparison">Review after comparison<a class="heading-anchor" href="#review-after-comparison" aria-label="Link to this section">#</a></h3>
-<p>Change one fixture value in exercise 4, Apply frozen centering, and predict the new result before running it. Keep the failing version of exercise 5, Freeze selection identity, next to its repair. A missing framework is an environment record, not a failed assertion. No solution downloads data, calls an online model, deploys a service or changes a database.</p></article>
+<p><strong>Verify:</strong> In a fresh process, the exercise checks confirm <code>new_value == 996</code> and <code>mean == 4</code>.</p></article>
   </main>
 </body>
 </html>

@@ -244,9 +244,9 @@ bash run.sh identity</code></pre>
 <span class="syntax-keyword">LIMIT</span> <span class="syntax-number">10</span></code></pre>
 <p>Save the full row list before stopping and compare it after resume and after replacement; all three should be (1, east, 4), (2, west, 9), (3, east, 7). A matching aggregate is weaker evidence than matching rows, since a lost row and a duplicated row can cancel out in a sum. Also compare the totalDocs field in the response; a doubled count with correct distinct IDs points to a segment that was pushed twice under different names.</p>
 <h3 id="complete-worked-source">Complete worked source<a class="heading-anchor" href="#complete-worked-source" aria-label="Link to this section">#</a></h3>
-<p>This is a project-only command notebook. Read and edit it in the classroom; run its explicitly labeled commands from the copied owned Docker workshop. The classroom does not execute these service commands.</p>
+<p>The classroom does not execute these service commands. See the <a href="../STUDY-GUIDE.md.html#workshop-notebooks">workshop rules</a>.</p>
 <h2 id="pinot-apache-062-command-notebook">Pinot apache-062 command notebook<a class="heading-anchor" href="#pinot-apache-062-command-notebook" aria-label="Link to this section">#</a></h2>
-<p>Use these commands only from the copied owned Pinot project described in its README. The classroom Markdown pad does not execute Docker commands.</p>
+<p>This sequence from the copied Pinot project never calls <code>initialize</code>. Each <code>identity</code> call reads container, image and segment identities so you can compare them across <code>stop</code>, <code>resume</code>, <code>down</code> and <code>start</code>.</p>
 <pre class="highlighted-code"><code class="language-bash">bash run.sh identity
 bash run.sh stop
 bash run.sh resume
@@ -255,7 +255,7 @@ bash run.sh down
 bash run.sh start
 bash run.sh identity</code></pre>
 <p>These are read-only identity observations. Never call initialize after stop/resume or replacement. Compare saved service IDs, image IDs, segment metadata and exact order rows; export evidence before explicit owned-data destruction.</p>
-<p>Native service acceptance and each advanced extension have distinct entries in <code>QUALIFICATION.md</code>. Source/configuration presence is not an observed service result.</p>
+<p>QUALIFICATION.md records that stop and resume kept all four role containers, and that replacement changed every container while the images, the offline segment and all query results stayed the same. Run <code>destroy</code> only after that evidence is exported.</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
 <ul>
 <li><a href="https://github.com/pinot-contrib/pinot-docs/blob/latest/operate-pinot/troubleshooting/README.md">Troubleshooting</a></li>

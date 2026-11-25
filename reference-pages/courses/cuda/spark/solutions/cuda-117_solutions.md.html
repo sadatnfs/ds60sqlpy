@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cuda/spark/solutions/cuda-117_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="cuda-117-explained-solutions">cuda-117: explained solutions<a class="heading-anchor" href="#cuda-117-explained-solutions" aria-label="Link to this section">#</a></h2>
-<p>These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.</p>
+<p>Compare with your <a href="../lessons/cuda-117.md.html">worksheet</a> attempt.</p>
 <h3 id="exercise-1-calculate-both-counts">Exercise 1: Calculate both counts<a class="heading-anchor" href="#exercise-1-calculate-both-counts" aria-label="Link to this section">#</a></h3>
 <p>Row count 3 and non-null count 2.</p>
 <p><strong>Approach.</strong> Calculate both counts over <code>[2, null, 5]</code>: <code>COUNT(*)</code> is 3 because it counts rows, and <code>COUNT(value)</code> is 2 because it counts non-null values; <code>SUM(value)</code> is 7.</p>
@@ -231,9 +231,19 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Why it is correct here.</strong> Spark does not guarantee output order without <code>ORDER BY</code>, and GPU execution may produce a different order.</p>
 <p><strong>A plausible wrong approach.</strong> Converting results to sets before comparing removes duplicates and hides a missing or extra row.</p>
 <p><strong>How to verify.</strong> Compare sorted lists and also compare row counts. When duplicates are expected, compare per-key counts too, so a duplicated row and a missing row cannot cancel each other out.</p>
+<h3 id="self-check-answers">Self-check answers<a class="heading-anchor" href="#self-check-answers" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>How do COUNT(<em>) and COUNT(value) differ?</strong> COUNT(</em>) counts rows, including those whose value is null; COUNT(value) counts only non-null values.</li>
+</ol>
+<ol start="2">
+<li><strong>Why can a binary float not stand in for a decimal test?</strong> Values like 1.10 have no exact binary representation, so the float result cannot verify the decimal&#x27;s precision and scale.</li>
+</ol>
+<ol start="3">
+<li><strong>Why name the timezone in a timestamp test?</strong> The same stored instant can format or compare differently under different session time zones.</li>
+</ol>
 <h3 id="reference-observation">Reference observation<a class="heading-anchor" href="#reference-observation" aria-label="Link to this section">#</a></h3>
 <p>Rows 3, non-null 2, sum 7 and exact decimal 3.30.</p>
-<p>The reference file is <code>courses/cuda/spark/references/cuda-117_cpu.py</code>. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.</p></article>
+<p>Asserted by <code>courses/cuda/spark/references/cuda-117_cpu.py</code>.</p></article>
   </main>
 </body>
 </html>

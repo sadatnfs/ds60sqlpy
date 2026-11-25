@@ -1,6 +1,8 @@
 # c-015: explained solutions
 
-Compare after an attempt or explicit reveal. The complete executable reference, `c-015_solution.c`, implements all six cases, from the "allocate and initialize" case to the "transfer ownership cleanup" case, in one `main.c`.
+`c-015_solution.c` assembles the "allocate and initialize" case through the "transfer ownership cleanup" case in one `main.c`.
+
+Compare only after an attempt: [Compare and transfer](../STUDY-GUIDE.md#compare-and-transfer).
 
 ## Mechanism and assumptions
 
@@ -10,7 +12,7 @@ Allocated storage lets a program choose capacity at runtime. malloc returns unin
 
 ## Exercise 1: Allocate and initialize: change one input
 
-Copy worked example 1, the "allocate and initialize" case, into a scratch pad and change `p[0] = 2;` to `p[1] = 2;`. Before running, predict which CHECK fails and which value it sees in place of the worked result (the sum is 12 before release); then run it and restore the original line.
+In worked example 1, change `p[0] = 2;` to `p[1] = 2;`. Predict which value the CHECK on `p[0] + p[1] + p[2] == 12` sees, then run and restore.
 
 The unchanged code is worked example 1:
 
@@ -24,13 +26,15 @@ CHECK(p[0] + p[1] + p[2] == 12);
 free(p);
 ```
 
-**Expected:** With `p[1] = 2;` the run stops with `Check failed` at the CHECK on `p[0] + p[1] + p[2] == 12`, because the "allocate and initialize" case no longer shows that the sum is 12 before release. Restoring `p[0] = 2;` brings that observation back.
+**Expected:** `Check failed` at `p[0] + p[1] + p[2] == 12`; restoring `p[0] = 2;` passes again.
+
+**Verify:** Name the value that made `p[0] + p[1] + p[2] == 12` false, where worked example 1 showed that the sum is 12 before release.
 
 malloc storage must be initialized before reading. The owner releases it after the final valid access.
 
 ## Exercise 2: Inspect zero-initialized integers: diagnose an edited check
 
-A careless edit changed the CHECK in worked example 2, the "inspect zero-initialized integers" case, so that it reads `CHECK(p[0] != 0 && p[1] == 0 && p[2] == 0);`. Run the example with that line, explain why the edited CHECK now fails even though the program state still means all three values are zero, and restore it.
+Worked example 2's CHECK now reads `CHECK(p[0] != 0 && p[1] == 0 && p[2] == 0);`. Explain why it fails although all three values are zero, then restore it.
 
 The unchanged code is worked example 2:
 
@@ -41,7 +45,9 @@ CHECK(p[0] == 0 && p[1] == 0 && p[2] == 0);
 free(p);
 ```
 
-**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `p[0] == 0 && p[1] == 0 && p[2] == 0`. Once the line reads `CHECK(p[0] == 0 && p[1] == 0 && p[2] == 0);` again, the "inspect zero-initialized integers" case again shows that all three values are zero.
+**Expected:** `Check failed` until the CHECK reads `CHECK(p[0] == 0 && p[1] == 0 && p[2] == 0);` again, though all three values are zero.
+
+**Verify:** Explain why `CHECK(p[0] != 0 && p[1] == 0 && p[2] == 0);` rejects a state that `p[0] == 0 && p[1] == 0 && p[2] == 0` accepts, using your failing and repaired runs.
 
 For integer objects, all-bits-zero represents zero. Do not generalize that claim blindly to every possible pointer or floating representation.
 
@@ -55,6 +61,8 @@ CHECK(allocate_ints(0) == NULL);
 
 **Expected:** The helper returns NULL without an allocation.
 
+**Verify:** Keep a CHECK equivalent to `allocate_ints(0) == NULL`. Control edit: `CHECK(allocate_ints(1) == NULL);` must fail; then restore it.
+
 The wrapper makes zero-size behavior predictable. Raw allocator zero-size behavior should not be treated as a portable nonempty object.
 
 ## Exercise 4: Reject multiplication overflow
@@ -66,6 +74,8 @@ CHECK(allocate_ints(SIZE_MAX) == NULL);
 ```
 
 **Expected:** The helper returns NULL before multiplication or allocation.
+
+**Verify:** Keep a CHECK equivalent to `allocate_ints(SIZE_MAX) == NULL`. Control edit: `CHECK(allocate_ints(SIZE_MAX) != NULL);` must fail; then restore it.
 
 The division bound proves the product will fit. Testing a wrapped product after multiplication would be too late.
 
@@ -80,6 +90,8 @@ CHECK(p == NULL);
 ```
 
 **Expected:** The operation is harmless.
+
+**Verify:** Keep a CHECK equivalent to `p == NULL`. Control edit: `CHECK(p != NULL);` must fail; then restore it.
 
 This defined behavior simplifies cleanup paths. It does not make double-free of a non-null stale pointer valid.
 
@@ -99,8 +111,10 @@ CHECK(p == NULL);
 
 **Expected:** The owner records absence afterward.
 
+**Verify:** Keep a CHECK equivalent to `*p == 9`. Control edit: changing `*p = 9;` to `*p = 10;` must fail it; then restore it.
+
 Clearing the owner reduces accidental reuse through that variable. Any aliases would still need to be retired by the ownership protocol.
 
 ## After comparison
 
-Add a fresh distinguishing input for the "transfer ownership cleanup" case to your own c-015 source. Explain why every access in `allocate_ints` stays within a live object and each owned resource is released. An expected allocation owner failure belongs in the test contract; undefined behavior does not. Keep diagnostics and sanitizer evidence for the "inspect zero-initialized integers" case apart from ordinary output: the fixture proves its stated allocation owner, dangling pointer and size overflow assumptions, not universal safety.
+Write `int *copy_with_zero(const int *source, size_t count)` that allocates `count + 1` ints, copies `count` values and appends 0. Call it with three values, CHECK the copy and the trailing 0, then free it exactly once. Reject `count > SIZE_MAX / sizeof(int) - 1` before computing `(count + 1) * sizeof(int)`: that single test covers both the addition and the multiplication, and the empty-allocation policy must not hide either overflow.

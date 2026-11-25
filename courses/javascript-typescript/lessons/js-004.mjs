@@ -1,15 +1,13 @@
 // Answer-free learner source. Save your own copy before editing.
 // Exercise 1: Call a pure function: predict an edited check
-// Copy Example A into a scratch `main.mjs` and change `assert.equal(add(-1, 1), 0);` to
-// `assert.equal(add(-2, 1), 0);` inside its check. Before running it, predict whether the
-// check still passes and explain why; then restore it.
-// Expected: The changed run fails with an `AssertionError` at `assert.equal(add(-2, 1),
-// 0);`. Restoring `assert.equal(add(-1, 1), 0);` brings back: 5 and 0.
+// In a scratch copy of Example A, change `assert.equal(add(-1, 1), 0);` to
+// `assert.equal(add(-2, 1), 0);` inside its check. Does the check still pass?
+// Expected: The edited run fails with an `AssertionError` at `assert.equal(add(-2, 1), 0);`.
+// Restoring `assert.equal(add(-1, 1), 0);` brings back: 5 and 0.
 
 // Exercise 2: Build independent closures: diagnose an edited check
-// A careless edit changed a check in Example B so that it reads `assert.equal(second(),
-// 2);`. Run Example B with that line, explain why the edited check now fails for the same
-// program state, and restore it.
+// Example B's check was edited to read `assert.equal(second(), 2);`. Run it, explain the
+// failure and restore the original.
 // Expected: Before the repair the run fails with an `AssertionError` at
 // `assert.equal(second(), 2);`. Restoring `assert.equal(second(), 1);` brings back: first 1,
 // 2; second 1.

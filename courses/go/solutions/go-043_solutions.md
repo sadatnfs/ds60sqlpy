@@ -1,6 +1,6 @@
 # go-043: explained solutions
 
-These are comparison material after an attempt or explicit reveal. The executable reference implements all six cases in one `main.go`.
+Compare after an attempt ([using solutions](../STUDY-GUIDE.md#use-the-solutions)). `courses/go/solutions/go-043_solution.go` implements all six cases.
 
 ## Mechanism
 
@@ -10,7 +10,7 @@ A finalizer is a qualified string in metadata.finalizers. The state machine firs
 
 ## 1. Register cleanup responsibility: predict an edited check
 
-Copy worked example 1 into a scratch pad and change `check(finalAction(false, false, false, true) == "add-finalizer", "register")` to `check(finalAction(true, false, false, true) == "add-finalizer", "register")` inside its check. Before running, predict whether the check still passes and explain why; then restore it.
+Copy worked example 1, change `check(finalAction(false, false, false, true) == "add-finalizer", "register")` to `check(finalAction(true, false, false, true) == "add-finalizer", "register")` inside its check and predict whether it still passes; then restore it.
 
 The unchanged code is worked example 1:
 
@@ -18,7 +18,9 @@ The unchanged code is worked example 1:
 check(finalAction(false, false, false, true) == "add-finalizer", "register")
 ```
 
-**Expected:** The changed run panics with `register` because the edited check no longer holds. Restoring the original line brings back the worked observation: the next action is add-finalizer.
+**Expected:** The edited check panics with `register` even though `finalAction(false, false, false, true) == "add-finalizer"` still holds.
+
+**Verify:** Restoring `check(finalAction(false, false, false, true) == "add-finalizer", "register")` makes the check pass again with the worked observation: the next action is add-finalizer.
 
 Register responsibility before creating an external resource that would otherwise be orphaned during deletion.
 
@@ -32,7 +34,7 @@ Register responsibility before creating an external resource that would otherwis
 
 ## 2. Retain a healthy object: diagnose an edited check
 
-A careless edit changed the check in worked example 2 so that it reads `check(finalAction(true, true, false, true) == "reconcile", "normal")`. Run worked example 2 with that line, explain why the edited check now fails for the same program state, and restore it.
+A careless edit rewrote the check in worked example 2 as `check(finalAction(true, true, false, true) == "reconcile", "normal")`. Explain the failure, then restore it.
 
 The unchanged code is worked example 2:
 
@@ -40,7 +42,9 @@ The unchanged code is worked example 2:
 check(finalAction(false, true, false, true) == "reconcile", "normal")
 ```
 
-**Expected:** Before the repair the program panics with `normal`; after it the line reads `check(finalAction(false, true, false, true) == "reconcile", "normal")` again and the action is reconcile.
+**Expected:** The defective run panics with `normal`; after restoring `check(finalAction(false, true, false, true) == "reconcile", "normal")`, the action is reconcile.
+
+**Verify:** The edited check fails with message `normal` for a state that `finalAction(false, true, false, true) == "reconcile"` accepts.
 
 A finalizer does not itself request deletion. Normal desired-state work continues while deletion has not begun.
 
@@ -62,6 +66,8 @@ check(finalAction(true, true, false, true) == "cleanup", "cleanup")
 
 **Expected:** The action is cleanup.
 
+**Verify:** Your solution must keep `finalAction(true, true, false, true) == "cleanup"` true. Control: changing `check(finalAction(true, true, false, true) == "cleanup", "cleanup")` to `check(finalAction(false, true, false, true) == "cleanup", "cleanup")` panics with message `cleanup`; revert it.
+
 Removing the gate before cleanup succeeds can lose the only durable reminder of the external responsibility.
 
 **Approach.** Call `finalAction(true, true, false, true)` for a deleting object whose external cleanup has not succeeded yet.
@@ -82,6 +88,8 @@ check(finalAction(true, true, true, true) == "remove-own-finalizer", "release")
 
 **Expected:** The action is remove-own-finalizer.
 
+**Verify:** Your solution must keep `finalAction(true, true, true, true) == "remove-own-finalizer"` true. Control: changing `check(finalAction(true, true, true, true) == "remove-own-finalizer", "release")` to `check(finalAction(false, true, true, true) == "remove-own-finalizer", "release")` panics with message `release`; revert it.
+
 Successful cleanup and removal are separate durable steps. Retrying either must tolerate the previous step having already completed.
 
 **Approach.** Call `finalAction(true, true, true, true)` for a deleting object whose cleanup is confirmed.
@@ -101,6 +109,8 @@ check(finalAction(true, true, false, false) == "ownership-error", "UID mismatch"
 ```
 
 **Expected:** The action is ownership-error.
+
+**Verify:** Your solution must keep `finalAction(true, true, false, false) == "ownership-error"` true. Control: changing `check(finalAction(true, true, false, false) == "ownership-error", "UID mismatch")` to `check(finalAction(true, true, false, true) == "ownership-error", "UID mismatch")` panics with message `UID mismatch`; revert it.
 
 A replacement resource reusing a name is not owned merely because the name is familiar. Do not delete it to force progress.
 
@@ -128,6 +138,8 @@ check(len(out) == 1 && out[0] == "other.example/retain", "preserve others")
 ```
 
 **Expected:** The unrelated entry remains.
+
+**Verify:** Your solution must keep `len(out) == 1 && out[0] == "other.example/retain"` true. Control: changing `if v != "lesson.example/cleanup" {` to `if v == "lesson.example/cleanup" {` panics with message `preserve others`; revert it.
 
 Each controller owns its own finalizer entry. Editing the list must preserve responsibilities belonging to other components.
 

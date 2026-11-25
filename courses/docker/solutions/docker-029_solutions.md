@@ -1,6 +1,6 @@
 # docker-029: explanatory solutions
 
-Compare after your own attempt or an explicit reveal. These explain the supplied teaching fixtures; they are not engine results. The mechanism is explained in `courses/docker/guides/docker-029.md`.
+These answers explain teaching fixtures, not engine results; the mechanism is in [the guide](../guides/docker-029.md).
 
 ## Exercise 1: Distinguish SBOM and provenance.
 
@@ -88,4 +88,4 @@ Compare after your own attempt or an explicit reveal. These explain the supplied
 
 ## Check your transfer
 
-A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.
+Most likely it does not appear as a package. The scanner finds packages through metadata such as the Debian package database and Python `dist-info` directories, and a loose file copied by `COPY server.py` has none. Its identity belongs in the source revision and build inputs that provenance records, tied to the same image digest. Searching the exported file for `server.py` settles it: if a file entry shows up, this scanner also catalogs plain files, and the review should note that coverage rather than assume it.

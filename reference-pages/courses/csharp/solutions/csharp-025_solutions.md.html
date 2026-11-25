@@ -194,7 +194,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/csharp/solutions/csharp-025_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="csharp-025-explanation-and-comparison">csharp-025: explanation and comparison<a class="heading-anchor" href="#csharp-025-explanation-and-comparison" aria-label="Link to this section">#</a></h2>
-<p>Attempt the six guide tasks before opening this comparison. The executable reference is <a href="csharp-025_solution.cs.html">csharp-025_solution.cs</a>. It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.</p>
+<p>Reference program: <a href="csharp-025_solution.cs.html">csharp-025_solution.cs</a>, covering both examples and the executed answers.</p>
+<p>Attempt the tasks first; see <a href="../STUDY-GUIDE.md.html#comparing-with-the-explanation">comparing with the explanation</a>.</p>
 <h3 id="why-the-two-examples-differ">Why the two examples differ<a class="heading-anchor" href="#why-the-two-examples-differ" aria-label="Link to this section">#</a></h3>
 <p><strong>Round-trip an owned text file:</strong> The random name prevents collisions while the observable content remains deterministic. <code>new UTF8Encoding(false)</code> writes UTF-8 without a byte order mark: <code>é</code> takes two bytes, so <code>café</code> is five bytes. <code>Encoding.UTF8</code> would prepend the three-byte BOM EF BB BF and make the file eight bytes long. The file holds exactly five bytes, the Unicode text round-trips and the owned directory is removed.</p>
 <p><strong>Separate logical and filesystem names:</strong> These lexical checks teach path structure; they are not a complete traversal or symlink security boundary. A simple leaf name and a nested path are recognized as different shapes.</p>
@@ -277,14 +278,14 @@ Directory<span class="syntax-punctuation">.</span>CreateDirectory<span class="sy
 <p><strong>How to verify.</strong> Write the empty file with <code>Encoding.UTF8</code> and check its length is 3. Then read the names file with <code>Encoding.Latin1</code> and confirm the comparison with <code>text</code> fails.</p>
 <h4 id="task-6-transfer-and-justify">Task 6: Transfer and justify<a class="heading-anchor" href="#task-6-transfer-and-justify" aria-label="Link to this section">#</a></h4>
 <p>Explain what must change to make a persistent report update crash-recoverable.</p>
-<p>No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry <strong>Working directory</strong>, and state one limitation of your choice.</p>
+<p>No single answer exists; extend task 3 using the <a href="../STUDY-GUIDE.md.html#open-transfer-tasks">open transfer routine</a>.</p>
 <h3 id="mechanism-and-diagnostic-reasoning">Mechanism and diagnostic reasoning<a class="heading-anchor" href="#mechanism-and-diagnostic-reasoning" aria-label="Link to this section">#</a></h3>
 <p>A path is a name in a filesystem, not the data itself. Relative paths are interpreted against a working directory, which may differ between an editor, test runner and container. Construct owned paths explicitly and avoid assuming the repository is writable from learner code. The classroom retains saved pads separately from temporary worker files.</p>
 <p>Writing a file creates a side effect with a lifetime. Tiny examples should create a unique temporary directory, operate only inside it, and remove it in finally. Production persistence requires more decisions: atomic replacement, backups, permissions and recovery after interruption. An in-memory assertion proves content logic but cannot establish durable storage behavior after a crash.</p>
 <p><code>Path.Combine</code> constructs a platform path. <code>File.WriteAllText</code> encodes text; <code>ReadAllText</code> decodes it. A try/finally protects cleanup, while recursive removal is safe only for a directory this operation uniquely owns.</p>
 <p>Path normalization alone does not solve symlink attacks or concurrent replacement. Do not delete arbitrary user-provided directories. Worker temporary files are not the durable learner progress store.</p>
 <h3 id="review-before-continuing">Review before continuing<a class="heading-anchor" href="#review-before-continuing" aria-label="Link to this section">#</a></h3>
-<p>Run the reference and confirm that it prints <code>csharp-025: passed</code>, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.</p></article>
+<p>Run the reference and confirm it prints <code>csharp-025: passed</code>, then rerun the guide&#x27;s counterexample.</p></article>
   </main>
 </body>
 </html>

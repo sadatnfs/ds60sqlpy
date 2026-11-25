@@ -32,11 +32,9 @@ Use read-only observations in the fixture. `/proc/self/status` can show process 
 
 ## How to use this lesson
 
-The classroom displays this guide and saves your worksheet, `courses/docker/lessons/docker-039.md`. Its Run button does not control your Docker engine. Docker engine access is powerful host access, so the classroom deliberately receives no engine socket. Work through the supplied examples without starting anything, then use the optional host lab only in your own disposable project. Reading a command, parsing YAML and actually running the project are different forms of evidence.
+The classroom saves `courses/docker/lessons/docker-039.md` and holds no engine socket ([host-lab setup](../STUDY-GUIDE.md#host-lab-setup)).
 
-Use Bash in Linux, macOS Terminal, or Ubuntu under WSL 2 on Windows. The supported engine runs Linux containers. The maintained fixture is `courses/docker/fixtures/compose-lab/`; its README explains copying it into a new ignored learner directory, checking the engine, building locally with visible logs, and using the fixed project name `ds60-docker-study`. The fixture uses port 18080 on host loopback. Stop if that project name or port belongs to unrelated work; choose a new project name consistently in your own copy. Never paste a command against a remote Docker context simply because it is currently selected.
-
-For Dockerfile examples, create a file named `Dockerfile` in a scratch project. YAML snippets describe a fragment unless explicitly called a complete file. Text transcripts are synthetic illustrations, not claims about your machine. Do not substitute a real password, token or private registry into a checked-in example. **How to use the lessons** in the [subject README](../README.md) collects these rules in one place.
+**Host lab.** Read the isolation from inside without changing anything. Run worked example 1 and note that the process sees itself as PID 1, while `docker compose -p ds60-docker-study top app` on the same engine lists the app's processes with host-side PIDs. Then compare kernels: `uname -r` on a Linux host, and `docker run --rm --pull never ds60-docker-study:local python -c "import platform; print(platform.release())"` inside. On Linux both print the same release, because containers share the host kernel; on Docker Desktop the container reports the virtual machine's kernel, which differs from macOS or Windows. Finally run the same image with `--network none` and `python -c "import socket; print(socket.if_nameindex())"` to see a network namespace holding only loopback. Every container used `--rm`, so nothing persists.
 
 ## Worked example / walkthrough
 
@@ -65,7 +63,7 @@ OCI runtime -> applies a prepared runtime configuration
 
 ## Six progressive exercises
 
-For each exercise, name the object involved and the phase of its lifetime before changing anything, then vary only the condition the task names. Exercises that ask you to predict, explain, compare or diagnose keep their answers in the solutions file; the others show the evidence to look for.
+Answer-type prompts keep their answers in the solutions file ([exercise rules](../STUDY-GUIDE.md#exercise-rules)).
 
 ### Exercise 1: Distinguish namespace and cgroup.
 
@@ -95,13 +93,19 @@ For each exercise, name the object involved and the phase of its lifetime before
 
 Believing each container has its own kernel. Changing kernel or cgroup settings to match an example. Assuming every OCI runtime behaves identically.
 
-Exercise 4 is this chapter's boundary case: Diagnose a missing cgroup path from an example. Record the host's cgroup version and mount layout, then map the example's path onto it without changing kernel or boot settings. Preserve the original failure and the exact changed field before retrying. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
+Exercise 4 is this chapter's boundary case: Diagnose a missing cgroup path from an example. Record the host's cgroup version and mount layout, then map the example's path onto it without changing kernel or boot settings.
+
+Inside the app container, `python -c "import os; print(os.cpu_count())"` prints the engine's full CPU count rather than the half CPU the service is allowed, and `/proc/meminfo` shows the machine's memory rather than 128 MB. Neither source is namespaced; the limits live in the cgroup. Programs that size worker pools or heaps from those numbers start more threads or allocate more memory than the cgroup permits, and the kernel's out-of-memory killer then ends the process, which Docker reports as exit code 137. Read the real limits from `/sys/fs/cgroup/memory.max` and `/sys/fs/cgroup/cpu.max` on cgroup v2, and set worker counts explicitly rather than trusting detected hardware.
+
+Never trade a safety control for a passing example ([safety rules](../STUDY-GUIDE.md#safety-rules)).
 
 ## Retrieval, transfer and next steps
 
-Close the explanations first. Match network namespace, mount namespace, cgroup and OCI runtime to what each isolates or controls. Then reconstruct worked example 2 (Separate isolation and accounting) with one different value, predict what changes, and name which of namespaces, cgroups, OCI runtime and container runtime the change touches.
+**Retrieval.** Match network namespace, mount namespace, cgroup and OCI runtime to what each isolates or controls.
 
-When a host session ends, run `docker compose -p ds60-docker-study down` from your fixture copy. It removes the project's containers and network but keeps named volumes; deleting a volume is a separate, deliberate reset described in the fixture README.
+**Transfer case.** A colleague says containers are lightweight virtual machines, so a kernel exploit inside one cannot touch the others. Correct the claim using what this lesson's observations showed.
+
+Then run the [retrieval loop](../STUDY-GUIDE.md#retrieval-and-cleanup) and end any host session with its cleanup.
 
 ## Primary references
 

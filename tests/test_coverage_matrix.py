@@ -18,6 +18,7 @@ from scripts.build_coverage_matrix import (
     orientation,
     outcome_issue,
     prose_paragraphs,
+    templated_share,
     templated_word_counts,
     term_count,
     track_gap_lines,
@@ -34,8 +35,13 @@ PRACTICE_GAP_CEILING = {"thin-guide": 0, "few-examples": 0, "thin-solution": 0}
 
 # Generator boilerplate across all guides and solutions. New prose must be
 # specific to its lesson, so this total may not grow; lower it when rewrites
-# replace template text.
-TEMPLATED_WORDS_CEILING = 835280
+# replace template text. Phase 11 (plan 11-07) lowered it from 835280 to the
+# rewritten catalog total of 71137 plus a small margin.
+TEMPLATED_WORDS_CEILING = 71250
+
+# No lesson may be mostly shared template text: templated words over the words
+# in the lesson's scored prose paragraphs (see prose_paragraphs).
+MAX_TEMPLATED_SHARE = 0.50
 
 
 @cache
@@ -155,6 +161,13 @@ def test_practice_gaps_never_grow() -> None:
 def test_templated_prose_never_grows() -> None:
     rows = json.loads(_built()[0])["lessons"]
     assert sum(row["metrics"]["templated_words"] for row in rows) <= TEMPLATED_WORDS_CEILING
+
+
+def test_no_lesson_is_mostly_templated_prose() -> None:
+    rows = json.loads(_built()[0])["lessons"]
+    shares = {row["id"]: templated_share(row) for row in rows}
+    over = {key: round(share, 3) for key, share in shares.items() if share > MAX_TEMPLATED_SHARE}
+    assert over == {}
 
 
 def test_prose_paragraphs_skip_code_headings_and_short_text() -> None:

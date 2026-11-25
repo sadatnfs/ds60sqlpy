@@ -1,6 +1,8 @@
 # c-019: explained solutions
 
-Compare after an attempt or explicit reveal. The complete executable reference, `c-019_solution.c`, implements all six cases, from the "encode a known word" case to the "transfer a framed payload" case, in one `main.c`.
+`c-019_solution.c` assembles the "encode a known word" case through the "transfer a framed payload" case in one `main.c`.
+
+Compare only after an attempt: [Compare and transfer](../STUDY-GUIDE.md#compare-and-transfer).
 
 ## Mechanism and assumptions
 
@@ -10,7 +12,7 @@ A big-endian 32-bit encoding stores the most significant byte first. Cast each i
 
 ## Exercise 1: Encode a known word: predict an edited check
 
-Copy worked example 1 into a scratch pad and change `CHECK(out[0] == 0x12 && out[1] == 0x34 && out[2] == 0x56 && out[3] == 0x78);` to `CHECK(out[1] == 0x12 && out[1] == 0x34 && out[2] == 0x56 && out[3] == 0x78);` inside its CHECK. Before running, predict whether the CHECK still holds and explain why; then restore it.
+In worked example 1, change `CHECK(out[0] == 0x12 && out[1] == 0x34 && out[2] == 0x56 && out[3] == 0x78);` to `CHECK(out[1] == 0x12 && out[1] == 0x34 && out[2] == 0x56 && out[3] == 0x78);`. Predict whether the CHECK still holds and why, then run and restore.
 
 The unchanged code is worked example 1:
 
@@ -20,13 +22,15 @@ encode_u32(UINT32_C(0x12345678), out);
 CHECK(out[0] == 0x12 && out[1] == 0x34 && out[2] == 0x56 && out[3] == 0x78);
 ```
 
-**Expected:** With `CHECK(out[1] == 0x12 && out[1] == 0x34 && out[2] == 0x56 && out[3] == 0x78);` the run stops with `Check failed` at the CHECK on `out[0] == 0x12 && out[1] == 0x34 && out[2] == 0x56 && out[3] == 0x78`, because the "encode a known word" case no longer shows that the bytes are 12, 34, 56, 78 in hexadecimal. Restoring `CHECK(out[0] == 0x12 && out[1] == 0x34 && out[2] == 0x56 && out[3] == 0x78);` brings that observation back.
+**Expected:** `Check failed`: `CHECK(out[1] == 0x12 && out[1] == 0x34 && out[2] == 0x56 && out[3] == 0x78);` is false, although the bytes are 12, 34, 56, 78 in hexadecimal.
+
+**Verify:** Explain which claim `CHECK(out[1] == 0x12 && out[1] == 0x34 && out[2] == 0x56 && out[3] == 0x78);` makes that the state fails; restoring `CHECK(out[0] == 0x12 && out[1] == 0x34 && out[2] == 0x56 && out[3] == 0x78);` passes again.
 
 The explicit byte contract does not depend on host endianness.
 
 ## Exercise 2: Decode a known word: debug a regression
 
-A regression changed one token in worked example 2, the "decode a known word" case, so one line now reads `unsigned char data[] = {1, 0, 1, 0};`. Run the example with that line, use the failing CHECK to find why the numeric value is 256 no longer holds and repair the line without changing the CHECK.
+Worked example 2 now has a line reading `unsigned char data[] = {1, 0, 1, 0};`. Repair it so that the numeric value is 256 again.
 
 The unchanged code is worked example 2:
 
@@ -36,7 +40,9 @@ uint32_t value = 0;
 CHECK(decode_u32(data, 4, &value) && value == 256);
 ```
 
-**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `decode_u32(data, 4, &value) && value == 256`. Once the line reads `unsigned char data[] = {0, 0, 1, 0};` again, the "decode a known word" case again shows that the numeric value is 256.
+**Expected:** `Check failed` at `decode_u32(data, 4, &value) && value == 256` until the line reads `unsigned char data[] = {0, 0, 1, 0};` again.
+
+**Verify:** Explain how `unsigned char data[] = {1, 0, 1, 0};` changes the value `decode_u32(data, 4, &value) && value == 256` tests, using your failing and repaired runs.
 
 Each byte is promoted to the intended unsigned width before shifting.
 
@@ -51,6 +57,8 @@ CHECK(!decode_u32(data, 3, &value) && value == 9);
 ```
 
 **Expected:** The decoder fails and preserves output.
+
+**Verify:** Keep a CHECK equivalent to `!decode_u32(data, 3, &value) && value == 9`. Control edit: changing `uint32_t value = 9;` to `uint32_t value = 10;` must fail it; then restore it.
 
 Length validation occurs before any fourth-byte access. Reading first and diagnosing later would already violate bounds.
 
@@ -67,6 +75,8 @@ CHECK(decode_u32(out, 4, &value) && value == 0);
 
 **Expected:** The result is zero.
 
+**Verify:** Keep a CHECK equivalent to `decode_u32(out, 4, &value) && value == 0`. Control edit: changing `encode_u32(0, out);` to `encode_u32(1, out);` must fail it; then restore it.
+
 Zero is a valid payload, not an absent field or string terminator in this format.
 
 ## Exercise 5: Round-trip the maximum
@@ -81,6 +91,8 @@ CHECK(decode_u32(out, 4, &value) && value == UINT32_MAX);
 ```
 
 **Expected:** All bits survive.
+
+**Verify:** Keep a CHECK equivalent to `decode_u32(out, 4, &value) && value == UINT32_MAX`. Control edit: `CHECK(decode_u32(out, 4, &value) && value != UINT32_MAX);` must fail; then restore it.
 
 The boundary case exercises every high bit and catches signed intermediate mistakes.
 
@@ -97,8 +109,10 @@ CHECK(frame[0] == 1 && decode_u32(frame + 1, sizeof frame - 1, &value) &&
 
 **Expected:** Version 1 and payload 7 are interpreted separately.
 
+**Verify:** Keep a CHECK equivalent to `frame[0] == 1 && decode_u32(frame + 1, sizeof frame - 1, &value) && value == 7`. Control edit: changing `unsigned char frame[] = {1, 0, 0, 0, 7};` to `unsigned char frame[] = {2, 0, 0, 0, 7};` must fail it; then restore it.
+
 A format should reject unsupported versions before interpreting fields under the wrong schema.
 
 ## After comparison
 
-Add a fresh distinguishing input for the "transfer a framed payload" case to your own c-019 source. Explain why every access in `encode_u32` or `decode_u32` stays within a live object and each owned resource is released. An expected endianness failure belongs in the test contract; undefined behavior does not. Keep diagnostics and sanitizer evidence for the "decode a known word" case apart from ordinary output: the fixture proves its stated endianness, wire format and alignment assumptions, not universal safety.
+Decode `{0x12, 0x34, 0x56, 0x78}` with `decode_u32` and CHECK that the value is `0x12345678`. Then `memcpy` the same bytes into a `uint32_t` and explain why it holds `0x78563412` on a little-endian host while the shift-based decoder gives the same answer everywhere. Finally CHECK that a 3-byte input is rejected before any fourth byte is read.

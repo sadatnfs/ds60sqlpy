@@ -1,6 +1,6 @@
 # web-003: explanatory solutions
 
-Open this after your own attempt. Each answer explains the lesson's synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in `courses/web-development/guides/web-003.md`.
+Attempt each exercise before reading; the mechanism is in `courses/web-development/guides/web-003.md` ([using these answers](../STUDY-GUIDE.md#solutions)).
 
 ## Exercise 1: Draw the heading outline of the first example.
 
@@ -76,4 +76,6 @@ Open this after your own attempt. Each answer explains the lesson's synthetic fi
 
 ## Reference comparison
 
-Open `courses/web-development/solutions/web-003_solution.html` only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; its success message is not an accessibility audit or proof of responsive behavior at every size.
+The reference asserts that the page has exactly one main element and that the first link's hash is #content. That catches a duplicated main and a skip link pointing at the wrong fragment. It cannot judge heading ranks, notice an h3 used for size, or confirm the target actually receives focus, so read the outline and press Tab yourself.
+
+Open `courses/web-development/solutions/web-003_solution.html` after saving your attempt ([comparing with the reference](../STUDY-GUIDE.md#references)).

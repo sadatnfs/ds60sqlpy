@@ -1,6 +1,6 @@
 # r-054: reference reasoning
 
-Use the [complete reference](r-054_reference.R) with the guide's declared inputs and runtime. Every worked example is also a standalone script.
+Run the [complete reference](r-054_reference.R) under the [run rules](../STUDY-GUIDE.md#run-a-chapter).
 
 ## Why the implementation has this shape
 
@@ -108,4 +108,6 @@ Different boundaries aggregate observations differently; use a documented policy
 
 ## What the checks establish
 
-The reference makes 5 `stopifnot()` checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.
+The checks confirm that counting raw records and drawing a precomputed table both give bar heights 2, 1 and 3, that `geom_bar()` with a y mapping fails to build, that two person-specific lines get two separate groups, and that the histogram's bins hold four observations in total. They do not show that a chosen bin width supports a particular conclusion.
+
+The reference makes 5 `stopifnot()` checks; see [what a passing run proves](../STUDY-GUIDE.md#what-a-passing-run-proves).

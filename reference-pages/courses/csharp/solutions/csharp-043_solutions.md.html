@@ -194,7 +194,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/csharp/solutions/csharp-043_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="csharp-043-explanation-and-comparison">csharp-043: explanation and comparison<a class="heading-anchor" href="#csharp-043-explanation-and-comparison" aria-label="Link to this section">#</a></h2>
-<p>Attempt the six guide tasks before opening this comparison. The executable reference is <a href="csharp-043_solution.cs.html">csharp-043_solution.cs</a>. It runs both worked examples, and its assertions are always active under the prepared classroom compile settings.</p>
+<p>Reference program: <a href="csharp-043_solution.cs.html">csharp-043_solution.cs</a>, covering both examples.</p>
+<p>Attempt the tasks first; see <a href="../STUDY-GUIDE.md.html#comparing-with-the-explanation">comparing with the explanation</a>.</p>
 <h3 id="why-the-two-examples-differ">Why the two examples differ<a class="heading-anchor" href="#why-the-two-examples-differ" aria-label="Link to this section">#</a></h3>
 <p><strong>Expose environment facts without overclaiming:</strong> Runtime facts are useful diagnostics but do not replace a source and project review. The running framework generation is compatible with the declared classroom target.</p>
 <p><strong>Read the compiled target framework:</strong> Both values come from the build and the runtime rather than from a hand-written table, so the checks fail if the project targets another framework. A real multi-project fixture is still required to qualify restore and publish behavior. The compiled program reports .NETCoreApp,Version=v10.0, the framework its project targeted, and runs on a .NET 10 runtime.</p>
@@ -241,14 +242,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>How to verify.</strong> Record source hashes, delete only the four output folders, restore, build and run, and confirm the hashes match and the checks pass.</p>
 <h4 id="task-6-transfer-and-justify">Task 6: Transfer and justify<a class="heading-anchor" href="#task-6-transfer-and-justify" aria-label="Link to this section">#</a></h4>
 <p>Design a dependency update review including lock changes, license checks and runtime evidence.</p>
-<p>No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry <strong>Target framework</strong>, and state one limitation of your choice.</p>
+<p>No single answer exists; extend task 3 using the <a href="../STUDY-GUIDE.md.html#open-transfer-tasks">open transfer routine</a>.</p>
 <h3 id="mechanism-and-diagnostic-reasoning">Mechanism and diagnostic reasoning<a class="heading-anchor" href="#mechanism-and-diagnostic-reasoning" aria-label="Link to this section">#</a></h3>
 <p>A project file records the compilation target and build policy. Source that compiles against one framework can fail against another if it uses unavailable APIs. Pin a supported SDK policy and target framework deliberately. Package references add another versioned dependency surface, including transitive dependencies and restore behavior.</p>
 <p>The classroom builds a fixed net10.0 project without arbitrary packages. External multi-file labs teach the project workflow explicitly: restore during preparation, build without changing dependencies, run tests, then publish a selected artifact. A portable build does not prove every architecture or operating system works. Keep actual build and runtime evidence separate.</p>
 <p><code>TargetFramework</code> selects net10.0. Nullable and ImplicitUsings are compile policies. <code>dotnet restore</code>, <code>dotnet build --no-restore</code>, <code>dotnet run --no-build</code> and <code>dotnet publish</code> have distinct responsibilities.</p>
 <p>An SDK version and target framework are related but different. A successful restore is not a successful build. Do not present self-contained deployment as architecture-independent.</p>
 <h3 id="review-before-continuing">Review before continuing<a class="heading-anchor" href="#review-before-continuing" aria-label="Link to this section">#</a></h3>
-<p>Run the reference and confirm that it prints <code>csharp-043: passed</code>, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.</p></article>
+<p>Run the reference and confirm it prints <code>csharp-043: passed</code>, then rerun the guide&#x27;s counterexample.</p></article>
   </main>
 </body>
 </html>

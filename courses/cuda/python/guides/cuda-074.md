@@ -1,10 +1,17 @@
 # cuda-074: One-dimensional indexing and tails
 
-**Route:** CUDA Python and machine learning. **Stage:** intermediate. **Prerequisites:** `cuda-004`, `cuda-073`. Allow several sessions when the hardware experiment is new; the chapter is not a deadline.
+**Route:** CUDA Python and machine learning. **Stage:** intermediate. **Prerequisites:** `cuda-004`, `cuda-073`.
 
-## What you will be able to explain
+Pacing, evidence labels and platform rules: [CUDA study guide](../../STUDY-GUIDE.md).
 
-By the end, you can **compute launch size for n=17**, **implement grid-stride coverage**, and **specify a sanitizer check** with evidence. Start with the two worked cases, then use the editable CPU model to make the quantities concrete.
+## Learning objectives
+
+- Compute launch size for n=17.
+- Trace the last block.
+- Test zero without launching.
+- Implement grid-stride coverage.
+- Find floor-division data loss.
+- Specify a sanitizer check.
 
 ## Mechanism and vocabulary
 
@@ -31,9 +38,13 @@ For n=10 and block size 4, three blocks launch 12 lanes. Indices 0 through 9 are
 
 With six total threads and n=14, thread zero visits 0,6,12 and thread one visits 1,7,13. The union contains every valid index exactly once.
 
-## Portable executable model
+## How to run the CPU model
 
-The **CPU reference model** variant runs this bounded worked example using `python-core`. It uses only the Python standard library, small synthetic values and no network. Its purpose is to expose the arithmetic or contract behind the chapter. The separate reference includes assertions for the stated observations.
+Edit the copy; the [reference](../references/cuda-074_cpu.py) adds assertions.
+
+```sh
+python courses/cuda/python/lessons/cuda-074_cpu.py
+```
 
 ```python
 n, block = 10, 4
@@ -57,11 +68,9 @@ print("CPU indexing model:", visits)
 | `visits` | `[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]` |
 | `strided` | `[0, 6, 12, 1, 7, 13, 2, 8, 3, 9, 4, 10, 5, 11]` |
 
-Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.
-
 ## Optional NVIDIA CUDA lab
 
-The **CuPy on NVIDIA CUDA** variant executes the actual operation with CuPy in the separately prepared `cuda-python` profile. It refuses a missing device instead of switching to CPU. Keep inputs bounded as supplied; inspect the device, synchronize and compare with the CPU reference. The profile must pass real host/device readiness checks. Successful syntax checking on a Mac is not GPU qualification.
+**CuPy on NVIDIA CUDA** needs the `cuda-python` profile; [lab rules](../../STUDY-GUIDE.md#python-gpu-and-framework-labs).
 
 ```python
 """Optional NVIDIA CUDA lab. No CPU fallback or external dataset."""
@@ -93,73 +102,60 @@ print("CUDA tail tests passed for zero, singleton and nonmultiples")
 
 ## Practice and transfer
 
+Record each attempt in the [worksheet](../lessons/cuda-074.md) before opening hints.
+
 ### Exercise 1: Compute launch size for n=17
 
 **Trap to avoid:** Computing `n // block = 4` blocks is the floor-division mistake; the program runs without error and the last element is never written, so its output slot keeps whatever value was in the allocation.
-
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 2: Trace the last block
 
 **Trap to avoid:** Assuming only one lane is out of range, or guarding with `i <= n`, lets index 17 through. That reads one element past the end, which may return a neighbor's data or trip a memory checker.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 3: Test zero without launching
 
 **Trap to avoid:** Clamping the grid to at least one block avoids the launch error but runs lanes whose guard is always false. That works, but it hides the empty case inside the kernel and still pays launch overhead for no work.
-
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 4: Implement grid-stride coverage
 
 **Trap to avoid:** Advancing by `block_size` instead of the total thread count makes threads in different blocks visit the same indices. The output may still look right for idempotent writes, but accumulations double count.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 5: Find floor-division data loss
 
 **Trap to avoid:** Fixing it by launching `n // block + 1` blocks always adds a block even when `n` is a multiple of the block size. That is safe with a guard but launches an entire idle block for `n = 8`.
-
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 6: Specify a sanitizer check
 
 **Trap to avoid:** Treating the passing CPU model as proof that the kernel is memory safe confuses the model of the formula with the code a compiler generated.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ## Progressive hints
 
-Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.
+Hint *k* belongs to exercise *k*; open one at a time.
 
-1. Start from worked example 1 and mark the quantities needed for the task "Compute launch size for n=17".
-2. Change one assumption in worked example 2 while preserving the declared contract: trace the last block.
-3. Trace the CPU program's variables before adding hardware behavior: test zero without launching.
-4. Draw producers, consumers and the exact operation boundary for the task "Implement grid-stride coverage".
-5. Separate what the small fixture establishes from what the real runtime must show: find floor-division data loss.
-6. Write a counterexample to an overbroad claim before you specify a sanitizer check.
+1. Divide 17 by the block size and round up, not down, then count the launched lanes.
+2. List the global indices of the last block and mark which ones exceed the valid range.
+3. Ask what the output for an empty input is and whether any launch is needed to produce it.
+4. After handling index i, how far must a thread advance so that no other thread repeats its work?
+5. Compute 17 divided by 4 with floor division and list the indices no block covers.
+6. Decide which tool can observe an out-of-bounds device access that a CPU model never performs.
 
-## Common mistakes and self-review
+## Common mistakes and self-check
 
-Confusing a correct tiny example with a general implementation is the central review risk. For this chapter, challenge the assumption in worked example 2, then ask whether your change preserves the mechanism described above. If you change dtype, layout, ordering, batch size or backend, update the acceptance contract rather than silently reusing the old observation. Explain an unexpected result before trying random configuration changes.
+The most common mistake is sizing the grid with floor division, which silently omits the final partial block, or launching with ceiling division but forgetting the bounds guard so lanes 10 and 11 in worked example 1 touch memory past the buffer. Fix both by using ceiling division for the block count and guarding every load and store with the input length, then test zero, one, block size minus one, block size, block size plus one and a nonmultiple.
 
-Keep a small evidence table with columns **claim**, **input**, **expected observation**, **actual observation** and **limit**. For the first claim use `Compute launch size for n=17`. For the final claim use `Specify a sanitizer check`. An unperformed GPU or cluster experiment remains pending even when the CPU model is correct.
+**Evidence limit:** The reference proves the integer mapping visits every valid index exactly once. It cannot prove race freedom, memory safety or correct guards in a real kernel; those need execution under a supported memory checker on a device.
 
-## Platform and evidence contract
+1. How is the global index computed in one-dimensional indexing?
+2. Why does a grid-stride loop help with large arrays?
+3. Which input sizes belong in an indexing test set?
 
-The reading worksheet and CPU reference model work through the ordinary Linux Docker classroom on macOS, Linux and Windows using WSL 2. They do not require an NVIDIA GPU. Their results are labeled CPU models or semantic oracles, not simulated hardware performance.
-
-Real CUDA work needs supported NVIDIA hardware, a compatible host driver and an explicitly prepared GPU runtime. An Apple GPU does not execute CUDA kernels. PyTorch MPS on a supported native Mac, ROCm on supported AMD hardware, or other vendor backends can provide separate accelerator learning routes; they need their own package and operation qualification and are not CUDA evidence. The ordinary Linux Docker classroom does not expose native Mac MPS automatically.
-
-Do not download packages, models or data by opening this lesson. Do not attach an engine socket, ambient cluster credentials or an arbitrary remote endpoint. A CPU pass, imported package, successful compilation, real GPU result and measured performance are distinct observations. Record the actual backend, data shape/dtype, source revision, versions and pending checks. A saved completion marker records learning progress, not hardware certification.
+Answers: [self-check answers](../solutions/cuda-074_solutions.md#self-check-answers).
 
 ## Primary references
 
 - [NVIDIA CUDA Python introduction](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/intro-to-cuda-python.html)
-- [Maintained numba-cuda project](https://github.com/NVIDIA/numba-cuda)
 
-Use the version-matched documentation of your prepared environment. These references describe interfaces and supported boundaries; the chapter's synthetic examples and CPU models are original teaching material.
+Full lists: [documentation and sources](../../STUDY-GUIDE.md#documentation-and-sources).
 
 ## Ask an AI tutor about this lesson
 

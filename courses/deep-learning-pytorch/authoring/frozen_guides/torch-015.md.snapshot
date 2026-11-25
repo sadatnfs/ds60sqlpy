@@ -183,7 +183,7 @@ Revisit the direct prerequisite `torch-014` if the calculation cannot be reconst
 
 ## Sources and verification status
 
-API and mechanism reference: [PyTorch2.9 DataLoader](https://docs.pytorch.org/docs/2.9/data.html), reviewed 2026-10-22. The fixture, examples, counterexamples and exercise design are original course material. See [validation](../../../docs/validation.md) for execution gates. Check CI artifacts for the exact revision and platform to determine which runtime checks actually ran; authored content alone does not establish runtime execution.
+API and mechanism reference: [PyTorch 2.9 DataLoader](https://docs.pytorch.org/docs/2.9/data.html), reviewed 2026-10-22. The fixture, examples, counterexamples and exercise design are original course material. See [validation](../../../docs/validation.md) for execution gates. Check CI artifacts for the exact revision and platform to determine which runtime checks actually ran; authored content alone does not establish runtime execution.
 
 ## Interview reasoning with worked answers
 

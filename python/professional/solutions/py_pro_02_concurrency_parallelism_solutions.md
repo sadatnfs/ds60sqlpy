@@ -110,9 +110,6 @@ The solution treats primitive choice, admission control, lifecycle, and result a
 
 ### Verification micro-example
 
-Run this small, deterministic case before adapting the reference to a
-larger system. It gives the reasoning above an executable anchor:
-
 ```python
 def choose_execution(*, waits_nonblocking=False, waits_blocking=False, cpu_python=False):
     if sum((waits_nonblocking, waits_blocking, cpu_python)) != 1:
@@ -130,31 +127,19 @@ assert choose_execution(cpu_python=True) == "processes-or-native-vectorization"
 
 **Expected observation:** The decision follows where time is spent, not a belief that one primitive is universally faster.
 
-The reference implementation is one defensible contract, not a license
-to copy internal steps into every system. Preserve the observable
-guarantees and repeat the failure tests when adapting it.
-
 <!-- END PROFESSIONAL PYTHON CONCEPT ENRICHMENT -->
 
 ## Exercise-by-exercise reference
 
-Use this map after an honest attempt. The executable implementation remains
-[`py_pro_02_concurrency_parallelism_solution.py`](py_pro_02_concurrency_parallelism_solution.py); this section explains the
-contract, evidence, alternatives, and edge cases behind every numbered task.
+The runnable [`py_pro_02_concurrency_parallelism_solution.py`](py_pro_02_concurrency_parallelism_solution.py) implements every task below.
+
+**Principle behind every task:** Choose concurrency from workload behavior, then bound task ownership, queued work, active work, cancellation, and process/thread lifecycle explicitly.
+
+**Trap behind every task:** Unbounded task creation, swallowed cancellation, shared mutation, or process startup outside a main guard can make correct-looking code leak work or fail on Windows.
 
 ### Exercise 1: choose a model
 
 **Prompt recap:** Implement `choose_execution_model` in the learner artifact. For each case, write one sentence explaining the choice: - an async database driver, - a synchronous file metadata API, - image transforms written in pure Python, - three tiny computations. Reject labels that contradict each other. An async function that performs computation without `await` is still CPU work and blocks the event loop.
-
-**Reference reasoning:** Choose concurrency from workload behavior, then bound task ownership, queued work, active work, cancellation, and process/thread lifecycle explicitly. The executable module and
-the focused discussion earlier in this file implement this original
-exercise. Verify every acceptance condition from the prompt with a
-normal case, a boundary case, and the documented failure behavior.
-
-**Common trap:** Unbounded task creation, swallowed cancellation, shared mutation, or process startup outside a main guard can make correct-looking code leak work or fail on Windows.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
 
 **Verify:** choose a model; implement choose execution model in the learner artifact; for each case, write one sentence explaining the choice: - an async database driver, - a synchronous file metadata API, - image transforms written in pure Python, - three tiny computations; reject labels that contradict each other.
 
@@ -162,31 +147,11 @@ and which input would make the policy reject or choose a different path.
 
 **Prompt recap:** Implement `bounded_map` with: 1. `asyncio.Queue(maxsize=queue_capacity)`, 2. one producer, 3. a fixed number of consumers, 4. indexed items so results retain input order, 5. a unique sentinel per consumer, and 6. `asyncio.TaskGroup`. Place `queue.task_done()` in `finally`. Let exceptions propagate. Do not catch `CancelledError` unless cleanup requires it; if caught, re-raise it.
 
-**Reference reasoning:** Choose concurrency from workload behavior, then bound task ownership, queued work, active work, cancellation, and process/thread lifecycle explicitly. The executable module and
-the focused discussion earlier in this file implement this original
-exercise. Verify every acceptance condition from the prompt with a
-normal case, a boundary case, and the documented failure behavior.
-
-**Common trap:** Unbounded task creation, swallowed cancellation, shared mutation, or process startup outside a main guard can make correct-looking code leak work or fail on Windows.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
-
 **Verify:** build a bounded async map; on ten indexed inputs with queue capacity 2 and two consumers, assert output order equals input order, peak queued/active work stays bounded, queue acknowledgements reach zero, and an injected worker exception cancels siblings cleanly.
 
 ### Exercise 3: add per-item timeouts
 
 **Prompt recap:** Wrap each worker call with `asyncio.timeout`. Test one worker slower than the limit. Inspect the `ExceptionGroup` from `TaskGroup`, and verify a `finally` block returns the active count to zero. Prediction: what happens to sibling consumers when one item times out?
-
-**Reference reasoning:** Choose concurrency from workload behavior, then bound task ownership, queued work, active work, cancellation, and process/thread lifecycle explicitly. The executable module and
-the focused discussion earlier in this file implement this original
-exercise. Verify every acceptance condition from the prompt with a
-normal case, a boundary case, and the documented failure behavior.
-
-**Common trap:** Unbounded task creation, swallowed cancellation, shared mutation, or process startup outside a main guard can make correct-looking code leak work or fail on Windows.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
 
 **Verify:** add per-item timeouts; test one worker slower than the limit; inspect the ExceptionGroup from TaskGroup, and verify a finally block returns the active count to zero; prediction: what happens to sibling consumers when one item times out?.
 
@@ -194,47 +159,17 @@ and which input would make the policy reject or choose a different path.
 
 **Prompt recap:** Use `ThreadPoolExecutor(max_workers=N)` for deterministic `time.sleep` jobs. Compare sequential and threaded elapsed time with generous bounds, then verify ordered results rather than treating speed as the correctness assertion. Explain why a thread pool requires a deliberate `max_workers`, even if the remote service could theoretically accept more requests.
 
-**Reference reasoning:** Choose concurrency from workload behavior, then bound task ownership, queued work, active work, cancellation, and process/thread lifecycle explicitly. The executable module and
-the focused discussion earlier in this file implement this original
-exercise. Verify every acceptance condition from the prompt with a
-normal case, a boundary case, and the documented failure behavior.
-
-**Common trap:** Unbounded task creation, swallowed cancellation, shared mutation, or process startup outside a main guard can make correct-looking code leak work or fail on Windows.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
-
 **Verify:** adapt blocking I/O; use ThreadPoolExecutor(max workers=N) for deterministic time.sleep jobs; compare sequential and threaded elapsed time with generous bounds, then verify ordered results rather than treating speed as the correctness assertion; explain why a thread pool requires a deliberate max workers, even if the remote service could theoretically accept more requests.
 
 ### Exercise 5: isolate CPU work
 
 **Prompt recap:** Make the CPU function top-level with serializable arguments and results. Use `multiprocessing.get_context("spawn")` with `ProcessPoolExecutor`, and create processes only beneath an `if __name__ == "__main__":` guard. Run the solution with `--with-processes`; explain why startup can make a small workload slower.
 
-**Reference reasoning:** Choose concurrency from workload behavior, then bound task ownership, queued work, active work, cancellation, and process/thread lifecycle explicitly. The executable module and
-the focused discussion earlier in this file implement this original
-exercise. Verify every acceptance condition from the prompt with a
-normal case, a boundary case, and the documented failure behavior.
-
-**Common trap:** Unbounded task creation, swallowed cancellation, shared mutation, or process startup outside a main guard can make correct-looking code leak work or fail on Windows.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
-
 **Verify:** run the solution module with `--with-processes` and record its process-pool result and wall time beside the sequential run; confirm that the worker function is defined at module top level, that the pool is created from `multiprocessing.get_context("spawn")`, and that no process starts outside the `__main__` guard. A slower pool on this small workload is the expected startup-cost observation.
 
 ### Exercise 6: reason about shared state
 
 **Prompt recap:** Implement `deterministic_lost_update`. Force two workers to read the same snapshot, then apply both writes. Compare with two serialized increments. List three repairs: - one owner task/process receives update messages, - a lock protects the complete read/modify/write unit, or - an external system performs an atomic update.
-
-**Reference reasoning:** Choose concurrency from workload behavior, then bound task ownership, queued work, active work, cancellation, and process/thread lifecycle explicitly. The executable module and
-the focused discussion earlier in this file implement this original
-exercise. Verify every acceptance condition from the prompt with a
-normal case, a boundary case, and the documented failure behavior.
-
-**Common trap:** Unbounded task creation, swallowed cancellation, shared mutation, or process startup outside a main guard can make correct-looking code leak work or fail on Windows.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
 
 **Verify:** reason about shared state; use barriers to make two workers read counter=0 before either writes; assert the lost-update result is 1, then protect the same two increments and assert the serialized result is 2 without timing sleeps.
 
@@ -253,11 +188,6 @@ Queue accounting must still call `task_done` for an item already removed.
 Cancellation is a normal control path; logging it as an application error or
 continuing with partial results is incorrect.
 
-**Common trap:** Unbounded task creation, swallowed cancellation, shared mutation, or process startup outside a main guard can make correct-looking code leak work or fail on Windows.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
-
 **Verify:** prove cancellation cleanup; cancel bounded map while workers are active; instrument acquired resources and prove active count, queued acknowledgements, and child tasks return to zero before the parent finishes.
 
 ### Exercise 8: inspect structured failures
@@ -273,11 +203,6 @@ not full sensitive payloads. Any unmatched subgroup must propagate.
 Do not flatten everything into one string or return only the first exception;
 that destroys evidence. Cancellation caused by sibling failure is distinct
 from an independent worker defect.
-
-**Common trap:** Unbounded task creation, swallowed cancellation, shared mutation, or process startup outside a main guard can make correct-looking code leak work or fail on Windows.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
 
 **Verify:** inspect structured failures; run multiple workers that fail with different typed exceptions; use except to handle one expected category while preserving unexpected failures and their original tracebacks.
 
@@ -296,11 +221,6 @@ Define cancellation and partial-output semantics before implementation.
 Preserving all results in a final list is incompatible with truly unbounded
 input, so expose an async result iterator instead.
 
-**Common trap:** Unbounded task creation, swallowed cancellation, shared mutation, or process startup outside a main guard can make correct-looking code leak work or fail on Windows.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
-
 **Verify:** stream a backpressured producer; adapt bounded map from a finite Sequence to an async iterator whose length is unknown; preserve output order without retaining every input or creating one task per item.
 
 ### Exercise 10: trace context across boundaries
@@ -316,11 +236,6 @@ so the test asserts behavior rather than inspecting logs by eye.
 
 Context propagation must never become credential propagation. Keep security
 tokens in a reviewed credential boundary, not a general diagnostic context.
-
-**Common trap:** Unbounded task creation, swallowed cancellation, shared mutation, or process startup outside a main guard can make correct-looking code leak work or fail on Windows.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
 
 **Verify:** trace context across boundaries; set a request ID in contextvars, then observe propagation through an async task, asyncio.to thread, a raw thread-pool submission, and a spawned process; make any explicit propagation visible.
 
@@ -338,11 +253,6 @@ blocking calls require their own timeout/cancellation contract.
 Process pools also need import-safe top-level callables and a main guard.
 Avoid relying only on garbage collection or interpreter teardown.
 
-**Common trap:** Unbounded task creation, swallowed cancellation, shared mutation, or process startup outside a main guard can make correct-looking code leak work or fail on Windows.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
-
 **Verify:** design graceful executor shutdown; own a thread or process pool through a context manager; stop accepting new work, wait with a bounded policy, cancel pending futures when allowed, and report unfinished work without hanging interpreter exit.
 
 ### Exercise 12: make an evidence-based model decision
@@ -359,10 +269,5 @@ and threads, include dependency capacity and caller deadline.
 Choose the simplest model that satisfies the measured requirement and resource
 budget. Preserve the benchmark plan so future workloads can invalidate the
 decision honestly.
-
-**Common trap:** Unbounded task creation, swallowed cancellation, shared mutation, or process startup outside a main guard can make correct-looking code leak work or fail on Windows.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
 
 **Verify:** make an evidence-based model decision; benchmark sequential, bounded asyncio/threads, and spawned processes on representative I/O and CPU fixtures; record correctness, startup, throughput, peak active work, transfer size, and cleanup, not just fastest elapsed time.

@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/r/solutions/r-018_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="r-018-reference-reasoning">r-018: reference reasoning<a class="heading-anchor" href="#r-018-reference-reasoning" aria-label="Link to this section">#</a></h2>
-<p>Use the <a href="r-018_reference.R.html">complete reference</a> with the guide&#x27;s declared inputs and runtime. Every worked example is also a standalone script.</p>
+<p>Run the <a href="r-018_reference.R.html">complete reference</a> under the <a href="../STUDY-GUIDE.md.html#run-a-chapter">run rules</a>.</p>
 <h3 id="why-the-implementation-has-this-shape">Why the implementation has this shape<a class="heading-anchor" href="#why-the-implementation-has-this-shape" aria-label="Link to this section">#</a></h3>
 <p>The calendar contains leap day. Counting date labels across the boundary therefore gives two days.</p>
 <p>Changing the display zone does not change the underlying instant. The elapsed interval is calculated between instants, not by subtracting printed clock strings.</p>
@@ -242,7 +242,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Tempting mistake:</strong> Sorting by the formatted local clock text. On 2025-11-02 an event at 01:45 EDT happened before one at 01:15 EST, yet the strings sort 01:15 first, reversing the true order.</p>
 <p><strong>Verify:</strong> <code>as.Date(as.POSIXct(&quot;2025-01-16 02:00&quot;, tz = &quot;UTC&quot;), tz = &quot;America/New_York&quot;)</code> returns 2025-01-15, and <code>as.numeric(instant + 1) &gt; as.numeric(instant)</code> returns TRUE.</p>
 <h3 id="what-the-checks-establish">What the checks establish<a class="heading-anchor" href="#what-the-checks-establish" aria-label="Link to this section">#</a></h3>
-<p>The reference makes 6 <code>stopifnot()</code> checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.</p></article>
+<p>The checks pin that adding one day to 2024-02-28 lands on February 29, that <code>difftime()</code> reports exactly 2 hours for a 7200 second gap, that a parsed date inherits <code>Date</code>, that the same UTC instant formats as 07:00 in America/New_York, that an impossible date parses to NA, and that one second later is numerically later. They do not test daylight saving transitions in other zones.</p>
+<p>The reference makes 6 <code>stopifnot()</code> checks; see <a href="../STUDY-GUIDE.md.html#what-a-passing-run-proves">what a passing run proves</a>.</p></article>
   </main>
 </body>
 </html>

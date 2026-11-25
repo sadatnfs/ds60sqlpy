@@ -24,9 +24,11 @@ The question-mark operator returns early with an error while continuing with the
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles the saved pad as `main.rs` with pinned Rust 1.99.1, edition 2024, and the prepared Arrow 60 library. `assert!` and `assert_eq!` remain active in normal builds. The fixed pad accepts one source file without arbitrary arguments, interactive input, Cargo manifests or package installation. The main function returns `Result<(), Box<dyn std::error::Error>>` so later examples can propagate errors with `?`; the final `Ok(())` means this fixture completed successfully. Standard library and Arrow examples remain offline after image preparation. Multi-file Cargo and external ecosystem projects have separate explicit preparation workflows.
+This lesson's programs need only the prelude and their own helpers. A passing run prints `rust-015: passed`.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Pad setup and limits: [Run a lesson](../STUDY-GUIDE.md#run-a-lesson).
+
+Before you run anything, follow [Attempt a lesson](../STUDY-GUIDE.md#attempt-a-lesson).
 
 
 
@@ -34,7 +36,9 @@ Start with the answer-free learner artifact in your saved classroom pad. It deli
 
 `Result<T,E>` carries a success type and an error type. `?` unwraps success or converts and returns an error. map_err translates an error deliberately. match handles both paths explicitly.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+**Reading Example A (Parse and validate separately, code below).** `parse_quantity` returns `Result<i32, &'static str>`: `Ok` carries a valid quantity and `Err` carries a fixed message. `text.parse()` gets its target type from the annotation `let value: i32` and returns `Result<i32, ParseIntError>`. `map_err(|_| "not an integer")` replaces the library error with this function's message, and the closure's `_` discards the original error value. The `?` operator then either unwraps an `Ok` into `value` or returns the `Err` from the function immediately. A separate `if` enforces the domain rule after parsing succeeds, with its own `return Err(...)`. The final `Ok(value)` has no semicolon, so it is the function's result.
+
+Method for tracing your own variants: [Trace a program](../STUDY-GUIDE.md#trace-a-program).
 
 ## Worked example / walkthrough
 
@@ -108,13 +112,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 6. **Transfer and justify.** Choose a public error enum and explain which internal details should remain private.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Record each task as in [Keep evidence for each task](../STUDY-GUIDE.md#keep-evidence-for-each-task).
 
 ## Common pitfalls and diagnosis
 
 Calling .ok discards the error reason. A catch-all fallback can turn data loss into success. Panic is generally the wrong interface for expected invalid external input.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+To turn a pitfall into a test, see [Design a regression case](../STUDY-GUIDE.md#design-a-regression-case).
 
 ## Progressive hints
 
@@ -122,13 +126,23 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 2. Compare Example B (Collect only explicitly accepted values) with Example A and name the first line whose behavior differs. Its observation is: Two accepted values and one rejection are accounted for.
 3. Before opening the explanation, test your task 3 attempt against this lesson's main pitfall: Calling .ok discards the error reason.
 
+Tempting approaches to rule out before you compare:
+
+- **Task 1.** Reading `"-1"` as a parse failure confuses representation with domain. `-1` is a perfectly valid `i32`; it is the application rule that refuses it.
+- **Task 2.** Folding the limit into the parse step with `text.parse::<i32>().ok().filter(|v| *v <= MAX_QUANTITY)` returns `None` for 1001, for `bad` and for `-1` alike, so the caller can no longer tell a typo from an oversized order.
+- **Task 5.** Assuming `"2147483648"` would wrap to a negative number and be rejected as negative ignores that `parse` checks the range and never wraps.
+
 ## Self-check and next step
 
-Explain Result, Propagation, Error category without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+Trace `"3"`, `"bad"` and `"-1"` through `parse_quantity`: which step rejects each, and which message does each `Err` carry? Why does replacing every `Err` with 0 corrupt a total rather than just hide a message? What does `.ok()` inside `filter_map` discard, and how does Example B still account for the rejected value?
+
+Then work through [Self-check and review](../STUDY-GUIDE.md#self-check-and-review).
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://doc.rust-lang.org/book/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+Read [The Rust Book, 9.2 Recoverable Errors with Result](https://doc.rust-lang.org/book/ch09-02-recoverable-errors-with-result.html) for what the `?` operator expands to.
+
+What the classroom does and does not prove: [Sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

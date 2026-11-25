@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/web-development/solutions/web-023_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="web-023-explanatory-solutions">web-023: explanatory solutions<a class="heading-anchor" href="#web-023-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Open this after your own attempt. Each answer explains the lesson&#x27;s synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in <code>courses/web-development/guides/web-023.md</code>.</p>
+<p>Attempt each exercise before reading; the mechanism is in <code>courses/web-development/guides/web-023.md</code> (<a href="../STUDY-GUIDE.md.html#solutions">using these answers</a>).</p>
 <h3 id="exercise-1-identify-content-that-must-survive-when-scripts-fail">Exercise 1: Identify content that must survive when scripts fail.<a class="heading-anchor" href="#exercise-1-identify-content-that-must-survive-when-scripts-fail" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> The page&#x27;s primary information and basic navigation remain available.</p>
 <p><strong>Approach:</strong> List what a reader came for, such as the article text, headings and plain links, and mark which pieces must work without scripts or styles.</p>
@@ -232,7 +232,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Plausible wrong approach:</strong> Treating a matched feature query as proof that the layout works well fails because supported syntax can still overflow or misorder content.</p>
 <p><strong>How to verify:</strong> A grid inside a matched <code>@supports</code> block can still overflow at narrow width, which you see only by resizing.</p>
 <h3 id="reference-comparison">Reference comparison<a class="heading-anchor" href="#reference-comparison" aria-label="Link to this section">#</a></h3>
-<p>Open <code>courses/web-development/solutions/web-023_solution.html</code> only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; its success message is not an accessibility audit or proof of responsive behavior at every size.</p></article>
+<p>The reference checks that an h1 exists inside the article, so it catches a printable page that has lost its title. It does not open print preview, check that navigation is hidden in print or test the feature query fallback, so inspect several pages of print preview yourself and compare what remains.</p>
+<p>Open <code>courses/web-development/solutions/web-023_solution.html</code> after saving your attempt (<a href="../STUDY-GUIDE.md.html#references">comparing with the reference</a>).</p></article>
   </main>
 </body>
 </html>

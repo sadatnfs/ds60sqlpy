@@ -196,7 +196,6 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <article class="document"><h2 id="cuda-007-explanatory-solutions">cuda-007: explanatory solutions<a class="heading-anchor" href="#cuda-007-explanatory-solutions" aria-label="Link to this section">#</a></h2>
 <h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
 <p>Arithmetic intensity measures operations per byte of data movement under an explicitly stated memory model. A roofline estimate limits performance by the smaller of arithmetic capacity and bandwidth times intensity. It is an upper bound, not a timer. Vector addition reads two float32 values and writes one for one addition, giving roughly one operation per twelve useful bytes before cache and transaction effects. Matrix multiplication can reuse each loaded value many times; tiling increases reuse but consumes working storage. Launch cost, transfer cost, dependency stalls and imperfect access patterns can keep measured work far below either bound.</p>
-<p>The separate <a href="../references/cuda-007_cpu.py.html">CPU reference</a> checks the chapter&#x27;s bounded model. It does not execute CUDA or establish GPU timing. Compare after attempting the worksheet or explicitly choosing to reveal solutions.</p>
 <h3 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h3>
 <p>Assume hypothetical bandwidth of 600 GB/s, using decimal billions, and a 12-byte-per-element vector addition. The ideal useful-element throughput is 50 billion elements/s. One million elements require at least 20 microseconds at that bandwidth, excluding launch and host transfer. This is a thought experiment, not a claim about the learner&#x27;s GPU.</p>
 <p><strong>Approach:</strong> Multiply one million elements by 12 bytes, giving 12 MB, and divide by 600e9 bytes per second.</p>
@@ -233,11 +232,16 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Why it is correct:</strong> Fewer global reads help only if doubled registers do not reduce resident warps so much that latency stays exposed.</p>
 <p><strong>A plausible wrong approach:</strong> Accepting the tiled version because estimated bytes fell skips both correctness and the occupancy trade.</p>
 <p><strong>How to verify:</strong> Record compiler resource usage and timed samples for both variants on the same device and workload.</p>
+<h3 id="self-check-answers">Self-check answers<a class="heading-anchor" href="#self-check-answers" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>What useful byte count does vector addition of n float32 elements move?</strong> 12n bytes: two 4-byte reads and one 4-byte write per element.</li>
+<li><strong>At what intensity does the worked example 2 device switch from bandwidth bound to compute bound?</strong> At 20 FLOP/byte, where 500 GB/s times intensity reaches 10 TFLOP/s.</li>
+<li><strong>Why must kernel time and end-to-end time be reported separately?</strong> Transfers, launch overhead and host work can dominate the end-to-end figure even when the kernel is fast.</li>
+</ol>
 <h3 id="numerical-reference-and-its-limits">Numerical reference and its limits<a class="heading-anchor" href="#numerical-reference-and-its-limits" aria-label="Link to this section">#</a></h3>
-<p>The complete CPU model is <a href="../references/cuda-007_cpu.py.html">here</a>. Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It does not claim CUDA execution, concurrency safety or a performance measurement.</p>
+<p>The <a href="../references/cuda-007_cpu.py.html">CPU reference</a> reproduces worked example 1 and prints <code>{&#x27;ideal_memory_seconds&#x27;: 2e-05, &#x27;roofline_flops_per_second&#x27;: [1000000000000.0, 10000000000000.0]}</code>.</p>
 <h3 id="transfer-review">Transfer review<a class="heading-anchor" href="#transfer-review" aria-label="Link to this section">#</a></h3>
-<p>Correctness first, then measured time, compiler resource usage and selected memory/occupancy metrics on the same workload. Reduced estimated bytes alone is insufficient.</p>
-<p>A complete explanation must name its inputs, the unchanged mathematical contract, the changed boundary or resource condition, and the evidence still needed on actual hardware. Preserve a CPU baseline even after a GPU path becomes available.</p></article>
+<p>Correctness first, then measured time, compiler resource usage and selected memory/occupancy metrics on the same workload. Reduced estimated bytes alone is insufficient.</p></article>
   </main>
 </body>
 </html>

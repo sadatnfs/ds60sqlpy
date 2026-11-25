@@ -1,10 +1,17 @@
 # cuda-112: Reproducible GPU performance review
 
-**Route:** CUDA Python and machine learning. **Stage:** advanced. **Prerequisites:** `cuda-071`, `cuda-085`, `cuda-092`. Allow several sessions when the hardware experiment is new; the chapter is not a deadline.
+**Route:** CUDA Python and machine learning. **Stage:** advanced. **Prerequisites:** `cuda-071`, `cuda-085`, `cuda-092`.
 
-## What you will be able to explain
+Pacing, evidence labels and platform rules: [CUDA study guide](../../STUDY-GUIDE.md).
 
-By the end, you can **calculate median speedup**, **separate cold and warm costs**, and **prepare a reproducibility checklist** with evidence. Start with the two worked cases, then use the editable CPU model to make the quantities concrete.
+## Learning objectives
+
+- Calculate median speedup.
+- Preserve raw observations.
+- Check equivalence first.
+- Separate cold and warm costs.
+- Write supported platform scope.
+- Prepare a reproducibility checklist.
 
 ## Mechanism and vocabulary
 
@@ -32,9 +39,13 @@ Baseline samples [10,11,9] and candidate [8,8,9] have medians 10 and 8. The medi
 
 If candidate output differs beyond tolerance, the speed ratio remains a measurement of different behavior and cannot be accepted as a valid optimization.
 
-## Portable executable model
+## How to run the CPU model
 
-The **CPU reference model** variant runs this bounded worked example using `python-core`. It uses only the Python standard library, small synthetic values and no network. Its purpose is to expose the arithmetic or contract behind the chapter. The separate reference includes assertions for the stated observations.
+Edit the copy; the [reference](../references/cuda-112_cpu.py) adds assertions.
+
+```sh
+python courses/cuda/python/lessons/cuda-112_cpu.py
+```
 
 ```python
 import statistics
@@ -60,77 +71,65 @@ print(report)
 | `candidate` | `[8, 8, 9]` |
 | `speedup` | `1.25` |
 
-Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.
-
 ## Practice and transfer
+
+Record each attempt in the [worksheet](../lessons/cuda-112.md) before opening hints.
 
 ### Exercise 1: Calculate median speedup
 
 **Trap to avoid:** Computing the ratio of the fastest samples, `9/8`, picks favorable outliers, while three samples are too few to support a precise estimate either way.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 2: Preserve raw observations
 
 **Trap to avoid:** Reporting only the speedup ratio discards the information needed to judge whether it is meaningful. With samples such as 9, 10 and 11, the spread is as large as part of the claimed gain, which a single ratio hides.
-
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 3: Check equivalence first
 
 **Trap to avoid:** Accepting a candidate on speed and checking correctness afterward risks deploying a wrong result if the check is skipped. A kernel that skips work, for example by mishandling the tail, will often look faster precisely because it is wrong.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 4: Separate cold and warm costs
 
 **Trap to avoid:** Mixing the cold run into warm samples raises one sample sharply and can shift the median with only three samples.
-
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 5: Write supported platform scope
 
 **Trap to avoid:** Stating the speedup for all NVIDIA GPUs generalizes from one device. Memory bandwidth, cache size and clock behavior differ by architecture, so the ratio can change or reverse on other hardware.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 6: Prepare a reproducibility checklist
 
 **Trap to avoid:** Leaving out the limits, such as only three samples, presents a fragile result as settled. A reader then cannot tell whether a follow-up run that disagrees reveals a regression or ordinary noise.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ## Progressive hints
 
-Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.
+Hint *k* belongs to exercise *k*; open one at a time.
 
-1. Start from worked example 1 and mark the quantities needed for the task "Calculate median speedup".
-2. Change one assumption in worked example 2 while preserving the declared contract: preserve raw observations.
-3. Trace the CPU program's variables before adding hardware behavior: check equivalence first.
-4. Draw producers, consumers and the exact operation boundary for the task "Separate cold and warm costs".
-5. Separate what the small fixture establishes from what the real runtime must show: write supported platform scope.
-6. Write a counterexample to an overbroad claim before you prepare a reproducibility checklist.
+1. Find the median of each sample list, then divide the baseline median by the candidate median.
+2. Keep every timing sample with the conditions under which it was taken, not just the best one.
+3. Compare outputs against the declared tolerance before looking at any speed number.
+4. Report the first run, with setup and compilation, separately from the warm runs.
+5. Name the exact hardware and software you tested on and nothing beyond it.
+6. List what another person needs to rerun the comparison and get the same answer.
 
-## Common mistakes and self-review
+## Common mistakes and self-check
 
-Confusing a correct tiny example with a general implementation is the central review risk. For this chapter, challenge the assumption in worked example 2, then ask whether your change preserves the mechanism described above. If you change dtype, layout, ordering, batch size or backend, update the acceptance contract rather than silently reusing the old observation. Explain an unexpected result before trying random configuration changes.
+A common mistake is reporting only the best timing and a single speedup number. That hides variation and conditions, and three samples cannot support a confident ratio. Another is quoting a speedup when the candidate's output differs beyond tolerance, which measures different behavior. Fix both by checking correctness first, keeping raw bounded samples with the source revision, hardware, driver, versions and load conditions, and stating the 1.25 median ratio with its limited confidence.
 
-Keep a small evidence table with columns **claim**, **input**, **expected observation**, **actual observation** and **limit**. For the first claim use `Calculate median speedup`. For the final claim use `Prepare a reproducibility checklist`. An unperformed GPU or cluster experiment remains pending even when the CPU model is correct.
+**Misconception:** Results from one GPU let a reviewer predict the speedup on another GPU. **Correction:** Bandwidth, cache sizes, clocks, driver and library versions all differ between devices. A review should state which device produced each number and treat other devices as untested until they are measured.
 
-## Platform and evidence contract
+**Evidence limit:** The reference computes a median ratio of 1.25 from synthetic samples. It is explicitly not a GPU benchmark; a real review needs repeated synchronized measurements on named hardware and software, and its results apply only to that device.
 
-The reading worksheet and CPU reference model work through the ordinary Linux Docker classroom on macOS, Linux and Windows using WSL 2. They do not require an NVIDIA GPU. Their results are labeled CPU models or semantic oracles, not simulated hardware performance.
+1. Why prefer the median of raw samples over the best time?
+2. Which costs should be reported separately?
+3. Does one device's result rank architectures in general?
 
-Real CUDA work needs supported NVIDIA hardware, a compatible host driver and an explicitly prepared GPU runtime. An Apple GPU does not execute CUDA kernels. PyTorch MPS on a supported native Mac, ROCm on supported AMD hardware, or other vendor backends can provide separate accelerator learning routes; they need their own package and operation qualification and are not CUDA evidence. The ordinary Linux Docker classroom does not expose native Mac MPS automatically.
-
-Do not download packages, models or data by opening this lesson. Do not attach an engine socket, ambient cluster credentials or an arbitrary remote endpoint. A CPU pass, imported package, successful compilation, real GPU result and measured performance are distinct observations. Record the actual backend, data shape/dtype, source revision, versions and pending checks. A saved completion marker records learning progress, not hardware certification.
+Answers: [self-check answers](../solutions/cuda-112_solutions.md#self-check-answers).
 
 ## Primary references
 
 - [PyTorch CUDA semantics](https://docs.pytorch.org/docs/2.9/notes/cuda.html)
 - [TensorFlow GPU guide](https://www.tensorflow.org/guide/gpu)
 
-Use the version-matched documentation of your prepared environment. These references describe interfaces and supported boundaries; the chapter's synthetic examples and CPU models are original teaching material.
+Full lists: [documentation and sources](../../STUDY-GUIDE.md#documentation-and-sources).
 
 ## Ask an AI tutor about this lesson
 

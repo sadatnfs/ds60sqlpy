@@ -1,6 +1,6 @@
 # go-019: explained solutions
 
-These are comparison material after an attempt or explicit reveal. The executable reference implements all six cases in one `main.go`.
+Compare after an attempt ([using solutions](../STUDY-GUIDE.md#use-the-solutions)). `courses/go/solutions/go-019_solution.go` implements all six cases.
 
 ## Mechanism
 
@@ -10,7 +10,7 @@ json:"name" maps a field to its wire name. json.Marshal returns bytes and an err
 
 ## 1. Decode a typed object: change one input
 
-Copy worked example 1 into a scratch pad and change ``err := json.Unmarshal([]byte(`{"name":"sample","count":3}`), &c)`` to ``err := json.Unmarshal([]byte(`{"name":"sample","count":4}`), &c)``. Before running, predict which check fails and which value it now sees; then run it and restore the original line.
+Copy worked example 1, change ``err := json.Unmarshal([]byte(`{"name":"sample","count":3}`), &c)`` to ``err := json.Unmarshal([]byte(`{"name":"sample","count":4}`), &c)`` and predict the failure before running; then restore the line.
 
 The unchanged code is worked example 1:
 
@@ -20,13 +20,15 @@ err := json.Unmarshal([]byte(`{"name":"sample","count":3}`), &c)
 check(err == nil && c.Name == "sample" && c.Count == 3, "typed JSON")
 ```
 
-**Expected:** The changed run panics with `typed JSON` because `err == nil && c.Name == "sample" && c.Count == 3` no longer holds. Restoring the original line brings back the worked observation: the fields become sample and 3.
+**Expected:** The edited run panics with `typed JSON` because `err == nil && c.Name == "sample" && c.Count == 3` no longer holds.
+
+**Verify:** Restoring ``err := json.Unmarshal([]byte(`{"name":"sample","count":3}`), &c)`` makes the check pass again with the worked observation: the fields become sample and 3.
 
 Field names follow tags rather than an accidental presentation format. Parsing success still leaves count-range and name rules to domain validation.
 
 ## 2. Reject an unknown property: diagnose an edited check
 
-A careless edit changed the check in worked example 2 so that it reads `check(d.Decode(&c) == nil, "unknown field")`. Run worked example 2 with that line, explain why the edited check now fails for the same program state, and restore it.
+A careless edit rewrote the check in worked example 2 as `check(d.Decode(&c) == nil, "unknown field")`. Explain the failure, then restore it.
 
 The unchanged code is worked example 2:
 
@@ -37,7 +39,9 @@ d.DisallowUnknownFields()
 check(d.Decode(&c) != nil, "unknown field")
 ```
 
-**Expected:** Before the repair the program panics with `unknown field`; after it the line reads `check(d.Decode(&c) != nil, "unknown field")` again and decoding returns an error.
+**Expected:** The defective run panics with `unknown field`; after restoring `check(d.Decode(&c) != nil, "unknown field")`, decoding returns an error.
+
+**Verify:** The edited check fails with message `unknown field` for a state that `d.Decode(&c) != nil` accepts.
 
 Strict rejection catches misspelled configuration keys instead of silently ignoring a learner or operator mistake.
 
@@ -52,6 +56,8 @@ check(d.Decode(&a) == nil && d.Decode(&b) == nil, "trailing document")
 ```
 
 **Expected:** A second value is observable, so the single-document contract fails.
+
+**Verify:** Your solution must keep `d.Decode(&a) == nil && d.Decode(&b) == nil` true. Control: changing `check(d.Decode(&a) == nil && d.Decode(&b) == nil, "trailing document")` to `check(d.Decode(&a) != nil && d.Decode(&b) == nil, "trailing document")` panics with message `trailing document`; revert it.
 
 One successful Decode consumes one value. It does not prove the entire input contains only that value.
 
@@ -69,6 +75,8 @@ check(d.Decode(&extra) == io.EOF, "exact end")
 
 **Expected:** The second decode returns io.EOF.
 
+**Verify:** Your solution must keep `d.Decode(&extra) == io.EOF` true. Control: changing `check(d.Decode(&extra) == io.EOF, "exact end")` to `check(d.Decode(&extra) != io.EOF, "exact end")` panics with message `exact end`; revert it.
+
 The second read establishes the single-document boundary. Whitespace after the object is allowed by the decoder.
 
 ## 5. Preserve a large integer token
@@ -84,6 +92,8 @@ check(d.Decode(&v) == nil && v.(json.Number).String() == "9007199254740993", "nu
 
 **Expected:** The exact decimal token is retained.
 
+**Verify:** Your solution must keep `d.Decode(&v) == nil && v.(json.Number).String() == "9007199254740993"` true. Control: changing ``d := json.NewDecoder(strings.NewReader(`9007199254740993`))`` to ``d := json.NewDecoder(strings.NewReader(`9007199254740994`))`` panics with message `number token`; revert it.
+
 Keeping the token avoids an early float64 conversion. The application still needs to choose a numeric range and handle conversion errors.
 
 ## 6. Transfer domain validation
@@ -98,8 +108,10 @@ check(err == nil && c.Count < 0, "domain invalid")
 
 **Expected:** JSON syntax is valid but count validation fails.
 
+**Verify:** Your solution must keep `err == nil && c.Count < 0` true. Control: changing `check(err == nil && c.Count < 0, "domain invalid")` to `check(err != nil && c.Count < 0, "domain invalid")` panics with message `domain invalid`; revert it.
+
 Separating syntax and semantics yields better diagnostics. A decoder cannot infer that this application forbids negative counts.
 
 ## Transfer after comparison
 
-Return to your own pad and reproduce one check with a new input. Explain why the check rejects a plausible wrong implementation. Keep the distinction between a pure model, an in-process fake, and a real external system visible in your notes.
+Every wire boundary in later lessons has the same layers: syntax, schema shape and domain validity. HTTP handlers decode request bodies, configuration loaders read files and Kubernetes manifests are JSON or YAML checked against a schema. For each, decide which unknown fields are errors, whether trailing data is allowed and which domain rules run after decoding.

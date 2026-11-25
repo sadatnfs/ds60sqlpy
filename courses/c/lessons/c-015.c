@@ -2,25 +2,16 @@
 
 int main(void) {
   /* Exercise 1: Allocate and initialize: change one input
-     Copy worked example 1, the "allocate and initialize" case, into a scratch
-     pad and change `p[0] = 2;` to `p[1] = 2;`. Before running, predict which
-     CHECK fails and which value it sees in place of the worked result (the sum
-     is 12 before release); then run it and restore the original line. Expected:
-     With `p[1] = 2;` the run stops with `Check failed` at the CHECK on `p[0] +
-     p[1] + p[2] == 12`, because the "allocate and initialize" case no longer
-     shows that the sum is 12 before release. Restoring `p[0] = 2;` brings that
-     observation back. */
+     In worked example 1, change `p[0] = 2;` to `p[1] = 2;`. Predict which value
+     the CHECK on `p[0] + p[1] + p[2] == 12` sees, then run and restore.
+     Expected: `Check failed` at `p[0] + p[1] + p[2] == 12`; restoring `p[0] =
+     2;` passes again. */
 
   /* Exercise 2: Inspect zero-initialized integers: diagnose an edited check
-     A careless edit changed the CHECK in worked example 2, the "inspect
-     zero-initialized integers" case, so that it reads `CHECK(p[0] != 0 && p[1]
-     == 0 && p[2] == 0);`. Run the example with that line, explain why the
-     edited CHECK now fails even though the program state still means all three
-     values are zero, and restore it. Expected: Before the repair the run stops
-     with `Check failed` at the CHECK on `p[0] == 0 && p[1] == 0 && p[2] == 0`.
-     Once the line reads `CHECK(p[0] == 0 && p[1] == 0 && p[2] == 0);` again,
-     the "inspect zero-initialized integers" case again shows that all three
-     values are zero. */
+     Worked example 2's CHECK now reads `CHECK(p[0] != 0 && p[1] == 0 && p[2] ==
+     0);`. Explain why it fails although all three values are zero, then restore
+     it. Expected: `Check failed` until the CHECK reads `CHECK(p[0] == 0 && p[1]
+     == 0 && p[2] == 0);` again, though all three values are zero. */
 
   /* Exercise 3: Define the empty allocation policy
      Request zero elements through the helper.

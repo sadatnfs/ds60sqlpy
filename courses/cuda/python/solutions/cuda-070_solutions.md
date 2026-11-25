@@ -1,6 +1,6 @@
 # cuda-070: explained solutions
 
-These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.
+Compare with your [worksheet](../lessons/cuda-070.md) attempt.
 
 ## Exercise 1: Compute live and reserved totals
 
@@ -74,8 +74,16 @@ Container host-memory limits do not generally cap VRAM.
 
 **How to verify.** List which tool reports each: host RSS from the OS, device usage from the GPU driver or the library pool. A correct note names both separately.
 
+## Self-check answers
+
+1. **What does a stable reserved total across repeated equal workloads usually mean?** The pool is reusing its cached blocks. That is normal behavior, not a leak, as long as live bytes also return to the same level after each step.
+
+2. **Which signal suggests retained tensors, outputs or graphs?** Live allocations that grow after every step of an equal workload, like the list of results that reaches 4096 bytes after four steps.
+
+3. **Why is clearing the cache not a repair for a workload whose live set exceeds memory?** Cache clearing returns only free blocks to the driver. Arrays the model still needs remain live, so the required memory is unchanged.
+
 ## Reference observation
 
 Live 1024, reserved 1024, retained-output example 4096 bytes.
 
-The reference file is `courses/cuda/python/references/cuda-070_cpu.py`. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.
+Asserted by `courses/cuda/python/references/cuda-070_cpu.py`.

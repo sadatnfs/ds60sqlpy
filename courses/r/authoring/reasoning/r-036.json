@@ -42,5 +42,7 @@
       "wrong": "Claiming the function handles data larger than memory because it loops over chunks. The loop proves the merge is correct, not that the data were never fully loaded.",
       "verify": "A run on a file many chunks long shows the same mean as an in memory calculation, with peak memory measured by a process monitor."
     }
-  ]
+  ],
+  "run_note": "The starter holds three chunks, one with 10, one with 20, 30 and 40 and one empty, and prints their lengths 1, 3 and 0. Run it, then carry sum, observed and missing counts from chunk to chunk instead of chunk means. The empty chunk must leave the state unchanged, and the final mean is computed once at the end.",
+  "checks_note": "The checks confirm a final mean of 25 that does not depend on chunk order, an NA mean with three missing values when every observation is missing, and a mean of 3 from three observed values in another stream. They show that the combination rule is correct, not that chunking reduced memory use, which would need separate measurement."
 }

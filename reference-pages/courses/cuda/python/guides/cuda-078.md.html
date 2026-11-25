@@ -194,9 +194,17 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cuda/python/guides/cuda-078.md</code></p>
     </header>
     <article class="document"><h2 id="cuda-078-atomics-and-contention">cuda-078: Atomics and contention<a class="heading-anchor" href="#cuda-078-atomics-and-contention" aria-label="Link to this section">#</a></h2>
-<p><strong>Route:</strong> CUDA Python and machine learning. <strong>Stage:</strong> intermediate. <strong>Prerequisites:</strong> <code>cuda-076</code>, <code>cuda-077</code>. Allow several sessions when the hardware experiment is new; the chapter is not a deadline.</p>
-<h3 id="what-you-will-be-able-to-explain">What you will be able to explain<a class="heading-anchor" href="#what-you-will-be-able-to-explain" aria-label="Link to this section">#</a></h3>
-<p>By the end, you can <strong>trace a lost update</strong>, <strong>count private storage</strong>, and <strong>specify completion before reading</strong> with evidence. Start with the two worked cases, then use the editable CPU model to make the quantities concrete.</p>
+<p><strong>Route:</strong> CUDA Python and machine learning. <strong>Stage:</strong> intermediate. <strong>Prerequisites:</strong> <code>cuda-076</code>, <code>cuda-077</code>.</p>
+<p>Pacing, evidence labels and platform rules: <a href="../../STUDY-GUIDE.md.html">CUDA study guide</a>.</p>
+<h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
+<ul>
+<li>Trace a lost update.</li>
+<li>Compute a skewed histogram.</li>
+<li>Merge partials.</li>
+<li>Count private storage.</li>
+<li>Explain floating atomic order.</li>
+<li>Specify completion before reading.</li>
+</ul>
 <h3 id="mechanism-and-vocabulary">Mechanism and vocabulary<a class="heading-anchor" href="#mechanism-and-vocabulary" aria-label="Link to this section">#</a></h3>
 <p>An atomic operation updates one supported location indivisibly with respect to competing atomic operations. It does not make an entire multi-location algorithm transactional. A histogram demonstrates the need: two threads reading count 0 and both writing count 1 lose an increment. Atomic addition prevents that lost update for the counter, but every thread targeting the same bin can serialize.</p>
 <p>Privatization reduces contention by building per-block or per-warp partial histograms and merging them later. The memory footprint grows with bin count and number of partials. Floating-point atomic addition can still vary with arrival order. Explain what is protected, what ordering is required, and whether non-atomic readers can observe partially completed results.</p>
@@ -212,8 +220,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Values [0,0,1,2,2,2] produce bins [2,1,3]. Six updates aimed at one bin would be a deliberately skewed contention case.</p>
 <h4 id="worked-example-2">Worked example 2<a class="heading-anchor" href="#worked-example-2" aria-label="Link to this section">#</a></h4>
 <p>Two local histograms [2,1,0] and [0,0,3] merge elementwise to [2,1,3]. Local updates reduce shared contention at the expense of extra storage and a merge.</p>
-<h3 id="portable-executable-model">Portable executable model<a class="heading-anchor" href="#portable-executable-model" aria-label="Link to this section">#</a></h3>
-<p>The <strong>CPU reference model</strong> variant runs this bounded worked example using <code>python-core</code>. It uses only the Python standard library, small synthetic values and no network. Its purpose is to expose the arithmetic or contract behind the chapter. The separate reference includes assertions for the stated observations.</p>
+<h3 id="how-to-run-the-cpu-model">How to run the CPU model<a class="heading-anchor" href="#how-to-run-the-cpu-model" aria-label="Link to this section">#</a></h3>
+<p>Edit the copy; the <a href="../references/cuda-078_cpu.py.html">reference</a> adds assertions.</p>
+<pre class="highlighted-code"><code class="language-bash">python courses/cuda/python/lessons/cuda-078_cpu.py</code></pre>
 <pre class="highlighted-code"><code class="language-python">values <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">]</span>
 bins <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">*</span> <span class="syntax-number">3</span>
 <span class="syntax-keyword">for</span> value <span class="syntax-operator">in</span> values<span class="syntax-punctuation">:</span>
@@ -253,49 +262,45 @@ merged <span class="syntax-operator">=</span> <span class="syntax-punctuation">[
 <td><code>[2, 1, 3]</code></td>
 </tr>
 </tbody></table></div>
-<p>Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.</p>
 <h3 id="practice-and-transfer">Practice and transfer<a class="heading-anchor" href="#practice-and-transfer" aria-label="Link to this section">#</a></h3>
+<p>Record each attempt in the <a href="../lessons/cuda-078.md.html">worksheet</a> before opening hints.</p>
 <h4 id="exercise-1-trace-a-lost-update">Exercise 1: Trace a lost update<a class="heading-anchor" href="#exercise-1-trace-a-lost-update" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Assuming the two writes collide in a visible way, raising an error or producing a garbled value, is incorrect. The lost update produces a plausible number, which is why it escapes notice.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-2-compute-a-skewed-histogram">Exercise 2: Compute a skewed histogram<a class="heading-anchor" href="#exercise-2-compute-a-skewed-histogram" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Using the uniform data <code>[0, 1, 2, 0, 1, 2]</code> as the contention test spreads updates evenly and measures the friendliest case instead.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-3-merge-partials">Exercise 3: Merge partials<a class="heading-anchor" href="#exercise-3-merge-partials" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Concatenating the partials or taking the bin-wise maximum produces wrong totals. The maximum here gives <code>[2, 1, 3]</code> by coincidence, so test with overlapping partials such as <code>[1, 1, 0]</code> and <code>[1, 0, 3]</code>.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-4-count-private-storage">Exercise 4: Count private storage<a class="heading-anchor" href="#exercise-4-count-private-storage" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Counting only bins times width, 1 KiB here, ignores that each partial owns its own copy and underestimates memory by a factor of the partial count.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-5-explain-floating-atomic-order">Exercise 5: Explain floating atomic order<a class="heading-anchor" href="#exercise-5-explain-floating-atomic-order" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Expecting atomics to give the same bits as a sequential CPU sum confuses race-freedom with order. No update is lost, but the order is still free.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-6-specify-completion-before-reading">Exercise 6: Specify completion before reading<a class="heading-anchor" href="#exercise-6-specify-completion-before-reading" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Reading after only the histogram kernel ignores the merge step, so the host sees one block&#x27;s partial instead of the total.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
-<p>Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.</p>
+<p>Hint <em>k</em> belongs to exercise <em>k</em>; open one at a time.</p>
 <ol>
-<li>Start from worked example 1 and mark the quantities needed for the task &quot;Trace a lost update&quot;.</li>
-<li>Change one assumption in worked example 2 while preserving the declared contract: compute a skewed histogram.</li>
-<li>Trace the CPU program&#x27;s variables before adding hardware behavior: merge partials.</li>
-<li>Draw producers, consumers and the exact operation boundary for the task &quot;Count private storage&quot;.</li>
-<li>Separate what the small fixture establishes from what the real runtime must show: explain floating atomic order.</li>
-<li>Write a counterexample to an overbroad claim before you specify completion before reading.</li>
+<li>Interleave two threads&#x27; read, add and write steps on one counter that starts at 0 and record the final value.</li>
+<li>Route all six inputs to the same bin and ask how many updates that bin&#x27;s counter must absorb.</li>
+<li>Line up the two local histograms bin by bin and add the matching counters.</li>
+<li>Multiply the number of partial histograms, the bin count and the bytes per counter.</li>
+<li>Ask whether atomic float additions arriving in a different order must give the same rounded total.</li>
+<li>Decide what must finish, including the merge, before the host may read the counts.</li>
 </ol>
-<h3 id="common-mistakes-and-self-review">Common mistakes and self-review<a class="heading-anchor" href="#common-mistakes-and-self-review" aria-label="Link to this section">#</a></h3>
-<p>Confusing a correct tiny example with a general implementation is the central review risk. For this chapter, challenge the assumption in worked example 2, then ask whether your change preserves the mechanism described above. If you change dtype, layout, ordering, batch size or backend, update the acceptance contract rather than silently reusing the old observation. Explain an unexpected result before trying random configuration changes.</p>
-<p>Keep a small evidence table with columns <strong>claim</strong>, <strong>input</strong>, <strong>expected observation</strong>, <strong>actual observation</strong> and <strong>limit</strong>. For the first claim use <code>Trace a lost update</code>. For the final claim use <code>Specify completion before reading</code>. An unperformed GPU or cluster experiment remains pending even when the CPU model is correct.</p>
-<h3 id="platform-and-evidence-contract">Platform and evidence contract<a class="heading-anchor" href="#platform-and-evidence-contract" aria-label="Link to this section">#</a></h3>
-<p>The reading worksheet and CPU reference model work through the ordinary Linux Docker classroom on macOS, Linux and Windows using WSL 2. They do not require an NVIDIA GPU. Their results are labeled CPU models or semantic oracles, not simulated hardware performance.</p>
-<p>Real CUDA work needs supported NVIDIA hardware, a compatible host driver and an explicitly prepared GPU runtime. An Apple GPU does not execute CUDA kernels. PyTorch MPS on a supported native Mac, ROCm on supported AMD hardware, or other vendor backends can provide separate accelerator learning routes; they need their own package and operation qualification and are not CUDA evidence. The ordinary Linux Docker classroom does not expose native Mac MPS automatically.</p>
-<p>Do not download packages, models or data by opening this lesson. Do not attach an engine socket, ambient cluster credentials or an arbitrary remote endpoint. A CPU pass, imported package, successful compilation, real GPU result and measured performance are distinct observations. Record the actual backend, data shape/dtype, source revision, versions and pending checks. A saved completion marker records learning progress, not hardware certification.</p>
+<h3 id="common-mistakes-and-self-check">Common mistakes and self-check<a class="heading-anchor" href="#common-mistakes-and-self-check" aria-label="Link to this section">#</a></h3>
+<p>A common mistake is assuming an atomic makes a whole algorithm safe. Atomic addition protects one counter from lost updates, but it does not order other memory, and a non-atomic reader can still see a half-merged histogram. Another mistake is sending every thread to one shared bin, which serializes the updates. Fix contention with per-block private histograms merged later, and read the result only after every update and merge has completed.</p>
+<p><strong>Misconception:</strong> Floating-point atomic addition always produces the same total because no update is lost. <strong>Correction:</strong> Atomics prevent lost updates, but they do not fix the order in which updates arrive. Floating-point addition is not associative, so a float sum accumulated with atomics can differ in its last bits between runs. Integer counts such as histogram bins are exact; for float totals, state a tolerance or use a deterministic reduction order when bitwise repeatability is required.</p>
+<p><strong>Evidence limit:</strong> The reference computes bins <code>[2, 1, 3]</code> and merges two partial histograms sequentially. It cannot exhibit a lost update, contention or arrival-order rounding, which only occur when real threads race on a device.</p>
+<ol>
+<li>What exactly does an atomic addition protect?</li>
+<li>What does privatization trade away to reduce contention?</li>
+<li>Why can floating-point atomic sums vary between runs?</li>
+</ol>
+<p>Answers: <a href="../solutions/cuda-078_solutions.md.html#self-check-answers">self-check answers</a>.</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
 <ul>
 <li><a href="https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/intro-to-cuda-python.html">NVIDIA CUDA Python introduction</a></li>
-<li><a href="https://github.com/NVIDIA/numba-cuda">Maintained numba-cuda project</a></li>
 </ul>
-<p>Use the version-matched documentation of your prepared environment. These references describe interfaces and supported boundaries; the chapter&#x27;s synthetic examples and CPU models are original teaching material.</p>
+<p>Full lists: <a href="../../STUDY-GUIDE.md.html#documentation-and-sources">documentation and sources</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning skill for cuda-078: Atomics and contention.
 Read courses/cuda/python/guides/cuda-078.md and courses/cuda/python/lessons/cuda-078.md.

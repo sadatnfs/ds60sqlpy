@@ -36,5 +36,7 @@
       "wrong": "Claiming a working package because observed_mean returned 3. That proves one function evaluates, not that the package installs or checks; network installation also does not belong in this pad.",
       "verify": "`exists(\".validate\", envir = environment)` returns TRUE in the sys.source environment, which shows that the export list was not enforced."
     }
-  ]
+  ],
+  "run_note": "The starter supplies the values 1, 4 and 9 and the package name measurekit. Run it, then define a global function named `median` that returns -999 and compare it with `stats::median()`, which still returns 4. Build the DESCRIPTION, NAMESPACE and R source files under a `tempfile()` directory only, never in your project tree.",
+  "checks_note": "The assertions confirm that DESCRIPTION names measurekit, that NAMESPACE contains exactly `export(observed_mean)`, that the source parses into two expressions and computes a mean of 3, that a masking global median returns -999 while `stats::median()` returns 4, that an empty input returns NA, and that `dnorm(0)` matches its closed form. They do not install or check the package; parsing a tree is not `R CMD check`."
 }

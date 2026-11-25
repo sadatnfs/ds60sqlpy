@@ -1,6 +1,6 @@
 # tf-015: explanatory solutions
 
-Open these answers for A reproducible tf.data pipeline after your own attempt at Example A, Observe batches, or after an explicit reveal. Each answer reuses the guide's literal inputs, so a mismatch points to one step. The companion script runs the assertions; this page explains why they test Cardinality, Map, Prefetch. After matching exercise 6, Check paired transformation, invent a new input without looking here.
+Open these answers after an attempt; they reuse the guide's inputs ([comparison steps](../STUDY-GUIDE.md#after-the-solutions)).
 
 ## Mechanism review
 
@@ -118,6 +118,3 @@ assert all(float(v) == 2 * (int(i) + 1) for i, v in scaled.as_numpy_iterator())
 
 **Verify:** In a fresh process, the exercise checks confirm `all((float(v) == 2 * (int(i) + 1) for i, v in scaled.as_numpy_iterator()))`.
 
-## Review after comparison
-
-Change one fixture value in exercise 4, Compare explicit dropping, and predict the new result before running it. Keep the failing version of exercise 5, Recreate a deterministic traversal, next to its repair. A missing framework is an environment record, not a failed assertion. No solution downloads data, calls an online model, deploys a service or changes a database.

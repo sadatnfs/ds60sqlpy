@@ -194,7 +194,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/csharp/solutions/csharp-003_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="csharp-003-explanation-and-comparison">csharp-003: explanation and comparison<a class="heading-anchor" href="#csharp-003-explanation-and-comparison" aria-label="Link to this section">#</a></h2>
-<p>Attempt the six guide tasks before opening this comparison. The executable reference is <a href="csharp-003_solution.cs.html">csharp-003_solution.cs</a>. It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.</p>
+<p>Reference program: <a href="csharp-003_solution.cs.html">csharp-003_solution.cs</a>, covering both examples and the executed answers.</p>
+<p>Attempt the tasks first; see <a href="../STUDY-GUIDE.md.html#comparing-with-the-explanation">comparing with the explanation</a>.</p>
 <h3 id="why-the-two-examples-differ">Why the two examples differ<a class="heading-anchor" href="#why-the-two-examples-differ" aria-label="Link to this section">#</a></h3>
 <p><strong>Reject overflowing counts:</strong> The normal and failure paths separate an exceptional boundary from ordinary arithmetic. The maximum int plus one is rejected; 100 plus 20 is accepted.</p>
 <p><strong>Preserve decimal intent:</strong> A rounding difference can be a policy disagreement rather than a compiler defect. Write the expected rule before the implementation. Two valid midpoint policies produce 2.34 and 2.35.</p>
@@ -256,14 +257,14 @@ Check<span class="syntax-punctuation">(</span>Math<span class="syntax-punctuatio
 <p><strong>How to verify.</strong> Add 2.355m: <code>ToEven</code> gives 2.36 because 6 is even, and <code>AwayFromZero</code> also gives 2.36. Then add -2.345m and confirm <code>AwayFromZero</code> gives -2.35, away from zero rather than upward.</p>
 <h4 id="task-6-transfer-and-justify">Task 6: Transfer and justify<a class="heading-anchor" href="#task-6-transfer-and-justify" aria-label="Link to this section">#</a></h4>
 <p>Design a quantity and currency contract that states overflow, rounding and invalid-input behavior.</p>
-<p>No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry <strong>Overflow</strong>, and state one limitation of your choice.</p>
+<p>No single answer exists; extend task 3 using the <a href="../STUDY-GUIDE.md.html#open-transfer-tasks">open transfer routine</a>.</p>
 <h3 id="mechanism-and-diagnostic-reasoning">Mechanism and diagnostic reasoning<a class="heading-anchor" href="#mechanism-and-diagnostic-reasoning" aria-label="Link to this section">#</a></h3>
 <p>Arithmetic has representation limits. An <code>int</code> has a finite range, so mathematically valid addition may overflow. C# supports checked contexts that reject integral overflow and unchecked contexts that wrap. Neither behavior should be chosen accidentally for business quantities. Floating-point arithmetic instead approximates most decimal fractions, so equality of independently calculated doubles often needs a scale-aware tolerance.</p>
 <p>Use <code>decimal</code> when a decimal representation matches the domain, such as many monetary calculations. Decimal arithmetic still has finite precision and range. Specify rounding at a business boundary, including its midpoint rule, rather than rounding every intermediate operation. Keep currency and units explicit: a bare number does not identify what it measures.</p>
 <p><code>checked(expression)</code> asks for integral overflow detection in that expression. The <code>m</code> suffix selects decimal, while <code>0.1</code> defaults to double. <code>Math.Round(amount, 2, MidpointRounding.ToEven)</code> records both precision and tie policy.</p>
 <p><code>checked</code> does not turn floating-point arithmetic into exact decimal arithmetic. Rounding before aggregation can produce a different total than rounding afterward. Never use an unexplained tolerance to hide a unit mismatch.</p>
 <h3 id="review-before-continuing">Review before continuing<a class="heading-anchor" href="#review-before-continuing" aria-label="Link to this section">#</a></h3>
-<p>Run the reference and confirm that it prints <code>csharp-003: passed</code>, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.</p></article>
+<p>Run the reference and confirm it prints <code>csharp-003: passed</code>, then rerun the guide&#x27;s counterexample.</p></article>
   </main>
 </body>
 </html>

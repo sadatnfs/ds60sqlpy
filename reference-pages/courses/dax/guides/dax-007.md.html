@@ -194,10 +194,10 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/dax/guides/dax-007.md</code></p>
     </header>
     <article class="document"><h2 id="dax-007-scalar-types-operators-and-measurement-units">dax-007: Scalar types, operators and measurement units<a class="heading-anchor" href="#dax-007-scalar-types-operators-and-measurement-units" aria-label="Link to this section">#</a></h2>
-<p><strong>Stage 2: Values, BLANK and reusable measures.</strong> Level: beginner. Read the mechanisms, trace the worked cases and retain your own draft. <strong>Direct prerequisites:</strong> <code>dax-005</code></p>
+<p><strong>Stage 2: Values, BLANK and reusable measures.</strong> Level: beginner. <strong>Direct prerequisites:</strong> <code>dax-005</code></p>
 <h3 id="how-to-use-this-offline-lesson">How to use this offline lesson<a class="heading-anchor" href="#how-to-use-this-offline-lesson" aria-label="Link to this section">#</a></h3>
-<p>This is an offline DAX editing lesson. No DAX compiler, semantic-model engine, Power BI account or network connection is required. Worked tables describe the named reference and model, not execution of your draft. Save, compare and export source; do not interpret a comparison or completion marker as a passed program run.</p>
-<p>Open the <a href="../lessons/dax-007.dax.html">starter</a>. Compare the <a href="../solutions/dax-007_reference.dax.html">named reference</a> and <a href="../solutions/dax-007_solutions.md.html">reasoning</a> when ready. The <a href="../models/retail/model.json.html">model specification</a> identifies every fixture table, column type, key and relationship. The <a href="../models/README.md.html">fixture handbook</a> displays the original data and explains each table grain.</p>
+<p>The starter keeps one numeric column and one text label side by side, with the label set to the word Draft. Predict the type of each column before filling them, and decide which one a report should sort and total. The <a href="../STUDY-GUIDE.md.html#offline-study-boundary">offline study boundary</a> explains what a worked table can show.</p>
+<p>Files: <a href="../lessons/dax-007.dax.html">starter</a>, <a href="../solutions/dax-007_reference.dax.html">reference</a> and <a href="../solutions/dax-007_solutions.md.html">reasoning</a>.</p>
 <h3 id="the-question-and-the-mechanism">The question and the mechanism<a class="heading-anchor" href="#the-question-and-the-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Keep a numeric measure numeric and explain why its display label is a separate concern.</p>
 <p>DAX expressions have types, even when a report formats several types to look similar. A whole number can represent a count, a decimal can represent an amount or ratio, a Boolean expresses a logical condition, and a date identifies a calendar value. Text that looks like a number is still text until an explicit or implicit conversion occurs. Do not design a model around hoping that every consumer makes the conversion you intended.</p>
@@ -207,14 +207,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>ROW can hold differently typed columns in one result. DATE constructs a date from year, month and day. DIVIDE returns the ratio of two numeric expressions. FORMAT&#x27;s explicit en-US locale makes this example&#x27;s decimal and currency characters reproducible; it still returns text. The classroom records an ISO date string in the worked table rather than pretending to emulate a report&#x27;s regional display settings.</p>
 <p>Concepts to explain in your own words: <strong>scalar</strong>, <strong>number</strong>, <strong>text</strong>, <strong>Boolean</strong>, <strong>date</strong>, <strong>format</strong>.</p>
 <h3 id="model-and-context-contract">Model and context contract<a class="heading-anchor" href="#model-and-context-contract" aria-label="Link to this section">#</a></h3>
-<p>The ordinary star follows Product → Sales, Customer → Sales and Date → Sales through OrderDate. The ShipDate relationship is inactive unless a case explicitly activates it. Filters flow from the one side to the many side. Additional analytical tables have only the relationships declared in their named model; a similar column name does not create a relationship.</p>
+<p>Types matter more than tables in this lesson. Quantity is a whole-number count of 17 units, NetAmount is a USD amount totaling 187, and the derived ratio of 11 USD per unit carries both units. The literal date 2025-01-02 is a calendar value inside the complete Date range. See the <a href="../models/retail/model.json.html">model specification</a> and the <a href="../STUDY-GUIDE.md.html#the-retail-star">shared star rules</a>.</p>
 <pre class="highlighted-code"><code class="language-text">Product (one)  --&gt; Sales (many) &lt;-- Customer (one)
                        ^
                        | active OrderDate
                     Date (one)
                        | inactive ShipDate
                        +------&gt; Sales</code></pre>
-<p>All amounts in ordinary Sales are USD after the line discount, before tax and returns. The Date fixture is complete for 2024 and 2025; a short result table is a selected slice, not the whole calendar. JSON <code>null</code> in the worked-results sidecar means DAX BLANK, not the text &quot;null&quot;.</p>
 <h3 id="worked-cases">Worked cases<a class="heading-anchor" href="#worked-cases" aria-label="Link to this section">#</a></h3>
 <p>The following query-local declarations are shared by these cases. They do not create persisted measures in this classroom.</p>
 <pre class="highlighted-code"><code class="language-dax"><span class="syntax-keyword">DEFINE</span>
@@ -265,8 +264,10 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 </tbody></table></div>
 <p>Replacing every revenue measure with FORMAT can break numerical behavior even when the report looks correct. Numeric measures and display policy should remain separate.</p>
 <p>Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table.</p>
+<h3 id="a-misconception-to-test">A misconception to test<a class="heading-anchor" href="#a-misconception-to-test" aria-label="Link to this section">#</a></h3>
+<p>Because a formatted measure looks right on a card, learners sometimes wrap every revenue measure in FORMAT so the dollar sign always appears. The result $187.00 is then text. Text sorts character by character, so $36.00 lands after $187.00 because 3 follows 1, and text cannot be summed or divided by quantity. Keep NetRevenue numeric and apply the currency display through a format string on the measure or the visual, leaving the number available for arithmetic.</p>
 <h3 id="practice-prediction-construction-and-diagnosis">Practice: prediction, construction and diagnosis<a class="heading-anchor" href="#practice-prediction-construction-and-diagnosis" aria-label="Link to this section">#</a></h3>
-<p>Retain your formula or written reasoning, the stated context, contributing rows or values, and a conclusion with its unit. These notes are your own study record; they do not show that a formula ran.</p>
+<p>Record each answer as the <a href="../STUDY-GUIDE.md.html#practice-routine">practice routine</a> describes.</p>
 <h4 id="exercise-1-predict">Exercise 1: Predict<a class="heading-anchor" href="#exercise-1-predict" aria-label="Link to this section">#</a></h4>
 <p>Predict 2 + 3 <em> 4 and (2 + 3) </em> 4.</p>
 <h4 id="exercise-2-change-one-condition">Exercise 2: Change one condition<a class="heading-anchor" href="#exercise-2-change-one-condition" aria-label="Link to this section">#</a></h4>
@@ -289,14 +290,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>A string&#x27;s appearance does not declare seconds, minutes or a clock time.</li>
 </ol>
 <h3 id="self-check-and-next-step">Self-check and next step<a class="heading-anchor" href="#self-check-and-next-step" aria-label="Link to this section">#</a></h3>
-<p>Explain one changed result without quoting the formula alone. Identify which rows, filters, relationship or evaluation scope changed, then construct a counterexample to a plausible wrong interpretation. Keep your draft separate from the supplied reference. A small correct derivation does not certify performance, model security or broad expertise.</p>
+<p>Compute revenue per unit for the Notebook (67 USD over 7 units) and for the Mug, and state each result with its unit. Then explain why formatting both ratios with a percent sign would mislead even though the digits stay the same. The <a href="../STUDY-GUIDE.md.html#self-check-routine">self-check routine</a> applies too.</p>
 <p>Continue to <a href="dax-008.md.html">dax-008</a> when its prerequisites make sense, or revisit this stage from the <a href="../README.md.html">course map</a>.</p>
 <h3 id="official-references-and-evidence-limits">Official references and evidence limits<a class="heading-anchor" href="#official-references-and-evidence-limits" aria-label="Link to this section">#</a></h3>
 <ul>
 <li><a href="https://learn.microsoft.com/en-us/dax/dax-operator-reference">DAX operator reference</a></li>
 <li><a href="https://learn.microsoft.com/en-us/dax/format-function-dax">DAX function: FORMAT</a></li>
 </ul>
-<p>Documentation was reviewed for this original course on 2026-10-25. Version-sensitive features have explicit notes. Source/model checks and independent fixture arithmetic are not a DAX parser, compiler, semantic engine, real RLS test or performance measurement.</p>
+<p>Review date and evidence limits: <a href="../STUDY-GUIDE.md.html#references-and-evidence-limits">study guide</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for dax-007. Read its guide and the named model.
 Review my draft and prediction. Ask me to enumerate the relevant rows and context.

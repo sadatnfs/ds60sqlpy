@@ -1,6 +1,6 @@
 # r-039: reference reasoning
 
-Use the [complete reference](r-039_reference.R) with the guide's declared inputs and runtime. Every worked example is also a standalone script.
+Run the [complete reference](r-039_reference.R) under the [run rules](../STUDY-GUIDE.md#run-a-chapter).
 
 ## Why the implementation has this shape
 
@@ -96,4 +96,6 @@ Use diagnostics and held-out evaluation after defining the statistical question.
 
 ## What the checks establish
 
-The reference makes 5 `stopifnot()` checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.
+The assertions confirm that the additive design has columns `(Intercept)`, `x` and `groupB`, that the interaction design adds `x:groupB` and has full rank, that a design with a redundant column loses rank, and that no unobserved level C appears. They do not show that any coefficient is meaningful; full rank only means each column can be estimated separately.
+
+The reference makes 5 `stopifnot()` checks; see [what a passing run proves](../STUDY-GUIDE.md#what-a-passing-run-proves).

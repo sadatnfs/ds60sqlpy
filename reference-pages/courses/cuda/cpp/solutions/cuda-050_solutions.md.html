@@ -196,7 +196,6 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <article class="document"><h2 id="cuda-050-explanatory-solutions">cuda-050: explanatory solutions<a class="heading-anchor" href="#cuda-050-explanatory-solutions" aria-label="Link to this section">#</a></h2>
 <h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
 <p>Parallel random-number generation needs a reproducible mapping from logical samples to independent streams or subsequences. Giving every thread identical initial state can repeat the same draws and destroy effective sample size. A seed identifies an experiment, but the generator, stream partition and sample-count mapping are also part of it. Monte Carlo error is sampling uncertainty, distinct from floating-point error or a bug. Increasing independent sample count usually reduces standard error at a square-root rate. RNG initialization can be expensive, so report setup separately from sustained generation when evaluating performance.</p>
-<p>The separate <a href="../references/cuda-050_cpu.py.html">CPU reference</a> checks the chapter&#x27;s bounded model. It does not execute CUDA or establish GPU timing. Compare after attempting the worksheet or explicitly choosing to reveal solutions.</p>
 <h3 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h3>
 <p>Estimate the integral of x squared on <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">[</mo><mn>0</mn><mo separator="true">,</mo><mn>1</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">[0,1]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">[</span><span class="mord">0</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">1</span><span class="mclose">]</span></span></span></span> by averaging squared uniform samples. The exact answer is one third. A fixed CPU seed produces a reproducible educational estimate; its closeness is not evidence about cuRAND or independent GPU streams. Keep a broad deterministic sanity check separate from statistical claims.</p>
 <p><strong>Approach:</strong> Average squared uniform draws from a fixed CPU seed to estimate the integral of x squared on [0, 1].</p>
@@ -233,11 +232,16 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Why it is correct:</strong> These fields let someone rerun and judge the estimate.</p>
 <p><strong>A plausible wrong approach:</strong> Recording only the final number makes the run impossible to reproduce or assess.</p>
 <p><strong>How to verify:</strong> Rerun from the receipt and confirm the same estimate.</p>
+<h3 id="self-check-answers">Self-check answers<a class="heading-anchor" href="#self-check-answers" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>How much does standard error shrink with 100 times more independent samples?</strong> By a factor of 10, the square root of 100.</li>
+<li><strong>What is the exact value targeted in worked example 1?</strong> One third, the integral of x squared from 0 to 1.</li>
+<li><strong>What should a Monte Carlo receipt record besides the seed?</strong> The generator, stream partition, sample count and the estimate with its standard error.</li>
+</ol>
 <h3 id="numerical-reference-and-its-limits">Numerical reference and its limits<a class="heading-anchor" href="#numerical-reference-and-its-limits" aria-label="Link to this section">#</a></h3>
-<p>The complete CPU model is <a href="../references/cuda-050_cpu.py.html">here</a>. Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It does not claim CUDA execution, concurrency safety or a performance measurement.</p>
+<p>The <a href="../references/cuda-050_cpu.py.html">CPU reference</a> reproduces worked example 1 and prints <code>{&#x27;CPU_integral_estimate&#x27;: 0.3322235056104499, &#x27;exact_integral&#x27;: 0.3333333333333333, &#x27;duplicated_stream_unique_draws&#x27;: 2}</code>.</p>
 <h3 id="transfer-review">Transfer review<a class="heading-anchor" href="#transfer-review" aria-label="Link to this section">#</a></h3>
-<p>Record generator/version, seed, subsequence assignment, sample count, estimator, uncertainty calculation and numeric precision.</p>
-<p>A complete explanation must name its inputs, the unchanged mathematical contract, the changed boundary or resource condition, and the evidence still needed on actual hardware. Preserve a CPU baseline even after a GPU path becomes available.</p></article>
+<p>Record generator/version, seed, subsequence assignment, sample count, estimator, uncertainty calculation and numeric precision.</p></article>
   </main>
 </body>
 </html>

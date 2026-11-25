@@ -1,6 +1,8 @@
 # c-010: explained solutions
 
-Compare after an attempt or explicit reveal. The complete executable reference, `c-010_solution.c`, implements all six cases, from the "use named fields" case to the "transfer invalid-tag diagnosis" case, in one `main.c`.
+`c-010_solution.c` assembles the "use named fields" case through the "transfer invalid-tag diagnosis" case in one `main.c`.
+
+Compare only after an attempt: [Compare and transfer](../STUDY-GUIDE.md#compare-and-transfer).
 
 ## Mechanism and assumptions
 
@@ -10,7 +12,7 @@ struct Point names a type unless a typedef adds a shorter alias. A designated in
 
 ## Exercise 1: Use named fields: change one input
 
-Copy worked example 1, the "use named fields" case, into a scratch pad and change `struct Point p = {.x = 2, .y = 3};` to `struct Point p = {.x = 3, .y = 3};`. Before running, predict which CHECK fails and which value it sees in place of the worked result (the field sum is 5); then run it and restore the original line.
+In worked example 1, change `struct Point p = {.x = 2, .y = 3};` to `struct Point p = {.x = 3, .y = 3};`. Predict which value the CHECK on `p.x + p.y == 5` sees, then run and restore.
 
 The unchanged code is worked example 1:
 
@@ -19,7 +21,7 @@ struct Point p = {.x = 2, .y = 3};
 CHECK(p.x + p.y == 5);
 ```
 
-**Expected:** With `struct Point p = {.x = 3, .y = 3};` the run stops with `Check failed` at the CHECK on `p.x + p.y == 5`, because the "use named fields" case no longer shows that the field sum is 5. Restoring `struct Point p = {.x = 2, .y = 3};` brings that observation back.
+**Expected:** `Check failed` at `p.x + p.y == 5`; restoring `struct Point p = {.x = 2, .y = 3};` passes again.
 
 Designated initialization preserves field meaning even if declaration order changes.
 
@@ -33,7 +35,7 @@ Designated initialization preserves field meaning even if declaration order chan
 
 ## Exercise 2: Copy scalar fields: debug a regression
 
-A regression changed one token in worked example 2, the "copy scalar fields" case, so one line now reads `struct Point a = {3, 3};`. Run the example with that line, use the failing CHECK to find why the original x stays 2 no longer holds and repair the line without changing the CHECK.
+Worked example 2 now has a line reading `struct Point a = {3, 3};`. Repair it so that the original x stays 2 again.
 
 The unchanged code is worked example 2:
 
@@ -44,7 +46,7 @@ b.x = 9;
 CHECK(a.x == 2 && b.x == 9);
 ```
 
-**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `a.x == 2 && b.x == 9`. Once the line reads `struct Point a = {2, 3};` again, the "copy scalar fields" case again shows that the original x stays 2.
+**Expected:** `Check failed` at `a.x == 2 && b.x == 9` until the line reads `struct Point a = {2, 3};` again.
 
 Scalar fields are copied into independent struct storage. Pointer fields would still designate their original targets.
 

@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/javascript-typescript/solutions/js-046_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="js-046-explanatory-solutions">js-046: explanatory solutions<a class="heading-anchor" href="#js-046-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit reveal. The separate .js reference is a complete offline browser program. These explanations discuss the six practice tasks; a visual resemblance alone is not a data or behavior check.</p>
+<p>Compare after your own attempt; the separate <code>.js</code> file is the complete reference program.</p>
 <h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
 <p>A scale maps values from a data domain to a visual range. A linear scale preserves proportional differences: equal changes in input produce equal changes in output. The domain is expressed in data units, while the range can be pixels or SVG coordinates. Mixing those spaces is a common source of invisible or misleading marks.</p>
 <p>A vertical quantitative scale often has range <code>[bottom, top]</code> because SVG y increases downward. This reversal makes larger values appear higher. A band scale maps categories to discrete bands and provides a bandwidth for bars. The category order is an explicit design decision.</p>
@@ -218,7 +218,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Expected:</strong> Reject or explicitly extend the domain rather than emit undefined geometry.</p>
 <h3 id="exercise-6-defend-a-scale-choice-for-signed-residuals">Exercise 6: Defend a scale choice for signed residuals.<a class="heading-anchor" href="#exercise-6-defend-a-scale-choice-for-signed-residuals" aria-label="Link to this section">#</a></h3>
 <p>Scale design should expose the analytical reference point. A zero baseline has a different role for signed residual position than for positive bar length. Residuals around 0 need a domain such as [-5, 5] with a visible zero line; starting at the minimum hides the sign. Confirm the zero line sits at the scale&#x27;s midpoint.</p>
-<p><strong>Expected:</strong> A diverging domain with visible zero and explicit units.</p></article>
+<p><strong>Expected:</strong> A diverging domain with visible zero and explicit units.</p>
+<h3 id="after-comparison">After comparison<a class="heading-anchor" href="#after-comparison" aria-label="Link to this section">#</a></h3>
+<p>Replace the linear scale with <code>scaleLog</code> for values from 1 to 10,000 and decide what to do with zero, which a log scale cannot map. Draw both versions of the chart and write one sentence on when each scale misleads.</p></article>
   </main>
 </body>
 </html>

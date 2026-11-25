@@ -32,11 +32,9 @@ Do not print a fully rendered production model containing secrets into a public 
 
 ## How to use this lesson
 
-The classroom displays this guide and saves your worksheet, `courses/docker/lessons/docker-026.md`. Its Run button does not control your Docker engine. Docker engine access is powerful host access, so the classroom deliberately receives no engine socket. Work through the supplied examples without starting anything, then use the optional host lab only in your own disposable project. Reading a command, parsing YAML and actually running the project are different forms of evidence.
+The classroom saves `courses/docker/lessons/docker-026.md` and holds no engine socket ([host-lab setup](../STUDY-GUIDE.md#host-lab-setup)).
 
-Use Bash in Linux, macOS Terminal, or Ubuntu under WSL 2 on Windows. The supported engine runs Linux containers. The maintained fixture is `courses/docker/fixtures/compose-lab/`; its README explains copying it into a new ignored learner directory, checking the engine, building locally with visible logs, and using the fixed project name `ds60-docker-study`. The fixture uses port 18080 on host loopback. Stop if that project name or port belongs to unrelated work; choose a new project name consistently in your own copy. Never paste a command against a remote Docker context simply because it is currently selected.
-
-For Dockerfile examples, create a file named `Dockerfile` in a scratch project. YAML snippets describe a fragment unless explicitly called a complete file. Text transcripts are synthetic illustrations, not claims about your machine. Do not substitute a real password, token or private registry into a checked-in example. **How to use the lessons** in the [subject README](../README.md) collects these rules in one place.
+**Host lab.** Work in a scratch copy of the fixture so the committed files stay unchanged. Create `compose.study.yaml` holding only `services:`, `app:`, `environment:` and `APP_MESSAGE: override from study file`, then render `docker compose -p ds60-docker-study -f compose.yaml -f compose.study.yaml config` and find the new message under `app`. Add a `ports:` entry of `"127.0.0.1:18081:8080"` to the same override and render again: the effective list now holds both 18080 and 18081, one after the other. Next compare `docker compose -p ds60-docker-study config --services`, which prints only `app`, with the same command after `--profile tools`, which prints `app` and `client`; `config --profiles` prints `tools`. None of these commands creates a container, network or volume, so deleting the scratch copy is the whole cleanup, and the rendered output is the record you keep.
 
 ## Worked example / walkthrough
 
@@ -62,7 +60,7 @@ docker compose -p ds60-docker-study -f compose.yaml -f compose.study.yaml config
 
 ## Six progressive exercises
 
-For each exercise, name the object involved and the phase of its lifetime before changing anything, then vary only the condition the task names. Exercises that ask you to predict, explain, compare or diagnose keep their answers in the solutions file; the others show the evidence to look for.
+Answer-type prompts keep their answers in the solutions file ([exercise rules](../STUDY-GUIDE.md#exercise-rules)).
 
 ### Exercise 1: Distinguish profiles and overrides.
 
@@ -96,13 +94,19 @@ For each exercise, name the object involved and the phase of its lifetime before
 
 Forgetting that Compose merges list fields such as `ports` instead of replacing them. Using profiles as a security boundary. Launching with a different file order than the one you reviewed.
 
-Exercise 4 is this chapter's boundary case: Diagnose an unexpected extra port after merging. Render the merged model with `docker compose config` and read the complete `ports` list for the service before assuming an override replaced it. Preserve the original failure and the exact changed field before retrying. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
+Exercise 4 is this chapter's boundary case: Diagnose an unexpected extra port after merging. Render the merged model with `docker compose config` and read the complete `ports` list for the service before assuming an override replaced it.
+
+Naming your override `compose.override.yaml` feels tidy, but Compose loads a file with exactly that name automatically whenever a command runs without `-f`. Every plain `docker compose up` in that directory then carries your study message and extra port, and the project you reviewed with explicit files is no longer the one people launch by habit. The symptom is a setting nobody passed on the command line. List `compose*.yaml` in the directory and render `docker compose config` with no flags to see what a bare command really uses. Keep study overrides under a name Compose does not pick up, such as `compose.study.yaml`, and pass them with `-f` so the choice is visible in every command you record.
+
+Never trade a safety control for a passing example ([safety rules](../STUDY-GUIDE.md#safety-rules)).
 
 ## Retrieval, transfer and next steps
 
-Close the explanations first. Predict the merged `ports` list when both Compose files declare a port for the same service. Then reconstruct worked example 2 (Review a combined model) with one different value, predict what changes, and name which of override file, merge rules, profiles and docker compose config the change touches.
+**Retrieval.** Predict the merged `ports` list when both Compose files declare a port for the same service.
 
-When a host session ends, run `docker compose -p ds60-docker-study down` from your fixture copy. It removes the project's containers and network but keeps named volumes; deleting a volume is a separate, deliberate reset described in the fixture README.
+**Transfer case.** A teammate adds `ports: []` to an override, expecting the app to run with no published port for a private test. What does the rendered model show, and how would you actually remove the mapping?
+
+Then run the [retrieval loop](../STUDY-GUIDE.md#retrieval-and-cleanup) and end any host session with its cleanup.
 
 ## Primary references
 

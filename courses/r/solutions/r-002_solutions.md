@@ -1,6 +1,6 @@
 # r-002: reference reasoning
 
-Use the [complete reference](r-002_reference.R) with the guide's declared inputs and runtime. Every worked example is also a standalone script.
+Run the [complete reference](r-002_reference.R) under the [run rules](../STUDY-GUIDE.md#run-a-chapter).
 
 ## Why the implementation has this shape
 
@@ -96,4 +96,6 @@ A tolerance should permit representation error, not an arbitrary change in the i
 
 ## What the checks establish
 
-The reference makes 6 `stopifnot()` checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.
+The assertions confirm that combining `1L` with 2.5 yields a double, that `"0017"` keeps four characters, that `19 %/% 5` is 3 with 4 left over, that `2L == 2` holds while `identical(2L, 2)` does not, and that `all.equal()` accepts 0.1 + 0.2 as 0.3 but rejects 0.31. They do not choose a tolerance for your own measurements; that remains a decision about the data.
+
+The reference makes 6 `stopifnot()` checks; see [what a passing run proves](../STUDY-GUIDE.md#what-a-passing-run-proves).

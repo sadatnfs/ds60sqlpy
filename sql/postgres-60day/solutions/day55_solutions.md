@@ -13,43 +13,23 @@ psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
   -f sql/postgres-60day/solutions/day55_solutions.sql
 ```
 
-`psql` prints each result/command tag in the terminal. Stop at the first
-unexpected `ERROR`; later output cannot repair an earlier failed invariant.
-Compare your own SQL, row grain, column names, row counts, `NULL` policy, and
-ordering with the explanation before comparing syntax.
+Everything here reads course tables only. Compare the 50 versus 56 count, the
+mask values and the top-five row counts before the revenue figures; the
+[solution routine](../../STUDY-GUIDE.md#read-a-solution) covers the rest.
 
 ## Clause-by-clause reading map
 
-The lesson's main concepts are ROLLUP, CUBE, GROUPING flag. Its worked-model focus is:
-Compare `ROLLUP(country, category)` with `CUBE(country, category)`. Both include detail, country subtotal, and grand total; `CUBE` also adds category-only subtotals. Use `GROUPING(country)` and `GROUPING(category)` to label each level, then reconcile the grand total with source line revenue.
+Read each query in the
+[logical clause order](../../STUDY-GUIDE.md#reading-any-query-in-logical-order).
+In this lesson the decisive clause is almost always `GROUP BY`: plain columns
+give one grain, `ROLLUP` gives a hierarchy of grains, `CUBE` gives every
+combination and `GROUPING SETS` lists them by hand. Whenever several grains
+share one result, look for the `GROUPING(...)` expression in the `SELECT` list
+that labels them, and check that the `ORDER BY` uses it.
 
-- Start at `FROM`/`JOIN` and state the intermediate row grain. Inspect join keys
-  before adding aggregates; a one-to-many join is allowed to multiply rows only
-  when the later contract accounts for it.
-- Apply `WHERE` to input rows, `GROUP BY` to form buckets, and `HAVING` to
-  completed groups. Window functions run over the surviving relation and
-  normally preserve its row count.
-- Read the `SELECT` list as the public result contract: keys establish grain,
-  measures state calculations, and aliases explain meaning. `ORDER BY` is the
-  only output-order guarantee; add a unique tie-breaker before `LIMIT`.
-- Trace every common table expression (CTE) as a temporary named relation.
-  Execute or inspect one stage at a time while debugging, but compare the final
-  result with an independent control rather than trusting stage names.
-- Keep SQL `NULL` as “missing/unknown/not applicable” until the metric contract
-  chooses another representation. Guard division with `NULLIF`; disclose
-  exclusions and distinguish zero from no row.
-- For DDL/DML, a command tag proves only that PostgreSQL accepted a statement.
-  Catalog checks, negative cases, row-count reconciliation, and the declared
-  transaction boundary prove behavior and cleanup.
-
-The exact final queries are not the only valid syntax. A join, subquery, CTE,
-window, or conditional aggregate can be an alternative when it preserves the
-same grain, `NULL` semantics, deterministic ordering, and safety. Prefer the
-form whose intermediate relations a reviewer can verify; optimize only after
-correctness is established with evidence.
-
-The two exercises compare `ROLLUP` and `CUBE`, then add order status to a
-country/category/product top-five drill-down. See
+The two worked exercises compare `ROLLUP` and `CUBE`, then add order status to
+a country/category/product top-five drill-down; Exercises 3 to 6 label levels,
+cap the drill-down at exactly five rows and protect real unknown members. See
 [`day55_solutions.sql`](day55_solutions.sql).
 
 ## Exercise 1: Compare row counts
@@ -108,13 +88,13 @@ is greater on this seed.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-55 Exercise 1, read from `orders`, `customers`, `order_items`, and `products`. Compute `rollup_row_count`, and `cube_row_count` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.
-- **Expected result/shape:** For sql-55 Exercise 1, expected output: one comparison row. `CUBE(country, category)` adds category-only subtotals that the hierarchical `ROLLUP(country, category)` omits, so its count is greater on this seed. The final columns are `rollup_row_count`, and `cube_row_count`.
-- **Independent verification:** For sql-55 Exercise 1, evaluate each of `rollup_row_count`, and `cube_row_count` in a separate control `SELECT` over `orders`, `customers`, `order_items`, and `products`; require one final row and compare every value. Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
-- **Intermediate relation check:** For sql-55 Exercise 1, run `line`, `rollup_rows`, and `cube_rows` one at a time. Record each CTE's row count and `order_id` uniqueness before the next stage uses it.
-- **Clause check:** For sql-55 Exercise 1, the solution actually uses `WITH`, `FROM`, `JOIN ... ON`, `GROUP BY`, and `SELECT`. Read only those operations: begin at `orders`, `customers`, `order_items`, and `products`, preserve exactly one summary row, and finish with `rollup_row_count`, and `cube_row_count`.
-- **Alternative/trade-off:** For sql-55 Exercise 1, the chosen form is justified by this lesson-specific rationale: Expected shape: one comparison row. Evaluate another form against the concrete expected result (one comparison row. `CUBE(country, category)` adds category-only subtotals that the hierarchical `ROLLUP(country, category)` omits, so its count is greater on this seed) and the verification above.
-- **Edge case:** Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
+- **Inputs/evidence:** For sql-55 Exercise 1, join `orders`, `customers`, `order_items`, and `products` into one revenue line per order item (13,085 lines carrying `country` and `category`), group those lines once with `ROLLUP (country, category)` and once with `CUBE (country, category)`, and count the rows each grouping produces.
+- **Expected result/shape:** For sql-55 Exercise 1, expected output: one row with `rollup_row_count` 50 and `cube_row_count` 56. Both share the 42 country and category detail rows, the 7 country subtotals, and the grand total; the 6 extra `CUBE` rows are the category-only subtotals. BR has no orders, so it appears in neither grouping.
+- **Independent verification:** For sql-55 Exercise 1, rebuild both counts from distinct values: 42 distinct (country, category) pairs plus 7 countries plus 1 total gives 50, and adding the 6 categories gives 56. In a rolled-back transaction, give BR customer 8 one order with a single Apparel line: both counts rise by 2 (52 and 58), one BR detail row and one BR subtotal, while the category-only subtotal count stays 6.
+- **Intermediate relation check:** Run `line` alone and confirm it has one row per order line, then run `rollup_rows` and `cube_rows` separately. On the course data they return 50 and 56 rows: 42 detail pairs, 7 country subtotals and 1 grand total in both, plus 6 category-only subtotals in the cube.
+- **Clause check:** The only difference between the two CTEs is `ROLLUP` versus `CUBE` in `GROUP BY`. The outer `SELECT` has no `FROM` of its own; two scalar subqueries each count one CTE, which is why the result is a single row with two columns.
+- **Alternative/trade-off:** `SELECT 'rollup', count(*) FROM rollup_rows UNION ALL SELECT 'cube', count(*) FROM cube_rows` gives the same numbers as two labeled rows. It is easier to extend to more variants, but it no longer matches the one-row, two-column contract.
+- **Edge case:** If a new country appeared with orders in only one category, the rollup would gain two rows (detail and country subtotal) and the cube would gain the same two, because its category subtotal already exists.
 
 ## Exercise 2: Status-aware top five
 
@@ -185,13 +165,13 @@ Expected grain: up to five rows per `(country, category, status)`.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-55 Exercise 2, read from `orders`, `customers`, `order_items`, and `products`. Build the answer toward `country`, `category`, `status`, `product_id`, `name`, `revenue`, and `product_rank`; keep `product_id` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-55 Exercise 2, expected output: up to five rows per `(country, category, status)`. The final columns are `country`, `category`, `status`, `product_id`, `name`, `revenue`, and `product_rank`. The final order is `country, category, status, product_rank`.
-- **Independent verification:** For sql-55 Exercise 2, project `product_id` plus the raw source columns from `orders`, `customers`, `order_items`, and `products` at each join stage; record row count and distinct `product_id`, then assert the final `country`, `category`, `status`, `product_id`, `name`, `revenue`, and `product_rank` values match those staged rows without unintended fanout or loss. Give two rows the same `country` value and different `product_rank` values; verify `country, category, status, product_rank` produces the intended rank and display order.
-- **Intermediate relation check:** For sql-55 Exercise 2, run `line`, `product_revenue`, and `ranked` one at a time. Record each CTE's row count and `product_id` uniqueness before the next stage uses it.
-- **Clause check:** For sql-55 Exercise 2, the solution actually uses `WITH`, `FROM`, `JOIN ... ON`, `WHERE`, `GROUP BY`, window `OVER`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `orders`, `customers`, `order_items`, and `products`, preserve one row per `product_id`, and finish with `country`, `category`, `status`, `product_id`, `name`, `revenue`, and `product_rank` ordered by `country, category, status, product_rank`.
-- **Alternative/trade-off:** For sql-55 Exercise 2, the chosen form is justified by this lesson-specific rationale: Expected grain: up to five rows per `(country, category, status)`. Evaluate another form against the concrete expected result (up to five rows per `(country, category, status)`) and the verification above.
-- **Edge case:** Give two rows the same `country` value and different `product_rank` values; verify `country, category, status, product_rank` produces the intended rank and display order.
+- **Inputs/evidence:** For sql-55 Exercise 2, sum line revenue (`unit_price * quantity * (1 - discount)`) per `country`, `category`, `status`, `product_id`, and `name` (7,566 product rows), then number the products inside each (country, category, status) group with `ROW_NUMBER()` ordered by `revenue DESC, product_id` and keep numbers 1 to 5.
+- **Expected result/shape:** For sql-55 Exercise 2, expected output: 1,050 rows, exactly five for each of the 210 (country, category, status) groups (7 countries, 6 categories, 5 statuses, each group holding 30 to 42 products), with columns `country`, `category`, `status`, `product_id`, `name`, `revenue` (rounded to 2 places), and `product_rank`. The final order is `country, category, status, product_rank`; the first group is AU, Apparel, `delivered`, led by product 241 at 793.36.
+- **Independent verification:** For sql-55 Exercise 2, check that AU, Apparel, `delivered` lists products 241, 223, 163, 121, and 97 (793.36 down to 727.36), with product 109 sixth at 651.77, and that no (country, category, status, `product_id`) repeats. In a rolled-back transaction, add a 150.00 line for product 109 to AU order 47 (delivered): product 109 moves to rank 1 at 801.77, product 97 drops out, and the group still returns five rows.
+- **Intermediate relation check:** `line` is at order-line grain; `product_revenue` must be unique on (country, category, status, product_id), which you can prove by comparing its `count(*)` with a `count(DISTINCT (country, category, status, product_id))`. `ranked` keeps that row count and only adds `product_rank`.
+- **Clause check:** `PARTITION BY country, category, status` restarts the numbering for each of the 210 groups, and `ORDER BY revenue DESC, product_id` breaks revenue ties by id. The outer `WHERE product_rank <= 5` then keeps at most five rows per group.
+- **Alternative/trade-off:** A `LATERAL` subquery with `ORDER BY revenue DESC, product_id LIMIT 5` per (country, category, status) gives the same rows. It reads naturally as "top five for each group" but needs a separate list of groups to drive it.
+- **Edge case:** A status group with fewer than five sold products would return fewer rows rather than padding; on this data all 210 groups are full, so the result has exactly 1,050 rows.
 
 ## Reasoning, safety, and pitfalls
 
@@ -210,13 +190,13 @@ subtotal, and grand total have stable numeric identities.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-55 Exercise 3, read from `orders`, `customers`, `order_items`, and `products`. Build the answer toward `country`, `category`, `revenue`, and `grouping_mask`; keep `country`, and `category` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-55 Exercise 3, expected output: one row per `country`, and `category`. The final columns are `country`, `category`, `revenue`, and `grouping_mask`. The final order is `grouping_mask, country, category`.
-- **Independent verification:** For sql-55 Exercise 3, independently aggregate `orders`, `customers`, `order_items`, and `products` by `country`, and `category`; require one output row for every distinct `country`, and `category` tuple and compare `revenue` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `revenue` for the existing `country`, and `category` tuple and verify the new tuple appears exactly once.
-- **Intermediate relation check:** For sql-55 Exercise 3, run `line` one at a time. Record each CTE's row count and `country`, and `category` uniqueness before the next stage uses it.
-- **Clause check:** For sql-55 Exercise 3, the solution actually uses `WITH`, `FROM`, `JOIN ... ON`, `GROUP BY`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `orders`, `customers`, `order_items`, and `products`, preserve one row per `country`, and `category`, and finish with `country`, `category`, `revenue`, and `grouping_mask` ordered by `grouping_mask, country, category`.
-- **Alternative/trade-off:** For sql-55 Exercise 3, the chosen form is justified by this lesson-specific rationale: PostgreSQL's `GROUPING(country, category)` returns a bit mask: detail, country subtotal, and grand total have stable numeric identities. Evaluate another form against the concrete expected result (one row per `country`, and `category`) and the verification above.
-- **Edge case:** Add one row to an existing group and one row for a new group; recompute `revenue` for the existing `country`, and `category` tuple and verify the new tuple appears exactly once.
+- **Inputs/evidence:** For sql-55 Exercise 3, first write down the grouping sets of `ROLLUP (country, category, month)` (4 sets, from full detail to the grand total) and of `CUBE` on the same columns (8 sets), then run `ROLLUP (country, category)` over the order-item revenue lines and expose `GROUPING (country, category)` as `grouping_mask`.
+- **Expected result/shape:** For sql-55 Exercise 3, expected output: 50 rows with columns `country`, `category`, `revenue`, and `grouping_mask`, ordered by `grouping_mask, country, category`: 42 detail rows with mask 0 (AU Apparel 54,277.4215), 7 country subtotals with mask 1 (AU 330,947.6960), and 1 grand total with mask 3 (2,355,647.1235). No row has mask 2, because `ROLLUP` never totals a category across countries.
+- **Independent verification:** For sql-55 Exercise 3, count the rows per mask (42, 7, 1) and confirm that the 7 mask 1 rows add up to the mask 3 total of 2,355,647.1235. In a rolled-back transaction, give BR customer 8 one order with a 20.00 Apparel line: the result grows to 52 rows (43 with mask 0, 8 with mask 1), and BR shows 20.0000 at both the detail and subtotal level.
+- **Intermediate relation check:** `line` has no `GROUP BY`; it is one row per order line with country, category and unrounded line revenue. Count it, then run the final query without `ORDER BY` and group its output by `grouping_mask`: you should see 42 rows with mask `0`, 7 with mask `1` and 1 with mask `3`, and the mask `0` rows for AU should add up to AU's mask `1` row of 330,947.70.
+- **Clause check:** `GROUPING(country, category)` reads the two arguments as bits, country first, so `1` means only category was rolled away and `3` means both were. `ROLLUP (country, category)` never drops country while keeping category, which is why mask `2` cannot appear.
+- **Alternative/trade-off:** Writing `GROUPING SETS ((country, category), (country), ())` produces the same 50 rows and makes the hierarchy explicit; `ROLLUP` is the shorter spelling of exactly that list.
+- **Edge case:** The grand total row (mask `3`, revenue 2355647.1235) must equal the sum of the 42 detail rows; if it does not, the line revenue was computed differently in the two places. Because `ORDER BY grouping_mask` comes first, the total is the last row, the reverse of Example 1, where `NULLS FIRST` put it on top.
 
 ## Exercise 4: Label levels from the bit mask
 
@@ -225,13 +205,13 @@ keeps machine-readable level identity beside human-readable text.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-55 Exercise 4, read from `orders`, `customers`, `order_items`, and `products`. Build the answer toward `level_id`, `level_name`, `country`, `category`, and `revenue`; keep `level_id` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-55 Exercise 4, expected output: one row per `level_id`. The final columns are `level_id`, `level_name`, `country`, `category`, and `revenue`. The final order is `level_id, country, category`.
-- **Independent verification:** For sql-55 Exercise 4, independently aggregate `orders`, `customers`, `order_items`, and `products` by `level_id`; require one output row for every distinct `level_id` tuple and compare `revenue` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `revenue` for the existing `level_id` tuple and verify the new tuple appears exactly once.
-- **Intermediate relation check:** For sql-55 Exercise 4, run `line` one at a time. Record each CTE's row count and `level_id` uniqueness before the next stage uses it.
-- **Clause check:** For sql-55 Exercise 4, the solution actually uses `WITH`, `FROM`, `JOIN ... ON`, `GROUP BY`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `orders`, `customers`, `order_items`, and `products`, preserve one row per `level_id`, and finish with `level_id`, `level_name`, `country`, `category`, and `revenue` ordered by `level_id, country, category`.
-- **Alternative/trade-off:** For sql-55 Exercise 4, the chosen form is justified by this lesson-specific rationale: The display label is derived from that mask, not from `column IS NULL`. Evaluate another form against the concrete expected result (one row per `level_id`) and the verification above.
-- **Edge case:** Add one row to an existing group and one row for a new group; recompute `revenue` for the existing `level_id` tuple and verify the new tuple appears exactly once.
+- **Inputs/evidence:** For sql-55 Exercise 4, group the same order-item revenue lines with `ROLLUP (country, category)` and return `GROUPING (country, category)` as `level_id`, plus a `CASE` on that same mask that maps 0, 1, and 3 to `level_name` values 'country/category detail', 'country subtotal', and 'grand total'.
+- **Expected result/shape:** For sql-55 Exercise 4, expected output: the same 50 rows as Exercise 3 with columns `level_id`, `level_name`, `country`, `category`, and `revenue`, ordered by `level_id, country, category`: 42 rows at level 0, 7 at level 1, and 1 at level 3, and no `NULL` `level_name`.
+- **Independent verification:** For sql-55 Exercise 4, count rows per `level_id` and `level_name` (42, 7, 1) and confirm each `level_id` maps to exactly one name. In a rolled-back transaction, run `ALTER TABLE products ALTER COLUMN category DROP NOT NULL` and set product 241's category to `NULL`: level 0 grows to 49 rows, 7 of them with a stored `NULL` category, and all 7 still say 'country/category detail' because the label reads the mask, not the column.
+- **Intermediate relation check:** Use the same `line` CTE as Exercise 3 (no payments, so no fan-out) and confirm the 50-row output carries only `level_id` values `0`, `1` and `3`. Then compare it row by row with Exercise 3: the country, category and revenue columns are identical, and only the two label columns at the front are new.
+- **Clause check:** The `CASE GROUPING (country, category)` expression maps each mask to a readable `level_name`, while `level_id` keeps the raw mask for code that filters or joins on it. Both come from `GROUPING`, not from testing `country IS NULL`, so a future customer with a stored `NULL` country could never be mislabeled as a subtotal.
+- **Alternative/trade-off:** A small `VALUES` lookup of (mask, name) joined on `level_id` would work too and keeps names in one place if several reports share them; the inline `CASE` is simpler for three levels.
+- **Edge case:** Switching the `GROUP BY` to `CUBE` would emit six mask `2` rows (category totals across all countries), and this `CASE` has no branch for them, so their `level_name` would be `NULL` and they would sort between the country subtotals and the grand total. Add a `WHEN 2` branch before changing the grouping.
 
 ## Exercise 5: Return exactly five products
 
@@ -240,13 +220,13 @@ limits every partition deterministically even when revenue ties.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-55 Exercise 5, read from `orders`, `customers`, `order_items`, and `products`. Build the answer toward `order_id`, `customer_id`, `order_date`, `status`, and `total_amount`; keep `order_id` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-55 Exercise 5, expected output: one row per `order_id`. The final columns are `order_id`, `customer_id`, `order_date`, `status`, and `total_amount`. The final order is `country, position`.
-- **Independent verification:** For sql-55 Exercise 5, project `order_id` plus the raw source columns from `orders`, `customers`, `order_items`, and `products` at each join stage; record row count and distinct `order_id`, then assert the final `order_id`, `customer_id`, `order_date`, `status`, and `total_amount` values match those staged rows without unintended fanout or loss. Add one row for which `(position <= 5)` is true and one for which it is false; verify only the matching `order_id` value is returned.
-- **Intermediate relation check:** For sql-55 Exercise 5, run `revenue`, and `ranked` one at a time. Record each CTE's row count and `order_id` uniqueness before the next stage uses it.
-- **Clause check:** For sql-55 Exercise 5, the solution actually uses `WITH`, `FROM`, `JOIN ... ON`, `WHERE`, `GROUP BY`, window `OVER`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `orders`, `customers`, `order_items`, and `products`, preserve one row per `order_id`, and finish with `order_id`, `customer_id`, `order_date`, `status`, and `total_amount` ordered by `country, position`.
-- **Alternative/trade-off:** For sql-55 Exercise 5, the chosen form is justified by this lesson-specific rationale: Revenue aggregates before ranking. Evaluate another form against the concrete expected result (one row per `order_id`) and the verification above.
-- **Edge case:** Add one row for which `(position <= 5)` is true and one for which it is false; verify only the matching `order_id` value is returned.
+- **Inputs/evidence:** For sql-55 Exercise 5, sum order-item revenue per `country`, `product_id`, and `name` (1,925 rows, 275 products in each of 7 countries), then number the products inside each country with `ROW_NUMBER()` ordered by `revenue DESC, product_id` as `position` and keep positions 1 to 5.
+- **Expected result/shape:** For sql-55 Exercise 5, expected output: 35 rows, one per country and `position` 1 to 5, with columns `country`, `product_id`, `name`, `revenue`, and `position`. The final order is `country, position`; AU starts with product 238 at 3,319.3310, followed by products 207, 251, 261, and 243 (2,692.5745).
+- **Independent verification:** For sql-55 Exercise 5, confirm that no (country, `product_id`) repeats and that AU product 233 sits sixth at 2,684.2590. In a rolled-back transaction, add a line for product 233 to AU order 46 with `unit_price` 166.31 and `discount` 0.95 (8.3155): products 233 and 243 tie at 2,692.5745, `RANK() <= 5` now returns 36 rows, and `ROW_NUMBER` still returns 35, giving position 5 to product 233 because it has the lower `product_id`.
+- **Intermediate relation check:** `revenue` holds one row per (country, product) and `ranked` adds `position` without changing that count. The final result has 35 rows, five for each of the seven countries with orders. The rows are products, not orders: the columns are `country`, `product_id`, `name`, `revenue` and `position`, and the check for duplicates is on (country, `product_id`).
+- **Clause check:** `ROW_NUMBER() OVER (PARTITION BY country ORDER BY revenue DESC, product_id)` gives every product a distinct position, so `WHERE position <= 5` can never return six rows even when two products tie on revenue.
+- **Alternative/trade-off:** `RANK()` with the same window would keep tied products together but may return more than five rows; choose it only if the report promises "all products at the top five revenue levels".
+- **Edge case:** If products 238 and 207 in AU had equal revenue, `ROW_NUMBER` would place 207 first because of the `product_id` tie-breaker, and the order would stay the same on every run.
 
 ## Exercise 6: Preserve unknown versus ALL
 
@@ -255,10 +235,10 @@ NULL/unknown member retains flag zero; ALL has flag one.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-55 Exercise 6, read from `customers`. Build the answer toward `display_country`, `is_generated_total`, and `customers`; keep `display_country` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-55 Exercise 6, expected output: one row per `display_country`. The final columns are `display_country`, `is_generated_total`, and `customers`. The final order is `is_generated_total, display_country`.
-- **Independent verification:** For sql-55 Exercise 6, independently aggregate `customers` by `display_country`; require one output row for every distinct `display_country` tuple and compare `is_generated_total`, and `customers` tuple by tuple. Repeat with `NULL` in `display_country`, and `is_generated_total` and state whether the row is kept, rejected, or classified.
-- **Intermediate relation check:** For sql-55 Exercise 6, confirm the groups are `display_country`; then check `is_generated_total, display_country` before applying the row cap.
-- **Clause check:** For sql-55 Exercise 6, the solution actually uses `FROM`, `GROUP BY`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `customers`, preserve one row per `display_country`, and finish with `display_country`, `is_generated_total`, and `customers` ordered by `is_generated_total, display_country`.
-- **Alternative/trade-off:** For sql-55 Exercise 6, the chosen form is justified by this lesson-specific rationale: The stored member label and generated-total flag are separate fields. Evaluate another form against the concrete expected result (one row per `display_country`) and the verification above.
-- **Edge case:** Repeat with `NULL` in `display_country`, and `is_generated_total` and state whether the row is kept, rejected, or classified.
+- **Inputs/evidence:** For sql-55 Exercise 6, read the 500 `customers` rows and group them with `GROUPING SETS ((country), ())`, returning `GROUPING (country)` as `is_generated_total` and a `display_country` that says 'ALL' only when that flag is 1 and '(unknown member)' for a stored `NULL` country.
+- **Expected result/shape:** For sql-55 Exercise 6, expected output: 9 rows with columns `display_country`, `is_generated_total`, and `customers`, ordered by `is_generated_total, display_country`: eight countries including BR (62 or 63 customers each, flag 0), then `ALL` with 500 and flag 1.
+- **Independent verification:** For sql-55 Exercise 6, compare each country row with `SELECT country, COUNT(*) FROM customers GROUP BY country` and confirm the eight counts add up to the `ALL` row. `country` is `NOT NULL` (default 'US'), so in a rolled-back transaction run `ALTER TABLE customers ALTER COLUMN country DROP NOT NULL` and insert one customer with a `NULL` country: the result has 10 rows, a '(unknown member)' row with 1 customer and flag 0, and `ALL` at 501.
+- **Intermediate relation check:** There is no CTE. Run `SELECT country, count(*) FROM customers GROUP BY country` and confirm eight countries of 62 or 63 customers each, which match the eight detail rows; the `ALL` row should be 500.
+- **Clause check:** `GROUPING SETS ((country), ())` asks for the per-country rows plus one total. The `CASE` tests `GROUPING (country) = 1` first, so only the generated total becomes `ALL`, and a stored `NULL` country would fall through to `COALESCE(country, '(unknown member)')`.
+- **Alternative/trade-off:** Two queries combined with `UNION ALL`, one grouped and one ungrouped, give the same rows, but you would have to add the `is_generated_total` flag by hand instead of reading it from `GROUPING`.
+- **Edge case:** The course customers have no `NULL` country, so `(unknown member)` does not appear today; the column is also `NOT NULL`, so in a transaction run `ALTER TABLE customers ALTER COLUMN country DROP NOT NULL`, insert one customer with `country = NULL`, and it shows up as its own `(unknown member)` detail row with 1 customer and `is_generated_total = 0`, while `ALL` becomes 501.

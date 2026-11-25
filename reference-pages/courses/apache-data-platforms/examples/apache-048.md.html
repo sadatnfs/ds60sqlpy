@@ -197,6 +197,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <pre class="highlighted-code"><code class="language-bash">bash run.sh checkpoint
 bash run.sh readback</code></pre>
 <p>The checkpoint route must observe completion before interruption, identify an actual restoration and reconcile all final IDs and state. Read the qualification ledger for the precise exercised topology.</p>
+<p>Inside <code>checkpoint</code>, the launcher submits the job, waits until the REST API reports at least one completed checkpoint, then stops and starts the single <code>taskmanager</code> container. The finishing step fails unless the job&#x27;s latest checkpoint record says it was restored. <code>readback</code> only lists saved receipts and requests; it submits nothing.</p>
 <p>For the independent real Kafka transaction observation, use its separately copied workshop after stopping this pack:</p>
 <pre class="highlighted-code"><code class="language-bash">bash run.sh stop</code></pre>
 <p>The Kafka project&#x27;s <code>check-transactions</code> result is not a Flink Kafka-sink receipt. The compatible connector/sink preparation and recovery boundary are documented separately; no package is fetched by opening this lesson.</p></article>

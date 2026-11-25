@@ -32,11 +32,9 @@ Rotate a credential by updating the controlled source and applying the appropria
 
 ## How to use this lesson
 
-The classroom displays this guide and saves your worksheet, `courses/docker/lessons/docker-040.md`. Its Run button does not control your Docker engine. Docker engine access is powerful host access, so the classroom deliberately receives no engine socket. Work through the supplied examples without starting anything, then use the optional host lab only in your own disposable project. Reading a command, parsing YAML and actually running the project are different forms of evidence.
+The classroom saves `courses/docker/lessons/docker-040.md` and holds no engine socket ([host-lab setup](../STUDY-GUIDE.md#host-lab-setup)).
 
-Use Bash in Linux, macOS Terminal, or Ubuntu under WSL 2 on Windows. The supported engine runs Linux containers. The maintained fixture is `courses/docker/fixtures/compose-lab/`; its README explains copying it into a new ignored learner directory, checking the engine, building locally with visible logs, and using the fixed project name `ds60-docker-study`. The fixture uses port 18080 on host loopback. Stop if that project name or port belongs to unrelated work; choose a new project name consistently in your own copy. Never paste a command against a remote Docker context simply because it is currently selected.
-
-For Dockerfile examples, create a file named `Dockerfile` in a scratch project. YAML snippets describe a fragment unless explicitly called a complete file. Text transcripts are synthetic illustrations, not claims about your machine. Do not substitute a real password, token or private registry into a checked-in example. **How to use the lessons** in the [subject README](../README.md) collects these rules in one place.
+**Host lab.** Rehearse a file secret in a scratch copy of the fixture. Write a throwaway value with `printf 'study-only-value' > demo-secret.txt`, and put the top-level `secrets:` block and the service grant from worked example 1 in a `compose.secret.yaml` override. Render `docker compose -p ds60-docker-study -f compose.yaml -f compose.secret.yaml config` and confirm that `app` lists `demo`. Start the app with both files and `up -d --wait`, then run `docker compose -p ds60-docker-study exec app python -c "from pathlib import Path; print(len(Path('/run/secrets/demo').read_text().strip()) > 0)"`, which prints `True` without revealing the value. Search `docker inspect` output for the app container for `study-only-value`: it is absent. Finish with a plain `up -d --wait` from the original file to recreate the app without the grant, then delete the override and the secret file.
 
 ## Worked example / walkthrough
 
@@ -72,7 +70,7 @@ print("demo input is present")
 
 ## Six progressive exercises
 
-For each exercise, name the object involved and the phase of its lifetime before changing anything, then vary only the condition the task names. Exercises that ask you to predict, explain, compare or diagnose keep their answers in the solutions file; the others show the evidence to look for.
+Answer-type prompts keep their answers in the solutions file ([exercise rules](../STUDY-GUIDE.md#exercise-rules)).
 
 ### Exercise 1: Compare build and runtime secrets.
 
@@ -106,13 +104,19 @@ For each exercise, name the object involved and the phase of its lifetime before
 
 Passing secrets as environment variables that appear in `docker inspect`. Declaring a secret but not granting it to the service. Rotating by restarting without revoking the old credential.
 
-Exercise 4 is this chapter's boundary case: Diagnose a secret declared but not granted to a service. Render the effective Compose model and read the service's `secrets` list before editing file permissions or adding a host mount. Preserve the original failure and the exact changed field before retrying. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
+Exercise 4 is this chapter's boundary case: Diagnose a secret declared but not granted to a service. Render the effective Compose model and read the service's `secrets` list before editing file permissions or adding a host mount.
+
+Tightening the secret file with `chmod 600` feels like the responsible step, and on a Linux host it breaks the service. Without Swarm, Compose bind-mounts a file secret into `/run/secrets` with its host owner and mode, so a file readable only by your account is unreadable for UID 10001 in the container. The validator then fails with `PermissionError`, which looks like a missing secret. Docker Desktop's file sharing can mask the problem, so a setup that works on a laptop fails on a server. Grant read access to the container's identity instead, for example group 10001 with mode 640, and run the validator to prove the service can read it.
+
+Never trade a safety control for a passing example ([safety rules](../STUDY-GUIDE.md#safety-rules)).
 
 ## Retrieval, transfer and next steps
 
-Close the explanations first. Recall how the validator proves the secret is present without printing it. Then reconstruct worked example 2 (Validate presence without disclosure) with one different value, predict what changes, and name which of runtime secret, secret file, /run/secrets and controlled disclosure the change touches.
+**Retrieval.** Recall how the validator proves the secret is present without printing it.
 
-When a host session ends, run `docker compose -p ds60-docker-study down` from your fixture copy. It removes the project's containers and network but keeps named volumes; deleting a volume is a separate, deliberate reset described in the fixture README.
+**Transfer case.** A teammate wants to bake a database password into the image with `ENV` so deployments need no extra files. What does that expose, and what would you propose instead?
+
+Then run the [retrieval loop](../STUDY-GUIDE.md#retrieval-and-cleanup) and end any host session with its cleanup.
 
 ## Primary references
 

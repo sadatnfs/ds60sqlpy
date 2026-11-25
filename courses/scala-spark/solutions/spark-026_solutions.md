@@ -1,6 +1,8 @@
 # spark-026: Explained paired reference solutions
 
-Read the [guide](../guides/spark-026.md) and attempt one language first. The [Scala reference](spark-026_solution.scala) and [PySpark reference](spark-026_solution.py) are complete single-file programs with explicit local sessions and finally-based stop. Each compares with literal expectations; matching two implementations alone would not rule out a shared mistake.
+Attempt the [guide](../guides/spark-026.md) exercises first.
+
+References: [Scala](spark-026_solution.scala), [PySpark](spark-026_solution.py).
 
 ## Exercises and reasoning
 
@@ -166,7 +168,7 @@ The population checks catch a normalizer that turns unknown input into empty tex
 
 Validate a result against the full golden sequence. Deliberately apply general lowercasing and default trimming without interior-whitespace collapse, and require rejection.
 
-**Expected:** The wrong implementation disagrees at least on IDs 4,5,6,9. Python additionally removes the preserved nonbreaking spaces at ID 8.
+**Expected:** The wrong implementation disagrees at least on IDs 4, 5, 6 and 9. Python additionally removes the preserved nonbreaking spaces at ID 8.
 
 ```scala
 def validateGolden(
@@ -189,6 +191,7 @@ The negative control proves that the fixture distinguishes the declared policy f
 
 ## Execution and interpretation
 
-Run the complete reference in its prepared fixed worker. Its first check (Implement the pure scalar rule precisely) is built inside the program, so opening the lesson fetches nothing; it expects: All 12 golden outputs, including `cafÉ`, `İi`, nonbreaking-space-wrapped `a` and unchanged decomposed e-plus-accent. The final success line prints only after every reference assertion passes.
+The references compare every implementation with the same twelve literal outputs: the scalar rule, the built-in expression and the UDF must each equal the golden list, and both Spark versions must declare `normalized` as a string. The plan check requires `BatchEvalPython` in the Python UDF plan, and neither `BatchEvalPython` nor `ArrowEvalPython` in the built-in plan. For both frames, the categories must be `(empty, 2)`, `(missing, 1)` and `(text, 9)`, the text `null` must belong only to ID 12, and a NULL result must belong only to ID 1.
 
-Local plan, partition and resource evidence does not establish cluster-scale performance; session cleanup is explicit.
+The golden validator accepts the built-in result and must reject the `strip().lower()` alternative, whose mismatch IDs must include 4, 5, 6, 8 and 9 in Python (4, 5, 6 and 9 in Scala). The program prints both plans and the mismatch IDs, then `spark-026: six PySpark reference contracts passed; Spark=` and the version, with Scala printing its own line. The plan evidence shows where Python runs for this rule on this version; it is not a timing comparison between built-ins and UDFs.
+

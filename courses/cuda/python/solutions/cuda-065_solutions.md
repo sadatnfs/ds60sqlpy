@@ -1,6 +1,6 @@
 # cuda-065: explained solutions
 
-These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.
+Compare with your [worksheet](../lessons/cuda-065.md) attempt.
 
 ## Exercise 1: Trace the five events
 
@@ -74,8 +74,16 @@ Report CPU reference rather than GPU success.
 
 **How to verify.** Run the reference on a CPU-only host and confirm the printed label starts with `CPU reference`. A correct fallback report contains the backend name, the reason, and the value, and a reviewer can see that the GPU stage was not attempted.
 
+## Self-check answers
+
+1. **Why can a statement that creates a CuPy result return before the answer exists?** The host only enqueues the kernel. The Python object holding shape and dtype exists immediately, while the device arithmetic finishes later; a synchronization or a transfer is what proves completion.
+
+2. **Which events in the five-event GPU sum belong to the host?** Constructing the input list and retrieving the scalar into a Python integer. The copy and the reduction happen in between, and the final value must land in host memory before Python can use it.
+
+3. **Why can printing a device scalar change what you were trying to observe?** Printing forces a device-to-host copy that waits for the producing kernel. That inserts a synchronization point, so timing or overlap measured around the print no longer reflects the unobserved program.
+
 ## Reference observation
 
 CPU reference: 6; every ledger event is CPU.
 
-The reference file is `courses/cuda/python/references/cuda-065_cpu.py`. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.
+Asserted by `courses/cuda/python/references/cuda-065_cpu.py`.

@@ -1,10 +1,17 @@
 # cuda-088: Input pipelines and a hungry GPU
 
-**Route:** CUDA Python and machine learning. **Stage:** intermediate. **Prerequisites:** `cuda-071`, `cuda-087`. Allow several sessions when the hardware experiment is new; the chapter is not a deadline.
+**Route:** CUDA Python and machine learning. **Stage:** intermediate. **Prerequisites:** `cuda-071`, `cuda-087`.
 
-## What you will be able to explain
+Pacing, evidence labels and platform rules: [CUDA study guide](../../STUDY-GUIDE.md).
 
-By the end, you can **compute serial time**, **explain pinned versus ordinary host storage**, and **choose bounded worker experiments** with evidence. Start with the two worked cases, then use the editable CPU model to make the quantities concrete.
+## Learning objectives
+
+- Compute serial time.
+- Compute an ideal bottleneck bound.
+- Budget the queue.
+- Explain pinned versus ordinary host storage.
+- Compare resident-data diagnostic.
+- Choose bounded worker experiments.
 
 ## Mechanism and vocabulary
 
@@ -31,9 +38,13 @@ A serial pipeline spends 6 ms preparing and 4 ms computing each batch, totaling 
 
 Prefetching three batches of 8 MiB requires at least 24 MiB for queued payloads, excluding decoder state, copies and framework overhead.
 
-## Portable executable model
+## How to run the CPU model
 
-The **CPU reference model** variant runs this bounded worked example using `python-core`. It uses only the Python standard library, small synthetic values and no network. Its purpose is to expose the arithmetic or contract behind the chapter. The separate reference includes assertions for the stated observations.
+Edit the copy; the [reference](../references/cuda-088_cpu.py) adds assertions.
+
+```sh
+python courses/cuda/python/lessons/cuda-088_cpu.py
+```
 
 ```python
 prepare, compute = 6, 4
@@ -56,8 +67,6 @@ print("CPU pipeline model:", serial, ideal, queued)
 | `ideal` | `6` |
 | `queued` | `25165824` |
 
-Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.
-
 ## Equal framework lanes
 
 ### PyTorch
@@ -68,83 +77,71 @@ Use a bounded DataLoader with num_workers=0 for the tiny baseline. Compare delib
 
 Build a finite tf.data pipeline with explicit batch and bounded prefetch. Limit the private thread pool in the teaching program and inspect preprocessing versus device work.
 
-Choose either lane first, then compare the other using identical mathematical inputs. Framework-specific shape, mode and optimizer rules must be checked separately. Both use offline synthetic examples; no model hub or dataset download is triggered.
+Lane rules: [framework labs](../../STUDY-GUIDE.md#python-gpu-and-framework-labs).
 
 ## Executable framework practice
 
-The variant chooser offers **PyTorch on CPU**, **TensorFlow on CPU**, and separate **NVIDIA CUDA** versions. CPU versions force CPU placement. CUDA versions require the named GPU profile and refuse to silently fall back. Each complete program uses the same tiny deterministic objective, bounded tensors and local synthetic data. Read its source before running; a framework pass establishes only that variant and environment.
-
-The checkpoint demonstration is in-memory. It teaches what state must be saved; it does not export a durable model artifact or preserve an in-flight device context. Advanced custom-op, distributed and engine-building projects remain separately prepared external workflows.
+Run the **PyTorch** and **TensorFlow** variants on CPU first; [lab rules](../../STUDY-GUIDE.md#python-gpu-and-framework-labs).
 
 ## Practice and transfer
+
+Record each attempt in the [worksheet](../lessons/cuda-088.md) before opening hints.
 
 ### Exercise 1: Compute serial time
 
 **Trap to avoid:** Reporting the 4 ms GPU compute time as the step time ignores the 6 ms the GPU spends idle waiting for input.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 2: Compute an ideal bottleneck bound
 
 **Trap to avoid:** Claiming overlap reduces the step to 4 ms assumes the input stage becomes free. Only a faster or more parallel preparation stage can move the bound below 6 ms.
-
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 3: Budget the queue
 
 **Trap to avoid:** Budgeting one batch because only one is used at a time ignores that all queued batches are resident at once.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 4: Explain pinned versus ordinary host storage
 
 **Trap to avoid:** Pinning every buffer by default can starve the host and slow the whole machine.
-
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 5: Compare resident-data diagnostic
 
 **Trap to avoid:** Reporting the resident-data speed as production throughput ignores that real training must load new data every step.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 6: Choose bounded worker experiments
 
 **Trap to avoid:** Raising all settings to their maximum at once may exhaust host memory or CPU cores and still hide which change helped.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ## Progressive hints
 
-Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.
+Hint *k* belongs to exercise *k*; open one at a time.
 
-1. Start from worked example 1 and mark the quantities needed for the task "Compute serial time".
-2. Change one assumption in worked example 2 while preserving the declared contract: compute an ideal bottleneck bound.
-3. Trace the CPU program's variables before adding hardware behavior: budget the queue.
-4. Draw producers, consumers and the exact operation boundary for the task "Explain pinned versus ordinary host storage".
-5. Separate what the small fixture establishes from what the real runtime must show: compare resident-data diagnostic.
-6. Write a counterexample to an overbroad claim before you choose bounded worker experiments.
+1. Add the preparation time and the compute time for one batch.
+2. Once stages overlap, find the slowest stage, because it sets the steady-state interval.
+3. Multiply the payload of one batch by the number of batches waiting in the queue.
+4. Ask what page-locked host memory changes for transfers and what it costs the host.
+5. Ask what a resident-tensor run removes from the pipeline and what it therefore cannot measure.
+6. Change one worker or queue setting per run and keep an upper bound on each.
 
-## Common mistakes and self-review
+## Common mistakes and self-check
 
-Confusing a correct tiny example with a general implementation is the central review risk. For this chapter, challenge the assumption in worked example 2, then ask whether your change preserves the mechanism described above. If you change dtype, layout, ordering, batch size or backend, update the acceptance contract rather than silently reusing the old observation. Explain an unexpected result before trying random configuration changes.
+A common mistake is blaming the model kernel when the GPU is idle because the next batch is not ready. Another is assuming more workers or a deeper prefetch queue always helps; once the bottleneck stops parallelizing, they only add memory and I/O pressure. Fix both by timing complete steps, checking whether preparation or computation is the slowest stage, and varying one bounded worker or queue setting at a time, shutting workers down cleanly afterward.
 
-Keep a small evidence table with columns **claim**, **input**, **expected observation**, **actual observation** and **limit**. For the first claim use `Compute serial time`. For the final claim use `Choose bounded worker experiments`. An unperformed GPU or cluster experiment remains pending even when the CPU model is correct.
+**Misconception:** Feeding the model synthetic tensors that already live on the device shows the speed the real pipeline will reach. **Correction:** Resident synthetic data removes decoding, transforms and transfers, so it measures only the compute side. Use it to bound what the model could do, then time the real pipeline and compare the two.
 
-## Platform and evidence contract
+**Evidence limit:** The reference computes a 10 ms serial step, a 6 ms ideal steady state and 25165824 queued bytes from given stage times. Real overlap, decoder cost and framework overhead must be measured with the actual pipeline.
 
-The reading worksheet and CPU reference model work through the ordinary Linux Docker classroom on macOS, Linux and Windows using WSL 2. They do not require an NVIDIA GPU. Their results are labeled CPU models or semantic oracles, not simulated hardware performance.
+1. Why is ideal overlap 6 ms per batch rather than 4 ms?
+2. What does a prefetch queue cost?
+3. Why bound and clean up workers in a small lesson?
 
-Real CUDA work needs supported NVIDIA hardware, a compatible host driver and an explicitly prepared GPU runtime. An Apple GPU does not execute CUDA kernels. PyTorch MPS on a supported native Mac, ROCm on supported AMD hardware, or other vendor backends can provide separate accelerator learning routes; they need their own package and operation qualification and are not CUDA evidence. The ordinary Linux Docker classroom does not expose native Mac MPS automatically.
-
-Do not download packages, models or data by opening this lesson. Do not attach an engine socket, ambient cluster credentials or an arbitrary remote endpoint. A CPU pass, imported package, successful compilation, real GPU result and measured performance are distinct observations. Record the actual backend, data shape/dtype, source revision, versions and pending checks. A saved completion marker records learning progress, not hardware certification.
+Answers: [self-check answers](../solutions/cuda-088_solutions.md#self-check-answers).
 
 ## Primary references
 
 - [PyTorch CUDA semantics](https://docs.pytorch.org/docs/2.9/notes/cuda.html)
 - [TensorFlow GPU guide](https://www.tensorflow.org/guide/gpu)
 
-Use the version-matched documentation of your prepared environment. These references describe interfaces and supported boundaries; the chapter's synthetic examples and CPU models are original teaching material.
+Full lists: [documentation and sources](../../STUDY-GUIDE.md#documentation-and-sources).
 
 ## Ask an AI tutor about this lesson
 

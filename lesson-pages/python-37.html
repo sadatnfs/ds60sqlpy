@@ -454,16 +454,7 @@ alphas <span class="syntax-operator">=</span> np<span class="syntax-operator">.<
     <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">f</span><span class="syntax-string">&quot;</span><span class="syntax-string">{</span>alpha<span class="syntax-string">=:</span><span class="syntax-string">.4f</span><span class="syntax-string">}</span><span class="syntax-string"> </span><span class="syntax-string">{</span>mean_r2<span class="syntax-string">=:</span><span class="syntax-string">.3f</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></code></pre>
 <p>A stronger penalty usually increases bias and decreases variance, but the validation curve is empirical. Select <code>alpha</code> using training folds rather than the final test set.</p>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
-<p><strong>Primary browser route:</strong> run <code>./classroom</code> from the repository root and choose <strong>Python and data science</strong> on <code>/classroom</code>. Open this lesson in the shared workspace, read its capability notice, and use its supported coding or reading workflow. The <a href="../reference-pages/docs/classroom-experience.md.html">classroom guide</a> explains saved work, runtimes and switching subjects.</p>
-<p><strong>Optional native notebook/editor route:</strong> the instructions below describe separately prepared host tools. They are useful alternatives, not prerequisites for opening this lesson in the Docker classroom.</p>
-<ol>
-<li>Open the Day 37 learner notebook from this guide&#x27;s <strong>Next step</strong> section in VS Code or JupyterLab.</li>
-<li>Select the <code>Python (ds60sqlpy)</code> kernel. Start at the top and use <strong>Run All</strong> only after making the written predictions; every added worked example is bounded and offline after bootstrap.</li>
-<li>Keep experiments in new scratch cells. Do not edit the official solution while attempting the numbered practice.</li>
-<li>Restart the kernel and run from the first cell before calling the lesson complete. A clean run catches hidden state and stale variables.</li>
-</ol>
-<p>Linux, macOS, or Ubuntu in Windows WSL 2:</p>
-<pre class="highlighted-code"><code class="language-bash">.venv/bin/python -m jupyter lab</code></pre>
+<p>Open <code>python-37</code> in the classroom, or <code>python/ds-60day/notebooks/day37_regularization_linear_models.ipynb</code> on a host; the <a href="../reference-pages/python/STUDY-GUIDE.md.html">Python study guide</a> explains both.</p>
 <h4 id="guide--concept-deep-dive-regularization-strength-coefficient-shrinkage-sparsity-and-stability">Concept deep dive: regularization strength, coefficient shrinkage, sparsity, and stability<a class="heading-anchor" href="#guide--concept-deep-dive-regularization-strength-coefficient-shrinkage-sparsity-and-stability" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--the-mental-model">The mental model<a class="heading-anchor" href="#guide--the-mental-model" aria-label="Link to this section">#</a></h5>
 <p>Linear models minimize a data-fitting loss. Regularization adds a cost for coefficient size: Ridge uses squared coefficients (L2), Lasso uses absolute coefficients (L1), and Elastic Net combines them. Increasing <code>alpha</code> gives the penalty more influence, usually increasing bias while reducing variance.</p>
@@ -475,7 +466,6 @@ alphas <span class="syntax-operator">=</span> np<span class="syntax-operator">.<
 <li><strong><code>model.coef_</code>:</strong> contains coefficients in transformed feature space; inspect magnitude and stability alongside validation error.</li>
 </ul>
 <h5 id="guide--focused-example-a-trace-ridge-shrinkage-as-alpha-grows">Focused example A: trace Ridge shrinkage as alpha grows<a class="heading-anchor" href="#guide--focused-example-a-trace-ridge-shrinkage-as-alpha-grows" aria-label="Link to this section">#</a></h5>
-<p>Before running the example, predict the shape, type, or direction of the result. Write the prediction down so that a surprise becomes evidence rather than something to overlook.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
 <span class="syntax-keyword">from</span> sklearn.datasets <span class="syntax-keyword">import</span> make_regression
 <span class="syntax-keyword">from</span> sklearn.linear_model <span class="syntax-keyword">import</span> Ridge
@@ -557,7 +547,6 @@ Xs <span class="syntax-operator">=</span> StandardScaler<span class="syntax-punc
 </ol>
 <h5 id="guide--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#guide--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
 <p>Connect regularization strength to coefficient geometry, validation, and feature scaling. Sparse or stable coefficients are model behaviors, not causal truths.</p>
-<p>Predict or plan before you run code. Use the hint only after an honest attempt, and record the evidence that would prove your result correct.</p>
 <ol start="3">
 <li><strong>Prediction:</strong> Predict the coefficient and training-error behavior of Ridge as alpha moves from nearly zero to an extremely large value. Identify what happens to an unpenalized intercept. <strong>Progressive hint:</strong> Larger alpha increases shrinkage and bias; most standard estimators exclude the intercept from the penalty.</li>
 </ol>
@@ -623,7 +612,7 @@ Xs <span class="syntax-operator">=</span> StandardScaler<span class="syntax-punc
 <li>Continue to <a href="python-38.html#guide">Day 38; Trees and Random Forests</a>.</li>
 </ul>
 <h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
-<p>The lesson is complete without an AI assistant. If you want optional coaching, copy this prompt into the AI tutor while the repository root is open:</p>
+<p>The lesson is complete without AI. For optional coaching, copy this prompt with the repository root open:</p>
 <pre class="highlighted-code"><code class="language-text">Tutor me through `python-37` (Day 37: Regularization and Linear Models).
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
@@ -929,7 +918,7 @@ s <span class="syntax-operator">=</span> cross_val_score<span class="syntax-punc
 </ul>
 <hr>
 <h4 id="solution-1--solution-reasoning-lens">Solution reasoning lens<a class="heading-anchor" href="#solution-1--solution-reasoning-lens" aria-label="Link to this section">#</a></h4>
-<p>A strong solution is not merely code that produces one plausible output. It establishes a chain from input contract to operation to verification:</p>
+<p>Each decision below links an input contract to an operation and its evidence:</p>
 <ol>
 <li><strong><code>Pipeline([(&#x27;scale&#x27;, StandardScaler()), (&#x27;model&#x27;, Ridge(...))])</code>:</strong> learns scaling inside each training boundary before applying the penalty.</li>
 <li><strong><code>alpha</code>:</strong> controls penalty strength; compare it on a logarithmic scale with cross-validation.</li>
@@ -941,25 +930,20 @@ s <span class="syntax-operator">=</span> cross_val_score<span class="syntax-punc
 <p><strong>Trade-off:</strong> Sparsity improves compactness but can make selection unstable; Ridge keeps all features but controls their combined magnitude.</p>
 <p><strong>Edge case to test:</strong> Perfect collinearity, constant features, an excessively large alpha, or too few optimizer iterations can hide useful signal or prevent convergence.</p>
 <p><strong>Evidence of correctness:</strong> Keep scaling inside the pipeline, report fold metrics and convergence state, compare coefficient norms/nonzero counts, and repeat selection across resamples.</p>
-<p>When comparing your attempt with the reference, explain which of these decisions your code made explicitly. If the reference makes a different choice, compare the contracts and evidence before deciding that one version is universally better.</p>
 <h4 id="solution-1--exercise-by-exercise-reasoning-map">Exercise-by-exercise reasoning map<a class="heading-anchor" href="#solution-1--exercise-by-exercise-reasoning-map" aria-label="Link to this section">#</a></h4>
-<p>This map connects every learner prompt to a reasoning path. Read the explanation before copying code: the goal is to understand the assumptions, the evidence that validates the result, and the edge cases that can make an apparently correct implementation fail.</p>
 <h5 id="solution-1--exercise-1-original-lesson-practice">Exercise 1: Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Sweep <code>alpha</code> values and plot validation scores for Ridge and Lasso.</p>
 <p><strong>How to reason about it:</strong> Use a logarithmic alpha grid because meaningful penalty strengths span orders of magnitude. Reuse folds, plot uncertainty, and include an unregularized or very-weak-penalty baseline for context.</p>
-<p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
 <p><strong>Verify:</strong> Evaluate Ridge and Lasso over one declared logarithmic alpha grid with identical folds; save a labeled validation-score curve, print the selected alpha/mean/std for each model, and leave the final test set untouched.</p>
 <h5 id="solution-1--exercise-2-original-lesson-practice">Exercise 2: Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-2-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Inspect fitted coefficients and compare their sparsity. The separate solution also demonstrates Elastic Net as a useful extension.</p>
 <p><strong>How to reason about it:</strong> L1 can set coefficients exactly to zero; L2 usually shrinks all of them. Compare coefficients only after identical scaling and remember that correlated predictors can exchange weight.</p>
-<p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
 <p><strong>Verify:</strong> Print a feature-aligned coefficient table for Ridge and Lasso, define the near-zero tolerance used for sparsity, and report each nonzero count plus validation metric from the same scaled pipeline.</p>
 <h5 id="solution-1--exercise-3-prediction">Exercise 3: Prediction<a class="heading-anchor" href="#solution-1--exercise-3-prediction" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Predict the coefficient and training-error behavior of Ridge as alpha moves from nearly zero to an extremely large value. Identify what happens to an unpenalized intercept.</p>
 <p><strong>Reasoning before implementation:</strong> Larger alpha increases shrinkage and bias; most standard estimators exclude the intercept from the penalty.</p>
 <p>As alpha approaches zero, Ridge approaches ordinary least squares when that solution is well defined. As alpha becomes very large, slope coefficients move toward zero and training error generally rises. The intercept remains available to represent the target mean when the estimator does not penalize it.</p>
 <p>Validation error can have a U shape: moderate shrinkage may reduce variance, while excessive shrinkage underfits. Confirm the estimator&#x27;s intercept policy rather than assuming every implementation uses the same objective.</p>
-<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
 <p><strong>Verify:</strong> Prediction; print Ridge coefficients, intercept, and training error for alpha near 0, 1, and 1e6; verify slopes shrink toward zero, the unpenalized intercept remains free, and training error does not improve as the penalty dominates.</p>
 <h5 id="solution-1--exercise-4-elastic-net-implementation">Exercise 4: Elastic Net implementation<a class="heading-anchor" href="#solution-1--exercise-4-elastic-net-implementation" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Build a scaled ElasticNetCV pipeline, state what alpha and l1_ratio control, and inspect both validation behavior and coefficient sparsity.</p>
@@ -985,21 +969,18 @@ elastic <span class="syntax-operator">=</span> Pipeline<span class="syntax-punct
     <span class="syntax-punctuation">]</span>
 <span class="syntax-punctuation">)</span></code></pre>
 <p>Fit only on training data, then report the selected parameters, held-out error, and near-zero coefficient count. Selection stability across folds matters more than presenting zeros as automatic feature discovery.</p>
-<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
 <p><strong>Verify:</strong> Elastic Net implementation; print ElasticNetCV selected alpha/l1_ratio, every validation score summary, coefficient table, and nonzero count under a declared tolerance; assert scaling is inside the fitted pipeline.</p>
 <h5 id="solution-1--exercise-5-scaling-bug">Exercise 5: Scaling bug<a class="heading-anchor" href="#solution-1--exercise-5-scaling-bug" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Fit Lasso to one feature measured in dollars and another measured in millions of dollars. Explain why the penalty treats them unfairly without scaling and repair the comparison.</p>
 <p><strong>Reasoning before implementation:</strong> The L1 penalty operates on coefficient magnitude; rescaling a feature changes the coefficient needed for the same prediction.</p>
 <p>Without scaling, equivalent predictive effects can require coefficients with very different numeric magnitudes, so the penalty is not comparable across features. Place <code>StandardScaler</code> inside the pipeline before Lasso and evaluate the complete pipeline in each fold.</p>
 <p>If a sparse matrix is used, choose a scaler compatible with sparsity (often <code>with_mean=False</code>) rather than densifying unexpectedly. For final interpretation, translate standardized coefficients back carefully or explain their standardized unit.</p>
-<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
 <p><strong>Verify:</strong> Scaling bug; fit the same Lasso problem before/after scaling, print feature scales and original-unit coefficients, and show the scaled pipeline removes unit-dependent penalty unfairness while producing finite validation metrics.</p>
 <h5 id="solution-1--exercise-6-stability-investigation">Exercise 6: Stability investigation<a class="heading-anchor" href="#solution-1--exercise-6-stability-investigation" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Create two highly correlated predictors, refit Lasso across several bootstrap samples, and compare selected features with Ridge predictions.</p>
 <p><strong>Reasoning before implementation:</strong> Lasso may alternate which correlated feature receives weight; Ridge often distributes weight while predictions remain similar.</p>
 <p>Record coefficient vectors and held-out predictions for every resample. Selection frequency exposes instability that one fitted coefficient table hides. If two interchangeable variables are selected 55% and 45% of the time, claiming that only one “matters” is not supported.</p>
 <p>Elastic Net can encourage grouped behavior, and domain-driven feature grouping can improve interpretation. Always separate predictive usefulness from causal importance.</p>
-<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
 <p><strong>Verify:</strong> Stability investigation; over declared bootstrap seeds, print Lasso selected-feature indicators/frequencies and Ridge prediction variability; report the predictor correlation and show whether Lasso selection swaps while Ridge predictions remain comparatively stable.</p></div>
       </section>
 

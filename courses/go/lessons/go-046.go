@@ -3,11 +3,11 @@ package main
 import "fmt"
 
 func main() {
-	// Exercise 1: Accept a valid range: change one input: Copy worked example 1 into a scratch pad and change `d := admit("r1", 3, 5, false)` to `d := admit("r2", 3, 5, false)`. Before running, predict which check fails and which value it now sees; then run it and restore the original line.
-	// Expected: The changed run panics with `allow` because `d.Allowed && d.UID == "r1"` no longer holds. Restoring the original line brings back the worked observation: the decision allows the request.
+	// Exercise 1: Accept a valid range: change one input: Copy worked example 1, change `d := admit("r1", 3, 5, false)` to `d := admit("r2", 3, 5, false)` and predict the failure before running; then restore the line.
+	// Expected: The edited run panics with `allow` because `d.Allowed && d.UID == "r1"` no longer holds.
 
-	// Exercise 2: Reject a negative value: diagnose an edited check: A careless edit changed the check in worked example 2 so that it reads `check(!d.Allowed && d.Reason == "", "negative")`. Run worked example 2 with that line, explain why the edited check now fails for the same program state, and restore it.
-	// Expected: Before the repair the program panics with `negative`; after it the line reads `check(!d.Allowed && d.Reason != "", "negative")` again and the decision denies it with a reason.
+	// Exercise 2: Reject a negative value: diagnose an edited check: A careless edit rewrote the check in worked example 2 as `check(!d.Allowed && d.Reason == "", "negative")`. Explain the failure, then restore it.
+	// Expected: The defective run panics with `negative`; after restoring `check(!d.Allowed && d.Reason != "", "negative")`, the decision denies it with a reason.
 
 	// Exercise 3: Check the exact upper boundary: Validate counts 5 and 6 against maximum 5.
 	// Expected: Five is allowed and six is denied.

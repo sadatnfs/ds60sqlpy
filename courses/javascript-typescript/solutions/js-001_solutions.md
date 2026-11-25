@@ -1,6 +1,6 @@
 # js-001: explanatory solutions
 
-Use these answers after an attempt or an explicit reveal. The reference uses the same literal fixtures as the guide and keeps the exercises in separate scopes. A successful run checks these examples; explaining a changed input is a separate learning goal.
+Open these after your own attempt; each exercise runs in its own scope in the reference.
 
 ## Mechanism review
 
@@ -20,7 +20,7 @@ An import statement loads a declared module binding. The node: prefix identifies
 
 ## Exercise 1: Inspect the actual host: predict an edited check
 
-Task: Copy Example A into a scratch `main.mjs` and change `assert.equal(Number(process.versions.node.split('.')[0]), 24);` to `assert.equal(Number(process.versions.node.split('.')[1]), 24);` inside its check. Before running it, predict whether the check still passes and explain why; then restore it.
+Task: In a scratch copy of Example A, change `assert.equal(Number(process.versions.node.split('.')[0]), 24);` to `assert.equal(Number(process.versions.node.split('.')[1]), 24);` inside its check. Does the check still pass?
 
 The version check verifies the actual process rather than trusting a file extension. The prepared profile is the supported baseline for later host APIs.
 
@@ -31,13 +31,13 @@ assert.equal(Number(process.versions.node.split('.')[0]), 24);
 assert.equal(process.release.name, 'node');
 ```
 
-**Expected:** The changed run fails with an `AssertionError` at `assert.equal(Number(process.versions.node.split('.')[1]), 24);`. Restoring `assert.equal(Number(process.versions.node.split('.')[0]), 24);` brings back: major version 24; process.release.name is node.
+**Expected:** The edited run fails with an `AssertionError` at `assert.equal(Number(process.versions.node.split('.')[1]), 24);`. Restoring `assert.equal(Number(process.versions.node.split('.')[0]), 24);` brings back: major version 24; process.release.name is node.
 
-**Verify:** Compare your written prediction with the reported `AssertionError`, including its actual and expected values, and explain why the edited check rejects the values that `assert.equal(Number(process.versions.node.split('.')[0]), 24)` accepts. After restoring the line, the program prints its `{"checks":1,"status":"passed"}` receipt again.
+**Verify:** Compare the reported actual and expected values with your prediction, then restore `assert.equal(Number(process.versions.node.split('.')[0]), 24);`.
 
 ## Exercise 2: Distinguish browser globals: diagnose an edited check
 
-Task: A careless edit changed a check in Example B so that it reads `assert.equal(typeof window, 'undefined!');`. Run Example B with that line, explain why the edited check now fails for the same program state, and restore it.
+Task: Example B's check was edited to read `assert.equal(typeof window, 'undefined!');`. Run it, explain the failure and restore the original.
 
 A browser DOM lesson cannot be validated by a Node run that never had a document. Later browser chapters use separate real HTML fixtures.
 
@@ -50,7 +50,7 @@ assert.equal(typeof window, 'undefined');
 
 **Expected:** Before the repair the run fails with an `AssertionError` at `assert.equal(typeof window, 'undefined!');`. Restoring `assert.equal(typeof window, 'undefined');` brings back: both undefined.
 
-**Verify:** Keep the failing and the repaired runs. Explain why the edited check rejects the same program state that `assert.equal(typeof window, 'undefined')` accepts.
+**Verify:** Keep the failing and repaired runs and name the first value that differs between them.
 
 ## Exercise 3: Use language arithmetic independently of host APIs
 
@@ -66,7 +66,7 @@ assert.notEqual(total, '5');
 
 **Expected:** number 5; not strictly equal to string 5.
 
-**Verify:** Keep a check equivalent to `assert.equal(total, 5)`. As a control, change `const total = 2 + 3;` to `const total = 2 - 3;`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
+**Verify:** Keep `assert.equal(total, 5)`. Control: changing `const total = 2 + 3;` to `const total = 2 - 3;` must make that check fail; then restore it.
 
 ## Exercise 4: Inspect module identity
 
@@ -81,7 +81,7 @@ assert.ok(import.meta.url.endsWith('.mjs'));
 
 **Expected:** a file URL ending in .mjs in the classroom.
 
-**Verify:** Keep a check equivalent to `assert.ok(import.meta.url.endsWith('.mjs'))`. As a control, change `assert.ok(import.meta.url.endsWith('.mjs'));` to `assert.ok(import.meta.url.endsWith('.mjs!'));` inside it: the run must fail with an `AssertionError`, which shows the check can fail. Restore it.
+**Verify:** Keep `assert.ok(import.meta.url.endsWith('.mjs'))`. Control: editing it to `assert.ok(import.meta.url.endsWith('.mjs!'));` must make the check fail; then restore it.
 
 ## Exercise 5: Observe strict module function calls
 
@@ -98,7 +98,7 @@ assert.equal(receiver(), undefined);
 
 **Expected:** this is undefined.
 
-**Verify:** Keep a check equivalent to `assert.equal(receiver(), undefined)` and confirm that the reference still passes. Then name an input that would make it fail and explain which value changes.
+**Verify:** Keep the check `assert.equal(receiver(), undefined)`; name an input that would make it fail and the value that changes.
 
 ## Exercise 6: Await a real Promise result
 
@@ -115,8 +115,8 @@ assert.equal(value, 7);
 
 **Expected:** observed value 7 after await.
 
-**Verify:** Keep a check equivalent to `assert.equal(value, 7)`. As a control, change `const pending = Promise.resolve(7);` to `const pending = Promise.resolve(8);`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
+**Verify:** Keep `assert.equal(value, 7)`. Control: changing `const pending = Promise.resolve(7);` to `const pending = Promise.resolve(8);` must make that check fail; then restore it.
 
 ## After comparison
 
-Return to your saved implementation and repeat a case with different values. Keep compiler diagnostics, process output and browser observations separate. Do not suppress a failing assertion or use a type assertion to declare an unvalidated value safe. Resource-owning examples must finish cleanup even when work fails. Describe each result with its actual host and fixture scope rather than as production acceptance.
+Fresh case: predict what `typeof globalThis.setTimeout` and `typeof globalThis.structuredClone` report in Node 24, then decide whether either belongs to ECMAScript itself. Both are host APIs, even though Node and browsers each provide them. ([After comparing](../STUDY-GUIDE.md#after-comparing-with-the-solution).)

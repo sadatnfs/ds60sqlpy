@@ -4,18 +4,15 @@
 
 Intermediate; about 110 minutes, plus any optional hardware experiment. Direct prerequisites: `cuda-014`, `cuda-016`
 
-The order supports learning at your own pace. Reading and CPU reasoning remain
-available when NVIDIA hardware is absent. Advanced hardware features need their
-own capability checks and are not prerequisites for opening this chapter.
+Pacing, evidence labels and platform rules for every chapter are in the [CUDA study guide](../../STUDY-GUIDE.md).
 
 ## Learning objectives
 
 Trace producer and consumer threads through each block barrier and verify correct tail behavior.
 
-Work through *Shared memory and block synchronization* with the concrete cases below. Finish with this evidence:
-correct boundary behavior and a synchronization explanation naming producer and consumer threads. Distinguish an algorithmic
-calculation, a compiled artifact and an actual device observation when explaining
-what your work establishes.
+**Scope:** Cooperative loads, visibility, barriers, race conditions and divergent barrier hazards.
+
+**Evidence to produce:** Correct boundary behavior and a synchronization explanation naming producer and consumer threads.
 
 ## Purpose, vocabulary and mental model
 
@@ -30,24 +27,15 @@ Shared memory lets threads in one block communicate through a common scratch arr
 
 ## How to run and study this lesson
 
-Use the saved reading worksheet in `/classroom`; the reading pad does not execute
-CUDA. For the bounded calculation, select **CPU model (Python)**, whose
-answer-free starter supplies the literal fixtures and task contract. The
-[CUDA C++ study workflow](../README.md) covers platforms, optional GPU
-compilation and evidence labels. In a prepared Python environment you can also
-run the separate [CPU reference](../references/cuda-017_cpu.py) from the
-repository root:
+Trace worked example 1 by hand, then run the [CPU reference](../references/cuda-017_cpu.py) from the repository root:
 
 ```sh
 python courses/cuda/cpp/references/cuda-017_cpu.py
 ```
 
-Its assertions check the stated numerical result or model invariant; console
-text is evidence of this CPU model only, not of CUDA execution.
-
 ## CUDA C++ kernel listing
 
-The kernel applies this chapter's reversal pattern to block-sized tiles. Each block loads its tile into shared memory, every thread reaches one barrier, and only then does any thread read a value another thread wrote. Tail threads load 0 instead of returning, so barrier participation stays uniform; with four values one block returns [12, 9, 6, 3]. Read it as CUDA C++ source; the classroom reading pad does not compile or run it.
+The kernel applies this chapter's reversal pattern to block-sized tiles. Each block loads its tile into shared memory, every thread reaches one barrier, and only then does any thread read a value another thread wrote. Tail threads load 0 instead of returning, so barrier participation stays uniform; with four values one block returns [12, 9, 6, 3].
 
 ```cpp
 constexpr int BLOCK = 256;
@@ -71,9 +59,7 @@ __global__ void reverse_tiles(const int *in, int *out, int n) {
 
 Four threads load \([3,6,9,12]\) into a shared tile, synchronize, then thread t reads tile[3-t]. The reversed output is \([12,9,6,3]\). Without the barrier, a consumer could read before another thread loads its value. An apparent success on one execution is not a synchronization proof.
 
-The complete CPU model below intentionally models only the named arithmetic,
-layout, dependency or capability decision. It does not model GPU scheduling,
-caches, instruction timing or device memory visibility.
+**Why:** The barrier guarantees every load completes before any thread reads another's slot.
 
 ```python
 tile = [3, 6, 9, 12]
@@ -85,41 +71,37 @@ assert sum(partial) == 18
 print({"reversal": output, "neutralized_tail_sum": sum(partial)})
 ```
 
-**Expected observation:** Every assertion succeeds. A representative CPU output is:
+**Expected observation:** every assertion succeeds, and the CPU model prints:
 
 ```text
 {'reversal': [12, 9, 6, 3], 'neutralized_tail_sum': 18}
 ```
 
-Integers, shapes and ordering must match exactly; only assertions with an explicit
-tolerance accept small floating-point differences. A printed duration is a model
-output, not a measured GPU benchmark.
+**Check:** The reference asserts the reversal [12, 9, 6, 3]; run racecheck on a GPU for evidence.
 
 ## Worked example 2: change a meaningful condition
 
 For a three-element tail in a four-thread block, lane three loads a neutral zero and still participates in the barrier. Only valid lanes store output. A conditional `if (i<n) { load; barrier; }` can violate the barrier contract when some block threads skip it.
 
-Before applying this example to your own program, write down which inputs are
-read, which result is produced, and the condition that makes the comparison
-valid. Keep the original case as a regression check when changing a boundary.
+**Why:** Every thread in the block must reach __syncthreads, and zero adds nothing to the sum.
+
+**Check:** The reference asserts the neutralized sum is 18 for [3, 6, 9, 0].
 
 ## Six progressive exercises
 
-Exercises 1 and 2 are guided reconstructions of the worked examples; exercises
-3-6 change an input, diagnose a defect, test a boundary and transfer the idea.
-For each one, keep the calculation, output, diagram or failure policy you
-produce so another reader can compare it with the worked cases. If the hint is
-not enough, reread the mechanism paragraph and the bounded CPU assertion.
-
 ### Exercise 1
 
-Predict and trace the first worked example before running its CPU reference. Write every intermediate quantity that leads to the stated result, including units or ownership where applicable.
+Reconstruct worked example 1 on paper before running its CPU reference. Load [3, 6, 9, 12] into the tile, synchronize, then read tile[3 - t].
+
+**Trap to avoid:** Dropping the barrier because one test run gave [12, 9, 6, 3] trusts luck over a guarantee.
 
 **Hint:** Start with the literal input and intermediate quantities in worked example 1.
 
 ### Exercise 2
 
-Reconstruct the second worked example without copying its conclusion. Identify the changed input or condition, show the resulting calculation or dependency, and explain why it differs from the first example.
+Rework worked example 2 without copying its conclusion. Load zero for lane three, have all four threads reach the barrier, store only valid lanes.
+
+**Trap to avoid:** Wrapping both the load and the barrier in if (i < n) leaves lane three skipping it.
 
 **Hint:** Identify exactly which condition changes in worked example 2.
 
@@ -127,11 +109,15 @@ Reconstruct the second worked example without copying its conclusion. Identify t
 
 Draw the producer and consumer for reversed output index zero.
 
+**Trap to avoid:** Assuming thread 0 wrote tile[3] confuses output ownership with input ownership.
+
 **Hint:** Use the first worked example to establish the relevant quantities, then change only the requested input.
 
 ### Exercise 4
 
 A conditional barrier hangs only on ragged input. What is the smallest repair?
+
+**Trap to avoid:** Adding a second barrier inside the else branch still splits threads across two distinct barriers.
 
 **Hint:** Locate the failed phase or violated dependency before proposing a repair.
 
@@ -139,35 +125,33 @@ A conditional barrier hangs only on ragged input. What is the smallest repair?
 
 Why does a block barrier not make a global reduction complete?
 
+**Trap to avoid:** Spinning on a global flag for other blocks can deadlock when those blocks are not resident.
+
 **Hint:** Check what the algorithm is allowed to read, write or assume at this boundary.
 
 ### Exercise 6
 
 Design a neighbor-average tile with a halo.
 
+**Trap to avoid:** Writing averages back into the input tile lets neighbors read already-updated values.
+
 **Hint:** State the output contract and which observations are needed in the new application.
 
 ## Common mistakes and diagnosis
 
-A tempting but incorrect claim in this chapter is: **a memory fence and a barrier are interchangeable.**
-
-For the concrete failure exercise, a conditional barrier hangs only on ragged input. What is the smallest repair?
-Preserve the original input and the stage where behavior diverged, and compare
-with the CPU model before changing hardware configuration.
+A tempting but incorrect claim: **A memory fence and a barrier are interchangeable.** A fence orders one thread's own memory operations as seen by others; it does not make any thread wait. A barrier such as `__syncthreads()` makes every thread of the block arrive before any proceeds and orders shared memory for them. Worked example 1 needs that waiting so no consumer reads an unloaded tile slot.
 
 ## Self-check, retrieval and transfer
 
-Explain the first example without its code, then use the second example to state
-one assumption that matters. Complete Exercise 3 independently, use Exercise 4 to
-diagnose a plausible defect, check the boundary in Exercise 5, and retain the
-application contract from Exercise 6. Compare the [separate explanations](../solutions/cuda-017_solutions.md)
-only after your attempt or a deliberate reveal. A reading marker records your
-choice; it does not certify hardware qualification or expert mastery.
+1. In worked example 1, which thread produces the value read by thread 0?
+2. Why must tail lanes still reach the barrier?
+3. What neutral value suits a max operation in a padded tile?
+
+Short answers are in the [separate explanations](../solutions/cuda-017_solutions.md#self-check-answers); compare only after an attempt.
 
 ## Primary references
 
-Check the documentation that matches your prepared toolkit before optional
-hardware execution.
+Use the documentation that matches your prepared toolkit.
 
 - [CUDA Programming Guide](https://docs.nvidia.com/cuda/cuda-programming-guide/)
 

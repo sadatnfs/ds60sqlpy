@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/kubernetes/solutions/k8s-055_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="k8s-055-explanatory-solutions">k8s-055: explanatory solutions<a class="heading-anchor" href="#k8s-055-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit reveal. These explanations describe the synthetic topology and stated API contracts. They are not fabricated runtime receipts.</p>
+<p>Attempt each exercise first, then compare (<a href="../STUDY-GUIDE.md.html#solutions-and-the-ai-tutor">study guide</a>).</p>
 <h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
 <p>TLS protects a transport connection through encryption and peer authentication according to a trust model. A server certificate binds a public key to identities such as DNS names. The client must validate the requested name, certificate chain and validity conditions. Encryption without meaningful identity verification does not establish the intended server.</p>
 <p>TLS termination means a component decrypts the client connection and may open another connection upstream. A load balancer, Ingress controller or Gateway can terminate TLS. The proxy-to-application hop then has its own protocol and trust requirements. Client-to-proxy encryption does not automatically encrypt the upstream hop.</p>

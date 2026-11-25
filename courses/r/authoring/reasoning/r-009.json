@@ -42,5 +42,7 @@
       "wrong": "Flattening and then calling `as.numeric()` to recover the numbers. The id becomes NA with a coercion warning, so one field is destroyed to repair another.",
       "verify": "The reference asserts `is.character(unlist(record[c(\"id\", \"values\")]))`, and the flattened result has length 3 from two fields."
     }
-  ]
+  ],
+  "run_note": "The starter builds one record with a scalar `id`, a numeric `values` vector and a nested `metadata` list holding the unit kg, then shows it with `str()`. Run it and read the indentation: `str()` marks `metadata` as a list inside the list, the structure that `unlist()` would flatten away. Every extraction you write should state whether it returns a sublist, as single brackets do, or the element itself, as double brackets and `$` do. The printed `str()` output after each step is how you confirm which one you actually received.",
+  "checks_note": "The assertions confirm that `record[1]` is still a list while `record[[\"values\"]][[1]]` is the number 2, that `id` and `values` are present with the right types and `id` has length one, that the mean of `values` is 3, that a missing `note` field reads as NULL, and that `unlist()` on `id` and `values` coerces everything to character. They do not validate deeper nesting or fields added later."
 }

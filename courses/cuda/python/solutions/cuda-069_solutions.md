@@ -1,6 +1,6 @@
 # cuda-069: explained solutions
 
-These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.
+Compare with your [worksheet](../lessons/cuda-069.md) attempt.
 
 ## Exercise 1: Predict repeated seeding
 
@@ -74,8 +74,16 @@ Include Python, NumPy, framework, device and sampler state.
 
 **How to verify.** Checkpoint, resume, and compare the next batch indices and a dropout mask with an uninterrupted run under the same backend. Both must match for the checkpoint to be complete.
 
+## Self-check answers
+
+1. **Why does a shared seed not guarantee identical numbers across CPU and GPU libraries?** Each library uses its own generator algorithm, stream partitioning and version-specific details. A seed selects a starting state within one generator design, not a cross-library agreement on bytes.
+
+2. **What is the difference between restoring saved state and reseeding?** Restoring resumes exactly where the stream was when the state was saved, so the replayed batch matches. Reseeding returns to the start of the stream, which repeats earlier draws.
+
+3. **Name three scopes of reproducibility a report should distinguish.** Same code and environment, same backend and hardware, and cross-backend numerical agreement within a stated tolerance. Each scope needs its own evidence.
+
 ## Reference observation
 
 Restored batch matches and continued batch differs.
 
-The reference file is `courses/cuda/python/references/cuda-069_cpu.py`. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.
+Asserted by `courses/cuda/python/references/cuda-069_cpu.py`.

@@ -1,6 +1,8 @@
 # rust-041: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [rust-041_solution.rs](rust-041_solution.rs). It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.
+Executable reference: [rust-041_solution.rs](rust-041_solution.rs), which runs both examples and the coded answers.
+
+Open this only after [an attempt](../STUDY-GUIDE.md#attempt-a-lesson).
 
 ## Why the two examples differ
 
@@ -26,7 +28,7 @@ Classify parent-null, empty and child-null states.
 
 Add another valid list with two non-null children.
 
-**Reference answer.** The same statements run as the `Task 2` block of the reference program; here they are wrapped in `main` as a complete file.
+**Reference answer**, wrapped in `main`; the reference runs it as its `Task 2` block.
 
 ```rust
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -65,7 +67,7 @@ Child values go into the shared child builder first, and `append(true)` closes t
 
 Build a nested column from a small ragged dataset.
 
-**Reference answer.** The same statements run as the `Task 3` block of the reference program; here they are wrapped in `main` as a complete file.
+**Reference answer**, wrapped in `main`; the reference runs it as its `Task 3` block.
 
 ```rust
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -106,7 +108,7 @@ Diagnose treating an empty list as equivalent to a missing list.
 
 Test zero-length slices and nonzero source offsets.
 
-**Reference answer.** The same statements run as the `Task 5` block of the reference program; here they are wrapped in `main` as a complete file.
+**Reference answer**, wrapped in `main`; the reference runs it as its `Task 5` block.
 
 ```rust
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -141,7 +143,7 @@ Slicing changes where index 0 starts for both values and validity, so the null t
 
 Explain when retaining a tiny shared slice may retain excessive memory and when copying is justified.
 
-No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **Offset buffer**, and state one limitation of your choice.
+**Judging criteria.** A strong answer explains that `slice` on a `StringArray` or `ListArray` shares the parent's buffers, so keeping one short slice of a large array keeps every byte of the parent allocated. Zero-copy is right when the slice is short-lived or covers most of the parent. Copying into a new array, for example through `take` or a builder, is justified when a small slice outlives a large parent, such as a cache entry kept after its batch is done. State one limitation: copying costs time in proportion to the slice and loses sharing with other views.
 
 ## Mechanism and diagnostic reasoning
 
@@ -155,4 +157,6 @@ Nested nullability has several layers. Zero-copy views can extend buffer lifetim
 
 ## Review before continuing
 
-Run the reference and confirm that it prints `rust-041: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.
+Rebuild Example B (Slice without confusing logical positions) from a blank pad.
+
+Review routine: [Self-check and review](../STUDY-GUIDE.md#self-check-and-review).

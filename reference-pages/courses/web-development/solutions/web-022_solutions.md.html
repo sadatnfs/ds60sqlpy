@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/web-development/solutions/web-022_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="web-022-explanatory-solutions">web-022: explanatory solutions<a class="heading-anchor" href="#web-022-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Open this after your own attempt. Each answer explains the lesson&#x27;s synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in <code>courses/web-development/guides/web-022.md</code>.</p>
+<p>Attempt each exercise before reading; the mechanism is in <code>courses/web-development/guides/web-022.md</code> (<a href="../STUDY-GUIDE.md.html#solutions">using these answers</a>).</p>
 <h3 id="exercise-1-predict-the-layer-winner-for-normal-declarations">Exercise 1: Predict the layer winner for normal declarations.<a class="heading-anchor" href="#exercise-1-predict-the-layer-winner-for-normal-declarations" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> A later declared layer outranks an earlier one before specificity is compared.</p>
 <p><strong>Approach:</strong> Compare the layer order declared in the first <code>@layer</code> statement first, and only compare specificity for declarations that share a layer.</p>
@@ -232,7 +232,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Plausible wrong approach:</strong> Assuming important rules simply follow the normal later-wins order fails because base <code>!important</code> would then be expected to lose, which it does not.</p>
 <p><strong>How to verify:</strong> Mark the same property important in base and utilities; the base value wins, which matches the reversed order.</p>
 <h3 id="reference-comparison">Reference comparison<a class="heading-anchor" href="#reference-comparison" aria-label="Link to this section">#</a></h3>
-<p>Open <code>courses/web-development/solutions/web-022_solution.html</code> only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; its success message is not an accessibility audit or proof of responsive behavior at every size.</p></article>
+<p>The reference reads the computed color of the text-muted paragraph and requires rgb(71, 85, 105), so it catches a utility layer declared too early or a component rule that still wins. It does not test the hover rule, layer placement of every rule or what happens under a different parent, so inspect the cascade in the Styles pane.</p>
+<p>Open <code>courses/web-development/solutions/web-022_solution.html</code> after saving your attempt (<a href="../STUDY-GUIDE.md.html#references">comparing with the reference</a>).</p></article>
   </main>
 </body>
 </html>

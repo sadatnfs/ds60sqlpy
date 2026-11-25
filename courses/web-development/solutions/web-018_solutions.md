@@ -1,6 +1,6 @@
 # web-018: explanatory solutions
 
-Open this after your own attempt. Each answer explains the lesson's synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in `courses/web-development/guides/web-018.md`.
+Attempt each exercise before reading; the mechanism is in `courses/web-development/guides/web-018.md` ([using these answers](../STUDY-GUIDE.md#solutions)).
 
 ## Exercise 1: Predict which card inherits a scoped token override.
 
@@ -76,4 +76,6 @@ Open this after your own attempt. Each answer explains the lesson's synthetic fi
 
 ## Reference comparison
 
-Open `courses/web-development/solutions/web-018_solution.html` only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; its success message is not an accessibility audit or proof of responsive behavior at every size.
+The reference reads the --surface custom property on the featured card and requires #e0f2fe, so it catches a token defined at the wrong scope or with another value. It does not check that the standard card keeps its default, that spacing uses tokens or that colors still contrast, so compare both cards side by side.
+
+Open `courses/web-development/solutions/web-018_solution.html` after saving your attempt ([comparing with the reference](../STUDY-GUIDE.md#references)).

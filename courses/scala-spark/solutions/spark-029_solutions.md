@@ -1,6 +1,8 @@
 # spark-029: Explained paired reference solutions
 
-Read the [guide](../guides/spark-029.md) and attempt one language first. The [Scala reference](spark-029_solution.scala) and [PySpark reference](spark-029_solution.py) are complete single-file programs with explicit local sessions and finally-based stop. Each compares with literal expectations; matching two implementations alone would not rule out a shared mistake.
+Attempt the [guide](../guides/spark-029.md) exercises first.
+
+References: [Scala](spark-029_solution.scala), [PySpark](spark-029_solution.py).
 
 ## Exercises and reasoning
 
@@ -8,7 +10,7 @@ Read the [guide](../guides/spark-029.md) and attempt one language first. The [Sc
 
 Require ordered fields id, value with bigint types, exactly 30 known unique IDs 0..29, known values equal to 2*id and total 870. Return SHA-256 of sorted Spark JSON lines joined by newline without a trailing newline.
 
-**Expected:** A64-character lowercase digest for the valid product. Wrong values, counts, types or identities are rejected before hashing.
+**Expected:** A 64-character lowercase digest for the valid product. Wrong values, counts, types or identities are rejected before hashing.
 
 ```scala
 def productDigest(frame: DataFrame): String = {
@@ -271,6 +273,7 @@ Canonical content identity is stable across physical repartitioning, so the retr
 
 ## Execution and interpretation
 
-Run the complete reference in its prepared fixed worker. Its first check (Validate the product before computing its digest) is built inside the program, so opening the lesson fetches nothing; it expects: A 64-character lowercase digest for the valid product. Wrong values, counts, types or identities are rejected before hashing. The final success line prints only after every reference assertion passes.
+The references pin the digest of the valid product to `b4eaf827f5ce5797e0df60939b503b2ca6f264c0c167c9ca557db2aeb6cc2879`, require the same digest after `repartition(3)`, and require a 31-row product to raise `ValueError`. Staging `run-a` must create `runs/run-a/receipt.json` whose `sha256` equals that digest, and validation must return the same receipt text while rejecting `../outside`. After publication, `current.json` must equal the staged receipt and name `run-a`.
 
-Local plan, partition and resource evidence does not establish cluster-scale performance; session cleanup is explicit.
+Staging `run-b` and publishing it with the injected failure must raise `injected_before_publication` while `current.json` keeps the `run-a` bytes and the published product still hashes to the same digest. Replaying `run-a` must return the digest without changing the Parquet file count or the manifest, an invalid 31-row replay under `run-c` must be rejected, and the published product must still have 30 rows. The PySpark run then prints `spark-029: six PySpark reference contracts passed; Spark=` with the version, and Scala prints its equivalent. These checks cover one local file system, where a same-directory replace is atomic; object stores need their own publication mechanism.
+

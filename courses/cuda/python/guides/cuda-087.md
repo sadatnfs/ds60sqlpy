@@ -1,10 +1,17 @@
 # cuda-087: Device placement and one auditable training step
 
-**Route:** CUDA Python and machine learning. **Stage:** intermediate. **Prerequisites:** `cuda-066`, `cuda-067`, `cuda-072`. Allow several sessions when the hardware experiment is new; the chapter is not a deadline.
+**Route:** CUDA Python and machine learning. **Stage:** intermediate. **Prerequisites:** `cuda-066`, `cuda-067`, `cuda-072`.
 
-## What you will be able to explain
+Pacing, evidence labels and platform rules: [CUDA study guide](../../STUDY-GUIDE.md).
 
-By the end, you can **derive the scalar gradient**, **inspect every tensor device**, and **distinguish correctness and performance** with evidence. Start with the two worked cases, then use the editable CPU model to make the quantities concrete.
+## Learning objectives
+
+- Derive the scalar gradient.
+- Calculate the update.
+- Compare sum and mean.
+- Inspect every tensor device.
+- Write equal PyTorch and TensorFlow contracts.
+- Distinguish correctness and performance.
 
 ## Mechanism and vocabulary
 
@@ -40,15 +47,19 @@ In TensorFlow, `GradientTape` records operations involving watched trainable var
 
 ### Worked example 1
 
-With x=[1,2], target=[2,4], \(w=0\), mean loss is 10 and derivative is-10. SGD with learning rate 0.1 updates w to 1.
+With x=[1,2], target=[2,4], \(w=0\), mean loss is 10 and derivative is -10. SGD with learning rate 0.1 updates w to 1.
 
 ### Worked example 2
 
 Using sum loss instead of mean doubles the derivative for this batch and changes the update to 2. A faster run with a different loss normalization is not an equivalent training comparison.
 
-## Portable executable model
+## How to run the CPU model
 
-The **CPU reference model** variant runs this bounded worked example using `python-core`. It uses only the Python standard library, small synthetic values and no network. Its purpose is to expose the arithmetic or contract behind the chapter. The separate reference includes assertions for the stated observations.
+Edit the copy; the [reference](../references/cuda-087_cpu.py) adds assertions.
+
+```sh
+python courses/cuda/python/lessons/cuda-087_cpu.py
+```
 
 ```python
 x, y = [1.0, 2.0], [2.0, 4.0]
@@ -60,7 +71,7 @@ assert loss == 10 and grad == -10 and w == 1
 print("CPU training oracle:", loss, grad, w)
 ```
 
-**Expected observation:** Loss 10, gradient-10, new weight 1.
+**Expected observation:** Loss 10, gradient -10, new weight 1.
 
 **Variable trace.** Before running the model, predict these final values; then compare:
 
@@ -72,8 +83,6 @@ print("CPU training oracle:", loss, grad, w)
 | `loss` | `10.0` |
 | `grad` | `-10.0` |
 
-Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.
-
 ## Equal framework lanes
 
 ### PyTorch
@@ -84,83 +93,69 @@ Create tensors and parameters on the chosen torch.device, zero gradients, comput
 
 Create variables and operations in an explicit tf.device scope, use GradientTape, and apply the resulting gradients. Inspect variable placement and compare the same mean-loss derivative.
 
-Choose either lane first, then compare the other using identical mathematical inputs. Framework-specific shape, mode and optimizer rules must be checked separately. Both use offline synthetic examples; no model hub or dataset download is triggered.
+Lane rules: [framework labs](../../STUDY-GUIDE.md#python-gpu-and-framework-labs).
 
 ## Executable framework practice
 
-The variant chooser offers **PyTorch on CPU**, **TensorFlow on CPU**, and separate **NVIDIA CUDA** versions. CPU versions force CPU placement. CUDA versions require the named GPU profile and refuse to silently fall back. Each complete program uses the same tiny deterministic objective, bounded tensors and local synthetic data. Read its source before running; a framework pass establishes only that variant and environment.
-
-The checkpoint demonstration is in-memory. It teaches what state must be saved; it does not export a durable model artifact or preserve an in-flight device context. Advanced custom-op, distributed and engine-building projects remain separately prepared external workflows.
+Run the **PyTorch** and **TensorFlow** variants on CPU first; [lab rules](../../STUDY-GUIDE.md#python-gpu-and-framework-labs).
 
 ## Practice and transfer
+
+Record each attempt in the [worksheet](../lessons/cuda-087.md) before opening hints.
 
 ### Exercise 1: Derive the scalar gradient
 
 **Trap to avoid:** Dropping the factor 2 from the derivative, a common slip when writing it by hand, gives -5 and a half-size update. Autograd would then disagree with the hand derivation.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 2: Calculate the update
 
 **Trap to avoid:** Adding the gradient instead of subtracting it gives `w = -1`, which raises the loss to `((-1-2)**2 + (-2-4)**2)/2 = 22.5`. The sign error is easy to miss when only the update size is checked.
-
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 3: Compare sum and mean
 
 **Trap to avoid:** Comparing a sum-loss run with a mean-loss run and attributing the speed or convergence difference to the GPU confounds hardware with loss normalization.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 4: Inspect every tensor device
 
 **Trap to avoid:** Checking only the model parameters misses inputs and targets, and moving the model after creating the optimizer can leave the optimizer holding stale references in some setups.
-
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 5: Write equal PyTorch and TensorFlow contracts
 
 **Trap to avoid:** Letting each framework use its default initializer or loss reduction makes the numbers differ for reasons unrelated to correctness.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 6: Distinguish correctness and performance
 
 **Trap to avoid:** Reporting a speedup from a run that silently used a sum loss, or ran partly on the CPU, compares different computations.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ## Progressive hints
 
-Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.
+Hint *k* belongs to exercise *k*; open one at a time.
 
-1. Start from worked example 1 and mark the quantities needed for the task "Derive the scalar gradient".
-2. Change one assumption in worked example 2 while preserving the declared contract: calculate the update.
-3. Trace the CPU program's variables before adding hardware behavior: compare sum and mean.
-4. Draw producers, consumers and the exact operation boundary for the task "Inspect every tensor device".
-5. Separate what the small fixture establishes from what the real runtime must show: write equal PyTorch and TensorFlow contracts.
-6. Write a counterexample to an overbroad claim before you distinguish correctness and performance.
+1. Differentiate the mean of `(w*x - y)**2` with respect to `w` and evaluate it at `w = 0` for the batch.
+2. Subtract the learning rate times the gradient from the current weight.
+3. Replace the mean with a sum and ask how the gradient changes with batch size.
+4. Check parameters, inputs, targets and optimizer state, not just the batch you moved.
+5. List each value both frameworks must share: data, initial weight, loss reduction and learning rate.
+6. Ask what must already agree before any timing number means anything.
 
-## Common mistakes and self-review
+## Common mistakes and self-check
 
-Confusing a correct tiny example with a general implementation is the central review risk. For this chapter, challenge the assumption in worked example 2, then ask whether your change preserves the mechanism described above. If you change dtype, layout, ordering, batch size or backend, update the acceptance contract rather than silently reusing the old observation. Explain an unexpected result before trying random configuration changes.
+A common mistake is moving only the inputs to the GPU while parameters, targets or optimizer state stay on the CPU, which raises a device mismatch error or forces hidden copies. Another is comparing frameworks whose loss reductions differ: a sum loss doubles this batch's gradient and changes the update. Fix both by inspecting every tensor's device, failing clearly when an explicitly requested GPU is missing, and keeping data, initialization, reduction and learning rate identical.
 
-Keep a small evidence table with columns **claim**, **input**, **expected observation**, **actual observation** and **limit**. For the first claim use `Derive the scalar gradient`. For the final claim use `Distinguish correctness and performance`. An unperformed GPU or cluster experiment remains pending even when the CPU model is correct.
+**Evidence limit:** The reference reproduces loss 10, gradient -10 and new weight 1 with CPU arithmetic. It does not run PyTorch or TensorFlow, so actual device placement and autograd results need the framework lanes.
 
-## Platform and evidence contract
+1. Why derive the gradient by hand before trusting autograd?
+2. How do PyTorch and TensorFlow differ in placement idiom?
+3. What does a correct one-step update establish?
 
-The reading worksheet and CPU reference model work through the ordinary Linux Docker classroom on macOS, Linux and Windows using WSL 2. They do not require an NVIDIA GPU. Their results are labeled CPU models or semantic oracles, not simulated hardware performance.
-
-Real CUDA work needs supported NVIDIA hardware, a compatible host driver and an explicitly prepared GPU runtime. An Apple GPU does not execute CUDA kernels. PyTorch MPS on a supported native Mac, ROCm on supported AMD hardware, or other vendor backends can provide separate accelerator learning routes; they need their own package and operation qualification and are not CUDA evidence. The ordinary Linux Docker classroom does not expose native Mac MPS automatically.
-
-Do not download packages, models or data by opening this lesson. Do not attach an engine socket, ambient cluster credentials or an arbitrary remote endpoint. A CPU pass, imported package, successful compilation, real GPU result and measured performance are distinct observations. Record the actual backend, data shape/dtype, source revision, versions and pending checks. A saved completion marker records learning progress, not hardware certification.
+Answers: [self-check answers](../solutions/cuda-087_solutions.md#self-check-answers).
 
 ## Primary references
 
 - [PyTorch CUDA semantics](https://docs.pytorch.org/docs/2.9/notes/cuda.html)
 - [TensorFlow GPU guide](https://www.tensorflow.org/guide/gpu)
 
-Use the version-matched documentation of your prepared environment. These references describe interfaces and supported boundaries; the chapter's synthetic examples and CPU models are original teaching material.
+Full lists: [documentation and sources](../../STUDY-GUIDE.md#documentation-and-sources).
 
 ## Ask an AI tutor about this lesson
 

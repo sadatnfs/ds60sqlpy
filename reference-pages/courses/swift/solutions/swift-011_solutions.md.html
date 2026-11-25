@@ -194,7 +194,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/swift/solutions/swift-011_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="swift-011-explanation-and-comparison">swift-011: explanation and comparison<a class="heading-anchor" href="#swift-011-explanation-and-comparison" aria-label="Link to this section">#</a></h2>
-<p>Attempt the six guide tasks before opening this comparison. The executable reference is <a href="swift-011_solution.swift.html">swift-011_solution.swift</a>. It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.</p>
+<p>Reference program: <a href="swift-011_solution.swift.html">swift-011_solution.swift</a>, covering both examples and the executed answers.</p>
+<p>Attempt the tasks first; see <a href="../STUDY-GUIDE.md.html#comparing-with-the-explanation">comparing with the explanation</a>.</p>
 <h3 id="why-the-two-examples-differ">Why the two examples differ<a class="heading-anchor" href="#why-the-two-examples-differ" aria-label="Link to this section">#</a></h3>
 <p><strong>Return two related counts:</strong> The grouping is useful locally without requiring an entire class hierarchy. Named tuple fields expose the accounting relationship.</p>
 <p><strong>Model distinct outcomes:</strong> The switch extracts data after establishing the state case. Each outcome exposes only its own meaningful payload.</p>
@@ -275,7 +276,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Before the new case clause was written, swiftc stopped with switch must be exhaustive at this switch; that error list is the set of consumers to update, which a default clause would have hidden.</p>
 <h4 id="task-6-transfer-and-justify">Task 6: Transfer and justify<a class="heading-anchor" href="#task-6-transfer-and-justify" aria-label="Link to this section">#</a></h4>
 <p>Choose tuple or named enum/struct for a reusable public API and explain the tradeoff.</p>
-<p>No single reference answer exists: several designs can satisfy this transfer task. Build yours from the task 3 answer above (Model loading, ready and failed states with an enum) and the mechanism described below, and state one limitation of your choice.</p>
+<p>No single answer exists; extend task 3 using the <a href="../STUDY-GUIDE.md.html#open-transfer-tasks">open transfer routine</a>.</p>
 <h3 id="solution-reasoning">Solution reasoning<a class="heading-anchor" href="#solution-reasoning" aria-label="Link to this section">#</a></h3>
 <p><strong>Approach.</strong> Example A returns a named tuple <code>(accepted: 3, rejected: 2)</code> and checks that the parts sum to 5. Example B defines <code>enum Outcome</code> with <code>.value(Int)</code> and <code>.invalid(String)</code> payloads and renders each case through an exhaustive <code>switch</code>. The task 3 answer models loading, ready and failed states as one enum.</p>
 <p><strong>Why it is correct.</strong> The tuple labels make the accounting relationship readable: 3 plus 2 is 5. Each enum case carries only its own data, so the switch binds <code>count</code> for <code>.value(4)</code> and <code>reason</code> for <code>.invalid(&quot;negative&quot;)</code>, producing <code>count:4</code> and <code>error:negative</code>. In task 3 the ready case carries a count and the failed case carries a reason, so they render as loading, ready:3 and failed:offline.</p>
@@ -287,7 +288,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><code>(count: Int, rejected: Int)</code> names tuple components. <code>enum Outcome { case value(Int); case invalid(String) }</code> binds case-specific payloads. <code>case .value(let count)</code> extracts only the matching payload.</p>
 <p>An enum raw value and an associated value solve different problems. A catch-all default can conceal a newly added state. Avoid using tuples so large that their positional relationship becomes obscure.</p>
 <h3 id="review-before-continuing">Review before continuing<a class="heading-anchor" href="#review-before-continuing" aria-label="Link to this section">#</a></h3>
-<p>Run the reference and confirm that it prints <code>swift-011: passed</code>, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.</p></article>
+<p>Run the reference and confirm it prints <code>swift-011: passed</code>, then rerun the guide&#x27;s counterexample.</p></article>
   </main>
 </body>
 </html>

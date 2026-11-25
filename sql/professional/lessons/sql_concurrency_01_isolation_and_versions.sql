@@ -86,12 +86,12 @@ WHERE
 -- 2. Reject a stale expected version.
 -- Inputs/evidence: For sql-concurrency-01 Exercise 2, Try reserving one A unit with expected version 99. Return sku, available, version for any successful update and inspect the row afterward.
 -- Expected result/shape: For sql-concurrency-01 Exercise 2, Zero returned rows with columns sku, available, version. A remains available 5 and version 1; SQL execution itself succeeds with UPDATE 0.
--- Verify: For sql-concurrency-01 Exercise 2, Require zero RETURNING rows and unchanged A state available=5,version=1. Removing the version condition would discard the requested stale-write protection.
+-- Verify: For sql-concurrency-01 Exercise 2, Require zero RETURNING rows and unchanged A state with `available` 5 and `version` 1. Removing the version condition would discard the requested stale-write protection.
 -- Hint: A failed precondition is an ordinary zero-row outcome.
 -- 3. Reject insufficient capacity independently.
 -- Inputs/evidence: For sql-concurrency-01 Exercise 3, Try reserving two B units with correct expected version 1. Return sku, available, version on success and inspect B afterward.
 -- Expected result/shape: For sql-concurrency-01 Exercise 3, Zero returned rows, columns sku, available, version. B remains (B,1,1), proving the capacity condition can fail even with a current version.
--- Verify: For sql-concurrency-01 Exercise 3, Require zero RETURNING rows and unchanged B state available=1,version=1. The current version and failed capacity distinguish this outcome from the stale-version case.
+-- Verify: For sql-concurrency-01 Exercise 3, Require zero RETURNING rows and unchanged B state with `available` 1 and `version` 1. The current version and failed capacity distinguish this outcome from the stale-version case.
 -- Hint: Use a boundary that differs from the stale-version example.
 -- 4. Model two callers sharing an old version.
 -- Inputs/evidence: For sql-concurrency-01 Exercise 4, Inside one savepoint, apply caller One reserving two A units at version 1, then caller Two reserving one A unit with the same old version. Return caller, affected_rows from both attempts.

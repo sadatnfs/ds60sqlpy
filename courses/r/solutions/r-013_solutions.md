@@ -1,6 +1,6 @@
 # r-013: reference reasoning
 
-Use the [complete reference](r-013_reference.R) with the guide's declared inputs and runtime. Every worked example is also a standalone script.
+Run the [complete reference](r-013_reference.R) under the [run rules](../STUDY-GUIDE.md#run-a-chapter).
 
 ## Why the implementation has this shape
 
@@ -96,4 +96,6 @@ Prefer explicit inputs or documented captured state with reset and reproducibili
 
 ## What the checks establish
 
-The reference makes 6 `stopifnot()` checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.
+The assertions confirm that the factory validates a finite numeric scalar, that `make_multiplier(4)(2)` is 8, that two closures built with different factors return 10 and 15 for the same input, that the captured predicate still accepts 20, that a lazy argument is evaluated when first used so `lazy(3)` gives 15, and that invalid configuration is rejected. They pin capture-time behavior only for these inputs; they cannot detect a closure in your own code that still reads a mutable global you forgot about, or a promise that a later change to a default argument would alter.
+
+The reference makes 6 `stopifnot()` checks; see [what a passing run proves](../STUDY-GUIDE.md#what-a-passing-run-proves).

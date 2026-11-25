@@ -396,25 +396,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="guide--prerequisites">Prerequisites<a class="heading-anchor" href="#guide--prerequisites" aria-label="Link to this section">#</a></h4>
 <p>Complete Day 20 (<code>python-20</code>): indexes, table grain, grouping, and validation.</p>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
-<p><strong>Primary browser route:</strong> run <code>./classroom</code> from the repository root and choose <strong>Python and data science</strong> on <code>/classroom</code>. Open this lesson in the shared workspace, read its capability notice and use its supported coding or reading workflow. The <a href="../reference-pages/docs/classroom-experience.md.html">classroom guide</a> explains saved work, runtimes and switching subjects. No host notebook setup is needed for this route.</p>
-<h5 id="guide--optional-contributor-notebook-route">Optional contributor notebook route<a class="heading-anchor" href="#guide--optional-contributor-notebook-route" aria-label="Link to this section">#</a></h5>
-<p>Use a separately prepared POSIX environment on Linux/macOS or Ubuntu in Windows WSL 2. Complete <a href="../reference-pages/CONTRIBUTING.md.html">contributor setup</a> once, including the notebook and data dependencies. Docker&#x27;s Python worker does not install packages into this host interpreter. Run the following commands from the repository root using that prepared environment.</p>
-<ol>
-<li>Check the interpreter and register its notebook kernel. Registration is needed once for this environment, or again after moving/replacing it:</li>
-</ol>
-<pre class="highlighted-code"><code class="language-bash">   uv run --no-sync python scripts/course.py doctor --no-database
-   uv run --no-sync python -m ipykernel install --user --name ds60sqlpy --display-name <span class="syntax-string">&quot;Python (ds60sqlpy)&quot;</span></code></pre>
-<p><code>--no-database</code> keeps this Python setup check local and does not require PostgreSQL. Do not install packages with <code>%pip</code> in a lesson. Use the declared dependency group when an optional import needs preparation.</p>
-<ol start="2">
-<li>Read <code>python/ds-60day/companion-guides/day21_time_series_pandas.md</code>, then launch the notebook directory:</li>
-</ol>
-<pre class="highlighted-code"><code class="language-bash">   uv run --no-sync python -m jupyter lab python/ds-60day/notebooks</code></pre>
-<p>Open <code>python/ds-60day/notebooks/day21_time_series_pandas.ipynb</code> and select <strong>Python (ds60sqlpy)</strong>. The friendly name alone is insufficient if you use several checkouts: confirm that the kernel&#x27;s <code>sys.executable</code> points to this checkout&#x27;s <code>.venv/bin/python</code>. <a href="../reference-pages/docs/vscode.md.html">VS Code guidance</a> explains the alternative editor route; Windows users open that editor in WSL with the same Linux environment.</p>
-<ol start="3">
-<li>Restart the kernel and run cells from the top. Notebook cells share kernel state; each browser Run starts a fresh process. Before every example, predict its result, then compare the actual value, type, shape or side effect.</li>
-<li>Attempt the numbered exercises in your own work cells and keep a backup of your notebook edits. Follow each example&#x27;s file and working-directory instructions. Keep <code>solutions/</code> separate until you want reference comparison.</li>
-</ol>
-<p>Notebook files and contributor CLI progress belong to this host checkout. They are separate from the browser&#x27;s saved pads, notes and progress in Docker volumes. Neither route automatically copies attempts or completion markers to the other; record progress in the interface you actually used.</p>
+<p>Open <code>python-21</code> in the classroom, or <code>python/ds-60day/notebooks/day21_time_series_pandas.ipynb</code> on a host; the <a href="../reference-pages/python/STUDY-GUIDE.md.html">Python study guide</a> explains both.</p>
 <p><strong>Outcome:</strong> Resample, roll, and lag time-stamped data with an explicit time zone.</p>
 <h4 id="guide--beginner-deep-dive-build-the-idea-before-the-syntax">Beginner deep dive: build the idea before the syntax<a class="heading-anchor" href="#guide--beginner-deep-dive-build-the-idea-before-the-syntax" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--start-with-one-mental-picture">Start with one mental picture<a class="heading-anchor" href="#guide--start-with-one-mental-picture" aria-label="Link to this section">#</a></h5>
@@ -463,14 +445,7 @@ time_features<span class="syntax-operator">.</span>round<span class="syntax-punc
 <li>For resampling, document frequency alias, closed side, label, and aggregation semantics.</li>
 </ol>
 <h5 id="guide--practice-ramp">Practice ramp<a class="heading-anchor" href="#guide--practice-ramp" aria-label="Link to this section">#</a></h5>
-<p>Work through the numbered exercises in five modes rather than treating all of them as blank-code prompts:</p>
-<ol>
-<li><strong>Prediction:</strong> state the value, type, shape, rows, or side effect before execution.</li>
-<li><strong>Guided modification:</strong> change one part of a worked example and explain which part of the result must change.</li>
-<li><strong>Independent application:</strong> implement the same idea with a new input and an explicit contract.</li>
-<li><strong>Debugging and edge cases:</strong> reproduce a failure, identify the violated assumption, and prove the repair at a boundary.</li>
-<li><strong>Retrieval:</strong> close the guide and explain the core model from memory before moving on.</li>
-</ol>
+<p>Work this lesson&#x27;s exercises in the five practice modes from the <a href="../reference-pages/python/STUDY-GUIDE.md.html">Python study guide</a>.</p>
 <p><strong>Useful alternative:</strong> Use row-count windows for evenly sampled observations and time-offset windows when elapsed time, not row count, defines the question.</p>
 <p><strong>Boundary to remember:</strong> Daylight-saving ambiguity/nonexistence, duplicate times, irregular gaps, empty bins, and partial boundary windows need policy.</p>
 <h4 id="guide--vocabulary-and-mental-model">Vocabulary and mental model<a class="heading-anchor" href="#guide--vocabulary-and-mental-model" aria-label="Link to this section">#</a></h4>
@@ -495,7 +470,6 @@ weekly <span class="syntax-operator">=</span> values<span class="syntax-operator
 trailing_7d <span class="syntax-operator">=</span> values<span class="syntax-operator">.</span>rolling<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">7D</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> min_periods<span class="syntax-operator">=</span><span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>mean<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span></code></pre>
 <p>The seeded generator makes results repeatable. The explicit weekly label and boundary make the bin definition reviewable.</p>
 <h4 id="guide--exercises-and-progressive-hints">Exercises and progressive hints<a class="heading-anchor" href="#guide--exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
-<p>Each item is a complete mini-contract. Before writing code, copy its input, expected behavior, constraints, and verification into your work cell. A result is not complete merely because it “looks right”; run the stated assertion or inspection and explain what it proves.</p>
 <ol>
 <li>Parse the supplied timestamp strings, reject unparseable values, localize according to a written source-timezone policy, and convert the result to UTC. <strong>Expected behavior:</strong> the final dtype is timezone-aware UTC and invalid text is reported rather than silently dropped. <strong>Verify:</strong> inspect the earliest/latest instant and demonstrate that conversion preserves the instant.</li>
 </ol>
@@ -536,7 +510,7 @@ trailing_7d <span class="syntax-operator">=</span> values<span class="syntax-ope
 <li><a href="python-22.html#guide">Next: Day 22; Advanced pandas</a></li>
 </ul>
 <h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
-<p>AI coaching is optional; the guide and notebook above contain the full lesson. If you want a patient tutor, copy this prompt from the repository root:</p>
+<p>AI coaching is optional. To use a tutor, copy this prompt from the repository root:</p>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning to tutor me through `python-21`
 (Day 21: Time Series with pandas). Direct catalog prerequisites: `python-20`.
 I have completed the direct prerequisites: `python-20`. Emphasize time-aware indexes, timezone policy, resampling, rolling windows, and lag features.

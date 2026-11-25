@@ -194,7 +194,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/swift/solutions/swift-037_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="swift-037-explanation-and-comparison">swift-037: explanation and comparison<a class="heading-anchor" href="#swift-037-explanation-and-comparison" aria-label="Link to this section">#</a></h2>
-<p>Attempt the six guide tasks before opening this comparison. The executable reference is <a href="swift-037_solution.swift.html">swift-037_solution.swift</a>. It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.</p>
+<p>Reference program: <a href="swift-037_solution.swift.html">swift-037_solution.swift</a>, covering both examples and the executed answers.</p>
+<p>Attempt the tasks first; see <a href="../STUDY-GUIDE.md.html#comparing-with-the-explanation">comparing with the explanation</a>.</p>
 <h3 id="why-the-two-examples-differ">Why the two examples differ<a class="heading-anchor" href="#why-the-two-examples-differ" aria-label="Link to this section">#</a></h3>
 <p><strong>Apply a bounded display policy:</strong> The wrapper enforces a deliberate display range at every assignment. Assignments are clamped into zero through ten.</p>
 <p><strong>Retain valid interior values:</strong> The projected information explains the policy without exposing mutable internal storage. A valid interior value is unchanged and the projection exposes the range.</p>
@@ -268,7 +269,7 @@ control<span class="syntax-punctuation">.</span>level <span class="syntax-punctu
 <p>The range is closed, so both endpoints are valid stored values; one step past either end is pulled back to that endpoint.</p>
 <h4 id="task-6-transfer-and-justify">Task 6: Transfer and justify<a class="heading-anchor" href="#task-6-transfer-and-justify" aria-label="Link to this section">#</a></h4>
 <p>Choose a wrapper or explicit validation method based on whether assignment can fail meaningfully.</p>
-<p>No single reference answer exists: several designs can satisfy this transfer task. Build yours from the task 3 answer above (Create a wrapper with an explicit normalization policy for a local display field) and the mechanism described below, and state one limitation of your choice.</p>
+<p>No single answer exists; extend task 3 using the <a href="../STUDY-GUIDE.md.html#open-transfer-tasks">open transfer routine</a>.</p>
 <h3 id="solution-reasoning">Solution reasoning<a class="heading-anchor" href="#solution-reasoning" aria-label="Link to this section">#</a></h3>
 <p><strong>Approach.</strong> <code>Clamped</code> is a property wrapper that stores an Int and a <code>ClosedRange</code>, clamps in both its initializer and its <code>wrappedValue</code> setter, and projects the range through <code>projectedValue</code>. <code>Control</code> declares <code>@Clamped(0...10) var level = 0</code>. Example A assigns values above and below the range; Example B assigns 4 and reads <code>$level</code>. The task 3 answer is a wrapper that trims text on both initialization and assignment.</p>
 <p><strong>Why it is correct.</strong> Assigning 12 runs <code>min(max(12, 0), 10)</code>, which is 10. Assigning -2 runs <code>min(max(-2, 0), 10)</code>, which is 0. For 4 both bounds leave it alone. Reading <code>control.$level</code> returns the projection, which is the range <code>0...10</code> rather than the stored integer. In task 3 both assignment and initialization store the trimmed text Report and x, because the same normalization runs in both places.</p>
@@ -280,7 +281,7 @@ control<span class="syntax-punctuation">.</span>level <span class="syntax-punctu
 <p><code>@propertyWrapper</code> marks a wrapper type. wrappedValue supplies get/set behavior. <code>@Clamped var level</code> applies it. A projectedValue is read through <code>$level</code> when declared.</p>
 <p>A wrapper is not a substitute for validating external input. Hidden side effects make ordinary-looking assignment hard to reason about. Document projection and mutation semantics.</p>
 <h3 id="review-before-continuing">Review before continuing<a class="heading-anchor" href="#review-before-continuing" aria-label="Link to this section">#</a></h3>
-<p>Run the reference and confirm that it prints <code>swift-037: passed</code>, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.</p></article>
+<p>Run the reference and confirm it prints <code>swift-037: passed</code>, then rerun the guide&#x27;s counterexample.</p></article>
   </main>
 </body>
 </html>

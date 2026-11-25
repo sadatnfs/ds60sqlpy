@@ -128,20 +128,18 @@ actual rejected-recipient boundary before any claim about reading table rows.
 
 ## Complete worked source
 
-This is a project-only command notebook. Read and edit it in the classroom; run its explicitly labeled commands from the copied owned Docker workshop. The classroom does not execute these service commands.
+The classroom does not execute these service commands. See the [workshop rules](../STUDY-GUIDE.md#workshop-notebooks).
 
 # Delta Sharing apache-075 prepared command notebook
 
-Copy the owned Delta Sharing project and follow PREPARATION.md. Delta Sharing
-belongs to Delta Lake/Linux Foundation. The offline preparation actions are:
+Copy the Delta Sharing project, a Delta Lake and Linux Foundation tool rather than an Apache one, and read PREPARATION.md. `prepare` only confirms the native client image, and the first `plan` creates the owned namespace and prints the expected rows with `server_contacted` false:
 
 ```bash
 bash run.sh prepare
 bash run.sh plan
 ```
 
-For a separately prepared actual owned reference server and untracked recipient
-profile, the bounded native Docker protocol client runs with:
+The check needs a reference server you prepared yourself and a recipient profile kept under the untracked `.workshop/` directory:
 
 ```bash
 bash run.sh check
@@ -149,9 +147,7 @@ bash run.sh check
 
 The actual check lists the exact owned share/schema/table and requires an invalid-recipient 401 or 403 before accepting its bounded row read.
 
-The classroom Markdown pad does not start a service. Source configuration and
-unit policy fixtures are not actual reference-server receipts. Keep credentials
-and signed URL query strings out of all published source and evidence.
+The pad never starts a server. Keep the bearer token and any signed URL query string out of the receipt; record the listed share, schema and table names and the 401 or 403 code instead.
 
 ## Primary references
 

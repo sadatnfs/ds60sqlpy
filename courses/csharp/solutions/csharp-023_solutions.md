@@ -1,6 +1,8 @@
 # csharp-023: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [csharp-023_solution.cs](csharp-023_solution.cs). It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.
+Reference program: [csharp-023_solution.cs](csharp-023_solution.cs), covering both examples and the executed answers.
+
+Attempt the tasks first; see [comparing with the explanation](../STUDY-GUIDE.md#comparing-with-the-explanation).
 
 ## Why the two examples differ
 
@@ -140,7 +142,7 @@ Each test targets one path. `"4"` reaches the return value. `"four"` reaches the
 
 Decide which layer owns user-facing error translation and which details should remain private diagnostics.
 
-No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **Exception**, and state one limitation of your choice.
+No single answer exists; extend task 3 using the [open transfer routine](../STUDY-GUIDE.md#open-transfer-tasks).
 
 ## Mechanism and diagnostic reasoning
 
@@ -154,4 +156,4 @@ A catch-all that returns a default can turn data loss into apparent success. Thr
 
 ## Review before continuing
 
-Run the reference and confirm that it prints `csharp-023: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.
+Run the reference and confirm it prints `csharp-023: passed`, then rerun the guide's counterexample.

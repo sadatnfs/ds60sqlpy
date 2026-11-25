@@ -1,6 +1,6 @@
 # js-046: explanatory solutions
 
-Compare after your own attempt or an explicit reveal. The separate .js reference is a complete offline browser program. These explanations discuss the six practice tasks; a visual resemblance alone is not a data or behavior check.
+Compare after your own attempt; the separate `.js` file is the complete reference program.
 
 ## Mechanism review
 
@@ -49,3 +49,7 @@ An undefined mapping should not silently remove a category. Keep the category do
 Scale design should expose the analytical reference point. A zero baseline has a different role for signed residual position than for positive bar length. Residuals around 0 need a domain such as [-5, 5] with a visible zero line; starting at the minimum hides the sign. Confirm the zero line sits at the scale's midpoint.
 
 **Expected:** A diverging domain with visible zero and explicit units.
+
+## After comparison
+
+Replace the linear scale with `scaleLog` for values from 1 to 10,000 and decide what to do with zero, which a log scale cannot map. Draw both versions of the chart and write one sentence on when each scale misleads.

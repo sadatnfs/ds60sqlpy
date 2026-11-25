@@ -2,7 +2,7 @@
 
 Deliver a complete local analytics product with a reviewable acceptance decision.
 
-The executable reference contains the two complete worked cases with assertions. The changes below explain the independent practice and its limits.
+The reference stages four raw orders into three accepted rows, joins them to the customer dimension and tests both keys. It writes a receipt only when the build passes, and a duplicate customer key blocks publication. The decision covers this fixture's tests, not quality rules nobody stated. See [how these answers are laid out](../STUDY-GUIDE.md#answers-and-references).
 
 
 ## 1. Change a valid order

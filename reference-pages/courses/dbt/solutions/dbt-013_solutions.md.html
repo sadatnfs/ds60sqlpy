@@ -195,7 +195,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="dbt-013-explained-reference">dbt-013: explained reference<a class="heading-anchor" href="#dbt-013-explained-reference" aria-label="Link to this section">#</a></h2>
 <p>Construct and inspect a reproducible selection against an explicit baseline.</p>
-<p>The executable reference contains the two complete worked cases with assertions. The changes below explain the independent practice and its limits.</p>
+<p>The reference parses the project and reads model names from <code>dbt ls</code> output for <code>tag:feature+</code> and for <code>state:modified+</code> against a copied manifest. It proves which nodes each selector expands to for this graph; it does not build or test them. See <a href="../STUDY-GUIDE.md.html#answers-and-references">how these answers are laid out</a>.</p>
 <h3 id="1-remove-graph-expansion">1. Remove graph expansion<a class="heading-anchor" href="#1-remove-graph-expansion" aria-label="Link to this section">#</a></h3>
 <p>Use graph operators deliberately and inspect the returned set. A tag on one model does not automatically label every downstream consumer.</p>
 <p><strong>Why it holds here:</strong> tag:feature matches only base, the one model with the tag. The plus suffix adds descendants, which is why example_one returns base and child.</p>

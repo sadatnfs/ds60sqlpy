@@ -24,9 +24,11 @@ The classroom can demonstrate modules inside one source file. A real multi-file 
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles the saved pad as `main.rs` with pinned Rust 1.99.1, edition 2024, and the prepared Arrow 60 library. `assert!` and `assert_eq!` remain active in normal builds. The fixed pad accepts one source file without arbitrary arguments, interactive input, Cargo manifests or package installation. The main function returns `Result<(), Box<dyn std::error::Error>>` so later examples can propagate errors with `?`; the final `Ok(())` means this fixture completed successfully. Standard library and Arrow examples remain offline after image preparation. Multi-file Cargo and external ecosystem projects have separate explicit preparation workflows.
+This lesson's programs need only the prelude and their own helpers. A passing run prints `rust-023: passed`.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Pad setup and limits: [Run a lesson](../STUDY-GUIDE.md#run-a-lesson).
+
+Before you run anything, follow [Attempt a lesson](../STUDY-GUIDE.md#attempt-a-lesson).
 
 The later [InventoryLab Cargo project](../fixtures/InventoryLab/README.md) supplies actual multi-file source and integration tests outside the single-file pad.
 
@@ -34,7 +36,9 @@ The later [InventoryLab Cargo project](../fixtures/InventoryLab/README.md) suppl
 
 `mod domain { ... }` declares a module. pub exposes an item to permitted external paths. use imports a name into scope without copying its implementation. pub(crate) limits visibility to the current crate.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+**Reading Example A (Call a reviewed public function, code below).** `mod domain { ... }` declares a module inline, creating a new namespace. Items in a module are private by default, visible only inside that module and its children. Writing `pub fn double` exports the function to the parent scope, so it can be called through the path `domain::double`. The function's body could change without affecting callers as long as its signature and documented behavior stay the same; that signature is the stable public surface. The two assertions act as consumer tests: they use only the public path and check an ordinary value and the zero edge. Removing `pub` makes both calls fail with E0603, function `double` is private.
+
+Method for tracing your own variants: [Trace a program](../STUDY-GUIDE.md#trace-a-program).
 
 ## Worked example / walkthrough
 
@@ -98,13 +102,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 6. **Transfer and justify.** Split a future library and executable crate by responsibility and document dependency direction.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Record each task as in [Keep evidence for each task](../STUDY-GUIDE.md#keep-evidence-for-each-task).
 
 ## Common pitfalls and diagnosis
 
 Modules are not runtime services. Excessive pub can freeze accidental implementation details into an API. A use declaration does not install a dependency.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+To turn a pitfall into a test, see [Design a regression case](../STUDY-GUIDE.md#design-a-regression-case).
 
 ## Progressive hints
 
@@ -112,13 +116,25 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 2. Compare Example B (Import a name without changing ownership) with Example A and name the first line whose behavior differs. Its observation is: The shorter imported name refers to the same function.
 3. Before opening the explanation, test your task 3 attempt against this lesson's main pitfall: Modules are not runtime services.
 
+Tempting approaches to rule out before you compare:
+
+- **Task 1.** Assuming `domain` must be `pub mod` before `main` can use it confuses crate-level privacy with export. That change compiles, but it would only matter for code outside this crate, and it widens the surface for no caller here.
+- **Task 2.** Marking the helper `pub fn factor` "just in case" compiles, but it lets `main` write `domain::factor()`. Renaming or inlining the helper later then breaks that caller, which is exactly the accidental surface the lesson warns about.
+- **Task 3.** Returning `unit * quantity` as a plain `u32` hides the overflow: `total(u32::MAX, 2)` panics with attempt to multiply with overflow when overflow checks are on and wraps to 4294967294 otherwise, so the `None` contract cannot be expressed at all.
+- **Task 5.** Asserting `domain::factor() == 2` fails to compile from `main` with E0603. Making `factor` public to satisfy the test turns a refactoring detail into API that every later change must preserve.
+- **Task 6.** Keeping the domain logic in `src/main.rs` and adding `tests/report.rs` fails: an integration test links against the library target, and a package with only a binary has no library for the test to `use`.
+
 ## Self-check and next step
 
-Explain Module, Crate, Public API without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+Which items in `domain` does `main` reach, and which `pub` keyword makes each reachable? What does rustc report if `double` loses its `pub`? After `use domain::double;`, does `double(3)` call a copy of the function or the same function? Why is a small public surface easier to keep stable than a module where every item is `pub`?
+
+Then work through [Self-check and review](../STUDY-GUIDE.md#self-check-and-review).
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://doc.rust-lang.org/book/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+Read [The Rust Book, 7.2 Modules and Privacy](https://doc.rust-lang.org/book/ch07-02-defining-modules-to-control-scope-and-privacy.html) for `pub` and the default of private items.
+
+What the classroom does and does not prove: [Sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

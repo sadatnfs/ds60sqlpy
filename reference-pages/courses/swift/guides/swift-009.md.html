@@ -206,11 +206,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Copy-on-write:</strong> Storage sharing until a mutation requires separation.</p>
 <p><strong>Capacity:</strong> Reserved storage distinct from logical count.</p>
 <h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>The Linux Docker classroom compiles the saved pad as <code>main.swift</code> with Swift 6 language checking. An explicit <code>@main</code> type contains <code>static func main() async throws</code>; the fixed compiler uses <code>-parse-as-library -swift-version 6</code>. The examples use the standard library and portable Foundation. <code>precondition</code> makes a violated invariant fail the process. The fixed pad accepts one source file, without arbitrary command arguments, interactive input or dependency installation. SwiftUI, UIKit, Apple simulators and application signing belong to the separately prepared macOS/Xcode project labs, never the Linux pad.</p>
-<p>Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.</p>
+<p>Example B&#x27;s capacity call has no visible effect, which is the point. Print <code>values.capacity</code> in a scratch pad if you are curious, but never write a check that depends on the exact number, because the standard library may reserve more than requested. Task 4 traps at runtime with an index out of range.</p>
+<p>Compile contract, starter stop and success marker: <a href="../STUDY-GUIDE.md.html#running-a-lesson">running a lesson</a>.</p>
 <h3 id="syntax-anatomy-and-execution-trace">Syntax anatomy and execution trace<a class="heading-anchor" href="#syntax-anatomy-and-execution-trace" aria-label="Link to this section">#</a></h3>
 <p><code>[Int]</code> is an array type. append grows logical count; an index replaces an existing element. reserveCapacity prepares storage. ArraySlice may preserve original indices, so use its indices rather than assuming zero.</p>
-<p>Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.</p>
+<p>Each example ends with a trace; method: <a href="../STUDY-GUIDE.md.html#tracing-a-program">tracing a program</a>.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="example-a-mutate-an-independent-array-value">Example A: Mutate an independent array value<a class="heading-anchor" href="#example-a-mutate-an-independent-array-value" aria-label="Link to this section">#</a></h4>
 <p>The language contract concerns observable behavior even if storage was initially shared.</p>
@@ -230,6 +230,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> Appending to the copy leaves the original unchanged.</p>
+<p><strong>Trace.</strong> <code>original</code> is the array <code>[1, 2]</code>. Assigning it to <code>changed</code> copies the value; the two may share one buffer at first, an optimization the language permits. The <code>append</code> on <code>changed</code> is a mutation, so <code>changed</code> obtains its own unique buffer before writing 3. Afterward <code>original</code> still reads <code>[1, 2]</code> and <code>changed</code> reads <code>[1, 2, 3]</code>, which is all the checks examine. Whether storage was ever shared cannot be observed by these checks; only the values are part of the contract.</p>
 <h4 id="example-b-do-not-confuse-capacity-and-count">Example B: Do not confuse capacity and count<a class="heading-anchor" href="#example-b-do-not-confuse-capacity-and-count" aria-label="Link to this section">#</a></h4>
 <p>Capacity is a performance hint, not an index range.</p>
 <pre class="highlighted-code"><code class="language-swift"><span class="syntax-keyword">import</span> <span class="syntax-class">Foundation</span>
@@ -248,6 +249,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> Reserving twenty slots creates no logical elements.</p>
+<p><strong>Trace.</strong> <code>values</code> starts empty. <code>reserveCapacity(20)</code> requests storage for at least twenty elements but adds none, so <code>count</code> stays 0 and <code>values[0]</code> would still trap. <code>append(7)</code> adds the first logical element, and the count becomes 1, which makes index 0 valid and lets the check read 7. Capacity says how many elements can be added before a reallocation; count says which indices exist, and only positions in <code>0..&lt;count</code> may be subscripted.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <ol>
 <li><strong>Predict and explain.</strong> Predict original and changed arrays after append.</li>
@@ -267,10 +269,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <ol start="6">
 <li><strong>Transfer and justify.</strong> Explain what changes when array elements are mutable class instances.</li>
 </ol>
-<p>For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.</p>
+<p>Log each task in the <a href="../STUDY-GUIDE.md.html#recording-exercise-evidence">evidence table</a> before opening the explanation.</p>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
 <p>Array value semantics do not recursively clone objects. Never assume ArraySlice starts at index zero. Repeated insertions at the front can create quadratic work.</p>
-<p>A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.</p>
+<p>For task 5, build <code>let slice = [10, 20, 30, 40][2...]</code>. Its <code>startIndex</code> is 2, not 0, so <code>slice[0]</code> traps even though the slice has two elements, and a loop over <code>0..&lt;slice.count</code> reads the wrong positions. Write the traversal with <code>slice.indices</code> instead and check it on the empty slice <code>[1, 2][2...]</code>, where the loop must run zero times.</p>
+<p>Repair routine: <a href="../STUDY-GUIDE.md.html#building-a-regression-case">building a regression case</a>.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <ol>
 <li>Reproduce Example A (Mutate an independent array value) before changing anything, and confirm its observation: Appending to the copy leaves the original unchanged.</li>
@@ -278,9 +281,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>Before opening the explanation, check your task 3 attempt (Build a filtered array without changing the source) against each pitfall listed above, and add one input that would expose the tempting wrong rule.</li>
 </ol>
 <h3 id="self-check-and-next-step">Self-check and next step<a class="heading-anchor" href="#self-check-and-next-step" aria-label="Link to this section">#</a></h3>
-<p>Explain Value semantics, Copy-on-write, Capacity without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.</p>
+<p>Explain what copy-on-write guarantees and what it does not promise about memory. Predict the result of copying an array of class instances and changing a property through the copy. Explain why inserting at index 0 inside a loop over n elements can take time proportional to n squared.</p>
+<p>Then follow the general <a href="../STUDY-GUIDE.md.html#self-check-routine">self-check routine</a> and save your pad.</p>
 <h3 id="sources-and-execution-boundary">Sources and execution boundary<a class="heading-anchor" href="#sources-and-execution-boundary" aria-label="Link to this section">#</a></h3>
-<p><a href="https://docs.swift.org/swift-book/documentation/the-swift-programming-language/">Official language or framework documentation</a>. The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.</p>
+<p><a href="https://docs.swift.org/swift-book/documentation/the-swift-programming-language/">Documentation</a>: The Collection Types chapter of the Swift book covers arrays and their mutating methods; Structures and Classes explains why arrays behave as values.</p>
+<p>Provenance and limits: <a href="../STUDY-GUIDE.md.html#sources-and-execution-boundary">sources and execution boundary</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for swift-009: Arrays and copy-on-write value semantics.
 Read courses/swift/guides/swift-009.md and courses/swift/lessons/swift-009.swift. Prerequisites: swift-008.

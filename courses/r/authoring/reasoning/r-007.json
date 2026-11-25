@@ -42,5 +42,7 @@
       "wrong": "Testing only `all(result == c(1, 2))`. That passes after `unname()` or `as.numeric()` has stripped the labels a caller relies on.",
       "verify": "The reference asserts `identical(names(x), c(\"A\", \"B\"))`, a test that fails as soon as the labels change."
     }
-  ]
+  ],
+  "run_note": "The starter copies a named vector and prints its attributes, which list only the names A and B. Run it, then change one element of `copy` and print both vectors: `original` keeps its values because ordinary vectors are copied on modification. That printed contrast is the baseline for the environment example, where a change made through one binding is visible through every other binding.",
+  "checks_note": "The assertions confirm that changing a copy leaves the original first element at 1, that `unname()` removes names but keeps the values 1 and 2, that a `dim` attribute turns four numbers into a 2 by 2 shape, that an environment counter reaches 3 through shared mutation, and that `c(A = 1)` is not identical to 1 because names are part of the value. They cannot detect attributes lost in steps you add later."
 }

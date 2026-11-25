@@ -194,10 +194,10 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/dax/guides/dax-036.md</code></p>
     </header>
     <article class="document"><h2 id="dax-036-calendar-based-time-intelligence-is-a-metadata-dependent-continuation">dax-036: Calendar-based time intelligence is a metadata-dependent continuation<a class="heading-anchor" href="#dax-036-calendar-based-time-intelligence-is-a-metadata-dependent-continuation" aria-label="Link to this section">#</a></h2>
-<p><strong>Stage 6: Dates, periods and temporal meaning.</strong> Level: intermediate. Read the mechanisms, trace the worked cases and retain your own draft. <strong>Direct prerequisites:</strong> <code>dax-031</code>, <code>dax-035</code></p>
+<p><strong>Stage 6: Dates, periods and temporal meaning.</strong> Level: intermediate. <strong>Direct prerequisites:</strong> <code>dax-031</code>, <code>dax-035</code></p>
 <h3 id="how-to-use-this-offline-lesson">How to use this offline lesson<a class="heading-anchor" href="#how-to-use-this-offline-lesson" aria-label="Link to this section">#</a></h3>
-<p>This is an offline DAX editing lesson. No DAX compiler, semantic-model engine, Power BI account or network connection is required. Worked tables describe the named reference and model, not execution of your draft. Save, compare and export source; do not interpret a comparison or completion marker as a passed program run.</p>
-<p>Open the <a href="../lessons/dax-036.dax.html">starter</a>. Compare the <a href="../solutions/dax-036_reference.dax.html">named reference</a> and <a href="../solutions/dax-036_solutions.md.html">reasoning</a> when ready. The <a href="../models/retail/model.json.html">model specification</a> identifies every fixture table, column type, key and relationship. The <a href="../models/README.md.html">fixture handbook</a> displays the original data and explains each table grain.</p>
+<p>The starter asks for a Gregorian YTD and a declared retail YTD at the same anchor. Before reading the cases, write the date range each year definition admits for 2025-02-03 and the lines inside each range. The <a href="../STUDY-GUIDE.md.html#offline-study-boundary">offline study boundary</a> explains what a worked table can show.</p>
+<p>Files: <a href="../lessons/dax-036.dax.html">starter</a>, <a href="../solutions/dax-036_reference.dax.html">reference</a> and <a href="../solutions/dax-036_solutions.md.html">reasoning</a>.</p>
 <h3 id="the-question-and-the-mechanism">The question and the mechanism<a class="heading-anchor" href="#the-question-and-the-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Explain why a calendar reference can represent a different year definition than a classic date column.</p>
 <p>Calendar-based time intelligence uses a named calendar&#x27;s tagged metadata rather than assuming that every time function receives a classic Date column. The metadata tells the engine which columns represent day, year and other temporal categories. A calendar name is not an arbitrary alias for a Date column; its definition is part of the formula&#x27;s input contract.</p>
@@ -207,14 +207,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The classic overload receives &#x27;Date&#x27;[Date]. The calendar overload receives the declared RetailCalendar reference. Both use the same revenue measure and anchor. Model JSON records the intended tags as a reviewable offline specification; it is not a claim that a Power BI project was loaded or that preview behavior was engine-tested.</p>
 <p>Concepts to explain in your own words: <strong>calendar metadata</strong>, <strong>calendar-based time intelligence</strong>, <strong>preview</strong>, <strong>tagged columns</strong>, <strong>compatibility</strong>.</p>
 <h3 id="model-and-context-contract">Model and context contract<a class="heading-anchor" href="#model-and-context-contract" aria-label="Link to this section">#</a></h3>
-<p>The ordinary star follows Product → Sales, Customer → Sales and Date → Sales through OrderDate. The ShipDate relationship is inactive unless a case explicitly activates it. Filters flow from the one side to the many side. Additional analytical tables have only the relationships declared in their named model; a similar column name does not create a relationship.</p>
+<p>The classic Date table uses the Gregorian year. The optional RetailCalendar metadata declares a retail year starting February 1, so the anchor sits on day three of RetailYear 2026. The February 2025 lines are S7 (20 USD) and S8 (36). See the <a href="../models/retail/model.json.html">model specification</a> and the <a href="../STUDY-GUIDE.md.html#the-retail-star">shared star rules</a>.</p>
 <pre class="highlighted-code"><code class="language-text">Product (one)  --&gt; Sales (many) &lt;-- Customer (one)
                        ^
                        | active OrderDate
                     Date (one)
                        | inactive ShipDate
                        +------&gt; Sales</code></pre>
-<p>All amounts in ordinary Sales are USD after the line discount, before tax and returns. The Date fixture is complete for 2024 and 2025; a short result table is a selected slice, not the whole calendar. JSON <code>null</code> in the worked-results sidecar means DAX BLANK, not the text &quot;null&quot;.</p>
 <h3 id="worked-cases">Worked cases<a class="heading-anchor" href="#worked-cases" aria-label="Link to this section">#</a></h3>
 <h4 id="feature-and-version-boundary">Feature and version boundary<a class="heading-anchor" href="#feature-and-version-boundary" aria-label="Link to this section">#</a></h4>
 <p>As reviewed on 2026-10-25, Microsoft&#x27;s calendar-based time-intelligence documentation labels the feature preview. It is an optional, metadata-dependent continuation. The offline course requires neither a preview engine nor a Power BI installation; do not confuse this status with the separate generally available DAX UDF feature.</p>
@@ -259,8 +258,10 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 </tbody></table></div>
 <p>This is a reference derivation under a declared metadata assumption, not observed preview-engine output. An undefined calendar name would not be a usable external query.</p>
 <p>Hand-derived under the explicitly specified optional calendar metadata. No preview engine, model authoring or execution was performed.</p>
+<h3 id="a-misconception-to-test">A misconception to test<a class="heading-anchor" href="#a-misconception-to-test" aria-label="Link to this section">#</a></h3>
+<p>Learners who see TOTALYTD in both queries expect the same number and suspect the retail result of 56 is a bug. The function is the same, but the calendar argument differs. With &#x27;Date&#x27;[Date] the year starts on January 1 and admits S4 through S8 for 123. With RetailCalendar the year begins on February 1 and admits only S7 and S8. The other trap is treating the second number as observed output. It is a derivation under a declared metadata assumption about a preview feature, and pasting the query into a model without that calendar object will not run.</p>
 <h3 id="practice-prediction-construction-and-diagnosis">Practice: prediction, construction and diagnosis<a class="heading-anchor" href="#practice-prediction-construction-and-diagnosis" aria-label="Link to this section">#</a></h3>
-<p>Retain your formula or written reasoning, the stated context, contributing rows or values, and a conclusion with its unit. These notes are your own study record; they do not show that a formula ran.</p>
+<p>Record each answer as the <a href="../STUDY-GUIDE.md.html#practice-routine">practice routine</a> describes.</p>
 <h4 id="exercise-1-predict">Exercise 1: Predict<a class="heading-anchor" href="#exercise-1-predict" aria-label="Link to this section">#</a></h4>
 <p>Predict the retail-year label for January 31, 2025.</p>
 <h4 id="exercise-2-change-one-condition">Exercise 2: Change one condition<a class="heading-anchor" href="#exercise-2-change-one-condition" aria-label="Link to this section">#</a></h4>
@@ -283,14 +284,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>Publish the exact period membership before choosing a function.</li>
 </ol>
 <h3 id="self-check-and-next-step">Self-check and next step<a class="heading-anchor" href="#self-check-and-next-step" aria-label="Link to this section">#</a></h3>
-<p>Explain one changed result without quoting the formula alone. Identify which rows, filters, relationship or evaluation scope changed, then construct a counterexample to a plausible wrong interpretation. Keep your draft separate from the supplied reference. A small correct derivation does not certify performance, model security or broad expertise.</p>
+<p>Predict both YTD values at anchor 2025-01-31. Then list the metadata you would need to confirm before trusting any retail-calendar figure in a real model. The <a href="../STUDY-GUIDE.md.html#self-check-routine">self-check routine</a> applies too.</p>
 <p>Continue to <a href="dax-037.md.html">dax-037</a> when its prerequisites make sense, or revisit this stage from the <a href="../README.md.html">course map</a>.</p>
 <h3 id="official-references-and-evidence-limits">Official references and evidence limits<a class="heading-anchor" href="#official-references-and-evidence-limits" aria-label="Link to this section">#</a></h3>
 <ul>
 <li><a href="https://learn.microsoft.com/en-us/power-bi/transform-model/desktop-time-intelligence">Power BI: time intelligence</a></li>
 <li><a href="https://learn.microsoft.com/en-us/dax/totalytd-function-dax">DAX function: TOTALYTD</a></li>
 </ul>
-<p>Documentation was reviewed for this original course on 2026-10-25. Version-sensitive features have explicit notes. Source/model checks and independent fixture arithmetic are not a DAX parser, compiler, semantic engine, real RLS test or performance measurement.</p>
+<p>Review date and evidence limits: <a href="../STUDY-GUIDE.md.html#references-and-evidence-limits">study guide</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for dax-036. Read its guide and the named model.
 Review my draft and prediction. Ask me to enumerate the relevant rows and context.

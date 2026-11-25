@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cuda/python/solutions/cuda-092_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="cuda-092-explained-solutions">cuda-092: explained solutions<a class="heading-anchor" href="#cuda-092-explained-solutions" aria-label="Link to this section">#</a></h2>
-<p>These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.</p>
+<p>Compare with your <a href="../lessons/cuda-092.md.html">worksheet</a> attempt.</p>
 <h3 id="exercise-1-compute-timeline-wall-time">Exercise 1: Compute timeline wall time<a class="heading-anchor" href="#exercise-1-compute-timeline-wall-time" aria-label="Link to this section">#</a></h3>
 <p>Use latest completion minus first start.</p>
 <p><strong>Approach.</strong> Compute wall time as latest completion minus earliest start: preparation runs 0 to 6 ms and GPU work 2 to 10 ms, so the step takes <code>10 - 0 = 10</code> ms.</p>
@@ -231,9 +231,19 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Why it is correct here.</strong> Profiler numbers include overhead, so the final claim must come from clean measurements. Equal outputs confirm the change did not alter what the step computes.</p>
 <p><strong>A plausible wrong approach.</strong> Reporting the speedup measured under the profiler assumes overhead is equal in both versions. Removing host reads also removes instrumented events, so overhead itself changes.</p>
 <p><strong>How to verify.</strong> Report the median step time over a fixed number of steps after warm-up for both versions, with equal loss values.</p>
+<h3 id="self-check-answers">Self-check answers<a class="heading-anchor" href="#self-check-answers" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>Why can summed event durations exceed wall time?</strong> Events on the CPU and the GPU can run at the same time, so their durations overlap rather than add.</li>
+</ol>
+<ol start="2">
+<li><strong>Why is high GPU utilization not proof of useful work?</strong> The device can be busy with wasteful copies or redundant kernels; utilization measures activity, not progress toward the result.</li>
+</ol>
+<ol start="3">
+<li><strong>What context must be kept with a saved trace?</strong> The hardware, software versions and workload, because the same code can produce a very different trace elsewhere.</li>
+</ol>
 <h3 id="reference-observation">Reference observation<a class="heading-anchor" href="#reference-observation" aria-label="Link to this section">#</a></h3>
 <p>Summed event durations 14 ms, complete interval 10 ms.</p>
-<p>The reference file is <code>courses/cuda/python/references/cuda-092_cpu.py</code>. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.</p></article>
+<p>Asserted by <code>courses/cuda/python/references/cuda-092_cpu.py</code>.</p></article>
   </main>
 </body>
 </html>

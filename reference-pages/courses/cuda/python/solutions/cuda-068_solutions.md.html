@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cuda/python/solutions/cuda-068_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="cuda-068-explained-solutions">cuda-068: explained solutions<a class="heading-anchor" href="#cuda-068-explained-solutions" aria-label="Link to this section">#</a></h2>
-<p>These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.</p>
+<p>Compare with your <a href="../lessons/cuda-068.md.html">worksheet</a> attempt.</p>
 <h3 id="exercise-1-compute-centered-columns">Exercise 1: Compute centered columns<a class="heading-anchor" href="#exercise-1-compute-centered-columns" aria-label="Link to this section">#</a></h3>
 <p>The means are two and five.</p>
 <p><strong>Approach.</strong> Compute each column mean over the two rows, then subtract it: column 0 is <code>(1+3)/2 = 2</code>, column 1 is <code>(3+7)/2 = 5</code>, giving centered rows <code>[[-1,-2],[1,2]]</code>.</p>
@@ -231,9 +231,19 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Why it is correct here.</strong> CuPy and NumPy implement these operations with tested dtype promotion and edge handling. The centering and distance in this chapter are a few library calls, so a custom kernel would have to beat a correct baseline rather than replace a missing one.</p>
 <p><strong>A plausible wrong approach.</strong> Starting with a raw kernel for centering means writing reduction, broadcasting and tail handling by hand, with no reference to tell whether a wrong column mean is a kernel bug or a math bug.</p>
 <p><strong>How to verify.</strong> Keep the library result for <code>[[1,3],[3,7]]</code> and the distance 25 as fixed test cases. Any later kernel must reproduce <code>[[-1,-2],[1,2]]</code> and 25 under a stated tolerance before its speed is discussed.</p>
+<h3 id="self-check-answers">Self-check answers<a class="heading-anchor" href="#self-check-answers" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>How does broadcasting subtract column means without building a repeated matrix?</strong> A dimension of size one is extended logically, so the length-2 mean vector is reused for every row. No full repeated copy is materialized.</li>
+</ol>
+<ol start="2">
+<li><strong>What property of the centered result checks the computation?</strong> Every centered column sums to zero, as <code>[-1, 1]</code> and <code>[-2, 2]</code> do here.</li>
+</ol>
+<ol start="3">
+<li><strong>Why is a mature library baseline also a performance competitor?</strong> A custom kernel must match the library&#x27;s correctness and beat its speed. If the library already optimizes the operation, the custom kernel adds maintenance and testing work with no gain.</li>
+</ol>
 <h3 id="reference-observation">Reference observation<a class="heading-anchor" href="#reference-observation" aria-label="Link to this section">#</a></h3>
 <p>Centered columns and distance 25.</p>
-<p>The reference file is <code>courses/cuda/python/references/cuda-068_cpu.py</code>. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.</p></article>
+<p>Asserted by <code>courses/cuda/python/references/cuda-068_cpu.py</code>.</p></article>
   </main>
 </body>
 </html>

@@ -196,7 +196,6 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <article class="document"><h2 id="cuda-036-explanatory-solutions">cuda-036: explanatory solutions<a class="heading-anchor" href="#cuda-036-explanatory-solutions" aria-label="Link to this section">#</a></h2>
 <h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
 <p>Occupancy compares resident warps with a hardware limit. Residency is constrained by threads, blocks, register allocation and shared memory, including allocation granularity. Resident does not mean ready to issue: a warp may wait for data or dependencies. More work per thread can improve reuse while increasing registers and reducing occupancy. Forcing fewer registers can increase spills to device memory. The goal is a correct faster workload, not maximizing one percentage. Use reviewed launch candidates, compiler resource reports and timings together, and avoid pretending a simplified resource arithmetic model reproduces every scheduling rule.</p>
-<p>The separate <a href="../references/cuda-036_cpu.py.html">CPU reference</a> checks the chapter&#x27;s bounded model. It does not execute CUDA or establish GPU timing. Compare after attempting the worksheet or explicitly choosing to reveal solutions.</p>
 <h3 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h3>
 <p>In a simplified SM with 65,536 registers, a 256-thread block using 64 registers per thread needs 16,384 registers. Registers alone permit four blocks. At 128 registers per thread, registers alone permit two. Other limits can reduce both figures; this calculation is not an actual occupancy API result.</p>
 <p><strong>Approach:</strong> Divide 65,536 registers by 256 threads times registers per thread for 64 and 128 registers.</p>
@@ -233,11 +232,16 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Why it is correct:</strong> Holding everything else fixed attributes differences to block size alone.</p>
 <p><strong>A plausible wrong approach:</strong> Changing tile size and block size together in one sweep mixes two effects.</p>
 <p><strong>How to verify:</strong> Validate every output and retain resource reports and timing samples for each size.</p>
+<h3 id="self-check-answers">Self-check answers<a class="heading-anchor" href="#self-check-answers" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>How many 256-thread blocks fit by registers at 32 registers per thread with 65,536 registers?</strong> Eight, since each block needs 8,192 registers.</li>
+<li><strong>What is the difference between a resident warp and an eligible warp?</strong> A resident warp has resources on the SM; an eligible warp also has its next instruction ready to issue.</li>
+<li><strong>What does a register spill cost?</strong> Extra local memory traffic, which is backed by device memory.</li>
+</ol>
 <h3 id="numerical-reference-and-its-limits">Numerical reference and its limits<a class="heading-anchor" href="#numerical-reference-and-its-limits" aria-label="Link to this section">#</a></h3>
-<p>The complete CPU model is <a href="../references/cuda-036_cpu.py.html">here</a>. Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It does not claim CUDA execution, concurrency safety or a performance measurement.</p>
+<p>The <a href="../references/cuda-036_cpu.py.html">CPU reference</a> reproduces worked example 1 and prints <code>{&#x27;register_only_block_limits&#x27;: [4, 2], &#x27;other_hardware_limits_included&#x27;: False}</code>.</p>
 <h3 id="transfer-review">Transfer review<a class="heading-anchor" href="#transfer-review" aria-label="Link to this section">#</a></h3>
-<p>Use a small explicit set such as 64,128,256 threads, hold algorithm/input fixed, validate every result, retain resource reports and timing distributions.</p>
-<p>A complete explanation must name its inputs, the unchanged mathematical contract, the changed boundary or resource condition, and the evidence still needed on actual hardware. Preserve a CPU baseline even after a GPU path becomes available.</p></article>
+<p>Use a small explicit set such as 64,128,256 threads, hold algorithm/input fixed, validate every result, retain resource reports and timing distributions.</p></article>
   </main>
 </body>
 </html>

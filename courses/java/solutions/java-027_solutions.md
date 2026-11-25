@@ -1,6 +1,6 @@
 # java-027: explanatory solutions
 
-Open after an attempt or an explicit solution reveal. The executable reference runs the six exercise checks together as `Main.java`. The guide contains independent worked examples, while this file explains the choices and failure cases in the complete answer.
+Open this after an attempt; see [using the solutions](../STUDY-GUIDE.md#use-the-solutions).
 
 ## Mechanism review
 
@@ -22,7 +22,7 @@ The JavaCompiler API invokes the prepared compiler with --release 21. The JDK ja
 
 ## Exercise 1: Compile a literal application: predict an edited check
 
-Task: Copy Example A into a scratch `Main.java` and change `assert java.nio.file.Files.isRegularFile(fixture.classes.resolve("Hello.class"));` to `assert java.nio.file.Files.isRegularFile(fixture.classes.resolve("Hello.class!"));` inside its assertion. Before running it with `java -ea Main`, predict whether the assertion still holds and explain why; then restore it.
+Task: Change Example A's assertion to `assert java.nio.file.Files.isRegularFile(fixture.classes.resolve("Hello.class!"));`, predict whether it holds, then run and restore it.
 
 The compiler target is explicit. A file named.class would not by itself prove that the source compiled successfully.
 
@@ -36,13 +36,13 @@ try (BuildFixture fixture = new BuildFixture()) {
 }
 ```
 
-**Expected:** The changed run fails with an `AssertionError` from the assertion on `java.nio.file.Files.isRegularFile(fixture.classes.resolve("Hello.class"))`. Restoring the original line brings back the worked observation: compiler exit 0; Hello.class exists.
+**Expected:** The edited run fails with an `AssertionError` from the assertion on `java.nio.file.Files.isRegularFile(fixture.classes.resolve("Hello.class"))`.
 
-**Verify:** Compare your written prediction with the reported `AssertionError` and its stack-trace line, and explain why the edited condition is false for the values that satisfy `java.nio.file.Files.isRegularFile(fixture.classes.resolve("Hello.class"))`. After restoring the line, the program completes without an `AssertionError` again.
+**Verify:** Explain why the edited assertion is false for the values that satisfy `java.nio.file.Files.isRegularFile(fixture.classes.resolve("Hello.class"))`.
 
 ## Exercise 2: Create a runnable archive: diagnose an edited check
 
-Task: A careless edit changed the assertion that Example B adds after Example A so that it reads `assert archive.getManifest().getMainAttributes().getValue("Main-Class").equals("Hello!");`. Run Example B with that line, explain why the edited assertion now fails for the same program state, and restore it.
+Task: Example B's new assertion was edited to `assert archive.getManifest().getMainAttributes().getValue("Main-Class").equals("Hello!");`. Explain why it fails for unchanged state and restore it.
 
 The archive contains both bytecode and entrypoint metadata. These are separate checks from its filename extension.
 
@@ -60,9 +60,9 @@ try (BuildFixture fixture = new BuildFixture()) {
 }
 ```
 
-**Expected:** Before the repair the run fails with an `AssertionError` from the assertion on `archive.getManifest().getMainAttributes().getValue("Main-Class").equals("Hello")`; after it the line reads `assert archive.getManifest().getMainAttributes().getValue("Main-Class").equals("Hello");` again and JAR exists and contains Hello.class.
+**Expected:** The edited run fails with an `AssertionError` from the assertion on `archive.getManifest().getMainAttributes().getValue("Main-Class").equals("Hello")`; the restored assertion passes.
 
-**Verify:** Keep the failing and the repaired runs. Explain why the edited assertion rejects the same program state that `archive.getManifest().getMainAttributes().getValue("Main-Class").equals("Hello")` accepts.
+**Verify:** Explain why the edited assertion rejects the state that `archive.getManifest().getMainAttributes().getValue("Main-Class").equals("Hello")` accepts.
 
 ## Exercise 3: Compare two builds with fixed metadata
 
@@ -89,7 +89,7 @@ try (BuildFixture fixture = new BuildFixture()) {
 
 **Expected:** archive byte hashes equal in this prepared JDK.
 
-**Verify:** Keep an assertion equivalent to `compiled == 0`. As a control, change `assert compiled == 0;` to `assert compiled != 0;` inside it: the run must fail with an `AssertionError`, which shows the assertion can fail. Restore it.
+**Verify:** Control: changing `assert compiled == 0;` to `assert compiled != 0;` inside the assertion must make it fail.
 
 ## Exercise 4: Execute the packaged entrypoint
 
@@ -108,7 +108,7 @@ try (BuildFixture fixture = new BuildFixture()) {
 
 **Expected:** stdout build-ok; exit 0.
 
-**Verify:** Keep an assertion equivalent to `output.strip().equals("build-ok")`. As a control, change `assert output.strip().equals("build-ok");` to `assert output.strip().equals("build-ok!");` inside it: the run must fail with an `AssertionError`, which shows the assertion can fail. Restore it.
+**Verify:** Control: changing `assert output.strip().equals("build-ok");` to `assert output.strip().equals("build-ok!");` inside the assertion must make it fail.
 
 ## Exercise 5: Detect a changed source identity
 
@@ -129,7 +129,7 @@ assert !Arrays.equals(first, second);
 
 **Expected:** different SHA-256 digests.
 
-**Verify:** Keep an assertion equivalent to `!Arrays.equals(first, second)`. As a control, change `"class A { int x=1; }".getBytes(java.nio.charset.StandardCharsets.UTF_8)` to `"class A { int x=2; }".getBytes(java.nio.charset.StandardCharsets.UTF_8)`: the run must fail with an `AssertionError` from the assertion on `!Arrays.equals(first, second)`. Restore the line before continuing.
+**Verify:** Control: changing `"class A { int x=1; }".getBytes(java.nio.charset.StandardCharsets.UTF_8)` to `"class A { int x=2; }".getBytes(java.nio.charset.StandardCharsets.UTF_8)` must fail the assertion on `!Arrays.equals(first, second)`.
 
 ## Exercise 6: Record an explicit dependency contract
 
@@ -152,8 +152,10 @@ assert dependency.get("version").equals("2.5.252") &&
 
 **Expected:** exact version accepted; LATEST not treated as a pin.
 
-**Verify:** Keep an assertion equivalent to `dependency.get("version").equals("2.5.252") && !dependency.get("version").equals("LATEST")`. As a control, change `"2.5.252",` to `"3.5.252",`: the run must fail with an `AssertionError` from the assertion on `dependency.get("version").equals("2.5.252") && !dependency.get("version").equals("LATEST")`. Restore the line before continuing.
+**Verify:** Control: changing `"2.5.252",` to `"3.5.252",` must fail the assertion on `dependency.get("version").equals("2.5.252") && !dependency.get("version").equals("LATEST")`.
 
 ## After comparing the answer
 
-Run the complete reference with assertions enabled, then return to your own implementation. Recreate one check with different values and explain its expected result before execution. A compiler error, an expected domain exception and an assertion failure represent different stages and should be reported separately. Preserve ownership boundaries when adapting file, network or concurrency examples. The reference never authorizes access to a shared service or deletion of learner state. Use a fresh tiny fixture when you need to distinguish two interpretations of an API contract.
+Remove the `--date` argument from `pack` in your copy, pack twice a few seconds apart, and compare the digests; then explain which bytes changed.
+
+Run the complete reference with `java -ea Main` first; the [review routine](../STUDY-GUIDE.md#use-the-solutions) covers the rest.

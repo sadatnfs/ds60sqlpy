@@ -206,12 +206,12 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Binding:</strong> Read/write access to state owned elsewhere.</p>
 <p><strong>View identity:</strong> The continuity SwiftUI uses to associate state with a view position.</p>
 <h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>The Linux Docker classroom compiles the saved pad as <code>main.swift</code> with Swift 6 language checking. An explicit <code>@main</code> type contains <code>static func main() async throws</code>; the fixed compiler uses <code>-parse-as-library -swift-version 6</code>. The examples use the standard library and portable Foundation. <code>precondition</code> makes a violated invariant fail the process. The fixed pad accepts one source file, without arbitrary command arguments, interactive input or dependency installation. SwiftUI, UIKit, Apple simulators and application signing belong to the separately prepared macOS/Xcode project labs, never the Linux pad.</p>
-<p>Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.</p>
+<p>Only the <code>FormState</code> kernel runs here, and the property wrappers named in the notes belong to the Apple app. Tasks 3 and 5 need JourneyApp on macOS with Xcode; on Linux, record them as not performed rather than reasoning from the kernel. Tasks 1 and 2 work in the pad.</p>
+<p>Compile contract, starter stop and success marker: <a href="../STUDY-GUIDE.md.html#running-a-lesson">running a lesson</a>.</p>
 <p>Apple-only project lab: <a href="../fixtures/JourneyApp/README.md.html">JourneyApp state and editing workflow</a>. Linux verifies the domain kernel only.</p>
 <h3 id="syntax-anatomy-and-execution-trace">Syntax anatomy and execution trace<a class="heading-anchor" href="#syntax-anatomy-and-execution-trace" aria-label="Link to this section">#</a></h3>
 <p>In the external app, @State retains the model reference, @Observable tracks relevant property access, and @Bindable creates bindings to editable model properties. The Linux kernel models the same single-source rule without importing SwiftUI.</p>
-<p>Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.</p>
+<p>Each example ends with a trace; method: <a href="../STUDY-GUIDE.md.html#tracing-a-program">tracing a program</a>.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="example-a-derive-presentation-from-one-state">Example A: Derive presentation from one state<a class="heading-anchor" href="#example-a-derive-presentation-from-one-state" aria-label="Link to this section">#</a></h4>
 <p>Derived presentation avoids a second label field that can become stale.</p>
@@ -234,6 +234,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The label follows the stored completion state.</p>
+<p><strong>Trace.</strong> <code>FormState</code> has two stored properties, title and completed, and one computed property, <code>buttonLabel</code>. Nothing stores a label. Reading <code>buttonLabel</code> evaluates the conditional at that moment: completed is false, so it returns Mark complete. Because the label is computed on each read, no code path can update the state and forget to update the label, which is the bug a separate stored label field invites.</p>
 <h4 id="example-b-a-state-change-updates-its-derived-view">Example B: A state change updates its derived view<a class="heading-anchor" href="#example-b-a-state-change-updates-its-derived-view" aria-label="Link to this section">#</a></h4>
 <p>The transition has one source of truth and independent fields remain unchanged.</p>
 <pre class="highlighted-code"><code class="language-swift"><span class="syntax-keyword">import</span> <span class="syntax-class">Foundation</span>
@@ -257,6 +258,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> Changing completion changes the derived label while retaining the title.</p>
+<p><strong>Trace.</strong> <code>state</code> is declared with <code>var</code> so its stored property can change. Setting completed to true is the only mutation. The next read of <code>buttonLabel</code> evaluates the conditional again and now returns Mark incomplete. The second check confirms title is still Read, so changing one stored field did not reset its neighbor. In SwiftUI the same rule appears as one source of truth with views computed from it.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <ol>
 <li><strong>Predict and explain.</strong> Identify stored and derived state in the kernel.</li>
@@ -276,10 +278,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <ol start="6">
 <li><strong>Transfer and justify.</strong> Decide whether a piece of state belongs to the view, model or domain core and justify its lifetime.</li>
 </ol>
-<p>For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.</p>
+<p>Log each task in the <a href="../STUDY-GUIDE.md.html#recording-exercise-evidence">evidence table</a> before opening the explanation.</p>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
 <p>A binding is not a cloned value. Recreating a model in a transient view computation can discard edits. UI disablement does not replace domain validation.</p>
-<p>A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.</p>
+<p>For task 2, a disabled state must be derived from title, and the boundary is a title of only spaces: decide whether trimming applies and test it. Task 4&#x27;s child view copies the parent&#x27;s value into its own state once, so later parent changes never reach it. The counterexample is changing the title in the parent after the child appears and seeing the child still show the old text.</p>
+<p>Repair routine: <a href="../STUDY-GUIDE.md.html#building-a-regression-case">building a regression case</a>.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <ol>
 <li>Reproduce Example A (Derive presentation from one state) before changing anything, and confirm its observation: The label follows the stored completion state.</li>
@@ -287,9 +290,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>Before opening the explanation, check your task 3 attempt (Run JourneyApp and edit a title through its real binding) against each pitfall listed above, and add one input that would expose the tempting wrong rule.</li>
 </ol>
 <h3 id="self-check-and-next-step">Self-check and next step<a class="heading-anchor" href="#self-check-and-next-step" aria-label="Link to this section">#</a></h3>
-<p>Explain Source of truth, Binding, View identity without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.</p>
+<p>Name the stored and derived properties of <code>FormState</code> and explain why the label must not be stored. Describe what <code>@State</code>, <code>@Observable</code> and <code>@Bindable</code> each contribute in the app. For one piece of form state, decide whether it belongs to the view, the model or the domain core and justify its lifetime.</p>
+<p>Then follow the general <a href="../STUDY-GUIDE.md.html#self-check-routine">self-check routine</a> and save your pad.</p>
 <h3 id="sources-and-execution-boundary">Sources and execution boundary<a class="heading-anchor" href="#sources-and-execution-boundary" aria-label="Link to this section">#</a></h3>
-<p><a href="https://developer.apple.com/documentation/swiftui/managing-model-data-in-your-app">Official language or framework documentation</a>. The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.</p>
+<p><a href="https://developer.apple.com/documentation/swiftui/managing-model-data-in-your-app">Documentation</a>: Apple&#x27;s SwiftUI documentation covers <code>State</code>, <code>Bindable</code> and the Observation framework; the Swift book&#x27;s Properties chapter covers computed properties.</p>
+<p>Provenance and limits: <a href="../STUDY-GUIDE.md.html#sources-and-execution-boundary">sources and execution boundary</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for swift-040: SwiftUI state, bindings and a single source of truth.
 Read courses/swift/guides/swift-040.md and courses/swift/lessons/swift-040.swift. Prerequisites: swift-039.

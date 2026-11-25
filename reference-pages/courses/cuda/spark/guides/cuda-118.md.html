@@ -194,9 +194,17 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cuda/spark/guides/cuda-118.md</code></p>
     </header>
     <article class="document"><h2 id="cuda-118-columnar-batches-arrow-and-data-movement">cuda-118: Columnar batches, Arrow and data movement<a class="heading-anchor" href="#cuda-118-columnar-batches-arrow-and-data-movement" aria-label="Link to this section">#</a></h2>
-<p><strong>Route:</strong> CUDA Python and machine learning / GPU Spark specialization. <strong>Stage:</strong> advanced. <strong>Prerequisites:</strong> <code>cuda-113</code>, <code>cuda-117</code>. Allow several sessions when the hardware experiment is new; the chapter is not a deadline.</p>
-<h3 id="what-you-will-be-able-to-explain">What you will be able to explain<a class="heading-anchor" href="#what-you-will-be-able-to-explain" aria-label="Link to this section">#</a></h3>
-<p>By the end, you can <strong>count fixed-width payload</strong>, <strong>locate row-column transitions</strong>, and <strong>design a conversion parity test</strong> with evidence. Start with the two worked cases, then use the editable CPU model to make the quantities concrete.</p>
+<p><strong>Route:</strong> CUDA Python and machine learning / GPU Spark specialization. <strong>Stage:</strong> advanced. <strong>Prerequisites:</strong> <code>cuda-113</code>, <code>cuda-117</code>.</p>
+<p>Pacing, evidence labels and platform rules: <a href="../../STUDY-GUIDE.md.html">CUDA study guide</a>.</p>
+<h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
+<ul>
+<li>Count fixed-width payload.</li>
+<li>Count validity bytes.</li>
+<li>Explain string offsets.</li>
+<li>Locate row-column transitions.</li>
+<li>Budget transfer payload.</li>
+<li>Design a conversion parity test.</li>
+</ul>
 <h3 id="mechanism-and-vocabulary">Mechanism and vocabulary<a class="heading-anchor" href="#mechanism-and-vocabulary" aria-label="Link to this section">#</a></h3>
 <p>Columnar execution groups values by column with accompanying validity and offset structures. Arrow defines interoperable columnar formats; it is not itself a guarantee of GPU residency or zero-copy across every process and device boundary. Variable-width strings need offsets and character storage, while nullable columns need validity information. A batch&#x27;s byte size can vary greatly with its schema.</p>
 <p>Spark&#x27;s row-to-columnar and columnar-to-row transitions can add work around unsupported operators. Host-to-device and device-to-host transfers are further boundaries. Plan batches by bytes as well as row counts and include temporary decoded representations. Increasing batch size can improve amortization while raising peak memory and spill risk. Preserve schema and null behavior through every conversion.</p>
@@ -212,8 +220,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>One thousand float64 values occupy 8000 payload bytes, plus any null mask and metadata. One thousand strings can occupy widely different storage depending on lengths.</p>
 <h4 id="worked-example-2">Worked example 2<a class="heading-anchor" href="#worked-example-2" aria-label="Link to this section">#</a></h4>
 <p>A validity mask for nine rows needs at least two bytes at one bit per row. Treating null as numeric zero would erase information rather than merely change representation.</p>
-<h3 id="portable-executable-model">Portable executable model<a class="heading-anchor" href="#portable-executable-model" aria-label="Link to this section">#</a></h3>
-<p>The <strong>CPU reference model</strong> variant runs this bounded worked example using <code>python-core</code>. It uses only the Python standard library, small synthetic values and no network. Its purpose is to expose the arithmetic or contract behind the chapter. The separate reference includes assertions for the stated observations.</p>
+<h3 id="how-to-run-the-cpu-model">How to run the CPU model<a class="heading-anchor" href="#how-to-run-the-cpu-model" aria-label="Link to this section">#</a></h3>
+<p>Edit the copy; the <a href="../references/cuda-118_cpu.py.html">reference</a> adds assertions.</p>
+<pre class="highlighted-code"><code class="language-bash">python courses/cuda/spark/lessons/cuda-118_cpu.py</code></pre>
 <pre class="highlighted-code"><code class="language-python">rows<span class="syntax-punctuation">,</span> itemsize <span class="syntax-operator">=</span> <span class="syntax-number">1000</span><span class="syntax-punctuation">,</span> <span class="syntax-number">8</span>
 payload <span class="syntax-operator">=</span> rows <span class="syntax-operator">*</span> itemsize
 mask <span class="syntax-operator">=</span> <span class="syntax-punctuation">(</span><span class="syntax-number">9</span> <span class="syntax-operator">+</span> <span class="syntax-number">7</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span><span class="syntax-operator">/</span> <span class="syntax-number">8</span>
@@ -248,52 +257,45 @@ strings <span class="syntax-operator">=</span> <span class="syntax-punctuation">
 <td><code>[&#x27;a&#x27;, &#x27;longer&#x27;, &#x27;&#x27;]</code></td>
 </tr>
 </tbody></table></div>
-<p>Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.</p>
 <h3 id="practice-and-transfer">Practice and transfer<a class="heading-anchor" href="#practice-and-transfer" aria-label="Link to this section">#</a></h3>
+<p>Record each attempt in the <a href="../lessons/cuda-118.md.html">worksheet</a> before opening hints.</p>
 <h4 id="exercise-1-count-fixed-width-payload">Exercise 1: Count fixed-width payload<a class="heading-anchor" href="#exercise-1-count-fixed-width-payload" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Counting 1000 values as 4000 bytes by assuming float32 underestimates the transfer by half when the schema says double. Schema inference from CSV or pandas commonly produces double even when the data looks like small decimals.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-2-count-validity-bytes">Exercise 2: Count validity bytes<a class="heading-anchor" href="#exercise-2-count-validity-bytes" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Using <code>9//8 = 1</code> floors the division and leaves the ninth row without a bit. The ninth row&#x27;s null state would then be read from whatever byte follows the mask.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-3-explain-string-offsets">Exercise 3: Explain string offsets<a class="heading-anchor" href="#exercise-3-explain-string-offsets" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Estimating string columns as rows times an average length ignores the offset array and the UTF-8 encoding of multibyte characters.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-4-locate-row-column-transitions">Exercise 4: Locate row-column transitions<a class="heading-anchor" href="#exercise-4-locate-row-column-transitions" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Assuming the whole query is columnar because the source is a Parquet file ignores row-based operators later in the plan. A Python UDF or an unsupported expression in a later stage forces a conversion back to rows at that point.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-5-budget-transfer-payload">Exercise 5: Budget transfer payload<a class="heading-anchor" href="#exercise-5-budget-transfer-payload" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Budgeting only values underestimates both transfer time and peak memory. For string-heavy tables, offsets and variable character data can exceed the numeric payload by a wide margin.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-6-design-a-conversion-parity-test">Exercise 6: Design a conversion parity test<a class="heading-anchor" href="#exercise-6-design-a-conversion-parity-test" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Comparing only values with nulls replaced by zero erases the distinction the mask exists to keep. A conversion bug that turns nulls into zeros would then pass the test unnoticed.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
-<p>Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.</p>
+<p>Hint <em>k</em> belongs to exercise <em>k</em>; open one at a time.</p>
 <ol>
-<li>Start from worked example 1 and mark the quantities needed for the task &quot;Count fixed-width payload&quot;.</li>
-<li>Change one assumption in worked example 2 while preserving the declared contract: count validity bytes.</li>
-<li>Trace the CPU program&#x27;s variables before adding hardware behavior: explain string offsets.</li>
-<li>Draw producers, consumers and the exact operation boundary for the task &quot;Locate row-column transitions&quot;.</li>
-<li>Separate what the small fixture establishes from what the real runtime must show: budget transfer payload.</li>
-<li>Write a counterexample to an overbroad claim before you design a conversion parity test.</li>
+<li>Multiply the number of rows by the width of one value.</li>
+<li>Divide the row count by eight and round up.</li>
+<li>Ask how a reader finds where the second string starts and ends in one shared character buffer.</li>
+<li>Read the physical plan and mark each row to columnar and columnar to row node.</li>
+<li>Add values, masks, offsets and any temporary decoded copies made for the transfer.</li>
+<li>Convert a batch with nulls and strings and back, then compare schema, row identity, nulls and values.</li>
 </ol>
-<h3 id="common-mistakes-and-self-review">Common mistakes and self-review<a class="heading-anchor" href="#common-mistakes-and-self-review" aria-label="Link to this section">#</a></h3>
-<p>Confusing a correct tiny example with a general implementation is the central review risk. For this chapter, challenge the assumption in worked example 2, then ask whether your change preserves the mechanism described above. If you change dtype, layout, ordering, batch size or backend, update the acceptance contract rather than silently reusing the old observation. Explain an unexpected result before trying random configuration changes.</p>
-<p>Keep a small evidence table with columns <strong>claim</strong>, <strong>input</strong>, <strong>expected observation</strong>, <strong>actual observation</strong> and <strong>limit</strong>. For the first claim use <code>Count fixed-width payload</code>. For the final claim use <code>Design a conversion parity test</code>. An unperformed GPU or cluster experiment remains pending even when the CPU model is correct.</p>
-<h3 id="platform-and-evidence-contract">Platform and evidence contract<a class="heading-anchor" href="#platform-and-evidence-contract" aria-label="Link to this section">#</a></h3>
-<p>The reading worksheet and CPU reference model work through the ordinary Linux Docker classroom on macOS, Linux and Windows using WSL 2. They do not require an NVIDIA GPU. Their results are labeled CPU models or semantic oracles, not simulated hardware performance.</p>
-<p>Real CUDA work needs supported NVIDIA hardware, a compatible host driver and an explicitly prepared GPU runtime. An Apple GPU does not execute CUDA kernels. PyTorch MPS on a supported native Mac, ROCm on supported AMD hardware, or other vendor backends can provide separate accelerator learning routes; they need their own package and operation qualification and are not CUDA evidence. The ordinary Linux Docker classroom does not expose native Mac MPS automatically.</p>
-<p>Do not download packages, models or data by opening this lesson. Do not attach an engine socket, ambient cluster credentials or an arbitrary remote endpoint. A CPU pass, imported package, successful compilation, real GPU result and measured performance are distinct observations. Record the actual backend, data shape/dtype, source revision, versions and pending checks. A saved completion marker records learning progress, not hardware certification.</p>
-<p>GPU Spark is a separate owned external workflow. The ordinary <code>spark-local-scala</code> and <code>spark-local-python</code> profiles are CPU Spark. Keep the GPU plugin disabled or absent for a CPU-only baseline. Per-operator CPU fallback inside a working GPU plugin environment is a different condition from having no compatible GPU. Never mount a host Docker socket or ambient kubeconfig into an ordinary lesson worker.</p>
+<h3 id="common-mistakes-and-self-check">Common mistakes and self-check<a class="heading-anchor" href="#common-mistakes-and-self-check" aria-label="Link to this section">#</a></h3>
+<p>A common mistake is sizing batches by row count alone. A thousand float64 values occupy 8000 payload bytes, but a thousand strings can occupy far more depending on their lengths. Another is treating null as zero during conversion, which erases information. Fix both by planning batches by bytes, including masks, offsets and temporary copies, and by testing that every conversion preserves schema, nulls and row identity.</p>
+<p><strong>Misconception:</strong> Arrow conversion between Spark and Python is free because both sides are columnar. <strong>Correction:</strong> Spark&#x27;s internal CPU rows and the plugin&#x27;s GPU columns are not Arrow buffers by default, so each boundary can serialize, copy or rebuild validity masks and offsets. A pandas UDF, for example, converts batches to Arrow, sends them to a Python worker and converts the result back. Measure that conversion separately and count every row to columnar transition in the plan.</p>
+<p><strong>Evidence limit:</strong> The reference counts 8000 payload bytes, a 2-byte mask for nine rows and 7 string bytes. It moves no data, so Arrow conversion, device transfers and spill behavior need measurement in the actual pipeline.</p>
+<ol>
+<li>Does using Arrow guarantee zero-copy GPU residency?</li>
+<li>Why can a larger batch raise spill risk?</li>
+<li>What structures does a nullable string column need?</li>
+</ol>
+<p>Answers: <a href="../solutions/cuda-118_solutions.md.html#self-check-answers">self-check answers</a>.</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
 <ul>
-<li><a href="https://nvidia.github.io/cudf-spark/docs/download.html">cuDF Spark plugin release and compatibility matrix</a></li>
-<li><a href="https://nvidia.github.io/cudf-spark/docs/supported_ops.html">Supported Spark operators and expression types</a></li>
 <li><a href="https://docs.nvidia.com/cudf-spark/latest/tuning-guide.html">GPU Spark tuning guide</a></li>
-<li><a href="https://spark.apache.org/docs/latest/sql-performance-tuning.html">Apache Spark SQL performance tuning</a></li>
 </ul>
-<p>Use the version-matched documentation of your prepared environment. These references describe interfaces and supported boundaries; the chapter&#x27;s synthetic examples and CPU models are original teaching material.</p>
+<p>Full lists: <a href="../../STUDY-GUIDE.md.html#documentation-and-sources">documentation and sources</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning skill for cuda-118: Columnar batches, Arrow and data movement.
 Read courses/cuda/spark/guides/cuda-118.md and courses/cuda/spark/lessons/cuda-118.md.

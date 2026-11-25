@@ -1,6 +1,6 @@
 # cuda-092: explained solutions
 
-These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.
+Compare with your [worksheet](../lessons/cuda-092.md) attempt.
 
 ## Exercise 1: Compute timeline wall time
 
@@ -74,8 +74,16 @@ Rerun synchronized uninstrumented samples with equal outputs.
 
 **How to verify.** Report the median step time over a fixed number of steps after warm-up for both versions, with equal loss values.
 
+## Self-check answers
+
+1. **Why can summed event durations exceed wall time?** Events on the CPU and the GPU can run at the same time, so their durations overlap rather than add.
+
+2. **Why is high GPU utilization not proof of useful work?** The device can be busy with wasteful copies or redundant kernels; utilization measures activity, not progress toward the result.
+
+3. **What context must be kept with a saved trace?** The hardware, software versions and workload, because the same code can produce a very different trace elsewhere.
+
 ## Reference observation
 
 Summed event durations 14 ms, complete interval 10 ms.
 
-The reference file is `courses/cuda/python/references/cuda-092_cpu.py`. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.
+Asserted by `courses/cuda/python/references/cuda-092_cpu.py`.

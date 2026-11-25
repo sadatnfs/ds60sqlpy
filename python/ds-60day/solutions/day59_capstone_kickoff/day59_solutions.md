@@ -58,9 +58,7 @@ Worked reference for Exercise 3: Baseline, risks, milestones
 
 ## Solution reasoning lens
 
-A strong solution is not merely code that produces one plausible
-output. It establishes a chain from input contract to operation to
-verification:
+Each decision below links an input contract to an operation and its evidence:
 
 1. **decision statement:** names stakeholder, action, prediction time, and consequence before selecting a model.
 2. **acceptance matrix:** connects each success/guardrail threshold to data, metric, owner, and verification command.
@@ -77,29 +75,15 @@ verification:
 
 **Evidence of correctness:** Get stakeholder sign-off on charter/thresholds, validate a local data sample and license, reproduce the target, run the baseline, and record continue/pivot/stop at each milestone.
 
-When comparing your attempt with the reference, explain which of these
-decisions your code made explicitly. If the reference makes a different
-choice, compare the contracts and evidence before deciding that one
-version is universally better.
-
 <!-- END ADVANCED PYTHON CONCEPT ENRICHMENT -->
 
 ## Exercise-by-exercise reasoning map
-
-This map connects every learner prompt to a reasoning path. Read the
-explanation before copying code: the goal is to understand the assumptions,
-the evidence that validates the result, and the edge cases that can make an
-apparently correct implementation fail.
 
 ### Exercise 1: Original lesson practice
 
 **Prompt:** Write the problem statement and success metric in the notebook.
 
 **How to reason about it:** Define stakeholder decision, prediction unit/time, target, error costs, success metric, minimum practical improvement, and excluded uses before choosing model families.
-
-Use the worked reference earlier in this file, then change one boundary
-condition and rerun the stated checks. A copied output is not evidence
-unless you can explain why that output follows from the inputs.
 
 **Verify:** Write a decision, population, prediction/analysis unit, target, primary metric formula, baseline, success threshold, guardrail, and out-of-scope list; include an owner and stop condition for each threshold.
 
@@ -109,10 +93,6 @@ unless you can explain why that output follows from the inputs.
 
 **How to reason about it:** Create the skeleton and ignored artifact/data locations before exploratory sprawl. The README and pyproject are active contracts, not end-of-project cleanup.
 
-Use the worked reference earlier in this file, then change one boundary
-condition and rerun the stated checks. A copied output is not evidence
-unless you can explain why that output follows from the inputs.
-
 **Verify:** Create the declared src/tests/notebooks/data-or-config layout plus README and ignored local artifact paths; print a tree and run one smoke import/test from a clean process with exit code 0.
 
 ### Exercise 3: Original lesson practice
@@ -120,10 +100,6 @@ unless you can explain why that output follows from the inputs.
 **Prompt:** Build a baseline and record metrics.
 
 **How to reason about it:** Use the simplest credible frozen-split baseline, save machine-readable metrics, and explain them. Optional tracking must not make offline completion dependent on a server.
-
-Use the worked reference earlier in this file, then change one boundary
-condition and rerun the stated checks. A copied output is not evidence
-unless you can explain why that output follows from the inputs.
 
 **Verify:** Save a baseline metric file containing dataset/split hash, seed, model parameters, metric value, denominator/support, and timestamp; reload it and reproduce the metric on the same frozen split.
 
@@ -140,10 +116,6 @@ quality, group support, or practical value are inadequate.
 Record the decision and date in a log. A well-supported “do not deploy” or
 “collect better labels” conclusion is a successful analytical outcome.
 
-**Why this matters:** The result should survive a fresh-kernel rerun and
-a deliberately chosen boundary case. If it does not, revisit the
-assumption or data boundary rather than hiding the failure.
-
 **Verify:** Scope and stop rules; deliver must/should/out-of-scope and kill-criteria tables with owner, measurement command, threshold, review date, and observed status for data availability, support, harm, and baseline value.
 
 ### Exercise 5: Capstone data contract
@@ -158,10 +130,6 @@ otherwise prefer packaged/generated data for a fully offline path.
 
 Preserve raw inputs and transform into ignored artifacts. Never commit a
 credential, restricted dataset, or developer-specific absolute path.
-
-**Why this matters:** The result should survive a fresh-kernel rerun and
-a deliberately chosen boundary case. If it does not, revisit the
-assumption or data boundary rather than hiding the failure.
 
 **Verify:** Capstone data contract; validate the versioned schema against the local snapshot and print source/license, row unit/count, target, types/ranges, missing/duplicate counts, split-key overlap, and SHA-256; reject one tampered fixture.
 
@@ -178,9 +146,5 @@ one chosen after results.
 Keep rejected alternatives and why they were rejected. A revisit trigger such
 as new labels, changed prevalence, or a failed slice metric makes the decision
 operational rather than permanent dogma.
-
-**Why this matters:** The result should survive a fresh-kernel rerun and
-a deliberately chosen boundary case. If it does not, revisit the
-assumption or data boundary rather than hiding the failure.
 
 **Verify:** Decision log; record at least five uniquely dated decisions with question, alternatives, evidence link/metric, chosen action, consequence, owner, and revisit trigger; cross-link each active decision from the experiment log or README.

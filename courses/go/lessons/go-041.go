@@ -3,11 +3,11 @@ package main
 import "fmt"
 
 func main() {
-	// Exercise 1: Accept explicit secure configuration: predict an edited check: Copy worked example 1 into a scratch pad and change `check(validateTarget("https://cluster.invalid:6443", "lesson", "owned-lesson") == nil, "target")` to `check(validateTarget("https://cluster.invalid:6443!", "lesson", "owned-lesson") == nil, "target")` inside its check. Before running, predict whether the check still passes and explain why; then restore it.
-	// Expected: The changed run panics with `target` because the edited check no longer holds. Restoring the original line brings back the worked observation: the configuration is accepted.
+	// Exercise 1: Accept explicit secure configuration: predict an edited check: Copy worked example 1, change `check(validateTarget("https://cluster.invalid:6443", "lesson", "owned-lesson") == nil, "target")` to `check(validateTarget("https://cluster.invalid:6443!", "lesson", "owned-lesson") == nil, "target")` inside its check and predict whether it still passes; then restore it.
+	// Expected: The edited check panics with `target` even though `validateTarget("https://cluster.invalid:6443", "lesson", "owned-lesson") == nil` still holds.
 
-	// Exercise 2: Reject insecure transport: diagnose an edited check: A careless edit changed the check in worked example 2 so that it reads `check(validateTarget("http://cluster.invalid", "lesson", "owned-lesson") == nil, "TLS")`. Run worked example 2 with that line, explain why the edited check now fails for the same program state, and restore it.
-	// Expected: Before the repair the program panics with `TLS`; after it the line reads `check(validateTarget("http://cluster.invalid", "lesson", "owned-lesson") != nil, "TLS")` again and the configuration is rejected.
+	// Exercise 2: Reject insecure transport: diagnose an edited check: A careless edit rewrote the check in worked example 2 as `check(validateTarget("http://cluster.invalid", "lesson", "owned-lesson") == nil, "TLS")`. Explain the failure, then restore it.
+	// Expected: The defective run panics with `TLS`; after restoring `check(validateTarget("http://cluster.invalid", "lesson", "owned-lesson") != nil, "TLS")`, the configuration is rejected.
 
 	// Exercise 3: Reject ambient context selection: Omit the context name.
 	// Expected: Validation rejects the configuration.

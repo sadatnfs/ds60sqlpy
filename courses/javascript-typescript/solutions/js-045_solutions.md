@@ -1,6 +1,6 @@
 # js-045: explanatory solutions
 
-Compare after your own attempt or an explicit reveal. The separate .js reference is a complete offline browser program. These explanations discuss the six practice tasks; a visual resemblance alone is not a data or behavior check.
+Compare after your own attempt; the separate `.js` file is the complete reference program.
 
 ## Mechanism review
 
@@ -49,3 +49,7 @@ Validation belongs near the data boundary. If duplicates are legitimate, define 
 The chart should show movement of known participants rather than replacement of anonymous ranked positions. Key on participant ID, not rank, so a score change moves the same node; check one participant's node is reused after two rank swaps.
 
 **Expected:** Scores change and ranks reorder while participant IDs remain stable.
+
+## After comparison
+
+Apply keyed joins to a leaderboard where two players swap ranks and a third joins. Predict which nodes enter and which update, then confirm by tagging nodes. Change the key to the rank and record which name now sits on the wrong node.

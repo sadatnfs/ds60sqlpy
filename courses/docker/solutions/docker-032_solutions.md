@@ -1,6 +1,6 @@
 # docker-032: explanatory solutions
 
-Compare after your own attempt or an explicit reveal. These explain the supplied teaching fixtures; they are not engine results. The mechanism is explained in `courses/docker/guides/docker-032.md`.
+These answers explain teaching fixtures, not engine results; the mechanism is in [the guide](../guides/docker-032.md).
 
 ## Exercise 1: Predict a missing-shell error in a minimal image.
 
@@ -88,4 +88,4 @@ Compare after your own attempt or an explicit reveal. These explain the supplied
 
 ## Check your transfer
 
-A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.
+The app, its listener and the project network work, so the fault sits on the published path between the host and the container. Start with `docker compose -p ds60-docker-study port app 8080`, which should print `127.0.0.1:18080`; then check whether another host process holds 18080, and on Docker Desktop whether its port forwarding is running. A repair is confirmed when the host request returns the health JSON. If `port` reports no mapping at all, the container was created without its `ports` entry, which points back to the effective Compose model.

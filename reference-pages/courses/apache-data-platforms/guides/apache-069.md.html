@@ -258,16 +258,16 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Inspect type definitions, supertypes, required attributes, qualified names, server-assigned GUIDs and actual mutation responses. A successful HTTP exchange is weaker than reading back the intended active entity. Keep source payload and identity-policy decisions with the observation so future ingestion can reconcile duplicates without deleting unrelated metadata.</p>
 <p><strong>Interview discussion: why are GUID and qualifiedName both useful?</strong> A GUID identifies the stored Atlas instance, while a well-designed qualified name helps an external producer locate the same logical asset across retries. These cases separate type design, asset identity and versioning instead of using one label for all three responsibilities.</p>
 <h3 id="complete-worked-source">Complete worked source<a class="heading-anchor" href="#complete-worked-source" aria-label="Link to this section">#</a></h3>
-<p>This is a project-only command notebook. Read and edit it in the classroom; run its explicitly labeled commands from the copied owned Docker workshop. The classroom does not execute these service commands.</p>
+<p>The classroom does not execute these service commands. See the <a href="../STUDY-GUIDE.md.html#workshop-notebooks">workshop rules</a>.</p>
 <h2 id="atlas-apache-069-prepared-command-notebook">Atlas apache-069 prepared command notebook<a class="heading-anchor" href="#atlas-apache-069-prepared-command-notebook" aria-label="Link to this section">#</a></h2>
-<p>Copy the owned Atlas project and read PREPARATION.md. Default local server execution is omitted until a supported native Java 8 graph/index stack exists.</p>
+<p><code>plan</code> prints the definitions and entities from <code>client.py</code> without any network call: an owned DataSet subtype, a Process subtype and a classification, plus raw, curated and unrecorded datasets. Copy the Atlas project and read PREPARATION.md first, since no local server is provided.</p>
 <pre class="highlighted-code"><code class="language-bash">bash run.sh prepare
 bash run.sh plan</code></pre>
-<p>These actions validate a portable native Docker client and print original payloads without contacting a server. For an explicitly prepared owned fixture server with untracked credentials, deliberate apply and read-only check are:</p>
+<p>Only a separately prepared Atlas 2.5.0 server with fixture credentials can receive these payloads. <code>apply</code> creates any missing types and posts the entities in bulk, and <code>check</code> reads them back by qualified name:</p>
 <pre class="highlighted-code"><code class="language-bash">bash run.sh apply
 bash run.sh check</code></pre>
 <p>Inspect the dataset/process/classification types and stable owned qualified names. After an actual apply/check, compare GUIDs before repeating apply to observe the chosen idempotent asset contract.</p>
-<p>Prepared payloads are not actual Atlas observations. Never place credentials or Authorization headers in notebooks, source, command arguments or receipts.</p>
+<p>A printed plan is a prepared payload, not an Atlas observation. Your receipt should hold the GUID for each qualified name after the first apply and again after the second.</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
 <ul>
 <li><a href="https://atlas.apache.org/api/v2/index.html">Atlas REST types/entities/lineage API</a></li>

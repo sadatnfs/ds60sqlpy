@@ -111,31 +111,27 @@ The backfill route triggers runs for explicit past intervals and the readback sh
 
 ## Complete worked source
 
-This is a project-only command notebook. Read and edit it in the classroom; run its explicitly labeled commands from the copied owned Docker workshop. The classroom does not execute these service commands.
+The classroom does not execute these service commands. See the [workshop rules](../STUDY-GUIDE.md#workshop-notebooks).
 
 # Integration apache-083 complete worked notebook
 
 Use the actual Airflow project for one explicit historical interval. Publish a validated candidate separately from the live stream. Reconcile unknown publication outcomes before retrying any writer.
 
-## Receipt fields and independent oracle
+## What this backfill receipt must hold
 
-- Source revision/hashes and exact declared input IDs, values, schema and time units.
-- Actual native platform, package/image identities and owned resource namespace.
-- Selected table snapshot/version, source positions or process/lineage identity as appropriate.
-- Positive result against an independent oracle and a typed negative observation.
-- Read-only retained-state comparison after the selected lifecycle transition.
-- Cleanup/evidence-storage result and any separate prepared or unavailable feature.
+- The DAG ID, run ID, logical date and the half-open data interval Airflow selected.
+- Each task attempt number, with the identified fail-once retry kept separate.
+- The input snapshot or file version the task read, as recorded in its own receipt.
+- The candidate output location and its identity before publication.
+- The published output identity, and the untouched identity of the other day.
+- The live stream's source positions at the moment of cutover.
 
-For the common three-order fixture, require IDs 1/2/3 with amounts 4/9/7, total 20,
-east 11 and west 9. A later fourth west order of 2 changes the current total to 22 and west
-to 11 while an earlier pinned snapshot remains unchanged. Do not use this simple
-oracle to claim correctness for a different pipeline without defining its
-deduplication, correction and visibility semantics.
-
-Read the selected project README and qualification ledger before commands. The
-classroom does not execute Docker commands in this Markdown pad. Prepared
-configuration, unit policy fixtures, successful compilation and actual service
-acceptance remain different observations. Never include credentials or signed URLs.
+The Airflow workshop gives a concrete oracle. Day one holds amounts 4 and 9 and
+day two holds 7. The correction changes 4 to 6, so day one becomes 15 while day
+two stays byte-for-byte equal. If day two's identity changes, the backfill wrote
+outside its interval. If the run ID is new but the published identity is
+unchanged, check whether the earlier attempt had already published. The
+[shared receipt rules](../STUDY-GUIDE.md#evidence-receipts) cover naming and storage.
 
 ## Concrete source inspection
 
@@ -146,14 +142,14 @@ cat ../airflow/README.md
 cat ../airflow/dags/classroom_workflows.py
 ```
 
-These inspections do not start or qualify a service. Execute only the chosen
-project's complete documented owned route and retain its actual receipt.
+In `classroom_workflows.py`, find the `classroom_orders` DAG: its
+`CronDataIntervalTimetable` and its start and end dates explain why only two UTC
+days exist. Then find `classroom_correction`, whose `correct` task writes only the
+first day and raises for any other. Reading the DAG shows intent. Only `run.sh backfill-check` and `run.sh readback` against
+the running workshop show the interval and outputs that Airflow actually produced.
 
 ## Primary references
 
-- [Iceberg reliability and table state](https://iceberg.apache.org/docs/latest/reliability/)
-- [Arrow data format](https://arrow.apache.org/docs/format/Columnar.html)
-- [Flink stateful stream processing](https://nightlies.apache.org/flink/flink-docs-release-2.3/docs/concepts/stateful-stream-processing/)
-- [Kafka delivery/transaction design](https://kafka.apache.org/44/design/design/)
-- [Atlas API and metadata boundaries](https://atlas.apache.org/api/v2/index.html)
-- [Delta Sharing protocol](https://github.com/delta-io/delta-sharing/blob/v1.4.1/PROTOCOL.md)
+- [Airflow backfill of historical intervals](https://airflow.apache.org/docs/apache-airflow/3.3.2/core-concepts/backfill.html)
+- [Airflow Dag Run data intervals](https://airflow.apache.org/docs/apache-airflow/3.3.2/core-concepts/dag-run.html)
+- [Flink event time for the live path](https://nightlies.apache.org/flink/flink-docs-release-2.3/docs/dev/datastream/event-time/generating_watermarks/)

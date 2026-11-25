@@ -2,6 +2,8 @@
 
 Open these answers only after attempting Pooling, local augmentation and label invariants yourself. They reuse the guide's literal inputs, starting from Example A, Compare local reductions, so a discrepancy points at one step. The executable companion runs the assertions; this page explains why each one tests Pooling, Augmentation, Label invariance. After a pass, choose a new input for exercise 6, Transform directional labels consistently, without looking.
 
+After comparing, follow the [review steps](../STUDY-GUIDE.md#after-the-solutions).
+
 ## Mechanism review
 
 Pooling reduces local spatial information. Max pooling retains the largest response; average pooling uses every entry. Both can make certain perturbations less visible while also discarding potentially useful details. Augmentation changes training inputs under a declared label policy. A horizontal flip may preserve a shape label but reverse a left/right direction label. A transform's availability in a library does not establish its validity for the task.
@@ -137,6 +139,3 @@ assert labels["left"] == "right" and labels[labels["left"]] == "left"
 
 **Verify:** In a fresh process, the exercise checks confirm `labels['left'] == 'right'` and `labels[labels['left']] == 'left'`.
 
-## Review after comparison
-
-Repeat exercise 4, Expose discarded information, with one changed fixture value and predict the difference before running it. Keep your failing attempt at exercise 5, Keep evaluation transforms deterministic, beside the repaired result. A missing framework is not a failing assertion. These solutions use only local fixtures.

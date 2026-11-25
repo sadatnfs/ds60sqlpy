@@ -3,22 +3,17 @@ public class Main {
 
   public static void main(String[] args) throws Exception {
     // Exercise 1: Publish a result through join: change one input
-    // Copy Example A into a scratch `Main.java` and change `Thread worker =
-    // Thread.ofPlatform().start(() -> result[0] = 42);` to `Thread worker =
-    // Thread.ofPlatform().start(() -> result[1] = 42);`. Before running it with `java -ea Main`,
-    // predict which assertion fails and which value it now sees; then run it and restore the
-    // original line.
-    // Expected: The changed run fails with an `AssertionError` from the assertion on `result[0]
-    // == 42`. Restoring the original line brings back the worked observation: worker terminated;
-    // result 42.
+    // Change `Thread worker = Thread.ofPlatform().start(() -> result[0] = 42);` to `Thread
+    // worker = Thread.ofPlatform().start(() -> result[1] = 42);` in Example A and predict which
+    // assertion fails and why.
+    // Expected: The edited run fails with an `AssertionError` from the assertion on `result[0]
+    // == 42`.
 
     // Exercise 2: Publish initial state through start: debug a regression
-    // A regression changed one token in the code that Example B adds after Example A, so one
-    // line now reads `int[] input = { 8 };`. Run Example B with that line, use the failing
-    // assertion to locate the defect and repair it without changing the assertion.
-    // Expected: Before the repair the run fails with an `AssertionError` from the assertion on
-    // `observed.get() == 7`; after it the line reads `int[] input = { 7 };` again and worker
-    // observes 7.
+    // A regression in Example B's new code makes one line read `int[] input = { 8 };`. Repair it
+    // using the failing assertion.
+    // Expected: The unrepaired run fails with an `AssertionError` from the assertion on
+    // `observed.get() == 7`; the repaired line reads `int[] input = { 7 };`.
 
     // Exercise 3: Force a lost update
     // Make two workers read counter 0, wait at a barrier, then each write its saved value plus

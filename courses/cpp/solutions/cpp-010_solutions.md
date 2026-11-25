@@ -1,6 +1,6 @@
 # cpp-010: explanations and reference observations
 
-Attempt the learner tasks before opening this document. The executable reference checks the bounded normal and boundary examples; the six explanations below cover the deliberate changes and manual checks.
+The [executable reference](cpp-010_solution.cpp) settles two paid payments of 200 to 400, and a paid plus a pending payment to 200. The explanations show why state, amount and identity are separate facts about a `Payment`. How to compare: [study guide](../STUDY-GUIDE.md#compare-with-the-solutions).
 
 ## Mechanism
 

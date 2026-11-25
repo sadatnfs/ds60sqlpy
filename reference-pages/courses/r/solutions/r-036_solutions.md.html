@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/r/solutions/r-036_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="r-036-reference-reasoning">r-036: reference reasoning<a class="heading-anchor" href="#r-036-reference-reasoning" aria-label="Link to this section">#</a></h2>
-<p>Use the <a href="r-036_reference.R.html">complete reference</a> with the guide&#x27;s declared inputs and runtime. Every worked example is also a standalone script.</p>
+<p>Run the <a href="r-036_reference.R.html">complete reference</a> under the <a href="../STUDY-GUIDE.md.html#run-a-chapter">run rules</a>.</p>
 <h3 id="why-the-implementation-has-this-shape">Why the implementation has this shape<a class="heading-anchor" href="#why-the-implementation-has-this-shape" aria-label="Link to this section">#</a></h3>
 <p>The two chunks have unequal sizes. Sufficient totals reconstruct the observation mean while averaging the two chunk means changes the weighting.</p>
 <p>Each input entry contributes to either observed or missing count. The total uses only observed measurements under the declared policy.</p>
@@ -242,7 +242,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Tempting mistake:</strong> Claiming the function handles data larger than memory because it loops over chunks. The loop proves the merge is correct, not that the data were never fully loaded.</p>
 <p><strong>Verify:</strong> A run on a file many chunks long shows the same mean as an in memory calculation, with peak memory measured by a process monitor.</p>
 <h3 id="what-the-checks-establish">What the checks establish<a class="heading-anchor" href="#what-the-checks-establish" aria-label="Link to this section">#</a></h3>
-<p>The reference makes 3 <code>stopifnot()</code> checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.</p></article>
+<p>The checks confirm a final mean of 25 that does not depend on chunk order, an NA mean with three missing values when every observation is missing, and a mean of 3 from three observed values in another stream. They show that the combination rule is correct, not that chunking reduced memory use, which would need separate measurement.</p>
+<p>The reference makes 3 <code>stopifnot()</code> checks; see <a href="../STUDY-GUIDE.md.html#what-a-passing-run-proves">what a passing run proves</a>.</p></article>
   </main>
 </body>
 </html>

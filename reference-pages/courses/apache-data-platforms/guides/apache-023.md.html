@@ -218,7 +218,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="mistakes-diagnosis-and-interview-discussion">Mistakes, diagnosis and interview discussion<a class="heading-anchor" href="#mistakes-diagnosis-and-interview-discussion" aria-label="Link to this section">#</a></h3>
 <p>Keep counts, bytes, key frequencies and measured task time distinct. A few rows with large nested payloads can create byte skew without row skew. A sort or join can dominate even when group counts look balanced. Inspect actual plan and metrics before changing target partitions, because extra partitions also create scheduling and bookkeeping overhead.</p>
 <p><strong>Interview discussion: why can an aggregation move less data than its input?</strong> Associative partial aggregation can compress each partition&#x27;s records into mergeable state before exchange. It is effective when groups repeat locally and the state is small. The two actual queries contrast balanced and hot-key inputs while preserving exact answers, and identify which performance conclusions still need real task metrics and representative scale.</p>
-<p>The <a href="../projects/ballista/README.md.html">complete Ballista workshop</a> provides the maintained files, preparation, lifecycle and exact qualification boundaries for these cases.</p>
+<p>In the <a href="../projects/ballista/README.md.html">Ballista workshop</a>, <code>plans</code> saves the EXPLAIN text for the order query and reruns it over a 200-row source where 180 rows share the <code>hot</code> region, giving you a skewed stage to inspect.</p>
 <h3 id="worked-examples">Worked examples<a class="heading-anchor" href="#worked-examples" aria-label="Link to this section">#</a></h3>
 <h4 id="capture-plan-text-and-hot-key-results">Capture plan text and hot-key results<a class="heading-anchor" href="#capture-plan-text-and-hot-key-results" aria-label="Link to this section">#</a></h4>
 <pre class="highlighted-code"><code class="language-bash"><span class="syntax-builtin">cd</span> work/ballista
@@ -234,7 +234,7 @@ counts <span class="syntax-operator">=</span> Counter<span class="syntax-punctua
 <pre class="highlighted-code"><code class="language-text">[(&#x27;hot&#x27;, 180), (&#x27;rare-180&#x27;, 1)] 21</code></pre>
 <p>One region holds 180 of 200 rows and the other 20 appear once each, giving 21 groups. That distribution is what makes the final aggregate stage uneven: whichever task receives hot does most of the stage work. The engine result must equal this oracle, but equality proves only correctness; a local frequency count says nothing about task timing, which needs scheduler telemetry.</p>
 <h3 id="complete-worked-source">Complete worked source<a class="heading-anchor" href="#complete-worked-source" aria-label="Link to this section">#</a></h3>
-<p>This is a project-only command notebook. Read and edit it in the classroom; run its explicitly labeled commands from the copied owned Docker workshop. The classroom does not execute these service commands.</p>
+<p>The classroom does not execute these service commands. See the <a href="../STUDY-GUIDE.md.html#workshop-notebooks">workshop rules</a>.</p>
 <h2 id="actual-distributed-plans-with-independent-result-checks">Actual distributed plans with independent result checks<a class="heading-anchor" href="#actual-distributed-plans-with-independent-result-checks" aria-label="Link to this section">#</a></h2>
 <pre class="highlighted-code"><code class="language-bash">bash run.sh plans
 bash run.sh evidence</code></pre>

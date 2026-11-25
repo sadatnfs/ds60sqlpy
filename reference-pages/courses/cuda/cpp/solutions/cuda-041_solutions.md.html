@@ -196,7 +196,6 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <article class="document"><h2 id="cuda-041-explanatory-solutions">cuda-041: explanatory solutions<a class="heading-anchor" href="#cuda-041-explanatory-solutions" aria-label="Link to this section">#</a></h2>
 <h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
 <p>A stream-ordered allocator treats allocation and free as operations with ordering relationships. It can reuse pooled storage efficiently, but the program must still ensure that every access occurs after allocation and before the relevant free/reuse. Cross-stream consumers require explicit dependencies. Memory returned to a pool can remain reserved for reuse, so reported device memory need not immediately drop to zero. Distinguish live application allocations from reserved pool storage. Pool behavior and support are runtime capabilities, not assumptions justified by a function name in documentation.</p>
-<p>The separate <a href="../references/cuda-041_cpu.py.html">CPU reference</a> checks the chapter&#x27;s bounded model. It does not execute CUDA or establish GPU timing. Compare after attempting the worksheet or explicitly choosing to reveal solutions.</p>
 <h3 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h3>
 <p>Stream A allocates X, writes X and records ready. Stream B waits, reads X and records done. Before A frees X, A waits for done. This closes both the producer-to-consumer edge and the consumer-to-reuse edge. The first event alone is insufficient for lifetime safety.</p>
 <p><strong>Approach:</strong> Order allocate, write, ready, wait in B, read, done, wait in A, then free X.</p>
@@ -233,11 +232,16 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Why it is correct:</strong> Reuse avoids repeated allocation cost while the bound caps memory.</p>
 <p><strong>A plausible wrong approach:</strong> An unbounded pool can grow until other work cannot allocate.</p>
 <p><strong>How to verify:</strong> Record live and reserved bytes and timings for both, with identical outputs.</p>
+<h3 id="self-check-answers">Self-check answers<a class="heading-anchor" href="#self-check-answers" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>Which two edges make the cross-stream allocation in worked example 1 safe?</strong> Producer to consumer through the ready event, and consumer to free through the done event.</li>
+<li><strong>Why is freeing right after enqueuing work in another stream unsafe?</strong> The free is ordered only in its own stream, so the other stream may still read the buffer.</li>
+<li><strong>What does a stream-ordered free promise?</strong> The memory becomes reusable after prior work in that stream completes, not immediately.</li>
+</ol>
 <h3 id="numerical-reference-and-its-limits">Numerical reference and its limits<a class="heading-anchor" href="#numerical-reference-and-its-limits" aria-label="Link to this section">#</a></h3>
-<p>The complete CPU model is <a href="../references/cuda-041_cpu.py.html">here</a>. Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It does not claim CUDA execution, concurrency safety or a performance measurement.</p>
+<p>The <a href="../references/cuda-041_cpu.py.html">CPU reference</a> reproduces worked example 1 and prints <code>{&#x27;lifetime_order&#x27;: [&#x27;allocate_A&#x27;, &#x27;write_A&#x27;, &#x27;ready&#x27;, &#x27;wait_ready_B&#x27;, &#x27;read_B&#x27;, &#x27;done&#x27;, &#x27;wait_done_A&#x27;, &#x27;free_A&#x27;], &#x27;reserved_MiB&#x27;: 64, &#x27;live_MiB&#x27;: 0}</code>.</p>
 <h3 id="transfer-review">Transfer review<a class="heading-anchor" href="#transfer-review" aria-label="Link to this section">#</a></h3>
-<p>Compare a bounded reuse pool with repeated allocation, record live versus reserved bytes and retain identical correctness and completion contracts.</p>
-<p>A complete explanation must name its inputs, the unchanged mathematical contract, the changed boundary or resource condition, and the evidence still needed on actual hardware. Preserve a CPU baseline even after a GPU path becomes available.</p></article>
+<p>Compare a bounded reuse pool with repeated allocation, record live versus reserved bytes and retain identical correctness and completion contracts.</p></article>
   </main>
 </body>
 </html>

@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/docker/solutions/docker-035_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="docker-035-explanatory-solutions">docker-035: explanatory solutions<a class="heading-anchor" href="#docker-035-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit reveal. These explain the supplied teaching fixtures; they are not engine results. The mechanism is explained in <code>courses/docker/guides/docker-035.md</code>.</p>
+<p>These answers explain teaching fixtures, not engine results; the mechanism is in <a href="../guides/docker-035.md.html">the guide</a>.</p>
 <h3 id="exercise-1-compare-total-image-size-and-incremental-transfer">Exercise 1: Compare total image size and incremental transfer.<a class="heading-anchor" href="#exercise-1-compare-total-image-size-and-incremental-transfer" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Shared cached layers can reduce new transferred bytes.</p>
 <p><strong>Why:</strong> A displayed size is not a complete network-cost estimate. Record cache state and the actual transfer path.</p>
@@ -238,7 +238,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>A plausible wrong approach:</strong> Recommending the smallest possible base because smaller is faster skips the measurement.</p>
 <p><strong>How to verify:</strong> The recommendation cites before and after timings for the same event and a passing acceptance run.</p>
 <h3 id="check-your-transfer">Check your transfer<a class="heading-anchor" href="#check-your-transfer" aria-label="Link to this section">#</a></h3>
-<p>A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.</p></article>
+<p>Measure the transfer a target host would actually need, given which base layers it already holds, and readiness with the same <code>--wait</code> method, since a new base shares nothing cached. Alpine uses musl rather than glibc, so rerun the health, host and peer requests, an increment, and the export and restore commands, and check that any later HTTPS client still finds a CA bundle. Accept only a measured gain with identical behavior. If readiness time does not move, the healthcheck interval, not image size, was the limit.</p></article>
   </main>
 </body>
 </html>

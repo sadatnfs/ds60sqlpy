@@ -1,6 +1,8 @@
 # spark-025: Explained paired reference solutions
 
-Read the [guide](../guides/spark-025.md) and attempt one language first. The [Scala reference](spark-025_solution.scala) and [PySpark reference](spark-025_solution.py) are complete single-file programs with explicit local sessions and finally-based stop. Each compares with literal expectations; matching two implementations alone would not rule out a shared mistake.
+Attempt the [guide](../guides/spark-025.md) exercises first.
+
+References: [Scala](spark-025_solution.scala), [PySpark](spark-025_solution.py).
 
 ## Exercises and reasoning
 
@@ -29,7 +31,7 @@ The comparison preserves semantic field types, values and duplicate occurrences 
 
 ### Exercise 2: Read a narrow filtered projection with an independent oracle
 
-Select only id and amount for day=even and id>=1990. Return the five ordered tuples.
+Select only id and amount for day = even and id >= 1990. Return the five ordered tuples.
 
 **Expected:** `(1990, 13930)`, `(1992, 13944)`, `(1994, 13958)`, `(1996, 13972)`, `(1998, 13986)`. No payload column is requested.
 
@@ -179,6 +181,7 @@ The intentional failure is confined to a path created by this run. The subsequen
 
 ## Execution and interpretation
 
-Run the complete reference in its prepared fixed worker. Its first check (Write and validate a compact partitioned round trip) is built inside the program, so opening the lesson fetches nothing; it expects: 2000 rows and total 13993000 survive. Types remain `id`/`amount` bigints and `day`/`payload` strings; read nullability may differ. The final success line prints only after every reference assertion passes.
+The references check the compact round trip as a bag equal to the source with 2,000 rows, the four declared field types and total 13,993,000. The filtered projection must have exactly the columns `id` and `amount` and the five pairs `(1990, 13930)` through `(1998, 13986)`. In the scan evidence, `ReadSchema` must contain `id:bigint` and `amount:bigint` without `payload`, `PartitionFilters` must mention `day` and `even`, and `PushedFilters` must include `GreaterThanOrEqual(id,1990)`. The 12-way copy must equal the source, have more data files than the compact copy, and keep both copies under 32 MiB.
 
-Local plan, partition and resource evidence does not establish cluster-scale performance; session cleanup is explicit.
+The program prints the scan evidence, the `(files, bytes)` inventories as `compact_data_files_bytes=` and `many_data_files_bytes=`, and the `(directories, files, scan partitions)` receipts as `layout_directory_file_scan_counts=`, where both layouts must have 2 day directories. The last check rewrites the compact path, expects failure and rereads the original bag. The final line is `spark-025: six PySpark reference contracts passed; Spark=` with the version, or Scala's twin. File and byte counts vary with the writer, which is why the checks compare the two layouts rather than pin exact numbers.
+

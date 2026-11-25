@@ -223,9 +223,7 @@ Takeaway
 
 ## Solution reasoning lens
 
-A strong solution is not merely code that produces one plausible
-output. It establishes a chain from input contract to operation to
-verification:
+Each decision below links an input contract to an operation and its evidence:
 
 1. **`tensor.requires_grad_(True)`:** marks a leaf tensor whose derivative should be accumulated.
 2. **`loss.backward()`:** computes derivatives through the recorded graph and adds them to existing `.grad` values.
@@ -242,29 +240,15 @@ verification:
 
 **Evidence of correctness:** Check a hand-computable gradient, assert shapes/dtypes, show parameters change after one step, separate train/eval modes, and report both training and validation behavior.
 
-When comparing your attempt with the reference, explain which of these
-decisions your code made explicitly. If the reference makes a different
-choice, compare the contracts and evidence before deciding that one
-version is universally better.
-
 <!-- END ADVANCED PYTHON CONCEPT ENRICHMENT -->
 
 ## Exercise-by-exercise reasoning map
-
-This map connects every learner prompt to a reasoning path. Read the
-explanation before copying code: the goal is to understand the assumptions,
-the evidence that validates the result, and the edge cases that can make an
-apparently correct implementation fail.
 
 ### Exercise 1: Original lesson practice
 
 **Prompt:** Plot the loss over epochs.
 
 **How to reason about it:** Store one scalar loss per epoch after aggregating by example, not an arbitrary last batch. Compare train and validation curves and label the optimizer, learning rate, seed, and capacity.
-
-Use the worked reference earlier in this file, then change one boundary
-condition and rerun the stated checks. A copied output is not evidence
-unless you can explain why that output follows from the inputs.
 
 **Verify:** Save a labeled epoch-versus-loss curve and print the raw loss sequence; assert every plotted point is the sample-weighted epoch loss and report whether the final value improved over epoch 1.
 
@@ -274,10 +258,6 @@ unless you can explain why that output follows from the inputs.
 
 **How to reason about it:** Recreate identically initialized models for optimizer comparisons. Adam and SGD often need different learning rates, so compare documented tuning budgets rather than forcing one shared setting.
 
-Use the worked reference earlier in this file, then change one boundary
-condition and rerun the stated checks. A copied output is not evidence
-unless you can explain why that output follows from the inputs.
-
 **Verify:** From identical initial weights, batches, epochs, and seed, print SGD and Adam loss per epoch plus final validation loss; report convergence behavior without declaring a winner from unequal settings.
 
 ### Exercise 3: Original lesson practice
@@ -285,10 +265,6 @@ unless you can explain why that output follows from the inputs.
 **Prompt:** Add one hidden layer and a ReLU activation.
 
 **How to reason about it:** A hidden layer adds capacity only when dimensions and activation order are correct. Track `(batch, features)` through Linear-ReLU-Linear and compare validation evidence, not merely lower training loss.
-
-Use the worked reference earlier in this file, then change one boundary
-condition and rerun the stated checks. A copied output is not evidence
-unless you can explain why that output follows from the inputs.
 
 **Verify:** Assert the network's layer dimensions and output shape on a fixed batch, then compare parameter count and validation loss with the original model under the same seed/optimizer budget.
 
@@ -308,10 +284,6 @@ gradient accumulation is possible, but then scale the loss and document the
 effective batch size. Inspect at least one gradient norm and assert it is
 finite before the update.
 
-**Why this matters:** The result should survive a fresh-kernel rerun and
-a deliberately chosen boundary case. If it does not, revisit the
-assumption or data boundary rather than hiding the failure.
-
 **Verify:** Autograd tracing; print parameter value, gradient before/after zero_grad, gradient after backward, and parameter after step for one fixed batch; assert accumulation occurs across backward calls until zeroed and only step changes parameters.
 
 ### Exercise 5: Mode debugging
@@ -328,10 +300,6 @@ those modules into evaluation behavior.
 After validation, call `model.train()` before the next training epoch. A common
 bug is evaluating correctly once and then continuing training while the model
 is still in evaluation mode.
-
-**Why this matters:** The result should survive a fresh-kernel rerun and
-a deliberately chosen boundary case. If it does not, revisit the
-assumption or data boundary rather than hiding the failure.
 
 **Verify:** Mode debugging; for one fixed input, print repeated train-mode and eval-mode outputs plus BatchNorm running statistics; assert eval outputs are repeatable, no_grad removes graph tracking, and the caller restores the intended mode.
 
@@ -373,9 +341,5 @@ assert abs(epoch_loss - direct_loss) < 1e-4 * max(1.0, abs(direct_loss))
 An unweighted mean of batch means gives the short final batch the same weight
 as every full batch. It is correct only when all batches are the same size or
 the loss function returns a sum and the denominator is handled accordingly.
-
-**Why this matters:** The result should survive a fresh-kernel rerun and
-a deliberately chosen boundary case. If it does not, revisit the
-assumption or data boundary rather than hiding the failure.
 
 **Verify:** Loss-aggregation edge case; with unequal final-batch size, print each batch loss/count, naive mean, weighted epoch loss, and direct full-dataset loss; assert weighted and direct losses agree within 1e-7 while the naive mean differs.

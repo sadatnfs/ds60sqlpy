@@ -65,31 +65,7 @@ information about global means, variances, and component directions.
 
 ## How to run this lesson
 
-**Primary browser route:** run `./classroom` from the repository root and
-choose **Python and data science** on `/classroom`. Open this lesson in the shared workspace,
-read its capability notice, and use its supported coding or reading workflow.
-The [classroom guide](../../../docs/classroom-experience.md) explains saved work, runtimes and switching subjects.
-
-**Optional native notebook/editor route:** the instructions below describe
-separately prepared host tools. They are useful alternatives, not prerequisites
-for opening this lesson in the Docker classroom.
-
-1. Open the Day 36 learner notebook from this guide's **Next
-   step** section in VS Code or JupyterLab.
-2. Select the `Python (ds60sqlpy)` kernel. Start at the top and use
-   **Run All** only after making the written predictions; every added
-   worked example is bounded and offline after bootstrap.
-3. Keep experiments in new scratch cells. Do not edit the official
-   solution while attempting the numbered practice.
-4. Restart the kernel and run from the first cell before calling the
-   lesson complete. A clean run catches hidden state and stale
-   variables.
-
-Linux, macOS, or Ubuntu in Windows WSL 2:
-
-```bash
-.venv/bin/python -m jupyter lab
-```
+Open `python-36` in the classroom, or `python/ds-60day/notebooks/day36_dimensionality_reduction_pca.ipynb` on a host; the [Python study guide](../../STUDY-GUIDE.md) explains both.
 
 ## Concept deep dive: PCA geometry, scaling, variance, and reconstruction
 
@@ -114,10 +90,6 @@ scaling, reconstruction, and downstream performance.
 - **`.transform()` / `.inverse_transform()`:** moves between feature and component spaces, enabling reconstruction-error checks.
 
 ### Focused example A: observe how units change the first component
-
-Before running the example, predict the shape, type, or direction of the
-result. Write the prediction down so that a surprise becomes evidence
-rather than something to overlook.
 
 ```python
 import numpy as np
@@ -212,9 +184,6 @@ assert all(errors[k] >= errors[k + 1] for k in (1, 2, 3))
 
 Use dimensionality reduction as a fitted transformation with measurable information loss. Keep scaling and supervised feature selection inside validation.
 
-Predict or plan before you run code. Use the hint only after an honest
-attempt, and record the evidence that would prove your result correct.
-
 4. **Reconstruction analysis:** Fit scaled PCA with several component counts, inverse-transform the representations, and plot mean squared reconstruction error versus retained components.
    **Progressive hint:** Call transform then inverse_transform on the same fitted PCA and compare in scaled space. Error should not increase as components are added.
 
@@ -267,8 +236,7 @@ downstream objective.
 
 ## Ask an AI tutor about this lesson
 
-The lesson is complete without an AI assistant. If you want optional
-coaching, copy this prompt into the AI tutor while the repository root is open:
+The lesson is complete without AI. For optional coaching, copy this prompt with the repository root open:
 
 ```text
 Tutor me through `python-36` (Day 36: Dimensionality Reduction with PCA).

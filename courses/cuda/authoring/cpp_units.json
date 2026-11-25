@@ -402,7 +402,7 @@
       "Conditioning": "How strongly the exact answer changes when the input changes slightly, independent of the algorithm.",
       "NaN": "A floating-point not-a-number value produced by invalid operations, which compares unequal even to itself."
     },
-    "mistake": "bitwise CPU/GPU equality is always necessary, or a loose tolerance makes any result acceptable. .",
+    "mistake": "bitwise CPU/GPU equality is always necessary, or a loose tolerance makes any result acceptable.",
     "sources": [["Numerical background", "https://docs.nvidia.com/cuda/floating-point/index.html"]],
     "mechanism": "Floating-point arithmetic stores a finite approximation to a real number. Adding a small quantity to a large one may round away the small quantity; subtracting similar large values can expose that loss. Relative error scales with a reference magnitude, while absolute error remains meaningful near zero. A common comparison accepts an error no larger than absolute tolerance plus relative tolerance times reference magnitude. The tolerances must come from input ranges, precision and the calculation, not from repeatedly widening them until a broken index passes. Check finite output explicitly, and use exact comparison for integer counts that cannot overflow.",
     "example1": "The exact sum of \\([10^{16},1,-10^{16}]\\) is 1. A sequential binary64 addition can return 0 because \\(10^{16}+1\\) rounds back to \\(10^{16}\\). Python's compensated `math.fsum` recovers 1 for this fixture. Different summation order is a numerical mechanism, not proof that either processor is faulty.",
@@ -789,7 +789,7 @@
       "Fat binary": "An embedded bundle of several device images, such as cubins for multiple architectures plus PTX.",
       "JIT compilation": "Just-in-time translation of PTX into machine code when a module is loaded on a device."
     },
-    "mistake": "an executable containing device code proves the device can execute it. .",
+    "mistake": "an executable containing device code proves the device can execute it.",
     "sources": [
       [
         "Compiler workflow",
@@ -871,7 +871,7 @@
       "Asynchronous launch": "Kernel submission that returns control to the host before the device finishes the work.",
       "Completion check": "A checked synchronization, such as `cudaDeviceSynchronize`, that waits for device work and reports errors raised during execution."
     },
-    "mistake": "returning from the launch expression means the kernel finished. .",
+    "mistake": "returning from the launch expression means the kernel finished.",
     "sources": [
       [
         "CUDA C++ introduction",
@@ -1970,7 +1970,7 @@
       "Synccheck": "The Compute Sanitizer tool that reports invalid uses of synchronization primitives such as divergent barriers.",
       "Error exit code": "A sanitizer option that makes the process return nonzero when a diagnostic occurs, so automation fails."
     },
-    "mistake": "a sanitizer pass proves speed, all global ordering, or correctness for every input. .",
+    "mistake": "a sanitizer pass proves speed, all global ordering, or correctness for every input.",
     "sources": [
       ["Compute Sanitizer", "https://docs.nvidia.com/compute-sanitizer/ComputeSanitizer/index.html"]
     ],
@@ -2440,7 +2440,7 @@
       "Critical path": "The longest chain of dependent work, which determines total elapsed time.",
       "Idle gap": "A period with no device work queued, often caused by host synchronization or slow submission."
     },
-    "mistake": "the slowest-looking kernel is necessarily the greatest end-to-end optimization opportunity. .",
+    "mistake": "the slowest-looking kernel is necessarily the greatest end-to-end optimization opportunity.",
     "sources": [
       ["Nsight Systems guide", "https://docs.nvidia.com/nsight-systems/UserGuide/index.html"]
     ],
@@ -2519,7 +2519,7 @@
       "Memory throughput": "The achieved rate of traffic at a memory level, often reported as a percentage of the hardware peak.",
       "Kernel replay": "Re-running one kernel several times so a profiler can collect more counters than one pass allows."
     },
-    "mistake": "a high utilization percentage proves the algorithm is efficient or any single metric diagnoses all bottlenecks. .",
+    "mistake": "a high utilization percentage proves the algorithm is efficient or any single metric diagnoses all bottlenecks.",
     "sources": [
       [
         "Nsight Compute profiling",
@@ -3156,7 +3156,7 @@
       "Release threshold": "A pool attribute that sets how much unused memory the pool may keep reserved.",
       "Use-after-free": "Accessing an allocation after it was freed; with `cudaFreeAsync`, any work not ordered before the free must not touch it."
     },
-    "mistake": "returning memory to a pool means the GPU's visible memory usage must immediately fall to zero. .",
+    "mistake": "returning memory to a pool means the GPU's visible memory usage must immediately fall to zero.",
     "sources": [
       [
         "Allocator chapter",
@@ -3238,7 +3238,7 @@
       "Prefetch": "A `cudaMemPrefetchAsync` hint that moves pages to a processor before they are needed.",
       "Unified virtual addressing": "One virtual address space shared by host and devices so a pointer value identifies its memory."
     },
-    "mistake": "one pointer means one physically uniform memory pool or that managed allocation eliminates data-movement cost. .",
+    "mistake": "one pointer means one physically uniform memory pool or that managed allocation eliminates data-movement cost.",
     "sources": [
       [
         "Unified memory",
@@ -3320,7 +3320,7 @@
       "Graph instantiation": "Turning a graph into an executable form once so later launches avoid most per-operation overhead.",
       "Graph update": "Changing parameters of an executable graph without rebuilding it, when the topology stays the same."
     },
-    "mistake": "a graph automatically fuses kernels or accepts arbitrary dynamic control flow without further design. .",
+    "mistake": "a graph automatically fuses kernels or accepts arbitrary dynamic control flow without further design.",
     "sources": [
       [
         "CUDA Graphs",
@@ -3479,7 +3479,7 @@
       "Temporary storage query": "A first CUB call with a null workspace pointer that returns the number of bytes the algorithm needs.",
       "Execution policy": "An argument such as `thrust::cuda::par.on(stream)` that selects where and on which stream a Thrust algorithm runs."
     },
-    "mistake": "library calls remove the need to understand allocation, synchronization or data layout.  should be replaced by the pinned release's docs at implementation time.",
+    "mistake": "library calls remove the need to understand allocation, synchronization or data layout.",
     "sources": [],
     "mechanism": "CUDA Core Compute Libraries bring maintained building blocks such as Thrust algorithms, CUB primitives and CUDA-oriented standard-library facilities. Their abstractions do not remove ownership, stream or temporary-storage obligations. Prefer a tested library primitive when it matches semantics, and keep a handwritten version as a learning baseline or for a demonstrated special requirement. Some primitive interfaces separate workspace-size queries from execution; read the pinned interface rather than guessing. Iterator adapters can avoid materializing intermediate arrays, but they must preserve valid lifetimes and access patterns.",
     "example1": "Transform \\([1,2,3,4]\\) by squaring and sum, obtaining 30. A fused transform-reduce can avoid a separate \\([1,4,9,16]\\) allocation when its interface supports the desired operation. The mathematical result is the same; the memory and scheduling behavior differ.",
@@ -3557,7 +3557,7 @@
       "cuBLAS handle": "A library context created once and reused, which owns workspace and stream settings.",
       "Alpha and beta": "Scalars in C = alpha * op(A) * op(B) + beta * C, where a nonzero beta reads the existing C."
     },
-    "mistake": "swapping dimensions until a test passes is an acceptable layout strategy. .",
+    "mistake": "swapping dimensions until a test passes is an acceptable layout strategy.",
     "sources": [["cuBLAS documentation", "https://docs.nvidia.com/cuda/cublas/index.html"]],
     "mechanism": "GEMM computes scaled matrix multiplication plus an existing output contribution. In conventional notation, C becomes alpha times A*B plus beta times C. Classic cuBLAS uses column-major conventions, so leading dimensions and transpose flags must be interpreted accordingly. cuBLASLt provides more explicit layout and algorithm descriptors, with workspace and compute-type choices. A handle has lifecycle and stream configuration. Check library status separately from CUDA completion. A successful call with wrong dimensions can produce plausible but incorrect data, especially when symmetric inputs conceal transposition mistakes.",
     "example1": "Use the rectangular A and B from cuda-018, whose product is \\([[7,4],[16,13]]\\). With \\(\\alpha=2\\), \\(\\beta=3\\) and initial C all ones, the result becomes \\([[17,11],[35,29]]\\). This catches implementations that ignore beta or assume the output is initially zero.",
@@ -3634,7 +3634,7 @@
       "Circular convolution": "Convolution in which indices wrap around, which is what pointwise multiplication of DFTs computes.",
       "Real-to-complex transform": "A transform of N real inputs that stores only N/2+1 complex outputs because of conjugate symmetry."
     },
-    "mistake": "a visually plausible spectrum proves correct scaling or an FFT automatically computes linear convolution. .",
+    "mistake": "a visually plausible spectrum proves correct scaling or an FFT automatically computes linear convolution.",
     "sources": [["cuFFT documentation", "https://docs.nvidia.com/cuda/cufft/index.html"]],
     "mechanism": "The discrete Fourier transform rewrites samples as frequency components with an explicit sign and normalization convention. An inverse transform must use the matching convention. cuFFT uses plans to prepare a transform shape/layout and may need workspace; plan creation is separate from execution. Multiplication in frequency space corresponds to circular convolution unless padding supplies enough length for the desired linear convolution. Real-to-complex storage has a special output shape and, for some in-place workflows, padding requirements. Define those layouts before moving data rather than treating all transforms as same-size arrays.",
     "example1": "The four-sample signal \\([0,1,0,-1]\\) has energy at the positive and negative one-cycle frequency components. A direct CPU DFT gives approximately [0,-2i,0,2i]. Small real roundoff terms are expected. This is a tiny semantic reference, not a fast FFT implementation.",
@@ -3711,7 +3711,7 @@
       "Sparsity": "The fraction of matrix entries that are zero, which alone does not decide whether sparse storage is faster.",
       "SpMV": "Sparse matrix-vector multiplication, often limited by irregular memory access and row length imbalance."
     },
-    "mistake": "a matrix containing many zero values is automatically stored sparsely or always runs faster. .",
+    "mistake": "a matrix containing many zero values is automatically stored sparsely or always runs faster.",
     "sources": [["cuSPARSE documentation", "https://docs.nvidia.com/cuda/cusparse/index.html"]],
     "mechanism": "Sparse storage represents selected entries and their coordinates instead of storing every zero. Compressed sparse row, CSR, stores row offsets, column indices and values. Row offsets delimit each row's entries; the final offset equals the stored-entry count. Specify index base, sortedness and duplicate handling. A sparse multiply can save arithmetic and storage but introduces indirect reads and uneven row work. Conversion and preprocessing costs matter, especially for one-shot operations. Arbitrary sparsity is different from structured sparsity supported by certain hardware/library modes.",
     "example1": "Matrix \\([[2,0,1],[0,3,0]]\\) has CSR offsets \\([0,2,3]\\), columns \\([0,2,1]\\) and values \\([2,1,3]\\). Multiplying by \\([4,5,6]\\) gives \\([14,15]\\). The first row reads two entries; the second reads one. Offsets are boundaries, not per-row counts.",
@@ -3788,7 +3788,7 @@
       "Condition number": "A measure of how much relative input error can be amplified in the solution.",
       "devInfo": "A device integer that cuSOLVER sets to report invalid parameters or a singular factorization."
     },
-    "mistake": "obtaining a vector from a solver proves that the original problem was well-posed. .",
+    "mistake": "obtaining a vector from a solver proves that the original problem was well-posed.",
     "sources": [["cuSOLVER documentation", "https://docs.nvidia.com/cuda/cusolver/index.html"]],
     "mechanism": "A linear solver seeks x such that A*x approximates b. Factorization usually avoids the unnecessary work and numerical costs of explicitly constructing an inverse. Library status tells whether the requested procedure completed; a residual checks how well the returned vector satisfies the equation. A small residual does not guarantee a small error in x when A is ill-conditioned, meaning small input changes can greatly change the solution. Report both the residual and a conditioning interpretation. Workspace, matrix layout, pivoting and rank assumptions belong to the solver contract rather than being incidental implementation details.",
     "example1": "For A=\\([[3,1],[1,2]]\\) and b=\\([9,8]\\), x=\\([2,3]\\) gives A*x=\\([9,8]\\), so residual is zero in this exact fixture. This is a good first layout and status test, but it does not exercise singular or poorly conditioned problems.",
@@ -3865,7 +3865,7 @@
       "Standard error": "The estimated standard deviation of a sample mean, used to build an uncertainty interval.",
       "Counter-based generator": "A generator such as Philox that computes any random value directly from a key and a counter."
     },
-    "mistake": "giving every thread the same seed creates independent samples, or statistical disagreement alone proves a coding defect. .",
+    "mistake": "giving every thread the same seed creates independent samples, or statistical disagreement alone proves a coding defect.",
     "sources": [["cuRAND documentation", "https://docs.nvidia.com/cuda/curand/index.html"]],
     "mechanism": "Parallel random-number generation needs a reproducible mapping from logical samples to independent streams or subsequences. Giving every thread identical initial state can repeat the same draws and destroy effective sample size. A seed identifies an experiment, but the generator, stream partition and sample-count mapping are also part of it. Monte Carlo error is sampling uncertainty, distinct from floating-point error or a bug. Increasing independent sample count usually reduces standard error at a square-root rate. RNG initialization can be expensive, so report setup separately from sustained generation when evaluating performance.",
     "example1": "Estimate the integral of x squared on \\([0,1]\\) by averaging squared uniform samples. The exact answer is one third. A fixed CPU seed produces a reproducible educational estimate; its closeness is not evidence about cuRAND or independent GPU streams. Keep a broad deterministic sanity check separate from statistical claims.",
@@ -4251,7 +4251,7 @@
       "Grid group": "A group representing every thread in the grid, which can synchronize only under a cooperative launch.",
       "Cooperative launch": "A launch through `cudaLaunchCooperativeKernel` that guarantees all blocks are resident at once."
     },
-    "mistake": "calling a grid barrier makes an ordinary launch globally synchronized. .",
+    "mistake": "calling a grid barrier makes an ordinary launch globally synchronized.",
     "sources": [
       [
         "Cooperative Groups",
@@ -4333,7 +4333,7 @@
       "Asynchronous barrier": "A `cuda::barrier` that separates arriving from waiting so threads can work between the two.",
       "Software pipelining": "Overlapping the load of the next tile with computation on the current tile using several buffers."
     },
-    "mistake": "initiating a copy makes its destination immediately readable. .",
+    "mistake": "initiating a copy makes its destination immediately readable.",
     "sources": [
       [
         "Asynchronous copies",
@@ -4492,7 +4492,7 @@
       "Epilogue": "The final stage of a GEMM kernel that applies scaling, bias or activation before storing results.",
       "MMA atom": "The smallest matrix-multiply-accumulate instruction shape that CuTe composes into larger tiles."
     },
-    "mistake": "a template library removes the need to understand layout or architecture support. , .",
+    "mistake": "a template library removes the need to understand layout or architecture support.",
     "sources": [
       ["CUTLASS", "https://docs.nvidia.com/cutlass/latest/overview.html"],
       [
@@ -4575,7 +4575,7 @@
       "cuobjdump": "A tool that extracts embedded PTX and SASS from compiled binaries.",
       "Resource usage report": "Compiler output from `-Xptxas -v` that lists registers, shared memory and spill bytes per kernel."
     },
-    "mistake": "PTX instruction count equals executed hardware instruction count or fewer instructions always means faster. , .",
+    "mistake": "PTX instruction count equals executed hardware instruction count or fewer instructions always means faster.",
     "sources": [
       ["NVCC reference", "https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html"],
       ["PTX reference", "https://docs.nvidia.com/cuda/parallel-thread-execution/index.html"]
@@ -4656,7 +4656,7 @@
       "Strong scaling": "Speedup for a fixed total problem size as the number of GPUs grows.",
       "Weak scaling": "Efficiency when the problem size grows in proportion to the number of GPUs."
     },
-    "mistake": "two GPUs share memory automatically or multi-GPU execution proves multi-node readiness. , .",
+    "mistake": "two GPUs share memory automatically or multi-GPU execution proves multi-node readiness.",
     "sources": [
       [
         "Multi-GPU programming",

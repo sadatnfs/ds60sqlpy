@@ -209,9 +209,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="syntax-anatomy-and-reasoning">Syntax anatomy and reasoning<a class="heading-anchor" href="#syntax-anatomy-and-reasoning" aria-label="Link to this section">#</a></h3>
 <p>A test table is often a slice of anonymous structs with name, input and want fields. In a prepared project, func TestName(t *testing.T) is discovered by go test, and t.Run creates named subtests. Compare actual and expected values directly; include the case name in failure messages. Fuzz tests describe invariants across generated inputs, but they need a bounded execution budget and persistent regression seeds. Do not treat successful compilation as a behavior test.</p>
 <h3 id="run-this-lesson">Run this lesson<a class="heading-anchor" href="#run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>Choose Go in the unified Docker classroom. Save your own pad before experimenting. The prepared worker stages it as <code>main.go</code>, compiles it, and executes the resulting program with bounded time and output. The pad is one source file. It does not supply interactive input, arbitrary command-line arguments, package installation, Kubernetes credentials or a host Docker socket. Every ordinary reference here uses the standard library, synthetic local data and explicit checks. A failed <code>check</code> panics and produces a nonzero process result; do not remove it to make the run appear successful.</p>
-<p>The explanatory solution snippets belong inside <code>func main()</code> unless they declare a helper. <code>check</code> is a tiny teaching helper that panics when a condition is false. The separate reference supplies required imports and helpers and implements all six cases. Use that complete source only after an attempt or an explicit reveal. For an independently prepared Go project, the equivalent local build is <code>go build -o lesson main.go</code>, followed by <code>./lesson</code>; use Linux or WSL 2 for that optional workflow. Compiling proves syntax and type consistency, while the executed checks establish the stated example contracts.</p>
-<p>Each worked example below is a complete Go file. Copy one whole block into your saved pad and run it. Example 2 includes the first case as well as the second, so its setup is complete. Its supporting declarations may be reused in later investigations. The separate reference implements all six cases.</p>
+<p>Run each worked example as one complete file in your saved pad (<a href="../STUDY-GUIDE.md.html#run-a-lesson">run steps</a>).</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1-build-a-named-table">Worked example 1: Build a named table<a class="heading-anchor" href="#worked-example-1-build-a-named-table" aria-label="Link to this section">#</a></h4>
 <p>Test clamp with values below, inside and above the range 0 to 10.</p>
@@ -309,77 +307,79 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Observe:</strong> Both endpoints are preserved.</p>
 <p>Endpoint tests distinguish inclusive boundaries from off-by-one policies. They should be named in the API contract.</p>
 <h3 id="predict-before-running">Predict before running<a class="heading-anchor" href="#predict-before-running" aria-label="Link to this section">#</a></h3>
-<p>For each example, write the input values, the state that can change, and the expected observation. Explain which result would disprove your current interpretation. For concurrency, predict a guaranteed relationship rather than an arbitrary scheduling order. For an error case, identify whether it is rejected at compilation or returned during execution.</p>
+<p>For each clamp case, predict the output before running and name a plausible wrong implementation the case would reject. Which inputs distinguish clamp from mutantClamp, and which do not? For the idempotence property, predict whether a function that always returns 5 would pass it, and what that says about properties used without concrete cases.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-build-a-named-table-change-one-input">Exercise 1: Build a named table: change one input<a class="heading-anchor" href="#exercise-1-build-a-named-table-change-one-input" aria-label="Link to this section">#</a></h4>
-<p>Copy worked example 1 into a scratch pad and change <code>cases := []struct{ in, want int }{{-2, 0}, {4, 4}, {12, 10}}</code> to <code>cases := []struct{ in, want int }{{-2, 1}, {4, 4}, {12, 10}}</code>. Before running, predict which check fails and which value it now sees; then run it and restore the original line.</p>
-<p><strong>Expected:</strong> The changed run panics with <code>clamp table</code> because <code>clamp(tc.in) == tc.want</code> no longer holds. Restoring the original line brings back the worked observation: the outputs are 0, 4 and 10.</p>
-<p><strong>Verify:</strong> Compare your written prediction with the panic message <code>clamp table</code> and name the value that made <code>clamp(tc.in) == tc.want</code> false. After restoring the input, the program must print its success line again.</p>
+<p>Copy worked example 1, change <code>cases := []struct{ in, want int }{{-2, 0}, {4, 4}, {12, 10}}</code> to <code>cases := []struct{ in, want int }{{-2, 1}, {4, 4}, {12, 10}}</code> and predict the failure before running; then restore the line.</p>
+<p><strong>Expected:</strong> The edited run panics with <code>clamp table</code> because <code>clamp(tc.in) == tc.want</code> no longer holds.</p>
+<p><strong>Verify:</strong> Restoring <code>cases := []struct{ in, want int }{{-2, 0}, {4, 4}, {12, 10}}</code> makes the check pass again with the worked observation: the outputs are 0, 4 and 10.</p>
 <h4 id="exercise-2-include-exact-endpoints-diagnose-an-edited-check">Exercise 2: Include exact endpoints: diagnose an edited check<a class="heading-anchor" href="#exercise-2-include-exact-endpoints-diagnose-an-edited-check" aria-label="Link to this section">#</a></h4>
-<p>A careless edit changed the check in worked example 2 so that it reads <code>check(clamp(1) == 0 &amp;&amp; clamp(10) == 10, &quot;endpoints&quot;)</code>. Run worked example 2 with that line, explain why the edited check now fails for the same program state, and restore it.</p>
-<p><strong>Expected:</strong> Before the repair the program panics with <code>endpoints</code>; after it the line reads <code>check(clamp(0) == 0 &amp;&amp; clamp(10) == 10, &quot;endpoints&quot;)</code> again and both endpoints are preserved.</p>
-<p><strong>Verify:</strong> Keep the failing and the repaired runs. Explain why the edited check rejects the same program state that <code>clamp(0) == 0 &amp;&amp; clamp(10) == 10</code> accepts.</p>
+<p>A careless edit rewrote the check in worked example 2 as <code>check(clamp(1) == 0 &amp;&amp; clamp(10) == 10, &quot;endpoints&quot;)</code>. Explain the failure, then restore it.</p>
+<p><strong>Expected:</strong> The defective run panics with <code>endpoints</code>; after restoring <code>check(clamp(0) == 0 &amp;&amp; clamp(10) == 10, &quot;endpoints&quot;)</code>, both endpoints are preserved.</p>
+<p><strong>Verify:</strong> The edited check fails with message <code>endpoints</code> for a state that <code>clamp(0) == 0 &amp;&amp; clamp(10) == 10</code> accepts.</p>
 <h4 id="exercise-3-check-idempotence">Exercise 3: Check idempotence<a class="heading-anchor" href="#exercise-3-check-idempotence" aria-label="Link to this section">#</a></h4>
 <p>Apply clamp twice to values -2, 4 and 12.</p>
 <p><strong>Expected:</strong> Applying it twice gives the same result as once.</p>
-<p><strong>Verify:</strong> Keep a check equivalent to <code>clamp(clamp(x)) == clamp(x)</code>. As a control, change <code>check(clamp(clamp(x)) == clamp(x), &quot;idempotence&quot;)</code> to <code>check(clamp(clamp(x)) != clamp(x), &quot;idempotence&quot;)</code> inside that check: it must panic with <code>idempotence</code>, which shows the check can fail. Restore it.</p>
+<p><strong>Verify:</strong> Your solution must keep <code>clamp(clamp(x)) == clamp(x)</code> true. Control: changing <code>check(clamp(clamp(x)) == clamp(x), &quot;idempotence&quot;)</code> to <code>check(clamp(clamp(x)) != clamp(x), &quot;idempotence&quot;)</code> panics with message <code>idempotence</code>; revert it.</p>
 <h4 id="exercise-4-reject-a-plausible-mutant">Exercise 4: Reject a plausible mutant<a class="heading-anchor" href="#exercise-4-reject-a-plausible-mutant" aria-label="Link to this section">#</a></h4>
 <p>Compare the correct clamp with a mutant that incorrectly caps at 9.</p>
 <p><strong>Expected:</strong> Input 10 distinguishes them.</p>
-<p><strong>Verify:</strong> Keep a check equivalent to <code>clamp(10) != mutantClamp(10)</code>. As a control, change <code>check(clamp(10) != mutantClamp(10), &quot;mutant rejected&quot;)</code> to <code>check(clamp(10) == mutantClamp(10), &quot;mutant rejected&quot;)</code> inside that check: it must panic with <code>mutant rejected</code>, which shows the check can fail. Restore it.</p>
+<p><strong>Verify:</strong> Your solution must keep <code>clamp(10) != mutantClamp(10)</code> true. Control: changing <code>check(clamp(10) != mutantClamp(10), &quot;mutant rejected&quot;)</code> to <code>check(clamp(10) == mutantClamp(10), &quot;mutant rejected&quot;)</code> panics with message <code>mutant rejected</code>; revert it.</p>
 <h4 id="exercise-5-cover-a-range-invariant">Exercise 5: Cover a range invariant<a class="heading-anchor" href="#exercise-5-cover-a-range-invariant" aria-label="Link to this section">#</a></h4>
 <p>Check all integer inputs from -20 through 20.</p>
 <p><strong>Expected:</strong> Every result lies between 0 and 10.</p>
-<p><strong>Verify:</strong> Keep a check equivalent to <code>v &gt;= 0 &amp;&amp; v &lt;= 10</code>. As a control, change <code>check(v &gt;= 0 &amp;&amp; v &lt;= 10, &quot;range invariant&quot;)</code> to <code>check(v &gt; 0 &amp;&amp; v &lt;= 10, &quot;range invariant&quot;)</code> inside that check: it must panic with <code>range invariant</code>, which shows the check can fail. Restore it.</p>
+<p><strong>Verify:</strong> Your solution must keep <code>v &gt;= 0 &amp;&amp; v &lt;= 10</code> true. Control: changing <code>check(v &gt;= 0 &amp;&amp; v &lt;= 10, &quot;range invariant&quot;)</code> to <code>check(v &gt; 0 &amp;&amp; v &lt;= 10, &quot;range invariant&quot;)</code> panics with message <code>range invariant</code>; revert it.</p>
 <h4 id="exercise-6-transfer-a-fresh-regression">Exercise 6: Transfer a fresh regression<a class="heading-anchor" href="#exercise-6-transfer-a-fresh-regression" aria-label="Link to this section">#</a></h4>
 <p>Retain input 11 as a regression for an implementation that forgets the upper cap.</p>
 <p><strong>Expected:</strong> The result is 10.</p>
-<p><strong>Verify:</strong> Keep a check equivalent to <code>clamp(11) == 10</code>. As a control, change <code>check(clamp(11) == 10, &quot;upper regression&quot;)</code> to <code>check(clamp(11) != 10, &quot;upper regression&quot;)</code> inside that check: it must panic with <code>upper regression</code>, which shows the check can fail. Restore it.</p>
-<p>Implement these in the answer-free learner source. Keep one independent check per claim. A task can require tracing, construction, a changed input or a deliberate safe failure. Do not run a data race, corrupt memory or contact a shared cluster merely to demonstrate why it would be wrong.</p>
+<p><strong>Verify:</strong> Your solution must keep <code>clamp(11) == 10</code> true. Control: changing <code>check(clamp(11) == 10, &quot;upper regression&quot;)</code> to <code>check(clamp(11) != 10, &quot;upper regression&quot;)</code> panics with message <code>upper regression</code>; revert it.</p>
+<p>Work in the answer-free learner source, <code>courses/go/lessons/go-014.go</code> (<a href="../STUDY-GUIDE.md.html#work-an-exercise">exercise contract</a>).</p>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
-<p>Read a compiler error from the first location in your source, then fix one cause at a time. Unused imports and variables are errors in Go; add an import when its use exists, rather than copying a large unused import list. A panic from <code>check</code> identifies a violated example contract. Compare the actual value with the expected value and inspect the state transition that produced it. A returned <code>error</code> is a value that the caller must handle; an ignored error can make later output look plausible while the original operation failed.</p>
-<p>The lesson-specific explanations in the two examples identify the important counterexamples. Extend that reasoning to every investigation: explain why a plausible alternative would fail, and preserve a tiny input that distinguishes it. Treat empty data, missing values and cancellation as domain cases with explicit policies. In concurrent work, replace sleeps used as synchronization with channels, mutexes or an explicit ownership protocol.</p>
+<p>A test that passes for the wrong implementation is the main danger. A table built only from interior values passes an off-by-one cap, and a property such as idempotence also passes for a constant function. Pair each property with concrete boundary cases. Another trap is computing the expected value with the code under test; the oracle must come from the specification, not from clamp itself.</p>
+<p>General compiler, panic and error diagnosis is in the <a href="../STUDY-GUIDE.md.html#diagnose-a-failure">study guide</a>.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <h4 id="hint-for-investigation-1-build-a-named-table-change-one-input">Hint for investigation 1: Build a named table: change one input<a class="heading-anchor" href="#hint-for-investigation-1-build-a-named-table-change-one-input" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The outputs are 0, 4 and 10.</li>
-<li>The check <code>clamp(tc.in) == tc.want</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Compute the checked value with <code>cases := []struct{ in, want int }{{-2, 1}, {4, 4}, {12, 10}}</code> in place before running, then compare it with the value <code>clamp(tc.in) == tc.want</code> expects.</li>
+<li>Each row pairs an input with a want. Which rows lie outside the 0 to 10 range?</li>
+<li>clamp(-2) is 0, so the edited row expects the wrong value and the table check fails on its first row. The function is fine; the oracle in the table changed.</li>
 </ol>
 <h4 id="hint-for-investigation-2-include-exact-endpoints-diagnose-an-edited-check">Hint for investigation 2: Include exact endpoints: diagnose an edited check<a class="heading-anchor" href="#hint-for-investigation-2-include-exact-endpoints-diagnose-an-edited-check" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: Both endpoints are preserved.</li>
-<li>The check <code>clamp(0) == 0 &amp;&amp; clamp(10) == 10</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Compare <code>check(clamp(1) == 0 &amp;&amp; clamp(10) == 10, &quot;endpoints&quot;)</code> with the same line in worked example 2 and state the claim each version makes.</li>
+<li>An inclusive endpoint maps to itself. What should clamp return at exactly 0 and at exactly 10?</li>
+<li>clamp(1) returns 1 because 1 is inside the range, so <code>clamp(1)==0</code> is false. The endpoint case must test exactly 0, the inclusive lower boundary.</li>
 </ol>
 <h4 id="hint-for-investigation-3-check-idempotence">Hint for investigation 3: Check idempotence<a class="heading-anchor" href="#hint-for-investigation-3-check-idempotence" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: Applying it twice gives the same result as once.</li>
-<li>The check <code>clamp(clamp(x)) == clamp(x)</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Name one input that would make <code>clamp(clamp(x)) == clamp(x)</code> false. A check that no input can falsify is not evidence.</li>
+<li>Idempotence compares clamp(clamp(x)) with clamp(x). Which inputs change on the first call?</li>
+<li>This is a property rather than a single expected output.</li>
 </ol>
 <h4 id="hint-for-investigation-4-reject-a-plausible-mutant">Hint for investigation 4: Reject a plausible mutant<a class="heading-anchor" href="#hint-for-investigation-4-reject-a-plausible-mutant" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: Input 10 distinguishes them.</li>
-<li>The check <code>clamp(10) != mutantClamp(10)</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Name one input that would make <code>clamp(10) != mutantClamp(10)</code> false. A check that no input can falsify is not evidence.</li>
+<li>The mutant caps at 9. Which single input lies between the two caps?</li>
+<li>A test&#x27;s value is visible when it rejects a realistic defect.</li>
 </ol>
 <h4 id="hint-for-investigation-5-cover-a-range-invariant">Hint for investigation 5: Cover a range invariant<a class="heading-anchor" href="#hint-for-investigation-5-cover-a-range-invariant" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: Every result lies between 0 and 10.</li>
-<li>The check <code>v &gt;= 0 &amp;&amp; v &lt;= 10</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Name one input that would make <code>v &gt;= 0 &amp;&amp; v &lt;= 10</code> false. A check that no input can falsify is not evidence.</li>
+<li>Every result must lie in the closed range. Does the loop include both -20 and 20?</li>
+<li>This bounded exhaustive set supports the invariant for its chosen domain.</li>
 </ol>
 <h4 id="hint-for-investigation-6-transfer-a-fresh-regression">Hint for investigation 6: Transfer a fresh regression<a class="heading-anchor" href="#hint-for-investigation-6-transfer-a-fresh-regression" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The result is 10.</li>
-<li>The check <code>clamp(11) == 10</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Name one input that would make <code>clamp(11) == 10</code> false. A check that no input can falsify is not evidence.</li>
+<li>11 is the smallest value above the cap. What must clamp return for it?</li>
+<li>The smallest counterexample just beyond the boundary often explains the defect better than a large random value.</li>
 </ol>
 <h3 id="self-check-and-retrieval">Self-check and retrieval<a class="heading-anchor" href="#self-check-and-retrieval" aria-label="Link to this section">#</a></h3>
-<p>Close the reference. Rebuild one normal case and one boundary case from a blank pad. Explain the role of test oracle without using its name in the definition. Then change the domain while keeping the same invariant. Record the new input, your prediction and the observed output. If your program passes only because its input is hard-coded, explain which part would need a reusable function in a larger project.</p>
+<p>Write a table for <code>grade(score int) string</code> that returns pass at 60 or more and fail otherwise, with rows for 59, 60, 61 and a negative score. Write a mutant that uses <code>&gt; 60</code> and name the row that rejects it. Then explain why a coverage report showing every line executed could still hide this mutant.</p>
+<p>The general <a href="../STUDY-GUIDE.md.html#self-check-and-retrieval">retrieval routine</a> still applies.</p>
 <h3 id="next-step-and-sources">Next step and sources<a class="heading-anchor" href="#next-step-and-sources" aria-label="Link to this section">#</a></h3>
-<p><a href="https://pkg.go.dev/testing">Primary language or library documentation</a>, reviewed 2026-10-23. The teaching explanations and synthetic fixtures are original. Continue with the next lesson when you can explain the six observations and diagnose a changed case without copying its answer.</p>
+<p>Source: <a href="https://pkg.go.dev/testing"><code>testing</code> package documentation</a>, reviewed 2026-10-23.</p>
+<p>Next: go-015, Generics and constraints without losing semantics (<a href="../STUDY-GUIDE.md.html#when-to-move-on">criteria</a>).</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for go-014: Table-driven tests and useful counterexamples.
 Read courses/go/guides/go-014.md and my saved attempt based on courses/go/lessons/go-014.go.

@@ -2,26 +2,18 @@
 
 int main(void) {
   /* Exercise 1: Install and restore a handler: predict an edited check
-     Copy worked example 1 into a scratch pad and change `CHECK(signal(SIGINT,
-     previous) != SIG_ERR);` to `CHECK(signal(SIGINT, previous) == SIG_ERR);`
-     inside its CHECK. Before running, predict whether the CHECK still holds and
-     explain why; then restore it. Expected: With `CHECK(signal(SIGINT,
-     previous) == SIG_ERR);` the run stops with `Check failed` at the CHECK on
-     `signal(SIGINT, previous) != SIG_ERR`, because the "install and restore a
-     handler" case no longer shows that both operations succeed. Restoring
-     `CHECK(signal(SIGINT, previous) != SIG_ERR);` brings that observation back.
-   */
+     In worked example 1, change `CHECK(signal(SIGINT, previous) != SIG_ERR);`
+     to `CHECK(signal(SIGINT, previous) == SIG_ERR);`. Predict whether the CHECK
+     still holds and why, then run and restore. Expected: `Check failed`:
+     `CHECK(signal(SIGINT, previous) == SIG_ERR);` is false, although both
+     operations succeed. */
 
   /* Exercise 2: Record a raised notification: diagnose an edited check
-     A careless edit changed the CHECK in worked example 2, the "record a raised
-     notification" case, so that it reads `CHECK(signal(SIGINT, previous) ==
-     SIG_ERR);`. Run the example with that line, explain why the edited CHECK
-     now fails even though the program state still means the signal flag becomes
-     one, and restore it. Expected: Before the repair the run stops with `Check
-     failed` at the CHECK on `signal(SIGINT, previous) != SIG_ERR`. Once the
-     line reads `CHECK(signal(SIGINT, previous) != SIG_ERR);` again, the "record
-     a raised notification" case again shows that the signal flag becomes one.
-   */
+     Worked example 2's CHECK now reads `CHECK(signal(SIGINT, previous) ==
+     SIG_ERR);`. Explain why it fails although the signal flag becomes one, then
+     restore it. Expected: `Check failed` until the CHECK reads
+     `CHECK(signal(SIGINT, previous) != SIG_ERR);` again, though the signal flag
+     becomes one. */
 
   /* Exercise 3: Keep work outside the handler
      Raise SIGINT with the lesson handler installed and let a normal-flow

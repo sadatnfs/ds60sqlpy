@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cuda/spark/solutions/cuda-126_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="cuda-126-explained-solutions">cuda-126: explained solutions<a class="heading-anchor" href="#cuda-126-explained-solutions" aria-label="Link to this section">#</a></h2>
-<p>These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.</p>
+<p>Compare with your <a href="../lessons/cuda-126.md.html">worksheet</a> attempt.</p>
 <h3 id="exercise-1-classify-failure-layers">Exercise 1: Classify failure layers<a class="heading-anchor" href="#exercise-1-classify-failure-layers" aria-label="Link to this section">#</a></h3>
 <p>Use first evidence rather than guessing.</p>
 <p><strong>Approach.</strong> Classify the failure layer from the first evidence: a device out-of-memory error while JVM heap is below its limit places the failure in GPU memory, not the JVM.</p>
@@ -231,9 +231,19 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Why it is correct here.</strong> The packet lets someone reproduce and analyze the failure later without access to the live system. Logs and metrics often expire on a retention schedule, so the packet may be the only lasting copy.</p>
 <p><strong>A plausible wrong approach.</strong> Keeping raw configuration with credentials risks leaking secrets. Dropping configuration entirely, on the other hand, removes the settings needed to reproduce the failure.</p>
 <p><strong>How to verify.</strong> Check the packet for secrets and confirm it contains each listed item. Record the input data identity as a path and version or checksum rather than copying sensitive data.</p>
+<h3 id="self-check-answers">Self-check answers<a class="heading-anchor" href="#self-check-answers" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>Why preserve the first relevant error?</strong> Later generic task retries can hide the original native failure that explains the incident.</li>
+</ol>
+<ol start="2">
+<li><strong>Why can task retries duplicate side effects?</strong> Spark may run a task again after it already wrote externally, so writes inside a UDF can happen twice.</li>
+</ol>
+<ol start="3">
+<li><strong>Who may reset a device?</strong> An administrator, because a device-wide reset can affect unrelated jobs; the classroom never does it automatically.</li>
+</ol>
 <h3 id="reference-observation">Reference observation<a class="heading-anchor" href="#reference-observation" aria-label="Link to this section">#</a></h3>
 <p>Two attempts can target one logical output key.</p>
-<p>The reference file is <code>courses/cuda/spark/references/cuda-126_cpu.py</code>. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.</p></article>
+<p>Asserted by <code>courses/cuda/spark/references/cuda-126_cpu.py</code>.</p></article>
   </main>
 </body>
 </html>

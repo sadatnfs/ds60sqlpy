@@ -1,6 +1,8 @@
 # rust-038: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [rust-038_solution.rs](rust-038_solution.rs). It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.
+Executable reference: [rust-038_solution.rs](rust-038_solution.rs), which runs both examples and the coded answers.
+
+Open this only after [an attempt](../STUDY-GUIDE.md#attempt-a-lesson).
 
 ## Why the two examples differ
 
@@ -26,7 +28,7 @@ Classify zero, null and NaN separately.
 
 Add a present infinity and update finite-value accounting.
 
-**Reference answer.** The same statements run as the `Task 2` block of the reference program; here they are wrapped in `main` as a complete file.
+**Reference answer**, wrapped in `main`; the reference runs it as its `Task 2` block.
 
 ```rust
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -57,7 +59,7 @@ Infinity is a present, non-null value, so validity is unchanged and only the fin
 
 Write a summary returning valid, null and finite counts.
 
-**Reference answer.** The same statements run as the `Task 3` block of the reference program; here they are wrapped in `main` as a complete file.
+**Reference answer**, wrapped in `main`; the reference runs it as its `Task 3` block.
 
 ```rust
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -93,7 +95,7 @@ Diagnose summing physical values without applying validity.
 
 Test all-null, empty and no-null columns.
 
-**Reference answer.** The same statements run as the `Task 5` block of the reference program; here they are wrapped in `main` as a complete file.
+**Reference answer**, wrapped in `main`; the reference runs it as its `Task 5` block.
 
 ```rust
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -134,7 +136,7 @@ All-null and empty both have zero valid values, but only the null count tells th
 
 Define missingness and non-finite policies for a sensor dataset before calculating a mean.
 
-No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **Null bitmap**, and state one limitation of your choice.
+**Judging criteria.** A strong policy defines both cases before computing. A null means no reading: exclude it from the mean and report how many there were, or reject the batch above a stated threshold. NaN and infinity mean a reading arrived but is not a usable number: reject them explicitly, count them separately, and never let one silently turn the whole mean into NaN. The report gives the mean with its valid, null and non-finite counts. State one limitation: excluding values biases the mean when readings go missing for reasons related to their value.
 
 ## Mechanism and diagnostic reasoning
 
@@ -148,4 +150,6 @@ Null positions can contain arbitrary physical values. NaN is not equal to itself
 
 ## Review before continuing
 
-Run the reference and confirm that it prints `rust-038: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.
+Rebuild Example B (Keep NaN separate from null) from a blank pad.
+
+Review routine: [Self-check and review](../STUDY-GUIDE.md#self-check-and-review).

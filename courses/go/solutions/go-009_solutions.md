@@ -1,6 +1,6 @@
 # go-009: explained solutions
 
-These are comparison material after an attempt or explicit reveal. The executable reference implements all six cases in one `main.go`.
+Compare after an attempt ([using solutions](../STUDY-GUIDE.md#use-the-solutions)). `courses/go/solutions/go-009_solution.go` implements all six cases.
 
 ## Mechanism
 
@@ -10,7 +10,7 @@ A pointer contains the address of a value. Passing a pointer still copies the po
 
 ## 1. Mutate through a pointer: change one input
 
-Copy worked example 1 into a scratch pad and change `n := 4` to `n := 5`. Before running, predict which check fails and which value it now sees; then run it and restore the original line.
+Copy worked example 1, change `n := 4` to `n := 5` and predict the failure before running; then restore the line.
 
 The unchanged code is worked example 1:
 
@@ -20,13 +20,15 @@ increment(&n)
 check(n == 5, "pointer mutation")
 ```
 
-**Expected:** The changed run panics with `pointer mutation` because `n == 5` no longer holds. Restoring the original line brings back the worked observation: the caller value becomes 5.
+**Expected:** The edited run panics with `pointer mutation` because `n == 5` no longer holds.
+
+**Verify:** Restoring `n := 4` makes the check pass again with the worked observation: the caller value becomes 5.
 
 The helper changes the shared target, not the caller variable that stores the pointer. The mutation contract must be visible at the call site.
 
 ## 2. Return a live value: diagnose an edited check
 
-A careless edit changed the check in worked example 2 so that it reads `check(*p != 7, "returned pointer")`. Run worked example 2 with that line, explain why the edited check now fails for the same program state, and restore it.
+A careless edit rewrote the check in worked example 2 as `check(*p != 7, "returned pointer")`. Explain the failure, then restore it.
 
 The unchanged code is worked example 2:
 
@@ -35,7 +37,9 @@ p := seven()
 check(*p == 7, "returned pointer")
 ```
 
-**Expected:** Before the repair the program panics with `returned pointer`; after it the line reads `check(*p == 7, "returned pointer")` again and the returned pointer remains valid and reads 7.
+**Expected:** The defective run panics with `returned pointer`; after restoring `check(*p == 7, "returned pointer")`, the returned pointer remains valid and reads 7.
+
+**Verify:** The edited check fails with message `returned pointer` for a state that `*p == 7` accepts.
 
 Go extends storage lifetime as needed. Stack-versus-heap placement is an implementation decision and should not be guessed from the lexical block alone.
 
@@ -50,6 +54,8 @@ check(p == nil, "nil pointer")
 
 **Expected:** The pointer is absent.
 
+**Verify:** Your solution must keep `p == nil` true. Control: changing `check(p == nil, "nil pointer")` to `check(p != nil, "nil pointer")` panics with message `nil pointer`; revert it.
+
 Nil is a useful absence marker only when callers check it. It is different from a pointer to an integer whose value is zero.
 
 ## 4. Allocate a zero target
@@ -62,6 +68,8 @@ check(p != nil && *p == 0, "new zero")
 ```
 
 **Expected:** The pointer is non-nil and its target is 0.
+
+**Verify:** Your solution must keep `p != nil && *p == 0` true. Control: changing `check(p != nil && *p == 0, "new zero")` to `check(p == nil && *p == 0, "new zero")` panics with message `new zero`; revert it.
 
 Allocation and initialization are separate questions. A target can exist while carrying its type zero value.
 
@@ -79,6 +87,8 @@ check(copied == 3 && n == 9, "copy target")
 
 **Expected:** The copied integer remains 3 while the target becomes 9.
 
+**Verify:** Your solution must keep `copied == 3 && n == 9` true. Control: changing `n := 3` to `n := 4` panics with message `copy target`; revert it.
+
 Dereferencing to obtain a scalar value copies that scalar. Retaining a pointer would instead retain access to the changing target.
 
 ## 6. Transfer an optional update
@@ -93,8 +103,10 @@ check(setIfPresent(&n, 8) && n == 8, "present update")
 
 **Expected:** The absent call returns false; the present value becomes 8.
 
+**Verify:** Your solution must keep `setIfPresent(&n, 8) && n == 8` true. Control: changing `check(setIfPresent(&n, 8) && n == 8, "present update")` to `check(setIfPresent(&n, 9) && n == 8, "present update")` panics with message `present update`; revert it.
+
 An explicit boolean tells the caller whether the update happened. Silently treating absent and updated states as identical would hide useful information.
 
 ## Transfer after comparison
 
-Return to your own pad and reproduce one check with a new input. Explain why the check rejects a plausible wrong implementation. Keep the distinction between a pure model, an in-process fake, and a real external system visible in your notes.
+A pointer is a deliberate sharing decision. Each case here asked whether a change should be visible through another name: increment wants it, the copied scalar does not, and setIfPresent reports whether it happened. Later lessons use pointer receivers, optional fields in decoded JSON and errors.As targets; for each one, state who owns the target, who may write it and how absence is represented.

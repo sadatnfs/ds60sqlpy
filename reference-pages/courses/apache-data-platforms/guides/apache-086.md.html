@@ -230,33 +230,29 @@ after <span class="syntax-operator">=</span> <span class="syntax-punctuation">{<
 bash run.sh verify-schema</code></pre>
 <p>Change exactly one value in the copy, such as the metastore database name in conf/hive-site.xml, and record the typed failure that verify-schema or start produces. Changing several things at once makes the error impossible to attribute. The original project stays untouched, so recovery means deleting the copy, not repairing the reference.</p>
 <h3 id="complete-worked-source">Complete worked source<a class="heading-anchor" href="#complete-worked-source" aria-label="Link to this section">#</a></h3>
-<p>This is a project-only command notebook. Read and edit it in the classroom; run its explicitly labeled commands from the copied owned Docker workshop. The classroom does not execute these service commands.</p>
+<p>The classroom does not execute these service commands. See the <a href="../STUDY-GUIDE.md.html#workshop-notebooks">workshop rules</a>.</p>
 <h2 id="integration-apache-086-complete-worked-notebook">Integration apache-086 complete worked notebook<a class="heading-anchor" href="#integration-apache-086-complete-worked-notebook" aria-label="Link to this section">#</a></h2>
 <p>Select one already qualified owned workshop. Compare exact resume and retained-state replacement using read-only identity actions. Break one configuration only in a separate disposable copy and retain its typed failure.</p>
-<h3 id="receipt-fields-and-independent-oracle">Receipt fields and independent oracle<a class="heading-anchor" href="#receipt-fields-and-independent-oracle" aria-label="Link to this section">#</a></h3>
+<h3 id="what-this-game-day-receipt-must-hold">What this game day receipt must hold<a class="heading-anchor" href="#what-this-game-day-receipt-must-hold" aria-label="Link to this section">#</a></h3>
 <ul>
-<li>Source revision/hashes and exact declared input IDs, values, schema and time units.</li>
-<li>Actual native platform, package/image identities and owned resource namespace.</li>
-<li>Selected table snapshot/version, source positions or process/lineage identity as appropriate.</li>
-<li>Positive result against an independent oracle and a typed negative observation.</li>
-<li>Read-only retained-state comparison after the selected lifecycle transition.</li>
-<li>Cleanup/evidence-storage result and any separate prepared or unavailable feature.</li>
+<li>The selected workshop, its source hash and the image ID it ran.</li>
+<li>Container IDs before stop, after resume and after down/start replacement.</li>
+<li>The read-only check result at each boundary, run without any initialize step.</li>
+<li>The single configuration change made in the disposable copy, as a diff.</li>
+<li>The first typed diagnostic the broken copy produced.</li>
+<li>The restored check result and confirmation that the learner&#x27;s volume was untouched.</li>
 </ul>
-<p>For the common three-order fixture, require IDs 1/2/3 with amounts 4/9/7, total 20, east 11 and west 9. A later fourth west order of 2 changes the current total to 22 and west to 11 while an earlier pinned snapshot remains unchanged. Do not use this simple oracle to claim correctness for a different pipeline without defining its deduplication, correction and visibility semantics.</p>
-<p>Read the selected project README and qualification ledger before commands. The classroom does not execute Docker commands in this Markdown pad. Prepared configuration, unit policy fixtures, successful compilation and actual service acceptance remain different observations. Never include credentials or signed URLs.</p>
+<p>Container IDs carry most of this oracle. After resume they must match the IDs taken before stop. After down/start they must differ while the semantic check still passes over the same volume. For Cassandra, that check compares host UUID, replication settings and the exact order rows. For Kafka retention, it compares end offsets and the latest value per key. Equal IDs after replacement mean down never ran. The <a href="../STUDY-GUIDE.md.html#evidence-receipts">shared receipt rules</a> cover naming and storage.</p>
 <h3 id="concrete-source-inspection">Concrete source inspection<a class="heading-anchor" href="#concrete-source-inspection" aria-label="Link to this section">#</a></h3>
 <p>From the copied integration directory, with sibling project copies when selected:</p>
 <pre class="highlighted-code"><code class="language-bash">cat ../cassandra/README.md
 cat ../streaming/QUALIFICATION.md</code></pre>
-<p>These inspections do not start or qualify a service. Execute only the chosen project&#x27;s complete documented owned route and retain its actual receipt.</p>
+<p>The Cassandra README&#x27;s lifecycle block runs <code>stop</code>, <code>resume</code>, <code>check</code>, then <code>down</code>, <code>start</code> and <code>check</code>. Down removes owned containers and the network but keeps the data volume. The Kafka qualification ledger records end offset 3 and latest-key state preserved across repeat, resume and replacement, with physical compaction not demonstrated. Use those recorded facts as the expected values.</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
 <ul>
-<li><a href="https://iceberg.apache.org/docs/latest/reliability/">Iceberg reliability and table state</a></li>
-<li><a href="https://arrow.apache.org/docs/format/Columnar.html">Arrow data format</a></li>
-<li><a href="https://nightlies.apache.org/flink/flink-docs-release-2.3/docs/concepts/stateful-stream-processing/">Flink stateful stream processing</a></li>
-<li><a href="https://kafka.apache.org/44/design/design/">Kafka delivery/transaction design</a></li>
-<li><a href="https://atlas.apache.org/api/v2/index.html">Atlas API and metadata boundaries</a></li>
-<li><a href="https://github.com/delta-io/delta-sharing/blob/v1.4.1/PROTOCOL.md">Delta Sharing protocol</a></li>
+<li><a href="https://cassandra.apache.org/doc/5.0/cassandra/architecture/guarantees.html">Cassandra consistency and durability guarantees</a></li>
+<li><a href="https://kafka.apache.org/44/operations/">Kafka broker operations and retention</a></li>
+<li><a href="https://docs.docker.com/compose/how-tos/networking/">Docker Compose networks for owned services</a></li>
 </ul></article>
   </main>
 </body>

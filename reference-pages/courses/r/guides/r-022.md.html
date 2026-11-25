@@ -196,7 +196,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <article class="document"><h2 id="r-022-s4-slots-validity-and-multiple-dispatch">r-022: S4 slots, validity and multiple dispatch<a class="heading-anchor" href="#r-022-s4-slots-validity-and-multiple-dispatch" aria-label="Link to this section">#</a></h2>
 <p><strong>Level:</strong> intermediate. <strong>Direct prerequisites:</strong> <code>r-021</code></p>
 <h3 id="run-and-retain-your-work">Run and retain your work<a class="heading-anchor" href="#run-and-retain-your-work" aria-label="Link to this section">#</a></h3>
-<p>Open <code>r-022</code> in <code>/classroom</code> and use the prepared <code>r-statistics</code> profile. Each Run evaluates one <code>main.R</code> script in a fresh offline R process, so define every input in the script; an earlier Run leaves no variables behind. Work in the <a href="../lessons/r-022.R.html">starter</a>. The <a href="../solutions/r-022_reference.R.html">complete reference</a> ends by printing <code>r-022 reference checks passed</code>, and the <a href="../solutions/r-022_solutions.md.html">explained answers</a> are there for deliberate comparison after your own attempt. This chapter prints values only; when a chapter draws figures, the classroom keeps at most two figures per run. The <a href="../README.md.html">course overview</a> describes saved work, figure capture and the prepared package versions.</p>
+<p>The starter supplies values 1 and 3, a second value of 5 and the unit ms, with one TODO per exercise. Run it, then define the class with a validity function that checks both slots together. Exercise 4 assigns an empty unit through <code>@</code> directly, which skips validity, so plan to call <code>validObject()</code> yourself to expose the broken invariant.</p>
+<p>Work in the <a href="../lessons/r-022.R.html">starter</a> under the <a href="../STUDY-GUIDE.md.html#run-a-chapter">run rules</a>.</p>
+<p>The <a href="../solutions/r-022_reference.R.html">complete reference</a> ends by printing <code>r-022 reference checks passed</code>.</p>
 <h3 id="outcome-and-mechanism">Outcome and mechanism<a class="heading-anchor" href="#outcome-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Define an S4 measurement with cross-slot invariants and select methods using both argument classes.</p>
 <p>S4 defines a formal class with named slots and declared slot classes. This is stronger structural metadata than an S3 class label: a FormalMeasure contains numeric values and a character unit. Slot classes still do not express every domain constraint. A character slot can be empty or have several entries, and numeric values can contain infinities. A validity function checks these additional invariants.</p>
@@ -339,7 +341,19 @@ good <span class="syntax-operator">&lt;-</span> methods<span class="syntax-opera
 <li><a href="https://stat.ethz.ch/R-manual/R-devel/library/methods/html/setMethod.html">R method definitions</a></li>
 </ul>
 <h3 id="continue">Continue<a class="heading-anchor" href="#continue" aria-label="Link to this section">#</a></h3>
-<p>Chapters that list <code>r-022</code> as a direct prerequisite: <a href="r-024.md.html"><code>r-024</code></a>, <a href="r-025.md.html"><code>r-025</code></a>.</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Next chapter</th>
+<th>Title</th>
+</tr></thead><tbody>
+<tr>
+<td><a href="r-024.md.html"><code>r-024</code></a></td>
+<td>S7 properties, validators and generic methods</td>
+</tr>
+<tr>
+<td><a href="r-025.md.html"><code>r-025</code></a></td>
+<td>Object interoperability and public data contracts</td>
+</tr>
+</tbody></table></div>
 <h3 id="ask-an-ai-tutor">Ask an AI tutor<a class="heading-anchor" href="#ask-an-ai-tutor" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for r-022 (S4 slots, validity and multiple dispatch).
 Read the guide and my saved attempt. Explain the relevant R mechanism,

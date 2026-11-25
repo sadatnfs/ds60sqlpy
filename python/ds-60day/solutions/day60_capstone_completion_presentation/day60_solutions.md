@@ -94,9 +94,7 @@ Notes
 
 ## Solution reasoning lens
 
-A strong solution is not merely code that produces one plausible
-output. It establishes a chain from input contract to operation to
-verification:
+Each decision below links an input contract to an operation and its evidence:
 
 1. **release manifest:** pins code/data/environment/artifact identities and the commands used to verify them.
 2. **claim-to-evidence matrix:** maps each slide or conclusion to a metric, artifact, test, and limitation.
@@ -113,29 +111,15 @@ verification:
 
 **Evidence of correctness:** Rebuild from clean instructions, run tests/smoke and artifact reload, hash the release, audit every claim/limitation, rehearse demo fallback/rollback, and obtain handoff sign-off.
 
-When comparing your attempt with the reference, explain which of these
-decisions your code made explicitly. If the reference makes a different
-choice, compare the contracts and evidence before deciding that one
-version is universally better.
-
 <!-- END ADVANCED PYTHON CONCEPT ENRICHMENT -->
 
 ## Exercise-by-exercise reasoning map
-
-This map connects every learner prompt to a reasoning path. Read the
-explanation before copying code: the goal is to understand the assumptions,
-the evidence that validates the result, and the edge cases that can make an
-apparently correct implementation fail.
 
 ### Exercise 1: Original lesson practice
 
 **Prompt:** Finalize the data and training/evaluation pipeline.
 
 **How to reason about it:** Freeze the final candidate and rebuild data, training, and evaluation from clean state. Stop adding model families; unresolved issues belong in limitations or future work.
-
-Use the worked reference earlier in this file, then change one boundary
-condition and rerun the stated checks. A copied output is not evidence
-unless you can explain why that output follows from the inputs.
 
 **Verify:** From a clean checkout/environment, run the documented train and test commands with exit code 0; record dataset/split hashes, baseline and candidate metric files, passing tests, and the frozen selection rule before opening final-test labels.
 
@@ -145,10 +129,6 @@ unless you can explain why that output follows from the inputs.
 
 **How to reason about it:** Generate README metrics and plots from the same tested evaluation path, with exact commands, expected outputs, and OS variants. Hand-edited numbers are a drift risk.
 
-Use the worked reference earlier in this file, then change one boundary
-condition and rerun the stated checks. A copied output is not evidence
-unless you can explain why that output follows from the inputs.
-
 **Verify:** Have another person or clean shell execute every README command in order; require exit code 0 and compare produced metric/artifact hashes with the results notebook, documenting any intentionally nondeterministic field.
 
 ### Exercise 3: Original lesson practice
@@ -156,10 +136,6 @@ unless you can explain why that output follows from the inputs.
 **Prompt:** Save artifacts under an ignored `artifacts/` path and retain dependency metadata/lock.
 
 **How to reason about it:** Keep reproducible artifacts under ignored paths, but retain code, schema, manifest, and dependency lock. A reviewer should be able to recreate large/generated files rather than receive hidden local state.
-
-Use the worked reference earlier in this file, then change one boundary
-condition and rerun the stated checks. A copied output is not evidence
-unless you can explain why that output follows from the inputs.
 
 **Verify:** Write artifacts only under ignored artifacts/, list relative path, SHA-256, size, model/data/split/code identity, Python and dependency-lock hash, then reload the primary artifact in a fresh process and match a fixed prediction.
 
@@ -169,10 +145,6 @@ unless you can explain why that output follows from the inputs.
 
 **How to reason about it:** Every visual needs a question, labeled population/metric/unit, readable baseline, and limitation. The short story should fit the audience and avoid causal or production claims unsupported by the evidence.
 
-Use the worked reference earlier in this file, then change one boundary
-condition and rerun the stated checks. A copied output is not evidence
-unless you can explain why that output follows from the inputs.
-
 **Verify:** Export every presentation visual with title, axes/units, population/window, support, and source metric; reconcile each plotted value with the results table and remove any claim not supported by the frozen evaluation.
 
 ### Exercise 5: Original lesson practice
@@ -180,10 +152,6 @@ unless you can explain why that output follows from the inputs.
 **Prompt:** Write three takeaways and one open question.
 
 **How to reason about it:** Three takeaways and one open question should connect directly to results and remaining uncertainty. A takeaway is not 'the model worked'; it states what the measured evidence supports.
-
-Use the worked reference earlier in this file, then change one boundary
-condition and rerun the stated checks. A copied output is not evidence
-unless you can explain why that output follows from the inputs.
 
 **Verify:** Write three takeaways that each cite a metric, comparison, and limitation, plus one open question with the data/experiment needed to answer it; rehearse the story in the declared time and keep a tested fallback demo.
 
@@ -201,10 +169,6 @@ Fix the instructions, not the clean environment, when a hidden import, working
 directory, cache, or absolute path is discovered. Repeat until the run needs no
 undocumented intervention.
 
-**Why this matters:** The result should survive a fresh-kernel rerun and
-a deliberately chosen boundary case. If it does not, revisit the
-assumption or data boundary rather than hiding the failure.
-
 **Verify:** Cold-start reproduction; from a fresh temporary copy, execute the README on the documented Windows/POSIX path and retain command transcript, exit codes, elapsed stages, network accesses, outputs, and ambiguities; require the final tests and artifact reload to pass.
 
 ### Exercise 7: Claim-to-evidence matrix
@@ -219,10 +183,6 @@ group support. Link each claim to the exact generated artifact and code path.
 
 If evidence is exploratory, label it. A polished chart cannot upgrade weak
 methodology into a confirmed finding.
-
-**Why this matters:** The result should survive a fresh-kernel rerun and
-a deliberately chosen boundary case. If it does not, revisit the
-assumption or data boundary rather than hiding the failure.
 
 **Verify:** Claim-to-evidence matrix; for every headline claim, provide one row with exact metric/visual, dataset/split hash, sample size, uncertainty, reproduction command, limitation, and owner; remove claims whose command/result cannot be reconciled.
 
@@ -240,10 +200,6 @@ evaluation story.
 Practice the failure transition and state what remains verified. Never expose
 credentials or sensitive records while troubleshooting on screen.
 
-**Why this matters:** The result should survive a fresh-kernel rerun and
-a deliberately chosen boundary case. If it does not, revisit the
-assumption or data boundary rather than hiding the failure.
-
 **Verify:** Failure-tolerant demo; record a timed five-minute rehearsal transcript: preflight passes, local fixture produces the expected result, one dependency is intentionally broken, the fallback is shown, recovery succeeds, and the time budget is met.
 
 ### Exercise 9: Operational handoff
@@ -258,10 +214,6 @@ can approve promotion/rollback and how stale data/models are detected.
 
 Avoid personal email, tokens, or organization-specific secrets in the portable
 repository. Use placeholder roles and documented configuration boundaries.
-
-**Why this matters:** The result should survive a fresh-kernel rerun and
-a deliberately chosen boundary case. If it does not, revisit the
-assumption or data boundary rather than hiding the failure.
 
 **Verify:** Operational handoff; name role/owner, cadence, command, expected result, escalation route, and rollback/end-of-life trigger for artifact/data refresh, dependencies, monitoring, and incidents; have a second person walk one maintenance scenario.
 
@@ -279,9 +231,5 @@ The next experiment should define population, intervention/change, comparison,
 metric, minimum practical effect, budget, and stop rule before execution. This
 turns the capstone ending into a disciplined handoff rather than an endless
 model search.
-
-**Why this matters:** The result should survive a fresh-kernel rerun and
-a deliberately chosen boundary case. If it does not, revisit the
-assumption or data boundary rather than hiding the failure.
 
 **Verify:** Retrospective and next experiment; write the strongest/weakest evidence with cited metrics, one discarded path and remaining risk; define the next experiment's population, intervention/input, metric, sample/budget, stop rule, and result that would reverse the current decision.

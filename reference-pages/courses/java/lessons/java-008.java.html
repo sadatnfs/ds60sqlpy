@@ -198,22 +198,17 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"></span>
 <span class="source-line">  <span class="syntax-keyword">public</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">void</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span>String<span class="syntax-operator">[</span><span class="syntax-operator">]</span> args<span class="syntax-punctuation">)</span> <span class="syntax-keyword">throws</span> Exception <span class="syntax-punctuation">{</span></span>
 <span class="source-line">    <span class="syntax-comment">// Exercise 1: Normalize at construction: change one input</span></span>
-<span class="source-line">    <span class="syntax-comment">// Copy Example A into a scratch `Main.java` and change `Order order = new Order(&quot; A &quot;,</span></span>
-<span class="source-line">    <span class="syntax-comment">// List.of(&quot;x&quot;));` to `Order order = new Order(&quot; A !&quot;, List.of(&quot;x&quot;));`. Before running it</span></span>
-<span class="source-line">    <span class="syntax-comment">// with `java -ea Main`, predict which assertion fails and which value it now sees; then run</span></span>
-<span class="source-line">    <span class="syntax-comment">// it and restore the original line.</span></span>
-<span class="source-line">    <span class="syntax-comment">// Expected: The changed run fails with an `AssertionError` from the assertion on</span></span>
-<span class="source-line">    <span class="syntax-comment">// `order.id().equals(&quot;A&quot;) &amp;&amp; order.items().equals(List.of(&quot;x&quot;))`. Restoring the original</span></span>
-<span class="source-line">    <span class="syntax-comment">// line brings back the worked observation: ID A and items[x].</span></span>
+<span class="source-line">    <span class="syntax-comment">// Change `Order order = new Order(&quot; A &quot;, List.of(&quot;x&quot;));` to `Order order = new Order(&quot; A !&quot;,</span></span>
+<span class="source-line">    <span class="syntax-comment">// List.of(&quot;x&quot;));` in Example A and predict which assertion fails and why.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Expected: The edited run fails with an `AssertionError` from the assertion on</span></span>
+<span class="source-line">    <span class="syntax-comment">// `order.id().equals(&quot;A&quot;) &amp;&amp; order.items().equals(List.of(&quot;x&quot;))`.</span></span>
 <span class="source-line"></span>
 <span class="source-line">    <span class="syntax-comment">// Exercise 2: Copy caller-owned collections: debug a regression</span></span>
-<span class="source-line">    <span class="syntax-comment">// A regression changed one token in the code that Example B adds after Example A, so one</span></span>
-<span class="source-line">    <span class="syntax-comment">// line now reads `List&lt;String&gt; supplied = new ArrayList&lt;&gt;(List.of(&quot;x!&quot;));`. Run Example B</span></span>
-<span class="source-line">    <span class="syntax-comment">// with that line, use the failing assertion to locate the defect and repair it without</span></span>
-<span class="source-line">    <span class="syntax-comment">// changing the assertion.</span></span>
-<span class="source-line">    <span class="syntax-comment">// Expected: Before the repair the run fails with an `AssertionError` from the assertion on</span></span>
-<span class="source-line">    <span class="syntax-comment">// `copied.items().equals(List.of(&quot;x&quot;))`; after it the line reads `List&lt;String&gt; supplied =</span></span>
-<span class="source-line">    <span class="syntax-comment">// new ArrayList&lt;&gt;(List.of(&quot;x&quot;));` again and record retains its original single item.</span></span>
+<span class="source-line">    <span class="syntax-comment">// A regression in Example B&#x27;s new code makes one line read `List&lt;String&gt; supplied = new</span></span>
+<span class="source-line">    <span class="syntax-comment">// ArrayList&lt;&gt;(List.of(&quot;x!&quot;));`. Repair it using the failing assertion.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Expected: The unrepaired run fails with an `AssertionError` from the assertion on</span></span>
+<span class="source-line">    <span class="syntax-comment">// `copied.items().equals(List.of(&quot;x&quot;))`; the repaired line reads `List&lt;String&gt; supplied =</span></span>
+<span class="source-line">    <span class="syntax-comment">// new ArrayList&lt;&gt;(List.of(&quot;x&quot;));`.</span></span>
 <span class="source-line"></span>
 <span class="source-line">    <span class="syntax-comment">// Exercise 3: Use value equality</span></span>
 <span class="source-line">    <span class="syntax-comment">// Construct another Order with normalized A and item x.</span></span>

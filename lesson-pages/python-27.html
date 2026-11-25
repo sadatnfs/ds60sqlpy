@@ -401,28 +401,10 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <pre class="highlighted-code"><code class="language-bash">uv sync --frozen --extra notebooks --extra data --extra bridge --extra quality --extra professional --extra sql-notebooks --extra geo</code></pre>
 <p>The host sync does not modify Docker workers. Dataset or basemap downloads remain separately disclosed by the example; installing a package does not cache its external data. Keep the lesson&#x27;s offline fallback available.</p>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
-<p><strong>Default Docker classroom:</strong> open <code>python-27</code> for its guide, notebook and capability notice. The default Core does not include the <code>geo</code> extra, so the complete legacy notebook is unavailable there until that app environment is deliberately prepared. Pressing Run or choosing a notebook kernel does not install packages.</p>
-<p><strong>Prepared browser alternative:</strong> use the <a href="../reference-pages/courses/data-ml-engineering/guides/dme-001.md.html">data and ML engineering course</a> in its declared runtime. Its supported examples have their own package and execution contract; this does not qualify every legacy optional extension.</p>
-<p><strong>Explicit legacy preparation:</strong> retain the contributor extras in <a href="../reference-pages/CONTRIBUTING.md.html">CONTRIBUTING</a> and add <code>geo</code> only when needed. See <a href="../reference-pages/docs/dependency-profiles.md.html">dependency profiles</a> and <a href="../reference-pages/docs/docker-profiles.md.html">Docker app package options</a> for deliberate preparation. A host notebook environment and a Docker app image are separate. Do not install packages inside a learner pad.</p>
+<p><strong>Default Docker classroom:</strong> <code>python-27</code> shows the guide and notebook, but the default Core does not include <code>geo</code>, so its GeoPandas and NetworkX imports fail there. Add <code>geo</code> through the <a href="../reference-pages/CONTRIBUTING.md.html">contributor setup</a> to draw maps on your own machine; a host notebook environment and a Docker app image are separate.</p>
+<p><strong>Prepared browser alternative:</strong> No Core course projects coordinates, but the <a href="../reference-pages/courses/data-ml-engineering/guides/dme-001.md.html">record-to-metric pipeline chapter</a> practices declaring what each record and metric means, much as a CRS declares what coordinates mean.</p>
 <p>The first two geometry examples are offline after installing GeoPandas. Natural Earth and map tiles are separate external assets; the connected data example is disabled by default. NetworkX also requires the declared optional group.</p>
-<h5 id="guide--optional-contributor-notebook-route">Optional contributor notebook route<a class="heading-anchor" href="#guide--optional-contributor-notebook-route" aria-label="Link to this section">#</a></h5>
-<p>Use a separately prepared POSIX environment on Linux/macOS or Ubuntu in Windows WSL 2. Complete <a href="../reference-pages/CONTRIBUTING.md.html">contributor setup</a> once, including the notebook and data dependencies. Docker&#x27;s Python worker does not install packages into this host interpreter. Run the following commands from the repository root using that prepared environment.</p>
-<ol>
-<li>Check the interpreter and register its notebook kernel. Registration is needed once for this environment, or again after moving/replacing it:</li>
-</ol>
-<pre class="highlighted-code"><code class="language-bash">   uv run --no-sync python scripts/course.py doctor --no-database
-   uv run --no-sync python -m ipykernel install --user --name ds60sqlpy --display-name <span class="syntax-string">&quot;Python (ds60sqlpy)&quot;</span></code></pre>
-<p><code>--no-database</code> keeps this Python setup check local and does not require PostgreSQL. Do not install packages with <code>%pip</code> in a lesson. Use the declared dependency group when an optional import needs preparation.</p>
-<ol start="2">
-<li>Read <code>python/ds-60day/companion-guides/day27_geospatial_or_domain_viz.md</code>, then launch the notebook directory:</li>
-</ol>
-<pre class="highlighted-code"><code class="language-bash">   uv run --no-sync python -m jupyter lab python/ds-60day/notebooks</code></pre>
-<p>Open <code>python/ds-60day/notebooks/day27_geospatial_or_domain_viz.ipynb</code> and select <strong>Python (ds60sqlpy)</strong>. The friendly name alone is insufficient if you use several checkouts: confirm that the kernel&#x27;s <code>sys.executable</code> points to this checkout&#x27;s <code>.venv/bin/python</code>. <a href="../reference-pages/docs/vscode.md.html">VS Code guidance</a> explains the alternative editor route; Windows users open that editor in WSL with the same Linux environment.</p>
-<ol start="3">
-<li>Restart the kernel and run cells from the top. Notebook cells share kernel state; each browser Run starts a fresh process. Before every example, predict its result, then compare the actual value, type, shape or side effect.</li>
-<li>Attempt the numbered exercises in your own work cells and keep a backup of your notebook edits. Follow each example&#x27;s file and working-directory instructions. Keep <code>solutions/</code> separate until you want reference comparison.</li>
-</ol>
-<p>Notebook files and contributor CLI progress belong to this host checkout. They are separate from the browser&#x27;s saved pads, notes and progress in Docker volumes. Neither route automatically copies attempts or completion markers to the other; record progress in the interface you actually used.</p>
+<p>The <a href="../reference-pages/python/STUDY-GUIDE.md.html">Python study guide</a> covers the notebook route and preparing optional extras.</p>
 <p><strong>Outcome:</strong> Map geographic data with the right coordinate reference system.</p>
 <h4 id="guide--beginner-deep-dive-build-the-idea-before-the-syntax">Beginner deep dive: build the idea before the syntax<a class="heading-anchor" href="#guide--beginner-deep-dive-build-the-idea-before-the-syntax" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--start-with-one-mental-picture">Start with one mental picture<a class="heading-anchor" href="#guide--start-with-one-mental-picture" aria-label="Link to this section">#</a></h5>
@@ -470,14 +452,7 @@ places <span class="syntax-operator">=</span> gpd<span class="syntax-operator">.
 <li>Keep an offline analytical layer or domain-graph alternative when basemap data is unavailable.</li>
 </ol>
 <h5 id="guide--practice-ramp">Practice ramp<a class="heading-anchor" href="#guide--practice-ramp" aria-label="Link to this section">#</a></h5>
-<p>Work through the numbered exercises in five modes rather than treating all of them as blank-code prompts:</p>
-<ol>
-<li><strong>Prediction:</strong> state the value, type, shape, rows, or side effect before execution.</li>
-<li><strong>Guided modification:</strong> change one part of a worked example and explain which part of the result must change.</li>
-<li><strong>Independent application:</strong> implement the same idea with a new input and an explicit contract.</li>
-<li><strong>Debugging and edge cases:</strong> reproduce a failure, identify the violated assumption, and prove the repair at a boundary.</li>
-<li><strong>Retrieval:</strong> close the guide and explain the core model from memory before moving on.</li>
-</ol>
+<p>Work this lesson&#x27;s exercises in the five practice modes from the <a href="../reference-pages/python/STUDY-GUIDE.md.html">Python study guide</a>.</p>
 <p><strong>Useful alternative:</strong> When location is not central or source geometry is unavailable, a deterministic domain/network visualization can teach graph structure without a misleading map.</p>
 <p><strong>Boundary to remember:</strong> Missing CRS, invalid/self-intersecting geometry, dateline crossing, swapped axes, empty geometry, and remote basemap failure need policy.</p>
 <h4 id="guide--vocabulary-and-mental-model">Vocabulary and mental model<a class="heading-anchor" href="#guide--vocabulary-and-mental-model" aria-label="Link to this section">#</a></h4>
@@ -512,7 +487,6 @@ ax<span class="syntax-operator">.</span>set<span class="syntax-punctuation">(</s
 <h4 id="guide--download-cache-note">Download/cache note<a class="heading-anchor" href="#guide--download-cache-note" aria-label="Link to this section">#</a></h4>
 <p>Only enabling <code>RUN_CONNECTED_GEODATA</code> allows <code>geodatasets.get_path(...)</code> to download and cache Natural Earth data on first use. <code>contextily</code> basemaps also require tile-network access unless separately cached. Prime approved caches while online, use a local GeoJSON file, or choose the NetworkX exercise for fully offline work.</p>
 <h4 id="guide--exercises-and-progressive-hints">Exercises and progressive hints<a class="heading-anchor" href="#guide--exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
-<p>Each item is a complete mini-contract. Before writing code, copy its input, expected behavior, constraints, and verification into your work cell. A result is not complete merely because it “looks right”; run the stated assertion or inspection and explain what it proves.</p>
 <ol>
 <li>Using only a local or already-cached boundary/point source, create a GeoDataFrame plot. <strong>Before plotting:</strong> record provenance/license, CRS, geometry types, invalid/empty counts, and bounds. <strong>Constraints:</strong> transform all layers to one appropriate CRS and never use <code>set_crs</code> as if it reprojected coordinates. <strong>Verify:</strong> check a known location/bounds and confirm entity count survives reprojection.</li>
 </ol>
@@ -553,7 +527,7 @@ ax<span class="syntax-operator">.</span>set<span class="syntax-punctuation">(</s
 <li><a href="python-28.html#guide">Next: Day 28; Feature engineering</a></li>
 </ul>
 <h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
-<p>AI coaching is optional; the guide and notebook above contain the full lesson. If you want a patient tutor, copy this prompt from the repository root:</p>
+<p>AI coaching is optional. To use a tutor, copy this prompt from the repository root:</p>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning to tutor me through `python-27`
 (Day 27: Geospatial or Domain-Specific Visualization). Direct catalog prerequisites: `python-26`.
 I have completed the direct prerequisites: `python-26`. Emphasize geospatial semantics, coordinate reference systems, valid geometry, and offline fallback.

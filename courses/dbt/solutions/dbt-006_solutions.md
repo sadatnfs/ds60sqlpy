@@ -2,7 +2,7 @@
 
 Use controlled fixtures to test transformation logic and real-data checks to test integration.
 
-The executable reference contains the two complete worked cases with assertions. The changes below explain the independent practice and its limits.
+The reference defines a YAML unit test on `totals` with its own `given` input for `ref('raw_orders')`, runs `dbt test --select test_type:unit`, and confirms the real seed still holds 100. It verifies transformation logic on controlled rows, not that production data meets the same contract. See [how these answers are laid out](../STUDY-GUIDE.md#answers-and-references).
 
 
 ## 1. Add a second customer

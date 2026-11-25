@@ -1,6 +1,11 @@
 # sql-deep-01: Explained reference solutions
 
-Read [NULL-Aware Quantification, Anti-Joins, and Relational Division](../companion-guides/sql_deep_01.md) and attempt its six queries before comparing. The [complete reference script](sql_deep_01_solutions.sql) recreates the same temporary fixture, runs every answer inside its own savepoint, compares exact JSON row sets with fail-fast assertions, then rolls back. No permanent table, role or service is changed.
+Attempt the six queries in [NULL-Aware Quantification, Anti-Joins, and
+Relational Division](../companion-guides/sql_deep_01.md) first. The [complete
+reference script](sql_deep_01_solutions.sql) rebuilds the same five `deep1_`
+tables and stores each answer in `answer_1` to `answer_6` inside its own
+savepoint, so the `TRUNCATE deep1_required` in Exercise 6 cannot leak into
+another answer.
 
 ## Exercises and reasoning
 
@@ -10,7 +15,7 @@ Using `deep1_values`, return one row per row_id with columns row_id, value, not_
 
 **Inputs/evidence:** For sql-deep-01 Exercise 1, Using `deep1_values`, return one row per row_id with columns row_id, value, not_two, not_in_block, null_safe_different. Compare value<>2, value NOT IN the blocklist and value IS DISTINCT FROM 2. Order by row_id and preserve all three source rows.
 
-**Expected result/shape:** For sql-deep-01 Exercise 1, Row 1 has true, NULL, true; row 2 has false, false, false; row 3 has NULL, NULL, true. value is 1,2, NULL respectively. A WHERE filter is not part of this diagnostic.
+**Expected result/shape:** For sql-deep-01 Exercise 1, Row 1 has true, NULL, true; row 2 has false, false, false; row 3 has NULL, NULL, true. value is 1, 2, NULL respectively. A WHERE filter is not part of this diagnostic.
 
 **Verify:** For sql-deep-01 Exercise 1, project predicates before filtering and compare all three row IDs. In particular, test NULL with IS NULL instead of equality and confirm the blocklist NULL makes the nonmatch unknown.
 
@@ -39,7 +44,7 @@ Return row_id, value for nonmissing candidate values that have no equal nonmissi
 
 **Inputs/evidence:** For sql-deep-01 Exercise 2, Return row_id, value for nonmissing candidate values that have no equal nonmissing blocklist value. Use NOT EXISTS and explicitly exclude missing candidate values. The result grain is one source row per row_id, ordered by row_id.
 
-**Expected result/shape:** For sql-deep-01 Exercise 2, Only(row_id1, value 1) remains. Value 2 is blocked; row 3 is excluded because its candidate value is unknown, not because it matched a known blocklist value.
+**Expected result/shape:** For sql-deep-01 Exercise 2, Only the row with `row_id` 1 and `value` 1 remains. Value 2 is blocked; row 3 is excluded because its candidate value is unknown, not because it matched a known blocklist value.
 
 **Verify:** For sql-deep-01 Exercise 2, check the returned ID against the known-value set difference {1,2} minus {2}; separately confirm row 3 is excluded by the outer nonmissing policy.
 
@@ -66,9 +71,9 @@ The outer nonmissing condition defines the operational policy for unknown candid
 
 ## Exercise 3: Distinguish empty, mixed and unknown quantified collections
 
-For five named integer-array cases, return case_id, any_larger, all_larger using 5<ANY and 5<ALL. Cases are empty,[6,7],[4,7],[4, NULL], and a NULL array. One row represents one case, ordered by case_id.
+For five named integer-array cases, return case_id, any_larger, all_larger using `5 < ANY` and `5 < ALL`. Cases are empty, `[6,7]`, `[4,7]`, `[4,NULL]`, and a NULL array. One row represents one case, ordered by case_id.
 
-**Inputs/evidence:** For sql-deep-01 Exercise 3, For five named integer-array cases, return case_id, any_larger, all_larger using 5<ANY and 5<ALL. Cases are empty,[6,7],[4,7],[4, NULL], and a NULL array. One row represents one case, ordered by case_id.
+**Inputs/evidence:** For sql-deep-01 Exercise 3, For five named integer-array cases, return case_id, any_larger, all_larger using `5 < ANY` and `5 < ALL`. Cases are empty, `[6,7]`, `[4,7]`, `[4,NULL]`, and a NULL array. One row represents one case, ordered by case_id.
 
 **Expected result/shape:** For sql-deep-01 Exercise 3, Case 1 gives false, true; case 2 true, true; case 3 true, false; case 4 NULL, false; case 5 NULL, NULL. A false element decides ALL even when another comparison is unknown.
 
@@ -221,4 +226,13 @@ No missing requirement can exist when the requirement table is empty, so the uni
 
 ## Verification and transaction boundary
 
-Every answer is materialized into a temporary answer table and compared with a literal expected row set, including column names, NULL values and deterministic order. The assertion function rejects both false and unknown Boolean results, so a NULL comparison cannot silently pass. Each exercise rolls back to its own savepoint, ensuring mutations used for one boundary case do not alter the next. The final ROLLBACK removes the full fixture. Read the first error if a contract fails; a later row count or command tag cannot repair an earlier failed assertion.
+`pg_temp.assert_true` compares each answer, aggregated in order into `jsonb`,
+with a literal expected row set, and it raises unless the comparison is exactly
+true, so a NULL from `NOT IN` cannot pass by accident. The expected sets are
+small enough to check by eye: Exercise 1 keeps all three rows with
+`not_in_block` NULL for rows 1 and 3, Exercise 2 returns only row 1, Exercise 4
+returns rows 2 and 3, Exercise 5 returns Ada and Dee, and Exercise 6 returns
+all five people with `all_requirements` true and `nonempty_policy` false. The
+rollback to `exercise_6` restores `sql` and `python`, and the final `ROLLBACK`
+drops the fixture. When an assertion fails, repair that exercise first, since
+later output cannot fix it.

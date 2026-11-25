@@ -194,10 +194,10 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/dax/guides/dax-054.md</code></p>
     </header>
     <article class="document"><h2 id="dax-054-optimization-capstone-prove-the-grouping-assumption-first">dax-054: Optimization capstone: prove the grouping assumption first<a class="heading-anchor" href="#dax-054-optimization-capstone-prove-the-grouping-assumption-first" aria-label="Link to this section">#</a></h2>
-<p><strong>Stage 9: Performance interpretation and equivalent rewrites.</strong> Level: advanced. Read the mechanisms, trace the worked cases and retain your own draft. <strong>Direct prerequisites:</strong> <code>dax-043</code>, <code>dax-050</code>, <code>dax-053</code></p>
+<p><strong>Stage 9: Performance interpretation and equivalent rewrites.</strong> Level: advanced. <strong>Direct prerequisites:</strong> <code>dax-043</code>, <code>dax-050</code>, <code>dax-053</code></p>
 <h3 id="how-to-use-this-offline-lesson">How to use this offline lesson<a class="heading-anchor" href="#how-to-use-this-offline-lesson" aria-label="Link to this section">#</a></h3>
-<p>This is an offline DAX editing lesson. No DAX compiler, semantic-model engine, Power BI account or network connection is required. Worked tables describe the named reference and model, not execution of your draft. Save, compare and export source; do not interpret a comparison or completion marker as a passed program run.</p>
-<p>Open the <a href="../lessons/dax-054.dax.html">starter</a>. Compare the <a href="../solutions/dax-054_reference.dax.html">named reference</a> and <a href="../solutions/dax-054_solutions.md.html">reasoning</a> when ready. The <a href="../models/retail/model.json.html">model specification</a> identifies every fixture table, column type, key and relationship. The <a href="../models/README.md.html">fixture handbook</a> displays the original data and explains each table grain.</p>
+<p>The starter compares line-grain cost with a grouped rewrite. Compute line cost by multiplying each line&#x27;s quantity by its product&#x27;s UnitCost, then the grouped version per product, for the whole model and for North in 2025. The <a href="../STUDY-GUIDE.md.html#offline-study-boundary">offline study boundary</a> explains what a worked table can show.</p>
+<p>Files: <a href="../lessons/dax-054.dax.html">starter</a>, <a href="../solutions/dax-054_reference.dax.html">reference</a> and <a href="../solutions/dax-054_solutions.md.html">reasoning</a>.</p>
 <h3 id="the-question-and-the-mechanism">The question and the mechanism<a class="heading-anchor" href="#the-question-and-the-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Review a grouped cost rewrite under explicit assumptions before proposing a performance measurement.</p>
 <p>A cost calculation can multiply each sales line&#x27;s quantity by its product&#x27;s constant unit cost, or aggregate quantities by product first and multiply once per product. These forms agree only when the grouping preserves every variable on which the rate depends. In our fixture UnitCost is explicitly constant per product across the modeled period.</p>
@@ -207,14 +207,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The line form uses RELATED inside SUMX(Sales,...). The grouped form iterates ProductKey, transitions the key for the fact quantity, retrieves the unique product cost and multiplies. The two result columns are independent expression shapes over the same fixed assumptions.</p>
 <p>Concepts to explain in your own words: <strong>semantic parity</strong>, <strong>grouped rewrite</strong>, <strong>constant rate</strong>, <strong>cost model</strong>, <strong>qualification</strong>.</p>
 <h3 id="model-and-context-contract">Model and context contract<a class="heading-anchor" href="#model-and-context-contract" aria-label="Link to this section">#</a></h3>
-<p>The ordinary star follows Product → Sales, Customer → Sales and Date → Sales through OrderDate. The ShipDate relationship is inactive unless a case explicitly activates it. Filters flow from the one side to the many side. Additional analytical tables have only the relationships declared in their named model; a similar column name does not create a relationship.</p>
+<p>UnitCost is constant per product: 2 for the Notebook, 1 for the Pen and 5 for the Mug. Total units sold are 7, 5 and 5, so line-grain cost is 44 USD. North 2025 holds S4 (3 Notebooks), S5 (4 Pens) and S8 (2 Mugs), for 6 plus 4 plus 10. See the <a href="../models/retail/model.json.html">model specification</a> and the <a href="../STUDY-GUIDE.md.html#the-retail-star">shared star rules</a>.</p>
 <pre class="highlighted-code"><code class="language-text">Product (one)  --&gt; Sales (many) &lt;-- Customer (one)
                        ^
                        | active OrderDate
                     Date (one)
                        | inactive ShipDate
                        +------&gt; Sales</code></pre>
-<p>All amounts in ordinary Sales are USD after the line discount, before tax and returns. The Date fixture is complete for 2024 and 2025; a short result table is a selected slice, not the whole calendar. JSON <code>null</code> in the worked-results sidecar means DAX BLANK, not the text &quot;null&quot;.</p>
 <h3 id="worked-cases">Worked cases<a class="heading-anchor" href="#worked-cases" aria-label="Link to this section">#</a></h3>
 <h4 id="case-a-whole-model-parity-under-a-constant-product-cost">Case A: Whole-model parity under a constant product cost<a class="heading-anchor" href="#case-a-whole-model-parity-under-a-constant-product-cost" aria-label="Link to this section">#</a></h4>
 <p><strong>Starting context:</strong> Clean retail model; UnitCost is constant per product and unique on ProductKey.</p>
@@ -258,8 +257,10 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 </tbody></table></div>
 <p>This filtered case checks that a rewrite does not accidentally remove region or period constraints. Add missing-key and changing-rate cases before generalizing.</p>
 <p>Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table.</p>
+<h3 id="a-misconception-to-test">A misconception to test<a class="heading-anchor" href="#a-misconception-to-test" aria-label="Link to this section">#</a></h3>
+<p>Matching results at 44 and again at 20 can feel like proof that the grouped rewrite is equivalent and should ship. It is evidence under one assumption: each product has exactly one UnitCost. The grouped form multiplies the summed quantity by MAX of the cost, which is exact only when the cost cannot vary within a product. If the model later stored a cost per transaction date, or two conflicting cost rows for the Mug, MAX would silently choose one and the totals would diverge with no error. A second mistake is treating parity as a performance result. The lesson shows only that the two expressions mean the same thing here; whether the rewrite is faster needs a measured comparison on representative data.</p>
 <h3 id="practice-prediction-construction-and-diagnosis">Practice: prediction, construction and diagnosis<a class="heading-anchor" href="#practice-prediction-construction-and-diagnosis" aria-label="Link to this section">#</a></h3>
-<p>Retain your formula or written reasoning, the stated context, contributing rows or values, and a conclusion with its unit. These notes are your own study record; they do not show that a formula ran.</p>
+<p>Record each answer as the <a href="../STUDY-GUIDE.md.html#practice-routine">practice routine</a> describes.</p>
 <h4 id="exercise-1-predict">Exercise 1: Predict<a class="heading-anchor" href="#exercise-1-predict" aria-label="Link to this section">#</a></h4>
 <p>Predict the parity result for Paper.</p>
 <h4 id="exercise-2-change-one-condition">Exercise 2: Change one condition<a class="heading-anchor" href="#exercise-2-change-one-condition" aria-label="Link to this section">#</a></h4>
@@ -282,7 +283,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>The exchange rate depends on date and currency, not product alone.</li>
 </ol>
 <h3 id="self-check-and-next-step">Self-check and next step<a class="heading-anchor" href="#self-check-and-next-step" aria-label="Link to this section">#</a></h3>
-<p>Explain one changed result without quoting the formula alone. Identify which rows, filters, relationship or evaluation scope changed, then construct a counterexample to a plausible wrong interpretation. Keep your draft separate from the supplied reference. A small correct derivation does not certify performance, model security or broad expertise.</p>
+<p>Suppose the Notebook&#x27;s cost became 3 for 2025 lines only. Compute the true line-grain cost and the grouped result using MAX, and explain the gap. The <a href="../STUDY-GUIDE.md.html#self-check-routine">self-check routine</a> applies too.</p>
 <p>Continue to <a href="dax-055.md.html">dax-055</a> when its prerequisites make sense, or revisit this stage from the <a href="../README.md.html">course map</a>.</p>
 <h3 id="official-references-and-evidence-limits">Official references and evidence limits<a class="heading-anchor" href="#official-references-and-evidence-limits" aria-label="Link to this section">#</a></h3>
 <ul>
@@ -290,7 +291,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li><a href="https://learn.microsoft.com/en-us/dax/related-function-dax">DAX function: RELATED</a></li>
 <li><a href="https://learn.microsoft.com/en-us/power-bi/create-reports/desktop-performance-analyzer">Power BI: Performance Analyzer</a></li>
 </ul>
-<p>Documentation was reviewed for this original course on 2026-10-25. Version-sensitive features have explicit notes. Source/model checks and independent fixture arithmetic are not a DAX parser, compiler, semantic engine, real RLS test or performance measurement.</p>
+<p>Review date and evidence limits: <a href="../STUDY-GUIDE.md.html#references-and-evidence-limits">study guide</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for dax-054. Read its guide and the named model.
 Review my draft and prediction. Ask me to enumerate the relevant rows and context.

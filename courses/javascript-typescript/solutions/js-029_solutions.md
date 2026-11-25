@@ -1,6 +1,6 @@
 # js-029: explanatory solutions
 
-Use these answers after an attempt or an explicit reveal. The reference uses the same literal fixtures as the guide and keeps the exercises in separate scopes. A successful run checks these examples; explaining a changed input is a separate learning goal.
+Open these after your own attempt; each exercise runs in its own scope in the reference.
 
 ## Mechanism review
 
@@ -26,7 +26,7 @@ Select an element after its markup exists, guard its expected type, and attach a
 
 ## Exercise 1: Use a native button and live result: change one input
 
-Task: Rebuild Example A in your copy of the lesson's browser fixture without looking at it. Then change one attribute, label or handler and write down the visible, focus or announcement change you expect before reloading.
+Task: Open the complete snippet, activate Add twice by pointer and once by keyboard, then inspect the count. Then change one attribute, label or handler in your copy and predict the visible difference before reloading.
 
 The browser supplies native button activation. The script handles click once rather than separately counting keydown and click, which could double-count keyboard use.
 
@@ -48,13 +48,13 @@ button.addEventListener('click', () => { count += 1; output.textContent = `Count
 >
 ```
 
-**Expected:** Your rebuild reproduces the worked observation (count 3; button remains keyboard reachable), and the changed copy shows the difference you predicted.
+**Expected:** The rebuild reproduces the observation: count 3; button remains keyboard reachable. The changed copy differs as you predicted.
 
-**Verify:** Record the browser observation before and after your change, including where focus lands and any live-region text, and explain which line caused the difference.
+**Verify:** Record the browser observation, then explain it: The browser supplies native button activation.
 
 ## Exercise 2: Trace target and currentTarget through delegation: debug a regression
 
-Task: Introduce one deliberate defect into a copy of Example B, such as a wrong selector, a missing attribute or a handler on the wrong element. Predict which browser behavior will expose it, confirm that prediction, then repair it.
+Task: Click the nested word inside the list button in the snippet. Then break one selector or attribute in a copy, predict which behavior exposes it, and repair it.
 
 The listener belongs to the list, but the original target can be a child inside the button. Delegation checks both the matching action and its containment in the component.
 
@@ -84,9 +84,9 @@ list.addEventListener('click', event => {
 >
 ```
 
-**Expected:** The defective copy no longer shows: selected A; target SPAN and currentTarget UL. The repaired copy shows it again.
+**Expected:** The broken copy no longer shows that selected A; target SPAN and currentTarget UL. The repair restores it.
 
-**Verify:** Keep notes on the failing and the repaired behavior and name the first browser observation that differed between them.
+**Verify:** Record the first browser observation that differed, then explain the repair: The listener belongs to the list, but the original target can be a child inside the button.
 
 ## Exercise 3: Handle a dynamically appended action
 
@@ -106,7 +106,7 @@ list.append(item);
 
 **Expected:** the existing ancestor listener reports B without a new per-button listener.
 
-**Verify:** In the browser fixture, record the observation that shows: the existing ancestor listener reports B without a new per-button listener. Then change one input and record what changes, keeping keyboard and pointer results separate.
+**Verify:** Record the browser observation that shows it, then explain why: Delegation observes future descendants through the same event path.
 
 ## Exercise 4: Implement an accessible disclosure
 
@@ -122,7 +122,7 @@ details.hidden = expanded;
 
 **Expected:** opening reveals details and sets true; closing hides it and sets false.
 
-**Verify:** In the browser fixture, record the observation that shows: opening reveals details and sets true; closing hides it and sets false. Then change one input and record what changes, keeping keyboard and pointer results separate.
+**Verify:** Record the browser observation that shows it, then explain why: The visual state and accessibility state describe the same Boolean.
 
 ## Exercise 5: Remove listeners through their lifecycle signal
 
@@ -138,7 +138,7 @@ controller.abort();
 
 **Expected:** the count stops increasing after abort.
 
-**Verify:** In the browser fixture, record the observation that shows: the count stops increasing after abort. Then change one input and record what changes, keeping keyboard and pointer results separate.
+**Verify:** Record the browser observation that shows it, then explain why: Removing a listener is separate from deleting visible content.
 
 ## Exercise 6: Diagnose a missing required element
 
@@ -155,8 +155,8 @@ if (missing === null) {
 
 **Expected:** null is detected before accessing a property.
 
-**Verify:** In the browser fixture, record the observation that shows: null is detected before accessing a property. Then change one input and record what changes, keeping keyboard and pointer results separate.
+**Verify:** Record the browser observation that shows it, then explain why: A typo or changed HTML structure can invalidate selectors.
 
 ## After comparison
 
-Return to your saved implementation and repeat a case with different values. Keep compiler diagnostics, process output and browser observations separate. Do not suppress a failing assertion or use a type assertion to declare an unvalidated value safe. Resource-owning examples must finish cleanup even when work fails. Describe each result with its actual host and fixture scope rather than as production acceptance.
+Fresh case: add a Remove button inside each delegated list item. Predict where focus goes after the focused item is removed, then move focus to a sensible neighbor so keyboard users keep their place. ([After comparing](../STUDY-GUIDE.md#after-comparing-with-the-solution).)

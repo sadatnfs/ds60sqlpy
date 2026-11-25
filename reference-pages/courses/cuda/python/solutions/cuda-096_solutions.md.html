@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cuda/python/solutions/cuda-096_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="cuda-096-explained-solutions">cuda-096: explained solutions<a class="heading-anchor" href="#cuda-096-explained-solutions" aria-label="Link to this section">#</a></h2>
-<p>These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.</p>
+<p>Compare with your <a href="../lessons/cuda-096.md.html">worksheet</a> attempt.</p>
 <h3 id="exercise-1-compute-the-validation-metric">Exercise 1: Compute the validation metric<a class="heading-anchor" href="#exercise-1-compute-the-validation-metric" aria-label="Link to this section">#</a></h3>
 <p>Mean squared errors 0,1,1 give 2/3.</p>
 <p><strong>Approach.</strong> Compute the validation MSE for predictions <code>[1, 2, 3]</code> against targets <code>[1, 3, 2]</code>: squared errors <code>0, 1, 1</code> sum to 2, divided by 3 gives <code>2/3</code>.</p>
@@ -231,9 +231,19 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Why it is correct here.</strong> A trustworthy report never implies that a CPU run validated GPU behavior. Explicit fields prevent a reader from assuming coverage.</p>
 <p><strong>A plausible wrong approach.</strong> Leaving out the verification field lets readers assume the GPU path was tested. A later reader cannot then distinguish a validated deployment from a desk check.</p>
 <p><strong>How to verify.</strong> The reference asserts <code>not report[&quot;gpu_verified&quot;]</code>. Only a real device run with recorded environment may set it to true.</p>
+<h3 id="self-check-answers">Self-check answers<a class="heading-anchor" href="#self-check-answers" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>Why define the held-out split before tuning?</strong> Choosing it afterward lets tuning decisions see evaluation data, so the reported metric becomes optimistic.</li>
+</ol>
+<ol start="2">
+<li><strong>Why keep a failed hypothesis in the report?</strong> It records what evidence rejected the idea and prevents repeating the experiment or overstating what was tried.</li>
+</ol>
+<ol start="3">
+<li><strong>What does a capstone completion marker certify?</strong> Completed learning work. It is not a production certification of the model or its performance.</li>
+</ol>
 <h3 id="reference-observation">Reference observation<a class="heading-anchor" href="#reference-observation" aria-label="Link to this section">#</a></h3>
 <p>Three examples, MSE 2/3, GPU verification explicitly false.</p>
-<p>The reference file is <code>courses/cuda/python/references/cuda-096_cpu.py</code>. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.</p></article>
+<p>Asserted by <code>courses/cuda/python/references/cuda-096_cpu.py</code>.</p></article>
   </main>
 </body>
 </html>

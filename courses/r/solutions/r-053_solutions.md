@@ -1,6 +1,6 @@
 # r-053: reference reasoning
 
-Use the [complete reference](r-053_reference.R) with the guide's declared inputs and runtime. Every worked example is also a standalone script.
+Run the [complete reference](r-053_reference.R) under the [run rules](../STUDY-GUIDE.md#run-a-chapter).
 
 ## Why the implementation has this shape
 
@@ -108,4 +108,6 @@ Correct marks and groups do not prove readable labels, sufficient contrast or ab
 
 ## What the checks establish
 
-The reference makes 4 `stopifnot()` checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.
+The assertions confirm that the mapped plot builds four points with two colours and two shapes, that a constant colour set outside `aes()` produces one colour, that a mean layer with its own data adds two points at 2 and 4 beside the four raw points, and that `aes(colour = "group")` yields a single colour because it maps a literal string. They inspect built data, not the rendered image.
+
+The reference makes 4 `stopifnot()` checks; see [what a passing run proves](../STUDY-GUIDE.md#what-a-passing-run-proves).

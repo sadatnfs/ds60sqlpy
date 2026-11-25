@@ -1,6 +1,6 @@
 # r-033: reference reasoning
 
-Use the [complete reference](r-033_reference.R) with the guide's declared inputs and runtime. Every worked example is also a standalone script.
+Run the [complete reference](r-033_reference.R) under the [run rules](../STUDY-GUIDE.md#run-a-chapter).
 
 ## Why the implementation has this shape
 
@@ -96,4 +96,6 @@ Declare join keys, expected matches, unmatched policy and before/after reconcili
 
 ## What the checks establish
 
-The reference makes 5 `stopifnot()` checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.
+The assertions confirm that the dimension key is present and unique, that every fact found a match, that a fully matched lookup returns categories Home, Paper and Home while the amount total stays 60, that both an unmatched key and a duplicated dimension key are detected, and that an empty join keeps the `product`, `amount` and `category` columns. They do not test many-to-many joins.
+
+The reference makes 5 `stopifnot()` checks; see [what a passing run proves](../STUDY-GUIDE.md#what-a-passing-run-proves).

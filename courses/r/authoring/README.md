@@ -14,6 +14,17 @@ mistake and Verify paragraphs of the solution. Each must name this lesson's data
 numbers and failure modes, and each `verify` must point at an observable check
 against objects that exist in the reference.
 
+Each reasoning record also carries two single-paragraph fields. `run_note` opens
+the guide's run section: it names the starter's inputs and what to predict before
+running them. `checks_note` opens the solution's "What the checks establish"
+section: it says what this reference's `stopifnot()` lines assert and what they
+leave open. The builder rejects either field if it is missing, shorter than 30
+words, spans lines or contains a dash. Run rules, figure capture, comparison and
+the limits of a passing run are shared by every chapter, so they live once in the
+hand-maintained `../STUDY-GUIDE.md`, which guides and solutions link by anchor.
+Keep its `## Run a chapter`, `## Figures` and `## What a passing run proves`
+headings stable.
+
 Edit those records and preserve every stable ID. Each worked program and reference
 must start from its own local input in a fresh R process. The reference uses
 meaningful assertions and ends with its own `r-XXX reference checks passed` marker.

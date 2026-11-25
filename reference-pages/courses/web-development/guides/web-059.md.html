@@ -212,7 +212,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="syntax-anatomy-and-mechanism">Syntax anatomy and mechanism<a class="heading-anchor" href="#syntax-anatomy-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Use reviewed locked dependencies and a deliberate image tag or digest policy. Supply secrets through a controlled runtime mechanism rather than baking them into images or committing them. Enable appropriate error logging without displaying internal stack traces publicly. TLS termination and trusted proxy headers require an explicit network ownership policy; do not trust forwarded identity or scheme headers from arbitrary clients.</p>
 <h3 id="classroom-execution-and-offline-inputs">Classroom execution and offline inputs<a class="heading-anchor" href="#classroom-execution-and-offline-inputs" aria-label="Link to this section">#</a></h3>
-<p>This lesson is a design worksheet saved as <code>courses/web-development/lessons/web-059.md</code>. The classroom does not start a server, install packages or control Docker, so a command here is a proposal until you deliberately run it in your own disposable project. The optional lab is <code>courses/web-development/fixtures/php-http-lab/</code>; read its README before preparing it and never expose it to the internet. <strong>How to run lessons</strong> in the <a href="../README.md.html">subject README</a> describes this boundary.</p>
+<p>The worksheet asks you to separate HTTP handling, PHP execution and durable storage in a deployment drawing, then write a release plan for the study planner that names its public document root, private directories, secrets handling and restore test.</p>
+<p><code>courses/web-development/lessons/web-059.md</code> is a design worksheet; its commands are proposals (<a href="../STUDY-GUIDE.md.html#worksheets">worksheet rules</a>).</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1-a-deployment-boundary">Worked example 1: A deployment boundary<a class="heading-anchor" href="#worked-example-1-a-deployment-boundary" aria-label="Link to this section">#</a></h4>
 <p>This diagram describes responsibilities rather than a ready-to-run production configuration.</p>
@@ -235,7 +236,7 @@ RUN rm /app/.env
 # docker run --env-file ./prod.env app:1.4.2</code></pre>
 <p>Each instruction creates a layer, and the COPY layer still contains the file even though a later RUN removes it from the merged view. Anyone who can pull the image can extract that layer and read the secret. The fix is not another delete but a different flow: keep the secret out of the build entirely, supply it when the container starts through a controlled mechanism, and rotate any secret that was already pushed in an image.</p>
 <h3 id="six-progressive-exercises">Six progressive exercises<a class="heading-anchor" href="#six-progressive-exercises" aria-label="Link to this section">#</a></h3>
-<p>Exercises that ask you to predict, explain, compare or diagnose keep their answers in the solutions file. The others show the evidence to look for.</p>
+<p>Exercises 1, 2, 4, 5 and 6 keep their expected answers in the solutions file.</p>
 <h4 id="exercise-1-explain-why-php-fpm-is-not-interchangeable-with-the-development-http-server">Exercise 1: Explain why PHP-FPM is not interchangeable with the development HTTP server.<a class="heading-anchor" href="#exercise-1-explain-why-php-fpm-is-not-interchangeable-with-the-development-http-server" aria-label="Link to this section">#</a></h4>
 <p><strong>Progressive hint:</strong> Ask what protocol each component speaks.</p>
 <h4 id="exercise-2-draw-the-public-document-root-and-private-application-directories">Exercise 2: Draw the public document root and private application directories.<a class="heading-anchor" href="#exercise-2-draw-the-public-document-root-and-private-application-directories" aria-label="Link to this section">#</a></h4>
@@ -251,10 +252,11 @@ RUN rm /app/.env
 <p><strong>Progressive hint:</strong> List each check and the environment where it ran.</p>
 <h3 id="debugging-and-common-mistakes">Debugging and common mistakes<a class="heading-anchor" href="#debugging-and-common-mistakes" aria-label="Link to this section">#</a></h3>
 <p>Do not expose the PHP built-in learning server to the public internet and call it a production architecture. Avoid broad prune commands as deployment recovery. A successful image build cannot establish application correctness or backup recoverability.</p>
-<p>A plausible plan or one successful request can hide an untested failure path. Record each request, response and stored state, and repeat the original failing case after every change.</p>
+<p>When a secret appears in an image even after a later layer deletes it, the earlier layer still contains it; pass secrets at runtime instead of copying them in. When a restore rehearsal fails, record which step broke before changing the plan, since the failure is evidence about recovery.</p>
+<p>The shared <a href="../STUDY-GUIDE.md.html#debugging-markdown">debugging routine</a> covers what to record before each repair.</p>
 <h3 id="retrieval-transfer-and-next-steps">Retrieval, transfer and next steps<a class="heading-anchor" href="#retrieval-transfer-and-next-steps" aria-label="Link to this section">#</a></h3>
-<p>Close the worked answers and explain PHP-FPM, reverse proxy and document root without using the terms as their own definitions. Rebuild worked example 1 (A deployment boundary) from a blank worksheet, then try one new value, one empty or missing case and one unusual boundary. State which result would disprove your explanation.</p>
-<p>If you can reproduce the output but cannot explain why it happens, revisit <code>web-058</code>. A saved completion marker records your own progress; it is not a certification.</p>
+<p>From memory, explain why PHP-FPM behind a web server replaces the built-in development server in production. Then describe which directory is public, where secrets come from, what a successful image build does and does not prove and why a restore test belongs in a separate disposable environment.</p>
+<p>Revisit <code>web-058</code> when an output is predictable but unexplained (<a href="../STUDY-GUIDE.md.html#review-loop">review loop</a>).</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
 <ul>
 <li><a href="https://www.php.net/manual/en/install.fpm.php">PHP-FPM</a></li>

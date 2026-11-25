@@ -1,6 +1,6 @@
 # js-036: explanatory solutions
 
-Use these answers after an attempt or an explicit reveal. The reference uses the same literal fixtures as the guide and keeps the exercises in separate scopes. A successful run checks these examples; explaining a changed input is a separate learning goal.
+Open these after your own attempt; each exercise runs in its own scope in the reference.
 
 ## Mechanism review
 
@@ -26,7 +26,7 @@ package.json type:module selects ESM for .js files in its package scope, while .
 
 ## Exercise 1: Import the public package entry: predict an edited check
 
-Task: Copy Example A into a scratch `main.mjs` and change `assert.equal(result.stdout.trim(), '1');` to `assert.equal(result.stdout.trim(), '2');` inside its check. Before running it, predict whether the check still passes and explain why; then restore it.
+Task: In a scratch copy of Example A, change `assert.equal(result.stdout.trim(), '1');` to `assert.equal(result.stdout.trim(), '2');` inside its check. Does the check still pass?
 
 The import uses normal package-name resolution from the temporary main module. It does not bypass the exports map with an absolute file URL.
 
@@ -43,13 +43,13 @@ await withPackage(async (directory) => {
 });
 ```
 
-**Expected:** The changed run fails with an `AssertionError` at `assert.equal(result.stdout.trim(), '2');`. Restoring `assert.equal(result.stdout.trim(), '1');` brings back: actual child prints 1.
+**Expected:** The edited run fails with an `AssertionError` at `assert.equal(result.stdout.trim(), '2');`. Restoring `assert.equal(result.stdout.trim(), '1');` brings back: actual child prints 1.
 
-**Verify:** Compare your written prediction with the reported `AssertionError`, including its actual and expected values, and explain why the edited check rejects the values that `assert.equal(result.stdout.trim(), '1')` accepts. After restoring the line, the program prints its `{"checks":1,"status":"passed"}` receipt again.
+**Verify:** Compare the reported actual and expected values with your prediction, then restore `assert.equal(result.stdout.trim(), '1');`.
 
 ## Exercise 2: Use an explicitly exported subpath: debug a regression
 
-Task: A regression changed one token in Example B, so one line now reads `console.log(twice(4));`. Run Example B with that line, use the failing check to locate the defect and repair it without changing the check.
+Task: A regression made one Example B line read `console.log(twice(4));`. Locate and repair it without editing the check.
 
 A public subpath is part of the package interface. Its name can remain stable even if the internal file layout later changes.
 
@@ -68,7 +68,7 @@ await withPackage(async (directory) => {
 
 **Expected:** Before the repair the run fails with an `AssertionError` at `assert.equal(result.stdout.trim(), '6')`. Restoring `console.log(twice(3));` brings back: actual child prints 6.
 
-**Verify:** Keep the failing and the repaired runs. Explain why the changed token alters the value tested by `assert.equal(result.stdout.trim(), '6')` for this input.
+**Verify:** Keep the failing and repaired runs and name the first value that differs between them.
 
 ## Exercise 3: Reject an undeclared private path
 
@@ -86,7 +86,7 @@ await withPackage(async (directory) => {
 
 **Expected:** nonzero child status with ERR_PACKAGE_PATH_NOT_EXPORTED.
 
-**Verify:** Keep a check equivalent to `assert.match(result.stderr, /ERR_PACKAGE_PATH_NOT_EXPORTED/u)`. As a control, change `const result = runImport(directory, 'import \'course-fixture/private.mjs\';');` to `const result = runImport(directory, 'import \'course-fixture/private.mjs\';!');`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
+**Verify:** Keep `assert.match(result.stderr, /ERR_PACKAGE_PATH_NOT_EXPORTED/u)`. Control: changing `const result = runImport(directory, 'import \'course-fixture/private.mjs\';');` to `const result = runImport(directory, 'import \'course-fixture/private.mjs\';!');` must make that check fail; then restore it.
 
 ## Exercise 4: Observe that engines is metadata rather than a loader gate
 
@@ -107,7 +107,7 @@ await withPackage(async (directory) => {
 
 **Expected:** metadata says >=99; ordinary import still succeeds.
 
-**Verify:** Keep a check equivalent to `assert.equal(runImport(directory, 'import \'course-fixture\';').status, 0)`. As a control, change `assert.equal(runImport(directory, 'import \'course-fixture\';').status, 0);` to `assert.equal(runImport(directory, 'import \'course-fixture\';!').status, 0);` inside it: the run must fail with an `AssertionError`, which shows the check can fail. Restore it.
+**Verify:** Keep `assert.equal(runImport(directory, 'import \'course-fixture\';').status, 0)`. Control: editing it to `assert.equal(runImport(directory, 'import \'course-fixture\';!').status, 0);` must make the check fail; then restore it.
 
 ## Exercise 5: Detect exact source tampering through a digest
 
@@ -128,7 +128,7 @@ await withPackage(async (directory) => {
 
 **Expected:** digest changes after modification.
 
-**Verify:** Keep a check equivalent to `assert.equal(before.length, 64)`. As a control, change `assert.equal(before.length, 64);` to `assert.equal(before.length, 65);` inside it: the run must fail with an `AssertionError`, which shows the check can fail. Restore it.
+**Verify:** Keep `assert.equal(before.length, 64)`. Control: editing it to `assert.equal(before.length, 65);` must make the check fail; then restore it.
 
 ## Exercise 6: Preserve a versioned behavior contract
 
@@ -148,8 +148,8 @@ await withPackage(async (directory) => {
 
 **Expected:** child exits successfully for twice(0)=0 and twice(-2)=-4.
 
-**Verify:** Keep a check equivalent to `assert.equal(result.status, 0, result.stderr)`. As a control, change `assert.equal(twice(0)` to `assert.equal(twice(1)`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
+**Verify:** Keep `assert.equal(result.status, 0, result.stderr)`. Control: changing `assert.equal(twice(0)` to `assert.equal(twice(1)` must make that check fail; then restore it.
 
 ## After comparison
 
-Return to your saved implementation and repeat a case with different values. Keep compiler diagnostics, process output and browser observations separate. Do not suppress a failing assertion or use a type assertion to declare an unvalidated value safe. Resource-owning examples must finish cleanup even when work fails. Describe each result with its actual host and fixture scope rather than as production acceptance.
+Fresh case: add a `./format` subpath to the fixture package. Predict the import result before and after listing it in `exports`, and hash the new file to record its identity. ([After comparing](../STUDY-GUIDE.md#after-comparing-with-the-solution).)

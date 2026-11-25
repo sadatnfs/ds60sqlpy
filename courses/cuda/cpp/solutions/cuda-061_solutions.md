@@ -4,8 +4,6 @@
 
 A maintainable CUDA project separates interfaces, host orchestration and device implementation without hiding ownership. Host .cpp files compile as ordinary C++; .cu files contain CUDA compilation units; headers declare shared interfaces. Calls across device translation units can require separable compilation and device linking. CMake targets should state languages, dependencies and architecture policy explicitly. A project directory cannot be pasted into a single-source coding pad. Keep external project commands in an owned scratch directory with clear source and build paths, and validate both a clean build and actual execution on supported hardware.
 
-The separate [CPU reference](../references/cuda-061_cpu.py) checks the chapter's bounded model. It does not execute CUDA or establish GPU timing. Compare after attempting the worksheet or explicitly choosing to reveal solutions.
-
 ## Exercise 1
 
 A three-file design has include/transform.hpp declaring a host launch function, src/transform.cu defining its kernel and launch wrapper, and src/main.cpp building fixtures and validating output. The caller sees an ordinary host interface, while the implementation owns its CUDA dependencies.
@@ -78,12 +76,16 @@ Keep CPU reference/unit tests, CUDA compile checks and actual device numerical/s
 
 **How to verify:** Run on a CPU-only machine and confirm device tests report unavailable.
 
+## Self-check answers
+
+1. **What are typical source and build directories for a clean project?** The repository root holds sources, and a separate build directory such as build holds generated files.
+2. **Why should architecture targets not come from lesson metadata argv?** They are a build policy, so they belong in the project's CMake settings.
+3. **What does a successful CMake configure prove?** That the toolchain was found and the project parsed, not that it compiles, links or runs correctly.
+
 ## Numerical reference and its limits
 
-The complete CPU model is [here](../references/cuda-061_cpu.py). Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It does not claim CUDA execution, concurrency safety or a performance measurement.
+The [CPU reference](../references/cuda-061_cpu.py) reproduces worked example 1 and prints `{'include/transform.hpp': 'host interface', 'src/transform.cu': 'kernel and launcher', 'src/main.cpp': 'fixture and validation', 'build/': 'generated artifacts'}`.
 
 ## Transfer review
 
 Keep CPU reference/unit tests, CUDA compile checks and actual device numerical/sanitizer tests distinct with explicit unavailable reasons.
-
-A complete explanation must name its inputs, the unchanged mathematical contract, the changed boundary or resource condition, and the evidence still needed on actual hardware. Preserve a CPU baseline even after a GPU path becomes available.

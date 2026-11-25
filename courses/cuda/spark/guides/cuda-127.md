@@ -1,10 +1,17 @@
 # cuda-127: Capstone: the same analytical pipeline in Scala and PySpark
 
-**Route:** CUDA Python and machine learning / GPU Spark specialization. **Stage:** advanced. **Prerequisites:** `cuda-117`, `cuda-121`, `cuda-123`, `cuda-124`. Allow several sessions when the hardware experiment is new; the chapter is not a deadline.
+**Route:** CUDA Python and machine learning / GPU Spark specialization. **Stage:** advanced. **Prerequisites:** `cuda-117`, `cuda-121`, `cuda-123`, `cuda-124`.
 
-## What you will be able to explain
+Pacing, evidence labels and platform rules: [CUDA study guide](../../STUDY-GUIDE.md).
 
-By the end, you can **derive expected revenue**, **test duplicate dimension keys**, and **prepare a balanced capstone report** with evidence. Start with the two worked cases, then use the editable CPU model to make the quantities concrete.
+## Learning objectives
+
+- Derive expected revenue.
+- Write Scala expressions.
+- Write PySpark expressions.
+- Test duplicate dimension keys.
+- Capture executed GPU evidence.
+- Prepare a balanced capstone report.
 
 ## Mechanism and vocabulary
 
@@ -41,9 +48,13 @@ Sales (A,2),(A,4),(B,3) joined to prices (A,10),(B,20) yield revenue A 60 and B 
 
 Adding a duplicate A price row intentionally doubles A matches. A defensive uniqueness check should reject that input if the business contract requires one price per product.
 
-## Portable executable model
+## How to run the CPU model
 
-The **CPU reference model** variant runs this bounded worked example using `python-core`. It uses only the Python standard library, small synthetic values and no network. Its purpose is to expose the arithmetic or contract behind the chapter. The separate reference includes assertions for the stated observations.
+Edit the copy; the [reference](../references/cuda-127_cpu.py) adds assertions.
+
+```sh
+python courses/cuda/spark/lessons/cuda-127_cpu.py
+```
 
 ```python
 sales = [("A", 2), ("A", 4), ("B", 3)]
@@ -67,87 +78,66 @@ print("CPU ETL oracle:", sorted(revenue.items()))
 | `product` | `'B'` |
 | `quantity` | `3` |
 
-Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.
-
 ## Scala and PySpark parity lab
 
-Choose **Scala Spark on CPU** or **PySpark on CPU** to run the same bounded query in the ordinary Spark workers. Both use explicit schemas, local fixtures, at most two local threads, a disabled GPU SQL setting and a finally-block session stop. They assert the same expected result. These are CPU Spark observations, not GPU plugin qualification.
-
-For external GPU comparison, retain the same relational expressions and expected result but use a separately reviewed launcher and compatibility matrix. Do not change the classroom source into an arbitrary cluster connection.
+Both CPU variants assert one expected result. Read the [parity rules](../../STUDY-GUIDE.md#spark-parity-and-gpu-spark).
 
 ## Practice and transfer
+
+Record each attempt in the [worksheet](../lessons/cuda-127.md) before opening hints.
 
 ### Exercise 1: Derive expected revenue
 
 **Trap to avoid:** Summing prices per product before multiplying, or multiplying the total quantity by the sum of all prices, mixes products and gives wrong totals such as 180 for A.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 2: Write Scala expressions
 
 **Trap to avoid:** Relying on schema inference from text files can type numbers as strings or doubles, changing join behavior or output types between runs.
-
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 3: Write PySpark expressions
 
 **Trap to avoid:** Collecting rows into Python and summing in a loop changes where the work runs and stops being a Spark pipeline comparison.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 4: Test duplicate dimension keys
 
 **Trap to avoid:** Running the join without checking lets a duplicate price row double A to 120 with no error, which looks like a real sales increase.
-
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 5: Capture executed GPU evidence
 
 **Trap to avoid:** Claiming GPU execution from a CPU-only environment, or from a configuration file alone, reports evidence that does not exist.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 6: Prepare a balanced capstone report
 
 **Trap to avoid:** Writing the report as if GPU acceleration was demonstrated when only CPU runs happened misleads anyone deciding on deployment.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ## Progressive hints
 
-Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.
+Hint *k* belongs to exercise *k*; open one at a time.
 
-1. Start from worked example 1 and mark the quantities needed for the task "Derive expected revenue".
-2. Change one assumption in worked example 2 while preserving the declared contract: write Scala expressions.
-3. Trace the CPU program's variables before adding hardware behavior: write PySpark expressions.
-4. Draw producers, consumers and the exact operation boundary for the task "Test duplicate dimension keys".
-5. Separate what the small fixture establishes from what the real runtime must show: capture executed GPU evidence.
-6. Write a counterexample to an overbroad claim before you prepare a balanced capstone report.
+1. Multiply each product's quantities by its price, sum per product and check both totals.
+2. Read the input with an explicit schema, join on product, derive revenue and group by product in Scala.
+3. Apply the same operations in PySpark and sort the output so the two results can be compared row by row.
+4. Add a second price for product A and decide whether your contract rejects it or accepts the multiplied rows.
+5. List the plans, metrics and equality checks that must come from actual GPU hardware.
+6. Report the CPU results and the pending GPU limitations in separate sections.
 
-## Common mistakes and self-review
+## Common mistakes and self-check
 
-Confusing a correct tiny example with a general implementation is the central review risk. For this chapter, challenge the assumption in worked example 2, then ask whether your change preserves the mechanism described above. If you change dtype, layout, ordering, batch size or backend, update the acceptance contract rather than silently reusing the old observation. Explain an unexpected result before trying random configuration changes.
+A common capstone mistake is treating a correct result table as proof of acceleration, or a GPU plan as proof of correctness. Each answers a different question. Another is letting a duplicate dimension key silently double revenue. Fix both by checking exact output against a CPU oracle, enforcing or explicitly accepting key uniqueness and keeping query text and inputs unchanged across backends while collecting plans and metrics separately.
 
-Keep a small evidence table with columns **claim**, **input**, **expected observation**, **actual observation** and **limit**. For the first claim use `Derive expected revenue`. For the final claim use `Prepare a balanced capstone report`. An unperformed GPU or cluster experiment remains pending even when the CPU model is correct.
+**Evidence limit:** The reference produces sorted revenue `[(A, 60), (B, 60)]` with exact integers. It runs neither Spark implementation, so equivalent Scala and PySpark plans and any GPU evidence must come from executed jobs.
 
-## Platform and evidence contract
+1. Why run both ordinary Spark implementations before any GPU comparison?
+2. What does a GPU report need besides timing?
+3. When may the query text change across backends?
 
-The reading worksheet and CPU reference model work through the ordinary Linux Docker classroom on macOS, Linux and Windows using WSL 2. They do not require an NVIDIA GPU. Their results are labeled CPU models or semantic oracles, not simulated hardware performance.
-
-Real CUDA work needs supported NVIDIA hardware, a compatible host driver and an explicitly prepared GPU runtime. An Apple GPU does not execute CUDA kernels. PyTorch MPS on a supported native Mac, ROCm on supported AMD hardware, or other vendor backends can provide separate accelerator learning routes; they need their own package and operation qualification and are not CUDA evidence. The ordinary Linux Docker classroom does not expose native Mac MPS automatically.
-
-Do not download packages, models or data by opening this lesson. Do not attach an engine socket, ambient cluster credentials or an arbitrary remote endpoint. A CPU pass, imported package, successful compilation, real GPU result and measured performance are distinct observations. Record the actual backend, data shape/dtype, source revision, versions and pending checks. A saved completion marker records learning progress, not hardware certification.
-
-GPU Spark is a separate owned external workflow. The ordinary `spark-local-scala` and `spark-local-python` profiles are CPU Spark. Keep the GPU plugin disabled or absent for a CPU-only baseline. Per-operator CPU fallback inside a working GPU plugin environment is a different condition from having no compatible GPU. Never mount a host Docker socket or ambient kubeconfig into an ordinary lesson worker.
+Answers: [self-check answers](../solutions/cuda-127_solutions.md#self-check-answers).
 
 ## Primary references
 
-- [cuDF Spark plugin release and compatibility matrix](https://nvidia.github.io/cudf-spark/docs/download.html)
 - [Supported Spark operators and expression types](https://nvidia.github.io/cudf-spark/docs/supported_ops.html)
-- [GPU Spark tuning guide](https://docs.nvidia.com/cudf-spark/latest/tuning-guide.html)
-- [Apache Spark SQL performance tuning](https://spark.apache.org/docs/latest/sql-performance-tuning.html)
 
-Use the version-matched documentation of your prepared environment. These references describe interfaces and supported boundaries; the chapter's synthetic examples and CPU models are original teaching material.
+Full lists: [documentation and sources](../../STUDY-GUIDE.md#documentation-and-sources).
 
 ## Ask an AI tutor about this lesson
 

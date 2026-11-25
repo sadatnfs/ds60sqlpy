@@ -1,6 +1,6 @@
 # web-034: explanatory solutions
 
-Open this after your own attempt. Each answer explains the lesson's synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in `courses/web-development/guides/web-034.md`.
+Attempt each exercise before reading; the mechanism is in `courses/web-development/guides/web-034.md` ([using these answers](../STUDY-GUIDE.md#solutions)).
 
 ## Exercise 1: Trace the accumulator after each iteration.
 
@@ -76,4 +76,6 @@ Open this after your own attempt. Each answer explains the lesson's synthetic fi
 
 ## Reference comparison
 
-Open `courses/web-development/solutions/web-034_solution.php` only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; server lifecycle, persistence, concurrency and security need their own integration evidence.
+The reference requires the accumulated total to equal 65 and prints the label with the minutes. That catches an accumulator reset inside the loop or a skipped element. It does not test the negative guard, the empty week or the unknown-label path, so run each of those inputs yourself.
+
+Open `courses/web-development/solutions/web-034_solution.php` after saving your attempt ([comparing with the reference](../STUDY-GUIDE.md#references)).

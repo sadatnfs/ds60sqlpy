@@ -4,18 +4,15 @@
 
 Advanced; about 130 minutes, plus any optional hardware experiment. Direct prerequisites: `cuda-019`, `cuda-029`, `cuda-034`, `cuda-051`
 
-The order supports learning at your own pace. Reading and CPU reasoning remain
-available when NVIDIA hardware is absent. Advanced hardware features need their
-own capability checks and are not prerequisites for opening this chapter.
+Pacing, evidence labels and platform rules for every chapter are in the [CUDA study guide](../../STUDY-GUIDE.md).
 
 ## Learning objectives
 
 Compare fused and unfused normalization kernels on error, bytes moved, launch count and measured time.
 
-Work through *Normalization, fusion and memory traffic* with the concrete cases below. Finish with this evidence:
-an error-budgeted result plus measured bytes/launch reduction and an honest performance comparison. Distinguish an algorithmic
-calculation, a compiled artifact and an actual device observation when explaining
-what your work establishes.
+**Scope:** Mean/variance versus RMS normalization, epsilon semantics, accumulation precision, fused elementwise work and reduction limits.
+
+**Evidence to produce:** An error-budgeted result plus measured bytes/launch reduction and an honest performance comparison.
 
 ## Purpose, vocabulary and mental model
 
@@ -38,28 +35,17 @@ This centered population normalization puts epsilon inside the square root. RMS 
 
 ## How to run and study this lesson
 
-Use the saved reading worksheet in `/classroom`; the reading pad does not execute
-CUDA. For the bounded calculation, select **CPU model (Python)**, whose
-answer-free starter supplies the literal fixtures and task contract. The
-[CUDA C++ study workflow](../README.md) covers platforms, optional GPU
-compilation and evidence labels. In a prepared Python environment you can also
-run the separate [CPU reference](../references/cuda-052_cpu.py) from the
-repository root:
+Trace worked example 1 by hand, then run the [CPU reference](../references/cuda-052_cpu.py) from the repository root:
 
 ```sh
 python courses/cuda/cpp/references/cuda-052_cpu.py
 ```
 
-Its assertions check the stated numerical result or model invariant; console
-text is evidence of this CPU model only, not of CUDA execution.
-
 ## Worked example 1: trace the mechanism
 
 For row \([1,3]\), mean is two and population variance is one. With zero epsilon for this nondegenerate demonstration, centered normalized output is \([-1,1]\). RMS normalization instead divides \([1,3]\) by square root of five, giving different noncentered outputs.
 
-The complete CPU model below intentionally models only the named arithmetic,
-layout, dependency or capability decision. It does not model GPU scheduling,
-caches, instruction timing or device memory visibility.
+**Why:** Layer normalization gives [-1, 1], while RMS divides by sqrt((1 + 9) / 2) = sqrt(5).
 
 ```python
 import math
@@ -73,41 +59,37 @@ assert [max(0, x + 1) for x in [-2, 1]] == [0, 2]
 print({"layer_normalized": normalized, "RMS_denominator": math.sqrt(5)})
 ```
 
-**Expected observation:** Every assertion succeeds. A representative CPU output is:
+**Expected observation:** every assertion succeeds, and the CPU model prints:
 
 ```text
 {'layer_normalized': [-1.0, 1.0], 'RMS_denominator': 2.23606797749979}
 ```
 
-Integers, shapes and ordering must match exactly; only assertions with an explicit
-tolerance accept small floating-point differences. A printed duration is a model
-output, not a measured GPU benchmark.
+**Check:** The reference asserts normalized == [-1.0, 1.0] and prints the RMS denominator sqrt(5).
 
 ## Worked example 2: change a meaningful condition
 
 For constant \([5,5]\), variance is zero. With positive epsilon inside the square root, centered output is \([0,0]\). A formula that omits epsilon divides zero by zero. Use this case to test stability, but also test low nonzero variance to detect an incorrectly placed epsilon.
 
-Before applying this example to your own program, write down which inputs are
-read, which result is produced, and the condition that makes the comparison
-valid. Keep the original case as a regression check when changing a boundary.
+**Why:** For [5, 5] the variance is 0, centering gives zeros, and epsilon keeps the denominator positive.
+
+**Check:** Test [5, 5] for [0, 0] output and a low-variance row for finite results.
 
 ## Six progressive exercises
 
-Exercises 1 and 2 are guided reconstructions of the worked examples; exercises
-3-6 change an input, diagnose a defect, test a boundary and transfer the idea.
-For each one, keep the calculation, output, diagram or failure policy you
-produce so another reader can compare it with the worked cases. If the hint is
-not enough, reread the mechanism paragraph and the bounded CPU assertion.
-
 ### Exercise 1
 
-Predict and trace the first worked example before running its CPU reference. Write every intermediate quantity that leads to the stated result, including units or ownership where applicable.
+Reconstruct worked example 1 on paper before running its CPU reference. Center [1, 3] at mean 2, divide by population standard deviation 1, then compute RMS normalization separately.
+
+**Trap to avoid:** Treating RMS normalization as layer normalization without centering returns different values.
 
 **Hint:** Start with the literal input and intermediate quantities in worked example 1.
 
 ### Exercise 2
 
-Reconstruct the second worked example without copying its conclusion. Identify the changed input or condition, show the resulting calculation or dependency, and explain why it differs from the first example.
+Rework worked example 2 without copying its conclusion. Add a positive epsilon inside the square root before dividing.
+
+**Trap to avoid:** Omitting epsilon divides 0 by 0 and yields NaN for a constant row.
 
 **Hint:** Identify exactly which condition changes in worked example 2.
 
@@ -115,11 +97,15 @@ Reconstruct the second worked example without copying its conclusion. Identify t
 
 Compute fused bias-plus-ReLU for x=\([-2,1]\), bias=1.
 
+**Trap to avoid:** Applying ReLU before bias gives [1, 2], a different operation order.
+
 **Hint:** Use the first worked example to establish the relevant quantities, then change only the requested input.
 
 ### Exercise 4
 
 An implementation uses sample variance instead of population variance. Diagnose it.
+
+**Trap to avoid:** Using sample variance changes every output slightly and drifts from the reference.
 
 **Hint:** Locate the failed phase or violated dependency before proposing a repair.
 
@@ -127,35 +113,33 @@ An implementation uses sample variance instead of population variance. Diagnose 
 
 What is the singleton centered normalization with positive epsilon?
 
+**Trap to avoid:** Skipping normalization for singletons returns the raw value instead of zero.
+
 **Hint:** Check what the algorithm is allowed to read, write or assume at this boundary.
 
 ### Exercise 6
 
 Estimate one benefit and one cost of fusion.
 
+**Trap to avoid:** Fusing everything by default can cause spills and slow the kernel.
+
 **Hint:** State the output contract and which observations are needed in the new application.
 
 ## Common mistakes and diagnosis
 
-A tempting but incorrect claim in this chapter is: **fusion is always faster or the same epsilon convention is interchangeable across formulas.**
-
-For the concrete failure exercise, an implementation uses sample variance instead of population variance. Diagnose it.
-Preserve the original input and the stage where behavior diverged, and compare
-with the CPU model before changing hardware configuration.
+A tempting but incorrect claim: **Fusion is always faster or the same epsilon convention is interchangeable across formulas.** Fusion removes intermediate traffic and launches but can raise register pressure or block reuse, so it must be measured. Epsilon conventions are not interchangeable either: adding it inside the square root differs from adding it to the denominator. Match the reference formula exactly and test constant and low variance rows.
 
 ## Self-check, retrieval and transfer
 
-Explain the first example without its code, then use the second example to state
-one assumption that matters. Complete Exercise 3 independently, use Exercise 4 to
-diagnose a plausible defect, check the boundary in Exercise 5, and retain the
-application contract from Exercise 6. Compare the [separate explanations](../solutions/cuda-052_solutions.md)
-only after your attempt or a deliberate reveal. A reading marker records your
-choice; it does not certify hardware qualification or expert mastery.
+1. What does fused bias-plus-ReLU give for x = [-2,1] and bias 1?
+2. What variance does sample variance give for [1,3], and what is the effect?
+3. What is centered normalization of a single value with positive epsilon?
+
+Short answers are in the [separate explanations](../solutions/cuda-052_solutions.md#self-check-answers); compare only after an attempt.
 
 ## Primary references
 
-Check the documentation that matches your prepared toolkit before optional
-hardware execution.
+Use the documentation that matches your prepared toolkit.
 
 - [CUDA Programming Guide](https://docs.nvidia.com/cuda/cuda-programming-guide/)
 

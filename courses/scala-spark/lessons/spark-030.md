@@ -42,11 +42,11 @@ Annotate the local, client-mode and cluster-mode diagrams with driver location, 
 
 ### Exercise 2: Repair a driver-only input path assumption
 
-Review the proposed/driver-local/input.parquet path. State the visibility problem and specify a bounded replacement contract without choosing or contacting a real service.
+Review the proposed `/driver-local/input.parquet` path. State the visibility problem and specify a bounded replacement contract without choosing or contacting a real service.
 
 **Inputs/evidence:** The input path in the sanitized proposal and evidence that the file exists only on the submitting machine.
 
-**Expected result/shape:** An explicit data-location/distribution contract naming driver and executor visibility, authorization,30-row fixture identity and readback verification.
+**Expected result/shape:** An explicit data-location/distribution contract naming driver and executor visibility, authorization, 30-row fixture identity and readback verification.
 
 **Verify:** Reject automatic shared-path assumptions and list the exact host/process where existence and content must be checked.
 

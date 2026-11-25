@@ -196,7 +196,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <article class="document"><h2 id="r-027-profile-equivalent-work-and-account-for-allocations">r-027: Profile equivalent work and account for allocations<a class="heading-anchor" href="#r-027-profile-equivalent-work-and-account-for-allocations" aria-label="Link to this section">#</a></h2>
 <p><strong>Level:</strong> intermediate. <strong>Direct prerequisites:</strong> <code>r-014</code>, <code>r-020</code>, <code>r-026</code></p>
 <h3 id="run-and-retain-your-work">Run and retain your work<a class="heading-anchor" href="#run-and-retain-your-work" aria-label="Link to this section">#</a></h3>
-<p>Open <code>r-027</code> in <code>/classroom</code> and use the prepared <code>r-statistics</code> profile. Each Run evaluates one <code>main.R</code> script in a fresh offline R process, so define every input in the script; an earlier Run leaves no variables behind. Work in the <a href="../lessons/r-027.R.html">starter</a>. The <a href="../solutions/r-027_reference.R.html">complete reference</a> ends by printing <code>r-027 reference checks passed</code>, and the <a href="../solutions/r-027_solutions.md.html">explained answers</a> are there for deliberate comparison after your own attempt. This chapter prints values only; when a chapter draws figures, the classroom keeps at most two figures per run. The <a href="../README.md.html">course overview</a> describes saved work, figure capture and the prepared package versions.</p>
+<p>The starter supplies a small 2 by 3 matrix and a 300 by 20 workload of <code>seq_len(6000) / 100</code>. Run it, then predict the row means of the small matrix by hand: columns are filled first, so the rows hold 1, 3, 5 and 2, 4, 6, giving means 3 and 4. Prove equivalence on the small case before timing anything on the workload.</p>
+<p>Work in the <a href="../lessons/r-027.R.html">starter</a> under the <a href="../STUDY-GUIDE.md.html#run-a-chapter">run rules</a>.</p>
+<p>The <a href="../solutions/r-027_reference.R.html">complete reference</a> ends by printing <code>r-027 reference checks passed</code>.</p>
 <h3 id="outcome-and-mechanism">Outcome and mechanism<a class="heading-anchor" href="#outcome-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Compare numerically equivalent R implementations, collect bounded timing and profiling evidence, and explain its measurement limits.</p>
 <p>Optimization starts with a defined computation and a correct reference. Comparing two programs is not meaningful when one ignores missing values, drops groups or performs fewer repetitions. This lesson computes one mean per matrix row using a preallocated R loop and rowMeans on exactly the same finite numeric matrix. The reference values are checked before timing begins, and performance is not asserted as a mathematical invariant.</p>
@@ -315,7 +317,15 @@ result <span class="syntax-operator">&lt;-</span> <span class="syntax-function">
 <li><a href="https://stat.ethz.ch/R-manual/R-devel/library/utils/html/object.size.html">R object size</a></li>
 </ul>
 <h3 id="continue">Continue<a class="heading-anchor" href="#continue" aria-label="Link to this section">#</a></h3>
-<p>Chapters that list <code>r-027</code> as a direct prerequisite: <a href="r-028.md.html"><code>r-028</code></a>.</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Next chapter</th>
+<th>Title</th>
+</tr></thead><tbody>
+<tr>
+<td><a href="r-028.md.html"><code>r-028</code></a></td>
+<td>Bounded local parallelism and task-owned random streams</td>
+</tr>
+</tbody></table></div>
 <h3 id="ask-an-ai-tutor">Ask an AI tutor<a class="heading-anchor" href="#ask-an-ai-tutor" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for r-027 (Profile equivalent work and account for allocations).
 Read the guide and my saved attempt. Explain the relevant R mechanism,

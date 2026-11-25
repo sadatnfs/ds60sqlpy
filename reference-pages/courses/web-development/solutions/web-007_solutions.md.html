@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/web-development/solutions/web-007_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="web-007-explanatory-solutions">web-007: explanatory solutions<a class="heading-anchor" href="#web-007-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Open this after your own attempt. Each answer explains the lesson&#x27;s synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in <code>courses/web-development/guides/web-007.md</code>.</p>
+<p>Attempt each exercise before reading; the mechanism is in <code>courses/web-development/guides/web-007.md</code> (<a href="../STUDY-GUIDE.md.html#solutions">using these answers</a>).</p>
 <h3 id="exercise-1-explain-what-a-single-cell-value-means-with-both-headers">Exercise 1: Explain what a single cell value means with both headers.<a class="heading-anchor" href="#exercise-1-explain-what-a-single-cell-value-means-with-both-headers" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> 40 means forty minutes of HTML study, not an unlabeled count.</p>
 <p><strong>Approach:</strong> Follow the cell left to its row header and up to its column header, then join them into one sentence with the unit.</p>
@@ -232,7 +232,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Plausible wrong approach:</strong> Relying on the chart plus hover tooltips fails because keyboard and screen reader users may never reach the values.</p>
 <p><strong>How to verify:</strong> Every value plotted in the chart also appears once in the table with matching units.</p>
 <h3 id="reference-comparison">Reference comparison<a class="heading-anchor" href="#reference-comparison" aria-label="Link to this section">#</a></h3>
-<p>Open <code>courses/web-development/solutions/web-007_solution.html</code> only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; its success message is not an accessibility audit or proof of responsive behavior at every size.</p></article>
+<p>The reference requires three th elements with scope row inside tbody, so it catches a table whose first column is still plain td cells. It does not check the caption text, the column headers or the removal of the layout table, and it cannot prove how a screen reader announces a cell.</p>
+<p>Open <code>courses/web-development/solutions/web-007_solution.html</code> after saving your attempt (<a href="../STUDY-GUIDE.md.html#references">comparing with the reference</a>).</p></article>
   </main>
 </body>
 </html>

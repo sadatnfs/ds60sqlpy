@@ -4,8 +4,6 @@
 
 Divergence occurs when lanes in a warp follow different control-flow paths. It can reduce useful parallel execution, but branches that are uniform across a warp or skip substantial work can be beneficial. Irregular workloads also suffer from imbalance when some lanes have much longer loops. Reordering or compacting work can improve grouping at the cost of an extra pass and changed order. Preserve semantic ordering where required and include preprocessing in end-to-end measurement. Branch elimination that evaluates both expensive sides can make the program slower even when it reduces control flow.
 
-The separate [CPU reference](../references/cuda-037_cpu.py) checks the chapter's bounded model. It does not execute CUDA or establish GPU timing. Compare after attempting the worksheet or explicitly choosing to reveal solutions.
-
 ## Exercise 1
 
 Four conceptual lanes process workloads \([1,1,1,9]\). A simplified lockstep cost is nine rounds, with 12 useful lane-rounds out of 36 available positions, or one third utilization. This is a pedagogical model, not an actual CUDA timing prediction.
@@ -78,12 +76,16 @@ Group similar lengths, preserve a mapping back to original rows, include groupin
 
 **How to verify:** Validate every row, including empty ones, and count grouping time in totals.
 
+## Self-check answers
+
+1. **What utilization does the lockstep model give for workloads [2,2,2,8]?** 14 useful lane-rounds out of 32, about 0.44.
+2. **When is a branch warp-uniform?** When every lane of the warp takes the same path, so no divergence occurs.
+3. **Why might reordering work change results?** It can change output order or arithmetic order unless order is restored or proven irrelevant.
+
 ## Numerical reference and its limits
 
-The complete CPU model is [here](../references/cuda-037_cpu.py). Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It does not claim CUDA execution, concurrency safety or a performance measurement.
+The [CPU reference](../references/cuda-037_cpu.py) reproduces worked example 1 and prints `{'synthetic_lockstep_useful_fraction': 0.3333333333333333, 'preprocess_ms_minus_saved_ms': 1}`.
 
 ## Transfer review
 
 Group similar lengths, preserve a mapping back to original rows, include grouping cost and validate every output and empty row.
-
-A complete explanation must name its inputs, the unchanged mathematical contract, the changed boundary or resource condition, and the evidence still needed on actual hardware. Preserve a CPU baseline even after a GPU path becomes available.

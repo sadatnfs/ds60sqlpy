@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/docker/solutions/docker-023_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="docker-023-explanatory-solutions">docker-023: explanatory solutions<a class="heading-anchor" href="#docker-023-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit reveal. These explain the supplied teaching fixtures; they are not engine results. The mechanism is explained in <code>courses/docker/guides/docker-023.md</code>.</p>
+<p>These answers explain teaching fixtures, not engine results; the mechanism is in <a href="../guides/docker-023.md.html">the guide</a>.</p>
 <h3 id="exercise-1-map-each-hardening-setting-to-its-mechanism">Exercise 1: Map each hardening setting to its mechanism.<a class="heading-anchor" href="#exercise-1-map-each-hardening-setting-to-its-mechanism" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Mount writes, capabilities, privilege gain and temporary storage.</p>
 <p><strong>Why:</strong> The settings are complementary rather than synonyms. A clear mapping helps diagnose which boundary rejected an unintended operation.</p>
@@ -238,7 +238,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>A plausible wrong approach:</strong> Calling the result fully secure invites running untrusted images under a configuration never tested for that.</p>
 <p><strong>How to verify:</strong> The review lists each control with its passing check and names the threats left out of scope.</p>
 <h3 id="check-your-transfer">Check your transfer<a class="heading-anchor" href="#check-your-transfer" aria-label="Link to this section">#</a></h3>
-<p>A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.</p></article>
+<p>Start from <code>cap_drop: [ALL]</code> and run the service&#x27;s real acceptance check: start up, answer HTTP on 8080, and persist its data. If that passes, the capability is not needed for this deployment and stays denied. If startup fails, read the exact operation that was refused, often interface or firewall changes at boot, and prefer turning that feature off or doing it outside the container. Grant the capability only for a named, required operation, and record why. A passing acceptance run without it is the observation that disproves the vendor&#x27;s claim for your use.</p></article>
   </main>
 </body>
 </html>

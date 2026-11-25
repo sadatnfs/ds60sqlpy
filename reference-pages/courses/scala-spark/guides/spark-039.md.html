@@ -194,17 +194,19 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/scala-spark/guides/spark-039.md</code></p>
     </header>
     <article class="document"><h2 id="spark-039-resource-budgets-spill-and-cost-tradeoffs">spark-039: Resource budgets, spill and cost tradeoffs<a class="heading-anchor" href="#spark-039-resource-budgets-spill-and-cost-tradeoffs" aria-label="Link to this section">#</a></h2>
-<p>Authored paired Scala/PySpark teaching content. The default fixtures are tiny, local and deterministic. Runtime acceptance, logical correctness and learner understanding remain separate evidence.</p>
+<p>The same amount of work can be cheap or costly depending on how it is spread. Twenty thousand rows over 100 keys, with key 0 holding 16,040 of them, are repartitioned by key at two and at four partitions. Each run reports bucket sizes, files, shuffle bytes, spill and elapsed time, and a small cost model then prices the work within a fixed budget.</p>
 <h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
-<p>Advanced; approximately 105 minutes. Direct prerequisites: <code>spark-038</code>. The prepared baseline is Spark 4.3.0, Scala binary 2.13, JDK 17 and Python 3.12. Read the <a href="../execution-baseline.md.html">execution baseline</a>.</p>
+<p>Advanced; approximately 105 minutes. Direct prerequisites: <code>spark-038</code>. Pinned versions: <a href="../execution-baseline.md.html">execution baseline</a>.</p>
 <h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>Open <code>spark-039</code> in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed <code>spark-local-scala</code> or <code>spark-local-python</code> profile, save your pad and run the complete source. Scala stages as <code>Main.scala</code> with <code>object Main</code>;Python stages as <code>main.py</code> with a main guard. Each program creates its own <code>local[2]</code> session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.</p>
-<p>The <a href="../lessons/spark-039.scala.html">Scala learner</a> and <a href="../lessons/spark-039.py.html">PySpark learner</a> run two complete demonstrations and retain six explicit task stubs. Use the <a href="../solutions/spark-039_solutions.md.html">explained solutions</a> only after an attempt or an explicit worked comparison; the <a href="../solutions/spark-039_solution.scala.html">Scala reference</a> and <a href="../solutions/spark-039_solution.py.html">PySpark reference</a> contain complete assertions. A bounded collect is used only for the declared tiny fixture; do not copy it onto an unbounded or large production table.</p>
+<p>Shared run steps and profile rules: <a href="../STUDY-GUIDE.md.html#run-a-paired-lesson">study guide</a>.</p>
+<p>Learner pads: <a href="../lessons/spark-039.scala.html">Scala</a> and <a href="../lessons/spark-039.py.html">PySpark</a>.</p>
+<p>Open the <a href="../solutions/spark-039_solutions.md.html">explained solutions</a> after an attempt.</p>
+<p>The first worked example builds the expected list directly, key 0 with 16,040 rows and keys 1 to 99 with 40 each, and checks that the 100 pairs sum to 20,000. The second prices 2 vCPU for 3,600 seconds at 0.05 per vCPU hour and 2 GiB for 30 days at 0.02 per GiB month, which gives 0.10 plus 0.04, or 0.14.</p>
 <h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
 <ul>
 <li>Choose a resource-aware strategy from measured work rather than a single elapsed time.</li>
-<li>State the input and output grain, schema, NULL policy and ordering before executing a transformation.</li>
-<li>Compare each language implementation with independent literal expectations, not only with the other implementation.</li>
+<li>Measure the same keyed repartition at 2 and 4 shuffle partitions under a job group, check that both runs persist the 100 exact <code>(key, count)</code> pairs, and read <code>dataSize</code>, <code>shuffleBytesWritten</code> and <code>spillSize</code> from the retained stage metrics instead of trusting elapsed time alone.</li>
+<li>Compute work imbalance as the largest bucket over the mean bucket, price a run with <code>estimated_cost</code> at 0.05 per vCPU hour plus 0.02 per GiB month, and refuse any request above 20,000 rows or outside 1 to 8 partitions.</li>
 </ul>
 <h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
 <ul>
@@ -240,7 +242,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The cost worksheet uses deliberately hypothetical prices: 0.05 currency units per vCPU-hour and 0.02 per GiB-month, with a 30-day month. Two vCPUs for 3600 seconds cost 0.10 and two GiB for 30 days cost 0.04, for 0.14 total. This arithmetic does not include network, API requests, minimum charges, replication or support overhead. It is a model for reasoning about units, not financial advice or a real service quote.</p>
 <p>The stop budget is part of the experiment design: at most 20000 source rows and 8 partitions. A proposal to increase either is rejected before constructing a larger dataset. A sensible next experiment states what uncertainty it would resolve, which metric would change and when it would stop. The goal is a measured, correct comparison with honest limitations, not a dramatic benchmark at any cost.</p>
 <h3 id="supplied-local-fixture">Supplied local fixture<a class="heading-anchor" href="#supplied-local-fixture" aria-label="Link to this section">#</a></h3>
-<p>The complete source creates the owned local session described above, then constructs this explicit fixture. The worked examples below run in that same main function; there is no hidden notebook state.</p>
+<p>The source is <code>spark.range(0, 20000, 1, 4)</code>: IDs below 16,000 get key 0 and the remaining 4,000 IDs get <code>id % 100</code>, so key 0 ends with 16,040 rows and every other key with 40. <code>measured</code> accepts 1 to 8 partitions, sets the shuffle partition count only for its own run and restores the previous value, tags the job with <code>setJobGroup</code>, writes Parquet with <code>errorifexists</code> and reads the output back before reporting any metric.</p>
 <pre class="highlighted-code"><code class="language-scala"><span class="syntax-keyword">import</span> org<span class="syntax-punctuation">.</span>apache<span class="syntax-punctuation">.</span>spark<span class="syntax-punctuation">.</span>sql<span class="syntax-punctuation">.</span>functions<span class="syntax-punctuation">.</span>_
 <span class="syntax-keyword">import</span> java<span class="syntax-punctuation">.</span>nio<span class="syntax-punctuation">.</span>file<span class="syntax-punctuation">.</span><span class="syntax-punctuation">{</span><span class="syntax-class">Files</span><span class="syntax-punctuation">,</span> <span class="syntax-class">Path</span><span class="syntax-punctuation">,</span> <span class="syntax-class">Paths</span><span class="syntax-punctuation">,</span> <span class="syntax-class">StandardOpenOption</span><span class="syntax-punctuation">,</span> <span class="syntax-class">StandardCopyOption</span><span class="syntax-punctuation">}</span>
 <span class="syntax-keyword">import</span> java<span class="syntax-punctuation">.</span>nio<span class="syntax-punctuation">.</span>charset<span class="syntax-punctuation">.</span><span class="syntax-class">StandardCharsets</span>
@@ -286,9 +288,9 @@ storage <span class="syntax-operator">=</span> <span class="syntax-number">2</sp
 <p>The hypothetical cost calculation exposes time/storage unit conversions. It is deliberately separate from actual Spark metrics and does not claim a cloud invoice.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-validate-the-generated-skewed-fixture">Exercise 1: Validate the generated skewed fixture<a class="heading-anchor" href="#exercise-1-validate-the-generated-skewed-fixture" aria-label="Link to this section">#</a></h4>
-<p>Require 20000 rows, IDs 0..19999,100 keys and total ID sum 199990000. Explain key 0 occurs 16040 times.</p>
-<p><strong>Expected result/shape:</strong> Exact population tuple 20000,20000,100,199990000; key 0 count 16040, other keys 40.</p>
-<p><strong>Verify:</strong> Compare aggregate counts and the independent formula 16000+4000/100.</p>
+<p>Require 20000 rows, IDs 0..19999, 100 keys and total ID sum 199990000. Explain key 0 occurs 16040 times.</p>
+<p><strong>Expected result/shape:</strong> Exact population tuple <code>20000, 20000, 100, 199990000</code>; key 0 count 16040, other keys 40.</p>
+<p><strong>Verify:</strong> Compare aggregate counts and the independent formula 16000 + 4000/100.</p>
 <p><strong>Progressive hint:</strong> The first 16000 rows intentionally share key 0.</p>
 <h4 id="exercise-2-measure-the-two-partition-configuration">Exercise 2: Measure the two-partition configuration<a class="heading-anchor" href="#exercise-2-measure-the-two-partition-configuration" aria-label="Link to this section">#</a></h4>
 <p>Execute the bounded grouped query under a unique job group, read actual executed metrics, measure partition row counts and persist/read back the product.</p>
@@ -318,9 +320,14 @@ storage <span class="syntax-operator">=</span> <span class="syntax-number">2</sp
 <h3 id="common-pitfalls">Common pitfalls<a class="heading-anchor" href="#common-pitfalls" aria-label="Link to this section">#</a></h3>
 <p>Do not equate serialized dataSize with remote network traffic, absent spill metrics with zero spill, or partition-row imbalance with measured task-duration imbalance. Do not compare elapsed times for different result contracts or different included work. More partitions do not increase <code>local[2]</code> CPU threads. Keep hypothetical prices and model assumptions separate from actual runtime observations, and enforce the stop budget before expanding data.</p>
 <h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
-<p>Explain the contract of <code>fixtureMetrics</code> / <code>fixture_metrics</code> without reading its solution. Then, from memory, state what Exercise 6 (Enforce the stop budget before scaling data) must produce: <code>20000/4</code> accepted; <code>20001/4</code> and <code>20000/9</code> rejected. Say which part of that result is evidence and what it still cannot show. Name the action in your trace that actually runs the plan.</p>
+<ul>
+<li>Key 0 holds 16,040 of 20,000 rows. Why does going from 2 to 4 partitions leave the imbalance ratio above 1, and which bucket sets how long the stage takes?</li>
+<li>Elapsed time is printed but never asserted. Why is a single local timing weak evidence for choosing a partition count?</li>
+<li>The write uses <code>errorifexists</code>. What mistake would <code>overwrite</code> hide if two measurements accidentally shared an output folder?</li>
+<li><code>estimated_cost</code> rejects a negative duration and <code>within_budget</code> rejects 20,001 rows and 9 partitions. Why check limits before running a job rather than after the bill arrives?</li>
+</ul>
 <h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
-<p>Use the <a href="../README.md.html">course route</a> to continue. Paired-language agreement is useful only when both outputs also satisfy the independent fixture contract. A successful local run is not evidence of cluster performance or production recovery.</p>
+<p>Go on to <a href="spark-040.md.html">spark-040: SQL bridge, JDBC boundaries and data handling</a>. This lesson priced work that stayed inside Spark; the next one looks at the boundary between Spark SQL and an external database reached through JDBC, and at which data may cross it.</p>
 <h3 id="primary-sources-and-official-apis">Primary sources and official APIs<a class="heading-anchor" href="#primary-sources-and-official-apis" aria-label="Link to this section">#</a></h3>
 <ul>
 <li><a href="https://spark.apache.org/docs/4.3.0/monitoring.html">Spark 4.3.0 monitoring metrics</a></li>

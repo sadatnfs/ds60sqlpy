@@ -24,9 +24,11 @@ Build the portable kernel first, then extend the external InventoryLab or a sepa
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles the saved pad as `main.rs` with pinned Rust 1.99.1, edition 2024, and the prepared Arrow 60 library. `assert!` and `assert_eq!` remain active in normal builds. The fixed pad accepts one source file without arbitrary arguments, interactive input, Cargo manifests or package installation. The main function returns `Result<(), Box<dyn std::error::Error>>` so later examples can propagate errors with `?`; the final `Ok(())` means this fixture completed successfully. Standard library and Arrow examples remain offline after image preparation. Multi-file Cargo and external ecosystem projects have separate explicit preparation workflows.
+Beyond the prelude, this lesson's programs use `arrow::array`. A passing run prints `rust-048: passed`.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Pad setup and limits: [Run a lesson](../STUDY-GUIDE.md#run-a-lesson).
+
+Before you run anything, follow [Attempt a lesson](../STUDY-GUIDE.md#attempt-a-lesson).
 
 Use [InventoryLab](../fixtures/InventoryLab/README.md) for the real library/project structure. The Arrow classroom dependency is already prepared; any independent Cargo project must deliberately prepare and lock Arrow60 before claiming offline builds.
 
@@ -34,7 +36,9 @@ Use [InventoryLab](../fixtures/InventoryLab/README.md) for the real library/proj
 
 A typed nullable array exposes valid values through Option iteration. The application can count nulls, reject negative present values and sum the admitted population. A stable report record makes those decisions inspectable.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+**Reading Example A (Summarize a nullable measurement column, code below).** `Int32Array::from` with `Option` items builds a nullable column. `values.iter()` yields an `Option<i32>` for each row by reading the validity bitmap, and `flatten()` drops the `None` rows, so nulls never reach the filter. `filter(|value| *value >= 0)` receives a reference to each remaining value, hence the `*`, and keeps the nonnegative ones. `collect` into `Vec<_>` materializes the accepted values. The last assertion is the accounting identity: total rows minus nulls minus accepted rows must equal the number rejected, so every row is counted exactly once in one of the three groups. `null_count` reads a stored count rather than rescanning the rows.
+
+Method for tracing your own variants: [Trace a program](../STUDY-GUIDE.md#trace-a-program).
 
 ## Worked example / walkthrough
 
@@ -98,13 +102,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 6. **Transfer and justify.** Deliver a project README with schema, ownership, bounds, failure policies, actual runtime evidence and one independent Arrow extension.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Record each task as in [Keep evidence for each task](../STUDY-GUIDE.md#keep-evidence-for-each-task).
 
 ## Common pitfalls and diagnosis
 
 A passing kernel does not prove external storage, authentication or every architecture. Do not label Parquet, DataFusion or a distributed service supported without explicit dependency and runtime qualification. Retain source-bound evidence for the program actually executed.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+To turn a pitfall into a test, see [Design a regression case](../STUDY-GUIDE.md#design-a-regression-case).
 
 ## Progressive hints
 
@@ -112,13 +116,23 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 2. Compare Example B (Keep empty and all-null data distinct) with Example A and name the first line whose behavior differs. Its observation is: No submitted rows and two missing observations remain different reports.
 3. Before opening the explanation, test your task 3 attempt against this lesson's main pitfall: A passing kernel does not prove external storage, authentication or every architecture.
 
+Tempting approaches to rule out before you compare:
+
+- **Task 1.** Rejecting 0 together with the negatives treats a valid zero as bad data and reports 2 accepted, 2 rejected.
+- **Task 2.** Updating the expected numbers by hand from the old report, 5 + 4 and 3 + 1, checks arithmetic, not the program.
+- **Task 5.** Using `sum += value` makes the overflow case panic in debug builds and wrap silently in release builds, so the report would depend on the build profile.
+
 ## Self-check and next step
 
-Explain Analytical contract, Acceptance evidence, Extension boundary without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+In Example A, which values make up the total of 5, and why do the null and the rejected negative appear as counts rather than vanishing? In Example B, why must an empty input and two missing observations produce different reports? Which acceptance check would fail if nulls were silently treated as zero?
+
+Then work through [Self-check and review](../STUDY-GUIDE.md#self-check-and-review).
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://docs.rs/arrow/60.0.0/arrow/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+Read [the Arrow 60 crate documentation](https://docs.rs/arrow/60.0.0/arrow/) for the array and compute APIs the capstone combines.
+
+What the classroom does and does not prove: [Sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

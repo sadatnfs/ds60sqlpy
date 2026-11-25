@@ -1,22 +1,26 @@
 # spark-036: foreachBatch, idempotent sinks and failure injection
 
-Authored paired Scala/PySpark teaching content. The default fixtures are tiny, local and deterministic. Runtime acceptance, logical correctness and learner understanding remain separate evidence.
+`foreachBatch` hands your code each microbatch together with a batch ID, and Spark may call it again with the same ID after a failure. This lesson builds a file sink keyed by query identity and batch ID that publishes each batch once, injects a failure just before publication, and shows that the retry ends with the same two rows written exactly one time.
 
 ## Level and prerequisites
 
-Advanced; approximately 135 minutes. Direct prerequisites: `spark-035`. The prepared baseline is Spark 4.3.0, Scala binary 2.13, JDK 17 and Python 3.12. Read the [execution baseline](../execution-baseline.md).
+Advanced; approximately 135 minutes. Direct prerequisites: `spark-035`. Pinned versions: [execution baseline](../execution-baseline.md).
 
 ## How to run this lesson
 
-Open `spark-036` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile, save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`;Python stages as `main.py` with a main guard. Each program creates its own `local[2]` session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.
+Shared run steps and profile rules: [study guide](../STUDY-GUIDE.md#run-a-paired-lesson).
 
-The [Scala learner](../lessons/spark-036.scala) and [PySpark learner](../lessons/spark-036.py) run two complete demonstrations and retain six explicit task stubs. Use the [explained solutions](../solutions/spark-036_solutions.md) only after an attempt or an explicit worked comparison; the [Scala reference](../solutions/spark-036_solution.scala) and [PySpark reference](../solutions/spark-036_solution.py) contain complete assertions. A bounded collect is used only for the declared tiny fixture; do not copy it onto an unbounded or large production table.
+Learner pads: [Scala](../lessons/spark-036.scala) and [PySpark](../lessons/spark-036.py).
+
+Open the [explained solutions](../solutions/spark-036_solutions.md) after an attempt.
+
+The first worked example reads the input as an ordinary batch, encodes it as the lines `1,100` and `2,200`, then publishes it under `demo-v1` batch 0 twice: the first call returns True and the second returns False. The second passes the failure flag for `demo-failure`, catches `RuntimeError` with the exact message `injected_before_publication`, and confirms that no rows were published for that identity.
 
 ## Learning objectives
 
 - Design an idempotent microbatch sink instead of assuming foreachBatch is exactly once.
-- State the input and output grain, schema, NULL policy and ordering before executing a transformation.
-- Compare each language implementation with independent literal expectations, not only with the other implementation.
+- Turn a microbatch into canonical sorted `id,cents` text with a SHA-256 digest, and publish it under `sink/<identity>/batch-<20-digit ID>.json` by staging a pending file and renaming it, so identical content returns False on a repeat and different content under the same key is refused.
+- Inject `injected_before_publication` inside the callback, restart on the same checkpoint, and read the attempt lists `[0, 0]` and then `[0, 0, 1]` as proof that a batch ran twice but was published once, unlike an unkeyed append that doubles its lines.
 
 ## Vocabulary and concepts
 
@@ -62,7 +66,7 @@ Every path is inside a fresh current-job scratch root. The reference waits with 
 
 ## Supplied local fixture
 
-The complete source creates the owned local session described above, then constructs this explicit fixture. The worked examples below run in that same main function; there is no hidden notebook state.
+The run owns a `spark-036-` scratch folder with `input`, `checkpoint` and `sink` paths. `batch-01.json` holds `(1, 100)` and `(2, 200)` under the schema `id bigint, cents bigint`. The canonical encoder sorts rows, caps a batch at 8 rows and rejects NULL or negative values. Identities must match `[a-z][a-z0-9-]{0,31}`, and before streaming starts the program writes a binding file that records the input path, checkpoint and schema the sink belongs to.
 
 ```scala prelude=../solutions/spark-036_solution.scala
 import org.apache.spark.sql.functions._
@@ -160,7 +164,7 @@ Failure after staging leaves no published row. The expected exception is inspect
 
 Validate the explicit bigint schema, nonnegative cents, positive IDs and at most 8 rows; return sorted id, cents newline records preserving multiplicity.
 
-**Expected result/shape:** Exact text 1,100 newline 2,200 newline, with a stable SHA256 after repartitioning.
+**Expected result/shape:** Exact text `1,100` newline `2,200` newline, with a stable SHA256 after repartitioning.
 
 **Verify:** Compare exact bytes and reject NULL cents before publication.
 
@@ -192,7 +196,7 @@ Restart the same source/checkpoint/query namespace without failure. Compare atte
 
 **Expected result/shape:** Batch 0 is attempted again and publishes 2 rows once. Query ID persists; run ID changes.
 
-**Verify:** Assert attempt sequence 0,0, exact rows and corresponding identities.
+**Verify:** Assert attempt sequence `0, 0`, exact rows and corresponding identities.
 
 **Progressive hint:** foreachBatch provides at-least-once callback execution; the sink supplies replay safety.
 
@@ -210,9 +214,9 @@ Append the same canonical batch text twice to a separate unsafe-demo file, then 
 
 Reject different content under an existing batch key, then publish a new source file 3:300 and resume the real query.
 
-**Expected result/shape:** The conflicting key fails without replacing its receipt. Stream batch 1 adds one row, leaving IDs 1,2,3 and total 600 across two batch files.
+**Expected result/shape:** The conflicting key fails without replacing its receipt. Stream batch 1 adds one row, leaving IDs 1, 2, 3 and total 600 across two batch files.
 
-**Verify:** Assert collision rejection, old receipt equality, attempt sequence 0,0,1 and exact 3-row sink.
+**Verify:** Assert collision rejection, old receipt equality, attempt sequence `0, 0, 1` and exact 3-row sink.
 
 **Progressive hint:** A duplicate key is safe only if its content agrees; new work receives a new batch ID.
 
@@ -222,11 +226,14 @@ Do not use runId as the replay key. Do not suppress a repeated batch ID without 
 
 ## Self-check
 
-Explain the contract of `encodeBatch` / `encode_batch` without reading its solution. Then, from memory, state what Exercise 6 (Reject identity collisions and admit the next batch) must produce: The conflicting key fails without replacing its receipt. Stream batch 1 adds one row, leaving IDs 1, 2, 3 and total 600 across two batch files. Say which part of that result is evidence and what it still cannot show. Name the action in your trace that actually runs the plan.
+- Why does `canonical_batch` sort the lines before hashing, and what could `repartition(2)` do to the digest without that sort?
+- Publishing identical content again returns False instead of raising. Why is a quiet no-op the right answer for a replay, while different content under `manual-v1` batch 7 must raise?
+- The injected failure happens after the pending file is staged. Why is the staged file removed, and what would a reader see if the rename had already happened?
+- The final attempt list is `[0, 0, 1]`. Which entry is the retry, and why does the unkeyed append in Exercise 5 end with 4 lines when the committed batch has 2?
 
 ## Next step
 
-Use the [course route](../README.md) to continue. Paired-language agreement is useful only when both outputs also satisfy the independent fixture contract. A successful local run is not evidence of cluster performance or production recovery.
+Go on to [spark-037: Deterministic streaming tests without sleep-based guesses](spark-037.md). With a sink that tolerates retries, the next lesson turns restart, duplicate, late and invalid inputs into finite test cases whose outcomes are exact bags.
 
 ## Primary sources and official APIs
 

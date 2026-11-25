@@ -1,6 +1,6 @@
 # cpp-022: explanations and reference observations
 
-Attempt the learner tasks before opening this document. The executable reference checks the bounded normal and boundary examples; the six explanations below cover the deliberate changes and manual checks.
+The [executable reference](cpp-022_solution.cpp) decodes `"v1,7,125"` back to the same record and rejects both a v2 prefix and an extra `junk` field. The explanations cover versioned formats and why path arithmetic needs no file. How to compare: [study guide](../STUDY-GUIDE.md#compare-with-the-solutions).
 
 ## Mechanism
 

@@ -1,6 +1,6 @@
 # web-006: explanatory solutions
 
-Open this after your own attempt. Each answer explains the lesson's synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in `courses/web-development/guides/web-006.md`.
+Attempt each exercise before reading; the mechanism is in `courses/web-development/guides/web-006.md` ([using these answers](../STUDY-GUIDE.md#solutions)).
 
 ## Exercise 1: Choose alternatives for decorative and informative images.
 
@@ -76,4 +76,6 @@ Open this after your own attempt. Each answer explains the lesson's synthetic fi
 
 ## Reference comparison
 
-Open `courses/web-development/solutions/web-006_solution.html` only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; its success message is not an accessibility audit or proof of responsive behavior at every size.
+The reference reads the text of the SVG title and requires the word Three, so it fails if the title is missing or describes a different progress value. It does not prove the title is referenced by aria-labelledby, that decorative images have empty alt text or that the figure keeps its aspect ratio at narrow widths.
+
+Open `courses/web-development/solutions/web-006_solution.html` after saving your attempt ([comparing with the reference](../STUDY-GUIDE.md#references)).

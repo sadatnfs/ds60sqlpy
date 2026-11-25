@@ -1,7 +1,6 @@
 # Hive apache-066 command notebook
 
-Run from the copied owned Hive project, following its README. Native service
-acceptance is separately recorded in QUALIFICATION.md.
+`explain.sql` is a plain SELECT over the fixture table, and `run.sh explain` sends it through the admin container of the copied Hive project. Save the full plan text, not a summary of it.
 
 ```bash
 cat explain.sql
@@ -10,5 +9,4 @@ bash run.sh explain
 
 Inspect actual partition and aggregate plan operators before claiming a specific engine optimization. Query result correctness and physical work are separate observations.
 
-The classroom does not execute these Docker commands. Retain source, schema,
-file identities, actual responses and failure scope in an independent receipt.
+The accepted Hive gate checked query answers and did not grade plan operators. A claim about partition pruning or aggregation needs the saved plan beside the matching row result.

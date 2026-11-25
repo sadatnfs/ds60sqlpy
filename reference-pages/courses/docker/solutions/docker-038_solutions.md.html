@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/docker/solutions/docker-038_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="docker-038-explanatory-solutions">docker-038: explanatory solutions<a class="heading-anchor" href="#docker-038-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit reveal. These explain the supplied teaching fixtures; they are not engine results. The mechanism is explained in <code>courses/docker/guides/docker-038.md</code>.</p>
+<p>These answers explain teaching fixtures, not engine results; the mechanism is in <a href="../guides/docker-038.md.html">the guide</a>.</p>
 <h3 id="exercise-1-classify-disk-usage-by-resource-type">Exercise 1: Classify disk usage by resource type.<a class="heading-anchor" href="#exercise-1-classify-disk-usage-by-resource-type" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Images, cache, writable layers, logs and volumes.</p>
 <p><strong>Why:</strong> Each category has a different owner and retention policy. A single aggregate number does not identify safe deletions.</p>
@@ -238,7 +238,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>A plausible wrong approach:</strong> A plan that says clean up Docker gives no target to review and no way to confirm the result.</p>
 <p><strong>How to verify:</strong> After the plan runs, the project-filtered listing matches the plan&#x27;s expected remaining resources.</p>
 <h3 id="check-your-transfer">Check your transfer<a class="heading-anchor" href="#check-your-transfer" aria-label="Link to this section">#</a></h3>
-<p>A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.</p></article>
+<p>Build cache is regenerable, so clearing it costs rebuild time rather than data, which makes it a reasonable target once the evidence packet exists. On a shared host it also slows other people&#x27;s builds, so prefer a bounded command such as <code>docker builder prune --filter until=24h</code>, announce it, and record what was freed. Rerun <code>docker system df</code> to confirm the reclaimed space and check that the app is still healthy. If disk use barely drops, the pressure lies elsewhere, often in logs or volumes.</p></article>
   </main>
 </body>
 </html>

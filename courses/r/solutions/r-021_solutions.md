@@ -1,6 +1,6 @@
 # r-021: reference reasoning
 
-Use the [complete reference](r-021_reference.R) with the guide's declared inputs and runtime. Every worked example is also a standalone script.
+Run the [complete reference](r-021_reference.R) under the [run rules](../STUDY-GUIDE.md#run-a-chapter).
 
 ## Why the implementation has this shape
 
@@ -108,4 +108,6 @@ An environment can be shared across list copies. The current constructor exclude
 
 ## What the checks establish
 
-The reference makes 6 `stopifnot()` checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.
+The assertions confirm that malformed input raises a diagnostic matching the expected text, that the total of 3 and 7 is `c(ms = 10)`, that a new object with 5 added totals 15 and counts 3 through its own generic, that the empty measurement counts 0 and totals 0 ms, and that modifying a copy to 9 leaves the original 3 in place. They do not test what happens when someone bypasses the constructor and never calls the validator.
+
+The reference makes 6 `stopifnot()` checks; see [what a passing run proves](../STUDY-GUIDE.md#what-a-passing-run-proves).

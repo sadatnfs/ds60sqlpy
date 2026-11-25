@@ -211,7 +211,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="syntax-anatomy-and-mechanism">Syntax anatomy and mechanism<a class="heading-anchor" href="#syntax-anatomy-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p>A foreach loop visits array values and can also expose keys. A for loop makes initialization, condition and update explicit. In a match expression, each arm maps a condition to a result, and a default arm handles other values when that is appropriate. Do not silently map invalid input to a valid default if the contract requires rejection.</p>
 <h3 id="classroom-execution-and-offline-inputs">Classroom execution and offline inputs<a class="heading-anchor" href="#classroom-execution-and-offline-inputs" aria-label="Link to this section">#</a></h3>
-<p>Choose the <strong>PHP CLI</strong> worker and work in <code>courses/web-development/lessons/web-034.php</code>, which runs as <code>main.php</code> in a bounded Linux process with PDO SQLite. Every input is a small synthetic value, and CLI runs are fresh processes, not persistent HTTP requests. Save your attempt before comparing it with <code>courses/web-development/solutions/web-034_solution.php</code>. <strong>How to run lessons</strong> in the <a href="../README.md.html">subject README</a> lists what the pad does not provide.</p>
+<p>The worked examples add durations in a bounded loop to reach 65 and map a route string with match. You build a weekly summary that guards against negative durations, totals the week and labels it through a match expression.</p>
+<p>Run <code>courses/web-development/lessons/web-034.php</code> with <strong>PHP CLI</strong>: synthetic inputs, not persistent HTTP requests (<a href="../STUDY-GUIDE.md.html#php-cli">why</a>).</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1-a-bounded-accumulation">Worked example 1: A bounded accumulation<a class="heading-anchor" href="#worked-example-1-a-bounded-accumulation" aria-label="Link to this section">#</a></h4>
 <p>The loop visits a finite array once.</p>
@@ -240,7 +241,7 @@ echo match ($value) {
 };</code></pre>
 <p><code>switch</code> compares with loose equality, and the string &#x27;0&#x27; loosely equals false, so it prints switch: false branch even though the value is a string. <code>match</code> uses strict identity, so the false arm does not match and the string arm does, printing match: string arm. If the string arm were removed, <code>match</code> would throw an <code>UnhandledMatchError</code> instead of quietly choosing a branch, which surfaces the unexpected value. That strictness is why worked example 2 uses <code>match</code> for a mapping where each input should land in one deliberate case. With <code>switch</code>, remember also that a missing <code>break</code> lets execution fall through into the next case.</p>
 <h3 id="six-progressive-exercises">Six progressive exercises<a class="heading-anchor" href="#six-progressive-exercises" aria-label="Link to this section">#</a></h3>
-<p>Exercises that ask you to predict, explain, compare or diagnose keep their answers in the solutions file. The others show the evidence to look for.</p>
+<p>Exercises 1, 4 and 6 keep their expected answers in the solutions file.</p>
 <h4 id="exercise-1-trace-the-accumulator-after-each-iteration">Exercise 1: Trace the accumulator after each iteration.<a class="heading-anchor" href="#exercise-1-trace-the-accumulator-after-each-iteration" aria-label="Link to this section">#</a></h4>
 <p><strong>Progressive hint:</strong> Write the total after each loop iteration in a table.</p>
 <h4 id="exercise-2-add-a-guard-against-negative-durations">Exercise 2: Add a guard against negative durations.<a class="heading-anchor" href="#exercise-2-add-a-guard-against-negative-durations" aria-label="Link to this section">#</a></h4>
@@ -258,10 +259,11 @@ echo match ($value) {
 <p><strong>Progressive hint:</strong> Pass an integer to a match keyed by strings and compare with switch.</p>
 <h3 id="debugging-and-common-mistakes">Debugging and common mistakes<a class="heading-anchor" href="#debugging-and-common-mistakes" aria-label="Link to this section">#</a></h3>
 <p>Do not rely on a worker timeout as the algorithm&#x27;s termination strategy. Avoid changing the collection unexpectedly while iterating. A default arm should not conceal an unknown state that needs an error.</p>
-<p>Keep the failing source, its input and the exact output, then repair one cause at a time. PHP can produce correct-looking text while missing an invalid-input branch, so rerun the empty, wrong-type and boundary cases after every fix.</p>
+<p>When a loop never ends, print the loop variable on each pass; a while condition whose inputs never change cannot become false. When match throws UnhandledMatchError, the input had a value you did not list, which is usually better than a switch silently falling through to the wrong arm.</p>
+<p>The shared <a href="../STUDY-GUIDE.md.html#debugging-php">debugging routine</a> covers what to record before each repair.</p>
 <h3 id="retrieval-transfer-and-next-steps">Retrieval, transfer and next steps<a class="heading-anchor" href="#retrieval-transfer-and-next-steps" aria-label="Link to this section">#</a></h3>
-<p>Close the worked answers and explain branch, loop and guard clause without using the terms as their own definitions. Rebuild worked example 1 (A bounded accumulation) from a blank pad, then try one new value, one empty or missing case and one unusual boundary. State which result would disprove your explanation.</p>
-<p>If you can reproduce the output but cannot explain why it happens, revisit <code>web-033</code>. A saved completion marker records your own progress; it is not a certification.</p>
+<p>From memory, trace the accumulator through each iteration of the 65 minute example and say what an empty collection produces. Then explain why a guard clause at the top of a function is easier to read than nested conditions, and why match compares strictly while switch compares loosely on a string zero.</p>
+<p>Revisit <code>web-033</code> when an output is predictable but unexplained (<a href="../STUDY-GUIDE.md.html#review-loop">review loop</a>).</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
 <ul>
 <li><a href="https://www.php.net/manual/en/language.control-structures.php">Control structures</a></li>

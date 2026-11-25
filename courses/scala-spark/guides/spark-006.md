@@ -1,20 +1,26 @@
 # spark-006: Case classes, pattern matching, and domain states
 
-Authored tutorial and practice content. The prepared Scala/JVM worker executes a bounded program; process success and understanding remain distinct. No source file installs a tool or downloads a dependency.
+Two payments of 100 cents are still two payments. This lesson models payment events as a sealed trait with `Paid`, `Voided` and `Refunded` cases, keeps each event's ID separate from its amount, and uses an exhaustive match so a new state cannot slip into a total unnoticed.
 
 ## Level and prerequisites
 
-Beginner; approximately 75 minutes. Direct prerequisites: `spark-005`. The lesson uses Scala 2.13 syntax and the prepared JDK 17 worker. The [execution baseline](../execution-baseline.md) lists the exact Scala, JDK and Spark versions.
+Beginner; approximately 75 minutes. Direct prerequisites: `spark-005`. Pinned versions: [execution baseline](../execution-baseline.md).
 
 ## How to run this lesson
 
-Open `spark-006` in the classroom, select the Scala source, prepare the `scala-jvm` profile and run the saved pad. The worker stages the single source as `Main.scala` and invokes `object Main`. Read the terminal output and exact assertions. The [learner source](../lessons/spark-006.scala) runs two complete demonstrations; its six task functions remain explicit stubs until you implement them. Preserve your saved attempt. The [reference program](../solutions/spark-006_solution.scala) and [explained solutions](../solutions/spark-006_solutions.md) are separate and should be opened after an attempt or an explicit worked-comparison request. If the profile is unavailable, reading and saving remain available; opening this guide does not prepare a runtime.
+Shared run steps and profile rules: [study guide](../STUDY-GUIDE.md#run-a-language-lesson).
+
+Learner pad: [spark-006.scala](../lessons/spark-006.scala).
+
+Open the [explained solutions](../solutions/spark-006_solutions.md) after an attempt.
+
+The pad first prints `original=Paid(p1,100) revised=Paid(p1,125)`, which shows that `copy(cents = 125L)` returns a new value and leaves the original alone. The second example prints `paid:p1:0` from a `describe` match that names all three cases; a zero-cent payment is still a payment, not a void. Compare that match with the `kind` function you write in Exercise 2, which must also avoid a catch-all case.
 
 ## Learning objectives
 
 - Model a small event domain with case classes and exhaustive pattern matching.
-- Explain the result of both worked examples before running them.
-- Implement the six contracts, inspect normal and boundary evidence, and explain a counterexample in your own words.
+- Explain why `Paid(p1, 100)` and `Paid(p2, 100)` are different events with equal cents, and why `copy` produces a revised event while the original keeps its 100 cents.
+- Compute the signed net of the four-event fixture (175 cents) without dropping the zero-valued voided event, and reject a repeated event ID even when both copies agree on amount.
 
 ## Vocabulary and concepts
 
@@ -139,11 +145,15 @@ If two equal payments collapse, inspect whether a projection or Set discarded th
 
 ## Self-check
 
-Explain one input-to-output trace without reading your code. Identify which function preserves repeated values, which condition distinguishes an invalid or missing input, and which assertion would fail for the tempting incorrect implementation. A printed success line alone is not the evidence; retain the exact values and the reasoning that connect them to the contract.
+- List the IDs and kinds for the fixture `Paid(p1, 100)`, `Paid(p2, 100)`, `Voided(v1, duplicate)`, `Refunded(r1, 25)`. Which two events would a deduplication on cents alone merge by mistake?
+- Give the signed contribution of each fixture event. Why does `Refunded(r0, 0)` contribute 0 but still count as a refund?
+- What happens at compile time if you add a fourth case to the sealed trait and your `kind` match has no wildcard? Why is that warning the point of sealing the trait?
+- `revisePaid` rejects 1,000,001 cents. Where should that bound be enforced so that an invalid `Paid` value cannot exist at all?
+- `audit` returns IDs `[p1, p2, v1, r1]`, net 175 and counts paid 2, voided 1, refunded 1. Which part of that result proves no event was lost, and which part proves the money adds up?
 
 ## Next step
 
-Continue to the next lesson only after you can explain the boundary behavior. The [course route](../README.md) shows authored material and runtime evidence separately.
+Go on to [spark-007: Either and validation without hidden data loss](spark-007.md). Your events here were constructed from trusted literals; next, records arrive as raw text, and `Either` carries a named reason for each rejected field so the rejection ledger can account for every input line.
 
 ## Primary sources and official APIs
 

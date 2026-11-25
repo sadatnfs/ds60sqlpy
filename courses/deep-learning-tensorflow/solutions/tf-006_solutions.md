@@ -1,19 +1,6 @@
 # tf-006: worked solutions
 
-Open this reference after an attempt or an explicit reveal request. Preserve
-your own version beside it. The [learner guide](../guides/tf-006.md) contains
-the public fixture and its independent Expected/Verify contracts. These six
-sections correspond to the same six learner actions, rather than six answer
-steps for one task. A different implementation is acceptable when it preserves
-the stated input policy, observations and evidence boundary.
-
-The [executable reference](tf-006_solution.py) exposes a `verify()` helper for
-authors and later comparison. It uses only local literals and the declared
-Python/NumPy environment. An assertion failure should retain its actual input
-and smallest failing observation. A passing reference is evidence about these
-fixed cases; use a changed fixture and a closed-reference explanation before
-recommending progression. The reading worksheet remains a reading exercise,
-regardless of the optional arithmetic checker.
+Compare after an attempt with the [learner guide](../guides/tf-006.md) ([comparison steps](../STUDY-GUIDE.md#after-the-solutions)).
 
 ## Exercise 1: Build a forward/backward table
 
@@ -65,9 +52,7 @@ Omitting dz/dw leaves \(6\cdot 4=24\) in the scale-2 case and \(16\cdot 6=96\) i
 
 ## Inspectable reference functions
 
-The core functions below make the input and reduction policies explicit. The
-separate executable file adds all six exercise checks. Do not replace a failed
-assertion with a flattering default value or remove the invalid-input case.
+`chain_trace` recomputes z, the activation and the loss from the weight, then multiplies all three local factors, including the inner scale. The [executable reference](tf-006_solution.py) adds all six exercise checks.
 
 ```python
 from __future__ import annotations
@@ -89,9 +74,4 @@ def chain_trace(weight, scale=2):
 
 Without viewing the trace, replace the inner scale with 1 and derive the loss and gradient at \(w=2\). Then explain why holding a fixed changes the function even when the original loss remains identical.
 
-After revealing this file, choose another fixture before treating the answer
-as independent retrieval evidence. Explain why the rejected case is invalid,
-not merely which exception class appeared. Alternative notation, array layout
-or a direct calculation is welcome when its domain meaning and denominator
-remain explicit. Keep implementation correctness separate from broad claims
-about unseen model quality, reliability or safety.
+Then follow the [after-solutions routine](../STUDY-GUIDE.md#after-the-solutions).

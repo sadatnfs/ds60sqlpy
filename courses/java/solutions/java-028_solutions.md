@@ -1,6 +1,6 @@
 # java-028: explanatory solutions
 
-Open after an attempt or an explicit solution reveal. The executable reference runs the six exercise checks together as `Main.java`. The guide contains independent worked examples, while this file explains the choices and failure cases in the complete answer.
+Open this after an attempt; see [using the solutions](../STUDY-GUIDE.md#use-the-solutions).
 
 ## Mechanism review
 
@@ -22,7 +22,7 @@ HttpServer.create binds an InetSocketAddress with port 0, then getAddress reveal
 
 ## Exercise 1: Call an owned loopback endpoint: change one input
 
-Task: Copy Example A into a scratch `Main.java` and change `java.net.http.HttpRequest.newBuilder(server.uri("/health"))` to `java.net.http.HttpRequest.newBuilder(server.uri("/health!"))`. Before running it with `java -ea Main`, predict which assertion fails and which value it now sees; then run it and restore the original line.
+Task: Change `java.net.http.HttpRequest.newBuilder(server.uri("/health"))` to `java.net.http.HttpRequest.newBuilder(server.uri("/health!"))` in Example A and predict which assertion fails and why.
 
 The request reaches a real localHTTPserver. A a returned String alone would not verify routing, status or resource closure.
 
@@ -46,13 +46,13 @@ try (
 }
 ```
 
-**Expected:** The changed run fails with an `AssertionError` from the assertion on `response.statusCode() == 200 && response.body().equals("ok")`. Restoring the original line brings back the worked observation: status 200 and body ok.
+**Expected:** The edited run fails with an `AssertionError` from the assertion on `response.statusCode() == 200 && response.body().equals("ok")`.
 
-**Verify:** Compare your written prediction with the reported `AssertionError` and its stack-trace line, and name the value that made `response.statusCode() == 200 && response.body().equals("ok")` false. After restoring the line, the program completes without an `AssertionError` again.
+**Verify:** Name the value that makes `response.statusCode() == 200 && response.body().equals("ok")` false, then restore the line.
 
 ## Exercise 2: Inspect content metadata: diagnose an edited check
 
-Task: A careless edit changed the assertion that Example B adds after Example A so that it reads `.equals("text/plain; charset=utf-9");`. Run Example B with that line, explain why the edited assertion now fails for the same program state, and restore it.
+Task: Example B's new assertion was edited to `.equals("text/plain; charset=utf-9");`. Explain why it fails for unchanged state and restore it.
 
 The encoding contract belongs in the response metadata as well as the byte-writing code. Clients should not guess a platform default.
 
@@ -78,9 +78,9 @@ try (
 }
 ```
 
-**Expected:** Before the repair the run fails with an `AssertionError` from the assertion on `response.headers().firstValue("Content-Type").orElseThrow().equals("text/plain; charset=utf-8")`; after it the line reads `.equals("text/plain; charset=utf-8");` again and text/plain with UTF-8 charset.
+**Expected:** The edited run fails with an `AssertionError` from the assertion on `response.headers().firstValue("Content-Type").orElseThrow().equals("text/plain; charset=utf-8")`; the restored assertion passes.
 
-**Verify:** Keep the failing and the repaired runs. Explain why the edited assertion rejects the same program state that `response.headers().firstValue("Content-Type").orElseThrow().equals("text/plain; charset=utf-8")` accepts.
+**Verify:** Explain why the edited assertion rejects the state that `response.headers().firstValue("Content-Type").orElseThrow().equals("text/plain; charset=utf-8")` accepts.
 
 ## Exercise 3: Reject an unsupported method
 
@@ -104,7 +104,7 @@ try (
 
 **Expected:** status 405 and method not allowed body.
 
-**Verify:** Keep an assertion equivalent to `response.statusCode() == 405 && response.body().equals("method not allowed")`. As a control, change `var request = java.net.http.HttpRequest.newBuilder(server.uri("/health"))` to `var request = java.net.http.HttpRequest.newBuilder(server.uri("/health!"))`: the run must fail with an `AssertionError` from the assertion on `response.statusCode() == 405 && response.body().equals("method not allowed")`. Restore the line before continuing.
+**Verify:** Control: changing `var request = java.net.http.HttpRequest.newBuilder(server.uri("/health"))` to `var request = java.net.http.HttpRequest.newBuilder(server.uri("/health!"))` must fail the assertion on `response.statusCode() == 405 && response.body().equals("method not allowed")`.
 
 ## Exercise 4: Reject a prefix lookalike
 
@@ -130,7 +130,7 @@ try (
 
 **Expected:** status 404.
 
-**Verify:** Keep an assertion equivalent to `response.statusCode() == 404`. As a control, change `assert response.statusCode() == 404;` to `assert response.statusCode() != 404;` inside it: the run must fail with an `AssertionError`, which shows the assertion can fail. Restore it.
+**Verify:** Control: changing `assert response.statusCode() == 404;` to `assert response.statusCode() != 404;` inside the assertion must make it fail.
 
 ## Exercise 5: Keep error status separate from transport success
 
@@ -156,7 +156,7 @@ try (
 
 **Expected:** HTTP exchange completes with 404 rather than a fabricated 200.
 
-**Verify:** Keep an assertion equivalent to `response.statusCode() == 404`. As a control, change `assert response.statusCode() == 404;` to `assert response.statusCode() != 404;` inside it: the run must fail with an `AssertionError`, which shows the assertion can fail. Restore it.
+**Verify:** Control: changing `assert response.statusCode() == 404;` to `assert response.statusCode() != 404;` inside the assertion must make it fail.
 
 ## Exercise 6: Verify local-only target and closure
 
@@ -173,8 +173,10 @@ assert owned.closed;
 
 **Expected:** host 127.0.0.1; port positive; closed flag true.
 
-**Verify:** Keep an assertion equivalent to `owned.closed` and confirm that `java -ea Main` completes. Then name an input that would make it fail and explain which value changes.
+**Verify:** Name an input that would make `owned.closed` false and the value that changes.
 
 ## After comparing the answer
 
-Run the complete reference with assertions enabled, then return to your own implementation. Recreate one check with different values and explain its expected result before execution. A compiler error, an expected domain exception and an assertion failure represent different stages and should be reported separately. Preserve ownership boundaries when adapting file, network or concurrency examples. The reference never authorizes access to a shared service or deletion of learner state. Use a fresh tiny fixture when you need to distinguish two interpretations of an API contract.
+Add a `/version` context to your copy of `LocalServer` that returns 1 as plain text, then call it and `/version/extra` and confirm that only the exact path gets 200.
+
+Run the complete reference with `java -ea Main` first; the [review routine](../STUDY-GUIDE.md#use-the-solutions) covers the rest.

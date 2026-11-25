@@ -194,7 +194,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/scala-spark/solutions/spark-017_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="spark-017-explained-paired-reference-solutions">spark-017: Explained paired reference solutions<a class="heading-anchor" href="#spark-017-explained-paired-reference-solutions" aria-label="Link to this section">#</a></h2>
-<p>Read the <a href="../guides/spark-017.md.html">guide</a> and attempt one language first. The <a href="spark-017_solution.scala.html">Scala reference</a> and <a href="spark-017_solution.py.html">PySpark reference</a> are complete single-file programs with explicit local sessions and finally-based stop. Each compares with literal expectations; matching two implementations alone would not rule out a shared mistake.</p>
+<p>Attempt the <a href="../guides/spark-017.md.html">guide</a> exercises first.</p>
+<p>References: <a href="spark-017_solution.scala.html">Scala</a>, <a href="spark-017_solution.py.html">PySpark</a>.</p>
 <h3 id="exercises-and-reasoning">Exercises and reasoning<a class="heading-anchor" href="#exercises-and-reasoning" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-parse-once-and-retain-rejection-evidence">Exercise 1: Parse once and retain rejection evidence<a class="heading-anchor" href="#exercise-1-parse-once-and-retain-rejection-evidence" aria-label="Link to this section">#</a></h4>
 <p>Parse raw with the explicit payload schema and PERMISSIVE mode, then add reason using precedence missing_payload, malformed_json, missing_parent, accepted. Preserve source_id and raw.</p>
@@ -354,8 +355,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The six-row relation models every independent pairing, while the three-row relation models aligned positions. Padding preserves the third channel without inventing a SKU. Zipping is not a generic cure for explosion and multiplying arrays is not automatically a bug. The data contract must state whether positions correspond before either implementation can be called correct.</p>
 <p><strong>Verification evidence:</strong> Assert the complete Cartesian pair set and all three ordered zipped rows including the padded NULL.</p>
 <h3 id="execution-and-interpretation">Execution and interpretation<a class="heading-anchor" href="#execution-and-interpretation" aria-label="Link to this section">#</a></h3>
-<p>Run the complete reference in its prepared fixed worker. Its first check (Parse once and retain rejection evidence) is built inside the program, so opening the lesson fetches nothing; it expects: Sources 1-4 accepted; 5 <code>malformed_json</code>; 6 <code>missing_parent</code>; 7 <code>missing_payload</code>. No source disappears and accepted count is 4. The final success line prints only after every reference assertion passes.</p>
-<p>Local plan, partition and resource evidence does not establish cluster-scale performance; session cleanup is explicit.</p></article>
+<p>The references check the full rejection ledger for all seven sources, the parent states populated, empty, unknown and populated, the three observed child rows with their positions, the five outer rows with placeholders for parents 20 and 30, and the per-parent summary <code>10:(2, 2, 5)</code>, <code>20:(0, 0, NULL)</code>, <code>30:(0, 0, NULL)</code>, <code>40:(1, 0, NULL)</code>. The relationship exercise asserts both the six Cartesian pairs and the three zipped pairs, including <code>(NULL, api)</code>.</p>
+<p>When the Python reference prints <code>spark-017: six PySpark reference contracts passed; Spark=</code> with the version, or the Scala reference prints its line, every source is accounted for. That result covers JSON with the declared schema only; a field the schema does not mention is silently ignored by <code>from_json</code>, which is a reason to version the schema with the data.</p></article>
   </main>
 </body>
 </html>

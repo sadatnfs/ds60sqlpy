@@ -24,9 +24,9 @@ Span is a ref struct with restrictions that prevent it from escaping into ordina
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles your saved pad as `Program.cs` in its fixed .NET 10 project. C# 14 is the matching language generation. This route uses the prepared framework libraries; it does not accept arbitrary project files, NuGet packages, command arguments or interactive input. The explicit `Program.Main` entrypoint makes compilation and execution visible. `Check` throws on a false condition in every build configuration, unlike conditional debugging assertions.
+`DoubleMiddle` and `SumDigits` are synchronous helpers declared after `Main`. Spans are ref structs, so an async method cannot keep one alive across an `await`: the compiler reports CS4007, saying the instance cannot be preserved across the boundary. That is why span work sits in separate synchronous methods.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Compile contract, starter stop and success marker: [running a lesson](../STUDY-GUIDE.md#running-a-lesson).
 
 
 
@@ -34,7 +34,7 @@ Start with the answer-free learner artifact in your saved classroom pad. It deli
 
 `array.AsSpan(start, length)` creates a view. `Slice` changes the viewed interval. `ReadOnlySpan<T>` narrows write capability. Keep synchronous span logic in a helper separate from async orchestration.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+Each example ends with a trace; method: [tracing a program](../STUDY-GUIDE.md#tracing-a-program).
 
 ## Worked example / walkthrough
 
@@ -93,6 +93,8 @@ internal static class Program {
 
 **Observe:** Only the middle element changes.
 
+**Trace.** `values` holds 1, 2 and 3. Inside `DoubleMiddle`, `AsSpan(1, 1)` creates a view of one element starting at index 1, with no copy. `middle[0]` therefore refers to `values[1]`, and multiplying by two writes 4 into the array. After the call, the array reads 1, 4, 3, and the span itself no longer exists.
+
 ### Example B: Parse without allocating substrings
 
 The helper reads directly from the character view and validates each admitted character.
@@ -147,6 +149,8 @@ internal static class Program {
 
 **Observe:** The digit total is 6 and empty input totals zero.
 
+**Trace.** `"123".AsSpan()` views the string's characters without allocating a substring. `SumDigits` walks the view: 1, 2 and 3 each pass the digit test and contribute `ch - '0'`, giving 6. `ReadOnlySpan<char>.Empty` has no characters, so the loop never runs and the result is 0. Text containing a letter throws `ArgumentException` from inside the loop.
+
 ## Exercises
 
 1. **Predict and explain.** Draw the backing array and slice boundaries.
@@ -161,13 +165,15 @@ internal static class Program {
 
 6. **Transfer and justify.** Choose Span or Memory for a synchronous parser and an asynchronous buffer owner.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Log each task in the [evidence table](../STUDY-GUIDE.md#recording-exercise-evidence) before opening the explanation.
 
 ## Common pitfalls and diagnosis
 
 ReadOnlySpan restricts this view, not every alias. A rented buffer must not be returned while a view is still in use. Bounds checking protects indices, not logical parsing rules.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+For task 5, `values.AsSpan(1, 5)` on a three-element array throws `ArgumentOutOfRangeException`, while `values.AsSpan(3, 0)` is a valid empty span at the end. For task 4, holding a `Span<int>` across `await Task.Yield()` does not compile, with error CS4007; `Memory<int>` can be stored and awaited across instead.
+
+Repair routine: [building a regression case](../STUDY-GUIDE.md#building-a-regression-case).
 
 ## Progressive hints
 
@@ -177,11 +183,15 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 ## Self-check and next step
 
-Explain Span, Slice, Lifetime without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+Draw the array for Example A and mark the interval `AsSpan(1, 1)` covers. Explain why a `ReadOnlySpan<char>` over 123 can be summed without allocating. For task 6, decide whether a synchronous parser should take `Span<T>` or `Memory<T>`, and do the same for an asynchronous buffer owner.
+
+Then follow the general [self-check routine](../STUDY-GUIDE.md#self-check-routine) and save your pad.
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://learn.microsoft.com/en-us/dotnet/standard/memory-and-spans/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+[Documentation](https://learn.microsoft.com/en-us/dotnet/standard/memory-and-spans/): The memory and spans guide explains `Span<T>`, `Memory<T>`, ownership rules and when each fits.
+
+Provenance and limits: [sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

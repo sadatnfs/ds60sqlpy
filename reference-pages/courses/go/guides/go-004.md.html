@@ -209,9 +209,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="syntax-anatomy-and-reasoning">Syntax anatomy and reasoning<a class="heading-anchor" href="#syntax-anatomy-and-reasoning" aria-label="Link to this section">#</a></h3>
 <p>func twice(x int) int declares a parameter and a return type. return ends the invocation. (int, error) declares two returned values, which callers normally bind together and check before using the result. A variadic parameter ...int accepts zero or more values; within the function it is a slice. A return from a helper returns only from that helper, not the caller.</p>
 <h3 id="run-this-lesson">Run this lesson<a class="heading-anchor" href="#run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>Choose Go in the unified Docker classroom. Save your own pad before experimenting. The prepared worker stages it as <code>main.go</code>, compiles it, and executes the resulting program with bounded time and output. The pad is one source file. It does not supply interactive input, arbitrary command-line arguments, package installation, Kubernetes credentials or a host Docker socket. Every ordinary reference here uses the standard library, synthetic local data and explicit checks. A failed <code>check</code> panics and produces a nonzero process result; do not remove it to make the run appear successful.</p>
-<p>The explanatory solution snippets belong inside <code>func main()</code> unless they declare a helper. <code>check</code> is a tiny teaching helper that panics when a condition is false. The separate reference supplies required imports and helpers and implements all six cases. Use that complete source only after an attempt or an explicit reveal. For an independently prepared Go project, the equivalent local build is <code>go build -o lesson main.go</code>, followed by <code>./lesson</code>; use Linux or WSL 2 for that optional workflow. Compiling proves syntax and type consistency, while the executed checks establish the stated example contracts.</p>
-<p>Each worked example below is a complete Go file. Copy one whole block into your saved pad and run it. Example 2 includes the first case as well as the second, so its setup is complete. Its supporting declarations may be reused in later investigations. The separate reference implements all six cases.</p>
+<p>Run each worked example as one complete file in your saved pad (<a href="../STUDY-GUIDE.md.html#run-a-lesson">run steps</a>).</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1-implement-a-pure-helper">Worked example 1: Implement a pure helper<a class="heading-anchor" href="#worked-example-1-implement-a-pure-helper" aria-label="Link to this section">#</a></h4>
 <p>Implement twice and check inputs 7 and 0.</p>
@@ -314,77 +312,79 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Observe:</strong> 3 by 4 returns 12; zero width returns an error.</p>
 <p>The error describes a domain policy. Another geometry API might allow zero area, but its contract must say so.</p>
 <h3 id="predict-before-running">Predict before running<a class="heading-anchor" href="#predict-before-running" aria-label="Link to this section">#</a></h3>
-<p>For each example, write the input values, the state that can change, and the expected observation. Explain which result would disprove your current interpretation. For concurrency, predict a guaranteed relationship rather than an arbitrary scheduling order. For an error case, identify whether it is rejected at compilation or returned during execution.</p>
+<p>Predict each function&#x27;s result from its contract alone, before reading its body: what should <code>twice(0)</code> return, and what does <code>positiveArea</code> return alongside an error? For <code>reassign</code>, predict the caller&#x27;s variable after the call. For <code>total</code>, predict the result with no arguments at all, and decide whether that call even compiles.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-implement-a-pure-helper-predict-an-edited-check">Exercise 1: Implement a pure helper: predict an edited check<a class="heading-anchor" href="#exercise-1-implement-a-pure-helper-predict-an-edited-check" aria-label="Link to this section">#</a></h4>
-<p>Copy worked example 1 into a scratch pad and change <code>check(twice(7) == 14 &amp;&amp; twice(0) == 0, &quot;twice&quot;)</code> to <code>check(twice(8) == 14 &amp;&amp; twice(0) == 0, &quot;twice&quot;)</code> inside its check. Before running, predict whether the check still passes and explain why; then restore it.</p>
-<p><strong>Expected:</strong> The changed run panics with <code>twice</code> because the edited check no longer holds. Restoring the original line brings back the worked observation: the results are 14 and 0.</p>
-<p><strong>Verify:</strong> Compare your written prediction with the panic message <code>twice</code> and name the value that made <code>twice(7) == 14 &amp;&amp; twice(0) == 0</code> false. After restoring the input, the program must print its success line again.</p>
+<p>Copy worked example 1, change <code>check(twice(7) == 14 &amp;&amp; twice(0) == 0, &quot;twice&quot;)</code> to <code>check(twice(8) == 14 &amp;&amp; twice(0) == 0, &quot;twice&quot;)</code> inside its check and predict whether it still passes; then restore it.</p>
+<p><strong>Expected:</strong> The edited check panics with <code>twice</code> even though <code>twice(7) == 14 &amp;&amp; twice(0) == 0</code> still holds.</p>
+<p><strong>Verify:</strong> Restoring <code>check(twice(7) == 14 &amp;&amp; twice(0) == 0, &quot;twice&quot;)</code> makes the check pass again with the worked observation: the results are 14 and 0.</p>
 <h4 id="exercise-2-return-an-explicit-failure-debug-a-regression">Exercise 2: Return an explicit failure: debug a regression<a class="heading-anchor" href="#exercise-2-return-an-explicit-failure-debug-a-regression" aria-label="Link to this section">#</a></h4>
-<p>A regression changed one token in worked example 2, so one line now reads <code>_, err = positiveArea(1, 4)</code>. Run worked example 2 with that line, use the failure to locate the defect and repair it without changing the check.</p>
-<p><strong>Expected:</strong> Before the repair the program panics with <code>invalid area</code>; after it the line reads <code>_, err = positiveArea(0, 4)</code> again and 3 by 4 returns 12; zero width returns an error.</p>
-<p><strong>Verify:</strong> Keep the failing and the repaired runs. Explain why the changed token alters the value tested by <code>err != nil</code> for this input.</p>
+<p>A one-token regression in worked example 2 makes a line read <code>_, err = positiveArea(1, 4)</code>. Repair it without changing the check.</p>
+<p><strong>Expected:</strong> The defective run panics with <code>invalid area</code>; after restoring <code>_, err = positiveArea(0, 4)</code>, 3 by 4 returns 12; zero width returns an error.</p>
+<p><strong>Verify:</strong> The failing run shows message <code>invalid area</code>; after the repair <code>err != nil</code> holds again.</p>
 <h4 id="exercise-3-trace-copied-scalar-state">Exercise 3: Trace copied scalar state<a class="heading-anchor" href="#exercise-3-trace-copied-scalar-state" aria-label="Link to this section">#</a></h4>
 <p>Pass 5 to a helper that reassigns its local parameter.</p>
 <p><strong>Expected:</strong> The caller still holds 5.</p>
-<p><strong>Verify:</strong> Keep a check equivalent to <code>n == 5</code>. As a control, change <code>n := 5</code> to <code>n := 6</code>: the run must panic with <code>value copy</code>. Restore the line before continuing.</p>
+<p><strong>Verify:</strong> Your solution must keep <code>n == 5</code> true. Control: changing <code>n := 5</code> to <code>n := 6</code> panics with message <code>value copy</code>; revert it.</p>
 <h4 id="exercise-4-return-both-ordered-values">Exercise 4: Return both ordered values<a class="heading-anchor" href="#exercise-4-return-both-ordered-values" aria-label="Link to this section">#</a></h4>
 <p>Implement bounds for two integers.</p>
 <p><strong>Expected:</strong> Inputs 9 and 2 return 2 then 9.</p>
-<p><strong>Verify:</strong> Keep a check equivalent to <code>low == 2 &amp;&amp; high == 9</code>. As a control, change <code>low, high := bounds(9, 2)</code> to <code>low, high := bounds(10, 2)</code>: the run must panic with <code>bounds</code>. Restore the line before continuing.</p>
+<p><strong>Verify:</strong> Your solution must keep <code>low == 2 &amp;&amp; high == 9</code> true. Control: changing <code>low, high := bounds(9, 2)</code> to <code>low, high := bounds(10, 2)</code> panics with message <code>bounds</code>; revert it.</p>
 <h4 id="exercise-5-test-a-variadic-identity">Exercise 5: Test a variadic identity<a class="heading-anchor" href="#exercise-5-test-a-variadic-identity" aria-label="Link to this section">#</a></h4>
 <p>Sum zero inputs and then 1, 2 and 3.</p>
 <p><strong>Expected:</strong> The results are 0 and 6.</p>
-<p><strong>Verify:</strong> Keep a check equivalent to <code>total() == 0 &amp;&amp; total(1, 2, 3) == 6</code>. As a control, change <code>check(total() == 0 &amp;&amp; total(1, 2, 3) == 6, &quot;variadic&quot;)</code> to <code>check(total() == 0 &amp;&amp; total(2, 2, 3) == 6, &quot;variadic&quot;)</code> inside that check: it must panic with <code>variadic</code>, which shows the check can fail. Restore it.</p>
+<p><strong>Verify:</strong> Your solution must keep <code>total() == 0 &amp;&amp; total(1, 2, 3) == 6</code> true. Control: changing <code>check(total() == 0 &amp;&amp; total(1, 2, 3) == 6, &quot;variadic&quot;)</code> to <code>check(total() == 0 &amp;&amp; total(2, 2, 3) == 6, &quot;variadic&quot;)</code> panics with message <code>variadic</code>; revert it.</p>
 <h4 id="exercise-6-transfer-the-contract">Exercise 6: Transfer the contract<a class="heading-anchor" href="#exercise-6-transfer-the-contract" aria-label="Link to this section">#</a></h4>
 <p>Call the area helper with a negative height and keep the error visible.</p>
 <p><strong>Expected:</strong> The invalid domain is rejected before returning a usable area.</p>
-<p><strong>Verify:</strong> Keep a check equivalent to <code>err != nil &amp;&amp; value == 0</code>. As a control, change <code>check(err != nil &amp;&amp; value == 0, &quot;negative dimension&quot;)</code> to <code>check(err == nil &amp;&amp; value == 0, &quot;negative dimension&quot;)</code> inside that check: it must panic with <code>negative dimension</code>, which shows the check can fail. Restore it.</p>
-<p>Implement these in the answer-free learner source. Keep one independent check per claim. A task can require tracing, construction, a changed input or a deliberate safe failure. Do not run a data race, corrupt memory or contact a shared cluster merely to demonstrate why it would be wrong.</p>
+<p><strong>Verify:</strong> Your solution must keep <code>err != nil &amp;&amp; value == 0</code> true. Control: changing <code>check(err != nil &amp;&amp; value == 0, &quot;negative dimension&quot;)</code> to <code>check(err == nil &amp;&amp; value == 0, &quot;negative dimension&quot;)</code> panics with message <code>negative dimension</code>; revert it.</p>
+<p>Work in the answer-free learner source, <code>courses/go/lessons/go-004.go</code> (<a href="../STUDY-GUIDE.md.html#work-an-exercise">exercise contract</a>).</p>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
-<p>Read a compiler error from the first location in your source, then fix one cause at a time. Unused imports and variables are errors in Go; add an import when its use exists, rather than copying a large unused import list. A panic from <code>check</code> identifies a violated example contract. Compare the actual value with the expected value and inspect the state transition that produced it. A returned <code>error</code> is a value that the caller must handle; an ignored error can make later output look plausible while the original operation failed.</p>
-<p>The lesson-specific explanations in the two examples identify the important counterexamples. Extend that reasoning to every investigation: explain why a plausible alternative would fail, and preserve a tiny input that distinguishes it. Treat empty data, missing values and cancellation as domain cases with explicit policies. In concurrent work, replace sleeps used as synchronization with channels, mutexes or an explicit ownership protocol.</p>
+<p>Discarding the error from a two-value function is the typical mistake: <code>area, _ := positiveArea(0, 4)</code> compiles and yields 0, which looks like a legitimate empty area. Another is expecting a function to change a caller&#x27;s scalar because it assigns to its parameter; Go copies the argument, so only a pointer or a returned value can communicate a change. Test both the success path and the failure path of every contract.</p>
+<p>General compiler, panic and error diagnosis is in the <a href="../STUDY-GUIDE.md.html#diagnose-a-failure">study guide</a>.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <h4 id="hint-for-investigation-1-implement-a-pure-helper-predict-an-edited-check">Hint for investigation 1: Implement a pure helper: predict an edited check<a class="heading-anchor" href="#hint-for-investigation-1-implement-a-pure-helper-predict-an-edited-check" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The results are 14 and 0.</li>
-<li>The check <code>twice(7) == 14 &amp;&amp; twice(0) == 0</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Compute the checked value with <code>check(twice(8) == 14 &amp;&amp; twice(0) == 0, &quot;twice&quot;)</code> in place before running, then compare it with the value <code>twice(7) == 14 &amp;&amp; twice(0) == 0</code> expects.</li>
+<li>A pure helper computes only from its input. Which input would expose a function that always returns 14?</li>
+<li><code>twice(8)</code> returns 16, so the first comparison in the check is false. The helper is still correct; the edit changed the claim, so restore 7.</li>
 </ol>
 <h4 id="hint-for-investigation-2-return-an-explicit-failure-debug-a-regression">Hint for investigation 2: Return an explicit failure: debug a regression<a class="heading-anchor" href="#hint-for-investigation-2-return-an-explicit-failure-debug-a-regression" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: 3 by 4 returns 12; zero width returns an error.</li>
-<li>The check <code>err != nil</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Compare <code>_, err = positiveArea(1, 4)</code> with the same line in worked example 2 and state the claim each version makes.</li>
+<li>positiveArea returns two values. Which do you inspect first, and what should the other contain on failure?</li>
+<li>With width 1 the dimensions are valid, so err is nil and <code>err != nil</code> fails. The failure path needs a nonpositive width to be exercised.</li>
 </ol>
 <h4 id="hint-for-investigation-3-trace-copied-scalar-state">Hint for investigation 3: Trace copied scalar state<a class="heading-anchor" href="#hint-for-investigation-3-trace-copied-scalar-state" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The caller still holds 5.</li>
-<li>The check <code>n == 5</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Predict the effect of changing <code>n := 5</code> to <code>n := 6</code> before running anything. If the prediction is hard, trace that line again with the original input.</li>
+<li>Arguments are passed by value. Which variable does the assignment inside the helper actually change?</li>
+<li>Reassigning the copied parameter does not reassign the caller variable.</li>
 </ol>
 <h4 id="hint-for-investigation-4-return-both-ordered-values">Hint for investigation 4: Return both ordered values<a class="heading-anchor" href="#hint-for-investigation-4-return-both-ordered-values" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: Inputs 9 and 2 return 2 then 9.</li>
-<li>The check <code>low == 2 &amp;&amp; high == 9</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Predict the effect of changing <code>low, high := bounds(9, 2)</code> to <code>low, high := bounds(10, 2)</code> before running anything. If the prediction is hard, trace that line again with the original input.</li>
+<li>bounds returns two results in a fixed order. Which comparison decides which input comes first?</li>
+<li>Multiple returns can make a small contract clearer than mutating two caller-owned outputs.</li>
 </ol>
 <h4 id="hint-for-investigation-5-test-a-variadic-identity">Hint for investigation 5: Test a variadic identity<a class="heading-anchor" href="#hint-for-investigation-5-test-a-variadic-identity" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The results are 0 and 6.</li>
-<li>The check <code>total() == 0 &amp;&amp; total(1, 2, 3) == 6</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Name one input that would make <code>total() == 0 &amp;&amp; total(1, 2, 3) == 6</code> false. A check that no input can falsify is not evidence.</li>
+<li>A variadic parameter is a slice inside the function. What does the loop add when that slice is empty?</li>
+<li>An empty variadic argument list is a normal case.</li>
 </ol>
 <h4 id="hint-for-investigation-6-transfer-the-contract">Hint for investigation 6: Transfer the contract<a class="heading-anchor" href="#hint-for-investigation-6-transfer-the-contract" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The invalid domain is rejected before returning a usable area.</li>
-<li>The check <code>err != nil &amp;&amp; value == 0</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Name one input that would make <code>err != nil &amp;&amp; value == 0</code> false. A check that no input can falsify is not evidence.</li>
+<li>A negative height violates the same precondition as a zero width. What should the error and the area be?</li>
+<li>Using only value while discarding err would erase the distinction between a valid zero and a rejected request.</li>
 </ol>
 <h3 id="self-check-and-retrieval">Self-check and retrieval<a class="heading-anchor" href="#self-check-and-retrieval" aria-label="Link to this section">#</a></h3>
-<p>Close the reference. Rebuild one normal case and one boundary case from a blank pad. Explain the role of parameter without using its name in the definition. Then change the domain while keeping the same invariant. Record the new input, your prediction and the observed output. If your program passes only because its input is hard-coded, explain which part would need a reusable function in a larger project.</p>
+<p>Without the reference, write <code>clamp(x, low, high int) (int, error)</code> that rejects <code>low &gt; high</code> and otherwise limits x to the range. Check one value inside the range, both boundaries, one value outside and the invalid range. Then explain in one sentence why a caller that ignores the error might accept a wrong result.</p>
+<p>The general <a href="../STUDY-GUIDE.md.html#self-check-and-retrieval">retrieval routine</a> still applies.</p>
 <h3 id="next-step-and-sources">Next step and sources<a class="heading-anchor" href="#next-step-and-sources" aria-label="Link to this section">#</a></h3>
-<p><a href="https://go.dev/ref/spec">Primary language or library documentation</a>, reviewed 2026-10-23. The teaching explanations and synthetic fixtures are original. Continue with the next lesson when you can explain the six observations and diagnose a changed case without copying its answer.</p>
+<p>Source: <a href="https://go.dev/ref/spec">The Go Programming Language Specification</a>, reviewed 2026-10-23.</p>
+<p>Next: go-005, Arrays, slices and backing-storage ownership (<a href="../STUDY-GUIDE.md.html#when-to-move-on">criteria</a>).</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for go-004: Functions and value-passing contracts.
 Read courses/go/guides/go-004.md and my saved attempt based on courses/go/lessons/go-004.go.

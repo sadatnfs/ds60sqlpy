@@ -13,40 +13,30 @@ psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
   -f sql/professional/solutions/sql_ops_02_backup_restore_recovery_solutions.sql
 ```
 
-`psql` prints each result/command tag in the terminal. Stop at the first
-unexpected `ERROR`; later output cannot repair an earlier failed invariant.
-Compare your own SQL, row grain, column names, row counts, `NULL` policy, and
-ordering with the explanation before comparing syntax.
+The solution uses its own pair of tables, `source_records` and
+`restored_records` with two rows each, and a `records_checksum(p_restored)`
+function, so compare the reasoning and the evidence, not the table names.
 
-## Clause-by-clause reading map
+## Reading map for this lesson
 
-The lesson's main concepts are Logical backup, Custom format, Physical base backup, WAL, PITR, Timeline. Its worked-model focus is:
-The SQL learner path creates source and independent restored relations, records a deterministic manifest, copies fixture data, and compares ordered MD5 digests and row counts. MD5 here detects accidental fixture drift; it is not a cryptographic authenticity/signing design.
+Read the solutions in three groups:
 
-- Start at `FROM`/`JOIN` and state the intermediate row grain. Inspect join keys
-  before adding aggregates; a one-to-many join is allowed to multiply rows only
-  when the later contract accounts for it.
-- Apply `WHERE` to input rows, `GROUP BY` to form buckets, and `HAVING` to
-  completed groups. Window functions run over the surviving relation and
-  normally preserve its row count.
-- Read the `SELECT` list as the public result contract: keys establish grain,
-  measures state calculations, and aliases explain meaning. `ORDER BY` is the
-  only output-order guarantee; add a unique tie-breaker before `LIMIT`.
-- Trace every common table expression (CTE) as a temporary named relation.
-  Execute or inspect one stage at a time while debugging, but compare the final
-  result with an independent control rather than trusting stage names.
-- Keep SQL `NULL` as “missing/unknown/not applicable” until the metric contract
-  chooses another representation. Guard division with `NULLIF`; disclose
-  exclusions and distinguish zero from no row.
-- For DDL/DML, a command tag proves only that PostgreSQL accepted a statement.
-  Catalog checks, negative cases, row-count reconciliation, and the declared
-  transaction boundary prove behavior and cleanup.
+- Exercises 1 and 2 are executable. Exercise 1 compares normalized column and
+  constraint contracts through the `schema_contract` and
+  `schema_contract_mismatches` views. Exercise 2 corrupts one restored row
+  after `SAVEPOINT before_corruption`, proves the checksum comparison fails,
+  then rolls back to the savepoint and releases it.
+- Exercises 3, 7 and 11 store decisions in small tables: a recovery plan driven
+  by RPO and RTO, artifact and key-custody controls, and a capacity budget that
+  ends only after validation.
+- Exercises 4 to 6, 8 to 10 and 12 are written procedure: exact
+  `pg_dump`/`pg_restore` commands, PITR and retention, evidence beyond an exit
+  code, whole-contract restore scope, major-version rehearsal, selective
+  restore dependencies and a game-day record.
 
-The exact final queries are not the only valid syntax. A join, subquery, CTE,
-window, or conditional aggregate can be an alternative when it preserves the
-same grain, `NULL` semantics, deterministic ordering, and safety. Prefer the
-form whose intermediate relations a reviewer can verify; optimize only after
-correctness is established with evidence.
+A different design is acceptable when it produces the same kind of evidence: a
+check that fails on a real mismatch, and a named owner for every decision that
+SQL cannot make.
 
 Run the safe SQL solution:
 

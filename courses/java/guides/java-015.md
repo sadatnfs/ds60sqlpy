@@ -6,7 +6,16 @@ Intermediate, approximately 90 minutes. Direct prerequisites: `java-014`
 
 ## Learning objectives
 
-Represent instants, local dates and zoned times correctly across daylight-saving gaps and overlaps. Along the way, explain instant, local date-time, zone rule using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. Exercises 1 and 2 start from the worked examples; the authored investigations begin with this task: Ask for valid offsets at 2024-03-10 02:30 in New York. The final exercise transfers the mechanism to use a half-open time window.
+Represent instants, local dates and zoned times correctly across daylight-saving gaps and overlaps.
+
+The six exercises practice these steps:
+
+- Preserve an instant across zones.
+- Compare calendar and elapsed days.
+- Detect a nonexistent local time.
+- Detect an ambiguous local time.
+- Parse a strict calendar date.
+- Use a half-open time window.
 
 ## Purpose and mental model
 
@@ -22,16 +31,9 @@ Time has several meanings. Instant identifies a point on the UTC timeline. Local
 
 ## How to run this lesson
 
-Open the Docker classroom, choose the prepared Java 21 profile and save a learner pad. The pad is compiled as `Main.java` with `javac --release 21` and executed with `java -ea Main`. Assertions are enabled deliberately. A successful assertion has no output; a failed assertion throws `AssertionError` and the process should fail. Do not remove assertions to obtain a green result.
+Every check uses fixed dates and the `America/New_York` zone, never the system clock, so results do not depend on where or when you run them; the zone rules come from the JDK's bundled time zone data.
 
-For a prepared native JDK, copy a worked example into your own `Main.java` under ignored `.learning/expansion/java-015/`. From that directory run the same two commands on PowerShell, macOS or Linux:
-
-```text
-javac --release 21 Main.java
-java -ea Main
-```
-
-The public class name and source filename must agree. Each worked example below is a complete file. Example B includes the setup it needs from Example A, so it can be compiled by itself. The six exercise reference blocks form one complete program in the separate solution. Keep your original prediction, source and diagnostic text together. Most examples use prepared JDK libraries and tiny local fixtures; any additional dependency is specified in the lesson notes below. Any lesson-specific library or additional file is named explicitly; do not download packages from inside a learner program. Resource examples close their owned files, executors or loopback servers.
+Classroom and native JDK steps, the exercise controls and the hint routine are in the [Java study guide](../STUDY-GUIDE.md).
 
 
 
@@ -100,62 +102,62 @@ public class Main {
 
 ## Prediction before your attempt
 
-Read the source from the entry point and name each value before executing it. Identify which operations create new values, which mutate existing state and which can fail. Predict the first observable output or assertion result. For a compile-time failure, explain which source rule is violated before discussing runtime state: a program that did not compile never reached its main method. Keep normal, boundary and invalid inputs separate so each check has a clear purpose.
+Before running Example A, decide whether `2024-01-01T00:00:00Z` viewed in New York is the same instant and which calendar date it shows (2023-12-31, because New York is five hours behind UTC). For Example B, starting at noon on 2024-03-09 in New York, predict the hour after `plusDays(1)` and after `plusHours(24)`, and how many elapsed hours separate the start from the calendar next day. Then predict how many valid offsets 02:30 on 2024-03-10 has in New York.
 
 ## Exercises
 
-1. **Preserve an instant across zones: predict an edited check.** Copy Example A into a scratch `Main.java` and change `ny.toLocalDate().equals(java.time.LocalDate.of(2023, 12, 31));` to `ny.toLocalDate().equals(java.time.LocalDate.of(2024, 12, 31));` inside its assertion. Before running it with `java -ea Main`, predict whether the assertion still holds and explain why; then restore it.
-   **Expected:** The changed run fails with an `AssertionError` from the assertion on `utc.toInstant().equals(ny.toInstant()) && ny.toLocalDate().equals(java.time.LocalDate.of(2023, 12, 31))`. Restoring the original line brings back the worked observation: same instant; New York local date 2023-12-31.
-   **Verify:** Compare your written prediction with the reported `AssertionError` and its stack-trace line, and explain why the edited condition is false for the values that satisfy `utc.toInstant().equals(ny.toInstant()) && ny.toLocalDate().equals(java.time.LocalDate.of(2023, 12, 31))`. After restoring the line, the program completes without an `AssertionError` again.
+1. **Preserve an instant across zones: predict an edited check.** Change Example A's assertion to `ny.toLocalDate().equals(java.time.LocalDate.of(2024, 12, 31));`, predict whether it holds, then run and restore it.
+   **Expected:** The edited run fails with an `AssertionError` from the assertion on `utc.toInstant().equals(ny.toInstant()) && ny.toLocalDate().equals(java.time.LocalDate.of(2023, 12, 31))`.
+   **Verify:** Explain why the edited assertion is false for the values that satisfy `utc.toInstant().equals(ny.toInstant()) && ny.toLocalDate().equals(java.time.LocalDate.of(2023, 12, 31))`.
 
-2. **Compare calendar and elapsed days: debug a regression.** A regression changed one token in the code that Example B adds after Example A, so one line now reads `13,`. Run Example B with that line, use the failing assertion to locate the defect and repair it without changing the assertion.
-   **Expected:** Before the repair the run fails with an `AssertionError` from the assertion on `nextDay.getHour() == 12 && next24.getHour() == 13`; after it the line reads `12,` again and calendar next noon is 23 elapsed hours later; 24 hours reaches 13:00.
-   **Verify:** Keep the failing and the repaired runs. Explain why the changed token alters the value tested by `nextDay.getHour() == 12 && next24.getHour() == 13` for this input.
+2. **Compare calendar and elapsed days: debug a regression.** A regression in Example B's new code makes one line read `13,`. Repair it using the failing assertion.
+   **Expected:** The unrepaired run fails with an `AssertionError` from the assertion on `nextDay.getHour() == 12 && next24.getHour() == 13`; the repaired line reads `12,`.
+   **Verify:** Explain how the changed token alters the value that `nextDay.getHour() == 12 && next24.getHour() == 13` tests.
 
 3. **Detect a nonexistent local time.** Ask for valid offsets at 2024-03-10 02:30 in New York.
    **Expected:** zero valid offsets.
-   **Verify:** Keep an assertion equivalent to `zone.getRules().getValidOffsets(gap).isEmpty()`. As a control, change `var gap = java.time.LocalDateTime.of(2024, 3, 10, 2, 30);` to `var gap = java.time.LocalDateTime.of(2025, 3, 10, 2, 30);`: the run must fail with an `AssertionError` from the assertion on `zone.getRules().getValidOffsets(gap).isEmpty()`. Restore the line before continuing.
+   **Verify:** Control: changing `var gap = java.time.LocalDateTime.of(2024, 3, 10, 2, 30);` to `var gap = java.time.LocalDateTime.of(2025, 3, 10, 2, 30);` must fail the assertion on `zone.getRules().getValidOffsets(gap).isEmpty()`.
 
 4. **Detect an ambiguous local time.** Ask for offsets at 2024-11-03 01:30 in New York.
    **Expected:** two valid offsets.
-   **Verify:** Keep an assertion equivalent to `zone.getRules().getValidOffsets(overlap).size() == 2`. As a control, change `var overlap = java.time.LocalDateTime.of(2024, 11, 3, 1, 30);` to `var overlap = java.time.LocalDateTime.of(2025, 11, 3, 1, 30);`: the run must fail with an `AssertionError` from the assertion on `zone.getRules().getValidOffsets(overlap).size() == 2`. Restore the line before continuing.
+   **Verify:** Control: changing `var overlap = java.time.LocalDateTime.of(2024, 11, 3, 1, 30);` to `var overlap = java.time.LocalDateTime.of(2025, 11, 3, 1, 30);` must fail the assertion on `zone.getRules().getValidOffsets(overlap).size() == 2`.
 
 5. **Parse a strict calendar date.** Parse 2024-02-29 and reject 2023-02-29 with ISO_LOCAL_DATE.
    **Expected:** leap-day accepted only for 2024.
-   **Verify:** Keep an assertion equivalent to `invalid`. As a control, change `java.time.LocalDate.parse("2023-02-29");` to `java.time.LocalDate.parse("2024-02-29");`: the run must fail with an `AssertionError` from the assertion on `invalid`. Restore the line before continuing.
+   **Verify:** Control: changing `java.time.LocalDate.parse("2023-02-29");` to `java.time.LocalDate.parse("2024-02-29");` must fail the assertion on `invalid`.
 
 6. **Use a half-open time window.** Include an instant at the start and exclude an instant exactly at the end of a one-hour window.
    **Expected:** start included; end excluded.
-   **Verify:** Keep an assertion equivalent to `!(!end.isBefore(instant) && end.isBefore(end))`. As a control, change `assert !(!end.isBefore(instant) && end.isBefore(end));` to `assert !(!end.isBefore(instant) || end.isBefore(end));` inside it: the run must fail with an `AssertionError`, which shows the assertion can fail. Restore it.
+   **Verify:** Control: changing `assert !(!end.isBefore(instant) && end.isBefore(end));` to `assert !(!end.isBefore(instant) || end.isBefore(end));` inside the assertion must make it fail.
 
 ## Common pitfalls and diagnosis
 
-When a check fails, keep the smallest source file that still demonstrates the failure. Read the first relevant compiler diagnostic before editing several lines; later diagnostics can be consequences of the same missing delimiter or wrong type. For a runtime exception, identify the first frame belonging to your code and compare its input with the method contract. For an assertion failure, inspect the actual value and the independent expected value. A passing process exit is weaker than a checked invariant, and a checked invariant applies only under its stated assumptions.
+Storing a `LocalDateTime` for an event loses the information needed to find the instant, and in a daylight-saving gap or overlap the reading does not identify one instant at all. Adding 24 hours is not the same as adding one day across a transition. Parsing text with a zone-less pattern and then attaching the system default zone makes results depend on the machine. Closed windows that include both endpoints count an event at the boundary twice when windows are adjacent.
 
-Do not replace a precise exception with a catch-all that returns a plausible default. That can hide an invalid input or an unfinished operation. If an example owns a resource, verify its lifetime on both the success and failure paths. If an operation is concurrent, use ordering primitives to establish the relationship you need; an observed timing coincidence is not a synchronization guarantee. The solution explanations identify the specific alternative that would break each exercise.
+General compiler, runtime and assertion triage: [diagnose a failure](../STUDY-GUIDE.md#diagnose-a-failure).
 
 ## Progressive hints
 
-Read one hint at a time and attempt the exercise again before reading the next. Keep a small table of input, expected value, actual value and exception type. Ask for one hint about the first incorrect assumption before requesting the entire reference implementation.
+Read one rung at a time, as described in [using hints](../STUDY-GUIDE.md#use-hints-one-at-a-time).
 
-- **Exercise 1:** First restate the expected observation: same instant; New York local date 2023-12-31. Then list the values read by `utc.toInstant().equals(ny.toInstant()) && ny.toLocalDate().equals(java.time.LocalDate.of(2023, 12, 31))` and trace each one from its declaration. Finally, compute the asserted value with `ny.toLocalDate().equals(java.time.LocalDate.of(2024, 12, 31));` in place before running.
-- **Exercise 2:** First restate the expected observation: calendar next noon is 23 elapsed hours later; 24 hours reaches 13:00. Then list the values read by `nextDay.getHour() == 12 && next24.getHour() == 13` and trace each one from its declaration. Finally, compare `13,` with the same line in Example B and state the claim each version makes.
-- **Exercise 3:** First restate the expected observation: zero valid offsets. Then list the values read by `zone.getRules().getValidOffsets(gap).isEmpty()` and trace each one from its declaration. Finally, predict the effect of changing `var gap = java.time.LocalDateTime.of(2024, 3, 10, 2, 30);` to `var gap = java.time.LocalDateTime.of(2025, 3, 10, 2, 30);` before running anything.
-- **Exercise 4:** First restate the expected observation: two valid offsets. Then list the values read by `zone.getRules().getValidOffsets(overlap).size() == 2` and trace each one from its declaration. Finally, predict the effect of changing `var overlap = java.time.LocalDateTime.of(2024, 11, 3, 1, 30);` to `var overlap = java.time.LocalDateTime.of(2025, 11, 3, 1, 30);` before running anything.
-- **Exercise 5:** First restate the expected observation: leap-day accepted only for 2024. Then list the values read by `invalid` and trace each one from its declaration. Finally, predict the effect of changing `java.time.LocalDate.parse("2023-02-29");` to `java.time.LocalDate.parse("2024-02-29");` before running anything.
-- **Exercise 6:** First restate the expected observation: start included; end excluded. Then list the values read by `!(!end.isBefore(instant) && end.isBefore(end))` and trace each one from its declaration. Finally, name one input that would make `!(!end.isBefore(instant) && end.isBefore(end))` false.
+- **Exercise 1:** First note that the edit changes the expected date to 2024-12-31 while the instant stays the same. Then convert the instant to New York local time and write its date. Finally, compare the two dates and decide whether the clock or the claim changed.
+- **Exercise 2:** First notice that the edit moves the start to 13:00 on 2024-03-09. Then compute the hour after `plusDays(1)` and after `plusHours(24)` from that start. Finally, compare them with 12 and 13 and explain why the elapsed-hours assertion still passes.
+- **Exercise 3:** First build `LocalDateTime.of(2024, 3, 10, 2, 30)`. Then ask the zone rules for its valid offsets in New York. Finally, explain why the list is empty: the clocks jump from 02:00 straight to 03:00 that night.
+- **Exercise 4:** First build `LocalDateTime.of(2024, 11, 3, 1, 30)`. Then ask the zone rules for its valid offsets. Finally, explain why there are two, one before and one after the clocks move back.
+- **Exercise 5:** First parse "2024-02-29" with `LocalDate.parse`. Then parse "2023-02-29" inside a `try` block and catch `DateTimeParseException`. Finally, explain which calendar rule separates the two years.
+- **Exercise 6:** First define the window as `[instant, instant + 3600 seconds)`, with the start included and the end excluded. Then test the start and the end with `!x.isBefore(start) && x.isBefore(end)`. Finally, explain why two adjacent windows never count the same instant.
 
 ## Self-check and retrieval
 
-Close the solution and explain Instant, Local date-time, Zone rule in your own words. Reconstruct one example from a blank `Main.java`, then add a new boundary input. Explain why the new case should pass or fail before compiling it. Identify a situation where this technique is appropriate and one where a different data structure, lifetime policy or abstraction would be clearer. This is a reasoning check, not a memorization test for an API spelling.
+Without the guide, explain the difference between `Instant`, `LocalDate`, `LocalDateTime` and `ZonedDateTime`, and which one you would store for a meeting, a birthday and a log event. Then explain why the March day in New York lasts 23 hours and what zero or two valid offsets mean for a local time.
 
 ## Next step
 
-Preserve the saved pad and the six exercise observations. Continue to the next lesson only when you can explain the invariants without reading the answer. Later chapters reuse these contracts in larger programs, so keep a failing counterexample as well as a repaired result. A reference implementation demonstrates one valid design under the stated assumptions; it is not a universal design rule.
+Continue with `java-016`: Files, paths and character encoding. Keep your six observations; see [moving on](../STUDY-GUIDE.md#move-to-the-next-lesson).
 
 ## Sources and verification status
 
-[Official Java 21 API or language reference](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/time/ZonedDateTime.html), reviewed 2026-10-22. Examples and exercise fixtures are original course material. Use the [validation guide](../../../docs/validation.md) and CI artifacts for the exact revision and platform to inspect actual compile/run results. Authoring, parsing, compilation, execution and learner mastery are separate forms of evidence.
+[Official Java 21 API or language reference](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/time/ZonedDateTime.html), reviewed 2026-10-22. Evidence levels: [sources and evidence](../STUDY-GUIDE.md#sources-and-evidence).
 
 ## Ask an AI tutor about this lesson
 

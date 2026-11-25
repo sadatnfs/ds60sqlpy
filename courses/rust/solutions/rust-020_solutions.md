@@ -1,6 +1,8 @@
 # rust-020: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [rust-020_solution.rs](rust-020_solution.rs). It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.
+Executable reference: [rust-020_solution.rs](rust-020_solution.rs), which runs both examples and the coded answers.
+
+Open this only after [an attempt](../STUDY-GUIDE.md#attempt-a-lesson).
 
 ## Why the two examples differ
 
@@ -38,7 +40,7 @@ Add a take limit and predict how much work is demanded.
 
 Write a borrowed transformation returning a collected result.
 
-**Reference answer.** The same statements run as the `Task 3` block of the reference program; here they are wrapped in `main` as a complete file.
+**Reference answer**, wrapped in `main`; the reference runs it as its `Task 3` block.
 
 ```rust
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -108,4 +110,6 @@ Laziness does not mean no allocation if a later consumer collects. Reusing an ex
 
 ## Review before continuing
 
-Run the reference and confirm that it prints `rust-020: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.
+Rebuild Example B (Observe iterator progress) from a blank pad.
+
+Review routine: [Self-check and review](../STUDY-GUIDE.md#self-check-and-review).

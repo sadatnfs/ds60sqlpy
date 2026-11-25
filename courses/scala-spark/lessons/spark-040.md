@@ -13,7 +13,7 @@ Illustrative partition 1: id >= 5
 Configured lowerBound=0, upperBound=10, numPartitions=2
 ```
 
-Partition 0 includes -10,0, NULL; partition 1 includes 5,10,99. All six source rows can be read. To select only [0, 10), the reviewed SQL must contain that population predicate and a deliberate NULL policy. This is a reasoning fixture, not an executed JDBC query.
+Partition 0 includes -10, 0 and NULL; partition 1 includes 5, 10 and 99. All six source rows can be read. To select only [0, 10), the reviewed SQL must contain that population predicate and a deliberate NULL policy. This is a reasoning fixture, not an executed JDBC query.
 
 ### Worked example 2: Map an exact decimal, instant and missing field
 

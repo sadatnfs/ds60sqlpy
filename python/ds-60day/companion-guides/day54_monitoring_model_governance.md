@@ -63,31 +63,7 @@ values, and tiny samples need explicit handling in real code.
 
 ## How to run this lesson
 
-**Primary browser route:** run `./classroom` from the repository root and
-choose **Python and data science** on `/classroom`. Open this lesson in the shared workspace,
-read its capability notice, and use its supported coding or reading workflow.
-The [classroom guide](../../../docs/classroom-experience.md) explains saved work, runtimes and switching subjects.
-
-**Optional native notebook/editor route:** the instructions below describe
-separately prepared host tools. They are useful alternatives, not prerequisites
-for opening this lesson in the Docker classroom.
-
-1. Open the Day 54 learner notebook from this guide's **Next
-   step** section in VS Code or JupyterLab.
-2. Select the `Python (ds60sqlpy)` kernel. Start at the top and use
-   **Run All** only after making the written predictions; every added
-   worked example is bounded and offline after bootstrap.
-3. Keep experiments in new scratch cells. Do not edit the official
-   solution while attempting the numbered practice.
-4. Restart the kernel and run from the first cell before calling the
-   lesson complete. A clean run catches hidden state and stale
-   variables.
-
-Linux, macOS, or Ubuntu in Windows WSL 2:
-
-```bash
-.venv/bin/python -m jupyter lab
-```
+Open `python-54` in the classroom, or `python/ds-60day/notebooks/day54_monitoring_model_governance.ipynb` on a host; the [Python study guide](../../STUDY-GUIDE.md) explains both.
 
 ## Concept deep dive: monitoring layers, drift signals, delayed labels, and governance decisions
 
@@ -112,10 +88,6 @@ and an incident path.
 - **monitor → investigate → decide:** separates automated signal detection from causal diagnosis and authorized action.
 
 ### Focused example A: calculate PSI with fixed reference quantile bins
-
-Before running the example, predict the shape, type, or direction of the
-result. Write the prediction down so that a surprise becomes evidence
-rather than something to overlook.
 
 ```python
 import numpy as np
@@ -208,9 +180,6 @@ assert label_coverage == 0.12
 
 Design monitoring around observable data, delayed truth, action thresholds, ownership, and rehearsed recovery, not dashboards that merely display numbers.
 
-Predict or plan before you run code. Use the hint only after an honest
-attempt, and record the evidence that would prove your result correct.
-
 4. **Label-delay analysis:** Simulate labels arriving 14-30 days after predictions. Build separate views for immediate input/score health and matured performance cohorts.
    **Progressive hint:** Join outcomes by stable prediction ID and evaluate only cohorts whose label window has matured; report label coverage and censoring.
 
@@ -265,8 +234,7 @@ health; document what is intentionally not monitored.
 
 ## Ask an AI tutor about this lesson
 
-The lesson is complete without an AI assistant. If you want optional
-coaching, copy this prompt into the AI tutor while the repository root is open:
+The lesson is complete without AI. For optional coaching, copy this prompt with the repository root open:
 
 ```text
 Tutor me through `python-54` (Day 54: Monitoring and Model Governance).

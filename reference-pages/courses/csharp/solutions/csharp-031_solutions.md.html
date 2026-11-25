@@ -194,7 +194,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/csharp/solutions/csharp-031_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="csharp-031-explanation-and-comparison">csharp-031: explanation and comparison<a class="heading-anchor" href="#csharp-031-explanation-and-comparison" aria-label="Link to this section">#</a></h2>
-<p>Attempt the six guide tasks before opening this comparison. The executable reference is <a href="csharp-031_solution.cs.html">csharp-031_solution.cs</a>. It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.</p>
+<p>Reference program: <a href="csharp-031_solution.cs.html">csharp-031_solution.cs</a>, covering both examples and the executed answers.</p>
+<p>Attempt the tasks first; see <a href="../STUDY-GUIDE.md.html#comparing-with-the-explanation">comparing with the explanation</a>.</p>
 <h3 id="why-the-two-examples-differ">Why the two examples differ<a class="heading-anchor" href="#why-the-two-examples-differ" aria-label="Link to this section">#</a></h3>
 <p><strong>Reject immediate excess admission:</strong> Bounded capacity is observable before work is lost or memory grows without limit. The first item is accepted and the second immediate write is refused.</p>
 <p><strong>Drain after completion:</strong> Closing admission does not discard buffered work. Completion becomes final after the reader drains it. Both admitted items are read after completion, and later writes fail.</p>
@@ -269,14 +270,14 @@ Check<span class="syntax-punctuation">(</span>sum <span class="syntax-operator">
 <p><strong>How to verify.</strong> Leave out <code>empty.Writer.Complete()</code> and observe that the empty read loop waits forever, which is why completion is the producer&#x27;s explicit responsibility.</p>
 <h4 id="task-6-transfer-and-justify">Task 6: Transfer and justify<a class="heading-anchor" href="#task-6-transfer-and-justify" aria-label="Link to this section">#</a></h4>
 <p>Choose wait, reject or drop behavior for a workload and explain what evidence the producer receives.</p>
-<p>No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry <strong>Backpressure</strong>, and state one limitation of your choice.</p>
+<p>No single answer exists; extend task 3 using the <a href="../STUDY-GUIDE.md.html#open-transfer-tasks">open transfer routine</a>.</p>
 <h3 id="mechanism-and-diagnostic-reasoning">Mechanism and diagnostic reasoning<a class="heading-anchor" href="#mechanism-and-diagnostic-reasoning" aria-label="Link to this section">#</a></h3>
 <p>A channel connects producers and consumers through an asynchronous queue. Capacity is a resource policy: an unbounded queue can retain more work than memory or downstream systems can handle. A bounded channel makes overload visible through waiting, rejection or an explicit drop policy. Choose that policy from the value of the work, not from convenience.</p>
 <p>Completion means no more writes will be admitted, while readers can still drain buffered items. A consumer should distinguish an empty-but-open channel from a completed channel. Cancellation and failure also need owners: somebody must complete the writer and account for admitted items. The single-process fixture teaches these states without depending on thread timing.</p>
 <p><code>Channel.CreateBounded&lt;T&gt;</code> creates a capacity-limited channel. TryWrite reports immediate admission. ReadAsync removes an item; Writer.Complete closes admission. Reader.Completion finishes after buffered work is drained.</p>
 <p>An ignored false TryWrite result loses work. Blocking a producer while holding a lock needed by the consumer can deadlock. Completion and cancellation need a deliberate ownership policy.</p>
 <h3 id="review-before-continuing">Review before continuing<a class="heading-anchor" href="#review-before-continuing" aria-label="Link to this section">#</a></h3>
-<p>Run the reference and confirm that it prints <code>csharp-031: passed</code>, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.</p></article>
+<p>Run the reference and confirm it prints <code>csharp-031: passed</code>, then rerun the guide&#x27;s counterexample.</p></article>
   </main>
 </body>
 </html>

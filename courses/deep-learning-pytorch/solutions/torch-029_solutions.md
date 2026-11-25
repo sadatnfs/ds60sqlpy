@@ -2,6 +2,8 @@
 
 Open these answers only after attempting Stable objectives, precision and mixed-precision boundaries yourself. They reuse the guide's literal inputs, starting from Example A, Expose naive overflow, so a discrepancy points at one step. The executable companion runs the assertions; this page explains why each one tests Overflow, Log-sum-exp, Mixed precision. After a pass, choose a new input for exercise 6, Reject a nonfinite input contract, without looking.
 
+After comparing, follow the [review steps](../STUDY-GUIDE.md#after-the-solutions).
+
 ## Mechanism review
 
 Numerical stability concerns how an equivalent mathematical expression behaves in a finite representation. Logits 1000, 999 define a valid two-class distribution, but directly exponentiating them overflows common floating-point types. Subtracting a shared maximum before softmax preserves the distribution. CrossEntropyLoss and logsumexp implement stable combined operations that avoid unnecessary probability round trips.
@@ -158,6 +160,3 @@ else:
 
 **Verify:** In a fresh process, the exercise checks confirm `checked_loss(torch.tensor([[0.0, float('nan')]]), torch.tensor([0]))` raises `ValueError`.
 
-## Review after comparison
-
-Repeat exercise 4, Inspect stable gradients, with one changed fixture value and predict the difference before running it. Keep your failing attempt at exercise 5, Compare dtype ranges explicitly, beside the repaired result. A missing framework is not a failing assertion. These solutions use only local fixtures.

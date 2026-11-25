@@ -2,67 +2,24 @@
 
 ## How to run this lesson
 
-Start the Linux-container engine and run `./classroom` from the repository
-root. On Windows, use Ubuntu in WSL 2 or the thin
-`START_DOCKER_CLASSROOM.cmd` wrapper. Choose **PostgreSQL** on the shared
-`/classroom` home, then open **sql-21**. The
-[launcher guide](../../../docs/one-command-classroom.md) covers first preparation, strict resume and
-the saved project selection. No host Python or PostgreSQL installation is
-required for this browser route.
-
-1. Read the prerequisite and fixture notes before running the file. Use only
-   the local disposable `advanced_sql_training` database.
-2. Choose **Whole SQL lesson (psql)** for the cataloged learner script. This
-   preserves the lesson's reviewed psql directives, relative includes and
-   transaction behavior. **SQL snippet** is appropriate for ordinary SQL
-   statements, but is not a replacement for an entire script's setup.
-3. The **Course database** panel above the code shows whether the course
-   training tables are loaded. Missing tables load automatically before your
-   first run (or choose **Load course tables**) and stay loaded for later
-   lessons. **Reset training data** restores the original rows only when your
-   own changes made results differ; it keeps your saved code and notes.
-4. Edit the learner copy in the classroom and save your prediction before
-   running. Its whole-script workspace is
-   `.learning/sql/sql-21/lesson/workspace/sql/postgres-60day/day21_distribution_functions.sql`.
-   For browser work this path is inside the Docker learning volume, not a
-   newly created host folder beside your checkout. The checked-in source
-   remains the answer-free starting artifact.
-5. Run the whole script and inspect the full transcript. The runner uses
-   `psql -X -v ON_ERROR_STOP=1 -f`. SELECT output has columns, rows and a row
-   count; DDL/DML has command tags; intentional checks may produce NOTICE
-   messages. An unexpected ERROR or nonzero exit is a failure to diagnose,
-   even when an earlier query printed plausible values.
-6. Verify the lesson's expected grain, ordering, constraints and declared
-   transaction or cleanup outcome. Keep required ROLLBACK statements.
-   The warehouse sequence and other explicitly stateful exercises explain
-   when state is committed. Read saved output without rerunning it when
-   reviewing an earlier attempt.
-
-If a relation is missing, inspect the lesson's required fixture and predecessor
-rather than guessing a new table definition. If authentication or runtime
-readiness fails, use `./classroom status` and the setup guide. Keep credentials
-out of SQL, notebooks, screenshots and committed files. Repair the first error
-before trusting partial output, and reveal separate solutions only when you
-want to compare after an attempt.
+Open **sql-21** from the PostgreSQL side of `./classroom` and choose **Whole SQL
+lesson (psql)** so the distribution queries run in file order against the local
+`advanced_sql_training` database. Your editable copy is
+`.learning/sql/sql-21/lesson/workspace/sql/postgres-60day/day21_distribution_functions.sql`.
+The script only reads `customers`, `orders`, `order_items`, `employees` and
+`products` from the standard course fixture inside one `BEGIN`/`ROLLBACK`
+block, so a clean `psql` transcript is a series of result tables whose bucket
+and rank columns you can check by hand. Launcher, saving and troubleshooting
+steps are in [Run a lesson in the classroom](../../STUDY-GUIDE.md#run-a-lesson-in-the-classroom).
 
 ### Optional contributor notebook route
 
-For notebook work, deliberately prepare the Linux/WSL contributor environment
-from [CONTRIBUTING.md](../../../CONTRIBUTING.md), including a compatible psql client and
-the notebook dependencies. Generate this lesson's private workspace through
-the maintained CLI:
+To step through the distribution queries in JupyterLab, generate this notebook
+([setup](../../STUDY-GUIDE.md#optional-contributor-notebook-route)):
 
 ```sh
 uv run --no-sync python scripts/course.py sql notebook sql-21
 ```
-
-Open the printed notebook path in that environment's JupyterLab. It uses the
-same catalog-derived learner-copy layout in that contributor checkout and
-executes the complete script through psql. Its host-side state is separate
-from the Docker browser's named volume. Follow
-[guided SQL notebooks](../../../docs/guided-sql-notebooks.md) for explicit local connection
-selection and kernel setup. Notebook generation does not execute SQL or
-authorize a reset.
 
 ## Level and prerequisites
 
@@ -74,28 +31,29 @@ authorize a reset.
 
 ## A beginner's mental model for this lesson
 
-A **table** stores facts in named columns. A **row** is one occurrence at the
-table's declared grain. A query creates a temporary **result set**: rows printed
-on screen are not automatically stored. The key vocabulary for this lesson is Quantile bucket, Percent rank, Cumulative distribution. Its worked SQL reads or creates `customers`, `orders`, `order_items`.
+All three functions in this lesson answer "where does this row sit in an
+ordered list?" without collapsing rows, so the row count after the window step
+equals the row count before it. They differ in what they count:
 
-Before writing a query, complete this sentence: “One output row represents
-___.” Joins can multiply rows, filters can remove them, grouping can collapse
-many rows into one, and window functions can add calculations while preserving
-row count. For a normal analytical `SELECT`, use this logical reading order:
-`FROM`/`JOIN` (including `ON`) → `WHERE` → `GROUP BY`/aggregates → `HAVING` →
-window calculations → `SELECT` → `ORDER BY` → `LIMIT`. PostgreSQL may execute a
-different physical plan while preserving those semantics.
+- `NTILE(n)` deals rows into n buckets by position, like dealing cards. With
+  438 ordering customers and `NTILE(4)`, the first two quartiles get 110
+  customers and the last two get 109, because 438 = 4 x 109 + 2 and the two
+  leftover rows go to the earliest buckets. Tied values can land in different
+  buckets, so the ordering needs a tie-breaker such as `customer_id`.
+- `PERCENT_RANK()` is `(rank - 1) / (rows in partition - 1)`. The lowest value
+  always gets 0, the highest distinct value gets 1, and tied rows share a value
+  because they share a rank.
+- `CUME_DIST()` is `(rows with a value at or below this one) / (rows in
+  partition)`. It never reaches 0, since every row counts itself, and the last
+  peer group always gets 1.
 
-The worked walkthrough's lesson-specific task is: Apply `NTILE(4)`, `PERCENT_RANK`, and `CUME_DIST` to a five-row `VALUES` set containing a tie. Observe that buckets need not have equal value ranges and that peer-aware distribution functions treat equal ordering values together.
-Exercise 1 expects this result: one row per ordering customer with bucket 1 to 4. Predict keys, row count, `NULL` behavior,
-and ordering before running. Afterwards, compare keys/counts/totals with an
-independent control. A blank string, SQL `NULL`, numeric zero, and a missing row
-are different facts; use `COALESCE` only after choosing which meaning the
-business question requires.
+For the values 10, 10 and 20 (Exercise 4), both 10s have rank 1, so
+`PERCENT_RANK` gives 0, 0 and 1. Two of the three rows are at or below 10, so
+`CUME_DIST` gives 0.667, 0.667 and 1. Before running any query here, write
+down how many rows the partition has, because every denominator above comes
+from that count.
 
 ## Two worked SQL examples
-
-These worked excerpts come from `sql/postgres-60day/day21_distribution_functions.sql`. Use **Whole SQL lesson (psql)** in the unified classroom for the complete file, including its fixture and transaction context. The optional contributor notebook and prepared `psql` routes are described above.
 
 ### Example 1
 
@@ -126,9 +84,20 @@ ORDER BY
 LIMIT 50;
 ```
 
-**How to read it:** Example 1: Start with `customers`, `orders`, and `order_items` in `FROM`/`JOIN`; let `GROUP BY` collapse rows to its grouping keys; let each `OVER` expression calculate across related rows without collapsing them. The final `SELECT` displays `customer_id`, `revenue`, `revenue_quartile`, and `pct_rank`. `ORDER BY` determines presentation order and the final `LIMIT 50` caps displayed rows. Before running, predict the row grain, row count, `NULL` positions, and first/last key; afterwards, compare each prediction with the transcript.
+**How to read it:** The `cust_rev` CTE starts from all 500 `customers` and
+left-joins `orders` and `order_items`, so customers who never ordered survive
+with `revenue` of 0 after `COALESCE`. Revenue is recomputed from line items
+(`unit_price * quantity * (1 - discount)`) rather than read from
+`orders.total_amount`. The two windows then read the same 500 rows in opposite
+directions: `NTILE(4)` sorts revenue descending, so quartile 1 holds the
+biggest spenders, while `PERCENT_RANK` sorts ascending, so a big spender gets a
+value near 1.
 
-**Expected result/shape:** Example 1 returns one grouped row per `customer_id`, capped at 50 rows with columns `customer_id`, `revenue`, `revenue_quartile`, and `pct_rank` from `customers`, `orders`, and `order_items`. Use a direct count or grouped aggregate over those same source relations as the control; check ordering only when this query has an `ORDER BY`, and inspect `NULL` only for columns this example can produce.
+**Expected result/shape:** 50 rows because of the `LIMIT`, all from
+quartile 1 and highest revenue first. Across the full 500 rows each quartile
+holds exactly 125 customers, and the 62 customers with zero revenue all sit in
+quartile 4 with a `pct_rank` of 0. Remove the `LIMIT` and count by
+`revenue_quartile` to see those numbers.
 
 ### Example 2
 
@@ -162,9 +131,18 @@ ORDER BY
 LIMIT 50;
 ```
 
-**How to read it:** Example 2 is executed by `psql` as part of the complete lesson. Expected notices are evidence; an unexpected error stops the script.
+**How to read it:** `EXPLAIN (COSTS OFF)` prints the plan for Example 1
+without running it. Read the tree from the bottom: sequential scans of the
+three tables feed two hash right joins and a `HashAggregate` grouped on
+`c.customer_id`. Above that sit two `Sort` and `WindowAgg` pairs, one per
+distinct window ordering (revenue descending with `customer_id` for `NTILE`,
+revenue ascending for `PERCENT_RANK`), then a final `Sort` and `Limit` for the
+presentation order.
 
-**Expected result/shape:** Example 2 prints a plan tree, not business rows. Run the underlying `SELECT` separately and reconcile its `customer_id` key set and row count over `customers`, `orders`, and `order_items`; then compare node estimates, actual rows × loops, buffers, and timing without requiring one fixed plan.
+**Expected result/shape:** About 20 plan lines and no business rows.
+Count the `WindowAgg` nodes: two windows with different `ORDER BY` lists need
+two sorts. Give both windows the same ordering and PostgreSQL can compute them
+in one `WindowAgg` over a single sort.
 
 ## Learning objectives
 
@@ -190,62 +168,71 @@ peer-aware distribution functions treat equal ordering values together.
 - **Focus:** Use distribution windows to express relative position while documenting ties, small partitions, and bucket size.
 - **Assumptions:** `PERCENT_RANK` ranges from 0 to 1 using rank; `CUME_DIST` is the fraction at or below the current value; `NTILE` balances row counts.
 - **Failure to watch for:** A percentile rank is not a probability or causal score, and `NTILE(10)` does not guarantee equal value ranges.
-- **Review loop:** predict the row grain and NULL/order behavior, run the
-  query, inspect a bounded sample, and reconcile counts or totals before
-  accepting the result.
+- **Review loop:** for each result, count rows per bucket or partition, then
+  compare the first and last value in one partition with the formulas in the
+  mental model above.
 
 ## Exercises
 
 Use distribution windows to express relative position while documenting ties, small partitions, and bucket size.
 
-Attempt each prompt in a scratch SQL file before opening the solution.
-For every result, write its row grain and expected shape first.
+Every exercise below windows either a 438-row customer-spend relation or a
+base table directly. Before running, write the partition size you expect (438
+ordering customers, 16 or 17 employees per department, 50 products per
+category), since each distribution value is a fraction of that count.
 
 1. **Query writing:** Assign customers to four stored-spend buckets.
    **Progressive hint:** Aggregate to customer grain first, then apply `NTILE(4)` with a stable tie-breaker.
-   **Inputs/evidence:** For sql-21 Exercise 1, read from `orders`. Build the answer toward `customer_id`, `stored_spend`, and `spend_quartile`; keep `order_id` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-21 Exercise 1, expected output: One row per ordering customer with bucket 1-4. The final columns are `customer_id`, `stored_spend`, and `spend_quartile`. The final order is `spend_quartile, stored_spend DESC, customer_id`.
-   **Verify:** For sql-21 Exercise 1, choose one complete partition from `orders`; hand-calculate its first, middle, and final window values for `customer_id`, `stored_spend`, and `spend_quartile`, then verify output keys remain `order_id`. Test a one-row partition and a partition with at least three rows; verify the frame boundary and partition reset explicitly.
+   **Inputs/evidence:** For sql-21 Exercise 1, read `orders`, total `total_amount` per `customer_id` in the `customer_spend` CTE, then apply `NTILE(4)` over that customer-grain relation ordered by spend descending with `customer_id` as the tie-breaker; `order_id` does not survive the aggregation.
+   **Expected result/shape:** For sql-21 Exercise 1, expected output: 438 rows, one per customer who has at least one order (the other 62 of the 500 customers have none), with quartiles of 110, 110, 109, and 109 customers. The final columns are `customer_id`, `stored_spend`, and `spend_quartile`. The final order is `spend_quartile, stored_spend DESC, customer_id`.
+   **Verify:** For sql-21 Exercise 1, confirm the row count equals `SELECT COUNT(DISTINCT customer_id) FROM orders` (438) and that grouping the result by `spend_quartile` returns counts 110, 110, 109, 109 with quartile 1 running from 9502.21 down to 7133.41 and quartile 4 from 3522.32 down to 962.26; the seed has 18 pairs of customers with identical spend (for example 51 and 428 at 8970.66), and each pair lands in the same quartile with the lower `customer_id` first.
 2. **Query writing:** Calculate salary percent rank within each department.
    **Progressive hint:** Partition by department and rank on salary alone so tied salaries share rank.
-   **Inputs/evidence:** For sql-21 Exercise 2, read from `employees`. Build the answer toward `employee_id`, `department_id`, `salary`, and `salary_percent_rank`; keep `employee_id` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-21 Exercise 2, expected output: One row per employee with values from 0 to 1. The final columns are `employee_id`, `department_id`, `salary`, and `salary_percent_rank`. The final order is `e.department_id, e.salary, e.employee_id`.
-   **Verify:** For sql-21 Exercise 2, choose one complete partition from `employees`; hand-calculate its first, middle, and final window values for `salary_percent_rank`, then verify output keys remain `employee_id`. Give two rows the same `e.department_id` value and different `e.employee_id` values; verify `e.department_id, e.salary, e.employee_id` produces the intended rank and display order.
+   **Inputs/evidence:** For sql-21 Exercise 2, read the 100 rows of `employees`, partition by `department_id`, and order each partition by `salary` alone so that equal salaries would share a rank; keep `employee_id` because the result stays at employee grain.
+   **Expected result/shape:** For sql-21 Exercise 2, expected output: 100 rows, one per employee, with `salary_percent_rank` from 0 to 1 inside each of the six departments (four of 17 employees and two of 16). The final columns are `employee_id`, `department_id`, `salary`, and `salary_percent_rank`. The final order is `e.department_id, e.salary, e.employee_id`.
+   **Verify:** For sql-21 Exercise 2, in department 1 (17 employees, no tied salaries) check the formula (rank - 1) / (rows - 1): employee 1 at 40079.19 returns 0, employee 7 at 40554.33 returns 0.0625 (1/16), employee 49 returns 0.5, and employee 97 at 47681.43 returns 1; in 16-employee department 5 the second row returns 1/15 (0.0667). Then run the window on `VALUES (9, 50000), (8, 100), (8, 100), (8, 200)` and expect 0 for the one-row department and 0, 0, 1 for the tied salaries.
 3. **Query writing:** Calculate cumulative distribution of product price within category.
    **Progressive hint:** Partition by category and order on price.
-   **Inputs/evidence:** For sql-21 Exercise 3, read from `products`. Build the answer toward `product_id`, `category`, `price`, and `price_cume_dist`; keep `product_id` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-21 Exercise 3, expected output: One row per product with cume_dist in (0, 1]. The final columns are `product_id`, `category`, `price`, and `price_cume_dist`. The final order is `p.category, p.price, p.product_id`.
-   **Verify:** For sql-21 Exercise 3, choose one complete partition from `products`; hand-calculate its first, middle, and final window values for `category`, `price`, and `price_cume_dist`, then verify output keys remain `product_id`. Test a one-row partition and a partition with at least three rows; verify the frame boundary and partition reset explicitly.
+   **Inputs/evidence:** For sql-21 Exercise 3, read the 300 rows of `products`, partition by `category`, and order by `price`; keep `product_id` because each product stays one row.
+   **Expected result/shape:** For sql-21 Exercise 3, expected output: 300 rows, one per product, 50 per category, with `price_cume_dist` in (0, 1]. The final columns are `product_id`, `category`, `price`, and `price_cume_dist`. The final order is `p.category, p.price, p.product_id`.
+   **Verify:** For sql-21 Exercise 3, in `Apparel` (50 products, no repeated prices) check rows at or below / partition rows: product 1 at 10.37 returns 0.02, product 7 at 12.59 returns 0.04, product 145 at 63.65 returns 0.5, and product 295 at 119.15 returns 1; confirm `MAX(price_cume_dist)` is exactly 1 in each of the six categories, and that a one-row partition such as `VALUES (9, 50000)` returns 1, not 0.
 4. **Prediction:** Compare percent rank and cumulative distribution for tied values 10, 10, and 20.
    **Progressive hint:** Tied values share rank and cumulative endpoint, but the two functions use different formulas.
-   **Inputs/evidence:** For sql-21 Exercise 4, read from the inline `VALUES` fixture. Build the answer toward `row_id`, `value`, `percent_rank_value`, and `cume_dist_value`; keep `row_id` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-21 Exercise 4, expected output: Three rows making tie behavior visible. The final columns are `row_id`, `value`, `percent_rank_value`, and `cume_dist_value`. The final order is `row_id`.
-   **Verify:** For sql-21 Exercise 4, choose one complete partition from the inline `VALUES` fixture; hand-calculate its first, middle, and final window values for `value`, `percent_rank_value`, and `cume_dist_value`, then verify output keys remain `row_id`. Give two rows the same `row_id` value and different ``row_id`` values; verify `row_id` produces the intended rank and display order.
+   **Inputs/evidence:** For sql-21 Exercise 4, read only the three-row inline `VALUES` fixture `(1, 10), (2, 10), (3, 20)` with columns `row_id` and `value`; compute both functions over the whole fixture ordered by `value`.
+   **Expected result/shape:** For sql-21 Exercise 4, expected output: three rows, one per `row_id`, where the two rows tied at 10 share both results. The final columns are `row_id`, `value`, `percent_rank_value`, and `cume_dist_value`. The final order is `row_id`.
+   **Verify:** For sql-21 Exercise 4, expect rows 1 and 2 to return `percent_rank_value` 0 and `cume_dist_value` 0.6667 (two of three rows are at or below 10), and row 3 to return 1 and 1; then change row 2 to 15 and confirm the results become 0, 0.5, 1 for percent rank and 0.3333, 0.6667, 1 for cumulative distribution, because the tie is gone.
 5. **Debugging:** Audit the row count in each customer spend decile rather than assuming exact equality.
    **Progressive hint:** NTILE bucket sizes differ by at most one when row count is not divisible by ten.
-   **Inputs/evidence:** For sql-21 Exercise 5, read from `orders`. Build the answer toward `decile`, and `customers`; keep `decile` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-21 Exercise 5, expected output: Up to 10 bucket rows with counts. The final columns are `decile`, and `customers`. The final order is `decile`.
-   **Verify:** For sql-21 Exercise 5, independently aggregate `orders` by `decile`; require one output row for every distinct `decile` tuple and compare `customers` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `customers` for the existing `decile` tuple and verify the new tuple appears exactly once.
+   **Inputs/evidence:** For sql-21 Exercise 5, read `orders`, total spend per `customer_id`, assign `NTILE(10)` over the 438 customer totals ordered by spend descending and `customer_id`, then count customers per decile.
+   **Expected result/shape:** For sql-21 Exercise 5, expected output: 10 rows, deciles 1 to 8 holding 44 customers and deciles 9 and 10 holding 43, because 438 = 10 x 43 + 8 and `NTILE` gives the remainder to the first buckets. The final columns are `decile`, and `customers`. The final order is `decile`.
+   **Verify:** For sql-21 Exercise 5, confirm `SUM(customers)` equals `SELECT COUNT(DISTINCT customer_id) FROM orders` (438) and that the counts differ by at most one; then run `NTILE(4)` over `generate_series(1, 3)` and confirm it returns only buckets 1, 2, and 3, showing that a bucket can be empty when there are fewer rows than buckets.
 6. **Extension:** Return customers in the top stored-spend decile with their spend and population share.
    **Progressive hint:** Filter an outer query after assigning deciles; state that bucket 1 is highest because ordering is descending.
-   **Inputs/evidence:** For sql-21 Exercise 6, read from `orders`. Build the answer toward `customer_id`, `total_spend`, `decile`, and `population`; keep `customer_id` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-21 Exercise 6, expected output: Customers in decile 1. The final columns are `customer_id`, `total_spend`, `decile`, and `population`. The final order is `total_spend DESC, customer_id`.
-   **Verify:** For sql-21 Exercise 6, run an anti-check that counts rows where NOT ((decile = 1)); require unique `customer_id` where the expected grain is one row per key and confirm the projected `customer_id`, `total_spend`, `decile`, and `population` against `orders`. Give two rows the same `total_spend DESC` value and different `customer_id` values; verify `total_spend DESC, customer_id` produces the intended rank and display order.
+   **Inputs/evidence:** For sql-21 Exercise 6, read `orders`, total spend per `customer_id`, assign `NTILE(10)` and `COUNT(*) OVER ()` in the `bucketed` CTE, and only then filter to `decile = 1`, so the population is counted before the filter.
+   **Expected result/shape:** For sql-21 Exercise 6, expected output: the 44 customers of decile 1, from customer 181 at 9502.21 down to 8190.44, each carrying `population` 438. The final columns are `customer_id`, `total_spend`, `decile`, and `population`. The final order is `total_spend DESC, customer_id`.
+   **Verify:** For sql-21 Exercise 6, confirm 44 rows, every `decile` equals 1, every `population` equals 438, and no customer appears twice; the first three rows are customers 181 (9502.21), 12 (9244.27), and 25 (9196.96). Customers 51 and 428 tie at 8970.66 and both appear, 51 first; the next spend below the cut, 8168.74, belongs to decile 2. Computing `COUNT(*) OVER ()` in the outer query after the filter instead returns 44, which is why `population` is taken inside `bucketed`.
 
 ## Common mistakes and how to recover
 
-- **Lesson-specific semantic mistake:** A percentile rank is not a probability or causal score, and `NTILE(10)` does not guarantee equal value ranges.
-- **Unexpected row count:** display keys before aggregates, count rows after
-  each join/filter stage, and find the first stage whose grain differs from the
-  contract. Do not hide fanout with `DISTINCT`.
-- **Unexpected `NULL` or missing row:** decide whether the fact is unknown,
-  inapplicable, zero, or absent before using `COALESCE`; inspect outer-join
-  predicate placement and empty-input aggregate behavior.
-- **Unstable top/first/last output:** add `ORDER BY` with a unique final
-  tie-breaker before `LIMIT` or order-sensitive windows/aggregates.
-- **`psql` stops on an error:** fix the first error shown by
-  `ON_ERROR_STOP`, restore the declared transaction/setup state, and rerun the
-  complete file. A later successful statement does not validate a partial run.
+- **Reading `PERCENT_RANK` as a probability.** A value of 0.75 means 75% of
+  the other rows in the partition rank below this one. It says nothing about
+  likelihood or cause, and a single-row partition always returns 0.
+- **Expecting equal value ranges from `NTILE`.** In Exercise 5 every decile
+  holds 43 or 44 customers, but decile 1 spans spend from 8,190.44 to 9,502.21
+  while decile 10 spans 962.26 to 2,521.63. Buckets are equal in row count,
+  not in spend width.
+- **Leaving ties to chance in `NTILE`.** Two customers both have stored spend
+  of 5,303.39. Ordering only by spend lets PostgreSQL put either one first,
+  which changes buckets when they sit on a boundary; adding `customer_id` makes
+  the assignment repeatable.
+- **Ranking before aggregating.** `NTILE(4)` applied directly to `orders`
+  buckets 4,362 orders, not 438 customers. Sum to one row per customer in a CTE
+  first, then window over that.
+- **Filtering on a window alias in the same `SELECT`.** `WHERE decile = 1`
+  cannot see `decile` at the level where it is computed, because `WHERE` runs
+  before windows. Exercise 6 assigns the decile in a CTE and filters outside.
+- General recovery steps (row counts, `NULL`s, `psql` stopping at the first
+  error) are in [Recover from common failures](../../STUDY-GUIDE.md#recover-from-common-failures).
 
 ## Self-check
 
@@ -286,9 +273,9 @@ Further reading
 
 ## Ask an AI tutor about this lesson
 
-An AI tutor is optional; the guide, learner SQL, PostgreSQL, and expected checks are
-enough to complete the lesson offline. If you want a patient tutor, copy this
-prompt after opening the repository in the AI tutor:
+A tutor is most useful here for checking your hand-calculated `PERCENT_RANK`
+and `CUME_DIST` fractions; the prompt below keeps it away from the solutions
+([why it is optional](../../STUDY-GUIDE.md#use-an-ai-tutor-optional)).
 
 ```text
 Tutor me through sql-21: Distribution Functions: NTILE, PERCENT_RANK, and CUME_DIST.

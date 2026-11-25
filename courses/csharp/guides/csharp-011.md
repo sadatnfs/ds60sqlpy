@@ -24,9 +24,9 @@ A nullable value type such as int? represents either an int or no value. Choosin
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles your saved pad as `Program.cs` in its fixed .NET 10 project. C# 14 is the matching language generation. This route uses the prepared framework libraries; it does not accept arbitrary project files, NuGet packages, command arguments or interactive input. The explicit `Program.Main` entrypoint makes compilation and execution visible. `Check` throws on a false condition in every build configuration, unlike conditional debugging assertions.
+This lesson relies on the project's `<Nullable>enable</Nullable>` setting, which makes `string?` a checked annotation. Task 4's `label!.Length` on a null label compiles without any warning, because `!` suppresses it, and then throws `NullReferenceException` when it runs.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Compile contract, starter stop and success marker: [running a lesson](../STUDY-GUIDE.md#running-a-lesson).
 
 
 
@@ -34,7 +34,7 @@ Start with the answer-free learner artifact in your saved classroom pad. It deli
 
 `string?` permits null in static analysis; `int?` is Nullable<int>. `?.` conditionally accesses a member and preserves absence. `??` supplies a fallback. The null-forgiving operator `!` silences analysis but performs no check.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+Each example ends with a trace; method: [tracing a program](../STUDY-GUIDE.md#tracing-a-program).
 
 ## Worked example / walkthrough
 
@@ -79,6 +79,8 @@ internal static class Program {
 ```
 
 **Observe:** The optional length is absent, not zero.
+
+**Trace.** `label` is null. `label?.Length` tests the receiver first and, finding null, skips the member access and produces null of type `int?`. The first check confirms that `length` is null rather than 0. `length ?? -1` substitutes -1 only at this display boundary, and `length` itself still says absent, so later code can still tell the two cases apart.
 
 ### Example B: Distinguish zero from missing
 
@@ -126,6 +128,8 @@ internal static class Program {
 
 **Observe:** A measured zero and an unknown measurement produce distinct descriptions.
 
+**Trace.** `measured` holds a present 0, so `HasValue` is true and `Value` is 0. `missing` has no value, so `HasValue` is false. In `Describe`, the pattern `value is int actual` matches only when a value is present and binds it to `actual`, an ordinary `int`. Zero becomes measured:0 and null becomes unknown, so the two cases never collapse into one string.
+
 ## Exercises
 
 1. **Predict and explain.** Predict nullable length and its fallback for null and empty text.
@@ -140,13 +144,15 @@ internal static class Program {
 
 6. **Transfer and justify.** Design an import field whose missing value has different meaning from an explicit zero or empty value.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Log each task in the [evidence table](../STUDY-GUIDE.md#recording-exercise-evidence) before opening the explanation.
 
 ## Common pitfalls and diagnosis
 
 A warning suppression is not validation. Null, empty and whitespace-only text are different states. Returning a fallback too early can irreversibly discard useful information.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+For task 5, use four inputs: null, empty text, three spaces and a real label. `string.IsNullOrEmpty` treats the first two alike, and `string.IsNullOrWhiteSpace` treats the first three alike, so pick the method that matches your contract. The tempting wrong fallback is `label?.Length ?? 0`, which reports a missing label as an empty one.
+
+Repair routine: [building a regression case](../STUDY-GUIDE.md#building-a-regression-case).
 
 ## Progressive hints
 
@@ -156,11 +162,15 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 ## Self-check and next step
 
-Explain Null, Flow analysis, Fallback without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+Give the type and value of `label?.Length` when label is null and when it is empty text. Explain what `!` does at compile time and what it does at runtime. For task 6, write one import row in which a missing field, an explicit zero and an empty string each mean something different.
+
+Then follow the general [self-check routine](../STUDY-GUIDE.md#self-check-routine) and save your pad.
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://learn.microsoft.com/en-us/dotnet/csharp/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+[Documentation](https://learn.microsoft.com/en-us/dotnet/csharp/): The C# guide's articles on nullable reference types and nullable value types explain annotations, warnings and `Nullable<T>`.
+
+Provenance and limits: [sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

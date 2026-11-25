@@ -1,6 +1,6 @@
 # cuda-066: explained solutions
 
-These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.
+Compare with your [worksheet](../lessons/cuda-066.md) attempt.
 
 ## Exercise 1: Calculate offset (1,1)
 
@@ -74,8 +74,16 @@ Include contiguous, sliced, transposed, empty and wrong dtype.
 
 **How to verify.** Each test compares the kernel or model output with a NumPy reference on the same view. The suite passes when all five cases agree, and the float64 case asserts a raised error or an explicit, counted conversion copy.
 
+## Self-check answers
+
+1. **What does a stride tell you that a shape does not?** The byte displacement for a one-step move along an axis. Two arrays with shape `(2, 2)` can address storage differently, as the column slice with strides `(12, 8)` shows.
+
+2. **Why do logical bytes and storage span differ for the column slice?** The slice holds four float32 values, 16 logical bytes, but they are scattered across the original 24-byte allocation because every other column is skipped.
+
+3. **Why is reinterpreting float64 bytes as float32 wrong even when element counts match?** Dtype decides both width and bit interpretation. Reading 8-byte doubles as 4-byte floats splits each value into two meaningless halves; a conversion must be an explicit cast.
+
 ## Reference observation
 
 All three views address byte offset 20.
 
-The reference file is `courses/cuda/python/references/cuda-066_cpu.py`. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.
+Asserted by `courses/cuda/python/references/cuda-066_cpu.py`.

@@ -24,9 +24,9 @@ Keep task ownership visible: the caller should await work whose result or failur
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles your saved pad as `Program.cs` in its fixed .NET 10 project. C# 14 is the matching language generation. This route uses the prepared framework libraries; it does not accept arbitrary project files, NuGet packages, command arguments or interactive input. The explicit `Program.Main` entrypoint makes compilation and execution visible. `Check` throws on a false condition in every build configuration, unlike conditional debugging assertions.
+`Main` is declared `async` in this lesson so that the examples can use `await` at the top level of each block. Every task in the examples is already complete when it is created, through `Task.FromResult` or `Task.FromException`, so the run is fast and deterministic and no real waiting happens.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Compile contract, starter stop and success marker: [running a lesson](../STUDY-GUIDE.md#running-a-lesson).
 
 
 
@@ -34,7 +34,7 @@ Start with the answer-free learner artifact in your saved classroom pad. It deli
 
 `async Task<int>` declares an asynchronous result. `await` obtains the completed result or rethrows the task failure. Task.WhenAll combines completion of several tasks; its result order follows the input task order, not completion order.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+Each example ends with a trace; method: [tracing a program](../STUDY-GUIDE.md#tracing-a-program).
 
 ## Worked example / walkthrough
 
@@ -79,6 +79,8 @@ internal static class Program {
 ```
 
 **Observe:** Await yields 7 and confirms successful completion.
+
+**Trace.** `Task.FromResult(7)` returns a `Task<int>` that has already completed with 7. `pending` holds the task, not the integer. `await pending` finds the task complete, extracts 7 and assigns it to `value`. `IsCompletedSuccessfully` is true because the task ended with a result rather than an exception or cancellation. Awaiting a completed task continues without suspending.
 
 ### Example B: Compose and observe failure
 
@@ -127,6 +129,8 @@ internal static class Program {
 
 **Observe:** WhenAll retains input order and await exposes the task exception.
 
+**Trace.** `Task.WhenAll` receives two completed tasks and returns a task whose result is an array in input order, 2 then 3. The second part awaits a task created already faulted with `InvalidOperationException`; `await` rethrows that exception, and the catch sets `observed`. The failure surfaced only because something awaited the task and caught it.
+
 ## Exercises
 
 1. **Predict and explain.** Distinguish the Task<int> handle from its awaited integer.
@@ -141,13 +145,15 @@ internal static class Program {
 
 6. **Transfer and justify.** Explain when CPU work might need scheduling separately from an asynchronous I/O API.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Log each task in the [evidence table](../STUDY-GUIDE.md#recording-exercise-evidence) before opening the explanation.
 
 ## Common pitfalls and diagnosis
 
 Async void is mainly for required event-handler signatures, not general composable methods. Blocking with Result can deadlock in synchronization contexts. Task.Run does not make a blocking external API inherently scalable.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+For task 5, `Task.WhenAll` over an empty array completes at once with an empty result. When two inputs both fail, `await` rethrows only the first exception, while the combined task's `Exception.InnerExceptions` holds both, here 2. For task 4, a task that is never awaited can fail without anyone seeing the exception.
+
+Repair routine: [building a regression case](../STUDY-GUIDE.md#building-a-regression-case).
 
 ## Progressive hints
 
@@ -157,11 +163,15 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 ## Self-check and next step
 
-Explain Task, Await, Composition without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+Give the types of `pending` and `value` in Example A. Explain the order of results from `WhenAll` when the second task finishes first. For task 6, describe a CPU-heavy computation that belongs on `Task.Run` and an I/O call that should be awaited directly without it.
+
+Then follow the general [self-check routine](../STUDY-GUIDE.md#self-check-routine) and save your pad.
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://learn.microsoft.com/en-us/dotnet/csharp/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+[Documentation](https://learn.microsoft.com/en-us/dotnet/csharp/): The asynchronous programming articles in the C# guide explain `async`, `await`, `Task` composition and exception propagation.
+
+Provenance and limits: [sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

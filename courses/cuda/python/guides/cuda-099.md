@@ -1,10 +1,17 @@
 # cuda-099: Memory-saving training techniques
 
-**Route:** CUDA Python and machine learning. **Stage:** advanced. **Prerequisites:** `cuda-089`, `cuda-090`, `cuda-094`. Allow several sessions when the hardware experiment is new; the chapter is not a deadline.
+**Route:** CUDA Python and machine learning. **Stage:** advanced. **Prerequisites:** `cuda-089`, `cuda-090`, `cuda-094`.
 
-## What you will be able to explain
+Pacing, evidence labels and platform rules: [CUDA study guide](../../STUDY-GUIDE.md).
 
-By the end, you can **compute weighted accumulation**, **explain checkpoint recomputation**, and **design equal-update tests** with evidence. Start with the two worked cases, then use the editable CPU model to make the quantities concrete.
+## Learning objectives
+
+- Compute weighted accumulation.
+- Find unequal-batch normalization error.
+- Place optimizer steps.
+- Explain checkpoint recomputation.
+- Account for frozen weights.
+- Design equal-update tests.
 
 ## Mechanism and vocabulary
 
@@ -25,15 +32,19 @@ Activation checkpointing saves selected intermediates and recomputes others duri
 
 ### Worked example 1
 
-Microbatch mean gradients 2 and 8 over sizes 3 and 1 combine to\((3\times2+1\times8)/4=3.5\). Averaging the two means gives 5, which is wrong for the effective batch.
+Microbatch mean gradients 2 and 8 over sizes 3 and 1 combine to \((3\times2+1\times8)/4=3.5\). Averaging the two means gives 5, which is wrong for the effective batch.
 
 ### Worked example 2
 
 Checkpointing reduces retained activations by an illustrative 20 MiB but adds another forward computation. Its benefit depends on memory pressure and the recomputation cost.
 
-## Portable executable model
+## How to run the CPU model
 
-The **CPU reference model** variant runs this bounded worked example using `python-core`. It uses only the Python standard library, small synthetic values and no network. Its purpose is to expose the arithmetic or contract behind the chapter. The separate reference includes assertions for the stated observations.
+Edit the copy; the [reference](../references/cuda-099_cpu.py) adds assertions.
+
+```sh
+python courses/cuda/python/lessons/cuda-099_cpu.py
+```
 
 ```python
 sizes, means = [3, 1], [2.0, 8.0]
@@ -54,8 +65,6 @@ print("CPU accumulation oracle:", weighted, wrong)
 | `weighted` | `3.5` |
 | `wrong` | `5.0` |
 
-Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.
-
 ## Equal framework lanes
 
 ### PyTorch
@@ -66,83 +75,69 @@ Normalize each microbatch contribution by total effective examples and step once
 
 Accumulate GradientTape gradients with example-count weighting. Use the prepared recomputation mechanism only after checking variable capture and stateful behavior; evaluate memory and extra forward work separately.
 
-Choose either lane first, then compare the other using identical mathematical inputs. Framework-specific shape, mode and optimizer rules must be checked separately. Both use offline synthetic examples; no model hub or dataset download is triggered.
+Lane rules: [framework labs](../../STUDY-GUIDE.md#python-gpu-and-framework-labs).
 
 ## Executable framework practice
 
-The variant chooser offers **PyTorch on CPU**, **TensorFlow on CPU**, and separate **NVIDIA CUDA** versions. CPU versions force CPU placement. CUDA versions require the named GPU profile and refuse to silently fall back. Each complete program uses the same tiny deterministic objective, bounded tensors and local synthetic data. Read its source before running; a framework pass establishes only that variant and environment.
-
-The checkpoint demonstration is in-memory. It teaches what state must be saved; it does not export a durable model artifact or preserve an in-flight device context. Advanced custom-op, distributed and engine-building projects remain separately prepared external workflows.
+Run the **PyTorch** and **TensorFlow** variants on CPU first; [lab rules](../../STUDY-GUIDE.md#python-gpu-and-framework-labs).
 
 ## Practice and transfer
+
+Record each attempt in the [worksheet](../lessons/cuda-099.md) before opening hints.
 
 ### Exercise 1: Compute weighted accumulation
 
 **Trap to avoid:** Averaging the two means, `(2 + 8)/2 = 5`, gives the single example in the second microbatch the same weight as the three in the first, so it counts three times as much as it should.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 2: Find unequal-batch normalization error
 
 **Trap to avoid:** Trusting that the loop is right because it matches the full-batch gradient on evenly divisible data hides the error, which only appears for an uneven final microbatch.
-
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 3: Place optimizer steps
 
 **Trap to avoid:** Calling `zero_grad()` inside the microbatch loop discards earlier contributions, so only the last microbatch affects the update.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 4: Explain checkpoint recomputation
 
 **Trap to avoid:** Checkpointing every layer when memory is not the constraint adds recomputation with no benefit.
-
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 5: Account for frozen weights
 
 **Trap to avoid:** Assuming a frozen model costs nothing in memory leads to under-budgeting by the full parameter size.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 6: Design equal-update tests
 
 **Trap to avoid:** Running the comparison with dropout enabled and different seeds produces differences that hide or mimic accumulation bugs.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ## Progressive hints
 
-Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.
+Hint *k* belongs to exercise *k*; open one at a time.
 
-1. Start from worked example 1 and mark the quantities needed for the task "Compute weighted accumulation".
-2. Change one assumption in worked example 2 while preserving the declared contract: find unequal-batch normalization error.
-3. Trace the CPU program's variables before adding hardware behavior: place optimizer steps.
-4. Draw producers, consumers and the exact operation boundary for the task "Explain checkpoint recomputation".
-5. Separate what the small fixture establishes from what the real runtime must show: account for frozen weights.
-6. Write a counterexample to an overbroad claim before you design equal-update tests.
+1. Weight each microbatch mean by its example count, add the products and divide by the total count.
+2. Average the two microbatch means without weights and compare the result with the full-batch mean gradient.
+3. Count the microbatches in one effective batch and place exactly one optimizer step after the last.
+4. Ask which intermediates backward needs, which were discarded and what must run again to recreate them.
+5. Ask whether a parameter with no gradient still has to be stored on the device.
+6. List everything that must match between the accumulated and full-batch runs: data order, reduction, state and randomness.
 
-## Common mistakes and self-review
+## Common mistakes and self-check
 
-Confusing a correct tiny example with a general implementation is the central review risk. For this chapter, challenge the assumption in worked example 2, then ask whether your change preserves the mechanism described above. If you change dtype, layout, ordering, batch size or backend, update the acceptance contract rather than silently reusing the old observation. Explain an unexpected result before trying random configuration changes.
+The classic mistake is averaging microbatch mean gradients equally when microbatch sizes differ. Means 2 and 8 over sizes 3 and 1 give 5 that way, but the correct effective-batch gradient is 3.5. Another mistake is stepping the optimizer after every microbatch. Fix both by weighting each microbatch by its share of examples and stepping once per effective batch, then confirming equal updates against a full batch before comparing memory or time.
 
-Keep a small evidence table with columns **claim**, **input**, **expected observation**, **actual observation** and **limit**. For the first claim use `Compute weighted accumulation`. For the final claim use `Design equal-update tests`. An unperformed GPU or cluster experiment remains pending even when the CPU model is correct.
+**Evidence limit:** The reference computes 3.5 against 5 with ordinary arithmetic. It does not run accumulation or activation checkpointing in a framework, so batch-dependent layers, random state and real peak memory must be checked with the pinned PyTorch or TensorFlow lane.
 
-## Platform and evidence contract
+1. When is dividing by the microbatch count correct?
+2. What does activation checkpointing trade?
+3. Can accumulation still differ from a full batch when weights are right?
 
-The reading worksheet and CPU reference model work through the ordinary Linux Docker classroom on macOS, Linux and Windows using WSL 2. They do not require an NVIDIA GPU. Their results are labeled CPU models or semantic oracles, not simulated hardware performance.
-
-Real CUDA work needs supported NVIDIA hardware, a compatible host driver and an explicitly prepared GPU runtime. An Apple GPU does not execute CUDA kernels. PyTorch MPS on a supported native Mac, ROCm on supported AMD hardware, or other vendor backends can provide separate accelerator learning routes; they need their own package and operation qualification and are not CUDA evidence. The ordinary Linux Docker classroom does not expose native Mac MPS automatically.
-
-Do not download packages, models or data by opening this lesson. Do not attach an engine socket, ambient cluster credentials or an arbitrary remote endpoint. A CPU pass, imported package, successful compilation, real GPU result and measured performance are distinct observations. Record the actual backend, data shape/dtype, source revision, versions and pending checks. A saved completion marker records learning progress, not hardware certification.
+Answers: [self-check answers](../solutions/cuda-099_solutions.md#self-check-answers).
 
 ## Primary references
 
 - [PyTorch CUDA semantics](https://docs.pytorch.org/docs/2.9/notes/cuda.html)
 - [TensorFlow GPU guide](https://www.tensorflow.org/guide/gpu)
 
-Use the version-matched documentation of your prepared environment. These references describe interfaces and supported boundaries; the chapter's synthetic examples and CPU models are original teaching material.
+Full lists: [documentation and sources](../../STUDY-GUIDE.md#documentation-and-sources).
 
 ## Ask an AI tutor about this lesson
 

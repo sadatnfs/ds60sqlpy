@@ -209,9 +209,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="syntax-anatomy-and-reasoning">Syntax anatomy and reasoning<a class="heading-anchor" href="#syntax-anatomy-and-reasoning" aria-label="Link to this section">#</a></h3>
 <p>make(chan int, 2) creates a two-element buffer. value, ok := &lt;-ch distinguishes a delivered value from the zero value after closure. range ch receives until closed and drained. chan&lt;- int restricts a parameter to sending; &lt;-chan int restricts it to receiving. len(ch) is a transient observation rather than a synchronization protocol.</p>
 <h3 id="run-this-lesson">Run this lesson<a class="heading-anchor" href="#run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>Choose Go in the unified Docker classroom. Save your own pad before experimenting. The prepared worker stages it as <code>main.go</code>, compiles it, and executes the resulting program with bounded time and output. The pad is one source file. It does not supply interactive input, arbitrary command-line arguments, package installation, Kubernetes credentials or a host Docker socket. Every ordinary reference here uses the standard library, synthetic local data and explicit checks. A failed <code>check</code> panics and produces a nonzero process result; do not remove it to make the run appear successful.</p>
-<p>The explanatory solution snippets belong inside <code>func main()</code> unless they declare a helper. <code>check</code> is a tiny teaching helper that panics when a condition is false. The separate reference supplies required imports and helpers and implements all six cases. Use that complete source only after an attempt or an explicit reveal. For an independently prepared Go project, the equivalent local build is <code>go build -o lesson main.go</code>, followed by <code>./lesson</code>; use Linux or WSL 2 for that optional workflow. Compiling proves syntax and type consistency, while the executed checks establish the stated example contracts.</p>
-<p>Each worked example below is a complete Go file. Copy one whole block into your saved pad and run it. Example 2 includes the first case as well as the second, so its setup is complete. Its supporting declarations may be reused in later investigations. The separate reference implements all six cases.</p>
+<p>Run each worked example as one complete file in your saved pad (<a href="../STUDY-GUIDE.md.html#run-a-lesson">run steps</a>).</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1-drain-before-iteration-ends">Worked example 1: Drain before iteration ends<a class="heading-anchor" href="#worked-example-1-drain-before-iteration-ends" aria-label="Link to this section">#</a></h4>
 <p>Buffer 2 and 3, close and sum the channel.</p>
@@ -286,77 +284,79 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Observe:</strong> The first zero has ok true; the second has ok false.</p>
 <p>Value equality cannot distinguish a delivered zero from the post-closure zero. The boolean carries completion information.</p>
 <h3 id="predict-before-running">Predict before running<a class="heading-anchor" href="#predict-before-running" aria-label="Link to this section">#</a></h3>
-<p>For each example, write the input values, the state that can change, and the expected observation. Explain which result would disprove your current interpretation. For concurrency, predict a guaranteed relationship rather than an arbitrary scheduling order. For an error case, identify whether it is rejected at compilation or returned during execution.</p>
+<p>Predict whether range over the buffered channel ends before or after both values are received, and what happens if close is removed. For the zero-and-closed case, predict both value and ok for each receive. For the nil select arm, decide whether it can ever be chosen, and for the slice case, predict the received element after the original is changed.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-drain-before-iteration-ends-change-one-input">Exercise 1: Drain before iteration ends: change one input<a class="heading-anchor" href="#exercise-1-drain-before-iteration-ends-change-one-input" aria-label="Link to this section">#</a></h4>
-<p>Copy worked example 1 into a scratch pad and change <code>ch &lt;- 2</code> to <code>ch &lt;- 3</code>. Before running, predict which check fails and which value it now sees; then run it and restore the original line.</p>
-<p><strong>Expected:</strong> The changed run panics with <code>drain</code> because <code>sum == 5</code> no longer holds. Restoring the original line brings back the worked observation: both values arrive and the sum is 5.</p>
-<p><strong>Verify:</strong> Compare your written prediction with the panic message <code>drain</code> and name the value that made <code>sum == 5</code> false. After restoring the input, the program must print its success line again.</p>
+<p>Copy worked example 1, change <code>ch &lt;- 2</code> to <code>ch &lt;- 3</code> and predict the failure before running; then restore the line.</p>
+<p><strong>Expected:</strong> The edited run panics with <code>drain</code> because <code>sum == 5</code> no longer holds.</p>
+<p><strong>Verify:</strong> Restoring <code>ch &lt;- 2</code> makes the check pass again with the worked observation: both values arrive and the sum is 5.</p>
 <h4 id="exercise-2-distinguish-zero-from-closed-debug-a-regression">Exercise 2: Distinguish zero from closed: debug a regression<a class="heading-anchor" href="#exercise-2-distinguish-zero-from-closed-debug-a-regression" aria-label="Link to this section">#</a></h4>
-<p>A regression changed one token in worked example 2, so one line now reads <code>ch &lt;- 1</code>. Run worked example 2 with that line, use the failure to locate the defect and repair it without changing the check.</p>
-<p><strong>Expected:</strong> Before the repair the program panics with <code>closed presence</code>; after it the line reads <code>ch &lt;- 0</code> again and the first zero has ok true; the second has ok false.</p>
-<p><strong>Verify:</strong> Keep the failing and the repaired runs. Explain why the changed token alters the value tested by <code>a == 0 &amp;&amp; b == 0 &amp;&amp; okA &amp;&amp; !okB</code> for this input.</p>
+<p>A one-token regression in worked example 2 makes a line read <code>ch &lt;- 1</code>. Repair it without changing the check.</p>
+<p><strong>Expected:</strong> The defective run panics with <code>closed presence</code>; after restoring <code>ch &lt;- 0</code>, the first zero has ok true; the second has ok false.</p>
+<p><strong>Verify:</strong> The failing run shows message <code>closed presence</code>; after the repair <code>a == 0 &amp;&amp; b == 0 &amp;&amp; okA &amp;&amp; !okB</code> holds again.</p>
 <h4 id="exercise-3-use-sender-ownership">Exercise 3: Use sender ownership<a class="heading-anchor" href="#exercise-3-use-sender-ownership" aria-label="Link to this section">#</a></h4>
 <p>Run a producer sending 1 and 2 before closing output.</p>
 <p><strong>Expected:</strong> The consumer receives exactly two values.</p>
-<p><strong>Verify:</strong> Keep a check equivalent to <code>count == 2</code>. As a control, change <code>count := 0</code> to <code>count := 1</code>: the run must panic with <code>producer close</code>. Restore the line before continuing.</p>
+<p><strong>Verify:</strong> Your solution must keep <code>count == 2</code> true. Control: changing <code>count := 0</code> to <code>count := 1</code> panics with message <code>producer close</code>; revert it.</p>
 <h4 id="exercise-4-inspect-bounded-buffering">Exercise 4: Inspect bounded buffering<a class="heading-anchor" href="#exercise-4-inspect-bounded-buffering" aria-label="Link to this section">#</a></h4>
 <p>Fill a channel of capacity two without a receiver.</p>
 <p><strong>Expected:</strong> Its buffered length is two.</p>
-<p><strong>Verify:</strong> Keep a check equivalent to <code>len(ch) == 2 &amp;&amp; cap(ch) == 2</code>. As a control, change <code>ch := make(chan int, 2)</code> to <code>ch := make(chan int, 3)</code>: the run must panic with <code>buffer</code>. Restore the line before continuing.</p>
+<p><strong>Verify:</strong> Your solution must keep <code>len(ch) == 2 &amp;&amp; cap(ch) == 2</code> true. Control: changing <code>ch := make(chan int, 2)</code> to <code>ch := make(chan int, 3)</code> panics with message <code>buffer</code>; revert it.</p>
 <h4 id="exercise-5-disable-a-nil-select-arm">Exercise 5: Disable a nil select arm<a class="heading-anchor" href="#exercise-5-disable-a-nil-select-arm" aria-label="Link to this section">#</a></h4>
 <p>Select between nil and a ready closed channel.</p>
 <p><strong>Expected:</strong> Only the ready arm can proceed.</p>
-<p><strong>Verify:</strong> Keep a check equivalent to <code>selected</code>. As a control, change <code>selected = true</code> to <code>selected = false</code>: the run must panic with <code>nil arm</code>. Restore the line before continuing.</p>
+<p><strong>Verify:</strong> Your solution must keep <code>selected</code> true. Control: changing <code>selected = true</code> to <code>selected = false</code> panics with message <code>nil arm</code>; revert it.</p>
 <h4 id="exercise-6-transfer-independent-message-storage">Exercise 6: Transfer independent message storage<a class="heading-anchor" href="#exercise-6-transfer-independent-message-storage" aria-label="Link to this section">#</a></h4>
 <p>Send a copied slice, then mutate its original.</p>
 <p><strong>Expected:</strong> The received copy stays 1.</p>
-<p><strong>Verify:</strong> Keep a check equivalent to <code>received[0] == 1</code>. As a control, change <code>original := []int{1}</code> to <code>original := []int{2}</code>: the run must panic with <code>copy</code>. Restore the line before continuing.</p>
-<p>Implement these in the answer-free learner source. Keep one independent check per claim. A task can require tracing, construction, a changed input or a deliberate safe failure. Do not run a data race, corrupt memory or contact a shared cluster merely to demonstrate why it would be wrong.</p>
+<p><strong>Verify:</strong> Your solution must keep <code>received[0] == 1</code> true. Control: changing <code>original := []int{1}</code> to <code>original := []int{2}</code> panics with message <code>copy</code>; revert it.</p>
+<p>Work in the answer-free learner source, <code>courses/go/lessons/go-025.go</code> (<a href="../STUDY-GUIDE.md.html#work-an-exercise">exercise contract</a>).</p>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
-<p>Read a compiler error from the first location in your source, then fix one cause at a time. Unused imports and variables are errors in Go; add an import when its use exists, rather than copying a large unused import list. A panic from <code>check</code> identifies a violated example contract. Compare the actual value with the expected value and inspect the state transition that produced it. A returned <code>error</code> is a value that the caller must handle; an ignored error can make later output look plausible while the original operation failed.</p>
-<p>The lesson-specific explanations in the two examples identify the important counterexamples. Extend that reasoning to every investigation: explain why a plausible alternative would fail, and preserve a tiny input that distinguishes it. Treat empty data, missing values and cancellation as domain cases with explicit policies. In concurrent work, replace sleeps used as synchronization with channels, mutexes or an explicit ownership protocol.</p>
+<p>Closing a channel from the receiver, or from one of several senders, is the classic ownership bug: a later send panics. Only the sender that knows no more values will come should close. A related surprise is treating a receive of zero as a real message; use comma-ok when closure matters. Buffering also does not copy referenced data, so a slice sent through a channel is still shared.</p>
+<p>General compiler, panic and error diagnosis is in the <a href="../STUDY-GUIDE.md.html#diagnose-a-failure">study guide</a>.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <h4 id="hint-for-investigation-1-drain-before-iteration-ends-change-one-input">Hint for investigation 1: Drain before iteration ends: change one input<a class="heading-anchor" href="#hint-for-investigation-1-drain-before-iteration-ends-change-one-input" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: Both values arrive and the sum is 5.</li>
-<li>The check <code>sum == 5</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Compute the checked value with <code>ch &lt;- 3</code> in place before running, then compare it with the value <code>sum == 5</code> expects.</li>
+<li>range over a channel stops after close and drain. Which values remain in the buffer?</li>
+<li>The buffer now holds 3 and 3, so the drained sum is 6 and <code>sum==5</code> fails. Draining still works; the first value changed.</li>
 </ol>
 <h4 id="hint-for-investigation-2-distinguish-zero-from-closed-debug-a-regression">Hint for investigation 2: Distinguish zero from closed: debug a regression<a class="heading-anchor" href="#hint-for-investigation-2-distinguish-zero-from-closed-debug-a-regression" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The first zero has ok true; the second has ok false.</li>
-<li>The check <code>a == 0 &amp;&amp; b == 0 &amp;&amp; okA &amp;&amp; !okB</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Compare <code>ch &lt;- 1</code> with the same line in worked example 2 and state the claim each version makes.</li>
+<li>A closed channel yields zero values forever. Which return value separates a real 0 from closure?</li>
+<li>The first receive yields 1, not 0, so <code>a==0</code> fails although okA and !okB still hold. The closure semantics are fine; restore the sent zero.</li>
 </ol>
 <h4 id="hint-for-investigation-3-use-sender-ownership">Hint for investigation 3: Use sender ownership<a class="heading-anchor" href="#hint-for-investigation-3-use-sender-ownership" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The consumer receives exactly two values.</li>
-<li>The check <code>count == 2</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Predict the effect of changing <code>count := 0</code> to <code>count := 1</code> before running anything. If the prediction is hard, trace that line again with the original input.</li>
+<li>produce defers close after its sends. How many values does range receive?</li>
+<li>The producer knows all sends are finished.</li>
 </ol>
 <h4 id="hint-for-investigation-4-inspect-bounded-buffering">Hint for investigation 4: Inspect bounded buffering<a class="heading-anchor" href="#hint-for-investigation-4-inspect-bounded-buffering" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: Its buffered length is two.</li>
-<li>The check <code>len(ch) == 2 &amp;&amp; cap(ch) == 2</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Predict the effect of changing <code>ch := make(chan int, 2)</code> to <code>ch := make(chan int, 3)</code> before running anything. If the prediction is hard, trace that line again with the original input.</li>
+<li>len reports buffered values and cap the capacity. What do both hold with no receiver?</li>
+<li>This sequential fixture has an exact count.</li>
 </ol>
 <h4 id="hint-for-investigation-5-disable-a-nil-select-arm">Hint for investigation 5: Disable a nil select arm<a class="heading-anchor" href="#hint-for-investigation-5-disable-a-nil-select-arm" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: Only the ready arm can proceed.</li>
-<li>The check <code>selected</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Predict the effect of changing <code>selected = true</code> to <code>selected = false</code> before running anything. If the prediction is hard, trace that line again with the original input.</li>
+<li>A receive from a nil channel blocks forever. Which arm can proceed?</li>
+<li>Nil can deliberately disable an unneeded select case.</li>
 </ol>
 <h4 id="hint-for-investigation-6-transfer-independent-message-storage">Hint for investigation 6: Transfer independent message storage<a class="heading-anchor" href="#hint-for-investigation-6-transfer-independent-message-storage" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The received copy stays 1.</li>
-<li>The check <code>received[0] == 1</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Predict the effect of changing <code>original := []int{1}</code> to <code>original := []int{2}</code> before running anything. If the prediction is hard, trace that line again with the original input.</li>
+<li>append onto a nil slice copies the elements. Which storage does the receiver see?</li>
+<li>A channel sends the slice descriptor.</li>
 </ol>
 <h3 id="self-check-and-retrieval">Self-check and retrieval<a class="heading-anchor" href="#self-check-and-retrieval" aria-label="Link to this section">#</a></h3>
-<p>Close the reference. Rebuild one normal case and one boundary case from a blank pad. Explain the role of backpressure without using its name in the definition. Then change the domain while keeping the same invariant. Record the new input, your prediction and the observed output. If your program passes only because its input is hard-coded, explain which part would need a reusable function in a larger project.</p>
+<p>Write a producer that sends the words of a sentence on a channel it owns and closes, and a consumer that counts them with range. Check the count, then add a second receive after the loop and check with comma-ok that the channel reports closed. Explain which goroutine is allowed to close, and why.</p>
+<p>The general <a href="../STUDY-GUIDE.md.html#self-check-and-retrieval">retrieval routine</a> still applies.</p>
 <h3 id="next-step-and-sources">Next step and sources<a class="heading-anchor" href="#next-step-and-sources" aria-label="Link to this section">#</a></h3>
-<p><a href="https://go.dev/ref/spec#Channel_types">Primary language or library documentation</a>, reviewed 2026-10-23. The teaching explanations and synthetic fixtures are original. Continue with the next lesson when you can explain the six observations and diagnose a changed case without copying its answer.</p>
+<p>Source: <a href="https://go.dev/ref/spec#Channel_types">Go specification: channel types</a>, reviewed 2026-10-23.</p>
+<p>Next: go-026, Select, contexts and cancellation trees (<a href="../STUDY-GUIDE.md.html#when-to-move-on">criteria</a>).</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for go-025: Channels, buffering and close ownership.
 Read courses/go/guides/go-025.md and my saved attempt based on courses/go/lessons/go-025.go.

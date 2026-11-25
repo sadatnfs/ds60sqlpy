@@ -1,6 +1,6 @@
 # docker-013: explanatory solutions
 
-Compare after your own attempt or an explicit reveal. These explain the supplied teaching fixtures; they are not engine results. The mechanism is explained in `courses/docker/guides/docker-013.md`.
+These answers explain teaching fixtures, not engine results; the mechanism is in [the guide](../guides/docker-013.md).
 
 ## Exercise 1: Predict data retention after app recreation.
 
@@ -88,4 +88,4 @@ Compare after your own attempt or an explicit reveal. These explain the supplied
 
 ## Check your transfer
 
-A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.
+Yes. The volume belongs to neither container, so removing and recreating the app does not touch it, and the reporting service keeps reading the same `counter.json` through its read-only mount. The file disappears for both only when the volume itself changes: `docker compose down -v`, an explicit `docker volume rm`, or a project name change that makes Compose create and mount a new, empty volume. If the reporting service saw no file after the recreation, compare the `Mounts` section of `docker inspect` for both containers; two different volume names would disprove the shared-volume assumption.

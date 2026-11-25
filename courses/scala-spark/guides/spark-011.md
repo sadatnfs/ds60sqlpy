@@ -1,22 +1,26 @@
 # spark-011: PySpark bridge: Python values versus Spark Columns
 
-Authored paired Scala/PySpark teaching content. The default fixtures are tiny, local and deterministic. Runtime acceptance, logical correctness and learner understanding remain separate evidence.
+This is the entry point for learners who already know Python. Four events, one with a missing amount and two with the same 20-cent amount, show the one idea that trips Python programmers most often: `amount_cents > 10` on a Column is not a True or False on your machine but an instruction Spark evaluates once per row.
 
 ## Level and prerequisites
 
-Beginner; approximately 75 minutes. Direct prerequisites: `spark-001`, `python-10`. The prepared baseline is Spark 4.3.0, Scala binary 2.13, JDK 17 and Python 3.12. Read the [execution baseline](../execution-baseline.md).
+Beginner; approximately 75 minutes. Direct prerequisites: `spark-001`, `python-10`. Pinned versions: [execution baseline](../execution-baseline.md).
 
 ## How to run this lesson
 
-Open `spark-011` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile, save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`; Python stages as `main.py` with a main guard. Each program creates its own `local[2]` session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.
+Shared run steps and profile rules: [study guide](../STUDY-GUIDE.md#run-a-paired-lesson).
 
-The [Scala learner](../lessons/spark-011.scala) and [PySpark learner](../lessons/spark-011.py) run two complete demonstrations and retain six explicit task stubs. Use the [explained solutions](../solutions/spark-011_solutions.md) only after an attempt or an explicit worked comparison; the [Scala reference](../solutions/spark-011_solution.scala) and [PySpark reference](../solutions/spark-011_solution.py) contain complete assertions. A bounded collect is used only for the declared tiny fixture; do not copy it onto an unbounded or large production table.
+Learner pads: [Scala](../lessons/spark-011.scala) and [PySpark](../lessons/spark-011.py).
+
+Open the [explained solutions](../solutions/spark-011_solutions.md) after an attempt.
+
+The first worked example sets a driver value `3 > 1` next to the Column `amount_cents > 10` and filters with the Column, printing `A Column describes row-wise engine work` once IDs 2 and 4 come back. The second filters twice, once with `isNull` and once with equality to zero, and prints `Missing amount and observed zero are different rows` after ID 3 and ID 1 land in different results.
 
 ## Learning objectives
 
 - Translate known Python collections and tests into explicit Spark expressions while keeping Python and engine execution distinct.
-- State the input and output grain, schema, NULL policy and ordering before executing a transformation.
-- Compare each language implementation with independent literal expectations, not only with the other implementation.
+- Build a Column predicate for `amount_cents > 10`, apply it with `filter`, and explain why calling Python `bool()` on that predicate raises `ValueError` instead of returning one answer.
+- Separate the missing amount (ID 3, found with `isNull`) from the observed zero (ID 1, found with `== 0`), and keep event IDs beside every derived amount so the two 21-cent results stay two events.
 
 ## Vocabulary and concepts
 
@@ -32,9 +36,9 @@ The [Scala learner](../lessons/spark-011.scala) and [PySpark learner](../lessons
 
 A Python Boolean and a Spark Column are different kinds of objects. `3 > 1` is already true on the driver. `F.col("amount_cents") > F.lit(10)` describes a comparison that Spark will evaluate for each row. Calling Python bool on that Column asks for one truth value from a distributed expression and is rejected. Python and/or/not have scalar short-circuit semantics, so they are not the operators for combining Spark predicates.
 
-In PySpark, use parenthesized &,| and ~ expressions or Column methods. In Scala, Column overloads such as &&,|| and ! construct engine expressions; they are distinct from applying ordinary driver Boolean logic to collected rows. Parentheses matter in Python because operator precedence can otherwise combine constants and Columns in an unintended order. Write each comparison as a complete unit before combining it.
+In PySpark, use parenthesized `&`, `|` and `~` expressions or Column methods. In Scala, Column overloads such as `&&`, `||` and `!` construct engine expressions; they are distinct from applying ordinary driver Boolean logic to collected rows. Parentheses matter in Python because operator precedence can otherwise combine constants and Columns in an unintended order. Write each comparison as a complete unit before combining it.
 
-The four-row fixture has unique event IDs and amounts 0,20, NULL,20. The two 20-cent values are different events. Filtering amount>10 should retain IDs 2 and 4, while the NULL comparison is unknown and does not pass WHERE/filter. Observed zero is not missing. Use isNull to find the missing amount and equality to 0 to find the observed zero; Python `is None` tests the Column object's identity rather than the row values.
+The four-row fixture has unique event IDs and amounts 0, 20, NULL and 20. The two 20-cent values are different events. Filtering `amount_cents > 10` should retain IDs 2 and 4, while the NULL comparison is unknown and does not pass WHERE/filter. Observed zero is not missing. Use isNull to find the missing amount and equality to 0 to find the observed zero; Python `is None` tests the Column object's identity rather than the row values.
 
 select constructs output columns and can preserve or change which identity is visible. Adding one to amount propagates NULL under SQL arithmetic. Replacing it with zero would be a separate imputation policy, not ordinary addition. The exercise retains event_id beside every derived amount so equal output values do not invite accidental deduplication.
 
@@ -46,7 +50,7 @@ This bridge assumes the existing Python testing lesson and does not require comp
 
 ## Supplied local fixture
 
-The complete source creates the owned local session described above, then constructs this explicit fixture. The worked examples below run in that same main function; there is no hidden notebook state.
+The fixture has exactly two columns: a non-nullable `event_id` and a nullable `amount_cents`. Row 3 carries the only NULL, row 1 carries an observed 0, and rows 2 and 4 share the value 20. The Scala version spreads the four rows over two partitions with `parallelize`; the PySpark version lets `createDataFrame` choose, which does not change any expected result.
 
 ```scala
 import org.apache.spark.sql.{Column, Row}
@@ -198,11 +202,14 @@ If Python reports that a Column cannot be converted to bool, inspect and/or/not 
 
 ## Self-check
 
-Explain the contract of `aboveTen` / `above_ten` without reading its solution. Then, from memory, state what Exercise 6 (Compare SQL and Columns with an independent expectation) must produce: Both paths return `[2, 4]`. The temporary view exists only in this owned session and no external database connection is opened. Say which part of that result is evidence and what it still cannot show. Name the action in your trace that actually runs the plan.
+- Your colleague writes `raw.filter(F.col("amount_cents") > 10 and F.col("event_id") < 4)`. What happens when Python evaluates that `and`, and how do you rewrite it with parenthesized `&`?
+- Why does `amount_cents > 10` leave out ID 3 even though nobody wrote a rule about missing values? Name the three-valued result that the comparison produces for that row.
+- Exercise 5 adds 1 to every amount. Predict all four `(event_id, amount)` pairs and say why ID 3 must not become 1.
+- Exercise 6 checks the SQL path and the Column path against the literal `[2, 4]` rather than against each other. What mistake would slip through if both paths were only compared with one another?
 
 ## Next step
 
-Use the [course route](../README.md) to continue. Paired-language agreement is useful only when both outputs also satisfy the independent fixture contract. A successful local run is not evidence of cluster performance or production recovery.
+Go on to [spark-012: SparkSession, explicit schemas, and bounded actions](spark-012.md). You have now seen that a Column is a description of work; the next lesson makes the session, the schema and the moment of execution explicit, and puts a hard budget on how many rows an action may bring back to the driver.
 
 ## Primary sources and official APIs
 

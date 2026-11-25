@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/docker/solutions/docker-037_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="docker-037-explanatory-solutions">docker-037: explanatory solutions<a class="heading-anchor" href="#docker-037-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit reveal. These explain the supplied teaching fixtures; they are not engine results. The mechanism is explained in <code>courses/docker/guides/docker-037.md</code>.</p>
+<p>These answers explain teaching fixtures, not engine results; the mechanism is in <a href="../guides/docker-037.md.html">the guide</a>.</p>
 <h3 id="exercise-1-distinguish-tls-and-application-authorization">Exercise 1: Distinguish TLS and application authorization.<a class="heading-anchor" href="#exercise-1-distinguish-tls-and-application-authorization" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Encrypted authenticated transport versus permission for an action.</p>
 <p><strong>Why:</strong> A correctly encrypted request can still be unauthorized. The application must decide who may read or change its data.</p>
@@ -238,7 +238,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>A plausible wrong approach:</strong> Changing the bind to 0.0.0.0 and calling it published exposes an unauthenticated writable counter.</p>
 <p><strong>How to verify:</strong> The publication note marks each item as designed, tested or missing before any exposure.</p>
 <h3 id="check-your-transfer">Check your transfer<a class="heading-anchor" href="#check-your-transfer" aria-label="Link to this section">#</a></h3>
-<p>A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.</p></article>
+<p>The warning comes from the TLS identity check between the browser and the proxy: the certificate the proxy presents does not list the DNS name users typed. The container port sits behind the proxy and plays no part in that check, so changing it fixes nothing and may break the upstream route. The fix is a certificate whose subject alternative names include that DNS name, installed on the proxy. <code>openssl s_client -connect</code> with <code>-servername</code> set to that name should show it; if the warning persists, users are reaching a different endpoint.</p></article>
   </main>
 </body>
 </html>

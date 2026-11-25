@@ -10,31 +10,19 @@ Intermediate. Direct catalog prerequisites: `python-20`. This lesson deepens the
 
 ## Learning objectives
 
-By the end, explain the mechanism in your own words, implement each bounded contract, and use a counterexample to distinguish a correct result from a plausible mistake. The six exercises progress from inspection to transformation, edge handling and transfer.
+By the end, you can predict how pandas aligns two Series by label before arithmetic or assignment, and refuse to proceed when the label sets differ instead of accepting the NaN-filled union. You will keep three-valued nullable logic visible, select only known True rows, record whether a reindexed label existed, and concatenate frames only when columns, dtypes and row identities agree.
 
 ## How to run this lesson
 
-**Primary browser route:** run `./classroom` from the repository root and
-choose **Python and data science** on `/classroom`. Open this lesson in the shared workspace,
-read its capability notice, and use its supported coding or reading workflow.
-The [classroom guide](../../../docs/classroom-experience.md) explains saved work, runtimes and switching subjects.
+The [learner script](../lessons/py_pandas_01.py) needs pandas and NumPy. Its worked examples subtract `[1, 2]` labeled `a, b` from `[20, 10]` labeled `b, a` and get `{'a': 9, 'b': 18}`, where positional NumPy subtraction gives 19 and 8, then show that an `Int64` comparison leaves the missing row as `<NA>`, so the Boolean mask keeps only row `a`.
 
-**Optional contributor route:** use the prepared environment in
-[CONTRIBUTING](../../../CONTRIBUTING.md) on Linux, macOS or Windows through
-WSL 2. The commands below assume its packages are already installed. They are
-not prerequisites for opening this lesson in the Docker classroom. Local
-`.learning/` files and CLI progress belong to this checkout; they do not read or
-update the Docker classroom's named learning volume.
-
-Open the [learner script](../lessons/py_pandas_01.py) in the prepared repository environment. In the Docker classroom, edit the saved learner pad; drafts, notes and results persist in the classroom learning volume. An ignored `.learning/` copy is a separate optional contributor workspace. Run from the repository root. The provided worked examples execute immediately; task functions intentionally raise `NotImplementedError` until you implement them. A successful example is not evidence that the six tasks are finished.
-
-Prepared POSIX/WSL contributor terminal:
+The [Python study guide](../../STUDY-GUIDE.md) covers the browser classroom and this prepared-checkout run:
 
 ```sh
 uv run --no-sync python python/professional/lessons/py_pandas_01.py
 ```
 
-Dependencies: pandas and NumPy. All fixtures are tiny and local. The terminal prints the worked results and stops without editing your files. Keep [explanatory solutions](../solutions/py_pandas_01_solutions.md) and [runnable reference](../solutions/py_pandas_01_solution.py) closed until an attempt or an explicit worked comparison.
+After your attempt, compare `aligned_difference` and `assign_by_label` with the [runnable reference](../solutions/py_pandas_01_solution.py), checking which label problems each rejects before any arithmetic runs. Use the [explanatory solutions](../solutions/py_pandas_01_solutions.md) to check the `present` column of `reindex_with_presence` for a label whose source value is missing.
 
 ## Vocabulary and mental model
 
@@ -120,11 +108,11 @@ If arithmetic yields unexpected NaNs, compare the index sets before filling valu
 
 ## Self-check and retrieval
 
-Without copying code, explain which input property each function assumes, which observable result proves the normal case, and which counterexample would expose an incorrect implementation. Trace one boundary input by hand before running it. Keep the input and expected output beside your saved result so a reviewer can reproduce the evidence.
+Trace `nullable_positive` on an `Int64` Series `[1, <NA>, -2]`: the mask is `[True, <NA>, False]` with dtype `boolean`, and `select_known_true` keeps only the first row. Then reindex values labeled `a, b`, with `b` missing, to targets `b, c`: `b` is present with a missing value and `c` is absent, a difference a plain `reindex` cannot show.
 
 ## Next steps
 
-Use these mechanisms in the next deepening lesson or return to the original prerequisite examples and explain precisely which new failure cases you can now diagnose. Review the [professional track](../README.md) for related modules.
+Next, [join contracts and point-in-time feature lookup](py_pandas_02.md) applies the same label discipline to merges, where a key mismatch silently adds rows or missing values. The [professional track](../README.md) lists the other modules.
 
 ## Primary sources and official APIs
 

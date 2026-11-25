@@ -194,7 +194,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/swift/solutions/swift-020_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="swift-020-explanation-and-comparison">swift-020: explanation and comparison<a class="heading-anchor" href="#swift-020-explanation-and-comparison" aria-label="Link to this section">#</a></h2>
-<p>Attempt the six guide tasks before opening this comparison. The executable reference is <a href="swift-020_solution.swift.html">swift-020_solution.swift</a>. It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.</p>
+<p>Reference program: <a href="swift-020_solution.swift.html">swift-020_solution.swift</a>, covering both examples and the executed answers.</p>
+<p>Attempt the tasks first; see <a href="../STUDY-GUIDE.md.html#comparing-with-the-explanation">comparing with the explanation</a>.</p>
 <h3 id="why-the-two-examples-differ">Why the two examples differ<a class="heading-anchor" href="#why-the-two-examples-differ" aria-label="Link to this section">#</a></h3>
 <p><strong>Use slice indices honestly:</strong> Element count and index origin are different properties. The slice starts at index 1 while traversal still produces two elements.</p>
 <p><strong>Materialize a lazy transformation:</strong> Pure transformations keep delayed execution understandable and reproducible. The lazy recipe produces 20 and 30 when consumed.</p>
@@ -262,7 +263,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>OneShot is its own iterator and consumes its state, so a second traversal sees an empty sequence; Sequence does not promise repeatable iteration.</p>
 <h4 id="task-6-transfer-and-justify">Task 6: Transfer and justify<a class="heading-anchor" href="#task-6-transfer-and-justify" aria-label="Link to this section">#</a></h4>
 <p>Choose lazy or materialized processing for a large input and explain repeatability and memory costs.</p>
-<p>No single reference answer exists: several designs can satisfy this transfer task. Build yours from the task 3 answer above (Write a generic sum over Sequence where the element type is suitable) and the mechanism described below, and state one limitation of your choice.</p>
+<p>No single answer exists; extend task 3 using the <a href="../STUDY-GUIDE.md.html#open-transfer-tasks">open transfer routine</a>.</p>
 <h3 id="solution-reasoning">Solution reasoning<a class="heading-anchor" href="#solution-reasoning" aria-label="Link to this section">#</a></h3>
 <p><strong>Approach.</strong> Example A slices <code>[10, 20, 30, 40]</code> with <code>1...2</code> and checks the slice&#x27;s <code>startIndex</code> separately from its contents. Example B builds a lazy filter-then-map pipeline over <code>[1, 2, 3]</code> and materializes it with <code>Array</code>. The task 3 answer is a generic sum over any Sequence whose elements are numeric.</p>
 <p><strong>Why it is correct.</strong> An <code>ArraySlice</code> shares indices with its base array, so the slice starts at 1, contains 20 and 30, and maps to <code>[2, 3]</code>. The lazy pipeline does nothing until <code>Array(transformed)</code> iterates it; then 1 is filtered out and 2 and 3 become 20 and 30. In task 3 the same function sums Ints to 6 and Doubles to 4.0, and returns 0 for an empty sequence.</p>
@@ -274,7 +275,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><code>collection.indices</code> supplies valid positions. <code>lazy.map</code> creates deferred transformation. <code>Array(sequence)</code> materializes. reduce summarizes a sequence without requiring indexing.</p>
 <p>Not every Sequence can be traversed repeatedly. Index movement may be linear. Side effects in lazy closures can run later or more often than a caller expects.</p>
 <h3 id="review-before-continuing">Review before continuing<a class="heading-anchor" href="#review-before-continuing" aria-label="Link to this section">#</a></h3>
-<p>Run the reference and confirm that it prints <code>swift-020: passed</code>, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.</p></article>
+<p>Run the reference and confirm it prints <code>swift-020: passed</code>, then rerun the guide&#x27;s counterexample.</p></article>
   </main>
 </body>
 </html>

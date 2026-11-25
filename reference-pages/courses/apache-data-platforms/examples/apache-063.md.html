@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/apache-data-platforms/examples/apache-063.md</code></p>
     </header>
     <article class="document"><h2 id="hive-apache-063-command-notebook">Hive apache-063 command notebook<a class="heading-anchor" href="#hive-apache-063-command-notebook" aria-label="Link to this section">#</a></h2>
-<p>Run from the copied owned Hive project, following its README. Native service acceptance is separately recorded in QUALIFICATION.md.</p>
+<p>Run the seven Hive actions in this order from the copied project. PostgreSQL starts first because <code>initialize-schema</code> writes the Metastore tables into it, and only <code>initialize</code> registers the three-row Parquet fixture.</p>
 <pre class="highlighted-code"><code class="language-bash">bash run.sh prepare
 bash run.sh start-db
 bash run.sh initialize-schema
@@ -203,7 +203,7 @@ bash run.sh initialize
 bash run.sh check
 bash run.sh metadata</code></pre>
 <p>The metadata probe reads actual Thrift table/partition metadata independently from Beeline and data files.</p>
-<p>The classroom does not execute these Docker commands. Retain source, schema, file identities, actual responses and failure scope in an independent receipt.</p></article>
+<p>QUALIFICATION.md records this full path as accepted with Hive 4.2.1 and PostgreSQL 17.6 on Linux ARM64. Keep the Thrift metadata answer and the Beeline rows as two receipt entries, because the probe never reads the data files.</p></article>
   </main>
 </body>
 </html>

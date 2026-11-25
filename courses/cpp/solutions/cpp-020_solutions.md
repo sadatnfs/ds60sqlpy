@@ -1,6 +1,6 @@
 # cpp-020: explanations and reference observations
 
-Attempt the learner tasks before opening this document. The executable reference checks the bounded normal and boundary examples; the six explanations below cover the deliberate changes and manual checks.
+The [executable reference](cpp-020_solution.cpp) checks the zero identity `7 + 0` for both int and long long. The explanations show where a constraint rejects a type and how deduction picks each instantiation. How to compare: [study guide](../STUDY-GUIDE.md#compare-with-the-solutions).
 
 ## Mechanism
 

@@ -137,7 +137,7 @@ The file format records batch locations in a footer, so the reader knows there a
 
 ## Complete worked source
 
-This is a complete editable worked program for the declared prepared runtime. It uses bounded local fixtures and does not install packages or start distributed services.
+Run it as the [worked program rules](../STUDY-GUIDE.md#worked-programs) describe.
 
 ```python
 import pyarrow as pa

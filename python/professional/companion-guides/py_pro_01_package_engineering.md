@@ -104,34 +104,16 @@ Both artifacts are valuable:
 
 ## How to run this lesson
 
-**Primary browser route:** run `./classroom` from the repository root and
-choose **Python and data science** on `/classroom`. Open this lesson in the shared workspace,
-read its capability notice, and use its supported coding or reading workflow.
-The [classroom guide](../../../docs/classroom-experience.md) explains saved work, runtimes and switching subjects.
+The learner module leaves three release contracts open: `classify_artifact`
+recognizes `.whl` and `.tar.gz` files, `offline_build_command` returns an
+argument list for a `--no-isolation` build, and `installed_origin_is_safe`
+refuses the working-tree `src` directory as proof of installation.
 
-**Optional contributor route:** use the prepared environment in
-[CONTRIBUTING](../../../CONTRIBUTING.md) on Linux, macOS or Windows through
-WSL 2. The commands below assume its packages are already installed. They are
-not prerequisites for opening this lesson in the Docker classroom. Local
-`.learning/` files and CLI progress belong to this checkout; they do not read or
-update the Docker classroom's named learning volume.
-
-Work from the repository root. First run the answer-free learner
-module named in this guide's original walkthrough. Read each TODO as a
-contract: record the input, returned value, raised exception, and side
-effect before implementing it. Then run the focused test command in
-**Self-check**. Keep exploratory changes in a copy or a new test; the
-checked-in solution remains a comparison artifact.
-
-Prepared POSIX/WSL contributor terminal:
+The [Python study guide](../../STUDY-GUIDE.md) covers the browser classroom and this prepared-checkout run:
 
 ```sh
 uv run --no-sync python python/professional/lessons/py_pro_01_package_engineering.py
 ```
-
-The focused test command is shown in **Self-check** below. The learner
-module is intentionally answer-free, so `TODO` output is the expected
-starting state rather than a setup failure.
 
 ## Mechanism lab: two small examples before the full system
 
@@ -285,9 +267,9 @@ the fresh target.
 
 ### Extended professional practice
 
-These exercises move from prediction and implementation through debugging,
-operational trade-offs, and review. Keep the default path deterministic and
-offline; optional connected behavior must remain explicit.
+The remaining tasks rebuild the wheel from the sdist, read installed
+metadata without importing, separate identical bytes from equivalent
+behavior, test markers per target and design a release gate.
 
 ### Exercise 6: build a wheel from the source distribution
 
@@ -383,8 +365,7 @@ build tools were not bootstrapped.
 
 ## Ask an AI tutor about this lesson
 
-The lesson is complete without an AI assistant. If you want optional
-coaching, copy this prompt into the AI tutor while the repository root is open:
+This prompt is optional; the [study guide](../../STUDY-GUIDE.md) explains how to use a tutor.
 
 ```text
 Tutor me through `python-pro-01`: Package engineering and a local release workflow.

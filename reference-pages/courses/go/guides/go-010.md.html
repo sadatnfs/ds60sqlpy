@@ -209,9 +209,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="syntax-anatomy-and-reasoning">Syntax anatomy and reasoning<a class="heading-anchor" href="#syntax-anatomy-and-reasoning" aria-label="Link to this section">#</a></h3>
 <p>func (c Counter) Value() int declares a value receiver. func (c *Counter) Add(n int) uses a pointer receiver. type Valuer interface { Value() int } declares required behavior. A type assertion value, ok := item.(Concrete) checks a dynamic type safely. Prefer the comma-ok form when failure is expected, rather than a panic-producing assertion.</p>
 <h3 id="run-this-lesson">Run this lesson<a class="heading-anchor" href="#run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>Choose Go in the unified Docker classroom. Save your own pad before experimenting. The prepared worker stages it as <code>main.go</code>, compiles it, and executes the resulting program with bounded time and output. The pad is one source file. It does not supply interactive input, arbitrary command-line arguments, package installation, Kubernetes credentials or a host Docker socket. Every ordinary reference here uses the standard library, synthetic local data and explicit checks. A failed <code>check</code> panics and produces a nonzero process result; do not remove it to make the run appear successful.</p>
-<p>The explanatory solution snippets belong inside <code>func main()</code> unless they declare a helper. <code>check</code> is a tiny teaching helper that panics when a condition is false. The separate reference supplies required imports and helpers and implements all six cases. Use that complete source only after an attempt or an explicit reveal. For an independently prepared Go project, the equivalent local build is <code>go build -o lesson main.go</code>, followed by <code>./lesson</code>; use Linux or WSL 2 for that optional workflow. Compiling proves syntax and type consistency, while the executed checks establish the stated example contracts.</p>
-<p>Each worked example below is a complete Go file. Copy one whole block into your saved pad and run it. Example 2 includes the first case as well as the second, so its setup is complete. Its supporting declarations may be reused in later investigations. The separate reference implements all six cases.</p>
+<p>Run each worked example as one complete file in your saved pad (<a href="../STUDY-GUIDE.md.html#run-a-lesson">run steps</a>).</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1-dispatch-through-behavior">Worked example 1: Dispatch through behavior<a class="heading-anchor" href="#worked-example-1-dispatch-through-behavior" aria-label="Link to this section">#</a></h4>
 <p>Store Counter with value 3 in a Valuer interface.</p>
@@ -293,77 +291,79 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Observe:</strong> Its value becomes 5.</p>
 <p>The language can take the address of this addressable variable for the method call. The pointer receiver makes the mutation effective on the original value.</p>
 <h3 id="predict-before-running">Predict before running<a class="heading-anchor" href="#predict-before-running" aria-label="Link to this section">#</a></h3>
-<p>For each example, write the input values, the state that can change, and the expected observation. Explain which result would disprove your current interpretation. For concurrency, predict a guaranteed relationship rather than an arbitrary scheduling order. For an error case, identify whether it is rejected at compilation or returned during execution.</p>
+<p>Predict each method set: does Counter or <code>*Counter</code> have Add, and can a Counter value be stored in a Valuer? Predict what Incremented returns and what the original Counter holds afterward. For the typed-nil case, predict the result of comparing the interface with nil before you run it.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-dispatch-through-behavior-change-one-input">Exercise 1: Dispatch through behavior: change one input<a class="heading-anchor" href="#exercise-1-dispatch-through-behavior-change-one-input" aria-label="Link to this section">#</a></h4>
-<p>Copy worked example 1 into a scratch pad and change <code>var v Valuer = Counter{N: 3}</code> to <code>var v Valuer = Counter{N: 4}</code>. Before running, predict which check fails and which value it now sees; then run it and restore the original line.</p>
-<p><strong>Expected:</strong> The changed run panics with <code>interface dispatch</code> because <code>v.Value() == 3</code> no longer holds. Restoring the original line brings back the worked observation: calling Value returns 3.</p>
-<p><strong>Verify:</strong> Compare your written prediction with the panic message <code>interface dispatch</code> and name the value that made <code>v.Value() == 3</code> false. After restoring the input, the program must print its success line again.</p>
+<p>Copy worked example 1, change <code>var v Valuer = Counter{N: 3}</code> to <code>var v Valuer = Counter{N: 4}</code> and predict the failure before running; then restore the line.</p>
+<p><strong>Expected:</strong> The edited run panics with <code>interface dispatch</code> because <code>v.Value() == 3</code> no longer holds.</p>
+<p><strong>Verify:</strong> Restoring <code>var v Valuer = Counter{N: 3}</code> makes the check pass again with the worked observation: calling Value returns 3.</p>
 <h4 id="exercise-2-mutate-through-a-method-debug-a-regression">Exercise 2: Mutate through a method: debug a regression<a class="heading-anchor" href="#exercise-2-mutate-through-a-method-debug-a-regression" aria-label="Link to this section">#</a></h4>
-<p>A regression changed one token in worked example 2, so one line now reads <code>c := Counter{N: 4}</code>. Run worked example 2 with that line, use the failure to locate the defect and repair it without changing the check.</p>
-<p><strong>Expected:</strong> Before the repair the program panics with <code>pointer receiver</code>; after it the line reads <code>c := Counter{N: 3}</code> again and its value becomes 5.</p>
-<p><strong>Verify:</strong> Keep the failing and the repaired runs. Explain why the changed token alters the value tested by <code>c.N == 5</code> for this input.</p>
+<p>A one-token regression in worked example 2 makes a line read <code>c := Counter{N: 4}</code>. Repair it without changing the check.</p>
+<p><strong>Expected:</strong> The defective run panics with <code>pointer receiver</code>; after restoring <code>c := Counter{N: 3}</code>, its value becomes 5.</p>
+<p><strong>Verify:</strong> The failing run shows message <code>pointer receiver</code>; after the repair <code>c.N == 5</code> holds again.</p>
 <h4 id="exercise-3-trace-a-value-receiver">Exercise 3: Trace a value receiver<a class="heading-anchor" href="#exercise-3-trace-a-value-receiver" aria-label="Link to this section">#</a></h4>
 <p>Call a value-receiver helper that increments only its receiver copy.</p>
 <p><strong>Expected:</strong> The returned value is 4 but the original remains 3.</p>
-<p><strong>Verify:</strong> Keep a check equivalent to <code>got == 4 &amp;&amp; c.N == 3</code>. As a control, change <code>c := Counter{N: 3}</code> to <code>c := Counter{N: 4}</code>: the run must panic with <code>receiver copy</code>. Restore the line before continuing.</p>
+<p><strong>Verify:</strong> Your solution must keep <code>got == 4 &amp;&amp; c.N == 3</code> true. Control: changing <code>c := Counter{N: 3}</code> to <code>c := Counter{N: 4}</code> panics with message <code>receiver copy</code>; revert it.</p>
 <h4 id="exercise-4-expose-typed-nil">Exercise 4: Expose typed nil<a class="heading-anchor" href="#exercise-4-expose-typed-nil" aria-label="Link to this section">#</a></h4>
 <p>Put a nil pointer to Counter inside an empty interface.</p>
 <p><strong>Expected:</strong> The interface is not nil.</p>
-<p><strong>Verify:</strong> Keep a check equivalent to <code>item != nil</code>. As a control, change <code>check(item != nil, &quot;typed nil&quot;)</code> to <code>check(item == nil, &quot;typed nil&quot;)</code> inside that check: it must panic with <code>typed nil</code>, which shows the check can fail. Restore it.</p>
+<p><strong>Verify:</strong> Your solution must keep <code>item != nil</code> true. Control: changing <code>check(item != nil, &quot;typed nil&quot;)</code> to <code>check(item == nil, &quot;typed nil&quot;)</code> panics with message <code>typed nil</code>; revert it.</p>
 <h4 id="exercise-5-use-safe-dynamic-inspection">Exercise 5: Use safe dynamic inspection<a class="heading-anchor" href="#exercise-5-use-safe-dynamic-inspection" aria-label="Link to this section">#</a></h4>
 <p>Assert that an interface containing a string is an int with comma-ok.</p>
 <p><strong>Expected:</strong> The assertion reports false without panicking.</p>
-<p><strong>Verify:</strong> Keep a check equivalent to <code>!ok</code>. As a control, change <code>check(!ok, &quot;type assertion&quot;)</code> to <code>check(ok, &quot;type assertion&quot;)</code> inside that check: it must panic with <code>type assertion</code>, which shows the check can fail. Restore it.</p>
+<p><strong>Verify:</strong> Your solution must keep <code>!ok</code> true. Control: changing <code>check(!ok, &quot;type assertion&quot;)</code> to <code>check(ok, &quot;type assertion&quot;)</code> panics with message <code>type assertion</code>; revert it.</p>
 <h4 id="exercise-6-transfer-substitutability">Exercise 6: Transfer substitutability<a class="heading-anchor" href="#exercise-6-transfer-substitutability" aria-label="Link to this section">#</a></h4>
 <p>Implement a second Valuer type returning a fixed value and use the same consuming helper.</p>
 <p><strong>Expected:</strong> Both implementations can be read through one contract.</p>
-<p><strong>Verify:</strong> Keep a check equivalent to <code>readValue(Counter{N: 2}) == 2 &amp;&amp; readValue(Fixed(8)) == 8</code>. As a control, change <code>check(readValue(Counter{N: 2}) == 2 &amp;&amp; readValue(Fixed(8)) == 8, &quot;substitution&quot;)</code> to <code>check(readValue(Counter{N: 3}) == 2 &amp;&amp; readValue(Fixed(8)) == 8, &quot;substitution&quot;)</code> inside that check: it must panic with <code>substitution</code>, which shows the check can fail. Restore it.</p>
-<p>Implement these in the answer-free learner source. Keep one independent check per claim. A task can require tracing, construction, a changed input or a deliberate safe failure. Do not run a data race, corrupt memory or contact a shared cluster merely to demonstrate why it would be wrong.</p>
+<p><strong>Verify:</strong> Your solution must keep <code>readValue(Counter{N: 2}) == 2 &amp;&amp; readValue(Fixed(8)) == 8</code> true. Control: changing <code>check(readValue(Counter{N: 2}) == 2 &amp;&amp; readValue(Fixed(8)) == 8, &quot;substitution&quot;)</code> to <code>check(readValue(Counter{N: 3}) == 2 &amp;&amp; readValue(Fixed(8)) == 8, &quot;substitution&quot;)</code> panics with message <code>substitution</code>; revert it.</p>
+<p>Work in the answer-free learner source, <code>courses/go/lessons/go-010.go</code> (<a href="../STUDY-GUIDE.md.html#work-an-exercise">exercise contract</a>).</p>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
-<p>Read a compiler error from the first location in your source, then fix one cause at a time. Unused imports and variables are errors in Go; add an import when its use exists, rather than copying a large unused import list. A panic from <code>check</code> identifies a violated example contract. Compare the actual value with the expected value and inspect the state transition that produced it. A returned <code>error</code> is a value that the caller must handle; an ignored error can make later output look plausible while the original operation failed.</p>
-<p>The lesson-specific explanations in the two examples identify the important counterexamples. Extend that reasoning to every investigation: explain why a plausible alternative would fail, and preserve a tiny input that distinguishes it. Treat empty data, missing values and cancellation as domain cases with explicit policies. In concurrent work, replace sleeps used as synchronization with channels, mutexes or an explicit ownership protocol.</p>
+<p>The typed-nil trap is this lesson&#x27;s signature bug: a function declares <code>var p *MyError</code> and returns it as <code>error</code>, so the caller&#x27;s <code>err != nil</code> is true although nothing failed. Return a literal nil instead. Another surprise is a value-receiver method that appears to mutate but changes only its copy. When a single-value type assertion would panic on unexpected input, use comma-ok.</p>
+<p>General compiler, panic and error diagnosis is in the <a href="../STUDY-GUIDE.md.html#diagnose-a-failure">study guide</a>.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <h4 id="hint-for-investigation-1-dispatch-through-behavior-change-one-input">Hint for investigation 1: Dispatch through behavior: change one input<a class="heading-anchor" href="#hint-for-investigation-1-dispatch-through-behavior-change-one-input" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: Calling Value returns 3.</li>
-<li>The check <code>v.Value() == 3</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Compute the checked value with <code>var v Valuer = Counter{N: 4}</code> in place before running, then compare it with the value <code>v.Value() == 3</code> expects.</li>
+<li>Counter&#x27;s Value method has a value receiver. Does that make Counter satisfy Valuer?</li>
+<li>The interface now dispatches to a Counter holding 4, so Value returns 4 and <code>v.Value()==3</code> fails. Dispatch still works; only the stored value changed.</li>
 </ol>
 <h4 id="hint-for-investigation-2-mutate-through-a-method-debug-a-regression">Hint for investigation 2: Mutate through a method: debug a regression<a class="heading-anchor" href="#hint-for-investigation-2-mutate-through-a-method-debug-a-regression" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: Its value becomes 5.</li>
-<li>The check <code>c.N == 5</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Compare <code>c := Counter{N: 4}</code> with the same line in worked example 2 and state the claim each version makes.</li>
+<li>Add has a pointer receiver. Which value does it modify when called on the addressable variable c?</li>
+<li>Starting from 4, <code>Add(2)</code> yields 6, so <code>c.N==5</code> fails. The pointer receiver mutated the original correctly; the starting value is the regression.</li>
 </ol>
 <h4 id="hint-for-investigation-3-trace-a-value-receiver">Hint for investigation 3: Trace a value receiver<a class="heading-anchor" href="#hint-for-investigation-3-trace-a-value-receiver" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The returned value is 4 but the original remains 3.</li>
-<li>The check <code>got == 4 &amp;&amp; c.N == 3</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Predict the effect of changing <code>c := Counter{N: 3}</code> to <code>c := Counter{N: 4}</code> before running anything. If the prediction is hard, trace that line again with the original input.</li>
+<li>A value receiver works on a copy. Which counter does <code>c.N++</code> inside Incremented change?</li>
+<li>Changing a value receiver&#x27;s scalar field changes the copied receiver.</li>
 </ol>
 <h4 id="hint-for-investigation-4-expose-typed-nil">Hint for investigation 4: Expose typed nil<a class="heading-anchor" href="#hint-for-investigation-4-expose-typed-nil" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The interface is not nil.</li>
-<li>The check <code>item != nil</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Name one input that would make <code>item != nil</code> false. A check that no input can falsify is not evidence.</li>
+<li>An interface value holds a dynamic type and a value. Which of the two is nil here?</li>
+<li>The interface contains the dynamic type *Counter even though its dynamic pointer is nil.</li>
 </ol>
 <h4 id="hint-for-investigation-5-use-safe-dynamic-inspection">Hint for investigation 5: Use safe dynamic inspection<a class="heading-anchor" href="#hint-for-investigation-5-use-safe-dynamic-inspection" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The assertion reports false without panicking.</li>
-<li>The check <code>!ok</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Name one input that would make <code>!ok</code> false. A check that no input can falsify is not evidence.</li>
+<li>Comma-ok reports a mismatch instead of panicking. What does ok hold when the dynamic type is string?</li>
+<li>A failed dynamic conversion is ordinary evidence when the input type is uncertain.</li>
 </ol>
 <h4 id="hint-for-investigation-6-transfer-substitutability">Hint for investigation 6: Transfer substitutability<a class="heading-anchor" href="#hint-for-investigation-6-transfer-substitutability" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: Both implementations can be read through one contract.</li>
-<li>The check <code>readValue(Counter{N: 2}) == 2 &amp;&amp; readValue(Fixed(8)) == 8</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Name one input that would make <code>readValue(Counter{N: 2}) == 2 &amp;&amp; readValue(Fixed(8)) == 8</code> false. A check that no input can falsify is not evidence.</li>
+<li>readValue needs only the Value method. What must Fixed provide to be accepted?</li>
+<li>The consumer should not depend on concrete fields or perform a type switch unless its real contract requires different behavior.</li>
 </ol>
 <h3 id="self-check-and-retrieval">Self-check and retrieval<a class="heading-anchor" href="#self-check-and-retrieval" aria-label="Link to this section">#</a></h3>
-<p>Close the reference. Rebuild one normal case and one boundary case from a blank pad. Explain the role of method set without using its name in the definition. Then change the domain while keeping the same invariant. Record the new input, your prediction and the observed output. If your program passes only because its input is hard-coded, explain which part would need a reusable function in a larger project.</p>
+<p>Without the reference, define an interface Shape with <code>Area() float64</code>, implement it for a Square value type and for a pointer to Circle, and sum the areas in a slice of Shapes with a check. Then store a nil <code>*Circle</code> in a Shape and explain, with a check, why the interface is not nil.</p>
+<p>The general <a href="../STUDY-GUIDE.md.html#self-check-and-retrieval">retrieval routine</a> still applies.</p>
 <h3 id="next-step-and-sources">Next step and sources<a class="heading-anchor" href="#next-step-and-sources" aria-label="Link to this section">#</a></h3>
-<p><a href="https://go.dev/ref/spec">Primary language or library documentation</a>, reviewed 2026-10-23. The teaching explanations and synthetic fixtures are original. Continue with the next lesson when you can explain the six observations and diagnose a changed case without copying its answer.</p>
+<p>Source: <a href="https://go.dev/ref/spec">The Go Programming Language Specification</a>, reviewed 2026-10-23.</p>
+<p>Next: go-011, Errors as values and preserving causal context (<a href="../STUDY-GUIDE.md.html#when-to-move-on">criteria</a>).</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for go-010: Methods, interfaces and the typed-nil trap.
 Read courses/go/guides/go-010.md and my saved attempt based on courses/go/lessons/go-010.go.

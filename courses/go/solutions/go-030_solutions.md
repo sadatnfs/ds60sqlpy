@@ -1,6 +1,6 @@
 # go-030: explained solutions
 
-These are comparison material after an attempt or explicit reveal. The executable reference implements all six cases in one `main.go`.
+Compare after an attempt ([using solutions](../STUDY-GUIDE.md#use-the-solutions)). `courses/go/solutions/go-030_solution.go` implements all six cases.
 
 ## Mechanism
 
@@ -10,7 +10,7 @@ sort.Search finds the first index where a monotone predicate becomes true, or n 
 
 ## 1. Find a lower boundary: change one input
 
-Copy worked example 1 into a scratch pad and change `items := []int{2, 4, 6, 8}` to `items := []int{2, 5, 6, 8}`. Before running, predict which check fails and which value it now sees; then run it and restore the original line.
+Copy worked example 1, change `items := []int{2, 4, 6, 8}` to `items := []int{2, 5, 6, 8}` and predict the failure before running; then restore the line.
 
 The unchanged code is worked example 1:
 
@@ -20,7 +20,9 @@ i := sort.Search(len(items), func(i int) bool { return items[i] >= 5 })
 check(i == 2, "boundary")
 ```
 
-**Expected:** The changed run panics with `boundary` because `i == 2` no longer holds. Restoring the original line brings back the worked observation: the index is 2.
+**Expected:** The edited run panics with `boundary` because `i == 2` no longer holds.
+
+**Verify:** Restoring `items := []int{2, 4, 6, 8}` makes the check pass again with the worked observation: the index is 2.
 
 Sorting makes the predicate monotone. The same expression over unsorted input violates the algorithm precondition.
 
@@ -34,7 +36,7 @@ Sorting makes the predicate monotone. The same expression over unsorted input vi
 
 ## 2. Represent no match: debug a regression
 
-A regression changed one token in worked example 2, so one line now reads `items := []int{2, 4, 6, 9}`. Run worked example 2 with that line, use the failure to locate the defect and repair it without changing the check.
+A one-token regression in worked example 2 makes a line read `items := []int{2, 4, 6, 9}`. Repair it without changing the check.
 
 The unchanged code is worked example 2:
 
@@ -44,7 +46,9 @@ i := sort.Search(len(items), func(i int) bool { return items[i] >= 9 })
 check(i == len(items), "not found")
 ```
 
-**Expected:** Before the repair the program panics with `not found`; after it the line reads `items := []int{2, 4, 6, 8}` again and the index equals the collection length.
+**Expected:** The defective run panics with `not found`; after restoring `items := []int{2, 4, 6, 8}`, the index equals the collection length.
+
+**Verify:** The failing run shows message `not found`; after the repair `i == len(items)` holds again.
 
 The sentinel is not a valid element index. Check it before indexing.
 
@@ -67,6 +71,8 @@ check(len(items) == 1 && cap(items) == 4 && items[0] == 7, "capacity")
 ```
 
 **Expected:** Length is 1, capacity is 4.
+
+**Verify:** Your solution must keep `len(items) == 1 && cap(items) == 4 && items[0] == 7` true. Control: changing `items := make([]int, 0, 4)` to `items := make([]int, 1, 4)` panics with message `capacity`; revert it.
 
 Starting with length four would create four logical zeros before the appended value.
 
@@ -93,6 +99,8 @@ check(visits == 5 && sum == 15, "work")
 
 **Expected:** There are five visits and the sum is 15.
 
+**Verify:** Your solution must keep `visits == 5 && sum == 15` true. Control: changing `sum += v` to `sum -= v` panics with message `work`; revert it.
+
 Operation counting supplies structural evidence without inventing a universal wall-clock threshold.
 
 **Approach.** Count one visit per element while summing, so the work count is measured, not assumed.
@@ -115,6 +123,8 @@ check(i == 0 && calls == 0, "empty")
 
 **Expected:** Index is 0 and the predicate is never called.
 
+**Verify:** Your solution must keep `i == 0 && calls == 0` true. Control: changing `calls := 0` to `calls := 1` panics with message `empty`; revert it.
+
 The empty interval has a valid insertion position without accessing any element.
 
 **Approach.** Call `sort.Search(0, f)` and count how often `f` runs.
@@ -136,6 +146,8 @@ check(i == 1, "duplicates")
 ```
 
 **Expected:** The first duplicate has index 1.
+
+**Verify:** Your solution must keep `i == 1` true. Control: changing `i := sort.Search(len(items), func(i int) bool { return items[i] >= 3 })` to `i := sort.Search(len(items), func(i int) bool { return items[i] > 3 })` panics with message `duplicates`; revert it.
 
 A lower bound is more precise than any matching index. That contract supports insertion and range queries.
 

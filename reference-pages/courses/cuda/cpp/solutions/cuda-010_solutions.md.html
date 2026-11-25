@@ -196,7 +196,6 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <article class="document"><h2 id="cuda-010-explanatory-solutions">cuda-010: explanatory solutions<a class="heading-anchor" href="#cuda-010-explanatory-solutions" aria-label="Link to this section">#</a></h2>
 <h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
 <p>RAII connects resource lifetime to an owning C++ object&#x27;s lifetime. Its constructor establishes an invariant, and its destructor releases the resource. Copying a unique owner is usually forbidden; moving transfers ownership and leaves the source empty. This is important for CUDA allocations, streams and events because a copied raw handle does not represent an independent resource. A destructor should not throw during stack unwinding. Error reporting for explicit completion and release should happen in a deliberate path, while final cleanup remains a last safeguard. Asynchronous use adds a further obligation: do not destroy the owner while a queued operation still borrows the resource.</p>
-<p>The separate <a href="../references/cuda-010_cpu.py.html">CPU reference</a> checks the chapter&#x27;s bounded model. It does not execute CUDA or establish GPU timing. Compare after attempting the worksheet or explicitly choosing to reveal solutions.</p>
 <h3 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h3>
 <p>An operation acquires buffer A, then fails to acquire B. If A already belongs to an automatic owner, stack unwinding releases A. The event trace is acquire-A, acquire-B-failed, release-A. If A is only a raw pointer and cleanup exists only at the normal return, the failure path leaks A.</p>
 <p><strong>Approach:</strong> Trace the events: A is acquired, B fails, unwinding runs A&#x27;s cleanup.</p>
@@ -233,11 +232,16 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Why it is correct:</strong> Each stream may still read the buffer after the host leaves scope, so release needs both completions.</p>
 <p><strong>A plausible wrong approach:</strong> Freeing when the host wrapper goes out of scope can release memory a queued kernel still reads.</p>
 <p><strong>How to verify:</strong> Trace a schedule where one stream finishes late and confirm release happens after both events.</p>
+<h3 id="self-check-answers">Self-check answers<a class="heading-anchor" href="#self-check-answers" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>What should a moved-from device buffer owner hold?</strong> An empty handle, so its destructor releases nothing.</li>
+<li><strong>In worked example 1, what releases buffer A when acquiring B fails?</strong> Stack unwinding runs A&#x27;s owner destructor, giving the trace acquire-A, acquire-B-failed, release-A.</li>
+<li><strong>Why should a destructor report errors rather than throw?</strong> Throwing during unwinding from another exception terminates the program.</li>
+</ol>
 <h3 id="numerical-reference-and-its-limits">Numerical reference and its limits<a class="heading-anchor" href="#numerical-reference-and-its-limits" aria-label="Link to this section">#</a></h3>
-<p>The complete CPU model is <a href="../references/cuda-010_cpu.py.html">here</a>. Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It does not claim CUDA execution, concurrency safety or a performance measurement.</p>
+<p>The <a href="../references/cuda-010_cpu.py.html">CPU reference</a> reproduces worked example 1 and prints <code>[&#x27;acquire-A&#x27;, &#x27;acquire-B-failed&#x27;, &#x27;release-A&#x27;]</code>.</p>
 <h3 id="transfer-review">Transfer review<a class="heading-anchor" href="#transfer-review" aria-label="Link to this section">#</a></h3>
-<p>Record both consumers&#x27; completion dependencies before freeing or reusing the buffer. Host scope exit alone does not prove GPU completion.</p>
-<p>A complete explanation must name its inputs, the unchanged mathematical contract, the changed boundary or resource condition, and the evidence still needed on actual hardware. Preserve a CPU baseline even after a GPU path becomes available.</p></article>
+<p>Record both consumers&#x27; completion dependencies before freeing or reusing the buffer. Host scope exit alone does not prove GPU completion.</p></article>
   </main>
 </body>
 </html>

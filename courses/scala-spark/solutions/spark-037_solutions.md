@@ -1,6 +1,8 @@
 # spark-037: Explained paired reference solutions
 
-Read the [guide](../guides/spark-037.md) and attempt one language first. The [Scala reference](spark-037_solution.scala) and [PySpark reference](spark-037_solution.py) are complete single-file programs with explicit local sessions and finally-based stop. Each compares with literal expectations; matching two implementations alone would not rule out a shared mistake.
+Attempt the [guide](../guides/spark-037.md) exercises first.
+
+References: [Scala](spark-037_solution.scala), [PySpark](spark-037_solution.py).
 
 ## Exercises and reasoning
 
@@ -8,7 +10,7 @@ Read the [guide](../guides/spark-037.md) and attempt one language first. The [Sc
 
 Run the restart scenario with two supplied records and retain progress plus exact sink values.
 
-**Expected:** 2 input rows and bag 1:100,2:200.
+**Expected:** 2 input rows and bag `1:100, 2:200`.
 
 ```scala
 def baseline(spark: SparkSession, paths: (Path, Path, Path)): RunReceipt = {
@@ -50,7 +52,7 @@ The source checkpoint is retained during this case. A new checkpoint would answe
 
 Use native streaming dropDuplicates on the id key for two identical occurrences of 1:100.
 
-**Expected:** 2 source rows,1 committed row 1:100.
+**Expected:** 2 source rows, 1 committed row `1:100`.
 
 ```scala
 def duplicateCase(spark: SparkSession, paths: (Path, Path, Path)): RunReceipt = {
@@ -69,9 +71,9 @@ This case runs a stateful Spark deduplication operator, not only a local Python 
 
 ### Exercise 4: Test the exact event-time boundary
 
-Apply the explicitly declared admission cutoff event_second>=90 to rows at 80,90 and 110.
+Apply the explicitly declared admission cutoff `event_second >= 90` to rows at 80, 90 and 110.
 
-**Expected:** 3 source rows; accepted IDs 2,3 with cents 200,300.
+**Expected:** 3 source rows; accepted IDs 2, 3 with cents 200, 300.
 
 ```scala
 def lateCase(spark: SparkSession, paths: (Path, Path, Path)): RunReceipt = {
@@ -92,7 +94,7 @@ Event seconds are integer seconds on a declared synthetic UTC timeline. The poli
 
 Reject a NULL identity and a negative amount while retaining valid 3:300.
 
-**Expected:** 3 input occurrences,2 invalid,1 accepted.
+**Expected:** 3 input occurrences, 2 invalid, 1 accepted.
 
 ```scala
 def invalidCase(spark: SparkSession, paths: (Path, Path, Path)): RunReceipt = {
@@ -105,7 +107,7 @@ def invalid_case(spark, paths):
     return run_scenario(spark, *paths, "invalid")
 ```
 
-The invalid count is established against the supplied raw fixture rather than disappearing from the report. The sum accepted+invalid=source occurrences is a conservation check. Invalid JSON syntax would be a different FAILFAST source error and is not relabeled as an ordinary valid-schema row rejection.
+The invalid count is established against the supplied raw fixture rather than disappearing from the report. The sum accepted + invalid = source occurrences is a conservation check. Invalid JSON syntax would be a different FAILFAST source error and is not relabeled as an ordinary valid-schema row rejection.
 
 **Verification evidence:** Compare raw source count 3, actual progress, sink bag 3:300 and static predicate count 2.
 
@@ -133,6 +135,7 @@ The negative control demonstrates that the case oracle would reject a duplicate-
 
 ## Execution and interpretation
 
-Run the complete reference in its prepared fixed worker. Its first check (Establish a finite restart baseline) is built inside the program, so opening the lesson fetches nothing; it expects: 2 input rows and bag `1:100, 2:200`. The final success line prints only after every reference assertion passes.
+In restart mode the first run reads 2 rows and commits `1:100, 2:200`; the empty rerun keeps the query ID, gets a new run ID and reads 0 rows. In duplicates mode 2 rows are read and only `1:100` is committed. In late mode the raw file has 3 rows, the committed bag is `2:200, 3:300`, and the progress input count must lie between 2 and 3 inclusive; the program prints `late_raw_rows=`, `progress_input_rows=`, `committed=` and `json_pushdown=`.
 
-Local plan, partition and resource evidence does not establish cluster-scale performance; session cleanup is explicit.
+In invalid mode the raw file again has 3 rows, only `3:300` survives and 2 rows are counted as invalid, printed after `invalid_raw_rows=` with the matching counts. `require_bag` accepts the correct bag and raises `ValueError` with `Canonical bag mismatch` for `["1:100", "1:100"]`, and no query may still be active at the end. Then `spark-037: six PySpark reference contracts passed; Spark=` appears with the version. Passing these cases proves the rules on these rows; it does not measure timing under a source that keeps producing data.
+

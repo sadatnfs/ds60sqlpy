@@ -1,6 +1,6 @@
 # cuda-112: explained solutions
 
-These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.
+Compare with your [worksheet](../lessons/cuda-112.md) attempt.
 
 ## Exercise 1: Calculate median speedup
 
@@ -74,8 +74,16 @@ Include source data commands versions metrics and unresolved limits.
 
 **How to verify.** Have another person or a clean environment follow the checklist and confirm it reproduces the medians. Any step that required undocumented knowledge to complete should be added to the checklist before the review is closed.
 
+## Self-check answers
+
+1. **Why prefer the median of raw samples over the best time?** The median resists outliers and the raw samples show variation, while the best time hides how often it occurs.
+
+2. **Which costs should be reported separately?** Kernel-only time, transfers, preprocessing, compilation and end-to-end latency.
+
+3. **Does one device's result rank architectures in general?** No. It is a result from that device with that software and workload, not a universal ranking.
+
 ## Reference observation
 
 Synthetic median ratio 1.25; explicitly not a GPU benchmark.
 
-The reference file is `courses/cuda/python/references/cuda-112_cpu.py`. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.
+Asserted by `courses/cuda/python/references/cuda-112_cpu.py`.

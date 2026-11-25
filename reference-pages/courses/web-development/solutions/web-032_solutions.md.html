@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/web-development/solutions/web-032_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="web-032-explanatory-solutions">web-032: explanatory solutions<a class="heading-anchor" href="#web-032-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Open this after your own attempt. Each answer explains the lesson&#x27;s synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in <code>courses/web-development/guides/web-032.md</code>.</p>
+<p>Attempt each exercise before reading; the mechanism is in <code>courses/web-development/guides/web-032.md</code> (<a href="../STUDY-GUIDE.md.html#solutions">using these answers</a>).</p>
 <h3 id="exercise-1-predict-strict-equality-for-0-0-and-false">Exercise 1: Predict strict equality for &#x27;0&#x27;, 0 and false.<a class="heading-anchor" href="#exercise-1-predict-strict-equality-for-0-0-and-false" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Each has a different type, so cross-type strict comparisons are false.</p>
 <p><strong>Approach:</strong> Note the type of each value, string, int and bool, and recall that <code>===</code> returns false whenever the two types differ.</p>
@@ -232,7 +232,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Plausible wrong approach:</strong> Claiming strict mode validates form input fails because data from requests is still a string that needs explicit checks.</p>
 <p><strong>How to verify:</strong> Passing &#x27;30&#x27; to an <code>int</code> parameter under strict mode throws a TypeError, while comparisons elsewhere are unaffected.</p>
 <h3 id="reference-comparison">Reference comparison<a class="heading-anchor" href="#reference-comparison" aria-label="Link to this section">#</a></h3>
-<p>Open <code>courses/web-development/solutions/web-032_solution.php</code> only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; server lifecycle, persistence, concurrency and security need their own integration evidence.</p></article>
+<p>The reference requires zero minutes to stay the integer 0, requires the note key to exist while isset reports it unset and requires &#x27;0&#x27; !== 0. That catches lost zeros and isset confusion. It does not test your typed diagnostic or empty(), so check those outputs against your own predictions.</p>
+<p>Open <code>courses/web-development/solutions/web-032_solution.php</code> after saving your attempt (<a href="../STUDY-GUIDE.md.html#references">comparing with the reference</a>).</p></article>
   </main>
 </body>
 </html>

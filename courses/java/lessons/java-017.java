@@ -3,21 +3,16 @@ public class Main {
 
   public static void main(String[] args) throws Exception {
     // Exercise 1: Represent a missing lookup: change one input
-    // Copy Example A into a scratch `Main.java` and change `Map<String, Integer> data =
-    // Map.of("a", 7);` to `Map<String, Integer> data = Map.of("a", 8);`. Before running it with
-    // `java -ea Main`, predict which assertion fails and which value it now sees; then run it
-    // and restore the original line.
-    // Expected: The changed run fails with an `AssertionError` from the assertion on
-    // `known.orElseThrow() == 7 && missing.isEmpty()`. Restoring the original line brings back
-    // the worked observation: a present with 7; b empty.
+    // Change `Map<String, Integer> data = Map.of("a", 7);` to `Map<String, Integer> data =
+    // Map.of("a", 8);` in Example A and predict which assertion fails and why.
+    // Expected: The edited run fails with an `AssertionError` from the assertion on
+    // `known.orElseThrow() == 7 && missing.isEmpty()`.
 
     // Exercise 2: Transform only present values: diagnose an edited check
-    // A careless edit changed the assertion that Example B adds after Example A so that it reads
-    // `assert known.map(value -> value + 2).orElseThrow() == 14;`. Run Example B with that line,
-    // explain why the edited assertion now fails for the same program state, and restore it.
-    // Expected: Before the repair the run fails with an `AssertionError` from the assertion on
-    // `known.map(value -> value * 2).orElseThrow() == 14`; after it the line reads `assert
-    // known.map(value -> value * 2).orElseThrow() == 14;` again and 14 and empty.
+    // Example B's new assertion was edited to `assert known.map(value -> value +
+    // 2).orElseThrow() == 14;`. Explain why it fails for unchanged state and restore it.
+    // Expected: The edited run fails with an `AssertionError` from the assertion on
+    // `known.map(value -> value * 2).orElseThrow() == 14`; the restored assertion passes.
 
     // Exercise 3: Compare eager and lazy fallback
     // Use a counter-producing fallback with orElse and orElseGet on a present value.

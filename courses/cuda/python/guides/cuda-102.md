@@ -1,10 +1,17 @@
 # cuda-102: LLM inference, KV caches and precision
 
-**Route:** CUDA Python and machine learning. **Stage:** advanced. **Prerequisites:** `cuda-095`, `cuda-100`. Allow several sessions when the hardware experiment is new; the chapter is not a deadline.
+**Route:** CUDA Python and machine learning. **Stage:** advanced. **Prerequisites:** `cuda-095`, `cuda-100`.
 
-## What you will be able to explain
+Pacing, evidence labels and platform rules: [CUDA study guide](../../STUDY-GUIDE.md).
 
-By the end, you can **derive cache bytes**, **compare cached logits**, and **label fake versus real quantization** with evidence. Start with the two worked cases, then use the editable CPU model to make the quantities concrete.
+## Learning objectives
+
+- Derive cache bytes.
+- Double the sequence.
+- Distinguish query and KV heads.
+- Compare cached logits.
+- Separate prefill and decode timing.
+- Label fake versus real quantization.
 
 ## Mechanism and vocabulary
 
@@ -39,15 +46,19 @@ Cache correctness requires position and mask consistency. Compare uncached and c
 
 ### Worked example 1
 
-For 2 layers, batch 1, sequence 16,4 KV heads, head dimension 8 and 2-byte elements, keys and values consume 4096 bytes in the simple dense model.
+For 2 layers, batch 1, sequence 16, 4 KV heads, head dimension 8 and 2-byte elements, keys and values consume 4096 bytes in the simple dense model.
 
 ### Worked example 2
 
 Doubling sequence length doubles this cache payload even if model weights are unchanged. Reducing weight precision alone leaves this term unchanged.
 
-## Portable executable model
+## How to run the CPU model
 
-The **CPU reference model** variant runs this bounded worked example using `python-core`. It uses only the Python standard library, small synthetic values and no network. Its purpose is to expose the arithmetic or contract behind the chapter. The separate reference includes assertions for the stated observations.
+Edit the copy; the [reference](../references/cuda-102_cpu.py) adds assertions.
+
+```sh
+python courses/cuda/python/lessons/cuda-102_cpu.py
+```
 
 ```python
 layers, batch, seq, heads, dim, width = 2, 1, 16, 4, 8, 2
@@ -70,8 +81,6 @@ print("CPU KV-cache ledger:", cache, "bytes")
 | `dim` | `8` |
 | `width` | `2` |
 
-Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.
-
 ## Equal framework lanes
 
 ### PyTorch
@@ -82,77 +91,65 @@ Keep cache tensors' batch, sequence, head and dtype contracts explicit. Compare 
 
 Represent cache state with explicit tensors or model inputs/outputs and preserve graph signatures across accepted lengths. Compare each cached step with the uncached reference before export.
 
-Choose either lane first, then compare the other using identical mathematical inputs. Framework-specific shape, mode and optimizer rules must be checked separately. Both use offline synthetic examples; no model hub or dataset download is triggered.
+Lane rules: [framework labs](../../STUDY-GUIDE.md#python-gpu-and-framework-labs).
 
 ## Practice and transfer
+
+Record each attempt in the [worksheet](../lessons/cuda-102.md) before opening hints.
 
 ### Exercise 1: Derive cache bytes
 
 **Trap to avoid:** Leaving out the factor two for keys and values gives 2048 bytes and underestimates the cache by half.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 2: Double the sequence
 
 **Trap to avoid:** Lowering weight precision to reduce memory does nothing for this term, since the cache precision is set separately.
-
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 3: Distinguish query and KV heads
 
 **Trap to avoid:** Assuming KV heads equal attention heads for every model gives a 4 times overestimate here.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 4: Compare cached logits
 
 **Trap to avoid:** Comparing only the final generated text hides small differences that alter sampling later. A wrong position offset in the cache can produce plausible text for many tokens before the output visibly drifts.
-
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 5: Separate prefill and decode timing
 
 **Trap to avoid:** Reporting a single tokens-per-second number mixes two regimes. A long prompt with short output looks very different from a short prompt with long output under one combined number.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 6: Label fake versus real quantization
 
 **Trap to avoid:** Reporting speed or memory gains from a simulation claims benefits only a deployed kernel can show. Memory can even rise under simulation, because both the original float weights and rounding scales may be held.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ## Progressive hints
 
-Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.
+Hint *k* belongs to exercise *k*; open one at a time.
 
-1. Start from worked example 1 and mark the quantities needed for the task "Derive cache bytes".
-2. Change one assumption in worked example 2 while preserving the declared contract: double the sequence.
-3. Trace the CPU program's variables before adding hardware behavior: distinguish query and KV heads.
-4. Draw producers, consumers and the exact operation boundary for the task "Compare cached logits".
-5. Separate what the small fixture establishes from what the real runtime must show: separate prefill and decode timing.
-6. Write a counterexample to an overbroad claim before you label fake versus real quantization.
+1. Multiply 2 for keys and values by layers, batch, sequence, KV heads, head dimension and bytes per element.
+2. Change only the sequence length and recompute.
+3. Look up the model's key-value head count instead of assuming it equals the query head count.
+4. Generate a few tokens with and without the cache and compare logits at every step.
+5. Time prefill over the prompt separately from each decode step.
+6. Ask whether rounding values in Python shows that a packed low-bit kernel ran.
 
-## Common mistakes and self-review
+## Common mistakes and self-check
 
-Confusing a correct tiny example with a general implementation is the central review risk. For this chapter, challenge the assumption in worked example 2, then ask whether your change preserves the mechanism described above. If you change dtype, layout, ordering, batch size or backend, update the acceptance contract rather than silently reusing the old observation. Explain an unexpected result before trying random configuration changes.
+A common mistake is estimating KV cache size with the query head count. Grouped-query models store fewer key-value heads, so the estimate is too large. Another mistake is assuming weight quantization also shrinks the cache. It does not: doubling sequence length doubles the cache even when weights are smaller. Fix both by using the model's actual KV layout, accounting for weights and cache separately and testing cached against uncached logits over bounded steps.
 
-Keep a small evidence table with columns **claim**, **input**, **expected observation**, **actual observation** and **limit**. For the first claim use `Derive cache bytes`. For the final claim use `Label fake versus real quantization`. An unperformed GPU or cluster experiment remains pending even when the CPU model is correct.
+**Evidence limit:** The reference computes 4096 cache bytes, doubling to 8192, in a dense model. Real caches may use paging, padding or other layouts, and Python rounding does not demonstrate quantized execution, so serving memory must be measured on the deployed stack.
 
-## Platform and evidence contract
+1. How do prefill and decode differ?
+2. Which factors grow the KV cache?
+3. Why state positional-encoding and mask conventions when testing cache equivalence?
 
-The reading worksheet and CPU reference model work through the ordinary Linux Docker classroom on macOS, Linux and Windows using WSL 2. They do not require an NVIDIA GPU. Their results are labeled CPU models or semantic oracles, not simulated hardware performance.
-
-Real CUDA work needs supported NVIDIA hardware, a compatible host driver and an explicitly prepared GPU runtime. An Apple GPU does not execute CUDA kernels. PyTorch MPS on a supported native Mac, ROCm on supported AMD hardware, or other vendor backends can provide separate accelerator learning routes; they need their own package and operation qualification and are not CUDA evidence. The ordinary Linux Docker classroom does not expose native Mac MPS automatically.
-
-Do not download packages, models or data by opening this lesson. Do not attach an engine socket, ambient cluster credentials or an arbitrary remote endpoint. A CPU pass, imported package, successful compilation, real GPU result and measured performance are distinct observations. Record the actual backend, data shape/dtype, source revision, versions and pending checks. A saved completion marker records learning progress, not hardware certification.
+Answers: [self-check answers](../solutions/cuda-102_solutions.md#self-check-answers).
 
 ## Primary references
 
 - [PyTorch CUDA semantics](https://docs.pytorch.org/docs/2.9/notes/cuda.html)
 - [TensorFlow GPU guide](https://www.tensorflow.org/guide/gpu)
 
-Use the version-matched documentation of your prepared environment. These references describe interfaces and supported boundaries; the chapter's synthetic examples and CPU models are original teaching material.
+Full lists: [documentation and sources](../../STUDY-GUIDE.md#documentation-and-sources).
 
 ## Ask an AI tutor about this lesson
 

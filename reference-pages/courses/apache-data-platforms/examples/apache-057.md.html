@@ -194,13 +194,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/apache-data-platforms/examples/apache-057.md</code></p>
     </header>
     <article class="document"><h2 id="pinot-apache-057-command-notebook">Pinot apache-057 command notebook<a class="heading-anchor" href="#pinot-apache-057-command-notebook" aria-label="Link to this section">#</a></h2>
-<p>Use these commands only from the copied owned Pinot project described in its README. The classroom Markdown pad does not execute Docker commands.</p>
+<p>Run these four actions in order from the copied Pinot project after reading its README. <code>prepare</code> records the pinned image, <code>start</code> brings up ZooKeeper, controller, broker and server, and <code>initialize</code> is the only step that loads the three order rows into a segment. The <a href="../STUDY-GUIDE.md.html#workshop-notebooks">workshop rules</a> explain why the pad only displays them.</p>
 <pre class="highlighted-code"><code class="language-bash">bash run.sh prepare
 bash run.sh start
 bash run.sh initialize
 bash run.sh check</code></pre>
 <p>The full source is in the copied project. Initialization is explicit. Require exact IDs and values before accepting aggregate totals.</p>
-<p>Native service acceptance and each advanced extension have distinct entries in <code>QUALIFICATION.md</code>. Source/configuration presence is not an observed service result.</p></article>
+<p>QUALIFICATION.md records this offline segment path as accepted on Linux ARM64: rows 1, 2 and 3, east 11 and west 9, and exactly one owned offline segment. Kafka, hybrid, upsert and multistage routes have their own entries there, so a passing <code>check</code> here says nothing about them.</p></article>
   </main>
 </body>
 </html>

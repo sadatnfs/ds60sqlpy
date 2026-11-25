@@ -42,5 +42,7 @@
       "wrong": "Writing that Beta customers spend three times as much as Alpha. That rests on 1 and 2 records, and the missing amount may not be missing at random.",
       "verify": "Every number in the handoff matches a value that result shows: the two report rows, input 4, admitted 3, rejected 1 and overall about 23.33."
     }
-  ]
+  ],
+  "run_note": "The starter prints four records, R1 to R4, in segments A and B with amounts 10, 20, NA and 40, and a dimension labeling A as Alpha and B as Beta. Run it and predict the result first: R3 is rejected, three rows are admitted, and the overall mean is 70/3. Wire validation, enrichment and summary into one function you can call again on changed inputs.",
+  "checks_note": "The assertions confirm types, required columns and unique keys, a complete lookup, group counts and totals that reconcile with the admitted rows, 3 admitted and 1 rejected with overall mean 70/3, a changed input giving 25, rejection of invalid or wrongly typed input, and an empty input that returns an NA overall mean with the `label`, `count`, `total` and `mean` columns. They do not prove the conclusion generalizes beyond these records."
 }

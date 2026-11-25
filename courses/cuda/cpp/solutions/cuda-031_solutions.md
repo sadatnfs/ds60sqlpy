@@ -4,8 +4,6 @@
 
 A host clock around an asynchronous launch measures submission unless a completion dependency is included. Device events record positions in a stream and can measure elapsed device work between those positions after completion. End-to-end host timing includes the transfers and synchronization the application actually requires. Warm-up separates one-time initialization or JIT work from repeated work, but cold start remains a real user concern and deserves its own measurement. Retain repeated samples and summarize a distribution. Profiling or sanitizer instrumentation changes execution, so do not mix instrumented and ordinary samples in one performance claim.
 
-The separate [CPU reference](../references/cuda-031_cpu.py) checks the chapter's bounded model. It does not execute CUDA or establish GPU timing. Compare after attempting the worksheet or explicitly choosing to reveal solutions.
-
 ## Exercise 1
 
 Suppose host submission takes 5 microseconds and the queued kernel completes 80 microseconds later. Reporting five as kernel duration measures the wrong interval. A correctly ordered event interval measures relevant device work; a completed host interval can measure the full request, including additional overhead.
@@ -78,12 +76,18 @@ Resident data can exclude repeated uploads by contract; request-response timing 
 
 **How to verify:** State each scope next to its number and confirm transfers are included where needed.
 
+## Self-check answers
+
+1. **What must happen before reading an elapsed time between two events?** The end event must complete, typically by synchronizing on it.
+2. **Why keep the 9.0 ms sample in worked example 2?** It may reveal interference or cold behavior that real users would also see.
+3. **What does warm-up separate from repeated work?** One-time costs such as context creation, module loading and JIT compilation.
+
 ## Numerical reference and its limits
 
-The complete CPU model is [here](../references/cuda-031_cpu.py). Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It also asserts an exercise answer that the guide's model leaves for you to derive: `assert 12 / 4 == 3`. It does not claim CUDA execution, concurrency safety or a performance measurement.
+The [CPU reference](../references/cuda-031_cpu.py) reproduces worked example 1 and prints `{'synthetic_samples_ms': [1.0, 1.1, 1.0, 1.2, 9.0], 'median_ms': 1.1, 'maximum_ms': 9.0}`.
+
+It also asserts an exercise answer you derive yourself: `assert 12 / 4 == 3`
 
 ## Transfer review
 
 Resident data can exclude repeated uploads by contract; request-response timing must include transfers needed to deliver the requested result.
-
-A complete explanation must name its inputs, the unchanged mathematical contract, the changed boundary or resource condition, and the evidence still needed on actual hardware. Preserve a CPU baseline even after a GPU path becomes available.

@@ -1,6 +1,8 @@
 # rust-039: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [rust-039_solution.rs](rust-039_solution.rs). It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.
+Executable reference: [rust-039_solution.rs](rust-039_solution.rs), which runs both examples and the coded answers.
+
+Open this only after [an attempt](../STUDY-GUIDE.md#attempt-a-lesson).
 
 ## Why the two examples differ
 
@@ -26,7 +28,7 @@ State the row grain and schema of the valid batch.
 
 Add a nullable numeric field with matching length.
 
-**Reference answer.** The same statements run as the `Task 2` block of the reference program; here they are wrapped in `main` as a complete file.
+**Reference answer**, wrapped in `main`; the reference runs it as its `Task 2` block.
 
 ```rust
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -64,7 +66,7 @@ The new array has the same two rows, so `try_new` accepts it, and the nullable f
 
 Construct a batch for a small validated inventory dataset.
 
-**Reference answer.** The same statements run as the `Task 3` block of the reference program; here they are wrapped in `main` as a complete file.
+**Reference answer**, wrapped in `main`; the reference runs it as its `Task 3` block.
 
 ```rust
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -110,7 +112,7 @@ Diagnose swapping arrays while retaining the old field order.
 
 Test type mismatch, length mismatch and a zero-row batch.
 
-**Reference answer.** The same statements run as the `Task 5` block of the reference program; here they are wrapped in `main` as a complete file.
+**Reference answer**, wrapped in `main`; the reference runs it as its `Task 5` block.
 
 ```rust
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -155,7 +157,7 @@ Type and length checks are the structural invariants `try_new` enforces, so both
 
 Design a schema evolution policy that preserves names, units and saved data meaning.
 
-No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **Schema**, and state one limitation of your choice.
+**Judging criteria.** A strong policy allows only additive changes by default: a new nullable field may be appended, while renaming a field, changing its type or changing its unit requires a new field name and a migration. Units live in field metadata, such as `unit=ms`, and the schema carries a version. Readers of old data supply nulls for new fields and never reinterpret saved values. Test it by reading a batch written under the old schema with the new code. State one limitation: Arrow does not enforce metadata, so the reader needs its own check.
 
 ## Mechanism and diagnostic reasoning
 
@@ -169,4 +171,6 @@ A nullable field permits nulls; it does not require them. Schema validation does
 
 ## Review before continuing
 
-Run the reference and confirm that it prints `rust-039: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.
+Rebuild Example B (Reject incompatible lengths) from a blank pad.
+
+Review routine: [Self-check and review](../STUDY-GUIDE.md#self-check-and-review).

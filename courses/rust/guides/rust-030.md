@@ -24,9 +24,11 @@ Rc is single-threaded shared ownership; Arc supports concurrent reference counts
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles the saved pad as `main.rs` with pinned Rust 1.99.1, edition 2024, and the prepared Arrow 60 library. `assert!` and `assert_eq!` remain active in normal builds. The fixed pad accepts one source file without arbitrary arguments, interactive input, Cargo manifests or package installation. The main function returns `Result<(), Box<dyn std::error::Error>>` so later examples can propagate errors with `?`; the final `Ok(())` means this fixture completed successfully. Standard library and Arrow examples remain offline after image preparation. Multi-file Cargo and external ecosystem projects have separate explicit preparation workflows.
+Beyond the prelude, this lesson's programs use `std::sync` and `std::thread`. A passing run prints `rust-030: passed`.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Pad setup and limits: [Run a lesson](../STUDY-GUIDE.md#run-a-lesson).
+
+Before you run anything, follow [Attempt a lesson](../STUDY-GUIDE.md#attempt-a-lesson).
 
 
 
@@ -34,7 +36,9 @@ Start with the answer-free learner artifact in your saved classroom pad. It deli
 
 A generic bound `T: Send` requires cross-thread transfer capability. `T: Sync` requires safe shared access. Thread spawn also imposes a lifetime requirement; Send and static solve different constraints.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+**Reading Example A (Transfer owned data, code below).** `std::thread::spawn` takes a closure and starts an operating-system thread that may outlive the function that created it. For that reason its signature requires the closure to be `'static` and `Send`: it may not borrow local data, and everything it captures must be safe to transfer to another thread. The `move` keyword makes the closure take ownership of `text`, which satisfies the first requirement, and `String` implements `Send`, which satisfies the second. The closure's result, `text.len()`, becomes the thread's return value. `spawn` returns a `JoinHandle<usize>`, and `join` waits for the thread and gives back `Result<usize, _>`, where `Err` would carry a panic payload. `unwrap` is acceptable in this fixture because a panic in the worker is a bug. After the move, the parent cannot use `text`; the string is freed in the worker when its closure finishes.
+
+Method for tracing your own variants: [Trace a program](../STUDY-GUIDE.md#trace-a-program).
 
 ## Worked example / walkthrough
 
@@ -91,13 +95,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 6. **Transfer and justify.** Document why a proposed custom type is or is not Send and Sync from its members.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Record each task as in [Keep evidence for each task](../STUDY-GUIDE.md#keep-evidence-for-each-task).
 
 ## Common pitfalls and diagnosis
 
 Send does not mean simultaneous mutation is safe. Static does not mean allocated forever; it constrains borrowed references in the value. Never add unsafe impl solely to silence a compiler error.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+To turn a pitfall into a test, see [Design a regression case](../STUDY-GUIDE.md#design-a-regression-case).
 
 ## Progressive hints
 
@@ -105,13 +109,23 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 2. Compare Example B (Check capabilities at compile time) with Example A and name the first line whose behavior differs. Its observation is: The compiler accepts the declared safe capability combinations.
 3. Before opening the explanation, test your task 3 attempt against this lesson's main pitfall: Send does not mean simultaneous mutation is safe.
 
+Tempting approaches to rule out before you compare:
+
+- **Task 1.** Treating `move` as making a copy for the thread predicts that `text` is still usable in `main`; using it after the spawn is E0382.
+- **Task 2.** Dropping `move` makes the closure borrow `readings`, and `std::thread::spawn` rejects that with E0373 because the thread could outlive the vector.
+- **Task 5.** Assuming `'static` means the data must live for the whole program leads to leaking or using global data. It only means the closure holds no borrowed references that could expire.
+
 ## Self-check and next step
 
-Explain Send, Sync, Marker trait without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+Why can `text` move into the spawned thread in Example A, and what does `join` hand back? What do `require_send::<String>()` and `require_sync::<String>()` prove, and when is that proof checked? Which line would fail to compile if you added `require_send::<std::rc::Rc<i32>>()`, and why is `Rc` not `Send`?
+
+Then work through [Self-check and review](../STUDY-GUIDE.md#self-check-and-review).
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://doc.rust-lang.org/book/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+Read [The Rust Book, 16.4 Send and Sync](https://doc.rust-lang.org/book/ch16-04-extensible-concurrency-sync-and-send.html) for why `Rc` is neither.
+
+What the classroom does and does not prove: [Sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

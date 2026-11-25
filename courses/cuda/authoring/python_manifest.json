@@ -407,7 +407,7 @@
       ],
       "outcome": "Derive the scalar gradient and justify the backend evidence.",
       "lab": "Complete the two worked cases, six exercises and bounded CPU reference model.",
-      "verification": "Loss 10, gradient-10, new weight 1. GPU and external cluster evidence must be recorded separately."
+      "verification": "Loss 10, gradient -10, new weight 1. GPU and external cluster evidence must be recorded separately."
     },
     {
       "id": "cuda-088",
@@ -514,7 +514,7 @@
       ],
       "outcome": "Count specializations and justify the backend evidence.",
       "lab": "Complete the two worked cases, six exercises and bounded CPU reference model.",
-      "verification": "Two modeled specializations;500-call break-even. GPU and external cluster evidence must be recorded separately."
+      "verification": "Two modeled specializations; 500-call break-even. GPU and external cluster evidence must be recorded separately."
     },
     {
       "id": "cuda-094",

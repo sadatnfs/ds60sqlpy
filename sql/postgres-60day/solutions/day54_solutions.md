@@ -13,45 +13,23 @@ psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
   -f sql/postgres-60day/solutions/day54_solutions.sql
 ```
 
-`psql` prints each result/command tag in the terminal. Stop at the first
-unexpected `ERROR`; later output cannot repair an earlier failed invariant.
-Compare your own SQL, row grain, column names, row counts, `NULL` policy, and
-ordering with the explanation before comparing syntax.
+Load the Day 52 warehouse first; the file stops with an exception if
+`dwh.fact_sales` is missing. Expect one reconciliation row with a 0.00
+difference after the refresh and two empty comparison sets at the end. The
+[solution routine](../../STUDY-GUIDE.md#read-a-solution) covers the rest.
 
 ## Clause-by-clause reading map
 
-The lesson's main concepts are Aggregate table, Idempotent refresh, Late-arriving fact. Its worked-model focus is:
-For one target year/month, delete category, customer, and product aggregate rows, rebuild each independently from facts, and commit or roll back the whole unit together. Reconcile each table's period revenue with a fact-only control before considering the refresh successful.
+Read the statements in
+[logical clause order](../../STUDY-GUIDE.md#reading-any-query-in-logical-order),
+but notice that this file is mostly about state. The two starter tables begin
+empty, Exercise 2's procedure fills only the newest month, and every later
+query describes that partly filled state, which is why Exercise 5 finds 45
+months missing.
 
-- Start at `FROM`/`JOIN` and state the intermediate row grain. Inspect join keys
-  before adding aggregates; a one-to-many join is allowed to multiply rows only
-  when the later contract accounts for it.
-- Apply `WHERE` to input rows, `GROUP BY` to form buckets, and `HAVING` to
-  completed groups. Window functions run over the surviving relation and
-  normally preserve its row count.
-- Read the `SELECT` list as the public result contract: keys establish grain,
-  measures state calculations, and aliases explain meaning. `ORDER BY` is the
-  only output-order guarantee; add a unique tie-breaker before `LIMIT`.
-- Trace every common table expression (CTE) as a temporary named relation.
-  Execute or inspect one stage at a time while debugging, but compare the final
-  result with an independent control rather than trusting stage names.
-- Keep SQL `NULL` as “missing/unknown/not applicable” until the metric contract
-  chooses another representation. Guard division with `NULLIF`; disclose
-  exclusions and distinguish zero from no row.
-- For DDL/DML, a command tag proves only that PostgreSQL accepted a statement.
-  Catalog checks, negative cases, row-count reconciliation, and the declared
-  transaction boundary prove behavior and cleanup.
-
-The exact final queries are not the only valid syntax. A join, subquery, CTE,
-window, or conditional aggregate can be an alternative when it preserves the
-same grain, `NULL` semantics, deterministic ordering, and safety. Prefer the
-form whose intermediate relations a reviewer can verify; optimize only after
-correctness is established with evidence.
-
-Run Day 52 first in the same database, either
-[`day52_solutions.sql`](day52_solutions.sql) or the Day 52 learner file; Day 54
-needs only the base warehouse. Day 54 creates and tests aggregate objects inside a transaction, then rolls
-everything back. The complete runnable answer is
+The project loads monthly category and customer aggregates, adds a
+product-month aggregate, refreshes one period idempotently, inventories late
+fact risk and reconciles every month to facts. See
 [`day54_solutions.sql`](day54_solutions.sql).
 
 ## Exercise 1: `agg_sales_product_month`
@@ -127,17 +105,21 @@ ROLLBACK;
 ```
 
 The two sides are aggregated independently before joining, preventing join
-fanout. Expected `difference` is zero for every built month.
+fanout. Expected `difference` is zero for every built month. In
+`day54_solutions.sql` the same `INSERT` and check run between
+`SAVEPOINT exercise_1` and `ROLLBACK TO SAVEPOINT exercise_1`, so the full
+build is proven and the table is empty again when Exercise 2 refreshes a
+single month.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-54 Exercise 1, read from `dim_product`, `agg_sales_product_month`, `fact_sales`, and `dim_date`. Build the answer toward `year`, `month`, and `product_sk`; keep `year`, `month`, and `product_sk` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-54 Exercise 1, expected output: one row per `year`, `month`, and `product_sk`. The final columns are `year`, `month`, and `product_sk`. The final order is `a.year, a.month`.
-- **Independent verification:** For sql-54 Exercise 1, independently aggregate `dim_product`, `agg_sales_product_month`, `fact_sales`, and `dim_date` by `year`, `month`, and `product_sk`; require one output row for every distinct `year`, `month`, and `product_sk` tuple and compare `product_sk` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `row_count` for the existing `year`, and `month` tuple and verify the new tuple appears exactly once.
-- **Intermediate relation check:** For sql-54 Exercise 1, run `aggregate_total`, and `fact_total` one at a time. Record each CTE's row count and `year`, `month`, and `product_sk` uniqueness before the next stage uses it.
-- **Clause check:** For sql-54 Exercise 1, the solution actually uses `WITH`, `FROM`, `JOIN ... ON`, `GROUP BY`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `dim_product`, `agg_sales_product_month`, `fact_sales`, and `dim_date`, preserve one row per `year`, `month`, and `product_sk`, and finish with `year`, `month`, and `product_sk` ordered by `a.year, a.month`.
-- **Alternative/trade-off:** For sql-54 Exercise 1, the chosen form is justified by this lesson-specific rationale: The answer uses this grain and schema: The two sides are aggregated independently before joining, preventing join fanout. Evaluate another form against the concrete expected result (one row per `year`, `month`, and `product_sk`) and the verification above.
-- **Edge case:** Add one row to an existing group and one row for a new group; recompute `row_count` for the existing `year`, and `month` tuple and verify the new tuple appears exactly once.
+- **Inputs/evidence:** For sql-54 Exercise 1, create `agg_sales_product_month` with `PRIMARY KEY (year, month, product_sk)` and load it by grouping the 13,085 `fact_sales` rows joined to `dim_date` on `date_key` by year, month, and `product_sk`, storing `ROUND(SUM(amount), 2)` as `revenue`, `SUM(quantity)` as `units`, and `COUNT(DISTINCT order_id)` as `orders`; then reconcile it against an independent per-month sum of `fact_sales`.
+- **Expected result/shape:** For sql-54 Exercise 1, expected output: the load inserts one row per year, month, and `product_sk` (6,741 rows on our load), and the reconciliation returns one row per month, 46 rows, with columns `year`, `month`, `aggregate_revenue`, `fact_revenue`, and `difference`, every `difference` 0.00. The final order is `a.year, a.month`. The solution file runs this full build inside `SAVEPOINT exercise_1` and rolls back to it, so Exercise 2 starts from an empty table.
+- **Independent verification:** For sql-54 Exercise 1, confirm that no (year, month, `product_sk`) appears twice, that February 2023 holds 6 product rows with 1,203.26 revenue and 17 units, and that November 2026 holds 234 product rows with 85,364.73 revenue. In the transaction, add 1.00 to the revenue of product 69 in February 2023: the reconciliation shows that month alone with `difference` 1.00. Then delete the February 2023 rows: the inner join drops to 45 months and reports no difference at all, which is the gap Exercise 5 closes.
+- **Intermediate relation check:** The `SELECT` feeding the `INSERT` groups 13,085 fact rows into 6,741 (year, month, product_sk) rows on our load. `aggregate_total` then collapses those to 46 months, and `fact_total` independently sums the facts to the same 46 months before the two meet.
+- **Clause check:** `PRIMARY KEY (year, month, product_sk)` matches the `GROUP BY`, and `REFERENCES dim_product` blocks orphan products. `COUNT(DISTINCT fs.order_id)` counts orders rather than lines; no order repeats a product here, but the `DISTINCT` keeps the measure right if one ever did.
+- **Alternative/trade-off:** A materialized view with the same query would also store the summary, but `REFRESH MATERIALIZED VIEW` rebuilds every month at once. The table form lets Exercise 2 replace one month and leave the rest alone.
+- **Edge case:** The reconciliation joins with `JOIN ... USING (year, month)`, so a month that exists only in the facts would silently vanish from the check. Exercise 5 replaces that join with a `FULL JOIN` that reports such months.
 
 ## Exercise 2: Refresh all aggregates for `(year, month)`
 
@@ -163,13 +145,13 @@ with `ROLLBACK`; the aggregate objects intentionally will not persist.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-54 Exercise 2, read from `agg_sales_category_month`, `agg_sales_customer_month`, `agg_sales_product_month`, `fact_sales`, and `dim_date`. Build the answer toward `year`, `month`, and `category`; keep `year`, `month`, and `product_sk` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-54 Exercise 2, expected output: one row per `year`, `month`, and `product_sk`. The final columns are `year`, `month`, and `category`. The final order is `dd.year DESC, dd.month DESC`.
-- **Independent verification:** For sql-54 Exercise 2, assert no more than 1 rows, no duplicate `year`, `month`, and `product_sk`, and no adjacent pair that violates `dd.year DESC, dd.month DESC`. Rejoin the returned keys to `agg_sales_category_month`, `agg_sales_customer_month`, `agg_sales_product_month`, `fact_sales`, and `dim_date` to confirm `year`, `month`, and `category` came from the same source rows. Run with 1 minus one and 1 plus one eligible rows; require the output cap of 1 while retaining `dd.year DESC, dd.month DESC`.
-- **Intermediate relation check:** For sql-54 Exercise 2, run `aggregate_total`, and `fact_total` one at a time. Record each CTE's row count and `year`, `month`, and `product_sk` uniqueness before the next stage uses it.
-- **Clause check:** For sql-54 Exercise 2, the solution actually uses `WITH`, `FROM`, `JOIN ... ON`, `WHERE`, `GROUP BY`, `SELECT`, `ORDER BY`, and `LIMIT`. Read only those operations: begin at `agg_sales_category_month`, `agg_sales_customer_month`, `agg_sales_product_month`, `fact_sales`, and `dim_date`, preserve one row per `year`, `month`, and `product_sk`, and finish with `year`, `month`, and `category` ordered by `dd.year DESC, dd.month DESC`.
-- **Alternative/trade-off:** For sql-54 Exercise 2, the chosen form is justified by this lesson-specific rationale: The executable solution creates: Within one procedure call it: 1. Evaluate another form against the concrete expected result (one row per `year`, `month`, and `product_sk`) and the verification above.
-- **Edge case:** Run with 1 minus one and 1 plus one eligible rows; require the output cap of 1 while retaining `dd.year DESC, dd.month DESC`.
+- **Inputs/evidence:** For sql-54 Exercise 2, write `refresh_sales_aggregates_solution(p_year, p_month)` so it deletes that month from `agg_sales_category_month`, `agg_sales_customer_month`, and `agg_sales_product_month` and reinserts it from `fact_sales` joined to `dim_date` (and to `dim_product` for the category); call it for the newest fact month, then reconcile the product aggregate against `fact_sales` for the months it holds.
+- **Expected result/shape:** For sql-54 Exercise 2, expected output: the procedure returns nothing; the call leaves 6 category rows, 73 customer rows, and 234 product rows, all for November 2026 on our load, and the reconciliation returns 1 row with columns `year`, `month`, `aggregate_revenue`, `fact_revenue`, and `difference` (2026, 11, 85,364.73, 85,364.73, 0.00 on our load). The query has no `ORDER BY` because it returns one month.
+- **Independent verification:** For sql-54 Exercise 2, check that all three tables sum to 85,364.73 revenue, that the category `units` total 1,399, and that the customer `orders` total 151, the same as `COUNT(DISTINCT order_id)` for that month in `fact_sales`. Call the procedure again for 2026-11 and then for 2030-01, a month with no facts: the counts stay 6, 73, and 234. Call it for 2023-02: the counts become 12, 75, and 240, and the reconciliation returns 2 rows, both with `difference` 0.00.
+- **Intermediate relation check:** After the `DO` block finds the newest year and month and calls the procedure, each aggregate holds only that month: 6 category rows plus one row for every customer and product with facts in it. `aggregate_total` therefore has a single row.
+- **Clause check:** `p_year` and `p_month` filter all three `DELETE` statements and all three `INSERT ... SELECT` statements, so every table is rebuilt for the same period. In the check, `WHERE (dd.year, dd.month) IN (...)` limits `fact_total` to the refreshed month so untouched months are not compared.
+- **Alternative/trade-off:** `INSERT ... ON CONFLICT DO UPDATE` could upsert the month instead, but it leaves behind a stale row for any category or customer that no longer has facts. Deleting first and inserting fresh rows avoids that.
+- **Edge case:** The procedure has no `COMMIT`, so it runs inside the caller's transaction and the final `ROLLBACK` undoes it. Calling it for a month with no facts empties that month in every aggregate, which is the correct result.
 
 ## Required Days 52 to 54 sequence
 
@@ -204,13 +186,13 @@ refreshing its own affected period, not merely the newest month.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-54 Exercise 3, read from `fact_sales`, and `dim_date`. Build the answer toward `year`, `month`, `fact_rows`, and `latest_fact_date`; keep `year`, and `month` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-54 Exercise 3, expected output: one row per `year`, and `month`. The final columns are `year`, `month`, `fact_rows`, and `latest_fact_date`. The final order is `dd.year DESC, dd.month DESC`.
-- **Independent verification:** For sql-54 Exercise 3, independently aggregate `fact_sales`, and `dim_date` by `year`, and `month`; require one output row for every distinct `year`, and `month` tuple and compare `fact_rows` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `fact_rows` for the existing `year`, and `month` tuple and verify the new tuple appears exactly once.
-- **Intermediate relation check:** For sql-54 Exercise 3, start with the first relation in `fact_sales`, and `dim_date`; after each join, record total rows and distinct `year`, and `month` so the exact fanout or loss is visible.
-- **Clause check:** For sql-54 Exercise 3, the solution actually uses `FROM`, `JOIN ... ON`, `GROUP BY`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `fact_sales`, and `dim_date`, preserve one row per `year`, and `month`, and finish with `year`, `month`, `fact_rows`, and `latest_fact_date` ordered by `dd.year DESC, dd.month DESC`.
-- **Alternative/trade-off:** For sql-54 Exercise 3, the chosen form is justified by this lesson-specific rationale: The period inventory identifies every loaded month. Evaluate another form against the concrete expected result (one row per `year`, and `month`) and the verification above.
-- **Edge case:** Add one row to an existing group and one row for a new group; recompute `fact_rows` for the existing `year`, and `month` tuple and verify the new tuple appears exactly once.
+- **Inputs/evidence:** For sql-54 Exercise 3, group the 13,085 `fact_sales` rows joined to `dim_date` by year and month, counting the fact rows and taking `MAX(date_actual)` as the latest loaded day of each month.
+- **Expected result/shape:** For sql-54 Exercise 3, expected output: 46 rows, one per year and month from February 2023 to November 2026, with columns `year`, `month`, `fact_rows`, and `latest_fact_date`, ordered by `dd.year DESC, dd.month DESC`. On our load October 2026 has 965 rows ending 2026-10-31, the partial November 2026 has 468 rows ending 2026-11-23, and February 2023 has 6 rows, all on 2023-02-13.
+- **Independent verification:** For sql-54 Exercise 3, confirm that `fact_rows` adds up to 13,085. In a transaction, insert a late fact for order 3739, product 69, `order_item_id` 999999, `date_key` 20230220, and amount 35.53: February 2023 rises to 7 rows with `latest_fact_date` 2023-02-20. If February 2023 was already refreshed, the Exercise 5 reconciliation now shows it with 1,203.26 against 1,238.79, a `difference` of -35.53, until the procedure is called for 2023-02 again; `ROLLBACK`.
+- **Intermediate relation check:** `fact_sales` joined to `dim_date` stays at 13,085 rows, one per order line, and `GROUP BY dd.year, dd.month` turns them into 46 periods. No aggregate table is read; the inventory comes straight from facts.
+- **Clause check:** `COUNT(*)` gives the fact rows per month and `MAX(dd.date_actual)` the last day that has facts, which shows whether a month is complete. The descending order puts the newest, still filling month first. On a fresh load the oldest month, February 2023, has only 6 fact rows, while recent full months approach a thousand.
+- **Alternative/trade-off:** Detecting late facts properly needs a load timestamp on each fact, compared with the time each month was last refreshed. This warehouse has no such column, so the query can list periods that might need a rebuild but not prove which did.
+- **Edge case:** Add one fact dated in an older month: that month's `fact_rows` rises by one while its aggregate rows stay as they were. Refreshing only the newest month leaves the difference, and Exercise 5's check would report it.
 
 ## Exercise 4: Refresh atomically
 
@@ -219,13 +201,13 @@ Failure rolls back the whole period instead of leaving partial tables.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-54 Exercise 4, read the target keys from `agg_sales_category_month` before writing. Keep the change inside the lesson transaction and capture the command tag or `RETURNING` values.
-- **Expected result/shape:** For sql-54 Exercise 4, expected output: the command tag and an independently counted set of affected `year`, and `month` values. The final columns are `year`, `month`, `category_rows`, and `revenue`. The final order is `year DESC, month DESC`.
-- **Independent verification:** For sql-54 Exercise 4, materialize the intended `year`, and `month` target set first; require the command tag/`RETURNING` set to match it, then query `agg_sales_category_month` again and prove rollback or idempotent retry. Use an empty target set and a multi-row target set; reconcile the affected `year`, and `month` values in both cases.
-- **Intermediate relation check:** For sql-54 Exercise 4, materialize the intended `year`, and `month` target set first; require the command tag/`RETURNING` set to match it, then query `agg_sales_category_month` again and prove rollback or idempotent retry.
-- **Clause check:** For sql-54 Exercise 4, the solution actually uses `FROM`, `GROUP BY`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `agg_sales_category_month`, preserve one row per `year`, and `month`, and finish with `year`, `month`, `category_rows`, and `revenue` ordered by `year DESC, month DESC`.
-- **Alternative/trade-off:** For sql-54 Exercise 4, the chosen form is justified by this lesson-specific rationale: Delete and all aggregate inserts run in one transaction through the procedure. Evaluate another form against the concrete expected result (the command tag and an independently counted set of affected `year`, and `month` values) and the verification above.
-- **Edge case:** Use an empty target set and a multi-row target set; reconcile the affected `year`, and `month` values in both cases.
+- **Inputs/evidence:** For sql-54 Exercise 4, after the Exercise 2 call has deleted and reinserted the newest month inside the open transaction, group `agg_sales_category_month` by year and month, counting the category rows and summing their revenue.
+- **Expected result/shape:** For sql-54 Exercise 4, expected output: one row per refreshed month, 1 row on our load (2026, 11, 6 category rows, 85,364.73 revenue), with columns `year`, `month`, `category_rows`, and `revenue`. The final order is `year DESC, month DESC`.
+- **Independent verification:** For sql-54 Exercise 4, list the six categories for the month (Apparel 14,026.26, Beauty 13,151.38, Books 15,823.05, Electronics 13,811.36, Home 12,125.38, and Sports 16,427.30 on our load) and confirm that they add up to the reported revenue. Call the procedure for 2023-02 as well: the query returns 2 rows, 2026-11 first and then 2023-02 with 6 rows and 1,203.26. After the file's `ROLLBACK`, `to_regclass('dwh.agg_sales_category_month')` returns `NULL`.
+- **Intermediate relation check:** `agg_sales_category_month` holds only the rows the procedure wrote, so the grouping returns one month. `category_rows` is 6 because every category sold in that month.
+- **Clause check:** `SUM(revenue)` per month must equal the fact revenue reconciled in Exercise 2. `COUNT(*)` against the number of categories with facts in that month shows whether the refresh missed one.
+- **Alternative/trade-off:** The procedure could also capture `GET DIAGNOSTICS ... ROW_COUNT` after each `INSERT` and return the counts directly, which avoids a separate summary query but hides whether the stored rows still match.
+- **Edge case:** `dim_product.category` allows `NULL`, while the aggregate column does not. A product without a category would make the insert fail, and because the deletes are in the same transaction the error undoes them too, leaving the old month intact.
 
 ## Exercise 5: Make reconciliation NULL-safe
 
@@ -234,13 +216,13 @@ turns that absence into a visible nonzero difference.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-54 Exercise 5, read from `agg_sales_category_month`, `fact_sales`, `dim_date`, and `f.revenue`. Build the answer toward `year`, `month`, `aggregate_revenue`, `fact_revenue`, and `difference`; keep `year`, and `month` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-54 Exercise 5, expected output: one row per `year`, and `month`. The final columns are `year`, `month`, `aggregate_revenue`, `fact_revenue`, and `difference`. The final order is `year, month`.
-- **Independent verification:** For sql-54 Exercise 5, project `year`, and `month` plus the raw source columns from `agg_sales_category_month`, `fact_sales`, `dim_date`, and `f.revenue` at each join stage; record row count and distinct `year`, and `month`, then assert the final `year`, `month`, `aggregate_revenue`, `fact_revenue`, and `difference` values match those staged rows without unintended fanout or loss. Repeat with `NULL` in `year`, and `month` and state whether the row is kept, rejected, or classified.
-- **Intermediate relation check:** For sql-54 Exercise 5, run `aggregate_total`, and `fact_total` one at a time. Record each CTE's row count and `year`, and `month` uniqueness before the next stage uses it.
-- **Clause check:** For sql-54 Exercise 5, the solution actually uses `WITH`, `FROM`, `JOIN ... ON`, `WHERE`, `GROUP BY`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `agg_sales_category_month`, `fact_sales`, `dim_date`, and `f.revenue`, preserve one row per `year`, and `month`, and finish with `year`, `month`, `aggregate_revenue`, `fact_revenue`, and `difference` ordered by `year, month`.
-- **Alternative/trade-off:** For sql-54 Exercise 5, the chosen form is justified by this lesson-specific rationale: FULL JOIN preserves a period missing on either side, and coalesced arithmetic turns that absence into a visible nonzero difference. Evaluate another form against the concrete expected result (one row per `year`, and `month`) and the verification above.
-- **Edge case:** Repeat with `NULL` in `year`, and `month` and state whether the row is kept, rejected, or classified.
+- **Inputs/evidence:** For sql-54 Exercise 5, sum `agg_sales_category_month` revenue by year and month in `aggregate_total`, sum the `fact_sales` amounts joined to `dim_date` by year and month in `fact_total`, and `FULL JOIN` the two on year and month, keeping the rows where `a.revenue IS DISTINCT FROM f.revenue`.
+- **Expected result/shape:** For sql-54 Exercise 5, expected output: 45 rows on our load, one for every fact month the aggregate does not hold (all but the refreshed November 2026), with columns `year`, `month`, `aggregate_revenue`, `fact_revenue`, and `difference`, ordered by `year, month`. Each row has a `NULL` `aggregate_revenue` and a `difference` equal to minus its fact revenue, for example -1,203.26 for February 2023.
+- **Independent verification:** For sql-54 Exercise 5, call the procedure for 2023-02 and confirm that the result drops to 44 rows, now starting at March 2023. Then insert a category row for 2030-01 (Books, 10.00 revenue, 1 unit) that has no facts: it appears with a `NULL` `fact_revenue` and a `difference` of 10.00, for 45 rows. An inner join with `<>` would return neither kind of row; `ROLLBACK`.
+- **Intermediate relation check:** `aggregate_total` has one row, the refreshed month, and `fact_total` has 46. The `FULL JOIN` yields 46 rows; the filter keeps the 45 months whose revenue differs, all of them because the aggregate side is missing.
+- **Clause check:** `a.revenue IS DISTINCT FROM f.revenue` treats a `NULL` and a number as different, so missing months are reported. `COALESCE` on both sides makes the `difference` column a real number instead of `NULL`.
+- **Alternative/trade-off:** Two `NOT EXISTS` queries, one per side, plus a value comparison would find the same problems. The `FULL JOIN` does all three in one statement and keeps both revenues on the same row.
+- **Edge case:** Rewriting the filter as `a.revenue <> f.revenue` returns zero rows here, because comparing with `NULL` is unknown. That empty result would look like a perfect reconciliation while 45 months are missing.
 
 ## Exercise 6: Prove idempotency
 
@@ -249,10 +231,10 @@ uses two-way `EXCEPT`. Both difference sets must be empty.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-54 Exercise 6, read from `agg_sales_category_month`, `fact_sales`, `dim_date`, and `aggregate_snapshot_before`. Build the answer toward `except`; keep `except` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-54 Exercise 6, expected output: at most one row keyed by `except`. The final columns are `except`. The final order is `dd.year DESC, dd.month DESC`.
-- **Independent verification:** For sql-54 Exercise 6, assert no more than 1 rows, no duplicate `except`, and no adjacent pair that violates `dd.year DESC, dd.month DESC`. Rejoin the returned keys to `agg_sales_category_month`, `fact_sales`, `dim_date`, and `aggregate_snapshot_before` to confirm `except` came from the same source rows. Add duplicate source candidates for `except`; verify the final SELECT returns each required key tuple exactly once and does not discard distinct tuples that share only part of the key.
-- **Intermediate relation check:** For sql-54 Exercise 6, start with the first relation in `agg_sales_category_month`, `fact_sales`, `dim_date`, and `aggregate_snapshot_before`; after each join, record total rows and distinct `except` so the exact fanout or loss is visible.
-- **Clause check:** For sql-54 Exercise 6, the solution actually uses `FROM`, `JOIN ... ON`, `SELECT`, `ORDER BY`, and `LIMIT`. Read only those operations: begin at `agg_sales_category_month`, `fact_sales`, `dim_date`, and `aggregate_snapshot_before`, preserve one row per `except`, and finish with `except` ordered by `dd.year DESC, dd.month DESC`.
-- **Alternative/trade-off:** For sql-54 Exercise 6, the chosen form is justified by this lesson-specific rationale: The answer snapshots category aggregates, reruns the same latest period, and uses two-way `EXCEPT`. Evaluate another form against the concrete expected result (at most one row keyed by `except`) and the verification above.
-- **Edge case:** Add duplicate source candidates for `except`; verify the final SELECT returns each required key tuple exactly once and does not discard distinct tuples that share only part of the key.
+- **Inputs/evidence:** For sql-54 Exercise 6, copy `agg_sales_category_month` into the temporary table `aggregate_snapshot_before`, call the refresh again for the same newest month, and compare the snapshot with the live table using `EXCEPT` in both directions, labeling each side.
+- **Expected result/shape:** For sql-54 Exercise 6, expected output: 0 rows on the course data, because the second refresh deletes and rewrites the same 6 category rows with the same values. The final columns are `side`, `year`, `month`, `category`, `revenue`, and `units`, where `side` is `before_minus_after` or `after_minus_before`; the query has no `ORDER BY`.
+- **Independent verification:** For sql-54 Exercise 6, check that the snapshot and the live table both hold 6 rows with 85,364.73 revenue after the rerun. Then, in a transaction, insert a late November 2026 fact (order 3739, product 69, `order_item_id` 999999, `date_key` 20261120, amount 35.53) between the snapshot and the rerun: the query returns 2 Home rows, `before_minus_after` with 12,125.38 and 209 units and `after_minus_before` with 12,160.91 and 210 units, which proves that the comparison catches a real change; `ROLLBACK`.
+- **Intermediate relation check:** `aggregate_snapshot_before` copies the 6 category rows. The second `DO` block reruns the refresh for the same month, and the table again holds 6 rows.
+- **Clause check:** `EXCEPT` compares whole rows, including `revenue` and `units`, and the query runs it in both directions joined with `UNION ALL`. One direction alone would miss rows that exist only after, or only before, the rerun.
+- **Alternative/trade-off:** Comparing just `COUNT(*)` and `SUM(revenue)` before and after is quicker but weaker: a revenue shift between two categories would leave both unchanged.
+- **Edge case:** `EXCEPT` removes duplicate rows, so it cannot notice a row loaded twice; the primary key prevents that here. The temporary snapshot is created inside the transaction, so `ROLLBACK` removes it with everything else.

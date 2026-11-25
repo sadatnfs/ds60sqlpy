@@ -194,7 +194,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/swift/solutions/swift-002_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="swift-002-explanation-and-comparison">swift-002: explanation and comparison<a class="heading-anchor" href="#swift-002-explanation-and-comparison" aria-label="Link to this section">#</a></h2>
-<p>Attempt the six guide tasks before opening this comparison. The executable reference is <a href="swift-002_solution.swift.html">swift-002_solution.swift</a>. It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.</p>
+<p>Reference program: <a href="swift-002_solution.swift.html">swift-002_solution.swift</a>, covering both examples and the executed answers.</p>
+<p>Attempt the tasks first; see <a href="../STUDY-GUIDE.md.html#comparing-with-the-explanation">comparing with the explanation</a>.</p>
 <h3 id="why-the-two-examples-differ">Why the two examples differ<a class="heading-anchor" href="#why-the-two-examples-differ" aria-label="Link to this section">#</a></h3>
 <p><strong>Reassign only mutable state:</strong> The code exposes which part is state and which part is a stable input. The accumulator becomes 8 while the fixed amount remains 4.</p>
 <p><strong>Convert before division:</strong> Converting after integer division would preserve the already truncated result. Integer division yields 3; floating division yields 3.5.</p>
@@ -251,7 +252,7 @@ total <span class="syntax-operator">+=</span> perBox
 <p>An exactly divisible pair cannot reveal truncation, so the non-divisible pair is the case that distinguishes the deliberate conversion from integer division.</p>
 <h4 id="task-6-transfer-and-justify">Task 6: Transfer and justify<a class="heading-anchor" href="#task-6-transfer-and-justify" aria-label="Link to this section">#</a></h4>
 <p>Choose units and types for a small measurement model.</p>
-<p>No single reference answer exists: several designs can satisfy this transfer task. Build yours from the task 3 answer above (Compute a mean from an integer total and count using a deliberate conversion) and the mechanism described below, and state one limitation of your choice.</p>
+<p>No single answer exists; extend task 3 using the <a href="../STUDY-GUIDE.md.html#open-transfer-tasks">open transfer routine</a>.</p>
 <h3 id="solution-reasoning">Solution reasoning<a class="heading-anchor" href="#solution-reasoning" aria-label="Link to this section">#</a></h3>
 <p><strong>Approach.</strong> Example A separates a fixed input, <code>let perBox = 4</code>, from an accumulator, <code>var total</code>, and adds the box size twice. Example B divides 7 by 2 twice: once with <code>Int</code> operands and once after converting both operands to <code>Double</code>. The task 3 answer converts a total and count before dividing to get a mean.</p>
 <p><strong>Why it is correct.</strong> <code>total</code> ends at 8 because two additions of 4 occur, while <code>perBox</code> cannot change since it is a <code>let</code> binding. <code>7 / 2</code> on integers truncates toward zero and yields 3; <code>Double(7) / Double(2)</code> keeps the fraction and yields 3.5. The conversion happens before the operator, so no information is lost.</p>
@@ -263,7 +264,7 @@ total <span class="syntax-operator">+=</span> perBox
 <p><code>let count: Int = 3</code> gives an explicit type. <code>var total = 0</code> infers Int. <code>Double(count)</code> converts a numeric value. Swift source normally does not need semicolons at line ends.</p>
 <p>Let protects the binding, not necessarily every object reachable from it. Avoid forced conversions at a boundary without validating range. A floating type is not automatically more appropriate for a count.</p>
 <h3 id="review-before-continuing">Review before continuing<a class="heading-anchor" href="#review-before-continuing" aria-label="Link to this section">#</a></h3>
-<p>Run the reference and confirm that it prints <code>swift-002: passed</code>, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.</p></article>
+<p>Run the reference and confirm it prints <code>swift-002: passed</code>, then rerun the guide&#x27;s counterexample.</p></article>
   </main>
 </body>
 </html>

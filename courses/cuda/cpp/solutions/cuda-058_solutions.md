@@ -4,8 +4,6 @@
 
 CUTLASS supplies composable matrix-operation building blocks, while CuTe provides abstractions for shapes, strides and layout composition used in tiled algorithms. An operation atom describes a small supported operation; larger tiles organize repeated work and data movement. Epilogues transform accumulated results, often adding scale, bias or activation. Templates encode choices at compile time, but they do not absolve the programmer from understanding coordinates, alignment, resource costs and architecture support. Pin dependencies and begin with a prepared supported example. A novel tile DSL is an elective comparison, not a universal prerequisite for basic CUDA.
 
-The separate [CPU reference](../references/cuda-058_cpu.py) checks the chapter's bounded model. It does not execute CUDA or establish GPU timing. Compare after attempting the worksheet or explicitly choosing to reveal solutions.
-
 ## Exercise 1
 
 A 2-by-3 logical tile with strides (3,1) maps coordinate (1,2) to offset five. A transposed view uses shape (3,2) and strides (1,3), mapping (2,1) to the same offset. Trace tiny layouts before interpreting a large template type.
@@ -78,12 +76,16 @@ When it expresses the required semantics and passes accuracy/performance tests w
 
 **How to verify:** Compare both against a reference and a library baseline.
 
+## Self-check answers
+
+1. **What offset does (1,1) map to under shape (2,3) and strides (3,1)?** 4, because 1 times 3 plus 1 times 1 is 4.
+2. **What does worked example 2 produce when bias comes after ReLU?** [1,2,5] instead of [0,2,5], so the order changes semantics.
+3. **An instantiation compiles but fails on the device. What is missing?** A check that the device supports the selected architecture target and instructions.
+
 ## Numerical reference and its limits
 
-The complete CPU model is [here](../references/cuda-058_cpu.py). Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It does not claim CUDA execution, concurrency safety or a performance measurement.
+The [CPU reference](../references/cuda-058_cpu.py) reproduces worked example 1 and prints `{'correct_epilogue': [0, 2, 5], 'changed_operation_order': [1, 2, 5]}`.
 
 ## Transfer review
 
 When it expresses the required semantics and passes accuracy/performance tests while reducing maintenance; compare against the relevant library baseline first.
-
-A complete explanation must name its inputs, the unchanged mathematical contract, the changed boundary or resource condition, and the evidence still needed on actual hardware. Preserve a CPU baseline even after a GPU path becomes available.

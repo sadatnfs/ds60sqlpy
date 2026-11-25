@@ -235,7 +235,7 @@ rows <span class="syntax-operator">=</span> table<span class="syntax-operator">.
 <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span>row<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">quality</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-keyword">for</span> row <span class="syntax-operator">in</span> rows<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></code></pre>
 <p>Existing rows report None for quality because the new field ID is absent from their files, and no data file is rewritten. Adding a required column to a table that already has rows is rejected, since old rows could not satisfy it. If a reader shows zeros instead of None for old rows, a default is being applied downstream and should be documented rather than assumed.</p>
 <h3 id="complete-worked-source">Complete worked source<a class="heading-anchor" href="#complete-worked-source" aria-label="Link to this section">#</a></h3>
-<p>This is a complete editable worked program for the declared prepared runtime. It uses bounded local fixtures and does not install packages or start distributed services.</p>
+<p>Run it as the <a href="../STUDY-GUIDE.md.html#worked-programs">worked program rules</a> describe.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> tempfile
 <span class="syntax-keyword">from</span> pathlib <span class="syntax-keyword">import</span> Path
 

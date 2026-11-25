@@ -1,6 +1,6 @@
 # cuda-090: explained solutions
 
-These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.
+Compare with your [worksheet](../lessons/cuda-090.md) attempt.
 
 ## Exercise 1: Calculate scaled and unscaled values
 
@@ -74,8 +74,16 @@ A speed improvement cannot excuse numerical failure.
 
 **How to verify.** Present a table with both metrics per configuration, and accept mixed precision only if quality meets the baseline tolerance.
 
+## Self-check answers
+
+1. **Why scale the loss in fp16 training?** Small gradients can underflow to zero in fp16. Scaling keeps them representable, and dividing afterward restores the intended update.
+
+2. **How do fp16 and bf16 differ although both use 16 bits?** bf16 has more exponent bits and therefore more range, while fp16 has more fraction bits and therefore more precision within its smaller range.
+
+3. **Can a speedup excuse a numerical failure?** No. Validate finite gradients and held-out behavior first; speed and memory are compared only after quality matches the baseline.
+
 ## Reference observation
 
 Correct gradient 0.5; incorrect clipping order yields 0.0009765625.
 
-The reference file is `courses/cuda/python/references/cuda-090_cpu.py`. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.
+Asserted by `courses/cuda/python/references/cuda-090_cpu.py`.

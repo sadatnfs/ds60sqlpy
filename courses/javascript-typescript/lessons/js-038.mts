@@ -2,20 +2,18 @@
 
 export {};
 // Exercise 1: Handle and decode a successful request: change one input
-// Copy Example A into a scratch `main.mts` and change `const reply = handle({ method:
-// 'POST', path: '/sum', requestId: 'R1', body: { a: 2, b: 3 } });` to `const reply =
-// handle({ method: 'POST', path: '/sum', requestId: 'R1', body: { a: 3, b: 3 } });`. Before
-// running it, predict which check fails and which value it now sees; then run it and restore
-// the original line.
-// Expected: The changed run fails with an `AssertionError` at
+// In a scratch copy of Example A, change `const reply = handle({ method: 'POST', path:
+// '/sum', requestId: 'R1', body: { a: 2, b: 3 } });` to `const reply = handle({ method:
+// 'POST', path: '/sum', requestId: 'R1', body: { a: 3, b: 3 } });`. Which check fails, and
+// what value does it see?
+// Expected: The edited run fails with an `AssertionError` at
 // `assert.equal(decoded.body.data.total, 5)`. Restoring `const reply = handle({ method:
 // 'POST', path: '/sum', requestId: 'R1', body: { a: 2, b: 3 } });` brings back: status 200
 // and decoded total 5.
 
 // Exercise 2: Return a stable invalid-input envelope: debug a regression
-// A regression changed one token in Example B, so one line now reads `const reply = handle({
-// method: 'POST', path: '/sum', requestId: 'R3', body: { a: '2', b: 3 } });`. Run Example B
-// with that line, use the failing check to locate the defect and repair it without changing
+// A regression made one Example B line read `const reply = handle({ method: 'POST', path:
+// '/sum', requestId: 'R3', body: { a: '2', b: 3 } });`. Locate and repair it without editing
 // the check.
 // Expected: Before the repair the run fails with an `AssertionError` at
 // `assert.equal(reply.body.requestId, 'R2')`. Restoring `const reply = handle({ method:

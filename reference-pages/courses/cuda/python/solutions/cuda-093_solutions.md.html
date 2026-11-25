@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cuda/python/solutions/cuda-093_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="cuda-093-explained-solutions">cuda-093: explained solutions<a class="heading-anchor" href="#cuda-093-explained-solutions" aria-label="Link to this section">#</a></h2>
-<p>These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.</p>
+<p>Compare with your <a href="../lessons/cuda-093.md.html">worksheet</a> attempt.</p>
 <h3 id="exercise-1-count-specializations">Exercise 1: Count specializations<a class="heading-anchor" href="#exercise-1-count-specializations" aria-label="Link to this section">#</a></h3>
 <p>Two distinct shape signatures.</p>
 <p><strong>Approach.</strong> Count specializations by collecting distinct shape signatures: the calls <code>(4, 8)</code>, <code>(4, 8)</code> and <code>(8, 8)</code> form the set <code>{(4, 8), (8, 8)}</code>, so the simplified cache compiles twice.</p>
@@ -231,9 +231,19 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Why it is correct here.</strong> Replay requires static shapes and fixed memory addresses. It reduces CPU launch cost but does not by itself change the kernels.</p>
 <p><strong>A plausible wrong approach.</strong> Expecting graph replay to speed up compute-bound kernels confuses launch overhead with kernel time.</p>
 <p><strong>How to verify.</strong> Profile a step before and after enabling graph capture and compare host launch time and kernel time separately.</p>
+<h3 id="self-check-answers">Self-check answers<a class="heading-anchor" href="#self-check-answers" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>How do tracing, compilation and replay differ?</strong> Tracing records operations, compilation transforms that record into code and replay reuses prepared work without rebuilding it.</li>
+</ol>
+<ol start="2">
+<li><strong>Why can changing shapes slow a compiled model?</strong> New shapes can fail the guards and trigger another specialization, paying compile time again.</li>
+</ol>
+<ol start="3">
+<li><strong>Is using a generic graph API proof that CUDA Graph replay happened?</strong> No. CUDA Graph replay has its own restrictions on allocations and stable execution, so it needs separate evidence.</li>
+</ol>
 <h3 id="reference-observation">Reference observation<a class="heading-anchor" href="#reference-observation" aria-label="Link to this section">#</a></h3>
-<p>Two modeled specializations;500-call break-even.</p>
-<p>The reference file is <code>courses/cuda/python/references/cuda-093_cpu.py</code>. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.</p></article>
+<p>Two modeled specializations; 500-call break-even.</p>
+<p>Asserted by <code>courses/cuda/python/references/cuda-093_cpu.py</code>.</p></article>
   </main>
 </body>
 </html>

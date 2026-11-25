@@ -1,6 +1,6 @@
 # js-024: explanatory solutions
 
-Use these answers after an attempt or an explicit reveal. The reference uses the same literal fixtures as the guide and keeps the exercises in separate scopes. A successful run checks these examples; explaining a changed input is a separate learning goal.
+Open these after your own attempt; each exercise runs in its own scope in the reference.
 
 ## Mechanism review
 
@@ -24,7 +24,7 @@ A record guard checks typeof object, non-null and non-array before exposing stri
 
 ## Exercise 1: Validate and copy a complete order: change one input
 
-Task: Copy Example A into a scratch `main.mts` and change `{ sku: 'X', quantity: 2 },` to `{ sku: 'X', quantity: 3 },`. Before running it, predict which check fails and which value it now sees; then run it and restore the original line.
+Task: In a scratch copy of Example A, change `{ sku: 'X', quantity: 2 },` to `{ sku: 'X', quantity: 3 },`. Which check fails, and what value does it see?
 
 The successful branch provides a typed value only after all fields pass. The result contains new objects, separating validation from later mutation of the input graph.
 
@@ -48,13 +48,13 @@ assert.equal(
 assert.notEqual(result.value, raw);
 ```
 
-**Expected:** The changed run fails with an `AssertionError` at `assert.equal(result.value.items.reduce((sum, item) => sum + item.quantity, 0), 5)`. Restoring `{ sku: 'X', quantity: 2 },` brings back: success with total quantity 5; independent copied item records.
+**Expected:** The edited run fails with an `AssertionError` at `assert.equal(result.value.items.reduce((sum, item) => sum + item.quantity, 0), 5)`. Restoring `{ sku: 'X', quantity: 2 },` brings back: success with total quantity 5; independent copied item records.
 
-**Verify:** Compare your written prediction with the reported `AssertionError`, including its actual and expected values, and name the value that made `assert.equal(result.value.items.reduce((sum, item) => sum + item.quantity, 0), 5)` fail. After restoring the line, the program prints its `{"checks":1,"status":"passed"}` receipt again.
+**Verify:** Compare the reported actual and expected values with your prediction, then restore `{ sku: 'X', quantity: 2 },`.
 
 ## Exercise 2: Report a nested domain failure precisely: debug a regression
 
-Task: A regression changed one token in Example B, so one line now reads `{ sku: 'Y', quantity: 1 },`. Run Example B with that line, use the failing check to locate the defect and repair it without changing the check.
+Task: A regression made one Example B line read `{ sku: 'Y', quantity: 1 },`. Locate and repair it without editing the check.
 
 Checking every element prevents a valid first row from legitimizing invalid later rows. A stable path is more useful to the caller than a generic invalid input message.
 
@@ -76,7 +76,7 @@ assert.equal(result.path, 'items[1].quantity');
 
 **Expected:** Before the repair the run fails with an `AssertionError` at `assert.equal(result.ok, false)`. Restoring `{ sku: 'Y', quantity: 0 },` brings back: failure code schema and path `items[1].quantity`.
 
-**Verify:** Keep the failing and the repaired runs. Explain why the changed token alters the value tested by `assert.equal(result.ok, false)` for this input.
+**Verify:** Keep the failing and repaired runs and name the first value that differs between them.
 
 ## Exercise 3: Separate JSON syntax failure from schema failure
 
@@ -96,7 +96,7 @@ assert.equal(wrongShape.code, 'schema');
 
 **Expected:** codes json and schema respectively.
 
-**Verify:** Keep a check equivalent to `assert.equal(wrongShape.code, 'schema')`. As a control, change `const wrongShape = parseOrder('null');` to `const wrongShape = parseOrder('null!');`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
+**Verify:** Keep `assert.equal(wrongShape.code, 'schema')`. Control: changing `const wrongShape = parseOrder('null');` to `const wrongShape = parseOrder('null!');` must make that check fail; then restore it.
 
 ## Exercise 4: Reject unknown fields and excessive item counts
 
@@ -119,7 +119,7 @@ assert.equal(tooMany.path, 'items');
 
 **Expected:** paths $ and items respectively.
 
-**Verify:** Keep a check equivalent to `assert.equal(tooMany.path, 'items')` and confirm that the reference still passes. Then name an input that would make it fail and explain which value changes.
+**Verify:** Keep the check `assert.equal(tooMany.path, 'items')`; name an input that would make it fail and the value that changes.
 
 ## Exercise 5: Preserve the validated value after input mutation
 
@@ -138,7 +138,7 @@ assert.equal(raw.items[0].quantity, 9);
 
 **Expected:** validated quantity stays 2 while input becomes 9.
 
-**Verify:** Keep a check equivalent to `assert.equal(raw.items[0].quantity, 9)`. As a control, change `raw.items[0].quantity = 9;` to `raw.items[0].quantity = 10;`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
+**Verify:** Keep `assert.equal(raw.items[0].quantity, 9)`. Control: changing `raw.items[0].quantity = 9;` to `raw.items[0].quantity = 10;` must make that check fail; then restore it.
 
 ## Exercise 6: Exercise numeric and string boundaries
 
@@ -157,8 +157,8 @@ assert.equal(validateOrder({ id: 'A', items: [] }).ok, true);
 
 **Expected:** every malformed fixture is rejected; an empty items array remains valid.
 
-**Verify:** Keep a check equivalent to `assert.equal(validateOrder({ id: 'A', items: [{ sku: 'X', quantity }] }).ok, false)`. As a control, change `for (const quantity of [NaN, 1.5, Number.MAX_SAFE_INTEGER + 1]) {` to `for (const quantity of [NaN, 1.5, Number.MAX_SAFE_INTEGER - 1]) {`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
+**Verify:** Keep `assert.equal(validateOrder({ id: 'A', items: [{ sku: 'X', quantity }] }).ok, false)`. Control: changing `for (const quantity of [NaN, 1.5, Number.MAX_SAFE_INTEGER + 1]) {` to `for (const quantity of [NaN, 1.5, Number.MAX_SAFE_INTEGER - 1]) {` must make that check fail; then restore it.
 
 ## After comparison
 
-Return to your saved implementation and repeat a case with different values. Keep compiler diagnostics, process output and browser observations separate. Do not suppress a failing assertion or use a type assertion to declare an unvalidated value safe. Resource-owning examples must finish cleanup even when work fails. Describe each result with its actual host and fixture scope rather than as production acceptance.
+Fresh case: add an optional `note` field limited to 200 characters. Predict the path and code for a 201-character note, for `note: null` and for a valid order without a note, then write the checks. ([After comparing](../STUDY-GUIDE.md#after-comparing-with-the-solution).)

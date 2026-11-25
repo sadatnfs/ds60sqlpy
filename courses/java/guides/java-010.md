@@ -6,7 +6,16 @@ Beginner, approximately 90 minutes. Direct prerequisites: `java-009`
 
 ## Learning objectives
 
-Program to an interface, compose behavior by delegation, and switch exhaustively over a sealed type with record patterns. Along the way, explain interface, dynamic dispatch, composition, sealed interface using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. Exercises 1 and 2 start from the worked examples; the authored investigations begin with this task: Price 200 cents with NoDiscount, Percent(25) and Fixed(250) through one pattern-matching switch over the sealed Discount interface. The final exercise transfers the mechanism to reject an invalid wrapper.
+Program to an interface, compose behavior by delegation, and switch exhaustively over a sealed type with record patterns.
+
+The six exercises practice these steps:
+
+- Call through an interface.
+- Compose a fee policy.
+- Switch exhaustively over a sealed type.
+- Validate every implementation.
+- Change a collaborator without changing caller code.
+- Reject an invalid wrapper.
 
 ## Purpose and mental model
 
@@ -24,16 +33,9 @@ An interface describes behavior a caller can rely on without depending on one im
 
 ## How to run this lesson
 
-Open the Docker classroom, choose the prepared Java 21 profile and save a learner pad. The pad is compiled as `Main.java` with `javac --release 21` and executed with `java -ea Main`. Assertions are enabled deliberately. A successful assertion has no output; a failed assertion throws `AssertionError` and the process should fail. Do not remove assertions to obtain a green result.
+`Pricing`, the `Fee` record and the sealed `Discount` hierarchy are declared inside `Main`; Exercise 3 relies on Java 21 record patterns in `switch`, so an older JDK rejects it at compile time.
 
-For a prepared native JDK, copy a worked example into your own `Main.java` under ignored `.learning/expansion/java-010/`. From that directory run the same two commands on PowerShell, macOS or Linux:
-
-```text
-javac --release 21 Main.java
-java -ea Main
-```
-
-The public class name and source filename must agree. Each worked example below is a complete file. Example B includes the setup it needs from Example A, so it can be compiled by itself. The six exercise reference blocks form one complete program in the separate solution. Keep your original prediction, source and diagnostic text together. Most examples use prepared JDK libraries and tiny local fixtures; any additional dependency is specified in the lesson notes below. Any lesson-specific library or additional file is named explicitly; do not download packages from inside a learner program. Resource examples close their owned files, executors or loopback servers.
+Classroom and native JDK steps, the exercise controls and the hint routine are in the [Java study guide](../STUDY-GUIDE.md).
 
 
 
@@ -168,62 +170,62 @@ public class Main {
 
 ## Prediction before your attempt
 
-Read the source from the entry point and name each value before executing it. Identify which operations create new values, which mutate existing state and which can fail. Predict the first observable output or assertion result. For a compile-time failure, explain which source rule is violated before discussing runtime state: a program that did not compile never reached its main method. Keep normal, boundary and invalid inputs separate so each check has a clear purpose.
+Before running Example A, write `regular.price(100)` and `half.price(100)` and say which class the JVM chooses for each call, given that both variables have the type `Pricing`. For Example B, predict the price of 100 after the half-price policy is wrapped in a 10-cent `Fee`, and whether the fee is added before or after halving (it is after: 50 plus 10). Before Exercise 3, predict what `javac` does if a fourth record is added to `permits` but not to the `switch`.
 
 ## Exercises
 
-1. **Call through an interface: change one input.** Copy Example A into a scratch `Main.java` and change `return amount / 2;` to `return amount / 3;`. Before running it with `java -ea Main`, predict which assertion fails and which value it now sees; then run it and restore the original line.
-   **Expected:** The changed run fails with an `AssertionError` from the assertion on `regular.price(100) == 100 && half.price(100) == 50`. Restoring the original line brings back the worked observation: 100 and 50.
-   **Verify:** Compare your written prediction with the reported `AssertionError` and its stack-trace line, and name the value that made `regular.price(100) == 100 && half.price(100) == 50` false. After restoring the line, the program completes without an `AssertionError` again.
+1. **Call through an interface: change one input.** Change `return amount / 2;` to `return amount / 3;` in Example A and predict which assertion fails and why.
+   **Expected:** The edited run fails with an `AssertionError` from the assertion on `regular.price(100) == 100 && half.price(100) == 50`.
+   **Verify:** Name the value that makes `regular.price(100) == 100 && half.price(100) == 50` false, then restore the line.
 
-2. **Compose a fee policy: debug a regression.** A regression changed one token in the code that Example B adds after Example A, so one line now reads `Pricing withFee = new Fee(half, 11);`. Run Example B with that line, use the failing assertion to locate the defect and repair it without changing the assertion.
-   **Expected:** Before the repair the run fails with an `AssertionError` from the assertion on `withFee.price(100) == 60`; after it the line reads `Pricing withFee = new Fee(half, 10);` again and price 100 becomes 60.
-   **Verify:** Keep the failing and the repaired runs. Explain why the changed token alters the value tested by `withFee.price(100) == 60` for this input.
+2. **Compose a fee policy: debug a regression.** A regression in Example B's new code makes one line read `Pricing withFee = new Fee(half, 11);`. Repair it using the failing assertion.
+   **Expected:** The unrepaired run fails with an `AssertionError` from the assertion on `withFee.price(100) == 60`; the repaired line reads `Pricing withFee = new Fee(half, 10);`.
+   **Verify:** Explain how the changed token alters the value that `withFee.price(100) == 60` tests.
 
 3. **Switch exhaustively over a sealed type.** Price 200 cents with NoDiscount, Percent(25) and Fixed(250) through one pattern-matching switch over the sealed Discount interface.
    **Expected:** 200, 150 and 0.
-   **Verify:** Keep an assertion equivalent to `discountedPrices.equals(List.of(200, 150, 0))`. As a control, change `for (Discount discount : List.of(new NoDiscount(), new Percent(25), new Fixed(250))) {` to `for (Discount discount : List.of(new NoDiscount(), new Percent(26), new Fixed(250))) {`: the run must fail with an `AssertionError` from the assertion on `discountedPrices.equals(List.of(200, 150, 0))`. Restore the line before continuing.
+   **Verify:** Control: changing `for (Discount discount : List.of(new NoDiscount(), new Percent(25), new Fixed(250))) {` to `for (Discount discount : List.of(new NoDiscount(), new Percent(26), new Fixed(250))) {` must fail the assertion on `discountedPrices.equals(List.of(200, 150, 0))`.
 
 4. **Validate every implementation.** Call regular, half and fee policy with -1.
    **Expected:** all throw IllegalArgumentException.
-   **Verify:** Keep an assertion equivalent to `rejected`. As a control, change `rejected = true;` to `rejected = false;`: the run must fail with an `AssertionError` from the assertion on `rejected`. Restore the line before continuing.
+   **Verify:** Control: changing `rejected = true;` to `rejected = false;` must fail the assertion on `rejected`.
 
 5. **Change a collaborator without changing caller code.** Iterate over the three policies and collect prices for 100.
    **Expected:** results 100, 50, 60.
-   **Verify:** Keep an assertion equivalent to `prices.equals(List.of(100, 50, 60))`. As a control, change `for (Pricing policy : List.of(regular, half, withFee)) prices.add(policy.price(100));` to `for (Pricing policy : List.of(regular, half, withFee)) prices.add(policy.price(101));`: the run must fail with an `AssertionError` from the assertion on `prices.equals(List.of(100, 50, 60))`. Restore the line before continuing.
+   **Verify:** Control: changing `for (Pricing policy : List.of(regular, half, withFee)) prices.add(policy.price(100));` to `for (Pricing policy : List.of(regular, half, withFee)) prices.add(policy.price(101));` must fail the assertion on `prices.equals(List.of(100, 50, 60))`.
 
 6. **Reject an invalid wrapper.** Construct a fee wrapper with a negative fee or null delegate.
    **Expected:** negative fee IllegalArgumentException; null delegate NullPointerException.
-   **Verify:** Keep an assertion equivalent to `feeRejected && delegateRejected`. As a control, change `feeRejected = true;` to `feeRejected = false;`: the run must fail with an `AssertionError` from the assertion on `feeRejected && delegateRejected`. Restore the line before continuing.
+   **Verify:** Control: changing `feeRejected = true;` to `feeRejected = false;` must fail the assertion on `feeRejected && delegateRejected`.
 
 ## Common pitfalls and diagnosis
 
-When a check fails, keep the smallest source file that still demonstrates the failure. Read the first relevant compiler diagnostic before editing several lines; later diagnostics can be consequences of the same missing delimiter or wrong type. For a runtime exception, identify the first frame belonging to your code and compare its input with the method contract. For an assertion failure, inspect the actual value and the independent expected value. A passing process exit is weaker than a checked invariant, and a checked invariant applies only under its stated assumptions.
+A common smell is a caller that tests `instanceof` or class names to decide how to price; that breaks every time an implementation is added, while a call through `Pricing` does not. Substitution also needs the same contract, not just the same signature: if one implementation accepted -1 while another threw, callers could not rely on the interface. For sealed types, a `default` branch in the `switch` hides a missing case that the compiler would otherwise report.
 
-Do not replace a precise exception with a catch-all that returns a plausible default. That can hide an invalid input or an unfinished operation. If an example owns a resource, verify its lifetime on both the success and failure paths. If an operation is concurrent, use ordering primitives to establish the relationship you need; an observed timing coincidence is not a synchronization guarantee. The solution explanations identify the specific alternative that would break each exercise.
+General compiler, runtime and assertion triage: [diagnose a failure](../STUDY-GUIDE.md#diagnose-a-failure).
 
 ## Progressive hints
 
-Read one hint at a time and attempt the exercise again before reading the next. Keep a small table of input, expected value, actual value and exception type. Ask for one hint about the first incorrect assumption before requesting the entire reference implementation.
+Read one rung at a time, as described in [using hints](../STUDY-GUIDE.md#use-hints-one-at-a-time).
 
-- **Exercise 1:** First restate the expected observation: 100 and 50. Then list the values read by `regular.price(100) == 100 && half.price(100) == 50` and trace each one from its declaration. Finally, compute the asserted value with `return amount / 3;` in place before running.
-- **Exercise 2:** First restate the expected observation: price 100 becomes 60. Then list the values read by `withFee.price(100) == 60` and trace each one from its declaration. Finally, compare `Pricing withFee = new Fee(half, 11);` with the same line in Example B and state the claim each version makes.
-- **Exercise 3:** First restate the expected observation: 200, 150 and 0. Then list the values read by `discountedPrices.equals(List.of(200, 150, 0))` and trace each one from its declaration. Finally, predict the effect of changing `for (Discount discount : List.of(new NoDiscount(), new Percent(25), new Fixed(250))) {` to `for (Discount discount : List.of(new NoDiscount(), new Percent(26), new Fixed(250))) {` before running anything.
-- **Exercise 4:** First restate the expected observation: all throw IllegalArgumentException. Then list the values read by `rejected` and trace each one from its declaration. Finally, predict the effect of changing `rejected = true;` to `rejected = false;` before running anything.
-- **Exercise 5:** First restate the expected observation: results 100, 50, 60. Then list the values read by `prices.equals(List.of(100, 50, 60))` and trace each one from its declaration. Finally, predict the effect of changing `for (Pricing policy : List.of(regular, half, withFee)) prices.add(policy.price(100));` to `for (Pricing policy : List.of(regular, half, withFee)) prices.add(policy.price(101));` before running anything.
-- **Exercise 6:** First restate the expected observation: negative fee IllegalArgumentException; null delegate NullPointerException. Then list the values read by `feeRejected && delegateRejected` and trace each one from its declaration. Finally, predict the effect of changing `feeRejected = true;` to `feeRejected = false;` before running anything.
+- **Exercise 1:** First compute `half.price(100)` with the edited divisor, using integer division. Then compare that value with the 50 the assertion expects, while `regular` still returns 100. Finally, explain why a change in one implementation leaves the calling code untouched.
+- **Exercise 2:** First evaluate the wrapped policy for 100 in order: the half-price delegate returns 50 and the fee is added afterward. Then compare 50 plus 11 with the 60 in the assertion. Finally, explain why the defect lives in the fee amount and not in the delegate.
+- **Exercise 3:** First compute each discount for 200 by hand: no discount, 25 percent, and a fixed 250 that is clamped at zero. Then loop over the three records and add `discounted(200, discount)` to a list. Finally, compare the list with 200, 150 and 0, and say which record pattern bound each component.
+- **Exercise 4:** First call `price(-1)` on each of the three policies inside separate `try` blocks. Then catch `IllegalArgumentException` from each and record the rejections. Finally, explain why `Fee` must also reject -1 before it delegates, so callers see one contract.
+- **Exercise 5:** First put `regular`, `half` and `withFee` into one `List<Pricing>`. Then loop and add each `price(100)` to a result list without testing any class. Finally, compare the list with 100, 50 and 60, and explain why a new policy needs no change to this loop.
+- **Exercise 6:** First construct a `Fee` with -1 cents inside a `try` block and catch `IllegalArgumentException`. Then construct one with a null delegate and catch `NullPointerException`. Finally, explain why the compact constructor reports both problems before the first `price` call could.
 
 ## Self-check and retrieval
 
-Close the solution and explain Interface, Dynamic dispatch, Composition in your own words. Reconstruct one example from a blank `Main.java`, then add a new boundary input. Explain why the new case should pass or fail before compiling it. Identify a situation where this technique is appropriate and one where a different data structure, lifetime policy or abstraction would be clearer. This is a reasoning check, not a memorization test for an API spelling.
+Without the guide, explain the difference between the declared type of a variable and the class of the object it refers to, and which one selects `price` at run time. Describe how `Fee` composes another policy without repeating its arithmetic, and why the `discounted` switch needs no `default` branch.
 
 ## Next step
 
-Preserve the saved pad and the six exercise observations. Continue to the next lesson only when you can explain the invariants without reading the answer. Later chapters reuse these contracts in larger programs, so keep a failing counterexample as well as a repaired result. A reference implementation demonstrates one valid design under the stated assumptions; it is not a universal design rule.
+Continue with `java-011`: Equality, hashing and ordering. Keep your six observations; see [moving on](../STUDY-GUIDE.md#move-to-the-next-lesson).
 
 ## Sources and verification status
 
-[Official Java 21 API or language reference](https://docs.oracle.com/en/java/javase/21/docs/api/index.html), reviewed 2026-10-22. Examples and exercise fixtures are original course material. Use the [validation guide](../../../docs/validation.md) and CI artifacts for the exact revision and platform to inspect actual compile/run results. Authoring, parsing, compilation, execution and learner mastery are separate forms of evidence.
+[Official Java 21 API or language reference](https://docs.oracle.com/en/java/javase/21/docs/api/index.html), reviewed 2026-10-22. Evidence levels: [sources and evidence](../STUDY-GUIDE.md#sources-and-evidence).
 
 ## Ask an AI tutor about this lesson
 

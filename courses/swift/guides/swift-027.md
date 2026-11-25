@@ -24,9 +24,9 @@ The pad uses precondition for dependency-free executable checks. The JourneyCore
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles the saved pad as `main.swift` with Swift 6 language checking. An explicit `@main` type contains `static func main() async throws`; the fixed compiler uses `-parse-as-library -swift-version 6`. The examples use the standard library and portable Foundation. `precondition` makes a violated invariant fail the process. The fixed pad accepts one source file, without arbitrary command arguments, interactive input or dependency installation. SwiftUI, UIKit, Apple simulators and application signing belong to the separately prepared macOS/Xcode project labs, never the Linux pad.
+The pad examples need no fixture, but task 3 adds a test to the copied JourneyCore package and is run with `swift test` there. Task 2 adds `Int.min`, the one value whose negation does not fit in `Int`. Writing `-Int.min` literally is rejected at compile time as an overflow, and negating a variable that holds it traps at runtime, so the clamp must avoid negation entirely.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Compile contract, starter stop and success marker: [running a lesson](../STUDY-GUIDE.md#running-a-lesson).
 
 Run the checked-in package tests using the commands in [JourneyCore](../fixtures/JourneyCore/README.md). Apple UI tests are a separate later lab.
 
@@ -34,7 +34,7 @@ Run the checked-in package tests using the commands in [JourneyCore](../fixtures
 
 Table-driven checks separate input fixtures from execution. XCTest test methods use XCTAssertEqual and XCTAssertThrowsError in the package. Async tests should await owned work rather than sleep and guess.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+Each example ends with a trace; method: [tracing a program](../STUDY-GUIDE.md#tracing-a-program).
 
 ## Worked example / walkthrough
 
@@ -59,6 +59,8 @@ struct LessonMain {
 
 **Observe:** Normal and boundary values satisfy the clamp contract.
 
+**Trace.** Each tuple in `cases` pairs an input with an expected output written from the rule, not computed by calling the function under test. The loop destructures each pair. For -2 the clamp returns 0, for 0 it returns 0 and for 3 it returns 3, and each result is compared with its literal. The three cases cover a value below the boundary, the boundary itself and a value above it, which is the smallest set that pins this contract.
+
 ### Example B: Catch a plausible wrong boundary
 
 A property adds evidence while the boundary example remains decisive.
@@ -81,6 +83,8 @@ struct LessonMain {
 
 **Observe:** The zero case catches the wrong default and clamping is idempotent.
 
+**Trace.** `wrong` returns 1 for any value at or below 0, a plausible slip when someone confuses at least zero with at least one. At input 0 it returns 1 while the clamp returns 0, so the first check proves the fixture can tell them apart. The second check states a property: clamping -4 gives 0, and clamping that 0 again still gives 0. Properties like idempotence add evidence, but only the boundary case catches this particular wrong rule.
+
 ## Exercises
 
 1. **Predict and explain.** Name a wrong implementation rejected by each fixture.
@@ -95,13 +99,15 @@ struct LessonMain {
 
 6. **Transfer and justify.** Create a verification plan distinguishing unit, package, UI and device evidence.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Log each task in the [evidence table](../STUDY-GUIDE.md#recording-exercise-evidence) before opening the explanation.
 
 ## Common pitfalls and diagnosis
 
 Random tests need reproducible seeds and an oracle. A test that catches its own precondition failure is not valid verification. Avoid narrow elapsed-time assertions on shared machines.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+Task 4's useless test compares `clamp(x)` with `clamp(x)`. It passes for every implementation, including `wrong`, so it cannot fail and proves nothing. The repair replaces one side with an independently derived literal. Run the suite against a deliberately broken clamp: a meaningful test fails, a tautological one stays green. Keep that broken version in a scratch copy, never in the package.
+
+Repair routine: [building a regression case](../STUDY-GUIDE.md#building-a-regression-case).
 
 ## Progressive hints
 
@@ -111,11 +117,15 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 ## Self-check and next step
 
-Explain Oracle, Regression, Property without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+For each of the three fixtures in Example A, name one wrong implementation it rejects that the other two accept. Explain why an expected value should come from the rule rather than from running the code. Separate what a passing `swift test` proves from what still needs UI or device evidence.
+
+Then follow the general [self-check routine](../STUDY-GUIDE.md#self-check-routine) and save your pad.
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://docs.swift.org/swift-book/documentation/the-swift-programming-language/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+[Documentation](https://docs.swift.org/swift-book/documentation/the-swift-programming-language/): The XCTest documentation describes test cases and assertions, and the Swift Package Manager documentation explains test targets and `swift test`.
+
+Provenance and limits: [sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

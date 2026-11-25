@@ -194,9 +194,17 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cuda/python/guides/cuda-073.md</code></p>
     </header>
     <article class="document"><h2 id="cuda-073-a-kernel-is-a-restricted-parallel-program">cuda-073: A kernel is a restricted parallel program<a class="heading-anchor" href="#cuda-073-a-kernel-is-a-restricted-parallel-program" aria-label="Link to this section">#</a></h2>
-<p><strong>Route:</strong> CUDA Python and machine learning. <strong>Stage:</strong> intermediate. <strong>Prerequisites:</strong> <code>cuda-066</code>, <code>cuda-072</code>. Allow several sessions when the hardware experiment is new; the chapter is not a deadline.</p>
-<h3 id="what-you-will-be-able-to-explain">What you will be able to explain<a class="heading-anchor" href="#what-you-will-be-able-to-explain" aria-label="Link to this section">#</a></h3>
-<p>By the end, you can <strong>separate host and device statements</strong>, <strong>move an allocation out of a kernel</strong>, and <strong>list a prepared toolchain ledger</strong> with evidence. Start with the two worked cases, then use the editable CPU model to make the quantities concrete.</p>
+<p><strong>Route:</strong> CUDA Python and machine learning. <strong>Stage:</strong> intermediate. <strong>Prerequisites:</strong> <code>cuda-066</code>, <code>cuda-072</code>.</p>
+<p>Pacing, evidence labels and platform rules: <a href="../../STUDY-GUIDE.md.html">CUDA study guide</a>.</p>
+<h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
+<ul>
+<li>Separate host and device statements.</li>
+<li>Implement the CPU oracle.</li>
+<li>Reject mismatched lengths.</li>
+<li>Move an allocation out of a kernel.</li>
+<li>Explain type specialization.</li>
+<li>List a prepared toolchain ledger.</li>
+</ul>
 <h3 id="mechanism-and-vocabulary">Mechanism and vocabulary<a class="heading-anchor" href="#mechanism-and-vocabulary" aria-label="Link to this section">#</a></h3>
 <p>A Python GPU kernel is compiled from a restricted typed subset; the Python interpreter does not run independently on every GPU thread. Host-side allocation, file access, arbitrary objects and unsupported library calls stay outside the device function. Compilation specializes supported argument types and shapes or layouts according to the selected toolchain. The same syntax can therefore have different legality on host and device.</p>
 <p>Keep allocation and validation in a host wrapper. The kernel receives fixed buffers and scalar parameters, calculates its index, checks bounds and writes only its assigned output. That separation makes errors easier to locate. The maintained numba-cuda distribution uses the numba.cuda namespace, so the import spelling alone does not identify which package supplied the implementation. Pin and record the distribution in a prepared environment.</p>
@@ -212,8 +220,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>A host wrapper allocates an output and checks equal input lengths. A device kernel writes <code>y[i] = 2*x[i]</code> only when i is in range.</p>
 <h4 id="worked-example-2">Worked example 2<a class="heading-anchor" href="#worked-example-2" aria-label="Link to this section">#</a></h4>
 <p>A kernel that tries to open a text file violates the execution model. Move file reading to the host, convert values into a numeric buffer, then copy explicitly.</p>
-<h3 id="portable-executable-model">Portable executable model<a class="heading-anchor" href="#portable-executable-model" aria-label="Link to this section">#</a></h3>
-<p>The <strong>CPU reference model</strong> variant runs this bounded worked example using <code>python-core</code>. It uses only the Python standard library, small synthetic values and no network. Its purpose is to expose the arithmetic or contract behind the chapter. The separate reference includes assertions for the stated observations.</p>
+<h3 id="how-to-run-the-cpu-model">How to run the CPU model<a class="heading-anchor" href="#how-to-run-the-cpu-model" aria-label="Link to this section">#</a></h3>
+<p>Edit the copy; the <a href="../references/cuda-073_cpu.py.html">reference</a> adds assertions.</p>
+<pre class="highlighted-code"><code class="language-bash">python courses/cuda/python/lessons/cuda-073_cpu.py</code></pre>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">affine_reference</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">,</span> scale<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
     <span class="syntax-keyword">return</span> <span class="syntax-punctuation">[</span>scale <span class="syntax-operator">*</span> x <span class="syntax-keyword">for</span> x <span class="syntax-operator">in</span> values<span class="syntax-punctuation">]</span>
 
@@ -222,49 +231,44 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="syntax-keyword">assert</span> affine_reference<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span>
 <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">CPU kernel oracle:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> affine_reference<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-operator">-</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation:</strong> [2, -4, 6], with empty input accepted by the oracle.</p>
-<p>Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.</p>
 <h3 id="practice-and-transfer">Practice and transfer<a class="heading-anchor" href="#practice-and-transfer" aria-label="Link to this section">#</a></h3>
+<p>Record each attempt in the <a href="../lessons/cuda-073.md.html">worksheet</a> before opening hints.</p>
 <h4 id="exercise-1-separate-host-and-device-statements">Exercise 1: Separate host and device statements<a class="heading-anchor" href="#exercise-1-separate-host-and-device-statements" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Moving the length check into the kernel, where each thread compares lengths and returns early, means a mismatch produces partial output instead of an error. The host never learns anything went wrong because a kernel cannot raise a Python exception.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-2-implement-the-cpu-oracle">Exercise 2: Implement the CPU oracle<a class="heading-anchor" href="#exercise-2-implement-the-cpu-oracle" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Writing the oracle with the same indexing code as the kernel, for example looping <code>i</code> over a launch-size range with the same guard, copies the kernel&#x27;s bugs into the reference, so both can agree and still be wrong.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-3-reject-mismatched-lengths">Exercise 3: Reject mismatched lengths<a class="heading-anchor" href="#exercise-3-reject-mismatched-lengths" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Using <code>n = min(len(x), len(y))</code> to avoid the overflow silently drops elements. The program then returns a result of the wrong length, and the mismatch surfaces far from the call that caused it.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-4-move-an-allocation-out-of-a-kernel">Exercise 4: Move an allocation out of a kernel<a class="heading-anchor" href="#exercise-4-move-an-allocation-out-of-a-kernel" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Creating a list or calling <code>numpy.zeros</code> inside a <code>@cuda.jit</code> function fails to compile because those objects do not exist in device code. Working around it with a fixed-size local array caps the problem size silently.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-5-explain-type-specialization">Exercise 5: Explain type specialization<a class="heading-anchor" href="#exercise-5-explain-type-specialization" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Assuming the decorated function still behaves like ordinary Python leads to passing mixed types or calling unsupported library functions; the result is a typing error at compile time, or an unintended second specialization with different precision.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-6-list-a-prepared-toolchain-ledger">Exercise 6: List a prepared toolchain ledger<a class="heading-anchor" href="#exercise-6-list-a-prepared-toolchain-ledger" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Writing only the package name and the word CUDA tells a reader nothing about which runtime and driver were present, so a later failure on another machine cannot be compared with the original success.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
-<p>Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.</p>
+<p>Hint <em>k</em> belongs to exercise <em>k</em>; open one at a time.</p>
 <ol>
-<li>Start from worked example 1 and mark the quantities needed for the task &quot;Separate host and device statements&quot;.</li>
-<li>Change one assumption in worked example 2 while preserving the declared contract: implement the CPU oracle.</li>
-<li>Trace the CPU program&#x27;s variables before adding hardware behavior: reject mismatched lengths.</li>
-<li>Draw producers, consumers and the exact operation boundary for the task &quot;Move an allocation out of a kernel&quot;.</li>
-<li>Separate what the small fixture establishes from what the real runtime must show: explain type specialization.</li>
-<li>Write a counterexample to an overbroad claim before you list a prepared toolchain ledger.</li>
+<li>Go line by line through the wrapper and the kernel and ask which lines touch Python objects, files or new allocations.</li>
+<li>Write the plain Python loop the kernel replaces, element by element, and run it on the supplied input.</li>
+<li>Decide where the length comparison belongs so that no launch happens with mismatched buffers.</li>
+<li>Ask who should own the output buffer&#x27;s lifetime: the host wrapper that launches, or each GPU thread.</li>
+<li>Compare what the compiler knows about argument types with what an interpreter learns only at run time.</li>
+<li>List every layer between your source and the device, from the Python package to the driver, and name what to record for each.</li>
 </ol>
-<h3 id="common-mistakes-and-self-review">Common mistakes and self-review<a class="heading-anchor" href="#common-mistakes-and-self-review" aria-label="Link to this section">#</a></h3>
-<p>Confusing a correct tiny example with a general implementation is the central review risk. For this chapter, challenge the assumption in worked example 2, then ask whether your change preserves the mechanism described above. If you change dtype, layout, ordering, batch size or backend, update the acceptance contract rather than silently reusing the old observation. Explain an unexpected result before trying random configuration changes.</p>
-<p>Keep a small evidence table with columns <strong>claim</strong>, <strong>input</strong>, <strong>expected observation</strong>, <strong>actual observation</strong> and <strong>limit</strong>. For the first claim use <code>Separate host and device statements</code>. For the final claim use <code>List a prepared toolchain ledger</code>. An unperformed GPU or cluster experiment remains pending even when the CPU model is correct.</p>
-<h3 id="platform-and-evidence-contract">Platform and evidence contract<a class="heading-anchor" href="#platform-and-evidence-contract" aria-label="Link to this section">#</a></h3>
-<p>The reading worksheet and CPU reference model work through the ordinary Linux Docker classroom on macOS, Linux and Windows using WSL 2. They do not require an NVIDIA GPU. Their results are labeled CPU models or semantic oracles, not simulated hardware performance.</p>
-<p>Real CUDA work needs supported NVIDIA hardware, a compatible host driver and an explicitly prepared GPU runtime. An Apple GPU does not execute CUDA kernels. PyTorch MPS on a supported native Mac, ROCm on supported AMD hardware, or other vendor backends can provide separate accelerator learning routes; they need their own package and operation qualification and are not CUDA evidence. The ordinary Linux Docker classroom does not expose native Mac MPS automatically.</p>
-<p>Do not download packages, models or data by opening this lesson. Do not attach an engine socket, ambient cluster credentials or an arbitrary remote endpoint. A CPU pass, imported package, successful compilation, real GPU result and measured performance are distinct observations. Record the actual backend, data shape/dtype, source revision, versions and pending checks. A saved completion marker records learning progress, not hardware certification.</p>
+<h3 id="common-mistakes-and-self-check">Common mistakes and self-check<a class="heading-anchor" href="#common-mistakes-and-self-check" aria-label="Link to this section">#</a></h3>
+<p>A common mistake is writing a device function as if each GPU thread ran a full Python interpreter, for example opening a file, building a list or calling an unsupported library inside the kernel. Those calls fail to compile or belong to the host. Fix it by splitting the work: the host wrapper validates lengths, reads files, allocates the output and copies data; the kernel computes one index, checks the bound and writes only its own element.</p>
+<p><strong>Evidence limit:</strong> The CPU oracle doubles <code>[1, -2, 3]</code> and accepts an empty input, which defines the expected values. It does not compile anything, so it cannot show which constructs the numba-cuda compiler accepts or how a specialized kernel behaves on a device.</p>
+<ol>
+<li>Why can the same syntax be legal on the host and illegal in a device function?</li>
+<li>What does a host wrapper do before launching the kernel?</li>
+<li>Why does <code>numba.cuda</code> in an import line not identify the implementation?</li>
+</ol>
+<p>Answers: <a href="../solutions/cuda-073_solutions.md.html#self-check-answers">self-check answers</a>.</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
 <ul>
 <li><a href="https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/intro-to-cuda-python.html">NVIDIA CUDA Python introduction</a></li>
-<li><a href="https://github.com/NVIDIA/numba-cuda">Maintained numba-cuda project</a></li>
 </ul>
-<p>Use the version-matched documentation of your prepared environment. These references describe interfaces and supported boundaries; the chapter&#x27;s synthetic examples and CPU models are original teaching material.</p>
+<p>Full lists: <a href="../../STUDY-GUIDE.md.html#documentation-and-sources">documentation and sources</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning skill for cuda-073: A kernel is a restricted parallel program.
 Read courses/cuda/python/guides/cuda-073.md and courses/cuda/python/lessons/cuda-073.md.

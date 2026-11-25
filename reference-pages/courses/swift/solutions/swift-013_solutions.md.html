@@ -194,7 +194,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/swift/solutions/swift-013_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="swift-013-explanation-and-comparison">swift-013: explanation and comparison<a class="heading-anchor" href="#swift-013-explanation-and-comparison" aria-label="Link to this section">#</a></h2>
-<p>Attempt the six guide tasks before opening this comparison. The executable reference is <a href="swift-013_solution.swift.html">swift-013_solution.swift</a>. It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.</p>
+<p>Reference program: <a href="swift-013_solution.swift.html">swift-013_solution.swift</a>, covering both examples and the executed answers.</p>
+<p>Attempt the tasks first; see <a href="../STUDY-GUIDE.md.html#comparing-with-the-explanation">comparing with the explanation</a>.</p>
 <h3 id="why-the-two-examples-differ">Why the two examples differ<a class="heading-anchor" href="#why-the-two-examples-differ" aria-label="Link to this section">#</a></h3>
 <p><strong>Observe shared identity:</strong> The copied reference still identifies one object, even though both bindings are constant. Both names observe the same increment.</p>
 <p><strong>Equal state need not mean identity:</strong> Object identity answers a different question from comparing a property value. Two fresh counters have equal state but distinct identities.</p>
@@ -265,7 +266,7 @@ second<span class="syntax-punctuation">.</span>increment<span class="syntax-punc
 <p>Equal property values say nothing about identity; === compares identity, and the later divergence shows the objects were never shared.</p>
 <h4 id="task-6-transfer-and-justify">Task 6: Transfer and justify<a class="heading-anchor" href="#task-6-transfer-and-justify" aria-label="Link to this section">#</a></h4>
 <p>Explain whether a shared class needs synchronization before use from concurrent tasks.</p>
-<p>No single reference answer exists: several designs can satisfy this transfer task. Build yours from the task 3 answer above (Choose class or struct for a shared connection coordinator and a coordinate value) and the mechanism described below, and state one limitation of your choice.</p>
+<p>No single answer exists; extend task 3 using the <a href="../STUDY-GUIDE.md.html#open-transfer-tasks">open transfer routine</a>.</p>
 <h3 id="solution-reasoning">Solution reasoning<a class="heading-anchor" href="#solution-reasoning" aria-label="Link to this section">#</a></h3>
 <p><strong>Approach.</strong> Example A assigns one <code>Counter</code> instance to two constants, increments through the second, and reads through the first. Example B creates two separate counters and compares both their values and their identities. The task 3 answer contrasts a shared connection coordinator class with a copied coordinate struct.</p>
 <p><strong>Why it is correct.</strong> <code>let second = first</code> copies the reference, not the object, so one increment is visible through both names and <code>first === second</code> holds. <code>let</code> only freezes the binding; the object&#x27;s <code>value</code> can still change through its method. Two fresh counters both have value 0, so <code>==</code> on values holds while <code>!==</code> shows two objects. In task 3 both coordinator references see 1 open connection, while moving the copied coordinate leaves the original at x = 1.</p>
@@ -277,7 +278,7 @@ second<span class="syntax-punctuation">.</span>increment<span class="syntax-punc
 <p><code>final class Counter</code> declares a reference type without subclasses. <code>===</code> compares object identity, while <code>==</code> requires an Equatable meaning. <code>let reference</code> can still call a mutating object method.</p>
 <p>Let does not make a referenced object deeply immutable. Reference semantics do not imply thread safety. Inheritance is not a general-purpose code reuse requirement.</p>
 <h3 id="review-before-continuing">Review before continuing<a class="heading-anchor" href="#review-before-continuing" aria-label="Link to this section">#</a></h3>
-<p>Run the reference and confirm that it prints <code>swift-013: passed</code>, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.</p></article>
+<p>Run the reference and confirm it prints <code>swift-013: passed</code>, then rerun the guide&#x27;s counterexample.</p></article>
   </main>
 </body>
 </html>

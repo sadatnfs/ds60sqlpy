@@ -4,8 +4,6 @@
 
 Debugging starts by placing a failure in its phase. A source error prevents compilation; a missing symbol prevents linking; incompatible device code can prevent loading; invalid launch parameters can reject submission; an illegal access can fail asynchronous execution; and a completed kernel can still calculate the wrong answer. Later CUDA calls may surface an earlier asynchronous failure, so the line reporting an error is not always the line that caused it. Use checked phase boundaries in a debug configuration and retain the earliest meaningful diagnostic. Avoid reinstalling tools before a small reproducer isolates the responsible layer.
 
-The separate [CPU reference](../references/cuda-025_cpu.py) checks the chapter's bounded model. It does not execute CUDA or establish GPU timing. Compare after attempting the worksheet or explicitly choosing to reveal solutions.
-
 ## Exercise 1
 
 A misspelled identifier in main.cu produces a compiler error before any device work. Fixing bounds checks cannot help until the file compiles. Record the diagnostic with source line and build command, and rerun the smallest compilation step.
@@ -78,12 +76,16 @@ Include source revision, exact shape/dtype/data generator, expected and observed
 
 **How to verify:** Ask a colleague to reproduce from the report alone and confirm they see the same index.
 
+## Self-check answers
+
+1. **Why can an error appear at a line far from the faulty kernel?** Asynchronous execution errors surface at the next synchronizing call, which may be later in the program.
+2. **What is a sticky error?** An error that corrupts the context so later calls keep failing until the process ends.
+3. **What should a minimal reproducer contain?** The smallest input and build command that still fails, the observed and expected output, and the versions used.
+
 ## Numerical reference and its limits
 
-The complete CPU model is [here](../references/cuda-025_cpu.py). Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It does not claim CUDA execution, concurrency safety or a performance measurement.
+The [CPU reference](../references/cuda-025_cpu.py) reproduces worked example 1 and prints `{'unknown identifier': 'compile', 'undefined reference': 'link', 'illegal access at completion': 'execute', 'wrong sum': 'validate'}`.
 
 ## Transfer review
 
 Include source revision, exact shape/dtype/data generator, expected and observed values, launch geometry, device/software identity and smallest failing index.
-
-A complete explanation must name its inputs, the unchanged mathematical contract, the changed boundary or resource condition, and the evidence still needed on actual hardware. Preserve a CPU baseline even after a GPU path becomes available.

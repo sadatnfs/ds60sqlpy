@@ -1,10 +1,17 @@
 # cuda-086: Capstone: an interoperable numerical pipeline
 
-**Route:** CUDA Python and machine learning. **Stage:** intermediate. **Prerequisites:** `cuda-077`, `cuda-081`, `cuda-082`, `cuda-085`. Allow several sessions when the hardware experiment is new; the chapter is not a deadline.
+**Route:** CUDA Python and machine learning. **Stage:** intermediate. **Prerequisites:** `cuda-077`, `cuda-081`, `cuda-082`, `cuda-085`.
 
-## What you will be able to explain
+Pacing, evidence labels and platform rules: [CUDA study guide](../../STUDY-GUIDE.md).
 
-By the end, you can **derive fitted means**, **draw owners and waits**, and **write the capstone acceptance report** with evidence. Start with the two worked cases, then use the editable CPU model to make the quantities concrete.
+## Learning objectives
+
+- Derive fitted means.
+- Score the centered rows.
+- Add a constant column.
+- Draw owners and waits.
+- Design train-validation separation.
+- Write the capstone acceptance report.
 
 ## Mechanism and vocabulary
 
@@ -31,9 +38,13 @@ Center training rows [[1,2],[3,4]] to [[-1,-1],[1,1]]. Scoring with weights [2,-
 
 If validation means are recomputed independently, the transformation changes and can leak evaluation information. Preserve fitted preprocessing state rather than hiding it in a convenient expression.
 
-## Portable executable model
+## How to run the CPU model
 
-The **CPU reference model** variant runs this bounded worked example using `python-core`. It uses only the Python standard library, small synthetic values and no network. Its purpose is to expose the arithmetic or contract behind the chapter. The separate reference includes assertions for the stated observations.
+Edit the copy; the [reference](../references/cuda-086_cpu.py) adds assertions.
+
+```sh
+python courses/cuda/python/lessons/cuda-086_cpu.py
+```
 
 ```python
 rows = [[1, 2], [3, 4]]
@@ -55,77 +66,64 @@ print("CPU pipeline oracle:", means, scores)
 | `centered` | `[[-1.0, -1.0], [1.0, 1.0]]` |
 | `scores` | `[-1.0, 1.0]` |
 
-Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.
-
 ## Practice and transfer
+
+Record each attempt in the [worksheet](../lessons/cuda-086.md) before opening hints.
 
 ### Exercise 1: Derive fitted means
 
 **Trap to avoid:** Averaging along columns, the per-row means, gives `[1.5, 3.5]` and centers the wrong axis.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 2: Score the centered rows
 
 **Trap to avoid:** Scoring the raw rows gives `[0, 2]`, which skips the fitted transformation.
-
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 3: Add a constant column
 
 **Trap to avoid:** Dividing by the standard deviation without a check fills the column with NaN, which spreads into the scores.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 4: Draw owners and waits
 
 **Trap to avoid:** Drawing only the computation steps without owners loses track of when buffers can be freed.
-
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 5: Design train-validation separation
 
 **Trap to avoid:** Fitting on the concatenated train and validation data is a subtler leak with the same effect: validation scores look better than they would on truly unseen rows.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 6: Write the capstone acceptance report
 
 **Trap to avoid:** Reporting a single speedup number leaves out correctness and the scope of the claim, so readers cannot tell whether transfers were timed or whether the means were reused.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ## Progressive hints
 
-Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.
+Hint *k* belongs to exercise *k*; open one at a time.
 
-1. Start from worked example 1 and mark the quantities needed for the task "Derive fitted means".
-2. Change one assumption in worked example 2 while preserving the declared contract: score the centered rows.
-3. Trace the CPU program's variables before adding hardware behavior: add a constant column.
-4. Draw producers, consumers and the exact operation boundary for the task "Draw owners and waits".
-5. Separate what the small fixture establishes from what the real runtime must show: design train-validation separation.
-6. Write a counterexample to an overbroad claim before you write the capstone acceptance report.
+1. Average each column of the two training rows separately.
+2. Subtract the fitted means from each row, then take the dot product with `[2, -1]`.
+3. Ask what a zero standard deviation does to division, and what scale value the schema should declare instead.
+4. For each array, name the library that allocated it, whether each handoff copies or aliases, and who reads it last.
+5. Ask which statistics a validation row may use, and where they must come from.
+6. List what a reviewer needs to accept the run: values, tolerances, timing boundaries and unsupported cases.
 
-## Common mistakes and self-review
+## Common mistakes and self-check
 
-Confusing a correct tiny example with a general implementation is the central review risk. For this chapter, challenge the assumption in worked example 2, then ask whether your change preserves the mechanism described above. If you change dtype, layout, ordering, batch size or backend, update the acceptance contract rather than silently reusing the old observation. Explain an unexpected result before trying random configuration changes.
+The typical capstone mistake is refitting preprocessing on validation data. Recomputing means independently changes the transformation and leaks evaluation information, so scores are no longer comparable. Another mistake is mixing libraries without a reason, which adds copies, ownership questions and waits. Fix both by fitting means and scales once on the training fixture, saving that state and reusing it, keeping the pipeline on one backend where practical, and documenting every allocation owner and handoff.
 
-Keep a small evidence table with columns **claim**, **input**, **expected observation**, **actual observation** and **limit**. For the first claim use `Derive fitted means`. For the final claim use `Write the capstone acceptance report`. An unperformed GPU or cluster experiment remains pending even when the CPU model is correct.
+**Misconception:** If the pipeline's final scores match the CPU oracle, the capstone is complete. **Correction:** Matching scores show the arithmetic is right for this fixture, but the capstone also asks which library owns each allocation, whether each handoff aliases or copies and when the consumer may read. A pipeline can produce correct scores while copying the data three times, or while reading a buffer before its producer finished on another stream. Report the ownership diagram and separate preparation, transfer and compute timings alongside the equality check.
 
-## Platform and evidence contract
+**Evidence limit:** The reference fits means `[2, 3]` and scores `[-1, 1]` on a two-row fixture with plain Python. It establishes expected values, not interchange behavior or latency, which require running the pipeline on a supported backend.
 
-The reading worksheet and CPU reference model work through the ordinary Linux Docker classroom on macOS, Linux and Windows using WSL 2. They do not require an NVIDIA GPU. Their results are labeled CPU models or semantic oracles, not simulated hardware performance.
+1. Why establish a CPU oracle before optimizing the pipeline?
+2. How should a constant feature be handled?
+3. Why report preparation, transfer and computation separately?
 
-Real CUDA work needs supported NVIDIA hardware, a compatible host driver and an explicitly prepared GPU runtime. An Apple GPU does not execute CUDA kernels. PyTorch MPS on a supported native Mac, ROCm on supported AMD hardware, or other vendor backends can provide separate accelerator learning routes; they need their own package and operation qualification and are not CUDA evidence. The ordinary Linux Docker classroom does not expose native Mac MPS automatically.
-
-Do not download packages, models or data by opening this lesson. Do not attach an engine socket, ambient cluster credentials or an arbitrary remote endpoint. A CPU pass, imported package, successful compilation, real GPU result and measured performance are distinct observations. Record the actual backend, data shape/dtype, source revision, versions and pending checks. A saved completion marker records learning progress, not hardware certification.
+Answers: [self-check answers](../solutions/cuda-086_solutions.md#self-check-answers).
 
 ## Primary references
 
 - [DLPack Python specification](https://dmlc.github.io/dlpack/latest/python_spec.html)
-- [CuPy interoperability](https://docs.cupy.dev/en/stable/user_guide/interoperability.html)
 
-Use the version-matched documentation of your prepared environment. These references describe interfaces and supported boundaries; the chapter's synthetic examples and CPU models are original teaching material.
+Full lists: [documentation and sources](../../STUDY-GUIDE.md#documentation-and-sources).
 
 ## Ask an AI tutor about this lesson
 

@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cuda/python/solutions/cuda-067_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="cuda-067-explained-solutions">cuda-067: explained solutions<a class="heading-anchor" href="#cuda-067-explained-solutions" aria-label="Link to this section">#</a></h2>
-<p>These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.</p>
+<p>Compare with your <a href="../lessons/cuda-067.md.html">worksheet</a> attempt.</p>
 <h3 id="exercise-1-count-bytes-for-ten-iterations">Exercise 1: Count bytes for ten iterations<a class="heading-anchor" href="#exercise-1-count-bytes-for-ten-iterations" aria-label="Link to this section">#</a></h3>
 <p>The round-trip version moves 20 B.</p>
 <p><strong>Approach.</strong> Count bytes per iteration for the round-trip version: one upload of B and one download of B, so <code>2B</code> per iteration and <code>20B</code> over ten iterations. With the reference size of 4096 bytes that is 81920.</p>
@@ -231,9 +231,19 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Why it is correct here.</strong> With the reference model, a 40-byte transfer costs about 10 microseconds of latency and 40 nanoseconds of bandwidth time. A CPU can finish a few arithmetic operations on 10 floats far faster than that latency, before any kernel launch cost is added.</p>
 <p><strong>A plausible wrong approach.</strong> Assuming the GPU always wins because it has more cores ignores the fixed costs. A benchmark on one tiny array would show the CPU ahead, and the conclusion that the GPU is slow would also be wrong.</p>
 <p><strong>How to verify.</strong> State the workload size and the transfer count, and compare modeled latency with an estimate of CPU work. The conclusion is valid when you can show that latency terms, not arithmetic, dominate the GPU total.</p>
+<h3 id="self-check-answers">Self-check answers<a class="heading-anchor" href="#self-check-answers" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>In the model latency plus B divided by W, which term does batching reduce?</strong> Only the fixed latency term, because it is paid once instead of once per copy. The bandwidth term depends on total bytes and is unchanged when the same payload is grouped.</li>
+</ol>
+<ol start="2">
+<li><strong>Why is pinning every host array a poor default?</strong> Pinned pages cannot be swapped out and consume host resources. Pin the buffers that feed overlapping copies, and keep their owners alive until each copy completes.</li>
+</ol>
+<ol start="3">
+<li><strong>What must an end-to-end timer include in this chapter?</strong> Preparation, the upload, the computation and the final download to host output. Excluding transfers hides exactly the difference between the round-trip and resident versions.</li>
+</ol>
 <h3 id="reference-observation">Reference observation<a class="heading-anchor" href="#reference-observation" aria-label="Link to this section">#</a></h3>
 <p>81920 versus 8192 modeled bytes; these are not measured timings.</p>
-<p>The reference file is <code>courses/cuda/python/references/cuda-067_cpu.py</code>. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.</p></article>
+<p>Asserted by <code>courses/cuda/python/references/cuda-067_cpu.py</code>.</p></article>
   </main>
 </body>
 </html>

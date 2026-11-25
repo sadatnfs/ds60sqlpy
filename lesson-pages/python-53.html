@@ -478,19 +478,10 @@ mlflow<span class="syntax-operator">.</span>set_experiment<span class="syntax-pu
 <pre class="highlighted-code"><code class="language-bash">.venv/bin/mlflow ui --backend-store-uri sqlite:///artifacts/day53/tracking.sqlite --host <span class="syntax-number">127</span>.0.0.1</code></pre>
 <p>Open <code>http://127.0.0.1:5000</code>, and stop the process with Ctrl+C when finished. The server binds locally and the lesson works offline.</p>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
-<p><strong>Default Docker classroom:</strong> open <code>python-53</code> for its guide, notebook and capability notice. The default Core does not include the <code>production</code> extra, so the complete legacy notebook is unavailable there until that app environment is deliberately prepared. Pressing Run or choosing a notebook kernel does not install packages.</p>
-<p><strong>Prepared browser alternative:</strong> use the <a href="../reference-pages/courses/ml-engineering/guides/mle-001.md.html">prepared ML engineering course</a> in its declared runtime. Its supported examples have their own package and execution contract; this does not qualify every legacy optional extension.</p>
-<p><strong>Explicit legacy preparation:</strong> retain the contributor extras in <a href="../reference-pages/CONTRIBUTING.md.html">CONTRIBUTING</a> and add <code>production</code> only when needed. See <a href="../reference-pages/docs/dependency-profiles.md.html">dependency profiles</a> and <a href="../reference-pages/docs/docker-profiles.md.html">Docker app package options</a> for deliberate preparation. A host notebook environment and a Docker app image are separate. Do not install packages inside a learner pad.</p>
+<p><strong>Default Docker classroom:</strong> MLflow tracking needs the <code>production</code> extra, and the default Core does not include it, so <code>python-53</code> cannot log runs there. A local install via <a href="../reference-pages/CONTRIBUTING.md.html">CONTRIBUTING</a> writes runs to your checkout; a host notebook environment and a Docker app image are separate.</p>
+<p><strong>Prepared browser alternative:</strong> Tracking only helps when accepted artifacts are defined, and the <a href="../reference-pages/courses/ml-engineering/guides/mle-001.md.html">prepared ML engineering course</a> defines them in its declared runtime.</p>
 <p>The notebook writes an explicit local SQLite metadata store and local model artifacts under artifacts/day53. The loopback UI is a separate terminal process. Registry promotion, hosted tracking and deployment are project extensions, not effects of opening this lesson.</p>
-<p><strong>Optional native notebook/editor route:</strong> the instructions below describe separately prepared host tools. They are useful alternatives, not prerequisites for opening this lesson in the Docker classroom.</p>
-<ol>
-<li>Open the Day 53 learner notebook from this guide&#x27;s <strong>Next step</strong> section in VS Code or JupyterLab.</li>
-<li>Select the <code>Python (ds60sqlpy)</code> kernel. Start at the top and use <strong>Run All</strong> only after making the written predictions; the default data examples are offline once the declared packages are prepared. Optional services and model assets have separate requirements.</li>
-<li>Keep experiments in new scratch cells. Do not edit the official solution while attempting the numbered practice.</li>
-<li>Restart the kernel and run from the first cell before calling the lesson complete. A clean run catches hidden state and stale variables.</li>
-</ol>
-<p>Linux, macOS, or Ubuntu in Windows WSL 2:</p>
-<pre class="highlighted-code"><code class="language-bash">.venv/bin/python -m jupyter lab</code></pre>
+<p>The <a href="../reference-pages/python/STUDY-GUIDE.md.html">Python study guide</a> covers the notebook route and preparing optional extras.</p>
 <h4 id="guide--concept-deep-dive-mlflow-run-identity-params-metrics-artifacts-and-reproducible-evidence">Concept deep dive: MLflow run identity, params, metrics, artifacts, and reproducible evidence<a class="heading-anchor" href="#guide--concept-deep-dive-mlflow-run-identity-params-metrics-artifacts-and-reproducible-evidence" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--the-mental-model">The mental model<a class="heading-anchor" href="#guide--the-mental-model" aria-label="Link to this section">#</a></h5>
 <p>Experiment tracking records evidence about a run; it does not make the run reproducible by itself. An experiment groups comparable runs. A run represents one execution. Parameters describe configuration, metrics are numeric observations (possibly by step), tags add searchable context, and artifacts preserve files or models.</p>
@@ -502,7 +493,6 @@ mlflow<span class="syntax-operator">.</span>set_experiment<span class="syntax-pu
 <li><strong><code>log_artifact</code> / model logging:</strong> copies output into the run&#x27;s artifact store; verify reload and input contract rather than trusting existence.</li>
 </ul>
 <h5 id="guide--focused-example-a-separate-comparable-configuration-from-results">Focused example A: separate comparable configuration from results<a class="heading-anchor" href="#guide--focused-example-a-separate-comparable-configuration-from-results" aria-label="Link to this section">#</a></h5>
-<p>Before running the example, predict the shape, type, or direction of the result. Write the prediction down so that a surprise becomes evidence rather than something to overlook.</p>
 <pre class="highlighted-code"><code class="language-python">run_record <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span>
     <span class="syntax-string">&quot;</span><span class="syntax-string">params</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-punctuation">{</span>
         <span class="syntax-string">&quot;</span><span class="syntax-string">model</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">logistic_regression</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
@@ -605,7 +595,6 @@ original_uri <span class="syntax-operator">=</span> mlflow<span class="syntax-op
 <p>The reference solution adds scikit-learn autologging and model reload. Start with explicit logging so you know which information is essential; use autolog as a supplement, not as a substitute for experiment design.</p>
 <h5 id="guide--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#guide--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
 <p>Make experiment records reconstructable: status, parameters, data/code identity, metrics, artifacts, and model signature must describe one coherent run.</p>
-<p>Predict or plan before you run code. Use the hint only after an honest attempt, and record the evidence that would prove your result correct.</p>
 <ol start="4">
 <li><strong>Failure-state handling:</strong> Run an experiment that intentionally raises after logging parameters. Verify MLflow records a failed status and useful exception context without exposing raw data or secrets. <strong>Progressive hint:</strong> Use the run context manager so exception exit marks the run failed. Log safe stage/status information before re-raising.</li>
 </ol>
@@ -667,7 +656,7 @@ original_uri <span class="syntax-operator">=</span> mlflow<span class="syntax-op
 <li>Continue to <a href="python-54.html#guide">Day 54; Monitoring and Governance</a>.</li>
 </ul>
 <h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
-<p>The lesson is complete without an AI assistant. If you want optional coaching, copy this prompt into the AI tutor while the repository root is open:</p>
+<p>The lesson is complete without AI. For optional coaching, copy this prompt with the repository root open:</p>
 <pre class="highlighted-code"><code class="language-text">Tutor me through `python-53` (Day 53: Experiment Tracking with MLflow).
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
@@ -1067,9 +1056,9 @@ loaded <span class="syntax-operator">=</span> mlflow<span class="syntax-operator
 <li>Versioned artifacts allow rollbacks and auditability</li>
 </ul>
 <hr>
-<p><strong>Portable worker default:</strong> These reference runs use <code>n_jobs=1</code> so they behave predictably on Windows, CI runners, and constrained notebook environments. After correctness is established, benchmark a larger worker count on your own workload rather than assuming <code>n_jobs=1</code> is faster.</p>
+<p><strong>Portable worker default:</strong> these runs use <code>n_jobs=1</code> for predictable results; benchmark more workers only after correctness.</p>
 <h4 id="solution-1--solution-reasoning-lens">Solution reasoning lens<a class="heading-anchor" href="#solution-1--solution-reasoning-lens" aria-label="Link to this section">#</a></h4>
-<p>A strong solution is not merely code that produces one plausible output. It establishes a chain from input contract to operation to verification:</p>
+<p>Each decision below links an input contract to an operation and its evidence:</p>
 <ol>
 <li><strong><code>with mlflow.start_run():</code>:</strong> creates a bounded lifecycle so successful and failed runs receive terminal status.</li>
 <li><strong><code>log_param</code> versus <code>log_metric</code>:</strong> stores fixed configuration separately from numeric measurements that may evolve by step.</li>
@@ -1081,44 +1070,36 @@ loaded <span class="syntax-operator">=</span> mlflow<span class="syntax-operator
 <p><strong>Trade-off:</strong> Automatic logging is convenient but may record too much, too little, or sensitive metadata; explicit logging is verbose but deliberate.</p>
 <p><strong>Edge case to test:</strong> Nested/failed runs, duplicate parameter writes, missing artifacts, deleted tracking directories, incompatible signatures, and sensitive tags require policy.</p>
 <p><strong>Evidence of correctness:</strong> Query exact run ID/status, record data/split/code/environment, distinguish params and metrics, hash artifacts, and reload with a representative input signature.</p>
-<p>When comparing your attempt with the reference, explain which of these decisions your code made explicitly. If the reference makes a different choice, compare the contracts and evidence before deciding that one version is universally better.</p>
 <h4 id="solution-1--exercise-by-exercise-reasoning-map">Exercise-by-exercise reasoning map<a class="heading-anchor" href="#solution-1--exercise-by-exercise-reasoning-map" aria-label="Link to this section">#</a></h4>
-<p>This map connects every learner prompt to a reasoning path. Read the explanation before copying code: the goal is to understand the assumptions, the evidence that validates the result, and the edge cases that can make an apparently correct implementation fail.</p>
 <h5 id="solution-1--exercise-1-original-lesson-practice">Exercise 1: Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Log additional parameters such as Logistic Regression <code>C</code> and compare runs.</p>
 <p><strong>How to reason about it:</strong> Log one controlled configuration per run, including split seed, model type, metric definition, and direct hyperparameters. Use tags for context rather than encoding all meaning in a run name.</p>
-<p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
 <p><strong>Verify:</strong> Query the exact run IDs and print each LogisticRegression C, split/data hash, ROC AUC, status, and artifact URI; assert the comparison uses the same split and metric definition.</p>
 <h5 id="solution-1--exercise-2-original-lesson-practice">Exercise 2: Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-2-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Save a confusion-matrix PNG and log it as an artifact.</p>
 <p><strong>How to reason about it:</strong> Create the confusion matrix under ignored <code>artifacts/</code>, label axes, close the figure, and log it. The artifact must correspond to the same evaluation rows and threshold as the run&#x27;s numeric metrics.</p>
-<p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
 <p><strong>Verify:</strong> Save a confusion-matrix PNG with labeled axes, log it under the selected run, fetch its artifact listing, and assert the downloaded file is a valid nonempty PNG tied to that run ID.</p>
 <h5 id="solution-1--exercise-3-original-lesson-practice">Exercise 3: Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-3-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Try a different classifier, such as Random Forest, and compare ROC AUC.</p>
 <p><strong>How to reason about it:</strong> Compare classifiers on one frozen split and include runtime/complexity beside ROC AUC. A model-family change is a new run, not an overwritten metric in the prior run.</p>
-<p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
 <p><strong>Verify:</strong> Run RandomForest and the baseline on the same data/split/metric, print both run IDs, parameters, ROC AUC, and fit status, and state that the final test was not used to choose between them.</p>
 <h5 id="solution-1--exercise-4-failure-state-handling">Exercise 4: Failure-state handling<a class="heading-anchor" href="#solution-1--exercise-4-failure-state-handling" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Run an experiment that intentionally raises after logging parameters. Verify MLflow records a failed status and useful exception context without exposing raw data or secrets.</p>
 <p><strong>Reasoning before implementation:</strong> Use the run context manager so exception exit marks the run failed. Log safe stage/status information before re-raising.</p>
 <p>Do not catch every exception and end the run as successful. If cleanup is needed, catch narrowly, log a redacted diagnostic or tag, and re-raise so the tracking status remains honest.</p>
 <p>Never put credentials, full environment variables, or sensitive records in tags/artifacts. Link to an approved local diagnostic ID when deeper incident evidence is restricted.</p>
-<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
 <p><strong>Verify:</strong> Failure-state handling; query the intentional-failure run ID and assert status FAILED, parameters remain present, no success metric/artifact is fabricated, and captured exception context excludes sentinel raw data/secret strings.</p>
 <h5 id="solution-1--exercise-5-provenance-manifest">Exercise 5: Provenance manifest<a class="heading-anchor" href="#solution-1--exercise-5-provenance-manifest" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Log a JSON provenance artifact containing data fingerprint, code revision, dependency lock hash, feature schema, split policy, and metric definitions.</p>
 <p><strong>Reasoning before implementation:</strong> Use portable identifiers and hashes, not developer-specific absolute paths. Validate required fields before ending the run.</p>
 <p>The manifest should make two similar-looking runs distinguishable. Include target/positive-label semantics and units/denominators for metrics. Record a dirty-worktree flag when applicable rather than falsely claiming the Git revision alone captures code state.</p>
 <p>A hash proves identity relative to the hashed bytes, not trust or data quality. Keep the source snapshot governed and reproducible.</p>
-<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
 <p><strong>Verify:</strong> Provenance manifest; download the provenance JSON by run ID, validate all required fields/types, recompute data/code/lock hashes, and fail promotion when one hash or feature-schema order is tampered.</p>
 <h5 id="solution-1--exercise-6-reload-and-signature-check">Exercise 6: Reload and signature check<a class="heading-anchor" href="#solution-1--exercise-6-reload-and-signature-check" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Log a fitted pipeline with an input example/signature, reload it by run URI, and assert prediction parity on a fixed fixture.</p>
 <p><strong>Reasoning before implementation:</strong> The fixture must use the documented schema and never come from hidden notebook state. Compare probabilities within a tolerance.</p>
 <p>Test missing/extra columns and dtypes as well as a valid prediction. The signature catches many integration errors but does not replace domain validation such as allowed ranges or category policy.</p>
 <p>Use the local file-backed tracking URI for the offline lesson. A production registry adds authentication and promotion policy, which should be documented as an extension rather than required for the portable course.</p>
-<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
 <p><strong>Verify:</strong> Reload and signature check; load the pipeline from its exact run URI in a fresh process, validate signature columns/types, and assert fixed-fixture predictions match pre-log values within 1e-12; reject a missing/reordered feature.</p></div>
       </section>
 
@@ -1246,9 +1227,9 @@ loaded <span class="syntax-operator">=</span> mlflow<span class="syntax-operator
 <li>Versioned artifacts allow rollbacks and auditability</li>
 </ul>
 <hr>
-<p><strong>Portable worker default:</strong> These reference runs use <code>n_jobs=1</code> so they behave predictably on Windows, CI runners, and constrained notebook environments. After correctness is established, benchmark a larger worker count on your own workload rather than assuming <code>n_jobs=1</code> is faster.</p>
+<p><strong>Portable worker default:</strong> these runs use <code>n_jobs=1</code> for predictable results; benchmark more workers only after correctness.</p>
 <h4 id="solution-2--cell-7--solution-reasoning-lens">Solution reasoning lens<a class="heading-anchor" href="#solution-2--cell-7--solution-reasoning-lens" aria-label="Link to this section">#</a></h4>
-<p>A strong solution is not merely code that produces one plausible output. It establishes a chain from input contract to operation to verification:</p>
+<p>Each decision below links an input contract to an operation and its evidence:</p>
 <ol>
 <li><strong><code>with mlflow.start_run():</code>:</strong> creates a bounded lifecycle so successful and failed runs receive terminal status.</li>
 <li><strong><code>log_param</code> versus <code>log_metric</code>:</strong> stores fixed configuration separately from numeric measurements that may evolve by step.</li>
@@ -1260,44 +1241,36 @@ loaded <span class="syntax-operator">=</span> mlflow<span class="syntax-operator
 <p><strong>Trade-off:</strong> Automatic logging is convenient but may record too much, too little, or sensitive metadata; explicit logging is verbose but deliberate.</p>
 <p><strong>Edge case to test:</strong> Nested/failed runs, duplicate parameter writes, missing artifacts, deleted tracking directories, incompatible signatures, and sensitive tags require policy.</p>
 <p><strong>Evidence of correctness:</strong> Query exact run ID/status, record data/split/code/environment, distinguish params and metrics, hash artifacts, and reload with a representative input signature.</p>
-<p>When comparing your attempt with the reference, explain which of these decisions your code made explicitly. If the reference makes a different choice, compare the contracts and evidence before deciding that one version is universally better.</p>
 <h4 id="solution-2--cell-7--exercise-by-exercise-reasoning-map">Exercise-by-exercise reasoning map<a class="heading-anchor" href="#solution-2--cell-7--exercise-by-exercise-reasoning-map" aria-label="Link to this section">#</a></h4>
-<p>This map connects every learner prompt to a reasoning path. Read the explanation before copying code: the goal is to understand the assumptions, the evidence that validates the result, and the edge cases that can make an apparently correct implementation fail.</p>
 <h5 id="solution-2--cell-7--exercise-1-original-lesson-practice">Exercise 1: Original lesson practice<a class="heading-anchor" href="#solution-2--cell-7--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Log additional parameters such as Logistic Regression <code>C</code> and compare runs.</p>
 <p><strong>How to reason about it:</strong> Log one controlled configuration per run, including split seed, model type, metric definition, and direct hyperparameters. Use tags for context rather than encoding all meaning in a run name.</p>
-<p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
 <p><strong>Verify:</strong> Query the exact run IDs and print each LogisticRegression C, split/data hash, ROC AUC, status, and artifact URI; assert the comparison uses the same split and metric definition.</p>
 <h5 id="solution-2--cell-7--exercise-2-original-lesson-practice">Exercise 2: Original lesson practice<a class="heading-anchor" href="#solution-2--cell-7--exercise-2-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Save a confusion-matrix PNG and log it as an artifact.</p>
 <p><strong>How to reason about it:</strong> Create the confusion matrix under ignored <code>artifacts/</code>, label axes, close the figure, and log it. The artifact must correspond to the same evaluation rows and threshold as the run&#x27;s numeric metrics.</p>
-<p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
 <p><strong>Verify:</strong> Save a confusion-matrix PNG with labeled axes, log it under the selected run, fetch its artifact listing, and assert the downloaded file is a valid nonempty PNG tied to that run ID.</p>
 <h5 id="solution-2--cell-7--exercise-3-original-lesson-practice">Exercise 3: Original lesson practice<a class="heading-anchor" href="#solution-2--cell-7--exercise-3-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Try a different classifier, such as Random Forest, and compare ROC AUC.</p>
 <p><strong>How to reason about it:</strong> Compare classifiers on one frozen split and include runtime/complexity beside ROC AUC. A model-family change is a new run, not an overwritten metric in the prior run.</p>
-<p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
 <p><strong>Verify:</strong> Run RandomForest and the baseline on the same data/split/metric, print both run IDs, parameters, ROC AUC, and fit status, and state that the final test was not used to choose between them.</p>
 <h5 id="solution-2--cell-7--exercise-4-failure-state-handling">Exercise 4: Failure-state handling<a class="heading-anchor" href="#solution-2--cell-7--exercise-4-failure-state-handling" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Run an experiment that intentionally raises after logging parameters. Verify MLflow records a failed status and useful exception context without exposing raw data or secrets.</p>
 <p><strong>Reasoning before implementation:</strong> Use the run context manager so exception exit marks the run failed. Log safe stage/status information before re-raising.</p>
 <p>Do not catch every exception and end the run as successful. If cleanup is needed, catch narrowly, log a redacted diagnostic or tag, and re-raise so the tracking status remains honest.</p>
 <p>Never put credentials, full environment variables, or sensitive records in tags/artifacts. Link to an approved local diagnostic ID when deeper incident evidence is restricted.</p>
-<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
 <p><strong>Verify:</strong> Failure-state handling; query the intentional-failure run ID and assert status FAILED, parameters remain present, no success metric/artifact is fabricated, and captured exception context excludes sentinel raw data/secret strings.</p>
 <h5 id="solution-2--cell-7--exercise-5-provenance-manifest">Exercise 5: Provenance manifest<a class="heading-anchor" href="#solution-2--cell-7--exercise-5-provenance-manifest" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Log a JSON provenance artifact containing data fingerprint, code revision, dependency lock hash, feature schema, split policy, and metric definitions.</p>
 <p><strong>Reasoning before implementation:</strong> Use portable identifiers and hashes, not developer-specific absolute paths. Validate required fields before ending the run.</p>
 <p>The manifest should make two similar-looking runs distinguishable. Include target/positive-label semantics and units/denominators for metrics. Record a dirty-worktree flag when applicable rather than falsely claiming the Git revision alone captures code state.</p>
 <p>A hash proves identity relative to the hashed bytes, not trust or data quality. Keep the source snapshot governed and reproducible.</p>
-<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
 <p><strong>Verify:</strong> Provenance manifest; download the provenance JSON by run ID, validate all required fields/types, recompute data/code/lock hashes, and fail promotion when one hash or feature-schema order is tampered.</p>
 <h5 id="solution-2--cell-7--exercise-6-reload-and-signature-check">Exercise 6: Reload and signature check<a class="heading-anchor" href="#solution-2--cell-7--exercise-6-reload-and-signature-check" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Log a fitted pipeline with an input example/signature, reload it by run URI, and assert prediction parity on a fixed fixture.</p>
 <p><strong>Reasoning before implementation:</strong> The fixture must use the documented schema and never come from hidden notebook state. Compare probabilities within a tolerance.</p>
 <p>Test missing/extra columns and dtypes as well as a valid prediction. The signature catches many integration errors but does not replace domain validation such as allowed ranges or category policy.</p>
 <p>Use the local file-backed tracking URI for the offline lesson. A production registry adds authentication and promotion policy, which should be documented as an extension rather than required for the portable course.</p>
-<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
 <p><strong>Verify:</strong> Reload and signature check; load the pipeline from its exact run URI in a fresh process, validate signature columns/types, and assert fixed-fixture predictions match pre-log values within 1e-12; reject a missing/reordered feature.</p></article></div>
       </section>
 

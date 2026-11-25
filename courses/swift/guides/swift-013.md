@@ -24,9 +24,9 @@ Inheritance lets a subclass reuse or refine behavior, but a subclass must preser
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles the saved pad as `main.swift` with Swift 6 language checking. An explicit `@main` type contains `static func main() async throws`; the fixed compiler uses `-parse-as-library -swift-version 6`. The examples use the standard library and portable Foundation. `precondition` makes a violated invariant fail the process. The fixed pad accepts one source file, without arbitrary command arguments, interactive input or dependency installation. SwiftUI, UIKit, Apple simulators and application signing belong to the separately prepared macOS/Xcode project labs, never the Linux pad.
+Both examples declare `Counter` as a `final class` above `LessonMain`. Draw two boxes for the bindings and one box per object before pasting anything; task 1 asks for exactly that diagram. Task 3 is a design decision rather than a program, so write the class or struct choice and its reason in your pad as comments.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Compile contract, starter stop and success marker: [running a lesson](../STUDY-GUIDE.md#running-a-lesson).
 
 
 
@@ -34,7 +34,7 @@ Start with the answer-free learner artifact in your saved classroom pad. It deli
 
 `final class Counter` declares a reference type without subclasses. `===` compares object identity, while `==` requires an Equatable meaning. `let reference` can still call a mutating object method.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+Each example ends with a trace; method: [tracing a program](../STUDY-GUIDE.md#tracing-a-program).
 
 ## Worked example / walkthrough
 
@@ -67,6 +67,8 @@ struct LessonMain {
 
 **Observe:** Both names observe the same increment.
 
+**Trace.** `Counter()` creates one object on the heap with `value` 0, and `first` holds a reference to it. `let second = first` copies the reference, not the object, so both constants now point at the same instance. `second.increment()` is allowed even though `second` is a `let`, because the constant fixes which object is referenced, not the object's contents. The object's value becomes 1, so reading through `first` also gives 1, and `===` confirms the two references identify one instance.
+
 ### Example B: Equal state need not mean identity
 
 Object identity answers a different question from comparing a property value.
@@ -95,6 +97,8 @@ struct LessonMain {
 
 **Observe:** Two fresh counters have equal state but distinct identities.
 
+**Trace.** This time `Counter()` runs twice, producing two separate objects, each with `value` 0. Comparing `first.value == second.value` asks whether their states are equal, and the answer is yes. Comparing `first !== second` asks whether they are the same instance, and the answer is no. `Counter` does not conform to `Equatable`, so `first == second` would not compile at all: Swift gives classes identity comparison for free but makes you define what equal state means.
+
 ## Exercises
 
 1. **Predict and explain.** Draw references before and after assignment.
@@ -109,13 +113,15 @@ struct LessonMain {
 
 6. **Transfer and justify.** Explain whether a shared class needs synchronization before use from concurrent tasks.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Log each task in the [evidence table](../STUDY-GUIDE.md#recording-exercise-evidence) before opening the explanation.
 
 ## Common pitfalls and diagnosis
 
 Let does not make a referenced object deeply immutable. Reference semantics do not imply thread safety. Inheritance is not a general-purpose code reuse requirement.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+Task 4's mistaken expectation is that `let snapshot = counter` freezes the current count. The counterexample takes three lines: assign, call `increment()` on the original, then read `snapshot.value`, which has moved too. A real snapshot must copy the state into a value, for example `let saved = counter.value`, which stays at the old number after the increment.
+
+Repair routine: [building a regression case](../STUDY-GUIDE.md#building-a-regression-case).
 
 ## Progressive hints
 
@@ -125,11 +131,15 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 ## Self-check and next step
 
-Explain Reference identity, Final class, Composition without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+Describe what `===` compares and what `==` would compare once a class conforms to `Equatable`. Explain why a `let` binding to a class instance still permits calling a mutating method on that object. Name one reason a shared coordinator should be a class and one reason a map coordinate should be a struct.
+
+Then follow the general [self-check routine](../STUDY-GUIDE.md#self-check-routine) and save your pad.
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://docs.swift.org/swift-book/documentation/the-swift-programming-language/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+[Documentation](https://docs.swift.org/swift-book/documentation/the-swift-programming-language/): The Structures and Classes chapter of the Swift book explains reference types and identity operators; Automatic Reference Counting explains instance lifetime.
+
+Provenance and limits: [sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

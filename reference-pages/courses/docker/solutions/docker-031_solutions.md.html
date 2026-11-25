@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/docker/solutions/docker-031_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="docker-031-explanatory-solutions">docker-031: explanatory solutions<a class="heading-anchor" href="#docker-031-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit reveal. These explain the supplied teaching fixtures; they are not engine results. The mechanism is explained in <code>courses/docker/guides/docker-031.md</code>.</p>
+<p>These answers explain teaching fixtures, not engine results; the mechanism is in <a href="../guides/docker-031.md.html">the guide</a>.</p>
 <h3 id="exercise-1-predict-what-a-unit-test-cannot-prove-about-packaging">Exercise 1: Predict what a unit test cannot prove about packaging.<a class="heading-anchor" href="#exercise-1-predict-what-a-unit-test-cannot-prove-about-packaging" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Missing image files or a wrong final command can remain undetected.</p>
 <p><strong>Why:</strong> Unit tests may run in a richer host environment. Execute the final image to observe its real dependency and filesystem contract.</p>
@@ -238,7 +238,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>A plausible wrong approach:</strong> Marking the release fully tested because the config defines many checks conflates defined with executed.</p>
 <p><strong>How to verify:</strong> The gate output shows ran, passed or skipped for each check, with the image ID.</p>
 <h3 id="check-your-transfer">Check your transfer<a class="heading-anchor" href="#check-your-transfer" aria-label="Link to this section">#</a></h3>
-<p>A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.</p></article>
+<p>Only the source hashes. The receipt&#x27;s image identity names the amd64 image, while arm64 nodes resolve the index to a different platform manifest with its own digest, which no recorded check ran against. Either run the same named checks on an arm64 runner and record that digest, or state in the receipt that it covers linux/amd64 only. <code>docker buildx imagetools inspect</code> on the published reference lists each platform&#x27;s digest; if it shows only linux/amd64, the arm64 nodes cannot pull a native image at all.</p></article>
   </main>
 </body>
 </html>

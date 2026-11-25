@@ -1,6 +1,6 @@
 # js-007: explanatory solutions
 
-Use these answers after an attempt or an explicit reveal. The reference uses the same literal fixtures as the guide and keeps the exercises in separate scopes. A successful run checks these examples; explaining a changed input is a separate learning goal.
+Open these after your own attempt; each exercise runs in its own scope in the reference.
 
 ## Mechanism review
 
@@ -22,7 +22,7 @@ Map.set inserts or replaces a key, value pair; get returns the value or undefine
 
 ## Exercise 1: Keep equal-looking object keys distinct: change one input
 
-Task: Copy Example A into a scratch `main.mjs` and change `[second, 'b'],` to `[second, 'b!'],`. Before running it, predict which check fails and which value it now sees; then run it and restore the original line.
+Task: In a scratch copy of Example A, change `[second, 'b'],` to `[second, 'b!'],`. Which check fails, and what value does it see?
 
 Field equality does not establish object identity. A domain needing value-based keys should choose a stable canonical identifier explicitly.
 
@@ -40,13 +40,13 @@ assert.equal(map.get(first), 'a');
 assert.equal(map.get(second), 'b');
 ```
 
-**Expected:** The changed run fails with an `AssertionError` at `assert.equal(map.get(second), 'b')`. Restoring `[second, 'b'],` brings back: size 2 and separate values.
+**Expected:** The edited run fails with an `AssertionError` at `assert.equal(map.get(second), 'b')`. Restoring `[second, 'b'],` brings back: size 2 and separate values.
 
-**Verify:** Compare your written prediction with the reported `AssertionError`, including its actual and expected values, and name the value that made `assert.equal(map.get(second), 'b')` fail. After restoring the line, the program prints its `{"checks":1,"status":"passed"}` receipt again.
+**Verify:** Compare the reported actual and expected values with your prediction, then restore `[second, 'b'],`.
 
 ## Exercise 2: Inspect Set equality: diagnose an edited check
 
-Task: A careless edit changed a check in Example B so that it reads `assert.equal(values.has(-1), true);`. Run Example B with that line, explain why the edited check now fails for the same program state, and restore it.
+Task: Example B's check was edited to read `assert.equal(values.has(-1), true);`. Run it, explain the failure and restore the original.
 
 The collection equality contract differs from strict NaN comparison and Object.is signed zero behavior. Know the actual relation used by the container.
 
@@ -61,7 +61,7 @@ assert.equal(values.has(-0), true);
 
 **Expected:** Before the repair the run fails with an `AssertionError` at `assert.equal(values.has(-1), true);`. Restoring `assert.equal(values.has(-0), true);` brings back: size 2: one NaN and one zero.
 
-**Verify:** Keep the failing and the repaired runs. Explain why the edited check rejects the same program state that `assert.equal(values.has(-0), true)` accepts.
+**Verify:** Keep the failing and repaired runs and name the first value that differs between them.
 
 ## Exercise 3: Count repeated events
 
@@ -83,7 +83,7 @@ assert.deepEqual(
 
 **Expected:** red 2, blue 1.
 
-**Verify:** Keep a check equivalent to `assert.deepEqual([...counts], [['red', 2], ['blue', 1]])`. As a control, change `for (const value of ['red', 'blue', 'red']) counts.set(value, (counts.get(value) ?? 0) + 1);` to `for (const value of ['red', 'blue', 'red']) counts.set(value, (counts.get(value) ?? 0) - 1);`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
+**Verify:** Keep `assert.deepEqual([...counts], [['red', 2], ['blue', 1]])`. Control: changing `for (const value of ['red', 'blue', 'red']) counts.set(value, (counts.get(value) ?? 0) + 1);` to `for (const value of ['red', 'blue', 'red']) counts.set(value, (counts.get(value) ?? 0) - 1);` must make that check fail; then restore it.
 
 ## Exercise 4: Distinguish a stored zero from absence
 
@@ -101,7 +101,7 @@ assert.equal(map.get('b'), undefined);
 
 **Expected:** a present with 0; b absent with undefined.
 
-**Verify:** Keep a check equivalent to `assert.equal(map.get('a'), 0)`. As a control, change `const map = new Map([['a', 0]]);` to `const map = new Map([['a', 1]]);`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
+**Verify:** Keep `assert.equal(map.get('a'), 0)`. Control: changing `const map = new Map([['a', 0]]);` to `const map = new Map([['a', 1]]);` must make that check fail; then restore it.
 
 ## Exercise 5: Trace insertion order updates
 
@@ -123,7 +123,7 @@ assert.deepEqual([...map.keys()], ['b', 'a']);
 
 **Expected:** update order a, b; reinsertion order b, a.
 
-**Verify:** Keep a check equivalent to `assert.deepEqual([...map.keys()], ['b', 'a'])`. As a control, change `map.delete('a'); map.set('a', 4);` to `map.delete('a!'); map.set('a', 4);`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
+**Verify:** Keep `assert.deepEqual([...map.keys()], ['b', 'a'])`. Control: changing `map.delete('a'); map.set('a', 4);` to `map.delete('a!'); map.set('a', 4);` must make that check fail; then restore it.
 
 ## Exercise 6: Deduplicate while preserving first occurrence
 
@@ -138,8 +138,8 @@ assert.deepEqual(unique, ['b', 'a', 'c']);
 
 **Expected:** b, a, c.
 
-**Verify:** Keep a check equivalent to `assert.deepEqual(unique, ['b', 'a', 'c'])`. As a control, change `const unique = [...new Set(['b', 'a', 'b', 'c', 'a'])];` to `const unique = [...new Set(['b!', 'a', 'b', 'c', 'a'])];`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
+**Verify:** Keep `assert.deepEqual(unique, ['b', 'a', 'c'])`. Control: changing `const unique = [...new Set(['b', 'a', 'b', 'c', 'a'])];` to `const unique = [...new Set(['b!', 'a', 'b', 'c', 'a'])];` must make that check fail; then restore it.
 
 ## After comparison
 
-Return to your saved implementation and repeat a case with different values. Keep compiler diagnostics, process output and browser observations separate. Do not suppress a failing assertion or use a type assertion to declare an unvalidated value safe. Resource-owning examples must finish cleanup even when work fails. Describe each result with its actual host and fixture scope rather than as production acceptance.
+Fresh case: count the words in `['to', 'be', 'or', 'not', 'to', 'be']` and list them by first occurrence with their counts. Then add the word `'constructor'`: a plain object counter breaks on it, while a `Map` needs no special case. ([After comparing](../STUDY-GUIDE.md#after-comparing-with-the-solution).)

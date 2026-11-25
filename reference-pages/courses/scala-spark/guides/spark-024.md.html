@@ -194,17 +194,19 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/scala-spark/guides/spark-024.md</code></p>
     </header>
     <article class="document"><h2 id="spark-024-aqe-skew-and-bounded-salting-experiments">spark-024: AQE, skew and bounded salting experiments<a class="heading-anchor" href="#spark-024-aqe-skew-and-bounded-salting-experiments" aria-label="Link to this section">#</a></h2>
-<p>Authored paired Scala/PySpark teaching content. The default fixtures are tiny, local and deterministic. Runtime acceptance, logical correctness and learner understanding remain separate evidence.</p>
+<p>Nine thousand of ten thousand facts carry key 0, so a plain sort-merge join sends 90 percent of the work to one task. This lesson measures that imbalance, lets adaptive execution re-plan the join, and then splits the hot key by hand with a four-way salt, insisting that every route returns the same 10,000 rows with weighted total 15,500.</p>
 <h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
-<p>Intermediate; approximately 120 minutes. Direct prerequisites: <code>spark-023</code>. The prepared baseline is Spark 4.3.0, Scala binary 2.13, JDK 17 and Python 3.12. Read the <a href="../execution-baseline.md.html">execution baseline</a>.</p>
+<p>Intermediate; approximately 120 minutes. Direct prerequisites: <code>spark-023</code>. Pinned versions: <a href="../execution-baseline.md.html">execution baseline</a>.</p>
 <h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>Open <code>spark-024</code> in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed <code>spark-local-scala</code> or <code>spark-local-python</code> profile, save your pad and run the complete source. Scala stages as <code>Main.scala</code> with <code>object Main</code>; Python stages as <code>main.py</code> with a main guard. Each program creates its own <code>local[2]</code> session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.</p>
-<p>The <a href="../lessons/spark-024.scala.html">Scala learner</a> and <a href="../lessons/spark-024.py.html">PySpark learner</a> run two complete demonstrations and retain six explicit task stubs. Use the <a href="../solutions/spark-024_solutions.md.html">explained solutions</a> only after an attempt or an explicit worked comparison; the <a href="../solutions/spark-024_solution.scala.html">Scala reference</a> and <a href="../solutions/spark-024_solution.py.html">PySpark reference</a> contain complete assertions. A bounded collect is used only for the declared tiny fixture; do not copy it onto an unbounded or large production table.</p>
+<p>Shared run steps and profile rules: <a href="../STUDY-GUIDE.md.html#run-a-paired-lesson">study guide</a>.</p>
+<p>Learner pads: <a href="../lessons/spark-024.scala.html">Scala</a> and <a href="../lessons/spark-024.py.html">PySpark</a>.</p>
+<p>Open the <a href="../solutions/spark-024_solutions.md.html">explained solutions</a> after an attempt.</p>
+<p>The first worked example divides the key-0 count by the total and prints <code>Observed hot-key fraction=</code> 0.9. The second computes the weighted total straight from the fixture rules, 9,000 rows at factor 1 plus 100 rows at each factor from 2 through 11, and prints <code>Weighted-total conservation oracle=</code> 15500. The baseline, adaptive and salted joins must each match that oracle.</p>
 <h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
 <ul>
 <li>Diagnose a skewed key and compare adaptive execution with an explicit, reversible skew strategy.</li>
-<li>State the input and output grain, schema, NULL policy and ordering before executing a transformation.</li>
-<li>Compare each language implementation with independent literal expectations, not only with the other implementation.</li>
+<li>Count rows per join key and per shuffle partition, show that one partition receives at least 9,000 of 10,000 rows, and capture the adaptive plan before execution and again afterward, when it reports <code>isFinalPlan=true</code>.</li>
+<li>Salt only key 0 into buckets 0 to 3 of 2,250 rows each, expand the matching dimension row into four copies for a 14-row dimension, and drop <code>salt</code> so the result schema is <code>fact_id, key, amount, factor</code>.</li>
 </ul>
 <h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
 <ul>
@@ -236,7 +238,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>This row-load ledger is only a task-size proxy. Wide records, expensive expressions, serialization, spill and network transfer can make equally sized row partitions have very different costs. A production comparison would examine task-duration and byte distributions, peak state, spills and failure/retry behavior. The local experiment demonstrates correctness, adaptive-plan observation and a reversible skew strategy without treating row balance alone as a complete performance model.</p>
 <p>All 10000 result tuples are deliberately bounded for this demonstration and collected only for an exact bag oracle. Larger workloads need distributed reconciliation and bounded diagnostics. No external source, checkpoint or service is created. The owned SparkSession is stopped in finally after every action or failure.</p>
 <h3 id="supplied-local-fixture">Supplied local fixture<a class="heading-anchor" href="#supplied-local-fixture" aria-label="Link to this section">#</a></h3>
-<p>The complete source creates the owned local session described above, then constructs this explicit fixture. The worked examples below run in that same main function; there is no hidden notebook state.</p>
+<p>Automatic broadcasting is disabled, including the adaptive threshold, so every join here is a shuffle join; sort-merge is preferred and there are 4 shuffle partitions. Facts 0 to 8999 get key 0 and facts 9000 to 9999 cycle through keys 1 to 10, each with amount 1. The dimension has keys 0 to 10 with <code>factor = key + 1</code>. One unit of amount per fact keeps every total checkable by hand.</p>
 <pre class="highlighted-code"><code class="language-scala"><span class="syntax-keyword">import</span> org<span class="syntax-punctuation">.</span>apache<span class="syntax-punctuation">.</span>spark<span class="syntax-punctuation">.</span>sql<span class="syntax-punctuation">.</span>functions<span class="syntax-punctuation">.</span>_
 
 spark<span class="syntax-punctuation">.</span>conf<span class="syntax-punctuation">.</span>set<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;spark.sql.autoBroadcastJoinThreshold&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;-1&quot;</span><span class="syntax-punctuation">)</span>
@@ -309,7 +311,7 @@ println<span class="syntax-punctuation">(</span><span class="syntax-string">&quo
 <p><strong>Verify:</strong> Assert all four hot bucket counts and both reconciled ledgers; print actual salted loads without inventing perfect hash balance.</p>
 <p><strong>Progressive hint:</strong> Split each fact once. Different salt buckets can still collide in the same execution partition.</p>
 <h4 id="exercise-5-replicate-only-the-matching-small-side-hot-row">Exercise 5: Replicate only the matching small-side hot row<a class="heading-anchor" href="#exercise-5-replicate-only-the-matching-small-side-hot-row" aria-label="Link to this section">#</a></h4>
-<p>Expand dimension key 0 to salts 0,1,2,3 and every other dimension key to salt 0. Retain factor and verify uniqueness on the composite key.</p>
+<p>Expand dimension key 0 to salts 0, 1, 2 and 3 and every other dimension key to salt 0. Retain factor and verify uniqueness on the composite key.</p>
 <p><strong>Expected result/shape:</strong> 14 dimension rows, with four key 0 variants and ten cold rows. Every (key, salt) pair is unique.</p>
 <p><strong>Verify:</strong> Assert row count 14, distinct composite keys 14 and exact hot/cold salt populations.</p>
 <p><strong>Progressive hint:</strong> Use an array of salts chosen by key and explode it on the dimension side only.</p>
@@ -321,9 +323,14 @@ println<span class="syntax-punctuation">(</span><span class="syntax-string">&quo
 <h3 id="common-pitfalls">Common pitfalls<a class="heading-anchor" href="#common-pitfalls" aria-label="Link to this section">#</a></h3>
 <p>Do not infer actual skew splitting from spark.sql.adaptive.skewJoin.enabled alone. Inspect the final plan after the same DataFrame is materialized. Do not salt with fresh randomness when reproducible mapping is required, replicate both sides accidentally, or forget the composite equality key. A balanced row ledger does not prove balanced bytes or CPU work. Keep the tiny demonstration thresholds out of production recommendations, and retain a simple broadcast alternative when the dimension is genuinely bounded.</p>
 <h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
-<p>Explain the contract of <code>keyFrequencies</code> / <code>key_frequencies</code> without reading its solution. Then, from memory, state what Exercise 6 (Remove the physical helper and reconcile the business relation) must produce: All 10000 fact tuples remain exactly equal, with amount 10000 and weighted total 15500. Salt is absent from the final schema. Say which part of that result is evidence and what it still cannot show. Name the action in your trace that actually runs the plan.</p>
+<ul>
+<li>Before salting, the partition loads show one partition with at least 9,000 rows. Why can no choice of shuffle partition count fix that for an unsalted join on <code>key</code> alone?</li>
+<li>The adaptive plan string is captured twice. What changes between the two captures, and why must the result be collected in between?</li>
+<li>Salt is <code>fact_id</code> modulo 4 for key 0 and 0 for every other key. If the facts were salted but the dimension was not expanded, how many of the 9,000 hot rows would still find a match?</li>
+<li>All three joins return identical canonical rows. Which assertion catches a salted join that forgot to drop the helper column, and which catches one that duplicated hot rows?</li>
+</ul>
 <h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
-<p>Use the <a href="../README.md.html">course route</a> to continue. Paired-language agreement is useful only when both outputs also satisfy the independent fixture contract. A successful local run is not evidence of cluster performance or production recovery.</p>
+<p>Go on to <a href="spark-025.md.html">spark-025: Parquet, column pruning and file layout</a>. Skew was a problem of how rows move between tasks; the next lesson looks at how rows sit on disk and how directory layout, file count and column choice decide what a scan reads.</p>
 <h3 id="primary-sources-and-official-apis">Primary sources and official APIs<a class="heading-anchor" href="#primary-sources-and-official-apis" aria-label="Link to this section">#</a></h3>
 <ul>
 <li><a href="https://spark.apache.org/docs/4.3.0/sql-performance-tuning.html">Spark 4.3.0 adaptive execution and skew criteria</a></li>

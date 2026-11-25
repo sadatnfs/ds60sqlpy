@@ -194,7 +194,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/swift/solutions/swift-032_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="swift-032-explanation-and-comparison">swift-032: explanation and comparison<a class="heading-anchor" href="#swift-032-explanation-and-comparison" aria-label="Link to this section">#</a></h2>
-<p>Attempt the six guide tasks before opening this comparison. The executable reference is <a href="swift-032_solution.swift.html">swift-032_solution.swift</a>. It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.</p>
+<p>Reference program: <a href="swift-032_solution.swift.html">swift-032_solution.swift</a>, covering both examples and the executed answers.</p>
+<p>Attempt the tasks first; see <a href="../STUDY-GUIDE.md.html#comparing-with-the-explanation">comparing with the explanation</a>.</p>
 <h3 id="why-the-two-examples-differ">Why the two examples differ<a class="heading-anchor" href="#why-the-two-examples-differ" aria-label="Link to this section">#</a></h3>
 <p><strong>Replay without duplicate effect:</strong> Identity lookup and state change occur under one actor-owned transition. A repeated operation returns its receipt without applying again.</p>
 <p><strong>Reject conflicting identity reuse:</strong> Reconciliation needs payload identity as well as an operation key. A changed payload is rejected and prior state remains intact.</p>
@@ -288,7 +289,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The actor runs each apply to completion without suspension, so only the first request applies the effect and the other four find its record.</p>
 <h4 id="task-6-transfer-and-justify">Task 6: Transfer and justify<a class="heading-anchor" href="#task-6-transfer-and-justify" aria-label="Link to this section">#</a></h4>
 <p>Design a durable adapter and document what actor isolation alone cannot guarantee.</p>
-<p>No single reference answer exists: several designs can satisfy this transfer task. Build yours from the task 3 answer above (Add a read-only receipt lookup that never re-executes work) and the mechanism described below, and state one limitation of your choice.</p>
+<p>No single answer exists; extend task 3 using the <a href="../STUDY-GUIDE.md.html#open-transfer-tasks">open transfer routine</a>.</p>
 <h3 id="solution-reasoning">Solution reasoning<a class="heading-anchor" href="#solution-reasoning" aria-label="Link to this section">#</a></h3>
 <p><strong>Approach.</strong> <code>ImportLedger</code> is an actor that stores, per operation id, the amount and the running total that was its receipt. A first call applies the amount; a repeated call with the same id and amount returns the stored receipt; the same id with a different amount throws <code>conflict</code>. The task 3 answer adds a lookup that never re-executes work.</p>
 <p><strong>Why it is correct.</strong> In Example A, <code>apply(id: &quot;one&quot;, amount: 3)</code> raises the total from 0 to 3 and records <code>(3, 3)</code>. The repeat finds the record, the amounts match, and it returns 3 without adding again, so the total stays 3. In Example B the second call carries 4, the stored amount is 3, so it throws and the total is untouched. In task 3 the lookup finds receipt 3 for one and nil for two.</p>
@@ -300,7 +301,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>An actor dictionary records identity to payload/result. A synchronous actor method validates replay and applies new work without await between its check and update. Errors preserve conflicting requests as failures.</p>
 <p>An in-memory actor ledger loses its state after restart. Overflow and retention policy remain explicit production requirements. Do not claim exactly-once delivery from a local dictionary.</p>
 <h3 id="review-before-continuing">Review before continuing<a class="heading-anchor" href="#review-before-continuing" aria-label="Link to this section">#</a></h3>
-<p>Run the reference and confirm that it prints <code>swift-032: passed</code>, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.</p></article>
+<p>Run the reference and confirm it prints <code>swift-032: passed</code>, then rerun the guide&#x27;s counterexample.</p></article>
   </main>
 </body>
 </html>

@@ -24,9 +24,11 @@ Static dispatch through generics can retain concrete type information, while a t
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles the saved pad as `main.rs` with pinned Rust 1.99.1, edition 2024, and the prepared Arrow 60 library. `assert!` and `assert_eq!` remain active in normal builds. The fixed pad accepts one source file without arbitrary arguments, interactive input, Cargo manifests or package installation. The main function returns `Result<(), Box<dyn std::error::Error>>` so later examples can propagate errors with `?`; the final `Ok(())` means this fixture completed successfully. Standard library and Arrow examples remain offline after image preparation. Multi-file Cargo and external ecosystem projects have separate explicit preparation workflows.
+This lesson's programs need only the prelude and their own helpers. A passing run prints `rust-017: passed`.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Pad setup and limits: [Run a lesson](../STUDY-GUIDE.md#run-a-lesson).
+
+Before you run anything, follow [Attempt a lesson](../STUDY-GUIDE.md#attempt-a-lesson).
 
 
 
@@ -34,7 +36,9 @@ Start with the answer-free learner artifact in your saved classroom pad. It deli
 
 `trait Pricer` declares a method. `impl Pricer for FlatPrice` supplies behavior. `&dyn Pricer` borrows a trait object and uses dynamic dispatch. The receiver &self permits inspection without consuming the implementation.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+**Reading Example A (Use a declared capability, code below).** `trait Pricer` declares one method signature with no body; any type that provides `cost` with that signature can implement it. `FlatPrice(3)` is a tuple struct, so its single field is read as `self.0`. `let view: &dyn Pricer = &price;` coerces a reference to the concrete type into a trait object: a pointer to the value plus a pointer to a table of `FlatPrice`'s method implementations. The call `view.cost(4)` looks up `cost` in that table at run time, which is dynamic dispatch. `CappedPrice` is declared but not used in Example A; its `min` clamps the product to the second field.
+
+Method for tracing your own variants: [Trace a program](../STUDY-GUIDE.md#trace-a-program).
 
 ## Worked example / walkthrough
 
@@ -121,13 +125,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 6. **Transfer and justify.** Choose a trait boundary for a file adapter while keeping the domain core pure.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Record each task as in [Keep evidence for each task](../STUDY-GUIDE.md#keep-evidence-for-each-task).
 
 ## Common pitfalls and diagnosis
 
 A matching signature does not establish compatible semantics. Traits and inheritance are different mechanisms. Avoid exposing implementation details merely to make a trait larger.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+To turn a pitfall into a test, see [Design a regression case](../STUDY-GUIDE.md#design-a-regression-case).
 
 ## Progressive hints
 
@@ -135,13 +139,25 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 2. Compare Example B (Substitute a second policy) with Example A and name the first line whose behavior differs. Its observation is: The same interface admits an uncapped and capped policy.
 3. Before opening the explanation, test your task 3 attempt against this lesson's main pitfall: A matching signature does not establish compatible semantics.
 
+Tempting approaches to rule out before you compare:
+
+- **Task 1.** Predicting `[12, 12]` because the array holds one type confuses the element type `&dyn Pricer` with the concrete types behind it. Each element still knows it is a `FlatPrice` or a `CappedPrice`.
+- **Task 2.** Dropping the annotation, `let prices = [&flat, &capped, &premium];`, fails with E0308: inference takes `&FlatPrice` from the first element and then finds `&CappedPrice`. Keeping `; 2` with three elements also fails, with a length mismatch.
+- **Task 3.** Giving the formatter state, such as a `&mut self` call counter appended to the output, breaks the contract: the second call returns a different string and the `formatter.format(3) == formatter.format(3)` assertion panics.
+- **Task 5.** Reusing Example B's `CappedPrice(3, 10)` for the exact-cap test never hits equality: 3 units cost 9 and 4 units cost 12, so no unit count produces exactly 10.
+- **Task 6.** Making the core take a `std::fs::File` mixes I/O failures into validation and means every test needs a real file. Adding file methods to `Pricer` widens a pricing trait with an unrelated capability.
+
 ## Self-check and next step
 
-Explain Trait, Implementation, Dynamic dispatch without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+Example A calls `view.cost(4)` through `&dyn Pricer`: how does the call reach `FlatPrice::cost` at run time, and what would change if the parameter were a generic `P: Pricer`? Why does `CappedPrice(3, 10)` return 10 rather than 12 for four units? What must the `Pricer` documentation promise so that a third implementation cannot satisfy the signature yet surprise callers?
+
+Then work through [Self-check and review](../STUDY-GUIDE.md#self-check-and-review).
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://doc.rust-lang.org/book/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+Read [The Rust Book, 18.2 Trait Objects](https://doc.rust-lang.org/book/ch18-02-trait-objects.html) for when `dyn Trait` replaces a generic parameter.
+
+What the classroom does and does not prove: [Sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

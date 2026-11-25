@@ -4,18 +4,15 @@
 
 Beginner; about 90 minutes, plus any optional hardware experiment. Direct prerequisites: `cuda-005`
 
-The order supports learning at your own pace. Reading and CPU reasoning remain
-available when NVIDIA hardware is absent. Advanced hardware features need their
-own capability checks and are not prerequisites for opening this chapter.
+Pacing, evidence labels and platform rules for every chapter are in the [CUDA study guide](../../STUDY-GUIDE.md).
 
 ## Learning objectives
 
 Write a testing policy that specifies reference precision, tolerances and adversarial floating-point cases.
 
-Work through *Numbers, units and a trustworthy answer* with the concrete cases below. Finish with this evidence:
-a testing policy specifying reference precision, tolerance and adversarial cases. Distinguish an algorithmic
-calculation, a compiled artifact and an actual device observation when explaining
-what your work establishes.
+**Scope:** Finite precision, integer overflow, floating-point reduction order, cancellation, absolute versus relative error, NaN/Inf and problem conditioning.
+
+**Evidence to produce:** A testing policy specifying reference precision, tolerance and adversarial cases.
 
 ## Purpose, vocabulary and mental model
 
@@ -39,28 +36,17 @@ The observed value is y and the reference is y-hat. Require finite values unless
 
 ## How to run and study this lesson
 
-Use the saved reading worksheet in `/classroom`; the reading pad does not execute
-CUDA. For the bounded calculation, select **CPU model (Python)**, whose
-answer-free starter supplies the literal fixtures and task contract. The
-[CUDA C++ study workflow](../README.md) covers platforms, optional GPU
-compilation and evidence labels. In a prepared Python environment you can also
-run the separate [CPU reference](../references/cuda-006_cpu.py) from the
-repository root:
+Trace worked example 1 by hand, then run the [CPU reference](../references/cuda-006_cpu.py) from the repository root:
 
 ```sh
 python courses/cuda/cpp/references/cuda-006_cpu.py
 ```
 
-Its assertions check the stated numerical result or model invariant; console
-text is evidence of this CPU model only, not of CUDA execution.
-
 ## Worked example 1: trace the mechanism
 
 The exact sum of \([10^{16},1,-10^{16}]\) is 1. A sequential binary64 addition can return 0 because \(10^{16}+1\) rounds back to \(10^{16}\). Python's compensated `math.fsum` recovers 1 for this fixture. Different summation order is a numerical mechanism, not proof that either processor is faulty.
 
-The complete CPU model below intentionally models only the named arithmetic,
-layout, dependency or capability decision. It does not model GPU scheduling,
-caches, instruction timing or device memory visibility.
+**Why:** Binary64 has a 53-bit significand, so near 1e16 the spacing is 2 and adding 1 is lost.
 
 ```python
 import math
@@ -74,41 +60,37 @@ assert abs(4e-8) <= 1e-7
 print({"sequential": naive, "compensated_reference": math.fsum(values)})
 ```
 
-**Expected observation:** Every assertion succeeds. A representative CPU output is:
+**Expected observation:** every assertion succeeds, and the CPU model prints:
 
 ```text
 {'sequential': 0.0, 'compensated_reference': 1.0}
 ```
 
-Integers, shapes and ordering must match exactly; only assertions with an explicit
-tolerance accept small floating-point differences. A printed duration is a model
-output, not a measured GPU benchmark.
+**Check:** The reference asserts naive == 0.0 and math.fsum(values) == 1.0, printing sequential 0.0 and compensated 1.0.
 
 ## Worked example 2: change a meaningful condition
 
 Compare output 0.00000004 with reference zero under absolute tolerance 0.0000001. It passes. A relative-only rule with zero reference would reject every nonzero result. Conversely, output 4 where reference is 3 cannot be excused as ordinary small rounding under those tolerances; first investigate shape, indexing and the mathematical contract.
 
-Before applying this example to your own program, write down which inputs are
-read, which result is produced, and the condition that makes the comparison
-valid. Keep the original case as a regression check when changing a boundary.
+**Why:** Absolute tolerance handles a zero reference, where relative error is undefined or infinite.
+
+**Check:** The reference asserts abs(4e-8) <= 1e-7; also confirm |4 - 3| far exceeds any stated bound.
 
 ## Six progressive exercises
 
-Exercises 1 and 2 are guided reconstructions of the worked examples; exercises
-3-6 change an input, diagnose a defect, test a boundary and transfer the idea.
-For each one, keep the calculation, output, diagram or failure policy you
-produce so another reader can compare it with the worked cases. If the hint is
-not enough, reread the mechanism paragraph and the bounded CPU assertion.
-
 ### Exercise 1
 
-Predict and trace the first worked example before running its CPU reference. Write every intermediate quantity that leads to the stated result, including units or ownership where applicable.
+Reconstruct worked example 1 on paper before running its CPU reference. Trace the sum in order: 1e16 + 1 rounds to 1e16, then subtracting 1e16 leaves 0.0.
+
+**Trap to avoid:** Blaming the processor for the zero ignores that the same order on any IEEE 754 machine gives 0.0.
 
 **Hint:** Start with the literal input and intermediate quantities in worked example 1.
 
 ### Exercise 2
 
-Reconstruct the second worked example without copying its conclusion. Identify the changed input or condition, show the resulting calculation or dependency, and explain why it differs from the first example.
+Rework worked example 2 without copying its conclusion. Evaluate 4e-8 against atol 1e-7 with reference zero, then contrast with a relative-only rule.
+
+**Trap to avoid:** Widening tolerance until output 4 matches reference 3 hides an indexing or contract bug as rounding.
 
 **Hint:** Identify exactly which condition changes in worked example 2.
 
@@ -116,11 +98,15 @@ Reconstruct the second worked example without copying its conclusion. Identify t
 
 With \(\mathrm{atol}=0.001\) and \(\mathrm{rtol}=0.01\), find the allowed error at reference 20.
 
+**Trap to avoid:** Using rtol alone gives 0.2 and rejects an output at error 0.2005 that the policy accepts.
+
 **Hint:** Use the first worked example to establish the relevant quantities, then change only the requested input.
 
 ### Exercise 4
 
 A result contains NaN and a comparison test silently returns false. Repair the test.
+
+**Trap to avoid:** Replacing NaN with zero before comparing hides the defect and can make a broken kernel pass.
 
 **Hint:** Locate the failed phase or violated dependency before proposing a repair.
 
@@ -128,35 +114,33 @@ A result contains NaN and a comparison test silently returns false. Repair the t
 
 Why can signed 32-bit integer accumulation fail despite exact input values?
 
+**Trap to avoid:** Switching to float32 avoids wrapping but loses exactness above 2^24, so counts become wrong.
+
 **Hint:** Check what the algorithm is allowed to read, write or assume at this boundary.
 
 ### Exercise 6
 
 Design a histogram oracle.
 
+**Trap to avoid:** Comparing only the total misses a kernel that puts every value in the wrong bin but keeps the sum.
+
 **Hint:** State the output contract and which observations are needed in the new application.
 
 ## Common mistakes and diagnosis
 
-A tempting but incorrect claim in this chapter is: **bitwise CPU/GPU equality is always necessary, or a loose tolerance makes any result acceptable. .**
-
-For the concrete failure exercise, a result contains NaN and a comparison test silently returns false. Repair the test.
-Preserve the original input and the stage where behavior diverged, and compare
-with the CPU model before changing hardware configuration.
+A tempting but incorrect claim: **Bitwise CPU/GPU equality is always necessary, or a loose tolerance makes any result acceptable.** Parallel reductions legitimately change summation order, so bitwise equality is the wrong default; worked example 1 shows order alone turning 1 into 0. A tolerance must still be justified, because worked example 2 shows 4 against a reference of 3 is a real error, not rounding noise.
 
 ## Self-check, retrieval and transfer
 
-Explain the first example without its code, then use the second example to state
-one assumption that matters. Complete Exercise 3 independently, use Exercise 4 to
-diagnose a plausible defect, check the boundary in Exercise 5, and retain the
-application contract from Exercise 6. Compare the [separate explanations](../solutions/cuda-006_solutions.md)
-only after your attempt or a deliberate reveal. A reading marker records your
-choice; it does not certify hardware qualification or expert mastery.
+1. Why does a relative-only tolerance fail at reference zero?
+2. What does `math.fsum` demonstrate in worked example 1?
+3. How should a test treat NaN in an output?
+
+Short answers are in the [separate explanations](../solutions/cuda-006_solutions.md#self-check-answers); compare only after an attempt.
 
 ## Primary references
 
-Check the documentation that matches your prepared toolkit before optional
-hardware execution.
+Use the documentation that matches your prepared toolkit.
 
 - [Numerical background](https://docs.nvidia.com/cuda/floating-point/index.html)
 

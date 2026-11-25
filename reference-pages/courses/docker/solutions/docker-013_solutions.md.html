@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/docker/solutions/docker-013_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="docker-013-explanatory-solutions">docker-013: explanatory solutions<a class="heading-anchor" href="#docker-013-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit reveal. These explain the supplied teaching fixtures; they are not engine results. The mechanism is explained in <code>courses/docker/guides/docker-013.md</code>.</p>
+<p>These answers explain teaching fixtures, not engine results; the mechanism is in <a href="../guides/docker-013.md.html">the guide</a>.</p>
 <h3 id="exercise-1-predict-data-retention-after-app-recreation">Exercise 1: Predict data retention after app recreation.<a class="heading-anchor" href="#exercise-1-predict-data-retention-after-app-recreation" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Named-volume data remains if the same volume is mounted.</p>
 <p><strong>Why:</strong> The container object changes, but the volume is separate. A changed project name can select a different volume, so identity matters as much as the mount path.</p>
@@ -238,7 +238,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>A plausible wrong approach:</strong> Putting docker compose down -v into a convenience script turns every stop into an irreversible reset.</p>
 <p><strong>How to verify:</strong> After a routine stop and start, GET /counter returns the earlier value; only the documented reset path sets it to 0.</p>
 <h3 id="check-your-transfer">Check your transfer<a class="heading-anchor" href="#check-your-transfer" aria-label="Link to this section">#</a></h3>
-<p>A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.</p></article>
+<p>Yes. The volume belongs to neither container, so removing and recreating the app does not touch it, and the reporting service keeps reading the same <code>counter.json</code> through its read-only mount. The file disappears for both only when the volume itself changes: <code>docker compose down -v</code>, an explicit <code>docker volume rm</code>, or a project name change that makes Compose create and mount a new, empty volume. If the reporting service saw no file after the recreation, compare the <code>Mounts</code> section of <code>docker inspect</code> for both containers; two different volume names would disprove the shared-volume assumption.</p></article>
   </main>
 </body>
 </html>

@@ -2,24 +2,16 @@
 
 int main(void) {
   /* Exercise 1: Group before calculating: predict an edited check
-     Copy worked example 1 into a scratch pad and change `CHECK((2 + 3) * 4 ==
-     20);` to `CHECK((3 + 3) * 4 == 20);` inside its CHECK. Before running,
-     predict whether the CHECK still holds and explain why; then restore it.
-     Expected: With `CHECK((3 + 3) * 4 == 20);` the run stops with `Check
-     failed` at the CHECK on `(2 + 3) * 4 == 20`, because the "group before
-     calculating" case no longer shows that the values are 14 and 20. Restoring
-     `CHECK((2 + 3) * 4 == 20);` brings that observation back. */
+     In worked example 1, change `CHECK((2 + 3) * 4 == 20);` to `CHECK((3 + 3) *
+     4 == 20);`. Predict whether the CHECK still holds and why, then run and
+     restore. Expected: `Check failed`: `CHECK((3 + 3) * 4 == 20);` is false,
+     although the values are 14 and 20. */
 
   /* Exercise 2: Use a short-circuit guard: debug a regression
-     A regression changed one token in worked example 2, the "use a
-     short-circuit guard" case, so one line now reads `bool found = length >= 0
-     && values[0] == 7;`. Run the example with that line, use the failing CHECK
-     to find why the access is skipped and the condition is false no longer
-     holds and repair the line without changing the CHECK. Expected: Before the
-     repair the run stops with `Check failed` at the CHECK on `!found`. Once the
-     line reads `bool found = length > 0 && values[0] == 7;` again, the "use a
-     short-circuit guard" case again shows that the access is skipped and the
-     condition is false. */
+     Worked example 2 now has a line reading `bool found = length >= 0 &&
+     values[0] == 7;`. Repair it so that the access is skipped and the condition
+     is false again. Expected: `Check failed` at `!found` until the line reads
+     `bool found = length > 0 && values[0] == 7;` again. */
 
   /* Exercise 3: Sequence updates explicitly
      Increment x and then calculate twice its updated value.

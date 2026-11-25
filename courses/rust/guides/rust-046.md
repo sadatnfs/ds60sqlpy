@@ -24,9 +24,11 @@ Security boundaries appear wherever data gains authority: paths reach files, tex
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles the saved pad as `main.rs` with pinned Rust 1.99.1, edition 2024, and the prepared Arrow 60 library. `assert!` and `assert_eq!` remain active in normal builds. The fixed pad accepts one source file without arbitrary arguments, interactive input, Cargo manifests or package installation. The main function returns `Result<(), Box<dyn std::error::Error>>` so later examples can propagate errors with `?`; the final `Ok(())` means this fixture completed successfully. Standard library and Arrow examples remain offline after image preparation. Multi-file Cargo and external ecosystem projects have separate explicit preparation workflows.
+This lesson's programs need only the prelude and their own helpers. A passing run prints `rust-046: passed`.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Pad setup and limits: [Run a lesson](../STUDY-GUIDE.md#run-a-lesson).
+
+Before you run anything, follow [Attempt a lesson](../STUDY-GUIDE.md#attempt-a-lesson).
 
 
 
@@ -34,7 +36,9 @@ Start with the answer-free learner artifact in your saved classroom pad. It deli
 
 A diagnostic record can contain a fixed operation ID, stage, outcome and count. Match exact allowed actions rather than executing arbitrary input. Format only reviewed fields and bound output volume.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+**Reading Example A (Describe outcome without raw payload, code below).** `struct Event` holds three `&'static str` fields and a `usize` count, so an event can carry only labels fixed in the program text and a number, never a borrowed piece of input read at run time. `render(&self)` formats the fields with `format!`, using positional `{}` placeholders filled in order by `self.operation`, `self.stage`, `self.outcome` and `self.count`. The literal `count=` before the last placeholder labels the number so the line can be searched. Example A constructs the event with struct literal syntax, naming every field. The assertion compares the whole rendered line, so an extra field or changed wording fails the check.
+
+Method for tracing your own variants: [Trace a program](../STUDY-GUIDE.md#trace-a-program).
 
 ## Worked example / walkthrough
 
@@ -116,13 +120,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 6. **Transfer and justify.** Design a fixed-operation boundary that separates validated data from executable instructions.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Record each task as in [Keep evidence for each task](../STUDY-GUIDE.md#keep-evidence-for-each-task).
 
 ## Common pitfalls and diagnosis
 
 Memory safety does not make arbitrary command execution safe. Do not log secrets or unbounded payloads. A successful process exit can still contain domain rejections that need explicit reporting.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+To turn a pitfall into a test, see [Design a regression case](../STUDY-GUIDE.md#design-a-regression-case).
 
 ## Progressive hints
 
@@ -130,13 +134,25 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 2. Compare Example B (Reject unlisted actions) with Example A and name the first line whose behavior differs. Its observation is: Only explicitly listed actions are admitted.
 3. Before opening the explanation, test your task 3 attempt against this lesson's main pitfall: Memory safety does not make arbitrary command execution safe.
 
+Tempting approaches to rule out before you compare:
+
+- **Task 1.** Treating `&'static str` as proof of safety goes too far: `Box::leak` can turn any input into a `&'static str`. The type is a strong hint; the reviewed fixed vocabulary is the actual rule.
+- **Task 2.** Adding a `detail: String` field to hold text such as the rejected line widens the event to raw input, which is exactly what this lesson's events are designed to exclude.
+- **Task 3.** Parsing with `parse::<i32>()` accepts `"-1"`, so the counts become accepted 3 and rejected 1 and the event assertion fails, even though a negative quantity is not a valid record.
+- **Task 5.** Checking `action.starts_with("report:")` to cover both listed actions also admits `"report:delete"`, turning a missing entry into implicit permission.
+- **Task 6.** Running `Command::new("sh").arg("-c").arg(format!("report {id}"))` lets an id of `1; echo injected` run a second command. Rust's memory safety does nothing to prevent that.
+
 ## Self-check and next step
 
-Explain Correlation identity, Authorization, Allowlist without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+Which fields does `Event::render` include in "fixture-1 validate rejected count=2", and what does it deliberately leave out? Why does Example B admit `report:read` through an allowlist instead of listing `report:delete` as forbidden? How does a fixed identifier such as `fixture-1` help an operator without echoing a user's data?
+
+Then work through [Self-check and review](../STUDY-GUIDE.md#self-check-and-review).
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://doc.rust-lang.org/book/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+Read [the `std::fmt::Debug` documentation](https://doc.rust-lang.org/std/fmt/trait.Debug.html) for why derived `Debug` output can leak secret fields.
+
+What the classroom does and does not prove: [Sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

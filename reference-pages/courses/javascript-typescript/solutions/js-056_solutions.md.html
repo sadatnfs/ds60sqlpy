@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/javascript-typescript/solutions/js-056_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="js-056-explanatory-solutions">js-056: explanatory solutions<a class="heading-anchor" href="#js-056-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit reveal. The separate .js reference is a complete offline browser program. These explanations discuss the six practice tasks; a visual resemblance alone is not a data or behavior check.</p>
+<p>Compare after your own attempt; the separate <code>.js</code> file is the complete reference program.</p>
 <h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
 <p>An interaction connects a user action to application state. D3 event handlers receive the event and the datum associated with the selected node. Pointer position is measured in a coordinate space; using page coordinates as SVG data values mixes two spaces and often produces misplaced tooltips or selections.</p>
 <p>A tooltip is supplemental information, not the only place essential values should exist. A pointer-only tooltip excludes keyboard and some touch users. Provide focusable controls or an alternative data list, and keep a visible summary. Use text insertion so a data label containing markup characters remains text.</p>
@@ -218,7 +218,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Expected:</strong> A summary or data list remains visible and usable.</p>
 <h3 id="exercise-6-review-focus-and-announcement-behavior">Exercise 6: Review focus and announcement behavior.<a class="heading-anchor" href="#exercise-6-review-focus-and-announcement-behavior" aria-label="Link to this section">#</a></h3>
 <p>Avoid moving focus on every hover or announcing a large changing DOM. Test the actual keyboard sequence rather than assuming ARIA alone implements it. Tab to each button and listen: aria-live=&quot;polite&quot; should read &quot;B: 7&quot; once per selection, and focus should stay on the button you pressed.</p>
-<p><strong>Expected:</strong> Focus stays predictable and the live summary is concise.</p></article>
+<p><strong>Expected:</strong> Focus stays predictable and the live summary is concise.</p>
+<h3 id="after-comparison">After comparison<a class="heading-anchor" href="#after-comparison" aria-label="Link to this section">#</a></h3>
+<p>Add a tooltip that follows the pointer and a details panel driven by focus. Test at two SVG widths to confirm the tooltip stays beside the hovered mark, and check that the details panel alone exposes every value the tooltip shows.</p></article>
   </main>
 </body>
 </html>

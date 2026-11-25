@@ -40,14 +40,21 @@
   ],
   "evidence": "A selected actual supported path with independent source/result/failure/lifecycle evidence; combined topologies and prepared native-server alternatives require separate acceptance and are not inferred from component tests.",
   "sources": [
-    ["Iceberg reliability and table state", "https://iceberg.apache.org/docs/latest/reliability/"],
-    ["Arrow data format", "https://arrow.apache.org/docs/format/Columnar.html"],
     [
-      "Flink stateful stream processing",
-      "https://nightlies.apache.org/flink/flink-docs-release-2.3/docs/concepts/stateful-stream-processing/"
+      "DataFusion memory pools",
+      "https://docs.rs/datafusion-execution/55.0.0/datafusion_execution/memory_pool/index.html"
     ],
-    ["Kafka delivery/transaction design", "https://kafka.apache.org/44/design/design/"],
-    ["Atlas API and metadata boundaries", "https://atlas.apache.org/api/v2/index.html"],
-    ["Delta Sharing protocol", "https://github.com/delta-io/delta-sharing/blob/v1.4.1/PROTOCOL.md"]
+    [
+      "DataFusion Python runtime settings",
+      "https://datafusion.apache.org/python/user-guide/configuration.html"
+    ],
+    [
+      "Flink backpressure as a capacity signal",
+      "https://nightlies.apache.org/flink/flink-docs-release-2.3/docs/ops/monitoring/back_pressure/"
+    ],
+    [
+      "Ballista task slots and tuning",
+      "https://datafusion.apache.org/ballista/user-guide/tuning-guide.html"
+    ]
   ]
 }

@@ -4,56 +4,26 @@
 <!-- beginner-solution-enrichment -->
 ## How to study and run this solution
 
-Open this explanation only after making an honest attempt. The executable
-companion runs solely against the disposable `advanced_sql_training` database:
+The six answers only read `orders`, `order_items` and `products`, inside
+`BEGIN`/`ROLLBACK` with `search_path` set to `training`. Month boundaries
+come from `order_date AT TIME ZONE 'UTC'`, so the session time zone does not
+matter. See [Read a solution](../../STUDY-GUIDE.md#read-a-solution) for the
+general approach.
 
 ```bash
-# Linux, macOS, or Windows through WSL 2, from the repository root
 psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
   -f sql/postgres-60day/solutions/day26_solutions.sql
 ```
 
-`psql` prints each result/command tag in the terminal. Stop at the first
-unexpected `ERROR`; later output cannot repair an earlier failed invariant.
-Compare your own SQL, row grain, column names, row counts, `NULL` policy, and
-ordering with the explanation before comparing syntax.
+## How these answers fit together
 
-## Clause-by-clause reading map
-
-The lesson's main concepts are Layered analytics, Window input grain, QUALIFY alternative. Its worked-model focus is:
-Create monthly totals in one CTE, add `LAG(total)` in the next, and calculate growth in the outer query with a guarded denominator. Keeping the ratio outside the `LAG` layer makes the prior value visible and lets you inspect both values before interpreting the percentage.
-
-- Start at `FROM`/`JOIN` and state the intermediate row grain. Inspect join keys
-  before adding aggregates; a one-to-many join is allowed to multiply rows only
-  when the later contract accounts for it.
-- Apply `WHERE` to input rows, `GROUP BY` to form buckets, and `HAVING` to
-  completed groups. Window functions run over the surviving relation and
-  normally preserve its row count.
-- Read the `SELECT` list as the public result contract: keys establish grain,
-  measures state calculations, and aliases explain meaning. `ORDER BY` is the
-  only output-order guarantee; add a unique tie-breaker before `LIMIT`.
-- Trace every common table expression (CTE) as a temporary named relation.
-  Execute or inspect one stage at a time while debugging, but compare the final
-  result with an independent control rather than trusting stage names.
-- Keep SQL `NULL` as “missing/unknown/not applicable” until the metric contract
-  chooses another representation. Guard division with `NULLIF`; disclose
-  exclusions and distinguish zero from no row.
-- For DDL/DML, a command tag proves only that PostgreSQL accepted a statement.
-  Catalog checks, negative cases, row-count reconciliation, and the declared
-  transaction boundary prove behavior and cleanup.
-
-The exact final queries are not the only valid syntax. A join, subquery, CTE,
-window, or conditional aggregate can be an alternative when it preserves the
-same grain, `NULL` semantics, deterministic ordering, and safety. Prefer the
-form whose intermediate relations a reviewer can verify; optimize only after
-correctness is established with evidence.
-
-These answers align one-for-one with [day26_ctes_with_windows.sql](../day26_ctes_with_windows.sql).
-Run only against the disposable `advanced_sql_training` database.
-The executable companion wraps every answer in `BEGIN`/`ROLLBACK`.
-The snippets below assume the lesson's
-`SET search_path TO training, public;` statement. Run the complete
-executable companion when you want a self-contained check.
+Every answer starts with a CTE that groups by UTC month, either over
+`orders.total_amount` or over the item formula split by category, and then
+applies a window to the grouped rows. The exact months depend on when the
+fixture was loaded (46 months when this guide was checked), but the totals
+do not: stored revenue adds to 2,355,646.89 and item revenue to
+2,355,647.12. The final answer checks that reconciliation directly. The
+learner file is [day26_ctes_with_windows.sql](../day26_ctes_with_windows.sql).
 
 ## Reading contract
 
@@ -68,16 +38,6 @@ executable companion when you want a self-contained check.
 **Prompt:** Calculate monthly stored revenue and its prior-month value/change.
 
 **Reasoning:** Aggregate to month in a CTE, then lag the monthly measure.
-
-**Clause-by-clause reading:**
-
-- `WITH`: names an intermediate relation so its grain can be checked before later joins or aggregation.
-- `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
-- `FROM`: establishes the starting relation and therefore the initial row grain.
-- `GROUP BY`: collapses input rows to the listed key grain; every non-aggregated selected value must belong to that grain.
-- `OVER (...)`: computes an analytic value while preserving detail rows; partition, order, and frame define its peer set.
-- time normalization: makes reporting boundaries explicit; UTC is applied before deriving calendar buckets where required.
-- `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 
 ```sql
 WITH monthly AS (
@@ -110,37 +70,21 @@ ORDER BY
 
 **Expected shape:** One row per observed month.
 
-Check the result at the stated grain. An alternative formulation is
-valid only if it preserves the same NULL, ordering, time, money, and
-cardinality contract.
-
 ### Reasoning and verification
 
 - **Inputs/evidence:** For sql-26 Exercise 1, read from `orders`, aggregate `SUM(total_amount)` to one row per UTC month in the CTE `monthly`, then use `LAG(revenue) OVER (ORDER BY month_start)` in `compared` and return `change = revenue - previous_revenue`.
-- **Expected result/shape:** For sql-26 Exercise 1, expected output: One row per observed month. The final columns are `month_start`, `revenue`, `previous_revenue`, and `change`. The final order is `month_start`.
+- **Expected result/shape:** For sql-26 Exercise 1, expected output: one row per UTC month with orders, 46 rows from 2023-02-01 to 2026-11-01 on a November 2026 load (seed dates move with the load date); the first row is 1203.26 with NULL `previous_revenue` and `change`, and the second is 1803.43 with a change of 600.17. The final columns are `month_start`, `revenue`, `previous_revenue`, and `change`. The final order is `month_start`.
 - **Independent verification:** For sql-26 Exercise 1, confirm that `month_start` is unique and that the row count equals `SELECT COUNT(DISTINCT date_trunc('month', order_date AT TIME ZONE 'UTC')) FROM orders`; exactly one row, the earliest month, has NULL `previous_revenue` and `change`, and the `revenue` values add up to 2355646.89.
-- **Intermediate relation check:** For sql-26 Exercise 1, run `monthly` alone and confirm one row per `month_start` before `compared` applies `LAG`.
-- **Clause check:** For sql-26 Exercise 1, the solution actually uses `WITH`, `FROM`, `GROUP BY`, window `OVER`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `orders`, preserve one row per `month_start`, and finish with `month_start`, `revenue`, `previous_revenue`, and `change` ordered by `month_start`.
-- **Alternative/trade-off:** For sql-26 Exercise 1, the chosen form is justified by this lesson-specific rationale: Aggregate to month in a CTE, then lag the monthly measure. Evaluate another form against the concrete expected result (One row per observed month) and the verification above.
-- **Edge case:** The first month has no predecessor, so `previous_revenue` and `change` are NULL there; replacing that NULL with 0 would claim a change that never happened.
+- **Intermediate relation check:** `monthly` has one row per month that has at least one order. When this guide was checked that was 46 months, and the revenues summed to 2,355,646.89.
+- **Clause check:** `LAG(revenue) OVER (ORDER BY month_start)` reads the previous row of the grouped data, not the previous calendar month. The first row's `previous_revenue` and `change` are therefore `NULL`, and every later row has both filled.
+- **Alternative/trade-off:** `revenue - LAG(revenue) OVER (...)` in one `SELECT` avoids the `compared` CTE. Naming `previous_revenue` as its own column makes the subtraction easy to check by eye.
+- **Edge case:** If a month had no orders, `LAG` would compare across the gap. The newest month is only partly filled, so its change is usually a large negative number, such as the drop of 84,814.46 seen at checking time.
 
 ## Exercise 2: Query writing
 
 **Prompt:** Rank product categories by net revenue within each UTC order month.
 
 **Reasoning:** Aggregate month/category first, then rank the stable aggregate.
-
-**Clause-by-clause reading:**
-
-- `WITH`: names an intermediate relation so its grain can be checked before later joins or aggregation.
-- `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
-- `FROM`: establishes the starting relation and therefore the initial row grain.
-- `JOIN ... ON`: combines relations and may multiply rows; the match predicate and each input's grain must agree.
-- `GROUP BY`: collapses input rows to the listed key grain; every non-aggregated selected value must belong to that grain.
-- `OVER (...)`: computes an analytic value while preserving detail rows; partition, order, and frame define its peer set.
-- `PARTITION BY`: restarts a window calculation independently for each partition key.
-- time normalization: makes reporting boundaries explicit; UTC is applied before deriving calendar buckets where required.
-- `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 
 ```sql
 WITH category_month AS (
@@ -171,38 +115,21 @@ ORDER BY
 
 **Expected shape:** One row per observed month/category.
 
-Check the result at the stated grain. An alternative formulation is
-valid only if it preserves the same NULL, ordering, time, money, and
-cardinality contract.
-
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-26 Exercise 2, read from `orders`, `order_items`, and `products`. Build the answer toward `month_start`, `category`, `revenue`, and `revenue_rank`; keep `category` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-26 Exercise 2, expected output: One row per observed month/category. The final columns are `month_start`, `category`, `revenue`, and `revenue_rank`. The final order is `month_start, revenue_rank, category`.
-- **Independent verification:** For sql-26 Exercise 2, choose one complete partition from `orders`, `order_items`, and `products`; hand-calculate its first, middle, and final window values for `revenue`, and `revenue_rank`, then verify output keys remain `category`. Give two rows the same `month_start` value and different `category` values; verify `month_start, revenue_rank, category` produces the intended rank and display order.
-- **Intermediate relation check:** For sql-26 Exercise 2, run `category_month` one at a time. Record each CTE's row count and `category` uniqueness before the next stage uses it.
-- **Clause check:** For sql-26 Exercise 2, the solution actually uses `WITH`, `FROM`, `JOIN ... ON`, `GROUP BY`, window `OVER`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `orders`, `order_items`, and `products`, preserve one row per `category`, and finish with `month_start`, `category`, `revenue`, and `revenue_rank` ordered by `month_start, revenue_rank, category`.
-- **Alternative/trade-off:** For sql-26 Exercise 2, the chosen form is justified by this lesson-specific rationale: Aggregate month/category first, then rank the stable aggregate. Evaluate another form against the concrete expected result (One row per observed month/category) and the verification above.
-- **Edge case:** Give two rows the same `month_start` value and different `category` values; verify `month_start, revenue_rank, category` produces the intended rank and display order.
+- **Inputs/evidence:** For sql-26 Exercise 2, read `orders` joined to `order_items` and `products`, sum net item revenue `unit_price * quantity * (1 - discount)` per UTC month and `category` in `category_month`, then apply `DENSE_RANK()` partitioned by `month_start` and ordered by `revenue DESC`.
+- **Expected result/shape:** For sql-26 Exercise 2, expected output: 6 rows per month, one per category, ranked 1 through 6 (276 rows for 46 months on this load); the first month, 2023-02-01, runs from Apparel at 407.05 down to Home at 30.20. The final columns are `month_start`, `category`, `revenue`, and `revenue_rank`. The final order is `month_start, revenue_rank, category`.
+- **Independent verification:** For sql-26 Exercise 2, confirm `COUNT(*)` is 6 times `COUNT(DISTINCT month_start)`, every month has ranks 1 through 6 exactly once, and the 2023-02-01 revenues add to 1203.26, the stored total for that month in Exercise 1; then rank the fixture `VALUES ('A', 10), ('B', 10), ('C', 5), ('D', 3)` and confirm `DENSE_RANK` gives 1, 1, 2, 3 where `RANK` gives 1, 1, 3, 4.
+- **Intermediate relation check:** `category_month` has one row per month and category. Every month in the checked data had all six categories, so the row count was 46 times 6, or 276.
+- **Clause check:** `DENSE_RANK()` is partitioned by `month_start` and ordered by `revenue DESC`, so ranks restart at 1 each month and run to 6. The outer sort by `month_start, revenue_rank, category` gives a stable order even if two categories tied.
+- **Alternative/trade-off:** `RANK()` and `ROW_NUMBER()` return the same numbers here, because no two categories had equal revenue in the same month. They only differ on ties: `RANK` would skip the next number and `ROW_NUMBER` would break the tie arbitrarily.
+- **Edge case:** A month in which some category sold nothing has fewer than six rows. The category simply does not appear; there is no zero row unless you build one from a calendar and the category list.
 
 ## Exercise 3: Query writing
 
 **Prompt:** Return the top three category revenue levels per month.
 
 **Reasoning:** Rank in one CTE and filter the window result outside.
-
-**Clause-by-clause reading:**
-
-- `WITH`: names an intermediate relation so its grain can be checked before later joins or aggregation.
-- `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
-- `FROM`: establishes the starting relation and therefore the initial row grain.
-- `JOIN ... ON`: combines relations and may multiply rows; the match predicate and each input's grain must agree.
-- `WHERE`: filters source rows before grouping and window calculation; SQL's unknown NULL comparisons do not pass.
-- `GROUP BY`: collapses input rows to the listed key grain; every non-aggregated selected value must belong to that grain.
-- `OVER (...)`: computes an analytic value while preserving detail rows; partition, order, and frame define its peer set.
-- `PARTITION BY`: restarts a window calculation independently for each partition key.
-- time normalization: makes reporting boundaries explicit; UTC is applied before deriving calendar buckets where required.
-- `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 
 ```sql
 WITH category_month AS (
@@ -242,39 +169,21 @@ ORDER BY
 
 **Expected shape:** Top three revenue ranks for each observed month.
 
-Check the result at the stated grain. An alternative formulation is
-valid only if it preserves the same NULL, ordering, time, money, and
-cardinality contract.
-
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-26 Exercise 3, read from `orders`, `order_items`, and `products`. Build the answer toward `month_start`, `category`, `revenue`, and `revenue_rank`; keep `category` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-26 Exercise 3, expected output: Top three revenue ranks for each observed month. The final columns are `month_start`, `category`, `revenue`, and `revenue_rank`. The final order is `month_start, revenue_rank, category`.
-- **Independent verification:** For sql-26 Exercise 3, project `category` plus the raw source columns from `orders`, `order_items`, and `products` at each join stage; record row count and distinct `category`, then assert the final `month_start`, `category`, `revenue`, and `revenue_rank` values match those staged rows without unintended fanout or loss. Give two rows the same `month_start` value and different `category` values; verify `month_start, revenue_rank, category` produces the intended rank and display order.
-- **Intermediate relation check:** For sql-26 Exercise 3, run `category_month`, and `ranked` one at a time. Record each CTE's row count and `category` uniqueness before the next stage uses it.
-- **Clause check:** For sql-26 Exercise 3, the solution actually uses `WITH`, `FROM`, `JOIN ... ON`, `WHERE`, `GROUP BY`, window `OVER`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `orders`, `order_items`, and `products`, preserve one row per `category`, and finish with `month_start`, `category`, `revenue`, and `revenue_rank` ordered by `month_start, revenue_rank, category`.
-- **Alternative/trade-off:** For sql-26 Exercise 3, the chosen form is justified by this lesson-specific rationale: Rank in one CTE and filter the window result outside. Evaluate another form against the concrete expected result (Top three revenue ranks for each observed month) and the verification above.
-- **Edge case:** Give two rows the same `month_start` value and different `category` values; verify `month_start, revenue_rank, category` produces the intended rank and display order.
+- **Inputs/evidence:** For sql-26 Exercise 3, read `orders`, `order_items`, and `products` into the same `category_month` CTE as Exercise 2, rank it in a second CTE `ranked`, and filter `revenue_rank <= 3` only in the outer query, after the window has run.
+- **Expected result/shape:** For sql-26 Exercise 3, expected output: 3 rows per month (138 rows for 46 months on this load, because no month has a revenue tie); 2023-02-01 keeps Apparel, Books, and Electronics, and 2026-11-01 keeps Sports, Books, and Apparel. The final columns are `month_start`, `category`, `revenue`, and `revenue_rank`. The final order is `month_start, revenue_rank, category`.
+- **Independent verification:** For sql-26 Exercise 3, confirm `COUNT(*)` is 3 times `COUNT(DISTINCT month_start)` and each month shows ranks 1, 2, and 3 once; then apply the same rank and filter to `VALUES ('A', 10), ('B', 10), ('C', 5), ('D', 3), ('E', 1)` and confirm four rows survive (ranks 1, 1, 2, 3), showing that ties in `DENSE_RANK` can return more than three categories in a month.
+- **Intermediate relation check:** `ranked` is the second answer's result before filtering, 276 rows at checking time, with `revenue_rank` from 1 to 6 within each month.
+- **Clause check:** `WHERE revenue_rank <= 3` runs in the outer query, after the window has been computed. With no ties it keeps three categories per month, 138 rows in the checked data.
+- **Alternative/trade-off:** `FETCH FIRST 3 ROWS WITH TIES` only works for one overall ordering, not per month. A `LATERAL` subquery per month can do it, but the rank-then-filter CTE is easier to read and check.
+- **Edge case:** `DENSE_RANK` allows more than three rows per month when categories tie: two categories tied at rank 2 would give four rows with ranks 1, 2, 2 and 3. Use `ROW_NUMBER` if the report must have exactly three.
 
 ## Exercise 4: Prediction
 
 **Prompt:** Calculate each category's cumulative share of monthly revenue in descending contribution order.
 
 **Reasoning:** Divide running category revenue by the full monthly total; use explicit frames.
-
-**Clause-by-clause reading:**
-
-- `WITH`: names an intermediate relation so its grain can be checked before later joins or aggregation.
-- `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
-- `FROM`: establishes the starting relation and therefore the initial row grain.
-- `JOIN ... ON`: combines relations and may multiply rows; the match predicate and each input's grain must agree.
-- `NULLIF`: turns a prohibited denominator into NULL so division reports unknown instead of raising an error.
-- `GROUP BY`: collapses input rows to the listed key grain; every non-aggregated selected value must belong to that grain.
-- `OVER (...)`: computes an analytic value while preserving detail rows; partition, order, and frame define its peer set.
-- `PARTITION BY`: restarts a window calculation independently for each partition key.
-- window frame: states exactly which rows or peers contribute to the current row's window result.
-- time normalization: makes reporting boundaries explicit; UTC is applied before deriving calendar buckets where required.
-- `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 
 ```sql
 WITH category_month AS (
@@ -305,38 +214,21 @@ ORDER BY
 
 **Expected shape:** One row per month/category with final share equal to one.
 
-Check the result at the stated grain. An alternative formulation is
-valid only if it preserves the same NULL, ordering, time, money, and
-cardinality contract.
-
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-26 Exercise 4, read from `orders`, `order_items`, and `products`. Build the answer toward `month_start`, `category`, `revenue`, and `cumulative_revenue_share`; keep `month` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-26 Exercise 4, expected output: One row per month/category with final share equal to one. The final columns are `month_start`, `category`, `revenue`, and `cumulative_revenue_share`. The final order is `month_start, revenue DESC, category`.
-- **Independent verification:** For sql-26 Exercise 4, choose one complete partition from `orders`, `order_items`, and `products`; hand-calculate its first, middle, and final window values for `revenue`, and `cumulative_revenue_share`, then verify output keys remain `month`. Test a one-row partition and a partition with at least three rows; verify the frame boundary and partition reset explicitly.
-- **Intermediate relation check:** For sql-26 Exercise 4, run `category_month` one at a time. Record each CTE's row count and `month` uniqueness before the next stage uses it.
-- **Clause check:** For sql-26 Exercise 4, the solution actually uses `WITH`, `FROM`, `JOIN ... ON`, `GROUP BY`, window `OVER`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `orders`, `order_items`, and `products`, preserve one row per `month`, and finish with `month_start`, `category`, `revenue`, and `cumulative_revenue_share` ordered by `month_start, revenue DESC, category`.
-- **Alternative/trade-off:** For sql-26 Exercise 4, the chosen form is justified by this lesson-specific rationale: Divide running category revenue by the full monthly total; use explicit frames. Evaluate another form against the concrete expected result (One row per month/category with final share equal to one) and the verification above.
-- **Edge case:** Test a one-row partition and a partition with at least three rows; verify the frame boundary and partition reset explicitly.
+- **Inputs/evidence:** For sql-26 Exercise 4, read `orders`, `order_items`, and `products` into `category_month`, then divide a running `SUM(revenue)` ordered by `revenue DESC, category` with a `ROWS` frame by the month total `SUM(revenue) OVER (PARTITION BY month_start)`, guarded by `NULLIF`.
+- **Expected result/shape:** For sql-26 Exercise 4, expected output: 276 rows on this load, 6 per month; in 2023-02-01 the shares climb 0.3383, 0.5708, 0.7510, 0.8968, 0.9749, and 1.0000. The final columns are `month_start`, `category`, `revenue`, and `cumulative_revenue_share`. The final order is `month_start, revenue DESC, category`.
+- **Independent verification:** For sql-26 Exercise 4, confirm the last row of every month is exactly 1.0000 (46 such rows, one per month, and no month whose maximum differs) and that the first 2023-02-01 share equals 407.05 / 1203.26; then run both frames over `VALUES ('A', 10.0), ('B', 10.0), ('C', 5.0)` and confirm `ROWS` gives 0.4000, 0.8000, 1.0000 while the default `RANGE` frame gives 0.8000 to both tied rows.
+- **Intermediate relation check:** `category_month` gives up to six rows per month. Within a month the running sum is divided by `SUM(revenue) OVER (PARTITION BY month_start)`, the month's total, which repeats on every row.
+- **Clause check:** The running window orders by `revenue DESC, category` with an explicit `ROWS` frame, so each row adds exactly one category. The share grows on every row and reaches 1.0000 on the smallest category in each month; in the checked data that was true for all 46 months.
+- **Alternative/trade-off:** With only `ORDER BY revenue DESC`, the default `RANGE` frame would give the same numbers today, since no revenues tie. Spelling out the frame and the tie-breaker keeps the result correct if ties ever appear.
+- **Edge case:** `NULLIF(..., 0)` turns a zero month total into `NULL` instead of a division error. That can only happen if a month's items all have a 100 percent discount, which this fixture never has.
 
 ## Exercise 5: Debugging
 
 **Prompt:** Calculate a three-month moving average after building a dense month calendar.
 
 **Reasoning:** Join observed monthly revenue onto the calendar and treat absent observed revenue as zero only because the report defines it that way.
-
-**Clause-by-clause reading:**
-
-- `WITH`: names an intermediate relation so its grain can be checked before later joins or aggregation.
-- `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
-- `FROM`: establishes the starting relation and therefore the initial row grain.
-- `JOIN ... ON`: combines relations and may multiply rows; the match predicate and each input's grain must agree.
-- `COALESCE`: replaces NULL only where the lesson explicitly defines a missing value as a concrete fallback.
-- `GROUP BY`: collapses input rows to the listed key grain; every non-aggregated selected value must belong to that grain.
-- `OVER (...)`: computes an analytic value while preserving detail rows; partition, order, and frame define its peer set.
-- window frame: states exactly which rows or peers contribute to the current row's window result.
-- time normalization: makes reporting boundaries explicit; UTC is applied before deriving calendar buckets where required.
-- `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 
 ```sql
 WITH bounds AS (
@@ -380,38 +272,21 @@ ORDER BY
 
 **Expected shape:** A continuous chronological month series.
 
-Check the result at the stated grain. An alternative formulation is
-valid only if it preserves the same NULL, ordering, time, money, and
-cardinality contract.
-
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-26 Exercise 5, read from `orders`. Build the answer toward `month_start`, `revenue`, and `moving_3_month_average`; keep `order_id` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-26 Exercise 5, expected output: A continuous chronological month series. The final columns are `month_start`, `revenue`, and `moving_3_month_average`. The final order is `month_start`.
-- **Independent verification:** For sql-26 Exercise 5, choose one complete partition from `orders`; hand-calculate its first, middle, and final window values for `revenue`, and `moving_3_month_average`, then verify output keys remain `order_id`. Test a one-row partition and a partition with at least three rows; verify the frame boundary and partition reset explicitly.
-- **Intermediate relation check:** For sql-26 Exercise 5, run `bounds`, `calendar`, `monthly`, and `dense` one at a time. Record each CTE's row count and `order_id` uniqueness before the next stage uses it.
-- **Clause check:** For sql-26 Exercise 5, the solution actually uses `WITH`, `FROM`, `JOIN ... ON`, `GROUP BY`, window `OVER`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `orders`, preserve one row per `order_id`, and finish with `month_start`, `revenue`, and `moving_3_month_average` ordered by `month_start`.
-- **Alternative/trade-off:** For sql-26 Exercise 5, the chosen form is justified by this lesson-specific rationale: Join observed monthly revenue onto the calendar and treat absent observed revenue as zero only because the report defines it that way. Evaluate another form against the concrete expected result (A continuous chronological month series) and the verification above.
-- **Edge case:** Test a one-row partition and a partition with at least three rows; verify the frame boundary and partition reset explicitly.
+- **Inputs/evidence:** For sql-26 Exercise 5, read `orders` three ways: `bounds` takes the first and last UTC month, `calendar` fills every month between them with `generate_series`, and `monthly` sums `total_amount`; `dense` `LEFT JOIN`s the calendar to `monthly` and turns a missing month into 0.
+- **Expected result/shape:** For sql-26 Exercise 5, expected output: one row per calendar month with no gaps, 46 rows on this load; the moving average starts 1203.26, 1503.35, 2197.18 because the first two rows average only one and two months. The final columns are `month_start`, `revenue`, and `moving_3_month_average`. The final order is `month_start`.
+- **Independent verification:** For sql-26 Exercise 5, confirm the row count equals the months between `MIN` and `MAX` month inclusive and that the third row averages 1203.26, 1803.43, and 3584.85; then, inside `BEGIN ... ROLLBACK`, move every 2023-04 order back one month and confirm `monthly` drops to 45 rows while the output keeps 46, with 2023-04-01 at 0.00 and its moving average 2197.18 still covering three calendar months.
+- **Intermediate relation check:** `bounds` is one row with the first and last order months, and `calendar` lists every month between them. In the checked data both `calendar` and `monthly` had 46 rows, so no month was missing.
+- **Clause check:** `calendar LEFT JOIN monthly USING (month_start)` keeps every calendar month, and `COALESCE(m.revenue, 0)` fills a missing one with 0 because the report defines no orders as zero revenue. The `ROWS BETWEEN 2 PRECEDING AND CURRENT ROW` frame then averages up to three consecutive months.
+- **Alternative/trade-off:** Without the calendar, a three-row frame would average across any gap and silently cover more than three months. Here the gap never happens, so the dense calendar changes nothing yet, but it guards the report as data changes.
+- **Edge case:** The first row averages only itself and the second row averages two months, because the frame cannot reach before the first month. Hide or mark those rows if the report needs full three-month windows.
 
 ## Exercise 6: Extension
 
 **Prompt:** Reconcile the final cumulative monthly revenue with the independent order total.
 
 **Reasoning:** Compare at the end of the CTE/window chain instead of assuming transformations preserved totals.
-
-**Clause-by-clause reading:**
-
-- `WITH`: names an intermediate relation so its grain can be checked before later joins or aggregation.
-- `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
-- `FROM`: establishes the starting relation and therefore the initial row grain.
-- `JOIN ... ON`: combines relations and may multiply rows; the match predicate and each input's grain must agree.
-- `GROUP BY`: collapses input rows to the listed key grain; every non-aggregated selected value must belong to that grain.
-- `OVER (...)`: computes an analytic value while preserving detail rows; partition, order, and frame define its peer set.
-- window frame: states exactly which rows or peers contribute to the current row's window result.
-- time normalization: makes reporting boundaries explicit; UTC is applied before deriving calendar buckets where required.
-- `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
-- `LIMIT`: is applied after ordering and is meaningful only when the query first defines which rows come first.
 
 ```sql
 WITH monthly AS (
@@ -452,24 +327,20 @@ GROUP BY
 
 **Expected shape:** One row with zero difference.
 
-Check the result at the stated grain. An alternative formulation is
-valid only if it preserves the same NULL, ordering, time, money, and
-cardinality contract.
-
 ### Reasoning and verification
 
 - **Inputs/evidence:** For sql-26 Exercise 6, read from `orders`; aggregate to UTC months in `monthly`, accumulate the monthly revenue with `SUM(revenue) OVER (ORDER BY month_start)` in `running`, keep the last month's cumulative value in `final`, and compare it with an independent `SUM(total_amount)`.
-- **Expected result/shape:** For sql-26 Exercise 6, expected output: One row with zero difference. The final columns are `final_cumulative`, `independent_total`, and `difference`.
+- **Expected result/shape:** For sql-26 Exercise 6, expected output: exactly one row, `final_cumulative` 2355646.89, `independent_total` 2355646.89, and `difference` 0.00. The final columns are `final_cumulative`, `independent_total`, and `difference`.
 - **Independent verification:** For sql-26 Exercise 6, confirm one row where `final_cumulative` and `independent_total` are both 2355646.89 and `difference` is 0.00; the `monthly` revenues must already add up to that total before the window is applied.
-- **Intermediate relation check:** For sql-26 Exercise 6, check that the `monthly` revenues add up to 2355646.89 before you build `running` and `final`.
-- **Clause check:** For sql-26 Exercise 6, the solution actually uses `WITH`, `FROM`, `JOIN ... ON`, `GROUP BY`, window `OVER`, `SELECT`, `ORDER BY`, and `LIMIT`. Read only those operations: begin at `orders`, preserve exactly one summary row, and finish with `final_cumulative`, `independent_total`, and `difference`.
-- **Alternative/trade-off:** For sql-26 Exercise 6, the chosen form is justified by this lesson-specific rationale: Compare at the end of the CTE/window chain instead of assuming transformations preserved totals. Evaluate another form against the concrete expected result (One row with zero difference) and the verification above.
-- **Edge case:** Comparing at the end of the chain catches any step that dropped or duplicated rows; a join that fanned out months would make `difference` nonzero.
+- **Intermediate relation check:** `running` has one row per month with a cumulative total, and `final` keeps only the newest month's value, a single row.
+- **Clause check:** `final CROSS JOIN orders` repeats that single value next to all 4,362 orders, and `GROUP BY final.cumulative_revenue` collapses them back to one row. Both columns show 2,355,646.89 and `difference` is 0.00.
+- **Alternative/trade-off:** Two scalar subqueries, one for the last cumulative value and one for `SUM(total_amount)`, avoid the cross join. The cross join is cheap here because one side has a single row.
+- **Edge case:** If `monthly` were built from the item formula instead, the difference would be 0.23, because item revenue totals 2,355,647.12. A nonzero difference therefore points to mixed sources, not to a window bug.
 
 ## Final self-check
 
-- Can you explain the logical grain before and after every aggregation?
-- Are missing values preserved or converted only by an explicit rule?
-- Does every ordered result have a deterministic final tie-breaker?
-- Are money and time assumptions visible beside the calculation?
-- Does the complete executable solution finish with `ROLLBACK`?
+- Which CTE in each answer fixes the grain, and which step adds the window?
+- Why can a rank only be filtered in an outer query?
+- How many months does your copy of the data have, and why might it differ
+  from 46?
+- What would a nonzero difference in the reconciliation tell you?

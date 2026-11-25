@@ -1,6 +1,8 @@
 # c-006: explained solutions
 
-Compare after an attempt or explicit reveal. The complete executable reference, `c-006_solution.c`, implements all six cases, from the "derive a local element count" case to the "transfer independent array storage" case, in one `main.c`.
+`c-006_solution.c` assembles the "derive a local element count" case through the "transfer independent array storage" case in one `main.c`.
+
+Compare only after an attempt: [Compare and transfer](../STUDY-GUIDE.md#compare-and-transfer).
 
 ## Mechanism and assumptions
 
@@ -10,7 +12,7 @@ An array owns a fixed number of elements of one type. Its valid indices run from
 
 ## Exercise 1: Derive a local element count: predict an edited check
 
-Copy worked example 1 into a scratch pad and change `CHECK(n == 3);` to `CHECK(n == 4);` inside its CHECK. Before running, predict whether the CHECK still holds and explain why; then restore it.
+In worked example 1, change `CHECK(n == 3);` to `CHECK(n == 4);`. Predict whether the CHECK still holds and why, then run and restore.
 
 The unchanged code is worked example 1:
 
@@ -20,13 +22,15 @@ size_t n = sizeof values / sizeof values[0];
 CHECK(n == 3);
 ```
 
-**Expected:** With `CHECK(n == 4);` the run stops with `Check failed` at the CHECK on `n == 3`, because the "derive a local element count" case no longer shows that the count is 3. Restoring `CHECK(n == 3);` brings that observation back.
+**Expected:** `Check failed`: `CHECK(n == 4);` is false, although the count is 3.
+
+**Verify:** Explain which claim `CHECK(n == 4);` makes that the state fails; restoring `CHECK(n == 3);` passes again.
 
 The expression works because values is an array in this scope. Moving it unchanged into a pointer-taking helper would change its meaning.
 
 ## Exercise 2: Pass an explicit length: debug a regression
 
-A regression changed one token in worked example 2, the "pass an explicit length" case, so one line now reads `int values[] = {3, 4, 6};`. Run the example with that line, use the failing CHECK to find why the result is 12 no longer holds and repair the line without changing the CHECK.
+Worked example 2 now has a line reading `int values[] = {3, 4, 6};`. Repair it so that the result is 12 again.
 
 The unchanged code is worked example 2:
 
@@ -35,7 +39,9 @@ int values[] = {2, 4, 6};
 CHECK(sum_items(values, 3) == 12);
 ```
 
-**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `sum_items(values, 3) == 12`. Once the line reads `int values[] = {2, 4, 6};` again, the "pass an explicit length" case again shows that the result is 12.
+**Expected:** `Check failed` at `sum_items(values, 3) == 12` until the line reads `int values[] = {2, 4, 6};` again.
+
+**Verify:** Explain how `int values[] = {3, 4, 6};` changes the value `sum_items(values, 3) == 12` tests, using your failing and repaired runs.
 
 The API relies on the caller providing at least three live elements. The pointer alone cannot prove that extent.
 
@@ -50,6 +56,8 @@ CHECK(values[0] == 7 && values[1] == 0 && values[2] == 0);
 
 **Expected:** The remaining two elements are zero.
 
+**Verify:** Keep a CHECK equivalent to `values[0] == 7 && values[1] == 0 && values[2] == 0`. Control edit: changing `int values[3] = {7};` to `int values[3] = {8};` must fail it; then restore it.
+
 This initialization rule differs from an uninitialized automatic array, whose elements must not be read before assignment.
 
 ## Exercise 4: Use a logical prefix
@@ -63,6 +71,8 @@ CHECK(sum_items(values, 2) == 6);
 
 **Expected:** The result is 6.
 
+**Verify:** Keep a CHECK equivalent to `sum_items(values, 2) == 6`. Control edit: changing `int values[] = {2, 4, 99};` to `int values[] = {3, 4, 99};` must fail it; then restore it.
+
 Physical capacity and logical length are separate. The third stored value is intentionally outside this operation.
 
 ## Exercise 5: Handle an empty logical view
@@ -74,6 +84,8 @@ CHECK(sum_items(NULL, 0) == 0);
 ```
 
 **Expected:** The sum is zero and no access occurs.
+
+**Verify:** Keep a CHECK equivalent to `sum_items(NULL, 0) == 0`. Control edit: `CHECK(sum_items(NULL, 0) != 0);` must fail; then restore it.
 
 This particular helper accepts an empty null view because its loop performs no access. Do not assume every library function accepts null with a zero size.
 
@@ -92,8 +104,10 @@ CHECK(a[0] == 1 && b[0] == 9);
 
 **Expected:** The original first element remains 1.
 
+**Verify:** Keep a CHECK equivalent to `a[0] == 1 && b[0] == 9`. Control edit: changing `int a[] = {1, 2};` to `int a[] = {2, 2};` must fail it; then restore it.
+
 C arrays cannot be assigned as whole arrays with =. Explicit element copy or a correctly sized memcpy creates separate element storage.
 
 ## After comparison
 
-Add a fresh distinguishing input for the "transfer independent array storage" case to your own c-006 source. Explain why every access in `sum_items` stays within a live object and each owned resource is released. An expected array extent failure belongs in the test contract; undefined behavior does not. Keep diagnostics and sanitizer evidence for the "pass an explicit length" case apart from ordinary output: the fixture proves its stated array extent, array-to-pointer conversion and logical length assumptions, not universal safety.
+Write `size_t count_positive(const int *values, size_t length)` and call it with `(int[]){4, -1, 7, 9}` and the length 4; CHECK that it returns 3. Inside the helper, `sizeof values / sizeof values[0]` would divide a pointer size by an `int` size, giving 2 on a typical 64-bit target, and GCC warns with `-Wsizeof-pointer-div`. Explain why only the caller, where the array is still an array, can compute the count with `sizeof`.

@@ -1,67 +1,23 @@
 # Day 15 solutions: Phase 1 Project: Multi-Dimensional Revenue Report
 
-
 <!-- beginner-solution-enrichment -->
 ## How to study and run this solution
 
-Open this explanation only after making an honest attempt. The executable
-companion runs solely against the disposable `advanced_sql_training` database:
+The six answers only read data, and together they build one reconciled picture of the fixture: Exercises 1 to 3 summarize single tables, Exercise 4 reconciles three totals for each order, Exercise 5 lines up budgets with expenses, and Exercise 6 prints the control row. Run the companion after your own attempt:
 
 ```bash
-# Linux, macOS, or Windows through WSL 2, from the repository root
 psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
   -f sql/postgres-60day/solutions/day15_solutions.sql
 ```
 
-`psql` prints each result/command tag in the terminal. Stop at the first
-unexpected `ERROR`; later output cannot repair an earlier failed invariant.
-Compare your own SQL, row grain, column names, row counts, `NULL` policy, and
-ordering with the explanation before comparing syntax.
-
-## Clause-by-clause reading map
-
-The lesson's main concepts are Metric contract, Dimensional report, Control total. Its worked-model focus is:
-Build one stable `order_lines` relation first, with one row per intended line or order and a single net-revenue formula. Reconcile its total, then add dimension joins one at a time and compare the total after each join. Only after totals remain stable should you add grouping sets and display labels.
-
-- Start at `FROM`/`JOIN` and state the intermediate row grain. Inspect join keys
-  before adding aggregates; a one-to-many join is allowed to multiply rows only
-  when the later contract accounts for it.
-- Apply `WHERE` to input rows, `GROUP BY` to form buckets, and `HAVING` to
-  completed groups. Window functions run over the surviving relation and
-  normally preserve its row count.
-- Read the `SELECT` list as the public result contract: keys establish grain,
-  measures state calculations, and aliases explain meaning. `ORDER BY` is the
-  only output-order guarantee; add a unique tie-breaker before `LIMIT`.
-- Trace every common table expression (CTE) as a temporary named relation.
-  Execute or inspect one stage at a time while debugging, but compare the final
-  result with an independent control rather than trusting stage names.
-- Keep SQL `NULL` as “missing/unknown/not applicable” until the metric contract
-  chooses another representation. Guard division with `NULLIF`; disclose
-  exclusions and distinguish zero from no row.
-- For DDL/DML, a command tag proves only that PostgreSQL accepted a statement.
-  Catalog checks, negative cases, row-count reconciliation, and the declared
-  transaction boundary prove behavior and cleanup.
-
-The exact final queries are not the only valid syntax. A join, subquery, CTE,
-window, or conditional aggregate can be an alternative when it preserves the
-same grain, `NULL` semantics, deterministic ordering, and safety. Prefer the
-form whose intermediate relations a reviewer can verify; optimize only after
-correctness is established with evidence.
-
-These answers align one-for-one with [day15_phase1_project.sql](../day15_phase1_project.sql).
-Run only against the disposable `advanced_sql_training` database.
-The executable companion wraps every answer in `BEGIN`/`ROLLBACK`.
-The snippets below assume the lesson's
-`SET search_path TO training, public;` statement. Run the complete
-executable companion when you want a self-contained check.
+It sets `search_path` to `training, public` and wraps all six queries in `BEGIN`/`ROLLBACK`. Fixture dates are generated relative to load time, so month labels and the sparse first months can differ on your load; counts and money totals that do not depend on the calendar (500 customers, 4,362 orders, 275 sold products, the Exercise 6 row) should match exactly. These answers align one-for-one with [day15_phase1_project.sql](../day15_phase1_project.sql), and the general [solution reading steps](../../STUDY-GUIDE.md#read-a-solution) apply.
 
 ## Reading contract
 
 - **Focus:** Deliver a reconciled Phase 1 report that combines filtering, joins, aggregation, text/time handling, and exact money semantics.
 - **Assumptions:** All monetary summaries identify stored totals versus computed net line revenue. Reporting month uses UTC and empty populations remain visible where required.
 - **Primary pitfall:** Combining fact tables before fixing their grain multiplies measures; every project output must state its row grain and acceptance checks.
-- **Safety:** all writes are bounded and rollback-protected; read-only
-  queries still use deterministic ordering whenever row order is claimed.
+- **Safety:** every answer is a read. The companion still wraps them in `BEGIN`/`ROLLBACK`, so experiments such as deleting a budget row or inserting a test customer vanish when it ends.
 
 ## Exercise 1: Query writing
 
@@ -71,12 +27,12 @@ executable companion when you want a self-contained check.
 
 **Clause-by-clause reading:**
 
-- `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
-- `FROM`: establishes the starting relation and therefore the initial row grain.
-- `JOIN ... ON`: combines relations and may multiply rows; the match predicate and each input's grain must agree.
-- `COALESCE`: replaces NULL only where the lesson explicitly defines a missing value as a concrete fallback.
-- `GROUP BY`: collapses input rows to the listed key grain; every non-aggregated selected value must belong to that grain.
-- `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
+- `FROM customers AS c LEFT JOIN orders AS o`: every customer survives, with one joined row per order, or a single row of NULL order columns for the 62 customers who never ordered.
+- `GROUP BY c.customer_id, c.full_name, c.country`: back to one row per customer. Name and country are listed so they can be selected; they cannot split a customer because both depend on the ID.
+- `COUNT(o.order_id)`: counts matched orders only, so a customer without orders gets 0.
+- `COALESCE(ROUND(SUM(o.total_amount), 2), 0)`: `SUM` over nothing but NULLs is NULL, and the fallback reports 0 because "spent nothing" is the honest reading.
+- `MAX(o.order_date)`: stays NULL for customers without orders; there is no latest date to invent.
+- `ORDER BY stored_revenue DESC, c.customer_id`: biggest spenders first, and the ID orders the zero-revenue rows at the bottom.
 
 ```sql
 SELECT
@@ -100,19 +56,15 @@ ORDER BY
 
 **Expected shape:** One row per customer.
 
-Check the result at the stated grain. An alternative formulation is
-valid only if it preserves the same NULL, ordering, time, money, and
-cardinality contract.
-
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-15 Exercise 1, read from `customers`, and `orders`. Build the answer toward `customer_id`, `full_name`, `country`, `order_count`, `stored_revenue`, and `latest_order_date`; keep `customer_id`, `full_name`, and `country` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-15 Exercise 1, expected output: One row per customer. The final columns are `customer_id`, `full_name`, `country`, `order_count`, `stored_revenue`, and `latest_order_date`. The final order is `stored_revenue DESC, c.customer_id`.
-- **Independent verification:** For sql-15 Exercise 1, independently aggregate `customers`, and `orders` by `customer_id`, `full_name`, and `country`; require one output row for every distinct `customer_id`, `full_name`, and `country` tuple and compare `order_count`, `stored_revenue`, and `latest_order_date` tuple by tuple. Use one key absent from `orders`; then tie two candidates on `stored_revenue DESC` and verify `c.customer_id` selects the same row on every run.
-- **Intermediate relation check:** For sql-15 Exercise 1, start with the first relation in `customers`, and `orders`; after each join, record total rows and distinct `customer_id`, `full_name`, and `country` so the exact fanout or loss is visible.
-- **Clause check:** For sql-15 Exercise 1, the solution actually uses `FROM`, `JOIN ... ON`, `GROUP BY`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `customers`, and `orders`, preserve one row per `customer_id`, `full_name`, and `country`, and finish with `customer_id`, `full_name`, `country`, `order_count`, `stored_revenue`, and `latest_order_date` ordered by `stored_revenue DESC, c.customer_id`.
-- **Alternative/trade-off:** For sql-15 Exercise 1, the chosen form is justified by this lesson-specific rationale: Left join from customers and aggregate at customer grain. Evaluate another form against the concrete expected result (One row per customer) and the verification above.
-- **Edge case:** Use one key absent from `orders`; then tie two candidates on `stored_revenue DESC` and verify `c.customer_id` selects the same row on every run.
+- **Inputs/evidence:** For sql-15 Exercise 1, `LEFT JOIN` all 500 `customers` to their `orders`, then count `o.order_id`, sum `total_amount` with `COALESCE(..., 0)`, and take `MAX(order_date)` per customer.
+- **Expected result/shape:** For sql-15 Exercise 1, return 500 rows, one per customer, led by customer 181 (FR, 16 orders, 9502.21) and ending with the 62 `BR` customers who never ordered, each with 0 orders, 0 revenue, and a `NULL` `latest_order_date`. The final columns are `customer_id`, `full_name`, `country`, `order_count`, `stored_revenue`, and `latest_order_date`. The final order is `stored_revenue DESC, c.customer_id`.
+- **Independent verification:** For sql-15 Exercise 1, confirm 500 distinct `customer_id` values, `SUM(order_count)` = 4,362, and `SUM(stored_revenue)` = 2355646.89, matching `orders`. Swap `COUNT(o.order_id)` for `COUNT(*)` and the 62 no-order customers must show 1 instead of 0. Customers 51 and 428 tie at 8970.66, so `c.customer_id` must place 51 first on every run.
+- **Count before you trust it:** the result needs 500 rows, matching `SELECT count(*) FROM customers`. The top row is customer 181 (FR) with 16 orders and 9,502.21; the last 62 rows are the BR customers with 0 orders and a NULL `latest_order_date`.
+- **The decisive choice:** `LEFT JOIN` together with `COUNT(o.order_id)`. An inner join drops the BR customers and leaves 438 rows; keeping the left join but switching to `COUNT(*)` gives each of them one phantom order.
+- **Another valid form:** aggregate `orders` per customer in a CTE, then left join that CTE to `customers`. It mirrors Exercise 4 and stays correct when a second fact table joins later.
+- **Something to try:** insert one customer with no orders inside the transaction. The row count rises to 501 and the newcomer sorts among the zero-revenue rows by its ID.
 
 ## Exercise 2: Query writing
 
@@ -122,11 +74,12 @@ cardinality contract.
 
 **Clause-by-clause reading:**
 
-- `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
-- `FROM`: establishes the starting relation and therefore the initial row grain.
-- `JOIN ... ON`: combines relations and may multiply rows; the match predicate and each input's grain must agree.
-- `GROUP BY`: collapses input rows to the listed key grain; every non-aggregated selected value must belong to that grain.
-- `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
+- `FROM products AS p JOIN order_items AS oi`: one row per order line with the product's catalog `cost` attached. The inner join drops products 276 to 300, which were never sold.
+- `SUM(oi.quantity)`: units sold.
+- `SUM(oi.unit_price * oi.quantity * (1 - oi.discount))`: net revenue, combined per line before summing because the discount (0, 0.05 or 0.15) changes from line to line.
+- `SUM(p.cost * oi.quantity)`: catalog cost of the units sold. The cost comes from `products`, so it is today's catalog cost rather than a cost recorded at sale time.
+- `gross_profit`: the difference of the two sums, rounded once at the end rather than per line.
+- `ORDER BY gross_profit DESC, p.product_id`: most profitable product first, with the ID settling equal profits.
 
 ```sql
 SELECT
@@ -151,19 +104,15 @@ ORDER BY
 
 **Expected shape:** One row per sold product.
 
-Check the result at the stated grain. An alternative formulation is
-valid only if it preserves the same NULL, ordering, time, money, and
-cardinality contract.
-
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-15 Exercise 2, read from `products`, and `order_items`. Build the answer toward `product_id`, `name`, `category`, `units_sold`, `net_revenue`, `catalog_cost`, and `gross_profit`; keep `product_id`, `name`, and `category` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-15 Exercise 2, expected output: One row per sold product. The final columns are `product_id`, `name`, `category`, `units_sold`, `net_revenue`, `catalog_cost`, and `gross_profit`. The final order is `gross_profit DESC, p.product_id`.
-- **Independent verification:** For sql-15 Exercise 2, independently aggregate `products`, and `order_items` by `product_id`, `name`, and `category`; require one output row for every distinct `product_id`, `name`, and `category` tuple and compare `units_sold`, and `net_revenue` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `units_sold`, and `net_revenue` for the existing `product_id`, and `name` tuple and verify the new tuple appears exactly once.
-- **Intermediate relation check:** For sql-15 Exercise 2, start with the first relation in `products`, and `order_items`; after each join, record total rows and distinct `product_id`, `name`, and `category` so the exact fanout or loss is visible.
-- **Clause check:** For sql-15 Exercise 2, the solution actually uses `FROM`, `JOIN ... ON`, `GROUP BY`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `products`, and `order_items`, preserve one row per `product_id`, `name`, and `category`, and finish with `product_id`, `name`, `category`, `units_sold`, `net_revenue`, `catalog_cost`, and `gross_profit` ordered by `gross_profit DESC, p.product_id`.
-- **Alternative/trade-off:** For sql-15 Exercise 2, the chosen form is justified by this lesson-specific rationale: Calculate line revenue and line cost at item grain, then aggregate to product. Evaluate another form against the concrete expected result (One row per sold product) and the verification above.
-- **Edge case:** Add one row to an existing group and one row for a new group; recompute `units_sold`, and `net_revenue` for the existing `product_id`, and `name` tuple and verify the new tuple appears exactly once.
+- **Inputs/evidence:** For sql-15 Exercise 2, inner-join `products` to `order_items` and, per product, sum `quantity`, net line revenue, catalog cost `p.cost * oi.quantity`, and their difference as `gross_profit`.
+- **Expected result/shape:** For sql-15 Exercise 2, return 275 rows, one per product that has sold at least once, led by product 271 (Apparel, 160 units, `gross_profit` 10939.20) and ending with product 3 at 323.61; products 276 to 300 have no item rows and are left out. The final columns are `product_id`, `name`, `category`, `units_sold`, `net_revenue`, `catalog_cost`, and `gross_profit`. The final order is `gross_profit DESC, p.product_id`.
+- **Independent verification:** For sql-15 Exercise 2, confirm 275 distinct `product_id` values, `SUM(units_sold)` = 39,257, and `SUM(net_revenue)` = 2355647.12, the item-level total. Inside a rolled-back transaction, insert one `order_items` row for product 300 on order 1; the result must grow to 276 rows with product 300 at 1 unit sold.
+- **Expected size:** 275 rows, one per product that appears in `order_items`. Product 271 (Apparel) leads with 160 units, 17,643.20 net revenue and 10,939.20 gross profit, followed by 237 (Home) and 262 (Beauty). No product shows a loss on this fixture.
+- **Why the math stays per line:** `SUM(oi.unit_price) * SUM(oi.quantity)` multiplies two unrelated totals. Price, quantity and discount belong to the same line and must be combined before aggregation.
+- **Worth noticing:** `oi.unit_price` equals the catalog `price` on all 13,085 lines, so here the discount is the only reason net revenue sits below list revenue. Real order lines drift from the catalog, which is why revenue uses the line price and not `p.price`.
+- **Something to try:** to show unsold products with zero profit, start from `products`, `LEFT JOIN` the items and wrap each sum in `COALESCE`; the row count becomes 300.
 
 ## Exercise 3: Query writing
 
@@ -173,11 +122,10 @@ cardinality contract.
 
 **Clause-by-clause reading:**
 
-- `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
-- `FROM`: establishes the starting relation and therefore the initial row grain.
-- `GROUP BY`: collapses input rows to the listed key grain; every non-aggregated selected value must belong to that grain.
-- time normalization: makes reporting boundaries explicit; UTC is applied before deriving calendar buckets where required.
-- `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
+- `date_trunc('month', o.order_date AT TIME ZONE 'UTC')::date`: converts the `timestamptz` to UTC wall-clock time, truncates to the first of the month and casts to `date` for display.
+- `GROUP BY date_trunc('month', o.order_date AT TIME ZONE 'UTC'), o.status`: groups on the same truncation without the cast, which produces identical buckets.
+- `COUNT(*)` and `ROUND(SUM(o.total_amount), 2)`: the order count and stored revenue in each bucket.
+- `ORDER BY utc_month, o.status`: oldest month first, then status as text, so delivered, paid, placed, returned, shipped.
 
 ```sql
 SELECT
@@ -197,19 +145,15 @@ ORDER BY
 
 **Expected shape:** One row per observed month and status.
 
-Check the result at the stated grain. An alternative formulation is
-valid only if it preserves the same NULL, ordering, time, money, and
-cardinality contract.
-
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-15 Exercise 3, read from `orders`. Build the answer toward `utc_month`, `status`, `order_count`, and `stored_revenue`; keep `status` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-15 Exercise 3, expected output: One row per observed month and status. The final columns are `utc_month`, `status`, `order_count`, and `stored_revenue`. The final order is `utc_month, o.status`.
-- **Independent verification:** For sql-15 Exercise 3, independently aggregate `orders` by `status`; require one output row for every distinct `status` tuple and compare `order_count`, and `stored_revenue` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `order_count`, and `stored_revenue` for the existing `status` tuple and verify the new tuple appears exactly once.
-- **Intermediate relation check:** For sql-15 Exercise 3, confirm the groups are `status`; then check `utc_month, o.status` before applying the row cap.
-- **Clause check:** For sql-15 Exercise 3, the solution actually uses `FROM`, `GROUP BY`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `orders`, preserve one row per `status`, and finish with `utc_month`, `status`, `order_count`, and `stored_revenue` ordered by `utc_month, o.status`.
-- **Alternative/trade-off:** For sql-15 Exercise 3, the chosen form is justified by this lesson-specific rationale: Derive one reporting month and group by month/status. Evaluate another form against the concrete expected result (One row per observed month and status) and the verification above.
-- **Edge case:** Add one row to an existing group and one row for a new group; recompute `order_count`, and `stored_revenue` for the existing `status` tuple and verify the new tuple appears exactly once.
+- **Inputs/evidence:** For sql-15 Exercise 3, group all 4,362 `orders` by UTC month (`date_trunc('month', o.order_date AT TIME ZONE 'UTC')`) and `status`, counting orders and summing `total_amount`.
+- **Expected result/shape:** For sql-15 Exercise 3, return 224 rows, one per observed month and status pair, starting with `2023-02-01` `delivered` (1 order, 986.42); 46 months times 5 statuses would give 230, but the first three months lack 6 of the pairs. The final columns are `utc_month`, `status`, `order_count`, and `stored_revenue`. The final order is `utc_month, o.status`.
+- **Independent verification:** For sql-15 Exercise 3, confirm 224 distinct (`utc_month`, `status`) pairs and that the `order_count` values add up to 4,362; `2023-02-01` must show only `delivered` and `shipped`. Inside a rolled-back transaction, insert one order with status `cancelled`; the result must grow to 225 rows with the new pair in the current month at 1 order.
+- **Expected size:** 224 month and status rows across 46 months on the load used here, not 46 times 5 = 230. The earliest months are sparse (the very first has only `delivered` and `shipped`), and a combination with no orders simply has no row.
+- **Totals to reconcile:** `order_count` must add to 4,362, and each status to 872 or 873 across all months.
+- **Another valid form:** `GROUP BY 1, 2` refers to select-list positions. It is shorter, but the named expression survives someone inserting a column at the front of the select list.
+- **Something to try:** run `SET TIME ZONE 'Pacific/Auckland'`, then rerun this query and a copy without `AT TIME ZONE 'UTC'`. Only the copy should move orders that sit near a month boundary.
 
 ## Exercise 4: Debugging
 
@@ -219,13 +163,12 @@ cardinality contract.
 
 **Clause-by-clause reading:**
 
-- `WITH`: names an intermediate relation so its grain can be checked before later joins or aggregation.
-- `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
-- `FROM`: establishes the starting relation and therefore the initial row grain.
-- `JOIN ... ON`: combines relations and may multiply rows; the match predicate and each input's grain must agree.
-- `COALESCE`: replaces NULL only where the lesson explicitly defines a missing value as a concrete fallback.
-- `GROUP BY`: collapses input rows to the listed key grain; every non-aggregated selected value must belong to that grain.
-- `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
+- `line_totals`: one row per order holding its net line revenue, 4,362 rows because every order has at least one item.
+- `paid_totals`: collapses the 3,836 payments to 3,489 paid orders, which is where the 347 split payments stop being a fanout risk.
+- `FROM orders AS o JOIN line_totals AS lt`: an inner join is safe here because no order lacks lines.
+- `LEFT JOIN paid_totals AS pt`: keeps the 873 `placed` orders, which have no payments at all.
+- `COALESCE(pt.paid_total, 0)`: an order with no payments has paid zero, so the fallback is the correct value, not a disguise.
+- `ORDER BY ABS(o.total_amount - lt.line_total) DESC, o.order_id`: the largest stored-versus-lines disagreement first.
 
 ```sql
 WITH line_totals AS (
@@ -264,19 +207,15 @@ ORDER BY
 
 **Expected shape:** One row per order with differences.
 
-Check the result at the stated grain. An alternative formulation is
-valid only if it preserves the same NULL, ordering, time, money, and
-cardinality contract.
-
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-15 Exercise 4, read from `order_items`, `payments`, and `orders`. Build the answer toward `order_id`, `stored_total`, `line_total`, `paid_total`, `stored_minus_lines`, and `unpaid_balance`; keep `order_id` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-15 Exercise 4, expected output: One row per order with differences. The final columns are `order_id`, `stored_total`, `line_total`, `paid_total`, `stored_minus_lines`, and `unpaid_balance`. The final order is `ABS(o.total_amount - lt.line_total) DESC, o.order_id`.
-- **Independent verification:** For sql-15 Exercise 4, project `order_id` plus the raw source columns from `order_items`, `payments`, and `orders` at each join stage; record row count and distinct `order_id`, then assert the final `order_id`, `stored_total`, `line_total`, `paid_total`, `stored_minus_lines`, and `unpaid_balance` values match those staged rows without unintended fanout or loss. Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
-- **Intermediate relation check:** For sql-15 Exercise 4, run `line_totals`, and `paid_totals` one at a time. Record each CTE's row count and `order_id` uniqueness before the next stage uses it.
-- **Clause check:** For sql-15 Exercise 4, the solution actually uses `WITH`, `FROM`, `JOIN ... ON`, `GROUP BY`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `order_items`, `payments`, and `orders`, preserve one row per `order_id`, and finish with `order_id`, `stored_total`, `line_total`, `paid_total`, `stored_minus_lines`, and `unpaid_balance` ordered by `ABS(o.total_amount - lt.line_total) DESC, o.order_id`.
-- **Alternative/trade-off:** For sql-15 Exercise 4, the chosen form is justified by this lesson-specific rationale: Aggregate items and payments independently to order grain before joining. Evaluate another form against the concrete expected result (One row per order with differences) and the verification above.
-- **Edge case:** Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
+- **Inputs/evidence:** For sql-15 Exercise 4, pre-aggregate `order_items` to `line_totals` and `payments` to `paid_totals`, one row per `order_id` each, then join both to `orders` (inner to line totals, left to payments).
+- **Expected result/shape:** For sql-15 Exercise 4, return 4,362 rows, one per order; every `stored_minus_lines` is 0.00 after rounding (2,855 orders differ by under half a cent), so the order falls back to `order_id`, starting with order 21. 1,072 rows have a positive `unpaid_balance`, 873 of them `placed` orders with no payment row. The final columns are `order_id`, `stored_total`, `line_total`, `paid_total`, `stored_minus_lines`, and `unpaid_balance`. The final order is `ABS(o.total_amount - lt.line_total) DESC, o.order_id`.
+- **Independent verification:** For sql-15 Exercise 4, confirm 4,362 distinct `order_id` values, 0 rows with a negative `unpaid_balance`, and that `SUM(unpaid_balance)` is 523746.08, which equals 2355646.89 stored minus 1831900.81 paid. Inside a rolled-back transaction, set order 1's `total_amount` to 250.20; order 1 must jump to the first row with `stored_minus_lines` and `unpaid_balance` both 10.00.
+- **What the rows show:** 4,362 rows. `stored_minus_lines` rounds to 0.00 for every order (the largest raw gap is 0.0045), so the sort is ranking sub-cent rounding. The informative column is `unpaid_balance`: the 873 placed orders owe their full total, and 199 paid, shipped, delivered or returned orders carry a positive balance of up to 716.24, adding to 53,902.98.
+- **The decisive choice:** aggregating both detail tables before the join. Joining `order_items` and `payments` directly to `orders` pairs every line with every payment, so a two-payment order would report double its line total.
+- **Another valid form:** correlated subqueries such as `(SELECT SUM(amount) FROM payments WHERE order_id = o.order_id)` return the same numbers and cannot fan out, at the cost of one lookup per order.
+- **Something to try:** sum `unpaid_balance` over the whole result. It should equal stored revenue minus payments from Exercise 6, 523,746.08.
 
 ## Exercise 5: Prediction
 
@@ -286,14 +225,12 @@ cardinality contract.
 
 **Clause-by-clause reading:**
 
-- `WITH`: names an intermediate relation so its grain can be checked before later joins or aggregation.
-- `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
-- `FROM`: establishes the starting relation and therefore the initial row grain.
-- `JOIN ... ON`: combines relations and may multiply rows; the match predicate and each input's grain must agree.
-- `COALESCE`: replaces NULL only where the lesson explicitly defines a missing value as a concrete fallback.
-- `GROUP BY`: collapses input rows to the listed key grain; every non-aggregated selected value must belong to that grain.
-- time normalization: makes reporting boundaries explicit; UTC is applied before deriving calendar buckets where required.
-- `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
+- `actual`: expenses summed per category and calendar month. `expense_date` is a `date`, so no time zone is involved in the truncation.
+- `planned`: budgets summed per category and `period`. The table already has one row per pair, so this `SUM` is defensive.
+- `FULL JOIN ... ON a.category = p.category AND a.period = p.period`: keeps a pair found on either side, matched or not.
+- `COALESCE(p.category, a.category)` and `COALESCE(p.period, a.period)`: take the key from whichever side exists.
+- `budget_amount`, `actual_amount` and `variance`: left NULL when a side is missing, so `variance` is NULL too instead of pretending one side was zero.
+- `ORDER BY period, category`: these names are output aliases, so the sort uses the coalesced keys.
 
 ```sql
 WITH actual AS (
@@ -335,19 +272,15 @@ FROM
 
 **Expected shape:** One row per category/month in either source.
 
-Check the result at the stated grain. An alternative formulation is
-valid only if it preserves the same NULL, ordering, time, money, and
-cardinality contract.
-
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-15 Exercise 5, read from `expenses`, and `budgets`. Build the answer toward `category`, `period`, `budget_amount`, `actual_amount`, and `variance`; keep `category` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-15 Exercise 5, expected output: One row per category/month in either source. The final columns are `category`, `period`, `budget_amount`, `actual_amount`, and `variance`. The final order is `period, category`.
-- **Independent verification:** For sql-15 Exercise 5, project `category` plus the raw source columns from `expenses`, and `budgets` at each join stage; record row count and distinct `category`, then assert the final `category`, `period`, `budget_amount`, `actual_amount`, and `variance` values match those staged rows without unintended fanout or loss. Add one source row with a new `category`; verify the result gains exactly one row carrying that `category` value.
-- **Intermediate relation check:** For sql-15 Exercise 5, run `actual`, and `planned` one at a time. Record each CTE's row count and `category` uniqueness before the next stage uses it.
-- **Clause check:** For sql-15 Exercise 5, the solution actually uses `WITH`, `FROM`, `JOIN ... ON`, `GROUP BY`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `expenses`, and `budgets`, preserve one row per `category`, and finish with `category`, `period`, `budget_amount`, `actual_amount`, and `variance` ordered by `period, category`.
-- **Alternative/trade-off:** For sql-15 Exercise 5, the chosen form is justified by this lesson-specific rationale: Aggregate both sources to category/month grain, then full join and keep NULL distinct from a real zero. Evaluate another form against the concrete expected result (One row per category/month in either source) and the verification above.
-- **Edge case:** Add one source row with a new `category`; verify the result gains exactly one row carrying that `category` value.
+- **Inputs/evidence:** For sql-15 Exercise 5, sum the 10,000 `expenses` rows by `category` and calendar month, sum the 125 `budgets` rows by `category` and `period`, then `FULL JOIN` the two summaries on both keys.
+- **Expected result/shape:** For sql-15 Exercise 5, return 125 rows, 5 categories (`COGS`, `G&A`, `Infrastructure`, `Marketing`, `Payroll`) times 25 months from `2024-11-01` to `2026-11-01`; on the fixture every pair has both a budget and an actual, so no column is `NULL`. The first row is `COGS` for `2024-11-01` with 654000.00 budgeted against 72384.36 spent. The final columns are `category`, `period`, `budget_amount`, `actual_amount`, and `variance`. The final order is `period, category`.
+- **Independent verification:** For sql-15 Exercise 5, confirm 125 distinct (`category`, `period`) pairs; joining raw `budgets` to raw `expenses` instead returns 10,000 rows, one per expense, which is the fanout the two summaries prevent. Inside a rolled-back transaction, add a `Travel` budget for `2026-11-01` and a `Legal` expense dated `2026-11-10`; both must appear, `Travel` with a `NULL` actual and `Legal` with a `NULL` budget, and both with a `NULL` variance.
+- **Prediction to write first:** five categories (COGS, G&A, Infrastructure, Marketing, Payroll) over 25 months give 125 rows on each side. The key sets match exactly on this fixture, so the full join returns 125 rows with no NULL budget or actual.
+- **Why a full join anyway:** the fixture happens to be complete and the query must not depend on that. An inner join would silently drop a month spent without a budget, and a left join from `planned` would drop unbudgeted spending.
+- **Another valid form:** build the key set with `SELECT category, period FROM planned UNION SELECT category, period FROM actual`, then left join both CTEs to it. Longer, but the "either source" rule is spelled out.
+- **Something to try:** delete one `budgets` row inside the transaction. The result still has 125 rows, and that pair now shows NULL `budget_amount` and NULL `variance` rather than a variance equal to the whole actual.
 
 ## Exercise 6: Extension
 
@@ -357,10 +290,9 @@ cardinality contract.
 
 **Clause-by-clause reading:**
 
-- `WITH`: names an intermediate relation so its grain can be checked before later joins or aggregation.
-- `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
-- `FROM`: establishes the starting relation and therefore the initial row grain.
-- `JOIN ... ON`: combines relations and may multiply rows; the match predicate and each input's grain must agree.
+- Four one-row CTEs: `customer_kpis` counts `customers`, `order_kpis` counts and sums `orders`, `line_kpis` sums net revenue from `order_items`, and `payment_kpis` sums `payments`.
+- `CROSS JOIN`: one row times one row times one row times one row is still one row, so no measure can be repeated.
+- `ROUND(..., 2)`: applied only to the three money columns, at display time.
 
 ```sql
 WITH customer_kpis AS (
@@ -403,24 +335,21 @@ FROM
 
 **Expected shape:** Exactly one summary row.
 
-Check the result at the stated grain. An alternative formulation is
-valid only if it preserves the same NULL, ordering, time, money, and
-cardinality contract.
-
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-15 Exercise 6, read from `customers`, `orders`, `order_items`, and `payments`. Build the answer toward `customers`, `orders`, `stored_revenue`, `computed_revenue`, and `payments`; keep `customer_id` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-15 Exercise 6, expected output: Exactly one summary row. The final columns are `customers`, `orders`, `stored_revenue`, `computed_revenue`, and `payments`.
-- **Independent verification:** For sql-15 Exercise 6, project `customer_id` plus the raw source columns from `customers`, `orders`, `order_items`, and `payments` at each join stage; record row count and distinct `customer_id`, then assert the final `customers`, `orders`, `stored_revenue`, `computed_revenue`, and `payments` values match those staged rows without unintended fanout or loss. Add one source row with a new `customer_id`; verify the result gains exactly one row carrying that `customer_id` value.
-- **Intermediate relation check:** For sql-15 Exercise 6, run `customer_kpis`, `order_kpis`, `line_kpis`, and `payment_kpis` one at a time. Record each CTE's row count and `customer_id` uniqueness before the next stage uses it.
-- **Clause check:** For sql-15 Exercise 6, the solution actually uses `WITH`, `FROM`, `JOIN ... ON`, and `SELECT`. Read only those operations: begin at `customers`, `orders`, `order_items`, and `payments`, preserve one row per `customer_id`, and finish with `customers`, `orders`, `stored_revenue`, `computed_revenue`, and `payments`.
-- **Alternative/trade-off:** For sql-15 Exercise 6, the chosen form is justified by this lesson-specific rationale: Compute independent one-row aggregates, then cross join them to avoid detail multiplication. Evaluate another form against the concrete expected result (Exactly one summary row) and the verification above.
-- **Edge case:** Add one source row with a new `customer_id`; verify the result gains exactly one row carrying that `customer_id` value.
+- **Inputs/evidence:** For sql-15 Exercise 6, compute each total in its own single-row CTE (customer count, order count and stored revenue, line revenue from `order_items`, and payment sum) and `CROSS JOIN` the four one-row results.
+- **Expected result/shape:** For sql-15 Exercise 6, return one row: 500 customers, 4,362 orders, `stored_revenue` 2355646.89, `computed_revenue` 2355647.12, and `payments` 1831900.81. The final columns are `customers`, `orders`, `stored_revenue`, `computed_revenue`, and `payments`.
+- **Independent verification:** For sql-15 Exercise 6, confirm each value against its own query, for example `SELECT ROUND(SUM(amount), 2) FROM payments` returns 1831900.81. Then sum `o.total_amount` after `orders JOIN order_items` and get 8633041.53, more than 3.6 times the stored figure; that fanout is why every total is computed before the `CROSS JOIN`.
+- **The row to expect:** 500 customers, 4,362 orders, stored revenue 2,355,646.89, computed revenue 2,355,647.12 and payments 1,831,900.81.
+- **Reading the gaps:** stored and computed revenue differ by 0.23 of cent rounding. Payments trail stored revenue by 523,746.08: 469,843.10 from the unpaid `placed` orders plus the 53,902.98 of partial balances found in Exercise 4.
+- **What the tempting version prints:** `FROM customers JOIN orders JOIN payments` yields 3,836 rows, and `SUM(o.total_amount)` over them gives 1,926,711.58, which both drops the placed orders and counts each split-payment order twice.
+- **Another valid form:** four scalar subqueries in one `SELECT` with no `FROM`. The result is identical; the CTE names help when a fifth metric arrives.
+- **Applying the add-a-row check:** a summary has no per-customer rows to gain, so inserting a test customer must leave exactly one output row while `customers` moves from 500 to 501 and the four other columns stay put. Any other change means that customer leaked into a join.
 
 ## Final self-check
 
-- Can you explain the logical grain before and after every aggregation?
-- Are missing values preserved or converted only by an explicit rule?
-- Does every ordered result have a deterministic final tie-breaker?
-- Are money and time assumptions visible beside the calculation?
-- Does the complete executable solution finish with `ROLLBACK`?
+- Which three money figures in the Exercise 6 row should your other reports reconcile to, and which revenue definition does each one use?
+- Why does Exercise 1 count `o.order_id` rather than `*`, and what would the 62 BR customers show otherwise?
+- In Exercise 4, which orders carry a nonzero `unpaid_balance`, and why is `COALESCE` right there but wrong for Exercise 5's missing budgets?
+- After `SET TIME ZONE 'Pacific/Auckland'`, does your Exercise 3 result change? Should it?
+- Did the companion finish at `ROLLBACK` without an `ERROR` line?

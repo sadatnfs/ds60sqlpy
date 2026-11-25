@@ -32,11 +32,9 @@ Do not broaden the project into a real database cluster for this exercise. The p
 
 ## How to use this lesson
 
-The classroom displays this guide and saves your worksheet, `courses/docker/lessons/docker-027.md`. Its Run button does not control your Docker engine. Docker engine access is powerful host access, so the classroom deliberately receives no engine socket. Work through the supplied examples without starting anything, then use the optional host lab only in your own disposable project. Reading a command, parsing YAML and actually running the project are different forms of evidence.
+The classroom saves `courses/docker/lessons/docker-027.md` and holds no engine socket ([host-lab setup](../STUDY-GUIDE.md#host-lab-setup)).
 
-Use Bash in Linux, macOS Terminal, or Ubuntu under WSL 2 on Windows. The supported engine runs Linux containers. The maintained fixture is `courses/docker/fixtures/compose-lab/`; its README explains copying it into a new ignored learner directory, checking the engine, building locally with visible logs, and using the fixed project name `ds60-docker-study`. The fixture uses port 18080 on host loopback. Stop if that project name or port belongs to unrelated work; choose a new project name consistently in your own copy. Never paste a command against a remote Docker context simply because it is currently selected.
-
-For Dockerfile examples, create a file named `Dockerfile` in a scratch project. YAML snippets describe a fragment unless explicitly called a complete file. Text transcripts are synthetic illustrations, not claims about your machine. Do not substitute a real password, token or private registry into a checked-in example. **How to use the lessons** in the [subject README](../README.md) collects these rules in one place.
+**Host lab.** Rehearse the full recovery path once, writing one line per transition with the observation that let you move on. Start with `up -d --wait`, then request `/counter` from the host and run the `tools` client, so both paths are confirmed before you touch data. Perform one increment through `exec` as the README shows, stop the writer, export with the README's `run --rm --no-deps` command into `counter-backup.json`, and check that the file's counter equals the value you just saw. Create and fill the separate `ds60-docker-study-restore` volume with the README's three commands, ending with the read-only verify, then start the app again and read `/counter` from the source. Both numbers should match the backup. Finish by removing only the restore volume and the backup file, and note in your record that `study-data` was never a restore target.
 
 ## Worked example / walkthrough
 
@@ -64,7 +62,7 @@ failure -> preserve logs -> identify phase -> targeted repair -> recheck
 
 ## Six progressive exercises
 
-For each exercise, name the object involved and the phase of its lifetime before changing anything, then vary only the condition the task names. Exercises that ask you to predict, explain, compare or diagnose keep their answers in the solutions file; the others show the evidence to look for.
+Answer-type prompts keep their answers in the solutions file ([exercise rules](../STUDY-GUIDE.md#exercise-rules)).
 
 ### Exercise 1: Predict which resources are durable.
 
@@ -100,13 +98,19 @@ For each exercise, name the object involved and the phase of its lifetime before
 
 Testing only from the host and missing a broken peer path. Restoring over the source volume. Claiming high availability from a single engine.
 
-Exercise 4 is this chapter's boundary case: Diagnose a passing host request with failing peer request. Send the same request from the host and from a peer container, then compare the host mapping with the service name and internal port the peer used. Preserve the original failure and the exact changed field before retrying. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
+Exercise 4 is this chapter's boundary case: Diagnose a passing host request with failing peer request. Send the same request from the host and from a peer container, then compare the host mapping with the service name and internal port the peer used.
+
+A healthcheck looks like self-healing, yet plain Docker and Compose only report health. When `/healthz` starts failing, `docker compose ps` shows the app as `unhealthy`, but no restart follows: the fixture sets no restart policy, and even a policy reacts to the process exiting, not to a failed probe. The `depends_on` condition `service_healthy` is likewise a check Compose makes when it starts the client; it does not watch the app afterward or repair it. Treat `unhealthy` as a signal someone must act on. Read `docker inspect --format '{{json .State.Health}}'` on the app container for the recent probe output, then decide between a targeted fix and a recreate.
+
+Never trade a safety control for a passing example ([safety rules](../STUDY-GUIDE.md#safety-rules)).
 
 ## Retrieval, transfer and next steps
 
-Close the explanations first. Draw the recovery state machine and mark where a failure stops the sequence. Then reconstruct worked example 2 (Review the operational state machine) with one different value, predict what changes, and name which of service discovery, resource limits, recovery test and release review the change touches.
+**Retrieval.** Draw the recovery state machine and mark where a failure stops the sequence.
 
-When a host session ends, run `docker compose -p ds60-docker-study down` from your fixture copy. It removes the project's containers and network but keeps named volumes; deleting a volume is a separate, deliberate reset described in the fixture README.
+**Transfer case.** After the rehearsal, `/counter` on the source shows 5 while the read-only verify of `ds60-docker-study-restore` shows 4. Is the restore broken, and which observation decides?
+
+Then run the [retrieval loop](../STUDY-GUIDE.md#retrieval-and-cleanup) and end any host session with its cleanup.
 
 ## Primary references
 

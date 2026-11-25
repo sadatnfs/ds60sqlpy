@@ -206,12 +206,12 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Migration:</strong> A reviewed transformation from an older format.</p>
 <p><strong>Recovery policy:</strong> How the app retains or restores data after failure.</p>
 <h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>The Linux Docker classroom compiles the saved pad as <code>main.swift</code> with Swift 6 language checking. An explicit <code>@main</code> type contains <code>static func main() async throws</code>; the fixed compiler uses <code>-parse-as-library -swift-version 6</code>. The examples use the standard library and portable Foundation. <code>precondition</code> makes a violated invariant fail the process. The fixed pad accepts one source file, without arbitrary command arguments, interactive input or dependency installation. SwiftUI, UIKit, Apple simulators and application signing belong to the separately prepared macOS/Xcode project labs, never the Linux pad.</p>
-<p>Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.</p>
+<p><code>SavedPlan</code> and <code>supported</code> are declared above <code>LessonMain</code>. Example A encodes and decodes in memory without touching the file system. Task 3&#x27;s save and load errors are inspected in JourneyApp with a test file you own; never point it at real saved data.</p>
+<p>Compile contract, starter stop and success marker: <a href="../STUDY-GUIDE.md.html#running-a-lesson">running a lesson</a>.</p>
 <p>The actual save/load implementation is in the <a href="../fixtures/JourneyApp/README.md.html">JourneyApp project</a>. It deliberately retains an unreadable file for recovery.</p>
 <h3 id="syntax-anatomy-and-execution-trace">Syntax anatomy and execution trace<a class="heading-anchor" href="#syntax-anatomy-and-execution-trace" aria-label="Link to this section">#</a></h3>
 <p>A versioned envelope contains schemaVersion and items. Decode first, then validate the version and domain invariants. Data.write with .atomic requests an atomic replacement strategy for the file operation.</p>
-<p>Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.</p>
+<p>Each example ends with a trace; method: <a href="../STUDY-GUIDE.md.html#tracing-a-program">tracing a program</a>.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="example-a-read-the-supported-version">Example A: Read the supported version<a class="heading-anchor" href="#example-a-read-the-supported-version" aria-label="Link to this section">#</a></h4>
 <p>Version and payload are inspected independently after decoding.</p>
@@ -238,6 +238,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The supported envelope round-trips with two titles.</p>
+<p><strong>Trace.</strong> The document holds version 1 and the titles Read and Practice. <code>JSONEncoder().encode</code> produces UTF-8 JSON bytes with both keys. <code>JSONDecoder().decode(SavedPlan.self, from:)</code> reads them back into a new value. The check inspects the decoded version and title count rather than the original, so it proves the round trip preserved both. <code>supported</code> is not called here; decoding succeeds for any integer version, which is why validation is a separate step.</p>
 <h4 id="example-b-refuse-an-unknown-future-schema">Example B: Refuse an unknown future schema<a class="heading-anchor" href="#example-b-refuse-an-unknown-future-schema" aria-label="Link to this section">#</a></h4>
 <p>Rejection should preserve recoverable source data rather than silently resetting it.</p>
 <pre class="highlighted-code"><code class="language-swift"><span class="syntax-keyword">import</span> <span class="syntax-class">Foundation</span>
@@ -262,6 +263,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The unsupported document is rejected without modifying its payload.</p>
+<p><strong>Trace.</strong> A document with version 99 is built directly, standing in for a file written by a newer release. <code>supported</code> returns false because the version is not 1, and the check confirms the rejection. The second check confirms the titles are still Keep me: rejecting the document did not discard or rewrite it, so the app can keep the source file for recovery instead of overwriting it with an empty plan.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <ol>
 <li><strong>Predict and explain.</strong> Identify the schema and domain validation boundaries.</li>
@@ -281,10 +283,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <ol start="6">
 <li><strong>Transfer and justify.</strong> Design a version-one to version-two migration with backup, rollback and verification steps.</li>
 </ol>
-<p>For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.</p>
+<p>Log each task in the <a href="../STUDY-GUIDE.md.html#recording-exercise-evidence">evidence table</a> before opening the explanation.</p>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
 <p>Atomic replacement is not a universal durability or backup guarantee. Do not store secrets in ordinary preferences or unencrypted example files. A migration must preserve meaning, not only produce parseable JSON.</p>
-<p>A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.</p>
+<p>For task 2, a new field must be optional, or an older file without it fails to decode with a missing-key error. The counterexample is decoding the original JSON after adding the field. Task 4&#x27;s automatic reset turns a recoverable unreadable file into permanent data loss. For task 5, empty data and malformed JSON must throw, while an unknown version decodes but is refused by <code>supported</code>.</p>
+<p>Repair routine: <a href="../STUDY-GUIDE.md.html#building-a-regression-case">building a regression case</a>.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <ol>
 <li>Reproduce Example A (Read the supported version) before changing anything, and confirm its observation: The supported envelope round-trips with two titles.</li>
@@ -292,9 +295,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>Before opening the explanation, check your task 3 attempt (Inspect JourneyApp save and load errors with an owned test file) against each pitfall listed above, and add one input that would expose the tempting wrong rule.</li>
 </ol>
 <h3 id="self-check-and-next-step">Self-check and next step<a class="heading-anchor" href="#self-check-and-next-step" aria-label="Link to this section">#</a></h3>
-<p>Explain Schema version, Migration, Recovery policy without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.</p>
+<p>Explain why decoding and version validation are separate steps. Say what happens when an older file lacks a newly added non-optional property. List the steps for migrating version 1 files to version 2, including where the backup goes and how you would verify the result before deleting it.</p>
+<p>Then follow the general <a href="../STUDY-GUIDE.md.html#self-check-routine">self-check routine</a> and save your pad.</p>
 <h3 id="sources-and-execution-boundary">Sources and execution boundary<a class="heading-anchor" href="#sources-and-execution-boundary" aria-label="Link to this section">#</a></h3>
-<p><a href="https://docs.swift.org/swift-book/documentation/the-swift-programming-language/">Official language or framework documentation</a>. The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.</p>
+<p><a href="https://docs.swift.org/swift-book/documentation/the-swift-programming-language/">Documentation</a>: The Foundation reference documents <code>JSONEncoder</code>, <code>JSONDecoder</code> and <code>Data.write(to:options:)</code>; Apple&#x27;s article on encoding and decoding custom types covers Codable keys.</p>
+<p>Provenance and limits: <a href="../STUDY-GUIDE.md.html#sources-and-execution-boundary">sources and execution boundary</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for swift-042: App persistence, migrations and recoverable saves.
 Read courses/swift/guides/swift-042.md and courses/swift/lessons/swift-042.swift. Prerequisites: swift-041.

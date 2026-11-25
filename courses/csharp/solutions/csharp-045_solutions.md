@@ -1,6 +1,8 @@
 # csharp-045: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [csharp-045_solution.cs](csharp-045_solution.cs). It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.
+Reference program: [csharp-045_solution.cs](csharp-045_solution.cs), covering both examples and the executed answers.
+
+Attempt the tasks first; see [comparing with the explanation](../STUDY-GUIDE.md#comparing-with-the-explanation).
 
 ## Why the two examples differ
 
@@ -103,4 +105,4 @@ Publishing AOT does not guarantee a smaller or faster application for every work
 
 ## Review before continuing
 
-Run the reference and confirm that it prints `csharp-045: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.
+Run the reference and confirm it prints `csharp-045: passed`, then rerun the guide's counterexample.

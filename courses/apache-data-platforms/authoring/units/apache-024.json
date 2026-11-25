@@ -30,6 +30,6 @@
       "https://datafusion.apache.org/ballista/user-guide/python/quickstart.html"
     ],
     ["Ballista Rust client", "https://datafusion.apache.org/ballista/user-guide/rust.html"],
-    ["Ballista54.1 crate", "https://docs.rs/ballista/54.1.0/ballista/"]
+    ["Ballista 54.1 crate", "https://docs.rs/ballista/54.1.0/ballista/"]
   ]
 }

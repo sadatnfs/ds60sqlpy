@@ -2,7 +2,7 @@
 
 ## Level and prerequisites
 
-Beginner; approximately 120 minutes. Direct prerequisites: . The prerequisite sequence introduces the notation used here; revisit its worked examples if an axis, probability or gradient is unfamiliar.
+Beginner; approximately 120 minutes. No course prerequisites.
 
 ## Learning objectives
 
@@ -11,8 +11,6 @@ Write an experiment card that names the prediction unit, the training and holdou
 Central investigation: Split seven points of y = 2x into three training and four untouched rows, score a constant training-mean baseline and audit a holdout that was reused for selection.
 
 Finish condition: The card records 3 training and 4 holdout rows, a baseline mean of 4 with holdout MSE 54, the hand rule labeled as an analytic oracle rather than a trained model, and the reused holdout reclassified as validation.
-
-The worked examples demonstrate the mechanism; exercises 1-3 transfer it to new inputs and exercises 4-6 extend it to failures and boundary cases. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
 
 ## Purpose and mental model
 
@@ -163,11 +161,11 @@ Close the worked examples and rebuild Example C, Separate an exact relation from
 
 ## Next step
 
-If Example A (Define a prediction unit) cannot be rebuilt without help, revisit  first. Otherwise keep your exercise 2 attempt, Recompute a training-only baseline, as a regression case alongside a fresh transfer input, then continue along the course plan.
+If Example A (Define a prediction unit) cannot be argued without help, reread this guide's mental model before continuing. `torch-002` (Tensors, devices, dtypes, strides and views) builds directly on this lesson.
 
 ## Sources and verification status
 
-API and mechanism reference: [PyTorch 2.9 reference](https://docs.pytorch.org/docs/2.9/index.html), reviewed 2026-10-22. The fixture, examples, counterexamples and exercise design are original course material. See [validation](../../../docs/validation.md) for execution gates. Check CI artifacts for the exact revision and platform to determine which runtime checks actually ran; authored content alone does not establish runtime execution.
+API and mechanism reference: [PyTorch 2.9 reference](https://docs.pytorch.org/docs/2.9/index.html), reviewed 2026-10-22 for the Prediction unit, Training, Holdout behavior these fixtures check ([verification status](../STUDY-GUIDE.md#sources-and-verification-status)).
 
 ## Interview reasoning with worked answers
 

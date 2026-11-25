@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/web-development/solutions/web-045_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="web-045-explanatory-solutions">web-045: explanatory solutions<a class="heading-anchor" href="#web-045-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Open this after your own attempt. Each answer explains the lesson&#x27;s synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in <code>courses/web-development/guides/web-045.md</code>.</p>
+<p>Attempt each exercise before reading; the mechanism is in <code>courses/web-development/guides/web-045.md</code> (<a href="../STUDY-GUIDE.md.html#solutions">using these answers</a>).</p>
 <h3 id="exercise-1-predict-the-escaped-form-of-a-name-containing-and">Exercise 1: Predict the escaped form of a name containing &lt; and &amp;.<a class="heading-anchor" href="#exercise-1-predict-the-escaped-form-of-a-name-containing-and" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> The special syntax characters become HTML character references.</p>
 <p><strong>Approach:</strong> Apply the helper&#x27;s mapping character by character: <code>&lt;</code> becomes <code>&amp;lt;</code>, <code>&amp;</code> becomes <code>&amp;amp;</code>, and <code>&gt;</code> becomes <code>&amp;gt;</code>.</p>
@@ -232,7 +232,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Plausible wrong approach:</strong> Rejecting names with apostrophes during validation fails because it blocks real people while the template is still unescaped. Validation and escaping answer different questions, so neither replaces the other.</p>
 <p><strong>How to verify:</strong> The name O&#x27;Brien passes validation and renders correctly once <code>e()</code> escapes it at output.</p>
 <h3 id="reference-comparison">Reference comparison<a class="heading-anchor" href="#reference-comparison" aria-label="Link to this section">#</a></h3>
-<p>Open <code>courses/web-development/solutions/web-045_solution.php</code> only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; server lifecycle, persistence, concurrency and security need their own integration evidence.</p></article>
+<p>The reference requires the rendered card to contain &amp;lt;Ada &amp;amp; Bea&amp;gt;, forbids a raw &lt;Ada tag and requires a double quote to become &amp;quot;. That catches missing and partial escaping. It does not test a JavaScript or URL context, so explain which other helper those contexts would need.</p>
+<p>Open <code>courses/web-development/solutions/web-045_solution.php</code> after saving your attempt (<a href="../STUDY-GUIDE.md.html#references">comparing with the reference</a>).</p></article>
   </main>
 </body>
 </html>

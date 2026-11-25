@@ -195,6 +195,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="torch-005-explanatory-solutions">torch-005: explanatory solutions<a class="heading-anchor" href="#torch-005-explanatory-solutions" aria-label="Link to this section">#</a></h2>
 <p>Open these answers only after attempting Derivatives, <code>requires_grad</code> and finite-difference checks yourself. They reuse the guide&#x27;s literal inputs, starting from Example A, Derive a scalar slope, so a discrepancy points at one step. The executable companion runs the assertions; this page explains why each one tests Derivative, Finite difference, Learning rate. After a pass, choose a new input for exercise 6, Reject invalid probes, without looking.</p>
+<p>After comparing, follow the <a href="../STUDY-GUIDE.md.html#after-the-solutions">review steps</a>.</p>
 <h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
 <p>A derivative measures local sensitivity: how much a function changes for a small input change. It is not itself a new parameter value. Gradient descent combines the derivative with a learning rate and a subtraction rule. PyTorch tracks operations involving tensors with <code>requires_grad=True</code> and can calculate a derivative through <code>autograd.grad</code>. A central finite difference estimates the same slope by evaluating the function at nearby inputs, providing an independent numerical check.</p>
 <p>Finite differences involve a tradeoff: large steps measure a wider region, while extremely small steps lose precision through subtractive cancellation. Float64 is useful for this small diagnostic. At a nondifferentiable kink, a framework&#x27;s chosen subgradient convention need not equal a symmetric finite difference. This lesson uses a smooth quadratic so the expected derivative is exact and the comparison is interpretable.</p>
@@ -270,9 +271,7 @@ derivative <span class="syntax-operator">=</span> torch<span class="syntax-opera
 <span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span>
     <span class="syntax-keyword">raise</span> AssertionError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">nonfinite probe point accepted</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> all raise ValueError.</p>
-<p><strong>Verify:</strong> In a fresh process, the exercise checks confirm for every looped case, <code>central(function, 0.0, h)</code> raises <code>ValueError</code> and <code>central(lambda value: 0.0, float(&#x27;nan&#x27;), 0.1)</code> raises <code>ValueError</code>.</p>
-<h3 id="review-after-comparison">Review after comparison<a class="heading-anchor" href="#review-after-comparison" aria-label="Link to this section">#</a></h3>
-<p>Repeat exercise 4, Inspect a stationary point, with one changed fixture value and predict the difference before running it. Keep your failing attempt at exercise 5, Observe grad-return behavior, beside the repaired result. A missing framework is not a failing assertion. These solutions use only local fixtures.</p></article>
+<p><strong>Verify:</strong> In a fresh process, the exercise checks confirm for every looped case, <code>central(function, 0.0, h)</code> raises <code>ValueError</code> and <code>central(lambda value: 0.0, float(&#x27;nan&#x27;), 0.1)</code> raises <code>ValueError</code>.</p></article>
   </main>
 </body>
 </html>

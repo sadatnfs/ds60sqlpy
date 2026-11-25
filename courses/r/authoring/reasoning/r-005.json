@@ -42,5 +42,7 @@
       "wrong": "Treating names like a primary key in a table. Nothing enforces uniqueness, and a missing name returns NA rather than an error.",
       "verify": "`anyDuplicated(c(\"A\", \"A\"))` returns 2, the position of the first repeat, so the reference check `> 0L` is TRUE."
     }
-  ]
+  ],
+  "run_note": "The starter names three values A, B and C and supplies a mask of TRUE, NA and FALSE, then prints the named vector. Run it and read the names above the values. Predict what `x[mask]` returns before you try it: the NA position yields an unknown element rather than being skipped, which is why this chapter insists on known-only masks.",
+  "checks_note": "The checks confirm that repeated positions duplicate elements, that a negative index drops only the second value, that a key is unique and present before it is updated, that an update by name changes only the selected value, that the guarded failure case really raised an error, that an empty integer index returns nothing, and that `anyDuplicated()` flags repeated names. They do not cover vectors whose names are missing entirely."
 }

@@ -194,13 +194,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/apache-data-platforms/examples/apache-064.md</code></p>
     </header>
     <article class="document"><h2 id="hive-apache-064-command-notebook">Hive apache-064 command notebook<a class="heading-anchor" href="#hive-apache-064-command-notebook" aria-label="Link to this section">#</a></h2>
-<p>Run from the copied owned Hive project, following its README. Native service acceptance is separately recorded in QUALIFICATION.md.</p>
+<p><code>initialize.hql</code> is the DDL that maps <code>ds60.orders</code> onto <code>file:/warehouse/orders</code> with partition key <code>day</code>, and <code>fixture.py</code> writes the Parquet rows that DDL expects. Read both in the copied Hive project before the two checks.</p>
 <pre class="highlighted-code"><code class="language-bash">cat initialize.hql
 cat fixture.py
 bash run.sh check
 bash run.sh metadata</code></pre>
 <p>Use separately named copied-owned tables for wrong-type and wrong-location experiments. Record the actual reader response; an empty location and an incompatible schema are different conditions.</p>
-<p>The classroom does not execute these Docker commands. Retain source, schema, file identities, actual responses and failure scope in an independent receipt.</p></article>
+<p>The accepted Hive gate covered one correct table. A wrong column type or a wrong location is your own experiment, and each needs its own table name, DDL and recorded diagnostic so nobody mistakes it for the reference result.</p></article>
   </main>
 </body>
 </html>

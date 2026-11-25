@@ -2,7 +2,7 @@
 
 Choose a materialization using observed database behavior and a stated workload.
 
-The executable reference contains the two complete worked cases with assertions. The changes below explain the independent practice and its limits.
+The reference reads `depends_on` from the manifest, checks information_schema for a VIEW and a BASE TABLE, and confirms that an ephemeral model becomes the `__dbt__cte__base` CTE inside compiled SQL. It does not measure query speed, so it cannot settle which materialization is cheaper. See [how these answers are laid out](../STUDY-GUIDE.md#answers-and-references).
 
 
 ## 1. Remove a declared edge

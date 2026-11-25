@@ -1,10 +1,17 @@
 # cuda-080: A simulator is a debugging tool
 
-**Route:** CUDA Python and machine learning. **Stage:** intermediate. **Prerequisites:** `cuda-073`, `cuda-074`. Allow several sessions when the hardware experiment is new; the chapter is not a deadline.
+**Route:** CUDA Python and machine learning. **Stage:** intermediate. **Prerequisites:** `cuda-073`, `cuda-074`.
 
-## What you will be able to explain
+Pacing, evidence labels and platform rules: [CUDA study guide](../../STUDY-GUIDE.md).
 
-By the end, you can **classify a CPU result**, **design the validation ladder**, and **write an honest evidence label** with evidence. Start with the two worked cases, then use the editable CPU model to make the quantities concrete.
+## Learning objectives
+
+- Classify a CPU result.
+- Construct a race hidden by serialization.
+- Name an unsupported feature.
+- Design the validation ladder.
+- Choose a tiny debugging input.
+- Write an honest evidence label.
 
 ## Mechanism and vocabulary
 
@@ -31,9 +38,13 @@ A CPU loop visiting all valid indices proves the intended index formula covers t
 
 A shared counter incremented serially yields the expected count even when the corresponding parallel code lacks an atomic operation. The serial result hides the race.
 
-## Portable executable model
+## How to run the CPU model
 
-The **CPU reference model** variant runs this bounded worked example using `python-core`. It uses only the Python standard library, small synthetic values and no network. Its purpose is to expose the arithmetic or contract behind the chapter. The separate reference includes assertions for the stated observations.
+Edit the copy; the [reference](../references/cuda-080_cpu.py) adds assertions.
+
+```sh
+python courses/cuda/python/lessons/cuda-080_cpu.py
+```
 
 ```python
 serial_counter = 0
@@ -55,77 +66,64 @@ print("CPU race illustration:", serial_counter, lost_update)
 | `parallel_reads` | `[0, 0]` |
 | `lost_update` | `1` |
 
-Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.
-
 ## Practice and transfer
+
+Record each attempt in the [worksheet](../lessons/cuda-080.md) before opening hints.
 
 ### Exercise 1: Classify a CPU result
 
 **Trap to avoid:** Calling the result GPU verified because the same Python source was used assumes the compiled device code behaves like the interpreter.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 2: Construct a race hidden by serialization
 
 **Trap to avoid:** Concluding the kernel needs no atomics because the simulator printed the right count treats a serial schedule as representative of every parallel schedule.
-
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 3: Name an unsupported feature
 
 **Trap to avoid:** Assuming anything that runs in the simulator runs identically on hardware ignores that the simulator interprets kernels in Python.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 4: Design the validation ladder
 
 **Trap to avoid:** Collapsing the ladder into a single pass/fail end-to-end test hides where a failure came from.
-
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 5: Choose a tiny debugging input
 
 **Trap to avoid:** Debugging with a million random elements makes a single wrong index hard to find. A size that is a multiple of the block hides tail bugs.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 6: Write an honest evidence label
 
 **Trap to avoid:** Writing only verified or tests pass gives no executor and invites the reader to assume GPU coverage.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ## Progressive hints
 
-Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.
+Hint *k* belongs to exercise *k*; open one at a time.
 
-1. Start from worked example 1 and mark the quantities needed for the task "Classify a CPU result".
-2. Change one assumption in worked example 2 while preserving the declared contract: construct a race hidden by serialization.
-3. Trace the CPU program's variables before adding hardware behavior: name an unsupported feature.
-4. Draw producers, consumers and the exact operation boundary for the task "Design the validation ladder".
-5. Separate what the small fixture establishes from what the real runtime must show: choose a tiny debugging input.
-6. Write a counterexample to an overbroad claim before you write an honest evidence label.
+1. Name the processor that executed the loop and pick the evidence label that matches it.
+2. Let two simulated threads both read count 0 before either writes, and record the final value.
+3. Look up the pinned simulator's documented support before assuming a feature behaves as it would on hardware.
+4. Order the stages from mathematical reference to stress cases, and say what each stage adds that the earlier one could not.
+5. Choose an input length that is not a multiple of the block size but is still small enough to trace by hand.
+6. Write a label that names what ran and what remains pending, without any device name, bandwidth or throughput.
 
-## Common mistakes and self-review
+## Common mistakes and self-check
 
-Confusing a correct tiny example with a general implementation is the central review risk. For this chapter, challenge the assumption in worked example 2, then ask whether your change preserves the mechanism described above. If you change dtype, layout, ordering, batch size or backend, update the acceptance contract rather than silently reusing the old observation. Explain an unexpected result before trying random configuration changes.
+The central mistake is treating a passing simulator run as GPU correctness. A simulator usually serializes threads, so a shared counter incremented without an atomic still reaches 2, while real concurrent threads can lose an update and report 1. Another mistake is quietly rewriting the algorithm when a feature is unsupported by the simulator. Fix both by keeping the validation ladder stages separate, labeling simulator output as such, and recording unsupported features instead of working around them.
 
-Keep a small evidence table with columns **claim**, **input**, **expected observation**, **actual observation** and **limit**. For the first claim use `Classify a CPU result`. For the final claim use `Write an honest evidence label`. An unperformed GPU or cluster experiment remains pending even when the CPU model is correct.
+**Misconception:** If the simulator and the CPU reference agree, the kernel only needs a quick hardware run to measure its speed. **Correction:** Agreement on the early rungs of the validation ladder says nothing about concurrency, memory transactions or compiler output for the target architecture. Real-device output must be checked for correctness, not just timed, and repeated stress runs with varied sizes are needed because a race can pass many times before it fails. Memory and race checking tools belong on the ladder as well.
 
-## Platform and evidence contract
+**Evidence limit:** The reference contrasts a serial count of 2 with a possible lost-update count of 1 by construction. It does not run a simulator or a GPU, so it cannot show which races your actual simulator hides or exposes.
 
-The reading worksheet and CPU reference model work through the ordinary Linux Docker classroom on macOS, Linux and Windows using WSL 2. They do not require an NVIDIA GPU. Their results are labeled CPU models or semantic oracles, not simulated hardware performance.
+1. Name three behaviors a simulator usually does not reproduce.
+2. Why can a serialized run hide a race?
+3. Where does the simulator belong in the validation ladder?
 
-Real CUDA work needs supported NVIDIA hardware, a compatible host driver and an explicitly prepared GPU runtime. An Apple GPU does not execute CUDA kernels. PyTorch MPS on a supported native Mac, ROCm on supported AMD hardware, or other vendor backends can provide separate accelerator learning routes; they need their own package and operation qualification and are not CUDA evidence. The ordinary Linux Docker classroom does not expose native Mac MPS automatically.
-
-Do not download packages, models or data by opening this lesson. Do not attach an engine socket, ambient cluster credentials or an arbitrary remote endpoint. A CPU pass, imported package, successful compilation, real GPU result and measured performance are distinct observations. Record the actual backend, data shape/dtype, source revision, versions and pending checks. A saved completion marker records learning progress, not hardware certification.
+Answers: [self-check answers](../solutions/cuda-080_solutions.md#self-check-answers).
 
 ## Primary references
 
-- [NVIDIA CUDA Python introduction](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/intro-to-cuda-python.html)
 - [Maintained numba-cuda project](https://github.com/NVIDIA/numba-cuda)
 
-Use the version-matched documentation of your prepared environment. These references describe interfaces and supported boundaries; the chapter's synthetic examples and CPU models are original teaching material.
+Full lists: [documentation and sources](../../STUDY-GUIDE.md#documentation-and-sources).
 
 ## Ask an AI tutor about this lesson
 

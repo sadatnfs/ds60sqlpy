@@ -1,6 +1,8 @@
 # spark-018: Explained paired reference solutions
 
-Read the [guide](../guides/spark-018.md) and attempt one language first. The [Scala reference](spark-018_solution.scala) and [PySpark reference](spark-018_solution.py) are complete single-file programs with explicit local sessions and finally-based stop. Each compares with literal expectations; matching two implementations alone would not rule out a shared mistake.
+Attempt the [guide](../guides/spark-018.md) exercises first.
+
+References: [Scala](spark-018_solution.scala), [PySpark](spark-018_solution.py).
 
 ## Exercises and reasoning
 
@@ -203,6 +205,7 @@ Try parsing exposes malformed input as data so a controlled ingestion boundary c
 
 ## Execution and interpretation
 
-Run the complete reference in its prepared fixed worker. Its first check (Parse offset evidence into comparable instants) is built inside the program, so opening the lesson fetches nothing; it expects: All 6 rows parse. `epoch(event 2) = epoch(event 5)`, and `epoch(event 3) - epoch(event 2) = 3600` seconds. The final success line prints only after every reference assertion passes.
+The references assert that all six rows parse, that events 2 and 5 share an epoch while event 3 is 3,600 seconds later, the 08:30 and 09:30 UTC renderings beside the single 01:30 Los Angeles rendering, the half-open filter result `[1, 2, 3, 5]`, two `timestamp_ntz` outputs of `2024-11-03 01:30:00`, one local label against two instants, and a quarantine ledger in which only one row is accepted with ANSI still on. Each check that changes the session zone restores UTC and the reference asserts it.
 
-Local plan, partition and resource evidence does not establish cluster-scale performance; session cleanup is explicit.
+`spark-018: six PySpark reference contracts passed; Spark=` with the version, or the Scala line, confirms the arithmetic for this particular transition. It does not cover other zones or historical rule changes; the time zone database shipped with the JDK decides those, so the zone name you pass is part of the contract.
+

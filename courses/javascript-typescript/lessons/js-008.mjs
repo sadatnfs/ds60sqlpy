@@ -1,16 +1,14 @@
 // Answer-free learner source. Save your own copy before editing.
 // Exercise 1: Count code units and codepoints: predict an edited check
-// Copy Example A into a scratch `main.mjs` and change `assert.equal(text.codePointAt(1),
-// 0x1f642);` to `assert.equal(text.codePointAt(2), 0x1f642);` inside its check. Before
-// running it, predict whether the check still passes and explain why; then restore it.
-// Expected: The changed run fails with an `AssertionError` at
+// In a scratch copy of Example A, change `assert.equal(text.codePointAt(1), 0x1f642);` to
+// `assert.equal(text.codePointAt(2), 0x1f642);` inside its check. Does the check still pass?
+// Expected: The edited run fails with an `AssertionError` at
 // `assert.equal(text.codePointAt(2), 0x1f642);`. Restoring
 // `assert.equal(text.codePointAt(1), 0x1f642);` brings back: length 3; spread count 2.
 
 // Exercise 2: Compare canonical spellings: debug a regression
-// A regression changed one token in Example B, so one line now reads `const composed =
-// 'é!';`. Run Example B with that line, use the failing check to locate the defect and
-// repair it without changing the check.
+// A regression made one Example B line read `const composed = 'é!';`. Locate and repair it
+// without editing the check.
 // Expected: Before the repair the run fails with an `AssertionError` at
 // `assert.equal(decomposed.normalize('NFC'), composed)`. Restoring `const composed = 'é';`
 // brings back: raw strings differ; normalized strings equal.

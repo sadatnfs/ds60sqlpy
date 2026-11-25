@@ -194,14 +194,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/apache-data-platforms/examples/apache-065.md</code></p>
     </header>
     <article class="document"><h2 id="hive-apache-065-command-notebook">Hive apache-065 command notebook<a class="heading-anchor" href="#hive-apache-065-command-notebook" aria-label="Link to this section">#</a></h2>
-<p>Run from the copied owned Hive project, following its README. Native service acceptance is separately recorded in QUALIFICATION.md.</p>
+<p>Start and end this lifecycle with <code>metadata</code> from the copied Hive project. The probe reads table type, partition key and both storage locations through Thrift, so matching output before <code>stop</code> and after <code>resume</code> shows the Metastore database kept its state.</p>
 <pre class="highlighted-code"><code class="language-bash">bash run.sh metadata
 bash run.sh stop
 bash run.sh resume
 bash run.sh metadata
 bash run.sh check</code></pre>
 <p>For replacement, use down/start then only check/metadata. Never initialize while testing retention. Compare database and warehouse ownership separately.</p>
-<p>The classroom does not execute these Docker commands. Retain source, schema, file identities, actual responses and failure scope in an independent receipt.</p></article>
+<p>QUALIFICATION.md records that stop and resume kept the three service containers, and that replacement changed all three while the database, warehouse and typed metadata stayed the same. No schema initialization ran during that readback.</p></article>
   </main>
 </body>
 </html>

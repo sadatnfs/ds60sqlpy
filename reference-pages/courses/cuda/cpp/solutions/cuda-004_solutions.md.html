@@ -196,7 +196,6 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <article class="document"><h2 id="cuda-004-explanatory-solutions">cuda-004: explanatory solutions<a class="heading-anchor" href="#cuda-004-explanatory-solutions" aria-label="Link to this section">#</a></h2>
 <h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
 <p>Decomposition assigns parts of a problem to workers while preserving its mathematical meaning. A map transforms each input independently. A reduction combines many values into one. A scan produces every prefix, so its outputs encode more information than a reduction. Gather reads from chosen locations; scatter writes to chosen locations and needs a conflict policy when destinations overlap. Work counts all operations, while dependency depth counts the longest chain that cannot be parallelized. A useful decomposition names each output owner, describes required inputs and states when producers must finish before consumers read.</p>
-<p>The separate <a href="../references/cuda-004_cpu.py.html">CPU reference</a> checks the chapter&#x27;s bounded model. It does not execute CUDA or establish GPU timing. Compare after attempting the worksheet or explicitly choosing to reveal solutions.</p>
 <h3 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h3>
 <p>Partition 10 elements into conceptual blocks of four. The ownership ranges are [0,4), [4,8) and [8,10). The half-open notation includes the start and excludes the end. Each element appears once; the final block has a tail. Allocating three full blocks of output without a bounds predicate would incorrectly expose positions 10 and 11.</p>
 <p><strong>Approach:</strong> Step through starts 0, 4 and 8 with block size 4, clamp each end to 10, and list the half-open ranges.</p>
@@ -233,11 +232,16 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Why it is correct:</strong> Earlier selected elements fix each destination, so a stable output keeps original order without collisions.</p>
 <p><strong>A plausible wrong approach:</strong> Assigning destinations with an atomic counter gives unique slots but scrambles the order across threads.</p>
 <p><strong>How to verify:</strong> For flags [1, 0, 1, 1] expect prefixes [0, 1, 1, 2] and count 3, with selected values in input order.</p>
+<h3 id="self-check-answers">Self-check answers<a class="heading-anchor" href="#self-check-answers" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>Write the ownership ranges for 13 elements in blocks of five.</strong> [0,5), [5,10) and [10,13); the last block has only three valid elements.</li>
+<li><strong>Why does a stable filter need a scan rather than a reduction?</strong> Each selected element needs its own output position, which is the count of selected elements before it, a prefix result that a single total cannot supply.</li>
+<li><strong>What extra rule does scatter need that map does not?</strong> A conflict policy for destinations written by more than one worker, such as atomic combination or a guarantee of unique targets.</li>
+</ol>
 <h3 id="numerical-reference-and-its-limits">Numerical reference and its limits<a class="heading-anchor" href="#numerical-reference-and-its-limits" aria-label="Link to this section">#</a></h3>
-<p>The complete CPU model is <a href="../references/cuda-004_cpu.py.html">here</a>. Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It does not claim CUDA execution, concurrency safety or a performance measurement.</p>
+<p>The <a href="../references/cuda-004_cpu.py.html">CPU reference</a> reproduces worked example 1 and prints <code>{&#x27;exclusive_scan&#x27;: [0, 2, 3, 6], &#x27;reduction&#x27;: 10, &#x27;ownership&#x27;: [[0, 1, 2, 3], [4, 5, 6, 7], [8, 9]]}</code>.</p>
 <h3 id="transfer-review">Transfer review<a class="heading-anchor" href="#transfer-review" aria-label="Link to this section">#</a></h3>
-<p>Map produces selection flags, exclusive scan gives each selected element&#x27;s destination, and the final prefix plus flag gives output count.</p>
-<p>A complete explanation must name its inputs, the unchanged mathematical contract, the changed boundary or resource condition, and the evidence still needed on actual hardware. Preserve a CPU baseline even after a GPU path becomes available.</p></article>
+<p>Map produces selection flags, exclusive scan gives each selected element&#x27;s destination, and the final prefix plus flag gives output count.</p></article>
   </main>
 </body>
 </html>

@@ -195,17 +195,15 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the classroom for supported runnable lessons, or follow the lesson's external project instructions.</div><pre class="source-code language-javascript"><code><span class="source-line"><span class="syntax-comment">// Answer-free learner source. Save your own copy before editing.</span></span>
 <span class="source-line"><span class="syntax-comment">// Exercise 1: Count code units and codepoints: predict an edited check</span></span>
-<span class="source-line"><span class="syntax-comment">// Copy Example A into a scratch `main.mjs` and change `assert.equal(text.codePointAt(1),</span></span>
-<span class="source-line"><span class="syntax-comment">// 0x1f642);` to `assert.equal(text.codePointAt(2), 0x1f642);` inside its check. Before</span></span>
-<span class="source-line"><span class="syntax-comment">// running it, predict whether the check still passes and explain why; then restore it.</span></span>
-<span class="source-line"><span class="syntax-comment">// Expected: The changed run fails with an `AssertionError` at</span></span>
+<span class="source-line"><span class="syntax-comment">// In a scratch copy of Example A, change `assert.equal(text.codePointAt(1), 0x1f642);` to</span></span>
+<span class="source-line"><span class="syntax-comment">// `assert.equal(text.codePointAt(2), 0x1f642);` inside its check. Does the check still pass?</span></span>
+<span class="source-line"><span class="syntax-comment">// Expected: The edited run fails with an `AssertionError` at</span></span>
 <span class="source-line"><span class="syntax-comment">// `assert.equal(text.codePointAt(2), 0x1f642);`. Restoring</span></span>
 <span class="source-line"><span class="syntax-comment">// `assert.equal(text.codePointAt(1), 0x1f642);` brings back: length 3; spread count 2.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">// Exercise 2: Compare canonical spellings: debug a regression</span></span>
-<span class="source-line"><span class="syntax-comment">// A regression changed one token in Example B, so one line now reads `const composed =</span></span>
-<span class="source-line"><span class="syntax-comment">// &#x27;é!&#x27;;`. Run Example B with that line, use the failing check to locate the defect and</span></span>
-<span class="source-line"><span class="syntax-comment">// repair it without changing the check.</span></span>
+<span class="source-line"><span class="syntax-comment">// A regression made one Example B line read `const composed = &#x27;é!&#x27;;`. Locate and repair it</span></span>
+<span class="source-line"><span class="syntax-comment">// without editing the check.</span></span>
 <span class="source-line"><span class="syntax-comment">// Expected: Before the repair the run fails with an `AssertionError` at</span></span>
 <span class="source-line"><span class="syntax-comment">// `assert.equal(decomposed.normalize(&#x27;NFC&#x27;), composed)`. Restoring `const composed = &#x27;é&#x27;;`</span></span>
 <span class="source-line"><span class="syntax-comment">// brings back: raw strings differ; normalized strings equal.</span></span>

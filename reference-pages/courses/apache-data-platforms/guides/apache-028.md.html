@@ -251,9 +251,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="mistakes-diagnosis-and-interview-discussion">Mistakes, diagnosis and interview discussion<a class="heading-anchor" href="#mistakes-diagnosis-and-interview-discussion" aria-label="Link to this section">#</a></h3>
 <p>Use retries for failure categories that can reasonably succeed later. A malformed schema, unauthorized connection or invalid parameter should not be retried indefinitely. Bound retry count and total execution time, retain the final failure and distinguish a completed data effect from a failure to report its receipt. Keep task logs free of credential values and bulk payloads.</p>
 <p><strong>Interview discussion: does setting retries to three make a task reliable?</strong> It adds attempts under a policy, but the task still needs correct identity, idempotence, timeouts, output validation and an understandable permanent-failure path. These cases show a safe local output contract and an actual scheduled failure/retry transition without claiming that the orchestrator rolls back arbitrary external systems.</p>
-<p>The <a href="../projects/airflow/README.md.html">complete Airflow workshop</a> provides the maintained files, preparation, lifecycle and exact qualification boundaries for these cases.</p>
+<p><code>retry-check</code> in the <a href="../projects/airflow/README.md.html">Airflow workshop</a> runs the same two intervals and requires the <code>fail_once</code> task to succeed on its second try in each run.</p>
 <h3 id="complete-worked-source">Complete worked source<a class="heading-anchor" href="#complete-worked-source" aria-label="Link to this section">#</a></h3>
-<p>This is a project-only command notebook. Read and edit it in the classroom; run its explicitly labeled commands from the copied owned Docker workshop. The classroom does not execute these service commands.</p>
+<p>The classroom does not execute these service commands. See the <a href="../STUDY-GUIDE.md.html#workshop-notebooks">workshop rules</a>.</p>
 <h2 id="retry-state-and-idempotent-outputs">Retry state and idempotent outputs<a class="heading-anchor" href="#retry-state-and-idempotent-outputs" aria-label="Link to this section">#</a></h2>
 <pre class="highlighted-code"><code class="language-bash">bash run.sh run-intervals
 bash run.sh retry-check

@@ -1,14 +1,12 @@
 // Answer-free learner source. Save your own copy before editing.
 // Exercise 1: Observe a live binding: change one input
-// Copy Example A into a scratch `main.mjs` and change `1;` to `2;`. Before running it,
-// predict which check fails and which value it now sees; then run it and restore the
-// original line.
-// Expected: The changed run fails with an `AssertionError` at `assert.equal(module.count,
+// In a scratch copy of Example A, change `1;` to `2;`. Which check fails, and what value
+// does it see?
+// Expected: The edited run fails with an `AssertionError` at `assert.equal(module.count,
 // 1)`. Restoring `1;` brings back: count changes from 0 to 1 through the imported namespace.
 
 // Exercise 2: Resolve a relative dependency: debug a regression
-// A regression changed one token in Example B, so one line now reads `3`. Run Example B with
-// that line, use the failing check to locate the defect and repair it without changing the
+// A regression made one Example B line read `3`. Locate and repair it without editing the
 // check.
 // Expected: Before the repair the run fails with an `AssertionError` at
 // `assert.equal(module.answer, 8)`. Restoring `2` brings back: answer equals 8.

@@ -1,6 +1,6 @@
 # r-038: reference reasoning
 
-Use the [complete reference](r-038_reference.R) with the guide's declared inputs and runtime. Every worked example is also a standalone script.
+Run the [complete reference](r-038_reference.R) under the [run rules](../STUDY-GUIDE.md#run-a-chapter).
 
 ## Why the implementation has this shape
 
@@ -96,4 +96,6 @@ Assess sampling, base rates and stable conditional mechanisms before generalizin
 
 ## What the checks establish
 
-The reference makes 5 `stopifnot()` checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.
+The checks confirm that the yes column totals 40 with 0.75 of it from A, that an alert rate of 0.14 and Bayes' rule give 3/7, that joint probabilities sum to 1, that dividing by a zero count returns NA, and that conditioning on the row total gives 0.3 while conditioning on the column total gives 0.75. They only cover this finite table.
+
+The reference makes 5 `stopifnot()` checks; see [what a passing run proves](../STUDY-GUIDE.md#what-a-passing-run-proves).

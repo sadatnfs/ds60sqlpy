@@ -194,16 +194,19 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/scala-spark/guides/spark-008.md</code></p>
     </header>
     <article class="document"><h2 id="spark-008-assertions-numeric-boundaries-and-independent-oracles">spark-008: Assertions, numeric boundaries, and independent oracles<a class="heading-anchor" href="#spark-008-assertions-numeric-boundaries-and-independent-oracles" aria-label="Link to this section">#</a></h2>
-<p>Authored tutorial and practice content. The prepared Scala/JVM worker executes a bounded program; process success and understanding remain distinct. No source file installs a tool or downloads a dependency.</p>
+<p>A test is only as good as its ability to fail. This lesson builds the checking helpers used later in the course (order-free bag equality, a checked <code>Long</code> sum, promotion before arithmetic, an explicit floating tolerance) and then proves the helpers reject real misconceptions instead of passing everything.</p>
 <h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
-<p>Beginner; approximately 75 minutes. Direct prerequisites: <code>spark-007</code>. The lesson uses Scala 2.13 syntax and the prepared JDK 17 worker. The <a href="../execution-baseline.md.html">execution baseline</a> lists the exact Scala, JDK and Spark versions.</p>
+<p>Beginner; approximately 75 minutes. Direct prerequisites: <code>spark-007</code>. Pinned versions: <a href="../execution-baseline.md.html">execution baseline</a>.</p>
 <h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>Open <code>spark-008</code> in the classroom, select the Scala source, prepare the <code>scala-jvm</code> profile and run the saved pad. The worker stages the single source as <code>Main.scala</code> and invokes <code>object Main</code>. Read the terminal output and exact assertions. The <a href="../lessons/spark-008.scala.html">learner source</a> runs two complete demonstrations; its six task functions remain explicit stubs until you implement them. Preserve your saved attempt. The <a href="../solutions/spark-008_solution.scala.html">reference program</a> and <a href="../solutions/spark-008_solutions.md.html">explained solutions</a> are separate and should be opened after an attempt or an explicit worked-comparison request. If the profile is unavailable, reading and saving remain available; opening this guide does not prepare a runtime.</p>
+<p>Shared run steps and profile rules: <a href="../STUDY-GUIDE.md.html#run-a-language-lesson">study guide</a>.</p>
+<p>Learner pad: <a href="../lessons/spark-008.scala.html">spark-008.scala</a>.</p>
+<p>Open the <a href="../solutions/spark-008_solutions.md.html">explained solutions</a> after an attempt.</p>
+<p>The pad prints <code>Set equality loses a repeated occurrence</code> after asserting that <code>Seq(1L, 1L, 2L).toSet</code> equals <code>Seq(1L, 2L).toSet</code> while the sorted sequences differ. It then prints <code>promoted=2147483648 tooLate=-2147483648</code>: adding 1 to <code>Int.MaxValue</code> in <code>Int</code> wraps to <code>Int.MinValue</code> before the conversion to <code>Long</code>, so the conversion has to come first. Exercises 1 and 3 turn those two observations into reusable helpers.</p>
 <h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
 <ul>
 <li>Test functions with exact integer money values and recognize overflow and order-sensitive comparisons.</li>
-<li>Explain the result of both worked examples before running them.</li>
-<li>Implement the six contracts, inspect normal and boundary evidence, and explain a counterexample in your own words.</li>
+<li>Show that <code>(1, 1, 2)</code> and <code>(1, 2)</code> are equal as sets but not as bags, and that equal count and sum still cannot tell <code>(1, 3)</code> from <code>(2, 2)</code>.</li>
+<li>Demonstrate that <code>filterContract</code> accepts the correct <code>&gt;= 0</code> filter and rejects a <code>&gt; 0</code> filter, a filter that also removes duplicates, and a candidate that throws.</li>
 </ul>
 <h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
 <ul>
@@ -274,9 +277,15 @@ println<span class="syntax-punctuation">(</span><span class="syntax-string">s&qu
 <h3 id="common-pitfalls">Common pitfalls<a class="heading-anchor" href="#common-pitfalls" aria-label="Link to this section">#</a></h3>
 <p>If a test passes despite a dropped duplicate, inspect whether the oracle compared Sets or only a total. If a boundary result is negative after increasing an Int, move the conversion before the operation. If a floating comparison passes NaN or a huge tolerance hides a logic error, review the policy rather than weakening assertions. If an invalid candidate passes every test, add a mechanism-specific counterexample and keep expected values independent of the candidate implementation. Finite fixture success is not automatic learner mastery or a universal correctness proof.</p>
 <h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
-<p>Without opening the reference, trace the listed boundary case through <code>bagEqual</code>. Then explain why <code>filterContract</code> needs its declared invariant or input restriction. Name the exact assertion that would reject one tempting wrong implementation. Retain the observed values and explain how they support the lesson outcome: Test functions with exact integer money values and recognize overflow and order-sensitive comparisons.</p>
+<ul>
+<li>Why does <code>bagEqual(Seq(1, 1, 2), Seq(2, 1, 1))</code> pass while <code>bagEqual(Seq(1, 1, 2), Seq(1, 2))</code> fails? Name a comparison that would wrongly pass the second pair.</li>
+<li><code>exactSum</code> must fail for <code>Long.MaxValue</code> plus 1. What value would a plain <code>+</code> produce, and why is a wrong total worse than an exception here?</li>
+<li><code>promotedIncrement(Int.MinValue)</code> is <code>-2147483647L</code>. Show the order of operations that produces it.</li>
+<li>With <code>atol = 0</code> and <code>rtol = 1e-7</code>, why does <code>1e8 + 1</code> match <code>1e8</code>? Why must <code>closeEnough</code> return false whenever either side is NaN, and reject a negative tolerance?</li>
+<li><code>validPartition</code> fails when a zero is placed in the rejected side. Which part of the contract does that break: conservation or classification?</li>
+</ul>
 <h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
-<p>Continue to the next lesson only after you can explain the boundary behavior. The <a href="../README.md.html">course route</a> shows authored material and runtime evidence separately.</p>
+<p>Go on to <a href="spark-009.md.html">spark-009: Packages, build inputs, and closure serialization</a>. Your helpers so far ran in one JVM; next you look at what Spark needs to ship your code elsewhere: a matching artifact family, a bounded master and closures that capture plain values rather than the objects that own them.</p>
 <h3 id="primary-sources-and-official-apis">Primary sources and official APIs<a class="heading-anchor" href="#primary-sources-and-official-apis" aria-label="Link to this section">#</a></h3>
 <ul>
 <li><a href="https://docs.scala-lang.org/overviews/collections-2.13/operations.html">Scala 2.13 collections operations</a>.</li>

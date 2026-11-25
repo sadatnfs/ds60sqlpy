@@ -259,8 +259,10 @@ def test_gap_and_status_rules() -> None:
         row.get("metrics", {}).pop("templated_words", None)
     errors = qualification.evaluate_track(unmeasured, record, ROOT)
     assert any("templated_words metric" in e for e in errors)
-    record["criteria"]["R8"]["templated_baseline"] = 0
-    assert any("exceeds the recorded baseline" in e for e in _errors(record))
+    grown = copy.deepcopy(MATRIX)
+    qualification.track_rows(grown, "go")[0]["metrics"]["templated_words"] += 1
+    errors = qualification.evaluate_track(grown, go_record(), ROOT)
+    assert any("exceeds the recorded baseline" in e for e in errors)
     record = go_record()
     record["criteria"]["R5"] = {"status": "gap", "justification": "too short"}
     assert any("at least 40" in e for e in _errors(record))

@@ -461,19 +461,10 @@ np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</
 <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>result<span class="syntax-punctuation">)</span></code></pre>
 <p>Nothing expensive happens until an execution trigger such as <code>compute</code>, <code>persist</code>, or a write. Inspect the task and expected output size before triggering it.</p>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
-<p><strong>Default Docker classroom:</strong> open <code>python-52</code> for its guide, notebook and capability notice. The default Core does not include the <code>production</code> extra, so the complete legacy notebook is unavailable there until that app environment is deliberately prepared. Pressing Run or choosing a notebook kernel does not install packages.</p>
-<p><strong>Prepared browser alternative:</strong> use the <a href="../reference-pages/courses/data-ml-engineering/guides/dme-001.md.html">data and ML engineering course</a> in its declared runtime. Its supported examples have their own package and execution contract; this does not qualify every legacy optional extension.</p>
-<p><strong>Explicit legacy preparation:</strong> retain the contributor extras in <a href="../reference-pages/CONTRIBUTING.md.html">CONTRIBUTING</a> and add <code>production</code> only when needed. See <a href="../reference-pages/docs/dependency-profiles.md.html">dependency profiles</a> and <a href="../reference-pages/docs/docker-profiles.md.html">Docker app package options</a> for deliberate preparation. A host notebook environment and a Docker app image are separate. Do not install packages inside a learner pad.</p>
+<p><strong>Default Docker classroom:</strong> Dask cannot import in <code>python-52</code>; the default Core does not include the <code>production</code> extra. Prepare it through the <a href="../reference-pages/CONTRIBUTING.md.html">contributor setup</a> to partition frames on your own machine; a host notebook environment and a Docker app image are separate.</p>
+<p><strong>Prepared browser alternative:</strong> Partitioned computation still needs a clear record and metric contract, which the <a href="../reference-pages/courses/data-ml-engineering/guides/dme-001.md.html">data and ML engineering course</a> builds in Core without a scheduler.</p>
 <p>The complete example needs Dask DataFrame; the distributed reference also needs dask.distributed. A chunked Python reduction illustrates the algebra without proving a Dask execution. Local scheduler and dashboard processes require a separately prepared project environment.</p>
-<p><strong>Optional native notebook/editor route:</strong> the instructions below describe separately prepared host tools. They are useful alternatives, not prerequisites for opening this lesson in the Docker classroom.</p>
-<ol>
-<li>Open the Day 52 learner notebook from this guide&#x27;s <strong>Next step</strong> section in VS Code or JupyterLab.</li>
-<li>Select the <code>Python (ds60sqlpy)</code> kernel. Start at the top and use <strong>Run All</strong> only after making the written predictions; the default data examples are offline once the declared packages are prepared. Optional services and model assets have separate requirements.</li>
-<li>Keep experiments in new scratch cells. Do not edit the official solution while attempting the numbered practice.</li>
-<li>Restart the kernel and run from the first cell before calling the lesson complete. A clean run catches hidden state and stale variables.</li>
-</ol>
-<p>Linux, macOS, or Ubuntu in Windows WSL 2:</p>
-<pre class="highlighted-code"><code class="language-bash">.venv/bin/python -m jupyter lab</code></pre>
+<p>The <a href="../reference-pages/python/STUDY-GUIDE.md.html">Python study guide</a> covers the notebook route and preparing optional extras.</p>
 <h4 id="guide--concept-deep-dive-lazy-task-graphs-partitions-bounded-reducers-and-scale-evidence">Concept deep dive: lazy task graphs, partitions, bounded reducers, and scale evidence<a class="heading-anchor" href="#guide--concept-deep-dive-lazy-task-graphs-partitions-bounded-reducers-and-scale-evidence" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--the-mental-model">The mental model<a class="heading-anchor" href="#guide--the-mental-model" aria-label="Link to this section">#</a></h5>
 <p>Dask DataFrame represents a logical plan split into pandas partitions. Most operations are lazy: they build a task graph but do not read or compute data until <code>compute</code> or <code>persist</code>. <code>persist</code> returns a new collection backed by computed partitions; it is not an in-place flag.</p>
@@ -485,7 +476,6 @@ np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</
 <li><strong>chunk state + combine:</strong> keeps sufficient statistics such as sum/count rather than averaging chunk averages incorrectly.</li>
 </ul>
 <h5 id="guide--focused-example-a-combine-chunk-sums-and-counts-correctly">Focused example A: combine chunk sums and counts correctly<a class="heading-anchor" href="#guide--focused-example-a-combine-chunk-sums-and-counts-correctly" aria-label="Link to this section">#</a></h5>
-<p>Before running the example, predict the shape, type, or direction of the result. Write the prediction down so that a surprise becomes evidence rather than something to overlook.</p>
 <pre class="highlighted-code"><code class="language-python">chunks <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">1.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">100.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span>
 states <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">sum</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">sum</span><span class="syntax-punctuation">(</span>chunk<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">count</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>chunk<span class="syntax-punctuation">)</span><span class="syntax-punctuation">}</span> <span class="syntax-keyword">for</span> chunk <span class="syntax-operator">in</span> chunks<span class="syntax-punctuation">]</span>
 total_sum <span class="syntax-operator">=</span> <span class="syntax-builtin">sum</span><span class="syntax-punctuation">(</span>state<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">sum</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-keyword">for</span> state <span class="syntax-operator">in</span> states<span class="syntax-punctuation">)</span>
@@ -573,7 +563,6 @@ result <span class="syntax-operator">=</span> planned<span class="syntax-operato
 <p>The reference solution contains an illustrative <code>s3://...</code> placeholder. Do not run it in the offline lesson. Replace it with a repository-local file or use the notebook&#x27;s generated frame.</p>
 <h5 id="guide--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#guide--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
 <p>Reason about partitions, task graphs, materialization, and associative reductions before scaling. Validate distributed results against a small exact baseline.</p>
-<p>Predict or plan before you run code. Use the hint only after an honest attempt, and record the evidence that would prove your result correct.</p>
 <ol start="4">
 <li><strong>Task-graph tracing:</strong> Build two aggregations from the same lazy Dask DataFrame, inspect their task graphs, and compare separate computes with one combined <code>dask.compute</code> call. <strong>Progressive hint:</strong> Building an expression does not read all data. Combining terminal computations can share upstream work without persisting the entire frame.</li>
 </ol>
@@ -635,7 +624,7 @@ result <span class="syntax-operator">=</span> planned<span class="syntax-operato
 <li>Continue to <a href="python-53.html#guide">Day 53; MLflow</a>.</li>
 </ul>
 <h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
-<p>The lesson is complete without an AI assistant. If you want optional coaching, copy this prompt into the AI tutor while the repository root is open:</p>
+<p>The lesson is complete without AI. For optional coaching, copy this prompt with the repository root open:</p>
 <pre class="highlighted-code"><code class="language-text">Tutor me through `python-52` (Day 52: Scalability with Dask and Chunked pandas).
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
@@ -1016,7 +1005,7 @@ client <span class="syntax-operator">=</span> Client<span class="syntax-punctuat
 </ul>
 <hr>
 <h4 id="solution-1--solution-reasoning-lens">Solution reasoning lens<a class="heading-anchor" href="#solution-1--solution-reasoning-lens" aria-label="Link to this section">#</a></h4>
-<p>A strong solution is not merely code that produces one plausible output. It establishes a chain from input contract to operation to verification:</p>
+<p>Each decision below links an input contract to an operation and its evidence:</p>
 <ol>
 <li><strong>lazy expression:</strong> describes tasks and dependencies; inspect partitions/graph before execution.</li>
 <li><strong><code>.compute()</code>:</strong> executes the graph and materializes the result in local memory.</li>
@@ -1028,44 +1017,36 @@ client <span class="syntax-operator">=</span> Client<span class="syntax-punctuat
 <p><strong>Trade-off:</strong> More partitions improve available parallelism but increase scheduler overhead; large partitions reduce overhead while increasing peak memory.</p>
 <p><strong>Edge case to test:</strong> Skewed keys, global sorts/shuffles, dtype inference drift, empty chunks, and a final result too large for memory defeat naive scaling.</p>
 <p><strong>Evidence of correctness:</strong> Reconcile results with pandas/standard library, inspect graph and partition sizes, measure repeated runs, bound memory/final output, and prove reducers are associative.</p>
-<p>When comparing your attempt with the reference, explain which of these decisions your code made explicitly. If the reference makes a different choice, compare the contracts and evidence before deciding that one version is universally better.</p>
 <h4 id="solution-1--exercise-by-exercise-reasoning-map">Exercise-by-exercise reasoning map<a class="heading-anchor" href="#solution-1--exercise-by-exercise-reasoning-map" aria-label="Link to this section">#</a></h4>
-<p>This map connects every learner prompt to a reasoning path. Read the explanation before copying code: the goal is to understand the assumptions, the evidence that validates the result, and the edge cases that can make an apparently correct implementation fail.</p>
 <h5 id="solution-1--exercise-1-original-lesson-practice">Exercise 1: Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Read a large local CSV with Dask and compute groupby aggregations.</p>
 <p><strong>How to reason about it:</strong> Generate or use a local CSV, begin small, and compare Dask aggregation with pandas before scaling. Dask expressions are lazy until <code>compute</code>, so measure materialization separately.</p>
-<p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
 <p><strong>Verify:</strong> Generate/read a named local CSV, print Dask partition count and groupby result, and assert keys/values match pandas within 1e-10 after deterministic sorting.</p>
 <h5 id="solution-1--exercise-2-original-lesson-practice">Exercise 2: Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-2-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Persist the DataFrame and compare repeated timings with and without persistence.</p>
 <p><strong>How to reason about it:</strong> Persist is beneficial only for reused intermediates and consumes memory. Time a first materialization plus repeated downstream actions, then close distributed clients and release references.</p>
-<p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
 <p><strong>Verify:</strong> Record at least three uncached and persisted repeated timings for the same aggregation, Dask graph/partition sizes, and result equality; close the local client and avoid claiming a speedup from one run.</p>
 <h5 id="solution-1--exercise-3-original-lesson-practice">Exercise 3: Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-3-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Implement the same reduction with <code>pandas.read_csv(..., chunksize=...)</code> and compare memory and elapsed time.</p>
 <p><strong>How to reason about it:</strong> Chunked pandas should carry partial sums and counts rather than concatenate all chunks. Verify the final reduction against an in-memory result and handle missing/group-key semantics consistently.</p>
-<p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
 <p><strong>Verify:</strong> For identical CSV and aggregation, print pandas-chunked and Dask results, elapsed-time samples, and measured peak memory; assert sorted numeric outputs match within 1e-10.</p>
 <h5 id="solution-1--exercise-4-task-graph-tracing">Exercise 4: Task-graph tracing<a class="heading-anchor" href="#solution-1--exercise-4-task-graph-tracing" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Build two aggregations from the same lazy Dask DataFrame, inspect their task graphs, and compare separate computes with one combined <code>dask.compute</code> call.</p>
 <p><strong>Reasoning before implementation:</strong> Building an expression does not read all data. Combining terminal computations can share upstream work without persisting the entire frame.</p>
 <p>Record graph/task counts and wall time, but treat timings as local evidence rather than universal benchmarks. <code>dask.compute(result_a, result_b)</code> can optimize shared dependencies in one execution. Two separate <code>.compute()</code> calls may reread and redo work unless data or intermediates are cached/persisted.</p>
 <p>Keep output bounded; computing a small aggregation is different from calling <code>compute()</code> on the full large DataFrame.</p>
-<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
 <p><strong>Verify:</strong> Task-graph tracing; print task counts/graph keys for two separate aggregations and one combined dask.compute call; assert all numeric results match and report shared-prefix work without promising scheduler-specific task elimination.</p>
 <h5 id="solution-1--exercise-5-partition-skew-diagnosis">Exercise 5: Partition-skew diagnosis<a class="heading-anchor" href="#solution-1--exercise-5-partition-skew-diagnosis" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Create a group key where one value owns most rows. Measure partition sizes and groupby runtime, then propose repartitioning or algorithm changes.</p>
 <p><strong>Reasoning before implementation:</strong> A balanced row count before a shuffle does not guarantee balanced work after grouping; one hot key can become a straggler.</p>
 <p>Report the largest group and partition relative to the median. Salting a hot key can distribute an associative partial aggregation, followed by a second combine, but it changes implementation complexity. More partitions alone do not split one indivisible group operation automatically.</p>
 <p>If the output is tiny, pre-aggregate within input partitions before the shuffle. Preserve exactness and test the salted/two-stage result against pandas.</p>
-<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
 <p><strong>Verify:</strong> Partition-skew diagnosis; print rows/bytes per partition, max-to-median skew ratio, dominant-key support, and repeated groupby timings before/after the chosen mitigation; assert outputs remain equal.</p>
 <h5 id="solution-1--exercise-6-reducer-correctness">Exercise 6: Reducer correctness<a class="heading-anchor" href="#solution-1--exercise-6-reducer-correctness" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Implement a mergeable mean/variance state for chunks and prove it matches NumPy across different chunk boundaries, including an empty chunk.</p>
 <p><strong>Reasoning before implementation:</strong> A mean alone is not mergeable without support. Carry count, mean, and M2 (sum of squared deviations) using a stable combine formula.</p>
 <p>The state must define an identity for an empty chunk and an associative combine operation (within floating-point tolerance). Welford/Chan formulas combine <code>count</code>, <code>mean</code>, and <code>M2</code> without concatenating values.</p>
 <p>Test one chunk, one-row chunks, uneven chunks, large-offset values, and an empty input policy. This same reasoning underlies correct distributed custom aggregations; averaging partition means is wrong when partition sizes differ.</p>
-<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
 <p><strong>Verify:</strong> Reducer correctness; test the mergeable state on empty, singleton, unequal, and reordered chunks; print count/mean/variance and assert agreement with NumPy within 1e-12 for every partitioning.</p></div>
       </section>
 
@@ -1213,7 +1194,7 @@ client <span class="syntax-operator">=</span> Client<span class="syntax-punctuat
 </ul>
 <hr>
 <h4 id="solution-2--cell-7--solution-reasoning-lens">Solution reasoning lens<a class="heading-anchor" href="#solution-2--cell-7--solution-reasoning-lens" aria-label="Link to this section">#</a></h4>
-<p>A strong solution is not merely code that produces one plausible output. It establishes a chain from input contract to operation to verification:</p>
+<p>Each decision below links an input contract to an operation and its evidence:</p>
 <ol>
 <li><strong>lazy expression:</strong> describes tasks and dependencies; inspect partitions/graph before execution.</li>
 <li><strong><code>.compute()</code>:</strong> executes the graph and materializes the result in local memory.</li>
@@ -1225,44 +1206,36 @@ client <span class="syntax-operator">=</span> Client<span class="syntax-punctuat
 <p><strong>Trade-off:</strong> More partitions improve available parallelism but increase scheduler overhead; large partitions reduce overhead while increasing peak memory.</p>
 <p><strong>Edge case to test:</strong> Skewed keys, global sorts/shuffles, dtype inference drift, empty chunks, and a final result too large for memory defeat naive scaling.</p>
 <p><strong>Evidence of correctness:</strong> Reconcile results with pandas/standard library, inspect graph and partition sizes, measure repeated runs, bound memory/final output, and prove reducers are associative.</p>
-<p>When comparing your attempt with the reference, explain which of these decisions your code made explicitly. If the reference makes a different choice, compare the contracts and evidence before deciding that one version is universally better.</p>
 <h4 id="solution-2--cell-7--exercise-by-exercise-reasoning-map">Exercise-by-exercise reasoning map<a class="heading-anchor" href="#solution-2--cell-7--exercise-by-exercise-reasoning-map" aria-label="Link to this section">#</a></h4>
-<p>This map connects every learner prompt to a reasoning path. Read the explanation before copying code: the goal is to understand the assumptions, the evidence that validates the result, and the edge cases that can make an apparently correct implementation fail.</p>
 <h5 id="solution-2--cell-7--exercise-1-original-lesson-practice">Exercise 1: Original lesson practice<a class="heading-anchor" href="#solution-2--cell-7--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Read a large local CSV with Dask and compute groupby aggregations.</p>
 <p><strong>How to reason about it:</strong> Generate or use a local CSV, begin small, and compare Dask aggregation with pandas before scaling. Dask expressions are lazy until <code>compute</code>, so measure materialization separately.</p>
-<p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
 <p><strong>Verify:</strong> Generate/read a named local CSV, print Dask partition count and groupby result, and assert keys/values match pandas within 1e-10 after deterministic sorting.</p>
 <h5 id="solution-2--cell-7--exercise-2-original-lesson-practice">Exercise 2: Original lesson practice<a class="heading-anchor" href="#solution-2--cell-7--exercise-2-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Persist the DataFrame and compare repeated timings with and without persistence.</p>
 <p><strong>How to reason about it:</strong> Persist is beneficial only for reused intermediates and consumes memory. Time a first materialization plus repeated downstream actions, then close distributed clients and release references.</p>
-<p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
 <p><strong>Verify:</strong> Record at least three uncached and persisted repeated timings for the same aggregation, Dask graph/partition sizes, and result equality; close the local client and avoid claiming a speedup from one run.</p>
 <h5 id="solution-2--cell-7--exercise-3-original-lesson-practice">Exercise 3: Original lesson practice<a class="heading-anchor" href="#solution-2--cell-7--exercise-3-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Implement the same reduction with <code>pandas.read_csv(..., chunksize=...)</code> and compare memory and elapsed time.</p>
 <p><strong>How to reason about it:</strong> Chunked pandas should carry partial sums and counts rather than concatenate all chunks. Verify the final reduction against an in-memory result and handle missing/group-key semantics consistently.</p>
-<p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
 <p><strong>Verify:</strong> For identical CSV and aggregation, print pandas-chunked and Dask results, elapsed-time samples, and measured peak memory; assert sorted numeric outputs match within 1e-10.</p>
 <h5 id="solution-2--cell-7--exercise-4-task-graph-tracing">Exercise 4: Task-graph tracing<a class="heading-anchor" href="#solution-2--cell-7--exercise-4-task-graph-tracing" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Build two aggregations from the same lazy Dask DataFrame, inspect their task graphs, and compare separate computes with one combined <code>dask.compute</code> call.</p>
 <p><strong>Reasoning before implementation:</strong> Building an expression does not read all data. Combining terminal computations can share upstream work without persisting the entire frame.</p>
 <p>Record graph/task counts and wall time, but treat timings as local evidence rather than universal benchmarks. <code>dask.compute(result_a, result_b)</code> can optimize shared dependencies in one execution. Two separate <code>.compute()</code> calls may reread and redo work unless data or intermediates are cached/persisted.</p>
 <p>Keep output bounded; computing a small aggregation is different from calling <code>compute()</code> on the full large DataFrame.</p>
-<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
 <p><strong>Verify:</strong> Task-graph tracing; print task counts/graph keys for two separate aggregations and one combined dask.compute call; assert all numeric results match and report shared-prefix work without promising scheduler-specific task elimination.</p>
 <h5 id="solution-2--cell-7--exercise-5-partition-skew-diagnosis">Exercise 5: Partition-skew diagnosis<a class="heading-anchor" href="#solution-2--cell-7--exercise-5-partition-skew-diagnosis" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Create a group key where one value owns most rows. Measure partition sizes and groupby runtime, then propose repartitioning or algorithm changes.</p>
 <p><strong>Reasoning before implementation:</strong> A balanced row count before a shuffle does not guarantee balanced work after grouping; one hot key can become a straggler.</p>
 <p>Report the largest group and partition relative to the median. Salting a hot key can distribute an associative partial aggregation, followed by a second combine, but it changes implementation complexity. More partitions alone do not split one indivisible group operation automatically.</p>
 <p>If the output is tiny, pre-aggregate within input partitions before the shuffle. Preserve exactness and test the salted/two-stage result against pandas.</p>
-<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
 <p><strong>Verify:</strong> Partition-skew diagnosis; print rows/bytes per partition, max-to-median skew ratio, dominant-key support, and repeated groupby timings before/after the chosen mitigation; assert outputs remain equal.</p>
 <h5 id="solution-2--cell-7--exercise-6-reducer-correctness">Exercise 6: Reducer correctness<a class="heading-anchor" href="#solution-2--cell-7--exercise-6-reducer-correctness" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Implement a mergeable mean/variance state for chunks and prove it matches NumPy across different chunk boundaries, including an empty chunk.</p>
 <p><strong>Reasoning before implementation:</strong> A mean alone is not mergeable without support. Carry count, mean, and M2 (sum of squared deviations) using a stable combine formula.</p>
 <p>The state must define an identity for an empty chunk and an associative combine operation (within floating-point tolerance). Welford/Chan formulas combine <code>count</code>, <code>mean</code>, and <code>M2</code> without concatenating values.</p>
 <p>Test one chunk, one-row chunks, uneven chunks, large-offset values, and an empty input policy. This same reasoning underlies correct distributed custom aggregations; averaging partition means is wrong when partition sizes differ.</p>
-<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
 <p><strong>Verify:</strong> Reducer correctness; test the mergeable state on empty, singleton, unequal, and reordered chunks; print count/mean/variance and assert agreement with NumPy within 1e-12 for every partitioning.</p></article></div>
       </section>
 

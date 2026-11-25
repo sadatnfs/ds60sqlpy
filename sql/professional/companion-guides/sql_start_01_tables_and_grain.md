@@ -2,75 +2,28 @@
 
 ## How to run this lesson
 
-Start the Linux-container engine and run `./classroom` from the repository
-root. On Windows, use Ubuntu in WSL 2 or the thin
-`START_DOCKER_CLASSROOM.cmd` wrapper. Choose **PostgreSQL** on the shared
-`/classroom` home, then open **sql-start-01**. The
-[launcher guide](../../../docs/one-command-classroom.md) covers first preparation, strict resume and
-the saved project selection. No host Python or PostgreSQL installation is
-required for this browser route.
+Start **sql-start-01** from `./classroom` using the shared [run steps](../../STUDY-GUIDE.md#run-a-lesson-in-the-classroom).
 
-1. Read the prerequisite and fixture notes before running the file. Use only
-   the local disposable `advanced_sql_training` database.
-2. Choose **Whole SQL lesson (psql)** for the cataloged learner script. This
-   preserves the lesson's reviewed psql directives, relative includes and
-   transaction behavior. **SQL snippet** is appropriate for ordinary SQL
-   statements, but is not a replacement for an entire script's setup.
-3. The **Course database** panel above the code shows whether the course
-   training tables are loaded. Missing tables load automatically before your
-   first run (or choose **Load course tables**) and stay loaded for later
-   lessons. **Reset training data** restores the original rows only when your
-   own changes made results differ; it keeps your saved code and notes.
-4. Edit the learner copy in the classroom and save your prediction before
-   running. Its whole-script workspace is
-   `.learning/sql/sql-start-01/lesson/workspace/sql/professional/lessons/sql_start_01_tables_and_grain.sql`.
-   For browser work this path is inside the Docker learning volume, not a
-   newly created host folder beside your checkout. The checked-in source
-   remains the answer-free starting artifact.
-5. Run the whole script and inspect the full transcript. The runner uses
-   `psql -X -v ON_ERROR_STOP=1 -f`. SELECT output has columns, rows and a row
-   count; DDL/DML has command tags; intentional checks may produce NOTICE
-   messages. An unexpected ERROR or nonzero exit is a failure to diagnose,
-   even when an earlier query printed plausible values.
-6. Verify the lesson's expected grain, ordering, constraints and declared
-   transaction or cleanup outcome. Keep required ROLLBACK statements.
-   The warehouse sequence and other explicitly stateful exercises explain
-   when state is committed. Read saved output without rerunning it when
-   reviewing an earlier attempt.
+Choose **Whole SQL lesson (psql)**. This lesson needs no course tables and
+nothing from an earlier lesson: the script opens a transaction in the
+disposable `advanced_sql_training` database, builds the six-row
+`start_readings` temporary table, and ends with `ROLLBACK`, so every run starts
+from the same six observations. Write your attempts in the saved copy at
+`.learning/sql/sql-start-01/lesson/workspace/sql/professional/lessons/sql_start_01_tables_and_grain.sql`,
+above that final `ROLLBACK`. A healthy psql transcript shows the setup tags
+(`BEGIN`, `DO`, `SET`, `CREATE TABLE`, `INSERT 0 6`), then six rows for
+Example 1, two rows for Example 2, your own result sets, and `ROLLBACK`. A lone
+query pasted into **SQL snippet** runs on a new connection and fails with
+`relation "start_readings" does not exist`, because a temporary table is
+visible only to the session that created it.
 
-If a relation is missing, inspect the lesson's required fixture and predecessor
-rather than guessing a new table definition. If authentication or runtime
-readiness fails, use `./classroom status` and the setup guide. Keep credentials
-out of SQL, notebooks, screenshots and committed files. Repair the first error
-before trusting partial output, and reveal separate solutions only when you
-want to compare after an attempt.
-
-### Optional contributor notebook route
-
-For notebook work, deliberately prepare the Linux/WSL contributor environment
-from [CONTRIBUTING.md](../../../CONTRIBUTING.md), including a compatible psql client and
-the notebook dependencies. Generate this lesson's private workspace through
-the maintained CLI:
-
-```sh
-uv run --no-sync python scripts/course.py sql notebook sql-start-01
-```
-
-Open the printed notebook path in that environment's JupyterLab. It uses the
-same catalog-derived learner-copy layout in that contributor checkout and
-executes the complete script through psql. Its host-side state is separate
-from the Docker browser's named volume. Follow
-[guided SQL notebooks](../../../docs/guided-sql-notebooks.md) for explicit local connection
-selection and kernel setup. Notebook generation does not execute SQL or
-authorize a reset.
+The optional notebook route starts with `uv run --no-sync python scripts/course.py sql notebook sql-start-01`; see the [study guide](../../STUDY-GUIDE.md#optional-contributor-notebook-route).
 
 ## Level and prerequisites
 
 - **Level:** foundation
 - **Direct catalog prerequisites:** None. Start here if you have never queried a database.
 - **Artifacts:** [learner SQL](../lessons/sql_start_01_tables_and_grain.sql), [solution reasoning](../solutions/sql_start_01_tables_and_grain_solutions.md), [executable solution](../solutions/sql_start_01_tables_and_grain_solutions.sql).
-
-Direct prerequisites name the required boundary. The fixture setup is supplied; do not mistake its table-definition syntax for extra unstated prerequisite work.
 
 ## Learning objectives
 
@@ -165,7 +118,11 @@ Exercise 6 uses the same form for a new collection.
 
 ## Worked example / walkthrough
 
-Run these in the complete learner file so the temporary fixture and transaction are present. The fixture values are fixed; the examples never depend on the current clock. Predict each result before running it.
+Both examples read the same six `start_readings` rows. Before running each
+one, write how many rows it will print and which `reading_id` values they come
+from. Example 2 is where that prediction usually goes wrong: it hides the
+identity column, so you must reason from the `WHERE reading_id <= 2` filter
+rather than from what the screen shows.
 
 ### Example 1: A full observation retains its identity
 
@@ -205,7 +162,13 @@ FROM starts with six observations; WHERE keeps IDs 1 and 2; SELECT hides their I
 
 ## Exercises
 
-Attempt these in order in the ignored working copy, before its final rollback. Write the output grain and a prediction before execution. Compare the actual identities and values with each contract. A query merely running is not sufficient evidence. Hints are optional and leave the answer construction to you.
+Exercises 1 to 5 query `start_readings`; Exercise 6 builds its own `VALUES`
+collection. Before each query, finish the sentence "One output row represents
+..." and check it against the Expected line. Exercises 3 and 5 are a pair:
+both filter on `station`, but South returns a row whose temperature is NULL
+while East returns no row at all, and your explanation should keep those two
+outcomes apart. The contract lines work as described in the
+[study guide](../../STUDY-GUIDE.md#work-an-exercise).
 
 1. **Trace identities.**
 
@@ -273,7 +236,11 @@ Attempt these in order in the ignored working copy, before its final rollback. W
 - What changes when a column is removed from SELECT, and what does not?
 - How would you distinguish no matching station from one observation with an unknown temperature?
 
-Keep your actual query and transcript. Explain one incorrect alternative and the exact fixture row that exposes it. A passing worked example does not prove an unattempted exercise. Revisit a failed prediction after taking a break, then answer the retrieval questions without looking at the code.
+For retrieval practice, explain without the code why
+`SELECT DISTINCT station, temperature FROM start_readings` returns five rows
+instead of six (IDs 1 and 2 collapse into one North/18 row), and why adding
+`AND temperature > 0` to Exercise 3 would remove both South observations, the
+known zero at ID 3 and the unknown value at ID 4.
 
 ## Common pitfalls
 

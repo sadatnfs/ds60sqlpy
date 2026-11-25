@@ -251,7 +251,7 @@ bash run.sh start
 bash run.sh check-transactions</code></pre>
 <p>In an owned workshop, the check prints a JSON line with committed_records 3, uncommitted_records 4 and aborted_hidden true. The read_committed consumer sees order-1 plus two identical same-business-id records, while read_uncommitted also sees the aborted order-2 value. The two identical records are correct Kafka behavior: they came from two awaited send calls, so deduplicating them is the consumer&#x27;s business rule, not a broker guarantee.</p>
 <h3 id="complete-worked-source">Complete worked source<a class="heading-anchor" href="#complete-worked-source" aria-label="Link to this section">#</a></h3>
-<p>This is a project-only command notebook. Read and edit it in the classroom; run its explicitly labeled commands from the copied owned Docker workshop. The classroom does not execute these service commands.</p>
+<p>The classroom does not execute these service commands. See the <a href="../STUDY-GUIDE.md.html#workshop-notebooks">workshop rules</a>.</p>
 <h2 id="actual-acknowledged-writes-and-distinct-application-calls">Actual acknowledged writes and distinct application calls<a class="heading-anchor" href="#actual-acknowledged-writes-and-distinct-application-calls" aria-label="Link to this section">#</a></h2>
 <p>From the copied streaming workshop using its explicit binary route:</p>
 <pre class="highlighted-code"><code class="language-bash">bash run.sh start

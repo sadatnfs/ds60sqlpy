@@ -34,11 +34,9 @@ The exec-form command array does not expand `$NAME` like a shell. If the applica
 
 ## How to use this lesson
 
-The classroom displays this guide and saves your worksheet, `courses/docker/lessons/docker-008.md`. Its Run button does not control your Docker engine. Docker engine access is powerful host access, so the classroom deliberately receives no engine socket. Work through the supplied examples without starting anything, then use the optional host lab only in your own disposable project. Reading a command, parsing YAML and actually running the project are different forms of evidence.
+The classroom saves `courses/docker/lessons/docker-008.md` and holds no engine socket ([host-lab setup](../STUDY-GUIDE.md#host-lab-setup)).
 
-Use Bash in Linux, macOS Terminal, or Ubuntu under WSL 2 on Windows. The supported engine runs Linux containers. The maintained fixture is `courses/docker/fixtures/compose-lab/`; its README explains copying it into a new ignored learner directory, checking the engine, building locally with visible logs, and using the fixed project name `ds60-docker-study`. The fixture uses port 18080 on host loopback. Stop if that project name or port belongs to unrelated work; choose a new project name consistently in your own copy. Never paste a command against a remote Docker context simply because it is currently selected.
-
-For Dockerfile examples, create a file named `Dockerfile` in a scratch project. YAML snippets describe a fragment unless explicitly called a complete file. Text transcripts are synthetic illustrations, not claims about your machine. Do not substitute a real password, token or private registry into a checked-in example. **How to use the lessons** in the [subject README](../README.md) collects these rules in one place.
+**Host lab.** Start the fixture project and request the root URL to read the default message. Then create `compose.override.yaml` in your copy with worked example 1 and run `docker compose -p ds60-docker-study config` to see the merged value before anything starts. Run `docker compose -p ds60-docker-study restart app` and request the root URL again: the old message remains, because restart reuses the existing container configuration. Now run `up -d --wait` and request it once more; the new message appears and `ps -q app` shows a new container ID. Finally, change worked example 2 to pass `-e APP_MESSAGE=42` and print `type(os.environ['APP_MESSAGE'])`: the result is `<class 'str'>`, because every environment value arrives as text. Delete the override file afterwards so later lessons start from the fixture defaults.
 
 ## Worked example / walkthrough
 
@@ -67,7 +65,7 @@ docker run --rm --pull never -e APP_MESSAGE=sample ds60-docker-study:local pytho
 
 ## Six progressive exercises
 
-For each exercise, name the object involved and the phase of its lifetime before changing anything, then vary only the condition the task names. Exercises that ask you to predict, explain, compare or diagnose keep their answers in the solutions file; the others show the evidence to look for.
+Answer-type prompts keep their answers in the solutions file ([exercise rules](../STUDY-GUIDE.md#exercise-rules)).
 
 ### Exercise 1: Distinguish Compose interpolation from container environment.
 
@@ -101,13 +99,19 @@ For each exercise, name the object involved and the phase of its lifetime before
 
 Expecting every `.env` value to appear inside the container. Restarting a container after changing its environment instead of recreating it. Overriding `--entrypoint` and expecting the image's `CMD` to still apply.
 
-Exercise 4 is this chapter's boundary case: Diagnose an exec array containing literal $PORT. Print the argument vector the program actually received, and compare the exec array with the shell form, before adding a shell wrapper to the command. Preserve the original failure and the exact changed field before retrying. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
+Exercise 4 is this chapter's boundary case: Diagnose an exec array containing literal $PORT. Print the argument vector the program actually received, and compare the exec array with the shell form, before adding a shell wrapper to the command.
+
+Compose interpolation catches people in a second way: a literal dollar sign in a value is treated as a variable reference while the file is rendered. A message such as `cost $AMOUNT` becomes `cost ` followed by nothing, with a warning that the `AMOUNT` variable is not set, before the container ever sees it. Escape it as `$$AMOUNT`, which Compose renders as a single dollar sign, and confirm with `docker compose config`, which prints the rendered value. That same command is the quickest way to see whether a value came from the shell, an `.env` file or the YAML itself.
+
+Never trade a safety control for a passing example ([safety rules](../STUDY-GUIDE.md#safety-rules)).
 
 ## Retrieval, transfer and next steps
 
-Close the explanations first. Explain from memory why `restart` keeps the old environment while recreating the service applies the new value. Then reconstruct worked example 2 (Read one explicit variable) with one different value, predict what changes, and name which of environment variables, ENTRYPOINT, CMD, Compose interpolation and configuration validation the change touches.
+**Retrieval.** Explain from memory why `restart` keeps the old environment while recreating the service applies the new value.
 
-When a host session ends, run `docker compose -p ds60-docker-study down` from your fixture copy. It removes the project's containers and network but keeps named volumes; deleting a volume is a separate, deliberate reset described in the fixture README.
+**Transfer case.** An image has `ENTRYPOINT ["python", "server.py"]` and `CMD ["--port", "8080"]`. A learner runs `docker run IMAGE --port 9090` and later `docker run --entrypoint python IMAGE -V`. What command line does each container start?
+
+Then run the [retrieval loop](../STUDY-GUIDE.md#retrieval-and-cleanup) and end any host session with its cleanup.
 
 ## Primary references
 

@@ -1,6 +1,8 @@
 # rust-046: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [rust-046_solution.rs](rust-046_solution.rs). It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.
+Executable reference: [rust-046_solution.rs](rust-046_solution.rs), which runs both examples and the coded answers.
+
+Open this only after [an attempt](../STUDY-GUIDE.md#attempt-a-lesson).
 
 ## Why the two examples differ
 
@@ -38,7 +40,7 @@ Add a fixed stage category without adding raw input.
 
 Instrument an importer with submitted, accepted and rejected counts.
 
-**Reference answer.** The same statements run as the `Task 3` block of the reference program; here they are wrapped in `main` as a complete file.
+**Reference answer**, wrapped in `main`; the reference runs it as its `Task 3` block.
 
 ```rust
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -116,4 +118,6 @@ Memory safety does not make arbitrary command execution safe. Do not log secrets
 
 ## Review before continuing
 
-Run the reference and confirm that it prints `rust-046: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.
+Rebuild Example B (Reject unlisted actions) from a blank pad.
+
+Review routine: [Self-check and review](../STUDY-GUIDE.md#self-check-and-review).

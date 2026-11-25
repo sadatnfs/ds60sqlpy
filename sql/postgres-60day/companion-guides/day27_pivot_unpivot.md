@@ -2,67 +2,22 @@
 
 ## How to run this lesson
 
-Start the Linux-container engine and run `./classroom` from the repository
-root. On Windows, use Ubuntu in WSL 2 or the thin
-`START_DOCKER_CLASSROOM.cmd` wrapper. Choose **PostgreSQL** on the shared
-`/classroom` home, then open **sql-27**. The
-[launcher guide](../../../docs/one-command-classroom.md) covers first preparation, strict resume and
-the saved project selection. No host Python or PostgreSQL installation is
-required for this browser route.
-
-1. Read the prerequisite and fixture notes before running the file. Use only
-   the local disposable `advanced_sql_training` database.
-2. Choose **Whole SQL lesson (psql)** for the cataloged learner script. This
-   preserves the lesson's reviewed psql directives, relative includes and
-   transaction behavior. **SQL snippet** is appropriate for ordinary SQL
-   statements, but is not a replacement for an entire script's setup.
-3. The **Course database** panel above the code shows whether the course
-   training tables are loaded. Missing tables load automatically before your
-   first run (or choose **Load course tables**) and stay loaded for later
-   lessons. **Reset training data** restores the original rows only when your
-   own changes made results differ; it keeps your saved code and notes.
-4. Edit the learner copy in the classroom and save your prediction before
-   running. Its whole-script workspace is
-   `.learning/sql/sql-27/lesson/workspace/sql/postgres-60day/day27_pivot_unpivot.sql`.
-   For browser work this path is inside the Docker learning volume, not a
-   newly created host folder beside your checkout. The checked-in source
-   remains the answer-free starting artifact.
-5. Run the whole script and inspect the full transcript. The runner uses
-   `psql -X -v ON_ERROR_STOP=1 -f`. SELECT output has columns, rows and a row
-   count; DDL/DML has command tags; intentional checks may produce NOTICE
-   messages. An unexpected ERROR or nonzero exit is a failure to diagnose,
-   even when an earlier query printed plausible values.
-6. Verify the lesson's expected grain, ordering, constraints and declared
-   transaction or cleanup outcome. Keep required ROLLBACK statements.
-   The warehouse sequence and other explicitly stateful exercises explain
-   when state is committed. Read saved output without rerunning it when
-   reviewing an earlier attempt.
-
-If a relation is missing, inspect the lesson's required fixture and predecessor
-rather than guessing a new table definition. If authentication or runtime
-readiness fails, use `./classroom status` and the setup guide. Keep credentials
-out of SQL, notebooks, screenshots and committed files. Repair the first error
-before trusting partial output, and reveal separate solutions only when you
-want to compare after an attempt.
+Open `./classroom`, select **sql-27** and choose **Whole SQL lesson (psql)**.
+The classroom runs
+`.learning/sql/sql-27/lesson/workspace/sql/postgres-60day/day27_pivot_unpivot.sql`
+against `advanced_sql_training` between `BEGIN` and `ROLLBACK`. Both examples
+filter on the current UTC year, so their numbers change with the date you
+run them and the date your fixture was loaded. Steps shared by every lesson
+are in [Run a lesson in the classroom](../../STUDY-GUIDE.md#run-a-lesson-in-the-classroom).
 
 ### Optional contributor notebook route
 
-For notebook work, deliberately prepare the Linux/WSL contributor environment
-from [CONTRIBUTING.md](../../../CONTRIBUTING.md), including a compatible psql client and
-the notebook dependencies. Generate this lesson's private workspace through
-the maintained CLI:
+A notebook is handy for printing the wide and long forms side by side
+([notebook setup](../../STUDY-GUIDE.md#optional-contributor-notebook-route)):
 
 ```sh
 uv run --no-sync python scripts/course.py sql notebook sql-27
 ```
-
-Open the printed notebook path in that environment's JupyterLab. It uses the
-same catalog-derived learner-copy layout in that contributor checkout and
-executes the complete script through psql. Its host-side state is separate
-from the Docker browser's named volume. Follow
-[guided SQL notebooks](../../../docs/guided-sql-notebooks.md) for explicit local connection
-selection and kernel setup. Notebook generation does not execute SQL or
-authorize a reset.
 
 ## Level and prerequisites
 
@@ -74,28 +29,31 @@ authorize a reset.
 
 ## A beginner's mental model for this lesson
 
-A **table** stores facts in named columns. A **row** is one occurrence at the
-table's declared grain. A query creates a temporary **result set**: rows printed
-on screen are not automatically stored. The key vocabulary for this lesson is Pivot, Unpivot, Conditional aggregation. Its worked SQL reads or creates `order_items`, `orders`, `products`.
+A pivot turns values in a column into separate columns; an unpivot turns
+columns back into rows. PostgreSQL has no `PIVOT` keyword, so both are built
+from ordinary pieces:
 
-Before writing a query, complete this sentence: “One output row represents
-___.” Joins can multiply rows, filters can remove them, grouping can collapse
-many rows into one, and window functions can add calculations while preserving
-row count. For a normal analytical `SELECT`, use this logical reading order:
-`FROM`/`JOIN` (including `ON`) → `WHERE` → `GROUP BY`/aggregates → `HAVING` →
-window calculations → `SELECT` → `ORDER BY` → `LIMIT`. PostgreSQL may execute a
-different physical plan while preserving those semantics.
+- **Pivot:** group by the row label and write one aggregate per output
+  column, each with its own `FILTER (WHERE ...)`. Example 1 groups by
+  `p.category` and keeps three month columns, so six categories give six
+  rows and three numbers each.
+- **Unpivot:** `CROSS JOIN LATERAL (VALUES ...)` emits one row per listed
+  column for every input row. Example 2 builds a two-column `wide` relation
+  and turns each category back into a `jan` row and a `feb` row, 12 rows in
+  total.
 
-The worked walkthrough's lesson-specific task is: At one row per quarter, calculate `SUM(amount) FILTER (WHERE method = 'card')` and parallel columns for the other known methods. Reconcile the sum of pivot columns to the long-form payment total and decide whether absent combinations display as `NULL` or zero.
-Exercise 1 expects this result: exactly one row. Predict keys, row count, `NULL` behavior,
-and ordering before running. Afterwards, compare keys/counts/totals with an
-independent control. A blank string, SQL `NULL`, numeric zero, and a missing row
-are different facts; use `COALESCE` only after choosing which meaning the
-business question requires.
+The pivot has a cost: you must know the column list when you write the
+query. A new status or category does not appear as a new column; it is
+simply not counted unless you also keep a total column. When the list is
+open-ended, return the values as data instead, for example as a JSON object
+(the fifth answer).
+
+The second rule is about missing values. `COUNT(*) FILTER (...)` returns 0
+when no row matches, but `SUM(x) FILTER (...)` returns `NULL`. Whether a
+`NULL` cell should be shown as 0 is a reporting decision, not something the
+SQL can decide for you.
 
 ## Two worked SQL examples
-
-These worked excerpts come from `sql/postgres-60day/day27_pivot_unpivot.sql`. Use **Whole SQL lesson (psql)** in the unified classroom for the complete file, including its fixture and transaction context. The optional contributor notebook and prepared `psql` routes are described above.
 
 ### Example 1
 
@@ -118,9 +76,17 @@ ORDER BY
   p.category;
 ```
 
-**How to read it:** Example 1: Start with `o.order_date`, `order_items`, `orders`, and `products` in `FROM`/`JOIN`; let `WHERE` remove nonqualifying rows; let `GROUP BY` collapse rows to its grouping keys. The final `SELECT` displays `category`, `jan_qty`, `feb_qty`, and `mar_qty`. `ORDER BY` determines presentation order. Before running, predict the row grain, row count, `NULL` positions, and first/last key; afterwards, compare each prediction with the transcript.
+**How to read it:** The `WHERE` clause keeps only orders from the
+current UTC year, then each `FILTER` picks one month from what is left.
+`EXTRACT(MONTH ...)` is applied to `order_date AT TIME ZONE 'UTC'`, so an
+order placed late on 31 January in another time zone still counts as
+January if it was January in UTC.
 
-**Expected result/shape:** Example 1 returns one grouped row per `category` with columns `category`, `jan_qty`, `feb_qty`, and `mar_qty` from `o.order_date`, `order_items`, `orders`, and `products`. Use a direct count or grouped aggregate over those same source relations as the control; check ordering only when this query has an `ORDER BY`, and inspect `NULL` only for columns this example can produce.
+**Expected result/shape:** Six rows, Apparel to Sports, with
+`jan_qty`, `feb_qty` and `mar_qty`. Run in 2026, Apparel showed 195, 240
+and 256, and the 18 cells added to 4,342 units, the same as a plain
+`SUM(quantity)` over January to March. Early in a year, the later columns are
+`NULL` because no order has been placed in those months yet.
 
 ### Example 2
 
@@ -162,9 +128,15 @@ ORDER BY
   month_value.month_name;
 ```
 
-**How to read it:** Example 2: Start with `o.order_date`, `order_items`, `orders`, and `products` in `FROM`/`JOIN`; let `WHERE` remove nonqualifying rows; let `GROUP BY` collapse rows to its grouping keys. The final `SELECT` displays `category`, `month_name`, and `quantity`. `ORDER BY` determines presentation order. Before running, predict the row grain, row count, `NULL` positions, and first/last key; afterwards, compare each prediction with the transcript.
+**How to read it:** `source` is detail rows, `wide` pivots them to one
+row per category, and the lateral `VALUES` list unpivots `jan_qty` and
+`feb_qty` back to rows. The literal labels `'jan'` and `'feb'` become the
+`month_name` column, and the column the label came from becomes `quantity`.
 
-**Expected result/shape:** Example 2 returns one grouped row per `category` with columns `category`, `month_name`, and `quantity` from `o.order_date`, `order_items`, `orders`, and `products`. Use a direct count or grouped aggregate over those same source relations as the control; check ordering only when this query has an `ORDER BY`, and inspect `NULL` only for columns this example can produce.
+**Expected result/shape:** 12 rows, two per category. Inside each
+category `feb` comes before `jan` because `month_name` is text and sorts
+alphabetically; order by a month number if you need calendar order. In 2026
+the first rows were Apparel `feb` 240 and Apparel `jan` 195.
 
 ## Learning objectives
 
@@ -189,16 +161,18 @@ and decide whether absent combinations display as `NULL` or zero.
 - **Focus:** Pivot with conditional aggregation when output categories are known, and unpivot with explicit typed rows while preserving missing-value meaning.
 - **Assumptions:** PostgreSQL core has no portable dynamic PIVOT keyword. `FILTER`, `CASE`, `VALUES`, JSON objects, or optional `tablefunc` serve different needs.
 - **Failure to watch for:** Replacing missing category combinations with zero is a business decision; dynamic columns are difficult for stable downstream schemas.
-- **Review loop:** predict the row grain and NULL/order behavior, run the
-  query, inspect a bounded sample, and reconcile counts or totals before
-  accepting the result.
+- **Review loop:** for every pivot, add the pivoted columns across one row
+  and compare with an unfiltered total; for every unpivot, check that the
+  row count equals input rows times listed columns.
 
 ## Exercises
 
 Pivot with conditional aggregation when output categories are known, and unpivot with explicit typed rows while preserving missing-value meaning.
 
-Attempt each prompt in a scratch SQL file before opening the solution.
-For every result, write its row grain and expected shape first.
+Before writing each pivot, list the values that will become
+columns and decide what the report should show for a value that never
+occurs. The two unpivot answers use small inline samples, so you can predict
+every output row by hand.
 
 1. **Query writing:** Pivot order counts by status into one summary row.
    **Progressive hint:** Use one filtered count per known status and keep an all-orders denominator.
@@ -207,44 +181,52 @@ For every result, write its row grain and expected shape first.
    **Verify:** For sql-27 Exercise 1, confirm one row with `placed_orders` 873, `paid_orders` 872, `shipped_orders` 873, `delivered_orders` 872, `returned_orders` 872, and `all_orders` 4362; the five status columns must add up to `all_orders`, or an unknown status exists.
 2. **Query writing:** Pivot customer counts for US, CA, GB, and DE by segment.
    **Progressive hint:** Group at segment grain and use filtered counts for known country columns.
-   **Inputs/evidence:** For sql-27 Exercise 2, read from `customers`. Build the answer toward `segment`, `us_customers`, `ca_customers`, `gb_customers`, `de_customers`, and `all_customers`; keep `segment` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-27 Exercise 2, expected output: One row per segment. The final columns are `segment`, `us_customers`, `ca_customers`, `gb_customers`, `de_customers`, and `all_customers`. The final order is `c.segment NULLS LAST`.
-   **Verify:** For sql-27 Exercise 2, independently aggregate `customers` by `segment`; require one output row for every distinct `segment` tuple and compare `us_customers`, `ca_customers`, `gb_customers`, `de_customers`, and `all_customers` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `us_customers`, `ca_customers`, and `gb_customers` for the existing `segment` tuple and verify the new tuple appears exactly once.
+   **Inputs/evidence:** For sql-27 Exercise 2, read the 500 rows of `customers`, group by `segment`, and turn four countries into columns with `COUNT(*) FILTER (WHERE country = ...)`; `all_customers` counts every row in the segment, including the 312 customers in AU, BR, FR, and IN.
+   **Expected result/shape:** For sql-27 Exercise 2, expected output: exactly 4 rows of 125 customers each, and every segment maps to one country in this seed: `gold` has 63 GB customers, `platinum` 63 DE, `silver` 63 CA, and `standard` 63 US, with 0 in the other three columns. The final columns are `segment`, `us_customers`, `ca_customers`, `gb_customers`, `de_customers`, and `all_customers`. The final order is `c.segment NULLS LAST`.
+   **Verify:** For sql-27 Exercise 2, confirm `all_customers` adds to 500 and that each country column adds to its `SELECT COUNT(*) FROM customers WHERE country = ...` count of 63; then, inside `BEGIN ... ROLLBACK`, run `UPDATE customers SET segment = NULL WHERE customer_id = 1` (a US customer) and confirm a fifth row with a NULL segment appears last with 1 US customer, while `standard` drops to 62 and 124.
 3. **Query writing:** Unpivot a wide quarterly sample into quarter/amount rows.
    **Progressive hint:** Use a lateral `VALUES` relation with one output row per source column.
-   **Inputs/evidence:** For sql-27 Exercise 3, read from `wide`. Build the answer toward `company`, `quarter`, and `amount`; keep `company` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-27 Exercise 3, expected output: Eight rows from two source rows and four quarters. The final columns are `company`, `quarter`, and `amount`. The final order is `w.company, unpivoted.quarter`.
-   **Verify:** For sql-27 Exercise 3, project `company` plus the raw source columns from `wide` at each join stage; record row count and distinct `company`, then assert the final `company`, `quarter`, and `amount` values match those staged rows without unintended fanout or loss. Add one source row with a new `company`; verify the result gains exactly one row carrying that `company` value.
+   **Inputs/evidence:** For sql-27 Exercise 3, no table is read: the `wide` CTE holds two `VALUES` rows, company A with 10, 20, 30, 40 and company B with 5, NULL, 15, 25, and `CROSS JOIN LATERAL (VALUES ...)` turns each row's four quarter columns into four `(quarter, amount)` rows.
+   **Expected result/shape:** For sql-27 Exercise 3, expected output: exactly 8 rows, four per company, with B `Q2` kept as a row whose `amount` is NULL. The final columns are `company`, `quarter`, and `amount`. The final order is `w.company, unpivoted.quarter`.
+   **Verify:** For sql-27 Exercise 3, confirm 8 rows, 4 per company, that `SUM(amount)` is 100 for A and 45 for B, and that exactly one row has `amount IS NULL`; adding `WHERE unpivoted.amount IS NOT NULL` would return 7 rows and lose the fact that B reported nothing for `Q2`.
 4. **Prediction:** Compare a missing pivot combination with a real zero and preserve the distinction.
    **Progressive hint:** Filtered `SUM` returns NULL when no rows contribute; `COALESCE` should be used only when the report defines absence as zero.
-   **Inputs/evidence:** For sql-27 Exercise 4, read from `expenses`. Build the answer toward `category`, `january_observed_amount`, and `january_reported_zero_if_absent`; keep `category` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-27 Exercise 4, expected output: One row per expense category with nullable/zero-aware columns. The final columns are `category`, `january_observed_amount`, and `january_reported_zero_if_absent`. The final order is `e.category`.
-   **Verify:** For sql-27 Exercise 4, independently aggregate `expenses` by `category`; require one output row for every distinct `category` tuple and compare `january_observed_amount` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `january_observed_amount` for the existing `category` tuple and verify the new tuple appears exactly once.
+   **Inputs/evidence:** For sql-27 Exercise 4, read the 10000 `expenses` rows (5 categories, 2000 each, dated over the two years before the load), group by `category`, and sum only January rows with `FILTER (WHERE EXTRACT(MONTH FROM expense_date) = 1)`, once raw and once wrapped in `COALESCE(..., 0)`.
+   **Expected result/shape:** For sql-27 Exercise 4, expected output: exactly 5 rows; every category has January rows on this load (164 to 192 rows across two Januaries), so both columns match, for example COGS 856904.40 and Marketing 972676.11. The final columns are `category`, `january_observed_amount`, and `january_reported_zero_if_absent`. The final order is `e.category`.
+   **Verify:** For sql-27 Exercise 4, confirm each category's January row count with `SELECT category, COUNT(*) FROM expenses WHERE EXTRACT(MONTH FROM expense_date) = 1 GROUP BY category`; then, inside `BEGIN ... ROLLBACK`, insert `('Legal', 100, '2026-03-01')` and `('Travel', 0, '2026-01-15')` and confirm Legal returns NULL and 0 (no January rows) while Travel returns 0.00 and 0.00 (a real zero).
 5. **Debugging:** Produce a dynamic category report as a JSONB object instead of generating unstable SQL columns.
    **Progressive hint:** Aggregate category/value pairs into data values so the result schema remains stable.
-   **Inputs/evidence:** For sql-27 Exercise 5, read from `orders`, `order_items`, and `products`. Build the answer toward `month_start`, and `revenue_by_category`; keep `month_start` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-27 Exercise 5, expected output: One row per UTC month with a JSON object of category revenue. The final columns are `month_start`, and `revenue_by_category`. The final order is `month_start`.
-   **Verify:** For sql-27 Exercise 5, independently aggregate `orders`, `order_items`, and `products` by `month_start`; require one output row for every distinct `month_start` tuple and compare `revenue_by_category` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `revenue_by_category` for the existing `month_start` tuple and verify the new tuple appears exactly once.
+   **Inputs/evidence:** For sql-27 Exercise 5, read `orders`, `order_items`, and `products`, round net item revenue per UTC month and `category` in `category_month`, then fold each month's six rows into one JSONB value with `jsonb_object_agg(category, revenue ORDER BY category)`.
+   **Expected result/shape:** For sql-27 Exercise 5, expected output: one row per UTC month (46 on this load), each object holding all 6 category keys; the first month is `{"Home": 30.20, "Books": 279.76, "Beauty": 94.00, "Sports": 175.41, "Apparel": 407.05, "Electronics": 216.84}`, because JSONB stores keys shorter first, not in the `ORDER BY` order. The final columns are `month_start`, and `revenue_by_category`. The final order is `month_start`.
+   **Verify:** For sql-27 Exercise 5, confirm every object has 6 keys with `jsonb_object_keys`, and that summing `jsonb_each_text` values over all months gives 2355647.24, slightly above the unrounded 2355647.12 because each cell was rounded first; a missing key such as `revenue_by_category -> 'Toys'` returns NULL, and `jsonb_object_agg` over `VALUES ('a', 1), (NULL, 2)` fails with `field name must not be null`.
 6. **Extension:** Round-trip a wide sample to long form and back, verifying values and NULLs.
    **Progressive hint:** Unpivot with lateral values, then use conditional aggregation keyed by company.
-   **Inputs/evidence:** For sql-27 Exercise 6, read from `wide`. Build the answer toward `company`, `q1`, and `q2`; keep `company` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-27 Exercise 6, expected output: Two reconstructed rows matching the source. The final columns are `company`, `q1`, and `q2`. The final order is `company`.
-   **Verify:** For sql-27 Exercise 6, independently aggregate `wide` by `company`; require one output row for every distinct `company` tuple and compare `q1`, and `q2` tuple by tuple. Repeat with `NULL` in `company`, and `q1` and state whether the row is kept, rejected, or classified.
+   **Inputs/evidence:** For sql-27 Exercise 6, no table is read: the `wide` CTE holds A with 10 and 20 and B with NULL and 5; `long` unpivots it into four `(company, quarter, amount)` rows, and the outer query pivots back with `MAX(amount) FILTER (WHERE quarter = ...)` grouped by `company`.
+   **Expected result/shape:** For sql-27 Exercise 6, expected output: exactly 2 rows, A with 10 and 20 and B with NULL and 5, identical to `wide`. The final columns are `company`, `q1`, and `q2`. The final order is `company`.
+   **Verify:** For sql-27 Exercise 6, confirm `long` has 4 rows with one NULL `amount`, and that both `SELECT * FROM wide EXCEPT SELECT ...` and the reverse return 0 rows, since `EXCEPT` treats the two NULLs as equal; then pivot `VALUES ('A', 'Q1', 10), ('A', 'Q1', 99), ('A', 'Q2', 20)` and confirm `q1` shows 99, because `MAX` silently hides a duplicate quarter that a `COUNT(*)` of 3 would reveal.
 
 ## Common mistakes and how to recover
 
-- **Lesson-specific semantic mistake:** Replacing missing category combinations with zero is a business decision; dynamic columns are difficult for stable downstream schemas.
-- **Unexpected row count:** display keys before aggregates, count rows after
-  each join/filter stage, and find the first stage whose grain differs from the
-  contract. Do not hide fanout with `DISTINCT`.
-- **Unexpected `NULL` or missing row:** decide whether the fact is unknown,
-  inapplicable, zero, or absent before using `COALESCE`; inspect outer-join
-  predicate placement and empty-input aggregate behavior.
-- **Unstable top/first/last output:** add `ORDER BY` with a unique final
-  tie-breaker before `LIMIT` or order-sensitive windows/aggregates.
-- **`psql` stops on an error:** fix the first error shown by
-  `ON_ERROR_STOP`, restore the declared transaction/setup state, and rerun the
-  complete file. A later successful statement does not validate a partial run.
+- **Assuming the pivot adds up.** The segment pivot lists only US, CA, GB
+  and DE, so each segment's four columns add to 63 while `all_customers` is
+  125. The other 62 customers live in a country without a column. Keep a
+  total column so the gap is visible.
+- **Mixing up `COUNT` and `SUM` under `FILTER`.** A filtered `COUNT` gives 0
+  when nothing matches, while a filtered `SUM` gives `NULL`. Only add
+  `COALESCE(..., 0)` when the report really treats no data as zero.
+- **Losing the year in `EXTRACT(MONTH ...)`.** The expense data covers two
+  years, so a January column built with `EXTRACT(MONTH FROM expense_date) = 1`
+  can add two Januaries together; a late-2026 load had 425 and 424 rows. Filter or
+  group by year too when that matters.
+- **Incompatible types in `VALUES`.** Every column listed in one lateral
+  `VALUES` must share a type. `VALUES ('Q1', 1), ('Q2', 'x')` fails with
+  `invalid input syntax for type integer: "x"`; cast to a common type first.
+- **Expecting `jsonb` to keep key order.** `jsonb_object_agg(... ORDER BY
+  category)` still prints keys shortest first (`Home`, `Books`, `Beauty`, and
+  so on), because `jsonb` stores keys in its own order. Use `json_object_agg`
+  if printed order matters.
+- For general recovery steps, see
+  [Recover from common failures](../../STUDY-GUIDE.md#recover-from-common-failures).
 
 ## Self-check
 
@@ -298,9 +280,9 @@ Further reading
 
 ## Ask an AI tutor about this lesson
 
-An AI tutor is optional; the guide, learner SQL, PostgreSQL, and expected checks are
-enough to complete the lesson offline. If you want a patient tutor, copy this
-prompt after opening the repository in the AI tutor:
+A tutor can generate small wide tables for you to unpivot by hand,
+which is the quickest way to practice the lateral `VALUES` pattern
+([optional tutor notes](../../STUDY-GUIDE.md#use-an-ai-tutor-optional)).
 
 ```text
 Tutor me through sql-27: Pivoting and Unpivoting.

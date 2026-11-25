@@ -13,40 +13,35 @@ psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
   -f sql/professional/solutions/sql_types_01_native_types_search_solutions.sql
 ```
 
-`psql` prints each result/command tag in the terminal. Stop at the first
-unexpected `ERROR`; later output cannot repair an earlier failed invariant.
-Compare your own SQL, row grain, column names, row counts, `NULL` policy, and
-ordering with the explanation before comparing syntax.
+The solution builds its own smaller fixture with documents 201 to 203 and a
+plain `text` state column, then adds probe rows in later exercises, so do not
+compare its row IDs with the learner script's 101 to 103.
 
-## Clause-by-clause reading map
+## Reading map for this lesson
 
-The lesson's main concepts are Domain, Enum, UUID, Array, Range/multirange, JSONB. Its worked-model focus is:
-The model uses a domain for a reusable email-shape rule and an enum for a small database-owned lifecycle. Enums are compact and clear, but adding/removing labels is migration work; a reference table is more flexible when labels carry metadata or change frequently.
+Read each solution by naming the operator that answers the question and the
+type that supplies it:
 
-- Start at `FROM`/`JOIN` and state the intermediate row grain. Inspect join keys
-  before adding aggregates; a one-to-many join is allowed to multiply rows only
-  when the later contract accounts for it.
-- Apply `WHERE` to input rows, `GROUP BY` to form buckets, and `HAVING` to
-  completed groups. Window functions run over the surviving relation and
-  normally preserve its row count.
-- Read the `SELECT` list as the public result contract: keys establish grain,
-  measures state calculations, and aliases explain meaning. `ORDER BY` is the
-  only output-order guarantee; add a unique tie-breaker before `LIMIT`.
-- Trace every common table expression (CTE) as a temporary named relation.
-  Execute or inspect one stage at a time while debugging, but compare the final
-  result with an independent control rather than trusting stage names.
-- Keep SQL `NULL` as “missing/unknown/not applicable” until the metric contract
-  chooses another representation. Guard division with `NULLIF`; disclose
-  exclusions and distinguish zero from no row.
-- For DDL/DML, a command tag proves only that PostgreSQL accepted a statement.
-  Catalog checks, negative cases, row-count reconciliation, and the declared
-  transaction boundary prove behavior and cleanup.
+- Containment and membership: Exercise 1 uses one `@>` for both required tags,
+  and Exercise 2 combines `availability @> probe_date` with
+  `NOT blackout_windows @> probe_date`, which excludes document 201.
+- JSON: Exercise 3 checks the JSON type before comparing minutes, and Exercise
+  10 adds valid JSON probes that are wrong for the property before defining a
+  stored generated column and its B-tree index.
+- Text search: Exercise 4 parses the phrase with `websearch_to_tsquery`,
+  and Exercise 11 inspects `to_tsvector` lexemes to explain stop words and
+  stemming.
+- Modeling: Exercises 6, 9 and 12 choose between domain, enum, reference table
+  and array. Exercise 9 defines `nonnegative_money` as `numeric(12, 2)`,
+  and Exercise 12 replaces the tags array with `tags` and `document_tags` tables.
+- Ranges and networks: Exercise 7 lets a `datemultirange` merge overlapping
+  windows and subtracts it from August to list the gaps, and Exercise 8 picks
+  the longest matching `cidr` prefix.
 
-The exact final queries are not the only valid syntax. A join, subquery, CTE,
-window, or conditional aggregate can be an alternative when it preserves the
-same grain, `NULL` semantics, deterministic ordering, and safety. Prefer the
-form whose intermediate relations a reviewer can verify; optimize only after
-correctness is established with evidence.
+Alternatives are fine when they answer the same question: two `= ANY`
+predicates in place of `@>`, or `->>` with a cast in place of JSONPath. The
+difference is which index can help; Exercise 5 asks you to say which operator
+class supports each form.
 
 Run:
 

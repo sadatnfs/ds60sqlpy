@@ -32,11 +32,9 @@ Run these in the same Bash terminal you will use for the fixture. Do not change 
 
 ## How to use this lesson
 
-The classroom displays this guide and saves your worksheet, `courses/docker/lessons/docker-002.md`. Its Run button does not control your Docker engine. Docker engine access is powerful host access, so the classroom deliberately receives no engine socket. Work through the supplied examples without starting anything, then use the optional host lab only in your own disposable project. Reading a command, parsing YAML and actually running the project are different forms of evidence.
+The classroom saves `courses/docker/lessons/docker-002.md` and holds no engine socket ([host-lab setup](../STUDY-GUIDE.md#host-lab-setup)).
 
-Use Bash in Linux, macOS Terminal, or Ubuntu under WSL 2 on Windows. The supported engine runs Linux containers. The maintained fixture is `courses/docker/fixtures/compose-lab/`; its README explains copying it into a new ignored learner directory, checking the engine, building locally with visible logs, and using the fixed project name `ds60-docker-study`. The fixture uses port 18080 on host loopback. Stop if that project name or port belongs to unrelated work; choose a new project name consistently in your own copy. Never paste a command against a remote Docker context simply because it is currently selected.
-
-For Dockerfile examples, create a file named `Dockerfile` in a scratch project. YAML snippets describe a fragment unless explicitly called a complete file. Text transcripts are synthetic illustrations, not claims about your machine. Do not substitute a real password, token or private registry into a checked-in example. **How to use the lessons** in the [subject README](../README.md) collects these rules in one place.
+**Host lab.** Run worked example 1 on the host before any other lab and copy four facts into the worksheet: the context name, the `Endpoint` value from `docker context inspect`, the OSType and the Compose version. Then check the environment with `env | grep '^DOCKER_'`, which should print nothing on a plain local setup. If your engine is a local one you control, quit it briefly and run worked example 2 again: `docker --version` still prints, while `docker info` fails with a connection error and shows no Server section. Start the engine again and wait for `docker info` to succeed before continuing. On Windows, do all of this in the Ubuntu terminal under WSL 2, where `command -v docker` should resolve to a Linux path. This lesson creates no containers or volumes, so there is nothing to clean up; the recorded endpoint is the evidence that later labs build on.
 
 ## Worked example / walkthrough
 
@@ -66,7 +64,7 @@ docker info
 
 ## Six progressive exercises
 
-For each exercise, name the object involved and the phase of its lifetime before changing anything, then vary only the condition the task names. Exercises that ask you to predict, explain, compare or diagnose keep their answers in the solutions file; the others show the evidence to look for.
+Answer-type prompts keep their answers in the solutions file ([exercise rules](../STUDY-GUIDE.md#exercise-rules)).
 
 ### Exercise 1: Predict whether docker --version proves readiness.
 
@@ -98,13 +96,19 @@ For each exercise, name the object involved and the phase of its lifetime before
 
 Reading a successful `docker --version` as proof that the engine is running. Running lab commands while a remote or shared context is selected. Using PowerShell paths on Windows instead of the Ubuntu shell under WSL 2.
 
-Exercise 4 is this chapter's boundary case: Diagnose client success with daemon connection failure. Run `docker version` and read whether the Server section appears at all; a printed client version alone says nothing about the engine, the selected context or socket permission. Preserve the original failure and the exact changed field before retrying. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
+Exercise 4 is this chapter's boundary case: Diagnose client success with daemon connection failure. Run `docker version` and read whether the Server section appears at all; a printed client version alone says nothing about the engine, the selected context or socket permission.
+
+Another trap is trusting `docker context show` while an environment variable redirects the client. An exported `DOCKER_HOST` or `DOCKER_CONTEXT` takes precedence over the context saved with `docker context use`, so the selected context can look local while commands go elsewhere. The symptom is containers or images you do not recognize, or a different `Name` and kernel in `docker info`. Read `env | grep '^DOCKER_'`, compare the `Server` section of `docker version` with the endpoint you recorded, and unset the variable in this shell instead of running destructive commands to find out what the other engine holds.
+
+Never trade a safety control for a passing example ([safety rules](../STUDY-GUIDE.md#safety-rules)).
 
 ## Retrieval, transfer and next steps
 
-Close the explanations first. Without notes, say which command output proves the client works and which proves the engine answers. Then reconstruct worked example 2 (Distinguish client from server availability) with one different value, predict what changes, and name which of Docker client, Docker engine, Docker context, WSL 2 and docker info the change touches.
+**Retrieval.** Without notes, say which command output proves the client works and which proves the engine answers.
 
-When a host session ends, run `docker compose -p ds60-docker-study down` from your fixture copy. It removes the project's containers and network but keeps named volumes; deleting a volume is a separate, deliberate reset described in the fixture README.
+**Transfer case.** On Windows, a learner runs `docker info` successfully in PowerShell, then pastes the fixture README's guard block (`if [ -e .learning/docker-study ]; then ...`) into the same window and gets a parse error. Which shell should they use, and does the successful `docker info` change the answer?
+
+Then run the [retrieval loop](../STUDY-GUIDE.md#retrieval-and-cleanup) and end any host session with its cleanup.
 
 ## Primary references
 

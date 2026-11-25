@@ -1,6 +1,8 @@
 # spark-035: Explained paired reference solutions
 
-Read the [guide](../guides/spark-035.md) and attempt one language first. The [Scala reference](spark-035_solution.scala) and [PySpark reference](spark-035_solution.py) are complete single-file programs with explicit local sessions and finally-based stop. Each compares with literal expectations; matching two implementations alone would not rule out a shared mistake.
+Attempt the [guide](../guides/spark-035.md) exercises first.
+
+References: [Scala](spark-035_solution.scala), [PySpark](spark-035_solution.py).
 
 ## Exercises and reasoning
 
@@ -8,7 +10,7 @@ Read the [guide](../guides/spark-035.md) and attempt one language first. The [Sc
 
 Read a static copy of the two-row schema fixture and require bigint id/cents, known nonnull values and at most 8 rows. Return its canonical ordered bag without removing duplicates.
 
-**Expected:** The first bag is 1:100,2:200. A NULL identity or cents value is rejected.
+**Expected:** The first bag is `1:100, 2:200`. A NULL identity or cents value is rejected.
 
 ```scala
 def validatedBag(frame: DataFrame): Seq[String] = {
@@ -55,7 +57,7 @@ The row grain is one input event occurrence, not one distinct business identity.
 
 Execute the AvailableNow Parquet query with its owned checkpoint/output and retain query ID, run ID, input count and batch IDs.
 
-**Expected:** Two input rows and exactly 1:100,2:200 in the committed sink.
+**Expected:** Two input rows and exactly `1:100, 2:200` in the committed sink.
 
 ```scala
 def firstRun(spark: SparkSession, input: Path, checkpoint: Path, output: Path): RunReceipt = {
@@ -76,7 +78,7 @@ AvailableNow bounds the available input for this invocation and terminates after
 
 Publish a second file with 2:200 and 3:300, then restart the compatible query with the same checkpoint and sink.
 
-**Expected:** Only 2 new input rows are processed. The sink bag is 1:100,2:200,2:200,3:300. Query ID persists and run ID changes.
+**Expected:** Only 2 new input rows are processed. The sink bag is `1:100, 2:200, 2:200, 3:300`. Query ID persists and run ID changes.
 
 ```scala
 def resumeNewFile(
@@ -172,7 +174,7 @@ The new checkpoint defines a new source-history namespace and can see all availa
 
 Return output row count, distinct business IDs and total cents, then explain why source recovery is not business-ID deduplication or a universal exactly-once guarantee.
 
-**Expected:** 4 occurrences,3 distinct IDs, total 800.
+**Expected:** 4 occurrences, 3 distinct IDs, total 800.
 
 ```scala
 def guaranteeLedger(frame: DataFrame): Seq[Long] = {
@@ -194,6 +196,7 @@ The three-number ledger catches a misleading countDistinct-only success claim. A
 
 ## Execution and interpretation
 
-Run the complete reference in its prepared fixed worker. Its first check (Validate the finite input and output grain) is built inside the program, so opening the lesson fetches nothing; it expects: The first bag is `1:100, 2:200`. A NULL identity or cents value is rejected. The final success line prints only after every reference assertion passes.
+The references must publish `batch-01.json`, return `["1:100", "2:200"]` from `validated_bag`, and raise `ValueError` when an ID is NULL. The first run must read 2 rows and leave no active query. After `batch-02.json` arrives, the restart must keep the query ID, change the run ID, read 2 rows and produce `1:100, 2:200, 2:200, 3:300`; an immediate rerun with no new file reads 0 rows and leaves that bag alone.
 
-Local plan, partition and resource evidence does not establish cluster-scale performance; session cleanup is explicit.
+The separate replay needs a checkpoint and an output folder that do not exist yet. It reports a new query ID, reads all 4 occurrences and writes the same four-row bag, while the first output keeps its rows. `guarantee_ledger` reduces the sink to `(4, 3, 800)`: occurrences, distinct IDs and total cents. The program prints `spark-035: six PySpark reference contracts passed; Spark=` with the version; Scala prints its own line. These runs show source progress tracking on one machine. The sink stores every row it is given, so duplicates inside the data remain the program's job, and a crash in the middle of a write is not tested here.
+

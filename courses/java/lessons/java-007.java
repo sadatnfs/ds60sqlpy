@@ -3,21 +3,16 @@ public class Main {
 
   public static void main(String[] args) throws Exception {
     // Exercise 1: Create independent accounts: change one input
-    // Copy Example A into a scratch `Main.java` and change `Account first = new Account(100);`
-    // to `Account first = new Account(101);`. Before running it with `java -ea Main`, predict
-    // which assertion fails and which value it now sees; then run it and restore the original
-    // line.
-    // Expected: The changed run fails with an `AssertionError` from the assertion on
-    // `first.balance() == 150 && second.balance() == 100`. Restoring the original line brings
-    // back the worked observation: balances 150 and 100.
+    // Change `Account first = new Account(100);` to `Account first = new Account(101);` in
+    // Example A and predict which assertion fails and why.
+    // Expected: The edited run fails with an `AssertionError` from the assertion on
+    // `first.balance() == 150 && second.balance() == 100`.
 
     // Exercise 2: Withdraw within the contract: debug a regression
-    // A regression changed one token in the code that Example B adds after Example A, so one
-    // line now reads `first.withdraw(41);`. Run Example B with that line, use the failing
-    // assertion to locate the defect and repair it without changing the assertion.
-    // Expected: Before the repair the run fails with an `AssertionError` from the assertion on
-    // `first.balance() == 110`; after it the line reads `first.withdraw(40);` again and balance
-    // 110.
+    // A regression in Example B's new code makes one line read `first.withdraw(41);`. Repair it
+    // using the failing assertion.
+    // Expected: The unrepaired run fails with an `AssertionError` from the assertion on
+    // `first.balance() == 110`; the repaired line reads `first.withdraw(40);`.
 
     // Exercise 3: Reject overdraft atomically
     // Attempt to withdraw 111 from balance 110.

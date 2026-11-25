@@ -195,22 +195,21 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="integration-apache-083-complete-worked-notebook">Integration apache-083 complete worked notebook<a class="heading-anchor" href="#integration-apache-083-complete-worked-notebook" aria-label="Link to this section">#</a></h2>
 <p>Use the actual Airflow project for one explicit historical interval. Publish a validated candidate separately from the live stream. Reconcile unknown publication outcomes before retrying any writer.</p>
-<h3 id="receipt-fields-and-independent-oracle">Receipt fields and independent oracle<a class="heading-anchor" href="#receipt-fields-and-independent-oracle" aria-label="Link to this section">#</a></h3>
+<h3 id="what-this-backfill-receipt-must-hold">What this backfill receipt must hold<a class="heading-anchor" href="#what-this-backfill-receipt-must-hold" aria-label="Link to this section">#</a></h3>
 <ul>
-<li>Source revision/hashes and exact declared input IDs, values, schema and time units.</li>
-<li>Actual native platform, package/image identities and owned resource namespace.</li>
-<li>Selected table snapshot/version, source positions or process/lineage identity as appropriate.</li>
-<li>Positive result against an independent oracle and a typed negative observation.</li>
-<li>Read-only retained-state comparison after the selected lifecycle transition.</li>
-<li>Cleanup/evidence-storage result and any separate prepared or unavailable feature.</li>
+<li>The DAG ID, run ID, logical date and the half-open data interval Airflow selected.</li>
+<li>Each task attempt number, with the identified fail-once retry kept separate.</li>
+<li>The input snapshot or file version the task read, as recorded in its own receipt.</li>
+<li>The candidate output location and its identity before publication.</li>
+<li>The published output identity, and the untouched identity of the other day.</li>
+<li>The live stream&#x27;s source positions at the moment of cutover.</li>
 </ul>
-<p>For the common three-order fixture, require IDs 1/2/3 with amounts 4/9/7, total 20, east 11 and west 9. A later fourth west order of 2 changes the current total to 22 and west to 11 while an earlier pinned snapshot remains unchanged. Do not use this simple oracle to claim correctness for a different pipeline without defining its deduplication, correction and visibility semantics.</p>
-<p>Read the selected project README and qualification ledger before commands. The classroom does not execute Docker commands in this Markdown pad. Prepared configuration, unit policy fixtures, successful compilation and actual service acceptance remain different observations. Never include credentials or signed URLs.</p>
+<p>The Airflow workshop gives a concrete oracle. Day one holds amounts 4 and 9 and day two holds 7. The correction changes 4 to 6, so day one becomes 15 while day two stays byte-for-byte equal. If day two&#x27;s identity changes, the backfill wrote outside its interval. If the run ID is new but the published identity is unchanged, check whether the earlier attempt had already published. The <a href="../STUDY-GUIDE.md.html#evidence-receipts">shared receipt rules</a> cover naming and storage.</p>
 <h3 id="concrete-source-inspection">Concrete source inspection<a class="heading-anchor" href="#concrete-source-inspection" aria-label="Link to this section">#</a></h3>
 <p>From the copied integration directory, with sibling project copies when selected:</p>
 <pre class="highlighted-code"><code class="language-bash">cat ../airflow/README.md
 cat ../airflow/dags/classroom_workflows.py</code></pre>
-<p>These inspections do not start or qualify a service. Execute only the chosen project&#x27;s complete documented owned route and retain its actual receipt.</p></article>
+<p>In <code>classroom_workflows.py</code>, find the <code>classroom_orders</code> DAG: its <code>CronDataIntervalTimetable</code> and its start and end dates explain why only two UTC days exist. Then find <code>classroom_correction</code>, whose <code>correct</code> task writes only the first day and raises for any other. Reading the DAG shows intent. Only <code>run.sh backfill-check</code> and <code>run.sh readback</code> against the running workshop show the interval and outputs that Airflow actually produced.</p></article>
   </main>
 </body>
 </html>

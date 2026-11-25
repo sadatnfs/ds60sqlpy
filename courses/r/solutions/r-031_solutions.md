@@ -1,6 +1,6 @@
 # r-031: reference reasoning
 
-Use the [complete reference](r-031_reference.R) with the guide's declared inputs and runtime. Every worked example is also a standalone script.
+Run the [complete reference](r-031_reference.R) under the [run rules](../STUDY-GUIDE.md#run-a-chapter).
 
 ## Why the implementation has this shape
 
@@ -96,4 +96,6 @@ Sort by entity, time and a deterministic tie-breaker before computing lags.
 
 ## What the checks establish
 
-The reference makes 5 `stopifnot()` checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.
+The assertions confirm unique, present ids, a result ordered as L1 then L3 with nets 8 and 9, an audit of 3 input rows, 2 retained and 1 excluded, a second selection that keeps only L3 at 9, and an empty selection that still returns the `id` and `net` columns. They do not check that the exclusion rule matches a business policy you were never given.
+
+The reference makes 5 `stopifnot()` checks; see [what a passing run proves](../STUDY-GUIDE.md#what-a-passing-run-proves).

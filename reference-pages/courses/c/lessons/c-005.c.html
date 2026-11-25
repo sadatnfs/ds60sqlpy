@@ -197,23 +197,16 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">int</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">void</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span></span>
 <span class="source-line">  <span class="syntax-comment">/* Exercise 1: Call a pure calculation: predict an edited check</span></span>
-<span class="source-line"><span class="syntax-comment">     Copy worked example 1 into a scratch pad and change `CHECK(twice(0) == 0);`</span></span>
-<span class="source-line"><span class="syntax-comment">     to `CHECK(twice(1) == 0);` inside its CHECK. Before running, predict</span></span>
-<span class="source-line"><span class="syntax-comment">     whether the CHECK still holds and explain why; then restore it. Expected:</span></span>
-<span class="source-line"><span class="syntax-comment">     With `CHECK(twice(1) == 0);` the run stops with `Check failed` at the CHECK</span></span>
-<span class="source-line"><span class="syntax-comment">     on `twice(0) == 0`, because the &quot;call a pure calculation&quot; case no longer</span></span>
-<span class="source-line"><span class="syntax-comment">     shows that the results are 14 and 0. Restoring `CHECK(twice(0) == 0);`</span></span>
-<span class="source-line"><span class="syntax-comment">     brings that observation back. */</span></span>
+<span class="source-line"><span class="syntax-comment">     In worked example 1, change `CHECK(twice(0) == 0);` to `CHECK(twice(1) ==</span></span>
+<span class="source-line"><span class="syntax-comment">     0);`. Predict whether the CHECK still holds and why, then run and restore.</span></span>
+<span class="source-line"><span class="syntax-comment">     Expected: `Check failed`: `CHECK(twice(1) == 0);` is false, although the</span></span>
+<span class="source-line"><span class="syntax-comment">     results are 14 and 0. */</span></span>
 <span class="source-line"></span>
 <span class="source-line">  <span class="syntax-comment">/* Exercise 2: Return an output on success: diagnose an edited check</span></span>
-<span class="source-line"><span class="syntax-comment">     A careless edit changed the CHECK in worked example 2, the &quot;return an</span></span>
-<span class="source-line"><span class="syntax-comment">     output on success&quot; case, so that it reads `CHECK(try_area(4, 4, &amp;out));`.</span></span>
-<span class="source-line"><span class="syntax-comment">     Run the example with that line, explain why the edited CHECK now fails even</span></span>
-<span class="source-line"><span class="syntax-comment">     though the program state still means success is true and output becomes 12,</span></span>
-<span class="source-line"><span class="syntax-comment">     and restore it. Expected: Before the repair the run stops with `Check</span></span>
-<span class="source-line"><span class="syntax-comment">     failed` at the CHECK on `out == 12`. Once the line reads `CHECK(try_area(3,</span></span>
-<span class="source-line"><span class="syntax-comment">     4, &amp;out));` again, the &quot;return an output on success&quot; case again shows that</span></span>
-<span class="source-line"><span class="syntax-comment">     success is true and output becomes 12. */</span></span>
+<span class="source-line"><span class="syntax-comment">     Worked example 2&#x27;s CHECK now reads `CHECK(try_area(4, 4, &amp;out));`. Explain</span></span>
+<span class="source-line"><span class="syntax-comment">     why it fails although success is true and output becomes 12, then restore</span></span>
+<span class="source-line"><span class="syntax-comment">     it. Expected: `Check failed` until the CHECK reads `CHECK(try_area(3, 4,</span></span>
+<span class="source-line"><span class="syntax-comment">     &amp;out));` again, though success is true and output becomes 12. */</span></span>
 <span class="source-line"></span>
 <span class="source-line">  <span class="syntax-comment">/* Exercise 3: Preserve output on rejection</span></span>
 <span class="source-line"><span class="syntax-comment">     Request area with width zero.</span></span>

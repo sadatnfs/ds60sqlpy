@@ -1,6 +1,6 @@
 # js-042: explanatory solutions
 
-Use these answers after an attempt or an explicit reveal. The reference uses the same literal fixtures as the guide and keeps the exercises in separate scopes. A successful run checks these examples; explaining a changed input is a separate learning goal.
+Open these after your own attempt; each exercise runs in its own scope in the reference.
 
 ## Mechanism review
 
@@ -26,7 +26,7 @@ The manifest uses an explicit filename allowlist and SHA-256 digests. Paths are 
 
 ## Exercise 1: Build, verify and execute a fresh bundle: change one input
 
-Task: Copy Example A into a scratch `main.mjs` and change `const result = runBundle(directory, ['--self-test']);` to `const result = runBundle(directory, ['--self-test!']);`. Before running it, predict which check fails and which value it now sees; then run it and restore the original line.
+Task: In a scratch copy of Example A, change `const result = runBundle(directory, ['--self-test']);` to `const result = runBundle(directory, ['--self-test!']);`. Which check fails, and what value does it see?
 
 The child executes the packaged bytes rather than an already imported development function. The receipt records the runtime that actually ran.
 
@@ -44,13 +44,13 @@ await withBundle(async (directory) => {
 });
 ```
 
-**Expected:** The changed run fails with an `AssertionError` at `assert.equal(result.status, 0, result.stderr)`. Restoring `const result = runBundle(directory, ['--self-test']);` brings back: three checks passed; actual Node version reported.
+**Expected:** The edited run fails with an `AssertionError` at `assert.equal(result.status, 0, result.stderr)`. Restoring `const result = runBundle(directory, ['--self-test']);` brings back: three checks passed; actual Node version reported.
 
-**Verify:** Compare your written prediction with the reported `AssertionError`, including its actual and expected values, and name the value that made `assert.equal(result.status, 0, result.stderr)` fail. After restoring the line, the program prints its `{"checks":1,"status":"passed"}` receipt again.
+**Verify:** Compare the reported actual and expected values with your prediction, then restore `const result = runBundle(directory, ['--self-test']);`.
 
 ## Exercise 2: Reject altered application bytes before execution: debug a regression
 
-Task: A regression changed one token in Example B, so one line now reads `await appendFile(join(directory, 'app.mjs!'), '\n// controlled tamper fixture\n');`. Run Example B with that line, use the failing check to locate the defect and repair it without changing the check.
+Task: A regression made one Example B line read `await appendFile(join(directory, 'app.mjs!'), '\n// controlled tamper fixture\n');`. Locate and repair it without editing the check.
 
 Even a behavior-preserving edit changes artifact identity. The correct repair is to create a new reviewed manifest and rerun evidence, not ignore the mismatch.
 
@@ -65,7 +65,7 @@ await withBundle(async (directory) => {
 
 **Expected:** Before the repair the run fails with an `AssertionError` at `assert.rejects(verifyBundle(directory), /digest mismatch/u)`. Restoring `await appendFile(join(directory, 'app.mjs'), '\n// controlled tamper fixture\n');` brings back: digest verification fails.
 
-**Verify:** Keep the failing and the repaired runs. Explain why the changed token alters the value tested by `assert.rejects(verifyBundle(directory), /digest mismatch/u)` for this input.
+**Verify:** Keep the failing and repaired runs and name the first value that differs between them.
 
 ## Exercise 3: Reject a manifest path outside the allowlist
 
@@ -85,7 +85,7 @@ await withBundle(async (directory) => {
 
 **Expected:** path is rejected before any outside file is read.
 
-**Verify:** Keep a check equivalent to `assert.rejects(verifyBundle(directory), /unapproved artifact path/u)` and confirm that the reference still passes. Then name an input that would make it fail and explain which value changes.
+**Verify:** Keep the check `assert.rejects(verifyBundle(directory), /unapproved artifact path/u)`; name an input that would make it fail and the value that changes.
 
 ## Exercise 4: Preserve result and diagnostic channels on failure
 
@@ -106,7 +106,7 @@ await withBundle(async (directory) => {
 
 **Expected:** nonzero child exit; stdout empty; generic stderr without the value.
 
-**Verify:** Keep a check equivalent to `assert.equal(diagnostic.event, 'usage_error')`. As a control, change `assert.equal(diagnostic.event, 'usage_error');` to `assert.equal(diagnostic.event, 'usage_error!');` inside it: the run must fail with an `AssertionError`, which shows the check can fail. Restore it.
+**Verify:** Keep `assert.equal(diagnostic.event, 'usage_error')`. Control: editing it to `assert.equal(diagnostic.event, 'usage_error!');` must make the check fail; then restore it.
 
 ## Exercise 5: Derive stable content identity from unchanged files
 
@@ -127,7 +127,7 @@ await withBundle(async (directory) => {
 
 **Expected:** equal digests and an unchanged manifest match.
 
-**Verify:** Keep a check equivalent to `assert.equal(manifest.files.find((file) => file.path === 'app.mjs').sha256, first)`. As a control, change `assert.equal(manifest.files.find(file => file.path === 'app.mjs').sha256, first);` to `assert.equal(manifest.files.find(file => file.path !== 'app.mjs').sha256, first);` inside it: the run must fail with an `AssertionError`, which shows the check can fail. Restore it.
+**Verify:** Keep `assert.equal(manifest.files.find((file) => file.path === 'app.mjs').sha256, first)`. Control: editing it to `assert.equal(manifest.files.find(file => file.path !== 'app.mjs').sha256, first);` must make the check fail; then restore it.
 
 ## Exercise 6: Gate an observed runtime against explicit policy
 
@@ -146,8 +146,8 @@ await withBundle(async (directory) => {
 
 **Expected:** matching policy passes; mismatched policy throws.
 
-**Verify:** Keep a check equivalent to `assert.equal(qualifyRuntime(receipt, actual), true)`. As a control, change `assert.equal(qualifyRuntime(receipt, actual), true);` to `assert.equal(qualifyRuntime(receipt, actual), false);` inside it: the run must fail with an `AssertionError`, which shows the check can fail. Restore it.
+**Verify:** Keep `assert.equal(qualifyRuntime(receipt, actual), true)`. Control: editing it to `assert.equal(qualifyRuntime(receipt, actual), false);` must make the check fail; then restore it.
 
 ## After comparison
 
-Return to your saved implementation and repeat a case with different values. Keep compiler diagnostics, process output and browser observations separate. Do not suppress a failing assertion or use a type assertion to declare an unvalidated value safe. Resource-owning examples must finish cleanup even when work fails. Describe each result with its actual host and fixture scope rather than as production acceptance.
+Fresh case: add `README.txt` to the bundle. Predict the verification result when the manifest lists it but the file is missing, and when the file exists but the manifest omits it. ([After comparing](../STUDY-GUIDE.md#after-comparing-with-the-solution).)

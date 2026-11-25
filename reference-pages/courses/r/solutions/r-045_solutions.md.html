@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/r/solutions/r-045_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="r-045-reference-reasoning">r-045: reference reasoning<a class="heading-anchor" href="#r-045-reference-reasoning" aria-label="Link to this section">#</a></h2>
-<p>Use the <a href="r-045_reference.R.html">complete reference</a> with the guide&#x27;s declared inputs and runtime. Every worked example is also a standalone script.</p>
+<p>Run the <a href="r-045_reference.R.html">complete reference</a> under the <a href="../STUDY-GUIDE.md.html#run-a-chapter">run rules</a>.</p>
 <h3 id="why-the-implementation-has-this-shape">Why the implementation has this shape<a class="heading-anchor" href="#why-the-implementation-has-this-shape" aria-label="Link to this section">#</a></h3>
 <p>The reference checks disjointness at the family level and refits inside each fold. Its perfect synthetic affine predictions test implementation mechanics, not the credibility of real-world validation. The training-only centering example isolates a preprocessing leak without mixing it with model error.</p>
 <p>The final aggregation preserves both sums and counts, allowing the observation-weighted result to be reconstructed. Temporal ordering is checked independently. A complete applied study must also reserve model-selection decisions for development data and retain a final assessment that was not reused for tuning.</p>
@@ -248,7 +248,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Tempting mistake:</strong> Reporting the average of the fold means, 3, as the error per observation. It gives the single observation fold the same weight as the three observation fold and understates the pooled error by 0.5.</p>
 <p><strong>Verify:</strong> <code>(2 + 12) / (1 + 3) == 3.5</code> returns TRUE and <code>mean(c(2 / 1, 12 / 3)) == 3</code> returns TRUE.</p>
 <h3 id="what-the-checks-establish">What the checks establish<a class="heading-anchor" href="#what-the-checks-establish" aria-label="Link to this section">#</a></h3>
-<p>The reference makes 7 <code>stopifnot()</code> checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.</p></article>
+<p>The assertions confirm that the grouped split shares no group between training and testing while the alternating split shares all four, that leave-one-group-out folds cover 8 rows with essentially zero error for the exact rule y equals 1 plus 2x, that a training-only center of 1 differs from a leaked mean of 51, that every training day precedes every test day, and that a pooled ratio of 3.5 differs from the mean of ratios, 3. They do not cover nested tuning.</p>
+<p>The reference makes 7 <code>stopifnot()</code> checks; see <a href="../STUDY-GUIDE.md.html#what-a-passing-run-proves">what a passing run proves</a>.</p></article>
   </main>
 </body>
 </html>

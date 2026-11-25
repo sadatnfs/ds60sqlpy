@@ -1,8 +1,6 @@
 # dax-035: explained reference and practice reasoning
 
-This is an offline DAX editing lesson. No DAX compiler, semantic-model engine, Power BI account or network connection is required. Worked tables describe the named reference and model, not execution of your draft. Save, compare and export source; do not interpret a comparison or completion marker as a passed program run.
-
-The complete [reference source](dax-035_reference.dax) and [named model](../models/retail/model.json) belong together. The reference-results sidecar binds both exact files by SHA-256. Those hashes identify bytes; they do not certify DAX execution.
+Check that the reference reads 'Date'[FiscalYear] rather than deriving the label from Year, and that the to-date case caps dates at February 28, 2025. Your draft should explain why 123 matches the calendar total here only by coincidence. Read it beside the [reference source](dax-035_reference.dax); the [study guide](../STUDY-GUIDE.md#answers-and-references) explains how the sidecar binds it to the model.
 
 ## Worked-case reconciliation
 

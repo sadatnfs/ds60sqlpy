@@ -1,8 +1,6 @@
 # dax-013: explained reference and practice reasoning
 
-This is an offline DAX editing lesson. No DAX compiler, semantic-model engine, Power BI account or network connection is required. Worked tables describe the named reference and model, not execution of your draft. Save, compare and export source; do not interpret a comparison or completion marker as a passed program run.
-
-The complete [reference source](dax-013_reference.dax) and [named model](../models/retail/model.json) belong together. The reference-results sidecar binds both exact files by SHA-256. Those hashes identify bytes; they do not certify DAX execution.
+Compare the reference's two projections: the only change is CALCULATE around the same SUM. Verify that the transitioned values 96, 67 and 24 sum to 187 and that the Bag row is still returned with BLANK revenue. Read it beside the [reference source](dax-013_reference.dax); the [study guide](../STUDY-GUIDE.md#answers-and-references) explains how the sidecar binds it to the model.
 
 ## Worked-case reconciliation
 

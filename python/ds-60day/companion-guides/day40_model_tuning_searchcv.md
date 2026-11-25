@@ -71,31 +71,7 @@ untouched final test set.
 
 ## How to run this lesson
 
-**Primary browser route:** run `./classroom` from the repository root and
-choose **Python and data science** on `/classroom`. Open this lesson in the shared workspace,
-read its capability notice, and use its supported coding or reading workflow.
-The [classroom guide](../../../docs/classroom-experience.md) explains saved work, runtimes and switching subjects.
-
-**Optional native notebook/editor route:** the instructions below describe
-separately prepared host tools. They are useful alternatives, not prerequisites
-for opening this lesson in the Docker classroom.
-
-1. Open the Day 40 learner notebook from this guide's **Next
-   step** section in VS Code or JupyterLab.
-2. Select the `Python (ds60sqlpy)` kernel. Start at the top and use
-   **Run All** only after making the written predictions; every added
-   worked example is bounded and offline after bootstrap.
-3. Keep experiments in new scratch cells. Do not edit the official
-   solution while attempting the numbered practice.
-4. Restart the kernel and run from the first cell before calling the
-   lesson complete. A clean run catches hidden state and stale
-   variables.
-
-Linux, macOS, or Ubuntu in Windows WSL 2:
-
-```bash
-.venv/bin/python -m jupyter lab
-```
+Open `python-40` in the classroom, or `python/ds-60day/notebooks/day40_model_tuning_searchcv.ipynb` on a host; the [Python study guide](../../STUDY-GUIDE.md) explains both.
 
 ## Concept deep dive: hyperparameter search spaces, fit budgets, and nested evaluation
 
@@ -119,10 +95,6 @@ cross-validation loop evaluates the entire selection procedure.
 - **`GridSearchCV(..., scoring=..., refit=...)`:** scores candidates in inner folds and refits the selected configuration on all supplied rows.
 
 ### Focused example A: calculate the search budget before fitting
-
-Before running the example, predict the shape, type, or direction of the
-result. Write the prediction down so that a surprise becomes evidence
-rather than something to overlook.
 
 ```python
 from sklearn.model_selection import ParameterGrid
@@ -217,9 +189,6 @@ assert search.refit == "f1_macro"
 
 Treat tuning as a finite experimental budget with a declared search space, selection metric, resampling design, and reproducible result table.
 
-Predict or plan before you run code. Use the hint only after an honest
-attempt, and record the evidence that would prove your result correct.
-
 3. **Search-budget calculation:** For a grid with 5 values of C, 4 penalties, 3 class weights, and 5-fold CV, calculate candidate and fit counts. Then identify invalid solver/penalty combinations before running.
    **Progressive hint:** Cartesian-product candidates multiply; each candidate is fit once per fold, plus a possible final refit.
 
@@ -277,8 +246,7 @@ held-out set when the project requires a locked evaluation.
 
 ## Ask an AI tutor about this lesson
 
-The lesson is complete without an AI assistant. If you want optional
-coaching, copy this prompt into the AI tutor while the repository root is open:
+The lesson is complete without AI. For optional coaching, copy this prompt with the repository root open:
 
 ```text
 Tutor me through `python-40` (Day 40: Hyperparameter Tuning with SearchCV).

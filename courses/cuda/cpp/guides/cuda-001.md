@@ -4,18 +4,15 @@
 
 Beginner; about 90 minutes, plus any optional hardware experiment. Direct prerequisites: None within this subject. Basic loops and arrays help; revisit Python or C++ foundations when needed.
 
-The order supports learning at your own pace. Reading and CPU reasoning remain
-available when NVIDIA hardware is absent. Advanced hardware features need their
-own capability checks and are not prerequisites for opening this chapter.
+Pacing, evidence labels and platform rules for every chapter are in the [CUDA study guide](../../STUDY-GUIDE.md).
 
 ## Learning objectives
 
 Decide whether to accelerate or keep each of two tasks on the CPU using an end-to-end Amdahl model.
 
-Work through *What a GPU accelerates, and what it cannot make fast* with the concrete cases below. Finish with this evidence:
-a decomposition diagram and a justified decision to accelerate or keep two tasks on CPU. Distinguish an algorithmic
-calculation, a compiled artifact and an actual device observation when explaining
-what your work establishes.
+**Scope:** Distinguish latency from throughput, independent tasks from dependent chains, and parallelizable work from serial overhead.
+
+**Evidence to produce:** A decomposition diagram and a justified decision to accelerate or keep two tasks on CPU.
 
 ## Purpose, vocabulary and mental model
 
@@ -38,28 +35,17 @@ Times use the same units; s is the speedup of only the parallel portion. Launch 
 
 ## How to run and study this lesson
 
-Use the saved reading worksheet in `/classroom`; the reading pad does not execute
-CUDA. For the bounded calculation, select **CPU model (Python)**, whose
-answer-free starter supplies the literal fixtures and task contract. The
-[CUDA C++ study workflow](../README.md) covers platforms, optional GPU
-compilation and evidence labels. In a prepared Python environment you can also
-run the separate [CPU reference](../references/cuda-001_cpu.py) from the
-repository root:
+Trace worked example 1 by hand, then run the [CPU reference](../references/cuda-001_cpu.py) from the repository root:
 
 ```sh
 python courses/cuda/cpp/references/cuda-001_cpu.py
 ```
 
-Its assertions check the stated numerical result or model invariant; console
-text is evidence of this CPU model only, not of CUDA execution.
-
 ## Worked example 1: trace the mechanism
 
 Suppose an application spends 20 seconds parsing and 80 seconds transforming pixels. An imagined GPU makes the transform ten times faster and adds 4 seconds of transfers. The new time is \(20 + 8 + 4 = 32\) seconds, so the application speedup is 3.125. The tenfold kernel improvement is not the application improvement. Even an infinitely fast transform leaves 24 seconds under these assumptions.
 
-The complete CPU model below intentionally models only the named arithmetic,
-layout, dependency or capability decision. It does not model GPU scheduling,
-caches, instruction timing or device memory visibility.
+**Why:** Amdahl's model divides only the accelerated phase, so parsing stays at 20 seconds and the added copies count against the 32-second total.
 
 ```python
 cpu = 20 + 80
@@ -69,41 +55,37 @@ assert cpu / gpu == 3.125
 print({"CPU_seconds": cpu, "modeled_GPU_seconds": gpu, "speedup": cpu / gpu})
 ```
 
-**Expected observation:** Every assertion succeeds. A representative CPU output is:
+**Expected observation:** every assertion succeeds, and the CPU model prints:
 
 ```text
 {'CPU_seconds': 100, 'modeled_GPU_seconds': 32.0, 'speedup': 3.125}
 ```
 
-Integers, shapes and ordering must match exactly; only assertions with an explicit
-tolerance accept small floating-point differences. A printed duration is a model
-output, not a measured GPU benchmark.
+**Check:** Run the CPU reference: its assertions require gpu == 32 and cpu / gpu == 3.125, and the printed dictionary shows modeled_GPU_seconds 32.0.
 
 ## Worked example 2: change a meaningful condition
 
 For one tiny request, suppose CPU arithmetic costs 2 microseconds, while GPU submission and transfers cost 30 microseconds before arithmetic. A 0.2 microsecond kernel gives 30.2 microseconds end to end. Batching 1,000 independent requests may amortize overhead, but it changes waiting time and memory usage. Neither result follows from a core count.
 
-Before applying this example to your own program, write down which inputs are
-read, which result is produced, and the condition that makes the comparison
-valid. Keep the original case as a regression check when changing a boundary.
+**Why:** A single request waits for every phase in sequence, so fixed launch and copy overhead dominate when the arithmetic itself is only two microseconds.
+
+**Check:** Recompute 30 + 0.2 by hand, then recompute per-request overhead for a batch of 1,000 and note the extra queueing delay it introduces.
 
 ## Six progressive exercises
 
-Exercises 1 and 2 are guided reconstructions of the worked examples; exercises
-3-6 change an input, diagnose a defect, test a boundary and transfer the idea.
-For each one, keep the calculation, output, diagram or failure policy you
-produce so another reader can compare it with the worked cases. If the hint is
-not enough, reread the mechanism paragraph and the bounded CPU assertion.
-
 ### Exercise 1
 
-Predict and trace the first worked example before running its CPU reference. Write every intermediate quantity that leads to the stated result, including units or ownership where applicable.
+Reconstruct worked example 1 on paper before running its CPU reference. Split the 100-second run into its 20-second parse, 80-second transform and the new 4-second transfer, then rescale only the transform by ten.
+
+**Trap to avoid:** Dividing the whole 100 seconds by ten predicts 10 seconds; that silently accelerates the parser and forgets the 4 seconds of copies.
 
 **Hint:** Start with the literal input and intermediate quantities in worked example 1.
 
 ### Exercise 2
 
-Reconstruct the second worked example without copying its conclusion. Identify the changed input or condition, show the resulting calculation or dependency, and explain why it differs from the first example.
+Rework worked example 2 without copying its conclusion. Add the 30 microseconds of submission and transfer to the 0.2 microsecond kernel and compare that 30.2 sum with 2 microseconds of CPU arithmetic.
+
+**Trap to avoid:** Comparing 0.2 against 2 and claiming a tenfold win measures the kernel alone; the requester still waits more than fifteen times longer.
 
 **Hint:** Identify exactly which condition changes in worked example 2.
 
@@ -111,11 +93,15 @@ Reconstruct the second worked example without copying its conclusion. Identify t
 
 Construct a 100-second workload with 60 seconds parallelizable and no transfer cost; compute the best possible speedup.
 
+**Trap to avoid:** Answering 60 or 100 times faster from the parallel fraction alone ignores that the serial 40 seconds never shrinks.
+
 **Hint:** Use the first worked example to establish the relevant quantities, then change only the requested input.
 
 ### Exercise 4
 
 A report compares a 2 ms CPU request against a 0.1 ms kernel and claims 20 times faster. Identify the missing observations.
+
+**Trap to avoid:** Timing the kernel with a host clock and no synchronization records only the asynchronous launch call, inflating the claimed speedup further.
 
 **Hint:** Locate the failed phase or violated dependency before proposing a repair.
 
@@ -123,35 +109,33 @@ A report compares a 2 ms CPU request against a 0.1 ms kernel and claims 20 times
 
 What changes if the input contains zero pixels?
 
+**Trap to avoid:** Computing a grid of ceil(0 / 256) blocks and launching anyway yields a zero-sized grid, which the runtime rejects as an invalid configuration.
+
 **Hint:** Check what the algorithm is allowed to read, write or assume at this boundary.
 
 ### Exercise 6
 
 Would you accelerate a chain of 1,000 dependent HTTP requests using a CUDA kernel?
 
+**Trap to avoid:** Launching 1,000 GPU threads, one per request, ignores that request k cannot start until request k minus one returns.
+
 **Hint:** State the output contract and which observations are needed in the new application.
 
 ## Common mistakes and diagnosis
 
-A tempting but incorrect claim in this chapter is: **more GPU cores imply every program becomes faster.**
-
-For the concrete failure exercise, a report compares a 2 ms CPU request against a 0.1 ms kernel and claims 20 times faster. Identify the missing observations.
-Preserve the original input and the stage where behavior diverged, and compare
-with the CPU model before changing hardware configuration.
+A tempting but incorrect claim: **More GPU cores imply every program becomes faster.** Cores only help the fraction of time spent on independent work. In worked example 1 the 20 seconds of parsing and 4 seconds of transfers stay put, so a tenfold kernel gives only a 3.125 times application speedup. A dependent chain, such as a running balance, cannot use extra cores at all.
 
 ## Self-check, retrieval and transfer
 
-Explain the first example without its code, then use the second example to state
-one assumption that matters. Complete Exercise 3 independently, use Exercise 4 to
-diagnose a plausible defect, check the boundary in Exercise 5, and retain the
-application contract from Exercise 6. Compare the [separate explanations](../solutions/cuda-001_solutions.md)
-only after your attempt or a deliberate reveal. A reading marker records your
-choice; it does not certify hardware qualification or expert mastery.
+1. If parsing in worked example 1 grew to 40 seconds while the transform stayed 80 seconds, what would cap the speedup?
+2. Why does batching 1,000 tiny requests change the verdict of worked example 2?
+3. Name one workload in your own projects that has a dependency chain.
+
+Short answers are in the [separate explanations](../solutions/cuda-001_solutions.md#self-check-answers); compare only after an attempt.
 
 ## Primary references
 
-Check the documentation that matches your prepared toolkit before optional
-hardware execution.
+Use the documentation that matches your prepared toolkit.
 
 - [CUDA Programming Guide](https://docs.nvidia.com/cuda/cuda-programming-guide/)
 

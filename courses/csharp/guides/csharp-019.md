@@ -24,9 +24,9 @@ Events build a publish-and-subscribe boundary. The publisher controls when to ra
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles your saved pad as `Program.cs` in its fixed .NET 10 project. C# 14 is the matching language generation. This route uses the prepared framework libraries; it does not accept arbitrary project files, NuGet packages, command arguments or interactive input. The explicit `Program.Main` entrypoint makes compilation and execution visible. `Check` throws on a false condition in every build configuration, unlike conditional debugging assertions.
+`Signal` is the only helper; it raises its event with `Raised?.Invoke`, so emitting with no subscribers does nothing rather than throwing. For task 4, unsubscribe with a freshly written lambda that has the same text and run it: the handler stays attached and `calls` ends at 2.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Compile contract, starter stop and success marker: [running a lesson](../STUDY-GUIDE.md#running-a-lesson).
 
 
 
@@ -34,7 +34,7 @@ Start with the answer-free learner artifact in your saved classroom pad. It deli
 
 `Func<int,int>` represents a callable taking int and returning int. `x => x * factor` is a lambda. An event uses `+=` to subscribe and `-=` to remove the same handler instance.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+Each example ends with a trace; method: [tracing a program](../STUDY-GUIDE.md#tracing-a-program).
 
 ## Worked example / walkthrough
 
@@ -85,6 +85,8 @@ internal static class Program {
 ```
 
 **Observe:** Changing factor changes later calls through the closure.
+
+**Trace.** `factor` starts at 2. The lambda `value => value * factor` captures the variable `factor` itself, not its current value. `scale(3)` reads factor, finds 2 and returns 6. After `factor = 4`, the same delegate reads the variable again and `scale(3)` returns 12. Capturing a variable means later writes are visible.
 
 ### Example B: Manage an event subscription
 
@@ -137,6 +139,8 @@ internal static class Program {
 
 **Observe:** Only the first emission reaches the removed handler.
 
+**Trace.** `handler` stores one delegate instance. `+=` adds it to the event's invocation list, and `Emit` calls it, so `calls` becomes 1. `-=` with the same instance removes it, so the second `Emit` finds no subscribers and `Raised?.Invoke` skips the call. The count stays at 1 because removal matched the stored delegate.
+
 ## Exercises
 
 1. **Predict and explain.** Predict both scale results before running.
@@ -151,13 +155,15 @@ internal static class Program {
 
 6. **Transfer and justify.** Design ownership for subscriptions in a screen or service that can be disposed.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Log each task in the [evidence table](../STUDY-GUIDE.md#recording-exercise-evidence) before opening the explanation.
 
 ## Common pitfalls and diagnosis
 
 Closure capture can retain large objects or unexpected mutable state. Event handlers should avoid hiding failures. A new lambda with similar source is not necessarily the same delegate needed for unsubscription.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+Task 4's version writes `source.Raised -= (_, _) => calls++;`, which creates a new delegate. It matches nothing in the invocation list, so removal silently fails and the second emission increments calls to 2. For task 5, two subscribers must each run once per emission, and a source with none must not throw.
+
+Repair routine: [building a regression case](../STUDY-GUIDE.md#building-a-regression-case).
 
 ## Progressive hints
 
@@ -167,11 +173,15 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 ## Self-check and next step
 
-Explain Delegate, Closure, Subscription without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+Predict `scale(3)` after `factor = 0`, and explain why. Describe what a local copy taken before the change, such as `int snapshot = factor;`, would capture instead. For task 6, say which object unsubscribes when a screen closes and what stays alive in memory if it never does.
+
+Then follow the general [self-check routine](../STUDY-GUIDE.md#self-check-routine) and save your pad.
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://learn.microsoft.com/en-us/dotnet/csharp/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+[Documentation](https://learn.microsoft.com/en-us/dotnet/csharp/): The C# programming guide's articles on delegates, lambda expressions and events explain capture, invocation lists and subscription.
+
+Provenance and limits: [sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

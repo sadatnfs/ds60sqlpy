@@ -1,6 +1,8 @@
 # spark-014: Explained paired reference solutions
 
-Read the [guide](../guides/spark-014.md) and attempt one language first. The [Scala reference](spark-014_solution.scala) and [PySpark reference](spark-014_solution.py) are complete single-file programs with explicit local sessions and finally-based stop. Each compares with literal expectations; matching two implementations alone would not rule out a shared mistake.
+Attempt the [guide](../guides/spark-014.md) exercises first.
+
+References: [Scala](spark-014_solution.scala), [PySpark](spark-014_solution.py).
 
 ## Exercises and reasoning
 
@@ -209,6 +211,7 @@ The final gate validates the occurrence and event grains before presenting a rep
 
 ## Execution and interpretation
 
-Run the complete reference in its prepared fixed worker. Its first check (Classify defects without dropping source occurrences) is built inside the program, so opening the lesson fetches nothing; it expects: Source row 11 has `unknown_status`, row 12 has `missing_id`, and the other 10 reasons are NULL. All 12 `source_row` identities remain. The final success line prints only after every reference assertion passes.
+Both references check the full classification of all twelve rows, the two quarantine rows field by field, the six golden paid groups `A:(3, 2, 200)`, `B:(2, 2, 25)`, `C:(1, 0, NULL)`, `D:(1, 1, 200)`, `E:(1, 1, 0)` and `NULL:(1, 1, 50)`, and the paid metrics `(9, 7, 475)` against the lossy `(8, 6, 375)`. The audited SQL report runs three gates before it registers its view: source identities must be unique and at most 100, accepted event IDs must be positive and unique, and accepted plus quarantined must equal the source count. The duplicate-ID batch is expected to raise.
 
-Local plan, partition and resource evidence does not establish cluster-scale performance; session cleanup is explicit.
+A passing run prints `spark-014: six PySpark reference contracts passed; Spark=` with the version, or the matching Scala line. That means this batch reconciled; it does not certify that tomorrow's batch will, which is why the gates live inside the report function rather than in a one-time test.
+

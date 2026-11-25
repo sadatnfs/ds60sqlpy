@@ -32,11 +32,9 @@ For a shutdown investigation record the main process, signal, elapsed time, exit
 
 ## How to use this lesson
 
-The classroom displays this guide and saves your worksheet, `courses/docker/lessons/docker-004.md`. Its Run button does not control your Docker engine. Docker engine access is powerful host access, so the classroom deliberately receives no engine socket. Work through the supplied examples without starting anything, then use the optional host lab only in your own disposable project. Reading a command, parsing YAML and actually running the project are different forms of evidence.
+The classroom saves `courses/docker/lessons/docker-004.md` and holds no engine socket ([host-lab setup](../STUDY-GUIDE.md#host-lab-setup)).
 
-Use Bash in Linux, macOS Terminal, or Ubuntu under WSL 2 on Windows. The supported engine runs Linux containers. The maintained fixture is `courses/docker/fixtures/compose-lab/`; its README explains copying it into a new ignored learner directory, checking the engine, building locally with visible logs, and using the fixed project name `ds60-docker-study`. The fixture uses port 18080 on host loopback. Stop if that project name or port belongs to unrelated work; choose a new project name consistently in your own copy. Never paste a command against a remote Docker context simply because it is currently selected.
-
-For Dockerfile examples, create a file named `Dockerfile` in a scratch project. YAML snippets describe a fragment unless explicitly called a complete file. Text transcripts are synthetic illustrations, not claims about your machine. Do not substitute a real password, token or private registry into a checked-in example. **How to use the lessons** in the [subject README](../README.md) collects these rules in one place.
+**Host lab.** Start the fixture project, then time the stop in worked example 2: `time docker compose -p ds60-docker-study stop --timeout 10 app`. The fixture already does three things right. Its `CMD` is exec form, `init: true` places a small init as PID 1 that forwards signals, and `server.py` installs a SIGTERM handler that shuts the HTTP server down cleanly. So the stop should take well under ten seconds, and `docker compose -p ds60-docker-study ps -a` should report `Exited (0)` rather than 137. Run `docker compose -p ds60-docker-study exec app ps -o pid,args` before stopping if `ps` is available in your image; otherwise read `/proc/1/cmdline`. Write the PID 1 command, the stop duration and the exit code in the worksheet. Start the service again with `up -d --wait` when you are done.
 
 ## Worked example / walkthrough
 
@@ -65,7 +63,7 @@ docker compose -p ds60-docker-study ps -a
 
 ## Six progressive exercises
 
-For each exercise, name the object involved and the phase of its lifetime before changing anything, then vary only the condition the task names. Exercises that ask you to predict, explain, compare or diagnose keep their answers in the solutions file; the others show the evidence to look for.
+Answer-type prompts keep their answers in the solutions file ([exercise rules](../STUDY-GUIDE.md#exercise-rules)).
 
 ### Exercise 1: Predict what happens when the main process exits.
 
@@ -99,13 +97,19 @@ For each exercise, name the object involved and the phase of its lifetime before
 
 Starting the server in the background and keeping the container alive with `sleep`. Using shell form, so a shell becomes PID 1 and may not forward SIGTERM. Reading exit code 137 as proof of an out-of-memory kill without checking the OOMKilled state.
 
-Exercise 4 is this chapter's boundary case: Diagnose a service kept alive only by sleep. List the processes inside the container and identify which one is PID 1 before reading the running status as evidence about the server. Preserve the original failure and the exact changed field before retrying. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
+Exercise 4 is this chapter's boundary case: Diagnose a service kept alive only by sleep. List the processes inside the container and identify which one is PID 1 before reading the running status as evidence about the server.
+
+A subtler problem is a startup script that ends without `exec`. A `start.sh` that sets variables and then runs `python server.py` leaves the shell as the parent, so SIGTERM reaches the shell, which does not forward it, and Python never runs its handler. The engine waits for the timeout and then sends SIGKILL, which you see as a stop that always takes the full grace period and an exit code of 137. The fix is one word: end the script with `exec python server.py`, so Python replaces the shell and receives signals directly. An init process helps reap children but does not repair a script that swallows the signal.
+
+Never trade a safety control for a passing example ([safety rules](../STUDY-GUIDE.md#safety-rules)).
 
 ## Retrieval, transfer and next steps
 
-Close the explanations first. Describe what happens to the main process during `docker compose stop --timeout 10` when it ignores SIGTERM. Then reconstruct worked example 2 (Observe a bounded stop) with one different value, predict what changes, and name which of PID 1, signals, graceful shutdown, exec form and init process the change touches.
+**Retrieval.** Describe what happens to the main process during `docker compose stop --timeout 10` when it ignores SIGTERM.
 
-When a host session ends, run `docker compose -p ds60-docker-study down` from your fixture copy. It removes the project's containers and network but keeps named volumes; deleting a volume is a separate, deliberate reset described in the fixture README.
+**Transfer case.** A worker container always takes exactly 30 seconds to stop and then shows exit code 137. Its Compose file sets `stop_grace_period: 30s` and its command is `sh -c "python worker.py"`. What is happening, and what would you change first?
+
+Then run the [retrieval loop](../STUDY-GUIDE.md#retrieval-and-cleanup) and end any host session with its cleanup.
 
 ## Primary references
 

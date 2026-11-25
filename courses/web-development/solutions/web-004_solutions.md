@@ -1,6 +1,6 @@
 # web-004: explanatory solutions
 
-Open this after your own attempt. Each answer explains the lesson's synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in `courses/web-development/guides/web-004.md`.
+Attempt each exercise before reading; the mechanism is in `courses/web-development/guides/web-004.md` ([using these answers](../STUDY-GUIDE.md#solutions)).
 
 ## Exercise 1: Resolve ../images/plot.svg from /notes/week1/page.html.
 
@@ -76,4 +76,6 @@ Open this after your own attempt. Each answer explains the lesson's synthetic fi
 
 ## Reference comparison
 
-Open `courses/web-development/solutions/web-004_solution.html` only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; its success message is not an accessibility audit or proof of responsive behavior at every size.
+The reference loops over the navigation links and requires that each hash finds an element in the document, so it catches a fragment like #result that does not match the section id. It does not judge link wording, test relative file paths or check that the destination section has a heading, so review the link text yourself.
+
+Open `courses/web-development/solutions/web-004_solution.html` after saving your attempt ([comparing with the reference](../STUDY-GUIDE.md#references)).

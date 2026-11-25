@@ -4,7 +4,7 @@ Use this saved worksheet on any classroom platform. Optional CPU and NVIDIA obse
 
 ## Exercise 1
 
-Predict and trace the first worked example before running its CPU reference. Write every intermediate quantity that leads to the stated result, including units or ownership where applicable.
+Reconstruct worked example 1 on paper before running its CPU reference. Take the longest workload 9 as rounds, sum useful work 12, and divide by 4 lanes times 9 rounds.
 
 My prediction or design:
 
@@ -16,7 +16,7 @@ What this does not establish:
 
 ## Exercise 2
 
-Reconstruct the second worked example without copying its conclusion. Identify the changed input or condition, show the resulting calculation or dependency, and explain why it differs from the first example.
+Rework worked example 2 without copying its conclusion. Compare 2 ms of compaction with 1 ms of kernel savings for a one-shot request.
 
 My prediction or design:
 

@@ -195,7 +195,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="dbt-021-explained-reference">dbt-021: explained reference<a class="heading-anchor" href="#dbt-021-explained-reference" aria-label="Link to this section">#</a></h2>
 <p>Implement a reproducible reduced CI workflow with explicit selection, baseline and ownership.</p>
-<p>The executable reference contains the two complete worked cases with assertions. The changes below explain the independent practice and its limits.</p>
+<p>The reference builds a prod baseline, copies its manifest, edits <code>child</code>, and runs <code>state:modified+</code> with <code>--defer</code> in dev. It checks the prod row count and whether fail appears in run_results.json. It proves that this selection and test caught one duplicate, not that unselected models are safe. See <a href="../STUDY-GUIDE.md.html#answers-and-references">how these answers are laid out</a>.</p>
 <h3 id="1-inspect-selected-resources">1. Inspect selected resources<a class="heading-anchor" href="#1-inspect-selected-resources" aria-label="Link to this section">#</a></h3>
 <p>Keep that inventory with the result. An empty or incomplete selection cannot justify acceptance merely because the command exits successfully.</p>
 <p><strong>Expected:</strong> The changed child and required tests are visible.</p>

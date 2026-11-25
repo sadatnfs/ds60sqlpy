@@ -1,6 +1,6 @@
 # r-036: reference reasoning
 
-Use the [complete reference](r-036_reference.R) with the guide's declared inputs and runtime. Every worked example is also a standalone script.
+Run the [complete reference](r-036_reference.R) under the [run rules](../STUDY-GUIDE.md#run-a-chapter).
 
 ## Why the implementation has this shape
 
@@ -96,4 +96,6 @@ Measure representative peak memory, elapsed work and equivalent outputs under co
 
 ## What the checks establish
 
-The reference makes 3 `stopifnot()` checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.
+The checks confirm a final mean of 25 that does not depend on chunk order, an NA mean with three missing values when every observation is missing, and a mean of 3 from three observed values in another stream. They show that the combination rule is correct, not that chunking reduced memory use, which would need separate measurement.
+
+The reference makes 3 `stopifnot()` checks; see [what a passing run proves](../STUDY-GUIDE.md#what-a-passing-run-proves).

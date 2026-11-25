@@ -4,7 +4,7 @@ Use this saved worksheet on any classroom platform. Optional CPU and NVIDIA obse
 
 ## Exercise 1
 
-Predict and trace the first worked example before running its CPU reference. Write every intermediate quantity that leads to the stated result, including units or ownership where applicable.
+Reconstruct worked example 1 on paper before running its CPU reference. For each row and column add ten at row * 4 + col, leaving column 3 alone.
 
 My prediction or design:
 
@@ -16,7 +16,7 @@ What this does not establish:
 
 ## Exercise 2
 
-Reconstruct the second worked example without copying its conclusion. Identify the changed input or condition, show the resulting calculation or dependency, and explain why it differs from the first example.
+Rework worked example 2 without copying its conclusion. Predicate x < width and y < height separately before forming any flat offset.
 
 My prediction or design:
 

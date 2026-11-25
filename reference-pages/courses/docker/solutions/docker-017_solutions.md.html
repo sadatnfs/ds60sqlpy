@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/docker/solutions/docker-017_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="docker-017-explanatory-solutions">docker-017: explanatory solutions<a class="heading-anchor" href="#docker-017-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit reveal. These explain the supplied teaching fixtures; they are not engine results. The mechanism is explained in <code>courses/docker/guides/docker-017.md</code>.</p>
+<p>These answers explain teaching fixtures, not engine results; the mechanism is in <a href="../guides/docker-017.md.html">the guide</a>.</p>
 <h3 id="exercise-1-predict-whether-linux-implies-amd64">Exercise 1: Predict whether Linux implies amd64.<a class="heading-anchor" href="#exercise-1-predict-whether-linux-implies-amd64" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> No; operating system and architecture are separate axes.</p>
 <p><strong>Why:</strong> Linux supports multiple instruction families. A release statement should name both dimensions rather than collapsing them into a single platform label.</p>
@@ -238,7 +238,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>A plausible wrong approach:</strong> Writing works everywhere from one amd64 run makes a claim nobody has observed.</p>
 <p><strong>How to verify:</strong> Each platform named as supported has a matching row of execution evidence.</p>
 <h3 id="check-your-transfer">Check your transfer<a class="heading-anchor" href="#check-your-transfer" aria-label="Link to this section">#</a></h3>
-<p>A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.</p></article>
+<p>The image has no arm64 entry, so the engine pulls the amd64 image. With emulation installed it starts and warns that the image platform does not match the host; it then runs translated, slower, and native extensions may behave differently. Without emulation it fails with <code>exec format error</code>. The publishing team should build and push an index with both <code>linux/amd64</code> and <code>linux/arm64</code>, then test each platform separately. If inspection on the laptop showed <code>linux/arm64</code> and the run still failed, the problem would be in the image contents, not platform selection.</p></article>
   </main>
 </body>
 </html>

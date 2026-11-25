@@ -196,7 +196,6 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <article class="document"><h2 id="cuda-040-explanatory-solutions">cuda-040: explanatory solutions<a class="heading-anchor" href="#cuda-040-explanatory-solutions" aria-label="Link to this section">#</a></h2>
 <h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
 <p>Pinned host memory is page-locked storage that can support suitable asynchronous transfers. Pinning has a host resource cost, so use bounded reusable buffers rather than pinning arbitrary datasets. Overlap needs eligible transfers, independent work, compatible copy engines and correct dependencies. In double buffering, one slot can be computing while another is filled, but a producer must not overwrite a slot before its previous consumers finish. Chunk size trades fixed overhead against latency and memory. The word Async in an API name does not prove useful overlap occurred; a timeline supplies that evidence.</p>
-<p>The separate <a href="../references/cuda-040_cpu.py.html">CPU reference</a> checks the chapter&#x27;s bounded model. It does not execute CUDA or establish GPU timing. Compare after attempting the worksheet or explicitly choosing to reveal solutions.</p>
 <h3 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h3>
 <p>Three chunks each need 2 ms upload, 3 ms compute and 2 ms download. Fully serial time is 21 ms. An ideal three-stage pipeline takes 7 ms for the first result plus two 3 ms steady-state intervals, totaling 13 ms. This optimistic model assumes independent stages and sufficient engines/resources.</p>
 <p><strong>Approach:</strong> Add 2 + 3 + 2 per chunk for 21 ms serial, then 7 ms for the first chunk plus two 3 ms intervals.</p>
@@ -233,11 +232,16 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Why it is correct:</strong> Larger chunks raise throughput but delay the first response.</p>
 <p><strong>A plausible wrong approach:</strong> Choosing the largest chunk because throughput peaks violates response-time needs.</p>
 <p><strong>How to verify:</strong> Plot both metrics per size and pick one that meets the latency target.</p>
+<h3 id="self-check-answers">Self-check answers<a class="heading-anchor" href="#self-check-answers" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>What is the ideal time for four chunks with stage costs 2, 3 and 2 ms?</strong> 7 ms for the first result plus three 3 ms intervals, which is 16 ms.</li>
+<li><strong>Why reuse pinned buffers instead of pinning in every iteration?</strong> Pinning is expensive and consumes host memory that the operating system cannot page.</li>
+<li><strong>When may a double-buffering slot be refilled?</strong> Only after its download and any host consumption have completed.</li>
+</ol>
 <h3 id="numerical-reference-and-its-limits">Numerical reference and its limits<a class="heading-anchor" href="#numerical-reference-and-its-limits" aria-label="Link to this section">#</a></h3>
-<p>The complete CPU model is <a href="../references/cuda-040_cpu.py.html">here</a>. Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It does not claim CUDA execution, concurrency safety or a performance measurement.</p>
+<p>The <a href="../references/cuda-040_cpu.py.html">CPU reference</a> reproduces worked example 1 and prints <code>{&#x27;synthetic_serial_ms&#x27;: 21, &#x27;ideal_pipeline_ms&#x27;: 13, &#x27;measured_overlap&#x27;: False}</code>.</p>
 <h3 id="transfer-review">Transfer review<a class="heading-anchor" href="#transfer-review" aria-label="Link to this section">#</a></h3>
-<p>Measure both per-request latency and throughput under a memory budget; maximum batching may violate response-time requirements.</p>
-<p>A complete explanation must name its inputs, the unchanged mathematical contract, the changed boundary or resource condition, and the evidence still needed on actual hardware. Preserve a CPU baseline even after a GPU path becomes available.</p></article>
+<p>Measure both per-request latency and throughput under a memory budget; maximum batching may violate response-time requirements.</p></article>
   </main>
 </body>
 </html>

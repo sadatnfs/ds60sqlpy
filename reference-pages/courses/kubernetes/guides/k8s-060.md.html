@@ -195,9 +195,12 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="k8s-060-ipv4-ipv6-and-dual-stack-services">k8s-060: IPv4, IPv6 and dual-stack Services<a class="heading-anchor" href="#k8s-060-ipv4-ipv6-and-dual-stack-services" aria-label="Link to this section">#</a></h2>
 <h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
-<p>Advanced; about 120 minutes plus optional supervised host observations. Direct prerequisites: <code>k8s-059</code>. This is the deep networking and operations extension; it preserves the original Kubernetes sequence and its separately qualified browser operations.</p>
+<p>Advanced; about 120 minutes. Direct prerequisites: <code>k8s-059</code>. Shared workflow: <a href="../STUDY-GUIDE.md.html#networking-extension-boundary">study guide</a>.</p>
 <h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
-<p>Build a family-specific acceptance table. Review dual-stack security coverage. Trace the exact caller, destination, control-plane object and data-plane behavior that would support your conclusion.</p>
+<ul>
+<li>Build a family-specific acceptance table.</li>
+<li>Review dual-stack security coverage.</li>
+</ul>
 <h3 id="purpose-vocabulary-and-mental-model">Purpose, vocabulary and mental model<a class="heading-anchor" href="#purpose-vocabulary-and-mental-model" aria-label="Link to this section">#</a></h3>
 <p>Dual-stack networking supports IPv4 and IPv6 together. It requires compatible cluster configuration, node networking, CNI behavior and service allocation. Adding an IPv6 address to a manifest cannot supply a missing network family underneath it.</p>
 <p>A dual-stack Service can have addresses in both families. The order and primary family are meaningful in the API. A client may receive A and AAAA DNS records and choose or race connection attempts according to its library. A successful IPv4 request does not prove IPv6 reachability, and a timeout in one family can affect perceived latency.</p>
@@ -219,7 +222,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 IPv4 Service -&gt; IPv4 endpoint path
 IPv6 Service -&gt; IPv6 endpoint path
 each path needs independent routing and policy acceptance</code></pre>
-<p>Read this diagram as a sequence of responsibilities. A controller can successfully create desired state while a later traffic or application step still fails. Identify the component that makes each decision and the concrete observation that would prove it. The addresses in these lessons are synthetic examples, never instructions to contact a shared or public system.</p>
+<p>The first line is a client decision: DNS may return A and AAAA records and the client picks a family, often IPv6 first. The next two lines are independent paths, each with its own Service address, endpoints and routes. The last line is the point of the lesson: one family passing tells you nothing about the other, including policy coverage.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1-read-a-dual-stack-intent">Worked example 1: Read a dual-stack intent<a class="heading-anchor" href="#worked-example-1-read-a-dual-stack-intent" aria-label="Link to this section">#</a></h4>
 <p>This is a manual-only Service fragment.</p>
@@ -231,40 +234,45 @@ each path needs independent routing and policy acceptance</code></pre>
 <pre class="highlighted-code"><code class="language-text">http://[2001:db8::10]:8080/</code></pre>
 <p><strong>Expected observation:</strong> Brackets separate the address colons from the port separator; do not contact this example address.</p>
 <h3 id="run-boundary-and-the-owned-host-lab">Run boundary and the owned host lab<a class="heading-anchor" href="#run-boundary-and-the-owned-host-lab" aria-label="Link to this section">#</a></h3>
-<p>The classroom saves a reading worksheet for this lesson. It does not provide the full advanced networking or controller operation in the ordinary Run adapter. The original admitted Kubernetes reference cases keep their existing contracts. A manifest being valid YAML does not mean it is admitted by that adapter, supported by your cluster, or successfully routed at runtime.</p>
-<p>Start with the original synthetic topology and manifests in <a href="../fixtures/networking/README.md.html">the networking fixture</a>. Its static checker makes no API calls. It checks internal consistency of the teaching inputs and cannot establish a live CNI, DNS, load balancer, controller or NetworkPolicy result. The fixture inventory names the extra capability required for each optional live observation.</p>
-<p>Optional live work requires a separately prepared, explicitly owned disposable target and the capability named by the fixture. Use the receipt&#x27;s private kubeconfig, exact context and namespace. On Windows run Bash inside WSL 2. Do not use an ambient current-context, install a controller automatically or broaden RBAC after a Forbidden error. A completed one-shot browser Run has already cleaned its resources, so the host observation must belong to a separately retained owned session.</p>
+<p><a href="../fixtures/networking/dual-stack-service.yaml.html">dual-stack-service.yaml</a> declares network-study-dual with RequireDualStack and families IPv4 then IPv6, but the ordinary fixture app binds IPv4 only. The separate <a href="../fixtures/networking/dual-stack/README.md.html">dual-stack fixture</a> supplies a server bound to :: with IPV6_V6ONLY set to zero and a family-specific client. The checker validates API intent; family routing needs an owned dual-stack cluster.</p>
+<p>The <a href="../fixtures/networking/README.md.html">fixture checker</a> makes no API calls; on Windows use WSL 2.</p>
 <pre class="highlighted-code"><code class="language-bash">: <span class="syntax-string">&quot;</span><span class="syntax-string">${</span>LAB_KUBECONFIG<span class="syntax-punctuation">:</span><span class="syntax-punctuation">?Use the private path from the owned receipt</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span>
 : <span class="syntax-string">&quot;</span><span class="syntax-string">${</span>LAB_CONTEXT<span class="syntax-punctuation">:</span><span class="syntax-punctuation">?Use the exact context from the owned receipt</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span>
 : <span class="syntax-string">&quot;</span><span class="syntax-string">${</span>LAB_NAMESPACE<span class="syntax-punctuation">:</span><span class="syntax-punctuation">?Use the namespace from the owned receipt</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span>
-kubectl --kubeconfig <span class="syntax-string">&quot;</span>$LAB_KUBECONFIG<span class="syntax-string">&quot;</span> --context <span class="syntax-string">&quot;</span>$LAB_CONTEXT<span class="syntax-string">&quot;</span> --namespace <span class="syntax-string">&quot;</span>$LAB_NAMESPACE<span class="syntax-string">&quot;</span> get services -o wide</code></pre>
-<p>This is a scoped read, not permission to create resources or change cluster networking. Keep credentials out of worksheets and portable exports. A host lab must record created resource UIDs and clean only those identities through its reviewed ownership procedure. Never delete a namespace merely because its name resembles the example.</p>
+kubectl --kubeconfig <span class="syntax-string">&quot;</span>$LAB_KUBECONFIG<span class="syntax-string">&quot;</span> --context <span class="syntax-string">&quot;</span>$LAB_CONTEXT<span class="syntax-string">&quot;</span> --namespace <span class="syntax-string">&quot;</span>$LAB_NAMESPACE<span class="syntax-string">&quot;</span> get service network-study-dual -o custom-columns<span class="syntax-operator">=</span>NAME:.metadata.name,POLICY:.spec.ipFamilyPolicy,FAMILIES:.spec.ipFamilies,CLUSTER_IPS:.spec.clusterIPs</code></pre>
+<p>On a single-stack cluster the API server rejects RequireDualStack, so the object may not exist; record that rejection as your evidence for Exercise 1. On a dual-stack cluster CLUSTER_IPS shows two addresses, and each family still needs its own request result. Read rules: <a href="../STUDY-GUIDE.md.html#owned-live-reads">owned live reads</a>.</p>
 <h3 id="six-progressive-exercises">Six progressive exercises<a class="heading-anchor" href="#six-progressive-exercises" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-predict-a-requiredualstack-request-on-a-single-stack-cluster">Exercise 1: Predict a RequireDualStack request on a single-stack cluster.<a class="heading-anchor" href="#exercise-1-predict-a-requiredualstack-request-on-a-single-stack-cluster" aria-label="Link to this section">#</a></h4>
 <p><strong>Expected evidence:</strong> The intended requirement cannot be satisfied.</p>
-<p><strong>Progressive hint:</strong> Name the caller and the first layer that can distinguish the possible causes. Compare the relevant object fields before changing a route, policy or workload.</p>
+<p><strong>Progressive hint:</strong> What does RequireDualStack demand of the cluster, and what can the API server do if it cannot comply?</p>
 <h4 id="exercise-2-distinguish-a-and-aaaa-records">Exercise 2: Distinguish A and AAAA records.<a class="heading-anchor" href="#exercise-2-distinguish-a-and-aaaa-records" aria-label="Link to this section">#</a></h4>
 <p><strong>Expected evidence:</strong> IPv4 addresses versus IPv6 addresses.</p>
-<p><strong>Progressive hint:</strong> Name the caller and the first layer that can distinguish the possible causes. Compare the relevant object fields before changing a route, policy or workload.</p>
+<p><strong>Progressive hint:</strong> Each record type carries one family. Which one holds the longer address written with colons?</p>
 <h4 id="exercise-3-build-a-family-specific-acceptance-table">Exercise 3: Build a family-specific acceptance table.<a class="heading-anchor" href="#exercise-3-build-a-family-specific-acceptance-table" aria-label="Link to this section">#</a></h4>
 <p><strong>Expected evidence:</strong> DNS, Service, endpoints, policy and app response for both families.</p>
-<p><strong>Progressive hint:</strong> Name the caller and the first layer that can distinguish the possible causes. Compare the relevant object fields before changing a route, policy or workload.</p>
+<p><strong>Progressive hint:</strong> Make two columns, one per family, and fill DNS, Service, endpoints, policy and response separately.</p>
 <h4 id="exercise-4-diagnose-ipv4-success-with-ipv6-timeout">Exercise 4: Diagnose IPv4 success with IPv6 timeout.<a class="heading-anchor" href="#exercise-4-diagnose-ipv4-success-with-ipv6-timeout" aria-label="Link to this section">#</a></h4>
 <p><strong>Expected evidence:</strong> Inspect the IPv6 route, listener, endpoints and policy path.</p>
-<p><strong>Progressive hint:</strong> Name the caller and the first layer that can distinguish the possible causes. Compare the relevant object fields before changing a route, policy or workload.</p>
+<p><strong>Progressive hint:</strong> IPv4 works, so the app runs. Check the IPv6 leg: route, endpoint address, listener family and policy.</p>
 <h4 id="exercise-5-explain-bracketed-ipv6-url-syntax">Exercise 5: Explain bracketed IPv6 URL syntax.<a class="heading-anchor" href="#exercise-5-explain-bracketed-ipv6-url-syntax" aria-label="Link to this section">#</a></h4>
 <p><strong>Expected evidence:</strong> Brackets delimit the address before a colon-prefixed port.</p>
-<p><strong>Progressive hint:</strong> Name the caller and the first layer that can distinguish the possible causes. Compare the relevant object fields before changing a route, policy or workload.</p>
+<p><strong>Progressive hint:</strong> An IPv6 address already contains colons. How would a URL parser find the port without a delimiter?</p>
 <h4 id="exercise-6-review-dual-stack-security-coverage">Exercise 6: Review dual-stack security coverage.<a class="heading-anchor" href="#exercise-6-review-dual-stack-security-coverage" aria-label="Link to this section">#</a></h4>
 <p><strong>Expected evidence:</strong> Intended allow/deny rules and observations cover both families.</p>
-<p><strong>Progressive hint:</strong> Name the caller and the first layer that can distinguish the possible causes. Compare the relevant object fields before changing a route, policy or workload.</p>
+<p><strong>Progressive hint:</strong> Read every ipBlock in your policies. Does each one have a twin for the other family?</p>
 <h3 id="diagnosis-failure-boundaries-and-common-mistakes">Diagnosis, failure boundaries and common mistakes<a class="heading-anchor" href="#diagnosis-failure-boundaries-and-common-mistakes" aria-label="Link to this section">#</a></h3>
-<p>Exercise 4 is this chapter&#x27;s controlled failure: Diagnose IPv4 success with IPv6 timeout. The distinguishing result: Inspect the IPv6 route, listener, endpoints and policy path. Keep that observation separate from guesses about adjacent layers. A DNS answer is not proof of a listening process. A Ready Pod is not proof of an externally reachable listener. A load-balancer address is not proof of TLS identity, path routing or a correct application response.</p>
-<p>Use bounded observations from the actual caller&#x27;s network namespace. Preserve timestamps, object UIDs, generation or resource versions where relevant, and the intended image identity. A stale healthy result from another namespace or an earlier revision cannot qualify the current path. Avoid broad packet captures, all-namespace dumps and secret output when a smaller field-level observation answers the question.</p>
-<p>Do not repair a failed example by disabling NetworkPolicy, making a workload privileged, publishing every port or selecting another cluster. Those changes alter the contract rather than explain the failure. An unavailable capability is a valid boundary to report. Rehearse its mechanism with the synthetic fixture until the owned target is deliberately provisioned.</p>
+<p>The supplied network-study app binds IPv4 only, so creating network-study-dual and seeing an IPv6 ClusterIP is not success; IPv6 requests reach no listener. Use the separate dual-stack fixture when you need a real IPv6 response. Another mistake is testing one family and filling both rows, when a client that prefers IPv6 may be the only one failing. Policies are often written with IPv4 ipBlocks only, leaving IPv6 open or blocked by accident. Finally, typing an IPv6 address into a URL without brackets makes the last group look like a port.</p>
+<p>Before concluding, record:</p>
+<ul>
+<li>The Service <code>ipFamilies</code> and <code>ipFamilyPolicy</code>, and whether a RequireDualStack request was accepted or rejected.</li>
+<li>Separate A and AAAA answers for the Service name; one row never stands in for both families.</li>
+<li>The app&#x27;s listener bind address: 0.0.0.0 alone serves IPv4, while :: may also serve IPv6.</li>
+<li>IPv6 test URLs written with brackets, such as <code>http://[2001:db8::10]:8080/</code>, so the port parses correctly.</li>
+</ul>
+<p>General evidence rules: <a href="../STUDY-GUIDE.md.html#diagnosis-rules">diagnosis rules</a>.</p>
 <h3 id="retrieval-and-transfer">Retrieval and transfer<a class="heading-anchor" href="#retrieval-and-transfer" aria-label="Link to this section">#</a></h3>
-<p>Close the solution and reconstruct the diagram with different synthetic addresses and one changed failure condition. Explain which identities are stable, which can change after replacement, and how a client discovers the current destination. State one observation that would falsify your diagnosis.</p>
-<p>Complete the six evidence records before advancing. For optional live work, review the owned resource ledger and UID-aware cleanup result. Keep source validation, API acceptance, controller status, actual traffic, application output and cleanup as distinct evidence. No local exercise establishes every cloud provider, CNI implementation, Kubernetes version or public production deployment.</p>
+<p>Change network-study-dual to PreferDualStack and apply it on a single-stack IPv4 cluster. Predict the families and ClusterIPs the API assigns, then explain why the IPv6 row of your acceptance table must say not run rather than passed.</p>
+<p>Score your answer with the <a href="../STUDY-GUIDE.md.html#retrieval-loop">retrieval loop</a>.</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
 <ul>
 <li><a href="https://kubernetes.io/docs/concepts/services-networking/dual-stack/">Kubernetes documentation: IPv4/IPv6 dual-stack</a></li>

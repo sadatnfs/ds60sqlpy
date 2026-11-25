@@ -2,7 +2,7 @@
 
 Implement a reproducible reduced CI workflow with explicit selection, baseline and ownership.
 
-The executable reference contains the two complete worked cases with assertions. The changes below explain the independent practice and its limits.
+The reference builds a prod baseline, copies its manifest, edits `child`, and runs `state:modified+` with `--defer` in dev. It checks the prod row count and whether fail appears in run_results.json. It proves that this selection and test caught one duplicate, not that unselected models are safe. See [how these answers are laid out](../STUDY-GUIDE.md#answers-and-references).
 
 
 ## 1. Inspect selected resources

@@ -13,40 +13,42 @@ psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
   -f sql/professional/solutions/sql_found_02_versioned_migrations_solutions.sql
 ```
 
-`psql` prints each result/command tag in the terminal. Stop at the first
-unexpected `ERROR`; later output cannot repair an earlier failed invariant.
-Compare your own SQL, row grain, column names, row counts, `NULL` policy, and
-ordering with the explanation before comparing syntax.
+This solution commits real versions. Migrations 006, 007 and 008 each run in
+their own `BEGIN` and `COMMIT`, so the transcript should show three `COMMIT`
+tags and a manifest that grows from five rows to eight before `cleanup.sql`
+drops the schema. If your run stops partway, the committed versions stay in
+`pro_migration_lab` until the next reset, which is the behavior the lesson is
+about rather than a leak.
 
-## Clause-by-clause reading map
+## Reading map for this lesson
 
-The lesson's main concepts are Migration, Migration metadata, Immutable migration, Seed, Idempotent, Expand-migrate-contract. Its worked-model focus is:
-The fixture owns one schema and five ordered files. Every migration starts a transaction, checks `schema_migrations`, performs its body only when absent, records metadata last, and commits. A failed statement prevents the metadata row from lying about a partial migration.
+Read the solutions in the order a deployment would meet them:
 
-- Start at `FROM`/`JOIN` and state the intermediate row grain. Inspect join keys
-  before adding aggregates; a one-to-many join is allowed to multiply rows only
-  when the later contract accounts for it.
-- Apply `WHERE` to input rows, `GROUP BY` to form buckets, and `HAVING` to
-  completed groups. Window functions run over the surviving relation and
-  normally preserve its row count.
-- Read the `SELECT` list as the public result contract: keys establish grain,
-  measures state calculations, and aliases explain meaning. `ORDER BY` is the
-  only output-order guarantee; add a unique tie-breaker before `LIMIT`.
-- Trace every common table expression (CTE) as a temporary named relation.
-  Execute or inspect one stage at a time while debugging, but compare the final
-  result with an independent control rather than trusting stage names.
-- Keep SQL `NULL` as “missing/unknown/not applicable” until the metric contract
-  chooses another representation. Guard division with `NULLIF`; disclose
-  exclusions and distinguish zero from no row.
-- For DDL/DML, a command tag proves only that PostgreSQL accepted a statement.
-  Catalog checks, negative cases, row-count reconciliation, and the declared
-  transaction boundary prove behavior and cleanup.
+- Manifest first. Exercise 1 reads `schema_migrations` ordered by
+  `migration_id` and checks the name and content tag as well as the ID, because
+  a version is identified by all three.
+- Compatibility before storage. Exercise 2 puts storage and the view side by
+  side at version 2: `priority_code` is still NULL, and the view's `COALESCE`
+  gives an old reader the same value it saw at version 1.
+- One change per version. Exercise 3 adds `assigned_team` as 006 (nullable
+  column), 007 (backfill `high` and `critical` to `response`, the rest to
+  `general`) and 008 (default, `NOT NULL` and `CHECK`), each with its own
+  metadata row, and leaves versions 1 to 5 untouched.
+- Retry and runner boundaries. Exercise 5 classifies manifest and schema state
+  before acting. Exercises 4 and 6 return inspectable matrices because
+  operations such as `CREATE INDEX CONCURRENTLY` cannot run inside the
+  fixture's transactions.
+- Drift and recovery. Exercise 7 compares expected manifests with `pg_catalog`,
+  and Exercise 8 gives a separate recovery row for expand, backfill and
+  contract.
 
-The exact final queries are not the only valid syntax. A join, subquery, CTE,
-window, or conditional aggregate can be an alternative when it preserves the
-same grain, `NULL` semantics, deterministic ordering, and safety. Prefer the
-form whose intermediate relations a reviewer can verify; optimize only after
-correctness is established with evidence.
+Other syntax is fine when the behavior matches: for the retry check, a `DO`
+block that raises unless both flags are true, instead of the two-column
+`EXISTS` classification, or `pg_attribute` instead of
+`information_schema.columns`. Editing migration 002 in place, combining the
+backfill with `NOT NULL` in one version, or relying on `IF NOT EXISTS` alone is
+not equivalent, because each of those hides drift that the manifest is meant to
+expose.
 
 Run the complete solution from the repository root:
 

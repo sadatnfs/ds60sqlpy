@@ -194,12 +194,12 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/go/solutions/go-003_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="go-003-explained-solutions">go-003: explained solutions<a class="heading-anchor" href="#go-003-explained-solutions" aria-label="Link to this section">#</a></h2>
-<p>These are comparison material after an attempt or explicit reveal. The executable reference implements all six cases in one <code>main.go</code>.</p>
+<p>Compare after an attempt (<a href="../STUDY-GUIDE.md.html#use-the-solutions">using solutions</a>). <code>courses/go/solutions/go-003_solution.go</code> implements all six cases.</p>
 <h3 id="mechanism">Mechanism<a class="heading-anchor" href="#mechanism" aria-label="Link to this section">#</a></h3>
 <p>Control flow determines which statements execute. A condition is a boolean expression, not a number used as a truth value. Go&#x27;s for statement covers counting loops, condition-controlled loops and collection iteration. The safest way to reason about a loop is to name an invariant: a statement true before the first iteration and preserved by every iteration. In a prefix sum, the accumulator contains exactly the elements already visited. Empty input is therefore not an exceptional accident; the initial accumulator already represents its result. Short-circuit operators also affect execution, which makes a guard before a potentially unsafe operation meaningful.</p>
 <p>if condition { ... } selects a branch. &amp;&amp; skips the right operand when the left is false. for i := 0; i &lt; len(items); i++ visits a half-open index interval. break leaves the innermost loop; continue skips to its next iteration. switch compares one expression against alternatives and does not fall through by default. A boundary using &lt;= instead of &lt; often attempts one extra iteration.</p>
 <h3 id="1-trace-a-prefix-sum-change-one-input">1. Trace a prefix sum: change one input<a class="heading-anchor" href="#1-trace-a-prefix-sum-change-one-input" aria-label="Link to this section">#</a></h3>
-<p>Copy worked example 1 into a scratch pad and change <code>items := []int{2, 4, 6}</code> to <code>items := []int{3, 4, 6}</code>. Before running, predict which check fails and which value it now sees; then run it and restore the original line.</p>
+<p>Copy worked example 1, change <code>items := []int{2, 4, 6}</code> to <code>items := []int{3, 4, 6}</code> and predict the failure before running; then restore the line.</p>
 <p>The unchanged code is worked example 1:</p>
 <pre class="highlighted-code"><code class="language-go">items <span class="syntax-operator">:=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-keyword">int</span><span class="syntax-punctuation">{</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">6</span><span class="syntax-punctuation">}</span>
 sum <span class="syntax-operator">:=</span> <span class="syntax-number">0</span>
@@ -207,17 +207,19 @@ sum <span class="syntax-operator">:=</span> <span class="syntax-number">0</span>
 	sum <span class="syntax-operator">+=</span> x
 <span class="syntax-punctuation">}</span>
 check<span class="syntax-punctuation">(</span>sum <span class="syntax-operator">==</span> <span class="syntax-number">12</span> <span class="syntax-operator">&amp;&amp;</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>items<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;sum&quot;</span><span class="syntax-punctuation">)</span></code></pre>
-<p><strong>Expected:</strong> The changed run panics with <code>sum</code> because <code>sum == 12 &amp;&amp; len(items) == 3</code> no longer holds. Restoring the original line brings back the worked observation: the final sum is 12 and three elements were visited.</p>
+<p><strong>Expected:</strong> The edited run panics with <code>sum</code> because <code>sum == 12 &amp;&amp; len(items) == 3</code> no longer holds.</p>
+<p><strong>Verify:</strong> Restoring <code>items := []int{2, 4, 6}</code> makes the check pass again with the worked observation: the final sum is 12 and three elements were visited.</p>
 <p>The accumulator starts at the additive identity. Each iteration includes exactly one new value; double addition or a skipped element breaks the independently known total.</p>
 <h3 id="2-handle-empty-data-debug-a-regression">2. Handle empty data: debug a regression<a class="heading-anchor" href="#2-handle-empty-data-debug-a-regression" aria-label="Link to this section">#</a></h3>
-<p>A regression changed one token in worked example 2, so one line now reads <code>sum := 1</code>. Run worked example 2 with that line, use the failure to locate the defect and repair it without changing the check.</p>
+<p>A one-token regression in worked example 2 makes a line read <code>sum := 1</code>. Repair it without changing the check.</p>
 <p>The unchanged code is worked example 2:</p>
 <pre class="highlighted-code"><code class="language-go">sum <span class="syntax-operator">:=</span> <span class="syntax-number">0</span>
 <span class="syntax-keyword">for</span> _<span class="syntax-punctuation">,</span> x <span class="syntax-operator">:=</span> <span class="syntax-keyword">range</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-keyword">int</span><span class="syntax-punctuation">{</span><span class="syntax-punctuation">}</span> <span class="syntax-punctuation">{</span>
 	sum <span class="syntax-operator">+=</span> x
 <span class="syntax-punctuation">}</span>
 check<span class="syntax-punctuation">(</span>sum <span class="syntax-operator">==</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;empty sum&quot;</span><span class="syntax-punctuation">)</span></code></pre>
-<p><strong>Expected:</strong> Before the repair the program panics with <code>empty sum</code>; after it the line reads <code>sum := 0</code> again and the result is 0 with no special invented element.</p>
+<p><strong>Expected:</strong> The defective run panics with <code>empty sum</code>; after restoring <code>sum := 0</code>, the result is 0 with no special invented element.</p>
+<p><strong>Verify:</strong> The failing run shows message <code>empty sum</code>; after the repair <code>sum == 0</code> holds again.</p>
 <p>The loop body never runs. A correct initial state makes the empty case follow from the same algorithm rather than a separate patch.</p>
 <h3 id="3-use-a-safe-guard">3. Use a safe guard<a class="heading-anchor" href="#3-use-a-safe-guard" aria-label="Link to this section">#</a></h3>
 <p>Guard access to the first element of an empty slice with a length check.</p>
@@ -225,6 +227,7 @@ check<span class="syntax-punctuation">(</span>sum <span class="syntax-operator">
 positive <span class="syntax-operator">:=</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>items<span class="syntax-punctuation">)</span> <span class="syntax-punctuation">&gt;</span> <span class="syntax-number">0</span> <span class="syntax-operator">&amp;&amp;</span> items<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span> <span class="syntax-punctuation">&gt;</span> <span class="syntax-number">0</span>
 check<span class="syntax-punctuation">(</span><span class="syntax-punctuation">!</span>positive<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;guard&quot;</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> The condition is false and no indexing occurs.</p>
+<p><strong>Verify:</strong> Your solution must keep <code>!positive</code> true. Control: changing <code>check(!positive, &quot;guard&quot;)</code> to <code>check(positive, &quot;guard&quot;)</code> panics with message <code>guard</code>; revert it.</p>
 <p>Reversing the operands would index before proving a valid position. Short-circuit behavior is part of this safety argument.</p>
 <h3 id="4-find-the-first-match">4. Find the first match<a class="heading-anchor" href="#4-find-the-first-match" aria-label="Link to this section">#</a></h3>
 <p>Find the first 8 in 3, 8, 8.</p>
@@ -237,6 +240,7 @@ check<span class="syntax-punctuation">(</span><span class="syntax-punctuation">!
 <span class="syntax-punctuation">}</span>
 check<span class="syntax-punctuation">(</span>found <span class="syntax-operator">==</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;first match&quot;</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> Its index is 1.</p>
+<p><strong>Verify:</strong> Your solution must keep <code>found == 1</code> true. Control: changing <code>if x == 8 {</code> to <code>if x != 8 {</code> panics with message <code>first match</code>; revert it.</p>
 <p>Without break, the later match replaces the first one. The -1 sentinel distinguishes absence from a valid first index of zero.</p>
 <h3 id="5-classify-an-exact-boundary">5. Classify an exact boundary<a class="heading-anchor" href="#5-classify-an-exact-boundary" aria-label="Link to this section">#</a></h3>
 <p>Classify a score of 60 as pass using a threshold of 60.</p>
@@ -247,6 +251,7 @@ label <span class="syntax-operator">:=</span> <span class="syntax-string">&quot;
 <span class="syntax-punctuation">}</span>
 check<span class="syntax-punctuation">(</span>label <span class="syntax-operator">==</span> <span class="syntax-string">&quot;pass&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;inclusive boundary&quot;</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> The boundary belongs to the passing branch.</p>
+<p><strong>Verify:</strong> Your solution must keep <code>label == &quot;pass&quot;</code> true. Control: changing <code>if score &gt;= 60 {</code> to <code>if score &gt; 60 {</code> panics with message <code>inclusive boundary</code>; revert it.</p>
 <p>Boundary tests distinguish &gt;= from &gt;. Natural-language requirements should make inclusion explicit rather than leaving it to an arbitrary operator choice.</p>
 <h3 id="6-transfer-to-a-filtered-count">6. Transfer to a filtered count<a class="heading-anchor" href="#6-transfer-to-a-filtered-count" aria-label="Link to this section">#</a></h3>
 <p>Count nonnegative values in -2, 0, 4 and -1.</p>
@@ -259,9 +264,10 @@ check<span class="syntax-punctuation">(</span>label <span class="syntax-operator
 <span class="syntax-punctuation">}</span>
 check<span class="syntax-punctuation">(</span>count <span class="syntax-operator">==</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;filtered count&quot;</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> Exactly 2 values satisfy the predicate.</p>
+<p><strong>Verify:</strong> Your solution must keep <code>count == 2</code> true. Control: changing <code>if x &lt; 0 {</code> to <code>if x &lt;= 0 {</code> panics with message <code>filtered count</code>; revert it.</p>
 <p>continue avoids the increment for negative inputs. Zero is included deliberately, so the boundary case rejects a mistakenly positive-only predicate.</p>
 <h3 id="transfer-after-comparison">Transfer after comparison<a class="heading-anchor" href="#transfer-after-comparison" aria-label="Link to this section">#</a></h3>
-<p>Return to your own pad and reproduce one check with a new input. Explain why the check rejects a plausible wrong implementation. Keep the distinction between a pure model, an in-process fake, and a real external system visible in your notes.</p></article>
+<p>The habit to keep is naming the invariant before writing the loop. A prefix sum, a first-match search and a filtered count all start from a state that is already correct for zero elements, and each iteration preserves it. When later lessons loop over channels, informer events or retry attempts, state what is true before the first iteration and after each one, then test the empty and exact-boundary inputs first.</p></article>
   </main>
 </body>
 </html>

@@ -1,19 +1,17 @@
 // Answer-free learner source. Save your own copy before editing.
 // Exercise 1: Compare false and truthy containers: predict an edited check
-// Copy Example A into a scratch `main.mjs` and change `assert.deepEqual([Boolean(0),
-// Boolean(''), Boolean([]), Boolean({})], [false, false, true, true]);` to
-// `assert.deepEqual([Boolean(1), Boolean(''), Boolean([]), Boolean({})], [false, false,
-// true, true]);` inside its check. Before running it, predict whether the check still passes
-// and explain why; then restore it.
-// Expected: The changed run fails with an `AssertionError` at `assert.deepEqual([Boolean(1),
+// In a scratch copy of Example A, change `assert.deepEqual([Boolean(0), Boolean(''),
+// Boolean([]), Boolean({})], [false, false, true, true]);` to `assert.deepEqual([Boolean(1),
+// Boolean(''), Boolean([]), Boolean({})], [false, false, true, true]);` inside its check.
+// Does the check still pass?
+// Expected: The edited run fails with an `AssertionError` at `assert.deepEqual([Boolean(1),
 // Boolean(''), Boolean([]), Boolean({})], [false, false, true, true]);`. Restoring
 // `assert.deepEqual([Boolean(0), Boolean(''), Boolean([]), Boolean({})], [false, false,
 // true, true]);` brings back: false, false, true, true.
 
 // Exercise 2: Preserve a valid zero with nullish fallback: diagnose an edited check
-// A careless edit changed a check in Example B so that it reads `assert.equal(null ?? 11,
-// 10);`. Run Example B with that line, explain why the edited check now fails for the same
-// program state, and restore it.
+// Example B's check was edited to read `assert.equal(null ?? 11, 10);`. Run it, explain the
+// failure and restore the original.
 // Expected: Before the repair the run fails with an `AssertionError` at `assert.equal(null
 // ?? 11, 10);`. Restoring `assert.equal(null ?? 10, 10);` brings back: 10, 0, 10.
 

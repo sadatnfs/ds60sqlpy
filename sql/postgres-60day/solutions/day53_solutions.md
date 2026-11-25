@@ -13,40 +13,36 @@ psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
   -f sql/postgres-60day/solutions/day53_solutions.sql
 ```
 
-`psql` prints each result/command tag in the terminal. Stop at the first
-unexpected `ERROR`; later output cannot repair an earlier failed invariant.
-Compare your own SQL, row grain, column names, row counts, `NULL` policy, and
-ordering with the explanation before comparing syntax.
+The solution does not include the learner file. It opens its own `BEGIN`, so
+customers 1 to 10 are never versioned in this run, and a `DO` block stops the
+file early if `dwh.dim_customer` does not exist. On a Day 52 solution base it
+prints the two `NOTICE` lines, `INSERT 0 0`, `UPDATE 0` and the `ALTER TABLE`
+tags for the country rule and the audit columns, then `SELECT 1`, `UPDATE 1`
+and `INSERT 0 1` for customer 1's change, `SELECT 13085` for the temporal fact
+table and five result grids before `ROLLBACK`. Exercise 2 sits above Exercise
+1 because it creates the version Exercise 1 maps. The
+[solution-reading steps](../../STUDY-GUIDE.md#read-a-solution) show how to set
+your transcript beside this one.
 
 ## Clause-by-clause reading map
 
-The lesson's main concepts are SCD Type 2, Business key, Validity interval. Its worked-model focus is:
-For one changed customer, locate exactly one current row, set its `valid_to` to the day before the new version, and insert the successor at `CURRENT_DATE`. Then as-of join a fact date using inclusive bounds and verify it resolves to one surrogate key, not zero and not two.
+Each Day 53 answer asks about versions of one business key, so begin by
+naming the `dim_customer` rows in play (customer 1's standard row and its
+gold successor) and then trace the statement in
+[logical clause order](../../STUDY-GUIDE.md#reading-any-query-in-logical-order).
+Three rules connect the six answers:
 
-- Start at `FROM`/`JOIN` and state the intermediate row grain. Inspect join keys
-  before adding aggregates; a one-to-many join is allowed to multiply rows only
-  when the later contract accounts for it.
-- Apply `WHERE` to input rows, `GROUP BY` to form buckets, and `HAVING` to
-  completed groups. Window functions run over the surviving relation and
-  normally preserve its row count.
-- Read the `SELECT` list as the public result contract: keys establish grain,
-  measures state calculations, and aliases explain meaning. `ORDER BY` is the
-  only output-order guarantee; add a unique tie-breaker before `LIMIT`.
-- Trace every common table expression (CTE) as a temporary named relation.
-  Execute or inspect one stage at a time while debugging, but compare the final
-  result with an independent control rather than trusting stage names.
-- Keep SQL `NULL` as “missing/unknown/not applicable” until the metric contract
-  chooses another representation. Guard division with `NULLIF`; disclose
-  exclusions and distinguish zero from no row.
-- For DDL/DML, a command tag proves only that PostgreSQL accepted a statement.
-  Catalog checks, negative cases, row-count reconciliation, and the declared
-  transaction boundary prove behavior and cleanup.
-
-The exact final queries are not the only valid syntax. A join, subquery, CTE,
-window, or conditional aggregate can be an alternative when it preserves the
-same grain, `NULL` semantics, deterministic ordering, and safety. Prefer the
-form whose intermediate relations a reviewer can verify; optimize only after
-correctness is established with evidence.
+- **The as-of join must find exactly one version.** The fact rebuild joins
+  `dim_customer` on `customer_id` with the order date between `valid_from`
+  and `COALESCE(valid_to, 'infinity'::date)`, and its check row sets 13,085
+  mapped rows beside 13,085 source lines.
+- **Boundaries are inspected, not inferred from counts.** The same-day and
+  overlap answers read the intervals themselves, because a one-day overlap on
+  a date with no orders leaves the fact count untouched.
+- **A replay compares against what was applied.** The idempotence answer
+  reads the same staged state that the audit answer wrote, so an unchanged
+  rerun reports 0 and opens no third version; the timestamp answer shows the
+  half-open ranges a same-day policy would need.
 
 Run Day 52 first in the same database, either
 [`day52_solutions.sql`](day52_solutions.sql) or the Day 52 learner file. Day 53
@@ -233,7 +229,7 @@ WHERE
 
 - **Inputs/evidence:** For sql-53 Exercise 5, compare the current `dim_customer` row to `desired_customer_state`, which is copied from the same `staged_customer_change` used by Exercise 2.
 - **Expected result/shape:** For sql-53 Exercise 5, expected output: exactly one aggregate row, `unchanged_rows_that_would_version = 0`.
-- **Independent verification:** For sql-53 Exercise 5, rerun the nullable-safe attribute comparison against `desired_customer_state`; the result must report zero differences. Then alter one staged attribute and require a result of exactly one difference before applying any close/insert statements.
+- **Independent verification:** For sql-53 Exercise 5, confirm that `staged_customer_change` holds one row (customer 1, `Customer 1`, US, `gold`) and that customer 1's current `dim_customer` row carries the same three values, so the count is 0. Then, after a savepoint, run `UPDATE staged_customer_change SET segment = 'silver'` and rerun the comparison: it reports 1 before any close or insert runs; roll back to the savepoint.
 - **Intermediate relation check:** For sql-53 Exercise 5, prove `desired_customer_state` and the current dimension are each unique on `customer_id` before comparing attributes.
 - **Clause check:** For sql-53 Exercise 5, `IS DISTINCT FROM` compares nullable attributes, while `dc.is_current` restricts the check to the one version that a replay would consider.
 - **Alternative/trade-off:** For sql-53 Exercise 5, comparing `md5(ROW(full_name, country, segment)::text)` on both sides detects the same differences in one comparison, but a reordered attribute list silently changes every hash; the explicit `IS DISTINCT FROM` list is easier to review.

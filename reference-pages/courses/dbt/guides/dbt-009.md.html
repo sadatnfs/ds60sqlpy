@@ -252,10 +252,10 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>A declared backfill names both bounds; dbt rebuilds each day between them as an independent batch, and <code>dbt retry</code> reruns only batches that failed:</p>
 <pre class="highlighted-code"><code class="language-bash">dbt run --select current_events --event-time-start <span class="syntax-string">&quot;2024-01-01&quot;</span> --event-time-end <span class="syntax-string">&quot;2024-01-03&quot;</span></code></pre>
 <h3 id="run-the-lesson">Run the lesson<a class="heading-anchor" href="#run-the-lesson" aria-label="Link to this section">#</a></h3>
-<p>Open <code>dbt-009</code> in <code>/classroom</code>. Its starter <code>main.py</code> contains both worked cases, &quot;Revisit rows without duplicating them&quot; and &quot;Expose the limit of a finite lookback&quot;, and prints the dictionary each case returns. The prepared <code>data-engineering</code> worker runs it in a fresh temporary directory. An <code>AssertionError</code> means that an observation differs from the case&#x27;s stated contract. Each case writes its dbt project and DuckDB database into its own temporary directory, runs real dbt commands through dbt&#x27;s Python entry point and removes the directory when it returns. No account, warehouse, network request or package download is involved. Save source and notes before switching lessons.</p>
+<p>Expect <code>keyed_update_and_late_insert: True</code> with three rows after the rerun, where ids 1, 2 and 3 hold 6, 7 and 9. The second case should show one row before and two after <code>--full-refresh</code>; the missing record&#x27;s timestamp fell outside the ten-unit lookback. See the <a href="../STUDY-GUIDE.md.html#run-a-lesson">run routine</a>.</p>
 <h3 id="worked-case-1-revisit-rows-without-duplicating-them">Worked case 1: Revisit rows without duplicating them<a class="heading-anchor" href="#worked-case-1-revisit-rows-without-duplicating-them" aria-label="Link to this section">#</a></h3>
 <p>The first case updates an existing amount and adds a late record within the allowed window. It then reruns the model to verify the same three identified values. This checks the combination of selection and write semantics.</p>
-<p><strong>Project files.</strong> The case writes these files before its first dbt command. YAML is shown in conventional key order; dbt reads the same mappings.</p>
+<p><strong>Project files</strong>, written before the first dbt command:</p>
 <p><code>models/current_events.sql</code></p>
 <pre class="highlighted-code"><code class="language-sql">{{ config<span class="syntax-punctuation">(</span>materialized<span class="syntax-operator">=</span><span class="syntax-string">&#x27;incremental&#x27;</span><span class="syntax-punctuation">,</span> unique_key<span class="syntax-operator">=</span><span class="syntax-string">&#x27;id&#x27;</span><span class="syntax-punctuation">,</span> incremental_strategy<span class="syntax-operator">=</span><span class="syntax-string">&#x27;delete+insert&#x27;</span><span class="syntax-punctuation">)</span> }}
 <span class="syntax-keyword">select</span> <span class="syntax-operator">*</span>
@@ -267,7 +267,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <pre class="highlighted-code"><code class="language-text">id,updated_at,amount
 1,10,5
 2,20,7</code></pre>
-<p><strong>Commands and changes, in order.</strong> Each <code>dbt</code> line is one <code>invoke(...)</code> call; the harness adds <code>--project-dir</code> and <code>--profiles-dir</code> for the temporary project.</p>
+<p><strong>Commands, in order.</strong> Each <code>dbt</code> line is one <code>invoke(...)</code> call.</p>
 <pre class="highlighted-code"><code class="language-bash">dbt build</code></pre>
 <p>The case then writes <code>seeds/events.csv</code>:</p>
 <pre class="highlighted-code"><code class="language-text">id,updated_at,amount
@@ -277,7 +277,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <pre class="highlighted-code"><code class="language-bash">dbt build
 dbt run</code></pre>
 <p><strong>Expected evidence:</strong> Final amounts are id 1=6, id 2=7 and id 3=9, with three rows after rerun.</p>
-<p>The program below shows only this case&#x27;s own functions. They call the shared helpers <code>project</code>, <code>invoke</code> and <code>rows</code>, which write the files above, run dbt through <code>dbtRunner</code> and read the results; the helpers are explained in <a href="dbt-001.md.html">dbt-001</a> and appear in full at the top of this lesson&#x27;s <a href="../lessons/dbt-009.py.html">starter</a>.</p>
+<p>Helpers <code>project</code>, <code>invoke</code> and <code>rows</code>: see the <a href="../STUDY-GUIDE.md.html#case-harness">case harness</a>.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> tempfile
 
 
@@ -309,7 +309,7 @@ dbt run</code></pre>
         <span class="syntax-keyword">return</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">keyed_update_and_late_insert</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">rows_after_rerun</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">3</span><span class="syntax-punctuation">}</span></code></pre>
 <h3 id="worked-case-2-expose-the-limit-of-a-finite-lookback">Worked case 2: Expose the limit of a finite lookback<a class="heading-anchor" href="#worked-case-2-expose-the-limit-of-a-finite-lookback" aria-label="Link to this section">#</a></h3>
 <p>The second case adds a record older than the ten-unit window. A normal update misses it, while full refresh recovers it. The result makes the lateness assumption visible rather than describing lookback as universal correctness.</p>
-<p><strong>Project files.</strong> The case writes these files before its first dbt command. YAML is shown in conventional key order; dbt reads the same mappings.</p>
+<p><strong>Project files</strong>, written before the first dbt command:</p>
 <p><code>models/current_events.sql</code></p>
 <pre class="highlighted-code"><code class="language-sql">{{ config<span class="syntax-punctuation">(</span>materialized<span class="syntax-operator">=</span><span class="syntax-string">&#x27;incremental&#x27;</span><span class="syntax-punctuation">,</span> unique_key<span class="syntax-operator">=</span><span class="syntax-string">&#x27;id&#x27;</span><span class="syntax-punctuation">,</span> incremental_strategy<span class="syntax-operator">=</span><span class="syntax-string">&#x27;delete+insert&#x27;</span><span class="syntax-punctuation">)</span> }}
 <span class="syntax-keyword">select</span> <span class="syntax-operator">*</span>
@@ -320,7 +320,7 @@ dbt run</code></pre>
 <p><code>seeds/events.csv</code></p>
 <pre class="highlighted-code"><code class="language-text">id,updated_at,amount
 1,20,5</code></pre>
-<p><strong>Commands and changes, in order.</strong> Each <code>dbt</code> line is one <code>invoke(...)</code> call; the harness adds <code>--project-dir</code> and <code>--profiles-dir</code> for the temporary project.</p>
+<p><strong>Commands, in order.</strong> Each <code>dbt</code> line is one <code>invoke(...)</code> call.</p>
 <pre class="highlighted-code"><code class="language-bash">dbt build</code></pre>
 <p>The case then writes <code>seeds/events.csv</code>:</p>
 <pre class="highlighted-code"><code class="language-text">id,updated_at,amount
@@ -329,7 +329,7 @@ dbt run</code></pre>
 <pre class="highlighted-code"><code class="language-bash">dbt build
 dbt run --full-refresh</code></pre>
 <p><strong>Expected evidence:</strong> Normal output has 1 row; a declared full refresh produces 2.</p>
-<p>The program below shows only this case&#x27;s own functions. They call the shared helpers <code>project</code>, <code>invoke</code> and <code>rows</code>, which write the files above, run dbt through <code>dbtRunner</code> and read the results; the helpers are explained in <a href="dbt-001.md.html">dbt-001</a> and appear in full at the top of this lesson&#x27;s <a href="../lessons/dbt-009.py.html">starter</a>.</p>
+<p>Helpers <code>project</code>, <code>invoke</code> and <code>rows</code>: see the <a href="../STUDY-GUIDE.md.html#case-harness">case harness</a>.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> tempfile
 
 
@@ -355,7 +355,7 @@ dbt run --full-refresh</code></pre>
         <span class="syntax-keyword">assert</span> rows<span class="syntax-punctuation">(</span>p<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">select count(*) from current_events</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span>
         <span class="syntax-keyword">return</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">outside_lookback_missed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">repair_requires_declared_backfill</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">True</span><span class="syntax-punctuation">}</span></code></pre>
 <h3 id="practice">Practice<a class="heading-anchor" href="#practice" aria-label="Link to this section">#</a></h3>
-<p>The starter contains both worked cases, so a task can change either one. Make each change in a saved copy, run it, and compare the printed result with the task&#x27;s check before opening the separate explained answers.</p>
+<p>Use the <a href="../STUDY-GUIDE.md.html#practice-routine">practice routine</a>.</p>
 <h4 id="1-test-the-exact-boundary">1. Test the exact boundary<a class="heading-anchor" href="#1-test-the-exact-boundary" aria-label="Link to this section">#</a></h4>
 <p>Add a record at max(updated_at)-10.</p>
 <p><strong>Check:</strong> The inclusive predicate considers it.</p>
@@ -391,7 +391,7 @@ dbt run --full-refresh</code></pre>
 <li><a href="https://github.com/duckdb/dbt-duckdb">dbt-duckdb repository README</a></li>
 </ul>
 <h3 id="tutor-guidance">Tutor guidance<a class="heading-anchor" href="#tutor-guidance" aria-label="Link to this section">#</a></h3>
-<p>Use the repository&#x27;s <code>$guide-ds60sqlpy-learning</code> skill (<code>.agents/skills/guide-ds60sqlpy-learning/SKILL.md</code>) for <code>dbt-009</code>. Inspect the learner&#x27;s own source and printed output first. Ask for an explanation of unique_key, delete+insert, lookback, idempotency and backfill in their own words, then give one focused hint at a time. Keep an assertion on this synthetic fixture separate from a claim about an external dataset or deployed service.</p></article>
+<p>Ask the learner why <code>unique_key</code> prevents duplicates on rerun and what the lookback adds that a strict watermark lacks. Then ask what idempotency means here, and how they would choose the lookback width from evidence rather than a guess. See the <a href="../STUDY-GUIDE.md.html#tutor-guidance">tutor routine</a>.</p></article>
   </main>
 </body>
 </html>

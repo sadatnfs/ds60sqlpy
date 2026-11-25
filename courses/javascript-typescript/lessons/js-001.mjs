@@ -1,18 +1,17 @@
 // Answer-free learner source. Save your own copy before editing.
 // Exercise 1: Inspect the actual host: predict an edited check
-// Copy Example A into a scratch `main.mjs` and change
+// In a scratch copy of Example A, change
 // `assert.equal(Number(process.versions.node.split('.')[0]), 24);` to
-// `assert.equal(Number(process.versions.node.split('.')[1]), 24);` inside its check. Before
-// running it, predict whether the check still passes and explain why; then restore it.
-// Expected: The changed run fails with an `AssertionError` at
+// `assert.equal(Number(process.versions.node.split('.')[1]), 24);` inside its check. Does
+// the check still pass?
+// Expected: The edited run fails with an `AssertionError` at
 // `assert.equal(Number(process.versions.node.split('.')[1]), 24);`. Restoring
 // `assert.equal(Number(process.versions.node.split('.')[0]), 24);` brings back: major
 // version 24; process.release.name is node.
 
 // Exercise 2: Distinguish browser globals: diagnose an edited check
-// A careless edit changed a check in Example B so that it reads `assert.equal(typeof window,
-// 'undefined!');`. Run Example B with that line, explain why the edited check now fails for
-// the same program state, and restore it.
+// Example B's check was edited to read `assert.equal(typeof window, 'undefined!');`. Run it,
+// explain the failure and restore the original.
 // Expected: Before the repair the run fails with an `AssertionError` at `assert.equal(typeof
 // window, 'undefined!');`. Restoring `assert.equal(typeof window, 'undefined');` brings
 // back: both undefined.

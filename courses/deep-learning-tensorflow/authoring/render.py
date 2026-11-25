@@ -10,6 +10,7 @@ from scripts.format_inline_code import canonical_markdown  # noqa: E402
 from verify_text import describe_checks  # noqa: E402
 
 SPECS = {}
+STUDY_GUIDE = "../STUDY-GUIDE.md"
 DEFAULT_DIAGNOSIS = "When a result disagrees, locate the first intermediate value that violates this explanation. Inspect shapes and identities before aggregates, and inspect counts before averages. Preserve the original fixture and introduce only one controlled change at a time. If an arithmetic identity passes but a data-boundary condition fails, the experiment is still invalid. If a runtime is unavailable, record the unexecuted code as unverified rather than replacing its output with the expected text. The separate explanation discusses why the tempting alternative in each case changes the result."
 
 
@@ -85,8 +86,15 @@ def write_all(only=None, guides_only=False, markdown_only=False):
             if id not in SPECS or (only is not None and id not in only):
                 continue
             s = SPECS[id]
+            tf_track = track == "deep-learning-tensorflow"
             reading = p["runtime"] == "reading"
             worked, exercises, reference_order, practice_note = practice_plan(s, TRANSFER.get(id))
+            if tf_track and practice_note:
+                practice_note = (
+                    f"Exercises 1 and 2 use new inputs; 3-6 add failures ([exercise plan]({STUDY_GUIDE}#exercise-plan))."
+                    if id in TRANSFER
+                    else f"Exercises 1 and 2 rebuild the worked examples; 3-6 change the fixture ([exercise plan]({STUDY_GUIDE}#exercise-plan))."
+                )
             separate_worked = "worked_examples" in s or id in TRANSFER
             count = COUNT_WORDS[len(worked)]
             ext = "md" if reading else "py"
@@ -108,18 +116,22 @@ def write_all(only=None, guides_only=False, markdown_only=False):
             runtime = (
                 "Use the reading worksheet. Write a reasoned response for each case; no execution or model download is required."
                 if reading
+                else f"Use the `{p['runtime']}` worker; each example block is a complete program ([shared routine]({STUDY_GUIDE}#launch-a-lesson))."
+                if tf_track
                 else f"Start or resume the Docker classroom with `./classroom` from the repository root. On Windows, run that command in WSL 2. In the shared home, choose the **{plan['title']}** subject and select `{id}`. Use its `{p['runtime']}` worker and wait for readiness before choosing **Run**; the [classroom instructions](../../../docs/one-command-classroom.md) explain how to prepare a missing profile. The worker supplies the declared packages and starts a fresh Python process, so no host Python or framework installation is needed. Save your current attempt before replacing the pad with a complete worked example. Keep the example sequence specified below together. Inputs are small local fixtures, with no package installation, dataset or model download, or online service call. For an optional contributor workflow on Linux, macOS or Windows through WSL 2, deliberately prepare an interpreter with the same declared dependencies, then invoke that interpreter on an owned copy of `{learner}` under `.learning/expansion/{id}/`. The general contributor uv environment does not imply that TensorFlow or PyTorch is installed. The Docker profile is the default execution route."
             )
             study_method = (
                 f"Read {count} worked reasoning cases. Derive the intermediate quantities and units on paper, then compare the assumptions and conclusions. Text blocks here are evidence tables or written arguments, not programs. Keep unknown evidence distinct from a failed condition and explain what observation would settle it."
                 if reading
-                else (
-                    f"Start by reading Example A without running it. Write the intermediate quantities and their units on paper. Run the entire example in a fresh process, not only the final line in a notebook with hidden variables. {'Examples B and C change assumptions' if len(worked) == 3 else 'Example B changes an assumption'} that matters to this mechanism. Compare {'the' if len(worked) == 3 else 'both'} observations before starting independent work. An assertion failure is a request to inspect an assumption, not a reason to widen every tolerance. For float64 arithmetic use an absolute tolerance of 1e-12 unless an exercise gives another bound. TensorFlow and PyTorch float32 comparisons use 1e-6. Integer counts, identities and boolean decisions should be exact."
-                    if track == "deep-learning-tensorflow"
-                    else f"Start by reading Example A without running it. Write the intermediate quantities and their units on paper. Run the entire example in a fresh process, not only the final line in a notebook with hidden variables. {'Examples B and C change assumptions' if len(worked) == 3 else 'Example B changes an assumption'} that matters to this mechanism. Compare {'the' if len(worked) == 3 else 'both'} observations before starting independent work. An assertion failure is a request to inspect an assumption, not a reason to widen every tolerance. For float64 arithmetic use an absolute tolerance of 1e-12 unless an exercise gives another bound. TensorFlow and PyTorch float32 comparisons use 1e-6. Integer counts, identities and boolean decisions should be exact."
-                )
+                else f"Start by reading Example A without running it. Write the intermediate quantities and their units on paper. Run the entire example in a fresh process, not only the final line in a notebook with hidden variables. {'Examples B and C change assumptions' if len(worked) == 3 else 'Example B changes an assumption'} that matters to this mechanism. Compare {'the' if len(worked) == 3 else 'both'} observations before starting independent work. An assertion failure is a request to inspect an assumption, not a reason to widen every tolerance. For float64 arithmetic use an absolute tolerance of 1e-12 unless an exercise gives another bound. TensorFlow and PyTorch float32 comparisons use 1e-6. Integer counts, identities and boolean decisions should be exact."
             )
             code_anatomy = s["anatomy"]
+            run_section = runtime if tf_track else f"{runtime}\n\n{study_method}"
+            level_text = f"{p['level'].capitalize()}; approximately {p['minutes']} minutes. Direct prerequisites: {prereq}."
+            objectives = f"{p['outcome']} The central investigation is concrete: {p['lab']} The finish condition is {p['verification']}"
+            if not tf_track:
+                level_text += " The prerequisite sequence introduces the notation used here; revisit its worked examples if an axis, probability or gradient is unfamiliar."
+                objectives += " A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition."
             prompt = f"""Use the checked-in $guide-ds60sqlpy-learning skill for {id}, {p["title"]}.
 Read {guide} and {learner}. Direct prerequisites: {prereq}.
 Explain the mental model, ask me to predict the worked example, review my attempt,
@@ -127,7 +139,6 @@ give one hint, request output evidence, and ask a fresh retrieval question.
 Keep {prefix}/solutions/ closed until I request comparison or show an attempt.
 Use only the declared local fixtures. Distinguish arithmetic checks, code execution,
 and evidence about generalization. Done when I can derive the worked values, pass all six exercise checks, explain a failed counterexample, and solve one fresh transfer case without solutions."""
-            tf_track = track == "deep-learning-tensorflow"
             w = [e["title"] for e in worked]
             x = [e["title"] for e in exercises]
             term_list = ", ".join(k for k, v in s["terms"][:3])
@@ -151,17 +162,22 @@ and evidence about generalization. Done when I can derive the worked values, pas
                 if tf_track
                 else f"Revisit the direct prerequisite {prereq} if the calculation cannot be reconstructed without a solution. Otherwise preserve your independent implementation, the six exercise observations and a fresh transfer case, then continue along the course plan. For a capstone, treat a failed acceptance condition as a valid no-go decision and explain what evidence would be needed to revisit it."
             )
+            sources = (
+                f"API and mechanism reference: [{s['source'][0]}]({s['source'][1]}), reviewed 2026-10-22 ([verification status]({STUDY_GUIDE}#verification-status))."
+                if tf_track
+                else f"API and mechanism reference: [{s['source'][0]}]({s['source'][1]}), reviewed 2026-10-22. The fixture, examples, counterexamples and exercise design are original course material. See [validation](../../../docs/validation.md) for execution gates. Check CI artifacts for the exact revision and platform to determine which runtime checks actually ran; authored content alone does not establish runtime execution."
+            )
             if tf_track and "capstone" in p["title"].lower():
                 next_step += " In a capstone, a failed acceptance condition is a valid no-go decision; state what evidence would reopen it."
             document = f"""# {id}: {p["title"]}
 
 ## Level and prerequisites
 
-{p["level"].capitalize()}; approximately {p["minutes"]} minutes. Direct prerequisites: {prereq}. The prerequisite sequence introduces the notation used here; revisit its worked examples if an axis, probability or gradient is unfamiliar.
+{level_text}
 
 ## Learning objectives
 
-{p["outcome"]} The central investigation is concrete: {p["lab"]} The finish condition is {p["verification"]} A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
+{objectives}
 
 ## Purpose and mental model
 
@@ -173,9 +189,7 @@ and evidence about generalization. Done when I can derive the worked values, pas
 
 ## How to run this lesson
 
-{runtime}
-
-{study_method}
+{run_section}
 
 ## Syntax anatomy and reasoning sequence
 
@@ -215,7 +229,7 @@ and evidence about generalization. Done when I can derive the worked values, pas
 
 ## Sources and verification status
 
-API and mechanism reference: [{s["source"][0]}]({s["source"][1]}), reviewed 2026-10-22. The fixture, examples, counterexamples and exercise design are original course material. See [validation](../../../docs/validation.md) for execution gates. Check CI artifacts for the exact revision and platform to determine which runtime checks actually ran; authored content alone does not establish runtime execution.
+{sources}
 
 ## Ask an AI tutor about this lesson
 
@@ -224,7 +238,7 @@ API and mechanism reference: [{s["source"][0]}]({s["source"][1]}), reviewed 2026
 ```
 """
             solutions_intro = (
-                f"Open these answers for {p['title']} after your own attempt at Example A, {w[0]}, or after an explicit reveal. Each answer reuses the guide's literal inputs, so a mismatch points to one step. The companion script runs the assertions; this page explains why they test {term_list}. After matching exercise 6, {x[5]}, invent a new input without looking here."
+                f"Open these answers after an attempt; they reuse the guide's inputs ([comparison steps]({STUDY_GUIDE}#after-the-solutions))."
                 if tf_track
                 else "Compare these answers only after an attempt or an explicit solution reveal. They use the same literal inputs as the guide, so a discrepancy can be localized to a specific step. The executable companion runs the assertions; the explanation states why those assertions test the subject. Passing a reference function is rehearsal, and should be followed by a new input chosen without looking at the answer."
             )
@@ -271,9 +285,7 @@ The question is: {e["prompt"]}
                     e["code"], "    "
                 )
             blocks.extend(exercise_blocks[index] for index in reference_order)
-            if tf_track:
-                explanation_doc += f"## Review after comparison\n\nChange one fixture value in exercise 4, {x[3]}, and predict the new result before running it. Keep the failing version of exercise 5, {x[4]}, next to its repair. A missing framework is an environment record, not a failed assertion. No solution downloads data, calls an online model, deploys a service or changes a database.\n"
-            else:
+            if not tf_track:
                 explanation_doc += "## Review after comparison\n\nRepeat one case with a changed fixture and explain the difference before running it. Keep the original failure case as well as the repaired result. Record a missing framework separately from a failing assertion. No solution downloads data, calls an online model, deploys a service or changes a database.\n"
             (ROOT / guide).write_text(canonical_markdown(document, root=SOURCE_ROOT, path=guide))
             if guides_only:

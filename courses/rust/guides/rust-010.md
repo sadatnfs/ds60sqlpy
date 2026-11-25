@@ -24,9 +24,11 @@ Small scopes make mutation ownership easier to see. After an exclusive borrow's 
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles the saved pad as `main.rs` with pinned Rust 1.99.1, edition 2024, and the prepared Arrow 60 library. `assert!` and `assert_eq!` remain active in normal builds. The fixed pad accepts one source file without arbitrary arguments, interactive input, Cargo manifests or package installation. The main function returns `Result<(), Box<dyn std::error::Error>>` so later examples can propagate errors with `?`; the final `Ok(())` means this fixture completed successfully. Standard library and Arrow examples remain offline after image preparation. Multi-file Cargo and external ecosystem projects have separate explicit preparation workflows.
+This lesson's programs need only the prelude and their own helpers. A passing run prints `rust-010: passed`.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Pad setup and limits: [Run a lesson](../STUDY-GUIDE.md#run-a-lesson).
+
+Before you run anything, follow [Attempt a lesson](../STUDY-GUIDE.md#attempt-a-lesson).
 
 
 
@@ -34,7 +36,9 @@ Start with the answer-free learner artifact in your saved classroom pad. It deli
 
 `&mut value` creates exclusive access and the original binding must permit mutation. A function taking &mut T may update the borrowed value but does not own its eventual destruction. split_at_mut proves disjoint slices.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+**Reading Example A (Mutate through one explicit borrower, code below).** `fn append_mark(text: &mut String)` declares a parameter that is an exclusive, mutable borrow: the function may change the `String` but does not own it and cannot free it. The caller opts in twice. `let mut text` makes the binding mutable, which is required before any `&mut` borrow can be taken from it, and the call site writes `&mut text` explicitly, so a reader of the block can see where mutation may happen. Inside the function, `text.push('!')` appends one `char`; the method may reallocate the heap buffer if capacity runs out, which is exactly why no other reference may exist during the call. When `append_mark` returns, the exclusive borrow ends, ownership never left the caller, and the assertion reads the changed value through the original owner. Passing `&text` instead is rejected with E0308, because a shared reference cannot stand where `&mut String` is expected.
+
+Method for tracing your own variants: [Trace a program](../STUDY-GUIDE.md#trace-a-program).
 
 ## Worked example / walkthrough
 
@@ -93,13 +97,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 6. **Transfer and justify.** Design an API that exposes only the smallest mutable region needed by a transformation.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Record each task as in [Keep evidence for each task](../STUDY-GUIDE.md#keep-evidence-for-each-task).
 
 ## Common pitfalls and diagnosis
 
 An exclusive borrow is not a thread lock. More mut annotations do not solve aliasing conflicts. Prefer safe disjointness APIs to manually asserting pointer safety.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+To turn a pitfall into a test, see [Design a regression case](../STUDY-GUIDE.md#design-a-regression-case).
 
 ## Progressive hints
 
@@ -107,13 +111,23 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 2. Compare Example B (Mutate two proven-disjoint regions) with Example A and name the first line whose behavior differs. Its observation is: The two slices mutate separate halves safely.
 3. Before opening the explanation, test your task 3 attempt against this lesson's main pitfall: An exclusive borrow is not a thread lock.
 
+Tempting approaches to rule out before you compare:
+
+- **Task 1.** Thinking the function receives a copy predicts that `main` still sees `ready`; the passing assertion shows the change happened in place through the borrow.
+- **Task 2.** Placing `values[3] = 7;` between `left[0] = 9;` and `right[0] = 8;` is rejected with E0506, cannot assign to `values[_]` because it is borrowed, because `right` is still used afterwards and so its borrow of `values` is still live.
+- **Task 5.** Assuming a split at 0 is invalid and guarding with `if mid > 0` skips the legitimate whole-slice case; using `split_at_mut(4)` to probe the far edge panics instead of observing it.
+
 ## Self-check and next step
 
-Explain Exclusive borrow, Aliasing, Disjoint regions without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+While a function holds `&mut text`, what may the caller do with `text`, and when does that permission come back? Why does `split_at_mut` succeed where two separate `&mut slice[..]` borrows fail? What does `split_at_mut(0)` return, and why is that a valid split rather than an error?
+
+Then work through [Self-check and review](../STUDY-GUIDE.md#self-check-and-review).
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://doc.rust-lang.org/book/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+Read [the `split_at_mut` documentation](https://doc.rust-lang.org/std/primitive.slice.html#method.split_at_mut) for how a safe API proves two mutable regions disjoint.
+
+What the classroom does and does not prove: [Sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

@@ -194,9 +194,17 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cuda/python/guides/cuda-102.md</code></p>
     </header>
     <article class="document"><h2 id="cuda-102-llm-inference-kv-caches-and-precision">cuda-102: LLM inference, KV caches and precision<a class="heading-anchor" href="#cuda-102-llm-inference-kv-caches-and-precision" aria-label="Link to this section">#</a></h2>
-<p><strong>Route:</strong> CUDA Python and machine learning. <strong>Stage:</strong> advanced. <strong>Prerequisites:</strong> <code>cuda-095</code>, <code>cuda-100</code>. Allow several sessions when the hardware experiment is new; the chapter is not a deadline.</p>
-<h3 id="what-you-will-be-able-to-explain">What you will be able to explain<a class="heading-anchor" href="#what-you-will-be-able-to-explain" aria-label="Link to this section">#</a></h3>
-<p>By the end, you can <strong>derive cache bytes</strong>, <strong>compare cached logits</strong>, and <strong>label fake versus real quantization</strong> with evidence. Start with the two worked cases, then use the editable CPU model to make the quantities concrete.</p>
+<p><strong>Route:</strong> CUDA Python and machine learning. <strong>Stage:</strong> advanced. <strong>Prerequisites:</strong> <code>cuda-095</code>, <code>cuda-100</code>.</p>
+<p>Pacing, evidence labels and platform rules: <a href="../../STUDY-GUIDE.md.html">CUDA study guide</a>.</p>
+<h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
+<ul>
+<li>Derive cache bytes.</li>
+<li>Double the sequence.</li>
+<li>Distinguish query and KV heads.</li>
+<li>Compare cached logits.</li>
+<li>Separate prefill and decode timing.</li>
+<li>Label fake versus real quantization.</li>
+</ul>
 <h3 id="mechanism-and-vocabulary">Mechanism and vocabulary<a class="heading-anchor" href="#mechanism-and-vocabulary" aria-label="Link to this section">#</a></h3>
 <p>Autoregressive generation separates prefill, which processes an input sequence, from decode, which adds one token repeatedly. A key-value cache stores previous attention projections so decode can reuse them. Cache size grows with layers, batch, sequence length, key/value head count, head dimension and element width. Grouped-query architectures require the actual KV-head count, not necessarily the query-head count.</p>
 <p>Weight quantization changes one memory category; it does not automatically quantize the cache or every activation. Educational rounding examples demonstrate error but do not establish packed low-bit execution. Compare cached and uncached logits at each step, bound generation length, and measure prefill and token latency separately. State positional-encoding and mask conventions when testing cache equivalence.</p>
@@ -216,11 +224,12 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 </ul>
 <h3 id="worked-examples">Worked examples<a class="heading-anchor" href="#worked-examples" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
-<p>For 2 layers, batch 1, sequence 16,4 KV heads, head dimension 8 and 2-byte elements, keys and values consume 4096 bytes in the simple dense model.</p>
+<p>For 2 layers, batch 1, sequence 16, 4 KV heads, head dimension 8 and 2-byte elements, keys and values consume 4096 bytes in the simple dense model.</p>
 <h4 id="worked-example-2">Worked example 2<a class="heading-anchor" href="#worked-example-2" aria-label="Link to this section">#</a></h4>
 <p>Doubling sequence length doubles this cache payload even if model weights are unchanged. Reducing weight precision alone leaves this term unchanged.</p>
-<h3 id="portable-executable-model">Portable executable model<a class="heading-anchor" href="#portable-executable-model" aria-label="Link to this section">#</a></h3>
-<p>The <strong>CPU reference model</strong> variant runs this bounded worked example using <code>python-core</code>. It uses only the Python standard library, small synthetic values and no network. Its purpose is to expose the arithmetic or contract behind the chapter. The separate reference includes assertions for the stated observations.</p>
+<h3 id="how-to-run-the-cpu-model">How to run the CPU model<a class="heading-anchor" href="#how-to-run-the-cpu-model" aria-label="Link to this section">#</a></h3>
+<p>Edit the copy; the <a href="../references/cuda-102_cpu.py.html">reference</a> adds assertions.</p>
+<pre class="highlighted-code"><code class="language-bash">python courses/cuda/python/lessons/cuda-102_cpu.py</code></pre>
 <pre class="highlighted-code"><code class="language-python">layers<span class="syntax-punctuation">,</span> batch<span class="syntax-punctuation">,</span> seq<span class="syntax-punctuation">,</span> heads<span class="syntax-punctuation">,</span> dim<span class="syntax-punctuation">,</span> width <span class="syntax-operator">=</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">16</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">8</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span>
 cache <span class="syntax-operator">=</span> <span class="syntax-number">2</span> <span class="syntax-operator">*</span> layers <span class="syntax-operator">*</span> batch <span class="syntax-operator">*</span> seq <span class="syntax-operator">*</span> heads <span class="syntax-operator">*</span> dim <span class="syntax-operator">*</span> width
 <span class="syntax-keyword">assert</span> cache <span class="syntax-operator">==</span> <span class="syntax-number">4096</span>
@@ -257,55 +266,51 @@ cache <span class="syntax-operator">=</span> <span class="syntax-number">2</span
 <td><code>2</code></td>
 </tr>
 </tbody></table></div>
-<p>Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.</p>
 <h3 id="equal-framework-lanes">Equal framework lanes<a class="heading-anchor" href="#equal-framework-lanes" aria-label="Link to this section">#</a></h3>
 <h4 id="pytorch">PyTorch<a class="heading-anchor" href="#pytorch" aria-label="Link to this section">#</a></h4>
 <p>Keep cache tensors&#x27; batch, sequence, head and dtype contracts explicit. Compare cached token logits with uncached computation under inference mode and the same positional encoding.</p>
 <h4 id="tensorflow">TensorFlow<a class="heading-anchor" href="#tensorflow" aria-label="Link to this section">#</a></h4>
 <p>Represent cache state with explicit tensors or model inputs/outputs and preserve graph signatures across accepted lengths. Compare each cached step with the uncached reference before export.</p>
-<p>Choose either lane first, then compare the other using identical mathematical inputs. Framework-specific shape, mode and optimizer rules must be checked separately. Both use offline synthetic examples; no model hub or dataset download is triggered.</p>
+<p>Lane rules: <a href="../../STUDY-GUIDE.md.html#python-gpu-and-framework-labs">framework labs</a>.</p>
 <h3 id="practice-and-transfer">Practice and transfer<a class="heading-anchor" href="#practice-and-transfer" aria-label="Link to this section">#</a></h3>
+<p>Record each attempt in the <a href="../lessons/cuda-102.md.html">worksheet</a> before opening hints.</p>
 <h4 id="exercise-1-derive-cache-bytes">Exercise 1: Derive cache bytes<a class="heading-anchor" href="#exercise-1-derive-cache-bytes" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Leaving out the factor two for keys and values gives 2048 bytes and underestimates the cache by half.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-2-double-the-sequence">Exercise 2: Double the sequence<a class="heading-anchor" href="#exercise-2-double-the-sequence" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Lowering weight precision to reduce memory does nothing for this term, since the cache precision is set separately.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-3-distinguish-query-and-kv-heads">Exercise 3: Distinguish query and KV heads<a class="heading-anchor" href="#exercise-3-distinguish-query-and-kv-heads" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Assuming KV heads equal attention heads for every model gives a 4 times overestimate here.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-4-compare-cached-logits">Exercise 4: Compare cached logits<a class="heading-anchor" href="#exercise-4-compare-cached-logits" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Comparing only the final generated text hides small differences that alter sampling later. A wrong position offset in the cache can produce plausible text for many tokens before the output visibly drifts.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-5-separate-prefill-and-decode-timing">Exercise 5: Separate prefill and decode timing<a class="heading-anchor" href="#exercise-5-separate-prefill-and-decode-timing" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Reporting a single tokens-per-second number mixes two regimes. A long prompt with short output looks very different from a short prompt with long output under one combined number.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-6-label-fake-versus-real-quantization">Exercise 6: Label fake versus real quantization<a class="heading-anchor" href="#exercise-6-label-fake-versus-real-quantization" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Reporting speed or memory gains from a simulation claims benefits only a deployed kernel can show. Memory can even rise under simulation, because both the original float weights and rounding scales may be held.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
-<p>Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.</p>
+<p>Hint <em>k</em> belongs to exercise <em>k</em>; open one at a time.</p>
 <ol>
-<li>Start from worked example 1 and mark the quantities needed for the task &quot;Derive cache bytes&quot;.</li>
-<li>Change one assumption in worked example 2 while preserving the declared contract: double the sequence.</li>
-<li>Trace the CPU program&#x27;s variables before adding hardware behavior: distinguish query and KV heads.</li>
-<li>Draw producers, consumers and the exact operation boundary for the task &quot;Compare cached logits&quot;.</li>
-<li>Separate what the small fixture establishes from what the real runtime must show: separate prefill and decode timing.</li>
-<li>Write a counterexample to an overbroad claim before you label fake versus real quantization.</li>
+<li>Multiply 2 for keys and values by layers, batch, sequence, KV heads, head dimension and bytes per element.</li>
+<li>Change only the sequence length and recompute.</li>
+<li>Look up the model&#x27;s key-value head count instead of assuming it equals the query head count.</li>
+<li>Generate a few tokens with and without the cache and compare logits at every step.</li>
+<li>Time prefill over the prompt separately from each decode step.</li>
+<li>Ask whether rounding values in Python shows that a packed low-bit kernel ran.</li>
 </ol>
-<h3 id="common-mistakes-and-self-review">Common mistakes and self-review<a class="heading-anchor" href="#common-mistakes-and-self-review" aria-label="Link to this section">#</a></h3>
-<p>Confusing a correct tiny example with a general implementation is the central review risk. For this chapter, challenge the assumption in worked example 2, then ask whether your change preserves the mechanism described above. If you change dtype, layout, ordering, batch size or backend, update the acceptance contract rather than silently reusing the old observation. Explain an unexpected result before trying random configuration changes.</p>
-<p>Keep a small evidence table with columns <strong>claim</strong>, <strong>input</strong>, <strong>expected observation</strong>, <strong>actual observation</strong> and <strong>limit</strong>. For the first claim use <code>Derive cache bytes</code>. For the final claim use <code>Label fake versus real quantization</code>. An unperformed GPU or cluster experiment remains pending even when the CPU model is correct.</p>
-<h3 id="platform-and-evidence-contract">Platform and evidence contract<a class="heading-anchor" href="#platform-and-evidence-contract" aria-label="Link to this section">#</a></h3>
-<p>The reading worksheet and CPU reference model work through the ordinary Linux Docker classroom on macOS, Linux and Windows using WSL 2. They do not require an NVIDIA GPU. Their results are labeled CPU models or semantic oracles, not simulated hardware performance.</p>
-<p>Real CUDA work needs supported NVIDIA hardware, a compatible host driver and an explicitly prepared GPU runtime. An Apple GPU does not execute CUDA kernels. PyTorch MPS on a supported native Mac, ROCm on supported AMD hardware, or other vendor backends can provide separate accelerator learning routes; they need their own package and operation qualification and are not CUDA evidence. The ordinary Linux Docker classroom does not expose native Mac MPS automatically.</p>
-<p>Do not download packages, models or data by opening this lesson. Do not attach an engine socket, ambient cluster credentials or an arbitrary remote endpoint. A CPU pass, imported package, successful compilation, real GPU result and measured performance are distinct observations. Record the actual backend, data shape/dtype, source revision, versions and pending checks. A saved completion marker records learning progress, not hardware certification.</p>
+<h3 id="common-mistakes-and-self-check">Common mistakes and self-check<a class="heading-anchor" href="#common-mistakes-and-self-check" aria-label="Link to this section">#</a></h3>
+<p>A common mistake is estimating KV cache size with the query head count. Grouped-query models store fewer key-value heads, so the estimate is too large. Another mistake is assuming weight quantization also shrinks the cache. It does not: doubling sequence length doubles the cache even when weights are smaller. Fix both by using the model&#x27;s actual KV layout, accounting for weights and cache separately and testing cached against uncached logits over bounded steps.</p>
+<p><strong>Evidence limit:</strong> The reference computes 4096 cache bytes, doubling to 8192, in a dense model. Real caches may use paging, padding or other layouts, and Python rounding does not demonstrate quantized execution, so serving memory must be measured on the deployed stack.</p>
+<ol>
+<li>How do prefill and decode differ?</li>
+<li>Which factors grow the KV cache?</li>
+<li>Why state positional-encoding and mask conventions when testing cache equivalence?</li>
+</ol>
+<p>Answers: <a href="../solutions/cuda-102_solutions.md.html#self-check-answers">self-check answers</a>.</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
 <ul>
 <li><a href="https://docs.pytorch.org/docs/2.9/notes/cuda.html">PyTorch CUDA semantics</a></li>
 <li><a href="https://www.tensorflow.org/guide/gpu">TensorFlow GPU guide</a></li>
 </ul>
-<p>Use the version-matched documentation of your prepared environment. These references describe interfaces and supported boundaries; the chapter&#x27;s synthetic examples and CPU models are original teaching material.</p>
+<p>Full lists: <a href="../../STUDY-GUIDE.md.html#documentation-and-sources">documentation and sources</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning skill for cuda-102: LLM inference, KV caches and precision.
 Read courses/cuda/python/guides/cuda-102.md and courses/cuda/python/lessons/cuda-102.md.

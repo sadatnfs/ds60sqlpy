@@ -1,6 +1,6 @@
 # js-049: explanatory solutions
 
-Compare after your own attempt or an explicit reveal. The separate .js reference is a complete offline browser program. These explanations discuss the six practice tasks; a visual resemblance alone is not a data or behavior check.
+Compare after your own attempt; the separate `.js` file is the complete reference program.
 
 ## Mechanism review
 
@@ -49,3 +49,7 @@ Extent on no valid data does not define a meaningful chart scale. Make the empty
 Label gaps and sampling intervals. A smooth curve can suggest precision or continuity the data does not support. Here observations are daily, so a straight segment between January 4 and 5 says nothing about hours in between; label the sampling interval. If a gap is real, keep it visible as the break line.defined already draws.
 
 **Expected:** Connecting samples is a visual assumption, not evidence between measurements.
+
+## After comparison
+
+Convert the reference to hourly data across a daylight-saving change in New York. Keep the instants in UTC, label the axis in local time, and check that the transition day has 23 or 25 hourly points rather than a silent gap or duplicate.

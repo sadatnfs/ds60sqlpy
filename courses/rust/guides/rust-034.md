@@ -24,9 +24,11 @@ Foreign-function interfaces add an ABI contract: layout, calling convention, str
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles the saved pad as `main.rs` with pinned Rust 1.99.1, edition 2024, and the prepared Arrow 60 library. `assert!` and `assert_eq!` remain active in normal builds. The fixed pad accepts one source file without arbitrary arguments, interactive input, Cargo manifests or package installation. The main function returns `Result<(), Box<dyn std::error::Error>>` so later examples can propagate errors with `?`; the final `Ok(())` means this fixture completed successfully. Standard library and Arrow examples remain offline after image preparation. Multi-file Cargo and external ecosystem projects have separate explicit preparation workflows.
+Beyond the prelude, this lesson's programs use `std::slice`. A passing run prints `rust-034: passed`.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Pad setup and limits: [Run a lesson](../STUDY-GUIDE.md#run-a-lesson).
+
+Before you run anything, follow [Attempt a lesson](../STUDY-GUIDE.md#attempt-a-lesson).
 
 
 
@@ -34,7 +36,9 @@ Start with the answer-free learner artifact in your saved classroom pad. It deli
 
 `as_ptr` borrows an address from live storage. `slice::from_raw_parts` is unsafe because the caller supplies validity and length. A SAFETY comment explains why this exact operation satisfies its preconditions.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+**Reading Example A (Reconstruct a bounded borrowed view, code below).** `values.as_ptr()` returns a `*const i32` to the first element. Creating a raw pointer is safe; only dereferencing it, or calling a function that does, requires `unsafe`. `std::slice::from_raw_parts` is an `unsafe fn` because its correctness depends on facts the compiler cannot check about the pointer, the length and what else may touch that memory; the function's documentation lists them under Safety. The `// SAFETY:` comment is the conventional place to argue that each one holds, and Clippy's `undocumented_unsafe_blocks` lint can require it. The `unsafe` block wraps only the one call that needs it. Its result is an ordinary `&[i32]`, so the assertion compares it with a slice literal like any safe borrow.
+
+Method for tracing your own variants: [Trace a program](../STUDY-GUIDE.md#trace-a-program).
 
 ## Worked example / walkthrough
 
@@ -90,13 +94,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 6. **Transfer and justify.** Design an FFI ownership document stating allocation, release, encoding and error conventions.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Record each task as in [Keep evidence for each task](../STUDY-GUIDE.md#keep-evidence-for-each-task).
 
 ## Common pitfalls and diagnosis
 
 Never test undefined behavior by hoping it crashes predictably. A null check is insufficient to prove pointer validity. Panics crossing an incompatible FFI boundary need a deliberate policy.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+To turn a pitfall into a test, see [Design a regression case](../STUDY-GUIDE.md#design-a-regression-case).
 
 ## Progressive hints
 
@@ -104,13 +108,23 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 2. Compare Example B (Prefer the safe operation when available) with Example A and name the first line whose behavior differs. Its observation is: A normal slice provides the same read contract without a manual safety burden.
 3. Before opening the explanation, test your task 3 attempt against this lesson's main pitfall: Never test undefined behavior by hoping it crashes predictably.
 
+Tempting approaches to rule out before you compare:
+
+- **Task 1.** Treating a null check as sufficient misses alignment, length, initialization, aliasing and lifetime. A non-null pointer into freed memory satisfies it and is still undefined behavior.
+- **Task 2.** Increasing the length beyond `values.len()` to read neighboring memory is undefined behavior even if a run happens to print plausible numbers.
+- **Task 5.** Passing `std::ptr::null()` as the pointer of an empty slice, on the reasoning that nothing is read, is undefined behavior, and dereferencing a misaligned `*const u64` to see what happens is undefined behavior too.
+
 ## Self-check and next step
 
-Explain Unsafe operation, ABI, Safety invariant without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+What must be true of the pointer and length passed to `from_raw_parts` in Example A, and which of those facts does the compiler check? Why does Example B prefer an ordinary slice for the same read? Rewrite Example A's `SAFETY` comment for a pointer that came from a foreign function instead of a live local array.
+
+Then work through [Self-check and review](../STUDY-GUIDE.md#self-check-and-review).
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://doc.rust-lang.org/nomicon/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+Read [the `std::slice::from_raw_parts` documentation](https://doc.rust-lang.org/std/slice/fn.from_raw_parts.html) for the exact safety preconditions the `SAFETY` comment must establish. The broader reference is [https://doc.rust-lang.org/nomicon/](https://doc.rust-lang.org/nomicon/).
+
+What the classroom does and does not prove: [Sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

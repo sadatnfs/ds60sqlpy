@@ -231,7 +231,7 @@ now <span class="syntax-operator">=</span> table<span class="syntax-operator">.<
 <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>table<span class="syntax-operator">.</span>metadata_location<span class="syntax-punctuation">)</span></code></pre>
 <p>The history should list two entries in commit order, one per append, and the metadata location should point at a JSON file under the warehouse metadata directory. A stray Parquet file copied into the warehouse never appears here because nothing committed it. When someone claims data is in the table, ask which snapshot lists the file in its manifests; a readable file on disk is evidence of bytes, not of table membership.</p>
 <h3 id="complete-worked-source">Complete worked source<a class="heading-anchor" href="#complete-worked-source" aria-label="Link to this section">#</a></h3>
-<p>This is a complete editable worked program for the declared prepared runtime. It uses bounded local fixtures and does not install packages or start distributed services.</p>
+<p>Run it as the <a href="../STUDY-GUIDE.md.html#worked-programs">worked program rules</a> describe.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> tempfile
 <span class="syntax-keyword">from</span> pathlib <span class="syntax-keyword">import</span> Path
 

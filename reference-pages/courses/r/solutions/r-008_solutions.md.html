@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/r/solutions/r-008_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="r-008-reference-reasoning">r-008: reference reasoning<a class="heading-anchor" href="#r-008-reference-reasoning" aria-label="Link to this section">#</a></h2>
-<p>Use the <a href="r-008_reference.R.html">complete reference</a> with the guide&#x27;s declared inputs and runtime. Every worked example is also a standalone script.</p>
+<p>Run the <a href="r-008_reference.R.html">complete reference</a> under the <a href="../STUDY-GUIDE.md.html#run-a-chapter">run rules</a>.</p>
 <h3 id="why-the-implementation-has-this-shape">Why the implementation has this shape<a class="heading-anchor" href="#why-the-implementation-has-this-shape" aria-label="Link to this section">#</a></h3>
 <p>Each row combines an intercept and one feature with the same coefficient vector. Matrix multiplication preserves one output per observation.</p>
 <p>The residual checks the solved equation. The extraction comparison shows why a one-column matrix needs an explicit shape policy.</p>
@@ -242,7 +242,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Tempting mistake:</strong> Treating a tiny residual as proof the coefficients are trustworthy. A nearly singular matrix can return a solution with a small residual that changes wildly when b moves slightly, and the check says nothing about whether the model is right.</p>
 <p><strong>Verify:</strong> The residual value here is 0, below the 1e-12 threshold; <code>kappa(a, exact = TRUE)</code> returns 2, showing this system is well conditioned.</p>
 <h3 id="what-the-checks-establish">What the checks establish<a class="heading-anchor" href="#what-the-checks-establish" aria-label="Link to this section">#</a></h3>
-<p>The reference makes 5 <code>stopifnot()</code> checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.</p></article>
+<p>The checks pin column-major filling with a first row of 1, 3 and 5, <code>byrow = TRUE</code> giving 1, 2 and 3, an intercept design that predicts 11 and 14 from intercept 2 and slope 3 at x of 3 and 4, <code>drop = FALSE</code> keeping a 2 by 1 shape, and a solved system whose residual stays below 1e-12. They do not test conditioning for larger or nearly singular matrices.</p>
+<p>The reference makes 5 <code>stopifnot()</code> checks; see <a href="../STUDY-GUIDE.md.html#what-a-passing-run-proves">what a passing run proves</a>.</p></article>
   </main>
 </body>
 </html>

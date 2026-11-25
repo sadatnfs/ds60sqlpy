@@ -42,5 +42,7 @@
       "wrong": "Describing the groupB coefficient as the average for B. It is B minus A, and the groupC estimate cannot be computed at all.",
       "verify": "`colnames(design)` returns \"(Intercept)\", \"groupB\", \"groupC\", and `colSums(design)` shows 3, 1 and 0."
     }
-  ]
+  ],
+  "run_note": "The starter builds a factor of A, B and A with declared levels A, B and C, and prints it. Run it and read the Levels line: C is listed even though no observation uses it. Keep that unused level when you tabulate, because a zero count for C is information, and dropping the level would hide that the category exists.",
+  "checks_note": "The assertions confirm that `as.numeric()` on a factor of \"5\" and \"9\" returns the codes 1 and 2 rather than the labels, that `relevel()` makes B the reference, that the unused C level tabulates as zero, that an ordered factor reports `is.ordered()`, that an undeclared label becomes NA, and that the model matrix names the columns `groupB` and `groupC`. They do not check that a chosen reference category is meaningful for an analysis."
 }

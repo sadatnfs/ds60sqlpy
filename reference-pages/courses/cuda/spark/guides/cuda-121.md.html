@@ -194,9 +194,17 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cuda/spark/guides/cuda-121.md</code></p>
     </header>
     <article class="document"><h2 id="cuda-121-joins-skew-and-broadcast-decisions">cuda-121: Joins, skew and broadcast decisions<a class="heading-anchor" href="#cuda-121-joins-skew-and-broadcast-decisions" aria-label="Link to this section">#</a></h2>
-<p><strong>Route:</strong> CUDA Python and machine learning / GPU Spark specialization. <strong>Stage:</strong> advanced. <strong>Prerequisites:</strong> <code>cuda-117</code>, <code>cuda-120</code>. Allow several sessions when the hardware experiment is new; the chapter is not a deadline.</p>
-<h3 id="what-you-will-be-able-to-explain">What you will be able to explain<a class="heading-anchor" href="#what-you-will-be-able-to-explain" aria-label="Link to this section">#</a></h3>
-<p>By the end, you can <strong>calculate duplicate join output</strong>, <strong>compare broadcast and shuffle</strong>, and <strong>inspect final AQE decision</strong> with evidence. Start with the two worked cases, then use the editable CPU model to make the quantities concrete.</p>
+<p><strong>Route:</strong> CUDA Python and machine learning / GPU Spark specialization. <strong>Stage:</strong> advanced. <strong>Prerequisites:</strong> <code>cuda-117</code>, <code>cuda-120</code>.</p>
+<p>Pacing, evidence labels and platform rules: <a href="../../STUDY-GUIDE.md.html">CUDA study guide</a>.</p>
+<h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
+<ul>
+<li>Calculate duplicate join output.</li>
+<li>Add unmatched keys.</li>
+<li>Identify skew.</li>
+<li>Compare broadcast and shuffle.</li>
+<li>Design a safe rewrite.</li>
+<li>Inspect final AQE decision.</li>
+</ul>
 <h3 id="mechanism-and-vocabulary">Mechanism and vocabulary<a class="heading-anchor" href="#mechanism-and-vocabulary" aria-label="Link to this section">#</a></h3>
 <p>A join matches keys across relations; duplicate keys multiply output rows. GPU acceleration cannot remove that semantic expansion. A broadcast join replicates a small side to workers, while a shuffle join redistributes records by key. Choice depends on estimated sizes, runtime statistics, supported operators and memory. Broadcasting a relation that only appears small in stale statistics can cause pressure.</p>
 <p>Skew concentrates rows on a few keys, creating large partitions and long tasks. Salting or repartitioning is not automatically correct: a transformation must preserve intended join multiplicity and outer-join behavior. Inspect partition sizes, output cardinality and the final adaptive plan. Keep one simple CPU oracle with duplicate and missing keys to prevent a fast but incorrect rewrite.</p>
@@ -218,8 +226,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Left keys [A, A, B] and right keys [A, A, C] produce four matches for A in an inner join. Expected cardinality is not the minimum of input lengths.</p>
 <h4 id="worked-example-2">Worked example 2<a class="heading-anchor" href="#worked-example-2" aria-label="Link to this section">#</a></h4>
 <p>If one partition holds 900 rows and nine others hold roughly 11, the maximum task dominates the barrier despite a small average partition size.</p>
-<h3 id="portable-executable-model">Portable executable model<a class="heading-anchor" href="#portable-executable-model" aria-label="Link to this section">#</a></h3>
-<p>The <strong>CPU reference model</strong> variant runs this bounded worked example using <code>python-core</code>. It uses only the Python standard library, small synthetic values and no network. Its purpose is to expose the arithmetic or contract behind the chapter. The separate reference includes assertions for the stated observations.</p>
+<h3 id="how-to-run-the-cpu-model">How to run the CPU model<a class="heading-anchor" href="#how-to-run-the-cpu-model" aria-label="Link to this section">#</a></h3>
+<p>Edit the copy; the <a href="../references/cuda-121_cpu.py.html">reference</a> adds assertions.</p>
+<pre class="highlighted-code"><code class="language-bash">python courses/cuda/spark/lessons/cuda-121_cpu.py</code></pre>
 <pre class="highlighted-code"><code class="language-python">left <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">A</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">A</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">B</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span>
 right <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">A</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">10</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">A</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">20</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">C</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">30</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span>
 joined <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span>k<span class="syntax-punctuation">,</span> a<span class="syntax-punctuation">,</span> b<span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> k<span class="syntax-punctuation">,</span> a <span class="syntax-operator">in</span> left <span class="syntax-keyword">for</span> r<span class="syntax-punctuation">,</span> b <span class="syntax-operator">in</span> right <span class="syntax-keyword">if</span> k <span class="syntax-operator">==</span> r<span class="syntax-punctuation">]</span>
@@ -245,55 +254,46 @@ joined <span class="syntax-operator">=</span> <span class="syntax-punctuation">[
 <td><code>[(&#x27;A&#x27;, 1, 10), (&#x27;A&#x27;, 1, 20), (&#x27;A&#x27;, 2, 10), (&#x27;A&#x27;, 2, 20)]</code></td>
 </tr>
 </tbody></table></div>
-<p>Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.</p>
 <h3 id="scala-and-pyspark-parity-lab">Scala and PySpark parity lab<a class="heading-anchor" href="#scala-and-pyspark-parity-lab" aria-label="Link to this section">#</a></h3>
-<p>Choose <strong>Scala Spark on CPU</strong> or <strong>PySpark on CPU</strong> to run the same bounded query in the ordinary Spark workers. Both use explicit schemas, local fixtures, at most two local threads, a disabled GPU SQL setting and a finally-block session stop. They assert the same expected result. These are CPU Spark observations, not GPU plugin qualification.</p>
-<p>For external GPU comparison, retain the same relational expressions and expected result but use a separately reviewed launcher and compatibility matrix. Do not change the classroom source into an arbitrary cluster connection.</p>
+<p>Both CPU variants assert one expected result. Read the <a href="../../STUDY-GUIDE.md.html#spark-parity-and-gpu-spark">parity rules</a>.</p>
 <h3 id="practice-and-transfer">Practice and transfer<a class="heading-anchor" href="#practice-and-transfer" aria-label="Link to this section">#</a></h3>
+<p>Record each attempt in the <a href="../lessons/cuda-121.md.html">worksheet</a> before opening hints.</p>
 <h4 id="exercise-1-calculate-duplicate-join-output">Exercise 1: Calculate duplicate join output<a class="heading-anchor" href="#exercise-1-calculate-duplicate-join-output" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Expecting the output size to be at most the smaller input underestimates joins with duplicate keys, which can grow much larger than either input.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-2-add-unmatched-keys">Exercise 2: Add unmatched keys<a class="heading-anchor" href="#exercise-2-add-unmatched-keys" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Using an inner join where unmatched records must be preserved silently drops them. Downstream totals then shrink without any error, which is harder to detect than a failure.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-3-identify-skew">Exercise 3: Identify skew<a class="heading-anchor" href="#exercise-3-identify-skew" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Reporting the average partition size of about 100 rows hides the 900-row partition.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-4-compare-broadcast-and-shuffle">Exercise 4: Compare broadcast and shuffle<a class="heading-anchor" href="#exercise-4-compare-broadcast-and-shuffle" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Broadcasting a table that is large after a filter misestimate can exhaust executor memory. The driver also collects the broadcast side before sending it, so a too-large table can fail on the driver first.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-5-design-a-safe-rewrite">Exercise 5: Design a safe rewrite<a class="heading-anchor" href="#exercise-5-design-a-safe-rewrite" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Dropping null keys or deduplicating to reduce skew changes results. Salting only one side without replicating the other loses matches, which reduces output silently rather than raising an error.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-6-inspect-final-aqe-decision">Exercise 6: Inspect final AQE decision<a class="heading-anchor" href="#exercise-6-inspect-final-aqe-decision" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Citing the pre-execution plan reports a strategy that may not have run. Skew handling in particular appears only in the final plan, so the initial plan cannot show whether a skewed partition was split.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
-<p>Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.</p>
+<p>Hint <em>k</em> belongs to exercise <em>k</em>; open one at a time.</p>
 <ol>
-<li>Start from worked example 1 and mark the quantities needed for the task &quot;Calculate duplicate join output&quot;.</li>
-<li>Change one assumption in worked example 2 while preserving the declared contract: add unmatched keys.</li>
-<li>Trace the CPU program&#x27;s variables before adding hardware behavior: identify skew.</li>
-<li>Draw producers, consumers and the exact operation boundary for the task &quot;Compare broadcast and shuffle&quot;.</li>
-<li>Separate what the small fixture establishes from what the real runtime must show: design a safe rewrite.</li>
-<li>Write a counterexample to an overbroad claim before you inspect final AQE decision.</li>
+<li>Multiply how many times a key appears on the left by how many times it appears on the right.</li>
+<li>Decide what each join type does with a key that appears on only one side.</li>
+<li>Compare the largest partition with the typical ones, not only the average size.</li>
+<li>Ask which strategy copies one side to every worker and which redistributes records by key.</li>
+<li>Check that a salted or repartitioned version returns the same duplicates and null-key rows as the CPU oracle.</li>
+<li>Run an action and read the final adaptive plan to see which join strategy actually ran.</li>
 </ol>
-<h3 id="common-mistakes-and-self-review">Common mistakes and self-review<a class="heading-anchor" href="#common-mistakes-and-self-review" aria-label="Link to this section">#</a></h3>
-<p>Confusing a correct tiny example with a general implementation is the central review risk. For this chapter, challenge the assumption in worked example 2, then ask whether your change preserves the mechanism described above. If you change dtype, layout, ordering, batch size or backend, update the acceptance contract rather than silently reusing the old observation. Explain an unexpected result before trying random configuration changes.</p>
-<p>Keep a small evidence table with columns <strong>claim</strong>, <strong>input</strong>, <strong>expected observation</strong>, <strong>actual observation</strong> and <strong>limit</strong>. For the first claim use <code>Calculate duplicate join output</code>. For the final claim use <code>Inspect final AQE decision</code>. An unperformed GPU or cluster experiment remains pending even when the CPU model is correct.</p>
-<h3 id="platform-and-evidence-contract">Platform and evidence contract<a class="heading-anchor" href="#platform-and-evidence-contract" aria-label="Link to this section">#</a></h3>
-<p>The reading worksheet and CPU reference model work through the ordinary Linux Docker classroom on macOS, Linux and Windows using WSL 2. They do not require an NVIDIA GPU. Their results are labeled CPU models or semantic oracles, not simulated hardware performance.</p>
-<p>Real CUDA work needs supported NVIDIA hardware, a compatible host driver and an explicitly prepared GPU runtime. An Apple GPU does not execute CUDA kernels. PyTorch MPS on a supported native Mac, ROCm on supported AMD hardware, or other vendor backends can provide separate accelerator learning routes; they need their own package and operation qualification and are not CUDA evidence. The ordinary Linux Docker classroom does not expose native Mac MPS automatically.</p>
-<p>Do not download packages, models or data by opening this lesson. Do not attach an engine socket, ambient cluster credentials or an arbitrary remote endpoint. A CPU pass, imported package, successful compilation, real GPU result and measured performance are distinct observations. Record the actual backend, data shape/dtype, source revision, versions and pending checks. A saved completion marker records learning progress, not hardware certification.</p>
-<p>GPU Spark is a separate owned external workflow. The ordinary <code>spark-local-scala</code> and <code>spark-local-python</code> profiles are CPU Spark. Keep the GPU plugin disabled or absent for a CPU-only baseline. Per-operator CPU fallback inside a working GPU plugin environment is a different condition from having no compatible GPU. Never mount a host Docker socket or ambient kubeconfig into an ordinary lesson worker.</p>
+<h3 id="common-mistakes-and-self-check">Common mistakes and self-check<a class="heading-anchor" href="#common-mistakes-and-self-check" aria-label="Link to this section">#</a></h3>
+<p>A common mistake is expecting a join&#x27;s output to be at most as large as its inputs. Duplicate keys multiply: two A rows on each side produce four matches. Another is broadcasting a side that looks small only because statistics are stale, or salting skewed keys in a way that changes multiplicity or outer-join rows. Fix both by checking cardinality against a CPU oracle with duplicate and missing keys, and by inspecting partition sizes and the final executed plan.</p>
+<p><strong>Evidence limit:</strong> The reference counts four A matches from two-by-two duplicate keys. It does not execute Spark joins, so broadcast choices, skew handling and memory pressure need the final adaptive plan from a real run.</p>
+<ol>
+<li>Can GPU acceleration reduce a join&#x27;s output rows?</li>
+<li>Why does skew lengthen a stage?</li>
+<li>Why keep a simple CPU oracle for joins?</li>
+</ol>
+<p>Answers: <a href="../solutions/cuda-121_solutions.md.html#self-check-answers">self-check answers</a>.</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
 <ul>
-<li><a href="https://nvidia.github.io/cudf-spark/docs/download.html">cuDF Spark plugin release and compatibility matrix</a></li>
-<li><a href="https://nvidia.github.io/cudf-spark/docs/supported_ops.html">Supported Spark operators and expression types</a></li>
-<li><a href="https://docs.nvidia.com/cudf-spark/latest/tuning-guide.html">GPU Spark tuning guide</a></li>
 <li><a href="https://spark.apache.org/docs/latest/sql-performance-tuning.html">Apache Spark SQL performance tuning</a></li>
 </ul>
-<p>Use the version-matched documentation of your prepared environment. These references describe interfaces and supported boundaries; the chapter&#x27;s synthetic examples and CPU models are original teaching material.</p>
+<p>Full lists: <a href="../../STUDY-GUIDE.md.html#documentation-and-sources">documentation and sources</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning skill for cuda-121: Joins, skew and broadcast decisions.
 Read courses/cuda/spark/guides/cuda-121.md and courses/cuda/spark/lessons/cuda-121.md.

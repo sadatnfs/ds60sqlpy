@@ -1,6 +1,6 @@
 # cpp-004: explanations and reference observations
 
-Attempt the learner tasks before opening this document. The executable reference checks the bounded normal and boundary examples; the six explanations below cover the deliberate changes and manual checks.
+Beyond the pad's sums, the [executable reference](cpp-004_solution.cpp) runs a counting loop from 1 to 4 that must total 10 and checks the Exercise 6 window: readings in [0, 5] from `[-1, 0, 4, 5, 6]` total 9. The threshold change, the reset repair and the empty-boundary test are explained below with their Verify steps. How to compare: [study guide](../STUDY-GUIDE.md#compare-with-the-solutions).
 
 ## Mechanism
 

@@ -1,6 +1,6 @@
 # cpp-008: explanations and reference observations
 
-Attempt the learner tasks before opening this document. The executable reference checks the bounded normal and boundary examples; the six explanations below cover the deliberate changes and manual checks.
+The [executable reference](cpp-008_solution.cpp) adds an observer lambda that takes a vector by const reference and reports sizes 2 and 0, and checks that `doubled({5})` returns `{10}` from a temporary. The explanations contrast returning by value with returning a view into the argument. How to compare: [study guide](../STUDY-GUIDE.md#compare-with-the-solutions).
 
 ## Mechanism
 

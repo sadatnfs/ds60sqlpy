@@ -2,6 +2,8 @@
 
 Open these answers only after attempting Convolutions, channel layouts and shared computation yourself. They reuse the guide's literal inputs, starting from Example A, Compute the fixed spatial filter, so a discrepancy points at one step. The executable companion runs the assertions; this page explains why each one tests NCHW, Shared kernel, Receptive field. After a pass, choose a new input for exercise 6, Count shared parameters, without looking.
 
+After comparing, follow the [review steps](../STUDY-GUIDE.md#after-the-solutions).
+
 ## Mechanism review
 
 Convolution applies a shared local kernel across spatial positions. PyTorch Conv2d expects NCHW layout: batch, channels, height, width. Its weight shape is output_channels, input_channels, kernel_height, kernel_width, which differs from the common TensorFlow NHWC image and HWIO kernel conventions. A legal reshape is not always a correct layout conversion; use permute to exchange the meaning of axes.
@@ -141,6 +143,3 @@ assert sum(p.numel() for p in layer.parameters()) == 8
 
 **Verify:** In a fresh process, the exercise checks confirm `sum((p.numel() for p in layer.parameters())) == 8`.
 
-## Review after comparison
-
-Repeat exercise 4, Inspect stride output size, with one changed fixture value and predict the difference before running it. Keep your failing attempt at exercise 5, Trace one pixel influence, beside the repaired result. A missing framework is not a failing assertion. These solutions use only local fixtures.

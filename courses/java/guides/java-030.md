@@ -6,7 +6,16 @@ Advanced, approximately 120 minutes. Direct prerequisites: `java-029`
 
 ## Learning objectives
 
-Serialize a versioned binary format and reject unknown versions, truncation, oversized lengths and trailing data. Along the way, explain wire schema, schema evolution, length bound, deserialization boundary using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. Exercises 1 and 2 start from the worked examples; the authored investigations begin with this task: Change the version bytes to 99 and decode. The final exercise transfers the mechanism to reject trailing data and invalid domain state.
+Serialize a versioned binary format and reject unknown versions, truncation, oversized lengths and trailing data.
+
+The six exercises practice these steps:
+
+- Round-trip version 2 data.
+- Apply a version 1 default.
+- Reject an unknown version.
+- Detect truncation.
+- Reject an oversized declared text length.
+- Reject trailing data and invalid domain state.
 
 ## Purpose and mental model
 
@@ -26,16 +35,9 @@ This lesson defines a small explicit binary format using DataInputStream and Dat
 
 ## How to run this lesson
 
-Open the Docker classroom, choose the prepared Java 21 profile and save a learner pad. The pad is compiled as `Main.java` with `javac --release 21` and executed with `java -ea Main`. Assertions are enabled deliberately. A successful assertion has no output; a failed assertion throws `AssertionError` and the process should fail. Do not remove assertions to obtain a green result.
+`encode` and `decode` implement a small binary format with `DataOutputStream` and `DataInputStream`: a magic number, a version, length-prefixed UTF-8 text with limits, a long balance and an optional note. Exercise 1 has no recorded edit.
 
-For a prepared native JDK, copy a worked example into your own `Main.java` under ignored `.learning/expansion/java-030/`. From that directory run the same two commands on PowerShell, macOS or Linux:
-
-```text
-javac --release 21 Main.java
-java -ea Main
-```
-
-The public class name and source filename must agree. Each worked example below is a complete file. Example B includes the setup it needs from Example A, so it can be compiled by itself. The six exercise reference blocks form one complete program in the separate solution. Keep your original prediction, source and diagnostic text together. Most examples use prepared JDK libraries and tiny local fixtures; any additional dependency is specified in the lesson notes below. Any lesson-specific library or additional file is named explicitly; do not download packages from inside a learner program. Resource examples close their owned files, executors or loopback servers.
+Classroom and native JDK steps, the exercise controls and the hint routine are in the [Java study guide](../STUDY-GUIDE.md).
 
 
 
@@ -216,62 +218,62 @@ public class Main {
 
 ## Prediction before your attempt
 
-Read the source from the entry point and name each value before executing it. Identify which operations create new values, which mutate existing state and which can fail. Predict the first observable output or assertion result. For a compile-time failure, explain which source rule is violated before discussing runtime state: a program that did not compile never reached its main method. Keep normal, boundary and invalid inputs separate so each check has a clear purpose.
+Before running Example A, list the fields in the order `encode` writes them for version 2, and decide whether "Café" survives the round trip unchanged. For Example B, predict what note a version 1 record receives when decoded, given that version 1 never writes one. Before Exercise 5, decide whether the decoder should allocate a buffer before or after it checks a declared length of `Integer.MAX_VALUE`.
 
 ## Exercises
 
-1. **Round-trip version 2 data: change one input.** Close Example A and rebuild it in a fresh `Main.java`, keeping the assertion on `decode(encoded).equals(record)`. Then propose one input change that would make that assertion fail and explain why before trying it.
-   **Expected:** Your rebuild reproduces the worked observation (equal domain record and exact Unicode note), and your proposed change makes the assertion on `decode(encoded).equals(record)` fail.
-   **Verify:** Run the rebuild with `java -ea Main` first, then the changed copy, and keep both results. Name the value that makes `decode(encoded).equals(record)` false in the changed copy.
+1. **Round-trip version 2 data: change one input.** Rebuild Example A from memory and propose one input change that makes the assertion on `decode(encoded).equals(record)` fail.
+   **Expected:** The rebuild passes and the changed copy fails as predicted.
+   **Verify:** Name the value that differs between your rebuild and the changed copy.
 
-2. **Apply a version 1 default: debug a regression.** A regression changed one token in the code that Example B adds after Example A, so one line now reads `Account legacy = decode(encode(new Account("a1", 126, "ignored by v1"), 1));`. Run Example B with that line, use the failing assertion to locate the defect and repair it without changing the assertion.
-   **Expected:** Before the repair the run fails with an `AssertionError` from the assertion on `legacy.id().equals("a1") && legacy.cents() == 125 && legacy.note().equals("unlabelled")`; after it the line reads `Account legacy = decode(encode(new Account("a1", 125, "ignored by v1"), 1));` again and decoded note unlabelled.
-   **Verify:** Keep the failing and the repaired runs. Explain why the changed token alters the value tested by `legacy.id().equals("a1") && legacy.cents() == 125 && legacy.note().equals("unlabelled")` for this input.
+2. **Apply a version 1 default: debug a regression.** A regression in Example B's new code makes one line read `Account legacy = decode(encode(new Account("a1", 126, "ignored by v1"), 1));`. Repair it using the failing assertion.
+   **Expected:** The unrepaired run fails with an `AssertionError` from the assertion on `legacy.id().equals("a1") && legacy.cents() == 125 && legacy.note().equals("unlabelled")`; the repaired line reads `Account legacy = decode(encode(new Account("a1", 125, "ignored by v1"), 1));`.
+   **Verify:** Explain how the changed token alters the value that `legacy.id().equals("a1") && legacy.cents() == 125 && legacy.note().equals("unlabelled")` tests.
 
 3. **Reject an unknown version.** Change the version bytes to 99 and decode.
    **Expected:** IOException naming version.
-   **Verify:** Keep an assertion equivalent to `rejected`. As a control, change `unknown[5] = 99;` to `unknown[6] = 99;`: the run must fail with an `AssertionError` from the assertion on `rejected`. Restore the line before continuing.
+   **Verify:** Control: changing `unknown[5] = 99;` to `unknown[6] = 99;` must fail the assertion on `rejected`.
 
 4. **Detect truncation.** Remove the final byte from a valid version 2 payload.
    **Expected:** IOException or EOFException before returning a record.
-   **Verify:** Keep an assertion equivalent to `truncated`. As a control, change `truncated = true;` to `truncated = false;`: the run must fail with an `AssertionError` from the assertion on `truncated`. Restore the line before continuing.
+   **Verify:** Control: changing `truncated = true;` to `truncated = false;` must fail the assertion on `truncated`.
 
 5. **Reject an oversized declared text length.** Replace the first text length with Integer.MAX_VALUE.
    **Expected:** IOException for length before allocating that size.
-   **Verify:** Keep an assertion equivalent to `bounded`. As a control, change `bounded = expected.getMessage().contains("length");` to `bounded = expected.getMessage().contains("length!");`: the run must fail with an `AssertionError` from the assertion on `bounded`. Restore the line before continuing.
+   **Verify:** Control: changing `bounded = expected.getMessage().contains("length");` to `bounded = expected.getMessage().contains("length!");` must fail the assertion on `bounded`.
 
 6. **Reject trailing data and invalid domain state.** Append an extra byte, then try constructing a negative-balance account.
    **Expected:** trailing payload IOException; negative balance IllegalArgumentException.
-   **Verify:** Keep an assertion equivalent to `extra && negative`. As a control, change `byte[] trailing = Arrays.copyOf(encoded, encoded.length + 1);` to `byte[] trailing = Arrays.copyOf(encoded, encoded.length - 1);`: the run must fail with an `AssertionError` from the assertion on `extra && negative`. Restore the line before continuing.
+   **Verify:** Control: changing `byte[] trailing = Arrays.copyOf(encoded, encoded.length + 1);` to `byte[] trailing = Arrays.copyOf(encoded, encoded.length - 1);` must fail the assertion on `extra && negative`.
 
 ## Common pitfalls and diagnosis
 
-When a check fails, keep the smallest source file that still demonstrates the failure. Read the first relevant compiler diagnostic before editing several lines; later diagnostics can be consequences of the same missing delimiter or wrong type. For a runtime exception, identify the first frame belonging to your code and compare its input with the method contract. For an assertion failure, inspect the actual value and the independent expected value. A passing process exit is weaker than a checked invariant, and a checked invariant applies only under its stated assumptions.
+Java's built-in `ObjectInputStream` will construct arbitrary classes from untrusted bytes, a long-running source of remote code execution bugs, so prefer an explicit format like this one. Trusting a length prefix before checking it lets a 4-byte header request gigabytes of memory. Guessing at an unknown version reads bytes with the wrong layout. Ignoring trailing bytes hides corruption. And `String.length()` counts UTF-16 units, not encoded bytes, so limit the byte array too.
 
-Do not replace a precise exception with a catch-all that returns a plausible default. That can hide an invalid input or an unfinished operation. If an example owns a resource, verify its lifetime on both the success and failure paths. If an operation is concurrent, use ordering primitives to establish the relationship you need; an observed timing coincidence is not a synchronization guarantee. The solution explanations identify the specific alternative that would break each exercise.
+General compiler, runtime and assertion triage: [diagnose a failure](../STUDY-GUIDE.md#diagnose-a-failure).
 
 ## Progressive hints
 
-Read one hint at a time and attempt the exercise again before reading the next. Keep a small table of input, expected value, actual value and exception type. Ask for one hint about the first incorrect assumption before requesting the entire reference implementation.
+Read one rung at a time, as described in [using hints](../STUDY-GUIDE.md#use-hints-one-at-a-time).
 
-- **Exercise 1:** First restate the expected observation: equal domain record and exact Unicode note. Then list the values read by `decode(encoded).equals(record)` and trace each one from its declaration. Finally, name one input that would make `decode(encoded).equals(record)` false.
-- **Exercise 2:** First restate the expected observation: decoded note unlabelled. Then list the values read by `legacy.id().equals("a1") && legacy.cents() == 125 && legacy.note().equals("unlabelled")` and trace each one from its declaration. Finally, compare `Account legacy = decode(encode(new Account("a1", 126, "ignored by v1"), 1));` with the same line in Example B and state the claim each version makes.
-- **Exercise 3:** First restate the expected observation: IOException naming version. Then list the values read by `rejected` and trace each one from its declaration. Finally, predict the effect of changing `unknown[5] = 99;` to `unknown[6] = 99;` before running anything.
-- **Exercise 4:** First restate the expected observation: IOException or EOFException before returning a record. Then list the values read by `truncated` and trace each one from its declaration. Finally, predict the effect of changing `truncated = true;` to `truncated = false;` before running anything.
-- **Exercise 5:** First restate the expected observation: IOException for length before allocating that size. Then list the values read by `bounded` and trace each one from its declaration. Finally, predict the effect of changing `bounded = expected.getMessage().contains("length");` to `bounded = expected.getMessage().contains("length!");` before running anything.
-- **Exercise 6:** First restate the expected observation: trailing payload IOException; negative balance IllegalArgumentException. Then list the values read by `extra && negative` and trace each one from its declaration. Finally, predict the effect of changing `byte[] trailing = Arrays.copyOf(encoded, encoded.length + 1);` to `byte[] trailing = Arrays.copyOf(encoded, encoded.length - 1);` before running anything.
+- **Exercise 1:** First encode an `Account` with id "a1", 125 cents and the note "Café" using version 2. Then decode the bytes. Finally, assert that the decoded record `equals` the original and explain why record equality covers all three fields.
+- **Exercise 2:** First note that the edit encodes 126 cents instead of 125. Then decode the version 1 bytes and read the cents field. Finally, explain why the id and default note still match and only the balance comparison fails.
+- **Exercise 3:** First copy a valid encoding and overwrite the two version bytes at offsets 4 and 5 with 0 and 99. Then decode it inside a `try` block. Finally, assert that the `IOException` message mentions the version, not some later field.
+- **Exercise 4:** First drop the last byte with `Arrays.copyOf(encoded, encoded.length - 1)`. Then decode the shorter array and catch `IOException`, which also covers `EOFException`. Finally, assert that no record was returned and say which field was incomplete.
+- **Exercise 5:** First overwrite the four bytes of the id length with the value of `Integer.MAX_VALUE`. Then decode and catch the `IOException`. Finally, assert that its message mentions the length limit and explain why the check runs before `readNBytes`.
+- **Exercise 6:** First append one extra byte to a valid encoding and confirm that `decode` rejects the trailing data. Then construct an `Account` with a negative balance and catch `IllegalArgumentException`. Finally, assert both failures and explain why they are separate gates.
 
 ## Self-check and retrieval
 
-Close the solution and explain Wire schema, Schema evolution, Length bound in your own words. Reconstruct one example from a blank `Main.java`, then add a new boundary input. Explain why the new case should pass or fail before compiling it. Identify a situation where this technique is appropriate and one where a different data structure, lifetime policy or abstraction would be clearer. This is a reasoning check, not a memorization test for an API spelling.
+From memory, describe the byte layout of a version 2 record and the default that version 1 needs. Explain why the decoder rejects an unknown version instead of guessing, why it checks lengths before allocating, and why format errors and domain errors are separate checks.
 
 ## Next step
 
-Preserve the saved pad and the six exercise observations. Continue to the next lesson only when you can explain the invariants without reading the answer. Later chapters reuse these contracts in larger programs, so keep a failing counterexample as well as a repaired result. A reference implementation demonstrates one valid design under the stated assumptions; it is not a universal design rule.
+Continue with `java-031`: Reflection, annotations and service loading. Keep your six observations; see [moving on](../STUDY-GUIDE.md#move-to-the-next-lesson).
 
 ## Sources and verification status
 
-[Official Java 21 API or language reference](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/io/DataInputStream.html), reviewed 2026-10-22. Examples and exercise fixtures are original course material. Use the [validation guide](../../../docs/validation.md) and CI artifacts for the exact revision and platform to inspect actual compile/run results. Authoring, parsing, compilation, execution and learner mastery are separate forms of evidence.
+[Official Java 21 API or language reference](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/io/DataInputStream.html), reviewed 2026-10-22. Evidence levels: [sources and evidence](../STUDY-GUIDE.md#sources-and-evidence).
 
 ## Ask an AI tutor about this lesson
 

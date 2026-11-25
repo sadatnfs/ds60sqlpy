@@ -1,6 +1,6 @@
 # go-010: explained solutions
 
-These are comparison material after an attempt or explicit reveal. The executable reference implements all six cases in one `main.go`.
+Compare after an attempt ([using solutions](../STUDY-GUIDE.md#use-the-solutions)). `courses/go/solutions/go-010_solution.go` implements all six cases.
 
 ## Mechanism
 
@@ -10,7 +10,7 @@ func (c Counter) Value() int declares a value receiver. func (c *Counter) Add(n 
 
 ## 1. Dispatch through behavior: change one input
 
-Copy worked example 1 into a scratch pad and change `var v Valuer = Counter{N: 3}` to `var v Valuer = Counter{N: 4}`. Before running, predict which check fails and which value it now sees; then run it and restore the original line.
+Copy worked example 1, change `var v Valuer = Counter{N: 3}` to `var v Valuer = Counter{N: 4}` and predict the failure before running; then restore the line.
 
 The unchanged code is worked example 1:
 
@@ -19,7 +19,9 @@ var v Valuer = Counter{N: 3}
 check(v.Value() == 3, "interface dispatch")
 ```
 
-**Expected:** The changed run panics with `interface dispatch` because `v.Value() == 3` no longer holds. Restoring the original line brings back the worked observation: calling Value returns 3.
+**Expected:** The edited run panics with `interface dispatch` because `v.Value() == 3` no longer holds.
+
+**Verify:** Restoring `var v Valuer = Counter{N: 3}` makes the check pass again with the worked observation: calling Value returns 3.
 
 The concrete type satisfies the interface without declaring that relationship. The caller depends only on the method contract.
 
@@ -33,7 +35,7 @@ The concrete type satisfies the interface without declaring that relationship. T
 
 ## 2. Mutate through a method: debug a regression
 
-A regression changed one token in worked example 2, so one line now reads `c := Counter{N: 4}`. Run worked example 2 with that line, use the failure to locate the defect and repair it without changing the check.
+A one-token regression in worked example 2 makes a line read `c := Counter{N: 4}`. Repair it without changing the check.
 
 The unchanged code is worked example 2:
 
@@ -43,7 +45,9 @@ c.Add(2)
 check(c.N == 5, "pointer receiver")
 ```
 
-**Expected:** Before the repair the program panics with `pointer receiver`; after it the line reads `c := Counter{N: 3}` again and its value becomes 5.
+**Expected:** The defective run panics with `pointer receiver`; after restoring `c := Counter{N: 3}`, its value becomes 5.
+
+**Verify:** The failing run shows message `pointer receiver`; after the repair `c.N == 5` holds again.
 
 The language can take the address of this addressable variable for the method call. The pointer receiver makes the mutation effective on the original value.
 
@@ -67,6 +71,8 @@ check(got == 4 && c.N == 3, "receiver copy")
 
 **Expected:** The returned value is 4 but the original remains 3.
 
+**Verify:** Your solution must keep `got == 4 && c.N == 3` true. Control: changing `c := Counter{N: 3}` to `c := Counter{N: 4}` panics with message `receiver copy`; revert it.
+
 Changing a value receiver's scalar field changes the copied receiver. Fields that reference shared storage still require separate ownership reasoning.
 
 **Approach.** Call the value-receiver method `Incremented` and inspect both its return value and the caller's field.
@@ -88,6 +94,8 @@ check(item != nil, "typed nil")
 ```
 
 **Expected:** The interface is not nil.
+
+**Verify:** Your solution must keep `item != nil` true. Control: changing `check(item != nil, "typed nil")` to `check(item == nil, "typed nil")` panics with message `typed nil`; revert it.
 
 The interface contains the dynamic type *Counter even though its dynamic pointer is nil. Comparing only the interface to nil does not test target availability.
 
@@ -111,6 +119,8 @@ check(!ok, "type assertion")
 
 **Expected:** The assertion reports false without panicking.
 
+**Verify:** Your solution must keep `!ok` true. Control: changing `check(!ok, "type assertion")` to `check(ok, "type assertion")` panics with message `type assertion`; revert it.
+
 A failed dynamic conversion is ordinary evidence when the input type is uncertain. A single-value assertion would turn this expected mismatch into a panic.
 
 **Approach.** Use the two-result assertion `_, ok := item.(int)` on an interface that holds the string `three`.
@@ -130,6 +140,8 @@ check(readValue(Counter{N: 2}) == 2 && readValue(Fixed(8)) == 8, "substitution")
 ```
 
 **Expected:** Both implementations can be read through one contract.
+
+**Verify:** Your solution must keep `readValue(Counter{N: 2}) == 2 && readValue(Fixed(8)) == 8` true. Control: changing `check(readValue(Counter{N: 2}) == 2 && readValue(Fixed(8)) == 8, "substitution")` to `check(readValue(Counter{N: 3}) == 2 && readValue(Fixed(8)) == 8, "substitution")` panics with message `substitution`; revert it.
 
 The consumer should not depend on concrete fields or perform a type switch unless its real contract requires different behavior.
 

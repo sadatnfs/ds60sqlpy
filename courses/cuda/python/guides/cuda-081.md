@@ -1,10 +1,17 @@
 # cuda-081: Sharing a buffer without sharing its meaning
 
-**Route:** CUDA Python and machine learning. **Stage:** intermediate. **Prerequisites:** `cuda-066`, `cuda-070`, `cuda-072`. Allow several sessions when the hardware experiment is new; the chapter is not a deadline.
+**Route:** CUDA Python and machine learning. **Stage:** intermediate. **Prerequisites:** `cuda-066`, `cuda-070`, `cuda-072`.
 
-## What you will be able to explain
+Pacing, evidence labels and platform rules: [CUDA study guide](../../STUDY-GUIDE.md).
 
-By the end, you can **distinguish copy and alias**, **explain missing autograd edges**, and **design mutation tests** with evidence. Start with the two worked cases, then use the editable CPU model to make the quantities concrete.
+## Learning objectives
+
+- Distinguish copy and alias.
+- Trace owner lifetime.
+- Describe metadata requirements.
+- Explain missing autograd edges.
+- Name stream readiness evidence.
+- Design mutation tests.
 
 ## Mechanism and vocabulary
 
@@ -41,9 +48,13 @@ A Python list alias sees a mutation made through the original name. A list copy 
 
 A tensor passed to another array library may share bytes but not the originating autograd graph. Compute a numerical forward check and a separate gradient check rather than assuming both survive exchange.
 
-## Portable executable model
+## How to run the CPU model
 
-The **CPU reference model** variant runs this bounded worked example using `python-core`. It uses only the Python standard library, small synthetic values and no network. Its purpose is to expose the arithmetic or contract behind the chapter. The separate reference includes assertions for the stated observations.
+Edit the copy; the [reference](../references/cuda-081_cpu.py) adds assertions.
+
+```sh
+python courses/cuda/python/lessons/cuda-081_cpu.py
+```
 
 ```python
 owner = [1, 2, 3]
@@ -65,77 +76,62 @@ print("CPU alias reference:", owner, copied)
 | `alias` | `[9, 2, 3]` |
 | `copied` | `[1, 2, 3]` |
 
-Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.
-
 ## Practice and transfer
+
+Record each attempt in the [worksheet](../lessons/cuda-081.md) before opening hints.
 
 ### Exercise 1: Distinguish copy and alias
 
 **Trap to avoid:** Assuming any transfer between libraries copies data leads to surprises when a zero-copy exchange like DLPack shares storage and a later in-place edit changes both arrays.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 2: Trace owner lifetime
 
 **Trap to avoid:** Deleting the original tensor right after the exchange to save memory assumes the consumer holds a copy.
-
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 3: Describe metadata requirements
 
 **Trap to avoid:** Passing only the pointer and the shape forces the consumer to guess dtype and layout.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 4: Explain missing autograd edges
 
 **Trap to avoid:** Assuming a forward result that matches means gradients are also correct conflates two different checks.
-
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 5: Name stream readiness evidence
 
 **Trap to avoid:** Relying on the host call having returned treats Python completion as device completion.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 6: Design mutation tests
 
 **Trap to avoid:** Writing from both libraries at once to see what happens produces a race whose outcome proves nothing.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ## Progressive hints
 
-Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.
+Hint *k* belongs to exercise *k*; open one at a time.
 
-1. Start from worked example 1 and mark the quantities needed for the task "Distinguish copy and alias".
-2. Change one assumption in worked example 2 while preserving the declared contract: trace owner lifetime.
-3. Trace the CPU program's variables before adding hardware behavior: describe metadata requirements.
-4. Draw producers, consumers and the exact operation boundary for the task "Explain missing autograd edges".
-5. Separate what the small fixture establishes from what the real runtime must show: name stream readiness evidence.
-6. Write a counterexample to an overbroad claim before you design mutation tests.
+1. Mutate the original list and check which of the two names reports the new value.
+2. Ask what happens to the consumer's view if the producer's owning object is released first.
+3. List every field a consumer needs to locate element (i, j) on the correct device.
+4. Ask whether passing bytes to another library also passes the record of how they were computed.
+5. Ask how the consumer knows the producer's writes have finished before it reads.
+6. Change one view while nothing else writes, then inspect the other, and decide which outcome proves aliasing.
 
-## Common mistakes and self-review
+## Common mistakes and self-check
 
-Confusing a correct tiny example with a general implementation is the central review risk. For this chapter, challenge the assumption in worked example 2, then ask whether your change preserves the mechanism described above. If you change dtype, layout, ordering, batch size or backend, update the acceptance contract rather than silently reusing the old observation. Explain an unexpected result before trying random configuration changes.
+A common mistake is assuming DLPack exchange keeps autograd working across frameworks. The protocol shares storage and metadata, not the originating computation graph, so gradients can silently stop at the boundary. Another is letting the producer's owner be freed while the consumer still holds the buffer. Fix both by running a numerical forward check and a separate gradient check after exchange, and by keeping the producer alive according to the pinned API's ownership rules.
 
-Keep a small evidence table with columns **claim**, **input**, **expected observation**, **actual observation** and **limit**. For the first claim use `Distinguish copy and alias`. For the final claim use `Design mutation tests`. An unperformed GPU or cluster experiment remains pending even when the CPU model is correct.
+**Evidence limit:** The reference uses Python lists to show aliasing, where the alias changes to 9 and the copy stays 1. It does not exchange device buffers, so stream readiness, lifetime rules and autograd behavior across real frameworks remain untested.
 
-## Platform and evidence contract
+1. Why is a zero-copy exchange not the same as two independent values?
+2. Does sharing a physical GPU let two separate workers share a buffer?
+3. What does the modern exchange interface add over legacy capsules?
 
-The reading worksheet and CPU reference model work through the ordinary Linux Docker classroom on macOS, Linux and Windows using WSL 2. They do not require an NVIDIA GPU. Their results are labeled CPU models or semantic oracles, not simulated hardware performance.
-
-Real CUDA work needs supported NVIDIA hardware, a compatible host driver and an explicitly prepared GPU runtime. An Apple GPU does not execute CUDA kernels. PyTorch MPS on a supported native Mac, ROCm on supported AMD hardware, or other vendor backends can provide separate accelerator learning routes; they need their own package and operation qualification and are not CUDA evidence. The ordinary Linux Docker classroom does not expose native Mac MPS automatically.
-
-Do not download packages, models or data by opening this lesson. Do not attach an engine socket, ambient cluster credentials or an arbitrary remote endpoint. A CPU pass, imported package, successful compilation, real GPU result and measured performance are distinct observations. Record the actual backend, data shape/dtype, source revision, versions and pending checks. A saved completion marker records learning progress, not hardware certification.
+Answers: [self-check answers](../solutions/cuda-081_solutions.md#self-check-answers).
 
 ## Primary references
 
 - [DLPack Python specification](https://dmlc.github.io/dlpack/latest/python_spec.html)
-- [CuPy interoperability](https://docs.cupy.dev/en/stable/user_guide/interoperability.html)
 
-Use the version-matched documentation of your prepared environment. These references describe interfaces and supported boundaries; the chapter's synthetic examples and CPU models are original teaching material.
+Full lists: [documentation and sources](../../STUDY-GUIDE.md#documentation-and-sources).
 
 ## Ask an AI tutor about this lesson
 

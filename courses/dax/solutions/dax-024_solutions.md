@@ -1,8 +1,6 @@
 # dax-024: explained reference and practice reasoning
 
-This is an offline DAX editing lesson. No DAX compiler, semantic-model engine, Power BI account or network connection is required. Worked tables describe the named reference and model, not execution of your draft. Save, compare and export source; do not interpret a comparison or completion marker as a passed program run.
-
-The complete [reference source](dax-024_reference.dax) and [named model](../models/retail/model.json) belong together. The reference-results sidecar binds both exact files by SHA-256. Those hashes identify bytes; they do not certify DAX execution.
+Check that the reference keeps the same outer selection and grouping in both cases and changes only the denominator, ALLSELECTED versus REMOVEFILTERS on Product[Product]. Shares of 91 and of 187 should both be explainable. Read it beside the [reference source](dax-024_reference.dax); the [study guide](../STUDY-GUIDE.md#answers-and-references) explains how the sidecar binds it to the model.
 
 ## Worked-case reconciliation
 

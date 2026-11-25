@@ -1,17 +1,15 @@
 // Answer-free learner source. Save your own copy before editing.
 // Exercise 1: Trace lower bound with duplicates: predict an edited check
-// Copy Example A into a scratch `main.mjs` and change `assert.equal(lowerBound([1, 4, 4, 8],
-// 4, trace), 1);` to `assert.equal(lowerBound([1, 4, 4, 8], 5, trace), 1);` inside its
-// check. Before running it, predict whether the check still passes and explain why; then
-// restore it.
-// Expected: The changed run fails with an `AssertionError` at `assert.equal(lowerBound([1,
-// 4, 4, 8], 5, trace), 1);`. Restoring `assert.equal(lowerBound([1, 4, 4, 8], 4, trace),
-// 1);` brings back: index 1; intervals shrink to the first duplicate.
+// In a scratch copy of Example A, change `assert.equal(lowerBound([1, 4, 4, 8], 4, trace),
+// 1);` to `assert.equal(lowerBound([1, 4, 4, 8], 5, trace), 1);` inside its check. Does the
+// check still pass?
+// Expected: The edited run fails with an `AssertionError` at `assert.equal(lowerBound([1, 4,
+// 4, 8], 5, trace), 1);`. Restoring `assert.equal(lowerBound([1, 4, 4, 8], 4, trace), 1);`
+// brings back: index 1; intervals shrink to the first duplicate.
 
 // Exercise 2: Use a heap for repeated minimum extraction: debug a regression
-// A regression changed one token in Example B, so one line now reads `for (const value of
-// [6, 1, 3, 1]) heap.push(value);`. Run Example B with that line, use the failing check to
-// locate the defect and repair it without changing the check.
+// A regression made one Example B line read `for (const value of [6, 1, 3, 1])
+// heap.push(value);`. Locate and repair it without editing the check.
 // Expected: Before the repair the run fails with an `AssertionError` at
 // `assert.deepEqual([heap.pop(), heap.pop(), heap.pop(), heap.pop()], [1, 1, 3, 5])`.
 // Restoring `for (const value of [5, 1, 3, 1]) heap.push(value);` brings back: pops 1,1,3,5,

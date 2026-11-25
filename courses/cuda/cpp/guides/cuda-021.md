@@ -4,18 +4,15 @@
 
 Intermediate; about 110 minutes, plus any optional hardware experiment. Direct prerequisites: `cuda-020`, `cuda-004`
 
-The order supports learning at your own pace. Reading and CPU reasoning remain
-available when NVIDIA hardware is absent. Advanced hardware features need their
-own capability checks and are not prerequisites for opening this chapter.
+Pacing, evidence labels and platform rules for every chapter are in the [CUDA study guide](../../STUDY-GUIDE.md).
 
 ## Learning objectives
 
 Implement stable stream compaction with exact counts and order for empty, all-match and no-match inputs.
 
-Work through *Scans and stream compaction* with the concrete cases below. Finish with this evidence:
-exact output counts and element order for empty, all-match and no-match cases. Distinguish an algorithmic
-calculation, a compiled artifact and an actual device observation when explaining
-what your work establishes.
+**Scope:** Inclusive versus exclusive prefix sums, local scan and block offsets, work-efficient design, stable compaction and allocation of output positions.
+
+**Evidence to produce:** Exact output counts and element order for empty, all-match and no-match cases.
 
 ## Purpose, vocabulary and mental model
 
@@ -38,28 +35,17 @@ Each selection flag f is zero or one. A selected element writes at its exclusive
 
 ## How to run and study this lesson
 
-Use the saved reading worksheet in `/classroom`; the reading pad does not execute
-CUDA. For the bounded calculation, select **CPU model (Python)**, whose
-answer-free starter supplies the literal fixtures and task contract. The
-[CUDA C++ study workflow](../README.md) covers platforms, optional GPU
-compilation and evidence labels. In a prepared Python environment you can also
-run the separate [CPU reference](../references/cuda-021_cpu.py) from the
-repository root:
+Trace worked example 1 by hand, then run the [CPU reference](../references/cuda-021_cpu.py) from the repository root:
 
 ```sh
 python courses/cuda/cpp/references/cuda-021_cpu.py
 ```
 
-Its assertions check the stated numerical result or model invariant; console
-text is evidence of this CPU model only, not of CUDA execution.
-
 ## Worked example 1: trace the mechanism
 
 For values \([8,3,6,1,4]\), select even values. Flags are \([1,0,1,0,1]\), exclusive positions are \([0,1,1,2,2]\), and selected writes produce \([8,6,4]\). Nonselected elements have positions too, but they do not write.
 
-The complete CPU model below intentionally models only the named arithmetic,
-layout, dependency or capability decision. It does not model GPU scheduling,
-caches, instruction timing or device memory visibility.
+**Why:** The exclusive prefix at a selected element counts selected elements before it, so 8 lands at slot 0, 6 at slot 1 and 4 at slot 2 in original order.
 
 ```python
 values = [8, 3, 6, 1, 4]
@@ -76,41 +62,37 @@ assert out == [8, 6, 4] and positions == [0, 1, 1, 2, 2]
 print({"flags": flags, "positions": positions, "compacted": out})
 ```
 
-**Expected observation:** Every assertion succeeds. A representative CPU output is:
+**Expected observation:** every assertion succeeds, and the CPU model prints:
 
 ```text
 {'flags': [1, 0, 1, 0, 1], 'positions': [0, 1, 1, 2, 2], 'compacted': [8, 6, 4]}
 ```
 
-Integers, shapes and ordering must match exactly; only assertions with an explicit
-tolerance accept small floating-point differences. A printed duration is a model
-output, not a measured GPU benchmark.
+**Check:** The CPU reference asserts positions == [0, 1, 1, 2, 2] and out == [8, 6, 4]; on a GPU compare the compacted buffer element by element, not as a set.
 
 ## Worked example 2: change a meaningful condition
 
 For flags \([0,0,0]\), the exclusive scan is \([0,0,0]\) and count is zero. For \([1,1,1]\), positions are \([0,1,2]\) and count is three. These cases catch allocating from the final exclusive prefix alone without adding the final flag.
 
-Before applying this example to your own program, write down which inputs are
-read, which result is produced, and the condition that makes the comparison
-valid. Keep the original case as a regression check when changing a boundary.
+**Why:** For [1, 1, 1] the last exclusive prefix is 2 while three items survive, and for [0, 0, 0] the same formula correctly gives zero.
+
+**Check:** Assert count == 0 for the empty selection and count == 3 for the full one, and place a sentinel after the output to catch a short allocation.
 
 ## Six progressive exercises
 
-Exercises 1 and 2 are guided reconstructions of the worked examples; exercises
-3-6 change an input, diagnose a defect, test a boundary and transfer the idea.
-For each one, keep the calculation, output, diagram or failure policy you
-produce so another reader can compare it with the worked cases. If the hint is
-not enough, reread the mechanism paragraph and the bounded CPU assertion.
-
 ### Exercise 1
 
-Predict and trace the first worked example before running its CPU reference. Write every intermediate quantity that leads to the stated result, including units or ownership where applicable.
+Reconstruct worked example 1 on paper before running its CPU reference. Map each of [8, 3, 6, 1, 4] to an even flag, run an exclusive prefix sum over the flags, then let flagged elements write at their position.
+
+**Trap to avoid:** Letting each thread claim a slot with atomicAdd on a counter also yields three outputs, but their order depends on scheduling and may come back as [6, 8, 4].
 
 **Hint:** Start with the literal input and intermediate quantities in worked example 1.
 
 ### Exercise 2
 
-Reconstruct the second worked example without copying its conclusion. Identify the changed input or condition, show the resulting calculation or dependency, and explain why it differs from the first example.
+Rework worked example 2 without copying its conclusion. Run the scan on the all-zero and all-one flag arrays and compute count as the final exclusive prefix plus the final flag in both cases.
+
+**Trap to avoid:** Sizing the output from the last exclusive prefix alone allocates two slots for three survivors, and the third write overruns the buffer.
 
 **Hint:** Identify exactly which condition changes in worked example 2.
 
@@ -118,11 +100,15 @@ Reconstruct the second worked example without copying its conclusion. Identify t
 
 Compact \([5,2,7,8]\) for values greater than four.
 
+**Trap to avoid:** Writing every element at its own position lets the rejected 2 overwrite slot 1 before or after 7 depending on thread timing.
+
 **Hint:** Use the first worked example to establish the relevant quantities, then change only the requested input.
 
 ### Exercise 4
 
 Why is the last exclusive prefix insufficient for count?
+
+**Trap to avoid:** Adding one unconditionally to the last prefix overcounts whenever the final element is rejected, as in [1, 0, 1, 0, 0].
 
 **Hint:** Locate the failed phase or violated dependency before proposing a repair.
 
@@ -130,35 +116,33 @@ Why is the last exclusive prefix insufficient for count?
 
 What are scan and compact outputs for empty input?
 
+**Trap to avoid:** Computing count as positions[n - 1] + flags[n - 1] for n == 0 reads index -1, which in C++ is out of bounds before the buffer.
+
 **Hint:** Check what the algorithm is allowed to read, write or assume at this boundary.
 
 ### Exercise 6
 
 Use scan to build ragged row offsets from lengths \([2,0,3]\).
 
+**Trap to avoid:** Using an inclusive scan [2, 2, 5] as row starts shifts every row by its own length and makes row 0 begin at 2.
+
 **Hint:** State the output contract and which observations are needed in the new application.
 
 ## Common mistakes and diagnosis
 
-A tempting but incorrect claim in this chapter is: **a parallel sum is enough to recover every element's output position.**
-
-For the concrete failure exercise, why is the last exclusive prefix insufficient for count?
-Preserve the original input and the stage where behavior diverged, and compare
-with the CPU model before changing hardware configuration.
+A tempting but incorrect claim: **A parallel sum is enough to recover every element's output position.** A sum gives one total, but compaction needs a different position for each selected element: the count of selected elements before it. That is an exclusive scan of the flags, as worked example 1 shows with positions [0,1,1,2,2]. The total count still needs the last prefix plus the last flag.
 
 ## Self-check, retrieval and transfer
 
-Explain the first example without its code, then use the second example to state
-one assumption that matters. Complete Exercise 3 independently, use Exercise 4 to
-diagnose a plausible defect, check the boundary in Exercise 5, and retain the
-application contract from Exercise 6. Compare the [separate explanations](../solutions/cuda-021_solutions.md)
-only after your attempt or a deliberate reveal. A reading marker records your
-choice; it does not certify hardware qualification or expert mastery.
+1. Give the exclusive scan of flags [0,1,1,0,1].
+2. What does stability mean for compaction?
+3. What extra stage do multiple blocks need for a scan?
+
+Short answers are in the [separate explanations](../solutions/cuda-021_solutions.md#self-check-answers); compare only after an attempt.
 
 ## Primary references
 
-Check the documentation that matches your prepared toolkit before optional
-hardware execution.
+Use the documentation that matches your prepared toolkit.
 
 - [CUDA Programming Guide](https://docs.nvidia.com/cuda/cuda-programming-guide/)
 

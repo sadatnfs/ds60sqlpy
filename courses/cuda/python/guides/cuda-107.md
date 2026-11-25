@@ -1,10 +1,17 @@
 # cuda-107: Python-accessible CUDA library algorithms
 
-**Route:** CUDA Python and machine learning. **Stage:** advanced. **Prerequisites:** `cuda-082`, `cuda-085`. Allow several sessions when the hardware experiment is new; the chapter is not a deadline.
+**Route:** CUDA Python and machine learning. **Stage:** advanced. **Prerequisites:** `cuda-082`, `cuda-085`.
 
-## What you will be able to explain
+Pacing, evidence labels and platform rules: [CUDA study guide](../../STUDY-GUIDE.md).
 
-By the end, you can **trace stable sorting**, **account for temporary storage**, and **choose a release-specific contract** with evidence. Start with the two worked cases, then use the editable CPU model to make the quantities concrete.
+## Learning objectives
+
+- Trace stable sorting.
+- Specify duplicate semantics.
+- Calculate output shape.
+- Account for temporary storage.
+- Separate plan creation.
+- Choose a release-specific contract.
 
 ## Mechanism and vocabulary
 
@@ -31,9 +38,13 @@ A stable sort of [(2, A),(1, B),(2, C)] by key retains A before C among equal ke
 
 A matrix multiply output shape follows contracted dimensions: a 2 by 3 matrix times 3 by 4 gives 2 by 4. A plan prepared for a different dtype or shape cannot be reused blindly.
 
-## Portable executable model
+## How to run the CPU model
 
-The **CPU reference model** variant runs this bounded worked example using `python-core`. It uses only the Python standard library, small synthetic values and no network. Its purpose is to expose the arithmetic or contract behind the chapter. The separate reference includes assertions for the stated observations.
+Edit the copy; the [reference](../references/cuda-107_cpu.py) adds assertions.
+
+```sh
+python courses/cuda/python/lessons/cuda-107_cpu.py
+```
 
 ```python
 records = [(2, "A"), (1, "B"), (2, "C")]
@@ -55,77 +66,65 @@ print("CPU library contracts:", ordered, "matrix output", (a[0], b[1]))
 | `a` | `(2, 3)` |
 | `b` | `(3, 4)` |
 
-Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.
-
 ## Practice and transfer
+
+Record each attempt in the [worksheet](../lessons/cuda-107.md) before opening hints.
 
 ### Exercise 1: Trace stable sorting
 
 **Trap to avoid:** Assuming every GPU sort is stable lets downstream code rely on an order an unstable sort may legally change, which then varies between runs or releases.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 2: Specify duplicate semantics
 
 **Trap to avoid:** Leaving the rule unstated passes tests on small inputs where an unstable algorithm happens to preserve order, then fails on larger inputs that use a different internal path.
-
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 3: Calculate output shape
 
 **Trap to avoid:** Taking the output as 3 by 3 or 2 by 3 confuses contracted and kept dimensions, and allocating the wrong output buffer causes a library error or an out-of-bounds write.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 4: Account for temporary storage
 
 **Trap to avoid:** Budgeting only inputs and outputs leads to out-of-memory errors that appear only on large arrays.
-
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 5: Separate plan creation
 
 **Trap to avoid:** Reusing a plan prepared for a different shape or dtype gives wrong results or errors, so caching must be keyed by both.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 6: Choose a release-specific contract
 
 **Trap to avoid:** Relying on the latest online docs while running an older release can promise features or guarantees the installed version does not have.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ## Progressive hints
 
-Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.
+Hint *k* belongs to exercise *k*; open one at a time.
 
-1. Start from worked example 1 and mark the quantities needed for the task "Trace stable sorting".
-2. Change one assumption in worked example 2 while preserving the declared contract: specify duplicate semantics.
-3. Trace the CPU program's variables before adding hardware behavior: calculate output shape.
-4. Draw producers, consumers and the exact operation boundary for the task "Account for temporary storage".
-5. Separate what the small fixture establishes from what the real runtime must show: separate plan creation.
-6. Write a counterexample to an overbroad claim before you choose a release-specific contract.
+1. Sort the records by key and keep the original order among records whose keys are equal.
+2. Ask whether the library documents a guaranteed order among duplicates, and what you may assume if it does not.
+3. Drop the contracted inner dimension and keep the two outer dimensions.
+4. Add the workspace the library requests to the inputs and outputs that are live at the same time.
+5. Time creating the plan separately from running it repeatedly.
+6. Read the documentation for the exact installed release rather than the newest online version.
 
-## Common mistakes and self-review
+## Common mistakes and self-check
 
-Confusing a correct tiny example with a general implementation is the central review risk. For this chapter, challenge the assumption in worked example 2, then ask whether your change preserves the mechanism described above. If you change dtype, layout, ordering, batch size or backend, update the acceptance contract rather than silently reusing the old observation. Explain an unexpected result before trying random configuration changes.
+A common mistake is assuming every sort is stable. An unstable sort may legally put record C before A when both have key 2, which breaks code that relies on input order. Another is reusing a plan built for a different shape or dtype, or forgetting the workspace it allocates. Fix both by stating duplicate semantics in the contract, testing duplicates and empty inputs on tiny fixtures and keeping plan creation, workspace and stream association explicit in the ledger.
 
-Keep a small evidence table with columns **claim**, **input**, **expected observation**, **actual observation** and **limit**. For the first claim use `Trace stable sorting`. For the final claim use `Choose a release-specific contract`. An unperformed GPU or cluster experiment remains pending even when the CPU model is correct.
+**Misconception:** A library sum or FFT returns the same answer as NumPy as long as the inputs match. **Correction:** Library conventions differ. A reduction may accumulate in a different dtype or order, so a float32 sum can differ in its last digits, and an integer sum may overflow its type. Some FFT libraries leave both directions unnormalized, so a forward then inverse transform returns values n times larger than the input, while NumPy scales the inverse by 1/n by default. Read each function's dtype, identity and normalization rules and compare on tiny fixtures with stated tolerances.
 
-## Platform and evidence contract
+**Evidence limit:** The reference traces a stable sort and a `(2, 4)` output shape in Python. It calls no CUDA library, so plan lifetime, workspace size and release-specific behavior require the prepared library package.
 
-The reading worksheet and CPU reference model work through the ordinary Linux Docker classroom on macOS, Linux and Windows using WSL 2. They do not require an NVIDIA GPU. Their results are labeled CPU models or semantic oracles, not simulated hardware performance.
+1. What does an FFT contract need besides the input array?
+2. Why does a plan have a shape and dtype contract?
+3. Why choose a small release-pinned library family?
 
-Real CUDA work needs supported NVIDIA hardware, a compatible host driver and an explicitly prepared GPU runtime. An Apple GPU does not execute CUDA kernels. PyTorch MPS on a supported native Mac, ROCm on supported AMD hardware, or other vendor backends can provide separate accelerator learning routes; they need their own package and operation qualification and are not CUDA evidence. The ordinary Linux Docker classroom does not expose native Mac MPS automatically.
-
-Do not download packages, models or data by opening this lesson. Do not attach an engine socket, ambient cluster credentials or an arbitrary remote endpoint. A CPU pass, imported package, successful compilation, real GPU result and measured performance are distinct observations. Record the actual backend, data shape/dtype, source revision, versions and pending checks. A saved completion marker records learning progress, not hardware certification.
+Answers: [self-check answers](../solutions/cuda-107_solutions.md#self-check-answers).
 
 ## Primary references
 
 - [PyTorch CUDA semantics](https://docs.pytorch.org/docs/2.9/notes/cuda.html)
 - [TensorFlow GPU guide](https://www.tensorflow.org/guide/gpu)
 
-Use the version-matched documentation of your prepared environment. These references describe interfaces and supported boundaries; the chapter's synthetic examples and CPU models are original teaching material.
+Full lists: [documentation and sources](../../STUDY-GUIDE.md#documentation-and-sources).
 
 ## Ask an AI tutor about this lesson
 

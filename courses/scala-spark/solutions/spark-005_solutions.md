@@ -1,6 +1,8 @@
 # spark-005: Explained reference solutions
 
-Read the [guide](../guides/spark-005.md) and attempt the [learner source](../lessons/spark-005.scala) first. The [complete reference](spark-005_solution.scala) contains each implementation and its assertions. Values, identity, missingness and failure behavior are separate checks; compilation alone does not establish any of them.
+Attempt the [guide](../guides/spark-005.md) exercises first.
+
+Reference: [complete Scala program](spark-005_solution.scala).
 
 ## Exercises and reasoning
 
@@ -141,4 +143,7 @@ assert(feeOption(None).isEmpty && feeOption(Some("bad")).isEmpty)
 
 ## Evidence and scope
 
-Run the complete reference using the same prepared profile as the learner source. Its assertions check normal values, malformed or boundary inputs and conservation where relevant. The final version line records the actual compiler/runtime family used. The reference is an executable explanation, not a hidden grading service or proof that a distributed Spark job would have the same performance characteristics.
+The reference checks each parser and classifier against literal expectations from the token fixture: `Some(0L)` and `Some(25L)` for the valid tokens, `None` for absence and for each invalid token, the ledger `observed -> 2, missing -> 1, rejected -> 2`, and a ledger of three zero counts for an empty input. It also covers the boundary tokens that a casual parser accepts by mistake: a signed value, a decimal, a value above 1,000,000 cents and a supplied `null`. The fee check confirms `Some("100")` gives `Some(5L)` and that `None` and `Some("bad")` both stay `None`.
+
+The success line `spark-005: six reference contracts passed` is followed by the Scala and Java versions of this run. Passing shows that no state was collapsed on these tokens; it does not prove the parser handles every Unicode digit or locale format, because the contract deliberately accepts only trimmed ASCII digits. Spark has the same distinction in a different form: a SQL NULL is absence, while a malformed string cast under ANSI mode is an error, and later lessons keep those apart the same way this ledger does.
+

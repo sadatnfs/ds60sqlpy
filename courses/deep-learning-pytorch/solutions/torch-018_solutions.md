@@ -2,6 +2,8 @@
 
 Open these answers only after attempting BatchNorm, LayerNorm and stateful normalization yourself. They reuse the guide's literal inputs, starting from Example A, Update a running mean, so a discrepancy points at one step. The executable companion runs the assertions; this page explains why each one tests Running statistic, Momentum convention, Batch coupling. After a pass, choose a new input for exercise 6, Handle a constant feature row, without looking.
 
+After comparing, follow the [review steps](../STUDY-GUIDE.md#after-the-solutions).
+
 ## Mechanism review
 
 Normalization can introduce both state and cross-observation dependencies. BatchNorm uses batch statistics during training and updates running statistics for later inference. LayerNorm normalizes feature values within each record and does not mix unrelated batch rows. PyTorch BatchNorm momentum specifies the weight of the new batch statistic, whereas Keras momentum specifies the retention weight of the old statistic. Equal numeric momentum arguments therefore usually mean different updates.
@@ -156,6 +158,3 @@ torch.testing.assert_close(constant, torch.zeros((1, 2)), atol=1e-6, rtol=0)
 
 **Verify:** In a fresh process, the exercise checks confirm `torch.isfinite(constant).all()` and `constant` matches `torch.zeros((1, 2))` within 1e-06.
 
-## Review after comparison
-
-Repeat exercise 4, Inspect running variance convention, with one changed fixture value and predict the difference before running it. Keep your failing attempt at exercise 5, Translate momentum explicitly, beside the repaired result. A missing framework is not a failing assertion. These solutions use only local fixtures.

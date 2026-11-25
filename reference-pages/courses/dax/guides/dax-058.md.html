@@ -194,10 +194,10 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/dax/guides/dax-058.md</code></p>
     </header>
     <article class="document"><h2 id="dax-058-commercial-model-capstone-reconcile-adjustments-and-targets">dax-058: Commercial-model capstone: reconcile adjustments and targets<a class="heading-anchor" href="#dax-058-commercial-model-capstone-reconcile-adjustments-and-targets" aria-label="Link to this section">#</a></h2>
-<p><strong>Stage 10: Security, delivery and integrated capstones.</strong> Level: advanced. Read the mechanisms, trace the worked cases and retain your own draft. <strong>Direct prerequisites:</strong> <code>dax-029</code>, <code>dax-041</code>, <code>dax-042</code>, <code>dax-043</code></p>
+<p><strong>Stage 10: Security, delivery and integrated capstones.</strong> Level: advanced. <strong>Direct prerequisites:</strong> <code>dax-029</code>, <code>dax-041</code>, <code>dax-042</code>, <code>dax-043</code></p>
 <h3 id="how-to-use-this-offline-lesson">How to use this offline lesson<a class="heading-anchor" href="#how-to-use-this-offline-lesson" aria-label="Link to this section">#</a></h3>
-<p>This is an offline DAX editing lesson. No DAX compiler, semantic-model engine, Power BI account or network connection is required. Worked tables describe the named reference and model, not execution of your draft. Save, compare and export source; do not interpret a comparison or completion marker as a passed program run.</p>
-<p>Open the <a href="../lessons/dax-058.dax.html">starter</a>. Compare the <a href="../solutions/dax-058_reference.dax.html">named reference</a> and <a href="../solutions/dax-058_solutions.md.html">reasoning</a> when ready. The <a href="../models/analytics/model.json.html">model specification</a> identifies every fixture table, column type, key and relationship. The <a href="../models/README.md.html">fixture handbook</a> displays the original data and explains each table grain.</p>
+<p>Predict core revenue, attributed refunds, adjusted revenue and converted foreign USD, then the Paper and Home budget variance for January and February 2025. The <a href="../STUDY-GUIDE.md.html#offline-study-boundary">offline study boundary</a> explains what a worked table can show.</p>
+<p>Files: <a href="../lessons/dax-058.dax.html">starter</a>, <a href="../solutions/dax-058_reference.dax.html">reference</a> and <a href="../solutions/dax-058_solutions.md.html">reasoning</a>.</p>
 <h3 id="the-question-and-the-mechanism">The question and the mechanism<a class="heading-anchor" href="#the-question-and-the-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Produce a reviewable commercial metric specification with explicit populations and adjustment policies.</p>
 <p>An integrated commercial model needs more than a large final revenue formula. Define the grain, currency, date role and adjustment policy for each input. Our core Sales are USD amounts after line discounts. Returns records monetary refunds linked to SaleID; this fixture attributes those refunds to the original sale&#x27;s date, not an unprovided return-event date. ForeignSales is a separate population requiring explicit conversion.</p>
@@ -207,7 +207,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The reference composes named measures for refund attribution, adjusted core revenue and converted foreign amounts. The relationship Sales-&gt;Returns propagates the original sale&#x27;s dimension/date context. Budget remains disconnected and is matched explicitly by month and category. The two cases expose component totals before reporting a variance.</p>
 <p>Concepts to explain in your own words: <strong>commercial model</strong>, <strong>refund attribution</strong>, <strong>currency conversion</strong>, <strong>budget grain</strong>, <strong>reconciliation</strong>.</p>
 <h3 id="model-and-context-contract">Model and context contract<a class="heading-anchor" href="#model-and-context-contract" aria-label="Link to this section">#</a></h3>
-<p>The ordinary star follows Product → Sales, Customer → Sales and Date → Sales through OrderDate. The ShipDate relationship is inactive unless a case explicitly activates it. Filters flow from the one side to the many side. Additional analytical tables have only the relationships declared in their named model; a similar column name does not create a relationship.</p>
+<p>Returns link R1 (4 USD) to S2 and R2 (9 USD) to S4. Budget for the two months totals 165. See the <a href="../models/analytics/model.json.html">model specification</a> and the <a href="../STUDY-GUIDE.md.html#the-retail-star">shared star rules</a>.</p>
 <pre class="highlighted-code"><code class="language-text">Product (one)  --&gt; Sales (many) &lt;-- Customer (one)
                        ^
                        | active OrderDate
@@ -215,7 +215,6 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
                        | inactive ShipDate
                        +------&gt; Sales</code></pre>
 <p>This lesson also uses the <code>analytics</code> model&#x27;s <code>Budget</code> table. <code>Budget</code> has no relationship, so a filter on another table reaches it only if the expression transfers the filter explicitly.</p>
-<p>All amounts in ordinary Sales are USD after the line discount, before tax and returns. The Date fixture is complete for 2024 and 2025; a short result table is a selected slice, not the whole calendar. JSON <code>null</code> in the worked-results sidecar means DAX BLANK, not the text &quot;null&quot;.</p>
 <h3 id="worked-cases">Worked cases<a class="heading-anchor" href="#worked-cases" aria-label="Link to this section">#</a></h3>
 <p>The following query-local declarations are shared by these cases. They do not create persisted measures in this classroom.</p>
 <pre class="highlighted-code"><code class="language-dax"><span class="syntax-keyword">DEFINE</span>
@@ -281,8 +280,10 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 </tbody></table></div>
 <p>A return-date report could differ, but this fixture does not contain ReturnDate. The correct conclusion is to state the limitation, not invent another temporal attribution.</p>
 <p>Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table.</p>
+<h3 id="a-misconception-to-test">A misconception to test<a class="heading-anchor" href="#a-misconception-to-test" aria-label="Link to this section">#</a></h3>
+<p>Adding the 270 foreign USD to the 174 adjusted core figure mixes populations; the budget covers core sales only.</p>
 <h3 id="practice-prediction-construction-and-diagnosis">Practice: prediction, construction and diagnosis<a class="heading-anchor" href="#practice-prediction-construction-and-diagnosis" aria-label="Link to this section">#</a></h3>
-<p>Retain your formula or written reasoning, the stated context, contributing rows or values, and a conclusion with its unit. These notes are your own study record; they do not show that a formula ran.</p>
+<p>Record each answer as the <a href="../STUDY-GUIDE.md.html#practice-routine">practice routine</a> describes.</p>
 <h4 id="exercise-1-predict">Exercise 1: Predict<a class="heading-anchor" href="#exercise-1-predict" aria-label="Link to this section">#</a></h4>
 <p>Reconcile adjusted core revenue by year.</p>
 <h4 id="exercise-2-change-one-condition">Exercise 2: Change one condition<a class="heading-anchor" href="#exercise-2-change-one-condition" aria-label="Link to this section">#</a></h4>
@@ -305,7 +306,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>Source review, engine behavior and release are distinct gates.</li>
 </ol>
 <h3 id="self-check-and-next-step">Self-check and next step<a class="heading-anchor" href="#self-check-and-next-step" aria-label="Link to this section">#</a></h3>
-<p>Explain one changed result without quoting the formula alone. Identify which rows, filters, relationship or evaluation scope changed, then construct a counterexample to a plausible wrong interpretation. Keep your draft separate from the supplied reference. A small correct derivation does not certify performance, model security or broad expertise.</p>
+<p>Reconcile 2025 adjusted core revenue of 114 to its lines and refund, then explain the minus 51 variance. The <a href="../STUDY-GUIDE.md.html#self-check-routine">self-check routine</a> applies too.</p>
 <p>Continue to <a href="dax-059.md.html">dax-059</a> when its prerequisites make sense, or revisit this stage from the <a href="../README.md.html">course map</a>.</p>
 <h3 id="official-references-and-evidence-limits">Official references and evidence limits<a class="heading-anchor" href="#official-references-and-evidence-limits" aria-label="Link to this section">#</a></h3>
 <ul>
@@ -313,7 +314,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li><a href="https://learn.microsoft.com/en-us/dax/treatas-function-dax">DAX function: TREATAS</a></li>
 <li><a href="https://learn.microsoft.com/en-us/dax/lookupvalue-function-dax">DAX function: LOOKUPVALUE</a></li>
 </ul>
-<p>Documentation was reviewed for this original course on 2026-10-25. Version-sensitive features have explicit notes. Source/model checks and independent fixture arithmetic are not a DAX parser, compiler, semantic engine, real RLS test or performance measurement.</p>
+<p>Review date and evidence limits: <a href="../STUDY-GUIDE.md.html#references-and-evidence-limits">study guide</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for dax-058. Read its guide and the named model.
 Review my draft and prediction. Ask me to enumerate the relevant rows and context.

@@ -463,19 +463,10 @@ history<span class="syntax-punctuation">:</span> <span class="syntax-builtin">li
     history<span class="syntax-operator">.</span>append<span class="syntax-punctuation">(</span>loss<span class="syntax-operator">.</span>item<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <p>The seed controls parameter initialization and generated noise on this CPU path. Hardware and library differences can still affect exact floating-point results, so reproducibility means bounded, explainable variation, not bitwise identity everywhere.</p>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
-<p><strong>Default Docker classroom:</strong> open <code>python-46</code> for its guide, notebook and capability notice. The default Core does not include the <code>deep-learning</code> extra, so the complete legacy notebook is unavailable there until that app environment is deliberately prepared. Pressing Run or choosing a notebook kernel does not install packages.</p>
-<p><strong>Prepared browser alternative:</strong> use the <a href="../reference-pages/courses/deep-learning-pytorch/guides/torch-002.md.html">prepared PyTorch CPU course</a> in its declared runtime. Its supported examples have their own package and execution contract; this does not qualify every legacy optional extension.</p>
-<p><strong>Explicit legacy preparation:</strong> retain the contributor extras in <a href="../reference-pages/CONTRIBUTING.md.html">CONTRIBUTING</a> and add <code>deep-learning</code> only when needed. See <a href="../reference-pages/docs/dependency-profiles.md.html">dependency profiles</a> and <a href="../reference-pages/docs/docker-profiles.md.html">Docker app package options</a> for deliberate preparation. A host notebook environment and a Docker app image are separate. Do not install packages inside a learner pad.</p>
+<p><strong>Default Docker classroom:</strong> Torch is unavailable in <code>python-46</code> because the default Core does not include <code>deep-learning</code>. Installing that extra through <a href="../reference-pages/CONTRIBUTING.md.html">CONTRIBUTING</a> prepares a local notebook only: a host notebook environment and a Docker app image are separate.</p>
+<p><strong>Prepared browser alternative:</strong> For tensors in the browser, use the <a href="../reference-pages/courses/deep-learning-pytorch/guides/torch-002.md.html">prepared PyTorch CPU course</a>, whose worker already includes PyTorch and starts with shapes, dtypes and views.</p>
 <p>The prepared PyTorch CPU course runs tensor and training examples in its own worker. It does not add PyTorch to this legacy lesson&#x27;s Core worker. TensorFlow is a separate optional comparison, not used by the starter.</p>
-<p><strong>Optional native notebook/editor route:</strong> the instructions below describe separately prepared host tools. They are useful alternatives, not prerequisites for opening this lesson in the Docker classroom.</p>
-<ol>
-<li>Open the Day 46 learner notebook from this guide&#x27;s <strong>Next step</strong> section in VS Code or JupyterLab.</li>
-<li>Select the <code>Python (ds60sqlpy)</code> kernel. Start at the top and use <strong>Run All</strong> only after making the written predictions; the default data examples are offline once the declared packages are prepared. Optional services and model assets have separate requirements.</li>
-<li>Keep experiments in new scratch cells. Do not edit the official solution while attempting the numbered practice.</li>
-<li>Restart the kernel and run from the first cell before calling the lesson complete. A clean run catches hidden state and stale variables.</li>
-</ol>
-<p>Linux, macOS, or Ubuntu in Windows WSL 2:</p>
-<pre class="highlighted-code"><code class="language-bash">.venv/bin/python -m jupyter lab</code></pre>
+<p>The <a href="../reference-pages/python/STUDY-GUIDE.md.html">Python study guide</a> covers the notebook route and preparing optional extras.</p>
 <h4 id="guide--concept-deep-dive-tensors-computation-graphs-gradients-and-the-optimizer-cycle">Concept deep dive: tensors, computation graphs, gradients, and the optimizer cycle<a class="heading-anchor" href="#guide--concept-deep-dive-tensors-computation-graphs-gradients-and-the-optimizer-cycle" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--the-mental-model">The mental model<a class="heading-anchor" href="#guide--the-mental-model" aria-label="Link to this section">#</a></h5>
 <p>A neural network is a parameterized function composed from tensor operations. The <strong>forward pass</strong> produces predictions and a loss. Autograd records the computation graph and <code>backward()</code> applies the chain rule to accumulate gradients in parameter <code>.grad</code> fields. <code>optimizer.step()</code> then updates parameters according to those gradients.</p>
@@ -487,7 +478,6 @@ history<span class="syntax-punctuation">:</span> <span class="syntax-builtin">li
 <li><strong><code>optimizer.zero_grad(); ...; optimizer.step()</code>:</strong> clears old gradients, computes a new step, and updates registered parameters.</li>
 </ul>
 <h5 id="guide--focused-example-a-differentiate-a-scalar-function-by-autograd">Focused example A: differentiate a scalar function by autograd<a class="heading-anchor" href="#guide--focused-example-a-differentiate-a-scalar-function-by-autograd" aria-label="Link to this section">#</a></h5>
-<p>Before running the example, predict the shape, type, or direction of the result. Write the prediction down so that a surprise becomes evidence rather than something to overlook.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> torch
 
 x <span class="syntax-operator">=</span> torch<span class="syntax-operator">.</span>tensor<span class="syntax-punctuation">(</span><span class="syntax-number">3.0</span><span class="syntax-punctuation">,</span> requires_grad<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span>
@@ -569,7 +559,6 @@ cleared <span class="syntax-operator">=</span> weight<span class="syntax-operato
 <p>The separate solution extends these ideas with train/validation curves, capacity comparisons, and gradient-stability techniques. Treat those as deeper reference material after completing the notebook&#x27;s three exercises.</p>
 <h5 id="guide--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#guide--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
 <p>Trace tensor shapes, gradients, modes, and loss aggregation through a complete training step. Deep-learning code is correct only when its state transitions are explicit.</p>
-<p>Predict or plan before you run code. Use the hint only after an honest attempt, and record the evidence that would prove your result correct.</p>
 <ol start="4">
 <li><strong>Autograd tracing:</strong> For one scalar regression batch, annotate every line from <code>zero_grad()</code> through <code>step()</code>: which tensors receive gradients, when are they accumulated, and when do parameters change? <strong>Progressive hint:</strong> Gradients accumulate in parameter <code>.grad</code> fields during backward; the optimizer reads them during step. zero_grad clears the previous batch.</li>
 </ol>
@@ -631,7 +620,7 @@ cleared <span class="syntax-operator">=</span> weight<span class="syntax-operato
 <li>Continue to <a href="python-47.html#guide">Day 47; PyTorch Training Loops</a>.</li>
 </ul>
 <h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
-<p>The lesson is complete without an AI assistant. If you want optional coaching, copy this prompt into the AI tutor while the repository root is open:</p>
+<p>The lesson is complete without AI. For optional coaching, copy this prompt with the repository root open:</p>
 <pre class="highlighted-code"><code class="language-text">Tutor me through `python-46` (Day 46: Deep Learning Overview).
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
@@ -1083,7 +1072,7 @@ loss_fn <span class="syntax-operator">=</span> nn<span class="syntax-operator">.
 </ul>
 <hr>
 <h4 id="solution-1--solution-reasoning-lens">Solution reasoning lens<a class="heading-anchor" href="#solution-1--solution-reasoning-lens" aria-label="Link to this section">#</a></h4>
-<p>A strong solution is not merely code that produces one plausible output. It establishes a chain from input contract to operation to verification:</p>
+<p>Each decision below links an input contract to an operation and its evidence:</p>
 <ol>
 <li><strong><code>tensor.requires_grad_(True)</code>:</strong> marks a leaf tensor whose derivative should be accumulated.</li>
 <li><strong><code>loss.backward()</code>:</strong> computes derivatives through the recorded graph and adds them to existing <code>.grad</code> values.</li>
@@ -1095,37 +1084,30 @@ loss_fn <span class="syntax-operator">=</span> nn<span class="syntax-operator">.
 <p><strong>Trade-off:</strong> More network capacity can fit complex patterns but raises optimization, data, compute, and overfitting risk.</p>
 <p><strong>Edge case to test:</strong> Wrong dtype/device, unintended broadcasting, detached tensors, retained graphs, or non-finite loss can make training fail or silently optimize the wrong quantity.</p>
 <p><strong>Evidence of correctness:</strong> Check a hand-computable gradient, assert shapes/dtypes, show parameters change after one step, separate train/eval modes, and report both training and validation behavior.</p>
-<p>When comparing your attempt with the reference, explain which of these decisions your code made explicitly. If the reference makes a different choice, compare the contracts and evidence before deciding that one version is universally better.</p>
 <h4 id="solution-1--exercise-by-exercise-reasoning-map">Exercise-by-exercise reasoning map<a class="heading-anchor" href="#solution-1--exercise-by-exercise-reasoning-map" aria-label="Link to this section">#</a></h4>
-<p>This map connects every learner prompt to a reasoning path. Read the explanation before copying code: the goal is to understand the assumptions, the evidence that validates the result, and the edge cases that can make an apparently correct implementation fail.</p>
 <h5 id="solution-1--exercise-1-original-lesson-practice">Exercise 1: Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Plot the loss over epochs.</p>
 <p><strong>How to reason about it:</strong> Store one scalar loss per epoch after aggregating by example, not an arbitrary last batch. Compare train and validation curves and label the optimizer, learning rate, seed, and capacity.</p>
-<p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
 <p><strong>Verify:</strong> Save a labeled epoch-versus-loss curve and print the raw loss sequence; assert every plotted point is the sample-weighted epoch loss and report whether the final value improved over epoch 1.</p>
 <h5 id="solution-1--exercise-2-original-lesson-practice">Exercise 2: Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-2-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Replace SGD with Adam and compare convergence.</p>
 <p><strong>How to reason about it:</strong> Recreate identically initialized models for optimizer comparisons. Adam and SGD often need different learning rates, so compare documented tuning budgets rather than forcing one shared setting.</p>
-<p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
 <p><strong>Verify:</strong> From identical initial weights, batches, epochs, and seed, print SGD and Adam loss per epoch plus final validation loss; report convergence behavior without declaring a winner from unequal settings.</p>
 <h5 id="solution-1--exercise-3-original-lesson-practice">Exercise 3: Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-3-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Add one hidden layer and a ReLU activation.</p>
 <p><strong>How to reason about it:</strong> A hidden layer adds capacity only when dimensions and activation order are correct. Track <code>(batch, features)</code> through Linear-ReLU-Linear and compare validation evidence, not merely lower training loss.</p>
-<p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
 <p><strong>Verify:</strong> Assert the network&#x27;s layer dimensions and output shape on a fixed batch, then compare parameter count and validation loss with the original model under the same seed/optimizer budget.</p>
 <h5 id="solution-1--exercise-4-autograd-tracing">Exercise 4: Autograd tracing<a class="heading-anchor" href="#solution-1--exercise-4-autograd-tracing" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> For one scalar regression batch, annotate every line from <code>zero_grad()</code> through <code>step()</code>: which tensors receive gradients, when are they accumulated, and when do parameters change?</p>
 <p><strong>Reasoning before implementation:</strong> Gradients accumulate in parameter <code>.grad</code> fields during backward; the optimizer reads them during step. zero_grad clears the previous batch.</p>
 <p>Forward computation builds an autograd graph because model parameters require gradients. <code>loss.backward()</code> applies the chain rule and <em>adds</em> into each parameter&#x27;s <code>.grad</code>. <code>optimizer.step()</code> then updates parameter values; it does not clear gradients.</p>
 <p>Call <code>zero_grad()</code> once per optimization step before backward. Deliberate gradient accumulation is possible, but then scale the loss and document the effective batch size. Inspect at least one gradient norm and assert it is finite before the update.</p>
-<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
 <p><strong>Verify:</strong> Autograd tracing; print parameter value, gradient before/after zero_grad, gradient after backward, and parameter after step for one fixed batch; assert accumulation occurs across backward calls until zeroed and only step changes parameters.</p>
 <h5 id="solution-1--exercise-5-mode-debugging">Exercise 5: Mode debugging<a class="heading-anchor" href="#solution-1--exercise-5-mode-debugging" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Build a model with Dropout and BatchNorm, then compare repeated predictions in <code>train()</code> and <code>eval()</code> modes. Explain why <code>torch.no_grad()</code> is related but not interchangeable.</p>
 <p><strong>Reasoning before implementation:</strong> Mode changes module behavior; no_grad disables graph recording. Validation usually needs both <code>model.eval()</code> and <code>with torch.no_grad()</code>.</p>
 <p>Dropout remains random in training mode, and BatchNorm updates/runs from batch statistics. Evaluation mode disables Dropout and uses stored BatchNorm state. <code>no_grad()</code> saves memory and prevents gradient tracking, but it does not switch those modules into evaluation behavior.</p>
 <p>After validation, call <code>model.train()</code> before the next training epoch. A common bug is evaluating correctly once and then continuing training while the model is still in evaluation mode.</p>
-<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
 <p><strong>Verify:</strong> Mode debugging; for one fixed input, print repeated train-mode and eval-mode outputs plus BatchNorm running statistics; assert eval outputs are repeatable, no_grad removes graph tracking, and the caller restores the intended mode.</p>
 <h5 id="solution-1--exercise-6-loss-aggregation-edge-case">Exercise 6: Loss-aggregation edge case<a class="heading-anchor" href="#solution-1--exercise-6-loss-aggregation-edge-case" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Compare averaging per-batch losses with a sample-weighted epoch loss when the final batch is smaller. Implement the correct aggregation.</p>
@@ -1157,7 +1139,6 @@ epoch_loss <span class="syntax-operator">=</span> loss_sum <span class="syntax-o
     direct_loss <span class="syntax-operator">=</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>loss_function<span class="syntax-punctuation">(</span>model<span class="syntax-punctuation">(</span>features<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> targets<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>item<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
 <span class="syntax-keyword">assert</span> <span class="syntax-builtin">abs</span><span class="syntax-punctuation">(</span>epoch_loss <span class="syntax-operator">-</span> direct_loss<span class="syntax-punctuation">)</span> <span class="syntax-operator">&lt;</span> <span class="syntax-number">1e-4</span> <span class="syntax-operator">*</span> <span class="syntax-builtin">max</span><span class="syntax-punctuation">(</span><span class="syntax-number">1.0</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">abs</span><span class="syntax-punctuation">(</span>direct_loss<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <p>An unweighted mean of batch means gives the short final batch the same weight as every full batch. It is correct only when all batches are the same size or the loss function returns a sum and the denominator is handled accordingly.</p>
-<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
 <p><strong>Verify:</strong> Loss-aggregation edge case; with unequal final-batch size, print each batch loss/count, naive mean, weighted epoch loss, and direct full-dataset loss; assert weighted and direct losses agree within 1e-7 while the naive mean differs.</p></div>
       </section>
 
@@ -1404,7 +1385,7 @@ epoch_loss <span class="syntax-operator">=</span> loss_sum <span class="syntax-o
 </ul>
 <hr>
 <h4 id="solution-2--cell-9--solution-reasoning-lens">Solution reasoning lens<a class="heading-anchor" href="#solution-2--cell-9--solution-reasoning-lens" aria-label="Link to this section">#</a></h4>
-<p>A strong solution is not merely code that produces one plausible output. It establishes a chain from input contract to operation to verification:</p>
+<p>Each decision below links an input contract to an operation and its evidence:</p>
 <ol>
 <li><strong><code>tensor.requires_grad_(True)</code>:</strong> marks a leaf tensor whose derivative should be accumulated.</li>
 <li><strong><code>loss.backward()</code>:</strong> computes derivatives through the recorded graph and adds them to existing <code>.grad</code> values.</li>
@@ -1416,37 +1397,30 @@ epoch_loss <span class="syntax-operator">=</span> loss_sum <span class="syntax-o
 <p><strong>Trade-off:</strong> More network capacity can fit complex patterns but raises optimization, data, compute, and overfitting risk.</p>
 <p><strong>Edge case to test:</strong> Wrong dtype/device, unintended broadcasting, detached tensors, retained graphs, or non-finite loss can make training fail or silently optimize the wrong quantity.</p>
 <p><strong>Evidence of correctness:</strong> Check a hand-computable gradient, assert shapes/dtypes, show parameters change after one step, separate train/eval modes, and report both training and validation behavior.</p>
-<p>When comparing your attempt with the reference, explain which of these decisions your code made explicitly. If the reference makes a different choice, compare the contracts and evidence before deciding that one version is universally better.</p>
 <h4 id="solution-2--cell-9--exercise-by-exercise-reasoning-map">Exercise-by-exercise reasoning map<a class="heading-anchor" href="#solution-2--cell-9--exercise-by-exercise-reasoning-map" aria-label="Link to this section">#</a></h4>
-<p>This map connects every learner prompt to a reasoning path. Read the explanation before copying code: the goal is to understand the assumptions, the evidence that validates the result, and the edge cases that can make an apparently correct implementation fail.</p>
 <h5 id="solution-2--cell-9--exercise-1-original-lesson-practice">Exercise 1: Original lesson practice<a class="heading-anchor" href="#solution-2--cell-9--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Plot the loss over epochs.</p>
 <p><strong>How to reason about it:</strong> Store one scalar loss per epoch after aggregating by example, not an arbitrary last batch. Compare train and validation curves and label the optimizer, learning rate, seed, and capacity.</p>
-<p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
 <p><strong>Verify:</strong> Save a labeled epoch-versus-loss curve and print the raw loss sequence; assert every plotted point is the sample-weighted epoch loss and report whether the final value improved over epoch 1.</p>
 <h5 id="solution-2--cell-9--exercise-2-original-lesson-practice">Exercise 2: Original lesson practice<a class="heading-anchor" href="#solution-2--cell-9--exercise-2-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Replace SGD with Adam and compare convergence.</p>
 <p><strong>How to reason about it:</strong> Recreate identically initialized models for optimizer comparisons. Adam and SGD often need different learning rates, so compare documented tuning budgets rather than forcing one shared setting.</p>
-<p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
 <p><strong>Verify:</strong> From identical initial weights, batches, epochs, and seed, print SGD and Adam loss per epoch plus final validation loss; report convergence behavior without declaring a winner from unequal settings.</p>
 <h5 id="solution-2--cell-9--exercise-3-original-lesson-practice">Exercise 3: Original lesson practice<a class="heading-anchor" href="#solution-2--cell-9--exercise-3-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Add one hidden layer and a ReLU activation.</p>
 <p><strong>How to reason about it:</strong> A hidden layer adds capacity only when dimensions and activation order are correct. Track <code>(batch, features)</code> through Linear-ReLU-Linear and compare validation evidence, not merely lower training loss.</p>
-<p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
 <p><strong>Verify:</strong> Assert the network&#x27;s layer dimensions and output shape on a fixed batch, then compare parameter count and validation loss with the original model under the same seed/optimizer budget.</p>
 <h5 id="solution-2--cell-9--exercise-4-autograd-tracing">Exercise 4: Autograd tracing<a class="heading-anchor" href="#solution-2--cell-9--exercise-4-autograd-tracing" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> For one scalar regression batch, annotate every line from <code>zero_grad()</code> through <code>step()</code>: which tensors receive gradients, when are they accumulated, and when do parameters change?</p>
 <p><strong>Reasoning before implementation:</strong> Gradients accumulate in parameter <code>.grad</code> fields during backward; the optimizer reads them during step. zero_grad clears the previous batch.</p>
 <p>Forward computation builds an autograd graph because model parameters require gradients. <code>loss.backward()</code> applies the chain rule and <em>adds</em> into each parameter&#x27;s <code>.grad</code>. <code>optimizer.step()</code> then updates parameter values; it does not clear gradients.</p>
 <p>Call <code>zero_grad()</code> once per optimization step before backward. Deliberate gradient accumulation is possible, but then scale the loss and document the effective batch size. Inspect at least one gradient norm and assert it is finite before the update.</p>
-<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
 <p><strong>Verify:</strong> Autograd tracing; print parameter value, gradient before/after zero_grad, gradient after backward, and parameter after step for one fixed batch; assert accumulation occurs across backward calls until zeroed and only step changes parameters.</p>
 <h5 id="solution-2--cell-9--exercise-5-mode-debugging">Exercise 5: Mode debugging<a class="heading-anchor" href="#solution-2--cell-9--exercise-5-mode-debugging" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Build a model with Dropout and BatchNorm, then compare repeated predictions in <code>train()</code> and <code>eval()</code> modes. Explain why <code>torch.no_grad()</code> is related but not interchangeable.</p>
 <p><strong>Reasoning before implementation:</strong> Mode changes module behavior; no_grad disables graph recording. Validation usually needs both <code>model.eval()</code> and <code>with torch.no_grad()</code>.</p>
 <p>Dropout remains random in training mode, and BatchNorm updates/runs from batch statistics. Evaluation mode disables Dropout and uses stored BatchNorm state. <code>no_grad()</code> saves memory and prevents gradient tracking, but it does not switch those modules into evaluation behavior.</p>
 <p>After validation, call <code>model.train()</code> before the next training epoch. A common bug is evaluating correctly once and then continuing training while the model is still in evaluation mode.</p>
-<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
 <p><strong>Verify:</strong> Mode debugging; for one fixed input, print repeated train-mode and eval-mode outputs plus BatchNorm running statistics; assert eval outputs are repeatable, no_grad removes graph tracking, and the caller restores the intended mode.</p>
 <h5 id="solution-2--cell-9--exercise-6-loss-aggregation-edge-case">Exercise 6: Loss-aggregation edge case<a class="heading-anchor" href="#solution-2--cell-9--exercise-6-loss-aggregation-edge-case" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Compare averaging per-batch losses with a sample-weighted epoch loss when the final batch is smaller. Implement the correct aggregation.</p>
@@ -1479,7 +1453,6 @@ epoch_loss <span class="syntax-operator">=</span> loss_sum <span class="syntax-o
 <span class="source-line"><span class="syntax-keyword">assert</span> <span class="syntax-builtin">abs</span><span class="syntax-punctuation">(</span>epoch_loss <span class="syntax-operator">-</span> direct_loss<span class="syntax-punctuation">)</span> <span class="syntax-operator">&lt;</span> <span class="syntax-number">1e-4</span> <span class="syntax-operator">*</span> <span class="syntax-builtin">max</span><span class="syntax-punctuation">(</span><span class="syntax-number">1.0</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">abs</span><span class="syntax-punctuation">(</span>direct_loss<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></span></code></pre>
 </article>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 6</div><p>An unweighted mean of batch means gives the short final batch the same weight as every full batch. It is correct only when all batches are the same size or the loss function returns a sum and the denominator is handled accordingly.</p>
-<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
 <p><strong>Verify:</strong> Loss-aggregation edge case; with unequal final-batch size, print each batch loss/count, naive mean, weighted epoch loss, and direct full-dataset loss; assert weighted and direct losses agree within 1e-7 while the naive mean differs.</p></article></div>
       </section>
 

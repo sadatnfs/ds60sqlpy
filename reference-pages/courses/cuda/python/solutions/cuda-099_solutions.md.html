@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cuda/python/solutions/cuda-099_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="cuda-099-explained-solutions">cuda-099: explained solutions<a class="heading-anchor" href="#cuda-099-explained-solutions" aria-label="Link to this section">#</a></h2>
-<p>These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.</p>
+<p>Compare with your <a href="../lessons/cuda-099.md.html">worksheet</a> attempt.</p>
 <h3 id="exercise-1-compute-weighted-accumulation">Exercise 1: Compute weighted accumulation<a class="heading-anchor" href="#exercise-1-compute-weighted-accumulation" aria-label="Link to this section">#</a></h3>
 <p>Use sample-count weights.</p>
 <p><strong>Approach.</strong> Weight each microbatch mean gradient by its sample count: <code>(3*2 + 1*8) / (3 + 1) = 14/4 = 3.5</code>.</p>
@@ -231,9 +231,19 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Why it is correct here.</strong> Accumulation is meant to reproduce the large-batch update. Holding every other factor fixed isolates the accumulation logic.</p>
 <p><strong>A plausible wrong approach.</strong> Running the comparison with dropout enabled and different seeds produces differences that hide or mimic accumulation bugs.</p>
 <p><strong>How to verify.</strong> Assert weights after one effective step agree within float tolerance, and repeat with an uneven final microbatch.</p>
+<h3 id="self-check-answers">Self-check answers<a class="heading-anchor" href="#self-check-answers" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>When is dividing by the microbatch count correct?</strong> Only when every microbatch has the same number of examples; otherwise weights must follow example counts.</li>
+</ol>
+<ol start="2">
+<li><strong>What does activation checkpointing trade?</strong> Memory for compute: discarded intermediates are recomputed during backward, so arithmetic increases.</li>
+</ol>
+<ol start="3">
+<li><strong>Can accumulation still differ from a full batch when weights are right?</strong> Yes. Batch-dependent layers such as batch normalization, random state and optimizer timing can break the equivalence.</li>
+</ol>
 <h3 id="reference-observation">Reference observation<a class="heading-anchor" href="#reference-observation" aria-label="Link to this section">#</a></h3>
 <p>Correct weighted gradient 3.5 versus incorrect 5.</p>
-<p>The reference file is <code>courses/cuda/python/references/cuda-099_cpu.py</code>. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.</p></article>
+<p>Asserted by <code>courses/cuda/python/references/cuda-099_cpu.py</code>.</p></article>
   </main>
 </body>
 </html>

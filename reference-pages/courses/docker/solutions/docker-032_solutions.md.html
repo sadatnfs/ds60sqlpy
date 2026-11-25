@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/docker/solutions/docker-032_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="docker-032-explanatory-solutions">docker-032: explanatory solutions<a class="heading-anchor" href="#docker-032-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit reveal. These explain the supplied teaching fixtures; they are not engine results. The mechanism is explained in <code>courses/docker/guides/docker-032.md</code>.</p>
+<p>These answers explain teaching fixtures, not engine results; the mechanism is in <a href="../guides/docker-032.md.html">the guide</a>.</p>
 <h3 id="exercise-1-predict-a-missing-shell-error-in-a-minimal-image">Exercise 1: Predict a missing-shell error in a minimal image.<a class="heading-anchor" href="#exercise-1-predict-a-missing-shell-error-in-a-minimal-image" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> It may be expected image content, not an app crash.</p>
 <p><strong>Why:</strong> The diagnostic command needs its own dependency. Do not conclude that the application is broken merely because a familiar tool is absent.</p>
@@ -238,7 +238,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>A plausible wrong approach:</strong> A procedure that begins with installing your favorite tools assumes network access and changes what you inspect.</p>
 <p><strong>How to verify:</strong> Another learner follows it on a fresh copy and reaches the same diagnosis.</p>
 <h3 id="check-your-transfer">Check your transfer<a class="heading-anchor" href="#check-your-transfer" aria-label="Link to this section">#</a></h3>
-<p>A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.</p></article>
+<p>The app, its listener and the project network work, so the fault sits on the published path between the host and the container. Start with <code>docker compose -p ds60-docker-study port app 8080</code>, which should print <code>127.0.0.1:18080</code>; then check whether another host process holds 18080, and on Docker Desktop whether its port forwarding is running. A repair is confirmed when the host request returns the health JSON. If <code>port</code> reports no mapping at all, the container was created without its <code>ports</code> entry, which points back to the effective Compose model.</p></article>
   </main>
 </body>
 </html>

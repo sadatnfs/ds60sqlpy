@@ -2,7 +2,7 @@
 
 Separate candidate computation from accepted publication.
 
-The executable reference contains the two complete worked cases with assertions. The changes below explain the independent practice and its limits.
+The reference builds a candidate model, reads every status in run_results.json, and writes the publication file only when the build succeeded and all statuses are pass or success. It shows a gate after materialization; it does not stop consumers who query the candidate relation directly. See [how these answers are laid out](../STUDY-GUIDE.md#answers-and-references).
 
 
 ## 1. Change the failure condition

@@ -16,6 +16,7 @@ if str(HERE) not in sys.path:
 
 import variants  # noqa: E402
 from outcomes import OUTCOMES  # noqa: E402
+from guidance import GUIDANCE  # noqa: E402
 
 SPECS = {}
 
@@ -110,48 +111,46 @@ def formatted_codes(spec, path, language):
     return [code.rstrip("\n") for code in shown]
 
 
+def _first_sentence(text):
+    """The opening sentence of an example's explanation, used as the rule a check exercises."""
+    return re.split(r"(?<=[.!?])\s+(?=[A-Z`(])", text.strip(), maxsplit=1)[0]
+
+
 def reading_practice(spec):
     """Browser reading lessons: no Node runtime, so practice is phrased as browser observations."""
     rows = []
     for index, e in enumerate(spec["exercises"]):
         expected = _lower_first(e["expected"])
+        why_first = _first_sentence(e["why"])
         row = {"title": e["title"], "task": e["prompt"], "expected": e["expected"]}
         if index == 0:
             row["title"] = e["title"] + ": change one input"
             row["task"] = (
-                "Rebuild Example A in your copy of the lesson's browser fixture without looking at it. Then change one "
-                "attribute, label or handler and write down the visible, focus or announcement change you expect "
-                "before reloading."
+                f"{e['prompt']} Then change one attribute, label or handler in your copy and predict the "
+                "visible difference before reloading."
             )
             row["expected"] = (
-                f"Your rebuild reproduces the worked observation ({expected.rstrip('.')}), and the changed copy shows the "
-                "difference you predicted."
+                f"The rebuild reproduces the observation: {expected} The changed copy differs as you predicted."
             )
-            row["verify"] = (
-                "Record the browser observation before and after your change, including where focus lands and any "
-                "live-region text, and explain which line caused the difference."
-            )
+            row["verify"] = f"Record the browser observation, then explain it: {why_first}"
         elif index == 1:
             row["title"] = e["title"] + ": debug a regression"
             row["task"] = (
-                "Introduce one deliberate defect into a copy of Example B, such as a wrong selector, a missing attribute or a handler on the wrong element. Predict which browser behavior will expose it, confirm that prediction, then repair it."
+                f"{e['prompt']} Then break one selector or attribute in a copy, predict which behavior exposes "
+                "it, and repair it."
             )
             row["expected"] = (
-                f"The defective copy no longer shows: {expected} The repaired copy shows it again."
+                f"The broken copy no longer shows that {expected} The repair restores it."
             )
             row["verify"] = (
-                "Keep notes on the failing and the repaired behavior and name the first browser observation that "
-                "differed between them."
+                f"Record the first browser observation that differed, then explain the repair: {why_first}"
             )
         else:
             row["verify"] = (
-                f"In the browser fixture, record the observation that shows: {expected} Then change one input and "
-                "record what changes, keeping keyboard and pointer results separate."
+                f"Record the browser observation that shows it, then explain why: {why_first}"
             )
         row["hints"] = (
-            f"First restate the expected observation: {expected} Then inspect the elements, attributes and listeners "
-            "involved in the browser's developer tools. Finally, change one thing at a time and reload before changing "
-            "another."
+            f"{why_first} Inspect the elements and listeners involved in the browser's developer tools."
         )
         rows.append(row)
     return rows
@@ -171,13 +170,12 @@ def practice(ident, spec, typed, language, path):
     """Six exercises: two derived from the worked examples, four authored investigations.
 
     Every Verify line and hint names the exercise's own check and, where recorded, a
-    one-token edit that qualify_variants.py observed making that check fail.
+    one-token edit that qualify_variants.py observed making that check fail. The shared
+    edit-predict-restore routine is explained once in ../STUDY-GUIDE.md.
     """
     span = variants.code_span
     records = variants.load_records()
     shown_codes = formatted_codes(spec, path, language)
-    pad = "`main.mts`" if typed else "`main.mjs`"
-    receipt = '`{"checks":1,"status":"passed"}`'
     rows = []
     for index, e in enumerate(spec["exercises"]):
         shown = shown_codes[index]
@@ -188,55 +186,50 @@ def practice(ident, spec, typed, language, path):
         condition = v["condition"] if v and v.get("condition") else spans[-1][2] if spans else None
         cond = span(condition) if condition else None
         expected = _lower_first(e["expected"])
+        why_first = _first_sentence(e["why"])
         row = {"title": e["title"], "task": e["prompt"], "expected": e["expected"]}
         if v:
             original, edited = span(v["line"]), span(v["broken"])
-            fail = (
-                f"fails with an `AssertionError` at {edited}"
-                if v["in_check"]
-                else f"fails with an `AssertionError` at {cond}"
-            )
+            fail = f"fails with an `AssertionError` at {edited if v['in_check'] else cond}"
         if index == 0:
             row["title"] = e["title"] + (
                 ": predict an edited check" if v and v["in_check"] else ": change one input"
             )
             if v and v["in_check"]:
                 row["task"] = (
-                    f"Copy Example A into a scratch {pad} and change {original} to {edited} inside its check. "
-                    "Before running it, predict whether the check still passes and explain why; then restore it."
+                    f"In a scratch copy of Example A, change {original} to {edited} inside its check. "
+                    "Does the check still pass?"
                 )
             elif v:
                 row["task"] = (
-                    f"Copy Example A into a scratch {pad} and change {original} to {edited}. Before running it, "
-                    "predict which check fails and which value it now sees; then run it and restore the original line."
+                    f"In a scratch copy of Example A, change {original} to {edited}. Which check fails, "
+                    "and what value does it see?"
                 )
             else:
                 row["task"] = (
-                    f"Close Example A and rebuild it in a fresh {pad}, keeping the check {cond}. Then propose one "
-                    "input change that would make that check fail and explain why before trying it."
+                    f"Rebuild Example A from memory, keeping the check {cond}, then propose one input "
+                    "change that should make it fail."
                 )
             if v:
                 row["expected"] = (
-                    f"The changed run {fail}. Restoring {original} brings back: {expected}"
+                    f"The edited run {fail}. Restoring {original} brings back: {expected}"
                 )
                 row["verify"] = (
-                    "Compare your written prediction with the reported `AssertionError`, including its actual and "
-                    "expected values, and "
-                    + (
-                        f"explain why the edited check rejects the values that {cond} accepts."
-                        if v["in_check"]
-                        else f"name the value that made {cond} fail."
-                    )
-                    + f" After restoring the line, the program prints its {receipt} receipt again."
+                    f"{why_first} Use that rule to account for the actual and expected values in the "
+                    "`AssertionError`."
+                )
+                row["verify_solution"] = (
+                    f"Compare the reported actual and expected values with your prediction, then restore {original}."
                 )
             else:
                 row["expected"] = (
-                    f"Your rebuild reproduces the worked observation ({expected.rstrip('.')}), and your proposed "
-                    f"change makes the check {cond} fail."
+                    f"The rebuild reproduces: {expected} Your proposed change makes {cond} fail."
                 )
                 row["verify"] = (
-                    f"Run the rebuild first and confirm the {receipt} receipt, then the changed copy. Name the value "
-                    f"that makes {cond} fail in the changed copy."
+                    f"{why_first} Name the value that makes {cond} fail in your changed copy."
+                )
+                row["verify_solution"] = (
+                    f"Name the value that makes {cond} fail in your changed copy."
                 )
         elif index == 1:
             row["title"] = e["title"] + (
@@ -244,69 +237,93 @@ def practice(ident, spec, typed, language, path):
             )
             if v and v["in_check"]:
                 row["task"] = (
-                    f"A careless edit changed a check in Example B so that it reads {edited}. Run Example B with that "
-                    "line, explain why the edited check now fails for the same program state, and restore it."
+                    f"Example B's check was edited to read {edited}. Run it, explain the failure and "
+                    "restore the original."
                 )
             elif v and _occurs(v["broken"], shown):
                 row["task"] = (
-                    f"A regression changed {original} to {edited} in Example B. Run Example B with that change, use the "
-                    "failing check to explain the defect and repair it without changing the check."
+                    f"A regression changed {original} to {edited} in Example B. Repair it without "
+                    "editing the check."
                 )
             elif v:
                 row["task"] = (
-                    f"A regression changed one token in Example B, so one line now reads {edited}. Run Example B with "
-                    "that line, use the failing check to locate the defect and repair it without changing the check."
+                    f"A regression made one Example B line read {edited}. Locate and repair it without "
+                    "editing the check."
                 )
             else:
                 row["task"] = (
-                    f"Introduce one deliberate defect into a copy of Example B that makes the check {cond} fail, then "
-                    "explain how the reported actual and expected values lead back to the faulty line."
+                    f"Break a copy of Example B so that {cond} fails, then trace the reported values "
+                    "back to the faulty line."
                 )
             row["expected"] = (
                 f"Before the repair the run {fail}. Restoring {original} brings back: {expected}"
                 if v
-                else f"The defective copy fails the check {cond}; the repaired copy reproduces the worked observation: {expected}"
+                else f"The broken copy fails {cond}; the repaired copy reproduces: {expected}"
             )
             row["verify"] = (
-                f"Keep the failing and the repaired runs. Explain why the edited check rejects the same program state that {cond} accepts."
-                if v and v["in_check"]
-                else f"Keep the failing and the repaired runs. Explain why the changed token alters the value tested by {cond} for this input."
-                if v
-                else "Keep the failing and the repaired runs and name the first value that differs between them."
+                f"{why_first} Keep the failing and repaired runs and compare the values each one reports."
+            )
+            row["verify_solution"] = (
+                "Keep the failing and repaired runs and name the first value that differs between them."
             )
         elif v and not v["in_check"]:
             row["verify"] = (
-                f"Keep a check equivalent to {cond}. As a control, change {original} to {edited}: the run must fail "
-                "with an `AssertionError` at that check. Restore the line before continuing."
+                f"Keep {cond}. Control: changing {original} to {edited} must make that check fail; "
+                "then restore it."
             )
         elif v:
             row["verify"] = (
-                f"Keep a check equivalent to {cond}. As a control, change {original} to {edited} inside it: the run "
-                "must fail with an `AssertionError`, which shows the check can fail. Restore it."
+                f"Keep {cond}. Control: editing it to {edited} must make the check fail; then restore it."
             )
         else:
             guard = _guard(shown, condition) if condition else None
             row["verify"] = (
-                f"Keep the guarded check {span(guard)} and confirm that the reference still passes. Then name an input "
-                "that satisfies the guard but makes the check fail, and explain which value changes."
+                f"Keep the guarded check {span(guard)}; name an input that passes the guard but fails "
+                "the check."
                 if guard
-                else f"Keep a check equivalent to {cond} and confirm that the reference still passes. Then name an input "
-                "that would make it fail and explain which value changes."
+                else f"Keep the check {cond}; name an input that would make it fail and the value that changes."
             )
-        if index == 0 and v:
-            third = f"compute the checked value with {edited} in place before running"
-        elif index == 1 and v:
-            third = f"compare {edited} with the same line in Example B and state the claim each version makes"
-        elif v and not v["in_check"]:
-            third = f"predict the effect of changing {original} to {edited} before running anything"
+        if index == 0:
+            row["hints"] = (
+                f"Compute the checked value with {edited} in place before running it."
+                if v
+                else f"Name one input that would make {cond} fail."
+            )
+        elif index == 1:
+            row["hints"] = (
+                f"Compare {edited} with the original line and state the claim each version makes."
+                if v
+                else "Trace the first value that differs between the failing and repaired runs."
+            )
         else:
-            third = f"name one input that would make {cond} fail"
-        row["hints"] = (
-            f"First restate the expected observation: {expected} Then list the values read by {cond} and trace each "
-            f"one from its declaration. Finally, {third}."
-        )
+            row["hints"] = f"{why_first} Trace each value that {cond} reads."
         rows.append(row)
     return rows
+
+
+SOURCE_LABELS = {
+    "https://dom.spec.whatwg.org/": "DOM Standard",
+    "https://html.spec.whatwg.org/multipage/webstorage.html": "HTML Standard: Web storage",
+    "https://www.w3.org/TR/CSP3/": "Content Security Policy Level 3",
+}
+
+
+def _source_label(url):
+    """A short link label naming the reference document."""
+    if url in SOURCE_LABELS:
+        return SOURCE_LABELS[url]
+    stem = url.rstrip("/").rsplit("/", 1)[-1].removesuffix(".html").replace("_", " ")
+    if "tc39.es" in url:
+        return "ECMAScript specification"
+    if "typescriptlang.org" in url:
+        return f"TypeScript handbook: {stem.replace('-', ' ')}"
+    return f"Node.js {stem} documentation"
+
+
+def _modules(imports):
+    """Inline list of the module specifiers a lesson imports."""
+    names = dict.fromkeys(re.findall(r"from ['\"]([^'\"]+)['\"]", imports))
+    return ", ".join(f"`{name}`" for name in names)
 
 
 def write_all():
@@ -356,12 +373,15 @@ def write_all():
             examples.append(
                 f"### Example {chr(65 + i)}: {e['title']}\n\n{e['why']}\n\n```{'html' if reading else language}\n{code}\n```\n\n**Expected:** {e['expected']}"
             )
+        guidance = GUIDANCE[identity]
         if reading:
-            run = "This is a browser reading and practice lesson. Node has no document or window. Use the separate checked-in browser fixture described below and record its visible interaction, focus and state changes. The manifest deliberately supplies no Node execution claim for these DOM examples."
+            run = "Open the checked-in browser fixture described below ([browser lessons](../STUDY-GUIDE.md#browser-reading-lessons))."
         elif typed:
-            run = "Use the prepared TypeScript 5.9.3 profile. The classroom saves main.mts, checks strict NodeNext resolution with noEmitOnError and an ES2022 target, then runs compiled/main.mjs on Node 24.22.3. Node typings 24.10.0 are prepared. Compilation and execution are separate stages. Types are erased and do not validate external JSON. No npm installation belongs inside the lesson."
+            run = f"Compile `main.mts`, then run `compiled/main.mjs` ([setup](../STUDY-GUIDE.md#running-typescript-lessons)).\n\nModules used: {_modules(spec['imports'])}."
         else:
-            run = "Use the prepared Node 24.22.3 profile. The classroom saves an ES module as main.mjs and executes it with Node. Only built-in Node or ECMAScript APIs are used. For a prepared native environment, node main.mjs is the same command on PowerShell and POSIX. Browser APIs have separate host requirements."
+            run = f"Run `node main.mjs` ([setup](../STUDY-GUIDE.md#running-node-lessons)).\n\nModules used: {_modules(spec['imports'])}."
+        objectives = ", ".join(_lower_first(e["title"]) for e in spec["exercises"][:-1])
+        objectives += ", and " + _lower_first(spec["exercises"][-1]["title"])
         prompt = f"""Use $guide-ds60sqlpy-learning for {identity}: {row["title"]}.
 Read {guide} and {learner}. Direct prerequisites: {prerequisites}.
 Explain the mechanism, ask me to predict a value or failure, review my own attempt,
@@ -377,7 +397,9 @@ diagnose a controlled failure, and solve a new boundary case without copying the
 
 ## Learning objectives
 
-{outcome} Along the way, explain {", ".join(name.lower() for name, _ in spec["terms"])} with a concrete program. Trace how the values change, identify the assumptions, and make a boundary or invalid case observable. Exercises 1 and 2 start from the worked examples; the authored investigations begin with this task: {spec["exercises"][2]["prompt"]} The final task tests {spec["exercises"][-1]["title"].lower()}.
+{outcome}
+
+By the end you can {objectives}.
 
 ## Purpose and mental model
 
@@ -391,7 +413,7 @@ diagnose a controlled failure, and solve a new boundary case without copying the
 
 {run}
 
-Save your own learner copy under ignored `.learning/expansion/{identity}/` or use a saved classroom pad. Record predictions before execution. Each worked program includes its helper definitions. The reference puts the six exercises in separate scopes, so a task cannot silently rely on a variable from a previous task. A successful assertion is silent; the final JSON receipt reports how many exercise blocks completed. A failing assertion must produce a failed process, not a generic success message.
+Save your copy under `.learning/expansion/{identity}/` ([saved copies](../STUDY-GUIDE.md#saved-copies-and-the-success-receipt)).
 
 {spec["notes"]}
 
@@ -405,9 +427,7 @@ Save your own learner copy under ignored `.learning/expansion/{identity}/` or us
 
 ## Prediction before your attempt
 
-Trace the entry point and identify the values that exist before each operation. Distinguish a value from a reference to an object, a returned Promise from its eventual result, and a compile-time type from a runtime check. Write down the first observation that would disprove your explanation. A useful prediction includes an expected value or failure category, not merely a claim that the program should work.
-
-For a loop, write the state before and after one iteration. For a callback, identify the caller and the arguments it supplies. For an asynchronous operation, identify who starts it, who awaits it, and who owns cleanup. These small traces make failures local: you can compare the first incorrect state instead of guessing from a much later symptom.
+{guidance["predict"]} ([Predicting before you run](../STUDY-GUIDE.md#predicting-before-you-run).)
 
 ## Exercises
 
@@ -415,23 +435,23 @@ For a loop, write the state before and after one iteration. For a callback, iden
 
 ## Common pitfalls and diagnosis
 
-Keep the smallest fixture that distinguishes the intended behavior from a tempting alternative. Read the assertion message and inspect the input, return value and state at that point. Do not remove a failing check just to reach the success receipt. Preserve the original failure, repair the responsible assumption, then check the normal path and the negative case again.
-
-If a host API is absent, confirm the actual host and version before changing the algorithm. A successful parse does not prove that an API exists. Compiler success does not prove that external data satisfies a type. A browser interaction requires browser evidence. For resource-owning examples, inspect cleanup after failure as carefully as the happy path. The separate explanations discuss the specific mistaken inference in each exercise.
+{guidance["pitfall"]} ([Diagnosing a failure](../STUDY-GUIDE.md#diagnosing-a-failure).)
 
 ## Progressive hints
 
-Read one hint at a time and attempt the exercise again before reading the next. If a discrepancy involves scheduling, replace unrelated work with a small trace array and await the exact completion you intend to observe. Ask for one hint about the first incorrect assumption before opening the reference.
+Reveal one hint at a time ([using the hints](../STUDY-GUIDE.md#using-the-hints)).
 
 {hints}
 
 ## Self-check and retrieval
 
-Close the solution and explain {", ".join(name for name, _ in spec["terms"][:3])} using the fixture. Reconstruct one example from a blank saved copy. Change a boundary input and predict the new result before running it. Explain the assumptions under which the mechanism is useful and a situation in which its cost or host requirements make another design preferable. A copied program is useful rehearsal; a fresh case demonstrates transfer.
+{guidance["retrieve"]} ([Retrieval practice](../STUDY-GUIDE.md#retrieval-practice).)
 
 ## Sources and verification status
 
-[Official language or host reference]({spec["source"]}). Fixtures and exercises are original course material. The [validation guide](../../../docs/validation.md) describes how the references are run. No default lesson installs dependencies, downloads a model or contacts a shared service.
+Reference: [{_source_label(spec["source"])}]({spec["source"]}).
+
+Fixtures are original; see [sources and validation](../STUDY-GUIDE.md#sources-and-validation).
 
 ## Ask an AI tutor about this lesson
 
@@ -441,7 +461,7 @@ Close the solution and explain {", ".join(name for name, _ in spec["terms"][:3])
 """
         answer = f"""# {identity}: explanatory solutions
 
-Use these answers after an attempt or an explicit reveal. The reference uses the same literal fixtures as the guide and keeps the exercises in separate scopes. A successful run checks these examples; explaining a changed input is a separate learning goal.
+Open these after your own attempt; each exercise runs in its own scope in the reference.
 
 ## Mechanism review
 
@@ -472,12 +492,12 @@ Task: {r["task"]}
 
 **Expected:** {r["expected"]}
 
-**Verify:** {r["verify"]}
+**Verify:** {r.get("verify_solution", r["verify"])}
 
 """
-        answer += """## After comparison
+        answer += f"""## After comparison
 
-Return to your saved implementation and repeat a case with different values. Keep compiler diagnostics, process output and browser observations separate. Do not suppress a failing assertion or use a type assertion to declare an unvalidated value safe. Resource-owning examples must finish cleanup even when work fails. Describe each result with its actual host and fixture scope rather than as production acceptance.
+{guidance["transfer"]} ([After comparing](../STUDY-GUIDE.md#after-comparing-with-the-solution).)
 """
         document = canonical_markdown(document, root=ROOT, path=guide)
         answer = canonical_markdown(answer, root=ROOT, path=explanation)

@@ -194,16 +194,19 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/scala-spark/guides/spark-005.md</code></p>
     </header>
     <article class="document"><h2 id="spark-005-option-missing-values-and-total-functions">spark-005: Option, missing values, and total functions<a class="heading-anchor" href="#spark-005-option-missing-values-and-total-functions" aria-label="Link to this section">#</a></h2>
-<p>Authored tutorial and practice content. The prepared Scala/JVM worker executes a bounded program; process success and understanding remain distinct. No source file installs a tool or downloads a dependency.</p>
+<p>An amount can be present, absent or present but unreadable, and those are three different facts. This lesson parses optional amount text into <code>Option[Long]</code>, keeps a ledger with a separate count for each state, and refuses to turn a missing or rejected value into a zero that would quietly lower a total.</p>
 <h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
-<p>Beginner; approximately 75 minutes. Direct prerequisites: <code>spark-004</code>. The lesson uses Scala 2.13 syntax and the prepared JDK 17 worker. The <a href="../execution-baseline.md.html">execution baseline</a> lists the exact Scala, JDK and Spark versions.</p>
+<p>Beginner; approximately 75 minutes. Direct prerequisites: <code>spark-004</code>. Pinned versions: <a href="../execution-baseline.md.html">execution baseline</a>.</p>
 <h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>Open <code>spark-005</code> in the classroom, select the Scala source, prepare the <code>scala-jvm</code> profile and run the saved pad. The worker stages the single source as <code>Main.scala</code> and invokes <code>object Main</code>. Read the terminal output and exact assertions. The <a href="../lessons/spark-005.scala.html">learner source</a> runs two complete demonstrations; its six task functions remain explicit stubs until you implement them. Preserve your saved attempt. The <a href="../solutions/spark-005_solution.scala.html">reference program</a> and <a href="../solutions/spark-005_solutions.md.html">explained solutions</a> are separate and should be opened after an attempt or an explicit worked-comparison request. If the profile is unavailable, reading and saving remain available; opening this guide does not prepare a runtime.</p>
+<p>Shared run steps and profile rules: <a href="../STUDY-GUIDE.md.html#run-a-language-lesson">study guide</a>.</p>
+<p>Learner pad: <a href="../lessons/spark-005.scala.html">spark-005.scala</a>.</p>
+<p>Open the <a href="../solutions/spark-005_solutions.md.html">explained solutions</a> after an attempt.</p>
+<p>The first worked example prints <code>present=Some(0) absent=None</code>: a real zero is still a present value, and mapping <code>_ + 5L</code> over it gives <code>Some(5)</code> while the same map over <code>None</code> stays <code>None</code>. The second prints that <code>Option(null)</code> and <code>Some(null)</code> are distinct constructions, because <code>Option(null)</code> is <code>None</code> but <code>Some(null)</code> is defined and only <code>flatMap(Option(_))</code> exposes the hidden null. Exercises 1 and 2 depend on that difference.</p>
 <h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
 <ul>
 <li>Represent absence explicitly and distinguish None, zero, empty text and JVM null.</li>
-<li>Explain the result of both worked examples before running them.</li>
-<li>Implement the six contracts, inspect normal and boundary evidence, and explain a counterexample in your own words.</li>
+<li>Classify <code>Some(&quot;0&quot;)</code>, <code>Some(&quot;25&quot;)</code>, <code>None</code>, <code>Some(&quot;bad&quot;)</code> and <code>Some(null)</code> as observed, observed, missing, rejected and rejected, and say why a supplied <code>null</code> is rejected rather than missing.</li>
+<li>Reconcile every input token into exactly one of the three ledger keys, so the counts always sum to the input size and an empty input still reports all three keys at zero.</li>
 </ul>
 <h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
 <ul>
@@ -275,9 +278,15 @@ println<span class="syntax-punctuation">(</span><span class="syntax-string">&quo
 <h3 id="common-pitfalls">Common pitfalls<a class="heading-anchor" href="#common-pitfalls" aria-label="Link to this section">#</a></h3>
 <p>If observed zero disappears, inspect a value-based filter rather than blaming Option. If None causes an exception, look for unchecked get or a method call on Some(null). If missing and invalid tokens have identical ledger labels, retain the original input state or move to Either with reasons. If total 25 passes while counts fail, do not repair the ledger by inventing zeros. If a signed or decimal token is accepted unexpectedly, compare the lexical grammar with the conversion method&#x27;s broader behavior.</p>
 <h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
-<p>Explain one input-to-output trace without reading your code. Identify which function preserves repeated values, which condition distinguishes an invalid or missing input, and which assertion would fail for the tempting incorrect implementation. A printed success line alone is not the evidence; retain the exact values and the reasoning that connect them to the contract.</p>
+<ul>
+<li>What does <code>parseAmount</code> return for <code>Some(&quot; 25 &quot;)</code>, <code>Some(&quot;-1&quot;)</code>, <code>Some(&quot;1.0&quot;)</code> and <code>Some(&quot;1000001&quot;)</code>, and which of those are bound violations rather than format violations?</li>
+<li>Explain why <code>classify(Some(null))</code> must be &quot;rejected&quot; and not &quot;missing&quot;. What would a ledger total of observed 2, missing 2, rejected 1 hide?</li>
+<li><code>observed</code> returns <code>Seq(0L, 25L)</code> for the five-token fixture. Why is <code>flatMap</code> the right operation here, and why must the zero stay in the result?</li>
+<li><code>displayAmount</code> prints &quot;0&quot;, &quot;missing&quot; or &quot;rejected&quot;. Why is this a presentation function only, and what goes wrong if a report sums the displayed text instead of the parsed values?</li>
+<li><code>feeOption(Some(&quot;100&quot;))</code> is <code>Some(5L)</code>. Trace <code>feeOption(Some(&quot;bad&quot;))</code> and show where the absence carries through without a <code>.get</code>.</li>
+</ul>
 <h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
-<p>Continue to the next lesson only after you can explain the boundary behavior. The <a href="../README.md.html">course route</a> shows authored material and runtime evidence separately.</p>
+<p>Go on to <a href="spark-006.md.html">spark-006: Case classes, pattern matching, and domain states</a>. Here the value was the only question; next, each record carries an identity and one of several states (paid, voided, refunded), and a sealed type lets the compiler point out every place a new state must be handled.</p>
 <h3 id="primary-sources-and-official-apis">Primary sources and official APIs<a class="heading-anchor" href="#primary-sources-and-official-apis" aria-label="Link to this section">#</a></h3>
 <ul>
 <li><a href="https://docs.scala-lang.org/overviews/scala-book/functional-error-handling.html">Scala 2 Option and functional error handling</a>.</li>

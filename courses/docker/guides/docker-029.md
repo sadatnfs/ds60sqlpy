@@ -32,11 +32,9 @@ The scanner itself runs as an image that is downloaded on first use, so treat SB
 
 ## How to use this lesson
 
-The classroom displays this guide and saves your worksheet, `courses/docker/lessons/docker-029.md`. Its Run button does not control your Docker engine. Docker engine access is powerful host access, so the classroom deliberately receives no engine socket. Work through the supplied examples without starting anything, then use the optional host lab only in your own disposable project. Reading a command, parsing YAML and actually running the project are different forms of evidence.
+The classroom saves `courses/docker/lessons/docker-029.md` and holds no engine socket ([host-lab setup](../STUDY-GUIDE.md#host-lab-setup)).
 
-Use Bash in Linux, macOS Terminal, or Ubuntu under WSL 2 on Windows. The supported engine runs Linux containers. The maintained fixture is `courses/docker/fixtures/compose-lab/`; its README explains copying it into a new ignored learner directory, checking the engine, building locally with visible logs, and using the fixed project name `ds60-docker-study`. The fixture uses port 18080 on host loopback. Stop if that project name or port belongs to unrelated work; choose a new project name consistently in your own copy. Never paste a command against a remote Docker context simply because it is currently selected.
-
-For Dockerfile examples, create a file named `Dockerfile` in a scratch project. YAML snippets describe a fragment unless explicitly called a complete file. Text transcripts are synthetic illustrations, not claims about your machine. Do not substitute a real password, token or private registry into a checked-in example. **How to use the lessons** in the [subject README](../README.md) collects these rules in one place.
+**Host lab.** From your fixture copy, run worked example 1 to export the build result with its SBOM into `../ds60-sbom-out`. If the engine answers that the current builder driver cannot produce attestations, record that message as your finding and stop there; switching builders is a separate decision. Otherwise open the file with `python3 -c "import json; d=json.load(open('../ds60-sbom-out/sbom.spdx.json')); doc=d.get('predicate', d); print(doc['spdxVersion'], len(doc['packages']))"`. The wrapper is an in-toto statement whose `predicate` holds the SPDX document. Search the package names for `python` and for a Debian library whose name starts with `libssl`, then note which ones your Dockerfile never mentions: they arrived with `python:3.12-slim`. Delete `../ds60-sbom-out` afterward, since it also holds a full copy of the image filesystem.
 
 ## Worked example / walkthrough
 
@@ -65,7 +63,7 @@ image digest -> provenance statement -> issuer verification policy
 
 ## Six progressive exercises
 
-For each exercise, name the object involved and the phase of its lifetime before changing anything, then vary only the condition the task names. Exercises that ask you to predict, explain, compare or diagnose keep their answers in the solutions file; the others show the evidence to look for.
+Answer-type prompts keep their answers in the solutions file ([exercise rules](../STUDY-GUIDE.md#exercise-rules)).
 
 ### Exercise 1: Distinguish SBOM and provenance.
 
@@ -99,13 +97,19 @@ For each exercise, name the object involved and the phase of its lifetime before
 
 Generating an SBOM for a tag instead of the exact digest you ship. Trusting provenance JSON without verifying its issuer. Expecting attestations to survive a `--load` into the classic image store.
 
-Exercise 4 is this chapter's boundary case: Diagnose an unsigned provenance statement from an unknown source. Identify who issued the provenance statement and whether a verification policy accepts that issuer before reading any of its fields as fact. Preserve the original failure and the exact changed field before retrying. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
+Exercise 4 is this chapter's boundary case: Diagnose an unsigned provenance statement from an unknown source. Identify who issued the provenance statement and whether a verification policy accepts that issuer before reading any of its fields as fact.
+
+A clean SBOM for the shipped image says nothing about tools used only while building it. BuildKit scans the final stage by default, so in a multi-stage Dockerfile a compiler, a package manager cache or a downloaded binary used in an earlier stage never appears, even though it shaped the output. The fixture is single-stage, which hides the issue here, but a project that later adds a `builder` stage will see its SBOM stay just as short. When build stages matter to the review, set the build argument `BUILDKIT_SBOM_SCAN_STAGE=true`, globally or in the stages concerned, so they are scanned too, and state in the review which stages each inventory covers.
+
+Never trade a safety control for a passing example ([safety rules](../STUDY-GUIDE.md#safety-rules)).
 
 ## Retrieval, transfer and next steps
 
-Close the explanations first. Explain what an SBOM describes, what a provenance statement claims and which object both refer to. Then reconstruct worked example 2 (Separate evidence objects) with one different value, predict what changes, and name which of SBOM, provenance, attestation, SPDX and image digest the change touches.
+**Retrieval.** Explain what an SBOM describes, what a provenance statement claims and which object both refer to.
 
-When a host session ends, run `docker compose -p ds60-docker-study down` from your fixture copy. It removes the project's containers and network but keeps named volumes; deleting a volume is a separate, deliberate reset described in the fixture README.
+**Transfer case.** An auditor asks whether `server.py` appears in the SBOM you exported. Predict the answer, explain it, and say where the application's own identity should be recorded instead.
+
+Then run the [retrieval loop](../STUDY-GUIDE.md#retrieval-and-cleanup) and end any host session with its cleanup.
 
 ## Primary references
 

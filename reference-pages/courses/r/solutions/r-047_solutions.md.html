@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/r/solutions/r-047_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="r-047-reference-reasoning">r-047: reference reasoning<a class="heading-anchor" href="#r-047-reference-reasoning" aria-label="Link to this section">#</a></h2>
-<p>Use the <a href="r-047_reference.R.html">complete reference</a> with the guide&#x27;s declared inputs and runtime. Every worked example is also a standalone script.</p>
+<p>Run the <a href="r-047_reference.R.html">complete reference</a> under the <a href="../STUDY-GUIDE.md.html#run-a-chapter">run rules</a>.</p>
 <h3 id="why-the-implementation-has-this-shape">Why the implementation has this shape<a class="heading-anchor" href="#why-the-implementation-has-this-shape" aria-label="Link to this section">#</a></h3>
 <p>The reference validates the fitted partition and the response identities in probability output. It intentionally uses an easy separable fixture so the model mechanics are independently inspectable. The pruning case changes the actual model object and retains a separate leaf count.</p>
 <p>The complete-input policy belongs to the wrapper, not to a false assertion about rpart&#x27;s native capabilities. Prediction outside the training range is labeled as a model extrapolation. Real complexity selection, calibration and group-aware validation require a separate study.</p>
@@ -248,7 +248,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Tempting mistake:</strong> Reading the result as stronger evidence for high because 1000 is far beyond the cut. The tree gives x = 5 and x = 1000 an identical output, and no training row says anything about values that large.</p>
 <p><strong>Verify:</strong> <code>as.character(predict_complete(1000)) == &quot;high&quot;</code> returns TRUE.</p>
 <h3 id="what-the-checks-establish">What the checks establish<a class="heading-anchor" href="#what-the-checks-establish" aria-label="Link to this section">#</a></h3>
-<p>The reference makes 6 <code>stopifnot()</code> checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.</p></article>
+<p>The assertions confirm that new points are classified low and high, that probability columns are named low and high and each row sums to 1, that pruning with cp 1 leaves one leaf, that a wrapper rejects a missing x, that an x of 1000 is still labeled high because the tree extends its last partition, and that the training rows are all classified correctly. Perfect training accuracy here is not evidence about held-out accuracy.</p>
+<p>The reference makes 6 <code>stopifnot()</code> checks; see <a href="../STUDY-GUIDE.md.html#what-a-passing-run-proves">what a passing run proves</a>.</p></article>
   </main>
 </body>
 </html>

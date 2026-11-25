@@ -113,9 +113,7 @@ Notes
 
 ## Solution reasoning lens
 
-A strong solution is not merely code that produces one plausible
-output. It establishes a chain from input contract to operation to
-verification:
+Each decision below links an input contract to an operation and its evidence:
 
 1. **`FROM` / pinned base:** establishes operating-system and Python dependencies; pin and scan rather than trusting `latest`.
 2. **`COPY` and `.dockerignore`:** define which local files enter the build context and image layers.
@@ -132,29 +130,15 @@ verification:
 
 **Evidence of correctness:** Inspect context and image history, scan dependencies, run as non-root, test valid/invalid requests and signals, distinguish health/readiness, and rebuild deterministically.
 
-When comparing your attempt with the reference, explain which of these
-decisions your code made explicitly. If the reference makes a different
-choice, compare the contracts and evidence before deciding that one
-version is universally better.
-
 <!-- END ADVANCED PYTHON CONCEPT ENRICHMENT -->
 
 ## Exercise-by-exercise reasoning map
-
-This map connects every learner prompt to a reasoning path. Read the
-explanation before copying code: the goal is to understand the assumptions,
-the evidence that validates the result, and the edge cases that can make an
-apparently correct implementation fail.
 
 ### Exercise 1: Original lesson practice
 
 **Prompt:** Create a slim dependency file containing only direct API runtime needs.
 
 **How to reason about it:** Trace direct imports from the service and serialized pipeline, install only runtime needs, and rebuild from a clean context. Keep development notebooks, tests, datasets, and credentials out of the image.
-
-Use the worked reference earlier in this file, then change one boundary
-condition and rerun the stated checks. A copied output is not evidence
-unless you can explain why that output follows from the inputs.
 
 **Verify:** Build the image from a direct-runtime-only dependency file, print resolved package versions and image size, and run the health/predict smoke tests; prove test/notebook-only packages are absent.
 
@@ -164,10 +148,6 @@ unless you can explain why that output follows from the inputs.
 
 **How to reason about it:** A liveness endpoint is cheap and local; a readiness endpoint verifies the artifact/schema is loaded. Test both and use a standard-library probe when a slim image does not contain curl.
 
-Use the worked reference earlier in this file, then change one boundary
-condition and rerun the stated checks. A copied output is not evidence
-unless you can explain why that output follows from the inputs.
-
 **Verify:** With TestClient and the running container, assert GET /health returns status 200 and exactly {'status': 'ok'}; distinguish liveness from readiness by testing a missing/tampered model artifact.
 
 ### Exercise 3: Original lesson practice
@@ -175,10 +155,6 @@ unless you can explain why that output follows from the inputs.
 **Prompt:** Optionally push the image to a registry if you intentionally use a connected account.
 
 **How to reason about it:** Registry upload is optional and networked. Use the registry's credential flow, a non-secret versioned tag/digest, image scanning, and never place tokens in Dockerfile instructions or build arguments.
-
-Use the worked reference earlier in this file, then change one boundary
-condition and rerun the stated checks. A copied output is not evidence
-unless you can explain why that output follows from the inputs.
 
 **Verify:** Keep this optional and connected: either record a skipped result, or name the registry/repository/tag/digest, show authenticated push exit code 0, pull by digest, and rerun health/predict without exposing credentials.
 
@@ -196,10 +172,6 @@ Inspect final files as a non-root user and scan both source and image. If a
 secret ever entered a built/pushed layer, rotate it, removing the file from the
 latest layer is not sufficient.
 
-**Why this matters:** The result should survive a fresh-kernel rerun and
-a deliberately chosen boundary case. If it does not, revisit the
-assumption or data boundary rather than hiding the failure.
-
 **Verify:** Layer and secret audit; build/save the image, inspect history and archive file list, and assert sentinel .env, .git, notebook, cache, and artifacts paths/content are absent while required application files remain.
 
 ### Exercise 5: Least-privilege runtime
@@ -216,10 +188,6 @@ and document its lifecycle.
 Bind to an unprivileged port such as 8000. Dropping root reduces impact but
 does not replace dependency updates, network policy, or input validation.
 
-**Why this matters:** The result should survive a fresh-kernel rerun and
-a deliberately chosen boundary case. If it does not, revisit the
-assumption or data boundary rather than hiding the failure.
-
 **Verify:** Least-privilege runtime; inside the container, print UID/GID and filesystem mount policy; assert UID is nonzero, writes outside the declared temp path fail, temp writes succeed, and health/predict still return expected statuses.
 
 ### Exercise 6: Health semantics
@@ -235,9 +203,5 @@ false, not return an “ok” response with later prediction failures.
 
 Tests should simulate absent and mismatched artifacts without requiring Docker
 or a network, then add one container smoke test for the packaged path.
-
-**Why this matters:** The result should survive a fresh-kernel rerun and
-a deliberately chosen boundary case. If it does not, revisit the
-assumption or data boundary rather than hiding the failure.
 
 **Verify:** Health semantics; assert /live is 200 while the process runs, /ready is 200 only after a compatible artifact loads, and tampered/missing manifests produce non-ready or startup failure with a sanitized message.

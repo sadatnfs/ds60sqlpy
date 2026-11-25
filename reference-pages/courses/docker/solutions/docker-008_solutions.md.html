@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/docker/solutions/docker-008_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="docker-008-explanatory-solutions">docker-008: explanatory solutions<a class="heading-anchor" href="#docker-008-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit reveal. These explain the supplied teaching fixtures; they are not engine results. The mechanism is explained in <code>courses/docker/guides/docker-008.md</code>.</p>
+<p>These answers explain teaching fixtures, not engine results; the mechanism is in <a href="../guides/docker-008.md.html">the guide</a>.</p>
 <h3 id="exercise-1-distinguish-compose-interpolation-from-container-environment">Exercise 1: Distinguish Compose interpolation from container environment.<a class="heading-anchor" href="#exercise-1-distinguish-compose-interpolation-from-container-environment" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Model rendering versus process input.</p>
 <p><strong>Why:</strong> A value used to choose a host port need not appear inside the container. Conversely, a container environment entry can be literal and independent of a host variable.</p>
@@ -238,7 +238,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>A plausible wrong approach:</strong> Pasting a real API token as the sample value proves precedence just as well but copies a secret into notes, screenshots and shell history.</p>
 <p><strong>How to verify:</strong> Someone else can repeat the record: change the value at the stated source, recreate, and see the same message in the JSON response.</p>
 <h3 id="check-your-transfer">Check your transfer<a class="heading-anchor" href="#check-your-transfer" aria-label="Link to this section">#</a></h3>
-<p>A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.</p></article>
+<p>In the first run, arguments after the image name replace CMD, so the container runs <code>python server.py --port 9090</code>; the entrypoint stays. In the second, <code>--entrypoint python</code> replaces the entrypoint, and setting the entrypoint also resets the default CMD, so the container runs <code>python -V</code> and prints a version instead of starting the server. <code>docker inspect</code> on each container shows the effective <code>Path</code> and <code>Args</code>. If the second container started the server, the entrypoint override was not applied, perhaps because it was placed after the image name, where it becomes an argument instead.</p></article>
   </main>
 </body>
 </html>

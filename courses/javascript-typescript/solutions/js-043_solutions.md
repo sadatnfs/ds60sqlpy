@@ -1,6 +1,6 @@
 # js-043: explanatory solutions
 
-Compare after your own attempt or an explicit reveal. The separate .js reference is a complete offline browser program. These explanations discuss the six practice tasks; a visual resemblance alone is not a data or behavior check.
+Compare after your own attempt; the separate `.js` file is the complete reference program.
 
 ## Mechanism review
 
@@ -49,3 +49,7 @@ Zero is data, not missingness. Keep its label so the absence of length has an ex
 Choose the encoding to match the task. Area and decorative shapes can make a simple comparison harder. All three bars start at x 100, so their right edges can be compared directly. Mapping counts to circle radius would make C's area 16 times A's for a 4 to 1 count ratio.
 
 **Expected:** A common baseline supports meaningful magnitude comparison.
+
+## After comparison
+
+Extend the reference to five categories read from an array of objects. Compute the multiplier from the largest count so the longest bar fills 560 units, and keep every label inside the `viewBox`. Check that doubling all counts leaves the drawn widths unchanged, and explain why.

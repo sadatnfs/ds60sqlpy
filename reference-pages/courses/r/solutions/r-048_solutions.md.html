@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/r/solutions/r-048_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="r-048-reference-reasoning">r-048: reference reasoning<a class="heading-anchor" href="#r-048-reference-reasoning" aria-label="Link to this section">#</a></h2>
-<p>Use the <a href="r-048_reference.R.html">complete reference</a> with the guide&#x27;s declared inputs and runtime. Every worked example is also a standalone script.</p>
+<p>Run the <a href="r-048_reference.R.html">complete reference</a> under the <a href="../STUDY-GUIDE.md.html#run-a-chapter">run rules</a>.</p>
 <h3 id="why-the-implementation-has-this-shape">Why the implementation has this shape<a class="heading-anchor" href="#why-the-implementation-has-this-shape" aria-label="Link to this section">#</a></h3>
 <p>The exact Kaplan-Meier oracle checks event coding and risk-set arithmetic. The changed-status case supplies a meaningful negative comparison: the same times produce a different survival curve when a censor is incorrectly declared an event.</p>
 <p>The Cox fit and its proportional-hazards diagnostic are actual package operations on a synthetic fixture. Their interpretation remains conditional on the event definition, censoring assumptions and model. Finite coefficients and diagnostic output do not turn the example into a validated prediction system.</p>
@@ -248,7 +248,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Tempting mistake:</strong> Dropping the censored row and averaging 1, 3 and 4 to get about 2.67. The curve on the remaining 3 rows becomes 2/3, 1/3 and 0, lower than 3/4, 3/8 and 0, because a known survivor vanished.</p>
 <p><strong>Verify:</strong> <code>sum(d$event)</code> returns 3 against <code>nrow(d)</code> of 4, which shows one record would be lost by dropping censored rows.</p>
 <h3 id="what-the-checks-establish">What the checks establish<a class="heading-anchor" href="#what-the-checks-establish" aria-label="Link to this section">#</a></h3>
-<p>The reference makes 6 <code>stopifnot()</code> checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.</p></article>
+<p>The checks confirm survival of 0.75, 0.75, 0.375 and 0 at times 1 to 4, a wrong analysis that treats the censored time as an event and drops to 0.5 at time 2, rejection of an event code of 2, finite Cox coefficients with positive hazard ratios, a proportional hazards diagnostic with a GLOBAL row, and three events among four rows. They do not show that the proportional hazards assumption holds for real data.</p>
+<p>The reference makes 6 <code>stopifnot()</code> checks; see <a href="../STUDY-GUIDE.md.html#what-a-passing-run-proves">what a passing run proves</a>.</p></article>
   </main>
 </body>
 </html>

@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cuda/spark/solutions/cuda-121_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="cuda-121-explained-solutions">cuda-121: explained solutions<a class="heading-anchor" href="#cuda-121-explained-solutions" aria-label="Link to this section">#</a></h2>
-<p>These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.</p>
+<p>Compare with your <a href="../lessons/cuda-121.md.html">worksheet</a> attempt.</p>
 <h3 id="exercise-1-calculate-duplicate-join-output">Exercise 1: Calculate duplicate join output<a class="heading-anchor" href="#exercise-1-calculate-duplicate-join-output" aria-label="Link to this section">#</a></h3>
 <p>Multiply key multiplicities.</p>
 <p><strong>Approach.</strong> Calculate duplicate join output by multiplying key multiplicities: A appears twice on each side, so the inner join produces <code>2*2 = 4</code> rows for A.</p>
@@ -231,9 +231,19 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Why it is correct here.</strong> AQE uses statistics from completed stages, so the executed plan may differ from the initial one.</p>
 <p><strong>A plausible wrong approach.</strong> Citing the pre-execution plan reports a strategy that may not have run. Skew handling in particular appears only in the final plan, so the initial plan cannot show whether a skewed partition was split.</p>
 <p><strong>How to verify.</strong> Compare the initial explain output with the final plan in the SQL tab. Record the AQE settings with the plan, since disabling adaptive execution changes which plan runs.</p>
+<h3 id="self-check-answers">Self-check answers<a class="heading-anchor" href="#self-check-answers" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>Can GPU acceleration reduce a join&#x27;s output rows?</strong> No. The semantic expansion from duplicate keys is the same on any backend.</li>
+</ol>
+<ol start="2">
+<li><strong>Why does skew lengthen a stage?</strong> One large partition creates a long task, and the stage cannot finish until that task does.</li>
+</ol>
+<ol start="3">
+<li><strong>Why keep a simple CPU oracle for joins?</strong> It catches fast but incorrect rewrites that drop duplicates or mishandle missing and null keys.</li>
+</ol>
 <h3 id="reference-observation">Reference observation<a class="heading-anchor" href="#reference-observation" aria-label="Link to this section">#</a></h3>
 <p>Four A matches from two-by-two duplicate keys.</p>
-<p>The reference file is <code>courses/cuda/spark/references/cuda-121_cpu.py</code>. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.</p></article>
+<p>Asserted by <code>courses/cuda/spark/references/cuda-121_cpu.py</code>.</p></article>
   </main>
 </body>
 </html>

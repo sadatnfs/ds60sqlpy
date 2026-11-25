@@ -206,11 +206,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Argument:</strong> The value supplied at a call site.</p>
 <p><strong>Pure function:</strong> A computation without observable external mutation.</p>
 <h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>The Linux Docker classroom compiles your saved pad as <code>Program.cs</code> in its fixed .NET 10 project. C# 14 is the matching language generation. This route uses the prepared framework libraries; it does not accept arbitrary project files, NuGet packages, command arguments or interactive input. The explicit <code>Program.Main</code> entrypoint makes compilation and execution visible. <code>Check</code> throws on a false condition in every build configuration, unlike conditional debugging assertions.</p>
-<p>Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.</p>
+<p><code>Double</code> and <code>DivideExact</code> are local functions declared inside their example blocks, so each example compiles on its own. <code>Double</code> multiplies inside <code>checked</code>, so <code>Double(int.MaxValue)</code> throws <code>OverflowException</code> instead of returning a negative number; try it while you write task 2&#x27;s cases.</p>
+<p>Compile contract, starter stop and success marker: <a href="../STUDY-GUIDE.md.html#running-a-lesson">running a lesson</a>.</p>
 <h3 id="syntax-anatomy-and-execution-trace">Syntax anatomy and execution trace<a class="heading-anchor" href="#syntax-anatomy-and-execution-trace" aria-label="Link to this section">#</a></h3>
 <p><code>int Double(int value) =&gt; value * 2</code> declares a local function with a typed parameter and return. <code>return</code> ends the current method. <code>ref</code> and <code>out</code> are explicit parameter passing modes, not decorations; prefer ordinary return values until shared mutation is required.</p>
-<p>Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.</p>
+<p>Each example ends with a trace; method: <a href="../STUDY-GUIDE.md.html#tracing-a-program">tracing a program</a>.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="example-a-return-a-transformed-value">Example A: Return a transformed value<a class="heading-anchor" href="#example-a-return-a-transformed-value" aria-label="Link to this section">#</a></h4>
 <p>The parameter receives a value. Returning a transformed value does not reassign the caller variable.</p>
@@ -249,6 +249,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The result is 14 and the caller still holds 7.</p>
+<p><strong>Trace.</strong> <code>original</code> holds 7. The call <code>Double(original)</code> copies 7 into the parameter <code>value</code>. The function multiplies inside <code>checked</code> and returns 14, which is stored in <code>result</code>. Nothing assigns to <code>original</code>, and the parameter was a separate copy, so the caller&#x27;s variable still holds 7. The second check runs <code>Double(0)</code> to show that zero needs no special handling.</p>
 <h4 id="example-b-expose-rejection-as-part-of-the-contract">Example B: Expose rejection as part of the contract<a class="heading-anchor" href="#example-b-expose-rejection-as-part-of-the-contract" aria-label="Link to this section">#</a></h4>
 <p>A precise function name and guard prevent accidental truncation from masquerading as a valid result.</p>
 <pre class="highlighted-code"><code class="language-csharp"><span class="syntax-keyword">using</span> System<span class="syntax-punctuation">;</span>
@@ -294,6 +295,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> 12 divided by 3 returns 4; the exact-integer contract rejects 7 divided by 2.</p>
+<p><strong>Trace.</strong> For 12 and 3, the guard tests <code>divisor == 0</code>, which is false, then <code>12 % 3 != 0</code>, also false, so the method returns 4. For 7 and 2 the remainder is 1, so the guard throws <code>ArgumentException</code> and the catch sets <code>rejected</code>. Because <code>||</code> short-circuits, a zero divisor is rejected before <code>%</code> runs, so the method never throws <code>DivideByZeroException</code>.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <ol>
 <li><strong>Predict and explain.</strong> Trace the caller and parameter values through Double.</li>
@@ -313,10 +315,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <ol start="6">
 <li><strong>Transfer and justify.</strong> Extract one computation from a larger program and state its input, output, mutation and failure contract.</li>
 </ol>
-<p>For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.</p>
+<p>Log each task in the <a href="../STUDY-GUIDE.md.html#recording-exercise-evidence">evidence table</a> before opening the explanation.</p>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
 <p>A method name is part of the interface. A generic catch returning zero can make rejected input indistinguishable from a valid zero result. Prefer one clear responsibility over a long list of optional switches.</p>
-<p>A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.</p>
+<p>Task 4&#x27;s tempting wrong version returns <code>value / divisor</code> without the remainder test, so 7 and 2 quietly return 3. Task 5 needs separate cases because the failures have different causes: 5 and 0 must reject on the divisor test, while 7 and 2 reject on the remainder test. Swapping the guard&#x27;s operands turns the zero case into a <code>DivideByZeroException</code>.</p>
+<p>Repair routine: <a href="../STUDY-GUIDE.md.html#building-a-regression-case">building a regression case</a>.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <ol>
 <li>Reproduce Example A (Return a transformed value) before changing anything, and confirm its observation: The result is 14 and the caller still holds 7.</li>
@@ -324,9 +327,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>Before opening the explanation, test your task 3 attempt against this lesson&#x27;s main pitfall: A method name is part of the interface.</li>
 </ol>
 <h3 id="self-check-and-next-step">Self-check and next step<a class="heading-anchor" href="#self-check-and-next-step" aria-label="Link to this section">#</a></h3>
-<p>Explain Parameter, Argument, Pure function without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.</p>
+<p>Trace <code>original</code>, <code>value</code> and <code>result</code> through the call <code>Double(original)</code>. Explain why <code>DivideExact</code> throws rather than returning 0 for 7 and 2. For task 3&#x27;s area method, list each rejected input, the exception type you throw and the message a caller would read.</p>
+<p>Then follow the general <a href="../STUDY-GUIDE.md.html#self-check-routine">self-check routine</a> and save your pad.</p>
 <h3 id="sources-and-execution-boundary">Sources and execution boundary<a class="heading-anchor" href="#sources-and-execution-boundary" aria-label="Link to this section">#</a></h3>
-<p><a href="https://learn.microsoft.com/en-us/dotnet/csharp/">Official language or framework documentation</a>. The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.</p>
+<p><a href="https://learn.microsoft.com/en-us/dotnet/csharp/">Documentation</a>: The C# programming guide covers methods, local functions, parameters and the <code>ref</code> and <code>out</code> modifiers.</p>
+<p>Provenance and limits: <a href="../STUDY-GUIDE.md.html#sources-and-execution-boundary">sources and execution boundary</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for csharp-007: Methods, parameters and return contracts.
 Read courses/csharp/guides/csharp-007.md and courses/csharp/lessons/csharp-007.cs. Prerequisites: csharp-006.

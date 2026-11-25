@@ -24,9 +24,9 @@ Conversions are explicit between many numeric types. This makes information-chan
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles the saved pad as `main.swift` with Swift 6 language checking. An explicit `@main` type contains `static func main() async throws`; the fixed compiler uses `-parse-as-library -swift-version 6`. The examples use the standard library and portable Foundation. `precondition` makes a violated invariant fail the process. The fixed pad accepts one source file, without arbitrary command arguments, interactive input or dependency installation. SwiftUI, UIKit, Apple simulators and application signing belong to the separately prepared macOS/Xcode project labs, never the Linux pad.
+Task 2 changes an unnecessary `var` to `let`, which still compiles because nothing reassigns it. Make the same change to `total` in Example A and the compiler rejects the first `+=` instead, naming the constant. Run Example B before writing your own mean in task 3 so you have seen integer division truncate.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Compile contract, starter stop and success marker: [running a lesson](../STUDY-GUIDE.md#running-a-lesson).
 
 
 
@@ -34,7 +34,7 @@ Start with the answer-free learner artifact in your saved classroom pad. It deli
 
 `let count: Int = 3` gives an explicit type. `var total = 0` infers Int. `Double(count)` converts a numeric value. Swift source normally does not need semicolons at line ends.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+Each example ends with a trace; method: [tracing a program](../STUDY-GUIDE.md#tracing-a-program).
 
 ## Worked example / walkthrough
 
@@ -62,6 +62,8 @@ struct LessonMain {
 
 **Observe:** The accumulator becomes 8 while the fixed amount remains 4.
 
+**Trace.** `perBox` is a constant 4 and `total` starts at 0; both are inferred as `Int`. The first `+=` reads `total` (0), adds 4 and stores 4. The second reads 4 and stores 8. `perBox` never changes, and the compiler would reject any assignment to it because it is a `let`. The combined check confirms both facts at once: the accumulator moved to 8 and the input stayed 4. Change `var total` to `let total` and the program never runs, because the first `+=` becomes a compile error.
+
 ### Example B: Convert before division
 
 Converting after integer division would preserve the already truncated result.
@@ -85,6 +87,8 @@ struct LessonMain {
 
 **Observe:** Integer division yields 3; floating division yields 3.5.
 
+**Trace.** `7 / 2` has two `Int` operands, so Swift performs integer division and discards the remainder: `whole` is 3. `Double(7)` and `Double(2)` convert before dividing, so `fractional` is 3.5, a value binary floating point represents exactly. Compare the wrong order, `Double(7 / 2)`: the division happens first in `Int`, produces 3, and only then converts, giving 3.0. Both checks pass silently in the correct version; the second would stop the program under the late conversion.
+
 ## Exercises
 
 1. **Predict and explain.** Identify the inferred type of every binding.
@@ -99,13 +103,15 @@ struct LessonMain {
 
 6. **Transfer and justify.** Choose units and types for a small measurement model.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Log each task in the [evidence table](../STUDY-GUIDE.md#recording-exercise-evidence) before opening the explanation.
 
 ## Common pitfalls and diagnosis
 
 Let protects the binding, not necessarily every object reachable from it. Avoid forced conversions at a boundary without validating range. A floating type is not automatically more appropriate for a count.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+For the mean in task 3, the counterexample is any total that does not divide evenly by its count. A total of 10 over 4 items should give 2.5, but converting after dividing gives 2.0. An evenly divisible pair such as 12 over 4 gives 3.0 under both rules and hides the bug, so keep one pair of each kind in your checks, exactly as task 5 asks.
+
+Repair routine: [building a regression case](../STUDY-GUIDE.md#building-a-regression-case).
 
 ## Progressive hints
 
@@ -115,11 +121,15 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 ## Self-check and next step
 
-Explain Binding, Type inference, Conversion without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+State the inferred type of `0`, `0.0` and `Double(count)` without running anything. Explain why `let` on an array binding prevents reassignment, then describe what `let` would and would not protect for a class instance. Finally, choose a type for a temperature reading and justify `Int` or `Double` for it.
+
+Then follow the general [self-check routine](../STUDY-GUIDE.md#self-check-routine) and save your pad.
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://docs.swift.org/swift-book/documentation/the-swift-programming-language/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+[Documentation](https://docs.swift.org/swift-book/documentation/the-swift-programming-language/): Read the sections on constants and variables, type safety, type inference and numeric type conversion in The Basics chapter of the Swift book.
+
+Provenance and limits: [sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

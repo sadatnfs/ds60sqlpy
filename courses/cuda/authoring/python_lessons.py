@@ -477,7 +477,7 @@ add(
     23,
     "Device placement and one auditable training step",
     "A training step includes forward computation, scalar loss, gradients and an optimizer update. Moving only inputs to a GPU while leaving parameters on CPU violates the intended placement contract. Frameworks differ in idiom: PyTorch explicitly moves tensors and modules to a device; TensorFlow uses device scopes, placement rules and tracked variables. Inspect actual placement and fail clearly if an explicitly requested GPU is unavailable.\n\nFor a one-parameter regressor \\(y=wx\\) with mean squared error, derive the derivative before trusting autograd. Both framework lanes should reproduce this tiny update and compare to the same CPU arithmetic. Keep initialization, examples, loss reduction and learning rate identical. A correct one-step update establishes a bounded behavior, not model quality or GPU performance.",
-    "With x=[1,2], target=[2,4], \\(w=0\\), mean loss is 10 and derivative is-10. SGD with learning rate 0.1 updates w to 1.",
+    "With x=[1,2], target=[2,4], \\(w=0\\), mean loss is 10 and derivative is -10. SGD with learning rate 0.1 updates w to 1.",
     "Using sum loss instead of mean doubles the derivative for this batch and changes the update to 2. A faster run with a different loss normalization is not an equivalent training comparison.",
     "Derive the scalar gradient;Calculate the update;Compare sum and mean;Inspect every tensor device;Write equal PyTorch and TensorFlow contracts;Distinguish correctness and performance",
     "The mean derivative is average of 2*x*(w*x-y);Weight becomes 1;Sum scales by batch size;Include parameters inputs targets and optimizer tensors;Use identical data initial state reduction and rate;Time only after output and gradient agreement",
@@ -488,7 +488,7 @@ grad = sum(2 * a * (w * a - b) for a, b in zip(x, y, strict=True)) / len(x)
 w -= 0.1 * grad
 assert loss == 10 and grad == -10 and w == 1
 print("CPU training oracle:", loss, grad, w)""",
-    "Loss 10, gradient-10, new weight 1.",
+    "Loss 10, gradient -10, new weight 1.",
 )
 
 add(
@@ -599,7 +599,7 @@ assert len(set(shapes)) == 2
 compile_ms, saving_ms = 500, 1
 assert compile_ms / saving_ms == 500
 print("CPU compilation model:", len(set(shapes)), "specializations; break-even", 500)""",
-    "Two modeled specializations;500-call break-even.",
+    "Two modeled specializations; 500-call break-even.",
 )
 
 add(
@@ -710,7 +710,7 @@ add(
     """Gradient accumulation splits an effective batch across microbatches and delays the optimizer step. To match a full mean-loss gradient, weight each microbatch by its number of examples divided by the total. Equal division by microbatch count works only when sizes are equal. Batch-dependent layers, random state and optimizer timing can still break equivalence.
 
 Activation checkpointing saves selected intermediates and recomputes others during backward. It exchanges compute for memory rather than eliminating arithmetic. PyTorch checkpoint utilities and TensorFlow recomputation mechanisms have framework-specific state and randomness rules. Frozen parameters still occupy storage, and upstream activations may remain necessary for trainable downstream components. Compare updates first, then measured peak memory and time.""",
-    "Microbatch mean gradients 2 and 8 over sizes 3 and 1 combine to\\((3\\times2+1\\times8)/4=3.5\\). Averaging the two means gives 5, which is wrong for the effective batch.",
+    "Microbatch mean gradients 2 and 8 over sizes 3 and 1 combine to \\((3\\times2+1\\times8)/4=3.5\\). Averaging the two means gives 5, which is wrong for the effective batch.",
     "Checkpointing reduces retained activations by an illustrative 20 MiB but adds another forward computation. Its benefit depends on memory pressure and the recomputation cost.",
     "Compute weighted accumulation;Find unequal-batch normalization error;Place optimizer steps;Explain checkpoint recomputation;Account for frozen weights;Design equal-update tests",
     "Use sample-count weights;Do not average unequal means blindly;Step once per effective batch;Recompute discarded intermediates during backward;Freezing gradients does not remove parameters;Match data order loss reduction state and random behavior",
@@ -752,7 +752,7 @@ add(
     """Full fine-tuning updates all selected model parameters. Adapter methods train additional small structures while retaining the base weights. Low-rank updates factor a matrix update into two thinner matrices, reducing trainable parameter count, but the base model still occupies memory and activations still flow through it. Optimizer membership should match the intended trainable set exactly.
 
 Sequence length, padding, batch size, precision, saved activations and optimizer state can dominate different workloads. Build a tiny transformer locally with synthetic tokens before considering downloads. Compare full and adapter training on a held-out synthetic task with equal data accounting. Parameter efficiency is not a guarantee of lower total runtime memory or better quality. Both PyTorch and TensorFlow lanes should report their actual variable census and optimizer state.""",
-    "A 1024 by 1024 matrix has 1,048,576 parameters. A rank 8 update uses\\(8(1024+1024)=16{,}384\\) trainable parameters while the original matrix remains present.",
+    "A 1024 by 1024 matrix has 1,048,576 parameters. A rank 8 update uses \\(8(1024+1024)=16{,}384\\) trainable parameters while the original matrix remains present.",
     "Freezing the base matrix removes its gradient and optimizer-update requirement under the chosen implementation, but downstream training can still need intermediate activations.",
     "Count low-rank parameters;Include base storage;Inspect optimizer membership;Compare sequence-length budgets;Design tiny offline training;Define held-out evaluation",
     "Rank times sum of dimensions;Base parameters are not deleted;Only intended trainable tensors belong in optimizer state;Attention intermediates and caches grow with sequence geometry;Use generated tokens and bounded steps;Keep validation separate from fitting and tuning",
@@ -771,7 +771,7 @@ add(
     """Autoregressive generation separates prefill, which processes an input sequence, from decode, which adds one token repeatedly. A key-value cache stores previous attention projections so decode can reuse them. Cache size grows with layers, batch, sequence length, key/value head count, head dimension and element width. Grouped-query architectures require the actual KV-head count, not necessarily the query-head count.
 
 Weight quantization changes one memory category; it does not automatically quantize the cache or every activation. Educational rounding examples demonstrate error but do not establish packed low-bit execution. Compare cached and uncached logits at each step, bound generation length, and measure prefill and token latency separately. State positional-encoding and mask conventions when testing cache equivalence.""",
-    "For 2 layers, batch 1, sequence 16,4 KV heads, head dimension 8 and 2-byte elements, keys and values consume 4096 bytes in the simple dense model.",
+    "For 2 layers, batch 1, sequence 16, 4 KV heads, head dimension 8 and 2-byte elements, keys and values consume 4096 bytes in the simple dense model.",
     "Doubling sequence length doubles this cache payload even if model weights are unchanged. Reducing weight precision alone leaves this term unchanged.",
     "Derive cache bytes;Double the sequence;Distinguish query and KV heads;Compare cached logits;Separate prefill and decode timing;Label fake versus real quantization",
     "Multiply two for keys and values then all dimensions and width;Cache grows linearly in stored positions;Use the model actual KV layout;Compare each bounded step within tolerance;They stress different operation shapes;A rounding simulation is not a deployed quantized kernel",
@@ -807,8 +807,8 @@ add(
     """A systems decision balances correctness, model quality, latency, throughput, memory, cost and maintainability. Start with explicit constraints and a reproducible baseline. Choose an optimization tied to a measured bottleneck: input preparation, transfer, arithmetic, memory traffic or communication. A custom kernel and multiple GPUs are optional solutions, not achievements that must be forced into every project.
 
 Retain source, environment, data recipe, checkpoint and rollback instructions. Report distributions and failure behavior, including unsupported shapes and resource limits. An acceptance matrix should show which claims have live evidence and which are still hypotheses. CPU-only work can produce a valuable model and decision report while honestly leaving GPU execution and deployment qualification open.""",
-    "CandidateA uses 8 GiB and meets a 20 ms latency target; candidate B uses 12 GiB on an 8 GiB device. B is infeasible regardless of its optimistic kernel timing.",
-    "CandidateC meets latency but reduces held-out accuracy below the required threshold. Performance and quality constraints both belong in acceptance.",
+    "Candidate A uses 8 GiB and meets a 20 ms latency target; candidate B uses 12 GiB on an 8 GiB device. B is infeasible regardless of its optimistic kernel timing.",
+    "Candidate C meets latency but reduces held-out accuracy below the required threshold. Performance and quality constraints both belong in acceptance.",
     "Write three constraints;Filter infeasible candidates;Choose a bottleneck hypothesis;Preserve rollback;Design failure tests;State evidence gaps",
     "Use measurable limits with units;Reject memory and quality violations before speed ranking;Tie a change to a trace;Keep the unchanged baseline runnable;Test bounded invalid inputs and resource refusal;Pending GPU validation must remain visible",
     """candidates = [
@@ -830,7 +830,7 @@ add(
     """Across hosts, the network joins GPU compute and storage as a first-class resource. A rendezvous establishes participants; collectives require compatible ordering and membership. Data parallelism replicates parameters, tensor parallelism partitions operations, pipeline parallelism partitions layers, and state sharding distributes selected model or optimizer state. Their communication patterns differ.
 
 Stragglers delay synchronized steps. Worker failure requires a coordinated stop or a deliberately implemented recovery protocol; independently retrying one rank can hang the rest. Checkpoints need a consistent global boundary and data-position contract. This lesson uses diagrams and synthetic timelines by default. Actual multi-host work requires explicitly owned hosts, bounded access, suitable networking and separate PyTorch/TensorFlow qualification. Nothing in the browser creates a cluster.""",
-    "Three ranks taking 10,12 and 30 ms before a barrier yield at least 30 ms compute-phase latency, even though their average is 17.3 ms.",
+    "Three ranks taking 10, 12 and 30 ms before a barrier yield at least 30 ms compute-phase latency, even though their average is 17.3 ms.",
     "A checkpoint assembled from rank 0 at step 10 and rank 1 at step 11 is not a coherent global state unless a protocol explicitly reconciles that difference.",
     "Compute barrier time;Compare parallelism types;Diagnose a missing rank;Define checkpoint consistency;Budget communication;Design owned-host cleanup",
     "The slowest rank controls the barrier;Separate model replication and operation/layer/state partition;Bound waits and stop the owned job;Use a documented common update boundary;Count bytes and frequency per collective;Terminate only declared job resources and preserve checkpoints",

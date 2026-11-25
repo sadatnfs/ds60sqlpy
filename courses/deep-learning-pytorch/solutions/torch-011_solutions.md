@@ -2,6 +2,8 @@
 
 Open these answers only after attempting nn.Module, registered parameters and explicit training loops yourself. They reuse the guide's literal inputs, starting from Example A, Inspect module state, so a discrepancy points at one step. The executable companion runs the assertions; this page explains why each one tests Module, Buffer, Optimizer membership. After a pass, choose a new input for exercise 6, Keep parameter count stable across calls, without looking.
 
+After comparing, follow the [review steps](../STUDY-GUIDE.md#after-the-solutions).
+
 ## Mechanism review
 
 An nn.Module owns a model's registered parameters, buffers and child modules. Its forward method defines a computation, but the optimizer membership and training loop remain explicit. A plain tensor attribute is not automatically a Parameter. A buffer is tracked state that moves with the module and appears in state_dict without being optimized by default. This distinction is useful for fixed preprocessing statistics, running counts or nontrainable masks.
@@ -151,6 +153,3 @@ assert id(stable.weight) == identity and len(list(stable.parameters())) == 1
 
 **Verify:** In a fresh process, the exercise checks confirm `id(stable.weight) == identity` and `len(list(stable.parameters())) == 1`.
 
-## Review after comparison
-
-Repeat exercise 4, Move dtype through registered state, with one changed fixture value and predict the difference before running it. Keep your failing attempt at exercise 5, Expose stale optimizer membership, beside the repaired result. A missing framework is not a failing assertion. These solutions use only local fixtures.

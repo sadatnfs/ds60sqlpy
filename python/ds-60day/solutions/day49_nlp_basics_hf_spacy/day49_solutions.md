@@ -224,9 +224,7 @@ Notes
 
 ## Solution reasoning lens
 
-A strong solution is not merely code that produces one plausible
-output. It establishes a chain from input contract to operation to
-verification:
+Each decision below links an input contract to an operation and its evidence:
 
 1. **`spacy.blank('en')`:** creates an offline tokenizer without a downloaded statistical pipeline.
 2. **`pipeline(task, model=..., local_files_only=...)`:** bundles a specific cached Transformer tokenizer/model and postprocessing; model identity must be explicit.
@@ -243,29 +241,15 @@ verification:
 
 **Evidence of correctness:** Reconstruct text from offsets, test unknown/truncation behavior, pin and record model artifacts, evaluate task-specific slices, and prove raw sensitive text is not leaked.
 
-When comparing your attempt with the reference, explain which of these
-decisions your code made explicitly. If the reference makes a different
-choice, compare the contracts and evidence before deciding that one
-version is universally better.
-
 <!-- END ADVANCED PYTHON CONCEPT ENRICHMENT -->
 
 ## Exercise-by-exercise reasoning map
-
-This map connects every learner prompt to a reasoning path. Read the
-explanation before copying code: the goal is to understand the assumptions,
-the evidence that validates the result, and the edge cases that can make an
-apparently correct implementation fail.
 
 ### Exercise 1: Original lesson practice
 
 **Prompt:** Try a zero-shot-classification pipeline with your own candidate labels.
 
 **How to reason about it:** Zero-shot classification is an optional cached/connected extension. Record model ID, revision, candidate-label wording, hypothesis template, and an ambiguous case because each can alter scores.
-
-Use the worked reference earlier in this file, then change one boundary
-condition and rerun the stated checks. A copied output is not evidence
-unless you can explain why that output follows from the inputs.
 
 **Verify:** When cached model artifacts exist, print model revision, candidate labels, input text, ordered labels, and scores whose sum is approximately 1; otherwise print an explicit offline-skip result without downloading.
 
@@ -274,10 +258,6 @@ unless you can explain why that output follows from the inputs.
 **Prompt:** Compare tokenization from spaCy with a Hugging Face tokenizer.
 
 **How to reason about it:** spaCy and Transformer tokenizers optimize different representations. Inspect text, tokens, IDs, decoded output, punctuation, Unicode, and truncation rather than declaring one tokenization universally correct.
-
-Use the worked reference earlier in this file, then change one boundary
-condition and rerun the stated checks. A copied output is not evidence
-unless you can explain why that output follows from the inputs.
 
 **Verify:** For one fixed text, print spaCy token text/start/end and Hugging Face token IDs/tokens/offsets; reconstruct covered substrings, mark special/unknown/truncated tokens, and record exact tokenizer model/revision or local fallback.
 
@@ -295,10 +275,6 @@ aggregation on labeled validation examples.
 Do not set an arbitrarily huge max length: the model has a positional limit
 and attention memory cost grows rapidly.
 
-**Why this matters:** The result should survive a fresh-kernel rerun and
-a deliberately chosen boundary case. If it does not, revisit the
-assumption or data boundary rather than hiding the failure.
-
 **Verify:** Truncation debugging; print original character length, token count before/after truncation, special tokens, attention mask, offsets, and lost suffix; assert all retained offsets reconstruct exact source substrings.
 
 ### Exercise 4: Model-provenance contract
@@ -314,10 +290,6 @@ pipeline package name/version and enabled components.
 Do not store developer-specific absolute cache paths. Record a portable cache
 status and the connected preload command, then verify an offline load with
 network disabled.
-
-**Why this matters:** The result should survive a fresh-kernel rerun and
-a deliberately chosen boundary case. If it does not, revisit the
-assumption or data boundary rather than hiding the failure.
 
 **Verify:** Model-provenance contract; write and validate metadata containing model/tokenizer IDs and revisions, spaCy pipeline/version, local artifact hashes, offline/cache status, and preprocessing limits; reject a revision/hash mismatch.
 
@@ -335,10 +307,6 @@ Run exact normalized-hash checks first, then bounded near-duplicate detection.
 Keep deduplication rules inside the data-version manifest so results can be
 reconstructed.
 
-**Why this matters:** The result should survive a fresh-kernel rerun and
-a deliberately chosen boundary case. If it does not, revisit the
-assumption or data boundary rather than hiding the failure.
-
 **Verify:** Evaluation leakage; group near-duplicates/source excerpts before splitting, print group-overlap count before/after repair, assert repaired overlap is zero, and compare the leaked versus grouped validation metric.
 
 ### Exercise 6: Sensitive-text boundary
@@ -354,9 +322,5 @@ to an optional external service without explicit authorization.
 PII detection is imperfect; document false-positive and false-negative risks.
 For error analysis, retain only the minimum redacted context needed and route
 incidents through the project's security process.
-
-**Why this matters:** The result should survive a fresh-kernel rerun and
-a deliberately chosen boundary case. If it does not, revisit the
-assumption or data boundary rather than hiding the failure.
 
 **Verify:** Sensitive-text boundary; run email/phone/name-like fixtures through logging, cache, example, and error paths; assert raw sentinel strings are absent from captured logs/artifacts while redacted IDs still support debugging.

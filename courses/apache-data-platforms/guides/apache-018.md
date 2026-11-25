@@ -130,7 +130,7 @@ Projecting two columns and keeping only values 0 and 1 means the sort sees rough
 
 ## Complete worked source
 
-This is a complete editable worked program for the declared prepared runtime. It uses bounded local fixtures and does not install packages or start distributed services.
+Run it as the [worked program rules](../STUDY-GUIDE.md#worked-programs) describe.
 
 ```python
 import tempfile

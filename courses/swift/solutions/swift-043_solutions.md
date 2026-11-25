@@ -1,6 +1,8 @@
 # swift-043: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [swift-043_solution.swift](swift-043_solution.swift). It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.
+Reference program: [swift-043_solution.swift](swift-043_solution.swift), covering both examples and the executed answers.
+
+Attempt the tasks first; see [comparing with the explanation](../STUDY-GUIDE.md#comparing-with-the-explanation).
 
 ## Why the two examples differ
 
@@ -132,7 +134,7 @@ Each case gets its own outcome so the UI can explain it, and cancellation is a s
 
 Design a URLSession boundary with explicit FoundationNetworking import on Linux, request timeout, size bound and schema validation.
 
-No single reference answer exists: several designs can satisfy this transfer task. Build yours from the task 3 answer above (Implement a deterministic fake transport returning success and failure values) and the mechanism described below, and state one limitation of your choice.
+No single answer exists; extend task 3 using the [open transfer routine](../STUDY-GUIDE.md#open-transfer-tasks).
 
 ## Solution reasoning
 
@@ -156,4 +158,4 @@ An awaited response is not automatically a successful HTTP status. Never assume 
 
 ## Review before continuing
 
-Run the reference and confirm that it prints `swift-043: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.
+Run the reference and confirm it prints `swift-043: passed`, then rerun the guide's counterexample.

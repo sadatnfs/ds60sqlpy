@@ -2,7 +2,7 @@
 
 Use data tests as explicit evidence for a declared contract.
 
-The executable reference contains the two complete worked cases with assertions. The changes below explain the independent practice and its limits.
+The reference declares not_null and unique on `orders.id`, counts the pass statuses in run_results.json, and checks that a duplicate key fails the build yet leaves the materialized table in place. It shows what a failed test reports, not that downstream consumers were protected from the duplicate. See [how these answers are laid out](../STUDY-GUIDE.md#answers-and-references).
 
 
 ## 1. Create a null key

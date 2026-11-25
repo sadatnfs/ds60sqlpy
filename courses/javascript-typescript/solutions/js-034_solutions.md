@@ -1,6 +1,6 @@
 # js-034: explanatory solutions
 
-Use these answers after an attempt or an explicit reveal. The reference uses the same literal fixtures as the guide and keeps the exercises in separate scopes. A successful run checks these examples; explaining a changed input is a separate learning goal.
+Open these after your own attempt; each exercise runs in its own scope in the reference.
 
 ## Mechanism review
 
@@ -26,7 +26,7 @@ Measure a known-correct function using start/end performance.now values. Summari
 
 ## Exercise 1: Measure only a checked computation: change one input
 
-Task: Copy Example A into a scratch `main.mjs` and change `const result = sumTo(10000);` to `const result = sumTo(10001);`. Before running it, predict which check fails and which value it now sees; then run it and restore the original line.
+Task: In a scratch copy of Example A, change `const result = sumTo(10000);` to `const result = sumTo(10001);`. Which check fails, and what value does it see?
 
 Correctness is checked independently of the measured time. No assertion says the operation must be faster than a machine-dependent threshold.
 
@@ -41,13 +41,13 @@ assert.ok(Number.isFinite(elapsed) && elapsed >= 0);
 console.log(JSON.stringify({ operation: 'sumTo10000', elapsedMs: elapsed }));
 ```
 
-**Expected:** The changed run fails with an `AssertionError` at `assert.equal(result, 50005000)`. Restoring `const result = sumTo(10000);` brings back: correct sum 50005000; finite nonnegative elapsed time.
+**Expected:** The edited run fails with an `AssertionError` at `assert.equal(result, 50005000)`. Restoring `const result = sumTo(10000);` brings back: correct sum 50005000; finite nonnegative elapsed time.
 
-**Verify:** Compare your written prediction with the reported `AssertionError`, including its actual and expected values, and name the value that made `assert.equal(result, 50005000)` fail. After restoring the line, the program prints its `{"checks":1,"status":"passed"}` receipt again.
+**Verify:** Compare the reported actual and expected values with your prediction, then restore `const result = sumTo(10000);`.
 
 ## Exercise 2: Preserve repeated samples and summarize them: debug a regression
 
-Task: A regression changed one token in Example B, so one line now reads `const medianOf = values => [...values].sort()[Math.floor(values.length / 2)];`. Run Example B with that line, use the failing check to locate the defect and repair it without changing the check.
+Task: A regression made one Example B line read `const medianOf = values => [...values].sort()[Math.floor(values.length / 2)];`. Locate and repair it without editing the check.
 
 Five tiny trials illustrate record keeping, not a statistically robust benchmark. A real comparison needs workload control, enough repetitions and an analysis of variability.
 
@@ -72,7 +72,7 @@ console.log(JSON.stringify({ samplesMs: samples, medianMs: median }));
 
 **Expected:** Before the repair the run fails with an `AssertionError` at `assert.equal(medianOf([9, 10, 100, 2, 30]), 10)`. Restoring `const medianOf = values => [...values].sort(byValue)[Math.floor(values.length / 2)];` brings back: five finite samples; median lies between minimum and maximum; the fixed control `[9, 10, 100, 2, 30]` has numeric median 10.
 
-**Verify:** Keep the failing and the repaired runs. Explain why the changed token alters the value tested by `assert.equal(medianOf([9, 10, 100, 2, 30]), 10)` for this input.
+**Verify:** Keep the failing and repaired runs and name the first value that differs between them.
 
 ## Exercise 3: Release owned references without claiming immediate RSS change
 
@@ -94,7 +94,7 @@ console.log(JSON.stringify({ before, after, retainedEntries: cache.size }));
 
 **Expected:** entry count 100 then 0; valid counters, with no asserted memory drop.
 
-**Verify:** Keep a check equivalent to `assert.equal(cache.size, 100)`. As a control, change `for (let index = 0; index < 100; index += 1) cache.set(index, { payload: 'x'.repeat(100) });` to `for (let index = 0; index <= 100; index += 1) cache.set(index, { payload: 'x'.repeat(100) });`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
+**Verify:** Keep `assert.equal(cache.size, 100)`. Control: changing `for (let index = 0; index < 100; index += 1) cache.set(index, { payload: 'x'.repeat(100) });` to `for (let index = 0; index <= 100; index += 1) cache.set(index, { payload: 'x'.repeat(100) });` must make that check fail; then restore it.
 
 ## Exercise 4: Use and clear only owned performance entries
 
@@ -122,7 +122,7 @@ assert.equal(performance.getEntriesByName(prefix).length, 0);
 
 **Expected:** one nonnegative duration; owned entries removed afterward.
 
-**Verify:** Keep a check equivalent to `assert.ok(entries[0].duration >= 0)`. As a control, change `performance.measure(prefix, prefix + '-start', prefix + '-end');` to `performance.measure(prefix, prefix + '-start', prefix - '-end');`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
+**Verify:** Keep `assert.ok(entries[0].duration >= 0)`. Control: changing `performance.measure(prefix, prefix + '-start', prefix + '-end');` to `performance.measure(prefix, prefix + '-start', prefix - '-end');` must make that check fail; then restore it.
 
 ## Exercise 5: Inspect event-loop utilization as a bounded observation
 
@@ -141,7 +141,7 @@ console.log(JSON.stringify({ eventLoop: observed }));
 
 **Expected:** finite utilization between 0 and 1; no speed or CPU-percentage claim.
 
-**Verify:** Keep a check equivalent to `assert.ok(observed.utilization >= 0 && observed.utilization <= 1)`. As a control, change `assert.ok(observed.utilization >= 0 && observed.utilization <= 1);` to `assert.ok(observed.utilization >= 1 && observed.utilization <= 1);` inside it: the run must fail with an `AssertionError`, which shows the check can fail. Restore it.
+**Verify:** Keep `assert.ok(observed.utilization >= 0 && observed.utilization <= 1)`. Control: editing it to `assert.ok(observed.utilization >= 1 && observed.utilization <= 1);` must make the check fail; then restore it.
 
 ## Exercise 6: Enable and disable a real delay monitor
 
@@ -165,8 +165,8 @@ try {
 
 **Expected:** monitor disabled afterward; sample count reported honestly.
 
-**Verify:** Keep the guarded check `if (count > 0) assert.ok(Number.isFinite(histogram.mean))` and confirm that the reference still passes. Then name an input that satisfies the guard but makes the check fail, and explain which value changes.
+**Verify:** Keep the guarded check `if (count > 0) assert.ok(Number.isFinite(histogram.mean))`; name an input that passes the guard but fails the check.
 
 ## After comparison
 
-Return to your saved implementation and repeat a case with different values. Keep compiler diagnostics, process output and browser observations separate. Do not suppress a failing assertion or use a type assertion to declare an unvalidated value safe. Resource-owning examples must finish cleanup even when work fails. Describe each result with its actual host and fixture scope rather than as production acceptance.
+Fresh case: compare a `for` loop with `reduce` for summing 100,000 numbers. Check both results first, take seven samples of each, and report the medians with a claim limited to this run. ([After comparing](../STUDY-GUIDE.md#after-comparing-with-the-solution).)

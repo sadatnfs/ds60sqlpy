@@ -1,6 +1,6 @@
 # js-047: explanatory solutions
 
-Compare after your own attempt or an explicit reveal. The separate .js reference is a complete offline browser program. These explanations discuss the six practice tasks; a visual resemblance alone is not a data or behavior check.
+Compare after your own attempt; the separate `.js` file is the complete reference program.
 
 ## Mechanism review
 
@@ -49,3 +49,7 @@ More decimals are not more accuracy. Choose enough precision to avoid hiding mea
 A count and a rate answer different questions. Shared colors do not make their numeric scales interchangeable. Give each panel its own scale and caption, for example "visits (count)" and "conversion rate (fraction)". Sharing one y scale would squash the rates near zero.
 
 **Expected:** Separate unit labels and denominators make the comparison explicit.
+
+## After comparison
+
+Add a second axis for rates per 1,000 beside the counts axis, each with its own title and units. Format counts with thousands separators using `d3.format(',')` and rates with one decimal place, then justify both precision choices in a sentence each.

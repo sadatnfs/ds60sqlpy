@@ -465,16 +465,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 .venv/bin/python -m pytest -q</code></pre>
 <p>Ruff is the repository&#x27;s sole Python formatter and linter; keep its checked-in configuration as the source of truth.</p>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
-<p><strong>Primary browser route:</strong> run <code>./classroom</code> from the repository root and choose <strong>Python and data science</strong> on <code>/classroom</code>. Open this lesson in the shared workspace, read its capability notice, and use its supported coding or reading workflow. The <a href="../reference-pages/docs/classroom-experience.md.html">classroom guide</a> explains saved work, runtimes and switching subjects.</p>
-<p><strong>Optional native notebook/editor route:</strong> the instructions below describe separately prepared host tools. They are useful alternatives, not prerequisites for opening this lesson in the Docker classroom.</p>
-<ol>
-<li>Open the Day 58 learner notebook from this guide&#x27;s <strong>Next step</strong> section in VS Code or JupyterLab.</li>
-<li>Select the <code>Python (ds60sqlpy)</code> kernel. Start at the top and use <strong>Run All</strong> only after making the written predictions; every added worked example is bounded and offline after bootstrap.</li>
-<li>Keep experiments in new scratch cells. Do not edit the official solution while attempting the numbered practice.</li>
-<li>Restart the kernel and run from the first cell before calling the lesson complete. A clean run catches hidden state and stale variables.</li>
-</ol>
-<p>Linux, macOS, or Ubuntu in Windows WSL 2:</p>
-<pre class="highlighted-code"><code class="language-bash">.venv/bin/python -m jupyter lab</code></pre>
+<p>Open <code>python-58</code> in the classroom, or <code>python/ds-60day/notebooks/day58_code_review_refactor_tests.ipynb</code> on a host; the <a href="../reference-pages/python/STUDY-GUIDE.md.html">Python study guide</a> explains both.</p>
 <h4 id="guide--concept-deep-dive-behavior-preserving-refactoring-seams-tests-and-compatibility-review">Concept deep dive: behavior-preserving refactoring, seams, tests, and compatibility review<a class="heading-anchor" href="#guide--concept-deep-dive-behavior-preserving-refactoring-seams-tests-and-compatibility-review" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--the-mental-model">The mental model<a class="heading-anchor" href="#guide--the-mental-model" aria-label="Link to this section">#</a></h5>
 <p>Refactoring changes internal structure while preserving observable behavior. Before changing unfamiliar code, a <strong>characterization test</strong> records what it currently does for representative and boundary inputs. Then small pure functions and explicit dependencies create seams that can be tested without files, networks, clocks, or global state.</p>
@@ -486,7 +477,6 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li><strong>Ruff + mypy + pytest:</strong> checks formatting/lint, static type contracts, and executable behavior as complementary evidence.</li>
 </ul>
 <h5 id="guide--focused-example-a-capture-legacy-behavior-before-extraction">Focused example A: capture legacy behavior before extraction<a class="heading-anchor" href="#guide--focused-example-a-capture-legacy-behavior-before-extraction" aria-label="Link to this section">#</a></h5>
-<p>Before running the example, predict the shape, type, or direction of the result. Write the prediction down so that a surprise becomes evidence rather than something to overlook.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">legacy_total</span><span class="syntax-punctuation">(</span>rows<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
     <span class="syntax-keyword">return</span> <span class="syntax-builtin">round</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">sum</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>row<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">price</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">*</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">(</span>row<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">units</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> row <span class="syntax-operator">in</span> rows<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span>
 
@@ -580,7 +570,6 @@ observed <span class="syntax-operator">=</span> legacy_total<span class="syntax-
 <p>The separate solution demonstrates a small extraction, local pre-commit hooks, and GitHub Actions. Treat CI as remote repetition of checks you can already run locally.</p>
 <h5 id="guide--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#guide--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
 <p>Refactor behind tests, review risk at boundaries, and preserve behavior while improving structure. Type checks and formatting support, not replace, domain evidence.</p>
-<p>Predict or plan before you run code. Use the hint only after an honest attempt, and record the evidence that would prove your result correct.</p>
 <ol start="4">
 <li><strong>Characterization testing:</strong> Before refactoring a legacy notebook function, capture current behavior for normal, boundary, and known-bug inputs. Mark which behavior is a contract and which bug will intentionally change. <strong>Progressive hint:</strong> Characterization tests prevent accidental drift; an intentional fix needs a new expected result and a documented reason.</li>
 </ol>
@@ -642,7 +631,7 @@ observed <span class="syntax-operator">=</span> legacy_total<span class="syntax-
 <li>Continue to <a href="python-59.html#guide">Day 59; Capstone Kickoff</a>.</li>
 </ul>
 <h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
-<p>The lesson is complete without an AI assistant. If you want optional coaching, copy this prompt into the AI tutor while the repository root is open:</p>
+<p>The lesson is complete without AI. For optional coaching, copy this prompt with the repository root open:</p>
 <pre class="highlighted-code"><code class="language-text">Tutor me through `python-58` (Day 58: Code Review, Refactoring, and Tests).
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
@@ -1033,7 +1022,7 @@ merely ran is not evidence of mastery.</code></pre></div>
 </ul>
 <hr>
 <h4 id="solution-1--solution-reasoning-lens">Solution reasoning lens<a class="heading-anchor" href="#solution-1--solution-reasoning-lens" aria-label="Link to this section">#</a></h4>
-<p>A strong solution is not merely code that produces one plausible output. It establishes a chain from input contract to operation to verification:</p>
+<p>Each decision below links an input contract to an operation and its evidence:</p>
 <ol>
 <li><strong>characterization test:</strong> locks down important current behavior before extracting or renaming it.</li>
 <li><strong>pure core + impure shell:</strong> isolates transformations from I/O so normal, boundary, and failure cases are deterministic.</li>
@@ -1045,44 +1034,36 @@ merely ran is not evidence of mastery.</code></pre></div>
 <p><strong>Trade-off:</strong> More abstraction can improve reuse and testing but increases indirection; extract around real responsibilities, not hypothetical reuse.</p>
 <p><strong>Edge case to test:</strong> Floating-point/rounding changes, exception type/message changes, ordering, mutation, file encoding, and public type narrowing can be breaking.</p>
 <p><strong>Evidence of correctness:</strong> Run old/new behavior on normal and boundary fixtures, test failure/side effects, check public types and deprecation, and pass formatter/linter/type/tests from a clean process.</p>
-<p>When comparing your attempt with the reference, explain which of these decisions your code made explicitly. If the reference makes a different choice, compare the contracts and evidence before deciding that one version is universally better.</p>
 <h4 id="solution-1--exercise-by-exercise-reasoning-map">Exercise-by-exercise reasoning map<a class="heading-anchor" href="#solution-1--exercise-by-exercise-reasoning-map" aria-label="Link to this section">#</a></h4>
-<p>This map connects every learner prompt to a reasoning path. Read the explanation before copying code: the goal is to understand the assumptions, the evidence that validates the result, and the edge cases that can make an apparently correct implementation fail.</p>
 <h5 id="solution-1--exercise-1-original-lesson-practice">Exercise 1: Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Move at least two notebook functions into a <code>src/</code> package and add tests.</p>
 <p><strong>How to reason about it:</strong> Extract deterministic transformation/model-building functions first and add tiny offline tests before changing behavior. Keep notebooks as reader-facing orchestration, not the only home of reusable logic.</p>
-<p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
 <p><strong>Verify:</strong> Import two moved functions from src in a fresh process and run focused normal/boundary/failure tests with exit code 0; prove the notebook now calls those imports and no copied implementation remains.</p>
 <h5 id="solution-1--exercise-2-original-lesson-practice">Exercise 2: Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-2-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Add type hints and docstrings, then run mypy.</p>
 <p><strong>How to reason about it:</strong> Type public boundaries and document inputs, outputs, assumptions, and failures. Run mypy on the real package; broad Any or unexplained ignores erase the value of the contract.</p>
-<p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
 <p><strong>Verify:</strong> Run mypy on the exact src/test paths with exit code 0 and save its transcript; include parameter/return annotations and docstrings that state errors/side effects, plus one negative typing fixture that fails as expected.</p>
 <h5 id="solution-1--exercise-3-original-lesson-practice">Exercise 3: Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-3-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Write a short maintainer guide in the project root.</p>
 <p><strong>How to reason about it:</strong> A maintainer guide should cover setup, architecture, tests, formatting, data contracts, artifacts, security, and acceptance gates with Windows and POSIX commands where they differ.</p>
-<p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
 <p><strong>Verify:</strong> Write a maintainer guide containing clean setup, test/lint/type commands, architecture/data flow, artifact locations, release/rollback, and troubleshooting; have another clean shell execute every command successfully.</p>
 <h5 id="solution-1--exercise-4-characterization-testing">Exercise 4: Characterization testing<a class="heading-anchor" href="#solution-1--exercise-4-characterization-testing" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Before refactoring a legacy notebook function, capture current behavior for normal, boundary, and known-bug inputs. Mark which behavior is a contract and which bug will intentionally change.</p>
 <p><strong>Reasoning before implementation:</strong> Characterization tests prevent accidental drift; an intentional fix needs a new expected result and a documented reason.</p>
 <p>Freeze representative fixtures and outputs before moving code. Include error types/messages only to the degree they are part of the public contract. Then refactor in small steps while the unchanged tests stay green.</p>
 <p>For the known bug, first add a failing regression test that describes desired behavior, then implement the fix. Do not quietly update all snapshots to accept whatever the refactor produced.</p>
-<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
 <p><strong>Verify:</strong> Characterization testing; save characterization tests and outputs for normal, boundary, and known-bug fixtures before editing; after refactor, assert contract cases match byte/value-for-value and the intentional bug change has a separately approved expected result.</p>
 <h5 id="solution-1--exercise-5-risk-based-review">Exercise 5: Risk-based review<a class="heading-anchor" href="#solution-1--exercise-5-risk-based-review" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Review a data-loading-to-prediction change using a checklist for security, data loss, leakage, schema compatibility, performance, error handling, and cross-platform paths.</p>
 <p><strong>Reasoning before implementation:</strong> Trace inputs to side effects and downstream consumers. Prioritize high-impact boundaries over cosmetic preferences.</p>
 <p>Ask for evidence: tests, before/after contract, bounded benchmark, secret scan, and fresh-environment command. Verify that unrelated dirty files are not mixed into the change and that generated artifacts were regenerated from their source.</p>
 <p>Categorize comments by correctness/risk, maintainability, and optional style so the author can act on the most important issues first.</p>
-<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
 <p><strong>Verify:</strong> Risk-based review; complete a review matrix for security, data loss, leakage, schema, performance, errors, and Windows/POSIX paths; each row must cite changed lines, a test/measurement result, severity, owner, and disposition.</p>
 <h5 id="solution-1--exercise-6-compatibility-change">Exercise 6: Compatibility change<a class="heading-anchor" href="#solution-1--exercise-6-compatibility-change" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Rename a public function parameter without breaking callers. Implement a deprecation path, tests for old/new usage, and a removal plan.</p>
 <p><strong>Reasoning before implementation:</strong> Accept the old keyword temporarily, reject ambiguous double use, emit a targeted DeprecationWarning, and update docs/call sites.</p>
 <p>Compatibility is a time-bounded contract. The warning should name the new parameter and intended removal version, use an appropriate stack level, and avoid firing for unrelated code paths. Tests should assert both semantics and warning behavior.</p>
 <p>Search all repository references and update maintained examples. Remove the alias only in a declared breaking release or after the documented migration window.</p>
-<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
 <p><strong>Verify:</strong> Compatibility change; assert old keyword and new keyword produce identical results during the compatibility window, simultaneous/conflicting use raises an error, the old path emits the named deprecation warning, and the removal version/date is documented.</p></div>
       </section>
 
@@ -1111,6 +1092,7 @@ merely ran is not evidence of mastery.</code></pre></div>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> Code cells are not running in this browser page. Use the run controls above to open the real notebook with the course kernel.</div>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 1</div><h3 id="solution-2--cell-1--day-58-solutions-code-review-refactoring-and-tests">Day 58 Solutions: Code Review, Refactoring, and Tests<a class="heading-anchor" href="#solution-2--cell-1--day-58-solutions-code-review-refactoring-and-tests" aria-label="Link to this section">#</a></h3>
+<p>The notebook reference creates a real, owned temporary <code>src/myproj</code> package and runs a fresh pytest process against it. The test output establishes the import boundary and three behavioral cases, then the temporary project is removed. The multi-file snippets below are separately prepared project layouts; save them at their declared paths when following that optional contributor route. Ordinary classroom learners need no host package or source-directory setup.</p>
 <p>We refactor notebook logic into a module, write unit tests, configure pre‑commit hooks, and add a CI workflow.</p>
 <p>Contents</p>
 <ul>
@@ -1253,7 +1235,7 @@ merely ran is not evidence of mastery.</code></pre></div>
 </ul>
 <hr>
 <h4 id="solution-2--cell-4--solution-reasoning-lens">Solution reasoning lens<a class="heading-anchor" href="#solution-2--cell-4--solution-reasoning-lens" aria-label="Link to this section">#</a></h4>
-<p>A strong solution is not merely code that produces one plausible output. It establishes a chain from input contract to operation to verification:</p>
+<p>Each decision below links an input contract to an operation and its evidence:</p>
 <ol>
 <li><strong>characterization test:</strong> locks down important current behavior before extracting or renaming it.</li>
 <li><strong>pure core + impure shell:</strong> isolates transformations from I/O so normal, boundary, and failure cases are deterministic.</li>
@@ -1265,45 +1247,37 @@ merely ran is not evidence of mastery.</code></pre></div>
 <p><strong>Trade-off:</strong> More abstraction can improve reuse and testing but increases indirection; extract around real responsibilities, not hypothetical reuse.</p>
 <p><strong>Edge case to test:</strong> Floating-point/rounding changes, exception type/message changes, ordering, mutation, file encoding, and public type narrowing can be breaking.</p>
 <p><strong>Evidence of correctness:</strong> Run old/new behavior on normal and boundary fixtures, test failure/side effects, check public types and deprecation, and pass formatter/linter/type/tests from a clean process.</p>
-<p>When comparing your attempt with the reference, explain which of these decisions your code made explicitly. If the reference makes a different choice, compare the contracts and evidence before deciding that one version is universally better.</p>
 <h4 id="solution-2--cell-4--exercise-by-exercise-reasoning-map">Exercise-by-exercise reasoning map<a class="heading-anchor" href="#solution-2--cell-4--exercise-by-exercise-reasoning-map" aria-label="Link to this section">#</a></h4>
-<p>This map connects every learner prompt to a reasoning path. Read the explanation before copying code: the goal is to understand the assumptions, the evidence that validates the result, and the edge cases that can make an apparently correct implementation fail.</p>
 <h5 id="solution-2--cell-4--exercise-1-original-lesson-practice">Exercise 1: Original lesson practice<a class="heading-anchor" href="#solution-2--cell-4--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Move at least two notebook functions into a <code>src/</code> package and add tests.</p>
 <p><strong>How to reason about it:</strong> Extract deterministic transformation/model-building functions first and add tiny offline tests before changing behavior. Keep notebooks as reader-facing orchestration, not the only home of reusable logic.</p>
-<p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
 <p><strong>Verify:</strong> Import two moved functions from src in a fresh process and run focused normal/boundary/failure tests with exit code 0; prove the notebook now calls those imports and no copied implementation remains.</p>
 <h5 id="solution-2--cell-4--exercise-2-original-lesson-practice">Exercise 2: Original lesson practice<a class="heading-anchor" href="#solution-2--cell-4--exercise-2-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Add type hints and docstrings, then run mypy.</p>
 <p><strong>How to reason about it:</strong> Type public boundaries and document inputs, outputs, assumptions, and failures. Run mypy on the real package; broad Any or unexplained ignores erase the value of the contract.</p>
-<p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
 <p><strong>Verify:</strong> Run mypy on the exact src/test paths with exit code 0 and save its transcript; include parameter/return annotations and docstrings that state errors/side effects, plus one negative typing fixture that fails as expected.</p>
 <h5 id="solution-2--cell-4--exercise-3-original-lesson-practice">Exercise 3: Original lesson practice<a class="heading-anchor" href="#solution-2--cell-4--exercise-3-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Write a short maintainer guide in the project root.</p>
 <p><strong>How to reason about it:</strong> A maintainer guide should cover setup, architecture, tests, formatting, data contracts, artifacts, security, and acceptance gates with Windows and POSIX commands where they differ.</p>
-<p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
 <p><strong>Verify:</strong> Write a maintainer guide containing clean setup, test/lint/type commands, architecture/data flow, artifact locations, release/rollback, and troubleshooting; have another clean shell execute every command successfully.</p>
 <h5 id="solution-2--cell-4--exercise-4-characterization-testing">Exercise 4: Characterization testing<a class="heading-anchor" href="#solution-2--cell-4--exercise-4-characterization-testing" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Before refactoring a legacy notebook function, capture current behavior for normal, boundary, and known-bug inputs. Mark which behavior is a contract and which bug will intentionally change.</p>
 <p><strong>Reasoning before implementation:</strong> Characterization tests prevent accidental drift; an intentional fix needs a new expected result and a documented reason.</p>
 <p>Freeze representative fixtures and outputs before moving code. Include error types/messages only to the degree they are part of the public contract. Then refactor in small steps while the unchanged tests stay green.</p>
 <p>For the known bug, first add a failing regression test that describes desired behavior, then implement the fix. Do not quietly update all snapshots to accept whatever the refactor produced.</p>
-<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
-<p><strong>Verify:</strong> Characterization testing: save characterization tests and outputs for normal, boundary, and known-bug fixtures before editing; after refactor, assert contract cases match byte/value-for-value and the intentional bug change has a separately approved expected result.</p>
+<p><strong>Verify:</strong> Characterization testing; save characterization tests and outputs for normal, boundary, and known-bug fixtures before editing; after refactor, assert contract cases match byte/value-for-value and the intentional bug change has a separately approved expected result.</p>
 <h5 id="solution-2--cell-4--exercise-5-risk-based-review">Exercise 5: Risk-based review<a class="heading-anchor" href="#solution-2--cell-4--exercise-5-risk-based-review" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Review a data-loading-to-prediction change using a checklist for security, data loss, leakage, schema compatibility, performance, error handling, and cross-platform paths.</p>
 <p><strong>Reasoning before implementation:</strong> Trace inputs to side effects and downstream consumers. Prioritize high-impact boundaries over cosmetic preferences.</p>
 <p>Ask for evidence: tests, before/after contract, bounded benchmark, secret scan, and fresh-environment command. Verify that unrelated dirty files are not mixed into the change and that generated artifacts were regenerated from their source.</p>
 <p>Categorize comments by correctness/risk, maintainability, and optional style so the author can act on the most important issues first.</p>
-<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
-<p><strong>Verify:</strong> Risk-based review: complete a review matrix for security, data loss, leakage, schema, performance, errors, and Windows/POSIX paths; each row must cite changed lines, a test/measurement result, severity, owner, and disposition.</p>
+<p><strong>Verify:</strong> Risk-based review; complete a review matrix for security, data loss, leakage, schema, performance, errors, and Windows/POSIX paths; each row must cite changed lines, a test/measurement result, severity, owner, and disposition.</p>
 <h5 id="solution-2--cell-4--exercise-6-compatibility-change">Exercise 6: Compatibility change<a class="heading-anchor" href="#solution-2--cell-4--exercise-6-compatibility-change" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Rename a public function parameter without breaking callers. Implement a deprecation path, tests for old/new usage, and a removal plan.</p>
 <p><strong>Reasoning before implementation:</strong> Accept the old keyword temporarily, reject ambiguous double use, emit a targeted DeprecationWarning, and update docs/call sites.</p>
 <p>Compatibility is a time-bounded contract. The warning should name the new parameter and intended removal version, use an appropriate stack level, and avoid firing for unrelated code paths. Tests should assert both semantics and warning behavior.</p>
 <p>Search all repository references and update maintained examples. Remove the alias only in a declared breaking release or after the documented migration window.</p>
-<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
-<p><strong>Verify:</strong> Compatibility change: assert old keyword and new keyword produce identical results during the compatibility window, simultaneous/conflicting use raises an error, the old path emits the named deprecation warning, and the removal version/date is documented.</p></article></div>
+<p><strong>Verify:</strong> Compatibility change; assert old keyword and new keyword produce identical results during the compatibility window, simultaneous/conflicting use raises an error, the old path emits the named deprecation warning, and the removal version/date is documented.</p></article></div>
       </section>
 
 

@@ -1,7 +1,7 @@
 # Real Flink stream and SQL entry points
 
 From the repository root, copy the complete project into a fresh owned directory.
-Prepare the native Java17 base and selected pinned runtime as documented there.
+Prepare the native Java 17 base and selected pinned runtime as documented there.
 
 ```bash
 mkdir -p work

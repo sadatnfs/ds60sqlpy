@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/kubernetes/solutions/k8s-061_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="k8s-061-explanatory-solutions">k8s-061: explanatory solutions<a class="heading-anchor" href="#k8s-061-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit reveal. These explanations describe the synthetic topology and stated API contracts. They are not fabricated runtime receipts.</p>
+<p>Attempt each exercise first, then compare (<a href="../STUDY-GUIDE.md.html#solutions-and-the-ai-tutor">study guide</a>).</p>
 <h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
 <p>A topology label describes placement, such as a node or availability zone. Locality-aware routing tries to prefer nearby endpoints to reduce latency or cross-zone traffic, subject to implementation and policy. It is a preference or constraint with tradeoffs, not a guarantee of balanced load or failure tolerance.</p>
 <p>Spreading replicas across zones can improve resilience to a zone failure, but only if scheduling, storage and dependencies also span the required failure domains. A local preference can concentrate traffic on a small number of endpoints if placement is uneven. Capacity and availability must be considered together.</p>

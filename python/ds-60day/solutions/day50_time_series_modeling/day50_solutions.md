@@ -182,9 +182,7 @@ Notes
 
 ## Solution reasoning lens
 
-A strong solution is not merely code that produces one plausible
-output. It establishes a chain from input contract to operation to
-verification:
+Each decision below links an input contract to an operation and its evidence:
 
 1. **`series.shift(lag)`:** aligns a past value as a current-row feature; positive lags must precede any rolling summary.
 2. **`train.iloc[:-horizon]` / `test.iloc[-horizon:]`:** creates a simple chronological boundary with a declared horizon.
@@ -201,29 +199,15 @@ verification:
 
 **Evidence of correctness:** Assert timestamp ordering/alignment and feature-source cutoffs, beat last/seasonal naive on identical origins, and report errors by origin plus uncertainty.
 
-When comparing your attempt with the reference, explain which of these
-decisions your code made explicitly. If the reference makes a different
-choice, compare the contracts and evidence before deciding that one
-version is universally better.
-
 <!-- END ADVANCED PYTHON CONCEPT ENRICHMENT -->
 
 ## Exercise-by-exercise reasoning map
-
-This map connects every learner prompt to a reasoning path. Read the
-explanation before copying code: the goal is to understand the assumptions,
-the evidence that validates the result, and the edge cases that can make an
-apparently correct implementation fail.
 
 ### Exercise 1: Original lesson practice
 
 **Prompt:** Fit `auto_arima` with `m=7` and `m=30`; compare mean absolute error on the same test window.
 
 **How to reason about it:** Compare seasonal periods on the identical training window and forecast horizon. Bound auto-ARIMA search, report runtime, and remember that the best period may change across forecast origins.
-
-Use the worked reference earlier in this file, then change one boundary
-condition and rerun the stated checks. A copied output is not evidence
-unless you can explain why that output follows from the inputs.
 
 **Verify:** Fit m=7 and m=30 using training observations only, forecast the identical timestamped test window, and print MAE plus errors by horizon for both; report convergence/skip status and selected seasonal period.
 
@@ -233,10 +217,6 @@ unless you can explain why that output follows from the inputs.
 
 **How to reason about it:** Last-value and seasonal-naive forecasts are required baselines. Build them only from information available at each origin and align prediction indices exactly with the test targets.
 
-Use the worked reference earlier in this file, then change one boundary
-condition and rerun the stated checks. A copied output is not evidence
-unless you can explain why that output follows from the inputs.
-
 **Verify:** On the same forecast origins, print MAE for last-value, 30-day seasonal-naive, and ARIMA; assert each forecast at time t uses only observations before t and include a metric table keyed by model.
 
 ### Exercise 3: Original lesson practice
@@ -244,10 +224,6 @@ unless you can explain why that output follows from the inputs.
 **Prompt:** Difference the training series and inspect autocorrelation without using test-period observations.
 
 **How to reason about it:** Differencing and autocorrelation diagnostics use training data only. Inspect stationarity assumptions and avoid differencing mechanically without understanding what must be inverted for forecasts.
-
-Use the worked reference earlier in this file, then change one boundary
-condition and rerun the stated checks. A copied output is not evidence
-unless you can explain why that output follows from the inputs.
 
 **Verify:** Difference only the training series, print its length/NaN handling and selected autocorrelations with confidence bounds, and assert no test-period timestamp entered the transform or lag calculation.
 
@@ -265,10 +241,6 @@ Never fit one candidate on the full series and slice its in-sample predictions
 for earlier origins. That uses future observations and invalidates the
 backtest.
 
-**Why this matters:** The result should survive a fresh-kernel rerun and
-a deliberately chosen boundary case. If it does not, revisit the
-assumption or data boundary rather than hiding the failure.
-
 **Verify:** Rolling-origin evaluation; print at least four forecast origins with train-end, horizon timestamps, seasonal-naive MAE, candidate MAE, and aggregate weighted MAE; assert every prediction uses data strictly before its origin.
 
 ### Exercise 5: Prediction intervals
@@ -284,10 +256,6 @@ Report coverage by horizon because uncertainty usually grows farther ahead.
 Model-based intervals rely on residual/distribution assumptions. Residual
 bootstrap or conformal methods offer alternatives, but still require
 forward-only calibration data and exchangeability assumptions.
-
-**Why this matters:** The result should survive a fresh-kernel rerun and
-a deliberately chosen boundary case. If it does not, revisit the
-assumption or data boundary rather than hiding the failure.
 
 **Verify:** Prediction intervals; print interval level, per-origin coverage indicator, aggregate empirical coverage, and mean width; compare at least two interval widths/levels and flag severe undercoverage.
 
@@ -305,9 +273,5 @@ Timezone-aware series should be normalized deliberately, often to UTC for
 storage while retaining local-calendar features separately. Imputation is a
 fitted or policy step and must not read future values in a forecasting
 evaluation.
-
-**Why this matters:** The result should survive a fresh-kernel rerun and
-a deliberately chosen boundary case. If it does not, revisit the
-assumption or data boundary rather than hiding the failure.
 
 **Verify:** Timestamp/data-quality debugging; produce a validation report listing duplicate timestamps, exact missing periods, irregular gaps, timezone/ambiguous transitions, frequency, and chosen repair; assert the cleaned index is unique, ordered, and regular before modeling.

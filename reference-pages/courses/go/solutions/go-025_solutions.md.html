@@ -194,12 +194,12 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/go/solutions/go-025_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="go-025-explained-solutions">go-025: explained solutions<a class="heading-anchor" href="#go-025-explained-solutions" aria-label="Link to this section">#</a></h2>
-<p>These are comparison material after an attempt or explicit reveal. The executable reference implements all six cases in one <code>main.go</code>.</p>
+<p>Compare after an attempt (<a href="../STUDY-GUIDE.md.html#use-the-solutions">using solutions</a>). <code>courses/go/solutions/go-025_solution.go</code> implements all six cases.</p>
 <h3 id="mechanism">Mechanism<a class="heading-anchor" href="#mechanism" aria-label="Link to this section">#</a></h3>
 <p>A channel connects producers and consumers with typed communication. An unbuffered send completes when a receiver participates; a buffered channel retains values up to its capacity. Buffering changes backpressure, not ownership of referenced objects sent through the channel. Closing means no more values will be sent. Receivers drain buffered values before observing closure. The producer that knows all sending is finished should own close. A receiver normally must not close the channel merely because it is done reading. Sending after close panics. A send or receive on a nil channel blocks forever, and a select skips such a case; closing a nil channel panics.</p>
 <p>make(chan int, 2) creates a two-element buffer. value, ok := &lt;-ch distinguishes a delivered value from the zero value after closure. range ch receives until closed and drained. chan&lt;- int restricts a parameter to sending; &lt;-chan int restricts it to receiving. len(ch) is a transient observation rather than a synchronization protocol.</p>
 <h3 id="1-drain-before-iteration-ends-change-one-input">1. Drain before iteration ends: change one input<a class="heading-anchor" href="#1-drain-before-iteration-ends-change-one-input" aria-label="Link to this section">#</a></h3>
-<p>Copy worked example 1 into a scratch pad and change <code>ch &lt;- 2</code> to <code>ch &lt;- 3</code>. Before running, predict which check fails and which value it now sees; then run it and restore the original line.</p>
+<p>Copy worked example 1, change <code>ch &lt;- 2</code> to <code>ch &lt;- 3</code> and predict the failure before running; then restore the line.</p>
 <p>The unchanged code is worked example 1:</p>
 <pre class="highlighted-code"><code class="language-go">ch <span class="syntax-operator">:=</span> <span class="syntax-builtin">make</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">chan</span> <span class="syntax-keyword">int</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span>
 ch <span class="syntax-operator">&lt;-</span> <span class="syntax-number">2</span>
@@ -210,14 +210,15 @@ sum <span class="syntax-operator">:=</span> <span class="syntax-number">0</span>
 	sum <span class="syntax-operator">+=</span> v
 <span class="syntax-punctuation">}</span>
 check<span class="syntax-punctuation">(</span>sum <span class="syntax-operator">==</span> <span class="syntax-number">5</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;drain&quot;</span><span class="syntax-punctuation">)</span></code></pre>
-<p><strong>Expected:</strong> The changed run panics with <code>drain</code> because <code>sum == 5</code> no longer holds. Restoring the original line brings back the worked observation: both values arrive and the sum is 5.</p>
+<p><strong>Expected:</strong> The edited run panics with <code>drain</code> because <code>sum == 5</code> no longer holds.</p>
+<p><strong>Verify:</strong> Restoring <code>ch &lt;- 2</code> makes the check pass again with the worked observation: both values arrive and the sum is 5.</p>
 <p>Close does not erase buffered values. Iteration ends after those values have been received.</p>
 <p><strong>Approach.</strong> Trace the edited sends: the buffer of capacity 2 now holds 3 and 3, <code>close</code> marks the channel finished, and <code>range</code> receives both values before it stops.</p>
 <p><strong>Why it holds here.</strong> Both sends complete without a receiver because the buffer has room for two, and close keeps buffered values, so the sum is 6 and the check <code>sum == 5</code> panics with <code>drain</code>.</p>
 <p><strong>A plausible wrong approach.</strong> Predicting a deadlock because nothing receives during the sends, or a zero sum because close discards the buffer. Capacity 2 lets both sends finish, and <code>range</code> drains buffered values before it observes the close.</p>
 <p><strong>Verify.</strong> Print <code>sum</code> and see 6 before the panic. As a separate experiment, delete <code>close(ch)</code>: the loop drains both values and then the runtime stops with <code>fatal error: all goroutines are asleep - deadlock!</code>.</p>
 <h3 id="2-distinguish-zero-from-closed-debug-a-regression">2. Distinguish zero from closed: debug a regression<a class="heading-anchor" href="#2-distinguish-zero-from-closed-debug-a-regression" aria-label="Link to this section">#</a></h3>
-<p>A regression changed one token in worked example 2, so one line now reads <code>ch &lt;- 1</code>. Run worked example 2 with that line, use the failure to locate the defect and repair it without changing the check.</p>
+<p>A one-token regression in worked example 2 makes a line read <code>ch &lt;- 1</code>. Repair it without changing the check.</p>
 <p>The unchanged code is worked example 2:</p>
 <pre class="highlighted-code"><code class="language-go">ch <span class="syntax-operator">:=</span> <span class="syntax-builtin">make</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">chan</span> <span class="syntax-keyword">int</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span>
 ch <span class="syntax-operator">&lt;-</span> <span class="syntax-number">0</span>
@@ -225,7 +226,8 @@ ch <span class="syntax-operator">&lt;-</span> <span class="syntax-number">0</spa
 a<span class="syntax-punctuation">,</span> okA <span class="syntax-operator">:=</span> <span class="syntax-operator">&lt;-</span>ch
 b<span class="syntax-punctuation">,</span> okB <span class="syntax-operator">:=</span> <span class="syntax-operator">&lt;-</span>ch
 check<span class="syntax-punctuation">(</span>a <span class="syntax-operator">==</span> <span class="syntax-number">0</span> <span class="syntax-operator">&amp;&amp;</span> b <span class="syntax-operator">==</span> <span class="syntax-number">0</span> <span class="syntax-operator">&amp;&amp;</span> okA <span class="syntax-operator">&amp;&amp;</span> <span class="syntax-punctuation">!</span>okB<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;closed presence&quot;</span><span class="syntax-punctuation">)</span></code></pre>
-<p><strong>Expected:</strong> Before the repair the program panics with <code>closed presence</code>; after it the line reads <code>ch &lt;- 0</code> again and the first zero has ok true; the second has ok false.</p>
+<p><strong>Expected:</strong> The defective run panics with <code>closed presence</code>; after restoring <code>ch &lt;- 0</code>, the first zero has ok true; the second has ok false.</p>
+<p><strong>Verify:</strong> The failing run shows message <code>closed presence</code>; after the repair <code>a == 0 &amp;&amp; b == 0 &amp;&amp; okA &amp;&amp; !okB</code> holds again.</p>
 <p>Value equality cannot distinguish a delivered zero from the post-closure zero. The boolean carries completion information.</p>
 <p><strong>Approach.</strong> Use the two-result receive to read the regressed state: the first receive yields 1 with <code>okA</code> true and the second yields the zero value with <code>okB</code> false.</p>
 <p><strong>Why it holds here.</strong> The check requires the delivered value to be 0, so 1 fails <code>a == 0</code> and panics with <code>closed presence</code>. Sending 0 again makes both received values zero while <code>ok</code> still separates them.</p>
@@ -241,6 +243,7 @@ count <span class="syntax-operator">:=</span> <span class="syntax-number">0</spa
 <span class="syntax-punctuation">}</span>
 check<span class="syntax-punctuation">(</span>count <span class="syntax-operator">==</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;producer close&quot;</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> The consumer receives exactly two values.</p>
+<p><strong>Verify:</strong> Your solution must keep <code>count == 2</code> true. Control: changing <code>count := 0</code> to <code>count := 1</code> panics with message <code>producer close</code>; revert it.</p>
 <p>The producer knows all sends are finished. A receiver closing early could race with a later send.</p>
 <p><strong>Approach.</strong> Let <code>produce</code> own the channel: it sends 1 and 2 on the unbuffered channel and its deferred <code>close</code> runs after the last send, which ends the consumer&#x27;s <code>range</code>.</p>
 <p><strong>Why it holds here.</strong> Each unbuffered send waits for the receive, so both values arrive in order, and the close happens only after the producer has finished sending, so <code>count</code> is exactly 2.</p>
@@ -255,6 +258,7 @@ check<span class="syntax-punctuation">(</span><span class="syntax-builtin">len</
 <span class="syntax-operator">&lt;-</span>ch
 <span class="syntax-operator">&lt;-</span>ch</code></pre>
 <p><strong>Expected:</strong> Its buffered length is two.</p>
+<p><strong>Verify:</strong> Your solution must keep <code>len(ch) == 2 &amp;&amp; cap(ch) == 2</code> true. Control: changing <code>ch := make(chan int, 2)</code> to <code>ch := make(chan int, 3)</code> panics with message <code>buffer</code>; revert it.</p>
 <p>This sequential fixture has an exact count. Concurrent length checks cannot prove a later send will be nonblocking.</p>
 <p><strong>Approach.</strong> Send 4 and 5 into a channel of capacity 2 with no receiver, then read <code>len</code> and <code>cap</code> before draining.</p>
 <p><strong>Why it holds here.</strong> Two sends fit the buffer, so neither blocks; <code>len(ch)</code> reports the two queued values and <code>cap(ch)</code> the fixed capacity 2.</p>
@@ -274,6 +278,7 @@ selected <span class="syntax-operator">:=</span> <span class="syntax-keyword">fa
 <span class="syntax-punctuation">}</span>
 check<span class="syntax-punctuation">(</span>selected<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;nil arm&quot;</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> Only the ready arm can proceed.</p>
+<p><strong>Verify:</strong> Your solution must keep <code>selected</code> true. Control: changing <code>selected = true</code> to <code>selected = false</code> panics with message <code>nil arm</code>; revert it.</p>
 <p>Nil can deliberately disable an unneeded select case. It does not signal completion like a closed channel.</p>
 <p><strong>Approach.</strong> Use a nil receive channel as the disabled arm and a closed <code>ready</code> channel as the live one.</p>
 <p><strong>Why it holds here.</strong> A receive from a nil channel never proceeds, so <code>select</code> can only choose <code>&lt;-ready</code>, which is immediately ready because the channel is closed. <code>selected</code> becomes true every run.</p>
@@ -288,6 +293,7 @@ original<span class="syntax-punctuation">[</span><span class="syntax-number">0</
 received <span class="syntax-operator">:=</span> <span class="syntax-operator">&lt;-</span>ch
 check<span class="syntax-punctuation">(</span>received<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;copy&quot;</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> The received copy stays 1.</p>
+<p><strong>Verify:</strong> Your solution must keep <code>received[0] == 1</code> true. Control: changing <code>original := []int{1}</code> to <code>original := []int{2}</code> panics with message <code>copy</code>; revert it.</p>
 <p>A channel sends the slice descriptor. The explicit copy establishes independent storage before communication.</p>
 <p><strong>Approach.</strong> Copy the slice with <code>append([]int(nil), original...)</code> before sending it, then mutate <code>original</code>.</p>
 <p><strong>Why it holds here.</strong> The copy has its own backing array, so <code>original[0] = 9</code> changes only the original, and the received slice still holds 1.</p>

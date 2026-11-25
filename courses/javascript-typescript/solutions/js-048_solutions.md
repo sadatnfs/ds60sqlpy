@@ -1,6 +1,6 @@
 # js-048: explanatory solutions
 
-Compare after your own attempt or an explicit reveal. The separate .js reference is a complete offline browser program. These explanations discuss the six practice tasks; a visual resemblance alone is not a data or behavior check.
+Compare after your own attempt; the separate `.js` file is the complete reference program.
 
 ## Mechanism review
 
@@ -49,3 +49,7 @@ Whether to retain an empty category depends on the analytical universe. Make tha
 Averaging percentages can differ from a ratio of sums. Choose the aggregation that matches the question. For rates, sum numerators and denominators per group before dividing; averaging per-row percentages weights a 1-visit row like a 100-visit row.
 
 **Expected:** Validate numerator and denominator at a defined grain before division.
+
+## After comparison
+
+Point the same pipeline at a second inline CSV with a date column and a rate built from two numeric columns. Validate numerator and denominator separately, count rejections by reason and aggregate by week before charting. Record which rejected rows would have changed the result.

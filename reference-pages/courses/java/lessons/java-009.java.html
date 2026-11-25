@@ -198,23 +198,18 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"></span>
 <span class="source-line">  <span class="syntax-keyword">public</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">void</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span>String<span class="syntax-operator">[</span><span class="syntax-operator">]</span> args<span class="syntax-punctuation">)</span> <span class="syntax-keyword">throws</span> Exception <span class="syntax-punctuation">{</span></span>
 <span class="source-line">    <span class="syntax-comment">// Exercise 1: Close on normal completion: change one input</span></span>
-<span class="source-line">    <span class="syntax-comment">// Copy Example A into a scratch `Main.java` and change `try (Probe resource = new Probe(&quot;A&quot;,</span></span>
-<span class="source-line">    <span class="syntax-comment">// events, false)) {` to `try (Probe resource = new Probe(&quot;A!&quot;, events, false)) {`. Before</span></span>
-<span class="source-line">    <span class="syntax-comment">// running it with `java -ea Main`, predict which assertion fails and which value it now</span></span>
-<span class="source-line">    <span class="syntax-comment">// sees; then run it and restore the original line.</span></span>
-<span class="source-line">    <span class="syntax-comment">// Expected: The changed run fails with an `AssertionError` from the assertion on</span></span>
-<span class="source-line">    <span class="syntax-comment">// `events.equals(List.of(&quot;body&quot;, &quot;closeA&quot;))`. Restoring the original line brings back the</span></span>
-<span class="source-line">    <span class="syntax-comment">// worked observation: events `body` then `closeA`.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Change `try (Probe resource = new Probe(&quot;A&quot;, events, false)) {` to `try (Probe resource =</span></span>
+<span class="source-line">    <span class="syntax-comment">// new Probe(&quot;A!&quot;, events, false)) {` in Example A and predict which assertion fails and why.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Expected: The edited run fails with an `AssertionError` from the assertion on</span></span>
+<span class="source-line">    <span class="syntax-comment">// `events.equals(List.of(&quot;body&quot;, &quot;closeA&quot;))`.</span></span>
 <span class="source-line"></span>
 <span class="source-line">    <span class="syntax-comment">// Exercise 2: Close in reverse order: debug a regression</span></span>
-<span class="source-line">    <span class="syntax-comment">// A regression changed one token in the code that Example B adds after Example A, so one</span></span>
-<span class="source-line">    <span class="syntax-comment">// line now reads `try (Probe a = new Probe(&quot;A!&quot;, events, false); Probe b = new Probe(&quot;B&quot;,</span></span>
-<span class="source-line">    <span class="syntax-comment">// events, false)) {`. Run Example B with that line, use the failing assertion to locate the</span></span>
-<span class="source-line">    <span class="syntax-comment">// defect and repair it without changing the assertion.</span></span>
-<span class="source-line">    <span class="syntax-comment">// Expected: Before the repair the run fails with an `AssertionError` from the assertion on</span></span>
-<span class="source-line">    <span class="syntax-comment">// `events.equals(List.of(&quot;body&quot;, &quot;closeB&quot;, &quot;closeA&quot;))`; after it the line reads `try (Probe</span></span>
-<span class="source-line">    <span class="syntax-comment">// a = new Probe(&quot;A&quot;, events, false); Probe b = new Probe(&quot;B&quot;, events, false)) {` again and</span></span>
-<span class="source-line">    <span class="syntax-comment">// `closeB` is recorded before `closeA`.</span></span>
+<span class="source-line">    <span class="syntax-comment">// A regression in Example B&#x27;s new code makes one line read `try (Probe a = new Probe(&quot;A!&quot;,</span></span>
+<span class="source-line">    <span class="syntax-comment">// events, false); Probe b = new Probe(&quot;B&quot;, events, false)) {`. Repair it using the failing</span></span>
+<span class="source-line">    <span class="syntax-comment">// assertion.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Expected: The unrepaired run fails with an `AssertionError` from the assertion on</span></span>
+<span class="source-line">    <span class="syntax-comment">// `events.equals(List.of(&quot;body&quot;, &quot;closeB&quot;, &quot;closeA&quot;))`; the repaired line reads `try (Probe</span></span>
+<span class="source-line">    <span class="syntax-comment">// a = new Probe(&quot;A&quot;, events, false); Probe b = new Probe(&quot;B&quot;, events, false)) {`.</span></span>
 <span class="source-line"></span>
 <span class="source-line">    <span class="syntax-comment">// Exercise 3: Close after body failure</span></span>
 <span class="source-line">    <span class="syntax-comment">// Throw IllegalStateException in the body and inspect events after catching it.</span></span>

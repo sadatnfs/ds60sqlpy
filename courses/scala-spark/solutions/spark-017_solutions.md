@@ -1,6 +1,8 @@
 # spark-017: Explained paired reference solutions
 
-Read the [guide](../guides/spark-017.md) and attempt one language first. The [Scala reference](spark-017_solution.scala) and [PySpark reference](spark-017_solution.py) are complete single-file programs with explicit local sessions and finally-based stop. Each compares with literal expectations; matching two implementations alone would not rule out a shared mistake.
+Attempt the [guide](../guides/spark-017.md) exercises first.
+
+References: [Scala](spark-017_solution.scala), [PySpark](spark-017_solution.py).
 
 ## Exercises and reasoning
 
@@ -229,6 +231,7 @@ The six-row relation models every independent pairing, while the three-row relat
 
 ## Execution and interpretation
 
-Run the complete reference in its prepared fixed worker. Its first check (Parse once and retain rejection evidence) is built inside the program, so opening the lesson fetches nothing; it expects: Sources 1-4 accepted; 5 `malformed_json`; 6 `missing_parent`; 7 `missing_payload`. No source disappears and accepted count is 4. The final success line prints only after every reference assertion passes.
+The references check the full rejection ledger for all seven sources, the parent states populated, empty, unknown and populated, the three observed child rows with their positions, the five outer rows with placeholders for parents 20 and 30, and the per-parent summary `10:(2, 2, 5)`, `20:(0, 0, NULL)`, `30:(0, 0, NULL)`, `40:(1, 0, NULL)`. The relationship exercise asserts both the six Cartesian pairs and the three zipped pairs, including `(NULL, api)`.
 
-Local plan, partition and resource evidence does not establish cluster-scale performance; session cleanup is explicit.
+When the Python reference prints `spark-017: six PySpark reference contracts passed; Spark=` with the version, or the Scala reference prints its line, every source is accounted for. That result covers JSON with the declared schema only; a field the schema does not mention is silently ignored by `from_json`, which is a reason to version the schema with the data.
+

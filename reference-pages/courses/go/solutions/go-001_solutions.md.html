@@ -194,24 +194,26 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/go/solutions/go-001_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="go-001-explained-solutions">go-001: explained solutions<a class="heading-anchor" href="#go-001-explained-solutions" aria-label="Link to this section">#</a></h2>
-<p>These are comparison material after an attempt or explicit reveal. The executable reference implements all six cases in one <code>main.go</code>.</p>
+<p>Compare after an attempt (<a href="../STUDY-GUIDE.md.html#use-the-solutions">using solutions</a>). <code>courses/go/solutions/go-001_solution.go</code> implements all six cases.</p>
 <h3 id="mechanism">Mechanism<a class="heading-anchor" href="#mechanism" aria-label="Link to this section">#</a></h3>
 <p>A Go program is source text organized into packages. A runnable executable needs package main and a function named main with no arguments or return values. The compiler checks names and types before any statement executes. A successful build creates machine code for a particular operating system and processor architecture; the source file itself is not the executable. Inside a single goroutine, statements follow the program&#x27;s control flow. Printing a reassuring message proves only that a print statement ran. A useful reference instead computes a result and checks an independently known expectation. This distinction becomes important when later lessons contain cancellation, partial failure and distributed state.</p>
 <p>package declares the compilation unit&#x27;s package. import makes another package available under a name such as fmt. func main() declares the entrypoint; braces delimit its body. A short declaration with := creates a variable and infers its type. fmt.Sprintf constructs text while fmt.Println writes it. Go inserts many semicolons automatically, so keep an opening brace on the declaration line. The helper check(condition, message) panics on false; its message should identify the broken claim.</p>
 <h3 id="1-predict-a-first-value-change-one-input">1. Predict a first value: change one input<a class="heading-anchor" href="#1-predict-a-first-value-change-one-input" aria-label="Link to this section">#</a></h3>
-<p>Copy worked example 1 into a scratch pad and change <code>greeting := &quot;Hello, Go&quot;</code> to <code>greeting := &quot;Hello, Go!&quot;</code>. Before running, predict which check fails and which value it now sees; then run it and restore the original line.</p>
+<p>Copy worked example 1, change <code>greeting := &quot;Hello, Go&quot;</code> to <code>greeting := &quot;Hello, Go!&quot;</code> and predict the failure before running; then restore the line.</p>
 <p>The unchanged code is worked example 1:</p>
 <pre class="highlighted-code"><code class="language-go">greeting <span class="syntax-operator">:=</span> <span class="syntax-string">&quot;Hello, Go&quot;</span>
 check<span class="syntax-punctuation">(</span>greeting <span class="syntax-operator">==</span> <span class="syntax-string">&quot;Hello, Go&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;greeting&quot;</span><span class="syntax-punctuation">)</span></code></pre>
-<p><strong>Expected:</strong> The changed run panics with <code>greeting</code> because <code>greeting == &quot;Hello, Go&quot;</code> no longer holds. Restoring the original line brings back the worked observation: greeting equals Hello, Go.</p>
+<p><strong>Expected:</strong> The edited run panics with <code>greeting</code> because <code>greeting == &quot;Hello, Go&quot;</code> no longer holds.</p>
+<p><strong>Verify:</strong> Restoring <code>greeting := &quot;Hello, Go&quot;</code> makes the check pass again with the worked observation: greeting equals Hello, Go.</p>
 <p>The quotes delimit a string literal; they are not part of the stored value. Matching the exact text catches a changed greeting even if printing would still look reasonable.</p>
 <h3 id="2-compute-before-formatting-debug-a-regression">2. Compute before formatting: debug a regression<a class="heading-anchor" href="#2-compute-before-formatting-debug-a-regression" aria-label="Link to this section">#</a></h3>
-<p>A regression changed one token in worked example 2, so one line now reads <code>total := 2 - 3</code>. Run worked example 2 with that line, use the failure to locate the defect and repair it without changing the check.</p>
+<p>A one-token regression in worked example 2 makes a line read <code>total := 2 - 3</code>. Repair it without changing the check.</p>
 <p>The unchanged code is worked example 2:</p>
 <pre class="highlighted-code"><code class="language-go">total <span class="syntax-operator">:=</span> <span class="syntax-number">2</span> <span class="syntax-operator">+</span> <span class="syntax-number">3</span>
 line <span class="syntax-operator">:=</span> fmt<span class="syntax-punctuation">.</span>Sprintf<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;total=%d&quot;</span><span class="syntax-punctuation">,</span> total<span class="syntax-punctuation">)</span>
 check<span class="syntax-punctuation">(</span>total <span class="syntax-operator">==</span> <span class="syntax-number">5</span> <span class="syntax-operator">&amp;&amp;</span> line <span class="syntax-operator">==</span> <span class="syntax-string">&quot;total=5&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;format&quot;</span><span class="syntax-punctuation">)</span></code></pre>
-<p><strong>Expected:</strong> Before the repair the program panics with <code>format</code>; after it the line reads <code>total := 2 + 3</code> again and the integer is 5 and the text is total=5.</p>
+<p><strong>Expected:</strong> The defective run panics with <code>format</code>; after restoring <code>total := 2 + 3</code>, the integer is 5 and the text is total=5.</p>
+<p><strong>Verify:</strong> The failing run shows message <code>format</code>; after the repair <code>total == 5 &amp;&amp; line == &quot;total=5&quot;</code> holds again.</p>
 <p>The arithmetic result and its presentation are separate values. %d formats a decimal integer, and a wrong formatting verb can produce diagnostic text rather than the intended representation.</p>
 <h3 id="3-trace-statement-order">3. Trace statement order<a class="heading-anchor" href="#3-trace-statement-order" aria-label="Link to this section">#</a></h3>
 <p>Start count at 1, add 1, then multiply by 3.</p>
@@ -220,6 +222,7 @@ count<span class="syntax-operator">++</span>
 count <span class="syntax-operator">*=</span> <span class="syntax-number">3</span>
 check<span class="syntax-punctuation">(</span>count <span class="syntax-operator">==</span> <span class="syntax-number">6</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;order&quot;</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> The final count is 6.</p>
+<p><strong>Verify:</strong> Your solution must keep <code>count == 6</code> true. Control: changing <code>count := 1</code> to <code>count := 2</code> panics with message <code>order</code>; revert it.</p>
 <p>Multiplication observes the already-incremented value. Reversing the last two statements produces 4, so source order is part of the contract.</p>
 <h3 id="4-distinguish-zero-initialization">4. Distinguish zero initialization<a class="heading-anchor" href="#4-distinguish-zero-initialization" aria-label="Link to this section">#</a></h3>
 <p>Declare an int and a bool without explicit values.</p>
@@ -227,6 +230,7 @@ check<span class="syntax-punctuation">(</span>count <span class="syntax-operator
 <span class="syntax-keyword">var</span> ready <span class="syntax-keyword">bool</span>
 check<span class="syntax-punctuation">(</span>n <span class="syntax-operator">==</span> <span class="syntax-number">0</span> <span class="syntax-operator">&amp;&amp;</span> <span class="syntax-punctuation">!</span>ready<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;zero values&quot;</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> The values are 0 and false.</p>
+<p><strong>Verify:</strong> Your solution must keep <code>n == 0 &amp;&amp; !ready</code> true. Control: changing <code>check(n == 0 &amp;&amp; !ready, &quot;zero values&quot;)</code> to <code>check(n != 0 &amp;&amp; !ready, &quot;zero values&quot;)</code> panics with message <code>zero values</code>; revert it.</p>
 <p>Every declared Go variable has a defined zero value. That avoids uninitialized numeric storage, but zero may still be an invalid domain value that requires validation.</p>
 <h3 id="5-repair-a-naming-assumption">5. Repair a naming assumption<a class="heading-anchor" href="#5-repair-a-naming-assumption" aria-label="Link to this section">#</a></h3>
 <p>Bind total and Total to different integers and compare them.</p>
@@ -234,6 +238,7 @@ check<span class="syntax-punctuation">(</span>n <span class="syntax-operator">==
 Total <span class="syntax-operator">:=</span> <span class="syntax-number">7</span>
 check<span class="syntax-punctuation">(</span>total <span class="syntax-operator">!=</span> Total<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;case-sensitive names&quot;</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> The names refer to distinct variables.</p>
+<p><strong>Verify:</strong> Your solution must keep <code>total != Total</code> true. Control: changing <code>check(total != Total, &quot;case-sensitive names&quot;)</code> to <code>check(total == Total, &quot;case-sensitive names&quot;)</code> panics with message <code>case-sensitive names</code>; revert it.</p>
 <p>Identifier case matters. Export rules use capitalization across package boundaries; local variables with different case remain separate bindings.</p>
 <h3 id="6-transfer-to-a-receipt">6. Transfer to a receipt<a class="heading-anchor" href="#6-transfer-to-a-receipt" aria-label="Link to this section">#</a></h3>
 <p>Format an item count of 4 and unit price of 6 as amount=24.</p>
@@ -241,9 +246,10 @@ check<span class="syntax-punctuation">(</span>total <span class="syntax-operator
 receipt <span class="syntax-operator">:=</span> fmt<span class="syntax-punctuation">.</span>Sprintf<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;amount=%d&quot;</span><span class="syntax-punctuation">,</span> items<span class="syntax-operator">*</span>unit<span class="syntax-punctuation">)</span>
 check<span class="syntax-punctuation">(</span>receipt <span class="syntax-operator">==</span> <span class="syntax-string">&quot;amount=24&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;receipt&quot;</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> The checked result is amount=24.</p>
+<p><strong>Verify:</strong> Your solution must keep <code>receipt == &quot;amount=24&quot;</code> true. Control: changing <code>receipt := fmt.Sprintf(&quot;amount=%d&quot;, items*unit)</code> to <code>receipt := fmt.Sprintf(&quot;amount=%d&quot;, items+unit)</code> panics with message <code>receipt</code>; revert it.</p>
 <p>This combines calculation and representation while keeping the expected result independently inspectable. The example assumes whole units; currency rounding needs a separate policy.</p>
 <h3 id="transfer-after-comparison">Transfer after comparison<a class="heading-anchor" href="#transfer-after-comparison" aria-label="Link to this section">#</a></h3>
-<p>Return to your own pad and reproduce one check with a new input. Explain why the check rejects a plausible wrong implementation. Keep the distinction between a pure model, an in-process fake, and a real external system visible in your notes.</p></article>
+<p>Carry the separation between computing and presenting into every later lesson. Each case here checked a value first (an integer, a bool, a string) and its formatted text second, so a wrong format verb and a wrong calculation fail differently. When a later lesson decodes JSON or reconciles a cluster object, ask the same two questions: which value is the result, and which check would notice if only its presentation changed?</p></article>
   </main>
 </body>
 </html>

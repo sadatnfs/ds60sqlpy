@@ -194,13 +194,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/apache-data-platforms/examples/apache-080.md</code></p>
     </header>
     <article class="document"><h2 id="delta-sharing-apache-080-prepared-command-notebook">Delta Sharing apache-080 prepared command notebook<a class="heading-anchor" href="#delta-sharing-apache-080-prepared-command-notebook" aria-label="Link to this section">#</a></h2>
-<p>Copy the owned Delta Sharing project and follow PREPARATION.md. Delta Sharing belongs to Delta Lake/Linux Foundation. The offline preparation actions are:</p>
+<p>Keep the <code>plan</code> output from the copied Delta Sharing project as your reference copy of the three expected rows:</p>
 <pre class="highlighted-code"><code class="language-bash">bash run.sh prepare
 bash run.sh plan</code></pre>
-<p>For a separately prepared actual owned reference server and untracked recipient profile, the bounded native Docker protocol client runs with:</p>
+<p>After the owned server resumes or is replaced, run only <code>check</code>, and never rewrite the source table first:</p>
 <pre class="highlighted-code"><code class="language-bash">bash run.sh check</code></pre>
 <p>After actual server resume/replacement, run check alone and compare the same table ID/version/rows. Never rewrite the source table during retention readback. Server outage and missing-file experiments are distinct.</p>
-<p>The classroom Markdown pad does not start a service. Source configuration and unit policy fixtures are not actual reference-server receipts. Keep credentials and signed URL query strings out of all published source and evidence.</p></article>
+<p>A server outage fails at the control endpoint, while a missing data file fails at storage. Record which call failed and its status so the two are never merged into one result.</p></article>
   </main>
 </body>
 </html>

@@ -196,7 +196,6 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <article class="document"><h2 id="cuda-027-explanatory-solutions">cuda-027: explanatory solutions<a class="heading-anchor" href="#cuda-027-explanatory-solutions" aria-label="Link to this section">#</a></h2>
 <h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
 <p>Warp collectives require agreement about participating lanes. A mask names lanes expected to take part in a synchronized intrinsic, and source lanes used by a shuffle must actually participate. Independent thread scheduling means a convenient source ordering is not a general synchronization guarantee. Partial warps and divergent predicates need explicit reasoning. One safe educational reduction pattern has all lanes in a full warp participate, assigns zero to invalid data lanes, and then uses a full mask. A genuinely partial group needs a suitable mask and algorithm, not the same mask pasted everywhere.</p>
-<p>The separate <a href="../references/cuda-027_cpu.py.html">CPU reference</a> checks the chapter&#x27;s bounded model. It does not execute CUDA or establish GPU timing. Compare after attempting the worksheet or explicitly choosing to reveal solutions.</p>
 <h3 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h3>
 <p>Eight selected lanes among a full 32-thread warp contribute values 1 through 8; other lanes contribute zero. All 32 lanes execute the collective, giving sum 36. This is different from launching only eight threads and pretending the absent 24 lanes participate.</p>
 <p><strong>Approach:</strong> Keep all 32 lanes in the collective and let the 24 unselected lanes contribute zero to the sum.</p>
@@ -233,11 +232,16 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Why it is correct:</strong> Lanes outside a segment must not supply or receive values for it.</p>
 <p><strong>A plausible wrong approach:</strong> Using the full-warp sum for each segment mixes values from neighboring segments.</p>
 <p><strong>How to verify:</strong> Test segments that end inside a warp and one that crosses into the next warp.</p>
+<h3 id="self-check-answers">Self-check answers<a class="heading-anchor" href="#self-check-answers" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>What ballot mask do predicates true at lanes 0 and 3 produce?</strong> 1 plus 8, which is 9.</li>
+<li><strong>Why may a shuffle not read from lane seven in worked example 2?</strong> Lane seven is outside the participating group, so its value is not defined for that collective.</li>
+<li><strong>Why is source order not a synchronization guarantee within a warp?</strong> Independent thread scheduling lets lanes progress separately, so ordering needs explicit synchronization.</li>
+</ol>
 <h3 id="numerical-reference-and-its-limits">Numerical reference and its limits<a class="heading-anchor" href="#numerical-reference-and-its-limits" aria-label="Link to this section">#</a></h3>
-<p>The complete CPU model is <a href="../references/cuda-027_cpu.py.html">here</a>. Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It does not claim CUDA execution, concurrency safety or a performance measurement.</p>
+<p>The <a href="../references/cuda-027_cpu.py.html">CPU reference</a> reproduces worked example 1 and prints <code>{&#x27;ballot_mask&#x27;: 37, &#x27;count&#x27;: 3, &#x27;sum&#x27;: 36}</code>.</p>
 <h3 id="transfer-review">Transfer review<a class="heading-anchor" href="#transfer-review" aria-label="Link to this section">#</a></h3>
-<p>Define membership separately for each segment, ensure each collective&#x27;s source/destination lanes belong to the group and test segments crossing warp boundaries.</p>
-<p>A complete explanation must name its inputs, the unchanged mathematical contract, the changed boundary or resource condition, and the evidence still needed on actual hardware. Preserve a CPU baseline even after a GPU path becomes available.</p></article>
+<p>Define membership separately for each segment, ensure each collective&#x27;s source/destination lanes belong to the group and test segments crossing warp boundaries.</p></article>
   </main>
 </body>
 </html>

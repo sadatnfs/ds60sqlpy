@@ -1,6 +1,6 @@
 # js-019: explanatory solutions
 
-Use these answers after an attempt or an explicit reveal. The reference uses the same literal fixtures as the guide and keeps the exercises in separate scopes. A successful run checks these examples; explaining a changed input is a separate learning goal.
+Open these after your own attempt; each exercise runs in its own scope in the reference.
 
 ## Mechanism review
 
@@ -26,7 +26,7 @@ A parameter annotation follows its name, and a return annotation follows the par
 
 ## Exercise 1: Annotate a numeric function: change one input
 
-Task: Copy Example A into a scratch `main.mts` and change `const result = add(2, 3);` to `const result = add(3, 3);`. Before running it, predict which check fails and which value it now sees; then run it and restore the original line.
+Task: In a scratch copy of Example A, change `const result = add(2, 3);` to `const result = add(3, 3);`. Which check fails, and what value does it see?
 
 The annotation describes accepted calls to checked TypeScript code. It is erased during compilation; the emitted function still performs JavaScript addition and would need validation at an untyped boundary.
 
@@ -46,13 +46,13 @@ function negativeTypeCheck(): void {
 void negativeTypeCheck;
 ```
 
-**Expected:** The changed run fails with an `AssertionError` at `assert.equal(result, 5)`. Restoring `const result = add(2, 3);` brings back: sum 5 with runtime typeof number.
+**Expected:** The edited run fails with an `AssertionError` at `assert.equal(result, 5)`. Restoring `const result = add(2, 3);` brings back: sum 5 with runtime typeof number.
 
-**Verify:** Compare your written prediction with the reported `AssertionError`, including its actual and expected values, and name the value that made `assert.equal(result, 5)` fail. After restoring the line, the program prints its `{"checks":1,"status":"passed"}` receipt again.
+**Verify:** Compare the reported actual and expected values with your prediction, then restore `const result = add(2, 3);`.
 
 ## Exercise 2: Show that an assertion does not convert data: debug a regression
 
-Task: A regression changed one token in Example B, so one line now reads `const external: unknown = 'wrong!';`. Run Example B with that line, use the failing check to locate the defect and repair it without changing the check.
+Task: A regression made one Example B line read `const external: unknown = 'wrong!';`. Locate and repair it without editing the check.
 
 This intentionally unsafe assertion demonstrates the escape hatch. The correct repair for external data is a runtime check or parser, not a stronger-looking cast.
 
@@ -67,7 +67,7 @@ assert.equal(String(claimed), 'wrong');
 
 **Expected:** Before the repair the run fails with an `AssertionError` at `assert.equal(String(claimed), 'wrong')`. Restoring `const external: unknown = 'wrong';` brings back: the runtime value remains the string wrong.
 
-**Verify:** Keep the failing and the repaired runs. Explain why the changed token alters the value tested by `assert.equal(String(claimed), 'wrong')` for this input.
+**Verify:** Keep the failing and repaired runs and name the first value that differs between them.
 
 ## Exercise 3: Compare literal preservation and widening
 
@@ -93,7 +93,7 @@ void negativeTypeCheck;
 
 **Expected:** fixed tag remains ready; mutable text can change to done.
 
-**Verify:** Keep a check equivalent to `assert.equal(mutable, 'done')`. As a control, change `mutable = 'done';` to `mutable = 'done!';`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
+**Verify:** Keep `assert.equal(mutable, 'done')`. Control: changing `mutable = 'done';` to `mutable = 'done!';` must make that check fail; then restore it.
 
 ## Exercise 4: Handle null explicitly under strict checking
 
@@ -116,7 +116,7 @@ void negativeTypeCheck;
 
 **Expected:** length 3 for abc and 0 for null.
 
-**Verify:** Keep a check equivalent to `assert.equal(lengthOrZero(null), 0)`. As a control, change `return value === null ? 0 : value.length;` to `return value === null ? 1 : value.length;`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
+**Verify:** Keep `assert.equal(lengthOrZero(null), 0)`. Control: changing `return value === null ? 0 : value.length;` to `return value === null ? 1 : value.length;` must make that check fail; then restore it.
 
 ## Exercise 5: Observe type erasure through object keys
 
@@ -133,7 +133,7 @@ assert.equal('Item' in item, false);
 
 **Expected:** runtime keys contain only id and count, with no type alias metadata.
 
-**Verify:** Keep a check equivalent to `assert.equal('Item' in item, false)`. As a control, change `assert.equal('Item' in item, false);` to `assert.equal('Item' in item, true);` inside it: the run must fail with an `AssertionError`, which shows the check can fail. Restore it.
+**Verify:** Keep `assert.equal('Item' in item, false)`. Control: editing it to `assert.equal('Item' in item, true);` must make the check fail; then restore it.
 
 ## Exercise 6: Narrow unknown before numeric use
 
@@ -154,8 +154,8 @@ assert.throws(() => doubleFinite(Infinity), TypeError);
 
 **Expected:** 12 doubles to 24; string 12 and Infinity reject.
 
-**Verify:** Keep a check equivalent to `assert.equal(doubleFinite(12), 24)`. As a control, change `return value * 2;` to `return value + 2;`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
+**Verify:** Keep `assert.equal(doubleFinite(12), 24)`. Control: changing `return value * 2;` to `return value + 2;` must make that check fail; then restore it.
 
 ## After comparison
 
-Return to your saved implementation and repeat a case with different values. Keep compiler diagnostics, process output and browser observations separate. Do not suppress a failing assertion or use a type assertion to declare an unvalidated value safe. Resource-owning examples must finish cleanup even when work fails. Describe each result with its actual host and fixture scope rather than as production acceptance.
+Fresh case: write `parsePort(value: unknown): number` that accepts only integers from 1 to 65535. Predict the result for `8080`, `'8080'`, `0` and `NaN`, and confirm that the compiled JavaScript contains no annotations. ([After comparing](../STUDY-GUIDE.md#after-comparing-with-the-solution).)

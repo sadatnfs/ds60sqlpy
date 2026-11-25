@@ -1,6 +1,8 @@
 # rust-034: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [rust-034_solution.rs](rust-034_solution.rs). It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.
+Executable reference: [rust-034_solution.rs](rust-034_solution.rs), which runs both examples and the coded answers.
+
+Open this only after [an attempt](../STUDY-GUIDE.md#attempt-a-lesson).
 
 ## Why the two examples differ
 
@@ -26,7 +28,7 @@ State every precondition needed by from_raw_parts.
 
 Reduce the borrowed length while retaining valid initialized storage.
 
-**Reference answer.** The same statements run as the `Task 2` block of the reference program; here they are wrapped in `main` as a complete file.
+**Reference answer**, wrapped in `main`; the reference runs it as its `Task 2` block.
 
 ```rust
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -54,7 +56,7 @@ Shortening the length keeps every precondition: the first two elements are insid
 
 Write a safe wrapper specification before considering an unsafe implementation.
 
-**Reference answer.** The same statements run as the `Task 3` block of the reference program; here they are wrapped in `main` as a complete file.
+**Reference answer**, wrapped in `main`; the reference runs it as its `Task 3` block.
 
 ```rust
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -92,7 +94,7 @@ Diagnose returning a pointer after its owner is dropped.
 
 Review zero-length and alignment rules without executing undefined behavior.
 
-**Reference answer.** The same statements run as the `Task 5` block of the reference program; here they are wrapped in `main` as a complete file.
+**Reference answer**, wrapped in `main`; the reference runs it as its `Task 5` block.
 
 ```rust
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -126,7 +128,7 @@ A zero-length slice reads no memory, but its pointer must still be non-null and 
 
 Design an FFI ownership document stating allocation, release, encoding and error conventions.
 
-No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **Unsafe operation**, and state one limitation of your choice.
+**Judging criteria.** A strong document answers four questions for every pointer that crosses the boundary: which side allocates it; which side frees it and with which function, never mixing Rust's allocator with C `free`; how text is encoded, for example NUL-terminated UTF-8 through `CString` and `CStr` with invalid bytes rejected; and how errors are reported, as a return code plus an out-parameter rather than a panic unwinding into C. It also states whether a pointer may outlive the call. State one limitation: the compiler checks none of it, so each rule needs a test or review step.
 
 ## Mechanism and diagnostic reasoning
 
@@ -140,4 +142,6 @@ Never test undefined behavior by hoping it crashes predictably. A null check is 
 
 ## Review before continuing
 
-Run the reference and confirm that it prints `rust-034: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.
+Rebuild Example B (Prefer the safe operation when available) from a blank pad.
+
+Review routine: [Self-check and review](../STUDY-GUIDE.md#self-check-and-review).

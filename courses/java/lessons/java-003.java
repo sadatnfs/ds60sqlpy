@@ -3,20 +3,16 @@ public class Main {
 
   public static void main(String[] args) throws Exception {
     // Exercise 1: Guard a nullable value: predict an edited check
-    // Copy Example A into a scratch `Main.java` and change `assert !nonempty;` to `assert
-    // nonempty;` inside its assertion. Before running it with `java -ea Main`, predict whether
-    // the assertion still holds and explain why; then restore it.
-    // Expected: The changed run fails with an `AssertionError` from the assertion on
-    // `!nonempty`. Restoring the original line brings back the worked observation: condition
-    // false with no NullPointerException.
+    // Change Example A's assertion to `assert nonempty;`, predict whether it holds, then run and
+    // restore it.
+    // Expected: The edited run fails with an `AssertionError` from the assertion on `!nonempty`.
 
     // Exercise 2: Trace a prefix sum: debug a regression
-    // A regression changed one token in the code that Example B adds after Example A, so one
-    // line now reads `sum -= values[i];`. Run Example B with that line, use the failing
-    // assertion to locate the defect and repair it without changing the assertion.
-    // Expected: Before the repair the run fails with an `AssertionError` from the assertion on
-    // `prefixes.equals(List.of(2, 6, 12)) && sum == 12`; after it the line reads `sum +=
-    // values[i];` again and prefix sums 2, 6, 12; final 12.
+    // A regression in Example B's new code makes one line read `sum -= values[i];`. Repair it
+    // using the failing assertion.
+    // Expected: The unrepaired run fails with an `AssertionError` from the assertion on
+    // `prefixes.equals(List.of(2, 6, 12)) && sum == 12`; the repaired line reads `sum +=
+    // values[i];`.
 
     // Exercise 3: Handle an empty loop
     // Run the same sum pattern over an empty int array.

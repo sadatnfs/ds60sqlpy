@@ -246,13 +246,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Record input cardinalities, expected join multiplicity, selected engine, explain plan, query options, response exceptions and resource observations. Attribute latency to the full path, including queueing and serialization, rather than only the arithmetic operator. Keep measured local timings separate from capacity forecasts for larger hardware or a different data distribution.</p>
 <p><strong>Interview discussion: why can LIMIT 10 still be expensive?</strong> The engine may need to process many rows or groups before it knows which ten belong in the result. The join case establishes cardinality correctness, while the bounded-request case explains the difference between result size, computational work and explicit failure handling.</p>
 <h3 id="complete-worked-source">Complete worked source<a class="heading-anchor" href="#complete-worked-source" aria-label="Link to this section">#</a></h3>
-<p>This is a project-only command notebook. Read and edit it in the classroom; run its explicitly labeled commands from the copied owned Docker workshop. The classroom does not execute these service commands.</p>
+<p>The classroom does not execute these service commands. See the <a href="../STUDY-GUIDE.md.html#workshop-notebooks">workshop rules</a>.</p>
 <h2 id="pinot-apache-061-command-notebook">Pinot apache-061 command notebook<a class="heading-anchor" href="#pinot-apache-061-command-notebook" aria-label="Link to this section">#</a></h2>
-<p>Use these commands only from the copied owned Pinot project described in its README. The classroom Markdown pad does not execute Docker commands.</p>
+<p><code>client.py</code> in the copied Pinot project holds every query the checker sends, and <code>run.sh check</code> runs it. Its <code>query</code> helper raises as soon as a broker response carries an <code>exceptions</code> entry, so a failed join cannot pass silently.</p>
 <pre class="highlighted-code"><code class="language-bash">cat client.py
 bash run.sh check</code></pre>
 <p>The default checker inspects response exceptions and bounded results. A multistage join needs the supported engine configured and separately qualified, with unique-dimension and duplicate-dimension oracles.</p>
-<p>Native service acceptance and each advanced extension have distinct entries in <code>QUALIFICATION.md</code>. Source/configuration presence is not an observed service result.</p>
+<p>The multistage engine is outside the accepted Pinot gate. QUALIFICATION.md keeps multistage joins as a prepared extension, so a join receipt needs its own engine setting and both dimension oracles.</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
 <ul>
 <li><a href="https://github.com/pinot-contrib/pinot-docs/blob/latest/build-with-pinot/querying-and-sql/multi-stage-query/README.md">Multistage query engine</a></li>

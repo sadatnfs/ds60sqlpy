@@ -90,7 +90,7 @@ executor scan, and the file can disappear or be invisible at that later boundary
 The two cases demonstrate both the valid shared-file contract and a real source-removal
 condition detected after planning, with explicit limits on the single-host topology's conclusions.
 
-The [complete Ballista workshop](../projects/ballista/README.md) provides the maintained files, preparation, lifecycle and exact qualification boundaries for these cases.
+The `paths` action in the [Ballista workshop](../projects/ballista/README.md) registers a temporary Parquet file, deletes it and then queries it, so you see whether the cluster rejects the missing file or returns rows it should not have.
 
 ## Worked examples
 
@@ -118,7 +118,7 @@ This fragment from the project client shows why registration is not proof of ava
 
 ## Complete worked source
 
-This is a project-only command notebook. Read and edit it in the classroom; run its explicitly labeled commands from the copied owned Docker workshop. The classroom does not execute these service commands.
+The classroom does not execute these service commands. See the [workshop rules](../STUDY-GUIDE.md#workshop-notebooks).
 
 # Data visibility and delayed failure
 

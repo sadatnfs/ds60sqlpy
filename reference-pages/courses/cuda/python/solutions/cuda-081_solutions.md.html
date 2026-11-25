@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cuda/python/solutions/cuda-081_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="cuda-081-explained-solutions">cuda-081: explained solutions<a class="heading-anchor" href="#cuda-081-explained-solutions" aria-label="Link to this section">#</a></h2>
-<p>These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.</p>
+<p>Compare with your <a href="../lessons/cuda-081.md.html">worksheet</a> attempt.</p>
 <h3 id="exercise-1-distinguish-copy-and-alias">Exercise 1: Distinguish copy and alias<a class="heading-anchor" href="#exercise-1-distinguish-copy-and-alias" aria-label="Link to this section">#</a></h3>
 <p>An alias shares storage.</p>
 <p><strong>Approach.</strong> Contrast <code>alias = owner</code> with <code>copied = list(owner)</code>. After <code>alias[0] = 9</code>, <code>owner</code> is <code>[9, 2, 3]</code> while <code>copied</code> stays <code>[1, 2, 3]</code>.</p>
@@ -231,9 +231,19 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Why it is correct here.</strong> Visibility after a sequential mutation determines whether the exchange produced an alias or a copy. Sequencing avoids a data race that would make the result undefined.</p>
 <p><strong>A plausible wrong approach.</strong> Writing from both libraries at once to see what happens produces a race whose outcome proves nothing.</p>
 <p><strong>How to verify.</strong> Record whether the mutation was visible and compare with the documented behavior of the exchange.</p>
+<h3 id="self-check-answers">Self-check answers<a class="heading-anchor" href="#self-check-answers" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>Why is a zero-copy exchange not the same as two independent values?</strong> Both views share one allocation, so a mutation through one is visible through the other, and the consumer depends on the owner&#x27;s lifetime.</li>
+</ol>
+<ol start="2">
+<li><strong>Does sharing a physical GPU let two separate workers share a buffer?</strong> No. Zero-copy exchange here happens inside one process. Separate workers or containers cannot simply pass a live pointer.</li>
+</ol>
+<ol start="3">
+<li><strong>What does the modern exchange interface add over legacy capsules?</strong> It can negotiate stream readiness between producer and consumer. Legacy capsules have their own ownership rules and must be followed exactly.</li>
+</ol>
 <h3 id="reference-observation">Reference observation<a class="heading-anchor" href="#reference-observation" aria-label="Link to this section">#</a></h3>
 <p>Alias changes to 9 while copied value remains 1.</p>
-<p>The reference file is <code>courses/cuda/python/references/cuda-081_cpu.py</code>. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.</p></article>
+<p>Asserted by <code>courses/cuda/python/references/cuda-081_cpu.py</code>.</p></article>
   </main>
 </body>
 </html>

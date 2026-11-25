@@ -209,9 +209,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="syntax-anatomy-and-reasoning">Syntax anatomy and reasoning<a class="heading-anchor" href="#syntax-anatomy-and-reasoning" aria-label="Link to this section">#</a></h3>
 <p><code>func first[T any](items []T) (T,bool)</code> declares a type parameter <code>T</code>. <code>var zero T</code> obtains its zero value for an empty result. A custom constraint such as <code>interface { ~int | ~int64 }</code> admits named types with those underlying types. Type inference often determines <code>T</code> from arguments. A constraint belongs to compile-time capability checking; it is not runtime validation of application data.</p>
 <h3 id="run-this-lesson">Run this lesson<a class="heading-anchor" href="#run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>Choose Go in the unified Docker classroom. Save your own pad before experimenting. The prepared worker stages it as <code>main.go</code>, compiles it, and executes the resulting program with bounded time and output. The pad is one source file. It does not supply interactive input, arbitrary command-line arguments, package installation, Kubernetes credentials or a host Docker socket. Every ordinary reference here uses the standard library, synthetic local data and explicit checks. A failed <code>check</code> panics and produces a nonzero process result; do not remove it to make the run appear successful.</p>
-<p>The explanatory solution snippets belong inside <code>func main()</code> unless they declare a helper. <code>check</code> is a tiny teaching helper that panics when a condition is false. The separate reference supplies required imports and helpers and implements all six cases. Use that complete source only after an attempt or an explicit reveal. For an independently prepared Go project, the equivalent local build is <code>go build -o lesson main.go</code>, followed by <code>./lesson</code>; use Linux or WSL 2 for that optional workflow. Compiling proves syntax and type consistency, while the executed checks establish the stated example contracts.</p>
-<p>Each worked example below is a complete Go file. Copy one whole block into your saved pad and run it. Example 2 includes the first case as well as the second, so its setup is complete. Its supporting declarations may be reused in later investigations. The separate reference implements all six cases.</p>
+<p>Run each worked example as one complete file in your saved pad (<a href="../STUDY-GUIDE.md.html#run-a-lesson">run steps</a>).</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1-reuse-an-element-contract">Worked example 1: Reuse an element contract<a class="heading-anchor" href="#worked-example-1-reuse-an-element-contract" aria-label="Link to this section">#</a></h4>
 <p>Call first with an integer slice and a string slice.</p>
@@ -328,77 +326,79 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Observe:</strong> The result is zero with presence false.</p>
 <p>A zero value alone cannot distinguish an empty input from a first element equal to zero. The boolean preserves that information.</p>
 <h3 id="predict-before-running">Predict before running<a class="heading-anchor" href="#predict-before-running" aria-label="Link to this section">#</a></h3>
-<p>For each example, write the input values, the state that can change, and the expected observation. Explain which result would disprove your current interpretation. For concurrency, predict a guaranteed relationship rather than an arbitrary scheduling order. For an error case, identify whether it is rejected at compilation or returned during execution.</p>
+<p>Predict the type argument Go infers for each call to first, and whether unique would accept a slice of slices. For sumInts, decide whether a slice of the named Count type is admitted and what type the result has. For the empty case, predict both return values of first before reading its body.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-reuse-an-element-contract-change-one-input">Exercise 1: Reuse an element contract: change one input<a class="heading-anchor" href="#exercise-1-reuse-an-element-contract-change-one-input" aria-label="Link to this section">#</a></h4>
-<p>Copy worked example 1 into a scratch pad and change <code>a, okA := first([]int{4, 5})</code> to <code>a, okA := first([]int{5, 5})</code>. Before running, predict which check fails and which value it now sees; then run it and restore the original line.</p>
-<p><strong>Expected:</strong> The changed run panics with <code>generic first</code> because <code>okA &amp;&amp; okB &amp;&amp; a == 4 &amp;&amp; b == &quot;red&quot;</code> no longer holds. Restoring the original line brings back the worked observation: the results are 4 and red with presence true.</p>
-<p><strong>Verify:</strong> Compare your written prediction with the panic message <code>generic first</code> and name the value that made <code>okA &amp;&amp; okB &amp;&amp; a == 4 &amp;&amp; b == &quot;red&quot;</code> false. After restoring the input, the program must print its success line again.</p>
+<p>Copy worked example 1, change <code>a, okA := first([]int{4, 5})</code> to <code>a, okA := first([]int{5, 5})</code> and predict the failure before running; then restore the line.</p>
+<p><strong>Expected:</strong> The edited run panics with <code>generic first</code> because <code>okA &amp;&amp; okB &amp;&amp; a == 4 &amp;&amp; b == &quot;red&quot;</code> no longer holds.</p>
+<p><strong>Verify:</strong> Restoring <code>a, okA := first([]int{4, 5})</code> makes the check pass again with the worked observation: the results are 4 and red with presence true.</p>
 <h4 id="exercise-2-handle-a-generic-empty-value-diagnose-an-edited-check">Exercise 2: Handle a generic empty value: diagnose an edited check<a class="heading-anchor" href="#exercise-2-handle-a-generic-empty-value-diagnose-an-edited-check" aria-label="Link to this section">#</a></h4>
-<p>A careless edit changed the check in worked example 2 so that it reads <code>check(v != 0 &amp;&amp; !ok, &quot;empty generic&quot;)</code>. Run worked example 2 with that line, explain why the edited check now fails for the same program state, and restore it.</p>
-<p><strong>Expected:</strong> Before the repair the program panics with <code>empty generic</code>; after it the line reads <code>check(v == 0 &amp;&amp; !ok, &quot;empty generic&quot;)</code> again and the result is zero with presence false.</p>
-<p><strong>Verify:</strong> Keep the failing and the repaired runs. Explain why the edited check rejects the same program state that <code>v == 0 &amp;&amp; !ok</code> accepts.</p>
+<p>A careless edit rewrote the check in worked example 2 as <code>check(v != 0 &amp;&amp; !ok, &quot;empty generic&quot;)</code>. Explain the failure, then restore it.</p>
+<p><strong>Expected:</strong> The defective run panics with <code>empty generic</code>; after restoring <code>check(v == 0 &amp;&amp; !ok, &quot;empty generic&quot;)</code>, the result is zero with presence false.</p>
+<p><strong>Verify:</strong> The edited check fails with message <code>empty generic</code> for a state that <code>v == 0 &amp;&amp; !ok</code> accepts.</p>
 <h4 id="exercise-3-preserve-stable-uniqueness">Exercise 3: Preserve stable uniqueness<a class="heading-anchor" href="#exercise-3-preserve-stable-uniqueness" aria-label="Link to this section">#</a></h4>
 <p>Deduplicate 2, 1, 2 while preserving first occurrence.</p>
 <p><strong>Expected:</strong> The result is 2 then 1.</p>
-<p><strong>Verify:</strong> Keep a check equivalent to <code>len(v) == 2 &amp;&amp; v[0] == 2 &amp;&amp; v[1] == 1</code>. As a control, change <code>v := unique([]int{2, 1, 2})</code> to <code>v := unique([]int{3, 1, 2})</code>: the run must panic with <code>unique order</code>. Restore the line before continuing.</p>
+<p><strong>Verify:</strong> Your solution must keep <code>len(v) == 2 &amp;&amp; v[0] == 2 &amp;&amp; v[1] == 1</code> true. Control: changing <code>v := unique([]int{2, 1, 2})</code> to <code>v := unique([]int{3, 1, 2})</code> panics with message <code>unique order</code>; revert it.</p>
 <h4 id="exercise-4-admit-a-named-underlying-type">Exercise 4: Admit a named underlying type<a class="heading-anchor" href="#exercise-4-admit-a-named-underlying-type" aria-label="Link to this section">#</a></h4>
 <p>Sum two values of a named Count type.</p>
 <p><strong>Expected:</strong> The result is Count(7).</p>
-<p><strong>Verify:</strong> Keep a check equivalent to <code>sumInts([]Count{3, 4}) == Count(7)</code>. As a control, change <code>check(sumInts([]Count{3, 4}) == Count(7), &quot;underlying type&quot;)</code> to <code>check(sumInts([]Count{4, 4}) == Count(7), &quot;underlying type&quot;)</code> inside that check: it must panic with <code>underlying type</code>, which shows the check can fail. Restore it.</p>
+<p><strong>Verify:</strong> Your solution must keep <code>sumInts([]Count{3, 4}) == Count(7)</code> true. Control: changing <code>check(sumInts([]Count{3, 4}) == Count(7), &quot;underlying type&quot;)</code> to <code>check(sumInts([]Count{4, 4}) == Count(7), &quot;underlying type&quot;)</code> panics with message <code>underlying type</code>; revert it.</p>
 <h4 id="exercise-5-test-the-empty-sum-identity">Exercise 5: Test the empty sum identity<a class="heading-anchor" href="#exercise-5-test-the-empty-sum-identity" aria-label="Link to this section">#</a></h4>
 <p>Sum an empty int64 slice.</p>
 <p><strong>Expected:</strong> The result is int64 zero.</p>
-<p><strong>Verify:</strong> Keep a check equivalent to <code>sumInts([]int64{}) == 0</code>. As a control, change <code>check(sumInts([]int64{}) == 0, &quot;generic identity&quot;)</code> to <code>check(sumInts([]int64{}) != 0, &quot;generic identity&quot;)</code> inside that check: it must panic with <code>generic identity</code>, which shows the check can fail. Restore it.</p>
+<p><strong>Verify:</strong> Your solution must keep <code>sumInts([]int64{}) == 0</code> true. Control: changing <code>check(sumInts([]int64{}) == 0, &quot;generic identity&quot;)</code> to <code>check(sumInts([]int64{}) != 0, &quot;generic identity&quot;)</code> panics with message <code>generic identity</code>; revert it.</p>
 <h4 id="exercise-6-transfer-equality-semantics">Exercise 6: Transfer equality semantics<a class="heading-anchor" href="#exercise-6-transfer-equality-semantics" aria-label="Link to this section">#</a></h4>
 <p>Deduplicate strings with different case.</p>
 <p><strong>Expected:</strong> Red and red remain distinct.</p>
-<p><strong>Verify:</strong> Keep a check equivalent to <code>len(v) == 2</code>. As a control, change <code>v := unique([]string{&quot;Red&quot;, &quot;red&quot;, &quot;Red&quot;})</code> to <code>v := unique([]string{&quot;Red!&quot;, &quot;red&quot;, &quot;Red&quot;})</code>: the run must panic with <code>case policy</code>. Restore the line before continuing.</p>
-<p>Implement these in the answer-free learner source. Keep one independent check per claim. A task can require tracing, construction, a changed input or a deliberate safe failure. Do not run a data race, corrupt memory or contact a shared cluster merely to demonstrate why it would be wrong.</p>
+<p><strong>Verify:</strong> Your solution must keep <code>len(v) == 2</code> true. Control: changing <code>v := unique([]string{&quot;Red&quot;, &quot;red&quot;, &quot;Red&quot;})</code> to <code>v := unique([]string{&quot;Red!&quot;, &quot;red&quot;, &quot;Red&quot;})</code> panics with message <code>case policy</code>; revert it.</p>
+<p>Work in the answer-free learner source, <code>courses/go/lessons/go-015.go</code> (<a href="../STUDY-GUIDE.md.html#work-an-exercise">exercise contract</a>).</p>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
-<p>Read a compiler error from the first location in your source, then fix one cause at a time. Unused imports and variables are errors in Go; add an import when its use exists, rather than copying a large unused import list. A panic from <code>check</code> identifies a violated example contract. Compare the actual value with the expected value and inspect the state transition that produced it. A returned <code>error</code> is a value that the caller must handle; an ignored error can make later output look plausible while the original operation failed.</p>
-<p>The lesson-specific explanations in the two examples identify the important counterexamples. Extend that reasoning to every investigation: explain why a plausible alternative would fail, and preserve a tiny input that distinguishes it. Treat empty data, missing values and cancellation as domain cases with explicit policies. In concurrent work, replace sleeps used as synchronization with channels, mutexes or an explicit ownership protocol.</p>
+<p>The usual generic mistake is choosing a constraint by habit. any cannot compare, comparable cannot order or add, and a numeric constraint does not make overflow or float equality disappear. Another is assuming comparable means deep equality: two pointers are equal only when they point to the same variable. If only one concrete type is ever used, an ordinary function is clearer.</p>
+<p>General compiler, panic and error diagnosis is in the <a href="../STUDY-GUIDE.md.html#diagnose-a-failure">study guide</a>.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <h4 id="hint-for-investigation-1-reuse-an-element-contract-change-one-input">Hint for investigation 1: Reuse an element contract: change one input<a class="heading-anchor" href="#hint-for-investigation-1-reuse-an-element-contract-change-one-input" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The results are 4 and red with presence true.</li>
-<li>The check <code>okA &amp;&amp; okB &amp;&amp; a == 4 &amp;&amp; b == &quot;red&quot;</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Compute the checked value with <code>a, okA := first([]int{5, 5})</code> in place before running, then compare it with the value <code>okA &amp;&amp; okB &amp;&amp; a == 4 &amp;&amp; b == &quot;red&quot;</code> expects.</li>
+<li>first only indexes and measures the slice. Which constraint does that require?</li>
+<li>first returns 5 for the edited slice, so <code>a==4</code> fails while b is still red. Inference and indexing work; only the input element changed.</li>
 </ol>
 <h4 id="hint-for-investigation-2-handle-a-generic-empty-value-diagnose-an-edited-check">Hint for investigation 2: Handle a generic empty value: diagnose an edited check<a class="heading-anchor" href="#hint-for-investigation-2-handle-a-generic-empty-value-diagnose-an-edited-check" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The result is zero with presence false.</li>
-<li>The check <code>v == 0 &amp;&amp; !ok</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Compare <code>check(v != 0 &amp;&amp; !ok, &quot;empty generic&quot;)</code> with the same line in worked example 2 and state the claim each version makes.</li>
+<li>An empty slice has no first element. What does <code>var zero T</code> hold for int?</li>
+<li>For an empty slice first returns the zero value 0, so <code>v!=0</code> is false and the check panics. The boolean, not the value, reports absence.</li>
 </ol>
 <h4 id="hint-for-investigation-3-preserve-stable-uniqueness">Hint for investigation 3: Preserve stable uniqueness<a class="heading-anchor" href="#hint-for-investigation-3-preserve-stable-uniqueness" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The result is 2 then 1.</li>
-<li>The check <code>len(v) == 2 &amp;&amp; v[0] == 2 &amp;&amp; v[1] == 1</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Predict the effect of changing <code>v := unique([]int{2, 1, 2})</code> to <code>v := unique([]int{3, 1, 2})</code> before running anything. If the prediction is hard, trace that line again with the original input.</li>
+<li>The map records membership and the slice records order. Which occurrence of 2 is kept?</li>
+<li>A map tracks membership while the result slice preserves order.</li>
 </ol>
 <h4 id="hint-for-investigation-4-admit-a-named-underlying-type">Hint for investigation 4: Admit a named underlying type<a class="heading-anchor" href="#hint-for-investigation-4-admit-a-named-underlying-type" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The result is Count(7).</li>
-<li>The check <code>sumInts([]Count{3, 4}) == Count(7)</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Name one input that would make <code>sumInts([]Count{3, 4}) == Count(7)</code> false. A check that no input can falsify is not evidence.</li>
+<li>~int admits types whose underlying type is int. Does the result keep the name Count?</li>
+<li>The tilde constraint admits the underlying int representation while preserving the named result type.</li>
 </ol>
 <h4 id="hint-for-investigation-5-test-the-empty-sum-identity">Hint for investigation 5: Test the empty sum identity<a class="heading-anchor" href="#hint-for-investigation-5-test-the-empty-sum-identity" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The result is int64 zero.</li>
-<li>The check <code>sumInts([]int64{}) == 0</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Name one input that would make <code>sumInts([]int64{}) == 0</code> false. A check that no input can falsify is not evidence.</li>
+<li><code>var out T</code> starts at zero for every allowed type. What does the loop add for an empty slice?</li>
+<li>The identity must make sense for every allowed type.</li>
 </ol>
 <h4 id="hint-for-investigation-6-transfer-equality-semantics">Hint for investigation 6: Transfer equality semantics<a class="heading-anchor" href="#hint-for-investigation-6-transfer-equality-semantics" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: Red and red remain distinct.</li>
-<li>The check <code>len(v) == 2</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Predict the effect of changing <code>v := unique([]string{&quot;Red&quot;, &quot;red&quot;, &quot;Red&quot;})</code> to <code>v := unique([]string{&quot;Red!&quot;, &quot;red&quot;, &quot;Red&quot;})</code> before running anything. If the prediction is hard, trace that line again with the original input.</li>
+<li>comparable uses ==. Are Red and red equal strings?</li>
+<li>comparable uses the language equality operation.</li>
 </ol>
 <h3 id="self-check-and-retrieval">Self-check and retrieval<a class="heading-anchor" href="#self-check-and-retrieval" aria-label="Link to this section">#</a></h3>
-<p>Close the reference. Rebuild one normal case and one boundary case from a blank pad. Explain the role of type parameter without using its name in the definition. Then change the domain while keeping the same invariant. Record the new input, your prediction and the observed output. If your program passes only because its input is hard-coded, explain which part would need a reusable function in a larger project.</p>
+<p>Write <code>maxOf[T cmp.Ordered](items []T) (T, bool)</code> that reports absence for an empty slice, and check it with ints and with strings. Explain why comparable would not compile for this function and why any would not either. Then name one type that satisfies comparable but not cmp.Ordered.</p>
+<p>The general <a href="../STUDY-GUIDE.md.html#self-check-and-retrieval">retrieval routine</a> still applies.</p>
 <h3 id="next-step-and-sources">Next step and sources<a class="heading-anchor" href="#next-step-and-sources" aria-label="Link to this section">#</a></h3>
-<p><a href="https://go.dev/doc/tutorial/generics">Primary language or library documentation</a>, reviewed 2026-10-23. The teaching explanations and synthetic fixtures are original. Continue with the next lesson when you can explain the six observations and diagnose a changed case without copying its answer.</p>
+<p>Source: <a href="https://go.dev/doc/tutorial/generics">Go tutorial: getting started with generics</a>, reviewed 2026-10-23.</p>
+<p>Next: go-016, Closures, callbacks and controlled iteration (<a href="../STUDY-GUIDE.md.html#when-to-move-on">criteria</a>).</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for go-015: Generics and constraints without losing semantics.
 Read courses/go/guides/go-015.md and my saved attempt based on courses/go/lessons/go-015.go.

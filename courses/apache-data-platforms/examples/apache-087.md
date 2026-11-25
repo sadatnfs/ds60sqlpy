@@ -2,25 +2,21 @@
 
 Measure one actual supported path with source/image/native identity, input distribution, CPU/memory/storage/time definitions and sampling window. Keep configured limits and larger capacity forecasts distinct from measured values.
 
-## Receipt fields and independent oracle
+## What this capacity receipt must hold
 
-- Source revision/hashes and exact declared input IDs, values, schema and time units.
-- Actual native platform, package/image identities and owned resource namespace.
-- Selected table snapshot/version, source positions or process/lineage identity as appropriate.
-- Positive result against an independent oracle and a typed negative observation.
-- Read-only retained-state comparison after the selected lifecycle transition.
-- Cleanup/evidence-storage result and any separate prepared or unavailable feature.
+- The Docker engine OS, architecture and total memory, as `docker info` reports them.
+- Image and build cache sizes from `docker system df`, before and after the run.
+- The workload input in rows and bytes, with its exact result oracle.
+- The configured container limits, such as 512 MB and one CPU for the batch path.
+- Peak memory and CPU as sampled, with the sampling interval and the tool used.
+- Elapsed time for each run in a stated cold and warm sequence.
 
-For the common three-order fixture, require IDs 1/2/3 with amounts 4/9/7, total 20,
-east 11 and west 9. A later fourth west order of 2 changes the current total to 22 and west
-to 11 while an earlier pinned snapshot remains unchanged. Do not use this simple
-oracle to claim correctness for a different pipeline without defining its
-deduplication, correction and visibility semantics.
-
-Read the selected project README and qualification ledger before commands. The
-classroom does not execute Docker commands in this Markdown pad. Prepared
-configuration, unit policy fixtures, successful compilation and actual service
-acceptance remain different observations. Never include credentials or signed URLs.
+The capacity oracle is a consistency check rather than a target number. A peak
+memory reading above the configured limit means the counter measured something
+other than the container. Elapsed time with a wrong result is not a measurement
+of the workload. A warm run slower than a cold run usually means another process
+competed, so record what else was running. The
+[shared receipt rules](../STUDY-GUIDE.md#evidence-receipts) cover naming and storage.
 
 ## Concrete source inspection
 
@@ -31,5 +27,7 @@ docker info --format "{{.OSType}}/{{.Architecture}} {{.MemTotal}}"
 docker system df
 ```
 
-These inspections do not start or qualify a service. Execute only the chosen
-project's complete documented owned route and retain its actual receipt.
+Both commands only read engine state. `MemTotal` is the memory the Docker
+engine's virtual machine sees, which on a desktop install can be far less than
+the host's physical memory. `docker system df` shows reclaimable space; a large
+reclaimable figure is not permission to prune shared bases or other projects.

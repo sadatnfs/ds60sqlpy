@@ -1,22 +1,21 @@
 # SQL-SCALE-01: solution reasoning
 
-Use this after an honest attempt at the [guide](../companion-guides/sql_scale_01_cursors_and_batches.md)
-and [learner script](../lessons/sql_scale_01_cursors_and_batches.sql). The separate
-[executable solution](sql_scale_01_cursors_and_batches_solutions.sql) runs all six answers and independent
-fail-fast checks with `psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/solutions/sql_scale_01_cursors_and_batches_solutions.sql`.
-It uses only temporary fixtures, starts a transaction, and ends in rollback.
-It must exit 0 with no contract failures. Each answer has a savepoint so an
-experiment cannot silently change a later exercise's starting conditions.
-The assertion helper treats false and unknown as failures, rather than allowing
-a NULL assertion to pass accidentally. Keep the original fixture unchanged
-when comparing your work so the stated identities remain a reliable oracle.
+Open this after attempting the
+[guide](../companion-guides/sql_scale_01_cursors_and_batches.md) and your
+[learner script](../lessons/sql_scale_01_cursors_and_batches.sql). The
+[executable solution](sql_scale_01_cursors_and_batches_solutions.sql) rebuilds
+`scale_events` and its ordering index, runs each answer in a savepoint, saves
+it as `solution_answer_N`, and uses `pg_temp.assert_true` to compare the exact
+event IDs on each page. Event 7 in Exercises 4 and 5 is added with `UNION ALL`
+inside the query, never inserted. Run it as the [study
+guide](../../STUDY-GUIDE.md#read-a-solution) shows, with
+`-f sql/professional/solutions/sql_scale_01_cursors_and_batches_solutions.sql`.
 
-The code below is the answer for each numbered prompt, followed by its
-reasoning. Inspect the first discrepancy in your own transcript before reading
-a different answer. A solution is one defensible implementation of this contract;
-an alternative is valid if its identities, values, missingness, ordering, and
-transaction behavior match. Tests constrain the actual returned relation,
-rather than assuming a familiar-looking query must be right.
+A different continuation is equally correct if every page returns the same
+event IDs in the same order and the six events are each visited exactly once. A
+row comparison such as `(occurred_at, event_id) < (...)` and an expanded `OR`
+form are both fine for the known-timestamp pages, but neither reaches event 4
+unless the NULL phase is written separately.
 
 ## Exercise solutions
 
@@ -232,4 +231,10 @@ ROW_NUMBER assigns a unique position under the same total order, and integer div
 
 ## Cleanup and evidence boundary
 
-The final rollback removes every temporary table, helper function, index, and modeled change. Running this file twice starts from the same fixture and should produce the same logical evidence. No extension, external dataset, current timestamp, or administrator capability is required. For the optional two-session concurrency lab, use its separate explicit cleanup because that fixture is deliberately committed; the default script never prepares that shared state. A static content check can validate contracts and file structure, while only a live PostgreSQL transcript validates SQL execution. Retain that distinction when reporting completion.
+Each `ROLLBACK TO SAVEPOINT` discards that exercise's `solution_answer_N`
+table, and the closing `ROLLBACK` drops `scale_events`, its index and the
+assertion helper. Because event 7 lives only inside the Exercise 4 and 5
+queries, the stored table keeps exactly six events throughout and every run
+walks the same pages. A clean run proves these cursors on this fixture; it does
+not prove a cursor against a table that other sessions are changing, which is
+the subject of the self-check.

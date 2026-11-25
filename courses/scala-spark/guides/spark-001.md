@@ -1,10 +1,10 @@
 # spark-001: Choose a Scala-first or PySpark-first local route
 
-Authored classroom lesson. Content availability and runtime readiness are separate checks. Read the current capability notice before running. Opening or saving this lesson does not install tools, start a cluster or prove mastery.
+Before any Spark code runs, you need to know which layer does which job. Scala source compiles to JVM bytecode, a JVM runs that bytecode, and Spark is a separate engine that a Scala or Python driver describes work for. This lesson helps you pick a Scala-first or PySpark-first route into the course and practice telling a proposed version profile apart from a receipt showing that a worker actually ran.
 
 ## Level and prerequisites
 
-Beginner; 45 minutes. Direct prerequisites: none. Use the subject browser to open prerequisite lessons or review their concepts. Runtime readiness is checked separately before execution.
+Beginner; 45 minutes. Direct prerequisites: none. Pinned versions: [execution baseline](../execution-baseline.md). How the lesson files fit together: [study guide](../STUDY-GUIDE.md#lesson-files).
 
 Learner artifact: [spark-001.md](../lessons/spark-001.md). Keep [solutions](../solutions/spark-001_solutions.md) closed until an attempt or explicit reveal.
 
@@ -190,8 +190,10 @@ Explain a report that has Python but no JVM.
 
 ## Self-check
 
-- Can you reproduce each exact observation without reading the official answer?
-- Can you explain a failed check using the lesson's model, rather than changing an expected value?
+- `Main.scala`, `Main.class`, stdout `42` and exit status 0 are four different artifacts. Which one can you edit, and why does editing it not change an output that was already printed?
+- Route A starts at `spark-002`, while route B starts at `spark-011` after a `python-10` check. Why does the Scala-first route need no Python, and where do the two routes meet?
+- A dependency labeled `spark-sql_2.13` cannot be swapped for `spark-sql_3` in this profile. What does the suffix tell you, and what separate evidence would show that the profile really ran?
+- A version report shows Python 3.12 but no Java and no Spark profile. Which layer is missing, and why does pressing Run not install it for you?
 
 ## Retrieval and transfer
 

@@ -1,6 +1,6 @@
 # cpp-013: explanations and reference observations
 
-Attempt the learner tasks before opening this document. The executable reference checks the bounded normal and boundary examples; the six explanations below cover the deliberate changes and manual checks.
+The [executable reference](cpp-013_solution.cpp) adds `twice(7) == 14` and `twice(-2) == -4` as further always-active checks. The explanations show which checks disappear under `NDEBUG` and how the broken version in Exercise 6 is caught. How to compare: [study guide](../STUDY-GUIDE.md#compare-with-the-solutions).
 
 ## Mechanism
 

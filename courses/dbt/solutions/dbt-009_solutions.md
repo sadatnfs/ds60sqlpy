@@ -2,7 +2,7 @@
 
 Implement a keyed incremental contract with tested boundary and repeat-run behavior.
 
-The executable reference contains the two complete worked cases with assertions. The changes below explain the independent practice and its limits.
+The reference applies a delete+insert model keyed on `id` with a ten-unit lookback, checks that a correction replaces its old value without duplication, and shows that an older record needs a declared backfill. The lookback width is a fixture assumption; choosing one for real data needs measured lateness. See [how these answers are laid out](../STUDY-GUIDE.md#answers-and-references).
 
 
 ## 1. Test the exact boundary

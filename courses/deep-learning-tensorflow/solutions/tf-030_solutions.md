@@ -1,6 +1,6 @@
 # tf-030: explanatory solutions
 
-Open these answers for Distributed gradient semantics on one CPU after your own attempt at Example A, Weight shard means, or after an explicit reveal. Each answer reuses the guide's literal inputs, so a mismatch points to one step. The companion script runs the assertions; this page explains why they test Shard, Gradient accumulation, Global denominator. After matching exercise 6, Handle an empty shard, invent a new input without looking here.
+Open these answers after an attempt; they reuse the guide's inputs ([comparison steps](../STUDY-GUIDE.md#after-the-solutions)).
 
 ## Mechanism review
 
@@ -125,6 +125,3 @@ assert sum(len(p) for p in [np.array([])]) == 0
 
 **Verify:** In a fresh process, the exercise checks confirm `count == 4`, `sum((p.sum() for p in parts)) / count == 5` and `sum((len(p) for p in [np.array([])])) == 0`.
 
-## Review after comparison
-
-Change one fixture value in exercise 4, Apply exactly one update, and predict the new result before running it. Keep the failing version of exercise 5, Expose per-batch updates, next to its repair. A missing framework is an environment record, not a failed assertion. No solution downloads data, calls an online model, deploys a service or changes a database.

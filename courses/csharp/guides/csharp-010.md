@@ -24,9 +24,9 @@ A missing key is different from a present key holding a default value. Use TryGe
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles your saved pad as `Program.cs` in its fixed .NET 10 project. C# 14 is the matching language generation. This route uses the prepared framework libraries; it does not accept arbitrary project files, NuGet packages, command arguments or interactive input. The explicit `Program.Main` entrypoint makes compilation and execution visible. `Check` throws on a false condition in every build configuration, unlike conditional debugging assertions.
+Both examples pass an explicit comparer to the collection constructor, and every later lookup uses it. For task 2, construct the dictionary without a comparer, which defaults to ordinal case-sensitive equality, and run the same `TryGetValue("OAK", ...)` call; it then returns false.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Compile contract, starter stop and success marker: [running a lesson](../STUDY-GUIDE.md#running-a-lesson).
 
 
 
@@ -34,7 +34,7 @@ Start with the answer-free learner artifact in your saved classroom pad. It deli
 
 `Dictionary<string,int>(StringComparer.OrdinalIgnoreCase)` defines key identity. `TryGetValue(key, out value)` separates absence from a stored zero. `HashSet<T>.Add` returns whether membership changed.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+Each example ends with a trace; method: [tracing a program](../STUDY-GUIDE.md#tracing-a-program).
 
 ## Worked example / walkthrough
 
@@ -81,6 +81,8 @@ internal static class Program {
 
 **Observe:** OAK finds a present zero; Pine is absent.
 
+**Trace.** The initializer stores the key Oak with the value 0 under `OrdinalIgnoreCase`. `TryGetValue("OAK", out int zero)` hashes OAK with that comparer, finds Oak, writes 0 into `zero` and returns true. For Pine it finds nothing, still writes 0 to the output and returns false. Only the Boolean separates a stored zero from an absent key.
+
 ### Example B: Deduplicate by an explicit policy
 
 Deduplication is meaningful only after defining equality. Case-insensitive comparison is appropriate for this fixture, not for every identifier.
@@ -124,6 +126,8 @@ internal static class Program {
 
 **Observe:** RED is a duplicate under the selected comparer.
 
+**Trace.** The set uses the case-insensitive comparer. `Add("red")` inserts the label and returns true. `Add("RED")` finds an equal element, leaves the set unchanged and returns false. `Add("blue")` inserts a second identity, so Count is 2. Under the default ordinal comparer, RED would have become a third member. The comparer is fixed at construction, so it cannot be changed later.
+
 ## Exercises
 
 1. **Predict and explain.** Predict the difference between absent Pine and present-zero Oak.
@@ -138,13 +142,15 @@ internal static class Program {
 
 6. **Transfer and justify.** Design stable identity for records and explain which fields may change without invalidating lookup.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Log each task in the [evidence table](../STUDY-GUIDE.md#recording-exercise-evidence) before opening the explanation.
 
 ## Common pitfalls and diagnosis
 
 Changing a key field after insertion can break hash-based lookup for mutable custom keys. Distinct text spellings are not always distinct identities. Do not rely on incidental traversal order for reports.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+Task 4's direct indexer `counts["Pine"]` throws `KeyNotFoundException`, saying the key was not present. Returning 0 there instead would make Pine look counted. For task 5, the tags a, A and a should produce one key with count 3 under the case-insensitive comparer and two keys under the default comparer.
+
+Repair routine: [building a regression case](../STUDY-GUIDE.md#building-a-regression-case).
 
 ## Progressive hints
 
@@ -154,11 +160,15 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 ## Self-check and next step
 
-Explain Key, Hashing, Membership without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+Explain why `TryGetValue` returns a Boolean when its output value is filled in either way. Predict `Count` after adding red, RED, Red and blue to a case-insensitive set and to a default set. Describe what breaks if a custom key changes a field used by its hash code after insertion.
+
+Then follow the general [self-check routine](../STUDY-GUIDE.md#self-check-routine) and save your pad.
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://learn.microsoft.com/en-us/dotnet/csharp/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+[Documentation](https://learn.microsoft.com/en-us/dotnet/csharp/): The `Dictionary<TKey,TValue>` and `HashSet<T>` reference pages describe comparers, `TryGetValue` and the return value of `Add`.
+
+Provenance and limits: [sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

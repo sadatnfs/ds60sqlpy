@@ -4,18 +4,15 @@
 
 Beginner; about 90 minutes, plus any optional hardware experiment. Direct prerequisites: `cuda-001`, `cuda-005`, `cuda-006`
 
-The order supports learning at your own pace. Reading and CPU reasoning remain
-available when NVIDIA hardware is absent. Advanced hardware features need their
-own capability checks and are not prerequisites for opening this chapter.
+Pacing, evidence labels and platform rules for every chapter are in the [CUDA study guide](../../STUDY-GUIDE.md).
 
 ## Learning objectives
 
 Build a units-correct roofline estimate and design an experiment that could disprove it.
 
-Work through *From elapsed time to a performance model* with the concrete cases below. Finish with this evidence:
-a units-correct model and an experiment that could disprove it. Distinguish an algorithmic
-calculation, a compiled artifact and an actual device observation when explaining
-what your work establishes.
+**Scope:** FLOPs, bytes moved, arithmetic intensity, bandwidth, launch overhead, warm versus cold state, and kernel time versus end-to-end time.
+
+**Evidence to produce:** A units-correct model and an experiment that could disprove it.
 
 ## Purpose, vocabulary and mental model
 
@@ -38,28 +35,17 @@ P is operations per second, B is bytes per second, and I is operations per byte 
 
 ## How to run and study this lesson
 
-Use the saved reading worksheet in `/classroom`; the reading pad does not execute
-CUDA. For the bounded calculation, select **CPU model (Python)**, whose
-answer-free starter supplies the literal fixtures and task contract. The
-[CUDA C++ study workflow](../README.md) covers platforms, optional GPU
-compilation and evidence labels. In a prepared Python environment you can also
-run the separate [CPU reference](../references/cuda-007_cpu.py) from the
-repository root:
+Trace worked example 1 by hand, then run the [CPU reference](../references/cuda-007_cpu.py) from the repository root:
 
 ```sh
 python courses/cuda/cpp/references/cuda-007_cpu.py
 ```
 
-Its assertions check the stated numerical result or model invariant; console
-text is evidence of this CPU model only, not of CUDA execution.
-
 ## Worked example 1: trace the mechanism
 
 Assume hypothetical bandwidth of 600 GB/s, using decimal billions, and a 12-byte-per-element vector addition. The ideal useful-element throughput is 50 billion elements/s. One million elements require at least 20 microseconds at that bandwidth, excluding launch and host transfer. This is a thought experiment, not a claim about the learner's GPU.
 
-The complete CPU model below intentionally models only the named arithmetic,
-layout, dependency or capability decision. It does not model GPU scheduling,
-caches, instruction timing or device memory visibility.
+**Why:** Vector add reads two float32 values and writes one, so 12 bytes per element is the useful traffic floor.
 
 ```python
 n, bytes_per_element, bandwidth = 1_000_000, 12, 600e9
@@ -70,41 +56,37 @@ assert limits == [1e12, 10e12]
 print({"ideal_memory_seconds": seconds, "roofline_flops_per_second": limits})
 ```
 
-**Expected observation:** Every assertion succeeds. A representative CPU output is:
+**Expected observation:** every assertion succeeds, and the CPU model prints:
 
 ```text
 {'ideal_memory_seconds': 2e-05, 'roofline_flops_per_second': [1000000000000.0, 10000000000000.0]}
 ```
 
-Integers, shapes and ordering must match exactly; only assertions with an explicit
-tolerance accept small floating-point differences. A printed duration is a model
-output, not a measured GPU benchmark.
+**Check:** The reference asserts the time is within 1e-15 of 20e-6 seconds and prints ideal_memory_seconds 2e-05.
 
 ## Worked example 2: change a meaningful condition
 
 A hypothetical device has 10 TFLOP/s arithmetic capacity and 500 GB/s bandwidth. At intensity 2 FLOP/byte the roofline is 1 TFLOP/s; at intensity 40 it is capped at 10 TFLOP/s. Increasing reuse can change the limiting resource, but a kernel must still expose sufficient independent work.
 
-Before applying this example to your own program, write down which inputs are
-read, which result is produced, and the condition that makes the comparison
-valid. Keep the original case as a regression check when changing a boundary.
+**Why:** At 2 FLOP/byte bandwidth allows 1 TFLOP/s, below the compute ceiling; at 40 the product 20 TFLOP/s is capped at 10.
+
+**Check:** The reference asserts limits == [1e12, 10e12]; the ridge point 10e12 / 500e9 = 20 FLOP/byte separates the regimes.
 
 ## Six progressive exercises
 
-Exercises 1 and 2 are guided reconstructions of the worked examples; exercises
-3-6 change an input, diagnose a defect, test a boundary and transfer the idea.
-For each one, keep the calculation, output, diagram or failure policy you
-produce so another reader can compare it with the worked cases. If the hint is
-not enough, reread the mechanism paragraph and the bounded CPU assertion.
-
 ### Exercise 1
 
-Predict and trace the first worked example before running its CPU reference. Write every intermediate quantity that leads to the stated result, including units or ownership where applicable.
+Reconstruct worked example 1 on paper before running its CPU reference. Multiply one million elements by 12 bytes, giving 12 MB, and divide by 600e9 bytes per second.
+
+**Trap to avoid:** Dividing by 600 GiB/s instead of decimal GB/s shifts the answer by about 7 percent and mixes unit systems.
 
 **Hint:** Start with the literal input and intermediate quantities in worked example 1.
 
 ### Exercise 2
 
-Reconstruct the second worked example without copying its conclusion. Identify the changed input or condition, show the resulting calculation or dependency, and explain why it differs from the first example.
+Rework worked example 2 without copying its conclusion. Compute min(10 TFLOP/s, intensity times 500 GB/s) separately for intensity 2 and intensity 40.
+
+**Trap to avoid:** Quoting 10 TFLOP/s for both kernels ignores that the low-intensity kernel starves for bytes long before arithmetic saturates.
 
 **Hint:** Identify exactly which condition changes in worked example 2.
 
@@ -112,11 +94,15 @@ Reconstruct the second worked example without copying its conclusion. Identify t
 
 Estimate useful bytes for adding two length-1,000 float64 vectors.
 
+**Trap to avoid:** Using 4-byte elements from the float32 example gives 12,000 bytes, half the real payload for float64.
+
 **Hint:** Use the first worked example to establish the relevant quantities, then change only the requested input.
 
 ### Exercise 4
 
 A calculation divides bytes by TFLOP/s and calls the result seconds. Diagnose it.
+
+**Trap to avoid:** Converting TFLOP/s to bytes by assuming one byte per FLOP invents an intensity that the kernel does not have.
 
 **Hint:** Locate the failed phase or violated dependency before proposing a repair.
 
@@ -124,35 +110,33 @@ A calculation divides bytes by TFLOP/s and calls the result seconds. Diagnose it
 
 Why is a roofline less useful for a one-element kernel?
 
+**Trap to avoid:** Plotting the single-element kernel on a roofline predicts near-zero time and makes any measurement look like a defect.
+
 **Hint:** Check what the algorithm is allowed to read, write or assume at this boundary.
 
 ### Exercise 6
 
 A tiled kernel reduces global reads but doubles register use. What evidence decides?
 
+**Trap to avoid:** Accepting the tiled version because estimated bytes fell skips both correctness and the occupancy trade.
+
 **Hint:** State the output contract and which observations are needed in the new application.
 
 ## Common mistakes and diagnosis
 
-A tempting but incorrect claim in this chapter is: **peak TFLOPS predicts every kernel, or a kernel speedup is automatically an application speedup.**
-
-For the concrete failure exercise, a calculation divides bytes by TFLOP/s and calls the result seconds. Diagnose it.
-Preserve the original input and the stage where behavior diverged, and compare
-with the CPU model before changing hardware configuration.
+A tempting but incorrect claim: **Peak TFLOPS predicts every kernel, or a kernel speedup is automatically an application speedup.** Peak arithmetic is only one roof. Worked example 2 shows a kernel at intensity 2 FLOP/byte capped at 1 TFLOP/s by bandwidth on a 10 TFLOP/s device, and launch overhead or transfers can dominate an application even when the kernel itself speeds up.
 
 ## Self-check, retrieval and transfer
 
-Explain the first example without its code, then use the second example to state
-one assumption that matters. Complete Exercise 3 independently, use Exercise 4 to
-diagnose a plausible defect, check the boundary in Exercise 5, and retain the
-application contract from Exercise 6. Compare the [separate explanations](../solutions/cuda-007_solutions.md)
-only after your attempt or a deliberate reveal. A reading marker records your
-choice; it does not certify hardware qualification or expert mastery.
+1. What useful byte count does vector addition of n float32 elements move?
+2. At what intensity does the worked example 2 device switch from bandwidth bound to compute bound?
+3. Why must kernel time and end-to-end time be reported separately?
+
+Short answers are in the [separate explanations](../solutions/cuda-007_solutions.md#self-check-answers); compare only after an attempt.
 
 ## Primary references
 
-Check the documentation that matches your prepared toolkit before optional
-hardware execution.
+Use the documentation that matches your prepared toolkit.
 
 - [CUDA Programming Guide](https://docs.nvidia.com/cuda/cuda-programming-guide/)
 

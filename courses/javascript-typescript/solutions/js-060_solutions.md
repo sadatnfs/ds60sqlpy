@@ -1,6 +1,6 @@
 # js-060: explanatory solutions
 
-Compare after your own attempt or an explicit reveal. The separate .js reference is a complete offline browser program. These explanations discuss the six practice tasks; a visual resemblance alone is not a data or behavior check.
+Compare after your own attempt; the separate `.js` file is the complete reference program.
 
 ## Mechanism review
 
@@ -49,3 +49,7 @@ Treemaps prioritize compact hierarchy and composition. State the task that justi
 Large layout changes can disorient viewers. Identity and textual values help them follow the same entity across updates. The reference keys leaves by d.data.name, so updates keep "Analysis" attached to the same cell group; show a text list of values when cells move. Expect cells to change aspect ratio when values change.
 
 **Expected:** Stable keys, explicit updates and a readable alternate value list.
+
+## After comparison
+
+Build a treemap and a sorted bar chart from the same leaf data and ask a reader to name the third-largest leaf from each. Record which was easier, then animate one changing value with keyed rectangles and check that identities persist.

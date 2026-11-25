@@ -83,7 +83,7 @@ service was unavailable during interruption. These cases separate actual local
 persistence and task diagnosis from a broad unsupported claim of production
 resilience.
 
-The [complete Airflow workshop](../projects/airflow/README.md) provides the maintained files, preparation, lifecycle and exact qualification boundaries for these cases.
+The [Airflow workshop](../projects/airflow/README.md) actions `stop`, `resume`, `readback` and `health` let you compare saved runs, outputs and observations before and after a restart without triggering new work.
 
 ## Worked examples
 
@@ -128,7 +128,7 @@ Status shows whether the airflow container is running and healthy, the bounded l
 
 ## Complete worked source
 
-This is a project-only command notebook. Read and edit it in the classroom; run its explicitly labeled commands from the copied owned Docker workshop. The classroom does not execute these service commands.
+The classroom does not execute these service commands. See the [workshop rules](../STUDY-GUIDE.md#workshop-notebooks).
 
 # Health, saved history and exact resume
 

@@ -4,8 +4,6 @@
 
 RAII connects resource lifetime to an owning C++ object's lifetime. Its constructor establishes an invariant, and its destructor releases the resource. Copying a unique owner is usually forbidden; moving transfers ownership and leaves the source empty. This is important for CUDA allocations, streams and events because a copied raw handle does not represent an independent resource. A destructor should not throw during stack unwinding. Error reporting for explicit completion and release should happen in a deliberate path, while final cleanup remains a last safeguard. Asynchronous use adds a further obligation: do not destroy the owner while a queued operation still borrows the resource.
 
-The separate [CPU reference](../references/cuda-010_cpu.py) checks the chapter's bounded model. It does not execute CUDA or establish GPU timing. Compare after attempting the worksheet or explicitly choosing to reveal solutions.
-
 ## Exercise 1
 
 An operation acquires buffer A, then fails to acquire B. If A already belongs to an automatic owner, stack unwinding releases A. The event trace is acquire-A, acquire-B-failed, release-A. If A is only a raw pointer and cleanup exists only at the normal return, the failure path leaks A.
@@ -78,12 +76,16 @@ Record both consumers' completion dependencies before freeing or reusing the buf
 
 **How to verify:** Trace a schedule where one stream finishes late and confirm release happens after both events.
 
+## Self-check answers
+
+1. **What should a moved-from device buffer owner hold?** An empty handle, so its destructor releases nothing.
+2. **In worked example 1, what releases buffer A when acquiring B fails?** Stack unwinding runs A's owner destructor, giving the trace acquire-A, acquire-B-failed, release-A.
+3. **Why should a destructor report errors rather than throw?** Throwing during unwinding from another exception terminates the program.
+
 ## Numerical reference and its limits
 
-The complete CPU model is [here](../references/cuda-010_cpu.py). Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It does not claim CUDA execution, concurrency safety or a performance measurement.
+The [CPU reference](../references/cuda-010_cpu.py) reproduces worked example 1 and prints `['acquire-A', 'acquire-B-failed', 'release-A']`.
 
 ## Transfer review
 
 Record both consumers' completion dependencies before freeing or reusing the buffer. Host scope exit alone does not prove GPU completion.
-
-A complete explanation must name its inputs, the unchanged mathematical contract, the changed boundary or resource condition, and the evidence still needed on actual hardware. Preserve a CPU baseline even after a GPU path becomes available.

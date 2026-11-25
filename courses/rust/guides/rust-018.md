@@ -24,9 +24,11 @@ Associated types express a type chosen by an implementation, as Iterator does wi
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles the saved pad as `main.rs` with pinned Rust 1.99.1, edition 2024, and the prepared Arrow 60 library. `assert!` and `assert_eq!` remain active in normal builds. The fixed pad accepts one source file without arbitrary arguments, interactive input, Cargo manifests or package installation. The main function returns `Result<(), Box<dyn std::error::Error>>` so later examples can propagate errors with `?`; the final `Ok(())` means this fixture completed successfully. Standard library and Arrow examples remain offline after image preparation. Multi-file Cargo and external ecosystem projects have separate explicit preparation workflows.
+This lesson's programs need only the prelude and their own helpers. A passing run prints `rust-018: passed`.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Pad setup and limits: [Run a lesson](../STUDY-GUIDE.md#run-a-lesson).
+
+Before you run anything, follow [Attempt a lesson](../STUDY-GUIDE.md#attempt-a-lesson).
 
 
 
@@ -34,7 +36,9 @@ Start with the answer-free learner artifact in your saved classroom pad. It deli
 
 `T: Ord` constrains a type parameter. Returning T preserves the selected type. `type Item = i32` defines an associated type in an implementation. where clauses can make complex bounds easier to read.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+**Reading Example A (Retain the result type, code below).** `fn larger<T: Ord>(left: T, right: T) -> T` declares a type parameter `T` in angle brackets and a bound after the colon. The bound is a promise the caller must keep: whatever `T` is, it implements `Ord`, which supplies a total order and, through its `PartialOrd` supertrait, the `>=` operator the body uses. Both parameters and the result share the single name `T`, so the function cannot mix types or return a different one. At each call the compiler infers `T` from the arguments and generates a separate copy of the function for that type, a process called monomorphization; no boxing or run-time type check is involved. The two calls in Example A therefore produce two specialized versions. Because the parameters are taken by value, the call with `String` arguments moves both strings into `larger`, and the one not returned is dropped inside the function.
+
+Method for tracing your own variants: [Trace a program](../STUDY-GUIDE.md#trace-a-program).
 
 ## Worked example / walkthrough
 
@@ -96,13 +100,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 6. **Transfer and justify.** Choose a generic parameter or associated type for a producer relationship and explain who selects it.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Record each task as in [Keep evidence for each task](../STUDY-GUIDE.md#keep-evidence-for-each-task).
 
 ## Common pitfalls and diagnosis
 
 Generic code still has ownership and failure contracts. Deriving Ord chooses a field-order policy that may not match domain meaning. A broad bound should not replace an explicit comparator when multiple orderings are useful.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+To turn a pitfall into a test, see [Design a regression case](../STUDY-GUIDE.md#design-a-regression-case).
 
 ## Progressive hints
 
@@ -110,13 +114,23 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 2. Compare Example B (Use an associated iterator item) with Example A and name the first line whose behavior differs. Its observation is: The iterator's item relationship supports a typed sum.
 3. Before opening the explanation, test your task 3 attempt against this lesson's main pitfall: Generic code still has ownership and failure contracts.
 
+Tempting approaches to rule out before you compare:
+
+- **Task 1.** Thinking `larger(3, String::from("x"))` should work because both types are `Ord` misses that the signature uses one `T` for both parameters; the call is E0308, mismatched types.
+- **Task 2.** Declaring `minor` before `major` still compiles, but the derived order would then rank 1.9 above 2.0.
+- **Task 5.** Testing ties only with `larger(5, 5)` passes for both `>=` and `>`, so it cannot detect a change in the policy.
+
 ## Self-check and next step
 
-Explain Generic parameter, Trait bound, Associated type without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+Why does `larger(3, 8)` compile while `larger(3, String::from("x"))` does not, even though both types are `Ord`? Which bound on `larger` makes its comparison compile, and which argument does it return for `larger(5, 5)`? Why does an iterator fix its `Item` as an associated type instead of letting each caller choose one?
+
+Then work through [Self-check and review](../STUDY-GUIDE.md#self-check-and-review).
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://doc.rust-lang.org/book/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+Read [The Rust Book, 10.1 Generic Data Types](https://doc.rust-lang.org/book/ch10-01-syntax.html) for bounds and monomorphization.
+
+What the classroom does and does not prove: [Sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

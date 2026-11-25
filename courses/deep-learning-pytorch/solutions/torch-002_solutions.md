@@ -2,6 +2,8 @@
 
 Open these answers only after attempting Tensors, devices, dtypes, strides and views yourself. They reuse the guide's literal inputs, starting from Example A, Inspect shape and stride, so a discrepancy points at one step. The executable companion runs the assertions; this page explains why each one tests Stride, View, Device. After a pass, choose a new input for exercise 6, Reject incompatible arithmetic, without looking.
 
+After comparing, follow the [review steps](../STUDY-GUIDE.md#after-the-solutions).
+
 ## Mechanism review
 
 A PyTorch tensor has values plus metadata: shape, dtype, device, strides and gradient-tracking state. Shape tells you the number of elements along each axis; strides describe how an index moves through storage. A view can share storage with another tensor, so mutation through one reference may change the other. clone creates independent storage. Transpose changes the interpretation of axes and often produces a noncontiguous view. reshape may return a view or a copy, so code should not infer ownership solely from its name.
@@ -153,6 +155,3 @@ else:
 
 **Verify:** In a fresh process, the exercise checks confirm `torch.zeros((2, 3)) + torch.zeros(4)` raises `RuntimeError`.
 
-## Review after comparison
-
-Repeat exercise 4, Trace a transposed layout, with one changed fixture value and predict the difference before running it. Keep your failing attempt at exercise 5, Detect a pairing broadcast, beside the repaired result. A missing framework is not a failing assertion. These solutions use only local fixtures.

@@ -1,6 +1,6 @@
 # cuda-076: explained solutions
 
-These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.
+Compare with your [worksheet](../lessons/cuda-076.md) attempt.
 
 ## Exercise 1: Choose a sum identity
 
@@ -74,8 +74,16 @@ Use n=blocksize+1 with explicit expected output.
 
 **How to verify.** Write the expected partials explicitly, `[10, 5]`, and the total 15 before running. A mismatch in the second partial points directly to tail handling.
 
+## Self-check answers
+
+1. **What makes a barrier a collective obligation?** Every thread of the block that participates must reach a compatible synchronization point. A thread that returns early can leave the others waiting.
+
+2. **Why is the identity value algorithm-specific?** Zero is neutral for a sum but not for a minimum, and a weighted average also needs a count. The pad must leave that algorithm's answer unchanged.
+
+3. **Can shared memory pass data between two blocks?** No. It is local to one block. Cross-block cooperation needs a separate stage, such as writing partials to global memory and combining them in another launch.
+
 ## Reference observation
 
 All four modeled lanes participate; padded sum is 12.
 
-The reference file is `courses/cuda/python/references/cuda-076_cpu.py`. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.
+Asserted by `courses/cuda/python/references/cuda-076_cpu.py`.

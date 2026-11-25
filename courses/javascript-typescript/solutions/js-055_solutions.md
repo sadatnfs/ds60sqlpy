@@ -1,6 +1,6 @@
 # js-055: explanatory solutions
 
-Compare after your own attempt or an explicit reveal. The separate .js reference is a complete offline browser program. These explanations discuss the six practice tasks; a visual resemblance alone is not a data or behavior check.
+Compare after your own attempt; the separate `.js` file is the complete reference program.
 
 ## Mechanism review
 
@@ -49,3 +49,7 @@ Named ownership avoids canceling unrelated animations. Keep data state separate 
 Animation is a design choice, not a requirement of a polished chart. Respect speed, attention and motion sensitivity. For a single value change from 80 to 480 with no ordering to follow, an instant update reads just as well; keep motion for changes whose path explains something.
 
 **Expected:** Prefer immediate clarity when motion adds no explanatory value.
+
+## After comparison
+
+Add a staggered transition with `delay((d, i) => i * 50)` to a keyed bar update and trigger a second update mid-flight. Check that interrupted bars still reach the final values and that reduced motion removes both the delay and the duration.

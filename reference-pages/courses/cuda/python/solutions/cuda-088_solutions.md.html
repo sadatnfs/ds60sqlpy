@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cuda/python/solutions/cuda-088_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="cuda-088-explained-solutions">cuda-088: explained solutions<a class="heading-anchor" href="#cuda-088-explained-solutions" aria-label="Link to this section">#</a></h2>
-<p>These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.</p>
+<p>Compare with your <a href="../lessons/cuda-088.md.html">worksheet</a> attempt.</p>
 <h3 id="exercise-1-compute-serial-time">Exercise 1: Compute serial time<a class="heading-anchor" href="#exercise-1-compute-serial-time" aria-label="Link to this section">#</a></h3>
 <p>Sum stage times.</p>
 <p><strong>Approach.</strong> Add the stage times for a serial pipeline: 6 ms of preparation plus 4 ms of compute gives 10 ms per batch.</p>
@@ -231,9 +231,19 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Why it is correct here.</strong> Changing workers and queue depth together makes it impossible to attribute an improvement. Each extra worker also costs CPU memory and process startup.</p>
 <p><strong>A plausible wrong approach.</strong> Raising all settings to their maximum at once may exhaust host memory or CPU cores and still hide which change helped.</p>
 <p><strong>How to verify.</strong> Record step time and host memory for each setting. The best setting should be confirmed by repeating it.</p>
+<h3 id="self-check-answers">Self-check answers<a class="heading-anchor" href="#self-check-answers" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>Why is ideal overlap 6 ms per batch rather than 4 ms?</strong> Preparation takes 6 ms, so even with perfect overlap a new batch cannot arrive faster than the slowest stage.</li>
+</ol>
+<ol start="2">
+<li><strong>What does a prefetch queue cost?</strong> Memory for every queued batch, at least depth times payload, plus decoder state and framework overhead.</li>
+</ol>
+<ol start="3">
+<li><strong>Why bound and clean up workers in a small lesson?</strong> Unbounded workers can leave a large background process tree and exhaust host memory or I/O on a shared machine.</li>
+</ol>
 <h3 id="reference-observation">Reference observation<a class="heading-anchor" href="#reference-observation" aria-label="Link to this section">#</a></h3>
 <p>Serial 10 ms, ideal steady-state 6 ms, queued payload 25165824 bytes.</p>
-<p>The reference file is <code>courses/cuda/python/references/cuda-088_cpu.py</code>. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.</p></article>
+<p>Asserted by <code>courses/cuda/python/references/cuda-088_cpu.py</code>.</p></article>
   </main>
 </body>
 </html>

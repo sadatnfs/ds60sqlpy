@@ -24,9 +24,11 @@ Measure allocations and throughput under a realistic workload, and retain identi
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles the saved pad as `main.rs` with pinned Rust 1.99.1, edition 2024, and the prepared Arrow 60 library. `assert!` and `assert_eq!` remain active in normal builds. The fixed pad accepts one source file without arbitrary arguments, interactive input, Cargo manifests or package installation. The main function returns `Result<(), Box<dyn std::error::Error>>` so later examples can propagate errors with `?`; the final `Ok(())` means this fixture completed successfully. Standard library and Arrow examples remain offline after image preparation. Multi-file Cargo and external ecosystem projects have separate explicit preparation workflows.
+Beyond the prelude, this lesson's programs use `std::mem`. A passing run prints `rust-035: passed`.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Pad setup and limits: [Run a lesson](../STUDY-GUIDE.md#run-a-lesson).
+
+Before you run anything, follow [Attempt a lesson](../STUDY-GUIDE.md#attempt-a-lesson).
 
 
 
@@ -34,7 +36,9 @@ Start with the answer-free learner artifact in your saved classroom pad. It deli
 
 size_of measures a type's inline representation, not every allocation reachable from it. Vec capacity is separate allocated storage. reserve can reduce reallocations without changing the algorithmic cost of shifting or sorting.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+**Reading Example A (Distinguish handle size from owned data, code below).** `String::from("a")` and `"x".repeat(1000)` both produce a `String`, so both values have the same type and therefore the same inline representation: a pointer to a heap buffer, a capacity and a length. `std::mem::size_of_val(&small)` takes a reference and reports the size in bytes of the value it points to. For a `String` that is the size of those three fields, which depends on the target's pointer width and not on the text. The heap buffers are separate allocations that the strings own, so they do not appear in this number. `len()` reads the length field, which counts bytes of text. `repeat` computes the final length first and allocates one buffer large enough for every copy, so the long string costs one allocation, not a thousand. `size_of_val` is also useful for unsized values such as slices, where `size_of::<T>()` cannot be written; for a `String`, both give the same answer.
+
+Method for tracing your own variants: [Trace a program](../STUDY-GUIDE.md#trace-a-program).
 
 ## Worked example / walkthrough
 
@@ -91,13 +95,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 6. **Transfer and justify.** Choose a layout for repeated column scans and explain locality, ownership and update tradeoffs.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Record each task as in [Keep evidence for each task](../STUDY-GUIDE.md#keep-evidence-for-each-task).
 
 ## Common pitfalls and diagnosis
 
 Benchmarking different validation or ordering semantics is invalid. Size and alignment can vary by target. Do not use unsafe layout assumptions to replace an actual profiling result.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+To turn a pitfall into a test, see [Design a regression case](../STUDY-GUIDE.md#design-a-regression-case).
 
 ## Progressive hints
 
@@ -105,13 +109,23 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 2. Compare Example B (Prepare capacity without inventing elements) with Example A and name the first line whose behavior differs. Its observation is: Only ten initialized elements participate in the sum.
 3. Before opening the explanation, test your task 3 attempt against this lesson's main pitfall: Benchmarking different validation or ordering semantics is invalid.
 
+Tempting approaches to rule out before you compare:
+
+- **Task 1.** Concluding that the two strings use the same memory because the sizes match ignores the heap buffers entirely.
+- **Task 2.** Asserting `exact.capacity() == 10` relies on an allocator detail that the documentation does not promise; only `>= 10` is guaranteed.
+- **Task 5.** Testing only the large input for speed and the small input for correctness lets a version that overflows on large data pass both checks.
+
 ## Self-check and next step
 
-Explain Inline size, Locality, Allocation profile without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+Why does `size_of_val` report the same size for a one-byte and a thousand-byte `String`? After `Vec::with_capacity(100)` and `extend(0..10)`, what are `len()` and the sum, and why are the other reserved slots not elements? What would an allocation count show about reserving capacity that a single wall-clock timing might hide?
+
+Then work through [Self-check and review](../STUDY-GUIDE.md#self-check-and-review).
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://doc.rust-lang.org/book/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+Read [the `std::mem::size_of` documentation](https://doc.rust-lang.org/std/mem/fn.size_of.html) for how layout and niche optimization set inline size.
+
+What the classroom does and does not prove: [Sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

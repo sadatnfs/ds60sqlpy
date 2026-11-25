@@ -32,11 +32,9 @@ A recovery point objective describes tolerable data loss measured in time. A rec
 
 ## How to use this lesson
 
-The classroom displays this guide and saves your worksheet, `courses/docker/lessons/docker-021.md`. Its Run button does not control your Docker engine. Docker engine access is powerful host access, so the classroom deliberately receives no engine socket. Work through the supplied examples without starting anything, then use the optional host lab only in your own disposable project. Reading a command, parsing YAML and actually running the project are different forms of evidence.
+The classroom saves `courses/docker/lessons/docker-021.md` and holds no engine socket ([host-lab setup](../STUDY-GUIDE.md#host-lab-setup)).
 
-Use Bash in Linux, macOS Terminal, or Ubuntu under WSL 2 on Windows. The supported engine runs Linux containers. The maintained fixture is `courses/docker/fixtures/compose-lab/`; its README explains copying it into a new ignored learner directory, checking the engine, building locally with visible logs, and using the fixed project name `ds60-docker-study`. The fixture uses port 18080 on host loopback. Stop if that project name or port belongs to unrelated work; choose a new project name consistently in your own copy. Never paste a command against a remote Docker context simply because it is currently selected.
-
-For Dockerfile examples, create a file named `Dockerfile` in a scratch project. YAML snippets describe a fragment unless explicitly called a complete file. Text transcripts are synthetic illustrations, not claims about your machine. Do not substitute a real password, token or private registry into a checked-in example. **How to use the lessons** in the [subject README](../README.md) collects these rules in one place.
+**Host lab.** Follow the export and restore sections of the fixture README: stop the app, export `counter-backup.json` with noclobber, then restore it into the new `ds60-docker-study-restore` volume and run the read-only verification. Add one more check that uses the application's own validation rather than a copy of it: `docker run --rm --pull never --network none --read-only -v ds60-docker-study-restore:/data:ro ds60-docker-study:local python -c "import server; print(server.read_counter())"`. `read_counter` rejects a wrong schema version or a negative counter, so a printed number means the app would accept the file. Start the original project again with `up -d --wait` and confirm that its counter did not change. Keep the backup file and remove the restore volume only after you record both values.
 
 ## Worked example / walkthrough
 
@@ -62,7 +60,7 @@ stop writer -> export owned volume -> validate JSON -> restore into new volume -
 
 ## Six progressive exercises
 
-For each exercise, name the object involved and the phase of its lifetime before changing anything, then vary only the condition the task names. Exercises that ask you to predict, explain, compare or diagnose keep their answers in the solutions file; the others show the evidence to look for.
+Answer-type prompts keep their answers in the solutions file ([exercise rules](../STUDY-GUIDE.md#exercise-rules)).
 
 ### Exercise 1: Distinguish backup creation and restore acceptance.
 
@@ -96,13 +94,19 @@ For each exercise, name the object involved and the phase of its lifetime before
 
 Copying a live database directory instead of making a consistent export. Restoring over the only good copy. Calling a backup successful without a restore test.
 
-Exercise 4 is this chapter's boundary case: Diagnose a valid checksum with invalid application data. Parse and validate the restored file with the application's own reader; a matching checksum only shows the bytes were copied faithfully. Preserve the original failure and the exact changed field before retrying. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
+Exercise 4 is this chapter's boundary case: Diagnose a valid checksum with invalid application data. Parse and validate the restored file with the application's own reader; a matching checksum only shows the bytes were copied faithfully.
+
+Another weak backup is one stored next to the data it protects. A JSON export written into the same named volume, or a volume archive kept only inside the Docker Desktop virtual disk, shares every failure of the original: `docker compose down -v`, a reset of the engine's virtual machine or a disk failure removes both at once. A backup also needs a recorded location and owner outside the engine. The fixture README writes `counter-backup.json` to the host folder, which is the minimum; a real service would also copy it off the machine and test a restore from that copy.
+
+Never trade a safety control for a passing example ([safety rules](../STUDY-GUIDE.md#safety-rules)).
 
 ## Retrieval, transfer and next steps
 
-Close the explanations first. List the restore steps in order and name the check that proves the restored data is usable. Then reconstruct worked example 2 (Plan an independent restore) with one different value, predict what changes, and name which of backup, restore, recovery test and volume archive the change touches.
+**Retrieval.** List the restore steps in order and name the check that proves the restored data is usable.
 
-When a host session ends, run `docker compose -p ds60-docker-study down` from your fixture copy. It removes the project's containers and network but keeps named volumes; deleting a volume is a separate, deliberate reset described in the fixture README.
+**Transfer case.** A nightly job exports the counter volume while the app is still serving `POST /increment`. The exported JSON always parses. Using the fixture's write pattern, is each export consistent, and what does it still fail to guarantee?
+
+Then run the [retrieval loop](../STUDY-GUIDE.md#retrieval-and-cleanup) and end any host session with its cleanup.
 
 ## Primary references
 

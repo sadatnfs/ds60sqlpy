@@ -1,6 +1,6 @@
 # r-015: reference reasoning
 
-Use the [complete reference](r-015_reference.R) with the guide's declared inputs and runtime. Every worked example is also a standalone script.
+Run the [complete reference](r-015_reference.R) under the [run rules](../STUDY-GUIDE.md#run-a-chapter).
 
 ## Why the implementation has this shape
 
@@ -96,4 +96,6 @@ Handle or record a specifically understood warning; do not silence all new warni
 
 ## What the checks establish
 
-The reference makes 3 `stopifnot()` checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.
+The assertions confirm that "0" parses successfully to 0L, that "bad" is reported as a failure, that an integer overflow string and a non-character input are both rejected instead of coerced, and that the `on.exit()` cleanup restores the `digits` option. They do not prove that your handler lets unexpected programming errors propagate instead of absorbing them.
+
+The reference makes 3 `stopifnot()` checks; see [what a passing run proves](../STUDY-GUIDE.md#what-a-passing-run-proves).

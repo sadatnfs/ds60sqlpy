@@ -1,67 +1,23 @@
 # Day 08 solutions: Scalar and Inline Subqueries
 
-
 <!-- beginner-solution-enrichment -->
 ## How to study and run this solution
 
-Open this explanation only after making an honest attempt. The executable
-companion runs solely against the disposable `advanced_sql_training` database:
+Five of these answers put a subquery where a single value belongs and rely on an aggregate (`AVG`, `COUNT` or `MAX`) to guarantee one row; Exercise 4 shows what happens when the subquery finds nothing. Exercise 6 moves the repeated value into a `WITH` clause. Write your versions first, then run:
 
 ```bash
-# Linux, macOS, or Windows through WSL 2, from the repository root
 psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
   -f sql/postgres-60day/solutions/day08_solutions.sql
 ```
 
-`psql` prints each result/command tag in the terminal. Stop at the first
-unexpected `ERROR`; later output cannot repair an earlier failed invariant.
-Compare your own SQL, row grain, column names, row counts, `NULL` policy, and
-ordering with the explanation before comparing syntax.
-
-## Clause-by-clause reading map
-
-The lesson's main concepts are Scalar subquery, Inline view, Uncorrelated subquery. Its worked-model focus is:
-For each customer, the learner needs one first-order date. `MIN(order_date)` returns exactly one value, including `NULL` when no order exists. Contrast that with selecting raw order dates, which can raise “more than one row returned by a subquery used as an expression.”
-
-- Start at `FROM`/`JOIN` and state the intermediate row grain. Inspect join keys
-  before adding aggregates; a one-to-many join is allowed to multiply rows only
-  when the later contract accounts for it.
-- Apply `WHERE` to input rows, `GROUP BY` to form buckets, and `HAVING` to
-  completed groups. Window functions run over the surviving relation and
-  normally preserve its row count.
-- Read the `SELECT` list as the public result contract: keys establish grain,
-  measures state calculations, and aliases explain meaning. `ORDER BY` is the
-  only output-order guarantee; add a unique tie-breaker before `LIMIT`.
-- Trace every common table expression (CTE) as a temporary named relation.
-  Execute or inspect one stage at a time while debugging, but compare the final
-  result with an independent control rather than trusting stage names.
-- Keep SQL `NULL` as “missing/unknown/not applicable” until the metric contract
-  chooses another representation. Guard division with `NULLIF`; disclose
-  exclusions and distinguish zero from no row.
-- For DDL/DML, a command tag proves only that PostgreSQL accepted a statement.
-  Catalog checks, negative cases, row-count reconciliation, and the declared
-  transaction boundary prove behavior and cleanup.
-
-The exact final queries are not the only valid syntax. A join, subquery, CTE,
-window, or conditional aggregate can be an alternative when it preserves the
-same grain, `NULL` semantics, deterministic ordering, and safety. Prefer the
-form whose intermediate relations a reviewer can verify; optimize only after
-correctness is established with evidence.
-
-These answers align one-for-one with [day08_scalar_inline_subqueries.sql](../day08_scalar_inline_subqueries.sql).
-Run only against the disposable `advanced_sql_training` database.
-The executable companion wraps every answer in `BEGIN`/`ROLLBACK`.
-The snippets below assume the lesson's
-`SET search_path TO training, public;` statement. Run the complete
-executable companion when you want a self-contained check.
+Expect 2,269 orders, 8 countries, 500 customers, a single `t`, 6 categories and 8 countries again. The file runs inside `BEGIN`/`ROLLBACK`, and the snippets below skip its `SET search_path` line. Numbering follows [the learner file](../day08_scalar_inline_subqueries.sql), and the study guide's page on [reading a solution](../../STUDY-GUIDE.md#read-a-solution) suggests what to compare first.
 
 ## Reading contract
 
 - **Focus:** Use scalar and inline subqueries only when their one-row or one-value cardinality is guaranteed and visible.
 - **Assumptions:** A scalar subquery returning no rows becomes NULL; more than one row is an error. Order a `LIMIT 1` subquery deterministically.
 - **Primary pitfall:** Adding `LIMIT 1` to hide an unintended multi-row result creates arbitrary logic unless `ORDER BY` defines the chosen row.
-- **Safety:** all writes are bounded and rollback-protected; read-only
-  queries still use deterministic ordering whenever row order is claimed.
+- **Safety:** nothing here writes; six `SELECT` statements run between `BEGIN` and `ROLLBACK`.
 
 ## Exercise 1: Query writing
 
@@ -71,10 +27,9 @@ executable companion when you want a self-contained check.
 
 **Clause-by-clause reading:**
 
-- `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
-- `FROM`: establishes the starting relation and therefore the initial row grain.
-- `WHERE`: filters source rows before grouping and window calculation; SQL's unknown NULL comparisons do not pass.
-- `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
+- `(SELECT AVG(all_orders.total_amount) FROM orders AS all_orders)`: an uncorrelated scalar subquery. It ignores the outer row and returns one number, 540.04 (to two places).
+- `WHERE o.total_amount > (...)`: keeps orders strictly above that number.
+- `ORDER BY o.total_amount DESC, o.order_id`: biggest orders first, ID breaking ties.
 
 ```sql
 SELECT
@@ -96,19 +51,14 @@ ORDER BY
 
 **Expected shape:** Order rows above the global average.
 
-Check the result at the stated grain. An alternative formulation is
-valid only if it preserves the same NULL, ordering, time, money, and
-cardinality contract.
-
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-08 Exercise 1, read from `orders`. Build the answer toward `order_id`, `customer_id`, and `total_amount`; keep `order_id` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-08 Exercise 1, expected output: Order rows above the global average. The final columns are `order_id`, `customer_id`, and `total_amount`. The final order is `o.total_amount DESC, o.order_id`.
-- **Independent verification:** For sql-08 Exercise 1, run an anti-check that counts rows where NOT ((o.total_amount > ( SELECT AVG(all_orders.total_amount) FROM orders AS all_orders ))); require unique `order_id` where the expected grain is one row per key and confirm the projected `order_id`, `customer_id`, and `total_amount` against `orders`. Add one row for which `(o.total_amount > ( SELECT AVG(all_orders.total_amount) FROM orders AS all_orders ))` is true and one for which it is false; verify only the matching `order_id` value is returned.
-- **Intermediate relation check:** For sql-08 Exercise 1, inspect the source keys that survive `WHERE`; then check `o.total_amount DESC, o.order_id` before applying the row cap.
-- **Clause check:** For sql-08 Exercise 1, the solution actually uses `FROM`, `WHERE`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `orders`, preserve one row per `order_id`, and finish with `order_id`, `customer_id`, and `total_amount` ordered by `o.total_amount DESC, o.order_id`.
-- **Alternative/trade-off:** For sql-08 Exercise 1, the chosen form is justified by this lesson-specific rationale: The aggregate subquery is guaranteed to return exactly one value. Evaluate another form against the concrete expected result (Order rows above the global average) and the verification above.
-- **Edge case:** Add one row for which `(o.total_amount > ( SELECT AVG(all_orders.total_amount) FROM orders AS all_orders ))` is true and one for which it is false; verify only the matching `order_id` value is returned.
+- **Inputs/evidence:** For sql-08 Exercise 1, compare each of the 4,362 `orders` rows with one scalar subquery, `SELECT AVG(total_amount) FROM orders`, which evaluates to about 540.0383.
+- **Expected result/shape:** For sql-08 Exercise 1, return 2,269 rows, one per order above the average, from 16 orders tied at 1432.49 (order 104 first) down to 540.27. The final columns are `order_id`, `customer_id`, and `total_amount`. The final order is `o.total_amount DESC, o.order_id`.
+- **Independent verification:** For sql-08 Exercise 1, confirm 2,269 distinct `order_id` values and that the complementary filter `total_amount <= (SELECT AVG(total_amount) FROM orders)` returns the other 2,093 orders, topping out at 538.05. Replace `AVG(all_orders.total_amount)` with the bare column and the query must fail with `more than one row returned by a subquery used as an expression`.
+- **What prints:** 2,269 of the 4,362 orders, from 1,432.49 down to 540.27 (order 29, customer 5). Sixteen orders tie at the top value, so the ID ordering matters: 104, 379 and 654 come first.
+- **Why more than half:** the median order is 561.21, above the mean of 540.04, so a little over half the orders (52%) clear the average.
+- **The alias inside:** writing `AVG(o.total_amount)` inside the subquery points the aggregate at the outer `orders`, and PostgreSQL rejects the query with `aggregate functions are not allowed in WHERE`. Plain `AVG(total_amount)` works because an unqualified name is looked up in the nearest `FROM` first; the `all_orders` alias makes that choice visible.
 
 ## Exercise 2: Query writing
 
@@ -118,10 +68,10 @@ cardinality contract.
 
 **Clause-by-clause reading:**
 
-- `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
-- `FROM`: establishes the starting relation and therefore the initial row grain.
-- `GROUP BY`: collapses input rows to the listed key grain; every non-aggregated selected value must belong to that grain.
-- `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
+- `FROM customers AS c GROUP BY c.country`: one group per country.
+- `COUNT(*) AS country_customers`: how many customers each group holds.
+- `(SELECT COUNT(*) FROM customers) AS all_customers`: an uncorrelated scalar subquery, the same 500 on every row. It is allowed beside `GROUP BY` because it does not depend on any ungrouped column.
+- `ORDER BY country_customers DESC, c.country`: larger countries first, alphabetical within ties.
 
 ```sql
 SELECT
@@ -143,19 +93,14 @@ ORDER BY
 
 **Expected shape:** One row per country with a common global total.
 
-Check the result at the stated grain. An alternative formulation is
-valid only if it preserves the same NULL, ordering, time, money, and
-cardinality contract.
-
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-08 Exercise 2, read from `customers`. Build the answer toward `country`, `country_customers`, and `all_customers`; keep `country` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-08 Exercise 2, expected output: One row per country with a common global total. The final columns are `country`, `country_customers`, and `all_customers`. The final order is `country_customers DESC, c.country`.
-- **Independent verification:** For sql-08 Exercise 2, independently aggregate `customers` by `country`; require one output row for every distinct `country` tuple and compare `country_customers`, and `all_customers` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `country_customers`, and `all_customers` for the existing `country` tuple and verify the new tuple appears exactly once.
-- **Intermediate relation check:** For sql-08 Exercise 2, confirm the groups are `country`; then check `country_customers DESC, c.country` before applying the row cap.
-- **Clause check:** For sql-08 Exercise 2, the solution actually uses `FROM`, `GROUP BY`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `customers`, preserve one row per `country`, and finish with `country`, `country_customers`, and `all_customers` ordered by `country_customers DESC, c.country`.
-- **Alternative/trade-off:** For sql-08 Exercise 2, the chosen form is justified by this lesson-specific rationale: An uncorrelated aggregate subquery is one row and repeats safely for each grouped output row. Evaluate another form against the concrete expected result (One row per country with a common global total) and the verification above.
-- **Edge case:** Add one row to an existing group and one row for a new group; recompute `country_customers`, and `all_customers` for the existing `country` tuple and verify the new tuple appears exactly once.
+- **Inputs/evidence:** For sql-08 Exercise 2, group the 500 `customers` rows by `country` and add an uncorrelated scalar subquery, `SELECT COUNT(*) FROM customers`, as a constant column.
+- **Expected result/shape:** For sql-08 Exercise 2, return 8 rows, one per country: CA, DE, GB, and US with 63 customers, then AU, BR, FR, and IN with 62, each showing `all_customers` = 500. The final columns are `country`, `country_customers`, and `all_customers`. The final order is `country_customers DESC, c.country`.
+- **Independent verification:** For sql-08 Exercise 2, confirm the `country_customers` values sum to 500, the value repeated in every `all_customers` cell. Inside a rolled-back transaction, insert one customer from `MX`; the result must grow to 9 rows, with `MX` at 1 and every `all_customers` value at 501.
+- **What prints:** 8 rows. CA, DE, GB and US have 63 customers each; AU, BR, FR and IN have 62. Every row shows 500 in `all_customers`.
+- **Reconciliation:** 4 x 63 + 4 x 62 = 500, which matches the scalar column. Brazil appears here, unlike in reports built from orders, because this one counts customers.
+- **Why not `COUNT(*)` twice:** a second `COUNT(*)` in the same `SELECT` would count the current group, not the table; only the subquery steps outside the grouping.
 
 ## Exercise 3: Query writing
 
@@ -165,10 +110,9 @@ cardinality contract.
 
 **Clause-by-clause reading:**
 
-- `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
-- `FROM`: establishes the starting relation and therefore the initial row grain.
-- `WHERE`: filters source rows before grouping and window calculation; SQL's unknown NULL comparisons do not pass.
-- `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
+- `FROM customers AS c`: all 500 customers, including those with no orders.
+- `(SELECT MAX(o.order_date) FROM orders AS o WHERE o.customer_id = c.customer_id)`: a correlated scalar subquery. `MAX` reduces each customer's orders to one timestamp, or to `NULL` when there are none.
+- `ORDER BY latest_order_date DESC NULLS LAST, c.customer_id`: most recent buyers first, customers with no orders at the bottom.
 
 ```sql
 SELECT
@@ -190,19 +134,15 @@ ORDER BY
 
 **Expected shape:** One row per customer.
 
-Check the result at the stated grain. An alternative formulation is
-valid only if it preserves the same NULL, ordering, time, money, and
-cardinality contract.
-
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-08 Exercise 3, read from `orders`, and `customers`. Build the answer toward `customer_id`, `full_name`, and `latest_order_date`; keep `customer_id` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-08 Exercise 3, expected output: One row per customer. The final columns are `customer_id`, `full_name`, and `latest_order_date`. The final order is `latest_order_date DESC NULLS LAST, c.customer_id`.
-- **Independent verification:** For sql-08 Exercise 3, reselect the returned keys directly from the source; require unique `customer_id` where the expected grain is one row per key and confirm the projected `customer_id`, `full_name`, and `latest_order_date` against `orders`, and `customers`. Tie two rows on `latest_order_date DESC NULLS LAST` and give them different `c.customer_id` values; verify `latest_order_date DESC NULLS LAST, c.customer_id` chooses a stable first/last row.
-- **Intermediate relation check:** For sql-08 Exercise 3, inspect the source keys that survive `WHERE`; then check `latest_order_date DESC NULLS LAST, c.customer_id` before applying the row cap.
-- **Clause check:** For sql-08 Exercise 3, the solution actually uses `FROM`, `WHERE`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `orders`, and `customers`, preserve one row per `customer_id`, and finish with `customer_id`, `full_name`, and `latest_order_date` ordered by `latest_order_date DESC NULLS LAST, c.customer_id`.
-- **Alternative/trade-off:** For sql-08 Exercise 3, the chosen form is justified by this lesson-specific rationale: Use `MAX` to guarantee one result and let customers without orders receive NULL. Evaluate another form against the concrete expected result (One row per customer) and the verification above.
-- **Edge case:** Tie two rows on `latest_order_date DESC NULLS LAST` and give them different `c.customer_id` values; verify `latest_order_date DESC NULLS LAST, c.customer_id` chooses a stable first/last row.
+- **Inputs/evidence:** For sql-08 Exercise 3, list all 500 `customers` and fill `latest_order_date` with a correlated subquery that takes `MAX(order_date)` over that customer's `orders`.
+- **Expected result/shape:** For sql-08 Exercise 3, return 500 rows, one per customer: 438 dated rows, newest first and led by customer 258 on a freshly loaded fixture, then the 62 customers without orders with a `NULL` date. The final columns are `customer_id`, `full_name`, and `latest_order_date`. The final order is `latest_order_date DESC NULLS LAST, c.customer_id`.
+- **Independent verification:** For sql-08 Exercise 3, confirm 438 non-`NULL` dates, all distinct, so the `c.customer_id` tiebreaker only orders the 62 `NULL` rows. A `LEFT JOIN` to `orders` grouped by customer must return the same 500 `(customer_id, latest_order_date)` pairs; removing `NULLS LAST` must move customers 8 through 496 to the top.
+- **What prints:** 500 rows. In our check the first is customer 258 (latest order 2026-11-23), then 86 and 259; the last dated row is customer 429, whose most recent order goes back to February 2026.
+- **The 62 blanks:** rows 439 to 500 are the Brazilian customers with `NULL` dates, sorted by ID from 8 to 496.
+- **Without `NULLS LAST`:** PostgreSQL puts `NULL` first in a descending sort, so the list would open with 62 empty rows.
+- **Without `MAX`:** the raw `o.order_date` version fails as soon as it reaches a customer with two or more orders.
 
 ## Exercise 4: Prediction
 
@@ -212,9 +152,9 @@ cardinality contract.
 
 **Clause-by-clause reading:**
 
-- `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
-- `FROM`: establishes the starting relation and therefore the initial row grain.
-- `WHERE`: filters source rows before grouping and window calculation; SQL's unknown NULL comparisons do not pass.
+- `(SELECT p.price FROM products AS p WHERE p.product_id = -1)`: looks up a product ID that cannot exist, so the subquery finds no row.
+- `... IS NULL AS no_row_becomes_null`: tests the result of that empty lookup.
+- No `FROM` on the outer query: it returns exactly one row with one boolean.
 
 ```sql
 SELECT
@@ -229,19 +169,14 @@ SELECT
 
 **Expected shape:** One row whose boolean result is true.
 
-Check the result at the stated grain. An alternative formulation is
-valid only if it preserves the same NULL, ordering, time, money, and
-cardinality contract.
-
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-08 Exercise 4, read from `products`. Compute `no_row_becomes_null` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.
-- **Expected result/shape:** For sql-08 Exercise 4, expected output: One row whose boolean result is true. The final columns are `no_row_becomes_null`.
-- **Independent verification:** For sql-08 Exercise 4, evaluate each of `no_row_becomes_null` in a separate control `SELECT` over `products`; require one final row and compare every value. Repeat with `NULL` in `no_row_becomes_null` and state whether the row is kept, rejected, or classified.
-- **Intermediate relation check:** For sql-08 Exercise 4, inspect the source keys that survive `WHERE`.
-- **Clause check:** For sql-08 Exercise 4, the solution actually uses `FROM`, `WHERE`, and `SELECT`. Read only those operations: begin at `products`, preserve exactly one summary row, and finish with `no_row_becomes_null`.
-- **Alternative/trade-off:** For sql-08 Exercise 4, the chosen form is justified by this lesson-specific rationale: Use a deliberately impossible product key and test the scalar result with `IS NULL`. Evaluate another form against the concrete expected result (One row whose boolean result is true) and the verification above.
-- **Edge case:** Repeat with `NULL` in `no_row_becomes_null` and state whether the row is kept, rejected, or classified.
+- **Inputs/evidence:** For sql-08 Exercise 4, wrap a scalar subquery that selects `price` for `product_id = -1`, an ID no `products` row has, and test the result with `IS NULL`.
+- **Expected result/shape:** For sql-08 Exercise 4, return one row with `no_row_becomes_null` = `true`. The final columns are `no_row_becomes_null`.
+- **Independent verification:** For sql-08 Exercise 4, confirm `SELECT COUNT(*) FROM products WHERE product_id = -1` returns 0, so the scalar subquery has no row and yields `NULL`. Point the subquery at product 300 instead and the column must become `false`, because that row exists with a price of 121.00.
+- **What prints:** one row, `t`. An empty scalar subquery is not an error and not zero rows; it becomes `NULL`, and `IS NULL` reports true.
+- **The tempting wrong test:** `(...) = NULL` prints an empty cell instead of true, because any comparison with `NULL` is unknown.
+- **Same lookup, other forms:** `SELECT COUNT(*) FROM products WHERE product_id = -1` returns 0, and the bare `SELECT p.price ... WHERE p.product_id = -1` returns zero rows. Only the scalar form turns "nothing" into `NULL`.
 
 ## Exercise 5: Debugging
 
@@ -251,10 +186,10 @@ cardinality contract.
 
 **Clause-by-clause reading:**
 
-- `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
-- `FROM`: establishes the starting relation and therefore the initial row grain.
-- `GROUP BY`: collapses input rows to the listed key grain; every non-aggregated selected value must belong to that grain.
-- `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
+- `FROM products AS p GROUP BY p.category`: six groups of 50 products.
+- `MAX(p.price) AS category_max_price`: the most expensive product per category.
+- `(SELECT MAX(all_products.price) FROM products AS all_products) AS global_max_price`: the repaired subquery. `MAX` reduces 300 prices to one.
+- `ORDER BY p.category`: categories alphabetically.
 
 ```sql
 SELECT
@@ -275,19 +210,16 @@ ORDER BY
 
 **Expected shape:** One row per category with a scalar global maximum for comparison.
 
-Check the result at the stated grain. An alternative formulation is
-valid only if it preserves the same NULL, ordering, time, money, and
-cardinality contract.
-
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-08 Exercise 5, read from `products`. Build the answer toward `category`, `category_max_price`, and `global_max_price`; keep `category` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-08 Exercise 5, expected output: One row per category with a scalar global maximum for comparison. The final columns are `category`, `category_max_price`, and `global_max_price`. The final order is `p.category`.
-- **Independent verification:** For sql-08 Exercise 5, independently aggregate `products` by `category`; require one output row for every distinct `category` tuple and compare `category_max_price`, and `global_max_price` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `category_max_price`, and `global_max_price` for the existing `category` tuple and verify the new tuple appears exactly once.
-- **Intermediate relation check:** For sql-08 Exercise 5, confirm the groups are `category`; then check `p.category` before applying the row cap.
-- **Clause check:** For sql-08 Exercise 5, the solution actually uses `FROM`, `GROUP BY`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `products`, preserve one row per `category`, and finish with `category`, `category_max_price`, and `global_max_price` ordered by `p.category`.
-- **Alternative/trade-off:** For sql-08 Exercise 5, the chosen form is justified by this lesson-specific rationale: Choose the business reduction explicitly; this answer uses maximum price. Evaluate another form against the concrete expected result (One row per category with a scalar global maximum for comparison) and the verification above.
-- **Edge case:** Add one row to an existing group and one row for a new group; recompute `category_max_price`, and `global_max_price` for the existing `category` tuple and verify the new tuple appears exactly once.
+- **Inputs/evidence:** For sql-08 Exercise 5, group the 300 `products` rows (50 per category) by `category` for `MAX(price)`, and add the uncorrelated subquery `SELECT MAX(price) FROM products` as a constant column.
+- **Expected result/shape:** For sql-08 Exercise 5, return 6 rows, one per category from Apparel (119.15) to Sports (120.63); every row shows `global_max_price` = 121.00, which only Books reaches, through product 300. The final columns are `category`, `category_max_price`, and `global_max_price`. The final order is `p.category`.
+- **Independent verification:** For sql-08 Exercise 5, confirm `global_max_price` equals the largest `category_max_price` (121.00 for Books). Inside a rolled-back transaction, set product 1's price to 130.00; Apparel's maximum and every `global_max_price` value must become 130.00, while the other five category maximums stay the same.
+- **What prints:** 6 rows, Apparel to Sports, each showing a global maximum of 121.00. Category maximums run from 119.15 (Apparel) to 121.00 (Books).
+- **What the bug printed:** `(SELECT price FROM products)` returns 300 rows, and PostgreSQL stops with `more than one row returned by a subquery used as an expression`. The query never prints any rows.
+- **Where 121.00 comes from:** product 300, a Book, which has never been sold. A price report built from order lines would never show it.
+- **Gap to the top:** Books holds the global maximum, so its gap is 0.00. Sports trails by 0.37 and Apparel by 1.85, the widest gap of the six.
+- **Choosing the reduction:** `MAX` answers "highest price"; `AVG` or `MIN` would be equally valid fixes for other questions, which is why the hint asks you to choose on purpose.
 
 ## Exercise 6: Extension
 
@@ -297,13 +229,11 @@ cardinality contract.
 
 **Clause-by-clause reading:**
 
-- `WITH`: names an intermediate relation so its grain can be checked before later joins or aggregation.
-- `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
-- `FROM`: establishes the starting relation and therefore the initial row grain.
-- `JOIN ... ON`: combines relations and may multiply rows; the match predicate and each input's grain must agree.
-- `NULLIF`: turns a prohibited denominator into NULL so division reports unknown instead of raising an error.
-- `GROUP BY`: collapses input rows to the listed key grain; every non-aggregated selected value must belong to that grain.
-- `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
+- `WITH global AS (SELECT COUNT(*)::numeric AS customer_count FROM customers)`: a one-row, one-column relation computed once; the cast makes later division exact.
+- `FROM customers AS c CROSS JOIN global`: pairs every customer with that single row, so the customer count stays at 500.
+- `GROUP BY c.country, global.customer_count`: the total must appear in `GROUP BY` because it is a column now, not a subquery; it has one value, so it does not split any group.
+- `ROUND(COUNT(*) / NULLIF(global.customer_count, 0), 4) AS customer_share`: each country's share of all customers, guarded against an empty table.
+- `ORDER BY customer_share DESC, c.country`: largest share first.
 
 ```sql
 WITH global AS (
@@ -329,24 +259,20 @@ ORDER BY
 
 **Expected shape:** One row per country with country share.
 
-Check the result at the stated grain. An alternative formulation is
-valid only if it preserves the same NULL, ordering, time, money, and
-cardinality contract.
-
 ### Reasoning and verification
 
 - **Inputs/evidence:** For sql-08 Exercise 6, read from `customers`; compute the overall customer count once in a one-row CTE named `global`, then return each `country` with `country_customers` and `customer_share`, its fraction of all customers rounded to 4 places.
-- **Expected result/shape:** For sql-08 Exercise 6, expected output: One row per country with country share. The final columns are `country`, `country_customers`, and `customer_share`. The final order is `customer_share DESC, c.country`.
+- **Expected result/shape:** For sql-08 Exercise 6, return 8 rows, one per country, with the four 63-customer countries (CA, DE, GB, US) first at 0.1260 and the four 62-customer countries (AU, BR, FR, IN) after them at 0.1240. The final columns are `country`, `country_customers`, and `customer_share`. The final order is `customer_share DESC, c.country`.
 - **Independent verification:** For sql-08 Exercise 6, confirm 8 rows whose `country_customers` add up to `SELECT COUNT(*) FROM customers` (500) and whose `customer_share` values add up to 1.0000; on the seed, CA, DE, GB, and US have 63 customers (0.1260) and AU, BR, FR, and IN have 62 (0.1240).
-- **Intermediate relation check:** For sql-08 Exercise 6, run `global` alone and confirm it returns one row; cross joining a one-row relation does not multiply the grouped rows.
-- **Clause check:** For sql-08 Exercise 6, the solution actually uses `WITH`, `FROM`, `JOIN ... ON`, `GROUP BY`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `customers`, preserve one row per `country`, and finish with `country`, `country_customers`, and `customer_share` ordered by `customer_share DESC, c.country`.
-- **Alternative/trade-off:** For sql-08 Exercise 6, the chosen form is justified by this lesson-specific rationale: Compute the global total once, then cross join the guaranteed one-row relation. Evaluate another form against the concrete expected result (One row per country with country share) and the verification above.
-- **Edge case:** `global` casts the total to `numeric`; without that cast, dividing two integer counts would truncate every share to 0.
+- **What prints:** 8 rows. CA, DE, GB and US show 63 customers and a share of 0.1260; AU, BR, FR and IN show 62 and 0.1240. The shares add up to 1.0000.
+- **Why the cast:** without `::numeric`, `63 / 500` is integer division and every share would print 0.
+- **Why `CROSS JOIN` is safe here:** a cross join multiplies rows, but by exactly one, because `global` is an aggregate without `GROUP BY`.
+- **Same answer, older form:** Exercise 2's scalar subquery could compute the share too; the CTE names the total once and makes it easy to reuse in several columns.
 
 ## Final self-check
 
-- Can you explain the logical grain before and after every aggregation?
-- Are missing values preserved or converted only by an explicit rule?
-- Does every ordered result have a deterministic final tie-breaker?
-- Are money and time assumptions visible beside the calculation?
-- Does the complete executable solution finish with `ROLLBACK`?
+- What makes `(SELECT AVG(total_amount) FROM orders)` safe as a scalar subquery?
+- What does a scalar subquery return when it finds no row, and how do you test for it?
+- Why would Example 1 show 62 blank rows at the top without `COALESCE`?
+- Which product supplies the 121.00 in Exercise 5, and why would a sales report miss it?
+- Why does Exercise 6 add `global.customer_count` to `GROUP BY`?

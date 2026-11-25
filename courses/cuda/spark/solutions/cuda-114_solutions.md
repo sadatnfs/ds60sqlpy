@@ -1,6 +1,6 @@
 # cuda-114: explained solutions
 
-These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.
+Compare with your [worksheet](../lessons/cuda-114.md) attempt.
 
 ## Exercise 1: List matrix axes
 
@@ -74,8 +74,16 @@ Require import startup bounded query and expected result on the selected host.
 
 **How to verify.** Store the result of each step for each row and accept the row only with all four passing.
 
+## Self-check answers
+
+1. **Why is a nominal Spark version not enough to establish compatibility?** Distributions can carry vendor patches, so binary compatibility must be checked against the exact distribution and release.
+
+2. **What does the CUDA classifier on a plugin jar select?** The native library packaging. It does not supply or replace a compatible NVIDIA driver on the host.
+
+3. **Are a local ARM Mac image and an NVIDIA Linux host the same concern?** No. Image architecture and the GPU host's architecture are separate axes in the matrix.
+
 ## Reference observation
 
 Illustrative Scala/host-architecture predicate rejects mismatch; not a full compatibility probe.
 
-The reference file is `courses/cuda/spark/references/cuda-114_cpu.py`. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.
+Asserted by `courses/cuda/spark/references/cuda-114_cpu.py`.

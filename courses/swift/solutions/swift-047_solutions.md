@@ -1,6 +1,8 @@
 # swift-047: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [swift-047_solution.swift](swift-047_solution.swift). It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.
+Reference program: [swift-047_solution.swift](swift-047_solution.swift), covering both examples and the executed answers.
+
+Attempt the tasks first; see [comparing with the explanation](../STUDY-GUIDE.md#comparing-with-the-explanation).
 
 ## Why the two examples differ
 
@@ -85,7 +87,7 @@ Checking the declared capability set before acting turns a missing platform feat
 
 Create a platform support matrix listing compiled, executed and manually inspected surfaces separately.
 
-No single reference answer exists: several designs can satisfy this transfer task. Build yours from the task 3 answer above (Build JourneyCore on a prepared Linux Swift environment and separately build JourneyApp on macOS) and the mechanism described below, and state one limitation of your choice.
+No single answer exists; extend task 3 using the [open transfer routine](../STUDY-GUIDE.md#open-transfer-tasks).
 
 ## Solution reasoning
 
@@ -109,4 +111,4 @@ CanImport proves a module is available to the compiler, not that every API is av
 
 ## Review before continuing
 
-Run the reference and confirm that it prints `swift-047: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.
+Run the reference and confirm it prints `swift-047: passed`, then rerun the guide's counterexample.

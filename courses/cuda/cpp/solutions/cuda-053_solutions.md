@@ -4,8 +4,6 @@
 
 Tensor cores accelerate supported matrix multiply-accumulate tile operations. Operand formats, accumulator types, layouts, alignment and instruction availability depend on architecture and library mode. Lower precision can reduce memory and increase throughput while changing range and rounding. FP16 and BF16 are not interchangeable merely because both occupy sixteen bits; they allocate exponent and precision bits differently. TF32 and FP8 families also need explicit hardware/software qualification. Use a supported library path first, then study tile-level APIs. A matrix shape or low-precision tensor alone does not prove tensor-core instructions executed.
 
-The separate [CPU reference](../references/cuda-053_cpu.py) checks the chapter's bounded model. It does not execute CUDA or establish GPU timing. Compare after attempting the worksheet or explicitly choosing to reveal solutions.
-
 ## Exercise 1
 
 A toy decimal format retaining three significant digits represents 1.001 as 1.00. Summing 1,000 such rounded inputs gives 1,000 rather than 1,001. This is a CPU quantization analogy, not an emulation of FP16 or a measured tensor-core error. Accumulating in a wider type cannot restore information already lost in the inputs.
@@ -78,12 +76,16 @@ Compare operator error and the model-level metric, including gradients/training 
 
 **How to verify:** Train or evaluate with both precisions and compare the metric.
 
+## Self-check answers
+
+1. **In worked example 1, how far is the rounded sum from the exact sum?** 1, because 1,000 inputs of 1.001 rounded to 1.00 sum to 1,000 instead of 1,001.
+2. **A float16 GEMM ran successfully. Does that prove tensor core use?** No; only profiler or library mode evidence shows which instructions ran.
+3. **Why test extreme magnitudes?** Low precision formats overflow or underflow earlier, and well scaled inputs hide those failures.
+
 ## Numerical reference and its limits
 
-The complete CPU model is [here](../references/cuda-053_cpu.py). Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It does not claim CUDA execution, concurrency safety or a performance measurement.
+The [CPU reference](../references/cuda-053_cpu.py) reproduces worked example 1 and prints `{'toy_decimal_exact_sum': 1000.9999999999999, 'toy_quantized_sum': 1000.0, 'tensor_core_emulation': False}`.
 
 ## Transfer review
 
 Compare operator error and the model-level metric, including gradients/training stability where applicable, instead of assuming lower precision is harmless.
-
-A complete explanation must name its inputs, the unchanged mathematical contract, the changed boundary or resource condition, and the evidence still needed on actual hardware. Preserve a CPU baseline even after a GPU path becomes available.

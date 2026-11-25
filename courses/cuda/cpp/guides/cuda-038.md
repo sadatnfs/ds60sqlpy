@@ -4,18 +4,15 @@
 
 Intermediate; about 110 minutes, plus any optional hardware experiment. Direct prerequisites: `cuda-031`, `cuda-032`, `cuda-033`, `cuda-034`, `cuda-035`, `cuda-036`, `cuda-037`, `cuda-029`
 
-The order supports learning at your own pace. Reading and CPU reasoning remain
-available when NVIDIA hardware is absent. Advanced hardware features need their
-own capability checks and are not prerequisites for opening this chapter.
+Pacing, evidence labels and platform rules for every chapter are in the [CUDA study guide](../../STUDY-GUIDE.md).
 
 ## Learning objectives
 
 Produce a reproducible benchmark report with retained raw data, an error budget and a limited recommendation.
 
-Work through *Optimization review and a defensible benchmark* with the concrete cases below. Finish with this evidence:
-reproducible report, retained raw data, error budget and a recommendation with its limits. Distinguish an algorithmic
-calculation, a compiled artifact and an actual device observation when explaining
-what your work establishes.
+**Scope:** One-variable experiments, statistical uncertainty, baseline fairness, warm/cold scenarios, power and thermal state, hardware provenance and regressions.
+
+**Evidence to produce:** Reproducible report, retained raw data, error budget and a recommendation with its limits.
 
 ## Purpose, vocabulary and mental model
 
@@ -38,28 +35,17 @@ Use a consistent summary policy and retain both raw sample sets. The ratio is sc
 
 ## How to run and study this lesson
 
-Use the saved reading worksheet in `/classroom`; the reading pad does not execute
-CUDA. For the bounded calculation, select **CPU model (Python)**, whose
-answer-free starter supplies the literal fixtures and task contract. The
-[CUDA C++ study workflow](../README.md) covers platforms, optional GPU
-compilation and evidence labels. In a prepared Python environment you can also
-run the separate [CPU reference](../references/cuda-038_cpu.py) from the
-repository root:
+Trace worked example 1 by hand, then run the [CPU reference](../references/cuda-038_cpu.py) from the repository root:
 
 ```sh
 python courses/cuda/cpp/references/cuda-038_cpu.py
 ```
 
-Its assertions check the stated numerical result or model invariant; console
-text is evidence of this CPU model only, not of CUDA execution.
-
 ## Worked example 1: trace the mechanism
 
 Baseline times are \([10,11,10,9,10]\) ms and candidate times \([8,8,9,8,7]\) ms. Median ratio is \(\frac{10}{8}=1.25\). This suggests an improvement for the measured fixture, but five synthetic samples do not establish stability across hardware, sizes or operating conditions.
 
-The complete CPU model below intentionally models only the named arithmetic,
-layout, dependency or capability decision. It does not model GPU scheduling,
-caches, instruction timing or device memory visibility.
+**Why:** Medians of 10 ms and 8 ms give 1.25 for this fixture.
 
 ```python
 import statistics
@@ -76,41 +62,37 @@ print(
 )
 ```
 
-**Expected observation:** Every assertion succeeds. A representative CPU output is:
+**Expected observation:** every assertion succeeds, and the CPU model prints:
 
 ```text
 {'synthetic_median_speedup': 1.25, 'baseline_samples_ms': [10, 11, 10, 9, 10], 'candidate_samples_ms': [8, 8, 9, 8, 7]}
 ```
 
-Integers, shapes and ordering must match exactly; only assertions with an explicit
-tolerance accept small floating-point differences. A printed duration is a model
-output, not a measured GPU benchmark.
+**Check:** The reference asserts the median speedup equals 1.25.
 
 ## Worked example 2: change a meaningful condition
 
 A candidate uses float16 while the baseline uses float64. It may legitimately target a different accuracy budget, but it is not a like-for-like implementation comparison until both satisfy the same required error contract. Include conversion cost if the application supplies and consumes another dtype.
 
-Before applying this example to your own program, write down which inputs are
-read, which result is produced, and the condition that makes the comparison
-valid. Keep the original case as a regression check when changing a boundary.
+**Why:** float16 changes accuracy and conversion cost, so its speed is a different trade.
+
+**Check:** Measure error against a reference for both and include conversions in timing.
 
 ## Six progressive exercises
 
-Exercises 1 and 2 are guided reconstructions of the worked examples; exercises
-3-6 change an input, diagnose a defect, test a boundary and transfer the idea.
-For each one, keep the calculation, output, diagram or failure policy you
-produce so another reader can compare it with the worked cases. If the hint is
-not enough, reread the mechanism paragraph and the bounded CPU assertion.
-
 ### Exercise 1
 
-Predict and trace the first worked example before running its CPU reference. Write every intermediate quantity that leads to the stated result, including units or ownership where applicable.
+Reconstruct worked example 1 on paper before running its CPU reference. Take the median of each sample set and divide 10 by 8.
+
+**Trap to avoid:** Claiming a general 25 percent improvement from five synthetic samples overstates what they show.
 
 **Hint:** Start with the literal input and intermediate quantities in worked example 1.
 
 ### Exercise 2
 
-Reconstruct the second worked example without copying its conclusion. Identify the changed input or condition, show the resulting calculation or dependency, and explain why it differs from the first example.
+Rework worked example 2 without copying its conclusion. Hold both versions to the same error contract before comparing speed.
+
+**Trap to avoid:** Reporting float16 against float64 as a like-for-like speedup hides the accuracy loss.
 
 **Hint:** Identify exactly which condition changes in worked example 2.
 
@@ -118,11 +100,15 @@ Reconstruct the second worked example without copying its conclusion. Identify t
 
 Write a benchmark contract for a 1,024-by-1,024 matrix product.
 
+**Trap to avoid:** Writing only the matrix size lets two runs differ in dtype or layout.
+
 **Hint:** Use the first worked example to establish the relevant quantities, then change only the requested input.
 
 ### Exercise 4
 
 A report keeps only the minimum candidate time and median baseline time. Repair it.
+
+**Trap to avoid:** Dropping baseline outliers while keeping candidate ones biases the result.
 
 **Hint:** Locate the failed phase or violated dependency before proposing a repair.
 
@@ -130,35 +116,33 @@ A report keeps only the minimum candidate time and median baseline time. Repair 
 
 Why include tiny and ragged shapes?
 
+**Trap to avoid:** Testing only 1,024 aligned sizes hides costs real requests pay.
+
 **Hint:** Check what the algorithm is allowed to read, write or assume at this boundary.
 
 ### Exercise 6
 
 Decide whether to ship a faster but less accurate variant.
 
+**Trap to avoid:** Shipping because typical inputs look fine leaves edge inputs unprotected.
+
 **Hint:** State the output contract and which observations are needed in the new application.
 
 ## Common mistakes and diagnosis
 
-A tempting but incorrect claim in this chapter is: **a single best run or one large speedup proves a universally superior implementation.**
-
-For the concrete failure exercise, a report keeps only the minimum candidate time and median baseline time. Repair it.
-Preserve the original input and the stage where behavior diverged, and compare
-with the CPU model before changing hardware configuration.
+A tempting but incorrect claim: **A single best run or one large speedup proves a universally superior implementation.** One fast run can reflect a lucky clock state, a warm cache or a different accuracy target. Worked example 1 compares medians of five samples each and still limits the claim to that fixture, and worked example 2 shows float16 against float64 is not like for like. A defensible claim keeps raw samples, a competent baseline and the same error contract.
 
 ## Self-check, retrieval and transfer
 
-Explain the first example without its code, then use the second example to state
-one assumption that matters. Complete Exercise 3 independently, use Exercise 4 to
-diagnose a plausible defect, check the boundary in Exercise 5, and retain the
-application contract from Exercise 6. Compare the [separate explanations](../solutions/cuda-038_solutions.md)
-only after your attempt or a deliberate reveal. A reading marker records your
-choice; it does not certify hardware qualification or expert mastery.
+1. Why compare medians rather than the fastest run of each version?
+2. What makes a CPU baseline competent?
+3. Why record thermal state and device sharing?
+
+Short answers are in the [separate explanations](../solutions/cuda-038_solutions.md#self-check-answers); compare only after an attempt.
 
 ## Primary references
 
-Check the documentation that matches your prepared toolkit before optional
-hardware execution.
+Use the documentation that matches your prepared toolkit.
 
 - [CUDA Programming Guide](https://docs.nvidia.com/cuda/cuda-programming-guide/)
 

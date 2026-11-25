@@ -3,20 +3,16 @@ public class Main {
 
   public static void main(String[] args) throws Exception {
     // Exercise 1: Expose a strong retention path: change one input
-    // Copy Example A into a scratch `Main.java` and change `byte[] payload = new byte[1024];` to
-    // `byte[] payload = new byte[1025];`. Before running it with `java -ea Main`, predict which
-    // assertion fails and which value it now sees; then run it and restore the original line.
-    // Expected: The changed run fails with an `AssertionError` from the assertion on
-    // `retained.get(0)[0] == 7 && retained.get(0).length == 1024`. Restoring the original line
-    // brings back the worked observation: list still exposes the same array contents.
+    // Change `byte[] payload = new byte[1024];` to `byte[] payload = new byte[1025];` in Example
+    // A and predict which assertion fails and why.
+    // Expected: The edited run fails with an `AssertionError` from the assertion on
+    // `retained.get(0)[0] == 7 && retained.get(0).length == 1024`.
 
     // Exercise 2: Remove one ownership path deliberately: diagnose an edited check
-    // A careless edit changed the assertion that Example B adds after Example A so that it reads
-    // `assert retained.isEmpty() && separate[1] == 7;`. Run Example B with that line, explain
-    // why the edited assertion now fails for the same program state, and restore it.
-    // Expected: Before the repair the run fails with an `AssertionError` from the assertion on
-    // `retained.isEmpty() && separate[0] == 7`; after it the line reads `assert
-    // retained.isEmpty() && separate[0] == 7;` again and list empty; separate array still valid.
+    // Example B's new assertion was edited to `assert retained.isEmpty() && separate[1] == 7;`.
+    // Explain why it fails for unchanged state and restore it.
+    // Expected: The edited run fails with an `AssertionError` from the assertion on
+    // `retained.isEmpty() && separate[0] == 7`; the restored assertion passes.
 
     // Exercise 3: Inspect a weak reference without timing assumptions
     // Create a WeakReference to the still-strongly-referenced array.

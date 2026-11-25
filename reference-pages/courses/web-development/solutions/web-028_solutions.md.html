@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/web-development/solutions/web-028_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="web-028-explanatory-solutions">web-028: explanatory solutions<a class="heading-anchor" href="#web-028-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Open this after your own attempt. Each answer explains the lesson&#x27;s synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in <code>courses/web-development/guides/web-028.md</code>.</p>
+<p>Attempt each exercise before reading; the mechanism is in <code>courses/web-development/guides/web-028.md</code> (<a href="../STUDY-GUIDE.md.html#solutions">using these answers</a>).</p>
 <h3 id="exercise-1-predict-the-rows-retained-for-a-forty-minute-threshold">Exercise 1: Predict the rows retained for a forty-minute threshold.<a class="heading-anchor" href="#exercise-1-predict-the-rows-retained-for-a-forty-minute-threshold" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Only the records whose minutes are at least forty remain.</p>
 <p><strong>Approach:</strong> Apply <code>row.minutes &gt;= 40</code> to each record and keep only those where it is true, counting rows equal to 40 as retained.</p>
@@ -232,7 +232,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Plausible wrong approach:</strong> Starting the y axis at a value other than zero for bar lengths fails because bar heights then exaggerate differences.</p>
 <p><strong>How to verify:</strong> The chart and the table show the same records and values, and the axis labels state minutes.</p>
 <h3 id="reference-comparison">Reference comparison<a class="heading-anchor" href="#reference-comparison" aria-label="Link to this section">#</a></h3>
-<p>Open <code>courses/web-development/solutions/web-028_solution.html</code> only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; its success message is not an accessibility audit or proof of responsive behavior at every size.</p></article>
+<p>The reference checks three initial rows, sets the threshold to 100 and requires zero rows, then resets to 0. That catches a broken render and a filter with no empty case. It does not check the empty state message, the result count or that the source array survived, so switch thresholds back and forth yourself.</p>
+<p>Open <code>courses/web-development/solutions/web-028_solution.html</code> after saving your attempt (<a href="../STUDY-GUIDE.md.html#references">comparing with the reference</a>).</p></article>
   </main>
 </body>
 </html>

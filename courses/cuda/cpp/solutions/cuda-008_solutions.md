@@ -4,8 +4,6 @@
 
 A reproducible experiment records enough context to explain why a result happened. An input seed is useful only alongside the generator, dtype, shape and distribution. A benchmark needs timing scope, warm-up policy and retained samples, while a correctness result needs an independent expected answer. Hardware access, successful compilation, successful execution and acceptable numerical output are four distinct observations. A resource budget limits input size and repeated work before running. On a shared GPU, reserve only the memory and compute time that the owner has authorized; do not use unbounded spin loops as teaching fixtures.
 
-The separate [CPU reference](../references/cuda-008_cpu.py) checks the chapter's bounded model. It does not execute CUDA or establish GPU timing. Compare after attempting the worksheet or explicitly choosing to reveal solutions.
-
 ## Exercise 1
 
 Report A says 'GPU: 0.2 ms'. Report B records a synthetic float32 vector of 1,024 elements, seed 7, upload excluded, five warm-ups, twenty event-timed samples, device/toolkit identities and an absolute error bound. B is interpretable, but it still needs raw samples and CPU comparison before supporting a speedup claim.
@@ -78,12 +76,18 @@ Their raw payload is 12 MB total. Add library workspace and runtime overhead sep
 
 **How to verify:** The reference asserts 3 * 1_000_000 * 4 == 12_000_000; test that oversized requests are rejected before allocation.
 
+## Self-check answers
+
+1. **Which four observations must stay separate in a receipt?** Hardware access, successful compilation, successful execution and acceptable numerical output.
+2. **Why does a seed alone not reproduce an input?** The generator, dtype, shape and distribution must also be recorded to regenerate the same values.
+3. **Why add a 33-element fixture to the vector-add oracle?** It crosses a 32-thread boundary, exposing tail and bounds assumptions that a three-element case cannot.
+
 ## Numerical reference and its limits
 
-The complete CPU model is [here](../references/cuda-008_cpu.py). Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It also asserts an exercise answer that the guide's model leaves for you to derive: `assert 3 * 1_000_000 * 4 == 12_000_000`. It does not claim CUDA execution, concurrency safety or a performance measurement.
+The [CPU reference](../references/cuda-008_cpu.py) reproduces worked example 1 and prints `{'surface': 'CPU reference', 'shape': [3], 'result': [3, 0, 4], 'gpu_executed': False}`.
+
+It also asserts an exercise answer you derive yourself: `assert 3 * 1_000_000 * 4 == 12_000_000`
 
 ## Transfer review
 
 Their raw payload is 12 MB total. Add library workspace and runtime overhead separately and reject larger input before allocation.
-
-A complete explanation must name its inputs, the unchanged mathematical contract, the changed boundary or resource condition, and the evidence still needed on actual hardware. Preserve a CPU baseline even after a GPU path becomes available.

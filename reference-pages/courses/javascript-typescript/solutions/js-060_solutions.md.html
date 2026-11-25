@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/javascript-typescript/solutions/js-060_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="js-060-explanatory-solutions">js-060: explanatory solutions<a class="heading-anchor" href="#js-060-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit reveal. The separate .js reference is a complete offline browser program. These explanations discuss the six practice tasks; a visual resemblance alone is not a data or behavior check.</p>
+<p>Compare after your own attempt; the separate <code>.js</code> file is the complete reference program.</p>
 <h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
 <p>A treemap divides a rectangular area into nested regions whose areas represent nonnegative values. It is useful for part-to-whole structure when many categories must fit in a compact view. Exact comparisons are harder than aligned position or length, so a table or labels should support precise reading.</p>
 <p>Hierarchy sums need a clear grain. If a parent value already includes its children and you also sum the children, the total can be double-counted. A common input supplies values only at leaves and uses hierarchy.sum to aggregate upward. Missing or negative values require an explicit policy.</p>
@@ -218,7 +218,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Expected:</strong> Bars usually offer easier aligned magnitude comparison.</p>
 <h3 id="exercise-6-design-a-changing-treemap-with-identity-preserved">Exercise 6: Design a changing treemap with identity preserved.<a class="heading-anchor" href="#exercise-6-design-a-changing-treemap-with-identity-preserved" aria-label="Link to this section">#</a></h3>
 <p>Large layout changes can disorient viewers. Identity and textual values help them follow the same entity across updates. The reference keys leaves by d.data.name, so updates keep &quot;Analysis&quot; attached to the same cell group; show a text list of values when cells move. Expect cells to change aspect ratio when values change.</p>
-<p><strong>Expected:</strong> Stable keys, explicit updates and a readable alternate value list.</p></article>
+<p><strong>Expected:</strong> Stable keys, explicit updates and a readable alternate value list.</p>
+<h3 id="after-comparison">After comparison<a class="heading-anchor" href="#after-comparison" aria-label="Link to this section">#</a></h3>
+<p>Build a treemap and a sorted bar chart from the same leaf data and ask a reader to name the third-largest leaf from each. Record which was easier, then animate one changing value with keyed rectangles and check that identities persist.</p></article>
   </main>
 </body>
 </html>

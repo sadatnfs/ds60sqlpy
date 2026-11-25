@@ -42,5 +42,7 @@
       "wrong": "Sorting by the formatted local clock text. On 2025-11-02 an event at 01:45 EDT happened before one at 01:15 EST, yet the strings sort 01:15 first, reversing the true order.",
       "verify": "`as.Date(as.POSIXct(\"2025-01-16 02:00\", tz = \"UTC\"), tz = \"America/New_York\")` returns 2025-01-15, and `as.numeric(instant + 1) > as.numeric(instant)` returns TRUE."
     }
-  ]
+  ],
+  "run_note": "The starter holds two date strings, 2024-02-28 and 2024-03-01, and prints them as text. Run it and predict the gap in days before parsing: 2024 is a leap year, so the answer is two, not one. Parse them with an explicit format, and when you create timestamps, always pass `tz` so the instant does not depend on the machine's zone.",
+  "checks_note": "The checks pin that adding one day to 2024-02-28 lands on February 29, that `difftime()` reports exactly 2 hours for a 7200 second gap, that a parsed date inherits `Date`, that the same UTC instant formats as 07:00 in America/New_York, that an impossible date parses to NA, and that one second later is numerically later. They do not test daylight saving transitions in other zones."
 }

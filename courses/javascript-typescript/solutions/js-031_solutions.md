@@ -1,6 +1,6 @@
 # js-031: explanatory solutions
 
-Use these answers after an attempt or an explicit reveal. The reference uses the same literal fixtures as the guide and keeps the exercises in separate scopes. A successful run checks these examples; explaining a changed input is a separate learning goal.
+Open these after your own attempt; each exercise runs in its own scope in the reference.
 
 ## Mechanism review
 
@@ -26,7 +26,7 @@ Create elements with document.createElement, set textContent for untrusted visib
 
 ## Exercise 1: Render a markup-looking title as literal text: change one input
 
-Task: Rebuild Example A in your copy of the lesson's browser fixture without looking at it. Then change one attribute, label or handler and write down the visible, focus or announcement change you expect before reloading.
+Task: Save the snippet and inspect the resulting DOM and visible title. Then change one attribute, label or handler in your copy and predict the visible difference before reloading.
 
 The suspicious-looking string is a local inert test value. textContent preserves it as characters, so the browser does not create the image or interpret its event attribute.
 
@@ -47,13 +47,13 @@ document.querySelector('#status').textContent = `Image elements: ${title.querySe
 >
 ```
 
-**Expected:** Your rebuild reproduces the worked observation (the angle-bracket text is visible; no img element is created), and the changed copy shows the difference you predicted.
+**Expected:** The rebuild reproduces the observation: the angle-bracket text is visible; no img element is created. The changed copy differs as you predicted.
 
-**Verify:** Record the browser observation before and after your change, including where focus lands and any live-region text, and explain which line caused the difference.
+**Verify:** Record the browser observation, then explain it: The suspicious-looking string is a local inert test value. textContent preserves it as characters, so the browser does not create the image or interpret its event attribute.
 
 ## Exercise 2: Validate a URL before creating a link: debug a regression
 
-Task: Introduce one deliberate defect into a copy of Example B, such as a wrong selector, a missing attribute or a handler on the wrong element. Predict which browser behavior will expose it, confirm that prediction, then repair it.
+Task: Use a same-origin relative link and reject a javascript URL under the shown policy. Then break one selector or attribute in a copy, predict which behavior exposes it, and repair it.
 
 The policy acts on parsed components rather than textual resemblance. Serve this example over loopback HTTP; a file origin does not satisfy its HTTP navigation contract.
 
@@ -79,9 +79,9 @@ catch { result.textContent += '\nRejected javascript URL'; }
 >
 ```
 
-**Expected:** The defective copy no longer shows: local help is accepted; javascript: is rejected. The repaired copy shows it again.
+**Expected:** The broken copy no longer shows that local help is accepted; javascript: is rejected. The repair restores it.
 
-**Verify:** Keep notes on the failing and the repaired behavior and name the first browser observation that differed between them.
+**Verify:** Record the first browser observation that differed, then explain the repair: The policy acts on parsed components rather than textual resemblance.
 
 ## Exercise 3: Install the complete fixture CSP
 
@@ -100,7 +100,7 @@ The policy permits only the local resource categories the fixture requires. It i
 
 **Expected:** local resources load; no inline handlers or eval are needed.
 
-**Verify:** In the browser fixture, record the observation that shows: local resources load; no inline handlers or eval are needed. Then change one input and record what changes, keeping keyboard and pointer results separate.
+**Verify:** Record the browser observation that shows it, then explain why: The policy permits only the local resource categories the fixture requires.
 
 ## Exercise 4: Reject origin and credential tricks
 
@@ -119,7 +119,7 @@ for (const candidate of ['http://127.0.0.1:1/', 'https://example.invalid/', 'dat
 
 **Expected:** every candidate is rejected by the local-link policy.
 
-**Verify:** In the browser fixture, record the observation that shows: every candidate is rejected by the local-link policy. Then change one input and record what changes, keeping keyboard and pointer results separate.
+**Verify:** Record the browser observation that shows it, then explain why: Changing the port changes origin.
 
 ## Exercise 5: Inspect dynamic text without changing policy
 
@@ -135,7 +135,7 @@ const count = output.childElementCount;
 
 **Expected:** text remains literal and child element count stays zero.
 
-**Verify:** In the browser fixture, record the observation that shows: text remains literal and child element count stays zero. Then change one input and record what changes, keeping keyboard and pointer results separate.
+**Verify:** Record the browser observation that shows it, then explain why: An allowlisted script can still be unsafe if it uses an injection sink.
 
 ## Exercise 6: Explain the actual policy boundary
 
@@ -150,8 +150,8 @@ Browser restrictions and server decisions solve different problems. An accurate 
 
 **Expected:** no claim that CSP authenticates callers, CORS authorizes actions, or meta implements frame-ancestors.
 
-**Verify:** In the browser fixture, record the observation that shows: no claim that CSP authenticates callers, CORS authorizes actions, or meta implements frame-ancestors. Then change one input and record what changes, keeping keyboard and pointer results separate.
+**Verify:** Record the browser observation that shows it, then explain why: Browser restrictions and server decisions solve different problems.
 
 ## After comparison
 
-Return to your saved implementation and repeat a case with different values. Keep compiler diagnostics, process output and browser observations separate. Do not suppress a failing assertion or use a type assertion to declare an unvalidated value safe. Resource-owning examples must finish cleanup even when work fails. Describe each result with its actual host and fixture scope rather than as production acceptance.
+Fresh case: render a user comment that contains a link. Decide which characters stay literal and predict the policy result for `HTTPS://EXAMPLE.COM`, `/help#top` and `data:text/html,hi`. ([After comparing](../STUDY-GUIDE.md#after-comparing-with-the-solution).)

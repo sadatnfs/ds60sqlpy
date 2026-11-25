@@ -10,31 +10,19 @@ Intermediate. Direct catalog prerequisites: `python-numpy-01`. This lesson deepe
 
 ## Learning objectives
 
-By the end, explain the mechanism in your own words, implement each bounded contract, and use a counterexample to distinguish a correct result from a plausible mistake. The six exercises progress from inspection to transformation, edge handling and transfer.
+By the end, you can name the axis a reduction removes, use `keepdims` or `None` axes to line a result back up with its source, and predict a broadcast's output shape before running it. You will compute pairwise distances and batched projections without Python loops, and reject zero weights or zero-length rows explicitly instead of letting NaN or a hidden warning through.
 
 ## How to run this lesson
 
-**Primary browser route:** run `./classroom` from the repository root and
-choose **Python and data science** on `/classroom`. Open this lesson in the shared workspace,
-read its capability notice, and use its supported coding or reading workflow.
-The [classroom guide](../../../docs/classroom-experience.md) explains saved work, runtimes and switching subjects.
+The [learner script](../lessons/py_numpy_02.py) needs NumPy. Its worked examples center each row of a 2 by 3 matrix with `keepdims=True`, then broadcast a `(2, 1, 2)` difference against `(1, 3, 2)` to get a 2 by 3 table of distances, `[[4, 3, 0], [3, 4, 5]]`, with one row per left point.
 
-**Optional contributor route:** use the prepared environment in
-[CONTRIBUTING](../../../CONTRIBUTING.md) on Linux, macOS or Windows through
-WSL 2. The commands below assume its packages are already installed. They are
-not prerequisites for opening this lesson in the Docker classroom. Local
-`.learning/` files and CLI progress belong to this checkout; they do not read or
-update the Docker classroom's named learning volume.
-
-Open the [learner script](../lessons/py_numpy_02.py) in the prepared repository environment. In the Docker classroom, edit the saved learner pad; drafts, notes and results persist in the classroom learning volume. An ignored `.learning/` copy is a separate optional contributor workspace. Run from the repository root. The provided worked examples execute immediately; task functions intentionally raise `NotImplementedError` until you implement them. A successful example is not evidence that the six tasks are finished.
-
-Prepared POSIX/WSL contributor terminal:
+The [Python study guide](../../STUDY-GUIDE.md) covers the browser classroom and this prepared-checkout run:
 
 ```sh
 uv run --no-sync python python/professional/lessons/py_numpy_02.py
 ```
 
-Dependencies: NumPy. All fixtures are tiny and local. The terminal prints the worked results and stops without editing your files. Keep [explanatory solutions](../solutions/py_numpy_02_solutions.md) and [runnable reference](../solutions/py_numpy_02_solution.py) closed until an attempt or an explicit worked comparison.
+After your attempt, compare `weighted_columns` and `unit_rows` with the [runnable reference](../solutions/py_numpy_02_solution.py), checking where each validates before it divides. Use the [explanatory solutions](../solutions/py_numpy_02_solutions.md) to check the shape bookkeeping in `batched_projection` for inputs with more than one leading axis.
 
 ## Vocabulary and mental model
 
@@ -119,11 +107,11 @@ A broadcasting error names incompatible dimensions, but a successful broadcast c
 
 ## Self-check and retrieval
 
-Without copying code, explain which input property each function assumes, which observable result proves the normal case, and which counterexample would expose an incorrect implementation. Trace one boundary input by hand before running it. Keep the input and expected output beside your saved result so a reviewer can reproduce the evidence.
+Trace `column_center` on `[[1, 3, 5], [2, 4, 9]]`: the column means are 1.5, 3.5 and 7, so the first row becomes `[-0.5, -0.5, -2]`. Using `axis=1` by mistake gives shape `(2,)`, which cannot broadcast against three columns, so the 2 by 3 test fails loudly where a square matrix would silently subtract the wrong means. Then confirm `unit_rows([[3, 4], [0, 0]])` returns `[[0.6, 0.8], [0, 0]]` with no warning.
 
 ## Next steps
 
-Use these mechanisms in the next deepening lesson or return to the original prerequisite examples and explain precisely which new failure cases you can now diagnose. Review the [professional track](../README.md) for related modules.
+Next, [gather, scatter, masks, and deterministic selection](py_numpy_03.md) replaces whole-axis operations with chosen positions, where repeated indices and the copy or view distinction decide the result. The [professional track](../README.md) lists the other modules.
 
 ## Primary sources and official APIs
 

@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/javascript-typescript/solutions/js-057_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="js-057-explanatory-solutions">js-057: explanatory solutions<a class="heading-anchor" href="#js-057-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit reveal. The separate .js reference is a complete offline browser program. These explanations discuss the six practice tasks; a visual resemblance alone is not a data or behavior check.</p>
+<p>Compare after your own attempt; the separate <code>.js</code> file is the complete reference program.</p>
 <h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
 <p>A brush lets a user choose a spatial interval or rectangle. The brush selection is expressed in display coordinates. The analytical selection is usually expressed in data values or record IDs. Convert between those spaces explicitly and decide which boundary values count as selected.</p>
 <p>Linked views share application state: selecting a range in one chart changes the records or emphasis in another. If each chart keeps an unrelated hidden selection, the dashboard can contradict itself. A small state object and a pure filter function make coordination easier to inspect.</p>
@@ -218,7 +218,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Expected:</strong> Native controls reach the same state update as brushing.</p>
 <h3 id="exercise-6-design-a-two-chart-coordination-rule">Exercise 6: Design a two-chart coordination rule.<a class="heading-anchor" href="#exercise-6-design-a-two-chart-coordination-rule" aria-label="Link to this section">#</a></h3>
 <p>Keep data filtering and rendering separate. This makes interactions testable without depending on exact pixel appearance. A second chart should read the same set of selected ids rather than run its own filter; verify both show &quot;2,3,4&quot; after one brush. Write the selection logic as a pure function from a range to ids so it can be unit tested without a browser.</p>
-<p><strong>Expected:</strong> One shared selected-ID set drives both views.</p></article>
+<p><strong>Expected:</strong> One shared selected-ID set drives both views.</p>
+<h3 id="after-comparison">After comparison<a class="heading-anchor" href="#after-comparison" aria-label="Link to this section">#</a></h3>
+<p>Link a brush on a time axis to a bar chart of counts per category and a text list, and add a keyboard preset for the last seven days. Check that the bars, the list and the announced count describe the same selected IDs after every change.</p></article>
   </main>
 </body>
 </html>

@@ -86,4 +86,4 @@ path. These cases show a safe local output contract and an actual scheduled
 failure/retry transition without claiming that the orchestrator rolls back
 arbitrary external systems.
 
-The [complete Airflow workshop](../../projects/airflow/README.md) provides the maintained files, preparation, lifecycle and exact qualification boundaries for these cases.
+`retry-check` in the [Airflow workshop](../../projects/airflow/README.md) runs the same two intervals and requires the `fail_once` task to succeed on its second try in each run.

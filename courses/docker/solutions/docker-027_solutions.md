@@ -1,6 +1,6 @@
 # docker-027: explanatory solutions
 
-Compare after your own attempt or an explicit reveal. These explain the supplied teaching fixtures; they are not engine results. The mechanism is explained in `courses/docker/guides/docker-027.md`.
+These answers explain teaching fixtures, not engine results; the mechanism is in [the guide](../guides/docker-027.md).
 
 ## Exercise 1: Predict which resources are durable.
 
@@ -88,4 +88,4 @@ Compare after your own attempt or an explicit reveal. These explain the supplied
 
 ## Check your transfer
 
-A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.
+Not necessarily. The restore volume holds the snapshot taken at export time, while the source keeps accepting increments, so a later increment through `exec` or the browser explains a higher source value. Compare the restored value with the counter in `counter-backup.json`: if both say 4, export and restore are correct and the source simply moved on, which `docker compose logs app` confirms with a later `POST /increment` line. If the backup says 5 and the restore says 4, the restore step wrote something other than the export.

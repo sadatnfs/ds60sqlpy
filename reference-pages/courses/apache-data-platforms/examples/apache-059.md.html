@@ -194,11 +194,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/apache-data-platforms/examples/apache-059.md</code></p>
     </header>
     <article class="document"><h2 id="pinot-apache-059-command-notebook">Pinot apache-059 command notebook<a class="heading-anchor" href="#pinot-apache-059-command-notebook" aria-label="Link to this section">#</a></h2>
-<p>Use these commands only from the copied owned Pinot project described in its README. The classroom Markdown pad does not execute Docker commands.</p>
+<p>In the copied Pinot project, <code>table.json</code> declares an inverted index on <code>region</code> and a range index on <code>amount</code>. <code>run.sh check</code> then sends the selective query <code>region = &#x27;east&#x27; AND amount &gt;= 5</code> and accepts only the single ID 3.</p>
 <pre class="highlighted-code"><code class="language-bash">cat table.json
 bash run.sh check</code></pre>
 <p>The configuration prepares inverted/range indexes. The checker establishes exact selective-query results. Build separately named indexed/unindexed tables and inspect actual plans before asserting a performance difference.</p>
-<p>Native service acceptance and each advanced extension have distinct entries in <code>QUALIFICATION.md</code>. Source/configuration presence is not an observed service result.</p></article>
+<p>The accepted Pinot gate proves the selective answer, not a speedup. QUALIFICATION.md names the indexed versus unindexed plan comparison as a separate gate that has not run.</p></article>
   </main>
 </body>
 </html>

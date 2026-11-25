@@ -24,9 +24,9 @@ The app fixture stores a small Codable document in its application support direc
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles the saved pad as `main.swift` with Swift 6 language checking. An explicit `@main` type contains `static func main() async throws`; the fixed compiler uses `-parse-as-library -swift-version 6`. The examples use the standard library and portable Foundation. `precondition` makes a violated invariant fail the process. The fixed pad accepts one source file, without arbitrary command arguments, interactive input or dependency installation. SwiftUI, UIKit, Apple simulators and application signing belong to the separately prepared macOS/Xcode project labs, never the Linux pad.
+`SavedPlan` and `supported` are declared above `LessonMain`. Example A encodes and decodes in memory without touching the file system. Task 3's save and load errors are inspected in JourneyApp with a test file you own; never point it at real saved data.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Compile contract, starter stop and success marker: [running a lesson](../STUDY-GUIDE.md#running-a-lesson).
 
 The actual save/load implementation is in the [JourneyApp project](../fixtures/JourneyApp/README.md). It deliberately retains an unreadable file for recovery.
 
@@ -34,7 +34,7 @@ The actual save/load implementation is in the [JourneyApp project](../fixtures/J
 
 A versioned envelope contains schemaVersion and items. Decode first, then validate the version and domain invariants. Data.write with .atomic requests an atomic replacement strategy for the file operation.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+Each example ends with a trace; method: [tracing a program](../STUDY-GUIDE.md#tracing-a-program).
 
 ## Worked example / walkthrough
 
@@ -69,6 +69,8 @@ struct LessonMain {
 
 **Observe:** The supported envelope round-trips with two titles.
 
+**Trace.** The document holds version 1 and the titles Read and Practice. `JSONEncoder().encode` produces UTF-8 JSON bytes with both keys. `JSONDecoder().decode(SavedPlan.self, from:)` reads them back into a new value. The check inspects the decoded version and title count rather than the original, so it proves the round trip preserved both. `supported` is not called here; decoding succeeds for any integer version, which is why validation is a separate step.
+
 ### Example B: Refuse an unknown future schema
 
 Rejection should preserve recoverable source data rather than silently resetting it.
@@ -99,6 +101,8 @@ struct LessonMain {
 
 **Observe:** The unsupported document is rejected without modifying its payload.
 
+**Trace.** A document with version 99 is built directly, standing in for a file written by a newer release. `supported` returns false because the version is not 1, and the check confirms the rejection. The second check confirms the titles are still Keep me: rejecting the document did not discard or rewrite it, so the app can keep the source file for recovery instead of overwriting it with an empty plan.
+
 ## Exercises
 
 1. **Predict and explain.** Identify the schema and domain validation boundaries.
@@ -113,13 +117,15 @@ struct LessonMain {
 
 6. **Transfer and justify.** Design a version-one to version-two migration with backup, rollback and verification steps.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Log each task in the [evidence table](../STUDY-GUIDE.md#recording-exercise-evidence) before opening the explanation.
 
 ## Common pitfalls and diagnosis
 
 Atomic replacement is not a universal durability or backup guarantee. Do not store secrets in ordinary preferences or unencrypted example files. A migration must preserve meaning, not only produce parseable JSON.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+For task 2, a new field must be optional, or an older file without it fails to decode with a missing-key error. The counterexample is decoding the original JSON after adding the field. Task 4's automatic reset turns a recoverable unreadable file into permanent data loss. For task 5, empty data and malformed JSON must throw, while an unknown version decodes but is refused by `supported`.
+
+Repair routine: [building a regression case](../STUDY-GUIDE.md#building-a-regression-case).
 
 ## Progressive hints
 
@@ -129,11 +135,15 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 ## Self-check and next step
 
-Explain Schema version, Migration, Recovery policy without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+Explain why decoding and version validation are separate steps. Say what happens when an older file lacks a newly added non-optional property. List the steps for migrating version 1 files to version 2, including where the backup goes and how you would verify the result before deleting it.
+
+Then follow the general [self-check routine](../STUDY-GUIDE.md#self-check-routine) and save your pad.
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://docs.swift.org/swift-book/documentation/the-swift-programming-language/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+[Documentation](https://docs.swift.org/swift-book/documentation/the-swift-programming-language/): The Foundation reference documents `JSONEncoder`, `JSONDecoder` and `Data.write(to:options:)`; Apple's article on encoding and decoding custom types covers Codable keys.
+
+Provenance and limits: [sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

@@ -1,6 +1,6 @@
 # cuda-096: explained solutions
 
-These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.
+Compare with your [worksheet](../lessons/cuda-096.md) attempt.
 
 ## Exercise 1: Compute the validation metric
 
@@ -74,8 +74,16 @@ Mark CPU and GPU results independently.
 
 **How to verify.** The reference asserts `not report["gpu_verified"]`. Only a real device run with recorded environment may set it to true.
 
+## Self-check answers
+
+1. **Why define the held-out split before tuning?** Choosing it afterward lets tuning decisions see evaluation data, so the reported metric becomes optimistic.
+
+2. **Why keep a failed hypothesis in the report?** It records what evidence rejected the idea and prevents repeating the experiment or overstating what was tried.
+
+3. **What does a capstone completion marker certify?** Completed learning work. It is not a production certification of the model or its performance.
+
 ## Reference observation
 
 Three examples, MSE 2/3, GPU verification explicitly false.
 
-The reference file is `courses/cuda/python/references/cuda-096_cpu.py`. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.
+Asserted by `courses/cuda/python/references/cuda-096_cpu.py`.

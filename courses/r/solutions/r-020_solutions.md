@@ -1,6 +1,6 @@
 # r-020: reference reasoning
 
-Use the [complete reference](r-020_reference.R) with the guide's declared inputs and runtime. Every worked example is also a standalone script.
+Run the [complete reference](r-020_reference.R) under the [run rules](../STUDY-GUIDE.md#run-a-chapter).
 
 ## Why the implementation has this shape
 
@@ -96,4 +96,6 @@ A reviewer can reproduce the failure without the original private data or hidden
 
 ## What the checks establish
 
-The reference makes 7 `stopifnot()` checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.
+The checks pin the input contract (numeric, equal and nonzero lengths, finite values, nonnegative weights with a positive total), the 17.5 result, the same result after scaling weights to 5 and 15, rejection of mismatched lengths, zero total weight, empty inputs and a missing value, and a seeded simulation that repeats exactly within 0 and 1. They do not cover every invalid input a caller could construct.
+
+The reference makes 7 `stopifnot()` checks; see [what a passing run proves](../STUDY-GUIDE.md#what-a-passing-run-proves).

@@ -1,22 +1,26 @@
 # spark-012: SparkSession, explicit schemas, and bounded actions
 
-Authored paired Scala/PySpark teaching content. The default fixtures are tiny, local and deterministic. Runtime acceptance, logical correctness and learner understanding remain separate evidence.
+Every later Spark lesson depends on three habits introduced here: declare the schema instead of letting Spark guess it, know which call actually runs the plan, and never pull an unbounded result into the driver. Four team rows, one with an unknown amount, are enough to practice all three in Scala and in PySpark.
 
 ## Level and prerequisites
 
-Beginner; approximately 90 minutes. Direct prerequisites: `spark-001`. The prepared baseline is Spark 4.3.0, Scala binary 2.13, JDK 17 and Python 3.12. Read the [execution baseline](../execution-baseline.md).
+Beginner; approximately 90 minutes. Direct prerequisites: `spark-001`. Pinned versions: [execution baseline](../execution-baseline.md).
 
 ## How to run this lesson
 
-Open `spark-012` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile, save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`; Python stages as `main.py` with a main guard. Each program creates its own `local[2]` session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.
+Shared run steps and profile rules: [study guide](../STUDY-GUIDE.md#run-a-paired-lesson).
 
-The [Scala learner](../lessons/spark-012.scala) and [PySpark learner](../lessons/spark-012.py) run two complete demonstrations and retain six explicit task stubs. Use the [explained solutions](../solutions/spark-012_solutions.md) only after an attempt or an explicit worked comparison; the [Scala reference](../solutions/spark-012_solution.scala) and [PySpark reference](../solutions/spark-012_solution.py) contain complete assertions. A bounded collect is used only for the declared tiny fixture; do not copy it onto an unbounded or large production table.
+Learner pads: [Scala](../lessons/spark-012.scala) and [PySpark](../lessons/spark-012.py).
+
+Open the [explained solutions](../solutions/spark-012_solutions.md) after an attempt.
+
+The first worked example prints the schema with `simpleString`, so you can compare it character by character with the declared `StructType`. The second builds a team A filter, runs it with `count`, checks that IDs 1 and 3 come back in order, and prints `team A rows= 2` (Scala prints `team A rows=2`). Notice that the filter line itself does no work; `count` is the action.
 
 ## Learning objectives
 
 - Create an owned local session and a typed schema, then distinguish transformations from actions in either API.
-- State the input and output grain, schema, NULL policy and ordering before executing a transformation.
-- Compare each language implementation with independent literal expectations, not only with the other implementation.
+- Read the schema back as `(event_id, bigint, false)`, `(team, string, true)` and `(amount_cents, bigint, true)`, and explain what the `false` on `event_id` promises that the other two fields do not.
+- Collect IDs only through a budget: fetch `limit + 1` rows, reject the result if that extra row arrives, and refuse any budget outside 0 to 20 before Spark runs anything.
 
 ## Vocabulary and concepts
 
@@ -44,7 +48,7 @@ The final settings report distinguishes an actual Spark version from a target de
 
 ## Supplied local fixture
 
-The complete source creates the owned local session described above, then constructs this explicit fixture. The worked examples below run in that same main function; there is no hidden notebook state.
+Four rows with explicit types: team A has events 1 and 3 with amounts 0 and 25, team B has event 2 with a NULL amount and event 4 with 40. The NULL and the 0 are deliberately placed on different teams so that a filter which drops one but keeps the other is easy to detect in Exercise 4.
 
 ```scala
 import org.apache.spark.sql.Row
@@ -190,11 +194,14 @@ If a schema assertion fails, compare names, types and nullability separately rat
 
 ## Self-check
 
-Explain the contract of `schemaFields` / `schema_fields` without reading its solution. Then, from memory, state what Exercise 6 (Read back the actual local session contract) must produce: Master `local[2]`, UTC, two shuffle partitions, ANSI true, AQE false, UI false, both driver addresses 127.0.0.1, and Spark version 4.3.0. Say which part of that result is evidence and what it still cannot show. Name the action in your trace that actually runs the plan.
+- `teamA` must contain only a filter. If you added `.cache().count()` inside it, which promise in Exercise 2 would you break?
+- `boundedIds(raw, 3)` must fail even though Spark could easily return four IDs. Explain how fetching `limit + 1` rows detects the overflow without collecting the whole frame.
+- Exercise 4 keeps IDs 1, 3 and 4 with total 65. Which single condition would wrongly remove ID 1, and which would wrongly keep ID 2?
+- After `repartition`, the rows may arrive in any order. What does `canonical` do so that the expected list `(1, A, 0)`, `(2, B, NULL)`, `(3, A, 25)`, `(4, B, 40)` still matches?
 
 ## Next step
 
-Use the [course route](../README.md) to continue. Paired-language agreement is useful only when both outputs also satisfy the independent fixture contract. A successful local run is not evidence of cluster performance or production recovery.
+Go on to [spark-013: One row, one event: NULL-aware aggregates](spark-013.md). With a known schema and bounded actions in hand, the next lesson asks what one row means and shows how `COUNT(*)`, `COUNT(col)` and `SUM` disagree when some amounts are unknown.
 
 ## Primary sources and official APIs
 

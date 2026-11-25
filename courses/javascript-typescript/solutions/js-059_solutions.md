@@ -1,6 +1,6 @@
 # js-059: explanatory solutions
 
-Compare after your own attempt or an explicit reveal. The separate .js reference is a complete offline browser program. These explanations discuss the six practice tasks; a visual resemblance alone is not a data or behavior check.
+Compare after your own attempt; the separate `.js` file is the complete reference program.
 
 ## Mechanism review
 
@@ -49,3 +49,7 @@ Truncation needs a discoverable full value. Geometric fit alone does not establi
 Do not encode collapse only by deleting data permanently. Keep the source hierarchy and view state distinct. Store collapsed ids in a Set and rebuild the view from the unchanged source; deleting children would lose them for re-expansion.
 
 **Expected:** Stable node IDs and explicit collapsed sets preserve identity.
+
+## After comparison
+
+Convert a flat table of id and parentId rows into a tree with `d3.stratify`, render it, and add a collapse toggle that stores collapsed IDs in a set. Check that collapsing and expanding preserves node identity and the total node count.

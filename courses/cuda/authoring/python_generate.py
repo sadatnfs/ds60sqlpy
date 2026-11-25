@@ -15,6 +15,7 @@ from python_gpu_labs import CUPY, TORCH, cupy_program, tensorflow_program, torch
 from python_key_terms import KEY_TERMS
 from python_lessons import LESSONS
 from python_reasoning import REASONING
+from python_study_notes import MISCONCEPTIONS, STUDY_NOTES
 from spark_lessons import SPARK_LESSONS
 from spark_programs import PYSPARK_BODY, pyspark_program, scala_program
 
@@ -121,6 +122,27 @@ SOURCE_GROUPS = {
         ),
     ],
 }
+# A lesson cites the one route reference closest to its topic; the complete route
+# lists live in STUDY-GUIDE.md#documentation-and-sources. Missing chapters use index 0.
+PRIMARY_SOURCE = {
+    16: 1,
+    18: 1,
+    20: 1,
+    21: 1,
+    51: 1,
+    52: 1,
+    53: 1,
+    54: 2,
+    55: 2,
+    56: 2,
+    57: 3,
+    58: 2,
+    59: 3,
+    60: 1,
+    62: 2,
+    63: 1,
+    64: 3,
+}
 FRAMEWORK_NOTES = {
     23: (
         "Create tensors and parameters on the chosen torch.device, zero gradients, compute mean loss, call backward and step. Inspect w.device and compare the derived gradient before changing the model.",
@@ -197,10 +219,6 @@ FRAMEWORK_NOTES = {
 }
 
 
-def lower_initial(text):
-    return text[:1].lower() + text[1:]
-
-
 def put(relative, text):
     path = ROOT / relative
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -262,6 +280,21 @@ def checked_reasoning(n):
     return entries
 
 
+def checked_notes(n):
+    """Return chapter n's authored hints, mistake, evidence limit and self-check."""
+    notes = STUDY_NOTES.get(n)
+    assert notes is not None, f"chapter {n} needs study notes"
+    assert len(notes["hints"]) == 6, f"chapter {n} needs six hints"
+    assert len(notes["self_check"]) == 3, f"chapter {n} needs three self-check pairs"
+    texts = [*notes["hints"], notes["mistake"], notes["limit"]]
+    texts += [part for pair in notes["self_check"] for part in pair]
+    texts += list(MISCONCEPTIONS.get(n, ()))
+    for text in texts:
+        assert text.strip(), f"chapter {n} has an empty study note"
+        assert "\u2014" not in text and "\u2013" not in text, f"chapter {n} uses a dash"
+    return notes
+
+
 def build(record):
     n = record["n"]
     number = n + 64
@@ -294,7 +327,9 @@ def build(record):
         if n <= 22
         else "framework"
     )
-    sources = "\n".join(f"- [{title}]({url})" for title, url in SOURCE_GROUPS[group])
+    group_sources = SOURCE_GROUPS[group]
+    cited = group_sources if group == "framework" else [group_sources[PRIMARY_SOURCE.get(n, 0)]]
+    sources = "\n".join(f"- [{title}]({url})" for title, url in cited)
     prereq = ", ".join(f"`{value}`" for value in ids)
     theory = record["mechanism"] + "\n\n" + DETAILS.get(n, "")
     terms = KEY_TERMS[n]
@@ -303,29 +338,25 @@ def build(record):
     worked = "\n\n".join(
         f"### Worked example {i + 1}\n\n{text}" for i, text in enumerate(record["examples"])
     )
+    notes = checked_notes(n)
+    reasoning = checked_reasoning(n)
+    objectives = "\n".join(f"- {text}." for text in exercises)
     # Each exercise names its own tempting wrong route, taken from the chapter's
-    # reasoning data, so the prompt is specific without stating the answer.
-    traps = [entry[2] for entry in checked_reasoning(n)]
+    # reasoning data. Checks that would reveal answers stay in the solution file.
     tasks = "\n\n".join(
-        f"### Exercise {i + 1}: {text}\n\n**Trap to avoid:** {trap}\n\n"
-        "Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet."
-        for i, (text, trap) in enumerate(zip(exercises, traps, strict=True))
+        f"### Exercise {i + 1}: {text}\n\n**Trap to avoid:** {entry[2]}"
+        for i, (text, entry) in enumerate(zip(exercises, reasoning, strict=True))
     )
-    # Each hint points to a different part of this lesson's reasoning rather than
-    # revealing the answer. Explanatory answers remain in a separate artifact.
-    hints = [
-        f'Start from worked example 1 and mark the quantities needed for the task "{exercises[0]}".',
-        f"Change one assumption in worked example 2 while preserving the declared contract: {lower_initial(exercises[1])}.",
-        f"Trace the CPU program's variables before adding hardware behavior: {lower_initial(exercises[2])}.",
-        f'Draw producers, consumers and the exact operation boundary for the task "{exercises[3]}".',
-        f"Separate what the small fixture establishes from what the real runtime must show: {lower_initial(exercises[4])}.",
-        f"Write a counterexample to an overbroad claim before you {lower_initial(exercises[5])}.",
-    ]
-    hints_text = "\n".join(f"{i + 1}. {hint}" for i, hint in enumerate(hints))
+    misconception = ""
+    if n in MISCONCEPTIONS:
+        belief, correction = MISCONCEPTIONS[n]
+        misconception = f"\n\n**Misconception:** {belief} **Correction:** {correction}"
+    hints_text = "\n".join(f"{i + 1}. {hint}" for i, hint in enumerate(notes["hints"]))
+    self_check = "\n".join(f"{i + 1}. {q}" for i, (q, _) in enumerate(notes["self_check"]))
     framework = ""
     if n in FRAMEWORK_NOTES:
         torch_note, tf_note = FRAMEWORK_NOTES[n]
-        framework = f"\n## Equal framework lanes\n\n### PyTorch\n\n{torch_note}\n\n### TensorFlow\n\n{tf_note}\n\nChoose either lane first, then compare the other using identical mathematical inputs. Framework-specific shape, mode and optimizer rules must be checked separately. Both use offline synthetic examples; no model hub or dataset download is triggered.\n"
+        framework = f"\n## Equal framework lanes\n\n### PyTorch\n\n{torch_note}\n\n### TensorFlow\n\n{tf_note}\n\nLane rules: [framework labs](../../STUDY-GUIDE.md#python-gpu-and-framework-labs).\n"
     gpu_section = ""
     variants = [
         variant("cpu-model", "CPU reference model", "python-core", source, reference, explanation)
@@ -363,7 +394,7 @@ def build(record):
             )
         )
         gpu_section += (
-            "\n## Optional NVIDIA CUDA lab\n\nThe **CuPy on NVIDIA CUDA** variant executes the actual operation with CuPy in the separately prepared `cuda-python` profile. It refuses a missing device instead of switching to CPU. Keep inputs bounded as supplied; inspect the device, synchronize and compare with the CPU reference. The profile must pass real host/device readiness checks. Successful syntax checking on a Mac is not GPU qualification.\n\n```python\n"
+            "\n## Optional NVIDIA CUDA lab\n\n**CuPy on NVIDIA CUDA** needs the `cuda-python` profile; [lab rules](../../STUDY-GUIDE.md#python-gpu-and-framework-labs).\n\n```python\n"
             + code
             + "```\n"
         )
@@ -394,7 +425,7 @@ def build(record):
                         explanation,
                     )
                 )
-        gpu_section += "\n## Executable framework practice\n\nThe variant chooser offers **PyTorch on CPU**, **TensorFlow on CPU**, and separate **NVIDIA CUDA** versions. CPU versions force CPU placement. CUDA versions require the named GPU profile and refuse to silently fall back. Each complete program uses the same tiny deterministic objective, bounded tensors and local synthetic data. Read its source before running; a framework pass establishes only that variant and environment.\n\nThe checkpoint demonstration is in-memory. It teaches what state must be saved; it does not export a durable model artifact or preserve an in-flight device context. Advanced custom-op, distributed and engine-building projects remain separately prepared external workflows.\n"
+        gpu_section += "\n## Executable framework practice\n\nRun the **PyTorch** and **TensorFlow** variants on CPU first; [lab rules](../../STUDY-GUIDE.md#python-gpu-and-framework-labs).\n"
     if n in PYSPARK_BODY:
         for label, title, language, profile, suffix, maker in [
             (
@@ -421,24 +452,17 @@ def build(record):
             entry = variant(label, title, profile, src, sol, explanation)
             entry["language"] = language
             variants.append(entry)
-        gpu_section += "\n## Scala and PySpark parity lab\n\nChoose **Scala Spark on CPU** or **PySpark on CPU** to run the same bounded query in the ordinary Spark workers. Both use explicit schemas, local fixtures, at most two local threads, a disabled GPU SQL setting and a finally-block session stop. They assert the same expected result. These are CPU Spark observations, not GPU plugin qualification.\n\nFor external GPU comparison, retain the same relational expressions and expected result but use a separately reviewed launcher and compatibility matrix. Do not change the classroom source into an arbitrary cluster connection.\n"
-    boundary = """## Platform and evidence contract
-
-The reading worksheet and CPU reference model work through the ordinary Linux Docker classroom on macOS, Linux and Windows using WSL 2. They do not require an NVIDIA GPU. Their results are labeled CPU models or semantic oracles, not simulated hardware performance.
-
-Real CUDA work needs supported NVIDIA hardware, a compatible host driver and an explicitly prepared GPU runtime. An Apple GPU does not execute CUDA kernels. PyTorch MPS on a supported native Mac, ROCm on supported AMD hardware, or other vendor backends can provide separate accelerator learning routes; they need their own package and operation qualification and are not CUDA evidence. The ordinary Linux Docker classroom does not expose native Mac MPS automatically.
-
-Do not download packages, models or data by opening this lesson. Do not attach an engine socket, ambient cluster credentials or an arbitrary remote endpoint. A CPU pass, imported package, successful compilation, real GPU result and measured performance are distinct observations. Record the actual backend, data shape/dtype, source revision, versions and pending checks. A saved completion marker records learning progress, not hardware certification.
-"""
-    if n > 48:
-        boundary += "\nGPU Spark is a separate owned external workflow. The ordinary `spark-local-scala` and `spark-local-python` profiles are CPU Spark. Keep the GPU plugin disabled or absent for a CPU-only baseline. Per-operator CPU fallback inside a working GPU plugin environment is a different condition from having no compatible GPU. Never mount a host Docker socket or ambient kubeconfig into an ordinary lesson worker.\n"
+        gpu_section += "\n## Scala and PySpark parity lab\n\nBoth CPU variants assert one expected result. Read the [parity rules](../../STUDY-GUIDE.md#spark-parity-and-gpu-spark).\n"
+    spark_route = " / GPU Spark specialization" if n > 48 else ""
     content = f"""# {ident}: {record["title"]}
 
-**Route:** CUDA Python and machine learning{" / GPU Spark specialization" if n > 48 else ""}. **Stage:** {level}. **Prerequisites:** {prereq}. Allow several sessions when the hardware experiment is new; the chapter is not a deadline.
+**Route:** CUDA Python and machine learning{spark_route}. **Stage:** {level}. **Prerequisites:** {prereq}.
 
-## What you will be able to explain
+Pacing, evidence labels and platform rules: [CUDA study guide](../../STUDY-GUIDE.md).
 
-By the end, you can **{lower_initial(exercises[0])}**, **{lower_initial(exercises[3])}**, and **{lower_initial(exercises[5])}** with evidence. Start with the two worked cases, then use the editable CPU model to make the quantities concrete.
+## Learning objectives
+
+{objectives}
 
 ## Mechanism and vocabulary
 
@@ -452,39 +476,46 @@ By the end, you can **{lower_initial(exercises[0])}**, **{lower_initial(exercise
 
 {worked}
 
-## Portable executable model
+## How to run the CPU model
 
-The **CPU reference model** variant runs this bounded worked example using `python-core`. It uses only the Python standard library, small synthetic values and no network. Its purpose is to expose the arithmetic or contract behind the chapter. The separate reference includes assertions for the stated observations.
+Edit the copy; the [reference](../references/{ident}_cpu.py) adds assertions.
+
+```sh
+python {source}
+```
 
 ```python
 {source_code}```
 
 **Expected observation:** {record["expected"]}{variable_trace(source_code)}
-
-Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.
 {framework}{gpu_section}
 ## Practice and transfer
+
+Record each attempt in the [worksheet](../lessons/{ident}.md) before opening hints.
 
 {tasks}
 
 ## Progressive hints
 
-Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.
+Hint *k* belongs to exercise *k*; open one at a time.
 
 {hints_text}
 
-## Common mistakes and self-review
+## Common mistakes and self-check
 
-Confusing a correct tiny example with a general implementation is the central review risk. For this chapter, challenge the assumption in worked example 2, then ask whether your change preserves the mechanism described above. If you change dtype, layout, ordering, batch size or backend, update the acceptance contract rather than silently reusing the old observation. Explain an unexpected result before trying random configuration changes.
+{notes["mistake"]}{misconception}
 
-Keep a small evidence table with columns **claim**, **input**, **expected observation**, **actual observation** and **limit**. For the first claim use `{exercises[0]}`. For the final claim use `{exercises[5]}`. An unperformed GPU or cluster experiment remains pending even when the CPU model is correct.
+**Evidence limit:** {notes["limit"]}
 
-{boundary}
+{self_check}
+
+Answers: [self-check answers](../solutions/{ident}_solutions.md#self-check-answers).
+
 ## Primary references
 
 {sources}
 
-Use the version-matched documentation of your prepared environment. These references describe interfaces and supported boundaries; the chapter's synthetic examples and CPU models are original teaching material.
+Full lists: [documentation and sources](../../STUDY-GUIDE.md#documentation-and-sources).
 
 ## Ask an AI tutor about this lesson
 
@@ -504,8 +535,7 @@ not as GPU or cluster measurements.
         for i, task in enumerate(exercises)
     )
     put(learner, worksheet)
-    solution = f"# {ident}: explained solutions\n\nThese answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.\n\n"
-    reasoning = checked_reasoning(n)
+    solution = f"# {ident}: explained solutions\n\nCompare with your [worksheet](../lessons/{ident}.md) attempt.\n\n"
     solution += "\n\n".join(
         f"## Exercise {i + 1}: {task}\n\n{answer}.\n\n"
         + "\n\n".join(
@@ -513,7 +543,12 @@ not as GPU or cluster measurements.
         )
         for i, (task, answer, parts) in enumerate(zip(exercises, answers, reasoning, strict=True))
     )
-    solution += f"\n\n## Reference observation\n\n{record['expected']}\n\nThe reference file is `{reference}`. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.\n"
+    solution += "\n\n## Self-check answers\n\n" + "\n\n".join(
+        f"{i + 1}. **{q}** {a}" for i, (q, a) in enumerate(notes["self_check"])
+    )
+    solution += (
+        f"\n\n## Reference observation\n\n{record['expected']}\n\nAsserted by `{reference}`.\n"
+    )
     put(explanation, solution)
     track = dict(
         id=ident,

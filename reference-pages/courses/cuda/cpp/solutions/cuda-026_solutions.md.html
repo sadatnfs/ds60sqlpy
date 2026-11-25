@@ -196,7 +196,6 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <article class="document"><h2 id="cuda-026-explanatory-solutions">cuda-026: explanatory solutions<a class="heading-anchor" href="#cuda-026-explanatory-solutions" aria-label="Link to this section">#</a></h2>
 <h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
 <p>Compute Sanitizer provides several checks with different scopes. Memcheck investigates invalid and misaligned memory accesses; racecheck investigates shared-memory hazards; initcheck investigates uninitialized global-memory reads; synccheck investigates invalid synchronization use. Their observations complement mathematical tests. Instrumentation can be expensive and can change timing, so sanitizer runs are not performance samples. An automated command should select a nonzero error-exitcode, because a tool diagnostic must make the check fail even if the application itself returns success. Never conclude that one clean run proves race freedom for every input or validates unsupported global protocols.</p>
-<p>The separate <a href="../references/cuda-026_cpu.py.html">CPU reference</a> checks the chapter&#x27;s bounded model. It does not execute CUDA or establish GPU timing. Compare after attempting the worksheet or explicitly choosing to reveal solutions.</p>
 <h3 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h3>
 <p>For an array of four elements, valid indices are 0 through 3. A kernel that accesses index four has an off-by-one defect even if the returned allocation happens to contain readable bytes nearby. Memcheck is an appropriate additional diagnostic, while a CPU bounds model pinpoints the invalid logical access without a GPU.</p>
 <p><strong>Approach:</strong> Audit indices 0 through 4 against n = 4 on the CPU and run memcheck on the GPU build.</p>
@@ -233,11 +232,16 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Why it is correct:</strong> This sequence shows the fixture detects the bug, the fix removes it, and results are correct.</p>
 <p><strong>A plausible wrong approach:</strong> Benchmarking under the sanitizer reports instrumented timings that do not reflect the real kernel.</p>
 <p><strong>How to verify:</strong> Keep the failing fixture as a regression test and check it fails on the old commit.</p>
+<h3 id="self-check-answers">Self-check answers<a class="heading-anchor" href="#self-check-answers" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>Which checker targets shared-memory hazards?</strong> Racecheck.</li>
+<li><strong>Why are sanitizer runs not performance evidence?</strong> Instrumentation slows execution and changes timing.</li>
+<li><strong>Why is a host sleep not a repair for a missing barrier?</strong> It creates no ordering between device threads, so the race remains.</li>
+</ol>
 <h3 id="numerical-reference-and-its-limits">Numerical reference and its limits<a class="heading-anchor" href="#numerical-reference-and-its-limits" aria-label="Link to this section">#</a></h3>
-<p>The complete CPU model is <a href="../references/cuda-026_cpu.py.html">here</a>. Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It does not claim CUDA execution, concurrency safety or a performance measurement.</p>
+<p>The <a href="../references/cuda-026_cpu.py.html">CPU reference</a> reproduces worked example 1 and prints <code>{&#x27;CPU_bounds_audit&#x27;: [4], &#x27;tool_selection&#x27;: {&#x27;out_of_bounds&#x27;: &#x27;memcheck&#x27;, &#x27;shared_hazard&#x27;: &#x27;racecheck&#x27;, &#x27;uninitialized&#x27;: &#x27;initcheck&#x27;, &#x27;invalid_barrier&#x27;: &#x27;synccheck&#x27;}}</code>.</p>
 <h3 id="transfer-review">Transfer review<a class="heading-anchor" href="#transfer-review" aria-label="Link to this section">#</a></h3>
-<p>Confirm the intended failing fixture diagnoses the old problem, run the corrected checker, validate normal/tail outputs and benchmark separately without instrumentation.</p>
-<p>A complete explanation must name its inputs, the unchanged mathematical contract, the changed boundary or resource condition, and the evidence still needed on actual hardware. Preserve a CPU baseline even after a GPU path becomes available.</p></article>
+<p>Confirm the intended failing fixture diagnoses the old problem, run the corrected checker, validate normal/tail outputs and benchmark separately without instrumentation.</p></article>
   </main>
 </body>
 </html>

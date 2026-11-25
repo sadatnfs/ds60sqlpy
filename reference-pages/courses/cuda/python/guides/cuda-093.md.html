@@ -194,9 +194,17 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cuda/python/guides/cuda-093.md</code></p>
     </header>
     <article class="document"><h2 id="cuda-093-graphs-compilation-and-shape-behavior">cuda-093: Graphs, compilation and shape behavior<a class="heading-anchor" href="#cuda-093-graphs-compilation-and-shape-behavior" aria-label="Link to this section">#</a></h2>
-<p><strong>Route:</strong> CUDA Python and machine learning. <strong>Stage:</strong> intermediate. <strong>Prerequisites:</strong> <code>cuda-087</code>, <code>cuda-092</code>. Allow several sessions when the hardware experiment is new; the chapter is not a deadline.</p>
-<h3 id="what-you-will-be-able-to-explain">What you will be able to explain<a class="heading-anchor" href="#what-you-will-be-able-to-explain" aria-label="Link to this section">#</a></h3>
-<p>By the end, you can <strong>count specializations</strong>, <strong>specify an accepted shape set</strong>, and <strong>separate compilation and replay</strong> with evidence. Start with the two worked cases, then use the editable CPU model to make the quantities concrete.</p>
+<p><strong>Route:</strong> CUDA Python and machine learning. <strong>Stage:</strong> intermediate. <strong>Prerequisites:</strong> <code>cuda-087</code>, <code>cuda-092</code>.</p>
+<p>Pacing, evidence labels and platform rules: <a href="../../STUDY-GUIDE.md.html">CUDA study guide</a>.</p>
+<h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
+<ul>
+<li>Count specializations.</li>
+<li>Calculate break-even calls.</li>
+<li>Describe a graph break.</li>
+<li>Specify an accepted shape set.</li>
+<li>Compare gradients.</li>
+<li>Separate compilation and replay.</li>
+</ul>
 <h3 id="mechanism-and-vocabulary">Mechanism and vocabulary<a class="heading-anchor" href="#mechanism-and-vocabulary" aria-label="Link to this section">#</a></h3>
 <p>Tracing records a representation of operations; compilation transforms that representation; replay reuses prepared work. These are related but different. Python side effects, data-dependent control flow and changing shapes may trigger graph breaks or new specializations. A compiled path can spend substantial time before steady-state execution, which matters for short-lived jobs.</p>
 <p>PyTorch torch.compile has guards and graph-break behavior; TensorFlow tf.function uses tracing and signatures, with XLA an additional choice. Explain them through each framework&#x27;s idioms. Compare eager and compiled outputs and gradients over the accepted shape set. CUDA Graph replay has further restrictions around allocations and stable execution, so a generic graph API is not proof of CUDA Graph use.</p>
@@ -212,14 +220,15 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>A specialization cache sees shapes (4,8),(4,8),(8,8) and compiles twice in a simplified model. Repeating the first shape reuses its entry.</p>
 <h4 id="worked-example-2">Worked example 2<a class="heading-anchor" href="#worked-example-2" aria-label="Link to this section">#</a></h4>
 <p>A compiled model saves 1 ms per call after a 500 ms compile. More than 500 equivalent calls are needed to repay that startup cost under this simple model.</p>
-<h3 id="portable-executable-model">Portable executable model<a class="heading-anchor" href="#portable-executable-model" aria-label="Link to this section">#</a></h3>
-<p>The <strong>CPU reference model</strong> variant runs this bounded worked example using <code>python-core</code>. It uses only the Python standard library, small synthetic values and no network. Its purpose is to expose the arithmetic or contract behind the chapter. The separate reference includes assertions for the stated observations.</p>
+<h3 id="how-to-run-the-cpu-model">How to run the CPU model<a class="heading-anchor" href="#how-to-run-the-cpu-model" aria-label="Link to this section">#</a></h3>
+<p>Edit the copy; the <a href="../references/cuda-093_cpu.py.html">reference</a> adds assertions.</p>
+<pre class="highlighted-code"><code class="language-bash">python courses/cuda/python/lessons/cuda-093_cpu.py</code></pre>
 <pre class="highlighted-code"><code class="language-python">shapes <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">8</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">8</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-number">8</span><span class="syntax-punctuation">,</span> <span class="syntax-number">8</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span>
 <span class="syntax-keyword">assert</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">set</span><span class="syntax-punctuation">(</span>shapes<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">2</span>
 compile_ms<span class="syntax-punctuation">,</span> saving_ms <span class="syntax-operator">=</span> <span class="syntax-number">500</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span>
 <span class="syntax-keyword">assert</span> compile_ms <span class="syntax-operator">/</span> saving_ms <span class="syntax-operator">==</span> <span class="syntax-number">500</span>
 <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">CPU compilation model:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">set</span><span class="syntax-punctuation">(</span>shapes<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">specializations; break-even</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">500</span><span class="syntax-punctuation">)</span></code></pre>
-<p><strong>Expected observation:</strong> Two modeled specializations;500-call break-even.</p>
+<p><strong>Expected observation:</strong> Two modeled specializations; 500-call break-even.</p>
 <p><strong>Variable trace.</strong> Before running the model, predict these final values; then compare:</p>
 <div class="table-wrap"><table><thead><tr>
 <th>Variable</th>
@@ -238,55 +247,52 @@ compile_ms<span class="syntax-punctuation">,</span> saving_ms <span class="synta
 <td><code>1</code></td>
 </tr>
 </tbody></table></div>
-<p>Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.</p>
 <h3 id="equal-framework-lanes">Equal framework lanes<a class="heading-anchor" href="#equal-framework-lanes" aria-label="Link to this section">#</a></h3>
 <h4 id="pytorch">PyTorch<a class="heading-anchor" href="#pytorch" aria-label="Link to this section">#</a></h4>
 <p>Compare eager and torch.compile with the same initial state. Record compilation latency, shape guards, graph breaks and accepted shape changes; do not claim every graph uses CUDA Graph replay.</p>
 <h4 id="tensorflow">TensorFlow<a class="heading-anchor" href="#tensorflow" aria-label="Link to this section">#</a></h4>
 <p>Compare eager and tf.function with a stated input signature. Count retraces, then evaluate XLA as a separate configuration and preserve both outputs and gradients.</p>
-<p>Choose either lane first, then compare the other using identical mathematical inputs. Framework-specific shape, mode and optimizer rules must be checked separately. Both use offline synthetic examples; no model hub or dataset download is triggered.</p>
+<p>Lane rules: <a href="../../STUDY-GUIDE.md.html#python-gpu-and-framework-labs">framework labs</a>.</p>
 <h3 id="practice-and-transfer">Practice and transfer<a class="heading-anchor" href="#practice-and-transfer" aria-label="Link to this section">#</a></h3>
+<p>Record each attempt in the <a href="../lessons/cuda-093.md.html">worksheet</a> before opening hints.</p>
 <h4 id="exercise-1-count-specializations">Exercise 1: Count specializations<a class="heading-anchor" href="#exercise-1-count-specializations" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Counting one compilation per call, three here, ignores the cache and overestimates startup cost. Counting one compilation total assumes the compiler generalizes across shapes, which static specialization does not.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-2-calculate-break-even-calls">Exercise 2: Calculate break-even calls<a class="heading-anchor" href="#exercise-2-calculate-break-even-calls" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Assuming compilation pays off immediately because each call is faster ignores the startup cost. A short-lived job of 100 calls loses 400 ms overall.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-3-describe-a-graph-break">Exercise 3: Describe a graph break<a class="heading-anchor" href="#exercise-3-describe-a-graph-break" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Assuming a program that ran without errors under the compiler was compiled as one graph overlooks silent breaks, which are reported only when logging is enabled.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-4-specify-an-accepted-shape-set">Exercise 4: Specify an accepted shape set<a class="heading-anchor" href="#exercise-4-specify-an-accepted-shape-set" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Accepting arbitrary shapes in production lets each new batch size trigger a recompilation, causing latency spikes.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-5-compare-gradients">Exercise 5: Compare gradients<a class="heading-anchor" href="#exercise-5-compare-gradients" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Checking only that forward outputs match and assuming gradients follow can miss a backward bug that shows up only as slower training.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-6-separate-compilation-and-replay">Exercise 6: Separate compilation and replay<a class="heading-anchor" href="#exercise-6-separate-compilation-and-replay" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Expecting graph replay to speed up compute-bound kernels confuses launch overhead with kernel time.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
-<p>Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.</p>
+<p>Hint <em>k</em> belongs to exercise <em>k</em>; open one at a time.</p>
 <ol>
-<li>Start from worked example 1 and mark the quantities needed for the task &quot;Count specializations&quot;.</li>
-<li>Change one assumption in worked example 2 while preserving the declared contract: calculate break-even calls.</li>
-<li>Trace the CPU program&#x27;s variables before adding hardware behavior: describe a graph break.</li>
-<li>Draw producers, consumers and the exact operation boundary for the task &quot;Specify an accepted shape set&quot;.</li>
-<li>Separate what the small fixture establishes from what the real runtime must show: compare gradients.</li>
-<li>Write a counterexample to an overbroad claim before you separate compilation and replay.</li>
+<li>List the shape signatures in order and count how many are new when they arrive.</li>
+<li>Divide the compile time by the per-call saving, then check the calls just below and above that number.</li>
+<li>Ask what happens when compiled code meets a Python side effect or a data-dependent branch it cannot capture.</li>
+<li>Write the dimensions and dtypes the compiled path must accept, with explicit bounds.</li>
+<li>Ask whether matching forward outputs guarantees that the backward pass matches too.</li>
+<li>Ask which step generates code and which step only reuses a recorded execution schedule.</li>
 </ol>
-<h3 id="common-mistakes-and-self-review">Common mistakes and self-review<a class="heading-anchor" href="#common-mistakes-and-self-review" aria-label="Link to this section">#</a></h3>
-<p>Confusing a correct tiny example with a general implementation is the central review risk. For this chapter, challenge the assumption in worked example 2, then ask whether your change preserves the mechanism described above. If you change dtype, layout, ordering, batch size or backend, update the acceptance contract rather than silently reusing the old observation. Explain an unexpected result before trying random configuration changes.</p>
-<p>Keep a small evidence table with columns <strong>claim</strong>, <strong>input</strong>, <strong>expected observation</strong>, <strong>actual observation</strong> and <strong>limit</strong>. For the first claim use <code>Count specializations</code>. For the final claim use <code>Separate compilation and replay</code>. An unperformed GPU or cluster experiment remains pending even when the CPU model is correct.</p>
-<h3 id="platform-and-evidence-contract">Platform and evidence contract<a class="heading-anchor" href="#platform-and-evidence-contract" aria-label="Link to this section">#</a></h3>
-<p>The reading worksheet and CPU reference model work through the ordinary Linux Docker classroom on macOS, Linux and Windows using WSL 2. They do not require an NVIDIA GPU. Their results are labeled CPU models or semantic oracles, not simulated hardware performance.</p>
-<p>Real CUDA work needs supported NVIDIA hardware, a compatible host driver and an explicitly prepared GPU runtime. An Apple GPU does not execute CUDA kernels. PyTorch MPS on a supported native Mac, ROCm on supported AMD hardware, or other vendor backends can provide separate accelerator learning routes; they need their own package and operation qualification and are not CUDA evidence. The ordinary Linux Docker classroom does not expose native Mac MPS automatically.</p>
-<p>Do not download packages, models or data by opening this lesson. Do not attach an engine socket, ambient cluster credentials or an arbitrary remote endpoint. A CPU pass, imported package, successful compilation, real GPU result and measured performance are distinct observations. Record the actual backend, data shape/dtype, source revision, versions and pending checks. A saved completion marker records learning progress, not hardware certification.</p>
+<h3 id="common-mistakes-and-self-check">Common mistakes and self-check<a class="heading-anchor" href="#common-mistakes-and-self-check" aria-label="Link to this section">#</a></h3>
+<p>A common mistake is enabling compilation for a short job and reporting a speedup from warm calls only. With a 500 ms compile and a 1 ms saving per call, the first 500 calls are slower in total. Another mistake is feeding many distinct shapes, which triggers new specializations or graph breaks. Fix both by stating an accepted shape set, measuring compile time separately and comparing eager and compiled outputs and gradients across that set.</p>
+<p><strong>Misconception:</strong> A compiled function always computes exactly the same values as its eager version. <strong>Correction:</strong> Compilation can fuse operations and reorder floating-point arithmetic, and Python side effects in traced code may run once at trace time rather than on every call. Compare compiled and eager outputs and gradients with a stated tolerance over the accepted shape set, and keep side effects outside compiled regions.</p>
+<p><strong>Evidence limit:</strong> The reference counts two specializations and a 500-call break-even with a simplified cache. Real frameworks use guards, graph breaks and recompilation limits of their own, so actual behavior must be observed with the pinned PyTorch or TensorFlow release.</p>
+<ol>
+<li>How do tracing, compilation and replay differ?</li>
+<li>Why can changing shapes slow a compiled model?</li>
+<li>Is using a generic graph API proof that CUDA Graph replay happened?</li>
+</ol>
+<p>Answers: <a href="../solutions/cuda-093_solutions.md.html#self-check-answers">self-check answers</a>.</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
 <ul>
 <li><a href="https://docs.pytorch.org/docs/2.9/notes/cuda.html">PyTorch CUDA semantics</a></li>
 <li><a href="https://www.tensorflow.org/guide/gpu">TensorFlow GPU guide</a></li>
 </ul>
-<p>Use the version-matched documentation of your prepared environment. These references describe interfaces and supported boundaries; the chapter&#x27;s synthetic examples and CPU models are original teaching material.</p>
+<p>Full lists: <a href="../../STUDY-GUIDE.md.html#documentation-and-sources">documentation and sources</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning skill for cuda-093: Graphs, compilation and shape behavior.
 Read courses/cuda/python/guides/cuda-093.md and courses/cuda/python/lessons/cuda-093.md.

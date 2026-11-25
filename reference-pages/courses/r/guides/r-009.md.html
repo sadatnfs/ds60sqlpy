@@ -196,7 +196,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <article class="document"><h2 id="r-009-lists-and-nested-records-without-accidental-flattening">r-009: Lists and nested records without accidental flattening<a class="heading-anchor" href="#r-009-lists-and-nested-records-without-accidental-flattening" aria-label="Link to this section">#</a></h2>
 <p><strong>Level:</strong> beginner. <strong>Direct prerequisites:</strong> <code>r-005</code>, <code>r-006</code>, <code>r-007</code></p>
 <h3 id="run-and-retain-your-work">Run and retain your work<a class="heading-anchor" href="#run-and-retain-your-work" aria-label="Link to this section">#</a></h3>
-<p>Open <code>r-009</code> in <code>/classroom</code> and use the prepared <code>r-statistics</code> profile. Each Run evaluates one <code>main.R</code> script in a fresh offline R process, so define every input in the script; an earlier Run leaves no variables behind. Work in the <a href="../lessons/r-009.R.html">starter</a>. The <a href="../solutions/r-009_reference.R.html">complete reference</a> ends by printing <code>r-009 reference checks passed</code>, and the <a href="../solutions/r-009_solutions.md.html">explained answers</a> are there for deliberate comparison after your own attempt. This chapter prints values only; when a chapter draws figures, the classroom keeps at most two figures per run. The <a href="../README.md.html">course overview</a> describes saved work, figure capture and the prepared package versions.</p>
+<p>The starter builds one record with a scalar <code>id</code>, a numeric <code>values</code> vector and a nested <code>metadata</code> list holding the unit kg, then shows it with <code>str()</code>. Run it and read the indentation: <code>str()</code> marks <code>metadata</code> as a list inside the list, the structure that <code>unlist()</code> would flatten away. Every extraction you write should state whether it returns a sublist, as single brackets do, or the element itself, as double brackets and <code>$</code> do. The printed <code>str()</code> output after each step is how you confirm which one you actually received.</p>
+<p>Work in the <a href="../lessons/r-009.R.html">starter</a> under the <a href="../STUDY-GUIDE.md.html#run-a-chapter">run rules</a>.</p>
+<p>The <a href="../solutions/r-009_reference.R.html">complete reference</a> ends by printing <code>r-009 reference checks passed</code>.</p>
 <h3 id="outcome-and-mechanism">Outcome and mechanism<a class="heading-anchor" href="#outcome-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Read and update nested records while preserving heterogeneous fields and validating required components.</p>
 <p>A list can contain a character ID, a numeric vector and another list without coercing them into one atomic type. It is therefore useful for structured records, model outputs and configuration. The structure itself is not a validated schema: fields can be absent, misspelled, duplicated or contain an unexpected object. Validate the pieces a function actually requires.</p>
@@ -287,14 +289,26 @@ record[[&quot;val&quot;]]                  NULL       NULL</code></pre>
 <li>One atomic output needs a common type.</li>
 </ol>
 <h3 id="reference-review">Reference review<a class="heading-anchor" href="#reference-review" aria-label="Link to this section">#</a></h3>
-<p>The reference applies the reasoning explained under the worked examples above; the <a href="../solutions/r-009_solutions.md.html">explained answers</a> add an answer for each exercise.</p>
+<p>The reference reuses the worked examples&#x27; reasoning; <a href="../solutions/r-009_solutions.md.html">explained answers</a> cover each exercise.</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
 <ul>
 <li><a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/list.html">R lists</a></li>
 <li><a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/Extract.html">R extraction</a></li>
 </ul>
 <h3 id="continue">Continue<a class="heading-anchor" href="#continue" aria-label="Link to this section">#</a></h3>
-<p>Chapters that list <code>r-009</code> as a direct prerequisite: <a href="r-010.md.html"><code>r-010</code></a>, <a href="r-014.md.html"><code>r-014</code></a>.</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Next chapter</th>
+<th>Title</th>
+</tr></thead><tbody>
+<tr>
+<td><a href="r-010.md.html"><code>r-010</code></a></td>
+<td>Data frames, column types and record identity</td>
+</tr>
+<tr>
+<td><a href="r-014.md.html"><code>r-014</code></a></td>
+<td>Functional iteration, typed results and the base pipe</td>
+</tr>
+</tbody></table></div>
 <h3 id="ask-an-ai-tutor">Ask an AI tutor<a class="heading-anchor" href="#ask-an-ai-tutor" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for r-009 (Lists and nested records without accidental flattening).
 Read the guide and my saved attempt. Explain the relevant R mechanism,

@@ -1,6 +1,6 @@
 # go-045: explained solutions
 
-These are comparison material after an attempt or explicit reveal. The executable reference implements all six cases in one `main.go`.
+Compare after an attempt ([using solutions](../STUDY-GUIDE.md#use-the-solutions)). `courses/go/solutions/go-045_solution.go` implements all six cases.
 
 ## Mechanism
 
@@ -10,7 +10,7 @@ A lease model records holder and expiry. A current holder can renew, another can
 
 ## 1. Acquire an empty lease: predict an edited check
 
-Copy worked example 1 into a scratch pad and change `check(acquire(&l, "a", 10, 5) && l.Holder == "a" && l.Expires == 15, "acquire")` to `check(acquire(&l, "a", 11, 5) && l.Holder == "a" && l.Expires == 15, "acquire")` inside its check. Before running, predict whether the check still passes and explain why; then restore it.
+Copy worked example 1, change `check(acquire(&l, "a", 10, 5) && l.Holder == "a" && l.Expires == 15, "acquire")` to `check(acquire(&l, "a", 11, 5) && l.Holder == "a" && l.Expires == 15, "acquire")` inside its check and predict whether it still passes; then restore it.
 
 The unchanged code is worked example 1:
 
@@ -19,7 +19,9 @@ l := Lease{}
 check(acquire(&l, "a", 10, 5) && l.Holder == "a" && l.Expires == 15, "acquire")
 ```
 
-**Expected:** The changed run panics with `acquire` because the edited check no longer holds. Restoring the original line brings back the worked observation: holder becomes a and expiry 15.
+**Expected:** The edited check panics with `acquire` even though `acquire(&l, "a", 10, 5) && l.Holder == "a" && l.Expires == 15` still holds.
+
+**Verify:** Restoring `check(acquire(&l, "a", 10, 5) && l.Holder == "a" && l.Expires == 15, "acquire")` makes the check pass again with the worked observation: holder becomes a and expiry 15.
 
 This local policy model does not implement distributed atomicity. A real update must be protected by the API concurrency contract.
 
@@ -33,7 +35,7 @@ This local policy model does not implement distributed atomicity. A real update 
 
 ## 2. Reject a competing candidate: debug a regression
 
-A regression changed one token in worked example 2, so one line now reads `l := Lease{Holder: "a!", Expires: 15}`. Run worked example 2 with that line, use the failure to locate the defect and repair it without changing the check.
+A one-token regression in worked example 2 makes a line read `l := Lease{Holder: "a!", Expires: 15}`. Repair it without changing the check.
 
 The unchanged code is worked example 2:
 
@@ -42,7 +44,9 @@ l := Lease{Holder: "a", Expires: 15}
 check(!acquire(&l, "b", 12, 5) && l.Holder == "a", "contender")
 ```
 
-**Expected:** Before the repair the program panics with `contender`; after it the line reads `l := Lease{Holder: "a", Expires: 15}` again and the request fails and a remains holder.
+**Expected:** The defective run panics with `contender`; after restoring `l := Lease{Holder: "a", Expires: 15}`, the request fails and a remains holder.
+
+**Verify:** The failing run shows message `contender`; after the repair `!acquire(&l, "b", 12, 5) && l.Holder == "a"` holds again.
 
 The contender waits while the current claim remains valid under this model.
 
@@ -65,6 +69,8 @@ check(acquire(&l, "a", 13, 5) && l.Expires == 18, "renew")
 
 **Expected:** Expiry advances to 18.
 
+**Verify:** Your solution must keep `acquire(&l, "a", 13, 5) && l.Expires == 18` true. Control: changing `check(acquire(&l, "a", 13, 5) && l.Expires == 18, "renew")` to `check(acquire(&l, "a", 14, 5) && l.Expires == 18, "renew")` panics with message `renew`; revert it.
+
 Renewal extends a claim; it does not prove a formerly paused process cannot still perform external work.
 
 **Approach.** Let the current holder `a` call `acquire` at 13. The holder equals the candidate, so the lease is renewed with `Expires` set to 13 plus 5.
@@ -85,6 +91,8 @@ check(acquire(&l, "b", 15, 5) && l.Holder == "b", "takeover")
 ```
 
 **Expected:** Holder becomes b.
+
+**Verify:** Your solution must keep `acquire(&l, "b", 15, 5) && l.Holder == "b"` true. Control: changing `l := Lease{Holder: "a", Expires: 15}` to `l := Lease{Holder: "a", Expires: 16}` panics with message `takeover`; revert it.
 
 The boundary policy is explicit. Real clock-skew and API latency assumptions require careful configuration and testing.
 
@@ -108,6 +116,8 @@ check(!accept(4) && accept(5), "fencing")
 
 **Expected:** Only token 5 is accepted by the destination model.
 
+**Verify:** Your solution must keep `!accept(4) && accept(5)` true. Control: changing `accept := func(token int) bool { return token == current }` to `accept := func(token int) bool { return token != current }` panics with message `fencing`; revert it.
+
 The protected destination enforces the token. Merely logging that leadership changed does not fence stale work.
 
 **Approach.** Let the destination accept a write only when its token equals the current fencing token 5.
@@ -128,6 +138,8 @@ check(!acquire(&l, "a", 10, 0) && l.Holder == "", "duration")
 ```
 
 **Expected:** No lease is acquired.
+
+**Verify:** Your solution must keep `!acquire(&l, "a", 10, 0) && l.Holder == ""` true. Control: changing `check(!acquire(&l, "a", 10, 0) && l.Holder == "", "duration")` to `check(!acquire(&l, "a", 10, 1) && l.Holder == "", "duration")` panics with message `duration`; revert it.
 
 Invalid timing configuration must fail before coordination starts. Silent fallback can create unpredictable failover behavior.
 

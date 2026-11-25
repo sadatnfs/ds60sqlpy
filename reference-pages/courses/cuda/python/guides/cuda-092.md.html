@@ -194,9 +194,17 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cuda/python/guides/cuda-092.md</code></p>
     </header>
     <article class="document"><h2 id="cuda-092-profiling-a-complete-training-step">cuda-092: Profiling a complete training step<a class="heading-anchor" href="#cuda-092-profiling-a-complete-training-step" aria-label="Link to this section">#</a></h2>
-<p><strong>Route:</strong> CUDA Python and machine learning. <strong>Stage:</strong> intermediate. <strong>Prerequisites:</strong> <code>cuda-071</code>, <code>cuda-088</code>, <code>cuda-089</code>. Allow several sessions when the hardware experiment is new; the chapter is not a deadline.</p>
-<h3 id="what-you-will-be-able-to-explain">What you will be able to explain<a class="heading-anchor" href="#what-you-will-be-able-to-explain" aria-label="Link to this section">#</a></h3>
-<p>By the end, you can <strong>compute timeline wall time</strong>, <strong>name profiler overhead</strong>, and <strong>verify outside profiling</strong> with evidence. Start with the two worked cases, then use the editable CPU model to make the quantities concrete.</p>
+<p><strong>Route:</strong> CUDA Python and machine learning. <strong>Stage:</strong> intermediate. <strong>Prerequisites:</strong> <code>cuda-071</code>, <code>cuda-088</code>, <code>cuda-089</code>.</p>
+<p>Pacing, evidence labels and platform rules: <a href="../../STUDY-GUIDE.md.html">CUDA study guide</a>.</p>
+<h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
+<ul>
+<li>Compute timeline wall time.</li>
+<li>Identify an overlap.</li>
+<li>Find a forced synchronization.</li>
+<li>Name profiler overhead.</li>
+<li>Propose one targeted change.</li>
+<li>Verify outside profiling.</li>
+</ul>
 <h3 id="mechanism-and-vocabulary">Mechanism and vocabulary<a class="heading-anchor" href="#mechanism-and-vocabulary" aria-label="Link to this section">#</a></h3>
 <p>A profiler records events and dependencies, but a table of operator totals is not itself the critical path. CPU preparation, copies, kernels, synchronization and logging may overlap. Summing all event durations can exceed wall time when events run concurrently. Instrumentation also adds overhead, especially with shapes, stacks or memory capture enabled.</p>
 <p>PyTorch profiler activities and named ranges make forward, backward and update visible; TensorFlow Profiler adds graph and input-pipeline views. Capture a short bounded schedule after warmup, inspect a timeline, then test one hypothesis with ordinary timing. Preserve a trace&#x27;s hardware, software and workload context. A busy GPU can spend time on wasteful copies or redundant kernels, so utilization alone is not useful-work evidence.</p>
@@ -212,8 +220,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>CPU preparation from 0 to 6 ms overlaps GPU work from 2 to 10 ms. The complete interval is 10 ms, not 14 ms obtained by summing durations.</p>
 <h4 id="worked-example-2">Worked example 2<a class="heading-anchor" href="#worked-example-2" aria-label="Link to this section">#</a></h4>
 <p>A trace with repeated host scalar reads between kernels can reveal forced synchronization. Replacing per-step logging with bounded aggregated reporting changes the host dependency path.</p>
-<h3 id="portable-executable-model">Portable executable model<a class="heading-anchor" href="#portable-executable-model" aria-label="Link to this section">#</a></h3>
-<p>The <strong>CPU reference model</strong> variant runs this bounded worked example using <code>python-core</code>. It uses only the Python standard library, small synthetic values and no network. Its purpose is to expose the arithmetic or contract behind the chapter. The separate reference includes assertions for the stated observations.</p>
+<h3 id="how-to-run-the-cpu-model">How to run the CPU model<a class="heading-anchor" href="#how-to-run-the-cpu-model" aria-label="Link to this section">#</a></h3>
+<p>Edit the copy; the <a href="../references/cuda-092_cpu.py.html">reference</a> adds assertions.</p>
+<pre class="highlighted-code"><code class="language-bash">python courses/cuda/python/lessons/cuda-092_cpu.py</code></pre>
 <pre class="highlighted-code"><code class="language-python">events <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">prepare</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">6</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">gpu</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">10</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span>
 summed <span class="syntax-operator">=</span> <span class="syntax-builtin">sum</span><span class="syntax-punctuation">(</span>end <span class="syntax-operator">-</span> start <span class="syntax-keyword">for</span> _<span class="syntax-punctuation">,</span> start<span class="syntax-punctuation">,</span> end <span class="syntax-operator">in</span> events<span class="syntax-punctuation">)</span>
 wall <span class="syntax-operator">=</span> <span class="syntax-builtin">max</span><span class="syntax-punctuation">(</span>end <span class="syntax-keyword">for</span> _<span class="syntax-punctuation">,</span> _<span class="syntax-punctuation">,</span> end <span class="syntax-operator">in</span> events<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span> <span class="syntax-builtin">min</span><span class="syntax-punctuation">(</span>start <span class="syntax-keyword">for</span> _<span class="syntax-punctuation">,</span> start<span class="syntax-punctuation">,</span> _ <span class="syntax-operator">in</span> events<span class="syntax-punctuation">)</span>
@@ -238,55 +247,51 @@ wall <span class="syntax-operator">=</span> <span class="syntax-builtin">max</sp
 <td><code>10</code></td>
 </tr>
 </tbody></table></div>
-<p>Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.</p>
 <h3 id="equal-framework-lanes">Equal framework lanes<a class="heading-anchor" href="#equal-framework-lanes" aria-label="Link to this section">#</a></h3>
 <h4 id="pytorch">PyTorch<a class="heading-anchor" href="#pytorch" aria-label="Link to this section">#</a></h4>
 <p>Capture a bounded torch.profiler schedule with CPU and CUDA activities when available, add named ranges, then verify the hypothesis with ordinary synchronized timing.</p>
 <h4 id="tensorflow">TensorFlow<a class="heading-anchor" href="#tensorflow" aria-label="Link to this section">#</a></h4>
 <p>Capture a short TensorFlow Profiler trace using the prepared external tooling. Use input-pipeline and device views together, then repeat without profiling overhead.</p>
-<p>Choose either lane first, then compare the other using identical mathematical inputs. Framework-specific shape, mode and optimizer rules must be checked separately. Both use offline synthetic examples; no model hub or dataset download is triggered.</p>
+<p>Lane rules: <a href="../../STUDY-GUIDE.md.html#python-gpu-and-framework-labs">framework labs</a>.</p>
 <h3 id="practice-and-transfer">Practice and transfer<a class="heading-anchor" href="#practice-and-transfer" aria-label="Link to this section">#</a></h3>
+<p>Record each attempt in the <a href="../lessons/cuda-092.md.html">worksheet</a> before opening hints.</p>
 <h4 id="exercise-1-compute-timeline-wall-time">Exercise 1: Compute timeline wall time<a class="heading-anchor" href="#exercise-1-compute-timeline-wall-time" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Summing durations, <code>6 + 8 = 14</code> ms, double counts the 4 ms overlap and overstates the step.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-2-identify-an-overlap">Exercise 2: Identify an overlap<a class="heading-anchor" href="#exercise-2-identify-an-overlap" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Treating events on different rows of the trace as sequential hides the concurrency that is already happening. The step then looks like it needs a faster GPU when the existing overlap is already working.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-3-find-a-forced-synchronization">Exercise 3: Find a forced synchronization<a class="heading-anchor" href="#exercise-3-find-a-forced-synchronization" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Blaming the gaps on slow kernels leads to optimizing compute while the host dependency stays. Faster kernels only make the GPU wait longer for the next enqueue.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-4-name-profiler-overhead">Exercise 4: Name profiler overhead<a class="heading-anchor" href="#exercise-4-name-profiler-overhead" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Quoting step times from a detailed profiler run as production numbers overstates the step time.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-5-propose-one-targeted-change">Exercise 5: Propose one targeted change<a class="heading-anchor" href="#exercise-5-propose-one-targeted-change" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Applying several optimizations at once makes it impossible to tell which helped or which hurt. One change might help while another reintroduces a synchronization.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-6-verify-outside-profiling">Exercise 6: Verify outside profiling<a class="heading-anchor" href="#exercise-6-verify-outside-profiling" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Reporting the speedup measured under the profiler assumes overhead is equal in both versions. Removing host reads also removes instrumented events, so overhead itself changes.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
-<p>Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.</p>
+<p>Hint <em>k</em> belongs to exercise <em>k</em>; open one at a time.</p>
 <ol>
-<li>Start from worked example 1 and mark the quantities needed for the task &quot;Compute timeline wall time&quot;.</li>
-<li>Change one assumption in worked example 2 while preserving the declared contract: identify an overlap.</li>
-<li>Trace the CPU program&#x27;s variables before adding hardware behavior: find a forced synchronization.</li>
-<li>Draw producers, consumers and the exact operation boundary for the task &quot;Name profiler overhead&quot;.</li>
-<li>Separate what the small fixture establishes from what the real runtime must show: propose one targeted change.</li>
-<li>Write a counterexample to an overbroad claim before you verify outside profiling.</li>
+<li>Take the latest end time and subtract the earliest start time.</li>
+<li>List the time ranges where both the CPU and GPU intervals are active.</li>
+<li>Look for a host line that turns a device value into a Python number between kernels.</li>
+<li>Ask what recording shapes, stacks and memory adds to every event.</li>
+<li>Pick the single bottleneck the timeline suggests and change only that.</li>
+<li>Rerun without the profiler, synchronize before reading the clock and check the outputs still match.</li>
 </ol>
-<h3 id="common-mistakes-and-self-review">Common mistakes and self-review<a class="heading-anchor" href="#common-mistakes-and-self-review" aria-label="Link to this section">#</a></h3>
-<p>Confusing a correct tiny example with a general implementation is the central review risk. For this chapter, challenge the assumption in worked example 2, then ask whether your change preserves the mechanism described above. If you change dtype, layout, ordering, batch size or backend, update the acceptance contract rather than silently reusing the old observation. Explain an unexpected result before trying random configuration changes.</p>
-<p>Keep a small evidence table with columns <strong>claim</strong>, <strong>input</strong>, <strong>expected observation</strong>, <strong>actual observation</strong> and <strong>limit</strong>. For the first claim use <code>Compute timeline wall time</code>. For the final claim use <code>Verify outside profiling</code>. An unperformed GPU or cluster experiment remains pending even when the CPU model is correct.</p>
-<h3 id="platform-and-evidence-contract">Platform and evidence contract<a class="heading-anchor" href="#platform-and-evidence-contract" aria-label="Link to this section">#</a></h3>
-<p>The reading worksheet and CPU reference model work through the ordinary Linux Docker classroom on macOS, Linux and Windows using WSL 2. They do not require an NVIDIA GPU. Their results are labeled CPU models or semantic oracles, not simulated hardware performance.</p>
-<p>Real CUDA work needs supported NVIDIA hardware, a compatible host driver and an explicitly prepared GPU runtime. An Apple GPU does not execute CUDA kernels. PyTorch MPS on a supported native Mac, ROCm on supported AMD hardware, or other vendor backends can provide separate accelerator learning routes; they need their own package and operation qualification and are not CUDA evidence. The ordinary Linux Docker classroom does not expose native Mac MPS automatically.</p>
-<p>Do not download packages, models or data by opening this lesson. Do not attach an engine socket, ambient cluster credentials or an arbitrary remote endpoint. A CPU pass, imported package, successful compilation, real GPU result and measured performance are distinct observations. Record the actual backend, data shape/dtype, source revision, versions and pending checks. A saved completion marker records learning progress, not hardware certification.</p>
+<h3 id="common-mistakes-and-self-check">Common mistakes and self-check<a class="heading-anchor" href="#common-mistakes-and-self-check" aria-label="Link to this section">#</a></h3>
+<p>A frequent mistake is adding up operator durations from a profiler table and calling the result step time. When CPU preparation and GPU kernels overlap, the sum exceeds wall time: 14 ms instead of 10 ms in worked example 1. Another mistake is trusting GPU utilization, since a busy device can be running redundant copies. Fix both by reading the timeline for the critical path, testing one hypothesis at a time and confirming with uninstrumented, synchronized timing.</p>
+<p><strong>Evidence limit:</strong> The reference computes a 14 ms event sum against a 10 ms interval from given timestamps. It does not capture a trace, so real overlap, synchronization points and profiler overhead must come from a bounded profile on the target system.</p>
+<ol>
+<li>Why can summed event durations exceed wall time?</li>
+<li>Why is high GPU utilization not proof of useful work?</li>
+<li>What context must be kept with a saved trace?</li>
+</ol>
+<p>Answers: <a href="../solutions/cuda-092_solutions.md.html#self-check-answers">self-check answers</a>.</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
 <ul>
 <li><a href="https://docs.pytorch.org/docs/2.9/notes/cuda.html">PyTorch CUDA semantics</a></li>
 <li><a href="https://www.tensorflow.org/guide/gpu">TensorFlow GPU guide</a></li>
 </ul>
-<p>Use the version-matched documentation of your prepared environment. These references describe interfaces and supported boundaries; the chapter&#x27;s synthetic examples and CPU models are original teaching material.</p>
+<p>Full lists: <a href="../../STUDY-GUIDE.md.html#documentation-and-sources">documentation and sources</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning skill for cuda-092: Profiling a complete training step.
 Read courses/cuda/python/guides/cuda-092.md and courses/cuda/python/lessons/cuda-092.md.

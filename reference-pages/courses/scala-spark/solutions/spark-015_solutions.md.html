@@ -194,7 +194,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/scala-spark/solutions/spark-015_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="spark-015-explained-paired-reference-solutions">spark-015: Explained paired reference solutions<a class="heading-anchor" href="#spark-015-explained-paired-reference-solutions" aria-label="Link to this section">#</a></h2>
-<p>Read the <a href="../guides/spark-015.md.html">guide</a> and attempt one language first. The <a href="spark-015_solution.scala.html">Scala reference</a> and <a href="spark-015_solution.py.html">PySpark reference</a> are complete single-file programs with explicit local sessions and finally-based stop. Each compares with literal expectations; matching two implementations alone would not rule out a shared mistake.</p>
+<p>Attempt the <a href="../guides/spark-015.md.html">guide</a> exercises first.</p>
+<p>References: <a href="spark-015_solution.scala.html">Scala</a>, <a href="spark-015_solution.py.html">PySpark</a>.</p>
 <h3 id="exercises-and-reasoning">Exercises and reasoning<a class="heading-anchor" href="#exercises-and-reasoning" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-add-an-explicit-tolerant-parse-column">Exercise 1: Add an explicit tolerant parse column<a class="heading-anchor" href="#exercise-1-add-an-explicit-tolerant-parse-column" aria-label="Link to this section">#</a></h4>
 <p>Return all source columns plus parsed_amount from try_cast(trim(amount_text) AS BIGINT). Preserve eight rows and distinguish this nullable parse result from a final validity decision.</p>
@@ -281,8 +282,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The domain rule is applied after conversion and retains its own rejected population. A syntactically valid negative adjustment can therefore be reported as a domain decision rather than a parse error. Keeping source-missing amounts is also explicit. The conservation equation accounts for all eight inputs across the two validation stages, preventing a successful total from hiding unexplained row loss.</p>
 <p><strong>Verification evidence:</strong> Assert final rows/metrics, negative ID 7 and the 8-row conservation equation.</p>
 <h3 id="execution-and-interpretation">Execution and interpretation<a class="heading-anchor" href="#execution-and-interpretation" aria-label="Link to this section">#</a></h3>
-<p>Run the complete reference in its prepared fixed worker. Its first check (Add an explicit tolerant parse column) is built inside the program, so opening the lesson fetches nothing; it expects: Ordered parsed values are <code>100, 0, 25, NULL, NULL, NULL, -5, 50</code>. The output parsed type is bigint. The final success line prints only after every reference assertion passes.</p>
-<p>Local plan, partition and resource evidence does not establish cluster-scale performance; session cleanup is explicit.</p></article>
+<p>The references assert the exact parsed sequence <code>100, 0, 25, NULL, NULL, NULL, -5, 50</code>, the category counts 5, 1 and 2, the six parse-accepted rows with total 170, the identical SQL result, and the final nonnegative set <code>[1, 2, 3, 4, 8]</code> with total 175. For the strict branch they run the ANSI cast on the valid subset, which succeeds, and then collect ID 5 alone and require an error whose message contains <code>CAST_INVALID_INPUT</code>; any other exception counts as a failure, and the PySpark reference prints the diagnostic it observed.</p>
+<p>The success line, <code>spark-015: six PySpark reference contracts passed; Spark=</code> plus the version in Python or its Scala twin, shows that each of the eight strings went to the bucket you predicted. It does not show that every locale-formatted or decimal amount would be handled, because the contract deliberately accepts only integer text.</p></article>
   </main>
 </body>
 </html>

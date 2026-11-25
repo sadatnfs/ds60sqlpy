@@ -206,11 +206,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Accumulator:</strong> State summarizing processed input.</p>
 <p><strong>Termination argument:</strong> A reason the loop cannot continue indefinitely.</p>
 <h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>The Linux Docker classroom compiles the saved pad as <code>main.swift</code> with Swift 6 language checking. An explicit <code>@main</code> type contains <code>static func main() async throws</code>; the fixed compiler uses <code>-parse-as-library -swift-version 6</code>. The examples use the standard library and portable Foundation. <code>precondition</code> makes a violated invariant fail the process. The fixed pad accepts one source file, without arbitrary command arguments, interactive input or dependency installation. SwiftUI, UIKit, Apple simulators and application signing belong to the separately prepared macOS/Xcode project labs, never the Linux pad.</p>
-<p>Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.</p>
+<p>Task 1 wants the accumulator written out for every iteration, so keep a paper table beside Example A while it runs. Task 4 studies a loop whose progress variable never changes; run that experiment with an explicit iteration cap in the condition rather than waiting on a program that never reaches its marker.</p>
+<p>Compile contract, starter stop and success marker: <a href="../STUDY-GUIDE.md.html#running-a-lesson">running a lesson</a>.</p>
 <h3 id="syntax-anatomy-and-execution-trace">Syntax anatomy and execution trace<a class="heading-anchor" href="#syntax-anatomy-and-execution-trace" aria-label="Link to this section">#</a></h3>
 <p><code>for value in values</code> traverses elements. <code>for (offset, value) in values.enumerated()</code> adds a traversal counter. <code>break</code> stops the loop; <code>continue</code> skips the remaining body. A while loop needs an explicit progress step.</p>
-<p>Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.</p>
+<p>Each example ends with a trace; method: <a href="../STUDY-GUIDE.md.html#tracing-a-program">tracing a program</a>.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="example-a-accumulate-a-total">Example A: Accumulate a total<a class="heading-anchor" href="#example-a-accumulate-a-total" aria-label="Link to this section">#</a></h4>
 <p>Before each iteration, total summarizes exactly the values already visited.</p>
@@ -230,6 +230,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The total is 12 and the empty total is zero.</p>
+<p><strong>Trace.</strong> Before the loop, <code>total</code> is 0 and nothing has been visited. The first iteration reads 2 and stores 2; the second reads 4 and stores 6; the third reads 6 and stores 12. At the start of every iteration the invariant holds: <code>total</code> equals the sum of the elements already seen. The second check covers the empty array, where <code>reduce(0, +)</code> returns its starting value 0 without calling <code>+</code> at all. An empty input is the case most likely to expose an accumulator seeded with the first element.</p>
 <h4 id="example-b-stop-at-the-first-match">Example B: Stop at the first match<a class="heading-anchor" href="#example-b-stop-at-the-first-match" aria-label="Link to this section">#</a></h4>
 <p>The break encodes first-match semantics rather than accidentally returning the last match.</p>
 <pre class="highlighted-code"><code class="language-swift"><span class="syntax-keyword">import</span> <span class="syntax-class">Foundation</span>
@@ -253,6 +254,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The first 8 appears at offset 1 and 9 is absent.</p>
+<p><strong>Trace.</strong> <code>found</code> starts as nil. At offset 0 the value is 3, so the body does nothing. At offset 1 the value is 8; <code>found</code> becomes 1 and <code>break</code> leaves the loop at once, so offset 2, which also holds 8, is never examined. Without the <code>break</code>, the loop would overwrite <code>found</code> with 2 and report the last match. The final check uses <code>firstIndex(of:)</code>, which already implements first-match search, to show that an absent value yields nil rather than a sentinel such as -1.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <ol>
 <li><strong>Predict and explain.</strong> Write the accumulator trace for every iteration.</li>
@@ -272,10 +274,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <ol start="6">
 <li><strong>Transfer and justify.</strong> Design a bounded retry loop and explain both its invariant and its stop condition.</li>
 </ol>
-<p>For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.</p>
+<p>Log each task in the <a href="../STUDY-GUIDE.md.html#recording-exercise-evidence">evidence table</a> before opening the explanation.</p>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
 <p>An enumerated offset is not universally a collection index. A not-found sentinel should never be used as an index. Mutating traversal state in several places makes termination difficult to establish.</p>
-<p>A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.</p>
+<p>A first-match search that forgets <code>break</code> passes on any input with a single match, which makes the bug easy to miss. The counterexample is a repeated-match input such as <code>[5, 7, 7]</code> searched for 7: the correct offset is 1 and the buggy one is 2. Add the empty array and a singleton as well; neither may touch an index outside the array.</p>
+<p>Repair routine: <a href="../STUDY-GUIDE.md.html#building-a-regression-case">building a regression case</a>.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <ol>
 <li>Reproduce Example A (Accumulate a total) before changing anything, and confirm its observation: The total is 12 and the empty total is zero.</li>
@@ -283,9 +286,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>Before opening the explanation, check your task 3 attempt (Implement a first-match search with an optional result) against each pitfall listed above, and add one input that would expose the tempting wrong rule.</li>
 </ol>
 <h3 id="self-check-and-next-step">Self-check and next step<a class="heading-anchor" href="#self-check-and-next-step" aria-label="Link to this section">#</a></h3>
-<p>Explain Invariant, Accumulator, Termination argument without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.</p>
+<p>Describe the invariant of Example A in one sentence that stays true at the start of any iteration. Explain why the offset from <code>enumerated()</code> equals the index for an <code>Array</code> but not for an <code>ArraySlice</code>. Write the stop condition of a bounded retry loop and name the value that changes on every pass.</p>
+<p>Then follow the general <a href="../STUDY-GUIDE.md.html#self-check-routine">self-check routine</a> and save your pad.</p>
 <h3 id="sources-and-execution-boundary">Sources and execution boundary<a class="heading-anchor" href="#sources-and-execution-boundary" aria-label="Link to this section">#</a></h3>
-<p><a href="https://docs.swift.org/swift-book/documentation/the-swift-programming-language/">Official language or framework documentation</a>. The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.</p>
+<p><a href="https://docs.swift.org/swift-book/documentation/the-swift-programming-language/">Documentation</a>: See the Control Flow chapter of the Swift book for for-in loops, while loops and control transfer statements such as break and continue.</p>
+<p>Provenance and limits: <a href="../STUDY-GUIDE.md.html#sources-and-execution-boundary">sources and execution boundary</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for swift-007: Loops, invariants and safe traversal.
 Read courses/swift/guides/swift-007.md and courses/swift/lessons/swift-007.swift. Prerequisites: swift-006.

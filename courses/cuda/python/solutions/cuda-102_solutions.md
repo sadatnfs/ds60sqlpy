@@ -1,6 +1,6 @@
 # cuda-102: explained solutions
 
-These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.
+Compare with your [worksheet](../lessons/cuda-102.md) attempt.
 
 ## Exercise 1: Derive cache bytes
 
@@ -74,8 +74,16 @@ A rounding simulation is not a deployed quantized kernel.
 
 **How to verify.** State in each result whether quantization was simulated or executed, and which kernel ran.
 
+## Self-check answers
+
+1. **How do prefill and decode differ?** Prefill processes the whole input sequence at once, while decode adds one token at a time and reuses cached keys and values.
+
+2. **Which factors grow the KV cache?** Layers, batch, sequence length, KV head count, head dimension and element width.
+
+3. **Why state positional-encoding and mask conventions when testing cache equivalence?** Cached and uncached paths must apply the same positions and masks, or matching logits cannot be expected.
+
 ## Reference observation
 
 4096 bytes, doubling to 8192 at twice the sequence length.
 
-The reference file is `courses/cuda/python/references/cuda-102_cpu.py`. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.
+Asserted by `courses/cuda/python/references/cuda-102_cpu.py`.

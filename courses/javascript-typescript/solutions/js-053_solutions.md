@@ -1,6 +1,6 @@
 # js-053: explanatory solutions
 
-Compare after your own attempt or an explicit reveal. The separate .js reference is a complete offline browser program. These explanations discuss the six practice tasks; a visual resemblance alone is not a data or behavior check.
+Compare after your own attempt; the separate `.js` file is the complete reference program.
 
 ## Mechanism review
 
@@ -49,3 +49,7 @@ Dividing by zero does not produce an interpretable percentage. Do not invent sha
 A stack can still be useful for total composition, but the tradeoff should be explicit. Comparing b across X (3) and Y (2) is easier in grouped bars, which share a zero baseline, than in stacks where b starts at 2 and 4. Stacks still suit the question of how each group's total of 5 or 6 splits. Pick the layout from the comparison readers need most and name that choice in the caption.
 
 **Expected:** Use shared baselines when precise subgroup comparison is the primary task.
+
+## After comparison
+
+Redraw the same data as grouped bars and compare one subgroup across groups in both versions, then add a normalized view with totals labeled. Record which question each of the three charts answers best.

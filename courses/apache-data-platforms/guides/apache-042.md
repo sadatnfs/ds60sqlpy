@@ -134,7 +134,7 @@ Each line prints a different metadata JSON path under the table metadata directo
 
 ## Complete worked source
 
-This is a complete editable worked program for the declared prepared runtime. It uses bounded local fixtures and does not install packages or start distributed services.
+Run it as the [worked program rules](../STUDY-GUIDE.md#worked-programs) describe.
 
 ```python
 import tempfile

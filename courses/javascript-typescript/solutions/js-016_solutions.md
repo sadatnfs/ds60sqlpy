@@ -1,6 +1,6 @@
 # js-016: explanatory solutions
 
-Use these answers after an attempt or an explicit reveal. The reference uses the same literal fixtures as the guide and keeps the exercises in separate scopes. A successful run checks these examples; explaining a changed input is a separate learning goal.
+Open these after your own attempt; each exercise runs in its own scope in the reference.
 
 ## Mechanism review
 
@@ -24,7 +24,7 @@ mkdtemp allocates a unique directory under tmpdir. writeFile with flag wx reject
 
 ## Exercise 1: Read a small UTF-8 file: change one input
 
-Task: Copy Example A into a scratch `main.mjs` and change `const text = 'A😀B\n';` to `const text = 'A😀B\n!';`. Before running it, predict which check fails and which value it now sees; then run it and restore the original line.
+Task: In a scratch copy of Example A, change `const text = 'A😀B\n';` to `const text = 'A😀B\n!';`. Which check fails, and what value does it see?
 
 The emoji occupies four UTF-8 bytes and two UTF-16 code units. Neither byte count nor JavaScript string length is a universal count of user-perceived characters. The await using declaration closes the FileHandle when its block ends, even if a read throws, so no descriptor stays open; the retained reference only proves that by reporting fd -1.
 
@@ -47,13 +47,13 @@ await withDirectory(async (directory) => {
 });
 ```
 
-**Expected:** The changed run fails with an `AssertionError` at `assert.equal((await handle.readFile()).length, 7)`. Restoring `const text = 'A😀B\n';` brings back: text round-trips; 7 UTF-8 bytes versus 5 code units; the handle reports fd -1 after its block.
+**Expected:** The edited run fails with an `AssertionError` at `assert.equal((await handle.readFile()).length, 7)`. Restoring `const text = 'A😀B\n';` brings back: text round-trips; 7 UTF-8 bytes versus 5 code units; the handle reports fd -1 after its block.
 
-**Verify:** Compare your written prediction with the reported `AssertionError`, including its actual and expected values, and name the value that made `assert.equal((await handle.readFile()).length, 7)` fail. After restoring the line, the program prints its `{"checks":1,"status":"passed"}` receipt again.
+**Verify:** Compare the reported actual and expected values with your prediction, then restore `const text = 'A😀B\n';`.
 
 ## Exercise 2: Preserve characters and lines across chunks: debug a regression
 
-Task: A regression changed one token in Example B, so one line now reads `await writeFile(path, 'A😀B\r\nsecond\n!', 'utf8');`. Run Example B with that line, use the failing check to locate the defect and repair it without changing the check.
+Task: A regression made one Example B line read `await writeFile(path, 'A😀B\r\nsecond\n!', 'utf8');`. Locate and repair it without editing the check.
 
 The stream decoder retains incomplete UTF-8 sequences, while readline retains incomplete lines. Chunk size is not a record size or a guarantee about the bytes held by every layer.
 
@@ -69,7 +69,7 @@ await withDirectory(async (directory) => {
 
 **Expected:** Before the repair the run fails with an `AssertionError` at `assert.deepEqual(await readLines(path), ['A😀B', 'second'])`. Restoring `await writeFile(path, 'A😀B\r\nsecond\n', 'utf8');` brings back: lines are A😀B and second, without a corrupt replacement character.
 
-**Verify:** Keep the failing and the repaired runs. Explain why the changed token alters the value tested by `assert.deepEqual(await readLines(path), ['A😀B', 'second'])` for this input.
+**Verify:** Keep the failing and repaired runs and name the first value that differs between them.
 
 ## Exercise 3: Refuse accidental overwrite
 
@@ -91,7 +91,7 @@ await withDirectory(async (directory) => {
 
 **Expected:** second creation rejects with EEXIST; original first remains.
 
-**Verify:** Keep a check equivalent to `assert.equal(await readFile(path, 'utf8'), 'first')`. As a control, change `await writeFile(path, 'first', { flag: 'wx' });` to `await writeFile(path, 'first!', { flag: 'wx' });`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
+**Verify:** Keep `assert.equal(await readFile(path, 'utf8'), 'first')`. Control: changing `await writeFile(path, 'first', { flag: 'wx' });` to `await writeFile(path, 'first!', { flag: 'wx' });` must make that check fail; then restore it.
 
 ## Exercise 4: Distinguish a missing file
 
@@ -110,7 +110,7 @@ await withDirectory(async (directory) => {
 
 **Expected:** ENOENT rejection.
 
-**Verify:** Keep a check equivalent to `assert.rejects(readFile(join(directory, 'missing.txt')), (error) => error.code === 'ENOENT')`. As a control, change `await assert.rejects(readFile(join(directory, 'missing.txt')), error => error.code === 'ENOENT');` to `await assert.rejects(readFile(join(directory, 'missing.txt')), error => error.code !== 'ENOENT');` inside it: the run must fail with an `AssertionError`, which shows the check can fail. Restore it.
+**Verify:** Keep `assert.rejects(readFile(join(directory, 'missing.txt')), (error) => error.code === 'ENOENT')`. Control: editing it to `await assert.rejects(readFile(join(directory, 'missing.txt')), error => error.code !== 'ENOENT');` must make the check fail; then restore it.
 
 ## Exercise 5: Restrict a learner-supplied fixture name
 
@@ -127,7 +127,7 @@ for (const name of ['../report.txt', '/tmp/report.txt', 'a/b.txt', 'a\\b.txt']) 
 
 **Expected:** only report.txt is accepted.
 
-**Verify:** Keep a check equivalent to `assert.equal(fixtureName('report.txt'), 'report.txt')`. As a control, change `assert.equal(fixtureName('report.txt'), 'report.txt');` to `assert.equal(fixtureName('report.txt'), 'report.txt!');` inside it: the run must fail with an `AssertionError`, which shows the check can fail. Restore it.
+**Verify:** Keep `assert.equal(fixtureName('report.txt'), 'report.txt')`. Control: editing it to `assert.equal(fixtureName('report.txt'), 'report.txt!');` must make the check fail; then restore it.
 
 ## Exercise 6: Handle an empty text stream
 
@@ -145,8 +145,8 @@ await withDirectory(async (directory) => {
 
 **Expected:** no lines.
 
-**Verify:** Keep a check equivalent to `assert.deepEqual(await readLines(path), [])` and confirm that the reference still passes. Then name an input that would make it fail and explain which value changes.
+**Verify:** Keep the check `assert.deepEqual(await readLines(path), [])`; name an input that would make it fail and the value that changes.
 
 ## After comparison
 
-Return to your saved implementation and repeat a case with different values. Keep compiler diagnostics, process output and browser observations separate. Do not suppress a failing assertion or use a type assertion to declare an unvalidated value safe. Resource-owning examples must finish cleanup even when work fails. Describe each result with its actual host and fixture scope rather than as production acceptance.
+Fresh case: append three lines to a log, the last one containing the emoji and lacking a trailing newline, then read it back with a one-byte `highWaterMark`. Predict the lines you receive before running. ([After comparing](../STUDY-GUIDE.md#after-comparing-with-the-solution).)

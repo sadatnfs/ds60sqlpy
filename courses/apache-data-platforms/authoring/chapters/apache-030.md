@@ -86,4 +86,4 @@ fanout, and pools constrain concurrent pressure on a dependency. These cases use
 all three in the real scheduler while independently validating the files and
 source versions that the tasks actually observed.
 
-The [complete Airflow workshop](../../projects/airflow/README.md) provides the maintained files, preparation, lifecycle and exact qualification boundaries for these cases.
+`asset-check` in the [Airflow workshop](../../projects/airflow/README.md) unpauses `classroom_asset_consumer`, which the order runs trigger through an asset, and requires two mapped `summarize` tasks sharing the one-slot `classroom_io` pool.

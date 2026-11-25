@@ -2,6 +2,8 @@
 
 Open these answers only after attempting Transfer learning, frozen layers and optimizer membership yourself. They reuse the guide's literal inputs, starting from Example A, Freeze a known base, so a discrepancy points at one step. The executable companion runs the assertions; this page explains why each one tests Frozen base, Optimizer membership, Mode-dependent buffer. After a pass, choose a new input for exercise 6, Begin an explicit unfreeze phase, without looking.
 
+After comparing, follow the [review steps](../STUDY-GUIDE.md#after-the-solutions).
+
 ## Mechanism review
 
 Transfer learning reuses a representation while adapting a task-specific head. Freezing requires both a gradient policy and a correct optimizer membership policy. Setting `requires_grad=False` prevents new derivatives for those parameters, but an optimizer can still contain stale gradient state if the transition is handled carelessly. Clear old gradients and deliberately select trainable parameters. Evaluation mode is a separate concern: a frozen BatchNorm base can still update running buffers if left in training mode.
@@ -155,6 +157,3 @@ assert not torch.equal(base.weight, base_before)
 
 **Verify:** In a fresh process, the exercise checks confirm `not torch.equal(base.weight, base_before)`.
 
-## Review after comparison
-
-Repeat exercise 4, Expose buffer updates despite freezing, with one changed fixture value and predict the difference before running it. Keep your failing attempt at exercise 5, Freeze normalization behavior with eval, beside the repaired result. A missing framework is not a failing assertion. These solutions use only local fixtures.

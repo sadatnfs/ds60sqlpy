@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cuda/python/solutions/cuda-079_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="cuda-079-explained-solutions">cuda-079: explained solutions<a class="heading-anchor" href="#cuda-079-explained-solutions" aria-label="Link to this section">#</a></h2>
-<p>These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.</p>
+<p>Compare with your <a href="../lessons/cuda-079.md.html">worksheet</a> attempt.</p>
 <h3 id="exercise-1-count-touched-segments">Exercise 1: Count touched segments<a class="heading-anchor" href="#exercise-1-count-touched-segments" aria-label="Link to this section">#</a></h3>
 <p>Count distinct integer offsets divided by segment size.</p>
 <p><strong>Approach.</strong> Apply the simplified rule: divide each byte offset by the 32-byte segment width with integer division and count the distinct quotients. Offsets <code>0, 4, ..., 28</code> all give quotient 0, so one segment is touched.</p>
@@ -231,9 +231,19 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Why it is correct here.</strong> Holding everything else fixed isolates the access pattern as the cause. The CPU segment model predicts a direction, and only hardware counters can confirm it.</p>
 <p><strong>A plausible wrong approach.</strong> Comparing kernels that differ in dtype or element count mixes several causes. A float64 strided kernel against a float32 contiguous one cannot attribute the difference to stride.</p>
 <p><strong>How to verify.</strong> Before reading counters, check both kernels produce the same output. Record GPU model, driver and profiler versions; without a GPU, report the experiment as designed but not run.</p>
+<h3 id="self-check-answers">Self-check answers<a class="heading-anchor" href="#self-check-answers" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>Why can neighboring lanes reading neighboring elements be cheaper?</strong> Their bytes fall in few aligned segments, so the hardware serves them with fewer memory transactions than widely strided accesses.</li>
+</ol>
+<ol start="2">
+<li><strong>What problem does a tiled transpose address?</strong> A naive transpose has contiguous reads but strided writes. Staging a tile in shared memory lets both the reads and the writes stay contiguous.</li>
+</ol>
+<ol start="3">
+<li><strong>Why can padding a shared tile have a cost?</strong> Padding may reduce bank conflicts for one layout, but it consumes shared capacity that could otherwise hold more data or more resident blocks.</li>
+</ol>
 <h3 id="reference-observation">Reference observation<a class="heading-anchor" href="#reference-observation" aria-label="Link to this section">#</a></h3>
 <p>Simplified segment counts 1 and 8, not hardware measurements.</p>
-<p>The reference file is <code>courses/cuda/python/references/cuda-079_cpu.py</code>. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.</p></article>
+<p>Asserted by <code>courses/cuda/python/references/cuda-079_cpu.py</code>.</p></article>
   </main>
 </body>
 </html>

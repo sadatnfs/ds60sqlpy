@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/r/solutions/r-038_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="r-038-reference-reasoning">r-038: reference reasoning<a class="heading-anchor" href="#r-038-reference-reasoning" aria-label="Link to this section">#</a></h2>
-<p>Use the <a href="r-038_reference.R.html">complete reference</a> with the guide&#x27;s declared inputs and runtime. Every worked example is also a standalone script.</p>
+<p>Run the <a href="r-038_reference.R.html">complete reference</a> under the <a href="../STUDY-GUIDE.md.html#run-a-chapter">run rules</a>.</p>
 <h3 id="why-the-implementation-has-this-shape">Why the implementation has this shape<a class="heading-anchor" href="#why-the-implementation-has-this-shape" aria-label="Link to this section">#</a></h3>
 <p>Thirty of one hundred A records are alerted, while thirty of forty alerted records are A. Both calculations are correct for different questions.</p>
 <p>The total alert probability combines both segments. Bayes rule reconstructs the same finite-table conditional rather than introducing new observations.</p>
@@ -242,7 +242,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Tempting mistake:</strong> Applying 0.75 to the new population as though the share of A were a fixed property of alerts.</p>
 <p><strong>Verify:</strong> Computing <code>0.3 * 0.05 / (0.3 * 0.05 + 0.1 * 0.95)</code> returns about 0.136.</p>
 <h3 id="what-the-checks-establish">What the checks establish<a class="heading-anchor" href="#what-the-checks-establish" aria-label="Link to this section">#</a></h3>
-<p>The reference makes 5 <code>stopifnot()</code> checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.</p></article>
+<p>The checks confirm that the yes column totals 40 with 0.75 of it from A, that an alert rate of 0.14 and Bayes&#x27; rule give 3/7, that joint probabilities sum to 1, that dividing by a zero count returns NA, and that conditioning on the row total gives 0.3 while conditioning on the column total gives 0.75. They only cover this finite table.</p>
+<p>The reference makes 5 <code>stopifnot()</code> checks; see <a href="../STUDY-GUIDE.md.html#what-a-passing-run-proves">what a passing run proves</a>.</p></article>
   </main>
 </body>
 </html>

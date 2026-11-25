@@ -147,11 +147,11 @@ Airflow 3's default `CronTriggerTimetable`. Actual execution can occur later bec
 of capacity, retries or backfill. These cases connect real interval-driven outputs
 to actual metadata and explain why wall-clock selection breaks reproducibility.
 
-The [complete Airflow workshop](../projects/airflow/README.md) provides the maintained files, preparation, lifecycle and exact qualification boundaries for these cases.
+In the [Airflow workshop](../projects/airflow/README.md), `run-intervals` unpauses `classroom_orders`, waits for exactly two runs, one per fixture day, and then reads each day's output partition.
 
 ## Complete worked source
 
-This is a project-only command notebook. Read and edit it in the classroom; run its explicitly labeled commands from the copied owned Docker workshop. The classroom does not execute these service commands.
+The classroom does not execute these service commands. See the [workshop rules](../STUDY-GUIDE.md#workshop-notebooks).
 
 # Actual scheduled TaskFlow intervals
 

@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/javascript-typescript/solutions/js-044_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="js-044-explanatory-solutions">js-044: explanatory solutions<a class="heading-anchor" href="#js-044-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit reveal. The separate .js reference is a complete offline browser program. These explanations discuss the six practice tasks; a visual resemblance alone is not a data or behavior check.</p>
+<p>Compare after your own attempt; the separate <code>.js</code> file is the complete reference program.</p>
 <h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
 <p>A selection is a group of DOM nodes, not a copy of their HTML. A data join relates an array of records to selected nodes. Records without corresponding nodes enter; nodes with corresponding records update; surplus nodes exit. This makes repeated rendering a reconciliation operation rather than an instruction to append duplicates forever.</p>
 <p>The selector describes the nodes you intend to manage. <code>selectAll(&#x27;circle&#x27;)</code> can begin empty; the subsequent data join creates the required nodes. <code>join(&#x27;circle&#x27;)</code> handles the common enter/update/exit case. Attribute callbacks then assign geometry from each bound record.</p>
@@ -218,7 +218,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Expected:</strong> A negative radius input is refused before drawing.</p>
 <h3 id="exercise-6-apply-the-same-pattern-to-an-html-list">Exercise 6: Apply the same pattern to an HTML list.<a class="heading-anchor" href="#exercise-6-apply-the-same-pattern-to-an-html-list" aria-label="Link to this section">#</a></h3>
 <p>The mechanism is about data-to-node relationships, not SVG alone. Preserve text safety when labels are external. Replace &quot;circle&quot; with &quot;li&quot; inside a ul and set .text(d =&gt; d). Using .html() with an external label would let markup in the label run as HTML; count li nodes after two updates to confirm reconciliation.</p>
-<p><strong>Expected:</strong> Current records reconcile to current list items.</p></article>
+<p><strong>Expected:</strong> Current records reconcile to current list items.</p>
+<h3 id="after-comparison">After comparison<a class="heading-anchor" href="#after-comparison" aria-label="Link to this section">#</a></h3>
+<p>Reuse the join pattern for table rows whose data change on a timer that you stop after three updates. Check after each update that the row count equals the data length, and log how many nodes entered and exited on each call.</p></article>
   </main>
 </body>
 </html>

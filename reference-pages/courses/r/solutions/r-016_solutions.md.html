@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/r/solutions/r-016_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="r-016-reference-reasoning">r-016: reference reasoning<a class="heading-anchor" href="#r-016-reference-reasoning" aria-label="Link to this section">#</a></h2>
-<p>Use the <a href="r-016_reference.R.html">complete reference</a> with the guide&#x27;s declared inputs and runtime. Every worked example is also a standalone script.</p>
+<p>Run the <a href="r-016_reference.R.html">complete reference</a> under the <a href="../STUDY-GUIDE.md.html#run-a-chapter">run rules</a>.</p>
 <h3 id="why-the-implementation-has-this-shape">Why the implementation has this shape<a class="heading-anchor" href="#why-the-implementation-has-this-shape" aria-label="Link to this section">#</a></h3>
 <p>Normalization removes only surrounding whitespace. The four-digit contract rejects partial or mixed matches without converting the ID to a number.</p>
 <p>Literal matching avoids regex wildcard semantics. The accented character uses multiple UTF-8 bytes while the string has four code-point characters.</p>
@@ -242,7 +242,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Tempting mistake:</strong> Checking <code>nchar(text) &lt;= 4</code> for a four-byte column. café passes, then overflows the column or is cut in the middle of é, leaving the lone byte c3, which is not valid UTF-8 on its own.</p>
 <p><strong>Verify:</strong> <code>nchar(text, type = &quot;bytes&quot;)</code> returns 5 while <code>nchar(text)</code> returns 4.</p>
 <h3 id="what-the-checks-establish">What the checks establish<a class="heading-anchor" href="#what-the-checks-establish" aria-label="Link to this section">#</a></h3>
-<p>The reference makes 6 <code>stopifnot()</code> checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.</p></article>
+<p>The checks pin that a fixed pattern matches a literal dot only, that an anchored five-digit pattern accepts &quot;00123&quot; but rejects &quot;123&quot;, that splitting &quot;A|12&quot; on a literal pipe gives &quot;A&quot; and &quot;12&quot;, that an unanchored digit test cannot wrongly accept &quot;ID12bad&quot;, that a trailing empty field is dropped by <code>strsplit()</code>, and that a four-character accented word occupies five bytes in UTF-8. They do not cover other normalization forms or right-to-left text, and they do not show what happens when your own input arrives in a different encoding.</p>
+<p>The reference makes 6 <code>stopifnot()</code> checks; see <a href="../STUDY-GUIDE.md.html#what-a-passing-run-proves">what a passing run proves</a>.</p></article>
   </main>
 </body>
 </html>

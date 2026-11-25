@@ -1,6 +1,8 @@
 # rust-042: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [rust-042_solution.rs](rust-042_solution.rs). It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.
+Executable reference: [rust-042_solution.rs](rust-042_solution.rs), which runs both examples and the coded answers.
+
+Open this only after [an attempt](../STUDY-GUIDE.md#attempt-a-lesson).
 
 ## Why the two examples differ
 
@@ -26,7 +28,7 @@ Trace schema, batch and finish operations.
 
 Write two batches with the same schema and count them on readback.
 
-**Reference answer.** The same statements run as the `Task 2` block of the reference program; here they are wrapped in `main` as a complete file.
+**Reference answer**, wrapped in `main`; the reference runs it as its `Task 2` block.
 
 ```rust
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -75,7 +77,7 @@ One schema message is followed by two batch messages, so the reader reports each
 
 Build an in-memory IPC round trip preserving a nullable column.
 
-**Reference answer.** The same statements run as the `Task 3` block of the reference program; here they are wrapped in `main` as a complete file.
+**Reference answer**, wrapped in `main`; the reference runs it as its `Task 3` block.
 
 ```rust
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -119,7 +121,7 @@ Diagnose reading before writer completion or ignoring a reader error.
 
 Test malformed bytes and an empty-batch stream with a valid schema.
 
-**Reference answer.** The same statements run as the `Task 5` block of the reference program; here they are wrapped in `main` as a complete file.
+**Reference answer**, wrapped in `main`; the reference runs it as its `Task 5` block.
 
 ```rust
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -162,7 +164,7 @@ Malformed framing fails at `try_new`, before any batch is produced. A zero-row b
 
 Design an IPC transport with size limits, schema checks and explicit ownership of received buffers.
 
-No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **IPC**, and state one limitation of your choice.
+**Judging criteria.** A strong design rejects a message above a stated byte limit before allocating for it, checks that the stream's schema matches the expected field names, types and nullability, and treats a stream without its end marker as truncated. It states who owns the received buffers: decoded arrays keep their backing allocation alive, so a consumer that keeps one small column holds the whole message. Malformed input like Example B's three bytes becomes a typed rejection. State one limitation: a per-message limit does not bound the total size of a long stream.
 
 ## Mechanism and diagnostic reasoning
 
@@ -176,4 +178,6 @@ IPC is not encryption or authentication. A valid schema can still describe unwan
 
 ## Review before continuing
 
-Run the reference and confirm that it prints `rust-042: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.
+Rebuild Example B (Reject invalid framing) from a blank pad.
+
+Review routine: [Self-check and review](../STUDY-GUIDE.md#self-check-and-review).

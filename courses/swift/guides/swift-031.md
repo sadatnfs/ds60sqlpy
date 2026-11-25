@@ -24,9 +24,9 @@ Keep a state transition synchronous inside the actor whenever possible. If an op
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles the saved pad as `main.swift` with Swift 6 language checking. An explicit `@main` type contains `static func main() async throws`; the fixed compiler uses `-parse-as-library -swift-version 6`. The examples use the standard library and portable Foundation. `precondition` makes a violated invariant fail the process. The fixed pad accepts one source file, without arbitrary command arguments, interactive input or dependency installation. SwiftUI, UIKit, Apple simulators and application signing belong to the separately prepared macOS/Xcode project labs, never the Linux pad.
+Both actors are declared above `LessonMain` in both examples. Every access to actor state from outside needs `await`, including reading `counter.value`; leaving it out fails to compile. Task 4 introduces a suspension in the middle of a check and update, which compiles cleanly, so only a carefully ordered test reveals it.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Compile contract, starter stop and success marker: [running a lesson](../STUDY-GUIDE.md#running-a-lesson).
 
 
 
@@ -34,7 +34,7 @@ Start with the answer-free learner artifact in your saved classroom pad. It deli
 
 `actor CounterActor` owns isolated state. Calls from outside use await even when the method body itself does not suspend. Read an actor result into a local value before passing it to precondition, whose autoclosure is synchronous.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+Each example ends with a trace; method: [tracing a program](../STUDY-GUIDE.md#tracing-a-program).
 
 ## Worked example / walkthrough
 
@@ -77,6 +77,8 @@ struct LessonMain {
 
 **Observe:** All twenty increments are retained.
 
+**Trace.** `counter` is an actor instance with `value` 0. The task group adds twenty children, and each calls `await counter.increment()`. The actor runs one isolated method at a time, so the twenty increments are serialized even though the children may run in parallel; no two read-modify-write steps interleave. When the group completes, the parent awaits a read of `value` and gets 20. With a plain class and no synchronization the count could come out lower.
+
 ### Example B: Keep a reservation atomic within the actor
 
 The check and update contain no suspension, preserving the invariant as one actor operation.
@@ -115,6 +117,8 @@ struct LessonMain {
 
 **Observe:** The second reservation is rejected without making stock negative.
 
+**Trace.** `inventory` starts with stock 3. The first `reserve(2)` runs entirely inside the actor: the guard sees 2 at most 3, subtraction leaves 1, and it returns true. The second `reserve(2)` sees 2 greater than 1 and returns false without changing anything. The read of `stock` gives 1. Because `reserve` contains no `await`, no other actor call can run between its check and its update.
+
 ## Exercises
 
 1. **Predict and explain.** Identify every actor-isolated read and write.
@@ -129,13 +133,15 @@ struct LessonMain {
 
 6. **Transfer and justify.** Design a reservation state machine for an operation requiring external I/O before commitment.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Log each task in the [evidence table](../STUDY-GUIDE.md#recording-exercise-evidence) before opening the explanation.
 
 ## Common pitfalls and diagnosis
 
 Actors do not make all multi-step workflows transactional. Await inside an invariant-sensitive operation is a reentrancy boundary. Do not use unchecked Sendable merely to silence a real ownership diagnostic.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+Task 4's version checks stock, then awaits an external call, then subtracts. During that await, another call can reserve the same units, so both subtract and stock goes negative. The counterexample is two concurrent reservations of 2 from stock 3. Rechecking after the await, or keeping the check and update in one synchronous actor method, restores the invariant.
+
+Repair routine: [building a regression case](../STUDY-GUIDE.md#building-a-regression-case).
 
 ## Progressive hints
 
@@ -145,11 +151,15 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 ## Self-check and next step
 
-Explain Actor isolation, Reentrancy, Sendable without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+Explain why reading `counter.value` from `main` needs `await` even though it is only a read. Describe actor reentrancy and why it makes a suspension inside a method risky. For task 2, explain why returning a value-type snapshot is safer than exposing actor state to callers.
+
+Then follow the general [self-check routine](../STUDY-GUIDE.md#self-check-routine) and save your pad.
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://docs.swift.org/swift-book/documentation/the-swift-programming-language/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+[Documentation](https://docs.swift.org/swift-book/documentation/the-swift-programming-language/): Actors, isolation and the rule that actor methods may interleave at suspension points are explained in the book's Concurrency chapter.
+
+Provenance and limits: [sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

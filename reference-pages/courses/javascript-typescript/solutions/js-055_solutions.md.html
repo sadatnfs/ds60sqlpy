@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/javascript-typescript/solutions/js-055_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="js-055-explanatory-solutions">js-055: explanatory solutions<a class="heading-anchor" href="#js-055-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit reveal. The separate .js reference is a complete offline browser program. These explanations discuss the six practice tasks; a visual resemblance alone is not a data or behavior check.</p>
+<p>Compare after your own attempt; the separate <code>.js</code> file is the complete reference program.</p>
 <h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
 <p>A transition changes attributes over time rather than setting the final state immediately. Interpolation computes intermediate values, while easing controls the pace along the timeline. Motion can help a reader follow identity through a change, but it can also distract, delay access or imply a continuous process that the data does not represent.</p>
 <p>Transitions are asynchronous. Starting one does not mean its final geometry exists on the next line. A newer update may interrupt an earlier transition, so a component must decide whether to finish, replace or cancel work. Awaiting a transition’s completion can reject when it is interrupted; handling that rejection is part of lifecycle correctness.</p>
@@ -218,7 +218,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Expected:</strong> Only the component-owned update channel is interrupted.</p>
 <h3 id="exercise-6-defend-when-to-use-a-static-update">Exercise 6: Defend when to use a static update.<a class="heading-anchor" href="#exercise-6-defend-when-to-use-a-static-update" aria-label="Link to this section">#</a></h3>
 <p>Animation is a design choice, not a requirement of a polished chart. Respect speed, attention and motion sensitivity. For a single value change from 80 to 480 with no ordering to follow, an instant update reads just as well; keep motion for changes whose path explains something.</p>
-<p><strong>Expected:</strong> Prefer immediate clarity when motion adds no explanatory value.</p></article>
+<p><strong>Expected:</strong> Prefer immediate clarity when motion adds no explanatory value.</p>
+<h3 id="after-comparison">After comparison<a class="heading-anchor" href="#after-comparison" aria-label="Link to this section">#</a></h3>
+<p>Add a staggered transition with <code>delay((d, i) =&gt; i * 50)</code> to a keyed bar update and trigger a second update mid-flight. Check that interrupted bars still reach the final values and that reduced motion removes both the delay and the duration.</p></article>
   </main>
 </body>
 </html>

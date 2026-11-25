@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/web-development/solutions/web-038_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="web-038-explanatory-solutions">web-038: explanatory solutions<a class="heading-anchor" href="#web-038-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Open this after your own attempt. Each answer explains the lesson&#x27;s synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in <code>courses/web-development/guides/web-038.md</code>.</p>
+<p>Attempt each exercise before reading; the mechanism is in <code>courses/web-development/guides/web-038.md</code> (<a href="../STUDY-GUIDE.md.html#solutions">using these answers</a>).</p>
 <h3 id="exercise-1-explain-why-valid-json-can-still-be-invalid-application-input">Exercise 1: Explain why valid JSON can still be invalid application input.<a class="heading-anchor" href="#exercise-1-explain-why-valid-json-can-still-be-invalid-application-input" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> It may contain the wrong structure, types, ranges or required fields.</p>
 <p><strong>Approach:</strong> Separate syntax from meaning: decoding proves the text is JSON, while field checks prove it has the required keys, types and ranges.</p>
@@ -232,7 +232,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Plausible wrong approach:</strong> Joining user text onto a base directory fails because ../ segments can reach files outside the intended folder.</p>
 <p><strong>How to verify:</strong> An identifier of ../secrets is rejected, while a listed identifier resolves to a file inside the data directory. Logging the resolved path with <code>realpath</code> shows it still begins with the data directory.</p>
 <h3 id="reference-comparison">Reference comparison<a class="heading-anchor" href="#reference-comparison" aria-label="Link to this section">#</a></h3>
-<p>Open <code>courses/web-development/solutions/web-038_solution.php</code> only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; server lifecycle, persistence, concurrency and security need their own integration evidence.</p></article>
+<p>The reference requires an array with integer minutes, a complete write, a stream round trip after rewind and a closed handle in finally. That catches unchecked decoding and a missing rewind. It does not test oversized input or a wrong field type, so feed those cases to your parser.</p>
+<p>Open <code>courses/web-development/solutions/web-038_solution.php</code> after saving your attempt (<a href="../STUDY-GUIDE.md.html#references">comparing with the reference</a>).</p></article>
   </main>
 </body>
 </html>

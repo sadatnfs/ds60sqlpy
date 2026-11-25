@@ -1,6 +1,8 @@
 # spark-010: Explained reference solutions
 
-Read the [guide](../guides/spark-010.md) and attempt the [learner source](../lessons/spark-010.scala) first. The [complete reference](spark-010_solution.scala) contains each implementation and its assertions. Values, identity, missingness and failure behavior are separate checks; compilation alone does not establish any of them.
+Attempt the [guide](../guides/spark-010.md) exercises first.
+
+Reference: [complete Scala program](spark-010_solution.scala).
 
 ## Exercises and reasoning
 
@@ -177,4 +179,7 @@ expectIllegalArgument(boundedTake(Iterator.from(1), 1001))
 
 ## Evidence and scope
 
-Run the complete reference using the same prepared profile as the learner source. Its assertions check normal values, malformed or boundary inputs and conservation where relevant. The final version line records the actual compiler/runtime family used. The reference is an executable explanation, not a hidden grading service or proof that a distributed Spark job would have the same performance characteristics.
+The reference asserts the strict pipeline on normal, repeated-value and empty inputs, then the exact trace lists after one `next()` and after full consumption. It checks that a consumed iterator yields `(Vector(1, 2, 3), Vector())`, that an already empty iterator yields two empty vectors, that two factory calls both return `Vector(4, 8)`, and that `retryTotals` returns naive 500 and logical 150 for two attempts, `(0, 0)` for zero attempts, and an error for one ID carrying two amounts. The bounded take must return 1, 2, 3 and leave 4 next, return nothing and leave 1 next for limit 0, and reject limit 1001.
+
+`spark-010: six reference contracts passed` and the runtime versions print after those checks. The trace assertions show the evaluation order of Scala iterators in one thread; Spark tasks follow the same lazy idea but can be retried or speculatively run on other executors, so a counter or file write inside a transformation is not made safe by this lesson's results. What carries over is the design rule: key the result by logical identity, and treat any side effect as something that may repeat.
+

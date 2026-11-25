@@ -1,6 +1,8 @@
 # rust-015: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [rust-015_solution.rs](rust-015_solution.rs). It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.
+Executable reference: [rust-015_solution.rs](rust-015_solution.rs), which runs both examples and the coded answers.
+
+Open this only after [an attempt](../STUDY-GUIDE.md#attempt-a-lesson).
 
 ## Why the two examples differ
 
@@ -26,7 +28,7 @@ Trace the success, parse-error and domain-error paths.
 
 Add an application maximum quantity with a separate error category.
 
-**Reference answer.** The same statements run as the `Task 2` block of the reference program; here they are wrapped in `main` as a complete file. It uses `parse_quantity` from the lesson's helpers, defined in the reference program.
+**Reference answer**, wrapped in `main`; the reference runs it as its `Task 2` block. Helpers used: `parse_quantity`.
 
 ```rust
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -58,7 +60,7 @@ The maximum is an application policy layered on top of `parse_quantity`, so it g
 
 Write a function using ? to compose two fallible steps.
 
-**Reference answer.** The same statements run as the `Task 3` block of the reference program; here they are wrapped in `main` as a complete file. It uses `parse_quantity` from the lesson's helpers, defined in the reference program.
+**Reference answer**, wrapped in `main`; the reference runs it as its `Task 3` block. Helpers used: `parse_quantity`.
 
 ```rust
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -93,7 +95,7 @@ Diagnose replacing every Err with zero.
 
 Test empty, zero, negative and overflowing textual input.
 
-**Reference answer.** The same statements run as the `Task 5` block of the reference program; here they are wrapped in `main` as a complete file. It uses `parse_quantity` from the lesson's helpers, defined in the reference program.
+**Reference answer**, wrapped in `main`; the reference runs it as its `Task 5` block. Helpers used: `parse_quantity`.
 
 ```rust
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -119,7 +121,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 Choose a public error enum and explain which internal details should remain private.
 
-No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **Result**, and state one limitation of your choice.
+**Judging criteria.** A strong public enum names recovery categories, for example `Malformed`, `OutOfRange { max }` and `Io`, and keeps internal detail such as raw input, file paths with user names or library error types behind `source()` or out of the type entirely. Each variant should help a caller decide what to do next. State one limitation: adding a variant to a public enum is a breaking change unless it is marked `#[non_exhaustive]`.
 
 ## Mechanism and diagnostic reasoning
 
@@ -133,4 +135,6 @@ Calling .ok discards the error reason. A catch-all fallback can turn data loss i
 
 ## Review before continuing
 
-Run the reference and confirm that it prints `rust-015: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.
+Rebuild Example B (Collect only explicitly accepted values) from a blank pad.
+
+Review routine: [Self-check and review](../STUDY-GUIDE.md#self-check-and-review).

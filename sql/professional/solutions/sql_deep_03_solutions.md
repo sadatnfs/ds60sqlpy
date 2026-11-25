@@ -1,6 +1,10 @@
 # sql-deep-03: Explained reference solutions
 
-Read [ROWS, RANGE, GROUPS, Exclusions, and Sessionization](../companion-guides/sql_deep_03.md) and attempt its six queries before comparing. The [complete reference script](sql_deep_03_solutions.sql) recreates the same temporary fixture, runs every answer inside its own savepoint, compares exact JSON row sets with fail-fast assertions, then rolls back. No permanent table, role or service is changed.
+Attempt the six queries in [ROWS, RANGE, GROUPS, Exclusions, and
+Sessionization](../companion-guides/sql_deep_03.md) first. The [complete
+reference script](sql_deep_03_solutions.sql) rebuilds `deep3_events` and
+answers each exercise inside its own savepoint. None of the six queries
+modifies the table, so every window reads the same seven events.
 
 ## Exercises and reasoning
 
@@ -10,7 +14,7 @@ For customer a only, return event_id, row_total, peer_total. Use ROWS with occur
 
 **Inputs/evidence:** For sql-deep-03 Exercise 1, For customer a only, return event_id, row_total, peer_total. Use ROWS with occurred_at, event_id for row_total and RANGE with occurred_at alone for peer_total. Both frames start at UNBOUNDED PRECEDING and end at CURRENT ROW. Order final rows by event_id.
 
-**Expected result/shape:** For sql-deep-03 Exercise 1, IDs 1..5 have row_total[1,3,6,10,15] and peer_total[3,3,6,10,15]. The two 10:00 events share only the peer-aware total.
+**Expected result/shape:** For sql-deep-03 Exercise 1, IDs 1..5 have `row_total` values 1, 3, 6, 10, 15 and `peer_total` values 3, 3, 6, 10, 15. The two 10:00 events share only the peer-aware total.
 
 **Verify:** For sql-deep-03 Exercise 1, inspect the tied timestamp rows together: ROWS advances by the full ordering while RANGE includes all peers at the same timestamp.
 
@@ -35,7 +39,7 @@ For customer a, return event_id, two_rows, two_groups. The first frame is ROWS B
 
 **Inputs/evidence:** For sql-deep-03 Exercise 2, For customer a, return event_id, two_rows, two_groups. The first frame is ROWS BETWEEN 1 PRECEDING AND CURRENT ROW ordered by timestamp, event_id; the second is GROUPS BETWEEN 1 PRECEDING AND CURRENT ROW ordered by timestamp alone. Final order is event_id.
 
-**Expected result/shape:** For sql-deep-03 Exercise 2, two_rows is[1,3,5,7,9] and two_groups is[3,3,6,7,9]. At event 3 the previous peer group contains both events 1 and 2.
+**Expected result/shape:** For sql-deep-03 Exercise 2, `two_rows` is 1, 3, 5, 7, 9 and `two_groups` is 3, 3, 6, 7, 9. At event 3 the previous peer group contains both events 1 and 2.
 
 **Verify:** For sql-deep-03 Exercise 2, write each frame membership as a set of event IDs for the tied rows and boundary rows; sum amounts from those memberships independently.
 
@@ -60,7 +64,7 @@ For customer a, return event_id, without_current, without_group, without_other_t
 
 **Inputs/evidence:** For sql-deep-03 Exercise 3, For customer a, return event_id, without_current, without_group, without_other_ties using a RANGE unbounded-preceding-to-current frame ordered by timestamp. Apply EXCLUDE CURRENT ROW, EXCLUDE GROUP and EXCLUDE TIES respectively. Preserve NULL for empty frames and order by event_id.
 
-**Expected result/shape:** For sql-deep-03 Exercise 3, ID 1 gives 2, NULL,1; ID 2 gives 1, NULL,2; ID 3 gives 3,3,6; ID 4 gives 6,6,10; ID 5 gives 10,10,15.
+**Expected result/shape:** For sql-deep-03 Exercise 3, ID 1 gives 2, NULL, 1; ID 2 gives 1, NULL, 2; ID 3 gives 3, 3, 6; ID 4 gives 6, 6, 10; ID 5 gives 10, 10, 15.
 
 **Verify:** For sql-deep-03 Exercise 3, compare CURRENT ROW, GROUP and TIES using the same base frame; confirm TIES retains the current row while removing its other peers.
 
@@ -89,7 +93,7 @@ For customer a, return event_id, prefix_last, partition_last. Order both windows
 
 **Inputs/evidence:** For sql-deep-03 Exercise 4, For customer a, return event_id, prefix_last, partition_last. Order both windows by timestamp, event_id. Use the default ordered frame for prefix_last and explicit ROWS UNBOUNDED PRECEDING TO UNBOUNDED FOLLOWING for partition_last. Final order is event_id.
 
-**Expected result/shape:** For sql-deep-03 Exercise 4, prefix_last is[1,2,3,4,5], while partition_last is 5 for every row. No row is removed or collapsed.
+**Expected result/shape:** For sql-deep-03 Exercise 4, `prefix_last` is 1, 2, 3, 4, 5, while `partition_last` is 5 for every row. No row is removed or collapsed.
 
 **Verify:** For sql-deep-03 Exercise 4, compare the default frame last value with a frame extending to UNBOUNDED FOLLOWING; check both peer groups and the final row.
 
@@ -114,7 +118,7 @@ For all customers return event_id, prior_30m over [occurred_at-30minutes, occurr
 
 **Inputs/evidence:** For sql-deep-03 Exercise 5, For all customers return event_id, prior_30m over [occurred_at-30minutes, occurred_at), excluding every event at the current timestamp. Use a timestamp RANGE frame plus EXCLUDE GROUP and partition by customer_id. Treat an empty complete-log window as zero. Order by event_id.
 
-**Expected result/shape:** For sql-deep-03 Exercise 5, IDs 1..7 yield prior_30m[0,0,3,3,0,0,10]. Event 4 includes the exact 10:10 lower boundary; event 5 excludes 10:40 because it is 31 minutes old.
+**Expected result/shape:** For sql-deep-03 Exercise 5, IDs 1..7 yield `prior_30m` values 0, 0, 3, 3, 0, 0, 10. Event 4 includes the exact 10:10 lower boundary; event 5 excludes 10:40 because it is 31 minutes old.
 
 **Verify:** For sql-deep-03 Exercise 5, enumerate timestamps inside the elapsed-time interval and exclude every event at the current timestamp; confirm a prior physical row with the same timestamp cannot leak.
 
@@ -137,7 +141,7 @@ Define a new session for a customer's first event or a gap strictly greater than
 
 **Inputs/evidence:** For sql-deep-03 Exercise 6, Define a new session for a customer's first event or a gap strictly greater than 30 minutes. Return customer_id, session_id, event_count, first_event_id, last_event_id, one row per customer/session, ordered by customer_id, session_id. Use deterministic timestamp, event_id ordering and separate lag, flag, cumulative stages.
 
-**Expected result/shape:** For sql-deep-03 Exercise 6, Rows are(a,1,4,1,4),(a,2,1,5,5),(b,1,2,6,7). Exact 30-minute gaps stay in the same session; the 31-minute a gap starts session 2.
+**Expected result/shape:** For sql-deep-03 Exercise 6, Rows are (a,1,4,1,4), (a,2,1,5,5), (b,1,2,6,7). Exact 30-minute gaps stay in the same session; the 31-minute a gap starts session 2.
 
 **Verify:** For sql-deep-03 Exercise 6, compute each lag gap, then the break flag, then its cumulative sum in separate stages; check exactly the threshold and the first event of each user.
 
@@ -190,4 +194,12 @@ The first CTE adds prior timestamps without collapsing events. The next creates 
 
 ## Verification and transaction boundary
 
-Every answer is materialized into a temporary answer table and compared with a literal expected row set, including column names, NULL values and deterministic order. The assertion function rejects both false and unknown Boolean results, so a NULL comparison cannot silently pass. Each exercise rolls back to its own savepoint, ensuring mutations used for one boundary case do not alter the next. The final ROLLBACK removes the full fixture. Read the first error if a contract fails; a later row count or command tag cannot repair an earlier failed assertion.
+`pg_temp.assert_true` compares each ordered answer, aggregated into `jsonb`,
+with a literal expected row set and raises unless the comparison is exactly
+true, so an empty frame that should be NULL cannot pass as 0 or the reverse.
+Frame bugs usually show up at the tie or the boundary: with `ROWS` in Exercise
+1, events 1 and 2 get different totals instead of a shared 3; a closed upper
+bound in Exercise 5 lets each event count itself; and a `>=` gap rule
+in Exercise 6 splits customer `b` at its exact 30-minute gap instead of returning
+one two-event session. The final `ROLLBACK` drops the fixture. Repair the first
+failing assertion before reading any later output.

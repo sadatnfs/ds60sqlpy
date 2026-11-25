@@ -382,7 +382,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
         </header>
 
         <div class="artifact-content"><h3 id="guide--day-56-workflow-orchestration-with-prefect">Day 56: Workflow Orchestration with Prefect<a class="heading-anchor" href="#guide--day-56-workflow-orchestration-with-prefect" aria-label="Link to this section">#</a></h3>
-<p><strong>Offline teaching data:</strong> The <a href="../reference-pages/python/fixtures/README.md.html">original synthetic fixtures</a> replace first-run sample-data downloads. Their values are not historical or observational evidence. Keep numerical conclusions scoped to the declared teaching input.</p>
+<p><strong>Offline teaching data:</strong> the <code>passenger-outcomes</code> <a href="../reference-pages/python/fixtures/README.md.html">synthetic fixture</a> is invented, so its numbers prove methods, not facts.</p>
 <p><strong>Lesson ID:</strong> <code>python-56</code> · <strong>Level:</strong> advanced · <strong>Dependencies:</strong> <code>production</code> · <strong>Network:</strong> offline</p>
 <p>Orchestration coordinates when and how a workflow runs, records state, and helps operators recover from failure. It does not make a non-idempotent, leaky, or incorrect pipeline reliable automatically.</p>
 <h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
@@ -467,19 +467,10 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <pre class="highlighted-code"><code class="language-bash">.venv/bin/prefect server start --host <span class="syntax-number">127</span>.0.0.1</code></pre>
 <p>Follow the CLI output for the local API URL and open the displayed local UI (normally <code>http://127.0.0.1:4200</code>). Keep this local; no hosted account is needed. For scheduling practice in Prefect 3, prefer a local <code>flow.serve(...)</code> example after the direct flow is correct, and keep its serving process running.</p>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
-<p><strong>Default Docker classroom:</strong> open <code>python-56</code> for its guide, notebook and capability notice. The default Core does not include the <code>production</code> extra, so the complete legacy notebook is unavailable there until that app environment is deliberately prepared. Pressing Run or choosing a notebook kernel does not install packages.</p>
-<p><strong>Prepared browser alternative:</strong> use the <a href="../reference-pages/courses/data-ml-engineering/guides/dme-001.md.html">data and ML engineering course</a> in its declared runtime. Its supported examples have their own package and execution contract; this does not qualify every legacy optional extension.</p>
-<p><strong>Explicit legacy preparation:</strong> retain the contributor extras in <a href="../reference-pages/CONTRIBUTING.md.html">CONTRIBUTING</a> and add <code>production</code> only when needed. See <a href="../reference-pages/docs/dependency-profiles.md.html">dependency profiles</a> and <a href="../reference-pages/docs/docker-profiles.md.html">Docker app package options</a> for deliberate preparation. A host notebook environment and a Docker app image are separate. Do not install packages inside a learner pad.</p>
+<p><strong>Default Docker classroom:</strong> Prefect is missing from <code>python-56</code>, since the default Core does not include the <code>production</code> extra. Prepare it with the <a href="../reference-pages/CONTRIBUTING.md.html">contributor setup</a> to run flows locally; a host notebook environment and a Docker app image are separate.</p>
+<p><strong>Prepared browser alternative:</strong> An orchestrated flow is a chain of contracts, and the <a href="../reference-pages/courses/data-ml-engineering/guides/dme-001.md.html">data and ML engineering course</a> traces one record-to-metric chain in Core.</p>
 <p>Teaching data are checked in and offline. Prefect remains a separately prepared dependency with local API/state requirements. Flow execution is opt-in; scheduling and a persistent UI require a separately managed local project, not the default Core pad.</p>
-<p><strong>Optional native notebook/editor route:</strong> the instructions below describe separately prepared host tools. They are useful alternatives, not prerequisites for opening this lesson in the Docker classroom.</p>
-<ol>
-<li>Open the Day 56 learner notebook from this guide&#x27;s <strong>Next step</strong> section in VS Code or JupyterLab.</li>
-<li>Select the <code>Python (ds60sqlpy)</code> kernel. Start at the top and use <strong>Run All</strong> only after making the written predictions; the default data examples are offline once the declared packages are prepared. Optional services and model assets have separate requirements.</li>
-<li>Keep experiments in new scratch cells. Do not edit the official solution while attempting the numbered practice.</li>
-<li>Restart the kernel and run from the first cell before calling the lesson complete. A clean run catches hidden state and stale variables.</li>
-</ol>
-<p>Linux, macOS, or Ubuntu in Windows WSL 2:</p>
-<pre class="highlighted-code"><code class="language-bash">.venv/bin/python -m jupyter lab</code></pre>
+<p>The <a href="../reference-pages/python/STUDY-GUIDE.md.html">Python study guide</a> covers the notebook route and preparing optional extras.</p>
 <h4 id="guide--concept-deep-dive-observable-task-boundaries-retries-caching-and-idempotent-orchestration">Concept deep dive: observable task boundaries, retries, caching, and idempotent orchestration<a class="heading-anchor" href="#guide--concept-deep-dive-observable-task-boundaries-retries-caching-and-idempotent-orchestration" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--the-mental-model">The mental model<a class="heading-anchor" href="#guide--the-mental-model" aria-label="Link to this section">#</a></h5>
 <p>An orchestrator records workflow state and coordinates retries, dependencies, schedules, and concurrency. A flow describes the larger run; tasks are observable units with their own state and policy. The boundary should be large enough to be meaningful and small enough to retry without repeating unrelated side effects.</p>
@@ -491,7 +482,6 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li><strong>cache key + result persistence:</strong> reuses a completed result only when identity and storage semantics are deliberate.</li>
 </ul>
 <h5 id="guide--focused-example-a-derive-an-idempotent-local-output-identity">Focused example A: derive an idempotent local output identity<a class="heading-anchor" href="#guide--focused-example-a-derive-an-idempotent-local-output-identity" aria-label="Link to this section">#</a></h5>
-<p>Before running the example, predict the shape, type, or direction of the result. Write the prediction down so that a surprise becomes evidence rather than something to overlook.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> hashlib
 <span class="syntax-keyword">import</span> json
 
@@ -580,7 +570,6 @@ decisions <span class="syntax-operator">=</span> <span class="syntax-punctuation
 <p>The separate solution reinforces retry, notification, and scheduling concepts. Use the Prefect 3 execution path in this guide and the current learner environment when translating those concepts.</p>
 <h5 id="guide--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#guide--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
 <p>Orchestrate explicit, typed tasks whose retries are safe, artifacts are versioned, and failures are observable. A flow wrapper does not repair an unsafe task.</p>
-<p>Predict or plan before you run code. Use the hint only after an honest attempt, and record the evidence that would prove your result correct.</p>
 <ol start="4">
 <li><strong>Retry and idempotence:</strong> Add retries to a task that writes an artifact. Make the write idempotent so a failure after writing cannot create duplicate or partially valid outputs. <strong>Progressive hint:</strong> Write to a temporary path, validate, then atomically replace a versioned destination. A retry should produce the same logical result.</li>
 </ol>
@@ -647,7 +636,7 @@ decisions <span class="syntax-operator">=</span> <span class="syntax-punctuation
 <li>Continue to <a href="python-57.html#guide">Day 57; Security, Privacy, and Ethics</a>.</li>
 </ul>
 <h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
-<p>The lesson is complete without an AI assistant. If you want optional coaching, copy this prompt into the AI tutor while the repository root is open:</p>
+<p>The lesson is complete without AI. For optional coaching, copy this prompt with the repository root open:</p>
 <pre class="highlighted-code"><code class="language-text">Tutor me through `python-56` (Day 56: Orchestration with Prefect 3).
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
@@ -964,7 +953,7 @@ merely ran is not evidence of mastery.</code></pre></div>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
         <div class="artifact-content"><p><strong>Execution boundary:</strong> The default flag only defines a synthetic ETL skeleton. Prefect is an optional package, and actual runs require a deliberately selected loopback API. The learner notebook contains the separate model-training exercise. Serving a deployment is a blocking local project extension.</p>
 <h3 id="solution-1--day-56-solutions-workflow-orchestration-with-prefect">Day 56 Solutions: Workflow Orchestration with Prefect<a class="heading-anchor" href="#solution-1--day-56-solutions-workflow-orchestration-with-prefect" aria-label="Link to this section">#</a></h3>
-<p><strong>Offline teaching data:</strong> The <a href="../reference-pages/python/fixtures/README.md.html">original synthetic fixtures</a> replace first-run sample-data downloads. Their values are not historical or observational evidence. Keep numerical conclusions scoped to the declared teaching input.</p>
+<p><strong>Offline teaching data:</strong> the <code>passenger-outcomes</code> <a href="../reference-pages/python/fixtures/README.md.html">synthetic fixture</a> is invented, so its numbers prove methods, not facts.</p>
 <p>We convert a small offline ETL job into a Prefect 3 flow, add retries and a local failure hook, and serve it from a self-hosted local scheduler.</p>
 <p>Contents</p>
 <ul>
@@ -1098,7 +1087,7 @@ python etl_schedule.py</code></pre>
 </ul>
 <hr>
 <h4 id="solution-1--solution-reasoning-lens">Solution reasoning lens<a class="heading-anchor" href="#solution-1--solution-reasoning-lens" aria-label="Link to this section">#</a></h4>
-<p>A strong solution is not merely code that produces one plausible output. It establishes a chain from input contract to operation to verification:</p>
+<p>Each decision below links an input contract to an operation and its evidence:</p>
 <ol>
 <li><strong><code>@flow</code>:</strong> creates the orchestration boundary and run-level parameters/state.</li>
 <li><strong><code>@task(retries=..., retry_delay_seconds=...)</code>:</strong> declares task-level retry policy; exception classification still matters.</li>
@@ -1110,44 +1099,36 @@ python etl_schedule.py</code></pre>
 <p><strong>Trade-off:</strong> More task boundaries improve visibility and selective retry but add serialization, state, and coordination overhead.</p>
 <p><strong>Edge case to test:</strong> Partial writes, stale caches, concurrent duplicate keys, nonserializable results, cancellation, and credentials in logs need tests.</p>
 <p><strong>Evidence of correctness:</strong> Inject retryable/permanent failures, prove attempt counts and cleanup, repeat with identical inputs, change one key input, and inspect final task/flow states.</p>
-<p>When comparing your attempt with the reference, explain which of these decisions your code made explicitly. If the reference makes a different choice, compare the contracts and evidence before deciding that one version is universally better.</p>
 <h4 id="solution-1--exercise-by-exercise-reasoning-map">Exercise-by-exercise reasoning map<a class="heading-anchor" href="#solution-1--exercise-by-exercise-reasoning-map" aria-label="Link to this section">#</a></h4>
-<p>This map connects every learner prompt to a reasoning path. Read the explanation before copying code: the goal is to understand the assumptions, the evidence that validates the result, and the edge cases that can make an apparently correct implementation fail.</p>
 <h5 id="solution-1--exercise-1-original-lesson-practice">Exercise 1: Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Add <code>test_size</code> and <code>random_state</code> parameters to the training flow.</p>
 <p><strong>How to reason about it:</strong> Flow parameters such as test size and random state must reach the task and be logged with outputs. Defaults are part of the reproducibility contract, not hidden UI settings.</p>
-<p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
 <p><strong>Verify:</strong> Run the flow twice with two explicit test_size/random_state pairs, print parameter values, split row counts/hashes, and metrics, and assert a repeated identical pair reproduces the same split.</p>
 <h5 id="solution-1--exercise-2-original-lesson-practice">Exercise 2: Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-2-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Split the training task into separate train and evaluate tasks with explicit outputs.</p>
 <p><strong>How to reason about it:</strong> Separate train and evaluate tasks with small explicit results. Passing large in-memory objects can be acceptable locally but should trigger a documented artifact/reference design for distributed execution.</p>
-<p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
 <p><strong>Verify:</strong> Make train return a model/artifact identity and evaluate accept that explicit value; print task states and metric, and inject a train failure to prove evaluate does not run on missing output.</p>
 <h5 id="solution-1--exercise-3-original-lesson-practice">Exercise 3: Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-3-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Explore the optional local Prefect UI and scheduling basics.</p>
 <p><strong>How to reason about it:</strong> Prove direct local flow execution first. Prefect UI/deployment/scheduling is an optional local extension whose commands must match Prefect 3, and the core lesson must remain useful offline without a running server.</p>
-<p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
 <p><strong>Verify:</strong> Either print an explicit offline-skip result or start the local UI, record the local URL and one completed flow-run ID/state, then stop it cleanly; scheduling remains optional and must not require a cloud account.</p>
 <h5 id="solution-1--exercise-4-retry-and-idempotence">Exercise 4: Retry and idempotence<a class="heading-anchor" href="#solution-1--exercise-4-retry-and-idempotence" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Add retries to a task that writes an artifact. Make the write idempotent so a failure after writing cannot create duplicate or partially valid outputs.</p>
 <p><strong>Reasoning before implementation:</strong> Write to a temporary path, validate, then atomically replace a versioned destination. A retry should produce the same logical result.</p>
 <p>Retries are safe only when repeated execution has a known effect. Derive the artifact ID from flow/run inputs, avoid append-only side effects without a deduplication key, and write a completion manifest last.</p>
 <p>Use retries for transient failures, not deterministic schema or programming errors. Classify the exception and preserve the original cause in task state.</p>
-<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
 <p><strong>Verify:</strong> Retry and idempotence; inject a failure after the first artifact write, then retry; assert exactly one final path/manifest exists, its hash matches a clean run, no partial file remains, and attempt count/state are recorded.</p>
 <h5 id="solution-1--exercise-5-cache-key-design">Exercise 5: Cache-key design<a class="heading-anchor" href="#solution-1--exercise-5-cache-key-design" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Design a task cache key that changes when data fingerprint, code/config, or relevant parameters change, but not when an unrelated log message changes.</p>
 <p><strong>Reasoning before implementation:</strong> Hash canonical semantic inputs and include a task/schema version. Do not cache a task whose hidden external state is untracked.</p>
 <p>A cache hit is a correctness claim that prior output is interchangeable with a new execution. Include data identity, transformation version, dependency/model configuration, and meaningful parameters. Exclude timestamps and machine paths that would defeat reuse.</p>
 <p>If a task reads “latest.csv” or a mutable service without a snapshot ID, a reliable cache key cannot be constructed from visible inputs. Fix the source contract or disable caching.</p>
-<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
 <p><strong>Verify:</strong> Cache-key design; print cache keys for identical inputs, changed data hash, changed code/config, changed relevant parameter, and log-only change; assert equality only for identical/log-only cases and inequality for semantic changes.</p>
 <h5 id="solution-1--exercise-6-failure-observability">Exercise 6: Failure observability<a class="heading-anchor" href="#solution-1--exercise-6-failure-observability" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Instrument a three-task flow so logs and a final summary identify run ID, task, safe input version, attempt, elapsed time, artifact ID, and failure category without logging sensitive rows.</p>
 <p><strong>Reasoning before implementation:</strong> Use structured fields and task/run context. Emit counts and opaque IDs rather than raw feature values.</p>
 <p>The final state must distinguish completed, failed, retried, cached, and skipped tasks. Propagate an upstream failure rather than producing a misleading downstream success with empty data.</p>
 <p>Keep the core lesson&#x27;s logging local. Optional Prefect server telemetry should be explicitly enabled, and no secret or credential should be printed during diagnosis.</p>
-<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
 <p><strong>Verify:</strong> Failure observability; capture a three-task failure run and assert every event contains run ID, task, safe input version, attempt, elapsed time, artifact ID, and failure category; raw row and secret sentinels must be absent and final state must identify the failed task.</p></div>
       </section>
 
@@ -1177,7 +1158,7 @@ python etl_schedule.py</code></pre>
         <div class="artifact-content"><div class="preview-note" role="note"><strong>Readable preview.</strong> Code cells are not running in this browser page. Use the run controls above to open the real notebook with the course kernel.</div>
 <article class="notebook-cell markdown-cell"><div class="cell-label">Explanation 1</div><p><strong>Execution boundary:</strong> The default flag only defines a synthetic ETL skeleton. Prefect is an optional package, and actual runs require a deliberately selected loopback API. The learner notebook contains the separate model-training exercise. Serving a deployment is a blocking local project extension.</p>
 <h3 id="solution-2--cell-1--day-56-solutions-workflow-orchestration-with-prefect">Day 56 Solutions: Workflow Orchestration with Prefect<a class="heading-anchor" href="#solution-2--cell-1--day-56-solutions-workflow-orchestration-with-prefect" aria-label="Link to this section">#</a></h3>
-<p><strong>Offline teaching data:</strong> The <a href="../reference-pages/python/fixtures/README.md.html">original synthetic fixtures</a> replace first-run sample-data downloads. Their values are not historical or observational evidence. Keep numerical conclusions scoped to the declared teaching input.</p>
+<p><strong>Offline teaching data:</strong> the <code>passenger-outcomes</code> <a href="../reference-pages/python/fixtures/README.md.html">synthetic fixture</a> is invented, so its numbers prove methods, not facts.</p>
 <p>We convert a small offline ETL job into a Prefect 3 flow, add retries and a local failure hook, and serve it from a self-hosted local scheduler.</p>
 <p>Contents</p>
 <ul>
@@ -1315,7 +1296,7 @@ python etl_schedule.py</code></pre>
 </ul>
 <hr>
 <h4 id="solution-2--cell-7--solution-reasoning-lens">Solution reasoning lens<a class="heading-anchor" href="#solution-2--cell-7--solution-reasoning-lens" aria-label="Link to this section">#</a></h4>
-<p>A strong solution is not merely code that produces one plausible output. It establishes a chain from input contract to operation to verification:</p>
+<p>Each decision below links an input contract to an operation and its evidence:</p>
 <ol>
 <li><strong><code>@flow</code>:</strong> creates the orchestration boundary and run-level parameters/state.</li>
 <li><strong><code>@task(retries=..., retry_delay_seconds=...)</code>:</strong> declares task-level retry policy; exception classification still matters.</li>
@@ -1327,44 +1308,36 @@ python etl_schedule.py</code></pre>
 <p><strong>Trade-off:</strong> More task boundaries improve visibility and selective retry but add serialization, state, and coordination overhead.</p>
 <p><strong>Edge case to test:</strong> Partial writes, stale caches, concurrent duplicate keys, nonserializable results, cancellation, and credentials in logs need tests.</p>
 <p><strong>Evidence of correctness:</strong> Inject retryable/permanent failures, prove attempt counts and cleanup, repeat with identical inputs, change one key input, and inspect final task/flow states.</p>
-<p>When comparing your attempt with the reference, explain which of these decisions your code made explicitly. If the reference makes a different choice, compare the contracts and evidence before deciding that one version is universally better.</p>
 <h4 id="solution-2--cell-7--exercise-by-exercise-reasoning-map">Exercise-by-exercise reasoning map<a class="heading-anchor" href="#solution-2--cell-7--exercise-by-exercise-reasoning-map" aria-label="Link to this section">#</a></h4>
-<p>This map connects every learner prompt to a reasoning path. Read the explanation before copying code: the goal is to understand the assumptions, the evidence that validates the result, and the edge cases that can make an apparently correct implementation fail.</p>
 <h5 id="solution-2--cell-7--exercise-1-original-lesson-practice">Exercise 1: Original lesson practice<a class="heading-anchor" href="#solution-2--cell-7--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Add <code>test_size</code> and <code>random_state</code> parameters to the training flow.</p>
 <p><strong>How to reason about it:</strong> Flow parameters such as test size and random state must reach the task and be logged with outputs. Defaults are part of the reproducibility contract, not hidden UI settings.</p>
-<p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
 <p><strong>Verify:</strong> Run the flow twice with two explicit test_size/random_state pairs, print parameter values, split row counts/hashes, and metrics, and assert a repeated identical pair reproduces the same split.</p>
 <h5 id="solution-2--cell-7--exercise-2-original-lesson-practice">Exercise 2: Original lesson practice<a class="heading-anchor" href="#solution-2--cell-7--exercise-2-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Split the training task into separate train and evaluate tasks with explicit outputs.</p>
 <p><strong>How to reason about it:</strong> Separate train and evaluate tasks with small explicit results. Passing large in-memory objects can be acceptable locally but should trigger a documented artifact/reference design for distributed execution.</p>
-<p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
 <p><strong>Verify:</strong> Make train return a model/artifact identity and evaluate accept that explicit value; print task states and metric, and inject a train failure to prove evaluate does not run on missing output.</p>
 <h5 id="solution-2--cell-7--exercise-3-original-lesson-practice">Exercise 3: Original lesson practice<a class="heading-anchor" href="#solution-2--cell-7--exercise-3-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Explore the optional local Prefect UI and scheduling basics.</p>
 <p><strong>How to reason about it:</strong> Prove direct local flow execution first. Prefect UI/deployment/scheduling is an optional local extension whose commands must match Prefect 3, and the core lesson must remain useful offline without a running server.</p>
-<p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
 <p><strong>Verify:</strong> Either print an explicit offline-skip result or start the local UI, record the local URL and one completed flow-run ID/state, then stop it cleanly; scheduling remains optional and must not require a cloud account.</p>
 <h5 id="solution-2--cell-7--exercise-4-retry-and-idempotence">Exercise 4: Retry and idempotence<a class="heading-anchor" href="#solution-2--cell-7--exercise-4-retry-and-idempotence" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Add retries to a task that writes an artifact. Make the write idempotent so a failure after writing cannot create duplicate or partially valid outputs.</p>
 <p><strong>Reasoning before implementation:</strong> Write to a temporary path, validate, then atomically replace a versioned destination. A retry should produce the same logical result.</p>
 <p>Retries are safe only when repeated execution has a known effect. Derive the artifact ID from flow/run inputs, avoid append-only side effects without a deduplication key, and write a completion manifest last.</p>
 <p>Use retries for transient failures, not deterministic schema or programming errors. Classify the exception and preserve the original cause in task state.</p>
-<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
 <p><strong>Verify:</strong> Retry and idempotence; inject a failure after the first artifact write, then retry; assert exactly one final path/manifest exists, its hash matches a clean run, no partial file remains, and attempt count/state are recorded.</p>
 <h5 id="solution-2--cell-7--exercise-5-cache-key-design">Exercise 5: Cache-key design<a class="heading-anchor" href="#solution-2--cell-7--exercise-5-cache-key-design" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Design a task cache key that changes when data fingerprint, code/config, or relevant parameters change, but not when an unrelated log message changes.</p>
 <p><strong>Reasoning before implementation:</strong> Hash canonical semantic inputs and include a task/schema version. Do not cache a task whose hidden external state is untracked.</p>
 <p>A cache hit is a correctness claim that prior output is interchangeable with a new execution. Include data identity, transformation version, dependency/model configuration, and meaningful parameters. Exclude timestamps and machine paths that would defeat reuse.</p>
 <p>If a task reads “latest.csv” or a mutable service without a snapshot ID, a reliable cache key cannot be constructed from visible inputs. Fix the source contract or disable caching.</p>
-<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
 <p><strong>Verify:</strong> Cache-key design; print cache keys for identical inputs, changed data hash, changed code/config, changed relevant parameter, and log-only change; assert equality only for identical/log-only cases and inequality for semantic changes.</p>
 <h5 id="solution-2--cell-7--exercise-6-failure-observability">Exercise 6: Failure observability<a class="heading-anchor" href="#solution-2--cell-7--exercise-6-failure-observability" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Instrument a three-task flow so logs and a final summary identify run ID, task, safe input version, attempt, elapsed time, artifact ID, and failure category without logging sensitive rows.</p>
 <p><strong>Reasoning before implementation:</strong> Use structured fields and task/run context. Emit counts and opaque IDs rather than raw feature values.</p>
 <p>The final state must distinguish completed, failed, retried, cached, and skipped tasks. Propagate an upstream failure rather than producing a misleading downstream success with empty data.</p>
 <p>Keep the core lesson&#x27;s logging local. Optional Prefect server telemetry should be explicitly enabled, and no secret or credential should be printed during diagnosis.</p>
-<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
 <p><strong>Verify:</strong> Failure observability; capture a three-task failure run and assert every event contains run ID, task, safe input version, attempt, elapsed time, artifact ID, and failure category; raw row and secret sentinels must be absent and final state must identify the failed task.</p></article></div>
       </section>
 

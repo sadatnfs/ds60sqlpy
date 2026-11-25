@@ -4,18 +4,15 @@
 
 Intermediate; about 110 minutes, plus any optional hardware experiment. Direct prerequisites: `cuda-012`, `cuda-013`, `cuda-014`, `cuda-024`
 
-The order supports learning at your own pace. Reading and CPU reasoning remain
-available when NVIDIA hardware is absent. Advanced hardware features need their
-own capability checks and are not prerequisites for opening this chapter.
+Pacing, evidence labels and platform rules for every chapter are in the [CUDA study guide](../../STUDY-GUIDE.md).
 
 ## Learning objectives
 
 Classify a CUDA failure by its phase and write a bug report around the smallest reproducer.
 
-Work through *A disciplined CUDA error taxonomy* with the concrete cases below. Finish with this evidence:
-a useful bug report that includes the smallest reproducer and the responsible phase. Distinguish an algorithmic
-calculation, a compiled artifact and an actual device observation when explaining
-what your work establishes.
+**Scope:** Compilation, linking, loading, invalid launch, allocation, asynchronous execution and application-validation failures.
+
+**Evidence to produce:** A useful bug report that includes the smallest reproducer and the responsible phase.
 
 ## Purpose, vocabulary and mental model
 
@@ -30,28 +27,17 @@ Debugging starts by placing a failure in its phase. A source error prevents comp
 
 ## How to run and study this lesson
 
-Use the saved reading worksheet in `/classroom`; the reading pad does not execute
-CUDA. For the bounded calculation, select **CPU model (Python)**, whose
-answer-free starter supplies the literal fixtures and task contract. The
-[CUDA C++ study workflow](../README.md) covers platforms, optional GPU
-compilation and evidence labels. In a prepared Python environment you can also
-run the separate [CPU reference](../references/cuda-025_cpu.py) from the
-repository root:
+Trace worked example 1 by hand, then run the [CPU reference](../references/cuda-025_cpu.py) from the repository root:
 
 ```sh
 python courses/cuda/cpp/references/cuda-025_cpu.py
 ```
 
-Its assertions check the stated numerical result or model invariant; console
-text is evidence of this CPU model only, not of CUDA execution.
-
 ## Worked example 1: trace the mechanism
 
 A misspelled identifier in main.cu produces a compiler error before any device work. Fixing bounds checks cannot help until the file compiles. Record the diagnostic with source line and build command, and rerun the smallest compilation step.
 
-The complete CPU model below intentionally models only the named arithmetic,
-layout, dependency or capability decision. It does not model GPU scheduling,
-caches, instruction timing or device memory visibility.
+**Why:** No device code exists until compilation succeeds, so runtime checks are irrelevant.
 
 ```python
 failures = {
@@ -65,41 +51,37 @@ assert failures["unknown identifier"] != failures["illegal access at completion"
 print(failures)
 ```
 
-**Expected observation:** Every assertion succeeds. A representative CPU output is:
+**Expected observation:** every assertion succeeds, and the CPU model prints:
 
 ```text
 {'unknown identifier': 'compile', 'undefined reference': 'link', 'illegal access at completion': 'execute', 'wrong sum': 'validate'}
 ```
 
-Integers, shapes and ordering must match exactly; only assertions with an explicit
-tolerance accept small floating-point differences. A printed duration is a model
-output, not a measured GPU benchmark.
+**Check:** Rerun only the compile command for main.cu and confirm it exits zero.
 
 ## Worked example 2: change a meaningful condition
 
 A launch is accepted but a checked synchronization reports an illegal memory access. Now examine ownership and bounds near that launch. If synchronization succeeds and one output is wrong, inspect arithmetic, layout or uninitialized data instead. These outcomes require different next experiments.
 
-Before applying this example to your own program, write down which inputs are
-read, which result is produced, and the condition that makes the comparison
-valid. Keep the original case as a regression check when changing a boundary.
+**Why:** Launch acceptance only means the configuration was valid; the fault appears when work completes.
+
+**Check:** Check indices near that kernel's bounds and rerun with a sanitizer to name the bad address.
 
 ## Six progressive exercises
 
-Exercises 1 and 2 are guided reconstructions of the worked examples; exercises
-3-6 change an input, diagnose a defect, test a boundary and transfer the idea.
-For each one, keep the calculation, output, diagram or failure policy you
-produce so another reader can compare it with the worked cases. If the hint is
-not enough, reread the mechanism paragraph and the bounded CPU assertion.
-
 ### Exercise 1
 
-Predict and trace the first worked example before running its CPU reference. Write every intermediate quantity that leads to the stated result, including units or ownership where applicable.
+Reconstruct worked example 1 on paper before running its CPU reference. Classify the misspelled identifier as a compile failure and fix it at the reported source line.
+
+**Trap to avoid:** Adding bounds checks in the kernel cannot help a file that never builds.
 
 **Hint:** Start with the literal input and intermediate quantities in worked example 1.
 
 ### Exercise 2
 
-Reconstruct the second worked example without copying its conclusion. Identify the changed input or condition, show the resulting calculation or dependency, and explain why it differs from the first example.
+Rework worked example 2 without copying its conclusion. Treat an illegal access at a checked synchronization as an execution failure tied to the preceding launch.
+
+**Trap to avoid:** Blaming the synchronize call itself sends you to inspect the wrong line of host code.
 
 **Hint:** Identify exactly which condition changes in worked example 2.
 
@@ -107,11 +89,15 @@ Reconstruct the second worked example without copying its conclusion. Identify t
 
 Classify an undefined reference to a host helper.
 
+**Trap to avoid:** Recompiling with different GPU architecture flags changes nothing about a missing host symbol.
+
 **Hint:** Use the first worked example to establish the relevant quantities, then change only the requested input.
 
 ### Exercise 4
 
 Why add synchronization after each stage only during localization?
+
+**Trap to avoid:** Leaving every synchronization in production serializes stages that could overlap.
 
 **Hint:** Locate the failed phase or violated dependency before proposing a repair.
 
@@ -119,35 +105,33 @@ Why add synchronization after each stage only during localization?
 
 What does a no-device status mean for a numerical test?
 
+**Trap to avoid:** Counting it as passed hides that the GPU path has never been exercised.
+
 **Hint:** Check what the algorithm is allowed to read, write or assume at this boundary.
 
 ### Exercise 6
 
 Write a minimal bug report for a shape-dependent wrong answer.
 
+**Trap to avoid:** Writing only 'wrong answer on large inputs' gives no reproducer and no index to inspect.
+
 **Hint:** State the output contract and which observations are needed in the new application.
 
 ## Common mistakes and diagnosis
 
-A tempting but incorrect claim in this chapter is: **every error is fixed by reinstalling CUDA or rebuilding every image.**
-
-For the concrete failure exercise, why add synchronization after each stage only during localization?
-Preserve the original input and the stage where behavior diverged, and compare
-with the CPU model before changing hardware configuration.
+A tempting but incorrect claim: **Every error is fixed by reinstalling CUDA or rebuilding every image.** Reinstalling only changes the toolkit and driver, which matters for loading or version failures but not for code faults. A compile error needs a source fix, an illegal access needs bounds or ownership repair, and a wrong answer after a clean run needs arithmetic or layout review. Classifying the phase first, as worked examples 1 and 2 do, tells you which repair applies and avoids hours of unrelated rebuilds.
 
 ## Self-check, retrieval and transfer
 
-Explain the first example without its code, then use the second example to state
-one assumption that matters. Complete Exercise 3 independently, use Exercise 4 to
-diagnose a plausible defect, check the boundary in Exercise 5, and retain the
-application contract from Exercise 6. Compare the [separate explanations](../solutions/cuda-025_solutions.md)
-only after your attempt or a deliberate reveal. A reading marker records your
-choice; it does not certify hardware qualification or expert mastery.
+1. Why can an error appear at a line far from the faulty kernel?
+2. What is a sticky error?
+3. What should a minimal reproducer contain?
+
+Short answers are in the [separate explanations](../solutions/cuda-025_solutions.md#self-check-answers); compare only after an attempt.
 
 ## Primary references
 
-Check the documentation that matches your prepared toolkit before optional
-hardware execution.
+Use the documentation that matches your prepared toolkit.
 
 - [CUDA Programming Guide](https://docs.nvidia.com/cuda/cuda-programming-guide/)
 

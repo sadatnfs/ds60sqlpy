@@ -1,6 +1,8 @@
 # csharp-015: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [csharp-015_solution.cs](csharp-015_solution.cs). It runs both worked examples, and its assertions are always active under the prepared classroom compile settings.
+Reference program: [csharp-015_solution.cs](csharp-015_solution.cs), covering both examples.
+
+Attempt the tasks first; see [comparing with the explanation](../STUDY-GUIDE.md#comparing-with-the-explanation).
 
 ## Why the two examples differ
 
@@ -94,4 +96,4 @@ An early broad pattern can make a later case unreachable. A default branch can h
 
 ## Review before continuing
 
-Run the reference and confirm that it prints `csharp-015: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.
+Run the reference and confirm it prints `csharp-015: passed`, then rerun the guide's counterexample.

@@ -1,6 +1,6 @@
 # go-022: explained solutions
 
-These are comparison material after an attempt or explicit reveal. The executable reference implements all six cases in one `main.go`.
+Compare after an attempt ([using solutions](../STUDY-GUIDE.md#use-the-solutions)). `courses/go/solutions/go-022_solution.go` implements all six cases.
 
 ## Mechanism
 
@@ -10,7 +10,7 @@ http.HandlerFunc adapts a function with ResponseWriter and *Request parameters. 
 
 ## 1. Serve a health request: change one input
 
-Copy worked example 1 into a scratch pad and change `health(r, httptest.NewRequest("GET", "/health", nil))` to `health(r, httptest.NewRequest("GET!", "/health", nil))`. Before running, predict which check fails and which value it now sees; then run it and restore the original line.
+Copy worked example 1, change `health(r, httptest.NewRequest("GET", "/health", nil))` to `health(r, httptest.NewRequest("GET!", "/health", nil))` and predict the failure before running; then restore the line.
 
 The unchanged code is worked example 1:
 
@@ -20,13 +20,15 @@ health(r, httptest.NewRequest("GET", "/health", nil))
 check(r.Code == 200 && r.Body.String() == "ok\n", "health")
 ```
 
-**Expected:** The changed run panics with `health` because `r.Code == 200 && r.Body.String() == "ok\n"` no longer holds. Restoring the original line brings back the worked observation: the status is 200 and the body is ok plus a newline.
+**Expected:** The edited run panics with `health` because `r.Code == 200 && r.Body.String() == "ok\n"` no longer holds.
+
+**Verify:** Restoring `health(r, httptest.NewRequest("GET", "/health", nil))` makes the check pass again with the worked observation: the status is 200 and the body is ok plus a newline.
 
 The recorder runs the handler directly. This proves the handler contract without making any network availability claim.
 
 ## 2. Reject an unsupported method: debug a regression
 
-A regression changed one token in worked example 2, so one line now reads `health(r, httptest.NewRequest("POST", "/health!", nil))`. Run worked example 2 with that line, use the failure to locate the defect and repair it without changing the check.
+A one-token regression in worked example 2 makes a line read `health(r, httptest.NewRequest("POST", "/health!", nil))`. Repair it without changing the check.
 
 The unchanged code is worked example 2:
 
@@ -36,7 +38,9 @@ health(r, httptest.NewRequest("POST", "/health", nil))
 check(r.Code == 405 && r.Header().Get("Allow") == "GET", "method")
 ```
 
-**Expected:** Before the repair the program panics with `method`; after it the line reads `health(r, httptest.NewRequest("POST", "/health", nil))` again and the status is 405 and Allow is GET.
+**Expected:** The defective run panics with `method`; after restoring `health(r, httptest.NewRequest("POST", "/health", nil))`, the status is 405 and Allow is GET.
+
+**Verify:** The failing run shows message `method`; after the repair `r.Code == 405 && r.Header().Get("Allow") == "GET"` holds again.
 
 The method boundary is explicit. Returning after the error prevents success text from being appended to an already rejected response.
 
@@ -52,6 +56,8 @@ check(r.Code == 404, "route")
 
 **Expected:** The status is 404.
 
+**Verify:** Your solution must keep `r.Code == 404` true. Control: changing `check(r.Code == 404, "route")` to `check(r.Code != 404, "route")` panics with message `route`; revert it.
+
 A catch-all success handler can conceal path mistakes and break monitoring assumptions.
 
 ## 4. Check content metadata
@@ -65,6 +71,8 @@ check(r.Header().Get("Content-Type") == "text/plain; charset=utf-8", "content ty
 ```
 
 **Expected:** The response declares text/plain with UTF-8.
+
+**Verify:** Your solution must keep `r.Header().Get("Content-Type") == "text/plain; charset=utf-8"` true. Control: changing `check(r.Header().Get("Content-Type") == "text/plain; charset=utf-8", "content type")` to `check(r.Header().Get("Content-Type!") == "text/plain; charset=utf-8", "content type")` panics with message `content type`; revert it.
 
 Representation metadata belongs to the response contract. The body alone does not describe how a client should interpret it.
 
@@ -82,6 +90,8 @@ for i := 0; i < 2; i++ {
 
 **Expected:** Both responses succeed identically.
 
+**Verify:** Your solution must keep `r.Code == 200 && r.Body.String() == "ok\n"` true. Control: changing `health(r, httptest.NewRequest("GET", "/health", nil))` to `health(r, httptest.NewRequest("GET!", "/health", nil))` panics with message `repeat`; revert it.
+
 The handler has no mutable request-global state. More complex handlers should keep per-request data separate from explicitly synchronized shared state.
 
 ## 6. Transfer query independence
@@ -96,8 +106,10 @@ check(r.Code == 200, "query separation")
 
 **Expected:** The path still matches and returns 200.
 
+**Verify:** Your solution must keep `r.Code == 200` true. Control: changing `health(r, httptest.NewRequest("GET", "/health?probe=1", nil))` to `health(r, httptest.NewRequest("GET!", "/health?probe=1", nil))` panics with message `query separation`; revert it.
+
 URL.Path excludes the query string. If query parameters influence behavior, validate them separately instead of matching the entire raw target.
 
 ## Transfer after comparison
 
-Return to your own pad and reproduce one check with a new input. Explain why the check rejects a plausible wrong implementation. Keep the distinction between a pure model, an in-process fake, and a real external system visible in your notes.
+A handler is a protocol contract: method, path, status, headers and body are each observable and each deserves a test. Later lessons add JSON bodies, timeouts and graceful shutdown, and Kubernetes controllers expose health and metrics endpoints with the same shape. Test them in process with httptest first, then use a real listener only where network behavior itself matters.

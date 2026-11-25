@@ -452,16 +452,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <span class="syntax-keyword">return</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>np<span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>current_rate <span class="syntax-operator">-</span> reference_rate<span class="syntax-punctuation">)</span> <span class="syntax-operator">*</span> np<span class="syntax-operator">.</span>log<span class="syntax-punctuation">(</span>current_rate <span class="syntax-operator">/</span> reference_rate<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <p>Quantile edges are learned from the reference and extended to infinity so current out-of-range observations are counted. Duplicated quantiles, missing values, and tiny samples need explicit handling in real code.</p>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
-<p><strong>Primary browser route:</strong> run <code>./classroom</code> from the repository root and choose <strong>Python and data science</strong> on <code>/classroom</code>. Open this lesson in the shared workspace, read its capability notice, and use its supported coding or reading workflow. The <a href="../reference-pages/docs/classroom-experience.md.html">classroom guide</a> explains saved work, runtimes and switching subjects.</p>
-<p><strong>Optional native notebook/editor route:</strong> the instructions below describe separately prepared host tools. They are useful alternatives, not prerequisites for opening this lesson in the Docker classroom.</p>
-<ol>
-<li>Open the Day 54 learner notebook from this guide&#x27;s <strong>Next step</strong> section in VS Code or JupyterLab.</li>
-<li>Select the <code>Python (ds60sqlpy)</code> kernel. Start at the top and use <strong>Run All</strong> only after making the written predictions; every added worked example is bounded and offline after bootstrap.</li>
-<li>Keep experiments in new scratch cells. Do not edit the official solution while attempting the numbered practice.</li>
-<li>Restart the kernel and run from the first cell before calling the lesson complete. A clean run catches hidden state and stale variables.</li>
-</ol>
-<p>Linux, macOS, or Ubuntu in Windows WSL 2:</p>
-<pre class="highlighted-code"><code class="language-bash">.venv/bin/python -m jupyter lab</code></pre>
+<p>Open <code>python-54</code> in the classroom, or <code>python/ds-60day/notebooks/day54_monitoring_model_governance.ipynb</code> on a host; the <a href="../reference-pages/python/STUDY-GUIDE.md.html">Python study guide</a> explains both.</p>
 <h4 id="guide--concept-deep-dive-monitoring-layers-drift-signals-delayed-labels-and-governance-decisions">Concept deep dive: monitoring layers, drift signals, delayed labels, and governance decisions<a class="heading-anchor" href="#guide--concept-deep-dive-monitoring-layers-drift-signals-delayed-labels-and-governance-decisions" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--the-mental-model">The mental model<a class="heading-anchor" href="#guide--the-mental-model" aria-label="Link to this section">#</a></h5>
 <p>Production monitoring has several layers. Data-quality checks ask whether inputs are valid. Data drift compares input distributions. Performance and calibration require outcomes, which may arrive later. Service telemetry measures availability, latency, errors, and saturation. One green layer cannot substitute for another.</p>
@@ -473,7 +464,6 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li><strong>monitor → investigate → decide:</strong> separates automated signal detection from causal diagnosis and authorized action.</li>
 </ul>
 <h5 id="guide--focused-example-a-calculate-psi-with-fixed-reference-quantile-bins">Focused example A: calculate PSI with fixed reference quantile bins<a class="heading-anchor" href="#guide--focused-example-a-calculate-psi-with-fixed-reference-quantile-bins" aria-label="Link to this section">#</a></h5>
-<p>Before running the example, predict the shape, type, or direction of the result. Write the prediction down so that a surprise becomes evidence rather than something to overlook.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
 
 reference <span class="syntax-operator">=</span> np<span class="syntax-operator">.</span>array<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">,</span> <span class="syntax-number">6</span><span class="syntax-punctuation">,</span> <span class="syntax-number">7</span><span class="syntax-punctuation">,</span> <span class="syntax-number">8</span><span class="syntax-punctuation">,</span> <span class="syntax-number">9</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> dtype<span class="syntax-operator">=</span><span class="syntax-builtin">float</span><span class="syntax-punctuation">)</span>
@@ -564,7 +554,6 @@ label_coverage <span class="syntax-operator">=</span> monitoring_snapshot<span c
 </ol>
 <h5 id="guide--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#guide--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
 <p>Design monitoring around observable data, delayed truth, action thresholds, ownership, and rehearsed recovery, not dashboards that merely display numbers.</p>
-<p>Predict or plan before you run code. Use the hint only after an honest attempt, and record the evidence that would prove your result correct.</p>
 <ol start="4">
 <li><strong>Label-delay analysis:</strong> Simulate labels arriving 14-30 days after predictions. Build separate views for immediate input/score health and matured performance cohorts. <strong>Progressive hint:</strong> Join outcomes by stable prediction ID and evaluate only cohorts whose label window has matured; report label coverage and censoring.</li>
 </ol>
@@ -632,7 +621,7 @@ label_coverage <span class="syntax-operator">=</span> monitoring_snapshot<span c
 <li>Continue to <a href="python-55.html#guide">Day 55; Docker</a>.</li>
 </ul>
 <h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
-<p>The lesson is complete without an AI assistant. If you want optional coaching, copy this prompt into the AI tutor while the repository root is open:</p>
+<p>The lesson is complete without AI. For optional coaching, copy this prompt with the repository root open:</p>
 <pre class="highlighted-code"><code class="language-text">Tutor me through `python-54` (Day 54: Monitoring and Model Governance).
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
@@ -972,7 +961,7 @@ plot_dist<span class="syntax-punctuation">(</span>data_train<span class="syntax-
 </ul>
 <hr>
 <h4 id="solution-1--solution-reasoning-lens">Solution reasoning lens<a class="heading-anchor" href="#solution-1--solution-reasoning-lens" aria-label="Link to this section">#</a></h4>
-<p>A strong solution is not merely code that produces one plausible output. It establishes a chain from input contract to operation to verification:</p>
+<p>Each decision below links an input contract to an operation and its evidence:</p>
 <ol>
 <li><strong>fixed reference bins:</strong> keep comparison semantics stable; recomputing bins on current data changes the question.</li>
 <li><strong><code>(actual - expected) * log(actual / expected)</code>:</strong> accumulates PSI contributions after a declared zero-count smoothing policy.</li>
@@ -984,44 +973,36 @@ plot_dist<span class="syntax-punctuation">(</span>data_train<span class="syntax-
 <p><strong>Trade-off:</strong> Sensitive alerts detect changes sooner but increase false alarms; long windows stabilize metrics while delaying response.</p>
 <p><strong>Edge case to test:</strong> Zero-count bins, tiny slices, delayed/missing labels, seasonality, upstream schema changes, and changed model versions can create misleading trends.</p>
 <p><strong>Evidence of correctness:</strong> Freeze reference/bins and recompute PSI, report counts/windows/slices/label coverage, connect alerts to owners/actions, and rehearse rollback with artifact evidence.</p>
-<p>When comparing your attempt with the reference, explain which of these decisions your code made explicitly. If the reference makes a different choice, compare the contracts and evidence before deciding that one version is universally better.</p>
 <h4 id="solution-1--exercise-by-exercise-reasoning-map">Exercise-by-exercise reasoning map<a class="heading-anchor" href="#solution-1--exercise-by-exercise-reasoning-map" aria-label="Link to this section">#</a></h4>
-<p>This map connects every learner prompt to a reasoning path. Read the explanation before copying code: the goal is to understand the assumptions, the evidence that validates the result, and the edge cases that can make an apparently correct implementation fail.</p>
 <h5 id="solution-1--exercise-1-original-lesson-practice">Exercise 1: Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Compute PSI for multiple features or score windows over time.</p>
 <p><strong>How to reason about it:</strong> Freeze reference bins, include support, and test no shift plus controlled mean/variance shifts. PSI depends on binning and is a heuristic signal, not proof of performance degradation.</p>
-<p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
 <p><strong>Verify:</strong> For each named feature/window, print reference/current counts, fixed bin edges, PSI contributions, and total; assert bins/reference remain frozen and independently recompute one total within 1e-12.</p>
 <h5 id="solution-1--exercise-2-original-lesson-practice">Exercise 2: Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-2-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Build a small pandas/Matplotlib dashboard of weekly AUC and PSI.</p>
 <p><strong>How to reason about it:</strong> A weekly dashboard should retain model/data version, score volume, label coverage, AUC uncertainty, PSI, and missingness. Mark delayed labels rather than inventing or forward-filling performance.</p>
-<p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
 <p><strong>Verify:</strong> Save a dashboard with weekly AUC and PSI on labeled separate axes, and print the underlying week/support/AUC/PSI table; mark missing-label weeks rather than silently treating them as zero.</p>
 <h5 id="solution-1--exercise-3-original-lesson-practice">Exercise 3: Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-3-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Draft a governance policy covering roles, approvals, alerts, and rollback.</p>
 <p><strong>How to reason about it:</strong> Every governance threshold needs an owner, evidence source, review clock, action, escalation, and recovery test. Separate automated alerts from human approval for promotion/rollback.</p>
-<p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
 <p><strong>Verify:</strong> Produce a policy table naming model owner, approver, metric/window/threshold, minimum support, alert route, investigation SLA, rollback trigger, artifact ID, and audit evidence; walk one breached alert through named owners and actions.</p>
 <h5 id="solution-1--exercise-4-label-delay-analysis">Exercise 4: Label-delay analysis<a class="heading-anchor" href="#solution-1--exercise-4-label-delay-analysis" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Simulate labels arriving 14-30 days after predictions. Build separate views for immediate input/score health and matured performance cohorts.</p>
 <p><strong>Reasoning before implementation:</strong> Join outcomes by stable prediction ID and evaluate only cohorts whose label window has matured; report label coverage and censoring.</p>
 <p>Current-week AUC is not available when outcomes arrive later. Operational signals such as schema failures, missingness, score distribution, latency, and volume can be monitored immediately. Performance metrics belong to matured prediction cohorts with explicit cutoff dates.</p>
 <p>Late or selectively missing labels can bias results. Compare coverage across slices and investigate the label process rather than treating unlabeled rows as negatives.</p>
-<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
 <p><strong>Verify:</strong> Label-delay analysis; print prediction week, label-available date, immediate-health metrics/support, and matured-cohort AUC/support; assert immature weeks show unavailable performance rather than zero or forward-filled values.</p>
 <h5 id="solution-1--exercise-5-alert-hysteresis">Exercise 5: Alert hysteresis<a class="heading-anchor" href="#solution-1--exercise-5-alert-hysteresis" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Design warning and critical thresholds that require persistence or multiple windows, then show how hysteresis prevents alert flapping.</p>
 <p><strong>Reasoning before implementation:</strong> Use different enter and clear conditions, minimum support, and a cooldown. Preserve raw measurements for audit.</p>
 <p>For example, enter warning after PSI exceeds a reviewed threshold for two consecutive supported windows, but clear only after it stays below a lower threshold for two windows. Critical conditions can bypass the delay when a hard safety constraint fails.</p>
 <p>Thresholds are policy, not universal PSI constants. Validate them on historical incidents and false-alarm cost, assign ownership, and version changes.</p>
-<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
 <p><strong>Verify:</strong> Alert hysteresis; feed a declared metric sequence around warning/critical thresholds, print alert state by window, and assert persistence opens an alert while the lower recovery threshold prevents one-window flapping.</p>
 <h5 id="solution-1--exercise-6-rollback-drill">Exercise 6: Rollback drill<a class="heading-anchor" href="#solution-1--exercise-6-rollback-drill" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Write and rehearse a rollback from model version B to A, including trigger, authority, artifact verification, traffic switch, smoke test, communication, and post-incident evidence.</p>
 <p><strong>Reasoning before implementation:</strong> A rollback is complete only when the prior artifact, schema, and dependencies remain loadable and the recovery check passes.</p>
 <p>Run the drill in a disposable/local environment and time each step. Verify artifact hashes and input compatibility before switching. After rollback, confirm health, prediction shape, representative fixture outputs, and monitoring recovery.</p>
 <p>Keep version B and incident evidence for investigation; do not overwrite or delete the failed artifact as part of the emergency path.</p>
-<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
 <p><strong>Verify:</strong> Rollback drill; record version-B trigger, authorized actor, verified version-A hash, traffic switch, health/predict smoke results, communication timestamp, and final state; inject a bad rollback artifact and assert the switch stops.</p></div>
       </section>
 
@@ -1126,7 +1107,7 @@ plot_dist<span class="syntax-punctuation">(</span>data_train<span class="syntax-
 </ul>
 <hr>
 <h4 id="solution-2--cell-3--solution-reasoning-lens">Solution reasoning lens<a class="heading-anchor" href="#solution-2--cell-3--solution-reasoning-lens" aria-label="Link to this section">#</a></h4>
-<p>A strong solution is not merely code that produces one plausible output. It establishes a chain from input contract to operation to verification:</p>
+<p>Each decision below links an input contract to an operation and its evidence:</p>
 <ol>
 <li><strong>fixed reference bins:</strong> keep comparison semantics stable; recomputing bins on current data changes the question.</li>
 <li><strong><code>(actual - expected) * log(actual / expected)</code>:</strong> accumulates PSI contributions after a declared zero-count smoothing policy.</li>
@@ -1138,45 +1119,37 @@ plot_dist<span class="syntax-punctuation">(</span>data_train<span class="syntax-
 <p><strong>Trade-off:</strong> Sensitive alerts detect changes sooner but increase false alarms; long windows stabilize metrics while delaying response.</p>
 <p><strong>Edge case to test:</strong> Zero-count bins, tiny slices, delayed/missing labels, seasonality, upstream schema changes, and changed model versions can create misleading trends.</p>
 <p><strong>Evidence of correctness:</strong> Freeze reference/bins and recompute PSI, report counts/windows/slices/label coverage, connect alerts to owners/actions, and rehearse rollback with artifact evidence.</p>
-<p>When comparing your attempt with the reference, explain which of these decisions your code made explicitly. If the reference makes a different choice, compare the contracts and evidence before deciding that one version is universally better.</p>
 <h4 id="solution-2--cell-3--exercise-by-exercise-reasoning-map">Exercise-by-exercise reasoning map<a class="heading-anchor" href="#solution-2--cell-3--exercise-by-exercise-reasoning-map" aria-label="Link to this section">#</a></h4>
-<p>This map connects every learner prompt to a reasoning path. Read the explanation before copying code: the goal is to understand the assumptions, the evidence that validates the result, and the edge cases that can make an apparently correct implementation fail.</p>
 <h5 id="solution-2--cell-3--exercise-1-original-lesson-practice">Exercise 1: Original lesson practice<a class="heading-anchor" href="#solution-2--cell-3--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Compute PSI for multiple features or score windows over time.</p>
 <p><strong>How to reason about it:</strong> Freeze reference bins, include support, and test no shift plus controlled mean/variance shifts. PSI depends on binning and is a heuristic signal, not proof of performance degradation.</p>
-<p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
 <p><strong>Verify:</strong> For each named feature/window, print reference/current counts, fixed bin edges, PSI contributions, and total; assert bins/reference remain frozen and independently recompute one total within 1e-12.</p>
 <h5 id="solution-2--cell-3--exercise-2-original-lesson-practice">Exercise 2: Original lesson practice<a class="heading-anchor" href="#solution-2--cell-3--exercise-2-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Build a small pandas/Matplotlib dashboard of weekly AUC and PSI.</p>
 <p><strong>How to reason about it:</strong> A weekly dashboard should retain model/data version, score volume, label coverage, AUC uncertainty, PSI, and missingness. Mark delayed labels rather than inventing or forward-filling performance.</p>
-<p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
 <p><strong>Verify:</strong> Save a dashboard with weekly AUC and PSI on labeled separate axes, and print the underlying week/support/AUC/PSI table; mark missing-label weeks rather than silently treating them as zero.</p>
 <h5 id="solution-2--cell-3--exercise-3-original-lesson-practice">Exercise 3: Original lesson practice<a class="heading-anchor" href="#solution-2--cell-3--exercise-3-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Draft a governance policy covering roles, approvals, alerts, and rollback.</p>
 <p><strong>How to reason about it:</strong> Every governance threshold needs an owner, evidence source, review clock, action, escalation, and recovery test. Separate automated alerts from human approval for promotion/rollback.</p>
-<p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
 <p><strong>Verify:</strong> Produce a policy table naming model owner, approver, metric/window/threshold, minimum support, alert route, investigation SLA, rollback trigger, artifact ID, and audit evidence; walk one breached alert through named owners and actions.</p>
 <h5 id="solution-2--cell-3--exercise-4-label-delay-analysis">Exercise 4: Label-delay analysis<a class="heading-anchor" href="#solution-2--cell-3--exercise-4-label-delay-analysis" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Simulate labels arriving 14-30 days after predictions. Build separate views for immediate input/score health and matured performance cohorts.</p>
 <p><strong>Reasoning before implementation:</strong> Join outcomes by stable prediction ID and evaluate only cohorts whose label window has matured; report label coverage and censoring.</p>
 <p>Current-week AUC is not available when outcomes arrive later. Operational signals such as schema failures, missingness, score distribution, latency, and volume can be monitored immediately. Performance metrics belong to matured prediction cohorts with explicit cutoff dates.</p>
 <p>Late or selectively missing labels can bias results. Compare coverage across slices and investigate the label process rather than treating unlabeled rows as negatives.</p>
-<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
-<p><strong>Verify:</strong> Label-delay analysis: print prediction week, label-available date, immediate-health metrics/support, and matured-cohort AUC/support; assert immature weeks show unavailable performance rather than zero or forward-filled values.</p>
+<p><strong>Verify:</strong> Label-delay analysis; print prediction week, label-available date, immediate-health metrics/support, and matured-cohort AUC/support; assert immature weeks show unavailable performance rather than zero or forward-filled values.</p>
 <h5 id="solution-2--cell-3--exercise-5-alert-hysteresis">Exercise 5: Alert hysteresis<a class="heading-anchor" href="#solution-2--cell-3--exercise-5-alert-hysteresis" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Design warning and critical thresholds that require persistence or multiple windows, then show how hysteresis prevents alert flapping.</p>
 <p><strong>Reasoning before implementation:</strong> Use different enter and clear conditions, minimum support, and a cooldown. Preserve raw measurements for audit.</p>
 <p>For example, enter warning after PSI exceeds a reviewed threshold for two consecutive supported windows, but clear only after it stays below a lower threshold for two windows. Critical conditions can bypass the delay when a hard safety constraint fails.</p>
 <p>Thresholds are policy, not universal PSI constants. Validate them on historical incidents and false-alarm cost, assign ownership, and version changes.</p>
-<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
-<p><strong>Verify:</strong> Alert hysteresis: feed a declared metric sequence around warning/critical thresholds, print alert state by window, and assert persistence opens an alert while the lower recovery threshold prevents one-window flapping.</p>
+<p><strong>Verify:</strong> Alert hysteresis; feed a declared metric sequence around warning/critical thresholds, print alert state by window, and assert persistence opens an alert while the lower recovery threshold prevents one-window flapping.</p>
 <h5 id="solution-2--cell-3--exercise-6-rollback-drill">Exercise 6: Rollback drill<a class="heading-anchor" href="#solution-2--cell-3--exercise-6-rollback-drill" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Write and rehearse a rollback from model version B to A, including trigger, authority, artifact verification, traffic switch, smoke test, communication, and post-incident evidence.</p>
 <p><strong>Reasoning before implementation:</strong> A rollback is complete only when the prior artifact, schema, and dependencies remain loadable and the recovery check passes.</p>
 <p>Run the drill in a disposable/local environment and time each step. Verify artifact hashes and input compatibility before switching. After rollback, confirm health, prediction shape, representative fixture outputs, and monitoring recovery.</p>
 <p>Keep version B and incident evidence for investigation; do not overwrite or delete the failed artifact as part of the emergency path.</p>
-<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
-<p><strong>Verify:</strong> Rollback drill: record version-B trigger, authorized actor, verified version-A hash, traffic switch, health/predict smoke results, communication timestamp, and final state; inject a bad rollback artifact and assert the switch stops.</p></article></div>
+<p><strong>Verify:</strong> Rollback drill; record version-B trigger, authorized actor, verified version-A hash, traffic switch, health/predict smoke results, communication timestamp, and final state; inject a bad rollback artifact and assert the switch stops.</p></article></div>
       </section>
 
 

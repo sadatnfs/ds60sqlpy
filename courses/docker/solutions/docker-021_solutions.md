@@ -1,6 +1,6 @@
 # docker-021: explanatory solutions
 
-Compare after your own attempt or an explicit reveal. These explain the supplied teaching fixtures; they are not engine results. The mechanism is explained in `courses/docker/guides/docker-021.md`.
+These answers explain teaching fixtures, not engine results; the mechanism is in [the guide](../guides/docker-021.md).
 
 ## Exercise 1: Distinguish backup creation and restore acceptance.
 
@@ -88,4 +88,4 @@ Compare after your own attempt or an explicit reveal. These explain the supplied
 
 ## Check your transfer
 
-A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.
+For this single file, yes. `increment` writes `counter.next` and then atomically replaces `counter.json`, so a reader sees either the old complete file or the new one, never a half write. The export can still miss increments that land after the copy, which is the recovery point objective, and the guarantee does not extend to a database whose state spans several files written at different moments; that needs a stopped writer or the database's own export. A parse failure or a truncated export would disprove the atomic replacement assumption.

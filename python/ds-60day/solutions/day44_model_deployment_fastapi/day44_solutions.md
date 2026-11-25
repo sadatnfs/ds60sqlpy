@@ -97,9 +97,7 @@ Deployment pointers
 
 ## Solution reasoning lens
 
-A strong solution is not merely code that produces one plausible
-output. It establishes a chain from input contract to operation to
-verification:
+Each decision below links an input contract to an operation and its evidence:
 
 1. **`class Request(BaseModel)`:** declares typed input fields and validation constraints that become JSON Schema.
 2. **`@app.post('/predict', response_model=...)`:** binds an HTTP method/path to a validated function contract.
@@ -116,29 +114,15 @@ verification:
 
 **Evidence of correctness:** Use TestClient for valid/invalid payloads, assert response schema/status, verify artifact identity and feature metadata before readiness, and test no credential or input body enters logs.
 
-When comparing your attempt with the reference, explain which of these
-decisions your code made explicitly. If the reference makes a different
-choice, compare the contracts and evidence before deciding that one
-version is universally better.
-
 <!-- END ADVANCED PYTHON CONCEPT ENRICHMENT -->
 
 ## Exercise-by-exercise reasoning map
-
-This map connects every learner prompt to a reasoning path. Read the
-explanation before copying code: the goal is to understand the assumptions,
-the evidence that validates the result, and the edge cases that can make an
-apparently correct implementation fail.
 
 ### Exercise 1: Original lesson practice
 
 **Prompt:** Add input validation and friendly error behavior.
 
 **How to reason about it:** Let Pydantic reject malformed requests with field-level messages, but validate domain rules such as finite values and exact feature count. Do not catch programming defects and relabel them as client mistakes.
-
-Use the worked reference earlier in this file, then change one boundary
-condition and rerun the stated checks. A copied output is not evidence
-unless you can explain why that output follows from the inputs.
 
 **Verify:** With TestClient, assert a valid payload returns 200 and the declared response schema; assert missing, wrong-type, extra, and out-of-range fields return 422 with field-level errors and no traceback or request body in logs.
 
@@ -148,10 +132,6 @@ unless you can explain why that output follows from the inputs.
 
 **How to reason about it:** Map numeric classes through metadata saved with the model and test every valid identifier. A class-name list copied independently into the service can drift from the fitted encoder.
 
-Use the worked reference earlier in this file, then change one boundary
-condition and rerun the stated checks. A copied output is not evidence
-unless you can explain why that output follows from the inputs.
-
 **Verify:** For a fixed request, assert the response contains both numeric class_id and the matching class_name from persisted metadata; test an unknown/out-of-range model class as an explicit startup or 5xx failure.
 
 ### Exercise 3: Original lesson practice
@@ -159,10 +139,6 @@ unless you can explain why that output follows from the inputs.
 **Prompt:** Create a minimal runtime dependency file for this API.
 
 **How to reason about it:** A runtime dependency list contains direct imports needed to load the artifact and serve requests, not the entire notebook environment. Build and smoke-test it in a clean environment.
-
-Use the worked reference earlier in this file, then change one boundary
-condition and rerun the stated checks. A copied output is not evidence
-unless you can explain why that output follows from the inputs.
 
 **Verify:** Build a fresh environment from the runtime file, run the health and predict smoke tests with exit code 0, and record installed versions; exclude notebooks, test-only tools, and undeclared transitive guesses.
 
@@ -180,10 +156,6 @@ Tests should assert a stable error shape without pinning every word of
 framework-generated prose. A valid request should assert response schema,
 probability range, class mapping, and model version.
 
-**Why this matters:** The result should survive a fresh-kernel rerun and
-a deliberately chosen boundary case. If it does not, revisit the
-assumption or data boundary rather than hiding the failure.
-
 **Verify:** Boundary-case testing; parameterize TestClient cases for missing, extra, string, NaN, infinity, wrong-length, and valid payloads; assert exact 2xx/4xx families, response keys, and that no invalid request reaches model.predict.
 
 ### Exercise 5: Batch contract
@@ -200,10 +172,6 @@ Choose atomic failure for a teaching service: if any row is invalid, return a
 4xx response with indexed details and score none. Partial success is possible
 but requires a more complex, versioned response contract.
 
-**Why this matters:** The result should survive a fresh-kernel rerun and
-a deliberately chosen boundary case. If it does not, revisit the
-assumption or data boundary rather than hiding the failure.
-
 **Verify:** Batch contract; define request/response examples with stable row_id, max batch size, ordered one-result-per-input output, model_id/version, and per-row error policy; test empty, oversize, duplicate-ID, mixed-validity, and valid batches.
 
 ### Exercise 6: Artifact-compatibility check
@@ -219,9 +187,5 @@ false until these checks pass.
 Only load artifacts produced through the trusted course pipeline. Hashes detect
 accidental change but do not make an untrusted pickle safe; artifact provenance
 and controlled storage are security boundaries.
-
-**Why this matters:** The result should survive a fresh-kernel rerun and
-a deliberately chosen boundary case. If it does not, revisit the
-assumption or data boundary rather than hiding the failure.
 
 **Verify:** Artifact-compatibility check; tamper model version, feature order, and class metadata one at a time; assert readiness/startup fails before traffic for each, while a matching manifest yields ready status and one fixed prediction.

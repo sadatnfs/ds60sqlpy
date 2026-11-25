@@ -194,7 +194,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/csharp/solutions/csharp-030_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="csharp-030-explanation-and-comparison">csharp-030: explanation and comparison<a class="heading-anchor" href="#csharp-030-explanation-and-comparison" aria-label="Link to this section">#</a></h2>
-<p>Attempt the six guide tasks before opening this comparison. The executable reference is <a href="csharp-030_solution.cs.html">csharp-030_solution.cs</a>. It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.</p>
+<p>Reference program: <a href="csharp-030_solution.cs.html">csharp-030_solution.cs</a>, covering both examples and the executed answers.</p>
+<p>Attempt the tasks first; see <a href="../STUDY-GUIDE.md.html#comparing-with-the-explanation">comparing with the explanation</a>.</p>
 <h3 id="why-the-two-examples-differ">Why the two examples differ<a class="heading-anchor" href="#why-the-two-examples-differ" aria-label="Link to this section">#</a></h3>
 <p><strong>Observe a requested cancellation:</strong> Calling Cancel changes request state; the explicit observation is what changes the operation control flow. The token check acknowledges cancellation.</p>
 <p><strong>Cancel waiting while work remains live:</strong> This deterministic distinction prevents treating an interrupted observer as proof that an operation never happened. The wait cancels, then the original task later completes with 9.</p>
@@ -285,14 +286,14 @@ Check<span class="syntax-punctuation">(</span><span class="syntax-keyword">await
 <p><strong>How to verify.</strong> Replace <code>finished</code> with a task from a <code>TaskCompletionSource</code> that has not completed and confirm <code>WaitAsync(late.Token)</code> now throws <code>OperationCanceledException</code>.</p>
 <h4 id="task-6-transfer-and-justify">Task 6: Transfer and justify<a class="heading-anchor" href="#task-6-transfer-and-justify" aria-label="Link to this section">#</a></h4>
 <p>Design an operation receipt distinguishing cancelled waiting, confirmed cancellation and unknown outcome.</p>
-<p>No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry <strong>Cancellation token</strong>, and state one limitation of your choice.</p>
+<p>No single answer exists; extend task 3 using the <a href="../STUDY-GUIDE.md.html#open-transfer-tasks">open transfer routine</a>.</p>
 <h3 id="mechanism-and-diagnostic-reasoning">Mechanism and diagnostic reasoning<a class="heading-anchor" href="#mechanism-and-diagnostic-reasoning" aria-label="Link to this section">#</a></h3>
 <p>Cancellation is a request for cooperation. A CancellationTokenSource owns the request; its token lets operations observe it. An operation that never checks or passes the token can continue after cancellation is requested. A timeout on the caller waiting is also distinct from termination of the underlying work.</p>
 <p>Correct ownership includes awaiting or otherwise accounting for admitted work after a timeout. Do not retry a state-changing operation merely because the result is unknown. The first operation may still complete. Use operation identity and recovery evidence for such systems. Here, a TaskCompletionSource establishes exact states without guessing how long a background task takes.</p>
 <p><code>ThrowIfCancellationRequested</code> reports acknowledged cancellation. <code>WaitAsync(token)</code> cancels the wait without necessarily canceling the source task. TaskCompletionSource with RunContinuationsAsynchronously avoids executing arbitrary continuations inline inside a signal setter.</p>
 <p>A catch for OperationCanceledException should match the intended cancellation policy. Cancelling a waiter does not dispose all resources owned by the operation. Retain and observe tasks that may still complete.</p>
 <h3 id="review-before-continuing">Review before continuing<a class="heading-anchor" href="#review-before-continuing" aria-label="Link to this section">#</a></h3>
-<p>Run the reference and confirm that it prints <code>csharp-030: passed</code>, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.</p></article>
+<p>Run the reference and confirm it prints <code>csharp-030: passed</code>, then rerun the guide&#x27;s counterexample.</p></article>
   </main>
 </body>
 </html>

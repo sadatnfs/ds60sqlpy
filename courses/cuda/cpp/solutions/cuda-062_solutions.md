@@ -4,8 +4,6 @@
 
 Portability means defining what is supported and how unsupported situations behave. CUDA execution requires a supported NVIDIA device and host software path; a CPU-only classroom can still teach algorithms and validate CPU references. AMD, Intel and Apple GPU programming use different backends and APIs, not an automatic CUDA compatibility promise. Detect capability for the operation, not simply the operating-system name. Containers package user-space dependencies but share host driver and hardware constraints. MIG, MPS, device sharing and resets are operator-managed topics. A teaching worker must never silently reset a shared device or erase learner state to recover from a fault.
 
-The separate [CPU reference](../references/cuda-062_cpu.py) checks the chapter's bounded model. It does not execute CUDA or establish GPU timing. Compare after attempting the worksheet or explicitly choosing to reveal solutions.
-
 ## Exercise 1
 
 A dispatch policy offers CPU reference on every ordinary classroom and CUDA execution only after visibility, allocation and a small numerical probe succeed. It records which path actually ran. The same expected mathematical result does not make CPU output evidence of CUDA execution.
@@ -78,12 +76,16 @@ Keep its own API/runtime/capability labels and numerical oracle, teach conceptua
 
 **How to verify:** Check labels in output name the actual backend.
 
+## Self-check answers
+
+1. **Why is an operating-system check insufficient for dispatch?** Linux does not guarantee a visible device, a compatible driver or enough memory.
+2. **What should a device fault preserve?** The original error, the learner's source and the path that ran.
+3. **In worked example 1, when does the CUDA path run?** Only after visibility, allocation and a small numerical probe succeed.
+
 ## Numerical reference and its limits
 
-The complete CPU model is [here](../references/cuda-062_cpu.py). Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It does not claim CUDA execution, concurrency safety or a performance measurement.
+The [CPU reference](../references/cuda-062_cpu.py) reproduces worked example 1 and prints `{'selected_path': 'CPU_reference', 'CUDA_execution': 'unavailable'}`.
 
 ## Transfer review
 
 Keep its own API/runtime/capability labels and numerical oracle, teach conceptual correspondence, and do not present it as executing CUDA kernels.
-
-A complete explanation must name its inputs, the unchanged mathematical contract, the changed boundary or resource condition, and the evidence still needed on actual hardware. Preserve a CPU baseline even after a GPU path becomes available.

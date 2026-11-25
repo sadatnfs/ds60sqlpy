@@ -254,9 +254,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="mistakes-diagnosis-and-interview-discussion">Mistakes, diagnosis and interview discussion<a class="heading-anchor" href="#mistakes-diagnosis-and-interview-discussion" aria-label="Link to this section">#</a></h3>
 <p>Check asset identity spelling, producer success, event creation, consumer schedule, pool availability and task state separately. An event existing in metadata does not prove a consumer is unpaused or has enough capacity. A mapped task waiting for a pool slot is not the same failure as a task that started and rejected its input.</p>
 <p><strong>Interview discussion: why combine assets, mapping and pools?</strong> Assets express when a data-dependent workflow becomes eligible, mapping expresses bounded runtime fanout, and pools constrain concurrent pressure on a dependency. These cases use all three in the real scheduler while independently validating the files and source versions that the tasks actually observed.</p>
-<p>The <a href="../projects/airflow/README.md.html">complete Airflow workshop</a> provides the maintained files, preparation, lifecycle and exact qualification boundaries for these cases.</p>
+<p><code>asset-check</code> in the <a href="../projects/airflow/README.md.html">Airflow workshop</a> unpauses <code>classroom_asset_consumer</code>, which the order runs trigger through an asset, and requires two mapped <code>summarize</code> tasks sharing the one-slot <code>classroom_io</code> pool.</p>
 <h3 id="complete-worked-source">Complete worked source<a class="heading-anchor" href="#complete-worked-source" aria-label="Link to this section">#</a></h3>
-<p>This is a project-only command notebook. Read and edit it in the classroom; run its explicitly labeled commands from the copied owned Docker workshop. The classroom does not execute these service commands.</p>
+<p>The classroom does not execute these service commands. See the <a href="../STUDY-GUIDE.md.html#workshop-notebooks">workshop rules</a>.</p>
 <h2 id="asset-scheduling-and-bounded-mapping">Asset scheduling and bounded mapping<a class="heading-anchor" href="#asset-scheduling-and-bounded-mapping" aria-label="Link to this section">#</a></h2>
 <pre class="highlighted-code"><code class="language-bash">bash run.sh asset-check
 bash run.sh readback</code></pre>

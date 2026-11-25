@@ -1,20 +1,26 @@
 # spark-007: Either and validation without hidden data loss
 
-Authored tutorial and practice content. The prepared Scala/JVM worker executes a bounded program; process success and understanding remain distinct. No source file installs a tool or downloads a dependency.
+Six pipe-separated records arrive; three are valid and three are broken in different ways. This lesson validates ID, status and amount with `Either`, composes them in a `for` comprehension with a declared error order, and keeps every rejected line with its position and reason so nothing disappears between input and report.
 
 ## Level and prerequisites
 
-Beginner; approximately 75 minutes. Direct prerequisites: `spark-006`. The lesson uses Scala 2.13 syntax and the prepared JDK 17 worker. The [execution baseline](../execution-baseline.md) lists the exact Scala, JDK and Spark versions.
+Beginner; approximately 75 minutes. Direct prerequisites: `spark-006`. Pinned versions: [execution baseline](../execution-baseline.md).
 
 ## How to run this lesson
 
-Open `spark-007` in the classroom, select the Scala source, prepare the `scala-jvm` profile and run the saved pad. The worker stages the single source as `Main.scala` and invokes `object Main`. Read the terminal output and exact assertions. The [learner source](../lessons/spark-007.scala) runs two complete demonstrations; its six task functions remain explicit stubs until you implement them. Preserve your saved attempt. The [reference program](../solutions/spark-007_solution.scala) and [explained solutions](../solutions/spark-007_solutions.md) are separate and should be opened after an attempt or an explicit worked-comparison request. If the profile is unavailable, reading and saving remain available; opening this guide does not prepare a runtime.
+Shared run steps and profile rules: [study guide](../STUDY-GUIDE.md#run-a-language-lesson).
+
+Learner pad: [spark-007.scala](../lessons/spark-007.scala).
+
+Open the [explained solutions](../solutions/spark-007_solutions.md) after an attempt.
+
+The first worked example prints `Right(5)`, the result of `Right(25L).map(_ / 5L)`; mapping over a `Left` would have passed the error through untouched. The second prints `Right(25)` from a `for` comprehension that adds an amount and a fee. Its companion assertion shows that once the first step is `Left("invalid_amount")`, the comprehension stops there and returns that `Left`, which is the behavior Exercise 4 relies on.
 
 ## Learning objectives
 
 - Return accepted data or an explicit validation reason without throwing away invalid rows.
-- Explain the result of both worked examples before running them.
-- Implement the six contracts, inspect normal and boundary evidence, and explain a counterexample in your own words.
+- Predict the first error reported for a record with several defects, using the declared order ID, then status, then amount, and explain why a short-circuiting `for` comprehension gives that order.
+- Produce a rejection ledger for the six-line fixture (positions 3, 4 and 5 with `missing_id`, `invalid_amount` and `unknown_status`) whose accepted and rejected counts add up to six.
 
 ## Vocabulary and concepts
 
@@ -140,11 +146,15 @@ If rejected rows vanish, look for converting Either to Option and flatMapping on
 
 ## Self-check
 
-Explain one input-to-output trace without reading your code. Identify which function preserves repeated values, which condition distinguishes an invalid or missing input, and which assertion would fail for the tempting incorrect implementation. A printed success line alone is not the evidence; retain the exact values and the reasoning that connect them to the contract.
+- What do `parseId(" a1 ")`, `parseId(null)` and `parseId("  ")` return, and why is trimming done before the emptiness test?
+- `parseStatus` accepts "paid" and "void" but rejects "PAID". Give one reason a strict, case-sensitive status rule is safer than lowercasing input you have not seen.
+- Trace `parseRecord("|bogus|100")`. Which error appears, and which field's defect is never reported because the comprehension stopped earlier?
+- For the six-line fixture, list the rejected positions, raw lines and reasons. Why does the ledger store the original raw text rather than only the reason?
+- `paidTotal` returns count 2 and total 100 for the accepted records. Why is a void record with a malformed amount never seen by this function?
 
 ## Next step
 
-Continue to the next lesson only after you can explain the boundary behavior. The [course route](../README.md) shows authored material and runtime evidence separately.
+Go on to [spark-008: Assertions, numeric boundaries, and independent oracles](spark-008.md). You have been reading assertions written for you; next you write the checking helpers yourself (bag equality, checked sums, overflow-safe promotion and tolerance rules) and test whether they reject real wrong answers.
 
 ## Primary sources and official APIs
 

@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/r/solutions/r-042_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="r-042-reference-reasoning">r-042: reference reasoning<a class="heading-anchor" href="#r-042-reference-reasoning" aria-label="Link to this section">#</a></h2>
-<p>Use the <a href="r-042_reference.R.html">complete reference</a> with the guide&#x27;s declared inputs and runtime. Every worked example is also a standalone script.</p>
+<p>Run the <a href="r-042_reference.R.html">complete reference</a> under the <a href="../STUDY-GUIDE.md.html#run-a-chapter">run rules</a>.</p>
 <h3 id="why-the-implementation-has-this-shape">Why the implementation has this shape<a class="heading-anchor" href="#why-the-implementation-has-this-shape" aria-label="Link to this section">#</a></h3>
 <p>The reference uses different variance conventions for different objects. sd(x) estimates population spread from a sample, whereas the enumeration treats all bootstrap means as the complete conditional distribution. Neither result should be silently substituted for the other.</p>
 <p>The shift test checks an invariant of centered spread. The count guard prevents an undefined sample-variance calculation from being interpreted as a usable estimate. Interval construction is shown explicitly, with its target and assumptions retained; no coverage claim is inferred from one synthetic realization.</p>
@@ -248,7 +248,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Tempting mistake:</strong> Preferring the bootstrap interval because it is narrower, or claiming either has 95 percent coverage. With 4 values, the percentile method is known to be too narrow, and one fixture cannot check coverage.</p>
 <p><strong>Verify:</strong> The printed list shows <code>t_mean_interval</code> near 0.89 and 9.11 and <code>exact_empirical_percentile</code> at 3 and 7.</p>
 <h3 id="what-the-checks-establish">What the checks establish<a class="heading-anchor" href="#what-the-checks-establish" aria-label="Link to this section">#</a></h3>
-<p>The reference makes 7 <code>stopifnot()</code> checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.</p></article>
+<p>The checks confirm a mean of 5 with squared standard error 5/3, a shift by 3 that moves the mean but not the standard error, all 256 bootstrap resamples averaging exactly 5 with variance 5/4, the relationship between the standard deviation and the standard error, rejection of a single observation, and t and percentile intervals that both contain 5. They do not show that either interval has its nominal coverage for such a small sample.</p>
+<p>The reference makes 7 <code>stopifnot()</code> checks; see <a href="../STUDY-GUIDE.md.html#what-a-passing-run-proves">what a passing run proves</a>.</p></article>
   </main>
 </body>
 </html>

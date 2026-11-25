@@ -195,6 +195,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="torch-022-explanatory-solutions">torch-022: explanatory solutions<a class="heading-anchor" href="#torch-022-explanatory-solutions" aria-label="Link to this section">#</a></h2>
 <p>Open these answers only after attempting Attention, transformer masks and information boundaries yourself. They reuse the guide&#x27;s literal inputs, starting from Example A, Compute uniform causal mixtures, so a discrepancy points at one step. The executable companion runs the assertions; this page explains why each one tests SDPA, Mask polarity, Prefix invariance. After a pass, choose a new input for exercise 6, Keep inference dropout disabled, without looking.</p>
+<p>After comparing, follow the <a href="../STUDY-GUIDE.md.html#after-the-solutions">review steps</a>.</p>
 <h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
 <p>Attention forms weighted combinations of value vectors using query-key comparisons. A causal decoder restricts each query to current and earlier positions. PyTorch&#x27;s functional scaled_dot_product_attention uses boolean True for allowed positions, while other attention APIs such as Multihead Attention key_padding_mask use True for ignored keys. Mask polarity belongs to the exact parameter contract, not to the framework name.</p>
 <p>The functional API also applies dropout according to its <code>dropout_p</code> argument; calling an enclosing <code>module.eval</code> does not automatically change an explicit nonzero probability. For an evaluation oracle, pass <code>dropout_p=0</code>. Equal queries and keys make legal scores uniform, so the expected outputs are prefix means. Nonuniform scores and future-only perturbations add stronger checks than causal-looking triangles alone.</p>
@@ -386,9 +387,7 @@ empty<span class="syntax-punctuation">[</span><span class="syntax-number">1</spa
 <pre class="highlighted-code"><code class="language-python">again <span class="syntax-operator">=</span> attention<span class="syntax-punctuation">(</span>q<span class="syntax-punctuation">,</span> q<span class="syntax-punctuation">,</span> v<span class="syntax-punctuation">,</span> allowed<span class="syntax-punctuation">)</span>
 torch<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</span>assert_close<span class="syntax-punctuation">(</span>again<span class="syntax-punctuation">,</span> out<span class="syntax-punctuation">,</span> atol<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> rtol<span class="syntax-operator">=</span><span class="syntax-number">0</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> repeated evaluation matches.</p>
-<p><strong>Verify:</strong> In a fresh process, the exercise checks confirm <code>again</code> matches <code>out</code> exactly.</p>
-<h3 id="review-after-comparison">Review after comparison<a class="heading-anchor" href="#review-after-comparison" aria-label="Link to this section">#</a></h3>
-<p>Repeat exercise 4, Reject an all-masked row, with one changed fixture value and predict the difference before running it. Keep your failing attempt at exercise 5, Translate mask polarity explicitly, beside the repaired result. A missing framework is not a failing assertion. These solutions use only local fixtures.</p></article>
+<p><strong>Verify:</strong> In a fresh process, the exercise checks confirm <code>again</code> matches <code>out</code> exactly.</p></article>
   </main>
 </body>
 </html>

@@ -1,6 +1,6 @@
 # js-030: explanatory solutions
 
-Use these answers after an attempt or an explicit reveal. The reference uses the same literal fixtures as the guide and keeps the exercises in separate scopes. A successful run checks these examples; explaining a changed input is a separate learning goal.
+Open these after your own attempt; each exercise runs in its own scope in the reference.
 
 ## Mechanism review
 
@@ -26,7 +26,7 @@ Listen for submit on the form and preventDefault only because this local fixture
 
 ## Exercise 1: Validate one local form submission: change one input
 
-Task: Rebuild Example A in your copy of the lesson's browser fixture without looking at it. Then change one attribute, label or handler and write down the visible, focus or announcement change you expect before reloading.
+Task: Save the snippet as HTML and submit name Ada and quantity 2, then try an invalid quantity. Then change one attribute, label or handler in your copy and predict the visible difference before reloading.
 
 Native constraints stop many invalid user submissions before the submit handler. The explicit domain check still defines the accepted state and protects alternate invocation paths.
 
@@ -58,13 +58,13 @@ form.addEventListener('submit', event => {
 >
 ```
 
-**Expected:** Your rebuild reproduces the worked observation (valid output Ada: 2; invalid input produces no accepted state), and the changed copy shows the difference you predicted.
+**Expected:** The rebuild reproduces the observation: valid output Ada: 2; invalid input produces no accepted state. The changed copy differs as you predicted.
 
-**Verify:** Record the browser observation before and after your change, including where focus lands and any live-region text, and explain which line caused the difference.
+**Verify:** Record the browser observation, then explain it: Native constraints stop many invalid user submissions before the submit handler.
 
 ## Exercise 2: Handle storage success and failure explicitly: debug a regression
 
-Task: Introduce one deliberate defect into a copy of Example B, such as a wrong selector, a missing attribute or a handler on the wrong element. Predict which browser behavior will expose it, confirm that prediction, then repair it.
+Task: Run this standalone snippet on a loopback HTTP origin and activate Save. Then break one selector or attribute in a copy, predict which behavior exposes it, and repair it.
 
 A successful state update and a successful storage operation are separate observations. The interface reports the actual persistence outcome without hiding failure behind a local display update.
 
@@ -90,9 +90,9 @@ document.querySelector('#save').addEventListener('click', () => {
 >
 ```
 
-**Expected:** The defective copy no longer shows: either Saved or a visible Storage unavailable message, never an invented success. The repaired copy shows it again.
+**Expected:** The broken copy no longer shows that either Saved or a visible Storage unavailable message, never an invented success. The repair restores it.
 
-**Verify:** Keep notes on the failing and the repaired behavior and name the first browser observation that differed between them.
+**Verify:** Record the first browser observation that differed, then explain the repair: A successful state update and a successful storage operation are separate observations.
 
 ## Exercise 3: Load only a recognized stored schema
 
@@ -110,7 +110,7 @@ if (value === null || value.version !== 1 || typeof value.name !== 'string'
 
 **Expected:** invalid saved state is diagnosed and does not become accepted application state.
 
-**Verify:** In the browser fixture, record the observation that shows: invalid saved state is diagnosed and does not become accepted application state. Then change one input and record what changes, keeping keyboard and pointer results separate.
+**Verify:** Record the browser observation that shows it, then explain why: Stored data is another external boundary.
 
 ## Exercise 4: Distinguish current state from persisted state
 
@@ -125,7 +125,7 @@ An editable control is a draft, not automatically committed application state. K
 
 **Expected:** the last saved value returns; the unsaved edit is not falsely described as persisted.
 
-**Verify:** In the browser fixture, record the observation that shows: the last saved value returns; the unsaved edit is not falsely described as persisted. Then change one input and record what changes, keeping keyboard and pointer results separate.
+**Verify:** Record the browser observation that shows it, then explain why: An editable control is a draft, not automatically committed application state.
 
 ## Exercise 5: Observe a change from another tab
 
@@ -141,7 +141,7 @@ window.addEventListener('storage', event => {
 
 **Expected:** the other tab reports an external change; the writing tab does not receive its own storage event.
 
-**Verify:** In the browser fixture, record the observation that shows: the other tab reports an external change; the writing tab does not receive its own storage event. Then change one input and record what changes, keeping keyboard and pointer results separate.
+**Verify:** Record the browser observation that shows it, then explain why: The event notifies other same-origin documents.
 
 ## Exercise 6: Reset only this lesson's key
 
@@ -156,8 +156,8 @@ localStorage.removeItem(key);
 
 **Expected:** owned key absent; unrelated key unchanged.
 
-**Verify:** In the browser fixture, record the observation that shows: owned key absent; unrelated key unchanged. Then change one input and record what changes, keeping keyboard and pointer results separate.
+**Verify:** Record the browser observation that shows it, then explain why: A lesson owns its namespaced state, not the entire origin storage area.
 
 ## After comparison
 
-Return to your saved implementation and repeat a case with different values. Keep compiler diagnostics, process output and browser observations separate. Do not suppress a failing assertion or use a type assertion to declare an unvalidated value safe. Resource-owning examples must finish cleanup even when work fails. Describe each result with its actual host and fixture scope rather than as production acceptance.
+Fresh case: move the stored schema to version 2 with a renamed field. Predict what your loader does with an existing version-1 draft, then write a migration that upgrades it once and saves the new shape. ([After comparing](../STUDY-GUIDE.md#after-comparing-with-the-solution).)

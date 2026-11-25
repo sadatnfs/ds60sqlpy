@@ -2,67 +2,28 @@
 
 ## How to run this lesson
 
-Start the Linux-container engine and run `./classroom` from the repository
-root. On Windows, use Ubuntu in WSL 2 or the thin
-`START_DOCKER_CLASSROOM.cmd` wrapper. Choose **PostgreSQL** on the shared
-`/classroom` home, then open **sql-39**. The
-[launcher guide](../../../docs/one-command-classroom.md) covers first preparation, strict resume and
-the saved project selection. No host Python or PostgreSQL installation is
-required for this browser route.
+Start `./classroom`, pick **sql-39** and run **Whole SQL lesson (psql)**.
+The learner file lists the locks its own session holds, locks five
+high-value `orders` rows with `FOR UPDATE` and then rolls back, so nothing
+stays locked after the run. Your copy is at
+`.learning/sql/sql-39/lesson/workspace/sql/postgres-60day/day39_locks_deadlocks.sql`
+and runs against `advanced_sql_training`. For launch details see
+[Run a lesson in the classroom](../../STUDY-GUIDE.md#run-a-lesson-in-the-classroom).
 
-1. Read the prerequisite and fixture notes before running the file. Use only
-   the local disposable `advanced_sql_training` database.
-2. Choose **Whole SQL lesson (psql)** for the cataloged learner script. This
-   preserves the lesson's reviewed psql directives, relative includes and
-   transaction behavior. **SQL snippet** is appropriate for ordinary SQL
-   statements, but is not a replacement for an entire script's setup.
-3. The **Course database** panel above the code shows whether the course
-   training tables are loaded. Missing tables load automatically before your
-   first run (or choose **Load course tables**) and stay loaded for later
-   lessons. **Reset training data** restores the original rows only when your
-   own changes made results differ; it keeps your saved code and notes.
-4. Edit the learner copy in the classroom and save your prediction before
-   running. Its whole-script workspace is
-   `.learning/sql/sql-39/lesson/workspace/sql/postgres-60day/day39_locks_deadlocks.sql`.
-   For browser work this path is inside the Docker learning volume, not a
-   newly created host folder beside your checkout. The checked-in source
-   remains the answer-free starting artifact.
-5. Run the whole script and inspect the full transcript. The runner uses
-   `psql -X -v ON_ERROR_STOP=1 -f`. SELECT output has columns, rows and a row
-   count; DDL/DML has command tags; intentional checks may produce NOTICE
-   messages. An unexpected ERROR or nonzero exit is a failure to diagnose,
-   even when an earlier query printed plausible values.
-6. Verify the lesson's expected grain, ordering, constraints and declared
-   transaction or cleanup outcome. Keep required ROLLBACK statements.
-   The warehouse sequence and other explicitly stateful exercises explain
-   when state is committed. Read saved output without rerunning it when
-   reviewing an earlier attempt.
-
-If a relation is missing, inspect the lesson's required fixture and predecessor
-rather than guessing a new table definition. If authentication or runtime
-readiness fails, use `./classroom status` and the setup guide. Keep credentials
-out of SQL, notebooks, screenshots and committed files. Repair the first error
-before trusting partial output, and reveal separate solutions only when you
-want to compare after an attempt.
+Blocking and deadlocks need more than one connection. For the deadlock,
+`NOWAIT` and `SKIP LOCKED` prompts, open two `psql` terminals as Session A
+and Session B, plus a third terminal for reading `pg_locks` while one of
+them waits. Point all three at the same disposable database.
 
 ### Optional contributor notebook route
 
-For notebook work, deliberately prepare the Linux/WSL contributor environment
-from [CONTRIBUTING.md](../../../CONTRIBUTING.md), including a compatible psql client and
-the notebook dependencies. Generate this lesson's private workspace through
-the maintained CLI:
+A notebook is a single session, so use it for the lock-table queries and
+keep terminals for the contention schedules
+([notebook setup](../../STUDY-GUIDE.md#optional-contributor-notebook-route)):
 
 ```sh
 uv run --no-sync python scripts/course.py sql notebook sql-39
 ```
-
-Open the printed notebook path in that environment's JupyterLab. It uses the
-same catalog-derived learner-copy layout in that contributor checkout and
-executes the complete script through psql. Its host-side state is separate
-from the Docker browser's named volume. Follow
-[guided SQL notebooks](../../../docs/guided-sql-notebooks.md) for explicit local connection
-selection and kernel setup. Notebook generation does not execute SQL or
-authorize a reset.
 
 ## Level and prerequisites
 
@@ -74,27 +35,31 @@ authorize a reset.
 
 ## A beginner's mental model for this lesson
 
-A **table** stores facts in named columns. A **row** is one occurrence at the
-table's declared grain. A query creates a temporary **result set**: rows printed
-on screen are not automatically stored. The key vocabulary for this lesson is Blocking, Deadlock, Advisory lock. Its worked SQL reads or creates `orders`.
+Every statement takes locks, even a plain read. The learner file's first
+query proves it: `pg_locks` returns six rows for your own backend, all
+granted, five of them `AccessShareLock` on `pg_locks`, `pg_class` and the
+catalog indexes the join reads, plus the `virtualxid` lock every
+transaction holds on itself. Those read locks never conflict with each
+other, so a single session sees no waiting at all.
 
-Before writing a query, complete this sentence: “One output row represents
-___.” Joins can multiply rows, filters can remove them, grouping can collapse
-many rows into one, and window functions can add calculations while preserving
-row count. For a normal analytical `SELECT`, use this logical reading order:
-`FROM`/`JOIN` (including `ON`) → `WHERE` → `GROUP BY`/aggregates → `HAVING` →
-window calculations → `SELECT` → `ORDER BY` → `LIMIT`. PostgreSQL may execute a
-different physical plan while preserving those semantics.
+Row locks are where sessions collide. `FOR UPDATE` marks each returned row
+as taken until the transaction ends; 605 seeded orders have
+`total_amount > 900`, and the learner query takes the first five by key
+(`4`, `8`, `12`, `19`, `24`). A second session asking for one of those rows
+is **blocking** on the first: its `pg_locks` row is a `transactionid`
+`ShareLock` with `granted = false`, because it waits for the holder's
+transaction to finish rather than for the row itself.
 
-The worked walkthrough's lesson-specific task is: In two disposable sessions, lock test rows 1 and 2 in opposite orders and inspect the wait before PostgreSQL aborts one participant with `40P01`. Roll back, then repeat with both sessions ordering keys ascending to show the cycle cannot form.
-The first worked example lists the locks your own session holds, so you can read
-`pg_locks` before any contention exists. The second locks five rows in a fixed
-key order, which is the habit that prevents deadlocks when several sessions
-lock the same rows.
+A **deadlock** is two such waits pointing at each other. If Session A
+holds order 1 and asks for order 2 while Session B holds order 2 and asks
+for order 1, neither can ever proceed. PostgreSQL checks for that cycle
+after `deadlock_timeout` (one second by default), aborts one session
+with SQLSTATE `40P01` (usually the one whose wait closed the cycle), and
+lets the other one take its row. An **advisory lock** is different again: it locks a number
+your application chose, such as `3902`, not a row, and only code that
+agrees on that number respects it.
 
 ## Two worked SQL examples
-
-These worked excerpts come from `sql/postgres-60day/day39_locks_deadlocks.sql`. Use **Whole SQL lesson (psql)** in the unified classroom for the complete file, including its fixture and transaction context. The optional contributor notebook and prepared `psql` routes are described above.
 
 ### Example 1: read the lock table
 
@@ -175,11 +140,11 @@ cannot form.
 Complete these in the [learner SQL](../day39_locks_deadlocks.sql):
 
 1. Reproduce a deadlock and inspect it with `pg_locks`.
-   **Inputs/evidence:** For sql-39 Exercise 1, use two terminals on the seeded `training.orders` rows with `order_id` 1 and 2: Session A locks row 1 then row 2, Session B locks row 2 then row 1 (with `SELECT ... FOR UPDATE` or a no-op `UPDATE ... SET total_amount = total_amount`), and a third terminal reads `pg_locks` while a session waits.
+   **Inputs/evidence:** For sql-39 Exercise 1, use two terminals on the seeded `training.orders` rows with `order_id` 1 and 2: Session A locks row 1 with `SELECT ... FOR UPDATE` and then requests row 2 with the no-op `UPDATE ... SET total_amount = total_amount`, Session B does the same with row 2 and then row 1, and a third terminal reads `pg_locks` while a session waits.
    **Expected result/shape:** For sql-39 Exercise 1, expected output: while Session A's second lock request waits, the third terminal shows one ungranted `transactionid` row (`mode = ShareLock`, `granted = false`) for Session A's `pid`; when Session B's second lock request closes the cycle, about one second later (`deadlock_timeout`) Session B fails with SQLSTATE `40P01` (`deadlock detected`) and Session A's waiting statement completes.
    **Verify:** For sql-39 Exercise 1, record each session's `pg_backend_pid()`, the waiting `pid` from `pg_locks`, and the two `DETAIL` lines (`Process ... waits for ShareLock on transaction ...`); end both transactions with `ROLLBACK` and confirm that `SELECT order_id, status, total_amount FROM training.orders WHERE order_id IN (1, 2) ORDER BY order_id` returns the same values as before the experiment.
 2. Prevent it with consistent key ordering.
-   **Inputs/evidence:** For sql-39 Exercise 2, repeat the Exercise 1 schedule, but let both sessions lock `order_id` 1 and 2 in ascending order with one statement such as `SELECT order_id FROM training.orders WHERE order_id IN (1, 2) ORDER BY order_id FOR UPDATE`.
+   **Inputs/evidence:** For sql-39 Exercise 2, repeat the Exercise 1 schedule, but let both sessions lock `order_id` 1 and 2 in ascending order with the one statement `SELECT order_id FROM training.orders WHERE order_id IN (1, 2) ORDER BY order_id FOR UPDATE`.
    **Expected result/shape:** For sql-39 Exercise 2, expected output: Session A's locking `SELECT` returns two rows, `order_id` 1 and 2; Session B's identical statement waits instead of deadlocking and returns the same two rows after Session A ends. No session receives SQLSTATE `40P01`.
    **Verify:** For sql-39 Exercise 2, while Session B waits, confirm in a third terminal that `SELECT locktype, mode FROM pg_locks WHERE NOT granted` returns exactly one row, a `transactionid` `ShareLock`; then rerun the opposite-order schedule from Exercise 1 to show that only the lock order changed.
 3. Demonstrate a `SKIP LOCKED` worker.
@@ -207,18 +172,25 @@ Use a disposable queue and prove two workers claim different rows.
 
 ## Common mistakes and how to recover
 
-- **Lesson-specific semantic mistake:** Do not skip this worked-model requirement: In two disposable sessions, lock test rows 1 and 2 in opposite orders and inspect the wait before PostgreSQL aborts one participant with `40P01`. Roll back, then repeat with both sessions ordering keys ascending to show the cycle cannot form.
-- **Unexpected row count:** display keys before aggregates, count rows after
-  each join/filter stage, and find the first stage whose grain differs from the
-  contract. Do not hide fanout with `DISTINCT`.
-- **Unexpected `NULL` or missing row:** decide whether the fact is unknown,
-  inapplicable, zero, or absent before using `COALESCE`; inspect outer-join
-  predicate placement and empty-input aggregate behavior.
-- **Unstable top/first/last output:** add `ORDER BY` with a unique final
-  tie-breaker before `LIMIT` or order-sensitive windows/aggregates.
-- **`psql` stops on an error:** fix the first error shown by
-  `ON_ERROR_STOP`, restore the declared transaction/setup state, and rerun the
-  complete file. A later successful statement does not validate a partial run.
+- **Session B never errors:** if both terminals lock order 1 before order 2,
+  B simply waits for A and no cycle forms. Reverse the order in one
+  session to reproduce the deadlock, then restore it to see the fix.
+- **Cancelling before detection:** the `deadlock detected` error arrives
+  about one second after the second lock request, not instantly. Leave
+  both terminals alone until one of them prints `40P01`.
+- **A terminal left idle in transaction:** the surviving session still
+  holds orders 1 and 2 until it ends, so the next prompt in another
+  terminal hangs. Run `ROLLBACK` in both sessions, and look for
+  `state = 'idle in transaction'` in `pg_stat_activity` when a lock wait
+  has no obvious cause.
+- **Sorting in a CTE instead of the locking query:** an `ORDER BY` buried
+  in a CTE does not decide the order in which the outer `FOR UPDATE`
+  locks rows. Keep `ORDER BY o.order_id` on the locking `SELECT` and
+  confirm it with `EXPLAIN (COSTS OFF)`.
+- **The whole-file run stops on an error:** with `ON_ERROR_STOP`, a typo
+  ends the run inside the transaction and releases every lock. Fix the
+  first error and rerun; see
+  [recovering from failures](../../STUDY-GUIDE.md#recover-from-common-failures).
 
 ## Self-check
 
@@ -253,7 +225,12 @@ reduce risk.
 
 ## Practice map
 
-Use the numbered **Exercises** section above as the single authoritative practice contract. Its prompts, expected shapes, and verification checks map one-for-one to the learner SQL and both solution companions.
+Most prompts here are timed schedules rather than single queries, so write
+the order of statements for both sessions before typing any of them. The
+deadlock and its ordered fix use orders 1 and 2; the `NOWAIT` prompt reuses
+order 1; the two queue prompts run on a four-job `solution_jobs` table,
+where one claim takes jobs 1 and 2 and the bulk claim takes all four; and
+the advisory prompt uses key `3902`, which no other lesson touches.
 
 ## Operational safety
 
@@ -284,9 +261,11 @@ follows the same key convention.
 
 ## Ask an AI tutor about this lesson
 
-An AI tutor is optional; the guide, learner SQL, PostgreSQL, and expected checks are
-enough to complete the lesson offline. If you want a patient tutor, copy this
-prompt after opening the repository in the AI tutor:
+A tutor can act as the second session: it tells you which row it has
+locked and which it wants next, and you predict who waits, who fails and
+with which SQLSTATE. Setup is in the
+[AI tutor notes](../../STUDY-GUIDE.md#use-an-ai-tutor-optional); start
+with this prompt:
 
 ```text
 Tutor me through sql-39: Locks, Blocking, and Deadlocks.

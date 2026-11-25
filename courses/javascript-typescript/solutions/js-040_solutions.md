@@ -1,6 +1,6 @@
 # js-040: explanatory solutions
 
-Use these answers after an attempt or an explicit reveal. The reference uses the same literal fixtures as the guide and keeps the exercises in separate scopes. A successful run checks these examples; explaining a changed input is a separate learning goal.
+Open these after your own attempt; each exercise runs in its own scope in the reference.
 
 ## Mechanism review
 
@@ -26,7 +26,7 @@ createServer delegates to an async dispatcher and captures unexpected rejections
 
 ## Exercise 1: Create and retrieve an item over real HTTP: change one input
 
-Task: Copy Example A into a scratch `main.mjs` and change `JSON.stringify({ id: 'A', value: 2 })` to `JSON.stringify({ id: 'A', value: 3 })`. Before running it, predict which check fails and which value it now sees; then run it and restore the original line.
+Task: In a scratch copy of Example A, change `JSON.stringify({ id: 'A', value: 2 })` to `JSON.stringify({ id: 'A', value: 3 })`. Which check fails, and what value does it see?
 
 The assertions cross the real transport boundary. A typed or pure handler result alone would not check serialization, headers, routing or socket cleanup.
 
@@ -46,13 +46,13 @@ await withService(async (context) => {
 });
 ```
 
-**Expected:** The changed run fails with an `AssertionError` at `assert.deepEqual(await created.json(), { id: 'A', value: 2 })`. Restoring `JSON.stringify({ id: 'A', value: 2 })` brings back: 201 created; subsequent 200 list contains exactly A.
+**Expected:** The edited run fails with an `AssertionError` at `assert.deepEqual(await created.json(), { id: 'A', value: 2 })`. Restoring `JSON.stringify({ id: 'A', value: 2 })` brings back: 201 created; subsequent 200 list contains exactly A.
 
-**Verify:** Compare your written prediction with the reported `AssertionError`, including its actual and expected values, and name the value that made `assert.deepEqual(await created.json(), { id: 'A', value: 2 })` fail. After restoring the line, the program prints its `{"checks":1,"status":"passed"}` receipt again.
+**Verify:** Compare the reported actual and expected values with your prediction, then restore `JSON.stringify({ id: 'A', value: 2 })`.
 
 ## Exercise 2: Reject malformed data before changing state: diagnose an edited check
 
-Task: A careless edit changed a check in Example B so that it reads `assert.deepEqual(await (await request(context, '/items!')).json(), []);`. Run Example B with that line, explain why the edited check now fails for the same program state, and restore it.
+Task: Example B's check was edited to read `assert.deepEqual(await (await request(context, '/items!')).json(), []);`. Run it, explain the failure and restore the original.
 
 The failure is atomic relative to the in-memory mutation. No partial record is inserted before validation finishes.
 
@@ -71,7 +71,7 @@ await withService(async (context) => {
 
 **Expected:** Before the repair the run fails with an `AssertionError` at `assert.deepEqual(await (await request(context, '/items!')).json(), []);`. Restoring `assert.deepEqual(await (await request(context, '/items')).json(), []);` brings back: both 400; list remains empty.
 
-**Verify:** Keep the failing and the repaired runs. Explain why the edited check rejects the same program state that `assert.deepEqual(await (await request(context, '/items')).json(), [])` accepts.
+**Verify:** Keep the failing and repaired runs and name the first value that differs between them.
 
 ## Exercise 3: Preserve original state on duplicate creation
 
@@ -99,7 +99,7 @@ await withService(async (context) => {
 
 **Expected:** second request 409; stored value remains 2.
 
-**Verify:** Keep a check equivalent to `assert.deepEqual(await (await request(context, '/items')).json(), [{ id: 'A', value: 2 }])`. As a control, change `JSON.stringify({ id: 'A', value: 2 })` to `JSON.stringify({ id: 'A', value: 3 })`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
+**Verify:** Keep `assert.deepEqual(await (await request(context, '/items')).json(), [{ id: 'A', value: 2 }])`. Control: changing `JSON.stringify({ id: 'A', value: 2 })` to `JSON.stringify({ id: 'A', value: 3 })` must make that check fail; then restore it.
 
 ## Exercise 4: Enforce body and media-type contracts
 
@@ -124,7 +124,7 @@ await withService(async (context) => {
 
 **Expected:** 413 for size and 415 for media type.
 
-**Verify:** Keep a check equivalent to `assert.equal(wrongType.status, 415)`. As a control, change `await request(context, '/items', { method: 'POST', body: '{}', headers: { 'content-type': 'text/plain' } })` to `await request(context, '/items!', { method: 'POST', body: '{}', headers: { 'content-type': 'text/plain' } })`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
+**Verify:** Keep `assert.equal(wrongType.status, 415)`. Control: changing `await request(context, '/items', { method: 'POST', body: '{}', headers: { 'content-type': 'text/plain' } })` to `await request(context, '/items!', { method: 'POST', body: '{}', headers: { 'content-type': 'text/plain' } })` must make that check fail; then restore it.
 
 ## Exercise 5: Distinguish unknown routes and unsupported methods
 
@@ -145,7 +145,7 @@ await withService(async (context) => {
 
 **Expected:** 404 and 405 respectively.
 
-**Verify:** Keep a check equivalent to `assert.equal(wrongMethod.status, 405)`. As a control, change `const wrongMethod = await request(context, '/items', { method: 'DELETE' });` to `const wrongMethod = await request(context, '/items!', { method: 'DELETE' });`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
+**Verify:** Keep `assert.equal(wrongMethod.status, 405)`. Control: changing `const wrongMethod = await request(context, '/items', { method: 'DELETE' });` to `const wrongMethod = await request(context, '/items!', { method: 'DELETE' });` must make that check fail; then restore it.
 
 ## Exercise 6: Correlate safe events and prove listener cleanup
 
@@ -174,8 +174,8 @@ assert.equal(owned.listening, false);
 
 **Expected:** matching id and status; server no longer listening.
 
-**Verify:** Keep a check equivalent to `assert.deepEqual(await response.json(), { status: 'ready' })`. As a control, change `const response = await request(context, '/health');` to `const response = await request(context, '/health!');`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
+**Verify:** Keep `assert.deepEqual(await response.json(), { status: 'ready' })`. Control: changing `const response = await request(context, '/health');` to `const response = await request(context, '/health!');` must make that check fail; then restore it.
 
 ## After comparison
 
-Return to your saved implementation and repeat a case with different values. Keep compiler diagnostics, process output and browser observations separate. Do not suppress a failing assertion or use a type assertion to declare an unvalidated value safe. Resource-owning examples must finish cleanup even when work fails. Describe each result with its actual host and fixture scope rather than as production acceptance.
+Fresh case: add `PUT /items/A` to update a value. Predict the status for an existing item, an absent item and a body over 512 bytes, then check the stored value after each request. ([After comparing](../STUDY-GUIDE.md#after-comparing-with-the-solution).)

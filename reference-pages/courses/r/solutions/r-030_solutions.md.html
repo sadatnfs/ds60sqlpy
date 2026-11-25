@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/r/solutions/r-030_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="r-030-reference-reasoning">r-030: reference reasoning<a class="heading-anchor" href="#r-030-reference-reasoning" aria-label="Link to this section">#</a></h2>
-<p>Use the <a href="r-030_reference.R.html">complete reference</a> with the guide&#x27;s declared inputs and runtime. Every worked example is also a standalone script.</p>
+<p>Run the <a href="r-030_reference.R.html">complete reference</a> under the <a href="../STUDY-GUIDE.md.html#run-a-chapter">run rules</a>.</p>
 <h3 id="why-the-implementation-has-this-shape">Why the implementation has this shape<a class="heading-anchor" href="#why-the-implementation-has-this-shape" aria-label="Link to this section">#</a></h3>
 <p>The capstone reference checks independent arithmetic as well as the representation invariant. The equal-length rule prevents recycling; uniqueness prevents a repeated identifier from contributing twice; unit compatibility prevents a silent scale change. Missing observations remain visible in the summary ledger.</p>
 <p>The forged-object test establishes why class labels alone are insufficient. The unchanged-input assertions support the chosen value-object interface, while the proposed NAMESPACE lines identify the optional package boundary. No package has been installed or published by this script, and passing its checks does not make missingness ignorable or supply a causal design.</p>
@@ -248,7 +248,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Tempting mistake:</strong> Using an exportPattern that matches every name, which publishes validate_batch too, or saying the passing checks show latency improved.</p>
 <p><strong>Verify:</strong> <code>grepl(&quot;validate_batch&quot;, namespace, fixed = TRUE)</code> returns FALSE for all three lines.</p>
 <h3 id="what-the-checks-establish">What the checks establish<a class="heading-anchor" href="#what-the-checks-establish" aria-label="Link to this section">#</a></h3>
-<p>The reference makes 8 <code>stopifnot()</code> checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.</p></article>
+<p>The assertions confirm a summary of 3 rows, 2 observed, 1 missing and mean 4 in ms, an extended batch of 4 rows with mean 16/3, an all-missing batch with an NA mean, an empty batch with zero rows and an NA mean, an unchanged original after extension, a rejected forged or incompatible object, and a NAMESPACE that keeps the validator unexported. They do not establish any inference about the population behind these values.</p>
+<p>The reference makes 8 <code>stopifnot()</code> checks; see <a href="../STUDY-GUIDE.md.html#what-a-passing-run-proves">what a passing run proves</a>.</p></article>
   </main>
 </body>
 </html>

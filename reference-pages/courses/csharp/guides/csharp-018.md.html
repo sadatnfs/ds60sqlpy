@@ -206,11 +206,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Constraint:</strong> A requirement on admissible type arguments.</p>
 <p><strong>Type safety:</strong> Rejecting incompatible operations before execution.</p>
 <h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>The Linux Docker classroom compiles your saved pad as <code>Program.cs</code> in its fixed .NET 10 project. C# 14 is the matching language generation. This route uses the prepared framework libraries; it does not accept arbitrary project files, NuGet packages, command arguments or interactive input. The explicit <code>Program.Main</code> entrypoint makes compilation and execution visible. <code>Check</code> throws on a false condition in every build configuration, unlike conditional debugging assertions.</p>
-<p>Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.</p>
+<p><code>Max</code> and <code>Pair&lt;T&gt;</code> are declared after <code>Main</code>; the call sites never write a type argument, because the compiler infers <code>T</code> from the arguments. For task 4, write a generic method with an unconstrained <code>T</code> that reads <code>.Length</code>; the compiler rejects it because nothing promises that member exists.</p>
+<p>Compile contract, starter stop and success marker: <a href="../STUDY-GUIDE.md.html#running-a-lesson">running a lesson</a>.</p>
 <h3 id="syntax-anatomy-and-execution-trace">Syntax anatomy and execution trace<a class="heading-anchor" href="#syntax-anatomy-and-execution-trace" aria-label="Link to this section">#</a></h3>
 <p><code>T</code> names a type parameter. <code>where T : IComparable&lt;T&gt;</code> makes CompareTo available. The method call can infer T from its arguments. Return types preserve the relationship to the input type.</p>
-<p>Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.</p>
+<p>Each example ends with a trace; method: <a href="../STUDY-GUIDE.md.html#tracing-a-program">tracing a program</a>.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="example-a-retain-the-element-type">Example A: Retain the element type<a class="heading-anchor" href="#example-a-retain-the-element-type" aria-label="Link to this section">#</a></h4>
 <p>The constraint guarantees comparison while the generic return preserves the concrete type.</p>
@@ -253,6 +253,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The same method returns an int or a string without object casts.</p>
+<p><strong>Trace.</strong> In <code>Max(4, 9)</code> both arguments are <code>int</code>, so T is int, which implements <code>IComparable&lt;int&gt;</code>. <code>4.CompareTo(9)</code> is negative, so the method returns <code>right</code>, 9, typed as int. In <code>Max(&quot;apple&quot;, &quot;pear&quot;)</code> T is string, the comparison is negative again and the result is pear, a string, with no cast needed. Each call site got its own closed method.</p>
 <h4 id="example-b-preserve-a-generic-relationship">Example B: Preserve a generic relationship<a class="heading-anchor" href="#example-b-preserve-a-generic-relationship" aria-label="Link to this section">#</a></h4>
 <p>A generic data model encodes relationships between fields independently of the values used.</p>
 <pre class="highlighted-code"><code class="language-csharp"><span class="syntax-keyword">using</span> System<span class="syntax-punctuation">;</span>
@@ -294,6 +295,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> Swap preserves the element type, and a tie remains a valid value.</p>
+<p><strong>Trace.</strong> <code>new Pair&lt;string&gt;(&quot;left&quot;, &quot;right&quot;)</code> stores two strings. <code>Swap()</code> returns a new <code>Pair&lt;string&gt;</code> with the fields exchanged, and record equality compares First and Second, so it equals the expected right, left pair. <code>Max(5, 5)</code> gets a CompareTo result of 0, which satisfies <code>&gt;= 0</code>, so the method returns <code>left</code>. That tie rule is part of the method&#x27;s observable contract.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <ol>
 <li><strong>Predict and explain.</strong> Predict the inferred type at each Max call.</li>
@@ -313,10 +315,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <ol start="6">
 <li><strong>Transfer and justify.</strong> Design a generic helper with the smallest useful capability constraint.</li>
 </ol>
-<p>For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.</p>
+<p>Log each task in the <a href="../STUDY-GUIDE.md.html#recording-exercise-evidence">evidence table</a> before opening the explanation.</p>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
 <p>Adding a class constraint does not make arbitrary methods available. Avoid converting to object merely to escape a compiler error. String ordering may require a comparer for culture-independent business behavior.</p>
-<p>A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.</p>
+<p>For task 5, ties return the left argument because the test is <code>&gt;= 0</code>. With ints both arguments are equal, so test with records or objects whose comparison ignores one field. String comparison here is culture-aware; <code>string.CompareOrdinal(&quot;Pear&quot;, &quot;pear&quot;)</code> is negative because P is code 80 and p is 112.</p>
+<p>Repair routine: <a href="../STUDY-GUIDE.md.html#building-a-regression-case">building a regression case</a>.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <ol>
 <li>Reproduce Example A (Retain the element type) before changing anything, and confirm its observation: The same method returns an int or a string without object casts.</li>
@@ -324,9 +327,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>Before opening the explanation, test your task 3 attempt against this lesson&#x27;s main pitfall: Adding a class constraint does not make arbitrary methods available.</li>
 </ol>
 <h3 id="self-check-and-next-step">Self-check and next step<a class="heading-anchor" href="#self-check-and-next-step" aria-label="Link to this section">#</a></h3>
-<p>Explain Type parameter, Constraint, Type safety without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.</p>
+<p>State the inferred T for <code>Max(2.5m, 1.5m)</code> and the value it returns. Explain why <code>where T : class</code> would not let <code>Max</code> call <code>CompareTo</code>. For task 6, write the smallest constraint your helper needs and name the operation that constraint makes available.</p>
+<p>Then follow the general <a href="../STUDY-GUIDE.md.html#self-check-routine">self-check routine</a> and save your pad.</p>
 <h3 id="sources-and-execution-boundary">Sources and execution boundary<a class="heading-anchor" href="#sources-and-execution-boundary" aria-label="Link to this section">#</a></h3>
-<p><a href="https://learn.microsoft.com/en-us/dotnet/csharp/">Official language or framework documentation</a>. The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.</p>
+<p><a href="https://learn.microsoft.com/en-us/dotnet/csharp/">Documentation</a>: The C# reference on generic type parameters and on constraints on type parameters explains <code>where</code> clauses and type inference.</p>
+<p>Provenance and limits: <a href="../STUDY-GUIDE.md.html#sources-and-execution-boundary">sources and execution boundary</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for csharp-018: Generics and constraints that express capabilities.
 Read courses/csharp/guides/csharp-018.md and courses/csharp/lessons/csharp-018.cs. Prerequisites: csharp-017.

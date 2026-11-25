@@ -1,6 +1,6 @@
 # cuda-120: explained solutions
 
-These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.
+Compare with your [worksheet](../lessons/cuda-120.md) attempt.
 
 ## Exercise 1: Compute concurrent live memory
 
@@ -74,8 +74,16 @@ Completion is valid but performance and storage behavior need reporting.
 
 **How to verify.** Include spill bytes and stage time in the report next to the correctness check. Also record the spill path and peak disk use, since a later run with more data may exceed that capacity.
 
+## Self-check answers
+
+1. **What does a spill do?** It moves data to a slower tier so the query can progress under memory pressure, adding serialization and I/O cost.
+
+2. **Why is comparing only kernel time misleading when spills occur?** Spills add end-to-end time outside the kernels, so the slowdown is invisible in kernel measurements.
+
+3. **Why must memory experiments use bounded data?** Deliberately filling a shared device or disk can disrupt other users, so limits are set before running.
+
 ## Reference observation
 
 One through three tasks fit the simplified budget; four do not.
 
-The reference file is `courses/cuda/spark/references/cuda-120_cpu.py`. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.
+Asserted by `courses/cuda/spark/references/cuda-120_cpu.py`.

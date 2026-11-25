@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/r/solutions/r-002_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="r-002-reference-reasoning">r-002: reference reasoning<a class="heading-anchor" href="#r-002-reference-reasoning" aria-label="Link to this section">#</a></h2>
-<p>Use the <a href="r-002_reference.R.html">complete reference</a> with the guide&#x27;s declared inputs and runtime. Every worked example is also a standalone script.</p>
+<p>Run the <a href="r-002_reference.R.html">complete reference</a> under the <a href="../STUDY-GUIDE.md.html#run-a-chapter">run rules</a>.</p>
 <h3 id="why-the-implementation-has-this-shape">Why the implementation has this shape<a class="heading-anchor" href="#why-the-implementation-has-this-shape" aria-label="Link to this section">#</a></h3>
 <p>Numeric equality and exact object identity make different claims. The storage difference is intentional.</p>
 <p>The decimal check allows a tiny representation error. Grouping uses exact small integer arithmetic and keeps quotient separate from remainder.</p>
@@ -242,7 +242,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Tempting mistake:</strong> Setting <code>tolerance = 0.1</code> so a stubborn check passes. <code>all.equal(0.31, 0.3, tolerance = 0.1)</code> returns TRUE, silently accepting a 3 percent error in an amount that should have been exact to the cent.</p>
 <p><strong>Verify:</strong> Run both tolerances on 0.31 versus 0.3: 1e-12 gives a difference message, while 0.1 gives TRUE. That contrast is the evidence that a loose tolerance can hide a defect.</p>
 <h3 id="what-the-checks-establish">What the checks establish<a class="heading-anchor" href="#what-the-checks-establish" aria-label="Link to this section">#</a></h3>
-<p>The reference makes 6 <code>stopifnot()</code> checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.</p></article>
+<p>The assertions confirm that combining <code>1L</code> with 2.5 yields a double, that <code>&quot;0017&quot;</code> keeps four characters, that <code>19 %/% 5</code> is 3 with 4 left over, that <code>2L == 2</code> holds while <code>identical(2L, 2)</code> does not, and that <code>all.equal()</code> accepts 0.1 + 0.2 as 0.3 but rejects 0.31. They do not choose a tolerance for your own measurements; that remains a decision about the data.</p>
+<p>The reference makes 6 <code>stopifnot()</code> checks; see <a href="../STUDY-GUIDE.md.html#what-a-passing-run-proves">what a passing run proves</a>.</p></article>
   </main>
 </body>
 </html>

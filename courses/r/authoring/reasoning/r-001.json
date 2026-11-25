@@ -42,5 +42,7 @@
       "wrong": "Treating a saved file, or output left over from an earlier run, as proof the current source works. If you change unit_price after your last run, the old printed 18 describes code that no longer exists in the pad.",
       "verify": "Change one input, save without running and confirm no new output appears. Then run and confirm `r-001 reference checks passed` prints only when all five assertions hold."
     }
-  ]
+  ],
+  "run_note": "The starter defines `quantity` as 3 and `unit_price` as 6 and prints them as a named vector, but computes no invoice yet. Run it once unchanged and note the two printed values, then add the total and run again. Saving the edited file is not enough: only a new Run produces output, which is the distinction between saved source and fresh evidence that this chapter teaches.",
+  "checks_note": "Five assertions pin arithmetic you can also do by hand: 4 * 7 is 28, the first total is 30, subtotal plus fee is 23, the stale `total` stays 30 after `quantity` is rebound so the new product is 48, and a measured zero quantity gives a zero line total. They do not tell you whether your printed labels match the values or whether you ran the file after your last edit."
 }

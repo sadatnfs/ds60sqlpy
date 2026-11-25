@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/scala-spark/solutions/spark-003_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="spark-003-explanatory-solutions">spark-003: explanatory solutions<a class="heading-anchor" href="#spark-003-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after an attempt or an explicit reveal. The <a href="../guides/spark-003.md.html">guide</a> defines the learner contract. An authored reference is not a platform acceptance receipt.</p>
+<p>Compare with these notes once your fee function passes or fails the six <a href="../guides/spark-003.md.html">guide</a> checks. They trace every branch and boundary of the rule, so a mismatch points to the guard order or the threshold rather than to the expected value.</p>
 <h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
 <p>A function names a rule with input parameters and a result type. <code>def addCents(left: Long, right: Long): Long = left + right</code> reads: accept two Long values, return a Long, and evaluate their sum. Calling it supplies argument values; defining it does not run it. A pure function has no hidden state change and returns the same answer for the same inputs. An explicit return type makes the contract visible to both the reader and compiler.</p>
 <p>The fee domain is deliberately bounded to amounts from -1000000 through 1000000 cents. Nonpositive amounts cost zero. A nonmember with a positive amount pays 20 cents. A member pays zero below 500 cents and five percent at or above 500, rounded down by integer division. This makes every branch and numeric boundary inspectable. Multiplication is safe inside this domain; the lesson does not promise arbitrary Long multiplication cannot overflow.</p>
@@ -220,7 +220,7 @@ assert<span class="syntax-punctuation">(</span>bonus<span class="syntax-punctuat
 <p><strong>Expected:</strong> 9 maps to 0L and 10 maps to 2L.</p>
 <h3 id="exercises-and-explanatory-solutions">Exercises and explanatory solutions<a class="heading-anchor" href="#exercises-and-explanatory-solutions" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-separate-definition-and-call">Exercise 1: Separate definition and call<a class="heading-anchor" href="#exercise-1-separate-definition-and-call" aria-label="Link to this section">#</a></h4>
-<p><strong>Inputs/evidence:</strong> <code>AddCents(100L, 25L)</code>, <code>addCents(0L, 25L)</code>.</p>
+<p><strong>Inputs/evidence:</strong> <code>addCents(100L, 25L)</code>, <code>addCents(0L, 25L)</code>.</p>
 <p><strong>Expected result/shape:</strong> 125L and 25L.</p>
 <p><strong>Verify:</strong> Assert both returned values; distinguish parameter names from arguments.</p>
 <p>left/right name inputs in the definition. 100L and 25L are arguments in a call. The function definition is reused rather than copied and edited.</p>
@@ -240,7 +240,7 @@ assert<span class="syntax-punctuation">(</span>bonus<span class="syntax-punctuat
 <p><strong>Verify:</strong> Assert both calls give 50L; do not change the definition.</p>
 <p>Named arguments bind by parameter name. Reordering them is a readability choice and does not change the fee rule or types.</p>
 <h4 id="exercise-5-reject-hidden-state">Exercise 5: Reject hidden state<a class="heading-anchor" href="#exercise-5-reject-hidden-state" aria-label="Link to this section">#</a></h4>
-<p><strong>Inputs/evidence:</strong> Two consecutive <code>feeCents(1000L, true)</code> calls and negative amount-1L.</p>
+<p><strong>Inputs/evidence:</strong> Two consecutive <code>feeCents(1000L, true)</code> calls and the negative amount <code>-1L</code>.</p>
 <p><strong>Expected result/shape:</strong> Both calls 50L; negative amount yields 0L even for a nonmember.</p>
 <p><strong>Verify:</strong> Repeat exact calls and explain why a call counter must not alter the returned fee.</p>
 <p>Counting calls inside a pricing rule can make retries change business output. Preserve a pure calculation and keep operational counting separate.</p>

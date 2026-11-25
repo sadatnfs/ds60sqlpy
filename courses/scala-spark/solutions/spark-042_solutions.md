@@ -1,6 +1,8 @@
 # spark-042: Explained paired reference solutions
 
-Read the [guide](../guides/spark-042.md) and attempt one language first. The [Scala reference](spark-042_solution.scala) and [PySpark reference](spark-042_solution.py) are complete single-file programs with explicit local sessions and finally-based stop. Each compares with literal expectations; matching two implementations alone would not rule out a shared mistake.
+Attempt the [guide](../guides/spark-042.md) exercises first.
+
+References: [Scala](spark-042_solution.scala), [PySpark](spark-042_solution.py).
 
 ## Exercises and reasoning
 
@@ -212,7 +214,7 @@ The external effect exists even though the streaming query reports failure. That
 
 Restart the same compatible query and checkpoint. Validate the existing batch input/content/chain and reuse its state.
 
-**Expected:** Attempts 0,0 and callback rows 4,4; commit 0 bytes and logical state remain unchanged.
+**Expected:** Attempts `0, 0` and callback rows `4, 4`; commit 0 bytes and logical state remain unchanged.
 
 ```scala
 def recoverProduct(spark: SparkSession, input: Path, checkpoint: Path, sink: Path): RunReceipt = {
@@ -318,7 +320,7 @@ Batch B deliberately presents event E at 120 before event D at 95. A mistaken mo
 
 Return the exact final canonical state, record callback work 14 versus logical occurrences 10, and reject binding the existing sink to a different checkpoint.
 
-**Expected:** Literal golden state matches; attempt IDs 0,0,1,2; callback rows 4,4,4,2; only owned inactive queries are eligible for cleanup.
+**Expected:** Literal golden state matches; attempt IDs `0, 0, 1, 2`; callback rows `4, 4, 4, 2`; only owned inactive queries are eligible for cleanup.
 
 ```scala
 def handoffState(state: ProductState): String = {
@@ -344,6 +346,7 @@ The final state is compared with an independent literal JSON oracle, not only wi
 
 ## Execution and interpretation
 
-Run the complete reference in its prepared fixed worker. Its first check (Validate and canonicalize each raw microbatch) is built inside the program, so opening the lesson fetches nothing; it expects: Batch A has four occurrences with IDs A, B, A, NULL; NULL is preserved in canonical input. An oversized batch is rejected before collection. The final success line prints only after every reference assertion passes.
+`canonical_product_input` must keep deliveries 1 to 4 in order with a NULL ID on the last one and refuse a union of three copies as oversized. The first state accepts `A` at `(100, 10)` and `B` at `(105, 20)` with 1 duplicate, 1 invalid, 0 late and a maximum of 105; adding an invalid far-future d11 (`F`, 999, `-1` cents) leaves the maximum at 105 and raises the invalid count to 2. The failing run raises `injected_after_publication`, records attempts `[0]` and callback rows `[4]`, and commit 0 already equals the first state.
 
-Local plan, partition and resource evidence does not establish cluster-scale performance; session cleanup is explicit.
+Recovery on the same checkpoint records attempts `[0, 0]` and rows `[4, 4]`, keeps the query ID, changes the run ID and leaves commit 0 byte for byte. After batch B the state has 4 accepted IDs, 2 duplicates, 1 late and 1 invalid; after batch C it holds `A`, `B`, `D`, `E` and `F` with 75 cents, 2 duplicates, 1 late and 2 invalid out of 10 deliveries. The handoff matches the golden JSON, attempts are `[0, 0, 1, 2]`, callback rows add up to 14, and pointing the sink at an unrelated checkpoint raises a binding mismatch. The program prints the product summary and then `spark-042: six PySpark reference contracts passed; Spark=` with the version.
+

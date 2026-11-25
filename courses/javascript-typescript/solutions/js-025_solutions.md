@@ -1,6 +1,6 @@
 # js-025: explanatory solutions
 
-Use these answers after an attempt or an explicit reveal. The reference uses the same literal fixtures as the guide and keeps the exercises in separate scopes. A successful run checks these examples; explaining a changed input is a separate learning goal.
+Open these after your own attempt; each exercise runs in its own scope in the reference.
 
 ## Mechanism review
 
@@ -24,7 +24,7 @@ The prepared compiler path is /opt/typescript/node_modules/typescript/bin/tsc. D
 
 ## Exercise 1: Compile and run a two-module project: predict an edited check
 
-Task: Copy Example A into a scratch `main.mts` and change `assert.equal(await exists(join(directory, 'compiled', 'math.mjs')), true);` to `assert.equal(await exists(join(directory, 'compiled!', 'math.mjs')), true);` inside its check. Before running it, predict whether the check still passes and explain why; then restore it.
+Task: In a scratch copy of Example A, change `assert.equal(await exists(join(directory, 'compiled', 'math.mjs')), true);` to `assert.equal(await exists(join(directory, 'compiled!', 'math.mjs')), true);` inside its check. Does the check still pass?
 
 The runtime specifier is .mjs even though the source file is .mts. Naming a source-only extension without a corresponding emit policy can produce a runtime failure.
 
@@ -47,13 +47,13 @@ await withProject(
 );
 ```
 
-**Expected:** The changed run fails with an `AssertionError` at `assert.equal(await exists(join(directory, 'compiled!', 'math.mjs')), true);`. Restoring `assert.equal(await exists(join(directory, 'compiled', 'math.mjs')), true);` brings back: both processes succeed; output 8; math.mjs is emitted.
+**Expected:** The edited run fails with an `AssertionError` at `assert.equal(await exists(join(directory, 'compiled!', 'math.mjs')), true);`. Restoring `assert.equal(await exists(join(directory, 'compiled', 'math.mjs')), true);` brings back: both processes succeed; output 8; math.mjs is emitted.
 
-**Verify:** Compare your written prediction with the reported `AssertionError`, including its actual and expected values, and explain why the edited check rejects the values that `assert.equal(await exists(join(directory, 'compiled', 'math.mjs')), true)` accepts. After restoring the line, the program prints its `{"checks":1,"status":"passed"}` receipt again.
+**Verify:** Compare the reported actual and expected values with your prediction, then restore `assert.equal(await exists(join(directory, 'compiled', 'math.mjs')), true);`.
 
 ## Exercise 2: Inspect type-only erasure: debug a regression
 
-Task: A regression changed one token in Example B, so one line now reads `'model.mts!': 'export type Item = { id: string };',`. Run Example B with that line, use the failing check to locate the defect and repair it without changing the check.
+Task: A regression made one Example B line read `'model.mts!': 'export type Item = { id: string };',`. Locate and repair it without editing the check.
 
 The type relation constrains source checking without becoming a value dependency. Inspecting the emitted program demonstrates this directly.
 
@@ -78,7 +78,7 @@ await withProject(
 
 **Expected:** Before the repair the run fails with an `AssertionError` at `assert.equal(compiled.status, 0, compiled.stdout + compiled.stderr)`. Restoring `'model.mts': 'export type Item = { id: string };',` brings back: no model import in emitted entry; output A.
 
-**Verify:** Keep the failing and the repaired runs. Explain why the changed token alters the value tested by `assert.equal(compiled.status, 0, compiled.stdout + compiled.stderr)` for this input.
+**Verify:** Keep the failing and repaired runs and name the first value that differs between them.
 
 ## Exercise 3: Reject a type mismatch without output
 
@@ -100,7 +100,7 @@ await withProject(
 
 **Expected:** TS2322; nonzero compiler status; no compiled main.mjs.
 
-**Verify:** Keep a check equivalent to `assert.match(compiled.stdout + compiled.stderr, /TS2322/u)`. As a control, change `{ 'main.mts': 'const count: number = \'wrong\'; console.log(count);' },` to `{ 'main.mts!': 'const count: number = \'wrong\'; console.log(count);' },`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
+**Verify:** Keep `assert.match(compiled.stdout + compiled.stderr, /TS2322/u)`. Control: changing `{ 'main.mts': 'const count: number = \'wrong\'; console.log(count);' },` to `{ 'main.mts!': 'const count: number = \'wrong\'; console.log(count);' },` must make that check fail; then restore it.
 
 ## Exercise 4: Require runtime-valid relative extensions
 
@@ -125,7 +125,7 @@ await withProject(
 
 **Expected:** TS2835 and no emitted entry.
 
-**Verify:** Keep a check equivalent to `assert.match(compiled.stdout + compiled.stderr, /TS2835/u)`. As a control, change `'math.mts': 'export const value = 2;',` to `'math.mts!': 'export const value = 2;',`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
+**Verify:** Keep `assert.match(compiled.stdout + compiled.stderr, /TS2835/u)`. Control: changing `'math.mts': 'export const value = 2;',` to `'math.mts!': 'export const value = 2;',` must make that check fail; then restore it.
 
 ## Exercise 5: Observe a missing runtime artifact
 
@@ -152,7 +152,7 @@ await withProject(
 
 **Expected:** Node fails with ERR_MODULE_NOT_FOUND.
 
-**Verify:** Keep a check equivalent to `assert.equal(compiled.status, 0, compiled.stdout + compiled.stderr)`. As a control, change `'value.mts': 'export const value = 3;',` to `'value.mts!': 'export const value = 3;',`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
+**Verify:** Keep `assert.equal(compiled.status, 0, compiled.stdout + compiled.stderr)`. Control: changing `'value.mts': 'export const value = 3;',` to `'value.mts!': 'export const value = 3;',` must make that check fail; then restore it.
 
 ## Exercise 6: Retain value imports beside erased type imports
 
@@ -179,8 +179,8 @@ await withProject(
 
 **Expected:** value dependency remains; runtime prints ready:A.
 
-**Verify:** Keep a check equivalent to `assert.equal(compiled.status, 0, compiled.stdout + compiled.stderr)`. As a control, change `'model.mts': 'export type Item = { id: string }; export const prefix = \'ready\';',` to `'model.mts!': 'export type Item = { id: string }; export const prefix = \'ready\';',`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
+**Verify:** Keep `assert.equal(compiled.status, 0, compiled.stdout + compiled.stderr)`. Control: changing `'model.mts': 'export type Item = { id: string }; export const prefix = \'ready\';',` to `'model.mts!': 'export type Item = { id: string }; export const prefix = \'ready\';',` must make that check fail; then restore it.
 
 ## After comparison
 
-Return to your saved implementation and repeat a case with different values. Keep compiler diagnostics, process output and browser observations separate. Do not suppress a failing assertion or use a type assertion to declare an unvalidated value safe. Resource-owning examples must finish cleanup even when work fails. Describe each result with its actual host and fixture scope rather than as production acceptance.
+Fresh case: add `models.mts` exporting a `Model` type and a `defaultModel` value. Predict the emitted import lines for `import type { Model }` and for a normal import of `defaultModel`, then compile and compare. ([After comparing](../STUDY-GUIDE.md#after-comparing-with-the-solution).)

@@ -458,16 +458,7 @@ X_scaled <span class="syntax-operator">=</span> StandardScaler<span class="synta
     <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>k<span class="syntax-punctuation">,</span> model<span class="syntax-operator">.</span>inertia_<span class="syntax-punctuation">,</span> silhouette_score<span class="syntax-punctuation">(</span>X_scaled<span class="syntax-punctuation">,</span> labels<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <p>Scaling is appropriate when each numeric dimension should contribute comparably to Euclidean distance. Do not scale mechanically when original distances have a meaningful common unit.</p>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
-<p><strong>Primary browser route:</strong> run <code>./classroom</code> from the repository root and choose <strong>Python and data science</strong> on <code>/classroom</code>. Open this lesson in the shared workspace, read its capability notice, and use its supported coding or reading workflow. The <a href="../reference-pages/docs/classroom-experience.md.html">classroom guide</a> explains saved work, runtimes and switching subjects.</p>
-<p><strong>Optional native notebook/editor route:</strong> the instructions below describe separately prepared host tools. They are useful alternatives, not prerequisites for opening this lesson in the Docker classroom.</p>
-<ol>
-<li>Open the Day 42 learner notebook from this guide&#x27;s <strong>Next step</strong> section in VS Code or JupyterLab.</li>
-<li>Select the <code>Python (ds60sqlpy)</code> kernel. Start at the top and use <strong>Run All</strong> only after making the written predictions; every added worked example is bounded and offline after bootstrap.</li>
-<li>Keep experiments in new scratch cells. Do not edit the official solution while attempting the numbered practice.</li>
-<li>Restart the kernel and run from the first cell before calling the lesson complete. A clean run catches hidden state and stale variables.</li>
-</ol>
-<p>Linux, macOS, or Ubuntu in Windows WSL 2:</p>
-<pre class="highlighted-code"><code class="language-bash">.venv/bin/python -m jupyter lab</code></pre>
+<p>Open <code>python-42</code> in the classroom, or <code>python/ds-60day/notebooks/day42_unsupervised_kmeans_anomaly.ipynb</code> on a host; the <a href="../reference-pages/python/STUDY-GUIDE.md.html">Python study guide</a> explains both.</p>
 <h4 id="guide--concept-deep-dive-unsupervised-geometry-cluster-stability-and-anomaly-ranking">Concept deep dive: unsupervised geometry, cluster stability, and anomaly ranking<a class="heading-anchor" href="#guide--concept-deep-dive-unsupervised-geometry-cluster-stability-and-anomaly-ranking" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--the-mental-model">The mental model<a class="heading-anchor" href="#guide--the-mental-model" aria-label="Link to this section">#</a></h5>
 <p>Unsupervised algorithms optimize a mathematical objective without known target labels. K-Means alternates between assigning points to the nearest centroid and recomputing centroid means. It therefore favors roughly spherical, similarly scaled clusters under Euclidean distance.</p>
@@ -479,7 +470,6 @@ X_scaled <span class="syntax-operator">=</span> StandardScaler<span class="synta
 <li><strong><code>decision_function(X)</code>:</strong> returns a continuous anomaly score; inspect ordering before applying a threshold.</li>
 </ul>
 <h5 id="guide--focused-example-a-show-that-feature-scale-changes-k-means-geometry">Focused example A: show that feature scale changes K-Means geometry<a class="heading-anchor" href="#guide--focused-example-a-show-that-feature-scale-changes-k-means-geometry" aria-label="Link to this section">#</a></h5>
-<p>Before running the example, predict the shape, type, or direction of the result. Write the prediction down so that a surprise becomes evidence rather than something to overlook.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
 <span class="syntax-keyword">from</span> sklearn.cluster <span class="syntax-keyword">import</span> KMeans
 <span class="syntax-keyword">from</span> sklearn.preprocessing <span class="syntax-keyword">import</span> StandardScaler
@@ -573,7 +563,6 @@ most_unusual <span class="syntax-operator">=</span> np<span class="syntax-operat
 </ol>
 <h5 id="guide--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#guide--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
 <p>Make unsupervised assumptions observable through scaling, stability, domain checks, and synthetic controls. A cluster ID or anomaly label is not ground truth.</p>
-<p>Predict or plan before you run code. Use the hint only after an honest attempt, and record the evidence that would prove your result correct.</p>
 <ol start="4">
 <li><strong>Scaling sensitivity:</strong> Create two features with equal structure but scales of 1 and 10,000. Compare K-Means assignments before and after standardization. <strong>Progressive hint:</strong> Euclidean distance squares numeric differences, so the large-unit feature dominates unless that weighting is intentional.</li>
 </ol>
@@ -635,7 +624,7 @@ most_unusual <span class="syntax-operator">=</span> np<span class="syntax-operat
 <li>Continue to <a href="python-43.html#guide">Day 43; Model Interpretation</a>.</li>
 </ul>
 <h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
-<p>The lesson is complete without an AI assistant. If you want optional coaching, copy this prompt into the AI tutor while the repository root is open:</p>
+<p>The lesson is complete without AI. For optional coaching, copy this prompt with the repository root open:</p>
 <pre class="highlighted-code"><code class="language-text">Tutor me through `python-42` (Day 42: K-Means and Anomaly Detection).
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
@@ -962,7 +951,7 @@ lof_rate <span class="syntax-operator">=</span> <span class="syntax-punctuation"
 </ul>
 <hr>
 <h4 id="solution-1--solution-reasoning-lens">Solution reasoning lens<a class="heading-anchor" href="#solution-1--solution-reasoning-lens" aria-label="Link to this section">#</a></h4>
-<p>A strong solution is not merely code that produces one plausible output. It establishes a chain from input contract to operation to verification:</p>
+<p>Each decision below links an input contract to an operation and its evidence:</p>
 <ol>
 <li><strong><code>KMeans(n_clusters=k, n_init=..., random_state=...)</code>:</strong> declares cluster count and repeated initialization so a local optimum is not mistaken for truth.</li>
 <li><strong><code>silhouette_score(X, labels)</code>:</strong> compares cohesion and separation under the selected distance; it needs at least two nontrivial clusters.</li>
@@ -974,44 +963,36 @@ lof_rate <span class="syntax-operator">=</span> <span class="syntax-punctuation"
 <p><strong>Trade-off:</strong> More clusters reduce inertia mechanically but increase complexity; stricter anomaly thresholds reduce review volume while missing more unusual cases.</p>
 <p><strong>Edge case to test:</strong> Duplicate points, all-identical data, fewer rows than clusters, high-dimensional distance concentration, or changing contamination break naive interpretations.</p>
 <p><strong>Evidence of correctness:</strong> Compare scaled/unscaled results, repeat seeds, report cluster sizes and stability, retain continuous anomaly scores, and review synthetic plus domain controls.</p>
-<p>When comparing your attempt with the reference, explain which of these decisions your code made explicitly. If the reference makes a different choice, compare the contracts and evidence before deciding that one version is universally better.</p>
 <h4 id="solution-1--exercise-by-exercise-reasoning-map">Exercise-by-exercise reasoning map<a class="heading-anchor" href="#solution-1--exercise-by-exercise-reasoning-map" aria-label="Link to this section">#</a></h4>
-<p>This map connects every learner prompt to a reasoning path. Read the explanation before copying code: the goal is to understand the assumptions, the evidence that validates the result, and the edge cases that can make an apparently correct implementation fail.</p>
 <h5 id="solution-1--exercise-1-original-lesson-practice">Exercise 1: Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Try several values of <code>k</code> and plot inertia versus <code>k</code> (the elbow plot).</p>
 <p><strong>How to reason about it:</strong> Inertia always falls as k increases, so the elbow is a judgment rather than an optimizer. Fit each candidate on the same scaled representation and inspect stability and usefulness alongside the curve.</p>
-<p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
 <p><strong>Verify:</strong> For each declared k, print inertia, cluster sizes, and seed and save a labeled elbow curve; assert inertia is non-increasing and do not call the visual bend proof of true classes.</p>
 <h5 id="solution-1--exercise-2-original-lesson-practice">Exercise 2: Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-2-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Compute silhouette scores for <code>k</code> from 2 through 6 and discuss the result.</p>
 <p><strong>How to reason about it:</strong> Silhouette requires at least two clusters and rewards compact separation under its distance metric. A maximum is a candidate, not proof that the data contains that many real-world groups.</p>
-<p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
 <p><strong>Verify:</strong> For k=2..6 on identical scaled rows, print silhouette score and cluster sizes, choose the largest score only after checking no tiny/empty cluster, and repeat with at least three seeds to report stability.</p>
 <h5 id="solution-1--exercise-3-original-lesson-practice">Exercise 3: Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-3-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Compare Isolation Forest with Local Outlier Factor.</p>
 <p><strong>How to reason about it:</strong> Isolation Forest and LOF use different notions of unusualness. Match contamination, understand LOF&#x27;s novelty mode, and compare known synthetic outliers or reviewed cases instead of label overlap alone.</p>
-<p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
 <p><strong>Verify:</strong> On identical scaled data and declared contamination/neighbors, print each method&#x27;s continuous anomaly score and top-n row IDs; report overlap and inspect injected normal/outlier controls instead of equating labels blindly.</p>
 <h5 id="solution-1--exercise-4-scaling-sensitivity">Exercise 4: Scaling sensitivity<a class="heading-anchor" href="#solution-1--exercise-4-scaling-sensitivity" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Create two features with equal structure but scales of 1 and 10,000. Compare K-Means assignments before and after standardization.</p>
 <p><strong>Reasoning before implementation:</strong> Euclidean distance squares numeric differences, so the large-unit feature dominates unless that weighting is intentional.</p>
 <p>Scaling changes the geometry, not just presentation. Place the scaler and K-Means in one pipeline and fit on the intended training/reference population. Compare cluster centers after inverse transformation so stakeholders can read them in original units.</p>
 <p>Standardization is not automatically correct: a domain-approved unit or feature weight can be meaningful. State why the chosen metric represents similarity for this problem.</p>
-<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
 <p><strong>Verify:</strong> Scaling sensitivity; print feature ranges and K-Means assignments before/after StandardScaler, then report adjusted Rand agreement; verify the 10,000-scale feature dominates the unscaled distance calculation.</p>
 <h5 id="solution-1--exercise-5-cluster-stability">Exercise 5: Cluster stability<a class="heading-anchor" href="#solution-1--exercise-5-cluster-stability" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Refit K-Means across at least ten seeds and bootstrap samples. Compare inertia, silhouette, and assignment agreement without assuming numeric cluster labels line up.</p>
 <p><strong>Reasoning before implementation:</strong> Labels can permute. Use adjusted Rand index or align centers before comparing assignments.</p>
 <p>A solution that appears only for one initialization is weak evidence of structure. Summarize score distributions and pairwise adjusted Rand index. Inspect whether small or ambiguous clusters dissolve across resamples.</p>
 <p>High stability still does not prove business meaning; it only shows the algorithm consistently finds the same geometry. Validate profiles with domain knowledge and downstream usefulness.</p>
-<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
 <p><strong>Verify:</strong> Cluster stability; over at least ten seeds and bootstrap samples, print inertia, silhouette, cluster sizes, and label-aligned adjusted Rand scores; report distributions rather than comparing raw numeric labels.</p>
 <h5 id="solution-1--exercise-6-anomaly-validation-without-labels">Exercise 6: Anomaly validation without labels<a class="heading-anchor" href="#solution-1--exercise-6-anomaly-validation-without-labels" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Design an evaluation plan for an anomaly detector when historical anomaly labels are incomplete. Include synthetic injection, review capacity, and contamination sensitivity.</p>
 <p><strong>Reasoning before implementation:</strong> Use multiple evidence sources: known incidents, injected anomalies, top-k expert review, and stability across reasonable settings.</p>
 <p>Measure recall on carefully designed synthetic anomalies only as a unit test of detectable patterns, not as full real-world accuracy. Review a bounded top-k sample with blinded domain experts and track confirmed-yield plus false-alarm cost. Sweep contamination and report how the review queue changes.</p>
 <p>Preserve raw scores so policy thresholds can change without refitting. Never describe the detector&#x27;s <code>-1</code> output as a confirmed incident.</p>
-<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
 <p><strong>Verify:</strong> Anomaly validation without labels; deliver an evaluation table naming synthetic anomaly fixtures, domain-review sample/precision-at-k, review capacity, contamination sweep, stability metric, owner, and a stop threshold for each check.</p></div>
       </section>
 

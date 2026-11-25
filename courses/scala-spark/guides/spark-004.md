@@ -1,20 +1,26 @@
 # spark-004: Immutable collections and transformations
 
-Authored tutorial and practice content. The prepared Scala/JVM worker executes a bounded program; process success and understanding remain distinct. No source file installs a tool or downloads a dependency.
+Five order amounts in cents, one negative and two equal, carry this lesson. You will split them into accepted and rejected collections, count and total the accepted bag, and keep the repeated 100 cents visible at every step instead of letting a set or a careless filter erase it.
 
 ## Level and prerequisites
 
-Beginner; approximately 75 minutes. Direct prerequisites: `spark-003`. The lesson uses Scala 2.13 syntax and the prepared JDK 17 worker. The [execution baseline](../execution-baseline.md) lists the exact Scala, JDK and Spark versions.
+Beginner; approximately 75 minutes. Direct prerequisites: `spark-003`. Pinned versions: [execution baseline](../execution-baseline.md).
 
 ## How to run this lesson
 
-Open `spark-004` in the classroom, select the Scala source, prepare the `scala-jvm` profile and run the saved pad. The worker stages the single source as `Main.scala` and invokes `object Main`. Read the terminal output and exact assertions. The [learner source](../lessons/spark-004.scala) runs two complete demonstrations; its six task functions remain explicit stubs until you implement them. Preserve your saved attempt. The [reference program](../solutions/spark-004_solution.scala) and [explained solutions](../solutions/spark-004_solutions.md) are separate and should be opened after an attempt or an explicit worked-comparison request. If the profile is unavailable, reading and saving remain available; opening this guide does not prepare a runtime.
+Shared run steps and profile rules: [study guide](../STUDY-GUIDE.md#run-a-language-lesson).
+
+Learner pad: [spark-004.scala](../lessons/spark-004.scala).
+
+Open the [explained solutions](../solutions/spark-004_solutions.md) after an attempt.
+
+Before you write anything, the pad prints `2,4,6` from the map example and `total=15 empty=0` from the fold example. Study the second line: `foldLeft` starts from the explicit zero you pass it, so an empty sequence totals 0, while `reduce` on an empty sequence would throw. The fold also uses `Math.addExact`, which is the same overflow guard Exercise 4 asks you to keep.
 
 ## Learning objectives
 
 - Use Seq and Map with map, filter and fold without mutating shared state.
-- Explain the result of both worked examples before running them.
-- Implement the six contracts, inspect normal and boundary evidence, and explain a counterexample in your own words.
+- Predict why filtering `Seq(100L, -5L, 0L, 100L, 25L)` keeps both 100-cent entries and the zero, and show that the original sequence is unchanged afterwards.
+- Prove conservation with a rejected ledger: accepted size plus rejected size equals the input size, even for an empty or all-negative input, and the multiplicity map sums to the accepted count.
 
 ## Vocabulary and concepts
 
@@ -134,11 +140,15 @@ If the accepted count is three instead of four, inspect whether zero was dropped
 
 ## Self-check
 
-Explain one input-to-output trace without reading your code. Identify which function preserves repeated values, which condition distinguishes an invalid or missing input, and which assertion would fail for the tempting incorrect implementation. A printed success line alone is not the evidence; retain the exact values and the reasoning that connect them to the contract.
+- Without running anything, give the accepted sequence, the rejected sequence and the `(count, total)` pair for `Seq(100L, -5L, 0L, 100L, 25L)`. Which of your answers would change if `accepted` returned `values.toSet.toSeq`?
+- Why does `partitionAmounts(Seq(-2L, -1L))` return an empty accepted side rather than failing, and which assertion checks that the two sides still add up to the input size?
+- `fivePercent` maps 25 cents to 1 cent. State the rounding rule that produces that value and the input that `fivePercent` must reject.
+- `frequencies` returns `Map(100L -> 2L, 0L -> 1L, 25L -> 1L)`. Explain why a `Map[Long, Long]` can hold the repeated 100 when a `Set[Long]` cannot.
+- In `groupedSummary`, the row `C, -5` has a negative amount and contributes nothing to the report. Why does a blank label on a negative row still have to be rejected?
 
 ## Next step
 
-Continue to the next lesson only after you can explain the boundary behavior. The [course route](../README.md) shows authored material and runtime evidence separately.
+Go on to [spark-005: Option, missing values, and total functions](spark-005.md). This lesson assumed every amount was present and well formed; the next one parses amount text that may be missing or malformed, and keeps "missing" and "rejected" as separate outcomes instead of turning both into zero.
 
 ## Primary sources and official APIs
 

@@ -1,22 +1,26 @@
 # spark-026: Built-ins, UDFs and Python-JVM columnar boundaries
 
-Authored paired Scala/PySpark teaching content. The default fixtures are tiny, local and deterministic. Runtime acceptance, logical correctness and learner understanding remain separate evidence.
+One label rule gets three implementations: plain code on the driver, Spark built-in functions and a Python UDF. Twelve labels include a NULL, an empty string, the text `NULL`, a German sharp s, a Turkish dotted capital I, an emoji and a decomposed accent, and the rule must leave everything except ASCII capitals and four ASCII whitespace characters alone.
 
 ## Level and prerequisites
 
-Intermediate; approximately 105 minutes. Direct prerequisites: `spark-025`. The prepared baseline is Spark 4.3.0, Scala binary 2.13, JDK 17 and Python 3.12. Read the [execution baseline](../execution-baseline.md).
+Intermediate; approximately 105 minutes. Direct prerequisites: `spark-025`. Pinned versions: [execution baseline](../execution-baseline.md).
 
 ## How to run this lesson
 
-Open `spark-026` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile, save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`; Python stages as `main.py` with a main guard. Each program creates its own `local[2]` session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.
+Shared run steps and profile rules: [study guide](../STUDY-GUIDE.md#run-a-paired-lesson).
 
-The [Scala learner](../lessons/spark-026.scala) and [PySpark learner](../lessons/spark-026.py) run two complete demonstrations and retain six explicit task stubs. Use the [explained solutions](../solutions/spark-026_solutions.md) only after an attempt or an explicit worked comparison; the [Scala reference](../solutions/spark-026_solution.scala) and [PySpark reference](../solutions/spark-026_solution.py) contain complete assertions. A bounded collect is used only for the declared tiny fixture; do not copy it onto an unbounded or large production table.
+Learner pads: [Scala](../lessons/spark-026.scala) and [PySpark](../lessons/spark-026.py).
+
+Open the [explained solutions](../solutions/spark-026_solutions.md) after an attempt.
+
+The first worked example applies the ASCII-only `translate` to `CAFÉ` and prints `ASCII mapping preserves non-ASCII É` once `cafÉ` comes back. The second tests a NULL, an empty string and the text `null` for missingness, gets `(True, False, False)`, and prints `Missing, empty and literal null text are distinct`.
 
 ## Learning objectives
 
 - Prefer engine expressions when possible and make Python/JVM conversion and NULL behavior measurable.
-- State the input and output grain, schema, NULL policy and ordering before executing a transformation.
-- Compare each language implementation with independent literal expectations, not only with the other implementation.
+- Build the rule from `translate`, `regexp_replace` and `trim`, wrap the same rule as a Python UDF with a declared `StringType`, and find `BatchEvalPython` in the UDF plan but not in the built-in plan.
+- Keep the 1 missing, 2 empty and 9 text labels in separate categories, and show that a plausible `strip().lower()` rule disagrees with the golden list on IDs 4, 5, 6 and 9, and on ID 8 as well in Python.
 
 ## Vocabulary and concepts
 
@@ -52,7 +56,7 @@ Arrow and pandas UDFs are an optional extension, not imported or executed by the
 
 ## Supplied local fixture
 
-The complete source creates the owned local session described above, then constructs this explicit fixture. The worked examples below run in that same main function; there is no hidden notebook state.
+The session runs `local[2]` under the Python profile. The twelve labels are a NULL, an empty string, a single space, `  ALPHA  Beta ` with doubled spaces, a tab, `A`, newline, `B`, carriage return and space sequence, `CAFÉ`, `Straße`, an `A` between nonbreaking spaces, `İI`, `🙂 OK`, an `e` followed by a combining acute accent, and the four letters `NULL`. Every expected output is written out literally, so no implementation grades another.
 
 ```scala
 import org.apache.spark.sql.Row
@@ -241,7 +245,7 @@ Classify normalized values as missing, empty or text and count each category. Se
 
 Validate a result against the full golden sequence. Deliberately apply general lowercasing and default trimming without interior-whitespace collapse, and require rejection.
 
-**Expected result/shape:** The wrong implementation disagrees at least on IDs 4,5,6,9. Python additionally removes the preserved nonbreaking spaces at ID 8.
+**Expected result/shape:** The wrong implementation disagrees at least on IDs 4, 5, 6 and 9. Python additionally removes the preserved nonbreaking spaces at ID 8.
 
 **Verify:** Assert named mismatch identities and that the golden validator raises rather than accepting a visually plausible normalization.
 
@@ -253,11 +257,14 @@ Do not claim that all whitespace classes or lowercasing functions have identical
 
 ## Self-check
 
-Explain the contract of `normalizeLabel` / `normalize_label` without reading its solution. Then, from memory, state what Exercise 6 (Reject a plausible but semantically broader implementation) must produce: The wrong implementation disagrees at least on IDs 4, 5, 6, 9. Python additionally removes the preserved nonbreaking spaces at ID 8. Say which part of that result is evidence and what it still cannot show. Name the action in your trace that actually runs the plan.
+- ID 4 is `  ALPHA  Beta `. Walk it through the rule step by step and explain why the result is `alpha beta` with one interior space.
+- Why does `CAFÉ` become `cafÉ` rather than `café`, and which business requirement would have to be written down before the second answer became correct?
+- The UDF plan contains `BatchEvalPython` and the built-in plan does not. What does that operator tell you about where each label is processed, and what can the optimizer no longer see?
+- Python's `strip()` removes the nonbreaking spaces around ID 8 but Java's `trim` does not. Why does that make ID 8 a Python-only mismatch for the wrong rule?
 
 ## Next step
 
-Use the [course route](../README.md) to continue. Paired-language agreement is useful only when both outputs also satisfy the independent fixture contract. A successful local run is not evidence of cluster performance or production recovery.
+Go on to [spark-027: Persistence lifecycle and cross-language golden tests](spark-027.md). You now compare implementations against a literal golden list; the next lesson makes that comparison duplicate-aware and schema-aware, and adds a cache that must always be released.
 
 ## Primary sources and official APIs
 

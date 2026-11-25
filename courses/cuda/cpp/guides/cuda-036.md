@@ -4,18 +4,15 @@
 
 Intermediate; about 110 minutes, plus any optional hardware experiment. Direct prerequisites: `cuda-002`, `cuda-019`, `cuda-033`
 
-The order supports learning at your own pace. Reading and CPU reasoning remain
-available when NVIDIA hardware is absent. Advanced hardware features need their
-own capability checks and are not prerequisites for opening this chapter.
+Pacing, evidence labels and platform rules for every chapter are in the [CUDA study guide](../../STUDY-GUIDE.md).
 
 ## Learning objectives
 
 Choose a launch configuration for a stated workload and justify it even when the highest-occupancy setting loses.
 
-Work through *Occupancy, registers and latency hiding* with the concrete cases below. Finish with this evidence:
-a justified configuration choice for a stated workload and device, including an explanation when the highest-occupancy setting loses. Distinguish an algorithmic
-calculation, a compiled artifact and an actual device observation when explaining
-what your work establishes.
+**Scope:** Occupancy, active versus eligible warps, registers, shared-memory allocation, spills, instruction-level parallelism and work per thread.
+
+**Evidence to produce:** A justified configuration choice for a stated workload and device, including an explanation when the highest-occupancy setting loses.
 
 ## Purpose, vocabulary and mental model
 
@@ -39,28 +36,17 @@ This simplified register-only bound ignores allocation granularity and all other
 
 ## How to run and study this lesson
 
-Use the saved reading worksheet in `/classroom`; the reading pad does not execute
-CUDA. For the bounded calculation, select **CPU model (Python)**, whose
-answer-free starter supplies the literal fixtures and task contract. The
-[CUDA C++ study workflow](../README.md) covers platforms, optional GPU
-compilation and evidence labels. In a prepared Python environment you can also
-run the separate [CPU reference](../references/cuda-036_cpu.py) from the
-repository root:
+Trace worked example 1 by hand, then run the [CPU reference](../references/cuda-036_cpu.py) from the repository root:
 
 ```sh
 python courses/cuda/cpp/references/cuda-036_cpu.py
 ```
 
-Its assertions check the stated numerical result or model invariant; console
-text is evidence of this CPU model only, not of CUDA execution.
-
 ## Worked example 1: trace the mechanism
 
 In a simplified SM with 65,536 registers, a 256-thread block using 64 registers per thread needs 16,384 registers. Registers alone permit four blocks. At 128 registers per thread, registers alone permit two. Other limits can reduce both figures; this calculation is not an actual occupancy API result.
 
-The complete CPU model below intentionally models only the named arithmetic,
-layout, dependency or capability decision. It does not model GPU scheduling,
-caches, instruction timing or device memory visibility.
+**Why:** 256 * 64 is 16,384, so four blocks fit by registers; at 128 registers each block needs 32,768, so two fit.
 
 ```python
 register_file, threads = 65536, 256
@@ -69,41 +55,37 @@ assert blocks == [4, 2]
 print({"register_only_block_limits": blocks, "other_hardware_limits_included": False})
 ```
 
-**Expected observation:** Every assertion succeeds. A representative CPU output is:
+**Expected observation:** every assertion succeeds, and the CPU model prints:
 
 ```text
 {'register_only_block_limits': [4, 2], 'other_hardware_limits_included': False}
 ```
 
-Integers, shapes and ordering must match exactly; only assertions with an explicit
-tolerance accept small floating-point differences. A printed duration is a model
-output, not a measured GPU benchmark.
+**Check:** The reference asserts blocks == [4, 2] and prints other_hardware_limits_included False.
 
 ## Worked example 2: change a meaningful condition
 
 Configuration A takes 2 ms with 50% occupancy. Configuration B takes 2.4 ms with 75%. If both pass correctness, A wins that stated timing objective. Investigate reuse, instruction-level parallelism and spills rather than choosing B merely because its percentage is larger.
 
-Before applying this example to your own program, write down which inputs are
-read, which result is produced, and the condition that makes the comparison
-valid. Keep the original case as a regression check when changing a boundary.
+**Why:** The objective is time, and A wins it despite lower occupancy.
+
+**Check:** Keep both timing distributions and resource reports together with the decision.
 
 ## Six progressive exercises
 
-Exercises 1 and 2 are guided reconstructions of the worked examples; exercises
-3-6 change an input, diagnose a defect, test a boundary and transfer the idea.
-For each one, keep the calculation, output, diagram or failure policy you
-produce so another reader can compare it with the worked cases. If the hint is
-not enough, reread the mechanism paragraph and the bounded CPU assertion.
-
 ### Exercise 1
 
-Predict and trace the first worked example before running its CPU reference. Write every intermediate quantity that leads to the stated result, including units or ownership where applicable.
+Reconstruct worked example 1 on paper before running its CPU reference. Divide 65,536 registers by 256 threads times registers per thread for 64 and 128 registers.
+
+**Trap to avoid:** Treating four blocks as the final residency ignores shared memory, thread and block limits that may bind first.
 
 **Hint:** Start with the literal input and intermediate quantities in worked example 1.
 
 ### Exercise 2
 
-Reconstruct the second worked example without copying its conclusion. Identify the changed input or condition, show the resulting calculation or dependency, and explain why it differs from the first example.
+Rework worked example 2 without copying its conclusion. Choose A because it meets correctness and takes 2 ms against 2.4 ms.
+
+**Trap to avoid:** Picking B for its 75 percent occupancy confuses a resource metric with the goal.
 
 **Hint:** Identify exactly which condition changes in worked example 2.
 
@@ -111,11 +93,15 @@ Reconstruct the second worked example without copying its conclusion. Identify t
 
 Estimate register-limited blocks for 128 threads at 64 registers using 65,536 registers.
 
+**Trap to avoid:** Reusing the 256-thread answer of four blocks ignores that the block is half as large.
+
 **Hint:** Use the first worked example to establish the relevant quantities, then change only the requested input.
 
 ### Exercise 4
 
 Why might reducing a register limit make a kernel slower?
+
+**Trap to avoid:** Assuming more resident warps always hides the extra traffic ignores that spills sit on the critical path.
 
 **Hint:** Locate the failed phase or violated dependency before proposing a repair.
 
@@ -123,35 +109,33 @@ Why might reducing a register limit make a kernel slower?
 
 What limits an extremely small grid?
 
+**Trap to avoid:** Raising per-block occupancy for a two-block grid cannot use the remaining SMs.
+
 **Hint:** Check what the algorithm is allowed to read, write or assume at this boundary.
 
 ### Exercise 6
 
 Design a launch sweep.
 
+**Trap to avoid:** Changing tile size and block size together in one sweep mixes two effects.
+
 **Hint:** State the output contract and which observations are needed in the new application.
 
 ## Common mistakes and diagnosis
 
-A tempting but incorrect claim in this chapter is: **100 percent occupancy is always the best target.**
-
-For the concrete failure exercise, why might reducing a register limit make a kernel slower?
-Preserve the original input and the stage where behavior diverged, and compare
-with the CPU model before changing hardware configuration.
+A tempting but incorrect claim: **100 percent occupancy is always the best target.** Occupancy is a means of hiding latency, not the goal. Worked example 2 shows a 50% configuration beating a 75% one, because more work per thread can give reuse and instruction-level parallelism. Forcing fewer registers to raise occupancy can also cause spills that cost more than they save.
 
 ## Self-check, retrieval and transfer
 
-Explain the first example without its code, then use the second example to state
-one assumption that matters. Complete Exercise 3 independently, use Exercise 4 to
-diagnose a plausible defect, check the boundary in Exercise 5, and retain the
-application contract from Exercise 6. Compare the [separate explanations](../solutions/cuda-036_solutions.md)
-only after your attempt or a deliberate reveal. A reading marker records your
-choice; it does not certify hardware qualification or expert mastery.
+1. How many 256-thread blocks fit by registers at 32 registers per thread with 65,536 registers?
+2. What is the difference between a resident warp and an eligible warp?
+3. What does a register spill cost?
+
+Short answers are in the [separate explanations](../solutions/cuda-036_solutions.md#self-check-answers); compare only after an attempt.
 
 ## Primary references
 
-Check the documentation that matches your prepared toolkit before optional
-hardware execution.
+Use the documentation that matches your prepared toolkit.
 
 - [CUDA Programming Guide](https://docs.nvidia.com/cuda/cuda-programming-guide/)
 

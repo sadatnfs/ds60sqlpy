@@ -1,6 +1,8 @@
 # rust-010: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [rust-010_solution.rs](rust-010_solution.rs). It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.
+Executable reference: [rust-010_solution.rs](rust-010_solution.rs), which runs both examples and the coded answers.
+
+Open this only after [an attempt](../STUDY-GUIDE.md#attempt-a-lesson).
 
 ## Why the two examples differ
 
@@ -26,7 +28,7 @@ Trace who may access text during the mutable call.
 
 Add a second mutation after the first borrow ends.
 
-**Reference answer.** The same statements run as the `Task 2` block of the reference program; here they are wrapped in `main` as a complete file.
+**Reference answer**, wrapped in `main`; the reference runs it as its `Task 2` block.
 
 ```rust
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -52,7 +54,7 @@ Non-lexical lifetimes end the borrows held by `left` and `right` after their las
 
 Write a function swapping the ends of a mutable slice safely.
 
-**Reference answer.** The same statements run as the `Task 3` block of the reference program; here they are wrapped in `main` as a complete file.
+**Reference answer**, wrapped in `main`; the reference runs it as its `Task 3` block.
 
 ```rust
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -91,7 +93,7 @@ Create conflicting mutable borrows and explain the compiler diagnostic.
 
 Test an empty slice and a split at either endpoint.
 
-**Reference answer.** The same statements run as the `Task 5` block of the reference program; here they are wrapped in `main` as a complete file.
+**Reference answer**, wrapped in `main`; the reference runs it as its `Task 5` block.
 
 ```rust
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -123,7 +125,7 @@ Both endpoints are valid split points, so each produces one empty half and one h
 
 Design an API that exposes only the smallest mutable region needed by a transformation.
 
-No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **Exclusive borrow**, and state one limitation of your choice.
+**Judging criteria.** A strong design passes only the slice the transformation touches, for example `&mut values[start..end]`, rather than `&mut Vec<T>`, so the callee cannot push, truncate or reach other elements. When two regions must change together, `split_at_mut` or `chunks_mut` proves they are disjoint. State one limitation: a slice cannot change the length of its owner, so growth stays with the caller.
 
 ## Mechanism and diagnostic reasoning
 
@@ -137,4 +139,6 @@ An exclusive borrow is not a thread lock. More mut annotations do not solve alia
 
 ## Review before continuing
 
-Run the reference and confirm that it prints `rust-010: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.
+Rebuild Example B (Mutate two proven-disjoint regions) from a blank pad.
+
+Review routine: [Self-check and review](../STUDY-GUIDE.md#self-check-and-review).

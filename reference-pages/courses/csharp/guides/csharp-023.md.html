@@ -206,11 +206,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Stack trace:</strong> The recorded call path associated with failure.</p>
 <p><strong>Translation:</strong> Mapping an internal failure to a public contract.</p>
 <h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>The Linux Docker classroom compiles your saved pad as <code>Program.cs</code> in its fixed .NET 10 project. C# 14 is the matching language generation. This route uses the prepared framework libraries; it does not accept arbitrary project files, NuGet packages, command arguments or interactive input. The explicit <code>Program.Main</code> entrypoint makes compilation and execution visible. <code>Check</code> throws on a false condition in every build configuration, unlike conditional debugging assertions.</p>
-<p>Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.</p>
+<p><code>ParseCount</code> uses <code>CultureInfo.InvariantCulture</code>, which the worked examples import through <code>System.Globalization</code>, so the digits are read the same way on every machine. Text with digits too large for an int, such as 99999999999, throws <code>OverflowException</code> instead of <code>FormatException</code>, a third category for task 5.</p>
+<p>Compile contract, starter stop and success marker: <a href="../STUDY-GUIDE.md.html#running-a-lesson">running a lesson</a>.</p>
 <h3 id="syntax-anatomy-and-execution-trace">Syntax anatomy and execution trace<a class="heading-anchor" href="#syntax-anatomy-and-execution-trace" aria-label="Link to this section">#</a></h3>
 <p><code>try</code> encloses an operation; typed catch selects a failure category; finally runs cleanup when control leaves the protected region. <code>throw;</code> rethrows the current exception. A catch filter with <code>when</code> narrows recovery policy.</p>
-<p>Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.</p>
+<p>Each example ends with a trace; method: <a href="../STUDY-GUIDE.md.html#tracing-a-program">tracing a program</a>.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="example-a-catch-only-the-expected-invalid-format">Example A: Catch only the expected invalid format<a class="heading-anchor" href="#example-a-catch-only-the-expected-invalid-format" aria-label="Link to this section">#</a></h4>
 <p>The catch does not accidentally classify every possible programming error as bad user text.</p>
@@ -257,6 +257,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> Malformed numeric text is caught as a format error.</p>
+<p><strong>Trace.</strong> <code>ParseCount(&quot;oops&quot;)</code> calls <code>int.Parse</code>, which throws <code>FormatException</code> because the text has no digits. The range check never runs. The catch filters on <code>FormatException</code> and sets <code>format</code> to true. <code>ParseCount(&quot;3&quot;)</code> parses 3, passes the range check and returns it, so both halves of the condition hold. A null argument would throw <code>ArgumentNullException</code>, which this catch deliberately does not handle.</p>
 <h4 id="example-b-retain-an-inner-cause">Example B: Retain an inner cause<a class="heading-anchor" href="#example-b-retain-an-inner-cause" aria-label="Link to this section">#</a></h4>
 <p>A public description can add context without erasing the lower-level failure category.</p>
 <pre class="highlighted-code"><code class="language-csharp"><span class="syntax-keyword">using</span> System<span class="syntax-punctuation">;</span>
@@ -300,6 +301,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The outer domain failure still contains the I/O cause.</p>
+<p><strong>Trace.</strong> The inner <code>try</code> throws an <code>IOException</code>. Its catch block wraps that exception as the inner exception of a new <code>InvalidOperationException</code> with the message import failed, and throws the wrapper. The outer catch stores it. <code>observed?.InnerException is IOException</code> is true, so the original cause survives inside the domain-level failure for anyone reading the logs.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <ol>
 <li><strong>Predict and explain.</strong> Identify which failure category each catch handles.</li>
@@ -319,10 +321,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <ol start="6">
 <li><strong>Transfer and justify.</strong> Decide which layer owns user-facing error translation and which details should remain private diagnostics.</li>
 </ol>
-<p>For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.</p>
+<p>Log each task in the <a href="../STUDY-GUIDE.md.html#recording-exercise-evidence">evidence table</a> before opening the explanation.</p>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
 <p>A catch-all that returns a default can turn data loss into apparent success. Throwing the caught variable instead of using bare throw changes stack-trace behavior. Cleanup should not accidentally replace the original failure.</p>
-<p>A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.</p>
+<p>For task 2, <code>ParseCount(&quot;-1&quot;)</code> parses successfully and then throws <code>ArgumentOutOfRangeException</code>, so it must not land in the <code>FormatException</code> catch. Task 4&#x27;s catch-all returning an empty report hides real failures; rethrow with a bare <code>throw;</code> when you cannot handle an exception, because <code>throw ex;</code> resets its stack trace.</p>
+<p>Repair routine: <a href="../STUDY-GUIDE.md.html#building-a-regression-case">building a regression case</a>.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <ol>
 <li>Reproduce Example A (Catch only the expected invalid format) before changing anything, and confirm its observation: Malformed numeric text is caught as a format error.</li>
@@ -330,9 +333,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>Before opening the explanation, test your task 3 attempt against this lesson&#x27;s main pitfall: A catch-all that returns a default can turn data loss into apparent success.</li>
 </ol>
 <h3 id="self-check-and-next-step">Self-check and next step<a class="heading-anchor" href="#self-check-and-next-step" aria-label="Link to this section">#</a></h3>
-<p>Explain Exception, Stack trace, Translation without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.</p>
+<p>Name the exception type <code>ParseCount</code> throws for oops, for -1, for 99999999999 and for empty text. Explain what the inner exception keeps that the outer message does not. For task 6, decide which layer turns exceptions into user messages and which details stay in logs.</p>
+<p>Then follow the general <a href="../STUDY-GUIDE.md.html#self-check-routine">self-check routine</a> and save your pad.</p>
 <h3 id="sources-and-execution-boundary">Sources and execution boundary<a class="heading-anchor" href="#sources-and-execution-boundary" aria-label="Link to this section">#</a></h3>
-<p><a href="https://learn.microsoft.com/en-us/dotnet/csharp/">Official language or framework documentation</a>. The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.</p>
+<p><a href="https://learn.microsoft.com/en-us/dotnet/csharp/">Documentation</a>: The C# guide&#x27;s exception handling articles describe <code>try</code>, <code>catch</code>, <code>finally</code>, exception filters and <code>InnerException</code>.</p>
+<p>Provenance and limits: <a href="../STUDY-GUIDE.md.html#sources-and-execution-boundary">sources and execution boundary</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for csharp-023: Exceptions and preserving failure meaning.
 Read courses/csharp/guides/csharp-023.md and courses/csharp/lessons/csharp-023.cs. Prerequisites: csharp-022.

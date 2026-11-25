@@ -2,19 +2,17 @@
 
 export {};
 // Exercise 1: Compile and run a two-module project: predict an edited check
-// Copy Example A into a scratch `main.mts` and change `assert.equal(await
-// exists(join(directory, 'compiled', 'math.mjs')), true);` to `assert.equal(await
-// exists(join(directory, 'compiled!', 'math.mjs')), true);` inside its check. Before running
-// it, predict whether the check still passes and explain why; then restore it.
-// Expected: The changed run fails with an `AssertionError` at `assert.equal(await
+// In a scratch copy of Example A, change `assert.equal(await exists(join(directory,
+// 'compiled', 'math.mjs')), true);` to `assert.equal(await exists(join(directory,
+// 'compiled!', 'math.mjs')), true);` inside its check. Does the check still pass?
+// Expected: The edited run fails with an `AssertionError` at `assert.equal(await
 // exists(join(directory, 'compiled!', 'math.mjs')), true);`. Restoring `assert.equal(await
 // exists(join(directory, 'compiled', 'math.mjs')), true);` brings back: both processes
 // succeed; output 8; math.mjs is emitted.
 
 // Exercise 2: Inspect type-only erasure: debug a regression
-// A regression changed one token in Example B, so one line now reads `'model.mts!': 'export
-// type Item = { id: string };',`. Run Example B with that line, use the failing check to
-// locate the defect and repair it without changing the check.
+// A regression made one Example B line read `'model.mts!': 'export type Item = { id: string
+// };',`. Locate and repair it without editing the check.
 // Expected: Before the repair the run fails with an `AssertionError` at
 // `assert.equal(compiled.status, 0, compiled.stdout + compiled.stderr)`. Restoring
 // `'model.mts': 'export type Item = { id: string };',` brings back: no model import in

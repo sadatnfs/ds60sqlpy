@@ -250,18 +250,18 @@ amount: int32</code></pre>
   region<span class="syntax-punctuation">;</span></code></pre>
 <p>From explain.sql, this should return east 11 and west 9. The EXPLAIN version of the same query shows the partition filter applied before the scan, so only one directory is read. Two different failures look alike here: a missing partition returns zero rows with no error, while a wrong column type in a separately named table produces a reader error or nulls. Record which one you saw before changing anything, because the fixes are different.</p>
 <h3 id="complete-worked-source">Complete worked source<a class="heading-anchor" href="#complete-worked-source" aria-label="Link to this section">#</a></h3>
-<p>This is a project-only command notebook. Read and edit it in the classroom; run its explicitly labeled commands from the copied owned Docker workshop. The classroom does not execute these service commands.</p>
+<p>The classroom does not execute these service commands. See the <a href="../STUDY-GUIDE.md.html#workshop-notebooks">workshop rules</a>.</p>
 <h2 id="hive-apache-064-command-notebook">Hive apache-064 command notebook<a class="heading-anchor" href="#hive-apache-064-command-notebook" aria-label="Link to this section">#</a></h2>
-<p>Run from the copied owned Hive project, following its README. Native service acceptance is separately recorded in QUALIFICATION.md.</p>
+<p><code>initialize.hql</code> is the DDL that maps <code>ds60.orders</code> onto <code>file:/warehouse/orders</code> with partition key <code>day</code>, and <code>fixture.py</code> writes the Parquet rows that DDL expects. Read both in the copied Hive project before the two checks.</p>
 <pre class="highlighted-code"><code class="language-bash">cat initialize.hql
 cat fixture.py
 bash run.sh check
 bash run.sh metadata</code></pre>
 <p>Use separately named copied-owned tables for wrong-type and wrong-location experiments. Record the actual reader response; an empty location and an incompatible schema are different conditions.</p>
-<p>The classroom does not execute these Docker commands. Retain source, schema, file identities, actual responses and failure scope in an independent receipt.</p>
+<p>The accepted Hive gate covered one correct table. A wrong column type or a wrong location is your own experiment, and each needs its own table name, DDL and recorded diagnostic so nobody mistakes it for the reference result.</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
 <ul>
-<li><a href="https://hive.apache.org/development/quickstart/">Hive4.2.1 preparation and components</a></li>
+<li><a href="https://hive.apache.org/development/quickstart/">Hive 4.2.1 preparation and components</a></li>
 <li><a href="https://hive.apache.org/docs/latest/language/languagemanual-ddl/">Hive DDL</a></li>
 <li><a href="https://hive.apache.org/docs/latest/admin/adminmanual-metastore-administration/">Hive Metastore administration</a></li>
 <li><a href="https://iceberg.apache.org/docs/latest/hive/">Hive/Iceberg integration</a></li>

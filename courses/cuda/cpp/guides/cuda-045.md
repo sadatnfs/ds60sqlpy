@@ -4,18 +4,15 @@
 
 Advanced; about 130 minutes, plus any optional hardware experiment. Direct prerequisites: `cuda-020`, `cuda-021`, `cuda-022`, `cuda-039`
 
-The order supports learning at your own pace. Reading and CPU reasoning remain
-available when NVIDIA hardware is absent. Advanced hardware features need their
-own capability checks and are not prerequisites for opening this chapter.
+Pacing, evidence labels and platform rules for every chapter are in the [CUDA study guide](../../STUDY-GUIDE.md).
 
 ## Learning objectives
 
 Compare a Thrust or CUB primitive against a handwritten kernel and justify the library or custom choice.
 
-Work through *CCCL, Thrust and CUB before writing everything by hand* with the concrete cases below. Finish with this evidence:
-equivalent semantics, stated temporary-memory needs and a justified library/custom decision. Distinguish an algorithmic
-calculation, a compiled artifact and an actual device observation when explaining
-what your work establishes.
+**Scope:** Standard parallel algorithms, execution policies, temporary storage, iterators, ownership and custom operators.
+
+**Evidence to produce:** Equivalent semantics, stated temporary-memory needs and a justified library/custom decision.
 
 ## Purpose, vocabulary and mental model
 
@@ -30,28 +27,17 @@ CUDA Core Compute Libraries bring maintained building blocks such as Thrust algo
 
 ## How to run and study this lesson
 
-Use the saved reading worksheet in `/classroom`; the reading pad does not execute
-CUDA. For the bounded calculation, select **CPU model (Python)**, whose
-answer-free starter supplies the literal fixtures and task contract. The
-[CUDA C++ study workflow](../README.md) covers platforms, optional GPU
-compilation and evidence labels. In a prepared Python environment you can also
-run the separate [CPU reference](../references/cuda-045_cpu.py) from the
-repository root:
+Trace worked example 1 by hand, then run the [CPU reference](../references/cuda-045_cpu.py) from the repository root:
 
 ```sh
 python courses/cuda/cpp/references/cuda-045_cpu.py
 ```
 
-Its assertions check the stated numerical result or model invariant; console
-text is evidence of this CPU model only, not of CUDA execution.
-
 ## Worked example 1: trace the mechanism
 
 Transform \([1,2,3,4]\) by squaring and sum, obtaining 30. A fused transform-reduce can avoid a separate \([1,4,9,16]\) allocation when its interface supports the desired operation. The mathematical result is the same; the memory and scheduling behavior differ.
 
-The complete CPU model below intentionally models only the named arithmetic,
-layout, dependency or capability decision. It does not model GPU scheduling,
-caches, instruction timing or device memory visibility.
+**Why:** 1 + 4 + 9 + 16 = 30, and fusion avoids storing [1, 4, 9, 16].
 
 ```python
 values = [1, 2, 3, 4]
@@ -61,41 +47,37 @@ assert selected == [5, 5]
 print({"transform_reduce_reference": 30, "stable_selection": selected})
 ```
 
-**Expected observation:** Every assertion succeeds. A representative CPU output is:
+**Expected observation:** every assertion succeeds, and the CPU model prints:
 
 ```text
 {'transform_reduce_reference': 30, 'stable_selection': [5, 5]}
 ```
 
-Integers, shapes and ordering must match exactly; only assertions with an explicit
-tolerance accept small floating-point differences. A printed duration is a model
-output, not a measured GPU benchmark.
+**Check:** The reference asserts the sum of squares is 30.
 
 ## Worked example 2: change a meaningful condition
 
 Stable filtering \([5,2,5,1]\) for values at least five returns \([5,5]\). Sorting before filtering also retains the two fives here, but generally changes order. Choose the algorithm according to semantic requirements, not merely the nearest familiar function name.
 
-Before applying this example to your own program, write down which inputs are
-read, which result is produced, and the condition that makes the comparison
-valid. Keep the original case as a regression check when changing a boundary.
+**Why:** Stable filtering of [5, 2, 5, 1] returns [5, 5] with original order preserved.
+
+**Check:** Test a fixture with distinct survivors such as [7, 2, 5] and confirm order [7, 5].
 
 ## Six progressive exercises
 
-Exercises 1 and 2 are guided reconstructions of the worked examples; exercises
-3-6 change an input, diagnose a defect, test a boundary and transfer the idea.
-For each one, keep the calculation, output, diagram or failure policy you
-produce so another reader can compare it with the worked cases. If the hint is
-not enough, reread the mechanism paragraph and the bounded CPU assertion.
-
 ### Exercise 1
 
-Predict and trace the first worked example before running its CPU reference. Write every intermediate quantity that leads to the stated result, including units or ownership where applicable.
+Reconstruct worked example 1 on paper before running its CPU reference. Express squaring and summing of [1, 2, 3, 4] as one transform-reduce call.
+
+**Trap to avoid:** Materializing the squares then reducing is correct but allocates and reads an extra array.
 
 **Hint:** Start with the literal input and intermediate quantities in worked example 1.
 
 ### Exercise 2
 
-Reconstruct the second worked example without copying its conclusion. Identify the changed input or condition, show the resulting calculation or dependency, and explain why it differs from the first example.
+Rework worked example 2 without copying its conclusion. Use a stable selection keeping values at least 5 in input order.
+
+**Trap to avoid:** Sorting first passes this fixture but reorders survivors in general.
 
 **Hint:** Identify exactly which condition changes in worked example 2.
 
@@ -103,11 +85,15 @@ Reconstruct the second worked example without copying its conclusion. Identify t
 
 Compare reduce and transform-reduce for sum of squares.
 
+**Trap to avoid:** Claiming the results differ because the algorithms differ confuses implementation with value.
+
 **Hint:** Use the first worked example to establish the relevant quantities, then change only the requested input.
 
 ### Exercise 4
 
 Why must a library stream argument be deliberate?
+
+**Trap to avoid:** Leaving the default stream can add hidden synchronization with other streams.
 
 **Hint:** Locate the failed phase or violated dependency before proposing a repair.
 
@@ -115,35 +101,33 @@ Why must a library stream argument be deliberate?
 
 What is the empty sum-of-squares identity?
 
+**Trap to avoid:** Passing the first element as initial value fails when no element exists.
+
 **Hint:** Check what the algorithm is allowed to read, write or assume at this boundary.
 
 ### Exercise 6
 
 State when a custom reduction is justified.
 
+**Trap to avoid:** Writing one to avoid reading documentation duplicates tested code with new bugs.
+
 **Hint:** State the output contract and which observations are needed in the new application.
 
 ## Common mistakes and diagnosis
 
-A tempting but incorrect claim in this chapter is: **library calls remove the need to understand allocation, synchronization or data layout.  should be replaced by the pinned release's docs at implementation time.**
-
-For the concrete failure exercise, why must a library stream argument be deliberate?
-Preserve the original input and the stage where behavior diverged, and compare
-with the CPU model before changing hardware configuration.
+A tempting but incorrect claim: **Library calls remove the need to understand allocation, synchronization or data layout.** Libraries implement the algorithm, but the caller still owns inputs, outputs, temporary storage, stream choice and layout. CUB primitives ask you to query and allocate temporary storage, Thrust policies decide where work runs, and a call on the wrong stream races with other work. Worked example 2 shows semantics matter too: sorting before filtering changes order, so pick the primitive that matches the contract. Worked example 1 makes the memory point concrete: a fused transform-reduce sums the squares of [1,2,3,4] to 30 without storing the intermediate array [1,4,9,16] in device memory.
 
 ## Self-check, retrieval and transfer
 
-Explain the first example without its code, then use the second example to state
-one assumption that matters. Complete Exercise 3 independently, use Exercise 4 to
-diagnose a plausible defect, check the boundary in Exercise 5, and retain the
-application contract from Exercise 6. Compare the [separate explanations](../solutions/cuda-045_solutions.md)
-only after your attempt or a deliberate reveal. A reading marker records your
-choice; it does not certify hardware qualification or expert mastery.
+1. Why can transform-reduce use less memory than transform followed by reduce?
+2. What is the sum of squares of an empty input?
+3. Why is a library stream argument a correctness choice?
+
+Short answers are in the [separate explanations](../solutions/cuda-045_solutions.md#self-check-answers); compare only after an attempt.
 
 ## Primary references
 
-Check the documentation that matches your prepared toolkit before optional
-hardware execution.
+Use the documentation that matches your prepared toolkit.
 
 - [CUDA Core Compute Libraries](https://nvidia.github.io/cccl/)
 

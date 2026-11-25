@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/kubernetes/solutions/k8s-056_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="k8s-056-explanatory-solutions">k8s-056: explanatory solutions<a class="heading-anchor" href="#k8s-056-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit reveal. These explanations describe the synthetic topology and stated API contracts. They are not fabricated runtime receipts.</p>
+<p>Attempt each exercise first, then compare (<a href="../STUDY-GUIDE.md.html#solutions-and-the-ai-tutor">study guide</a>).</p>
 <h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
 <p>Network address translation changes address or port fields as traffic crosses a boundary. Destination NAT changes where a packet is delivered; source NAT changes the apparent sender. Connection tracking can maintain state so replies follow the corresponding translated path. These mechanisms can make an application’s observed client address differ from the original caller.</p>
 <p>Kubernetes traffic policies influence endpoint selection and source-address behavior, but exact paths depend on the Service type and implementation. externalTrafficPolicy Local can preserve source IP in common node-backed paths and restrict external traffic to local endpoints, with availability and load-distribution tradeoffs. It is not a universal declaration that every proxy will forward the original client address unchanged.</p>

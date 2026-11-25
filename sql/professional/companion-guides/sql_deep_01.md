@@ -4,79 +4,46 @@
 
 ## How to run this lesson
 
-Start the Linux-container engine and run `./classroom` from the repository
-root. On Windows, use Ubuntu in WSL 2 or the thin
-`START_DOCKER_CLASSROOM.cmd` wrapper. Choose **PostgreSQL** on the shared
-`/classroom` home, then open **sql-deep-01**. The
-[launcher guide](../../../docs/one-command-classroom.md) covers first preparation, strict resume and
-the saved project selection. No host Python or PostgreSQL installation is
-required for this browser route.
+Start **sql-deep-01** from `./classroom` using the shared [run steps](../../STUDY-GUIDE.md#run-a-lesson-in-the-classroom).
 
-1. Read the prerequisite and fixture notes before running the file. Use only
-   the local disposable `advanced_sql_training` database.
-2. Choose **Whole SQL lesson (psql)** for the cataloged learner script. This
-   preserves the lesson's reviewed psql directives, relative includes and
-   transaction behavior. **SQL snippet** is appropriate for ordinary SQL
-   statements, but is not a replacement for an entire script's setup.
-3. The **Course database** panel above the code shows whether the course
-   training tables are loaded. Missing tables load automatically before your
-   first run (or choose **Load course tables**) and stay loaded for later
-   lessons. **Reset training data** restores the original rows only when your
-   own changes made results differ; it keeps your saved code and notes.
-4. Edit the learner copy in the classroom and save your prediction before
-   running. Its whole-script workspace is
-   `.learning/sql/sql-deep-01/lesson/workspace/sql/professional/lessons/sql_deep_01.sql`.
-   For browser work this path is inside the Docker learning volume, not a
-   newly created host folder beside your checkout. The checked-in source
-   remains the answer-free starting artifact.
-5. Run the whole script and inspect the full transcript. The runner uses
-   `psql -X -v ON_ERROR_STOP=1 -f`. SELECT output has columns, rows and a row
-   count; DDL/DML has command tags; intentional checks may produce NOTICE
-   messages. An unexpected ERROR or nonzero exit is a failure to diagnose,
-   even when an earlier query printed plausible values.
-6. Verify the lesson's expected grain, ordering, constraints and declared
-   transaction or cleanup outcome. Keep required ROLLBACK statements.
-   The warehouse sequence and other explicitly stateful exercises explain
-   when state is committed. Read saved output without rerunning it when
-   reviewing an earlier attempt.
+Choose **Whole SQL lesson (psql)**. The script opens one transaction, refuses
+any database other than `advanced_sql_training`, sets UTC and a 15-second
+statement timeout, then builds five temporary tables: `deep1_values` (values 1,
+2 and NULL), `deep1_blocklist` (2 and NULL), five people from Ada to Eli, the
+required skills `sql` and `python`, and `deep1_skills`, where Ada holds `sql`
+twice and Dee also holds `rust`. Only the two worked examples run: a two-row
+comparison result in which `ordinary_inequality` is NULL, and a one-row
+empty-array result. No `NOTICE` is expected, and `ROLLBACK` drops every table.
+Save attempts in
+`.learning/sql/sql-deep-01/lesson/workspace/sql/professional/lessons/sql_deep_01.sql`.
 
-If a relation is missing, inspect the lesson's required fixture and predecessor
-rather than guessing a new table definition. If authentication or runtime
-readiness fails, use `./classroom status` and the setup guide. Keep credentials
-out of SQL, notebooks, screenshots and committed files. Repair the first error
-before trusting partial output, and reveal separate solutions only when you
-want to compare after an attempt.
-
-### Optional contributor notebook route
-
-For notebook work, deliberately prepare the Linux/WSL contributor environment
-from [CONTRIBUTING.md](../../../CONTRIBUTING.md), including a compatible psql client and
-the notebook dependencies. Generate this lesson's private workspace through
-the maintained CLI:
-
-```sh
-uv run --no-sync python scripts/course.py sql notebook sql-deep-01
-```
-
-Open the printed notebook path in that environment's JupyterLab. It uses the
-same catalog-derived learner-copy layout in that contributor checkout and
-executes the complete script through psql. Its host-side state is separate
-from the Docker browser's named volume. Follow
-[guided SQL notebooks](../../../docs/guided-sql-notebooks.md) for explicit local connection
-selection and kernel setup. Notebook generation does not execute SQL or
-authorize a reset.
+The optional notebook route starts with `uv run --no-sync python scripts/course.py sql notebook sql-deep-01`; see the [study guide](../../STUDY-GUIDE.md#optional-contributor-notebook-route).
 
 ## Level and prerequisites
 
-- **Level:** Advanced. The guide defines each new mechanism before relying on it.
-- **Prerequisites:** [`sql-09`](../../postgres-60day/companion-guides/day09_correlated_subqueries.md), [`sql-quality-01`](sql_quality_01_bags_and_fanout.md).
-- **Artifacts:** [Learner SQL](../lessons/sql_deep_01.sql), [explained reference](../solutions/sql_deep_01_solutions.md), and [executable reference](../solutions/sql_deep_01_solutions.sql). Every fixture is local, deterministic and rolled back; no prior lesson state is required.
+- **Level:** Advanced. Three-valued logic, `NOT IN` against `NOT EXISTS`, `ANY`
+  and `ALL`, and double `NOT EXISTS` are each defined before an exercise
+  depends on them.
+- **Prerequisites:**
+  [`sql-09`](../../postgres-60day/companion-guides/day09_correlated_subqueries.md),
+  [`sql-quality-01`](sql_quality_01_bags_and_fanout.md): correlated subqueries,
+  then bag semantics and duplicate rows.
+- **Artifacts:** [Learner SQL](../lessons/sql_deep_01.sql), [explained
+  reference](../solutions/sql_deep_01_solutions.md), and [executable
+  reference](../solutions/sql_deep_01_solutions.sql). The five `deep1_` tables
+  are temporary and vanish with the final `ROLLBACK`, so no earlier lesson
+  state is needed.
 
 ## Learning objectives
 
-- State the output grain and identity before writing a query, including the NULL and duplicate policies.
-- Explain the new SQL mechanism, produce each exact projected result and expose the listed counterexample.
-- Verify rollback-safe behavior from inspected result rows and assertions without relying on a final success message.
+- Predict whether `<>`, `NOT IN` and `IS DISTINCT FROM` return true, false or
+  NULL for each row of `deep1_values`, and explain why one NULL in
+  `deep1_blocklist` leaves row 1 unknown.
+- Write a known-value anti-join with `NOT EXISTS`, and state the missing-value
+  policy as its own predicate instead of relying on what NULL happens to do.
+- Express "holds every required skill" as a double `NOT EXISTS`, then show that
+  an empty requirement set approves everyone unless a separate nonempty
+  condition is added.
 
 ## Vocabulary and concepts
 
@@ -135,7 +102,7 @@ The one-row output has case_name, any_larger and all_larger. ANY is false becaus
 
 **Inputs/evidence:** For sql-deep-01 Exercise 1, Using `deep1_values`, return one row per row_id with columns row_id, value, not_two, not_in_block, null_safe_different. Compare value<>2, value NOT IN the blocklist and value IS DISTINCT FROM 2. Order by row_id and preserve all three source rows.
 
-**Expected result/shape:** For sql-deep-01 Exercise 1, Row 1 has true, NULL, true; row 2 has false, false, false; row 3 has NULL, NULL, true. value is 1,2, NULL respectively. A WHERE filter is not part of this diagnostic.
+**Expected result/shape:** For sql-deep-01 Exercise 1, Row 1 has true, NULL, true; row 2 has false, false, false; row 3 has NULL, NULL, true. value is 1, 2, NULL respectively. A WHERE filter is not part of this diagnostic.
 
 **Verify:** For sql-deep-01 Exercise 1, project predicates before filtering and compare all three row IDs. In particular, test NULL with IS NULL instead of equality and confirm the blocklist NULL makes the nonmatch unknown.
 
@@ -143,13 +110,13 @@ The one-row output has case_name, any_larger and all_larger. ANY is false becaus
 
 **Inputs/evidence:** For sql-deep-01 Exercise 2, Return row_id, value for nonmissing candidate values that have no equal nonmissing blocklist value. Use NOT EXISTS and explicitly exclude missing candidate values. The result grain is one source row per row_id, ordered by row_id.
 
-**Expected result/shape:** For sql-deep-01 Exercise 2, Only(row_id1, value 1) remains. Value 2 is blocked; row 3 is excluded because its candidate value is unknown, not because it matched a known blocklist value.
+**Expected result/shape:** For sql-deep-01 Exercise 2, Only the row with `row_id` 1 and `value` 1 remains. Value 2 is blocked; row 3 is excluded because its candidate value is unknown, not because it matched a known blocklist value.
 
 **Verify:** For sql-deep-01 Exercise 2, check the returned ID against the known-value set difference {1,2} minus {2}; separately confirm row 3 is excluded by the outer nonmissing policy.
 
-3. **Distinguish empty, mixed and unknown quantified collections.** For five named integer-array cases, return case_id, any_larger, all_larger using 5<ANY and 5<ALL. Cases are empty,[6,7],[4,7],[4, NULL], and a NULL array. One row represents one case, ordered by case_id.
+3. **Distinguish empty, mixed and unknown quantified collections.** For five named integer-array cases, return case_id, any_larger, all_larger using `5 < ANY` and `5 < ALL`. Cases are empty, `[6,7]`, `[4,7]`, `[4,NULL]`, and a NULL array. One row represents one case, ordered by case_id.
 
-**Inputs/evidence:** For sql-deep-01 Exercise 3, For five named integer-array cases, return case_id, any_larger, all_larger using 5<ANY and 5<ALL. Cases are empty,[6,7],[4,7],[4, NULL], and a NULL array. One row represents one case, ordered by case_id.
+**Inputs/evidence:** For sql-deep-01 Exercise 3, For five named integer-array cases, return case_id, any_larger, all_larger using `5 < ANY` and `5 < ALL`. Cases are empty, `[6,7]`, `[4,7]`, `[4,NULL]`, and a NULL array. One row represents one case, ordered by case_id.
 
 **Expected result/shape:** For sql-deep-01 Exercise 3, Case 1 gives false, true; case 2 true, true; case 3 true, false; case 4 NULL, false; case 5 NULL, NULL. A false element decides ALL even when another comparison is unknown.
 
@@ -185,12 +152,24 @@ If NOT IN unexpectedly removes every candidate, project its Boolean result and i
 
 ## Self-check
 
-- Explain the row grain after each FROM, JOIN, filter, grouping or window step. Name the identity columns that prove rows were neither lost nor multiplied.
-- Reconstruct a boundary result by hand, then compare with the query output. Explain why the tempting wrong query fails even if it returns the same total on an easier fixture.
+- Row 1 has value 1, which is not on the blocklist. Why does
+  `value NOT IN (SELECT value FROM deep1_blocklist)` still return NULL for it,
+  and which Exercise 2 rewrite returns row 1?
+- Ada holds `sql` twice and Dee adds `rust`. Why does the double `NOT EXISTS`
+  return exactly Ada and Dee, and how would `count(*)` over the joined skill
+  rows misjudge Ada?
+- After `TRUNCATE deep1_required`, all five people pass `all_requirements`.
+  Which column in Exercise 6 stops that vacuous truth from approving anyone,
+  and what restores the two skills?
 
 ## Next step
 
-Transfer the same reasoning to a new small fixture before using it on larger data, then continue with [the next deepening lesson](sql_deep_02.md). Keep the result columns, ordering, NULL policy and observation horizon explicit. The [professional SQL track](../README.md) provides the wider route.
+Before moving on, add a person who holds `sql` twice and no `python` to a copy
+of the fixture, and confirm the double `NOT EXISTS` rejects them while a row
+count of 2 would accept them. [The next deepening lesson](sql_deep_02.md) moves
+from row-level truth to metric algebra: which grain a total belongs to, and how
+snapshots and weighted bridges change it. The [professional SQL
+track](../README.md) lists the wider route.
 
 ## Primary sources and official APIs
 

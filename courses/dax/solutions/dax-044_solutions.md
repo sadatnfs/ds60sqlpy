@@ -1,8 +1,6 @@
 # dax-044: explained reference and practice reasoning
 
-This is an offline DAX editing lesson. No DAX compiler, semantic-model engine, Power BI account or network connection is required. Worked tables describe the named reference and model, not execution of your draft. Save, compare and export source; do not interpret a comparison or completion marker as a passed program run.
-
-The complete [reference source](dax-044_reference.dax) and [named model](../models/retail/model.json) belong together. The reference-results sidecar binds both exact files by SHA-256. Those hashes identify bytes; they do not certify DAX execution.
+Check that the reference's expanded query multiplies only NetRevenue by 0.9 and leaves QuantitySold untouched. Results of 168.3 and 17 follow from the guarded definition shown in the lesson's extra block. Read it beside the [reference source](dax-044_reference.dax); the [study guide](../STUDY-GUIDE.md#answers-and-references) explains how the sidecar binds it to the model.
 
 ## Worked-case reconciliation
 

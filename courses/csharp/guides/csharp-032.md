@@ -24,9 +24,9 @@ A complete service also owns its dependency lifetime and result shape. The class
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles your saved pad as `Program.cs` in its fixed .NET 10 project. C# 14 is the matching language generation. This route uses the prepared framework libraries; it does not accept arbitrary project files, NuGet packages, command arguments or interactive input. The explicit `Program.Main` entrypoint makes compilation and execution visible. `Check` throws on a false condition in every build configuration, unlike conditional debugging assertions.
+`ImportAsync` is a single-line helper after `Main` that combines earlier lessons: JSON decoding, validation, checked accumulation and cancellation checks. It awaits only `Task.CompletedTask`, so it finishes synchronously; the async signature is there so that a real source could be awaited later without changing callers.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Compile contract, starter stop and success marker: [running a lesson](../STUDY-GUIDE.md#running-a-lesson).
 
 
 
@@ -34,7 +34,7 @@ Start with the answer-free learner artifact in your saved classroom pad. It deli
 
 An async method can validate cancellation before admitting work and return a record describing accepted totals and rejected counts. Immutable result fields make it easier to store a receipt without later mutation.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+Each example ends with a trace; method: [tracing a program](../STUDY-GUIDE.md#tracing-a-program).
 
 ## Worked example / walkthrough
 
@@ -99,6 +99,8 @@ internal static class Program {
 ```
 
 **Observe:** The service returns total 2 and one rejected record.
+
+**Trace.** The token is not cancelled, so the first check passes. The text decodes into two `ImportItem` records. The first, pear with 2, passes validation and the total becomes 2. The second has a blank name, so `rejected` becomes 1 and its quantity is skipped. The result record holds total 2 and one rejection.
 
 ### Example B: Cancellation is not an empty report
 
@@ -169,6 +171,8 @@ internal static class Program {
 
 **Observe:** A cancelled request and a successful empty import have different outcomes.
 
+**Trace.** With a cancelled token, `ThrowIfCancellationRequested` throws before the JSON is even read, and the catch records cancellation. The second call uses `CancellationToken.None` and the text of an empty array, which decodes to zero items, so the method returns total 0 with no rejections. Cancelled and empty are different outcomes with different evidence.
+
 ## Exercises
 
 1. **Predict and explain.** Trace syntax, validation and aggregation as separate stages.
@@ -183,13 +187,15 @@ internal static class Program {
 
 6. **Transfer and justify.** Design an adapter boundary for a file or HTTP source without putting I/O inside the pure aggregation.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Log each task in the [evidence table](../STUDY-GUIDE.md#recording-exercise-evidence) before opening the explanation.
 
 ## Common pitfalls and diagnosis
 
 A transport DTO is not automatically a trusted domain object. Do not merge cancelled, invalid and successfully empty results into one representation. An async signature alone does not make CPU work asynchronous.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+For task 5, the literal null decodes to a null array, so the helper throws `ArgumentException` with the message array required, while malformed text throws `JsonException` from the decoder. An item without a Quantity key decodes as 0 and is accepted, which is a contract decision to document rather than an accident.
+
+Repair routine: [building a regression case](../STUDY-GUIDE.md#building-a-regression-case).
 
 ## Progressive hints
 
@@ -199,11 +205,15 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 ## Self-check and next step
 
-Explain Transport model, Domain validation, Service result without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+Name the stage, decoding, validation or aggregation, that handles each of the two items in Example A. Explain why catching every exception and returning total 0 would hide cancellation. For task 6, describe the adapter that reads a file and the pure function it hands the text to.
+
+Then follow the general [self-check routine](../STUDY-GUIDE.md#self-check-routine) and save your pad.
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://learn.microsoft.com/en-us/dotnet/csharp/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+[Documentation](https://learn.microsoft.com/en-us/dotnet/csharp/): The C# documentation's task-based asynchronous programming pages and the `System.Text.Json` guide cover the pieces this project combines.
+
+Provenance and limits: [sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

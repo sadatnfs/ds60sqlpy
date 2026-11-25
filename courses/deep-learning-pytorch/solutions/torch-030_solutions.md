@@ -2,6 +2,8 @@
 
 Open these answers only after attempting Distributed gradients and accumulation semantics on CPU yourself. They reuse the guide's literal inputs, starting from Example A, Weight unequal shard means, so a discrepancy points at one step. The executable companion runs the assertions; this page explains why each one tests Global objective, Microbatch accumulation, Sha rd weighting. After a pass, choose a new input for exercise 6, Represent empty-shard contributions, without looking.
 
+After comparing, follow the [review steps](../STUDY-GUIDE.md#after-the-solutions).
+
 ## Mechanism review
 
 Distributed and accumulated gradients should represent a declared global objective. Equal averaging of shard means weights shards equally, not examples. If one shard contains one observation with mean gradient 2 and another contains three with mean 6, the global example mean is 5 rather than 4. The same issue appears with unequal microbatches on one CPU.
@@ -153,6 +155,3 @@ assert denominator == 4 and numerator.div(denominator).item() == 5
 
 **Verify:** In a fresh process, the exercise checks confirm `denominator == 4` and `numerator.div(denominator).item() == 5`.
 
-## Review after comparison
-
-Repeat exercise 4, Apply one accumulated update, with one changed fixture value and predict the difference before running it. Keep your failing attempt at exercise 5, Contrast separate microbatch updates, beside the repaired result. A missing framework is not a failing assertion. These solutions use only local fixtures.

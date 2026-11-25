@@ -1,6 +1,6 @@
 # java-005: explanatory solutions
 
-Open after an attempt or an explicit solution reveal. The executable reference runs the six exercise checks together as `Main.java`. The guide contains independent worked examples, while this file explains the choices and failure cases in the complete answer.
+Open this after an attempt; see [using the solutions](../STUDY-GUIDE.md#use-the-solutions).
 
 ## Mechanism review
 
@@ -18,7 +18,7 @@ Array indices start at 0 and stop before length. Arrays.copyOf creates a separat
 
 ## Exercise 1: Copy array storage: change one input
 
-Task: Copy Example A into a scratch `Main.java` and change `int[] original = { 1, 2, 3 };` to `int[] original = { 2, 2, 3 };`. Before running it with `java -ea Main`, predict which assertion fails and which value it now sees; then run it and restore the original line.
+Task: Change `int[] original = { 1, 2, 3 };` to `int[] original = { 2, 2, 3 };` in Example A and predict which assertion fails and why.
 
 The new array owns its storage. A simple assignment copy=original would alias the same array and make the mutation visible through both variables.
 
@@ -31,13 +31,13 @@ copy[0] = 9;
 assert original[0] == 1 && copy[0] == 9;
 ```
 
-**Expected:** The changed run fails with an `AssertionError` from the assertion on `original[0] == 1 && copy[0] == 9`. Restoring the original line brings back the worked observation: original starts 1; copy starts 9.
+**Expected:** The edited run fails with an `AssertionError` from the assertion on `original[0] == 1 && copy[0] == 9`.
 
-**Verify:** Compare your written prediction with the reported `AssertionError` and its stack-trace line, and name the value that made `original[0] == 1 && copy[0] == 9` false. After restoring the line, the program completes without an `AssertionError` again.
+**Verify:** Name the value that makes `original[0] == 1 && copy[0] == 9` false, then restore the line.
 
 ## Exercise 2: Count text units: diagnose an edited check
 
-Task: A careless edit changed the assertion that Example B adds after Example A so that it reads `assert text.codePointCount(1, text.length()) == 2;`. Run Example B with that line, explain why the edited assertion now fails for the same program state, and restore it.
+Task: Example B's new assertion was edited to `assert text.codePointCount(1, text.length()) == 2;`. Explain why it fails for unchanged state and restore it.
 
 The emoji occupies a surrogate pair. Treating length as a visible-character count would overcount this simple example.
 
@@ -49,9 +49,9 @@ assert text.length() == 3;
 assert text.codePointCount(0, text.length()) == 2;
 ```
 
-**Expected:** Before the repair the run fails with an `AssertionError` from the assertion on `text.codePointCount(0, text.length()) == 2`; after it the line reads `assert text.codePointCount(0, text.length()) == 2;` again and length 3 code units; 2 code points.
+**Expected:** The edited run fails with an `AssertionError` from the assertion on `text.codePointCount(0, text.length()) == 2`; the restored assertion passes.
 
-**Verify:** Keep the failing and the repaired runs. Explain why the edited assertion rejects the same program state that `text.codePointCount(0, text.length()) == 2` accepts.
+**Verify:** Explain why the edited assertion rejects the state that `text.codePointCount(0, text.length()) == 2` accepts.
 
 ## Exercise 3: Observe String immutability
 
@@ -67,7 +67,7 @@ assert lower.equals("red") && upper.equals("RED");
 
 **Expected:** original red; new RED.
 
-**Verify:** Keep an assertion equivalent to `lower.equals("red") && upper.equals("RED")`. As a control, change `String lower = "red";` to `String lower = "red!";`: the run must fail with an `AssertionError` from the assertion on `lower.equals("red") && upper.equals("RED")`. Restore the line before continuing.
+**Verify:** Control: changing `String lower = "red";` to `String lower = "red!";` must fail the assertion on `lower.equals("red") && upper.equals("RED")`.
 
 ## Exercise 4: Select by code-point offset
 
@@ -83,7 +83,7 @@ assert emoji.length() == 2 && emoji.codePointCount(0, emoji.length()) == 1;
 
 **Expected:** substring is the intact emoji with length 2.
 
-**Verify:** Keep an assertion equivalent to `emoji.length() == 2 && emoji.codePointCount(0, emoji.length()) == 1`. As a control, change `int offset = text.offsetByCodePoints(0, 1);` to `int offset = text.offsetByCodePoints(1, 1);`: the run must fail with an `AssertionError` from the assertion on `emoji.length() == 2 && emoji.codePointCount(0, emoji.length()) == 1`. Restore the line before continuing.
+**Verify:** Control: changing `int offset = text.offsetByCodePoints(0, 1);` to `int offset = text.offsetByCodePoints(1, 1);` must fail the assertion on `emoji.length() == 2 && emoji.codePointCount(0, emoji.length()) == 1`.
 
 ## Exercise 5: Normalize deliberately
 
@@ -102,7 +102,7 @@ assert java.text.Normalizer.normalize(decomposed, java.text.Normalizer.Form.NFC)
 
 **Expected:** raw strings differ; normalized strings equal.
 
-**Verify:** Keep an assertion equivalent to `java.text.Normalizer.normalize(decomposed, java.text.Normalizer.Form.NFC).equals(composed)`. As a control, change `String composed = "é";` to `String composed = "é!";`: the run must fail with an `AssertionError` from the assertion on `java.text.Normalizer.normalize(decomposed, java.text.Normalizer.Form.NFC).equals(composed)`. Restore the line before continuing.
+**Verify:** Control: changing `String composed = "é";` to `String composed = "é!";` must fail the assertion on `java.text.Normalizer.normalize(decomposed, java.text.Normalizer.Form.NFC).equals(composed)`.
 
 ## Exercise 6: Reject an invalid array index
 
@@ -122,8 +122,10 @@ assert invalid;
 
 **Expected:** ArrayIndexOutOfBoundsException.
 
-**Verify:** Keep an assertion equivalent to `invalid`. As a control, change `invalid = true;` to `invalid = false;`: the run must fail with an `AssertionError` from the assertion on `invalid`. Restore the line before continuing.
+**Verify:** Control: changing `invalid = true;` to `invalid = false;` must fail the assertion on `invalid`.
 
 ## After comparing the answer
 
-Run the complete reference with assertions enabled, then return to your own implementation. Recreate one check with different values and explain its expected result before execution. A compiler error, an expected domain exception and an assertion failure represent different stages and should be reported separately. Preserve ownership boundaries when adapting file, network or concurrency examples. The reference never authorizes access to a shared service or deletion of learner state. Use a fresh tiny fixture when you need to distinguish two interpretations of an API contract.
+Add a fixture with a letter followed by a combining mark and show that `codePointCount` reports 2 even though a reader sees one character; that case needs grapheme-level tools such as `java.text.BreakIterator`.
+
+Run the complete reference with `java -ea Main` first; the [review routine](../STUDY-GUIDE.md#use-the-solutions) covers the rest.

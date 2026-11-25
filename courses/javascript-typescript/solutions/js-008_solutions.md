@@ -1,6 +1,6 @@
 # js-008: explanatory solutions
 
-Use these answers after an attempt or an explicit reveal. The reference uses the same literal fixtures as the guide and keeps the exercises in separate scopes. A successful run checks these examples; explaining a changed input is a separate learning goal.
+Open these after your own attempt; each exercise runs in its own scope in the reference.
 
 ## Mechanism review
 
@@ -22,7 +22,7 @@ Use codePointAt and string iteration to inspect codepoints. normalize('NFC') app
 
 ## Exercise 1: Count code units and codepoints: predict an edited check
 
-Task: Copy Example A into a scratch `main.mjs` and change `assert.equal(text.codePointAt(1), 0x1f642);` to `assert.equal(text.codePointAt(2), 0x1f642);` inside its check. Before running it, predict whether the check still passes and explain why; then restore it.
+Task: In a scratch copy of Example A, change `assert.equal(text.codePointAt(1), 0x1f642);` to `assert.equal(text.codePointAt(2), 0x1f642);` inside its check. Does the check still pass?
 
 The emoji uses two code units. Taking a one-unit substring from its middle would not produce a complete codepoint.
 
@@ -35,13 +35,13 @@ assert.equal([...text].length, 2);
 assert.equal(text.codePointAt(1), 0x1f642);
 ```
 
-**Expected:** The changed run fails with an `AssertionError` at `assert.equal(text.codePointAt(2), 0x1f642);`. Restoring `assert.equal(text.codePointAt(1), 0x1f642);` brings back: length 3; spread count 2.
+**Expected:** The edited run fails with an `AssertionError` at `assert.equal(text.codePointAt(2), 0x1f642);`. Restoring `assert.equal(text.codePointAt(1), 0x1f642);` brings back: length 3; spread count 2.
 
-**Verify:** Compare your written prediction with the reported `AssertionError`, including its actual and expected values, and explain why the edited check rejects the values that `assert.equal(text.codePointAt(1), 0x1f642)` accepts. After restoring the line, the program prints its `{"checks":1,"status":"passed"}` receipt again.
+**Verify:** Compare the reported actual and expected values with your prediction, then restore `assert.equal(text.codePointAt(1), 0x1f642);`.
 
 ## Exercise 2: Compare canonical spellings: debug a regression
 
-Task: A regression changed one token in Example B, so one line now reads `const composed = 'é!';`. Run Example B with that line, use the failing check to locate the defect and repair it without changing the check.
+Task: A regression made one Example B line read `const composed = 'é!';`. Locate and repair it without editing the check.
 
 Canonical normalization changes representation identity under an explicit policy. It does not solve every homoglyph or language-specific comparison problem.
 
@@ -56,7 +56,7 @@ assert.equal(decomposed.normalize('NFC'), composed);
 
 **Expected:** Before the repair the run fails with an `AssertionError` at `assert.equal(decomposed.normalize('NFC'), composed)`. Restoring `const composed = 'é';` brings back: raw strings differ; normalized strings equal.
 
-**Verify:** Keep the failing and the repaired runs. Explain why the changed token alters the value tested by `assert.equal(decomposed.normalize('NFC'), composed)` for this input.
+**Verify:** Keep the failing and repaired runs and name the first value that differs between them.
 
 ## Exercise 3: Match a literal regex fragment
 
@@ -73,7 +73,7 @@ assert.equal(pattern.test('axbb'), false);
 
 **Expected:** literal accepted; axbb rejected.
 
-**Verify:** Keep a check equivalent to `assert.equal(pattern.test('a.b+'), true)`. As a control, change `const literal = 'a.b+';` to `const literal = 'a.b+!';`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
+**Verify:** Keep `assert.equal(pattern.test('a.b+'), true)`. Control: changing `const literal = 'a.b+';` to `const literal = 'a.b+!';` must make that check fail; then restore it.
 
 ## Exercise 4: Observe global regex cursor state
 
@@ -93,7 +93,7 @@ assert.equal(pattern.lastIndex, 0);
 
 **Expected:** matches at 0 then 1; third call false resets cursor 0.
 
-**Verify:** Keep a check equivalent to `assert.equal(pattern.lastIndex, 0)`. As a control, change `assert.equal(pattern.lastIndex, 0);` to `assert.equal(pattern.lastIndex, 1);` inside it: the run must fail with an `AssertionError`, which shows the check can fail. Restore it.
+**Verify:** Keep `assert.equal(pattern.lastIndex, 0)`. Control: editing it to `assert.equal(pattern.lastIndex, 1);` must make the check fail; then restore it.
 
 ## Exercise 5: Use Unicode-aware dot matching
 
@@ -108,7 +108,7 @@ assert.equal(/^.$/u.test('🙂'), true);
 
 **Expected:** without u false; with u true.
 
-**Verify:** Keep a check equivalent to `assert.equal(/^.$/u.test('🙂'), true)`. As a control, change `assert.equal(/^.$/u.test('🙂'), true);` to `assert.equal(/^.$/u.test('🙂!'), true);` inside it: the run must fail with an `AssertionError`, which shows the check can fail. Restore it.
+**Verify:** Keep `assert.equal(/^.$/u.test('🙂'), true)`. Control: editing it to `assert.equal(/^.$/u.test('🙂!'), true);` must make the check fail; then restore it.
 
 ## Exercise 6: Bound a text-validation input
 
@@ -124,8 +124,8 @@ assert.throws(() => identifier('two words'), TypeError);
 
 **Expected:** item_1 accepted; oversized input rejected.
 
-**Verify:** Keep a check equivalent to `assert.equal(identifier('item_1'), 'item_1')`. As a control, change `assert.equal(identifier('item_1'), 'item_1');` to `assert.equal(identifier('item_2'), 'item_1');` inside it: the run must fail with an `AssertionError`, which shows the check can fail. Restore it.
+**Verify:** Keep `assert.equal(identifier('item_1'), 'item_1')`. Control: editing it to `assert.equal(identifier('item_2'), 'item_1');` must make the check fail; then restore it.
 
 ## After comparison
 
-Return to your saved implementation and repeat a case with different values. Keep compiler diagnostics, process output and browser observations separate. Do not suppress a failing assertion or use a type assertion to declare an unvalidated value safe. Resource-owning examples must finish cleanup even when work fails. Describe each result with its actual host and fixture scope rather than as production acceptance.
+Fresh case: truncate `'ab😀c'` to three characters. Predict the result of `slice(0, 3)`, which keeps only half of the emoji, versus `Array.from(text).slice(0, 3).join('')`, which keeps the whole emoji. ([After comparing](../STUDY-GUIDE.md#after-comparing-with-the-solution).)

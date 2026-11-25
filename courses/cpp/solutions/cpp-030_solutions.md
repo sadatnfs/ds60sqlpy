@@ -1,6 +1,6 @@
 # cpp-030: explanations and reference observations
 
-Attempt the learner tasks before opening this document. The executable reference checks the bounded normal and boundary examples; the six explanations below cover the deliberate changes and manual checks.
+The [executable reference](cpp-030_solution.cpp) checks a queue that is both empty and closed before the consumer waits. The explanations cover predicate waits and the drain-or-discard decision in Exercise 6. How to compare: [study guide](../STUDY-GUIDE.md#compare-with-the-solutions).
 
 ## Mechanism
 

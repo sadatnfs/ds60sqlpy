@@ -9,7 +9,6 @@ from pathlib import Path
 
 import pytest
 
-from ds60sqlpy.catalog import Catalog
 from ds60sqlpy.lesson_reader import LinkResolver, render_markdown
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -112,10 +111,10 @@ def observe(source: str, source_path: Path | None = None) -> _NumberingOracle:
 
 
 def test_real_day02_notebook_steps_continue_after_commands_and_paragraphs() -> None:
-    catalog = Catalog.load(ROOT)
-    guide = catalog.resolve(catalog.get("python-02").guide_path)
+    guide = ROOT / "python/STUDY-GUIDE.md"
     source = guide.read_text(encoding="utf-8")
-    route = source.split("### Optional contributor notebook route", 1)[1].split("\n## ", 1)[0]
+    route = source.split("### Optional contributor notebook route", 1)[1]
+    route = route.split("\n## ", 1)[0].split("\n### ", 1)[0]
 
     rendered = observe(route, guide)
 

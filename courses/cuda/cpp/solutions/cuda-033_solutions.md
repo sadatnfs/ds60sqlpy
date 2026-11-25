@@ -4,8 +4,6 @@
 
 Kernel counters describe selected aspects of execution, often through replay or sampled collection. They require context: achieved occupancy is a residency measurement, memory throughput measures traffic, and eligible-warps metrics describe scheduling opportunity. High utilization can mean an inefficient algorithm is busy moving unnecessary data. Low utilization can be expected for tiny work. Counter permissions are separate from ordinary CUDA execution capability; a working kernel does not promise profiler access. Start with a small question and a few relevant metrics, keeping the baseline's input, dtype and result contract fixed.
 
-The separate [CPU reference](../references/cuda-033_cpu.py) checks the chapter's bounded model. It does not execute CUDA or establish GPU timing. Compare after attempting the worksheet or explicitly choosing to reveal solutions.
-
 ## Exercise 1
 
 A synthetic kernel reads 400 useful bytes but causes 1,600 transferred bytes because of its access pattern. Useful-to-transferred ratio is 0.25. A high DRAM traffic counter does not imply useful data processing is efficient. Compare address patterns and a corrected layout before blaming arithmetic capacity.
@@ -78,12 +76,19 @@ Compare equal useful work, map lane addresses, collect relevant memory metrics i
 
 **How to verify:** Confirm both produce identical outputs before comparing metrics.
 
+## Self-check answers
+
+1. **What fraction of transferred bytes is useful in worked example 1?** 0.25, since 400 of 1,600 bytes are used.
+2. **Why can a profiled kernel run slower than in a normal timing run?** Collecting many counters often replays the kernel and adds instrumentation overhead.
+3. **What does achieved occupancy measure?** The average ratio of active warps to the maximum an SM supports, a residency figure, not speed.
+4. **What should you report if counter access is not permitted?** That counters are unavailable, plus timing and correctness evidence, without invented counter values.
+
 ## Numerical reference and its limits
 
-The complete CPU model is [here](../references/cuda-033_cpu.py). Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It also asserts an exercise answer that the guide's model leaves for you to derive: `assert 12_000_000 / 0.0002 == 60_000_000_000`. It does not claim CUDA execution, concurrency safety or a performance measurement.
+The [CPU reference](../references/cuda-033_cpu.py) reproduces worked example 1 and prints `{'useful_fraction': 0.25}`.
+
+It also asserts an exercise answer you derive yourself: `assert 12_000_000 / 0.0002 == 60_000_000_000`
 
 ## Transfer review
 
 Compare equal useful work, map lane addresses, collect relevant memory metrics if permitted and test a contiguous alternative while preserving output.
-
-A complete explanation must name its inputs, the unchanged mathematical contract, the changed boundary or resource condition, and the evidence still needed on actual hardware. Preserve a CPU baseline even after a GPU path becomes available.

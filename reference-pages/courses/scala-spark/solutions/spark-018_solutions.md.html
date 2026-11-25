@@ -194,7 +194,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/scala-spark/solutions/spark-018_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="spark-018-explained-paired-reference-solutions">spark-018: Explained paired reference solutions<a class="heading-anchor" href="#spark-018-explained-paired-reference-solutions" aria-label="Link to this section">#</a></h2>
-<p>Read the <a href="../guides/spark-018.md.html">guide</a> and attempt one language first. The <a href="spark-018_solution.scala.html">Scala reference</a> and <a href="spark-018_solution.py.html">PySpark reference</a> are complete single-file programs with explicit local sessions and finally-based stop. Each compares with literal expectations; matching two implementations alone would not rule out a shared mistake.</p>
+<p>Attempt the <a href="../guides/spark-018.md.html">guide</a> exercises first.</p>
+<p>References: <a href="spark-018_solution.scala.html">Scala</a>, <a href="spark-018_solution.py.html">PySpark</a>.</p>
 <h3 id="exercises-and-reasoning">Exercises and reasoning<a class="heading-anchor" href="#exercises-and-reasoning" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-parse-offset-evidence-into-comparable-instants">Exercise 1: Parse offset evidence into comparable instants<a class="heading-anchor" href="#exercise-1-parse-offset-evidence-into-comparable-instants" aria-label="Link to this section">#</a></h4>
 <p>Return event_id, text, event_time by parsing the declared offset pattern yyyy-MM-ddTHH: mm: ss with a literal T and XXX offset. The session timestamp type must be LTZ.</p>
@@ -328,8 +329,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Try parsing exposes malformed input as data so a controlled ingestion boundary can retain its reason. Raw NULL still needs a separate category because no invalid textual timestamp was supplied. The accepted count and full reason ledger reconcile the population, preventing a downstream time filter from silently discarding rejected records and calling the remaining count complete.</p>
 <p><strong>Verification evidence:</strong> Assert all reason rows, one known timestamp and unchanged ANSI setting.</p>
 <h3 id="execution-and-interpretation">Execution and interpretation<a class="heading-anchor" href="#execution-and-interpretation" aria-label="Link to this section">#</a></h3>
-<p>Run the complete reference in its prepared fixed worker. Its first check (Parse offset evidence into comparable instants) is built inside the program, so opening the lesson fetches nothing; it expects: All 6 rows parse. <code>epoch(event 2) = epoch(event 5)</code>, and <code>epoch(event 3) - epoch(event 2) = 3600</code> seconds. The final success line prints only after every reference assertion passes.</p>
-<p>Local plan, partition and resource evidence does not establish cluster-scale performance; session cleanup is explicit.</p></article>
+<p>The references assert that all six rows parse, that events 2 and 5 share an epoch while event 3 is 3,600 seconds later, the 08:30 and 09:30 UTC renderings beside the single 01:30 Los Angeles rendering, the half-open filter result <code>[1, 2, 3, 5]</code>, two <code>timestamp_ntz</code> outputs of <code>2024-11-03 01:30:00</code>, one local label against two instants, and a quarantine ledger in which only one row is accepted with ANSI still on. Each check that changes the session zone restores UTC and the reference asserts it.</p>
+<p><code>spark-018: six PySpark reference contracts passed; Spark=</code> with the version, or the Scala line, confirms the arithmetic for this particular transition. It does not cover other zones or historical rule changes; the time zone database shipped with the JDK decides those, so the zone name you pass is part of the contract.</p></article>
   </main>
 </body>
 </html>

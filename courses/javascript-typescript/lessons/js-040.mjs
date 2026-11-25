@@ -1,16 +1,14 @@
 // Answer-free learner source. Save your own copy before editing.
 // Exercise 1: Create and retrieve an item over real HTTP: change one input
-// Copy Example A into a scratch `main.mjs` and change `JSON.stringify({ id: 'A', value: 2
-// })` to `JSON.stringify({ id: 'A', value: 3 })`. Before running it, predict which check
-// fails and which value it now sees; then run it and restore the original line.
-// Expected: The changed run fails with an `AssertionError` at `assert.deepEqual(await
+// In a scratch copy of Example A, change `JSON.stringify({ id: 'A', value: 2 })` to
+// `JSON.stringify({ id: 'A', value: 3 })`. Which check fails, and what value does it see?
+// Expected: The edited run fails with an `AssertionError` at `assert.deepEqual(await
 // created.json(), { id: 'A', value: 2 })`. Restoring `JSON.stringify({ id: 'A', value: 2 })`
 // brings back: 201 created; subsequent 200 list contains exactly A.
 
 // Exercise 2: Reject malformed data before changing state: diagnose an edited check
-// A careless edit changed a check in Example B so that it reads `assert.deepEqual(await
-// (await request(context, '/items!')).json(), []);`. Run Example B with that line, explain
-// why the edited check now fails for the same program state, and restore it.
+// Example B's check was edited to read `assert.deepEqual(await (await request(context,
+// '/items!')).json(), []);`. Run it, explain the failure and restore the original.
 // Expected: Before the repair the run fails with an `AssertionError` at
 // `assert.deepEqual(await (await request(context, '/items!')).json(), []);`. Restoring
 // `assert.deepEqual(await (await request(context, '/items')).json(), []);` brings back: both

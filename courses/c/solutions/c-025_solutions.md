@@ -1,6 +1,8 @@
 # c-025: explained solutions
 
-Compare after an attempt or explicit reveal. The complete executable reference, `c-025_solution.c`, implements all six cases, from the "traverse a small tree" case to the "transfer a singleton" case, in one `main.c`.
+`c-025_solution.c` assembles the "traverse a small tree" case through the "transfer a singleton" case in one `main.c`.
+
+Compare only after an attempt: [Compare and transfer](../STUDY-GUIDE.md#compare-and-transfer).
 
 ## Mechanism and assumptions
 
@@ -10,7 +12,7 @@ A node stores value, left and right pointers. NULL represents an empty subtree. 
 
 ## Exercise 1: Traverse a small tree: change one input
 
-Copy worked example 1, the "traverse a small tree" case, into a scratch pad and change `struct Tree left = {1, NULL, NULL}, right = {3, NULL, NULL},` to `struct Tree left = {2, NULL, NULL}, right = {3, NULL, NULL},`. Before running, predict which CHECK fails and which value it sees in place of the worked result (the total is 6); then run it and restore the original line.
+In worked example 1, change `struct Tree left = {1, NULL, NULL}, right = {3, NULL, NULL},` to `struct Tree left = {2, NULL, NULL}, right = {3, NULL, NULL},`. Predict which value the CHECK on `tree_sum(&root) == 6` sees, then run and restore.
 
 The unchanged code is worked example 1:
 
@@ -20,7 +22,7 @@ struct Tree left = {1, NULL, NULL}, right = {3, NULL, NULL},
 CHECK(tree_sum(&root) == 6);
 ```
 
-**Expected:** With `struct Tree left = {2, NULL, NULL}, right = {3, NULL, NULL},` the run stops with `Check failed` at the CHECK on `tree_sum(&root) == 6`, because the "traverse a small tree" case no longer shows that the total is 6. Restoring `struct Tree left = {1, NULL, NULL}, right = {3, NULL, NULL},` brings that observation back.
+**Expected:** `Check failed` at `tree_sum(&root) == 6`; restoring `struct Tree left = {1, NULL, NULL}, right = {3, NULL, NULL},` passes again.
 
 Each node contributes once under the acyclic tree assumption.
 
@@ -34,7 +36,7 @@ Each node contributes once under the acyclic tree assumption.
 
 ## Exercise 2: Handle an empty tree: diagnose an edited check
 
-A careless edit changed the CHECK in worked example 2, the "handle an empty tree" case, so that it reads `CHECK(tree_sum(NULL) != 0);`. Run the example with that line, explain why the edited CHECK now fails even though the program state still means the result is zero, and restore it.
+Worked example 2's CHECK now reads `CHECK(tree_sum(NULL) != 0);`. Explain why it fails although the result is zero, then restore it.
 
 The unchanged code is worked example 2:
 
@@ -42,7 +44,7 @@ The unchanged code is worked example 2:
 CHECK(tree_sum(NULL) == 0);
 ```
 
-**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `tree_sum(NULL) == 0`. Once the line reads `CHECK(tree_sum(NULL) == 0);` again, the "handle an empty tree" case again shows that the result is zero.
+**Expected:** `Check failed` until the CHECK reads `CHECK(tree_sum(NULL) == 0);` again, though the result is zero.
 
 The empty subtree contributes the additive identity and ends recursion.
 

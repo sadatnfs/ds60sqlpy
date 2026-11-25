@@ -24,9 +24,11 @@ Rust's standard library defines Future and task primitives but does not provide 
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles the saved pad as `main.rs` with pinned Rust 1.99.1, edition 2024, and the prepared Arrow 60 library. `assert!` and `assert_eq!` remain active in normal builds. The fixed pad accepts one source file without arbitrary arguments, interactive input, Cargo manifests or package installation. The main function returns `Result<(), Box<dyn std::error::Error>>` so later examples can propagate errors with `?`; the final `Ok(())` means this fixture completed successfully. Standard library and Arrow examples remain offline after image preparation. Multi-file Cargo and external ecosystem projects have separate explicit preparation workflows.
+Beyond the prelude, this lesson's programs use `std::future` and `std::task`. A passing run prints `rust-033: passed`.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Pad setup and limits: [Run a lesson](../STUDY-GUIDE.md#run-a-lesson).
+
+Before you run anything, follow [Attempt a lesson](../STUDY-GUIDE.md#attempt-a-lesson).
 
 
 
@@ -34,7 +36,9 @@ Start with the answer-free learner artifact in your saved classroom pad. It deli
 
 An async block produces a Future. Pin protects address-sensitive future state from invalid movement while polled. Context carries a Waker. Poll::Ready and Poll::Pending are distinct completion states.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+**Reading Example A (Poll a ready computation, code below).** `Box::pin(async { 7 })` creates a future from an async block and pins it on the heap. An async block does nothing when created; its body runs only when something polls it. Pinning is required because `Future::poll` takes `self: Pin<&mut Self>`, a guarantee that the future will not move in memory once polling has started. `Waker::noop()` returns a waker that does nothing when woken, and `Context::from_waker` wraps it in the context that `poll` requires; a real executor would supply a waker that reschedules the task. `future.as_mut()` produces a fresh `Pin<&mut _>` for this call without giving up the box. Because the block contains no `.await`, the first poll runs it to completion and returns `Poll::Ready`.
+
+Method for tracing your own variants: [Trace a program](../STUDY-GUIDE.md#trace-a-program).
 
 ## Worked example / walkthrough
 
@@ -92,13 +96,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 6. **Transfer and justify.** Plan a separately prepared Tokio service, naming runtime, cancellation, I/O and dependency requirements.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Record each task as in [Keep evidence for each task](../STUDY-GUIDE.md#keep-evidence-for-each-task).
 
 ## Common pitfalls and diagnosis
 
 Async is not automatically parallel. A no-op waker cannot drive real asynchronous I/O. Dropping a future does not necessarily reverse effects already performed by external systems.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+To turn a pitfall into a test, see [Design a regression case](../STUDY-GUIDE.md#design-a-regression-case).
 
 ## Progressive hints
 
@@ -106,13 +110,23 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 2. Compare Example B (Observe pending without spinning) with Example A and name the first line whose behavior differs. Its observation is: The pending future reports no completed value.
 3. Before opening the explanation, test your task 3 attempt against this lesson's main pitfall: Async is not automatically parallel.
 
+Tempting approaches to rule out before you compare:
+
+- **Task 1.** Thinking `async { 7 }` evaluates 7 at creation predicts side effects before any poll. Put a `println!` inside the block and nothing prints until the poll.
+- **Task 2.** Expecting the two inner futures to run in parallel misreads `.await`: inside one async block they run sequentially, and neither runs at all until `combined` is polled.
+- **Task 5.** Expecting `finished` in the log assumes a dropped future runs to the end in the background. Nothing polls it after `drop`, so its remaining code is discarded.
+
 ## Self-check and next step
 
-Explain Future, Executor, Waker without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+What does `async { 7 }` produce before anything polls it, and why does its first poll return `Poll::Ready(7)`? Why does `std::future::pending` return `Poll::Pending` on every poll, and what would a loop that kept polling it do to a CPU core? Why is `Waker::noop()` enough for these two checks but not for a future waiting on real I/O?
+
+Then work through [Self-check and review](../STUDY-GUIDE.md#self-check-and-review).
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://doc.rust-lang.org/std/future/trait.Future.html). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+Read [the `Future` trait documentation](https://doc.rust-lang.org/std/future/trait.Future.html) for `poll`, `Poll::Pending` and the waker contract.
+
+What the classroom does and does not prove: [Sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

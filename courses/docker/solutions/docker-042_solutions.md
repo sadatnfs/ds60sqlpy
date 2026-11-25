@@ -1,6 +1,6 @@
 # docker-042: explanatory solutions
 
-Compare after your own attempt or an explicit reveal. These explain the supplied teaching fixtures; they are not engine results. The mechanism is explained in `courses/docker/guides/docker-042.md`.
+These answers explain teaching fixtures, not engine results; the mechanism is in [the guide](../guides/docker-042.md).
 
 ## Exercise 1: Predict all outcomes before running the final project.
 
@@ -88,4 +88,4 @@ Compare after your own attempt or an explicit reveal. These explain the supplied
 
 ## Check your transfer
 
-A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.
+Recreate. `APP_MESSAGE` is runtime environment that Compose sets, not something copied into the image, so `docker compose -p ds60-docker-study up -d --wait app` recreates the container with the new value and the image ID in the packet stays valid. A host request to `/` returning the new message, with `docker image inspect --format '{{.Id}}'` unchanged, proves it. Had you edited `server.py`, a rebuild would be required and the packet's image identity would change. If `/` still shows the old message, the container was not recreated.

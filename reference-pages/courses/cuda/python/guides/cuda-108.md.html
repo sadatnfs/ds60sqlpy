@@ -194,9 +194,17 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cuda/python/guides/cuda-108.md</code></p>
     </header>
     <article class="document"><h2 id="cuda-108-accelerator-aware-data-science-pipelines">cuda-108: Accelerator-aware data science pipelines<a class="heading-anchor" href="#cuda-108-accelerator-aware-data-science-pipelines" aria-label="Link to this section">#</a></h2>
-<p><strong>Route:</strong> CUDA Python and machine learning. <strong>Stage:</strong> advanced. <strong>Prerequisites:</strong> <code>cuda-068</code>, <code>cuda-081</code>, <code>cuda-085</code>. Allow several sessions when the hardware experiment is new; the chapter is not a deadline.</p>
-<h3 id="what-you-will-be-able-to-explain">What you will be able to explain<a class="heading-anchor" href="#what-you-will-be-able-to-explain" aria-label="Link to this section">#</a></h3>
-<p>By the end, you can <strong>compute grouped sums</strong>, <strong>preserve row identity</strong>, and <strong>distinguish cuDF from Spark acceleration</strong> with evidence. Start with the two worked cases, then use the editable CPU model to make the quantities concrete.</p>
+<p><strong>Route:</strong> CUDA Python and machine learning. <strong>Stage:</strong> advanced. <strong>Prerequisites:</strong> <code>cuda-068</code>, <code>cuda-081</code>, <code>cuda-085</code>.</p>
+<p>Pacing, evidence labels and platform rules: <a href="../../STUDY-GUIDE.md.html">CUDA study guide</a>.</p>
+<h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
+<ul>
+<li>Compute grouped sums.</li>
+<li>Distinguish null and zero.</li>
+<li>Define category mapping.</li>
+<li>Preserve row identity.</li>
+<li>Count conversion bytes.</li>
+<li>Distinguish cuDF from Spark acceleration.</li>
+</ul>
 <h3 id="mechanism-and-vocabulary">Mechanism and vocabulary<a class="heading-anchor" href="#mechanism-and-vocabulary" aria-label="Link to this section">#</a></h3>
 <p>Tabular acceleration connects schemas, null masks, columnar storage, preprocessing and model inputs. RAPIDS cuDF provides GPU dataframe operations; it is not the Spark scheduling engine. A single-process cuDF pipeline differs from the cuDF plugin that replaces supported Spark physical operators. Both require compatible NVIDIA execution for their GPU paths, and both can spend time moving data across boundaries.</p>
 <p>Preserve null semantics, category mappings and row identity when converting a dataframe into dense tensors. A missing value is not always a NaN, and an integer nullable column may require a validity mask. Fit encoders on training data and define unknown-category behavior. Compare with a CPU dataframe or simple Python oracle before measuring. The Spark specialization follows this chapter for distributed plans, resource scheduling and operations.</p>
@@ -213,8 +221,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Rows [(A,2),(A, null),(B,5)] grouped by category have non-null sums A=2 and B=5 under the declared skip-null rule. Counting rows and counting non-null values are different.</p>
 <h4 id="worked-example-2">Worked example 2<a class="heading-anchor" href="#worked-example-2" aria-label="Link to this section">#</a></h4>
 <p>Encoding categories A-&gt;0, B-&gt;1 then seeing C requires an explicit unknown policy. Relearning category IDs independently in another partition can corrupt model features.</p>
-<h3 id="portable-executable-model">Portable executable model<a class="heading-anchor" href="#portable-executable-model" aria-label="Link to this section">#</a></h3>
-<p>The <strong>CPU reference model</strong> variant runs this bounded worked example using <code>python-core</code>. It uses only the Python standard library, small synthetic values and no network. Its purpose is to expose the arithmetic or contract behind the chapter. The separate reference includes assertions for the stated observations.</p>
+<h3 id="how-to-run-the-cpu-model">How to run the CPU model<a class="heading-anchor" href="#how-to-run-the-cpu-model" aria-label="Link to this section">#</a></h3>
+<p>Edit the copy; the <a href="../references/cuda-108_cpu.py.html">reference</a> adds assertions.</p>
+<pre class="highlighted-code"><code class="language-bash">python courses/cuda/python/lessons/cuda-108_cpu.py</code></pre>
 <pre class="highlighted-code"><code class="language-python">rows <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">A</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">A</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">B</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span>
 totals <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span><span class="syntax-punctuation">}</span>
 counts <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span><span class="syntax-punctuation">}</span>
@@ -252,49 +261,46 @@ counts <span class="syntax-operator">=</span> <span class="syntax-punctuation">{
 <td><code>5</code></td>
 </tr>
 </tbody></table></div>
-<p>Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.</p>
 <h3 id="practice-and-transfer">Practice and transfer<a class="heading-anchor" href="#practice-and-transfer" aria-label="Link to this section">#</a></h3>
+<p>Record each attempt in the <a href="../lessons/cuda-108.md.html">worksheet</a> before opening hints.</p>
 <h4 id="exercise-1-compute-grouped-sums">Exercise 1: Compute grouped sums<a class="heading-anchor" href="#exercise-1-compute-grouped-sums" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Treating the null as an error and dropping group A entirely, or failing the whole aggregation, contradicts the stated skip-null rule.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-2-distinguish-null-and-zero">Exercise 2: Distinguish null and zero<a class="heading-anchor" href="#exercise-2-distinguish-null-and-zero" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Filling nulls with zero before aggregation silently changes averages and counts, which then disagree with reports computed by a SQL engine that skips nulls.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-3-define-category-mapping">Exercise 3: Define category mapping<a class="heading-anchor" href="#exercise-3-define-category-mapping" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Fitting category codes independently in each partition assigns code 0 to whatever category appears first there, so the same code means different things to the model.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-4-preserve-row-identity">Exercise 4: Preserve row identity<a class="heading-anchor" href="#exercise-4-preserve-row-identity" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Matching rows by position after a join or a GPU to CPU conversion can attach predictions to the wrong records.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-5-count-conversion-bytes">Exercise 5: Count conversion bytes<a class="heading-anchor" href="#exercise-5-count-conversion-bytes" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Counting only the numeric values misses null masks, string offsets and temporary converted copies.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-6-distinguish-cudf-from-spark-acceleration">Exercise 6: Distinguish cuDF from Spark acceleration<a class="heading-anchor" href="#exercise-6-distinguish-cudf-from-spark-acceleration" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Assuming a Spark job uses the GPU because cuDF is installed confuses a library with a plugin that needs its own configuration.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
-<p>Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.</p>
+<p>Hint <em>k</em> belongs to exercise <em>k</em>; open one at a time.</p>
 <ol>
-<li>Start from worked example 1 and mark the quantities needed for the task &quot;Compute grouped sums&quot;.</li>
-<li>Change one assumption in worked example 2 while preserving the declared contract: distinguish null and zero.</li>
-<li>Trace the CPU program&#x27;s variables before adding hardware behavior: define category mapping.</li>
-<li>Draw producers, consumers and the exact operation boundary for the task &quot;Preserve row identity&quot;.</li>
-<li>Separate what the small fixture establishes from what the real runtime must show: count conversion bytes.</li>
-<li>Write a counterexample to an overbroad claim before you distinguish cuDF from Spark acceleration.</li>
+<li>Group rows by category and add only the non-null values under the declared rule.</li>
+<li>Compare how a zero and a missing value affect a sum and a count.</li>
+<li>Fit the category-to-integer mapping on training data once, and decide where an unseen category goes.</li>
+<li>Carry a stable key column through every step, so each output row can be traced to its input.</li>
+<li>Add the value bytes, the validity masks and every host-device copy made during conversion.</li>
+<li>Ask which one schedules distributed work and which one runs dataframe operations in one process.</li>
 </ol>
-<h3 id="common-mistakes-and-self-review">Common mistakes and self-review<a class="heading-anchor" href="#common-mistakes-and-self-review" aria-label="Link to this section">#</a></h3>
-<p>Confusing a correct tiny example with a general implementation is the central review risk. For this chapter, challenge the assumption in worked example 2, then ask whether your change preserves the mechanism described above. If you change dtype, layout, ordering, batch size or backend, update the acceptance contract rather than silently reusing the old observation. Explain an unexpected result before trying random configuration changes.</p>
-<p>Keep a small evidence table with columns <strong>claim</strong>, <strong>input</strong>, <strong>expected observation</strong>, <strong>actual observation</strong> and <strong>limit</strong>. For the first claim use <code>Compute grouped sums</code>. For the final claim use <code>Distinguish cuDF from Spark acceleration</code>. An unperformed GPU or cluster experiment remains pending even when the CPU model is correct.</p>
-<h3 id="platform-and-evidence-contract">Platform and evidence contract<a class="heading-anchor" href="#platform-and-evidence-contract" aria-label="Link to this section">#</a></h3>
-<p>The reading worksheet and CPU reference model work through the ordinary Linux Docker classroom on macOS, Linux and Windows using WSL 2. They do not require an NVIDIA GPU. Their results are labeled CPU models or semantic oracles, not simulated hardware performance.</p>
-<p>Real CUDA work needs supported NVIDIA hardware, a compatible host driver and an explicitly prepared GPU runtime. An Apple GPU does not execute CUDA kernels. PyTorch MPS on a supported native Mac, ROCm on supported AMD hardware, or other vendor backends can provide separate accelerator learning routes; they need their own package and operation qualification and are not CUDA evidence. The ordinary Linux Docker classroom does not expose native Mac MPS automatically.</p>
-<p>Do not download packages, models or data by opening this lesson. Do not attach an engine socket, ambient cluster credentials or an arbitrary remote endpoint. A CPU pass, imported package, successful compilation, real GPU result and measured performance are distinct observations. Record the actual backend, data shape/dtype, source revision, versions and pending checks. A saved completion marker records learning progress, not hardware certification.</p>
+<h3 id="common-mistakes-and-self-check">Common mistakes and self-check<a class="heading-anchor" href="#common-mistakes-and-self-check" aria-label="Link to this section">#</a></h3>
+<p>A common mistake is turning a missing value into zero or NaN without stating the rule. Zero changes sums and means, and a nullable integer column cannot hold NaN without a type change. Another is fitting category codes separately per partition, so the same category gets different features. Fix both by keeping validity masks, fitting encoders once on training data with an explicit unknown category and checking results against a CPU dataframe before measuring.</p>
+<p><strong>Misconception:</strong> Using cuDF in a single process is the same as running the Spark plugin, just without a cluster. <strong>Correction:</strong> cuDF is a dataframe library that executes operations directly in one process. The Spark plugin replaces supported physical operators inside Spark&#x27;s scheduler, with Spark&#x27;s planning, partitioning, shuffles and fallback rules. Results, supported operations and performance must be checked separately for each path against the same CPU dataframe oracle.</p>
+<p><strong>Evidence limit:</strong> The reference computes sums A 2 and B 5 and a row count of 2 for A in Python. It does not run cuDF or the Spark plugin, so GPU null handling, conversion cost and supported operators need compatible NVIDIA execution.</p>
+<ol>
+<li>How does cuDF differ from the Spark RAPIDS plugin?</li>
+<li>Why are counting rows and counting non-null values different?</li>
+<li>Why carry row identity through conversion to tensors?</li>
+</ol>
+<p>Answers: <a href="../solutions/cuda-108_solutions.md.html#self-check-answers">self-check answers</a>.</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
 <ul>
 <li><a href="https://docs.pytorch.org/docs/2.9/notes/cuda.html">PyTorch CUDA semantics</a></li>
 <li><a href="https://www.tensorflow.org/guide/gpu">TensorFlow GPU guide</a></li>
 </ul>
-<p>Use the version-matched documentation of your prepared environment. These references describe interfaces and supported boundaries; the chapter&#x27;s synthetic examples and CPU models are original teaching material.</p>
+<p>Full lists: <a href="../../STUDY-GUIDE.md.html#documentation-and-sources">documentation and sources</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning skill for cuda-108: Accelerator-aware data science pipelines.
 Read courses/cuda/python/guides/cuda-108.md and courses/cuda/python/lessons/cuda-108.md.

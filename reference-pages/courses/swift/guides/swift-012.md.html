@@ -206,11 +206,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Mutating method:</strong> An operation explicitly allowed to modify a value.</p>
 <p><strong>Encapsulation:</strong> Controlling changes through a meaningful interface.</p>
 <h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>The Linux Docker classroom compiles the saved pad as <code>main.swift</code> with Swift 6 language checking. An explicit <code>@main</code> type contains <code>static func main() async throws</code>; the fixed compiler uses <code>-parse-as-library -swift-version 6</code>. The examples use the standard library and portable Foundation. <code>precondition</code> makes a violated invariant fail the process. The fixed pad accepts one source file, without arbitrary command arguments, interactive input or dependency installation. SwiftUI, UIKit, Apple simulators and application signing belong to the separately prepared macOS/Xcode project labs, never the Linux pad.</p>
-<p>Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.</p>
+<p><code>Inventory</code> is declared in the helper section above <code>LessonMain</code>, and both examples share it. Because <code>stock</code> is <code>private(set)</code>, assigning to it from <code>LessonMain</code> fails to compile with a message that the setter is inaccessible; record that diagnostic as evidence that the setter is restricted, not missing.</p>
+<p>Compile contract, starter stop and success marker: <a href="../STUDY-GUIDE.md.html#running-a-lesson">running a lesson</a>.</p>
 <h3 id="syntax-anatomy-and-execution-trace">Syntax anatomy and execution trace<a class="heading-anchor" href="#syntax-anatomy-and-execution-trace" aria-label="Link to this section">#</a></h3>
 <p><code>struct Inventory</code> defines a value type. <code>private(set)</code> exposes reading but restricts assignment. A <code>mutating func</code> may update stored state. An initializer can reject invalid input with a throwing or failable contract in later chapters.</p>
-<p>Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.</p>
+<p>Each example ends with a trace; method: <a href="../STUDY-GUIDE.md.html#tracing-a-program">tracing a program</a>.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="example-a-keep-copied-value-state-independent">Example A: Keep copied value state independent<a class="heading-anchor" href="#example-a-keep-copied-value-state-independent" aria-label="Link to this section">#</a></h4>
 <p>The struct contains value state and its mutation is explicit.</p>
@@ -239,6 +239,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> Reserving from the copied inventory does not change the original.</p>
+<p><strong>Trace.</strong> <code>first</code> is an <code>Inventory</code> with stock 5. <code>var second = first</code> copies the whole value, so <code>second</code> has its own stock of 5. <code>second.reserve(2)</code> passes both guard conditions, subtracts 2 and returns true; <code>second.stock</code> is now 3. <code>first.stock</code> is still 5, because no reference connects the two values. The last call, <code>first.reserve(0)</code>, shows that reserving nothing is allowed: it returns true and leaves the stock at 5.</p>
 <h4 id="example-b-reject-without-partial-mutation">Example B: Reject without partial mutation<a class="heading-anchor" href="#example-b-reject-without-partial-mutation" aria-label="Link to this section">#</a></h4>
 <p>Checking every rejection condition before subtraction preserves failure atomicity.</p>
 <pre class="highlighted-code"><code class="language-swift"><span class="syntax-keyword">import</span> <span class="syntax-class">Foundation</span>
@@ -265,6 +266,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> Rejected requests retain the previous valid stock.</p>
+<p><strong>Trace.</strong> <code>inventory</code> starts with stock 3. <code>reserve(4)</code> fails <code>amount &lt;= stock</code>, so the guard returns false before the subtraction runs. <code>reserve(-1)</code> fails <code>amount &gt;= 0</code> and also returns false. The final check confirms the stock is still 3. Because every rejection path leaves before <code>stock -= amount</code>, a rejected call cannot leave the value half-updated, which is the failure-atomicity property this lesson is about.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <ol>
 <li><strong>Predict and explain.</strong> Trace both inventory copies through reservation.</li>
@@ -284,10 +286,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <ol start="6">
 <li><strong>Transfer and justify.</strong> Choose a value model for an editable form and explain how cancel can restore an earlier snapshot.</li>
 </ol>
-<p>For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.</p>
+<p>Log each task in the <a href="../STUDY-GUIDE.md.html#recording-exercise-evidence">evidence table</a> before opening the explanation.</p>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
 <p>A struct can contain shared class references. Private setters are useful only when methods enforce invariants. The public memberwise initializer in a small fixture is not a substitute for validating external state.</p>
-<p>A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.</p>
+<p>Task 4&#x27;s defect subtracts first and repairs afterward, for example subtracting and then adding the amount back when the stock goes negative. It appears to work until something between the two steps returns early. The counterexample inputs are an exact-stock request, which must succeed and leave 0, and the stock plus one, which must fail and leave the stock unchanged.</p>
+<p>Repair routine: <a href="../STUDY-GUIDE.md.html#building-a-regression-case">building a regression case</a>.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <ol>
 <li>Reproduce Example A (Keep copied value state independent) before changing anything, and confirm its observation: Reserving from the copied inventory does not change the original.</li>
@@ -295,9 +298,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>Before opening the explanation, check your task 3 attempt (Build a bounded counter with private mutation) against each pitfall listed above, and add one input that would expose the tempting wrong rule.</li>
 </ol>
 <h3 id="self-check-and-next-step">Self-check and next step<a class="heading-anchor" href="#self-check-and-next-step" aria-label="Link to this section">#</a></h3>
-<p>Explain Struct, Mutating method, Encapsulation without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.</p>
+<p>Explain why <code>reserve</code> must be <code>mutating</code> and what the compiler says if you call it on a <code>let</code> inventory. Describe a struct containing a class reference and what copying it shares. Explain how a value-type form model lets a cancel button restore the snapshot taken when editing began.</p>
+<p>Then follow the general <a href="../STUDY-GUIDE.md.html#self-check-routine">self-check routine</a> and save your pad.</p>
 <h3 id="sources-and-execution-boundary">Sources and execution boundary<a class="heading-anchor" href="#sources-and-execution-boundary" aria-label="Link to this section">#</a></h3>
-<p><a href="https://docs.swift.org/swift-book/documentation/the-swift-programming-language/">Official language or framework documentation</a>. The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.</p>
+<p><a href="https://docs.swift.org/swift-book/documentation/the-swift-programming-language/">Documentation</a>: The Swift book&#x27;s Structures and Classes chapter explains value types, Methods covers mutating methods, and Access Control explains private setters.</p>
+<p>Provenance and limits: <a href="../STUDY-GUIDE.md.html#sources-and-execution-boundary">sources and execution boundary</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for swift-012: Structures and controlled value mutation.
 Read courses/swift/guides/swift-012.md and courses/swift/lessons/swift-012.swift. Prerequisites: swift-011.

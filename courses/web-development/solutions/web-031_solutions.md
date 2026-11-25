@@ -1,6 +1,6 @@
 # web-031: explanatory solutions
 
-Open this after your own attempt. Each answer explains the lesson's synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in `courses/web-development/guides/web-031.md`.
+Attempt each exercise before reading; the mechanism is in `courses/web-development/guides/web-031.md` ([using these answers](../STUDY-GUIDE.md#solutions)).
 
 ## Exercise 1: Predict which characters in the greeting source appear in output.
 
@@ -76,4 +76,6 @@ Open this after your own attempt. Each answer explains the lesson's synthetic fi
 
 ## Reference comparison
 
-Open `courses/web-development/solutions/web-031_solution.php` only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; server lifecycle, persistence, concurrency and security need their own integration evidence.
+The reference checks that the computed minutes equal 30, then echoes the topic and minutes lines. That catches an arithmetic slip in the duration. It does not compare your label wording, test literal angle brackets or show a server lifecycle, so compare the printed lines with your own prediction.
+
+Open `courses/web-development/solutions/web-031_solution.php` after saving your attempt ([comparing with the reference](../STUDY-GUIDE.md#references)).

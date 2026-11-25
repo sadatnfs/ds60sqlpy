@@ -194,9 +194,17 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cuda/python/guides/cuda-067.md</code></p>
     </header>
     <article class="document"><h2 id="cuda-067-transfers-have-cost-and-lifetime">cuda-067: Transfers have cost and lifetime<a class="heading-anchor" href="#cuda-067-transfers-have-cost-and-lifetime" aria-label="Link to this section">#</a></h2>
-<p><strong>Route:</strong> CUDA Python and machine learning. <strong>Stage:</strong> beginner. <strong>Prerequisites:</strong> <code>cuda-066</code>. Allow several sessions when the hardware experiment is new; the chapter is not a deadline.</p>
-<h3 id="what-you-will-be-able-to-explain">What you will be able to explain<a class="heading-anchor" href="#what-you-will-be-able-to-explain" aria-label="Link to this section">#</a></h3>
-<p>By the end, you can <strong>count bytes for ten iterations</strong>, <strong>explain pinned-memory lifetime</strong>, and <strong>identify an intentionally CPU-friendly workload</strong> with evidence. Start with the two worked cases, then use the editable CPU model to make the quantities concrete.</p>
+<p><strong>Route:</strong> CUDA Python and machine learning. <strong>Stage:</strong> beginner. <strong>Prerequisites:</strong> <code>cuda-066</code>.</p>
+<p>Pacing, evidence labels and platform rules: <a href="../../STUDY-GUIDE.md.html">CUDA study guide</a>.</p>
+<h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
+<ul>
+<li>Count bytes for ten iterations.</li>
+<li>Model a batched transfer.</li>
+<li>Find premature source reuse.</li>
+<li>Explain pinned-memory lifetime.</li>
+<li>Design an end-to-end timer.</li>
+<li>Identify an intentionally CPU-friendly workload.</li>
+</ul>
 <h3 id="mechanism-and-vocabulary">Mechanism and vocabulary<a class="heading-anchor" href="#mechanism-and-vocabulary" aria-label="Link to this section">#</a></h3>
 <p>A transfer pays fixed submission latency plus a size-dependent term. With payload B bytes and effective bandwidth W bytes per second, a useful first model is <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>T</mi><mo>=</mo><mi mathvariant="normal">ℓ</mi><mo>+</mo><mi>B</mi><mi mathvariant="normal">/</mi><mi>W</mi></mrow><annotation encoding="application/x-tex">T=\ell+B/W</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord mathnormal" style="margin-right:0.1389em;">T</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.7778em;vertical-align:-0.0833em;"></span><span class="mord">ℓ</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathnormal" style="margin-right:0.0502em;">B</span><span class="mord">/</span><span class="mord mathnormal" style="margin-right:0.1389em;">W</span></span></span></span>, where <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="normal">ℓ</mi></mrow><annotation encoding="application/x-tex">\ell</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6944em;"></span><span class="mord">ℓ</span></span></span></span> is submission latency. This is a hypothesis for planning, not a benchmark. Small transfers often pay the fixed term repeatedly. Keeping intermediate arrays on device can save round trips even when the arithmetic expression does not change.</p>
 <p>Asynchronous copying also creates an ownership obligation. The source must remain valid and unchanged until the copy finishes; the destination cannot be consumed before its dependency is satisfied. Pinned host memory can enable useful transfer overlap under supported conditions, but pinning every object consumes host resources. Count transfers before optimizing them and include serialization, packing and final output retrieval in end-to-end latency.</p>
@@ -212,8 +220,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Copying 100 rows separately at 10 microseconds submission cost spends at least 1 millisecond on submissions. One contiguous batch pays the submission term once.</p>
 <h4 id="worked-example-2">Worked example 2<a class="heading-anchor" href="#worked-example-2" aria-label="Link to this section">#</a></h4>
 <p>Over K iterations, a transformation that copies input and output every iteration moves <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>2</mn><mi>K</mi><mi>B</mi></mrow><annotation encoding="application/x-tex">2KB</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord">2</span><span class="mord mathnormal" style="margin-right:0.0715em;">K</span><span class="mord mathnormal" style="margin-right:0.0502em;">B</span></span></span></span> bytes. Uploading once and downloading once moves <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>2</mn><mi>B</mi></mrow><annotation encoding="application/x-tex">2B</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6833em;"></span><span class="mord">2</span><span class="mord mathnormal" style="margin-right:0.0502em;">B</span></span></span></span> bytes if all intermediates stay device-resident.</p>
-<h3 id="portable-executable-model">Portable executable model<a class="heading-anchor" href="#portable-executable-model" aria-label="Link to this section">#</a></h3>
-<p>The <strong>CPU reference model</strong> variant runs this bounded worked example using <code>python-core</code>. It uses only the Python standard library, small synthetic values and no network. Its purpose is to expose the arithmetic or contract behind the chapter. The separate reference includes assertions for the stated observations.</p>
+<h3 id="how-to-run-the-cpu-model">How to run the CPU model<a class="heading-anchor" href="#how-to-run-the-cpu-model" aria-label="Link to this section">#</a></h3>
+<p>Edit the copy; the <a href="../references/cuda-067_cpu.py.html">reference</a> adds assertions.</p>
+<pre class="highlighted-code"><code class="language-bash">python courses/cuda/python/lessons/cuda-067_cpu.py</code></pre>
 <pre class="highlighted-code"><code class="language-python">size <span class="syntax-operator">=</span> <span class="syntax-number">4096</span>
 iterations <span class="syntax-operator">=</span> <span class="syntax-number">10</span>
 round_trip <span class="syntax-operator">=</span> <span class="syntax-number">2</span> <span class="syntax-operator">*</span> size <span class="syntax-operator">*</span> iterations
@@ -257,48 +266,44 @@ one <span class="syntax-operator">=</span> latency <span class="syntax-operator"
 <td><code>1000000000.0</code></td>
 </tr>
 </tbody></table></div>
-<p>Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.</p>
 <h3 id="practice-and-transfer">Practice and transfer<a class="heading-anchor" href="#practice-and-transfer" aria-label="Link to this section">#</a></h3>
+<p>Record each attempt in the <a href="../lessons/cuda-067.md.html">worksheet</a> before opening hints.</p>
 <h4 id="exercise-1-count-bytes-for-ten-iterations">Exercise 1: Count bytes for ten iterations<a class="heading-anchor" href="#exercise-1-count-bytes-for-ten-iterations" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Counting only uploads (<code>10B</code>) treats the output copy as free. Many real pipelines download a result every step for logging, so omitting it halves the modeled traffic.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-2-model-a-batched-transfer">Exercise 2: Model a batched transfer<a class="heading-anchor" href="#exercise-2-model-a-batched-transfer" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Expecting batching to reduce the payload is the mistake. The bytes are the same; if your model shows the bandwidth term shrinking, you have double-counted or dropped rows.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-3-find-premature-source-reuse">Exercise 3: Find premature source reuse<a class="heading-anchor" href="#exercise-3-find-premature-source-reuse" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Adding a sleep after the copy call seems to fix it in testing because the copy usually finishes. It is timing luck: a larger batch or a busy bus makes the race reappear.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-4-explain-pinned-memory-lifetime">Exercise 4: Explain pinned-memory lifetime<a class="heading-anchor" href="#exercise-4-explain-pinned-memory-lifetime" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Pinning every array in the program to be safe consumes host memory the OS cannot page out, which can starve other processes. Pinning is a bounded resource, not a free speedup.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-5-design-an-end-to-end-timer">Exercise 5: Design an end-to-end timer<a class="heading-anchor" href="#exercise-5-design-an-end-to-end-timer" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Stopping the timer right after the kernel call returns measures submission only, because the call is asynchronous; it reports a tiny number regardless of the 81920 versus 8192 byte difference.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-6-identify-an-intentionally-cpu-friendly-workload">Exercise 6: Identify an intentionally CPU-friendly workload<a class="heading-anchor" href="#exercise-6-identify-an-intentionally-cpu-friendly-workload" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Assuming the GPU always wins because it has more cores ignores the fixed costs. A benchmark on one tiny array would show the CPU ahead, and the conclusion that the GPU is slow would also be wrong.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
-<p>Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.</p>
+<p>Hint <em>k</em> belongs to exercise <em>k</em>; open one at a time.</p>
 <ol>
-<li>Start from worked example 1 and mark the quantities needed for the task &quot;Count bytes for ten iterations&quot;.</li>
-<li>Change one assumption in worked example 2 while preserving the declared contract: model a batched transfer.</li>
-<li>Trace the CPU program&#x27;s variables before adding hardware behavior: find premature source reuse.</li>
-<li>Draw producers, consumers and the exact operation boundary for the task &quot;Explain pinned-memory lifetime&quot;.</li>
-<li>Separate what the small fixture establishes from what the real runtime must show: design an end-to-end timer.</li>
-<li>Write a counterexample to an overbroad claim before you identify an intentionally CPU-friendly workload.</li>
+<li>Count bytes per iteration in the round-trip version and multiply by ten; then count the upload-once, download-once version.</li>
+<li>Hold the 4000-byte payload fixed and ask which part of the transfer model, latency or bandwidth, changes with batching.</li>
+<li>Mark when Python regains control after the asynchronous upload and when the copy engine finishes reading the host buffer.</li>
+<li>Ask who owns the page-locked buffer while a copy is pending, and what happens if that owner is garbage collected.</li>
+<li>Write where the caller&#x27;s clock starts and stops, then check whether both transfers fall inside that interval.</li>
+<li>Compare about 10 microseconds of submission latency with the time a CPU needs for ten float additions.</li>
 </ol>
-<h3 id="common-mistakes-and-self-review">Common mistakes and self-review<a class="heading-anchor" href="#common-mistakes-and-self-review" aria-label="Link to this section">#</a></h3>
-<p>Confusing a correct tiny example with a general implementation is the central review risk. For this chapter, challenge the assumption in worked example 2, then ask whether your change preserves the mechanism described above. If you change dtype, layout, ordering, batch size or backend, update the acceptance contract rather than silently reusing the old observation. Explain an unexpected result before trying random configuration changes.</p>
-<p>Keep a small evidence table with columns <strong>claim</strong>, <strong>input</strong>, <strong>expected observation</strong>, <strong>actual observation</strong> and <strong>limit</strong>. For the first claim use <code>Count bytes for ten iterations</code>. For the final claim use <code>Identify an intentionally CPU-friendly workload</code>. An unperformed GPU or cluster experiment remains pending even when the CPU model is correct.</p>
-<h3 id="platform-and-evidence-contract">Platform and evidence contract<a class="heading-anchor" href="#platform-and-evidence-contract" aria-label="Link to this section">#</a></h3>
-<p>The reading worksheet and CPU reference model work through the ordinary Linux Docker classroom on macOS, Linux and Windows using WSL 2. They do not require an NVIDIA GPU. Their results are labeled CPU models or semantic oracles, not simulated hardware performance.</p>
-<p>Real CUDA work needs supported NVIDIA hardware, a compatible host driver and an explicitly prepared GPU runtime. An Apple GPU does not execute CUDA kernels. PyTorch MPS on a supported native Mac, ROCm on supported AMD hardware, or other vendor backends can provide separate accelerator learning routes; they need their own package and operation qualification and are not CUDA evidence. The ordinary Linux Docker classroom does not expose native Mac MPS automatically.</p>
-<p>Do not download packages, models or data by opening this lesson. Do not attach an engine socket, ambient cluster credentials or an arbitrary remote endpoint. A CPU pass, imported package, successful compilation, real GPU result and measured performance are distinct observations. Record the actual backend, data shape/dtype, source revision, versions and pending checks. A saved completion marker records learning progress, not hardware certification.</p>
+<h3 id="common-mistakes-and-self-check">Common mistakes and self-check<a class="heading-anchor" href="#common-mistakes-and-self-check" aria-label="Link to this section">#</a></h3>
+<p>The mistake this chapter targets is tuning the arithmetic while ignoring how many times data crosses the bus. Copying input and output on every one of K iterations moves 2KB bytes; keeping intermediates resident moves 2B. A second mistake is overwriting or freeing a host buffer while an asynchronous copy still reads it. Fix both by counting transfers before tuning kernels, and by waiting on the copy&#x27;s event before reusing or releasing the source.</p>
+<p><strong>Evidence limit:</strong> The 81920 and 8192 byte counts come from the transfer model, not from a timer. Real effective bandwidth, pinned versus pageable behavior and copy and compute overlap must be measured on the target system before you claim a latency saving.</p>
+<ol>
+<li>In the model latency plus B divided by W, which term does batching reduce?</li>
+<li>Why is pinning every host array a poor default?</li>
+<li>What must an end-to-end timer include in this chapter?</li>
+</ol>
+<p>Answers: <a href="../solutions/cuda-067_solutions.md.html#self-check-answers">self-check answers</a>.</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
 <ul>
 <li><a href="https://docs.cupy.dev/en/v13.6.0/">CuPy array and installation documentation</a></li>
 </ul>
-<p>Use the version-matched documentation of your prepared environment. These references describe interfaces and supported boundaries; the chapter&#x27;s synthetic examples and CPU models are original teaching material.</p>
+<p>Full lists: <a href="../../STUDY-GUIDE.md.html#documentation-and-sources">documentation and sources</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning skill for cuda-067: Transfers have cost and lifetime.
 Read courses/cuda/python/guides/cuda-067.md and courses/cuda/python/lessons/cuda-067.md.

@@ -206,11 +206,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Weak reference:</strong> A non-owning optional reference that can become nil.</p>
 <p><strong>Retain cycle:</strong> A cycle of strong references preventing release.</p>
 <h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>The Linux Docker classroom compiles the saved pad as <code>main.swift</code> with Swift 6 language checking. An explicit <code>@main</code> type contains <code>static func main() async throws</code>; the fixed compiler uses <code>-parse-as-library -swift-version 6</code>. The examples use the standard library and portable Foundation. <code>precondition</code> makes a violated invariant fail the process. The fixed pad accepts one source file, without arbitrary command arguments, interactive input or dependency installation. SwiftUI, UIKit, Apple simulators and application signing belong to the separately prepared macOS/Xcode project labs, never the Linux pad.</p>
-<p>Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.</p>
+<p>All three classes are declared above <code>LessonMain</code> in both examples. Draw strong references as solid arrows and weak references as dashed ones before running; task 1 asks for that drawing. Deallocation timing depends on releasing the last strong reference, so keep every extra binding you add for task 2 in a known scope.</p>
+<p>Compile contract, starter stop and success marker: <a href="../STUDY-GUIDE.md.html#running-a-lesson">running a lesson</a>.</p>
 <h3 id="syntax-anatomy-and-execution-trace">Syntax anatomy and execution trace<a class="heading-anchor" href="#syntax-anatomy-and-execution-trace" aria-label="Link to this section">#</a></h3>
 <p><code>weak var owner: Owner?</code> is optional and non-retaining. <code>[weak self]</code> captures a non-retaining reference for an escaping closure. Identity diagrams make cycles easier to detect than guessing from deinit timing.</p>
-<p>Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.</p>
+<p>Each example ends with a trace; method: <a href="../STUDY-GUIDE.md.html#tracing-a-program">tracing a program</a>.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="example-a-observe-weak-lifetime">Example A: Observe weak lifetime<a class="heading-anchor" href="#example-a-observe-weak-lifetime" aria-label="Link to this section">#</a></h4>
 <p>The example observes a controlled ownership boundary without retaining the target accidentally.</p>
@@ -234,6 +234,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The weak observer becomes nil after the last strong reference is removed.</p>
+<p><strong>Trace.</strong> <code>owner</code> is an optional strong reference to a new <code>Owner</code> instance, whose strong reference count is now one. <code>weak var observer = owner</code> refers to the same object without adding a strong reference. The first check sees a live object. Setting <code>owner</code> to nil releases the only strong reference, so the instance is deallocated, and Swift sets every weak reference to it to nil. The second check confirms that the observer now reads nil instead of pointing at freed memory.</p>
 <h4 id="example-b-break-a-parent-child-cycle">Example B: Break a parent-child cycle<a class="heading-anchor" href="#example-b-break-a-parent-child-cycle" aria-label="Link to this section">#</a></h4>
 <p>The weak back-reference breaks the ownership cycle while preserving navigation when the parent exists.</p>
 <pre class="highlighted-code"><code class="language-swift"><span class="syntax-keyword">import</span> <span class="syntax-class">Foundation</span>
@@ -258,6 +259,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The child survives independently without retaining its parent.</p>
+<p><strong>Trace.</strong> <code>parent</code> strongly owns a new <code>Parent</code>. <code>child</code> strongly owns a <code>Child</code>. Assigning <code>parent?.child = child</code> gives the parent a second strong reference to the child. <code>child.parent = parent</code> is weak, so it adds nothing to the parent&#x27;s count. <code>observed</code> is another weak reference. Setting <code>parent</code> to nil releases the last strong reference to the <code>Parent</code>, which is deallocated, clearing both weak references. The <code>Child</code> survives because the local constant <code>child</code> still owns it.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <ol>
 <li><strong>Predict and explain.</strong> Draw strong and weak arrows in both examples.</li>
@@ -277,10 +279,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <ol start="6">
 <li><strong>Transfer and justify.</strong> Choose weak or unowned for a relationship and justify the lifetime guarantee required.</li>
 </ol>
-<p>For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.</p>
+<p>Log each task in the <a href="../STUDY-GUIDE.md.html#recording-exercise-evidence">evidence table</a> before opening the explanation.</p>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
 <p>Weak is not a general replacement for ownership. A local strong binding can extend lifetime during observation. ARC does not cancel asynchronous work or close external resources automatically.</p>
-<p>A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.</p>
+<p>Task 4&#x27;s cycle appears when an object stores a closure that mentions <code>self</code> without a capture list. Give such a class a property <code>var onChange: (() -&gt; Void)?</code> set to <code>{ self.count += 1 }</code>, keep a weak observer and release the last outside reference: the observer stays non-nil, which proves the leak. Adding <code>[weak self]</code> to the closure lets it become nil.</p>
+<p>Repair routine: <a href="../STUDY-GUIDE.md.html#building-a-regression-case">building a regression case</a>.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <ol>
 <li>Reproduce Example A (Observe weak lifetime) before changing anything, and confirm its observation: The weak observer becomes nil after the last strong reference is removed.</li>
@@ -288,9 +291,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>Before opening the explanation, check your task 3 attempt (Design a weak delegate relationship) against each pitfall listed above, and add one input that would expose the tempting wrong rule.</li>
 </ol>
 <h3 id="self-check-and-next-step">Self-check and next step<a class="heading-anchor" href="#self-check-and-next-step" aria-label="Link to this section">#</a></h3>
-<p>Explain ARC, Weak reference, Retain cycle without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.</p>
+<p>Explain why a weak reference must be declared as an optional <code>var</code>. Describe what would happen in Example B if <code>Child.parent</code> were strong. Choose weak or unowned for a delegate, a parent pointer and a closure stored by its owner, and state the lifetime guarantee each choice relies on.</p>
+<p>Then follow the general <a href="../STUDY-GUIDE.md.html#self-check-routine">self-check routine</a> and save your pad.</p>
 <h3 id="sources-and-execution-boundary">Sources and execution boundary<a class="heading-anchor" href="#sources-and-execution-boundary" aria-label="Link to this section">#</a></h3>
-<p><a href="https://docs.swift.org/swift-book/documentation/the-swift-programming-language/">Official language or framework documentation</a>. The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.</p>
+<p><a href="https://docs.swift.org/swift-book/documentation/the-swift-programming-language/">Documentation</a>: The Automatic Reference Counting chapter of the Swift book covers strong reference cycles, weak and unowned references, and capture lists for closures.</p>
+<p>Provenance and limits: <a href="../STUDY-GUIDE.md.html#sources-and-execution-boundary">sources and execution boundary</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for swift-022: ARC, weak references and retain cycles.
 Read courses/swift/guides/swift-022.md and courses/swift/lessons/swift-022.swift. Prerequisites: swift-021.

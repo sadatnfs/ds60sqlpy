@@ -194,9 +194,17 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cuda/python/guides/cuda-086.md</code></p>
     </header>
     <article class="document"><h2 id="cuda-086-capstone-an-interoperable-numerical-pipeline">cuda-086: Capstone: an interoperable numerical pipeline<a class="heading-anchor" href="#cuda-086-capstone-an-interoperable-numerical-pipeline" aria-label="Link to this section">#</a></h2>
-<p><strong>Route:</strong> CUDA Python and machine learning. <strong>Stage:</strong> intermediate. <strong>Prerequisites:</strong> <code>cuda-077</code>, <code>cuda-081</code>, <code>cuda-082</code>, <code>cuda-085</code>. Allow several sessions when the hardware experiment is new; the chapter is not a deadline.</p>
-<h3 id="what-you-will-be-able-to-explain">What you will be able to explain<a class="heading-anchor" href="#what-you-will-be-able-to-explain" aria-label="Link to this section">#</a></h3>
-<p>By the end, you can <strong>derive fitted means</strong>, <strong>draw owners and waits</strong>, and <strong>write the capstone acceptance report</strong> with evidence. Start with the two worked cases, then use the editable CPU model to make the quantities concrete.</p>
+<p><strong>Route:</strong> CUDA Python and machine learning. <strong>Stage:</strong> intermediate. <strong>Prerequisites:</strong> <code>cuda-077</code>, <code>cuda-081</code>, <code>cuda-082</code>, <code>cuda-085</code>.</p>
+<p>Pacing, evidence labels and platform rules: <a href="../../STUDY-GUIDE.md.html">CUDA study guide</a>.</p>
+<h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
+<ul>
+<li>Derive fitted means.</li>
+<li>Score the centered rows.</li>
+<li>Add a constant column.</li>
+<li>Draw owners and waits.</li>
+<li>Design train-validation separation.</li>
+<li>Write the capstone acceptance report.</li>
+</ul>
 <h3 id="mechanism-and-vocabulary">Mechanism and vocabulary<a class="heading-anchor" href="#mechanism-and-vocabulary" aria-label="Link to this section">#</a></h3>
 <p>Build a small normalize-and-score pipeline with an explicit schema: rows are observations, columns are features, inputs are finite, and the chosen accumulation dtype is documented. Compute means and scales from the training fixture only, preserve constant-feature behavior and keep transformed arrays on one backend where practical. A CPU oracle establishes expected values before any optimization.</p>
 <p>The capstone adds ownership and dependency diagrams. Show which library owns each allocation, whether each interchange aliases or copies, and when the consumer may read it. Report preparation, transfer and computation separately, then report complete latency. One backend can implement the full pipeline; introducing a second library needs a reason. The deliverable includes an unchanged baseline and an explanation of one failed optimization.</p>
@@ -212,8 +220,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Center training rows [[1,2],[3,4]] to [[-1,-1],[1,1]]. Scoring with weights [2,-1] gives [-1,1]. The same means must be reused for later examples.</p>
 <h4 id="worked-example-2">Worked example 2<a class="heading-anchor" href="#worked-example-2" aria-label="Link to this section">#</a></h4>
 <p>If validation means are recomputed independently, the transformation changes and can leak evaluation information. Preserve fitted preprocessing state rather than hiding it in a convenient expression.</p>
-<h3 id="portable-executable-model">Portable executable model<a class="heading-anchor" href="#portable-executable-model" aria-label="Link to this section">#</a></h3>
-<p>The <strong>CPU reference model</strong> variant runs this bounded worked example using <code>python-core</code>. It uses only the Python standard library, small synthetic values and no network. Its purpose is to expose the arithmetic or contract behind the chapter. The separate reference includes assertions for the stated observations.</p>
+<h3 id="how-to-run-the-cpu-model">How to run the CPU model<a class="heading-anchor" href="#how-to-run-the-cpu-model" aria-label="Link to this section">#</a></h3>
+<p>Edit the copy; the <a href="../references/cuda-086_cpu.py.html">reference</a> adds assertions.</p>
+<pre class="highlighted-code"><code class="language-bash">python courses/cuda/python/lessons/cuda-086_cpu.py</code></pre>
 <pre class="highlighted-code"><code class="language-python">rows <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span>
 means <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-builtin">sum</span><span class="syntax-punctuation">(</span>row<span class="syntax-punctuation">[</span>c<span class="syntax-punctuation">]</span> <span class="syntax-keyword">for</span> row <span class="syntax-operator">in</span> rows<span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>rows<span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> c <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span>
 centered <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span>x <span class="syntax-operator">-</span> m <span class="syntax-keyword">for</span> x<span class="syntax-punctuation">,</span> m <span class="syntax-operator">in</span> <span class="syntax-builtin">zip</span><span class="syntax-punctuation">(</span>row<span class="syntax-punctuation">,</span> means<span class="syntax-punctuation">,</span> strict<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span> <span class="syntax-keyword">for</span> row <span class="syntax-operator">in</span> rows<span class="syntax-punctuation">]</span>
@@ -243,49 +252,45 @@ scores <span class="syntax-operator">=</span> <span class="syntax-punctuation">[
 <td><code>[-1.0, 1.0]</code></td>
 </tr>
 </tbody></table></div>
-<p>Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.</p>
 <h3 id="practice-and-transfer">Practice and transfer<a class="heading-anchor" href="#practice-and-transfer" aria-label="Link to this section">#</a></h3>
+<p>Record each attempt in the <a href="../lessons/cuda-086.md.html">worksheet</a> before opening hints.</p>
 <h4 id="exercise-1-derive-fitted-means">Exercise 1: Derive fitted means<a class="heading-anchor" href="#exercise-1-derive-fitted-means" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Averaging along columns, the per-row means, gives <code>[1.5, 3.5]</code> and centers the wrong axis.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-2-score-the-centered-rows">Exercise 2: Score the centered rows<a class="heading-anchor" href="#exercise-2-score-the-centered-rows" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Scoring the raw rows gives <code>[0, 2]</code>, which skips the fitted transformation.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-3-add-a-constant-column">Exercise 3: Add a constant column<a class="heading-anchor" href="#exercise-3-add-a-constant-column" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Dividing by the standard deviation without a check fills the column with NaN, which spreads into the scores.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-4-draw-owners-and-waits">Exercise 4: Draw owners and waits<a class="heading-anchor" href="#exercise-4-draw-owners-and-waits" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Drawing only the computation steps without owners loses track of when buffers can be freed.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-5-design-train-validation-separation">Exercise 5: Design train-validation separation<a class="heading-anchor" href="#exercise-5-design-train-validation-separation" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Fitting on the concatenated train and validation data is a subtler leak with the same effect: validation scores look better than they would on truly unseen rows.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-6-write-the-capstone-acceptance-report">Exercise 6: Write the capstone acceptance report<a class="heading-anchor" href="#exercise-6-write-the-capstone-acceptance-report" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Reporting a single speedup number leaves out correctness and the scope of the claim, so readers cannot tell whether transfers were timed or whether the means were reused.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
-<p>Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.</p>
+<p>Hint <em>k</em> belongs to exercise <em>k</em>; open one at a time.</p>
 <ol>
-<li>Start from worked example 1 and mark the quantities needed for the task &quot;Derive fitted means&quot;.</li>
-<li>Change one assumption in worked example 2 while preserving the declared contract: score the centered rows.</li>
-<li>Trace the CPU program&#x27;s variables before adding hardware behavior: add a constant column.</li>
-<li>Draw producers, consumers and the exact operation boundary for the task &quot;Draw owners and waits&quot;.</li>
-<li>Separate what the small fixture establishes from what the real runtime must show: design train-validation separation.</li>
-<li>Write a counterexample to an overbroad claim before you write the capstone acceptance report.</li>
+<li>Average each column of the two training rows separately.</li>
+<li>Subtract the fitted means from each row, then take the dot product with <code>[2, -1]</code>.</li>
+<li>Ask what a zero standard deviation does to division, and what scale value the schema should declare instead.</li>
+<li>For each array, name the library that allocated it, whether each handoff copies or aliases, and who reads it last.</li>
+<li>Ask which statistics a validation row may use, and where they must come from.</li>
+<li>List what a reviewer needs to accept the run: values, tolerances, timing boundaries and unsupported cases.</li>
 </ol>
-<h3 id="common-mistakes-and-self-review">Common mistakes and self-review<a class="heading-anchor" href="#common-mistakes-and-self-review" aria-label="Link to this section">#</a></h3>
-<p>Confusing a correct tiny example with a general implementation is the central review risk. For this chapter, challenge the assumption in worked example 2, then ask whether your change preserves the mechanism described above. If you change dtype, layout, ordering, batch size or backend, update the acceptance contract rather than silently reusing the old observation. Explain an unexpected result before trying random configuration changes.</p>
-<p>Keep a small evidence table with columns <strong>claim</strong>, <strong>input</strong>, <strong>expected observation</strong>, <strong>actual observation</strong> and <strong>limit</strong>. For the first claim use <code>Derive fitted means</code>. For the final claim use <code>Write the capstone acceptance report</code>. An unperformed GPU or cluster experiment remains pending even when the CPU model is correct.</p>
-<h3 id="platform-and-evidence-contract">Platform and evidence contract<a class="heading-anchor" href="#platform-and-evidence-contract" aria-label="Link to this section">#</a></h3>
-<p>The reading worksheet and CPU reference model work through the ordinary Linux Docker classroom on macOS, Linux and Windows using WSL 2. They do not require an NVIDIA GPU. Their results are labeled CPU models or semantic oracles, not simulated hardware performance.</p>
-<p>Real CUDA work needs supported NVIDIA hardware, a compatible host driver and an explicitly prepared GPU runtime. An Apple GPU does not execute CUDA kernels. PyTorch MPS on a supported native Mac, ROCm on supported AMD hardware, or other vendor backends can provide separate accelerator learning routes; they need their own package and operation qualification and are not CUDA evidence. The ordinary Linux Docker classroom does not expose native Mac MPS automatically.</p>
-<p>Do not download packages, models or data by opening this lesson. Do not attach an engine socket, ambient cluster credentials or an arbitrary remote endpoint. A CPU pass, imported package, successful compilation, real GPU result and measured performance are distinct observations. Record the actual backend, data shape/dtype, source revision, versions and pending checks. A saved completion marker records learning progress, not hardware certification.</p>
+<h3 id="common-mistakes-and-self-check">Common mistakes and self-check<a class="heading-anchor" href="#common-mistakes-and-self-check" aria-label="Link to this section">#</a></h3>
+<p>The typical capstone mistake is refitting preprocessing on validation data. Recomputing means independently changes the transformation and leaks evaluation information, so scores are no longer comparable. Another mistake is mixing libraries without a reason, which adds copies, ownership questions and waits. Fix both by fitting means and scales once on the training fixture, saving that state and reusing it, keeping the pipeline on one backend where practical, and documenting every allocation owner and handoff.</p>
+<p><strong>Misconception:</strong> If the pipeline&#x27;s final scores match the CPU oracle, the capstone is complete. <strong>Correction:</strong> Matching scores show the arithmetic is right for this fixture, but the capstone also asks which library owns each allocation, whether each handoff aliases or copies and when the consumer may read. A pipeline can produce correct scores while copying the data three times, or while reading a buffer before its producer finished on another stream. Report the ownership diagram and separate preparation, transfer and compute timings alongside the equality check.</p>
+<p><strong>Evidence limit:</strong> The reference fits means <code>[2, 3]</code> and scores <code>[-1, 1]</code> on a two-row fixture with plain Python. It establishes expected values, not interchange behavior or latency, which require running the pipeline on a supported backend.</p>
+<ol>
+<li>Why establish a CPU oracle before optimizing the pipeline?</li>
+<li>How should a constant feature be handled?</li>
+<li>Why report preparation, transfer and computation separately?</li>
+</ol>
+<p>Answers: <a href="../solutions/cuda-086_solutions.md.html#self-check-answers">self-check answers</a>.</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
 <ul>
 <li><a href="https://dmlc.github.io/dlpack/latest/python_spec.html">DLPack Python specification</a></li>
-<li><a href="https://docs.cupy.dev/en/stable/user_guide/interoperability.html">CuPy interoperability</a></li>
 </ul>
-<p>Use the version-matched documentation of your prepared environment. These references describe interfaces and supported boundaries; the chapter&#x27;s synthetic examples and CPU models are original teaching material.</p>
+<p>Full lists: <a href="../../STUDY-GUIDE.md.html#documentation-and-sources">documentation and sources</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning skill for cuda-086: Capstone: an interoperable numerical pipeline.
 Read courses/cuda/python/guides/cuda-086.md and courses/cuda/python/lessons/cuda-086.md.

@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/web-development/solutions/web-004_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="web-004-explanatory-solutions">web-004: explanatory solutions<a class="heading-anchor" href="#web-004-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Open this after your own attempt. Each answer explains the lesson&#x27;s synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in <code>courses/web-development/guides/web-004.md</code>.</p>
+<p>Attempt each exercise before reading; the mechanism is in <code>courses/web-development/guides/web-004.md</code> (<a href="../STUDY-GUIDE.md.html#solutions">using these answers</a>).</p>
 <h3 id="exercise-1-resolve-images-plot-svg-from-notes-week1-page-html">Exercise 1: Resolve ../images/plot.svg from /notes/week1/page.html.<a class="heading-anchor" href="#exercise-1-resolve-images-plot-svg-from-notes-week1-page-html" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> The resolved path is /notes/images/plot.svg on the same origin.</p>
 <p><strong>Approach:</strong> Drop the file name <code>page.html</code> to get the base <code>/notes/week1/</code>, apply <code>..</code> once to reach <code>/notes/</code>, then append <code>images/plot.svg</code>.</p>
@@ -232,7 +232,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Plausible wrong approach:</strong> Treating root-relative and document-relative paths as interchangeable fails as soon as the page moves to another folder.</p>
 <p><strong>How to verify:</strong> Changing the base URL in a <code>new URL(href, base)</code> console call alters the relative result but not the absolute one.</p>
 <h3 id="reference-comparison">Reference comparison<a class="heading-anchor" href="#reference-comparison" aria-label="Link to this section">#</a></h3>
-<p>Open <code>courses/web-development/solutions/web-004_solution.html</code> only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; its success message is not an accessibility audit or proof of responsive behavior at every size.</p></article>
+<p>The reference loops over the navigation links and requires that each hash finds an element in the document, so it catches a fragment like #result that does not match the section id. It does not judge link wording, test relative file paths or check that the destination section has a heading, so review the link text yourself.</p>
+<p>Open <code>courses/web-development/solutions/web-004_solution.html</code> after saving your attempt (<a href="../STUDY-GUIDE.md.html#references">comparing with the reference</a>).</p></article>
   </main>
 </body>
 </html>

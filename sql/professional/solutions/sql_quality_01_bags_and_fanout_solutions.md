@@ -1,22 +1,21 @@
 # SQL-QUALITY-01: solution reasoning
 
-Use this after an honest attempt at the [guide](../companion-guides/sql_quality_01_bags_and_fanout.md)
-and [learner script](../lessons/sql_quality_01_bags_and_fanout.sql). The separate
-[executable solution](sql_quality_01_bags_and_fanout_solutions.sql) runs all six answers and independent
-fail-fast checks with `psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/solutions/sql_quality_01_bags_and_fanout_solutions.sql`.
-It uses only temporary fixtures, starts a transaction, and ends in rollback.
-It must exit 0 with no contract failures. Each answer has a savepoint so an
-experiment cannot silently change a later exercise's starting conditions.
-The assertion helper treats false and unknown as failures, rather than allowing
-a NULL assertion to pass accidentally. Keep the original fixture unchanged
-when comparing your work so the stated identities remain a reliable oracle.
+Open this after attempting the
+[guide](../companion-guides/sql_quality_01_bags_and_fanout.md) and your
+[learner script](../lessons/sql_quality_01_bags_and_fanout.sql). The
+[executable solution](sql_quality_01_bags_and_fanout_solutions.sql) rebuilds
+all three fixtures, runs each answer in its own savepoint, saves it as
+`solution_answer_N`, and checks invoice IDs, directions and totals with
+`pg_temp.assert_true`, which fails on NULL as well as false. Run it as the
+[study guide](../../STUDY-GUIDE.md#read-a-solution) shows, with
+`-f sql/professional/solutions/sql_quality_01_bags_and_fanout_solutions.sql`.
 
-The code below is the answer for each numbered prompt, followed by its
-reasoning. Inspect the first discrepancy in your own transcript before reading
-a different answer. A solution is one defensible implementation of this contract;
-an alternative is valid if its identities, values, missingness, ordering, and
-transaction behavior match. Tests constrain the actual returned relation,
-rather than assuming a familiar-looking query must be right.
+Another reconciliation is just as correct if it reports the same differences
+with the same labels: invoice 2 changed, 4 missing from the target, 5 missing
+from the source, one surplus row in each bag, and order 1 at 100 and 200. A
+query that reaches those numbers through `DISTINCT` or `SUM(DISTINCT ...)` is
+not equivalent, even when the totals match, because it hides the duplicates the
+lesson is about.
 
 ## Exercise solutions
 
@@ -79,7 +78,7 @@ FULL OUTER JOIN retains all keys, so neither missing side disappears before diag
 
 **Expected result/shape:** For sql-quality-01 Exercise 2, Three invoice rows keyed by invoice_id, columns invoice_id, source_amount, target_amount, difference_kind; final ORDER BY invoice_id: 2 changed (50,40), 4 missing_target (80,NULL), 5 missing_source (NULL,90).
 
-**Verify:** For sql-quality-01 Exercise 2, Compare exact diagnostics for invoices 2,4,5 with kinds changed,missing_target,missing_source and amounts (50,40),(80,NULL),(NULL,90). Matching keys 1 and 3 are absent.
+**Verify:** For sql-quality-01 Exercise 2, Compare exact diagnostics for invoices 2, 4, 5 with kinds `changed`, `missing_target`, `missing_source` and amounts (50,40), (80,NULL), (NULL,90). Matching keys 1 and 3 are absent.
 
 ## Exercise 3: Preserve duplicate multiplicity
 
@@ -228,8 +227,13 @@ GROUP BY collects occurrences by the proposed key and HAVING retains keys with m
 
 **Expected result/shape:** For sql-quality-01 Exercise 6, One diagnostic row keyed by invoice_id, columns invoice_id, occurrences; final ORDER BY invoice_id: (1,2). No amount is used as an identity.
 
-**Verify:** For sql-quality-01 Exercise 6, Require exactly duplicate-key diagnostic (invoice_id=1,occurrences=2). This nonempty result prevents interpreting a later keyed join as one diagnostic per invoice.
+**Verify:** For sql-quality-01 Exercise 6, Require exactly one duplicate-key diagnostic, `invoice_id` 1 with `occurrences` 2. This nonempty result prevents interpreting a later keyed join as one diagnostic per invoice.
 
 ## Cleanup and evidence boundary
 
-The final rollback removes every temporary table, helper function, index, and modeled change. Running this file twice starts from the same fixture and should produce the same logical evidence. No extension, external dataset, current timestamp, or administrator capability is required. For the optional two-session concurrency lab, use its separate explicit cleanup because that fixture is deliberately committed; the default script never prepares that shared state. A static content check can validate contracts and file structure, while only a live PostgreSQL transcript validates SQL execution. Retain that distinction when reporting completion.
+Each `ROLLBACK TO SAVEPOINT` discards that exercise's `solution_answer_N`
+table, and the closing `ROLLBACK` drops all eight fixture tables and the
+assertion helper. None of the answers modifies a fixture row, so the raw fanout
+join, the bag differences and the keyed mismatches are the same on every run. A
+clean run checks these answers only; your own transcript is still the evidence
+for your queries.

@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/r/solutions/r-058_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="r-058-reference-reasoning">r-058: reference reasoning<a class="heading-anchor" href="#r-058-reference-reasoning" aria-label="Link to this section">#</a></h2>
-<p>Use the <a href="r-058_reference.R.html">complete reference</a> with the guide&#x27;s declared inputs and runtime. Every worked example is also a standalone script.</p>
+<p>Run the <a href="r-058_reference.R.html">complete reference</a> under the <a href="../STUDY-GUIDE.md.html#run-a-chapter">run rules</a>.</p>
 <h3 id="why-the-implementation-has-this-shape">Why the implementation has this shape<a class="heading-anchor" href="#why-the-implementation-has-this-shape" aria-label="Link to this section">#</a></h3>
 <p>The reference validates the identity metadata and the exact visibility vectors used by the controls. It also compares the full-data and selected-group means to demonstrate why a view change cannot silently inherit a full-data statistical label.</p>
 <p>A static table accompanies the figure. The R and worker-capture checks can establish that these structures were emitted, but they cannot prove accessibility or interaction behavior in a browser. Those observations remain part of the separate classroom delivery qualification.</p>
@@ -248,7 +248,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Tempting mistake:</strong> Reporting the controls as working because their argument vectors are correct. Correct arguments describe the intent, and only an observed click confirms the effect.</p>
 <p><strong>Verify:</strong> A browser session shows the Group A button hiding B1 and B2, and the page remains usable at a narrow width.</p>
 <h3 id="what-the-checks-establish">What the checks establish<a class="heading-anchor" href="#what-the-checks-establish" aria-label="Link to this section">#</a></h3>
-<p>The reference makes 5 <code>stopifnot()</code> checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.</p></article>
+<p>The checks confirm two traces carrying ids A1 and A2 and then B1 and B2 as custom data, a Group A button that sets visibility to TRUE and FALSE, an overall mean of 3.75 against a group A mean of 2.5, which is why a fixed global label is wrong in a filtered view, and a text summary that selects the two A rows. They do not test keyboard access or screen reader output.</p>
+<p>The reference makes 5 <code>stopifnot()</code> checks; see <a href="../STUDY-GUIDE.md.html#what-a-passing-run-proves">what a passing run proves</a>.</p></article>
   </main>
 </body>
 </html>

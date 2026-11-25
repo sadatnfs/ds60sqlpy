@@ -3,20 +3,16 @@ public class Main {
 
   public static void main(String[] args) throws Exception {
     // Exercise 1: Use a FIFO queue: change one input
-    // Copy Example A into a scratch `Main.java` and change `queue.addLast("a");` to
-    // `queue.addLast("a!");`. Before running it with `java -ea Main`, predict which assertion
-    // fails and which value it now sees; then run it and restore the original line.
-    // Expected: The changed run fails with an `AssertionError` from the assertion on
-    // `fifo.equals(List.of("a", "b", "c"))`. Restoring the original line brings back the worked
-    // observation: a, b, c order.
+    // Change `queue.addLast("a");` to `queue.addLast("a!");` in Example A and predict which
+    // assertion fails and why.
+    // Expected: The edited run fails with an `AssertionError` from the assertion on
+    // `fifo.equals(List.of("a", "b", "c"))`.
 
     // Exercise 2: Use a LIFO stack: debug a regression
-    // A regression changed `stack.push(1);` to `stack.push(2);` in the code that Example B adds
-    // after Example A. Run Example B with that change, use the failing assertion to explain the
-    // defect and repair it without changing the assertion.
-    // Expected: Before the repair the run fails with an `AssertionError` from the assertion on
-    // `lifo.equals(List.of(3, 2, 1))`; after it the line reads `stack.push(1);` again and 3, 2,
-    // 1.
+    // A regression changed `stack.push(1);` to `stack.push(2);` in Example B's new code. Repair
+    // it using the failing assertion.
+    // Expected: The unrepaired run fails with an `AssertionError` from the assertion on
+    // `lifo.equals(List.of(3, 2, 1))`; the repaired line reads `stack.push(1);`.
 
     // Exercise 3: Poll a priority queue
     // Insert 5, 1, 4, 2 and repeatedly poll.

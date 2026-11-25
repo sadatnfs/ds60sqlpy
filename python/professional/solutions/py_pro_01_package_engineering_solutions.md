@@ -108,9 +108,6 @@ The reference workflow separates source, build, artifact inspection, installatio
 
 ### Verification micro-example
 
-Run this small, deterministic case before adapting the reference to a
-larger system. It gives the reasoning above an executable anchor:
-
 ```python
 import importlib.util
 
@@ -124,31 +121,19 @@ print("installed import available:", importlib.util.find_spec(import_name) is no
 
 **Expected observation:** Installer and import identifiers can differ; availability must be checked through the intended interface.
 
-The reference implementation is one defensible contract, not a license
-to copy internal steps into every system. Preserve the observable
-guarantees and repeat the failure tests when adapting it.
-
 <!-- END PROFESSIONAL PYTHON CONCEPT ENRICHMENT -->
 
 ## Exercise-by-exercise reference
 
-Use this map after an honest attempt. The executable implementation remains
-[`py_pro_01_package_engineering_solution.py`](py_pro_01_package_engineering_solution.py); this section explains the
-contract, evidence, alternatives, and edge cases behind every numbered task.
+The runnable [`py_pro_01_package_engineering_solution.py`](py_pro_01_package_engineering_solution.py) implements every task below.
+
+**Principle behind every task:** Packaging evidence must come from standards metadata and a fresh installed artifact, never from an import that can fall back to the source tree.
+
+**Trap behind every task:** A successful local command can still use cached files, online build isolation, or the working tree; prove paths, inputs, and offline flags explicitly.
 
 ### Exercise 1: classify artifacts
 
 **Prompt recap:** Implement `classify_artifact`. Use complete final suffixes and reject `package.whl.txt`. Add checks for one wheel, one sdist, and one unsupported file.
-
-**Reference reasoning:** Packaging evidence must come from standards metadata and a fresh installed artifact, never from an import that can fall back to the source tree. The executable module and
-the focused discussion earlier in this file implement this original
-exercise. Verify every acceptance condition from the prompt with a
-normal case, a boundary case, and the documented failure behavior.
-
-**Common trap:** A successful local command can still use cached files, online build isolation, or the working tree; prove paths, inputs, and offline flags explicitly.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
 
 **Verify:** classify artifacts; assert classify_artifact accepts project-1.0.whl as wheel and project-1.0.tar.gz as sdist, while package.whl.txt and project.zip return the documented unsupported result/error.
 
@@ -156,31 +141,11 @@ and which input would make the policy reject or choose a different path.
 
 **Prompt recap:** Implement `offline_build_command` as an argument list. Use the running interpreter, invoke the `build` module, request both formats, disable isolation, and choose an explicit output directory. Why an argument list? It avoids a second round of shell parsing and behaves the same way in PowerShell, Command Prompt, Bash, and zsh.
 
-**Reference reasoning:** Packaging evidence must come from standards metadata and a fresh installed artifact, never from an import that can fall back to the source tree. The executable module and
-the focused discussion earlier in this file implement this original
-exercise. Verify every acceptance condition from the prompt with a
-normal case, a boundary case, and the documented failure behavior.
-
-**Common trap:** A successful local command can still use cached files, online build isolation, or the working tree; prove paths, inputs, and offline flags explicitly.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
-
 **Verify:** create an offline build command; assert the argument list starts with sys.executable and contains -m build --no-isolation --sdist --wheel --outdir followed by the explicit destination; execute no shell and test a path containing spaces.
 
 ### Exercise 3: inspect dependency intent
 
 **Prompt recap:** For each fixture entry, decide whether it is: 1. a runtime dependency, 2. an optional installed feature, 3. a development-only dependency group, or 4. a build bootstrap requirement. Explain when `colorama`'s environment marker is true. Confirm that building metadata does not install the `test` or `quality` groups.
-
-**Reference reasoning:** Packaging evidence must come from standards metadata and a fresh installed artifact, never from an import that can fall back to the source tree. The executable module and
-the focused discussion earlier in this file implement this original
-exercise. Verify every acceptance condition from the prompt with a
-normal case, a boundary case, and the documented failure behavior.
-
-**Common trap:** A successful local command can still use cached files, online build isolation, or the working tree; prove paths, inputs, and offline flags explicitly.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
 
 **Verify:** inspect dependency intent; for each fixture entry, decide whether it is: - a runtime dependency, - an optional installed feature, - a development-only dependency group, or - a build bootstrap requirement; explain when colorama's environment marker is true; confirm that building metadata does not install the test or quality groups.
 
@@ -188,31 +153,11 @@ and which input would make the policy reject or choose a different path.
 
 **Prompt recap:** Use disposable staging and output directories because a backend may write metadata beside its source. Invoke the running interpreter with `-m build --no-isolation --sdist --wheel --outdir <temporary-dir> <fixture>`. If a backend requirement is missing, return to connected setup instead of weakening the offline policy.
 
-**Reference reasoning:** Packaging evidence must come from standards metadata and a fresh installed artifact, never from an import that can fall back to the source tree. The executable module and
-the focused discussion earlier in this file implement this original
-exercise. Verify every acceptance condition from the prompt with a
-normal case, a boundary case, and the documented failure behavior.
-
-**Common trap:** A successful local command can still use cached files, online build isolation, or the working tree; prove paths, inputs, and offline flags explicitly.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
-
 **Verify:** build in a disposable directory; run the platform command in disposable storage with network disabled; require exit code 0, exactly one sdist and one wheel, no build artifacts beside the staged source, and an explicit missing-build-tool error when unavailable.
 
 ### Exercise 5: prove the installed origin
 
 **Prompt recap:** Install the wheel into a fresh target using `pip install --no-index --no-deps --target <directory> <wheel>`. Start Python outside the fixture source tree, expose only the target, and inspect the module origin, distribution version, console entry points, and greeting behavior. `installed_origin_is_safe` must accept only a resolved path beneath that fresh target.
-
-**Reference reasoning:** Packaging evidence must come from standards metadata and a fresh installed artifact, never from an import that can fall back to the source tree. The executable module and
-the focused discussion earlier in this file implement this original
-exercise. Verify every acceptance condition from the prompt with a
-normal case, a boundary case, and the documented failure behavior.
-
-**Common trap:** A successful local command can still use cached files, online build isolation, or the working tree; prove paths, inputs, and offline flags explicitly.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
 
 **Verify:** prove the installed origin; from outside the source tree, install with --no-index --no-deps into a fresh target and assert module.__file__ resolves under that target, version/entry point match metadata, and greeting('wheel') has the expected value.
 
@@ -233,11 +178,6 @@ requiring byte-identical archives: ZIP timestamps and tool versions can vary.
 If the sdist-built wheel fails, the release is incomplete even when a direct
 wheel succeeded.
 
-**Common trap:** A successful local command can still use cached files, online build isolation, or the working tree; prove paths, inputs, and offline flags explicitly.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
-
 **Verify:** build a wheel from the source distribution; build the fixture sdist in disposable storage, unpack it, build a wheel from that unpacked sdist with --no-isolation, and compare the result with the direct wheel build; record every required local tool.
 
 ### Exercise 7: inspect installed metadata without importing
@@ -254,11 +194,6 @@ separate module-origin and behavior proof.
 This catches a wheel that contains importable code but incorrect release
 metadata. It also avoids using `package.__version__` as the only authority when
 the project intentionally derives version from distribution metadata.
-
-**Common trap:** A successful local command can still use cached files, online build isolation, or the working tree; prove paths, inputs, and offline flags explicitly.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
 
 **Verify:** inspect installed metadata without importing; use importlib.metadata against the fresh target to inspect name, version, requirements, extras, and console scripts before importing the package; reject unexpected or missing metadata.
 
@@ -278,11 +213,6 @@ Do not claim reproducible builds until identical bytes are demonstrated under
 a documented controlled procedure. Semantic equivalence is useful evidence
 but a narrower claim.
 
-**Common trap:** A successful local command can still use cached files, online build isolation, or the working tree; prove paths, inputs, and offline flags explicitly.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
-
 **Verify:** separate reproducibility from equivalence; build twice from the same clean staged source; compare file hashes, archive member lists, metadata contents, and installed behavior; explain which differences are harmless and which invalidate the release.
 
 ### Exercise 9: test dependency markers across targets
@@ -300,11 +230,6 @@ The matrix is a test plan, not proof of every target. CI or local target
 environments must actually build, install, and exercise the declared supported
 combinations. Avoid unconditional imports of platform-selected packages.
 
-**Common trap:** A successful local command can still use cached files, online build isolation, or the working tree; prove paths, inputs, and offline flags explicitly.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
-
 **Verify:** test dependency markers across targets; create a review matrix for the fixture's build, runtime, optional, development, and environment-marked dependencies across Windows, macOS, Linux, Python 3.11, and Python 3.12.
 
 ### Exercise 10: design a local release gate
@@ -321,10 +246,5 @@ must execute outside the source tree.
 Signing, attestations, and index upload are separate authorized workflows.
 Document them as future controls without inventing credentials or claiming the
 unsigned local fixture has supply-chain provenance.
-
-**Common trap:** A successful local command can still use cached files, online build isolation, or the working tree; prove paths, inputs, and offline flags explicitly.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
 
 **Verify:** design a local release gate; write an offline release checklist that verifies clean source, tests, type/lint checks, sdist-to-wheel build, artifact contents, fresh install, metadata, hashes, and secret scan without publishing anything.

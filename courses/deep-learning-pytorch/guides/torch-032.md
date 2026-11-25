@@ -2,7 +2,7 @@
 
 ## Level and prerequisites
 
-Advanced; approximately 135 minutes. Direct prerequisites: `torch-031`. The prerequisite sequence introduces the notation used here; revisit its worked examples if an axis, probability or gradient is unfamiliar.
+Advanced; approximately 135 minutes. Direct prerequisites: `torch-031`.
 
 ## Learning objectives
 
@@ -11,8 +11,6 @@ Release a model as a state_dict and as an exported program, and verify inference
 Central investigation: Save a 2-to-1 Linear model with weight [2, -1] both ways, reload each in a new interpreter and test a three-row batch.
 
 Finish condition: Both artifacts predict 0 and 2 for the two fixture rows, the static export rejects three rows while the module accepts them, the dynamic export with batch range 1..4 matches the module, and the temporary directory is removed.
-
-The worked examples demonstrate the mechanism; exercises 1-3 transfer it to new inputs and exercises 4-6 extend it to failures and boundary cases. A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
 
 ## Purpose and mental model
 
@@ -44,9 +42,9 @@ TensorFlow/Keras distinguishes.keras reconstruction from SavedModel inference ex
 
 ## How to run this lesson
 
-Start or resume the Docker classroom with `./classroom` from the repository root. On Windows, run that command in WSL 2. In the shared home, choose the **Deep Learning with PyTorch: tensors to reliable model releases** subject and select `torch-032`. Use its `llm-torch-cpu` worker and wait for readiness before choosing **Run**; the [classroom instructions](../../../docs/one-command-classroom.md) explain how to prepare a missing profile. The worker supplies the declared packages and starts a fresh Python process, so no host Python or framework installation is needed. Save your current attempt before replacing the pad with a complete worked example. Keep the example sequence specified below together. Inputs are small local fixtures, with no package installation, dataset or model download, or online service call. For an optional contributor workflow on Linux, macOS or Windows through WSL 2, deliberately prepare an interpreter with the same declared dependencies, then invoke that interpreter on an owned copy of `courses/deep-learning-pytorch/lessons/torch-032.py` under `.learning/expansion/torch-032/`. The general contributor uv environment does not imply that TensorFlow or PyTorch is installed. The Docker profile is the default execution route.
+Run `torch-032` on the `llm-torch-cpu` worker ([launch, save and tolerance rules](../STUDY-GUIDE.md#launch-a-lesson)).
 
-Run the three worked blocks in order in one scratch file; later blocks reuse the earlier helper and fixture state. To reproduce a later block in a fresh process, include its preceding blocks. Start by reading Example A without running it. Write the intermediate quantities and their units on paper. Run the entire example in a fresh process, not only the final line in a notebook with hidden variables. Examples B and C change assumptions that matter to this mechanism. Compare value, gradient and state contracts separately. Equal forward numbers do not prove equal optimizer or training-mode behavior. Compare both observations before starting independent work. An assertion failure is a request to inspect an assumption, not a reason to widen every tolerance. Use the explicit tolerance in each assertion. Several analytic float64 fixtures use 1e-12 and float32 fixtures use 1e-6, but dtype alone is not a universal numerical-error bound. Finite differences, reductions and conditioning can require different justified tolerances. Integer counts, identities and boolean decisions should be exact.
+Examples B and C reuse `expected`, `x`, `model` and `folder` from earlier blocks; run all three in order.
 
 ## Syntax anatomy and reasoning sequence
 
@@ -177,11 +175,11 @@ Close the worked examples and rebuild Example C, Save an exported program, from 
 
 ## Next step
 
-If Example A (Create a known inference model) cannot be rebuilt without help, revisit `torch-031` first. Otherwise keep your exercise 2 attempt, Load state into matching and mismatched modules, as a regression case alongside a fresh transfer input, then continue along the course plan.
+If Example A (Create a known inference model) cannot be rebuilt without help, revisit `torch-031` first. `torch-033` (Inference mode, model contracts and bounded batching) builds directly on this lesson.
 
 ## Sources and verification status
 
-API and mechanism reference: [PyTorch2.9 export](https://docs.pytorch.org/docs/2.9/export.html), reviewed 2026-10-22. The fixture, examples, counterexamples and exercise design are original course material. See [validation](../../../docs/validation.md) for execution gates. Check CI artifacts for the exact revision and platform to determine which runtime checks actually ran; authored content alone does not establish runtime execution.
+API and mechanism reference: [PyTorch 2.9 export](https://docs.pytorch.org/docs/2.9/export.html), reviewed 2026-10-22 for the state_dict, Exported program, Dynamic dimension behavior these fixtures check ([verification status](../STUDY-GUIDE.md#sources-and-verification-status)).
 
 ## Interview reasoning with worked answers
 

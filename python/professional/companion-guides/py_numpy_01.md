@@ -10,31 +10,19 @@ Intermediate. Direct catalog prerequisites: `python-16`. This lesson deepens the
 
 ## Learning objectives
 
-By the end, explain the mechanism in your own words, implement each bounded contract, and use a counterexample to distinguish a correct result from a plausible mistake. The six exercises progress from inspection to transformation, edge handling and transfer.
+By the end, you can read an array's shape, strides, item size and byte count and predict from them whether a slice, transpose or fancy index shares memory with its source. You will return independent copies only where a contract needs them, center integer data without an in-place casting error, and explain why a read-only view does not freeze the buffer behind it.
 
 ## How to run this lesson
 
-**Primary browser route:** run `./classroom` from the repository root and
-choose **Python and data science** on `/classroom`. Open this lesson in the shared workspace,
-read its capability notice, and use its supported coding or reading workflow.
-The [classroom guide](../../../docs/classroom-experience.md) explains saved work, runtimes and switching subjects.
+The [learner script](../lessons/py_numpy_01.py) needs NumPy. Its worked examples write 99 through the step-2 view `a[::2]` and show the change in `a`, whose view stride is 16 bytes, then edit a `.copy()` of a column slice and confirm the source keeps `[[0, 1, 2], [3, 4, 5]]` while its transpose reports strides `(8, 24)`.
 
-**Optional contributor route:** use the prepared environment in
-[CONTRIBUTING](../../../CONTRIBUTING.md) on Linux, macOS or Windows through
-WSL 2. The commands below assume its packages are already installed. They are
-not prerequisites for opening this lesson in the Docker classroom. Local
-`.learning/` files and CLI progress belong to this checkout; they do not read or
-update the Docker classroom's named learning volume.
-
-Open the [learner script](../lessons/py_numpy_01.py) in the prepared repository environment. In the Docker classroom, edit the saved learner pad; drafts, notes and results persist in the classroom learning volume. An ignored `.learning/` copy is a separate optional contributor workspace. Run from the repository root. The provided worked examples execute immediately; task functions intentionally raise `NotImplementedError` until you implement them. A successful example is not evidence that the six tasks are finished.
-
-Prepared POSIX/WSL contributor terminal:
+The [Python study guide](../../STUDY-GUIDE.md) covers the browser classroom and this prepared-checkout run:
 
 ```sh
 uv run --no-sync python python/professional/lessons/py_numpy_01.py
 ```
 
-Dependencies: NumPy. All fixtures are tiny and local. The terminal prints the worked results and stops without editing your files. Keep [explanatory solutions](../solutions/py_numpy_01_solutions.md) and [runnable reference](../solutions/py_numpy_01_solution.py) closed until an attempt or an explicit worked comparison.
+After your attempt, compare `row_center_owned` and `read_only_view` with the [runnable reference](../solutions/py_numpy_01_solution.py): look for where a new float array is allocated and which object has its writeable flag cleared. Use the [explanatory solutions](../solutions/py_numpy_01_solutions.md) to check your reason for refusing object arrays in `snapshot_arrays`.
 
 ## Vocabulary and mental model
 
@@ -118,11 +106,11 @@ If changing a returned array unexpectedly changes the source, inspect np.shares_
 
 ## Self-check and retrieval
 
-Without copying code, explain which input property each function assumes, which observable result proves the normal case, and which counterexample would expose an incorrect implementation. Trace one boundary input by hand before running it. Keep the input and expected output beside your saved result so a reviewer can reproduce the evidence.
+Predict `layout(np.arange(12, dtype=np.int64).reshape(3, 4))` before running it: shape `(3, 4)`, strides `(32, 8)`, item size 8 and 96 bytes, with the transpose reporting strides `(8, 32)`. Then pass an integer matrix to `row_center_owned`; subtracting the row means in place would fail to cast floats into the integer buffer, so the correct result must be a new float array.
 
 ## Next steps
 
-Use these mechanisms in the next deepening lesson or return to the original prerequisite examples and explain precisely which new failure cases you can now diagnose. Review the [professional track](../README.md) for related modules.
+Next, [axes, broadcasting, and batched linear algebra](py_numpy_02.md) builds on strides: a broadcast stretches a length-1 axis with stride zero instead of copying it. The [professional track](../README.md) lists the other modules.
 
 ## Primary sources and official APIs
 

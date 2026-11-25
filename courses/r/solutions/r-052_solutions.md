@@ -1,6 +1,6 @@
 # r-052: reference reasoning
 
-Use the [complete reference](r-052_reference.R) with the guide's declared inputs and runtime. Every worked example is also a standalone script.
+Run the [complete reference](r-052_reference.R) under the [run rules](../STUDY-GUIDE.md#run-a-chapter).
 
 ## Why the implementation has this shape
 
@@ -108,4 +108,6 @@ The helper restores mfrow/margins and does not close an unrelated device.
 
 ## What the checks establish
 
-The reference makes 4 `stopifnot()` checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.
+The checks confirm means of 2.5 and 4.5 with squared standard errors 5/12 and 17/12, interval half widths larger than one standard error, a restored `mfrow` layout after the helper returns, that the logarithm of zero is not finite, and that 1, 10 and 100 are equally spaced on a log10 axis. They do not show that the two groups differ, and they cannot check whether readers interpret the bars correctly.
+
+The reference makes 4 `stopifnot()` checks; see [what a passing run proves](../STUDY-GUIDE.md#what-a-passing-run-proves).

@@ -1,6 +1,6 @@
 # docker-004: explanatory solutions
 
-Compare after your own attempt or an explicit reveal. These explain the supplied teaching fixtures; they are not engine results. The mechanism is explained in `courses/docker/guides/docker-004.md`.
+These answers explain teaching fixtures, not engine results; the mechanism is in [the guide](../guides/docker-004.md).
 
 ## Exercise 1: Predict what happens when the main process exits.
 
@@ -88,4 +88,4 @@ Compare after your own attempt or an explicit reveal. These explain the supplied
 
 ## Check your transfer
 
-A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.
+The shell started by `sh -c` is PID 1 and receives SIGTERM, but the worker never gets it, so the engine waits the full 30-second grace period and then kills everything with SIGKILL, which is the 137. Change the command to exec form, `["python", "worker.py"]`, or end the shell command with `exec`, and make sure the worker handles SIGTERM by finishing its current item. The expected result is a stop in a few seconds with exit code 0. If the stop still took exactly 30 seconds after that change, the worker itself would be ignoring SIGTERM, which disproves the shell explanation.

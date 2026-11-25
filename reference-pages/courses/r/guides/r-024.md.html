@@ -196,7 +196,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <article class="document"><h2 id="r-024-s7-properties-validators-and-generic-methods">r-024: S7 properties, validators and generic methods<a class="heading-anchor" href="#r-024-s7-properties-validators-and-generic-methods" aria-label="Link to this section">#</a></h2>
 <p><strong>Level:</strong> intermediate. <strong>Direct prerequisites:</strong> <code>r-021</code>, <code>r-022</code></p>
 <h3 id="run-and-retain-your-work">Run and retain your work<a class="heading-anchor" href="#run-and-retain-your-work" aria-label="Link to this section">#</a></h3>
-<p>Open <code>r-024</code> in <code>/classroom</code> and use the prepared <code>r-statistics</code> profile. Each Run evaluates one <code>main.R</code> script in a fresh offline R process, so define every input in the script; an earlier Run leaves no variables behind. Work in the <a href="../lessons/r-024.R.html">starter</a>. The <a href="../solutions/r-024_reference.R.html">complete reference</a> ends by printing <code>r-024 reference checks passed</code>, and the <a href="../solutions/r-024_solutions.md.html">explained answers</a> are there for deliberate comparison after your own attempt. This chapter prints values only; when a chapter draws figures, the classroom keeps at most two figures per run. The <a href="../README.md.html">course overview</a> describes saved work, figure capture and the prepared package versions.</p>
+<p>The starter supplies values 3 and 7 with the unit ms and an empty results list. Run it, then declare the <code>Series</code> class with typed properties and a validator using the pinned S7 API. Remember the contract difference from S4 in exercise 4: an S7 validator returns NULL on success and a character message on failure, not TRUE.</p>
+<p>Work in the <a href="../lessons/r-024.R.html">starter</a> under the <a href="../STUDY-GUIDE.md.html#run-a-chapter">run rules</a>.</p>
+<p>The <a href="../solutions/r-024_reference.R.html">complete reference</a> ends by printing <code>r-024 reference checks passed</code>.</p>
 <h3 id="outcome-and-mechanism">Outcome and mechanism<a class="heading-anchor" href="#outcome-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Use the pinned S7 property and method API to construct valid values, reject invalid replacement and dispatch across two typed arguments.</p>
 <p>S7 provides class definitions with declared properties and an explicit generic-method system. It aims to support interoperability with existing R object systems while offering more regular interfaces. It is not a spelling change for either S3 or S4. This lesson targets the prepared S7 0.2.2 API and uses method(generic, class) &lt;- function(...) replacement syntax. Newer development documentation can show syntax not present in this pinned environment.</p>
@@ -341,7 +343,15 @@ seconds <span class="syntax-operator">&lt;-</span> <span class="syntax-function"
 <li><a href="https://rconsortium.github.io/S7/articles/compatibility.html">S7 compatibility</a></li>
 </ul>
 <h3 id="continue">Continue<a class="heading-anchor" href="#continue" aria-label="Link to this section">#</a></h3>
-<p>Chapters that list <code>r-024</code> as a direct prerequisite: <a href="r-025.md.html"><code>r-025</code></a>.</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Next chapter</th>
+<th>Title</th>
+</tr></thead><tbody>
+<tr>
+<td><a href="r-025.md.html"><code>r-025</code></a></td>
+<td>Object interoperability and public data contracts</td>
+</tr>
+</tbody></table></div>
 <h3 id="ask-an-ai-tutor">Ask an AI tutor<a class="heading-anchor" href="#ask-an-ai-tutor" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for r-024 (S7 properties, validators and generic methods).
 Read the guide and my saved attempt. Explain the relevant R mechanism,

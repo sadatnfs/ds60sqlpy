@@ -32,11 +32,9 @@ A dependent service may specify `depends_on: app: condition: service_healthy`. T
 
 ## How to use this lesson
 
-The classroom displays this guide and saves your worksheet, `courses/docker/lessons/docker-012.md`. Its Run button does not control your Docker engine. Docker engine access is powerful host access, so the classroom deliberately receives no engine socket. Work through the supplied examples without starting anything, then use the optional host lab only in your own disposable project. Reading a command, parsing YAML and actually running the project are different forms of evidence.
+The classroom saves `courses/docker/lessons/docker-012.md` and holds no engine socket ([host-lab setup](../STUDY-GUIDE.md#host-lab-setup)).
 
-Use Bash in Linux, macOS Terminal, or Ubuntu under WSL 2 on Windows. The supported engine runs Linux containers. The maintained fixture is `courses/docker/fixtures/compose-lab/`; its README explains copying it into a new ignored learner directory, checking the engine, building locally with visible logs, and using the fixed project name `ds60-docker-study`. The fixture uses port 18080 on host loopback. Stop if that project name or port belongs to unrelated work; choose a new project name consistently in your own copy. Never paste a command against a remote Docker context simply because it is currently selected.
-
-For Dockerfile examples, create a file named `Dockerfile` in a scratch project. YAML snippets describe a fragment unless explicitly called a complete file. Text transcripts are synthetic illustrations, not claims about your machine. Do not substitute a real password, token or private registry into a checked-in example. **How to use the lessons** in the [subject README](../README.md) collects these rules in one place.
+**Host lab.** Start the project and watch the health state change with `docker compose -p ds60-docker-study ps` during the first few seconds; it moves from `starting` to `healthy`. Read the recorded probe results with `docker inspect --format '{{json .State.Health}}'` on the app container ID from `ps -q app`. Then run the tools-profile client from the fixture README, whose `depends_on` condition waits for that healthy state before it starts. Finally, compare the internal and host paths by running the health command yourself through `exec` and requesting `/healthz` from the host on port 18080. Both succeed here; write down which network namespace each one used, since the exercises ask what happens when only one of them works.
 
 ## Worked example / walkthrough
 
@@ -75,7 +73,7 @@ depends_on:
 
 ## Six progressive exercises
 
-For each exercise, name the object involved and the phase of its lifetime before changing anything, then vary only the condition the task names. Exercises that ask you to predict, explain, compare or diagnose keep their answers in the solutions file; the others show the evidence to look for.
+Answer-type prompts keep their answers in the solutions file ([exercise rules](../STUDY-GUIDE.md#exercise-rules)).
 
 ### Exercise 1: Compare running and healthy.
 
@@ -109,13 +107,19 @@ For each exercise, name the object involved and the phase of its lifetime before
 
 Using a check that only proves a process exists. Making the health check call an external service, so the local app looks unhealthy when the internet is down. Expecting `depends_on` to keep a dependency available after startup.
 
-Exercise 4 is this chapter's boundary case: Diagnose a healthy app with a broken host mapping. Run the healthcheck command from inside the container and the browser request from the host, then compare the two paths hop by hop. Preserve the original failure and the exact changed field before retrying. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
+Exercise 4 is this chapter's boundary case: Diagnose a healthy app with a broken host mapping. Run the healthcheck command from inside the container and the browser request from the host, then compare the two paths hop by hop.
+
+Another mistake is a health check that is too eager in a slow-starting service. If a database takes forty seconds to initialize and the check allows five retries at five-second intervals with no start period, the container is marked unhealthy before it ever had a chance, and anything waiting on `service_healthy` gives up. The fix is to set `start_period` to cover normal initialization, during which failed probes do not count against the retry limit, and to keep the probe itself cheap and local so that it measures the service rather than the network.
+
+Never trade a safety control for a passing example ([safety rules](../STUDY-GUIDE.md#safety-rules)).
 
 ## Retrieval, transfer and next steps
 
-Close the explanations first. Say what `condition: service_healthy` waits for and what it cannot promise about a host browser request. Then reconstruct worked example 2 (Express a dependency condition) with one different value, predict what changes, and name which of health check, readiness, depends_on, service_healthy and startup order the change touches.
+**Retrieval.** Say what `condition: service_healthy` waits for and what it cannot promise about a host browser request.
 
-When a host session ends, run `docker compose -p ds60-docker-study down` from your fixture copy. It removes the project's containers and network but keeps named volumes; deleting a volume is a separate, deliberate reset described in the fixture README.
+**Transfer case.** A web service depends on a database with `condition: service_healthy`. Startup works, but an hour later the database restarts and the web service returns errors for a minute. A teammate suggests adding a second `depends_on` condition. What is the actual fix?
+
+Then run the [retrieval loop](../STUDY-GUIDE.md#retrieval-and-cleanup) and end any host session with its cleanup.
 
 ## Primary references
 

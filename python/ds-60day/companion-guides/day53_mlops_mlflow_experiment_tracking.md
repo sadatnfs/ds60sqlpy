@@ -103,33 +103,13 @@ The server binds locally and the lesson works offline.
 
 ## How to run this lesson
 
-**Default Docker classroom:** open `python-53` for its guide, notebook and capability notice. The default Core does not include the `production` extra, so the complete legacy notebook is unavailable there until that app environment is deliberately prepared. Pressing Run or choosing a notebook kernel does not install packages.
+**Default Docker classroom:** MLflow tracking needs the `production` extra, and the default Core does not include it, so `python-53` cannot log runs there. A local install via [CONTRIBUTING](../../../CONTRIBUTING.md) writes runs to your checkout; a host notebook environment and a Docker app image are separate.
 
-**Prepared browser alternative:** use the [prepared ML engineering course](../../../courses/ml-engineering/guides/mle-001.md) in its declared runtime. Its supported examples have their own package and execution contract; this does not qualify every legacy optional extension.
-
-**Explicit legacy preparation:** retain the contributor extras in [CONTRIBUTING](../../../CONTRIBUTING.md) and add `production` only when needed. See [dependency profiles](../../../docs/dependency-profiles.md) and [Docker app package options](../../../docs/docker-profiles.md) for deliberate preparation. A host notebook environment and a Docker app image are separate. Do not install packages inside a learner pad.
+**Prepared browser alternative:** Tracking only helps when accepted artifacts are defined, and the [prepared ML engineering course](../../../courses/ml-engineering/guides/mle-001.md) defines them in its declared runtime.
 
 The notebook writes an explicit local SQLite metadata store and local model artifacts under artifacts/day53. The loopback UI is a separate terminal process. Registry promotion, hosted tracking and deployment are project extensions, not effects of opening this lesson.
 
-**Optional native notebook/editor route:** the instructions below describe
-separately prepared host tools. They are useful alternatives, not prerequisites
-for opening this lesson in the Docker classroom.
-
-1. Open the Day 53 learner notebook from this guide's **Next
-   step** section in VS Code or JupyterLab.
-2. Select the `Python (ds60sqlpy)` kernel. Start at the top and use
-   **Run All** only after making the written predictions; the default data examples are offline once the declared packages are prepared. Optional services and model assets have separate requirements.
-3. Keep experiments in new scratch cells. Do not edit the official
-   solution while attempting the numbered practice.
-4. Restart the kernel and run from the first cell before calling the
-   lesson complete. A clean run catches hidden state and stale
-   variables.
-
-Linux, macOS, or Ubuntu in Windows WSL 2:
-
-```bash
-.venv/bin/python -m jupyter lab
-```
+The [Python study guide](../../STUDY-GUIDE.md) covers the notebook route and preparing optional extras.
 
 ## Concept deep dive: MLflow run identity, params, metrics, artifacts, and reproducible evidence
 
@@ -153,10 +133,6 @@ control system, or backup.
 - **`log_artifact` / model logging:** copies output into the run's artifact store; verify reload and input contract rather than trusting existence.
 
 ### Focused example A: separate comparable configuration from results
-
-Before running the example, predict the shape, type, or direction of the
-result. Write the prediction down so that a surprise becomes evidence
-rather than something to overlook.
 
 ```python
 run_record = {
@@ -264,9 +240,6 @@ as a supplement, not as a substitute for experiment design.
 
 Make experiment records reconstructable: status, parameters, data/code identity, metrics, artifacts, and model signature must describe one coherent run.
 
-Predict or plan before you run code. Use the hint only after an honest
-attempt, and record the evidence that would prove your result correct.
-
 4. **Failure-state handling:** Run an experiment that intentionally raises after logging parameters. Verify MLflow records a failed status and useful exception context without exposing raw data or secrets.
    **Progressive hint:** Use the run context manager so exception exit marks the run failed. Log safe stage/status information before re-raising.
 
@@ -318,8 +291,7 @@ backends, access controls, retention, backup, and an explicit promotion process.
 
 ## Ask an AI tutor about this lesson
 
-The lesson is complete without an AI assistant. If you want optional
-coaching, copy this prompt into the AI tutor while the repository root is open:
+The lesson is complete without AI. For optional coaching, copy this prompt with the repository root open:
 
 ```text
 Tutor me through `python-53` (Day 53: Experiment Tracking with MLflow).

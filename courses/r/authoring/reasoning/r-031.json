@@ -42,5 +42,7 @@
       "wrong": "Sorting by time only, or computing lags in arrival order. Rows from two entities interleave, so an entity's first row receives the previous entity's last value.",
       "verify": "Shuffling the input rows and recomputing shows identical lag columns once both runs are sorted by entity, time and tie breaker."
     }
-  ]
+  ],
+  "run_note": "The starter prints three order lines, L3, L1 and L2, with quantities 2, 1 and NA, prices 5, 8 and 4 and discounts 1, 0 and 0. Run it and compute net values by hand before transforming: L3 gives 2 times 5 minus 1, which is 9, L1 gives 8, and L2 cannot be computed. Decide whether L2 is excluded or reported before writing any filter.",
+  "checks_note": "The assertions confirm unique, present ids, a result ordered as L1 then L3 with nets 8 and 9, an audit of 3 input rows, 2 retained and 1 excluded, a second selection that keeps only L3 at 9, and an empty selection that still returns the `id` and `net` columns. They do not check that the exclusion rule matches a business policy you were never given."
 }

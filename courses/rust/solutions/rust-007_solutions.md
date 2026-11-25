@@ -1,6 +1,8 @@
 # rust-007: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [rust-007_solution.rs](rust-007_solution.rs). It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.
+Executable reference: [rust-007_solution.rs](rust-007_solution.rs), which runs both examples and the coded answers.
+
+Open this only after [an attempt](../STUDY-GUIDE.md#attempt-a-lesson).
 
 ## Why the two examples differ
 
@@ -26,7 +28,7 @@ Identify which arguments are copied and which are borrowed.
 
 Add a function computing a labeled length from &str.
 
-**Reference answer.** The same statements run as the `Task 2` block of the reference program; here they are wrapped in `main` as a complete file.
+**Reference answer**, wrapped in `main`; the reference runs it as its `Task 2` block.
 
 ```rust
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -53,7 +55,7 @@ Both parameters are `&str`, so the function accepts literals and borrowed String
 
 Write a pure rectangle-area function with a documented valid range.
 
-**Reference answer.** The same statements run as the `Task 3` block of the reference program; here they are wrapped in `main` as a complete file.
+**Reference answer**, wrapped in `main`; the reference runs it as its `Task 3` block.
 
 ```rust
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -89,7 +91,7 @@ Diagnose an accidental semicolon on the final return expression.
 
 Test empty text and zero dimensions.
 
-**Reference answer.** The same statements run as the `Task 5` block of the reference program; here they are wrapped in `main` as a complete file.
+**Reference answer**, wrapped in `main`; the reference runs it as its `Task 5` block.
 
 ```rust
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -120,7 +122,7 @@ An empty `&str` is a valid input of length 0, not an error. A zero width or heig
 
 Choose owned or borrowed inputs for an API that stores data after the call.
 
-No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **Parameter**, and state one limitation of your choice.
+**Judging criteria.** An API that keeps data after the call should take ownership, as in `fn add(&mut self, name: String)`, so each caller decides whether to move or clone. Taking `&str` and calling `to_string` inside hides the allocation from the caller. A strong answer compares `String`, `&str` and `impl Into<String>` and states one limitation: storing a borrowed `&'a str` ties the container to the caller's data for its whole life.
 
 ## Mechanism and diagnostic reasoning
 
@@ -134,4 +136,6 @@ A reference is not permission to retain data beyond its lifetime. Pure-looking n
 
 ## Review before continuing
 
-Run the reference and confirm that it prints `rust-007: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.
+Rebuild Example B (Accept different text owners) from a blank pad.
+
+Review routine: [Self-check and review](../STUDY-GUIDE.md#self-check-and-review).

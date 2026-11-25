@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/r/solutions/r-017_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="r-017-reference-reasoning">r-017: reference reasoning<a class="heading-anchor" href="#r-017-reference-reasoning" aria-label="Link to this section">#</a></h2>
-<p>Use the <a href="r-017_reference.R.html">complete reference</a> with the guide&#x27;s declared inputs and runtime. Every worked example is also a standalone script.</p>
+<p>Run the <a href="r-017_reference.R.html">complete reference</a> under the <a href="../STUDY-GUIDE.md.html#run-a-chapter">run rules</a>.</p>
 <h3 id="why-the-implementation-has-this-shape">Why the implementation has this shape<a class="heading-anchor" href="#why-the-implementation-has-this-shape" aria-label="Link to this section">#</a></h3>
 <p>The intermediate character conversion retrieves the labels before numeric parsing. It is appropriate only if those labels genuinely represent measurements.</p>
 <p>Subsetting retains the declared levels. Zero counts for B and C can be useful evidence rather than categories that should automatically disappear.</p>
@@ -242,7 +242,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Tempting mistake:</strong> Describing the groupB coefficient as the average for B. It is B minus A, and the groupC estimate cannot be computed at all.</p>
 <p><strong>Verify:</strong> <code>colnames(design)</code> returns &quot;(Intercept)&quot;, &quot;groupB&quot;, &quot;groupC&quot;, and <code>colSums(design)</code> shows 3, 1 and 0.</p>
 <h3 id="what-the-checks-establish">What the checks establish<a class="heading-anchor" href="#what-the-checks-establish" aria-label="Link to this section">#</a></h3>
-<p>The reference makes 6 <code>stopifnot()</code> checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.</p></article>
+<p>The assertions confirm that <code>as.numeric()</code> on a factor of &quot;5&quot; and &quot;9&quot; returns the codes 1 and 2 rather than the labels, that <code>relevel()</code> makes B the reference, that the unused C level tabulates as zero, that an ordered factor reports <code>is.ordered()</code>, that an undeclared label becomes NA, and that the model matrix names the columns <code>groupB</code> and <code>groupC</code>. They do not check that a chosen reference category is meaningful for an analysis.</p>
+<p>The reference makes 6 <code>stopifnot()</code> checks; see <a href="../STUDY-GUIDE.md.html#what-a-passing-run-proves">what a passing run proves</a>.</p></article>
   </main>
 </body>
 </html>

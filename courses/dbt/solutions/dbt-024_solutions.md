@@ -2,7 +2,7 @@
 
 Use groups and model access to define supported project interfaces, while keeping database authorization claims separate.
 
-The executable reference contains the two complete worked cases with assertions. The changes below explain the independent practice and its limits.
+The reference declares commerce and analysis groups, marks `internal` private, and builds a consumer in one group or the other. dbt accepts the same-group ref and rejects the cross-group one at build time. It proves a project interface rule, not database authorization. See [how these answers are laid out](../STUDY-GUIDE.md#answers-and-references).
 
 
 ## 1. Identify the owner

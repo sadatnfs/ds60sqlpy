@@ -206,11 +206,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Rc:</strong> Single-threaded reference-counted shared ownership.</p>
 <p><strong>Weak:</strong> A non-owning link whose target may no longer exist.</p>
 <h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>The Linux Docker classroom compiles the saved pad as <code>main.rs</code> with pinned Rust 1.99.1, edition 2024, and the prepared Arrow 60 library. <code>assert!</code> and <code>assert_eq!</code> remain active in normal builds. The fixed pad accepts one source file without arbitrary arguments, interactive input, Cargo manifests or package installation. The main function returns <code>Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt;</code> so later examples can propagate errors with <code>?</code>; the final <code>Ok(())</code> means this fixture completed successfully. Standard library and Arrow examples remain offline after image preparation. Multi-file Cargo and external ecosystem projects have separate explicit preparation workflows.</p>
-<p>Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.</p>
+<p>Beyond the prelude, this lesson&#x27;s programs use <code>std::rc</code>. A passing run prints <code>rust-031: passed</code>.</p>
+<p>Pad setup and limits: <a href="../STUDY-GUIDE.md.html#run-a-lesson">Run a lesson</a>.</p>
+<p>Before you run anything, follow <a href="../STUDY-GUIDE.md.html#attempt-a-lesson">Attempt a lesson</a>.</p>
 <h3 id="syntax-anatomy-and-execution-trace">Syntax anatomy and execution trace<a class="heading-anchor" href="#syntax-anatomy-and-execution-trace" aria-label="Link to this section">#</a></h3>
 <p>Box::new stores an owned value behind a pointer. Rc::clone increments shared ownership. Rc::downgrade creates Weak, and upgrade returns Option because the owner may have disappeared.</p>
-<p>Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.</p>
+<p><strong>Reading Example A (Represent recursion through indirection, code below).</strong> <code>enum Node { End, More(i32, Box&lt;Node&gt;) }</code> defines a list as either an empty end or a value followed by another node. A field of type <code>Node</code> directly inside <code>Node</code> would make the type infinitely large, and rustc rejects that with E0072, recursive type has infinite size. <code>Box&lt;Node&gt;</code> stores the next node on the heap, so the outer value holds only a pointer of known size. <code>total(&amp;self)</code> matches on the borrowed node: <code>End</code> contributes 0, and <code>More(value, next)</code> binds the integer and a reference to the box. <code>next.total()</code> works through auto-dereference, calling the method on the boxed <code>Node</code> and recursing until it reaches <code>End</code>. Building the list nests the <code>Box::new</code> calls from the inside out.</p>
+<p>Method for tracing your own variants: <a href="../STUDY-GUIDE.md.html#trace-a-program">Trace a program</a>.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="example-a-represent-recursion-through-indirection">Example A: Represent recursion through indirection<a class="heading-anchor" href="#example-a-represent-recursion-through-indirection" aria-label="Link to this section">#</a></h4>
 <p>Each node owns the next node and releases that chain through ordinary ownership.</p>
@@ -282,20 +284,28 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <ol start="6">
 <li><strong>Transfer and justify.</strong> Choose Box, Rc or Arc for unique, local-shared and cross-thread ownership scenarios.</li>
 </ol>
-<p>For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.</p>
+<p>Record each task as in <a href="../STUDY-GUIDE.md.html#keep-evidence-for-each-task">Keep evidence for each task</a>.</p>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
 <p>Memory safety does not guarantee absence of leaks. Deep recursive drops can have stack costs. RefCell moves borrow checking to runtime and remains single-threaded.</p>
-<p>A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.</p>
+<p>To turn a pitfall into a test, see <a href="../STUDY-GUIDE.md.html#design-a-regression-case">Design a regression case</a>.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <ol>
 <li>Reproduce Example A (Represent recursion through indirection) before changing anything, and confirm its observation: Box makes the recursive type have a finite outer size.</li>
 <li>Compare Example B (Observe a weak target disappearing) with Example A and name the first line whose behavior differs. Its observation is: The weak reference does not keep the String alive.</li>
 <li>Before opening the explanation, test your task 3 attempt against this lesson&#x27;s main pitfall: Memory safety does not guarantee absence of leaks.</li>
 </ol>
+<p>Tempting approaches to rule out before you compare:</p>
+<ul>
+<li><strong>Task 1.</strong> Drawing <code>Node::More(i32, Node)</code> without the <code>Box</code> describes an infinitely sized type; the compiler rejects it with E0072, recursive type has infinite size.</li>
+<li><strong>Task 2.</strong> Predicting 10 for the extended list, as if the new head replaced the old one, forgets that <code>More(10, Box::new(list))</code> keeps the old nodes as its tail.</li>
+<li><strong>Task 5.</strong> Unwrapping <code>weak.upgrade()</code> on the assumption that the target is still alive turns a normal absence into a panic.</li>
+</ul>
 <h3 id="self-check-and-next-step">Self-check and next step<a class="heading-anchor" href="#self-check-and-next-step" aria-label="Link to this section">#</a></h3>
-<p>Explain Box, Rc, Weak without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.</p>
+<p>Why does the recursive <code>Node</code> in Example A need a <code>Box</code> for its next link, and what does rustc report without one? In Example B, why does <code>Weak::upgrade</code> return <code>Some</code> before the <code>String</code> is dropped and <code>None</code> afterwards? What would leak if a child held an <code>Rc</code> to its parent instead of a <code>Weak</code>?</p>
+<p>Then work through <a href="../STUDY-GUIDE.md.html#self-check-and-review">Self-check and review</a>.</p>
 <h3 id="sources-and-execution-boundary">Sources and execution boundary<a class="heading-anchor" href="#sources-and-execution-boundary" aria-label="Link to this section">#</a></h3>
-<p><a href="https://doc.rust-lang.org/book/">Official language or framework documentation</a>. The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.</p>
+<p>Read <a href="https://doc.rust-lang.org/book/ch15-06-reference-cycles.html">The Rust Book, 15.6 Reference Cycles</a> for how <code>Weak</code> breaks an ownership cycle.</p>
+<p>What the classroom does and does not prove: <a href="../STUDY-GUIDE.md.html#sources-and-execution-boundary">Sources and execution boundary</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for rust-031: Box, Rc, Weak and recursive structures.
 Read courses/rust/guides/rust-031.md and courses/rust/lessons/rust-031.rs. Prerequisites: rust-030.

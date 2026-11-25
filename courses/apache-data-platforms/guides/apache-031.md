@@ -133,11 +133,11 @@ It still needs provider compatibility and access controls. These two actual SDK
 lookups establish the intended resolution and rejection behavior without claiming
 a synthetic local reference proves a remote production database connection.
 
-The [complete Airflow workshop](../projects/airflow/README.md) provides the maintained files, preparation, lifecycle and exact qualification boundaries for these cases.
+In the [Airflow workshop](../projects/airflow/README.md), `connection-check` triggers `classroom_connections` and requires one known connection reference to resolve while a missing reference is rejected.
 
 ## Complete worked source
 
-This is a project-only command notebook. Read and edit it in the classroom; run its explicitly labeled commands from the copied owned Docker workshop. The classroom does not execute these service commands.
+The classroom does not execute these service commands. See the [workshop rules](../STUDY-GUIDE.md#workshop-notebooks).
 
 # Real runtime connection resolution
 

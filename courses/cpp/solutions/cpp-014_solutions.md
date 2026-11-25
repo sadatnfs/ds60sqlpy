@@ -1,6 +1,6 @@
 # cpp-014: explanations and reference observations
 
-Attempt the learner tasks before opening this document. The executable reference checks the bounded normal and boundary examples; the six explanations below cover the deliberate changes and manual checks.
+The [executable reference](cpp-014_solution.cpp) checks that the row `"25x"` changes the ledger to 2 accepted, 3 rejected and total 10. Its `main` also accepts `--input FILE`, exits 2 on a usage error and enforces a 100-row budget. The explanations cover the reviewer package for Exercise 6. How to compare: [study guide](../STUDY-GUIDE.md#compare-with-the-solutions).
 
 ## Mechanism
 

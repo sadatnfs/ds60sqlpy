@@ -24,9 +24,9 @@ A force unwrap asserts that absence is impossible and traps if that assertion is
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles the saved pad as `main.swift` with Swift 6 language checking. An explicit `@main` type contains `static func main() async throws`; the fixed compiler uses `-parse-as-library -swift-version 6`. The examples use the standard library and portable Foundation. `precondition` makes a violated invariant fail the process. The fixed pad accepts one source file, without arbitrary command arguments, interactive input or dependency installation. SwiftUI, UIKit, Apple simulators and application signing belong to the separately prepared macOS/Xcode project labs, never the Linux pad.
+Both examples compile only because every optional is unwrapped or compared before use; delete the `if let` and the compiler reports the missing unwrap. Task 4 fails at runtime instead: force-unwrapping the result of parsing forty-two stops the process with an unexpectedly-found-nil error, so keep that experiment in a separate pad.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Compile contract, starter stop and success marker: [running a lesson](../STUDY-GUIDE.md#running-a-lesson).
 
 
 
@@ -34,7 +34,7 @@ Start with the answer-free learner artifact in your saved classroom pad. It deli
 
 `Int?` abbreviates Optional<Int>. `if let value = optional` unwraps on the present branch. `guard let` requires an early exit on failure. `??` selects a fallback only when the optional is nil.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+Each example ends with a trace; method: [tracing a program](../STUDY-GUIDE.md#tracing-a-program).
 
 ## Worked example / walkthrough
 
@@ -65,6 +65,8 @@ struct LessonMain {
 
 **Observe:** A present zero remains distinct from nil.
 
+**Trace.** `measured` holds `Optional(0)` and `missing` holds nil; both have type `Int?`. The first check proves they are different states, even though a careless reading treats zero as nothing. The `if let` examines `measured`, finds a wrapped value, binds it to `value` of plain type `Int` and enters the first branch, where the check confirms 0. The else branch calls `preconditionFailure`, so a regression that turned a present zero into nil would stop the program with the message present zero.
+
 ### Example B: Parse with an absence policy
 
 The fallback is an explicit display sentinel in this fixture, not a valid quantity.
@@ -88,6 +90,8 @@ struct LessonMain {
 
 **Observe:** Parsing produces an optional and malformed text is absent.
 
+**Trace.** `Int("42")` succeeds and returns `Optional(42)`. Parsing forty-two fails, and the initializer returns nil instead of throwing or trapping. The first check compares each optional directly with a value, which Swift allows because `Optional` is equatable when its wrapped type is. The `??` operator then examines `invalid`, finds nil and substitutes -1. That -1 is only a display marker in this fixture; adding it to a real quantity total would quietly corrupt the sum, which is why the lesson calls it a sentinel.
+
 ## Exercises
 
 1. **Predict and explain.** Explain the difference between nil and a wrapped zero.
@@ -102,13 +106,15 @@ struct LessonMain {
 
 6. **Transfer and justify.** Model an optional measurement whose absence must survive serialization and reporting.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Log each task in the [evidence table](../STUDY-GUIDE.md#recording-exercise-evidence) before opening the explanation.
 
 ## Common pitfalls and diagnosis
 
 Optional chaining preserves absence; it does not validate the remaining value. A default chosen too early can erase meaningful missingness. Never silence absence merely to satisfy a compiler diagnostic.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+A parser for present nonnegative integers goes wrong subtly if it uses `Int(text) ?? 0`: malformed text and the input 0 both produce 0, and a caller can no longer tell them apart. The counterexample pair is therefore the text 0 and the text abc. Your version must return 0 for the first and nil for the second, and nil for -3, for empty text and for a value beyond `Int.max`.
+
+Repair routine: [building a regression case](../STUDY-GUIDE.md#building-a-regression-case).
 
 ## Progressive hints
 
@@ -118,11 +124,15 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 ## Self-check and next step
 
-Explain Optional, Unwrapping, Nil without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+Explain the difference between `Optional(0)` and nil to someone who expects them to be equal. Say when `guard let` fits better than `if let`, and what the compiler requires of a guard's else branch. Describe one report where a missing measurement must stay visibly missing rather than become zero.
+
+Then follow the general [self-check routine](../STUDY-GUIDE.md#self-check-routine) and save your pad.
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://docs.swift.org/swift-book/documentation/the-swift-programming-language/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+[Documentation](https://docs.swift.org/swift-book/documentation/the-swift-programming-language/): The Swift book covers optionals and optional binding in The Basics, nil-coalescing in Basic Operators, and optional chaining in its own chapter.
+
+Provenance and limits: [sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cuda/spark/solutions/cuda-127_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="cuda-127-explained-solutions">cuda-127: explained solutions<a class="heading-anchor" href="#cuda-127-explained-solutions" aria-label="Link to this section">#</a></h2>
-<p>These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.</p>
+<p>Compare with your <a href="../lessons/cuda-127.md.html">worksheet</a> attempt.</p>
 <h3 id="exercise-1-derive-expected-revenue">Exercise 1: Derive expected revenue<a class="heading-anchor" href="#exercise-1-derive-expected-revenue" aria-label="Link to this section">#</a></h3>
 <p>A revenue is <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">(</mo><mn>2</mn><mo>+</mo><mn>4</mn><mo stretchy="false">)</mo><mo>×</mo><mn>10</mn><mo>=</mo><mn>60</mn></mrow><annotation encoding="application/x-tex">(2+4)\times10=60</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord">2</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">4</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">10</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">60</span></span></span></span>, and B revenue is <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>3</mn><mo>×</mo><mn>20</mn><mo>=</mo><mn>60</mn></mrow><annotation encoding="application/x-tex">3\times20=60</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">3</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">20</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">60</span></span></span></span>.</p>
 <p><strong>Approach.</strong> Derive expected revenue by joining sales to prices and summing quantity times price per product: A is <code>(2 + 4)*10 = 60</code> and B is <code>3*20 = 60</code>.</p>
@@ -231,9 +231,19 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Why it is correct here.</strong> A reader needs to know what was proven and what remains open. Mixing them overstates the result.</p>
 <p><strong>A plausible wrong approach.</strong> Writing the report as if GPU acceleration was demonstrated when only CPU runs happened misleads anyone deciding on deployment.</p>
 <p><strong>How to verify.</strong> Check each claim in the report against a recorded run, and list every item that still requires hardware.</p>
+<h3 id="self-check-answers">Self-check answers<a class="heading-anchor" href="#self-check-answers" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>Why run both ordinary Spark implementations before any GPU comparison?</strong> Semantic agreement must be established first, so later differences point to the backend rather than the query.</li>
+</ol>
+<ol start="2">
+<li><strong>What does a GPU report need besides timing?</strong> The compatibility matrix, initial and executed plans, unsupported reasons, resource assignment, concurrency and memory observations.</li>
+</ol>
+<ol start="3">
+<li><strong>When may the query text change across backends?</strong> Only as a separately named rewrite that is revalidated against the oracle.</li>
+</ol>
 <h3 id="reference-observation">Reference observation<a class="heading-anchor" href="#reference-observation" aria-label="Link to this section">#</a></h3>
 <p>Sorted revenue [(A,60),(B,60)].</p>
-<p>The reference file is <code>courses/cuda/spark/references/cuda-127_cpu.py</code>. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.</p></article>
+<p>Asserted by <code>courses/cuda/spark/references/cuda-127_cpu.py</code>.</p></article>
   </main>
 </body>
 </html>

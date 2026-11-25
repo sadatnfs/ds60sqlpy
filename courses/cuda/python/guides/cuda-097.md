@@ -1,10 +1,17 @@
 # cuda-097: A Python API over a CUDA C++ operator
 
-**Route:** CUDA Python and machine learning. **Stage:** advanced. **Prerequisites:** `cuda-011`, `cuda-013`, `cuda-017`, `cuda-082`, `cuda-084`, `cuda-087`. Allow several sessions when the hardware experiment is new; the chapter is not a deadline.
+**Route:** CUDA Python and machine learning. **Stage:** advanced. **Prerequisites:** `cuda-011`, `cuda-013`, `cuda-017`, `cuda-082`, `cuda-084`, `cuda-087`.
 
-## What you will be able to explain
+Pacing, evidence labels and platform rules: [CUDA study guide](../../STUDY-GUIDE.md).
 
-By the end, you can **write the operator schema**, **reject unsupported layout**, and **define fixed-project build evidence** with evidence. Start with the two worked cases, then use the editable CPU model to make the quantities concrete.
+## Learning objectives
+
+- Write the operator schema.
+- Derive output values.
+- Specify aliasing.
+- Reject unsupported layout.
+- Compare framework registration mechanisms.
+- Define fixed-project build evidence.
 
 ## Mechanism and vocabulary
 
@@ -40,9 +47,13 @@ For \(y=\max(0,2x+1)\), inputs [-2,0,3] yield [0,1,7]. A custom kernel must matc
 
 A raw pointer kernel may return correct values for contiguous tensors but fail on a transposed view. Either implement strides or reject/pack the input explicitly and report copy cost.
 
-## Portable executable model
+## How to run the CPU model
 
-The **CPU reference model** variant runs this bounded worked example using `python-core`. It uses only the Python standard library, small synthetic values and no network. Its purpose is to expose the arithmetic or contract behind the chapter. The separate reference includes assertions for the stated observations.
+Edit the copy; the [reference](../references/cuda-097_cpu.py) adds assertions.
+
+```sh
+python courses/cuda/python/lessons/cuda-097_cpu.py
+```
 
 ```python
 def fused_reference(values, scale=2.0, bias=1.0):
@@ -56,8 +67,6 @@ print("CPU custom-op oracle:", fused_reference([-2, 0, 3]))
 
 **Expected observation:** Fused affine-ReLU output [0,1,7].
 
-Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.
-
 ## Equal framework lanes
 
 ### PyTorch
@@ -68,77 +77,65 @@ Use a prepared custom-operator project with a registered schema, dispatch implem
 
 Use a separately prepared TensorFlow custom-op project defining the op schema, shape behavior and device OpKernel. Match the framework build ABI and test placement and unsupported inputs independently.
 
-Choose either lane first, then compare the other using identical mathematical inputs. Framework-specific shape, mode and optimizer rules must be checked separately. Both use offline synthetic examples; no model hub or dataset download is triggered.
+Lane rules: [framework labs](../../STUDY-GUIDE.md#python-gpu-and-framework-labs).
 
 ## Practice and transfer
+
+Record each attempt in the [worksheet](../lessons/cuda-097.md) before opening hints.
 
 ### Exercise 1: Write the operator schema
 
 **Trap to avoid:** Leaving the schema implicit in a Python wrapper lets callers pass float64 or integers, which the C++ kernel then reinterprets.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 2: Derive output values
 
 **Trap to avoid:** Clamping before the affine step, `2*max(0, x) + 1`, gives `[1, 1, 7]`, a different function.
-
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 3: Specify aliasing
 
 **Trap to avoid:** Writing the output into `x` without declaring it breaks autograd when `x` was saved for backward.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 4: Reject unsupported layout
 
 **Trap to avoid:** Assuming every tensor reaching the operator is contiguous because the tests used fresh tensors misses views created by slicing or transposing.
-
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 5: Compare framework registration mechanisms
 
 **Trap to avoid:** Assuming a PyTorch extension can be loaded directly in TensorFlow treats a framework binding as a generic library. The library loads only if the framework finds a registered op, which it will not.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 6: Define fixed-project build evidence
 
 **Trap to avoid:** Recording only that the build succeeded omits whether the kernel ran on a real device. A build can succeed on a machine with no GPU at all, so the record proves compilation only.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ## Progressive hints
 
-Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.
+Hint *k* belongs to exercise *k*; open one at a time.
 
-1. Start from worked example 1 and mark the quantities needed for the task "Write the operator schema".
-2. Change one assumption in worked example 2 while preserving the declared contract: derive output values.
-3. Trace the CPU program's variables before adding hardware behavior: specify aliasing.
-4. Draw producers, consumers and the exact operation boundary for the task "Reject unsupported layout".
-5. Separate what the small fixture establishes from what the real runtime must show: compare framework registration mechanisms.
-6. Write a counterexample to an overbroad claim before you define fixed-project build evidence.
+1. List each tensor input, each scalar parameter and the output, with dtype, shape and device for every one.
+2. Compute `2*x + 1` for each input, then replace any negative result with zero.
+3. Decide whether the output gets new storage or writes into an input, and say so in the schema.
+4. Ask what a raw pointer kernel reads when it receives a transposed view, and where the wrapper should catch that.
+5. Ask whether registering the operator in one framework makes it callable from the other.
+6. List what a reviewer needs to reproduce the build and to trust that the forward pass matches.
 
-## Common mistakes and self-review
+## Common mistakes and self-check
 
-Confusing a correct tiny example with a general implementation is the central review risk. For this chapter, challenge the assumption in worked example 2, then ask whether your change preserves the mechanism described above. If you change dtype, layout, ordering, batch size or backend, update the acceptance contract rather than silently reusing the old observation. Explain an unexpected result before trying random configuration changes.
+A common mistake is treating a working kernel as a finished operator. The kernel may return `[0, 1, 7]` for a contiguous tensor yet silently read wrong values from a transposed view, a different dtype or another device. Fix it by writing the full schema first, including aliasing and mutation, validating dtype, device and layout in the host wrapper before launch, and either implementing strides or packing the input deliberately and reporting the copy cost.
 
-Keep a small evidence table with columns **claim**, **input**, **expected observation**, **actual observation** and **limit**. For the first claim use `Write the operator schema`. For the final claim use `Define fixed-project build evidence`. An unperformed GPU or cluster experiment remains pending even when the CPU model is correct.
+**Evidence limit:** The reference computes the fused affine-ReLU values `[0, 1, 7]` in Python. It builds no extension, so registration, dispatch, ABI compatibility and non-default stream behavior need a fixed, prepared project with a pinned toolkit and framework.
 
-## Platform and evidence contract
+1. What belongs in an operator contract besides argument types?
+2. Why can a Python pad accepting a source string not stand in for a registered operator?
+3. Why is backward treated as a separate contract?
 
-The reading worksheet and CPU reference model work through the ordinary Linux Docker classroom on macOS, Linux and Windows using WSL 2. They do not require an NVIDIA GPU. Their results are labeled CPU models or semantic oracles, not simulated hardware performance.
-
-Real CUDA work needs supported NVIDIA hardware, a compatible host driver and an explicitly prepared GPU runtime. An Apple GPU does not execute CUDA kernels. PyTorch MPS on a supported native Mac, ROCm on supported AMD hardware, or other vendor backends can provide separate accelerator learning routes; they need their own package and operation qualification and are not CUDA evidence. The ordinary Linux Docker classroom does not expose native Mac MPS automatically.
-
-Do not download packages, models or data by opening this lesson. Do not attach an engine socket, ambient cluster credentials or an arbitrary remote endpoint. A CPU pass, imported package, successful compilation, real GPU result and measured performance are distinct observations. Record the actual backend, data shape/dtype, source revision, versions and pending checks. A saved completion marker records learning progress, not hardware certification.
+Answers: [self-check answers](../solutions/cuda-097_solutions.md#self-check-answers).
 
 ## Primary references
 
 - [PyTorch CUDA semantics](https://docs.pytorch.org/docs/2.9/notes/cuda.html)
 - [TensorFlow GPU guide](https://www.tensorflow.org/guide/gpu)
 
-Use the version-matched documentation of your prepared environment. These references describe interfaces and supported boundaries; the chapter's synthetic examples and CPU models are original teaching material.
+Full lists: [documentation and sources](../../STUDY-GUIDE.md#documentation-and-sources).
 
 ## Ask an AI tutor about this lesson
 

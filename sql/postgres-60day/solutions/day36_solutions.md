@@ -4,87 +4,50 @@
 <!-- beginner-solution-enrichment -->
 ## How to study and run this solution
 
-Open this explanation only after making an honest attempt. The executable
-companion runs solely against the disposable `advanced_sql_training` database:
+The executable file runs all six answers in one transaction and rolls back,
+including the update to order 1 in exercise 3. Read each `SELECT n` tag and
+plan before the timing lines. General advice is in
+[Read a solution](../../STUDY-GUIDE.md#read-a-solution).
 
 ```bash
-# Linux, macOS, or Windows through WSL 2, from the repository root
 psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
   -f sql/postgres-60day/solutions/day36_solutions.sql
 ```
 
-`psql` prints each result/command tag in the terminal. Stop at the first
-unexpected `ERROR`; later output cannot repair an earlier failed invariant.
-Compare your own SQL, row grain, column names, row counts, `NULL` policy, and
-ordering with the explanation before comparing syntax.
+## How these answers fit together
 
-## Clause-by-clause reading map
-
-The lesson's main concepts are Materialized view, Freshness, Concurrent refresh. Its worked-model focus is:
-Create the monthly-category materialized view inside the learner transaction, reconcile its total revenue and row-grain uniqueness with the source query, then refresh it. Query speed is only one dimension; record when the stored rows become stale and who would own refresh failures.
-
-- Start at `FROM`/`JOIN` and state the intermediate row grain. Inspect join keys
-  before adding aggregates; a one-to-many join is allowed to multiply rows only
-  when the later contract accounts for it.
-- Apply `WHERE` to input rows, `GROUP BY` to form buckets, and `HAVING` to
-  completed groups. Window functions run over the surviving relation and
-  normally preserve its row count.
-- Read the `SELECT` list as the public result contract: keys establish grain,
-  measures state calculations, and aliases explain meaning. `ORDER BY` is the
-  only output-order guarantee; add a unique tie-breaker before `LIMIT`.
-- Trace every common table expression (CTE) as a temporary named relation.
-  Execute or inspect one stage at a time while debugging, but compare the final
-  result with an independent control rather than trusting stage names.
-- Keep SQL `NULL` as “missing/unknown/not applicable” until the metric contract
-  chooses another representation. Guard division with `NULLIF`; disclose
-  exclusions and distinguish zero from no row.
-- For DDL/DML, a command tag proves only that PostgreSQL accepted a statement.
-  Catalog checks, negative cases, row-count reconciliation, and the declared
-  transaction boundary prove behavior and cleanup.
-
-The exact final queries are not the only valid syntax. A join, subquery, CTE,
-window, or conditional aggregate can be an alternative when it preserves the
-same grain, `NULL` semantics, deterministic ordering, and safety. Prefer the
-form whose intermediate relations a reviewer can verify; optimize only after
-correctness is established with evidence.
-
-A materialized view stores query results. Reads can become cheaper, but the
-result is a snapshot and must be refreshed when source data changes.
+The answers build one view, `mv_weekly_country_revenue_solution`, and then
+question it: what it costs to read, how it goes stale, what makes a
+concurrent refresh possible, which revenue it stores and how missing
+combinations appear. The view sums `orders.total_amount` and counts
+orders per Monday week and country, with a unique index on
+`(week, country)`. The learner file is
+[day36_materialized_views.sql](../day36_materialized_views.sql).
 
 ## Exercise 1: Weekly revenue by country
 
-This demonstration is transactional and leaves no materialized view behind.
+The view is built inside the file's transaction and stays there for
+exercises 2 to 6, which all read it. The file's final `ROLLBACK` removes the
+view and its index, so nothing is left behind.
 
 ```sql
 BEGIN;
-SET LOCAL search_path TO training, public;
-
-DROP MATERIALIZED VIEW IF EXISTS mv_weekly_country_revenue_solution;
+SET search_path TO training, public;
 
 CREATE MATERIALIZED VIEW mv_weekly_country_revenue_solution AS
 SELECT
-  date_trunc('week', o.order_date)::date AS week_start,
+  date_trunc('week', o.order_date)::date AS week,
   c.country,
-  SUM(oi.unit_price * oi.quantity * (1 - oi.discount)) AS revenue
+  SUM(o.total_amount) AS revenue,
+  COUNT(*) AS orders
 FROM
   orders o
-  JOIN customers c ON c.customer_id = o.customer_id
-  JOIN order_items oi ON oi.order_id = o.order_id
+  JOIN customers c USING (customer_id)
 GROUP BY
   date_trunc('week', o.order_date),
   c.country;
 
-SELECT
-  week_start,
-  country,
-  ROUND(revenue, 2) AS revenue
-FROM
-  mv_weekly_country_revenue_solution
-ORDER BY
-  week_start DESC,
-  revenue DESC;
-
-ROLLBACK;
+CREATE UNIQUE INDEX idx_mv_weekly_country_solution ON mv_weekly_country_revenue_solution (week, country);
 ```
 
 Expected shape: one row per observed week-country pair. PostgreSQL weeks begin
@@ -93,30 +56,31 @@ on Monday under `date_trunc('week', ...)`.
 ### Reasoning and verification
 
 - **Inputs/evidence:** For sql-36 Exercise 1, read from `orders` joined to `customers` and create the materialized view `mv_weekly_country_revenue_solution` with one row per Monday-based `week` (`date_trunc('week', order_date)::date`) and `country`, carrying `revenue` (`SUM(total_amount)`) and `orders` (`COUNT(*)`), then add a unique index on `(week, country)`.
-- **Expected result/shape:** For sql-36 Exercise 1, expected output: a `SELECT n` command tag for the view build, one row per observed week-country pair, then `CREATE INDEX`. The view's columns are `week`, `country`, `revenue`, and `orders`.
+- **Expected result/shape:** For sql-36 Exercise 1, `SELECT 1080` on this load for the view build, one row per observed week-country pair across 193 Monday weeks and 7 countries (Brazil has no orders), then `CREATE INDEX`. The view's columns are `week`, `country`, `revenue`, and `orders`.
 - **Independent verification:** For sql-36 Exercise 1, confirm that the view's row count equals `SELECT COUNT(*) FROM (SELECT DISTINCT date_trunc('week', o.order_date), c.country FROM orders o JOIN customers c USING (customer_id)) d`, that `SUM(revenue)` is 2355646.89 and `SUM(orders)` is 4362, and that `EXTRACT(ISODOW FROM week)` is 1 (Monday) on every row.
-- **Intermediate relation check:** For sql-36 Exercise 1, run the `SELECT` behind the view first and check that (`week`, `country`) is unique in its output before you create the view and its unique index.
-- **Clause check:** For sql-36 Exercise 1, the solution actually uses `FROM`, `JOIN ... ON`, `GROUP BY`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `orders`, `customers`, `order_items`, and `mv_weekly_country_revenue_solution`, preserve one row per `week` and `country`, and finish with `week_start`, `country`, and `revenue` ordered by `week_start DESC, revenue DESC`.
-- **Alternative/trade-off:** For sql-36 Exercise 1, the chosen form is justified by this lesson-specific rationale: This demonstration is transactional and leaves no materialized view behind. Evaluate another form against the concrete expected result (one row per observed week-country pair. PostgreSQL weeks begin on Monday under `date_trunc('week',) and the verification above.
+
+- **Intermediate relation check:** On a late-2026 load the query behind the view returns 1,080 rows: 193 weeks that have orders times the countries that ordered in them. Brazil never appears, because its 62 customers have no orders. The `DISTINCT` count in the contract is also 1,080, so `(week, country)` is unique before the index is built.
+- **Clause check:** Grouping by `date_trunc('week', o.order_date)` and selecting its `::date` cast gives one Monday per group, so `EXTRACT(ISODOW FROM week)` is 1 on every row. The view's `revenue` totals 2,355,646.89 and `orders` totals 4,362, matching the base tables.
+- **Alternative/trade-off:** `CREATE MATERIALIZED VIEW ... WITH NO DATA` defines the view without running the query, and a later `REFRESH` fills it. That splits a slow build from the deployment, but a read before the first refresh fails instead of returning zero rows.
 - **Edge case:** `date_trunc('week', ...)` on a `timestamptz` uses the session `TimeZone`; an order placed late on a Sunday in one zone can belong to the next week in another.
 
 ## Exercise 2: Compare base-table and snapshot plans
 
+Run this in the same transaction, after exercise 1 has built the view.
+
 ```sql
-BEGIN;
-SET LOCAL search_path TO training, public;
-
-DROP MATERIALIZED VIEW IF EXISTS mv_weekly_country_revenue_compare;
-
-CREATE MATERIALIZED VIEW mv_weekly_country_revenue_compare AS
+EXPLAIN (
+  ANALYZE,
+  BUFFERS
+)
 SELECT
-  date_trunc('week', o.order_date)::date AS week_start,
+  date_trunc('week', o.order_date)::date AS week,
   c.country,
-  SUM(oi.unit_price * oi.quantity * (1 - oi.discount)) AS revenue
+  SUM(o.total_amount) AS revenue,
+  COUNT(*) AS orders
 FROM
   orders o
-  JOIN customers c ON c.customer_id = o.customer_id
-  JOIN order_items oi ON oi.order_id = o.order_id
+  JOIN customers c USING (customer_id)
 GROUP BY
   date_trunc('week', o.order_date),
   c.country;
@@ -126,29 +90,12 @@ EXPLAIN (
   BUFFERS
 )
 SELECT
-  date_trunc('week', o.order_date)::date AS week_start,
-  c.country,
-  SUM(oi.unit_price * oi.quantity * (1 - oi.discount)) AS revenue
-FROM
-  orders o
-  JOIN customers c ON c.customer_id = o.customer_id
-  JOIN order_items oi ON oi.order_id = o.order_id
-GROUP BY
-  date_trunc('week', o.order_date),
-  c.country;
-
-EXPLAIN (
-  ANALYZE,
-  BUFFERS
-)
-SELECT
-  week_start,
+  week,
   country,
-  revenue
+  revenue,
+  orders
 FROM
-  mv_weekly_country_revenue_compare;
-
-ROLLBACK;
+  mv_weekly_country_revenue_solution;
 ```
 
 The materialized-view plan should avoid source joins and aggregation. On this
@@ -160,10 +107,11 @@ buffers as well as execution time.
 - **Inputs/evidence:** For sql-36 Exercise 2, run `EXPLAIN (ANALYZE, BUFFERS)` on the base-table aggregate that defines the view, then on `SELECT week, country, revenue, orders FROM mv_weekly_country_revenue_solution`.
 - **Expected result/shape:** For sql-36 Exercise 2, expected output: two plans. The base-table plan aggregates all 4362 joined orders in a `HashAggregate`, while the view plan is a single `Seq Scan` on the materialized view; both top nodes report the same number of actual rows.
 - **Independent verification:** For sql-36 Exercise 2, compare the top node's actual `rows` in both plans (they must match) and the buffers each plan touched; then run both queries without `EXPLAIN` and confirm that `EXCEPT` in both directions returns no rows. Timings vary from run to run, so compare buffers and row counts rather than milliseconds.
-- **Intermediate relation check:** For sql-36 Exercise 2, start with the first relation in `orders`, `customers`, `order_items`, and `mv_weekly_country_revenue_compare`; after each join, record total rows and distinct `country` so the exact fanout or loss is visible.
-- **Clause check:** For sql-36 Exercise 2, the solution actually uses `FROM`, `JOIN ... ON`, `GROUP BY`, and `SELECT`. Read only those operations: begin at `orders`, `customers`, `order_items`, and `mv_weekly_country_revenue_compare`, preserve one row per `country`, and finish with `week_start`, `country`, and `revenue`.
-- **Alternative/trade-off:** For sql-36 Exercise 2, the chosen form is justified by this lesson-specific rationale: The materialized-view plan should avoid source joins and aggregation. Evaluate another form against the concrete expected result (one row per `country`) and the verification above.
-- **Edge case:** Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.
+
+- **Intermediate relation check:** Both top nodes report 1,080 actual rows. The base plan hash-joins 4,362 orders to 500 customers before its `HashAggregate`; the view plan is one `Seq Scan` on the stored rows.
+- **Clause check:** The base plan touches 74 shared buffers, 65 for `orders` and 9 for `customers`, while the view scan touches 8. The aggregate is estimated at 4,362 groups but produces 1,080, because the planner has no statistics for the `date_trunc` expression, the same blind spot Day 35 measured.
+- **Alternative/trade-off:** One run took about 3.7 ms for the base query and 0.07 ms for the view. The saving is real but small at this size, and it is paid back at every refresh, which reruns the full aggregate.
+- **Edge case:** Equal results here only show that the view is fresh immediately after it was built. In a running system the same comparison doubles as a freshness test: any rows returned by `EXCEPT` are changes the view has not caught up with.
 
 ## Pitfalls
 
@@ -185,13 +133,14 @@ visible instead of merely described.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-36 Exercise 3, read from `orders`, and `mv_weekly_country_revenue_solution`. Compute `live_total`, and `refreshed_mv_total` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.
-- **Expected result/shape:** For sql-36 Exercise 3, expected output: exactly one aggregate summary row. The final columns are `live_total`, and `refreshed_mv_total`.
-- **Independent verification:** For sql-36 Exercise 3, evaluate each of `live_total`, and `refreshed_mv_total` in a separate control `SELECT` over `orders`, and `mv_weekly_country_revenue_solution` using `(order_id = (SELECT MIN(order_id) FROM orders))`; require one final row and compare every value. Add one row for which `(order_id = (SELECT MIN(order_id) FROM orders))` is true and one for which it is false; verify only the matching `order_id` value is returned.
-- **Intermediate relation check:** For sql-36 Exercise 3, inspect the source keys that survive `WHERE`.
-- **Clause check:** For sql-36 Exercise 3, the solution actually uses `FROM`, `WHERE`, and `SELECT`. Read only those operations: begin at `orders`, and `mv_weekly_country_revenue_solution`, preserve exactly one summary row, and finish with `live_total`, and `refreshed_mv_total`.
-- **Alternative/trade-off:** For sql-36 Exercise 3, the chosen form is justified by this lesson-specific rationale: The transaction changes one disposable source row after materialization. Evaluate another form against the concrete expected result (exactly one aggregate summary row) and the verification above.
-- **Edge case:** Add one row for which `(order_id = (SELECT MIN(order_id) FROM orders))` is true and one for which it is false; verify only the matching `order_id` value is returned.
+- **Inputs/evidence:** For sql-36 Exercise 3, read `orders` and `mv_weekly_country_revenue_solution`: add 1.00 to order 1, the smallest `order_id` (240.20 becomes 241.20), compare `SUM(total_amount)` with `SUM(revenue)` from the view as `live_total` and `stale_mv_total`, then run `REFRESH MATERIALIZED VIEW` and compare again as `live_total` and `refreshed_mv_total`.
+- **Expected result/shape:** For sql-36 Exercise 3, expected output: `UPDATE 1`, then one row with `live_total` 2,355,647.89 and `stale_mv_total` 2,355,646.89, exactly one dollar apart, then after the refresh one row with both `live_total` and `refreshed_mv_total` at 2,355,647.89. The final columns are `live_total`, and `refreshed_mv_total`.
+- **Independent verification:** For sql-36 Exercise 3, confirm, before the refresh, that a fresh weekly aggregate `EXCEPT` the view returns one row, US in the week of 2026-10-12 on this load with revenue 5,847.26 against the view's 5,846.26 over 10 orders, and that the same `EXCEPT` returns 0 rows after the refresh; everything runs inside the file's `BEGIN ... ROLLBACK`, so order 1 is back to 240.20 afterward.
+
+- **Intermediate relation check:** The `UPDATE` reports `UPDATE 1`: order 1, the smallest id, goes from 240.20 to 241.20.
+- **Clause check:** Before the refresh the extra query shows `live_total` 2,355,647.89 against `stale_mv_total` 2,355,646.89, exactly one dollar apart. After `REFRESH MATERIALIZED VIEW` both columns read 2,355,647.89, which is the contract's `live_total` and `refreshed_mv_total` pair.
+- **Alternative/trade-off:** Totals can hide offsetting changes. A stricter check joins the view to a fresh aggregate on `(week, country)` and lists the rows whose revenue differs; before the refresh only one row, the week and country of order 1, should appear.
+- **Edge case:** The stale view is visible here only to this session, because nothing has been committed. In production, readers keep seeing the old rows until the refresh commits, and an ordinary refresh blocks them while it runs.
 
 ## Exercise 4: Explain concurrent-refresh eligibility
 
@@ -205,13 +154,14 @@ add work.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-36 Exercise 4, read from `pg_indexes`. Build the answer toward `indexdef`; keep `indexdef` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-36 Exercise 4, expected output: one row per `indexdef`. The final columns are `indexdef`.
-- **Independent verification:** For sql-36 Exercise 4, run an anti-check that counts rows where NOT ((schemaname = 'training' AND tablename = 'mv_weekly_country_revenue_solution')); require unique `indexdef` where the expected grain is one row per key and confirm the projected `indexdef` against `pg_indexes`. Add duplicate source candidates for `indexdef`; verify the final SELECT returns each required key tuple exactly once and does not discard distinct tuples that share only part of the key.
-- **Intermediate relation check:** For sql-36 Exercise 4, inspect the source keys that survive `WHERE`.
-- **Clause check:** For sql-36 Exercise 4, the solution actually uses `FROM`, `WHERE`, and `SELECT`. Read only those operations: begin at `pg_indexes`, preserve one row per `indexdef`, and finish with `indexdef`.
-- **Alternative/trade-off:** For sql-36 Exercise 4, the chosen form is justified by this lesson-specific rationale: The unique `(week, country)` index supplies a stable row identity required by concurrent refresh. Evaluate another form against the concrete expected result (one row per `indexdef`) and the verification above.
-- **Edge case:** Add duplicate source candidates for `indexdef`; verify the final SELECT returns each required key tuple exactly once and does not discard distinct tuples that share only part of the key.
+- **Inputs/evidence:** For sql-36 Exercise 4, read `pg_indexes` for `schemaname = 'training'` and `tablename = 'mv_weekly_country_revenue_solution'` after exercise 1 has built the view and its unique index on `(week, country)`.
+- **Expected result/shape:** For sql-36 Exercise 4, expected output: exactly one row, `CREATE UNIQUE INDEX idx_mv_weekly_country_solution ON training.mv_weekly_country_revenue_solution USING btree (week, country)`. The final columns are `indexdef`.
+- **Independent verification:** For sql-36 Exercise 4, confirm `REFRESH MATERIALIZED VIEW CONCURRENTLY mv_weekly_country_revenue_solution` succeeds inside the transaction; then, after a `SAVEPOINT`, drop the index and confirm the concurrent refresh fails with the error message `cannot refresh materialized view ... concurrently` and a hint to create a unique index with no `WHERE` clause, and confirm a unique index on `week` alone fails with `could not create unique index` because each week holds several countries.
+
+- **Intermediate relation check:** `pg_indexes` returns one row: `CREATE UNIQUE INDEX idx_mv_weekly_country_solution ON training.mv_weekly_country_revenue_solution USING btree (week, country)`.
+- **Clause check:** The filter names both `schemaname` and `tablename`. A view with the same name in another schema would otherwise add a row and hide which index belongs to this one.
+- **Alternative/trade-off:** Instead of reading the catalog, try the refresh. `REFRESH MATERIALIZED VIEW CONCURRENTLY` succeeds on this view inside the transaction, and fails on the learner's `mv_category_month_revenue` with a hint to create a unique index with no `WHERE` clause.
+- **Edge case:** A view created `WITH NO DATA` cannot be refreshed concurrently even with the index; PostgreSQL reports that `CONCURRENTLY` cannot be used until the view is populated, so the first fill is always an ordinary refresh.
 
 ## Exercise 5: Name the revenue definition
 
@@ -220,13 +170,14 @@ line-item revenue side by side so a consumer must choose a business definition.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-36 Exercise 5, read from `orders`, and `order_items`. Compute `header_revenue`, and `line_revenue` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.
-- **Expected result/shape:** For sql-36 Exercise 5, expected output: exactly one aggregate summary row. The final columns are `header_revenue`, and `line_revenue`.
-- **Independent verification:** For sql-36 Exercise 5, evaluate each of `header_revenue`, and `line_revenue` in a separate control `SELECT` over `orders`, and `order_items`; require one final row and compare every value. Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
-- **Intermediate relation check:** For sql-36 Exercise 5, select `order_id` from `orders`, and `order_items` before adding derived columns.
-- **Clause check:** For sql-36 Exercise 5, the solution actually uses `FROM`, and `SELECT`. Read only those operations: begin at `orders`, and `order_items`, preserve exactly one summary row, and finish with `header_revenue`, and `line_revenue`.
-- **Alternative/trade-off:** For sql-36 Exercise 5, the chosen form is justified by this lesson-specific rationale: The view stores order-header totals. Evaluate another form against the concrete expected result (exactly one aggregate summary row) and the verification above.
-- **Edge case:** Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
+- **Inputs/evidence:** For sql-36 Exercise 5, read `orders` for the header total `SUM(total_amount)` and `order_items` for the line total `SUM(quantity * unit_price * (1 - discount))`, as two scalar subqueries in one `SELECT` with no `FROM` clause.
+- **Expected result/shape:** For sql-36 Exercise 5, one row, read after exercise 3's update and refresh: `header_revenue` is 2,355,647.89 and `line_revenue` is 2,355,647.1235, so the header total is 0.7665 higher, the 1.00 added to order 1 less the 0.2335 that per-order rounding removes. The final columns are `header_revenue`, and `line_revenue`.
+- **Independent verification:** For sql-36 Exercise 5, confirm per order that order 1 is now the only `total_amount` that differs from `ROUND(SUM(line value), 2)`, by exactly 1.00, while 2,856 orders differ before rounding; then insert an order with `total_amount = 50.00` and no items and confirm `header_revenue` rises to 2,355,697.89 while `line_revenue` stays 2,355,647.1235.
+
+- **Intermediate relation check:** One row. This query runs after exercise 3 added 1.00 to order 1, so `header_revenue` is 2,355,647.89 against `line_revenue` 2,355,647.1235, a gap of 0.7665.
+- **Clause check:** The gap has two parts. Exercise 3's update adds 1.00 to the header side, and per-order rounding takes 0.2335 off it, because each order header is rounded to cents while line values keep four decimals.
+- **Alternative/trade-off:** The two views in this lesson disagree on purpose: the learner's category view stores line revenue and this exercise's view stores header totals. A name such as `header_revenue` for the column would stop a dashboard from mixing them.
+- **Edge case:** Neither measure filters on `status`, so the 872 returned orders count as revenue in both. A net-revenue view needs its own filter and its own name.
 
 ## Exercise 6: Materialize missing combinations explicitly
 
@@ -235,10 +186,20 @@ and `COALESCE` then implement a deliberate zero-display policy.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-36 Exercise 6, read from `orders`, `customers`, and `mv_weekly_country_revenue_solution`. Build the answer toward `week`, `country`, and `revenue`; keep `week`, and `country` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-36 Exercise 6, expected output: at most 20 rows keyed by `week`, and `country`. The final columns are `week`, `country`, and `revenue`. The final order is `m.week DESC, c.country`.
-- **Independent verification:** For sql-36 Exercise 6, assert no more than 20 rows, no duplicate `week`, and `country`, and no adjacent pair that violates `m.week DESC, c.country`. Rejoin the returned keys to `orders`, `customers`, and `mv_weekly_country_revenue_solution` to confirm `week`, `country`, and `revenue` came from the same source rows. Run with 20 minus one and 20 plus one eligible rows; require the output cap of 20 while retaining `m.week DESC, c.country`.
-- **Intermediate relation check:** For sql-36 Exercise 6, run `months`, and `countries` one at a time. Record each CTE's row count and `week`, and `country` uniqueness before the next stage uses it.
-- **Clause check:** For sql-36 Exercise 6, the solution actually uses `WITH`, `FROM`, `JOIN ... ON`, `SELECT`, `ORDER BY`, and `LIMIT`. Read only those operations: begin at `orders`, `customers`, and `mv_weekly_country_revenue_solution`, preserve one row per `week`, and `country`, and finish with `week`, `country`, and `revenue` ordered by `m.week DESC, c.country`.
-- **Alternative/trade-off:** For sql-36 Exercise 6, the chosen form is justified by this lesson-specific rationale: A cross-joined week/country spine defines requested combinations. Evaluate another form against the concrete expected result (at most 20 rows keyed by `week`, and `country`) and the verification above.
-- **Edge case:** Run with 20 minus one and 20 plus one eligible rows; require the output cap of 20 while retaining `m.week DESC, c.country`.
+- **Inputs/evidence:** For sql-36 Exercise 6, read `orders` for 193 distinct Monday weeks (the CTE is named `months`), `customers` for all 8 countries, and `mv_weekly_country_revenue_solution`; cross join weeks with countries and `LEFT JOIN` the view on both `week` and `country`, turning gaps into 0 with `COALESCE`.
+- **Expected result/shape:** For sql-36 Exercise 6, expected output: exactly 20 rows on this load: all 8 countries for the newest week, 2026-11-23, where only CA has revenue (742.14), then the weeks of 2026-11-16 and 2026-11-09, with 9 of the 20 rows showing 0. The final columns are `week`, `country`, and `revenue`. The final order is `m.week DESC, c.country`.
+- **Independent verification:** For sql-36 Exercise 6, confirm that without the `LIMIT` the grid has 1,544 rows, 193 times 8, of which 1,080 match the view and 464 are zero-filled, and that BR is 0 in every week; then, inside `BEGIN ... ROLLBACK`, insert a 100.00 order for BR customer 8 at the newest `order_date`, refresh the view, and confirm the 2026-11-23 BR row changes from 0 to 100.00.
+
+- **Intermediate relation check:** The CTE called `months` holds 193 distinct Monday weeks, and `countries` holds all 8 countries, Brazil included. The cross join makes 1,544 pairs, the view supplies 1,080 of them and the other 464 become zeros.
+- **Clause check:** The `LEFT JOIN` matches on both `week` and `country`, and `COALESCE(v.revenue, 0)` turns each unmatched pair into 0. On a late-2026 load 9 of the first 20 rows are zeros: Brazil in each week, and six countries with no order yet in the newest, partial week.
+- **Alternative/trade-off:** Taking weeks from `orders` skips any week with no order at all. A spine from `generate_series` between the first and last Monday has 198 weeks on the same load, so five empty weeks would appear as zeros too.
+- **Edge case:** A zero for Brazil says "no revenue", while the truth is that its customers have never ordered. Whether to show 0, `NULL` or no row is a reporting decision, so state it where the view is published.
+
+## Final self-check
+
+1. Why does the learner view total 2,355,647.1235 while `orders` totals
+   2,355,646.89?
+2. What did `stale_mv_total` show after order 1 changed, and what made it
+   match `live_total`?
+3. Which two conditions must hold before `REFRESH ... CONCURRENTLY` runs?
+4. How many zero rows does the spine add, and why is Brazil one of them?

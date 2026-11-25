@@ -16,6 +16,7 @@ import textwrap
 from pathlib import Path
 
 from cpp_gpu_sources import references, starter
+from cpp_study_notes import STUDY_NOTES
 
 ROOT = Path(__file__).resolve().parents[3]
 AUTHORING = Path(__file__).resolve().parent
@@ -162,6 +163,11 @@ def lesson_id(number: int) -> str:
     return f"cuda-{number:03}"
 
 
+def sentence_case(text: str) -> str:
+    """Capitalize a data fragment unless it opens with code or a number."""
+    return text[:1].upper() + text[1:] if text[:1].isalpha() else text
+
+
 def cpu_starter(unit: dict) -> str:
     """Keep only supplied literal fixtures/imports, never the solved model."""
     identity = lesson_id(unit["n"])
@@ -210,21 +216,11 @@ def listing_section(unit: dict, identity: str, gpu: dict[int, str]) -> str:
     if "listing" in unit:
         intro, code = unit["listing"]["intro"], unit["listing"]["code"].rstrip("\n")
     elif unit["n"] in gpu:
-        intro = (
-            f"The kernel below is an excerpt from the chapter's complete [GPU reference](../references/{identity}_gpu.cu). "
-            "The full program adds device discovery, checked allocation and launch, completion checks and host validation."
-        )
+        intro = f"An excerpt from the chapter's complete [GPU reference](../references/{identity}_gpu.cu); the reading pad does not compile it."
         code = kernel_excerpt(gpu[unit["n"]])
     else:
         return ""
-    return (
-        "## CUDA C++ kernel listing\n\n"
-        + intro
-        + " Read it as CUDA C++ source; the classroom reading pad does not compile or run it.\n\n"
-        + "```cpp\n"
-        + code
-        + "\n```\n\n"
-    )
+    return "## CUDA C++ kernel listing\n\n" + intro + "\n\n" + "```cpp\n" + code + "\n```\n\n"
 
 
 def render(unit: dict, gpu: dict[int, str]) -> dict[str, str]:
@@ -240,13 +236,16 @@ def render(unit: dict, gpu: dict[int, str]) -> dict[str, str]:
     worksheet_path = f"{PREFIX}/lessons/{identity}.md"
     explanation_path = f"{PREFIX}/solutions/{identity}_solutions.md"
     cpu_path = f"{PREFIX}/references/{identity}_cpu.py"
+    reasoning = unit["reasoning"]
+    notes = STUDY_NOTES[number]
     exercise_pairs = [
         (
-            "Predict and trace the first worked example before running its CPU reference. Write every intermediate quantity that leads to the stated result, including units or ownership where applicable.",
+            "Reconstruct worked example 1 on paper before running its CPU reference. "
+            + reasoning[0]["approach"],
             unit["example1"],
         ),
         (
-            "Reconstruct the second worked example without copying its conclusion. Identify the changed input or condition, show the resulting calculation or dependency, and explain why it differs from the first example.",
+            "Rework worked example 2 without copying its conclusion. " + reasoning[1]["approach"],
             unit["example2"],
         ),
         *[(entry["question"], entry["answer"]) for entry in unit["tasks"]],
@@ -259,7 +258,6 @@ def render(unit: dict, gpu: dict[int, str]) -> dict[str, str]:
     solutions = [
         f"# {identity}: explanatory solutions\n",
         f"## Mechanism review\n\n{unit['mechanism']}\n",
-        f"The separate [CPU reference](../references/{identity}_cpu.py) checks the chapter's bounded model. It does not execute CUDA or establish GPU timing. Compare after attempting the worksheet or explicitly choosing to reveal solutions.\n",
     ]
     for index, (question, answer) in enumerate(exercise_pairs, 1):
         hint1 = (
@@ -275,36 +273,26 @@ def render(unit: dict, gpu: dict[int, str]) -> dict[str, str]:
             if index == 5
             else "State the output contract and which observations are needed in the new application."
         )
-        exercises.append(f"### Exercise {index}\n\n{question}\n\n**Hint:** {hint1}\n")
+        exercises.append(
+            f"### Exercise {index}\n\n{question}\n\n**Trap to avoid:** {reasoning[index - 1]['wrong']}\n\n**Hint:** {hint1}\n"
+        )
         worksheet.append(
             f"## Exercise {index}\n\n{question}\n\nMy prediction or design:\n\nMy calculation, trace or observation:\n\nEvidence surface (reading / CPU reference / actual NVIDIA execution):\n\nWhat this does not establish:\n"
         )
-        reasoning = reasoning_markdown(unit["reasoning"][index - 1])
-        solutions.append(f"## Exercise {index}\n\n{answer}\n\n{reasoning}\n")
+        explained = reasoning_markdown(reasoning[index - 1])
+        solutions.append(f"## Exercise {index}\n\n{answer}\n\n{explained}\n")
     equation = ""
     if number in EQUATIONS:
         expression, meaning = EQUATIONS[number]
         equation = f"## Mathematical contract\n\n\\[\n{expression}\n\\]\n\n{meaning}\n\n"
     optional = ""
     if number in gpu:
-        optional = f"""## Optional CUDA C++ laboratory
-
-A complete [GPU reference](../references/{identity}_gpu.cu) and separate
-[GPU learner source](../lessons/{identity}_gpu.cu) accompany this chapter.
-They are standalone files with bounded fixtures, checked runtime calls and host
-validation. The learner source intentionally reports incomplete implementation
-until you add the chapter's algorithm and assertions. It must never return a
-fake GPU success on a CPU machine. Follow the [manual GPU workflow](../README.md)
-for exact compilation and execution paths. If the classroom offers the optional
-CUDA C++ variant, its capability notice must confirm actual runtime readiness.
-
-The reference contains an explicit no-device failure, launch and completion
-checks, and returned-value validation. Source review and CPU reference checks do
-not qualify this .cu file on your hardware. Preserve compilation, actual device
-execution and sanitizer evidence separately. Exercise 4 is a reasoning diagnosis;
-do not deliberately launch a hanging kernel or reset a shared GPU to reproduce it.
-
-"""
+        optional = (
+            "## Optional CUDA C++ laboratory\n\n"
+            f"- [GPU learner source](../lessons/{identity}_gpu.cu)\n"
+            f"- [GPU reference](../references/{identity}_gpu.cu)\n\n"
+            "Read the [laboratory rules](../../STUDY-GUIDE.md#optional-native-cuda-laboratories) before compiling.\n\n"
+        )
     sources = unit["sources"] or [
         ["CUDA Programming Guide", "https://docs.nvidia.com/cuda/cuda-programming-guide/"]
     ]
@@ -314,24 +302,25 @@ do not deliberately launch a hanging kernel or reset a shared GPU to reproduce i
     key_terms = "\n".join(
         f"- **{term}:** {definition}" for term, definition in unit["key_terms"].items()
     )
+    scope = sentence_case(unit["theory"].split(". ")[0].rstrip(".") + ".")
+    self_checks = "\n".join(
+        f"{index}. {question}" for index, (question, _) in enumerate(notes["self_check"], 1)
+    )
     guide = f"""# {identity}: {title}
 
 ## Level and prerequisites
 
 {level.capitalize()}; about {90 if number <= 16 else 110 if number <= 44 else 130} minutes, plus any optional hardware experiment. Direct prerequisites: {prerequisites}
 {(chr(10) + unit["prerequisite_note"] + chr(10)) if "prerequisite_note" in unit else ""}
-The order supports learning at your own pace. Reading and CPU reasoning remain
-available when NVIDIA hardware is absent. Advanced hardware features need their
-own capability checks and are not prerequisites for opening this chapter.
+Pacing, evidence labels and platform rules for every chapter are in the [CUDA study guide](../../STUDY-GUIDE.md).
 
 ## Learning objectives
 
 {unit["outcome"]}
 
-Work through *{title}* with the concrete cases below. Finish with this evidence:
-{unit["evidence"][0].lower() + unit["evidence"][1:] if unit["evidence"][1:2].islower() else unit["evidence"]} Distinguish an algorithmic
-calculation, a compiled artifact and an actual device observation when explaining
-what your work establishes.
+**Scope:** {scope}
+
+**Evidence to produce:** {sentence_case(unit["evidence"])}
 
 ## Purpose, vocabulary and mental model
 
@@ -343,81 +332,54 @@ what your work establishes.
 
 {equation}## How to run and study this lesson
 
-Use the saved reading worksheet in `/classroom`; the reading pad does not execute
-CUDA. For the bounded calculation, select **CPU model (Python)**, whose
-answer-free starter supplies the literal fixtures and task contract. The
-[CUDA C++ study workflow](../README.md) covers platforms, optional GPU
-compilation and evidence labels. In a prepared Python environment you can also
-run the separate [CPU reference](../references/{identity}_cpu.py) from the
-repository root:
+Trace worked example 1 by hand, then run the [CPU reference](../references/{identity}_cpu.py) from the repository root:
 
 ```sh
 python {cpu_path}
 ```
 
-Its assertions check the stated numerical result or model invariant; console
-text is evidence of this CPU model only, not of CUDA execution.
-
 {listing_section(unit, identity, gpu)}## Worked example 1: trace the mechanism
 
 {unit["example1"]}
 
-The complete CPU model below intentionally models only the named arithmetic,
-layout, dependency or capability decision. It does not model GPU scheduling,
-caches, instruction timing or device memory visibility.
+**Why:** {reasoning[0]["why"]}
 
 ```python
 {unit["code"]}
 ```
 
-**Expected observation:** Every assertion succeeds. A representative CPU output is:
+**Expected observation:** every assertion succeeds, and the CPU model prints:
 
 ```text
 {unit["expected_output"]}
 ```
 
-Integers, shapes and ordering must match exactly; only assertions with an explicit
-tolerance accept small floating-point differences. A printed duration is a model
-output, not a measured GPU benchmark.
+**Check:** {reasoning[0]["verify"]}
 
 ## Worked example 2: change a meaningful condition
 
 {unit["example2"]}
 
-Before applying this example to your own program, write down which inputs are
-read, which result is produced, and the condition that makes the comparison
-valid. Keep the original case as a regression check when changing a boundary.
+**Why:** {reasoning[1]["why"]}
+
+**Check:** {reasoning[1]["verify"]}
 
 {optional}## Six progressive exercises
-
-Exercises 1 and 2 are guided reconstructions of the worked examples; exercises
-3-6 change an input, diagnose a defect, test a boundary and transfer the idea.
-For each one, keep the calculation, output, diagram or failure policy you
-produce so another reader can compare it with the worked cases. If the hint is
-not enough, reread the mechanism paragraph and the bounded CPU assertion.
 
 {chr(10).join(exercises)}
 ## Common mistakes and diagnosis
 
-A tempting but incorrect claim in this chapter is: **{unit["mistake"]}**
-
-For the concrete failure exercise, {unit["tasks"][1]["question"][0].lower() + unit["tasks"][1]["question"][1:]}
-Preserve the original input and the stage where behavior diverged, and compare
-with the CPU model before changing hardware configuration.
+A tempting but incorrect claim: **{sentence_case(unit["mistake"])}** {notes["mistake_fix"]}
 
 ## Self-check, retrieval and transfer
 
-Explain the first example without its code, then use the second example to state
-one assumption that matters. Complete Exercise 3 independently, use Exercise 4 to
-diagnose a plausible defect, check the boundary in Exercise 5, and retain the
-application contract from Exercise 6. Compare the [separate explanations](../solutions/{identity}_solutions.md)
-only after your attempt or a deliberate reveal. A reading marker records your
-choice; it does not certify hardware qualification or expert mastery.
+{self_checks}
+
+Short answers are in the [separate explanations](../solutions/{identity}_solutions.md#self-check-answers); compare only after an attempt.
 
 ## Primary references
 
-Check the documentation that matches your prepared toolkit before optional
-hardware execution.
+Use the documentation that matches your prepared toolkit.
 
 {links}
 
@@ -434,13 +396,19 @@ Do not install drivers, download packages, run external jobs, reset devices or c
 Ask me to explain the boundary case and which observation would disprove my answer.
 ```
 """
+    answers = "\n".join(
+        f"{index}. **{question}** {answer}"
+        for index, (question, answer) in enumerate(notes["self_check"], 1)
+    )
     answer_checks = (
-        f" It also asserts an exercise answer that the guide's model leaves for you to derive: `{unit['reference_checks']}`."
+        f"\n\nIt also asserts an exercise answer you derive yourself: `{unit['reference_checks']}`"
         if "reference_checks" in unit
         else ""
     )
     solutions.append(
-        f"## Numerical reference and its limits\n\nThe complete CPU model is [here](../references/{identity}_cpu.py). Its assertions check the exact small model shown in the guide, including its explicit tolerance where present.{answer_checks} It does not claim CUDA execution, concurrency safety or a performance measurement.\n\n## Transfer review\n\n{unit['tasks'][3]['answer']}\n\nA complete explanation must name its inputs, the unchanged mathematical contract, the changed boundary or resource condition, and the evidence still needed on actual hardware. Preserve a CPU baseline even after a GPU path becomes available.\n"
+        f"## Self-check answers\n\n{answers}\n\n"
+        f"## Numerical reference and its limits\n\nThe [CPU reference](../references/{identity}_cpu.py) reproduces worked example 1 and prints `{unit['expected_output']}`.{answer_checks}\n\n"
+        f"## Transfer review\n\n{unit['tasks'][3]['answer']}\n"
     )
     result = {
         guide_path: guide,
@@ -467,6 +435,8 @@ def artifacts() -> dict[str, str]:
     for unit in units:
         assert unit["outcome"][:1].isupper() and len(unit["outcome"].split()) >= 4, unit["n"]
         assert 3 <= len(unit["key_terms"]) <= 5, unit["n"]
+        notes = STUDY_NOTES.get(unit["n"], {})
+        assert notes.get("mistake_fix") and len(notes.get("self_check", [])) >= 3, unit["n"]
         check_reasoning(unit)
     gpu = references()
     files: dict[str, str] = {}

@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/web-development/solutions/web-057_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="web-057-explanatory-solutions">web-057: explanatory solutions<a class="heading-anchor" href="#web-057-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Open this after your own attempt. Each answer explains the lesson&#x27;s synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in <code>courses/web-development/guides/web-057.md</code>.</p>
+<p>Attempt each exercise before reading; the mechanism is in <code>courses/web-development/guides/web-057.md</code> (<a href="../STUDY-GUIDE.md.html#solutions">using these answers</a>).</p>
 <h3 id="exercise-1-draw-the-lifecycle-from-browser-cookie-to-server-session-to-stored-note">Exercise 1: Draw the lifecycle from browser cookie to server session to stored note.<a class="heading-anchor" href="#exercise-1-draw-the-lifecycle-from-browser-cookie-to-server-session-to-stored-note" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> The cookie identifies session state; the session supplies an owner key and CSRF token; the database stores the owned note.</p>
 <p><strong>Approach:</strong> Trace one note: the browser sends the session cookie, the server finds the session, reads its owner key and token, and stores the note under that owner.</p>
@@ -232,7 +232,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Plausible wrong approach:</strong> Calling the lab production ready because notes persist fails because persistence on one machine says nothing about outages or attackers.</p>
 <p><strong>How to verify:</strong> Your list names at least four missing properties and the evidence each would need.</p>
 <h3 id="comparing-your-worksheet">Comparing your worksheet<a class="heading-anchor" href="#comparing-your-worksheet" aria-label="Link to this section">#</a></h3>
-<p>This lesson has no executable reference. Compare your worksheet with the answers above. The optional lab in <code>courses/web-development/fixtures/php-http-lab/</code> gives real request evidence only when you deliberately run it.</p></article>
+<p>Compare your lifecycle drawing with the solution&#x27;s and check that each arrow names the request, the status and where state is stored. If you ran the optional lab, the health response, the 303 redirect and a rejected token are your evidence; record them with the exact command you ran.</p>
+<p>This lesson has no executable reference (<a href="../STUDY-GUIDE.md.html#worksheets">worksheet rules</a>).</p></article>
   </main>
 </body>
 </html>

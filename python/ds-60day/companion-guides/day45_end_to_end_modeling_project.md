@@ -1,6 +1,6 @@
 # Day 45: Project: End-to-End Modeling
 
-**Offline teaching data:** The [original synthetic fixtures](../../fixtures/README.md) replace first-run sample-data downloads. Their values are not historical or observational evidence. Keep numerical conclusions scoped to the declared teaching input.
+**Offline teaching data:** the `passenger-outcomes` [synthetic fixture](../../fixtures/README.md) is invented, so its numbers prove methods, not facts.
 
 
 **Lesson ID:** `python-45` · **Level:** intermediate · **Dependencies:** `data` · **Network:** offline
@@ -27,8 +27,7 @@ By the end of the project, you can:
 
 ## Dataset and offline contract
 
-The checked-in synthetic teaching fixtures load without network access.
-Their generated values demonstrate programming methods, not real-world population facts.
+The checked-in `passenger-outcomes` fixture loads offline; its generated values illustrate methods, not real populations.
 
 The separate reference solution uses scikit-learn's package-bundled
 breast-cancer dataset to demonstrate the same engineering gates without a
@@ -86,31 +85,7 @@ future input must pass through the exact fitted preprocessing.
 
 ## How to run this lesson
 
-**Primary browser route:** run `./classroom` from the repository root and
-choose **Python and data science** on `/classroom`. Open this lesson in the shared workspace,
-read its capability notice, and use its supported coding or reading workflow.
-The [classroom guide](../../../docs/classroom-experience.md) explains saved work, runtimes and switching subjects.
-
-**Optional native notebook/editor route:** the instructions below describe
-separately prepared host tools. They are useful alternatives, not prerequisites
-for opening this lesson in the Docker classroom.
-
-1. Open the Day 45 learner notebook from this guide's **Next
-   step** section in VS Code or JupyterLab.
-2. Select the `Python (ds60sqlpy)` kernel. Start at the top and use
-   **Run All** only after making the written predictions; every added
-   worked example is bounded and offline after bootstrap.
-3. Keep experiments in new scratch cells. Do not edit the official
-   solution while attempting the numbered practice.
-4. Restart the kernel and run from the first cell before calling the
-   lesson complete. A clean run catches hidden state and stale
-   variables.
-
-Linux, macOS, or Ubuntu in Windows WSL 2:
-
-```bash
-.venv/bin/python -m jupyter lab
-```
+Open `python-45` in the classroom, or `python/ds-60day/notebooks/day45_end_to_end_modeling_project.ipynb` on a host; the [Python study guide](../../STUDY-GUIDE.md) explains both.
 
 ## Concept deep dive: an end-to-end evidence chain from decision to reproducible artifact
 
@@ -135,10 +110,6 @@ environment, seed, commands, and limitations.
 - **manifest + acceptance gates:** connect data hash, schema, code/environment, metrics, limitations, and artifact identity.
 
 ### Focused example A: require the candidate to beat a same-split baseline
-
-Before running the example, predict the shape, type, or direction of the
-result. Write the prediction down so that a surprise becomes evidence
-rather than something to overlook.
 
 ```python
 from sklearn.datasets import load_breast_cancer
@@ -259,9 +230,6 @@ The notebook's project checklist is the exercise:
 
 Finish one reproducible modeling system rather than a notebook demo. Every data boundary, fitted transform, metric, artifact, and handoff claim needs evidence.
 
-Predict or plan before you run code. Use the hint only after an honest
-attempt, and record the evidence that would prove your result correct.
-
 8. **Data-contract gate:** Write executable checks for row identity, required columns, target domain, missingness limits, duplicate policy, and data snapshot fingerprint.
    **Progressive hint:** Validate raw data before splitting. Separate hard failures from reported warnings and hash stable source bytes or a canonical snapshot manifest.
 
@@ -331,8 +299,7 @@ production readiness, causal validity, fairness, or stability under future data.
 
 ## Ask an AI tutor about this lesson
 
-The lesson is complete without an AI assistant. If you want optional
-coaching, copy this prompt into the AI tutor while the repository root is open:
+The lesson is complete without AI. For optional coaching, copy this prompt with the repository root open:
 
 ```text
 Tutor me through `python-45` (Day 45: End-to-End Modeling Mini-Project).

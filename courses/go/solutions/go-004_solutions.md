@@ -1,6 +1,6 @@
 # go-004: explained solutions
 
-These are comparison material after an attempt or explicit reveal. The executable reference implements all six cases in one `main.go`.
+Compare after an attempt ([using solutions](../STUDY-GUIDE.md#use-the-solutions)). `courses/go/solutions/go-004_solution.go` implements all six cases.
 
 ## Mechanism
 
@@ -10,7 +10,7 @@ func twice(x int) int declares a parameter and a return type. return ends the in
 
 ## 1. Implement a pure helper: predict an edited check
 
-Copy worked example 1 into a scratch pad and change `check(twice(7) == 14 && twice(0) == 0, "twice")` to `check(twice(8) == 14 && twice(0) == 0, "twice")` inside its check. Before running, predict whether the check still passes and explain why; then restore it.
+Copy worked example 1, change `check(twice(7) == 14 && twice(0) == 0, "twice")` to `check(twice(8) == 14 && twice(0) == 0, "twice")` inside its check and predict whether it still passes; then restore it.
 
 The unchanged code is worked example 1:
 
@@ -18,7 +18,9 @@ The unchanged code is worked example 1:
 check(twice(7) == 14 && twice(0) == 0, "twice")
 ```
 
-**Expected:** The changed run panics with `twice` because the edited check no longer holds. Restoring the original line brings back the worked observation: the results are 14 and 0.
+**Expected:** The edited check panics with `twice` even though `twice(7) == 14 && twice(0) == 0` still holds.
+
+**Verify:** Restoring `check(twice(7) == 14 && twice(0) == 0, "twice")` makes the check pass again with the worked observation: the results are 14 and 0.
 
 The zero case confirms the helper calculates from its input rather than returning a memorized positive result.
 
@@ -32,7 +34,7 @@ The zero case confirms the helper calculates from its input rather than returnin
 
 ## 2. Return an explicit failure: debug a regression
 
-A regression changed one token in worked example 2, so one line now reads `_, err = positiveArea(1, 4)`. Run worked example 2 with that line, use the failure to locate the defect and repair it without changing the check.
+A one-token regression in worked example 2 makes a line read `_, err = positiveArea(1, 4)`. Repair it without changing the check.
 
 The unchanged code is worked example 2:
 
@@ -43,7 +45,9 @@ _, err = positiveArea(0, 4)
 check(err != nil, "invalid area")
 ```
 
-**Expected:** Before the repair the program panics with `invalid area`; after it the line reads `_, err = positiveArea(0, 4)` again and 3 by 4 returns 12; zero width returns an error.
+**Expected:** The defective run panics with `invalid area`; after restoring `_, err = positiveArea(0, 4)`, 3 by 4 returns 12; zero width returns an error.
+
+**Verify:** The failing run shows message `invalid area`; after the repair `err != nil` holds again.
 
 The error describes a domain policy. Another geometry API might allow zero area, but its contract must say so.
 
@@ -67,6 +71,8 @@ check(n == 5, "value copy")
 
 **Expected:** The caller still holds 5.
 
+**Verify:** Your solution must keep `n == 5` true. Control: changing `n := 5` to `n := 6` panics with message `value copy`; revert it.
+
 Reassigning the copied parameter does not reassign the caller variable. This is a language rule, not a compiler optimization.
 
 **Approach.** Call `reassign(n)` with `n` holding 5 and inspect `n` afterward. The parameter `x` inside `reassign` is a separate copy of the argument.
@@ -88,6 +94,8 @@ check(low == 2 && high == 9, "bounds")
 
 **Expected:** Inputs 9 and 2 return 2 then 9.
 
+**Verify:** Your solution must keep `low == 2 && high == 9` true. Control: changing `low, high := bounds(9, 2)` to `low, high := bounds(10, 2)` panics with message `bounds`; revert it.
+
 Multiple returns can make a small contract clearer than mutating two caller-owned outputs.
 
 **Approach.** Implement `bounds` with one comparison: when `a < b` return `a, b`, otherwise return `b, a`. Both values come back as separate results.
@@ -107,6 +115,8 @@ check(total() == 0 && total(1, 2, 3) == 6, "variadic")
 ```
 
 **Expected:** The results are 0 and 6.
+
+**Verify:** Your solution must keep `total() == 0 && total(1, 2, 3) == 6` true. Control: changing `check(total() == 0 && total(1, 2, 3) == 6, "variadic")` to `check(total() == 0 && total(2, 2, 3) == 6, "variadic")` panics with message `variadic`; revert it.
 
 An empty variadic argument list is a normal case. The accumulator's identity determines its answer.
 
@@ -128,6 +138,8 @@ check(err != nil && value == 0, "negative dimension")
 ```
 
 **Expected:** The invalid domain is rejected before returning a usable area.
+
+**Verify:** Your solution must keep `err != nil && value == 0` true. Control: changing `check(err != nil && value == 0, "negative dimension")` to `check(err == nil && value == 0, "negative dimension")` panics with message `negative dimension`; revert it.
 
 Using only value while discarding err would erase the distinction between a valid zero and a rejected request. This helper deliberately reserves zero for its error path.
 

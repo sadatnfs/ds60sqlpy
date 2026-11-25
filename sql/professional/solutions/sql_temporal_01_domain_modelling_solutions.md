@@ -13,40 +13,28 @@ psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
   -f sql/professional/solutions/sql_temporal_01_domain_modelling_solutions.sql
 ```
 
-`psql` prints each result/command tag in the terminal. Stop at the first
-unexpected `ERROR`; later output cannot repair an earlier failed invariant.
-Compare your own SQL, row grain, column names, row counts, `NULL` policy, and
-ordering with the explanation before comparing syntax.
+The solution keeps `customer_terms` but replaces the ledger table with a
+`ledger` table and a `change_ledger` view, and it adds its own fixtures for
+later exercises, so compare clocks, bounds and evidence rather than names.
 
-## Clause-by-clause reading map
+## Reading map for this lesson
 
-The lesson's main concepts are Valid time, System time, Bitemporal, As-of query, Half-open interval, Exclusion constraint. Its worked-model focus is:
-The term-version grain is one recorded version of one customer's fact. A February-valid rate first enters the system March 1. On March 10, the old system period is closed and a corrected row begins. Querying valid February 15 as known March 5 returns 10; as known March 15 returns 12. History is appended/closed, not overwritten.
+The solutions build on the lesson's two-clock model:
 
-- Start at `FROM`/`JOIN` and state the intermediate row grain. Inspect join keys
-  before adding aggregates; a one-to-many join is allowed to multiply rows only
-  when the later contract accounts for it.
-- Apply `WHERE` to input rows, `GROUP BY` to form buckets, and `HAVING` to
-  completed groups. Window functions run over the surviving relation and
-  normally preserve its row count.
-- Read the `SELECT` list as the public result contract: keys establish grain,
-  measures state calculations, and aliases explain meaning. `ORDER BY` is the
-  only output-order guarantee; add a unique tie-breaker before `LIMIT`.
-- Trace every common table expression (CTE) as a temporary named relation.
-  Execute or inspect one stage at a time while debugging, but compare the final
-  result with an independent control rather than trusting stage names.
-- Keep SQL `NULL` as “missing/unknown/not applicable” until the metric contract
-  chooses another representation. Guard division with `NULLIF`; disclose
-  exclusions and distinguish zero from no row.
-- For DDL/DML, a command tag proves only that PostgreSQL accepted a statement.
-  Catalog checks, negative cases, row-count reconciliation, and the declared
-  transaction boundary prove behavior and cleanup.
+- Term corrections and boundaries: a retroactive correction appended on April 1
+  (Exercise 1), probes just before and exactly at each upper bound (Exercise
+  2), and the `btree_gist` exclusion alternative to the trigger (Exercise 3).
+- Append-only evidence: a reversal of a reversal in the immutable `ledger`
+  (Exercise 4) and an immutable, idempotent hold decision log (Exercise 5).
+- Clock and dimension design: domain assumptions, a stored instant plus IANA
+  zone across daylight saving changes, three event clocks with a watermark, a
+  type-2 as-of join whose diagnostic catches an injected overlap before rolling
+  back to `before_type_2_overlap`, temporal parent and child containment, a gap
+  and overlap report and a hold-aware archive plan (Exercises 6 to 12).
 
-The exact final queries are not the only valid syntax. A join, subquery, CTE,
-window, or conditional aggregate can be an alternative when it preserves the
-same grain, `NULL` semantics, deterministic ordering, and safety. Prefer the
-form whose intermediate relations a reviewer can verify; optimize only after
-correctness is established with evidence.
+Another answer is acceptable when each as-of probe returns one row, a correction
+closes a system period instead of overwriting a rate, and nothing on hold
+becomes eligible for deletion.
 
 Run:
 

@@ -196,7 +196,6 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <article class="document"><h2 id="cuda-011-explanatory-solutions">cuda-011: explanatory solutions<a class="heading-anchor" href="#cuda-011-explanatory-solutions" aria-label="Link to this section">#</a></h2>
 <h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
 <p>A .cu translation unit can contain ordinary host functions and CUDA device functions. nvcc coordinates separate compilation paths, invokes a supported host compiler and links the CUDA runtime. PTX is a virtual instruction representation; a cubin holds device machine code for a target architecture. An executable can package several device images in a fat binary. Loading may select a compatible image or invoke supported JIT compilation of PTX. This explains why source compilation, host linking, device loading and kernel execution can fail at different times. Header suffix .cuh is a convention, not an instruction that executes anything.</p>
-<p>The separate <a href="../references/cuda-011_cpu.py.html">CPU reference</a> checks the chapter&#x27;s bounded model. It does not execute CUDA or establish GPU timing. Compare after attempting the worksheet or explicitly choosing to reveal solutions.</p>
 <h3 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h3>
 <p>The manual lab command is <code>nvcc -std=c++17 -O2 -lineinfo main.cu -o main</code>. The input is main.cu; <code>-o main</code> names the executable. <code>./main</code> runs that file from the current directory. The toolkit&#x27;s default target must support the actual device. A release build later needs deliberately selected architecture targets, not guessed values from a tutorial.</p>
 <p><strong>Approach:</strong> Read each part of the command: language standard, optimization, line info, input file and output name.</p>
@@ -233,11 +232,16 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Why it is correct:</strong> These fields determine which devices can load the binary and which source produced it.</p>
 <p><strong>A plausible wrong approach:</strong> Recording only the toolkit version leaves the supported architectures unknown.</p>
 <p><strong>How to verify:</strong> Compare the recorded targets with a fresh device&#x27;s compute capability before deploying.</p>
+<h3 id="self-check-answers">Self-check answers<a class="heading-anchor" href="#self-check-answers" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>What is the difference between PTX and a cubin?</strong> PTX is a virtual instruction form that can be JIT compiled; a cubin is machine code for one target architecture.</li>
+<li><strong>Which diagnostic class is an undefined host function?</strong> A host link error, not a device or loading problem.</li>
+<li><strong>What should a release record include for a CUDA binary?</strong> Toolkit version, target architectures, host compiler, build flags and the commit, plus later runtime receipts per device.</li>
+</ol>
 <h3 id="numerical-reference-and-its-limits">Numerical reference and its limits<a class="heading-anchor" href="#numerical-reference-and-its-limits" aria-label="Link to this section">#</a></h3>
-<p>The complete CPU model is <a href="../references/cuda-011_cpu.py.html">here</a>. Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It does not claim CUDA execution, concurrency safety or a performance measurement.</p>
+<p>The <a href="../references/cuda-011_cpu.py.html">CPU reference</a> reproduces worked example 1 and prints <code>source -&gt; host/device compilation -&gt; link -&gt; load -&gt; execute -&gt; validate</code>.</p>
 <h3 id="transfer-review">Transfer review<a class="heading-anchor" href="#transfer-review" aria-label="Link to this section">#</a></h3>
-<p>Record toolkit and host compiler, target architectures/PTX policy, linked library versions, source revision and actual device runtime tests.</p>
-<p>A complete explanation must name its inputs, the unchanged mathematical contract, the changed boundary or resource condition, and the evidence still needed on actual hardware. Preserve a CPU baseline even after a GPU path becomes available.</p></article>
+<p>Record toolkit and host compiler, target architectures/PTX policy, linked library versions, source revision and actual device runtime tests.</p></article>
   </main>
 </body>
 </html>

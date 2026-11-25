@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/docker/solutions/docker-019_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="docker-019-explanatory-solutions">docker-019: explanatory solutions<a class="heading-anchor" href="#docker-019-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit reveal. These explain the supplied teaching fixtures; they are not engine results. The mechanism is explained in <code>courses/docker/guides/docker-019.md</code>.</p>
+<p>These answers explain teaching fixtures, not engine results; the mechanism is in <a href="../guides/docker-019.md.html">the guide</a>.</p>
 <h3 id="exercise-1-distinguish-attachment-from-published-ports">Exercise 1: Distinguish attachment from published ports.<a class="heading-anchor" href="#exercise-1-distinguish-attachment-from-published-ports" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Joining a network and exposing a host socket are different operations.</p>
 <p><strong>Why:</strong> A service can communicate with peers without publishing anything. A published port is an additional host-facing path that deserves separate review.</p>
@@ -238,7 +238,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>A plausible wrong approach:</strong> Disconnecting once and declaring the worker offline-ready misses code paths, such as an update check, that the test never exercised.</p>
 <p><strong>How to verify:</strong> Record which inputs were tested and that each finished under --network none.</p>
 <h3 id="check-your-transfer">Check your transfer<a class="heading-anchor" href="#check-your-transfer" aria-label="Link to this section">#</a></h3>
-<p>A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.</p></article>
+<p>Reject it. Joining <code>frontend</code>, which is not internal, gives the worker a default route through that network&#x27;s gateway and therefore outbound access, which is exactly what the policy forbids; attachment does not make anything faster. Attach the worker only to <code>backend</code>. Acceptance is a pair: the API request over <code>backend</code> succeeds, and the worker&#x27;s route table shows no default route, so outbound connections cannot leave. If the API request failed after removing <code>frontend</code>, the API itself is probably not attached to <code>backend</code>, which <code>docker network inspect backend</code> would show.</p></article>
   </main>
 </body>
 </html>

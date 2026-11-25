@@ -460,19 +460,10 @@ sentiment <span class="syntax-operator">=</span> pipeline<span class="syntax-pun
 <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>sentiment<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">I love this course!</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">This is terrible...</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <p>Record the exact model identifier and package version. A confidence-like score is not automatically calibrated probability, and sentiment labels may fail on sarcasm, dialect, negation, or domain-specific language.</p>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
-<p><strong>Default Docker classroom:</strong> open <code>python-49</code> for its guide, notebook and capability notice. The default Core does not include the <code>nlp</code> extra, so the complete legacy notebook is unavailable there until that app environment is deliberately prepared. Pressing Run or choosing a notebook kernel does not install packages.</p>
-<p><strong>Prepared browser alternative:</strong> use the <a href="../reference-pages/courses/nlp/guides/nlp-001.md.html">offline NLP course</a> in its declared runtime. Its supported examples have their own package and execution contract; this does not qualify every legacy optional extension.</p>
-<p><strong>Explicit legacy preparation:</strong> retain the contributor extras in <a href="../reference-pages/CONTRIBUTING.md.html">CONTRIBUTING</a> and add <code>nlp</code> only when needed. See <a href="../reference-pages/docs/dependency-profiles.md.html">dependency profiles</a> and <a href="../reference-pages/docs/docker-profiles.md.html">Docker app package options</a> for deliberate preparation. A host notebook environment and a Docker app image are separate. Do not install packages inside a learner pad.</p>
+<p><strong>Default Docker classroom:</strong> <code>python-49</code> opens for reading, but the default Core does not include the <code>nlp</code> extra. Add <code>nlp</code> using the <a href="../reference-pages/CONTRIBUTING.md.html">contributor setup</a> when you want to tokenize locally; a host notebook environment and a Docker app image are separate.</p>
+<p><strong>Prepared browser alternative:</strong> The <a href="../reference-pages/courses/nlp/guides/nlp-001.md.html">offline NLP course</a> starts from the same question of units, documents versus tokens, with a small corpus in its own runtime.</p>
 <p>The default tokenizer examples need spaCy; they do not contain a trained sentiment or POS model. Cached Transformers inference and the IMDB training reference are explicitly enabled local-asset extensions. Prepare Torch as well as the nlp extra for those extensions.</p>
-<p><strong>Optional native notebook/editor route:</strong> the instructions below describe separately prepared host tools. They are useful alternatives, not prerequisites for opening this lesson in the Docker classroom.</p>
-<ol>
-<li>Open the Day 49 learner notebook from this guide&#x27;s <strong>Next step</strong> section in VS Code or JupyterLab.</li>
-<li>Select the <code>Python (ds60sqlpy)</code> kernel. Start at the top and use <strong>Run All</strong> only after making the written predictions; the default data examples are offline once the declared packages are prepared. Optional services and model assets have separate requirements.</li>
-<li>Keep experiments in new scratch cells. Do not edit the official solution while attempting the numbered practice.</li>
-<li>Restart the kernel and run from the first cell before calling the lesson complete. A clean run catches hidden state and stale variables.</li>
-</ol>
-<p>Linux, macOS, or Ubuntu in Windows WSL 2:</p>
-<pre class="highlighted-code"><code class="language-bash">.venv/bin/python -m jupyter lab</code></pre>
+<p>The <a href="../reference-pages/python/STUDY-GUIDE.md.html">Python study guide</a> covers the notebook route and preparing optional extras.</p>
 <h4 id="guide--concept-deep-dive-tokenization-contracts-cached-nlp-models-and-sensitive-text-evaluation">Concept deep dive: tokenization contracts, cached NLP models, and sensitive-text evaluation<a class="heading-anchor" href="#guide--concept-deep-dive-tokenization-contracts-cached-nlp-models-and-sensitive-text-evaluation" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--the-mental-model">The mental model<a class="heading-anchor" href="#guide--the-mental-model" aria-label="Link to this section">#</a></h5>
 <p>Natural-language processing begins with a tokenizer contract. A token is a model-specific unit, not necessarily a word; subword models split rare words into reusable pieces and map them to integer IDs. A pipeline then combines preprocessing, model logits, and postprocessing labels.</p>
@@ -484,7 +475,6 @@ sentiment <span class="syntax-operator">=</span> pipeline<span class="syntax-pun
 <li><strong>token offsets and truncation:</strong> connect tokens back to original text and define what content the model actually saw.</li>
 </ul>
 <h5 id="guide--focused-example-a-inspect-an-offline-spacy-token-boundary">Focused example A: inspect an offline spaCy token boundary<a class="heading-anchor" href="#guide--focused-example-a-inspect-an-offline-spacy-token-boundary" aria-label="Link to this section">#</a></h5>
-<p>Before running the example, predict the shape, type, or direction of the result. Write the prediction down so that a surprise becomes evidence rather than something to overlook.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> spacy
 
 nlp <span class="syntax-operator">=</span> spacy<span class="syntax-operator">.</span>blank<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">en</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
@@ -556,7 +546,6 @@ token_ids <span class="syntax-operator">=</span> <span class="syntax-punctuation
 <p>The reference solution extends the topic with a 20-step DistilBERT smoke fine-tune and a spaCy matcher. That local project requires separately prepared dataset/model snapshots and is not the default offline exercise. It reads those local assets without Hub requests. IMDB is an external dataset with its own provenance; it is not one of the course&#x27;s original synthetic fixtures.</p>
 <h5 id="guide--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#guide--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
 <p>Treat tokenization, model identity, cache state, evaluation boundaries, and sensitive text handling as first-class NLP pipeline metadata.</p>
-<p>Predict or plan before you run code. Use the hint only after an honest attempt, and record the evidence that would prove your result correct.</p>
 <ol start="3">
 <li><strong>Truncation debugging:</strong> Create a text longer than the model limit and inspect token count, special tokens, truncation, attention mask, and which part of the document is lost. <strong>Progressive hint:</strong> Request truncation and max_length explicitly. The tokenizer can report overflowing tokens or support sliding windows.</li>
 </ol>
@@ -622,7 +611,7 @@ token_ids <span class="syntax-operator">=</span> <span class="syntax-punctuation
 <li>Continue to <a href="python-50.html#guide">Day 50; Time-Series Modeling</a>.</li>
 </ul>
 <h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
-<p>The lesson is complete without an AI assistant. If you want optional coaching, copy this prompt into the AI tutor while the repository root is open:</p>
+<p>The lesson is complete without AI. For optional coaching, copy this prompt with the repository root open:</p>
 <pre class="highlighted-code"><code class="language-text">Tutor me through `python-49` (Day 49: NLP Basics with Hugging Face and spaCy).
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
@@ -1083,7 +1072,7 @@ doc <span class="syntax-operator">=</span> nlp<span class="syntax-punctuation">(
 </ul>
 <hr>
 <h4 id="solution-1--solution-reasoning-lens">Solution reasoning lens<a class="heading-anchor" href="#solution-1--solution-reasoning-lens" aria-label="Link to this section">#</a></h4>
-<p>A strong solution is not merely code that produces one plausible output. It establishes a chain from input contract to operation to verification:</p>
+<p>Each decision below links an input contract to an operation and its evidence:</p>
 <ol>
 <li><strong><code>spacy.blank(&#x27;en&#x27;)</code>:</strong> creates an offline tokenizer without a downloaded statistical pipeline.</li>
 <li><strong><code>pipeline(task, model=..., local_files_only=...)</code>:</strong> bundles a specific cached Transformer tokenizer/model and postprocessing; model identity must be explicit.</li>
@@ -1095,46 +1084,38 @@ doc <span class="syntax-operator">=</span> nlp<span class="syntax-punctuation">(
 <p><strong>Trade-off:</strong> Large pretrained models add capability and transfer at the cost of downloads, compute, opaque failure modes, licensing, and privacy review.</p>
 <p><strong>Edge case to test:</strong> Empty/long text, unusual Unicode, unsupported language, label-map mismatch, missing cache, and domain shift require tests.</p>
 <p><strong>Evidence of correctness:</strong> Reconstruct text from offsets, test unknown/truncation behavior, pin and record model artifacts, evaluate task-specific slices, and prove raw sensitive text is not leaked.</p>
-<p>When comparing your attempt with the reference, explain which of these decisions your code made explicitly. If the reference makes a different choice, compare the contracts and evidence before deciding that one version is universally better.</p>
 <h4 id="solution-1--exercise-by-exercise-reasoning-map">Exercise-by-exercise reasoning map<a class="heading-anchor" href="#solution-1--exercise-by-exercise-reasoning-map" aria-label="Link to this section">#</a></h4>
-<p>This map connects every learner prompt to a reasoning path. Read the explanation before copying code: the goal is to understand the assumptions, the evidence that validates the result, and the edge cases that can make an apparently correct implementation fail.</p>
 <h5 id="solution-1--exercise-1-original-lesson-practice">Exercise 1: Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Try a zero-shot-classification pipeline with your own candidate labels.</p>
 <p><strong>How to reason about it:</strong> Zero-shot classification is an optional cached/connected extension. Record model ID, revision, candidate-label wording, hypothesis template, and an ambiguous case because each can alter scores.</p>
-<p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
 <p><strong>Verify:</strong> When cached model artifacts exist, print model revision, candidate labels, input text, ordered labels, and scores whose sum is approximately 1; otherwise print an explicit offline-skip result without downloading.</p>
 <h5 id="solution-1--exercise-2-original-lesson-practice">Exercise 2: Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-2-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Compare tokenization from spaCy with a Hugging Face tokenizer.</p>
 <p><strong>How to reason about it:</strong> spaCy and Transformer tokenizers optimize different representations. Inspect text, tokens, IDs, decoded output, punctuation, Unicode, and truncation rather than declaring one tokenization universally correct.</p>
-<p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
 <p><strong>Verify:</strong> For one fixed text, print spaCy token text/start/end and Hugging Face token IDs/tokens/offsets; reconstruct covered substrings, mark special/unknown/truncated tokens, and record exact tokenizer model/revision or local fallback.</p>
 <h5 id="solution-1--exercise-3-truncation-debugging">Exercise 3: Truncation debugging<a class="heading-anchor" href="#solution-1--exercise-3-truncation-debugging" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Create a text longer than the model limit and inspect token count, special tokens, truncation, attention mask, and which part of the document is lost.</p>
 <p><strong>Reasoning before implementation:</strong> Request truncation and max_length explicitly. The tokenizer can report overflowing tokens or support sliding windows.</p>
 <p>Silent right-side truncation can remove the decisive sentence. Record original character/token length, retained span, strategy, stride, and model maximum. For document tasks, compare head-only, tail-aware, and sliding-window aggregation on labeled validation examples.</p>
 <p>Do not set an arbitrarily huge max length: the model has a positional limit and attention memory cost grows rapidly.</p>
-<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
 <p><strong>Verify:</strong> Truncation debugging; print original character length, token count before/after truncation, special tokens, attention mask, offsets, and lost suffix; assert all retained offsets reconstruct exact source substrings.</p>
 <h5 id="solution-1--exercise-4-model-provenance-contract">Exercise 4: Model-provenance contract<a class="heading-anchor" href="#solution-1--exercise-4-model-provenance-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Design metadata that proves which Hugging Face model/tokenizer and spaCy pipeline produced an output, including revisions and offline cache state.</p>
 <p><strong>Reasoning before implementation:</strong> Record repository ID, immutable revision/commit when available, library versions, tokenizer settings, and local-files-only mode.</p>
 <p>Store model and tokenizer identifiers together; mixing compatible-looking versions can change vocabulary and special-token behavior. For spaCy, record pipeline package name/version and enabled components.</p>
 <p>Do not store developer-specific absolute cache paths. Record a portable cache status and the connected preload command, then verify an offline load with network disabled.</p>
-<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
 <p><strong>Verify:</strong> Model-provenance contract; write and validate metadata containing model/tokenizer IDs and revisions, spaCy pipeline/version, local artifact hashes, offline/cache status, and preprocessing limits; reject a revision/hash mismatch.</p>
 <h5 id="solution-1--exercise-5-evaluation-leakage">Exercise 5: Evaluation leakage<a class="heading-anchor" href="#solution-1--exercise-5-evaluation-leakage" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Find and repair leakage when near-duplicate documents or excerpts from one source appear in both train and validation.</p>
 <p><strong>Reasoning before implementation:</strong> Group by source/document/entity and use normalized hashes or similarity checks before splitting.</p>
 <p>Random row splits over fragments can make validation measure memorization of source wording. Define the deployment unit, new document, author, customer, or future period, and keep that group disjoint.</p>
 <p>Run exact normalized-hash checks first, then bounded near-duplicate detection. Keep deduplication rules inside the data-version manifest so results can be reconstructed.</p>
-<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
 <p><strong>Verify:</strong> Evaluation leakage; group near-duplicates/source excerpts before splitting, print group-overlap count before/after repair, assert repaired overlap is zero, and compare the leaked versus grouped validation metric.</p>
 <h5 id="solution-1--exercise-6-sensitive-text-boundary">Exercise 6: Sensitive-text boundary<a class="heading-anchor" href="#solution-1--exercise-6-sensitive-text-boundary" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Design a local text-classification workflow that minimizes PII in logs, cached datasets, examples, and error analysis.</p>
 <p><strong>Reasoning before implementation:</strong> Use synthetic fixtures, stable opaque IDs, redacted excerpts, bounded retention, and counts rather than raw matched values.</p>
 <p>Raw free text can contain identifiers even when the dataset has no “email” column. Restrict access, minimize retained fields, and never send lesson data to an optional external service without explicit authorization.</p>
 <p>PII detection is imperfect; document false-positive and false-negative risks. For error analysis, retain only the minimum redacted context needed and route incidents through the project&#x27;s security process.</p>
-<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
 <p><strong>Verify:</strong> Sensitive-text boundary; run email/phone/name-like fixtures through logging, cache, example, and error paths; assert raw sentinel strings are absent from captured logs/artifacts while redacted IDs still support debugging.</p></div>
       </section>
 
@@ -1381,7 +1362,7 @@ doc <span class="syntax-operator">=</span> nlp<span class="syntax-punctuation">(
 </ul>
 <hr>
 <h4 id="solution-2--cell-7--solution-reasoning-lens">Solution reasoning lens<a class="heading-anchor" href="#solution-2--cell-7--solution-reasoning-lens" aria-label="Link to this section">#</a></h4>
-<p>A strong solution is not merely code that produces one plausible output. It establishes a chain from input contract to operation to verification:</p>
+<p>Each decision below links an input contract to an operation and its evidence:</p>
 <ol>
 <li><strong><code>spacy.blank(&#x27;en&#x27;)</code>:</strong> creates an offline tokenizer without a downloaded statistical pipeline.</li>
 <li><strong><code>pipeline(task, model=..., local_files_only=...)</code>:</strong> bundles a specific cached Transformer tokenizer/model and postprocessing; model identity must be explicit.</li>
@@ -1393,46 +1374,38 @@ doc <span class="syntax-operator">=</span> nlp<span class="syntax-punctuation">(
 <p><strong>Trade-off:</strong> Large pretrained models add capability and transfer at the cost of downloads, compute, opaque failure modes, licensing, and privacy review.</p>
 <p><strong>Edge case to test:</strong> Empty/long text, unusual Unicode, unsupported language, label-map mismatch, missing cache, and domain shift require tests.</p>
 <p><strong>Evidence of correctness:</strong> Reconstruct text from offsets, test unknown/truncation behavior, pin and record model artifacts, evaluate task-specific slices, and prove raw sensitive text is not leaked.</p>
-<p>When comparing your attempt with the reference, explain which of these decisions your code made explicitly. If the reference makes a different choice, compare the contracts and evidence before deciding that one version is universally better.</p>
 <h4 id="solution-2--cell-7--exercise-by-exercise-reasoning-map">Exercise-by-exercise reasoning map<a class="heading-anchor" href="#solution-2--cell-7--exercise-by-exercise-reasoning-map" aria-label="Link to this section">#</a></h4>
-<p>This map connects every learner prompt to a reasoning path. Read the explanation before copying code: the goal is to understand the assumptions, the evidence that validates the result, and the edge cases that can make an apparently correct implementation fail.</p>
 <h5 id="solution-2--cell-7--exercise-1-original-lesson-practice">Exercise 1: Original lesson practice<a class="heading-anchor" href="#solution-2--cell-7--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Try a zero-shot-classification pipeline with your own candidate labels.</p>
 <p><strong>How to reason about it:</strong> Zero-shot classification is an optional cached/connected extension. Record model ID, revision, candidate-label wording, hypothesis template, and an ambiguous case because each can alter scores.</p>
-<p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
 <p><strong>Verify:</strong> When cached model artifacts exist, print model revision, candidate labels, input text, ordered labels, and scores whose sum is approximately 1; otherwise print an explicit offline-skip result without downloading.</p>
 <h5 id="solution-2--cell-7--exercise-2-original-lesson-practice">Exercise 2: Original lesson practice<a class="heading-anchor" href="#solution-2--cell-7--exercise-2-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Compare tokenization from spaCy with a Hugging Face tokenizer.</p>
 <p><strong>How to reason about it:</strong> spaCy and Transformer tokenizers optimize different representations. Inspect text, tokens, IDs, decoded output, punctuation, Unicode, and truncation rather than declaring one tokenization universally correct.</p>
-<p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
 <p><strong>Verify:</strong> For one fixed text, print spaCy token text/start/end and Hugging Face token IDs/tokens/offsets; reconstruct covered substrings, mark special/unknown/truncated tokens, and record exact tokenizer model/revision or local fallback.</p>
 <h5 id="solution-2--cell-7--exercise-3-truncation-debugging">Exercise 3: Truncation debugging<a class="heading-anchor" href="#solution-2--cell-7--exercise-3-truncation-debugging" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Create a text longer than the model limit and inspect token count, special tokens, truncation, attention mask, and which part of the document is lost.</p>
 <p><strong>Reasoning before implementation:</strong> Request truncation and max_length explicitly. The tokenizer can report overflowing tokens or support sliding windows.</p>
 <p>Silent right-side truncation can remove the decisive sentence. Record original character/token length, retained span, strategy, stride, and model maximum. For document tasks, compare head-only, tail-aware, and sliding-window aggregation on labeled validation examples.</p>
 <p>Do not set an arbitrarily huge max length: the model has a positional limit and attention memory cost grows rapidly.</p>
-<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
 <p><strong>Verify:</strong> Truncation debugging; print original character length, token count before/after truncation, special tokens, attention mask, offsets, and lost suffix; assert all retained offsets reconstruct exact source substrings.</p>
 <h5 id="solution-2--cell-7--exercise-4-model-provenance-contract">Exercise 4: Model-provenance contract<a class="heading-anchor" href="#solution-2--cell-7--exercise-4-model-provenance-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Design metadata that proves which Hugging Face model/tokenizer and spaCy pipeline produced an output, including revisions and offline cache state.</p>
 <p><strong>Reasoning before implementation:</strong> Record repository ID, immutable revision/commit when available, library versions, tokenizer settings, and local-files-only mode.</p>
 <p>Store model and tokenizer identifiers together; mixing compatible-looking versions can change vocabulary and special-token behavior. For spaCy, record pipeline package name/version and enabled components.</p>
 <p>Do not store developer-specific absolute cache paths. Record a portable cache status and the connected preload command, then verify an offline load with network disabled.</p>
-<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
 <p><strong>Verify:</strong> Model-provenance contract; write and validate metadata containing model/tokenizer IDs and revisions, spaCy pipeline/version, local artifact hashes, offline/cache status, and preprocessing limits; reject a revision/hash mismatch.</p>
 <h5 id="solution-2--cell-7--exercise-5-evaluation-leakage">Exercise 5: Evaluation leakage<a class="heading-anchor" href="#solution-2--cell-7--exercise-5-evaluation-leakage" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Find and repair leakage when near-duplicate documents or excerpts from one source appear in both train and validation.</p>
 <p><strong>Reasoning before implementation:</strong> Group by source/document/entity and use normalized hashes or similarity checks before splitting.</p>
 <p>Random row splits over fragments can make validation measure memorization of source wording. Define the deployment unit, new document, author, customer, or future period, and keep that group disjoint.</p>
 <p>Run exact normalized-hash checks first, then bounded near-duplicate detection. Keep deduplication rules inside the data-version manifest so results can be reconstructed.</p>
-<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
 <p><strong>Verify:</strong> Evaluation leakage; group near-duplicates/source excerpts before splitting, print group-overlap count before/after repair, assert repaired overlap is zero, and compare the leaked versus grouped validation metric.</p>
 <h5 id="solution-2--cell-7--exercise-6-sensitive-text-boundary">Exercise 6: Sensitive-text boundary<a class="heading-anchor" href="#solution-2--cell-7--exercise-6-sensitive-text-boundary" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Design a local text-classification workflow that minimizes PII in logs, cached datasets, examples, and error analysis.</p>
 <p><strong>Reasoning before implementation:</strong> Use synthetic fixtures, stable opaque IDs, redacted excerpts, bounded retention, and counts rather than raw matched values.</p>
 <p>Raw free text can contain identifiers even when the dataset has no “email” column. Restrict access, minimize retained fields, and never send lesson data to an optional external service without explicit authorization.</p>
 <p>PII detection is imperfect; document false-positive and false-negative risks. For error analysis, retain only the minimum redacted context needed and route incidents through the project&#x27;s security process.</p>
-<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
 <p><strong>Verify:</strong> Sensitive-text boundary; run email/phone/name-like fixtures through logging, cache, example, and error paths; assert raw sentinel strings are absent from captured logs/artifacts while redacted IDs still support debugging.</p></article></div>
       </section>
 

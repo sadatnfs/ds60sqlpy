@@ -24,9 +24,11 @@ Rust's built-in test harness runs functions marked test when compiling a test ta
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles the saved pad as `main.rs` with pinned Rust 1.99.1, edition 2024, and the prepared Arrow 60 library. `assert!` and `assert_eq!` remain active in normal builds. The fixed pad accepts one source file without arbitrary arguments, interactive input, Cargo manifests or package installation. The main function returns `Result<(), Box<dyn std::error::Error>>` so later examples can propagate errors with `?`; the final `Ok(())` means this fixture completed successfully. Standard library and Arrow examples remain offline after image preparation. Multi-file Cargo and external ecosystem projects have separate explicit preparation workflows.
+This lesson's programs need only the prelude and their own helpers. A passing run prints `rust-024: passed`.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Pad setup and limits: [Run a lesson](../STUDY-GUIDE.md#run-a-lesson).
+
+Before you run anything, follow [Attempt a lesson](../STUDY-GUIDE.md#attempt-a-lesson).
 
 
 
@@ -34,7 +36,9 @@ Start with the answer-free learner artifact in your saved classroom pad. It deli
 
 assert and assert_eq remain active in ordinary builds, unlike debug_assert. A cfg(test) module belongs to a test compilation. Cargo test discovers unit, integration and documentation tests under their own contracts.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+**Reading Example A (Use independent expected cases, code below).** `let cases = [(-2, 0), (0, 0), (3, 3)];` is an array of tuples, each pairing an input with an expected output written by hand. The `for` loop destructures each tuple into `input` and `expected` with the pattern `(input, expected)`. `input.max(0)` is the implementation under test: `Ord::max` returns the larger of two values, so it clamps negatives to zero. Each expected value is a literal that does not depend on `max`, which is what makes the check independent. When an assertion fails inside a loop, `assert_eq!` prints the left and right values but not the loop variable, so the message alone does not identify the case; a third argument such as `"input {input}"` adds it.
+
+Method for tracing your own variants: [Trace a program](../STUDY-GUIDE.md#trace-a-program).
 
 ## Worked example / walkthrough
 
@@ -89,13 +93,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 6. **Transfer and justify.** Separate unit, integration, compile-fail and runtime evidence for a library change.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Record each task as in [Keep evidence for each task](../STUDY-GUIDE.md#keep-evidence-for-each-task).
 
 ## Common pitfalls and diagnosis
 
 A disabled debug_assert is not a release invariant. Random cases require reproducibility and an oracle. A test that catches and ignores its own failure is misleading.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+To turn a pitfall into a test, see [Design a regression case](../STUDY-GUIDE.md#design-a-regression-case).
 
 ## Progressive hints
 
@@ -103,13 +107,25 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 2. Compare Example B (Reject a plausible wrong boundary) with Example A and name the first line whose behavior differs. Its observation is: Zero rejects the incorrect default while idempotence adds a second property.
 3. Before opening the explanation, test your task 3 attempt against this lesson's main pitfall: A disabled debug_assert is not a release invariant.
 
+Tempting approaches to rule out before you compare:
+
+- **Task 1.** Claiming `(3, 3)` catches `abs` is wrong: `3_i32.abs()` is 3. Only the negative row separates `abs` from the clamp, so removing it would let that bug through.
+- **Task 2.** Writing an expectation such as `-i32::MIN`, or calling `i32::MIN.abs()`, overflows because 2147483648 does not fit in an `i32`. The constant form is rejected at compile time by the deny-by-default arithmetic overflow lint, and `abs` panics with attempt to negate with overflow when checks are on.
+- **Task 3.** Writing the range as `(0..1000).contains(&value)` excludes 1000, because `..` is half-open. The `(1000, true)` row then panics with `left: false`, `right: true` and the message `input 1000`.
+- **Task 5.** Relying on idempotence alone passes for the identity `|value| value` and for the constant `|_| 0`, since both return the same result when applied twice. Neither is a clamp.
+- **Task 6.** Treating a green `cargo test` as proof the binary reads the right file is wrong here: the unit and integration tests pass slices of strings and never open the configured path.
+
 ## Self-check and next step
 
-Explain Test oracle, Regression case, Property without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+For the clamp rule `value.max(0)`, why does Example A test -2, 0 and 3 rather than three positive numbers? Which input exposes Example B's plausible wrong closure, and why would a suite of only negative and positive cases pass it? What does the second property, clamping twice equals clamping once, catch that a table of cases might miss?
+
+Then work through [Self-check and review](../STUDY-GUIDE.md#self-check-and-review).
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://doc.rust-lang.org/book/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+Read [The Rust Book, 11.1 How to Write Tests](https://doc.rust-lang.org/book/ch11-01-writing-tests.html) for what `assert_eq!` and `assert_ne!` print when a case fails.
+
+What the classroom does and does not prove: [Sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

@@ -24,9 +24,9 @@ Dictionary lookup returns an optional, preserving the distinction between a miss
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles the saved pad as `main.swift` with Swift 6 language checking. An explicit `@main` type contains `static func main() async throws`; the fixed compiler uses `-parse-as-library -swift-version 6`. The examples use the standard library and portable Foundation. `precondition` makes a violated invariant fail the process. The fixed pad accepts one source file, without arbitrary command arguments, interactive input or dependency installation. SwiftUI, UIKit, Apple simulators and application signing belong to the separately prepared macOS/Xcode project labs, never the Linux pad.
+Dictionary and set iteration order is unspecified, so never print a dictionary directly as evidence; sort first, as Example B does with `sorted()`. Task 4 is a written diagnosis: `hashValue` uses a per-process random seed, so a value stored by one run will not match the next run of the same program.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Compile contract, starter stop and success marker: [running a lesson](../STUDY-GUIDE.md#running-a-lesson).
 
 
 
@@ -34,7 +34,7 @@ Start with the answer-free learner artifact in your saved classroom pad. It deli
 
 `[String: Int]` declares a dictionary. `counts[key, default: 0] += 1` inserts a default only for that mutation. Set.insert returns whether an element was newly inserted. sorted establishes presentation order.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+Each example ends with a trace; method: [tracing a program](../STUDY-GUIDE.md#tracing-a-program).
 
 ## Worked example / walkthrough
 
@@ -60,6 +60,8 @@ struct LessonMain {
 
 **Observe:** Pear is present with zero and apple is absent.
 
+**Trace.** `counts` has one entry, pear mapped to 0. The subscript lookup for pear returns `Int?`, here `Optional(0)`, and the check compares it with 0. The lookup for apple finds no key and returns nil. The two lookups share a type but mean different things: one says the store knows there are zero pears, the other says the store holds no information about apples. Supplying a default of 0 at lookup time would merge those two meanings.
+
 ### Example B: Deduplicate and order deliberately
 
 Set semantics establish uniqueness while sorting separately establishes order.
@@ -83,6 +85,8 @@ struct LessonMain {
 
 **Observe:** Duplicate red is not inserted and sorted output is deterministic.
 
+**Trace.** `tags` starts with red. Inserting red again finds an equal element, leaves the set unchanged and returns a tuple whose `inserted` field is false. Inserting blue adds a new element and returns true. The set now holds two strings in an unspecified order, so the final check calls `sorted()`, which returns an `Array` in ascending order: blue, then red. Uniqueness comes from the set; the order comes only from the sort.
+
 ## Exercises
 
 1. **Predict and explain.** Explain the optional result of each dictionary lookup.
@@ -97,13 +101,15 @@ struct LessonMain {
 
 6. **Transfer and justify.** Design a custom Hashable key using only stable identity fields.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Log each task in the [evidence table](../STUDY-GUIDE.md#recording-exercise-evidence) before opening the explanation.
 
 ## Common pitfalls and diagnosis
 
 Hash collisions do not mean values are equal; equality resolves them. Dictionary order should not be treated as a report contract. A default subscript can insert values during mutation, so inspect side effects.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+The default-value subscript in task 2 has a side effect worth pinning: incrementing `counts[key, default: 0]` inserts a missing key, while merely reading it does not. Compare `counts.count` before and after each form to see the difference. Include a missing key, a key present with zero and a duplicate tag in the boundary checks for task 5.
+
+Repair routine: [building a regression case](../STUDY-GUIDE.md#building-a-regression-case).
 
 ## Progressive hints
 
@@ -113,11 +119,15 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 ## Self-check and next step
 
-Explain Hashable, Key, Set membership without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+Explain why two different strings can share a hash value and how a set still keeps them apart. State the type returned by a plain dictionary subscript and by the default-value subscript. List the fields of a customer record you would hash for a key that must stay stable across app launches.
+
+Then follow the general [self-check routine](../STUDY-GUIDE.md#self-check-routine) and save your pad.
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://docs.swift.org/swift-book/documentation/the-swift-programming-language/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+[Documentation](https://docs.swift.org/swift-book/documentation/the-swift-programming-language/): Sets, set operations and dictionaries appear in the book's Collection Types chapter; the standard library reference documents the Hashable protocol.
+
+Provenance and limits: [sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

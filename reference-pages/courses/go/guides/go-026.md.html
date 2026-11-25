@@ -209,9 +209,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="syntax-anatomy-and-reasoning">Syntax anatomy and reasoning<a class="heading-anchor" href="#syntax-anatomy-and-reasoning" aria-label="Link to this section">#</a></h3>
 <p>context.WithCancel returns a child and cancel function. Done closes on cancellation; Err explains cancellation or deadline expiry. WithDeadline accepts a past time for deterministic testing. A select arm receiving from ctx.Done cooperates with cancellation. Context values carry request-scoped metadata, not optional function arguments, authentication guarantees or mutable application state.</p>
 <h3 id="run-this-lesson">Run this lesson<a class="heading-anchor" href="#run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>Choose Go in the unified Docker classroom. Save your own pad before experimenting. The prepared worker stages it as <code>main.go</code>, compiles it, and executes the resulting program with bounded time and output. The pad is one source file. It does not supply interactive input, arbitrary command-line arguments, package installation, Kubernetes credentials or a host Docker socket. Every ordinary reference here uses the standard library, synthetic local data and explicit checks. A failed <code>check</code> panics and produces a nonzero process result; do not remove it to make the run appear successful.</p>
-<p>The explanatory solution snippets belong inside <code>func main()</code> unless they declare a helper. <code>check</code> is a tiny teaching helper that panics when a condition is false. The separate reference supplies required imports and helpers and implements all six cases. Use that complete source only after an attempt or an explicit reveal. For an independently prepared Go project, the equivalent local build is <code>go build -o lesson main.go</code>, followed by <code>./lesson</code>; use Linux or WSL 2 for that optional workflow. Compiling proves syntax and type consistency, while the executed checks establish the stated example contracts.</p>
-<p>Each worked example below is a complete Go file. Copy one whole block into your saved pad and run it. Example 2 includes the first case as well as the second, so its setup is complete. Its supporting declarations may be reused in later investigations. The separate reference implements all six cases.</p>
+<p>Run each worked example as one complete file in your saved pad (<a href="../STUDY-GUIDE.md.html#run-a-lesson">run steps</a>).</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1-cancel-a-child">Worked example 1: Cancel a child<a class="heading-anchor" href="#worked-example-1-cancel-a-child" aria-label="Link to this section">#</a></h4>
 <p>Create a cancelable context and cancel it.</p>
@@ -275,77 +273,79 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Observe:</strong> Both contexts become canceled.</p>
 <p>A child cannot extend work beyond the lifetime requested by its parent.</p>
 <h3 id="predict-before-running">Predict before running<a class="heading-anchor" href="#predict-before-running" aria-label="Link to this section">#</a></h3>
-<p>For each example, write the input values, the state that can change, and the expected observation. Explain which result would disprove your current interpretation. For concurrency, predict a guaranteed relationship rather than an arbitrary scheduling order. For an error case, identify whether it is rejected at compilation or returned during execution.</p>
+<p>Predict Err for a context before and after its cancel function runs. For the tree, predict which contexts become canceled when the parent is canceled, and which when only the child is. For the deadline at Unix time zero, predict Err immediately after construction, and for contextValue, predict both return values with a canceled and a live context.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-cancel-a-child-predict-an-edited-check">Exercise 1: Cancel a child: predict an edited check<a class="heading-anchor" href="#exercise-1-cancel-a-child-predict-an-edited-check" aria-label="Link to this section">#</a></h4>
-<p>Copy worked example 1 into a scratch pad and change <code>check(ctx.Err() == context.Canceled, &quot;cancel&quot;)</code> to <code>check(ctx.Err() != context.Canceled, &quot;cancel&quot;)</code> inside its check. Before running, predict whether the check still passes and explain why; then restore it.</p>
-<p><strong>Expected:</strong> The changed run panics with <code>cancel</code> because the edited check no longer holds. Restoring the original line brings back the worked observation: err returns context.Canceled.</p>
-<p><strong>Verify:</strong> Compare your written prediction with the panic message <code>cancel</code> and name the value that made <code>ctx.Err() == context.Canceled</code> false. After restoring the input, the program must print its success line again.</p>
+<p>Copy worked example 1, change <code>check(ctx.Err() == context.Canceled, &quot;cancel&quot;)</code> to <code>check(ctx.Err() != context.Canceled, &quot;cancel&quot;)</code> inside its check and predict whether it still passes; then restore it.</p>
+<p><strong>Expected:</strong> The edited check panics with <code>cancel</code> even though <code>ctx.Err() == context.Canceled</code> still holds.</p>
+<p><strong>Verify:</strong> Restoring <code>check(ctx.Err() == context.Canceled, &quot;cancel&quot;)</code> makes the check pass again with the worked observation: err returns context.Canceled.</p>
 <h4 id="exercise-2-propagate-parent-cancellation-diagnose-an-edited-check">Exercise 2: Propagate parent cancellation: diagnose an edited check<a class="heading-anchor" href="#exercise-2-propagate-parent-cancellation-diagnose-an-edited-check" aria-label="Link to this section">#</a></h4>
-<p>A careless edit changed the check in worked example 2 so that it reads <code>check(parent.Err() != context.Canceled &amp;&amp; child.Err() == context.Canceled, &quot;tree&quot;)</code>. Run worked example 2 with that line, explain why the edited check now fails for the same program state, and restore it.</p>
-<p><strong>Expected:</strong> Before the repair the program panics with <code>tree</code>; after it the line reads <code>check(parent.Err() == context.Canceled &amp;&amp; child.Err() == context.Canceled, &quot;tree&quot;)</code> again and both contexts become canceled.</p>
-<p><strong>Verify:</strong> Keep the failing and the repaired runs. Explain why the edited check rejects the same program state that <code>parent.Err() == context.Canceled &amp;&amp; child.Err() == context.Canceled</code> accepts.</p>
+<p>A careless edit rewrote the check in worked example 2 as <code>check(parent.Err() != context.Canceled &amp;&amp; child.Err() == context.Canceled, &quot;tree&quot;)</code>. Explain the failure, then restore it.</p>
+<p><strong>Expected:</strong> The defective run panics with <code>tree</code>; after restoring <code>check(parent.Err() == context.Canceled &amp;&amp; child.Err() == context.Canceled, &quot;tree&quot;)</code>, both contexts become canceled.</p>
+<p><strong>Verify:</strong> The edited check fails with message <code>tree</code> for a state that <code>parent.Err() == context.Canceled &amp;&amp; child.Err() == context.Canceled</code> accepts.</p>
 <h4 id="exercise-3-keep-child-cancellation-local">Exercise 3: Keep child cancellation local<a class="heading-anchor" href="#exercise-3-keep-child-cancellation-local" aria-label="Link to this section">#</a></h4>
 <p>Cancel a child of a live parent.</p>
 <p><strong>Expected:</strong> The child is canceled; the parent is unchanged.</p>
-<p><strong>Verify:</strong> Keep a check equivalent to <code>child.Err() != nil &amp;&amp; parent.Err() == nil</code>. As a control, change <code>check(child.Err() != nil &amp;&amp; parent.Err() == nil, &quot;child&quot;)</code> to <code>check(child.Err() == nil &amp;&amp; parent.Err() == nil, &quot;child&quot;)</code> inside that check: it must panic with <code>child</code>, which shows the check can fail. Restore it.</p>
+<p><strong>Verify:</strong> Your solution must keep <code>child.Err() != nil &amp;&amp; parent.Err() == nil</code> true. Control: changing <code>check(child.Err() != nil &amp;&amp; parent.Err() == nil, &quot;child&quot;)</code> to <code>check(child.Err() == nil &amp;&amp; parent.Err() == nil, &quot;child&quot;)</code> panics with message <code>child</code>; revert it.</p>
 <h4 id="exercise-4-test-an-expired-deadline">Exercise 4: Test an expired deadline<a class="heading-anchor" href="#exercise-4-test-an-expired-deadline" aria-label="Link to this section">#</a></h4>
 <p>Construct a context with a deadline at Unix time zero.</p>
 <p><strong>Expected:</strong> Err is context.DeadlineExceeded.</p>
-<p><strong>Verify:</strong> Keep a check equivalent to <code>ctx.Err() == context.DeadlineExceeded</code>. As a control, change <code>check(ctx.Err() == context.DeadlineExceeded, &quot;deadline&quot;)</code> to <code>check(ctx.Err() != context.DeadlineExceeded, &quot;deadline&quot;)</code> inside that check: it must panic with <code>deadline</code>, which shows the check can fail. Restore it.</p>
+<p><strong>Verify:</strong> Your solution must keep <code>ctx.Err() == context.DeadlineExceeded</code> true. Control: changing <code>check(ctx.Err() == context.DeadlineExceeded, &quot;deadline&quot;)</code> to <code>check(ctx.Err() != context.DeadlineExceeded, &quot;deadline&quot;)</code> panics with message <code>deadline</code>; revert it.</p>
 <h4 id="exercise-5-refuse-already-canceled-work">Exercise 5: Refuse already canceled work<a class="heading-anchor" href="#exercise-5-refuse-already-canceled-work" aria-label="Link to this section">#</a></h4>
 <p>Call a helper that checks its context before calculation.</p>
 <p><strong>Expected:</strong> It returns cancellation without a result.</p>
-<p><strong>Verify:</strong> Keep a check equivalent to <code>v == 0 &amp;&amp; err == context.Canceled</code>. As a control, change <code>check(v == 0 &amp;&amp; err == context.Canceled, &quot;refusal&quot;)</code> to <code>check(v != 0 &amp;&amp; err == context.Canceled, &quot;refusal&quot;)</code> inside that check: it must panic with <code>refusal</code>, which shows the check can fail. Restore it.</p>
+<p><strong>Verify:</strong> Your solution must keep <code>v == 0 &amp;&amp; err == context.Canceled</code> true. Control: changing <code>check(v == 0 &amp;&amp; err == context.Canceled, &quot;refusal&quot;)</code> to <code>check(v != 0 &amp;&amp; err == context.Canceled, &quot;refusal&quot;)</code> panics with message <code>refusal</code>; revert it.</p>
 <h4 id="exercise-6-transfer-successful-work">Exercise 6: Transfer successful work<a class="heading-anchor" href="#exercise-6-transfer-successful-work" aria-label="Link to this section">#</a></h4>
 <p>Use the same helper with a live context.</p>
 <p><strong>Expected:</strong> It returns 8 without error.</p>
-<p><strong>Verify:</strong> Keep a check equivalent to <code>err == nil &amp;&amp; v == 8</code>. As a control, change <code>v, err := contextValue(context.Background(), 4)</code> to <code>v, err := contextValue(context.Background(), 5)</code>: the run must panic with <code>live</code>. Restore the line before continuing.</p>
-<p>Implement these in the answer-free learner source. Keep one independent check per claim. A task can require tracing, construction, a changed input or a deliberate safe failure. Do not run a data race, corrupt memory or contact a shared cluster merely to demonstrate why it would be wrong.</p>
+<p><strong>Verify:</strong> Your solution must keep <code>err == nil &amp;&amp; v == 8</code> true. Control: changing <code>v, err := contextValue(context.Background(), 4)</code> to <code>v, err := contextValue(context.Background(), 5)</code> panics with message <code>live</code>; revert it.</p>
+<p>Work in the answer-free learner source, <code>courses/go/lessons/go-026.go</code> (<a href="../STUDY-GUIDE.md.html#work-an-exercise">exercise contract</a>).</p>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
-<p>Read a compiler error from the first location in your source, then fix one cause at a time. Unused imports and variables are errors in Go; add an import when its use exists, rather than copying a large unused import list. A panic from <code>check</code> identifies a violated example contract. Compare the actual value with the expected value and inspect the state transition that produced it. A returned <code>error</code> is a value that the caller must handle; an ignored error can make later output look plausible while the original operation failed.</p>
-<p>The lesson-specific explanations in the two examples identify the important counterexamples. Extend that reasoning to every investigation: explain why a plausible alternative would fail, and preserve a tiny input that distinguishes it. Treat empty data, missing values and cancellation as domain cases with explicit policies. In concurrent work, replace sleeps used as synchronization with channels, mutexes or an explicit ownership protocol.</p>
+<p>Contexts are cooperative, so the common mistake is assuming cancellation interrupts work: a function that never checks ctx.Err or ctx.Done keeps running. Another is discarding the cancel function, which leaks timers and children until the parent ends; go vet reports this. Do not store a context in a struct for later calls, and do not use context values for ordinary optional parameters.</p>
+<p>General compiler, panic and error diagnosis is in the <a href="../STUDY-GUIDE.md.html#diagnose-a-failure">study guide</a>.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <h4 id="hint-for-investigation-1-cancel-a-child-predict-an-edited-check">Hint for investigation 1: Cancel a child: predict an edited check<a class="heading-anchor" href="#hint-for-investigation-1-cancel-a-child-predict-an-edited-check" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: Err returns context.Canceled.</li>
-<li>The check <code>ctx.Err() == context.Canceled</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Compute the checked value with <code>check(ctx.Err() != context.Canceled, &quot;cancel&quot;)</code> in place before running, then compare it with the value <code>ctx.Err() == context.Canceled</code> expects.</li>
+<li>Calling cancel marks the context done. Which sentinel does Err report afterward?</li>
+<li>After cancel, Err is exactly context.Canceled, so <code>!=</code> is false and the check panics. The context behaves correctly; the edited comparison asserts the opposite.</li>
 </ol>
 <h4 id="hint-for-investigation-2-propagate-parent-cancellation-diagnose-an-edited-check">Hint for investigation 2: Propagate parent cancellation: diagnose an edited check<a class="heading-anchor" href="#hint-for-investigation-2-propagate-parent-cancellation-diagnose-an-edited-check" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: Both contexts become canceled.</li>
-<li>The check <code>parent.Err() == context.Canceled &amp;&amp; child.Err() == context.Canceled</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Compare <code>check(parent.Err() != context.Canceled &amp;&amp; child.Err() == context.Canceled, &quot;tree&quot;)</code> with the same line in worked example 2 and state the claim each version makes.</li>
+<li>Cancellation flows from parent to child. What do both Err calls return?</li>
+<li>Canceling the parent sets its Err to context.Canceled, so <code>parent.Err()!=context.Canceled</code> is false and the tree check fails. Restore <code>==</code> for the parent too.</li>
 </ol>
 <h4 id="hint-for-investigation-3-keep-child-cancellation-local">Hint for investigation 3: Keep child cancellation local<a class="heading-anchor" href="#hint-for-investigation-3-keep-child-cancellation-local" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The child is canceled; the parent is unchanged.</li>
-<li>The check <code>child.Err() != nil &amp;&amp; parent.Err() == nil</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Name one input that would make <code>child.Err() != nil &amp;&amp; parent.Err() == nil</code> false. A check that no input can falsify is not evidence.</li>
+<li>Canceling a child never reaches upward. What does the parent&#x27;s Err return?</li>
+<li>Cancellation propagates downward.</li>
 </ol>
 <h4 id="hint-for-investigation-4-test-an-expired-deadline">Hint for investigation 4: Test an expired deadline<a class="heading-anchor" href="#hint-for-investigation-4-test-an-expired-deadline" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: Err is context.DeadlineExceeded.</li>
-<li>The check <code>ctx.Err() == context.DeadlineExceeded</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Name one input that would make <code>ctx.Err() == context.DeadlineExceeded</code> false. A check that no input can falsify is not evidence.</li>
+<li>A deadline in the past is already expired. Which sentinel does Err report?</li>
+<li>The past deadline avoids flaky sleeps.</li>
 </ol>
 <h4 id="hint-for-investigation-5-refuse-already-canceled-work">Hint for investigation 5: Refuse already canceled work<a class="heading-anchor" href="#hint-for-investigation-5-refuse-already-canceled-work" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: It returns cancellation without a result.</li>
-<li>The check <code>v == 0 &amp;&amp; err == context.Canceled</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Name one input that would make <code>v == 0 &amp;&amp; err == context.Canceled</code> false. A check that no input can falsify is not evidence.</li>
+<li>contextValue checks Err before computing. What does it return for a canceled context?</li>
+<li>A preflight check expresses the already-canceled policy.</li>
 </ol>
 <h4 id="hint-for-investigation-6-transfer-successful-work">Hint for investigation 6: Transfer successful work<a class="heading-anchor" href="#hint-for-investigation-6-transfer-successful-work" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: It returns 8 without error.</li>
-<li>The check <code>err == nil &amp;&amp; v == 8</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Predict the effect of changing <code>v, err := contextValue(context.Background(), 4)</code> to <code>v, err := contextValue(context.Background(), 5)</code> before running anything. If the prediction is hard, trace that line again with the original input.</li>
+<li>With a live context the check passes. What is twice 4?</li>
+<li>Long loops or I/O must cooperate during work as well.</li>
 </ol>
 <h3 id="self-check-and-retrieval">Self-check and retrieval<a class="heading-anchor" href="#self-check-and-retrieval" aria-label="Link to this section">#</a></h3>
-<p>Close the reference. Rebuild one normal case and one boundary case from a blank pad. Explain the role of context tree without using its name in the definition. Then change the domain while keeping the same invariant. Record the new input, your prediction and the observed output. If your program passes only because its input is hard-coded, explain which part would need a reusable function in a larger project.</p>
+<p>Write <code>sumUntil(ctx context.Context, items []int) (int, error)</code> that checks ctx.Err before each element and returns the partial sum with the context error. Test it with a live context, an already canceled context and a parent that is canceled after its child is derived. Then explain why canceling the child leaves the parent untouched.</p>
+<p>The general <a href="../STUDY-GUIDE.md.html#self-check-and-retrieval">retrieval routine</a> still applies.</p>
 <h3 id="next-step-and-sources">Next step and sources<a class="heading-anchor" href="#next-step-and-sources" aria-label="Link to this section">#</a></h3>
-<p><a href="https://pkg.go.dev/context">Primary language or library documentation</a>, reviewed 2026-10-23. The teaching explanations and synthetic fixtures are original. Continue with the next lesson when you can explain the six observations and diagnose a changed case without copying its answer.</p>
+<p>Source: <a href="https://pkg.go.dev/context"><code>context</code> package documentation</a>, reviewed 2026-10-23.</p>
+<p>Next: go-027, Mutexes, atomics and shared-state invariants (<a href="../STUDY-GUIDE.md.html#when-to-move-on">criteria</a>).</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for go-026: Select, contexts and cancellation trees.
 Read courses/go/guides/go-026.md and my saved attempt based on courses/go/lessons/go-026.go.

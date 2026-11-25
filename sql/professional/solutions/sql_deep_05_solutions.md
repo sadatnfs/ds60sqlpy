@@ -1,6 +1,11 @@
 # sql-deep-05: Explained reference solutions
 
-Read [Predicate Proof, Partial Indexes, and Conditional Mutation Contracts](../companion-guides/sql_deep_05.md) and attempt its six queries before comparing. The [complete reference script](sql_deep_05_solutions.sql) recreates the same temporary fixture, runs every answer inside its own savepoint, compares exact JSON row sets with fail-fast assertions, then rolls back. No permanent table, role or service is changed.
+Attempt the six queries in [Predicate Proof, Partial Indexes, and Conditional
+Mutation Contracts](../companion-guides/sql_deep_05.md) first. The [complete
+reference script](sql_deep_05_solutions.sql) rebuilds `deep5_jobs`,
+`deep5_ready_idx` and `deep5_requests`, and answers each exercise inside its
+own savepoint. That isolation matters because Exercises 4 to 6 all change job
+1, and each must start from attempts 0 and version 1.
 
 ## Exercises and reasoning
 
@@ -10,7 +15,7 @@ Return job_id, priority for tenant 1 jobs whose status equals ready, ordered by 
 
 **Inputs/evidence:** For sql-deep-05 Exercise 1, Return job_id, priority for tenant 1 jobs whose status equals ready, ordered by priority descending then job_id ascending. Preserve the three eligible job identities and exclude another tenant, blocked, done and unknown statuses.
 
-**Expected result/shape:** For sql-deep-05 Exercise 1, Rows are(1,10),(3,5),(6,5). The tie between 3 and 6 follows job identity, not unspecified physical row order.
+**Expected result/shape:** For sql-deep-05 Exercise 1, Rows are (1,10), (3,5), (6,5). The tie between 3 and 6 follows job identity, not unspecified physical row order.
 
 **Verify:** For sql-deep-05 Exercise 1, list eligible queue IDs from the status and attempt conditions, including the NULL-attempt case, before considering whether an index could support the predicate.
 
@@ -62,7 +67,7 @@ Return one row with index_name, is_partial, key_columns, ready_rows for the temp
 
 **Inputs/evidence:** For sql-deep-05 Exercise 3, Return one row with index_name, is_partial, key_columns, ready_rows for the temporary `deep5_ready_idx`. Use pg_index and pg_class to verify a predicate exists and there are three key attributes; count ready source rows separately. Do not assert that the planner must choose this index.
 
-**Expected result/shape:** For sql-deep-05 Exercise 3, The row is `deep5_ready_idx`, true,3,4. The ready count includes tenant 2 job 4 because the index predicate restricts status, not tenant.
+**Expected result/shape:** For sql-deep-05 Exercise 3, The row is `deep5_ready_idx`, true, 3, 4. The ready count includes tenant 2 job 4 because the index predicate restricts status, not tenant.
 
 **Verify:** For sql-deep-05 Exercise 3, inspect the catalog index name, definition and predicate; confirm existence separately from planner choice, which would require actual EXPLAIN evidence.
 
@@ -93,7 +98,7 @@ Within the exercise savepoint, increment attempts and version for job 1 only whe
 
 **Inputs/evidence:** For sql-deep-05 Exercise 4, Within the exercise savepoint, increment attempts and version for job 1 only when tenant 1, status ready and expected version 1 still match. Capture ROW_COUNT and return action, affected, job_id, attempts, version in one row. Roll back after checking.
 
-**Expected result/shape:** For sql-deep-05 Exercise 4, action first, affected 1, job_id1, attempts 1, version 2. A read followed by an unguarded update is not an acceptable substitute for the combined predicate.
+**Expected result/shape:** For sql-deep-05 Exercise 4, `action` first, `affected` 1, `job_id` 1, `attempts` 1, `version` 2. A read followed by an unguarded update is not an acceptable substitute for the combined predicate.
 
 **Verify:** For sql-deep-05 Exercise 4, read the original value and version before writing, inspect the RETURNING receipt, and verify the committed-in-transaction state equals one increment with one version increase.
 
@@ -178,7 +183,7 @@ Implement a temporary apply_request function that stores request_key, job_id, a 
 
 **Inputs/evidence:** For sql-deep-05 Exercise 6, Implement a temporary apply_request function that stores request_key, job_id, a positive delta and applies a tenant 1 ready-job increment only on a new key. Replay the same key/payload without applying again, then reject the same key with a changed delta using SQLSTATE 22023. Return one row with request_key, first_applied, replay_applied, conflict_rejected, attempts, version, request_count.
 
-**Expected result/shape:** For sql-deep-05 Exercise 6, request-a, true, false, true,1,2,1. The changed-payload attempt is caught as an expected error and must not change the job or create another request row.
+**Expected result/shape:** For sql-deep-05 Exercise 6, `request-a`, true, false, true, 1, 2, 1. The changed-payload attempt is caught as an expected error and must not change the job or create another request row.
 
 **Verify:** For sql-deep-05 Exercise 6, perform an identical idempotent retry and then a conflicting payload under the same key; verify one stored receipt row and one increment, while the conflicting request raises the declared error.
 
@@ -270,4 +275,13 @@ The request-key constraint decides whether this operation is new, while stored p
 
 ## Verification and transaction boundary
 
-Every answer is materialized into a temporary answer table and compared with a literal expected row set, including column names, NULL values and deterministic order. The assertion function rejects both false and unknown Boolean results, so a NULL comparison cannot silently pass. Each exercise rolls back to its own savepoint, ensuring mutations used for one boundary case do not alter the next. The final ROLLBACK removes the full fixture. Read the first error if a contract fails; a later row count or command tag cannot repair an earlier failed assertion.
+`pg_temp.assert_true` compares each ordered answer, aggregated into `jsonb`,
+with a literal expected row set and raises unless the comparison is exactly
+true. The mutation exercises are checked by their receipts as well as their
+final rows: Exercise 5 expects `affected` 1 for the first update and 0 for the
+stale replay, with attempts still 1 and version 2 on both rows. In Exercise 6,
+`pg_temp.apply_request` returns true once and false on the replay, and a
+changed delta for `request-a` is caught as SQLSTATE 22023 without a second
+request row. Rolling back to each exercise savepoint restores job 1, and the
+final `ROLLBACK` drops the fixture. Repair the first failing assertion before
+reading any later output.

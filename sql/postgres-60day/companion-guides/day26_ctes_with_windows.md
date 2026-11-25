@@ -2,67 +2,22 @@
 
 ## How to run this lesson
 
-Start the Linux-container engine and run `./classroom` from the repository
-root. On Windows, use Ubuntu in WSL 2 or the thin
-`START_DOCKER_CLASSROOM.cmd` wrapper. Choose **PostgreSQL** on the shared
-`/classroom` home, then open **sql-26**. The
-[launcher guide](../../../docs/one-command-classroom.md) covers first preparation, strict resume and
-the saved project selection. No host Python or PostgreSQL installation is
-required for this browser route.
-
-1. Read the prerequisite and fixture notes before running the file. Use only
-   the local disposable `advanced_sql_training` database.
-2. Choose **Whole SQL lesson (psql)** for the cataloged learner script. This
-   preserves the lesson's reviewed psql directives, relative includes and
-   transaction behavior. **SQL snippet** is appropriate for ordinary SQL
-   statements, but is not a replacement for an entire script's setup.
-3. The **Course database** panel above the code shows whether the course
-   training tables are loaded. Missing tables load automatically before your
-   first run (or choose **Load course tables**) and stay loaded for later
-   lessons. **Reset training data** restores the original rows only when your
-   own changes made results differ; it keeps your saved code and notes.
-4. Edit the learner copy in the classroom and save your prediction before
-   running. Its whole-script workspace is
-   `.learning/sql/sql-26/lesson/workspace/sql/postgres-60day/day26_ctes_with_windows.sql`.
-   For browser work this path is inside the Docker learning volume, not a
-   newly created host folder beside your checkout. The checked-in source
-   remains the answer-free starting artifact.
-5. Run the whole script and inspect the full transcript. The runner uses
-   `psql -X -v ON_ERROR_STOP=1 -f`. SELECT output has columns, rows and a row
-   count; DDL/DML has command tags; intentional checks may produce NOTICE
-   messages. An unexpected ERROR or nonzero exit is a failure to diagnose,
-   even when an earlier query printed plausible values.
-6. Verify the lesson's expected grain, ordering, constraints and declared
-   transaction or cleanup outcome. Keep required ROLLBACK statements.
-   The warehouse sequence and other explicitly stateful exercises explain
-   when state is committed. Read saved output without rerunning it when
-   reviewing an earlier attempt.
-
-If a relation is missing, inspect the lesson's required fixture and predecessor
-rather than guessing a new table definition. If authentication or runtime
-readiness fails, use `./classroom status` and the setup guide. Keep credentials
-out of SQL, notebooks, screenshots and committed files. Repair the first error
-before trusting partial output, and reveal separate solutions only when you
-want to compare after an attempt.
+In `./classroom`, choose **sql-26** from the PostgreSQL list and run
+**Whole SQL lesson (psql)**. That executes
+`.learning/sql/sql-26/lesson/workspace/sql/postgres-60day/day26_ctes_with_windows.sql`
+against `advanced_sql_training` inside `BEGIN`/`ROLLBACK`; nothing is written.
+The first statement prints 1,314 ranked order rows, so scroll back to its
+header before reading the plan that follows. The general run steps are in
+[Run a lesson in the classroom](../../STUDY-GUIDE.md#run-a-lesson-in-the-classroom).
 
 ### Optional contributor notebook route
 
-For notebook work, deliberately prepare the Linux/WSL contributor environment
-from [CONTRIBUTING.md](../../../CONTRIBUTING.md), including a compatible psql client and
-the notebook dependencies. Generate this lesson's private workspace through
-the maintained CLI:
+A notebook lets you query `line` and `ranked` one at a time
+([notebook setup](../../STUDY-GUIDE.md#optional-contributor-notebook-route)):
 
 ```sh
 uv run --no-sync python scripts/course.py sql notebook sql-26
 ```
-
-Open the printed notebook path in that environment's JupyterLab. It uses the
-same catalog-derived learner-copy layout in that contributor checkout and
-executes the complete script through psql. Its host-side state is separate
-from the Docker browser's named volume. Follow
-[guided SQL notebooks](../../../docs/guided-sql-notebooks.md) for explicit local connection
-selection and kernel setup. Notebook generation does not execute SQL or
-authorize a reset.
 
 ## Level and prerequisites
 
@@ -74,28 +29,31 @@ authorize a reset.
 
 ## A beginner's mental model for this lesson
 
-A **table** stores facts in named columns. A **row** is one occurrence at the
-table's declared grain. A query creates a temporary **result set**: rows printed
-on screen are not automatically stored. The key vocabulary for this lesson is Layered analytics, Window input grain, QUALIFY alternative. Its worked SQL reads or creates `orders`, `order_items`.
+Window functions run after `WHERE`, `GROUP BY` and `HAVING`. That order
+causes two problems a CTE solves neatly:
 
-Before writing a query, complete this sentence: “One output row represents
-___.” Joins can multiply rows, filters can remove them, grouping can collapse
-many rows into one, and window functions can add calculations while preserving
-row count. For a normal analytical `SELECT`, use this logical reading order:
-`FROM`/`JOIN` (including `ON`) → `WHERE` → `GROUP BY`/aggregates → `HAVING` →
-window calculations → `SELECT` → `ORDER BY` → `LIMIT`. PostgreSQL may execute a
-different physical plan while preserving those semantics.
+1. **You often want to rank or lag a total, not a detail row.** A first CTE
+   aggregates to the grain you care about, such as one row per order or one
+   row per month, and a second step applies the window to those totals.
+2. **You cannot filter on a window result at the same level.** Writing
+   `WHERE RANK() OVER (...) <= 3` fails with
+   `window functions are not allowed in WHERE`. Computing the rank in a CTE
+   and filtering it in the outer query is the standard fix.
 
-The worked walkthrough's lesson-specific task is: Create monthly totals in one CTE, add `LAG(total)` in the next, and calculate growth in the outer query with a guarded denominator. Keeping the ratio outside the `LAG` layer makes the prior value visible and lets you inspect both values before interpreting the percentage.
-Exercise 1 expects this result: one row per observed month. Predict keys, row count, `NULL` behavior,
-and ordering before running. Afterwards, compare keys/counts/totals with an
-independent control. A blank string, SQL `NULL`, numeric zero, and a missing row
-are different facts; use `COALESCE` only after choosing which meaning the
-business question requires.
+Example 1 follows both rules. `line` sums `order_items` to one total per
+order (4,362 rows); `ranked` numbers each customer's orders from largest to
+smallest; the outer `WHERE rnk <= 3` keeps the top three. The 438 customers
+who ordered all have at least four orders and no tied totals, so the result
+is exactly 1,314 rows, three per customer.
+
+The exercises move the same pattern to months. Order dates are spread from
+each customer's signup up to the moment the fixture was loaded, so the
+months you see depend on when your database was built, and the newest month
+is only partly filled. What does not change is the money: however you group
+by month, the monthly totals must add back to the 2,355,646.89 stored in
+`orders.total_amount`.
 
 ## Two worked SQL examples
-
-These worked excerpts come from `sql/postgres-60day/day26_ctes_with_windows.sql`. Use **Whole SQL lesson (psql)** in the unified classroom for the complete file, including its fixture and transaction context. The optional contributor notebook and prepared `psql` routes are described above.
 
 ### Example 1
 
@@ -138,9 +96,16 @@ ORDER BY
   order_id;
 ```
 
-**How to read it:** Example 1: Start with `orders`, and `order_items` in `FROM`/`JOIN`; let `WHERE` remove nonqualifying rows; let `GROUP BY` collapse rows to its grouping keys; let each `OVER` expression calculate across related rows without collapsing them. The final `SELECT` displays `customer_id`, `order_id`, `order_date`, `order_total`, and `rnk`. `ORDER BY` determines presentation order. Before running, predict the row grain, row count, `NULL` positions, and first/last key; afterwards, compare each prediction with the transcript.
+**How to read it:** `line` joins orders to items and groups by order,
+so `order_total` is the unrounded item formula with four decimal places.
+`ranked` adds `RANK()` partitioned by customer and ordered by that total
+descending. Only the outer query can see `rnk` as an ordinary column, which
+is why the filter sits there.
 
-**Expected result/shape:** Example 1 returns one grouped row per `customer_id`, and `order_id` with columns `customer_id`, `order_id`, `order_date`, `order_total`, and `rnk` from `orders`, and `order_items`. Use a direct count or grouped aggregate over those same source relations as the control; check ordering only when this query has an `ORDER BY`, and inspect `NULL` only for columns this example can produce.
+**Expected result/shape:** 1,314 rows ordered by customer and rank.
+Customer 1 comes first with orders 4, 3 and 2 at 1155.9185, 601.7295 and
+417.9405; customer 2 follows with orders 8, 7 and 9. Every customer has
+exactly ranks 1, 2 and 3. The 62 customers without orders do not appear.
 
 ### Example 2
 
@@ -185,9 +150,17 @@ EXPLAIN (
     order_id;
 ```
 
-**How to read it:** Example 2 is executed by `psql` as part of the complete lesson. Expected notices are evidence; an unexpected error stops the script.
+**How to read it:** Both CTEs vanish into the main plan as
+`Subquery Scan on line` and `Subquery Scan on ranked`, since each is used
+once. Look at the `WindowAgg` node: its `Run Condition: (rank() OVER (?) <= 3)`
+means PostgreSQL stops ranking a customer's orders once the rank passes 3.
+`HashAggregate` groups by `o.order_id` alone, because the other grouping
+columns depend on the primary key.
 
-**Expected result/shape:** Example 2 prints a plan tree, not business rows. Run the underlying `SELECT` separately and reconcile its `customer_id`, and `order_id` key set and row count over `orders`, and `order_items`; then compare node estimates, actual rows × loops, buffers, and timing without requiring one fixed plan.
+**Expected result/shape:** A 16-line plan topped by
+`Incremental Sort` with `Presorted Key: ranked.customer_id`. Beneath it are
+the `WindowAgg`, a `Sort` on `line.customer_id, line.order_total DESC` and a
+`Hash Join` of `order_items` to `orders`. There is no `CTE Scan` node.
 
 ## Learning objectives
 
@@ -215,62 +188,71 @@ before interpreting the percentage.
 - **Focus:** Combine CTE grain control with window comparisons so time-series and ranking logic remain readable and reconcilable.
 - **Assumptions:** Monthly reporting uses UTC. Window order always includes chronological keys; revenue uses exact numeric and is rounded only in final output.
 - **Failure to watch for:** Applying windows before aggregation compares detail rows, while filtering too early can remove the history a lag or moving frame needs.
-- **Review loop:** predict the row grain and NULL/order behavior, run the
-  query, inspect a bounded sample, and reconcile counts or totals before
-  accepting the result.
+- **Review loop:** after each monthly CTE, count the months and sum the
+  revenue; the sum must equal 2,355,646.89 from `orders` (or 2,355,647.12
+  when built from `order_items`) before you add any window.
 
 ## Exercises
 
 Combine CTE grain control with window comparisons so time-series and ranking logic remain readable and reconcilable.
 
-Attempt each prompt in a scratch SQL file before opening the solution.
-For every result, write its row grain and expected shape first.
+For each answer, write the grain of the first CTE (one row per
+month, or per month and category) and the window that comes after it. Count
+the months in your copy of the data first; the category answers should
+return six rows for every month.
 
 1. **Query writing:** Calculate monthly stored revenue and its prior-month value/change.
    **Progressive hint:** Aggregate to month in a CTE, then lag the monthly measure.
    **Inputs/evidence:** For sql-26 Exercise 1, read from `orders`, aggregate `SUM(total_amount)` to one row per UTC month in the CTE `monthly`, then use `LAG(revenue) OVER (ORDER BY month_start)` in `compared` and return `change = revenue - previous_revenue`.
-   **Expected result/shape:** For sql-26 Exercise 1, expected output: One row per observed month. The final columns are `month_start`, `revenue`, `previous_revenue`, and `change`. The final order is `month_start`.
+   **Expected result/shape:** For sql-26 Exercise 1, expected output: one row per UTC month with orders, 46 rows from 2023-02-01 to 2026-11-01 on a November 2026 load (seed dates move with the load date); the first row is 1203.26 with NULL `previous_revenue` and `change`, and the second is 1803.43 with a change of 600.17. The final columns are `month_start`, `revenue`, `previous_revenue`, and `change`. The final order is `month_start`.
    **Verify:** For sql-26 Exercise 1, confirm that `month_start` is unique and that the row count equals `SELECT COUNT(DISTINCT date_trunc('month', order_date AT TIME ZONE 'UTC')) FROM orders`; exactly one row, the earliest month, has NULL `previous_revenue` and `change`, and the `revenue` values add up to 2355646.89.
 2. **Query writing:** Rank product categories by net revenue within each UTC order month.
    **Progressive hint:** Aggregate month/category first, then rank the stable aggregate.
-   **Inputs/evidence:** For sql-26 Exercise 2, read from `orders`, `order_items`, and `products`. Build the answer toward `month_start`, `category`, `revenue`, and `revenue_rank`; keep `category` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-26 Exercise 2, expected output: One row per observed month/category. The final columns are `month_start`, `category`, `revenue`, and `revenue_rank`. The final order is `month_start, revenue_rank, category`.
-   **Verify:** For sql-26 Exercise 2, choose one complete partition from `orders`, `order_items`, and `products`; hand-calculate its first, middle, and final window values for `revenue`, and `revenue_rank`, then verify output keys remain `category`. Give two rows the same `month_start` value and different `category` values; verify `month_start, revenue_rank, category` produces the intended rank and display order.
+   **Inputs/evidence:** For sql-26 Exercise 2, read `orders` joined to `order_items` and `products`, sum net item revenue `unit_price * quantity * (1 - discount)` per UTC month and `category` in `category_month`, then apply `DENSE_RANK()` partitioned by `month_start` and ordered by `revenue DESC`.
+   **Expected result/shape:** For sql-26 Exercise 2, expected output: 6 rows per month, one per category, ranked 1 through 6 (276 rows for 46 months on this load); the first month, 2023-02-01, runs from Apparel at 407.05 down to Home at 30.20. The final columns are `month_start`, `category`, `revenue`, and `revenue_rank`. The final order is `month_start, revenue_rank, category`.
+   **Verify:** For sql-26 Exercise 2, confirm `COUNT(*)` is 6 times `COUNT(DISTINCT month_start)`, every month has ranks 1 through 6 exactly once, and the 2023-02-01 revenues add to 1203.26, the stored total for that month in Exercise 1; then rank the fixture `VALUES ('A', 10), ('B', 10), ('C', 5), ('D', 3)` and confirm `DENSE_RANK` gives 1, 1, 2, 3 where `RANK` gives 1, 1, 3, 4.
 3. **Query writing:** Return the top three category revenue levels per month.
    **Progressive hint:** Rank in one CTE and filter the window result outside.
-   **Inputs/evidence:** For sql-26 Exercise 3, read from `orders`, `order_items`, and `products`. Build the answer toward `month_start`, `category`, `revenue`, and `revenue_rank`; keep `category` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-26 Exercise 3, expected output: Top three revenue ranks for each observed month. The final columns are `month_start`, `category`, `revenue`, and `revenue_rank`. The final order is `month_start, revenue_rank, category`.
-   **Verify:** For sql-26 Exercise 3, project `category` plus the raw source columns from `orders`, `order_items`, and `products` at each join stage; record row count and distinct `category`, then assert the final `month_start`, `category`, `revenue`, and `revenue_rank` values match those staged rows without unintended fanout or loss. Give two rows the same `month_start` value and different `category` values; verify `month_start, revenue_rank, category` produces the intended rank and display order.
+   **Inputs/evidence:** For sql-26 Exercise 3, read `orders`, `order_items`, and `products` into the same `category_month` CTE as Exercise 2, rank it in a second CTE `ranked`, and filter `revenue_rank <= 3` only in the outer query, after the window has run.
+   **Expected result/shape:** For sql-26 Exercise 3, expected output: 3 rows per month (138 rows for 46 months on this load, because no month has a revenue tie); 2023-02-01 keeps Apparel, Books, and Electronics, and 2026-11-01 keeps Sports, Books, and Apparel. The final columns are `month_start`, `category`, `revenue`, and `revenue_rank`. The final order is `month_start, revenue_rank, category`.
+   **Verify:** For sql-26 Exercise 3, confirm `COUNT(*)` is 3 times `COUNT(DISTINCT month_start)` and each month shows ranks 1, 2, and 3 once; then apply the same rank and filter to `VALUES ('A', 10), ('B', 10), ('C', 5), ('D', 3), ('E', 1)` and confirm four rows survive (ranks 1, 1, 2, 3), showing that ties in `DENSE_RANK` can return more than three categories in a month.
 4. **Prediction:** Calculate each category's cumulative share of monthly revenue in descending contribution order.
    **Progressive hint:** Divide running category revenue by the full monthly total; use explicit frames.
-   **Inputs/evidence:** For sql-26 Exercise 4, read from `orders`, `order_items`, and `products`. Build the answer toward `month_start`, `category`, `revenue`, and `cumulative_revenue_share`; keep `month` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-26 Exercise 4, expected output: One row per month/category with final share equal to one. The final columns are `month_start`, `category`, `revenue`, and `cumulative_revenue_share`. The final order is `month_start, revenue DESC, category`.
-   **Verify:** For sql-26 Exercise 4, choose one complete partition from `orders`, `order_items`, and `products`; hand-calculate its first, middle, and final window values for `revenue`, and `cumulative_revenue_share`, then verify output keys remain `month`. Test a one-row partition and a partition with at least three rows; verify the frame boundary and partition reset explicitly.
+   **Inputs/evidence:** For sql-26 Exercise 4, read `orders`, `order_items`, and `products` into `category_month`, then divide a running `SUM(revenue)` ordered by `revenue DESC, category` with a `ROWS` frame by the month total `SUM(revenue) OVER (PARTITION BY month_start)`, guarded by `NULLIF`.
+   **Expected result/shape:** For sql-26 Exercise 4, expected output: 276 rows on this load, 6 per month; in 2023-02-01 the shares climb 0.3383, 0.5708, 0.7510, 0.8968, 0.9749, and 1.0000. The final columns are `month_start`, `category`, `revenue`, and `cumulative_revenue_share`. The final order is `month_start, revenue DESC, category`.
+   **Verify:** For sql-26 Exercise 4, confirm the last row of every month is exactly 1.0000 (46 such rows, one per month, and no month whose maximum differs) and that the first 2023-02-01 share equals 407.05 / 1203.26; then run both frames over `VALUES ('A', 10.0), ('B', 10.0), ('C', 5.0)` and confirm `ROWS` gives 0.4000, 0.8000, 1.0000 while the default `RANGE` frame gives 0.8000 to both tied rows.
 5. **Debugging:** Calculate a three-month moving average after building a dense month calendar.
    **Progressive hint:** Join observed monthly revenue onto the calendar and treat absent observed revenue as zero only because the report defines it that way.
-   **Inputs/evidence:** For sql-26 Exercise 5, read from `orders`. Build the answer toward `month_start`, `revenue`, and `moving_3_month_average`; keep `order_id` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-26 Exercise 5, expected output: A continuous chronological month series. The final columns are `month_start`, `revenue`, and `moving_3_month_average`. The final order is `month_start`.
-   **Verify:** For sql-26 Exercise 5, choose one complete partition from `orders`; hand-calculate its first, middle, and final window values for `revenue`, and `moving_3_month_average`, then verify output keys remain `order_id`. Test a one-row partition and a partition with at least three rows; verify the frame boundary and partition reset explicitly.
+   **Inputs/evidence:** For sql-26 Exercise 5, read `orders` three ways: `bounds` takes the first and last UTC month, `calendar` fills every month between them with `generate_series`, and `monthly` sums `total_amount`; `dense` `LEFT JOIN`s the calendar to `monthly` and turns a missing month into 0.
+   **Expected result/shape:** For sql-26 Exercise 5, expected output: one row per calendar month with no gaps, 46 rows on this load; the moving average starts 1203.26, 1503.35, 2197.18 because the first two rows average only one and two months. The final columns are `month_start`, `revenue`, and `moving_3_month_average`. The final order is `month_start`.
+   **Verify:** For sql-26 Exercise 5, confirm the row count equals the months between `MIN` and `MAX` month inclusive and that the third row averages 1203.26, 1803.43, and 3584.85; then, inside `BEGIN ... ROLLBACK`, move every 2023-04 order back one month and confirm `monthly` drops to 45 rows while the output keeps 46, with 2023-04-01 at 0.00 and its moving average 2197.18 still covering three calendar months.
 6. **Extension:** Reconcile the final cumulative monthly revenue with the independent order total.
    **Progressive hint:** Compare at the end of the CTE/window chain instead of assuming transformations preserved totals.
    **Inputs/evidence:** For sql-26 Exercise 6, read from `orders`; aggregate to UTC months in `monthly`, accumulate the monthly revenue with `SUM(revenue) OVER (ORDER BY month_start)` in `running`, keep the last month's cumulative value in `final`, and compare it with an independent `SUM(total_amount)`.
-   **Expected result/shape:** For sql-26 Exercise 6, expected output: One row with zero difference. The final columns are `final_cumulative`, `independent_total`, and `difference`.
+   **Expected result/shape:** For sql-26 Exercise 6, expected output: exactly one row, `final_cumulative` 2355646.89, `independent_total` 2355646.89, and `difference` 0.00. The final columns are `final_cumulative`, `independent_total`, and `difference`.
    **Verify:** For sql-26 Exercise 6, confirm one row where `final_cumulative` and `independent_total` are both 2355646.89 and `difference` is 0.00; the `monthly` revenues must already add up to that total before the window is applied.
 
 ## Common mistakes and how to recover
 
-- **Lesson-specific semantic mistake:** Applying windows before aggregation compares detail rows, while filtering too early can remove the history a lag or moving frame needs.
-- **Unexpected row count:** display keys before aggregates, count rows after
-  each join/filter stage, and find the first stage whose grain differs from the
-  contract. Do not hide fanout with `DISTINCT`.
-- **Unexpected `NULL` or missing row:** decide whether the fact is unknown,
-  inapplicable, zero, or absent before using `COALESCE`; inspect outer-join
-  predicate placement and empty-input aggregate behavior.
-- **Unstable top/first/last output:** add `ORDER BY` with a unique final
-  tie-breaker before `LIMIT` or order-sensitive windows/aggregates.
-- **`psql` stops on an error:** fix the first error shown by
-  `ON_ERROR_STOP`, restore the declared transaction/setup state, and rerun the
-  complete file. A later successful statement does not validate a partial run.
+- **Filtering a window in the same `SELECT`.** `WHERE RANK() OVER (...) <= 3`
+  raises `window functions are not allowed in WHERE`. Rank in a CTE, then
+  filter the outer query, as Exercise 3 does.
+- **Filtering months before the lag.** If a `WHERE` keeps only the last six
+  months inside the CTE, the earliest of them gets a `NULL` previous value
+  even though the data exists. Compute `LAG` over all months, then filter.
+- **Mixing the two revenue sources.** Monthly totals from
+  `orders.total_amount` add to 2,355,646.89, while totals from the item
+  formula add to 2,355,647.12 because each order was rounded when stored.
+  Pick one source per report and reconcile against the same one.
+- **Relying on the default frame for running totals.** With an `ORDER BY`
+  and no frame, `SUM() OVER` uses `RANGE`, which treats tied values as one
+  peer group. Exercise 4 adds `category` to the order and states
+  `ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW` so ties cannot merge.
+- **Reading the newest month as a trend.** The latest month stops when the
+  fixture was loaded, so its change from the previous month is usually a
+  large drop that says nothing about sales.
+- General recovery steps are in
+  [Recover from common failures](../../STUDY-GUIDE.md#recover-from-common-failures).
 
 ## Self-check
 
@@ -311,9 +293,9 @@ Further reading
 
 ## Ask an AI tutor about this lesson
 
-An AI tutor is optional; the guide, learner SQL, PostgreSQL, and expected checks are
-enough to complete the lesson offline. If you want a patient tutor, copy this
-prompt after opening the repository in the AI tutor:
+A tutor can check whether each window in your answer sees totals or
+detail rows. Give it the prompt below so it stays on this lesson's files
+([optional tutor notes](../../STUDY-GUIDE.md#use-an-ai-tutor-optional)).
 
 ```text
 Tutor me through sql-26: CTEs with Window Functions.

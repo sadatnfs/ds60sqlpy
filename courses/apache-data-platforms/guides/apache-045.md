@@ -150,12 +150,12 @@ state recovery and external transactional sinks.
 
 ## Complete worked source
 
-This is a project-only command notebook. Read and edit it in the classroom; run its explicitly labeled commands from the copied owned Docker workshop. The classroom does not execute these service commands.
+The classroom does not execute these service commands. See the [workshop rules](../STUDY-GUIDE.md#workshop-notebooks).
 
 # Real Flink stream and SQL entry points
 
 From the repository root, copy the complete project into a fresh owned directory.
-Prepare the native Java17 base and selected pinned runtime as documented there.
+Prepare the native Java 17 base and selected pinned runtime as documented there.
 
 ```bash
 mkdir -p work

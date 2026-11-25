@@ -1,6 +1,8 @@
 # spark-024: Explained paired reference solutions
 
-Read the [guide](../guides/spark-024.md) and attempt one language first. The [Scala reference](spark-024_solution.scala) and [PySpark reference](spark-024_solution.py) are complete single-file programs with explicit local sessions and finally-based stop. Each compares with literal expectations; matching two implementations alone would not rule out a shared mistake.
+Attempt the [guide](../guides/spark-024.md) exercises first.
+
+References: [Scala](spark-024_solution.scala), [PySpark](spark-024_solution.py).
 
 ## Exercises and reasoning
 
@@ -115,7 +117,7 @@ The helper divides logical hot-key membership without duplicating facts. Exact b
 
 ### Exercise 5: Replicate only the matching small-side hot row
 
-Expand dimension key 0 to salts 0,1,2,3 and every other dimension key to salt 0. Retain factor and verify uniqueness on the composite key.
+Expand dimension key 0 to salts 0, 1, 2 and 3 and every other dimension key to salt 0. Retain factor and verify uniqueness on the composite key.
 
 **Expected:** 14 dimension rows, with four key 0 variants and ten cold rows. Every (key, salt) pair is unique.
 
@@ -174,6 +176,7 @@ Projecting away salt restores the declared business schema while the full bag co
 
 ## Execution and interpretation
 
-Run the complete reference in its prepared fixed worker. Its first check (Measure the key-frequency imbalance) is built inside the program, so opening the lesson fetches nothing; it expects: Key 0 has 9000; keys 1..10 each 100. Total 10000 and hot fraction 0.9. The final success line prints only after every reference assertion passes.
+Each reference starts from the key frequencies `(0, 9000)` followed by `(k, 100)` for keys 1 to 10, then requires the baseline join to equal 10,000 literal tuples computed from the fixture rule, with amount total 10,000 and weighted total 15,500. The adaptive run must show `AdaptiveSparkPlan` before collection and `isFinalPlan=true` after it, with rows equal to the baseline. With AQE off again, the salted facts must put exactly 2,250 key-0 rows in each of salts 0 to 3, and the unsalted partition loads must peak at 9,000 or more while both load lists sum to 10,000. The expanded dimension must have 14 unique `(key, salt)` pairs: salts 0 to 3 for key 0 and only salt 0 elsewhere.
 
-Local plan, partition and resource evidence does not establish cluster-scale performance; session cleanup is explicit.
+The printed evidence includes the baseline plan, both adaptive plans with the skew settings `skew_threshold=1024;advisory=16384`, the unsalted and salted row loads, and the salted plan, followed by `spark-024: six PySpark reference contracts passed; Spark=` and the version or the Scala line. The loads are row counts per partition on a laptop-sized fixture; they show where work would pile up, not how long a real cluster would take.
+

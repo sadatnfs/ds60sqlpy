@@ -1,6 +1,6 @@
 # r-055: reference reasoning
 
-Use the [complete reference](r-055_reference.R) with the guide's declared inputs and runtime. Every worked example is also a standalone script.
+Run the [complete reference](r-055_reference.R) under the [run rules](../STUDY-GUIDE.md#run-a-chapter).
 
 ## Why the implementation has this shape
 
@@ -108,4 +108,6 @@ Free scales can make a small and a large range occupy similar panel heights; sha
 
 ## What the checks establish
 
-The reference makes 7 `stopifnot()` checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.
+The assertions confirm that the zoomed fit still rises above 4 because the extreme row is kept, that the limited fit stays at or below 4 because that row is dropped, that fixed facets share one y scale while free facets get two, that only positive values reach the log axis and 1, 10 and 100 map to 0, 1 and 2, and that a palette missing a category name is detected. They do not judge whether free scales mislead a reader.
+
+The reference makes 7 `stopifnot()` checks; see [what a passing run proves](../STUDY-GUIDE.md#what-a-passing-run-proves).

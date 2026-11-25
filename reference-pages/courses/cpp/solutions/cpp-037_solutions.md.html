@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cpp/solutions/cpp-037_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="cpp-037-explanations-and-reference-observations">cpp-037: explanations and reference observations<a class="heading-anchor" href="#cpp-037-explanations-and-reference-observations" aria-label="Link to this section">#</a></h2>
-<p>Attempt the learner tasks before opening this document. The executable reference checks the bounded normal and boundary examples; the six explanations below cover the deliberate changes and manual checks.</p>
+<p>The <a href="cpp-037_solution.cpp.html">executable reference</a> passes an empty span to the generic filter. The explanations cover generic interfaces, owned results and filtering whole records. How to compare: <a href="../STUDY-GUIDE.md.html#compare-with-the-solutions">study guide</a>.</p>
 <h3 id="mechanism">Mechanism<a class="heading-anchor" href="#mechanism" aria-label="Link to this section">#</a></h3>
 <p>Composing generic interfaces means combining type constraints, ranges and ownership rules without hiding lifetime requirements. A range parameter can be traversable without being reusable. A returned owning vector is safer for long-lived results than a view over an unknown temporary. Concepts express admissible operations; prose still defines semantics.</p>
 <h3 id="detailed-reasoning">Detailed reasoning<a class="heading-anchor" href="#detailed-reasoning" aria-label="Link to this section">#</a></h3>

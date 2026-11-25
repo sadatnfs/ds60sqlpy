@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cuda/python/solutions/cuda-098_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="cuda-098-explained-solutions">cuda-098: explained solutions<a class="heading-anchor" href="#cuda-098-explained-solutions" aria-label="Link to this section">#</a></h2>
-<p>These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.</p>
+<p>Compare with your <a href="../lessons/cuda-098.md.html">worksheet</a> attempt.</p>
 <h3 id="exercise-1-derive-the-input-vjp">Exercise 1: Derive the input VJP<a class="heading-anchor" href="#exercise-1-derive-the-input-vjp" aria-label="Link to this section">#</a></h3>
 <p>Multiply upstream by a and the positive mask.</p>
 <p><strong>Approach.</strong> Derive the input vector-Jacobian product for <code>y = max(0, a*x + b)</code>: the gradient of x is <code>upstream * a * mask</code>, where <code>mask</code> is 1 where the preactivation is positive and 0 otherwise.</p>
@@ -231,9 +231,19 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Why it is correct here.</strong> Each framework binding may differ in subgradient conventions or dtype handling. Separate comparisons localize a mismatch.</p>
 <p><strong>A plausible wrong approach.</strong> Comparing PyTorch&#x27;s custom op with TensorFlow&#x27;s custom op only checks they agree with each other.</p>
 <p><strong>How to verify.</strong> Use the same inputs and upstream values in both frameworks and compare forward and backward results within tolerance.</p>
+<h3 id="self-check-answers">Self-check answers<a class="heading-anchor" href="#self-check-answers" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>What does a backward function compute?</strong> A vector-Jacobian product: each output&#x27;s upstream gradient weighted by how that output depends on each input.</li>
+</ol>
+<ol start="2">
+<li><strong>Why can a central difference disagree at the kink?</strong> It straddles the boundary, where the derivative is not unique, so it need not equal the framework&#x27;s chosen subgradient.</li>
+</ol>
+<ol start="3">
+<li><strong>What do framework registration checks validate?</strong> Integration properties of the operator, not the correctness of every derivative formula.</li>
+</ol>
 <h3 id="reference-observation">Reference observation<a class="heading-anchor" href="#reference-observation" aria-label="Link to this section">#</a></h3>
 <p>Finite-difference derivative approximately 2 and bias VJP 3.</p>
-<p>The reference file is <code>courses/cuda/python/references/cuda-098_cpu.py</code>. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.</p></article>
+<p>Asserted by <code>courses/cuda/python/references/cuda-098_cpu.py</code>.</p></article>
   </main>
 </body>
 </html>

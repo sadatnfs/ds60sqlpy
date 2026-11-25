@@ -1,6 +1,6 @@
 # cuda-083: explained solutions
 
-These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.
+Compare with your [worksheet](../lessons/cuda-083.md) attempt.
 
 ## Exercise 1: Specify the kernel signature
 
@@ -74,8 +74,16 @@ Record component versions target architecture and exact source.
 
 **How to verify.** Another engineer should rebuild from the recorded source and versions and get the same compiled-module hash.
 
+## Self-check answers
+
+1. **Why must compile success be recorded separately from launch success?** Code can compile for an architecture that the current device does not have, so it builds cleanly and still fails or misbehaves at launch.
+
+2. **What does a launch need besides the compiled function?** Arguments in the correct binary layout, grid and block geometry and a stream, all matched to the function signature.
+
+3. **Why use release-matched examples for CUDA Python?** Its components are versioned independently, so code copied from a moving development branch may use APIs your installed release does not have.
+
 ## Reference observation
 
 Insufficient storage for five float64 values is rejected.
 
-The reference file is `courses/cuda/python/references/cuda-083_cpu.py`. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.
+Asserted by `courses/cuda/python/references/cuda-083_cpu.py`.

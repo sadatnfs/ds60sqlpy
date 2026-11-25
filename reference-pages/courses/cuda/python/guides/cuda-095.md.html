@@ -194,9 +194,17 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cuda/python/guides/cuda-095.md</code></p>
     </header>
     <article class="document"><h2 id="cuda-095-inference-has-a-different-performance-contract">cuda-095: Inference has a different performance contract<a class="heading-anchor" href="#cuda-095-inference-has-a-different-performance-contract" aria-label="Link to this section">#</a></h2>
-<p><strong>Route:</strong> CUDA Python and machine learning. <strong>Stage:</strong> intermediate. <strong>Prerequisites:</strong> <code>cuda-087</code>, <code>cuda-090</code>, <code>cuda-092</code>. Allow several sessions when the hardware experiment is new; the chapter is not a deadline.</p>
-<h3 id="what-you-will-be-able-to-explain">What you will be able to explain<a class="heading-anchor" href="#what-you-will-be-able-to-explain" aria-label="Link to this section">#</a></h3>
-<p>By the end, you can <strong>compute throughput</strong>, <strong>specify TensorFlow training behavior</strong>, and <strong>test an exported signature boundary</strong> with evidence. Start with the two worked cases, then use the editable CPU model to make the quantities concrete.</p>
+<p><strong>Route:</strong> CUDA Python and machine learning. <strong>Stage:</strong> intermediate. <strong>Prerequisites:</strong> <code>cuda-087</code>, <code>cuda-090</code>, <code>cuda-092</code>.</p>
+<p>Pacing, evidence labels and platform rules: <a href="../../STUDY-GUIDE.md.html">CUDA study guide</a>.</p>
+<h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
+<ul>
+<li>Compute throughput.</li>
+<li>Separate per-item cost and request latency.</li>
+<li>Set both PyTorch inference controls.</li>
+<li>Specify TensorFlow training behavior.</li>
+<li>Measure cold start.</li>
+<li>Test an exported signature boundary.</li>
+</ul>
 <h3 id="mechanism-and-vocabulary">Mechanism and vocabulary<a class="heading-anchor" href="#mechanism-and-vocabulary" aria-label="Link to this section">#</a></h3>
 <p>Inference evaluates a trained model without performing optimizer updates, but framework mode still matters. Dropout and normalization can change behavior between training and evaluation. PyTorch eval and inference_mode address different concerns: module behavior versus autograd bookkeeping. TensorFlow calls need explicit inference behavior where the layer contract uses training, and exported signatures need shape and dtype definitions.</p>
 <p>Latency per request, batch throughput, tail latency, cold start and memory are separate metrics. A large batch can improve items per second while making an interactive request wait longer. Measure output materialization when a response must be sent to a CPU client. Include model loading and compilation in a separate cold-start result instead of hiding them in warmup.</p>
@@ -213,8 +221,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>A batch of 32 completes in 8 ms, giving 4000 items per second. That does not imply a single request has 0.25 ms latency when queueing and execution require the whole 8 ms.</p>
 <h4 id="worked-example-2">Worked example 2<a class="heading-anchor" href="#worked-example-2" aria-label="Link to this section">#</a></h4>
 <p>Dropout randomly removes activations during training but should follow the framework&#x27;s inference contract at evaluation. Disabling gradients alone does not necessarily switch module training behavior.</p>
-<h3 id="portable-executable-model">Portable executable model<a class="heading-anchor" href="#portable-executable-model" aria-label="Link to this section">#</a></h3>
-<p>The <strong>CPU reference model</strong> variant runs this bounded worked example using <code>python-core</code>. It uses only the Python standard library, small synthetic values and no network. Its purpose is to expose the arithmetic or contract behind the chapter. The separate reference includes assertions for the stated observations.</p>
+<h3 id="how-to-run-the-cpu-model">How to run the CPU model<a class="heading-anchor" href="#how-to-run-the-cpu-model" aria-label="Link to this section">#</a></h3>
+<p>Edit the copy; the <a href="../references/cuda-095_cpu.py.html">reference</a> adds assertions.</p>
+<pre class="highlighted-code"><code class="language-bash">python courses/cuda/python/lessons/cuda-095_cpu.py</code></pre>
 <pre class="highlighted-code"><code class="language-python">batch<span class="syntax-punctuation">,</span> seconds <span class="syntax-operator">=</span> <span class="syntax-number">32</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0.008</span>
 throughput <span class="syntax-operator">=</span> batch <span class="syntax-operator">/</span> seconds
 amortized <span class="syntax-operator">=</span> seconds <span class="syntax-operator">/</span> batch
@@ -244,58 +253,53 @@ amortized <span class="syntax-operator">=</span> seconds <span class="syntax-ope
 <td><code>0.00025</code></td>
 </tr>
 </tbody></table></div>
-<p>Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.</p>
 <h3 id="equal-framework-lanes">Equal framework lanes<a class="heading-anchor" href="#equal-framework-lanes" aria-label="Link to this section">#</a></h3>
 <h4 id="pytorch">PyTorch<a class="heading-anchor" href="#pytorch" aria-label="Link to this section">#</a></h4>
 <p>Use model.eval to select evaluation behavior and torch.inference_mode to avoid autograd work. They solve different problems. Materialize the final output inside response-latency timing.</p>
 <h4 id="tensorflow">TensorFlow<a class="heading-anchor" href="#tensorflow" aria-label="Link to this section">#</a></h4>
 <p>Call relevant layers with training=False and define a SavedModel serving signature for the external deployment route. Check output dtypes/shapes and first-call versus warm behavior.</p>
-<p>Choose either lane first, then compare the other using identical mathematical inputs. Framework-specific shape, mode and optimizer rules must be checked separately. Both use offline synthetic examples; no model hub or dataset download is triggered.</p>
+<p>Lane rules: <a href="../../STUDY-GUIDE.md.html#python-gpu-and-framework-labs">framework labs</a>.</p>
 <h3 id="executable-framework-practice">Executable framework practice<a class="heading-anchor" href="#executable-framework-practice" aria-label="Link to this section">#</a></h3>
-<p>The variant chooser offers <strong>PyTorch on CPU</strong>, <strong>TensorFlow on CPU</strong>, and separate <strong>NVIDIA CUDA</strong> versions. CPU versions force CPU placement. CUDA versions require the named GPU profile and refuse to silently fall back. Each complete program uses the same tiny deterministic objective, bounded tensors and local synthetic data. Read its source before running; a framework pass establishes only that variant and environment.</p>
-<p>The checkpoint demonstration is in-memory. It teaches what state must be saved; it does not export a durable model artifact or preserve an in-flight device context. Advanced custom-op, distributed and engine-building projects remain separately prepared external workflows.</p>
+<p>Run the <strong>PyTorch</strong> and <strong>TensorFlow</strong> variants on CPU first; <a href="../../STUDY-GUIDE.md.html#python-gpu-and-framework-labs">lab rules</a>.</p>
 <h3 id="practice-and-transfer">Practice and transfer<a class="heading-anchor" href="#practice-and-transfer" aria-label="Link to this section">#</a></h3>
+<p>Record each attempt in the <a href="../lessons/cuda-095.md.html">worksheet</a> before opening hints.</p>
 <h4 id="exercise-1-compute-throughput">Exercise 1: Compute throughput<a class="heading-anchor" href="#exercise-1-compute-throughput" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Dividing by the time until the batch was enqueued rather than completed inflates throughput, because GPU work is asynchronous and the enqueue returns almost immediately.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-2-separate-per-item-cost-and-request-latency">Exercise 2: Separate per-item cost and request latency<a class="heading-anchor" href="#exercise-2-separate-per-item-cost-and-request-latency" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Reporting 0.25 ms as request latency promises response times that no request experiences, and service level objectives built on it will fail.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-3-set-both-pytorch-inference-controls">Exercise 3: Set both PyTorch inference controls<a class="heading-anchor" href="#exercise-3-set-both-pytorch-inference-controls" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Using only <code>torch.no_grad()</code> keeps dropout active, so predictions vary between calls, and batch normalization keeps updating running statistics.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-4-specify-tensorflow-training-behavior">Exercise 4: Specify TensorFlow training behavior<a class="heading-anchor" href="#exercise-4-specify-tensorflow-training-behavior" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Assuming <code>model.predict</code> and <code>model(x)</code> behave the same in every custom layer is risky when a layer reads <code>training</code> differently.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-5-measure-cold-start">Exercise 5: Measure cold start<a class="heading-anchor" href="#exercise-5-measure-cold-start" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Averaging cold start into steady-state latency hides a multi-second first response. Autoscaling services start new replicas often, so cold start can affect many users.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-6-test-an-exported-signature-boundary">Exercise 6: Test an exported signature boundary<a class="heading-anchor" href="#exercise-6-test-an-exported-signature-boundary" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Letting the runtime cast silently makes accepted inputs ambiguous. A float64 request cast to float32 loses precision without anyone noticing.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
-<p>Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.</p>
+<p>Hint <em>k</em> belongs to exercise <em>k</em>; open one at a time.</p>
 <ol>
-<li>Start from worked example 1 and mark the quantities needed for the task &quot;Compute throughput&quot;.</li>
-<li>Change one assumption in worked example 2 while preserving the declared contract: separate per-item cost and request latency.</li>
-<li>Trace the CPU program&#x27;s variables before adding hardware behavior: set both PyTorch inference controls.</li>
-<li>Draw producers, consumers and the exact operation boundary for the task &quot;Specify TensorFlow training behavior&quot;.</li>
-<li>Separate what the small fixture establishes from what the real runtime must show: measure cold start.</li>
-<li>Write a counterexample to an overbroad claim before you test an exported signature boundary.</li>
+<li>Divide the batch size by the completed batch time in seconds.</li>
+<li>Ask how long a single request in that batch waits from arrival to answer.</li>
+<li>Name what <code>eval</code> changes in module behavior and what <code>inference_mode</code> changes in autograd bookkeeping.</li>
+<li>Find the layers whose call signature accepts a training flag and decide what to pass.</li>
+<li>Time model loading and the first execution separately from warm requests.</li>
+<li>Send a shape or dtype the exported signature does not accept and decide what should happen.</li>
 </ol>
-<h3 id="common-mistakes-and-self-review">Common mistakes and self-review<a class="heading-anchor" href="#common-mistakes-and-self-review" aria-label="Link to this section">#</a></h3>
-<p>Confusing a correct tiny example with a general implementation is the central review risk. For this chapter, challenge the assumption in worked example 2, then ask whether your change preserves the mechanism described above. If you change dtype, layout, ordering, batch size or backend, update the acceptance contract rather than silently reusing the old observation. Explain an unexpected result before trying random configuration changes.</p>
-<p>Keep a small evidence table with columns <strong>claim</strong>, <strong>input</strong>, <strong>expected observation</strong>, <strong>actual observation</strong> and <strong>limit</strong>. For the first claim use <code>Compute throughput</code>. For the final claim use <code>Test an exported signature boundary</code>. An unperformed GPU or cluster experiment remains pending even when the CPU model is correct.</p>
-<h3 id="platform-and-evidence-contract">Platform and evidence contract<a class="heading-anchor" href="#platform-and-evidence-contract" aria-label="Link to this section">#</a></h3>
-<p>The reading worksheet and CPU reference model work through the ordinary Linux Docker classroom on macOS, Linux and Windows using WSL 2. They do not require an NVIDIA GPU. Their results are labeled CPU models or semantic oracles, not simulated hardware performance.</p>
-<p>Real CUDA work needs supported NVIDIA hardware, a compatible host driver and an explicitly prepared GPU runtime. An Apple GPU does not execute CUDA kernels. PyTorch MPS on a supported native Mac, ROCm on supported AMD hardware, or other vendor backends can provide separate accelerator learning routes; they need their own package and operation qualification and are not CUDA evidence. The ordinary Linux Docker classroom does not expose native Mac MPS automatically.</p>
-<p>Do not download packages, models or data by opening this lesson. Do not attach an engine socket, ambient cluster credentials or an arbitrary remote endpoint. A CPU pass, imported package, successful compilation, real GPU result and measured performance are distinct observations. Record the actual backend, data shape/dtype, source revision, versions and pending checks. A saved completion marker records learning progress, not hardware certification.</p>
+<h3 id="common-mistakes-and-self-check">Common mistakes and self-check<a class="heading-anchor" href="#common-mistakes-and-self-check" aria-label="Link to this section">#</a></h3>
+<p>A common mistake is treating amortized cost per item as request latency. A batch of 32 that takes 8 ms gives 4000 items per second, but each request still waits the whole 8 ms, not 0.25 ms. Another mistake is disabling gradients and assuming dropout and normalization switched to inference behavior. Fix both by reporting latency, throughput, tail latency, cold start and memory separately, and by setting the framework&#x27;s evaluation mode explicitly.</p>
+<p><strong>Evidence limit:</strong> The reference computes 4000 items per second and an 8 ms batch latency from given numbers. It runs no model, so queueing, output materialization and cold start must be measured on the serving path.</p>
+<ol>
+<li>Why can a larger batch hurt an interactive service?</li>
+<li>Why measure cold start separately?</li>
+<li>Why include output materialization in latency?</li>
+</ol>
+<p>Answers: <a href="../solutions/cuda-095_solutions.md.html#self-check-answers">self-check answers</a>.</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
 <ul>
 <li><a href="https://docs.pytorch.org/docs/2.9/notes/cuda.html">PyTorch CUDA semantics</a></li>
 <li><a href="https://www.tensorflow.org/guide/gpu">TensorFlow GPU guide</a></li>
 </ul>
-<p>Use the version-matched documentation of your prepared environment. These references describe interfaces and supported boundaries; the chapter&#x27;s synthetic examples and CPU models are original teaching material.</p>
+<p>Full lists: <a href="../../STUDY-GUIDE.md.html#documentation-and-sources">documentation and sources</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning skill for cuda-095: Inference has a different performance contract.
 Read courses/cuda/python/guides/cuda-095.md and courses/cuda/python/lessons/cuda-095.md.

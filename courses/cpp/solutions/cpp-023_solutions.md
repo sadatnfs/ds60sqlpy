@@ -1,6 +1,6 @@
 # cpp-023: explanations and reference observations
 
-Attempt the learner tasks before opening this document. The executable reference checks the bounded normal and boundary examples; the six explanations below cover the deliberate changes and manual checks.
+The [executable reference](cpp-023_solution.cpp) shows that `out` keeps its previous value 91 when the addition overflows, and that the int minimum minus 1 also returns status 2. The explanations cover status codes, output parameters and the host-project build in Exercise 6. How to compare: [study guide](../STUDY-GUIDE.md#compare-with-the-solutions).
 
 ## Mechanism
 

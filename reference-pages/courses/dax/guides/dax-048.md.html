@@ -194,10 +194,10 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/dax/guides/dax-048.md</code></p>
     </header>
     <article class="document"><h2 id="dax-048-visual-calculations-operate-on-a-visual-s-aggregated-shape">dax-048: Visual calculations operate on a visual&#x27;s aggregated shape<a class="heading-anchor" href="#dax-048-visual-calculations-operate-on-a-visual-s-aggregated-shape" aria-label="Link to this section">#</a></h2>
-<p><strong>Stage 8: Reusable logic and calculation scope.</strong> Level: advanced. Read the mechanisms, trace the worked cases and retain your own draft. <strong>Direct prerequisites:</strong> <code>dax-023</code>, <code>dax-032</code>, <code>dax-038</code></p>
+<p><strong>Stage 8: Reusable logic and calculation scope.</strong> Level: advanced. <strong>Direct prerequisites:</strong> <code>dax-023</code>, <code>dax-032</code>, <code>dax-038</code></p>
 <h3 id="how-to-use-this-offline-lesson">How to use this offline lesson<a class="heading-anchor" href="#how-to-use-this-offline-lesson" aria-label="Link to this section">#</a></h3>
-<p>This is an offline DAX editing lesson. No DAX compiler, semantic-model engine, Power BI account or network connection is required. Worked tables describe the named reference and model, not execution of your draft. Save, compare and export source; do not interpret a comparison or completion marker as a passed program run.</p>
-<p>Open the <a href="../lessons/dax-048.dax.html">starter</a>. Compare the <a href="../solutions/dax-048_reference.dax.html">named reference</a> and <a href="../solutions/dax-048_solutions.md.html">reasoning</a> when ready. The <a href="../models/retail/model.json.html">model specification</a> identifies every fixture table, column type, key and relationship. The <a href="../models/README.md.html">fixture handbook</a> displays the original data and explains each table grain.</p>
+<p>Predict running revenue for the January and February 2025 snapshot rows in ascending order, then in descending order. The <a href="../STUDY-GUIDE.md.html#offline-study-boundary">offline study boundary</a> explains what a worked table can show.</p>
+<p>Files: <a href="../lessons/dax-048.dax.html">starter</a>, <a href="../solutions/dax-048_reference.dax.html">reference</a> and <a href="../solutions/dax-048_solutions.md.html">reasoning</a>.</p>
 <h3 id="the-question-and-the-mechanism">The question and the mechanism<a class="heading-anchor" href="#the-question-and-the-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Distinguish a visual running total from a reusable semantic-model measure.</p>
 <p>A visual calculation belongs to a visual and operates over the data and structure supplied to that visual. It does not receive the complete transaction model merely because its expression uses DAX. The fields must be available in that visual&#x27;s shape, and relationship-dependent functions such as RELATED or USERELATIONSHIP are not available in that scope according to the reviewed documentation.</p>
@@ -207,7 +207,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The literal Position column makes the visual order explicit. ADDCOLUMNS evaluates a current position, and SUMX sums snapshot values at positions up to it. This expansion explains the arithmetic of the named flat visual. A hierarchical visual can additionally require partition/reset rules that this example does not emulate.</p>
 <p>Concepts to explain in your own words: <strong>visual calculation</strong>, <strong>RUNNINGSUM</strong>, <strong>visual order</strong>, <strong>aggregation grain</strong>, <strong>scope</strong>.</p>
 <h3 id="model-and-context-contract">Model and context contract<a class="heading-anchor" href="#model-and-context-contract" aria-label="Link to this section">#</a></h3>
-<p>The ordinary star follows Product → Sales, Customer → Sales and Date → Sales through OrderDate. The ShipDate relationship is inactive unless a case explicitly activates it. Filters flow from the one side to the many side. Additional analytical tables have only the relationships declared in their named model; a similar column name does not create a relationship.</p>
+<p>The snapshot holds two monthly aggregates, January 67 and February 56, already summed from Sales. See the <a href="../models/retail/model.json.html">model specification</a> and the <a href="../STUDY-GUIDE.md.html#the-retail-star">shared star rules</a>.</p>
 <pre class="highlighted-code"><code class="language-text">Product (one)  --&gt; Sales (many) &lt;-- Customer (one)
                        ^
                        | active OrderDate
@@ -215,7 +215,6 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
                        | inactive ShipDate
                        +------&gt; Sales</code></pre>
 <p>A case builds a query-local <code>DATATABLE</code>. That table exists only inside its query and has no relationship to any model table.</p>
-<p>All amounts in ordinary Sales are USD after the line discount, before tax and returns. The Date fixture is complete for 2024 and 2025; a short result table is a selected slice, not the whole calendar. JSON <code>null</code> in the worked-results sidecar means DAX BLANK, not the text &quot;null&quot;.</p>
 <h3 id="worked-cases">Worked cases<a class="heading-anchor" href="#worked-cases" aria-label="Link to this section">#</a></h3>
 <h4 id="feature-and-version-boundary">Feature and version boundary<a class="heading-anchor" href="#feature-and-version-boundary" aria-label="Link to this section">#</a></h4>
 <p>Reviewed 2026-10-25: Microsoft&#x27;s visual-calculation documentation describes a separate visual-scoped facility available in Desktop and Service. This offline course does not provide that facility, a visual editor or external execution; it supplies explicit snapshots and arithmetic explanations.</p>
@@ -291,8 +290,10 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>A separately prepared flat visual can use this expression when Revenue is present in its visual shape:</p>
 <pre class="highlighted-code"><code class="language-dax">RunningRevenue <span class="syntax-operator">=</span> <span class="syntax-function">RUNNINGSUM</span> <span class="syntax-punctuation">(</span> <span class="syntax-attribute">[Revenue]</span> <span class="syntax-punctuation">)</span></code></pre>
 <p>It is a visual-calculation definition, not a persisted semantic-model measure or a complete DAX query. The two query expansions above explain the named snapshots without claiming to reproduce every visual-axis feature.</p>
+<h3 id="a-misconception-to-test">A misconception to test<a class="heading-anchor" href="#a-misconception-to-test" aria-label="Link to this section">#</a></h3>
+<p>RUNNINGSUM follows the visual&#x27;s sort, so reversing months gives 56 then 123; the last value matches but the first row&#x27;s meaning changes.</p>
 <h3 id="practice-prediction-construction-and-diagnosis">Practice: prediction, construction and diagnosis<a class="heading-anchor" href="#practice-prediction-construction-and-diagnosis" aria-label="Link to this section">#</a></h3>
-<p>Retain your formula or written reasoning, the stated context, contributing rows or values, and a conclusion with its unit. These notes are your own study record; they do not show that a formula ran.</p>
+<p>Record each answer as the <a href="../STUDY-GUIDE.md.html#practice-routine">practice routine</a> describes.</p>
 <h4 id="exercise-1-predict">Exercise 1: Predict<a class="heading-anchor" href="#exercise-1-predict" aria-label="Link to this section">#</a></h4>
 <p>Predict the running result if the visual includes only February.</p>
 <h4 id="exercise-2-change-one-condition">Exercise 2: Change one condition<a class="heading-anchor" href="#exercise-2-change-one-condition" aria-label="Link to this section">#</a></h4>
@@ -315,14 +316,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>The input is displayed aggregate cells, not necessarily raw observations.</li>
 </ol>
 <h3 id="self-check-and-next-step">Self-check and next step<a class="heading-anchor" href="#self-check-and-next-step" aria-label="Link to this section">#</a></h3>
-<p>Explain one changed result without quoting the formula alone. Identify which rows, filters, relationship or evaluation scope changed, then construct a counterexample to a plausible wrong interpretation. Keep your draft separate from the supplied reference. A small correct derivation does not certify performance, model security or broad expertise.</p>
+<p>Add a March row with 10 USD at position 3 and predict all running values. The <a href="../STUDY-GUIDE.md.html#self-check-routine">self-check routine</a> applies too.</p>
 <p>Continue to <a href="dax-049.md.html">dax-049</a> when its prerequisites make sense, or revisit this stage from the <a href="../README.md.html">course map</a>.</p>
 <h3 id="official-references-and-evidence-limits">Official references and evidence limits<a class="heading-anchor" href="#official-references-and-evidence-limits" aria-label="Link to this section">#</a></h3>
 <ul>
 <li><a href="https://learn.microsoft.com/en-us/power-bi/transform-model/desktop-visual-calculations-overview">Power BI: visual calculations</a></li>
 <li><a href="https://learn.microsoft.com/en-us/dax/runningsum-function-dax">DAX function: RUNNINGSUM</a></li>
 </ul>
-<p>Documentation was reviewed for this original course on 2026-10-25. Version-sensitive features have explicit notes. Source/model checks and independent fixture arithmetic are not a DAX parser, compiler, semantic engine, real RLS test or performance measurement.</p>
+<p>Review date and evidence limits: <a href="../STUDY-GUIDE.md.html#references-and-evidence-limits">study guide</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for dax-048. Read its guide and the named model.
 Review my draft and prediction. Ask me to enumerate the relevant rows and context.

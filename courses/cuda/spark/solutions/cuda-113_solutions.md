@@ -1,6 +1,6 @@
 # cuda-113: explained solutions
 
-These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.
+Compare with your [worksheet](../lessons/cuda-113.md) attempt.
 
 ## Exercise 1: Classify four execution layers
 
@@ -74,8 +74,16 @@ Require compatible GPU runtime executed operator plan metrics and equal results.
 
 **How to verify.** Collect each item from a single run on the target host and attach them together in the validation record.
 
+## Self-check answers
+
+1. **What was the plugin formerly called?** The RAPIDS Accelerator for Apache Spark; it is now the NVIDIA cuDF plugin for Apache Spark.
+
+2. **Why can Scala and PySpark reach the same physical plan?** Both build DataFrame expressions that the same Catalyst optimizer plans and executes.
+
+3. **Do GPU-aware UDF and machine learning integrations come with the plugin?** They have their own package and execution contracts and must be set up and verified separately.
+
 ## Reference observation
 
 Grouped totals A 6 and B 14; no GPU execution claimed.
 
-The reference file is `courses/cuda/spark/references/cuda-113_cpu.py`. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.
+Asserted by `courses/cuda/spark/references/cuda-113_cpu.py`.

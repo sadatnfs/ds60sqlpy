@@ -194,7 +194,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/csharp/solutions/csharp-034_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="csharp-034-explanation-and-comparison">csharp-034: explanation and comparison<a class="heading-anchor" href="#csharp-034-explanation-and-comparison" aria-label="Link to this section">#</a></h2>
-<p>Attempt the six guide tasks before opening this comparison. The executable reference is <a href="csharp-034_solution.cs.html">csharp-034_solution.cs</a>. It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.</p>
+<p>Reference program: <a href="csharp-034_solution.cs.html">csharp-034_solution.cs</a>, covering both examples and the executed answers.</p>
+<p>Attempt the tasks first; see <a href="../STUDY-GUIDE.md.html#comparing-with-the-explanation">comparing with the explanation</a>.</p>
 <h3 id="why-the-two-examples-differ">Why the two examples differ<a class="heading-anchor" href="#why-the-two-examples-differ" aria-label="Link to this section">#</a></h3>
 <p><strong>Count atomically:</strong> Each increment is one supported atomic operation rather than a compound unsynchronized expression. The atomic count is exactly 400.</p>
 <p><strong>Update one key safely:</strong> The update delegate is a pure calculation, so repeated evaluation cannot duplicate an external effect. Twenty admitted updates produce 20.</p>
@@ -248,7 +249,7 @@ Check<span class="syntax-punctuation">(</span>counts<span class="syntax-punctuat
 <p><code>Interlocked.Increment(ref value)</code> atomically updates one location. ConcurrentDictionary manages concurrent lookup/update operations. A factory must tolerate repeated evaluation.</p>
 <p>Concurrent containers protect their own structure, not arbitrary objects stored inside them. Do not infer once-only callback execution. Use a higher-level lock or transaction for multi-location invariants.</p>
 <h3 id="review-before-continuing">Review before continuing<a class="heading-anchor" href="#review-before-continuing" aria-label="Link to this section">#</a></h3>
-<p>Run the reference and confirm that it prints <code>csharp-034: passed</code>, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.</p></article>
+<p>Run the reference and confirm it prints <code>csharp-034: passed</code>, then rerun the guide&#x27;s counterexample.</p></article>
   </main>
 </body>
 </html>

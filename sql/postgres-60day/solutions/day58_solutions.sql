@@ -201,7 +201,7 @@ ORDER BY
   email;
 
 -- Exercise 4: deterministic winner selection happens after normalization and
--- before upsert. Newest valid timestamp wins; email/full_name break any ties.
+-- before upsert. Newest valid timestamp wins; higher source_row_number breaks ties.
 WITH candidates AS (
   SELECT
     email AS normalized_email,

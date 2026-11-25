@@ -212,21 +212,21 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="syntax-and-data-contract">Syntax and data contract<a class="heading-anchor" href="#syntax-and-data-contract" aria-label="Link to this section">#</a></h3>
 <p>Inspect compiled SQL for a database error and run_results for execution/test outcomes. A singular data test returns failing rows; zero rows mean that particular condition passed. The example uses a fixed independently calculated total 12 rather than deriving the expectation through the same mistaken expression as the model.</p>
 <h3 id="run-the-lesson">Run the lesson<a class="heading-anchor" href="#run-the-lesson" aria-label="Link to this section">#</a></h3>
-<p>Open <code>dbt-022</code> in <code>/classroom</code>. Its starter <code>main.py</code> contains both worked cases, &quot;Compile a template that the database rejects&quot; and &quot;Reject a wrong quantity after valid execution&quot;, and prints the dictionary each case returns. The prepared <code>data-engineering</code> worker runs it in a fresh temporary directory. An <code>AssertionError</code> means that an observation differs from the case&#x27;s stated contract. Each case writes its dbt project and DuckDB database into its own temporary directory, runs real dbt commands through dbt&#x27;s Python entry point and removes the directory when it returns. No account, warehouse, network request or package download is involved. Save source and notes before switching lessons.</p>
+<p>Case 1 should show that the template compiled but the database rejected the binding: <code>missing_column</code> does not exist, and the run result status is error. Case 2 shows SQL that ran successfully and produced 24, while an independent reconciliation test expected 12 and failed. Those are three different layers: Jinja, the database and the meaning of the result. Name the layer before editing anything, since each needs a different fix and different evidence. See the <a href="../STUDY-GUIDE.md.html#run-a-lesson">run routine</a>.</p>
 <h3 id="worked-case-1-compile-a-template-that-the-database-rejects">Worked case 1: Compile a template that the database rejects<a class="heading-anchor" href="#worked-case-1-compile-a-template-that-the-database-rejects" aria-label="Link to this section">#</a></h3>
 <p>The first project has a valid ref expression and a prepared input relation, so template compilation succeeds. The generated SQL names a missing column and actual execution fails. This isolates a database-binding issue from dependency preparation.</p>
-<p><strong>Project files.</strong> The case writes these files before its first dbt command. YAML is shown in conventional key order; dbt reads the same mappings.</p>
+<p><strong>Project files</strong>, written before the first dbt command:</p>
 <p><code>models/bad.sql</code></p>
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">select</span> missing_column <span class="syntax-keyword">from</span> {{ <span class="syntax-keyword">ref</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;orders&#x27;</span><span class="syntax-punctuation">)</span> }}</code></pre>
 <p><code>seeds/orders.csv</code></p>
 <pre class="highlighted-code"><code class="language-text">id,amount
 1,5</code></pre>
-<p><strong>Commands and changes, in order.</strong> Each <code>dbt</code> line is one <code>invoke(...)</code> call; the harness adds <code>--project-dir</code> and <code>--profiles-dir</code> for the temporary project.</p>
+<p><strong>Commands, in order.</strong> Each <code>dbt</code> line is one <code>invoke(...)</code> call.</p>
 <pre class="highlighted-code"><code class="language-bash">dbt seed
 dbt compile
 dbt run # expected to fail</code></pre>
 <p><strong>Expected evidence:</strong> Compiled SQL exists, but the model result status is error.</p>
-<p>The program below shows only this case&#x27;s own functions. They call the shared helpers <code>project</code>, <code>invoke</code> and <code>artifact</code>, which write the files above, run dbt through <code>dbtRunner</code> and read the results; the helpers are explained in <a href="dbt-001.md.html">dbt-001</a> and appear in full at the top of this lesson&#x27;s <a href="../lessons/dbt-022.py.html">starter</a>.</p>
+<p>Helpers <code>project</code>, <code>invoke</code> and <code>artifact</code>: see the <a href="../STUDY-GUIDE.md.html#case-harness">case harness</a>.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> tempfile
 
 
@@ -245,7 +245,7 @@ dbt run # expected to fail</code></pre>
         <span class="syntax-keyword">return</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">template_compiled</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">database_binding_rejected</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">True</span><span class="syntax-punctuation">}</span></code></pre>
 <h3 id="worked-case-2-reject-a-wrong-quantity-after-valid-execution">Worked case 2: Reject a wrong quantity after valid execution<a class="heading-anchor" href="#worked-case-2-reject-a-wrong-quantity-after-valid-execution" aria-label="Link to this section">#</a></h3>
 <p>The second model doubles a sum and materializes 24. A singular test expecting 12 returns a failing row. Both the result and the failure are inspected, so the diagnosis concerns semantics rather than syntax.</p>
-<p><strong>Project files.</strong> The case writes these files before its first dbt command. YAML is shown in conventional key order; dbt reads the same mappings.</p>
+<p><strong>Project files</strong>, written before the first dbt command:</p>
 <p><code>models/total.sql</code></p>
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">select</span> <span class="syntax-keyword">sum</span><span class="syntax-punctuation">(</span>amount<span class="syntax-punctuation">)</span> <span class="syntax-operator">*</span> <span class="syntax-number">2</span> <span class="syntax-keyword">as</span> amount <span class="syntax-keyword">from</span> {{ <span class="syntax-keyword">ref</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;orders&#x27;</span><span class="syntax-punctuation">)</span> }}</code></pre>
 <p><code>seeds/orders.csv</code></p>
@@ -254,10 +254,10 @@ dbt run # expected to fail</code></pre>
 2,7</code></pre>
 <p><code>tests/reconcile.sql</code></p>
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">select</span> <span class="syntax-operator">*</span> <span class="syntax-keyword">from</span> {{ <span class="syntax-keyword">ref</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;total&#x27;</span><span class="syntax-punctuation">)</span> }} <span class="syntax-keyword">where</span> amount <span class="syntax-operator">!</span><span class="syntax-operator">=</span> <span class="syntax-number">12</span></code></pre>
-<p><strong>Commands and changes, in order.</strong> Each <code>dbt</code> line is one <code>invoke(...)</code> call; the harness adds <code>--project-dir</code> and <code>--profiles-dir</code> for the temporary project.</p>
+<p><strong>Commands, in order.</strong> Each <code>dbt</code> line is one <code>invoke(...)</code> call.</p>
 <pre class="highlighted-code"><code class="language-bash">dbt build # expected to fail</code></pre>
 <p><strong>Expected evidence:</strong> The relation contains 24 and the independent reconciliation test fails.</p>
-<p>The program below shows only this case&#x27;s own functions. They call the shared helpers <code>project</code>, <code>invoke</code>, <code>rows</code> and <code>artifact</code>, which write the files above, run dbt through <code>dbtRunner</code> and read the results; the helpers are explained in <a href="dbt-001.md.html">dbt-001</a> and appear in full at the top of this lesson&#x27;s <a href="../lessons/dbt-022.py.html">starter</a>.</p>
+<p>Helpers <code>project</code>, <code>invoke</code>, <code>rows</code> and <code>artifact</code>: see the <a href="../STUDY-GUIDE.md.html#case-harness">case harness</a>.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> tempfile
 
 
@@ -277,7 +277,7 @@ dbt run # expected to fail</code></pre>
         <span class="syntax-keyword">assert</span> <span class="syntax-string">&quot;</span><span class="syntax-string">fail</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">in</span> <span class="syntax-punctuation">[</span>r<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">status</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-keyword">for</span> r <span class="syntax-operator">in</span> artifact<span class="syntax-punctuation">(</span>p<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">run_results.json</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">results</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span>
         <span class="syntax-keyword">return</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">sql_executed</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">wrong_quantity</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">24</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">independent_expected_quantity</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">12</span><span class="syntax-punctuation">}</span></code></pre>
 <h3 id="practice">Practice<a class="heading-anchor" href="#practice" aria-label="Link to this section">#</a></h3>
-<p>The starter contains both worked cases, so a task can change either one. Make each change in a saved copy, run it, and compare the printed result with the task&#x27;s check before opening the separate explained answers.</p>
+<p>Use the <a href="../STUDY-GUIDE.md.html#practice-routine">practice routine</a>.</p>
 <h4 id="1-classify-the-first-failure">1. Classify the first failure<a class="heading-anchor" href="#1-classify-the-first-failure" aria-label="Link to this section">#</a></h4>
 <p>Identify which layer rejects the missing-column model.</p>
 <p><strong>Check:</strong> It is database binding/execution.</p>
@@ -312,7 +312,7 @@ dbt run # expected to fail</code></pre>
 <li><a href="https://github.com/duckdb/dbt-duckdb">dbt-duckdb repository README</a></li>
 </ul>
 <h3 id="tutor-guidance">Tutor guidance<a class="heading-anchor" href="#tutor-guidance" aria-label="Link to this section">#</a></h3>
-<p>Use the repository&#x27;s <code>$guide-ds60sqlpy-learning</code> skill (<code>.agents/skills/guide-ds60sqlpy-learning/SKILL.md</code>) for <code>dbt-022</code>. Inspect the learner&#x27;s own source and printed output first. Ask for an explanation of compilation, binding error, semantic test, diagnosis and evidence in their own words, then give one focused hint at a time. Keep an assertion on this synthetic fixture separate from a claim about an external dataset or deployed service.</p></article>
+<p>Ask the learner to classify each failure by the layer that rejected it and to show the evidence: compiled file, run status or test result. Then ask why the 24 passed compilation and execution, and how they would write an independent expectation for a quantity in their own model. Ask too which of these failures a review of the SQL text alone would have caught. See the <a href="../STUDY-GUIDE.md.html#tutor-guidance">tutor routine</a>.</p></article>
   </main>
 </body>
 </html>

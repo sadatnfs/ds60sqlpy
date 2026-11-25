@@ -194,9 +194,17 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cuda/python/guides/cuda-099.md</code></p>
     </header>
     <article class="document"><h2 id="cuda-099-memory-saving-training-techniques">cuda-099: Memory-saving training techniques<a class="heading-anchor" href="#cuda-099-memory-saving-training-techniques" aria-label="Link to this section">#</a></h2>
-<p><strong>Route:</strong> CUDA Python and machine learning. <strong>Stage:</strong> advanced. <strong>Prerequisites:</strong> <code>cuda-089</code>, <code>cuda-090</code>, <code>cuda-094</code>. Allow several sessions when the hardware experiment is new; the chapter is not a deadline.</p>
-<h3 id="what-you-will-be-able-to-explain">What you will be able to explain<a class="heading-anchor" href="#what-you-will-be-able-to-explain" aria-label="Link to this section">#</a></h3>
-<p>By the end, you can <strong>compute weighted accumulation</strong>, <strong>explain checkpoint recomputation</strong>, and <strong>design equal-update tests</strong> with evidence. Start with the two worked cases, then use the editable CPU model to make the quantities concrete.</p>
+<p><strong>Route:</strong> CUDA Python and machine learning. <strong>Stage:</strong> advanced. <strong>Prerequisites:</strong> <code>cuda-089</code>, <code>cuda-090</code>, <code>cuda-094</code>.</p>
+<p>Pacing, evidence labels and platform rules: <a href="../../STUDY-GUIDE.md.html">CUDA study guide</a>.</p>
+<h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
+<ul>
+<li>Compute weighted accumulation.</li>
+<li>Find unequal-batch normalization error.</li>
+<li>Place optimizer steps.</li>
+<li>Explain checkpoint recomputation.</li>
+<li>Account for frozen weights.</li>
+<li>Design equal-update tests.</li>
+</ul>
 <h3 id="mechanism-and-vocabulary">Mechanism and vocabulary<a class="heading-anchor" href="#mechanism-and-vocabulary" aria-label="Link to this section">#</a></h3>
 <p>Gradient accumulation splits an effective batch across microbatches and delays the optimizer step. To match a full mean-loss gradient, weight each microbatch by its number of examples divided by the total. Equal division by microbatch count works only when sizes are equal. Batch-dependent layers, random state and optimizer timing can still break equivalence.</p>
 <p>Activation checkpointing saves selected intermediates and recomputes others during backward. It exchanges compute for memory rather than eliminating arithmetic. PyTorch checkpoint utilities and TensorFlow recomputation mechanisms have framework-specific state and randomness rules. Frozen parameters still occupy storage, and upstream activations may remain necessary for trainable downstream components. Compare updates first, then measured peak memory and time.</p>
@@ -209,11 +217,12 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 </ul>
 <h3 id="worked-examples">Worked examples<a class="heading-anchor" href="#worked-examples" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
-<p>Microbatch mean gradients 2 and 8 over sizes 3 and 1 combine to<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">(</mo><mn>3</mn><mo>×</mo><mn>2</mn><mo>+</mo><mn>1</mn><mo>×</mo><mn>8</mn><mo stretchy="false">)</mo><mi mathvariant="normal">/</mi><mn>4</mn><mo>=</mo><mn>3.5</mn></mrow><annotation encoding="application/x-tex">(3\times2+1\times8)/4=3.5</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord">3</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">2</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">1</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">8</span><span class="mclose">)</span><span class="mord">/4</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">3.5</span></span></span></span>. Averaging the two means gives 5, which is wrong for the effective batch.</p>
+<p>Microbatch mean gradients 2 and 8 over sizes 3 and 1 combine to <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">(</mo><mn>3</mn><mo>×</mo><mn>2</mn><mo>+</mo><mn>1</mn><mo>×</mo><mn>8</mn><mo stretchy="false">)</mo><mi mathvariant="normal">/</mi><mn>4</mn><mo>=</mo><mn>3.5</mn></mrow><annotation encoding="application/x-tex">(3\times2+1\times8)/4=3.5</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord">3</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">2</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">1</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">8</span><span class="mclose">)</span><span class="mord">/4</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">3.5</span></span></span></span>. Averaging the two means gives 5, which is wrong for the effective batch.</p>
 <h4 id="worked-example-2">Worked example 2<a class="heading-anchor" href="#worked-example-2" aria-label="Link to this section">#</a></h4>
 <p>Checkpointing reduces retained activations by an illustrative 20 MiB but adds another forward computation. Its benefit depends on memory pressure and the recomputation cost.</p>
-<h3 id="portable-executable-model">Portable executable model<a class="heading-anchor" href="#portable-executable-model" aria-label="Link to this section">#</a></h3>
-<p>The <strong>CPU reference model</strong> variant runs this bounded worked example using <code>python-core</code>. It uses only the Python standard library, small synthetic values and no network. Its purpose is to expose the arithmetic or contract behind the chapter. The separate reference includes assertions for the stated observations.</p>
+<h3 id="how-to-run-the-cpu-model">How to run the CPU model<a class="heading-anchor" href="#how-to-run-the-cpu-model" aria-label="Link to this section">#</a></h3>
+<p>Edit the copy; the <a href="../references/cuda-099_cpu.py.html">reference</a> adds assertions.</p>
+<pre class="highlighted-code"><code class="language-bash">python courses/cuda/python/lessons/cuda-099_cpu.py</code></pre>
 <pre class="highlighted-code"><code class="language-python">sizes<span class="syntax-punctuation">,</span> means <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">2.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">8.0</span><span class="syntax-punctuation">]</span>
 weighted <span class="syntax-operator">=</span> <span class="syntax-builtin">sum</span><span class="syntax-punctuation">(</span>n <span class="syntax-operator">*</span> g <span class="syntax-keyword">for</span> n<span class="syntax-punctuation">,</span> g <span class="syntax-operator">in</span> <span class="syntax-builtin">zip</span><span class="syntax-punctuation">(</span>sizes<span class="syntax-punctuation">,</span> means<span class="syntax-punctuation">,</span> strict<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> <span class="syntax-builtin">sum</span><span class="syntax-punctuation">(</span>sizes<span class="syntax-punctuation">)</span>
 wrong <span class="syntax-operator">=</span> <span class="syntax-builtin">sum</span><span class="syntax-punctuation">(</span>means<span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>means<span class="syntax-punctuation">)</span>
@@ -242,58 +251,53 @@ wrong <span class="syntax-operator">=</span> <span class="syntax-builtin">sum</s
 <td><code>5.0</code></td>
 </tr>
 </tbody></table></div>
-<p>Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.</p>
 <h3 id="equal-framework-lanes">Equal framework lanes<a class="heading-anchor" href="#equal-framework-lanes" aria-label="Link to this section">#</a></h3>
 <h4 id="pytorch">PyTorch<a class="heading-anchor" href="#pytorch" aria-label="Link to this section">#</a></h4>
 <p>Normalize each microbatch contribution by total effective examples and step once. Evaluate checkpoint recomputation separately, including random-state and nonreentrant/reentrant API choices for the pinned release.</p>
 <h4 id="tensorflow">TensorFlow<a class="heading-anchor" href="#tensorflow" aria-label="Link to this section">#</a></h4>
 <p>Accumulate GradientTape gradients with example-count weighting. Use the prepared recomputation mechanism only after checking variable capture and stateful behavior; evaluate memory and extra forward work separately.</p>
-<p>Choose either lane first, then compare the other using identical mathematical inputs. Framework-specific shape, mode and optimizer rules must be checked separately. Both use offline synthetic examples; no model hub or dataset download is triggered.</p>
+<p>Lane rules: <a href="../../STUDY-GUIDE.md.html#python-gpu-and-framework-labs">framework labs</a>.</p>
 <h3 id="executable-framework-practice">Executable framework practice<a class="heading-anchor" href="#executable-framework-practice" aria-label="Link to this section">#</a></h3>
-<p>The variant chooser offers <strong>PyTorch on CPU</strong>, <strong>TensorFlow on CPU</strong>, and separate <strong>NVIDIA CUDA</strong> versions. CPU versions force CPU placement. CUDA versions require the named GPU profile and refuse to silently fall back. Each complete program uses the same tiny deterministic objective, bounded tensors and local synthetic data. Read its source before running; a framework pass establishes only that variant and environment.</p>
-<p>The checkpoint demonstration is in-memory. It teaches what state must be saved; it does not export a durable model artifact or preserve an in-flight device context. Advanced custom-op, distributed and engine-building projects remain separately prepared external workflows.</p>
+<p>Run the <strong>PyTorch</strong> and <strong>TensorFlow</strong> variants on CPU first; <a href="../../STUDY-GUIDE.md.html#python-gpu-and-framework-labs">lab rules</a>.</p>
 <h3 id="practice-and-transfer">Practice and transfer<a class="heading-anchor" href="#practice-and-transfer" aria-label="Link to this section">#</a></h3>
+<p>Record each attempt in the <a href="../lessons/cuda-099.md.html">worksheet</a> before opening hints.</p>
 <h4 id="exercise-1-compute-weighted-accumulation">Exercise 1: Compute weighted accumulation<a class="heading-anchor" href="#exercise-1-compute-weighted-accumulation" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Averaging the two means, <code>(2 + 8)/2 = 5</code>, gives the single example in the second microbatch the same weight as the three in the first, so it counts three times as much as it should.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-2-find-unequal-batch-normalization-error">Exercise 2: Find unequal-batch normalization error<a class="heading-anchor" href="#exercise-2-find-unequal-batch-normalization-error" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Trusting that the loop is right because it matches the full-batch gradient on evenly divisible data hides the error, which only appears for an uneven final microbatch.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-3-place-optimizer-steps">Exercise 3: Place optimizer steps<a class="heading-anchor" href="#exercise-3-place-optimizer-steps" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Calling <code>zero_grad()</code> inside the microbatch loop discards earlier contributions, so only the last microbatch affects the update.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-4-explain-checkpoint-recomputation">Exercise 4: Explain checkpoint recomputation<a class="heading-anchor" href="#exercise-4-explain-checkpoint-recomputation" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Checkpointing every layer when memory is not the constraint adds recomputation with no benefit.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-5-account-for-frozen-weights">Exercise 5: Account for frozen weights<a class="heading-anchor" href="#exercise-5-account-for-frozen-weights" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Assuming a frozen model costs nothing in memory leads to under-budgeting by the full parameter size.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-6-design-equal-update-tests">Exercise 6: Design equal-update tests<a class="heading-anchor" href="#exercise-6-design-equal-update-tests" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Running the comparison with dropout enabled and different seeds produces differences that hide or mimic accumulation bugs.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
-<p>Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.</p>
+<p>Hint <em>k</em> belongs to exercise <em>k</em>; open one at a time.</p>
 <ol>
-<li>Start from worked example 1 and mark the quantities needed for the task &quot;Compute weighted accumulation&quot;.</li>
-<li>Change one assumption in worked example 2 while preserving the declared contract: find unequal-batch normalization error.</li>
-<li>Trace the CPU program&#x27;s variables before adding hardware behavior: place optimizer steps.</li>
-<li>Draw producers, consumers and the exact operation boundary for the task &quot;Explain checkpoint recomputation&quot;.</li>
-<li>Separate what the small fixture establishes from what the real runtime must show: account for frozen weights.</li>
-<li>Write a counterexample to an overbroad claim before you design equal-update tests.</li>
+<li>Weight each microbatch mean by its example count, add the products and divide by the total count.</li>
+<li>Average the two microbatch means without weights and compare the result with the full-batch mean gradient.</li>
+<li>Count the microbatches in one effective batch and place exactly one optimizer step after the last.</li>
+<li>Ask which intermediates backward needs, which were discarded and what must run again to recreate them.</li>
+<li>Ask whether a parameter with no gradient still has to be stored on the device.</li>
+<li>List everything that must match between the accumulated and full-batch runs: data order, reduction, state and randomness.</li>
 </ol>
-<h3 id="common-mistakes-and-self-review">Common mistakes and self-review<a class="heading-anchor" href="#common-mistakes-and-self-review" aria-label="Link to this section">#</a></h3>
-<p>Confusing a correct tiny example with a general implementation is the central review risk. For this chapter, challenge the assumption in worked example 2, then ask whether your change preserves the mechanism described above. If you change dtype, layout, ordering, batch size or backend, update the acceptance contract rather than silently reusing the old observation. Explain an unexpected result before trying random configuration changes.</p>
-<p>Keep a small evidence table with columns <strong>claim</strong>, <strong>input</strong>, <strong>expected observation</strong>, <strong>actual observation</strong> and <strong>limit</strong>. For the first claim use <code>Compute weighted accumulation</code>. For the final claim use <code>Design equal-update tests</code>. An unperformed GPU or cluster experiment remains pending even when the CPU model is correct.</p>
-<h3 id="platform-and-evidence-contract">Platform and evidence contract<a class="heading-anchor" href="#platform-and-evidence-contract" aria-label="Link to this section">#</a></h3>
-<p>The reading worksheet and CPU reference model work through the ordinary Linux Docker classroom on macOS, Linux and Windows using WSL 2. They do not require an NVIDIA GPU. Their results are labeled CPU models or semantic oracles, not simulated hardware performance.</p>
-<p>Real CUDA work needs supported NVIDIA hardware, a compatible host driver and an explicitly prepared GPU runtime. An Apple GPU does not execute CUDA kernels. PyTorch MPS on a supported native Mac, ROCm on supported AMD hardware, or other vendor backends can provide separate accelerator learning routes; they need their own package and operation qualification and are not CUDA evidence. The ordinary Linux Docker classroom does not expose native Mac MPS automatically.</p>
-<p>Do not download packages, models or data by opening this lesson. Do not attach an engine socket, ambient cluster credentials or an arbitrary remote endpoint. A CPU pass, imported package, successful compilation, real GPU result and measured performance are distinct observations. Record the actual backend, data shape/dtype, source revision, versions and pending checks. A saved completion marker records learning progress, not hardware certification.</p>
+<h3 id="common-mistakes-and-self-check">Common mistakes and self-check<a class="heading-anchor" href="#common-mistakes-and-self-check" aria-label="Link to this section">#</a></h3>
+<p>The classic mistake is averaging microbatch mean gradients equally when microbatch sizes differ. Means 2 and 8 over sizes 3 and 1 give 5 that way, but the correct effective-batch gradient is 3.5. Another mistake is stepping the optimizer after every microbatch. Fix both by weighting each microbatch by its share of examples and stepping once per effective batch, then confirming equal updates against a full batch before comparing memory or time.</p>
+<p><strong>Evidence limit:</strong> The reference computes 3.5 against 5 with ordinary arithmetic. It does not run accumulation or activation checkpointing in a framework, so batch-dependent layers, random state and real peak memory must be checked with the pinned PyTorch or TensorFlow lane.</p>
+<ol>
+<li>When is dividing by the microbatch count correct?</li>
+<li>What does activation checkpointing trade?</li>
+<li>Can accumulation still differ from a full batch when weights are right?</li>
+</ol>
+<p>Answers: <a href="../solutions/cuda-099_solutions.md.html#self-check-answers">self-check answers</a>.</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
 <ul>
 <li><a href="https://docs.pytorch.org/docs/2.9/notes/cuda.html">PyTorch CUDA semantics</a></li>
 <li><a href="https://www.tensorflow.org/guide/gpu">TensorFlow GPU guide</a></li>
 </ul>
-<p>Use the version-matched documentation of your prepared environment. These references describe interfaces and supported boundaries; the chapter&#x27;s synthetic examples and CPU models are original teaching material.</p>
+<p>Full lists: <a href="../../STUDY-GUIDE.md.html#documentation-and-sources">documentation and sources</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning skill for cuda-099: Memory-saving training techniques.
 Read courses/cuda/python/guides/cuda-099.md and courses/cuda/python/lessons/cuda-099.md.

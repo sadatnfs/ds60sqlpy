@@ -1,22 +1,26 @@
 # spark-024: AQE, skew and bounded salting experiments
 
-Authored paired Scala/PySpark teaching content. The default fixtures are tiny, local and deterministic. Runtime acceptance, logical correctness and learner understanding remain separate evidence.
+Nine thousand of ten thousand facts carry key 0, so a plain sort-merge join sends 90 percent of the work to one task. This lesson measures that imbalance, lets adaptive execution re-plan the join, and then splits the hot key by hand with a four-way salt, insisting that every route returns the same 10,000 rows with weighted total 15,500.
 
 ## Level and prerequisites
 
-Intermediate; approximately 120 minutes. Direct prerequisites: `spark-023`. The prepared baseline is Spark 4.3.0, Scala binary 2.13, JDK 17 and Python 3.12. Read the [execution baseline](../execution-baseline.md).
+Intermediate; approximately 120 minutes. Direct prerequisites: `spark-023`. Pinned versions: [execution baseline](../execution-baseline.md).
 
 ## How to run this lesson
 
-Open `spark-024` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile, save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`; Python stages as `main.py` with a main guard. Each program creates its own `local[2]` session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.
+Shared run steps and profile rules: [study guide](../STUDY-GUIDE.md#run-a-paired-lesson).
 
-The [Scala learner](../lessons/spark-024.scala) and [PySpark learner](../lessons/spark-024.py) run two complete demonstrations and retain six explicit task stubs. Use the [explained solutions](../solutions/spark-024_solutions.md) only after an attempt or an explicit worked comparison; the [Scala reference](../solutions/spark-024_solution.scala) and [PySpark reference](../solutions/spark-024_solution.py) contain complete assertions. A bounded collect is used only for the declared tiny fixture; do not copy it onto an unbounded or large production table.
+Learner pads: [Scala](../lessons/spark-024.scala) and [PySpark](../lessons/spark-024.py).
+
+Open the [explained solutions](../solutions/spark-024_solutions.md) after an attempt.
+
+The first worked example divides the key-0 count by the total and prints `Observed hot-key fraction=` 0.9. The second computes the weighted total straight from the fixture rules, 9,000 rows at factor 1 plus 100 rows at each factor from 2 through 11, and prints `Weighted-total conservation oracle=` 15500. The baseline, adaptive and salted joins must each match that oracle.
 
 ## Learning objectives
 
 - Diagnose a skewed key and compare adaptive execution with an explicit, reversible skew strategy.
-- State the input and output grain, schema, NULL policy and ordering before executing a transformation.
-- Compare each language implementation with independent literal expectations, not only with the other implementation.
+- Count rows per join key and per shuffle partition, show that one partition receives at least 9,000 of 10,000 rows, and capture the adaptive plan before execution and again afterward, when it reports `isFinalPlan=true`.
+- Salt only key 0 into buckets 0 to 3 of 2,250 rows each, expand the matching dimension row into four copies for a 14-row dimension, and drop `salt` so the result schema is `fact_id, key, amount, factor`.
 
 ## Vocabulary and concepts
 
@@ -54,7 +58,7 @@ All 10000 result tuples are deliberately bounded for this demonstration and coll
 
 ## Supplied local fixture
 
-The complete source creates the owned local session described above, then constructs this explicit fixture. The worked examples below run in that same main function; there is no hidden notebook state.
+Automatic broadcasting is disabled, including the adaptive threshold, so every join here is a shuffle join; sort-merge is preferred and there are 4 shuffle partitions. Facts 0 to 8999 get key 0 and facts 9000 to 9999 cycle through keys 1 to 10, each with amount 1. The dimension has keys 0 to 10 with `factor = key + 1`. One unit of amount per fact keeps every total checkable by hand.
 
 ```scala
 import org.apache.spark.sql.functions._
@@ -173,7 +177,7 @@ Add salt=fact_id modulo 4 only for key 0 and salt 0 otherwise. With AQE disabled
 
 ### Exercise 5: Replicate only the matching small-side hot row
 
-Expand dimension key 0 to salts 0,1,2,3 and every other dimension key to salt 0. Retain factor and verify uniqueness on the composite key.
+Expand dimension key 0 to salts 0, 1, 2 and 3 and every other dimension key to salt 0. Retain factor and verify uniqueness on the composite key.
 
 **Expected result/shape:** 14 dimension rows, with four key 0 variants and ten cold rows. Every (key, salt) pair is unique.
 
@@ -197,11 +201,14 @@ Do not infer actual skew splitting from spark.sql.adaptive.skewJoin.enabled alon
 
 ## Self-check
 
-Explain the contract of `keyFrequencies` / `key_frequencies` without reading its solution. Then, from memory, state what Exercise 6 (Remove the physical helper and reconcile the business relation) must produce: All 10000 fact tuples remain exactly equal, with amount 10000 and weighted total 15500. Salt is absent from the final schema. Say which part of that result is evidence and what it still cannot show. Name the action in your trace that actually runs the plan.
+- Before salting, the partition loads show one partition with at least 9,000 rows. Why can no choice of shuffle partition count fix that for an unsalted join on `key` alone?
+- The adaptive plan string is captured twice. What changes between the two captures, and why must the result be collected in between?
+- Salt is `fact_id` modulo 4 for key 0 and 0 for every other key. If the facts were salted but the dimension was not expanded, how many of the 9,000 hot rows would still find a match?
+- All three joins return identical canonical rows. Which assertion catches a salted join that forgot to drop the helper column, and which catches one that duplicated hot rows?
 
 ## Next step
 
-Use the [course route](../README.md) to continue. Paired-language agreement is useful only when both outputs also satisfy the independent fixture contract. A successful local run is not evidence of cluster performance or production recovery.
+Go on to [spark-025: Parquet, column pruning and file layout](spark-025.md). Skew was a problem of how rows move between tasks; the next lesson looks at how rows sit on disk and how directory layout, file count and column choice decide what a scan reads.
 
 ## Primary sources and official APIs
 

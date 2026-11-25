@@ -81,4 +81,4 @@ It still needs provider compatibility and access controls. These two actual SDK
 lookups establish the intended resolution and rejection behavior without claiming
 a synthetic local reference proves a remote production database connection.
 
-The [complete Airflow workshop](../../projects/airflow/README.md) provides the maintained files, preparation, lifecycle and exact qualification boundaries for these cases.
+In the [Airflow workshop](../../projects/airflow/README.md), `connection-check` triggers `classroom_connections` and requires one known connection reference to resolve while a missing reference is rejected.

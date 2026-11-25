@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cuda/spark/solutions/cuda-125_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="cuda-125-explained-solutions">cuda-125: explained solutions<a class="heading-anchor" href="#cuda-125-explained-solutions" aria-label="Link to this section">#</a></h2>
-<p>These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.</p>
+<p>Compare with your <a href="../lessons/cuda-125.md.html">worksheet</a> attempt.</p>
 <h3 id="exercise-1-draw-scheduler-layers">Exercise 1: Draw scheduler layers<a class="heading-anchor" href="#exercise-1-draw-scheduler-layers" aria-label="Link to this section">#</a></h3>
 <p>Kubernetes allocates pods and Spark allocates tasks.</p>
 <p><strong>Approach.</strong> Draw scheduler layers: Kubernetes schedules driver and executor pods onto nodes based on resource requests such as <code>nvidia.com/gpu: 1</code>, and Spark then schedules tasks onto executors.</p>
@@ -231,9 +231,19 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Why it is correct here.</strong> Label-scoped deletion protects other workloads, and preserving logs first keeps evidence.</p>
 <p><strong>A plausible wrong approach.</strong> Deleting by broad name patterns or whole namespaces you did not create can remove unrelated work. Deleting before saving logs also destroys the evidence needed to explain a failed run.</p>
 <p><strong>How to verify.</strong> List labeled resources before and after cleanup and confirm only those were removed and the logs remain saved.</p>
+<h3 id="self-check-answers">Self-check answers<a class="heading-anchor" href="#self-check-answers" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>Does a pod&#x27;s GPU resource limit prove the plugin can run?</strong> No. The image, driver and native libraries must also support Spark GPU execution inside the container.</li>
+</ol>
+<ol start="2">
+<li><strong>Can Docker Desktop on a Mac provide an NVIDIA GPU to Kubernetes?</strong> No. It is useful for the CPU classroom but does not create an NVIDIA GPU.</li>
+</ol>
+<ol start="3">
+<li><strong>What advertises GPU resources to the Kubernetes scheduler?</strong> An installed and configured device plugin on the nodes that have GPUs.</li>
+</ol>
 <h3 id="reference-observation">Reference observation<a class="heading-anchor" href="#reference-observation" aria-label="Link to this section">#</a></h3>
 <p>Only the illustrative GPU node is eligible; no cluster operation occurs.</p>
-<p>The reference file is <code>courses/cuda/spark/references/cuda-125_cpu.py</code>. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.</p></article>
+<p>Asserted by <code>courses/cuda/spark/references/cuda-125_cpu.py</code>.</p></article>
   </main>
 </body>
 </html>

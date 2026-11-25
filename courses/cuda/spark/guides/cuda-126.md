@@ -1,10 +1,17 @@
 # cuda-126: Operational diagnosis, metrics and recovery
 
-**Route:** CUDA Python and machine learning / GPU Spark specialization. **Stage:** advanced. **Prerequisites:** `cuda-120`, `cuda-122`, `cuda-125`. Allow several sessions when the hardware experiment is new; the chapter is not a deadline.
+**Route:** CUDA Python and machine learning / GPU Spark specialization. **Stage:** advanced. **Prerequisites:** `cuda-120`, `cuda-122`, `cuda-125`.
 
-## What you will be able to explain
+Pacing, evidence labels and platform rules: [CUDA study guide](../../STUDY-GUIDE.md).
 
-By the end, you can **classify failure layers**, **analyze retry side effects**, and **preserve an incident packet** with evidence. Start with the two worked cases, then use the editable CPU model to make the quantities concrete.
+## Learning objectives
+
+- Classify failure layers.
+- Correlate job identities.
+- Budget before changing settings.
+- Analyze retry side effects.
+- Define process cleanup.
+- Preserve an incident packet.
 
 ## Mechanism and vocabulary
 
@@ -31,9 +38,13 @@ An executor fails with device OOM while JVM heap is below its limit. Increasing 
 
 A task writes an external message then fails before Spark commits its output. Retrying may send the message twice unless an idempotency or transactional design handles it.
 
-## Portable executable model
+## How to run the CPU model
 
-The **CPU reference model** variant runs this bounded worked example using `python-core`. It uses only the Python standard library, small synthetic values and no network. Its purpose is to expose the arithmetic or contract behind the chapter. The separate reference includes assertions for the stated observations.
+Edit the copy; the [reference](../references/cuda-126_cpu.py) adds assertions.
+
+```sh
+python courses/cuda/spark/lessons/cuda-126_cpu.py
+```
 
 ```python
 events = [("task1", "write", "key-7"), ("task1-retry", "write", "key-7")]
@@ -52,81 +63,64 @@ print("CPU retry model:", raw, "attempts;", idempotent, "logical keys")
 | `raw` | `2` |
 | `idempotent` | `1` |
 
-Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.
-
 ## Practice and transfer
+
+Record each attempt in the [worksheet](../lessons/cuda-126.md) before opening hints.
 
 ### Exercise 1: Classify failure layers
 
 **Trap to avoid:** Increasing JVM heap after a device OOM changes an unrelated limit and leaves the GPU live set unchanged.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 2: Correlate job identities
 
 **Trap to avoid:** Matching logs by timestamp alone can mix events from concurrent tasks. Clock differences between hosts make timestamp matching even less reliable across executors.
-
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 3: Budget before changing settings
 
 **Trap to avoid:** Trying random settings until the job passes may hide the cause and fail again on larger data. Several simultaneous changes also make it impossible to say which one fixed the failure.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 4: Analyze retry side effects
 
 **Trap to avoid:** Sending messages directly from tasks without idempotency produces duplicates after a retry. Speculative execution can run two attempts at once, duplicating writes even without any failure.
-
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 5: Define process cleanup
 
 **Trap to avoid:** Killing all Java or Python processes on a node stops unrelated work. It can also kill the node's own agents, which are often Java or Python processes.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 6: Preserve an incident packet
 
 **Trap to avoid:** Keeping raw configuration with credentials risks leaking secrets. Dropping configuration entirely, on the other hand, removes the settings needed to reproduce the failure.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ## Progressive hints
 
-Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.
+Hint *k* belongs to exercise *k*; open one at a time.
 
-1. Start from worked example 1 and mark the quantities needed for the task "Classify failure layers".
-2. Change one assumption in worked example 2 while preserving the declared contract: correlate job identities.
-3. Trace the CPU program's variables before adding hardware behavior: budget before changing settings.
-4. Draw producers, consumers and the exact operation boundary for the task "Analyze retry side effects".
-5. Separate what the small fixture establishes from what the real runtime must show: define process cleanup.
-6. Write a counterexample to an overbroad claim before you preserve an incident packet.
+1. Find the first error in the logs and decide which layer produced it, before reading any later retries.
+2. Link the application, executor, stage, task and SQL execution identifiers that belong to the same failure.
+3. Count the actual live set and spill categories before changing any memory setting.
+4. Ask what happens to an external write when the same task runs a second time.
+5. List the processes your job started and stop only those, leaving any shared device untouched.
+6. Gather sanitized configuration, plans, logs, metrics and the input identity into one packet.
 
-## Common mistakes and self-review
+## Common mistakes and self-check
 
-Confusing a correct tiny example with a general implementation is the central review risk. For this chapter, challenge the assumption in worked example 2, then ask whether your change preserves the mechanism described above. If you change dtype, layout, ordering, batch size or backend, update the acceptance contract rather than silently reusing the old observation. Explain an unexpected result before trying random configuration changes.
+A common mistake is raising memory settings until an error disappears. A device out-of-memory error with JVM heap below its limit is a GPU live-set problem, so more heap changes nothing, and unbudgeted increases only move pressure between tiers. Another is resetting a shared GPU to recover, which can break unrelated jobs. Fix both by preserving the first relevant error, correlating it with executor, task and SQL identities, budgeting each memory category and stopping only processes the job owns. Treat retries as at-least-once execution, so external writes need idempotency.
 
-Keep a small evidence table with columns **claim**, **input**, **expected observation**, **actual observation** and **limit**. For the first claim use `Classify failure layers`. For the final claim use `Preserve an incident packet`. An unperformed GPU or cluster experiment remains pending even when the CPU model is correct.
+**Misconception:** Raising the task retry count makes a failing GPU job more reliable. **Correction:** Retries help with transient faults such as a lost executor, but a deterministic failure, like a device out-of-memory error on the same skewed partition or a native library mismatch, fails the same way on every attempt. Extra retries then delay the report, repeat external side effects and can bury the first error under many copies. Classify the failure first; retry only transient causes, and fix deterministic ones by changing the data split, memory budget or environment.
 
-## Platform and evidence contract
+**Evidence limit:** The reference shows two attempts targeting one logical output key. It does not produce real failures, so native library errors, device context poisoning and recovery behavior must be studied from preserved logs of an owned job, never by causing failures on shared hardware.
 
-The reading worksheet and CPU reference model work through the ordinary Linux Docker classroom on macOS, Linux and Windows using WSL 2. They do not require an NVIDIA GPU. Their results are labeled CPU models or semantic oracles, not simulated hardware performance.
+1. Why preserve the first relevant error?
+2. Why can task retries duplicate side effects?
+3. Who may reset a device?
 
-Real CUDA work needs supported NVIDIA hardware, a compatible host driver and an explicitly prepared GPU runtime. An Apple GPU does not execute CUDA kernels. PyTorch MPS on a supported native Mac, ROCm on supported AMD hardware, or other vendor backends can provide separate accelerator learning routes; they need their own package and operation qualification and are not CUDA evidence. The ordinary Linux Docker classroom does not expose native Mac MPS automatically.
-
-Do not download packages, models or data by opening this lesson. Do not attach an engine socket, ambient cluster credentials or an arbitrary remote endpoint. A CPU pass, imported package, successful compilation, real GPU result and measured performance are distinct observations. Record the actual backend, data shape/dtype, source revision, versions and pending checks. A saved completion marker records learning progress, not hardware certification.
-
-GPU Spark is a separate owned external workflow. The ordinary `spark-local-scala` and `spark-local-python` profiles are CPU Spark. Keep the GPU plugin disabled or absent for a CPU-only baseline. Per-operator CPU fallback inside a working GPU plugin environment is a different condition from having no compatible GPU. Never mount a host Docker socket or ambient kubeconfig into an ordinary lesson worker.
+Answers: [self-check answers](../solutions/cuda-126_solutions.md#self-check-answers).
 
 ## Primary references
 
-- [cuDF Spark plugin release and compatibility matrix](https://nvidia.github.io/cudf-spark/docs/download.html)
-- [Supported Spark operators and expression types](https://nvidia.github.io/cudf-spark/docs/supported_ops.html)
 - [GPU Spark tuning guide](https://docs.nvidia.com/cudf-spark/latest/tuning-guide.html)
-- [Apache Spark SQL performance tuning](https://spark.apache.org/docs/latest/sql-performance-tuning.html)
 
-Use the version-matched documentation of your prepared environment. These references describe interfaces and supported boundaries; the chapter's synthetic examples and CPU models are original teaching material.
+Full lists: [documentation and sources](../../STUDY-GUIDE.md#documentation-and-sources).
 
 ## Ask an AI tutor about this lesson
 

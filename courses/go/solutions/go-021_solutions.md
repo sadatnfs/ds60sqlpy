@@ -1,6 +1,6 @@
 # go-021: explained solutions
 
-These are comparison material after an attempt or explicit reveal. The executable reference implements all six cases in one `main.go`.
+Compare after an attempt ([using solutions](../STUDY-GUIDE.md#use-the-solutions)). `courses/go/solutions/go-021_solution.go` implements all six cases.
 
 ## Mechanism
 
@@ -10,7 +10,7 @@ flag.NewFlagSet with ContinueOnError returns parse failures instead of exiting t
 
 ## 1. Apply an explicit flag: change one input
 
-Copy worked example 1 into a scratch pad and change `n, args, err := parseArgs([]string{"-count=3"})` to `n, args, err := parseArgs([]string{"-count=4"})`. Before running, predict which check fails and which value it now sees; then run it and restore the original line.
+Copy worked example 1, change `n, args, err := parseArgs([]string{"-count=3"})` to `n, args, err := parseArgs([]string{"-count=4"})` and predict the failure before running; then restore the line.
 
 The unchanged code is worked example 1:
 
@@ -19,7 +19,9 @@ n, args, err := parseArgs([]string{"-count=3"})
 check(err == nil && n == 3 && len(args) == 0, "flag")
 ```
 
-**Expected:** The changed run panics with `flag` because `err == nil && n == 3 && len(args) == 0` no longer holds. Restoring the original line brings back the worked observation: the resulting count is 3.
+**Expected:** The edited run panics with `flag` because `err == nil && n == 3 && len(args) == 0` no longer holds.
+
+**Verify:** Restoring `n, args, err := parseArgs([]string{"-count=3"})` makes the check pass again with the worked observation: the resulting count is 3.
 
 The synthetic argument slice tests the actual parser while remaining independent of the classroom process arguments.
 
@@ -33,7 +35,7 @@ The synthetic argument slice tests the actual parser while remaining independent
 
 ## 2. Retain a default: diagnose an edited check
 
-A careless edit changed the check in worked example 2 so that it reads `check(err != nil && n == 1, "default")`. Run worked example 2 with that line, explain why the edited check now fails for the same program state, and restore it.
+A careless edit rewrote the check in worked example 2 as `check(err != nil && n == 1, "default")`. Explain the failure, then restore it.
 
 The unchanged code is worked example 2:
 
@@ -42,7 +44,9 @@ n, _, err := parseArgs(nil)
 check(err == nil && n == 1, "default")
 ```
 
-**Expected:** Before the repair the program panics with `default`; after it the line reads `check(err == nil && n == 1, "default")` again and the count remains 1.
+**Expected:** The defective run panics with `default`; after restoring `check(err == nil && n == 1, "default")`, the count remains 1.
+
+**Verify:** The edited check fails with message `default` for a state that `err == nil && n == 1` accepts.
 
 A default is an intentional contract, not an accidental zero value. Changing it can alter existing workflows even when parsing code is unchanged.
 
@@ -65,6 +69,8 @@ check(err != nil, "unknown option")
 
 **Expected:** Parsing returns an error.
 
+**Verify:** Your solution must keep `err != nil` true. Control: changing `check(err != nil, "unknown option")` to `check(err == nil, "unknown option")` panics with message `unknown option`; revert it.
+
 Unknown-flag rejection catches misspellings. Ignoring them would make users believe a setting was applied when it was not.
 
 **Approach.** Parse `-mystery=2` with a flag set built using `flag.ContinueOnError` and output sent to `io.Discard`, so `Parse` returns an error instead of exiting or printing usage.
@@ -85,6 +91,8 @@ check(err == nil && len(args) == 1 && args[0] == "input.csv", "positionals")
 ```
 
 **Expected:** The remaining argument is input.csv.
+
+**Verify:** Your solution must keep `err == nil && len(args) == 1 && args[0] == "input.csv"` true. Control: changing `_, args, err := parseArgs([]string{"-count=2", "input.csv"})` to `_, args, err := parseArgs([]string{"-count=2!", "input.csv"})` panics with message `positionals`; revert it.
 
 Flags and positional arguments have distinct roles. Validate their count and interpretation before opening any file.
 
@@ -107,6 +115,8 @@ check(err != nil, "range")
 
 **Expected:** The operation returns a domain error.
 
+**Verify:** Your solution must keep `err != nil` true. Control: changing `check(err != nil, "range")` to `check(err == nil, "range")` panics with message `range`; revert it.
+
 Successful integer parsing does not imply an acceptable concurrency, retry or item-count budget.
 
 **Approach.** Parse `-count=-1`. `IntVar` accepts any signed integer, so parsing succeeds, and the separate check `n < 1` rejects the value.
@@ -127,6 +137,8 @@ check(err == nil && n == 4, "precedence")
 ```
 
 **Expected:** The explicit setting wins.
+
+**Verify:** Your solution must keep `err == nil && n == 4` true. Control: changing `n, _, err := parseArgs([]string{"-count=4"})` to `n, _, err := parseArgs([]string{"-count=5"})` panics with message `precedence`; revert it.
 
 In a larger program, document whether flags override environment or files. Avoid repeated environment reads deep inside business logic.
 

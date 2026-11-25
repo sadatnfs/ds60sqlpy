@@ -196,7 +196,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <article class="document"><h2 id="r-013-lexical-scope-closures-and-lazy-arguments">r-013: Lexical scope, closures and lazy arguments<a class="heading-anchor" href="#r-013-lexical-scope-closures-and-lazy-arguments" aria-label="Link to this section">#</a></h2>
 <p><strong>Level:</strong> intermediate. <strong>Direct prerequisites:</strong> <code>r-007</code>, <code>r-012</code></p>
 <h3 id="run-and-retain-your-work">Run and retain your work<a class="heading-anchor" href="#run-and-retain-your-work" aria-label="Link to this section">#</a></h3>
-<p>Open <code>r-013</code> in <code>/classroom</code> and use the prepared <code>r-statistics</code> profile. Each Run evaluates one <code>main.R</code> script in a fresh offline R process, so define every input in the script; an earlier Run leaves no variables behind. Work in the <a href="../lessons/r-013.R.html">starter</a>. The <a href="../solutions/r-013_reference.R.html">complete reference</a> ends by printing <code>r-013 reference checks passed</code>, and the <a href="../solutions/r-013_solutions.md.html">explained answers</a> are there for deliberate comparison after your own attempt. This chapter prints values only; when a chapter draws figures, the classroom keeps at most two figures per run. The <a href="../README.md.html">course overview</a> describes saved work, figure capture and the prepared package versions.</p>
+<p>The starter defines only <code>threshold</code> as 10 at the top level and prints it. Run it once, then build a factory that receives the threshold as an argument instead of reading the global. Change the global to 50 after construction and run again: a correct closure keeps the value it captured, while a function that reads the global silently changes behavior.</p>
+<p>Work in the <a href="../lessons/r-013.R.html">starter</a> under the <a href="../STUDY-GUIDE.md.html#run-a-chapter">run rules</a>.</p>
+<p>The <a href="../solutions/r-013_reference.R.html">complete reference</a> ends by printing <code>r-013 reference checks passed</code>.</p>
 <h3 id="outcome-and-mechanism">Outcome and mechanism<a class="heading-anchor" href="#outcome-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Explain captured configuration and lazy argument timing without relying on hidden global state.</p>
 <p>A function&#x27;s environment influences where it finds names not defined locally. R uses lexical scope: the search follows the function&#x27;s enclosing environment rather than simply using the caller&#x27;s local variables. A closure combines executable function code with this environment. That makes it possible to construct a reusable function with a private configured value.</p>
@@ -305,7 +307,7 @@ lazy, read at first call  100              FALSE</code></pre>
 <li>Outputs can depend on invisible prior calls.</li>
 </ol>
 <h3 id="reference-review">Reference review<a class="heading-anchor" href="#reference-review" aria-label="Link to this section">#</a></h3>
-<p>The reference applies the reasoning explained under the worked examples above; the <a href="../solutions/r-013_solutions.md.html">explained answers</a> add an answer for each exercise.</p>
+<p>The reference reuses the worked examples&#x27; reasoning; <a href="../solutions/r-013_solutions.md.html">explained answers</a> cover each exercise.</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
 <ul>
 <li><a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/force.html">R argument forcing</a></li>
@@ -313,7 +315,23 @@ lazy, read at first call  100              FALSE</code></pre>
 <li><a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/function.html">R functions</a></li>
 </ul>
 <h3 id="continue">Continue<a class="heading-anchor" href="#continue" aria-label="Link to this section">#</a></h3>
-<p>Chapters that list <code>r-013</code> as a direct prerequisite: <a href="r-014.md.html"><code>r-014</code></a>, <a href="r-015.md.html"><code>r-015</code></a>, <a href="r-023.md.html"><code>r-023</code></a>.</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Next chapter</th>
+<th>Title</th>
+</tr></thead><tbody>
+<tr>
+<td><a href="r-014.md.html"><code>r-014</code></a></td>
+<td>Functional iteration, typed results and the base pipe</td>
+</tr>
+<tr>
+<td><a href="r-015.md.html"><code>r-015</code></a></td>
+<td>Errors, warnings and structured recovery</td>
+</tr>
+<tr>
+<td><a href="r-023.md.html"><code>r-023</code></a></td>
+<td>R6 identity, encapsulation and cloning</td>
+</tr>
+</tbody></table></div>
 <h3 id="ask-an-ai-tutor">Ask an AI tutor<a class="heading-anchor" href="#ask-an-ai-tutor" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for r-013 (Lexical scope, closures and lazy arguments).
 Read the guide and my saved attempt. Explain the relevant R mechanism,

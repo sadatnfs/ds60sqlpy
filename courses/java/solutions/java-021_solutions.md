@@ -1,6 +1,6 @@
 # java-021: explanatory solutions
 
-Open after an attempt or an explicit solution reveal. The executable reference runs the six exercise checks together as `Main.java`. The guide contains independent worked examples, while this file explains the choices and failure cases in the complete answer.
+Open this after an attempt; see [using the solutions](../STUDY-GUIDE.md#use-the-solutions).
 
 ## Mechanism review
 
@@ -20,7 +20,7 @@ Thread.start begins a new execution; calling run directly is an ordinary method 
 
 ## Exercise 1: Publish a result through join: change one input
 
-Task: Copy Example A into a scratch `Main.java` and change `Thread worker = Thread.ofPlatform().start(() -> result[0] = 42);` to `Thread worker = Thread.ofPlatform().start(() -> result[1] = 42);`. Before running it with `java -ea Main`, predict which assertion fails and which value it now sees; then run it and restore the original line.
+Task: Change `Thread worker = Thread.ofPlatform().start(() -> result[0] = 42);` to `Thread worker = Thread.ofPlatform().start(() -> result[1] = 42);` in Example A and predict which assertion fails and why.
 
 The join establishes the required visibility after completion. A timed sleep would not provide the same guarantee.
 
@@ -33,13 +33,13 @@ joinBounded(worker);
 assert result[0] == 42;
 ```
 
-**Expected:** The changed run fails with an `AssertionError` from the assertion on `result[0] == 42`. Restoring the original line brings back the worked observation: worker terminated; result 42.
+**Expected:** The edited run fails with an `AssertionError` from the assertion on `result[0] == 42`.
 
-**Verify:** Compare your written prediction with the reported `AssertionError` and its stack-trace line, and name the value that made `result[0] == 42` false. After restoring the line, the program completes without an `AssertionError` again.
+**Verify:** Name the value that makes `result[0] == 42` false, then restore the line.
 
 ## Exercise 2: Publish initial state through start: debug a regression
 
-Task: A regression changed one token in the code that Example B adds after Example A, so one line now reads `int[] input = { 8 };`. Run Example B with that line, use the failing assertion to locate the defect and repair it without changing the assertion.
+Task: A regression in Example B's new code makes one line read `int[] input = { 8 };`. Repair it using the failing assertion.
 
 Actions before start happen-before actions in the started thread. The fixture does not rely on the worker noticing an unsynchronized later mutation.
 
@@ -53,9 +53,9 @@ joinBounded(reader);
 assert observed.get() == 7;
 ```
 
-**Expected:** Before the repair the run fails with an `AssertionError` from the assertion on `observed.get() == 7`; after it the line reads `int[] input = { 7 };` again and worker observes 7.
+**Expected:** The unrepaired run fails with an `AssertionError` from the assertion on `observed.get() == 7`; the repaired line reads `int[] input = { 7 };`.
 
-**Verify:** Keep the failing and the repaired runs. Explain why the changed token alters the value tested by `observed.get() == 7` for this input.
+**Verify:** Explain how the changed token alters the value that `observed.get() == 7` tests.
 
 ## Exercise 3: Force a lost update
 
@@ -85,7 +85,7 @@ assert failure.get() == null && counter[0] == 1;
 
 **Expected:** final counter 1 despite two increments.
 
-**Verify:** Keep an assertion equivalent to `failure.get() == null && counter[0] == 1`. As a control, change `counter[0] = saved + 1;` to `counter[0] = saved - 1;`: the run must fail with an `AssertionError` from the assertion on `failure.get() == null && counter[0] == 1`. Restore the line before continuing.
+**Verify:** Control: changing `counter[0] = saved + 1;` to `counter[0] = saved - 1;` must fail the assertion on `failure.get() == null && counter[0] == 1`.
 
 ## Exercise 4: Use a volatile publication flag
 
@@ -112,7 +112,7 @@ assert seen.get() == 99;
 
 **Expected:** reader sees 99 and finishes within the bound.
 
-**Verify:** Keep an assertion equivalent to `seen.get() == 99`. As a control, change `long deadline = System.nanoTime() + 2_000_000_000L;` to `long deadline = System.nanoTime() - 2_000_000_000L;`: the run must fail with an `AssertionError` from the assertion on `seen.get() == 99`. Restore the line before continuing.
+**Verify:** Control: changing `long deadline = System.nanoTime() + 2_000_000_000L;` to `long deadline = System.nanoTime() - 2_000_000_000L;` must fail the assertion on `seen.get() == 99`.
 
 ## Exercise 5: Distinguish run from start
 
@@ -130,7 +130,7 @@ assert identity.get() == caller;
 
 **Expected:** same thread identity for direct run.
 
-**Verify:** Keep an assertion equivalent to `identity.get() == caller`. As a control, change `assert identity.get() == caller;` to `assert identity.get() != caller;` inside it: the run must fail with an `AssertionError`, which shows the assertion can fail. Restore it.
+**Verify:** Control: changing `assert identity.get() == caller;` to `assert identity.get() != caller;` inside the assertion must make it fail.
 
 ## Exercise 6: Respond to interruption
 
@@ -160,8 +160,10 @@ assert interrupted.get();
 
 **Expected:** interruption observed and worker terminated.
 
-**Verify:** Keep an assertion equivalent to `interrupted.get()` and confirm that `java -ea Main` completes. Then name an input that would make it fail and explain which value changes.
+**Verify:** Name an input that would make `interrupted.get()` false and the value that changes.
 
 ## After comparing the answer
 
-Run the complete reference with assertions enabled, then return to your own implementation. Recreate one check with different values and explain its expected result before execution. A compiler error, an expected domain exception and an assertion failure represent different stages and should be reported separately. Preserve ownership boundaries when adapting file, network or concurrency examples. The reference never authorizes access to a shared service or deletion of learner state. Use a fresh tiny fixture when you need to distinguish two interpretations of an API contract.
+Replace the counter in Exercise 3 of your copy with an `AtomicInteger` and `incrementAndGet()`, keep the barrier, and confirm that the final value is 2.
+
+Run the complete reference with `java -ea Main` first; the [review routine](../STUDY-GUIDE.md#use-the-solutions) covers the rest.

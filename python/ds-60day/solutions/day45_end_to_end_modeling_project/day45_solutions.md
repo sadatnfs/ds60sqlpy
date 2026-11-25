@@ -1,6 +1,6 @@
 # Day 45 Solutions: Project: End-to-End Modeling
 
-**Offline teaching data:** The [original synthetic fixtures](../../../fixtures/README.md) replace first-run sample-data downloads. Their values are not historical or observational evidence. Keep numerical conclusions scoped to the declared teaching input.
+**Offline teaching data:** the `passenger-outcomes` [synthetic fixture](../../../fixtures/README.md) is invented, so its numbers prove methods, not facts.
 
 
 We deliver a reproducible baseline solution: clean data pipeline with validation and features, model training with CV/tuning, holdout evaluation with thresholding, saved artifacts, and a minimal FastAPI service.
@@ -134,15 +134,13 @@ Checklist for README.md
 
 ---
 
-**Portable worker default:** These reference runs use `n_jobs=1` so they behave predictably on Windows, CI runners, and constrained notebook environments. After correctness is established, benchmark a larger worker count on your own workload rather than assuming `n_jobs=1` is faster.
+**Portable worker default:** these runs use `n_jobs=1` for predictable results; benchmark more workers only after correctness.
 
 <!-- BEGIN ADVANCED PYTHON CONCEPT ENRICHMENT -->
 
 ## Solution reasoning lens
 
-A strong solution is not merely code that produces one plausible
-output. It establishes a chain from input contract to operation to
-verification:
+Each decision below links an input contract to an operation and its evidence:
 
 1. **`DummyClassifier(strategy=...)`:** creates a minimal predictive reference under the exact same split and metric.
 2. **`ColumnTransformer` inside `Pipeline`:** binds column-specific preprocessing and prediction into one fitted artifact.
@@ -159,29 +157,15 @@ verification:
 
 **Evidence of correctness:** Reproduce from a fresh environment, validate data and split hashes, beat a same-split baseline, reload the complete pipeline, test slices, and connect every claim to an artifact.
 
-When comparing your attempt with the reference, explain which of these
-decisions your code made explicitly. If the reference makes a different
-choice, compare the contracts and evidence before deciding that one
-version is universally better.
-
 <!-- END ADVANCED PYTHON CONCEPT ENRICHMENT -->
 
 ## Exercise-by-exercise reasoning map
-
-This map connects every learner prompt to a reasoning path. Read the
-explanation before copying code: the goal is to understand the assumptions,
-the evidence that validates the result, and the edge cases that can make an
-apparently correct implementation fail.
 
 ### Exercise 1: Original lesson practice
 
 **Prompt:** Load the dataset and create train/validation/test boundaries.
 
 **How to reason about it:** Write the row unit, target, prediction time, and train/validation/test boundary before loading features. A stratified random split is valid only when entities and time do not require stronger separation.
-
-Use the worked reference earlier in this file, then change one boundary
-condition and rerun the stated checks. A copied output is not evidence
-unless you can explain why that output follows from the inputs.
 
 **Verify:** Record dataset identity/hash, target, row count, and frozen train/validation/test indices; assert the three index sets are pairwise disjoint and their counts sum to the validated rows.
 
@@ -191,10 +175,6 @@ unless you can explain why that output follows from the inputs.
 
 **How to reason about it:** Use ColumnTransformer to keep all learned preprocessing inside the pipeline. Test missing, unseen-category, dtype, and column-order behavior with tiny synthetic rows.
 
-Use the worked reference earlier in this file, then change one boundary
-condition and rerun the stated checks. A copied output is not evidence
-unless you can explain why that output follows from the inputs.
-
 **Verify:** Fit one ColumnTransformer inside the training pipeline, print output feature names/order and transformed shapes, and predict a validation row containing the declared missing/unknown-category boundary.
 
 ### Exercise 3: Original lesson practice
@@ -202,10 +182,6 @@ unless you can explain why that output follows from the inputs.
 **Prompt:** Train a baseline model.
 
 **How to reason about it:** A baseline establishes the minimum useful comparison and catches broken evaluation. Include a dummy predictor and one simple model before tuning.
-
-Use the worked reference earlier in this file, then change one boundary
-condition and rerun the stated checks. A copied output is not evidence
-unless you can explain why that output follows from the inputs.
 
 **Verify:** Fit a declared naive/simple baseline on training rows, print validation metric and denominator/support, and save its parameters and seed before trying a more complex candidate.
 
@@ -215,10 +191,6 @@ unless you can explain why that output follows from the inputs.
 
 **How to reason about it:** Cross-validation belongs only to development data. Report fold spread, choose metrics before results, and reserve the holdout for one frozen candidate and threshold.
 
-Use the worked reference earlier in this file, then change one boundary
-condition and rerun the stated checks. A copied output is not evidence
-unless you can explain why that output follows from the inputs.
-
 **Verify:** Print every cross-validation score plus mean/std on training data and one frozen validation comparison; reserve the test set for one final evaluation and report the metric formula and support.
 
 ### Exercise 5: Original lesson practice
@@ -226,10 +198,6 @@ unless you can explain why that output follows from the inputs.
 **Prompt:** Save the model and preprocessing together with `joblib`.
 
 **How to reason about it:** Serialize preprocessing and model together, under an ignored artifacts path. Record dependency/model/schema versions and validate reload parity in a fresh process.
-
-Use the worked reference earlier in this file, then change one boundary
-condition and rerun the stated checks. A copied output is not evidence
-unless you can explain why that output follows from the inputs.
 
 **Verify:** Save one joblib pipeline containing preprocessing and model, compute its SHA-256, reload it in a fresh process, and assert predictions and feature metadata match the pre-save values.
 
@@ -239,10 +207,6 @@ unless you can explain why that output follows from the inputs.
 
 **How to reason about it:** The README-style handoff must state exact commands, data origin, metric definitions, limitations, and output locations. A narrative without reproduction evidence is incomplete.
 
-Use the worked reference earlier in this file, then change one boundary
-condition and rerun the stated checks. A copied output is not evidence
-unless you can explain why that output follows from the inputs.
-
 **Verify:** Include runnable setup/train/test commands, data provenance/hash, baseline/candidate metrics, limitations, and next step; have a clean-shell replay finish with exit code 0.
 
 ### Exercise 7: Original lesson practice
@@ -250,10 +214,6 @@ unless you can explain why that output follows from the inputs.
 **Prompt:** Optionally adapt the Day 44 FastAPI service.
 
 **How to reason about it:** Serving is optional and should reuse the saved pipeline and schema rather than rebuilding preprocessing. Test the API boundary before adding network or container complexity.
-
-Use the worked reference earlier in this file, then change one boundary
-condition and rerun the stated checks. A copied output is not evidence
-unless you can explain why that output follows from the inputs.
 
 **Verify:** If the API extension is attempted, run Day 44 health/valid/invalid TestClient cases against the reloaded artifact; otherwise record an explicit skipped result and keep the capstone complete.
 
@@ -271,10 +231,6 @@ or hash the original immutable file.
 Record what was excluded and why. Quietly dropping invalid rows changes the
 training population and can make later metrics impossible to reproduce.
 
-**Why this matters:** The result should survive a fresh-kernel rerun and
-a deliberately chosen boundary case. If it does not, revisit the
-assumption or data boundary rather than hiding the failure.
-
 **Verify:** Data-contract gate; run the contract against one valid fixture and separate duplicate-ID, missing-column, invalid-target, excessive-missingness, and changed-snapshot fixtures; assert each failure names its rule and print the accepted snapshot hash.
 
 ### Exercise 9: Leakage audit
@@ -291,10 +247,6 @@ Version the audit beside the model. Feature names alone are insufficient:
 rolling aggregates and target encoders can leak through their time window or
 fit scope even when the raw field is available.
 
-**Why this matters:** The result should survive a fresh-kernel rerun and
-a deliberately chosen boundary case. If it does not, revisit the
-assumption or data boundary rather than hiding the failure.
-
 **Verify:** Leakage audit; save a feature lineage table with feature, source, availability timestamp, fit scope, target dependence, and decision; remove/quarantine the post-outcome fixture and show the corrected split/metric.
 
 ### Exercise 10: Baseline ladder
@@ -309,10 +261,6 @@ baseline tests whether added complexity earns its maintenance cost.
 
 If the selected candidate misses the predeclared improvement, document that
 finding rather than optimizing the acceptance criterion after the fact.
-
-**Why this matters:** The result should survive a fresh-kernel rerun and
-a deliberately chosen boundary case. If it does not, revisit the
-assumption or data boundary rather than hiding the failure.
 
 **Verify:** Baseline ladder; print fold-level and mean/std metrics for DummyClassifier, the declared simple model, and one candidate on identical folds; record a predeclared practical-improvement threshold and whether it is met.
 
@@ -330,10 +278,6 @@ selection.
 Include sensitivity scenarios because costs and prevalence are estimates.
 Ranking metrics alone cannot define the operating point.
 
-**Why this matters:** The result should survive a fresh-kernel rerun and
-a deliberately chosen boundary case. If it does not, revisit the
-assumption or data boundary rather than hiding the failure.
-
 **Verify:** Operating-policy selection; print one row per threshold with TP/FP/FN/TN, precision, recall, queue volume, and total expected cost; select on validation only, serialize the frozen threshold, and apply it once to test scores.
 
 ### Exercise 12: Error-slice analysis
@@ -348,10 +292,6 @@ with two examples cannot sustain a broad fairness claim.
 
 New features or threshold changes prompted by test errors return the project to
 development and require a new untouched evaluation set.
-
-**Why this matters:** The result should survive a fresh-kernel rerun and
-a deliberately chosen boundary case. If it does not, revisit the
-assumption or data boundary rather than hiding the failure.
 
 **Verify:** Error-slice analysis; for at least three predeclared slices, print support, metric, and uncertainty plus sanitized false-positive/false-negative examples; flag slices below minimum support rather than ranking them.
 
@@ -368,10 +308,6 @@ before loading. Keep secrets and absolute developer paths out of metadata.
 The manifest makes the artifact reviewable but does not make pickle safe from
 untrusted sources. Provenance and access control remain required.
 
-**Why this matters:** The result should survive a fresh-kernel rerun and
-a deliberately chosen boundary case. If it does not, revisit the
-assumption or data boundary rather than hiding the failure.
-
 **Verify:** Artifact manifest; validate the JSON manifest schema and every listed SHA-256/size, then tamper one artifact and assert loading/promotion stops before prediction.
 
 ### Exercise 14: Fresh-process acceptance
@@ -387,9 +323,5 @@ threshold behavior, and model/schema version.
 Reload parity catches missing custom classes, accidental preprocessing outside
 the pipeline, path assumptions, and serialization drift. Delete and rebuild
 the ignored test artifact to prove the workflow, not a stale file, creates it.
-
-**Why this matters:** The result should survive a fresh-kernel rerun and
-a deliberately chosen boundary case. If it does not, revisit the
-assumption or data boundary rather than hiding the failure.
 
 **Verify:** Fresh-process acceptance; run a subprocess from a clean working directory that loads the artifact and scores the fixed fixture; require exit code 0 and prediction parity within the declared numeric tolerance.

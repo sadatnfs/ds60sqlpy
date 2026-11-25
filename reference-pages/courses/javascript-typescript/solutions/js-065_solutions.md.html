@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/javascript-typescript/solutions/js-065_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="js-065-explanatory-solutions">js-065: explanatory solutions<a class="heading-anchor" href="#js-065-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit reveal. The separate .js reference is a complete offline browser program. These explanations discuss the six practice tasks; a visual resemblance alone is not a data or behavior check.</p>
+<p>Compare after your own attempt; the separate <code>.js</code> file is the complete reference program.</p>
 <h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
 <p>A dashboard coordinates multiple views around shared analytical state. Filters, selected IDs and display options belong in an explicit model. Each chart should derive its visible records from that model rather than mutating another chart’s DOM as an informal message bus.</p>
 <p>Cross-filtering can change denominators. If a category chart selects one group, a rate chart must state whether its denominator is the filtered group or the full population. A dashboard can be internally consistent in code while making a misleading comparison because the analytical universe changed silently.</p>
@@ -218,7 +218,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Expected:</strong> Filtering and rendering do not mutate original values or order.</p>
 <h3 id="exercise-6-design-a-reproducible-saved-view">Exercise 6: Design a reproducible saved view.<a class="heading-anchor" href="#exercise-6-design-a-reproducible-saved-view" aria-label="Link to this section">#</a></h3>
 <p>A screenshot lacks enough information to reconstruct the analysis. Save the decisions that generated the view. Save { group: &quot;A&quot; } plus the dataset name and aggregation rule; reloading that state should reproduce &quot;A: 2 records; total 5&quot;. A screenshot of the A view would not record that the total is a sum of value over frozen rows.</p>
-<p><strong>Expected:</strong> Record data identity, filters, units and aggregation policy.</p></article>
+<p><strong>Expected:</strong> Record data identity, filters, units and aggregation policy.</p>
+<h3 id="after-comparison">After comparison<a class="heading-anchor" href="#after-comparison" aria-label="Link to this section">#</a></h3>
+<p>Add a third view, a table of selected records, and a saved-view object that captures filters and units. Restore the dashboard from that object in a fresh run and check that all three views report the same counts and denominators.</p></article>
   </main>
 </body>
 </html>

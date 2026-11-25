@@ -1,6 +1,6 @@
 # cuda-122: explained solutions
 
-These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.
+Compare with your [worksheet](../lessons/cuda-122.md) attempt.
 
 ## Exercise 1: Compute transfer lower bound
 
@@ -74,8 +74,16 @@ Use identical partitioned fixtures and capture bytes spills and output.
 
 **How to verify.** Assert outputs are equal, then report bytes and stage times side by side. Repeat each configuration at least three times and keep every sample, since network contention varies between runs.
 
+## Self-check answers
+
+1. **What costs make up a shuffle?** Serialization or columnar handling, buffering, transport, disk and downstream processing.
+
+2. **When is pre-aggregation a valid rewrite?** When combining partial results first gives the same final answer, which fails for nonassociative or stateful operations.
+
+3. **Why should a lesson pad not change cluster settings?** Network services and cluster-wide settings affect other users and require owned, authorized environments.
+
 ## Reference observation
 
-Ten-second payload lower bound;50 ms kernel saving is below 1 percent of it.
+Ten-second payload lower bound; 50 ms kernel saving is below 1 percent of it.
 
-The reference file is `courses/cuda/spark/references/cuda-122_cpu.py`. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.
+Asserted by `courses/cuda/spark/references/cuda-122_cpu.py`.

@@ -79,34 +79,15 @@ validates text, schemas, transaction state, and descriptor assignments.
 
 ## How to run this lesson
 
-**Primary browser route:** run `./classroom` from the repository root and
-choose **Python and data science** on `/classroom`. Open this lesson in the shared workspace,
-read its capability notice, and use its supported coding or reading workflow.
-The [classroom guide](../../../docs/classroom-experience.md) explains saved work, runtimes and switching subjects.
+The learner module leaves two runtime contracts open: `parse_scalar` must
+return what each overload promises, and `Batches.__next__` must return the
+next tuple and raise `StopIteration` when the items run out.
 
-**Optional contributor route:** use the prepared environment in
-[CONTRIBUTING](../../../CONTRIBUTING.md) on Linux, macOS or Windows through
-WSL 2. The commands below assume its packages are already installed. They are
-not prerequisites for opening this lesson in the Docker classroom. Local
-`.learning/` files and CLI progress belong to this checkout; they do not read or
-update the Docker classroom's named learning volume.
-
-Work from the repository root. First run the answer-free learner
-module named in this guide's original walkthrough. Read each TODO as a
-contract: record the input, returned value, raised exception, and side
-effect before implementing it. Then run the focused test command in
-**Self-check**. Keep exploratory changes in a copy or a new test; the
-checked-in solution remains a comparison artifact.
-
-Prepared POSIX/WSL contributor terminal:
+The [Python study guide](../../STUDY-GUIDE.md) covers the browser classroom and this prepared-checkout run:
 
 ```sh
 uv run --no-sync python python/professional/lessons/py_lang_01_typing_data_model.py
 ```
-
-The focused test command is shown in **Self-check** below. The learner
-module is intentionally answer-free, so `TODO` output is the expected
-starting state rather than a setup failure.
 
 ## Mechanism lab: two small examples before the full system
 
@@ -257,9 +238,9 @@ decorators, or subclass hooks.
 
 ### Extended professional practice
 
-These exercises move from prediction and implementation through debugging,
-operational trade-offs, and review. Keep the default path deterministic and
-offline; optional connected behavior must remain explicit.
+The remaining tasks apply typing and the data model to Protocols,
+ParamSpec decorators, narrowing decoded JSON, frozen and slotted classes,
+cooperative equality, serialization evolution and weak-reference caches.
 
 ### Exercise 9: design a structural Protocol
 
@@ -368,8 +349,7 @@ checker diagnostics with explicit runtime validation.
 
 ## Ask an AI tutor about this lesson
 
-The lesson is complete without an AI assistant. If you want optional
-coaching, copy this prompt into the AI tutor while the repository root is open:
+This prompt is optional; the [study guide](../../STUDY-GUIDE.md) explains how to use a tutor.
 
 ```text
 Tutor me through `python-lang-01`: Advanced typing and the Python data model.

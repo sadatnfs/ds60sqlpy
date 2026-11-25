@@ -1,6 +1,6 @@
 # js-066: explanatory solutions
 
-Compare after your own attempt or an explicit reveal. The separate .js reference is a complete offline browser program. These explanations discuss the six practice tasks; a visual resemblance alone is not a data or behavior check.
+Compare after your own attempt; the separate `.js` file is the complete reference program.
 
 ## Mechanism review
 
@@ -49,3 +49,7 @@ Automated checks cannot prove the full human experience. Record actual observati
 Expert practice includes knowing what the chart does not establish. Separate software correctness from statistical inference and usability evidence. The fixture has four synthetic learners, so the chart proves the software path, not anything about study habits; say so, as the closing paragraph does.
 
 **Expected:** Explain data grain, cleaning, scales, aggregation, interactions and untested surfaces.
+
+## After comparison
+
+Give your dashboard and its stated claim to another learner, or reread it after a day, and list every question the chart cannot answer. Add one check for the weakest point you find and record which surfaces still need manual review.

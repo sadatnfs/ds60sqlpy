@@ -1,6 +1,6 @@
 # docker-039: explanatory solutions
 
-Compare after your own attempt or an explicit reveal. These explain the supplied teaching fixtures; they are not engine results. The mechanism is explained in `courses/docker/guides/docker-039.md`.
+These answers explain teaching fixtures, not engine results; the mechanism is in [the guide](../guides/docker-039.md).
 
 ## Exercise 1: Distinguish namespace and cgroup.
 
@@ -88,4 +88,4 @@ Compare after your own attempt or an explicit reveal. These explain the supplied
 
 ## Check your transfer
 
-A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.
+On Linux the kernel release printed inside the container matched the host's, so every container shares that kernel; namespaces only limit what each process can see, and cgroups only meter what it can use. A kernel vulnerability reachable from inside one container can therefore affect the host and its neighbors. Mitigations are a patched kernel, dropped capabilities, the default seccomp profile and no-new-privileges as the fixture uses, or a stronger boundary such as a VM per tenant. A differing release on a Linux host would mean a VM-based runtime.

@@ -196,7 +196,10 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <article class="document"><h2 id="r-059-ggplotly-translation-and-validation-boundaries">r-059: ggplotly translation and validation boundaries<a class="heading-anchor" href="#r-059-ggplotly-translation-and-validation-boundaries" aria-label="Link to this section">#</a></h2>
 <p><strong>Level:</strong> advanced. <strong>Direct prerequisites:</strong> <code>r-058</code></p>
 <h3 id="run-and-retain-your-work">Run and retain your work<a class="heading-anchor" href="#run-and-retain-your-work" aria-label="Link to this section">#</a></h3>
-<p>Open <code>r-059</code> in <code>/classroom</code> and use the prepared <code>r-statistics</code> profile. Each Run evaluates one <code>main.R</code> script in a fresh offline R process, so define every input in the script; an earlier Run leaves no variables behind. Work in the <a href="../lessons/r-059.R.html">starter</a>. The <a href="../solutions/r-059_reference.R.html">complete reference</a> ends by printing <code>r-059 reference checks passed</code>, and the <a href="../solutions/r-059_solutions.md.html">explained answers</a> are there for deliberate comparison after your own attempt. This chapter draws figures: base plots are captured as PNG, ggplot2 and Plotly objects must be printed explicitly, and the classroom keeps at most two figures per run. The <a href="../README.md.html">course overview</a> describes saved work, figure capture and the prepared package versions.</p>
+<p>The starter holds four points with x from 1 to 4, y values 1, 3, 2 and 6, and groups A and B, and an empty results list. Run it and write the four coordinate pairs down as text, such as 1:1 and 2:3. After translation with <code>ggplotly()</code>, compare those pairs with the translated traces, because sorted x and sorted y can each match while the pairing is wrong.</p>
+<p>Work in the <a href="../lessons/r-059.R.html">starter</a> under the <a href="../STUDY-GUIDE.md.html#run-a-chapter">run rules</a>.</p>
+<p>The <a href="../solutions/r-059_reference.R.html">complete reference</a> ends by printing <code>r-059 reference checks passed</code>.</p>
+<p>This chapter draws figures; read <a href="../STUDY-GUIDE.md.html#figures">figure capture</a> before printing them.</p>
 <h3 id="outcome-and-mechanism">Outcome and mechanism<a class="heading-anchor" href="#outcome-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Translate a supported ggplot to Plotly and verify retained data while identifying the visual and interaction properties that still require review.</p>
 <p>ggplotly translates a ggplot object into a Plotly figure. The source graphic and the interactive result use different representations and rendering systems. A successful conversion is therefore a useful starting point, not a guarantee that every geometry, label, facet, scale or theme behaves identically.</p>
@@ -289,7 +292,15 @@ marker_count <span class="syntax-operator">&lt;-</span> <span class="syntax-func
 <li><a href="https://ggplot2.tidyverse.org/reference/ggplot_build.html">ggplot2 build helpers</a></li>
 </ul>
 <h3 id="continue">Continue<a class="heading-anchor" href="#continue" aria-label="Link to this section">#</a></h3>
-<p>Chapters that list <code>r-059</code> as a direct prerequisite: <a href="r-060.md.html"><code>r-060</code></a>.</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Next chapter</th>
+<th>Title</th>
+</tr></thead><tbody>
+<tr>
+<td><a href="r-060.md.html"><code>r-060</code></a></td>
+<td>Capstone: an analytical visualization with an evidence record</td>
+</tr>
+</tbody></table></div>
 <h3 id="ask-an-ai-tutor">Ask an AI tutor<a class="heading-anchor" href="#ask-an-ai-tutor" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for r-059 (ggplotly translation and validation boundaries).
 Read the guide and my saved attempt. Explain the relevant R mechanism,

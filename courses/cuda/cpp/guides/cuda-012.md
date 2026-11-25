@@ -4,18 +4,15 @@
 
 Beginner; about 90 minutes, plus any optional hardware experiment. Direct prerequisites: `cuda-008`, `cuda-010`, `cuda-011`
 
-The order supports learning at your own pace. Reading and CPU reasoning remain
-available when NVIDIA hardware is absent. Advanced hardware features need their
-own capability checks and are not prerequisites for opening this chapter.
+Pacing, evidence labels and platform rules for every chapter are in the [CUDA study guide](../../STUDY-GUIDE.md).
 
 ## Learning objectives
 
 Launch a bounded kernel, check launch and completion status separately and validate returned values on the host.
 
-Work through *The first bounded kernel and the truth about completion* with the concrete cases below. Finish with this evidence:
-host validates the returned values and reports both launch and completion status. Distinguish an algorithmic
-calculation, a compiled artifact and an actual device observation when explaining
-what your work establishes.
+**Scope:** `__global__`, `__device__`, `__host__`, launch configuration and asynchronous launch.
+
+**Evidence to produce:** Host validates the returned values and reports both launch and completion status.
 
 ## Purpose, vocabulary and mental model
 
@@ -30,24 +27,15 @@ The `__global__` qualifier declares a kernel callable through CUDA launch syntax
 
 ## How to run and study this lesson
 
-Use the saved reading worksheet in `/classroom`; the reading pad does not execute
-CUDA. For the bounded calculation, select **CPU model (Python)**, whose
-answer-free starter supplies the literal fixtures and task contract. The
-[CUDA C++ study workflow](../README.md) covers platforms, optional GPU
-compilation and evidence labels. In a prepared Python environment you can also
-run the separate [CPU reference](../references/cuda-012_cpu.py) from the
-repository root:
+Trace worked example 1 by hand, then run the [CPU reference](../references/cuda-012_cpu.py) from the repository root:
 
 ```sh
 python courses/cuda/cpp/references/cuda-012_cpu.py
 ```
 
-Its assertions check the stated numerical result or model invariant; console
-text is evidence of this CPU model only, not of CUDA execution.
-
 ## CUDA C++ kernel listing
 
-The kernel below is an excerpt from the chapter's complete [GPU reference](../references/cuda-012_gpu.cu). The full program adds device discovery, checked allocation and launch, completion checks and host validation. Read it as CUDA C++ source; the classroom reading pad does not compile or run it.
+An excerpt from the chapter's complete [GPU reference](../references/cuda-012_gpu.cu); the reading pad does not compile it.
 
 ```cpp
 __global__ void affine_indices(int *out, std::size_t n) {
@@ -62,9 +50,7 @@ __global__ void affine_indices(int *out, std::size_t n) {
 
 Let one kernel write its global index into a five-element output using eight launched threads. Threads 0 through 4 write \([0,1,2,3,4]\); threads 5 through 7 perform no write because the bounds predicate is false. The host compares every returned value with its expected index.
 
-The complete CPU model below intentionally models only the named arithmetic,
-layout, dependency or capability decision. It does not model GPU scheduling,
-caches, instruction timing or device memory visibility.
+**Why:** The predicate rejects threads 5 to 7, so each valid index is written once and nothing beyond.
 
 ```python
 n, launched = 5, 8
@@ -76,58 +62,44 @@ assert out == [1, 3, 5, 7, 9]
 print({"CPU_ownership_trace": out, "GPU_execution": "not performed"})
 ```
 
-**Expected observation:** Every assertion succeeds. A representative CPU output is:
+**Expected observation:** every assertion succeeds, and the CPU model prints:
 
 ```text
 {'CPU_ownership_trace': [1, 3, 5, 7, 9], 'GPU_execution': 'not performed'}
 ```
 
-Integers, shapes and ordering must match exactly; only assertions with an explicit
-tolerance accept small floating-point differences. A printed duration is a model
-output, not a measured GPU benchmark.
+**Check:** Compare the returned [0, 1, 2, 3, 4] element by element after a checked synchronization.
 
 ## Worked example 2: change a meaningful condition
 
 Change the expression to twice the index plus one. Expected output is \([1,3,5,7,9]\). Keeping the same ownership mapping separates the arithmetic change from scheduling. A launch status of success without a completion check does not establish these values arrived in host memory.
 
-Before applying this example to your own program, write down which inputs are
-read, which result is produced, and the condition that makes the comparison
-valid. Keep the original case as a regression check when changing a boundary.
+**Why:** Ownership is unchanged, so any wrong value isolates an arithmetic error rather than scheduling.
+
+**Check:** The reference asserts out == [1, 3, 5, 7, 9] and prints GPU_execution not performed.
 
 ## Optional CUDA C++ laboratory
 
-A complete [GPU reference](../references/cuda-012_gpu.cu) and separate
-[GPU learner source](../lessons/cuda-012_gpu.cu) accompany this chapter.
-They are standalone files with bounded fixtures, checked runtime calls and host
-validation. The learner source intentionally reports incomplete implementation
-until you add the chapter's algorithm and assertions. It must never return a
-fake GPU success on a CPU machine. Follow the [manual GPU workflow](../README.md)
-for exact compilation and execution paths. If the classroom offers the optional
-CUDA C++ variant, its capability notice must confirm actual runtime readiness.
+- [GPU learner source](../lessons/cuda-012_gpu.cu)
+- [GPU reference](../references/cuda-012_gpu.cu)
 
-The reference contains an explicit no-device failure, launch and completion
-checks, and returned-value validation. Source review and CPU reference checks do
-not qualify this .cu file on your hardware. Preserve compilation, actual device
-execution and sanitizer evidence separately. Exercise 4 is a reasoning diagnosis;
-do not deliberately launch a hanging kernel or reset a shared GPU to reproduce it.
+Read the [laboratory rules](../../STUDY-GUIDE.md#optional-native-cuda-laboratories) before compiling.
 
 ## Six progressive exercises
 
-Exercises 1 and 2 are guided reconstructions of the worked examples; exercises
-3-6 change an input, diagnose a defect, test a boundary and transfer the idea.
-For each one, keep the calculation, output, diagram or failure policy you
-produce so another reader can compare it with the worked cases. If the hint is
-not enough, reread the mechanism paragraph and the bounded CPU assertion.
-
 ### Exercise 1
 
-Predict and trace the first worked example before running its CPU reference. Write every intermediate quantity that leads to the stated result, including units or ownership where applicable.
+Reconstruct worked example 1 on paper before running its CPU reference. Launch eight threads for five outputs and guard each write with i < 5.
+
+**Trap to avoid:** Omitting the guard lets threads 5 to 7 write past the five-element allocation.
 
 **Hint:** Start with the literal input and intermediate quantities in worked example 1.
 
 ### Exercise 2
 
-Reconstruct the second worked example without copying its conclusion. Identify the changed input or condition, show the resulting calculation or dependency, and explain why it differs from the first example.
+Rework worked example 2 without copying its conclusion. Keep the same index mapping and change only the stored expression to 2 * i + 1.
+
+**Trap to avoid:** Trusting the launch status as proof of results ignores that launches return before execution finishes.
 
 **Hint:** Identify exactly which condition changes in worked example 2.
 
@@ -135,11 +107,15 @@ Reconstruct the second worked example without copying its conclusion. Identify t
 
 Identify the configuration and arguments in fill<<<2,32>>>(out,50).
 
+**Trap to avoid:** Reading <<<2, 32>>> as 32 blocks of 2 threads reverses the configuration order.
+
 **Hint:** Use the first worked example to establish the relevant quantities, then change only the requested input.
 
 ### Exercise 4
 
 The process exits immediately after submission. What evidence is missing?
+
+**Trap to avoid:** Checking only cudaGetLastError after launch catches configuration errors but not execution faults.
 
 **Hint:** Locate the failed phase or violated dependency before proposing a repair.
 
@@ -147,35 +123,33 @@ The process exits immediately after submission. What evidence is missing?
 
 What should count zero do?
 
+**Trap to avoid:** Launching ceil(0 / 32) = 0 blocks yields an invalid configuration error, not a quiet no-op.
+
 **Hint:** Check what the algorithm is allowed to read, write or assume at this boundary.
 
 ### Exercise 6
 
 Write a useful success message.
 
+**Trap to avoid:** Printing 'GPU kernel is fast and correct' generalizes from five values and no timing.
+
 **Hint:** State the output contract and which observations are needed in the new application.
 
 ## Common mistakes and diagnosis
 
-A tempting but incorrect claim in this chapter is: **returning from the launch expression means the kernel finished. .**
-
-For the concrete failure exercise, the process exits immediately after submission. What evidence is missing?
-Preserve the original input and the stage where behavior diverged, and compare
-with the CPU model before changing hardware configuration.
+A tempting but incorrect claim: **Returning from the launch expression means the kernel finished.** Launches are asynchronous: the host regains control after submission. Only a synchronizing call, such as a checked `cudaDeviceSynchronize` or a blocking copy, proves the kernel completed and surfaces execution errors. Worked example 2 notes that a launch status alone does not establish the output values.
 
 ## Self-check, retrieval and transfer
 
-Explain the first example without its code, then use the second example to state
-one assumption that matters. Complete Exercise 3 independently, use Exercise 4 to
-diagnose a plausible defect, check the boundary in Exercise 5, and retain the
-application contract from Exercise 6. Compare the [separate explanations](../solutions/cuda-012_solutions.md)
-only after your attempt or a deliberate reveal. A reading marker records your
-choice; it does not certify hardware qualification or expert mastery.
+1. In `fill<<<2,32>>>(out,50)`, how many threads launch and how many write?
+2. Which call reports launch configuration errors and which reports execution errors?
+3. Why keep the ownership mapping fixed when changing the formula in worked example 2?
+
+Short answers are in the [separate explanations](../solutions/cuda-012_solutions.md#self-check-answers); compare only after an attempt.
 
 ## Primary references
 
-Check the documentation that matches your prepared toolkit before optional
-hardware execution.
+Use the documentation that matches your prepared toolkit.
 
 - [CUDA C++ introduction](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/intro-to-cuda-cpp.html)
 

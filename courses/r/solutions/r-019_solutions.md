@@ -1,6 +1,6 @@
 # r-019: reference reasoning
 
-Use the [complete reference](r-019_reference.R) with the guide's declared inputs and runtime. Every worked example is also a standalone script.
+Run the [complete reference](r-019_reference.R) under the [run rules](../STUDY-GUIDE.md#run-a-chapter).
 
 ## Why the implementation has this shape
 
@@ -96,4 +96,6 @@ Do not rely on arbitrary temporary files; retain source and supported captured a
 
 ## What the checks establish
 
-The reference makes 3 `stopifnot()` checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.
+The assertions confirm that the CSV round trip with declared classes is identical to the original, including names and the NA amount, that `readRDS()` returns exactly the saved object before `unlink()` removes it, and that a JSON array read back as a list keeps 2 as its first element. They do not prove that other programs will read these files the same way.
+
+The reference makes 3 `stopifnot()` checks; see [what a passing run proves](../STUDY-GUIDE.md#what-a-passing-run-proves).

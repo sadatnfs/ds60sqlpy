@@ -3,22 +3,17 @@ public class Main {
 
   public static void main(String[] args) throws Exception {
     // Exercise 1: Observe virtual identity: predict an edited check
-    // Copy Example A into a scratch `Main.java` and change `assert !task.isAlive() &&
-    // virtual.get();` to `assert task.isAlive() && virtual.get();` inside its assertion. Before
-    // running it with `java -ea Main`, predict whether the assertion still holds and explain
-    // why; then restore it.
-    // Expected: The changed run fails with an `AssertionError` from the assertion on
-    // `!task.isAlive() && virtual.get()`. Restoring the original line brings back the worked
-    // observation: true and terminated.
+    // Change Example A's assertion to `assert task.isAlive() && virtual.get();`, predict whether
+    // it holds, then run and restore it.
+    // Expected: The edited run fails with an `AssertionError` from the assertion on
+    // `!task.isAlive() && virtual.get()`.
 
     // Exercise 2: Use a scoped virtual executor: debug a regression
-    // A regression changed one token in the code that Example B adds after Example A, so one
-    // line now reads `for (int value = 1; value < 4; value++) {`. Run Example B with that line,
-    // use the failing assertion to locate the defect and repair it without changing the
-    // assertion.
-    // Expected: Before the repair the run fails with an `AssertionError` from the assertion on
-    // `results.equals(List.of(1, 4, 9, 16))`; after it the line reads `for (int value = 1; value
-    // <= 4; value++) {` again and 1, 4, 9, 16.
+    // A regression in Example B's new code makes one line read `for (int value = 1; value < 4;
+    // value++) {`. Repair it using the failing assertion.
+    // Expected: The unrepaired run fails with an `AssertionError` from the assertion on
+    // `results.equals(List.of(1, 4, 9, 16))`; the repaired line reads `for (int value = 1; value
+    // <= 4; value++) {`.
 
     // Exercise 3: Limit a scarce resource with a semaphore
     // Run six tasks but allow only two inside a gated resource section.

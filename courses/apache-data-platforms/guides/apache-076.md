@@ -110,20 +110,18 @@ path remains healthy.
 
 ## Complete worked source
 
-This is a project-only command notebook. Read and edit it in the classroom; run its explicitly labeled commands from the copied owned Docker workshop. The classroom does not execute these service commands.
+The classroom does not execute these service commands. See the [workshop rules](../STUDY-GUIDE.md#workshop-notebooks).
 
 # Delta Sharing apache-076 prepared command notebook
 
-Copy the owned Delta Sharing project and follow PREPARATION.md. Delta Sharing
-belongs to Delta Lake/Linux Foundation. The offline preparation actions are:
+In the copied Delta Sharing project, `plan` prints the three expected rows that the later file reads must reproduce, without contacting any server:
 
 ```bash
 bash run.sh prepare
 bash run.sh plan
 ```
 
-For a separately prepared actual owned reference server and untracked recipient
-profile, the bounded native Docker protocol client runs with:
+During `check` against your prepared server, every signed data URL must point at a host listed in `DS60_SHARING_DATA_HOSTS`, and the recipient token is never sent to that host:
 
 ```bash
 bash run.sh check
@@ -131,9 +129,7 @@ bash run.sh check
 
 Check separates metadata from file retrieval, never forwards recipient Authorization to storage, and withholds signed URLs. Use a separately copied owned table for the missing-file negative experiment.
 
-The classroom Markdown pad does not start a service. Source configuration and
-unit policy fixtures are not actual reference-server receipts. Keep credentials
-and signed URL query strings out of all published source and evidence.
+A signed URL grants temporary storage access, so the receipt keeps only the data host and file sizes or hashes. A missing file belongs in its own copied table, never in the fixture.
 
 ## Primary references
 

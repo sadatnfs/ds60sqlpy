@@ -4,18 +4,15 @@
 
 Beginner; about 90 minutes, plus any optional hardware experiment. Direct prerequisites: `cuda-004`
 
-The order supports learning at your own pace. Reading and CPU reasoning remain
-available when NVIDIA hardware is absent. Advanced hardware features need their
-own capability checks and are not prerequisites for opening this chapter.
+Pacing, evidence labels and platform rules for every chapter are in the [CUDA study guide](../../STUDY-GUIDE.md).
 
 ## Learning objectives
 
 Calculate element and byte offsets for strided views and draw an explicit ownership and lifetime diagram.
 
-Work through *Memory as addresses, ownership, shape and stride* with the concrete cases below. Finish with this evidence:
-a correct offset table and explicit ownership/lifetime diagram. Distinguish an algorithmic
-calculation, a compiled artifact and an actual device observation when explaining
-what your work establishes.
+**Scope:** Bytes versus elements, dtype, alignment, contiguous storage, row-major and column-major layout, strides, views, aliasing and ownership.
+
+**Evidence to produce:** A correct offset table and explicit ownership/lifetime diagram.
 
 ## Purpose, vocabulary and mental model
 
@@ -39,28 +36,17 @@ Here r is row, c is column, s is row stride in elements, and b is bytes per elem
 
 ## How to run and study this lesson
 
-Use the saved reading worksheet in `/classroom`; the reading pad does not execute
-CUDA. For the bounded calculation, select **CPU model (Python)**, whose
-answer-free starter supplies the literal fixtures and task contract. The
-[CUDA C++ study workflow](../README.md) covers platforms, optional GPU
-compilation and evidence labels. In a prepared Python environment you can also
-run the separate [CPU reference](../references/cuda-005_cpu.py) from the
-repository root:
+Trace worked example 1 by hand, then run the [CPU reference](../references/cuda-005_cpu.py) from the repository root:
 
 ```sh
 python courses/cuda/cpp/references/cuda-005_cpu.py
 ```
 
-Its assertions check the stated numerical result or model invariant; console
-text is evidence of this CPU model only, not of CUDA execution.
-
 ## Worked example 1: trace the mechanism
 
 Take a 2-by-3 float32 matrix with five stored elements per row. Coordinate (1,2) has element offset \(1\times 5+2=7\) and byte offset 28. The logical six values occupy a padded allocation of ten floats, or 40 bytes. Multiplying by logical width would read element 5 instead, a different location.
 
-The complete CPU model below intentionally models only the named arithmetic,
-layout, dependency or capability decision. It does not model GPU scheduling,
-caches, instruction timing or device memory visibility.
+**Why:** Rows advance by the allocation's stride of 5, not the logical width 3, so padding is skipped correctly.
 
 ```python
 rows, cols, stride, itemsize = 2, 3, 5, 4
@@ -71,41 +57,37 @@ assert transposed == [[1, 4], [2, 5], [3, 6]]
 print({"offset_bytes": 28, "transpose_view_values": transposed})
 ```
 
-**Expected observation:** Every assertion succeeds. A representative CPU output is:
+**Expected observation:** every assertion succeeds, and the CPU model prints:
 
 ```text
 {'offset_bytes': 28, 'transpose_view_values': [[1, 4], [2, 5], [3, 6]]}
 ```
 
-Integers, shapes and ordering must match exactly; only assertions with an explicit
-tolerance accept small floating-point differences. A printed duration is a model
-output, not a measured GPU benchmark.
+**Check:** The reference asserts (1 * 5 + 2) * 4 == 28 and prints offset_bytes 28.
 
 ## Worked example 2: change a meaningful condition
 
 For contiguous \([[1,2,3],[4,5,6]]\), the row-major strides are (3,1) elements. A transposed view has shape (3,2) and strides (1,3). Coordinate (2,1) still refers to underlying element 5, value 6. There was no mandatory movement of bytes, and writing through the view can change the original owner.
 
-Before applying this example to your own program, write down which inputs are
-read, which result is produced, and the condition that makes the comparison
-valid. Keep the original case as a regression check when changing a boundary.
+**Why:** The view reuses the same six stored values, so offset 5 still holds value 6 with no copy.
+
+**Check:** The reference rebuilds the view with storage[r + c * 3] and asserts [[1, 4], [2, 5], [3, 6]].
 
 ## Six progressive exercises
 
-Exercises 1 and 2 are guided reconstructions of the worked examples; exercises
-3-6 change an input, diagnose a defect, test a boundary and transfer the idea.
-For each one, keep the calculation, output, diagram or failure policy you
-produce so another reader can compare it with the worked cases. If the hint is
-not enough, reread the mechanism paragraph and the bounded CPU assertion.
-
 ### Exercise 1
 
-Predict and trace the first worked example before running its CPU reference. Write every intermediate quantity that leads to the stated result, including units or ownership where applicable.
+Reconstruct worked example 1 on paper before running its CPU reference. Compute element offset as row times stored stride plus column, 1 * 5 + 2 = 7, then multiply by 4 bytes.
+
+**Trap to avoid:** Using the logical width gives 1 * 3 + 2 = 5, reading a padding slot or the wrong row's element.
 
 **Hint:** Start with the literal input and intermediate quantities in worked example 1.
 
 ### Exercise 2
 
-Reconstruct the second worked example without copying its conclusion. Identify the changed input or condition, show the resulting calculation or dependency, and explain why it differs from the first example.
+Rework worked example 2 without copying its conclusion. Swap the shape to (3, 2) and the strides to (1, 3), then evaluate coordinate (2, 1) as 2 * 1 + 1 * 3.
+
+**Trap to avoid:** Copying data into a new transposed buffer before every read wastes bandwidth and detaches writes from the owner.
 
 **Hint:** Identify exactly which condition changes in worked example 2.
 
@@ -113,11 +95,15 @@ Reconstruct the second worked example without copying its conclusion. Identify t
 
 Compute the byte offset of (2,3) in a padded float64 matrix with row stride 8.
 
+**Trap to avoid:** Using 4 bytes per element, a float32 habit, yields 76 bytes and lands mid-way through a different value.
+
 **Hint:** Use the first worked example to establish the relevant quantities, then change only the requested input.
 
 ### Exercise 4
 
 A kernel receives only shape (3,2) for a transposed view and assumes contiguous rows. Diagnose the failure.
+
+**Trap to avoid:** Assuming row-major from the shape reads element (0, 1) at offset 1, which holds value 2 instead of 4.
 
 **Hint:** Locate the failed phase or violated dependency before proposing a repair.
 
@@ -125,35 +111,33 @@ A kernel receives only shape (3,2) for a transposed view and assumes contiguous 
 
 What changes for a one-column matrix with padding?
 
+**Trap to avoid:** Treating the column as a dense vector and reading offsets 0, 1, 2 mixes values and padding.
+
 **Hint:** Check what the algorithm is allowed to read, write or assume at this boundary.
 
 ### Exercise 6
 
 Compare particle position reads in array-of-structures and structure-of-arrays.
 
+**Trap to avoid:** Switching layout for this kernel alone ignores other consumers that read whole particles and the conversion cost.
+
 **Hint:** State the output contract and which observations are needed in the new application.
 
 ## Common mistakes and diagnosis
 
-A tempting but incorrect claim in this chapter is: **two arrays with the same shape necessarily have the same layout or independent storage.**
-
-For the concrete failure exercise, a kernel receives only shape (3,2) for a transposed view and assumes contiguous rows. Diagnose the failure.
-Preserve the original input and the stage where behavior diverged, and compare
-with the CPU model before changing hardware configuration.
+A tempting but incorrect claim: **Two arrays with the same shape necessarily have the same layout or independent storage.** Shape lists logical extents only; strides and ownership decide where elements live. Worked example 2 builds a transposed view with the same six values but strides (1,3), and writes through it change the original. Two arrays with identical shapes can therefore differ in layout and can even share storage.
 
 ## Self-check, retrieval and transfer
 
-Explain the first example without its code, then use the second example to state
-one assumption that matters. Complete Exercise 3 independently, use Exercise 4 to
-diagnose a plausible defect, check the boundary in Exercise 5, and retain the
-application contract from Exercise 6. Compare the [separate explanations](../solutions/cuda-005_solutions.md)
-only after your attempt or a deliberate reveal. A reading marker records your
-choice; it does not certify hardware qualification or expert mastery.
+1. Give the element offset of (1,1) in a 2-by-3 float32 matrix with row stride 4.
+2. Why must a kernel receive strides, not only a shape, for a view?
+3. What risk does aliasing add when one buffer is both input and output?
+
+Short answers are in the [separate explanations](../solutions/cuda-005_solutions.md#self-check-answers); compare only after an attempt.
 
 ## Primary references
 
-Check the documentation that matches your prepared toolkit before optional
-hardware execution.
+Use the documentation that matches your prepared toolkit.
 
 - [CUDA Programming Guide](https://docs.nvidia.com/cuda/cuda-programming-guide/)
 

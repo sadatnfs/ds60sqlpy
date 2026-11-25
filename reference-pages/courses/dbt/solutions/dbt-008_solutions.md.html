@@ -195,7 +195,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="dbt-008-explained-reference">dbt-008: explained reference<a class="heading-anchor" href="#dbt-008-explained-reference" aria-label="Link to this section">#</a></h2>
 <p>State the assumptions under which an incremental result equals a full recomputation.</p>
-<p>The executable reference contains the two complete worked cases with assertions. The changes below explain the independent practice and its limits.</p>
+<p>The reference runs a max-<code>updated_at</code> incremental model twice, appends a newer event, and checks that a rerun neither drops nor duplicates rows. It then inserts an event behind the watermark and shows that only <code>--full-refresh</code> recovers it. That proves the stated assumption fails here, not how often late data occurs. See <a href="../STUDY-GUIDE.md.html#answers-and-references">how these answers are laid out</a>.</p>
 <h3 id="1-add-a-later-event">1. Add a later event<a class="heading-anchor" href="#1-add-a-later-event" aria-label="Link to this section">#</a></h3>
 <p>The case demonstrates the intended append condition. Keep a stable identity so the inserted row can be verified.</p>
 <p><strong>Expected:</strong> The incremental relation gains that record.</p>

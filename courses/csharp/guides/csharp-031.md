@@ -24,9 +24,9 @@ Completion means no more writes will be admitted, while readers can still drain 
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles your saved pad as `Program.cs` in its fixed .NET 10 project. C# 14 is the matching language generation. This route uses the prepared framework libraries; it does not accept arbitrary project files, NuGet packages, command arguments or interactive input. The explicit `Program.Main` entrypoint makes compilation and execution visible. `Check` throws on a false condition in every build configuration, unlike conditional debugging assertions.
+`Channel.CreateBounded<int>` comes from `System.Threading.Channels`, which the worked examples import. The default full mode is Wait, so `TryWrite` reports false when the buffer is full rather than dropping anything. A bounded channel created with `BoundedChannelFullMode.DropOldest` instead accepts the write and discards the oldest item.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Compile contract, starter stop and success marker: [running a lesson](../STUDY-GUIDE.md#running-a-lesson).
 
 
 
@@ -34,7 +34,7 @@ Start with the answer-free learner artifact in your saved classroom pad. It deli
 
 `Channel.CreateBounded<T>` creates a capacity-limited channel. TryWrite reports immediate admission. ReadAsync removes an item; Writer.Complete closes admission. Reader.Completion finishes after buffered work is drained.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+Each example ends with a trace; method: [tracing a program](../STUDY-GUIDE.md#tracing-a-program).
 
 ## Worked example / walkthrough
 
@@ -79,6 +79,8 @@ internal static class Program {
 ```
 
 **Observe:** The first item is accepted and the second immediate write is refused.
+
+**Trace.** The channel holds at most one item. `TryWrite(4)` finds space, stores 4 and returns true. `TryWrite(5)` finds the buffer full and returns false immediately; 5 was never admitted. `ReadAsync` removes 4 and returns it, leaving the channel empty and open. The producer learned about the full buffer from the Boolean.
 
 ### Example B: Drain after completion
 
@@ -126,6 +128,8 @@ internal static class Program {
 
 **Observe:** Both admitted items are read after completion, and later writes fail.
 
+**Trace.** With capacity two, both writes succeed and then `Complete()` closes admission while 2 and 3 stay buffered. `ReadAllAsync` yields 2 and 3 and ends because the channel is complete and empty. `Reader.Completion` then finishes. The sum is 5, and `TryWrite(9)` returns false because writing after completion is refused, even though the buffer now has room.
+
 ## Exercises
 
 1. **Predict and explain.** Trace channel occupancy after each operation.
@@ -140,13 +144,15 @@ internal static class Program {
 
 6. **Transfer and justify.** Choose wait, reject or drop behavior for a workload and explain what evidence the producer receives.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Log each task in the [evidence table](../STUDY-GUIDE.md#recording-exercise-evidence) before opening the explanation.
 
 ## Common pitfalls and diagnosis
 
 An ignored false TryWrite result loses work. Blocking a producer while holding a lock needed by the consumer can deadlock. Completion and cancellation need a deliberate ownership policy.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+For task 4, an empty open channel is not finished: `TryRead` returns false while `Reader.Completion.IsCompleted` is still false. Only after `Complete()` and draining does `ReadAsync` throw `ChannelClosedException`. For task 5, completing with zero buffered items makes `ReadAllAsync` end immediately, and the loop body never runs.
+
+Repair routine: [building a regression case](../STUDY-GUIDE.md#building-a-regression-case).
 
 ## Progressive hints
 
@@ -156,11 +162,15 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 ## Self-check and next step
 
-Explain Backpressure, Admission, Drain without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+List the channel's contents after each operation in Example A. Explain what the producer must do with a false `TryWrite` result. For task 6, choose Wait, reject or DropOldest for a stream of sensor readings and for a stream of payments, and say what each producer learns.
+
+Then follow the general [self-check routine](../STUDY-GUIDE.md#self-check-routine) and save your pad.
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://learn.microsoft.com/en-us/dotnet/csharp/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+[Documentation](https://learn.microsoft.com/en-us/dotnet/csharp/): The .NET channels article covers bounded and unbounded channels, full modes, completion and the reader and writer APIs.
+
+Provenance and limits: [sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

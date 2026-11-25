@@ -1,6 +1,6 @@
 # java-024: explanatory solutions
 
-Open after an attempt or an explicit solution reveal. The executable reference runs the six exercise checks together as `Main.java`. The guide contains independent worked examples, while this file explains the choices and failure cases in the complete answer.
+Open this after an attempt; see [using the solutions](../STUDY-GUIDE.md#use-the-solutions).
 
 ## Mechanism review
 
@@ -22,7 +22,7 @@ Thread.ofVirtual starts a virtual thread; isVirtual identifies it. Executors.new
 
 ## Exercise 1: Observe virtual identity: predict an edited check
 
-Task: Copy Example A into a scratch `Main.java` and change `assert !task.isAlive() && virtual.get();` to `assert task.isAlive() && virtual.get();` inside its assertion. Before running it with `java -ea Main`, predict whether the assertion still holds and explain why; then restore it.
+Task: Change Example A's assertion to `assert task.isAlive() && virtual.get();`, predict whether it holds, then run and restore it.
 
 The identity check establishes the actual thread type. It does not measure performance or the number of carrier threads used.
 
@@ -35,13 +35,13 @@ task.join(2000);
 assert !task.isAlive() && virtual.get();
 ```
 
-**Expected:** The changed run fails with an `AssertionError` from the assertion on `!task.isAlive() && virtual.get()`. Restoring the original line brings back the worked observation: true and terminated.
+**Expected:** The edited run fails with an `AssertionError` from the assertion on `!task.isAlive() && virtual.get()`.
 
-**Verify:** Compare your written prediction with the reported `AssertionError` and its stack-trace line, and explain why the edited condition is false for the values that satisfy `!task.isAlive() && virtual.get()`. After restoring the line, the program completes without an `AssertionError` again.
+**Verify:** Explain why the edited assertion is false for the values that satisfy `!task.isAlive() && virtual.get()`.
 
 ## Exercise 2: Use a scoped virtual executor: debug a regression
 
-Task: A regression changed one token in the code that Example B adds after Example A, so one line now reads `for (int value = 1; value < 4; value++) {`. Run Example B with that line, use the failing assertion to locate the defect and repair it without changing the assertion.
+Task: A regression in Example B's new code makes one line read `for (int value = 1; value < 4; value++) {`. Repair it using the failing assertion.
 
 The executor lifetime encloses its tasks. Capturing a separate effectively-final input per submission avoids confusing loop-state ownership.
 
@@ -60,9 +60,9 @@ try (var executor = java.util.concurrent.Executors.newVirtualThreadPerTaskExecut
 }
 ```
 
-**Expected:** Before the repair the run fails with an `AssertionError` from the assertion on `results.equals(List.of(1, 4, 9, 16))`; after it the line reads `for (int value = 1; value <= 4; value++) {` again and 1, 4, 9, 16.
+**Expected:** The unrepaired run fails with an `AssertionError` from the assertion on `results.equals(List.of(1, 4, 9, 16))`; the repaired line reads `for (int value = 1; value <= 4; value++) {`.
 
-**Verify:** Keep the failing and the repaired runs. Explain why the changed token alters the value tested by `results.equals(List.of(1, 4, 9, 16))` for this input.
+**Verify:** Explain how the changed token alters the value that `results.equals(List.of(1, 4, 9, 16))` tests.
 
 ## Exercise 3: Limit a scarce resource with a semaphore
 
@@ -112,7 +112,7 @@ try (var executor = java.util.concurrent.Executors.newVirtualThreadPerTaskExecut
 
 **Expected:** maximum active count 2; all six complete.
 
-**Verify:** Keep an assertion equivalent to `completed == 6 && maximum.get() == 2`. As a control, change `for (int i = 0; i < 6; i++) futures.add(` to `for (int i = 0; i <= 6; i++) futures.add(`: the run must fail with an `AssertionError` from the assertion on `completed == 6 && maximum.get() == 2`. Restore the line before continuing.
+**Verify:** Control: changing `for (int i = 0; i < 6; i++) futures.add(` to `for (int i = 0; i <= 6; i++) futures.add(` must fail the assertion on `completed == 6 && maximum.get() == 2`.
 
 ## Exercise 4: Preserve a CPU calculation contract
 
@@ -137,7 +137,7 @@ try (var executor = java.util.concurrent.Executors.newVirtualThreadPerTaskExecut
 
 **Expected:** both 500500; no speed claim.
 
-**Verify:** Keep an assertion equivalent to `total == sequential && total == 500500`. As a control, change `for (int p = 0; p < 4; p++) {` to `for (int p = 0; p <= 4; p++) {`: the run must fail with an `AssertionError` from the assertion on `total == sequential && total == 500500`. Restore the line before continuing.
+**Verify:** Control: changing `for (int p = 0; p < 4; p++) {` to `for (int p = 0; p <= 4; p++) {` must fail the assertion on `total == sequential && total == 500500`.
 
 ## Exercise 5: Cancel a blocked virtual task
 
@@ -170,7 +170,7 @@ try (var executor = java.util.concurrent.Executors.newVirtualThreadPerTaskExecut
 
 **Expected:** Future cancelled; task exits cooperatively.
 
-**Verify:** Keep an assertion equivalent to `finished`. As a control, change `var exited = new java.util.concurrent.CountDownLatch(1);` to `var exited = new java.util.concurrent.CountDownLatch(2);`: the run must fail with an `AssertionError` from the assertion on `finished`. Restore the line before continuing.
+**Verify:** Control: changing `var exited = new java.util.concurrent.CountDownLatch(1);` to `var exited = new java.util.concurrent.CountDownLatch(2);` must fail the assertion on `finished`.
 
 ## Exercise 6: Keep a blocking wait outside a monitor
 
@@ -207,8 +207,10 @@ assert !worker.isAlive() && snapshot.get() == 7 && state[0] == 8;
 
 **Expected:** caller can acquire the monitor while the worker is waiting.
 
-**Verify:** Keep an assertion equivalent to `!worker.isAlive() && snapshot.get() == 7 && state[0] == 8`. As a control, change `var finish = new java.util.concurrent.CountDownLatch(1);` to `var finish = new java.util.concurrent.CountDownLatch(2);`: the run must fail with an `AssertionError` from the assertion on `!worker.isAlive() && snapshot.get() == 7 && state[0] == 8`. Restore the line before continuing.
+**Verify:** Control: changing `var finish = new java.util.concurrent.CountDownLatch(1);` to `var finish = new java.util.concurrent.CountDownLatch(2);` must fail the assertion on `!worker.isAlive() && snapshot.get() == 7 && state[0] == 8`.
 
 ## After comparing the answer
 
-Run the complete reference with assertions enabled, then return to your own implementation. Recreate one check with different values and explain its expected result before execution. A compiler error, an expected domain exception and an assertion failure represent different stages and should be reported separately. Preserve ownership boundaries when adapting file, network or concurrency examples. The reference never authorizes access to a shared service or deletion of learner state. Use a fresh tiny fixture when you need to distinguish two interpretations of an API contract.
+Raise the semaphore in your copy of Exercise 3 to three permits and change `entered` to wait for three tasks; predict the new maximum and then verify that every task still completes.
+
+Run the complete reference with `java -ea Main` first; the [review routine](../STUDY-GUIDE.md#use-the-solutions) covers the rest.

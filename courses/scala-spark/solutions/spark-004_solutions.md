@@ -1,6 +1,8 @@
 # spark-004: Explained reference solutions
 
-Read the [guide](../guides/spark-004.md) and attempt the [learner source](../lessons/spark-004.scala) first. The [complete reference](spark-004_solution.scala) contains each implementation and its assertions. Values, identity, missingness and failure behavior are separate checks; compilation alone does not establish any of them.
+Attempt the [guide](../guides/spark-004.md) exercises first.
+
+Reference: [complete Scala program](spark-004_solution.scala).
 
 ## Exercises and reasoning
 
@@ -140,4 +142,7 @@ expectIllegalArgument(groupedSummary(Seq(("", -5L))))
 
 ## Evidence and scope
 
-Run the complete reference using the same prepared profile as the learner source. Its assertions check normal values, malformed or boundary inputs and conservation where relevant. The final version line records the actual compiler/runtime family used. The reference is an executable explanation, not a hidden grading service or proof that a distributed Spark job would have the same performance characteristics.
+The reference asserts every result above against literal values typed from the five-amount fixture: the exact accepted and rejected sequences, `(4L, 225L)` for count and total, the multiplicity map, and the grouped report `A:(2, 200)`, `B:(2, 25)`. It also checks the boundaries that a happy-path test skips: an empty sequence stays empty and totals `(0L, 0L)`, an all-negative input moves every value to the rejected side, `Seq(Long.MaxValue, 1L)` fails checked addition instead of wrapping, and `Long.MaxValue` maps to `Long.MaxValue / 20L` in the fee policy.
+
+When every assertion holds, the program prints `spark-004: six reference contracts passed` and then the Scala and Java versions it actually ran with. That line tells you the contracts held on this one small fixture with this compiler. It does not show that a Spark `filter` or `groupBy` over partitioned data would keep the same order, because a distributed collection makes no ordering promise unless you sort it. The bag reasoning (multiplicity, conservation) is the part that carries over to Spark; the source order is not.
+

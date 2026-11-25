@@ -195,7 +195,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="dbt-026-explained-reference">dbt-026: explained reference<a class="heading-anchor" href="#dbt-026-explained-reference" aria-label="Link to this section">#</a></h2>
 <p>Deliver a complete local analytics product with a reviewable acceptance decision.</p>
-<p>The executable reference contains the two complete worked cases with assertions. The changes below explain the independent practice and its limits.</p>
+<p>The reference stages four raw orders into three accepted rows, joins them to the customer dimension and tests both keys. It writes a receipt only when the build passes, and a duplicate customer key blocks publication. The decision covers this fixture&#x27;s tests, not quality rules nobody stated. See <a href="../STUDY-GUIDE.md.html#answers-and-references">how these answers are laid out</a>.</p>
 <h3 id="1-change-a-valid-order">1. Change a valid order<a class="heading-anchor" href="#1-change-a-valid-order" aria-label="Link to this section">#</a></h3>
 <p>Verify the affected customer and overall total. Retain raw, accepted and rejected counts so the new result is explainable.</p>
 <p><strong>Expected:</strong> Counts and totals reconcile independently.</p>

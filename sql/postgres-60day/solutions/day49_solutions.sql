@@ -98,8 +98,8 @@ model_scores AS (
   ORDER BY
     model;
 
--- Exercise 2: forecast the next three months. This compact answer holds the
--- latest six-month average flat and blends it with each month last year.
+-- Exercise 2: backtest the 50/50 blend month by month. Both inputs end before
+-- the target month, and only months with a seasonal value a year earlier remain.
 WITH monthly AS (
   SELECT
     date_trunc('month', order_date)::date AS month,
@@ -109,34 +109,27 @@ WITH monthly AS (
   GROUP BY
     date_trunc('month', order_date)
 ),
-latest_six AS (
+forecasted AS (
   SELECT
-    AVG(revenue) AS ma6_forecast
-  FROM (
-    SELECT
-      revenue
-    FROM
-      monthly
-    ORDER BY
-      month DESC
-    LIMIT 6) recent
-),
-future AS (
-  SELECT
-    (date_trunc('month', CURRENT_DATE) + n * interval '1 month')::date AS forecast_month
+    month,
+    revenue,
+    LAG(revenue, 12) OVER (ORDER BY month) AS seasonal_naive,
+    AVG(revenue) OVER (ORDER BY month ROWS BETWEEN 6 PRECEDING AND 1 PRECEDING) AS ma6_forecast
   FROM
-    generate_series(1, 3) AS g (n))
+    monthly
+)
 SELECT
-  f.forecast_month,
-  ROUND(seasonal.revenue, 2) AS seasonal_naive,
-  ROUND(m.ma6_forecast, 2) AS ma6_forecast,
-  ROUND(0.5 * seasonal.revenue + 0.5 * m.ma6_forecast, 2) AS blended_forecast
+  month,
+  ROUND(revenue, 2) AS actual,
+  ROUND(seasonal_naive, 2) AS seasonal_naive,
+  ROUND(ma6_forecast, 2) AS ma6_forecast,
+  ROUND(0.5 * seasonal_naive + 0.5 * ma6_forecast, 2) AS blended_forecast
 FROM
-  future f
-  CROSS JOIN latest_six m
-  LEFT JOIN monthly seasonal ON seasonal.month = (f.forecast_month - interval '12 months')::date
+  forecasted
+WHERE
+  seasonal_naive IS NOT NULL
 ORDER BY
-  f.forecast_month;
+  month DESC;
 
 -- Exercise 3: the leaky frame includes the target actual; the honest frame ends
 -- at 1 PRECEDING. Display both to make the bias observable.

@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/docker/solutions/docker-016_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="docker-016-explanatory-solutions">docker-016: explanatory solutions<a class="heading-anchor" href="#docker-016-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit reveal. These explain the supplied teaching fixtures; they are not engine results. The mechanism is explained in <code>courses/docker/guides/docker-016.md</code>.</p>
+<p>These answers explain teaching fixtures, not engine results; the mechanism is in <a href="../guides/docker-016.md.html">the guide</a>.</p>
 <h3 id="exercise-1-locate-the-filesystem-used-by-copy-from">Exercise 1: Locate the filesystem used by COPY --from.<a class="heading-anchor" href="#exercise-1-locate-the-filesystem-used-by-copy-from" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> The named build stage.</p>
 <p><strong>Why:</strong> It is not a host path. This distinction lets the final stage copy exactly the artifact created by the build without relying on a developer’s local output directory.</p>
@@ -238,7 +238,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>A plausible wrong approach:</strong> Accepting the release because the builder stage tests passed checks a filesystem that will never ship.</p>
 <p><strong>How to verify:</strong> Record the image ID used in the acceptance run and deploy that same ID, not a rebuilt tag.</p>
 <h3 id="check-your-transfer">Check your transfer<a class="heading-anchor" href="#check-your-transfer" aria-label="Link to this section">#</a></h3>
-<p>A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.</p></article>
+<p>The binary is almost certainly dynamically linked, and the message refers to its program interpreter, the C library loader, which does not exist in a <code>scratch</code> image. The file is present, but the kernel cannot start it without the loader. Build a static binary, for example with <code>CGO_ENABLED=0</code>, or use a final base that provides the C library, then run the final image again. Running <code>file</code> on the binary in the build stage should say <code>statically linked</code> after the fix. If it already said that, the cause lies elsewhere, such as a wrong path in the entrypoint.</p></article>
   </main>
 </body>
 </html>

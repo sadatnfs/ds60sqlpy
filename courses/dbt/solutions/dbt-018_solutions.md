@@ -2,7 +2,7 @@
 
 Prepare and inspect a real reusable dbt dependency with an explicit source boundary.
 
-The executable reference contains the two complete worked cases with assertions. The changes below explain the independent practice and its limits.
+The reference declares a local package, runs `dbt deps`, and checks the manifest for `macro.classroom_utils.add_one`, the lock file and the value 42. It proves preparation of a local path dependency only; hub and git packages also involve network access and version resolution. See [how these answers are laid out](../STUDY-GUIDE.md#answers-and-references).
 
 
 ## 1. Inspect package identity

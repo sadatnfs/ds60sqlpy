@@ -1,6 +1,8 @@
 # csharp-047: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [csharp-047_solution.cs](csharp-047_solution.cs). It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.
+Reference program: [csharp-047_solution.cs](csharp-047_solution.cs), covering both examples and the executed answers.
+
+Attempt the tasks first; see [comparing with the explanation](../STUDY-GUIDE.md#comparing-with-the-explanation).
 
 ## Why the two examples differ
 
@@ -117,7 +119,7 @@ The ledger stores the payload with the receipt, so it can tell a retry from a di
 
 Design durable atomic storage for an effect and its receipt and state remaining failure modes.
 
-No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **Idempotency key**, and state one limitation of your choice.
+No single answer exists; extend task 3 using the [open transfer routine](../STUDY-GUIDE.md#open-transfer-tasks).
 
 ## Mechanism and diagnostic reasoning
 
@@ -131,4 +133,4 @@ This in-memory ledger does not survive restart and is not concurrent. A producti
 
 ## Review before continuing
 
-Run the reference and confirm that it prints `csharp-047: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.
+Run the reference and confirm it prints `csharp-047: passed`, then rerun the guide's counterexample.

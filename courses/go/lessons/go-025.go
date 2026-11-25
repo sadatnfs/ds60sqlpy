@@ -3,11 +3,11 @@ package main
 import "fmt"
 
 func main() {
-	// Exercise 1: Drain before iteration ends: change one input: Copy worked example 1 into a scratch pad and change `ch <- 2` to `ch <- 3`. Before running, predict which check fails and which value it now sees; then run it and restore the original line.
-	// Expected: The changed run panics with `drain` because `sum == 5` no longer holds. Restoring the original line brings back the worked observation: both values arrive and the sum is 5.
+	// Exercise 1: Drain before iteration ends: change one input: Copy worked example 1, change `ch <- 2` to `ch <- 3` and predict the failure before running; then restore the line.
+	// Expected: The edited run panics with `drain` because `sum == 5` no longer holds.
 
-	// Exercise 2: Distinguish zero from closed: debug a regression: A regression changed one token in worked example 2, so one line now reads `ch <- 1`. Run worked example 2 with that line, use the failure to locate the defect and repair it without changing the check.
-	// Expected: Before the repair the program panics with `closed presence`; after it the line reads `ch <- 0` again and the first zero has ok true; the second has ok false.
+	// Exercise 2: Distinguish zero from closed: debug a regression: A one-token regression in worked example 2 makes a line read `ch <- 1`. Repair it without changing the check.
+	// Expected: The defective run panics with `closed presence`; after restoring `ch <- 0`, the first zero has ok true; the second has ok false.
 
 	// Exercise 3: Use sender ownership: Run a producer sending 1 and 2 before closing output.
 	// Expected: The consumer receives exactly two values.

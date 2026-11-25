@@ -24,9 +24,9 @@ The browser pad exercises a pure endpoint decision kernel. The checked-in ApiLab
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles your saved pad as `Program.cs` in its fixed .NET 10 project. C# 14 is the matching language generation. This route uses the prepared framework libraries; it does not accept arbitrary project files, NuGet packages, command arguments or interactive input. The explicit `Program.Main` entrypoint makes compilation and execution visible. `Check` throws on a false condition in every build configuration, unlike conditional debugging assertions.
+`ApiDecision` and `ValidateCreate` sit after `Main`, so the portable pad tests the decision logic without starting a web host. The note below links to ApiLab, a separate ASP.NET project with its own preparation steps; it maps routes with `MapGet` and `MapPost` and keeps inventory in memory, so restarting it resets the sample data.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Compile contract, starter stop and success marker: [running a lesson](../STUDY-GUIDE.md#running-a-lesson).
 
 Continue with [ApiLab preparation and commands](../fixtures/ApiLab/README.md). Its complete project is separate from the classroom pad and needs a prepared .NET 10 SDK.
 
@@ -34,7 +34,7 @@ Continue with [ApiLab preparation and commands](../fixtures/ApiLab/README.md). I
 
 A pure mapping can return a status and body record. In the external project, MapGet and MapPost connect routes to handlers. Results.Ok, BadRequest and NotFound make transport outcomes explicit.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+Each example ends with a trace; method: [tracing a program](../STUDY-GUIDE.md#tracing-a-program).
 
 ## Worked example / walkthrough
 
@@ -84,6 +84,8 @@ internal static class Program {
 
 **Observe:** Valid input maps to the created outcome.
 
+**Trace.** `ValidateCreate("pear", 3)` evaluates the guard: the name is not blank and the quantity is not negative, so the conditional takes its second branch and returns `new(201, "accepted")`. The record exposes `Status` 201 and `Message` accepted, and the check reads both fields. Record value equality would also make it equal to a freshly built `ApiDecision(201, "accepted")`.
+
 ### Example B: Reject before claiming success
 
 The response category is part of the public contract and must not disagree with domain acceptance.
@@ -129,6 +131,8 @@ internal static class Program {
 
 **Observe:** Invalid requests produce 400 decisions.
 
+**Trace.** An empty name makes `string.IsNullOrWhiteSpace` true, and the `||` short-circuits straight to the 400 decision. With pear and -1, the name test is false but `quantity < 0` is true, so the result is again 400 with invalid. Neither call reaches the 201 branch, which is the property the check protects: rejection is decided before success is claimed.
+
 ## Exercises
 
 1. **Predict and explain.** Describe the valid request and its status/body contract.
@@ -143,13 +147,15 @@ internal static class Program {
 
 6. **Transfer and justify.** Design idempotent update behavior and explain how duplicate creation differs.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Log each task in the [evidence table](../STUDY-GUIDE.md#recording-exercise-evidence) before opening the explanation.
 
 ## Common pitfalls and diagnosis
 
 An offline kernel test does not prove endpoint routing, serialization or host startup. The external project intentionally uses in-memory state, so restarting loses its sample inventory. It is not a persistence claim.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+For task 5, quantity 0 is accepted under the current rule, because the guard rejects only negative values; if zero should fail, change the comparison and add a test that pins it. A null name also takes the 400 branch, although the compiler warns about passing null to a non-nullable string. For task 4, compute the decision first and build the response from it.
+
+Repair routine: [building a regression case](../STUDY-GUIDE.md#building-a-regression-case).
 
 ## Progressive hints
 
@@ -159,11 +165,15 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 ## Self-check and next step
 
-Explain Endpoint, Status mapping, Idempotency without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+Write the status and message for pear with 0, for a name of spaces with 5, and for pear with -2. Explain what the kernel test proves and what only a running ApiLab request can prove. For task 6, describe what a repeated PUT with the same body returns and how a repeated create differs.
+
+Then follow the general [self-check routine](../STUDY-GUIDE.md#self-check-routine) and save your pad.
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://learn.microsoft.com/en-us/dotnet/csharp/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+[Documentation](https://learn.microsoft.com/en-us/dotnet/csharp/): The C# guide covers records and conditional expressions; the ApiLab README covers the ASP.NET routing it uses.
+
+Provenance and limits: [sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

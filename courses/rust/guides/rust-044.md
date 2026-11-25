@@ -24,9 +24,11 @@ Arrow metadata can record application meaning such as units, but consumers must 
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles the saved pad as `main.rs` with pinned Rust 1.99.1, edition 2024, and the prepared Arrow 60 library. `assert!` and `assert_eq!` remain active in normal builds. The fixed pad accepts one source file without arbitrary arguments, interactive input, Cargo manifests or package installation. The main function returns `Result<(), Box<dyn std::error::Error>>` so later examples can propagate errors with `?`; the final `Ok(())` means this fixture completed successfully. Standard library and Arrow examples remain offline after image preparation. Multi-file Cargo and external ecosystem projects have separate explicit preparation workflows.
+Beyond the prelude, this lesson's programs use `arrow::array` and `arrow::datatypes`. A passing run prints `rust-044: passed`.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Pad setup and limits: [Run a lesson](../STUDY-GUIDE.md#run-a-lesson).
+
+Before you run anything, follow [Attempt a lesson](../STUDY-GUIDE.md#attempt-a-lesson).
 
 
 
@@ -34,7 +36,9 @@ Start with the answer-free learner artifact in your saved classroom pad. It deli
 
 Decimal128Array::with_precision_and_scale sets decimal interpretation. TimestampMillisecondArray carries a specific unit and can attach timezone metadata. data_type exposes the logical contract independently of physical integer access.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+**Reading Example A (Preserve decimal interpretation, code below).** `Decimal128Array::from(vec![125_i128, 250])` stores raw 128-bit integers, the coefficients. On its own the array has Arrow's default decimal type, so `with_precision_and_scale(10, 2)` attaches the contract: up to 10 significant decimal digits, 2 of them after the decimal point. It returns a `Result` because a precision or scale outside Decimal128's limits is rejected, and `?` propagates that error. `value(0)` returns the stored `i128` coefficient, not a decimal number; interpreting it requires the scale from the data type. `data_type()` returns a `&DataType`, which is why the expected value is borrowed. `DataType::Decimal128(10, 2)` is the enum variant that carries precision and scale together.
+
+Method for tracing your own variants: [Trace a program](../STUDY-GUIDE.md#trace-a-program).
 
 ## Worked example / walkthrough
 
@@ -92,13 +96,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 6. **Transfer and justify.** Plan a separately prepared Rust-to-PyArrow IPC round trip that checks schema, nulls, decimal scale and timestamp units in both languages.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Record each task as in [Keep evidence for each task](../STUDY-GUIDE.md#keep-evidence-for-each-task).
 
 ## Common pitfalls and diagnosis
 
 An integer cast is not a timestamp-unit conversion. Time-zone metadata is not a complete application scheduling policy. C Data Interface release callbacks and lifetime ownership require a reviewed FFI implementation.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+To turn a pitfall into a test, see [Design a regression case](../STUDY-GUIDE.md#design-a-regression-case).
 
 ## Progressive hints
 
@@ -106,13 +110,23 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 2. Compare Example B (Keep timestamp units explicit) with Example A and name the first line whose behavior differs. Its observation is: The second value is one thousand milliseconds after the epoch.
 3. Before opening the explanation, test your task 3 attempt against this lesson's main pitfall: An integer cast is not a timestamp-unit conversion.
 
+Tempting approaches to rule out before you compare:
+
+- **Task 1.** Reading `prices.value(0)` as the price gives 125, a hundred times too large, because it returns the coefficient.
+- **Task 2.** Storing -3.75 as `-375` in a column with scale 3 means -0.375; a value's coefficient is only correct under its column's scale.
+- **Task 5.** Filling the null price with 0 and the null time with 0 invents a free item measured at 1970-01-01.
+
 ## Self-check and next step
 
-Explain Decimal scale, Timestamp unit, Interchange contract without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+What value does coefficient 125 represent in a `Decimal128(10, 2)` column, and what would a receiver that assumed scale 3 report? Why is Example B's second timestamp 1000 in a millisecond column, and what would the same integer mean in seconds? Which parts of this contract must travel in the schema rather than in prose?
+
+Then work through [Self-check and review](../STUDY-GUIDE.md#self-check-and-review).
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://arrow.apache.org/docs/format/CDataInterface.html). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+Read [the Arrow C data interface specification](https://arrow.apache.org/docs/format/CDataInterface.html) for how decimal scale and timestamp units cross languages.
+
+What the classroom does and does not prove: [Sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

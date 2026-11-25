@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/r/solutions/r-025_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="r-025-reference-reasoning">r-025: reference reasoning<a class="heading-anchor" href="#r-025-reference-reasoning" aria-label="Link to this section">#</a></h2>
-<p>Use the <a href="r-025_reference.R.html">complete reference</a> with the guide&#x27;s declared inputs and runtime. Every worked example is also a standalone script.</p>
+<p>Run the <a href="r-025_reference.R.html">complete reference</a> under the <a href="../STUDY-GUIDE.md.html#run-a-chapter">run rules</a>.</p>
 <h3 id="why-the-implementation-has-this-shape">Why the implementation has this shape<a class="heading-anchor" href="#why-the-implementation-has-this-shape" aria-label="Link to this section">#</a></h3>
 <p>All four adapters converge on one ordinary record. The equal-record assertion compares values, type normalization and units, rather than merely comparing a final mean. The R6 copy test is intentionally limited to a returned numeric vector.</p>
 <p>The ggplot2 test exercises a public builder and checks actual layer coordinates. It remains valid without relying on the central plot object&#x27;s internal S3 or S7 layout. Empty values and nonfinite values take different paths under the declared contract: one yields a missing summary, the other is rejected.</p>
@@ -248,7 +248,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Tempting mistake:</strong> Reporting a mean of 0. A dashboard would show an empty period as zero latency, the best possible value, when it actually has no data.</p>
 <p><strong>Verify:</strong> <code>empty$count</code> returns 0L, <code>is.na(empty$mean)</code> returns TRUE, and <code>empty$unit</code> returns &quot;ms&quot;.</p>
 <h3 id="what-the-checks-establish">What the checks establish<a class="heading-anchor" href="#what-the-checks-establish" aria-label="Link to this section">#</a></h3>
-<p>The reference makes 9 <code>stopifnot()</code> checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.</p></article>
+<p>The checks confirm that each source object really belongs to its own system, S3, S4 and S7, that all four adapters produce identical records with mean 3, count 2L and unit ms, that the R6 adapter reads through public methods, that an empty record has count 0 and an NA mean, and that the built layer&#x27;s x and y equal the time and latency columns. They do not check rendered pixels.</p>
+<p>The reference makes 9 <code>stopifnot()</code> checks; see <a href="../STUDY-GUIDE.md.html#what-a-passing-run-proves">what a passing run proves</a>.</p></article>
   </main>
 </body>
 </html>

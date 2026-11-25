@@ -42,5 +42,7 @@
       "wrong": "Wrapping the whole batch in `suppressWarnings()`. A new warning from a later parser change disappears with no record.",
       "verify": "In Example 2 `warnings_seen` returns the one recorded notice and `value` is 4."
     }
-  ]
+  ],
+  "run_note": "The starter holds three text inputs, \"12\", \"0\" and \"bad\", and prints them. Run it, then parse each one inside a handler that records status, value and message rather than stopping the script. The zero is a valid parse and must report success with value 0, while \"bad\" must report failure with its diagnostic kept.",
+  "checks_note": "The assertions confirm that \"0\" parses successfully to 0L, that \"bad\" is reported as a failure, that an integer overflow string and a non-character input are both rejected instead of coerced, and that the `on.exit()` cleanup restores the `digits` option. They do not prove that your handler lets unexpected programming errors propagate instead of absorbing them."
 }

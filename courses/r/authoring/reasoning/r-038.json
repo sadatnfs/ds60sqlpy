@@ -42,5 +42,7 @@
       "wrong": "Applying 0.75 to the new population as though the share of A were a fixed property of alerts.",
       "verify": "Computing `0.3 * 0.05 / (0.3 * 0.05 + 0.1 * 0.95)` returns about 0.136."
     }
-  ]
+  ],
+  "run_note": "The starter prints a two by two count table: group A has 30 yes and 70 no, group B has 10 yes and 90 no. Run it and compute two different conditionals by hand: the share of A that says yes is 0.3, while the share of yes answers that come from A is 30 of 40, which is 0.75. Name the conditioning event in every variable.",
+  "checks_note": "The checks confirm that the yes column totals 40 with 0.75 of it from A, that an alert rate of 0.14 and Bayes' rule give 3/7, that joint probabilities sum to 1, that dividing by a zero count returns NA, and that conditioning on the row total gives 0.3 while conditioning on the column total gives 0.75. They only cover this finite table."
 }

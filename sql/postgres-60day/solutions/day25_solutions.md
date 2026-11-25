@@ -4,56 +4,26 @@
 <!-- beginner-solution-enrichment -->
 ## How to study and run this solution
 
-Open this explanation only after making an honest attempt. The executable
-companion runs solely against the disposable `advanced_sql_training` database:
+All six answers read `employees` and `departments` only, inside
+`BEGIN`/`ROLLBACK` with `search_path` set to `training`, so running the file
+changes nothing. Run each CTE as its own `SELECT` first and compare its row
+count with the notes below; the method is described in
+[Read a solution](../../STUDY-GUIDE.md#read-a-solution).
 
 ```bash
-# Linux, macOS, or Windows through WSL 2, from the repository root
 psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
   -f sql/postgres-60day/solutions/day25_solutions.sql
 ```
 
-`psql` prints each result/command tag in the terminal. Stop at the first
-unexpected `ERROR`; later output cannot repair an earlier failed invariant.
-Compare your own SQL, row grain, column names, row counts, `NULL` policy, and
-ordering with the explanation before comparing syntax.
+## How these answers fit together
 
-## Clause-by-clause reading map
-
-The lesson's main concepts are CTE pipeline, Hierarchy enrichment, Stage invariant. Its worked-model focus is:
-Build the employee hierarchy separately and validate `(employee_id, depth)`. Build department aggregates separately at one row per department. Join them only after both grains are stable, so a department measure is not accidentally re-aggregated across hierarchy paths.
-
-- Start at `FROM`/`JOIN` and state the intermediate row grain. Inspect join keys
-  before adding aggregates; a one-to-many join is allowed to multiply rows only
-  when the later contract accounts for it.
-- Apply `WHERE` to input rows, `GROUP BY` to form buckets, and `HAVING` to
-  completed groups. Window functions run over the surviving relation and
-  normally preserve its row count.
-- Read the `SELECT` list as the public result contract: keys establish grain,
-  measures state calculations, and aliases explain meaning. `ORDER BY` is the
-  only output-order guarantee; add a unique tie-breaker before `LIMIT`.
-- Trace every common table expression (CTE) as a temporary named relation.
-  Execute or inspect one stage at a time while debugging, but compare the final
-  result with an independent control rather than trusting stage names.
-- Keep SQL `NULL` as “missing/unknown/not applicable” until the metric contract
-  chooses another representation. Guard division with `NULLIF`; disclose
-  exclusions and distinguish zero from no row.
-- For DDL/DML, a command tag proves only that PostgreSQL accepted a statement.
-  Catalog checks, negative cases, row-count reconciliation, and the declared
-  transaction boundary prove behavior and cleanup.
-
-The exact final queries are not the only valid syntax. A join, subquery, CTE,
-window, or conditional aggregate can be an alternative when it preserves the
-same grain, `NULL` semantics, deterministic ordering, and safety. Prefer the
-form whose intermediate relations a reviewer can verify; optimize only after
-correctness is established with evidence.
-
-These answers align one-for-one with [day25_multiple_ctes_hierarchies.sql](../day25_multiple_ctes_hierarchies.sql).
-Run only against the disposable `advanced_sql_training` database.
-The executable companion wraps every answer in `BEGIN`/`ROLLBACK`.
-The snippets below assume the lesson's
-`SET search_path TO training, public;` statement. Run the complete
-executable companion when you want a self-contained check.
+The hierarchy has 100 employees, 6 roots, 3 managers (employees 1, 2 and 8)
+and 97 leaves. The answers ask for different grains over it: one row per depth,
+per direct team, per root or leaf label, a single reachability check, one row
+per manager's full subtree and one per department. Keep the company payroll of
+4,399,909.50 in mind, since any per-employee breakdown should add back to it.
+The learner file is
+[day25_multiple_ctes_hierarchies.sql](../day25_multiple_ctes_hierarchies.sql).
 
 ## Reading contract
 
@@ -68,17 +38,6 @@ executable companion when you want a self-contained check.
 **Prompt:** Build a root-based organization CTE and report headcount and payroll by depth.
 
 **Reasoning:** Assign depth during recursion, then aggregate employee rows once.
-
-**Clause-by-clause reading:**
-
-- `WITH RECURSIVE`: defines the anchor and repeated step; the stop or cycle rule is part of correctness.
-- `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
-- `FROM`: establishes the starting relation and therefore the initial row grain.
-- `JOIN ... ON`: combines relations and may multiply rows; the match predicate and each input's grain must agree.
-- `WHERE`: filters source rows before grouping and window calculation; SQL's unknown NULL comparisons do not pass.
-- `GROUP BY`: collapses input rows to the listed key grain; every non-aggregated selected value must belong to that grain.
-- set operation: combines compatible result shapes; the presence or absence of `ALL` controls duplicate preservation.
-- `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 
 ```sql
 WITH RECURSIVE organization AS (
@@ -118,35 +77,21 @@ ORDER BY
 
 **Expected shape:** One row per hierarchy depth.
 
-Check the result at the stated grain. An alternative formulation is
-valid only if it preserves the same NULL, ordering, time, money, and
-cardinality contract.
-
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-25 Exercise 1, read from `employees`, and `organization`. Build the answer toward `depth`, `headcount`, and `payroll`; keep `depth` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-25 Exercise 1, expected output: One row per hierarchy depth. The final columns are `depth`, `headcount`, and `payroll`. The final order is `depth`.
-- **Independent verification:** For sql-25 Exercise 1, independently aggregate `employees`, and `organization` by `depth`; require one output row for every distinct `depth` tuple and compare `headcount`, and `payroll` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `headcount`, and `payroll` for the existing `depth` tuple and verify the new tuple appears exactly once.
-- **Intermediate relation check:** For sql-25 Exercise 1, start with the first relation in `employees`, and `organization`; after each join, record total rows and distinct `depth` so the exact fanout or loss is visible.
-- **Clause check:** For sql-25 Exercise 1, the solution actually uses `WITH`, `FROM`, `JOIN ... ON`, `WHERE`, `GROUP BY`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `employees`, and `organization`, preserve one row per `depth`, and finish with `depth`, `headcount`, and `payroll` ordered by `depth`.
-- **Alternative/trade-off:** For sql-25 Exercise 1, the chosen form is justified by this lesson-specific rationale: Assign depth during recursion, then aggregate employee rows once. Evaluate another form against the concrete expected result (One row per hierarchy depth) and the verification above.
-- **Edge case:** Add one row to an existing group and one row for a new group; recompute `headcount`, and `payroll` for the existing `depth` tuple and verify the new tuple appears exactly once.
+- **Inputs/evidence:** For sql-25 Exercise 1, read `employees`: the recursive `organization` CTE starts at the 6 roots with `manager_id IS NULL`, carries each child's `salary` and `depth`, and guards against cycles with `path`; the outer query groups that CTE by `depth`.
+- **Expected result/shape:** For sql-25 Exercise 1, expected output: exactly 3 rows, depth 0 with 6 people and 241662.99 payroll, depth 1 with 2 and 81187.85, and depth 2 with 92 and 4077058.66. The final columns are `depth`, `headcount`, and `payroll`. The final order is `depth`.
+- **Independent verification:** For sql-25 Exercise 1, confirm the headcounts add to 100 and the payrolls to 4399909.50, matching `SELECT COUNT(*), ROUND(SUM(salary), 2) FROM employees`, and that the depth-1 payroll equals the two single-report payrolls in Exercise 2 (40633.52 + 40554.33); then, inside `BEGIN ... ROLLBACK`, set `manager_id = 9` for employee 1 and confirm only 5 people remain at depth 0 and 1 at depth 1.
+- **Intermediate relation check:** `organization` returns 100 rows, one per employee, with `depth` 0 for the 6 roots, 1 for employees 7 and 8, and 2 for the 92 people under employee 8.
+- **Clause check:** Grouping by `depth` gives three rows: 6 people with payroll 241,662.99, 2 with 81,187.85 and 92 with 4,077,058.66. Rounding happens once, after `SUM`, so the three payrolls add up to exactly 4,399,909.50.
+- **Alternative/trade-off:** Carrying `salary` through the recursion avoids a second join to `employees` after the walk. Joining back by `employee_id` instead is also correct here, because the CTE holds each employee once.
+- **Edge case:** Roots start at depth 0 in this answer, while the lesson's Example 1 starts them at 1. Both are fine as long as you say which you used; the headcounts per level do not change.
 
 ## Exercise 2: Query writing
 
 **Prompt:** Report each manager's direct-report count and payroll.
 
 **Reasoning:** Direct-team grain needs one self join, not full recursive descendants.
-
-**Clause-by-clause reading:**
-
-- `WITH`: names an intermediate relation so its grain can be checked before later joins or aggregation.
-- `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
-- `FROM`: establishes the starting relation and therefore the initial row grain.
-- `JOIN ... ON`: combines relations and may multiply rows; the match predicate and each input's grain must agree.
-- `WHERE`: filters source rows before grouping and window calculation; SQL's unknown NULL comparisons do not pass.
-- `GROUP BY`: collapses input rows to the listed key grain; every non-aggregated selected value must belong to that grain.
-- `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 
 ```sql
 WITH direct_teams AS (
@@ -176,34 +121,21 @@ ORDER BY
 
 **Expected shape:** One row per manager with at least one direct report.
 
-Check the result at the stated grain. An alternative formulation is
-valid only if it preserves the same NULL, ordering, time, money, and
-cardinality contract.
-
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-25 Exercise 2, read from `employees`. Build the answer toward `employee_id`, `full_name`, `direct_reports`, and `direct_report_payroll`; keep `employee_id` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-25 Exercise 2, expected output: One row per manager with at least one direct report. The final columns are `employee_id`, `full_name`, `direct_reports`, and `direct_report_payroll`. The final order is `dt.direct_reports DESC, manager.employee_id`.
-- **Independent verification:** For sql-25 Exercise 2, project `employee_id` plus the raw source columns from `employees` at each join stage; record row count and distinct `employee_id`, then assert the final `employee_id`, `full_name`, `direct_reports`, and `direct_report_payroll` values match those staged rows without unintended fanout or loss. Add one source row with a new `employee_id`; verify the result gains exactly one row carrying that `employee_id` value.
-- **Intermediate relation check:** For sql-25 Exercise 2, run `direct_teams` one at a time. Record each CTE's row count and `employee_id` uniqueness before the next stage uses it.
-- **Clause check:** For sql-25 Exercise 2, the solution actually uses `WITH`, `FROM`, `JOIN ... ON`, `WHERE`, `GROUP BY`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `employees`, preserve one row per `employee_id`, and finish with `employee_id`, `full_name`, `direct_reports`, and `direct_report_payroll` ordered by `dt.direct_reports DESC, manager.employee_id`.
-- **Alternative/trade-off:** For sql-25 Exercise 2, the chosen form is justified by this lesson-specific rationale: Direct-team grain needs one self join, not full recursive descendants. Evaluate another form against the concrete expected result (One row per manager with at least one direct report) and the verification above.
-- **Edge case:** Add one source row with a new `employee_id`; verify the result gains exactly one row carrying that `employee_id` value.
+- **Inputs/evidence:** For sql-25 Exercise 2, read `employees` once in `direct_teams`, grouping the 94 rows with a non-NULL `manager_id` by that `manager_id`, then join the CTE back to `employees` as `manager` to fetch `full_name`.
+- **Expected result/shape:** For sql-25 Exercise 2, expected output: exactly 3 rows, employee 8 with 92 direct reports and 4077058.66 of payroll, then employees 1 and 2 with 1 report each (40633.52 and 40554.33). The final columns are `employee_id`, `full_name`, `direct_reports`, and `direct_report_payroll`. The final order is `dt.direct_reports DESC, manager.employee_id`.
+- **Independent verification:** For sql-25 Exercise 2, confirm the `direct_reports` values add to 94 and the payrolls to 4158246.51, matching `SELECT COUNT(*), ROUND(SUM(salary), 2) FROM employees WHERE manager_id IS NOT NULL`, and that `SELECT COUNT(DISTINCT manager_id) FROM employees` also returns 3; employees 1 and 2 tie at one report, so only the `manager.employee_id` tiebreaker keeps employee 1 ahead.
+- **Intermediate relation check:** `direct_teams` groups the 94 employees who have a manager and returns 3 rows: manager 8 with 92 reports, and managers 1 and 2 with one each.
+- **Clause check:** Joining `direct_teams` back to `employees` by `manager.employee_id = dt.manager_id` adds the manager's name without changing the row count. Employee 8's direct payroll of 4,077,058.66 is the same as the depth-2 payroll from the first answer, because those are the same 92 people.
+- **Alternative/trade-off:** Grouping a self join directly, `employees AS manager JOIN employees AS report`, gives the same three rows. The CTE keeps the aggregate separate from the name lookup, which makes each step easy to check on its own.
+- **Edge case:** Employees with no reports never appear, because the inner join drops them. Use a left join and `COALESCE(dt.direct_reports, 0)` if the report must list every employee.
 
 ## Exercise 3: Query writing
 
 **Prompt:** Identify hierarchy roots and leaves in one report.
 
 **Reasoning:** Create root and leaf CTEs at employee grain, then union compatible labeled rows.
-
-**Clause-by-clause reading:**
-
-- `WITH`: names an intermediate relation so its grain can be checked before later joins or aggregation.
-- `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
-- `FROM`: establishes the starting relation and therefore the initial row grain.
-- `WHERE`: filters source rows before grouping and window calculation; SQL's unknown NULL comparisons do not pass.
-- set operation: combines compatible result shapes; the presence or absence of `ALL` controls duplicate preservation.
-- `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 
 ```sql
 WITH roots AS (
@@ -249,34 +181,21 @@ ORDER BY
 
 **Expected shape:** One labeled row per root or leaf employee.
 
-Check the result at the stated grain. An alternative formulation is
-valid only if it preserves the same NULL, ordering, time, money, and
-cardinality contract.
-
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-25 Exercise 3, read from `employees`. Build the answer toward `node_type`, `employee_id`, and `full_name`; keep `employee_id` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-25 Exercise 3, expected output: One labeled row per root or leaf employee. The final columns are `node_type`, `employee_id`, and `full_name`. The final order is `node_type, employee_id`.
-- **Independent verification:** For sql-25 Exercise 3, reselect the returned keys directly from the source; require unique `employee_id` where the expected grain is one row per key and confirm the projected `node_type`, `employee_id`, and `full_name` against `employees`. Add one source row with a new `employee_id`; verify the result gains exactly one row carrying that `employee_id` value.
-- **Intermediate relation check:** For sql-25 Exercise 3, run `roots`, and `leaves` one at a time. Record each CTE's row count and `employee_id` uniqueness before the next stage uses it.
-- **Clause check:** For sql-25 Exercise 3, the solution actually uses `WITH`, `FROM`, `WHERE`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `employees`, preserve one row per `employee_id`, and finish with `node_type`, `employee_id`, and `full_name` ordered by `node_type, employee_id`.
-- **Alternative/trade-off:** For sql-25 Exercise 3, the chosen form is justified by this lesson-specific rationale: Create root and leaf CTEs at employee grain, then union compatible labeled rows. Evaluate another form against the concrete expected result (One labeled row per root or leaf employee) and the verification above.
-- **Edge case:** Add one source row with a new `employee_id`; verify the result gains exactly one row carrying that `employee_id` value.
+- **Inputs/evidence:** For sql-25 Exercise 3, read `employees` in two CTEs: `roots` keeps the 6 rows with `manager_id IS NULL`, and `leaves` keeps rows for which `NOT EXISTS` finds no child pointing at them; the outer query labels each CTE and stacks them with `UNION ALL`.
+- **Expected result/shape:** For sql-25 Exercise 3, expected output: 103 rows, 97 `leaf` rows followed by 6 `root` rows (employees 1 through 6); employees 3, 4, 5, and 6 appear twice because they have no manager and no reports. The final columns are `node_type`, `employee_id`, and `full_name`. The final order is `node_type, employee_id`.
+- **Independent verification:** For sql-25 Exercise 3, count rows by `node_type` and confirm 97 and 6, and that `SELECT employee_id FROM employees e WHERE manager_id IS NULL AND NOT EXISTS (SELECT 1 FROM employees c WHERE c.manager_id = e.employee_id)` returns exactly 3, 4, 5, and 6; then rewrite the leaf test as `employee_id NOT IN (SELECT manager_id FROM employees)` and confirm it returns 0 leaves, because the 6 NULL `manager_id` values make every `NOT IN` test unknown.
+- **Intermediate relation check:** `roots` has 6 rows and `leaves` has 97. Employees 3, 4, 5 and 6 are in both, because they have no manager and nobody reports to them.
+- **Clause check:** `UNION ALL` keeps all 103 labeled rows, so those four employees appear once as `leaf` and once as `root`. Sorting by `node_type` puts the 97 `leaf` rows before the 6 `root` rows, because the labels sort alphabetically.
+- **Alternative/trade-off:** `NOT EXISTS` is the safe way to find leaves. Writing `employee_id NOT IN (SELECT manager_id FROM employees)` returns no rows, because that list contains `NULL` for every root, and a comparison with `NULL` is never true.
+- **Edge case:** The independent check asks for unique `employee_id`, which fails for those four employees. The pair (`node_type`, `employee_id`) is unique, and that is the real key of this result.
 
 ## Exercise 4: Prediction
 
 **Prompt:** Count employees reachable from roots and compare with total employees.
 
 **Reasoning:** A correct acyclic traversal should reach every employee exactly once in this parent-pointer schema.
-
-**Clause-by-clause reading:**
-
-- `WITH RECURSIVE`: defines the anchor and repeated step; the stop or cycle rule is part of correctness.
-- `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
-- `FROM`: establishes the starting relation and therefore the initial row grain.
-- `JOIN ... ON`: combines relations and may multiply rows; the match predicate and each input's grain must agree.
-- `WHERE`: filters source rows before grouping and window calculation; SQL's unknown NULL comparisons do not pass.
-- set operation: combines compatible result shapes; the presence or absence of `ALL` controls duplicate preservation.
 
 ```sql
 WITH RECURSIVE organization AS (
@@ -314,36 +233,21 @@ FROM
 
 **Expected shape:** One row with zero unreachable employees.
 
-Check the result at the stated grain. An alternative formulation is
-valid only if it preserves the same NULL, ordering, time, money, and
-cardinality contract.
-
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-25 Exercise 4, read from `employees`, and `organization`. Build the answer toward `all_employees`, `reachable_employees`, and `unreachable_employees`; keep `employee_id` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-25 Exercise 4, expected output: One row with zero unreachable employees. The final columns are `all_employees`, `reachable_employees`, and `unreachable_employees`.
-- **Independent verification:** For sql-25 Exercise 4, project `employee_id` plus the raw source columns from `employees`, and `organization` at each join stage; record row count and distinct `employee_id`, then assert the final `all_employees`, `reachable_employees`, and `unreachable_employees` values match those staged rows without unintended fanout or loss. Add one source row with a new `employee_id`; verify the result gains exactly one row carrying that `employee_id` value.
-- **Intermediate relation check:** For sql-25 Exercise 4, start with the first relation in `employees`, and `organization`; after each join, record total rows and distinct `employee_id` so the exact fanout or loss is visible.
-- **Clause check:** For sql-25 Exercise 4, the solution actually uses `WITH`, `FROM`, `JOIN ... ON`, `WHERE`, and `SELECT`. Read only those operations: begin at `employees`, and `organization`, preserve one row per `employee_id`, and finish with `all_employees`, `reachable_employees`, and `unreachable_employees`.
-- **Alternative/trade-off:** For sql-25 Exercise 4, the chosen form is justified by this lesson-specific rationale: A correct acyclic traversal should reach every employee exactly once in this parent-pointer schema. Evaluate another form against the concrete expected result (One row with zero unreachable employees) and the verification above.
-- **Edge case:** Add one source row with a new `employee_id`; verify the result gains exactly one row carrying that `employee_id` value.
+- **Inputs/evidence:** For sql-25 Exercise 4, read `employees` twice: the recursive `organization` CTE walks down from the 6 roots with a `path` guard, and two scalar subqueries count the full table; the outer query compares `COUNT(DISTINCT employee_id)` from the CTE with that total and has no `GROUP BY`.
+- **Expected result/shape:** For sql-25 Exercise 4, expected output: exactly one row, 100 `all_employees`, 100 `reachable_employees`, and 0 `unreachable_employees`. The final columns are `all_employees`, `reachable_employees`, and `unreachable_employees`.
+- **Independent verification:** For sql-25 Exercise 4, confirm the CTE returns 100 rows and 100 distinct `employee_id` values, so no employee is reached twice; then, inside `BEGIN ... ROLLBACK`, run `UPDATE employees SET manager_id = 9 WHERE employee_id = 1` and confirm the row changes to 100, 6, and 94, because employee 1, employee 8, and the 92 reports under 8 form a loop with no root.
+- **Intermediate relation check:** `organization` returns exactly 100 rows with 100 distinct ids, which means the walk reached every employee and none twice.
+- **Clause check:** The two scalar subqueries count `employees` again, independently of the walk, so the result is one row: 100, 100 and 0. Because there is no `GROUP BY`, `COUNT(DISTINCT employee_id)` runs over the whole CTE.
+- **Alternative/trade-off:** An anti-join, `employees LEFT JOIN organization ... WHERE organization.employee_id IS NULL`, would list the unreachable people by id. That is more useful when the count is not 0.
+- **Edge case:** An employee whose `manager_id` points at a missing id, or two employees who manage each other, would never be reached from a root. The count would then show 99 or 98 reachable and a nonzero gap.
 
 ## Exercise 5: Debugging
 
 **Prompt:** Calculate full-subtree report counts per manager without counting the manager as their own report.
 
 **Reasoning:** Seed direct edges and recurse descendants while carrying the original manager.
-
-**Clause-by-clause reading:**
-
-- `WITH RECURSIVE`: defines the anchor and repeated step; the stop or cycle rule is part of correctness.
-- `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
-- `FROM`: establishes the starting relation and therefore the initial row grain.
-- `JOIN ... ON`: combines relations and may multiply rows; the match predicate and each input's grain must agree.
-- `WHERE`: filters source rows before grouping and window calculation; SQL's unknown NULL comparisons do not pass.
-- `GROUP BY`: collapses input rows to the listed key grain; every non-aggregated selected value must belong to that grain.
-- set operation: combines compatible result shapes; the presence or absence of `ALL` controls duplicate preservation.
-- `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 
 ```sql
 WITH RECURSIVE descendants AS (
@@ -379,36 +283,21 @@ ORDER BY
 
 **Expected shape:** One row per manager with descendant count.
 
-Check the result at the stated grain. An alternative formulation is
-valid only if it preserves the same NULL, ordering, time, money, and
-cardinality contract.
-
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-25 Exercise 5, read from `employees`, and `descendants`. Build the answer toward `manager_id`, and `all_descendant_reports`; keep `manager_id` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-25 Exercise 5, expected output: One row per manager with descendant count. The final columns are `manager_id`, and `all_descendant_reports`. The final order is `all_descendant_reports DESC, manager_id`.
-- **Independent verification:** For sql-25 Exercise 5, independently aggregate `employees`, and `descendants` by `manager_id`; require one output row for every distinct `manager_id` tuple and compare `all_descendant_reports` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `all_descendant_reports` for the existing `manager_id` tuple and verify the new tuple appears exactly once.
-- **Intermediate relation check:** For sql-25 Exercise 5, start with the first relation in `employees`, and `descendants`; after each join, record total rows and distinct `manager_id` so the exact fanout or loss is visible.
-- **Clause check:** For sql-25 Exercise 5, the solution actually uses `WITH`, `FROM`, `JOIN ... ON`, `WHERE`, `GROUP BY`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `employees`, and `descendants`, preserve one row per `manager_id`, and finish with `manager_id`, and `all_descendant_reports` ordered by `all_descendant_reports DESC, manager_id`.
-- **Alternative/trade-off:** For sql-25 Exercise 5, the chosen form is justified by this lesson-specific rationale: Seed direct edges and recurse descendants while carrying the original manager. Evaluate another form against the concrete expected result (One row per manager with descendant count) and the verification above.
-- **Edge case:** Add one row to an existing group and one row for a new group; recompute `all_descendant_reports` for the existing `manager_id` tuple and verify the new tuple appears exactly once.
+- **Inputs/evidence:** For sql-25 Exercise 5, read `employees` twice in the anchor of the recursive `descendants` CTE (each manager joined to direct children, with `path` seeded as `ARRAY[parent, child]`), then keep joining children of `report_id`; the outer query groups by `manager_id`.
+- **Expected result/shape:** For sql-25 Exercise 5, expected output: exactly 3 rows, manager 1 with 93 descendants, manager 8 with 92, and manager 2 with 1. The final columns are `manager_id`, and `all_descendant_reports`. The final order is `all_descendant_reports DESC, manager_id`.
+- **Independent verification:** For sql-25 Exercise 5, confirm manager 8's 92 matches `SELECT COUNT(*) FROM employees WHERE manager_id = 8`, manager 1's 93 is that 92 plus employee 8 itself, `COUNT(*)` equals `COUNT(DISTINCT report_id)` for each manager, and no row has `report_id = manager_id`; then, inside `BEGIN ... ROLLBACK`, set `manager_id = 9` for employee 1 and confirm managers 1, 8, and 9 each return 93 and still never count themselves.
+- **Intermediate relation check:** `descendants` starts from the 94 manager-report edges and adds the 92 pairs that link manager 1 to the people under employee 8, giving 186 pairs.
+- **Clause check:** Grouping by the carried `manager_id` gives three rows: manager 1 with 93 reports, manager 8 with 92 and manager 2 with 1. The anchor never pairs a manager with themselves, which is why nobody is counted as their own report.
+- **Alternative/trade-off:** `COUNT(DISTINCT report_id)` equals `COUNT(*)` here, because each employee has one manager and can be reached by only one path. The `DISTINCT` is a safety net if the data ever allowed two paths to the same person.
+- **Edge case:** Summing salaries over these pairs counts employees 9 to 100 twice, giving 8,235,305.17 across all subtrees. Report subtree payrolls per manager only, never added together.
 
 ## Exercise 6: Extension
 
 **Prompt:** Report department headcount split between managers and nonmanagers.
 
 **Reasoning:** First derive the manager ID set, then conditionally aggregate employees once.
-
-**Clause-by-clause reading:**
-
-- `WITH`: names an intermediate relation so its grain can be checked before later joins or aggregation.
-- `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
-- `FROM`: establishes the starting relation and therefore the initial row grain.
-- `JOIN ... ON`: combines relations and may multiply rows; the match predicate and each input's grain must agree.
-- `WHERE`: filters source rows before grouping and window calculation; SQL's unknown NULL comparisons do not pass.
-- `GROUP BY`: collapses input rows to the listed key grain; every non-aggregated selected value must belong to that grain.
-- `FILTER (WHERE ...)`: limits one aggregate without removing rows needed by neighboring aggregates.
-- `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 
 ```sql
 WITH managers AS (
@@ -438,24 +327,20 @@ ORDER BY
 
 **Expected shape:** One row per department.
 
-Check the result at the stated grain. An alternative formulation is
-valid only if it preserves the same NULL, ordering, time, money, and
-cardinality contract.
-
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-25 Exercise 6, read from `employees`, and `departments`. Build the answer toward `department_id`, `name`, `headcount`, `managers`, and `nonmanagers`; keep `department_id`, and `name` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-25 Exercise 6, expected output: One row per department. The final columns are `department_id`, `name`, `headcount`, `managers`, and `nonmanagers`. The final order is `d.department_id`.
-- **Independent verification:** For sql-25 Exercise 6, independently aggregate `employees`, and `departments` by `department_id`, and `name`; require one output row for every distinct `department_id`, and `name` tuple and compare `headcount`, `managers`, and `nonmanagers` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `headcount`, `managers`, and `nonmanagers` for the existing `department_id`, and `name` tuple and verify the new tuple appears exactly once.
-- **Intermediate relation check:** For sql-25 Exercise 6, run `managers` one at a time. Record each CTE's row count and `department_id`, and `name` uniqueness before the next stage uses it.
-- **Clause check:** For sql-25 Exercise 6, the solution actually uses `WITH`, `FROM`, `JOIN ... ON`, `WHERE`, aggregate `FILTER`, `GROUP BY`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `employees`, and `departments`, preserve one row per `department_id`, and `name`, and finish with `department_id`, `name`, `headcount`, `managers`, and `nonmanagers` ordered by `d.department_id`.
-- **Alternative/trade-off:** For sql-25 Exercise 6, the chosen form is justified by this lesson-specific rationale: First derive the manager ID set, then conditionally aggregate employees once. Evaluate another form against the concrete expected result (One row per department) and the verification above.
-- **Edge case:** Add one row to an existing group and one row for a new group; recompute `headcount`, `managers`, and `nonmanagers` for the existing `department_id`, and `name` tuple and verify the new tuple appears exactly once.
+- **Inputs/evidence:** For sql-25 Exercise 6, read all 6 `departments`, `LEFT JOIN` their 100 `employees`, and `LEFT JOIN` the `managers` CTE, which holds the 3 distinct non-NULL `manager_id` values; the `FILTER` clauses split each department's count on whether that join found a match.
+- **Expected result/shape:** For sql-25 Exercise 6, expected output: exactly 6 rows; Sales has 17 people (1 manager), Engineering 17 (2 managers), HR and Finance 17 each, and Marketing and Operations 16 each, all with 0 managers. The final columns are `department_id`, `name`, `headcount`, `managers`, and `nonmanagers`. The final order is `d.department_id`.
+- **Independent verification:** For sql-25 Exercise 6, confirm `headcount` adds to 100, `managers` adds to 3, and `managers + nonmanagers = headcount` on every row; then, inside `BEGIN ... ROLLBACK`, run `INSERT INTO departments (department_id, name) VALUES (7, 'Legal')` and confirm a seventh row with 0, 0, and 0, while `COUNT(*)` would wrongly report 1 for that empty department.
+- **Intermediate relation check:** The `managers` CTE has 3 rows (employees 1, 2 and 8). Without `DISTINCT` it would keep all 94 `manager_id` values.
+- **Clause check:** The two left joins keep every department and every employee. `FILTER (WHERE m.employee_id IS NOT NULL)` counts managers: 1 in Sales, 2 in Engineering and 0 elsewhere. Headcounts are 17, 17, 17, 17, 16 and 16, and each row's two parts add up to its headcount.
+- **Alternative/trade-off:** `COUNT(e.employee_id) FILTER (WHERE EXISTS (SELECT 1 FROM employees r WHERE r.manager_id = e.employee_id))` avoids the extra join. The CTE version makes the manager set visible, so you can check it alone.
+- **Edge case:** If `managers` loses its `DISTINCT`, employee 8 joins 92 times and Engineering's headcount becomes 108. `COUNT(e.employee_id)` rather than `COUNT(*)` keeps a department with no employees at 0.
 
 ## Final self-check
 
-- Can you explain the logical grain before and after every aggregation?
-- Are missing values preserved or converted only by an explicit rule?
-- Does every ordered result have a deterministic final tie-breaker?
-- Are money and time assumptions visible beside the calculation?
-- Does the complete executable solution finish with `ROLLBACK`?
+- Which of your CTEs are one row per employee, and does each still total
+  100 people?
+- Why do subtree payrolls add up to almost twice the company payroll?
+- Which employees are both roots and leaves, and how many rows does that add?
+- What does `NOT IN` return when the subquery contains `NULL`?

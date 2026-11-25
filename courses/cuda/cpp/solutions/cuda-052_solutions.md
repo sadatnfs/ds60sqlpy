@@ -4,8 +4,6 @@
 
 Layer normalization centers a row by its mean and divides by a scale derived from variance; RMS normalization uses mean square without subtracting the mean. They are different operations. Epsilon stabilizes the denominator, but placing it inside versus outside a square root changes the formula. Fusion combines operations to avoid intermediates and launches. It can also increase registers, complicate reuse or prevent a good library path. Specify accumulation and output types, normalization axes and learned scale/bias if present. Compare both the mathematical contract and complete pipeline before claiming a fused kernel is better.
 
-The separate [CPU reference](../references/cuda-052_cpu.py) checks the chapter's bounded model. It does not execute CUDA or establish GPU timing. Compare after attempting the worksheet or explicitly choosing to reveal solutions.
-
 ## Exercise 1
 
 For row \([1,3]\), mean is two and population variance is one. With zero epsilon for this nondegenerate demonstration, centered normalized output is \([-1,1]\). RMS normalization instead divides \([1,3]\) by square root of five, giving different noncentered outputs.
@@ -78,12 +76,16 @@ It can avoid intermediate writes/reads and launches, while increasing live state
 
 **How to verify:** Measure fused and separate versions and check spill reports.
 
+## Self-check answers
+
+1. **What does fused bias-plus-ReLU give for x = [-2,1] and bias 1?** [0,2]: the biased values are [-1,2] and ReLU clamps the negative one to zero.
+2. **What variance does sample variance give for [1,3], and what is the effect?** 2 instead of the population value 1, so outputs shrink by a factor of the square root of 2.
+3. **What is centered normalization of a single value with positive epsilon?** [0], because the value minus its own mean is zero and epsilon keeps the denominator positive.
+
 ## Numerical reference and its limits
 
-The complete CPU model is [here](../references/cuda-052_cpu.py). Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It does not claim CUDA execution, concurrency safety or a performance measurement.
+The [CPU reference](../references/cuda-052_cpu.py) reproduces worked example 1 and prints `{'layer_normalized': [-1.0, 1.0], 'RMS_denominator': 2.23606797749979}`.
 
 ## Transfer review
 
 It can avoid intermediate writes/reads and launches, while increasing live state/register pressure or restricting reuse. Measure both.
-
-A complete explanation must name its inputs, the unchanged mathematical contract, the changed boundary or resource condition, and the evidence still needed on actual hardware. Preserve a CPU baseline even after a GPU path becomes available.

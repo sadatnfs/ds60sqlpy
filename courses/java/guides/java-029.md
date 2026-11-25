@@ -6,7 +6,16 @@ Advanced, approximately 120 minutes. Direct prerequisites: `java-028`
 
 ## Learning objectives
 
-Use JDBC prepared statements and transactions against H2, binding untrusted values and rolling back failures. Along the way, explain connection, prepared statement, transaction, isolation using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. Exercises 1 and 2 start from the worked examples; the authored investigations begin with this task: Disable auto-commit, move 20 cents from account 1 to 2, inspect intermediate balances, and rollback. The final exercise transfers the mechanism to observe committed visibility under the declared isolation.
+Use JDBC prepared statements and transactions against H2, binding untrusted values and rolling back failures.
+
+The six exercises practice these steps:
+
+- Verify a real local database.
+- Bind an injection-shaped value as data.
+- Roll back a transfer.
+- Commit and read from a second session.
+- Handle a constraint failure and rollback.
+- Observe committed visibility under the declared isolation.
 
 ## Purpose and mental model
 
@@ -26,16 +35,9 @@ This lesson uses a real embedded H2 database in memory through the prepared H2 J
 
 ## How to run this lesson
 
-Open the Docker classroom, choose the prepared Java 21 profile and save a learner pad. The pad is compiled as `Main.java` with `javac --release 21` and executed with `java -ea Main`. Assertions are enabled deliberately. A successful assertion has no output; a failed assertion throws `AssertionError` and the process should fail. Do not remove assertions to obtain a green result.
+`database()` opens a fresh in-memory H2 database with a unique name, creates the accounts table with a `CHECK(balance>=0)` constraint, and inserts Alice with 100 and Bob with 50; the H2 driver JAR must be on the classpath.
 
-For a prepared native JDK, copy a worked example into your own `Main.java` under ignored `.learning/expansion/java-029/`. From that directory run the same two commands on PowerShell, macOS or Linux:
-
-```text
-javac --release 21 Main.java
-java -ea Main
-```
-
-The public class name and source filename must agree. Each worked example below is a complete file. Example B includes the setup it needs from Example A, so it can be compiled by itself. The six exercise reference blocks form one complete program in the separate solution. Keep your original prediction, source and diagnostic text together. Most examples use prepared JDK libraries and tiny local fixtures; any additional dependency is specified in the lesson notes below. Any lesson-specific library or additional file is named explicitly; do not download packages from inside a learner program. Resource examples close their owned files, executors or loopback servers.
+Classroom and native JDK steps, the exercise controls and the hint routine are in the [Java study guide](../STUDY-GUIDE.md).
 
 ## Required prepared JDBC dependency
 
@@ -226,62 +228,62 @@ public class Main {
 
 ## Prediction before your attempt
 
-Read the source from the entry point and name each value before executing it. Identify which operations create new values, which mutate existing state and which can fail. Predict the first observable output or assertion result. For a compile-time failure, explain which source rule is violated before discussing runtime state: a program that did not compile never reached its main method. Keep normal, boundary and invalid inputs separate so each check has a clear purpose.
+Before running Example A, decide what `getDatabaseProductName()` returns and whether a new connection starts with auto-commit on. For Example B, predict the row count for the name Alice and for `Alice' OR '1'='1` bound through the same `?` parameter. Before Exercise 3, write both balances after moving 20 from account 1 to 2 inside a transaction, and again after `rollback()`.
 
 ## Exercises
 
-1. **Verify a real local database: predict an edited check.** Copy Example A into a scratch `Main.java` and change `assert connection.getMetaData().getDatabaseProductName().equals("H2") &&` to `assert connection.getMetaData().getDatabaseProductName().equals("H3") &&` inside its assertion. Before running it with `java -ea Main`, predict whether the assertion still holds and explain why; then restore it.
-   **Expected:** The changed run fails with an `AssertionError` from the assertion on `connection.getMetaData().getDatabaseProductName().equals("H2") && connection.getAutoCommit()`. Restoring the original line brings back the worked observation: database product H2; 2 rows; auto-commit initially true.
-   **Verify:** Compare your written prediction with the reported `AssertionError` and its stack-trace line, and explain why the edited condition is false for the values that satisfy `connection.getMetaData().getDatabaseProductName().equals("H2") && connection.getAutoCommit()`. After restoring the line, the program completes without an `AssertionError` again.
+1. **Verify a real local database: predict an edited check.** Change Example A's assertion to `assert connection.getMetaData().getDatabaseProductName().equals("H3") &&`, predict whether it holds, then run and restore it.
+   **Expected:** The edited run fails with an `AssertionError` from the assertion on `connection.getMetaData().getDatabaseProductName().equals("H2") && connection.getAutoCommit()`.
+   **Verify:** Explain why the edited assertion is false for the values that satisfy `connection.getMetaData().getDatabaseProductName().equals("H2") && connection.getAutoCommit()`.
 
-2. **Bind an injection-shaped value as data: debug a regression.** A regression changed one token in the code that Example B adds after Example A, so one line now reads `statement.setString(1, "Alice!");`. Run Example B with that line, use the failing assertion to locate the defect and repair it without changing the assertion.
-   **Expected:** Before the repair the run fails with an `AssertionError` from the assertion on `hasRow && rows.getInt(1) == 1`; after it the line reads `statement.setString(1, "Alice");` again and alice matches 1 row; the injection-shaped value matches 0.
-   **Verify:** Keep the failing and the repaired runs. Explain why the changed token alters the value tested by `hasRow && rows.getInt(1) == 1` for this input.
+2. **Bind an injection-shaped value as data: debug a regression.** A regression in Example B's new code makes one line read `statement.setString(1, "Alice!");`. Repair it using the failing assertion.
+   **Expected:** The unrepaired run fails with an `AssertionError` from the assertion on `hasRow && rows.getInt(1) == 1`; the repaired line reads `statement.setString(1, "Alice");`.
+   **Verify:** Explain how the changed token alters the value that `hasRow && rows.getInt(1) == 1` tests.
 
 3. **Roll back a transfer.** Disable auto-commit, move 20 cents from account 1 to 2, inspect intermediate balances, and rollback.
    **Expected:** inside 80, 70; after rollback 100, 50.
-   **Verify:** Keep an assertion equivalent to `balance(connection, 1) == 100 && balance(connection, 2) == 50`. As a control, change `assert balance(connection, 1) == 100 && balance(connection, 2) == 50;` to `assert balance(connection, 2) == 100 && balance(connection, 2) == 50;` inside it: the run must fail with an `AssertionError`, which shows the assertion can fail. Restore it.
+   **Verify:** Control: changing `assert balance(connection, 1) == 100 && balance(connection, 2) == 50;` to `assert balance(connection, 2) == 100 && balance(connection, 2) == 50;` inside the assertion must make it fail.
 
 4. **Commit and read from a second session.** Transfer 10 cents, commit, and open another connection to the same owned memory database.
    **Expected:** second connection sees 90, 60 and total 150.
-   **Verify:** Keep an assertion equivalent to `balance(second, 1) == 90 && balance(second, 2) == 60 && balance(second, 1) + balance(second, 2) == 150`. As a control, change `balance(second, 1) + balance(second, 2) == 150;` to `balance(second, 1) - balance(second, 2) == 150;` inside it: the run must fail with an `AssertionError`, which shows the assertion can fail. Restore it.
+   **Verify:** Control: changing `balance(second, 1) + balance(second, 2) == 150;` to `balance(second, 1) - balance(second, 2) == 150;` inside the assertion must make it fail.
 
 5. **Handle a constraint failure and rollback.** Attempt to subtract 200 from balance 100, catch the SQL integrity error, and rollback.
    **Expected:** SQLState class 23; balance remains 100 after rollback.
-   **Verify:** Keep an assertion equivalent to `constraint && balance(connection, 1) == 100`. As a control, change `constraint = expected.getSQLState() != null && expected.getSQLState().startsWith("23");` to `constraint = expected.getSQLState() == null && expected.getSQLState().startsWith("23");`: the run must fail with an `AssertionError` from the assertion on `constraint && balance(connection, 1) == 100`. Restore the line before continuing.
+   **Verify:** Control: changing `constraint = expected.getSQLState() != null && expected.getSQLState().startsWith("23");` to `constraint = expected.getSQLState() == null && expected.getSQLState().startsWith("23");` must fail the assertion on `constraint && balance(connection, 1) == 100`.
 
 6. **Observe committed visibility under the declared isolation.** Use two H2 connections at READ_COMMITTED; update account 1 without commit, read from the other, then commit and read again.
    **Expected:** second session sees 100 before commit and 95 after commit.
-   **Verify:** Keep an assertion equivalent to `balance(second, 1) == 95`. As a control, change `change(first, 1, -5);` to `change(first, 2, -5);`: the run must fail with an `AssertionError` from the assertion on `balance(second, 1) == 95`. Restore the line before continuing.
+   **Verify:** Control: changing `change(first, 1, -5);` to `change(first, 2, -5);` must fail the assertion on `balance(second, 1) == 95`.
 
 ## Common pitfalls and diagnosis
 
-When a check fails, keep the smallest source file that still demonstrates the failure. Read the first relevant compiler diagnostic before editing several lines; later diagnostics can be consequences of the same missing delimiter or wrong type. For a runtime exception, identify the first frame belonging to your code and compare its input with the method contract. For an assertion failure, inspect the actual value and the independent expected value. A passing process exit is weaker than a checked invariant, and a checked invariant applies only under its stated assumptions.
+Building SQL by concatenating user text lets a quote change the query's structure; a bound parameter is always data. Leaving auto-commit on makes each statement of a transfer commit separately, so a failure between them leaves money missing. After a `SQLException` inside a transaction, roll back before reusing the connection. Forgetting to close `ResultSet`, `PreparedStatement` and `Connection` leaks database resources. And isolation behavior varies by engine, so a result observed in H2 is not a promise about every database.
 
-Do not replace a precise exception with a catch-all that returns a plausible default. That can hide an invalid input or an unfinished operation. If an example owns a resource, verify its lifetime on both the success and failure paths. If an operation is concurrent, use ordering primitives to establish the relationship you need; an observed timing coincidence is not a synchronization guarantee. The solution explanations identify the specific alternative that would break each exercise.
+General compiler, runtime and assertion triage: [diagnose a failure](../STUDY-GUIDE.md#diagnose-a-failure).
 
 ## Progressive hints
 
-Read one hint at a time and attempt the exercise again before reading the next. Keep a small table of input, expected value, actual value and exception type. Ask for one hint about the first incorrect assumption before requesting the entire reference implementation.
+Read one rung at a time, as described in [using hints](../STUDY-GUIDE.md#use-hints-one-at-a-time).
 
-- **Exercise 1:** First restate the expected observation: database product H2; 2 rows; auto-commit initially true. Then list the values read by `connection.getMetaData().getDatabaseProductName().equals("H2") && connection.getAutoCommit()` and trace each one from its declaration. Finally, compute the asserted value with `assert connection.getMetaData().getDatabaseProductName().equals("H3") &&` in place before running.
-- **Exercise 2:** First restate the expected observation: alice matches 1 row; the injection-shaped value matches 0. Then list the values read by `hasRow && rows.getInt(1) == 1` and trace each one from its declaration. Finally, compare `statement.setString(1, "Alice!");` with the same line in Example B and state the claim each version makes.
-- **Exercise 3:** First restate the expected observation: inside 80, 70; after rollback 100, 50. Then list the values read by `balance(connection, 1) == 100 && balance(connection, 2) == 50` and trace each one from its declaration. Finally, name one input that would make `balance(connection, 1) == 100 && balance(connection, 2) == 50` false.
-- **Exercise 4:** First restate the expected observation: second connection sees 90, 60 and total 150. Then list the values read by `balance(second, 1) == 90 && balance(second, 2) == 60 && balance(second, 1) + balance(second, 2) == 150` and trace each one from its declaration. Finally, name one input that would make `balance(second, 1) == 90 && balance(second, 2) == 60 && balance(second, 1) + balance(second, 2) == 150` false.
-- **Exercise 5:** First restate the expected observation: SQLState class 23; balance remains 100 after rollback. Then list the values read by `constraint && balance(connection, 1) == 100` and trace each one from its declaration. Finally, predict the effect of changing `constraint = expected.getSQLState() != null && expected.getSQLState().startsWith("23");` to `constraint = expected.getSQLState() == null && expected.getSQLState().startsWith("23");` before running anything.
-- **Exercise 6:** First restate the expected observation: second session sees 100 before commit and 95 after commit. Then list the values read by `balance(second, 1) == 95` and trace each one from its declaration. Finally, predict the effect of changing `change(first, 1, -5);` to `change(first, 2, -5);` before running anything.
+- **Exercise 1:** First note that the in-check edit compares the product name with "H3". Then recall that the H2 driver reports "H2". Finally, explain why the connection and query worked and only the metadata comparison fails.
+- **Exercise 2:** First note that the edit binds "Alice!" instead of "Alice". Then count the rows whose name equals that exact text. Finally, compare 0 with the expected 1 and explain why binding treated the extra character as data.
+- **Exercise 3:** First call `setAutoCommit(false)` and apply both balance changes with `change`. Then read the balances on the same connection and assert 80 and 70. Finally, call `rollback()` and assert that the original 100 and 50 are back.
+- **Exercise 4:** First transfer 10 from account 1 to account 2 with auto-commit off and call `commit()`. Then open a second connection with the first connection's URL. Finally, assert 90, 60 and a total of 150 from the second session.
+- **Exercise 5:** First subtract 200 from account 1 inside a transaction and catch the `SQLException`. Then check that `getSQLState()` starts with "23" and call `rollback()`. Finally, assert that the balance is still 100 and name the constraint that refused the update.
+- **Exercise 6:** First set both connections to `TRANSACTION_READ_COMMITTED` and turn auto-commit off on the first. Then subtract 5 on the first and read account 1 from the second before and after `commit()`. Finally, assert 100 and then 95.
 
 ## Self-check and retrieval
 
-Close the solution and explain Connection, Prepared statement, Transaction in your own words. Reconstruct one example from a blank `Main.java`, then add a new boundary input. Explain why the new case should pass or fail before compiling it. Identify a situation where this technique is appropriate and one where a different data structure, lifetime policy or abstraction would be clearer. This is a reasoning check, not a memorization test for an API spelling.
+Without notes, explain how a prepared statement keeps `Alice' OR '1'='1` from matching every row, why a transfer needs auto-commit off, what SQLState class 23 means, and what the second connection sees before and after the first commits under `READ_COMMITTED`.
 
 ## Next step
 
-Preserve the saved pad and the six exercise observations. Continue to the next lesson only when you can explain the invariants without reading the answer. Later chapters reuse these contracts in larger programs, so keep a failing counterexample as well as a repaired result. A reference implementation demonstrates one valid design under the stated assumptions; it is not a universal design rule.
+Continue with `java-030`: Serialization and schema evolution. Keep your six observations; see [moving on](../STUDY-GUIDE.md#move-to-the-next-lesson).
 
 ## Sources and verification status
 
-[Official Java 21 API or language reference](https://docs.oracle.com/en/java/javase/21/docs/api/java.sql/java/sql/Connection.html), reviewed 2026-10-22. Examples and exercise fixtures are original course material. Use the [validation guide](../../../docs/validation.md) and CI artifacts for the exact revision and platform to inspect actual compile/run results. Authoring, parsing, compilation, execution and learner mastery are separate forms of evidence.
+[Official Java 21 API or language reference](https://docs.oracle.com/en/java/javase/21/docs/api/java.sql/java/sql/Connection.html), reviewed 2026-10-22. Evidence levels: [sources and evidence](../STUDY-GUIDE.md#sources-and-evidence).
 
 ## Ask an AI tutor about this lesson
 

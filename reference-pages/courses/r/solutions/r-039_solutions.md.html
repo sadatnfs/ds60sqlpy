@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/r/solutions/r-039_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="r-039-reference-reasoning">r-039: reference reasoning<a class="heading-anchor" href="#r-039-reference-reasoning" aria-label="Link to this section">#</a></h2>
-<p>Use the <a href="r-039_reference.R.html">complete reference</a> with the guide&#x27;s declared inputs and runtime. Every worked example is also a standalone script.</p>
+<p>Run the <a href="r-039_reference.R.html">complete reference</a> under the <a href="../STUDY-GUIDE.md.html#run-a-chapter">run rules</a>.</p>
 <h3 id="why-the-implementation-has-this-shape">Why the implementation has this shape<a class="heading-anchor" href="#why-the-implementation-has-this-shape" aria-label="Link to this section">#</a></h3>
 <p>The interaction is zero for A and follows x for B, allowing a different slope in the two groups under this encoding.</p>
 <p>twice_x is exactly determined by x. More column names do not create more independent information.</p>
@@ -242,7 +242,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Tempting mistake:</strong> Taking the perfect fit as support for the model. Any four values at these x and group settings would be fit perfectly.</p>
 <p><strong>Verify:</strong> <code>nrow(interaction) - qr(interaction)$rank</code> returns 0, which shows there is no residual information for checking the model.</p>
 <h3 id="what-the-checks-establish">What the checks establish<a class="heading-anchor" href="#what-the-checks-establish" aria-label="Link to this section">#</a></h3>
-<p>The reference makes 5 <code>stopifnot()</code> checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.</p></article>
+<p>The assertions confirm that the additive design has columns <code>(Intercept)</code>, <code>x</code> and <code>groupB</code>, that the interaction design adds <code>x:groupB</code> and has full rank, that a design with a redundant column loses rank, and that no unobserved level C appears. They do not show that any coefficient is meaningful; full rank only means each column can be estimated separately.</p>
+<p>The reference makes 5 <code>stopifnot()</code> checks; see <a href="../STUDY-GUIDE.md.html#what-a-passing-run-proves">what a passing run proves</a>.</p></article>
   </main>
 </body>
 </html>

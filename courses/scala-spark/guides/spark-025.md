@@ -1,22 +1,26 @@
 # spark-025: Parquet, column pruning and file layout
 
-Authored paired Scala/PySpark teaching content. The default fixtures are tiny, local and deterministic. Runtime acceptance, logical correctness and learner understanding remain separate evidence.
+Two thousand rows are written twice: once as a compact partitioned Parquet table and once as a deliberately fragmented copy with more files. The data never changes, so every difference you see in file counts, scan partitions and pushed filters comes from layout and query shape, which is why storage evidence comes before any tuning.
 
 ## Level and prerequisites
 
-Intermediate; approximately 105 minutes. Direct prerequisites: `spark-024`. The prepared baseline is Spark 4.3.0, Scala binary 2.13, JDK 17 and Python 3.12. Read the [execution baseline](../execution-baseline.md).
+Intermediate; approximately 105 minutes. Direct prerequisites: `spark-024`. Pinned versions: [execution baseline](../execution-baseline.md).
 
 ## How to run this lesson
 
-Open `spark-025` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile, save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`; Python stages as `main.py` with a main guard. Each program creates its own `local[2]` session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.
+Shared run steps and profile rules: [study guide](../STUDY-GUIDE.md#run-a-paired-lesson).
 
-The [Scala learner](../lessons/spark-025.scala) and [PySpark learner](../lessons/spark-025.py) run two complete demonstrations and retain six explicit task stubs. Use the [explained solutions](../solutions/spark-025_solutions.md) only after an attempt or an explicit worked comparison; the [Scala reference](../solutions/spark-025_solution.scala) and [PySpark reference](../solutions/spark-025_solution.py) contain complete assertions. A bounded collect is used only for the declared tiny fixture; do not copy it onto an unbounded or large production table.
+Learner pads: [Scala](../lessons/spark-025.scala) and [PySpark](../lessons/spark-025.py).
+
+Open the [explained solutions](../solutions/spark-025_solutions.md) after an attempt.
+
+The first worked example builds the source with an explicit schema and prints `Explicit-schema source: 2000 rows, total 13993000`. The second derives the expected IDs from the rule alone, the even IDs from 1990 up to the end of the range, and prints `Independent filtered identity oracle=` [1990, 1992, 1994, 1996, 1998] before any Parquet file is read.
 
 ## Learning objectives
 
 - Use a columnar local file layout and verify that schema and logical results survive round trips.
-- State the input and output grain, schema, NULL policy and ordering before executing a transformation.
-- Compare each language implementation with independent literal expectations, not only with the other implementation.
+- Write the source partitioned by `day`, read a projection of `id` and `amount` for `day = 'even'` and `id >= 1990`, and find the matching `ReadSchema`, `PartitionFilters` and `PushedFilters` entries in the scan node.
+- Report directory partitions, data files and scan partitions as three separate numbers for both layouts, and show that writing to an existing path with `errorifexists` fails and leaves the original product unchanged.
 
 ## Vocabulary and concepts
 
@@ -38,7 +42,7 @@ The compact layout repartitions by the day field before writing partitionBy(day)
 
 A storage directory partition is not an executor partition. A file is also not necessarily a scan partition: Spark can combine small files into fewer scan tasks or split larger files according to reader rules and configuration. The fifth exercise reports all three quantities separately. The fact that this example has two day directories does not imply two files, two executors or two tasks in every subsequent stage.
 
-The selected query asks for id and amount only, with day=even and id>=1990. Its exact IDs are 1990,1992,1994,1996,1998. The day predicate can be represented in PartitionFilters because day comes from directory structure. The id predicate can appear in DataFilters and PushedFilters, and the scan ReadSchema can omit payload. These are separate mechanisms: directory pruning chooses storage partitions, column pruning chooses fields, and predicate pushdown communicates a row-level condition to the reader.
+The selected query asks for id and amount only, with day = even and id >= 1990. Its exact IDs are 1990, 1992, 1994, 1996 and 1998. The day predicate can be represented in PartitionFilters because day comes from directory structure. The id predicate can appear in DataFilters and PushedFilters, and the scan ReadSchema can omit payload. These are separate mechanisms: directory pruning chooses storage partitions, column pruning chooses fields, and predicate pushdown communicates a row-level condition to the reader.
 
 Plan evidence establishes what Spark requested from the reader. It does not establish a specific byte saving without runtime metrics. A file can satisfy a pushed predicate description while its statistics are too broad to skip much data. A residual Filter can remain necessary for exact semantics. The lesson therefore asserts the requested fields, predicate markers and exact output, while avoiding a fabricated percentage improvement.
 
@@ -52,7 +56,7 @@ All cleanup is scoped to that fresh root. The program does not delete a user-sel
 
 ## Supplied local fixture
 
-The complete source creates the owned local session described above, then constructs this explicit fixture. The worked examples below run in that same main function; there is no hidden notebook state.
+The source has an explicit schema: `id` long, `day` string set to `even` or `odd`, `amount` equal to `id * 7`, and a 32-character `payload` of x's that no query asks for. It is written under a fresh `.ds60-spark-025-` scratch root into a `compact` path and later into a `many` path. Because the payload is wide and never selected, its absence from `ReadSchema` is easy to spot.
 
 ```scala
 import org.apache.spark.sql.Row
@@ -155,7 +159,7 @@ Repartition source by day into 2 execution partitions, write Parquet with error-
 
 ### Exercise 2: Read a narrow filtered projection with an independent oracle
 
-Select only id and amount for day=even and id>=1990. Return the five ordered tuples.
+Select only id and amount for day = even and id >= 1990. Return the five ordered tuples.
 
 **Expected result/shape:** `(1990, 13930)`, `(1992, 13944)`, `(1994, 13958)`, `(1996, 13972)`, `(1998, 13986)`. No payload column is requested.
 
@@ -209,11 +213,14 @@ Do not count all filesystem entries as data files or assume one file per storage
 
 ## Self-check
 
-Explain the contract of `writeCompact` / `write_compact` without reading its solution. Then, from memory, state what Exercise 6 (Reject an existing target and preserve its product) must produce: The second write fails with an existing-path analysis exception; the original 2000-row product remains unchanged. Say which part of that result is evidence and what it still cannot show. Name the action in your trace that actually runs the plan.
+- The filter has two parts. Which part can Spark satisfy by skipping whole `day=odd` directories, and which part has to be pushed into the Parquet reader?
+- `payload` is the widest column in the table. Where in the scan evidence do you confirm that it was not read, and why is that stronger than noticing it is missing from the output?
+- The `many` layout calls `repartition(12)` before writing. Predict whether its directory count, file count and scan partition count rise, stay the same or move independently, then check against Exercise 5.
+- Exercise 6 writes to the compact path a second time. What must be true of the table afterward, and why is "the write failed" alone not enough evidence?
 
 ## Next step
 
-Use the [course route](../README.md) to continue. Paired-language agreement is useful only when both outputs also satisfy the independent fixture contract. A successful local run is not evidence of cluster performance or production recovery.
+Go on to [spark-026: Built-ins, UDFs and Python-JVM columnar boundaries](spark-026.md). Scans showed what the engine can see inside a query; the next lesson writes one label rule as built-in functions and as a Python UDF and finds where the engine stops being able to see.
 
 ## Primary sources and official APIs
 

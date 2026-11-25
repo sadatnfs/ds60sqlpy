@@ -4,8 +4,6 @@
 
 A pointer identifies storage; a size defines the range your function may use. Pair them explicitly. A const input pointer prevents writes through that pointer, but it does not establish unique ownership or guarantee that another alias cannot modify storage. A vector owns contiguous elements and can lend its data pointer while it remains alive and does not reallocate. A device function cannot generally use an ordinary host vector object because its implementation, allocator and storage belong to the host environment. Use plain element buffers and explicit shape metadata at the boundary, with deliberate integer-width choices for address arithmetic.
 
-The separate [CPU reference](../references/cuda-009_cpu.py) checks the chapter's bounded model. It does not execute CUDA or establish GPU timing. Compare after attempting the worksheet or explicitly choosing to reveal solutions.
-
 ## Exercise 1
 
 A CPU affine transform accepts input, output, count, scale and bias. For input \([-1,0,2]\), scale 3 and bias 1, the result is \([-2,1,7]\). Reject mismatched ranges before indexing. If input and output overlap, either document in-place safety or reject that case; const alone does not answer it.
@@ -78,12 +76,16 @@ A cast changes the C++ type, not allocation location, accessibility or ownership
 
 **How to verify:** Query the pointer's attributes through the runtime and confirm the memory type before launch.
 
+## Self-check answers
+
+1. **What two values should travel together whenever a buffer crosses a function boundary?** The pointer and the element count, or an equivalent range.
+2. **What does `const float*` guarantee and what does it not?** It forbids writes through that pointer; it does not prove unique ownership or stop another alias from changing the data.
+3. **Why is `size_t` preferred for element counts?** It is unsigned and wide enough to index any object, avoiding overflow and sign errors for large buffers.
+
 ## Numerical reference and its limits
 
-The complete CPU model is [here](../references/cuda-009_cpu.py). Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It does not claim CUDA execution, concurrency safety or a performance measurement.
+The [CPU reference](../references/cuda-009_cpu.py) reproduces worked example 1 and prints `{'affine': [-2, 1, 7], 'row_sums': [3, 7]}`.
 
 ## Transfer review
 
 A cast changes the C++ type, not allocation location, accessibility or ownership. Use a supported memory allocation and transfer contract.
-
-A complete explanation must name its inputs, the unchanged mathematical contract, the changed boundary or resource condition, and the evidence still needed on actual hardware. Preserve a CPU baseline even after a GPU path becomes available.

@@ -1,6 +1,6 @@
 # js-065: explanatory solutions
 
-Compare after your own attempt or an explicit reveal. The separate .js reference is a complete offline browser program. These explanations discuss the six practice tasks; a visual resemblance alone is not a data or behavior check.
+Compare after your own attempt; the separate `.js` file is the complete reference program.
 
 ## Mechanism review
 
@@ -49,3 +49,7 @@ Shared immutable input makes reset and comparison predictable. Copy before sorti
 A screenshot lacks enough information to reconstruct the analysis. Save the decisions that generated the view. Save { group: "A" } plus the dataset name and aggregation rule; reloading that state should reproduce "A: 2 records; total 5". A screenshot of the A view would not record that the total is a sum of value over frozen rows.
 
 **Expected:** Record data identity, filters, units and aggregation policy.
+
+## After comparison
+
+Add a third view, a table of selected records, and a saved-view object that captures filters and units. Restore the dashboard from that object in a fresh run and check that all three views report the same counts and denominators.

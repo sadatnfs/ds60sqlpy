@@ -194,7 +194,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/swift/solutions/swift-022_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="swift-022-explanation-and-comparison">swift-022: explanation and comparison<a class="heading-anchor" href="#swift-022-explanation-and-comparison" aria-label="Link to this section">#</a></h2>
-<p>Attempt the six guide tasks before opening this comparison. The executable reference is <a href="swift-022_solution.swift.html">swift-022_solution.swift</a>. It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.</p>
+<p>Reference program: <a href="swift-022_solution.swift.html">swift-022_solution.swift</a>, covering both examples and the executed answers.</p>
+<p>Attempt the tasks first; see <a href="../STUDY-GUIDE.md.html#comparing-with-the-explanation">comparing with the explanation</a>.</p>
 <h3 id="why-the-two-examples-differ">Why the two examples differ<a class="heading-anchor" href="#why-the-two-examples-differ" aria-label="Link to this section">#</a></h3>
 <p><strong>Observe weak lifetime:</strong> The example observes a controlled ownership boundary without retaining the target accidentally. The weak observer becomes nil after the last strong reference is removed.</p>
 <p><strong>Break a parent-child cycle:</strong> The weak back-reference breaks the ownership cycle while preserving navigation when the parent exists. The child survives independently without retaining its parent.</p>
@@ -287,7 +288,7 @@ screen <span class="syntax-punctuation">=</span> <span class="syntax-keyword">ni
 <p>The capture list holds the screen weakly, so a late callback finds nil and reports that nothing was delivered instead of reviving or crashing.</p>
 <h4 id="task-6-transfer-and-justify">Task 6: Transfer and justify<a class="heading-anchor" href="#task-6-transfer-and-justify" aria-label="Link to this section">#</a></h4>
 <p>Choose weak or unowned for a relationship and justify the lifetime guarantee required.</p>
-<p>No single reference answer exists: several designs can satisfy this transfer task. Build yours from the task 3 answer above (Design a weak delegate relationship) and the mechanism described below, and state one limitation of your choice.</p>
+<p>No single answer exists; extend task 3 using the <a href="../STUDY-GUIDE.md.html#open-transfer-tasks">open transfer routine</a>.</p>
 <h3 id="solution-reasoning">Solution reasoning<a class="heading-anchor" href="#solution-reasoning" aria-label="Link to this section">#</a></h3>
 <p><strong>Approach.</strong> Example A holds an <code>Owner</code> in an optional strong variable and also in a <code>weak var</code>, then removes the strong reference. Example B links a <code>Parent</code> and a <code>Child</code> where the child&#x27;s back-reference is <code>weak</code>, then drops the only external strong reference to the parent. The task 3 answer designs a weak delegate that receives a finished message.</p>
 <p><strong>Why it is correct.</strong> ARC frees an object when its strong count reaches zero. In Example A the weak variable does not count, so setting <code>owner = nil</code> frees the object and the weak variable becomes nil. In Example B the parent strongly holds the child but the child only weakly holds the parent, so releasing <code>parent</code> frees it and <code>child.parent</code> reads nil while the child stays alive through <code>let child</code>.</p>
@@ -299,7 +300,7 @@ screen <span class="syntax-punctuation">=</span> <span class="syntax-keyword">ni
 <p><code>weak var owner: Owner?</code> is optional and non-retaining. <code>[weak self]</code> captures a non-retaining reference for an escaping closure. Identity diagrams make cycles easier to detect than guessing from deinit timing.</p>
 <p>Weak is not a general replacement for ownership. A local strong binding can extend lifetime during observation. ARC does not cancel asynchronous work or close external resources automatically.</p>
 <h3 id="review-before-continuing">Review before continuing<a class="heading-anchor" href="#review-before-continuing" aria-label="Link to this section">#</a></h3>
-<p>Run the reference and confirm that it prints <code>swift-022: passed</code>, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.</p></article>
+<p>Run the reference and confirm it prints <code>swift-022: passed</code>, then rerun the guide&#x27;s counterexample.</p></article>
   </main>
 </body>
 </html>

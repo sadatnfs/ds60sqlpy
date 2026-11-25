@@ -194,9 +194,17 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cuda/python/guides/cuda-100.md</code></p>
     </header>
     <article class="document"><h2 id="cuda-100-attention-as-gpu-work">cuda-100: Attention as GPU work<a class="heading-anchor" href="#cuda-100-attention-as-gpu-work" aria-label="Link to this section">#</a></h2>
-<p><strong>Route:</strong> CUDA Python and machine learning. <strong>Stage:</strong> advanced. <strong>Prerequisites:</strong> <code>cuda-087</code>, <code>cuda-090</code>, <code>cuda-092</code>. Allow several sessions when the hardware experiment is new; the chapter is not a deadline.</p>
-<h3 id="what-you-will-be-able-to-explain">What you will be able to explain<a class="heading-anchor" href="#what-you-will-be-able-to-explain" aria-label="Link to this section">#</a></h3>
-<p>By the end, you can <strong>compute stable softmax</strong>, <strong>define fully masked behavior</strong>, and <strong>separate backend selection from API name</strong> with evidence. Start with the two worked cases, then use the editable CPU model to make the quantities concrete.</p>
+<p><strong>Route:</strong> CUDA Python and machine learning. <strong>Stage:</strong> advanced. <strong>Prerequisites:</strong> <code>cuda-087</code>, <code>cuda-090</code>, <code>cuda-092</code>.</p>
+<p>Pacing, evidence labels and platform rules: <a href="../../STUDY-GUIDE.md.html">CUDA study guide</a>.</p>
+<h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
+<ul>
+<li>Compute stable softmax.</li>
+<li>Draw a causal mask.</li>
+<li>Count score-matrix bytes.</li>
+<li>Define fully masked behavior.</li>
+<li>Compare fused and reference gradients.</li>
+<li>Separate backend selection from API name.</li>
+</ul>
 <h3 id="mechanism-and-vocabulary">Mechanism and vocabulary<a class="heading-anchor" href="#mechanism-and-vocabulary" aria-label="Link to this section">#</a></h3>
 <p>Attention forms query-key scores, applies scaling and masks, normalizes with softmax, and combines values. Materializing a full sequence-by-sequence score matrix creates a quadratic intermediate. Fused algorithms can reorganize computation to reduce memory traffic while preserving the intended operation, but selected backend, dtype, head size and mask affect available implementations.</p>
 <p>Stable softmax subtracts each row&#x27;s maximum before exponentiation. A causal mask prevents positions from attending to later tokens; a padding mask excludes invalid positions. Define behavior for fully masked rows rather than accepting NaNs by accident. PyTorch scaled-dot-product attention and TensorFlow attention paths need actual backend inspection and forward/backward comparison. An API name alone cannot prove a particular fused kernel ran.</p>
@@ -235,8 +243,9 @@ O=PV.</code></pre></details></figure>
 <p>For scores [1000,1001], direct exponentiation can overflow. Subtracting 1001 yields [-1,0] and well-behaved probabilities summing to one.</p>
 <h4 id="worked-example-2">Worked example 2<a class="heading-anchor" href="#worked-example-2" aria-label="Link to this section">#</a></h4>
 <p>A causal row for token 0 can see only token 0. Masking later positions before normalization gives weight 1 to the sole valid position.</p>
-<h3 id="portable-executable-model">Portable executable model<a class="heading-anchor" href="#portable-executable-model" aria-label="Link to this section">#</a></h3>
-<p>The <strong>CPU reference model</strong> variant runs this bounded worked example using <code>python-core</code>. It uses only the Python standard library, small synthetic values and no network. Its purpose is to expose the arithmetic or contract behind the chapter. The separate reference includes assertions for the stated observations.</p>
+<h3 id="how-to-run-the-cpu-model">How to run the CPU model<a class="heading-anchor" href="#how-to-run-the-cpu-model" aria-label="Link to this section">#</a></h3>
+<p>Edit the copy; the <a href="../references/cuda-100_cpu.py.html">reference</a> adds assertions.</p>
+<pre class="highlighted-code"><code class="language-bash">python courses/cuda/python/lessons/cuda-100_cpu.py</code></pre>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> math
 
 scores <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1000.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1001.0</span><span class="syntax-punctuation">]</span>
@@ -275,58 +284,53 @@ causal <span class="syntax-operator">=</span> <span class="syntax-punctuation">[
 <td><code>[[1, 0, 0], [1, 1, 0], [1, 1, 1]]</code></td>
 </tr>
 </tbody></table></div>
-<p>Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.</p>
 <h3 id="equal-framework-lanes">Equal framework lanes<a class="heading-anchor" href="#equal-framework-lanes" aria-label="Link to this section">#</a></h3>
 <h4 id="pytorch">PyTorch<a class="heading-anchor" href="#pytorch" aria-label="Link to this section">#</a></h4>
 <p>Compare scaled_dot_product_attention with explicit scores, masks, softmax and value multiplication. Record actual backend selection when exposed; test dropout policy and backward separately.</p>
 <h4 id="tensorflow">TensorFlow<a class="heading-anchor" href="#tensorflow" aria-label="Link to this section">#</a></h4>
 <p>Build the explicit tf.matmul/mask/softmax reference first. Compare an optional prepared optimized attention path with the same shapes and gradients rather than assuming every Keras attention layer selects the same kernel.</p>
-<p>Choose either lane first, then compare the other using identical mathematical inputs. Framework-specific shape, mode and optimizer rules must be checked separately. Both use offline synthetic examples; no model hub or dataset download is triggered.</p>
+<p>Lane rules: <a href="../../STUDY-GUIDE.md.html#python-gpu-and-framework-labs">framework labs</a>.</p>
 <h3 id="executable-framework-practice">Executable framework practice<a class="heading-anchor" href="#executable-framework-practice" aria-label="Link to this section">#</a></h3>
-<p>The variant chooser offers <strong>PyTorch on CPU</strong>, <strong>TensorFlow on CPU</strong>, and separate <strong>NVIDIA CUDA</strong> versions. CPU versions force CPU placement. CUDA versions require the named GPU profile and refuse to silently fall back. Each complete program uses the same tiny deterministic objective, bounded tensors and local synthetic data. Read its source before running; a framework pass establishes only that variant and environment.</p>
-<p>The checkpoint demonstration is in-memory. It teaches what state must be saved; it does not export a durable model artifact or preserve an in-flight device context. Advanced custom-op, distributed and engine-building projects remain separately prepared external workflows.</p>
+<p>Run the <strong>PyTorch</strong> and <strong>TensorFlow</strong> variants on CPU first; <a href="../../STUDY-GUIDE.md.html#python-gpu-and-framework-labs">lab rules</a>.</p>
 <h3 id="practice-and-transfer">Practice and transfer<a class="heading-anchor" href="#practice-and-transfer" aria-label="Link to this section">#</a></h3>
+<p>Record each attempt in the <a href="../lessons/cuda-100.md.html">worksheet</a> before opening hints.</p>
 <h4 id="exercise-1-compute-stable-softmax">Exercise 1: Compute stable softmax<a class="heading-anchor" href="#exercise-1-compute-stable-softmax" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Exponentiating directly, <code>math.exp(1000)</code>, overflows to infinity in float64 and the division produces NaN. In float16 the overflow happens above about 11.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-2-draw-a-causal-mask">Exercise 2: Draw a causal mask<a class="heading-anchor" href="#exercise-2-draw-a-causal-mask" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Using <code>j &lt; i</code> excludes the diagonal, leaving row 0 with no allowed positions and producing NaN in softmax.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-3-count-score-matrix-bytes">Exercise 3: Count score-matrix bytes<a class="heading-anchor" href="#exercise-3-count-score-matrix-bytes" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Estimating attention memory as linear in sequence length misses the quadratic term, which dominates for long sequences.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-4-define-fully-masked-behavior">Exercise 4: Define fully masked behavior<a class="heading-anchor" href="#exercise-4-define-fully-masked-behavior" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Leaving it undefined lets NaN appear only with certain padding patterns.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-5-compare-fused-and-reference-gradients">Exercise 5: Compare fused and reference gradients<a class="heading-anchor" href="#exercise-5-compare-fused-and-reference-gradients" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Comparing only forward outputs leaves backward bugs undetected, and comparing a float16 fused result to a float32 reference with float32 tolerance reports false failures.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-6-separate-backend-selection-from-api-name">Exercise 6: Separate backend selection from API name<a class="heading-anchor" href="#exercise-6-separate-backend-selection-from-api-name" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Assuming the flash backend ran because the function was called leads to wrong memory estimates when it silently fell back to math.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
-<p>Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.</p>
+<p>Hint <em>k</em> belongs to exercise <em>k</em>; open one at a time.</p>
 <ol>
-<li>Start from worked example 1 and mark the quantities needed for the task &quot;Compute stable softmax&quot;.</li>
-<li>Change one assumption in worked example 2 while preserving the declared contract: draw a causal mask.</li>
-<li>Trace the CPU program&#x27;s variables before adding hardware behavior: count score-matrix bytes.</li>
-<li>Draw producers, consumers and the exact operation boundary for the task &quot;Define fully masked behavior&quot;.</li>
-<li>Separate what the small fixture establishes from what the real runtime must show: compare fused and reference gradients.</li>
-<li>Write a counterexample to an overbroad claim before you separate backend selection from API name.</li>
+<li>Subtract the row&#x27;s largest score from every score before exponentiating, then normalize.</li>
+<li>For each query position, mark which key positions are at or before it.</li>
+<li>Multiply batch, heads, sequence length squared and the bytes per element.</li>
+<li>Decide what a row with no valid key should return, and make it an explicit rule instead of a NaN.</li>
+<li>Compare masked outputs and gradients from the fused path and a plain reference at a stated tolerance.</li>
+<li>Ask what runtime evidence would show which backend actually executed.</li>
 </ol>
-<h3 id="common-mistakes-and-self-review">Common mistakes and self-review<a class="heading-anchor" href="#common-mistakes-and-self-review" aria-label="Link to this section">#</a></h3>
-<p>Confusing a correct tiny example with a general implementation is the central review risk. For this chapter, challenge the assumption in worked example 2, then ask whether your change preserves the mechanism described above. If you change dtype, layout, ordering, batch size or backend, update the acceptance contract rather than silently reusing the old observation. Explain an unexpected result before trying random configuration changes.</p>
-<p>Keep a small evidence table with columns <strong>claim</strong>, <strong>input</strong>, <strong>expected observation</strong>, <strong>actual observation</strong> and <strong>limit</strong>. For the first claim use <code>Compute stable softmax</code>. For the final claim use <code>Separate backend selection from API name</code>. An unperformed GPU or cluster experiment remains pending even when the CPU model is correct.</p>
-<h3 id="platform-and-evidence-contract">Platform and evidence contract<a class="heading-anchor" href="#platform-and-evidence-contract" aria-label="Link to this section">#</a></h3>
-<p>The reading worksheet and CPU reference model work through the ordinary Linux Docker classroom on macOS, Linux and Windows using WSL 2. They do not require an NVIDIA GPU. Their results are labeled CPU models or semantic oracles, not simulated hardware performance.</p>
-<p>Real CUDA work needs supported NVIDIA hardware, a compatible host driver and an explicitly prepared GPU runtime. An Apple GPU does not execute CUDA kernels. PyTorch MPS on a supported native Mac, ROCm on supported AMD hardware, or other vendor backends can provide separate accelerator learning routes; they need their own package and operation qualification and are not CUDA evidence. The ordinary Linux Docker classroom does not expose native Mac MPS automatically.</p>
-<p>Do not download packages, models or data by opening this lesson. Do not attach an engine socket, ambient cluster credentials or an arbitrary remote endpoint. A CPU pass, imported package, successful compilation, real GPU result and measured performance are distinct observations. Record the actual backend, data shape/dtype, source revision, versions and pending checks. A saved completion marker records learning progress, not hardware certification.</p>
+<h3 id="common-mistakes-and-self-check">Common mistakes and self-check<a class="heading-anchor" href="#common-mistakes-and-self-check" aria-label="Link to this section">#</a></h3>
+<p>A common mistake is exponentiating raw scores; values like 1000 overflow and produce infinities or NaNs. Another is masking after softmax, which leaves probability on forbidden positions, or leaving a fully masked row to return NaNs by accident. Fix these by subtracting the row maximum, applying causal and padding masks before normalization and defining behavior for fully masked rows, then comparing a fused path with a reference in both forward and backward.</p>
+<p><strong>Evidence limit:</strong> The reference computes stable probabilities that sum to 1 and a lower-triangular causal mask in Python. It cannot show which fused kernel a framework selects, since that depends on backend, dtype, head size and mask.</p>
+<ol>
+<li>Why does attention create a quadratic intermediate?</li>
+<li>Does subtracting the row maximum change the softmax result?</li>
+<li>Does calling a scaled-dot-product attention API prove a fused kernel ran?</li>
+</ol>
+<p>Answers: <a href="../solutions/cuda-100_solutions.md.html#self-check-answers">self-check answers</a>.</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
 <ul>
 <li><a href="https://docs.pytorch.org/docs/2.9/notes/cuda.html">PyTorch CUDA semantics</a></li>
 <li><a href="https://www.tensorflow.org/guide/gpu">TensorFlow GPU guide</a></li>
 </ul>
-<p>Use the version-matched documentation of your prepared environment. These references describe interfaces and supported boundaries; the chapter&#x27;s synthetic examples and CPU models are original teaching material.</p>
+<p>Full lists: <a href="../../STUDY-GUIDE.md.html#documentation-and-sources">documentation and sources</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning skill for cuda-100: Attention as GPU work.
 Read courses/cuda/python/guides/cuda-100.md and courses/cuda/python/lessons/cuda-100.md.

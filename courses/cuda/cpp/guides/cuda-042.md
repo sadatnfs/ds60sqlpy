@@ -4,18 +4,15 @@
 
 Intermediate; about 110 minutes, plus any optional hardware experiment. Direct prerequisites: `cuda-005`, `cuda-032`, `cuda-039`
 
-The order supports learning at your own pace. Reading and CPU reasoning remain
-available when NVIDIA hardware is absent. Advanced hardware features need their
-own capability checks and are not prerequisites for opening this chapter.
+Pacing, evidence labels and platform rules for every chapter are in the [CUDA study guide](../../STUDY-GUIDE.md).
 
 ## Learning objectives
 
 Report unified memory behavior tied to queried device capabilities and observed page migration.
 
-Work through *Unified memory, residency and migration* with the concrete cases below. Finish with this evidence:
-correctness and a report tied to actual memory capabilities and observed movement. Distinguish an algorithmic
-calculation, a compiled artifact and an actual device observation when explaining
-what your work establishes.
+**Scope:** Unified virtual addressing versus managed allocation, residency, migration, first touch, prefetch and oversubscription.
+
+**Evidence to produce:** Correctness and a report tied to actual memory capabilities and observed movement.
 
 ## Purpose, vocabulary and mental model
 
@@ -30,28 +27,17 @@ Unified virtual addressing concerns address-space organization; managed memory p
 
 ## How to run and study this lesson
 
-Use the saved reading worksheet in `/classroom`; the reading pad does not execute
-CUDA. For the bounded calculation, select **CPU model (Python)**, whose
-answer-free starter supplies the literal fixtures and task contract. The
-[CUDA C++ study workflow](../README.md) covers platforms, optional GPU
-compilation and evidence labels. In a prepared Python environment you can also
-run the separate [CPU reference](../references/cuda-042_cpu.py) from the
-repository root:
+Trace worked example 1 by hand, then run the [CPU reference](../references/cuda-042_cpu.py) from the repository root:
 
 ```sh
 python courses/cuda/cpp/references/cuda-042_cpu.py
 ```
 
-Its assertions check the stated numerical result or model invariant; console
-text is evidence of this CPU model only, not of CUDA execution.
-
 ## Worked example 1: trace the mechanism
 
 A 64 MiB managed array is initialized by the CPU and then processed repeatedly on a GPU. The first GPU pass may include migration costs that later resident passes do not. Report the first pass separately rather than using a warm result to promise cold-start latency.
 
-The complete CPU model below intentionally models only the named arithmetic,
-layout, dependency or capability decision. It does not model GPU scheduling,
-caches, instruction timing or device memory visibility.
+**Why:** The first pass may fault and migrate pages to the device, which later resident passes avoid.
 
 ```python
 mib, transitions = 64, 20
@@ -60,41 +46,37 @@ assert modeled_moved_mib == 1280
 print({"simplified_transition_volume_MiB": modeled_moved_mib, "actual_migration_measured": False})
 ```
 
-**Expected observation:** Every assertion succeeds. A representative CPU output is:
+**Expected observation:** every assertion succeeds, and the CPU model prints:
 
 ```text
 {'simplified_transition_volume_MiB': 1280, 'actual_migration_measured': False}
 ```
 
-Integers, shapes and ordering must match exactly; only assertions with an explicit
-tolerance accept small floating-point differences. A printed duration is a model
-output, not a measured GPU benchmark.
+**Check:** Record first and steady-state times separately on a GPU and label which pass each number describes.
 
 ## Worked example 2: change a meaningful condition
 
 Alternating a full CPU pass and full GPU pass for ten rounds can move the working set repeatedly. A simplified model counts twenty ownership transitions, unlike a batched design with one transfer to each side. Actual migration can occur at finer granularity and depends on platform support.
 
-Before applying this example to your own program, write down which inputs are
-read, which result is produced, and the condition that makes the comparison
-valid. Keep the original case as a regression check when changing a boundary.
+**Why:** Ten alternating rounds model twenty transitions of 64 MiB, or 1,280 MiB of potential movement.
+
+**Check:** The reference asserts modeled_moved_mib == 1280 and marks actual_migration_measured False.
 
 ## Six progressive exercises
 
-Exercises 1 and 2 are guided reconstructions of the worked examples; exercises
-3-6 change an input, diagnose a defect, test a boundary and transfer the idea.
-For each one, keep the calculation, output, diagram or failure policy you
-produce so another reader can compare it with the worked cases. If the hint is
-not enough, reread the mechanism paragraph and the bounded CPU assertion.
-
 ### Exercise 1
 
-Predict and trace the first worked example before running its CPU reference. Write every intermediate quantity that leads to the stated result, including units or ownership where applicable.
+Reconstruct worked example 1 on paper before running its CPU reference. Time the first GPU pass over the CPU-initialized 64 MiB managed array separately from later passes.
+
+**Trap to avoid:** Reporting only a warm pass as the speed of managed memory hides the first-touch migration a user pays.
 
 **Hint:** Start with the literal input and intermediate quantities in worked example 1.
 
 ### Exercise 2
 
-Reconstruct the second worked example without copying its conclusion. Identify the changed input or condition, show the resulting calculation or dependency, and explain why it differs from the first example.
+Rework worked example 2 without copying its conclusion. Batch CPU and GPU passes so data changes owner once per side instead of every round.
+
+**Trap to avoid:** Assuming a single pointer means no data moves ignores that pages follow whichever processor touches them.
 
 **Hint:** Identify exactly which condition changes in worked example 2.
 
@@ -102,11 +84,15 @@ Reconstruct the second worked example without copying its conclusion. Identify t
 
 Distinguish a pointer value from physical residency.
 
+**Trap to avoid:** Reading the pointer value to decide whether data is on the GPU treats an address as a location.
+
 **Hint:** Use the first worked example to establish the relevant quantities, then change only the requested input.
 
 ### Exercise 4
 
 Why can managed memory still run out of usable resources?
+
+**Trap to avoid:** Allocating more managed memory than the device holds and assuming it just works can thrash or fail.
 
 **Hint:** Locate the failed phase or violated dependency before proposing a repair.
 
@@ -114,35 +100,33 @@ Why can managed memory still run out of usable resources?
 
 What should an unsupported prefetch capability do?
 
+**Trap to avoid:** Ignoring the returned error and timing as if prefetch happened credits a nonexistent optimization.
+
 **Hint:** Check what the algorithm is allowed to read, write or assume at this boundary.
 
 ### Exercise 6
 
 Redesign an alternating pipeline to reduce movement.
 
+**Trap to avoid:** Adding prefetch calls inside the alternating loop still moves the data every round.
+
 **Hint:** State the output contract and which observations are needed in the new application.
 
 ## Common mistakes and diagnosis
 
-A tempting but incorrect claim in this chapter is: **one pointer means one physically uniform memory pool or that managed allocation eliminates data-movement cost. .**
-
-For the concrete failure exercise, why can managed memory still run out of usable resources?
-Preserve the original input and the stage where behavior diverged, and compare
-with the CPU model before changing hardware configuration.
+A tempting but incorrect claim: **One pointer means one physically uniform memory pool or that managed allocation eliminates data-movement cost.** A single pointer hides where the data currently lives. Managed memory still moves pages between host and device, so first touch, alternating access and oversubscription cost real transfers, as worked example 2 shows with twenty transitions. Prefetching and batching each side's work reduce that movement, but only measurement on the target platform confirms the saving. In worked example 2, ten alternating rounds cause twenty ownership transitions, while batching all CPU work and then all GPU work needs only one transfer to each side.
 
 ## Self-check, retrieval and transfer
 
-Explain the first example without its code, then use the second example to state
-one assumption that matters. Complete Exercise 3 independently, use Exercise 4 to
-diagnose a plausible defect, check the boundary in Exercise 5, and retain the
-application contract from Exercise 6. Compare the [separate explanations](../solutions/cuda-042_solutions.md)
-only after your attempt or a deliberate reveal. A reading marker records your
-choice; it does not certify hardware qualification or expert mastery.
+1. Why report the first GPU pass of worked example 1 separately?
+2. What does unified virtual addressing promise?
+3. What is prefetch?
+
+Short answers are in the [separate explanations](../solutions/cuda-042_solutions.md#self-check-answers); compare only after an attempt.
 
 ## Primary references
 
-Check the documentation that matches your prepared toolkit before optional
-hardware execution.
+Use the documentation that matches your prepared toolkit.
 
 - [Unified memory](https://docs.nvidia.com/cuda/cuda-programming-guide/04-special-topics/unified-memory.html)
 

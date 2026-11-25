@@ -2,6 +2,8 @@
 
 Open these answers only after attempting Dataset, DataLoader, collation and reproducible sampling yourself. They reuse the guide's literal inputs, starting from Example A, Inspect retained batches, so a discrepancy points at one step. The executable companion runs the assertions; this page explains why each one tests DataLoader, Collation, Sampler generator. After a pass, choose a new input for exercise 6, Reject invalid sequence records, without looking.
 
+After comparing, follow the [review steps](../STUDY-GUIDE.md#after-the-solutions).
+
 ## Mechanism review
 
 Dataset defines how to retrieve an observation, while DataLoader defines batching, sampling and collation. The default collator stacks compatible tensors and groups compatible structures; variable-length records may need a custom collate_fn. A loader's batch count differs from the number of records, and drop_last can omit a tail. Shuffling needs a controlled generator if the ordering itself is part of a reproducible experiment.
@@ -152,6 +154,3 @@ for invalid in [[[2.7]], [[True]], [[-1]], [[2**63]]]:
 
 **Verify:** In a fresh process, the exercise checks confirm `collate([[], [1]])` raises `ValueError` and for every `invalid` in `[[[2.7]], [[True]], [[-1]], [[2 ** 63]]]`, `collate(invalid)` raises `ValueError`.
 
-## Review after comparison
-
-Repeat exercise 4, Collate variable-length sequences, with one changed fixture value and predict the difference before running it. Keep your failing attempt at exercise 5, Preserve pairing after shuffle, beside the repaired result. A missing framework is not a failing assertion. These solutions use only local fixtures.

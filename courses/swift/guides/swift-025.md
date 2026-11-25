@@ -24,9 +24,9 @@ Use fixed instants in tests rather than the current machine clock. ISO 8601 is u
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles the saved pad as `main.swift` with Swift 6 language checking. An explicit `@main` type contains `static func main() async throws`; the fixed compiler uses `-parse-as-library -swift-version 6`. The examples use the standard library and portable Foundation. `precondition` makes a violated invariant fail the process. The fixed pad accepts one source file, without arbitrary command arguments, interactive input or dependency installation. SwiftUI, UIKit, Apple simulators and application signing belong to the separately prepared macOS/Xcode project labs, never the Linux pad.
+Both examples use fixed timestamps, so they give the same answer on every machine and in every time zone. Avoid `Date()` in your own checks for the same reason: the current time makes a check pass today and fail tomorrow. Task 5 includes malformed text, and `ISO8601DateFormatter.date(from:)` returns nil for it rather than throwing.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Compile contract, starter stop and success marker: [running a lesson](../STUDY-GUIDE.md#running-a-lesson).
 
 
 
@@ -34,7 +34,7 @@ Start with the answer-free learner artifact in your saved classroom pad. It deli
 
 Date(timeIntervalSince1970:) constructs a fixed instant. addingTimeInterval uses seconds. ISO8601DateFormatter translates an exchange representation. Calendar operations require an explicit calendar and time zone for reproducible component reasoning.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+Each example ends with a trace; method: [tracing a program](../STUDY-GUIDE.md#tracing-a-program).
 
 ## Worked example / walkthrough
 
@@ -60,6 +60,8 @@ struct LessonMain {
 
 **Observe:** The elapsed interval is 5,400 seconds.
 
+**Trace.** `Date(timeIntervalSince1970: 0)` is the instant 1970-01-01 at midnight UTC, chosen only because it is easy to write. `90 * 60` converts 90 minutes into 5400 seconds, the unit `TimeInterval` always uses. `addingTimeInterval` returns a new date 5400 seconds later and leaves `start` alone. `timeIntervalSince` subtracts in the other direction and returns 5400.0. The comparison is exact because both values are whole seconds well within the precision of a `Double`, so no tolerance is needed here.
+
 ### Example B: Parse equal instants with different offsets
 
 Offset information must be included when comparing wall-clock representations.
@@ -83,6 +85,8 @@ struct LessonMain {
 
 **Observe:** Both strings represent the same instant.
 
+**Trace.** The formatter parses the first string as noon at an offset of plus two hours, which is 10:00 in UTC. It parses the second, whose Z suffix means UTC, as exactly 10:00. Both calls return a `Date`, and a `Date` stores only an absolute instant with no offset or zone attached, so the two values compare equal. The check also confirms the first parse did not return nil, because comparing two nil results would pass too and prove nothing.
+
 ## Exercises
 
 1. **Predict and explain.** Convert the duration between seconds and minutes.
@@ -97,13 +101,15 @@ struct LessonMain {
 
 6. **Transfer and justify.** Design storage, display and duration-measurement policies for an appointment app.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Log each task in the [evidence table](../STUDY-GUIDE.md#recording-exercise-evidence) before opening the explanation.
 
 ## Common pitfalls and diagnosis
 
 Date has no inherent display time zone. Locale-sensitive formatting should not be used as an undocumented machine-data contract. Daylight-saving changes can create missing or repeated local times.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+For task 4, two strings with the same offset can belong to different zones. The counterexample uses one offset at two dates: +01:00 is Paris in January, but in July Paris uses +02:00 while Lagos stays at +01:00. Storing only the offset cannot recover which rule applies next week. For task 5, an interval from 23:30 to 00:15 the next day must be 2700 seconds, not negative.
+
+Repair routine: [building a regression case](../STUDY-GUIDE.md#building-a-regression-case).
 
 ## Progressive hints
 
@@ -113,11 +119,15 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 ## Self-check and next step
 
-Explain Instant, Calendar, Monotonic clock without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+Explain why `Date` comparison ignores the offset printed in the original text. State the number of seconds in 90 minutes and in one day, then explain why adding the one-day figure does not always land on the same local clock time tomorrow. Say what an appointment app should store to show a meeting correctly after a daylight-saving change.
+
+Then follow the general [self-check routine](../STUDY-GUIDE.md#self-check-routine) and save your pad.
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://docs.swift.org/swift-book/documentation/the-swift-programming-language/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+[Documentation](https://docs.swift.org/swift-book/documentation/the-swift-programming-language/): Read the Foundation reference pages for `Date`, `TimeInterval`, `ISO8601DateFormatter` and `TimeZone`, and the `Calendar` page for adding calendar days.
+
+Provenance and limits: [sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

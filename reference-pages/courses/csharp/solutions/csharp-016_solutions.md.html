@@ -194,7 +194,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/csharp/solutions/csharp-016_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="csharp-016-explanation-and-comparison">csharp-016: explanation and comparison<a class="heading-anchor" href="#csharp-016-explanation-and-comparison" aria-label="Link to this section">#</a></h2>
-<p>Attempt the six guide tasks before opening this comparison. The executable reference is <a href="csharp-016_solution.cs.html">csharp-016_solution.cs</a>. It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.</p>
+<p>Reference program: <a href="csharp-016_solution.cs.html">csharp-016_solution.cs</a>, covering both examples and the executed answers.</p>
+<p>Attempt the tasks first; see <a href="../STUDY-GUIDE.md.html#comparing-with-the-explanation">comparing with the explanation</a>.</p>
 <h3 id="why-the-two-examples-differ">Why the two examples differ<a class="heading-anchor" href="#why-the-two-examples-differ" aria-label="Link to this section">#</a></h3>
 <p><strong>Aggregate repeated valid items:</strong> Repeated identities accumulate after validation rather than creating ambiguous duplicate dictionary entries. Pear totals 6 and apple totals 3.</p>
 <p><strong>Retain rejection evidence:</strong> Malformed and negative quantities remain excluded, and empty input produces an empty report rather than an invented item. Three rejected lines do not alter the valid pear total.</p>
@@ -256,14 +257,14 @@ Check<span class="syntax-punctuation">(</span>none<span class="syntax-punctuatio
 <p><strong>How to verify.</strong> Add <code>&quot;pear, 2&quot;</code> with a space before the number and decide: <code>int.TryParse</code> allows leading whitespace, so it is accepted as 2. If the contract forbids spaces, tighten the parse and confirm the check flips.</p>
 <h4 id="task-6-transfer-and-justify">Task 6: Transfer and justify<a class="heading-anchor" href="#task-6-transfer-and-justify" aria-label="Link to this section">#</a></h4>
 <p>Design a reusable import result that retains per-line rejection reasons without exposing sensitive raw input.</p>
-<p>No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry <strong>Pipeline</strong>, and state one limitation of your choice.</p>
+<p>No single answer exists; extend task 3 using the <a href="../STUDY-GUIDE.md.html#open-transfer-tasks">open transfer routine</a>.</p>
 <h3 id="mechanism-and-diagnostic-reasoning">Mechanism and diagnostic reasoning<a class="heading-anchor" href="#mechanism-and-diagnostic-reasoning" aria-label="Link to this section">#</a></h3>
 <p>A useful first project combines parsing, representation and aggregation while keeping their responsibilities separate. The input boundary rejects malformed quantities. The domain representation preserves item identity. The report stage summarizes only accepted records. Mixing these stages often creates a subtle bug: a failed parse becomes zero and then appears as valid data.</p>
 <p>This project uses in-memory fixture lines so it runs offline without interactive input. It reports accepted totals and rejected line counts independently. A real importer would also record line identity and a safe reason. Build the smallest end-to-end path first, then introduce invalid and duplicate inputs. The final result must explain what happened, not merely produce a total that looks plausible.</p>
 <p><code>Split</code> produces fields; check the field count before indexing. <code>TryParse</code> separates syntax from a valid integer. <code>TryGetValue</code> supports accumulating repeated keys. Sorting keys before display gives a stable report.</p>
 <p>Checking field count after indexing is too late. Case policy affects identity and must be documented. Extremely large totals can overflow, so checked accumulation belongs in a production input contract.</p>
 <h3 id="review-before-continuing">Review before continuing<a class="heading-anchor" href="#review-before-continuing" aria-label="Link to this section">#</a></h3>
-<p>Run the reference and confirm that it prints <code>csharp-016: passed</code>, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.</p></article>
+<p>Run the reference and confirm it prints <code>csharp-016: passed</code>, then rerun the guide&#x27;s counterexample.</p></article>
   </main>
 </body>
 </html>

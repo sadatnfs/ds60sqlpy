@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cpp/solutions/cpp-029_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="cpp-029-explanations-and-reference-observations">cpp-029: explanations and reference observations<a class="heading-anchor" href="#cpp-029-explanations-and-reference-observations" aria-label="Link to this section">#</a></h2>
-<p>Attempt the learner tasks before opening this document. The executable reference checks the bounded normal and boundary examples; the six explanations below cover the deliberate changes and manual checks.</p>
+<p>The <a href="cpp-029_solution.cpp.html">executable reference</a> adds a <code>std::async</code> task that returns 7 through its future. The explanations cover joining on every path, including the early return in Exercise 6. How to compare: <a href="../STUDY-GUIDE.md.html#compare-with-the-solutions">study guide</a>.</p>
 <h3 id="mechanism">Mechanism<a class="heading-anchor" href="#mechanism" aria-label="Link to this section">#</a></h3>
 <p>A thread executes a function concurrently with its caller. Joining waits for that function to finish before borrowed state is destroyed. Cancellation is a request that cooperative code checks, not a forced kill. C++20 jthread adds joining destruction and stop_token support, while std::thread requires explicit joining on every path.</p>
 <h3 id="detailed-reasoning">Detailed reasoning<a class="heading-anchor" href="#detailed-reasoning" aria-label="Link to this section">#</a></h3>

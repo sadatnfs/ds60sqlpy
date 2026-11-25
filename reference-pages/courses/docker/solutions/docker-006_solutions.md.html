@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/docker/solutions/docker-006_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="docker-006-explanatory-solutions">docker-006: explanatory solutions<a class="heading-anchor" href="#docker-006-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit reveal. These explain the supplied teaching fixtures; they are not engine results. The mechanism is explained in <code>courses/docker/guides/docker-006.md</code>.</p>
+<p>These answers explain teaching fixtures, not engine results; the mechanism is in <a href="../guides/docker-006.md.html">the guide</a>.</p>
 <h3 id="exercise-1-predict-whether-gitignore-protects-docker-context">Exercise 1: Predict whether .gitignore protects Docker context.<a class="heading-anchor" href="#exercise-1-predict-whether-gitignore-protects-docker-context" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> No automatic equivalence exists.</p>
 <p><strong>Why:</strong> The tools use distinct input rules. A file ignored by Git can still be available to a Docker build unless the Docker context rules or explicit copy list exclude it.</p>
@@ -238,7 +238,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>A plausible wrong approach:</strong> Trusting a single scan of the final image misses secrets that were copied and later deleted, since a merged-view listing cannot show hidden earlier layers.</p>
 <p><strong>How to verify:</strong> Record the .dockerignore entries, the COPY lines and a listing of /app and /data from the built image, and confirm each matches the public inventory.</p>
 <h3 id="check-your-transfer">Check your transfer<a class="heading-anchor" href="#check-your-transfer" aria-label="Link to this section">#</a></h3>
-<p>A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.</p></article>
+<p><code>*.key</code> in <code>.dockerignore</code> matches only at the root of the build context, unlike <code>.gitignore</code>, so a nested <code>config/tls/server.key</code> is still sent and copied. The corrected rule is <code>**/*.key</code>. To prove the fix, build a throwaway stage that copies the whole context and list it with <code>find</code>, or check that a <code>COPY config/tls/server.key</code> step now fails because the file is absent. The key must also be rotated, since earlier images already contain it. Seeing <code>server.key</code> in the listing after the change would show that the rule or the context path is still wrong.</p></article>
   </main>
 </body>
 </html>

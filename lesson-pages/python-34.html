@@ -458,16 +458,7 @@ model<span class="syntax-operator">.</span>fit<span class="syntax-punctuation">(
 <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>model<span class="syntax-operator">.</span>score<span class="syntax-punctuation">(</span>X_test<span class="syntax-punctuation">,</span> y_test<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <p><code>StandardScaler.fit</code> sees only <code>X_train</code>. Calling <code>fit_transform</code> on the entire dataset before splitting would leak global means and variances into the test evaluation.</p>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
-<p><strong>Primary browser route:</strong> run <code>./classroom</code> from the repository root and choose <strong>Python and data science</strong> on <code>/classroom</code>. Open this lesson in the shared workspace, read its capability notice, and use its supported coding or reading workflow. The <a href="../reference-pages/docs/classroom-experience.md.html">classroom guide</a> explains saved work, runtimes and switching subjects.</p>
-<p><strong>Optional native notebook/editor route:</strong> the instructions below describe separately prepared host tools. They are useful alternatives, not prerequisites for opening this lesson in the Docker classroom.</p>
-<ol>
-<li>Open the Day 34 learner notebook from this guide&#x27;s <strong>Next step</strong> section in VS Code or JupyterLab.</li>
-<li>Select the <code>Python (ds60sqlpy)</code> kernel. Start at the top and use <strong>Run All</strong> only after making the written predictions; every added worked example is bounded and offline after bootstrap.</li>
-<li>Keep experiments in new scratch cells. Do not edit the official solution while attempting the numbered practice.</li>
-<li>Restart the kernel and run from the first cell before calling the lesson complete. A clean run catches hidden state and stale variables.</li>
-</ol>
-<p>Linux, macOS, or Ubuntu in Windows WSL 2:</p>
-<pre class="highlighted-code"><code class="language-bash">.venv/bin/python -m jupyter lab</code></pre>
+<p>Open <code>python-34</code> in the classroom, or <code>python/ds-60day/notebooks/day34_sklearn_intro_pipelines.ipynb</code> on a host; the <a href="../reference-pages/python/STUDY-GUIDE.md.html">Python study guide</a> explains both.</p>
 <h4 id="guide--concept-deep-dive-the-scikit-learn-estimator-contract-and-leakage-safe-pipelines">Concept deep dive: the scikit-learn estimator contract and leakage-safe pipelines<a class="heading-anchor" href="#guide--concept-deep-dive-the-scikit-learn-estimator-contract-and-leakage-safe-pipelines" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--the-mental-model">The mental model<a class="heading-anchor" href="#guide--the-mental-model" aria-label="Link to this section">#</a></h5>
 <p>Scikit-learn separates <strong>learning state</strong> from <strong>using learned state</strong>. <code>fit</code> estimates parameters from training data. <code>transform</code> applies a fitted representation, and <code>predict</code> applies a fitted predictor. Attributes ending in an underscore, such as <code>mean_</code> or <code>coef_</code>, are commonly learned during fitting.</p>
@@ -479,7 +470,6 @@ model<span class="syntax-operator">.</span>fit<span class="syntax-punctuation">(
 <li><strong><code>.predict(X_new)</code>:</strong> uses already learned preprocessing and model state; it must not refit on new data.</li>
 </ul>
 <h5 id="guide--focused-example-a-prove-that-the-scaler-learned-only-training-data">Focused example A: prove that the scaler learned only training data<a class="heading-anchor" href="#guide--focused-example-a-prove-that-the-scaler-learned-only-training-data" aria-label="Link to this section">#</a></h5>
-<p>Before running the example, predict the shape, type, or direction of the result. Write the prediction down so that a surprise becomes evidence rather than something to overlook.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
 <span class="syntax-keyword">from</span> sklearn.linear_model <span class="syntax-keyword">import</span> LinearRegression
 <span class="syntax-keyword">from</span> sklearn.pipeline <span class="syntax-keyword">import</span> Pipeline
@@ -562,7 +552,6 @@ transformed <span class="syntax-operator">=</span> encoder<span class="syntax-op
 </ol>
 <h5 id="guide--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#guide--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
 <p>Make preprocessing and estimation one fitted object. Data boundaries, feature names, and unknown-category behavior are part of the model contract.</p>
-<p>Predict or plan before you run code. Use the hint only after an honest attempt, and record the evidence that would prove your result correct.</p>
 <ol start="3">
 <li><strong>Leakage prediction:</strong> Predict how cross-validation scores can change when a scaler is fit on the complete dataset before <code>cross_val_score</code>, then explain why the code still runs without warning. <strong>Progressive hint:</strong> The globally fitted mean and scale contain information from each validation fold. A Pipeline refits them using only the fold&#x27;s training rows.</li>
 </ol>
@@ -628,7 +617,7 @@ transformed <span class="syntax-operator">=</span> encoder<span class="syntax-op
 <li>Continue to <a href="python-35.html#guide">Day 35; Model Evaluation</a>.</li>
 </ul>
 <h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
-<p>The lesson is complete without an AI assistant. If you want optional coaching, copy this prompt into the AI tutor while the repository root is open:</p>
+<p>The lesson is complete without AI. For optional coaching, copy this prompt with the repository root open:</p>
 <pre class="highlighted-code"><code class="language-text">Tutor me through `python-34` (Day 34: scikit-learn Estimators and Pipelines).
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
@@ -928,7 +917,7 @@ coefs_scaled<span class="syntax-punctuation">,</span> coefs_noscale</code></pre>
 </ul>
 <hr>
 <h4 id="solution-1--solution-reasoning-lens">Solution reasoning lens<a class="heading-anchor" href="#solution-1--solution-reasoning-lens" aria-label="Link to this section">#</a></h4>
-<p>A strong solution is not merely code that produces one plausible output. It establishes a chain from input contract to operation to verification:</p>
+<p>Each decision below links an input contract to an operation and its evidence:</p>
 <ol>
 <li><strong><code>Pipeline([(&#x27;scale&#x27;, ...), (&#x27;model&#x27;, ...)])</code>:</strong> names ordered steps so nested parameters and learned attributes remain inspectable.</li>
 <li><strong><code>.fit(X_train, y_train)</code>:</strong> fits every transformer on training rows, transforms those rows, then fits the final estimator.</li>
@@ -940,25 +929,20 @@ coefs_scaled<span class="syntax-punctuation">,</span> coefs_noscale</code></pre>
 <p><strong>Trade-off:</strong> Pipelines add naming and inspection overhead while sharply reducing inconsistent preprocessing and leakage risk.</p>
 <p><strong>Edge case to test:</strong> Unknown categories, missing columns, changed column order, and sparse/dense output expectations must be part of the input contract.</p>
 <p><strong>Evidence of correctness:</strong> Inspect fitted step attributes, prove test rows did not enter learned preprocessing, verify feature shape/order, and execute prediction on an unknown-category boundary.</p>
-<p>When comparing your attempt with the reference, explain which of these decisions your code made explicitly. If the reference makes a different choice, compare the contracts and evidence before deciding that one version is universally better.</p>
 <h4 id="solution-1--exercise-by-exercise-reasoning-map">Exercise-by-exercise reasoning map<a class="heading-anchor" href="#solution-1--exercise-by-exercise-reasoning-map" aria-label="Link to this section">#</a></h4>
-<p>This map connects every learner prompt to a reasoning path. Read the explanation before copying code: the goal is to understand the assumptions, the evidence that validates the result, and the edge cases that can make an apparently correct implementation fail.</p>
 <h5 id="solution-1--exercise-1-original-lesson-practice">Exercise 1: Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Swap <code>LinearRegression</code> for <code>Ridge</code> and compare test scores.</p>
 <p><strong>How to reason about it:</strong> Change only the final estimator while keeping the split and preprocessing fixed. Compare held-out metrics and coefficient magnitude; one score does not establish that regularization is universally better.</p>
-<p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
 <p><strong>Verify:</strong> Use one frozen train/test split and one preprocessing pipeline; report Ridge alpha, baseline and Ridge R² plus RMSE, and assert model selection never reads the test labels.</p>
 <h5 id="solution-1--exercise-2-original-lesson-practice">Exercise 2: Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-2-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Inspect the coefficients and discuss how feature scaling changes their numeric values and interpretation.</p>
 <p><strong>How to reason about it:</strong> A coefficient after StandardScaler describes a one-standard-deviation change in that fitted training feature. Preserve transformed feature names and avoid causal language when predictors are correlated.</p>
-<p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
 <p><strong>Verify:</strong> Print feature names in coefficient order and both scaled-space coefficients and coefficients converted back to original units; verify the two representations produce equal predictions within 1e-10.</p>
 <h5 id="solution-1--exercise-3-leakage-prediction">Exercise 3: Leakage prediction<a class="heading-anchor" href="#solution-1--exercise-3-leakage-prediction" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Predict how cross-validation scores can change when a scaler is fit on the complete dataset before <code>cross_val_score</code>, then explain why the code still runs without warning.</p>
 <p><strong>Reasoning before implementation:</strong> The globally fitted mean and scale contain information from each validation fold. A Pipeline refits them using only the fold&#x27;s training rows.</p>
 <p>The global transform lets every held-out row influence preprocessing statistics, so validation is no longer a simulation of unseen data. The score may be optimistically biased even though shapes and types are valid.</p>
 <p>Pass raw <code>X</code> and a <code>Pipeline([(&quot;scale&quot;, StandardScaler()), (&quot;model&quot;, ...)])</code> to cross-validation. scikit-learn clones and fits the entire pipeline inside each training fold. This same rule applies to imputation, feature selection, target encoding, and learned dimensionality reduction.</p>
-<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
 <p><strong>Verify:</strong> Leakage prediction; on one seeded dataset, print fold scores for a scaler fitted globally and for Pipeline(StandardScaler(), model); show the global fit has seen validation statistics and retain the score difference without treating its direction as guaranteed.</p>
 <h5 id="solution-1--exercise-4-mixed-type-implementation">Exercise 4: Mixed-type implementation<a class="heading-anchor" href="#solution-1--exercise-4-mixed-type-implementation" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Build a <code>ColumnTransformer</code> for numeric imputation/scaling and categorical imputation/one-hot encoding, followed by LogisticRegression. Use a tiny DataFrame containing a missing value.</p>
@@ -993,14 +977,12 @@ preprocess <span class="syntax-operator">=</span> ColumnTransformer<span class="
 <span class="syntax-punctuation">)</span>
 model <span class="syntax-operator">=</span> Pipeline<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">preprocess</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> preprocess<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">model</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> LogisticRegression<span class="syntax-punctuation">(</span>max_iter<span class="syntax-operator">=</span><span class="syntax-number">1_000</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span></code></pre>
 <p>Fit this object only after the split. Median and most-frequent values are learned state, not harmless cleanup constants.</p>
-<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
 <p><strong>Verify:</strong> Mixed-type implementation; fit the mixed pipeline on a tiny DataFrame with named numeric/categorical columns and one missing value; assert output row count, transformed feature names, finite values, and a prediction for a row containing an unseen category.</p>
 <h5 id="solution-1--exercise-5-unknown-category-debugging">Exercise 5: Unknown-category debugging<a class="heading-anchor" href="#solution-1--exercise-5-unknown-category-debugging" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Fit on regions <code>north</code> and <code>south</code>, then predict a row with region <code>west</code>. Compare <code>OneHotEncoder</code> default behavior with <code>handle_unknown=&#x27;ignore&#x27;</code> and explain the resulting representation.</p>
 <p><strong>Reasoning before implementation:</strong> The default raises on an unseen category. Ignore maps the unknown to all zeros for that feature block, which is operationally safe but lossy.</p>
 <p>With <code>handle_unknown=&quot;ignore&quot;</code>, the transformed categorical block for <code>west</code> contains zeros in both known-region columns. The model can score the row, but it cannot distinguish “unknown” from the baseline implied by that zero vector.</p>
 <p>Monitor unknown-category rates and consider an explicit rare/unknown bucket when the distinction matters. Do not fit the encoder again during prediction; that would change the feature schema and invalidate fitted coefficients.</p>
-<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
 <p><strong>Verify:</strong> Unknown-category debugging; capture the default OneHotEncoder unknown-category ValueError for region=&#x27;west&#x27;; with handle_unknown=&#x27;ignore&#x27;, assert prediction succeeds and the west one-hot block is all zeros in the documented feature order.</p>
 <h5 id="solution-1--exercise-6-inspection-and-schema-contract">Exercise 6: Inspection and schema contract<a class="heading-anchor" href="#solution-1--exercise-6-inspection-and-schema-contract" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> After fitting the mixed-type pipeline, recover transformed feature names, pair them with coefficients, and assert that an inference DataFrame has the required columns in a safe order.</p>
@@ -1020,7 +1002,6 @@ model <span class="syntax-operator">=</span> Pipeline<span class="syntax-punctua
 <span class="syntax-comment"># coefs = model.named_steps[&quot;model&quot;].coef_[0]</span>
 <span class="syntax-comment"># assert len(names) == len(coefs)</span></code></pre>
 <p>Extra columns may be rejected or deliberately ignored, but the policy should be explicit. Persist the fitted pipeline and its input schema together so serving code cannot silently invent another column order.</p>
-<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
 <p><strong>Verify:</strong> Inspection and schema contract; print get_feature_names_out() paired one-to-one with coefficients; assert required input columns are present, reject missing/extra columns under the chosen policy, reorder safely, and match a fixed prediction.</p></div>
       </section>
 

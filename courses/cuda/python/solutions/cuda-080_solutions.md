@@ -1,6 +1,6 @@
 # cuda-080: explained solutions
 
-These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.
+Compare with your [worksheet](../lessons/cuda-080.md) attempt.
 
 ## Exercise 1: Classify a CPU result
 
@@ -74,8 +74,16 @@ GPU correctness remains pending until real execution.
 
 **How to verify.** Check that every label names an executor and a status. A label that mentions a GPU must also cite device and driver details.
 
+## Self-check answers
+
+1. **Name three behaviors a simulator usually does not reproduce.** Warp scheduling, memory transactions and concurrent timing; occupancy and some synchronization defects are also typically absent.
+
+2. **Why can a serialized run hide a race?** Each update finishes before the next begins, so no two threads read the same old value. Real concurrent threads can interleave and lose a write.
+
+3. **Where does the simulator belong in the validation ladder?** Early, after the mathematical reference and CPU mapping model, for inspecting small inputs by hand. Real-device output and diagnostic tools come later.
+
 ## Reference observation
 
 Serial count 2 versus a possible lost-update count 1.
 
-The reference file is `courses/cuda/python/references/cuda-080_cpu.py`. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.
+Asserted by `courses/cuda/python/references/cuda-080_cpu.py`.

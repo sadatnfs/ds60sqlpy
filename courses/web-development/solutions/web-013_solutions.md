@@ -1,6 +1,6 @@
 # web-013: explanatory solutions
 
-Open this after your own attempt. Each answer explains the lesson's synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in `courses/web-development/guides/web-013.md`.
+Attempt each exercise before reading; the mechanism is in `courses/web-development/guides/web-013.md` ([using these answers](../STUDY-GUIDE.md#solutions)).
 
 ## Exercise 1: Identify the missing information in a red-only error dot.
 
@@ -76,4 +76,6 @@ Open this after your own attempt. Each answer explains the lesson's synthetic fi
 
 ## Reference comparison
 
-Open `courses/web-development/solutions/web-013_solution.html` only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; its success message is not an accessibility audit or proof of responsive behavior at every size.
+The reference counts strong elements inside status paragraphs and requires two, so it catches a status that has lost its text label. It does not measure contrast, check the focus-visible style or test forced-colors mode, so tab to the button and review the page in a high-contrast setting.
+
+Open `courses/web-development/solutions/web-013_solution.html` after saving your attempt ([comparing with the reference](../STUDY-GUIDE.md#references)).

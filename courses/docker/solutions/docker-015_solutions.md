@@ -1,6 +1,6 @@
 # docker-015: explanatory solutions
 
-Compare after your own attempt or an explicit reveal. These explain the supplied teaching fixtures; they are not engine results. The mechanism is explained in `courses/docker/guides/docker-015.md`.
+These answers explain teaching fixtures, not engine results; the mechanism is in [the guide](../guides/docker-015.md).
 
 ## Exercise 1: Compare a cache mount and a secret mount.
 
@@ -88,4 +88,4 @@ Compare after your own attempt or an explicit reveal. These explain the supplied
 
 ## Check your transfer
 
-A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.
+The step runs as UID 10001, so pip does not use `/root/.cache/pip`; it looks for a cache under that user's home, which is not the mounted path, and it may not be writable either, so pip works without a cache. Mount the cache where the running user's pip looks, or set `PIP_CACHE_DIR` to the mount target, and give the mount `uid=10001` so that user can write to it. The expected result is that the second build logs reused downloads. If downloads still repeat with the paths aligned, check whether `--no-cache` or a builder prune is clearing the cache between builds.

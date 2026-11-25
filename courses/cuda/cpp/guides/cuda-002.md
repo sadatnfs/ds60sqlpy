@@ -4,18 +4,15 @@
 
 Beginner; about 90 minutes, plus any optional hardware experiment. Direct prerequisites: `cuda-001`
 
-The order supports learning at your own pace. Reading and CPU reasoning remain
-available when NVIDIA hardware is absent. Advanced hardware features need their
-own capability checks and are not prerequisites for opening this chapter.
+Pacing, evidence labels and platform rules for every chapter are in the [CUDA study guide](../../STUDY-GUIDE.md).
 
 ## Learning objectives
 
 Label a hardware and software map that separates SMs, warps, memory levels and compute capability.
 
-Work through *Meet the hardware without memorizing a product catalog* with the concrete cases below. Finish with this evidence:
-labeled hardware/software map and a capability report if hardware exists. Distinguish an algorithmic
-calculation, a compiled artifact and an actual device observation when explaining
-what your work establishes.
+**Scope:** CPU cores, GPU streaming multiprocessors, warps, arithmetic pipelines, registers, shared memory, caches, device memory, copy engines and host interconnect.
+
+**Evidence to produce:** Labeled hardware/software map and a capability report if hardware exists.
 
 ## Purpose, vocabulary and mental model
 
@@ -31,28 +28,17 @@ An SM, or streaming multiprocessor, schedules groups of GPU threads and owns fin
 
 ## How to run and study this lesson
 
-Use the saved reading worksheet in `/classroom`; the reading pad does not execute
-CUDA. For the bounded calculation, select **CPU model (Python)**, whose
-answer-free starter supplies the literal fixtures and task contract. The
-[CUDA C++ study workflow](../README.md) covers platforms, optional GPU
-compilation and evidence labels. In a prepared Python environment you can also
-run the separate [CPU reference](../references/cuda-002_cpu.py) from the
-repository root:
+Trace worked example 1 by hand, then run the [CPU reference](../references/cuda-002_cpu.py) from the repository root:
 
 ```sh
 python courses/cuda/cpp/references/cuda-002_cpu.py
 ```
 
-Its assertions check the stated numerical result or model invariant; console
-text is evidence of this CPU model only, not of CUDA execution.
-
 ## Worked example 1: trace the mechanism
 
 Draw four SM boxes and a grid of ten blocks. Under the deliberately simplified assumption of one resident block per SM, the grid needs at least three waves: four, four and two blocks. This is an occupancy illustration, not a runtime prediction. Real residency depends on registers, shared memory, threads and architectural limits.
 
-The complete CPU model below intentionally models only the named arithmetic,
-layout, dependency or capability decision. It does not model GPU scheduling,
-caches, instruction timing or device memory visibility.
+**Why:** With at most four blocks running at once, ten blocks need ceil(10 / 4) = 3 rounds: four, four, then two.
 
 ```python
 from math import ceil
@@ -62,41 +48,37 @@ assert [ceil(n / 32) for n in (31, 32, 33, 100)] == [1, 1, 2, 4]
 print({"simplified_waves": ceil(10 / 4), "warps_for_100_threads": ceil(100 / 32)})
 ```
 
-**Expected observation:** Every assertion succeeds. A representative CPU output is:
+**Expected observation:** every assertion succeeds, and the CPU model prints:
 
 ```text
 {'simplified_waves': 3, 'warps_for_100_threads': 4}
 ```
 
-Integers, shapes and ordering must match exactly; only assertions with an explicit
-tolerance accept small floating-point differences. A printed duration is a model
-output, not a measured GPU benchmark.
+**Check:** The reference asserts ceil(10 / 4) == 3 and prints simplified_waves 3; redraw with five SMs and expect two waves.
 
 ## Worked example 2: change a meaningful condition
 
 A block with 100 threads occupies four warps. The last warp contains four valid program threads and 28 unused lane positions. A kernel with 100 blocks does not require 10,000 physical arithmetic units. Scheduling reuses execution resources over time. Do not build a dependency that assumes block 0 finishes first.
 
-Before applying this example to your own program, write down which inputs are
-read, which result is produced, and the condition that makes the comparison
-valid. Keep the original case as a regression check when changing a boundary.
+**Why:** Warps are allocated whole, so 96 threads fill three warps and the remaining 4 threads occupy a fourth with 28 idle lanes.
+
+**Check:** Check ceil(100 / 32) == 4 from the reference output and verify 100 - 3 * 32 = 4 active lanes in the last warp.
 
 ## Six progressive exercises
 
-Exercises 1 and 2 are guided reconstructions of the worked examples; exercises
-3-6 change an input, diagnose a defect, test a boundary and transfer the idea.
-For each one, keep the calculation, output, diagram or failure policy you
-produce so another reader can compare it with the worked cases. If the hint is
-not enough, reread the mechanism paragraph and the bounded CPU assertion.
-
 ### Exercise 1
 
-Predict and trace the first worked example before running its CPU reference. Write every intermediate quantity that leads to the stated result, including units or ownership where applicable.
+Reconstruct worked example 1 on paper before running its CPU reference. Assign ten blocks to four SM boxes one at a time under the stated one-resident-block rule and count rounds until every block has run.
+
+**Trap to avoid:** Reading the drawing as a timing forecast fails because real residency per SM depends on registers, shared memory and thread limits.
 
 **Hint:** Start with the literal input and intermediate quantities in worked example 1.
 
 ### Exercise 2
 
-Reconstruct the second worked example without copying its conclusion. Identify the changed input or condition, show the resulting calculation or dependency, and explain why it differs from the first example.
+Rework worked example 2 without copying its conclusion. Divide 100 threads by the warp width of 32 with ceiling division, then count valid lanes in the final warp.
+
+**Trap to avoid:** Using floor division gives three warps and silently drops threads 96 to 99, which then never compute their outputs.
 
 **Hint:** Identify exactly which condition changes in worked example 2.
 
@@ -104,11 +86,15 @@ Reconstruct the second worked example without copying its conclusion. Identify t
 
 Calculate the warp count for blocks with 31, 32 and 33 threads.
 
+**Trap to avoid:** Assuming 33 threads costs barely more than 32 hides that the second warp still occupies a whole scheduling slot for one lane.
+
 **Hint:** Use the first worked example to establish the relevant quantities, then change only the requested input.
 
 ### Exercise 4
 
 A program labels its toolkit version as the GPU compute capability. Repair the inventory.
+
+**Trap to avoid:** Copying the toolkit string into the capability field makes an inventory claim, for example 12.4, that no GPU actually reports.
 
 **Hint:** Locate the failed phase or violated dependency before proposing a repair.
 
@@ -116,35 +102,33 @@ A program labels its toolkit version as the GPU compute capability. Repair the i
 
 Can ten blocks require more than three waves in the four-SM drawing?
 
+**Trap to avoid:** Treating three waves as an exact count would wrongly reject a measured run that shows a staggered fourth group.
+
 **Hint:** Check what the algorithm is allowed to read, write or assume at this boundary.
 
 ### Exercise 6
 
 Map a 2 MiB array through host memory, transfer engine, device DRAM and an SM.
 
+**Trap to avoid:** Passing the host pointer straight to a kernel assumes unified addressing makes host data resident; without managed memory that is an illegal access.
+
 **Hint:** State the output contract and which observations are needed in the new application.
 
 ## Common mistakes and diagnosis
 
-A tempting but incorrect claim in this chapter is: **every launched thread occupies its own permanent physical core.**
-
-For the concrete failure exercise, a program labels its toolkit version as the GPU compute capability. Repair the inventory.
-Preserve the original input and the stage where behavior diverged, and compare
-with the CPU model before changing hardware configuration.
+A tempting but incorrect claim: **Every launched thread occupies its own permanent physical core.** Threads are a programming abstraction that the hardware schedules in warps onto a limited set of SMs over time. Worked example 2 shows a 100-thread block filling four warps, with 28 idle lanes, and 100 blocks reusing the same execution units in waves rather than claiming 10,000 permanent cores.
 
 ## Self-check, retrieval and transfer
 
-Explain the first example without its code, then use the second example to state
-one assumption that matters. Complete Exercise 3 independently, use Exercise 4 to
-diagnose a plausible defect, check the boundary in Exercise 5, and retain the
-application contract from Exercise 6. Compare the [separate explanations](../solutions/cuda-002_solutions.md)
-only after your attempt or a deliberate reveal. A reading marker records your
-choice; it does not certify hardware qualification or expert mastery.
+1. How many warps does a block of 65 threads occupy, and how many lanes sit idle?
+2. Why is a block not the same thing as an SM?
+3. What does the copy engine add to the hardware picture?
+
+Short answers are in the [separate explanations](../solutions/cuda-002_solutions.md#self-check-answers); compare only after an attempt.
 
 ## Primary references
 
-Check the documentation that matches your prepared toolkit before optional
-hardware execution.
+Use the documentation that matches your prepared toolkit.
 
 - [CUDA Programming Guide](https://docs.nvidia.com/cuda/cuda-programming-guide/)
 

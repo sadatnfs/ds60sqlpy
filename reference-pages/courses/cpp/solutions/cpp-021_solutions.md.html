@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cpp/solutions/cpp-021_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="cpp-021-explanations-and-reference-observations">cpp-021: explanations and reference observations<a class="heading-anchor" href="#cpp-021-explanations-and-reference-observations" aria-label="Link to this section">#</a></h2>
-<p>Attempt the learner tasks before opening this document. The executable reference checks the bounded normal and boundary examples; the six explanations below cover the deliberate changes and manual checks.</p>
+<p>The <a href="cpp-021_solution.cpp.html">executable reference</a> checks that <code>Cents</code> equality is symmetric and transitive. The explanations cover strong types, the zero identity and the checked addition near <code>LLONG_MAX</code> in Exercise 6. How to compare: <a href="../STUDY-GUIDE.md.html#compare-with-the-solutions">study guide</a>.</p>
 <h3 id="mechanism">Mechanism<a class="heading-anchor" href="#mechanism" aria-label="Link to this section">#</a></h3>
 <p>A strong type wraps a representation in a domain name so unrelated values cannot be mixed accidentally. An explicit constructor blocks implicit conversions. A value API should obey simple laws, such as addition identity and equality symmetry. Domain restrictions must be enforced at construction or operation boundaries.</p>
 <h3 id="detailed-reasoning">Detailed reasoning<a class="heading-anchor" href="#detailed-reasoning" aria-label="Link to this section">#</a></h3>

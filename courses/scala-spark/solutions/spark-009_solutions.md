@@ -1,6 +1,8 @@
 # spark-009: Explained reference solutions
 
-Read the [guide](../guides/spark-009.md) and attempt the [learner source](../lessons/spark-009.scala) first. The [complete reference](spark-009_solution.scala) contains each implementation and its assertions. Values, identity, missingness and failure behavior are separate checks; compilation alone does not establish any of them.
+Attempt the [guide](../guides/spark-009.md) exercises first.
+
+Reference: [complete Scala program](spark-009_solution.scala).
 
 ## Exercises and reasoning
 
@@ -163,4 +165,7 @@ assert(report("spark_target") == "4.3.0")
 
 ## Evidence and scope
 
-Run the complete reference using the same prepared profile as the learner source. Its assertions check normal values, malformed or boundary inputs and conservation where relevant. The final version line records the actual compiler/runtime family used. The reference is an executable explanation, not a hidden grading service or proof that a distributed Spark job would have the same performance characteristics.
+The reference checks the coordinate builder, then the master guard with `local[2]` accepted and `local[*]`, a `spark://` URL and `null` raising `IllegalArgumentException`. For closures it expects the safe function to map 7 to 21 and -2 to -6, to serialize to a positive byte count, and to return identical results for -2, 0 and 7 after a full serialization round trip through `ObjectOutputStream` and `ObjectInputStream`. The bad closure that keeps `Owner` must raise `NotSerializableException`. The version report must contain exactly the keys `scala_actual`, `java_actual` and `spark_target`.
+
+The program then prints `spark-009: six reference contracts passed` and the versions it ran on. Those checks use Java serialization in one process, which is the mechanism Spark's closure cleaner and task serializer rely on, but they do not start Spark or contact an executor, so they cannot reveal classpath conflicts that only appear on a cluster. The runtime readback is evidence about this worker; `spark_target` remains a declaration until a later lesson starts a session and reads `spark.version` back.
+

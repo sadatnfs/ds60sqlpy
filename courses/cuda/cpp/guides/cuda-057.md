@@ -4,18 +4,15 @@
 
 Advanced; about 130 minutes, plus any optional hardware experiment. Direct prerequisites: `cuda-055`, `cuda-056`
 
-The order supports learning at your own pace. Reading and CPU reasoning remain
-available when NVIDIA hardware is absent. Advanced hardware features need their
-own capability checks and are not prerequisites for opening this chapter.
+Pacing, evidence labels and platform rules for every chapter are in the [CUDA study guide](../../STUDY-GUIDE.md).
 
 ## Learning objectives
 
 Implement a feature-gated cluster or TMA path with a fallback and explain its data visibility rules.
 
-Work through *Clusters, TMA and newer GPU execution features* with the concrete cases below. Finish with this evidence:
-a feature-gated implementation with fallback and a correct explanation of data visibility. Distinguish an algorithmic
-calculation, a compiled artifact and an actual device observation when explaining
-what your work establishes.
+**Scope:** Thread-block clusters, distributed shared memory, tensor memory accelerator transfers, architecture-specific barriers and warpgroup work.
+
+**Evidence to produce:** A feature-gated implementation with fallback and a correct explanation of data visibility.
 
 ## Purpose, vocabulary and mental model
 
@@ -30,28 +27,17 @@ Thread-block clusters and tensor memory accelerator mechanisms expand cooperatio
 
 ## How to run and study this lesson
 
-Use the saved reading worksheet in `/classroom`; the reading pad does not execute
-CUDA. For the bounded calculation, select **CPU model (Python)**, whose
-answer-free starter supplies the literal fixtures and task contract. The
-[CUDA C++ study workflow](../README.md) covers platforms, optional GPU
-compilation and evidence labels. In a prepared Python environment you can also
-run the separate [CPU reference](../references/cuda-057_cpu.py) from the
-repository root:
+Trace worked example 1 by hand, then run the [CPU reference](../references/cuda-057_cpu.py) from the repository root:
 
 ```sh
 python courses/cuda/cpp/references/cuda-057_cpu.py
 ```
 
-Its assertions check the stated numerical result or model invariant; console
-text is evidence of this CPU model only, not of CUDA execution.
-
 ## Worked example 1: trace the mechanism
 
 A cluster-assisted histogram can combine partial bins across cooperating blocks before global output. Before a remote shared-memory read, the producing block's storage must be initialized and remain alive through the required cluster synchronization. A block exiting early can invalidate the assumed lifetime.
 
-The complete CPU model below intentionally models only the named arithmetic,
-layout, dependency or capability decision. It does not model GPU scheduling,
-caches, instruction timing or device memory visibility.
+**Why:** The cluster barrier guarantees the producer's bins are written and its shared storage still exists when a neighbor reads it.
 
 ```python
 capabilities = {"baseline": True, "cluster_histogram": False, "TMA_qualified": False}
@@ -60,41 +46,37 @@ assert selected == "baseline"
 print({"selected_implementation": selected, "specialized_execution_verified": False})
 ```
 
-**Expected observation:** Every assertion succeeds. A representative CPU output is:
+**Expected observation:** every assertion succeeds, and the CPU model prints:
 
 ```text
 {'selected_implementation': 'baseline', 'specialized_execution_verified': False}
 ```
 
-Integers, shapes and ordering must match exactly; only assertions with an explicit
-tolerance accept small floating-point differences. A printed duration is a model
-output, not a measured GPU benchmark.
+**Check:** Compare merged bins against a host histogram of the same input, and run on supported hardware only; otherwise record the check as unavailable.
 
 ## Worked example 2: change a meaningful condition
 
 A feature table might mark baseline kernels available, cluster launch unavailable and a TMA experiment unqualified. Dispatch should choose the baseline, not attempt an unsupported instruction and silently label a CPU calculation as the specialized result. Feature detection is per operation, not a marketing-name comparison.
 
-Before applying this example to your own program, write down which inputs are
-read, which result is produced, and the condition that makes the comparison
-valid. Keep the original case as a regression check when changing a boundary.
+**Why:** The baseline computes the same counts on any supported device, so choosing it keeps results correct.
+
+**Check:** The reference asserts selected == 'baseline' and prints specialized_execution_verified False.
 
 ## Six progressive exercises
 
-Exercises 1 and 2 are guided reconstructions of the worked examples; exercises
-3-6 change an input, diagnose a defect, test a boundary and transfer the idea.
-For each one, keep the calculation, output, diagram or failure policy you
-produce so another reader can compare it with the worked cases. If the hint is
-not enough, reread the mechanism paragraph and the bounded CPU assertion.
-
 ### Exercise 1
 
-Predict and trace the first worked example before running its CPU reference. Write every intermediate quantity that leads to the stated result, including units or ownership where applicable.
+Reconstruct worked example 1 on paper before running its CPU reference. Each block writes partial histogram bins to its shared memory, the cluster synchronizes, then blocks read remote bins and merge them before one global write.
+
+**Trap to avoid:** Reading a neighbor's distributed shared memory before the cluster sync, or after the producer block exits, reads uninitialized or freed storage.
 
 **Hint:** Start with the literal input and intermediate quantities in worked example 1.
 
 ### Exercise 2
 
-Reconstruct the second worked example without copying its conclusion. Identify the changed input or condition, show the resulting calculation or dependency, and explain why it differs from the first example.
+Rework worked example 2 without copying its conclusion. Consult the capability table and dispatch to the baseline kernel when cluster launch and TMA are not qualified.
+
+**Trap to avoid:** Trying the cluster instruction and catching a failure, then labeling a CPU result as the cluster path, misreports what ran.
 
 **Hint:** Identify exactly which condition changes in worked example 2.
 
@@ -102,11 +84,15 @@ Reconstruct the second worked example without copying its conclusion. Identify t
 
 List fields for an architecture-specific capability record.
 
+**Trap to avoid:** Recording only the GPU model name omits the compiler target and launch evidence that decide support.
+
 **Hint:** Use the first worked example to establish the relevant quantities, then change only the requested input.
 
 ### Exercise 4
 
 Why does a higher-looking GPU name not prove every instruction is supported?
+
+**Trap to avoid:** Assuming a larger model number includes every earlier specialized instruction can produce code the device cannot load.
 
 **Hint:** Locate the failed phase or violated dependency before proposing a repair.
 
@@ -114,35 +100,33 @@ Why does a higher-looking GPU name not prove every instruction is supported?
 
 What should an unavailable cluster feature do to reading progress?
 
+**Trap to avoid:** Blocking completion until a cluster-capable GPU appears punishes learners for hardware they cannot control.
+
 **Hint:** Check what the algorithm is allowed to read, write or assume at this boundary.
 
 ### Exercise 6
 
 Design a fallback histogram interface.
 
+**Trap to avoid:** Letting the fallback use different bin boundaries makes outputs differ silently between devices.
+
 **Hint:** State the output contract and which observations are needed in the new application.
 
 ## Common mistakes and diagnosis
 
-A tempting but incorrect claim in this chapter is: **a later-looking architecture name automatically supports every architecture-specific instruction variant.**
-
-For the concrete failure exercise, why does a higher-looking GPU name not prove every instruction is supported?
-Preserve the original input and the stage where behavior diverged, and compare
-with the CPU model before changing hardware configuration.
+A tempting but incorrect claim: **A later-looking architecture name automatically supports every architecture-specific instruction variant.** Instruction variants are tied to specific architectures, toolkit versions and compile targets, not to how new a product name sounds. Detect the feature with a real probe and record the result. Worked example 2 dispatches the baseline when cluster launch is unavailable instead of trying an unsupported instruction.
 
 ## Self-check, retrieval and transfer
 
-Explain the first example without its code, then use the second example to state
-one assumption that matters. Complete Exercise 3 independently, use Exercise 4 to
-diagnose a plausible defect, check the boundary in Exercise 5, and retain the
-application contract from Exercise 6. Compare the [separate explanations](../solutions/cuda-057_solutions.md)
-only after your attempt or a deliberate reveal. A reading marker records your
-choice; it does not certify hardware qualification or expert mastery.
+1. Name four fields of a capability record.
+2. What should an unavailable cluster feature do to reading progress?
+3. When may a block read another block's distributed shared memory?
+
+Short answers are in the [separate explanations](../solutions/cuda-057_solutions.md#self-check-answers); compare only after an attempt.
 
 ## Primary references
 
-Check the documentation that matches your prepared toolkit before optional
-hardware execution.
+Use the documentation that matches your prepared toolkit.
 
 - [CUDA Programming Guide](https://docs.nvidia.com/cuda/cuda-programming-guide/)
 

@@ -2,7 +2,7 @@
 
 Use deferral with an explicit upstream-state contract.
 
-The executable reference contains the two complete worked cases with assertions. The changes below explain the independent practice and its limits.
+The reference saves a prod manifest, runs a dev child with `--defer --state`, and checks that compiled SQL names `"prod"."base"`. The second case shows that an existing dev relation wins unless `--favor-state` is set. It proves which parent was read, not that production was correct. See [how these answers are laid out](../STUDY-GUIDE.md#answers-and-references).
 
 
 ## 1. Inspect the chosen parent

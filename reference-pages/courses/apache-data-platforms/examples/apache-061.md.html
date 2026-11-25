@@ -194,11 +194,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/apache-data-platforms/examples/apache-061.md</code></p>
     </header>
     <article class="document"><h2 id="pinot-apache-061-command-notebook">Pinot apache-061 command notebook<a class="heading-anchor" href="#pinot-apache-061-command-notebook" aria-label="Link to this section">#</a></h2>
-<p>Use these commands only from the copied owned Pinot project described in its README. The classroom Markdown pad does not execute Docker commands.</p>
+<p><code>client.py</code> in the copied Pinot project holds every query the checker sends, and <code>run.sh check</code> runs it. Its <code>query</code> helper raises as soon as a broker response carries an <code>exceptions</code> entry, so a failed join cannot pass silently.</p>
 <pre class="highlighted-code"><code class="language-bash">cat client.py
 bash run.sh check</code></pre>
 <p>The default checker inspects response exceptions and bounded results. A multistage join needs the supported engine configured and separately qualified, with unique-dimension and duplicate-dimension oracles.</p>
-<p>Native service acceptance and each advanced extension have distinct entries in <code>QUALIFICATION.md</code>. Source/configuration presence is not an observed service result.</p></article>
+<p>The multistage engine is outside the accepted Pinot gate. QUALIFICATION.md keeps multistage joins as a prepared extension, so a join receipt needs its own engine setting and both dimension oracles.</p></article>
   </main>
 </body>
 </html>

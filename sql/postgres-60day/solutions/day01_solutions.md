@@ -1,59 +1,16 @@
 # Day 01 solutions: SELECT, WHERE, ORDER BY, LIMIT/OFFSET
 
-
 <!-- beginner-solution-enrichment -->
 ## How to study and run this solution
 
-Open this explanation only after making an honest attempt. The executable
-companion runs solely against the disposable `advanced_sql_training` database:
+Every answer below is a single `SELECT` on one table (`orders`, `products` or `customers`), so the work is in the predicate and the sort, not in joins. After your own attempt, run the executable companion:
 
 ```bash
-# Linux, macOS, or Windows through WSL 2, from the repository root
 psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
   -f sql/postgres-60day/solutions/day01_solutions.sql
 ```
 
-`psql` prints each result/command tag in the terminal. Stop at the first
-unexpected `ERROR`; later output cannot repair an earlier failed invariant.
-Compare your own SQL, row grain, column names, row counts, `NULL` policy, and
-ordering with the explanation before comparing syntax.
-
-## Clause-by-clause reading map
-
-The lesson's main concepts are Projection, Predicate, Deterministic ordering. Its worked-model focus is:
-Trace the first learner query in logical order: `FROM training.customers` produces candidate rows, `WHERE country IN ('US', 'CA')` filters them, `ORDER BY created_at DESC, customer_id DESC` fixes their order, and `LIMIT 10` keeps the first ten. Remove the `customer_id` tie-breaker and explain why rows with equal timestamps no longer have a guaranteed relative order.
-
-- Start at `FROM`/`JOIN` and state the intermediate row grain. Inspect join keys
-  before adding aggregates; a one-to-many join is allowed to multiply rows only
-  when the later contract accounts for it.
-- Apply `WHERE` to input rows, `GROUP BY` to form buckets, and `HAVING` to
-  completed groups. Window functions run over the surviving relation and
-  normally preserve its row count.
-- Read the `SELECT` list as the public result contract: keys establish grain,
-  measures state calculations, and aliases explain meaning. `ORDER BY` is the
-  only output-order guarantee; add a unique tie-breaker before `LIMIT`.
-- Trace every common table expression (CTE) as a temporary named relation.
-  Execute or inspect one stage at a time while debugging, but compare the final
-  result with an independent control rather than trusting stage names.
-- Keep SQL `NULL` as “missing/unknown/not applicable” until the metric contract
-  chooses another representation. Guard division with `NULLIF`; disclose
-  exclusions and distinguish zero from no row.
-- For DDL/DML, a command tag proves only that PostgreSQL accepted a statement.
-  Catalog checks, negative cases, row-count reconciliation, and the declared
-  transaction boundary prove behavior and cleanup.
-
-The exact final queries are not the only valid syntax. A join, subquery, CTE,
-window, or conditional aggregate can be an alternative when it preserves the
-same grain, `NULL` semantics, deterministic ordering, and safety. Prefer the
-form whose intermediate relations a reviewer can verify; optimize only after
-correctness is established with evidence.
-
-These answers align one-for-one with [day01_select_where_orderby.sql](../day01_select_where_orderby.sql).
-Run only against the disposable `advanced_sql_training` database.
-The executable companion wraps every answer in `BEGIN`/`ROLLBACK`.
-The snippets below assume the lesson's
-`SET search_path TO training, public;` statement. Run the complete
-executable companion when you want a self-contained check.
+It wraps all six answers in one `BEGIN`/`ROLLBACK` and assumes `SET search_path TO training, public;`, which is why the snippets say `orders` rather than `training.orders`. Exercises 2 and 3 compare against `CURRENT_TIMESTAMP`, so their row counts shrink as the fixture ages; the counts quoted here are from a fresh load. These answers align one-for-one with [day01_select_where_orderby.sql](../day01_select_where_orderby.sql). The general [solution reading steps](../../STUDY-GUIDE.md#read-a-solution) and the [logical clause order](../../STUDY-GUIDE.md#reading-any-query-in-logical-order) apply to every query here.
 
 ## Reading contract
 
@@ -71,10 +28,11 @@ executable companion when you want a self-contained check.
 
 **Clause-by-clause reading:**
 
-- `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
-- `FROM`: establishes the starting relation and therefore the initial row grain.
-- `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
-- `LIMIT`: is applied after ordering and is meaningful only when the query first defines which rows come first.
+- `FROM orders AS o`: one row per order. Nothing filters, so all 4,362 orders are candidates.
+- `ORDER BY o.order_date DESC`: newest first. Order IDs were handed out customer by customer, so the newest order is not the highest ID.
+- `o.order_id DESC`: the unique final key. With it, the 20 rows and their positions are fully determined.
+- `LIMIT 20`: applied after the sort, so it keeps the 20 latest orders.
+- `SELECT`: four stored columns and no expressions.
 
 ```sql
 SELECT
@@ -92,19 +50,15 @@ LIMIT 20;
 
 **Expected shape:** At most 20 rows; one row per order, newest first.
 
-Check the result at the stated grain. An alternative formulation is
-valid only if it preserves the same NULL, ordering, time, money, and
-cardinality contract.
-
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-01 Exercise 1, read from `orders`. Build the answer toward `order_id`, `customer_id`, `total_amount`, and `order_date`; keep `order_id` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-01 Exercise 1, expected output: At most 20 rows; one row per order, newest first. The final columns are `order_id`, `customer_id`, `total_amount`, and `order_date`. The final order is `o.order_date DESC, o.order_id DESC`.
-- **Independent verification:** For sql-01 Exercise 1, assert the result has at most 20 rows, no duplicate `order_id`, and no adjacent pair out of `(order_date DESC, order_id DESC)` order. Check that each projected `customer_id`, `total_amount`, and `order_date` matches the same `orders.order_id` source row. Give two rows the same `o.order_date DESC` value and different `o.order_id DESC` values; verify `o.order_date DESC, o.order_id DESC` produces the intended rank and display order.
-- **Intermediate relation check:** For sql-01 Exercise 1, check `o.order_date DESC, o.order_id DESC` before applying the row cap.
-- **Clause check:** For sql-01 Exercise 1, the solution actually uses `FROM`, `SELECT`, `ORDER BY`, and `LIMIT`. Read only those operations: begin at `orders`, preserve one row per `order_id`, and finish with `order_id`, `customer_id`, `total_amount`, and `order_date` ordered by `o.order_date DESC, o.order_id DESC`.
-- **Alternative/trade-off:** For sql-01 Exercise 1, the chosen form is justified by this lesson-specific rationale: Sort by `order_date DESC` and add `order_id DESC` as a unique tie-breaker before applying `LIMIT`. Evaluate another form against the concrete expected result (At most 20 rows; one row per order, newest first) and the verification above.
-- **Edge case:** Give two rows the same `o.order_date DESC` value and different `o.order_id DESC` values; verify `o.order_date DESC, o.order_id DESC` produces the intended rank and display order.
+- **Inputs/evidence:** For sql-01 Exercise 1, read the 4,362 `orders` rows, one per `order_id`; `order_date` is `NOT NULL` and holds 4,362 distinct timestamps, so `order_id` only breaks future ties. Project `order_id`, `customer_id`, `total_amount`, and `order_date`.
+- **Expected result/shape:** For sql-01 Exercise 1, return exactly 20 rows, one per order, newest first; on a freshly loaded fixture the list starts with order 2258 and ends with order 743. The final columns are `order_id`, `customer_id`, `total_amount`, and `order_date`. The final order is `o.order_date DESC, o.order_id DESC`.
+- **Independent verification:** For sql-01 Exercise 1, confirm 20 rows and 20 distinct `order_id` values, then compare them with `SELECT order_id FROM orders ORDER BY order_date DESC, order_id DESC LIMIT 20`. Inside a rolled-back transaction, copy order 2258's `order_date` onto order 1; the first rows must become 2258, 1, 745, showing the higher ID wins the tie.
+- **Print the input first:** `SELECT count(*), count(DISTINCT order_date) FROM orders;` returns 4,362 twice, so the timestamp alone already orders every row today. The ID key is insurance for future data, not a fix for a current tie.
+- **Where the logic lives:** only `ORDER BY` decides which 20 rows appear. Delete it and the query still returns 20 rows, but on a fresh load they are simply orders 1 to 20, the first rows the scan reaches.
+- **Alternative:** `ORDER BY o.order_date DESC NULLS LAST, o.order_id DESC` spells out NULL placement. `order_date` is declared `NOT NULL`, so it changes nothing here and the shorter form is clearer.
+- **Edge case:** inside a transaction, copy the latest `order_date` onto order 1. The two tied orders must then appear with the higher ID first; roll back afterwards.
 
 ## Exercise 2: Query writing
 
@@ -114,11 +68,10 @@ cardinality contract.
 
 **Clause-by-clause reading:**
 
-- `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
-- `FROM`: establishes the starting relation and therefore the initial row grain.
-- `WHERE`: filters source rows before grouping and window calculation; SQL's unknown NULL comparisons do not pass.
-- `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
-- `LIMIT`: is applied after ordering and is meaningful only when the query first defines which rows come first.
+- `WHERE p.created_at >= CURRENT_TIMESTAMP - INTERVAL '90 days'`: compares the stored timestamp with a moving cutoff. On a fresh load only products 276 to 300 are that recent.
+- `ORDER BY p.price DESC, p.product_id`: price ranks the survivors and the product ID settles equal prices.
+- `LIMIT 10`: keeps the ten most expensive of those recent products.
+- `SELECT`: shows `created_at` so a reader can see that every row is inside the window.
 
 ```sql
 SELECT
@@ -138,19 +91,15 @@ LIMIT 10;
 
 **Expected shape:** At most 10 product rows; every row is in the 90-day window.
 
-Check the result at the stated grain. An alternative formulation is
-valid only if it preserves the same NULL, ordering, time, money, and
-cardinality contract.
-
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-01 Exercise 2, read from `products`. Build the answer toward `product_id`, `name`, `price`, and `created_at`; keep `product_id` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-01 Exercise 2, expected output: At most 10 product rows; every row is in the 90-day window. The final columns are `product_id`, `name`, `price`, and `created_at`. The final order is `p.price DESC, p.product_id`.
-- **Independent verification:** For sql-01 Exercise 2, assert no more than 10 rows, no duplicate `product_id`, and no adjacent pair that violates `p.price DESC, p.product_id`. Rejoin the returned keys to `products` to confirm `product_id`, `name`, `price`, and `created_at` came from the same source rows. Tie two rows on `p.price DESC` and give them different `p.product_id` values; verify `p.price DESC, p.product_id` chooses a stable first/last row.
-- **Intermediate relation check:** For sql-01 Exercise 2, inspect the source keys that survive `WHERE`; then check `p.price DESC, p.product_id` before applying the row cap.
-- **Clause check:** For sql-01 Exercise 2, the solution actually uses `FROM`, `WHERE`, `SELECT`, `ORDER BY`, and `LIMIT`. Read only those operations: begin at `products`, preserve one row per `product_id`, and finish with `product_id`, `name`, `price`, and `created_at` ordered by `p.price DESC, p.product_id`.
-- **Alternative/trade-off:** For sql-01 Exercise 2, the chosen form is justified by this lesson-specific rationale: Filter the timestamp directly, then sort by price and a stable product key. Evaluate another form against the concrete expected result (At most 10 product rows; every row is in the 90-day window) and the verification above.
-- **Edge case:** Tie two rows on `p.price DESC` and give them different `p.product_id` values; verify `p.price DESC, p.product_id` chooses a stable first/last row.
+- **Inputs/evidence:** For sql-01 Exercise 2, read `products` (300 rows, 300 distinct prices); 25 of them have `created_at` inside the last 90 days, priced from 112.12 to 121.00. Project `product_id`, `name`, `price`, and `created_at`.
+- **Expected result/shape:** For sql-01 Exercise 2, return exactly 10 of those 25 recent products, highest price first: product 300 at 121.00 down to product 291 at 117.67. The final columns are `product_id`, `name`, `price`, and `created_at`. The final order is `p.price DESC, p.product_id`.
+- **Independent verification:** For sql-01 Exercise 2, confirm `SELECT COUNT(*) FROM products WHERE created_at >= CURRENT_TIMESTAMP - INTERVAL '90 days'` returns 25 and that every returned `created_at` passes that test. Inside a rolled-back transaction, set product 299's price to 121.00; the first two rows must then be 299 and 300, because `product_id` ascending breaks the price tie.
+- **Print the window first:** `SELECT count(*) FROM products WHERE created_at >= CURRENT_TIMESTAMP - INTERVAL '90 days';` returns 25 on a fresh load. If an aged fixture drops that count below 10, the answer correctly returns fewer than ten rows.
+- **Where the logic lives:** the filter and the sort answer different questions. Prices in this fixture are `10 + 0.37 * product_id`, so they rise with the ID, and the top ten recent products are 300 down to 291.
+- **Alternative:** `WHERE p.created_at::date >= CURRENT_DATE - 90` reads naturally but compares calendar days, which admits products from earlier in the boundary day. Casting the column also stops a plain index on `created_at` from helping.
+- **Edge case:** a product created exactly 90 days before `CURRENT_TIMESTAMP` is kept because the predicate uses `>=`; one created a microsecond earlier is excluded.
 
 ## Exercise 3: Query writing
 
@@ -160,10 +109,10 @@ cardinality contract.
 
 **Clause-by-clause reading:**
 
-- `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
-- `FROM`: establishes the starting relation and therefore the initial row grain.
-- `WHERE`: filters source rows before grouping and window calculation; SQL's unknown NULL comparisons do not pass.
-- `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
+- `WHERE c.country IN ('GB', 'DE')`: shorthand for two equality tests joined by `OR`.
+- `AND c.created_at >= CURRENT_TIMESTAMP - INTERVAL '1 year'`: both conditions must hold for a customer to stay.
+- `ORDER BY c.created_at DESC, c.customer_id`: newest first, with the ascending ID as the tie-breaker. Exercise 1 breaks ties with a descending ID instead; either direction works as long as the key is unique.
+- No `LIMIT`: the prompt asks for every GB and DE customer in the window.
 
 ```sql
 SELECT
@@ -183,19 +132,15 @@ ORDER BY
 
 **Expected shape:** Only GB/DE customers from the declared window.
 
-Check the result at the stated grain. An alternative formulation is
-valid only if it preserves the same NULL, ordering, time, money, and
-cardinality contract.
-
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-01 Exercise 3, read from `customers`. Build the answer toward `customer_id`, `full_name`, `country`, and `created_at`; keep `customer_id` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-01 Exercise 3, expected output: Only GB/DE customers from the declared window. The final columns are `customer_id`, `full_name`, `country`, and `created_at`. The final order is `c.created_at DESC, c.customer_id`.
-- **Independent verification:** For sql-01 Exercise 3, run an anti-check that counts rows where NOT ((c.country IN ('GB', 'DE') AND c.created_at >= CURRENT_TIMESTAMP - INTERVAL '1 year')); require unique `customer_id` where the expected grain is one row per key and confirm the projected `customer_id`, `full_name`, `country`, and `created_at` against `customers`. Give two rows the same `c.created_at DESC` value and different `c.customer_id` values; verify `c.created_at DESC, c.customer_id` produces the intended rank and display order.
-- **Intermediate relation check:** For sql-01 Exercise 3, inspect the source keys that survive `WHERE`; then check `c.created_at DESC, c.customer_id` before applying the row cap.
-- **Clause check:** For sql-01 Exercise 3, the solution actually uses `FROM`, `WHERE`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `customers`, preserve one row per `customer_id`, and finish with `customer_id`, `full_name`, `country`, and `created_at` ordered by `c.created_at DESC, c.customer_id`.
-- **Alternative/trade-off:** For sql-01 Exercise 3, the chosen form is justified by this lesson-specific rationale: Use `IN` for the country set, combine the time condition with `AND`, and break timestamp ties. Evaluate another form against the concrete expected result (Only GB/DE customers from the declared window) and the verification above.
-- **Edge case:** Give two rows the same `c.created_at DESC` value and different `c.customer_id` values; verify `c.created_at DESC, c.customer_id` produces the intended rank and display order.
+- **Inputs/evidence:** For sql-01 Exercise 3, read `customers` (500 rows); 119 were created in the last year, of which 15 are `GB` and 14 are `DE`. Project `customer_id`, `full_name`, `country`, and `created_at`.
+- **Expected result/shape:** For sql-01 Exercise 3, return 29 rows on a freshly loaded fixture, all `GB` or `DE` and all created within one year, newest first starting with customer 172. The final columns are `customer_id`, `full_name`, `country`, and `created_at`. The final order is `c.created_at DESC, c.customer_id`.
+- **Independent verification:** For sql-01 Exercise 3, group the one-year window by `country` and confirm `GB` 15 plus `DE` 14 equals the 29 returned rows; grouping the output by `country` must show only those two values. The 29 rows carry 29 distinct `created_at` values, so `customer_id` only matters if a tie is added.
+- **Print the pieces separately:** count GB and DE customers without the date condition (126, 63 of each), then with it (29 on a fresh load: 15 GB and 14 DE). The gap shows the date predicate is doing work.
+- **Where the logic lives:** the `AND`. Writing `country = 'GB' OR country = 'DE' AND created_at >= ...` without parentheses binds `AND` first and returns every GB customer regardless of date.
+- **Alternative:** `c.country = ANY (ARRAY['GB', 'DE'])` is equivalent and convenient when the country list arrives as a parameter.
+- **Edge case:** `country` is `NOT NULL`, but it is case-sensitive text. A row stored as `gb` would be silently excluded by `IN ('GB', 'DE')`.
 
 ## Exercise 4: Prediction
 
@@ -205,9 +150,10 @@ cardinality contract.
 
 **Clause-by-clause reading:**
 
-- `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
-- `FROM`: establishes the starting relation and therefore the initial row grain.
-- `FILTER (WHERE ...)`: limits one aggregate without removing rows needed by neighboring aggregates.
+- `COUNT(*) FILTER (WHERE c.email IS NULL)`: counts customers whose email is missing.
+- `COUNT(*) FILTER (WHERE c.email IS NOT NULL)`: counts the rest.
+- `COUNT(*)`: every customer, the control total for the other two.
+- No `GROUP BY`, so the whole table collapses into one summary row.
 
 ```sql
 SELECT
@@ -220,19 +166,15 @@ FROM
 
 **Expected shape:** Exactly one summary row with counts whose sum equals all customers.
 
-Check the result at the stated grain. An alternative formulation is
-valid only if it preserves the same NULL, ordering, time, money, and
-cardinality contract.
-
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-01 Exercise 4, read from `customers`. Build the answer toward `missing_email_count`, `present_email_count`, and `customer_count`; keep `customer_id` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-01 Exercise 4, expected output: Exactly one summary row with counts whose sum equals all customers. The final columns are `missing_email_count`, `present_email_count`, and `customer_count`.
-- **Independent verification:** For sql-01 Exercise 4, assert exactly one row. Independently run `SELECT COUNT(*) FROM customers`; verify `missing_email_count + present_email_count = customer_count` and that `customer_count` equals the independent count. Repeat with `NULL` in `email` and state whether the row is kept, rejected, or classified.
-- **Intermediate relation check:** For sql-01 Exercise 4, inspect the source keys that survive `WHERE`.
-- **Clause check:** For sql-01 Exercise 4, the solution actually uses `FROM`, `WHERE`, aggregate `FILTER`, and `SELECT`. Read only those operations: begin at `customers`, preserve one row per `customer_id`, and finish with `missing_email_count`, `present_email_count`, and `customer_count`.
-- **Alternative/trade-off:** For sql-01 Exercise 4, the chosen form is justified by this lesson-specific rationale: Comparisons with `NULL` are unknown; use `IS NULL` and `IS NOT NULL`. Evaluate another form against the concrete expected result (Exactly one summary row with counts whose sum equals all customers) and the verification above.
-- **Edge case:** Repeat with `NULL` in `email` and state whether the row is kept, rejected, or classified.
+- **Inputs/evidence:** For sql-01 Exercise 4, read all 500 `customers` rows; `email` is nullable but currently filled on every row. The query returns counts only, so no customer key appears.
+- **Expected result/shape:** For sql-01 Exercise 4, return exactly one row: `missing_email_count` 0, `present_email_count` 500, `customer_count` 500. The final columns are `missing_email_count`, `present_email_count`, and `customer_count`.
+- **Independent verification:** For sql-01 Exercise 4, confirm 0 + 500 equals `customer_count` and matches `SELECT COUNT(*) FROM customers`. Inside a rolled-back transaction, set customer 1's `email` to `NULL` and rerun; the counts must become 1, 499, and 500, proving `COUNT(email)` skips the `NULL` while `COUNT(*)` keeps the row.
+- **Run the broken form first:** `SELECT count(*) FROM customers WHERE email = NULL;` returns 0, and so does `email <> NULL`, because neither comparison is ever true. That is the prediction the prompt asks for.
+- **Where the logic lives:** the `IS NULL` and `IS NOT NULL` tests inside `FILTER`. On this fixture the row reads 0 missing, 500 present, 500 total.
+- **Alternative:** `COUNT(c.email)` counts non-NULL emails directly, and `COUNT(*) - COUNT(c.email)` gives the missing number. It is shorter, but the `FILTER` form states each rule in words a reviewer can check.
+- **Edge case:** an empty string is not NULL. Inside a transaction, set one email to `''` and another to NULL; only the second moves into `missing_email_count`.
 
 ## Exercise 5: Debugging
 
@@ -242,10 +184,9 @@ cardinality contract.
 
 **Clause-by-clause reading:**
 
-- `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
-- `FROM`: establishes the starting relation and therefore the initial row grain.
-- `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
-- `LIMIT`: is applied after ordering and is meaningful only when the query first defines which rows come first.
+- `ORDER BY p.price DESC, p.product_id`: the repair. It defines "top" as the highest price and uses the product ID for equal prices.
+- `LIMIT 10`: now cuts a ranked list instead of an arbitrary one.
+- `SELECT`: three stored columns, enough to see the ranking.
 
 ```sql
 SELECT
@@ -262,19 +203,15 @@ LIMIT 10;
 
 **Expected shape:** At most 10 rows, highest prices first, stable across repeated runs on unchanged data.
 
-Check the result at the stated grain. An alternative formulation is
-valid only if it preserves the same NULL, ordering, time, money, and
-cardinality contract.
-
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-01 Exercise 5, read from `products`. Build the answer toward `product_id`, `name`, and `price`; keep `product_id` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-01 Exercise 5, expected output: At most 10 rows, highest prices first, stable across repeated runs on unchanged data. The final columns are `product_id`, `name`, and `price`. The final order is `p.price DESC, p.product_id`.
-- **Independent verification:** For sql-01 Exercise 5, assert no more than 10 rows, no duplicate `product_id`, and no adjacent pair that violates `p.price DESC, p.product_id`. Rejoin the returned keys to `products` to confirm `product_id`, `name`, and `price` came from the same source rows. Give two rows the same `p.price DESC` value and different `p.product_id` values; verify `p.price DESC, p.product_id` produces the intended rank and display order.
-- **Intermediate relation check:** For sql-01 Exercise 5, check `p.price DESC, p.product_id` before applying the row cap.
-- **Clause check:** For sql-01 Exercise 5, the solution actually uses `FROM`, `SELECT`, `ORDER BY`, and `LIMIT`. Read only those operations: begin at `products`, preserve one row per `product_id`, and finish with `product_id`, `name`, and `price` ordered by `p.price DESC, p.product_id`.
-- **Alternative/trade-off:** For sql-01 Exercise 5, the chosen form is justified by this lesson-specific rationale: Define the business ranking first; use a unique final key for tied prices. Evaluate another form against the concrete expected result (At most 10 rows, highest prices first, stable across repeated runs on unchanged data) and the verification above.
-- **Edge case:** Give two rows the same `p.price DESC` value and different `p.product_id` values; verify `p.price DESC, p.product_id` produces the intended rank and display order.
+- **Inputs/evidence:** For sql-01 Exercise 5, read all 300 `products` rows; every price is distinct, from product 1 up to product 300 at 121.00. Project `product_id`, `name`, and `price`.
+- **Expected result/shape:** For sql-01 Exercise 5, return exactly 10 rows, products 300 down to 291 with prices 121.00 down to 117.67, identical on every rerun. The final columns are `product_id`, `name`, and `price`. The final order is `p.price DESC, p.product_id`.
+- **Independent verification:** For sql-01 Exercise 5, confirm 10 distinct `product_id` values and that `SELECT COUNT(DISTINCT price) FROM products` returns 300, so the current fixture has no price tie. Inside a rolled-back transaction, set product 299's price to 121.00; the top three must read 299, 300, 298 on every run.
+- **Compare broken and fixed:** `SELECT product_id, name, price FROM products LIMIT 10;` returns products 1 to 10 at 10.37 to 13.70, the cheapest rows, only because that is the physical order of a freshly loaded table. The repaired query returns products 300 down to 291 (121.00 to 117.67).
+- **Why the original is nondeterministic:** without `ORDER BY`, SQL promises no row order. Scan order matches insertion order today, but an update, a vacuum or a parallel plan can change which ten rows arrive first.
+- **Alternative:** `FETCH FIRST 10 ROWS ONLY` is the standard spelling of `LIMIT 10`. `FETCH FIRST 10 ROWS WITH TIES` would return extra rows if the tenth price were shared, which breaks the at-most-ten contract.
+- **Edge case:** prices are unique in this fixture, so `p.product_id` never decides a position. Tie two prices inside a transaction to watch the lower ID win.
 
 ## Exercise 6: Extension
 
@@ -313,9 +250,9 @@ orders or change what an output row means.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-01 Exercise 6, read from `orders` at one row per `order_id` and compare pages only on an unchanged fixture.
-- **Expected result/shape:** For sql-01 Exercise 6, return at most 10 rows equal to positions 11 through 20 of the unchanged ordered input, one row per `order_id`. The final columns are `order_id`, `customer_id`, `total_amount`, and `order_date`. The final order is `o.order_date DESC, o.order_id DESC`.
-- **Verify:** For sql-01 Exercise 6, display the first 20 ordered IDs and compare the page with positions 11 through 20. Assert at most 10 unique `order_id` values, no overlap with page one, and projected values matching those source IDs.
+- **Inputs/evidence:** For sql-01 Exercise 6, read the 4,362 `orders` rows at one row per `order_id`, sorted by the Exercise 1 key, and compare pages only on an unchanged fixture.
+- **Expected result/shape:** For sql-01 Exercise 6, return 10 rows equal to positions 11 through 20 of the ordered input, one row per `order_id`; on a freshly loaded fixture the page runs from order 1500 to order 743. The final columns are `order_id`, `customer_id`, `total_amount`, and `order_date`. The final order is `o.order_date DESC, o.order_id DESC`.
+- **Verify:** For sql-01 Exercise 6, list the first 20 ordered IDs (2258 through 743) and confirm the page equals the last 10 of them, from 1500 to 743, with no ID shared with page one (2258 through 3014).
 - **Uniqueness and overlap:** Check that no order ID repeats within the page or appears on both pages. When fewer than twenty source rows exist, the second page is shorter or empty.
 - **Tie case:** Give two orders equal timestamps and different IDs. The ID tie-breaker still fixes their order.
 - **Alternative/trade-off:** An offset is easy to reason about for this stable fixture. Large offsets require the database to find and discard preceding rows. Changes between page requests can also shift positions. The later `sql-scale-01` workshop teaches keyset cursors after their prerequisites.
@@ -325,8 +262,8 @@ Those mechanisms are introduced in their own lessons.
 
 ## Final self-check
 
-- Can you explain the logical grain before and after every aggregation?
-- Are missing values preserved or converted only by an explicit rule?
-- Does every ordered result have a deterministic final tie-breaker?
-- Are money and time assumptions visible beside the calculation?
-- Does the complete executable solution finish with `ROLLBACK`?
+- Why can the worked margin query sort by `gross_margin` but not filter on it, and how would you filter on margin instead?
+- If you delete `ORDER BY` from Exercise 1, which 20 orders does your copy print, and why is that not a promise?
+- What does `email = NULL` return, and which column in Exercise 4 proves the two counts add up to 500?
+- Does page two from Exercise 6 share any `order_id` with page one?
+- Does the companion transcript end with `ROLLBACK` and no `ERROR`?

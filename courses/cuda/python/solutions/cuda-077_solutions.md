@@ -1,6 +1,6 @@
 # cuda-077: explained solutions
 
-These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.
+Compare with your [worksheet](../lessons/cuda-077.md) attempt.
 
 ## Exercise 1: Compute a tree by hand
 
@@ -74,8 +74,16 @@ Repeatability does not imply cross-hardware identical arithmetic.
 
 **How to verify.** Record the environment with each result. Expect bit-identical answers only within one environment, and use a tolerance when comparing across environments.
 
+## Self-check answers
+
+1. **Why can a tree reduction differ from a left-to-right loop?** Floating-point addition is not associative, and the tree groups additions differently. Both can be valid implementations with different rounding.
+
+2. **How do you tell rounding noise from a missing element?** Rounding noise is small relative to the data's scale. A missing element changes the sum by that element's value, like 10 instead of 15.
+
+3. **Why does a sum near zero need an absolute tolerance?** A relative tolerance scales with the expected value, so it shrinks to almost nothing near zero and rejects acceptable rounding.
+
 ## Reference observation
 
 Accurate cancellation sum 1 and tail-preserving sum 15.
 
-The reference file is `courses/cuda/python/references/cuda-077_cpu.py`. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.
+Asserted by `courses/cuda/python/references/cuda-077_cpu.py`.

@@ -3,23 +3,18 @@ public class Main {
 
   public static void main(String[] args) throws Exception {
     // Exercise 1: Verify a real local database: predict an edited check
-    // Copy Example A into a scratch `Main.java` and change `assert
-    // connection.getMetaData().getDatabaseProductName().equals("H2") &&` to `assert
-    // connection.getMetaData().getDatabaseProductName().equals("H3") &&` inside its assertion.
-    // Before running it with `java -ea Main`, predict whether the assertion still holds and
-    // explain why; then restore it.
-    // Expected: The changed run fails with an `AssertionError` from the assertion on
+    // Change Example A's assertion to `assert
+    // connection.getMetaData().getDatabaseProductName().equals("H3") &&`, predict whether it
+    // holds, then run and restore it.
+    // Expected: The edited run fails with an `AssertionError` from the assertion on
     // `connection.getMetaData().getDatabaseProductName().equals("H2") &&
-    // connection.getAutoCommit()`. Restoring the original line brings back the worked
-    // observation: database product H2; 2 rows; auto-commit initially true.
+    // connection.getAutoCommit()`.
 
     // Exercise 2: Bind an injection-shaped value as data: debug a regression
-    // A regression changed one token in the code that Example B adds after Example A, so one
-    // line now reads `statement.setString(1, "Alice!");`. Run Example B with that line, use the
-    // failing assertion to locate the defect and repair it without changing the assertion.
-    // Expected: Before the repair the run fails with an `AssertionError` from the assertion on
-    // `hasRow && rows.getInt(1) == 1`; after it the line reads `statement.setString(1,
-    // "Alice");` again and alice matches 1 row; the injection-shaped value matches 0.
+    // A regression in Example B's new code makes one line read `statement.setString(1,
+    // "Alice!");`. Repair it using the failing assertion.
+    // Expected: The unrepaired run fails with an `AssertionError` from the assertion on `hasRow
+    // && rows.getInt(1) == 1`; the repaired line reads `statement.setString(1, "Alice");`.
 
     // Exercise 3: Roll back a transfer
     // Disable auto-commit, move 20 cents from account 1 to 2, inspect intermediate balances, and

@@ -2,67 +2,13 @@
 
 ## How to run this lesson
 
-Start the Linux-container engine and run `./classroom` from the repository
-root. On Windows, use Ubuntu in WSL 2 or the thin
-`START_DOCKER_CLASSROOM.cmd` wrapper. Choose **PostgreSQL** on the shared
-`/classroom` home, then open **sql-04**. The
-[launcher guide](../../../docs/one-command-classroom.md) covers first preparation, strict resume and
-the saved project selection. No host Python or PostgreSQL installation is
-required for this browser route.
+Open `./classroom`, pick PostgreSQL and **sql-04**, and press **Whole SQL lesson (psql)**. `psql` connects to `advanced_sql_training` and runs three read-only outer joins between `BEGIN` and `ROLLBACK`: customers with their order counts (fewest first), products with units sold (fewest first), and every order or payment that has no partner on the other side.
 
-1. Read the prerequisite and fixture notes before running the file. Use only
-   the local disposable `advanced_sql_training` database.
-2. Choose **Whole SQL lesson (psql)** for the cataloged learner script. This
-   preserves the lesson's reviewed psql directives, relative includes and
-   transaction behavior. **SQL snippet** is appropriate for ordinary SQL
-   statements, but is not a replacement for an entire script's setup.
-3. The **Course database** panel above the code shows whether the course
-   training tables are loaded. Missing tables load automatically before your
-   first run (or choose **Load course tables**) and stay loaded for later
-   lessons. **Reset training data** restores the original rows only when your
-   own changes made results differ; it keeps your saved code and notes.
-4. Edit the learner copy in the classroom and save your prediction before
-   running. Its whole-script workspace is
-   `.learning/sql/sql-04/lesson/workspace/sql/postgres-60day/day04_outer_joins.sql`.
-   For browser work this path is inside the Docker learning volume, not a
-   newly created host folder beside your checkout. The checked-in source
-   remains the answer-free starting artifact.
-5. Run the whole script and inspect the full transcript. The runner uses
-   `psql -X -v ON_ERROR_STOP=1 -f`. SELECT output has columns, rows and a row
-   count; DDL/DML has command tags; intentional checks may produce NOTICE
-   messages. An unexpected ERROR or nonzero exit is a failure to diagnose,
-   even when an earlier query printed plausible values.
-6. Verify the lesson's expected grain, ordering, constraints and declared
-   transaction or cleanup outcome. Keep required ROLLBACK statements.
-   The warehouse sequence and other explicitly stateful exercises explain
-   when state is committed. Read saved output without rerunning it when
-   reviewing an earlier attempt.
+Your editable copy of the file is
+`.learning/sql/sql-04/lesson/workspace/sql/postgres-60day/day04_outer_joins.sql`.
+Try changing `LEFT JOIN` to `JOIN` in the first query and rerunning: the first 25 rows change completely, because the customers with no orders vanish and the list starts at customers with four orders instead.
 
-If a relation is missing, inspect the lesson's required fixture and predecessor
-rather than guessing a new table definition. If authentication or runtime
-readiness fails, use `./classroom status` and the setup guide. Keep credentials
-out of SQL, notebooks, screenshots and committed files. Repair the first error
-before trusting partial output, and reveal separate solutions only when you
-want to compare after an attempt.
-
-### Optional contributor notebook route
-
-For notebook work, deliberately prepare the Linux/WSL contributor environment
-from [CONTRIBUTING.md](../../../CONTRIBUTING.md), including a compatible psql client and
-the notebook dependencies. Generate this lesson's private workspace through
-the maintained CLI:
-
-```sh
-uv run --no-sync python scripts/course.py sql notebook sql-04
-```
-
-Open the printed notebook path in that environment's JupyterLab. It uses the
-same catalog-derived learner-copy layout in that contributor checkout and
-executes the complete script through psql. Its host-side state is separate
-from the Docker browser's named volume. Follow
-[guided SQL notebooks](../../../docs/guided-sql-notebooks.md) for explicit local connection
-selection and kernel setup. Notebook generation does not execute SQL or
-authorize a reset.
+If the classroom will not start or `advanced_sql_training` is missing, see [running a lesson in the classroom](../../STUDY-GUIDE.md#run-a-lesson-in-the-classroom). Contributors who prefer Jupyter can follow the [notebook route](../../STUDY-GUIDE.md#optional-contributor-notebook-route); learners do not need it.
 
 ## Level and prerequisites
 
@@ -74,28 +20,13 @@ authorize a reset.
 
 ## A beginner's mental model for this lesson
 
-A **table** stores facts in named columns. A **row** is one occurrence at the
-table's declared grain. A query creates a temporary **result set**: rows printed
-on screen are not automatically stored. The key vocabulary for this lesson is Preserved side, NULL-extended row, Anti-join. Its worked SQL reads or creates `customers`, `orders`, `order_items`, `products`, `payments`.
+An inner join only keeps pairs that match, so a customer who never ordered simply disappears from `customers JOIN orders`. An outer join names a **preserved side** that keeps every row whether or not a match exists. In `customers c LEFT JOIN orders o`, `customers` is preserved: all 500 customers come through, and the 62 Brazilian customers who have no orders arrive as **NULL-extended rows**, with every `o.` column set to `NULL`.
 
-Before writing a query, complete this sentence: “One output row represents
-___.” Joins can multiply rows, filters can remove them, grouping can collapse
-many rows into one, and window functions can add calculations while preserving
-row count. For a normal analytical `SELECT`, use this logical reading order:
-`FROM`/`JOIN` (including `ON`) → `WHERE` → `GROUP BY`/aggregates → `HAVING` →
-window calculations → `SELECT` → `ORDER BY` → `LIMIT`. PostgreSQL may execute a
-different physical plan while preserving those semantics.
+That `NULL` is the evidence of absence, and the lesson is mostly about not destroying it by accident. Three habits protect it. Count a right-side key, `COUNT(o.order_id)`, so a NULL-extended row counts as 0 rather than 1. Put conditions about the right-side table in `ON`, because a `WHERE o.status = 'delivered'` throws away every row where `o.status` is `NULL`. And decide what `NULL` means before replacing it: `COALESCE(SUM(oi.quantity), 0)` is right for units sold, because a product with no line items really sold zero.
 
-The worked walkthrough's lesson-specific task is: Start from `products` and left-join `order_items`. A product with no line item still appears, with `oi.product_id IS NULL`. Moving a right-side filter from `ON` into `WHERE` removes that row; run both shapes and explain the change.
-Exercise 1 expects this result: one row per customer; zero is visible. Predict keys, row count, `NULL` behavior,
-and ordering before running. Afterwards, compare keys/counts/totals with an
-independent control. A blank string, SQL `NULL`, numeric zero, and a missing row
-are different facts; use `COALESCE` only after choosing which meaning the
-business question requires.
+Keeping only the NULL-extended rows gives an **anti-join**: `products LEFT JOIN order_items ... WHERE oi.order_item_id IS NULL` lists the 25 products nobody has bought. A `FULL JOIN` preserves both sides at once, which turns it into a reconciliation tool: anything with `NULL` on one side exists only on the other.
 
 ## Two worked SQL examples
-
-These worked excerpts come from `sql/postgres-60day/day04_outer_joins.sql`. Use **Whole SQL lesson (psql)** in the unified classroom for the complete file, including its fixture and transaction context. The optional contributor notebook and prepared `psql` routes are described above.
 
 ### Example 1
 
@@ -116,9 +47,9 @@ ORDER BY
 LIMIT 25;
 ```
 
-**How to read it:** Example 1: Start with `customers`, and `orders` in `FROM`/`JOIN`; let `GROUP BY` collapse rows to its grouping keys. The final `SELECT` displays `customer_id`, `full_name`, and `orders`. `ORDER BY` determines presentation order and the final `LIMIT 25` caps displayed rows. Before running, predict the row grain, row count, `NULL` positions, and first/last key; afterwards, compare each prediction with the transcript.
+**How to read it:** `customers` is the preserved side, so every customer survives the join even with no matching order. `COUNT(o.order_id)` skips the `NULL` key on NULL-extended rows, giving 0 for customers without orders. Sorting by `orders ASC` puts those customers first, and `LIMIT 25` shows only the first 25.
 
-**Expected result/shape:** Example 1 returns one grouped row per `customer_id`, capped at 25 rows with columns `customer_id`, `full_name`, and `orders` from `customers`, and `orders`. Use a direct count or grouped aggregate over those same source relations as the control; check ordering only when this query has an `ORDER BY`, and inspect `NULL` only for columns this example can produce.
+**Expected result/shape:** 25 rows, all with `orders` = 0: customers 8, 16, 24 and so on up to 200, every one of them in Brazil. The fixture has 62 such customers (8 to 496 in steps of 8), so the limit hides 37 of them. The lowest count among customers who did order is 4, which is where the list would continue.
 
 ### Example 2
 
@@ -139,9 +70,9 @@ ORDER BY
 LIMIT 25;
 ```
 
-**How to read it:** Example 2: Start with `order_items`, and `products` in `FROM`/`JOIN`; let `GROUP BY` collapse rows to its grouping keys. The final `SELECT` displays `product_id`, `name`, and `sold_qty`. `ORDER BY` determines presentation order and the final `LIMIT 25` caps displayed rows. Before running, predict the row grain, row count, `NULL` positions, and first/last key; afterwards, compare each prediction with the transcript.
+**How to read it:** This is the same idea written as a `RIGHT JOIN`: `products` is on the right and preserved. Unsold products have no `order_items` rows, so `SUM(oi.quantity)` is `NULL` for them and `COALESCE` turns it into 0. The sort puts the zeros first and breaks ties by `product_id`.
 
-**Expected result/shape:** Example 2 returns one grouped row per `product_id`, capped at 25 rows with columns `product_id`, `name`, and `sold_qty` from `order_items`, and `products`. Use a direct count or grouped aggregate over those same source relations as the control; check ordering only when this query has an `ORDER BY`, and inspect `NULL` only for columns this example can produce.
+**Expected result/shape:** 25 rows, products 276 to 300, all with `sold_qty` 0. They are exactly the 25 products that appear in no order item, spread over all six categories. Without `COALESCE` the `NULL` sums would sort last under `ASC`, and the top of the list would show product 14 (105 units), 99 and 184 (106 each) instead.
 
 ## Learning objectives
 
@@ -167,62 +98,60 @@ still appears, with `oi.product_id IS NULL`. Moving a right-side filter from
 - **Focus:** Use outer joins to preserve a declared side and make absence visible without accidentally filtering it away.
 - **Assumptions:** Missing matches appear as NULL-extended columns. Decide whether absence means zero, unknown, or an exception before applying `COALESCE`.
 - **Failure to watch for:** A right-side predicate in `WHERE` can turn a left join into an inner join; put match-qualification predicates in `ON` when unmatched left rows must remain.
-- **Review loop:** predict the row grain and NULL/order behavior, run the
-  query, inspect a bounded sample, and reconcile counts or totals before
-  accepting the result.
+- **Review loop:** before running, decide which side is preserved and how many rows that side has; afterwards, count the rows whose right-side key is `NULL` and check that number against a separate `NOT EXISTS` query.
 
 ## Exercises
 
 Use outer joins to preserve a declared side and make absence visible without accidentally filtering it away.
 
-Attempt each prompt in a scratch SQL file before opening the solution.
-For every result, write its row grain and expected shape first.
+Before each query, write down which table is preserved, how many rows it has, and how many of them you expect to be NULL-extended.
 
 1. **Query writing:** List every customer with order count, including customers with zero orders.
+   **Expect:** how many of the 500 rows should show 0, and which country will those customers come from?
    **Progressive hint:** Start from customers, left join orders, and count the nullable order key rather than `COUNT(*)`.
-   **Inputs/evidence:** For sql-04 Exercise 1, read from `customers`, and `orders`. Build the answer toward `customer_id`, `full_name`, and `order_count`; keep `customer_id`, and `full_name` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-04 Exercise 1, expected output: One row per customer; zero is visible. The final columns are `customer_id`, `full_name`, and `order_count`. The final order is `order_count DESC, c.customer_id`.
-   **Verify:** For sql-04 Exercise 1, independently aggregate `customers`, and `orders` by `customer_id`, and `full_name`; require one output row for every distinct `customer_id`, and `full_name` tuple and compare `order_count` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `order_count` for the existing `customer_id`, and `full_name` tuple and verify the new tuple appears exactly once.
+   **Inputs/evidence:** For sql-04 Exercise 1, start from all 500 `customers` and `LEFT JOIN` the 4,362 `orders`; 62 customers have no orders. Return `customer_id`, `full_name`, and `order_count`.
+   **Expected result/shape:** For sql-04 Exercise 1, return 500 rows, one per customer: 33 customers tie at the maximum of 16 orders, starting with customer 12, and the 62 customers without orders show 0 at the bottom. The final columns are `customer_id`, `full_name`, and `order_count`. The final order is `order_count DESC, c.customer_id`.
+   **Verify:** For sql-04 Exercise 1, confirm 500 distinct `customer_id` values and that `order_count` sums to 4,362, the size of `orders`. Count rows with `order_count = 0` and expect 62; changing `COUNT(o.order_id)` to `COUNT(*)` would turn each of those zeros into 1.
 2. **Query writing:** Find products that have never appeared in an order item.
+   **Expect:** Example 2 already showed which products sold nothing. How many rows will this anti-join return?
    **Progressive hint:** Left join and retain rows where the right-side primary key is NULL.
-   **Inputs/evidence:** For sql-04 Exercise 2, read from `products`, and `order_items`. Build the answer toward `product_id`, `name`, and `category`; keep `product_id` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-04 Exercise 2, expected output: One row per unsold product. The final columns are `product_id`, `name`, and `category`. The final order is `p.product_id`.
-   **Verify:** For sql-04 Exercise 2, project `product_id` plus the raw source columns from `products`, and `order_items` at each join stage; record row count and distinct `product_id`, then assert the final `product_id`, `name`, and `category` values match those staged rows without unintended fanout or loss. Add one row for which `(oi.order_item_id IS NULL)` is true and one for which it is false; verify only the matching `product_id` value is returned.
+   **Inputs/evidence:** For sql-04 Exercise 2, `LEFT JOIN` all 300 `products` to the 13,085 `order_items` and keep only rows where `oi.order_item_id IS NULL`; the items use 275 distinct products.
+   **Expected result/shape:** For sql-04 Exercise 2, return 25 rows, one per product that has never been sold: products 276 through 300. The final columns are `product_id`, `name`, and `category`. The final order is `p.product_id`.
+   **Verify:** For sql-04 Exercise 2, confirm 300 products minus 275 sold products leaves the 25 returned rows, and that `SELECT COUNT(*) FROM products p WHERE NOT EXISTS (SELECT 1 FROM order_items oi WHERE oi.product_id = p.product_id)` also returns 25. Inside a rolled-back transaction, add one `order_items` row for product 300; the result must drop to 24 rows, ending at product 299.
 3. **Query writing:** Compare monthly budgets and expenses by category with a full outer join.
+   **Expect:** both tables cover five categories. If they cover the same months too, how many rows will have a `NULL` on either side?
    **Progressive hint:** Aggregate each side to the same category/month grain before joining; preserve keys from either side.
-   **Inputs/evidence:** For sql-04 Exercise 3, read from `expenses`, and `budgets`. Build the answer toward `category`, `period`, `budget_amount`, and `actual_amount`; keep `category` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-04 Exercise 3, expected output: One row per category/month present in either source. The final columns are `category`, `period`, `budget_amount`, and `actual_amount`. The final order is `period, category`.
-   **Verify:** For sql-04 Exercise 3, project `category` plus the raw source columns from `expenses`, and `budgets` at each join stage; record row count and distinct `category`, then assert the final `category`, `period`, `budget_amount`, and `actual_amount` values match those staged rows without unintended fanout or loss. Add one source row with a new `category`; verify the result gains exactly one row carrying that `category` value.
+   **Inputs/evidence:** For sql-04 Exercise 3, aggregate `budgets` (125 rows) and `expenses` (10,000 rows) separately to one row per category and month, then `FULL JOIN` the two; each side has 125 category-month keys over 25 months and 5 categories.
+   **Expected result/shape:** For sql-04 Exercise 3, return 125 rows, one per category and month, from the oldest budget month to the current month; on the fixture every key exists on both sides, so no amount is `NULL`. The final columns are `category`, `period`, `budget_amount`, and `actual_amount`. The final order is `period, category`.
+   **Verify:** For sql-04 Exercise 3, confirm 125 distinct `(category, period)` pairs and zero `NULL` values in either amount column. Inside a rolled-back transaction, delete the `COGS` expenses for the oldest month; the result must still have 125 rows, now with one `NULL` `actual_amount`, while an inner join would drop to 124.
 4. **Prediction:** Preserve every customer while counting only delivered orders; compare a status predicate in `ON` with the same predicate in `WHERE`.
+   **Expect:** will more customers show 0 delivered orders than the 62 who never ordered at all?
    **Progressive hint:** Place `o.status = 'delivered'` in `ON`; `WHERE` would remove NULL-extended customers.
-   **Inputs/evidence:** For sql-04 Exercise 4, read from `customers`, and `orders`. Build the answer toward `customer_id`, `full_name`, and `delivered_orders`; keep `customer_id`, and `full_name` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-04 Exercise 4, expected output: One row per customer, including zero delivered orders. The final columns are `customer_id`, `full_name`, and `delivered_orders`. The final order is `delivered_orders DESC, c.customer_id`.
-   **Verify:** For sql-04 Exercise 4, independently aggregate `customers`, and `orders` by `customer_id`, and `full_name`; require one output row for every distinct `customer_id`, and `full_name` tuple and compare `delivered_orders` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `delivered_orders` for the existing `customer_id`, and `full_name` tuple and verify the new tuple appears exactly once.
+   **Inputs/evidence:** For sql-04 Exercise 4, start from all 500 `customers` and `LEFT JOIN` `orders` with `o.status = 'delivered'` inside the `ON` clause; 872 orders are delivered.
+   **Expected result/shape:** For sql-04 Exercise 4, return 500 rows, one per customer: 7 customers lead with 4 delivered orders, starting with customer 38, and 69 customers show 0. The final columns are `customer_id`, `full_name`, and `delivered_orders`. The final order is `delivered_orders DESC, c.customer_id`.
+   **Verify:** For sql-04 Exercise 4, confirm 500 rows and that `delivered_orders` sums to 872, matching `SELECT COUNT(*) FROM orders WHERE status = 'delivered'`. Move the status test from `ON` to `WHERE` and the result must shrink to 431 customers, because the 69 zero rows are filtered out.
 5. **Debugging:** Repair `COUNT(*)` in a left-join order count so customers without orders report zero rather than one.
+   **Expect:** with `COUNT(*)`, what does customer 8 show, and why can no real customer in this data show that value?
    **Progressive hint:** Count a non-nullable right-side key that becomes NULL for an unmatched row.
-   **Inputs/evidence:** For sql-04 Exercise 5, read from `customers`, and `orders`. Build the answer toward `customer_id`, and `order_count`; keep `customer_id` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-04 Exercise 5, expected output: One row per customer with correct zero counts. The final columns are `customer_id`, and `order_count`. The final order is `c.customer_id`.
-   **Verify:** For sql-04 Exercise 5, independently aggregate `customers`, and `orders` by `customer_id`; require one output row for every distinct `customer_id` tuple and compare `order_count` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `order_count` for the existing `customer_id` tuple and verify the new tuple appears exactly once.
+   **Inputs/evidence:** For sql-04 Exercise 5, start from all 500 `customers` and `LEFT JOIN` `orders`, counting `o.order_id` rather than `*`; 62 customers have no orders.
+   **Expected result/shape:** For sql-04 Exercise 5, return 500 rows in `customer_id` order; customer 1 has 5 orders, customer 8 has 0, and customer 500 has 10. The final columns are `customer_id`, and `order_count`. The final order is `c.customer_id`.
+   **Verify:** For sql-04 Exercise 5, confirm `order_count` sums to 4,362 across 438 nonzero rows and 62 zero rows. The buggy `COUNT(*)` version sums to 4,424 instead, because each of the 62 unmatched customers contributes one all-`NULL` joined row.
 6. **Extension:** Reconcile product/order-item coverage as matched products, unsold products, and orphan item product keys.
+   **Expect:** the three counts should add up to the number of products plus any orphans. What total do you expect?
    **Progressive hint:** Use a full join and conditional distinct counts; the foreign key should make right-only product IDs zero.
-   **Inputs/evidence:** For sql-04 Exercise 6, read from `products`, and `order_items`. Build the answer toward `matched_products`, `unsold_products`, and `orphan_item_product_ids`; keep `product_id` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-04 Exercise 6, expected output: One summary row with three mutually interpretable counts. The final columns are `matched_products`, `unsold_products`, and `orphan_item_product_ids`.
-   **Verify:** For sql-04 Exercise 6, project `product_id` plus the raw source columns from `products`, and `order_items` at each join stage; record row count and distinct `product_id`, then assert the final `matched_products`, `unsold_products`, and `orphan_item_product_ids` values match those staged rows without unintended fanout or loss. Add one source row with a new `product_id`; verify the result gains exactly one row carrying that `product_id` value.
+   **Inputs/evidence:** For sql-04 Exercise 6, `FULL JOIN` all 300 `products` to the 13,085 `order_items` on `product_id`, which produces 13,110 joined rows, and count distinct product keys by match state.
+   **Expected result/shape:** For sql-04 Exercise 6, return exactly one row: `matched_products` 275, `unsold_products` 25, and `orphan_item_product_ids` 0. The final columns are `matched_products`, `unsold_products`, and `orphan_item_product_ids`.
+   **Verify:** For sql-04 Exercise 6, confirm 275 + 25 equals `SELECT COUNT(*) FROM products` and that 13,110 joined rows equal 13,085 items plus the 25 unsold products. The orphan count must be 0, because `order_items.product_id` is a foreign key to `products` and cannot point at a missing product.
 
 ## Common mistakes and how to recover
 
-- **Lesson-specific semantic mistake:** A right-side predicate in `WHERE` can turn a left join into an inner join; put match-qualification predicates in `ON` when unmatched left rows must remain.
-- **Unexpected row count:** display keys before aggregates, count rows after
-  each join/filter stage, and find the first stage whose grain differs from the
-  contract. Do not hide fanout with `DISTINCT`.
-- **Unexpected `NULL` or missing row:** decide whether the fact is unknown,
-  inapplicable, zero, or absent before using `COALESCE`; inspect outer-join
-  predicate placement and empty-input aggregate behavior.
-- **Unstable top/first/last output:** add `ORDER BY` with a unique final
-  tie-breaker before `LIMIT` or order-sensitive windows/aggregates.
-- **`psql` stops on an error:** fix the first error shown by
-  `ON_ERROR_STOP`, restore the declared transaction/setup state, and rerun the
-  complete file. A later successful statement does not validate a partial run.
+- **Filtering the preserved rows away:** `LEFT JOIN orders o ON ... WHERE o.status = 'delivered'` returns 431 customers, not 500, because the `WHERE` drops every NULL-extended row. Move the condition into `ON`.
+- **Counting rows instead of matches:** `COUNT(*)` gives each customer without orders a count of 1, since the NULL-extended row is still a row. Count `o.order_id`.
+- **Leaving `NULL` sums in a sort:** without `COALESCE`, unsold products have a `NULL` total, which PostgreSQL sorts after every number in ascending order. They drop out of a "fewest first" list.
+- **Joining detail to detail in a reconciliation:** joining raw `expenses` rows to `budgets` multiplies each budget by the number of expenses in that month. Sum each side to category and month first, as Exercise 3 does.
+- **Assuming a full join found nothing wrong:** zero one-sided rows can mean the data agrees, or that the join key is wrong on both sides. Check the row count against each input.
+
+A typo in one of the three outer joins (the `LEFT`, `RIGHT` or `FULL` query) stops `psql` at that statement, so the queries after it never print; fix the line and rerun the whole file, or follow the study guide's [advice on resetting a failed lesson run](../../STUDY-GUIDE.md#recover-from-common-failures).
 
 ## Self-check
 
@@ -269,9 +198,7 @@ Further reading
 
 ## Ask an AI tutor about this lesson
 
-An AI tutor is optional; the guide, learner SQL, PostgreSQL, and expected checks are
-enough to complete the lesson offline. If you want a patient tutor, copy this
-prompt after opening the repository in the AI tutor:
+An AI tutor is optional. A good use for this lesson: ask it to give you a three-customer, four-order table on paper and have you write the output of the same query with `JOIN`, `LEFT JOIN`, and `LEFT JOIN` plus a `WHERE` on an order column, before it reveals the answers. See the study guide's [tutor setup](../../STUDY-GUIDE.md#use-an-ai-tutor-optional); the prompt below keeps solutions hidden.
 
 ```text
 Tutor me through sql-04: Outer Joins and Unmatched Rows.

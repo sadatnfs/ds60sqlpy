@@ -194,9 +194,17 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cuda/python/guides/cuda-112.md</code></p>
     </header>
     <article class="document"><h2 id="cuda-112-reproducible-gpu-performance-review">cuda-112: Reproducible GPU performance review<a class="heading-anchor" href="#cuda-112-reproducible-gpu-performance-review" aria-label="Link to this section">#</a></h2>
-<p><strong>Route:</strong> CUDA Python and machine learning. <strong>Stage:</strong> advanced. <strong>Prerequisites:</strong> <code>cuda-071</code>, <code>cuda-085</code>, <code>cuda-092</code>. Allow several sessions when the hardware experiment is new; the chapter is not a deadline.</p>
-<h3 id="what-you-will-be-able-to-explain">What you will be able to explain<a class="heading-anchor" href="#what-you-will-be-able-to-explain" aria-label="Link to this section">#</a></h3>
-<p>By the end, you can <strong>calculate median speedup</strong>, <strong>separate cold and warm costs</strong>, and <strong>prepare a reproducibility checklist</strong> with evidence. Start with the two worked cases, then use the editable CPU model to make the quantities concrete.</p>
+<p><strong>Route:</strong> CUDA Python and machine learning. <strong>Stage:</strong> advanced. <strong>Prerequisites:</strong> <code>cuda-071</code>, <code>cuda-085</code>, <code>cuda-092</code>.</p>
+<p>Pacing, evidence labels and platform rules: <a href="../../STUDY-GUIDE.md.html">CUDA study guide</a>.</p>
+<h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
+<ul>
+<li>Calculate median speedup.</li>
+<li>Preserve raw observations.</li>
+<li>Check equivalence first.</li>
+<li>Separate cold and warm costs.</li>
+<li>Write supported platform scope.</li>
+<li>Prepare a reproducibility checklist.</li>
+</ul>
 <h3 id="mechanism-and-vocabulary">Mechanism and vocabulary<a class="heading-anchor" href="#mechanism-and-vocabulary" aria-label="Link to this section">#</a></h3>
 <p>A performance review should let another person reproduce the computation, understand the comparison and identify its limits. Record source revision, hardware, driver, library versions, workload distribution, dtype, precision policy, warmup, synchronization and competing load. Preserve raw bounded timing samples instead of only the best number. Compare complete equivalent work and quantify variation.</p>
 <p>Review correctness evidence before speed claims, including edge cases, error tolerance and any changed algorithm. Separate kernel-only time, transfers, preprocessing, compilation and end-to-end latency. Document unavailable platforms honestly. A result from one device is a result from that device; it does not establish a universal architecture ranking. The final artifact should make an independent reviewer able to say which claim is supported and which experiment is still missing.</p>
@@ -213,8 +221,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Baseline samples [10,11,9] and candidate [8,8,9] have medians 10 and 8. The median speedup is 1.25, with only three samples and explicitly limited confidence.</p>
 <h4 id="worked-example-2">Worked example 2<a class="heading-anchor" href="#worked-example-2" aria-label="Link to this section">#</a></h4>
 <p>If candidate output differs beyond tolerance, the speed ratio remains a measurement of different behavior and cannot be accepted as a valid optimization.</p>
-<h3 id="portable-executable-model">Portable executable model<a class="heading-anchor" href="#portable-executable-model" aria-label="Link to this section">#</a></h3>
-<p>The <strong>CPU reference model</strong> variant runs this bounded worked example using <code>python-core</code>. It uses only the Python standard library, small synthetic values and no network. Its purpose is to expose the arithmetic or contract behind the chapter. The separate reference includes assertions for the stated observations.</p>
+<h3 id="how-to-run-the-cpu-model">How to run the CPU model<a class="heading-anchor" href="#how-to-run-the-cpu-model" aria-label="Link to this section">#</a></h3>
+<p>Edit the copy; the <a href="../references/cuda-112_cpu.py.html">reference</a> adds assertions.</p>
+<pre class="highlighted-code"><code class="language-bash">python courses/cuda/python/lessons/cuda-112_cpu.py</code></pre>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> statistics
 
 baseline<span class="syntax-punctuation">,</span> candidate <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-number">10</span><span class="syntax-punctuation">,</span> <span class="syntax-number">11</span><span class="syntax-punctuation">,</span> <span class="syntax-number">9</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">8</span><span class="syntax-punctuation">,</span> <span class="syntax-number">8</span><span class="syntax-punctuation">,</span> <span class="syntax-number">9</span><span class="syntax-punctuation">]</span>
@@ -245,49 +254,46 @@ report <span class="syntax-operator">=</span> <span class="syntax-punctuation">{
 <td><code>1.25</code></td>
 </tr>
 </tbody></table></div>
-<p>Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.</p>
 <h3 id="practice-and-transfer">Practice and transfer<a class="heading-anchor" href="#practice-and-transfer" aria-label="Link to this section">#</a></h3>
+<p>Record each attempt in the <a href="../lessons/cuda-112.md.html">worksheet</a> before opening hints.</p>
 <h4 id="exercise-1-calculate-median-speedup">Exercise 1: Calculate median speedup<a class="heading-anchor" href="#exercise-1-calculate-median-speedup" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Computing the ratio of the fastest samples, <code>9/8</code>, picks favorable outliers, while three samples are too few to support a precise estimate either way.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-2-preserve-raw-observations">Exercise 2: Preserve raw observations<a class="heading-anchor" href="#exercise-2-preserve-raw-observations" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Reporting only the speedup ratio discards the information needed to judge whether it is meaningful. With samples such as 9, 10 and 11, the spread is as large as part of the claimed gain, which a single ratio hides.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-3-check-equivalence-first">Exercise 3: Check equivalence first<a class="heading-anchor" href="#exercise-3-check-equivalence-first" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Accepting a candidate on speed and checking correctness afterward risks deploying a wrong result if the check is skipped. A kernel that skips work, for example by mishandling the tail, will often look faster precisely because it is wrong.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-4-separate-cold-and-warm-costs">Exercise 4: Separate cold and warm costs<a class="heading-anchor" href="#exercise-4-separate-cold-and-warm-costs" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Mixing the cold run into warm samples raises one sample sharply and can shift the median with only three samples.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-5-write-supported-platform-scope">Exercise 5: Write supported platform scope<a class="heading-anchor" href="#exercise-5-write-supported-platform-scope" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Stating the speedup for all NVIDIA GPUs generalizes from one device. Memory bandwidth, cache size and clock behavior differ by architecture, so the ratio can change or reverse on other hardware.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-6-prepare-a-reproducibility-checklist">Exercise 6: Prepare a reproducibility checklist<a class="heading-anchor" href="#exercise-6-prepare-a-reproducibility-checklist" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Leaving out the limits, such as only three samples, presents a fragile result as settled. A reader then cannot tell whether a follow-up run that disagrees reveals a regression or ordinary noise.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
-<p>Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.</p>
+<p>Hint <em>k</em> belongs to exercise <em>k</em>; open one at a time.</p>
 <ol>
-<li>Start from worked example 1 and mark the quantities needed for the task &quot;Calculate median speedup&quot;.</li>
-<li>Change one assumption in worked example 2 while preserving the declared contract: preserve raw observations.</li>
-<li>Trace the CPU program&#x27;s variables before adding hardware behavior: check equivalence first.</li>
-<li>Draw producers, consumers and the exact operation boundary for the task &quot;Separate cold and warm costs&quot;.</li>
-<li>Separate what the small fixture establishes from what the real runtime must show: write supported platform scope.</li>
-<li>Write a counterexample to an overbroad claim before you prepare a reproducibility checklist.</li>
+<li>Find the median of each sample list, then divide the baseline median by the candidate median.</li>
+<li>Keep every timing sample with the conditions under which it was taken, not just the best one.</li>
+<li>Compare outputs against the declared tolerance before looking at any speed number.</li>
+<li>Report the first run, with setup and compilation, separately from the warm runs.</li>
+<li>Name the exact hardware and software you tested on and nothing beyond it.</li>
+<li>List what another person needs to rerun the comparison and get the same answer.</li>
 </ol>
-<h3 id="common-mistakes-and-self-review">Common mistakes and self-review<a class="heading-anchor" href="#common-mistakes-and-self-review" aria-label="Link to this section">#</a></h3>
-<p>Confusing a correct tiny example with a general implementation is the central review risk. For this chapter, challenge the assumption in worked example 2, then ask whether your change preserves the mechanism described above. If you change dtype, layout, ordering, batch size or backend, update the acceptance contract rather than silently reusing the old observation. Explain an unexpected result before trying random configuration changes.</p>
-<p>Keep a small evidence table with columns <strong>claim</strong>, <strong>input</strong>, <strong>expected observation</strong>, <strong>actual observation</strong> and <strong>limit</strong>. For the first claim use <code>Calculate median speedup</code>. For the final claim use <code>Prepare a reproducibility checklist</code>. An unperformed GPU or cluster experiment remains pending even when the CPU model is correct.</p>
-<h3 id="platform-and-evidence-contract">Platform and evidence contract<a class="heading-anchor" href="#platform-and-evidence-contract" aria-label="Link to this section">#</a></h3>
-<p>The reading worksheet and CPU reference model work through the ordinary Linux Docker classroom on macOS, Linux and Windows using WSL 2. They do not require an NVIDIA GPU. Their results are labeled CPU models or semantic oracles, not simulated hardware performance.</p>
-<p>Real CUDA work needs supported NVIDIA hardware, a compatible host driver and an explicitly prepared GPU runtime. An Apple GPU does not execute CUDA kernels. PyTorch MPS on a supported native Mac, ROCm on supported AMD hardware, or other vendor backends can provide separate accelerator learning routes; they need their own package and operation qualification and are not CUDA evidence. The ordinary Linux Docker classroom does not expose native Mac MPS automatically.</p>
-<p>Do not download packages, models or data by opening this lesson. Do not attach an engine socket, ambient cluster credentials or an arbitrary remote endpoint. A CPU pass, imported package, successful compilation, real GPU result and measured performance are distinct observations. Record the actual backend, data shape/dtype, source revision, versions and pending checks. A saved completion marker records learning progress, not hardware certification.</p>
+<h3 id="common-mistakes-and-self-check">Common mistakes and self-check<a class="heading-anchor" href="#common-mistakes-and-self-check" aria-label="Link to this section">#</a></h3>
+<p>A common mistake is reporting only the best timing and a single speedup number. That hides variation and conditions, and three samples cannot support a confident ratio. Another is quoting a speedup when the candidate&#x27;s output differs beyond tolerance, which measures different behavior. Fix both by checking correctness first, keeping raw bounded samples with the source revision, hardware, driver, versions and load conditions, and stating the 1.25 median ratio with its limited confidence.</p>
+<p><strong>Misconception:</strong> Results from one GPU let a reviewer predict the speedup on another GPU. <strong>Correction:</strong> Bandwidth, cache sizes, clocks, driver and library versions all differ between devices. A review should state which device produced each number and treat other devices as untested until they are measured.</p>
+<p><strong>Evidence limit:</strong> The reference computes a median ratio of 1.25 from synthetic samples. It is explicitly not a GPU benchmark; a real review needs repeated synchronized measurements on named hardware and software, and its results apply only to that device.</p>
+<ol>
+<li>Why prefer the median of raw samples over the best time?</li>
+<li>Which costs should be reported separately?</li>
+<li>Does one device&#x27;s result rank architectures in general?</li>
+</ol>
+<p>Answers: <a href="../solutions/cuda-112_solutions.md.html#self-check-answers">self-check answers</a>.</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
 <ul>
 <li><a href="https://docs.pytorch.org/docs/2.9/notes/cuda.html">PyTorch CUDA semantics</a></li>
 <li><a href="https://www.tensorflow.org/guide/gpu">TensorFlow GPU guide</a></li>
 </ul>
-<p>Use the version-matched documentation of your prepared environment. These references describe interfaces and supported boundaries; the chapter&#x27;s synthetic examples and CPU models are original teaching material.</p>
+<p>Full lists: <a href="../../STUDY-GUIDE.md.html#documentation-and-sources">documentation and sources</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning skill for cuda-112: Reproducible GPU performance review.
 Read courses/cuda/python/guides/cuda-112.md and courses/cuda/python/lessons/cuda-112.md.

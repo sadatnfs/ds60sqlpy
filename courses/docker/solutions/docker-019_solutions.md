@@ -1,6 +1,6 @@
 # docker-019: explanatory solutions
 
-Compare after your own attempt or an explicit reveal. These explain the supplied teaching fixtures; they are not engine results. The mechanism is explained in `courses/docker/guides/docker-019.md`.
+These answers explain teaching fixtures, not engine results; the mechanism is in [the guide](../guides/docker-019.md).
 
 ## Exercise 1: Distinguish attachment from published ports.
 
@@ -88,4 +88,4 @@ Compare after your own attempt or an explicit reveal. These explain the supplied
 
 ## Check your transfer
 
-A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.
+Reject it. Joining `frontend`, which is not internal, gives the worker a default route through that network's gateway and therefore outbound access, which is exactly what the policy forbids; attachment does not make anything faster. Attach the worker only to `backend`. Acceptance is a pair: the API request over `backend` succeeds, and the worker's route table shows no default route, so outbound connections cannot leave. If the API request failed after removing `frontend`, the API itself is probably not attached to `backend`, which `docker network inspect backend` would show.

@@ -2,67 +2,20 @@
 
 ## How to run this lesson
 
-Start the Linux-container engine and run `./classroom` from the repository
-root. On Windows, use Ubuntu in WSL 2 or the thin
-`START_DOCKER_CLASSROOM.cmd` wrapper. Choose **PostgreSQL** on the shared
-`/classroom` home, then open **sql-analytics-01**. The
-[launcher guide](../../../docs/one-command-classroom.md) covers first preparation, strict resume and
-the saved project selection. No host Python or PostgreSQL installation is
-required for this browser route.
+Start **sql-analytics-01** from `./classroom` using the shared [run steps](../../STUDY-GUIDE.md#run-a-lesson-in-the-classroom).
 
-1. Read the prerequisite and fixture notes before running the file. Use only
-   the local disposable `advanced_sql_training` database.
-2. Choose **Whole SQL lesson (psql)** for the cataloged learner script. This
-   preserves the lesson's reviewed psql directives, relative includes and
-   transaction behavior. **SQL snippet** is appropriate for ordinary SQL
-   statements, but is not a replacement for an entire script's setup.
-3. The **Course database** panel above the code shows whether the course
-   training tables are loaded. Missing tables load automatically before your
-   first run (or choose **Load course tables**) and stay loaded for later
-   lessons. **Reset training data** restores the original rows only when your
-   own changes made results differ; it keeps your saved code and notes.
-4. Edit the learner copy in the classroom and save your prediction before
-   running. Its whole-script workspace is
-   `.learning/sql/sql-analytics-01/lesson/workspace/sql/professional/lessons/sql_analytics_01_query_patterns.sql`.
-   For browser work this path is inside the Docker learning volume, not a
-   newly created host folder beside your checkout. The checked-in source
-   remains the answer-free starting artifact.
-5. Run the whole script and inspect the full transcript. The runner uses
-   `psql -X -v ON_ERROR_STOP=1 -f`. SELECT output has columns, rows and a row
-   count; DDL/DML has command tags; intentional checks may produce NOTICE
-   messages. An unexpected ERROR or nonzero exit is a failure to diagnose,
-   even when an earlier query printed plausible values.
-6. Verify the lesson's expected grain, ordering, constraints and declared
-   transaction or cleanup outcome. Keep required ROLLBACK statements.
-   The warehouse sequence and other explicitly stateful exercises explain
-   when state is committed. Read saved output without rerunning it when
-   reviewing an earlier attempt.
+Choose **Whole SQL lesson (psql)**. The script runs on `advanced_sql_training`
+in one transaction with `SET LOCAL search_path`. It loads 3 users, 16 raw
+events (source event `E103` is delivered twice), daily activity, 4 campaign
+touches and a tier history, then prints one labeled result for each pattern:
+deduplication, sessions, gaps and islands, an ordered funnel, last-touch
+attribution, an as-of tier join and monthly cohort retention. Two `DO` blocks
+check that each purchase matches one tier and that January retention is 1 of 2
+users; the final check requires 16 raw events, 15 deduplicated events and 2
+purchases. `ROLLBACK` removes `pro_analytics_lab`. Save attempts in
+`.learning/sql/sql-analytics-01/lesson/workspace/sql/professional/lessons/sql_analytics_01_query_patterns.sql`.
 
-If a relation is missing, inspect the lesson's required fixture and predecessor
-rather than guessing a new table definition. If authentication or runtime
-readiness fails, use `./classroom status` and the setup guide. Keep credentials
-out of SQL, notebooks, screenshots and committed files. Repair the first error
-before trusting partial output, and reveal separate solutions only when you
-want to compare after an attempt.
-
-### Optional contributor notebook route
-
-For notebook work, deliberately prepare the Linux/WSL contributor environment
-from [CONTRIBUTING.md](../../../CONTRIBUTING.md), including a compatible psql client and
-the notebook dependencies. Generate this lesson's private workspace through
-the maintained CLI:
-
-```sh
-uv run --no-sync python scripts/course.py sql notebook sql-analytics-01
-```
-
-Open the printed notebook path in that environment's JupyterLab. It uses the
-same catalog-derived learner-copy layout in that contributor checkout and
-executes the complete script through psql. Its host-side state is separate
-from the Docker browser's named volume. Follow
-[guided SQL notebooks](../../../docs/guided-sql-notebooks.md) for explicit local connection
-selection and kernel setup. Notebook generation does not execute SQL or
-authorize a reset.
+The optional notebook route starts with `uv run --no-sync python scripts/course.py sql notebook sql-analytics-01`; see the [study guide](../../STUDY-GUIDE.md#optional-contributor-notebook-route).
 
 ## Level and prerequisites
 
@@ -86,24 +39,29 @@ lab rolls back its fixture.
 
 ## A beginner's mental model for this lesson
 
-A **table** stores facts in named columns. A **row** is one occurrence at the
-table's declared grain. A query creates a temporary **result set**: rows printed
-on screen are not automatically stored. The key vocabulary for this lesson is Grain, Canonical row, Session, Gap/island, Funnel, Attribution window. Its worked SQL reads or creates `pro_analytics_lab.users`, `pro_analytics_lab.events`, `pro_analytics_lab.daily_activity`, `pro_analytics_lab.campaign_touches`, `pro_analytics_lab.tier_history`.
+Every pattern in this lesson starts by deciding what one row means and reducing
+the data to that grain before counting anything. The vocabulary below (grain,
+canonical row, session, gap and island, funnel, attribution window) names the
+patterns; each one is a window function or join applied to the deduplicated
+events, never to the raw retries.
 
-Before writing a query, complete this sentence: “One output row represents
-___.” Joins can multiply rows, filters can remove them, grouping can collapse
-many rows into one, and window functions can add calculations while preserving
-row count. For a normal analytical `SELECT`, use this logical reading order:
-`FROM`/`JOIN` (including `ON`) → `WHERE` → `GROUP BY`/aggregates → `HAVING` →
-window calculations → `SELECT` → `ORDER BY` → `LIMIT`. PostgreSQL may execute a
-different physical plan while preserving those semantics.
+The grain changes from query to query, so state it each time. Deduplication
+returns one row per `source_event_id`. Sessionization returns one row per user
+session, islands one row per run of consecutive active dates, attribution and
+the as-of join one row per purchase, and retention one row per signup cohort
+and month offset. User 1 alone has three islands: January 1 to 3, January 5 to
+6, and February 1.
 
-The worked walkthrough's lesson-specific task is: The raw event grain is one ingestion attempt, so `source_event_id` can repeat. The canonical view partitions by source ID and chooses latest `ingested_at`, then identity as a final tie-break. Deduplication happens before every downstream pattern to avoid double-counting retries.
-The first runnable example has a concrete contract: Example 1 must print the expected DDL command tag for `pro_analytics_lab.users`. Verify the object in `pg_catalog.pg_class`, run one accepted behavior and one rejected boundary behavior, and confirm the lesson rollback/cleanup removes only course-owned state.
+The raw table's grain is one ingestion attempt, so `source_event_id` can
+repeat. `deduplicated_events` ranks rows with `row_number()` partitioned by
+source ID, ordered by latest `ingested_at` and then `ingestion_id`, and keeps
+rank 1. That removes exactly one row, the 09:21 copy of `E103`. Every later
+pattern reads this view, so the retry is never counted as a second purchase.
 
 ## Two worked SQL examples
 
-These worked excerpts come from `sql/professional/lessons/sql_analytics_01_query_patterns.sql`. Use **Whole SQL lesson (psql)** in the unified classroom for the complete file, including its fixture and transaction context. The optional contributor notebook and prepared `psql` routes are described above.
+Example 1 is the user table and Example 2 is the raw event table whose retries
+the view removes.
 
 ### Example 1
 
@@ -114,9 +72,12 @@ CREATE TABLE pro_analytics_lab.users (
 );
 ```
 
-**How to read it:** Example 1 is data definition language (DDL). `psql` prints a command tag when PostgreSQL accepts the definition; a later catalog or behavior check must prove that the intended rule exists.
+**How to read it:** One row per user, keyed by `user_id`, with the `signup_at`
+instant that assigns each user to a monthly cohort. Users 1 and 2 sign up in
+January and user 3 in February.
 
-**Expected result/shape:** Example 1 must print the expected DDL command tag for `pro_analytics_lab.users`. Verify the object in `pg_catalog.pg_class`, run one accepted behavior and one rejected boundary behavior, and confirm the lesson rollback/cleanup removes only course-owned state.
+**Expected result/shape:** `CREATE TABLE`. Three users follow; the January
+cohort therefore has 2 members, which is the retention denominator.
 
 ### Example 2
 
@@ -131,9 +92,15 @@ CREATE TABLE pro_analytics_lab.events (
 );
 ```
 
-**How to read it:** Example 2 is data definition language (DDL). `psql` prints a command tag when PostgreSQL accepts the definition; a later catalog or behavior check must prove that the intended rule exists.
+**How to read it:** `ingestion_id` identifies a delivery and `source_event_id`
+identifies the real event, deliberately without a unique constraint. `event_at`
+is when it happened and `ingested_at` is when it arrived, which is the
+tie-breaker deduplication needs.
 
-**Expected result/shape:** Example 2 must print the expected DDL command tag for `pro_analytics_lab.users`, and `pro_analytics_lab.events`. Verify the object in `pg_catalog.pg_class`, run one accepted behavior and one rejected boundary behavior, and confirm the lesson rollback/cleanup removes only course-owned state.
+**Expected result/shape:** `CREATE TABLE`, then 16 events. User 1's purchase is
+attributed to the `email` touch at 09:15, because the lateral join takes the
+latest touch within seven days before the purchase; user 2's is attributed to
+`search`.
 
 ## Learning objectives
 
@@ -298,9 +265,8 @@ edge-case fixtures before turning a pattern into a metric.
 
 ## Ask an AI tutor about this lesson
 
-An AI tutor is optional; the guide, learner SQL, PostgreSQL, and expected checks are
-enough to complete the lesson offline. If you want a patient tutor, copy this
-prompt after opening the repository in the AI tutor:
+The lesson and expected observations are sufficient offline. For optional
+coaching, copy:
 
 ```text
 Tutor me through sql-analytics-01: Reusable Analytical Query Patterns.

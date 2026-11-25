@@ -196,7 +196,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <article class="document"><h2 id="r-032-grouped-summaries-and-sufficient-aggregation-state">r-032: Grouped summaries and sufficient aggregation state<a class="heading-anchor" href="#r-032-grouped-summaries-and-sufficient-aggregation-state" aria-label="Link to this section">#</a></h2>
 <p><strong>Level:</strong> intermediate. <strong>Direct prerequisites:</strong> <code>r-014</code>, <code>r-017</code>, <code>r-031</code></p>
 <h3 id="run-and-retain-your-work">Run and retain your work<a class="heading-anchor" href="#run-and-retain-your-work" aria-label="Link to this section">#</a></h3>
-<p>Open <code>r-032</code> in <code>/classroom</code> and use the prepared <code>r-statistics</code> profile. Each Run evaluates one <code>main.R</code> script in a fresh offline R process, so define every input in the script; an earlier Run leaves no variables behind. Work in the <a href="../lessons/r-032.R.html">starter</a>. The <a href="../solutions/r-032_reference.R.html">complete reference</a> ends by printing <code>r-032 reference checks passed</code>, and the <a href="../solutions/r-032_solutions.md.html">explained answers</a> are there for deliberate comparison after your own attempt. This chapter prints values only; when a chapter draws figures, the classroom keeps at most two figures per run. The <a href="../README.md.html">course overview</a> describes saved work, figure capture and the prepared package versions.</p>
+<p>The starter prints three groups: A with one value of 10, B with 20, 30 and 40, and C with no values. Run it and compare two answers by hand: the mean of the two group means is 20, while the pooled mean of all four observations is 25. Return sums and counts per group, because means alone cannot rebuild the pooled answer.</p>
+<p>Work in the <a href="../lessons/r-032.R.html">starter</a> under the <a href="../STUDY-GUIDE.md.html#run-a-chapter">run rules</a>.</p>
+<p>The <a href="../solutions/r-032_reference.R.html">complete reference</a> ends by printing <code>r-032 reference checks passed</code>.</p>
 <h3 id="outcome-and-mechanism">Outcome and mechanism<a class="heading-anchor" href="#outcome-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Aggregate groups while preserving missingness counts and enough state to reconstruct the intended overall mean.</p>
 <p>A grouped summary changes the row grain. An observation table becomes one row per group, so each output field needs a clear aggregation rule. Counts, sums and means do not have identical missingness behavior. A reliable summary records both the number of input rows and the number of observed measurements used by a numerical statistic.</p>
@@ -303,7 +305,7 @@ $C
 <li>Medians discard order information needed for the combined sample.</li>
 </ol>
 <h3 id="reference-review">Reference review<a class="heading-anchor" href="#reference-review" aria-label="Link to this section">#</a></h3>
-<p>The reference applies the reasoning explained under the worked examples above; the <a href="../solutions/r-032_solutions.md.html">explained answers</a> add an answer for each exercise.</p>
+<p>The reference reuses the worked examples&#x27; reasoning; <a href="../solutions/r-032_solutions.md.html">explained answers</a> cover each exercise.</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
 <ul>
 <li><a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/split.html">R split</a></li>
@@ -311,7 +313,23 @@ $C
 <li><a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/mean.html">R means</a></li>
 </ul>
 <h3 id="continue">Continue<a class="heading-anchor" href="#continue" aria-label="Link to this section">#</a></h3>
-<p>Chapters that list <code>r-032</code> as a direct prerequisite: <a href="r-036.md.html"><code>r-036</code></a>, <a href="r-038.md.html"><code>r-038</code></a>, <a href="r-040.md.html"><code>r-040</code></a>.</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Next chapter</th>
+<th>Title</th>
+</tr></thead><tbody>
+<tr>
+<td><a href="r-036.md.html"><code>r-036</code></a></td>
+<td>Chunked aggregation and memory-aware data contracts</td>
+</tr>
+<tr>
+<td><a href="r-038.md.html"><code>r-038</code></a></td>
+<td>Finite probability tables and conditional reasoning</td>
+</tr>
+<tr>
+<td><a href="r-040.md.html"><code>r-040</code></a></td>
+<td>An auditable analytical pipeline capstone</td>
+</tr>
+</tbody></table></div>
 <h3 id="ask-an-ai-tutor">Ask an AI tutor<a class="heading-anchor" href="#ask-an-ai-tutor" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for r-032 (Grouped summaries and sufficient aggregation state).
 Read the guide and my saved attempt. Explain the relevant R mechanism,

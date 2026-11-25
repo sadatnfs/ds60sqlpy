@@ -194,7 +194,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/swift/solutions/swift-021_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="swift-021-explanation-and-comparison">swift-021: explanation and comparison<a class="heading-anchor" href="#swift-021-explanation-and-comparison" aria-label="Link to this section">#</a></h2>
-<p>Attempt the six guide tasks before opening this comparison. The executable reference is <a href="swift-021_solution.swift.html">swift-021_solution.swift</a>. It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.</p>
+<p>Reference program: <a href="swift-021_solution.swift.html">swift-021_solution.swift</a>, covering both examples and the executed answers.</p>
+<p>Attempt the tasks first; see <a href="../STUDY-GUIDE.md.html#comparing-with-the-explanation">comparing with the explanation</a>.</p>
 <h3 id="why-the-two-examples-differ">Why the two examples differ<a class="heading-anchor" href="#why-the-two-examples-differ" aria-label="Link to this section">#</a></h3>
 <p><strong>Validate before returning:</strong> Failure carries a domain category instead of masquerading as zero. Three is accepted and a negative quantity is rejected.</p>
 <p><strong>Store an outcome for later inspection:</strong> Result separates when an operation executes from when its outcome is examined. The stored outcome retains a QuantityError.</p>
@@ -282,7 +283,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Int(&quot;&quot;) and Int on an overflowing literal both return nil, so the guard throws; 0 passes the value &gt;= 0 check exactly.</p>
 <h4 id="task-6-transfer-and-justify">Task 6: Transfer and justify<a class="heading-anchor" href="#task-6-transfer-and-justify" aria-label="Link to this section">#</a></h4>
 <p>Choose Optional, throws or Result for three APIs and explain each semantic distinction.</p>
-<p>No single reference answer exists: several designs can satisfy this transfer task. Build yours from the task 3 answer above (Write a throwing validator for an inventory record) and the mechanism described below, and state one limitation of your choice.</p>
+<p>No single answer exists; extend task 3 using the <a href="../STUDY-GUIDE.md.html#open-transfer-tasks">open transfer routine</a>.</p>
 <h3 id="solution-reasoning">Solution reasoning<a class="heading-anchor" href="#solution-reasoning" aria-label="Link to this section">#</a></h3>
 <p><strong>Approach.</strong> <code>parseQuantity</code> throws <code>QuantityError.invalid</code> when the text is not an integer or is negative. Example A uses <code>try</code> on valid input and a <code>do</code>/<code>catch</code> that records the rejection of -1. Example B wraps a throwing call in <code>Result</code> and inspects it later with a switch. The task 3 answer writes a throwing validator for an inventory record.</p>
 <p><strong>Why it is correct.</strong> &quot;3&quot; parses to 3 and passes the nonnegative guard, so it returns normally. &quot;-1&quot; parses but fails <code>value &gt;= 0</code>, so the catch clause runs and sets <code>rejected</code>. &quot;bad&quot; fails <code>Int(text)</code>, so the Result holds <code>.failure</code>, and <code>error is QuantityError</code> confirms the category. In task 3, a valid record passes and an empty name throws <code>RecordError.emptyName</code>.</p>
@@ -294,7 +295,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><code>throws</code> declares failure capability. <code>try</code> acknowledges a throwing call. <code>do/catch</code> handles errors. Result&lt;Success, Failure&gt; stores an outcome, with Failure conforming to Error.</p>
 <p>Try! turns recoverable failure into a trap. Try? deliberately discards error detail, so use it only when absence is the intended contract. Do not catch assertion failures as ordinary input errors.</p>
 <h3 id="review-before-continuing">Review before continuing<a class="heading-anchor" href="#review-before-continuing" aria-label="Link to this section">#</a></h3>
-<p>Run the reference and confirm that it prints <code>swift-021: passed</code>, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.</p></article>
+<p>Run the reference and confirm it prints <code>swift-021: passed</code>, then rerun the guide&#x27;s counterexample.</p></article>
   </main>
 </body>
 </html>

@@ -3,11 +3,11 @@ package main
 import "fmt"
 
 func main() {
-	// Exercise 1: Decode desired and observed replicas: change one input: Copy worked example 1 into a scratch pad and change `"replicas":3` to `"replicas":4`. Before running, predict which check fails and which value it now sees; then run it and restore the original line.
-	// Expected: The changed run panics with `spec status` because `err == nil && d.Spec.Replicas != nil && *d.Spec.Replicas == 3 && d.Status.Ready == 2` no longer holds. Restoring the original line brings back the worked observation: desired is 3 while ready is 2.
+	// Exercise 1: Decode desired and observed replicas: change one input: Copy worked example 1, change `"replicas":3` to `"replicas":4` and predict the failure before running; then restore the line.
+	// Expected: The edited run panics with `spec status` because `err == nil && d.Spec.Replicas != nil && *d.Spec.Replicas == 3 && d.Status.Ready == 2` no longer holds.
 
-	// Exercise 2: Distinguish omitted from explicit zero: diagnose an edited check: A careless edit changed the check in worked example 2 so that it reads ``check(json.Unmarshal([]byte(`{"spec":{"replicas":1}}`), &b) == nil, "decode")``. Run worked example 2 with that line, explain why the edited check now fails for the same program state, and restore it.
-	// Expected: Before the repair the program panics with `presence`; after it the line reads ``check(json.Unmarshal([]byte(`{"spec":{"replicas":0}}`), &b) == nil, "decode")`` again and only the explicit zero has a non-nil pointer.
+	// Exercise 2: Distinguish omitted from explicit zero: diagnose an edited check: A careless edit rewrote the check in worked example 2 as ``check(json.Unmarshal([]byte(`{"spec":{"replicas":1}}`), &b) == nil, "decode")``. Explain the failure, then restore it.
+	// Expected: The defective run panics with `presence`; after restoring ``check(json.Unmarshal([]byte(`{"spec":{"replicas":0}}`), &b) == nil, "decode")``, only the explicit zero has a non-nil pointer.
 
 	// Exercise 3: Separate name and incarnation: Decode two objects that share namespace and name but carry different UIDs.
 	// Expected: Their names match but their identities differ.

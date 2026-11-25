@@ -194,7 +194,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/scala-spark/solutions/spark-020_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="spark-020-explained-paired-reference-solutions">spark-020: Explained paired reference solutions<a class="heading-anchor" href="#spark-020-explained-paired-reference-solutions" aria-label="Link to this section">#</a></h2>
-<p>Read the <a href="../guides/spark-020.md.html">guide</a> and attempt one language first. The <a href="spark-020_solution.scala.html">Scala reference</a> and <a href="spark-020_solution.py.html">PySpark reference</a> are complete single-file programs with explicit local sessions and finally-based stop. Each compares with literal expectations; matching two implementations alone would not rule out a shared mistake.</p>
+<p>Attempt the <a href="../guides/spark-020.md.html">guide</a> exercises first.</p>
+<p>References: <a href="spark-020_solution.scala.html">Scala</a>, <a href="spark-020_solution.py.html">PySpark</a>.</p>
 <h3 id="exercises-and-reasoning">Exercises and reasoning<a class="heading-anchor" href="#exercises-and-reasoning" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-establish-logical-content-independently-of-layout">Exercise 1: Establish logical content independently of layout<a class="heading-anchor" href="#exercise-1-establish-logical-content-independently-of-layout" aria-label="Link to this section">#</a></h4>
 <p>Return the ordered list of (id, key, value) tuples for the declared 24-row fixture. Compare its full bag with the literal arithmetic rule and compute count, distinct IDs, sum(id), sum(value).</p>
@@ -281,8 +282,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The complete ordering converts a relation into a specified display sequence before selecting a bounded prefix. A key-only sort leaves same-key peers unresolved; an unordered limit chooses an arbitrary subset. The reference compares every displayed identity and value across layouts, providing a reusable pattern for deterministic small previews without implying that a full production result should be collected on the driver.</p>
 <p><strong>Verification evidence:</strong> Assert all five ordered tuples from original, keyed and coalesced inputs.</p>
 <h3 id="execution-and-interpretation">Execution and interpretation<a class="heading-anchor" href="#execution-and-interpretation" aria-label="Link to this section">#</a></h3>
-<p>Run the complete reference in its prepared fixed worker. Its first check (Establish logical content independently of layout) is built inside the program, so opening the lesson fetches nothing; it expects: IDs 0..23 appear once, <code>key = id % 4</code>, <code>value = 10 * id</code>. Metrics are <code>24, 24, 276, 2760</code>. The final success line prints only after every reference assertion passes.</p>
-<p>Local plan, partition and resource evidence does not establish cluster-scale performance; session cleanup is explicit.</p></article>
+<p>The references compare the canonical relation and the four metrics after each layout change, assert six requested partitions with each key observed in one partition, assert two partitions after <code>coalesce(2)</code> and four after the attempted increase, reconcile the partition ledger to 24 rows and ID total 276 with every partition ID inside the valid range, check that each partition sequence is sorted, and assert the bounded preview IDs <code>[3, 7, 11, 15, 19]</code> with values <code>[30, 70, 110, 150, 190]</code>.</p>
+<p><code>spark-020: six PySpark reference contracts passed; Spark=</code> with the version, or the Scala line, confirms layout and content were kept apart on two local cores. It deliberately asserts no raw collect order, because that order depends on task timing and would make a passing test flaky rather than informative.</p></article>
   </main>
 </body>
 </html>

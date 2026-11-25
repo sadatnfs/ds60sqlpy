@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cuda/python/solutions/cuda-100_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="cuda-100-explained-solutions">cuda-100: explained solutions<a class="heading-anchor" href="#cuda-100-explained-solutions" aria-label="Link to this section">#</a></h2>
-<p>These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.</p>
+<p>Compare with your <a href="../lessons/cuda-100.md.html">worksheet</a> attempt.</p>
 <h3 id="exercise-1-compute-stable-softmax">Exercise 1: Compute stable softmax<a class="heading-anchor" href="#exercise-1-compute-stable-softmax" aria-label="Link to this section">#</a></h3>
 <p>Subtract the maximum first.</p>
 <p><strong>Approach.</strong> Subtract the row maximum before exponentiating: scores <code>[1000, 1001]</code> become <code>[-1, 0]</code>, giving <code>exp</code> values about <code>[0.368, 1]</code> and probabilities about <code>[0.269, 0.731]</code>.</p>
@@ -231,9 +231,19 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Why it is correct here.</strong> The same call can run different kernels on different machines, so claims about memory or speed must name the backend actually selected.</p>
 <p><strong>A plausible wrong approach.</strong> Assuming the flash backend ran because the function was called leads to wrong memory estimates when it silently fell back to math.</p>
 <p><strong>How to verify.</strong> Restrict the allowed backends in a test and observe which configurations succeed, or inspect profiler kernel names.</p>
+<h3 id="self-check-answers">Self-check answers<a class="heading-anchor" href="#self-check-answers" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>Why does attention create a quadratic intermediate?</strong> The full score matrix has one entry per query and key pair, so its size grows with sequence length squared.</li>
+</ol>
+<ol start="2">
+<li><strong>Does subtracting the row maximum change the softmax result?</strong> No. It cancels in the normalization, but it keeps exponentials in range.</li>
+</ol>
+<ol start="3">
+<li><strong>Does calling a scaled-dot-product attention API prove a fused kernel ran?</strong> No. Backend selection depends on dtype, head size and mask, so it must be confirmed from runtime evidence.</li>
+</ol>
 <h3 id="reference-observation">Reference observation<a class="heading-anchor" href="#reference-observation" aria-label="Link to this section">#</a></h3>
 <p>Stable probabilities sum to 1; lower-triangular causal mask.</p>
-<p>The reference file is <code>courses/cuda/python/references/cuda-100_cpu.py</code>. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.</p></article>
+<p>Asserted by <code>courses/cuda/python/references/cuda-100_cpu.py</code>.</p></article>
   </main>
 </body>
 </html>

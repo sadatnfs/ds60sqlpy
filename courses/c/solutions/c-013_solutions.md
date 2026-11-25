@@ -1,6 +1,8 @@
 # c-013: explained solutions
 
-Compare after an attempt or explicit reveal. The complete executable reference, `c-013_solution.c`, implements all six cases, from the "use a parenthesized macro safely" case to the "transfer an inline-style function contract" case, in one `main.c`.
+`c-013_solution.c` assembles the "use a parenthesized macro safely" case through the "transfer an inline-style function contract" case in one `main.c`.
+
+Compare only after an attempt: [Compare and transfer](../STUDY-GUIDE.md#compare-and-transfer).
 
 ## Mechanism and assumptions
 
@@ -10,7 +12,7 @@ The preprocessor transforms tokens before the compiler performs ordinary type ch
 
 ## Exercise 1: Use a parenthesized macro safely: predict an edited check
 
-Copy worked example 1 into a scratch pad and change `CHECK(SQUARE(2 + 3) == 25);` to `CHECK(SQUARE(3 + 3) == 25);` inside its CHECK. Before running, predict whether the CHECK still holds and explain why; then restore it.
+In worked example 1, change `CHECK(SQUARE(2 + 3) == 25);` to `CHECK(SQUARE(3 + 3) == 25);`. Predict whether the CHECK still holds and why, then run and restore.
 
 The unchanged code is worked example 1:
 
@@ -18,7 +20,7 @@ The unchanged code is worked example 1:
 CHECK(SQUARE(2 + 3) == 25);
 ```
 
-**Expected:** With `CHECK(SQUARE(3 + 3) == 25);` the run stops with `Check failed` at the CHECK on `SQUARE(2 + 3) == 25`, because the "use a parenthesized macro safely" case no longer shows that the result is 25. Restoring `CHECK(SQUARE(2 + 3) == 25);` brings that observation back.
+**Expected:** `Check failed`: `CHECK(SQUARE(3 + 3) == 25);` is false, although the result is 25.
 
 Parentheses preserve grouping. This macro still evaluates its argument twice, so side effects remain inappropriate.
 
@@ -32,7 +34,7 @@ Parentheses preserve grouping. This macro still evaluates its argument twice, so
 
 ## Exercise 2: Prefer a typed helper for mutation: debug a regression
 
-A regression changed one token in worked example 2, the "prefer a typed helper for mutation" case, so one line now reads `int value = 4;`. Run the example with that line, use the failing CHECK to find why the result is 9 and value increments once to 4 no longer holds and repair the line without changing the CHECK.
+Worked example 2 now has a line reading `int value = 4;`. Repair it so that the result is 9 and value increments once to 4 again.
 
 The unchanged code is worked example 2:
 
@@ -42,7 +44,7 @@ int result = square_int(value++);
 CHECK(result == 9 && value == 4);
 ```
 
-**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `result == 9 && value == 4`. Once the line reads `int value = 3;` again, the "prefer a typed helper for mutation" case again shows that the result is 9 and value increments once to 4.
+**Expected:** `Check failed` at `result == 9 && value == 4` until the line reads `int value = 3;` again.
 
 A function argument expression is evaluated once for this call. SQUARE(value++) would create an unsequenced modification hazard.
 

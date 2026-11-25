@@ -1,6 +1,6 @@
 # java-017: explanatory solutions
 
-Open after an attempt or an explicit solution reveal. The executable reference runs the six exercise checks together as `Main.java`. The guide contains independent worked examples, while this file explains the choices and failure cases in the complete answer.
+Open this after an attempt; see [using the solutions](../STUDY-GUIDE.md#use-the-solutions).
 
 ## Mechanism review
 
@@ -18,7 +18,7 @@ Optional.of rejects null, ofNullable maps null to empty, and map transforms only
 
 ## Exercise 1: Represent a missing lookup: change one input
 
-Task: Copy Example A into a scratch `Main.java` and change `Map<String, Integer> data = Map.of("a", 7);` to `Map<String, Integer> data = Map.of("a", 8);`. Before running it with `java -ea Main`, predict which assertion fails and which value it now sees; then run it and restore the original line.
+Task: Change `Map<String, Integer> data = Map.of("a", 7);` to `Map<String, Integer> data = Map.of("a", 8);` in Example A and predict which assertion fails and why.
 
 The absence ofb is an expected lookup outcome. It is not represented as zero because zero could be a valid stored value.
 
@@ -31,13 +31,13 @@ Optional<Integer> missing = Optional.ofNullable(data.get("b"));
 assert known.orElseThrow() == 7 && missing.isEmpty();
 ```
 
-**Expected:** The changed run fails with an `AssertionError` from the assertion on `known.orElseThrow() == 7 && missing.isEmpty()`. Restoring the original line brings back the worked observation: a present with 7; b empty.
+**Expected:** The edited run fails with an `AssertionError` from the assertion on `known.orElseThrow() == 7 && missing.isEmpty()`.
 
-**Verify:** Compare your written prediction with the reported `AssertionError` and its stack-trace line, and name the value that made `known.orElseThrow() == 7 && missing.isEmpty()` false. After restoring the line, the program completes without an `AssertionError` again.
+**Verify:** Name the value that makes `known.orElseThrow() == 7 && missing.isEmpty()` false, then restore the line.
 
 ## Exercise 2: Transform only present values: diagnose an edited check
 
-Task: A careless edit changed the assertion that Example B adds after Example A so that it reads `assert known.map(value -> value + 2).orElseThrow() == 14;`. Run Example B with that line, explain why the edited assertion now fails for the same program state, and restore it.
+Task: Example B's new assertion was edited to `assert known.map(value -> value + 2).orElseThrow() == 14;`. Explain why it fails for unchanged state and restore it.
 
 The mapping function is not called for an empty Optional. This keeps the absence policy visible without repeated null conditionals.
 
@@ -48,9 +48,9 @@ assert known.map(value -> value * 2).orElseThrow() == 14;
 assert missing.map(value -> value * 2).isEmpty();
 ```
 
-**Expected:** Before the repair the run fails with an `AssertionError` from the assertion on `known.map(value -> value * 2).orElseThrow() == 14`; after it the line reads `assert known.map(value -> value * 2).orElseThrow() == 14;` again and 14 and empty.
+**Expected:** The edited run fails with an `AssertionError` from the assertion on `known.map(value -> value * 2).orElseThrow() == 14`; the restored assertion passes.
 
-**Verify:** Keep the failing and the repaired runs. Explain why the edited assertion rejects the same program state that `known.map(value -> value * 2).orElseThrow() == 14` accepts.
+**Verify:** Explain why the edited assertion rejects the state that `known.map(value -> value * 2).orElseThrow() == 14` accepts.
 
 ## Exercise 3: Compare eager and lazy fallback
 
@@ -68,7 +68,7 @@ assert lazy == 7 && calls.get() == 1;
 
 **Expected:** orElse increments; orElseGet does not.
 
-**Verify:** Keep an assertion equivalent to `lazy == 7 && calls.get() == 1`. As a control, change `assert lazy == 7 && calls.get() == 1;` to `assert lazy != 7 && calls.get() == 1;` inside it: the run must fail with an `AssertionError`, which shows the assertion can fail. Restore it.
+**Verify:** Control: changing `assert lazy == 7 && calls.get() == 1;` to `assert lazy != 7 && calls.get() == 1;` inside the assertion must make it fail.
 
 ## Exercise 4: Reject malformed lookup input
 
@@ -88,7 +88,7 @@ assert invalid && lookup(data, "b").isEmpty();
 
 **Expected:** IllegalArgumentException rather than empty.
 
-**Verify:** Keep an assertion equivalent to `invalid && lookup(data, "b").isEmpty()`. As a control, change `invalid = true;` to `invalid = false;`: the run must fail with an `AssertionError` from the assertion on `invalid && lookup(data, "b").isEmpty()`. Restore the line before continuing.
+**Verify:** Control: changing `invalid = true;` to `invalid = false;` must fail the assertion on `invalid && lookup(data, "b").isEmpty()`.
 
 ## Exercise 5: Flatten a nullable transformation
 
@@ -103,7 +103,7 @@ assert Optional.of("bad").flatMap(Main::tryParse).isEmpty();
 
 **Expected:** valid 12 present; bad text empty under this declared parser policy.
 
-**Verify:** Keep an assertion equivalent to `Optional.of("12").flatMap(Main::tryParse).orElseThrow() == 12`. As a control, change `assert Optional.of("12").flatMap(Main::tryParse).orElseThrow() == 12;` to `assert Optional.of("13").flatMap(Main::tryParse).orElseThrow() == 12;` inside it: the run must fail with an `AssertionError`, which shows the assertion can fail. Restore it.
+**Verify:** Control: changing `assert Optional.of("12").flatMap(Main::tryParse).orElseThrow() == 12;` to `assert Optional.of("13").flatMap(Main::tryParse).orElseThrow() == 12;` inside the assertion must make it fail.
 
 ## Exercise 6: Expose unsafe get
 
@@ -123,8 +123,10 @@ assert absent;
 
 **Expected:** specific absence failure.
 
-**Verify:** Keep an assertion equivalent to `absent`. As a control, change `absent = true;` to `absent = false;`: the run must fail with an `AssertionError` from the assertion on `absent`. Restore the line before continuing.
+**Verify:** Control: changing `absent = true;` to `absent = false;` must fail the assertion on `absent`.
 
 ## After comparing the answer
 
-Run the complete reference with assertions enabled, then return to your own implementation. Recreate one check with different values and explain its expected result before execution. A compiler error, an expected domain exception and an assertion failure represent different stages and should be reported separately. Preserve ownership boundaries when adapting file, network or concurrency examples. The reference never authorizes access to a shared service or deletion of learner state. Use a fresh tiny fixture when you need to distinguish two interpretations of an API contract.
+Change `tryParse` in your copy to return a small result record that keeps the parse error message, and decide which callers in this lesson actually need that extra information.
+
+Run the complete reference with `java -ea Main` first; the [review routine](../STUDY-GUIDE.md#use-the-solutions) covers the rest.

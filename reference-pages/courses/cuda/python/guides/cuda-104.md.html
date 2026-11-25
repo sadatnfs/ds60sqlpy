@@ -194,9 +194,17 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cuda/python/guides/cuda-104.md</code></p>
     </header>
     <article class="document"><h2 id="cuda-104-capstone-an-evidence-based-gpu-systems-decision">cuda-104: Capstone: an evidence-based GPU systems decision<a class="heading-anchor" href="#cuda-104-capstone-an-evidence-based-gpu-systems-decision" aria-label="Link to this section">#</a></h2>
-<p><strong>Route:</strong> CUDA Python and machine learning. <strong>Stage:</strong> advanced. <strong>Prerequisites:</strong> <code>cuda-085</code>, <code>cuda-092</code>, <code>cuda-096</code>. Allow several sessions when the hardware experiment is new; the chapter is not a deadline.</p>
-<h3 id="what-you-will-be-able-to-explain">What you will be able to explain<a class="heading-anchor" href="#what-you-will-be-able-to-explain" aria-label="Link to this section">#</a></h3>
-<p>By the end, you can <strong>write three constraints</strong>, <strong>preserve rollback</strong>, and <strong>state evidence gaps</strong> with evidence. Start with the two worked cases, then use the editable CPU model to make the quantities concrete.</p>
+<p><strong>Route:</strong> CUDA Python and machine learning. <strong>Stage:</strong> advanced. <strong>Prerequisites:</strong> <code>cuda-085</code>, <code>cuda-092</code>, <code>cuda-096</code>.</p>
+<p>Pacing, evidence labels and platform rules: <a href="../../STUDY-GUIDE.md.html">CUDA study guide</a>.</p>
+<h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
+<ul>
+<li>Write three constraints.</li>
+<li>Filter infeasible candidates.</li>
+<li>Choose a bottleneck hypothesis.</li>
+<li>Preserve rollback.</li>
+<li>Design failure tests.</li>
+<li>State evidence gaps.</li>
+</ul>
 <h3 id="mechanism-and-vocabulary">Mechanism and vocabulary<a class="heading-anchor" href="#mechanism-and-vocabulary" aria-label="Link to this section">#</a></h3>
 <p>A systems decision balances correctness, model quality, latency, throughput, memory, cost and maintainability. Start with explicit constraints and a reproducible baseline. Choose an optimization tied to a measured bottleneck: input preparation, transfer, arithmetic, memory traffic or communication. A custom kernel and multiple GPUs are optional solutions, not achievements that must be forced into every project.</p>
 <p>Retain source, environment, data recipe, checkpoint and rollback instructions. Report distributions and failure behavior, including unsupported shapes and resource limits. An acceptance matrix should show which claims have live evidence and which are still hypotheses. CPU-only work can produce a valuable model and decision report while honestly leaving GPU execution and deployment qualification open.</p>
@@ -209,11 +217,12 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 </ul>
 <h3 id="worked-examples">Worked examples<a class="heading-anchor" href="#worked-examples" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
-<p>CandidateA uses 8 GiB and meets a 20 ms latency target; candidate B uses 12 GiB on an 8 GiB device. B is infeasible regardless of its optimistic kernel timing.</p>
+<p>Candidate A uses 8 GiB and meets a 20 ms latency target; candidate B uses 12 GiB on an 8 GiB device. B is infeasible regardless of its optimistic kernel timing.</p>
 <h4 id="worked-example-2">Worked example 2<a class="heading-anchor" href="#worked-example-2" aria-label="Link to this section">#</a></h4>
-<p>CandidateC meets latency but reduces held-out accuracy below the required threshold. Performance and quality constraints both belong in acceptance.</p>
-<h3 id="portable-executable-model">Portable executable model<a class="heading-anchor" href="#portable-executable-model" aria-label="Link to this section">#</a></h3>
-<p>The <strong>CPU reference model</strong> variant runs this bounded worked example using <code>python-core</code>. It uses only the Python standard library, small synthetic values and no network. Its purpose is to expose the arithmetic or contract behind the chapter. The separate reference includes assertions for the stated observations.</p>
+<p>Candidate C meets latency but reduces held-out accuracy below the required threshold. Performance and quality constraints both belong in acceptance.</p>
+<h3 id="how-to-run-the-cpu-model">How to run the CPU model<a class="heading-anchor" href="#how-to-run-the-cpu-model" aria-label="Link to this section">#</a></h3>
+<p>Edit the copy; the <a href="../references/cuda-104_cpu.py.html">reference</a> adds assertions.</p>
+<pre class="highlighted-code"><code class="language-bash">python courses/cuda/python/lessons/cuda-104_cpu.py</code></pre>
 <pre class="highlighted-code"><code class="language-python">candidates <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span>
     <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">name</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">A</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">memory</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">8</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">latency</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">18</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">quality</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">0.95</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span>
     <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">name</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">B</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">memory</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">12</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">latency</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">10</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">quality</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">0.96</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span>
@@ -235,55 +244,52 @@ valid <span class="syntax-operator">=</span> <span class="syntax-punctuation">[<
 <td><code>[&#x27;A&#x27;]</code></td>
 </tr>
 </tbody></table></div>
-<p>Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.</p>
 <h3 id="equal-framework-lanes">Equal framework lanes<a class="heading-anchor" href="#equal-framework-lanes" aria-label="Link to this section">#</a></h3>
 <h4 id="pytorch">PyTorch<a class="heading-anchor" href="#pytorch" aria-label="Link to this section">#</a></h4>
 <p>Choose either a single-device or a separately qualified distributed/custom-op PyTorch path. Preserve an ordinary eager baseline and source-bound evidence for every claimed gain.</p>
 <h4 id="tensorflow">TensorFlow<a class="heading-anchor" href="#tensorflow" aria-label="Link to this section">#</a></h4>
 <p>Choose the equivalent bounded TensorFlow path, preserve an eager baseline and report graph/placement changes. TensorFlow needs its own acceptance evidence, not a copied PyTorch benchmark.</p>
-<p>Choose either lane first, then compare the other using identical mathematical inputs. Framework-specific shape, mode and optimizer rules must be checked separately. Both use offline synthetic examples; no model hub or dataset download is triggered.</p>
+<p>Lane rules: <a href="../../STUDY-GUIDE.md.html#python-gpu-and-framework-labs">framework labs</a>.</p>
 <h3 id="practice-and-transfer">Practice and transfer<a class="heading-anchor" href="#practice-and-transfer" aria-label="Link to this section">#</a></h3>
+<p>Record each attempt in the <a href="../lessons/cuda-104.md.html">worksheet</a> before opening hints.</p>
 <h4 id="exercise-1-write-three-constraints">Exercise 1: Write three constraints<a class="heading-anchor" href="#exercise-1-write-three-constraints" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Writing a single goal of maximizing speed ignores memory and quality, so the fastest candidate wins even when it cannot run on the device or produces worse answers.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-2-filter-infeasible-candidates">Exercise 2: Filter infeasible candidates<a class="heading-anchor" href="#exercise-2-filter-infeasible-candidates" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Ranking all candidates by latency first and picking B, then trying to make it fit later, wastes effort and treats a hard constraint as a preference.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-3-choose-a-bottleneck-hypothesis">Exercise 3: Choose a bottleneck hypothesis<a class="heading-anchor" href="#exercise-3-choose-a-bottleneck-hypothesis" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Making several optimizations at once without a hypothesis means any improvement cannot be attributed to a cause, and regressions get hidden by gains elsewhere.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-4-preserve-rollback">Exercise 4: Preserve rollback<a class="heading-anchor" href="#exercise-4-preserve-rollback" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Replacing the baseline code in place leaves no way to reproduce earlier results or revert quickly.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-5-design-failure-tests">Exercise 5: Design failure tests<a class="heading-anchor" href="#exercise-5-design-failure-tests" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Testing only valid inputs leaves error paths untested, and those paths are where GPU services typically fail in production.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-6-state-evidence-gaps">Exercise 6: State evidence gaps<a class="heading-anchor" href="#exercise-6-state-evidence-gaps" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Presenting fixture numbers such as 18 ms as measured performance claims evidence that does not exist.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
-<p>Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.</p>
+<p>Hint <em>k</em> belongs to exercise <em>k</em>; open one at a time.</p>
 <ol>
-<li>Start from worked example 1 and mark the quantities needed for the task &quot;Write three constraints&quot;.</li>
-<li>Change one assumption in worked example 2 while preserving the declared contract: filter infeasible candidates.</li>
-<li>Trace the CPU program&#x27;s variables before adding hardware behavior: choose a bottleneck hypothesis.</li>
-<li>Draw producers, consumers and the exact operation boundary for the task &quot;Preserve rollback&quot;.</li>
-<li>Separate what the small fixture establishes from what the real runtime must show: design failure tests.</li>
-<li>Write a counterexample to an overbroad claim before you state evidence gaps.</li>
+<li>Write each constraint as a number with a unit, such as a memory ceiling, a latency target and a quality floor.</li>
+<li>Check memory and quality against their limits first and drop any candidate that fails either one before comparing speed.</li>
+<li>Point to the part of a measured trace that shows where time goes, then pick the change that targets it.</li>
+<li>Ask how you would return to the baseline tomorrow if the new version fails in use.</li>
+<li>Send an unsupported shape and a request beyond the resource limit and describe the correct refusal.</li>
+<li>Mark each claim as measured live, measured on the CPU only or still a hypothesis.</li>
 </ol>
-<h3 id="common-mistakes-and-self-review">Common mistakes and self-review<a class="heading-anchor" href="#common-mistakes-and-self-review" aria-label="Link to this section">#</a></h3>
-<p>Confusing a correct tiny example with a general implementation is the central review risk. For this chapter, challenge the assumption in worked example 2, then ask whether your change preserves the mechanism described above. If you change dtype, layout, ordering, batch size or backend, update the acceptance contract rather than silently reusing the old observation. Explain an unexpected result before trying random configuration changes.</p>
-<p>Keep a small evidence table with columns <strong>claim</strong>, <strong>input</strong>, <strong>expected observation</strong>, <strong>actual observation</strong> and <strong>limit</strong>. For the first claim use <code>Write three constraints</code>. For the final claim use <code>State evidence gaps</code>. An unperformed GPU or cluster experiment remains pending even when the CPU model is correct.</p>
-<h3 id="platform-and-evidence-contract">Platform and evidence contract<a class="heading-anchor" href="#platform-and-evidence-contract" aria-label="Link to this section">#</a></h3>
-<p>The reading worksheet and CPU reference model work through the ordinary Linux Docker classroom on macOS, Linux and Windows using WSL 2. They do not require an NVIDIA GPU. Their results are labeled CPU models or semantic oracles, not simulated hardware performance.</p>
-<p>Real CUDA work needs supported NVIDIA hardware, a compatible host driver and an explicitly prepared GPU runtime. An Apple GPU does not execute CUDA kernels. PyTorch MPS on a supported native Mac, ROCm on supported AMD hardware, or other vendor backends can provide separate accelerator learning routes; they need their own package and operation qualification and are not CUDA evidence. The ordinary Linux Docker classroom does not expose native Mac MPS automatically.</p>
-<p>Do not download packages, models or data by opening this lesson. Do not attach an engine socket, ambient cluster credentials or an arbitrary remote endpoint. A CPU pass, imported package, successful compilation, real GPU result and measured performance are distinct observations. Record the actual backend, data shape/dtype, source revision, versions and pending checks. A saved completion marker records learning progress, not hardware certification.</p>
+<h3 id="common-mistakes-and-self-check">Common mistakes and self-check<a class="heading-anchor" href="#common-mistakes-and-self-check" aria-label="Link to this section">#</a></h3>
+<p>A common mistake is ranking candidates by kernel speed before checking feasibility. Candidate B in worked example 1 needs 12 GiB on an 8 GiB device, so its timing is irrelevant, and candidate C misses the accuracy threshold. Another mistake is adding a custom kernel or more GPUs because they sound advanced. Fix both by filtering on every stated constraint first and choosing one optimization tied to a measured bottleneck, with the unchanged baseline kept runnable for rollback.</p>
+<p><strong>Misconception:</strong> A capstone decision must recommend some optimization, or the project has failed. <strong>Correction:</strong> Keeping the reproducible baseline is a valid outcome when no candidate meets every constraint. The acceptance matrix should show which claims have live evidence and which remain hypotheses, so a reviewer can see why the baseline was kept.</p>
+<p><strong>Evidence limit:</strong> The reference filters three described candidates and accepts only candidate A. Its memory, latency and accuracy figures are given, not measured, so a real decision needs live evidence for each claim in the acceptance matrix.</p>
+<ol>
+<li>Why must quality be part of acceptance?</li>
+<li>Which bottlenecks can an optimization target?</li>
+<li>What can CPU-only work honestly deliver?</li>
+</ol>
+<p>Answers: <a href="../solutions/cuda-104_solutions.md.html#self-check-answers">self-check answers</a>.</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
 <ul>
 <li><a href="https://docs.pytorch.org/docs/2.9/notes/cuda.html">PyTorch CUDA semantics</a></li>
 <li><a href="https://www.tensorflow.org/guide/gpu">TensorFlow GPU guide</a></li>
 </ul>
-<p>Use the version-matched documentation of your prepared environment. These references describe interfaces and supported boundaries; the chapter&#x27;s synthetic examples and CPU models are original teaching material.</p>
+<p>Full lists: <a href="../../STUDY-GUIDE.md.html#documentation-and-sources">documentation and sources</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning skill for cuda-104: Capstone: an evidence-based GPU systems decision.
 Read courses/cuda/python/guides/cuda-104.md and courses/cuda/python/lessons/cuda-104.md.

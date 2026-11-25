@@ -1,67 +1,23 @@
 # Day 17 solutions: Ranking Functions: ROW_NUMBER, RANK, DENSE_RANK
 
-
 <!-- beginner-solution-enrichment -->
 ## How to study and run this solution
 
-Open this explanation only after making an honest attempt. The executable
-companion runs solely against the disposable `advanced_sql_training` database:
+Four answers rank real tables (`orders`, `products`, `employees`), one ranks three typed-in scores, and two of them filter on the rank in an outer query. After your own attempt, run the companion file:
 
 ```bash
-# Linux, macOS, or Windows through WSL 2, from the repository root
 psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
   -f sql/postgres-60day/solutions/day17_solutions.sql
 ```
 
-`psql` prints each result/command tag in the terminal. Stop at the first
-unexpected `ERROR`; later output cannot repair an earlier failed invariant.
-Compare your own SQL, row grain, column names, row counts, `NULL` policy, and
-ordering with the explanation before comparing syntax.
-
-## Clause-by-clause reading map
-
-The lesson's main concepts are Peer rows, Gap rank, Dense rank. Its worked-model focus is:
-Rank two products with equal revenue using `ROW_NUMBER`, `RANK`, and `DENSE_RANK`. Add `product_id` as the last `ORDER BY` key when the requirement is exactly five deterministic rows; omit that tie-breaker when equal metrics must share a business rank.
-
-- Start at `FROM`/`JOIN` and state the intermediate row grain. Inspect join keys
-  before adding aggregates; a one-to-many join is allowed to multiply rows only
-  when the later contract accounts for it.
-- Apply `WHERE` to input rows, `GROUP BY` to form buckets, and `HAVING` to
-  completed groups. Window functions run over the surviving relation and
-  normally preserve its row count.
-- Read the `SELECT` list as the public result contract: keys establish grain,
-  measures state calculations, and aliases explain meaning. `ORDER BY` is the
-  only output-order guarantee; add a unique tie-breaker before `LIMIT`.
-- Trace every common table expression (CTE) as a temporary named relation.
-  Execute or inspect one stage at a time while debugging, but compare the final
-  result with an independent control rather than trusting stage names.
-- Keep SQL `NULL` as “missing/unknown/not applicable” until the metric contract
-  chooses another representation. Guard division with `NULLIF`; disclose
-  exclusions and distinguish zero from no row.
-- For DDL/DML, a command tag proves only that PostgreSQL accepted a statement.
-  Catalog checks, negative cases, row-count reconciliation, and the declared
-  transaction boundary prove behavior and cleanup.
-
-The exact final queries are not the only valid syntax. A join, subquery, CTE,
-window, or conditional aggregate can be an alternative when it preserves the
-same grain, `NULL` semantics, deterministic ordering, and safety. Prefer the
-form whose intermediate relations a reviewer can verify; optimize only after
-correctness is established with evidence.
-
-These answers align one-for-one with [day17_rank_functions.sql](../day17_rank_functions.sql).
-Run only against the disposable `advanced_sql_training` database.
-The executable companion wraps every answer in `BEGIN`/`ROLLBACK`.
-The snippets below assume the lesson's
-`SET search_path TO training, public;` statement. Run the complete
-executable companion when you want a self-contained check.
+It sets `search_path` to `training, public` and ends with `ROLLBACK`. Row counts to expect, in order: 4,362, 300, 18, 3, 438 and 12. None of them depend on today's date. The prompts match [the learner file](../day17_rank_functions.sql) one for one; the study guide's [solution reading notes](../../STUDY-GUIDE.md#read-a-solution) cover how to compare your query with these.
 
 ## Reading contract
 
 - **Focus:** Choose `ROW_NUMBER`, `RANK`, or `DENSE_RANK` from tie semantics, and separate ranking from top-N filtering.
 - **Assumptions:** All ranking orders include a stable key when a unique sequence is required. Equal business values intentionally tie under rank functions.
 - **Primary pitfall:** `ROW_NUMBER` breaks ties, `RANK` leaves gaps, and `DENSE_RANK` does not; using the wrong function changes top-N membership.
-- **Safety:** all writes are bounded and rollback-protected; read-only
-  queries still use deterministic ordering whenever row order is claimed.
+- **Safety:** every statement here is a `SELECT`, and the file still runs inside `BEGIN`/`ROLLBACK`, so a tied test row you insert to try the edge cases disappears when it ends.
 
 ## Exercise 1: Query writing
 
@@ -71,11 +27,10 @@ executable companion when you want a self-contained check.
 
 **Clause-by-clause reading:**
 
-- `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
-- `FROM`: establishes the starting relation and therefore the initial row grain.
-- `OVER (...)`: computes an analytic value while preserving detail rows; partition, order, and frame define its peer set.
-- `PARTITION BY`: restarts a window calculation independently for each partition key.
-- `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
+- `FROM orders AS o`: 4,362 orders, one row each.
+- `ROW_NUMBER() OVER (PARTITION BY o.customer_id ...)`: restarts the count at 1 for each customer.
+- `ORDER BY o.order_date DESC, o.order_id DESC` inside `OVER`: newest first, with the order ID deciding any timestamp tie.
+- Outer `ORDER BY o.customer_id, recency_number`: groups each customer's orders together, newest at the top.
 
 ```sql
 SELECT
@@ -92,19 +47,16 @@ ORDER BY
 
 **Expected shape:** One row per order with sequence starting at one per customer.
 
-Check the result at the stated grain. An alternative formulation is
-valid only if it preserves the same NULL, ordering, time, money, and
-cardinality contract.
-
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-17 Exercise 1, read from `orders`. Build the answer toward `order_id`, `customer_id`, `order_date`, and `recency_number`; keep `order_id` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-17 Exercise 1, expected output: One row per order with sequence starting at one per customer. The final columns are `order_id`, `customer_id`, `order_date`, and `recency_number`. The final order is `o.customer_id, recency_number`.
-- **Independent verification:** For sql-17 Exercise 1, choose one complete partition from `orders`; hand-calculate its first, middle, and final window values for `order_date`, then verify output keys remain `order_id`. Give two rows the same `o.customer_id` value and different `recency_number` values; verify `o.customer_id, recency_number` produces the intended rank and display order.
-- **Intermediate relation check:** For sql-17 Exercise 1, inspect one window partition before projecting; then check `o.customer_id, recency_number` before applying the row cap.
-- **Clause check:** For sql-17 Exercise 1, the solution actually uses `FROM`, window `OVER`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `orders`, preserve one row per `order_id`, and finish with `order_id`, `customer_id`, `order_date`, and `recency_number` ordered by `o.customer_id, recency_number`.
-- **Alternative/trade-off:** For sql-17 Exercise 1, the chosen form is justified by this lesson-specific rationale: Partition by customer and use order date plus order ID as a unique descending order. Evaluate another form against the concrete expected result (One row per order with sequence starting at one per customer) and the verification above.
-- **Edge case:** Give two rows the same `o.customer_id` value and different `recency_number` values; verify `o.customer_id, recency_number` produces the intended rank and display order.
+- **Inputs/evidence:** For sql-17 Exercise 1, number each of the 4,362 `orders` rows with `ROW_NUMBER() OVER (PARTITION BY o.customer_id ORDER BY o.order_date DESC, o.order_id DESC)`; the 438 buyers have 4 to 16 orders each.
+- **Expected result/shape:** For sql-17 Exercise 1, return 4,362 rows, one per order, where each customer's numbers run from 1 up to that customer's order count; customer 1's orders 5, 4, 3, 2, and 1 get numbers 1 to 5, and the 33 customers with 16 orders, such as customer 12, reach 16. The final columns are `order_id`, `customer_id`, `order_date`, and `recency_number`. The final order is `o.customer_id, recency_number`.
+- **Independent verification:** For sql-17 Exercise 1, confirm that exactly 438 rows have `recency_number` 1, the maximum is 16, and each customer's maximum equals `COUNT(*)` from `orders` grouped by `customer_id`. All `order_date` values are distinct, so inside a rolled-back transaction copy order 5's `order_date` onto order 3; customer 1 must then number orders 5, 3, 4, 2, 1 as 1 to 5, because `o.order_id DESC` breaks the tie.
+- **What prints:** 4,362 rows for the 438 customers who ordered. Customer 1 has five orders; order 5 (2026-11-17) gets 1 and order 1 (2026-10-16) gets 5.
+- **Proof query:** `SELECT COUNT(*) FILTER (WHERE recency_number = 1)` over this result should equal 438, one newest order per customer.
+- **Does the tie-breaker matter here?** Not in this fixture: no customer has two orders with the same `order_date`. It still belongs in the query, because a future duplicate timestamp would otherwise make the numbering change between runs.
+- **Wrong function:** `RANK` would give two same-timestamp orders the same number, so "order number 1" could mean two rows.
+- **Busiest partitions:** customers 12, 25 and 38 each have 16 orders, the most in the fixture, so their numbering runs to 16; the smallest partitions stop at 4.
 
 ## Exercise 2: Query writing
 
@@ -114,11 +66,10 @@ cardinality contract.
 
 **Clause-by-clause reading:**
 
-- `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
-- `FROM`: establishes the starting relation and therefore the initial row grain.
-- `OVER (...)`: computes an analytic value while preserving detail rows; partition, order, and frame define its peer set.
-- `PARTITION BY`: restarts a window calculation independently for each partition key.
-- `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
+- `FROM products AS p`: 300 products in 6 categories.
+- `RANK() OVER (PARTITION BY p.category ORDER BY p.price DESC)`: position by price within the category, with gaps after ties.
+- `DENSE_RANK()` over the same window: the same position, without gaps.
+- Outer `ORDER BY p.category, p.price DESC, p.product_id`: product ID only fixes display order; it is not part of either rank.
 
 ```sql
 SELECT
@@ -137,19 +88,15 @@ ORDER BY
 
 **Expected shape:** One row per product with two rank semantics.
 
-Check the result at the stated grain. An alternative formulation is
-valid only if it preserves the same NULL, ordering, time, money, and
-cardinality contract.
-
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-17 Exercise 2, read from `products`. Build the answer toward `product_id`, `category`, `price`, `price_rank`, and `dense_price_rank`; keep `product_id` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-17 Exercise 2, expected output: One row per product with two rank semantics. The final columns are `product_id`, `category`, `price`, `price_rank`, and `dense_price_rank`. The final order is `p.category, p.price DESC, p.product_id`.
-- **Independent verification:** For sql-17 Exercise 2, choose one complete partition from `products`; hand-calculate its first, middle, and final window values for `price_rank`, and `dense_price_rank`, then verify output keys remain `product_id`. Give two rows the same `p.category` value and different `p.product_id` values; verify `p.category, p.price DESC, p.product_id` produces the intended rank and display order.
-- **Intermediate relation check:** For sql-17 Exercise 2, inspect one window partition before projecting; then check `p.category, p.price DESC, p.product_id` before applying the row cap.
-- **Clause check:** For sql-17 Exercise 2, the solution actually uses `FROM`, window `OVER`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `products`, preserve one row per `product_id`, and finish with `product_id`, `category`, `price`, `price_rank`, and `dense_price_rank` ordered by `p.category, p.price DESC, p.product_id`.
-- **Alternative/trade-off:** For sql-17 Exercise 2, the chosen form is justified by this lesson-specific rationale: Rank only on price so equal prices tie; order the final display by product ID. Evaluate another form against the concrete expected result (One row per product with two rank semantics) and the verification above.
-- **Edge case:** Give two rows the same `p.category` value and different `p.product_id` values; verify `p.category, p.price DESC, p.product_id` produces the intended rank and display order.
+- **Inputs/evidence:** For sql-17 Exercise 2, rank the 300 `products` within each of the 6 categories (50 products each) by `p.price DESC`, once with `RANK()` and once with `DENSE_RANK()`.
+- **Expected result/shape:** For sql-17 Exercise 2, return 300 rows, one per product; `Apparel` starts with product 295 at 119.15, 289 at 116.93, and 283 at 114.71 ranked 1, 2, and 3, and both rank columns end at 50 in every category. The final columns are `product_id`, `category`, `price`, `price_rank`, and `dense_price_rank`. The final order is `p.category, p.price DESC, p.product_id`.
+- **Independent verification:** For sql-17 Exercise 2, confirm 300 rows and zero rows where `price_rank <> dense_price_rank`, since every category has 50 distinct prices. Inside a rolled-back transaction, set product 289's price to 119.15; `Apparel` must then show products 289 and 295 at rank 1 and dense rank 1, product 283 at rank 3 but dense rank 2, and product 277 at rank 4 but dense rank 3.
+- **What prints:** 300 rows, 50 per category, ranks 1 to 50. Apparel starts with product 295 at 119.15.
+- **The surprise in this data:** every category has 50 different prices, so `price_rank` and `dense_price_rank` are equal on all 300 rows. The query is still right; the data simply has no ties to show the difference.
+- **Testing the tie rule:** inside a transaction, `UPDATE products SET price = 119.15 WHERE product_id = 289`. Apparel's ranks now read 1, 1, 3 under `RANK` and 1, 1, 2 under `DENSE_RANK`. Roll back afterwards.
+- **A common slip:** writing `ORDER BY p.price DESC, p.product_id` inside `OVER` makes the tie impossible, which defeats the purpose of using rank functions.
 
 ## Exercise 3: Query writing
 
@@ -159,13 +106,9 @@ cardinality contract.
 
 **Clause-by-clause reading:**
 
-- `WITH`: names an intermediate relation so its grain can be checked before later joins or aggregation.
-- `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
-- `FROM`: establishes the starting relation and therefore the initial row grain.
-- `WHERE`: filters source rows before grouping and window calculation; SQL's unknown NULL comparisons do not pass.
-- `OVER (...)`: computes an analytic value while preserving detail rows; partition, order, and frame define its peer set.
-- `PARTITION BY`: restarts a window calculation independently for each partition key.
-- `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
+- `ranked`: every product plus its `DENSE_RANK` by price within its category, still 300 rows.
+- Outer `WHERE price_rank <= 3`: keeps the top three price levels per category. It works here because the rank already exists as a column.
+- `ORDER BY category, price_rank, product_id`: tied products, if any, list in ID order.
 
 ```sql
 WITH ranked AS (
@@ -193,19 +136,15 @@ ORDER BY
 
 **Expected shape:** At least three price levels per category where available.
 
-Check the result at the stated grain. An alternative formulation is
-valid only if it preserves the same NULL, ordering, time, money, and
-cardinality contract.
-
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-17 Exercise 3, read from `products`. Build the answer toward `product_id`, `name`, `category`, `price`, and `price_rank`; keep `product_id` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-17 Exercise 3, expected output: At least three price levels per category where available. The final columns are `product_id`, `name`, `category`, `price`, and `price_rank`. The final order is `category, price_rank, product_id`.
-- **Independent verification:** For sql-17 Exercise 3, run an anti-check that counts rows where NOT ((price_rank <= 3)); require unique `product_id` where the expected grain is one row per key and confirm the projected `product_id`, `name`, `category`, `price`, and `price_rank` against `products`. Give two rows the same `category` value and different `product_id` values; verify `category, price_rank, product_id` produces the intended rank and display order.
-- **Intermediate relation check:** For sql-17 Exercise 3, run `ranked` one at a time. Record each CTE's row count and `product_id` uniqueness before the next stage uses it.
-- **Clause check:** For sql-17 Exercise 3, the solution actually uses `WITH`, `FROM`, `WHERE`, window `OVER`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `products`, preserve one row per `product_id`, and finish with `product_id`, `name`, `category`, `price`, and `price_rank` ordered by `category, price_rank, product_id`.
-- **Alternative/trade-off:** For sql-17 Exercise 3, the chosen form is justified by this lesson-specific rationale: Compute `DENSE_RANK` in a CTE and filter outside. Evaluate another form against the concrete expected result (At least three price levels per category where available) and the verification above.
-- **Edge case:** Give two rows the same `category` value and different `product_id` values; verify `category, price_rank, product_id` produces the intended rank and display order.
+- **Inputs/evidence:** For sql-17 Exercise 3, apply `DENSE_RANK() OVER (PARTITION BY p.category ORDER BY p.price DESC)` inside the `ranked` CTE, then keep `price_rank <= 3` in the outer query.
+- **Expected result/shape:** For sql-17 Exercise 3, return 18 rows, three per category for the 6 categories; `Apparel` keeps products 295, 289, and 283, and `Books` keeps 300 at 121.00, 294 at 118.78, and 288 at 116.56. The final columns are `product_id`, `name`, `category`, `price`, and `price_rank`. The final order is `category, price_rank, product_id`.
+- **Independent verification:** For sql-17 Exercise 3, confirm 18 rows, no `price_rank` above 3, and that each kept price is among the three highest from `SELECT category, price FROM products ORDER BY category, price DESC`. Inside a rolled-back transaction, set product 289's price to 119.15; the result must grow to 19 rows, with `Apparel` returning 289 and 295 at rank 1, 283 at rank 2, and 277 at rank 3.
+- **What prints:** 18 rows, three per category. Apparel shows 295 (119.15), 289 (116.93) and 283 (114.71). The most expensive product overall is 300 in Books at 121.00.
+- **Ties widen the answer:** with no repeated prices you get exactly 3 per category. If two Apparel products shared 119.15, Apparel would return 4 rows, both tied products at level 1 plus the next two levels. That is what "including price ties" asks for.
+- **`ROW_NUMBER` instead:** always 18 rows, even with ties, and one of the tied products would be dropped based on whatever breaks the tie.
+- **Where the filter goes:** `WHERE DENSE_RANK() OVER (...) <= 3` in a single query is rejected, because window functions are not allowed in `WHERE`.
 
 ## Exercise 4: Prediction
 
@@ -215,11 +154,10 @@ cardinality contract.
 
 **Clause-by-clause reading:**
 
-- `VALUES`: constructs a small relation explicitly, which makes examples and expected cardinality inspectable.
-- `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
-- `FROM`: establishes the starting relation and therefore the initial row grain.
-- `OVER (...)`: computes an analytic value while preserving detail rows; partition, order, and frame define its peer set.
-- `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
+- `VALUES (1, 100), (2, 100), (3, 90) AS sample (sample_id, score)`: three typed rows; samples 1 and 2 tie.
+- `ROW_NUMBER() OVER (ORDER BY score DESC, sample_id)`: the only ordering that includes the ID.
+- `RANK()` and `DENSE_RANK()` over `ORDER BY score DESC`: the tie stays a tie.
+- Outer `ORDER BY sample_id`: shows the samples in ID order, not rank order.
 
 ```sql
 SELECT
@@ -238,19 +176,15 @@ ORDER BY
 
 **Expected shape:** Three rows showing sequences 1/2/3, 1/1/3, and 1/1/2.
 
-Check the result at the stated grain. An alternative formulation is
-valid only if it preserves the same NULL, ordering, time, money, and
-cardinality contract.
-
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-17 Exercise 4, read from the inline `VALUES` fixture. Build the answer toward `sample_id`, `score`, `row_number_value`, `rank_value`, and `dense_rank_value`; keep `sample_id` visible whenever the result has row-level grain.
+- **Inputs/evidence:** For sql-17 Exercise 4, rank the three-row `VALUES` fixture `(1, 100), (2, 100), (3, 90)` by `score DESC` with `ROW_NUMBER()` (tie broken by `sample_id`), `RANK()`, and `DENSE_RANK()`.
 - **Expected result/shape:** For sql-17 Exercise 4, expected output: Three rows showing sequences 1/2/3, 1/1/3, and 1/1/2. The final columns are `sample_id`, `score`, `row_number_value`, `rank_value`, and `dense_rank_value`. The final order is `sample_id`.
-- **Independent verification:** For sql-17 Exercise 4, choose one complete partition from the inline `VALUES` fixture; hand-calculate its first, middle, and final window values for `score`, `row_number_value`, `rank_value`, and `dense_rank_value`, then verify output keys remain `sample_id`. Give two rows the same `sample_id` value and different ``sample_id`` values; verify `sample_id` produces the intended rank and display order.
-- **Intermediate relation check:** For sql-17 Exercise 4, inspect one window partition before projecting; then check `sample_id` before applying the row cap.
-- **Clause check:** For sql-17 Exercise 4, the solution actually uses `FROM`, window `OVER`, `SELECT`, and `ORDER BY`. Read only those operations: begin at the inline `VALUES` fixture, preserve one row per `sample_id`, and finish with `sample_id`, `score`, `row_number_value`, `rank_value`, and `dense_rank_value` ordered by `sample_id`.
-- **Alternative/trade-off:** For sql-17 Exercise 4, the chosen form is justified by this lesson-specific rationale: Use a deterministic ID only for row number; adding it to rank ordering would destroy the tie. Evaluate another form against the concrete expected result (Three rows showing sequences 1/2/3, 1/1/3, and 1/1/2) and the verification above.
-- **Edge case:** Give two rows the same `sample_id` value and different ``sample_id`` values; verify `sample_id` produces the intended rank and display order.
+- **Independent verification:** For sql-17 Exercise 4, check by hand that samples 1 and 2 tie at 100, so only `row_number_value` separates them (1 and 2), while sample 3 gets 3, 3, and 2. Add `(4, 90)` to the fixture; the four rows must read 1/1/1, 2/1/1, 3/3/2, and 4/3/2.
+- **What prints:** sample 1: 1, 1, 1. Sample 2: 2, 1, 1. Sample 3 (score 90): 3, 3, 2.
+- **Reading the last row:** `RANK` skips to 3 because two rows sit above it. `DENSE_RANK` gives 2 because only one distinct score sits above it.
+- **Moving the ID:** add `sample_id` to the `RANK` ordering and you get 1, 2, 3, identical to `ROW_NUMBER`; the tie is gone.
+- **Edge case:** a fourth row scoring 100 changes the 90 row to `RANK` 4 and leaves its `DENSE_RANK` at 2.
 
 ## Exercise 5: Debugging
 
@@ -260,13 +194,9 @@ cardinality contract.
 
 **Clause-by-clause reading:**
 
-- `WITH`: names an intermediate relation so its grain can be checked before later joins or aggregation.
-- `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
-- `FROM`: establishes the starting relation and therefore the initial row grain.
-- `WHERE`: filters source rows before grouping and window calculation; SQL's unknown NULL comparisons do not pass.
-- `OVER (...)`: computes an analytic value while preserving detail rows; partition, order, and frame define its peer set.
-- `PARTITION BY`: restarts a window calculation independently for each partition key.
-- `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
+- `numbered`: every order with its newest-first number per customer, as in Exercise 1.
+- Outer `WHERE recency_number = 1`: one row per customer, chosen by the number rather than by a date comparison.
+- `ORDER BY customer_id`.
 
 ```sql
 WITH numbered AS (
@@ -292,19 +222,15 @@ ORDER BY
 
 **Expected shape:** At most one row per customer.
 
-Check the result at the stated grain. An alternative formulation is
-valid only if it preserves the same NULL, ordering, time, money, and
-cardinality contract.
-
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-17 Exercise 5, read from `orders`. Build the answer toward `order_id`, `customer_id`, `order_date`, and `total_amount`; keep `order_id` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-17 Exercise 5, expected output: At most one row per customer. The final columns are `order_id`, `customer_id`, `order_date`, and `total_amount`. The final order is `customer_id`.
-- **Independent verification:** For sql-17 Exercise 5, run an anti-check that counts rows where NOT ((recency_number = 1)); require unique `order_id` where the expected grain is one row per key and confirm the projected `order_id`, `customer_id`, `order_date`, and `total_amount` against `orders`. Give two rows the same `customer_id` value and different ``order_id`` values; verify `customer_id` produces the intended rank and display order.
-- **Intermediate relation check:** For sql-17 Exercise 5, run `numbered` one at a time. Record each CTE's row count and `order_id` uniqueness before the next stage uses it.
-- **Clause check:** For sql-17 Exercise 5, the solution actually uses `WITH`, `FROM`, `WHERE`, window `OVER`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `orders`, preserve one row per `order_id`, and finish with `order_id`, `customer_id`, `order_date`, and `total_amount` ordered by `customer_id`.
-- **Alternative/trade-off:** For sql-17 Exercise 5, the chosen form is justified by this lesson-specific rationale: Use row number with the unique order ID as final tie-breaker. Evaluate another form against the concrete expected result (At most one row per customer) and the verification above.
-- **Edge case:** Give two rows the same `customer_id` value and different ``order_id`` values; verify `customer_id` produces the intended rank and display order.
+- **Inputs/evidence:** For sql-17 Exercise 5, number orders with `ROW_NUMBER()` partitioned by `o.customer_id` and ordered by `o.order_date DESC, o.order_id DESC` in the `numbered` CTE, then keep `recency_number = 1`.
+- **Expected result/shape:** For sql-17 Exercise 5, return 438 rows, one latest order per buyer, with no rows for the 62 customers who never ordered; customer 1's row is order 5 for 105.84 and customer 500's is order 4362 for 951.76. The final columns are `order_id`, `customer_id`, `order_date`, and `total_amount`. The final order is `customer_id`.
+- **Independent verification:** For sql-17 Exercise 5, confirm 438 distinct `customer_id` values and that all 438 rows match `SELECT customer_id, MAX(order_date) FROM orders GROUP BY customer_id` on both columns; the kept orders total 252375.44. Inside a rolled-back transaction, copy order 5's `order_date` onto order 3; customer 1 must still return order 5, because `o.order_id DESC` breaks the tie.
+- **What prints:** 438 rows, one per customer with orders. The oldest "latest order" belongs to customer 429 (2026-02-01); the newest is from 2026-11-23.
+- **The tempting shortcut:** joining `orders` to `SELECT customer_id, MAX(order_date)` also returns 438 rows today, but returns two rows for a customer whose two newest orders share a timestamp. The `ROW_NUMBER` version cannot.
+- **Seeing the bug:** drop `o.order_id DESC` from the window ordering. The result is identical on this data, which is exactly why the bug survives testing; insert a second order for customer 1 at 2026-11-17 09:47:32.140775 inside a transaction to expose it.
+- **Customers with no orders:** the 62 Brazilian customers are absent, since the query starts from `orders`.
 
 ## Exercise 6: Extension
 
@@ -314,13 +240,9 @@ cardinality contract.
 
 **Clause-by-clause reading:**
 
-- `WITH`: names an intermediate relation so its grain can be checked before later joins or aggregation.
-- `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
-- `FROM`: establishes the starting relation and therefore the initial row grain.
-- `WHERE`: filters source rows before grouping and window calculation; SQL's unknown NULL comparisons do not pass.
-- `OVER (...)`: computes an analytic value while preserving detail rows; partition, order, and frame define its peer set.
-- `PARTITION BY`: restarts a window calculation independently for each partition key.
-- `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
+- `ranked`: every employee with a `DENSE_RANK` by salary within the department.
+- Outer `WHERE salary_rank <= 2`: the top two salary levels, keeping everyone tied at either level.
+- `ORDER BY department_id, salary_rank, employee_id`.
 
 ```sql
 WITH ranked AS (
@@ -348,24 +270,20 @@ ORDER BY
 
 **Expected shape:** Top two salary levels per department.
 
-Check the result at the stated grain. An alternative formulation is
-valid only if it preserves the same NULL, ordering, time, money, and
-cardinality contract.
-
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-17 Exercise 6, read from `employees`. Build the answer toward `employee_id`, `full_name`, `department_id`, `salary`, and `salary_rank`; keep `employee_id` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-17 Exercise 6, expected output: Top two salary levels per department. The final columns are `employee_id`, `full_name`, `department_id`, `salary`, and `salary_rank`. The final order is `department_id, salary_rank, employee_id`.
-- **Independent verification:** For sql-17 Exercise 6, run an anti-check that counts rows where NOT ((salary_rank <= 2)); require unique `employee_id` where the expected grain is one row per key and confirm the projected `employee_id`, `full_name`, `department_id`, `salary`, and `salary_rank` against `employees`. Give two rows the same `department_id` value and different `employee_id` values; verify `department_id, salary_rank, employee_id` produces the intended rank and display order.
-- **Intermediate relation check:** For sql-17 Exercise 6, run `ranked` one at a time. Record each CTE's row count and `employee_id` uniqueness before the next stage uses it.
-- **Clause check:** For sql-17 Exercise 6, the solution actually uses `WITH`, `FROM`, `WHERE`, window `OVER`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `employees`, preserve one row per `employee_id`, and finish with `employee_id`, `full_name`, `department_id`, `salary`, and `salary_rank` ordered by `department_id, salary_rank, employee_id`.
-- **Alternative/trade-off:** For sql-17 Exercise 6, the chosen form is justified by this lesson-specific rationale: Dense rank includes all employees tied at either of the top two salary values. Evaluate another form against the concrete expected result (Top two salary levels per department) and the verification above.
-- **Edge case:** Give two rows the same `department_id` value and different `employee_id` values; verify `department_id, salary_rank, employee_id` produces the intended rank and display order.
+- **Inputs/evidence:** For sql-17 Exercise 6, apply `DENSE_RANK() OVER (PARTITION BY e.department_id ORDER BY e.salary DESC)` to the 100 `employees` rows in the `ranked` CTE, then keep `salary_rank <= 2`.
+- **Expected result/shape:** For sql-17 Exercise 6, return 12 rows, two per department for the 6 departments; department 1 keeps employee 97 at 47681.43 and employee 91 at 47206.29, and department 4 keeps employee 100 at 47919.00 and employee 94 at 47443.86. The final columns are `employee_id`, `full_name`, `department_id`, `salary`, and `salary_rank`. The final order is `department_id, salary_rank, employee_id`.
+- **Independent verification:** For sql-17 Exercise 6, confirm 12 rows and that each department's two salaries are its two highest from `SELECT department_id, salary FROM employees ORDER BY department_id, salary DESC`; no department has a salary tie. Inside a rolled-back transaction, set employee 91's salary to 47681.43; the result must grow to 13 rows, with employees 91 and 97 at rank 1 and employee 85 (46731.15) at rank 2 in department 1.
+- **What prints:** 12 rows, two per department. Department 1 lists Employee 97 (47,681.43) then 91 (47,206.29); department 2 lists 98 then 92.
+- **Why exactly two:** all 100 salaries differ, so each level holds one person. Salaries grow with employee ID in this fixture, which is why the top earners are the highest IDs and the department heads (Employees 1 to 6) rank last.
+- **Count to compare:** the same query with `ROW_NUMBER` also returns 12 here. Give two Sales staff the same top salary inside a transaction and the dense-rank version returns 3 Sales rows while `ROW_NUMBER` still returns 2.
+- **Distinct levels versus people:** "top two salary levels" counts levels, so `RANK <= 2` would be wrong after a two-way tie at the top: both tied people get 1 and the next person gets 3, which falls outside the filter.
 
 ## Final self-check
 
-- Can you explain the logical grain before and after every aggregation?
-- Are missing values preserved or converted only by an explicit rule?
-- Does every ordered result have a deterministic final tie-breaker?
-- Are money and time assumptions visible beside the calculation?
-- Does the complete executable solution finish with `ROLLBACK`?
+- In Example 1, which three numbers do customers 51 and 428 get, and what does row 13 show in each column?
+- Why are `price_rank` and `dense_price_rank` equal on every row of Exercise 2?
+- Exercise 5 gives the same answer with or without `order_id DESC`. Why keep it?
+- Which function answers "everyone in the top two salary levels", and how many rows would one tie at the top add?
+- Why must Exercises 3, 5 and 6 compute the rank in a CTE before filtering it?

@@ -1,6 +1,6 @@
 # java-029: explanatory solutions
 
-Open after an attempt or an explicit solution reveal. The executable reference runs the six exercise checks together as `Main.java`. The guide contains independent worked examples, while this file explains the choices and failure cases in the complete answer.
+Open this after an attempt; see [using the solutions](../STUDY-GUIDE.md#use-the-solutions).
 
 ## Mechanism review
 
@@ -22,7 +22,7 @@ DriverManager.getConnection selects a loaded driver for the jdbc:h2:mem URL. Bin
 
 ## Exercise 1: Verify a real local database: predict an edited check
 
-Task: Copy Example A into a scratch `Main.java` and change `assert connection.getMetaData().getDatabaseProductName().equals("H2") &&` to `assert connection.getMetaData().getDatabaseProductName().equals("H3") &&` inside its assertion. Before running it with `java -ea Main`, predict whether the assertion still holds and explain why; then restore it.
+Task: Change Example A's assertion to `assert connection.getMetaData().getDatabaseProductName().equals("H3") &&`, predict whether it holds, then run and restore it.
 
 Metadata and query execution establish actualJDBCbehavior. A map pretending to be a database would not exercise driver loading, SQL parsing or transaction state.
 
@@ -42,13 +42,13 @@ try (java.sql.Connection connection = database()) {
 }
 ```
 
-**Expected:** The changed run fails with an `AssertionError` from the assertion on `connection.getMetaData().getDatabaseProductName().equals("H2") && connection.getAutoCommit()`. Restoring the original line brings back the worked observation: database product H2; 2 rows; auto-commit initially true.
+**Expected:** The edited run fails with an `AssertionError` from the assertion on `connection.getMetaData().getDatabaseProductName().equals("H2") && connection.getAutoCommit()`.
 
-**Verify:** Compare your written prediction with the reported `AssertionError` and its stack-trace line, and explain why the edited condition is false for the values that satisfy `connection.getMetaData().getDatabaseProductName().equals("H2") && connection.getAutoCommit()`. After restoring the line, the program completes without an `AssertionError` again.
+**Verify:** Explain why the edited assertion is false for the values that satisfy `connection.getMetaData().getDatabaseProductName().equals("H2") && connection.getAutoCommit()`.
 
 ## Exercise 2: Bind an injection-shaped value as data: debug a regression
 
-Task: A regression changed one token in the code that Example B adds after Example A, so one line now reads `statement.setString(1, "Alice!");`. Run Example B with that line, use the failing assertion to locate the defect and repair it without changing the assertion.
+Task: A regression in Example B's new code makes one line read `statement.setString(1, "Alice!");`. Repair it using the failing assertion.
 
 The driver receives the value separately from the query structure. The test uses a valid normal lookup as well as the adversarial-looking value so blanket rejection is not mistaken for correct binding.
 
@@ -72,9 +72,9 @@ try (
 }
 ```
 
-**Expected:** Before the repair the run fails with an `AssertionError` from the assertion on `hasRow && rows.getInt(1) == 1`; after it the line reads `statement.setString(1, "Alice");` again and alice matches 1 row; the injection-shaped value matches 0.
+**Expected:** The unrepaired run fails with an `AssertionError` from the assertion on `hasRow && rows.getInt(1) == 1`; the repaired line reads `statement.setString(1, "Alice");`.
 
-**Verify:** Keep the failing and the repaired runs. Explain why the changed token alters the value tested by `hasRow && rows.getInt(1) == 1` for this input.
+**Verify:** Explain how the changed token alters the value that `hasRow && rows.getInt(1) == 1` tests.
 
 ## Exercise 3: Roll back a transfer
 
@@ -95,7 +95,7 @@ try (java.sql.Connection connection = database()) {
 
 **Expected:** inside 80, 70; after rollback 100, 50.
 
-**Verify:** Keep an assertion equivalent to `balance(connection, 1) == 100 && balance(connection, 2) == 50`. As a control, change `assert balance(connection, 1) == 100 && balance(connection, 2) == 50;` to `assert balance(connection, 2) == 100 && balance(connection, 2) == 50;` inside it: the run must fail with an `AssertionError`, which shows the assertion can fail. Restore it.
+**Verify:** Control: changing `assert balance(connection, 1) == 100 && balance(connection, 2) == 50;` to `assert balance(connection, 2) == 100 && balance(connection, 2) == 50;` inside the assertion must make it fail.
 
 ## Exercise 4: Commit and read from a second session
 
@@ -119,7 +119,7 @@ try (java.sql.Connection connection = database()) {
 
 **Expected:** second connection sees 90, 60 and total 150.
 
-**Verify:** Keep an assertion equivalent to `balance(second, 1) == 90 && balance(second, 2) == 60 && balance(second, 1) + balance(second, 2) == 150`. As a control, change `balance(second, 1) + balance(second, 2) == 150;` to `balance(second, 1) - balance(second, 2) == 150;` inside it: the run must fail with an `AssertionError`, which shows the assertion can fail. Restore it.
+**Verify:** Control: changing `balance(second, 1) + balance(second, 2) == 150;` to `balance(second, 1) - balance(second, 2) == 150;` inside the assertion must make it fail.
 
 ## Exercise 5: Handle a constraint failure and rollback
 
@@ -143,7 +143,7 @@ try (java.sql.Connection connection = database()) {
 
 **Expected:** SQLState class 23; balance remains 100 after rollback.
 
-**Verify:** Keep an assertion equivalent to `constraint && balance(connection, 1) == 100`. As a control, change `constraint = expected.getSQLState() != null && expected.getSQLState().startsWith("23");` to `constraint = expected.getSQLState() == null && expected.getSQLState().startsWith("23");`: the run must fail with an `AssertionError` from the assertion on `constraint && balance(connection, 1) == 100`. Restore the line before continuing.
+**Verify:** Control: changing `constraint = expected.getSQLState() != null && expected.getSQLState().startsWith("23");` to `constraint = expected.getSQLState() == null && expected.getSQLState().startsWith("23");` must fail the assertion on `constraint && balance(connection, 1) == 100`.
 
 ## Exercise 6: Observe committed visibility under the declared isolation
 
@@ -168,8 +168,10 @@ try (
 
 **Expected:** second session sees 100 before commit and 95 after commit.
 
-**Verify:** Keep an assertion equivalent to `balance(second, 1) == 95`. As a control, change `change(first, 1, -5);` to `change(first, 2, -5);`: the run must fail with an `AssertionError` from the assertion on `balance(second, 1) == 95`. Restore the line before continuing.
+**Verify:** Control: changing `change(first, 1, -5);` to `change(first, 2, -5);` must fail the assertion on `balance(second, 1) == 95`.
 
 ## After comparing the answer
 
-Run the complete reference with assertions enabled, then return to your own implementation. Recreate one check with different values and explain its expected result before execution. A compiler error, an expected domain exception and an assertion failure represent different stages and should be reported separately. Preserve ownership boundaries when adapting file, network or concurrency examples. The reference never authorizes access to a shared service or deletion of learner state. Use a fresh tiny fixture when you need to distinguish two interpretations of an API contract.
+In your copy, rewrite the lookup from Example B with string concatenation instead of `setString`, run it with the injection-shaped name, and compare the row count with the prepared version; then delete the unsafe version.
+
+Run the complete reference with `java -ea Main` first; the [review routine](../STUDY-GUIDE.md#use-the-solutions) covers the rest.

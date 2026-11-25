@@ -1,6 +1,6 @@
 # cuda-128: explained solutions
 
-These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.
+Compare with your [worksheet](../lessons/cuda-128.md) attempt.
 
 ## Exercise 1: Compute end-to-end tradeoff
 
@@ -74,8 +74,16 @@ Recommend the simplest qualified option and state missing evidence.
 
 **How to verify.** Check that each statement in the recommendation cites a measurement or is labeled as an assumption.
 
+## Self-check answers
+
+1. **Name three conditions that can make GPU Spark the wrong choice.** Tiny data, unsupported expressions, expensive transfers, external I/O, severe skew or a memory-constrained device.
+
+2. **How does a CPU fallback installation differ from plugin operator fallback?** It is a separate ordinary Spark environment, while operator fallback happens inside a running plugin job.
+
+3. **Why is a no-change outcome a valid result?** A good decision identifies the smallest system that solves the problem, and that can be the current one.
+
 ## Reference observation
 
 GPU candidate adds 10 modeled seconds end to end.
 
-The reference file is `courses/cuda/spark/references/cuda-128_cpu.py`. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.
+Asserted by `courses/cuda/spark/references/cuda-128_cpu.py`.

@@ -196,7 +196,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <article class="document"><h2 id="r-005-index-by-position-name-and-an-explicit-mask">r-005: Index by position, name and an explicit mask<a class="heading-anchor" href="#r-005-index-by-position-name-and-an-explicit-mask" aria-label="Link to this section">#</a></h2>
 <p><strong>Level:</strong> beginner. <strong>Direct prerequisites:</strong> <code>r-003</code>, <code>r-004</code></p>
 <h3 id="run-and-retain-your-work">Run and retain your work<a class="heading-anchor" href="#run-and-retain-your-work" aria-label="Link to this section">#</a></h3>
-<p>Open <code>r-005</code> in <code>/classroom</code> and use the prepared <code>r-statistics</code> profile. Each Run evaluates one <code>main.R</code> script in a fresh offline R process, so define every input in the script; an earlier Run leaves no variables behind. Work in the <a href="../lessons/r-005.R.html">starter</a>. The <a href="../solutions/r-005_reference.R.html">complete reference</a> ends by printing <code>r-005 reference checks passed</code>, and the <a href="../solutions/r-005_solutions.md.html">explained answers</a> are there for deliberate comparison after your own attempt. This chapter prints values only; when a chapter draws figures, the classroom keeps at most two figures per run. The <a href="../README.md.html">course overview</a> describes saved work, figure capture and the prepared package versions.</p>
+<p>The starter names three values A, B and C and supplies a mask of TRUE, NA and FALSE, then prints the named vector. Run it and read the names above the values. Predict what <code>x[mask]</code> returns before you try it: the NA position yields an unknown element rather than being skipped, which is why this chapter insists on known-only masks.</p>
+<p>Work in the <a href="../lessons/r-005.R.html">starter</a> under the <a href="../STUDY-GUIDE.md.html#run-a-chapter">run rules</a>.</p>
+<p>The <a href="../solutions/r-005_reference.R.html">complete reference</a> ends by printing <code>r-005 reference checks passed</code>.</p>
 <h3 id="outcome-and-mechanism">Outcome and mechanism<a class="heading-anchor" href="#outcome-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Select and replace vector elements without confusing positions, exclusions and unknown masks.</p>
 <p>R&#x27;s ordinary vector positions start at one. A positive integer index selects positions, and repeating an index repeats an output value. Zero selects nothing. A negative index excludes positions. Do not mix positive and negative positions in the same ordinary index, except zeros, because retaining and excluding would conflict.</p>
@@ -298,7 +300,35 @@ x[4]                   NA        &lt;NA&gt;</code></pre>
 <li><a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/which.html">R which</a></li>
 </ul>
 <h3 id="continue">Continue<a class="heading-anchor" href="#continue" aria-label="Link to this section">#</a></h3>
-<p>Chapters that list <code>r-005</code> as a direct prerequisite: <a href="r-007.md.html"><code>r-007</code></a>, <a href="r-008.md.html"><code>r-008</code></a>, <a href="r-009.md.html"><code>r-009</code></a>, <a href="r-010.md.html"><code>r-010</code></a>, <a href="r-011.md.html"><code>r-011</code></a>, <a href="r-016.md.html"><code>r-016</code></a>.</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Next chapter</th>
+<th>Title</th>
+</tr></thead><tbody>
+<tr>
+<td><a href="r-007.md.html"><code>r-007</code></a></td>
+<td>Names, attributes and ordinary value semantics</td>
+</tr>
+<tr>
+<td><a href="r-008.md.html"><code>r-008</code></a></td>
+<td>Matrices, dimensions and linear algebra operators</td>
+</tr>
+<tr>
+<td><a href="r-009.md.html"><code>r-009</code></a></td>
+<td>Lists and nested records without accidental flattening</td>
+</tr>
+<tr>
+<td><a href="r-010.md.html"><code>r-010</code></a></td>
+<td>Data frames, column types and record identity</td>
+</tr>
+<tr>
+<td><a href="r-011.md.html"><code>r-011</code></a></td>
+<td>Branching, loops and empty-input behavior</td>
+</tr>
+<tr>
+<td><a href="r-016.md.html"><code>r-016</code></a></td>
+<td>Strings, encodings and explicit text parsing</td>
+</tr>
+</tbody></table></div>
 <h3 id="ask-an-ai-tutor">Ask an AI tutor<a class="heading-anchor" href="#ask-an-ai-tutor" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for r-005 (Index by position, name and an explicit mask).
 Read the guide and my saved attempt. Explain the relevant R mechanism,

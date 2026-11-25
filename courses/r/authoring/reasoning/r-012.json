@@ -42,5 +42,7 @@
       "wrong": "Rerunning only tests that pass rate explicitly. They never exercise the default, so all of them stay green while every default caller changes.",
       "verify": "The reference check `after_fee(50, rate = 0.2) != after_fee(50)` returns TRUE today; with a default of 0.2 it would return FALSE and stop."
     }
-  ]
+  ],
+  "run_note": "The starter supplies two amounts and a rate of 0.1 but defines no function yet, so running it prints only 10 and 20. Write the function so `rate` has a stated default and every input is checked before arithmetic. Then call it twice, once relying on the default and once passing `rate` by name, and compare the printed results.",
+  "checks_note": "The checks pin `after_fee(50)` at 45 with the default rate and 50 at rate 0, a summary list of count 2L and total 6, a rejected invalid rate, an empty input returning `numeric(0)`, a changed rate producing a different result, and a rejected non-numeric amount. They cannot show that the default rate is the right business rule, only that the function honors it."
 }

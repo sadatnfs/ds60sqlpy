@@ -194,17 +194,19 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/scala-spark/guides/spark-020.md</code></p>
     </header>
     <article class="document"><h2 id="spark-020-partitions-repartition-coalesce-and-output-order">spark-020: Partitions, repartition, coalesce and output order<a class="heading-anchor" href="#spark-020-partitions-repartition-coalesce-and-output-order" aria-label="Link to this section">#</a></h2>
-<p>Authored paired Scala/PySpark teaching content. The default fixtures are tiny, local and deterministic. Runtime acceptance, logical correctness and learner understanding remain separate evidence.</p>
+<p>Twenty-four generated rows move through <code>repartition</code>, <code>coalesce</code> and <code>sortWithinPartitions</code> while their content stays fixed. The skill is to separate what changed (how rows are split across tasks) from what must not change (which rows exist and what they sum to), and to know that only a final <code>orderBy</code> with a full tie-breaker promises a display order.</p>
 <h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
-<p>Intermediate; approximately 90 minutes. Direct prerequisites: <code>spark-019</code>. The prepared baseline is Spark 4.3.0, Scala binary 2.13, JDK 17 and Python 3.12. Read the <a href="../execution-baseline.md.html">execution baseline</a>.</p>
+<p>Intermediate; approximately 90 minutes. Direct prerequisites: <code>spark-019</code>. Pinned versions: <a href="../execution-baseline.md.html">execution baseline</a>.</p>
 <h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>Open <code>spark-020</code> in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed <code>spark-local-scala</code> or <code>spark-local-python</code> profile, save your pad and run the complete source. Scala stages as <code>Main.scala</code> with <code>object Main</code>; Python stages as <code>main.py</code> with a main guard. Each program creates its own <code>local[2]</code> session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.</p>
-<p>The <a href="../lessons/spark-020.scala.html">Scala learner</a> and <a href="../lessons/spark-020.py.html">PySpark learner</a> run two complete demonstrations and retain six explicit task stubs. Use the <a href="../solutions/spark-020_solutions.md.html">explained solutions</a> only after an attempt or an explicit worked comparison; the <a href="../solutions/spark-020_solution.scala.html">Scala reference</a> and <a href="../solutions/spark-020_solution.py.html">PySpark reference</a> contain complete assertions. A bounded collect is used only for the declared tiny fixture; do not copy it onto an unbounded or large production table.</p>
+<p>Shared run steps and profile rules: <a href="../STUDY-GUIDE.md.html#run-a-paired-lesson">study guide</a>.</p>
+<p>Learner pads: <a href="../lessons/spark-020.scala.html">Scala</a> and <a href="../lessons/spark-020.py.html">PySpark</a>.</p>
+<p>Open the <a href="../solutions/spark-020_solutions.md.html">explained solutions</a> after an attempt.</p>
+<p>The first worked example builds the 24 rows with <code>range</code> over four partitions, confirms 24 rows, 4 partitions and 4 keys, and prints <code>24 rows,4 key values,4 initial execution partitions</code>. The second calls <code>repartition(6)</code>, confirms six partitions and still 24 rows, and prints <code>Repartition changes layout while preserving the row population</code>.</p>
 <h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
 <ul>
 <li>Separate logical rows, physical partitions and a presentation order.</li>
-<li>State the input and output grain, schema, NULL policy and ordering before executing a transformation.</li>
-<li>Compare each language implementation with independent literal expectations, not only with the other implementation.</li>
+<li>Check content independently of layout with the metrics <code>(24, 24, 276, 2760)</code> for rows, distinct IDs, ID total and value total, and confirm they hold after every redistribution.</li>
+<li>Explain why <code>coalesce(2)</code> reduces four partitions to two but <code>coalesce(6)</code> leaves four, and why <code>sortWithinPartitions</code> sorts each partition without ordering the whole result.</li>
 </ul>
 <h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
 <ul>
@@ -231,7 +233,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>For a stable learner-facing preview, the final task uses orderBy(key descending, id ascending), then limit 5. The complete tie-breaker makes the preview IDs 3,7,11,15,19 regardless of earlier layout. A limit without an ordering would produce an arbitrary subset of the relation; a sort by key alone would leave six peer identities unordered. If the user needs pagination, the same complete ordering and a suitable continuation key belong in the interface contract.</p>
 <p>Canonical collection is intentionally limited to 24 rows. Production correctness comparisons should use distributed reconciliation suited to duplicate occurrences, or carefully designed fingerprints with stated collision limitations. A count and sum alone are insufficient: a missing ID and duplicated ID can sometimes preserve those aggregates. The literal identity bag in this tiny lesson makes those failure cases impossible to hide while partition evidence explains the execution layout separately.</p>
 <h3 id="supplied-local-fixture">Supplied local fixture<a class="heading-anchor" href="#supplied-local-fixture" aria-label="Link to this section">#</a></h3>
-<p>The complete source creates the owned local session described above, then constructs this explicit fixture. The worked examples below run in that same main function; there is no hidden notebook state.</p>
+<p>The data is generated, not typed: IDs 0 to 23 in four initial partitions, <code>key</code> equal to the ID modulo 4 and <code>value</code> equal to ten times the ID. The fixture asserts that adaptive query execution is off, because AQE could otherwise merge shuffle partitions and make the partition counts in Exercises 2 and 3 differ from run to run.</p>
 <pre class="highlighted-code"><code class="language-scala"><span class="syntax-keyword">import</span> org<span class="syntax-punctuation">.</span>apache<span class="syntax-punctuation">.</span>spark<span class="syntax-punctuation">.</span>sql<span class="syntax-punctuation">.</span>functions<span class="syntax-punctuation">.</span>_
 
 <span class="syntax-keyword">val</span> facts <span class="syntax-operator">=</span>
@@ -296,9 +298,14 @@ println<span class="syntax-punctuation">(</span><span class="syntax-string">&quo
 <h3 id="common-pitfalls">Common pitfalls<a class="heading-anchor" href="#common-pitfalls" aria-label="Link to this section">#</a></h3>
 <p>Do not equate partitions with executors, worker threads, business groups or output files without inspecting the relevant stage and write path. Do not claim that six partitions means six occupied partitions. Do not use spark_partition_id as stable data identity. Coalesce can reduce parallelism and retain skew; repartition incurs redistribution. Neither operation guarantees a globally ordered presentation. The 24-row fixture demonstrates semantics only; production tuning requires recorded size, skew, task and shuffle metrics under a controlled workload.</p>
 <h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
-<p>Explain the contract of <code>canonical</code> / <code>canonical</code> without reading its solution. Then, from memory, state what Exercise 6 (Create a globally ordered bounded preview) must produce: IDs <code>[3, 7, 11, 15, 19]</code>, all with key 3, and values <code>[30, 70, 110, 150, 190]</code>. The sixth key 3 row is outside the limit. Say which part of that result is evidence and what it still cannot show. Name the action in your trace that actually runs the plan.</p>
+<ul>
+<li>After <code>repartition(6, col(&quot;key&quot;))</code>, each key sits in exactly one partition. Why might two different keys still share a partition, and why is that acceptable?</li>
+<li><code>coalesce(6)</code> on a four-partition frame still has four partitions. What would you call instead if you really needed six, and what does it cost?</li>
+<li>The partition ledger may list fewer occupied partitions than the total. Why is an empty partition not an error?</li>
+<li>Exercise 6 returns IDs 3, 7, 11, 15 and 19. Which two calls make that answer deterministic, and what goes wrong if you use <code>limit</code> before <code>orderBy</code>?</li>
+</ul>
 <h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
-<p>Use the <a href="../README.md.html">course route</a> to continue. Paired-language agreement is useful only when both outputs also satisfy the independent fixture contract. A successful local run is not evidence of cluster performance or production recovery.</p>
+<p>Go on to <a href="spark-021.md.html">spark-021: Read logical and physical plans</a>. You have watched partitions change from the outside; next you read the plan Spark builds and find where those exchanges and sorts actually appear.</p>
 <h3 id="primary-sources-and-official-apis">Primary sources and official APIs<a class="heading-anchor" href="#primary-sources-and-official-apis" aria-label="Link to this section">#</a></h3>
 <ul>
 <li><a href="https://spark.apache.org/docs/4.3.0/api/python/reference/pyspark.sql/api/pyspark.sql.DataFrame.repartition.html">Spark 4.3.0 repartition</a></li>

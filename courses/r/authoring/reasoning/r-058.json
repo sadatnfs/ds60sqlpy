@@ -36,5 +36,7 @@
       "wrong": "Reporting the controls as working because their argument vectors are correct. Correct arguments describe the intent, and only an observed click confirms the effect.",
       "verify": "A browser session shows the Group A button hiding B1 and B2, and the page remains usable at a narrow width."
     }
-  ]
+  ],
+  "run_note": "The starter holds four observations, A1 and A2 in group A and B1 and B2 in group B, with x values 1 and 2 and y values 2, 3, 4 and 6, and an empty results list. Run it and compute the overall mean, 3.75, and the group A mean, 2.5. Attach ids as `customdata` so hover text names each point regardless of its coordinates.",
+  "checks_note": "The checks confirm two traces carrying ids A1 and A2 and then B1 and B2 as custom data, a Group A button that sets visibility to TRUE and FALSE, an overall mean of 3.75 against a group A mean of 2.5, which is why a fixed global label is wrong in a filtered view, and a text summary that selects the two A rows. They do not test keyboard access or screen reader output."
 }

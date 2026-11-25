@@ -194,11 +194,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/apache-data-platforms/examples/apache-058.md</code></p>
     </header>
     <article class="document"><h2 id="pinot-apache-058-command-notebook">Pinot apache-058 command notebook<a class="heading-anchor" href="#pinot-apache-058-command-notebook" aria-label="Link to this section">#</a></h2>
-<p>Use these commands only from the copied owned Pinot project described in its README. The classroom Markdown pad does not execute Docker commands.</p>
+<p>Both <code>cat</code> commands only print files from the copied Pinot project; nothing connects to Kafka. In <code>realtime-table.json</code> find the topic <code>ds60-orders</code>, the broker list <code>kafka:9092</code> and the offset reset <code>smallest</code>, then match each decoded field against <code>schema.json</code>.</p>
 <pre class="highlighted-code"><code class="language-bash">cat realtime-table.json
 cat schema.json</code></pre>
 <p>This displays the released connector configuration only. Prepare a separately owned Kafka route, reconcile partition positions and exact decoded IDs, and record malformed-event handling before calling the streaming route qualified.</p>
-<p>Native service acceptance and each advanced extension have distinct entries in <code>QUALIFICATION.md</code>. Source/configuration presence is not an observed service result.</p></article>
+<p>QUALIFICATION.md lists Kafka ingestion as a prepared extension with no actual gate yet. Until a stream run records consumed offsets beside the decoded IDs, this lesson&#x27;s evidence is a reviewed configuration, not an ingested table.</p></article>
   </main>
 </body>
 </html>

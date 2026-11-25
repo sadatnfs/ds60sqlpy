@@ -2,7 +2,7 @@
 
 Construct and inspect a reproducible selection against an explicit baseline.
 
-The executable reference contains the two complete worked cases with assertions. The changes below explain the independent practice and its limits.
+The reference parses the project and reads model names from `dbt ls` output for `tag:feature+` and for `state:modified+` against a copied manifest. It proves which nodes each selector expands to for this graph; it does not build or test them. See [how these answers are laid out](../STUDY-GUIDE.md#answers-and-references).
 
 
 ## 1. Remove graph expansion

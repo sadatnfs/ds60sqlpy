@@ -1,18 +1,15 @@
 // Answer-free learner source. Save your own copy before editing.
 // Exercise 1: Compare offset spellings of one instant: change one input
-// Copy Example A into a scratch `main.mjs` and change `const utc = new
-// Date('2024-01-01T00:00:00Z');` to `const utc = new Date('2025-01-01T00:00:00Z');`. Before
-// running it, predict which check fails and which value it now sees; then run it and restore
-// the original line.
-// Expected: The changed run fails with an `AssertionError` at `assert.equal(utc.getTime(),
+// In a scratch copy of Example A, change `const utc = new Date('2024-01-01T00:00:00Z');` to
+// `const utc = new Date('2025-01-01T00:00:00Z');`. Which check fails, and what value does it
+// see?
+// Expected: The edited run fails with an `AssertionError` at `assert.equal(utc.getTime(),
 // offset.getTime())`. Restoring `const utc = new Date('2024-01-01T00:00:00Z');` brings back:
 // equal timestamps and UTC ISO output.
 
 // Exercise 2: Observe a spring-forward clock gap: diagnose an edited check
-// A careless edit changed a check in Example B so that it reads
-// `assert.equal(after.getTime() + before.getTime(), 60 * 60 * 1000);`. Run Example B with
-// that line, explain why the edited check now fails for the same program state, and restore
-// it.
+// Example B's check was edited to read `assert.equal(after.getTime() + before.getTime(), 60
+// * 60 * 1000);`. Run it, explain the failure and restore the original.
 // Expected: Before the repair the run fails with an `AssertionError` at
 // `assert.equal(after.getTime() + before.getTime(), 60 * 60 * 1000);`. Restoring
 // `assert.equal(after.getTime() - before.getTime(), 60 * 60 * 1000);` brings back: local

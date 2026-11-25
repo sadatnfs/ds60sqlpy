@@ -2,67 +2,21 @@
 
 ## How to run this lesson
 
-Start the Linux-container engine and run `./classroom` from the repository
-root. On Windows, use Ubuntu in WSL 2 or the thin
-`START_DOCKER_CLASSROOM.cmd` wrapper. Choose **PostgreSQL** on the shared
-`/classroom` home, then open **sql-found-01**. The
-[launcher guide](../../../docs/one-command-classroom.md) covers first preparation, strict resume and
-the saved project selection. No host Python or PostgreSQL installation is
-required for this browser route.
+Start **sql-found-01** from `./classroom` using the shared [run steps](../../STUDY-GUIDE.md#run-a-lesson-in-the-classroom).
 
-1. Read the prerequisite and fixture notes before running the file. Use only
-   the local disposable `advanced_sql_training` database.
-2. Choose **Whole SQL lesson (psql)** for the cataloged learner script. This
-   preserves the lesson's reviewed psql directives, relative includes and
-   transaction behavior. **SQL snippet** is appropriate for ordinary SQL
-   statements, but is not a replacement for an entire script's setup.
-3. The **Course database** panel above the code shows whether the course
-   training tables are loaded. Missing tables load automatically before your
-   first run (or choose **Load course tables**) and stay loaded for later
-   lessons. **Reset training data** restores the original rows only when your
-   own changes made results differ; it keeps your saved code and notes.
-4. Edit the learner copy in the classroom and save your prediction before
-   running. Its whole-script workspace is
-   `.learning/sql/sql-found-01/lesson/workspace/sql/professional/lessons/sql_found_01_relational_design.sql`.
-   For browser work this path is inside the Docker learning volume, not a
-   newly created host folder beside your checkout. The checked-in source
-   remains the answer-free starting artifact.
-5. Run the whole script and inspect the full transcript. The runner uses
-   `psql -X -v ON_ERROR_STOP=1 -f`. SELECT output has columns, rows and a row
-   count; DDL/DML has command tags; intentional checks may produce NOTICE
-   messages. An unexpected ERROR or nonzero exit is a failure to diagnose,
-   even when an earlier query printed plausible values.
-6. Verify the lesson's expected grain, ordering, constraints and declared
-   transaction or cleanup outcome. Keep required ROLLBACK statements.
-   The warehouse sequence and other explicitly stateful exercises explain
-   when state is committed. Read saved output without rerunning it when
-   reviewing an earlier attempt.
+Choose **Whole SQL lesson (psql)**. The script needs no course tables. Inside
+one transaction on `advanced_sql_training` it creates the `pro_relational_lab`
+schema with four tables (`members`, `equipment_categories`, `equipment_items`
+and `loans`), loads two categories, two members, two items (`AUD-001` and
+`TOL-001`) and one loan of `AUD-001`, and ends with `ROLLBACK`. Three `DO`
+blocks then try a duplicate email, a due date before checkout and a nonexistent
+member. Each should print a NOTICE such as `Expected UNIQUE failure`; that
+NOTICE is the passing outcome, while an uncaught ERROR or an "unexpectedly
+succeeded" exception is a real failure. Save your DDL in
+`.learning/sql/sql-found-01/lesson/workspace/sql/professional/lessons/sql_found_01_relational_design.sql`,
+before the final `ROLLBACK`, so a rerun starts without the schema.
 
-If a relation is missing, inspect the lesson's required fixture and predecessor
-rather than guessing a new table definition. If authentication or runtime
-readiness fails, use `./classroom status` and the setup guide. Keep credentials
-out of SQL, notebooks, screenshots and committed files. Repair the first error
-before trusting partial output, and reveal separate solutions only when you
-want to compare after an attempt.
-
-### Optional contributor notebook route
-
-For notebook work, deliberately prepare the Linux/WSL contributor environment
-from [CONTRIBUTING.md](../../../CONTRIBUTING.md), including a compatible psql client and
-the notebook dependencies. Generate this lesson's private workspace through
-the maintained CLI:
-
-```sh
-uv run --no-sync python scripts/course.py sql notebook sql-found-01
-```
-
-Open the printed notebook path in that environment's JupyterLab. It uses the
-same catalog-derived learner-copy layout in that contributor checkout and
-executes the complete script through psql. Its host-side state is separate
-from the Docker browser's named volume. Follow
-[guided SQL notebooks](../../../docs/guided-sql-notebooks.md) for explicit local connection
-selection and kernel setup. Notebook generation does not execute SQL or
-authorize a reset.
+The optional notebook route starts with `uv run --no-sync python scripts/course.py sql notebook sql-found-01`; see the [study guide](../../STUDY-GUIDE.md#optional-contributor-notebook-route).
 
 ## Level and prerequisites
 
@@ -75,34 +29,35 @@ authorize a reset.
   [solution reasoning](../solutions/sql_found_01_relational_design_solutions.md) ·
   [executable solution](../solutions/sql_found_01_relational_design_solutions.sql)
 
-Use the Docker classroom workflow below for this cataloged script. The optional
-contributor route requires its own prepared interpreter, psql client and
-explicit disposable-database connection.
-
 The file creates `pro_relational_lab` inside a transaction and rolls it back.
 Expected constraint failures are caught as notices; any unexpected error still
 stops the script.
 
 ## A beginner's mental model for this lesson
 
-A **table** stores facts in named columns. A **row** is one occurrence at the
-table's declared grain. A query creates a temporary **result set**: rows printed
-on screen are not automatically stored. The key vocabulary for this lesson is Grain, Cardinality, Natural key, Surrogate key, Primary key, Foreign key. Its worked SQL reads or creates `pro_relational_lab.members`, `pro_relational_lab.equipment_categories`, `pro_relational_lab.equipment_items`, `pro_relational_lab.loans`.
+This lesson is about the tables themselves rather than about query results. The
+vocabulary below (grain, cardinality, natural and surrogate keys, primary and
+foreign keys) is what you use to decide where each fact lives in
+`pro_relational_lab`, and the constraints are what make PostgreSQL refuse a row
+that breaks one of those decisions.
 
-Before writing a query, complete this sentence: “One output row represents
-___.” Joins can multiply rows, filters can remove them, grouping can collapse
-many rows into one, and window functions can add calculations while preserving
-row count. For a normal analytical `SELECT`, use this logical reading order:
-`FROM`/`JOIN` (including `ON`) → `WHERE` → `GROUP BY`/aggregates → `HAVING` →
-window calculations → `SELECT` → `ORDER BY` → `LIMIT`. PostgreSQL may execute a
-different physical plan while preserving those semantics.
+Here the grain question comes before any query: write what one row of each
+table means before you type a column. The four requirements below give one
+member, one reusable category, one physical item and one checkout, and the
+`loans` row is the only one that points at two parents. When you later join the
+tables back together, as the learner script's loan description does, one output
+row should still be one loan; the general reading order is in the [study
+guide](../../STUDY-GUIDE.md#reading-any-query-in-logical-order).
 
-The worked walkthrough's lesson-specific task is: The example begins with four requirements and turns each into a grain:
-The first runnable example has a concrete contract: Example 1 must print the expected DDL command tag for `pro_relational_lab.members`. Verify the object in `pg_catalog.pg_class`, run one accepted behavior and one rejected boundary behavior, and confirm the lesson rollback/cleanup removes only course-owned state.
+The walkthrough turns four sentences of requirements into four tables, then
+shows which rule each constraint protects. Example 1 and Example 2 are the
+first two of those tables; read them with the requirement sentence beside each
+column.
 
 ## Two worked SQL examples
 
-These worked excerpts come from `sql/professional/lessons/sql_found_01_relational_design.sql`. Use **Whole SQL lesson (psql)** in the unified classroom for the complete file, including its fixture and transaction context. The optional contributor notebook and prepared `psql` routes are described above.
+Both excerpts below run inside the learner script after its setup, before its
+final `ROLLBACK`.
 
 ### Example 1
 
@@ -116,9 +71,16 @@ CREATE TABLE pro_relational_lab.members (
 );
 ```
 
-**How to read it:** Example 1 is data definition language (DDL). `psql` prints a command tag when PostgreSQL accepts the definition; a later catalog or behavior check must prove that the intended rule exists.
+**How to read it:** `members` has a generated surrogate key, `member_id`, and
+also makes `email` `UNIQUE` because two member rows must never share an email
+address. `backup_contact` is `UNIQUE` but nullable, and
+`btrim(display_name) <> ''` rejects a name made only of spaces. `joined_on`
+uses `DEFAULT CURRENT_DATE` only when an insert leaves the column out.
 
-**Expected result/shape:** Example 1 must print the expected DDL command tag for `pro_relational_lab.members`. Verify the object in `pg_catalog.pg_class`, run one accepted behavior and one rejected boundary behavior, and confirm the lesson rollback/cleanup removes only course-owned state.
+**Expected result/shape:** psql prints `CREATE TABLE`. The two members loaded
+later both have a NULL `backup_contact`, and the script's count query shows
+that ordinary `UNIQUE` accepts both, while the duplicate `avery@example.test`
+insert prints the expected UNIQUE notice.
 
 ### Example 2
 
@@ -130,9 +92,14 @@ CREATE TABLE pro_relational_lab.equipment_categories (
 );
 ```
 
-**How to read it:** Example 2 is data definition language (DDL). `psql` prints a command tag when PostgreSQL accepts the definition; a later catalog or behavior check must prove that the intended rule exists.
+**How to read it:** `equipment_categories` uses the natural key `category_code`
+(such as `AUDIO`) as its primary key, keeps `display_name` unique, and limits
+`standard_loan_days` to 1 through 90. Items reference this code, so one
+category row serves many items.
 
-**Expected result/shape:** Example 2 must print the expected DDL command tag for `pro_relational_lab.equipment_categories`. Verify the object in `pg_catalog.pg_class`, run one accepted behavior and one rejected boundary behavior, and confirm the lesson rollback/cleanup removes only course-owned state.
+**Expected result/shape:** psql prints `CREATE TABLE`. The fixture loads two
+categories, `AUDIO` with 7 loan days and `TOOL` with 14, and every item's
+`category_code` must match one of them.
 
 ## Learning objectives
 
@@ -291,9 +258,8 @@ skills needed for safe migrations.
 
 ## Ask an AI tutor about this lesson
 
-An AI tutor is optional; the guide, learner SQL, PostgreSQL, and expected checks are
-enough to complete the lesson offline. If you want a patient tutor, copy this
-prompt after opening the repository in the AI tutor:
+The lesson and expected observations are sufficient offline. For optional
+coaching, copy:
 
 ```text
 Tutor me through sql-found-01: Relational Design, DDL, and Integrity Constraints.

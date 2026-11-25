@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cuda/python/solutions/cuda-103_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="cuda-103-explained-solutions">cuda-103: explained solutions<a class="heading-anchor" href="#cuda-103-explained-solutions" aria-label="Link to this section">#</a></h2>
-<p>These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.</p>
+<p>Compare with your <a href="../lessons/cuda-103.md.html">worksheet</a> attempt.</p>
 <h3 id="exercise-1-compute-equal-replica-average">Exercise 1: Compute equal-replica average<a class="heading-anchor" href="#exercise-1-compute-equal-replica-average" aria-label="Link to this section">#</a></h3>
 <p>Average equal contributions.</p>
 <p><strong>Approach.</strong> With two replicas of equal batch size and mean gradients 2 and 4, all-reduce the gradients and divide by the world size: <code>(2 + 4)/2 = 3</code>.</p>
@@ -231,9 +231,19 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Why it is correct here.</strong> Defaults differ, such as whether the gradient is summed or averaged and how uneven final batches are handled, so a result validated under one framework does not transfer.</p>
 <p><strong>A plausible wrong approach.</strong> Porting a training script between frameworks and assuming identical gradients because both are data-parallel skips the place where the semantics actually differ.</p>
 <p><strong>How to verify.</strong> Write an integration test per framework that compares the two-rank gradient with a single-device reference on the same examples.</p>
+<h3 id="self-check-answers">Self-check answers<a class="heading-anchor" href="#self-check-answers" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>What does data parallelism give each replica?</strong> Different examples. Each replica computes gradients, and the gradients are combined before a consistent update.</li>
+</ol>
+<ol start="2">
+<li><strong>Why does adding replicas change the optimization problem?</strong> It changes the effective batch size, which changes gradient noise and can require different learning rates.</li>
+</ol>
+<ol start="3">
+<li><strong>What is the usual PyTorch arrangement for DistributedDataParallel?</strong> One process per device, each with its own rank, joined through a suitable collective backend.</li>
+</ol>
 <h3 id="reference-observation">Reference observation<a class="heading-anchor" href="#reference-observation" aria-label="Link to this section">#</a></h3>
 <p>Global example-weighted gradient 2.5.</p>
-<p>The reference file is <code>courses/cuda/python/references/cuda-103_cpu.py</code>. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.</p></article>
+<p>Asserted by <code>courses/cuda/python/references/cuda-103_cpu.py</code>.</p></article>
   </main>
 </body>
 </html>

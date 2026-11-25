@@ -1,6 +1,6 @@
 # docker-010: explanatory solutions
 
-Compare after your own attempt or an explicit reveal. These explain the supplied teaching fixtures; they are not engine results. The mechanism is explained in `courses/docker/guides/docker-010.md`.
+These answers explain teaching fixtures, not engine results; the mechanism is in [the guide](../guides/docker-010.md).
 
 ## Exercise 1: Predict the streams used by the two short programs.
 
@@ -88,4 +88,4 @@ Compare after your own attempt or an explicit reveal. These explain the supplied
 
 ## Check your transfer
 
-A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.
+Capture the image identity, `docker compose ps -a` state, a bounded `logs --tail` sample and the status code from one failing request, with timestamps. `Up` only says the main process exists, so the evidence has to come from the application's own responses. A restart may make the errors stop for a while, but it changes the conditions without explaining them, and the logs from the failing period become harder to find. If the same request still failed after a restart, that observation would rule out transient in-memory state as the cause.

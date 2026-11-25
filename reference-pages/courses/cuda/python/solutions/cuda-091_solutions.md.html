@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cuda/python/solutions/cuda-091_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="cuda-091-explained-solutions">cuda-091: explained solutions<a class="heading-anchor" href="#cuda-091-explained-solutions" aria-label="Link to this section">#</a></h2>
-<p>These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.</p>
+<p>Compare with your <a href="../lessons/cuda-091.md.html">worksheet</a> attempt.</p>
 <h3 id="exercise-1-state-cross-correlation-convention">Exercise 1: State cross-correlation convention<a class="heading-anchor" href="#exercise-1-state-cross-correlation-convention" aria-label="Link to this section">#</a></h3>
 <p>Write the exact index formula.</p>
 <p><strong>Approach.</strong> Write the cross-correlation formula used by deep learning libraries: <code>out[i] = sum(x[i+j]*k[j] for j in range(len(k)))</code>, with no kernel flip.</p>
@@ -231,9 +231,19 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Why it is correct here.</strong> The best algorithm and layout can differ by shape, so one size may not represent the workload. A batch of 1 may favor a different algorithm than a batch of 32, and conversion overhead weighs more when each call does little work.</p>
 <p><strong>A plausible wrong approach.</strong> Testing a single shape and generalizing the chosen layout risks regressions at other batch sizes. Production traffic that mixes sizes then sees the slow path.</p>
 <p><strong>How to verify.</strong> Verify outputs for both shapes against a reference, then report time per sample for each.</p>
+<h3 id="self-check-answers">Self-check answers<a class="heading-anchor" href="#self-check-answers" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>How does a deep learning convolution usually differ from the textbook definition?</strong> Frameworks typically compute cross-correlation, which does not flip the kernel. Flipping it changes the sign in worked example 1.</li>
+</ol>
+<ol start="2">
+<li><strong>When does a layout conversion pay off?</strong> When the converted data is reused across enough operations that the per-call savings exceed the one-time conversion cost.</li>
+</ol>
+<ol start="3">
+<li><strong>Why might the fastest algorithm for one shape lose on another?</strong> Library implementations choose algorithms by shape, dtype, workspace and determinism settings, and each choice has different strengths.</li>
+</ol>
 <h3 id="reference-observation">Reference observation<a class="heading-anchor" href="#reference-observation" aria-label="Link to this section">#</a></h3>
 <p>Valid cross-correlation [-1,-1,-1]; conversion amortization depends on reuse.</p>
-<p>The reference file is <code>courses/cuda/python/references/cuda-091_cpu.py</code>. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.</p></article>
+<p>Asserted by <code>courses/cuda/python/references/cuda-091_cpu.py</code>.</p></article>
   </main>
 </body>
 </html>

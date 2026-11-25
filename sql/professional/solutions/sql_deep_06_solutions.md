@@ -1,6 +1,12 @@
 # sql-deep-06: Explained reference solutions
 
-Read [Cohort Denominators, Follow-Up Maturity, and Point-in-Time Quality](../companion-guides/sql_deep_06.md) and attempt its six queries before comparing. The [complete reference script](sql_deep_06_solutions.sql) recreates the same temporary fixture, runs every answer inside its own savepoint, compares exact JSON row sets with fail-fast assertions, then rolls back. No permanent table, role or service is changed.
+Attempt the six queries in [Cohort Denominators, Follow-Up Maturity, and
+Point-in-Time Quality](../companion-guides/sql_deep_06.md) first. The [complete
+reference script](sql_deep_06_solutions.sql) rebuilds `deep6_users` and
+`deep6_events` and answers each exercise inside its own savepoint. Nothing is
+updated, so the savepoints mainly keep each answer table separate. Exercises 3,
+4 and 6 repeat the same eligibility and label CTEs, which lets each one be read
+on its own.
 
 ## Exercises and reasoning
 
@@ -37,11 +43,11 @@ The left join preserves orphan events that an inner join would erase before the 
 
 ## Exercise 2: Define denominator eligibility using both clocks
 
-As of January 10 UTC, return user_id, cohort_day, eligible for each user. A day 7 label is eligible only when signup+8days is no later than both the report cutoff and observed_through. Preserve one row per user ordered by user_id.
+As of January 10 UTC, return user_id, cohort_day, eligible for each user. A day 7 label is eligible only when signup + 8 days is no later than both the report cutoff and observed_through. Preserve one row per user ordered by user_id.
 
-**Inputs/evidence:** For sql-deep-06 Exercise 2, As of January 10 UTC, return user_id, cohort_day, eligible for each user. A day 7 label is eligible only when signup+8days is no later than both the report cutoff and observed_through. Preserve one row per user ordered by user_id.
+**Inputs/evidence:** For sql-deep-06 Exercise 2, As of January 10 UTC, return user_id, cohort_day, eligible for each user. A day 7 label is eligible only when signup + 8 days is no later than both the report cutoff and observed_through. Preserve one row per user ordered by user_id.
 
-**Expected result/shape:** For sql-deep-06 Exercise 2, Users 1,3,5 are eligible; users 2 and 4 are pending. User 2 has elapsed calendar time but an incomplete observation watermark. User 3 ends its window exactly at the cutoff and is eligible.
+**Expected result/shape:** For sql-deep-06 Exercise 2, Users 1, 3, 5 are eligible; users 2 and 4 are pending. User 2 has elapsed calendar time but an incomplete observation watermark. User 3 ends its window exactly at the cutoff and is eligible.
 
 **Verify:** For sql-deep-06 Exercise 2, check both event-time maturity and availability-time eligibility at the report cutoff; explain why passing only one clock is insufficient.
 
@@ -61,9 +67,9 @@ Eligibility concerns the end of the entire outcome window, not merely reaching i
 
 ## Exercise 3: Create one nullable retention label per user
 
-Return user_id, eligible, `day7_retained` from a user-level label CTE. Use EXISTS for available events in[signup+7days, signup+8days), and leave `day7_retained` NULL when ineligible. Require event available_at no later than the historical cutoff. Order by user_id.
+Return user_id, eligible, `day7_retained` from a user-level label CTE. Use EXISTS for available events in [signup + 7 days, signup + 8 days), and leave `day7_retained` NULL when ineligible. Require event available_at no later than the historical cutoff. Order by user_id.
 
-**Inputs/evidence:** For sql-deep-06 Exercise 3, Return user_id, eligible, `day7_retained` from a user-level label CTE. Use EXISTS for available events in[signup+7days, signup+8days), and leave `day7_retained` NULL when ineligible. Require event available_at no later than the historical cutoff. Order by user_id.
+**Inputs/evidence:** For sql-deep-06 Exercise 3, Return user_id, eligible, `day7_retained` from a user-level label CTE. Use EXISTS for available events in [signup + 7 days, signup + 8 days), and leave `day7_retained` NULL when ineligible. Require event available_at no later than the historical cutoff. Order by user_id.
 
 **Expected result/shape:** For sql-deep-06 Exercise 3, Users 1 and 3 are true, user 5 is false, and users 2 and 4 are NULL. User 1's multiple day 7 events still produce one true label; its exact window-end event is excluded.
 
@@ -119,7 +125,7 @@ Aggregate user labels to cohort_day, total_users, eligible_users, retained_users
 
 **Inputs/evidence:** For sql-deep-06 Exercise 4, Aggregate user labels to cohort_day, total_users, eligible_users, retained_users, retention_rate, ordered by cohort_day. Count only eligible users in the rate denominator and only true labels in the numerator. Return NULL when no user is eligible, preserving the pending cohort.
 
-**Expected result/shape:** For sql-deep-06 Exercise 4, January 1 has 3 total,2 eligible,1 retained, rate 0.5; January 2 has 1,1,1, rate 1; January 9 has 1,0,0, rateNULL.
+**Expected result/shape:** For sql-deep-06 Exercise 4, January 1 has 3 total, 2 eligible, 1 retained, rate 0.5; January 2 has 1, 1, 1, rate 1; January 9 has 1, 0, 0, rate NULL.
 
 **Verify:** For sql-deep-06 Exercise 4, sum eligible user labels and denominators independently, checking that pending labels do not silently enter either the retained count or mature denominator.
 
@@ -173,9 +179,9 @@ The aggregation starts from one row per user, so a retained person contributes e
 
 ## Exercise 5: Detect a historical feature or label leakage candidate
 
-Return event_id, user_id, event_before_cutoff, available_by_cutoff for events occurring no later thanJanuary 10 but available only afterward. One row represents one late-arriving historical event, ordered by event_id. Do not include events that themselves occur after the cutoff.
+Return event_id, user_id, event_before_cutoff, available_by_cutoff for events occurring no later than January 10 but available only afterward. One row represents one late-arriving historical event, ordered by event_id. Do not include events that themselves occur after the cutoff.
 
-**Inputs/evidence:** For sql-deep-06 Exercise 5, Return event_id, user_id, event_before_cutoff, available_by_cutoff for events occurring no later thanJanuary 10 but available only afterward. One row represents one late-arriving historical event, ordered by event_id. Do not include events that themselves occur after the cutoff.
+**Inputs/evidence:** For sql-deep-06 Exercise 5, Return event_id, user_id, event_before_cutoff, available_by_cutoff for events occurring no later than January 10 but available only afterward. One row represents one late-arriving historical event, ordered by event_id. Do not include events that themselves occur after the cutoff.
 
 **Expected result/shape:** For sql-deep-06 Exercise 5, Only event 5 for user 2 appears, with event_before_cutoff=true and available_by_cutoff=false. Event 9 is future occurrence and is outside this particular late-arrival diagnostic.
 
@@ -200,11 +206,11 @@ A later warehouse extract can contain records that describe an earlier period bu
 
 ## Exercise 6: Distinguish empty cohorts from pending-only cohorts
 
-Create a daily cohort spine for January 1 throughJanuary 10 and left-join the cohort label summary. Return cohort_day, cohort_state, eligible_users, retention_rate ordered by cohort_day. Use empty for no signup rows, pending_only for signups but no eligible users, and has_eligible otherwise.
+Create a daily cohort spine for January 1 through January 10 and left-join the cohort label summary. Return cohort_day, cohort_state, eligible_users, retention_rate ordered by cohort_day. Use empty for no signup rows, pending_only for signups but no eligible users, and has_eligible otherwise.
 
-**Inputs/evidence:** For sql-deep-06 Exercise 6, Create a daily cohort spine for January 1 throughJanuary 10 and left-join the cohort label summary. Return cohort_day, cohort_state, eligible_users, retention_rate ordered by cohort_day. Use empty for no signup rows, pending_only for signups but no eligible users, and has_eligible otherwise.
+**Inputs/evidence:** For sql-deep-06 Exercise 6, Create a daily cohort spine for January 1 through January 10 and left-join the cohort label summary. Return cohort_day, cohort_state, eligible_users, retention_rate ordered by cohort_day. Use empty for no signup rows, pending_only for signups but no eligible users, and has_eligible otherwise.
 
-**Expected result/shape:** For sql-deep-06 Exercise 6, January 1 is has_eligible,2,0.5; January 2 has_eligible,1,1; January 9 pending_only,0, NULL; the other seven dates are empty,0, NULL. Ten date rows must remain.
+**Expected result/shape:** For sql-deep-06 Exercise 6, January 1 is `has_eligible`, 2, 0.5; January 2 `has_eligible`, 1, 1; January 9 `pending_only`, 0, NULL; the other seven dates are `empty`, 0, NULL. Ten date rows must remain.
 
 **Verify:** For sql-deep-06 Exercise 6, left join the cohort spine to user-level evidence and distinguish zero users from users with no mature labels; inspect the count columns before interpreting a NULL rate.
 
@@ -279,4 +285,11 @@ The spine defines the reporting domain independently of observed data, so dates 
 
 ## Verification and transaction boundary
 
-Every answer is materialized into a temporary answer table and compared with a literal expected row set, including column names, NULL values and deterministic order. The assertion function rejects both false and unknown Boolean results, so a NULL comparison cannot silently pass. Each exercise rolls back to its own savepoint, ensuring mutations used for one boundary case do not alter the next. The final ROLLBACK removes the full fixture. Read the first error if a contract fails; a later row count or command tag cannot repair an earlier failed assertion.
+`pg_temp.assert_true` compares each ordered answer, aggregated into `jsonb`,
+with a literal expected row set and raises unless the comparison is exactly
+true. That exactness matters here because NULL is part of the contract: users 2
+and 4 must carry a NULL label rather than false, and January 9 must carry a
+NULL rate from `NULLIF` rather than 0. The Exercise 6 literal lists all ten
+spine dates, so dropping an empty day fails the comparison even when every
+surviving row is right. The final `ROLLBACK` drops both tables. Repair the
+first failing assertion before reading any later output.

@@ -194,7 +194,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/swift/solutions/swift-014_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="swift-014-explanation-and-comparison">swift-014: explanation and comparison<a class="heading-anchor" href="#swift-014-explanation-and-comparison" aria-label="Link to this section">#</a></h2>
-<p>Attempt the six guide tasks before opening this comparison. The executable reference is <a href="swift-014_solution.swift.html">swift-014_solution.swift</a>. It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.</p>
+<p>Reference program: <a href="swift-014_solution.swift.html">swift-014_solution.swift</a>, covering both examples and the executed answers.</p>
+<p>Attempt the tasks first; see <a href="../STUDY-GUIDE.md.html#comparing-with-the-explanation">comparing with the explanation</a>.</p>
 <h3 id="why-the-two-examples-differ">Why the two examples differ<a class="heading-anchor" href="#why-the-two-examples-differ" aria-label="Link to this section">#</a></h3>
 <p><strong>Derive instead of duplicating:</strong> One source of truth prevents stale duplicated state. Area changes with width without a separately updated area field.</p>
 <p><strong>Expose a conversion property:</strong> A computed property can expose a convenient representation while retaining one stored unit. The getter and setter translate between temperature scales.</p>
@@ -259,7 +260,7 @@ temperature<span class="syntax-punctuation">.</span>fahrenheit <span class="synt
 <p>37.5 <em> 9 / 5 + 32 is 99.5, and (98.6 - 32) </em> 5 / 9 is 37; 98.6 is not exact in binary, so the tolerance compares the conversion rather than exact bits.</p>
 <h4 id="task-6-transfer-and-justify">Task 6: Transfer and justify<a class="heading-anchor" href="#task-6-transfer-and-justify" aria-label="Link to this section">#</a></h4>
 <p>Choose an explicit method instead of a setter for a state change with validation and failure.</p>
-<p>No single reference answer exists: several designs can satisfy this transfer task. Build yours from the task 3 answer above (Build a value model with one stored unit and a documented converted view) and the mechanism described below, and state one limitation of your choice.</p>
+<p>No single answer exists; extend task 3 using the <a href="../STUDY-GUIDE.md.html#open-transfer-tasks">open transfer routine</a>.</p>
 <h3 id="solution-reasoning">Solution reasoning<a class="heading-anchor" href="#solution-reasoning" aria-label="Link to this section">#</a></h3>
 <p><strong>Approach.</strong> Example A computes <code>area</code> from stored <code>width</code> and <code>height</code> instead of storing it. Example B stores only <code>celsius</code> and exposes <code>fahrenheit</code> as a computed property with a getter and setter. The task 3 answer stores meters and exposes a converted feet view.</p>
 <p><strong>Why it is correct.</strong> Because area is computed on every read, changing width from 3 to 5 changes area from 12 to 20 with no update code. The Fahrenheit getter applies <code>celsius * 9 / 5 + 32</code>, giving 32 at 0, and the setter inverts it, so assigning 212 stores a Celsius value within 1e-9 of 100. In task 3, 3.048 meters reads as 10 feet.</p>
@@ -271,7 +272,7 @@ temperature<span class="syntax-punctuation">.</span>fahrenheit <span class="synt
 <p><code>var area: Int { width * height }</code> computes a value. <code>get</code> and <code>set</code> define two-way access; newValue names the assigned value. didSet observes assignments after the new value is stored.</p>
 <p>Expensive computed properties can surprise callers who expect cheap access. Observers can hide cascading side effects. Avoid duplicating state unless there is a measured caching need and invalidation policy.</p>
 <h3 id="review-before-continuing">Review before continuing<a class="heading-anchor" href="#review-before-continuing" aria-label="Link to this section">#</a></h3>
-<p>Run the reference and confirm that it prints <code>swift-014: passed</code>, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.</p></article>
+<p>Run the reference and confirm it prints <code>swift-014: passed</code>, then rerun the guide&#x27;s counterexample.</p></article>
   </main>
 </body>
 </html>

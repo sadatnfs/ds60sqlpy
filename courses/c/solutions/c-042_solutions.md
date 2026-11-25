@@ -1,6 +1,8 @@
 # c-042: explained solutions
 
-Compare after an attempt or explicit reveal. The complete executable reference, `c-042_solution.c`, implements all six cases, from the "summarize valid records" case to the "transfer repeatable recovery" case, in one `main.c`.
+`c-042_solution.c` assembles the "summarize valid records" case through the "transfer repeatable recovery" case in one `main.c`.
+
+Compare only after an attempt: [Compare and transfer](../STUDY-GUIDE.md#compare-and-transfer).
 
 ## Mechanism and assumptions
 
@@ -10,7 +12,7 @@ parse_record separates a bounded name from a complete decimal value using strtol
 
 ## Exercise 1: Summarize valid records: change one input
 
-Copy worked example 1, the "summarize valid records" case, into a scratch pad and change `const char *rows[] = {"alpha,3", "beta,4"};` to `const char *rows[] = {"alpha,4", "beta,4"};`. Before running, predict which CHECK fails and which value it sees in place of the worked result (two rows produce total 7); then run it and restore the original line.
+In worked example 1, change `const char *rows[] = {"alpha,3", "beta,4"};` to `const char *rows[] = {"alpha,4", "beta,4"};`. Predict which value the CHECK on `summarize(rows, 2, &out) && out.rows == 2 && out.total == 7` sees, then run and restore.
 
 The unchanged code is worked example 1:
 
@@ -20,13 +22,15 @@ struct Summary out = {0};
 CHECK(summarize(rows, 2, &out) && out.rows == 2 && out.total == 7);
 ```
 
-**Expected:** With `const char *rows[] = {"alpha,4", "beta,4"};` the run stops with `Check failed` at the CHECK on `summarize(rows, 2, &out) && out.rows == 2 && out.total == 7`, because the "summarize valid records" case no longer shows that two rows produce total 7. Restoring `const char *rows[] = {"alpha,3", "beta,4"};` brings that observation back.
+**Expected:** `Check failed` at `summarize(rows, 2, &out) && out.rows == 2 && out.total == 7`; restoring `const char *rows[] = {"alpha,3", "beta,4"};` passes again.
+
+**Verify:** Name the value that made `summarize(rows, 2, &out) && out.rows == 2 && out.total == 7` false, where worked example 1 showed that two rows produce total 7.
 
 The total represents the complete accepted batch, not merely a successful prefix.
 
 ## Exercise 2: Reject a malformed record: debug a regression
 
-A regression changed one token in worked example 2, the "reject a malformed record" case, so one line now reads `struct Summary out = {10, 99};`. Run the example with that line, use the failing CHECK to find why the batch fails and the previous summary remains unchanged no longer holds and repair the line without changing the CHECK.
+Worked example 2 now has a line reading `struct Summary out = {10, 99};`. Repair it so that the batch fails and the previous summary remains unchanged again.
 
 The unchanged code is worked example 2:
 
@@ -36,7 +40,9 @@ struct Summary out = {9, 99};
 CHECK(!summarize(rows, 2, &out) && out.rows == 9 && out.total == 99);
 ```
 
-**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `!summarize(rows, 2, &out) && out.rows == 9 && out.total == 99`. Once the line reads `struct Summary out = {9, 99};` again, the "reject a malformed record" case again shows that the batch fails and the previous summary remains unchanged.
+**Expected:** `Check failed` at `!summarize(rows, 2, &out) && out.rows == 9 && out.total == 99` until the line reads `struct Summary out = {9, 99};` again.
+
+**Verify:** Explain how `struct Summary out = {10, 99};` changes the value `!summarize(rows, 2, &out) && out.rows == 9 && out.total == 99` tests, using your failing and repaired runs.
 
 Staging prevents a partial total from masquerading as a successful batch result.
 
@@ -51,6 +57,8 @@ CHECK(summarize(NULL, 0, &out) && out.rows == 0 && out.total == 0);
 
 **Expected:** Rows and total are both zero.
 
+**Verify:** Keep a CHECK equivalent to `summarize(NULL, 0, &out) && out.rows == 0 && out.total == 0`. Control edit: `CHECK(summarize(NULL, 1, &out) && out.rows == 0 && out.total == 0);` must fail; then restore it.
+
 The empty input has an explicit identity result. No record pointer is accessed.
 
 ## Exercise 4: Reject extra field syntax
@@ -63,6 +71,8 @@ CHECK(!parse_record("alpha,3,extra", &value));
 ```
 
 **Expected:** The record is rejected.
+
+**Verify:** Keep a CHECK equivalent to `!parse_record("alpha,3,extra", &value)`. Control edit: `CHECK(parse_record("alpha,3,extra", &value));` must fail; then restore it.
 
 The accepted grammar is intentionally narrow. Extra fields must not be silently ignored.
 
@@ -77,6 +87,8 @@ CHECK(summarize(rows, 1, &out) && out.rows == 1 && out.total == 0);
 ```
 
 **Expected:** One row contributes zero to the total.
+
+**Verify:** Keep a CHECK equivalent to `summarize(rows, 1, &out) && out.rows == 1 && out.total == 0`. Control edit: changing `const char *rows[] = {"alpha,0"};` to `const char *rows[] = {"alpha,1"};` must fail it; then restore it.
 
 A zero measurement differs from missing or invalid input, and row count retains that distinction.
 
@@ -93,8 +105,10 @@ CHECK(summarize(good, 1, &out) && out.rows == 1 && out.total == 8);
 
 **Expected:** Only the corrected complete batch publishes total 8.
 
+**Verify:** Keep a CHECK equivalent to `summarize(good, 1, &out) && out.rows == 1 && out.total == 8`. Control edit: changing `const char *bad[] = {"x,bad"}, *good[] = {"x,8"};` to `const char *bad[] = {"x,bad"}, *good[] = {"x,9"};` must fail it; then restore it.
+
 The failed attempt leaves no hidden partial state. Re-running corrected input is safe under this pure in-memory batch contract.
 
 ## After comparison
 
-Add a fresh distinguishing input for the "transfer repeatable recovery" case to your own c-042 source. Explain why every access in `parse_record` or `summarize` stays within a live object and each owned resource is released. An expected data contract failure belongs in the test contract; undefined behavior does not. Keep diagnostics and sanitizer evidence for the "reject a malformed record" case apart from ordinary output: the fixture proves its stated data contract, batch atomicity and operational evidence assumptions, not universal safety.
+Summarize `{"a,4294967295", "b,1"}`: each record parses, but the running total would exceed `UINT_MAX`. CHECK that `summarize` fails and that an `out` already holding one row and total 8 is unchanged. Then explain why the test `value > UINT_MAX - staged.total` must come before the addition, and why staging in `staged` keeps the failed batch invisible.

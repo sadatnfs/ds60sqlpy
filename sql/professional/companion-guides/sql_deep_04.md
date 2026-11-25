@@ -4,79 +4,45 @@
 
 ## How to run this lesson
 
-Start the Linux-container engine and run `./classroom` from the repository
-root. On Windows, use Ubuntu in WSL 2 or the thin
-`START_DOCKER_CLASSROOM.cmd` wrapper. Choose **PostgreSQL** on the shared
-`/classroom` home, then open **sql-deep-04**. The
-[launcher guide](../../../docs/one-command-classroom.md) covers first preparation, strict resume and
-the saved project selection. No host Python or PostgreSQL installation is
-required for this browser route.
+Start **sql-deep-04** from `./classroom` using the shared [run steps](../../STUDY-GUIDE.md#run-a-lesson-in-the-classroom).
 
-1. Read the prerequisite and fixture notes before running the file. Use only
-   the local disposable `advanced_sql_training` database.
-2. Choose **Whole SQL lesson (psql)** for the cataloged learner script. This
-   preserves the lesson's reviewed psql directives, relative includes and
-   transaction behavior. **SQL snippet** is appropriate for ordinary SQL
-   statements, but is not a replacement for an entire script's setup.
-3. The **Course database** panel above the code shows whether the course
-   training tables are loaded. Missing tables load automatically before your
-   first run (or choose **Load course tables**) and stay loaded for later
-   lessons. **Reset training data** restores the original rows only when your
-   own changes made results differ; it keeps your saved code and notes.
-4. Edit the learner copy in the classroom and save your prediction before
-   running. Its whole-script workspace is
-   `.learning/sql/sql-deep-04/lesson/workspace/sql/professional/lessons/sql_deep_04.sql`.
-   For browser work this path is inside the Docker learning volume, not a
-   newly created host folder beside your checkout. The checked-in source
-   remains the answer-free starting artifact.
-5. Run the whole script and inspect the full transcript. The runner uses
-   `psql -X -v ON_ERROR_STOP=1 -f`. SELECT output has columns, rows and a row
-   count; DDL/DML has command tags; intentional checks may produce NOTICE
-   messages. An unexpected ERROR or nonzero exit is a failure to diagnose,
-   even when an earlier query printed plausible values.
-6. Verify the lesson's expected grain, ordering, constraints and declared
-   transaction or cleanup outcome. Keep required ROLLBACK statements.
-   The warehouse sequence and other explicitly stateful exercises explain
-   when state is committed. Read saved output without rerunning it when
-   reviewing an earlier attempt.
+Choose **Whole SQL lesson (psql)**. Inside one transaction on
+`advanced_sql_training` (any other database is refused), the script builds two
+temporary tables: seven vertices `a` to `g` in `deep4_vertices`, and seven
+weighted edges in `deep4_edges`. The edges contain the directed cycle `b`, `c`,
+`d`, `b`, a costly shortcut from `a` to `c`, branches from `b` to `e` and from
+`d` to `g`, and nothing at all touching `f`. Only the two worked examples
+print: a recursive sequence 1 to 4 with squares, then one row showing that `b`
+is already in the path `{a,b,c}` and that appending `d` extends it. No `NOTICE`
+is expected, and `ROLLBACK` drops both tables. Save attempts in
+`.learning/sql/sql-deep-04/lesson/workspace/sql/professional/lessons/sql_deep_04.sql`.
 
-If a relation is missing, inspect the lesson's required fixture and predecessor
-rather than guessing a new table definition. If authentication or runtime
-readiness fails, use `./classroom status` and the setup guide. Keep credentials
-out of SQL, notebooks, screenshots and committed files. Repair the first error
-before trusting partial output, and reveal separate solutions only when you
-want to compare after an attempt.
-
-### Optional contributor notebook route
-
-For notebook work, deliberately prepare the Linux/WSL contributor environment
-from [CONTRIBUTING.md](../../../CONTRIBUTING.md), including a compatible psql client and
-the notebook dependencies. Generate this lesson's private workspace through
-the maintained CLI:
-
-```sh
-uv run --no-sync python scripts/course.py sql notebook sql-deep-04
-```
-
-Open the printed notebook path in that environment's JupyterLab. It uses the
-same catalog-derived learner-copy layout in that contributor checkout and
-executes the complete script through psql. Its host-side state is separate
-from the Docker browser's named volume. Follow
-[guided SQL notebooks](../../../docs/guided-sql-notebooks.md) for explicit local connection
-selection and kernel setup. Notebook generation does not execute SQL or
-authorize a reset.
+The optional notebook route starts with `uv run --no-sync python scripts/course.py sql notebook sql-deep-04`; see the [study guide](../../STUDY-GUIDE.md#optional-contributor-notebook-route).
 
 ## Level and prerequisites
 
-- **Level:** Advanced. The guide defines each new mechanism before relying on it.
-- **Prerequisites:** [`sql-24`](../../postgres-60day/companion-guides/day24_recursive_ctes.md), [`sql-25`](../../postgres-60day/companion-guides/day25_multiple_ctes_hierarchies.md).
-- **Artifacts:** [Learner SQL](../lessons/sql_deep_04.sql), [explained reference](../solutions/sql_deep_04_solutions.md), and [executable reference](../solutions/sql_deep_04_solutions.sql). Every fixture is local, deterministic and rolled back; no prior lesson state is required.
+- **Level:** Advanced. Recursive state, simple paths, cycle-closing edges and
+  blocked dependencies are each defined before an exercise relies on them.
+- **Prerequisites:**
+  [`sql-24`](../../postgres-60day/companion-guides/day24_recursive_ctes.md),
+  [`sql-25`](../../postgres-60day/companion-guides/day25_multiple_ctes_hierarchies.md):
+  recursive CTEs, then multiple CTEs and hierarchies.
+- **Artifacts:** [Learner SQL](../lessons/sql_deep_04.sql), [explained
+  reference](../solutions/sql_deep_04_solutions.md), and [executable
+  reference](../solutions/sql_deep_04_solutions.sql). Both `deep4_` tables are
+  temporary and disappear at the final `ROLLBACK`, so no earlier lesson state
+  is needed.
 
 ## Learning objectives
 
-- State the output grain and identity before writing a query, including the NULL and duplicate policies.
-- Explain the new SQL mechanism, produce each exact projected result and expose the listed counterexample.
-- Verify rollback-safe behavior from inspected result rows and assertions without relying on a final success message.
+- Compute reachability from `a` with a recursive `UNION` over vertex identity,
+  so the `b`, `c`, `d` cycle terminates without a depth cap.
+- Carry a path array to enumerate simple routes, emit exactly one cycle-closing
+  step as evidence, and report honestly when a two-edge budget truncates the
+  search.
+- Choose the cheapest path to each vertex with deterministic tie-breaking, and
+  separate processed dependencies from vertices that are cyclic or only blocked
+  by a cycle.
 
 ## Vocabulary and concepts
 
@@ -126,7 +92,7 @@ ORDER BY
   value;
 ```
 
-The anchor starts at one and the step adds one only while the current value is below four. The output grain is one integer value with its square, yielding(1,1),(2,4),(3,9),(4,16). The strict step condition supplies a finite termination argument; ORDER BY supplies presentation, not recursion execution order.
+The anchor starts at one and the step adds one only while the current value is below four. The output grain is one integer value with its square, yielding (1,1), (2,4), (3,9), (4,16). The strict step condition supplies a finite termination argument; ORDER BY supplies presentation, not recursion execution order.
 
 ### Example 2
 
@@ -153,7 +119,7 @@ The one-row output has path, revisits_b, extended_path. Membership is true for b
 
 **Inputs/evidence:** For sql-deep-04 Exercise 2, Return path, total_cost, hops for every simple path from a to d. Carry vertex, path, cost in the recursive state, append targets and prevent revisiting any vertex already in the path. One output row represents a complete path; order by path.
 
-**Expected result/shape:** For sql-deep-04 Exercise 2, Paths[a, b, c, d] cost 3, hops 3 and [a, c, d] cost 5, hops 2 appear. The cheaper route has more hops, and no path repeats a vertex.
+**Expected result/shape:** For sql-deep-04 Exercise 2, Paths [a, b, c, d] cost 3, hops 3 and [a, c, d] cost 5, hops 2 appear. The cheaper route has more hops, and no path repeats a vertex.
 
 **Verify:** For sql-deep-04 Exercise 2, inspect every route array for repeated vertices and check each consecutive pair is an edge; sum edge weights independently and retain distinct valid routes.
 
@@ -161,7 +127,7 @@ The one-row output has path, revisits_b, extended_path. Membership is true for b
 
 **Inputs/evidence:** For sql-deep-04 Exercise 3, Return cycle_path, repeated_vertex, cycle_cost for traversals from a that first revisit a vertex. Allow a closing edge to be emitted, mark it as a cycle and stop expanding marked states. Order by cycle_path and do not claim that the whole path prefix is itself a cycle.
 
-**Expected result/shape:** For sql-deep-04 Exercise 3, Paths[a, b, c, d, b] repeat b at cost 4 and [a, c, d, b, c] repeat c at cost 7. Both are emitted once and terminate.
+**Expected result/shape:** For sql-deep-04 Exercise 3, Paths [a, b, c, d, b] repeat b at cost 4 and [a, c, d, b, c] repeat c at cost 7. Both are emitted once and terminate.
 
 **Verify:** For sql-deep-04 Exercise 3, confirm the final step repeats a vertex already in the route, and that this closing row is emitted once without being expanded further.
 
@@ -169,7 +135,7 @@ The one-row output has path, revisits_b, extended_path. Membership is true for b
 
 **Inputs/evidence:** For sql-deep-04 Exercise 4, Explore simple paths from a for at most two edges. Return vertex, min_hops, search_truncated for vertices reached within that budget, ordered by vertex. Set the global truncation flag true if any depth-two state has an outgoing target not already in its path.
 
-**Expected result/shape:** For sql-deep-04 Exercise 4, Vertices a, b, c, d, e have minimum hops 0,1,1,2,2 and search_truncated=true. Vertex g is absent because it requires more than two hops, so absence cannot be called unreachable.
+**Expected result/shape:** For sql-deep-04 Exercise 4, Vertices a, b, c, d, e have minimum hops 0, 1, 1, 2, 2 and `search_truncated` true. Vertex g is absent because it requires more than two hops, so absence cannot be called unreachable.
 
 **Verify:** For sql-deep-04 Exercise 4, find at least one admissible outgoing edge beyond a boundary-depth route; a nonempty frontier proves the result is truncated rather than complete.
 
@@ -177,7 +143,7 @@ The one-row output has path, revisits_b, extended_path. Membership is true for b
 
 **Inputs/evidence:** For sql-deep-04 Exercise 5, Enumerate simple paths on this tiny nonnegative graph and choose the cheapest per vertex, breaking ties by fewer hops then lexicographic path. Left-join to all vertices and return vertex, total_cost, path ordered by vertex, preserving unreachable f with NULL cost/path.
 
-**Expected result/shape:** For sql-deep-04 Exercise 5, Costs a0, b1, c2, d3, e6, g4 have paths[a],[a, b],[a, b, c],[a, b, c, d],[a, b, e],[a, b, c, d, g]. Vertex f has NULL cost and path.
+**Expected result/shape:** For sql-deep-04 Exercise 5, Costs are a 0, b 1, c 2, d 3, e 6, g 4, with paths [a], [a, b], [a, b, c], [a, b, c, d], [a, b, e], [a, b, c, d, g]. Vertex f has NULL cost and path.
 
 **Verify:** For sql-deep-04 Exercise 5, compare candidate simple routes for each reachable vertex and independently sum the selected route weights; preserve the unreachable vertex as explicitly unreachable.
 
@@ -195,12 +161,23 @@ If recursion does not terminate on a cycle, inspect every state column used by U
 
 ## Self-check
 
-- Explain the row grain after each FROM, JOIN, filter, grouping or window step. Name the identity columns that prove rows were neither lost nor multiplied.
-- Reconstruct a boundary result by hand, then compare with the query output. Explain why the tempting wrong query fails even if it returns the same total on an easier fixture.
+- Exercise 1 uses `UNION`, not `UNION ALL`, over vertex identity. Why does that
+  alone make the cycle terminate, and why would adding a path column to the
+  state remove that guarantee?
+- The route `a`, `c`, `d` has fewer hops but costs 5, while `a`, `b`, `c`, `d`
+  costs 3. Which one does Exercise 5 keep for `d`, and why is `f` still in its
+  output?
+- Exercise 6 processes only `a` and `f`. Why are `e` and `g` labeled cyclic or
+  blocked even though neither lies on the `b`, `c`, `d` loop?
 
 ## Next step
 
-Transfer the same reasoning to a new small fixture before using it on larger data, then continue with [the next deepening lesson](sql_deep_05.md). Keep the result columns, ordering, NULL policy and observation horizon explicit. The [professional SQL track](../README.md) provides the wider route.
+Before moving on, delete the edge from `d` to `b` in a copy of the fixture and
+predict which vertices Exercise 6 now processes and in what order. [The next
+deepening lesson](sql_deep_05.md) turns from graph traversal to predicate
+proof: when a partial index can serve a query and how conditional mutations
+state their own contracts. The [professional SQL track](../README.md) lists the
+wider route.
 
 ## Primary sources and official APIs
 

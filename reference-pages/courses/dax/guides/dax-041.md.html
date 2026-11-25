@@ -194,10 +194,10 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/dax/guides/dax-041.md</code></p>
     </header>
     <article class="document"><h2 id="dax-041-budget-comparisons-require-compatible-grains">dax-041: Budget comparisons require compatible grains<a class="heading-anchor" href="#dax-041-budget-comparisons-require-compatible-grains" aria-label="Link to this section">#</a></h2>
-<p><strong>Stage 7: Analytical patterns and decision units.</strong> Level: advanced. Read the mechanisms, trace the worked cases and retain your own draft. <strong>Direct prerequisites:</strong> <code>dax-023</code>, <code>dax-027</code>, <code>dax-031</code></p>
+<p><strong>Stage 7: Analytical patterns and decision units.</strong> Level: advanced. <strong>Direct prerequisites:</strong> <code>dax-023</code>, <code>dax-027</code>, <code>dax-031</code></p>
 <h3 id="how-to-use-this-offline-lesson">How to use this offline lesson<a class="heading-anchor" href="#how-to-use-this-offline-lesson" aria-label="Link to this section">#</a></h3>
-<p>This is an offline DAX editing lesson. No DAX compiler, semantic-model engine, Power BI account or network connection is required. Worked tables describe the named reference and model, not execution of your draft. Save, compare and export source; do not interpret a comparison or completion marker as a passed program run.</p>
-<p>Open the <a href="../lessons/dax-041.dax.html">starter</a>. Compare the <a href="../solutions/dax-041_reference.dax.html">named reference</a> and <a href="../solutions/dax-041_solutions.md.html">reasoning</a> when ready. The <a href="../models/analytics/model.json.html">model specification</a> identifies every fixture table, column type, key and relationship. The <a href="../models/README.md.html">fixture handbook</a> displays the original data and explains each table grain.</p>
+<p>Predict Paper&#x27;s January 2025 actual, budget and variance, then the same for the single day January 2, and say what the budget should be there. The <a href="../STUDY-GUIDE.md.html#offline-study-boundary">offline study boundary</a> explains what a worked table can show.</p>
+<p>Files: <a href="../lessons/dax-041.dax.html">starter</a>, <a href="../solutions/dax-041_reference.dax.html">reference</a> and <a href="../solutions/dax-041_solutions.md.html">reasoning</a>.</p>
 <h3 id="the-question-and-the-mechanism">The question and the mechanism<a class="heading-anchor" href="#the-question-and-the-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Align actuals with a monthly category budget without copying a whole-month target into a daily metric.</p>
 <p>Budget is recorded at month/category grain, while Sales is recorded at order-line grain. A daily product-level query does not automatically have a comparable target. Relating a monthly budget to an arbitrary date key can make it appear only on one day; copying the entire monthly value into every day can multiply it. The model must state the intended temporal and category mapping.</p>
@@ -207,7 +207,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>HASONEVALUE and the date-row count form this fixture&#x27;s single-complete-month guard. DAY(EOMONTH(...)) gives the calendar month length. TREATAS maps the retained month and category sets to the disconnected Budget columns. The guard is a documented comparison policy, not a universal pattern for every fiscal calendar.</p>
 <p>Concepts to explain in your own words: <strong>monthly budget</strong>, <strong>grain mismatch</strong>, <strong>TREATAS</strong>, <strong>full-period guard</strong>, <strong>allocation</strong>.</p>
 <h3 id="model-and-context-contract">Model and context contract<a class="heading-anchor" href="#model-and-context-contract" aria-label="Link to this section">#</a></h3>
-<p>The ordinary star follows Product → Sales, Customer → Sales and Date → Sales through OrderDate. The ShipDate relationship is inactive unless a case explicitly activates it. Filters flow from the one side to the many side. Additional analytical tables have only the relationships declared in their named model; a similar column name does not create a relationship.</p>
+<p>Budget rows are monthly by category, with January Paper at 60 USD. Paper sold S4 (27) and S5 (20) in January 2025, so the actual is 47. See the <a href="../models/analytics/model.json.html">model specification</a> and the <a href="../STUDY-GUIDE.md.html#the-retail-star">shared star rules</a>.</p>
 <pre class="highlighted-code"><code class="language-text">Product (one)  --&gt; Sales (many) &lt;-- Customer (one)
                        ^
                        | active OrderDate
@@ -215,7 +215,6 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
                        | inactive ShipDate
                        +------&gt; Sales</code></pre>
 <p>This lesson also uses the <code>analytics</code> model&#x27;s <code>Budget</code> table. <code>Budget</code> has no relationship, so a filter on another table reaches it only if the expression transfers the filter explicitly.</p>
-<p>All amounts in ordinary Sales are USD after the line discount, before tax and returns. The Date fixture is complete for 2024 and 2025; a short result table is a selected slice, not the whole calendar. JSON <code>null</code> in the worked-results sidecar means DAX BLANK, not the text &quot;null&quot;.</p>
 <h3 id="worked-cases">Worked cases<a class="heading-anchor" href="#worked-cases" aria-label="Link to this section">#</a></h3>
 <p>The following query-local declarations are shared by these cases. They do not create persisted measures in this classroom.</p>
 <pre class="highlighted-code"><code class="language-dax"><span class="syntax-keyword">DEFINE</span>
@@ -264,8 +263,10 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 </tbody></table></div>
 <p>BLANK protects an undefined comparison. If a daily target is required, add and explain an allocation policy rather than removing the guard without replacement.</p>
 <p>Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table.</p>
+<h3 id="a-misconception-to-test">A misconception to test<a class="heading-anchor" href="#a-misconception-to-test" aria-label="Link to this section">#</a></h3>
+<p>Showing 60 against January 2 alone would report a 33 USD shortfall for one day; the guard returns BLANK until an allocation policy exists.</p>
 <h3 id="practice-prediction-construction-and-diagnosis">Practice: prediction, construction and diagnosis<a class="heading-anchor" href="#practice-prediction-construction-and-diagnosis" aria-label="Link to this section">#</a></h3>
-<p>Retain your formula or written reasoning, the stated context, contributing rows or values, and a conclusion with its unit. These notes are your own study record; they do not show that a formula ran.</p>
+<p>Record each answer as the <a href="../STUDY-GUIDE.md.html#practice-routine">practice routine</a> describes.</p>
 <h4 id="exercise-1-predict">Exercise 1: Predict<a class="heading-anchor" href="#exercise-1-predict" aria-label="Link to this section">#</a></h4>
 <p>Predict February Home actual and budget.</p>
 <h4 id="exercise-2-change-one-condition">Exercise 2: Change one condition<a class="heading-anchor" href="#exercise-2-change-one-condition" aria-label="Link to this section">#</a></h4>
@@ -288,7 +289,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>Plans and events often have different time and organizational grains.</li>
 </ol>
 <h3 id="self-check-and-next-step">Self-check and next step<a class="heading-anchor" href="#self-check-and-next-step" aria-label="Link to this section">#</a></h3>
-<p>Explain one changed result without quoting the formula alone. Identify which rows, filters, relationship or evaluation scope changed, then construct a counterexample to a plausible wrong interpretation. Keep your draft separate from the supplied reference. A small correct derivation does not certify performance, model security or broad expertise.</p>
+<p>Compute January Home actual, budget and variance, then the uniform daily target for January Home. The <a href="../STUDY-GUIDE.md.html#self-check-routine">self-check routine</a> applies too.</p>
 <p>Continue to <a href="dax-042.md.html">dax-042</a> when its prerequisites make sense, or revisit this stage from the <a href="../README.md.html">course map</a>.</p>
 <h3 id="official-references-and-evidence-limits">Official references and evidence limits<a class="heading-anchor" href="#official-references-and-evidence-limits" aria-label="Link to this section">#</a></h3>
 <ul>
@@ -296,7 +297,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li><a href="https://learn.microsoft.com/en-us/dax/hasonevalue-function-dax">DAX function: HASONEVALUE</a></li>
 <li><a href="https://learn.microsoft.com/en-us/dax/eomonth-function-dax">DAX function: EOMONTH</a></li>
 </ul>
-<p>Documentation was reviewed for this original course on 2026-10-25. Version-sensitive features have explicit notes. Source/model checks and independent fixture arithmetic are not a DAX parser, compiler, semantic engine, real RLS test or performance measurement.</p>
+<p>Review date and evidence limits: <a href="../STUDY-GUIDE.md.html#references-and-evidence-limits">study guide</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for dax-041. Read its guide and the named model.
 Review my draft and prediction. Ask me to enumerate the relevant rows and context.

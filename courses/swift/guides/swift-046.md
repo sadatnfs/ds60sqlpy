@@ -24,9 +24,9 @@ A simulator build can run without provisioning a physical device, while distribu
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles the saved pad as `main.swift` with Swift 6 language checking. An explicit `@main` type contains `static func main() async throws`; the fixed compiler uses `-parse-as-library -swift-version 6`. The examples use the standard library and portable Foundation. `precondition` makes a violated invariant fail the process. The fixed pad accepts one source file, without arbitrary command arguments, interactive input or dependency installation. SwiftUI, UIKit, Apple simulators and application signing belong to the separately prepared macOS/Xcode project labs, never the Linux pad.
+The pad checks only evidence accounting with sets. Task 3 runs `xcodebuild` on a Mac: list the schemes and destinations first and choose one that is actually installed. On Linux, record task 3 as not performed rather than marking it passed.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Compile contract, starter stop and success marker: [running a lesson](../STUDY-GUIDE.md#running-a-lesson).
 
 Follow [JourneyApp build and test commands](../fixtures/JourneyApp/README.md). The repository does not claim those Apple-platform commands have run merely because Linux references pass.
 
@@ -34,7 +34,7 @@ Follow [JourneyApp build and test commands](../fixtures/JourneyApp/README.md). T
 
 Xcode schemes choose build/test actions and destinations. xcodebuild -list and -showdestinations reveal actual available options. The fixture provides domain tests plus a UI smoke source to add to the generated project targets.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+Each example ends with a trace; method: [tracing a program](../STUDY-GUIDE.md#tracing-a-program).
 
 ## Worked example / walkthrough
 
@@ -60,6 +60,8 @@ struct LessonMain {
 
 **Observe:** Domain and package evidence do not imply UI or device qualification.
 
+**Trace.** `evidence` holds the two categories that were actually produced, domain tests and a package build. The checks confirm that neither ui-tested nor device-signed is present. Nothing in the program infers a missing category from the ones that exist: a passing domain test says nothing about whether a screen renders, and a package build says nothing about code signing on a device.
+
 ### Example B: Require every declared release gate
 
 Set difference is a simple portable model of honest acceptance accounting.
@@ -82,6 +84,8 @@ struct LessonMain {
 
 **Observe:** Save/reload remains an explicit incomplete gate.
 
+**Trace.** `required` lists three gates and `observed` lists the two performed. `required.subtracting(observed)` removes every observed element and leaves save-reload. The check compares against that one-element set. Set difference gives an honest accounting rule: a release is complete only when the difference is empty, and the leftover names exactly which evidence is still missing.
+
 ## Exercises
 
 1. **Predict and explain.** Explain what each evidence category proves.
@@ -96,13 +100,15 @@ struct LessonMain {
 
 6. **Transfer and justify.** Prepare a release note listing platform, SDK, destination, test results and remaining device/signing limitations.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Log each task in the [evidence table](../STUDY-GUIDE.md#recording-exercise-evidence) before opening the explanation.
 
 ## Common pitfalls and diagnosis
 
 Never commit a personal development team, certificate or provisioning profile. A simulator is not a physical device. Keep test-state cleanup scoped to the app-owned test location.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+Task 4's mistake reads an archive build as proof of accessibility. An archive proves only that the code compiled and was packaged; the counterexample is a button with no label that archives cleanly and is unusable with VoiceOver. For task 2, add save-reload only after quitting and relaunching the app and seeing the saved item reappear.
+
+Repair routine: [building a regression case](../STUDY-GUIDE.md#building-a-regression-case).
 
 ## Progressive hints
 
@@ -112,11 +118,15 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 ## Self-check and next step
 
-Explain Scheme, Simulator, Signing without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+State what each of domain tests, package build, UI smoke, save-reload and device signing proves, and what it does not. Explain how set difference reports missing gates. List the facts a release note must record about platform, SDK and destination so a reader can repeat the test.
+
+Then follow the general [self-check routine](../STUDY-GUIDE.md#self-check-routine) and save your pad.
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://developer.apple.com/documentation/xcode/running-your-app-in-simulator-or-on-a-device). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+[Documentation](https://developer.apple.com/documentation/xcode/running-your-app-in-simulator-or-on-a-device): Apple's Xcode documentation covers schemes, test plans and running tests from the command line with `xcodebuild`.
+
+Provenance and limits: [sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

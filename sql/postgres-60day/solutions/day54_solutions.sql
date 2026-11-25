@@ -52,6 +52,63 @@ CREATE TABLE agg_sales_product_month (
   PRIMARY KEY (year, month, product_sk)
 );
 
+-- Load every month once and reconcile it, then return to the empty table so
+-- Exercise 2 shows a single-month refresh on its own.
+SAVEPOINT exercise_1;
+
+INSERT INTO agg_sales_product_month (year, month, product_sk, revenue, units, orders)
+SELECT
+  dd.year,
+  dd.month,
+  fs.product_sk,
+  ROUND(SUM(fs.amount), 2),
+  SUM(fs.quantity),
+  COUNT(DISTINCT fs.order_id)
+FROM
+  fact_sales fs
+  JOIN dim_date dd USING (date_key)
+GROUP BY
+  dd.year,
+  dd.month,
+  fs.product_sk;
+
+WITH aggregate_total AS (
+  SELECT
+    year,
+    month,
+    SUM(revenue) AS revenue
+  FROM
+    agg_sales_product_month
+  GROUP BY
+    year,
+    month
+),
+fact_total AS (
+  SELECT
+    dd.year,
+    dd.month,
+    ROUND(SUM(fs.amount), 2) AS revenue
+  FROM
+    fact_sales fs
+    JOIN dim_date dd USING (date_key)
+  GROUP BY
+    dd.year, dd.month
+)
+SELECT
+  a.year,
+  a.month,
+  a.revenue AS aggregate_revenue,
+  f.revenue AS fact_revenue,
+  a.revenue - f.revenue AS difference
+FROM
+  aggregate_total a
+  JOIN fact_total f USING (year, month)
+ORDER BY
+  a.year,
+  a.month;
+
+ROLLBACK TO SAVEPOINT exercise_1;
+
 -- Exercise 2: refresh all aggregate tables for one year/month.
 CREATE OR REPLACE PROCEDURE refresh_sales_aggregates_solution (p_year int, p_month int)
 LANGUAGE plpgsql

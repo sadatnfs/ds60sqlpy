@@ -1,6 +1,6 @@
 # r-057: reference reasoning
 
-Use the [complete reference](r-057_reference.R) with the guide's declared inputs and runtime. Every worked example is also a standalone script.
+Run the [complete reference](r-057_reference.R) under the [run rules](../STUDY-GUIDE.md#run-a-chapter).
 
 ## Why the implementation has this shape
 
@@ -108,4 +108,6 @@ Printing requests capture; data checks validate the specification. Actual browse
 
 ## What the checks establish
 
-The reference makes 5 `stopifnot()` checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.
+The assertions confirm two traces with a scatter first, marker y values equal to the observed column, line y values equal to the rule column, an ordered trace with x 1, 2 and 3 and y 2, 4 and 6, and a bar figure whose categories and heights equal the supplied count table. They check the figure specification, not how a browser renders or animates it.
+
+The reference makes 5 `stopifnot()` checks; see [what a passing run proves](../STUDY-GUIDE.md#what-a-passing-run-proves).

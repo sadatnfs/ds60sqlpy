@@ -24,9 +24,9 @@ Deployment targets state the oldest platform APIs an app promises to support. Ru
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles the saved pad as `main.swift` with Swift 6 language checking. An explicit `@main` type contains `static func main() async throws`; the fixed compiler uses `-parse-as-library -swift-version 6`. The examples use the standard library and portable Foundation. `precondition` makes a violated invariant fail the process. The fixed pad accepts one source file, without arbitrary command arguments, interactive input or dependency installation. SwiftUI, UIKit, Apple simulators and application signing belong to the separately prepared macOS/Xcode project labs, never the Linux pad.
+Both checks run on Linux because they use only the standard library. Task 3 builds JourneyCore on Linux and JourneyApp separately on macOS, so record which machine produced each result. `#if canImport` decides at compile time, while `#available` checks the running OS version on Apple platforms.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Compile contract, starter stop and success marker: [running a lesson](../STUDY-GUIDE.md#running-a-lesson).
 
 The portable [JourneyCore](../fixtures/JourneyCore/README.md) and Apple-only [JourneyApp](../fixtures/JourneyApp/README.md) establish the intended boundary.
 
@@ -34,7 +34,7 @@ The portable [JourneyCore](../fixtures/JourneyCore/README.md) and Apple-only [Jo
 
 #if canImport selects compile-time framework availability. #available guards runtime API availability on Apple platforms. Package platform declarations and Xcode deployment settings are related project contracts.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+Each example ends with a trace; method: [tracing a program](../STUDY-GUIDE.md#tracing-a-program).
 
 ## Worked example / walkthrough
 
@@ -59,6 +59,8 @@ struct LessonMain {
 
 **Observe:** The same domain summary works without a UI framework.
 
+**Trace.** `summary` interpolates two integers into the text 2/3 complete. It uses only `String` interpolation, which is part of the standard library on every platform, so the same function compiles in JourneyCore on Linux and inside the Apple app. The check compares the exact string. If formatting needed locale rules, that richer presentation could live in the app layer.
+
 ### Example B: Declare a capability rather than guess
 
 Capability descriptions should follow actual prepared runtime evidence.
@@ -81,6 +83,8 @@ struct LessonMain {
 
 **Observe:** The Linux capability set does not invent SwiftUI support.
 
+**Trace.** `capabilities` lists what the Linux environment actually provides. The first check confirms the portable core is present; the second confirms swiftui-linux is absent, because SwiftUI is not available on Linux. A support statement built from a set like this cannot claim a capability that was never observed. The app should show a clear message for an absent capability instead of a Run action that fails.
+
 ## Exercises
 
 1. **Predict and explain.** Identify which code belongs in the portable core.
@@ -95,13 +99,15 @@ struct LessonMain {
 
 6. **Transfer and justify.** Create a platform support matrix listing compiled, executed and manually inspected surfaces separately.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Log each task in the [evidence table](../STUDY-GUIDE.md#recording-exercise-evidence) before opening the explanation.
 
 ## Common pitfalls and diagnosis
 
 CanImport proves a module is available to the compiler, not that every API is available at the deployment target. Do not assume Foundation APIs have identical availability everywhere. Keep unsupported surfaces explicit.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+Task 4's shared target imports UIKit, which builds for iOS but fails on macOS and Linux with a message that no such module exists. The counterexample is running `swift build` for JourneyCore on Linux after adding the import. Moving the import into the app target, or guarding it with `#if canImport(UIKit)`, restores the portable build.
+
+Repair routine: [building a regression case](../STUDY-GUIDE.md#building-a-regression-case).
 
 ## Progressive hints
 
@@ -111,11 +117,15 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 ## Self-check and next step
 
-Explain Deployment target, Conditional compilation, Platform adapter without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+Explain the difference between `#if canImport` and `#available`. Say which JourneyCore code would break if it imported SwiftUI. For your support matrix, define compiled, executed and manually inspected, and say why each surface needs its own column. Then place `summary` in the matrix and justify its row.
+
+Then follow the general [self-check routine](../STUDY-GUIDE.md#self-check-routine) and save your pad.
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://www.swift.org/platform-support/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+[Documentation](https://www.swift.org/platform-support/): The Swift language reference covers conditional compilation and availability conditions; the Swift Package Manager documentation covers platform declarations.
+
+Provenance and limits: [sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

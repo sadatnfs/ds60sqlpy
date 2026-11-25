@@ -20,6 +20,8 @@ Read the guide beside its editable `.dax` starter. Save a draft and notes, compa
 
 The [fixture handbook](models/README.md) exposes the tiny original CSVs. The [reference-results sidecar](reference-results.json) identifies every case and binds the exact reference and model bytes with SHA-256. No checked-in file is evidence that a DAX engine, model role or external service was executed.
 
+The [study guide](STUDY-GUIDE.md) collects the routine every lesson shares: the offline boundary, the retail star rules, the practice and self-check routines and how references are bound.
+
 ## Course map
 
 Prerequisites are direct concept dependencies, not a requirement to finish every earlier row. Revisit the named prerequisites when an expression's context is unclear.

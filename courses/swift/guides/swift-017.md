@@ -24,9 +24,9 @@ A conforming type must preserve the behavioral contract, not just compile with t
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles the saved pad as `main.swift` with Swift 6 language checking. An explicit `@main` type contains `static func main() async throws`; the fixed compiler uses `-parse-as-library -swift-version 6`. The examples use the standard library and portable Foundation. `precondition` makes a violated invariant fail the process. The fixed pad accepts one source file, without arbitrary command arguments, interactive input or dependency installation. SwiftUI, UIKit, Apple simulators and application signing belong to the separately prepared macOS/Xcode project labs, never the Linux pad.
+Both examples declare the `Pricer` protocol and its two conformers above `LessonMain`. Task 2 adds another `FlatPrice` value without editing the code that calls `cost`, which is the whole point of the protocol. Task 4 is a design defect that compiles and runs; only a check with known units reveals it.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Compile contract, starter stop and success marker: [running a lesson](../STUDY-GUIDE.md#running-a-lesson).
 
 
 
@@ -34,7 +34,7 @@ Start with the answer-free learner artifact in your saved classroom pad. It deli
 
 `protocol Pricer` declares a required method. A type lists conformance after a colon. `any Pricer` is an existential container that can hold differing conforming concrete types behind the protocol interface.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+Each example ends with a trace; method: [tracing a program](../STUDY-GUIDE.md#tracing-a-program).
 
 ## Worked example / walkthrough
 
@@ -70,6 +70,8 @@ struct LessonMain {
 
 **Observe:** The consumer calls the pricing capability without needing its storage details.
 
+**Trace.** `price` has the existential type `any Pricer`, holding a `FlatPrice` with `unit` 3. The call `price.cost(units: 4)` is dispatched at runtime to `FlatPrice.cost`, which multiplies 3 by 4 and returns 12. The calling code never mentions `FlatPrice` after the declaration, so replacing it with another conformer changes the behavior without changing the call site. The protocol guarantees the method exists, but not that every conformer charges in the same currency unit.
+
 ### Example B: Substitute another policy
 
 Substitution allows variation within the documented contract, not arbitrary semantic disagreement.
@@ -102,6 +104,8 @@ struct LessonMain {
 
 **Observe:** Two conforming policies produce different valid prices.
 
+**Trace.** `prices` is an array of `any Pricer` holding two different concrete types. `map` calls `cost(units: 4)` on each element. The flat policy returns 12. The capped policy computes 12 as well, then `min(12, 10)` limits it to 10. The result `[12, 10]` shows one call site producing different valid prices. Both conformers agree that the input is a unit count and the output is a whole price in the same currency, which is the semantic contract the protocol cannot express in its signature.
+
 ## Exercises
 
 1. **Predict and explain.** Trace the protocol call to each concrete implementation.
@@ -116,13 +120,15 @@ struct LessonMain {
 
 6. **Transfer and justify.** Choose a dependency worth abstracting in the importer and explain why a protocol helps.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Log each task in the [evidence table](../STUDY-GUIDE.md#recording-exercise-evidence) before opening the explanation.
 
 ## Common pitfalls and diagnosis
 
 A protocol is not automatically a good abstraction for every type. Default extension methods not declared as requirements can have surprising static dispatch. Preserve behavior and error semantics across conformers.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+Task 4's mismatch is easy to construct: a conformer that returns cents while the others return whole units. With 4 units at 3 per unit, it reports 1200 next to 12, and a consumer summing both is wrong by a factor of 100. For task 5, check zero units, which should cost 0 under both policies, and exactly the cap: 3 units at 3 per unit with a cap of 9 should return 9.
+
+Repair routine: [building a regression case](../STUDY-GUIDE.md#building-a-regression-case).
 
 ## Progressive hints
 
@@ -132,11 +138,15 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 ## Self-check and next step
 
-Explain Protocol, Conformance, Existential without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+Explain what `any Pricer` means as a type and what Swift must do at runtime to call `cost` through it. Name one requirement that belongs in the protocol's documentation because the signature cannot express it. Say which dependency of the importer from swift-016 you would abstract behind a protocol, and why.
+
+Then follow the general [self-check routine](../STUDY-GUIDE.md#self-check-routine) and save your pad.
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://docs.swift.org/swift-book/documentation/the-swift-programming-language/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+[Documentation](https://docs.swift.org/swift-book/documentation/the-swift-programming-language/): The Protocols chapter of the Swift book covers protocol requirements, conformance and protocols as types; Opaque and Boxed Protocol Types explains `any`.
+
+Provenance and limits: [sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

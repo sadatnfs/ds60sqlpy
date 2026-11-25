@@ -2,67 +2,17 @@
 
 ## How to run this lesson
 
-Start the Linux-container engine and run `./classroom` from the repository
-root. On Windows, use Ubuntu in WSL 2 or the thin
-`START_DOCKER_CLASSROOM.cmd` wrapper. Choose **PostgreSQL** on the shared
-`/classroom` home, then open **sql-prog-01**. The
-[launcher guide](../../../docs/one-command-classroom.md) covers first preparation, strict resume and
-the saved project selection. No host Python or PostgreSQL installation is
-required for this browser route.
+Start **sql-prog-01** from `./classroom` using the shared [run steps](../../STUDY-GUIDE.md#run-a-lesson-in-the-classroom).
 
-1. Read the prerequisite and fixture notes before running the file. Use only
-   the local disposable `advanced_sql_training` database.
-2. Choose **Whole SQL lesson (psql)** for the cataloged learner script. This
-   preserves the lesson's reviewed psql directives, relative includes and
-   transaction behavior. **SQL snippet** is appropriate for ordinary SQL
-   statements, but is not a replacement for an entire script's setup.
-3. The **Course database** panel above the code shows whether the course
-   training tables are loaded. Missing tables load automatically before your
-   first run (or choose **Load course tables**) and stay loaded for later
-   lessons. **Reset training data** restores the original rows only when your
-   own changes made results differ; it keeps your saved code and notes.
-4. Edit the learner copy in the classroom and save your prediction before
-   running. Its whole-script workspace is
-   `.learning/sql/sql-prog-01/lesson/workspace/sql/professional/lessons/sql_prog_01_routines_triggers.sql`.
-   For browser work this path is inside the Docker learning volume, not a
-   newly created host folder beside your checkout. The checked-in source
-   remains the answer-free starting artifact.
-5. Run the whole script and inspect the full transcript. The runner uses
-   `psql -X -v ON_ERROR_STOP=1 -f`. SELECT output has columns, rows and a row
-   count; DDL/DML has command tags; intentional checks may produce NOTICE
-   messages. An unexpected ERROR or nonzero exit is a failure to diagnose,
-   even when an earlier query printed plausible values.
-6. Verify the lesson's expected grain, ordering, constraints and declared
-   transaction or cleanup outcome. Keep required ROLLBACK statements.
-   The warehouse sequence and other explicitly stateful exercises explain
-   when state is committed. Read saved output without rerunning it when
-   reviewing an earlier attempt.
+Choose **Whole SQL lesson (psql)**. The script opens one transaction on
+`advanced_sql_training`, builds `pro_routines_lab` with three work items, one
+function, three trigger functions and one procedure, then ends with `ROLLBACK`.
+The run is healthy when the final `DO` self-check raises nothing: it requires
+three items, three row-level status audits, and statement audits whose
+`changed_rows` sum to three. Save attempts in
+`.learning/sql/sql-prog-01/lesson/workspace/sql/professional/lessons/sql_prog_01_routines_triggers.sql`.
 
-If a relation is missing, inspect the lesson's required fixture and predecessor
-rather than guessing a new table definition. If authentication or runtime
-readiness fails, use `./classroom status` and the setup guide. Keep credentials
-out of SQL, notebooks, screenshots and committed files. Repair the first error
-before trusting partial output, and reveal separate solutions only when you
-want to compare after an attempt.
-
-### Optional contributor notebook route
-
-For notebook work, deliberately prepare the Linux/WSL contributor environment
-from [CONTRIBUTING.md](../../../CONTRIBUTING.md), including a compatible psql client and
-the notebook dependencies. Generate this lesson's private workspace through
-the maintained CLI:
-
-```sh
-uv run --no-sync python scripts/course.py sql notebook sql-prog-01
-```
-
-Open the printed notebook path in that environment's JupyterLab. It uses the
-same catalog-derived learner-copy layout in that contributor checkout and
-executes the complete script through psql. Its host-side state is separate
-from the Docker browser's named volume. Follow
-[guided SQL notebooks](../../../docs/guided-sql-notebooks.md) for explicit local connection
-selection and kernel setup. Notebook generation does not execute SQL or
-authorize a reset.
+The optional notebook route starts with `uv run --no-sync python scripts/course.py sql notebook sql-prog-01`; see the [study guide](../../STUDY-GUIDE.md#optional-contributor-notebook-route).
 
 ## Level and prerequisites
 
@@ -85,24 +35,32 @@ one transaction and removed by `ROLLBACK`.
 
 ## A beginner's mental model for this lesson
 
-A **table** stores facts in named columns. A **row** is one occurrence at the
-table's declared grain. A query creates a temporary **result set**: rows printed
-on screen are not automatically stored. The key vocabulary for this lesson is Routine, Function, Procedure, Volatility, Security invoker/definer, Trigger. Its worked SQL reads or creates `pro_routines_lab.work_items`, `pro_routines_lab.work_item_audit`, `pro_routines_lab.statement_audit`.
+Routines move logic into the database, so the useful question is when it runs
+and what it may change. Here a function is called inside a `SELECT`, triggers
+fire on their own during an `UPDATE`, and a procedure runs only through `CALL`.
+The vocabulary below (routine, volatility, security invoker or definer,
+trigger) describes those promises.
 
-Before writing a query, complete this sentence: “One output row represents
-___.” Joins can multiply rows, filters can remove them, grouping can collapse
-many rows into one, and window functions can add calculations while preserving
-row count. For a normal analytical `SELECT`, use this logical reading order:
-`FROM`/`JOIN` (including `ON`) → `WHERE` → `GROUP BY`/aggregates → `HAVING` →
-window calculations → `SELECT` → `ORDER BY` → `LIMIT`. PostgreSQL may execute a
-different physical plan while preserving those semantics.
+Count rows at two grains whenever a trigger fires. `work_item_audit` gets one
+row per item whose status changed, while `statement_audit` gets one row per
+`UPDATE` statement, with `changed_rows` and an `item_ids` array. Updating
+Avery's two items therefore yields two row audits but one statement audit, and
+the later `CALL` for Morgan adds one of each.
 
-The worked walkthrough's lesson-specific task is: `open_item_count(text)` is a `STABLE`, `PARALLEL SAFE`, `SECURITY INVOKER` SQL function. It reads one statement snapshot and composes inside `SELECT`. Do not label a routine `IMMUTABLE` merely because its source text looks simple: a table-reading function changes when table data changes.
-The first runnable example has a concrete contract: Example 1 must print the expected DDL command tag for `pro_routines_lab.work_items`. Verify the object in `pg_catalog.pg_class`, run one accepted behavior and one rejected boundary behavior, and confirm the lesson rollback/cleanup removes only course-owned state.
+The walkthrough starts with `open_item_count(text)`, a `STABLE`,
+`PARALLEL SAFE`, `SECURITY INVOKER` SQL function with
+`SET search_path = pg_catalog`. Before the update it reports two open items for
+Avery (the `in_progress` item counts as open) and one for Morgan. It must not
+be `IMMUTABLE`: it reads `work_items`, so the same argument gives a different
+answer once the data changes. The `BEFORE` trigger rewrites `NEW.updated_at`,
+the `AFTER` row trigger writes one audit per status change, and the statement
+trigger reads the `old_rows` and `new_rows` transition tables once per
+statement.
 
 ## Two worked SQL examples
 
-These worked excerpts come from `sql/professional/lessons/sql_prog_01_routines_triggers.sql`. Use **Whole SQL lesson (psql)** in the unified classroom for the complete file, including its fixture and transaction context. The optional contributor notebook and prepared `psql` routes are described above.
+Both excerpts are table definitions from the lab setup; the routines are built
+on top of them.
 
 ### Example 1
 
@@ -117,9 +75,14 @@ CREATE TABLE pro_routines_lab.work_items (
 );
 ```
 
-**How to read it:** Example 1 is data definition language (DDL). `psql` prints a command tag when PostgreSQL accepts the definition; a later catalog or behavior check must prove that the intended rule exists.
+**How to read it:** `work_items` is the table every routine reads or changes.
+The `CHECK` constraints reject blank owners and titles and any status outside
+`open`, `in_progress` and `closed`, so the triggers never have to validate the
+vocabulary.
 
-**Expected result/shape:** Example 1 must print the expected DDL command tag for `pro_routines_lab.work_items`. Verify the object in `pg_catalog.pg_class`, run one accepted behavior and one rejected boundary behavior, and confirm the lesson rollback/cleanup removes only course-owned state.
+**Expected result/shape:** `CREATE TABLE`. Three seeded rows follow: two for
+Avery (`open`, `in_progress`) and one for Morgan (`open`). The final listing
+after the `CALL` shows all three `closed`.
 
 ### Example 2
 
@@ -134,9 +97,14 @@ CREATE TABLE pro_routines_lab.work_item_audit (
 );
 ```
 
-**How to read it:** Example 2 is data definition language (DDL). `psql` prints a command tag when PostgreSQL accepts the definition; a later catalog or behavior check must prove that the intended rule exists.
+**How to read it:** `work_item_audit` is written only by the `AFTER UPDATE` row
+trigger, one row per item whose status actually changed. `changed_by` records
+`CURRENT_USER`, which is the invoker because the trigger function is
+`SECURITY INVOKER`.
 
-**Expected result/shape:** Example 2 must print the expected DDL command tag for `pro_routines_lab.work_item_audit`. Verify the object in `pg_catalog.pg_class`, run one accepted behavior and one rejected boundary behavior, and confirm the lesson rollback/cleanup removes only course-owned state.
+**Expected result/shape:** `CREATE TABLE`. After the lesson runs it holds three
+rows: `open` to `closed` and `in_progress` to `closed` for Avery, then `open`
+to `closed` for Morgan.
 
 ## Learning objectives
 
@@ -292,9 +260,8 @@ signatures, owners, grants, triggers, and side effects are release-tested.
 
 ## Ask an AI tutor about this lesson
 
-An AI tutor is optional; the guide, learner SQL, PostgreSQL, and expected checks are
-enough to complete the lesson offline. If you want a patient tutor, copy this
-prompt after opening the repository in the AI tutor:
+The lesson and expected observations are sufficient offline. For optional
+coaching, copy:
 
 ```text
 Tutor me through sql-prog-01: Functions, Procedures, and Triggers.

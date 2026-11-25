@@ -4,8 +4,6 @@
 
 Tiling loads small regions of A and B into shared memory and reuses each value across several output calculations. For each k-phase, threads cooperatively load both tiles, synchronize, accumulate from the tiles, then synchronize again before overwriting shared storage for the next phase. Partial tiles require zero-filled invalid positions. An early return by tail threads can break the barrier contract. Tile size trades global reuse against shared storage, registers, occupancy and unused tail work. A tiled learning kernel is a correctness and reuse experiment, not an automatic replacement for a mature GEMM library.
 
-The separate [CPU reference](../references/cuda-019_cpu.py) checks the chapter's bounded model. It does not execute CUDA or establish GPU timing. Compare after attempting the worksheet or explicitly choosing to reveal solutions.
-
 ## Exercise 1
 
 For a 2-by-2 output tile and \(\mathrm{k}=2\), the four outputs need eight products. Loading four A values and four B values allows reuse across outputs. The naive per-output scheme conceptually reads sixteen scalar operands; the tile loads eight. Cache behavior can change actual transactions.
@@ -78,12 +76,18 @@ Not necessarily. Compare correctness first; setup, synchronization and unused la
 
 **How to verify:** Record measured times on an actual device for several sizes before choosing.
 
+## Self-check answers
+
+1. **How many phases does k equal 7 need with tile width 4?** Two, using ceiling division of 7 by 4.
+2. **Why are invalid tile entries filled with zero?** Zero adds nothing to the dot product, so tail phases keep the sum correct.
+3. **Why is a second barrier needed at the end of each phase?** It stops fast threads from overwriting the tile while slower threads are still reading it.
+
 ## Numerical reference and its limits
 
-The complete CPU model is [here](../references/cuda-019_cpu.py). Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It also asserts an exercise answer that the guide's model leaves for you to derive: `assert 2 * 16 * 16 * 4 == 2048`. It does not claim CUDA execution, concurrency safety or a performance measurement.
+The [CPU reference](../references/cuda-019_cpu.py) reproduces worked example 1 and prints `{'phases': [(0, 2), (2, 4), (4, 5)]}`.
+
+It also asserts an exercise answer you derive yourself: `assert 2 * 16 * 16 * 4 == 2048`
 
 ## Transfer review
 
 Not necessarily. Compare correctness first; setup, synchronization and unused lanes can outweigh reuse for small shapes.
-
-A complete explanation must name its inputs, the unchanged mathematical contract, the changed boundary or resource condition, and the evidence still needed on actual hardware. Preserve a CPU baseline even after a GPU path becomes available.

@@ -72,4 +72,4 @@ is small. The two actual queries contrast balanced and hot-key inputs while
 preserving exact answers, and identify which performance conclusions still need
 real task metrics and representative scale.
 
-The [complete Ballista workshop](../../projects/ballista/README.md) provides the maintained files, preparation, lifecycle and exact qualification boundaries for these cases.
+In the [Ballista workshop](../../projects/ballista/README.md), `plans` saves the EXPLAIN text for the order query and reruns it over a 200-row source where 180 rows share the `hot` region, giving you a skewed stage to inspect.

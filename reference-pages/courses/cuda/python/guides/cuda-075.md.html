@@ -194,9 +194,17 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cuda/python/guides/cuda-075.md</code></p>
     </header>
     <article class="document"><h2 id="cuda-075-two-dimensional-indexing-and-images">cuda-075: Two-dimensional indexing and images<a class="heading-anchor" href="#cuda-075-two-dimensional-indexing-and-images" aria-label="Link to this section">#</a></h2>
-<p><strong>Route:</strong> CUDA Python and machine learning. <strong>Stage:</strong> intermediate. <strong>Prerequisites:</strong> <code>cuda-066</code>, <code>cuda-074</code>. Allow several sessions when the hardware experiment is new; the chapter is not a deadline.</p>
-<h3 id="what-you-will-be-able-to-explain">What you will be able to explain<a class="heading-anchor" href="#what-you-will-be-able-to-explain" aria-label="Link to this section">#</a></h3>
-<p>By the end, you can <strong>trace a rectangular tile</strong>, <strong>find in-place stencil contamination</strong>, and <strong>explain row and column tail guards</strong> with evidence. Start with the two worked cases, then use the editable CPU model to make the quantities concrete.</p>
+<p><strong>Route:</strong> CUDA Python and machine learning. <strong>Stage:</strong> intermediate. <strong>Prerequisites:</strong> <code>cuda-066</code>, <code>cuda-074</code>.</p>
+<p>Pacing, evidence labels and platform rules: <a href="../../STUDY-GUIDE.md.html">CUDA study guide</a>.</p>
+<h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
+<ul>
+<li>Trace a rectangular tile.</li>
+<li>Calculate flat offsets.</li>
+<li>Change clamp to zero padding.</li>
+<li>Find in-place stencil contamination.</li>
+<li>Test width one.</li>
+<li>Explain row and column tail guards.</li>
+</ul>
 <h3 id="mechanism-and-vocabulary">Mechanism and vocabulary<a class="heading-anchor" href="#mechanism-and-vocabulary" aria-label="Link to this section">#</a></h3>
 <p>An image has coordinates, channel conventions and storage layout. Map thread x to columns and thread y to rows only after defining that contract. A row-major scalar image uses offset <code>row * width + column</code>. A rectangular block launch requires independent checks for row and column, because the input dimensions may have different tails. Multiplying both dimensions by the same bound accidentally accepts invalid coordinates.</p>
 <p>Stencil operations read neighbors, so boundary policy is part of correctness: zero padding, clamp, reflect and valid-only output produce different results. Read from an immutable input and write to a separate output unless a proven algorithm allows in-place updates. A CPU loop is useful because its coordinate meanings are visible. Do not infer coalescing or performance from that loop&#x27;s execution time.</p>
@@ -212,8 +220,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>For a 2 by 3 image, row 1 column 2 maps to flat offset 5. Swapping row and column changes the address and can escape the allocation.</p>
 <h4 id="worked-example-2">Worked example 2<a class="heading-anchor" href="#worked-example-2" aria-label="Link to this section">#</a></h4>
 <p>A horizontal three-point average with clamped borders maps [3,6,9] to [4,6,8]. Zero padding would produce [3,6,5], a different documented operation.</p>
-<h3 id="portable-executable-model">Portable executable model<a class="heading-anchor" href="#portable-executable-model" aria-label="Link to this section">#</a></h3>
-<p>The <strong>CPU reference model</strong> variant runs this bounded worked example using <code>python-core</code>. It uses only the Python standard library, small synthetic values and no network. Its purpose is to expose the arithmetic or contract behind the chapter. The separate reference includes assertions for the stated observations.</p>
+<h3 id="how-to-run-the-cpu-model">How to run the CPU model<a class="heading-anchor" href="#how-to-run-the-cpu-model" aria-label="Link to this section">#</a></h3>
+<p>Edit the copy; the <a href="../references/cuda-075_cpu.py.html">reference</a> adds assertions.</p>
+<pre class="highlighted-code"><code class="language-bash">python courses/cuda/python/lessons/cuda-075_cpu.py</code></pre>
 <pre class="highlighted-code"><code class="language-python">values <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">6</span><span class="syntax-punctuation">,</span> <span class="syntax-number">9</span><span class="syntax-punctuation">]</span>
 clamped <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span>
     <span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">[</span><span class="syntax-builtin">max</span><span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> i <span class="syntax-operator">-</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">+</span> values<span class="syntax-punctuation">[</span>i<span class="syntax-punctuation">]</span> <span class="syntax-operator">+</span> values<span class="syntax-punctuation">[</span><span class="syntax-builtin">min</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">)</span> <span class="syntax-operator">-</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> i <span class="syntax-operator">+</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> <span class="syntax-number">3</span>
@@ -237,49 +246,44 @@ clamped <span class="syntax-operator">=</span> <span class="syntax-punctuation">
 <td><code>[4.0, 6.0, 8.0]</code></td>
 </tr>
 </tbody></table></div>
-<p>Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.</p>
 <h3 id="practice-and-transfer">Practice and transfer<a class="heading-anchor" href="#practice-and-transfer" aria-label="Link to this section">#</a></h3>
+<p>Record each attempt in the <a href="../lessons/cuda-075.md.html">worksheet</a> before opening hints.</p>
 <h4 id="exercise-1-trace-a-rectangular-tile">Exercise 1: Trace a rectangular tile<a class="heading-anchor" href="#exercise-1-trace-a-rectangular-tile" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Writing pairs directly from a single flattened thread number tempts the reader to assign <code>x</code> to rows, because rows are listed first in mathematics. The tile then covers three rows and two columns, a transposed shape.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-2-calculate-flat-offsets">Exercise 2: Calculate flat offsets<a class="heading-anchor" href="#exercise-2-calculate-flat-offsets" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Using <code>column * width + row</code> swaps the roles. For row 1 column 2 it gives <code>2*3 + 1 = 7</code>, which lies past the six-element allocation, so a kernel would read or write out of bounds.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-3-change-clamp-to-zero-padding">Exercise 3: Change clamp to zero padding<a class="heading-anchor" href="#exercise-3-change-clamp-to-zero-padding" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Calling both versions a three-point average and comparing only the interior value 6 hides the change. Tests that skip the edges will pass for either padding and miss a semantic regression.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-4-find-in-place-stencil-contamination">Exercise 4: Find in-place stencil contamination<a class="heading-anchor" href="#exercise-4-find-in-place-stencil-contamination" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Assuming each thread writes only its own element and therefore cannot interfere ignores that neighbors read that element. Ownership of writes is not the same as ownership of reads.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-5-test-width-one">Exercise 5: Test width one<a class="heading-anchor" href="#exercise-5-test-width-one" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Assuming width is always at least 3 and reading <code>values[i-1]</code> and <code>values[i+1]</code> directly fails: <code>values[-1]</code> silently returns the last element in Python, and <code>values[1]</code> raises IndexError. A device version reads out of bounds.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-6-explain-row-and-column-tail-guards">Exercise 6: Explain row and column tail guards<a class="heading-anchor" href="#exercise-6-explain-row-and-column-tail-guards" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Guarding only the flat offset with <code>offset &lt; height*width</code> lets a thread with column 3 and row 0 in a width-3 image pass, because its offset 3 is valid. It then writes into row 1, column 0, corrupting another pixel.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
-<p>Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.</p>
+<p>Hint <em>k</em> belongs to exercise <em>k</em>; open one at a time.</p>
 <ol>
-<li>Start from worked example 1 and mark the quantities needed for the task &quot;Trace a rectangular tile&quot;.</li>
-<li>Change one assumption in worked example 2 while preserving the declared contract: calculate flat offsets.</li>
-<li>Trace the CPU program&#x27;s variables before adding hardware behavior: change clamp to zero padding.</li>
-<li>Draw producers, consumers and the exact operation boundary for the task &quot;Find in-place stencil contamination&quot;.</li>
-<li>Separate what the small fixture establishes from what the real runtime must show: test width one.</li>
-<li>Write a counterexample to an overbroad claim before you explain row and column tail guards.</li>
+<li>Pick a small rectangular tile and list its row indices and column indices as two separate ranges.</li>
+<li>Use the row-major formula with the image width, then check the largest offset against the allocation size.</li>
+<li>Recompute each border element of <code>[3,6,9]</code> with a zero outside the image instead of a repeated edge value.</li>
+<li>Update the output in place from left to right and note which neighbor value the second element reads.</li>
+<li>With a single column, ask which value clamping supplies for both the left and right neighbors.</li>
+<li>Choose an image whose height and width have different tails and test each coordinate&#x27;s guard separately.</li>
 </ol>
-<h3 id="common-mistakes-and-self-review">Common mistakes and self-review<a class="heading-anchor" href="#common-mistakes-and-self-review" aria-label="Link to this section">#</a></h3>
-<p>Confusing a correct tiny example with a general implementation is the central review risk. For this chapter, challenge the assumption in worked example 2, then ask whether your change preserves the mechanism described above. If you change dtype, layout, ordering, batch size or backend, update the acceptance contract rather than silently reusing the old observation. Explain an unexpected result before trying random configuration changes.</p>
-<p>Keep a small evidence table with columns <strong>claim</strong>, <strong>input</strong>, <strong>expected observation</strong>, <strong>actual observation</strong> and <strong>limit</strong>. For the first claim use <code>Trace a rectangular tile</code>. For the final claim use <code>Explain row and column tail guards</code>. An unperformed GPU or cluster experiment remains pending even when the CPU model is correct.</p>
-<h3 id="platform-and-evidence-contract">Platform and evidence contract<a class="heading-anchor" href="#platform-and-evidence-contract" aria-label="Link to this section">#</a></h3>
-<p>The reading worksheet and CPU reference model work through the ordinary Linux Docker classroom on macOS, Linux and Windows using WSL 2. They do not require an NVIDIA GPU. Their results are labeled CPU models or semantic oracles, not simulated hardware performance.</p>
-<p>Real CUDA work needs supported NVIDIA hardware, a compatible host driver and an explicitly prepared GPU runtime. An Apple GPU does not execute CUDA kernels. PyTorch MPS on a supported native Mac, ROCm on supported AMD hardware, or other vendor backends can provide separate accelerator learning routes; they need their own package and operation qualification and are not CUDA evidence. The ordinary Linux Docker classroom does not expose native Mac MPS automatically.</p>
-<p>Do not download packages, models or data by opening this lesson. Do not attach an engine socket, ambient cluster credentials or an arbitrary remote endpoint. A CPU pass, imported package, successful compilation, real GPU result and measured performance are distinct observations. Record the actual backend, data shape/dtype, source revision, versions and pending checks. A saved completion marker records learning progress, not hardware certification.</p>
+<h3 id="common-mistakes-and-self-check">Common mistakes and self-check<a class="heading-anchor" href="#common-mistakes-and-self-check" aria-label="Link to this section">#</a></h3>
+<p>A frequent mistake is writing a stencil&#x27;s output into its own input. After the first pixel is updated, its neighbor reads the new value instead of the original, so the result depends on thread order. A second mistake is guarding only one coordinate, or using one bound for both, which lets threads in a non-square tail write outside the image. Fix both by reading from an immutable input, writing to a separate output and checking row and column against their own limits.</p>
+<p><strong>Evidence limit:</strong> The CPU loop reproduces the clamped average <code>[4, 6, 8]</code> with visible coordinates. Its run time says nothing about coalescing, tile shape or GPU throughput, and it cannot show races that only appear when threads run concurrently.</p>
+<ol>
+<li>Why must the boundary policy be stated as part of correctness?</li>
+<li>What is the flat offset of row 1, column 2 in a row-major 2 by 3 image?</li>
+<li>Why does a rectangular launch need two independent guards?</li>
+</ol>
+<p>Answers: <a href="../solutions/cuda-075_solutions.md.html#self-check-answers">self-check answers</a>.</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
 <ul>
 <li><a href="https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/intro-to-cuda-python.html">NVIDIA CUDA Python introduction</a></li>
-<li><a href="https://github.com/NVIDIA/numba-cuda">Maintained numba-cuda project</a></li>
 </ul>
-<p>Use the version-matched documentation of your prepared environment. These references describe interfaces and supported boundaries; the chapter&#x27;s synthetic examples and CPU models are original teaching material.</p>
+<p>Full lists: <a href="../../STUDY-GUIDE.md.html#documentation-and-sources">documentation and sources</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning skill for cuda-075: Two-dimensional indexing and images.
 Read courses/cuda/python/guides/cuda-075.md and courses/cuda/python/lessons/cuda-075.md.

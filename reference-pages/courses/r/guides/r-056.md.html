@@ -196,7 +196,10 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <article class="document"><h2 id="r-056-statistical-graphics-for-model-diagnosis">r-056: Statistical graphics for model diagnosis<a class="heading-anchor" href="#r-056-statistical-graphics-for-model-diagnosis" aria-label="Link to this section">#</a></h2>
 <p><strong>Level:</strong> advanced. <strong>Direct prerequisites:</strong> <code>r-055</code>, <code>r-043</code></p>
 <h3 id="run-and-retain-your-work">Run and retain your work<a class="heading-anchor" href="#run-and-retain-your-work" aria-label="Link to this section">#</a></h3>
-<p>Open <code>r-056</code> in <code>/classroom</code> and use the prepared <code>r-statistics</code> profile. Each Run evaluates one <code>main.R</code> script in a fresh offline R process, so define every input in the script; an earlier Run leaves no variables behind. Work in the <a href="../lessons/r-056.R.html">starter</a>. The <a href="../solutions/r-056_reference.R.html">complete reference</a> ends by printing <code>r-056 reference checks passed</code>, and the <a href="../solutions/r-056_solutions.md.html">explained answers</a> are there for deliberate comparison after your own attempt. This chapter draws figures: base plots are captured as PNG, ggplot2 and Plotly objects must be printed explicitly, and the classroom keeps at most two figures per run. The <a href="../README.md.html">course overview</a> describes saved work, figure capture and the prepared package versions.</p>
+<p>The starter holds eight ids with x from 0 to 7 and an empty results list; the response follows the authored rule 1 plus 2x. Run it, fit the model and keep each id with its fitted value and residual in one table before plotting. A residual plot must draw the model&#x27;s own residual vector, so build it from that table rather than recomputing values separately.</p>
+<p>Work in the <a href="../lessons/r-056.R.html">starter</a> under the <a href="../STUDY-GUIDE.md.html#run-a-chapter">run rules</a>.</p>
+<p>The <a href="../solutions/r-056_reference.R.html">complete reference</a> ends by printing <code>r-056 reference checks passed</code>.</p>
+<p>This chapter draws figures; read <a href="../STUDY-GUIDE.md.html#figures">figure capture</a> before printing them.</p>
 <h3 id="outcome-and-mechanism">Outcome and mechanism<a class="heading-anchor" href="#outcome-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Construct diagnostic graphics from fitted quantities and explain which model concerns they can investigate without treating a plot as proof.</p>
 <p>A diagnostic graphic asks a specific question about a fitted model or its assumptions. Residuals versus fitted values can reveal systematic mean patterns or changing spread. A normal Q-Q plot compares ordered residuals with a reference distribution&#x27;s quantiles. Neither graphic automatically decides whether an analysis is scientifically valid.</p>
@@ -289,7 +292,7 @@ p <span class="syntax-operator">&lt;-</span> ggplot2<span class="syntax-operator
 <li><a href="https://stat.ethz.ch/R-manual/R-devel/library/stats/html/residuals.html">R residuals</a></li>
 </ul>
 <h3 id="continue">Continue<a class="heading-anchor" href="#continue" aria-label="Link to this section">#</a></h3>
-<p>No later chapter lists <code>r-056</code> as a direct prerequisite; the <a href="../README.md.html">course map</a> lists every chapter with its prerequisites.</p>
+<p>No later chapter lists <code>r-056</code> as a direct prerequisite; see the <a href="../README.md.html">course map</a>.</p>
 <h3 id="ask-an-ai-tutor">Ask an AI tutor<a class="heading-anchor" href="#ask-an-ai-tutor" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for r-056 (Statistical graphics for model diagnosis).
 Read the guide and my saved attempt. Explain the relevant R mechanism,

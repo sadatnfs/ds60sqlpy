@@ -219,7 +219,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Define recovery-point and recovery-time objectives before choosing backup frequency. Record which writes are included, how snapshots and incremental data are retained, where schema is stored, who can restore it, and how the restored result is checked. A restore on the same machine is useful evidence, but a new-host exercise is needed to qualify a different failure domain.</p>
 <p><strong>Interview discussion: why is a successful backup command weaker than a recovery plan?</strong> It can produce files that are incomplete, inaccessible or incompatible with the intended restore target. These cases require exact restored data and a separate retained-volume replacement readback, while explicitly naming the remote storage and whole-cluster guarantees that remain outside the local fixture.</p>
 <h3 id="complete-worked-source">Complete worked source<a class="heading-anchor" href="#complete-worked-source" aria-label="Link to this section">#</a></h3>
-<p>This is a project-only command notebook. Read and edit it in the classroom; run its explicitly labeled commands from the copied owned Docker workshop. The classroom does not execute these service commands.</p>
+<p>The classroom does not execute these service commands. See the <a href="../STUDY-GUIDE.md.html#workshop-notebooks">workshop rules</a>.</p>
 <h2 id="real-restore-and-read-only-lifecycle-readback">Real restore and read-only lifecycle readback<a class="heading-anchor" href="#real-restore-and-read-only-lifecycle-readback" aria-label="Link to this section">#</a></h2>
 <pre class="highlighted-code"><code class="language-bash">bash run.sh check-backup
 bash run.sh identity
@@ -231,6 +231,7 @@ bash run.sh start
 bash run.sh identity</code></pre>
 <p><code>check-backup</code> snapshots the known source table, stages its compatible SSTable components, imports into a distinct restore table with extended verification, and checks every key/value. It retains a source-bound receipt and the restore target while removing only its exact staging and snapshot. At most four restore targets are allowed. Export receipts before explicitly destroying synthetic state.</p>
 <p>Compare the same host UUID and retained orders at each lifecycle boundary. Read-only identity calls do not replay writes or recreate an empty fixture.</p>
+<p>Each <code>identity</code> call reads <code>host_id</code> and <code>cluster_name</code> from <code>system.local</code> and the order rows sorted by <code>order_id</code>. After <code>stop</code> and <code>resume</code> the containers are the same ones, so a changed <code>host_id</code> is a failure. After <code>down</code> and <code>start</code> the containers are new but the volume is kept, so the same <code>host_id</code> and orders show that state survived on disk rather than in the container.</p>
 <pre class="highlighted-code"><code class="language-bash">bash run.sh destroy --confirm-owned-data-loss</code></pre>
 <p>This final command deletes only verified workshop-owned synthetic data. It is optional cleanup after evidence export, not part of ordinary resume.</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>

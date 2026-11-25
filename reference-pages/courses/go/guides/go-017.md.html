@@ -209,9 +209,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="syntax-anatomy-and-reasoning">Syntax anatomy and reasoning<a class="heading-anchor" href="#syntax-anatomy-and-reasoning" aria-label="Link to this section">#</a></h3>
 <p>Read receives a byte slice and returns n and err. Only the first n bytes contain this call&#x27;s data. io.EOF means the stream has ended; io.ErrUnexpectedEOF means a fixed-size request ended after partial data. io.Copy repeatedly transfers data and returns a count plus error. io.LimitReader caps visible bytes. bytes.Buffer provides an in-memory reader/writer useful for deterministic tests.</p>
 <h3 id="run-this-lesson">Run this lesson<a class="heading-anchor" href="#run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>Choose Go in the unified Docker classroom. Save your own pad before experimenting. The prepared worker stages it as <code>main.go</code>, compiles it, and executes the resulting program with bounded time and output. The pad is one source file. It does not supply interactive input, arbitrary command-line arguments, package installation, Kubernetes credentials or a host Docker socket. Every ordinary reference here uses the standard library, synthetic local data and explicit checks. A failed <code>check</code> panics and produces a nonzero process result; do not remove it to make the run appear successful.</p>
-<p>The explanatory solution snippets belong inside <code>func main()</code> unless they declare a helper. <code>check</code> is a tiny teaching helper that panics when a condition is false. The separate reference supplies required imports and helpers and implements all six cases. Use that complete source only after an attempt or an explicit reveal. For an independently prepared Go project, the equivalent local build is <code>go build -o lesson main.go</code>, followed by <code>./lesson</code>; use Linux or WSL 2 for that optional workflow. Compiling proves syntax and type consistency, while the executed checks establish the stated example contracts.</p>
-<p>Each worked example below is a complete Go file. Copy one whole block into your saved pad and run it. Example 2 includes the first case as well as the second, so its setup is complete. Its supporting declarations may be reused in later investigations. The separate reference implements all six cases.</p>
+<p>Run each worked example as one complete file in your saved pad (<a href="../STUDY-GUIDE.md.html#run-a-lesson">run steps</a>).</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1-copy-a-stream">Worked example 1: Copy a stream<a class="heading-anchor" href="#worked-example-1-copy-a-stream" aria-label="Link to this section">#</a></h4>
 <p>Copy alpha from a strings.Reader into bytes.Buffer.</p>
@@ -277,77 +275,79 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Observe:</strong> Two bytes arrive and ErrUnexpectedEOF is returned.</p>
 <p>Partial data is useful evidence, but it is not a complete fixed-width record. Treating any positive n as completion would accept truncation.</p>
 <h3 id="predict-before-running">Predict before running<a class="heading-anchor" href="#predict-before-running" aria-label="Link to this section">#</a></h3>
-<p>For each example, write the input values, the state that can change, and the expected observation. Explain which result would disprove your current interpretation. For concurrency, predict a guaranteed relationship rather than an arbitrary scheduling order. For an error case, identify whether it is rejected at compilation or returned during execution.</p>
+<p>Predict the count io.Copy returns for alpha, and whether one Read call is guaranteed to fill a buffer. For ReadFull on a two-byte source, predict both n and the error. For the limit cases, decide which budget distinguishes input exactly at the limit from input over it, and predict the result of copying an empty reader.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-copy-a-stream-change-one-input">Exercise 1: Copy a stream: change one input<a class="heading-anchor" href="#exercise-1-copy-a-stream-change-one-input" aria-label="Link to this section">#</a></h4>
-<p>Copy worked example 1 into a scratch pad and change <code>n, err := io.Copy(&amp;out, strings.NewReader(&quot;alpha&quot;))</code> to <code>n, err := io.Copy(&amp;out, strings.NewReader(&quot;alpha!&quot;))</code>. Before running, predict which check fails and which value it now sees; then run it and restore the original line.</p>
-<p><strong>Expected:</strong> The changed run panics with <code>copy</code> because <code>err == nil &amp;&amp; n == 5 &amp;&amp; out.String() == &quot;alpha&quot;</code> no longer holds. Restoring the original line brings back the worked observation: five bytes are copied and output is alpha.</p>
-<p><strong>Verify:</strong> Compare your written prediction with the panic message <code>copy</code> and name the value that made <code>err == nil &amp;&amp; n == 5 &amp;&amp; out.String() == &quot;alpha&quot;</code> false. After restoring the input, the program must print its success line again.</p>
+<p>Copy worked example 1, change <code>n, err := io.Copy(&amp;out, strings.NewReader(&quot;alpha&quot;))</code> to <code>n, err := io.Copy(&amp;out, strings.NewReader(&quot;alpha!&quot;))</code> and predict the failure before running; then restore the line.</p>
+<p><strong>Expected:</strong> The edited run panics with <code>copy</code> because <code>err == nil &amp;&amp; n == 5 &amp;&amp; out.String() == &quot;alpha&quot;</code> no longer holds.</p>
+<p><strong>Verify:</strong> Restoring <code>n, err := io.Copy(&amp;out, strings.NewReader(&quot;alpha&quot;))</code> makes the check pass again with the worked observation: five bytes are copied and output is alpha.</p>
 <h4 id="exercise-2-require-a-full-record-debug-a-regression">Exercise 2: Require a full record: debug a regression<a class="heading-anchor" href="#exercise-2-require-a-full-record-debug-a-regression" aria-label="Link to this section">#</a></h4>
-<p>A regression changed one token in worked example 2, so one line now reads <code>n, err := io.ReadFull(strings.NewReader(&quot;ab!&quot;), buf)</code>. Run worked example 2 with that line, use the failure to locate the defect and repair it without changing the check.</p>
-<p><strong>Expected:</strong> Before the repair the program panics with <code>partial record</code>; after it the line reads <code>n, err := io.ReadFull(strings.NewReader(&quot;ab&quot;), buf)</code> again and two bytes arrive and ErrUnexpectedEOF is returned.</p>
-<p><strong>Verify:</strong> Keep the failing and the repaired runs. Explain why the changed token alters the value tested by <code>n == 2 &amp;&amp; err == io.ErrUnexpectedEOF</code> for this input.</p>
+<p>A one-token regression in worked example 2 makes a line read <code>n, err := io.ReadFull(strings.NewReader(&quot;ab!&quot;), buf)</code>. Repair it without changing the check.</p>
+<p><strong>Expected:</strong> The defective run panics with <code>partial record</code>; after restoring <code>n, err := io.ReadFull(strings.NewReader(&quot;ab&quot;), buf)</code>, two bytes arrive and ErrUnexpectedEOF is returned.</p>
+<p><strong>Verify:</strong> The failing run shows message <code>partial record</code>; after the repair <code>n == 2 &amp;&amp; err == io.ErrUnexpectedEOF</code> holds again.</p>
 <h4 id="exercise-3-bound-visible-input">Exercise 3: Bound visible input<a class="heading-anchor" href="#exercise-3-bound-visible-input" aria-label="Link to this section">#</a></h4>
 <p>Read at most three bytes from abcdef.</p>
 <p><strong>Expected:</strong> The visible result is abc.</p>
-<p><strong>Verify:</strong> Keep a check equivalent to <code>err == nil &amp;&amp; string(v) == &quot;abc&quot;</code>. As a control, change <code>v, err := io.ReadAll(io.LimitReader(strings.NewReader(&quot;abcdef&quot;), 3))</code> to <code>v, err := io.ReadAll(io.LimitReader(strings.NewReader(&quot;abcdef&quot;), 4))</code>: the run must panic with <code>limit</code>. Restore the line before continuing.</p>
+<p><strong>Verify:</strong> Your solution must keep <code>err == nil &amp;&amp; string(v) == &quot;abc&quot;</code> true. Control: changing <code>v, err := io.ReadAll(io.LimitReader(strings.NewReader(&quot;abcdef&quot;), 3))</code> to <code>v, err := io.ReadAll(io.LimitReader(strings.NewReader(&quot;abcdef&quot;), 4))</code> panics with message <code>limit</code>; revert it.</p>
 <h4 id="exercise-4-detect-excess-data">Exercise 4: Detect excess data<a class="heading-anchor" href="#exercise-4-detect-excess-data" aria-label="Link to this section">#</a></h4>
 <p>Read a four-byte budget for a three-byte maximum.</p>
 <p><strong>Expected:</strong> A four-byte result proves the maximum was exceeded.</p>
-<p><strong>Verify:</strong> Keep a check equivalent to <code>err == nil &amp;&amp; len(v) &gt; 3</code>. As a control, change <code>check(err == nil &amp;&amp; len(v) &gt; 3, &quot;excess input&quot;)</code> to <code>check(err != nil &amp;&amp; len(v) &gt; 3, &quot;excess input&quot;)</code> inside that check: it must panic with <code>excess input</code>, which shows the check can fail. Restore it.</p>
+<p><strong>Verify:</strong> Your solution must keep <code>err == nil &amp;&amp; len(v) &gt; 3</code> true. Control: changing <code>check(err == nil &amp;&amp; len(v) &gt; 3, &quot;excess input&quot;)</code> to <code>check(err != nil &amp;&amp; len(v) &gt; 3, &quot;excess input&quot;)</code> panics with message <code>excess input</code>; revert it.</p>
 <h4 id="exercise-5-preserve-an-empty-stream">Exercise 5: Preserve an empty stream<a class="heading-anchor" href="#exercise-5-preserve-an-empty-stream" aria-label="Link to this section">#</a></h4>
 <p>Copy an empty reader to a buffer.</p>
 <p><strong>Expected:</strong> The count is zero and there is no error.</p>
-<p><strong>Verify:</strong> Keep a check equivalent to <code>err == nil &amp;&amp; n == 0 &amp;&amp; out.Len() == 0</code>. As a control, change <code>check(err == nil &amp;&amp; n == 0 &amp;&amp; out.Len() == 0, &quot;empty copy&quot;)</code> to <code>check(err != nil &amp;&amp; n == 0 &amp;&amp; out.Len() == 0, &quot;empty copy&quot;)</code> inside that check: it must panic with <code>empty copy</code>, which shows the check can fail. Restore it.</p>
+<p><strong>Verify:</strong> Your solution must keep <code>err == nil &amp;&amp; n == 0 &amp;&amp; out.Len() == 0</code> true. Control: changing <code>check(err == nil &amp;&amp; n == 0 &amp;&amp; out.Len() == 0, &quot;empty copy&quot;)</code> to <code>check(err != nil &amp;&amp; n == 0 &amp;&amp; out.Len() == 0, &quot;empty copy&quot;)</code> panics with message <code>empty copy</code>; revert it.</p>
 <h4 id="exercise-6-transfer-exact-framing">Exercise 6: Transfer exact framing<a class="heading-anchor" href="#exercise-6-transfer-exact-framing" aria-label="Link to this section">#</a></h4>
 <p>Read a two-byte header followed by a three-byte payload.</p>
 <p><strong>Expected:</strong> The header is AB and payload is xyz.</p>
-<p><strong>Verify:</strong> Keep a check equivalent to <code>e1 == nil &amp;&amp; e2 == nil &amp;&amp; string(h) == &quot;AB&quot; &amp;&amp; string(p) == &quot;xyz&quot;</code>. As a control, change <code>h := make([]byte, 2)</code> to <code>h := make([]byte, 3)</code>: the run must panic with <code>framing</code>. Restore the line before continuing.</p>
-<p>Implement these in the answer-free learner source. Keep one independent check per claim. A task can require tracing, construction, a changed input or a deliberate safe failure. Do not run a data race, corrupt memory or contact a shared cluster merely to demonstrate why it would be wrong.</p>
+<p><strong>Verify:</strong> Your solution must keep <code>e1 == nil &amp;&amp; e2 == nil &amp;&amp; string(h) == &quot;AB&quot; &amp;&amp; string(p) == &quot;xyz&quot;</code> true. Control: changing <code>h := make([]byte, 2)</code> to <code>h := make([]byte, 3)</code> panics with message <code>framing</code>; revert it.</p>
+<p>Work in the answer-free learner source, <code>courses/go/lessons/go-017.go</code> (<a href="../STUDY-GUIDE.md.html#work-an-exercise">exercise contract</a>).</p>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
-<p>Read a compiler error from the first location in your source, then fix one cause at a time. Unused imports and variables are errors in Go; add an import when its use exists, rather than copying a large unused import list. A panic from <code>check</code> identifies a violated example contract. Compare the actual value with the expected value and inspect the state transition that produced it. A returned <code>error</code> is a value that the caller must handle; an ignored error can make later output look plausible while the original operation failed.</p>
-<p>The lesson-specific explanations in the two examples identify the important counterexamples. Extend that reasoning to every investigation: explain why a plausible alternative would fail, and preserve a tiny input that distinguishes it. Treat empty data, missing values and cancellation as domain cases with explicit policies. In concurrent work, replace sleeps used as synchronization with channels, mutexes or an explicit ownership protocol.</p>
+<p>Treating one Read as a whole message, or any positive n as a complete record, are the classic stream bugs; both accept truncated input from slow or chunked sources. Another is discarding the bytes returned alongside an error. A LimitReader also truncates silently: reading exactly the maximum cannot tell you whether more data followed, so read one extra byte when excess must be rejected.</p>
+<p>General compiler, panic and error diagnosis is in the <a href="../STUDY-GUIDE.md.html#diagnose-a-failure">study guide</a>.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <h4 id="hint-for-investigation-1-copy-a-stream-change-one-input">Hint for investigation 1: Copy a stream: change one input<a class="heading-anchor" href="#hint-for-investigation-1-copy-a-stream-change-one-input" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: Five bytes are copied and output is alpha.</li>
-<li>The check <code>err == nil &amp;&amp; n == 5 &amp;&amp; out.String() == &quot;alpha&quot;</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Compute the checked value with <code>n, err := io.Copy(&amp;out, strings.NewReader(&quot;alpha!&quot;))</code> in place before running, then compare it with the value <code>err == nil &amp;&amp; n == 5 &amp;&amp; out.String() == &quot;alpha&quot;</code> expects.</li>
+<li>io.Copy reports the number of bytes written. How many bytes are in alpha?</li>
+<li>alpha! has six bytes, so Copy reports 6 and <code>n==5</code> fails along with the output comparison. Copying works; the input changed.</li>
 </ol>
 <h4 id="hint-for-investigation-2-require-a-full-record-debug-a-regression">Hint for investigation 2: Require a full record: debug a regression<a class="heading-anchor" href="#hint-for-investigation-2-require-a-full-record-debug-a-regression" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: Two bytes arrive and ErrUnexpectedEOF is returned.</li>
-<li>The check <code>n == 2 &amp;&amp; err == io.ErrUnexpectedEOF</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Compare <code>n, err := io.ReadFull(strings.NewReader(&quot;ab!&quot;), buf)</code> with the same line in worked example 2 and state the claim each version makes.</li>
+<li>ReadFull wants exactly len(buf) bytes. What does it return when the source ends early?</li>
+<li>Three bytes arrive from ab!, so n is 3, not 2, while the error is still ErrUnexpectedEOF. Restore the two-byte source; ReadFull behaves correctly.</li>
 </ol>
 <h4 id="hint-for-investigation-3-bound-visible-input">Hint for investigation 3: Bound visible input<a class="heading-anchor" href="#hint-for-investigation-3-bound-visible-input" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The visible result is abc.</li>
-<li>The check <code>err == nil &amp;&amp; string(v) == &quot;abc&quot;</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Predict the effect of changing <code>v, err := io.ReadAll(io.LimitReader(strings.NewReader(&quot;abcdef&quot;), 3))</code> to <code>v, err := io.ReadAll(io.LimitReader(strings.NewReader(&quot;abcdef&quot;), 4))</code> before running anything. If the prediction is hard, trace that line again with the original input.</li>
+<li>LimitReader stops after n bytes. Which bytes of abcdef are visible?</li>
+<li>The limit controls resource use.</li>
 </ol>
 <h4 id="hint-for-investigation-4-detect-excess-data">Hint for investigation 4: Detect excess data<a class="heading-anchor" href="#hint-for-investigation-4-detect-excess-data" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: A four-byte result proves the maximum was exceeded.</li>
-<li>The check <code>err == nil &amp;&amp; len(v) &gt; 3</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Name one input that would make <code>err == nil &amp;&amp; len(v) &gt; 3</code> false. A check that no input can falsify is not evidence.</li>
+<li>The budget is one more than the maximum. What does a four-byte result prove?</li>
+<li>Reading maximum plus one distinguishes exactly-at-limit data from truncated over-limit input without unbounded allocation.</li>
 </ol>
 <h4 id="hint-for-investigation-5-preserve-an-empty-stream">Hint for investigation 5: Preserve an empty stream<a class="heading-anchor" href="#hint-for-investigation-5-preserve-an-empty-stream" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The count is zero and there is no error.</li>
-<li>The check <code>err == nil &amp;&amp; n == 0 &amp;&amp; out.Len() == 0</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Name one input that would make <code>err == nil &amp;&amp; n == 0 &amp;&amp; out.Len() == 0</code> false. A check that no input can falsify is not evidence.</li>
+<li>An empty source is still a valid stream. What should Copy return for count and error?</li>
+<li>An empty stream can be valid transport input even when an application later requires at least one record.</li>
 </ol>
 <h4 id="hint-for-investigation-6-transfer-exact-framing">Hint for investigation 6: Transfer exact framing<a class="heading-anchor" href="#hint-for-investigation-6-transfer-exact-framing" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The header is AB and payload is xyz.</li>
-<li>The check <code>e1 == nil &amp;&amp; e2 == nil &amp;&amp; string(h) == &quot;AB&quot; &amp;&amp; string(p) == &quot;xyz&quot;</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Predict the effect of changing <code>h := make([]byte, 2)</code> to <code>h := make([]byte, 3)</code> before running anything. If the prediction is hard, trace that line again with the original input.</li>
+<li>Both ReadFull calls consume the same reader. Where does the second read begin?</li>
+<li>Explicit frame lengths prevent a reader from guessing where one logical object ends.</li>
 </ol>
 <h3 id="self-check-and-retrieval">Self-check and retrieval<a class="heading-anchor" href="#self-check-and-retrieval" aria-label="Link to this section">#</a></h3>
-<p>Close the reference. Rebuild one normal case and one boundary case from a blank pad. Explain the role of reader without using its name in the definition. Then change the domain while keeping the same invariant. Record the new input, your prediction and the observed output. If your program passes only because its input is hard-coded, explain which part would need a reusable function in a larger project.</p>
+<p>Write <code>readAtMost(r io.Reader, max int64) ([]byte, error)</code> that reads at most max plus one bytes and rejects input longer than max. Check it with input shorter than the maximum, exactly at it and one byte over. Then explain why a fixed two-byte header needs io.ReadFull rather than a single Read call.</p>
+<p>The general <a href="../STUDY-GUIDE.md.html#self-check-and-retrieval">retrieval routine</a> still applies.</p>
 <h3 id="next-step-and-sources">Next step and sources<a class="heading-anchor" href="#next-step-and-sources" aria-label="Link to this section">#</a></h3>
-<p><a href="https://pkg.go.dev/io">Primary language or library documentation</a>, reviewed 2026-10-23. The teaching explanations and synthetic fixtures are original. Continue with the next lesson when you can explain the six observations and diagnose a changed case without copying its answer.</p>
+<p>Source: <a href="https://pkg.go.dev/io"><code>io</code> package documentation</a>, reviewed 2026-10-23.</p>
+<p>Next: go-018, Filesystems, paths and owned cleanup (<a href="../STUDY-GUIDE.md.html#when-to-move-on">criteria</a>).</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for go-017: Readers, writers and bounded streaming.
 Read courses/go/guides/go-017.md and my saved attempt based on courses/go/lessons/go-017.go.

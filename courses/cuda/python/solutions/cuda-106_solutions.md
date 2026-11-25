@@ -1,6 +1,6 @@
 # cuda-106: explained solutions
 
-These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.
+Compare with your [worksheet](../lessons/cuda-106.md) attempt.
 
 ## Exercise 1: Create tile boundaries
 
@@ -74,8 +74,16 @@ Larger tiles can increase live state and reduce concurrency.
 
 **How to verify.** Measure several tile sizes on the target device and record register usage and achieved occupancy beside timings.
 
+## Self-check answers
+
+1. **What does a tile-level language change for the programmer?** The programmer describes operations on blocks of data, and the compiler chooses how to distribute them over threads and instructions.
+
+2. **Why use half-open tile intervals?** Each tile ends where the next begins, so every element is covered exactly once without overlap.
+
+3. **Does opening this lesson give the Python worker a DSL compiler?** No. It provides a CPU tiling model only; a DSL needs a prepared environment with a supported device.
+
 ## Reference observation
 
 Three tiles cover ten elements exactly once.
 
-The reference file is `courses/cuda/python/references/cuda-106_cpu.py`. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.
+Asserted by `courses/cuda/python/references/cuda-106_cpu.py`.

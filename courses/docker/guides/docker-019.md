@@ -32,11 +32,9 @@ The fixture uses a single bridge for its first exercises. Sketch multi-tier desi
 
 ## How to use this lesson
 
-The classroom displays this guide and saves your worksheet, `courses/docker/lessons/docker-019.md`. Its Run button does not control your Docker engine. Docker engine access is powerful host access, so the classroom deliberately receives no engine socket. Work through the supplied examples without starting anything, then use the optional host lab only in your own disposable project. Reading a command, parsing YAML and actually running the project are different forms of evidence.
+The classroom saves `courses/docker/lessons/docker-019.md` and holds no engine socket ([host-lab setup](../STUDY-GUIDE.md#host-lab-setup)).
 
-Use Bash in Linux, macOS Terminal, or Ubuntu under WSL 2 on Windows. The supported engine runs Linux containers. The maintained fixture is `courses/docker/fixtures/compose-lab/`; its README explains copying it into a new ignored learner directory, checking the engine, building locally with visible logs, and using the fixed project name `ds60-docker-study`. The fixture uses port 18080 on host loopback. Stop if that project name or port belongs to unrelated work; choose a new project name consistently in your own copy. Never paste a command against a remote Docker context simply because it is currently selected.
-
-For Dockerfile examples, create a file named `Dockerfile` in a scratch project. YAML snippets describe a fragment unless explicitly called a complete file. Text transcripts are synthetic illustrations, not claims about your machine. Do not substitute a real password, token or private registry into a checked-in example. **How to use the lessons** in the [subject README](../README.md) collects these rules in one place.
+**Host lab.** Create a scratch internal network with `docker network create --internal ds60-internal-demo`. Run `docker run --rm --pull never --network ds60-internal-demo ds60-docker-study:local cat /proc/net/route` and compare it with `docker compose -p ds60-docker-study exec app cat /proc/net/route` from the running project. The project container has a row whose destination is `00000000`, its default route through the network gateway; the internal network gives a subnet route and no default route, so traffic for any other address has nowhere to go. Then run worked example 2 and add `cat /proc/net/dev` to see that `--network none` leaves only the loopback interface. No request leaves the machine during this lab. Remove the scratch network with `docker network rm ds60-internal-demo`.
 
 ## Worked example / walkthrough
 
@@ -70,7 +68,7 @@ docker run --rm --pull never --network none ds60-docker-study:local python -c "p
 
 ## Six progressive exercises
 
-For each exercise, name the object involved and the phase of its lifetime before changing anything, then vary only the condition the task names. Exercises that ask you to predict, explain, compare or diagnose keep their answers in the solutions file; the others show the evidence to look for.
+Answer-type prompts keep their answers in the solutions file ([exercise rules](../STUDY-GUIDE.md#exercise-rules)).
 
 ### Exercise 1: Distinguish attachment from published ports.
 
@@ -104,13 +102,19 @@ For each exercise, name the object involved and the phase of its lifetime before
 
 Switching to host networking to make a port problem disappear. Treating a private network as authentication. Attaching every service to every network.
 
-Exercise 4 is this chapter's boundary case: Diagnose host-network mode used to hide a mapping error. Restore the bridge network, reproduce the original refusal and read the published mapping and listen address that host mode was hiding. Preserve the original failure and the exact changed field before retrying. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
+Exercise 4 is this chapter's boundary case: Diagnose host-network mode used to hide a mapping error. Restore the bridge network, reproduce the original refusal and read the published mapping and listen address that host mode was hiding.
+
+Network isolation limits sockets, not every data path. A worker started with `--network none` can still read and change any volume or bind mount it receives, and whatever it writes to stdout is kept in the container log for anyone who can run `docker logs`. So an offline job that mounts a broad host directory is not contained just because it cannot open connections. When you review an isolated service, list its mounts, its output destinations and its environment alongside its networks, and give it only the paths its task needs, read-only where it only reads.
+
+Never trade a safety control for a passing example ([safety rules](../STUDY-GUIDE.md#safety-rules)).
 
 ## Retrieval, transfer and next steps
 
-Close the explanations first. Predict the output of the computation under `--network none` and explain why no network was needed. Then reconstruct worked example 2 (Run a network-free computation) with one different value, predict what changes, and name which of network isolation, internal network, gateway and outbound connectivity the change touches.
+**Retrieval.** Predict the output of the computation under `--network none` and explain why no network was needed.
 
-When a host session ends, run `docker compose -p ds60-docker-study down` from your fixture copy. It removes the project's containers and network but keeps named volumes; deleting a volume is a separate, deliberate reset described in the fixture README.
+**Transfer case.** A worker must call an API on the internal `backend` network and must never reach the internet. A teammate attaches it to both `backend` and the non-internal `frontend` network so it starts faster. Evaluate the change and state an acceptance check.
+
+Then run the [retrieval loop](../STUDY-GUIDE.md#retrieval-and-cleanup) and end any host session with its cleanup.
 
 ## Primary references
 

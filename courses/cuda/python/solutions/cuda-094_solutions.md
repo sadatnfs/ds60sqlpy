@@ -1,6 +1,6 @@
 # cuda-094: explained solutions
 
-These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.
+Compare with your [worksheet](../lessons/cuda-094.md) attempt.
 
 ## Exercise 1: List checkpoint fields
 
@@ -74,8 +74,16 @@ Document numerical agreement rather than universal byte equality.
 
 **How to verify.** Resume the same checkpoint on two machines and compare loss curves within the documented tolerance, recording both environments.
 
+## Self-check answers
+
+1. **Why save at an update boundary?** Partially accumulated gradients are ambiguous to restore unless the format explicitly handles them, while a completed step is consistent.
+
+2. **Does a checkpoint restore a running GPU context?** No. It restores numerical training state, not a live context, an in-flight stream or allocator contents.
+
+3. **Why must checkpoint storage outlive the training process?** The process is disposable; a restart can only continue if the saved state survives the process that wrote it.
+
 ## Reference observation
 
 Correct restored update 0.935 differs from weights-only 0.98.
 
-The reference file is `courses/cuda/python/references/cuda-094_cpu.py`. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.
+Asserted by `courses/cuda/python/references/cuda-094_cpu.py`.

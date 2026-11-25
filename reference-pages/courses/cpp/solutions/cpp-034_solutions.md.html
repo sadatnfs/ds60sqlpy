@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cpp/solutions/cpp-034_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="cpp-034-explanations-and-reference-observations">cpp-034: explanations and reference observations<a class="heading-anchor" href="#cpp-034-explanations-and-reference-observations" aria-label="Link to this section">#</a></h2>
-<p>Attempt the learner tasks before opening this document. The executable reference checks the bounded normal and boundary examples; the six explanations below cover the deliberate changes and manual checks.</p>
+<p>The <a href="cpp-034_solution.cpp.html">executable reference</a> checks that <code>reserve(100)</code> leaves size 0 with capacity at least 100. The explanations compare the two layouts and say what to measure before choosing one. How to compare: <a href="../STUDY-GUIDE.md.html#compare-with-the-solutions">study guide</a>.</p>
 <h3 id="mechanism">Mechanism<a class="heading-anchor" href="#mechanism" aria-label="Link to this section">#</a></h3>
 <p>Data layout determines which values are adjacent in memory. Array-of-structs stores complete records together; struct-of-arrays groups each field separately. Locality can reduce memory traffic when a calculation uses one field, while another workload may favor complete records. Allocation count is a separate cost from algorithmic work.</p>
 <h3 id="detailed-reasoning">Detailed reasoning<a class="heading-anchor" href="#detailed-reasoning" aria-label="Link to this section">#</a></h3>

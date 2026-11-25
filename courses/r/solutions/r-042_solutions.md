@@ -1,6 +1,6 @@
 # r-042: reference reasoning
 
-Use the [complete reference](r-042_reference.R) with the guide's declared inputs and runtime. Every worked example is also a standalone script.
+Run the [complete reference](r-042_reference.R) under the [run rules](../STUDY-GUIDE.md#run-a-chapter).
 
 ## Why the implementation has this shape
 
@@ -108,4 +108,6 @@ Both describe uncertainty of a mean under different procedures; their agreement 
 
 ## What the checks establish
 
-The reference makes 7 `stopifnot()` checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.
+The checks confirm a mean of 5 with squared standard error 5/3, a shift by 3 that moves the mean but not the standard error, all 256 bootstrap resamples averaging exactly 5 with variance 5/4, the relationship between the standard deviation and the standard error, rejection of a single observation, and t and percentile intervals that both contain 5. They do not show that either interval has its nominal coverage for such a small sample.
+
+The reference makes 7 `stopifnot()` checks; see [what a passing run proves](../STUDY-GUIDE.md#what-a-passing-run-proves).

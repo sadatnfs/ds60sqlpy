@@ -194,12 +194,12 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/go/solutions/go-027_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="go-027-explained-solutions">go-027: explained solutions<a class="heading-anchor" href="#go-027-explained-solutions" aria-label="Link to this section">#</a></h2>
-<p>These are comparison material after an attempt or explicit reveal. The executable reference implements all six cases in one <code>main.go</code>.</p>
+<p>Compare after an attempt (<a href="../STUDY-GUIDE.md.html#use-the-solutions">using solutions</a>). <code>courses/go/solutions/go-027_solution.go</code> implements all six cases.</p>
 <h3 id="mechanism">Mechanism<a class="heading-anchor" href="#mechanism" aria-label="Link to this section">#</a></h3>
 <p>A mutex protects a state invariant across several operations. Every relevant access must follow the same protocol: locking writes while reading without synchronization can still race. Atomic operations protect specific values and ordering relationships, but do not automatically make a multi-field transaction atomic. Prefer a mutex for a compound invariant that must be inspected and changed together. Never copy a mutex after use. Keep critical sections small, avoid calling unknown callbacks while holding a lock, and define lock ordering when several locks are unavoidable. A correct observed count is not by itself proof of correct synchronization.</p>
 <p>sync.Mutex uses Lock and Unlock; defer Unlock after acquisition handles early returns. atomic.Int64 supplies typed Load, Store and Add. sync.Once runs one initialization function. Keep synchronized state in a pointer-owned holder so it is not copied accidentally. count++ on an ordinary shared integer is a read-modify-write sequence, not an atomic operation.</p>
 <h3 id="1-protect-a-concurrent-count-change-one-input">1. Protect a concurrent count: change one input<a class="heading-anchor" href="#1-protect-a-concurrent-count-change-one-input" aria-label="Link to this section">#</a></h3>
-<p>Copy worked example 1 into a scratch pad and change <code>for i := 0; i &lt; 4; i++ {</code> to <code>for i := 1; i &lt; 4; i++ {</code>. Before running, predict which check fails and which value it now sees; then run it and restore the original line.</p>
+<p>Copy worked example 1, change <code>for i := 0; i &lt; 4; i++ {</code> to <code>for i := 1; i &lt; 4; i++ {</code> and predict the failure before running; then restore the line.</p>
 <p>The unchanged code is worked example 1:</p>
 <pre class="highlighted-code"><code class="language-go">c <span class="syntax-operator">:=</span> <span class="syntax-operator">&amp;</span>LockedCount<span class="syntax-punctuation">{</span><span class="syntax-punctuation">}</span>
 <span class="syntax-keyword">var</span> wg sync<span class="syntax-punctuation">.</span>WaitGroup
@@ -214,20 +214,22 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="syntax-punctuation">}</span>
 wg<span class="syntax-punctuation">.</span>Wait<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
 check<span class="syntax-punctuation">(</span>c<span class="syntax-punctuation">.</span>Value<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">400</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;count&quot;</span><span class="syntax-punctuation">)</span></code></pre>
-<p><strong>Expected:</strong> The changed run panics with <code>count</code> because <code>c.Value() == 400</code> no longer holds. Restoring the original line brings back the worked observation: the joined final count is 400.</p>
+<p><strong>Expected:</strong> The edited run panics with <code>count</code> because <code>c.Value() == 400</code> no longer holds.</p>
+<p><strong>Verify:</strong> Restoring <code>for i := 0; i &lt; 4; i++ {</code> makes the check pass again with the worked observation: the joined final count is 400.</p>
 <p>Reads and writes use the same lock. The join establishes task completion before inspection.</p>
 <p><strong>Approach.</strong> Count goroutines in the edited loop: starting at 1 and stopping before 4 launches three workers, each calling <code>Inc</code> 100 times.</p>
 <p><strong>Why it holds here.</strong> Every increment holds the mutex and <code>wg.Wait</code> joins all workers before <code>Value</code> reads, so the result is exactly 300 on every run and <code>c.Value() == 400</code> panics with <code>count</code>.</p>
 <p><strong>A plausible wrong approach.</strong> Predicting a different total on each run because goroutines interleave. The lock makes each increment indivisible and the join waits for all of them, so the value is deterministic; only an unlocked <code>c.n++</code> would lose updates.</p>
 <p><strong>Verify.</strong> Print <code>c.Value()</code> and see 300 before the panic. <code>go run -race</code> on the restored program reports no data race and prints the success line.</p>
 <h3 id="2-use-a-typed-atomic-debug-a-regression">2. Use a typed atomic: debug a regression<a class="heading-anchor" href="#2-use-a-typed-atomic-debug-a-regression" aria-label="Link to this section">#</a></h3>
-<p>A regression changed <code>n.Add(3)</code> to <code>n.Add(4)</code> in worked example 2. Run worked example 2 with that change, use the failure to explain the defect and repair it without changing the check.</p>
+<p>A regression changed <code>n.Add(3)</code> to <code>n.Add(4)</code> in worked example 2. Repair it without changing the check.</p>
 <p>The unchanged code is worked example 2:</p>
 <pre class="highlighted-code"><code class="language-go"><span class="syntax-keyword">var</span> n atomic<span class="syntax-punctuation">.</span>Int64
 n<span class="syntax-punctuation">.</span>Add<span class="syntax-punctuation">(</span><span class="syntax-number">3</span><span class="syntax-punctuation">)</span>
 n<span class="syntax-punctuation">.</span>Add<span class="syntax-punctuation">(</span><span class="syntax-number">4</span><span class="syntax-punctuation">)</span>
 check<span class="syntax-punctuation">(</span>n<span class="syntax-punctuation">.</span>Load<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">7</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;atomic&quot;</span><span class="syntax-punctuation">)</span></code></pre>
-<p><strong>Expected:</strong> Before the repair the program panics with <code>atomic</code>; after it the line reads <code>n.Add(3)</code> again and load returns 7.</p>
+<p><strong>Expected:</strong> The defective run panics with <code>atomic</code>; after restoring <code>n.Add(3)</code>, load returns 7.</p>
+<p><strong>Verify:</strong> The failing run shows message <code>atomic</code>; after the repair <code>n.Load() == 7</code> holds again.</p>
 <p>Use the atomic access API consistently. Mixing it with ordinary conflicting accesses undermines the protocol.</p>
 <p><strong>Approach.</strong> Add the two deltas: with the regression both calls add 4, so <code>Load</code> returns 8 instead of 7.</p>
 <p><strong>Why it holds here.</strong> Atomic adds compose exactly, so 8 is the true sum of the regressed deltas and the check panics with <code>atomic</code>. Restoring the first delta to 3 gives 7.</p>
@@ -240,6 +242,7 @@ p<span class="syntax-punctuation">.</span>Transfer<span class="syntax-punctuatio
 a<span class="syntax-punctuation">,</span> b <span class="syntax-operator">:=</span> p<span class="syntax-punctuation">.</span>Snapshot<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
 check<span class="syntax-punctuation">(</span>a <span class="syntax-operator">==</span> <span class="syntax-number">2</span> <span class="syntax-operator">&amp;&amp;</span> b <span class="syntax-operator">==</span> <span class="syntax-number">8</span> <span class="syntax-operator">&amp;&amp;</span> a<span class="syntax-operator">+</span>b <span class="syntax-operator">==</span> <span class="syntax-number">10</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;pair&quot;</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> The balances become 2 and 8; their sum remains 10.</p>
+<p><strong>Verify:</strong> Your solution must keep <code>a == 2 &amp;&amp; b == 8 &amp;&amp; a+b == 10</code> true. Control: changing <code>check(a == 2 &amp;&amp; b == 8 &amp;&amp; a+b == 10, &quot;pair&quot;)</code> to <code>check(a == 2 &amp;&amp; b == 8 &amp;&amp; a-b == 10, &quot;pair&quot;)</code> panics with message <code>pair</code>; revert it.</p>
 <p>One lock protects both fields. Independent updates could expose an intermediate state with the wrong total.</p>
 <p><strong>Approach.</strong> Move 3 from <code>A</code> to <code>B</code> inside one locked method, then read both fields with <code>Snapshot</code> under the same lock.</p>
 <p><strong>Why it holds here.</strong> Both fields change while the mutex is held, so no reader can see one update without the other: the snapshot is 2 and 8 and the sum stays 10.</p>
@@ -254,6 +257,7 @@ n <span class="syntax-operator">:=</span> <span class="syntax-number">0</span>
 <span class="syntax-punctuation">}</span>
 check<span class="syntax-punctuation">(</span>n <span class="syntax-operator">==</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;once&quot;</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> Its body runs once.</p>
+<p><strong>Verify:</strong> Your solution must keep <code>n == 1</code> true. Control: changing <code>n := 0</code> to <code>n := 1</code> panics with message <code>once</code>; revert it.</p>
 <p>Once is not a retry mechanism. Fallible initialization requiring retries needs a separately designed state machine.</p>
 <p><strong>Approach.</strong> Call <code>once.Do</code> three times with the same <code>sync.Once</code>; only the first call runs the function.</p>
 <p><strong>Why it holds here.</strong> <code>Once</code> records that its function has run, so the second and third calls return immediately and <code>n</code> is 1.</p>
@@ -266,6 +270,7 @@ n<span class="syntax-punctuation">.</span>Store<span class="syntax-punctuation">
 check<span class="syntax-punctuation">(</span>n<span class="syntax-punctuation">.</span>CompareAndSwap<span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;CAS&quot;</span><span class="syntax-punctuation">)</span>
 check<span class="syntax-punctuation">(</span><span class="syntax-punctuation">!</span>n<span class="syntax-punctuation">.</span>CompareAndSwap<span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&amp;&amp;</span> n<span class="syntax-punctuation">.</span>Load<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;stale&quot;</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> The first succeeds and the second fails.</p>
+<p><strong>Verify:</strong> Your solution must keep <code>!n.CompareAndSwap(2, 4) &amp;&amp; n.Load() == 3</code> true. Control: changing <code>check(n.CompareAndSwap(2, 3), &quot;CAS&quot;)</code> to <code>check(n.CompareAndSwap(2, 4), &quot;CAS&quot;)</code> panics with message <code>stale</code>; revert it.</p>
 <p>A stale expectation detects changed state. A single-value CAS does not validate unrelated fields.</p>
 <p><strong>Approach.</strong> Store 2, swap it for 3 with <code>CompareAndSwap(2, 3)</code>, then try <code>CompareAndSwap(2, 4)</code> with the now stale expectation.</p>
 <p><strong>Why it holds here.</strong> The first swap finds 2 and succeeds. The second finds 3, which does not match 2, so it returns false and leaves the value at 3.</p>
@@ -278,6 +283,7 @@ a<span class="syntax-punctuation">,</span> b <span class="syntax-operator">:=</s
 c<span class="syntax-punctuation">,</span> d <span class="syntax-operator">:=</span> p<span class="syntax-punctuation">.</span>Snapshot<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
 check<span class="syntax-punctuation">(</span>a<span class="syntax-operator">+</span>b <span class="syntax-operator">==</span> <span class="syntax-number">10</span> <span class="syntax-operator">&amp;&amp;</span> c<span class="syntax-operator">+</span>d <span class="syntax-operator">==</span> <span class="syntax-number">10</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;snapshot&quot;</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> Both snapshots preserve total 10.</p>
+<p><strong>Verify:</strong> Your solution must keep <code>a+b == 10 &amp;&amp; c+d == 10</code> true. Control: changing <code>check(a+b == 10 &amp;&amp; c+d == 10, &quot;snapshot&quot;)</code> to <code>check(a-b == 10 &amp;&amp; c+d == 10, &quot;snapshot&quot;)</code> panics with message <code>snapshot</code>; revert it.</p>
 <p>An accessor hides locking without exposing mutable internals. Returning pointers to fields would bypass that boundary.</p>
 <p><strong>Approach.</strong> Read the same <code>Pair{A: 4, B: 6}</code> twice through <code>Snapshot</code>, which locks, copies both fields and unlocks.</p>
 <p><strong>Why it holds here.</strong> Nothing modifies the pair between the reads and each read is consistent, so both totals are 10.</p>

@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cpp/solutions/cpp-030_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="cpp-030-explanations-and-reference-observations">cpp-030: explanations and reference observations<a class="heading-anchor" href="#cpp-030-explanations-and-reference-observations" aria-label="Link to this section">#</a></h2>
-<p>Attempt the learner tasks before opening this document. The executable reference checks the bounded normal and boundary examples; the six explanations below cover the deliberate changes and manual checks.</p>
+<p>The <a href="cpp-030_solution.cpp.html">executable reference</a> checks a queue that is both empty and closed before the consumer waits. The explanations cover predicate waits and the drain-or-discard decision in Exercise 6. How to compare: <a href="../STUDY-GUIDE.md.html#compare-with-the-solutions">study guide</a>.</p>
 <h3 id="mechanism">Mechanism<a class="heading-anchor" href="#mechanism" aria-label="Link to this section">#</a></h3>
 <p>A mutex serializes access to shared state. A condition variable lets a thread wait for a state predicate while releasing the mutex. A queue invariant describes valid states such as size at most capacity. Notifications are hints to recheck state because wakes can be spurious or another thread can consume the item first.</p>
 <h3 id="detailed-reasoning">Detailed reasoning<a class="heading-anchor" href="#detailed-reasoning" aria-label="Link to this section">#</a></h3>

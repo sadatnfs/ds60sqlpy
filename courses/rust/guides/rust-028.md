@@ -24,9 +24,11 @@ Several separately protected fields can still violate a relationship if updated 
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles the saved pad as `main.rs` with pinned Rust 1.99.1, edition 2024, and the prepared Arrow 60 library. `assert!` and `assert_eq!` remain active in normal builds. The fixed pad accepts one source file without arbitrary arguments, interactive input, Cargo manifests or package installation. The main function returns `Result<(), Box<dyn std::error::Error>>` so later examples can propagate errors with `?`; the final `Ok(())` means this fixture completed successfully. Standard library and Arrow examples remain offline after image preparation. Multi-file Cargo and external ecosystem projects have separate explicit preparation workflows.
+Beyond the prelude, this lesson's programs use `std::sync` and `std::thread`. A passing run prints `rust-028: passed`.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Pad setup and limits: [Run a lesson](../STUDY-GUIDE.md#run-a-lesson).
+
+Before you run anything, follow [Attempt a lesson](../STUDY-GUIDE.md#attempt-a-lesson).
 
 
 
@@ -34,7 +36,9 @@ Start with the answer-free learner artifact in your saved classroom pad. It deli
 
 Arc::clone shares ownership rather than deep-copying the value. Mutex::lock returns a result containing a guard. Dereferencing the mutable guard grants access until its scope ends.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+**Reading Example A (Protect concurrent increments, code below).** `use std::sync::{Arc, Mutex};` imports both types. `Arc::new(Mutex::new(0))` puts a mutex-protected integer behind an atomically reference-counted pointer. Inside the scope the loop runs four times; each pass calls `Arc::clone(&count)`, which copies the pointer and increments the reference count without copying the integer, and the inner `let count` shadows the outer name. `move` transfers that clone into the spawned closure. Each worker runs its own loop of increments, and every increment calls `count.lock()`, which blocks until the mutex is free and returns a guard, and `unwrap` handles the poisoned case where an earlier holder panicked. `*count.lock().unwrap() += 1` writes through the guard, which is a temporary dropped at the end of the statement, releasing the lock. The scope joins all four workers automatically before the final read.
+
+Method for tracing your own variants: [Trace a program](../STUDY-GUIDE.md#trace-a-program).
 
 ## Worked example / walkthrough
 
@@ -104,13 +108,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 6. **Transfer and justify.** Choose message passing or shared locking for a service and justify the invariant owner.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Record each task as in [Keep evidence for each task](../STUDY-GUIDE.md#keep-evidence-for-each-task).
 
 ## Common pitfalls and diagnosis
 
 Arc is not a lock and clone does not copy its inner state. Holding a guard longer than needed can block unrelated work. Do not ignore poisoning without understanding whether the invariant survived.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+To turn a pitfall into a test, see [Design a regression case](../STUDY-GUIDE.md#design-a-regression-case).
 
 ## Progressive hints
 
@@ -118,13 +122,23 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 2. Compare Example B (Protect a relationship in one value) with Example A and name the first line whose behavior differs. Its observation is: The transfer preserves the total under one protected tuple.
 3. Before opening the explanation, test your task 3 attempt against this lesson's main pitfall: Arc is not a lock and clone does not copy its inner state.
 
+Tempting approaches to rule out before you compare:
+
+- **Task 1.** Drawing each `Arc::clone` as a copy of the counter predicts four separate counts of 100. The final 400 shows that all clones point to the same protected integer.
+- **Task 2.** Locking once to read, releasing, and locking again to write the incremented value can lose updates between the two locks, and the total falls below 500 on some runs.
+- **Task 5.** Recovering with `lock().unwrap_or_else(|p| p.into_inner())` everywhere and carrying on treats (7, 0) as a valid state and silently loses three units.
+
 ## Self-check and next step
 
-Explain Arc, Mutex, Poisoning without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+In Example A, what does `Arc` share and what does `Mutex` protect, and why are all 400 increments retained? In Example B, why is the (7, 3) pair kept in one `Mutex` tuple rather than behind two separate locks? What does a poisoned lock tell you about the invariant it protected?
+
+Then work through [Self-check and review](../STUDY-GUIDE.md#self-check-and-review).
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://doc.rust-lang.org/book/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+Read [The Rust Book, 16.3 Shared-State Concurrency](https://doc.rust-lang.org/book/ch16-03-shared-state.html) for `Arc<Mutex<T>>` and lock guards.
+
+What the classroom does and does not prove: [Sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

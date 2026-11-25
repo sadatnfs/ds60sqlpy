@@ -198,21 +198,16 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"></span>
 <span class="source-line">  <span class="syntax-keyword">public</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">void</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span>String<span class="syntax-operator">[</span><span class="syntax-operator">]</span> args<span class="syntax-punctuation">)</span> <span class="syntax-keyword">throws</span> Exception <span class="syntax-punctuation">{</span></span>
 <span class="source-line">    <span class="syntax-comment">// Exercise 1: Read from a producer: predict an edited check</span></span>
-<span class="source-line">    <span class="syntax-comment">// Copy Example A into a scratch `Main.java` and change `assert sum(List.of(1, 2, 3)) ==</span></span>
-<span class="source-line">    <span class="syntax-comment">// 6.0;` to `assert sum(List.of(2, 2, 3)) == 6.0;` inside its assertion. Before running it</span></span>
-<span class="source-line">    <span class="syntax-comment">// with `java -ea Main`, predict whether the assertion still holds and explain why; then</span></span>
-<span class="source-line">    <span class="syntax-comment">// restore it.</span></span>
-<span class="source-line">    <span class="syntax-comment">// Expected: The changed run fails with an `AssertionError` from the assertion on</span></span>
-<span class="source-line">    <span class="syntax-comment">// `sum(List.of(1, 2, 3)) == 6.0`. Restoring the original line brings back the worked</span></span>
-<span class="source-line">    <span class="syntax-comment">// observation: sums 6.0 and 4.0.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Change Example A&#x27;s assertion to `assert sum(List.of(2, 2, 3)) == 6.0;`, predict whether it</span></span>
+<span class="source-line">    <span class="syntax-comment">// holds, then run and restore it.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Expected: The edited run fails with an `AssertionError` from the assertion on</span></span>
+<span class="source-line">    <span class="syntax-comment">// `sum(List.of(1, 2, 3)) == 6.0`.</span></span>
 <span class="source-line"></span>
 <span class="source-line">    <span class="syntax-comment">// Exercise 2: Write to a consumer: diagnose an edited check</span></span>
-<span class="source-line">    <span class="syntax-comment">// A careless edit changed the assertion that Example B adds after Example A so that it reads</span></span>
-<span class="source-line">    <span class="syntax-comment">// `assert numbers.equals(List.of(2, 2));`. Run Example B with that line, explain why the</span></span>
-<span class="source-line">    <span class="syntax-comment">// edited assertion now fails for the same program state, and restore it.</span></span>
-<span class="source-line">    <span class="syntax-comment">// Expected: Before the repair the run fails with an `AssertionError` from the assertion on</span></span>
-<span class="source-line">    <span class="syntax-comment">// `numbers.equals(List.of(1, 2))`; after it the line reads `assert numbers.equals(List.of(1,</span></span>
-<span class="source-line">    <span class="syntax-comment">// 2));` again and list contains 1, 2.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Example B&#x27;s new assertion was edited to `assert numbers.equals(List.of(2, 2));`. Explain</span></span>
+<span class="source-line">    <span class="syntax-comment">// why it fails for unchanged state and restore it.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Expected: The edited run fails with an `AssertionError` from the assertion on</span></span>
+<span class="source-line">    <span class="syntax-comment">// `numbers.equals(List.of(1, 2))`; the restored assertion passes.</span></span>
 <span class="source-line"></span>
 <span class="source-line">    <span class="syntax-comment">// Exercise 3: Connect source and destination types</span></span>
 <span class="source-line">    <span class="syntax-comment">// Copy List&lt;Integer&gt; into List&lt;Number&gt; with a bounded generic method.</span></span>

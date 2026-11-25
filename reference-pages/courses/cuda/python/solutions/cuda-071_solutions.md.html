@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cuda/python/solutions/cuda-071_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="cuda-071-explained-solutions">cuda-071: explained solutions<a class="heading-anchor" href="#cuda-071-explained-solutions" aria-label="Link to this section">#</a></h2>
-<p>These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.</p>
+<p>Compare with your <a href="../lessons/cuda-071.md.html">worksheet</a> attempt.</p>
 <h3 id="exercise-1-identify-the-timing-boundary">Exercise 1: Identify the timing boundary<a class="heading-anchor" href="#exercise-1-identify-the-timing-boundary" aria-label="Link to this section">#</a></h3>
 <p>Completion must be inside the interval when timing finished work.</p>
 <p><strong>Approach.</strong> Place the stop point after the completion event, not after the call returns: the operation spans from submission at 2 microseconds to finish at 102 microseconds.</p>
@@ -231,9 +231,19 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Why it is correct here.</strong> The reference script computes a median of a hard-coded list; nothing executes on a GPU. Reporting its output as performance would be fabricated evidence.</p>
 <p><strong>A plausible wrong approach.</strong> Copying the 11 ms median into a report as GPU latency misrepresents a CPU script&#x27;s constant as a hardware result.</p>
 <p><strong>How to verify.</strong> The reference prints <code>CPU trace analysis</code>, which is the correct label. A real benchmark records host, device, versions and raw samples.</p>
+<h3 id="self-check-answers">Self-check answers<a class="heading-anchor" href="#self-check-answers" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>Why can a first call be much slower than later ones?</strong> It can include context creation, library initialization, compilation and allocator population. Those are real costs, but they belong in a cold-start report separate from steady-state samples.</li>
+</ol>
+<ol start="2">
+<li><strong>What does the median hide that the maximum reveals?</strong> Tail behavior. For <code>[10, 11, 10, 12, 100]</code> the median of 11 ms looks healthy while one request took 100 ms.</li>
+</ol>
+<ol start="3">
+<li><strong>What makes two timings an equal-work comparison?</strong> The same input data, dtype and transfer policy, completed outputs that agree within a stated tolerance, and the same synchronization boundary on both sides.</li>
+</ol>
 <h3 id="reference-observation">Reference observation<a class="heading-anchor" href="#reference-observation" aria-label="Link to this section">#</a></h3>
 <p>Median 11 ms and maximum 100 ms, from synthetic trace data.</p>
-<p>The reference file is <code>courses/cuda/python/references/cuda-071_cpu.py</code>. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.</p></article>
+<p>Asserted by <code>courses/cuda/python/references/cuda-071_cpu.py</code>.</p></article>
   </main>
 </body>
 </html>

@@ -211,7 +211,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="syntax-anatomy-and-mechanism">Syntax anatomy and mechanism<a class="heading-anchor" href="#syntax-anatomy-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Define a repository interface with a narrow operation such as countCompleted. The service receives that interface through its constructor. A memory implementation holds synthetic records for this lesson. The service can then be tested with known data and no network. Later PDO lessons qualify the database boundary separately.</p>
 <h3 id="classroom-execution-and-offline-inputs">Classroom execution and offline inputs<a class="heading-anchor" href="#classroom-execution-and-offline-inputs" aria-label="Link to this section">#</a></h3>
-<p>Choose the <strong>PHP CLI</strong> worker and work in <code>courses/web-development/lessons/web-041.php</code>, which runs as <code>main.php</code> in a bounded Linux process with PDO SQLite. Every input is a small synthetic value, and CLI runs are fresh processes, not persistent HTTP requests. Save your attempt before comparing it with <code>courses/web-development/solutions/web-041_solution.php</code>. <strong>How to run lessons</strong> in the <a href="../README.md.html">subject README</a> lists what the pad does not provide.</p>
+<p>The worked examples show a narrow progress interface and a summary built from a controlled store. You write a Summary service that receives its repository through the constructor and a MemoryProgress double for deterministic runs.</p>
+<p>Run <code>courses/web-development/lessons/web-041.php</code> with <strong>PHP CLI</strong>: synthetic inputs, not persistent HTTP requests (<a href="../STUDY-GUIDE.md.html#php-cli">why</a>).</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1-a-narrow-dependency">Worked example 1: A narrow dependency<a class="heading-anchor" href="#worked-example-1-a-narrow-dependency" aria-label="Link to this section">#</a></h4>
 <p>The interface exposes a behavior rather than its storage details.</p>
@@ -236,7 +237,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 }</code></pre>
 <p>The class decides on its own which database file to open, so a test can only run where that exact path exists, and the answer depends on whatever rows happen to be stored there today. There is no way to hand it a store that reports 0 or 3 on demand, so the empty state and the normal state cannot both be checked deterministically. In the CLI worker the file does not exist and the constructor of PDO fails before any summary logic runs. Worked example 2 moves that choice out: the caller passes any <code>ProgressStore</code>, a memory store in tests and a PDO store in the application. The label logic is identical in both cases, and only the source of the count changes.</p>
 <h3 id="six-progressive-exercises">Six progressive exercises<a class="heading-anchor" href="#six-progressive-exercises" aria-label="Link to this section">#</a></h3>
-<p>Exercises that ask you to predict, explain, compare or diagnose keep their answers in the solutions file. The others show the evidence to look for.</p>
+<p>Exercises 1, 4 and 6 keep their expected answers in the solutions file.</p>
 <h4 id="exercise-1-identify-the-dependency-hidden-by-the-interface">Exercise 1: Identify the dependency hidden by the interface.<a class="heading-anchor" href="#exercise-1-identify-the-dependency-hidden-by-the-interface" aria-label="Link to this section">#</a></h4>
 <p><strong>Progressive hint:</strong> Read the interface method and ask what the service really needs from storage.</p>
 <h4 id="exercise-2-supply-an-in-memory-store-with-a-known-count">Exercise 2: Supply an in-memory store with a known count.<a class="heading-anchor" href="#exercise-2-supply-an-in-memory-store-with-a-known-count" aria-label="Link to this section">#</a></h4>
@@ -254,10 +255,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Progressive hint:</strong> List what the real database adds that the in-memory class cannot show.</p>
 <h3 id="debugging-and-common-mistakes">Debugging and common mistakes<a class="heading-anchor" href="#debugging-and-common-mistakes" aria-label="Link to this section">#</a></h3>
 <p>Do not claim database acceptance from a mock. Avoid injecting a giant container that hides dependencies again. Use an interface only when it clarifies a meaningful boundary.</p>
-<p>Keep the failing source, its input and the exact output, then repair one cause at a time. PHP can produce correct-looking text while missing an invalid-input branch, so rerun the empty, wrong-type and boundary cases after every fix.</p>
+<p>When a test double makes the summary pass with impossible data, compare the double&#x27;s values with what the real store could return, such as negative counts. When the service cannot be tested without a database, look for a new PDO or connection created inside the class instead of injected.</p>
+<p>The shared <a href="../STUDY-GUIDE.md.html#debugging-php">debugging routine</a> covers what to record before each repair.</p>
 <h3 id="retrieval-transfer-and-next-steps">Retrieval, transfer and next steps<a class="heading-anchor" href="#retrieval-transfer-and-next-steps" aria-label="Link to this section">#</a></h3>
-<p>Close the worked answers and explain interface, composition and dependency injection without using the terms as their own definitions. Rebuild worked example 1 (A narrow dependency) from a blank pad, then try one new value, one empty or missing case and one unusual boundary. State which result would disprove your explanation.</p>
-<p>If you can reproduce the output but cannot explain why it happens, revisit <code>web-040</code>. A saved completion marker records your own progress; it is not a certification.</p>
+<p>Without notes, name the dependency the progress interface hides and what the Summary service still knows about it. Then explain why constructor injection makes the zero-lesson case easy to test and what an in-memory repository cannot tell you about SQL, transactions or concurrent writers.</p>
+<p>Revisit <code>web-040</code> when an output is predictable but unexplained (<a href="../STUDY-GUIDE.md.html#review-loop">review loop</a>).</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
 <ul>
 <li><a href="https://www.php.net/manual/en/language.oop5.interfaces.php">Interfaces</a></li>

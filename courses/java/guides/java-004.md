@@ -6,7 +6,16 @@ Beginner, approximately 90 minutes. Direct prerequisites: `java-003`
 
 ## Learning objectives
 
-Write methods with explicit preconditions and predict what a call can change for primitive and object arguments. Along the way, explain parameter, return value, pass by value using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. Exercises 1 and 2 start from the worked examples; the authored investigations begin with this task: Pass int 5 to a helper that reassigns its local parameter to 99. The final exercise transfers the mechanism to inspect overload selection.
+Write methods with explicit preconditions and predict what a call can change for primitive and object arguments.
+
+The six exercises practice these steps:
+
+- Call a pure calculation.
+- Validate a precondition.
+- Observe copied primitive values.
+- Observe shared object mutation.
+- Distinguish reference reassignment.
+- Inspect overload selection.
 
 ## Purpose and mental model
 
@@ -22,16 +31,9 @@ A method packages a computation behind a contract: which inputs it accepts, what
 
 ## How to run this lesson
 
-Open the Docker classroom, choose the prepared Java 21 profile and save a learner pad. The pad is compiled as `Main.java` with `javac --release 21` and executed with `java -ea Main`. Assertions are enabled deliberately. A successful assertion has no output; a failed assertion throws `AssertionError` and the process should fail. Do not remove assertions to obtain a green result.
+All helpers in this lesson are `static` methods declared beside `main`, so each example stays one file; Example B calls a method that throws on purpose, and its check catches the exception.
 
-For a prepared native JDK, copy a worked example into your own `Main.java` under ignored `.learning/expansion/java-004/`. From that directory run the same two commands on PowerShell, macOS or Linux:
-
-```text
-javac --release 21 Main.java
-java -ea Main
-```
-
-The public class name and source filename must agree. Each worked example below is a complete file. Example B includes the setup it needs from Example A, so it can be compiled by itself. The six exercise reference blocks form one complete program in the separate solution. Keep your original prediction, source and diagnostic text together. Most examples use prepared JDK libraries and tiny local fixtures; any additional dependency is specified in the lesson notes below. Any lesson-specific library or additional file is named explicitly; do not download packages from inside a learner program. Resource examples close their owned files, executors or loopback servers.
+Classroom and native JDK steps, the exercise controls and the hint routine are in the [Java study guide](../STUDY-GUIDE.md).
 
 
 
@@ -150,62 +152,62 @@ public class Main {
 
 ## Prediction before your attempt
 
-Read the source from the entry point and name each value before executing it. Identify which operations create new values, which mutate existing state and which can fail. Predict the first observable output or assertion result. For a compile-time failure, explain which source rule is violated before discussing runtime state: a program that did not compile never reached its main method. Keep normal, boundary and invalid inputs separate so each check has a clear purpose.
+Before running Example A, evaluate `doubleValue(7)` and `doubleValue(0)` and decide whether calling the method twice could ever give different results. For Example B, predict what `positiveArea(3, 4)` returns and which call throws. Before Exercises 3 to 5, predict for each helper whether the caller can see its change: reassigning an `int` parameter, appending to a list argument, and replacing the list parameter with a new list.
 
 ## Exercises
 
-1. **Call a pure calculation: predict an edited check.** Copy Example A into a scratch `Main.java` and change `assert doubleValue(0) == 0;` to `assert doubleValue(1) == 0;` inside its assertion. Before running it with `java -ea Main`, predict whether the assertion still holds and explain why; then restore it.
-   **Expected:** The changed run fails with an `AssertionError` from the assertion on `doubleValue(0) == 0`. Restoring the original line brings back the worked observation: 14 and 0.
-   **Verify:** Compare your written prediction with the reported `AssertionError` and its stack-trace line, and explain why the edited condition is false for the values that satisfy `doubleValue(0) == 0`. After restoring the line, the program completes without an `AssertionError` again.
+1. **Call a pure calculation: predict an edited check.** Change Example A's assertion to `assert doubleValue(1) == 0;`, predict whether it holds, then run and restore it.
+   **Expected:** The edited run fails with an `AssertionError` from the assertion on `doubleValue(0) == 0`.
+   **Verify:** Explain why the edited assertion is false for the values that satisfy `doubleValue(0) == 0`.
 
-2. **Validate a precondition: debug a regression.** A regression changed one token in the code that Example B adds after Example A, so one line now reads `positiveArea(1, 4);`. Run Example B with that line, use the failing assertion to locate the defect and repair it without changing the assertion.
-   **Expected:** Before the repair the run fails with an `AssertionError` from the assertion on `badArea`; after it the line reads `positiveArea(0, 4);` again and 3 by 4 gives 12; zero width throws IllegalArgumentException.
-   **Verify:** Keep the failing and the repaired runs. Explain why the changed token alters the value tested by `badArea` for this input.
+2. **Validate a precondition: debug a regression.** A regression in Example B's new code makes one line read `positiveArea(1, 4);`. Repair it using the failing assertion.
+   **Expected:** The unrepaired run fails with an `AssertionError` from the assertion on `badArea`; the repaired line reads `positiveArea(0, 4);`.
+   **Verify:** Explain how the changed token alters the value that `badArea` tests.
 
 3. **Observe copied primitive values.** Pass int 5 to a helper that reassigns its local parameter to 99.
    **Expected:** caller value remains 5.
-   **Verify:** Keep an assertion equivalent to `original == 5`. As a control, change `int original = 5;` to `int original = 6;`: the run must fail with an `AssertionError` from the assertion on `original == 5`. Restore the line before continuing.
+   **Verify:** Control: changing `int original = 5;` to `int original = 6;` must fail the assertion on `original == 5`.
 
 4. **Observe shared object mutation.** Pass a list containing 1 to a helper that appends 2.
    **Expected:** caller list becomes 1, 2.
-   **Verify:** Keep an assertion equivalent to `list.equals(List.of(1, 2))`. As a control, change `List<Integer> list = new ArrayList<>(List.of(1));` to `List<Integer> list = new ArrayList<>(List.of(2));`: the run must fail with an `AssertionError` from the assertion on `list.equals(List.of(1, 2))`. Restore the line before continuing.
+   **Verify:** Control: changing `List<Integer> list = new ArrayList<>(List.of(1));` to `List<Integer> list = new ArrayList<>(List.of(2));` must fail the assertion on `list.equals(List.of(1, 2))`.
 
 5. **Distinguish reference reassignment.** Pass the list to a helper that replaces only its local parameter with a new list.
    **Expected:** caller list remains 1, 2.
-   **Verify:** Keep an assertion equivalent to `list.equals(List.of(1, 2))`. As a control, change `assert list.equals(List.of(1, 2));` to `assert list.equals(List.of(2, 2));` inside it: the run must fail with an `AssertionError`, which shows the assertion can fail. Restore it.
+   **Verify:** Control: changing `assert list.equals(List.of(1, 2));` to `assert list.equals(List.of(2, 2));` inside the assertion must make it fail.
 
 6. **Inspect overload selection.** Call describe with int 1 and long 1L using two overloads.
    **Expected:** int and long respectively.
-   **Verify:** Keep an assertion equivalent to `describe(1L).equals("long")`. As a control, change `assert describe(1L).equals("long");` to `assert describe(1L).equals("long!");` inside it: the run must fail with an `AssertionError`, which shows the assertion can fail. Restore it.
+   **Verify:** Control: changing `assert describe(1L).equals("long");` to `assert describe(1L).equals("long!");` inside the assertion must make it fail.
 
 ## Common pitfalls and diagnosis
 
-When a check fails, keep the smallest source file that still demonstrates the failure. Read the first relevant compiler diagnostic before editing several lines; later diagnostics can be consequences of the same missing delimiter or wrong type. For a runtime exception, identify the first frame belonging to your code and compare its input with the method contract. For an assertion failure, inspect the actual value and the independent expected value. A passing process exit is weaker than a checked invariant, and a checked invariant applies only under its stated assumptions.
+The misconception this lesson targets is "Java passes objects by reference". Java passes every argument by value; for an object, the value is a reference. So `list.add(2)` inside a helper is visible to the caller, while `list = new ArrayList<>()` inside the helper is not. A related mistake is returning a sentinel such as -1 for a bad dimension instead of throwing `IllegalArgumentException`, which lets an invalid area flow into later arithmetic.
 
-Do not replace a precise exception with a catch-all that returns a plausible default. That can hide an invalid input or an unfinished operation. If an example owns a resource, verify its lifetime on both the success and failure paths. If an operation is concurrent, use ordering primitives to establish the relationship you need; an observed timing coincidence is not a synchronization guarantee. The solution explanations identify the specific alternative that would break each exercise.
+General compiler, runtime and assertion triage: [diagnose a failure](../STUDY-GUIDE.md#diagnose-a-failure).
 
 ## Progressive hints
 
-Read one hint at a time and attempt the exercise again before reading the next. Keep a small table of input, expected value, actual value and exception type. Ask for one hint about the first incorrect assumption before requesting the entire reference implementation.
+Read one rung at a time, as described in [using hints](../STUDY-GUIDE.md#use-hints-one-at-a-time).
 
-- **Exercise 1:** First restate the expected observation: 14 and 0. Then list the values read by `doubleValue(0) == 0` and trace each one from its declaration. Finally, compute the asserted value with `assert doubleValue(1) == 0;` in place before running.
-- **Exercise 2:** First restate the expected observation: 3 by 4 gives 12; zero width throws IllegalArgumentException. Then list the values read by `badArea` and trace each one from its declaration. Finally, compare `positiveArea(1, 4);` with the same line in Example B and state the claim each version makes.
-- **Exercise 3:** First restate the expected observation: caller value remains 5. Then list the values read by `original == 5` and trace each one from its declaration. Finally, predict the effect of changing `int original = 5;` to `int original = 6;` before running anything.
-- **Exercise 4:** First restate the expected observation: caller list becomes 1, 2. Then list the values read by `list.equals(List.of(1, 2))` and trace each one from its declaration. Finally, predict the effect of changing `List<Integer> list = new ArrayList<>(List.of(1));` to `List<Integer> list = new ArrayList<>(List.of(2));` before running anything.
-- **Exercise 5:** First restate the expected observation: caller list remains 1, 2. Then list the values read by `list.equals(List.of(1, 2))` and trace each one from its declaration. Finally, name one input that would make `list.equals(List.of(1, 2))` false.
-- **Exercise 6:** First restate the expected observation: int and long respectively. Then list the values read by `describe(1L).equals("long")` and trace each one from its declaration. Finally, name one input that would make `describe(1L).equals("long")` false.
+- **Exercise 1:** First evaluate `doubleValue(1)`, the call the edited assertion now makes. Then compare that result with the 0 the assertion still expects. Finally, decide whether the method or the edited claim is wrong, and restore the boundary case `doubleValue(0)`.
+- **Exercise 2:** First notice that `positiveArea(1, 4)` satisfies the precondition, so no exception is thrown. Then follow what happens to `badArea` when the `catch` block never runs. Finally, explain why the rejection test must use a zero dimension to reach the failure path.
+- **Exercise 3:** First write a helper that takes an `int` parameter and assigns 99 to it. Then call it with a caller variable holding 5 and compare the caller's value afterward. Finally, explain why the assignment changed only the helper's own copy.
+- **Exercise 4:** First pass a mutable `ArrayList` holding 1 to a helper that calls `add(2)`. Then compare the caller's list with `List.of(1, 2)`. Finally, explain which value the call copied and which object both variables now share.
+- **Exercise 5:** First reuse the list from Exercise 4, which holds 1 and 2. Then write a helper that assigns a new list to its parameter and changes only that new list. Finally, assert that the caller's list still equals `List.of(1, 2)` and explain why no caller variable was reassigned.
+- **Exercise 6:** First declare `describe(int)` and `describe(long)` returning "int" and "long". Then call it with the literals `1` and `1L` and keep both strings. Finally, explain that the choice was fixed at compile time from the argument types, before the program ran.
 
 ## Self-check and retrieval
 
-Close the solution and explain Parameter, Return value, Pass by value in your own words. Reconstruct one example from a blank `Main.java`, then add a new boundary input. Explain why the new case should pass or fail before compiling it. Identify a situation where this technique is appropriate and one where a different data structure, lifetime policy or abstraction would be clearer. This is a reasoning check, not a memorization test for an API spelling.
+Explain without notes why the caller's `int` stays 5 after the helper assigns 99, why the caller's list gains 2 after `add`, and why it does not become empty when the helper reassigns its parameter. Then say how the compiler chooses between `describe(int)` and `describe(long)` for the literals `1` and `1L`.
 
 ## Next step
 
-Preserve the saved pad and the six exercise observations. Continue to the next lesson only when you can explain the invariants without reading the answer. Later chapters reuse these contracts in larger programs, so keep a failing counterexample as well as a repaired result. A reference implementation demonstrates one valid design under the stated assumptions; it is not a universal design rule.
+Continue with `java-005`: Arrays, strings and Unicode. Keep your six observations; see [moving on](../STUDY-GUIDE.md#move-to-the-next-lesson).
 
 ## Sources and verification status
 
-[Official Java 21 API or language reference](https://docs.oracle.com/en/java/javase/21/docs/api/index.html), reviewed 2026-10-22. Examples and exercise fixtures are original course material. Use the [validation guide](../../../docs/validation.md) and CI artifacts for the exact revision and platform to inspect actual compile/run results. Authoring, parsing, compilation, execution and learner mastery are separate forms of evidence.
+[Official Java 21 API or language reference](https://docs.oracle.com/en/java/javase/21/docs/api/index.html), reviewed 2026-10-22. Evidence levels: [sources and evidence](../STUDY-GUIDE.md#sources-and-evidence).
 
 ## Ask an AI tutor about this lesson
 

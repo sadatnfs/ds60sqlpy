@@ -1,6 +1,6 @@
 # r-035: reference reasoning
 
-Use the [complete reference](r-035_reference.R) with the guide's declared inputs and runtime. Every worked example is also a standalone script.
+Run the [complete reference](r-035_reference.R) under the [run rules](../STUDY-GUIDE.md#run-a-chapter).
 
 ## Why the implementation has this shape
 
@@ -96,4 +96,6 @@ Range and schema checks do not establish representativeness, causality, freshnes
 
 ## What the checks establish
 
-The reference makes 5 `stopifnot()` checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.
+The assertions confirm the required columns and types, one admitted row and three rejected rows for this input, rejection flags for a missing id and an invalid amount, that admitted plus rejected rows always equal the input row count, and that an empty input yields two empty tables. They do not test inputs with unexpected extra columns or text in the amount column.
+
+The reference makes 5 `stopifnot()` checks; see [what a passing run proves](../STUDY-GUIDE.md#what-a-passing-run-proves).

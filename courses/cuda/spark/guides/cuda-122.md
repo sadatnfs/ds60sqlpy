@@ -1,10 +1,17 @@
 # cuda-122: Shuffle, transport and network bottlenecks
 
-**Route:** CUDA Python and machine learning / GPU Spark specialization. **Stage:** advanced. **Prerequisites:** `cuda-118`, `cuda-119`, `cuda-120`. Allow several sessions when the hardware experiment is new; the chapter is not a deadline.
+**Route:** CUDA Python and machine learning / GPU Spark specialization. **Stage:** advanced. **Prerequisites:** `cuda-118`, `cuda-119`, `cuda-120`.
 
-## What you will be able to explain
+Pacing, evidence labels and platform rules: [CUDA study guide](../../STUDY-GUIDE.md).
 
-By the end, you can **compute transfer lower bound**, **list transport qualification**, and **design a bounded shuffle comparison** with evidence. Start with the two worked cases, then use the editable CPU model to make the quantities concrete.
+## Learning objectives
+
+- Compute transfer lower bound.
+- Identify local versus network time.
+- Explain pre-aggregation.
+- List transport qualification.
+- Separate startup settings.
+- Design a bounded shuffle comparison.
 
 ## Mechanism and vocabulary
 
@@ -31,9 +38,13 @@ Moving 10 GiB over an effective 1 GiB/s path has a 10-second payload lower bound
 
 Reducing shuffle volume through an equivalent pre-aggregation may help more than changing transport. The rewrite must preserve aggregate semantics, especially for nonassociative or stateful operations.
 
-## Portable executable model
+## How to run the CPU model
 
-The **CPU reference model** variant runs this bounded worked example using `python-core`. It uses only the Python standard library, small synthetic values and no network. Its purpose is to expose the arithmetic or contract behind the chapter. The separate reference includes assertions for the stated observations.
+Edit the copy; the [reference](../references/cuda-122_cpu.py) adds assertions.
+
+```sh
+python courses/cuda/spark/lessons/cuda-122_cpu.py
+```
 
 ```python
 gib = 1024**3
@@ -46,7 +57,7 @@ assert kernel_saving / seconds < 0.01
 print("CPU shuffle bound:", seconds, "seconds before additional overhead")
 ```
 
-**Expected observation:** Ten-second payload lower bound;50 ms kernel saving is below 1 percent of it.
+**Expected observation:** Ten-second payload lower bound; 50 ms kernel saving is below 1 percent of it.
 
 **Variable trace.** Before running the model, predict these final values; then compare:
 
@@ -58,81 +69,64 @@ print("CPU shuffle bound:", seconds, "seconds before additional overhead")
 | `seconds` | `10.0` |
 | `kernel_saving` | `0.05` |
 
-Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.
-
 ## Practice and transfer
+
+Record each attempt in the [worksheet](../lessons/cuda-122.md) before opening hints.
 
 ### Exercise 1: Compute transfer lower bound
 
 **Trap to avoid:** Spending effort to halve a 100 ms kernel, saving 50 ms, addresses less than 1 percent of the 10-second floor, as the reference asserts with `kernel_saving/seconds < 0.01`.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 2: Identify local versus network time
 
 **Trap to avoid:** Profiling only the GPU kernels shows local compute and misses fetch wait time, which may dominate. A GPU profile of a shuffle-bound stage can look idle for long stretches, and that idle time is exactly the network wait.
-
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 3: Explain pre-aggregation
 
 **Trap to avoid:** Pre-aggregating a non-associative operation, such as a median computed from partial medians, produces wrong results.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 4: List transport qualification
 
 **Trap to avoid:** Enabling the transport setting and assuming it is active skips checking whether it actually carried traffic. A missing library on one host can silently route that host's traffic over the default path.
-
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 5: Separate startup settings
 
 **Trap to avoid:** Setting a shuffle manager in an existing session and attributing later timing changes to it measures noise. Any improvement seen there comes from caching, warm JIT code or variation between runs.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 6: Design a bounded shuffle comparison
 
 **Trap to avoid:** Comparing configurations on different data sizes confounds the transport effect with payload size. Different partition counts also change the number of shuffle blocks, which affects per-block overhead independently of bandwidth.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ## Progressive hints
 
-Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.
+Hint *k* belongs to exercise *k*; open one at a time.
 
-1. Start from worked example 1 and mark the quantities needed for the task "Compute transfer lower bound".
-2. Change one assumption in worked example 2 while preserving the declared contract: identify local versus network time.
-3. Trace the CPU program's variables before adding hardware behavior: explain pre-aggregation.
-4. Draw producers, consumers and the exact operation boundary for the task "List transport qualification".
-5. Separate what the small fixture establishes from what the real runtime must show: separate startup settings.
-6. Write a counterexample to an overbroad claim before you design a bounded shuffle comparison.
+1. Divide the payload size by the effective bandwidth, keeping the units consistent.
+2. Time the complete stage, then separate the time spent in local operators from the time spent moving data.
+3. Ask whether partial results can be combined before the shuffle without changing the aggregate's meaning.
+4. List the hardware, topology, libraries and real traffic test an accelerated transport needs before you trust it.
+5. Ask which shuffle settings can change in a running session and which need fresh executors.
+6. Use identical partitioned fixtures for both shuffle paths and record bytes, spills and the output rows.
 
-## Common mistakes and self-review
+## Common mistakes and self-check
 
-Confusing a correct tiny example with a general implementation is the central review risk. For this chapter, challenge the assumption in worked example 2, then ask whether your change preserves the mechanism described above. If you change dtype, layout, ordering, batch size or backend, update the acceptance contract rather than silently reusing the old observation. Explain an unexpected result before trying random configuration changes.
+A common mistake is optimizing a local kernel when the stage is limited by moving data. Moving 10 GiB over an effective 1 GiB/s path takes at least 10 seconds, so saving 50 ms in a kernel changes almost nothing. Another is assuming RDMA or GPUDirect works because a library is installed. Fix both by measuring the complete stage, establishing an ordinary shuffle baseline and qualifying any accelerated transport on real hardware and topology before comparing.
 
-Keep a small evidence table with columns **claim**, **input**, **expected observation**, **actual observation** and **limit**. For the first claim use `Compute transfer lower bound`. For the final claim use `Design a bounded shuffle comparison`. An unperformed GPU or cluster experiment remains pending even when the CPU model is correct.
+**Misconception:** Adding more shuffle partitions always spreads the network load and speeds up the stage. **Correction:** More partitions create more, smaller blocks. Each block needs metadata, requests and buffer space, and many tiny blocks can be slower to fetch and process than fewer large ones. The bytes crossing the network stay the same unless the query changes. Measure total shuffle bytes, block counts and fetch wait time, and change the partition count in bounded steps alongside the semantic checks.
 
-## Platform and evidence contract
+**Evidence limit:** The reference computes a ten-second payload lower bound and a 50 ms kernel saving. It sends no network traffic, so real bandwidth, retries, spill and transport compatibility must be measured on owned hosts with a bounded fixture.
 
-The reading worksheet and CPU reference model work through the ordinary Linux Docker classroom on macOS, Linux and Windows using WSL 2. They do not require an NVIDIA GPU. Their results are labeled CPU models or semantic oracles, not simulated hardware performance.
+1. What costs make up a shuffle?
+2. When is pre-aggregation a valid rewrite?
+3. Why should a lesson pad not change cluster settings?
 
-Real CUDA work needs supported NVIDIA hardware, a compatible host driver and an explicitly prepared GPU runtime. An Apple GPU does not execute CUDA kernels. PyTorch MPS on a supported native Mac, ROCm on supported AMD hardware, or other vendor backends can provide separate accelerator learning routes; they need their own package and operation qualification and are not CUDA evidence. The ordinary Linux Docker classroom does not expose native Mac MPS automatically.
-
-Do not download packages, models or data by opening this lesson. Do not attach an engine socket, ambient cluster credentials or an arbitrary remote endpoint. A CPU pass, imported package, successful compilation, real GPU result and measured performance are distinct observations. Record the actual backend, data shape/dtype, source revision, versions and pending checks. A saved completion marker records learning progress, not hardware certification.
-
-GPU Spark is a separate owned external workflow. The ordinary `spark-local-scala` and `spark-local-python` profiles are CPU Spark. Keep the GPU plugin disabled or absent for a CPU-only baseline. Per-operator CPU fallback inside a working GPU plugin environment is a different condition from having no compatible GPU. Never mount a host Docker socket or ambient kubeconfig into an ordinary lesson worker.
+Answers: [self-check answers](../solutions/cuda-122_solutions.md#self-check-answers).
 
 ## Primary references
 
-- [cuDF Spark plugin release and compatibility matrix](https://nvidia.github.io/cudf-spark/docs/download.html)
-- [Supported Spark operators and expression types](https://nvidia.github.io/cudf-spark/docs/supported_ops.html)
 - [GPU Spark tuning guide](https://docs.nvidia.com/cudf-spark/latest/tuning-guide.html)
-- [Apache Spark SQL performance tuning](https://spark.apache.org/docs/latest/sql-performance-tuning.html)
 
-Use the version-matched documentation of your prepared environment. These references describe interfaces and supported boundaries; the chapter's synthetic examples and CPU models are original teaching material.
+Full lists: [documentation and sources](../../STUDY-GUIDE.md#documentation-and-sources).
 
 ## Ask an AI tutor about this lesson
 

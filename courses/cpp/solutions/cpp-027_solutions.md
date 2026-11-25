@@ -1,6 +1,6 @@
 # cpp-027: explanations and reference observations
 
-Attempt the learner tasks before opening this document. The executable reference checks the bounded normal and boundary examples; the six explanations below cover the deliberate changes and manual checks.
+The [executable reference](cpp-027_solution.cpp) adds `add(0, 0) == 0` and `add(-2, 2) == 0`. The explanations cover version pinning and what qualifying another architecture would require. How to compare: [study guide](../STUDY-GUIDE.md#compare-with-the-solutions).
 
 ## Mechanism
 

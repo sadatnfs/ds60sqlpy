@@ -1617,7 +1617,7 @@
       ],
       "outcome": "Derive the scalar gradient and justify the backend evidence.",
       "lab": "Complete the two worked cases, six exercises and bounded CPU reference model.",
-      "verification": "Loss 10, gradient-10, new weight 1. GPU and external cluster evidence must be recorded separately."
+      "verification": "Loss 10, gradient -10, new weight 1. GPU and external cluster evidence must be recorded separately."
     },
     {
       "id": "cuda-088",
@@ -1724,7 +1724,7 @@
       ],
       "outcome": "Count specializations and justify the backend evidence.",
       "lab": "Complete the two worked cases, six exercises and bounded CPU reference model.",
-      "verification": "Two modeled specializations;500-call break-even. GPU and external cluster evidence must be recorded separately."
+      "verification": "Two modeled specializations; 500-call break-even. GPU and external cluster evidence must be recorded separately."
     },
     {
       "id": "cuda-094",
@@ -2250,7 +2250,7 @@
       ],
       "outcome": "Compute transfer lower bound and justify the backend evidence.",
       "lab": "Complete the two worked cases, six exercises and bounded CPU reference model.",
-      "verification": "Ten-second payload lower bound;50 ms kernel saving is below 1 percent of it. GPU and external cluster evidence must be recorded separately."
+      "verification": "Ten-second payload lower bound; 50 ms kernel saving is below 1 percent of it. GPU and external cluster evidence must be recorded separately."
     },
     {
       "id": "cuda-123",
@@ -2287,7 +2287,7 @@
       ],
       "outcome": "Classify four APIs and justify the backend evidence.",
       "lab": "Complete the two worked cases, six exercises and bounded CPU reference model.",
-      "verification": "Null-preserving expression produces [2, None,6]. GPU and external cluster evidence must be recorded separately."
+      "verification": "Null-preserving expression produces [2, None, 6]. GPU and external cluster evidence must be recorded separately."
     },
     {
       "id": "cuda-125",

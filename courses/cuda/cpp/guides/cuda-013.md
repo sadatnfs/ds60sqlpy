@@ -4,18 +4,15 @@
 
 Beginner; about 90 minutes, plus any optional hardware experiment. Direct prerequisites: `cuda-010`, `cuda-012`
 
-The order supports learning at your own pace. Reading and CPU reasoning remain
-available when NVIDIA hardware is absent. Advanced hardware features need their
-own capability checks and are not prerequisites for opening this chapter.
+Pacing, evidence labels and platform rules for every chapter are in the [CUDA study guide](../../STUDY-GUIDE.md).
 
 ## Learning objectives
 
 Implement checked device allocation and transfers that preserve guard values and clean up after an injected failure.
 
-Work through *Explicit device allocation and transfer* with the concrete cases below. Finish with this evidence:
-unchanged guard values, correct output, checked statuses and cleanup after an injected host-side failure. Distinguish an algorithmic
-calculation, a compiled artifact and an actual device observation when explaining
-what your work establishes.
+**Scope:** Allocation sizes, error checking, host/device memory spaces, transfer directions, buffer lifetimes and zero-length behavior.
+
+**Evidence to produce:** Unchanged guard values, correct output, checked statuses and cleanup after an injected host-side failure.
 
 ## Purpose, vocabulary and mental model
 
@@ -30,28 +27,17 @@ cudaMalloc requests a number of bytes and returns a device allocation handle thr
 
 ## How to run and study this lesson
 
-Use the saved reading worksheet in `/classroom`; the reading pad does not execute
-CUDA. For the bounded calculation, select **CPU model (Python)**, whose
-answer-free starter supplies the literal fixtures and task contract. The
-[CUDA C++ study workflow](../README.md) covers platforms, optional GPU
-compilation and evidence labels. In a prepared Python environment you can also
-run the separate [CPU reference](../references/cuda-013_cpu.py) from the
-repository root:
+Trace worked example 1 by hand, then run the [CPU reference](../references/cuda-013_cpu.py) from the repository root:
 
 ```sh
 python courses/cuda/cpp/references/cuda-013_cpu.py
 ```
 
-Its assertions check the stated numerical result or model invariant; console
-text is evidence of this CPU model only, not of CUDA execution.
-
 ## Worked example 1: trace the mechanism
 
 Copy \([2,4,6,8]\) as float32. Four elements require 16 bytes. A request for four bytes copies only one float. Zero-initialized test data can hide that error, so use distinct nonzero entries and validate the entire result after the round trip.
 
-The complete CPU model below intentionally models only the named arithmetic,
-layout, dependency or capability decision. It does not model GPU scheduling,
-caches, instruction timing or device memory visibility.
+**Why:** Copy APIs take bytes, so the size must be element count times element size.
 
 ```python
 storage = [-99, 1, 2, 3, -99]
@@ -62,41 +48,37 @@ assert 4 * 4 == 16
 print({"guarded_output": storage, "four_float32_bytes": 16})
 ```
 
-**Expected observation:** Every assertion succeeds. A representative CPU output is:
+**Expected observation:** every assertion succeeds, and the CPU model prints:
 
 ```text
 {'guarded_output': [-99, 2, 4, 6, -99], 'four_float32_bytes': 16}
 ```
 
-Integers, shapes and ordering must match exactly; only assertions with an explicit
-tolerance accept small floating-point differences. A printed duration is a model
-output, not a measured GPU benchmark.
+**Check:** The reference asserts 4 * 4 == 16; compare all of [2, 4, 6, 8] after the round trip.
 
 ## Worked example 2: change a meaningful condition
 
 Place sentinel values around a three-element target: \([-99,1,2,3,-99]\). Transform only positions 1 through 3 by doubling, expecting \([-99,2,4,6,-99]\). Guards reveal writes beyond the intended subrange, but they do not prove absence of every possible invalid read; sanitizers add a different check.
 
-Before applying this example to your own program, write down which inputs are
-read, which result is produced, and the condition that makes the comparison
-valid. Keep the original case as a regression check when changing a boundary.
+**Why:** Unchanged sentinels show that no write escaped the intended subrange.
+
+**Check:** The reference asserts storage == [-99, 2, 4, 6, -99]; run a sanitizer for read checks.
 
 ## Six progressive exercises
 
-Exercises 1 and 2 are guided reconstructions of the worked examples; exercises
-3-6 change an input, diagnose a defect, test a boundary and transfer the idea.
-For each one, keep the calculation, output, diagram or failure policy you
-produce so another reader can compare it with the worked cases. If the hint is
-not enough, reread the mechanism paragraph and the bounded CPU assertion.
-
 ### Exercise 1
 
-Predict and trace the first worked example before running its CPU reference. Write every intermediate quantity that leads to the stated result, including units or ownership where applicable.
+Reconstruct worked example 1 on paper before running its CPU reference. Multiply four float32 elements by sizeof(float), giving 16 bytes, and copy that many.
+
+**Trap to avoid:** Passing 4 as the byte count copies one float and leaves three elements uninitialized.
 
 **Hint:** Start with the literal input and intermediate quantities in worked example 1.
 
 ### Exercise 2
 
-Reconstruct the second worked example without copying its conclusion. Identify the changed input or condition, show the resulting calculation or dependency, and explain why it differs from the first example.
+Rework worked example 2 without copying its conclusion. Surround the three targets with -99 sentinels and double only indices 1 to 3.
+
+**Trap to avoid:** Assuming sentinels prove no invalid reads ignores that reads leave no trace in memory.
 
 **Hint:** Identify exactly which condition changes in worked example 2.
 
@@ -104,11 +86,15 @@ Reconstruct the second worked example without copying its conclusion. Identify t
 
 How many bytes hold 33 double values?
 
+**Trap to avoid:** Using 33 * 4 copies only half the doubles, as if they were floats.
+
 **Hint:** Use the first worked example to establish the relevant quantities, then change only the requested input.
 
 ### Exercise 4
 
 A copy uses count where the API expects bytes. Which fixture catches it?
+
+**Trap to avoid:** Using zero-filled buffers can hide a short copy because destination memory may also be zero.
 
 **Hint:** Locate the failed phase or violated dependency before proposing a repair.
 
@@ -116,35 +102,33 @@ A copy uses count where the API expects bytes. Which fixture catches it?
 
 Define an empty-vector transfer policy.
 
+**Trap to avoid:** Calling the copy with a null source and zero bytes still relies on unclear API behavior.
+
 **Hint:** Check what the algorithm is allowed to read, write or assume at this boundary.
 
 ### Exercise 6
 
 Design cleanup after a failed output allocation.
 
+**Trap to avoid:** Continuing to copy results from an output pointer that was never allocated reads invalid memory.
+
 **Hint:** State the output contract and which observations are needed in the new application.
 
 ## Common mistakes and diagnosis
 
-A tempting but incorrect claim in this chapter is: **equal numerical addresses imply interchangeable host and device pointers.**
-
-For the concrete failure exercise, a copy uses count where the API expects bytes. Which fixture catches it?
-Preserve the original input and the stage where behavior diverged, and compare
-with the CPU model before changing hardware configuration.
+A tempting but incorrect claim: **Equal numerical addresses imply interchangeable host and device pointers.** Host and device pointers live in different address spaces, so a matching numerical value means nothing. Pass device pointers only to kernels and device APIs, move data with an explicit `cudaMemcpy` direction, and validate the full round trip as worked example 1 does with distinct nonzero values. Four float32 values need 16 bytes, so a request for 4 bytes copies only the first element.
 
 ## Self-check, retrieval and transfer
 
-Explain the first example without its code, then use the second example to state
-one assumption that matters. Complete Exercise 3 independently, use Exercise 4 to
-diagnose a plausible defect, check the boundary in Exercise 5, and retain the
-application contract from Exercise 6. Compare the [separate explanations](../solutions/cuda-013_solutions.md)
-only after your attempt or a deliberate reveal. A reading marker records your
-choice; it does not certify hardware qualification or expert mastery.
+1. Why does worked example 1 use distinct nonzero values?
+2. What do the sentinel values in worked example 2 detect?
+3. When may the host input buffer be freed after a copy to the device?
+
+Short answers are in the [separate explanations](../solutions/cuda-013_solutions.md#self-check-answers); compare only after an attempt.
 
 ## Primary references
 
-Check the documentation that matches your prepared toolkit before optional
-hardware execution.
+Use the documentation that matches your prepared toolkit.
 
 - [CUDA Programming Guide](https://docs.nvidia.com/cuda/cuda-programming-guide/)
 

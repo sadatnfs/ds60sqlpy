@@ -1,22 +1,26 @@
 # spark-019: Windows, ties and deterministic deduplication
 
-Authored paired Scala/PySpark teaching content. The default fixtures are tiny, local and deterministic. Runtime acceptance, logical correctness and learner understanding remain separate evidence.
+Eight events for three entities include two pairs that share a timestamp and one event with no time at all. Picking "the newest row per entity" sounds easy until two candidates tie; this lesson makes the tie-breaker explicit with `row_number` so that the winners are the same on every run and every partitioning.
 
 ## Level and prerequisites
 
-Intermediate; approximately 90 minutes. Direct prerequisites: `spark-018`. The prepared baseline is Spark 4.3.0, Scala binary 2.13, JDK 17 and Python 3.12. Read the [execution baseline](../execution-baseline.md).
+Intermediate; approximately 90 minutes. Direct prerequisites: `spark-018`. Pinned versions: [execution baseline](../execution-baseline.md).
 
 ## How to run this lesson
 
-Open `spark-019` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile, save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`; Python stages as `main.py` with a main guard. Each program creates its own `local[2]` session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.
+Shared run steps and profile rules: [study guide](../STUDY-GUIDE.md#run-a-paired-lesson).
 
-The [Scala learner](../lessons/spark-019.scala) and [PySpark learner](../lessons/spark-019.py) run two complete demonstrations and retain six explicit task stubs. Use the [explained solutions](../solutions/spark-019_solutions.md) only after an attempt or an explicit worked comparison; the [Scala reference](../solutions/spark-019_solution.scala) and [PySpark reference](../solutions/spark-019_solution.py) contain complete assertions. A bounded collect is used only for the declared tiny fixture; do not copy it onto an unbounded or large production table.
+Learner pads: [Scala](../lessons/spark-019.scala) and [PySpark](../lessons/spark-019.py).
+
+Open the [explained solutions](../solutions/spark-019_solutions.md) after an attempt.
+
+The first worked example filters entity A, finds three events but only two distinct times and prints `Three event identities share only two timestamp values`. The second calls `dropDuplicates` on `entity`, confirms that three rows come back and prints that this guarantees entity cardinality but no newest-row policy. Neither example says which A row survives, and that gap is the point.
 
 ## Learning objectives
 
 - Choose a stable winner per key without relying on partition arrival order.
-- State the input and output grain, schema, NULL policy and ordering before executing a transformation.
-- Compare each language implementation with independent literal expectations, not only with the other implementation.
+- Rank candidates with `row_number` over `event_time` descending, NULLs last, then `event_id` descending, and show that the winners are always `[3, 6, 8]`.
+- Explain why `dropDuplicates("entity")` returns one row per entity but makes no promise about which one, and why a timestamp-only order leaves A and B with two admissible winners each.
 
 ## Vocabulary and concepts
 
@@ -48,7 +52,7 @@ Lag uses the prior row in the declared sequence. Two tied-time events can theref
 
 ## Supplied local fixture
 
-The complete source creates the owned local session described above, then constructs this explicit fixture. The worked examples below run in that same main function; there is no hidden notebook state.
+Entities A and B each have a later pair of events with identical times (A: events 2 and 3 at 00:01; B: events 5 and 6 at 00:02). Entity C has event 7 with a NULL time and event 8 at 00:01. Amounts are distinct (10 to 80) so that you can see which event a running total or a lag value came from.
 
 ```scala
 import org.apache.spark.sql.Row
@@ -214,11 +218,14 @@ Do not assume sort before dropDuplicates defines its survivor contract. Do not o
 
 ## Self-check
 
-Explain the contract of `validateCandidates` / `validate_candidates` without reading its solution. Then, from memory, state what Exercise 6 (Interpret lag without claiming strict temporal availability) must produce: `1(NULL, NULL)`, `2(1, 60)`, `3(2, 0)`, `4(NULL, NULL)`, `5(4, 120)`, `6(5, 0)`, `7(8, NULL)`, `8(NULL, NULL)`. Say which part of that result is evidence and what it still cannot show. Name the action in your trace that actually runs the plan.
+- Write the complete window order you would use. Which part of it decides between events 2 and 3, and what happens to that decision if you remove it?
+- Event 7 has no timestamp. Why does it rank 2 and not 1, and where in your window specification is that rule written?
+- Exercise 5 shows event 2 with a running total of 60 even though it is the second A event. Which window frame produces that, and how do you get 30 instead?
+- Exercise 6 reports `(8, NULL)` for event 7 and `(2, 0)` for event 3. Why is there a previous event but no gap for event 7, and why is event 2 not really "earlier" than event 3?
 
 ## Next step
 
-Use the [course route](../README.md) to continue. Paired-language agreement is useful only when both outputs also satisfy the independent fixture contract. A successful local run is not evidence of cluster performance or production recovery.
+Go on to [spark-020: Partitions, repartition, coalesce and output order](spark-020.md). The winners here did not depend on partitioning because the order was complete; the next lesson looks directly at partitions and shows which promises about order Spark does and does not make.
 
 ## Primary sources and official APIs
 

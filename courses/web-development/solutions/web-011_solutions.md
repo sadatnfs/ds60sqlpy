@@ -1,6 +1,6 @@
 # web-011: explanatory solutions
 
-Open this after your own attempt. Each answer explains the lesson's synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in `courses/web-development/guides/web-011.md`.
+Attempt each exercise before reading; the mechanism is in `courses/web-development/guides/web-011.md` ([using these answers](../STUDY-GUIDE.md#solutions)).
 
 ## Exercise 1: Calculate outer widths for the two examples.
 
@@ -8,7 +8,7 @@ Open this after your own attempt. Each answer explains the lesson's synthetic fi
 
 **Approach:** Add content width, both paddings and both borders for the content-box card, and for the border-box card treat 200px as the border box itself.
 
-**Why:** With content-box, 200px of content plus 2 × 20px padding plus 2 × 2px border gives 244px; with border-box, the padding and border fit inside the declared 200px.
+**Why:** With content-box, 200px of content plus two 20px paddings plus two 2px borders gives 244px; with border-box, the padding and border fit inside the declared 200px.
 
 **Plausible wrong approach:** Adding padding to the border-box card as well gives 244px for both, because it ignores that border-box absorbs padding and border inside the declared width.
 
@@ -76,4 +76,6 @@ Open this after your own attempt. Each answer explains the lesson's synthetic fi
 
 ## Reference comparison
 
-Open `courses/web-development/solutions/web-011_solution.html` only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; its success message is not an accessibility audit or proof of responsive behavior at every size.
+The reference reads the card's computed box-sizing and requires border-box, so it catches a missing sizing rule or one that never matched the card. It does not measure the long identifier, test enlarged text or detect clipped content, so narrow the preview and zoom in to compare overflow behavior.
+
+Open `courses/web-development/solutions/web-011_solution.html` after saving your attempt ([comparing with the reference](../STUDY-GUIDE.md#references)).

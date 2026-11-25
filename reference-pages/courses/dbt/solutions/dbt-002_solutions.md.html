@@ -195,7 +195,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="dbt-002-explained-reference">dbt-002: explained reference<a class="heading-anchor" href="#dbt-002-explained-reference" aria-label="Link to this section">#</a></h2>
 <p>Create a staging boundary with complete record accounting.</p>
-<p>The executable reference contains the two complete worked cases with assertions. The changes below explain the independent practice and its limits.</p>
+<p>The reference loads a CSV seed, stages it with explicit casts and uses <code>try_cast</code> to keep ids 1 and 3 with amounts 5 and 9. It also counts the malformed raw row, so rejection is measured rather than assumed. The result covers this three-row fixture, not every malformed input pattern. See <a href="../STUDY-GUIDE.md.html#answers-and-references">how these answers are laid out</a>.</p>
 <h3 id="1-add-a-valid-row">1. Add a valid row<a class="heading-anchor" href="#1-add-a-valid-row" aria-label="Link to this section">#</a></h3>
 <p>The source and staged counts should both increase by one. Keep the identifier unique and verify the new row separately.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-comment"># Uses the tempfile import and the project(), invoke() and rows() helpers in main.py.</span>

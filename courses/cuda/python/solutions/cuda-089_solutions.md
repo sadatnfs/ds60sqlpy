@@ -1,6 +1,6 @@
 # cuda-089: explained solutions
 
-These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.
+Compare with your [worksheet](../lessons/cuda-089.md) attempt.
 
 ## Exercise 1: Build a parameter ledger
 
@@ -74,8 +74,16 @@ Use small fixed upper bounds and stop before exhausting hardware.
 
 **How to verify.** Fit peak memory against batch size from the recorded points and check the slope matches the activation ledger.
 
+## Self-check answers
+
+1. **Why does Adam need more memory than plain SGD?** Adam typically keeps two moment tensors per parameter in addition to the parameters and gradients.
+
+2. **What does TensorFlow memory growth change?** How memory is reserved over time. It does not make a workload whose live bytes exceed the device fit.
+
+3. **Does a container memory limit cap GPU memory?** Not generally. Host container limits do not impose a per-process GPU memory quota, so plan bounded experiments explicitly.
+
 ## Reference observation
 
 State 16000 bytes and activation 4096 bytes for the example.
 
-The reference file is `courses/cuda/python/references/cuda-089_cpu.py`. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.
+Asserted by `courses/cuda/python/references/cuda-089_cpu.py`.

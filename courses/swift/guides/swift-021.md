@@ -24,9 +24,9 @@ Result stores success or failure as a value, useful when an outcome must be reta
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles the saved pad as `main.swift` with Swift 6 language checking. An explicit `@main` type contains `static func main() async throws`; the fixed compiler uses `-parse-as-library -swift-version 6`. The examples use the standard library and portable Foundation. `precondition` makes a violated invariant fail the process. The fixed pad accepts one source file, without arbitrary command arguments, interactive input or dependency installation. SwiftUI, UIKit, Apple simulators and application signing belong to the separately prepared macOS/Xcode project labs, never the Linux pad.
+Both examples share `QuantityError` and the throwing `parseQuantity` declared above `LessonMain`. A `try` call outside a `do` block inside the throwing `main` would propagate the error and end the program, so keep the rejected input inside `do` and `catch`. Task 2 adds a second error case, and every exhaustive catch must change with it.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Compile contract, starter stop and success marker: [running a lesson](../STUDY-GUIDE.md#running-a-lesson).
 
 
 
@@ -34,7 +34,7 @@ Start with the answer-free learner artifact in your saved classroom pad. It deli
 
 `throws` declares failure capability. `try` acknowledges a throwing call. `do/catch` handles errors. Result<Success, Failure> stores an outcome, with Failure conforming to Error.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+Each example ends with a trace; method: [tracing a program](../STUDY-GUIDE.md#tracing-a-program).
 
 ## Worked example / walkthrough
 
@@ -68,6 +68,8 @@ struct LessonMain {
 
 **Observe:** Three is accepted and a negative quantity is rejected.
 
+**Trace.** `parseQuantity("3")` converts the text to 3, passes `value >= 0` and returns 3 normally, so `parsed` holds 3. The second call receives -1: `Int` parses it, but the guard's second condition fails, so the function throws `QuantityError.invalid` and never reaches its return. Control jumps to the matching `catch QuantityError.invalid` clause, which sets `rejected` to true. The check then proves the failure path actually ran, rather than assuming it did because no value appeared.
+
 ### Example B: Store an outcome for later inspection
 
 Result separates when an operation executes from when its outcome is examined.
@@ -98,6 +100,8 @@ struct LessonMain {
 
 **Observe:** The stored outcome retains a QuantityError.
 
+**Trace.** `Result { try parseQuantity("bad") }` uses the catching initializer: it runs the closure immediately, and because `Int("bad")` is nil the function throws, so the error is stored as `.failure` instead of propagating. The switch then inspects the stored outcome later. The success case would stop the program with a clear message. The failure case binds the stored error, typed `any Error`, and `is QuantityError` confirms the category survived storage.
+
 ## Exercises
 
 1. **Predict and explain.** Trace the normal and throwing paths.
@@ -112,13 +116,15 @@ struct LessonMain {
 
 6. **Transfer and justify.** Choose Optional, throws or Result for three APIs and explain each semantic distinction.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Log each task in the [evidence table](../STUDY-GUIDE.md#recording-exercise-evidence) before opening the explanation.
 
 ## Common pitfalls and diagnosis
 
 Try! turns recoverable failure into a trap. Try? deliberately discards error detail, so use it only when absence is the intended contract. Do not catch assertion failures as ordinary input errors.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+For task 4, `try? parseQuantity(text)` turns every failure into nil, so malformed text and a negative number become indistinguishable from each other. The counterexample pair is abc and -1: after task 2's split, they must report different error cases, and any code path using `try?` reports nil for both. Test empty text and a number beyond `Int.max` as well; both are malformed under this parser.
+
+Repair routine: [building a regression case](../STUDY-GUIDE.md#building-a-regression-case).
 
 ## Progressive hints
 
@@ -128,11 +134,15 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 ## Self-check and next step
 
-Explain Error, Throwing function, Result without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+Name the three places an error can go after a throwing call: handled in a `catch`, propagated with `try` in a throwing function, or converted with `try?`. Explain when storing a `Result` is better than handling the error immediately. Choose Optional, throws or Result for a cache lookup, a file read and a deferred network reply.
+
+Then follow the general [self-check routine](../STUDY-GUIDE.md#self-check-routine) and save your pad.
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://docs.swift.org/swift-book/documentation/the-swift-programming-language/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+[Documentation](https://docs.swift.org/swift-book/documentation/the-swift-programming-language/): The Error Handling chapter of the Swift book covers throwing functions, do-catch and converting errors to optionals; the standard library reference documents `Result`.
+
+Provenance and limits: [sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

@@ -31,11 +31,9 @@ Record whether each diagnostic ran inside the app container, a peer container or
 
 ## How to use this lesson
 
-The classroom displays this guide and saves your worksheet, `courses/docker/lessons/docker-032.md`. Its Run button does not control your Docker engine. Docker engine access is powerful host access, so the classroom deliberately receives no engine socket. Work through the supplied examples without starting anything, then use the optional host lab only in your own disposable project. Reading a command, parsing YAML and actually running the project are different forms of evidence.
+The classroom saves `courses/docker/lessons/docker-032.md` and holds no engine socket ([host-lab setup](../STUDY-GUIDE.md#host-lab-setup)).
 
-Use Bash in Linux, macOS Terminal, or Ubuntu under WSL 2 on Windows. The supported engine runs Linux containers. The maintained fixture is `courses/docker/fixtures/compose-lab/`; its README explains copying it into a new ignored learner directory, checking the engine, building locally with visible logs, and using the fixed project name `ds60-docker-study`. The fixture uses port 18080 on host loopback. Stop if that project name or port belongs to unrelated work; choose a new project name consistently in your own copy. Never paste a command against a remote Docker context simply because it is currently selected.
-
-For Dockerfile examples, create a file named `Dockerfile` in a scratch project. YAML snippets describe a fragment unless explicitly called a complete file. Text transcripts are synthetic illustrations, not claims about your machine. Do not substitute a real password, token or private registry into a checked-in example. **How to use the lessons** in the [subject README](../README.md) collects these rules in one place.
+**Host lab.** Collect the three views without installing anything. From the host, run `curl -s http://127.0.0.1:18080/healthz`. From a peer, run the `tools` client, which reaches `app:8080` by service name. From inside, use the fixture's own Python as worked example 1 shows. Then try `docker compose -p ds60-docker-study exec app curl -s http://127.0.0.1:8080/healthz`: the slim image ships no `curl`, so the engine reports that the executable was not found, which describes the image, not the app. For process evidence, `docker compose -p ds60-docker-study top app` reads the process list from the host side, and because the service sets `init: true` it shows a small init process with `python server.py` as its child. Record each result under its vantage point. There is nothing to clean up.
 
 ## Worked example / walkthrough
 
@@ -63,7 +61,7 @@ app: local listener, filesystem and effective UID
 
 ## Six progressive exercises
 
-For each exercise, name the object involved and the phase of its lifetime before changing anything, then vary only the condition the task names. Exercises that ask you to predict, explain, compare or diagnose keep their answers in the solutions file; the others show the evidence to look for.
+Answer-type prompts keep their answers in the solutions file ([exercise rules](../STUDY-GUIDE.md#exercise-rules)).
 
 ### Exercise 1: Predict a missing-shell error in a minimal image.
 
@@ -97,13 +95,19 @@ For each exercise, name the object involved and the phase of its lifetime before
 
 Installing tools into a live container and losing the original evidence. Reading a missing shell as an application crash. Mounting the host filesystem to debug a single HTTP endpoint.
 
-Exercise 4 is this chapter's boundary case: Diagnose an interactive repair that cannot survive recreation. Write down what the interactive change revealed, then recreate the container from the maintained image to confirm the repair is gone. Preserve the original failure and the exact changed field before retrying. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
+Exercise 4 is this chapter's boundary case: Diagnose an interactive repair that cannot survive recreation. Write down what the interactive change revealed, then recreate the container from the maintained image to confirm the repair is gone.
+
+The address `127.0.0.1` means a different machine depending on where a command runs, and debugging sessions mix these up constantly. Inside the app container it is the app's own loopback, where port 8080 answers. Inside a separate helper container on the project network it is the helper itself, so a request to `127.0.0.1:8080` there is refused even though nothing is wrong, while `app:8080` works. A helper started with `--network container:` and the app's container name shares the app's network namespace, and then its loopback is the app's again. On the host it is the host, where only the published 18080 answers. Before reading a refused connection as a fault, write down which network namespace the command ran in.
+
+Never trade a safety control for a passing example ([safety rules](../STUDY-GUIDE.md#safety-rules)).
 
 ## Retrieval, transfer and next steps
 
-Close the explanations first. Name one observation from each vantage point, host, peer and app, without looking back. Then reconstruct worked example 2 (Label observations by vantage point) with one different value, predict what changes, and name which of minimal image, debug container, shared namespaces and diagnostic vantage point the change touches.
+**Retrieval.** Name one observation from each vantage point, host, peer and app, without looking back.
 
-When a host session ends, run `docker compose -p ds60-docker-study down` from your fixture copy. It removes the project's containers and network but keeps named volumes; deleting a volume is a separate, deliberate reset described in the fixture README.
+**Transfer case.** The host request to `127.0.0.1:18080` times out, yet the peer client and the in-container health request both succeed. Which layer is at fault, and what would you check first?
+
+Then run the [retrieval loop](../STUDY-GUIDE.md#retrieval-and-cleanup) and end any host session with its cleanup.
 
 ## Primary references
 

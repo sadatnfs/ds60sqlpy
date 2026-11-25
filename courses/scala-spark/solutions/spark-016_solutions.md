@@ -1,6 +1,8 @@
 # spark-016: Explained paired reference solutions
 
-Read the [guide](../guides/spark-016.md) and attempt one language first. The [Scala reference](spark-016_solution.scala) and [PySpark reference](spark-016_solution.py) are complete single-file programs with explicit local sessions and finally-based stop. Each compares with literal expectations; matching two implementations alone would not rule out a shared mistake.
+Attempt the [guide](../guides/spark-016.md) exercises first.
+
+References: [Scala](spark-016_solution.scala), [PySpark](spark-016_solution.py).
 
 ## Exercises and reasoning
 
@@ -188,6 +190,7 @@ COUNT DISTINCT ignores NULL and collapses duplicates, so equality with total row
 
 ## Execution and interpretation
 
-Run the complete reference in its prepared fixed worker. Its first check (Build a multiplicity ledger before joining facts) is built inside the program, so opening the lesson fetches nothing; it expects: `A:(2, 3, 6)`, `B:(1, 1, 1)`, `C:(1, 0, 0)`, `D:(1, 0, 0)`, `E:(0, 1, 0)`, `NULL:(1, 1, 0)`. Predicted inner rows sum to 7. The final success line prints only after every reference assertion passes.
+The references check the multiplicity ledger key by key, the seven equality pairs, the ten-row left join with exactly seven matched dimension rows, the semi and anti partitions `[1, 2, 3]` and `[4, 5, 6]`, and the eight-pair NULL-safe join that adds only `(5, 105)`. For enrichment they expect the raw dimension to be rejected and then join the reviewed rows 103, 104 and 106, checking six facts, total 210 and each label.
 
-Local plan, partition and resource evidence does not establish cluster-scale performance; session cleanup is explicit.
+The final print, `spark-016: six PySpark reference contracts passed; Spark=` with the version, or the Scala equivalent, confirms these counts for a seven-row dimension. It does not tell you how the planner would choose a join strategy for large tables; that is the subject of the plan and broadcast lessons that follow.
+

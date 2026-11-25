@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/r/solutions/r-010_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="r-010-reference-reasoning">r-010: reference reasoning<a class="heading-anchor" href="#r-010-reference-reasoning" aria-label="Link to this section">#</a></h2>
-<p>Use the <a href="r-010_reference.R.html">complete reference</a> with the guide&#x27;s declared inputs and runtime. Every worked example is also a standalone script.</p>
+<p>Run the <a href="r-010_reference.R.html">complete reference</a> under the <a href="../STUDY-GUIDE.md.html#run-a-chapter">run rules</a>.</p>
 <h3 id="why-the-implementation-has-this-shape">Why the implementation has this shape<a class="heading-anchor" href="#why-the-implementation-has-this-shape" aria-label="Link to this section">#</a></h3>
 <p>The row permutation is applied to the entire data frame. Each ID retains its original amount.</p>
 <p>The complete mask excludes the unknown amount. drop=FALSE preserves a table even though only one row and one column remain.</p>
@@ -242,7 +242,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Tempting mistake:</strong> Requiring order_id to be unique, or deduplicating on it. The check rejects a valid two-line order, and deduplication drops L2 and understates the order.</p>
 <p><strong>Verify:</strong> <code>anyDuplicated(lines$order_id)</code> returns 2 while <code>anyDuplicated(lines$line_id)</code> returns 0.</p>
 <h3 id="what-the-checks-establish">What the checks establish<a class="heading-anchor" href="#what-the-checks-establish" aria-label="Link to this section">#</a></h3>
-<p>The reference makes 6 <code>stopifnot()</code> checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.</p></article>
+<p>The checks confirm a three row by two column table, a derived fee column reading 22, 12 and 32 in the original row order, ids that are present and unique, an amount sort yielding 10, 20 and 30, an empty selection that keeps the column names, and line ids that are unique while order ids repeat. They do not prove that a key stays unique across future data loads.</p>
+<p>The reference makes 6 <code>stopifnot()</code> checks; see <a href="../STUDY-GUIDE.md.html#what-a-passing-run-proves">what a passing run proves</a>.</p></article>
   </main>
 </body>
 </html>

@@ -4,8 +4,6 @@
 
 A histogram counts values into bins. Several threads can increment the same bin, so ordinary read-modify-write operations can lose updates. An atomic addition makes that individual update indivisible at its supported scope. It does not make an entire multi-step algorithm atomic or publish unrelated data automatically. A block-private histogram can reduce global contention by combining local counts before a global merge. It also costs shared memory and initialization work. Distribution matters: uniformly spread samples and one hot bin exercise very different contention patterns even with identical input size.
 
-The separate [CPU reference](../references/cuda-022_cpu.py) checks the chapter's bounded model. It does not execute CUDA or establish GPU timing. Compare after attempting the worksheet or explicitly choosing to reveal solutions.
-
 ## Exercise 1
 
 Values \([0,2,2,1,2,0]\) with three bins produce \([2,1,3]\). The sum of bins is six. Two workers both reading an old count of zero and then each writing one lose a count; correct atomic accumulation produces two.
@@ -78,12 +76,16 @@ Specify bin edges, inclusivity, out-of-range and NaN policies before mapping val
 
 **How to verify:** Test values equal to each edge, the top edge, a value below range, and NaN, and check each lands where the contract says.
 
+## Self-check answers
+
+1. **Why must the bin counts in worked example 1 sum to six?** Every input value lands in exactly one bin, so the total equals the input count.
+2. **What does an atomic add guarantee and what does it not?** Each single update is indivisible; it does not make a multi-step algorithm atomic or order other writes.
+3. **When might a private histogram be slower?** On small inputs or with many bins, where initializing and merging private copies costs more than it saves.
+
 ## Numerical reference and its limits
 
-The complete CPU model is [here](../references/cuda-022_cpu.py). Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It does not claim CUDA execution, concurrency safety or a performance measurement.
+The [CPU reference](../references/cuda-022_cpu.py) reproduces worked example 1 and prints `{'partials': [[1, 0, 2], [1, 1, 1]], 'merged': [2, 1, 3]}`.
 
 ## Transfer review
 
 Specify bin edges, inclusivity, out-of-range and NaN policies before mapping values to integer bins.
-
-A complete explanation must name its inputs, the unchanged mathematical contract, the changed boundary or resource condition, and the evidence still needed on actual hardware. Preserve a CPU baseline even after a GPU path becomes available.

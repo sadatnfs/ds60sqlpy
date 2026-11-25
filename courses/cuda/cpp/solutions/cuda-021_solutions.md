@@ -4,8 +4,6 @@
 
 An exclusive scan gives each item the reduction of preceding items; an inclusive scan includes the item itself. For stable compaction, map the selection predicate to zeros and ones, scan those flags, then let selected input i write to its exclusive prefix position. Stability means selected elements keep their relative order. Multiple blocks require scanning block totals and adding offsets in another stage. A total count says how much output is needed but does not assign every destination. Separate input and output or prove that aliasing cannot overwrite unread values.
 
-The separate [CPU reference](../references/cuda-021_cpu.py) checks the chapter's bounded model. It does not execute CUDA or establish GPU timing. Compare after attempting the worksheet or explicitly choosing to reveal solutions.
-
 ## Exercise 1
 
 For values \([8,3,6,1,4]\), select even values. Flags are \([1,0,1,0,1]\), exclusive positions are \([0,1,1,2,2]\), and selected writes produce \([8,6,4]\). Nonselected elements have positions too, but they do not write.
@@ -78,12 +76,16 @@ Exclusive offsets are \([0,2,2]\); append total five to obtain \([0,2,2,5]\), th
 
 **How to verify:** Check that consecutive differences of the offsets reproduce the original lengths [2, 0, 3] and that the last offset equals the item count.
 
+## Self-check answers
+
+1. **Give the exclusive scan of flags [0,1,1,0,1].** [0,0,1,2,2], with total count 3.
+2. **What does stability mean for compaction?** Selected elements keep their original relative order in the output.
+3. **What extra stage do multiple blocks need for a scan?** Scan the block totals and add each block's offset to its local results.
+
 ## Numerical reference and its limits
 
-The complete CPU model is [here](../references/cuda-021_cpu.py). Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It does not claim CUDA execution, concurrency safety or a performance measurement.
+The [CPU reference](../references/cuda-021_cpu.py) reproduces worked example 1 and prints `{'flags': [1, 0, 1, 0, 1], 'positions': [0, 1, 1, 2, 2], 'compacted': [8, 6, 4]}`.
 
 ## Transfer review
 
 Exclusive offsets are \([0,2,2]\); append total five to obtain \([0,2,2,5]\), the row-boundary representation.
-
-A complete explanation must name its inputs, the unchanged mathematical contract, the changed boundary or resource condition, and the evidence still needed on actual hardware. Preserve a CPU baseline even after a GPU path becomes available.

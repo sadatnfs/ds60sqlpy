@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/web-development/solutions/web-043_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="web-043-explanatory-solutions">web-043: explanatory solutions<a class="heading-anchor" href="#web-043-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Open this after your own attempt. Each answer explains the lesson&#x27;s synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in <code>courses/web-development/guides/web-043.md</code>.</p>
+<p>Attempt each exercise before reading; the mechanism is in <code>courses/web-development/guides/web-043.md</code> (<a href="../STUDY-GUIDE.md.html#solutions">using these answers</a>).</p>
 <h3 id="exercise-1-explain-an-instant-versus-a-local-clock-reading">Exercise 1: Explain an instant versus a local clock reading.<a class="heading-anchor" href="#exercise-1-explain-an-instant-versus-a-local-clock-reading" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> An instant is a timeline point; a local reading needs zone context and can be ambiguous.</p>
 <p><strong>Approach:</strong> Describe an instant as one point on the global timeline, and a local reading as a date and clock value that needs a zone to locate it.</p>
@@ -232,7 +232,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Plausible wrong approach:</strong> Storing -05:00 as the learner&#x27;s zone fails because summer dates in that region use -04:00.</p>
 <p><strong>How to verify:</strong> Formatting a July and a January date in the named zone prints -04:00 and -05:00 respectively.</p>
 <h3 id="reference-comparison">Reference comparison<a class="heading-anchor" href="#reference-comparison" aria-label="Link to this section">#</a></h3>
-<p>Open <code>courses/web-development/solutions/web-043_solution.php</code> only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; server lifecycle, persistence, concurrency and security need their own integration evidence.</p></article>
+<p>The reference requires the converted time to keep the same timestamp, to read 07:00 -05:00 and to add exactly 1800 seconds for 30 minutes. That catches mutable dates and a wrong zone. It does not test a daylight saving transition, so compare a calendar day across one yourself.</p>
+<p>Open <code>courses/web-development/solutions/web-043_solution.php</code> after saving your attempt (<a href="../STUDY-GUIDE.md.html#references">comparing with the reference</a>).</p></article>
   </main>
 </body>
 </html>

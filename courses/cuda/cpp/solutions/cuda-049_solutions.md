@@ -4,8 +4,6 @@
 
 A linear solver seeks x such that A*x approximates b. Factorization usually avoids the unnecessary work and numerical costs of explicitly constructing an inverse. Library status tells whether the requested procedure completed; a residual checks how well the returned vector satisfies the equation. A small residual does not guarantee a small error in x when A is ill-conditioned, meaning small input changes can greatly change the solution. Report both the residual and a conditioning interpretation. Workspace, matrix layout, pivoting and rank assumptions belong to the solver contract rather than being incidental implementation details.
 
-The separate [CPU reference](../references/cuda-049_cpu.py) checks the chapter's bounded model. It does not execute CUDA or establish GPU timing. Compare after attempting the worksheet or explicitly choosing to reveal solutions.
-
 ## Exercise 1
 
 For A=\([[3,1],[1,2]]\) and b=\([9,8]\), x=\([2,3]\) gives A*x=\([9,8]\), so residual is zero in this exact fixture. This is a good first layout and status test, but it does not exercise singular or poorly conditioned problems.
@@ -78,12 +76,16 @@ State rank and scaling assumptions, compare a suitable factorization method and 
 
 **How to verify:** Compare QR and normal-equation residuals on a poorly scaled design matrix.
 
+## Self-check answers
+
+1. **What is the residual of x = [2,3] in worked example 1?** Zero, because A times x equals b exactly.
+2. **Why prefer factorization over computing the inverse?** It is cheaper and numerically more stable for solving.
+3. **What does an ill-conditioned matrix mean for the answer?** Small input changes can cause large changes in x, so errors in b are amplified.
+
 ## Numerical reference and its limits
 
-The complete CPU model is [here](../references/cuda-049_cpu.py). Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It does not claim CUDA execution, concurrency safety or a performance measurement.
+The [CPU reference](../references/cuda-049_cpu.py) reproduces worked example 1 and prints `{'solution': [2, 3], 'residual': [0, 0]}`.
 
 ## Transfer review
 
 State rank and scaling assumptions, compare a suitable factorization method and report residual plus uncertainty/conditioning rather than only coefficient values.
-
-A complete explanation must name its inputs, the unchanged mathematical contract, the changed boundary or resource condition, and the evidence still needed on actual hardware. Preserve a CPU baseline even after a GPU path becomes available.

@@ -196,7 +196,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <article class="document"><h2 id="r-008-matrices-dimensions-and-linear-algebra-operators">r-008: Matrices, dimensions and linear algebra operators<a class="heading-anchor" href="#r-008-matrices-dimensions-and-linear-algebra-operators" aria-label="Link to this section">#</a></h2>
 <p><strong>Level:</strong> beginner. <strong>Direct prerequisites:</strong> <code>r-003</code>, <code>r-005</code>, <code>r-007</code></p>
 <h3 id="run-and-retain-your-work">Run and retain your work<a class="heading-anchor" href="#run-and-retain-your-work" aria-label="Link to this section">#</a></h3>
-<p>Open <code>r-008</code> in <code>/classroom</code> and use the prepared <code>r-statistics</code> profile. Each Run evaluates one <code>main.R</code> script in a fresh offline R process, so define every input in the script; an earlier Run leaves no variables behind. Work in the <a href="../lessons/r-008.R.html">starter</a>. The <a href="../solutions/r-008_reference.R.html">complete reference</a> ends by printing <code>r-008 reference checks passed</code>, and the <a href="../solutions/r-008_solutions.md.html">explained answers</a> are there for deliberate comparison after your own attempt. This chapter prints values only; when a chapter draws figures, the classroom keeps at most two figures per run. The <a href="../README.md.html">course overview</a> describes saved work, figure capture and the prepared package versions.</p>
+<p>The starter fills a 2 by 3 matrix with <code>1:6</code>, defines <code>beta</code> as <code>c(2, 3)</code> and prints the matrix. Run it and read the first row: R fills by column, so it shows 1, 3 and 5. Before multiplying, confirm that your design matrix has as many columns as <code>beta</code> has elements, because <code>%*%</code> requires matching inner dimensions while <code>*</code> works elementwise without complaint.</p>
+<p>Work in the <a href="../lessons/r-008.R.html">starter</a> under the <a href="../STUDY-GUIDE.md.html#run-a-chapter">run rules</a>.</p>
+<p>The <a href="../solutions/r-008_reference.R.html">complete reference</a> ends by printing <code>r-008 reference checks passed</code>.</p>
 <h3 id="outcome-and-mechanism">Outcome and mechanism<a class="heading-anchor" href="#outcome-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Construct and subset matrices while distinguishing elementwise arithmetic from a matrix product.</p>
 <p>A matrix is an atomic vector with a two-element dim attribute. Its entries share one storage type. By default matrix fills columns first, so matrix(1:6, nrow=2) has first column 1,2 and second column 3,4. The optional byrow argument changes how the supplied sequence is arranged, not the meaning of later row and column indices.</p>
@@ -291,7 +293,7 @@ matrix(1:6, nrow = 2, byrow = TRUE)   1 2 3   4 5 6</code></pre>
 <li>It checks the equation at the returned value.</li>
 </ol>
 <h3 id="reference-review">Reference review<a class="heading-anchor" href="#reference-review" aria-label="Link to this section">#</a></h3>
-<p>The reference applies the reasoning explained under the worked examples above; the <a href="../solutions/r-008_solutions.md.html">explained answers</a> add an answer for each exercise.</p>
+<p>The reference reuses the worked examples&#x27; reasoning; <a href="../solutions/r-008_solutions.md.html">explained answers</a> cover each exercise.</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
 <ul>
 <li><a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/matrix.html">R matrix construction</a></li>
@@ -299,7 +301,27 @@ matrix(1:6, nrow = 2, byrow = TRUE)   1 2 3   4 5 6</code></pre>
 <li><a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/solve.html">R linear systems</a></li>
 </ul>
 <h3 id="continue">Continue<a class="heading-anchor" href="#continue" aria-label="Link to this section">#</a></h3>
-<p>Chapters that list <code>r-008</code> as a direct prerequisite: <a href="r-020.md.html"><code>r-020</code></a>, <a href="r-037.md.html"><code>r-037</code></a>, <a href="r-038.md.html"><code>r-038</code></a>, <a href="r-039.md.html"><code>r-039</code></a>.</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Next chapter</th>
+<th>Title</th>
+</tr></thead><tbody>
+<tr>
+<td><a href="r-020.md.html"><code>r-020</code></a></td>
+<td>Debugging, regression checks and reproducible scripts</td>
+</tr>
+<tr>
+<td><a href="r-037.md.html"><code>r-037</code></a></td>
+<td>Simulation, Monte Carlo error and reproducible randomness</td>
+</tr>
+<tr>
+<td><a href="r-038.md.html"><code>r-038</code></a></td>
+<td>Finite probability tables and conditional reasoning</td>
+</tr>
+<tr>
+<td><a href="r-039.md.html"><code>r-039</code></a></td>
+<td>Formulas, design matrices and identifiability</td>
+</tr>
+</tbody></table></div>
 <h3 id="ask-an-ai-tutor">Ask an AI tutor<a class="heading-anchor" href="#ask-an-ai-tutor" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for r-008 (Matrices, dimensions and linear algebra operators).
 Read the guide and my saved attempt. Explain the relevant R mechanism,

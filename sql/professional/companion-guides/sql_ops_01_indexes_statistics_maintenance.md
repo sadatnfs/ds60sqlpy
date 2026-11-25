@@ -2,67 +2,19 @@
 
 ## How to run this lesson
 
-Start the Linux-container engine and run `./classroom` from the repository
-root. On Windows, use Ubuntu in WSL 2 or the thin
-`START_DOCKER_CLASSROOM.cmd` wrapper. Choose **PostgreSQL** on the shared
-`/classroom` home, then open **sql-ops-01**. The
-[launcher guide](../../../docs/one-command-classroom.md) covers first preparation, strict resume and
-the saved project selection. No host Python or PostgreSQL installation is
-required for this browser route.
+Start **sql-ops-01** from `./classroom` using the shared [run steps](../../STUDY-GUIDE.md#run-a-lesson-in-the-classroom).
 
-1. Read the prerequisite and fixture notes before running the file. Use only
-   the local disposable `advanced_sql_training` database.
-2. Choose **Whole SQL lesson (psql)** for the cataloged learner script. This
-   preserves the lesson's reviewed psql directives, relative includes and
-   transaction behavior. **SQL snippet** is appropriate for ordinary SQL
-   statements, but is not a replacement for an entire script's setup.
-3. The **Course database** panel above the code shows whether the course
-   training tables are loaded. Missing tables load automatically before your
-   first run (or choose **Load course tables**) and stay loaded for later
-   lessons. **Reset training data** restores the original rows only when your
-   own changes made results differ; it keeps your saved code and notes.
-4. Edit the learner copy in the classroom and save your prediction before
-   running. Its whole-script workspace is
-   `.learning/sql/sql-ops-01/lesson/workspace/sql/professional/lessons/sql_ops_01_indexes_statistics_maintenance.sql`.
-   For browser work this path is inside the Docker learning volume, not a
-   newly created host folder beside your checkout. The checked-in source
-   remains the answer-free starting artifact.
-5. Run the whole script and inspect the full transcript. The runner uses
-   `psql -X -v ON_ERROR_STOP=1 -f`. SELECT output has columns, rows and a row
-   count; DDL/DML has command tags; intentional checks may produce NOTICE
-   messages. An unexpected ERROR or nonzero exit is a failure to diagnose,
-   even when an earlier query printed plausible values.
-6. Verify the lesson's expected grain, ordering, constraints and declared
-   transaction or cleanup outcome. Keep required ROLLBACK statements.
-   The warehouse sequence and other explicitly stateful exercises explain
-   when state is committed. Read saved output without rerunning it when
-   reviewing an earlier attempt.
+Choose **Whole SQL lesson (psql)**. The script opens one transaction on
+`advanced_sql_training`, loads 6,000 events into `pro_ops_lab`, builds seven
+teaching indexes and one extended statistics object, runs `ANALYZE`, prints
+four `EXPLAIN (COSTS OFF)` plans and several statistics views, and ends with
+`ROLLBACK`. It never runs `VACUUM`, changes a server setting or enables
+`pg_stat_statements`. The final `DO` check requires 6,000 rows and at least
+eight indexes on `events`. Your plans may differ from a classmate's; that is
+expected. Save attempts in
+`.learning/sql/sql-ops-01/lesson/workspace/sql/professional/lessons/sql_ops_01_indexes_statistics_maintenance.sql`.
 
-If a relation is missing, inspect the lesson's required fixture and predecessor
-rather than guessing a new table definition. If authentication or runtime
-readiness fails, use `./classroom status` and the setup guide. Keep credentials
-out of SQL, notebooks, screenshots and committed files. Repair the first error
-before trusting partial output, and reveal separate solutions only when you
-want to compare after an attempt.
-
-### Optional contributor notebook route
-
-For notebook work, deliberately prepare the Linux/WSL contributor environment
-from [CONTRIBUTING.md](../../../CONTRIBUTING.md), including a compatible psql client and
-the notebook dependencies. Generate this lesson's private workspace through
-the maintained CLI:
-
-```sh
-uv run --no-sync python scripts/course.py sql notebook sql-ops-01
-```
-
-Open the printed notebook path in that environment's JupyterLab. It uses the
-same catalog-derived learner-copy layout in that contributor checkout and
-executes the complete script through psql. Its host-side state is separate
-from the Docker browser's named volume. Follow
-[guided SQL notebooks](../../../docs/guided-sql-notebooks.md) for explicit local connection
-selection and kernel setup. Notebook generation does not execute SQL or
-authorize a reset.
+The optional notebook route starts with `uv run --no-sync python scripts/course.py sql notebook sql-ops-01`; see the [study guide](../../STUDY-GUIDE.md#optional-contributor-notebook-route).
 
 ## Level and prerequisites
 
@@ -88,24 +40,28 @@ host settings, runs `VACUUM`, or enables `pg_stat_statements`.
 
 ## A beginner's mental model for this lesson
 
-A **table** stores facts in named columns. A **row** is one occurrence at the
-table's declared grain. A query creates a temporary **result set**: rows printed
-on screen are not automatically stored. The key vocabulary for this lesson is Access method, Operator class, Partial index, Expression index, Covering index, BRIN range. Its worked SQL reads or creates `pro_ops_lab.events`, `pg_catalog.pg_index`, `pg_catalog.pg_class`, `pg_catalog.pg_namespace`, `pg_catalog.pg_am`.
+This lesson is about the physical side of a query: an index changes how
+PostgreSQL finds rows, never which rows a correct query returns. The vocabulary
+below (access method, operator class, partial, expression and covering index,
+BRIN range) names the choices you make when one index should serve one operator
+in one workload.
 
-Before writing a query, complete this sentence: “One output row represents
-___.” Joins can multiply rows, filters can remove them, grouping can collapse
-many rows into one, and window functions can add calculations while preserving
-row count. For a normal analytical `SELECT`, use this logical reading order:
-`FROM`/`JOIN` (including `ON`) → `WHERE` → `GROUP BY`/aggregates → `HAVING` →
-window calculations → `SELECT` → `ORDER BY` → `LIMIT`. PostgreSQL may execute a
-different physical plan while preserving those semantics.
+Two kinds of output appear here. The catalog queries return one row per index
+or statistics object, which you can count against the DDL: a primary key plus
+seven teaching indexes. The `EXPLAIN` blocks are not rows of data at all; they
+are the plan PostgreSQL chose for this table size and these statistics, so read
+them as evidence about this run.
 
-The worked walkthrough's lesson-specific task is: The fixture inserts 6,000 events in timestamp order. That physical correlation makes time a plausible BRIN candidate in a much larger append-oriented table. The teaching table is intentionally small, so PostgreSQL may still prefer a sequential scan; that is a valid cost decision.
-The first runnable example has a concrete contract: Example 1 must print the expected DDL command tag for `pro_ops_lab.events`. Verify the object in `pg_catalog.pg_class`, run one accepted behavior and one rejected boundary behavior, and confirm the lesson rollback/cleanup removes only course-owned state.
+The walkthrough fixture inserts 6,000 events one minute apart, so physical row
+order follows `occurred_at`. That correlation is what makes the BRIN index with
+`pages_per_range = 8` a plausible choice in a much larger append-only table.
+The teaching table is small, so PostgreSQL may still pick a sequential scan for
+the one-day count, and that is a valid cost decision, not a broken index.
 
 ## Two worked SQL examples
 
-These worked excerpts come from `sql/professional/lessons/sql_ops_01_indexes_statistics_maintenance.sql`. Use **Whole SQL lesson (psql)** in the unified classroom for the complete file, including its fixture and transaction context. The optional contributor notebook and prepared `psql` routes are described above.
+Example 1 defines the event table and Example 2 generates its 6,000 rows; the
+indexes follow them.
 
 ### Example 1
 
@@ -121,9 +77,14 @@ CREATE TABLE pro_ops_lab.events (
 );
 ```
 
-**How to read it:** Example 1 is data definition language (DDL). `psql` prints a command tag when PostgreSQL accepts the definition; a later catalog or behavior check must prove that the intended rule exists.
+**How to read it:** Each column feeds a different index type: `device_id` and
+`occurred_at` feed the covering B-tree, `occurred_at` alone feeds BRIN, the
+`tags` array feeds GIN, `location` (a `point`) feeds GiST, and `message` feeds
+an expression index on `lower(message)`.
 
-**Expected result/shape:** Example 1 must print the expected DDL command tag for `pro_ops_lab.events`. Verify the object in `pg_catalog.pg_class`, run one accepted behavior and one rejected boundary behavior, and confirm the lesson rollback/cleanup removes only course-owned state.
+**Expected result/shape:** `CREATE TABLE`. The seven `CREATE INDEX` statements
+and the `CREATE STATISTICS` on `(device_id, severity)` follow, then `ANALYZE`
+so the planner has fresh statistics.
 
 ### Example 2
 
@@ -150,9 +111,14 @@ FROM
   generate_series(1, 6000) AS g (n);
 ```
 
-**How to read it:** Example 2 changes rows inside the lesson's declared transaction. The command tag reports affected rows, but a follow-up query must prove the intended before/after invariant.
+**How to read it:** `generate_series(1, 6000)` drives every column from `n`.
+Devices cycle through 40 values and severity through 5, so each device always
+has the same severity, which is the correlation the extended statistics
+capture. Every tenth message is the retry warning.
 
-**Expected result/shape:** Example 2 returns one row per `smallint`, and `END` with columns `smallint`, and `END` from `pro_ops_lab.events`, and `generate_series`. Compare the key set and row count with a simpler control over the same filter/window; inspect `NULL` versus zero/absent-row meaning and verify the final ordering/tie-breaker when present.
+**Expected result/shape:** `INSERT 0 6000`. With 40 devices, `device-007` has
+150 events, and one fifth of all rows have severity 5. The partial index
+`events_high_severity_partial` covers only the severity 4 and 5 rows.
 
 ## Learning objectives
 
@@ -361,9 +327,8 @@ statistics, extension, and post-restore verification in a recovery rehearsal.
 
 ## Ask an AI tutor about this lesson
 
-An AI tutor is optional; the guide, learner SQL, PostgreSQL, and expected checks are
-enough to complete the lesson offline. If you want a patient tutor, copy this
-prompt after opening the repository in the AI tutor:
+The lesson and expected observations are sufficient offline. For optional
+coaching, copy:
 
 ```text
 Tutor me through sql-ops-01: Index Types, Statistics, and Maintenance Lifecycle.

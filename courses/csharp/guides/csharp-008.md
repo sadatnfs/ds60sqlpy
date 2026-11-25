@@ -24,9 +24,9 @@ A rectangular array has dimensions built into its shape; a jagged array is an ar
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles your saved pad as `Program.cs` in its fixed .NET 10 project. C# 14 is the matching language generation. This route uses the prepared framework libraries; it does not accept arbitrary project files, NuGet packages, command arguments or interactive input. The explicit `Program.Main` entrypoint makes compilation and execution visible. `Check` throws on a false condition in every build configuration, unlike conditional debugging assertions.
+Example B's nested loop sits on one line of source; rewrite it across several lines in a scratch pad if that is easier to trace. For task 5, an empty rectangular array such as `new int[0, 3]` is legal: its `Length` is 0 while `GetLength(1)` still reports 3.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Compile contract, starter stop and success marker: [running a lesson](../STUDY-GUIDE.md#running-a-lesson).
 
 
 
@@ -34,7 +34,7 @@ Start with the answer-free learner artifact in your saved classroom pad. It deli
 
 `new int[3]` creates three zero-initialized entries. `values[0]` addresses the first. `int[,] grid` has rank two and GetLength selects a dimension. `int[][]` contains separate row arrays.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+Each example ends with a trace; method: [tracing a program](../STUDY-GUIDE.md#tracing-a-program).
 
 ## Worked example / walkthrough
 
@@ -80,6 +80,8 @@ internal static class Program {
 ```
 
 **Observe:** The alias changes source; the copied integer array retains 2.
+
+**Trace.** `source` refers to a new array holding 2 and 4. `alias = source` copies the reference, so both names point to one array. `Clone()` allocates a second array and copies the two integers into it, and the cast restores the `int[]` type. Writing 9 through `alias` changes the shared array, so `source[0]` reads 9 while `copy[0]` still reads 2.
 
 ### Example B: Respect distinct dimensions
 
@@ -127,6 +129,8 @@ internal static class Program {
 
 **Observe:** The shape is two by three and the sum is 21.
 
+**Trace.** `GetLength(0)` returns 2 rows and `GetLength(1)` returns 3 columns. The outer loop fixes a row and the inner loop visits each column of it: 1, 2 and 3 give 6, then 4, 5 and 6 add 15, so `sum` ends at 21. Using `grid.Length`, which is 6, as the bound for either loop would run past that dimension.
+
 ## Exercises
 
 1. **Predict and explain.** Predict source and copy after alias mutation.
@@ -141,13 +145,15 @@ internal static class Program {
 
 6. **Transfer and justify.** Choose rectangular or jagged storage for variable-length sensor histories and justify the choice.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Log each task in the [evidence table](../STUDY-GUIDE.md#recording-exercise-evidence) before opening the explanation.
 
 ## Common pitfalls and diagnosis
 
 Clone is shallow for referenced elements. Length of a rectangular array is total cells, not the number of rows. Validate an index before using it, including results returned by searches.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+Task 4's loop that uses `GetLength(0)` for both bounds visits only columns 0 and 1 of the two-by-three grid; it misses 3 and 6 and returns 12 without throwing. A three-by-two grid throws instead, so test both shapes. For task 1, remember that cloning an array of objects copies only the references, so a shared object would still change.
+
+Repair routine: [building a regression case](../STUDY-GUIDE.md#building-a-regression-case).
 
 ## Progressive hints
 
@@ -157,11 +163,15 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 ## Self-check and next step
 
-Explain Array, Alias, Shape without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+Draw `source`, `alias` and `copy` after `alias[0] = 9`, showing which names share storage. Give `Length` and both `GetLength` values for a three-by-four rectangular array. Explain when a jagged `int[][]` fits variable-length rows better than `int[,]`, and what a jagged array costs when every row has the same length.
+
+Then follow the general [self-check routine](../STUDY-GUIDE.md#self-check-routine) and save your pad.
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://learn.microsoft.com/en-us/dotnet/csharp/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+[Documentation](https://learn.microsoft.com/en-us/dotnet/csharp/): The reference article on arrays covers single-dimensional, multidimensional and jagged arrays and their properties.
+
+Provenance and limits: [sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

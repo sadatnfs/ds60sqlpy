@@ -4,8 +4,6 @@
 
 A stencil computes each output from a neighborhood of input values. The boundary policy is part of the mathematics: clamped, periodic and fixed-zero boundaries describe different problems. Use separate input and output buffers for a time step so one update cannot change a neighbor's inputs halfway through the step. A tiled implementation loads a halo around its interior region because edge outputs need values from neighboring tiles. A barrier only protects data loaded by the same cooperating group; it does not legalize global in-place updates across independently scheduled blocks.
 
-The separate [CPU reference](../references/cuda-023_cpu.py) checks the chapter's bounded model. It does not execute CUDA or establish GPU timing. Compare after attempting the worksheet or explicitly choosing to reveal solutions.
-
 ## Exercise 1
 
 For \([2,4,8]\) with a three-point mean and fixed-zero outside values, one step gives \([2,\frac{14}{3},4]\). With clamped boundaries it gives \([\frac{8}{3},\frac{14}{3},\frac{20}{3}]\). Both are valid calculations, but they answer different questions. A reference must match the chosen policy.
@@ -78,12 +76,16 @@ Define timestep and stability assumptions, separate old/new fields, exchange hal
 
 **How to verify:** Track the total over steps under periodic boundaries and confirm it stays constant within rounding.
 
+## Self-check answers
+
+1. **What is the clamped three-point mean of the last element of [2,4,8]?** (4 + 8 + 8) / 3, which is 20/3.
+2. **Why use two buffers per time step?** Every output must read the old values; writing in place lets later outputs read new ones.
+3. **What is a halo in a tiled stencil?** Extra cells around the tile loaded so edge outputs have all their neighbors.
+
 ## Numerical reference and its limits
 
-The complete CPU model is [here](../references/cuda-023_cpu.py). Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It does not claim CUDA execution, concurrency safety or a performance measurement.
+The [CPU reference](../references/cuda-023_cpu.py) reproduces worked example 1 and prints `{'fixed_zero_mean': [2.0, 4.666666666666667, 4.0], 'original_preserved': [2.0, 4.0, 8.0]}`.
 
 ## Transfer review
 
 Define timestep and stability assumptions, separate old/new fields, exchange halos where needed and check an appropriate conservation or monotonicity property.
-
-A complete explanation must name its inputs, the unchanged mathematical contract, the changed boundary or resource condition, and the evidence still needed on actual hardware. Preserve a CPU baseline even after a GPU path becomes available.

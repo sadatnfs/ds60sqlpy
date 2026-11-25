@@ -119,31 +119,27 @@ With GROUP_ID set to the Flink consumer group, the output lists each partition w
 
 ## Complete worked source
 
-This is a project-only command notebook. Read and edit it in the classroom; run its explicitly labeled commands from the copied owned Docker workshop. The classroom does not execute these service commands.
+The classroom does not execute these service commands. See the [workshop rules](../STUDY-GUIDE.md#workshop-notebooks).
 
 # Integration apache-082 complete worked notebook
 
 Prepare a separately owned combined Kafka/Flink/Pinot route. Capture actual connector versions, private DNS, source offsets, checkpoint/sink state and exact serving IDs. Exercise duplicate and late-correction rules; component receipts alone do not qualify the whole path.
 
-## Receipt fields and independent oracle
+## What this streaming receipt must hold
 
-- Source revision/hashes and exact declared input IDs, values, schema and time units.
-- Actual native platform, package/image identities and owned resource namespace.
-- Selected table snapshot/version, source positions or process/lineage identity as appropriate.
-- Positive result against an independent oracle and a typed negative observation.
-- Read-only retained-state comparison after the selected lifecycle transition.
-- Cleanup/evidence-storage result and any separate prepared or unavailable feature.
+- The integration topic name, partition count and end offsets after the single produce.
+- The Flink job ID, parallelism, watermark policy and the last completed checkpoint ID.
+- The sink connector name and version, and whether it joins the checkpoint commit.
+- The Pinot table name, decoder class, offset reset policy and consuming segment names.
+- The broker query result as stable event IDs with amounts, not only a row count.
+- The duplicate ID, the correction version and what serving returned for each.
 
-For the common three-order fixture, require IDs 1/2/3 with amounts 4/9/7, total 20,
-east 11 and west 9. A later fourth west order of 2 changes the current total to 22 and west
-to 11 while an earlier pinned snapshot remains unchanged. Do not use this simple
-oracle to claim correctness for a different pipeline without defining its
-deduplication, correction and visibility semantics.
-
-Read the selected project README and qualification ledger before commands. The
-classroom does not execute Docker commands in this Markdown pad. Prepared
-configuration, unit policy fixtures, successful compilation and actual service
-acceptance remain different observations. Never include credentials or signed URLs.
+Reconcile three ledgers before writing any verdict: Kafka offsets, Flink
+checkpoint state and Pinot query rows. Producing the three orders once should
+leave three offsets, three logical events and a total of 20. After the duplicate, Kafka
+holds four records while a deduplicating route still serves three IDs. A served
+total of 29 means the duplicate of order 2 was counted. The
+[shared receipt rules](../STUDY-GUIDE.md#evidence-receipts) cover naming and storage.
 
 ## Concrete source inspection
 
@@ -155,14 +151,16 @@ cat ../flink/README.md
 cat ../streaming/README.md
 ```
 
-These inspections do not start or qualify a service. Execute only the chosen
-project's complete documented owned route and retain its actual receipt.
+In `realtime-table.json`, the topic `ds60-orders`, the broker list `kafka:9092`
+and `auto.offset.reset` set to `smallest` decide where Pinot starts reading. A
+combined route needs its own topic name so that the Pinot table never consumes
+the streaming workshop's retained records. None of these files proves a combined
+topology ran; they show which settings must agree across the three projects.
 
 ## Primary references
 
-- [Iceberg reliability and table state](https://iceberg.apache.org/docs/latest/reliability/)
-- [Arrow data format](https://arrow.apache.org/docs/format/Columnar.html)
-- [Flink stateful stream processing](https://nightlies.apache.org/flink/flink-docs-release-2.3/docs/concepts/stateful-stream-processing/)
-- [Kafka delivery/transaction design](https://kafka.apache.org/44/design/design/)
-- [Atlas API and metadata boundaries](https://atlas.apache.org/api/v2/index.html)
-- [Delta Sharing protocol](https://github.com/delta-io/delta-sharing/blob/v1.4.1/PROTOCOL.md)
+- [Kafka offsets, producers and transactions](https://kafka.apache.org/44/design/design/)
+- [Flink checkpoints and sink participation](https://nightlies.apache.org/flink/flink-docs-release-2.3/docs/dev/datastream/fault-tolerance/checkpointing/)
+- [Flink watermarks for late corrections](https://nightlies.apache.org/flink/flink-docs-release-2.3/docs/dev/datastream/event-time/generating_watermarks/)
+- [Pinot ingestion from a Kafka topic](https://github.com/pinot-contrib/pinot-docs/blob/latest/build-with-pinot/ingestion/stream-ingestion/import-from-apache-kafka.md)
+- [Pinot upsert for current-state serving](https://github.com/pinot-contrib/pinot-docs/blob/latest/build-with-pinot/ingestion/upsert-and-dedup/upsert.md)

@@ -19,6 +19,10 @@ from scripts.format_inline_code import canonical_markdown, ownership  # noqa: E4
 from scripts.format_repo import load_policy  # noqa: E402
 
 SPECS = runpy.run_path(str(Path(__file__).with_name("chapters.py")))["CHAPTERS"]
+TEACH = runpy.run_path(str(Path(__file__).with_name("teaching.py")))["TEACHING"]
+LAB_READ = (
+    'kubectl --kubeconfig "$LAB_KUBECONFIG" --context "$LAB_CONTEXT" --namespace "$LAB_NAMESPACE" '
+)
 
 SITES = {
     "kubernetes.io": "Kubernetes documentation",
@@ -102,6 +106,11 @@ def build():
     for n, spec in enumerate(SPECS, 43):
         title, concepts, mental, mechanism, diagram, examples, tasks, refs = spec
         key = f"k8s-{n:03d}"
+        t = TEACH[key]
+        reads = "\n".join(LAB_READ + read for read in t["reads"])
+        checklist = "".join(f"\n- {item}" for item in t.get("checklist", []))
+        if checklist:
+            checklist = f"\nBefore concluding, record:\n{checklist}\n"
         vocabulary = "\n\n".join(part for part in (mental, key_terms_block(key)) if part)
         prereq = ["k8s-008", "k8s-020"] if n == 43 else [f"k8s-{n - 1:03d}"]
         prerequisites = ", ".join(f"`{p}`" for p in prereq)
@@ -113,11 +122,12 @@ def build():
 
 ## Level and prerequisites
 
-{level.capitalize()}; about 120 minutes plus optional supervised host observations. Direct prerequisites: {prerequisites}. This is the deep networking and operations extension; it preserves the original Kubernetes sequence and its separately qualified browser operations.
+{level.capitalize()}; about 120 minutes. Direct prerequisites: {prerequisites}. Shared workflow: [study guide](../STUDY-GUIDE.md#networking-extension-boundary).
 
 ## Learning objectives
 
-{tasks[2][0]} {tasks[-1][0]} Trace the exact caller, destination, control-plane object and data-plane behavior that would support your conclusion.
+- {tasks[2][0]}
+- {tasks[-1][0]}
 
 ## Purpose, vocabulary and mental model
 
@@ -133,37 +143,35 @@ def build():
 {diagram}
 ```
 
-Read this diagram as a sequence of responsibilities. A controller can successfully create desired state while a later traffic or application step still fails. Identify the component that makes each decision and the concrete observation that would prove it. The addresses in these lessons are synthetic examples, never instructions to contact a shared or public system.
+{t["trace"]}
 
 ## Worked example / walkthrough
 """
         for i, (heading, body, lang, code, expected) in enumerate(examples, 1):
             text += f"\n### Worked example {i}: {heading}\n\n{body}\n\n```{lang}\n{code}\n```\n\n**Expected observation:** {expected}\n"
-        text += """
+        text += f"""
 ## Run boundary and the owned host lab
 
-The classroom saves a reading worksheet for this lesson. It does not provide the full advanced networking or controller operation in the ordinary Run adapter. The original admitted Kubernetes reference cases keep their existing contracts. A manifest being valid YAML does not mean it is admitted by that adapter, supported by your cluster, or successfully routed at runtime.
+{t["run"]}
 
-Start with the original synthetic topology and manifests in [the networking fixture](../fixtures/networking/README.md). Its static checker makes no API calls. It checks internal consistency of the teaching inputs and cannot establish a live CNI, DNS, load balancer, controller or NetworkPolicy result. The fixture inventory names the extra capability required for each optional live observation.
-
-Optional live work requires a separately prepared, explicitly owned disposable target and the capability named by the fixture. Use the receipt's private kubeconfig, exact context and namespace. On Windows run Bash inside WSL 2. Do not use an ambient current-context, install a controller automatically or broaden RBAC after a Forbidden error. A completed one-shot browser Run has already cleaned its resources, so the host observation must belong to a separately retained owned session.
+The [fixture checker](../fixtures/networking/README.md) makes no API calls; on Windows use WSL 2.
 
 ```sh
-: "${LAB_KUBECONFIG:?Use the private path from the owned receipt}"
-: "${LAB_CONTEXT:?Use the exact context from the owned receipt}"
-: "${LAB_NAMESPACE:?Use the namespace from the owned receipt}"
-kubectl --kubeconfig "$LAB_KUBECONFIG" --context "$LAB_CONTEXT" --namespace "$LAB_NAMESPACE" get services -o wide
+: "${{LAB_KUBECONFIG:?Use the private path from the owned receipt}}"
+: "${{LAB_CONTEXT:?Use the exact context from the owned receipt}}"
+: "${{LAB_NAMESPACE:?Use the namespace from the owned receipt}}"
+{reads}
 ```
 
-This is a scoped read, not permission to create resources or change cluster networking. Keep credentials out of worksheets and portable exports. A host lab must record created resource UIDs and clean only those identities through its reviewed ownership procedure. Never delete a namespace merely because its name resembles the example.
+{t["read_note"]} Read rules: [owned live reads](../STUDY-GUIDE.md#owned-live-reads).
 
 ## Six progressive exercises
 """
         worksheet = f"# {key}: learner evidence worksheet\n\nThe default examples are synthetic. Record actual cluster evidence only after a separately prepared owned host lab. Never copy credentials into this file.\n"
-        answer = f"# {key}: explanatory solutions\n\nCompare after your own attempt or an explicit reveal. These explanations describe the synthetic topology and stated API contracts. They are not fabricated runtime receipts.\n\n## Mechanism review\n\n{mental}\n\n{mechanism}\n"
+        answer = f"# {key}: explanatory solutions\n\nAttempt each exercise first, then compare ([study guide](../STUDY-GUIDE.md#solutions-and-the-ai-tutor)).\n\n## Mechanism review\n\n{mental}\n\n{mechanism}\n"
         ledger = []
         for i, (prompt, expected, why) in enumerate(tasks, 1):
-            text += f"\n### Exercise {i}: {prompt}\n\n**Expected evidence:** {expected}\n\n**Progressive hint:** Name the caller and the first layer that can distinguish the possible causes. Compare the relevant object fields before changing a route, policy or workload.\n"
+            text += f"\n### Exercise {i}: {prompt}\n\n**Expected evidence:** {expected}\n\n**Progressive hint:** {t['hints'][i - 1]}\n"
             worksheet += f"\n## Exercise {i}: {prompt}\n\nMy prediction:\n\nSynthetic facts used:\n\nActual owned observation, if performed:\n\nInterpretation and remaining uncertainty:\n"
             answer += f"\n## Exercise {i}: {prompt}\n\n{why}\n\n**Expected:** {expected}\n"
             if reasoning_block(key, i):
@@ -173,17 +181,15 @@ This is a scoped read, not permission to create resources or change cluster netw
             f"""
 ## Diagnosis, failure boundaries and common mistakes
 
-Exercise 4 is this chapter's controlled failure: {tasks[3][0]} The distinguishing result: {tasks[3][1]} Keep that observation separate from guesses about adjacent layers. A DNS answer is not proof of a listening process. A Ready Pod is not proof of an externally reachable listener. A load-balancer address is not proof of TLS identity, path routing or a correct application response.
-
-Use bounded observations from the actual caller's network namespace. Preserve timestamps, object UIDs, generation or resource versions where relevant, and the intended image identity. A stale healthy result from another namespace or an earlier revision cannot qualify the current path. Avoid broad packet captures, all-namespace dumps and secret output when a smaller field-level observation answers the question.
-
-Do not repair a failed example by disabling NetworkPolicy, making a workload privileged, publishing every port or selecting another cluster. Those changes alter the contract rather than explain the failure. An unavailable capability is a valid boundary to report. Rehearse its mechanism with the synthetic fixture until the owned target is deliberately provisioned.
+{t["mistakes"]}
+{checklist}
+General evidence rules: [diagnosis rules](../STUDY-GUIDE.md#diagnosis-rules).
 
 ## Retrieval and transfer
 
-Close the solution and reconstruct the diagram with different synthetic addresses and one changed failure condition. Explain which identities are stable, which can change after replacement, and how a client discovers the current destination. State one observation that would falsify your diagnosis.
+{t["retrieval"]}
 
-Complete the six evidence records before advancing. For optional live work, review the owned resource ledger and UID-aware cleanup result. Keep source validation, API acceptance, controller status, actual traffic, application output and cleanup as distinct evidence. No local exercise establishes every cloud provider, CNI implementation, Kubernetes version or public production deployment.
+Score your answer with the [retrieval loop](../STUDY-GUIDE.md#retrieval-loop).
 
 ## Primary references
 

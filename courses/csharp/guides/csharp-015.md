@@ -24,9 +24,9 @@ A fallback branch should have a deliberate meaning. If a new domain state is int
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles your saved pad as `Program.cs` in its fixed .NET 10 project. C# 14 is the matching language generation. This route uses the prepared framework libraries; it does not accept arbitrary project files, NuGet packages, command arguments or interactive input. The explicit `Program.Main` entrypoint makes compilation and execution visible. `Check` throws on a false condition in every build configuration, unlike conditional debugging assertions.
+Example A declares `Describe` as a local function inside the example, while the `Result` hierarchy lives after `Main` as three record declarations. Task 4 is a compile-time lesson: putting an `object` arm first produces error CS8510 on the later arm, so the program never runs.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Compile contract, starter stop and success marker: [running a lesson](../STUDY-GUIDE.md#running-a-lesson).
 
 
 
@@ -34,7 +34,7 @@ Start with the answer-free learner artifact in your saved classroom pad. It deli
 
 `value is int number` tests and binds. Property patterns inspect named properties. A switch expression can select an expression by type and guard. `when` adds a condition after the structural match.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+Each example ends with a trace; method: [tracing a program](../STUDY-GUIDE.md#tracing-a-program).
 
 ## Worked example / walkthrough
 
@@ -89,6 +89,8 @@ internal static class Program {
 
 **Observe:** The same method distinguishes type, value range and string shape.
 
+**Trace.** `value` holds a boxed 12. The switch tries `int number when number > 0`: the type test succeeds, binds 12 to `number`, and the guard passes, so the result is positive. For -1 the first arm's guard fails and the plain `int` arm returns nonpositive. Empty text skips both integer arms and matches the property pattern `string { Length: 0 }`.
+
 ### Example B: Represent results without impossible combinations
 
 Separate cases prevent a Boolean success flag from disagreeing with unrelated optional fields.
@@ -140,6 +142,8 @@ internal static class Program {
 
 **Observe:** Success carries a count; failure carries a reason.
 
+**Trace.** `success` has static type `Result` and runtime type `Success`. In `Render`, the positional pattern `Success(var count)` checks the runtime type, deconstructs it and binds 8, so the result is count:8. `failure` fails that arm, matches `Failure(var reason)` and binds the reason text invalid. The discard arm throws because a third subtype would be a programming error.
+
 ## Exercises
 
 1. **Predict and explain.** Predict the matched arm for zero, positive integer, empty text and nonempty text.
@@ -154,13 +158,15 @@ internal static class Program {
 
 6. **Transfer and justify.** Replace several loosely related flags in a program with explicit states and justify which impossible combinations disappear.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Log each task in the [evidence table](../STUDY-GUIDE.md#recording-exercise-evidence) before opening the explanation.
 
 ## Common pitfalls and diagnosis
 
 An early broad pattern can make a later case unreachable. A default branch can hide a newly added state. Pattern matching is not a substitute for validating external data.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+For task 4, an arm `object => "other"` placed first matches every non-null value, so the compiler rejects the later `int` arm with CS8510, the pattern is unreachable. Task 2's nonempty string arm must come after the empty case. In task 1, 0 falls to nonpositive and text like x lands on the discard arm.
+
+Repair routine: [building a regression case](../STUDY-GUIDE.md#building-a-regression-case).
 
 ## Progressive hints
 
@@ -170,11 +176,15 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 ## Self-check and next step
 
-Explain Pattern, Guard, State model without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+Name the arm Example A's `Describe` selects for 0, 12, empty text and the text x. Explain what a `when` guard adds that a type pattern cannot express. For task 3, list the payload each of loading, ready and failed carries, and name one combination your design makes impossible.
+
+Then follow the general [self-check routine](../STUDY-GUIDE.md#self-check-routine) and save your pad.
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://learn.microsoft.com/en-us/dotnet/csharp/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+[Documentation](https://learn.microsoft.com/en-us/dotnet/csharp/): The pattern matching overview in the C# documentation covers type, property, positional and relational patterns along with `when` guards.
+
+Provenance and limits: [sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

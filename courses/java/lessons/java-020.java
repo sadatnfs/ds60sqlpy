@@ -3,20 +3,16 @@ public class Main {
 
   public static void main(String[] args) throws Exception {
     // Exercise 1: Find the first duplicate boundary: change one input
-    // Copy Example A into a scratch `Main.java` and change `int[] sorted = { 1, 2, 2, 5 };` to
-    // `int[] sorted = { 2, 2, 2, 5 };`. Before running it with `java -ea Main`, predict which
-    // assertion fails and which value it now sees; then run it and restore the original line.
-    // Expected: The changed run fails with an `AssertionError` from the assertion on
-    // `lowerBound(sorted, 2) == 1 && lowerBound(sorted, 6) == 4`. Restoring the original line
-    // brings back the worked observation: indices 1 and 4.
+    // Change `int[] sorted = { 1, 2, 2, 5 };` to `int[] sorted = { 2, 2, 2, 5 };` in Example A
+    // and predict which assertion fails and why.
+    // Expected: The edited run fails with an `AssertionError` from the assertion on
+    // `lowerBound(sorted, 2) == 1 && lowerBound(sorted, 6) == 4`.
 
     // Exercise 2: Handle empty and outside searches: diagnose an edited check
-    // A careless edit changed the assertion that Example B adds after Example A so that it reads
-    // `assert lowerBound(new int[1], 7) == 0;`. Run Example B with that line, explain why the
-    // edited assertion now fails for the same program state, and restore it.
-    // Expected: Before the repair the run fails with an `AssertionError` from the assertion on
-    // `lowerBound(new int[0], 7) == 0`; after it the line reads `assert lowerBound(new int[0],
-    // 7) == 0;` again and both return 0.
+    // Example B's new assertion was edited to `assert lowerBound(new int[1], 7) == 0;`. Explain
+    // why it fails for unchanged state and restore it.
+    // Expected: The edited run fails with an `AssertionError` from the assertion on
+    // `lowerBound(new int[0], 7) == 0`; the restored assertion passes.
 
     // Exercise 3: Preserve stable ties
     // Sort records (a, 2), (b, 1) and (c, 2) by key only and inspect the equal-key order.

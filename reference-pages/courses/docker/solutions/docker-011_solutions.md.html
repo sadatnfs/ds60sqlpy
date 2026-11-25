@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/docker/solutions/docker-011_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="docker-011-explanatory-solutions">docker-011: explanatory solutions<a class="heading-anchor" href="#docker-011-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit reveal. These explain the supplied teaching fixtures; they are not engine results. The mechanism is explained in <code>courses/docker/guides/docker-011.md</code>.</p>
+<p>These answers explain teaching fixtures, not engine results; the mechanism is in <a href="../guides/docker-011.md.html">the guide</a>.</p>
 <h3 id="exercise-1-identify-the-project-and-service-names">Exercise 1: Identify the project and service names.<a class="heading-anchor" href="#exercise-1-identify-the-project-and-service-names" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Project ds60-docker-study and service app.</p>
 <p><strong>Why:</strong> The project groups engine resources; the service describes an application role. A container ID is a third identity that can change after recreation.</p>
@@ -238,7 +238,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>A plausible wrong approach:</strong> Changing only the project name leaves both copies trying to bind 127.0.0.1:18080, so the second up fails to publish.</p>
 <p><strong>How to verify:</strong> Both projects appear in docker compose ls, and each loopback port returns its own copy&#x27;s response.</p>
 <h3 id="check-your-transfer">Check your transfer<a class="heading-anchor" href="#check-your-transfer" aria-label="Link to this section">#</a></h3>
-<p>A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.</p></article>
+<p>Both copies used the same project name, so Compose treated them as one project. The second <code>up</code> reconciled the first learner&#x27;s containers, and both copies shared the same named volume, which is why the counter changed. The second copy needs a distinct project name such as <code>ds60-docker-study-b</code> and a distinct loopback port such as 18081, used consistently in every command. After that, <code>docker compose ls</code> shows two projects and each label filter finds its own volume. One volume appearing under both project names would show the rename was incomplete.</p></article>
   </main>
 </body>
 </html>

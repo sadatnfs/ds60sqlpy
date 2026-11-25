@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/javascript-typescript/solutions/js-047_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="js-047-explanatory-solutions">js-047: explanatory solutions<a class="heading-anchor" href="#js-047-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit reveal. The separate .js reference is a complete offline browser program. These explanations discuss the six practice tasks; a visual resemblance alone is not a data or behavior check.</p>
+<p>Compare after your own attempt; the separate <code>.js</code> file is the complete reference program.</p>
 <h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
 <p>An axis makes a scale interpretable by displaying reference positions and labels. D3 axis generators create SVG elements from a scale; they do not choose the right statistical units or description. The chart author must name the quantity and make tick formatting consistent with the values.</p>
 <p>Ticks are selected reference values, not necessarily every data point. A requested tick count is often a hint rather than an exact guarantee. Explicit tick values are useful for small controlled examples. Formatting changes displayed text, not the underlying numeric scale.</p>
@@ -218,7 +218,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Expected:</strong> Displayed digits reflect measurement and comparison needs.</p>
 <h3 id="exercise-6-design-axes-for-counts-and-rates-side-by-side">Exercise 6: Design axes for counts and rates side by side.<a class="heading-anchor" href="#exercise-6-design-axes-for-counts-and-rates-side-by-side" aria-label="Link to this section">#</a></h3>
 <p>A count and a rate answer different questions. Shared colors do not make their numeric scales interchangeable. Give each panel its own scale and caption, for example &quot;visits (count)&quot; and &quot;conversion rate (fraction)&quot;. Sharing one y scale would squash the rates near zero.</p>
-<p><strong>Expected:</strong> Separate unit labels and denominators make the comparison explicit.</p></article>
+<p><strong>Expected:</strong> Separate unit labels and denominators make the comparison explicit.</p>
+<h3 id="after-comparison">After comparison<a class="heading-anchor" href="#after-comparison" aria-label="Link to this section">#</a></h3>
+<p>Add a second axis for rates per 1,000 beside the counts axis, each with its own title and units. Format counts with thousands separators using <code>d3.format(&#x27;,&#x27;)</code> and rates with one decimal place, then justify both precision choices in a sentence each.</p></article>
   </main>
 </body>
 </html>

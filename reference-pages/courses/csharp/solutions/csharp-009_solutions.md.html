@@ -194,7 +194,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/csharp/solutions/csharp-009_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="csharp-009-explanation-and-comparison">csharp-009: explanation and comparison<a class="heading-anchor" href="#csharp-009-explanation-and-comparison" aria-label="Link to this section">#</a></h2>
-<p>Attempt the six guide tasks before opening this comparison. The executable reference is <a href="csharp-009_solution.cs.html">csharp-009_solution.cs</a>. It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.</p>
+<p>Reference program: <a href="csharp-009_solution.cs.html">csharp-009_solution.cs</a>, covering both examples and the executed answers.</p>
+<p>Attempt the tasks first; see <a href="../STUDY-GUIDE.md.html#comparing-with-the-explanation">comparing with the explanation</a>.</p>
 <h3 id="why-the-two-examples-differ">Why the two examples differ<a class="heading-anchor" href="#why-the-two-examples-differ" aria-label="Link to this section">#</a></h3>
 <p><strong>Separate count from reserved storage:</strong> Capacity is an implementation resource, not a promise that ten logical entries exist. Reserving ten slots leaves Count at zero; two appends produce Count two.</p>
 <p><strong>Remove under one mutation policy:</strong> A bulk operation owns traversal and mutation, avoiding an invalidated external enumerator. Two entries are removed while the earlier integer snapshot keeps four values.</p>
@@ -246,7 +247,7 @@ Check<span class="syntax-punctuation">(</span>original<span class="syntax-punctu
 <p><code>new List&lt;int&gt; { ... }</code> uses a collection initializer. <code>Add</code> changes Count; an indexer replaces an existing element. <code>RemoveAll(predicate)</code> expresses structural removal as one owned operation. <code>ToArray</code> creates a snapshot of the element references or values.</p>
 <p>Capacity is not an index boundary. A snapshot of objects still shares those objects. Repeated front insertion can turn an apparently simple loop into quadratic work.</p>
 <h3 id="review-before-continuing">Review before continuing<a class="heading-anchor" href="#review-before-continuing" aria-label="Link to this section">#</a></h3>
-<p>Run the reference and confirm that it prints <code>csharp-009: passed</code>, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.</p></article>
+<p>Run the reference and confirm it prints <code>csharp-009: passed</code>, then rerun the guide&#x27;s counterexample.</p></article>
   </main>
 </body>
 </html>

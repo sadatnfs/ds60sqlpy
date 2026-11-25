@@ -85,7 +85,7 @@ execution model and the team can operate its dependencies. The two allocation
 and bounded-output cases provide concrete evidence to discuss that tradeoff
 without claiming that a tutorial benchmark proves production capacity.
 
-The [complete Ballista workshop](../projects/ballista/README.md) provides the maintained files, preparation, lifecycle and exact qualification boundaries for these cases.
+The [Ballista workshop](../projects/ballista/README.md) actions `one-slot` and `two-slots` restart the scheduler and executor with that many task slots, and `bounded-output` caps the returned rows at three and the payload at 2,048 bytes.
 
 ## Worked examples
 
@@ -114,7 +114,7 @@ This fragment from the project client puts the LIMIT in the query so executors s
 
 ## Complete worked source
 
-This is a project-only command notebook. Read and edit it in the classroom; run its explicitly labeled commands from the copied owned Docker workshop. The classroom does not execute these service commands.
+The classroom does not execute these service commands. See the [workshop rules](../STUDY-GUIDE.md#workshop-notebooks).
 
 # Fixed-host capacity comparison and bounded output
 

@@ -196,7 +196,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <article class="document"><h2 id="r-011-branching-loops-and-empty-input-behavior">r-011: Branching, loops and empty-input behavior<a class="heading-anchor" href="#r-011-branching-loops-and-empty-input-behavior" aria-label="Link to this section">#</a></h2>
 <p><strong>Level:</strong> beginner. <strong>Direct prerequisites:</strong> <code>r-004</code>, <code>r-005</code>, <code>r-010</code></p>
 <h3 id="run-and-retain-your-work">Run and retain your work<a class="heading-anchor" href="#run-and-retain-your-work" aria-label="Link to this section">#</a></h3>
-<p>Open <code>r-011</code> in <code>/classroom</code> and use the prepared <code>r-statistics</code> profile. Each Run evaluates one <code>main.R</code> script in a fresh offline R process, so define every input in the script; an earlier Run leaves no variables behind. Work in the <a href="../lessons/r-011.R.html">starter</a>. The <a href="../solutions/r-011_reference.R.html">complete reference</a> ends by printing <code>r-011 reference checks passed</code>, and the <a href="../solutions/r-011_solutions.md.html">explained answers</a> are there for deliberate comparison after your own attempt. This chapter prints values only; when a chapter draws figures, the classroom keeps at most two figures per run. The <a href="../README.md.html">course overview</a> describes saved work, figure capture and the prepared package versions.</p>
+<p>The starter holds -2, 3 and 4 and preallocates <code>out</code> with <code>numeric(length(x))</code>, then prints three zeros. Run it to see that preallocated shape before writing the loop. Your loop should iterate with <code>seq_along(x)</code> so an empty input runs zero times, and the branch on each element must test one scalar condition, never the whole vector.</p>
+<p>Work in the <a href="../lessons/r-011.R.html">starter</a> under the <a href="../STUDY-GUIDE.md.html#run-a-chapter">run rules</a>.</p>
+<p>The <a href="../solutions/r-011_reference.R.html">complete reference</a> ends by printing <code>r-011 reference checks passed</code>.</p>
 <h3 id="outcome-and-mechanism">Outcome and mechanism<a class="heading-anchor" href="#outcome-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Implement bounded loops with explicit scalar conditions, empty-input behavior and predictable output shape.</p>
 <p>An if expression chooses one branch based on a single TRUE or FALSE value. A missing or multi-element condition is not a valid replacement for one known decision. When the input is a vector, decide whether the question concerns any value, every value or each value separately before selecting a control structure.</p>
@@ -304,14 +306,22 @@ bad <span class="syntax-operator">&lt;-</span> <span class="syntax-function">squ
 <li>Compare shape and values, including empty inputs.</li>
 </ol>
 <h3 id="reference-review">Reference review<a class="heading-anchor" href="#reference-review" aria-label="Link to this section">#</a></h3>
-<p>The reference applies the reasoning explained under the worked examples above; the <a href="../solutions/r-011_solutions.md.html">explained answers</a> add an answer for each exercise.</p>
+<p>The reference reuses the worked examples&#x27; reasoning; <a href="../solutions/r-011_solutions.md.html">explained answers</a> cover each exercise.</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
 <ul>
 <li><a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/Control.html">R control flow</a></li>
 <li><a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/seq.html">R sequences</a></li>
 </ul>
 <h3 id="continue">Continue<a class="heading-anchor" href="#continue" aria-label="Link to this section">#</a></h3>
-<p>Chapters that list <code>r-011</code> as a direct prerequisite: <a href="r-012.md.html"><code>r-012</code></a>.</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Next chapter</th>
+<th>Title</th>
+</tr></thead><tbody>
+<tr>
+<td><a href="r-012.md.html"><code>r-012</code></a></td>
+<td>Functions, arguments and return contracts</td>
+</tr>
+</tbody></table></div>
 <h3 id="ask-an-ai-tutor">Ask an AI tutor<a class="heading-anchor" href="#ask-an-ai-tutor" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for r-011 (Branching, loops and empty-input behavior).
 Read the guide and my saved attempt. Explain the relevant R mechanism,

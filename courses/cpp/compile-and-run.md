@@ -150,7 +150,7 @@ ctest --test-dir build/debug --output-on-failure
 
 `-S` chooses source and `-B` generated build output. `add_executable` names the program sources, and `target_link_libraries` connects the caller to the library target. CTest actually executes registered checks. Debug and Release need separate build directories. See the [CMake 3.28 tutorial](https://cmake.org/cmake/help/v3.28/guide/tutorial/index.html).
 
-Missing native CMake/Ninja leaves the native CMake route unavailable;the Docker-only route below uses the prepared image instead. Do not infer CMake or CTest acceptance from a source review or compiler success. Do not install tools automatically during Run.
+Missing native CMake/Ninja leaves the native CMake route unavailable; the Docker-only route below uses the prepared image instead. Do not infer CMake or CTest acceptance from a source review or compiler success. Do not install tools automatically during Run.
 
 ### Docker-only CMake project route
 

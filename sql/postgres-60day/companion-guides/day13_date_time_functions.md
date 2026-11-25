@@ -2,67 +2,13 @@
 
 ## How to run this lesson
 
-Start the Linux-container engine and run `./classroom` from the repository
-root. On Windows, use Ubuntu in WSL 2 or the thin
-`START_DOCKER_CLASSROOM.cmd` wrapper. Choose **PostgreSQL** on the shared
-`/classroom` home, then open **sql-13**. The
-[launcher guide](../../../docs/one-command-classroom.md) covers first preparation, strict resume and
-the saved project selection. No host Python or PostgreSQL installation is
-required for this browser route.
+In `./classroom`, choose PostgreSQL, open **sql-13** and run **Whole SQL lesson (psql)**. Inside one `BEGIN`/`ROLLBACK` block on `advanced_sql_training`, `psql` prints two result blocks: the 50 longest-standing customers with their tenure and UTC sign-up month, then the 30 latest UTC order dates with daily revenue and a seven-row running sum. Both queries only read.
 
-1. Read the prerequisite and fixture notes before running the file. Use only
-   the local disposable `advanced_sql_training` database.
-2. Choose **Whole SQL lesson (psql)** for the cataloged learner script. This
-   preserves the lesson's reviewed psql directives, relative includes and
-   transaction behavior. **SQL snippet** is appropriate for ordinary SQL
-   statements, but is not a replacement for an entire script's setup.
-3. The **Course database** panel above the code shows whether the course
-   training tables are loaded. Missing tables load automatically before your
-   first run (or choose **Load course tables**) and stay loaded for later
-   lessons. **Reset training data** restores the original rows only when your
-   own changes made results differ; it keeps your saved code and notes.
-4. Edit the learner copy in the classroom and save your prediction before
-   running. Its whole-script workspace is
-   `.learning/sql/sql-13/lesson/workspace/sql/postgres-60day/day13_date_time_functions.sql`.
-   For browser work this path is inside the Docker learning volume, not a
-   newly created host folder beside your checkout. The checked-in source
-   remains the answer-free starting artifact.
-5. Run the whole script and inspect the full transcript. The runner uses
-   `psql -X -v ON_ERROR_STOP=1 -f`. SELECT output has columns, rows and a row
-   count; DDL/DML has command tags; intentional checks may produce NOTICE
-   messages. An unexpected ERROR or nonzero exit is a failure to diagnose,
-   even when an earlier query printed plausible values.
-6. Verify the lesson's expected grain, ordering, constraints and declared
-   transaction or cleanup outcome. Keep required ROLLBACK statements.
-   The warehouse sequence and other explicitly stateful exercises explain
-   when state is committed. Read saved output without rerunning it when
-   reviewing an earlier attempt.
+Edit your copy at
+`.learning/sql/sql-13/lesson/workspace/sql/postgres-60day/day13_date_time_functions.sql`.
+This lesson is unusual: the fixture's timestamps are generated relative to the day the course tables were loaded, and several queries compare them with `now()` or `CURRENT_DATE`. The numbers quoted below come from a check run on 2026-11-25 UTC, roughly a day after loading. Your dates will differ; the patterns (which rows lead, where gaps appear, which boundary is excluded) will not.
 
-If a relation is missing, inspect the lesson's required fixture and predecessor
-rather than guessing a new table definition. If authentication or runtime
-readiness fails, use `./classroom status` and the setup guide. Keep credentials
-out of SQL, notebooks, screenshots and committed files. Repair the first error
-before trusting partial output, and reveal separate solutions only when you
-want to compare after an attempt.
-
-### Optional contributor notebook route
-
-For notebook work, deliberately prepare the Linux/WSL contributor environment
-from [CONTRIBUTING.md](../../../CONTRIBUTING.md), including a compatible psql client and
-the notebook dependencies. Generate this lesson's private workspace through
-the maintained CLI:
-
-```sh
-uv run --no-sync python scripts/course.py sql notebook sql-13
-```
-
-Open the printed notebook path in that environment's JupyterLab. It uses the
-same catalog-derived learner-copy layout in that contributor checkout and
-executes the complete script through psql. Its host-side state is separate
-from the Docker browser's named volume. Follow
-[guided SQL notebooks](../../../docs/guided-sql-notebooks.md) for explicit local connection
-selection and kernel setup. Notebook generation does not execute SQL or
-authorize a reset.
+Loading, resetting and the classroom buttons are covered in the study guide's [classroom section](../../STUDY-GUIDE.md#run-a-lesson-in-the-classroom); the [notebook route](../../STUDY-GUIDE.md#optional-contributor-notebook-route) is optional.
 
 ## Level and prerequisites
 
@@ -74,28 +20,13 @@ authorize a reset.
 
 ## A beginner's mental model for this lesson
 
-A **table** stores facts in named columns. A **row** is one occurrence at the
-table's declared grain. A query creates a temporary **result set**: rows printed
-on screen are not automatically stored. The key vocabulary for this lesson is Half-open interval, Time zone, Calendar bucket. Its worked SQL reads or creates `customers`, `orders`.
+`orders.order_date`, `customers.created_at` and `events.event_time` are all `timestamptz`. Despite the name, a `timestamptz` stores no zone: it stores one instant, and `psql` prints it in the session's `TimeZone`, which is UTC in the classroom. That is why every value ends in `+00`. A calendar date, on the other hand, only exists once you pick a **time zone**: the first event in the fixture happened on 9 December 2022 in UTC and on 8 December in Los Angeles.
 
-Before writing a query, complete this sentence: “One output row represents
-___.” Joins can multiply rows, filters can remove them, grouping can collapse
-many rows into one, and window functions can add calculations while preserving
-row count. For a normal analytical `SELECT`, use this logical reading order:
-`FROM`/`JOIN` (including `ON`) → `WHERE` → `GROUP BY`/aggregates → `HAVING` →
-window calculations → `SELECT` → `ORDER BY` → `LIMIT`. PostgreSQL may execute a
-different physical plan while preserving those semantics.
+`instant AT TIME ZONE 'UTC'` turns the instant into a plain wall-clock `timestamp` for that zone, and `::date` or `date_trunc` then makes a **calendar bucket** from it. Do the conversion first and the truncation second. If you skip the conversion, PostgreSQL truncates in whatever zone the session uses; in a Los Angeles session, 69 orders would land in a different month.
 
-The worked walkthrough's lesson-specific task is: Express one day as `timestamp >= day_start AND timestamp < next_day_start`. Test a row exactly at each boundary. This half-open form prevents double counting when adjacent daily queries are combined and is friendlier to a normal timestamp index than wrapping the column in a function.
-Exercise 1 expects this result: recent order rows in deterministic order. Predict keys, row count, `NULL` behavior,
-and ordering before running. Afterwards, compare keys/counts/totals with an
-independent control. A blank string, SQL `NULL`, numeric zero, and a missing row
-are different facts; use `COALESCE` only after choosing which meaning the
-business question requires.
+To select a period, compare the raw instant with two boundaries: `order_date >= start AND order_date < next_start`. This **half-open interval** includes the first instant and excludes the next period's first instant, so consecutive months never share a row and never miss one. `BETWEEN` includes both ends, which double-counts an order placed exactly at midnight on the first.
 
 ## Two worked SQL examples
-
-These worked excerpts come from `sql/postgres-60day/day13_date_time_functions.sql`. Use **Whole SQL lesson (psql)** in the unified classroom for the complete file, including its fixture and transaction context. The optional contributor notebook and prepared `psql` routes are described above.
 
 ### Example 1
 
@@ -113,9 +44,9 @@ ORDER BY
 LIMIT 50;
 ```
 
-**How to read it:** Example 1: Start with `customers` in `FROM`/`JOIN`. The final `SELECT` displays `customer_id`, `full_name`, `tenure`, and `cohort_month_utc`. `ORDER BY` determines presentation order and the final `LIMIT 50` caps displayed rows. Before running, predict the row grain, row count, `NULL` positions, and first/last key; afterwards, compare each prediction with the transcript.
+**How to read it:** `now() - created_at` subtracts two instants and returns an `interval`, displayed as days plus a clock time such as `1483 days 04:37:06`. It never shows months, because a month has no fixed length. `created_at AT TIME ZONE 'UTC'` turns each instant into a UTC wall-clock time, `date_trunc('month', ...)` rounds it down to the first of the month, and `::date` drops the zero time. Sorting by `tenure DESC` puts the earliest sign-ups first.
 
-**Expected result/shape:** Example 1 returns one row per `customer_id`, capped at 50 rows with columns `customer_id`, `full_name`, `tenure`, and `cohort_month_utc` from `customers`. Use a direct count or grouped aggregate over those same source relations as the control; check ordering only when this query has an `ORDER BY`, and inspect `NULL` only for columns this example can produce.
+**Expected result/shape:** 50 rows. In our check, customer 429 (created 2022-11-03 03:00 UTC) leads with about 1,483 days, followed by customers 343 and 257, all in the 2022-11-01 cohort. The 50 rows cover six cohort months, November 2022 to April 2023. No two customers share a `created_at`, so the `customer_id` tie-breaker never decides anything here. Rerun tomorrow and every tenure grows by one day while the order stays the same.
 
 ### Example 2
 
@@ -140,9 +71,9 @@ ORDER BY
 LIMIT 30;
 ```
 
-**How to read it:** Example 2: Start with `orders` in `FROM`/`JOIN`; let `GROUP BY` collapse rows to its grouping keys; let each `OVER` expression calculate across related rows without collapsing them. The final `SELECT` displays `d_utc`, `revenue`, and `revenue_7_observed_days`. `ORDER BY` determines presentation order and the final `LIMIT 30` caps displayed rows. Before running, predict the row grain, row count, `NULL` positions, and first/last key; afterwards, compare each prediction with the transcript.
+**How to read it:** `daily` converts each order to its UTC calendar date and adds up `total_amount` per date, one row per date that has orders. The window `ROWS BETWEEN 6 PRECEDING AND CURRENT ROW` then sums the current row and the six rows before it in date order. Those are the seven most recent dates that had orders, not necessarily the last seven calendar days, which is what the alias `revenue_7_observed_days` admits.
 
-**Expected result/shape:** Example 2 returns one grouped row per `d_utc`, capped at 30 rows with columns `d_utc`, `revenue`, and `revenue_7_observed_days` from `orders`. Use a direct count or grouped aggregate over those same source relations as the control; check ordering only when this query has an `ORDER BY`, and inspect `NULL` only for columns this example can produce.
+**Expected result/shape:** 30 rows, newest first. In our check they run from 2026-11-23 (one order, 742.14, seven-row sum 14,555.16) back to 2026-10-25. Every one of those 30 dates had orders, so here the seven rows do equal seven calendar days. Earlier history is sparser: only 1,081 dates between 2023-02-13 and 2026-11-23 have orders, and 406 of the seven-row windows stretch over more than seven calendar days, one of them over 60.
 
 ## Learning objectives
 
@@ -168,62 +99,60 @@ timestamp index than wrapping the column in a function.
 - **Focus:** Treat timestamps as instants, dates as calendar values, and reporting zones/window boundaries as explicit parts of the query.
 - **Assumptions:** Stored event/order timestamps are `timestamptz`. Relative examples use the database clock; reports label UTC explicitly where conversion matters.
 - **Failure to watch for:** `BETWEEN` is inclusive at both ends and is often wrong for adjacent time windows; use half-open `[start, end)` predicates.
-- **Review loop:** predict the row grain and NULL/order behavior, run the
-  query, inspect a bounded sample, and reconcile counts or totals before
-  accepting the result.
+- **Review loop:** for each query, write the boundary instants it uses (in UTC) and say which side is included; then look at the first and last row printed and check they sit inside those boundaries.
 
 ## Exercises
 
 Treat timestamps as instants, dates as calendar values, and reporting zones/window boundaries as explicit parts of the query.
 
-Attempt each prompt in a scratch SQL file before opening the solution.
-For every result, write its row grain and expected shape first.
+Exercises 1, 4 and 6 depend on the current time, so note the timestamp you run them at; Exercises 2, 3 and 5 group or label fixed data. For each one, write down the boundary instants or zone it uses before you run it.
 
 1. **Query writing:** List orders from the last 30 days with their UTC calendar date.
+   **Think first:** the fixture never gains new orders. Will the count from this query rise or fall if you run it again next week?
    **Progressive hint:** Filter the timestamp directly and convert for display only.
-   **Inputs/evidence:** For sql-13 Exercise 1, read from `orders`. Build the answer toward `order_id`, `order_date`, and `utc_order_date`; keep `order_id` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-13 Exercise 1, expected output: Recent order rows in deterministic order. The final columns are `order_id`, `order_date`, and `utc_order_date`. The final order is `o.order_date DESC, o.order_id DESC`.
-   **Verify:** For sql-13 Exercise 1, run an anti-check that counts rows where NOT ((o.order_date >= CURRENT_TIMESTAMP - INTERVAL '30 days')); require unique `order_id` where the expected grain is one row per key and confirm the projected `order_id`, `order_date`, and `utc_order_date` against `orders`. Tie two rows on `o.order_date DESC` and give them different `o.order_id DESC` values; verify `o.order_date DESC, o.order_id DESC` chooses a stable first/last row.
+   **Inputs/evidence:** For sql-13 Exercise 1, read `orders.order_date` (`timestamptz`) and keep rows on or after `CURRENT_TIMESTAMP - INTERVAL '30 days'`, adding `(o.order_date AT TIME ZONE 'UTC')::date` as `utc_order_date`.
+   **Expected result/shape:** For sql-13 Exercise 1, return 209 rows on a freshly loaded fixture, newest first from order 2258 (`2026-11-23` UTC when loaded on 2026-11-25) back to order 734, the oldest order still inside the window. The final columns are `order_id`, `order_date`, and `utc_order_date`. The final order is `o.order_date DESC, o.order_id DESC`.
+   **Verify:** For sql-13 Exercise 1, confirm 209 distinct `order_id` values and 0 returned rows where `order_date < CURRENT_TIMESTAMP - INTERVAL '30 days'`. Inside a rolled-back transaction, insert one order dated `CURRENT_TIMESTAMP - INTERVAL '29 days'` and one dated 31 days back; the count must become 210, so only the first one enters the window.
 2. **Query writing:** Summarize orders and stored revenue by UTC month.
+   **Think first:** orders start in February 2023 and every month since has at least one. How many month rows should print?
    **Progressive hint:** Convert to UTC before truncating when the reporting calendar is UTC.
-   **Inputs/evidence:** For sql-13 Exercise 2, read from `orders`. Build the answer toward `utc_month`, `order_count`, and `stored_revenue`; keep `utc_month` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-13 Exercise 2, expected output: One row per observed UTC month. The final columns are `utc_month`, `order_count`, and `stored_revenue`. The final order is `utc_month`.
-   **Verify:** For sql-13 Exercise 2, independently aggregate `orders` by `utc_month`; require one output row for every distinct `utc_month` tuple and compare `order_count`, and `stored_revenue` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `order_count`, and `stored_revenue` for the existing `utc_month` tuple and verify the new tuple appears exactly once.
+   **Inputs/evidence:** For sql-13 Exercise 2, bucket all 4,362 `orders` by `date_trunc('month', o.order_date AT TIME ZONE 'UTC')`, counting orders and summing `total_amount` per UTC month.
+   **Expected result/shape:** For sql-13 Exercise 2, return 46 month rows on a freshly loaded fixture, from `2023-02-01` (2 orders, 1203.26) to the current month, which holds 151 orders and 85364.67 when loaded on 2026-11-25. The final columns are `utc_month`, `order_count`, and `stored_revenue`. The final order is `utc_month`.
+   **Verify:** For sql-13 Exercise 2, confirm the 46 `order_count` values add up to 4,362 and the `stored_revenue` values add up to 2355646.89, matching `SELECT SUM(total_amount) FROM orders`. Run it again after `SET LOCAL timezone = 'America/Los_Angeles'` in a rolled-back transaction; the output must not change, because the month is computed from the UTC wall time rather than the session zone.
 3. **Query writing:** Calculate each customer's age in whole days as of the current date.
+   **Think first:** subtracting one `date` from another gives what type? An integer, or an interval?
    **Progressive hint:** Compare calendar dates after declaring the UTC reporting date.
-   **Inputs/evidence:** For sql-13 Exercise 3, read from `customers`. Build the answer toward `customer_id`, `created_at`, and `customer_age_days`; keep `customer_id` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-13 Exercise 3, expected output: One row per customer with nonnegative age days. The final columns are `customer_id`, `created_at`, and `customer_age_days`. The final order is `c.customer_id`.
-   **Verify:** For sql-13 Exercise 3, reselect the returned keys directly from the source; require unique `customer_id` where the expected grain is one row per key and confirm the projected `customer_id`, `created_at`, and `customer_age_days` against `customers`. Add one source row with a new `customer_id`; verify the result gains exactly one row carrying that `customer_id` value.
+   **Inputs/evidence:** For sql-13 Exercise 3, subtract each customer's UTC `created_at` date from today's UTC date for all 500 `customers` rows.
+   **Expected result/shape:** For sql-13 Exercise 3, return 500 rows, one per customer, with `customer_age_days` between 33 (customer 86) and 1,483 (customer 429) on a freshly loaded fixture; customer 1 shows 48. The final columns are `customer_id`, `created_at`, and `customer_age_days`. The final order is `c.customer_id`.
+   **Verify:** For sql-13 Exercise 3, confirm 500 distinct `customer_id` values and 0 rows with a negative `customer_age_days`. Inside a rolled-back transaction, set customer 1's `created_at` to `CURRENT_TIMESTAMP`; its age must become 0, not 1, because both sides are converted to UTC dates before subtracting.
 4. **Prediction:** Use a half-open interval to select one UTC calendar month and explain which boundary instant is excluded.
+   **Think first:** which exact instant does `< next_month_start` leave out, and would `BETWEEN` count an order placed at that instant in two months?
    **Progressive hint:** Include the month start and exclude the next month start.
-   **Inputs/evidence:** For sql-13 Exercise 4, read from `orders`. Build the answer toward `order_id`, and `order_date`; keep `order_id` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-13 Exercise 4, expected output: Orders in exactly one UTC month. The final columns are `order_id`, and `order_date`. The final order is `o.order_date, o.order_id`.
-   **Verify:** For sql-13 Exercise 4, project `order_id` plus the raw source columns from `orders` at each join stage; record row count and distinct `order_id`, then assert the final `order_id`, and `order_date` values match those staged rows without unintended fanout or loss. Insert rows immediately before, exactly at, and immediately after the literal lower and upper comparisons in the final `WHERE` clause; identify which rows pass each inclusive or exclusive comparison.
+   **Inputs/evidence:** For sql-13 Exercise 4, build the current UTC month's start and the next month's start in a one-row `bounds` CTE, then keep `orders` with `order_date >= month_start AT TIME ZONE 'UTC'` and `order_date < next_month_start AT TIME ZONE 'UTC'`.
+   **Expected result/shape:** For sql-13 Exercise 4, return one row per order placed in the current UTC month, oldest first; on a fixture loaded on 2026-11-25 that is 151 orders, from order 3106 on 2026-11-01 to order 2258 on 2026-11-23. The final columns are `order_id`, and `order_date`. The final order is `o.order_date, o.order_id`.
+   **Verify:** For sql-13 Exercise 4, confirm the row count equals the last `order_count` from Exercise 2 (151 on that load). Inside a rolled-back transaction, insert one order one microsecond before the month start, one exactly at the month start, and one exactly at the next month's start; the count must rise by 1 only, and the new earliest row must be the one at midnight on the first.
 5. **Debugging:** Compare UTC and America/Los_Angeles display times without stripping the stored instant.
+   **Think first:** the earliest events are in December and January. How many hours behind UTC is Los Angeles then, and can that change the date?
    **Progressive hint:** `AT TIME ZONE` on `timestamptz` produces a local wall-clock display value.
-   **Inputs/evidence:** For sql-13 Exercise 5, read from `events`. Build the answer toward `event_id`, `event_time`, `utc_wall_time`, and `los_angeles_wall_time`; keep `event_id` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-13 Exercise 5, expected output: One row per sampled event with two displays of the same instant. The final columns are `event_id`, `event_time`, `utc_wall_time`, and `los_angeles_wall_time`. The final order is `e.event_time, e.event_id`.
-   **Verify:** For sql-13 Exercise 5, assert no more than 20 rows, no duplicate `event_id`, and no adjacent pair that violates `e.event_time, e.event_id`. Rejoin the returned keys to `events` to confirm `event_id`, `event_time`, `utc_wall_time`, and `los_angeles_wall_time` came from the same source rows. Run with 20 minus one and 20 plus one eligible rows; require the output cap of 20 while retaining `e.event_time, e.event_id`.
+   **Inputs/evidence:** For sql-13 Exercise 5, sort the 20,000 `events` rows by `event_time, event_id`, keep the first 20, and show each instant as `AT TIME ZONE 'UTC'` and `AT TIME ZONE 'America/Los_Angeles'` wall times.
+   **Expected result/shape:** For sql-13 Exercise 5, return 20 rows from event 17121 (`2022-12-09 07:14:09.605663` UTC, `2022-12-08 23:14:09.605663` in Los Angeles) to event 3362 on 2023-01-22; every winter row shows Los Angeles 8 hours behind UTC. The final columns are `event_id`, `event_time`, `utc_wall_time`, and `los_angeles_wall_time`. The final order is `e.event_time, e.event_id`.
+   **Verify:** For sql-13 Exercise 5, confirm 20 distinct `event_id` values and that the 21st row of the same ordering is event 17001, which the `LIMIT` cuts off. Rerun after `SET LOCAL timezone = 'America/Los_Angeles'` in a rolled-back transaction: `event_time` must display as `2022-12-08 23:14:09.605663-08` while `utc_wall_time` stays the same. Event 6402 (`2023-07-01 01:13` UTC) shows the summer gap of 7 hours.
 6. **Extension:** Create a seven-day UTC calendar and left join daily order counts so missing days appear as zero.
+   **Think first:** if today and yesterday had no orders, how many rows should still print, and what should they show?
    **Progressive hint:** Generate the date spine first, aggregate orders by the same UTC date, then `COALESCE` absent counts.
-   **Inputs/evidence:** For sql-13 Exercise 6, read from `orders`. Build the answer toward `utc_date`, and `order_count`; keep `order_id` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-13 Exercise 6, expected output: Exactly seven chronological rows. The final columns are `utc_date`, and `order_count`. The final order is `c.utc_date`.
-   **Verify:** For sql-13 Exercise 6, project `order_id` plus the raw source columns from `orders` at each join stage; record row count and distinct `order_id`, then assert the final `utc_date`, and `order_count` values match those staged rows without unintended fanout or loss. Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
+   **Inputs/evidence:** For sql-13 Exercise 6, generate the last seven UTC dates with `generate_series`, count `orders` per UTC date from the first of those days onward, and `LEFT JOIN` the counts to the calendar.
+   **Expected result/shape:** For sql-13 Exercise 6, return exactly 7 rows ending with today's UTC date; on a fixture loaded on 2026-11-25 the counts run 4, 4, 2, 2, 1, 0, 0 from 2026-11-19, and the two zero days come from `COALESCE` on dates with no orders. The final columns are `utc_date`, and `order_count`. The final order is `c.utc_date`.
+   **Verify:** For sql-13 Exercise 6, confirm 7 distinct dates and that `SUM(order_count)` equals `SELECT COUNT(*) FROM orders WHERE order_date >= ((CURRENT_TIMESTAMP AT TIME ZONE 'UTC')::date - 6) AT TIME ZONE 'UTC'` (13 on that load). Inside a rolled-back transaction, insert an order at `CURRENT_TIMESTAMP`; the last row must change from 0 to 1 and the row count must stay 7.
 
 ## Common mistakes and how to recover
 
-- **Lesson-specific semantic mistake:** `BETWEEN` is inclusive at both ends and is often wrong for adjacent time windows; use half-open `[start, end)` predicates.
-- **Unexpected row count:** display keys before aggregates, count rows after
-  each join/filter stage, and find the first stage whose grain differs from the
-  contract. Do not hide fanout with `DISTINCT`.
-- **Unexpected `NULL` or missing row:** decide whether the fact is unknown,
-  inapplicable, zero, or absent before using `COALESCE`; inspect outer-join
-  predicate placement and empty-input aggregate behavior.
-- **Unstable top/first/last output:** add `ORDER BY` with a unique final
-  tie-breaker before `LIMIT` or order-sensitive windows/aggregates.
-- **`psql` stops on an error:** fix the first error shown by
-  `ON_ERROR_STOP`, restore the declared transaction/setup state, and rerun the
-  complete file. A later successful statement does not validate a partial run.
+- **`BETWEEN` for a month:** `order_date BETWEEN '2026-11-01' AND '2026-12-01'` includes an order stamped exactly at midnight on 1 December, so it counts in both November and December. Use `>= start AND < next_start`.
+- **Truncating before converting:** `date_trunc('month', order_date)` uses the session zone. In a session set to America/Los_Angeles, 69 of the 4,362 orders move into the previous month. Convert with `AT TIME ZONE 'UTC'` first when the report calendar is UTC.
+- **Wrapping the column in the filter:** `WHERE order_date::date >= CURRENT_DATE - 30` silently switches to whole calendar days (211 rows instead of 209 in our check) and cannot use a plain index on `order_date`. Compare the raw column with a computed boundary instead, as Exercise 1 does.
+- **Expecting "last 30 days" to be stable:** the fixture is generated once at load time. Each day you wait, the newest orders slide out of the window and no new ones arrive, so the count keeps shrinking.
+- **Treating `ROWS` frames as calendar windows:** Example 2's seven rows can span 60 calendar days in sparse periods. For a true seven-day window, use `RANGE BETWEEN INTERVAL '6 days' PRECEDING AND CURRENT ROW` or a calendar spine.
+
+If the script stopped on an error, follow the study guide's [failure recovery notes](../../STUDY-GUIDE.md#recover-from-common-failures).
 
 ## Self-check
 
@@ -262,9 +191,7 @@ Further reading
 
 ## Ask an AI tutor about this lesson
 
-An AI tutor is optional; the guide, learner SQL, PostgreSQL, and expected checks are
-enough to complete the lesson offline. If you want a patient tutor, copy this
-prompt after opening the repository in the AI tutor:
+A tutor is optional. A good use for one here: ask it to pick an instant near midnight UTC on the first of a month and quiz you on its date in UTC, Los Angeles and Tokyo before revealing them. The prompt below keeps `solutions/` closed; setup is in the study guide's [tutor section](../../STUDY-GUIDE.md#use-an-ai-tutor-optional).
 
 ```text
 Tutor me through sql-13: Date and Time Functions and Time Zones.

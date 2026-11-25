@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cpp/solutions/cpp-027_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="cpp-027-explanations-and-reference-observations">cpp-027: explanations and reference observations<a class="heading-anchor" href="#cpp-027-explanations-and-reference-observations" aria-label="Link to this section">#</a></h2>
-<p>Attempt the learner tasks before opening this document. The executable reference checks the bounded normal and boundary examples; the six explanations below cover the deliberate changes and manual checks.</p>
+<p>The <a href="cpp-027_solution.cpp.html">executable reference</a> adds <code>add(0, 0) == 0</code> and <code>add(-2, 2) == 0</code>. The explanations cover version pinning and what qualifying another architecture would require. How to compare: <a href="../STUDY-GUIDE.md.html#compare-with-the-solutions">study guide</a>.</p>
 <h3 id="mechanism">Mechanism<a class="heading-anchor" href="#mechanism" aria-label="Link to this section">#</a></h3>
 <p>Reproducibility means another environment can reconstruct the same declared build inputs. Vendoring keeps an approved source dependency locally. A CMake target names include paths, features and link requirements so consumers inherit the right settings. A lock records exact dependency identities but still needs an actual offline build check.</p>
 <h3 id="detailed-reasoning">Detailed reasoning<a class="heading-anchor" href="#detailed-reasoning" aria-label="Link to this section">#</a></h3>

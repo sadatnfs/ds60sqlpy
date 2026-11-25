@@ -194,9 +194,17 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cuda/spark/guides/cuda-117.md</code></p>
     </header>
     <article class="document"><h2 id="cuda-117-nulls-decimals-timestamps-and-equality-contracts">cuda-117: Nulls, decimals, timestamps and equality contracts<a class="heading-anchor" href="#cuda-117-nulls-decimals-timestamps-and-equality-contracts" aria-label="Link to this section">#</a></h2>
-<p><strong>Route:</strong> CUDA Python and machine learning / GPU Spark specialization. <strong>Stage:</strong> advanced. <strong>Prerequisites:</strong> <code>cuda-116</code>. Allow several sessions when the hardware experiment is new; the chapter is not a deadline.</p>
-<h3 id="what-you-will-be-able-to-explain">What you will be able to explain<a class="heading-anchor" href="#what-you-will-be-able-to-explain" aria-label="Link to this section">#</a></h3>
-<p>By the end, you can <strong>calculate both counts</strong>, <strong>name timestamp timezone</strong>, and <strong>design ordered result comparison</strong> with evidence. Start with the two worked cases, then use the editable CPU model to make the quantities concrete.</p>
+<p><strong>Route:</strong> CUDA Python and machine learning / GPU Spark specialization. <strong>Stage:</strong> advanced. <strong>Prerequisites:</strong> <code>cuda-116</code>.</p>
+<p>Pacing, evidence labels and platform rules: <a href="../../STUDY-GUIDE.md.html">CUDA study guide</a>.</p>
+<h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
+<ul>
+<li>Calculate both counts.</li>
+<li>Handle all-null aggregate.</li>
+<li>Compare decimal values.</li>
+<li>Name timestamp timezone.</li>
+<li>Choose float tolerances.</li>
+<li>Design ordered result comparison.</li>
+</ul>
 <h3 id="mechanism-and-vocabulary">Mechanism and vocabulary<a class="heading-anchor" href="#mechanism-and-vocabulary" aria-label="Link to this section">#</a></h3>
 <p>SQL semantics include null propagation, three-valued predicates, decimal precision/scale, overflow policy, timezone interpretation and string ordering. GPU and CPU results should be compared under the query&#x27;s declared semantics, not by assuming every numeric column is a floating array. An empty aggregate and an aggregate of only null values can differ from a sum initialized to zero in Python.</p>
 <p>Use explicit schemas and deterministic ordering for comparison. Floating aggregates may require a justified tolerance because reduction order can change; decimal and integer outputs often require exact equality under the selected SQL mode. Timestamp tests should name the session timezone and include boundary cases. Never hide a semantic mismatch by relaxing tolerance until the test passes.</p>
@@ -209,11 +217,12 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 </ul>
 <h3 id="worked-examples">Worked examples<a class="heading-anchor" href="#worked-examples" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
-<p>COUNT (*) over [2, null,5] is 3 while COUNT (value) is 2. SUM (value) is 7 under skip-null semantics. The two counts answer different questions.</p>
+<p>COUNT(*) over [2, null, 5] is 3 while COUNT(value) is 2. SUM(value) is 7 under skip-null semantics. The two counts answer different questions.</p>
 <h4 id="worked-example-2">Worked example 2<a class="heading-anchor" href="#worked-example-2" aria-label="Link to this section">#</a></h4>
 <p>Decimal 1.10 plus 2.20 should preserve the chosen decimal contract. A binary floating approximation is not a substitute for testing a decimal expression.</p>
-<h3 id="portable-executable-model">Portable executable model<a class="heading-anchor" href="#portable-executable-model" aria-label="Link to this section">#</a></h3>
-<p>The <strong>CPU reference model</strong> variant runs this bounded worked example using <code>python-core</code>. It uses only the Python standard library, small synthetic values and no network. Its purpose is to expose the arithmetic or contract behind the chapter. The separate reference includes assertions for the stated observations.</p>
+<h3 id="how-to-run-the-cpu-model">How to run the CPU model<a class="heading-anchor" href="#how-to-run-the-cpu-model" aria-label="Link to this section">#</a></h3>
+<p>Edit the copy; the <a href="../references/cuda-117_cpu.py.html">reference</a> adds assertions.</p>
+<pre class="highlighted-code"><code class="language-bash">python courses/cuda/spark/lessons/cuda-117_cpu.py</code></pre>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> decimal <span class="syntax-keyword">import</span> Decimal
 
 values <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">None</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">]</span>
@@ -233,55 +242,47 @@ values <span class="syntax-operator">=</span> <span class="syntax-punctuation">[
 <td><code>[2, None, 5]</code></td>
 </tr>
 </tbody></table></div>
-<p>Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.</p>
 <h3 id="scala-and-pyspark-parity-lab">Scala and PySpark parity lab<a class="heading-anchor" href="#scala-and-pyspark-parity-lab" aria-label="Link to this section">#</a></h3>
-<p>Choose <strong>Scala Spark on CPU</strong> or <strong>PySpark on CPU</strong> to run the same bounded query in the ordinary Spark workers. Both use explicit schemas, local fixtures, at most two local threads, a disabled GPU SQL setting and a finally-block session stop. They assert the same expected result. These are CPU Spark observations, not GPU plugin qualification.</p>
-<p>For external GPU comparison, retain the same relational expressions and expected result but use a separately reviewed launcher and compatibility matrix. Do not change the classroom source into an arbitrary cluster connection.</p>
+<p>Both CPU variants assert one expected result. Read the <a href="../../STUDY-GUIDE.md.html#spark-parity-and-gpu-spark">parity rules</a>.</p>
 <h3 id="practice-and-transfer">Practice and transfer<a class="heading-anchor" href="#practice-and-transfer" aria-label="Link to this section">#</a></h3>
+<p>Record each attempt in the <a href="../lessons/cuda-117.md.html">worksheet</a> before opening hints.</p>
 <h4 id="exercise-1-calculate-both-counts">Exercise 1: Calculate both counts<a class="heading-anchor" href="#exercise-1-calculate-both-counts" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Treating null as zero gives the same sum but makes <code>COUNT(value)</code> 3 and the average 7/3 instead of 3.5, which disagrees with Spark.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-2-handle-all-null-aggregate">Exercise 2: Handle all-null aggregate<a class="heading-anchor" href="#exercise-2-handle-all-null-aggregate" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Returning 0 for the sum of an all-null group makes a group with no data look like a group whose values cancel out.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-3-compare-decimal-values">Exercise 3: Compare decimal values<a class="heading-anchor" href="#exercise-3-compare-decimal-values" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Using float64 for the same values gives <code>3.3000000000000003</code>, which fails an exact comparison and suggests a bug that exists only in the test.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-4-name-timestamp-timezone">Exercise 4: Name timestamp timezone<a class="heading-anchor" href="#exercise-4-name-timestamp-timezone" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Relying on the machine&#x27;s default timezone gives results that depend on where the job runs. Executors and the driver may also disagree, producing values that differ between stages of one job.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-5-choose-float-tolerances">Exercise 5: Choose float tolerances<a class="heading-anchor" href="#exercise-5-choose-float-tolerances" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Using exact equality for float sums fails on correct results, while using a very loose tolerance passes wrong ones.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-6-design-ordered-result-comparison">Exercise 6: Design ordered result comparison<a class="heading-anchor" href="#exercise-6-design-ordered-result-comparison" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Converting results to sets before comparing removes duplicates and hides a missing or extra row.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
-<p>Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.</p>
+<p>Hint <em>k</em> belongs to exercise <em>k</em>; open one at a time.</p>
 <ol>
-<li>Start from worked example 1 and mark the quantities needed for the task &quot;Calculate both counts&quot;.</li>
-<li>Change one assumption in worked example 2 while preserving the declared contract: handle all-null aggregate.</li>
-<li>Trace the CPU program&#x27;s variables before adding hardware behavior: compare decimal values.</li>
-<li>Draw producers, consumers and the exact operation boundary for the task &quot;Name timestamp timezone&quot;.</li>
-<li>Separate what the small fixture establishes from what the real runtime must show: choose float tolerances.</li>
-<li>Write a counterexample to an overbroad claim before you design ordered result comparison.</li>
+<li>Count all rows for one answer and only the rows where the value is present for the other.</li>
+<li>Look up what Spark SQL returns for a sum over values that are all null, then compare it with a Python sum starting at zero.</li>
+<li>Represent both operands as decimals with the declared scale and compare the result exactly.</li>
+<li>Set the session timezone explicitly and include values near a day or offset boundary.</li>
+<li>Base the tolerance on the dtype, the reduction algorithm and the magnitude of the values.</li>
+<li>Sort both result sets by stable keys before comparing, and keep duplicate rows instead of removing them.</li>
 </ol>
-<h3 id="common-mistakes-and-self-review">Common mistakes and self-review<a class="heading-anchor" href="#common-mistakes-and-self-review" aria-label="Link to this section">#</a></h3>
-<p>Confusing a correct tiny example with a general implementation is the central review risk. For this chapter, challenge the assumption in worked example 2, then ask whether your change preserves the mechanism described above. If you change dtype, layout, ordering, batch size or backend, update the acceptance contract rather than silently reusing the old observation. Explain an unexpected result before trying random configuration changes.</p>
-<p>Keep a small evidence table with columns <strong>claim</strong>, <strong>input</strong>, <strong>expected observation</strong>, <strong>actual observation</strong> and <strong>limit</strong>. For the first claim use <code>Calculate both counts</code>. For the final claim use <code>Design ordered result comparison</code>. An unperformed GPU or cluster experiment remains pending even when the CPU model is correct.</p>
-<h3 id="platform-and-evidence-contract">Platform and evidence contract<a class="heading-anchor" href="#platform-and-evidence-contract" aria-label="Link to this section">#</a></h3>
-<p>The reading worksheet and CPU reference model work through the ordinary Linux Docker classroom on macOS, Linux and Windows using WSL 2. They do not require an NVIDIA GPU. Their results are labeled CPU models or semantic oracles, not simulated hardware performance.</p>
-<p>Real CUDA work needs supported NVIDIA hardware, a compatible host driver and an explicitly prepared GPU runtime. An Apple GPU does not execute CUDA kernels. PyTorch MPS on a supported native Mac, ROCm on supported AMD hardware, or other vendor backends can provide separate accelerator learning routes; they need their own package and operation qualification and are not CUDA evidence. The ordinary Linux Docker classroom does not expose native Mac MPS automatically.</p>
-<p>Do not download packages, models or data by opening this lesson. Do not attach an engine socket, ambient cluster credentials or an arbitrary remote endpoint. A CPU pass, imported package, successful compilation, real GPU result and measured performance are distinct observations. Record the actual backend, data shape/dtype, source revision, versions and pending checks. A saved completion marker records learning progress, not hardware certification.</p>
-<p>GPU Spark is a separate owned external workflow. The ordinary <code>spark-local-scala</code> and <code>spark-local-python</code> profiles are CPU Spark. Keep the GPU plugin disabled or absent for a CPU-only baseline. Per-operator CPU fallback inside a working GPU plugin environment is a different condition from having no compatible GPU. Never mount a host Docker socket or ambient kubeconfig into an ordinary lesson worker.</p>
+<h3 id="common-mistakes-and-self-check">Common mistakes and self-check<a class="heading-anchor" href="#common-mistakes-and-self-check" aria-label="Link to this section">#</a></h3>
+<p>A common mistake is comparing CPU and GPU results as if every column were a float array. Decimal and integer results usually need exact equality, an all-null sum is null rather than zero, and timestamps depend on the session timezone. Another is widening a tolerance until a semantic mismatch passes. Fix both by using explicit schemas, deterministic ordering and exact comparison for decimals, reserving justified tolerances for floating aggregates whose reduction order can change.</p>
+<p><strong>Misconception:</strong> Results from CPU Spark and the GPU plugin can always be compared exactly. <strong>Correction:</strong> The plugin documents operations whose GPU results can differ from CPU Spark, such as floating aggregations whose order varies, and some of them are disabled by default for that reason. Read the compatibility notes for each operation in the query, compare decimals and integers exactly and compare floats with a justified tolerance.</p>
+<p><strong>Evidence limit:</strong> The reference computes row count 3, non-null count 2, sum 7 and the exact decimal 3.30 in Python. It does not run Spark SQL, so null, overflow and timezone behavior must be confirmed against the selected Spark mode and plugin release.</p>
+<ol>
+<li>How do COUNT(*) and COUNT(value) differ?</li>
+<li>Why can a binary float not stand in for a decimal test?</li>
+<li>Why name the timezone in a timestamp test?</li>
+</ol>
+<p>Answers: <a href="../solutions/cuda-117_solutions.md.html#self-check-answers">self-check answers</a>.</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
 <ul>
-<li><a href="https://nvidia.github.io/cudf-spark/docs/download.html">cuDF Spark plugin release and compatibility matrix</a></li>
 <li><a href="https://nvidia.github.io/cudf-spark/docs/supported_ops.html">Supported Spark operators and expression types</a></li>
-<li><a href="https://docs.nvidia.com/cudf-spark/latest/tuning-guide.html">GPU Spark tuning guide</a></li>
-<li><a href="https://spark.apache.org/docs/latest/sql-performance-tuning.html">Apache Spark SQL performance tuning</a></li>
 </ul>
-<p>Use the version-matched documentation of your prepared environment. These references describe interfaces and supported boundaries; the chapter&#x27;s synthetic examples and CPU models are original teaching material.</p>
+<p>Full lists: <a href="../../STUDY-GUIDE.md.html#documentation-and-sources">documentation and sources</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning skill for cuda-117: Nulls, decimals, timestamps and equality contracts.
 Read courses/cuda/spark/guides/cuda-117.md and courses/cuda/spark/lessons/cuda-117.md.

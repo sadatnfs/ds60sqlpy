@@ -194,9 +194,17 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cuda/spark/guides/cuda-125.md</code></p>
     </header>
     <article class="document"><h2 id="cuda-125-gpu-spark-on-an-explicitly-owned-kubernetes-cluster">cuda-125: GPU Spark on an explicitly owned Kubernetes cluster<a class="heading-anchor" href="#cuda-125-gpu-spark-on-an-explicitly-owned-kubernetes-cluster" aria-label="Link to this section">#</a></h2>
-<p><strong>Route:</strong> CUDA Python and machine learning / GPU Spark specialization. <strong>Stage:</strong> advanced. <strong>Prerequisites:</strong> <code>cuda-114</code>, <code>cuda-119</code>, <code>cuda-122</code>. Allow several sessions when the hardware experiment is new; the chapter is not a deadline.</p>
-<h3 id="what-you-will-be-able-to-explain">What you will be able to explain<a class="heading-anchor" href="#what-you-will-be-able-to-explain" aria-label="Link to this section">#</a></h3>
-<p>By the end, you can <strong>draw scheduler layers</strong>, <strong>verify device visibility</strong>, and <strong>write scoped cleanup</strong> with evidence. Start with the two worked cases, then use the editable CPU model to make the quantities concrete.</p>
+<p><strong>Route:</strong> CUDA Python and machine learning / GPU Spark specialization. <strong>Stage:</strong> advanced. <strong>Prerequisites:</strong> <code>cuda-114</code>, <code>cuda-119</code>, <code>cuda-122</code>.</p>
+<p>Pacing, evidence labels and platform rules: <a href="../../STUDY-GUIDE.md.html">CUDA study guide</a>.</p>
+<h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
+<ul>
+<li>Draw scheduler layers.</li>
+<li>Name ownership boundaries.</li>
+<li>Diagnose Pending executors.</li>
+<li>Verify device visibility.</li>
+<li>Design private networking.</li>
+<li>Write scoped cleanup.</li>
+</ul>
 <h3 id="mechanism-and-vocabulary">Mechanism and vocabulary<a class="heading-anchor" href="#mechanism-and-vocabulary" aria-label="Link to this section">#</a></h3>
 <p>Kubernetes schedules pods onto nodes; an installed and configured device plugin advertises GPU resources to that scheduler. Spark&#x27;s driver requests executors, and Spark&#x27;s own resource discovery must agree with what each executor container can access. These are different layers. A pod resource limit alone does not prove the selected image, driver and native libraries can execute the Spark GPU plugin.</p>
 <p>This is a manual external lab for a named disposable cluster and namespace. Never use ambient kubeconfig or expose a driver service publicly by convenience. Define service accounts, image provenance, node selection, resource limits, storage and cleanup before creating workloads. Docker Desktop on a Mac is useful for the CPU classroom, but it does not manufacture an NVIDIA GPU for Kubernetes. Observe pod placement and actual device visibility before a bounded query.</p>
@@ -212,8 +220,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>A cluster can have three nodes but only one advertising a compatible GPU. A GPU executor must land on the eligible node and see the assigned resource inside its container.</p>
 <h4 id="worked-example-2">Worked example 2<a class="heading-anchor" href="#worked-example-2" aria-label="Link to this section">#</a></h4>
 <p>A driver pod running successfully while executors remain Pending proves control-plane submission only. Inspect resource requests, events and image/runtime constraints before changing code.</p>
-<h3 id="portable-executable-model">Portable executable model<a class="heading-anchor" href="#portable-executable-model" aria-label="Link to this section">#</a></h3>
-<p>The <strong>CPU reference model</strong> variant runs this bounded worked example using <code>python-core</code>. It uses only the Python standard library, small synthetic values and no network. Its purpose is to expose the arithmetic or contract behind the chapter. The separate reference includes assertions for the stated observations.</p>
+<h3 id="how-to-run-the-cpu-model">How to run the CPU model<a class="heading-anchor" href="#how-to-run-the-cpu-model" aria-label="Link to this section">#</a></h3>
+<p>Edit the copy; the <a href="../references/cuda-125_cpu.py.html">reference</a> adds assertions.</p>
+<pre class="highlighted-code"><code class="language-bash">python courses/cuda/spark/lessons/cuda-125_cpu.py</code></pre>
 <pre class="highlighted-code"><code class="language-python">nodes <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">name</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">cpu-node</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">gpu</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">0</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">name</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">gpu-node</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">gpu</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">1</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">]</span>
 eligible <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span>node<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">name</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-keyword">for</span> node <span class="syntax-operator">in</span> nodes <span class="syntax-keyword">if</span> node<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">gpu</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-number">1</span><span class="syntax-punctuation">]</span>
 <span class="syntax-keyword">assert</span> eligible <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">gpu-node</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span>
@@ -229,52 +238,45 @@ eligible <span class="syntax-operator">=</span> <span class="syntax-punctuation"
 <td><code>[&#x27;gpu-node&#x27;]</code></td>
 </tr>
 </tbody></table></div>
-<p>Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.</p>
 <h3 id="practice-and-transfer">Practice and transfer<a class="heading-anchor" href="#practice-and-transfer" aria-label="Link to this section">#</a></h3>
+<p>Record each attempt in the <a href="../lessons/cuda-125.md.html">worksheet</a> before opening hints.</p>
 <h4 id="exercise-1-draw-scheduler-layers">Exercise 1: Draw scheduler layers<a class="heading-anchor" href="#exercise-1-draw-scheduler-layers" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Debugging Spark task settings when executors never started confuses the two layers, since the problem sits at pod placement.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-2-name-ownership-boundaries">Exercise 2: Name ownership boundaries<a class="heading-anchor" href="#exercise-2-name-ownership-boundaries" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Running in the default namespace without labels mixes lab resources with others, making safe cleanup impossible. It also makes the cluster context easy to get wrong, so commands meant for a lab cluster can reach a shared one.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-3-diagnose-pending-executors">Exercise 3: Diagnose Pending executors<a class="heading-anchor" href="#exercise-3-diagnose-pending-executors" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Changing Spark code or increasing memory without reading events addresses the wrong layer. Raising executor memory can even make placement harder, since larger requests fit on fewer nodes.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-4-verify-device-visibility">Exercise 4: Verify device visibility<a class="heading-anchor" href="#exercise-4-verify-device-visibility" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Assuming visibility because the node has a GPU misses runtime misconfiguration that leaves the container without the device. The executor would then start and the plugin would fail at initialization, or the job would run entirely on CPU.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-5-design-private-networking">Exercise 5: Design private networking<a class="heading-anchor" href="#exercise-5-design-private-networking" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Exposing the driver UI with a public load balancer for convenience makes job data reachable from outside. Query plans and configuration can include paths, table names and connection details.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-6-write-scoped-cleanup">Exercise 6: Write scoped cleanup<a class="heading-anchor" href="#exercise-6-write-scoped-cleanup" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Deleting by broad name patterns or whole namespaces you did not create can remove unrelated work. Deleting before saving logs also destroys the evidence needed to explain a failed run.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
-<p>Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.</p>
+<p>Hint <em>k</em> belongs to exercise <em>k</em>; open one at a time.</p>
 <ol>
-<li>Start from worked example 1 and mark the quantities needed for the task &quot;Draw scheduler layers&quot;.</li>
-<li>Change one assumption in worked example 2 while preserving the declared contract: name ownership boundaries.</li>
-<li>Trace the CPU program&#x27;s variables before adding hardware behavior: diagnose Pending executors.</li>
-<li>Draw producers, consumers and the exact operation boundary for the task &quot;Verify device visibility&quot;.</li>
-<li>Separate what the small fixture establishes from what the real runtime must show: design private networking.</li>
-<li>Write a counterexample to an overbroad claim before you write scoped cleanup.</li>
+<li>Draw Kubernetes placing pods on nodes and Spark placing tasks on executors as two separate layers.</li>
+<li>Name the exact cluster, namespace, labels and job identity that this lab may touch.</li>
+<li>Read the pod events and compare the requested resources with what eligible nodes advertise.</li>
+<li>Run a small probe inside an owned executor container to see which devices it can actually access.</li>
+<li>Ask which services must stay internal and how you would reach them without exposing them publicly.</li>
+<li>List only the resources this lab created and delete those, keeping any logs you were asked to preserve.</li>
 </ol>
-<h3 id="common-mistakes-and-self-review">Common mistakes and self-review<a class="heading-anchor" href="#common-mistakes-and-self-review" aria-label="Link to this section">#</a></h3>
-<p>Confusing a correct tiny example with a general implementation is the central review risk. For this chapter, challenge the assumption in worked example 2, then ask whether your change preserves the mechanism described above. If you change dtype, layout, ordering, batch size or backend, update the acceptance contract rather than silently reusing the old observation. Explain an unexpected result before trying random configuration changes.</p>
-<p>Keep a small evidence table with columns <strong>claim</strong>, <strong>input</strong>, <strong>expected observation</strong>, <strong>actual observation</strong> and <strong>limit</strong>. For the first claim use <code>Draw scheduler layers</code>. For the final claim use <code>Write scoped cleanup</code>. An unperformed GPU or cluster experiment remains pending even when the CPU model is correct.</p>
-<h3 id="platform-and-evidence-contract">Platform and evidence contract<a class="heading-anchor" href="#platform-and-evidence-contract" aria-label="Link to this section">#</a></h3>
-<p>The reading worksheet and CPU reference model work through the ordinary Linux Docker classroom on macOS, Linux and Windows using WSL 2. They do not require an NVIDIA GPU. Their results are labeled CPU models or semantic oracles, not simulated hardware performance.</p>
-<p>Real CUDA work needs supported NVIDIA hardware, a compatible host driver and an explicitly prepared GPU runtime. An Apple GPU does not execute CUDA kernels. PyTorch MPS on a supported native Mac, ROCm on supported AMD hardware, or other vendor backends can provide separate accelerator learning routes; they need their own package and operation qualification and are not CUDA evidence. The ordinary Linux Docker classroom does not expose native Mac MPS automatically.</p>
-<p>Do not download packages, models or data by opening this lesson. Do not attach an engine socket, ambient cluster credentials or an arbitrary remote endpoint. A CPU pass, imported package, successful compilation, real GPU result and measured performance are distinct observations. Record the actual backend, data shape/dtype, source revision, versions and pending checks. A saved completion marker records learning progress, not hardware certification.</p>
-<p>GPU Spark is a separate owned external workflow. The ordinary <code>spark-local-scala</code> and <code>spark-local-python</code> profiles are CPU Spark. Keep the GPU plugin disabled or absent for a CPU-only baseline. Per-operator CPU fallback inside a working GPU plugin environment is a different condition from having no compatible GPU. Never mount a host Docker socket or ambient kubeconfig into an ordinary lesson worker.</p>
+<h3 id="common-mistakes-and-self-check">Common mistakes and self-check<a class="heading-anchor" href="#common-mistakes-and-self-check" aria-label="Link to this section">#</a></h3>
+<p>A common mistake is treating a running driver pod as proof that GPU Spark works. If executors stay Pending, only submission succeeded. Another is using an ambient kubeconfig or exposing the driver service publicly for convenience. Fix both by working only in a named disposable cluster and namespace, reading events and resource requests for Pending pods, confirming device visibility inside an executor and cleaning up only resources this lab created.</p>
+<p><strong>Misconception:</strong> If Spark requests a GPU for each executor, Kubernetes will find a GPU node automatically. <strong>Correction:</strong> The scheduler can place the pod only on a node whose device plugin advertises enough GPUs and whose taints, selectors and other resource limits allow it. Spark must also be given a discovery script or an equivalent so the executor reports the device address it received. Check node capacity, pod events and the executor&#x27;s discovered address.</p>
+<p><strong>Evidence limit:</strong> The reference marks the single illustrative GPU node as eligible and performs no cluster operation. Device plugins, image provenance, scheduling and real device visibility can only be checked in an explicitly owned Kubernetes cluster.</p>
+<ol>
+<li>Does a pod&#x27;s GPU resource limit prove the plugin can run?</li>
+<li>Can Docker Desktop on a Mac provide an NVIDIA GPU to Kubernetes?</li>
+<li>What advertises GPU resources to the Kubernetes scheduler?</li>
+</ol>
+<p>Answers: <a href="../solutions/cuda-125_solutions.md.html#self-check-answers">self-check answers</a>.</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
 <ul>
 <li><a href="https://nvidia.github.io/cudf-spark/docs/download.html">cuDF Spark plugin release and compatibility matrix</a></li>
-<li><a href="https://nvidia.github.io/cudf-spark/docs/supported_ops.html">Supported Spark operators and expression types</a></li>
-<li><a href="https://docs.nvidia.com/cudf-spark/latest/tuning-guide.html">GPU Spark tuning guide</a></li>
-<li><a href="https://spark.apache.org/docs/latest/sql-performance-tuning.html">Apache Spark SQL performance tuning</a></li>
 </ul>
-<p>Use the version-matched documentation of your prepared environment. These references describe interfaces and supported boundaries; the chapter&#x27;s synthetic examples and CPU models are original teaching material.</p>
+<p>Full lists: <a href="../../STUDY-GUIDE.md.html#documentation-and-sources">documentation and sources</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning skill for cuda-125: GPU Spark on an explicitly owned Kubernetes cluster.
 Read courses/cuda/spark/guides/cuda-125.md and courses/cuda/spark/lessons/cuda-125.md.

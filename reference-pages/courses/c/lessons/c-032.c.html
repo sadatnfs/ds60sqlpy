@@ -197,25 +197,17 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">int</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">void</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span></span>
 <span class="source-line">  <span class="syntax-comment">/* Exercise 1: Swap integer objects: change one input</span></span>
-<span class="source-line"><span class="syntax-comment">     Copy worked example 1, the &quot;swap integer objects&quot; case, into a scratch pad</span></span>
-<span class="source-line"><span class="syntax-comment">     and change `int a = 2, b = 7;` to `int a = 3, b = 7;`. Before running,</span></span>
-<span class="source-line"><span class="syntax-comment">     predict which CHECK fails and which value it sees in place of the worked</span></span>
-<span class="source-line"><span class="syntax-comment">     result (the values become 7 and 2); then run it and restore the original</span></span>
-<span class="source-line"><span class="syntax-comment">     line. Expected: With `int a = 3, b = 7;` the run stops with `Check failed`</span></span>
-<span class="source-line"><span class="syntax-comment">     at the CHECK on `a == 7 &amp;&amp; b == 2`, because the &quot;swap integer objects&quot; case</span></span>
-<span class="source-line"><span class="syntax-comment">     no longer shows that the values become 7 and 2. Restoring `int a = 2, b =</span></span>
-<span class="source-line"><span class="syntax-comment">     7;` brings that observation back. */</span></span>
+<span class="source-line"><span class="syntax-comment">     In worked example 1, change `int a = 2, b = 7;` to `int a = 3, b = 7;`.</span></span>
+<span class="source-line"><span class="syntax-comment">     Predict which value the CHECK on `a == 7 &amp;&amp; b == 2` sees, then run and</span></span>
+<span class="source-line"><span class="syntax-comment">     restore. Expected: `Check failed` at `a == 7 &amp;&amp; b == 2`; restoring `int a =</span></span>
+<span class="source-line"><span class="syntax-comment">     2, b = 7;` passes again. */</span></span>
 <span class="source-line"></span>
 <span class="source-line">  <span class="syntax-comment">/* Exercise 2: Swap fixed byte arrays: debug a regression</span></span>
-<span class="source-line"><span class="syntax-comment">     A regression changed one token in worked example 2, the &quot;swap fixed byte</span></span>
-<span class="source-line"><span class="syntax-comment">     arrays&quot; case, so one line now reads `unsigned char a[] = {2, 2, 3}, b[] =</span></span>
-<span class="source-line"><span class="syntax-comment">     {4, 5, 6};`. Run the example with that line, use the failing CHECK to find</span></span>
-<span class="source-line"><span class="syntax-comment">     why their byte contents exchange exactly no longer holds and repair the</span></span>
-<span class="source-line"><span class="syntax-comment">     line without changing the CHECK. Expected: Before the repair the run stops</span></span>
-<span class="source-line"><span class="syntax-comment">     with `Check failed` at the CHECK on `a[0] == 4 &amp;&amp; a[2] == 6 &amp;&amp; b[0] == 1 &amp;&amp;</span></span>
-<span class="source-line"><span class="syntax-comment">     b[2] == 3`. Once the line reads `unsigned char a[] = {1, 2, 3}, b[] = {4,</span></span>
-<span class="source-line"><span class="syntax-comment">     5, 6};` again, the &quot;swap fixed byte arrays&quot; case again shows that their</span></span>
-<span class="source-line"><span class="syntax-comment">     byte contents exchange exactly. */</span></span>
+<span class="source-line"><span class="syntax-comment">     Worked example 2 now has a line reading `unsigned char a[] = {2, 2, 3}, b[]</span></span>
+<span class="source-line"><span class="syntax-comment">     = {4, 5, 6};`. Repair it so that their byte contents exchange exactly</span></span>
+<span class="source-line"><span class="syntax-comment">     again. Expected: `Check failed` at `a[0] == 4 &amp;&amp; a[2] == 6 &amp;&amp; b[0] == 1 &amp;&amp;</span></span>
+<span class="source-line"><span class="syntax-comment">     b[2] == 3` until the line reads `unsigned char a[] = {1, 2, 3}, b[] = {4,</span></span>
+<span class="source-line"><span class="syntax-comment">     5, 6};` again. */</span></span>
 <span class="source-line"></span>
 <span class="source-line">  <span class="syntax-comment">/* Exercise 3: Use a zero-length operation</span></span>
 <span class="source-line"><span class="syntax-comment">     Invoke the helper with size zero and valid object pointers.</span></span>

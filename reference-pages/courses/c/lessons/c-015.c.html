@@ -197,25 +197,16 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">int</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">void</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span></span>
 <span class="source-line">  <span class="syntax-comment">/* Exercise 1: Allocate and initialize: change one input</span></span>
-<span class="source-line"><span class="syntax-comment">     Copy worked example 1, the &quot;allocate and initialize&quot; case, into a scratch</span></span>
-<span class="source-line"><span class="syntax-comment">     pad and change `p[0] = 2;` to `p[1] = 2;`. Before running, predict which</span></span>
-<span class="source-line"><span class="syntax-comment">     CHECK fails and which value it sees in place of the worked result (the sum</span></span>
-<span class="source-line"><span class="syntax-comment">     is 12 before release); then run it and restore the original line. Expected:</span></span>
-<span class="source-line"><span class="syntax-comment">     With `p[1] = 2;` the run stops with `Check failed` at the CHECK on `p[0] +</span></span>
-<span class="source-line"><span class="syntax-comment">     p[1] + p[2] == 12`, because the &quot;allocate and initialize&quot; case no longer</span></span>
-<span class="source-line"><span class="syntax-comment">     shows that the sum is 12 before release. Restoring `p[0] = 2;` brings that</span></span>
-<span class="source-line"><span class="syntax-comment">     observation back. */</span></span>
+<span class="source-line"><span class="syntax-comment">     In worked example 1, change `p[0] = 2;` to `p[1] = 2;`. Predict which value</span></span>
+<span class="source-line"><span class="syntax-comment">     the CHECK on `p[0] + p[1] + p[2] == 12` sees, then run and restore.</span></span>
+<span class="source-line"><span class="syntax-comment">     Expected: `Check failed` at `p[0] + p[1] + p[2] == 12`; restoring `p[0] =</span></span>
+<span class="source-line"><span class="syntax-comment">     2;` passes again. */</span></span>
 <span class="source-line"></span>
 <span class="source-line">  <span class="syntax-comment">/* Exercise 2: Inspect zero-initialized integers: diagnose an edited check</span></span>
-<span class="source-line"><span class="syntax-comment">     A careless edit changed the CHECK in worked example 2, the &quot;inspect</span></span>
-<span class="source-line"><span class="syntax-comment">     zero-initialized integers&quot; case, so that it reads `CHECK(p[0] != 0 &amp;&amp; p[1]</span></span>
-<span class="source-line"><span class="syntax-comment">     == 0 &amp;&amp; p[2] == 0);`. Run the example with that line, explain why the</span></span>
-<span class="source-line"><span class="syntax-comment">     edited CHECK now fails even though the program state still means all three</span></span>
-<span class="source-line"><span class="syntax-comment">     values are zero, and restore it. Expected: Before the repair the run stops</span></span>
-<span class="source-line"><span class="syntax-comment">     with `Check failed` at the CHECK on `p[0] == 0 &amp;&amp; p[1] == 0 &amp;&amp; p[2] == 0`.</span></span>
-<span class="source-line"><span class="syntax-comment">     Once the line reads `CHECK(p[0] == 0 &amp;&amp; p[1] == 0 &amp;&amp; p[2] == 0);` again,</span></span>
-<span class="source-line"><span class="syntax-comment">     the &quot;inspect zero-initialized integers&quot; case again shows that all three</span></span>
-<span class="source-line"><span class="syntax-comment">     values are zero. */</span></span>
+<span class="source-line"><span class="syntax-comment">     Worked example 2&#x27;s CHECK now reads `CHECK(p[0] != 0 &amp;&amp; p[1] == 0 &amp;&amp; p[2] ==</span></span>
+<span class="source-line"><span class="syntax-comment">     0);`. Explain why it fails although all three values are zero, then restore</span></span>
+<span class="source-line"><span class="syntax-comment">     it. Expected: `Check failed` until the CHECK reads `CHECK(p[0] == 0 &amp;&amp; p[1]</span></span>
+<span class="source-line"><span class="syntax-comment">     == 0 &amp;&amp; p[2] == 0);` again, though all three values are zero. */</span></span>
 <span class="source-line"></span>
 <span class="source-line">  <span class="syntax-comment">/* Exercise 3: Define the empty allocation policy</span></span>
 <span class="source-line"><span class="syntax-comment">     Request zero elements through the helper.</span></span>

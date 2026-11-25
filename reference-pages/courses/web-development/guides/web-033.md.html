@@ -211,7 +211,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="syntax-anatomy-and-mechanism">Syntax anatomy and mechanism<a class="heading-anchor" href="#syntax-anatomy-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Compute subtotal cents as unit cents times quantity, then add a fixed fee. Validate quantity before multiplication. Use intdiv for deliberate integer division and the remainder operator for the remaining cents. This lesson does not accept arbitrary decimal currency strings; that parser would need explicit scale, sign, range and rounding rules.</p>
 <h3 id="classroom-execution-and-offline-inputs">Classroom execution and offline inputs<a class="heading-anchor" href="#classroom-execution-and-offline-inputs" aria-label="Link to this section">#</a></h3>
-<p>Choose the <strong>PHP CLI</strong> worker and work in <code>courses/web-development/lessons/web-033.php</code>, which runs as <code>main.php</code> in a bounded Linux process with PDO SQLite. Every input is a small synthetic value, and CLI runs are fresh processes, not persistent HTTP requests. Save your attempt before comparing it with <code>courses/web-development/solutions/web-033_solution.php</code>. <strong>How to run lessons</strong> in the <a href="../README.md.html">subject README</a> lists what the pad does not provide.</p>
+<p>The worked examples store a price as 125 integer cents and format 375 cents for display. You write a totalCents function with a bounded quantity and a named fee, plus a formatter that never converts the money back to a float.</p>
+<p>Run <code>courses/web-development/lessons/web-033.php</code> with <strong>PHP CLI</strong>: synthetic inputs, not persistent HTTP requests (<a href="../STUDY-GUIDE.md.html#php-cli">why</a>).</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1-integer-minor-units">Worked example 1: Integer minor units<a class="heading-anchor" href="#worked-example-1-integer-minor-units" aria-label="Link to this section">#</a></h4>
 <p>The unit is encoded in the variable name.</p>
@@ -235,7 +236,7 @@ $cents = 10 + 20;
 var_export($cents === 30);</code></pre>
 <p>Binary floating point cannot represent 0.1 or 0.2 exactly, so their sum is slightly larger than 0.3. <code>echo</code> rounds to the configured display precision and shows 0.3, which makes the value look correct. The strict comparison with 0.3 is false, and <code>var_export</code> prints the full value 0.30000000000000004. Across many line items these tiny differences can change a rounded total or make an equality check fail. The integer version stores 10 and 20 cents, adds them to exactly 30, and the comparison is true. That is why this lesson keeps every amount in integer cents and only formats a decimal label at output time.</p>
 <h3 id="six-progressive-exercises">Six progressive exercises<a class="heading-anchor" href="#six-progressive-exercises" aria-label="Link to this section">#</a></h3>
-<p>Exercises that ask you to predict, explain, compare or diagnose keep their answers in the solutions file. The others show the evidence to look for.</p>
+<p>Exercises 1, 4 and 6 keep their expected answers in the solutions file.</p>
 <h4 id="exercise-1-predict-125-cents-times-three-units">Exercise 1: Predict 125 cents times three units.<a class="heading-anchor" href="#exercise-1-predict-125-cents-times-three-units" aria-label="Link to this section">#</a></h4>
 <p><strong>Progressive hint:</strong> Multiply the integer cents first and convert to a display format only at the end.</p>
 <h4 id="exercise-2-add-a-fixed-50-cent-fee-with-a-named-intermediate-value">Exercise 2: Add a fixed 50-cent fee with a named intermediate value.<a class="heading-anchor" href="#exercise-2-add-a-fixed-50-cent-fee-with-a-named-intermediate-value" aria-label="Link to this section">#</a></h4>
@@ -253,10 +254,11 @@ var_export($cents === 30);</code></pre>
 <p><strong>Progressive hint:</strong> List cases where two decimal places or 64-bit integers are not enough.</p>
 <h3 id="debugging-and-common-mistakes">Debugging and common mistakes<a class="heading-anchor" href="#debugging-and-common-mistakes" aria-label="Link to this section">#</a></h3>
 <p>Do not convert a formatted currency label back into a number by deleting random characters. Avoid claiming floating point is universally bad; it is appropriate for many approximate scientific calculations. Define the precision contract first.</p>
-<p>Keep the failing source, its input and the exact output, then repair one cause at a time. PHP can produce correct-looking text while missing an invalid-input branch, so rerun the empty, wrong-type and boundary cases after every fix.</p>
+<p>When a total is wrong, print each intermediate value with its type; a string from formatting may have slipped back into arithmetic. When concatenation and arithmetic mix in one echo, wrap the arithmetic in parentheses, because the dot and plus operators have precedence rules that surprise many readers.</p>
+<p>The shared <a href="../STUDY-GUIDE.md.html#debugging-php">debugging routine</a> covers what to record before each repair.</p>
 <h3 id="retrieval-transfer-and-next-steps">Retrieval, transfer and next steps<a class="heading-anchor" href="#retrieval-transfer-and-next-steps" aria-label="Link to this section">#</a></h3>
-<p>Close the worked answers and explain expression, operator and integer minor units without using the terms as their own definitions. Rebuild worked example 1 (Integer minor units) from a blank pad, then try one new value, one empty or missing case and one unusual boundary. State which result would disprove your explanation.</p>
-<p>If you can reproduce the output but cannot explain why it happens, revisit <code>web-032</code>. A saved completion marker records your own progress; it is not a certification.</p>
+<p>Without notes, compute 125 cents times three, add a 50 cent fee and format the result, showing each step. Then explain why integer cents avoid binary fraction errors, why intdiv and the remainder rebuild the display, what quantity bounds keep the integer range safe and when cents are still not enough.</p>
+<p>Revisit <code>web-032</code> when an output is predictable but unexplained (<a href="../STUDY-GUIDE.md.html#review-loop">review loop</a>).</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
 <ul>
 <li><a href="https://www.php.net/manual/en/language.operators.arithmetic.php">Arithmetic operators</a></li>

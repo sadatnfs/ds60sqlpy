@@ -4,18 +4,15 @@
 
 Intermediate; about 110 minutes, plus any optional hardware experiment. Direct prerequisites: `cuda-017`, `cuda-006`
 
-The order supports learning at your own pace. Reading and CPU reasoning remain
-available when NVIDIA hardware is absent. Advanced hardware features need their
-own capability checks and are not prerequisites for opening this chapter.
+Pacing, evidence labels and platform rules for every chapter are in the [CUDA study guide](../../STUDY-GUIDE.md).
 
 ## Learning objectives
 
 Implement a two-stage block reduction with correct tails and a justified floating-point tolerance.
 
-Work through *Parallel reductions and the order of arithmetic* with the concrete cases below. Finish with this evidence:
-correct tails and a justified tolerance, with no assumption of a fixed block completion order. Distinguish an algorithmic
-calculation, a compiled artifact and an actual device observation when explaining
-what your work establishes.
+**Scope:** Tree reduction, partial sums, neutral elements, non-power-of-two lengths and numerical ordering.
+
+**Evidence to produce:** Correct tails and a justified tolerance, with no assumption of a fixed block completion order.
 
 ## Purpose, vocabulary and mental model
 
@@ -38,24 +35,15 @@ This specifies the mathematical sum. The chosen parallel association affects fin
 
 ## How to run and study this lesson
 
-Use the saved reading worksheet in `/classroom`; the reading pad does not execute
-CUDA. For the bounded calculation, select **CPU model (Python)**, whose
-answer-free starter supplies the literal fixtures and task contract. The
-[CUDA C++ study workflow](../README.md) covers platforms, optional GPU
-compilation and evidence labels. In a prepared Python environment you can also
-run the separate [CPU reference](../references/cuda-020_cpu.py) from the
-repository root:
+Trace worked example 1 by hand, then run the [CPU reference](../references/cuda-020_cpu.py) from the repository root:
 
 ```sh
 python courses/cuda/cpp/references/cuda-020_cpu.py
 ```
 
-Its assertions check the stated numerical result or model invariant; console
-text is evidence of this CPU model only, not of CUDA execution.
-
 ## CUDA C++ kernel listing
 
-The kernel below is an excerpt from the chapter's complete [GPU reference](../references/cuda-020_gpu.cu). The full program adds device discovery, checked allocation and launch, completion checks and host validation. Read it as CUDA C++ source; the classroom reading pad does not compile or run it.
+An excerpt from the chapter's complete [GPU reference](../references/cuda-020_gpu.cu); the reading pad does not compile it.
 
 ```cpp
 __global__ void block_sums(const int *input, int *output, std::size_t n) {
@@ -79,9 +67,7 @@ __global__ void block_sums(const int *input, int *output, std::size_t n) {
 
 Pad \([1,2,3,4,5]\) to \([1,2,3,4,5,0,0,0]\). A halving tree produces pairwise states \([6,2,3,4]\), then \([9,6]\), then \([15]\). Each phase needs the appropriate communication ordering. Exact integer arithmetic makes ownership mistakes visible without rounding ambiguity.
 
-The complete CPU model below intentionally models only the named arithmetic,
-layout, dependency or capability decision. It does not model GPU scheduling,
-caches, instruction timing or device memory visibility.
+**Why:** Zeros preserve the sum, and each phase halves the active values until one remains.
 
 ```python
 values = [1, 2, 3, 4, 5, 0, 0, 0]
@@ -96,58 +82,44 @@ assert trace == [[6, 2, 3, 4], [9, 6], [15]]
 print(trace)
 ```
 
-**Expected observation:** Every assertion succeeds. A representative CPU output is:
+**Expected observation:** every assertion succeeds, and the CPU model prints:
 
 ```text
 [[6, 2, 3, 4], [9, 6], [15]]
 ```
 
-Integers, shapes and ordering must match exactly; only assertions with an explicit
-tolerance accept small floating-point differences. A printed duration is a model
-output, not a measured GPU benchmark.
+**Check:** The reference asserts trace == [[6, 2, 3, 4], [9, 6], [15]].
 
 ## Worked example 2: change a meaningful condition
 
 For \([10^{16},1,-10^{16}]\), different valid sum trees can disagree. Compare against a compensated or higher-precision reference and report error. Do not require a GPU result to copy an arbitrary CPU association, and do not enlarge tolerance enough to hide dropped tail elements.
 
-Before applying this example to your own program, write down which inputs are
-read, which result is produced, and the condition that makes the comparison
-valid. Keep the original case as a regression check when changing a boundary.
+**Why:** Different trees round differently, and both can be valid floating sums.
+
+**Check:** Compute math.fsum on the fixture and compare each tree's result to 1.0.
 
 ## Optional CUDA C++ laboratory
 
-A complete [GPU reference](../references/cuda-020_gpu.cu) and separate
-[GPU learner source](../lessons/cuda-020_gpu.cu) accompany this chapter.
-They are standalone files with bounded fixtures, checked runtime calls and host
-validation. The learner source intentionally reports incomplete implementation
-until you add the chapter's algorithm and assertions. It must never return a
-fake GPU success on a CPU machine. Follow the [manual GPU workflow](../README.md)
-for exact compilation and execution paths. If the classroom offers the optional
-CUDA C++ variant, its capability notice must confirm actual runtime readiness.
+- [GPU learner source](../lessons/cuda-020_gpu.cu)
+- [GPU reference](../references/cuda-020_gpu.cu)
 
-The reference contains an explicit no-device failure, launch and completion
-checks, and returned-value validation. Source review and CPU reference checks do
-not qualify this .cu file on your hardware. Preserve compilation, actual device
-execution and sanitizer evidence separately. Exercise 4 is a reasoning diagnosis;
-do not deliberately launch a hanging kernel or reset a shared GPU to reproduce it.
+Read the [laboratory rules](../../STUDY-GUIDE.md#optional-native-cuda-laboratories) before compiling.
 
 ## Six progressive exercises
 
-Exercises 1 and 2 are guided reconstructions of the worked examples; exercises
-3-6 change an input, diagnose a defect, test a boundary and transfer the idea.
-For each one, keep the calculation, output, diagram or failure policy you
-produce so another reader can compare it with the worked cases. If the hint is
-not enough, reread the mechanism paragraph and the bounded CPU assertion.
-
 ### Exercise 1
 
-Predict and trace the first worked example before running its CPU reference. Write every intermediate quantity that leads to the stated result, including units or ownership where applicable.
+Reconstruct worked example 1 on paper before running its CPU reference. Pad five values to eight with zeros, then add element i + width into i while width halves.
+
+**Trap to avoid:** Padding with ones changes the total to 18 instead of 15.
 
 **Hint:** Start with the literal input and intermediate quantities in worked example 1.
 
 ### Exercise 2
 
-Reconstruct the second worked example without copying its conclusion. Identify the changed input or condition, show the resulting calculation or dependency, and explain why it differs from the first example.
+Rework worked example 2 without copying its conclusion. Compare the result with a compensated or wider reference and report the error.
+
+**Trap to avoid:** Requiring an exact match with sequential CPU order rejects a valid GPU tree.
 
 **Hint:** Identify exactly which condition changes in worked example 2.
 
@@ -155,11 +127,15 @@ Reconstruct the second worked example without copying its conclusion. Identify t
 
 Choose an identity for maximum over \([-7,-3,-9]\).
 
+**Trap to avoid:** Starting from zero returns 0 for an all-negative input instead of -3.
+
 **Hint:** Use the first worked example to establish the relevant quantities, then change only the requested input.
 
 ### Exercise 4
 
 One block waits for a counter from all other blocks. Explain the deadlock risk.
+
+**Trap to avoid:** Adding more waiting blocks makes the deadlock more likely, not less.
 
 **Hint:** Locate the failed phase or violated dependency before proposing a repair.
 
@@ -167,35 +143,33 @@ One block waits for a counter from all other blocks. Explain the deadlock risk.
 
 Define sum for zero and one element.
 
+**Trap to avoid:** Launching a zero-block reduction for empty input triggers an invalid configuration.
+
 **Hint:** Check what the algorithm is allowed to read, write or assume at this boundary.
 
 ### Exercise 6
 
 Transfer reduction to mean.
 
+**Trap to avoid:** Dividing every partial sum by its block count averages unequal blocks wrongly.
+
 **Hint:** State the output contract and which observations are needed in the new application.
 
 ## Common mistakes and diagnosis
 
-A tempting but incorrect claim in this chapter is: **floating-point addition is associative or one block can safely wait for every other block in an ordinary launch.**
-
-For the concrete failure exercise, one block waits for a counter from all other blocks. Explain the deadlock risk.
-Preserve the original input and the stage where behavior diverged, and compare
-with the CPU model before changing hardware configuration.
+A tempting but incorrect claim: **Floating-point addition is associative or one block can safely wait for every other block in an ordinary launch.** Floating-point addition rounds at each step, so different trees give different answers, as worked example 2 shows. Blocks also have no guaranteed co-residency, so a block spinning on a counter can wait forever for a block that never starts. Combine block partials in a second launch.
 
 ## Self-check, retrieval and transfer
 
-Explain the first example without its code, then use the second example to state
-one assumption that matters. Complete Exercise 3 independently, use Exercise 4 to
-diagnose a plausible defect, check the boundary in Exercise 5, and retain the
-application contract from Exercise 6. Compare the [separate explanations](../solutions/cuda-020_solutions.md)
-only after your attempt or a deliberate reveal. A reading marker records your
-choice; it does not certify hardware qualification or expert mastery.
+1. Trace the halving tree for [3,1,4,1].
+2. What identity does a product reduction use for tail threads?
+3. Why compare a float reduction against a compensated reference instead of a plain CPU loop?
+
+Short answers are in the [separate explanations](../solutions/cuda-020_solutions.md#self-check-answers); compare only after an attempt.
 
 ## Primary references
 
-Check the documentation that matches your prepared toolkit before optional
-hardware execution.
+Use the documentation that matches your prepared toolkit.
 
 - [CUDA Programming Guide](https://docs.nvidia.com/cuda/cuda-programming-guide/)
 

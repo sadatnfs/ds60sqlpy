@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cuda/spark/solutions/cuda-124_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="cuda-124-explained-solutions">cuda-124: explained solutions<a class="heading-anchor" href="#cuda-124-explained-solutions" aria-label="Link to this section">#</a></h2>
-<p>These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.</p>
+<p>Compare with your <a href="../lessons/cuda-124.md.html">worksheet</a> attempt.</p>
 <h3 id="exercise-1-classify-four-apis">Exercise 1: Classify four APIs<a class="heading-anchor" href="#exercise-1-classify-four-apis" aria-label="Link to this section">#</a></h3>
 <p>Name SQL UDF pandas-style and local GPU dataframe surfaces.</p>
 <p><strong>Approach.</strong> Classify four API surfaces: built-in SQL and DataFrame expressions, row-at-a-time Python UDFs, pandas-style vectorized UDFs that receive Arrow batches, and a local GPU dataframe library such as cuDF called inside a task.</p>
@@ -231,9 +231,19 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Why it is correct here.</strong> Training algorithms on different backends can differ in floating-point order and defaults, so model quality, not identical weights, is the right comparison.</p>
 <p><strong>A plausible wrong approach.</strong> Comparing a GPU model trained on a different split with a CPU model attributes data differences to the backend.</p>
 <p><strong>How to verify.</strong> Fix the split by a seeded key, record preprocessing steps, and report both metrics with the tolerance used.</p>
+<h3 id="self-check-answers">Self-check answers<a class="heading-anchor" href="#self-check-answers" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>Does Arrow make a pandas UDF&#x27;s body run on the GPU?</strong> No. Arrow improves interchange; the function body still runs wherever its code runs.</li>
+</ol>
+<ol start="2">
+<li><strong>Why are SQL and ML acceleration validated separately?</strong> They are separate integrations with their own estimator support, semantics and release compatibility.</li>
+</ol>
+<ol start="3">
+<li><strong>Why compare model quality as well as elapsed time?</strong> A faster training path is not acceptable if it changes results on the same split and metric.</li>
+</ol>
 <h3 id="reference-observation">Reference observation<a class="heading-anchor" href="#reference-observation" aria-label="Link to this section">#</a></h3>
-<p>Null-preserving expression produces [2, None,6].</p>
-<p>The reference file is <code>courses/cuda/spark/references/cuda-124_cpu.py</code>. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.</p></article>
+<p>Null-preserving expression produces [2, None, 6].</p>
+<p>Asserted by <code>courses/cuda/spark/references/cuda-124_cpu.py</code>.</p></article>
   </main>
 </body>
 </html>

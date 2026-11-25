@@ -2,25 +2,21 @@
 
 Read real catalog metadata, register explicitly sourced Atlas identities/lineage, then test the actual protected data operation separately. Metadata classification alone is not enforcement.
 
-## Receipt fields and independent oracle
+## What this governance receipt must hold
 
-- Source revision/hashes and exact declared input IDs, values, schema and time units.
-- Actual native platform, package/image identities and owned resource namespace.
-- Selected table snapshot/version, source positions or process/lineage identity as appropriate.
-- Positive result against an independent oracle and a typed negative observation.
-- Read-only retained-state comparison after the selected lifecycle transition.
-- Cleanup/evidence-storage result and any separate prepared or unavailable feature.
+- The catalog, database and table names exactly as the Metastore client returned them.
+- The table location, schema and selected snapshot or external table properties.
+- The Atlas qualified names built from those fields, and the GUIDs Atlas assigned.
+- The lineage edges read back from Atlas, with direction, input and output.
+- The classification name, who attached it and when it was read back.
+- Two engine requests under two fixture principals, with the enforcement point named.
 
-For the common three-order fixture, require IDs 1/2/3 with amounts 4/9/7, total 20,
-east 11 and west 9. A later fourth west order of 2 changes the current total to 22 and west
-to 11 while an earlier pinned snapshot remains unchanged. Do not use this simple
-oracle to claim correctness for a different pipeline without defining its
-deduplication, correction and visibility semantics.
-
-Read the selected project README and qualification ledger before commands. The
-classroom does not execute Docker commands in this Markdown pad. Prepared
-configuration, unit policy fixtures, successful compilation and actual service
-acceptance remain different observations. Never include credentials or signed URLs.
+The governance oracle has two halves that must not be merged. The metadata half
+passes when the qualified name read back from Atlas matches the observed catalog
+identity and the lineage edge points from source to result. The access half
+passes only when the allowed principal reads the three orders and the denied
+principal receives a typed refusal from the data engine itself. The
+[shared receipt rules](../STUDY-GUIDE.md#evidence-receipts) cover naming and storage.
 
 ## Concrete source inspection
 
@@ -32,5 +28,9 @@ cat ../atlas/README.md
 cat ../atlas/client.py
 ```
 
-These inspections do not start or qualify a service. Execute only the chosen
-project's complete documented owned route and retain its actual receipt.
+`MetadataProbe.java` checks `ds60.orders` as an `EXTERNAL_TABLE` at
+`file:/warehouse/orders` with partition key `day`. Those observed fields, not a
+display name, are the source for the Atlas qualified name. In `client.py`, the
+`plan` action prints prepared payloads without contacting a server. A printed payload is
+the request you intend to send, not an entity that Atlas accepted, so record it
+separately from any server response.

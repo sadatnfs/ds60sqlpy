@@ -1,16 +1,14 @@
 // Answer-free learner source. Save your own copy before editing.
 // Exercise 1: Run a passing pure-function test: change one input
-// Copy Example A into a scratch `main.mjs` and change `assert.equal(2` to `assert.equal(3`.
-// Before running it, predict which check fails and which value it now sees; then run it and
-// restore the original line.
-// Expected: The changed run fails with an `AssertionError` at `assert.equal(result.status,
-// 0, result.stderr + result.stdout)`. Restoring `assert.equal(2` brings back: child exit
-// status 0; one passing test.
+// In a scratch copy of Example A, change `assert.equal(2` to `assert.equal(3`. Which check
+// fails, and what value does it see?
+// Expected: The edited run fails with an `AssertionError` at `assert.equal(result.status, 0,
+// result.stderr + result.stdout)`. Restoring `assert.equal(2` brings back: child exit status
+// 0; one passing test.
 
 // Exercise 2: Prove a wrong result fails the runner: debug a regression
-// A regression changed one token in Example B, so one line now reads `assert.equal(3`. Run
-// Example B with that line, use the failing check to locate the defect and repair it without
-// changing the check.
+// A regression made one Example B line read `assert.equal(3`. Locate and repair it without
+// editing the check.
 // Expected: Before the repair the run fails with an `AssertionError` at
 // `assert.notEqual(result.status, 0)`. Restoring `assert.equal(2` brings back: nonzero child
 // exit; one failing test.

@@ -195,7 +195,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="dbt-014-explained-reference">dbt-014: explained reference<a class="heading-anchor" href="#dbt-014-explained-reference" aria-label="Link to this section">#</a></h2>
 <p>Build documentation that joins observed structure with authored meaning and ownership.</p>
-<p>The executable reference contains the two complete worked cases with assertions. The changes below explain the independent practice and its limits.</p>
+<p>The reference runs <code>dbt docs generate</code>, then reads catalog.json for observed columns and types and manifest.json for authored descriptions and the <code>decision_report</code> exposure owned by Classroom team. Generated docs prove structure and declared ownership, not that the descriptions are accurate. See <a href="../STUDY-GUIDE.md.html#answers-and-references">how these answers are laid out</a>.</p>
 <h3 id="1-write-a-complete-definition">1. Write a complete definition<a class="heading-anchor" href="#1-write-a-complete-definition" aria-label="Link to this section">#</a></h3>
 <p>State which records contribute, the grouping key, time boundary and unit. Keep the definition aligned with the model and tests.</p>
 <p><strong>Why it holds here:</strong> mart sums amount across all orders, so its grain is one row for the whole table. With the seed rows 5 and 7, total is 12 in the same unit as amount.</p>

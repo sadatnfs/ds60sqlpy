@@ -1,6 +1,6 @@
 # go-005: explained solutions
 
-These are comparison material after an attempt or explicit reveal. The executable reference implements all six cases in one `main.go`.
+Compare after an attempt ([using solutions](../STUDY-GUIDE.md#use-the-solutions)). `courses/go/solutions/go-005_solution.go` implements all six cases.
 
 ## Mechanism
 
@@ -10,7 +10,7 @@ An array includes its length in its type and owns a fixed sequence of elements. 
 
 ## 1. Observe shared storage: change one input
 
-Copy worked example 1 into a scratch pad and change `view[0] = 9` to `view[1] = 9`. Before running, predict which check fails and which value it now sees; then run it and restore the original line.
+Copy worked example 1, change `view[0] = 9` to `view[1] = 9` and predict the failure before running; then restore the line.
 
 The unchanged code is worked example 1:
 
@@ -21,13 +21,15 @@ view[0] = 9
 check(values[0] == 9, "alias")
 ```
 
-**Expected:** The changed run panics with `alias` because `values[0] == 9` no longer holds. Restoring the original line brings back the worked observation: the original first element becomes 9.
+**Expected:** The edited run panics with `alias` because `values[0] == 9` no longer holds.
+
+**Verify:** Restoring `view[0] = 9` makes the check pass again with the worked observation: the original first element becomes 9.
 
 Slicing constructs a view over existing storage. It does not give the new variable independent ownership of its elements.
 
 ## 2. Make an independent copy: debug a regression
 
-A regression changed one token in worked example 2, so one line now reads `values := []int{2, 2, 3}`. Run worked example 2 with that line, use the failure to locate the defect and repair it without changing the check.
+A one-token regression in worked example 2 makes a line read `values := []int{2, 2, 3}`. Repair it without changing the check.
 
 The unchanged code is worked example 2:
 
@@ -38,7 +40,9 @@ cloned[0] = 9
 check(values[0] == 1 && cloned[0] == 9, "copy")
 ```
 
-**Expected:** Before the repair the program panics with `copy`; after it the line reads `values := []int{1, 2, 3}` again and the original stays 1 while the copy starts 9.
+**Expected:** The defective run panics with `copy`; after restoring `values := []int{1, 2, 3}`, the original stays 1 while the copy starts 9.
+
+**Verify:** The failing run shows message `copy`; after the repair `values[0] == 1 && cloned[0] == 9` holds again.
 
 Appending into initially nil storage allocates enough backing storage for these nonempty values. Nested pointers would still require a deeper copy policy.
 
@@ -55,6 +59,8 @@ check(values[1] == 2 && grown[1] == 8, "capacity boundary")
 
 **Expected:** The original second element remains 2.
 
+**Verify:** Your solution must keep `values[1] == 2 && grown[1] == 8` true. Control: changing `values := []int{1, 2, 3}` to `values := []int{1, 3, 3}` panics with message `capacity boundary`; revert it.
+
 The three-index form caps available capacity at one. append must allocate to grow, which separates subsequent writes to the grown slice.
 
 ## 4. Inspect a truncated copy
@@ -68,6 +74,8 @@ check(n == 2 && dst[1] == 5, "copy length")
 ```
 
 **Expected:** Exactly two elements are copied.
+
+**Verify:** Your solution must keep `n == 2 && dst[1] == 5` true. Control: changing `dst := make([]int, 2)` to `dst := make([]int, 3)` panics with message `copy length`; revert it.
 
 Capacity alone does not determine how many elements copy writes; the destination length is the bound.
 
@@ -84,6 +92,8 @@ check(len(values) == 1 && values[0] == 7, "append nil")
 
 **Expected:** The result has length 1 and value 7.
 
+**Verify:** Your solution must keep `len(values) == 1 && values[0] == 7` true. Control: changing `values = append(values, 7)` to `values = append(values, 8)` panics with message `append nil`; revert it.
+
 Nil is an empty slice value with no backing array. It supports ordinary append without an explicit allocation call.
 
 ## 6. Transfer array semantics
@@ -99,8 +109,10 @@ check(a[0] == 1 && b[0] == 9, "array copy")
 
 **Expected:** The original array remains unchanged.
 
+**Verify:** Your solution must keep `a[0] == 1 && b[0] == 9` true. Control: changing `a := [2]int{1, 2}` to `a := [2]int{2, 2}` panics with message `array copy`; revert it.
+
 Array assignment copies every element, unlike slice-descriptor assignment. This contrast explains why representation affects mutation behavior.
 
 ## Transfer after comparison
 
-Return to your own pad and reproduce one check with a new input. Explain why the check rejects a plausible wrong implementation. Keep the distinction between a pure model, an in-process fake, and a real external system visible in your notes.
+Ownership is the question this lesson trains: who else can write to this storage, and for how long? Arrays answer it by copying; slices share until an explicit copy or a capacity boundary separates them. The same question returns with maps, struct fields holding slices, buffers passed to readers and informer caches that must not be mutated, so check aliasing before trusting that a value is private.

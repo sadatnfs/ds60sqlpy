@@ -212,10 +212,10 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="syntax-and-data-contract">Syntax and data contract<a class="heading-anchor" href="#syntax-and-data-contract" aria-label="Link to this section">#</a></h3>
 <p>The program writes seed CSVs, model SQL and YAML tests, runs build, inspects actual query results and generates documentation artifacts. Only the accepted path writes published.json. Its hash binds a canonical serialized result for this fixture. The manifest supplies declared model dependencies; the row checks and test outcomes provide separate evidence about the computation.</p>
 <h3 id="run-the-lesson">Run the lesson<a class="heading-anchor" href="#run-the-lesson" aria-label="Link to this section">#</a></h3>
-<p>Open <code>dbt-026</code> in <code>/classroom</code>. Its starter <code>main.py</code> contains both worked cases, &quot;Build and publish the accepted case&quot; and &quot;Block an invalid dimension&quot;, and prints the dictionary each case returns. The prepared <code>data-engineering</code> worker runs it in a fresh temporary directory. An <code>AssertionError</code> means that an observation differs from the case&#x27;s stated contract. Each case writes its dbt project and DuckDB database into its own temporary directory, runs real dbt commands through dbt&#x27;s Python entry point and removes the directory when it returns. No account, warehouse, network request or package download is involved. Save source and notes before switching lessons.</p>
+<p>The good run prints a publication with total 21, one quarantined row, a receipt, and rows for customer 10 in north with 12 from two orders and customer 20 in south with 9 from one. The bad-dimension run writes no <code>published.json</code>, because a duplicate customer key fails its unique test. See the <a href="../STUDY-GUIDE.md.html#run-a-lesson">run routine</a>.</p>
 <h3 id="worked-case-1-build-and-publish-the-accepted-case">Worked case 1: Build and publish the accepted case<a class="heading-anchor" href="#worked-case-1-build-and-publish-the-accepted-case" aria-label="Link to this section">#</a></h3>
 <p>The clean dimension and staged order rules produce two customer summaries. The program reconciles raw and accepted counts, inspects dependency metadata and checks the written receipt. This is a complete local workflow rather than a list of proposed commands.</p>
-<p><strong>Project files.</strong> The case writes these files before its first dbt command. YAML is shown in conventional key order; dbt reads the same mappings.</p>
+<p><strong>Project files</strong>, written before the first dbt command:</p>
 <p><code>models/staging_orders.sql</code></p>
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">select</span>
     id<span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">integer</span> <span class="syntax-keyword">as</span> order_id<span class="syntax-punctuation">,</span> customer<span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">integer</span> <span class="syntax-keyword">as</span> customer_id<span class="syntax-punctuation">,</span> try_cast<span class="syntax-punctuation">(</span>amount <span class="syntax-keyword">as</span> <span class="syntax-builtin">integer</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">as</span> amount
@@ -254,12 +254,12 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
           <span class="syntax-punctuation">-</span> not_null
   <span class="syntax-punctuation">-</span> <span class="syntax-tag">name</span><span class="syntax-punctuation">:</span> customer_mart
     <span class="syntax-tag">description</span><span class="syntax-punctuation">:</span> One accepted order total per customer and region.</code></pre>
-<p><strong>Commands and changes, in order.</strong> Each <code>dbt</code> line is one <code>invoke(...)</code> call; the harness adds <code>--project-dir</code> and <code>--profiles-dir</code> for the temporary project.</p>
+<p><strong>Commands, in order.</strong> Each <code>dbt</code> line is one <code>invoke(...)</code> call.</p>
 <pre class="highlighted-code"><code class="language-bash">dbt build
 dbt docs generate</code></pre>
 <p>The program then writes <code>published.json</code> from values computed at run time.</p>
 <p><strong>Expected evidence:</strong> Customer totals are 12 and 9, overall 21; one raw order is quarantined and a receipt is written.</p>
-<p>The program below shows only this case&#x27;s own functions. They call the shared helpers <code>project</code>, <code>invoke</code>, <code>rows</code> and <code>artifact</code>, which write the files above, run dbt through <code>dbtRunner</code> and read the results; the helpers are explained in <a href="dbt-001.md.html">dbt-001</a> and appear in full at the top of this lesson&#x27;s <a href="../lessons/dbt-026.py.html">starter</a>.</p>
+<p>Helpers <code>project</code>, <code>invoke</code>, <code>rows</code> and <code>artifact</code>: see the <a href="../STUDY-GUIDE.md.html#case-harness">case harness</a>.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> hashlib
 <span class="syntax-keyword">import</span> json
 <span class="syntax-keyword">import</span> tempfile
@@ -355,7 +355,7 @@ dbt docs generate</code></pre>
     <span class="syntax-keyword">return</span> capstone<span class="syntax-punctuation">(</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">)</span></code></pre>
 <h3 id="worked-case-2-block-an-invalid-dimension">Worked case 2: Block an invalid dimension<a class="heading-anchor" href="#worked-case-2-block-an-invalid-dimension" aria-label="Link to this section">#</a></h3>
 <p>The second fixture repeats customer 10 in the dimension. The uniqueness test fails and publication remains absent. The failure is an expected decision under the contract, and should not be concealed by deduplicating a final report.</p>
-<p><strong>Project files.</strong> The case writes these files before its first dbt command. YAML is shown in conventional key order; dbt reads the same mappings.</p>
+<p><strong>Project files</strong>, written before the first dbt command:</p>
 <p><code>models/staging_orders.sql</code></p>
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">select</span>
     id<span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">integer</span> <span class="syntax-keyword">as</span> order_id<span class="syntax-punctuation">,</span> customer<span class="syntax-punctuation">:</span><span class="syntax-punctuation">:</span><span class="syntax-builtin">integer</span> <span class="syntax-keyword">as</span> customer_id<span class="syntax-punctuation">,</span> try_cast<span class="syntax-punctuation">(</span>amount <span class="syntax-keyword">as</span> <span class="syntax-builtin">integer</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">as</span> amount
@@ -395,10 +395,10 @@ dbt docs generate</code></pre>
           <span class="syntax-punctuation">-</span> not_null
   <span class="syntax-punctuation">-</span> <span class="syntax-tag">name</span><span class="syntax-punctuation">:</span> customer_mart
     <span class="syntax-tag">description</span><span class="syntax-punctuation">:</span> One accepted order total per customer and region.</code></pre>
-<p><strong>Commands and changes, in order.</strong> Each <code>dbt</code> line is one <code>invoke(...)</code> call; the harness adds <code>--project-dir</code> and <code>--profiles-dir</code> for the temporary project.</p>
+<p><strong>Commands, in order.</strong> Each <code>dbt</code> line is one <code>invoke(...)</code> call.</p>
 <pre class="highlighted-code"><code class="language-bash">dbt build # expected to fail</code></pre>
 <p><strong>Expected evidence:</strong> The invalid candidate is not published.</p>
-<p>The program below shows only this case&#x27;s own functions. They call the shared helpers <code>project</code>, <code>invoke</code>, <code>rows</code> and <code>artifact</code>, which write the files above, run dbt through <code>dbtRunner</code> and read the results; the helpers are explained in <a href="dbt-001.md.html">dbt-001</a> and appear in full at the top of this lesson&#x27;s <a href="../lessons/dbt-026.py.html">starter</a>.</p>
+<p>Helpers <code>project</code>, <code>invoke</code>, <code>rows</code> and <code>artifact</code>: see the <a href="../STUDY-GUIDE.md.html#case-harness">case harness</a>.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> hashlib
 <span class="syntax-keyword">import</span> json
 <span class="syntax-keyword">import</span> tempfile
@@ -493,7 +493,7 @@ dbt docs generate</code></pre>
 <span class="syntax-keyword">def</span> <span class="syntax-function">example_two</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
     <span class="syntax-keyword">return</span> capstone<span class="syntax-punctuation">(</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></code></pre>
 <h3 id="practice">Practice<a class="heading-anchor" href="#practice" aria-label="Link to this section">#</a></h3>
-<p>The starter contains both worked cases, so a task can change either one. Make each change in a saved copy, run it, and compare the printed result with the task&#x27;s check before opening the separate explained answers.</p>
+<p>Use the <a href="../STUDY-GUIDE.md.html#practice-routine">practice routine</a>.</p>
 <h4 id="1-change-a-valid-order">1. Change a valid order<a class="heading-anchor" href="#1-change-a-valid-order" aria-label="Link to this section">#</a></h4>
 <p>Add a new identified paid amount and predict the mart change.</p>
 <p><strong>Check:</strong> Counts and totals reconcile independently.</p>
@@ -528,7 +528,7 @@ dbt docs generate</code></pre>
 <li><a href="https://github.com/duckdb/dbt-duckdb">dbt-duckdb repository README</a></li>
 </ul>
 <h3 id="tutor-guidance">Tutor guidance<a class="heading-anchor" href="#tutor-guidance" aria-label="Link to this section">#</a></h3>
-<p>Use the repository&#x27;s <code>$guide-ds60sqlpy-learning</code> skill (<code>.agents/skills/guide-ds60sqlpy-learning/SKILL.md</code>) for <code>dbt-026</code>. Inspect the learner&#x27;s own source and printed output first. Ask for an explanation of capstone, staging, tests, lineage, publication and decision receipt in their own words, then give one focused hint at a time. Keep an assertion on this synthetic fixture separate from a claim about an external dataset or deployed service.</p></article>
+<p>Ask the learner to account for all four raw orders, then explain why a duplicate customer would double a total if the key test were missing. Ask what the receipt records and who should review it before the product is accepted. See the <a href="../STUDY-GUIDE.md.html#tutor-guidance">tutor routine</a>.</p></article>
   </main>
 </body>
 </html>

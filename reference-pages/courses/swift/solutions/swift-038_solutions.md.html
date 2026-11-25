@@ -194,7 +194,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/swift/solutions/swift-038_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="swift-038-explanation-and-comparison">swift-038: explanation and comparison<a class="heading-anchor" href="#swift-038-explanation-and-comparison" aria-label="Link to this section">#</a></h2>
-<p>Attempt the six guide tasks before opening this comparison. The executable reference is <a href="swift-038_solution.swift.html">swift-038_solution.swift</a>. It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.</p>
+<p>Reference program: <a href="swift-038_solution.swift.html">swift-038_solution.swift</a>, covering both examples and the executed answers.</p>
+<p>Attempt the tasks first; see <a href="../STUDY-GUIDE.md.html#comparing-with-the-explanation">comparing with the explanation</a>.</p>
 <h3 id="why-the-two-examples-differ">Why the two examples differ<a class="heading-anchor" href="#why-the-two-examples-differ" aria-label="Link to this section">#</a></h3>
 <p><strong>Compose report sections:</strong> The builder supplies the combining mechanism; the block supplies domain content. Two expressions become an ordered array of sections.</p>
 <p><strong>Include a conditional section:</strong> The buildOptional method gives the conditional branch an explicit combination rule. The conditional contributes its section when true.</p>
@@ -260,7 +261,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>buildBlock with no components flattens to an empty array, and buildOptional(nil) also returns []; neither case needs a special path.</p>
 <h4 id="task-6-transfer-and-justify">Task 6: Transfer and justify<a class="heading-anchor" href="#task-6-transfer-and-justify" aria-label="Link to this section">#</a></h4>
 <p>Explain why a domain-specific builder may be clearer or less clear than an ordinary array literal.</p>
-<p>No single reference answer exists: several designs can satisfy this transfer task. Build yours from the task 3 answer above (Build a small report declaration using the existing builder) and the mechanism described below, and state one limitation of your choice.</p>
+<p>No single answer exists; extend task 3 using the <a href="../STUDY-GUIDE.md.html#open-transfer-tasks">open transfer routine</a>.</p>
 <h3 id="solution-reasoning">Solution reasoning<a class="heading-anchor" href="#solution-reasoning" aria-label="Link to this section">#</a></h3>
 <p><strong>Approach.</strong> <code>SectionBuilder</code> is a result builder with three methods: <code>buildExpression</code> wraps a String in a one-element array, <code>buildBlock</code> flattens the arrays, and <code>buildOptional</code> turns a missing <code>if</code> branch into an empty array. <code>sections</code> applies the builder to a closure. Example A lists two strings; Example B adds an <code>if include</code> branch.</p>
 <p><strong>Why it is correct.</strong> The compiler rewrites Example A into roughly <code>buildBlock(buildExpression(&quot;Overview&quot;), buildExpression(&quot;Details&quot;))</code>, which flattens to <code>[&quot;Overview&quot;, &quot;Details&quot;]</code>. In Example B the <code>if</code> becomes <code>buildOptional(include ? buildBlock(buildExpression(&quot;Diagnostics&quot;)) : nil)</code>; with <code>include</code> true it contributes <code>[&quot;Diagnostics&quot;]</code>. In task 3 the report contains Summary and Totals, and the Warnings section is omitted because its condition is false.</p>
@@ -272,7 +273,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><code>@resultBuilder</code> marks the builder. buildBlock combines expressions and buildOptional handles an if without else. A function parameter annotated with the builder accepts the transformed closure.</p>
 <p>A result builder is not runtime reflection or arbitrary syntax parsing. Type errors can surface inside generated combinations, so reduce the block to a small failing expression. Do not reinvent SwiftUI ViewBuilder for ordinary views.</p>
 <h3 id="review-before-continuing">Review before continuing<a class="heading-anchor" href="#review-before-continuing" aria-label="Link to this section">#</a></h3>
-<p>Run the reference and confirm that it prints <code>swift-038: passed</code>, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.</p></article>
+<p>Run the reference and confirm it prints <code>swift-038: passed</code>, then rerun the guide&#x27;s counterexample.</p></article>
   </main>
 </body>
 </html>

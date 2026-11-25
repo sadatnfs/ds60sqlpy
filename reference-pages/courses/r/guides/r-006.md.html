@@ -196,7 +196,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <article class="document"><h2 id="r-006-missing-values-null-nan-and-infinity">r-006: Missing values, NULL, NaN and infinity<a class="heading-anchor" href="#r-006-missing-values-null-nan-and-infinity" aria-label="Link to this section">#</a></h2>
 <p><strong>Level:</strong> beginner. <strong>Direct prerequisites:</strong> <code>r-002</code>, <code>r-004</code></p>
 <h3 id="run-and-retain-your-work">Run and retain your work<a class="heading-anchor" href="#run-and-retain-your-work" aria-label="Link to this section">#</a></h3>
-<p>Open <code>r-006</code> in <code>/classroom</code> and use the prepared <code>r-statistics</code> profile. Each Run evaluates one <code>main.R</code> script in a fresh offline R process, so define every input in the script; an earlier Run leaves no variables behind. Work in the <a href="../lessons/r-006.R.html">starter</a>. The <a href="../solutions/r-006_reference.R.html">complete reference</a> ends by printing <code>r-006 reference checks passed</code>, and the <a href="../solutions/r-006_solutions.md.html">explained answers</a> are there for deliberate comparison after your own attempt. This chapter prints values only; when a chapter draws figures, the classroom keeps at most two figures per run. The <a href="../README.md.html">course overview</a> describes saved work, figure capture and the prepared package versions.</p>
+<p>The starter vector mixes 0, <code>NA_real_</code>, NaN, Inf and 4 and prints it unchanged. Run it and notice that R prints NA and NaN differently even though <code>is.na()</code> is TRUE for both. Your summary policy has to separate those two from Inf, which is a defined value, and from 0, which is a real measurement that must never be treated as missing.</p>
+<p>Work in the <a href="../lessons/r-006.R.html">starter</a> under the <a href="../STUDY-GUIDE.md.html#run-a-chapter">run rules</a>.</p>
+<p>The <a href="../solutions/r-006_reference.R.html">complete reference</a> ends by printing <code>r-006 reference checks passed</code>.</p>
 <h3 id="outcome-and-mechanism">Outcome and mechanism<a class="heading-anchor" href="#outcome-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Choose and test a missingness policy that preserves the distinction between absence, undefined arithmetic and zero.</p>
 <p>NA represents a missing entry within a vector. Typed forms such as NA_real_, NA_integer_ and NA_character_ help retain a desired representation. NULL is different: it often denotes an absent component and has length zero. Combining NULL into a vector contributes no entry, while combining NA contributes one missing entry. Confusing these meanings changes counts and denominators.</p>
@@ -298,7 +300,23 @@ Inf    FALSE  FALSE   FALSE      TRUE
 <li><a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/NULL.html">R null object</a></li>
 </ul>
 <h3 id="continue">Continue<a class="heading-anchor" href="#continue" aria-label="Link to this section">#</a></h3>
-<p>Chapters that list <code>r-006</code> as a direct prerequisite: <a href="r-009.md.html"><code>r-009</code></a>, <a href="r-016.md.html"><code>r-016</code></a>, <a href="r-018.md.html"><code>r-018</code></a>.</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Next chapter</th>
+<th>Title</th>
+</tr></thead><tbody>
+<tr>
+<td><a href="r-009.md.html"><code>r-009</code></a></td>
+<td>Lists and nested records without accidental flattening</td>
+</tr>
+<tr>
+<td><a href="r-016.md.html"><code>r-016</code></a></td>
+<td>Strings, encodings and explicit text parsing</td>
+</tr>
+<tr>
+<td><a href="r-018.md.html"><code>r-018</code></a></td>
+<td>Dates, instants and explicit time zones</td>
+</tr>
+</tbody></table></div>
 <h3 id="ask-an-ai-tutor">Ask an AI tutor<a class="heading-anchor" href="#ask-an-ai-tutor" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for r-006 (Missing values, NULL, NaN and infinity).
 Read the guide and my saved attempt. Explain the relevant R mechanism,

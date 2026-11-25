@@ -132,11 +132,11 @@ path. These cases show a safe local output contract and an actual scheduled
 failure/retry transition without claiming that the orchestrator rolls back
 arbitrary external systems.
 
-The [complete Airflow workshop](../projects/airflow/README.md) provides the maintained files, preparation, lifecycle and exact qualification boundaries for these cases.
+`retry-check` in the [Airflow workshop](../projects/airflow/README.md) runs the same two intervals and requires the `fail_once` task to succeed on its second try in each run.
 
 ## Complete worked source
 
-This is a project-only command notebook. Read and edit it in the classroom; run its explicitly labeled commands from the copied owned Docker workshop. The classroom does not execute these service commands.
+The classroom does not execute these service commands. See the [workshop rules](../STUDY-GUIDE.md#workshop-notebooks).
 
 # Retry state and idempotent outputs
 

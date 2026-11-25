@@ -194,9 +194,17 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cuda/python/guides/cuda-079.md</code></p>
     </header>
     <article class="document"><h2 id="cuda-079-python-kernels-meet-memory-performance">cuda-079: Python kernels meet memory performance<a class="heading-anchor" href="#cuda-079-python-kernels-meet-memory-performance" aria-label="Link to this section">#</a></h2>
-<p><strong>Route:</strong> CUDA Python and machine learning. <strong>Stage:</strong> intermediate. <strong>Prerequisites:</strong> <code>cuda-007</code>, <code>cuda-071</code>, <code>cuda-075</code>, <code>cuda-076</code>. Allow several sessions when the hardware experiment is new; the chapter is not a deadline.</p>
-<h3 id="what-you-will-be-able-to-explain">What you will be able to explain<a class="heading-anchor" href="#what-you-will-be-able-to-explain" aria-label="Link to this section">#</a></h3>
-<p>By the end, you can <strong>count touched segments</strong>, <strong>explain tiled transpose</strong>, and <strong>propose a matched profiler experiment</strong> with evidence. Start with the two worked cases, then use the editable CPU model to make the quantities concrete.</p>
+<p><strong>Route:</strong> CUDA Python and machine learning. <strong>Stage:</strong> intermediate. <strong>Prerequisites:</strong> <code>cuda-007</code>, <code>cuda-071</code>, <code>cuda-075</code>, <code>cuda-076</code>.</p>
+<p>Pacing, evidence labels and platform rules: <a href="../../STUDY-GUIDE.md.html">CUDA study guide</a>.</p>
+<h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
+<ul>
+<li>Count touched segments.</li>
+<li>Shift the base by four bytes.</li>
+<li>Model a stride of two.</li>
+<li>Explain tiled transpose.</li>
+<li>Separate occupancy from throughput.</li>
+<li>Propose a matched profiler experiment.</li>
+</ul>
 <h3 id="mechanism-and-vocabulary">Mechanism and vocabulary<a class="heading-anchor" href="#mechanism-and-vocabulary" aria-label="Link to this section">#</a></h3>
 <p>Neighboring lanes accessing neighboring elements can be served by fewer memory transactions than widely strided accesses. Count bytes requested by useful data and compare them with the transactions the layout forces. Alignment, transaction granularity and cache behavior depend on architecture, so a simple segment model is educational rather than a complete GPU simulator.</p>
 <p>A transpose illustrates the conflict: contiguous reads can lead to strided writes. Shared-memory tiling can reorganize the data before output. Padding may reduce bank conflicts for specific layouts, but it consumes shared capacity. Measure the entire kernel and inspect profiler counters before attributing speed to one mechanism. Increased occupancy is a means to hide latency, not an unconditional goal.</p>
@@ -213,8 +221,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Eight four-byte lanes reading offsets 0,4,...,28 fit one aligned 32-byte segment in the simplified model. Offsets 0,32,...,224 touch eight segments.</p>
 <h4 id="worked-example-2">Worked example 2<a class="heading-anchor" href="#worked-example-2" aria-label="Link to this section">#</a></h4>
 <p>A tiled transpose first reads rows cooperatively then writes rows in the transposed coordinate system. This changes traffic organization without changing the mathematical transpose.</p>
-<h3 id="portable-executable-model">Portable executable model<a class="heading-anchor" href="#portable-executable-model" aria-label="Link to this section">#</a></h3>
-<p>The <strong>CPU reference model</strong> variant runs this bounded worked example using <code>python-core</code>. It uses only the Python standard library, small synthetic values and no network. Its purpose is to expose the arithmetic or contract behind the chapter. The separate reference includes assertions for the stated observations.</p>
+<h3 id="how-to-run-the-cpu-model">How to run the CPU model<a class="heading-anchor" href="#how-to-run-the-cpu-model" aria-label="Link to this section">#</a></h3>
+<p>Edit the copy; the <a href="../references/cuda-079_cpu.py.html">reference</a> adds assertions.</p>
+<pre class="highlighted-code"><code class="language-bash">python courses/cuda/python/lessons/cuda-079_cpu.py</code></pre>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">segments</span><span class="syntax-punctuation">(</span>offsets<span class="syntax-punctuation">,</span> width<span class="syntax-operator">=</span><span class="syntax-number">32</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
     <span class="syntax-keyword">return</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span>offset <span class="syntax-operator">/</span><span class="syntax-operator">/</span> width <span class="syntax-keyword">for</span> offset <span class="syntax-operator">in</span> offsets<span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span>
 
@@ -238,49 +247,44 @@ strided <span class="syntax-operator">=</span> <span class="syntax-punctuation">
 <td><code>[0, 32, 64, 96, 128, 160, 192, 224]</code></td>
 </tr>
 </tbody></table></div>
-<p>Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.</p>
 <h3 id="practice-and-transfer">Practice and transfer<a class="heading-anchor" href="#practice-and-transfer" aria-label="Link to this section">#</a></h3>
+<p>Record each attempt in the <a href="../lessons/cuda-079.md.html">worksheet</a> before opening hints.</p>
 <h4 id="exercise-1-count-touched-segments">Exercise 1: Count touched segments<a class="heading-anchor" href="#exercise-1-count-touched-segments" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Counting one transaction per lane, eight here, treats every load as independent and ignores coalescing. That would make the contiguous and strided patterns look equally expensive.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-2-shift-the-base-by-four-bytes">Exercise 2: Shift the base by four bytes<a class="heading-anchor" href="#exercise-2-shift-the-base-by-four-bytes" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Assuming contiguity alone guarantees one segment ignores the boundary. A misaligned base can double the modeled transactions for the same amount of useful data.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-3-model-a-stride-of-two">Exercise 3: Model a stride of two<a class="heading-anchor" href="#exercise-3-model-a-stride-of-two" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Thinking stride only matters when it reaches the segment size misses the intermediate cost. Stride two already doubles the transactions in this model.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-4-explain-tiled-transpose">Exercise 4: Explain tiled transpose<a class="heading-anchor" href="#exercise-4-explain-tiled-transpose" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Expecting the shared-memory version to change the output values, or to need a different verification, confuses reorganized traffic with a different algorithm.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-5-separate-occupancy-from-throughput">Exercise 5: Separate occupancy from throughput<a class="heading-anchor" href="#exercise-5-separate-occupancy-from-throughput" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Treating the occupancy number as the performance goal leads to changes that raise the percentage while total runtime stays the same or rises.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-6-propose-a-matched-profiler-experiment">Exercise 6: Propose a matched profiler experiment<a class="heading-anchor" href="#exercise-6-propose-a-matched-profiler-experiment" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Comparing kernels that differ in dtype or element count mixes several causes. A float64 strided kernel against a float32 contiguous one cannot attribute the difference to stride.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
-<p>Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.</p>
+<p>Hint <em>k</em> belongs to exercise <em>k</em>; open one at a time.</p>
 <ol>
-<li>Start from worked example 1 and mark the quantities needed for the task &quot;Count touched segments&quot;.</li>
-<li>Change one assumption in worked example 2 while preserving the declared contract: shift the base by four bytes.</li>
-<li>Trace the CPU program&#x27;s variables before adding hardware behavior: model a stride of two.</li>
-<li>Draw producers, consumers and the exact operation boundary for the task &quot;Explain tiled transpose&quot;.</li>
-<li>Separate what the small fixture establishes from what the real runtime must show: separate occupancy from throughput.</li>
-<li>Write a counterexample to an overbroad claim before you propose a matched profiler experiment.</li>
+<li>List each lane&#x27;s byte offset, divide by the 32-byte segment size with floor division and count the distinct results.</li>
+<li>Add 4 to every offset of the contiguous case and check whether the last lane now lands in a new segment.</li>
+<li>Double the spacing between lanes and recount the segments eight four-byte loads touch.</li>
+<li>Ask which side of a naive transpose is contiguous, the reads or the writes, and how a shared tile could swap that.</li>
+<li>Ask what extra resident warps need from registers and shared memory, and whether they still wait on the same memory traffic.</li>
+<li>List what to hold fixed between the two kernels and which real profiler counters would confirm a traffic difference.</li>
 </ol>
-<h3 id="common-mistakes-and-self-review">Common mistakes and self-review<a class="heading-anchor" href="#common-mistakes-and-self-review" aria-label="Link to this section">#</a></h3>
-<p>Confusing a correct tiny example with a general implementation is the central review risk. For this chapter, challenge the assumption in worked example 2, then ask whether your change preserves the mechanism described above. If you change dtype, layout, ordering, batch size or backend, update the acceptance contract rather than silently reusing the old observation. Explain an unexpected result before trying random configuration changes.</p>
-<p>Keep a small evidence table with columns <strong>claim</strong>, <strong>input</strong>, <strong>expected observation</strong>, <strong>actual observation</strong> and <strong>limit</strong>. For the first claim use <code>Count touched segments</code>. For the final claim use <code>Propose a matched profiler experiment</code>. An unperformed GPU or cluster experiment remains pending even when the CPU model is correct.</p>
-<h3 id="platform-and-evidence-contract">Platform and evidence contract<a class="heading-anchor" href="#platform-and-evidence-contract" aria-label="Link to this section">#</a></h3>
-<p>The reading worksheet and CPU reference model work through the ordinary Linux Docker classroom on macOS, Linux and Windows using WSL 2. They do not require an NVIDIA GPU. Their results are labeled CPU models or semantic oracles, not simulated hardware performance.</p>
-<p>Real CUDA work needs supported NVIDIA hardware, a compatible host driver and an explicitly prepared GPU runtime. An Apple GPU does not execute CUDA kernels. PyTorch MPS on a supported native Mac, ROCm on supported AMD hardware, or other vendor backends can provide separate accelerator learning routes; they need their own package and operation qualification and are not CUDA evidence. The ordinary Linux Docker classroom does not expose native Mac MPS automatically.</p>
-<p>Do not download packages, models or data by opening this lesson. Do not attach an engine socket, ambient cluster credentials or an arbitrary remote endpoint. A CPU pass, imported package, successful compilation, real GPU result and measured performance are distinct observations. Record the actual backend, data shape/dtype, source revision, versions and pending checks. A saved completion marker records learning progress, not hardware certification.</p>
+<h3 id="common-mistakes-and-self-check">Common mistakes and self-check<a class="heading-anchor" href="#common-mistakes-and-self-check" aria-label="Link to this section">#</a></h3>
+<p>A common mistake is crediting a speedup to one mechanism, such as higher occupancy or a padded shared tile, without measuring. Occupancy only helps hide latency; more resident warps can still compete for the same bandwidth or shared capacity. Another mistake is treating this chapter&#x27;s segment counts as hardware facts. Fix both by holding dtype, shape and output fixed, timing the entire kernel, and checking profiler counters for memory transactions before naming a cause.</p>
+<p><strong>Evidence limit:</strong> The segment counts 1 and 8 come from a simplified 32-byte model. Real alignment, transaction granularity, caching and bank conflicts depend on the GPU architecture, so the model teaches the access pattern, not measured traffic.</p>
+<ol>
+<li>Why can neighboring lanes reading neighboring elements be cheaper?</li>
+<li>What problem does a tiled transpose address?</li>
+<li>Why can padding a shared tile have a cost?</li>
+</ol>
+<p>Answers: <a href="../solutions/cuda-079_solutions.md.html#self-check-answers">self-check answers</a>.</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
 <ul>
 <li><a href="https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/intro-to-cuda-python.html">NVIDIA CUDA Python introduction</a></li>
-<li><a href="https://github.com/NVIDIA/numba-cuda">Maintained numba-cuda project</a></li>
 </ul>
-<p>Use the version-matched documentation of your prepared environment. These references describe interfaces and supported boundaries; the chapter&#x27;s synthetic examples and CPU models are original teaching material.</p>
+<p>Full lists: <a href="../../STUDY-GUIDE.md.html#documentation-and-sources">documentation and sources</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning skill for cuda-079: Python kernels meet memory performance.
 Read courses/cuda/python/guides/cuda-079.md and courses/cuda/python/lessons/cuda-079.md.

@@ -1,6 +1,6 @@
 # cuda-095: explained solutions
 
-These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.
+Compare with your [worksheet](../lessons/cuda-095.md) attempt.
 
 ## Exercise 1: Compute throughput
 
@@ -74,8 +74,16 @@ Reject unsupported shape or dtype explicitly.
 
 **How to verify.** Write tests for one valid and two invalid inputs and assert the error messages name the expected signature.
 
+## Self-check answers
+
+1. **Why can a larger batch hurt an interactive service?** It raises throughput but makes each request wait for the whole batch, increasing latency.
+
+2. **Why measure cold start separately?** Loading and compiling the model happen once and would distort warm request timings if hidden in warmup.
+
+3. **Why include output materialization in latency?** A response for a CPU client is not finished until results are copied back and serialized.
+
 ## Reference observation
 
 4000 items/s with 8 ms batch latency, not 0.25 ms request latency.
 
-The reference file is `courses/cuda/python/references/cuda-095_cpu.py`. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.
+Asserted by `courses/cuda/python/references/cuda-095_cpu.py`.

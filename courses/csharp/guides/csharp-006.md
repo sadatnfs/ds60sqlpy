@@ -24,9 +24,9 @@ A loop repeats a state transition. To understand it, state what is true before t
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles your saved pad as `Program.cs` in its fixed .NET 10 project. C# 14 is the matching language generation. This route uses the prepared framework libraries; it does not accept arbitrary project files, NuGet packages, command arguments or interactive input. The explicit `Program.Main` entrypoint makes compilation and execution visible. `Check` throws on a false condition in every build configuration, unlike conditional debugging assertions.
+Example A calls LINQ's `Sum()` on an empty array; the classroom's implicit usings already import `System.Linq`. Task 4's off-by-one loop compiles and fails only at runtime with `IndexOutOfRangeException`, which tells you the bad index came from the loop condition rather than from the data.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Compile contract, starter stop and success marker: [running a lesson](../STUDY-GUIDE.md#running-a-lesson).
 
 
 
@@ -34,7 +34,7 @@ Start with the answer-free learner artifact in your saved classroom pad. It deli
 
 `for (initial; condition; update)` initializes once, checks before each body, and updates after each body. For an array of Length n, valid indices are zero through n minus one. `break` exits the loop; `continue` skips the remainder of one iteration.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+Each example ends with a trace; method: [tracing a program](../STUDY-GUIDE.md#tracing-a-program).
 
 ## Worked example / walkthrough
 
@@ -81,6 +81,8 @@ internal static class Program {
 ```
 
 **Observe:** The sum is 12 and the empty sum is zero.
+
+**Trace.** Before the loop, `sum` is 0, the total of no values. The first iteration adds 2, so sum is 2, the total of the one value visited. The second adds 4 for 6, and the third adds 6 for 12. After every step the invariant holds: sum equals the total of the values visited so far. `Array.Empty<int>().Sum()` returns 0, the same starting value.
 
 ### Example B: Locate the first match
 
@@ -130,6 +132,8 @@ internal static class Program {
 
 **Observe:** The first 8 is at index 1; 9 is absent.
 
+**Trace.** `found` starts at -1, meaning not yet found. At index 0 the value 3 does not match. At index 1 the value is 8, so `found` becomes 1 and `break` leaves the loop at once; index 2 is never examined. Without `break`, the loop would continue to index 2 and overwrite found with 2, the last match. `Array.Exists` confirms that 9 is absent.
+
 ## Exercises
 
 1. **Predict and explain.** Write the accumulator value before and after every iteration in Example A.
@@ -144,13 +148,15 @@ internal static class Program {
 
 6. **Transfer and justify.** Design a bounded retry loop and explain both its invariant and its stopping argument.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Log each task in the [evidence table](../STUDY-GUIDE.md#recording-exercise-evidence) before opening the explanation.
 
 ## Common pitfalls and diagnosis
 
 Loop indices count from zero while lengths count elements. A sentinel such as -1 must be checked before indexing. Mutating a collection during enumeration can invalidate the traversal contract.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+For task 4, the one-element array `{ 5 }` is the smallest counterexample: with `i <= values.Length` the loop runs for 0 and then for 1, and the second access throws `IndexOutOfRangeException`. For task 5, the input `{ 8, 8 }` separates first match from last match, and an empty array checks that -1 comes back without any element access.
+
+Repair routine: [building a regression case](../STUDY-GUIDE.md#building-a-regression-case).
 
 ## Progressive hints
 
@@ -160,11 +166,15 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 ## Self-check and next step
 
-Explain Invariant, Accumulator, Termination without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+Write the value of `sum` before and after each iteration of Example A, then state the invariant in one sentence. Explain what `found` means when the loop ends holding -1. For task 6's bounded retry loop, name the quantity that decreases on every attempt and the condition that stops the loop.
+
+Then follow the general [self-check routine](../STUDY-GUIDE.md#self-check-routine) and save your pad.
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://learn.microsoft.com/en-us/dotnet/csharp/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+[Documentation](https://learn.microsoft.com/en-us/dotnet/csharp/): The reference describes `for`, `foreach`, `break` and `continue` in its iteration statements and jump statements articles.
+
+Provenance and limits: [sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

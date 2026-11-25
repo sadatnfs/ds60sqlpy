@@ -194,9 +194,17 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cuda/spark/guides/cuda-114.md</code></p>
     </header>
     <article class="document"><h2 id="cuda-114-compatibility-is-a-tested-matrix-not-a-jar-name">cuda-114: Compatibility is a tested matrix, not a jar name<a class="heading-anchor" href="#cuda-114-compatibility-is-a-tested-matrix-not-a-jar-name" aria-label="Link to this section">#</a></h2>
-<p><strong>Route:</strong> CUDA Python and machine learning / GPU Spark specialization. <strong>Stage:</strong> intermediate. <strong>Prerequisites:</strong> <code>cuda-113</code>. Allow several sessions when the hardware experiment is new; the chapter is not a deadline.</p>
-<h3 id="what-you-will-be-able-to-explain">What you will be able to explain<a class="heading-anchor" href="#what-you-will-be-able-to-explain" aria-label="Link to this section">#</a></h3>
-<p>By the end, you can <strong>list matrix axes</strong>, <strong>record artifact provenance</strong>, and <strong>define compatibility acceptance</strong> with evidence. Start with the two worked cases, then use the editable CPU model to make the quantities concrete.</p>
+<p><strong>Route:</strong> CUDA Python and machine learning / GPU Spark specialization. <strong>Stage:</strong> intermediate. <strong>Prerequisites:</strong> <code>cuda-113</code>.</p>
+<p>Pacing, evidence labels and platform rules: <a href="../../STUDY-GUIDE.md.html">CUDA study guide</a>.</p>
+<h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
+<ul>
+<li>List matrix axes.</li>
+<li>Identify a Scala mismatch.</li>
+<li>Distinguish toolkit and driver.</li>
+<li>Record artifact provenance.</li>
+<li>Design a CPU rollback.</li>
+<li>Define compatibility acceptance.</li>
+</ul>
 <h3 id="mechanism-and-vocabulary">Mechanism and vocabulary<a class="heading-anchor" href="#mechanism-and-vocabulary" aria-label="Link to this section">#</a></h3>
 <p>A working GPU Spark installation matches Spark patch line, Scala binary version, Java runtime, plugin release, CUDA native-library variant, host CPU architecture, Linux userspace, NVIDIA driver and GPU architecture. Spark distributions can carry vendor patches, so a nominal Spark version alone may not establish binary compatibility. The published support matrix and release notes must be checked for the exact selected release.</p>
 <p>Record artifacts by version and checksum and keep a known CPU baseline. Do not copy a development SNAPSHOT from a documentation example into a beginner setup. The Scala suffix selects a binary ecosystem; the CUDA classifier selects native-library packaging and is not a substitute for a compatible host driver. A local ARM Mac image architecture and an NVIDIA Linux host architecture are separate concerns. This lesson&#x27;s compatibility worksheet deliberately does not invent a universally supported version combination.</p>
@@ -212,8 +220,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>A jar built for Scala 2.12 should not be assumed compatible with a Scala 2.13 Spark distribution. A NoSuchMethodError can indicate binary integration trouble before useful GPU work starts.</p>
 <h4 id="worked-example-2">Worked example 2<a class="heading-anchor" href="#worked-example-2" aria-label="Link to this section">#</a></h4>
 <p>A package can load on one Linux host but fail to initialize native libraries on another architecture. Version ledger completeness and actual smoke execution are both required.</p>
-<h3 id="portable-executable-model">Portable executable model<a class="heading-anchor" href="#portable-executable-model" aria-label="Link to this section">#</a></h3>
-<p>The <strong>CPU reference model</strong> variant runs this bounded worked example using <code>python-core</code>. It uses only the Python standard library, small synthetic values and no network. Its purpose is to expose the arithmetic or contract behind the chapter. The separate reference includes assertions for the stated observations.</p>
+<h3 id="how-to-run-the-cpu-model">How to run the CPU model<a class="heading-anchor" href="#how-to-run-the-cpu-model" aria-label="Link to this section">#</a></h3>
+<p>Edit the copy; the <a href="../references/cuda-114_cpu.py.html">reference</a> adds assertions.</p>
+<pre class="highlighted-code"><code class="language-bash">python courses/cuda/spark/lessons/cuda-114_cpu.py</code></pre>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">compatible</span><span class="syntax-punctuation">(</span>spark_scala<span class="syntax-punctuation">,</span> jar_scala<span class="syntax-punctuation">,</span> host_arch<span class="syntax-punctuation">,</span> jar_arch<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
     <span class="syntax-keyword">return</span> spark_scala <span class="syntax-operator">==</span> jar_scala <span class="syntax-operator">and</span> host_arch <span class="syntax-operator">==</span> jar_arch
 
@@ -222,52 +231,45 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="syntax-keyword">assert</span> <span class="syntax-operator">not</span> compatible<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">2.13</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">2.12</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">x86_64</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">x86_64</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
 <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">CPU compatibility worksheet: mismatched Scala binary line rejected</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation:</strong> Illustrative Scala/host-architecture predicate rejects mismatch; not a full compatibility probe.</p>
-<p>Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.</p>
 <h3 id="practice-and-transfer">Practice and transfer<a class="heading-anchor" href="#practice-and-transfer" aria-label="Link to this section">#</a></h3>
+<p>Record each attempt in the <a href="../lessons/cuda-114.md.html">worksheet</a> before opening hints.</p>
 <h4 id="exercise-1-list-matrix-axes">Exercise 1: List matrix axes<a class="heading-anchor" href="#exercise-1-list-matrix-axes" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Treating the jar name as proof of compatibility ignores axes the name does not encode, such as the driver or GPU architecture.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-2-identify-a-scala-mismatch">Exercise 2: Identify a Scala mismatch<a class="heading-anchor" href="#exercise-2-identify-a-scala-mismatch" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Matching only the Spark version number while ignoring the Scala suffix in the jar name leads to runtime linkage errors before any query runs.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-3-distinguish-toolkit-and-driver">Exercise 3: Distinguish toolkit and driver<a class="heading-anchor" href="#exercise-3-distinguish-toolkit-and-driver" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Checking <code>nvcc --version</code> and concluding the host is ready tests the compiler, not the driver the executors will use.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-4-record-artifact-provenance">Exercise 4: Record artifact provenance<a class="heading-anchor" href="#exercise-4-record-artifact-provenance" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Copying a jar from a shared folder without a checksum leaves no way to tell which build it is.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-5-design-a-cpu-rollback">Exercise 5: Design a CPU rollback<a class="heading-anchor" href="#exercise-5-design-a-cpu-rollback" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Removing CPU configuration once the plugin works means a driver or library failure stops the job entirely.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-6-define-compatibility-acceptance">Exercise 6: Define compatibility acceptance<a class="heading-anchor" href="#exercise-6-define-compatibility-acceptance" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Accepting a host because the Spark session started with the plugin listed skips native library loading on executors and actual query execution.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
-<p>Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.</p>
+<p>Hint <em>k</em> belongs to exercise <em>k</em>; open one at a time.</p>
 <ol>
-<li>Start from worked example 1 and mark the quantities needed for the task &quot;List matrix axes&quot;.</li>
-<li>Change one assumption in worked example 2 while preserving the declared contract: identify a Scala mismatch.</li>
-<li>Trace the CPU program&#x27;s variables before adding hardware behavior: distinguish toolkit and driver.</li>
-<li>Draw producers, consumers and the exact operation boundary for the task &quot;Record artifact provenance&quot;.</li>
-<li>Separate what the small fixture establishes from what the real runtime must show: design a CPU rollback.</li>
-<li>Write a counterexample to an overbroad claim before you define compatibility acceptance.</li>
+<li>Name every component that must line up, from the Spark line and Scala version to the GPU and operating system.</li>
+<li>Read the Scala suffix on the jar and compare it with the Scala binary version of the Spark distribution.</li>
+<li>Ask which one ships inside a package and which one must already be installed on the host.</li>
+<li>Record each artifact&#x27;s release version, checksum and the primary source you took it from.</li>
+<li>Keep an ordinary CPU Spark environment and a query whose expected result is known.</li>
+<li>Write the steps a selected host must pass: import, startup, a bounded query and the expected result.</li>
 </ol>
-<h3 id="common-mistakes-and-self-review">Common mistakes and self-review<a class="heading-anchor" href="#common-mistakes-and-self-review" aria-label="Link to this section">#</a></h3>
-<p>Confusing a correct tiny example with a general implementation is the central review risk. For this chapter, challenge the assumption in worked example 2, then ask whether your change preserves the mechanism described above. If you change dtype, layout, ordering, batch size or backend, update the acceptance contract rather than silently reusing the old observation. Explain an unexpected result before trying random configuration changes.</p>
-<p>Keep a small evidence table with columns <strong>claim</strong>, <strong>input</strong>, <strong>expected observation</strong>, <strong>actual observation</strong> and <strong>limit</strong>. For the first claim use <code>List matrix axes</code>. For the final claim use <code>Define compatibility acceptance</code>. An unperformed GPU or cluster experiment remains pending even when the CPU model is correct.</p>
-<h3 id="platform-and-evidence-contract">Platform and evidence contract<a class="heading-anchor" href="#platform-and-evidence-contract" aria-label="Link to this section">#</a></h3>
-<p>The reading worksheet and CPU reference model work through the ordinary Linux Docker classroom on macOS, Linux and Windows using WSL 2. They do not require an NVIDIA GPU. Their results are labeled CPU models or semantic oracles, not simulated hardware performance.</p>
-<p>Real CUDA work needs supported NVIDIA hardware, a compatible host driver and an explicitly prepared GPU runtime. An Apple GPU does not execute CUDA kernels. PyTorch MPS on a supported native Mac, ROCm on supported AMD hardware, or other vendor backends can provide separate accelerator learning routes; they need their own package and operation qualification and are not CUDA evidence. The ordinary Linux Docker classroom does not expose native Mac MPS automatically.</p>
-<p>Do not download packages, models or data by opening this lesson. Do not attach an engine socket, ambient cluster credentials or an arbitrary remote endpoint. A CPU pass, imported package, successful compilation, real GPU result and measured performance are distinct observations. Record the actual backend, data shape/dtype, source revision, versions and pending checks. A saved completion marker records learning progress, not hardware certification.</p>
-<p>GPU Spark is a separate owned external workflow. The ordinary <code>spark-local-scala</code> and <code>spark-local-python</code> profiles are CPU Spark. Keep the GPU plugin disabled or absent for a CPU-only baseline. Per-operator CPU fallback inside a working GPU plugin environment is a different condition from having no compatible GPU. Never mount a host Docker socket or ambient kubeconfig into an ordinary lesson worker.</p>
+<h3 id="common-mistakes-and-self-check">Common mistakes and self-check<a class="heading-anchor" href="#common-mistakes-and-self-check" aria-label="Link to this section">#</a></h3>
+<p>A common mistake is choosing jars by name, for example a plugin built for Scala 2.12 on a Scala 2.13 distribution, which can fail with a NoSuchMethodError before any GPU work. Another is copying a development SNAPSHOT from a documentation example, or assuming the CUDA classifier replaces a compatible host driver. Fix these by checking the published support matrix for the exact release, recording versions and checksums and running a bounded smoke query on the selected host with a CPU rollback ready.</p>
+<p><strong>Misconception:</strong> If the plugin jar loads and the Spark session starts, the installation is compatible. <strong>Correction:</strong> Session startup on the driver proves little about executors. Native libraries and the device are initialized on each executor, where a driver, CUDA variant or CPU architecture mismatch can still fail. Count the installation as compatible only after a bounded smoke query runs operators on the GPU and the executed plan confirms it.</p>
+<p><strong>Evidence limit:</strong> The reference applies an illustrative predicate that rejects a Scala or host-architecture mismatch. It is not a full compatibility probe; driver, GPU architecture, vendor Spark patches and native library initialization can only be confirmed by a smoke run on the selected host.</p>
+<ol>
+<li>Why is a nominal Spark version not enough to establish compatibility?</li>
+<li>What does the CUDA classifier on a plugin jar select?</li>
+<li>Are a local ARM Mac image and an NVIDIA Linux host the same concern?</li>
+</ol>
+<p>Answers: <a href="../solutions/cuda-114_solutions.md.html#self-check-answers">self-check answers</a>.</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
 <ul>
 <li><a href="https://nvidia.github.io/cudf-spark/docs/download.html">cuDF Spark plugin release and compatibility matrix</a></li>
-<li><a href="https://nvidia.github.io/cudf-spark/docs/supported_ops.html">Supported Spark operators and expression types</a></li>
-<li><a href="https://docs.nvidia.com/cudf-spark/latest/tuning-guide.html">GPU Spark tuning guide</a></li>
-<li><a href="https://spark.apache.org/docs/latest/sql-performance-tuning.html">Apache Spark SQL performance tuning</a></li>
 </ul>
-<p>Use the version-matched documentation of your prepared environment. These references describe interfaces and supported boundaries; the chapter&#x27;s synthetic examples and CPU models are original teaching material.</p>
+<p>Full lists: <a href="../../STUDY-GUIDE.md.html#documentation-and-sources">documentation and sources</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning skill for cuda-114: Compatibility is a tested matrix, not a jar name.
 Read courses/cuda/spark/guides/cuda-114.md and courses/cuda/spark/lessons/cuda-114.md.

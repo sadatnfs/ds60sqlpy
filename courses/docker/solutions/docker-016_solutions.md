@@ -1,6 +1,6 @@
 # docker-016: explanatory solutions
 
-Compare after your own attempt or an explicit reveal. These explain the supplied teaching fixtures; they are not engine results. The mechanism is explained in `courses/docker/guides/docker-016.md`.
+These answers explain teaching fixtures, not engine results; the mechanism is in [the guide](../guides/docker-016.md).
 
 ## Exercise 1: Locate the filesystem used by COPY --from.
 
@@ -88,4 +88,4 @@ Compare after your own attempt or an explicit reveal. These explain the supplied
 
 ## Check your transfer
 
-A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.
+The binary is almost certainly dynamically linked, and the message refers to its program interpreter, the C library loader, which does not exist in a `scratch` image. The file is present, but the kernel cannot start it without the loader. Build a static binary, for example with `CGO_ENABLED=0`, or use a final base that provides the C library, then run the final image again. Running `file` on the binary in the build stage should say `statically linked` after the fix. If it already said that, the cause lies elsewhere, such as a wrong path in the entrypoint.

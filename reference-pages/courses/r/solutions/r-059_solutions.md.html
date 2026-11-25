@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/r/solutions/r-059_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="r-059-reference-reasoning">r-059: reference reasoning<a class="heading-anchor" href="#r-059-reference-reasoning" aria-label="Link to this section">#</a></h2>
-<p>Use the <a href="r-059_reference.R.html">complete reference</a> with the guide&#x27;s declared inputs and runtime. Every worked example is also a standalone script.</p>
+<p>Run the <a href="r-059_reference.R.html">complete reference</a> under the <a href="../STUDY-GUIDE.md.html#run-a-chapter">run rules</a>.</p>
 <h3 id="why-the-implementation-has-this-shape">Why the implementation has this shape<a class="heading-anchor" href="#why-the-implementation-has-this-shape" aria-label="Link to this section">#</a></h3>
 <p>The reference strengthens coordinate-set checks by comparing paired x/y keys, so a permutation of y values cannot pass merely because the marginal coordinate sets match. It separately counts marker observations and auxiliary line geometry.</p>
 <p>Only the static baseline and one converted widget are printed. Their payload checks establish the stated supported conversion, while the final visual and interaction contract still requires browser inspection. This is not a blanket compatibility claim for every ggplot extension.</p>
@@ -248,7 +248,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Tempting mistake:</strong> Patching the converted widget by index, such as editing the third entry of its data list. The index depends on how the translator split the layers, so the edit can land on the wrong trace after a change to the ggplot.</p>
 <p><strong>Verify:</strong> A direct plot_ly version with two add_trace calls returns exactly 2 traces from plotly_build.</p>
 <h3 id="what-the-checks-establish">What the checks establish<a class="heading-anchor" href="#what-the-checks-establish" aria-label="Link to this section">#</a></h3>
-<p>The reference makes 4 <code>stopifnot()</code> checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.</p></article>
+<p>The assertions confirm that every translated trace has equal numbers of x and y values, that the four translated pairs equal the original pairs, that adding a mean line yields at least three traces, and that four markers survive translation. A successful conversion call does not prove the legend, tooltip text or colours match the ggplot, which still needs visual review.</p>
+<p>The reference makes 4 <code>stopifnot()</code> checks; see <a href="../STUDY-GUIDE.md.html#what-a-passing-run-proves">what a passing run proves</a>.</p></article>
   </main>
 </body>
 </html>

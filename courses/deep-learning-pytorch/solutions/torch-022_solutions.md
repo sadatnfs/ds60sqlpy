@@ -2,6 +2,8 @@
 
 Open these answers only after attempting Attention, transformer masks and information boundaries yourself. They reuse the guide's literal inputs, starting from Example A, Compute uniform causal mixtures, so a discrepancy points at one step. The executable companion runs the assertions; this page explains why each one tests SDPA, Mask polarity, Prefix invariance. After a pass, choose a new input for exercise 6, Keep inference dropout disabled, without looking.
 
+After comparing, follow the [review steps](../STUDY-GUIDE.md#after-the-solutions).
+
 ## Mechanism review
 
 Attention forms weighted combinations of value vectors using query-key comparisons. A causal decoder restricts each query to current and earlier positions. PyTorch's functional scaled_dot_product_attention uses boolean True for allowed positions, while other attention APIs such as Multihead Attention key_padding_mask use True for ignored keys. Mask polarity belongs to the exact parameter contract, not to the framework name.
@@ -166,6 +168,3 @@ torch.testing.assert_close(again, out, atol=0, rtol=0)
 
 **Verify:** In a fresh process, the exercise checks confirm `again` matches `out` exactly.
 
-## Review after comparison
-
-Repeat exercise 4, Reject an all-masked row, with one changed fixture value and predict the difference before running it. Keep your failing attempt at exercise 5, Translate mask polarity explicitly, beside the repaired result. A missing framework is not a failing assertion. These solutions use only local fixtures.

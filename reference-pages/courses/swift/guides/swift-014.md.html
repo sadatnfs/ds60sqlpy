@@ -206,11 +206,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Computed property:</strong> A value derived on access.</p>
 <p><strong>Observer:</strong> Code invoked around a stored-property change.</p>
 <h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>The Linux Docker classroom compiles the saved pad as <code>main.swift</code> with Swift 6 language checking. An explicit <code>@main</code> type contains <code>static func main() async throws</code>; the fixed compiler uses <code>-parse-as-library -swift-version 6</code>. The examples use the standard library and portable Foundation. <code>precondition</code> makes a violated invariant fail the process. The fixed pad accepts one source file, without arbitrary command arguments, interactive input or dependency installation. SwiftUI, UIKit, Apple simulators and application signing belong to the separately prepared macOS/Xcode project labs, never the Linux pad.</p>
-<p>Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.</p>
+<p>Both structs appear in both examples, so Example A compiles <code>Temperature</code> without using it and Example B does the same with <code>Rectangle</code>. That is harmless. Task 2 adds a perimeter as another computed property; if you write it as a stored <code>let</code> instead, task 4&#x27;s stale-value bug appears as soon as the width changes.</p>
+<p>Compile contract, starter stop and success marker: <a href="../STUDY-GUIDE.md.html#running-a-lesson">running a lesson</a>.</p>
 <h3 id="syntax-anatomy-and-execution-trace">Syntax anatomy and execution trace<a class="heading-anchor" href="#syntax-anatomy-and-execution-trace" aria-label="Link to this section">#</a></h3>
 <p><code>var area: Int { width * height }</code> computes a value. <code>get</code> and <code>set</code> define two-way access; newValue names the assigned value. didSet observes assignments after the new value is stored.</p>
-<p>Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.</p>
+<p>Each example ends with a trace; method: <a href="../STUDY-GUIDE.md.html#tracing-a-program">tracing a program</a>.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="example-a-derive-instead-of-duplicating">Example A: Derive instead of duplicating<a class="heading-anchor" href="#example-a-derive-instead-of-duplicating" aria-label="Link to this section">#</a></h4>
 <p>One source of truth prevents stale duplicated state.</p>
@@ -242,6 +242,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> Area changes with width without a separately updated area field.</p>
+<p><strong>Trace.</strong> <code>rectangle</code> is created with width 3 and height 4. Reading <code>area</code> runs the getter, which multiplies the current stored values and returns 12; nothing is cached. Assigning 5 to <code>width</code> changes one stored property. The next read of <code>area</code> runs the getter again, now computing 5 times 4, and returns 20. Because <code>area</code> has no storage of its own, there is no moment at which it can disagree with the dimensions, which is the single source of truth idea in this lesson.</p>
 <h4 id="example-b-expose-a-conversion-property">Example B: Expose a conversion property<a class="heading-anchor" href="#example-b-expose-a-conversion-property" aria-label="Link to this section">#</a></h4>
 <p>A computed property can expose a convenient representation while retaining one stored unit.</p>
 <pre class="highlighted-code"><code class="language-swift"><span class="syntax-keyword">import</span> <span class="syntax-class">Foundation</span>
@@ -272,6 +273,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The getter and setter translate between temperature scales.</p>
+<p><strong>Trace.</strong> <code>temperature</code> stores <code>celsius</code> 0. Reading <code>fahrenheit</code> runs the getter: 0 times 9 divided by 5 plus 32 gives exactly 32.0. Assigning 212 runs the setter with <code>newValue</code> 212, which computes (212 minus 32) times 5 divided by 9 and stores 100 in <code>celsius</code>. Only Celsius is ever stored. The check compares against 100 with a small tolerance, because a setter that converts through floating-point division may land a rounding error away from the exact value for other inputs.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <ol>
 <li><strong>Predict and explain.</strong> Trace which properties are stored and which are derived.</li>
@@ -291,10 +293,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <ol start="6">
 <li><strong>Transfer and justify.</strong> Choose an explicit method instead of a setter for a state change with validation and failure.</li>
 </ol>
-<p>For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.</p>
+<p>Log each task in the <a href="../STUDY-GUIDE.md.html#recording-exercise-evidence">evidence table</a> before opening the explanation.</p>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
 <p>Expensive computed properties can surprise callers who expect cheap access. Observers can hide cascading side effects. Avoid duplicating state unless there is a measured caching need and invalidation policy.</p>
-<p>A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.</p>
+<p>For task 4, add <code>var storedArea: Int</code> initialized to 12 alongside the computed <code>area</code>. Set <code>width</code> to 5: the computed value becomes 20 while the stored one stays 12, and a check comparing them exposes the bug immediately. For task 5, a Fahrenheit value such as 100 converts to 37.777..., so an exact equality check on the Celsius result would fail there.</p>
+<p>Repair routine: <a href="../STUDY-GUIDE.md.html#building-a-regression-case">building a regression case</a>.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <ol>
 <li>Reproduce Example A (Derive instead of duplicating) before changing anything, and confirm its observation: Area changes with width without a separately updated area field.</li>
@@ -302,9 +305,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>Before opening the explanation, check your task 3 attempt (Build a value model with one stored unit and a documented converted view) against each pitfall listed above, and add one input that would expose the tempting wrong rule.</li>
 </ol>
 <h3 id="self-check-and-next-step">Self-check and next step<a class="heading-anchor" href="#self-check-and-next-step" aria-label="Link to this section">#</a></h3>
-<p>Explain Stored property, Computed property, Observer without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.</p>
+<p>Point to each stored and each computed property in both structs and say how you can tell from the syntax. Explain why <code>rectangle</code> must be declared with <code>var</code> before <code>rectangle.width = 5</code> compiles. Give one state change that should be a throwing method rather than a property setter, and say what the setter could not report.</p>
+<p>Then follow the general <a href="../STUDY-GUIDE.md.html#self-check-routine">self-check routine</a> and save your pad.</p>
 <h3 id="sources-and-execution-boundary">Sources and execution boundary<a class="heading-anchor" href="#sources-and-execution-boundary" aria-label="Link to this section">#</a></h3>
-<p><a href="https://docs.swift.org/swift-book/documentation/the-swift-programming-language/">Official language or framework documentation</a>. The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.</p>
+<p><a href="https://docs.swift.org/swift-book/documentation/the-swift-programming-language/">Documentation</a>: The Properties chapter of the Swift book covers stored properties, computed properties with getters and setters, read-only computed properties and property observers.</p>
+<p>Provenance and limits: <a href="../STUDY-GUIDE.md.html#sources-and-execution-boundary">sources and execution boundary</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for swift-014: Properties, observers and derived state.
 Read courses/swift/guides/swift-014.md and courses/swift/lessons/swift-014.swift. Prerequisites: swift-013.

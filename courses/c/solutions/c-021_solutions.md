@@ -1,6 +1,8 @@
 # c-021: explained solutions
 
-Compare after an attempt or explicit reveal. The complete executable reference, `c-021_solution.c`, implements all six cases, from the "insert at the head" case to the "transfer double-reversal reasoning" case, in one `main.c`.
+`c-021_solution.c` assembles the "insert at the head" case through the "transfer double-reversal reasoning" case in one `main.c`.
+
+Compare only after an attempt: [Compare and transfer](../STUDY-GUIDE.md#compare-and-transfer).
 
 ## Mechanism and assumptions
 
@@ -10,7 +12,7 @@ struct Node contains a value and next pointer. push_front allocates first and ch
 
 ## Exercise 1: Insert at the head: predict an edited check
 
-Copy worked example 1 into a scratch pad and change `CHECK(push_front(&head, 1) && push_front(&head, 2));` to `CHECK(push_front(&head, 2) && push_front(&head, 2));` inside its CHECK. Before running, predict whether the CHECK still holds and explain why; then restore it.
+In worked example 1, change `CHECK(push_front(&head, 1) && push_front(&head, 2));` to `CHECK(push_front(&head, 2) && push_front(&head, 2));`. Predict whether the CHECK still holds and why, then run and restore.
 
 The unchanged code is worked example 1:
 
@@ -21,13 +23,15 @@ CHECK(head->value == 2 && head->next->value == 1);
 destroy_list(&head);
 ```
 
-**Expected:** With `CHECK(push_front(&head, 2) && push_front(&head, 2));` the run stops with `Check failed` at the CHECK on `head->value == 2 && head->next->value == 1`, because the "insert at the head" case no longer shows that the list order is 2 then 1. Restoring `CHECK(push_front(&head, 1) && push_front(&head, 2));` brings that observation back.
+**Expected:** `Check failed`: `CHECK(push_front(&head, 2) && push_front(&head, 2));` is false, although the list order is 2 then 1.
+
+**Verify:** Explain which claim `CHECK(push_front(&head, 2) && push_front(&head, 2));` makes that the state fails; restoring `CHECK(push_front(&head, 1) && push_front(&head, 2));` passes again.
 
 Head insertion reverses arrival order. If FIFO order is required, a tail pointer or different structure is needed.
 
 ## Exercise 2: Count a constructed list: debug a regression
 
-A regression changed one token in worked example 2, the "count a constructed list" case, so one line now reads `for (int i = 0; i <= 3; i++)`. Run the example with that line, use the failing CHECK to find why the length is 3 no longer holds and repair the line without changing the CHECK.
+Worked example 2 now has a line reading `for (int i = 0; i <= 3; i++)`. Repair it so that the length is 3 again.
 
 The unchanged code is worked example 2:
 
@@ -39,7 +43,9 @@ CHECK(list_length(head) == 3);
 destroy_list(&head);
 ```
 
-**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `list_length(head) == 3`. Once the line reads `for (int i = 0; i < 3; i++)` again, the "count a constructed list" case again shows that the length is 3.
+**Expected:** `Check failed` at `list_length(head) == 3` until the line reads `for (int i = 0; i < 3; i++)` again.
+
+**Verify:** Explain how `for (int i = 0; i <= 3; i++)` changes the value `list_length(head) == 3` tests, using your failing and repaired runs.
 
 The traversal stops at NULL and does not assume nodes occupy adjacent addresses.
 
@@ -55,6 +61,8 @@ CHECK(head == NULL);
 ```
 
 **Expected:** Length is zero and head stays NULL.
+
+**Verify:** Keep a CHECK equivalent to `head == NULL`. Control edit: `CHECK(head != NULL);` must fail; then restore it.
 
 An empty structure should have natural operations without a fabricated sentinel payload.
 
@@ -73,6 +81,8 @@ destroy_list(&head);
 
 **Expected:** The order becomes 1, 2, 3.
 
+**Verify:** Keep a CHECK equivalent to `head->value == 1 && head->next->value == 2 && head->next->next->value == 3`. Control edit: `CHECK(push_front(&head, 2) && push_front(&head, 2) && push_front(&head, 3));` must fail; then restore it.
+
 Saving next before rewiring preserves access to the unprocessed suffix.
 
 ## Exercise 5: Reverse a singleton
@@ -88,6 +98,8 @@ destroy_list(&head);
 ```
 
 **Expected:** Its value and terminating link are preserved.
+
+**Verify:** Keep a CHECK equivalent to `head->value == 7 && head->next == NULL`. Control edit: `CHECK(push_front(&head, 8));` must fail; then restore it.
 
 The smallest nonempty structure checks the initial and final link conditions.
 
@@ -106,8 +118,10 @@ destroy_list(&head);
 
 **Expected:** Its original order is restored.
 
+**Verify:** Keep a CHECK equivalent to `head->value == 2 && head->next->value == 1`. Control edit: `CHECK(push_front(&head, 2) && push_front(&head, 2));` must fail; then restore it.
+
 This involution property complements exact order tests. It alone would not reject a no-op implementation, so keep both forms of evidence.
 
 ## After comparison
 
-Add a fresh distinguishing input for the "transfer double-reversal reasoning" case to your own c-021 source. Explain why every access in `push_front` or `list_length` or `destroy_list` stays within a live object and each owned resource is released. An expected node failure belongs in the test contract; undefined behavior does not. Keep diagnostics and sanitizer evidence for the "count a constructed list" case apart from ordinary output: the fixture proves its stated node, head pointer and mutation invariant assumptions, not universal safety.
+Build the list 3, 2, 1 with three `push_front` calls, reverse it once and CHECK the exact order 1, 2, 3 node by node, then the NULL after the last node. A double reversal cannot reject a no-op `reverse_list`; a single reversal checked against exact values can. Explain which pointer each step must save before it rewires `next`.

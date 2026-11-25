@@ -81,4 +81,4 @@ actual Python execution from the separately prepared Rust extension and explain
 which additional observation is required before either becomes a supported
 end-to-end language route.
 
-The [complete Ballista workshop](../../projects/ballista/README.md) provides the maintained files, preparation, lifecycle and exact qualification boundaries for these cases.
+The `clients` action in the [Ballista workshop](../../projects/ballista/README.md) repeats the read through the DataFrame API, selecting, sorting and limiting to three rows, so SQL and DataFrame calls can be compared on one cluster.

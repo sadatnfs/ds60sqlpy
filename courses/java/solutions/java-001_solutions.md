@@ -1,6 +1,6 @@
 # java-001: explanatory solutions
 
-Open after an attempt or an explicit solution reveal. The executable reference runs the six exercise checks together as `Main.java`. The guide contains independent worked examples, while this file explains the choices and failure cases in the complete answer.
+Open this after an attempt; see [using the solutions](../STUDY-GUIDE.md#use-the-solutions).
 
 ## Mechanism review
 
@@ -18,7 +18,7 @@ The class braces enclose methods, and the main-method braces enclose statements.
 
 ## Exercise 1: Print a first result: change one input
 
-Task: Copy Example A into a scratch `Main.java` and change `String message = "Hello, Java";` to `String message = "Hello, Java!";`. Before running it with `java -ea Main`, predict which assertion fails and which value it now sees; then run it and restore the original line.
+Task: Change `String message = "Hello, Java";` to `String message = "Hello, Java!";` in Example A and predict which assertion fails and why.
 
 The variable holds a reference to a String value. println adds a line separator, while the assertion checks the content independently of terminal formatting.
 
@@ -30,13 +30,13 @@ System.out.println(message);
 assert message.equals("Hello, Java");
 ```
 
-**Expected:** The changed run fails with an `AssertionError` from the assertion on `message.equals("Hello, Java")`. Restoring the original line brings back the worked observation: one line Hello, Java.
+**Expected:** The edited run fails with an `AssertionError` from the assertion on `message.equals("Hello, Java")`.
 
-**Verify:** Compare your written prediction with the reported `AssertionError` and its stack-trace line, and name the value that made `message.equals("Hello, Java")` false. After restoring the line, the program completes without an `AssertionError` again.
+**Verify:** Name the value that makes `message.equals("Hello, Java")` false, then restore the line.
 
 ## Exercise 2: Evaluate before printing: diagnose an edited check
 
-Task: A careless edit changed the assertion that Example B adds after Example A so that it reads `assert line.equals("total=6");`. Run Example B with that line, explain why the edited assertion now fails for the same program state, and restore it.
+Task: Example B's new assertion was edited to `assert line.equals("total=6");`. Explain why it fails for unchanged state and restore it.
 
 The numeric addition happens before concatenation because it is assigned first. Mixing strings and numbers in one expression can change which plus operators mean concatenation.
 
@@ -49,9 +49,9 @@ assert total == 5;
 assert line.equals("total=5");
 ```
 
-**Expected:** Before the repair the run fails with an `AssertionError` from the assertion on `line.equals("total=5")`; after it the line reads `assert line.equals("total=5");` again and integer 5 and text total=5.
+**Expected:** The edited run fails with an `AssertionError` from the assertion on `line.equals("total=5")`; the restored assertion passes.
 
-**Verify:** Keep the failing and the repaired runs. Explain why the edited assertion rejects the same program state that `line.equals("total=5")` accepts.
+**Verify:** Explain why the edited assertion rejects the state that `line.equals("total=5")` accepts.
 
 ## Exercise 3: Trace sequential state
 
@@ -68,7 +68,7 @@ assert count == 6;
 
 **Expected:** final count 6.
 
-**Verify:** Keep an assertion equivalent to `count == 6`. As a control, change `count = count + 1;` to `count = count - 1;`: the run must fail with an `AssertionError` from the assertion on `count == 6`. Restore the line before continuing.
+**Verify:** Control: changing `count = count + 1;` to `count = count - 1;` must fail the assertion on `count == 6`.
 
 ## Exercise 4: Verify assertion mode
 
@@ -85,7 +85,7 @@ assert enabled;
 
 **Expected:** assertion-enabled flag true.
 
-**Verify:** Keep an assertion equivalent to `enabled = true`. As a control, change `assert enabled = true;` to `assert enabled = false;` inside it: the run must fail with an `AssertionError`, which shows the assertion can fail. Restore it.
+**Verify:** Control: changing `assert enabled = true;` to `assert enabled = false;` inside the assertion must make it fail.
 
 ## Exercise 5: Separate runtime failure
 
@@ -106,7 +106,7 @@ assert dividedByZero;
 
 **Expected:** ArithmeticException observed; program continues after the catch.
 
-**Verify:** Keep an assertion equivalent to `dividedByZero`. As a control, change `int zero = 0;` to `int zero = 1;`: the run must fail with an `AssertionError` from the assertion on `dividedByZero`. Restore the line before continuing.
+**Verify:** Control: changing `int zero = 0;` to `int zero = 1;` must fail the assertion on `dividedByZero`.
 
 ## Exercise 6: Observe a real compiler diagnostic
 
@@ -147,8 +147,10 @@ try (var files = compiler.getStandardFileManager(diagnostics, null, null)) {
 
 **Expected:** compiler result false and at least one ERROR diagnostic.
 
-**Verify:** Keep an assertion equivalent to `diagnostics.getDiagnostics().stream().anyMatch(d -> d.getKind() == javax.tools.Diagnostic.Kind.ERROR)`. As a control, change `.anyMatch(d -> d.getKind() == javax.tools.Diagnostic.Kind.ERROR);` to `.anyMatch(d -> d.getKind() != javax.tools.Diagnostic.Kind.ERROR);` inside it: the run must fail with an `AssertionError`, which shows the assertion can fail. Restore it.
+**Verify:** Control: changing `.anyMatch(d -> d.getKind() == javax.tools.Diagnostic.Kind.ERROR);` to `.anyMatch(d -> d.getKind() != javax.tools.Diagnostic.Kind.ERROR);` inside the assertion must make it fail.
 
 ## After comparing the answer
 
-Run the complete reference with assertions enabled, then return to your own implementation. Recreate one check with different values and explain its expected result before execution. A compiler error, an expected domain exception and an assertion failure represent different stages and should be reported separately. Preserve ownership boundaries when adapting file, network or concurrency examples. The reference never authorizes access to a shared service or deletion of learner state. Use a fresh tiny fixture when you need to distinguish two interpretations of an API contract.
+Break a different rule in the Exercise 6 source, such as using an undeclared variable, and confirm that the compiler again reports an ERROR diagnostic while no class runs.
+
+Run the complete reference with `java -ea Main` first; the [review routine](../STUDY-GUIDE.md#use-the-solutions) covers the rest.

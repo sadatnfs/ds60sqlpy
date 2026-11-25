@@ -1,10 +1,17 @@
 # cuda-076: Shared memory and collective responsibility
 
-**Route:** CUDA Python and machine learning. **Stage:** intermediate. **Prerequisites:** `cuda-002`, `cuda-075`. Allow several sessions when the hardware experiment is new; the chapter is not a deadline.
+**Route:** CUDA Python and machine learning. **Stage:** intermediate. **Prerequisites:** `cuda-002`, `cuda-075`.
 
-## What you will be able to explain
+Pacing, evidence labels and platform rules: [CUDA study guide](../../STUDY-GUIDE.md).
 
-By the end, you can **choose a sum identity**, **repair early return**, and **design a nonmultiple test** with evidence. Start with the two worked cases, then use the editable CPU model to make the quantities concrete.
+## Learning objectives
+
+- Choose a sum identity.
+- Choose a minimum identity.
+- Trace barrier participants.
+- Repair early return.
+- Separate block and grid scope.
+- Design a nonmultiple test.
 
 ## Mechanism and vocabulary
 
@@ -31,9 +38,13 @@ A four-lane tile reads [2,4,6] and stores [2,4,6,0]. All four lanes synchronize,
 
 Replacing the invalid lane with an early return is unsafe when later code has a block barrier. Keeping that lane active with a neutral value preserves collective participation.
 
-## Portable executable model
+## How to run the CPU model
 
-The **CPU reference model** variant runs this bounded worked example using `python-core`. It uses only the Python standard library, small synthetic values and no network. Its purpose is to expose the arithmetic or contract behind the chapter. The separate reference includes assertions for the stated observations.
+Edit the copy; the [reference](../references/cuda-076_cpu.py) adds assertions.
+
+```sh
+python courses/cuda/python/lessons/cuda-076_cpu.py
+```
 
 ```python
 tile = [2, 4, 6]
@@ -56,77 +67,62 @@ print("CPU cooperative model:", shared, sum(shared))
 | `shared` | `[2, 4, 6, 0]` |
 | `participants` | `[0, 1, 2, 3]` |
 
-Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.
-
 ## Practice and transfer
+
+Record each attempt in the [worksheet](../lessons/cuda-076.md) before opening hints.
 
 ### Exercise 1: Choose a sum identity
 
 **Trap to avoid:** Padding with the value of the last valid element, 6, changes the sum to 18. Such a pad looks harmless because it is in the data range, which is why it passes casual inspection.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 2: Choose a minimum identity
 
 **Trap to avoid:** Padding with 0 is the common mistake carried over from sums. For data `[2, 4, 6]` it reports a minimum of 0, a value not in the input.
-
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 3: Trace barrier participants
 
 **Trap to avoid:** Listing only lanes 0 to 2 because they hold data treats the barrier as a data operation. On hardware, a barrier not reached by all threads is undefined behavior and can hang or corrupt shared memory.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 4: Repair early return
 
 **Trap to avoid:** Moving the early return below the first barrier but above the second still leaves later barriers missing a participant. Every barrier after the return is affected, not only the first.
-
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 5: Separate block and grid scope
 
 **Trap to avoid:** Reading another block's partial from shared memory assumes a grid-wide shared space. The read returns the current block's own data, so the total silently counts one block several times.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 6: Design a nonmultiple test
 
 **Trap to avoid:** Testing only with `n = 4` or `n = 8` makes every block full. Bugs in padding or early returns never execute, so the test passes against broken code.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ## Progressive hints
 
-Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.
+Hint *k* belongs to exercise *k*; open one at a time.
 
-1. Start from worked example 1 and mark the quantities needed for the task "Choose a sum identity".
-2. Change one assumption in worked example 2 while preserving the declared contract: choose a minimum identity.
-3. Trace the CPU program's variables before adding hardware behavior: trace barrier participants.
-4. Draw producers, consumers and the exact operation boundary for the task "Repair early return".
-5. Separate what the small fixture establishes from what the real runtime must show: separate block and grid scope.
-6. Write a counterexample to an overbroad claim before you design a nonmultiple test.
+1. Ask which value leaves a sum unchanged when it is added to a padded lane.
+2. Zero can be a real minimum. Pick a value no real input can reach, or carry a separate valid flag.
+3. Count the lanes in the block, not the input elements, and ask which must arrive at the barrier.
+4. Move the length check from the top of the kernel to the load, so the lane stays active but reads nothing.
+5. Ask whether one block's shared array is visible to a thread in a different block.
+6. Pick a length one larger than the block size and write the expected padded result before running.
 
-## Common mistakes and self-review
+## Common mistakes and self-check
 
-Confusing a correct tiny example with a general implementation is the central review risk. For this chapter, challenge the assumption in worked example 2, then ask whether your change preserves the mechanism described above. If you change dtype, layout, ordering, batch size or backend, update the acceptance contract rather than silently reusing the old observation. Explain an unexpected result before trying random configuration changes.
+The dangerous mistake is letting a tail lane return early before a block barrier. Other lanes then wait at a synchronization point that not every thread reaches, which can hang or produce undefined behavior. Another mistake is padding with a value that is not the identity, such as zero for a minimum. Fix the first by guarding only the data access while every lane still reaches the barrier, and the second by choosing an algorithm-specific identity or a validity flag.
 
-Keep a small evidence table with columns **claim**, **input**, **expected observation**, **actual observation** and **limit**. For the first claim use `Choose a sum identity`. For the final claim use `Design a nonmultiple test`. An unperformed GPU or cluster experiment remains pending even when the CPU model is correct.
+**Evidence limit:** The model lists four participating lanes and a padded sum of 12. It is a sequential trace, so it cannot detect a missing barrier, a shared-memory race or a hang; those only appear when a real block runs on a device.
 
-## Platform and evidence contract
+1. What makes a barrier a collective obligation?
+2. Why is the identity value algorithm-specific?
+3. Can shared memory pass data between two blocks?
 
-The reading worksheet and CPU reference model work through the ordinary Linux Docker classroom on macOS, Linux and Windows using WSL 2. They do not require an NVIDIA GPU. Their results are labeled CPU models or semantic oracles, not simulated hardware performance.
-
-Real CUDA work needs supported NVIDIA hardware, a compatible host driver and an explicitly prepared GPU runtime. An Apple GPU does not execute CUDA kernels. PyTorch MPS on a supported native Mac, ROCm on supported AMD hardware, or other vendor backends can provide separate accelerator learning routes; they need their own package and operation qualification and are not CUDA evidence. The ordinary Linux Docker classroom does not expose native Mac MPS automatically.
-
-Do not download packages, models or data by opening this lesson. Do not attach an engine socket, ambient cluster credentials or an arbitrary remote endpoint. A CPU pass, imported package, successful compilation, real GPU result and measured performance are distinct observations. Record the actual backend, data shape/dtype, source revision, versions and pending checks. A saved completion marker records learning progress, not hardware certification.
+Answers: [self-check answers](../solutions/cuda-076_solutions.md#self-check-answers).
 
 ## Primary references
 
 - [NVIDIA CUDA Python introduction](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/intro-to-cuda-python.html)
-- [Maintained numba-cuda project](https://github.com/NVIDIA/numba-cuda)
 
-Use the version-matched documentation of your prepared environment. These references describe interfaces and supported boundaries; the chapter's synthetic examples and CPU models are original teaching material.
+Full lists: [documentation and sources](../../STUDY-GUIDE.md#documentation-and-sources).
 
 ## Ask an AI tutor about this lesson
 

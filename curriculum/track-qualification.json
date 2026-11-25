@@ -143,8 +143,8 @@
         },
         "R8": {
           "status": "pass",
-          "templated_baseline": 7970,
-          "templated_baseline_source": "Per-track sum of metrics.templated_words in curriculum/coverage-matrix.json at commit b1847ca7e6f36bc851f39daa8e98a96770d371dc, the first commit carrying the metric (Phase 4 closed); Phase 4 recorded only catalog totals (970529 after Phase 3, 835280 after Phase 4), so this stricter per-track baseline is used."
+          "templated_baseline": 1877,
+          "templated_baseline_source": "Per-track sum of metrics.templated_words in curriculum/coverage-matrix.json at commit b1847ca7e6f36bc851f39daa8e98a96770d371dc, the first commit carrying the metric (Phase 4 closed); Phase 4 recorded only catalog totals (970529 after Phase 3, 835280 after Phase 4), so this stricter per-track baseline is used. Lowered from 7970 to 1877 by the Phase 11 lesson-specific prose rewrite (plan 11-07), which replaced repeated scaffold paragraphs with lesson-specific teaching and moved shared operating notes into the track study guide."
         },
         "R9": {
           "status": "pass"
@@ -410,8 +410,8 @@
         },
         "R8": {
           "status": "pass",
-          "templated_baseline": 24148,
-          "templated_baseline_source": "Per-track sum of metrics.templated_words in curriculum/coverage-matrix.json at commit b1847ca7e6f36bc851f39daa8e98a96770d371dc, the first commit carrying the metric (Phase 4 closed); Phase 4 recorded only catalog totals (970529 after Phase 3, 835280 after Phase 4), so this stricter per-track baseline is used."
+          "templated_baseline": 468,
+          "templated_baseline_source": "Per-track sum of metrics.templated_words in curriculum/coverage-matrix.json at commit b1847ca7e6f36bc851f39daa8e98a96770d371dc, the first commit carrying the metric (Phase 4 closed); Phase 4 recorded only catalog totals (970529 after Phase 3, 835280 after Phase 4), so this stricter per-track baseline is used. Lowered from 24148 to 468 by the Phase 11 lesson-specific prose rewrite (plan 11-07), which replaced repeated scaffold paragraphs with lesson-specific teaching and moved shared operating notes into the track study guide."
         },
         "R9": {
           "status": "pass"
@@ -484,8 +484,8 @@
         },
         "R8": {
           "status": "pass",
-          "templated_baseline": 8105,
-          "templated_baseline_source": "Per-track sum of metrics.templated_words in curriculum/coverage-matrix.json at commit b1847ca7e6f36bc851f39daa8e98a96770d371dc, the first commit carrying the metric (Phase 4 closed); Phase 4 recorded only catalog totals (970529 after Phase 3, 835280 after Phase 4), so this stricter per-track baseline is used."
+          "templated_baseline": 0,
+          "templated_baseline_source": "Per-track sum of metrics.templated_words in curriculum/coverage-matrix.json at commit b1847ca7e6f36bc851f39daa8e98a96770d371dc, the first commit carrying the metric (Phase 4 closed); Phase 4 recorded only catalog totals (970529 after Phase 3, 835280 after Phase 4), so this stricter per-track baseline is used. Lowered from 8105 to 0 by the Phase 11 lesson-specific prose rewrite (plan 11-07), which replaced repeated scaffold paragraphs with lesson-specific teaching and moved shared operating notes into the track study guide."
         },
         "R9": {
           "status": "pass"
@@ -549,8 +549,8 @@
         },
         "R8": {
           "status": "pass",
-          "templated_baseline": 26305,
-          "templated_baseline_source": "Per-track sum of metrics.templated_words in curriculum/coverage-matrix.json at commit b1847ca7e6f36bc851f39daa8e98a96770d371dc, the first commit carrying the metric (Phase 4 closed); Phase 4 recorded only catalog totals (970529 after Phase 3, 835280 after Phase 4), so this stricter per-track baseline is used."
+          "templated_baseline": 0,
+          "templated_baseline_source": "Per-track sum of metrics.templated_words in curriculum/coverage-matrix.json at commit b1847ca7e6f36bc851f39daa8e98a96770d371dc, the first commit carrying the metric (Phase 4 closed); Phase 4 recorded only catalog totals (970529 after Phase 3, 835280 after Phase 4), so this stricter per-track baseline is used. Lowered from 26305 to 0 by the Phase 11 lesson-specific prose rewrite (plan 11-07), which replaced repeated scaffold paragraphs with lesson-specific teaching and moved shared operating notes into the track study guide."
         },
         "R9": {
           "status": "pass"
@@ -612,8 +612,8 @@
         },
         "R8": {
           "status": "pass",
-          "templated_baseline": 69931,
-          "templated_baseline_source": "Per-track sum of metrics.templated_words in curriculum/coverage-matrix.json at commit b1847ca7e6f36bc851f39daa8e98a96770d371dc, the first commit carrying the metric (Phase 4 closed); Phase 4 recorded only catalog totals (970529 after Phase 3, 835280 after Phase 4), so this stricter per-track baseline is used."
+          "templated_baseline": 0,
+          "templated_baseline_source": "Per-track sum of metrics.templated_words in curriculum/coverage-matrix.json at commit b1847ca7e6f36bc851f39daa8e98a96770d371dc, the first commit carrying the metric (Phase 4 closed); Phase 4 recorded only catalog totals (970529 after Phase 3, 835280 after Phase 4), so this stricter per-track baseline is used. Lowered from 69931 to 0 by the Phase 11 lesson-specific prose rewrite (plan 11-07), which replaced repeated scaffold paragraphs with lesson-specific teaching and moved shared operating notes into the track study guide."
         },
         "R9": {
           "status": "na",
@@ -890,8 +890,8 @@
         },
         "R8": {
           "status": "pass",
-          "templated_baseline": 26172,
-          "templated_baseline_source": "Per-track sum of metrics.templated_words in curriculum/coverage-matrix.json at commit b1847ca7e6f36bc851f39daa8e98a96770d371dc, the first commit carrying the metric (Phase 4 closed); Phase 4 recorded only catalog totals (970529 after Phase 3, 835280 after Phase 4), so this stricter per-track baseline is used."
+          "templated_baseline": 1657,
+          "templated_baseline_source": "Per-track sum of metrics.templated_words in curriculum/coverage-matrix.json at commit b1847ca7e6f36bc851f39daa8e98a96770d371dc, the first commit carrying the metric (Phase 4 closed); Phase 4 recorded only catalog totals (970529 after Phase 3, 835280 after Phase 4), so this stricter per-track baseline is used. Lowered from 26172 to 1657 by the Phase 11 lesson-specific prose rewrite (plan 11-07), which replaced repeated scaffold paragraphs with lesson-specific teaching and moved shared operating notes into the track study guide."
         },
         "R9": {
           "status": "pass"
@@ -955,8 +955,8 @@
         },
         "R8": {
           "status": "pass",
-          "templated_baseline": 10128,
-          "templated_baseline_source": "Per-track sum of metrics.templated_words in curriculum/coverage-matrix.json at commit b1847ca7e6f36bc851f39daa8e98a96770d371dc, the first commit carrying the metric (Phase 4 closed); Phase 4 recorded only catalog totals (970529 after Phase 3, 835280 after Phase 4), so this stricter per-track baseline is used."
+          "templated_baseline": 0,
+          "templated_baseline_source": "Per-track sum of metrics.templated_words in curriculum/coverage-matrix.json at commit b1847ca7e6f36bc851f39daa8e98a96770d371dc, the first commit carrying the metric (Phase 4 closed); Phase 4 recorded only catalog totals (970529 after Phase 3, 835280 after Phase 4), so this stricter per-track baseline is used. Lowered from 10128 to 0 by the Phase 11 lesson-specific prose rewrite (plan 11-07), which replaced repeated scaffold paragraphs with lesson-specific teaching and moved shared operating notes into the track study guide."
         },
         "R9": {
           "status": "pass"
@@ -1029,8 +1029,8 @@
         },
         "R8": {
           "status": "pass",
-          "templated_baseline": 19980,
-          "templated_baseline_source": "Per-track sum of metrics.templated_words in curriculum/coverage-matrix.json at commit b1847ca7e6f36bc851f39daa8e98a96770d371dc, the first commit carrying the metric (Phase 4 closed); Phase 4 recorded only catalog totals (970529 after Phase 3, 835280 after Phase 4), so this stricter per-track baseline is used."
+          "templated_baseline": 3645,
+          "templated_baseline_source": "Per-track sum of metrics.templated_words in curriculum/coverage-matrix.json at commit b1847ca7e6f36bc851f39daa8e98a96770d371dc, the first commit carrying the metric (Phase 4 closed); Phase 4 recorded only catalog totals (970529 after Phase 3, 835280 after Phase 4), so this stricter per-track baseline is used. Lowered from 19980 to 3645 by the Phase 11 lesson-specific prose rewrite (plan 11-07), which replaced repeated scaffold paragraphs with lesson-specific teaching and moved shared operating notes into the track study guide."
         },
         "R9": {
           "status": "pass"
@@ -1108,8 +1108,8 @@
         },
         "R8": {
           "status": "pass",
-          "templated_baseline": 17628,
-          "templated_baseline_source": "Per-track sum of metrics.templated_words in curriculum/coverage-matrix.json at commit b1847ca7e6f36bc851f39daa8e98a96770d371dc, the first commit carrying the metric (Phase 4 closed); Phase 4 recorded only catalog totals (970529 after Phase 3, 835280 after Phase 4), so this stricter per-track baseline is used."
+          "templated_baseline": 581,
+          "templated_baseline_source": "Per-track sum of metrics.templated_words in curriculum/coverage-matrix.json at commit b1847ca7e6f36bc851f39daa8e98a96770d371dc, the first commit carrying the metric (Phase 4 closed); Phase 4 recorded only catalog totals (970529 after Phase 3, 835280 after Phase 4), so this stricter per-track baseline is used. Lowered from 17628 to 581 by the Phase 11 lesson-specific prose rewrite (plan 11-07), which replaced repeated scaffold paragraphs with lesson-specific teaching and moved shared operating notes into the track study guide."
         },
         "R9": {
           "status": "pass"
@@ -1171,8 +1171,8 @@
         },
         "R8": {
           "status": "pass",
-          "templated_baseline": 15734,
-          "templated_baseline_source": "Per-track sum of metrics.templated_words in curriculum/coverage-matrix.json at commit b1847ca7e6f36bc851f39daa8e98a96770d371dc, the first commit carrying the metric (Phase 4 closed); Phase 4 recorded only catalog totals (970529 after Phase 3, 835280 after Phase 4), so this stricter per-track baseline is used."
+          "templated_baseline": 0,
+          "templated_baseline_source": "Per-track sum of metrics.templated_words in curriculum/coverage-matrix.json at commit b1847ca7e6f36bc851f39daa8e98a96770d371dc, the first commit carrying the metric (Phase 4 closed); Phase 4 recorded only catalog totals (970529 after Phase 3, 835280 after Phase 4), so this stricter per-track baseline is used. Lowered from 15734 to 0 by the Phase 11 lesson-specific prose rewrite (plan 11-07), which replaced repeated scaffold paragraphs with lesson-specific teaching and moved shared operating notes into the track study guide."
         },
         "R9": {
           "status": "na",
@@ -1237,8 +1237,8 @@
         },
         "R8": {
           "status": "pass",
-          "templated_baseline": 61712,
-          "templated_baseline_source": "Per-track sum of metrics.templated_words in curriculum/coverage-matrix.json at commit b1847ca7e6f36bc851f39daa8e98a96770d371dc, the first commit carrying the metric (Phase 4 closed); Phase 4 recorded only catalog totals (970529 after Phase 3, 835280 after Phase 4), so this stricter per-track baseline is used."
+          "templated_baseline": 0,
+          "templated_baseline_source": "Per-track sum of metrics.templated_words in curriculum/coverage-matrix.json at commit b1847ca7e6f36bc851f39daa8e98a96770d371dc, the first commit carrying the metric (Phase 4 closed); Phase 4 recorded only catalog totals (970529 after Phase 3, 835280 after Phase 4), so this stricter per-track baseline is used. Lowered from 61712 to 0 by the Phase 11 lesson-specific prose rewrite (plan 11-07), which replaced repeated scaffold paragraphs with lesson-specific teaching and moved shared operating notes into the track study guide."
         },
         "R9": {
           "status": "pass"
@@ -1302,8 +1302,8 @@
         },
         "R8": {
           "status": "pass",
-          "templated_baseline": 54115,
-          "templated_baseline_source": "Per-track sum of metrics.templated_words in curriculum/coverage-matrix.json at commit b1847ca7e6f36bc851f39daa8e98a96770d371dc, the first commit carrying the metric (Phase 4 closed); Phase 4 recorded only catalog totals (970529 after Phase 3, 835280 after Phase 4), so this stricter per-track baseline is used. Lowered from 54234 to 54232 by the comment and guide prose spacing correction that restored spaces stripped by an old math normalizer; no templated content was added. Lowered from 54232 to 54115 by the Java guide and lesson prose correction that wrapped code identifiers in code spans; no templated content was added."
+          "templated_baseline": 6016,
+          "templated_baseline_source": "Per-track sum of metrics.templated_words in curriculum/coverage-matrix.json at commit b1847ca7e6f36bc851f39daa8e98a96770d371dc, the first commit carrying the metric (Phase 4 closed); Phase 4 recorded only catalog totals (970529 after Phase 3, 835280 after Phase 4), so this stricter per-track baseline is used. Lowered from 54234 to 54232 by the comment and guide prose spacing correction that restored spaces stripped by an old math normalizer; no templated content was added. Lowered from 54232 to 54115 by the Java guide and lesson prose correction that wrapped code identifiers in code spans; no templated content was added. Lowered from 54115 to 6016 by the Phase 11 lesson-specific prose rewrite (plan 11-07), which replaced repeated scaffold paragraphs with lesson-specific teaching and moved shared operating notes into the track study guide."
         },
         "R9": {
           "status": "pass"
@@ -1389,8 +1389,8 @@
         },
         "R8": {
           "status": "pass",
-          "templated_baseline": 69429,
-          "templated_baseline_source": "Per-track sum of metrics.templated_words in curriculum/coverage-matrix.json at commit b1847ca7e6f36bc851f39daa8e98a96770d371dc, the first commit carrying the metric (Phase 4 closed); Phase 4 recorded only catalog totals (970529 after Phase 3, 835280 after Phase 4), so this stricter per-track baseline is used."
+          "templated_baseline": 4277,
+          "templated_baseline_source": "Per-track sum of metrics.templated_words in curriculum/coverage-matrix.json at commit b1847ca7e6f36bc851f39daa8e98a96770d371dc, the first commit carrying the metric (Phase 4 closed); Phase 4 recorded only catalog totals (970529 after Phase 3, 835280 after Phase 4), so this stricter per-track baseline is used. Lowered from 69429 to 4277 by the Phase 11 lesson-specific prose rewrite (plan 11-07), which replaced repeated scaffold paragraphs with lesson-specific teaching and moved shared operating notes into the track study guide."
         },
         "R9": {
           "status": "pass"
@@ -1599,8 +1599,8 @@
         },
         "R8": {
           "status": "pass",
-          "templated_baseline": 31598,
-          "templated_baseline_source": "Per-track sum of metrics.templated_words in curriculum/coverage-matrix.json at commit b1847ca7e6f36bc851f39daa8e98a96770d371dc, the first commit carrying the metric (Phase 4 closed); Phase 4 recorded only catalog totals (970529 after Phase 3, 835280 after Phase 4), so this stricter per-track baseline is used."
+          "templated_baseline": 258,
+          "templated_baseline_source": "Per-track sum of metrics.templated_words in curriculum/coverage-matrix.json at commit b1847ca7e6f36bc851f39daa8e98a96770d371dc, the first commit carrying the metric (Phase 4 closed); Phase 4 recorded only catalog totals (970529 after Phase 3, 835280 after Phase 4), so this stricter per-track baseline is used. Lowered from 31598 to 258 by the Phase 11 lesson-specific prose rewrite (plan 11-07), which replaced repeated scaffold paragraphs with lesson-specific teaching and moved shared operating notes into the track study guide."
         },
         "R9": {
           "status": "na",
@@ -2081,8 +2081,8 @@
         },
         "R8": {
           "status": "pass",
-          "templated_baseline": 57268,
-          "templated_baseline_source": "Per-track sum of metrics.templated_words in curriculum/coverage-matrix.json at commit b1847ca7e6f36bc851f39daa8e98a96770d371dc, the first commit carrying the metric (Phase 4 closed); Phase 4 recorded only catalog totals (970529 after Phase 3, 835280 after Phase 4), so this stricter per-track baseline is used."
+          "templated_baseline": 9581,
+          "templated_baseline_source": "Per-track sum of metrics.templated_words in curriculum/coverage-matrix.json at commit b1847ca7e6f36bc851f39daa8e98a96770d371dc, the first commit carrying the metric (Phase 4 closed); Phase 4 recorded only catalog totals (970529 after Phase 3, 835280 after Phase 4), so this stricter per-track baseline is used. Lowered from 57268 to 9581 by the Phase 11 lesson-specific prose rewrite (plan 11-07), which replaced repeated scaffold paragraphs with lesson-specific teaching and moved shared operating notes into the track study guide."
         },
         "R9": {
           "status": "pass"
@@ -2222,8 +2222,8 @@
         },
         "R8": {
           "status": "pass",
-          "templated_baseline": 11266,
-          "templated_baseline_source": "Per-track sum of metrics.templated_words in curriculum/coverage-matrix.json at commit b1847ca7e6f36bc851f39daa8e98a96770d371dc, the first commit carrying the metric (Phase 4 closed); Phase 4 recorded only catalog totals (970529 after Phase 3, 835280 after Phase 4), so this stricter per-track baseline is used."
+          "templated_baseline": 99,
+          "templated_baseline_source": "Per-track sum of metrics.templated_words in curriculum/coverage-matrix.json at commit b1847ca7e6f36bc851f39daa8e98a96770d371dc, the first commit carrying the metric (Phase 4 closed); Phase 4 recorded only catalog totals (970529 after Phase 3, 835280 after Phase 4), so this stricter per-track baseline is used. Lowered from 11266 to 99 by the Phase 11 lesson-specific prose rewrite (plan 11-07), which replaced repeated scaffold paragraphs with lesson-specific teaching and moved shared operating notes into the track study guide."
         },
         "R9": {
           "status": "pass"
@@ -2287,8 +2287,8 @@
         },
         "R8": {
           "status": "pass",
-          "templated_baseline": 27935,
-          "templated_baseline_source": "Per-track sum of metrics.templated_words in curriculum/coverage-matrix.json at commit b1847ca7e6f36bc851f39daa8e98a96770d371dc, the first commit carrying the metric (Phase 4 closed); Phase 4 recorded only catalog totals (970529 after Phase 3, 835280 after Phase 4), so this stricter per-track baseline is used."
+          "templated_baseline": 71,
+          "templated_baseline_source": "Per-track sum of metrics.templated_words in curriculum/coverage-matrix.json at commit b1847ca7e6f36bc851f39daa8e98a96770d371dc, the first commit carrying the metric (Phase 4 closed); Phase 4 recorded only catalog totals (970529 after Phase 3, 835280 after Phase 4), so this stricter per-track baseline is used. Lowered from 27935 to 71 by the Phase 11 lesson-specific prose rewrite (plan 11-07), which replaced repeated scaffold paragraphs with lesson-specific teaching and moved shared operating notes into the track study guide."
         },
         "R9": {
           "status": "pass"
@@ -2371,8 +2371,8 @@
         },
         "R8": {
           "status": "pass",
-          "templated_baseline": 13549,
-          "templated_baseline_source": "Per-track sum of metrics.templated_words in curriculum/coverage-matrix.json at commit b1847ca7e6f36bc851f39daa8e98a96770d371dc, the first commit carrying the metric (Phase 4 closed); Phase 4 recorded only catalog totals (970529 after Phase 3, 835280 after Phase 4), so this stricter per-track baseline is used."
+          "templated_baseline": 183,
+          "templated_baseline_source": "Per-track sum of metrics.templated_words in curriculum/coverage-matrix.json at commit b1847ca7e6f36bc851f39daa8e98a96770d371dc, the first commit carrying the metric (Phase 4 closed); Phase 4 recorded only catalog totals (970529 after Phase 3, 835280 after Phase 4), so this stricter per-track baseline is used. Lowered from 13549 to 183 by the Phase 11 lesson-specific prose rewrite (plan 11-07), which replaced repeated scaffold paragraphs with lesson-specific teaching and moved shared operating notes into the track study guide."
         },
         "R9": {
           "status": "pass"
@@ -2495,8 +2495,8 @@
         },
         "R8": {
           "status": "pass",
-          "templated_baseline": 194391,
-          "templated_baseline_source": "Per-track sum of metrics.templated_words in curriculum/coverage-matrix.json at commit b1847ca7e6f36bc851f39daa8e98a96770d371dc, the first commit carrying the metric (Phase 4 closed); Phase 4 recorded only catalog totals (970529 after Phase 3, 835280 after Phase 4), so this stricter per-track baseline is used."
+          "templated_baseline": 188,
+          "templated_baseline_source": "Per-track sum of metrics.templated_words in curriculum/coverage-matrix.json at commit b1847ca7e6f36bc851f39daa8e98a96770d371dc, the first commit carrying the metric (Phase 4 closed); Phase 4 recorded only catalog totals (970529 after Phase 3, 835280 after Phase 4), so this stricter per-track baseline is used. Lowered from 194391 to 188 by the Phase 11 lesson-specific prose rewrite (plan 11-07), which replaced repeated scaffold paragraphs with lesson-specific teaching and moved shared operating notes into the track study guide."
         },
         "R9": {
           "status": "pass"
@@ -2632,8 +2632,8 @@
         },
         "R8": {
           "status": "pass",
-          "templated_baseline": 27932,
-          "templated_baseline_source": "Per-track sum of metrics.templated_words in curriculum/coverage-matrix.json at commit b1847ca7e6f36bc851f39daa8e98a96770d371dc, the first commit carrying the metric (Phase 4 closed); Phase 4 recorded only catalog totals (970529 after Phase 3, 835280 after Phase 4), so this stricter per-track baseline is used."
+          "templated_baseline": 0,
+          "templated_baseline_source": "Per-track sum of metrics.templated_words in curriculum/coverage-matrix.json at commit b1847ca7e6f36bc851f39daa8e98a96770d371dc, the first commit carrying the metric (Phase 4 closed); Phase 4 recorded only catalog totals (970529 after Phase 3, 835280 after Phase 4), so this stricter per-track baseline is used. Lowered from 27932 to 0 by the Phase 11 lesson-specific prose rewrite (plan 11-07), which replaced repeated scaffold paragraphs with lesson-specific teaching and moved shared operating notes into the track study guide."
         },
         "R9": {
           "status": "pass"
@@ -2781,8 +2781,8 @@
         },
         "R8": {
           "status": "pass",
-          "templated_baseline": 17765,
-          "templated_baseline_source": "Per-track sum of metrics.templated_words in curriculum/coverage-matrix.json at commit b1847ca7e6f36bc851f39daa8e98a96770d371dc, the first commit carrying the metric (Phase 4 closed); Phase 4 recorded only catalog totals (970529 after Phase 3, 835280 after Phase 4), so this stricter per-track baseline is used."
+          "templated_baseline": 136,
+          "templated_baseline_source": "Per-track sum of metrics.templated_words in curriculum/coverage-matrix.json at commit b1847ca7e6f36bc851f39daa8e98a96770d371dc, the first commit carrying the metric (Phase 4 closed); Phase 4 recorded only catalog totals (970529 after Phase 3, 835280 after Phase 4), so this stricter per-track baseline is used. Lowered from 17765 to 136 by the Phase 11 lesson-specific prose rewrite (plan 11-07), which replaced repeated scaffold paragraphs with lesson-specific teaching and moved shared operating notes into the track study guide."
         },
         "R9": {
           "status": "pass"

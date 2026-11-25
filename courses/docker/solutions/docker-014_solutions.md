@@ -1,6 +1,6 @@
 # docker-014: explanatory solutions
 
-Compare after your own attempt or an explicit reveal. These explain the supplied teaching fixtures; they are not engine results. The mechanism is explained in `courses/docker/guides/docker-014.md`.
+These answers explain teaching fixtures, not engine results; the mechanism is in [the guide](../guides/docker-014.md).
 
 ## Exercise 1: Predict every resource the project creates.
 
@@ -88,4 +88,4 @@ Compare after your own attempt or an explicit reveal. These explain the supplied
 
 ## Check your transfer
 
-A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.
+Check the project state with `docker compose -p ds60-docker-study ps`. Without `--wait`, `up -d` returns once the container has started, which can be before the server is listening, so the health column may still say `starting`. Retry after it reports `healthy`; the expected result is the configured JSON. A real fault is indicated if the service is healthy and the request is still refused: then `docker compose port app 8080` shows whether the beginner is using a different host port, for example from a rehearsal copy on 18081.

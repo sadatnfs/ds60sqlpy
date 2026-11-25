@@ -100,9 +100,6 @@ A small transport seam exposes every attempt, allowing policy tests to prove tim
 
 ### Verification micro-example
 
-Run this small, deterministic case before adapting the reference to a
-larger system. It gives the reasoning above an executable anchor:
-
 ```python
 def may_retry(method, status, *, idempotency_key=None):
     transient = status in {429, 502, 503, 504}
@@ -123,31 +120,19 @@ assert decisions == [True, False, True, False]
 
 **Expected observation:** A transient status is insufficient for an unsafe mutation without a stable idempotency identity.
 
-The reference implementation is one defensible contract, not a license
-to copy internal steps into every system. Preserve the observable
-guarantees and repeat the failure tests when adapting it.
-
 <!-- END PROFESSIONAL PYTHON CONCEPT ENRICHMENT -->
 
 ## Exercise-by-exercise reference
 
-Use this map after an honest attempt. The executable implementation remains
-[`py_svc_01_reliable_http_clients_solution.py`](py_svc_01_reliable_http_clients_solution.py); this section explains the
-contract, evidence, alternatives, and edge cases behind every numbered task.
+The runnable [`py_svc_01_reliable_http_clients_solution.py`](py_svc_01_reliable_http_clients_solution.py) implements every task below.
+
+**Principle behind every task:** Reliable clients separate transport mechanism from bounded retry, replay, identity, pagination, configuration, and diagnostic policy.
+
+**Trap behind every task:** Retrying because an error looks transient can duplicate side effects, exceed a caller deadline, leak credentials, or turn a small outage into a retry storm.
 
 ### Exercise 1: classify status
 
 **Prompt recap:** Implement `classify_status`. Treat 2xx as success and 408/425/429/500/502/503/504 as retryable. Other valid statuses are permanent for this course policy. Reject impossible values. Classification is configurable in real systems. For example, a particular 409 may be retryable only when the API contract says so.
-
-**Reference reasoning:** Reliable clients separate transport mechanism from bounded retry, replay, identity, pagination, configuration, and diagnostic policy. The executable module and
-the focused discussion earlier in this file implement this original
-exercise. Verify every acceptance condition from the prompt with a
-normal case, a boundary case, and the documented failure behavior.
-
-**Common trap:** Retrying because an error looks transient can duplicate side effects, exceed a caller deadline, leak credentials, or turn a small outage into a retry storm.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
 
 **Verify:** classify status; table-test classify_status for representative 2xx success, retryable 429/503, permanent 400/401/403, contract-specific 409, and impossible <100 or >599 values; assert the exact enum/result or ValueError.
 
@@ -155,31 +140,11 @@ and which input would make the policy reject or choose a different path.
 
 **Prompt recap:** Implement `method_can_retry`: - GET, HEAD, PUT, DELETE, and OPTIONS are replayable by HTTP semantics. - POST and PATCH require a non-empty idempotency key in this lesson. An idempotency header helps only if the server documents and enforces it. Never invent safety solely on the client side.
 
-**Reference reasoning:** Reliable clients separate transport mechanism from bounded retry, replay, identity, pagination, configuration, and diagnostic policy. The executable module and
-the focused discussion earlier in this file implement this original
-exercise. Verify every acceptance condition from the prompt with a
-normal case, a boundary case, and the documented failure behavior.
-
-**Common trap:** Retrying because an error looks transient can duplicate side effects, exceed a caller deadline, leak credentials, or turn a small outage into a retry storm.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
-
 **Verify:** authorize replay; implement method can retry: - GET, HEAD, PUT, DELETE, and OPTIONS are replayable by HTTP semantics; pOST and PATCH require a non-empty idempotency key in this lesson; an idempotency header helps only if the server documents and enforces it.
 
 ### Exercise 3: add bounded backoff
 
 **Prompt recap:** For one-based failed attempt `n`, start with `base_delay * 2 ** (n - 1) + base_delay * jitter_fraction`, then cap the result. Inject jitter and sleep so tests record delays without waiting. For 429 with numeric `Retry-After`, honor at least the server value without exceeding policy.
-
-**Reference reasoning:** Reliable clients separate transport mechanism from bounded retry, replay, identity, pagination, configuration, and diagnostic policy. The executable module and
-the focused discussion earlier in this file implement this original
-exercise. Verify every acceptance condition from the prompt with a
-normal case, a boundary case, and the documented failure behavior.
-
-**Common trap:** Retrying because an error looks transient can duplicate side effects, exceed a caller deadline, leak credentials, or turn a small outage into a retry storm.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
 
 **Verify:** add bounded backoff; with injected jitter/sleep, assert failed attempt n uses capped base_delay * 2**(n-1) plus the declared jitter; numeric Retry-After is honored up to the cap and tests record delays without sleeping.
 
@@ -187,31 +152,11 @@ and which input would make the policy reject or choose a different path.
 
 **Prompt recap:** Generate one correlation ID before the attempt loop. Generate or accept one idempotency key per logical mutation. Assert every scripted attempt sees the same values. Do not create a new idempotency key inside a retry loop; the server would see each replay as a new operation.
 
-**Reference reasoning:** Reliable clients separate transport mechanism from bounded retry, replay, identity, pagination, configuration, and diagnostic policy. The executable module and
-the focused discussion earlier in this file implement this original
-exercise. Verify every acceptance condition from the prompt with a
-normal case, a boundary case, and the documented failure behavior.
-
-**Common trap:** Retrying because an error looks transient can duplicate side effects, exceed a caller deadline, leak credentials, or turn a small outage into a retry storm.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
-
 **Verify:** keep identities stable; generate one correlation ID before the attempt loop; generate or accept one idempotency key per logical mutation; assert every scripted attempt sees the same values.
 
 ### Exercise 5: paginate defensively
 
 **Prompt recap:** Collect `items` until `next_cursor` is null. Require a list of objects, reject blank cursors, remember seen cursors, and enforce a maximum page count. Treat the cursor as opaque. URL-encode it rather than parsing or concatenating it manually.
-
-**Reference reasoning:** Reliable clients separate transport mechanism from bounded retry, replay, identity, pagination, configuration, and diagnostic policy. The executable module and
-the focused discussion earlier in this file implement this original
-exercise. Verify every acceptance condition from the prompt with a
-normal case, a boundary case, and the documented failure behavior.
-
-**Common trap:** Retrying because an error looks transient can duplicate side effects, exceed a caller deadline, leak credentials, or turn a small outage into a retry storm.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
 
 **Verify:** paginate defensively; collect items until next cursor is null; require a list of objects, reject blank cursors, remember seen cursors, and enforce a maximum page count; treat the cursor as opaque.
 
@@ -219,31 +164,11 @@ and which input would make the policy reject or choose a different path.
 
 **Prompt recap:** Read `DS60_API_TOKEN`, `DS60_API_BASE_URL`, and a numeric timeout from an injected environment mapping. Make the token field `repr=False`. Implement case-insensitive redaction for authorization, cookies, proxy authorization, and API-key headers. Redact common query credential keys before logging URLs. Do not log bodies by default.
 
-**Reference reasoning:** Reliable clients separate transport mechanism from bounded retry, replay, identity, pagination, configuration, and diagnostic policy. The executable module and
-the focused discussion earlier in this file implement this original
-exercise. Verify every acceptance condition from the prompt with a
-normal case, a boundary case, and the documented failure behavior.
-
-**Common trap:** Retrying because an error looks transient can duplicate side effects, exceed a caller deadline, leak credentials, or turn a small outage into a retry storm.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
-
 **Verify:** configure and redact auth; read DS60 API TOKEN, DS60 API BASE URL, and a numeric timeout from an injected environment mapping; make the token field repr=False; implement case-insensitive redaction for authorization, cookies, proxy authorization, and API-key headers.
 
 ### Exercise 7: prove policy with scripts
 
 **Prompt recap:** Create deterministic scripts for: 1. 503 then 200 for GET, 2. 400 for GET, 3. 503 for POST without a key, 4. 503 then 200 for POST with a key, 5. 429 with `Retry-After`, 6. three transport timeouts, 7. two valid pages, and 8. a repeated cursor. Assert request count, delays, identities, timeout propagation, returned items, and redacted logs.
-
-**Reference reasoning:** Reliable clients separate transport mechanism from bounded retry, replay, identity, pagination, configuration, and diagnostic policy. The executable module and
-the focused discussion earlier in this file implement this original
-exercise. Verify every acceptance condition from the prompt with a
-normal case, a boundary case, and the documented failure behavior.
-
-**Common trap:** Retrying because an error looks transient can duplicate side effects, exceed a caller deadline, leak credentials, or turn a small outage into a retry storm.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
 
 **Verify:** prove policy with scripts; run scripted transports for 503→200 GET, permanent 400 GET, unsafe POST without key, retryable POST with stable key, 429 Retry-After, three timeouts, two pages, and repeated cursor; assert exact attempts/pages/final outcomes.
 
@@ -262,11 +187,6 @@ The final error should preserve attempts, correlation ID, and whether the
 deadline or retry count ended the request. Wall-clock time is unsuitable
 because clock adjustment can move it backward.
 
-**Common trap:** Retrying because an error looks transient can duplicate side effects, exceed a caller deadline, leak credentials, or turn a small outage into a retry storm.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
-
 **Verify:** allocate an end-to-end timeout budget; given a 2-second caller deadline, allocate connect, read, pool, retry sleep, and parsing budgets across at most three attempts; reject a retry when the remaining budget cannot support another useful attempt.
 
 ### Exercise 9: support Retry-After dates safely
@@ -283,11 +203,6 @@ policy and caller deadline. A past date contributes zero.
 Malformed guidance should be recorded safely and ignored, not crash the client
 or produce an unbounded sleep. Tests use fixed clocks and recorded sleep; they
 never wait in real time.
-
-**Common trap:** Retrying because an error looks transient can duplicate side effects, exceed a caller deadline, leak credentials, or turn a small outage into a retry storm.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
 
 **Verify:** support Retry-After dates safely; extend policy reasoning from numeric Retry-After seconds to an HTTP-date; inject wall and monotonic clocks, handle a past date, malformed text, clock skew, and the local delay cap.
 
@@ -306,11 +221,6 @@ Expose state transitions as low-cardinality metrics/events. Do not count local
 validation or caller-cancellation errors as dependency health unless the
 contract explicitly says so.
 
-**Common trap:** Retrying because an error looks transient can duplicate side effects, exceed a caller deadline, leak credentials, or turn a small outage into a retry storm.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
-
 **Verify:** model a circuit breaker; design closed, open, and half-open states around the existing retrying client; specify counted failures, threshold, cooldown, one probe, success reset, and concurrency ownership.
 
 ### Exercise 11: bound concurrent requests
@@ -327,11 +237,6 @@ transport call, not during unrelated parsing or caller work.
 A bulkhead limits one process; distributed request pressure requires an
 upstream/shared policy. Avoid unbounded queues that merely move the overload
 into memory and latency.
-
-**Common trap:** Retrying because an error looks transient can duplicate side effects, exceed a caller deadline, leak credentials, or turn a small outage into a retry storm.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
 
 **Verify:** bound concurrent requests; add a client-side bulkhead that caps active transport calls and defines whether excess work waits with a deadline or fails immediately; prove permits release on success, exception, timeout, and cancellation.
 
@@ -350,11 +255,6 @@ Reject oversized or decompression-expanded content before it exhausts memory.
 Never retry after an unsafe partial side effect merely because stream parsing
 failed.
 
-**Common trap:** Retrying because an error looks transient can duplicate side effects, exceed a caller deadline, leak credentials, or turn a small outage into a retry storm.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
-
 **Verify:** close streaming responses; define a streaming-response protocol with explicit close and cancellation semantics; test partial consumption, parse failure, caller cancellation, and a body larger than the configured byte limit.
 
 ### Exercise 13: inject a credential provider
@@ -370,11 +270,6 @@ safe. Keep token values out of dataclass repr, errors, and logs.
 
 Concurrent expired requests should share one refresh where practical.
 Authentication failure is not a reason for unbounded general retries.
-
-**Common trap:** Retrying because an error looks transient can duplicate side effects, exceed a caller deadline, leak credentials, or turn a small outage into a retry storm.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
 
 **Verify:** inject a credential provider; replace a static token field with a credential-provider protocol that can refresh once after a documented authentication challenge; preserve redaction and prevent refresh loops.
 
@@ -392,10 +287,5 @@ shape before using fields.
 Use only local fake transports and placeholder credentials. A contract suite
 proves client policy independent of any particular HTTP library adapter; each
 real adapter still needs a small local integration test.
-
-**Common trap:** Retrying because an error looks transient can duplicate side effects, exceed a caller deadline, leak credentials, or turn a small outage into a retry storm.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
 
 **Verify:** build an adversarial transport contract suite; extend scripted tests with redirect loops, malformed JSON, wrong content type, repeated/blank cursors, oversized bodies, connection reset after send, and credentials embedded in mixed-case headers or query strings.

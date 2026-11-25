@@ -196,7 +196,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <article class="document"><h2 id="r-048-censoring-risk-sets-and-survival-models">r-048: Censoring, risk sets and survival models<a class="heading-anchor" href="#r-048-censoring-risk-sets-and-survival-models" aria-label="Link to this section">#</a></h2>
 <p><strong>Level:</strong> advanced. <strong>Direct prerequisites:</strong> <code>r-043</code></p>
 <h3 id="run-and-retain-your-work">Run and retain your work<a class="heading-anchor" href="#run-and-retain-your-work" aria-label="Link to this section">#</a></h3>
-<p>Open <code>r-048</code> in <code>/classroom</code> and use the prepared <code>r-statistics</code> profile. Each Run evaluates one <code>main.R</code> script in a fresh offline R process, so define every input in the script; an earlier Run leaves no variables behind. Work in the <a href="../lessons/r-048.R.html">starter</a>. The <a href="../solutions/r-048_reference.R.html">complete reference</a> ends by printing <code>r-048 reference checks passed</code>, and the <a href="../solutions/r-048_solutions.md.html">explained answers</a> are there for deliberate comparison after your own attempt. This chapter prints values only; when a chapter draws figures, the classroom keeps at most two figures per run. The <a href="../README.md.html">course overview</a> describes saved work, figure capture and the prepared package versions.</p>
+<p>The starter holds four subjects with times 1 to 4 and event indicators 1, 0, 1 and 1, so the subject at time 2 is censored. Run it and compute the Kaplan-Meier steps by hand: 0.75 after time 1, unchanged at time 2, 0.375 after time 3 when two remain at risk, and 0 after time 4. Validate the event column before creating <code>Surv()</code>.</p>
+<p>Work in the <a href="../lessons/r-048.R.html">starter</a> under the <a href="../STUDY-GUIDE.md.html#run-a-chapter">run rules</a>.</p>
+<p>The <a href="../solutions/r-048_reference.R.html">complete reference</a> ends by printing <code>r-048 reference checks passed</code>.</p>
 <h3 id="outcome-and-mechanism">Outcome and mechanism<a class="heading-anchor" href="#outcome-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Construct survival outcomes and inspect Kaplan-Meier and Cox calculations without treating censored observations as observed event times.</p>
 <p>A right-censored observation tells us that an event had not occurred by the last observation time. It does not say the event happened at that time or that it will never happen. Survival methods retain this partial information through risk sets rather than replacing censored times with ordinary completed durations.</p>
@@ -280,7 +282,8 @@ curves <span class="syntax-operator">&lt;-</span> survival<span class="syntax-op
 <li><a href="https://stat.ethz.ch/R-manual/R-devel/library/survival/html/coxph.html">R Cox models</a></li>
 </ul>
 <h3 id="continue">Continue<a class="heading-anchor" href="#continue" aria-label="Link to this section">#</a></h3>
-<p>No later chapter lists <code>r-048</code> as a direct prerequisite; the <a href="../README.md.html">course map</a> lists every chapter with its prerequisites. For the modeling assumptions behind these examples, read the <a href="../../statistics-ml/README.md.html">statistics tutorial</a> alongside the R code.</p>
+<p>No later chapter lists <code>r-048</code> as a direct prerequisite; see the <a href="../README.md.html">course map</a>.</p>
+<p>Modeling assumptions behind these examples are in the <a href="../../statistics-ml/README.md.html">statistics tutorial</a>.</p>
 <h3 id="ask-an-ai-tutor">Ask an AI tutor<a class="heading-anchor" href="#ask-an-ai-tutor" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for r-048 (Censoring, risk sets and survival models).
 Read the guide and my saved attempt. Explain the relevant R mechanism,

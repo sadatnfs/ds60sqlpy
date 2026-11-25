@@ -1,6 +1,6 @@
 # cpp-012: explanations and reference observations
 
-Attempt the learner tasks before opening this document. The executable reference checks the bounded normal and boundary examples; the six explanations below cover the deliberate changes and manual checks.
+The [executable reference](cpp-012_solution.cpp) keeps `add` declared and defined in one file and adds `subtract_example(5, 3) == 2` beside it, so it can only show behavior. The multi-file work cannot run there: a missing object file and a duplicate definition of `add` are explained below, each with the phase that reports it, the compiler or the linker. How to compare: [study guide](../STUDY-GUIDE.md#compare-with-the-solutions).
 
 ## Mechanism
 

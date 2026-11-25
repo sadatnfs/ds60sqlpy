@@ -1,6 +1,6 @@
 # js-021: explanatory solutions
 
-Use these answers after an attempt or an explicit reveal. The reference uses the same literal fixtures as the guide and keeps the exercises in separate scopes. A successful run checks these examples; explaining a changed input is a separate learning goal.
+Open these after your own attempt; each exercise runs in its own scope in the reference.
 
 ## Mechanism review
 
@@ -24,7 +24,7 @@ Use property?: Type for optional fields and readonly property: Type for a restri
 
 ## Exercise 1: Use structural compatibility: change one input
 
-Task: Copy Example A into a scratch `main.mts` and change `const wider = { id: 'A', count: 2 };` to `const wider = { id: 'A', count: 3 };`. Before running it, predict which check fails and which value it now sees; then run it and restore the original line.
+Task: In a scratch copy of Example A, change `const wider = { id: 'A', count: 2 };` to `const wider = { id: 'A', count: 3 };`. Which check fails, and what value does it see?
 
 Structural acceptance is useful for small interfaces, but does not strip extra fields. Treating an accepted type as an exact serialization schema can leak fields that still exist at runtime.
 
@@ -44,13 +44,13 @@ function negativeTypeCheck(): void {
 void negativeTypeCheck;
 ```
 
-**Expected:** The changed run fails with an `AssertionError` at `assert.equal(wider.count, 2)`. Restoring `const wider = { id: 'A', count: 2 };` brings back: label A; original count remains 2.
+**Expected:** The edited run fails with an `AssertionError` at `assert.equal(wider.count, 2)`. Restoring `const wider = { id: 'A', count: 2 };` brings back: label A; original count remains 2.
 
-**Verify:** Compare your written prediction with the reported `AssertionError`, including its actual and expected values, and name the value that made `assert.equal(wider.count, 2)` fail. After restoring the line, the program prints its `{"checks":1,"status":"passed"}` receipt again.
+**Verify:** Compare the reported actual and expected values with your prediction, then restore `const wider = { id: 'A', count: 2 };`.
 
 ## Exercise 2: Observe mutation through an alias: debug a regression
 
-Task: A regression changed one token in Example B, so one line now reads `mutable.count = 5;`. Run Example B with that line, use the failing check to locate the defect and repair it without changing the check.
+Task: A regression made one Example B line read `mutable.count = 5;`. Locate and repair it without editing the check.
 
 The view and original reference point to the same object. Readonly is a static access restriction, not a historical snapshot or deep immutability guarantee.
 
@@ -70,7 +70,7 @@ void negativeTypeCheck;
 
 **Expected:** Before the repair the run fails with an `AssertionError` at `assert.equal(view.count, 4)`. Restoring `mutable.count = 4;` brings back: readonly view observes count changing from 1 to 4.
 
-**Verify:** Keep the failing and the repaired runs. Explain why the changed token alters the value tested by `assert.equal(view.count, 4)` for this input.
+**Verify:** Keep the failing and repaired runs and name the first value that differs between them.
 
 ## Exercise 3: Handle absent and zero-valued optional counts
 
@@ -89,7 +89,7 @@ assert.equal(count({ count: 0 }), 0);
 
 **Expected:** absent becomes 10; explicit 0 remains 0.
 
-**Verify:** Keep a check equivalent to `assert.equal(count({ count: 0 }), 0)`. As a control, change `assert.equal(count({ count: 0 }), 0);` to `assert.equal(count({ count: 1 }), 0);` inside it: the run must fail with an `AssertionError`, which shows the check can fail. Restore it.
+**Verify:** Keep `assert.equal(count({ count: 0 }), 0)`. Control: editing it to `assert.equal(count({ count: 1 }), 0);` must make the check fail; then restore it.
 
 ## Exercise 4: Distinguish runtime presence from undefined
 
@@ -108,7 +108,7 @@ assert.equal(JSON.stringify(present), '{}');
 
 **Expected:** hasOwn is false versus true; JSON serializes both as empty objects.
 
-**Verify:** Keep a check equivalent to `assert.equal(Object.hasOwn(present, 'count'), true)`. As a control, change `assert.equal(Object.hasOwn(present, 'count'), true);` to `assert.equal(Object.hasOwn(present, 'count!'), true);` inside it: the run must fail with an `AssertionError`, which shows the check can fail. Restore it.
+**Verify:** Keep `assert.equal(Object.hasOwn(present, 'count'), true)`. Control: editing it to `assert.equal(Object.hasOwn(present, 'count!'), true);` must make the check fail; then restore it.
 
 ## Exercise 5: Show shallow readonly and shallow freeze boundaries
 
@@ -126,7 +126,7 @@ assert.equal(Object.isFrozen(record.nested), false);
 
 **Expected:** nested count becomes 3; outer object is frozen.
 
-**Verify:** Keep a check equivalent to `assert.equal(record.nested.count, 3)`. As a control, change `record.nested.count = 3;` to `record.nested.count = 4;`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
+**Verify:** Keep `assert.equal(record.nested.count, 3)`. Control: changing `record.nested.count = 3;` to `record.nested.count = 4;` must make that check fail; then restore it.
 
 ## Exercise 6: Transform a readonly array without mutation
 
@@ -148,8 +148,8 @@ void negativeTypeCheck;
 
 **Expected:** new array 2,4; input remains 1,2.
 
-**Verify:** Keep a check equivalent to `assert.deepEqual(doubled, [2, 4])`. As a control, change `const doubled = values.map(value => value * 2);` to `const doubled = values.map(value => value + 2);`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
+**Verify:** Keep `assert.deepEqual(doubled, [2, 4])`. Control: changing `const doubled = values.map(value => value * 2);` to `const doubled = values.map(value => value + 2);` must make that check fail; then restore it.
 
 ## After comparison
 
-Return to your saved implementation and repeat a case with different values. Keep compiler diagnostics, process output and browser observations separate. Do not suppress a failing assertion or use a type assertion to declare an unvalidated value safe. Resource-owning examples must finish cleanup even when work fails. Describe each result with its actual host and fixture scope rather than as production acceptance.
+Fresh case: declare `interface Point { x: number; y: number }`, then pass a variable holding `{ x, y, z }` and the same object written as a literal. Predict which call the compiler rejects and explain why. ([After comparing](../STUDY-GUIDE.md#after-comparing-with-the-solution).)

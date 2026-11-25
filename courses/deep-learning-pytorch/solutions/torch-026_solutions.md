@@ -2,6 +2,8 @@
 
 Open these answers only after attempting Custom modules, residual paths, buffers and autograd checks yourself. They reuse the guide's literal inputs, starting from Example A, Build an identity residual, so a discrepancy points at one step. The executable companion runs the assertions; this page explains why each one tests Custom module, Buffer, Grad check. After a pass, choose a new input for exercise 6, Inspect the incoming-gradient factor, without looking.
 
+After comparing, follow the [review steps](../STUDY-GUIDE.md#after-the-solutions).
+
 ## Mechanism review
 
 Custom modules should make state ownership and differentiation explicit. Parameters are optimized; buffers are tracked but normally fixed; temporary activations are rebuilt during forward. A residual branch adds a transformed input to the original, so feature dimensions must match or an explicit projection must reconcile them. Creating new parameters in forward would change model identity and invalidate optimizer membership.
@@ -147,6 +149,3 @@ assert value.grad.item() == 24
 
 **Verify:** In a fresh process, the exercise checks confirm `value.grad.item() == 24`.
 
-## Review after comparison
-
-Repeat exercise 4, Reject incompatible feature width, with one changed fixture value and predict the difference before running it. Keep your failing attempt at exercise 5, Validate a custom cube derivative, beside the repaired result. A missing framework is not a failing assertion. These solutions use only local fixtures.

@@ -194,9 +194,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/scala-spark/guides/spark-001.md</code></p>
     </header>
     <article class="document"><h2 id="spark-001-choose-a-scala-first-or-pyspark-first-local-route">spark-001: Choose a Scala-first or PySpark-first local route<a class="heading-anchor" href="#spark-001-choose-a-scala-first-or-pyspark-first-local-route" aria-label="Link to this section">#</a></h2>
-<p>Authored classroom lesson. Content availability and runtime readiness are separate checks. Read the current capability notice before running. Opening or saving this lesson does not install tools, start a cluster or prove mastery.</p>
+<p>Before any Spark code runs, you need to know which layer does which job. Scala source compiles to JVM bytecode, a JVM runs that bytecode, and Spark is a separate engine that a Scala or Python driver describes work for. This lesson helps you pick a Scala-first or PySpark-first route into the course and practice telling a proposed version profile apart from a receipt showing that a worker actually ran.</p>
 <h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
-<p>Beginner; 45 minutes. Direct prerequisites: none. Use the subject browser to open prerequisite lessons or review their concepts. Runtime readiness is checked separately before execution.</p>
+<p>Beginner; 45 minutes. Direct prerequisites: none. Pinned versions: <a href="../execution-baseline.md.html">execution baseline</a>. How the lesson files fit together: <a href="../STUDY-GUIDE.md.html#lesson-files">study guide</a>.</p>
 <p>Learner artifact: <a href="../lessons/spark-001.md.html">spark-001.md</a>. Keep <a href="../solutions/spark-001_solutions.md.html">solutions</a> closed until an attempt or explicit reveal.</p>
 <h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
 <ul>
@@ -315,8 +315,10 @@ receipt: profile absent; no executed probe</code></pre>
 </ol>
 <h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
 <ul>
-<li>Can you reproduce each exact observation without reading the official answer?</li>
-<li>Can you explain a failed check using the lesson&#x27;s model, rather than changing an expected value?</li>
+<li><code>Main.scala</code>, <code>Main.class</code>, stdout <code>42</code> and exit status 0 are four different artifacts. Which one can you edit, and why does editing it not change an output that was already printed?</li>
+<li>Route A starts at <code>spark-002</code>, while route B starts at <code>spark-011</code> after a <code>python-10</code> check. Why does the Scala-first route need no Python, and where do the two routes meet?</li>
+<li>A dependency labeled <code>spark-sql_2.13</code> cannot be swapped for <code>spark-sql_3</code> in this profile. What does the suffix tell you, and what separate evidence would show that the profile really ran?</li>
+<li>A version report shows Python 3.12 but no Java and no Spark profile. Which layer is missing, and why does pressing Run not install it for you?</li>
 </ul>
 <h3 id="retrieval-and-transfer">Retrieval and transfer<a class="heading-anchor" href="#retrieval-and-transfer" aria-label="Link to this section">#</a></h3>
 <p>Close the source. Explain the mechanism in your own words, name the boundary that a plausible wrong answer crosses, and predict a changed fixture before running again.</p>

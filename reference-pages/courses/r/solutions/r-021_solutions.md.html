@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/r/solutions/r-021_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="r-021-reference-reasoning">r-021: reference reasoning<a class="heading-anchor" href="#r-021-reference-reasoning" aria-label="Link to this section">#</a></h2>
-<p>Use the <a href="r-021_reference.R.html">complete reference</a> with the guide&#x27;s declared inputs and runtime. Every worked example is also a standalone script.</p>
+<p>Run the <a href="r-021_reference.R.html">complete reference</a> under the <a href="../STUDY-GUIDE.md.html#run-a-chapter">run rules</a>.</p>
 <h3 id="why-the-implementation-has-this-shape">Why the implementation has this shape<a class="heading-anchor" href="#why-the-implementation-has-this-shape" aria-label="Link to this section">#</a></h3>
 <p>The reference separates assembly, validation and dispatch, so each failed input has a stated cause. The matrix case is numeric but has a shape that the vector contract excludes. The NA case demonstrates a declared policy rather than accidental na.rm behavior.</p>
 <p>The count generic is an independent operation with the same object invariant. Its default rejection prevents unrelated values from silently acquiring domain meaning. Copy assertions establish behavior for the actual numeric-list representation. They are not a proof that all S3 objects are immutable or that package registration has already occurred.</p>
@@ -248,7 +248,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Tempting mistake:</strong> Claiming value semantics for every measurement. Adding a cache environment field later would break the claim without any error.</p>
 <p><strong>Verify:</strong> <code>x$values[[1]]</code> still returns 3 after the copy is set to 9, while for a list field holding an environment <code>identical(copy$env, x$env)</code> returns TRUE after copying.</p>
 <h3 id="what-the-checks-establish">What the checks establish<a class="heading-anchor" href="#what-the-checks-establish" aria-label="Link to this section">#</a></h3>
-<p>The reference makes 6 <code>stopifnot()</code> checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.</p></article>
+<p>The assertions confirm that malformed input raises a diagnostic matching the expected text, that the total of 3 and 7 is <code>c(ms = 10)</code>, that a new object with 5 added totals 15 and counts 3 through its own generic, that the empty measurement counts 0 and totals 0 ms, and that modifying a copy to 9 leaves the original 3 in place. They do not test what happens when someone bypasses the constructor and never calls the validator.</p>
+<p>The reference makes 6 <code>stopifnot()</code> checks; see <a href="../STUDY-GUIDE.md.html#what-a-passing-run-proves">what a passing run proves</a>.</p></article>
   </main>
 </body>
 </html>

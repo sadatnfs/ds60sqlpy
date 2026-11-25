@@ -36,5 +36,7 @@
       "wrong": "Citing `identical(a, b)` as validation of the estimate. Repetition removes variation between runs, not systematic error in how the data were chosen.",
       "verify": "A run with seed 2027 shows different draws, which measures sampling variation; no run shows how the sample was collected."
     }
-  ]
+  ],
+  "run_note": "The starter supplies a configuration with seed 2026, five draws and a reject missing policy, plus a three-record fixture measured in ms. Run it, then wrap random draws so the caller's RNG kind and `.Random.seed` are captured first and restored afterward. Check the case where no seed existed before the call, because restoring means removing it again.",
+  "checks_note": "The checks confirm that two wrapped draws with seed 2026 match while the caller's seed and RNG kind are restored, including after an error, that no seed is left behind when none existed, that the fixture digest is 64 hex characters and changes when one value changes, and that the ledger records exactly the named configuration and version fields. They do not show the estimator is unbiased."
 }

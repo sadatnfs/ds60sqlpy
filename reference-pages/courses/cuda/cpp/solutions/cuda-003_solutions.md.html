@@ -196,7 +196,6 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <article class="document"><h2 id="cuda-003-explanatory-solutions">cuda-003: explanatory solutions<a class="heading-anchor" href="#cuda-003-explanatory-solutions" aria-label="Link to this section">#</a></h2>
 <h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
 <p>An application calls a runtime API or a higher-level library. User-space CUDA libraries then cooperate with the host NVIDIA driver to access a device. A container packages application code and user-space dependencies; it does not package a physical GPU or replace the host kernel driver. The toolkit includes tools such as the nvcc compiler. A framework wheel may bring compatible CUDA user-space components without a general-purpose CUDA compiler. Conversely, nvcc can exist on a machine where no GPU is visible. Each observation answers a different question: compilation, driver management access, framework device discovery, allocation and numerical execution are separate checks.</p>
-<p>The separate <a href="../references/cuda-003_cpu.py.html">CPU reference</a> checks the chapter&#x27;s bounded model. It does not execute CUDA or establish GPU timing. Compare after attempting the worksheet or explicitly choosing to reveal solutions.</p>
 <h3 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h3>
 <p>A shell reports <code>nvcc: command not found</code>, while an already installed framework executes a tensor operation on a GPU. This is possible because the framework can run precompiled kernels without the developer compiler. Building a new CUDA extension has a different dependency contract from running the existing tensor operator.</p>
 <p><strong>Approach:</strong> Separate two capabilities: running prebuilt framework kernels, which needs a driver and runtime libraries, and compiling new kernels, which needs nvcc.</p>
@@ -233,11 +232,16 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Why it is correct:</strong> A build-only machine can produce binaries yet has never allocated or launched, so execution remains unverified by construction.</p>
 <p><strong>A plausible wrong approach:</strong> Labeling the machine CUDA-ready merges two claims and lets a reader assume kernels have produced validated results there.</p>
 <p><strong>How to verify:</strong> The reference asserts compiler is true and kernel_validated is false; the label must keep those values distinguishable.</p>
+<h3 id="self-check-answers">Self-check answers<a class="heading-anchor" href="#self-check-answers" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>Which layer must exist on the host and cannot be supplied by a container image?</strong> The NVIDIA kernel driver, together with a physical GPU exposed to the container.</li>
+<li><strong>Why can a framework run GPU tensors on a machine where <code>nvcc</code> is missing?</strong> Its wheel ships precompiled kernels and compatible user-space libraries, so no developer compiler is needed to execute them.</li>
+<li><strong>What label would you give a successful nvcc build on a machine with no GPU?</strong> Build evidence only: the source compiled for a target, but nothing about runtime behavior was observed.</li>
+</ol>
 <h3 id="numerical-reference-and-its-limits">Numerical reference and its limits<a class="heading-anchor" href="#numerical-reference-and-its-limits" aria-label="Link to this section">#</a></h3>
-<p>The complete CPU model is <a href="../references/cuda-003_cpu.py.html">here</a>. Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It does not claim CUDA execution, concurrency safety or a performance measurement.</p>
+<p>The <a href="../references/cuda-003_cpu.py.html">CPU reference</a> reproduces worked example 1 and prints <code>Compilation evidence only; no GPU execution evidence.</code>.</p>
 <h3 id="transfer-review">Transfer review<a class="heading-anchor" href="#transfer-review" aria-label="Link to this section">#</a></h3>
-<p>Use &#x27;CUDA compilation available; GPU execution not verified&#x27;. Keep hardware, driver access and actual allocation/execution observations separate.</p>
-<p>A complete explanation must name its inputs, the unchanged mathematical contract, the changed boundary or resource condition, and the evidence still needed on actual hardware. Preserve a CPU baseline even after a GPU path becomes available.</p></article>
+<p>Use &#x27;CUDA compilation available; GPU execution not verified&#x27;. Keep hardware, driver access and actual allocation/execution observations separate.</p></article>
   </main>
 </body>
 </html>

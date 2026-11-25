@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cuda/python/solutions/cuda-109_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="cuda-109-explained-solutions">cuda-109: explained solutions<a class="heading-anchor" href="#cuda-109-explained-solutions" aria-label="Link to this section">#</a></h2>
-<p>These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.</p>
+<p>Compare with your <a href="../lessons/cuda-109.md.html">worksheet</a> attempt.</p>
 <h3 id="exercise-1-define-the-shape-envelope">Exercise 1: Define the shape envelope<a class="heading-anchor" href="#exercise-1-define-the-shape-envelope" aria-label="Link to this section">#</a></h3>
 <p>List bounded dimensions and dtypes.</p>
 <p><strong>Approach.</strong> Define the shape envelope: batch from 1 to 8, sequence length from 1 to 32 and the accepted dtypes, written as explicit bounds the service checks.</p>
@@ -231,9 +231,19 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Why it is correct here.</strong> Lower precision can change outputs. A successful build only shows the engine runs, so quality must be measured against the application&#x27;s tolerance.</p>
 <p><strong>A plausible wrong approach.</strong> Comparing only a few output tensors for closeness can miss a quality drop concentrated in some classes.</p>
 <p><strong>How to verify.</strong> Report both accuracies on the same examples and accept only if the drop is within the declared tolerance.</p>
+<h3 id="self-check-answers">Self-check answers<a class="heading-anchor" href="#self-check-answers" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>Why is one successful shape weak evidence for an engine?</strong> Implementations are chosen per shape, precision and hardware, so other shapes in the contract can fail or behave differently.</li>
+</ol>
+<ol start="2">
+<li><strong>Why keep calibration data separate from evaluation data?</strong> Calibrating on evaluation examples tunes the engine to them and makes reported quality optimistic.</li>
+</ol>
+<ol start="3">
+<li><strong>Can an engine cache be copied to another machine safely?</strong> Not by assumption. It can depend on the hardware, toolkit and runtime versions, so record them and rebuild or requalify when they differ.</li>
+</ol>
 <h3 id="reference-observation">Reference observation<a class="heading-anchor" href="#reference-observation" aria-label="Link to this section">#</a></h3>
 <p>Declared shape envelope enforced.</p>
-<p>The reference file is <code>courses/cuda/python/references/cuda-109_cpu.py</code>. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.</p></article>
+<p>Asserted by <code>courses/cuda/python/references/cuda-109_cpu.py</code>.</p></article>
   </main>
 </body>
 </html>

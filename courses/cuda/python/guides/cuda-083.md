@@ -1,10 +1,17 @@
 # cuda-083: Python controls, CUDA executes
 
-**Route:** CUDA Python and machine learning. **Stage:** intermediate. **Prerequisites:** `cuda-003`, `cuda-073`, `cuda-082`. Allow several sessions when the hardware experiment is new; the chapter is not a deadline.
+**Route:** CUDA Python and machine learning. **Stage:** intermediate. **Prerequisites:** `cuda-003`, `cuda-073`, `cuda-082`.
 
-## What you will be able to explain
+Pacing, evidence labels and platform rules: [CUDA study guide](../../STUDY-GUIDE.md).
 
-By the end, you can **specify the kernel signature**, **design cleanup order**, and **define release-pinned evidence** with evidence. Start with the two worked cases, then use the editable CPU model to make the quantities concrete.
+## Learning objectives
+
+- Specify the kernel signature.
+- Count allocation bytes.
+- Classify compile versus launch errors.
+- Design cleanup order.
+- Explain ABI mismatch.
+- Define release-pinned evidence.
 
 ## Mechanism and vocabulary
 
@@ -31,9 +38,13 @@ A kernel expecting float32 input plus a 32-bit length cannot safely receive a fl
 
 Compilation success is recorded separately from launch success and readback equality. A program can compile for a device architecture absent on the current machine.
 
-## Portable executable model
+## How to run the CPU model
 
-The **CPU reference model** variant runs this bounded worked example using `python-core`. It uses only the Python standard library, small synthetic values and no network. Its purpose is to expose the arithmetic or contract behind the chapter. The separate reference includes assertions for the stated observations.
+Edit the copy; the [reference](../references/cuda-083_cpu.py) adds assertions.
+
+```sh
+python courses/cuda/python/lessons/cuda-083_cpu.py
+```
 
 ```python
 def validate_contract(count, itemsize, allocated):
@@ -52,77 +63,64 @@ else:
 
 **Expected observation:** Insufficient storage for five float64 values is rejected.
 
-Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.
-
 ## Practice and transfer
+
+Record each attempt in the [worksheet](../lessons/cuda-083.md) before opening hints.
 
 ### Exercise 1: Specify the kernel signature
 
 **Trap to avoid:** Passing a plain Python `int` for `n` and letting the wrapper guess the width may package it as 64 bits. On some interfaces that shifts the following arguments or truncates the value.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 2: Count allocation bytes
 
 **Trap to avoid:** Sizing a buffer by element count alone, as if every element were one byte, under-allocates by the itemsize factor and lets the kernel write past the end.
-
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 3: Classify compile versus launch errors
 
 **Trap to avoid:** Reporting compile success as working code treats the first stage as the whole contract. A module built for one architecture may still fail to load on another.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 4: Design cleanup order
 
 **Trap to avoid:** Releasing resources in reverse creation order without waiting looks tidy, but order of creation says nothing about device completion.
-
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 5: Explain ABI mismatch
 
 **Trap to avoid:** Expecting a type error from the device is the mistake: device code has no runtime type information about its arguments.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 6: Define release-pinned evidence
 
 **Trap to avoid:** Recording only the Python package version omits the toolkit, driver and architecture, which are the usual causes of cross-machine failures.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ## Progressive hints
 
-Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.
+Hint *k* belongs to exercise *k*; open one at a time.
 
-1. Start from worked example 1 and mark the quantities needed for the task "Specify the kernel signature".
-2. Change one assumption in worked example 2 while preserving the declared contract: count allocation bytes.
-3. Trace the CPU program's variables before adding hardware behavior: classify compile versus launch errors.
-4. Draw producers, consumers and the exact operation boundary for the task "Design cleanup order".
-5. Separate what the small fixture establishes from what the real runtime must show: explain ABI mismatch.
-6. Write a counterexample to an overbroad claim before you define release-pinned evidence.
+1. For each kernel parameter, write the element type behind the pointer and the exact width of each scalar.
+2. Multiply the element count by the itemsize of the declared dtype and compare it with the allocated bytes.
+3. Ask what each stage needs: compiling only needs source and target, while launching needs a compatible device.
+4. List the resources in creation order, then ask what must complete before each one is released.
+5. Pass a float64 buffer where float32 is expected and write down how the kernel would read the first element.
+6. List every independently versioned component between your source and the device, and the target architecture.
 
-## Common mistakes and self-review
+## Common mistakes and self-check
 
-Confusing a correct tiny example with a general implementation is the central review risk. For this chapter, challenge the assumption in worked example 2, then ask whether your change preserves the mechanism described above. If you change dtype, layout, ordering, batch size or backend, update the acceptance contract rather than silently reusing the old observation. Explain an unexpected result before trying random configuration changes.
+The chapter's key mistake is passing arguments that do not match the compiled signature, such as a float64 allocation where the kernel expects float32, or a pointer where a 32-bit length belongs. The launch may not fail; it reads wrong bytes. Another mistake is checking only the launch status, which misses errors reported at completion. Fix both by validating dtype, size and argument layout in a small host wrapper, and by checking errors at submission and again after synchronization.
 
-Keep a small evidence table with columns **claim**, **input**, **expected observation**, **actual observation** and **limit**. For the first claim use `Specify the kernel signature`. For the final claim use `Define release-pinned evidence`. An unperformed GPU or cluster experiment remains pending even when the CPU model is correct.
+**Misconception:** Once a kernel compiles and the launch call returns without an error, the device has finished the computation correctly. **Correction:** A kernel launch is asynchronous: the call queues work on a stream and returns before the device runs it. Errors from an invalid memory access or a bad configuration can surface only at a later synchronization or copy, sometimes reported by an unrelated call. Compilation proves only that source was translated, possibly for an architecture this machine lacks. Treat compilation, submission, completion and readback equality as four separate checks, and synchronize before reading results on the host.
 
-## Platform and evidence contract
+**Evidence limit:** The reference rejects storage too small for five float64 values in a CPU contract check. It does not load a driver, compile a module or launch anything, so binding behavior and release-specific API details need a prepared CUDA Python environment.
 
-The reading worksheet and CPU reference model work through the ordinary Linux Docker classroom on macOS, Linux and Windows using WSL 2. They do not require an NVIDIA GPU. Their results are labeled CPU models or semantic oracles, not simulated hardware performance.
+1. Why must compile success be recorded separately from launch success?
+2. What does a launch need besides the compiled function?
+3. Why use release-matched examples for CUDA Python?
 
-Real CUDA work needs supported NVIDIA hardware, a compatible host driver and an explicitly prepared GPU runtime. An Apple GPU does not execute CUDA kernels. PyTorch MPS on a supported native Mac, ROCm on supported AMD hardware, or other vendor backends can provide separate accelerator learning routes; they need their own package and operation qualification and are not CUDA evidence. The ordinary Linux Docker classroom does not expose native Mac MPS automatically.
-
-Do not download packages, models or data by opening this lesson. Do not attach an engine socket, ambient cluster credentials or an arbitrary remote endpoint. A CPU pass, imported package, successful compilation, real GPU result and measured performance are distinct observations. Record the actual backend, data shape/dtype, source revision, versions and pending checks. A saved completion marker records learning progress, not hardware certification.
+Answers: [self-check answers](../solutions/cuda-083_solutions.md#self-check-answers).
 
 ## Primary references
 
 - [DLPack Python specification](https://dmlc.github.io/dlpack/latest/python_spec.html)
-- [CuPy interoperability](https://docs.cupy.dev/en/stable/user_guide/interoperability.html)
 
-Use the version-matched documentation of your prepared environment. These references describe interfaces and supported boundaries; the chapter's synthetic examples and CPU models are original teaching material.
+Full lists: [documentation and sources](../../STUDY-GUIDE.md#documentation-and-sources).
 
 ## Ask an AI tutor about this lesson
 

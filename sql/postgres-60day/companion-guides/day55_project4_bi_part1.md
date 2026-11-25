@@ -2,96 +2,50 @@
 
 ## How to run this lesson
 
-Start the Linux-container engine and run `./classroom` from the repository
-root. On Windows, use Ubuntu in WSL 2 or the thin
-`START_DOCKER_CLASSROOM.cmd` wrapper. Choose **PostgreSQL** on the shared
-`/classroom` home, then open **sql-55**. The
-[launcher guide](../../../docs/one-command-classroom.md) covers first preparation, strict resume and
-the saved project selection. No host Python or PostgreSQL installation is
-required for this browser route.
-
-1. Read the prerequisite and fixture notes before running the file. Use only
-   the local disposable `advanced_sql_training` database.
-2. Choose **Whole SQL lesson (psql)** for the cataloged learner script. This
-   preserves the lesson's reviewed psql directives, relative includes and
-   transaction behavior. **SQL snippet** is appropriate for ordinary SQL
-   statements, but is not a replacement for an entire script's setup.
-3. The **Course database** panel above the code shows whether the course
-   training tables are loaded. Missing tables load automatically before your
-   first run (or choose **Load course tables**) and stay loaded for later
-   lessons. **Reset training data** restores the original rows only when your
-   own changes made results differ; it keeps your saved code and notes.
-4. Edit the learner copy in the classroom and save your prediction before
-   running. Its whole-script workspace is
-   `.learning/sql/sql-55/lesson/workspace/sql/postgres-60day/day55_project4_bi_part1.sql`.
-   For browser work this path is inside the Docker learning volume, not a
-   newly created host folder beside your checkout. The checked-in source
-   remains the answer-free starting artifact.
-5. Run the whole script and inspect the full transcript. The runner uses
-   `psql -X -v ON_ERROR_STOP=1 -f`. SELECT output has columns, rows and a row
-   count; DDL/DML has command tags; intentional checks may produce NOTICE
-   messages. An unexpected ERROR or nonzero exit is a failure to diagnose,
-   even when an earlier query printed plausible values.
-6. Verify the lesson's expected grain, ordering, constraints and declared
-   transaction or cleanup outcome. Keep required ROLLBACK statements.
-   The warehouse sequence and other explicitly stateful exercises explain
-   when state is committed. Read saved output without rerunning it when
-   reviewing an earlier attempt.
-
-If a relation is missing, inspect the lesson's required fixture and predecessor
-rather than guessing a new table definition. If authentication or runtime
-readiness fails, use `./classroom status` and the setup guide. Keep credentials
-out of SQL, notebooks, screenshots and committed files. Repair the first error
-before trusting partial output, and reveal separate solutions only when you
-want to compare after an attempt.
-
-### Optional contributor notebook route
-
-For notebook work, deliberately prepare the Linux/WSL contributor environment
-from [CONTRIBUTING.md](../../../CONTRIBUTING.md), including a compatible psql client and
-the notebook dependencies. Generate this lesson's private workspace through
-the maintained CLI:
-
-```sh
-uv run --no-sync python scripts/course.py sql notebook sql-55
-```
-
-Open the printed notebook path in that environment's JupyterLab. It uses the
-same catalog-derived learner-copy layout in that contributor checkout and
-executes the complete script through psql. Its host-side state is separate
-from the Docker browser's named volume. Follow
-[guided SQL notebooks](../../../docs/guided-sql-notebooks.md) for explicit local connection
-selection and kernel setup. Notebook generation does not execute SQL or
-authorize a reset.
+Open **sql-55** from `./classroom` (PostgreSQL), choose **Whole SQL lesson
+(psql)** and edit your saved copy at
+`.learning/sql/sql-55/lesson/workspace/sql/postgres-60day/day55_project4_bi_part1.sql`.
+It needs only the course tables in `advanced_sql_training` (`orders`,
+`customers`, `order_items`, `products` and `payments`); the file wraps every
+query in `BEGIN` ... `ROLLBACK`, so it leaves nothing behind. A clean `psql`
+transcript prints the four-level `ROLLUP` report, the 210-row top-five product
+list and then one result per finished exercise. Month buckets follow the
+current date, so the first report's row count drifts slightly between runs
+while the country and category totals do not. Launcher steps and recovery are
+in the [SQL study guide](../../STUDY-GUIDE.md#run-a-lesson-in-the-classroom);
+the notebook alternative is in its
+[notebook section](../../STUDY-GUIDE.md#optional-contributor-notebook-route).
 
 ## Level and prerequisites
 
 - **Level:** Advanced
-- **Prerequisites:** [Day 54; warehouse aggregates](day54_project3_dwh_part3_aggregations.md)
+- **Prerequisites:** [Day 54; warehouse aggregates](day54_project3_dwh_part3_aggregations.md) From Day 54 you need the habit of computing revenue at line grain before any rollup, so subtotals add up to the same grand total.
 - **Artifacts:** [learner SQL](../day55_project4_bi_part1.sql) ·
   [solution reasoning](../solutions/day55_solutions.md) ·
   [executable solution](../solutions/day55_solutions.sql)
 
 ## A beginner's mental model for this lesson
 
-A **table** stores facts in named columns. A **row** is one occurrence at the
-table's declared grain. A query creates a temporary **result set**: rows printed
-on screen are not automatically stored. The key vocabulary for this lesson is ROLLUP, CUBE, GROUPING flag. Its worked SQL reads or creates `payments`, `orders`, `customers`, `order_items`, `products`.
+A BI report usually wants totals at several levels at once: each country and
+category, each country, and everything. `GROUP BY ROLLUP (country, category)`
+asks PostgreSQL for exactly those three **grouping sets** in one pass, and it
+fills the column that a level leaves out with `NULL`. That `NULL` is generated,
+not stored, so the lesson pairs every rolled-up column with `GROUPING(column)`,
+which is `1` when the column was left out and `0` when it is a real value.
+`CUBE (country, category)` adds the fourth set, category without country.
 
-Before writing a query, complete this sentence: “One output row represents
-___.” Joins can multiply rows, filters can remove them, grouping can collapse
-many rows into one, and window functions can add calculations while preserving
-row count. For a normal analytical `SELECT`, use this logical reading order:
-`FROM`/`JOIN` (including `ON`) → `WHERE` → `GROUP BY`/aggregates → `HAVING` →
-window calculations → `SELECT` → `ORDER BY` → `LIMIT`. PostgreSQL may execute a
-different physical plan while preserving those semantics.
-
-The worked walkthrough's lesson-specific task is: Compare `ROLLUP(country, category)` with `CUBE(country, category)`. Both include detail, country subtotal, and grand total; `CUBE` also adds category-only subtotals. Use `GROUPING(country)` and `GROUPING(category)` to label each level, then reconcile the grand total with source line revenue.
-The first runnable example has a concrete contract: Example 1 returns one grouped row per `category`, `month`, and `g_country` with columns `category`, `payment_method`, `month`, `revenue`, `qty`, and `units` from `payments`, `orders`, `customers`, `order_items`, and `products`. Compare the key set and row count with a simpler control over the same filter/window; inspect `NULL` versus zero/absent-row meaning and verify the final ordering/tie-breaker when present. Its final projection is `country`, `category`, `payment_method`, `month`, `revenue`, `units`, `g_country`, and `g_category`. Independently group `payments`, `payment_by_method`, `orders`, `customers`, and `order_items` by the shown grouping expressions and compare every displayed aggregate at that exact grain. For tied business values, inspect the final ordering expression and verify its last key makes the displayed order reproducible.
+The second idea is dimension hygiene. Example 1 adds payment method as a
+dimension, but 347 orders were paid with two different methods, so joining
+`payments` straight onto order lines would count those lines twice. The
+`primary_payment_method` CTE first reduces payments to one method per order
+(largest amount wins, method name breaks ties) and labels the 873 `placed`
+orders as `unpaid`. Only then is it safe to roll up. Read every query with the
+[logical clause order](../../STUDY-GUIDE.md#reading-any-query-in-logical-order)
+and ask what one row of each CTE represents before the `GROUP BY` collapses it.
 
 ## Two worked SQL examples
 
-These worked excerpts come from `sql/postgres-60day/day55_project4_bi_part1.sql`. Use **Whole SQL lesson (psql)** in the unified classroom for the complete file, including its fixture and transaction context. The optional contributor notebook and prepared `psql` routes are described above.
+Both excerpts come from the learner script and run in order.
 
 ### Example 1
 
@@ -159,9 +113,19 @@ ORDER BY
   month NULLS FIRST;
 ```
 
-**How to read it:** Example 1: Start with `payments`, `orders`, `customers`, and `order_items` in `FROM`/`JOIN`; let `WHERE` remove nonqualifying rows; let `GROUP BY` collapse rows to its grouping keys; let each `OVER` expression calculate across related rows without collapsing them. The final `SELECT` displays `country`, `category`, `payment_method`, `month`, `revenue`, `units`, and `g_country`. `ORDER BY` determines presentation order. Before running, predict the row grain, row count, `NULL` positions, and first/last key; afterwards, compare each prediction with the transcript.
+**How to read it:** `payment_by_method` sums payments per (order, method), the inner
+`ROW_NUMBER` keeps the method with the largest amount, and `line` attaches that
+single method (or `unpaid`) to every order line together with country,
+category, month and line revenue. `ROLLUP (country, category, payment_method,
+month)` then produces five levels, from full detail down to the grand total,
+and the four `GROUPING` columns tell you which level each row is.
 
-**Expected result/shape:** Example 1 returns one grouped row per `category`, `month`, and `g_country` with columns `category`, `payment_method`, `month`, `revenue`, `qty`, and `units` from `payments`, `orders`, `customers`, `order_items`, and `products`. Compare the key set and row count with a simpler control over the same filter/window; inspect `NULL` versus zero/absent-row meaning and verify the final ordering/tie-breaker when present.
+**Expected result/shape:** About six thousand rows (the exact count depends on how many months the data
+spans today). Because the sort uses `NULLS FIRST`, the first row is the grand
+total, 2,355,647.12 revenue and 39,257 units with all four flags at `1`, then
+AU's country subtotal of 330,947.70 with `g_country = 0` and the other flags
+at `1`. A row with `g_month = 1` is a subtotal over all months, never "unknown
+month".
 
 ### Example 2
 
@@ -204,9 +168,15 @@ ORDER BY
   rnk;
 ```
 
-**How to read it:** Example 2: Start with `orders`, `customers`, `order_items`, and `products` in `FROM`/`JOIN`; let `WHERE` remove nonqualifying rows; let `GROUP BY` collapse rows to its grouping keys; let each `OVER` expression calculate across related rows without collapsing them. The final `SELECT` displays `*`. `ORDER BY` determines presentation order. Before running, predict the row grain, row count, `NULL` positions, and first/last key; afterwards, compare each prediction with the transcript.
+**How to read it:** `prod_rev` collapses lines to one row per (country, category, product), and
+`RANK()` numbers products inside each (country, category) pair by revenue.
+Filtering `rnk <= 5` happens in the outer query because a window result cannot
+be used in the `WHERE` of the same `SELECT`.
 
-**Expected result/shape:** Example 2 returns one grouped row per `country`, `category`, and `product_id` with columns `country`, `category`, `product_id`, `name`, `revenue`, and `rnk` from `orders`, `customers`, `order_items`, and `products`. Compare the key set and row count with a simpler control over the same filter/window; inspect `NULL` versus zero/absent-row meaning and verify the final ordering/tie-breaker when present.
+**Expected result/shape:** 210 rows on the course data: 7 countries with orders times 6 categories times
+5 products. AU Apparel starts with Product 271 at 2,646.48. `RANK` gives tied
+products the same rank, so a tie at fifth place would add a sixth row to that
+group; Exercise 5 shows the deterministic fix.
 
 ## Learning objectives
 
@@ -233,46 +203,54 @@ then reconcile the grand total with source line revenue.
 Complete these in the [learner SQL](../day55_project4_bi_part1.sql):
 
 1. Replace `ROLLUP` with `CUBE` and compare row counts.
-   **Inputs/evidence:** For sql-55 Exercise 1, read from `orders`, `customers`, `order_items`, and `products`. Compute `rollup_row_count`, and `cube_row_count` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.
-   **Expected result/shape:** For sql-55 Exercise 1, expected output: one comparison row. `CUBE(country, category)` adds category-only subtotals that the hierarchical `ROLLUP(country, category)` omits, so its count is greater on this seed. The final columns are `rollup_row_count`, and `cube_row_count`.
-   **Verify:** For sql-55 Exercise 1, evaluate each of `rollup_row_count`, and `cube_row_count` in a separate control `SELECT` over `orders`, `customers`, `order_items`, and `products`; require one final row and compare every value. Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
+   **Inputs/evidence:** For sql-55 Exercise 1, join `orders`, `customers`, `order_items`, and `products` into one revenue line per order item (13,085 lines carrying `country` and `category`), group those lines once with `ROLLUP (country, category)` and once with `CUBE (country, category)`, and count the rows each grouping produces.
+   **Expected result/shape:** For sql-55 Exercise 1, expected output: one row with `rollup_row_count` 50 and `cube_row_count` 56. Both share the 42 country and category detail rows, the 7 country subtotals, and the grand total; the 6 extra `CUBE` rows are the category-only subtotals. BR has no orders, so it appears in neither grouping.
+   **Verify:** For sql-55 Exercise 1, rebuild both counts from distinct values: 42 distinct (country, category) pairs plus 7 countries plus 1 total gives 50, and adding the 6 categories gives 56. In a rolled-back transaction, give BR customer 8 one order with a single Apparel line: both counts rise by 2 (52 and 58), one BR detail row and one BR subtotal, while the category-only subtotal count stays 6.
+   **Data check:** On the course data the counts are 50 and 56. Both outputs share the 42 country/category detail rows, the 7 country subtotals and the grand total; the six extra cube rows are the category-only subtotals (Apparel, Beauty, Books, Electronics, Home, Sports across all countries). BR has no orders, so it never appears in either grouping.
 2. Add status to an exact top-five drill-down.
-   **Inputs/evidence:** For sql-55 Exercise 2, read from `orders`, `customers`, `order_items`, and `products`. Build the answer toward `country`, `category`, `status`, `product_id`, `name`, `revenue`, and `product_rank`; keep `product_id` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-55 Exercise 2, expected output: up to five rows per `(country, category, status)`. The final columns are `country`, `category`, `status`, `product_id`, `name`, `revenue`, and `product_rank`. The final order is `country, category, status, product_rank`.
-   **Verify:** For sql-55 Exercise 2, project `product_id` plus the raw source columns from `orders`, `customers`, `order_items`, and `products` at each join stage; record row count and distinct `product_id`, then assert the final `country`, `category`, `status`, `product_id`, `name`, `revenue`, and `product_rank` values match those staged rows without unintended fanout or loss. Give two rows the same `country` value and different `product_rank` values; verify `country, category, status, product_rank` produces the intended rank and display order.
+   **Inputs/evidence:** For sql-55 Exercise 2, sum line revenue (`unit_price * quantity * (1 - discount)`) per `country`, `category`, `status`, `product_id`, and `name` (7,566 product rows), then number the products inside each (country, category, status) group with `ROW_NUMBER()` ordered by `revenue DESC, product_id` and keep numbers 1 to 5.
+   **Expected result/shape:** For sql-55 Exercise 2, expected output: 1,050 rows, exactly five for each of the 210 (country, category, status) groups (7 countries, 6 categories, 5 statuses, each group holding 30 to 42 products), with columns `country`, `category`, `status`, `product_id`, `name`, `revenue` (rounded to 2 places), and `product_rank`. The final order is `country, category, status, product_rank`; the first group is AU, Apparel, `delivered`, led by product 241 at 793.36.
+   **Verify:** For sql-55 Exercise 2, check that AU, Apparel, `delivered` lists products 241, 223, 163, 121, and 97 (793.36 down to 727.36), with product 109 sixth at 651.77, and that no (country, category, status, `product_id`) repeats. In a rolled-back transaction, add a 150.00 line for product 109 to AU order 47 (delivered): product 109 moves to rank 1 at 801.77, product 97 drops out, and the group still returns five rows.
+   **Data check:** Expect 1,050 rows, because every one of the 210 (country, category, status) groups (7 countries, 6 categories, 5 statuses) has at least five products. The first group in sort order is AU, Apparel, `delivered`, led by product 241 at 793.36. If one group returned six rows, look for a `RANK` or a missing `product_id` tie-breaker.
 3. Predict `ROLLUP(country, category, month)` grouping sets.
-   **Inputs/evidence:** For sql-55 Exercise 3, read from `orders`, `customers`, `order_items`, and `products`. Build the answer toward `country`, `category`, `revenue`, and `grouping_mask`; keep `country`, and `category` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-55 Exercise 3, expected output: one row per `country`, and `category`. The final columns are `country`, `category`, `revenue`, and `grouping_mask`. The final order is `grouping_mask, country, category`.
-   **Verify:** For sql-55 Exercise 3, independently aggregate `orders`, `customers`, `order_items`, and `products` by `country`, and `category`; require one output row for every distinct `country`, and `category` tuple and compare `revenue` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `revenue` for the existing `country`, and `category` tuple and verify the new tuple appears exactly once.
+   **Inputs/evidence:** For sql-55 Exercise 3, first write down the grouping sets of `ROLLUP (country, category, month)` (4 sets, from full detail to the grand total) and of `CUBE` on the same columns (8 sets), then run `ROLLUP (country, category)` over the order-item revenue lines and expose `GROUPING (country, category)` as `grouping_mask`.
+   **Expected result/shape:** For sql-55 Exercise 3, expected output: 50 rows with columns `country`, `category`, `revenue`, and `grouping_mask`, ordered by `grouping_mask, country, category`: 42 detail rows with mask 0 (AU Apparel 54,277.4215), 7 country subtotals with mask 1 (AU 330,947.6960), and 1 grand total with mask 3 (2,355,647.1235). No row has mask 2, because `ROLLUP` never totals a category across countries.
+   **Verify:** For sql-55 Exercise 3, count the rows per mask (42, 7, 1) and confirm that the 7 mask 1 rows add up to the mask 3 total of 2,355,647.1235. In a rolled-back transaction, give BR customer 8 one order with a 20.00 Apparel line: the result grows to 52 rows (43 with mask 0, 8 with mask 1), and BR shows 20.0000 at both the detail and subtotal level.
+   **Data check:** Expect 50 rows: 42 with mask `0`, 7 with mask `1` and 1 with mask `3`. The AU Apparel detail row shows 54,277.42 (unrounded in the solution), and the single mask `3` row must match the 2,355,647.12 grand total from Example 1. Ask yourself why no row can carry mask `2` under `ROLLUP`.
 4. Label levels with PostgreSQL's `GROUPING(country, category)` bit mask.
-   **Inputs/evidence:** For sql-55 Exercise 4, read from `orders`, `customers`, `order_items`, and `products`. Build the answer toward `level_id`, `level_name`, `country`, `category`, and `revenue`; keep `level_id` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-55 Exercise 4, expected output: one row per `level_id`. The final columns are `level_id`, `level_name`, `country`, `category`, and `revenue`. The final order is `level_id, country, category`.
-   **Verify:** For sql-55 Exercise 4, independently aggregate `orders`, `customers`, `order_items`, and `products` by `level_id`; require one output row for every distinct `level_id` tuple and compare `revenue` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `revenue` for the existing `level_id` tuple and verify the new tuple appears exactly once.
+   **Inputs/evidence:** For sql-55 Exercise 4, group the same order-item revenue lines with `ROLLUP (country, category)` and return `GROUPING (country, category)` as `level_id`, plus a `CASE` on that same mask that maps 0, 1, and 3 to `level_name` values 'country/category detail', 'country subtotal', and 'grand total'.
+   **Expected result/shape:** For sql-55 Exercise 4, expected output: the same 50 rows as Exercise 3 with columns `level_id`, `level_name`, `country`, `category`, and `revenue`, ordered by `level_id, country, category`: 42 rows at level 0, 7 at level 1, and 1 at level 3, and no `NULL` `level_name`.
+   **Verify:** For sql-55 Exercise 4, count rows per `level_id` and `level_name` (42, 7, 1) and confirm each `level_id` maps to exactly one name. In a rolled-back transaction, run `ALTER TABLE products ALTER COLUMN category DROP NOT NULL` and set product 241's category to `NULL`: level 0 grows to 49 rows, 7 of them with a stored `NULL` category, and all 7 still say 'country/category detail' because the label reads the mask, not the column.
+   **Data check:** The labels sit on the same 50 rows as Exercise 3: 42 rows named for country/category detail, 7 country subtotals and 1 grand total. Sorting by the level id puts all detail rows first, so a correct run ends with the subtotals and the total, and no label is ever `NULL`.
 5. Use deterministic `ROW_NUMBER` for exactly five results.
-   **Inputs/evidence:** For sql-55 Exercise 5, read from `orders`, `customers`, `order_items`, and `products`. Build the answer toward `order_id`, `customer_id`, `order_date`, `status`, and `total_amount`; keep `order_id` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-55 Exercise 5, expected output: one row per `order_id`. The final columns are `order_id`, `customer_id`, `order_date`, `status`, and `total_amount`. The final order is `country, position`.
-   **Verify:** For sql-55 Exercise 5, project `order_id` plus the raw source columns from `orders`, `customers`, `order_items`, and `products` at each join stage; record row count and distinct `order_id`, then assert the final `order_id`, `customer_id`, `order_date`, `status`, and `total_amount` values match those staged rows without unintended fanout or loss. Add one row for which `(position <= 5)` is true and one for which it is false; verify only the matching `order_id` value is returned.
+   **Inputs/evidence:** For sql-55 Exercise 5, sum order-item revenue per `country`, `product_id`, and `name` (1,925 rows, 275 products in each of 7 countries), then number the products inside each country with `ROW_NUMBER()` ordered by `revenue DESC, product_id` as `position` and keep positions 1 to 5.
+   **Expected result/shape:** For sql-55 Exercise 5, expected output: 35 rows, one per country and `position` 1 to 5, with columns `country`, `product_id`, `name`, `revenue`, and `position`. The final order is `country, position`; AU starts with product 238 at 3,319.3310, followed by products 207, 251, 261, and 243 (2,692.5745).
+   **Verify:** For sql-55 Exercise 5, confirm that no (country, `product_id`) repeats and that AU product 233 sits sixth at 2,684.2590. In a rolled-back transaction, add a line for product 233 to AU order 46 with `unit_price` 166.31 and `discount` 0.95 (8.3155): products 233 and 243 tie at 2,692.5745, `RANK() <= 5` now returns 36 rows, and `ROW_NUMBER` still returns 35, giving position 5 to product 233 because it has the lower `product_id`.
+   **Data check:** Expect 35 rows, exactly five per country for the seven countries with orders, and a position column running 1 to 5 in each. The AU list starts with product 238 at 3,319.33. The rows are products, so check for duplicate (country, product) pairs rather than duplicate orders.
 6. Separate real unknown members from generated subtotals.
-   **Inputs/evidence:** For sql-55 Exercise 6, read from `customers`. Build the answer toward `display_country`, `is_generated_total`, and `customers`; keep `display_country` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-55 Exercise 6, expected output: one row per `display_country`. The final columns are `display_country`, `is_generated_total`, and `customers`. The final order is `is_generated_total, display_country`.
-   **Verify:** For sql-55 Exercise 6, independently aggregate `customers` by `display_country`; require one output row for every distinct `display_country` tuple and compare `is_generated_total`, and `customers` tuple by tuple. Repeat with `NULL` in `display_country`, and `is_generated_total` and state whether the row is kept, rejected, or classified.
+   **Inputs/evidence:** For sql-55 Exercise 6, read the 500 `customers` rows and group them with `GROUPING SETS ((country), ())`, returning `GROUPING (country)` as `is_generated_total` and a `display_country` that says 'ALL' only when that flag is 1 and '(unknown member)' for a stored `NULL` country.
+   **Expected result/shape:** For sql-55 Exercise 6, expected output: 9 rows with columns `display_country`, `is_generated_total`, and `customers`, ordered by `is_generated_total, display_country`: eight countries including BR (62 or 63 customers each, flag 0), then `ALL` with 500 and flag 1.
+   **Verify:** For sql-55 Exercise 6, compare each country row with `SELECT country, COUNT(*) FROM customers GROUP BY country` and confirm the eight counts add up to the `ALL` row. `country` is `NOT NULL` (default 'US'), so in a rolled-back transaction run `ALTER TABLE customers ALTER COLUMN country DROP NOT NULL` and insert one customer with a `NULL` country: the result has 10 rows, a '(unknown member)' row with 1 customer and flag 0, and `ALL` at 501.
+   **Data check:** Expect nine rows: eight countries, BR included because this query reads `customers` rather than orders, each with 62 or 63 customers, plus one `ALL` row of 500. The course data has no stored `NULL` country, and `country` is declared `NOT NULL`, so the unknown label only appears if a transaction first drops that constraint and then adds such a customer; that run returns 10 rows and an `ALL` of 501.
 
 Test one real NULL/unknown dimension value.
 
 ## Common mistakes and how to recover
 
-- **Lesson-specific semantic mistake:** A raw payment join fans out split-payment orders. Keep the declared primary method policy, or document a different allocation, before using that dimension.
-- **Unexpected row count:** display keys before aggregates, count rows after
-  each join/filter stage, and find the first stage whose grain differs from the
-  contract. Do not hide fanout with `DISTINCT`.
-- **Unexpected `NULL` or missing row:** decide whether the fact is unknown,
-  inapplicable, zero, or absent before using `COALESCE`; inspect outer-join
-  predicate placement and empty-input aggregate behavior.
-- **Unstable top/first/last output:** add `ORDER BY` with a unique final
-  tie-breaker before `LIMIT` or order-sensitive windows/aggregates.
-- **`psql` stops on an error:** fix the first error shown by
-  `ON_ERROR_STOP`, restore the declared transaction/setup state, and rerun the
-  complete file. A later successful statement does not validate a partial run.
+- **Lesson-specific semantic mistake:** A raw payment join fans out
+  split-payment orders. Keep the declared primary method policy, or document a
+  different allocation, before using that dimension.
+- **Grand total larger than the line revenue:** you joined `payments` before
+  reducing it to one method per order. Compare `SUM(revenue)` from `line` with
+  a plain line-revenue sum; they must both be 2,355,647.12 (rounded).
+- **Subtotal rows treated as missing data:** a blank `country` with
+  `g_country = 1` is the generated total; test `GROUPING(...)`, never
+  `country IS NULL`, before labeling it.
+- **Six rows in a top-five group:** `RANK` repeats a rank on ties. Use
+  `ROW_NUMBER()` with `product_id` as the last sort key when the report
+  promises exactly five.
+- General recovery steps (fanout, unexpected `NULL`, `psql` stopping) are in
+  the [study guide](../../STUDY-GUIDE.md#recover-from-common-failures).
 
 ## Self-check
 
@@ -304,7 +282,9 @@ It separately ranks product revenue within `(country, category)`.
 
 ## Practice map
 
-Use the numbered **Exercises** section above as the single authoritative practice contract. Its prompts, expected shapes, and verification checks map one-for-one to the learner SQL and both solution companions.
+Exercises 1, 3 and 4 explore which grouping sets `ROLLUP` and `CUBE` emit and
+how to name them, Exercises 2 and 5 make the top-five drill-down exact, and Exercise 6 keeps a stored unknown apart from the generated `ALL` row. The
+numbered list above is the contract, repeated unchanged in the learner SQL.
 
 ## BI reasoning
 
@@ -323,9 +303,9 @@ Use the numbered **Exercises** section above as the single authoritative practic
 
 ## Ask an AI tutor about this lesson
 
-An AI tutor is optional; the guide, learner SQL, PostgreSQL, and expected checks are
-enough to complete the lesson offline. If you want a patient tutor, copy this
-prompt after opening the repository in the AI tutor:
+Ask a tutor to predict which subtotal rows `CUBE` adds before you run it,
+then let PostgreSQL settle the argument. To use one, paste this prompt and
+read the [study guide's tutor notes](../../STUDY-GUIDE.md#use-an-ai-tutor-optional):
 
 ```text
 Tutor me through sql-55: BI Project, Part 1: Drill-Downs and Subtotals.

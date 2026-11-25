@@ -4,79 +4,44 @@
 
 ## How to run this lesson
 
-Start the Linux-container engine and run `./classroom` from the repository
-root. On Windows, use Ubuntu in WSL 2 or the thin
-`START_DOCKER_CLASSROOM.cmd` wrapper. Choose **PostgreSQL** on the shared
-`/classroom` home, then open **sql-deep-02**. The
-[launcher guide](../../../docs/one-command-classroom.md) covers first preparation, strict resume and
-the saved project selection. No host Python or PostgreSQL installation is
-required for this browser route.
+Start **sql-deep-02** from `./classroom` using the shared [run steps](../../STUDY-GUIDE.md#run-a-lesson-in-the-classroom).
 
-1. Read the prerequisite and fixture notes before running the file. Use only
-   the local disposable `advanced_sql_training` database.
-2. Choose **Whole SQL lesson (psql)** for the cataloged learner script. This
-   preserves the lesson's reviewed psql directives, relative includes and
-   transaction behavior. **SQL snippet** is appropriate for ordinary SQL
-   statements, but is not a replacement for an entire script's setup.
-3. The **Course database** panel above the code shows whether the course
-   training tables are loaded. Missing tables load automatically before your
-   first run (or choose **Load course tables**) and stay loaded for later
-   lessons. **Reset training data** restores the original rows only when your
-   own changes made results differ; it keeps your saved code and notes.
-4. Edit the learner copy in the classroom and save your prediction before
-   running. Its whole-script workspace is
-   `.learning/sql/sql-deep-02/lesson/workspace/sql/professional/lessons/sql_deep_02.sql`.
-   For browser work this path is inside the Docker learning volume, not a
-   newly created host folder beside your checkout. The checked-in source
-   remains the answer-free starting artifact.
-5. Run the whole script and inspect the full transcript. The runner uses
-   `psql -X -v ON_ERROR_STOP=1 -f`. SELECT output has columns, rows and a row
-   count; DDL/DML has command tags; intentional checks may produce NOTICE
-   messages. An unexpected ERROR or nonzero exit is a failure to diagnose,
-   even when an earlier query printed plausible values.
-6. Verify the lesson's expected grain, ordering, constraints and declared
-   transaction or cleanup outcome. Keep required ROLLBACK statements.
-   The warehouse sequence and other explicitly stateful exercises explain
-   when state is committed. Read saved output without rerunning it when
-   reviewing an earlier attempt.
+Choose **Whole SQL lesson (psql)**. Inside one transaction on
+`advanced_sql_training` (any other database is refused), the script builds six
+temporary tables: three customers in `deep2_usage`, including customer 3 with 0
+revenue and 0 visits; five stock snapshots, one of them a future January 3 row
+with 99 units; three orders totaling 200; a `deep2_bridge` whose order 3
+weights add up to only 0.9; overlapping segment history for customer 2; and
+four events. Only the two worked examples print: one `population` row with
+rates 0.833 and 0.700, then daily stock totals of 30 and 29. No `NOTICE` is
+expected, and `ROLLBACK` drops everything. Save attempts in
+`.learning/sql/sql-deep-02/lesson/workspace/sql/professional/lessons/sql_deep_02.sql`.
 
-If a relation is missing, inspect the lesson's required fixture and predecessor
-rather than guessing a new table definition. If authentication or runtime
-readiness fails, use `./classroom status` and the setup guide. Keep credentials
-out of SQL, notebooks, screenshots and committed files. Repair the first error
-before trusting partial output, and reveal separate solutions only when you
-want to compare after an attempt.
-
-### Optional contributor notebook route
-
-For notebook work, deliberately prepare the Linux/WSL contributor environment
-from [CONTRIBUTING.md](../../../CONTRIBUTING.md), including a compatible psql client and
-the notebook dependencies. Generate this lesson's private workspace through
-the maintained CLI:
-
-```sh
-uv run --no-sync python scripts/course.py sql notebook sql-deep-02
-```
-
-Open the printed notebook path in that environment's JupyterLab. It uses the
-same catalog-derived learner-copy layout in that contributor checkout and
-executes the complete script through psql. Its host-side state is separate
-from the Docker browser's named volume. Follow
-[guided SQL notebooks](../../../docs/guided-sql-notebooks.md) for explicit local connection
-selection and kernel setup. Notebook generation does not execute SQL or
-authorize a reset.
+The optional notebook route starts with `uv run --no-sync python scripts/course.py sql notebook sql-deep-02`; see the [study guide](../../STUDY-GUIDE.md#optional-contributor-notebook-route).
 
 ## Level and prerequisites
 
-- **Level:** Advanced. The guide defines each new mechanism before relying on it.
-- **Prerequisites:** [`sql-quality-01`](sql_quality_01_bags_and_fanout.md), [`sql-analytics-01`](sql_analytics_01_query_patterns.md).
-- **Artifacts:** [Learner SQL](../lessons/sql_deep_02.sql), [explained reference](../solutions/sql_deep_02_solutions.md), and [executable reference](../solutions/sql_deep_02_solutions.sql). Every fixture is local, deterministic and rolled back; no prior lesson state is required.
+- **Level:** Advanced. Additive and semi-additive measures, ratios of totals
+  and allocation bridges are each defined before an exercise relies on them.
+- **Prerequisites:** [`sql-quality-01`](sql_quality_01_bags_and_fanout.md),
+  [`sql-analytics-01`](sql_analytics_01_query_patterns.md): duplicate rows and
+  fan-out, then the grouping and window patterns used for as-of snapshots.
+- **Artifacts:** [Learner SQL](../lessons/sql_deep_02.sql), [explained
+  reference](../solutions/sql_deep_02_solutions.md), and [executable
+  reference](../solutions/sql_deep_02_solutions.sql). All six `deep2_` tables
+  are temporary and disappear at the final `ROLLBACK`, so no earlier lesson
+  state is needed.
 
 ## Learning objectives
 
-- State the output grain and identity before writing a query, including the NULL and duplicate policies.
-- Explain the new SQL mechanism, produce each exact projected result and expose the listed counterexample.
-- Verify rollback-safe behavior from inspected result rows and assertions without relying on a final success message.
+- Keep a zero-visit customer in the result with a NULL ratio and a false
+  `ratio_defined` flag, instead of dropping the row or dividing by zero.
+- Explain why the ratio of totals (100 revenue over 4 visits, 25) differs from
+  the mean customer ratio (20), and choose the one a question actually asks
+  for.
+- Select one stock state per product as of a cutoff, refuse a weighted
+  allocation until every order sums to 1, and label temporal matches as
+  matched, missing or ambiguous.
 
 ## Vocabulary and concepts
 
@@ -90,7 +55,7 @@ authorize a reset.
 
 Correct join cardinality is necessary but not sufficient for a correct metric. Even one row per customer can support several different averages. Revenue divided by visits across all customers weights each visit equally. Averaging each customer's revenue-per-visit weights each customer with a defined ratio equally. The two estimands differ when activity varies, even if neither query duplicates a row.
 
-A zero denominator represents an undefined ratio, not automatically zero efficiency. NULLIF(denominator,0) makes that undefined result visible, while counts of eligible and ratio-defined customers reveal how the mean's population changed. Replacing the ratio with zero changes both the value and interpretation of an average. Specify which population owns the decision before choosing a convenient expression.
+A zero denominator represents an undefined ratio, not automatically zero efficiency. `NULLIF(denominator, 0)` makes that undefined result visible, while counts of eligible and ratio-defined customers reveal how the mean's population changed. Replacing the ratio with zero changes both the value and interpretation of an average. Specify which population owns the decision before choosing a convenient expression.
 
 Snapshot measures require a time contract. Inventory at a date can be summed across products, but summing daily inventory counts the same stock repeatedly. To report inventory as of a cutoff, choose the latest eligible snapshot separately for each product, with a deterministic tie rule, then aggregate. A missing new snapshot does not necessarily mean stock zero; it may mean carry forward the last known state, subject to a freshness policy.
 
@@ -120,7 +85,7 @@ FROM
   groups;
 ```
 
-One output row keyed by metric_id has trial_weighted_rate0.833 and equal_group_rate0.700. The small group rate is 0.5 and large group rate 0.9. Summing first weights by trials; averaging the two ratios gives each group equal influence. Neither formula is inherently wrong, but they answer different questions.
+One output row keyed by metric_id has `trial_weighted_rate` 0.833 and `equal_group_rate` 0.700. The small group rate is 0.5 and large group rate 0.9. Summing first weights by trials; averaging the two ratios gives each group equal influence. Neither formula is inherently wrong, but they answer different questions.
 
 ### Example 2
 
@@ -153,7 +118,7 @@ The result grain is one snapshot day, with columns day and units_at_day, ordered
 
 **Inputs/evidence:** For sql-deep-02 Exercise 1, Return customer_id, revenue, visits, revenue_per_visit, ratio_defined from `deep2_usage`, one row per customer ordered by customer_id. Use NULLIF for a zero denominator and retain the zero-visit customer.
 
-**Expected result/shape:** For sql-deep-02 Exercise 1, Customer 1 ratio 10, true; customer 2 ratio 30, true; customer 3 ratioNULL, false. Revenue/visits remain 10/1,90/3,0/0.
+**Expected result/shape:** For sql-deep-02 Exercise 1, Customer 1 ratio 10, true; customer 2 ratio 30, true; customer 3 ratio NULL, false. Revenue/visits remain 10/1, 90/3, 0/0.
 
 **Verify:** For sql-deep-02 Exercise 1, recompute each numerator and denominator from its customer rows; retain a NULL ratio when the denominator is zero rather than substituting an observed zero.
 
@@ -161,7 +126,7 @@ The result grain is one snapshot day, with columns day and units_at_day, ordered
 
 **Inputs/evidence:** For sql-deep-02 Exercise 2, Return one row keyed by metric_id=all_customers with columns metric_id, customer_count, defined_ratio_count, ratio_of_totals, mean_customer_ratio. Compute both ratio targets from the same source, retaining the denominator policy from Exercise 1.
 
-**Expected result/shape:** For sql-deep-02 Exercise 2, The row is all_customers,3,2,25,20. Ratio of totals uses 100 revenue/4 visits, while the mean customer ratio averages 10 and 30.
+**Expected result/shape:** For sql-deep-02 Exercise 2, The row is `all_customers`, 3, 2, 25, 20. Ratio of totals uses 100 revenue/4 visits, while the mean customer ratio averages 10 and 30.
 
 **Verify:** For sql-deep-02 Exercise 2, calculate the pooled numerator divided by the pooled denominator independently of the average of defined customer ratios; report how many customer ratios each calculation includes.
 
@@ -177,7 +142,7 @@ The result grain is one snapshot day, with columns day and units_at_day, ordered
 
 **Inputs/evidence:** For sql-deep-02 Exercise 4, Return order_id, weight_sum only for orders whose total bridge weight is not exactly 1, including orders with no bridge rows. Preserve one diagnostic row per invalid order and order by order_id. Use exact numeric weights from the fixture.
 
-**Expected result/shape:** For sql-deep-02 Exercise 4, Only order 3 appears with weight_sum0.9. Orders 1 and 2 sum to 1. The diagnostic must exist before any channel totals are treated as complete allocations.
+**Expected result/shape:** For sql-deep-02 Exercise 4, Only order 3 appears with `weight_sum` 0.9. Orders 1 and 2 sum to 1. The diagnostic must exist before any channel totals are treated as complete allocations.
 
 **Verify:** For sql-deep-02 Exercise 4, sum the bridge weights separately for each source identity before multiplying amounts; inspect the per-source weight-sum output to identify the source whose weights fail conservation.
 
@@ -203,12 +168,22 @@ If average ratios disagree with a ratio of totals, calculate their implicit weig
 
 ## Self-check
 
-- Explain the row grain after each FROM, JOIN, filter, grouping or window step. Name the identity columns that prove rows were neither lost nor multiplied.
-- Reconstruct a boundary result by hand, then compare with the query output. Explain why the tempting wrong query fails even if it returns the same total on an easier fixture.
+- The worked stock example prints 30 and 29. What does 59 measure, and along
+  which dimension can `units` be summed safely?
+- Order 3 has weights 0.7 and 0.2. Why must Exercise 4 report it
+  before Exercise 5 allocates anything, and what channel totals appear once `direct`
+  becomes 0.3?
+- Event 3 falls inside both `alpha` and `beta` for customer 2. Why does a plain
+  join double-count it, and what does Exercise 6 return instead?
 
 ## Next step
 
-Transfer the same reasoning to a new small fixture before using it on larger data, then continue with [the next deepening lesson](sql_deep_03.md). Keep the result columns, ordering, NULL policy and observation horizon explicit. The [professional SQL track](../README.md) provides the wider route.
+Before moving on, add a fourth customer with 1 visit and 1,000 revenue to a
+copy of `deep2_usage` and predict how far the ratio of totals and the mean
+customer ratio move. [The next deepening lesson](sql_deep_03.md) turns to
+window frames: `ROWS`, `RANGE` and `GROUPS`, frame exclusions and
+sessionization. The [professional SQL track](../README.md) lists the wider
+route.
 
 ## Primary sources and official APIs
 

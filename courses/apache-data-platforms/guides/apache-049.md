@@ -157,7 +157,7 @@ The backpressure route polls the REST job details and keeps the accumulated-back
 
 ## Complete worked source
 
-This is a project-only command notebook. Read and edit it in the classroom; run its explicitly labeled commands from the copied owned Docker workshop. The classroom does not execute these service commands.
+The classroom does not execute these service commands. See the [workshop rules](../STUDY-GUIDE.md#workshop-notebooks).
 
 # Bounded pressure observation and compatible capacity changes
 

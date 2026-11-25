@@ -4,8 +4,6 @@
 
 Compute Sanitizer provides several checks with different scopes. Memcheck investigates invalid and misaligned memory accesses; racecheck investigates shared-memory hazards; initcheck investigates uninitialized global-memory reads; synccheck investigates invalid synchronization use. Their observations complement mathematical tests. Instrumentation can be expensive and can change timing, so sanitizer runs are not performance samples. An automated command should select a nonzero error-exitcode, because a tool diagnostic must make the check fail even if the application itself returns success. Never conclude that one clean run proves race freedom for every input or validates unsupported global protocols.
 
-The separate [CPU reference](../references/cuda-026_cpu.py) checks the chapter's bounded model. It does not execute CUDA or establish GPU timing. Compare after attempting the worksheet or explicitly choosing to reveal solutions.
-
 ## Exercise 1
 
 For an array of four elements, valid indices are 0 through 3. A kernel that accesses index four has an off-by-one defect even if the returned allocation happens to contain readable bytes nearby. Memcheck is an appropriate additional diagnostic, while a CPU bounds model pinpoints the invalid logical access without a GPU.
@@ -78,12 +76,16 @@ Confirm the intended failing fixture diagnoses the old problem, run the correcte
 
 **How to verify:** Keep the failing fixture as a regression test and check it fails on the old commit.
 
+## Self-check answers
+
+1. **Which checker targets shared-memory hazards?** Racecheck.
+2. **Why are sanitizer runs not performance evidence?** Instrumentation slows execution and changes timing.
+3. **Why is a host sleep not a repair for a missing barrier?** It creates no ordering between device threads, so the race remains.
+
 ## Numerical reference and its limits
 
-The complete CPU model is [here](../references/cuda-026_cpu.py). Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It does not claim CUDA execution, concurrency safety or a performance measurement.
+The [CPU reference](../references/cuda-026_cpu.py) reproduces worked example 1 and prints `{'CPU_bounds_audit': [4], 'tool_selection': {'out_of_bounds': 'memcheck', 'shared_hazard': 'racecheck', 'uninitialized': 'initcheck', 'invalid_barrier': 'synccheck'}}`.
 
 ## Transfer review
 
 Confirm the intended failing fixture diagnoses the old problem, run the corrected checker, validate normal/tail outputs and benchmark separately without instrumentation.
-
-A complete explanation must name its inputs, the unchanged mathematical contract, the changed boundary or resource condition, and the evidence still needed on actual hardware. Preserve a CPU baseline even after a GPU path becomes available.

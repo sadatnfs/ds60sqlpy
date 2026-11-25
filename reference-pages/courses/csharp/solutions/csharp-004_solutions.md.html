@@ -194,7 +194,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/csharp/solutions/csharp-004_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="csharp-004-explanation-and-comparison">csharp-004: explanation and comparison<a class="heading-anchor" href="#csharp-004-explanation-and-comparison" aria-label="Link to this section">#</a></h2>
-<p>Attempt the six guide tasks before opening this comparison. The executable reference is <a href="csharp-004_solution.cs.html">csharp-004_solution.cs</a>. It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.</p>
+<p>Reference program: <a href="csharp-004_solution.cs.html">csharp-004_solution.cs</a>, covering both examples and the executed answers.</p>
+<p>Attempt the tasks first; see <a href="../STUDY-GUIDE.md.html#comparing-with-the-explanation">comparing with the explanation</a>.</p>
 <h3 id="why-the-two-examples-differ">Why the two examples differ<a class="heading-anchor" href="#why-the-two-examples-differ" aria-label="Link to this section">#</a></h3>
 <p><strong>Immutable transformations:</strong> Assignment of the returned value is necessary to keep a transformation. An explicit comparison policy prevents dependence on ambient culture. The original remains data while the result is DATA.</p>
 <p><strong>Choose the counting unit:</strong> The fixture disproves the assumption that Length is a universal character count. One scalar occupies two UTF-16 units and four UTF-8 bytes.</p>
@@ -253,14 +254,14 @@ Check<span class="syntax-punctuation">(</span>accented<span class="syntax-punctu
 <p><strong>How to verify.</strong> Normalize the accented string with <code>accented.Normalize(NormalizationForm.FormC)</code> and check its <code>Length</code> becomes 1, because the precomposed é exists. A flag emoji such as U+1F1FA U+1F1F8 shows the opposite: four code units, two runes and one text element.</p>
 <h4 id="task-6-transfer-and-justify">Task 6: Transfer and justify<a class="heading-anchor" href="#task-6-transfer-and-justify" aria-label="Link to this section">#</a></h4>
 <p>Design a text-field limit and explain whether its contract measures bytes, scalars or user-visible graphemes.</p>
-<p>No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry <strong>Code unit</strong>, and state one limitation of your choice.</p>
+<p>No single answer exists; extend task 3 using the <a href="../STUDY-GUIDE.md.html#open-transfer-tasks">open transfer routine</a>.</p>
 <h3 id="mechanism-and-diagnostic-reasoning">Mechanism and diagnostic reasoning<a class="heading-anchor" href="#mechanism-and-diagnostic-reasoning" aria-label="Link to this section">#</a></h3>
 <p>A string is an immutable sequence of UTF-16 code units. Immutability means an operation such as replacement returns a new string; it does not edit the original object. Human-visible characters are more complicated than code units: some Unicode scalar values need two units, and a visible grapheme can combine several scalar values. Choose the unit that matches the task before counting or slicing text.</p>
 <p>Text comparison also has a policy. Machine identifiers usually need ordinal comparison; user-facing sorting can need culture rules. Encoding turns text into bytes for a file or protocol. UTF-8 byte length is not string Length, and neither is automatically the number of visible characters. Keep these boundaries distinct when limiting input.</p>
 <p><code>$&quot;item {count}&quot;</code> interpolates a value. <code>StringComparison.OrdinalIgnoreCase</code> makes a comparison policy explicit. <code>EnumerateRunes()</code> visits Unicode scalar values. <code>Encoding.UTF8.GetByteCount</code> measures an encoded representation.</p>
 <p>Indexing a string can split a surrogate pair. Invariant casing is useful for stable transformations but is not a universal user-language display rule. Normalization and comparison are separate policies.</p>
 <h3 id="review-before-continuing">Review before continuing<a class="heading-anchor" href="#review-before-continuing" aria-label="Link to this section">#</a></h3>
-<p>Run the reference and confirm that it prints <code>csharp-004: passed</code>, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.</p></article>
+<p>Run the reference and confirm it prints <code>csharp-004: passed</code>, then rerun the guide&#x27;s counterexample.</p></article>
   </main>
 </body>
 </html>

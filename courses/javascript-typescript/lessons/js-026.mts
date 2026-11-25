@@ -2,18 +2,15 @@
 
 export {};
 // Exercise 1: Maintain balance through methods: change one input
-// Copy Example A into a scratch `main.mts` and change `const wallet = new Wallet(100);` to
-// `const wallet = new Wallet(101);`. Before running it, predict which check fails and which
-// value it now sees; then run it and restore the original line.
-// Expected: The changed run fails with an `AssertionError` at `assert.equal(wallet.cents,
+// In a scratch copy of Example A, change `const wallet = new Wallet(100);` to `const wallet
+// = new Wallet(101);`. Which check fails, and what value does it see?
+// Expected: The edited run fails with an `AssertionError` at `assert.equal(wallet.cents,
 // 120)`. Restoring `const wallet = new Wallet(100);` brings back: balance 120; no enumerable
 // balance field.
 
 // Exercise 2: Inject a deterministic clock: debug a regression
-// A regression changed one token in Example B, so one line now reads `const service = new
-// ReceiptService({ now: () => new Date('2027-01-01T00:00:00.000Z') });`. Run Example B with
-// that line, use the failing check to locate the defect and repair it without changing the
-// check.
+// A regression made one Example B line read `const service = new ReceiptService({ now: () =>
+// new Date('2027-01-01T00:00:00.000Z') });`. Locate and repair it without editing the check.
 // Expected: Before the repair the run fails with an `AssertionError` at
 // `assert.deepEqual(service.create('A'), { id: 'A', createdAt: '2026-01-01T00:00:00.000Z'
 // })`. Restoring `const service = new ReceiptService({ now: () => new

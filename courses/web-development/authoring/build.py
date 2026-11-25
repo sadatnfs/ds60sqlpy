@@ -30,11 +30,11 @@ ANSWER_VERBS = {
     "Resolve",
     "Trace",
 }
-FAILURE_NOTES = {
-    "html": "Keep the failing source, the viewport width and what you observed, then repair one cause at a time. A browser can recover malformed HTML, silently ignore a CSS declaration or display a plausible layout with the wrong reading order, so inspect the element and its computed styles in the browser's developer tools instead of trusting the rendering alone.",
-    "php": "Keep the failing source, its input and the exact output, then repair one cause at a time. PHP can produce correct-looking text while missing an invalid-input branch, so rerun the empty, wrong-type and boundary cases after every fix.",
-    "markdown": "A plausible plan or one successful request can hide an untested failure path. Record each request, response and stored state, and repeat the original failing case after every change.",
-}
+# Shared operating guidance (preview limits, debugging routine, review loop and
+# reference comparison) lives in STUDY-GUIDE.md; lessons keep only their own
+# teaching and link there with short pointers.
+STUDY = "../STUDY-GUIDE.md"
+LESSON_FIELDS = ("workspace", "debugging", "retrieval", "reference_note")
 
 
 def answer_task(prompt: str) -> bool:
@@ -56,6 +56,7 @@ def specs() -> list[dict]:
         check_key_terms(item["n"], item.get("key_terms"))
         check_reasoning(item["n"], item.get("reasoning"))
         check_contrast(item["n"], item.get("contrast"))
+        check_lesson_fields(item["n"], item)
     return result
 
 
@@ -105,6 +106,14 @@ def check_contrast(n: int, item: object) -> None:
         raise ValueError(f"web-{n:03d} contrast code must be a non-empty fenced snippet")
     if "\u2014" in code or "\u2013" in code:
         raise ValueError(f"web-{n:03d} contrast code contains a dash character")
+
+
+def check_lesson_fields(n: int, item: dict) -> None:
+    """Require the lesson-specific workspace, debugging, retrieval and reference prose."""
+    for field in LESSON_FIELDS:
+        plain_text(n, field, item.get(field))
+        if len(item[field].split()) < 20:
+            raise ValueError(f"web-{n:03d} {field} is too thin to teach")
 
 
 def check_key_terms(n: int, pairs: object) -> None:
@@ -172,13 +181,13 @@ def artifacts() -> dict[Path, str]:
                 verification=tasks[2][1],
             )
         )
-        readme = "**How to run lessons** in the [subject README](../README.md)"
         if language == "html":
-            execution = f"Choose **HTML browser preview** and work in `{source}`, one complete HTML document with embedded CSS and, where taught, inline JavaScript. The preview is offline: it cannot contact a server, submit real forms or load external assets, so every fixture is inline and synthetic. Save your attempt before comparing it with `{reference}`. {readme} explains Live preview, the viewport presets and what a reference check does not show."
+            pointer = f"Open `{source}` in **HTML browser preview**; fixtures are inline and synthetic ([offline rules]({STUDY}#html-preview))."
         elif language == "php":
-            execution = f"Choose the **PHP CLI** worker and work in `{source}`, which runs as `main.php` in a bounded Linux process with PDO SQLite. Every input is a small synthetic value, and CLI runs are fresh processes, not persistent HTTP requests. Save your attempt before comparing it with `{reference}`. {readme} lists what the pad does not provide."
+            pointer = f"Run `{source}` with **PHP CLI**: synthetic inputs, not persistent HTTP requests ([why]({STUDY}#php-cli))."
         else:
-            execution = f"This lesson is a design worksheet saved as `{source}`. The classroom does not start a server, install packages or control Docker, so a command here is a proposal until you deliberately run it in your own disposable project. The optional lab is `courses/web-development/fixtures/php-http-lab/`; read its README before preparing it and never expose it to the internet. {readme} describes this boundary."
+            pointer = f"`{source}` is a design worksheet; its commands are proposals ([worksheet rules]({STUDY}#worksheets))."
+        execution = f"{spec['workspace']}\n\n{pointer}"
         terms = series(spec["terms"][:3])
         key_terms = "\n".join(
             f"- **{term}:** {definition}" for term, definition in spec["key_terms"]
@@ -220,9 +229,11 @@ def artifacts() -> dict[Path, str]:
             f"```{contrast['lang']}\n{contrast['code']}\n```\n\n{contrast['reading']}\n"
         )
         text += "\n## Six progressive exercises\n"
-        if any(answer_task(prompt) for prompt, *_ in tasks):
-            text += "\nExercises that ask you to predict, explain, compare or diagnose keep their answers in the solutions file. The others show the evidence to look for.\n"
-        answers = f"# {key}: explanatory solutions\n\nOpen this after your own attempt. Each answer explains the lesson's synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in `{guide}`.\n"
+        answer_only = [str(i) for i, (prompt, *_) in enumerate(tasks, 1) if answer_task(prompt)]
+        if answer_only:
+            plural = "Exercises" if len(answer_only) > 1 else "Exercise"
+            text += f"\n{plural} {series(answer_only)} keep their expected answers in the solutions file.\n"
+        answers = f"# {key}: explanatory solutions\n\nAttempt each exercise before reading; the mechanism is in `{guide}` ([using these answers]({STUDY}#solutions)).\n"
         for i, ((prompt, answer, hint, why), reason) in enumerate(
             zip(tasks, spec["reasoning"], strict=True), 1
         ):
@@ -243,13 +254,15 @@ def artifacts() -> dict[Path, str]:
 
 {spec["mistakes"]}
 
-{FAILURE_NOTES[language]}
+{spec["debugging"]}
+
+The shared [debugging routine]({STUDY}#debugging-{language}) covers what to record before each repair.
 
 ## Retrieval, transfer and next steps
 
-Close the worked answers and explain {terms} without using the terms as their own definitions. Rebuild worked example 1 ({spec["examples"][0][0]}) from a blank {"worksheet" if language == "markdown" else "pad"}, then try one new value, one empty or missing case and one unusual boundary. State which result would disprove your explanation.
+{spec["retrieval"]}
 
-If you can reproduce the output but cannot explain why it happens, revisit {prereq_text if prerequisites else "the worked examples"}. A saved completion marker records your own progress; it is not a certification.
+Revisit {prereq_text if prerequisites else "the worked examples"} when an output is predictable but unexplained ([review loop]({STUDY}#review-loop)).
 
 ## Primary references
 
@@ -271,14 +284,9 @@ Finish with a new boundary case and ask me to explain the mechanism in my own wo
 """
         )
         if language == "markdown":
-            answers += "\n## Comparing your worksheet\n\nThis lesson has no executable reference. Compare your worksheet with the answers above. The optional lab in `courses/web-development/fixtures/php-http-lab/` gives real request evidence only when you deliberately run it.\n"
+            answers += f"\n## Comparing your worksheet\n\n{spec['reference_note']}\n\nThis lesson has no executable reference ([worksheet rules]({STUDY}#worksheets)).\n"
         else:
-            limit = (
-                "its success message is not an accessibility audit or proof of responsive behavior at every size"
-                if language == "html"
-                else "server lifecycle, persistence, concurrency and security need their own integration evidence"
-            )
-            answers += f"\n## Reference comparison\n\nOpen `{reference}` only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; {limit}.\n"
+            answers += f"\n## Reference comparison\n\n{spec['reference_note']}\n\nOpen `{reference}` after saving your attempt ([comparing with the reference]({STUDY}#references)).\n"
         if language in {"html", "php"}:
             templates = HERE / "templates"
             files[ROOT / reference] = (templates / f"{key}_reference{extension}").read_text(

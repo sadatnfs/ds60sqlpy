@@ -206,11 +206,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Schema:</strong> The expected structure and meaning of fields.</p>
 <p><strong>Migration:</strong> A deliberate conversion between schema versions.</p>
 <h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>The Linux Docker classroom compiles your saved pad as <code>Program.cs</code> in its fixed .NET 10 project. C# 14 is the matching language generation. This route uses the prepared framework libraries; it does not accept arbitrary project files, NuGet packages, command arguments or interactive input. The explicit <code>Program.Main</code> entrypoint makes compilation and execution visible. <code>Check</code> throws on a false condition in every build configuration, unlike conditional debugging assertions.</p>
-<p>Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.</p>
+<p><code>ItemDto</code> and <code>Valid</code> are declared after <code>Main</code>. Default <code>System.Text.Json</code> options match property names case-sensitively, so JSON with lowercase name and quantity keys decodes into an <code>ItemDto</code> whose Name is null and Quantity is 0, without any exception. That silent default is the subject of task 4.</p>
+<p>Compile contract, starter stop and success marker: <a href="../STUDY-GUIDE.md.html#running-a-lesson">running a lesson</a>.</p>
 <h3 id="syntax-anatomy-and-execution-trace">Syntax anatomy and execution trace<a class="heading-anchor" href="#syntax-anatomy-and-execution-trace" aria-label="Link to this section">#</a></h3>
 <p><code>JsonSerializer.Serialize</code> creates JSON text. <code>Deserialize&lt;T&gt;</code> maps it into T and can return null. Records provide compact transport shapes. Serialization options control naming and formatting but do not replace domain validation.</p>
-<p>Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.</p>
+<p>Each example ends with a trace; method: <a href="../STUDY-GUIDE.md.html#tracing-a-program">tracing a program</a>.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="example-a-round-trip-a-small-transport-record">Example A: Round-trip a small transport record<a class="heading-anchor" href="#example-a-round-trip-a-small-transport-record" aria-label="Link to this section">#</a></h4>
 <p>Equality checks the modeled data rather than incidental property ordering in JSON text.</p>
@@ -253,6 +253,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
                                                                       <span class="syntax-operator">&gt;=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The restored name and quantity match the original record.</p>
+<p><strong>Trace.</strong> <code>Serialize</code> writes the record&#x27;s public properties in declaration order, producing the text with Name pear and Quantity 3. <code>Deserialize&lt;ItemDto&gt;</code> reads that text, matches both keys to the constructor parameters and builds a new record. Record equality compares the two property values, so <code>restored == original</code> is true even though they are different objects.</p>
 <h4 id="example-b-validate-after-structural-decoding">Example B: Validate after structural decoding<a class="heading-anchor" href="#example-b-validate-after-structural-decoding" aria-label="Link to this section">#</a></h4>
 <p>Parsing answers whether the representation is understood. Validation answers whether the application may use it.</p>
 <pre class="highlighted-code"><code class="language-csharp"><span class="syntax-keyword">using</span> System<span class="syntax-punctuation">;</span>
@@ -295,6 +296,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
                                                                       <span class="syntax-operator">&gt;=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> Valid JSON can decode into a rejected domain value.</p>
+<p><strong>Trace.</strong> The JSON text is well formed, and -2 is a valid JSON number, so decoding succeeds and returns a record with Quantity -2. <code>Valid</code> then checks the domain rules: the name is not blank, but the quantity is negative, so it returns false. A record with an empty name decodes just as easily and also fails validation.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <ol>
 <li><strong>Predict and explain.</strong> Predict what round-trip equality establishes and what it does not.</li>
@@ -314,10 +316,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <ol start="6">
 <li><strong>Transfer and justify.</strong> Design a migration from a renamed quantity field while retaining old saved records.</li>
 </ol>
-<p>For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.</p>
+<p>Log each task in the <a href="../STUDY-GUIDE.md.html#recording-exercise-evidence">evidence table</a> before opening the explanation.</p>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
 <p>JSON text equality is sensitive to formatting and property ordering. Structural decoding does not enforce every domain invariant. Keep public transport models separate from internal objects carrying credentials or resources.</p>
-<p>A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.</p>
+<p>For task 4, the text with only a Name key decodes with Quantity 0, because the missing constructor parameter receives its default; a validator cannot tell that from an explicit zero unless the contract makes Quantity nullable or required. For task 5, malformed text throws <code>JsonException</code>, the literal null returns a null reference and an unknown extra key is ignored.</p>
+<p>Repair routine: <a href="../STUDY-GUIDE.md.html#building-a-regression-case">building a regression case</a>.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <ol>
 <li>Reproduce Example A (Round-trip a small transport record) before changing anything, and confirm its observation: The restored name and quantity match the original record.</li>
@@ -325,9 +328,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>Before opening the explanation, test your task 3 attempt against this lesson&#x27;s main pitfall: JSON text equality is sensitive to formatting and property ordering.</li>
 </ol>
 <h3 id="self-check-and-next-step">Self-check and next step<a class="heading-anchor" href="#self-check-and-next-step" aria-label="Link to this section">#</a></h3>
-<p>Explain Serialization, Schema, Migration without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.</p>
+<p>Explain why comparing JSON strings is a weaker round-trip test than comparing records. List what <code>Deserialize&lt;ItemDto&gt;</code> returns or throws for null, for a missing Quantity and for a syntax error. For task 6, describe how old records with a renamed field stay readable after the rename.</p>
+<p>Then follow the general <a href="../STUDY-GUIDE.md.html#self-check-routine">self-check routine</a> and save your pad.</p>
 <h3 id="sources-and-execution-boundary">Sources and execution boundary<a class="heading-anchor" href="#sources-and-execution-boundary" aria-label="Link to this section">#</a></h3>
-<p><a href="https://learn.microsoft.com/en-us/dotnet/csharp/">Official language or framework documentation</a>. The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.</p>
+<p><a href="https://learn.microsoft.com/en-us/dotnet/csharp/">Documentation</a>: The <code>System.Text.Json</code> serialization overview describes <code>JsonSerializer</code>, naming policies, case sensitivity and missing-member handling.</p>
+<p>Provenance and limits: <a href="../STUDY-GUIDE.md.html#sources-and-execution-boundary">sources and execution boundary</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for csharp-026: JSON contracts and schema evolution.
 Read courses/csharp/guides/csharp-026.md and courses/csharp/lessons/csharp-026.cs. Prerequisites: csharp-025.

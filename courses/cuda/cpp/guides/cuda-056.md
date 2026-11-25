@@ -4,18 +4,15 @@
 
 Advanced; about 130 minutes, plus any optional hardware experiment. Direct prerequisites: `cuda-019`, `cuda-028`, `cuda-036`, `cuda-039`
 
-The order supports learning at your own pace. Reading and CPU reasoning remain
-available when NVIDIA hardware is absent. Advanced hardware features need their
-own capability checks and are not prerequisites for opening this chapter.
+Pacing, evidence labels and platform rules for every chapter are in the [CUDA study guide](../../STUDY-GUIDE.md).
 
 ## Learning objectives
 
 Implement a two-stage asynchronous copy pipeline with correct tails and explain whether the overlap helped.
 
-Work through *Asynchronous copies, barriers and software pipelines* with the concrete cases below. Finish with this evidence:
-correct tails, synchronization checks and a measured explanation of whether overlap helped. Distinguish an algorithmic
-calculation, a compiled artifact and an actual device observation when explaining
-what your work establishes.
+**Scope:** Producer/consumer stages, completion tokens, shared-memory lifetime, double buffering and alignment.
+
+**Evidence to produce:** Correct tails, synchronization checks and a measured explanation of whether overlap helped.
 
 ## Purpose, vocabulary and mental model
 
@@ -30,28 +27,17 @@ Within-GPU asynchronous copy mechanisms can move tiles from global to shared sto
 
 ## How to run and study this lesson
 
-Use the saved reading worksheet in `/classroom`; the reading pad does not execute
-CUDA. For the bounded calculation, select **CPU model (Python)**, whose
-answer-free starter supplies the literal fixtures and task contract. The
-[CUDA C++ study workflow](../README.md) covers platforms, optional GPU
-compilation and evidence labels. In a prepared Python environment you can also
-run the separate [CPU reference](../references/cuda-056_cpu.py) from the
-repository root:
+Trace worked example 1 by hand, then run the [CPU reference](../references/cuda-056_cpu.py) from the repository root:
 
 ```sh
 python courses/cuda/cpp/references/cuda-056_cpu.py
 ```
 
-Its assertions check the stated numerical result or model invariant; console
-text is evidence of this CPU model only, not of CUDA execution.
-
 ## Worked example 1: trace the mechanism
 
 For three tiles using two slots, tile 0 loads slot A and tile 1 loads slot B. Tile 2 may reuse A only after computation using tile 0 finishes. Copy completion permits reading; consumer completion permits reuse. Those are two different milestones.
 
-The complete CPU model below intentionally models only the named arithmetic,
-layout, dependency or capability decision. It does not model GPU scheduling,
-caches, instruction timing or device memory visibility.
+**Why:** Copy completion allows reading, while consumer completion allows overwriting.
 
 ```python
 states = ["free", "copying", "ready", "consuming", "done", "free"]
@@ -60,41 +46,37 @@ assert 16 % 16 == 0 and (16 + 4) % 16 != 0
 print({"slot_lifetime": states, "offset_address_aligned_to_16": False})
 ```
 
-**Expected observation:** Every assertion succeeds. A representative CPU output is:
+**Expected observation:** every assertion succeeds, and the CPU model prints:
 
 ```text
 {'slot_lifetime': ['free', 'copying', 'ready', 'consuming', 'done', 'free'], 'offset_address_aligned_to_16': False}
 ```
 
-Integers, shapes and ordering must match exactly; only assertions with an explicit
-tolerance accept small floating-point differences. A printed duration is a model
-output, not a measured GPU benchmark.
+**Check:** The reference asserts ready precedes consuming, which precedes done.
 
 ## Worked example 2: change a meaningful condition
 
 A 16-byte transfer requirement does not mean an arbitrary pointer cast creates 16-byte alignment. An address offset by four bytes from an aligned base is still misaligned for that contract. Use valid alignment/layout or a supported fallback, and test the final partial tile separately.
 
-Before applying this example to your own program, write down which inputs are
-read, which result is produced, and the condition that makes the comparison
-valid. Keep the original case as a regression check when changing a boundary.
+**Why:** An address 4 bytes past an aligned base is not a multiple of 16.
+
+**Check:** The reference asserts (16 + 4) % 16 != 0 and prints aligned False.
 
 ## Six progressive exercises
 
-Exercises 1 and 2 are guided reconstructions of the worked examples; exercises
-3-6 change an input, diagnose a defect, test a boundary and transfer the idea.
-For each one, keep the calculation, output, diagram or failure policy you
-produce so another reader can compare it with the worked cases. If the hint is
-not enough, reread the mechanism paragraph and the bounded CPU assertion.
-
 ### Exercise 1
 
-Predict and trace the first worked example before running its CPU reference. Write every intermediate quantity that leads to the stated result, including units or ownership where applicable.
+Reconstruct worked example 1 on paper before running its CPU reference. Load tiles 0 and 1 into slots A and B, and reuse A for tile 2 only after tile 0's compute finishes.
+
+**Trap to avoid:** Reusing A when tile 0's copy completed overwrites data still being computed on.
 
 **Hint:** Start with the literal input and intermediate quantities in worked example 1.
 
 ### Exercise 2
 
-Reconstruct the second worked example without copying its conclusion. Identify the changed input or condition, show the resulting calculation or dependency, and explain why it differs from the first example.
+Rework worked example 2 without copying its conclusion. Check the real address alignment before using a 16-byte transfer.
+
+**Trap to avoid:** Casting the pointer to a 16-byte type does not change its address.
 
 **Hint:** Identify exactly which condition changes in worked example 2.
 
@@ -102,11 +84,15 @@ Reconstruct the second worked example without copying its conclusion. Identify t
 
 List the lifetime states of one tile slot.
 
+**Trap to avoid:** Collapsing ready and done into one state allows reuse too early.
+
 **Hint:** Use the first worked example to establish the relevant quantities, then change only the requested input.
 
 ### Exercise 4
 
 A consumer reads immediately after initiating a copy. Diagnose it.
+
+**Trap to avoid:** Reading immediately sees stale or partial data.
 
 **Hint:** Locate the failed phase or violated dependency before proposing a repair.
 
@@ -114,35 +100,34 @@ A consumer reads immediately after initiating a copy. Diagnose it.
 
 What happens to a partial final tile?
 
+**Trap to avoid:** Filling the tile by over-reading past the end can fault.
+
 **Hint:** Check what the algorithm is allowed to read, write or assume at this boundary.
 
 ### Exercise 6
 
 Choose whether to add asynchronous staging.
 
+**Trap to avoid:** Adding them because they sound faster can slow small kernels.
+
 **Hint:** State the output contract and which observations are needed in the new application.
 
 ## Common mistakes and diagnosis
 
-A tempting but incorrect claim in this chapter is: **initiating a copy makes its destination immediately readable. .**
-
-For the concrete failure exercise, a consumer reads immediately after initiating a copy. Diagnose it.
-Preserve the original input and the stage where behavior diverged, and compare
-with the CPU model before changing hardware configuration.
+A tempting but incorrect claim: **Initiating a copy makes its destination immediately readable.** Issuing an asynchronous copy only starts the transfer, so the consumer must wait on its completion token or barrier before reading the destination. A second milestone governs reuse: a slot may be refilled only after the consumer has finished with it. Worked example 1 separates the two milestones for three tiles in two slots, and worked example 2 shows that alignment must be real, not cast into existence. Double buffering adds overlap but not correctness: with two slots, every refill still waits for the consumer of the tile that last used that slot.
 
 ## Self-check, retrieval and transfer
 
-Explain the first example without its code, then use the second example to state
-one assumption that matters. Complete Exercise 3 independently, use Exercise 4 to
-diagnose a plausible defect, check the boundary in Exercise 5, and retain the
-application contract from Exercise 6. Compare the [separate explanations](../solutions/cuda-056_solutions.md)
-only after your attempt or a deliberate reveal. A reading marker records your
-choice; it does not certify hardware qualification or expert mastery.
+1. List the lifetime states of one tile slot.
+2. When may tile 2 reuse slot A in worked example 1?
+3. Is an address four bytes past a 16-byte aligned base valid for a 16-byte contract?
+4. How should a partial final tile be handled?
+
+Short answers are in the [separate explanations](../solutions/cuda-056_solutions.md#self-check-answers); compare only after an attempt.
 
 ## Primary references
 
-Check the documentation that matches your prepared toolkit before optional
-hardware execution.
+Use the documentation that matches your prepared toolkit.
 
 - [Asynchronous copies](https://docs.nvidia.com/cuda/cuda-programming-guide/04-special-topics/async-copies.html)
 

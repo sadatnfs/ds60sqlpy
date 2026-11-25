@@ -36,5 +36,7 @@
       "wrong": "Reporting the average of the fold means, 3, as the error per observation. It gives the single observation fold the same weight as the three observation fold and understates the pooled error by 0.5.",
       "verify": "`(2 + 12) / (1 + 3) == 3.5` returns TRUE and `mean(c(2 / 1, 12 / 3)) == 3` returns TRUE."
     }
-  ]
+  ],
+  "run_note": "The starter holds eight rows with ids 1 to 8, four groups A to D of two rows each, and x values 0 to 7, and an empty results list. Run it and list which groups would appear on both sides of an alternating row split: all four would. Splitting by group instead keeps every group on one side, which is the partition a claim about new groups requires. Compute any centering constant from the training rows only.",
+  "checks_note": "The assertions confirm that the grouped split shares no group between training and testing while the alternating split shares all four, that leave-one-group-out folds cover 8 rows with essentially zero error for the exact rule y equals 1 plus 2x, that a training-only center of 1 differs from a leaked mean of 51, that every training day precedes every test day, and that a pooled ratio of 3.5 differs from the mean of ratios, 3. They do not cover nested tuning."
 }

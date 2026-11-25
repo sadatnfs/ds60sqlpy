@@ -112,20 +112,18 @@ After rotating the fixture credential, this call with the old token should retur
 
 ## Complete worked source
 
-This is a project-only command notebook. Read and edit it in the classroom; run its explicitly labeled commands from the copied owned Docker workshop. The classroom does not execute these service commands.
+The classroom does not execute these service commands. See the [workshop rules](../STUDY-GUIDE.md#workshop-notebooks).
 
 # Delta Sharing apache-078 prepared command notebook
 
-Copy the owned Delta Sharing project and follow PREPARATION.md. Delta Sharing
-belongs to Delta Lake/Linux Foundation. The offline preparation actions are:
+The copied Delta Sharing project never stores a recipient token, and these two actions work with no profile at all. That is the safe state to begin a rotation exercise from:
 
 ```bash
 bash run.sh prepare
 bash run.sh plan
 ```
 
-For a separately prepared actual owned reference server and untracked recipient
-profile, the bounded native Docker protocol client runs with:
+Run `check` once with the old fixture profile and once with the rotated one, both against your prepared server:
 
 ```bash
 bash run.sh check
@@ -133,9 +131,7 @@ bash run.sh check
 
 Rotate only fixture credentials via the real provider mechanism, then test old/new control access separately. Previously issued URLs and downloaded copies have different revocation boundaries.
 
-The classroom Markdown pad does not start a service. Source configuration and
-unit policy fixtures are not actual reference-server receipts. Keep credentials
-and signed URL query strings out of all published source and evidence.
+Rotation stops new control calls made with the old token. URLs already issued keep working until they expire, and copies already downloaded are beyond the provider's reach.
 
 ## Primary references
 

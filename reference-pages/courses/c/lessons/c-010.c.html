@@ -197,25 +197,15 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">int</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">void</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span></span>
 <span class="source-line">  <span class="syntax-comment">/* Exercise 1: Use named fields: change one input</span></span>
-<span class="source-line"><span class="syntax-comment">     Copy worked example 1, the &quot;use named fields&quot; case, into a scratch pad and</span></span>
-<span class="source-line"><span class="syntax-comment">     change `struct Point p = {.x = 2, .y = 3};` to `struct Point p = {.x = 3,</span></span>
-<span class="source-line"><span class="syntax-comment">     .y = 3};`. Before running, predict which CHECK fails and which value it</span></span>
-<span class="source-line"><span class="syntax-comment">     sees in place of the worked result (the field sum is 5); then run it and</span></span>
-<span class="source-line"><span class="syntax-comment">     restore the original line. Expected: With `struct Point p = {.x = 3, .y =</span></span>
-<span class="source-line"><span class="syntax-comment">     3};` the run stops with `Check failed` at the CHECK on `p.x + p.y == 5`,</span></span>
-<span class="source-line"><span class="syntax-comment">     because the &quot;use named fields&quot; case no longer shows that the field sum</span></span>
-<span class="source-line"><span class="syntax-comment">     is 5. Restoring `struct Point p = {.x = 2, .y = 3};` brings that</span></span>
-<span class="source-line"><span class="syntax-comment">     observation back. */</span></span>
+<span class="source-line"><span class="syntax-comment">     In worked example 1, change `struct Point p = {.x = 2, .y = 3};` to `struct</span></span>
+<span class="source-line"><span class="syntax-comment">     Point p = {.x = 3, .y = 3};`. Predict which value the CHECK on `p.x + p.y</span></span>
+<span class="source-line"><span class="syntax-comment">     == 5` sees, then run and restore. Expected: `Check failed` at `p.x + p.y ==</span></span>
+<span class="source-line"><span class="syntax-comment">     5`; restoring `struct Point p = {.x = 2, .y = 3};` passes again. */</span></span>
 <span class="source-line"></span>
 <span class="source-line">  <span class="syntax-comment">/* Exercise 2: Copy scalar fields: debug a regression</span></span>
-<span class="source-line"><span class="syntax-comment">     A regression changed one token in worked example 2, the &quot;copy scalar</span></span>
-<span class="source-line"><span class="syntax-comment">     fields&quot; case, so one line now reads `struct Point a = {3, 3};`. Run the</span></span>
-<span class="source-line"><span class="syntax-comment">     example with that line, use the failing CHECK to find why the original x</span></span>
-<span class="source-line"><span class="syntax-comment">     stays 2 no longer holds and repair the line without changing the CHECK.</span></span>
-<span class="source-line"><span class="syntax-comment">     Expected: Before the repair the run stops with `Check failed` at the CHECK</span></span>
-<span class="source-line"><span class="syntax-comment">     on `a.x == 2 &amp;&amp; b.x == 9`. Once the line reads `struct Point a = {2, 3};`</span></span>
-<span class="source-line"><span class="syntax-comment">     again, the &quot;copy scalar fields&quot; case again shows that the original x</span></span>
-<span class="source-line"><span class="syntax-comment">     stays 2. */</span></span>
+<span class="source-line"><span class="syntax-comment">     Worked example 2 now has a line reading `struct Point a = {3, 3};`. Repair</span></span>
+<span class="source-line"><span class="syntax-comment">     it so that the original x stays 2 again. Expected: `Check failed` at `a.x</span></span>
+<span class="source-line"><span class="syntax-comment">     == 2 &amp;&amp; b.x == 9` until the line reads `struct Point a = {2, 3};` again. */</span></span>
 <span class="source-line"></span>
 <span class="source-line">  <span class="syntax-comment">/* Exercise 3: Interpret an integer alternative</span></span>
 <span class="source-line"><span class="syntax-comment">     Create a tagged number with an integer payload.</span></span>

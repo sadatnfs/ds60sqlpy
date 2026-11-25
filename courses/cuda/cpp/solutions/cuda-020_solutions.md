@@ -4,8 +4,6 @@
 
 A reduction combines values with an operation and identity. A tree reduces dependency depth compared with a serial chain, but it changes floating-point addition order. A block reduction usually first writes one partial per block; another launch combines those partials. This creates a real cross-block dependency without an unsafe grid-wide spin barrier. Tail threads contribute the identity, such as zero for addition. For a maximum, zero is not a neutral value if all inputs are negative. Define empty input explicitly and retain a higher-accuracy CPU oracle for floating-point work.
 
-The separate [CPU reference](../references/cuda-020_cpu.py) checks the chapter's bounded model. It does not execute CUDA or establish GPU timing. Compare after attempting the worksheet or explicitly choosing to reveal solutions.
-
 ## Exercise 1
 
 Pad \([1,2,3,4,5]\) to \([1,2,3,4,5,0,0,0]\). A halving tree produces pairwise states \([6,2,3,4]\), then \([9,6]\), then \([15]\). Each phase needs the appropriate communication ordering. Exact integer arithmetic makes ownership mistakes visible without rounding ambiguity.
@@ -78,12 +76,16 @@ Reduce both sum and count, then divide only when count is nonzero; define the em
 
 **How to verify:** Compute the mean of [1, 2, 3, 4, 5] as 3 and test empty input.
 
+## Self-check answers
+
+1. **Trace the halving tree for [3,1,4,1].** [7,2], then [9].
+2. **What identity does a product reduction use for tail threads?** One, so padding leaves the product unchanged.
+3. **Why compare a float reduction against a compensated reference instead of a plain CPU loop?** The CPU loop is just another association order; a compensated reference shows the true error.
+
 ## Numerical reference and its limits
 
-The complete CPU model is [here](../references/cuda-020_cpu.py). Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It does not claim CUDA execution, concurrency safety or a performance measurement.
+The [CPU reference](../references/cuda-020_cpu.py) reproduces worked example 1 and prints `[[6, 2, 3, 4], [9, 6], [15]]`.
 
 ## Transfer review
 
 Reduce both sum and count, then divide only when count is nonzero; define the empty mean policy explicitly.
-
-A complete explanation must name its inputs, the unchanged mathematical contract, the changed boundary or resource condition, and the evidence still needed on actual hardware. Preserve a CPU baseline even after a GPU path becomes available.

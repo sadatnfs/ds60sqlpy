@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cuda/python/solutions/cuda-090_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="cuda-090-explained-solutions">cuda-090: explained solutions<a class="heading-anchor" href="#cuda-090-explained-solutions" aria-label="Link to this section">#</a></h2>
-<p>These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.</p>
+<p>Compare with your <a href="../lessons/cuda-090.md.html">worksheet</a> attempt.</p>
 <h3 id="exercise-1-calculate-scaled-and-unscaled-values">Exercise 1: Calculate scaled and unscaled values<a class="heading-anchor" href="#exercise-1-calculate-scaled-and-unscaled-values" aria-label="Link to this section">#</a></h3>
 <p>Apply inverse scale exactly once.</p>
 <p><strong>Approach.</strong> Trace the scaled value: a gradient of 0.5 multiplied by scale 1024 becomes 512 during backpropagation, and dividing by 1024 once before the optimizer step restores 0.5.</p>
@@ -231,9 +231,19 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Why it is correct here.</strong> Mixed precision can raise throughput while degrading quality. A combined score hides which side changed.</p>
 <p><strong>A plausible wrong approach.</strong> Reporting the speedup without the quality comparison can justify a configuration that fails to train properly.</p>
 <p><strong>How to verify.</strong> Present a table with both metrics per configuration, and accept mixed precision only if quality meets the baseline tolerance.</p>
+<h3 id="self-check-answers">Self-check answers<a class="heading-anchor" href="#self-check-answers" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>Why scale the loss in fp16 training?</strong> Small gradients can underflow to zero in fp16. Scaling keeps them representable, and dividing afterward restores the intended update.</li>
+</ol>
+<ol start="2">
+<li><strong>How do fp16 and bf16 differ although both use 16 bits?</strong> bf16 has more exponent bits and therefore more range, while fp16 has more fraction bits and therefore more precision within its smaller range.</li>
+</ol>
+<ol start="3">
+<li><strong>Can a speedup excuse a numerical failure?</strong> No. Validate finite gradients and held-out behavior first; speed and memory are compared only after quality matches the baseline.</li>
+</ol>
 <h3 id="reference-observation">Reference observation<a class="heading-anchor" href="#reference-observation" aria-label="Link to this section">#</a></h3>
 <p>Correct gradient 0.5; incorrect clipping order yields 0.0009765625.</p>
-<p>The reference file is <code>courses/cuda/python/references/cuda-090_cpu.py</code>. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.</p></article>
+<p>Asserted by <code>courses/cuda/python/references/cuda-090_cpu.py</code>.</p></article>
   </main>
 </body>
 </html>

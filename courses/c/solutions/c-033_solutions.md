@@ -1,6 +1,8 @@
 # c-033: explained solutions
 
-Compare after an attempt or explicit reveal. The complete executable reference, `c-033_solution.c`, implements all six cases, from the "create a trailing payload" case to the "transfer source independence" case, in one `main.c`.
+`c-033_solution.c` assembles the "create a trailing payload" case through the "transfer source independence" case in one `main.c`.
+
+Compare only after an attempt: [Compare and transfer](../STUDY-GUIDE.md#compare-and-transfer).
 
 ## Mechanism and assumptions
 
@@ -10,7 +12,7 @@ struct Packet { size_t length; unsigned char data[]; } declares a flexible membe
 
 ## Exercise 1: Create a trailing payload: change one input
 
-Copy worked example 1, the "create a trailing payload" case, into a scratch pad and change `unsigned char data[] = {1, 2, 3};` to `unsigned char data[] = {2, 2, 3};`. Before running, predict which CHECK fails and which value it sees in place of the worked result (length and all three bytes are retained); then run it and restore the original line.
+In worked example 1, change `unsigned char data[] = {1, 2, 3};` to `unsigned char data[] = {2, 2, 3};`. Predict which value the CHECK on `p != NULL && p->length == 3 && p->data[0] == 1 && p->data[2] == 3` sees, then run and restore.
 
 The unchanged code is worked example 1:
 
@@ -21,13 +23,15 @@ CHECK(p != NULL && p->length == 3 && p->data[0] == 1 && p->data[2] == 3);
 free(p);
 ```
 
-**Expected:** With `unsigned char data[] = {2, 2, 3};` the run stops with `Check failed` at the CHECK on `p != NULL && p->length == 3 && p->data[0] == 1 && p->data[2] == 3`, because the "create a trailing payload" case no longer shows that length and all three bytes are retained. Restoring `unsigned char data[] = {1, 2, 3};` brings that observation back.
+**Expected:** `Check failed` at `p != NULL && p->length == 3 && p->data[0] == 1 && p->data[2] == 3`; restoring `unsigned char data[] = {1, 2, 3};` passes again.
+
+**Verify:** Name the value that made `p != NULL && p->length == 3 && p->data[0] == 1 && p->data[2] == 3` false, where worked example 1 showed that length and all three bytes are retained.
 
 One owner releases header and payload together.
 
 ## Exercise 2: Create an empty packet: debug a regression
 
-A regression changed one token in worked example 2, the "create an empty packet" case, so one line now reads `struct Packet *p = packet_create(NULL, 1);`. Run the example with that line, use the failing CHECK to find why the header exists and records zero length no longer holds and repair the line without changing the CHECK.
+Worked example 2 now has a line reading `struct Packet *p = packet_create(NULL, 1);`. Repair it so that the header exists and records zero length again.
 
 The unchanged code is worked example 2:
 
@@ -37,7 +41,9 @@ CHECK(p != NULL && p->length == 0);
 free(p);
 ```
 
-**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `p != NULL && p->length == 0`. Once the line reads `struct Packet *p = packet_create(NULL, 0);` again, the "create an empty packet" case again shows that the header exists and records zero length.
+**Expected:** `Check failed` at `p != NULL && p->length == 0` until the line reads `struct Packet *p = packet_create(NULL, 0);` again.
+
+**Verify:** Explain how `struct Packet *p = packet_create(NULL, 1);` changes the value `p != NULL && p->length == 0` tests, using your failing and repaired runs.
 
 The helper avoids calling memcpy on absent payload pointers when no bytes are requested.
 
@@ -50,6 +56,8 @@ CHECK(packet_create(NULL, SIZE_MAX) == NULL);
 ```
 
 **Expected:** The operation returns NULL before allocation.
+
+**Verify:** Keep a CHECK equivalent to `packet_create(NULL, SIZE_MAX) == NULL`. Control edit: `CHECK(packet_create(NULL, SIZE_MAX) != NULL);` must fail; then restore it.
 
 Checking the addition before allocation prevents a wrapped header-plus-payload size.
 
@@ -69,6 +77,8 @@ free(b);
 
 **Expected:** The other payload remains unchanged.
 
+**Verify:** Keep a CHECK equivalent to `a->data[0] == 4 && b->data[0] == 9`. Control edit: changing `unsigned char data[] = {4, 5};` to `unsigned char data[] = {5, 5};` must fail it; then restore it.
+
 Separate complete allocations create independent owners. A base-struct assignment would not copy the flexible payload.
 
 ## Exercise 5: Preserve binary zero
@@ -83,6 +93,8 @@ free(p);
 ```
 
 **Expected:** Length remains three and the zero is retained.
+
+**Verify:** Keep a CHECK equivalent to `p != NULL && p->length == 3 && p->data[1] == 0`. Control edit: changing `unsigned char data[] = {7, 0, 8};` to `unsigned char data[] = {7, 1, 8};` must fail it; then restore it.
 
 The payload is length-delimited binary data rather than a C string.
 
@@ -101,8 +113,10 @@ free(p);
 
 **Expected:** The owned packet retains its copied value.
 
+**Verify:** Keep a CHECK equivalent to `p->data[0] == 1`. Control edit: changing `unsigned char data[] = {1};` to `unsigned char data[] = {2};` must fail it; then restore it.
+
 Construction copies input bytes. A borrowed-view API would require a different lifetime contract.
 
 ## After comparison
 
-Add a fresh distinguishing input for the "transfer source independence" case to your own c-033 source. Explain why every access in `packet_create` stays within a live object and each owned resource is released. An expected flexible array member failure belongs in the test contract; undefined behavior does not. Keep diagnostics and sanitizer evidence for the "create an empty packet" case apart from ordinary output: the fixture proves its stated flexible array member, header size and contiguous ownership assumptions, not universal safety.
+Create a packet from a four-byte payload and CHECK that `p->data[3]` holds the last byte. Then CHECK `offsetof(struct Packet, data) <= sizeof(struct Packet)` and explain why `sizeof *p + length` is therefore enough even if padding follows `length`. Finally explain why declaring `unsigned char data[1]` instead would make the size arithmetic disagree with the record's real layout.

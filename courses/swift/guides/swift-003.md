@@ -24,9 +24,9 @@ Floating-point values approximate many decimal fractions. Compare a result accor
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles the saved pad as `main.swift` with Swift 6 language checking. An explicit `@main` type contains `static func main() async throws`; the fixed compiler uses `-parse-as-library -swift-version 6`. The examples use the standard library and portable Foundation. `precondition` makes a violated invariant fail the process. The fixed pad accepts one source file, without arbitrary command arguments, interactive input or dependency installation. SwiftUI, UIKit, Apple simulators and application signing belong to the separately prepared macOS/Xcode project labs, never the Linux pad.
+Run Example A before task 1 so you can check your predicted flag and partial value. Task 2 uses `subtractingReportingOverflow`. Writing `UInt8(0) - 1` with the plain operator is a different experiment: the compiler can reject a constant overflow outright, and a computed one traps at runtime, so classify whichever failure you see.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Compile contract, starter stop and success marker: [running a lesson](../STUDY-GUIDE.md#running-a-lesson).
 
 
 
@@ -34,7 +34,7 @@ Start with the answer-free learner artifact in your saved classroom pad. It deli
 
 `addingReportingOverflow` returns a tuple with partialValue and overflow. `&+` explicitly wraps. `abs(actual - expected) < tolerance` expresses a simple absolute error bound appropriate only to the stated scale.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+Each example ends with a trace; method: [tracing a program](../STUDY-GUIDE.md#tracing-a-program).
 
 ## Worked example / walkthrough
 
@@ -61,6 +61,8 @@ struct LessonMain {
 
 **Observe:** 255 plus one reports overflow and a wrapped partial result of zero.
 
+**Trace.** `UInt8.max` is 255, the largest value one unsigned byte holds. `addingReportingOverflow(1)` computes the true sum 256, keeps only the low eight bits and returns the tuple `(partialValue: 0, overflow: true)`. The first check reads the flag and the second reads the wrapped value. The last line is the control case: 2 plus 3 fits, so its partial value is 5 and its flag is false. Without the flag, a caller seeing 0 could not tell an overflowed 255 + 1 from a genuine 0 + 0.
+
 ### Example B: Use a numerical comparison policy
 
 The force unwrap is limited to authored literal fixtures known to parse; external text needs conditional handling.
@@ -84,6 +86,8 @@ struct LessonMain {
 
 **Observe:** The floating result meets the stated tolerance and the decimal fixture retains decimal intent.
 
+**Trace.** `0.1 + 0.2` in `Double` produces 0.30000000000000004 because neither operand has an exact binary representation. The check therefore measures the distance from 0.3 and accepts anything closer than 1e-12, a bound chosen for values near 1. `Decimal(string:)` parses base-ten text and returns an optional; the force unwraps are safe only because these literals are authored here. Decimal addition of 0.1 and 0.2 gives exactly 0.3, so its equality check needs no tolerance.
+
 ## Exercises
 
 1. **Predict and explain.** Predict the overflow flag and partial result.
@@ -98,13 +102,15 @@ struct LessonMain {
 
 6. **Transfer and justify.** Choose a numeric representation and rounding policy for a price calculation.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Log each task in the [evidence table](../STUDY-GUIDE.md#recording-exercise-evidence) before opening the explanation.
 
 ## Common pitfalls and diagnosis
 
 A tolerance that hides a unit error is not a numerical policy. Avoid wrapping operators for business totals unless modulo behavior is intended. Never force-unwrap untrusted numeric text.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+For checked quantity addition, the counterexample is the pair that sits exactly at the type's limit. With `Int8`, 100 + 27 is 127 and must be accepted, while 100 + 28 must produce your rejected outcome. An implementation that tests `sum > Int8.max` after a plain `+` never reaches its test, because the addition traps first. Keep 0 + 0 as the normal-range control.
+
+Repair routine: [building a regression case](../STUDY-GUIDE.md#building-a-regression-case).
 
 ## Progressive hints
 
@@ -114,11 +120,15 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 ## Self-check and next step
 
-Explain Overflow, Tolerance, Wrapping arithmetic without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+In one sentence each, say what `addingReportingOverflow`, `&+` and plain `+` do when a result does not fit. Justify a tolerance of 1e-12 for sums near 1 and explain why the same bound fails for values near one billion. Name a case where `Decimal` is the better representation and the cost it carries.
+
+Then follow the general [self-check routine](../STUDY-GUIDE.md#self-check-routine) and save your pad.
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://docs.swift.org/swift-book/documentation/the-swift-programming-language/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+[Documentation](https://docs.swift.org/swift-book/documentation/the-swift-programming-language/): The Advanced Operators chapter of the Swift book explains overflow operators, and the standard library reference documents `addingReportingOverflow(_:)` on `FixedWidthInteger`.
+
+Provenance and limits: [sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

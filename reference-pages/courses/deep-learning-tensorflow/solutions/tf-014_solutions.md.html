@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/deep-learning-tensorflow/solutions/tf-014_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="tf-014-explanatory-solutions">tf-014: explanatory solutions<a class="heading-anchor" href="#tf-014-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Open these answers for Multiclass and multilabel are different tasks after your own attempt at Example A, Uniform class uncertainty, or after an explicit reveal. Each answer reuses the guide&#x27;s literal inputs, so a mismatch points to one step. The companion script runs the assertions; this page explains why they test Multiclass, Multilabel, Sparse target. After matching exercise 6, Reject an impossible class, invent a new input without looking here.</p>
+<p>Open these answers after an attempt; they reuse the guide&#x27;s inputs (<a href="../STUDY-GUIDE.md.html#after-the-solutions">comparison steps</a>).</p>
 <h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
 <p>Multiclass and multilabel prediction answer different questions. In a multiclass task exactly one class is chosen, so a softmax distributes one unit of probability across mutually exclusive outcomes. In a multilabel task several labels may hold at once, so each label gets its own binary decision. A tensor with three outputs does not by itself tell you which task is intended. The target contract determines the activation, loss and denominator. Integer sparse targets name one class index; a vector such as [1, 0, 1] names two independently present labels. Converting one task into the other changes the meaning of the data.</p>
 <p><strong>Multiclass:</strong> One outcome among mutually exclusive categories.</p>
@@ -262,9 +262,7 @@ np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</
 <span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span>
     <span class="syntax-keyword">raise</span> AssertionError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">accepted unknown class</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> index 3 is outside legal indices 0, 1, 2.</p>
-<p><strong>Verify:</strong> In a fresh process, the exercise checks confirm <code>validate_class(2) == 2</code> and <code>validate_class(3)</code> raises <code>ValueError</code>.</p>
-<h3 id="review-after-comparison">Review after comparison<a class="heading-anchor" href="#review-after-comparison" aria-label="Link to this section">#</a></h3>
-<p>Change one fixture value in exercise 4, Verify softmax mass, and predict the new result before running it. Keep the failing version of exercise 5, Choose the denominator, next to its repair. A missing framework is an environment record, not a failed assertion. No solution downloads data, calls an online model, deploys a service or changes a database.</p></article>
+<p><strong>Verify:</strong> In a fresh process, the exercise checks confirm <code>validate_class(2) == 2</code> and <code>validate_class(3)</code> raises <code>ValueError</code>.</p></article>
   </main>
 </body>
 </html>

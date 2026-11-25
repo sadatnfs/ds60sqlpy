@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cuda/spark/solutions/cuda-115_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="cuda-115-explained-solutions">cuda-115: explained solutions<a class="heading-anchor" href="#cuda-115-explained-solutions" aria-label="Link to this section">#</a></h2>
-<p>These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.</p>
+<p>Compare with your <a href="../lessons/cuda-115.md.html">worksheet</a> attempt.</p>
 <h3 id="exercise-1-draw-logical-versus-physical-plan">Exercise 1: Draw logical versus physical plan<a class="heading-anchor" href="#exercise-1-draw-logical-versus-physical-plan" aria-label="Link to this section">#</a></h3>
 <p>Logical nodes describe intent and physical nodes choose execution.</p>
 <p><strong>Approach.</strong> Draw the logical plan as intent, such as a scan, a filter and an aggregate, and the physical plan as the chosen execution, such as a file scan, a filter operator, a partial aggregate, an exchange and a final aggregate.</p>
@@ -231,9 +231,19 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Why it is correct here.</strong> Rows confirm correctness of scale, time shows cost, and spill reveals memory pressure. A fast operator that spilled heavily may not stay fast with larger data.</p>
 <p><strong>A plausible wrong approach.</strong> Reporting only total job time hides which operator dominates and whether spilling occurred.</p>
 <p><strong>How to verify.</strong> Collect metrics for each GPU operator from the SQL view after the action and check row counts against expectations.</p>
+<h3 id="self-check-answers">Self-check answers<a class="heading-anchor" href="#self-check-answers" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>What is the difference between explain output and the executed SQL view?</strong> Explain shows what Spark planned; the executed view and its metrics show what happened for a completed action.</li>
+</ol>
+<ol start="2">
+<li><strong>Can a CPU node coexist with useful GPU computation?</strong> Yes. Metadata or coordination nodes can stay on the CPU while the heavy operators run on the GPU.</li>
+</ol>
+<ol start="3">
+<li><strong>Why count transitions in a mixed plan?</strong> Each transition may copy data or change its representation, and that cost belongs in the measurement.</li>
+</ol>
 <h3 id="reference-observation">Reference observation<a class="heading-anchor" href="#reference-observation" aria-label="Link to this section">#</a></h3>
 <p>Synthetic plan has two GPU nodes and two backend transitions.</p>
-<p>The reference file is <code>courses/cuda/spark/references/cuda-115_cpu.py</code>. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.</p></article>
+<p>Asserted by <code>courses/cuda/spark/references/cuda-115_cpu.py</code>.</p></article>
   </main>
 </body>
 </html>

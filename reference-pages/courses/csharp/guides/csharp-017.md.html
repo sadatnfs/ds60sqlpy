@@ -206,11 +206,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Substitution:</strong> Using an implementation without breaking consumer expectations.</p>
 <p><strong>Dependency injection:</strong> Supplying a collaborator from outside the consumer.</p>
 <h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>The Linux Docker classroom compiles your saved pad as <code>Program.cs</code> in its fixed .NET 10 project. C# 14 is the matching language generation. This route uses the prepared framework libraries; it does not accept arbitrary project files, NuGet packages, command arguments or interactive input. The explicit <code>Program.Main</code> entrypoint makes compilation and execution visible. <code>Check</code> throws on a false condition in every build configuration, unlike conditional debugging assertions.</p>
-<p>Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.</p>
+<p><code>IRate</code>, <code>FlatRate</code>, <code>CappedRate</code> and <code>Total</code> are declared after <code>Main</code>. Both rate types are sealed positional records that implement the interface, so each example builds a rate with one expression. Multiplication is checked, so an extreme unit count throws <code>OverflowException</code> instead of returning a negative price.</p>
+<p>Compile contract, starter stop and success marker: <a href="../STUDY-GUIDE.md.html#running-a-lesson">running a lesson</a>.</p>
 <h3 id="syntax-anatomy-and-execution-trace">Syntax anatomy and execution trace<a class="heading-anchor" href="#syntax-anatomy-and-execution-trace" aria-label="Link to this section">#</a></h3>
 <p><code>interface IRate</code> declares a method contract. A class implements that interface and supplies the method body. A variable typed as the interface exposes the contract, while dynamic dispatch chooses the implementation.</p>
-<p>Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.</p>
+<p>Each example ends with a trace; method: <a href="../STUDY-GUIDE.md.html#tracing-a-program">tracing a program</a>.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="example-a-use-a-declared-contract">Example A: Use a declared contract<a class="heading-anchor" href="#example-a-use-a-declared-contract" aria-label="Link to this section">#</a></h4>
 <p>The consumer depends on the interface rather than the concrete class.</p>
@@ -258,6 +258,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-keyword">public</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">int</span> <span class="syntax-function">Total</span><span class="syntax-punctuation">(</span>IRate rate<span class="syntax-punctuation">,</span> <span class="syntax-keyword">int</span> units<span class="syntax-punctuation">)</span> <span class="syntax-operator">=&gt;</span> rate<span class="syntax-punctuation">.</span>Cost<span class="syntax-punctuation">(</span>units<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> Four units cost 12 and zero units cost zero.</p>
+<p><strong>Trace.</strong> <code>rate</code> has static type <code>IRate</code> and refers to a <code>FlatRate</code> with Price 3. The call <code>rate.Cost(4)</code> dispatches to <code>FlatRate.Cost</code>, which returns 12. <code>Total(rate, 0)</code> accepts any <code>IRate</code>, calls <code>Cost(0)</code> through the interface and returns 0. Total never names FlatRate, so it would work unchanged with any other implementation, including one written after Total was compiled.</p>
 <h4 id="example-b-change-policy-without-changing-the-consumer">Example B: Change policy without changing the consumer<a class="heading-anchor" href="#example-b-change-policy-without-changing-the-consumer" aria-label="Link to this section">#</a></h4>
 <p>An implementation can change the pricing rule while preserving units and accepted inputs.</p>
 <pre class="highlighted-code"><code class="language-csharp"><span class="syntax-keyword">using</span> System<span class="syntax-punctuation">;</span>
@@ -304,6 +305,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-keyword">public</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">int</span> <span class="syntax-function">Total</span><span class="syntax-punctuation">(</span>IRate rate<span class="syntax-punctuation">,</span> <span class="syntax-keyword">int</span> units<span class="syntax-punctuation">)</span> <span class="syntax-operator">=&gt;</span> rate<span class="syntax-punctuation">.</span>Cost<span class="syntax-punctuation">(</span>units<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The same consumer applies a capped or uncapped policy.</p>
+<p><strong>Trace.</strong> <code>CappedRate(3, 10).Cost(4)</code> computes 3 times 4, which is 12, then <code>Math.Min</code> returns the cap, 10. The second check passes a <code>FlatRate(3)</code> to the same <code>Total</code> method and gets the uncapped 12. One consumer, two policies: the runtime type of the argument chose which <code>Cost</code> body ran, and the consumer needed no <code>if</code> statement to pick a policy.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <ol>
 <li><strong>Predict and explain.</strong> Trace the interface call to the selected implementation.</li>
@@ -323,10 +325,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <ol start="6">
 <li><strong>Transfer and justify.</strong> Choose one dependency worth injecting in the inventory importer and explain the testing benefit.</li>
 </ol>
-<p>For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.</p>
+<p>Log each task in the <a href="../STUDY-GUIDE.md.html#recording-exercise-evidence">evidence table</a> before opening the explanation.</p>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
 <p>Identical signatures do not imply compatible semantics. Avoid interfaces that expose every private implementation detail. Validate domain ranges consistently across implementations.</p>
-<p>A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.</p>
+<p>For task 5, the exact-cap case needs a price times units that equals the cap, such as price 5 for 2 units under a cap of 10, which must return 10 whether <code>Min</code> keeps the product or the cap. For task 4, an implementation returning cents compiles against <code>IRate</code> and returns 1200 for four units, because a matching signature cannot check the unit.</p>
+<p>Repair routine: <a href="../STUDY-GUIDE.md.html#building-a-regression-case">building a regression case</a>.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <ol>
 <li>Reproduce Example A (Use a declared contract) before changing anything, and confirm its observation: Four units cost 12 and zero units cost zero.</li>
@@ -334,9 +337,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>Before opening the explanation, test your task 3 attempt against this lesson&#x27;s main pitfall: Identical signatures do not imply compatible semantics.</li>
 </ol>
 <h3 id="self-check-and-next-step">Self-check and next step<a class="heading-anchor" href="#self-check-and-next-step" aria-label="Link to this section">#</a></h3>
-<p>Explain Interface, Substitution, Dependency injection without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.</p>
+<p>Explain which method body runs for <code>rate.Cost(4)</code> and what decides it. Give the cost of 0, 3 and 4 units under a cap of 10 with price 3. For task 6, name the dependency you would inject into the importer and describe the fake you would pass in tests.</p>
+<p>Then follow the general <a href="../STUDY-GUIDE.md.html#self-check-routine">self-check routine</a> and save your pad.</p>
 <h3 id="sources-and-execution-boundary">Sources and execution boundary<a class="heading-anchor" href="#sources-and-execution-boundary" aria-label="Link to this section">#</a></h3>
-<p><a href="https://learn.microsoft.com/en-us/dotnet/csharp/">Official language or framework documentation</a>. The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.</p>
+<p><a href="https://learn.microsoft.com/en-us/dotnet/csharp/">Documentation</a>: Interfaces are described in the C# reference and in the object-oriented programming tutorials, including explicit and default implementations.</p>
+<p>Provenance and limits: <a href="../STUDY-GUIDE.md.html#sources-and-execution-boundary">sources and execution boundary</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for csharp-017: Interfaces and substitutable behavior.
 Read courses/csharp/guides/csharp-017.md and courses/csharp/lessons/csharp-017.cs. Prerequisites: csharp-016.

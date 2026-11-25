@@ -194,7 +194,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/swift/solutions/swift-035_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="swift-035-explanation-and-comparison">swift-035: explanation and comparison<a class="heading-anchor" href="#swift-035-explanation-and-comparison" aria-label="Link to this section">#</a></h2>
-<p>Attempt the six guide tasks before opening this comparison. The executable reference is <a href="swift-035_solution.swift.html">swift-035_solution.swift</a>. It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.</p>
+<p>Reference program: <a href="swift-035_solution.swift.html">swift-035_solution.swift</a>, covering both examples and the executed answers.</p>
+<p>Attempt the tasks first; see <a href="../STUDY-GUIDE.md.html#comparing-with-the-explanation">comparing with the explanation</a>.</p>
 <h3 id="why-the-two-examples-differ">Why the two examples differ<a class="heading-anchor" href="#why-the-two-examples-differ" aria-label="Link to this section">#</a></h3>
 <p><strong>Borrow only within the closure:</strong> Scoped access limits the lifetime reasoning to one visible closure. The result escapes as an integer while the borrowed pointer does not.</p>
 <p><strong>Handle empty storage without dereferencing:</strong> No base-address dereference is needed, avoiding assumptions about a pointer for empty storage. An empty buffer is valid to inspect by count.</p>
@@ -257,7 +258,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>reduce never dereferences an empty buffer, and the singleton case shows the loop runs exactly once; all three sizes use the same scoped access.</p>
 <h4 id="task-6-transfer-and-justify">Task 6: Transfer and justify<a class="heading-anchor" href="#task-6-transfer-and-justify" aria-label="Link to this section">#</a></h4>
 <p>Write an interoperability checklist covering ownership, alignment, initialization and error reporting.</p>
-<p>No single reference answer exists: several designs can satisfy this transfer task. Build yours from the task 3 answer above (Wrap a scoped read-only buffer operation behind a safe function contract) and the mechanism described below, and state one limitation of your choice.</p>
+<p>No single answer exists; extend task 3 using the <a href="../STUDY-GUIDE.md.html#open-transfer-tasks">open transfer routine</a>.</p>
 <h3 id="solution-reasoning">Solution reasoning<a class="heading-anchor" href="#solution-reasoning" aria-label="Link to this section">#</a></h3>
 <p><strong>Approach.</strong> Example A calls <code>withUnsafeBufferPointer</code> on <code>[2, 3, 4]</code> and reduces the buffer inside the closure, returning only an Int. Example B calls the same method on an empty array and reads only <code>buffer.count</code>. The task 3 answer wraps the scoped read behind a safe function that takes and returns ordinary Swift values.</p>
 <p><strong>Why it is correct.</strong> The buffer is valid only for the duration of the closure, and the closure returns an owned Int, so no pointer outlives the borrow. 2 plus 3 plus 4 is 9. For empty storage the buffer&#x27;s <code>baseAddress</code> may be nil, but <code>count</code> is defined and is 0, so nothing is dereferenced. The task 3 wrapper returns 9 for <code>[2, 3, 4]</code> and 0 for an empty array.</p>
@@ -269,7 +270,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>withUnsafeBufferPointer temporarily borrows contiguous elements. The pointer count states initialized accessible elements. Return a copied result from the closure, never the borrowed pointer itself.</p>
 <p>Unsafe does not disable all runtime checks or make an operation faster. Never infer lifetime from a pointer value remaining numerically unchanged. Keep native API ownership documented and avoid unsafe code when safe collections suffice.</p>
 <h3 id="review-before-continuing">Review before continuing<a class="heading-anchor" href="#review-before-continuing" aria-label="Link to this section">#</a></h3>
-<p>Run the reference and confirm that it prints <code>swift-035: passed</code>, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.</p></article>
+<p>Run the reference and confirm it prints <code>swift-035: passed</code>, then rerun the guide&#x27;s counterexample.</p></article>
   </main>
 </body>
 </html>

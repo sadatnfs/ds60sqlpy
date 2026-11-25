@@ -42,5 +42,7 @@
       "wrong": "Treating a tiny residual as proof the coefficients are trustworthy. A nearly singular matrix can return a solution with a small residual that changes wildly when b moves slightly, and the check says nothing about whether the model is right.",
       "verify": "The residual value here is 0, below the 1e-12 threshold; `kappa(a, exact = TRUE)` returns 2, showing this system is well conditioned."
     }
-  ]
+  ],
+  "run_note": "The starter fills a 2 by 3 matrix with `1:6`, defines `beta` as `c(2, 3)` and prints the matrix. Run it and read the first row: R fills by column, so it shows 1, 3 and 5. Before multiplying, confirm that your design matrix has as many columns as `beta` has elements, because `%*%` requires matching inner dimensions while `*` works elementwise without complaint.",
+  "checks_note": "The checks pin column-major filling with a first row of 1, 3 and 5, `byrow = TRUE` giving 1, 2 and 3, an intercept design that predicts 11 and 14 from intercept 2 and slope 3 at x of 3 and 4, `drop = FALSE` keeping a 2 by 1 shape, and a solved system whose residual stays below 1e-12. They do not test conditioning for larger or nearly singular matrices."
 }

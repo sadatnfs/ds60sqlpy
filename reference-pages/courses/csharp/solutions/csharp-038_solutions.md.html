@@ -194,7 +194,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/csharp/solutions/csharp-038_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="csharp-038-explanation-and-comparison">csharp-038: explanation and comparison<a class="heading-anchor" href="#csharp-038-explanation-and-comparison" aria-label="Link to this section">#</a></h2>
-<p>Attempt the six guide tasks before opening this comparison. The executable reference is <a href="csharp-038_solution.cs.html">csharp-038_solution.cs</a>. It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.</p>
+<p>Reference program: <a href="csharp-038_solution.cs.html">csharp-038_solution.cs</a>, covering both examples and the executed answers.</p>
+<p>Attempt the tasks first; see <a href="../STUDY-GUIDE.md.html#comparing-with-the-explanation">comparing with the explanation</a>.</p>
 <h3 id="why-the-two-examples-differ">Why the two examples differ<a class="heading-anchor" href="#why-the-two-examples-differ" aria-label="Link to this section">#</a></h3>
 <p><strong>Validate a bounded identifier:</strong> Whole-input anchors prevent a valid substring from disguising an invalid full value. The identifier begins with a lowercase letter and uses only admitted characters.</p>
 <p><strong>Keep literal user text literal:</strong> Escaping preserves data meaning instead of accidentally granting regex syntax authority. The plus sign is matched literally.</p>
@@ -250,7 +251,7 @@ Check<span class="syntax-punctuation">(</span><span class="syntax-operator">!</s
 <p><code>RegexOptions.NonBacktracking</code> supports a bounded engine for compatible patterns. Anchors constrain the entire input. Regex.Escape treats input as literal pattern text. Domain validation follows a successful shape match.</p>
 <p>A timeout is a fallback, not a substitute for a simple pattern and bounded input. Regex does not make a path, SQL query or HTML context safe. Validate according to the destination meaning.</p>
 <h3 id="review-before-continuing">Review before continuing<a class="heading-anchor" href="#review-before-continuing" aria-label="Link to this section">#</a></h3>
-<p>Run the reference and confirm that it prints <code>csharp-038: passed</code>, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.</p></article>
+<p>Run the reference and confirm it prints <code>csharp-038: passed</code>, then rerun the guide&#x27;s counterexample.</p></article>
   </main>
 </body>
 </html>

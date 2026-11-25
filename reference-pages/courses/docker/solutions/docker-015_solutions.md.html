@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/docker/solutions/docker-015_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="docker-015-explanatory-solutions">docker-015: explanatory solutions<a class="heading-anchor" href="#docker-015-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit reveal. These explain the supplied teaching fixtures; they are not engine results. The mechanism is explained in <code>courses/docker/guides/docker-015.md</code>.</p>
+<p>These answers explain teaching fixtures, not engine results; the mechanism is in <a href="../guides/docker-015.md.html">the guide</a>.</p>
 <h3 id="exercise-1-compare-a-cache-mount-and-a-secret-mount">Exercise 1: Compare a cache mount and a secret mount.<a class="heading-anchor" href="#exercise-1-compare-a-cache-mount-and-a-secret-mount" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Reusable acceleration versus sensitive transient input.</p>
 <p><strong>Why:</strong> The two mounts solve different problems. A cache may persist across builds; a secret should be available only to the intended step and should never become a normal artifact.</p>
@@ -238,7 +238,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>A plausible wrong approach:</strong> Letting builds inherit whatever registry login exists on the host makes results depend on who ran them.</p>
 <p><strong>How to verify:</strong> Run the documented acquisition once, then rebuild with networking disabled for RUN steps and the cache warm; it succeeds without new fetches.</p>
 <h3 id="check-your-transfer">Check your transfer<a class="heading-anchor" href="#check-your-transfer" aria-label="Link to this section">#</a></h3>
-<p>A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.</p></article>
+<p>The step runs as UID 10001, so pip does not use <code>/root/.cache/pip</code>; it looks for a cache under that user&#x27;s home, which is not the mounted path, and it may not be writable either, so pip works without a cache. Mount the cache where the running user&#x27;s pip looks, or set <code>PIP_CACHE_DIR</code> to the mount target, and give the mount <code>uid=10001</code> so that user can write to it. The expected result is that the second build logs reused downloads. If downloads still repeat with the paths aligned, check whether <code>--no-cache</code> or a builder prune is clearing the cache between builds.</p></article>
   </main>
 </body>
 </html>

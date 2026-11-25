@@ -196,10 +196,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <article class="document"><h2 id="cuda-062-portability-operations-and-the-cost-of-a-gpu-dependency">cuda-062: Portability, operations and the cost of a GPU dependency<a class="heading-anchor" href="#cuda-062-portability-operations-and-the-cost-of-a-gpu-dependency" aria-label="Link to this section">#</a></h2>
 <h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
 <p>Advanced; about 130 minutes, plus any optional hardware experiment. Direct prerequisites: <code>cuda-003</code>, <code>cuda-008</code>, <code>cuda-030</code>, <code>cuda-061</code></p>
-<p>The order supports learning at your own pace. Reading and CPU reasoning remain available when NVIDIA hardware is absent. Advanced hardware features need their own capability checks and are not prerequisites for opening this chapter.</p>
+<p>Pacing, evidence labels and platform rules for every chapter are in the <a href="../../STUDY-GUIDE.md.html">CUDA study guide</a>.</p>
 <h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
 <p>Write a deployment checklist tied to evidence tiers that fails gracefully when no supported GPU is present.</p>
-<p>Work through <em>Portability, operations and the cost of a GPU dependency</em> with the concrete cases below. Finish with this evidence: a deployment checklist tied to supported evidence tiers and graceful failures. Distinguish an algorithmic calculation, a compiled artifact and an actual device observation when explaining what your work establishes.</p>
+<p><strong>Scope:</strong> Feature detection, compatible driver/toolkit/library combinations, binary targets, runtime fallbacks, architecture-specific code, memory budgets, warm-up, diagnostics and fault reporting.</p>
+<p><strong>Evidence to produce:</strong> A deployment checklist tied to supported evidence tiers and graceful failures.</p>
 <h3 id="purpose-vocabulary-and-mental-model">Purpose, vocabulary and mental model<a class="heading-anchor" href="#purpose-vocabulary-and-mental-model" aria-label="Link to this section">#</a></h3>
 <p>Portability means defining what is supported and how unsupported situations behave. CUDA execution requires a supported NVIDIA device and host software path; a CPU-only classroom can still teach algorithms and validate CPU references. AMD, Intel and Apple GPU programming use different backends and APIs, not an automatic CUDA compatibility promise. Detect capability for the operation, not simply the operating-system name. Containers package user-space dependencies but share host driver and hardware constraints. MIG, MPS, device sharing and resets are operator-managed topics. A teaching worker must never silently reset a shared device or erase learner state to recover from a fault.</p>
 <h4 id="key-terms">Key terms<a class="heading-anchor" href="#key-terms" aria-label="Link to this section">#</a></h4>
@@ -210,49 +211,58 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li><strong>Evidence tier:</strong> A labeled level of proof, such as compiled, executed on a GPU or benchmarked, attached to a claim.</li>
 </ul>
 <h3 id="how-to-run-and-study-this-lesson">How to run and study this lesson<a class="heading-anchor" href="#how-to-run-and-study-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>Use the saved reading worksheet in <code>/classroom</code>; the reading pad does not execute CUDA. For the bounded calculation, select <strong>CPU model (Python)</strong>, whose answer-free starter supplies the literal fixtures and task contract. The <a href="../README.md.html">CUDA C++ study workflow</a> covers platforms, optional GPU compilation and evidence labels. In a prepared Python environment you can also run the separate <a href="../references/cuda-062_cpu.py.html">CPU reference</a> from the repository root:</p>
+<p>Trace worked example 1 by hand, then run the <a href="../references/cuda-062_cpu.py.html">CPU reference</a> from the repository root:</p>
 <pre class="highlighted-code"><code class="language-bash">python courses/cuda/cpp/references/cuda-062_cpu.py</code></pre>
-<p>Its assertions check the stated numerical result or model invariant; console text is evidence of this CPU model only, not of CUDA execution.</p>
 <h3 id="worked-example-1-trace-the-mechanism">Worked example 1: trace the mechanism<a class="heading-anchor" href="#worked-example-1-trace-the-mechanism" aria-label="Link to this section">#</a></h3>
 <p>A dispatch policy offers CPU reference on every ordinary classroom and CUDA execution only after visibility, allocation and a small numerical probe succeed. It records which path actually ran. The same expected mathematical result does not make CPU output evidence of CUDA execution.</p>
-<p>The complete CPU model below intentionally models only the named arithmetic, layout, dependency or capability decision. It does not model GPU scheduling, caches, instruction timing or device memory visibility.</p>
+<p><strong>Why:</strong> The probe checks that the device actually computes correctly, and logging the chosen path records what really ran.</p>
 <pre class="highlighted-code"><code class="language-python">capability <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">reading</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">CPU_reference</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">CUDA_device_probe</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">False</span><span class="syntax-punctuation">}</span>
 selected <span class="syntax-operator">=</span> <span class="syntax-string">&quot;</span><span class="syntax-string">CUDA</span><span class="syntax-string">&quot;</span> <span class="syntax-keyword">if</span> capability<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">CUDA_device_probe</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-keyword">else</span> <span class="syntax-string">&quot;</span><span class="syntax-string">CPU_reference</span><span class="syntax-string">&quot;</span>
 <span class="syntax-keyword">assert</span> selected <span class="syntax-operator">==</span> <span class="syntax-string">&quot;</span><span class="syntax-string">CPU_reference</span><span class="syntax-string">&quot;</span>
 <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">selected_path</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> selected<span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">CUDA_execution</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">unavailable</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span></code></pre>
-<p><strong>Expected observation:</strong> Every assertion succeeds. A representative CPU output is:</p>
+<p><strong>Expected observation:</strong> every assertion succeeds, and the CPU model prints:</p>
 <pre class="highlighted-code"><code class="language-text">{&#x27;selected_path&#x27;: &#x27;CPU_reference&#x27;, &#x27;CUDA_execution&#x27;: &#x27;unavailable&#x27;}</code></pre>
-<p>Integers, shapes and ordering must match exactly; only assertions with an explicit tolerance accept small floating-point differences. A printed duration is a model output, not a measured GPU benchmark.</p>
+<p><strong>Check:</strong> The reference asserts selected == &#x27;CPU_reference&#x27; when the probe is False and prints CUDA_execution unavailable.</p>
 <h3 id="worked-example-2-change-a-meaningful-condition">Worked example 2: change a meaningful condition<a class="heading-anchor" href="#worked-example-2-change-a-meaningful-condition" aria-label="Link to this section">#</a></h3>
 <p>A model fits on one 24 GiB GPU but fails on an 8 GiB device. The container tag is identical; the resource contract is not. Reduce the bounded workload or choose a supported alternate path, preserving the original memory error and learner source.</p>
-<p>Before applying this example to your own program, write down which inputs are read, which result is produced, and the condition that makes the comparison valid. Keep the original case as a regression check when changing a boundary.</p>
+<p><strong>Why:</strong> A model fitting 24 GiB does not fit 8 GiB regardless of container tag.</p>
+<p><strong>Check:</strong> Run on the smaller device and confirm the original memory error is preserved and reported.</p>
 <h3 id="six-progressive-exercises">Six progressive exercises<a class="heading-anchor" href="#six-progressive-exercises" aria-label="Link to this section">#</a></h3>
-<p>Exercises 1 and 2 are guided reconstructions of the worked examples; exercises 3-6 change an input, diagnose a defect, test a boundary and transfer the idea. For each one, keep the calculation, output, diagram or failure policy you produce so another reader can compare it with the worked cases. If the hint is not enough, reread the mechanism paragraph and the bounded CPU assertion.</p>
 <h4 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h4>
-<p>Predict and trace the first worked example before running its CPU reference. Write every intermediate quantity that leads to the stated result, including units or ownership where applicable.</p>
+<p>Reconstruct worked example 1 on paper before running its CPU reference. Offer the CPU reference everywhere, and enable CUDA only after device visibility, allocation and a small numerical probe all succeed.</p>
+<p><strong>Trap to avoid:</strong> Reporting the CUDA path because the expected numbers matched hides that the CPU reference produced them.</p>
 <p><strong>Hint:</strong> Start with the literal input and intermediate quantities in worked example 1.</p>
 <h4 id="exercise-2">Exercise 2<a class="heading-anchor" href="#exercise-2" aria-label="Link to this section">#</a></h4>
-<p>Reconstruct the second worked example without copying its conclusion. Identify the changed input or condition, show the resulting calculation or dependency, and explain why it differs from the first example.</p>
+<p>Rework worked example 2 without copying its conclusion. Check the model&#x27;s memory need against device memory and shrink the workload or choose another path.</p>
+<p><strong>Trap to avoid:</strong> Assuming the same image guarantees the same resources hides the memory limit.</p>
 <p><strong>Hint:</strong> Identify exactly which condition changes in worked example 2.</p>
 <h4 id="exercise-3">Exercise 3<a class="heading-anchor" href="#exercise-3" aria-label="Link to this section">#</a></h4>
 <p>Write a supported-surface table for Linux, WSL 2 and Mac learners.</p>
+<p><strong>Trap to avoid:</strong> Promising Mac CUDA execution sets expectations the platform cannot meet.</p>
 <p><strong>Hint:</strong> Use the first worked example to establish the relevant quantities, then change only the requested input.</p>
 <h4 id="exercise-4">Exercise 4<a class="heading-anchor" href="#exercise-4" aria-label="Link to this section">#</a></h4>
 <p>Why is an operating-system check insufficient for dispatch?</p>
+<p><strong>Trap to avoid:</strong> Dispatching on OS name alone selects CUDA on Linux machines without GPUs.</p>
 <p><strong>Hint:</strong> Locate the failed phase or violated dependency before proposing a repair.</p>
 <h4 id="exercise-5">Exercise 5<a class="heading-anchor" href="#exercise-5" aria-label="Link to this section">#</a></h4>
 <p>What should a device fault preserve?</p>
+<p><strong>Trap to avoid:</strong> Resetting hardware or volumes destroys unrelated state.</p>
 <p><strong>Hint:</strong> Check what the algorithm is allowed to read, write or assume at this boundary.</p>
 <h4 id="exercise-6">Exercise 6<a class="heading-anchor" href="#exercise-6" aria-label="Link to this section">#</a></h4>
 <p>Design an optional alternate GPU backend lesson.</p>
+<p><strong>Trap to avoid:</strong> Presenting it as running CUDA kernels misleads learners.</p>
 <p><strong>Hint:</strong> State the output contract and which observations are needed in the new application.</p>
 <h3 id="common-mistakes-and-diagnosis">Common mistakes and diagnosis<a class="heading-anchor" href="#common-mistakes-and-diagnosis" aria-label="Link to this section">#</a></h3>
-<p>A tempting but incorrect claim in this chapter is: <strong>one container tag makes every NVIDIA device and driver equivalent.</strong></p>
-<p>For the concrete failure exercise, why is an operating-system check insufficient for dispatch? Preserve the original input and the stage where behavior diverged, and compare with the CPU model before changing hardware configuration.</p>
+<p>A tempting but incorrect claim: <strong>One container tag makes every NVIDIA device and driver equivalent.</strong> A container fixes user space software, but the driver, device architecture and memory come from the host. Worked example 2 shows the same tag fitting a 24 GiB device and failing on an 8 GiB one. Dispatch on detected capability and a small numerical probe, and record which path actually ran. A smaller device may need a reduced workload, but report the reduction and keep the original memory error, so a fit on 8 GiB is not mistaken for the full model.</p>
 <h3 id="self-check-retrieval-and-transfer">Self-check, retrieval and transfer<a class="heading-anchor" href="#self-check-retrieval-and-transfer" aria-label="Link to this section">#</a></h3>
-<p>Explain the first example without its code, then use the second example to state one assumption that matters. Complete Exercise 3 independently, use Exercise 4 to diagnose a plausible defect, check the boundary in Exercise 5, and retain the application contract from Exercise 6. Compare the <a href="../solutions/cuda-062_solutions.md.html">separate explanations</a> only after your attempt or a deliberate reveal. A reading marker records your choice; it does not certify hardware qualification or expert mastery.</p>
+<ol>
+<li>Why is an operating-system check insufficient for dispatch?</li>
+<li>What should a device fault preserve?</li>
+<li>In worked example 1, when does the CUDA path run?</li>
+</ol>
+<p>Short answers are in the <a href="../solutions/cuda-062_solutions.md.html#self-check-answers">separate explanations</a>; compare only after an attempt.</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
-<p>Check the documentation that matches your prepared toolkit before optional hardware execution.</p>
+<p>Use the documentation that matches your prepared toolkit.</p>
 <ul>
 <li><a href="https://docs.nvidia.com/cuda/cuda-programming-guide/">CUDA Programming Guide</a></li>
 </ul>

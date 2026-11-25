@@ -3,23 +3,18 @@ public class Main {
 
   public static void main(String[] args) throws Exception {
     // Exercise 1: Close on normal completion: change one input
-    // Copy Example A into a scratch `Main.java` and change `try (Probe resource = new Probe("A",
-    // events, false)) {` to `try (Probe resource = new Probe("A!", events, false)) {`. Before
-    // running it with `java -ea Main`, predict which assertion fails and which value it now
-    // sees; then run it and restore the original line.
-    // Expected: The changed run fails with an `AssertionError` from the assertion on
-    // `events.equals(List.of("body", "closeA"))`. Restoring the original line brings back the
-    // worked observation: events `body` then `closeA`.
+    // Change `try (Probe resource = new Probe("A", events, false)) {` to `try (Probe resource =
+    // new Probe("A!", events, false)) {` in Example A and predict which assertion fails and why.
+    // Expected: The edited run fails with an `AssertionError` from the assertion on
+    // `events.equals(List.of("body", "closeA"))`.
 
     // Exercise 2: Close in reverse order: debug a regression
-    // A regression changed one token in the code that Example B adds after Example A, so one
-    // line now reads `try (Probe a = new Probe("A!", events, false); Probe b = new Probe("B",
-    // events, false)) {`. Run Example B with that line, use the failing assertion to locate the
-    // defect and repair it without changing the assertion.
-    // Expected: Before the repair the run fails with an `AssertionError` from the assertion on
-    // `events.equals(List.of("body", "closeB", "closeA"))`; after it the line reads `try (Probe
-    // a = new Probe("A", events, false); Probe b = new Probe("B", events, false)) {` again and
-    // `closeB` is recorded before `closeA`.
+    // A regression in Example B's new code makes one line read `try (Probe a = new Probe("A!",
+    // events, false); Probe b = new Probe("B", events, false)) {`. Repair it using the failing
+    // assertion.
+    // Expected: The unrepaired run fails with an `AssertionError` from the assertion on
+    // `events.equals(List.of("body", "closeB", "closeA"))`; the repaired line reads `try (Probe
+    // a = new Probe("A", events, false); Probe b = new Probe("B", events, false)) {`.
 
     // Exercise 3: Close after body failure
     // Throw IllegalStateException in the body and inspect events after catching it.

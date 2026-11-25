@@ -36,5 +36,7 @@
       "wrong": "Writing that the figure was validated because the script finished. That merges payload checks with classroom observations that nobody made.",
       "verify": "The reference prints r-060 reference checks passed after the three printed objects, and the record shows the browser checks marked as not yet performed."
     }
-  ]
+  ],
+  "run_note": "The starter holds ten records, A1 to A5 and B1 to B5, with one missing value in each group, and an empty results list. Run it and build the eligibility ledger by hand: ten rows, eight observed and two missing. Then compute group means of 2.5 and 4.5 from the eight observed values, and derive every display from those two tables rather than from new calculations.",
+  "checks_note": "The checks confirm ten records with eight unique observed ids and two missing, means of 2.5 and 4.5 with squared standard errors 5/12 and 17/12, a static display with eight raw points, two means and two intervals, an interactive figure with eight raw points carrying their ids and a summary trace whose error bars equal the half widths, and a mean difference of 2. They do not support a causal interpretation of that difference."
 }

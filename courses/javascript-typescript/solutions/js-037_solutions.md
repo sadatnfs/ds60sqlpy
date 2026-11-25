@@ -1,6 +1,6 @@
 # js-037: explanatory solutions
 
-Use these answers after an attempt or an explicit reveal. The reference uses the same literal fixtures as the guide and keeps the exercises in separate scopes. A successful run checks these examples; explaining a changed input is a separate learning goal.
+Open these after your own attempt; each exercise runs in its own scope in the reference.
 
 ## Mechanism review
 
@@ -26,7 +26,7 @@ retry receives an operation, an injected wait, an injected random function and a
 
 ## Exercise 1: Retry transient failures with deterministic full jitter: change one input
 
-Task: Copy Example A into a scratch `main.mjs` and change `let attempts = 0;` to `let attempts = 1;`. Before running it, predict which check fails and which value it now sees; then run it and restore the original line.
+Task: In a scratch copy of Example A, change `let attempts = 0;` to `let attempts = 1;`. Which check fails, and what value does it see?
 
 The injected wait records policy without sleeping. The result demonstrates classification and arithmetic, not elapsed network latency or a live outage recovery.
 
@@ -53,13 +53,13 @@ assert.equal(attempts, 3);
 assert.deepEqual(waits, [50, 100]);
 ```
 
-**Expected:** The changed run fails with an `AssertionError` at `assert.deepEqual(waits, [50, 100])`. Restoring `let attempts = 0;` brings back: three attempts; delays 50 and 100; result ready.
+**Expected:** The edited run fails with an `AssertionError` at `assert.deepEqual(waits, [50, 100])`. Restoring `let attempts = 0;` brings back: three attempts; delays 50 and 100; result ready.
 
-**Verify:** Compare your written prediction with the reported `AssertionError`, including its actual and expected values, and name the value that made `assert.deepEqual(waits, [50, 100])` fail. After restoring the line, the program prints its `{"checks":1,"status":"passed"}` receipt again.
+**Verify:** Compare the reported actual and expected values with your prediction, then restore `let attempts = 0;`.
 
 ## Exercise 2: Stop on permanent failure and on exhausted attempts: diagnose an edited check
 
-Task: A careless edit changed a check in Example B so that it reads `async () => { transient -= 1`. Run Example B with that line, explain why the edited check now fails for the same program state, and restore it.
+Task: Example B's check was edited to read `async () => { transient -= 1`. Run it, explain the failure and restore the original.
 
 A retry policy must retain a bounded final failure. Converting exhaustion into a default success would erase the operation's actual outcome.
 
@@ -91,7 +91,7 @@ assert.equal(transient, 3);
 
 **Expected:** Before the repair the run fails with an `AssertionError` at `async () => { transient -= 1`. Restoring `async () => { transient += 1` brings back: permanent attempted once; transient attempted three times and still rejects.
 
-**Verify:** Keep the failing and the repaired runs. Explain why the edited check rejects the same program state that `assert.equal(transient, 3)` accepts.
+**Verify:** Keep the failing and repaired runs and name the first value that differs between them.
 
 ## Exercise 3: Reuse a completed idempotent result
 
@@ -109,7 +109,7 @@ assert.equal(store.effects, 1);
 
 **Expected:** one side effect; identical returned receipt.
 
-**Verify:** Keep a check equivalent to `assert.deepEqual(second, first)`. As a control, change `const first = store.apply('request-A', { amount: 5 });` to `const first = store.apply('request-A!', { amount: 5 });`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
+**Verify:** Keep `assert.deepEqual(second, first)`. Control: changing `const first = store.apply('request-A', { amount: 5 });` to `const first = store.apply('request-A!', { amount: 5 });` must make that check fail; then restore it.
 
 ## Exercise 4: Reject conflicting reuse of an idempotency key
 
@@ -126,7 +126,7 @@ assert.equal(store.effects, 1);
 
 **Expected:** conflict error; effects remains 1.
 
-**Verify:** Keep a check equivalent to `assert.throws(() => store.apply('request-A', { amount: 7 }), /key conflict/u)`. As a control, change `store.apply('request-A', { amount: 5 });` to `store.apply('request-A!', { amount: 5 });`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
+**Verify:** Keep `assert.throws(() => store.apply('request-A', { amount: 7 }), /key conflict/u)`. Control: changing `store.apply('request-A', { amount: 5 });` to `store.apply('request-A!', { amount: 5 });` must make that check fail; then restore it.
 
 ## Exercise 5: Bound active work while preserving input order
 
@@ -172,7 +172,7 @@ assert.deepEqual(await mapBounded([], 2, async (value) => value), []);
 
 **Expected:** results 2,4,6,8; peak active at most 2; active returns to 0.
 
-**Verify:** Keep a check equivalent to `assert.ok(peak <= 2 && peak > 0)`. As a control, change `active += 1; peak = Math.max(peak, active);` to `active -= 1; peak = Math.max(peak, active);`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
+**Verify:** Keep `assert.ok(peak <= 2 && peak > 0)`. Control: changing `active += 1; peak = Math.max(peak, active);` to `active -= 1; peak = Math.max(peak, active);` must make that check fail; then restore it.
 
 ## Exercise 6: Honor cancellation before the first attempt
 
@@ -200,8 +200,8 @@ assert.equal(attempts, 0);
 
 **Expected:** original reason rejects; attempts remain 0.
 
-**Verify:** Keep a check equivalent to `assert.equal(attempts, 0)`. As a control, change `let attempts = 0;` to `let attempts = 1;`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
+**Verify:** Keep `assert.equal(attempts, 0)`. Control: changing `let attempts = 0;` to `let attempts = 1;` must make that check fail; then restore it.
 
 ## After comparison
 
-Return to your saved implementation and repeat a case with different values. Keep compiler diagnostics, process output and browser observations separate. Do not suppress a failing assertion or use a type assertion to declare an unvalidated value safe. Resource-owning examples must finish cleanup even when work fails. Describe each result with its actual host and fixture scope rather than as production acceptance.
+Fresh case: cap the backoff at 150. Predict the delays for four failed attempts with random value 1, and decide which errors your classifier treats as transient. ([After comparing](../STUDY-GUIDE.md#after-comparing-with-the-solution).)

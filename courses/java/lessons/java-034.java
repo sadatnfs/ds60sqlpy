@@ -3,23 +3,18 @@ public class Main {
 
   public static void main(String[] args) throws Exception {
     // Exercise 1: Test the pure calculation: change one input
-    // Copy Example A into a scratch `Main.java` and change `total(0, 125);` to `total(1, 125);`.
-    // Before running it with `java -ea Main`, predict which assertion fails and which value it
-    // now sees; then run it and restore the original line.
-    // Expected: The changed run fails with an `AssertionError` from the assertion on `invalid`.
-    // Restoring the original line brings back the worked observation: 375 cents; nonpositive
-    // quantity rejected.
+    // Change `total(0, 125);` to `total(1, 125);` in Example A and predict which assertion fails
+    // and why.
+    // Expected: The edited run fails with an `AssertionError` from the assertion on `invalid`.
 
     // Exercise 2: Compose a deterministic service: debug a regression
-    // A regression changed one token in the code that Example B adds after Example A, so one
-    // line now reads `id.equals("item-a") ? java.util.OptionalLong.of(126) :
-    // java.util.OptionalLong.empty();`. Run Example B with that line, use the failing assertion
-    // to locate the defect and repair it without changing the assertion.
-    // Expected: Before the repair the run fails with an `AssertionError` from the assertion on
+    // A regression in Example B's new code makes one line read `id.equals("item-a") ?
+    // java.util.OptionalLong.of(126) : java.util.OptionalLong.empty();`. Repair it using the
+    // failing assertion.
+    // Expected: The unrepaired run fails with an `AssertionError` from the assertion on
     // `quote.totalCents() == 250 && quote.created().equals(instant) &&
-    // audit.equals(List.of("quoted:item-a"))`; after it the line reads `id.equals("item-a") ?
-    // java.util.OptionalLong.of(125) : java.util.OptionalLong.empty();` again and total 250,
-    // time 2026-01-01T00:00:00Z, one audit event.
+    // audit.equals(List.of("quoted:item-a"))`; the repaired line reads `id.equals("item-a") ?
+    // java.util.OptionalLong.of(125) : java.util.OptionalLong.empty();`.
 
     // Exercise 3: Reject an unknown catalog item
     // Request missing and inspect the audit list.

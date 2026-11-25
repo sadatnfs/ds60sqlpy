@@ -2,7 +2,7 @@
 
 Explain what a snapshot actually observed and what it cannot reconstruct.
 
-The executable reference contains the two complete worked cases with assertions. The changes below explain the independent practice and its limits.
+The reference snapshots the customer seed with the check strategy on `region`, reruns after a change, and reads current rows where `dbt_valid_to` is null. The history covers only the moments when dbt snapshot ran; a change that happened and reverted between runs is invisible to it. See [how these answers are laid out](../STUDY-GUIDE.md#answers-and-references).
 
 
 ## 1. Inspect a closed version

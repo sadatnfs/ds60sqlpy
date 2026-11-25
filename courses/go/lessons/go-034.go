@@ -3,11 +3,11 @@ package main
 import "fmt"
 
 func main() {
-	// Exercise 1: Inspect the current target: predict an edited check: Copy worked example 1 into a scratch pad and change `check(runtime.GOOS != "" && runtime.GOARCH != "", "target")` to `check(runtime.GOOS == "" && runtime.GOARCH != "", "target")` inside its check. Before running, predict whether the check still passes and explain why; then restore it.
-	// Expected: The changed run panics with `target` because the edited check no longer holds. Restoring the original line brings back the worked observation: both identifiers are nonempty.
+	// Exercise 1: Inspect the current target: predict an edited check: Copy worked example 1, change `check(runtime.GOOS != "" && runtime.GOARCH != "", "target")` to `check(runtime.GOOS == "" && runtime.GOARCH != "", "target")` inside its check and predict whether it still passes; then restore it.
+	// Expected: The edited check panics with `target` even though `runtime.GOOS != "" && runtime.GOARCH != ""` still holds.
 
-	// Exercise 2: Validate the running deployment tuple: debug a regression: A regression changed one token in worked example 2, so one line now reads `allowed := map[string]bool{"linux/amd64": true, "linux/arm65": true}`. Run worked example 2 with that line, use the failure to locate the defect and repair it without changing the check.
-	// Expected: Before the repair the program panics with `running target`; after it the line reads `allowed := map[string]bool{"linux/amd64": true, "linux/arm64": true}` again and the running Linux tuple is admitted.
+	// Exercise 2: Validate the running deployment tuple: debug a regression: A one-token regression in worked example 2 makes a line read `allowed := map[string]bool{"linux/amd64": true, "linux/arm65": true}`. Repair it without changing the check.
+	// Expected: The defective run panics with `running target`; after restoring `allowed := map[string]bool{"linux/amd64": true, "linux/arm64": true}`, the running Linux tuple is admitted.
 
 	// Exercise 3: Refuse an unsupported tuple: Check plan9/386 and an incomplete linux tuple with the same lookup, keeping linux/arm64 as the control.
 	// Expected: Both unsupported tuples are rejected while linux/arm64 is admitted.

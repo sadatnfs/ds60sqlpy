@@ -2,19 +2,17 @@
 
 export {};
 // Exercise 1: Complete one valid job lifecycle: change one input
-// Copy Example A into a scratch `main.mts` and change `const completed = transition(started,
-// { type: 'complete', value: 7 });` to `const completed = transition(started, { type:
-// 'complete', value: 8 });`. Before running it, predict which check fails and which value it
-// now sees; then run it and restore the original line.
-// Expected: The changed run fails with an `AssertionError` at `assert.deepEqual(completed, {
+// In a scratch copy of Example A, change `const completed = transition(started, { type:
+// 'complete', value: 7 });` to `const completed = transition(started, { type: 'complete',
+// value: 8 });`. Which check fails, and what value does it see?
+// Expected: The edited run fails with an `AssertionError` at `assert.deepEqual(completed, {
 // id: 'A', attempt: 1, kind: 'succeeded', value: 7 })`. Restoring `const completed =
 // transition(started, { type: 'complete', value: 7 });` brings back: succeeded with attempt
 // 1 and value 7.
 
 // Exercise 2: Reject a result arriving before start: diagnose an edited check
-// A careless edit changed a check in Example B so that it reads `assert.deepEqual(queued, {
-// id: 'A', attempt: 1, kind: 'queued' });`. Run Example B with that line, explain why the
-// edited check now fails for the same program state, and restore it.
+// Example B's check was edited to read `assert.deepEqual(queued, { id: 'A', attempt: 1,
+// kind: 'queued' });`. Run it, explain the failure and restore the original.
 // Expected: Before the repair the run fails with an `AssertionError` at
 // `assert.deepEqual(queued, { id: 'A', attempt: 1, kind: 'queued' });`. Restoring
 // `assert.deepEqual(queued, { id: 'A', attempt: 0, kind: 'queued' });` brings back: invalid

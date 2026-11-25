@@ -194,17 +194,19 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/scala-spark/guides/spark-036.md</code></p>
     </header>
     <article class="document"><h2 id="spark-036-foreachbatch-idempotent-sinks-and-failure-injection">spark-036: foreachBatch, idempotent sinks and failure injection<a class="heading-anchor" href="#spark-036-foreachbatch-idempotent-sinks-and-failure-injection" aria-label="Link to this section">#</a></h2>
-<p>Authored paired Scala/PySpark teaching content. The default fixtures are tiny, local and deterministic. Runtime acceptance, logical correctness and learner understanding remain separate evidence.</p>
+<p><code>foreachBatch</code> hands your code each microbatch together with a batch ID, and Spark may call it again with the same ID after a failure. This lesson builds a file sink keyed by query identity and batch ID that publishes each batch once, injects a failure just before publication, and shows that the retry ends with the same two rows written exactly one time.</p>
 <h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
-<p>Advanced; approximately 135 minutes. Direct prerequisites: <code>spark-035</code>. The prepared baseline is Spark 4.3.0, Scala binary 2.13, JDK 17 and Python 3.12. Read the <a href="../execution-baseline.md.html">execution baseline</a>.</p>
+<p>Advanced; approximately 135 minutes. Direct prerequisites: <code>spark-035</code>. Pinned versions: <a href="../execution-baseline.md.html">execution baseline</a>.</p>
 <h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>Open <code>spark-036</code> in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed <code>spark-local-scala</code> or <code>spark-local-python</code> profile, save your pad and run the complete source. Scala stages as <code>Main.scala</code> with <code>object Main</code>;Python stages as <code>main.py</code> with a main guard. Each program creates its own <code>local[2]</code> session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.</p>
-<p>The <a href="../lessons/spark-036.scala.html">Scala learner</a> and <a href="../lessons/spark-036.py.html">PySpark learner</a> run two complete demonstrations and retain six explicit task stubs. Use the <a href="../solutions/spark-036_solutions.md.html">explained solutions</a> only after an attempt or an explicit worked comparison; the <a href="../solutions/spark-036_solution.scala.html">Scala reference</a> and <a href="../solutions/spark-036_solution.py.html">PySpark reference</a> contain complete assertions. A bounded collect is used only for the declared tiny fixture; do not copy it onto an unbounded or large production table.</p>
+<p>Shared run steps and profile rules: <a href="../STUDY-GUIDE.md.html#run-a-paired-lesson">study guide</a>.</p>
+<p>Learner pads: <a href="../lessons/spark-036.scala.html">Scala</a> and <a href="../lessons/spark-036.py.html">PySpark</a>.</p>
+<p>Open the <a href="../solutions/spark-036_solutions.md.html">explained solutions</a> after an attempt.</p>
+<p>The first worked example reads the input as an ordinary batch, encodes it as the lines <code>1,100</code> and <code>2,200</code>, then publishes it under <code>demo-v1</code> batch 0 twice: the first call returns True and the second returns False. The second passes the failure flag for <code>demo-failure</code>, catches <code>RuntimeError</code> with the exact message <code>injected_before_publication</code>, and confirms that no rows were published for that identity.</p>
 <h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
 <ul>
 <li>Design an idempotent microbatch sink instead of assuming foreachBatch is exactly once.</li>
-<li>State the input and output grain, schema, NULL policy and ordering before executing a transformation.</li>
-<li>Compare each language implementation with independent literal expectations, not only with the other implementation.</li>
+<li>Turn a microbatch into canonical sorted <code>id,cents</code> text with a SHA-256 digest, and publish it under <code>sink/&lt;identity&gt;/batch-&lt;20-digit ID&gt;.json</code> by staging a pending file and renaming it, so identical content returns False on a repeat and different content under the same key is refused.</li>
+<li>Inject <code>injected_before_publication</code> inside the callback, restart on the same checkpoint, and read the attempt lists <code>[0, 0]</code> and then <code>[0, 0, 1]</code> as proof that a batch ran twice but was published once, unlike an unkeyed append that doubles its lines.</li>
 </ul>
 <h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
 <ul>
@@ -240,7 +242,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>A separate unsafe-demo file appends the same canonical text twice and therefore contains four occurrences. It never shares a path with the real sink. This deterministic counterexample shows exactly what a naive external append can do under repeated delivery. The repaired sink retains two rows for that logical batch and then accepts a genuinely new batch containing 3:300.</p>
 <p>Every path is inside a fresh current-job scratch root. The reference waits with a deadline, stops only queries it created, then removes only that root before stopping its session. The checkpoint remains intact during the failure/restart experiment. No existing learner checkpoint or external database is touched. The final evidence states the precise local protocol, observed failure point, attempt IDs, committed rows and limitations rather than claiming universal end-to-end exactly-once execution.</p>
 <h3 id="supplied-local-fixture">Supplied local fixture<a class="heading-anchor" href="#supplied-local-fixture" aria-label="Link to this section">#</a></h3>
-<p>The complete source creates the owned local session described above, then constructs this explicit fixture. The worked examples below run in that same main function; there is no hidden notebook state.</p>
+<p>The run owns a <code>spark-036-</code> scratch folder with <code>input</code>, <code>checkpoint</code> and <code>sink</code> paths. <code>batch-01.json</code> holds <code>(1, 100)</code> and <code>(2, 200)</code> under the schema <code>id bigint, cents bigint</code>. The canonical encoder sorts rows, caps a batch at 8 rows and rejects NULL or negative values. Identities must match <code>[a-z][a-z0-9-]{0,31}</code>, and before streaming starts the program writes a binding file that records the input path, checkpoint and schema the sink belongs to.</p>
 <pre class="highlighted-code"><code class="language-scala"><span class="syntax-keyword">import</span> org<span class="syntax-punctuation">.</span>apache<span class="syntax-punctuation">.</span>spark<span class="syntax-punctuation">.</span>sql<span class="syntax-punctuation">.</span>functions<span class="syntax-punctuation">.</span>_
 <span class="syntax-keyword">import</span> java<span class="syntax-punctuation">.</span>nio<span class="syntax-punctuation">.</span>file<span class="syntax-punctuation">.</span><span class="syntax-punctuation">{</span><span class="syntax-class">Files</span><span class="syntax-punctuation">,</span> <span class="syntax-class">Path</span><span class="syntax-punctuation">,</span> <span class="syntax-class">Paths</span><span class="syntax-punctuation">,</span> <span class="syntax-class">StandardOpenOption</span><span class="syntax-punctuation">,</span> <span class="syntax-class">StandardCopyOption</span><span class="syntax-punctuation">}</span>
 <span class="syntax-keyword">import</span> java<span class="syntax-punctuation">.</span>nio<span class="syntax-punctuation">.</span>charset<span class="syntax-punctuation">.</span><span class="syntax-class">StandardCharsets</span>
@@ -311,7 +313,7 @@ assert<span class="syntax-punctuation">(</span>failed <span class="syntax-operat
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-define-canonical-bounded-microbatch-content">Exercise 1: Define canonical bounded microbatch content<a class="heading-anchor" href="#exercise-1-define-canonical-bounded-microbatch-content" aria-label="Link to this section">#</a></h4>
 <p>Validate the explicit bigint schema, nonnegative cents, positive IDs and at most 8 rows; return sorted id, cents newline records preserving multiplicity.</p>
-<p><strong>Expected result/shape:</strong> Exact text 1,100 newline 2,200 newline, with a stable SHA256 after repartitioning.</p>
+<p><strong>Expected result/shape:</strong> Exact text <code>1,100</code> newline <code>2,200</code> newline, with a stable SHA256 after repartitioning.</p>
 <p><strong>Verify:</strong> Compare exact bytes and reject NULL cents before publication.</p>
 <p><strong>Progressive hint:</strong> Content validation precedes the digest; the digest is not itself a business oracle.</p>
 <h4 id="exercise-2-publish-one-logical-batch-idempotently">Exercise 2: Publish one logical batch idempotently<a class="heading-anchor" href="#exercise-2-publish-one-logical-batch-idempotently" aria-label="Link to this section">#</a></h4>
@@ -327,7 +329,7 @@ assert<span class="syntax-punctuation">(</span>failed <span class="syntax-operat
 <h4 id="exercise-4-recover-the-same-checkpoint-and-observe-replay">Exercise 4: Recover the same checkpoint and observe replay<a class="heading-anchor" href="#exercise-4-recover-the-same-checkpoint-and-observe-replay" aria-label="Link to this section">#</a></h4>
 <p>Restart the same source/checkpoint/query namespace without failure. Compare attempts and logical query/run IDs.</p>
 <p><strong>Expected result/shape:</strong> Batch 0 is attempted again and publishes 2 rows once. Query ID persists; run ID changes.</p>
-<p><strong>Verify:</strong> Assert attempt sequence 0,0, exact rows and corresponding identities.</p>
+<p><strong>Verify:</strong> Assert attempt sequence <code>0, 0</code>, exact rows and corresponding identities.</p>
 <p><strong>Progressive hint:</strong> foreachBatch provides at-least-once callback execution; the sink supplies replay safety.</p>
 <h4 id="exercise-5-expose-a-non-idempotent-append-counterexample">Exercise 5: Expose a non-idempotent append counterexample<a class="heading-anchor" href="#exercise-5-expose-a-non-idempotent-append-counterexample" aria-label="Link to this section">#</a></h4>
 <p>Append the same canonical batch text twice to a separate unsafe-demo file, then compare it with the idempotent published batch.</p>
@@ -336,15 +338,20 @@ assert<span class="syntax-punctuation">(</span>failed <span class="syntax-operat
 <p><strong>Progressive hint:</strong> A retry after an uncertain response is enough to duplicate append side effects.</p>
 <h4 id="exercise-6-reject-identity-collisions-and-admit-the-next-batch">Exercise 6: Reject identity collisions and admit the next batch<a class="heading-anchor" href="#exercise-6-reject-identity-collisions-and-admit-the-next-batch" aria-label="Link to this section">#</a></h4>
 <p>Reject different content under an existing batch key, then publish a new source file 3:300 and resume the real query.</p>
-<p><strong>Expected result/shape:</strong> The conflicting key fails without replacing its receipt. Stream batch 1 adds one row, leaving IDs 1,2,3 and total 600 across two batch files.</p>
-<p><strong>Verify:</strong> Assert collision rejection, old receipt equality, attempt sequence 0,0,1 and exact 3-row sink.</p>
+<p><strong>Expected result/shape:</strong> The conflicting key fails without replacing its receipt. Stream batch 1 adds one row, leaving IDs 1, 2, 3 and total 600 across two batch files.</p>
+<p><strong>Verify:</strong> Assert collision rejection, old receipt equality, attempt sequence <code>0, 0, 1</code> and exact 3-row sink.</p>
 <p><strong>Progressive hint:</strong> A duplicate key is safe only if its content agrees; new work receives a new batch ID.</p>
 <h3 id="common-pitfalls">Common pitfalls<a class="heading-anchor" href="#common-pitfalls" aria-label="Link to this section">#</a></h3>
 <p>Do not use runId as the replay key. Do not suppress a repeated batch ID without checking content and query namespace. Do not catch a callback failure and return success to Spark. A local rename protocol is not a distributed transaction or an fsync durability claim. A declared tiny collection bound must be checked before collection, and a missing capability is not permission to download a connector or open a database.</p>
 <h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
-<p>Explain the contract of <code>encodeBatch</code> / <code>encode_batch</code> without reading its solution. Then, from memory, state what Exercise 6 (Reject identity collisions and admit the next batch) must produce: The conflicting key fails without replacing its receipt. Stream batch 1 adds one row, leaving IDs 1, 2, 3 and total 600 across two batch files. Say which part of that result is evidence and what it still cannot show. Name the action in your trace that actually runs the plan.</p>
+<ul>
+<li>Why does <code>canonical_batch</code> sort the lines before hashing, and what could <code>repartition(2)</code> do to the digest without that sort?</li>
+<li>Publishing identical content again returns False instead of raising. Why is a quiet no-op the right answer for a replay, while different content under <code>manual-v1</code> batch 7 must raise?</li>
+<li>The injected failure happens after the pending file is staged. Why is the staged file removed, and what would a reader see if the rename had already happened?</li>
+<li>The final attempt list is <code>[0, 0, 1]</code>. Which entry is the retry, and why does the unkeyed append in Exercise 5 end with 4 lines when the committed batch has 2?</li>
+</ul>
 <h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
-<p>Use the <a href="../README.md.html">course route</a> to continue. Paired-language agreement is useful only when both outputs also satisfy the independent fixture contract. A successful local run is not evidence of cluster performance or production recovery.</p>
+<p>Go on to <a href="spark-037.md.html">spark-037: Deterministic streaming tests without sleep-based guesses</a>. With a sink that tolerates retries, the next lesson turns restart, duplicate, late and invalid inputs into finite test cases whose outcomes are exact bags.</p>
 <h3 id="primary-sources-and-official-apis">Primary sources and official APIs<a class="heading-anchor" href="#primary-sources-and-official-apis" aria-label="Link to this section">#</a></h3>
 <ul>
 <li><a href="https://spark.apache.org/docs/4.3.0/streaming/apis-on-dataframes-and-datasets.html#using-foreach-and-foreachbatch">Spark 4.3.0 foreachBatch semantics</a></li>

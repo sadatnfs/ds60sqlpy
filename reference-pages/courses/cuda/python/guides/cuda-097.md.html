@@ -194,9 +194,17 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cuda/python/guides/cuda-097.md</code></p>
     </header>
     <article class="document"><h2 id="cuda-097-a-python-api-over-a-cuda-c-operator">cuda-097: A Python API over a CUDA C++ operator<a class="heading-anchor" href="#cuda-097-a-python-api-over-a-cuda-c-operator" aria-label="Link to this section">#</a></h2>
-<p><strong>Route:</strong> CUDA Python and machine learning. <strong>Stage:</strong> advanced. <strong>Prerequisites:</strong> <code>cuda-011</code>, <code>cuda-013</code>, <code>cuda-017</code>, <code>cuda-082</code>, <code>cuda-084</code>, <code>cuda-087</code>. Allow several sessions when the hardware experiment is new; the chapter is not a deadline.</p>
-<h3 id="what-you-will-be-able-to-explain">What you will be able to explain<a class="heading-anchor" href="#what-you-will-be-able-to-explain" aria-label="Link to this section">#</a></h3>
-<p>By the end, you can <strong>write the operator schema</strong>, <strong>reject unsupported layout</strong>, and <strong>define fixed-project build evidence</strong> with evidence. Start with the two worked cases, then use the editable CPU model to make the quantities concrete.</p>
+<p><strong>Route:</strong> CUDA Python and machine learning. <strong>Stage:</strong> advanced. <strong>Prerequisites:</strong> <code>cuda-011</code>, <code>cuda-013</code>, <code>cuda-017</code>, <code>cuda-082</code>, <code>cuda-084</code>, <code>cuda-087</code>.</p>
+<p>Pacing, evidence labels and platform rules: <a href="../../STUDY-GUIDE.md.html">CUDA study guide</a>.</p>
+<h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
+<ul>
+<li>Write the operator schema.</li>
+<li>Derive output values.</li>
+<li>Specify aliasing.</li>
+<li>Reject unsupported layout.</li>
+<li>Compare framework registration mechanisms.</li>
+<li>Define fixed-project build evidence.</li>
+</ul>
 <h3 id="mechanism-and-vocabulary">Mechanism and vocabulary<a class="heading-anchor" href="#mechanism-and-vocabulary" aria-label="Link to this section">#</a></h3>
 <p>A framework operator is more than a callable function. Its contract includes name, argument and return types, dtype, shape, device, layout, aliasing and mutation. Dispatch chooses an implementation for the backend; compilation systems may also need metadata behavior that predicts output structure without running real data. A host wrapper must validate unsupported cases before handing pointers to a kernel.</p>
 <p>PyTorch custom operator registration and TensorFlow REGISTER_OP/OpKernel follow different integration mechanisms and require independently prepared builds. Neither is implied by a Python pad accepting a source string. Use a fixed reviewed project with pinned compiler, toolkit and framework ABI. First compare a fused affine-plus-ReLU forward against the native expression, then verify invalid inputs and non-default stream behavior. Backward is a separate contract taught next.</p>
@@ -217,8 +225,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>For <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>y</mi><mo>=</mo><mi>max</mi><mo>⁡</mo><mo stretchy="false">(</mo><mn>0</mn><mo separator="true">,</mo><mn>2</mn><mi>x</mi><mo>+</mo><mn>1</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">y=\max(0,2x+1)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.0359em;">y</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mop">max</span><span class="mopen">(</span><span class="mord">0</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">2</span><span class="mord mathnormal">x</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">1</span><span class="mclose">)</span></span></span></span>, inputs [-2,0,3] yield [0,1,7]. A custom kernel must match the chosen dtype and define behavior at the activation boundary.</p>
 <h4 id="worked-example-2">Worked example 2<a class="heading-anchor" href="#worked-example-2" aria-label="Link to this section">#</a></h4>
 <p>A raw pointer kernel may return correct values for contiguous tensors but fail on a transposed view. Either implement strides or reject/pack the input explicitly and report copy cost.</p>
-<h3 id="portable-executable-model">Portable executable model<a class="heading-anchor" href="#portable-executable-model" aria-label="Link to this section">#</a></h3>
-<p>The <strong>CPU reference model</strong> variant runs this bounded worked example using <code>python-core</code>. It uses only the Python standard library, small synthetic values and no network. Its purpose is to expose the arithmetic or contract behind the chapter. The separate reference includes assertions for the stated observations.</p>
+<h3 id="how-to-run-the-cpu-model">How to run the CPU model<a class="heading-anchor" href="#how-to-run-the-cpu-model" aria-label="Link to this section">#</a></h3>
+<p>Edit the copy; the <a href="../references/cuda-097_cpu.py.html">reference</a> adds assertions.</p>
+<pre class="highlighted-code"><code class="language-bash">python courses/cuda/python/lessons/cuda-097_cpu.py</code></pre>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">fused_reference</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">,</span> scale<span class="syntax-operator">=</span><span class="syntax-number">2.0</span><span class="syntax-punctuation">,</span> bias<span class="syntax-operator">=</span><span class="syntax-number">1.0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
     <span class="syntax-keyword">return</span> <span class="syntax-punctuation">[</span><span class="syntax-builtin">max</span><span class="syntax-punctuation">(</span><span class="syntax-number">0.0</span><span class="syntax-punctuation">,</span> scale <span class="syntax-operator">*</span> x <span class="syntax-operator">+</span> bias<span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> x <span class="syntax-operator">in</span> values<span class="syntax-punctuation">]</span>
 
@@ -227,55 +236,51 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="syntax-keyword">assert</span> fused_reference<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span>
 <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">CPU custom-op oracle:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> fused_reference<span class="syntax-punctuation">(</span><span class="syntax-punctuation">[</span><span class="syntax-operator">-</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation:</strong> Fused affine-ReLU output [0,1,7].</p>
-<p>Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.</p>
 <h3 id="equal-framework-lanes">Equal framework lanes<a class="heading-anchor" href="#equal-framework-lanes" aria-label="Link to this section">#</a></h3>
 <h4 id="pytorch">PyTorch<a class="heading-anchor" href="#pytorch" aria-label="Link to this section">#</a></h4>
 <p>Use a prepared custom-operator project with a registered schema, dispatch implementation, metadata behavior where needed, and explicit mutation/alias contracts. Python-level callable success is insufficient.</p>
 <h4 id="tensorflow">TensorFlow<a class="heading-anchor" href="#tensorflow" aria-label="Link to this section">#</a></h4>
 <p>Use a separately prepared TensorFlow custom-op project defining the op schema, shape behavior and device OpKernel. Match the framework build ABI and test placement and unsupported inputs independently.</p>
-<p>Choose either lane first, then compare the other using identical mathematical inputs. Framework-specific shape, mode and optimizer rules must be checked separately. Both use offline synthetic examples; no model hub or dataset download is triggered.</p>
+<p>Lane rules: <a href="../../STUDY-GUIDE.md.html#python-gpu-and-framework-labs">framework labs</a>.</p>
 <h3 id="practice-and-transfer">Practice and transfer<a class="heading-anchor" href="#practice-and-transfer" aria-label="Link to this section">#</a></h3>
+<p>Record each attempt in the <a href="../lessons/cuda-097.md.html">worksheet</a> before opening hints.</p>
 <h4 id="exercise-1-write-the-operator-schema">Exercise 1: Write the operator schema<a class="heading-anchor" href="#exercise-1-write-the-operator-schema" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Leaving the schema implicit in a Python wrapper lets callers pass float64 or integers, which the C++ kernel then reinterprets.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-2-derive-output-values">Exercise 2: Derive output values<a class="heading-anchor" href="#exercise-2-derive-output-values" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Clamping before the affine step, <code>2*max(0, x) + 1</code>, gives <code>[1, 1, 7]</code>, a different function.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-3-specify-aliasing">Exercise 3: Specify aliasing<a class="heading-anchor" href="#exercise-3-specify-aliasing" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Writing the output into <code>x</code> without declaring it breaks autograd when <code>x</code> was saved for backward.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-4-reject-unsupported-layout">Exercise 4: Reject unsupported layout<a class="heading-anchor" href="#exercise-4-reject-unsupported-layout" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Assuming every tensor reaching the operator is contiguous because the tests used fresh tensors misses views created by slicing or transposing.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-5-compare-framework-registration-mechanisms">Exercise 5: Compare framework registration mechanisms<a class="heading-anchor" href="#exercise-5-compare-framework-registration-mechanisms" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Assuming a PyTorch extension can be loaded directly in TensorFlow treats a framework binding as a generic library. The library loads only if the framework finds a registered op, which it will not.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-6-define-fixed-project-build-evidence">Exercise 6: Define fixed-project build evidence<a class="heading-anchor" href="#exercise-6-define-fixed-project-build-evidence" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Recording only that the build succeeded omits whether the kernel ran on a real device. A build can succeed on a machine with no GPU at all, so the record proves compilation only.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
-<p>Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.</p>
+<p>Hint <em>k</em> belongs to exercise <em>k</em>; open one at a time.</p>
 <ol>
-<li>Start from worked example 1 and mark the quantities needed for the task &quot;Write the operator schema&quot;.</li>
-<li>Change one assumption in worked example 2 while preserving the declared contract: derive output values.</li>
-<li>Trace the CPU program&#x27;s variables before adding hardware behavior: specify aliasing.</li>
-<li>Draw producers, consumers and the exact operation boundary for the task &quot;Reject unsupported layout&quot;.</li>
-<li>Separate what the small fixture establishes from what the real runtime must show: compare framework registration mechanisms.</li>
-<li>Write a counterexample to an overbroad claim before you define fixed-project build evidence.</li>
+<li>List each tensor input, each scalar parameter and the output, with dtype, shape and device for every one.</li>
+<li>Compute <code>2*x + 1</code> for each input, then replace any negative result with zero.</li>
+<li>Decide whether the output gets new storage or writes into an input, and say so in the schema.</li>
+<li>Ask what a raw pointer kernel reads when it receives a transposed view, and where the wrapper should catch that.</li>
+<li>Ask whether registering the operator in one framework makes it callable from the other.</li>
+<li>List what a reviewer needs to reproduce the build and to trust that the forward pass matches.</li>
 </ol>
-<h3 id="common-mistakes-and-self-review">Common mistakes and self-review<a class="heading-anchor" href="#common-mistakes-and-self-review" aria-label="Link to this section">#</a></h3>
-<p>Confusing a correct tiny example with a general implementation is the central review risk. For this chapter, challenge the assumption in worked example 2, then ask whether your change preserves the mechanism described above. If you change dtype, layout, ordering, batch size or backend, update the acceptance contract rather than silently reusing the old observation. Explain an unexpected result before trying random configuration changes.</p>
-<p>Keep a small evidence table with columns <strong>claim</strong>, <strong>input</strong>, <strong>expected observation</strong>, <strong>actual observation</strong> and <strong>limit</strong>. For the first claim use <code>Write the operator schema</code>. For the final claim use <code>Define fixed-project build evidence</code>. An unperformed GPU or cluster experiment remains pending even when the CPU model is correct.</p>
-<h3 id="platform-and-evidence-contract">Platform and evidence contract<a class="heading-anchor" href="#platform-and-evidence-contract" aria-label="Link to this section">#</a></h3>
-<p>The reading worksheet and CPU reference model work through the ordinary Linux Docker classroom on macOS, Linux and Windows using WSL 2. They do not require an NVIDIA GPU. Their results are labeled CPU models or semantic oracles, not simulated hardware performance.</p>
-<p>Real CUDA work needs supported NVIDIA hardware, a compatible host driver and an explicitly prepared GPU runtime. An Apple GPU does not execute CUDA kernels. PyTorch MPS on a supported native Mac, ROCm on supported AMD hardware, or other vendor backends can provide separate accelerator learning routes; they need their own package and operation qualification and are not CUDA evidence. The ordinary Linux Docker classroom does not expose native Mac MPS automatically.</p>
-<p>Do not download packages, models or data by opening this lesson. Do not attach an engine socket, ambient cluster credentials or an arbitrary remote endpoint. A CPU pass, imported package, successful compilation, real GPU result and measured performance are distinct observations. Record the actual backend, data shape/dtype, source revision, versions and pending checks. A saved completion marker records learning progress, not hardware certification.</p>
+<h3 id="common-mistakes-and-self-check">Common mistakes and self-check<a class="heading-anchor" href="#common-mistakes-and-self-check" aria-label="Link to this section">#</a></h3>
+<p>A common mistake is treating a working kernel as a finished operator. The kernel may return <code>[0, 1, 7]</code> for a contiguous tensor yet silently read wrong values from a transposed view, a different dtype or another device. Fix it by writing the full schema first, including aliasing and mutation, validating dtype, device and layout in the host wrapper before launch, and either implementing strides or packing the input deliberately and reporting the copy cost.</p>
+<p><strong>Evidence limit:</strong> The reference computes the fused affine-ReLU values <code>[0, 1, 7]</code> in Python. It builds no extension, so registration, dispatch, ABI compatibility and non-default stream behavior need a fixed, prepared project with a pinned toolkit and framework.</p>
+<ol>
+<li>What belongs in an operator contract besides argument types?</li>
+<li>Why can a Python pad accepting a source string not stand in for a registered operator?</li>
+<li>Why is backward treated as a separate contract?</li>
+</ol>
+<p>Answers: <a href="../solutions/cuda-097_solutions.md.html#self-check-answers">self-check answers</a>.</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
 <ul>
 <li><a href="https://docs.pytorch.org/docs/2.9/notes/cuda.html">PyTorch CUDA semantics</a></li>
 <li><a href="https://www.tensorflow.org/guide/gpu">TensorFlow GPU guide</a></li>
 </ul>
-<p>Use the version-matched documentation of your prepared environment. These references describe interfaces and supported boundaries; the chapter&#x27;s synthetic examples and CPU models are original teaching material.</p>
+<p>Full lists: <a href="../../STUDY-GUIDE.md.html#documentation-and-sources">documentation and sources</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning skill for cuda-097: A Python API over a CUDA C++ operator.
 Read courses/cuda/python/guides/cuda-097.md and courses/cuda/python/lessons/cuda-097.md.

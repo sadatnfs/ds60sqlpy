@@ -1,10 +1,10 @@
 # spark-003: Functions, arguments, and explicit return contracts
 
-Authored classroom lesson. Content availability and runtime readiness are separate checks. Read the current capability notice before running. Opening or saving this lesson does not install tools, start a cluster or prove mastery.
+A function turns a rule into something you can call, test and reuse. This lesson writes a small fee function with explicit parameter and return types, orders its branches so that nonpositive amounts are handled first, tests the 500-cent membership threshold on both sides and checks that the function stays pure when it is called twice with the same arguments.
 
 ## Level and prerequisites
 
-Beginner; 60 minutes. Direct prerequisites: `spark-002`. Use the subject browser to open prerequisite lessons or review their concepts. Runtime readiness is checked separately before execution.
+Beginner; 60 minutes. Direct prerequisites: `spark-002`. Pinned versions: [execution baseline](../execution-baseline.md). Shared run steps: [study guide](../STUDY-GUIDE.md#run-a-language-lesson).
 
 Learner artifact: [spark-003.scala](../lessons/spark-003.scala). Keep [solutions](../solutions/spark-003_solutions.md) closed until an attempt or explicit reveal.
 
@@ -57,7 +57,7 @@ assert(bonus(10L) == 2L)
 
 Explain addCents then evaluate two calls.
 
-**Inputs/evidence:** `AddCents(100L, 25L)`, `addCents(0L, 25L)`.
+**Inputs/evidence:** `addCents(100L, 25L)`, `addCents(0L, 25L)`.
 
 **Expected result/shape:** 125L and 25L.
 
@@ -121,7 +121,7 @@ Call the same function with named parameters in reverse order.
 
 Compare a proposed call counter with the fee contract.
 
-**Inputs/evidence:** Two consecutive `feeCents(1000L, true)` calls and negative amount-1L.
+**Inputs/evidence:** Two consecutive `feeCents(1000L, true)` calls and the negative amount `-1L`.
 
 **Expected result/shape:** Both calls 50L; negative amount yields 0L even for a nonmember.
 
@@ -151,8 +151,10 @@ Predict member 2000L and nonmember 2000L; review an out-of-domain value.
 
 ## Self-check
 
-- Can you reproduce each exact observation without reading the official answer?
-- Can you explain a failed check using the lesson's model, rather than changing an expected value?
+- Exercise 1 returns `125L` and `25L` from one `addCents` definition. Which names in your code are parameters, and which values are arguments?
+- The fee rule checks for a nonpositive amount before it looks at membership. What would a nonmember with `-1L` pay if the membership branch came first?
+- Member amounts 499L, 500L and 501L give 0L, 25L and 25L. Why does integer division give 25L for 501L, and why must 500 itself be one of the tested inputs?
+- A call counter would let the second `feeCents(1000L, true)` call depend on the first. Why must both calls still return `50L`, and what does the bound of 1,000,000 cents protect against?
 
 ## Retrieval and transfer
 

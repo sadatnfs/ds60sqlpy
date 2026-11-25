@@ -32,11 +32,9 @@ Use POST `/increment` only within the disposable lab to intentionally change the
 
 ## How to use this lesson
 
-The classroom displays this guide and saves your worksheet, `courses/docker/lessons/docker-013.md`. Its Run button does not control your Docker engine. Docker engine access is powerful host access, so the classroom deliberately receives no engine socket. Work through the supplied examples without starting anything, then use the optional host lab only in your own disposable project. Reading a command, parsing YAML and actually running the project are different forms of evidence.
+The classroom saves `courses/docker/lessons/docker-013.md` and holds no engine socket ([host-lab setup](../STUDY-GUIDE.md#host-lab-setup)).
 
-Use Bash in Linux, macOS Terminal, or Ubuntu under WSL 2 on Windows. The supported engine runs Linux containers. The maintained fixture is `courses/docker/fixtures/compose-lab/`; its README explains copying it into a new ignored learner directory, checking the engine, building locally with visible logs, and using the fixed project name `ds60-docker-study`. The fixture uses port 18080 on host loopback. Stop if that project name or port belongs to unrelated work; choose a new project name consistently in your own copy. Never paste a command against a remote Docker context simply because it is currently selected.
-
-For Dockerfile examples, create a file named `Dockerfile` in a scratch project. YAML snippets describe a fragment unless explicitly called a complete file. Text transcripts are synthetic illustrations, not claims about your machine. Do not substitute a real password, token or private registry into a checked-in example. **How to use the lessons** in the [subject README](../README.md) collects these rules in one place.
+**Host lab.** Create a scratch volume with `docker volume create ds60-vol-demo` and write into it from one throwaway container: `docker run --rm --pull never -v ds60-vol-demo:/data ds60-docker-study:local python -c "open('/data/n.txt','w').write('kept')"`. Read the file back from a second, separate container with `cat /data/n.txt`. The two containers never ran at the same time, yet they shared one file, because the data lives in the volume. Next, mount the same volume at `/app` in a third run and list it with `ls /app`: only `n.txt` appears, and the packaged `server.py` is hidden for that container. Finish with `docker volume rm ds60-vol-demo`, a deliberate deletion of a scratch volume you created yourself, and leave the project's `study-data` volume and its counter untouched.
 
 ## Worked example / walkthrough
 
@@ -67,7 +65,7 @@ docker compose -p ds60-docker-study up -d --force-recreate --wait app
 
 ## Six progressive exercises
 
-For each exercise, name the object involved and the phase of its lifetime before changing anything, then vary only the condition the task names. Exercises that ask you to predict, explain, compare or diagnose keep their answers in the solutions file; the others show the evidence to look for.
+Answer-type prompts keep their answers in the solutions file ([exercise rules](../STUDY-GUIDE.md#exercise-rules)).
 
 ### Exercise 1: Predict data retention after app recreation.
 
@@ -99,13 +97,19 @@ For each exercise, name the object involved and the phase of its lifetime before
 
 Mounting a host directory over `/app` and hiding the packaged code. Changing the project name and then looking for data in the new, empty volume. Deleting volumes as part of routine cleanup.
 
-Exercise 4 is this chapter's boundary case: Diagnose missing code after mounting over /app. Compare the files in `/app` from the image with the files the running container shows, and read the mount table for the same path. Preserve the original failure and the exact changed field before retrying. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
+Exercise 4 is this chapter's boundary case: Diagnose missing code after mounting over /app. Compare the files in `/app` from the image with the files the running container shows, and read the mount table for the same path.
+
+A quieter surprise comes from how an empty named volume is initialized. The first time an empty named volume is mounted over a path that already holds files in the image, the engine copies those files and their ownership into the volume. That is why the fixture's `/data`, owned by UID 10001 in the image, is writable in a brand new volume. After that first mount the volume is no longer empty, so a later image that ships new or changed files at the same path does not update it, and the container keeps showing the old copies. Bind mounts never perform this copy. Keep image defaults out of data paths, or let the application create missing defaults at startup.
+
+Never trade a safety control for a passing example ([safety rules](../STUDY-GUIDE.md#safety-rules)).
 
 ## Retrieval, transfer and next steps
 
-Close the explanations first. Predict the counter value after recreating the app with the named volume kept, and after removing that volume. Then reconstruct worked example 2 (Recreate the app while retaining its volume) with one different value, predict what changes, and name which of named volume, bind mount, persistence and container recreation the change touches.
+**Retrieval.** Predict the counter value after recreating the app with the named volume kept, and after removing that volume.
 
-When a host session ends, run `docker compose -p ds60-docker-study down` from your fixture copy. It removes the project's containers and network but keeps named volumes; deleting a volume is a separate, deliberate reset described in the fixture README.
+**Transfer case.** Two services in one project mount `study-data`, the app at `/data` and a reporting service at `/source:ro`. A learner removes the app container and recreates it. Does the reporting service still see `counter.json`, and what would make the file disappear for both?
+
+Then run the [retrieval loop](../STUDY-GUIDE.md#retrieval-and-cleanup) and end any host session with its cleanup.
 
 ## Primary references
 

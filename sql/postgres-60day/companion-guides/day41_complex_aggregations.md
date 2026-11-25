@@ -2,67 +2,18 @@
 
 ## How to run this lesson
 
-Start the Linux-container engine and run `./classroom` from the repository
-root. On Windows, use Ubuntu in WSL 2 or the thin
-`START_DOCKER_CLASSROOM.cmd` wrapper. Choose **PostgreSQL** on the shared
-`/classroom` home, then open **sql-41**. The
-[launcher guide](../../../docs/one-command-classroom.md) covers first preparation, strict resume and
-the saved project selection. No host Python or PostgreSQL installation is
-required for this browser route.
-
-1. Read the prerequisite and fixture notes before running the file. Use only
-   the local disposable `advanced_sql_training` database.
-2. Choose **Whole SQL lesson (psql)** for the cataloged learner script. This
-   preserves the lesson's reviewed psql directives, relative includes and
-   transaction behavior. **SQL snippet** is appropriate for ordinary SQL
-   statements, but is not a replacement for an entire script's setup.
-3. The **Course database** panel above the code shows whether the course
-   training tables are loaded. Missing tables load automatically before your
-   first run (or choose **Load course tables**) and stay loaded for later
-   lessons. **Reset training data** restores the original rows only when your
-   own changes made results differ; it keeps your saved code and notes.
-4. Edit the learner copy in the classroom and save your prediction before
-   running. Its whole-script workspace is
-   `.learning/sql/sql-41/lesson/workspace/sql/postgres-60day/day41_complex_aggregations.sql`.
-   For browser work this path is inside the Docker learning volume, not a
-   newly created host folder beside your checkout. The checked-in source
-   remains the answer-free starting artifact.
-5. Run the whole script and inspect the full transcript. The runner uses
-   `psql -X -v ON_ERROR_STOP=1 -f`. SELECT output has columns, rows and a row
-   count; DDL/DML has command tags; intentional checks may produce NOTICE
-   messages. An unexpected ERROR or nonzero exit is a failure to diagnose,
-   even when an earlier query printed plausible values.
-6. Verify the lesson's expected grain, ordering, constraints and declared
-   transaction or cleanup outcome. Keep required ROLLBACK statements.
-   The warehouse sequence and other explicitly stateful exercises explain
-   when state is committed. Read saved output without rerunning it when
-   reviewing an earlier attempt.
-
-If a relation is missing, inspect the lesson's required fixture and predecessor
-rather than guessing a new table definition. If authentication or runtime
-readiness fails, use `./classroom status` and the setup guide. Keep credentials
-out of SQL, notebooks, screenshots and committed files. Repair the first error
-before trusting partial output, and reveal separate solutions only when you
-want to compare after an attempt.
-
-### Optional contributor notebook route
-
-For notebook work, deliberately prepare the Linux/WSL contributor environment
-from [CONTRIBUTING.md](../../../CONTRIBUTING.md), including a compatible psql client and
-the notebook dependencies. Generate this lesson's private workspace through
-the maintained CLI:
-
-```sh
-uv run --no-sync python scripts/course.py sql notebook sql-41
-```
-
-Open the printed notebook path in that environment's JupyterLab. It uses the
-same catalog-derived learner-copy layout in that contributor checkout and
-executes the complete script through psql. Its host-side state is separate
-from the Docker browser's named volume. Follow
-[guided SQL notebooks](../../../docs/guided-sql-notebooks.md) for explicit local connection
-selection and kernel setup. Notebook generation does not execute SQL or
-authorize a reset.
+Open **sql-41** from `./classroom` (PostgreSQL), choose **Whole SQL lesson
+(psql)** and edit your saved copy at
+`.learning/sql/sql-41/lesson/workspace/sql/postgres-60day/day41_complex_aggregations.sql`.
+The script only reads `orders`, `order_items`, `products` and `customers` from
+the course load of `advanced_sql_training`, inside `BEGIN` ... `ROLLBACK`, so a
+rerun never changes data. A clean `psql` transcript shows three worked result
+sets (category FILTER metrics, country CASE metrics, category name labels) and
+then one result set per finished exercise. The 30- and 90-day columns move
+with `now()`, but the six categories and seven countries that have orders stay
+fixed. Launcher steps, failure recovery and the optional notebook route live in
+the [SQL study guide](../../STUDY-GUIDE.md#run-a-lesson-in-the-classroom) and
+its [notebook section](../../STUDY-GUIDE.md#optional-contributor-notebook-route).
 
 ## Level and prerequisites
 
@@ -74,24 +25,30 @@ authorize a reset.
 
 ## A beginner's mental model for this lesson
 
-A **table** stores facts in named columns. A **row** is one occurrence at the
-table's declared grain. A query creates a temporary **result set**: rows printed
-on screen are not automatically stored. The key vocabulary for this lesson is FILTER clause, Conditional aggregate, Ordered aggregation. Its worked SQL reads or creates `order_items`, `products`, `orders`, `customers`.
+Every query today collapses many order lines into a few summary rows, so first
+ask which rows feed each aggregate. In Example 1 the joins produce one row per
+order line. `SUM(oi.quantity)` adds every line in the category, while
+`SUM(oi.quantity) FILTER (WHERE o.order_date >= now() - interval '30 days')`
+adds only lines whose parent order is recent. Old lines stay in the group for
+`total_qty`; they are simply skipped by `qty_30d`. That is the whole point of a
+**FILTER clause**: one grouped pass, with each measure choosing its own
+population. A `CASE` inside `SUM` (Example 2) gives the same number but hides
+the condition inside the expression.
 
-Before writing a query, complete this sentence: “One output row represents
-___.” Joins can multiply rows, filters can remove them, grouping can collapse
-many rows into one, and window functions can add calculations while preserving
-row count. For a normal analytical `SELECT`, use this logical reading order:
-`FROM`/`JOIN` (including `ON`) → `WHERE` → `GROUP BY`/aggregates → `HAVING` →
-window calculations → `SELECT` → `ORDER BY` → `LIMIT`. PostgreSQL may execute a
-different physical plan while preserving those semantics.
-
-The worked walkthrough's lesson-specific task is: Establish one order-line relation, then calculate 30-day revenue, 90-day revenue, order count, and customer count in one category group using `FILTER`. Reconcile each measure with a simpler single-purpose query before trusting the combined dashboard.
-The first runnable example has a concrete contract: Example 1 returns one grouped row per `category` with columns `category`, `total_qty`, `qty_30d`, `qty_90d`, `revenue`, and `revenue_30d` from `order_items`, `products`, and `orders`. Compare the key set and row count with a simpler control over the same filter/window; inspect `NULL` versus zero/absent-row meaning and verify the final ordering/tie-breaker when present. Its final projection is `category`, `total_qty`, `qty_30d`, `qty_90d`, `revenue`, and `revenue_30d`. Independently group `order_items`, `products`, and `orders` by the shown grouping expressions and compare every displayed aggregate at that exact grain. For tied business values, inspect the final ordering expression and verify its last key makes the displayed order reproducible.
+A group can exist while one of its measures has no qualifying input. `SUM`
+over zero filtered rows returns `NULL`, whereas `COUNT(*) FILTER (...)`
+returns `0`, so decide which one your report means before adding `COALESCE`.
+Exercises 3 and 5 add a third idea: `CUBE` and `GROUPING SETS` print several
+grains in one result, so each row needs a `GROUPING` label that says which
+grain it is. The [logical reading order](../../STUDY-GUIDE.md#reading-any-query-in-logical-order)
+still holds: the joins build line grain, `GROUP BY` collapses it, and each
+`FILTER` acts inside its own aggregate.
 
 ## Two worked SQL examples
 
-These worked excerpts come from `sql/postgres-60day/day41_complex_aggregations.sql`. Use **Whole SQL lesson (psql)** in the unified classroom for the complete file, including its fixture and transaction context. The optional contributor notebook and prepared `psql` routes are described above.
+Both excerpts come from the learner script; its third worked query, a
+`string_agg(DISTINCT p.name, ', ' ORDER BY p.name)` label per category, is
+best read straight from the file.
 
 ### Example 1
 
@@ -113,9 +70,21 @@ ORDER BY
   revenue DESC;
 ```
 
-**How to read it:** Example 1: Start with `order_items`, `products`, and `orders` in `FROM`/`JOIN`; let `WHERE` remove nonqualifying rows; let `GROUP BY` collapse rows to its grouping keys. The final `SELECT` displays `category`, `total_qty`, `qty_30d`, `qty_90d`, `revenue`, and `revenue_30d`. `ORDER BY` determines presentation order. Before running, predict the row grain, row count, `NULL` positions, and first/last key; afterwards, compare each prediction with the transcript.
+**How to read it:** The three joins put each order line next to its product category and its
+parent order's date. All five measures read the same rows. The two unfiltered
+columns (`total_qty`, `revenue`) cover the whole history, and each `FILTER`
+narrows only its own aggregate to orders placed in the last 30 or 90 days
+relative to `now()`. Revenue is computed per line as
+`unit_price * quantity * (1 - discount)`, which is why the query never touches
+`orders.total_amount`: that order-level value would repeat once per line after
+the join.
 
-**Expected result/shape:** Example 1 returns one grouped row per `category` with columns `category`, `total_qty`, `qty_30d`, `qty_90d`, `revenue`, and `revenue_30d` from `order_items`, `products`, and `orders`. Compare the key set and row count with a simpler control over the same filter/window; inspect `NULL` versus zero/absent-row meaning and verify the final ordering/tie-breaker when present.
+**Expected result/shape:** Six rows, one per category (Apparel, Beauty, Books, Electronics, Home,
+Sports), ordered by all-time `revenue` from highest to lowest. For each row
+`qty_30d <= qty_90d <= total_qty` must hold, because the windows are nested
+subsets of the same lines. If a category had no recent lines its `qty_30d`
+would print as an empty `NULL`, not `0`. To check one cell, rerun a plain
+`SUM(oi.quantity)` for that category with the 30-day condition in `WHERE`.
 
 ### Example 2
 
@@ -149,9 +118,20 @@ ORDER BY
   net_revenue DESC;
 ```
 
-**How to read it:** Example 2: Start with `orders`, and `customers` in `FROM`/`JOIN`; let `GROUP BY` collapse rows to its grouping keys. The final `SELECT` displays `country`, `successful_orders`, `returned_orders`, and `net_revenue`. `ORDER BY` determines presentation order. Before running, predict the row grain, row count, `NULL` positions, and first/last key; afterwards, compare each prediction with the transcript.
+**How to read it:** Here the grain is one row per order, not per line: `orders` joins only to
+`customers`, so `o.total_amount` appears exactly once per order and can be
+summed safely. Each `CASE` turns an order into a 1 or 0 (or into its amount or
+0), and `SUM` counts or totals those values per country. Statuses `paid`,
+`shipped` and `delivered` are successful, `returned` is counted separately, and
+`placed` orders fall into neither count but still add to `net_revenue` because
+the third `CASE` only excludes `returned`.
 
-**Expected result/shape:** Example 2 returns one grouped row per `country` with columns `country`, `successful_orders`, `returned_orders`, and `net_revenue` from `orders`, and `customers`. Compare the key set and row count with a simpler control over the same filter/window; inspect `NULL` versus zero/absent-row meaning and verify the final ordering/tie-breaker when present.
+**Expected result/shape:** Seven rows, one per country that has orders (AU, CA, DE, FR, GB, IN, US),
+sorted by `net_revenue` descending. BR customers exist but have no orders, so
+the inner join leaves BR out entirely instead of printing a zero row. Note
+that `successful_orders + returned_orders` is smaller than the country's order
+count, and the gap is exactly its `placed` orders; that is a useful one-line
+reconciliation.
 
 ## Learning objectives
 
@@ -218,29 +198,29 @@ combined dashboard.
 Complete these in the [learner SQL](../day41_complex_aggregations.sql):
 
 1. Build six category metrics with `FILTER`.
-   **Inputs/evidence:** For sql-41 Exercise 1, read from `orders`, `order_items`, `products`, and `training.products`. Build the answer toward `category`, `revenue_30d`, `revenue_90d`, `orders_30d`, `units_30d`, `customers_90d`, and `revenue_per_order_30d`; keep `category` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-41 Exercise 1, expected output: one row for each category in `training.products`, with six metric columns. The final columns are `category`, `revenue_30d`, `revenue_90d`, `orders_30d`, `units_30d`, `customers_90d`, and `revenue_per_order_30d`. The final order is `revenue_30d DESC NULLS LAST, category`.
-   **Verify:** For sql-41 Exercise 1, independently aggregate `orders`, `order_items`, `products`, and `training.products` by `category`; require one output row for every distinct `category` tuple and compare `revenue_30d`, `revenue_90d`, `orders_30d`, `units_30d`, `customers_90d`, and `revenue_per_order_30d` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `revenue_30d`, `revenue_90d`, and `orders_30d` for the existing `category` tuple and verify the new tuple appears exactly once.
+   **Inputs/evidence:** For sql-41 Exercise 1, join `orders`, `order_items`, and `products` once in a `lines` CTE (13,085 rows, one per order line) carrying `category`, `order_id`, `customer_id`, `order_date`, `quantity`, and line revenue `unit_price * quantity * (1 - discount)`; every metric is a `FILTER` over that relation with 30-day or 90-day windows anchored at `CURRENT_TIMESTAMP`.
+   **Expected result/shape:** For sql-41 Exercise 1, return 6 rows, one per sold category (`Apparel`, `Beauty`, `Books`, `Electronics`, `Home`, `Sports`); the window values move with the load date because the seed dates are relative to it. The final columns are `category`, `revenue_30d`, `revenue_90d`, `orders_30d`, `units_30d`, `customers_90d`, and `revenue_per_order_30d`. The final order is `revenue_30d DESC NULLS LAST, category`.
+   **Verify:** For sql-41 Exercise 1, confirm 6 rows with unique `category`, `revenue_90d >= revenue_30d` on every row, and `revenue_per_order_30d` within 0.01 of `revenue_30d / orders_30d`; recompute `Books` with a plain `WHERE p.category = 'Books' AND o.order_date >= CURRENT_TIMESTAMP - interval '30 days'` query and match `revenue_30d`, `orders_30d`, and `units_30d`; then, in a rolled-back transaction, insert a product in a new `Garden` category and confirm the result still has 6 rows, because categories come from order lines.
 2. List each country's top five products with `string_agg`.
-   **Inputs/evidence:** For sql-41 Exercise 2, read from `customers`, `orders`, `order_items`, and `products`. First aggregate at (`country`, `product_id`, `name`) grain, then rank products within each country; build the answer toward `country` and `top_five_products`.
-   **Expected result/shape:** For sql-41 Exercise 2, expected output: one row per represented country. `top_five_products` contains at most five product names ordered by `revenue DESC, product_id`; `product_id` is the deterministic tie-breaker. The final columns are `country` and `top_five_products`. The final order is `country`.
-   **Verify:** For sql-41 Exercise 2, independently aggregate line revenue at (`country`, `product_id`, `name`) grain and rank with `ROW_NUMBER() OVER (PARTITION BY country ORDER BY revenue DESC, product_id)`. For every country, compare the ordered products used by `string_agg`, require no more than five ranked products, and confirm a country with fewer than five products is not padded.
+   **Inputs/evidence:** For sql-41 Exercise 2, join `customers`, `orders`, `order_items`, and `products`, sum line revenue at (`country`, `product_id`, `name`) grain in `product_revenue`, rank it with `ROW_NUMBER() OVER (PARTITION BY country ORDER BY revenue DESC, product_id)` in `ranked`, and keep ranks 1 to 5 for `string_agg`.
+   **Expected result/shape:** For sql-41 Exercise 2, return 7 rows, one per country with orders (`AU`, `CA`, `DE`, `FR`, `GB`, `IN`, `US`; `BR` has no orders), each listing exactly five names in rank order, for example `AU` = `Product 238, Product 207, Product 251, Product 261, Product 243`. The final columns are `country` and `top_five_products`. The final order is `country`.
+   **Verify:** For sql-41 Exercise 2, rerun `ranked` alone with `WHERE country = 'AU' AND product_rank <= 5` and match the five `AU` names in order; confirm every country bought 275 distinct products, so no list is short; then add `WHERE o.order_id = 1` inside `product_revenue` and confirm one row whose list has only the order's two products, `Product 79, Product 48`, with no padding.
 3. Predict explicit grouping sets versus a two-column `CUBE`.
-   **Inputs/evidence:** For sql-41 Exercise 3, calculate line revenue from `orders`, `customers`, `order_items`, and `products`, then aggregate with `CUBE(country, category)`. Build the answer toward `country`, `category`, `revenue`, `grouping_mask`, and `grouping_level`.
-   **Expected result/shape:** For sql-41 Exercise 3, expected output: every grouping level emitted by the two-dimensional cube. `grouping_mask` is `0` for detail, `1` for a country subtotal, `2` for a category subtotal, and `3` for the grand total. The final columns are `country`, `category`, `revenue`, `grouping_mask`, and `grouping_level`. The final order is `grouping_mask, country, category`.
-   **Verify:** For sql-41 Exercise 3, compare mask `0` with an independent (`country`, `category`) aggregate, mask `1` with a country aggregate, and mask `2` with a category aggregate; require exactly one mask `3` row. Within each mask, the sum of `revenue` must equal the independent all-lines revenue total.
+   **Inputs/evidence:** For sql-41 Exercise 3, build a `lines` CTE of order-line revenue with each line's customer `country` and product `category` (13,085 rows), then aggregate it with `GROUP BY CUBE (country, category)` and label `GROUPING(country, category)` as `grouping_mask` and `grouping_level`.
+   **Expected result/shape:** For sql-41 Exercise 3, return 56 rows: 42 detail rows (7 countries times 6 categories, mask `0`), 7 country subtotals (mask `1`), 6 category subtotals (mask `2`), and one grand total (mask `3`) of 2355647.1235. `grouping_mask` is `0` for detail, `1` for a country subtotal, `2` for a category subtotal, and `3` for the grand total. The final columns are `country`, `category`, `revenue`, `grouping_mask`, and `grouping_level`. The final order is `grouping_mask, country, category`.
+   **Verify:** For sql-41 Exercise 3, count rows per `grouping_mask` (42, 7, 6, 1) and confirm that `revenue` sums to 2355647.1235 within each mask; check one cell such as `AU`/`Apparel` = 54277.4215 against a plain filtered sum; then replace `CUBE` with `GROUPING SETS ((country), (category), ())` and confirm 14 rows, because the 42 country-by-category detail rows are the level that list omits.
 4. Build country status/revenue/customer metrics with `FILTER`.
-   **Inputs/evidence:** For sql-41 Exercise 4, read from `orders`, and `customers`. Build the answer toward `country`, `orders`, `paid_orders`, `paid_revenue`, `returned_revenue`, and `customers`; keep `country` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-41 Exercise 4, expected output: one row per `country`. The final columns are `country`, `orders`, `paid_orders`, `paid_revenue`, `returned_revenue`, and `customers`. The final order is `c.country`.
-   **Verify:** For sql-41 Exercise 4, independently aggregate `orders`, and `customers` by `country`; require one output row for every distinct `country` tuple and compare `orders`, `paid_orders`, `paid_revenue`, `returned_revenue`, and `customers` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `orders`, `paid_orders`, and `paid_revenue` for the existing `country` tuple and verify the new tuple appears exactly once.
+   **Inputs/evidence:** For sql-41 Exercise 4, join `orders` to `customers` (4,362 order rows), group by `c.country`, and compute every measure with `COUNT` or `SUM` plus `FILTER (WHERE o.status = ...)` over the same rows; `status` has five values (`placed`, `paid`, `shipped`, `delivered`, `returned`).
+   **Expected result/shape:** For sql-41 Exercise 4, return 7 rows, one per country with orders; `BR` is absent because none of its 62 customers ordered. `AU` shows 613 orders, 123 paid orders, 66338.06 paid revenue, 66707.95 returned revenue, and 62 customers. The final columns are `country`, `orders`, `paid_orders`, `paid_revenue`, `returned_revenue`, and `customers`. The final order is `c.country`.
+   **Verify:** For sql-41 Exercise 4, confirm `orders` sums to 4362, `paid_orders` to 872, and `paid_revenue` to 478068.36, matching `SELECT count(*), sum(total_amount) FROM orders WHERE status = 'paid'`; then rewrite the join as `customers LEFT JOIN orders` and observe that `BR` appears with `orders = 1` from `COUNT(*)` but `customers = 0`, so a left-join version must count `o.order_id`.
 5. Distinguish stored NULLs from subtotal NULLs with `GROUPING`.
-   **Inputs/evidence:** For sql-41 Exercise 5, read `customers.country` and append one controlled `NULL::text` input row in a `country_input` CTE. Apply `GROUPING(country)` to the grouped expression and build `country_label`, `is_subtotal`, and `customers`.
-   **Expected result/shape:** For sql-41 Exercise 5, expected output: one detail row per distinct input country with `is_subtotal = 0`, including a `(stored null)` row, plus exactly one `ALL COUNTRIES` row with `is_subtotal = 1`. The final columns are `country_label`, `is_subtotal`, and `customers`. The final order is `is_subtotal, country_label`.
-   **Verify:** For sql-41 Exercise 5, require exactly one row with `is_subtotal = 1`, require the `(stored null)` row to have `is_subtotal = 0`, and verify that detail-row `customers` sum to the grand-total `customers`. `GROUPING` receives the grouped `country` expression; do not try to call `GROUPING(NULL)`.
+   **Inputs/evidence:** For sql-41 Exercise 5, read `customers.country` (500 rows) and append one controlled `NULL::text` row with `UNION ALL` in a `country_input` CTE; group by `GROUPING SETS ((country), ())`, and use `GROUPING(country)` to build `country_label`, `is_subtotal`, and `customers`.
+   **Expected result/shape:** For sql-41 Exercise 5, return 10 rows: 8 country rows and one `(stored null)` row with 1 customer, all with `is_subtotal = 0`, plus one `ALL COUNTRIES` row with `is_subtotal = 1` and 501 customers. The final columns are `country_label`, `is_subtotal`, and `customers`. The final order is `is_subtotal, country_label`.
+   **Verify:** For sql-41 Exercise 5, confirm exactly one row has `is_subtotal = 1` and that the nine detail `customers` values sum to its 501; confirm `(stored null)` carries `is_subtotal = 0`; then remove the `UNION ALL` branch and confirm 9 rows with a 500 total. `GROUPING` receives the grouped `country` expression; do not try to call `GROUPING(NULL)`.
 6. Return a typed empty array for an empty aggregate input.
-   **Inputs/evidence:** For sql-41 Exercise 6, read `customers.email` through `array_agg(email) FILTER (WHERE false)` and use a same-type `COALESCE` fallback. Build the answer toward `empty_email_array`.
-   **Expected result/shape:** For sql-41 Exercise 6, expected output: exactly one scalar row with one column, `empty_email_array`, whose value is the non-NULL empty `text[]` value `{}`. There is no customer-level key because the query has no `GROUP BY`.
-   **Verify:** For sql-41 Exercise 6, assert that the uncoalesced filtered `array_agg` result is `NULL`, while the final result satisfies `empty_email_array IS NOT NULL` and `cardinality(empty_email_array) = 0`.
+   **Inputs/evidence:** For sql-41 Exercise 6, read `customers.email` through `array_agg(email) FILTER (WHERE false)`, which sees all 500 rows but aggregates none, and wrap it in `COALESCE(..., '{}'::text[])` so both branches are `text[]`.
+   **Expected result/shape:** For sql-41 Exercise 6, return exactly one row with one column, `empty_email_array`, whose value is the non-NULL empty `text[]` value `{}`. There is no customer-level key because the query has no `GROUP BY`.
+   **Verify:** For sql-41 Exercise 6, select the uncoalesced filtered `array_agg` and confirm `IS NULL` is true, while the final result satisfies `empty_email_array IS NOT NULL` and `cardinality(empty_email_array) = 0`; then replace the fallback with a bare `ARRAY[]` and confirm the error `cannot determine type of empty array`.
 
 Decide explicitly when an absent measure should be `NULL` or zero.
 
@@ -291,7 +271,10 @@ by the course setup.
 
 ## Practice map
 
-Use the numbered **Exercises** section above as the single authoritative practice contract. Its prompts, expected shapes, and verification checks map one-for-one to the learner SQL and both solution companions.
+Exercises 1 and 4 rebuild the two worked shapes with `FILTER`, Exercise 2 ranks
+before aggregating, Exercises 3 and 5 make subtotal grain visible with
+`GROUPING`, and Exercise 6 isolates the empty-input case. The numbered list
+above is the contract; the learner SQL repeats it unchanged.
 
 ## Pitfalls and validation
 
@@ -315,9 +298,9 @@ Aggregates over no input rows often return NULL, so `COALESCE(array_agg(...),
 
 ## Ask an AI tutor about this lesson
 
-An AI tutor is optional; the guide, learner SQL, PostgreSQL, and expected checks are
-enough to complete the lesson offline. If you want a patient tutor, copy this
-prompt after opening the repository in the AI tutor:
+The tutor is optional; the guide, the learner SQL and PostgreSQL are enough.
+To use one, paste this prompt (see
+[the study guide's tutor notes](../../STUDY-GUIDE.md#use-an-ai-tutor-optional)):
 
 ```text
 Tutor me through sql-41: Complex Aggregations: FILTER, String Aggregation, and CUBE.

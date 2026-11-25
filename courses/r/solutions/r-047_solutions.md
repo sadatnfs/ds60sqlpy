@@ -1,6 +1,6 @@
 # r-047: reference reasoning
 
-Use the [complete reference](r-047_reference.R) with the guide's declared inputs and runtime. Every worked example is also a standalone script.
+Run the [complete reference](r-047_reference.R) under the [run rules](../STUDY-GUIDE.md#run-a-chapter).
 
 ## Why the implementation has this shape
 
@@ -108,4 +108,6 @@ The tree returns the high region rather than extending a numerical trend. This i
 
 ## What the checks establish
 
-The reference makes 6 `stopifnot()` checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.
+The assertions confirm that new points are classified low and high, that probability columns are named low and high and each row sums to 1, that pruning with cp 1 leaves one leaf, that a wrapper rejects a missing x, that an x of 1000 is still labeled high because the tree extends its last partition, and that the training rows are all classified correctly. Perfect training accuracy here is not evidence about held-out accuracy.
+
+The reference makes 6 `stopifnot()` checks; see [what a passing run proves](../STUDY-GUIDE.md#what-a-passing-run-proves).

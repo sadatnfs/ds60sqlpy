@@ -1,22 +1,26 @@
 # spark-021: Read logical and physical plans
 
-Authored paired Scala/PySpark teaching content. The default fixtures are tiny, local and deterministic. Runtime acceptance, logical correctness and learner understanding remain separate evidence.
+Spark gives you several views of one query before it runs a single task. Twelve rows in an owned Parquet directory, with a payload column that no query needs, let you trace a filter, a projection and a grouped sum from the SQL you wrote down to the scan, the `Filter`, the `Project` and the `Exchange` the engine plans.
 
 ## Level and prerequisites
 
-Intermediate; approximately 90 minutes. Direct prerequisites: `spark-020`. The prepared baseline is Spark 4.3.0, Scala binary 2.13, JDK 17 and Python 3.12. Read the [execution baseline](../execution-baseline.md).
+Intermediate; approximately 90 minutes. Direct prerequisites: `spark-020`. Pinned versions: [execution baseline](../execution-baseline.md).
 
 ## How to run this lesson
 
-Open `spark-021` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile, save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`; Python stages as `main.py` with a main guard. Each program creates its own `local[2]` session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.
+Shared run steps and profile rules: [study guide](../STUDY-GUIDE.md#run-a-paired-lesson).
 
-The [Scala learner](../lessons/spark-021.scala) and [PySpark learner](../lessons/spark-021.py) run two complete demonstrations and retain six explicit task stubs. Use the [explained solutions](../solutions/spark-021_solutions.md) only after an attempt or an explicit worked comparison; the [Scala reference](../solutions/spark-021_solution.scala) and [PySpark reference](../solutions/spark-021_solution.py) contain complete assertions. A bounded collect is used only for the declared tiny fixture; do not copy it onto an unbounded or large production table.
+Learner pads: [Scala](../lessons/spark-021.scala) and [PySpark](../lessons/spark-021.py).
+
+Open the [explained solutions](../solutions/spark-021_solutions.md) after an attempt.
+
+The first worked example writes the fixture, reads it back and prints `Owned Parquet fixture has four stored columns and 12 rows`. The second runs the projection query, collects the nine rows for IDs 3 through 11 and then shows `EXPLAIN FORMATTED` with truncation turned off, so you can match each numbered operator with a clause of the SQL text you just ran.
 
 ## Learning objectives
 
 - Use explain output to connect filters, projections and exchanges to the written query.
-- State the input and output grain, schema, NULL policy and ordering before executing a transformation.
-- Compare each language implementation with independent literal expectations, not only with the other implementation.
+- Capture `EXPLAIN EXTENDED` text and locate its Parsed, Analyzed and Optimized Logical Plan sections and its Physical Plan, and reject an unsupported mode such as `UNSUPPORTED` with a clear `ValueError`.
+- Read the Parquet `ReadSchema` to show that only `id` and `amount` are scanned for the projection, then replace expression IDs such as `#123L` and the scratch path before comparing two plans as text.
 
 ## Vocabulary and concepts
 
@@ -52,7 +56,7 @@ All file creation is under a fresh lesson-owned root, and cleanup removes only t
 
 ## Supplied local fixture
 
-The complete source creates the owned local session described above, then constructs this explicit fixture. The worked examples below run in that same main function; there is no hidden notebook state.
+`spark.range(0, 12, 1, 2)` supplies IDs 0 to 11 in two partitions. Each row gets `group_id = id % 3`, `amount = id * 10` and a 16-character `unused_payload` of x's. The table is written once to Parquet under a fresh `.ds60-spark-021-` scratch root with `errorifexists`, read back and registered as the view `ds60_spark_021_input`. The payload exists only so that column pruning has something visible to prune.
 
 ```scala
 import org.apache.spark.sql.functions._
@@ -166,7 +170,7 @@ Capture FORMATTED output and extract lines containing ReadSchema. Verify that th
 
 Execute the grouped aggregate and capture its FORMATTED plan. Return group_id, n, total and locate aggregate plus Exchange operators under the fixed AQE-disabled configuration.
 
-**Expected result/shape:** Groups 0,1,2 each have n = 3 with totals 180,210,240. The plan shows aggregation and an Exchange.
+**Expected result/shape:** Groups 0, 1 and 2 each have n = 3 with totals 180, 210 and 240. The plan shows aggregation and an Exchange.
 
 **Verify:** Assert all group tuples independently, then assert the relevant operator markers and recorded AQE setting.
 
@@ -198,11 +202,14 @@ Do not treat EXPLAIN as a benchmark or proof that the final action completed. Do
 
 ## Self-check
 
-Explain the contract of `projectionResult` / `projection_result` without reading its solution. Then, from memory, state what Exercise 6 (Compare equivalent query forms with separate semantic and plan evidence) must produce: The nested query has the same nine tuples. Receipt shows Spark 4.3.0, ANSI true, AQE false, shuffle partitions 2. Both extended plans expose an optimized stage. Say which part of that result is evidence and what it still cannot show. Name the action in your trace that actually runs the plan.
+- The projection query filters on `amount >= 30` but returns `doubled`. Predict the first and last `(id, doubled)` pairs and explain why that answer does not depend on reading any plan.
+- `ReadSchema` for the projection lists `id` and `amount`. Why is `group_id` absent even though it is stored in the files, and what would change if the query added `ORDER BY group_id`?
+- The grouped query returns three rows with totals 180, 210 and 240. Which physical operator moves rows between partitions, and why is it needed when the input already sits in two partitions?
+- Two runs of the same query print `id#123L` and `id#457L`. What does the normalizer replace, and which kind of plan difference must it never hide?
 
 ## Next step
 
-Use the [course route](../README.md) to continue. Paired-language agreement is useful only when both outputs also satisfy the independent fixture contract. A successful local run is not evidence of cluster performance or production recovery.
+Go on to [spark-022: Shuffles, stages, tasks and aggregation cost](spark-022.md). You can now point to an `Exchange` in a plan; the next lesson runs one, reads its partition count and data size after the action, and ties it to the stages and tasks that Spark's status tracker records.
 
 ## Primary sources and official APIs
 

@@ -1,6 +1,8 @@
 # csharp-046: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [csharp-046_solution.cs](csharp-046_solution.cs). It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.
+Reference program: [csharp-046_solution.cs](csharp-046_solution.cs), covering both examples and the executed answers.
+
+Attempt the tasks first; see [comparing with the explanation](../STUDY-GUIDE.md#comparing-with-the-explanation).
 
 ## Why the two examples differ
 
@@ -124,7 +126,7 @@ A spread copies each element of its source, so an empty source contributes nothi
 
 Review a proposed new feature and justify adopting it using readability, compatibility and tooling evidence.
 
-No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **Language version**, and state one limitation of your choice.
+No single answer exists; extend task 3 using the [open transfer routine](../STUDY-GUIDE.md#open-transfer-tasks).
 
 ## Mechanism and diagnostic reasoning
 
@@ -138,4 +140,4 @@ Newer syntax is not inherently better. A collection expression is not universall
 
 ## Review before continuing
 
-Run the reference and confirm that it prints `csharp-046: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.
+Run the reference and confirm it prints `csharp-046: passed`, then rerun the guide's counterexample.

@@ -206,11 +206,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Isolation domain:</strong> The context owning access to mutable state.</p>
 <p><strong>Snapshot:</strong> An independent value representing state at one point.</p>
 <h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>The Linux Docker classroom compiles the saved pad as <code>main.swift</code> with Swift 6 language checking. An explicit <code>@main</code> type contains <code>static func main() async throws</code>; the fixed compiler uses <code>-parse-as-library -swift-version 6</code>. The examples use the standard library and portable Foundation. <code>precondition</code> makes a violated invariant fail the process. The fixed pad accepts one source file, without arbitrary command arguments, interactive input or dependency installation. SwiftUI, UIKit, Apple simulators and application signing belong to the separately prepared macOS/Xcode project labs, never the Linux pad.</p>
-<p>Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.</p>
+<p><code>Snapshot</code> is declared <code>Sendable</code> above <code>LessonMain</code> in both examples. Under Swift 6 checking, a non-Sendable value captured by a <code>Task</code> closure produces a compile error, so the type annotation is doing real work. For task 4, compile a class marked <code>@unchecked Sendable</code> and note that the compiler accepts it without verifying anything.</p>
+<p>Compile contract, starter stop and success marker: <a href="../STUDY-GUIDE.md.html#running-a-lesson">running a lesson</a>.</p>
 <h3 id="syntax-anatomy-and-execution-trace">Syntax anatomy and execution trace<a class="heading-anchor" href="#syntax-anatomy-and-execution-trace" aria-label="Link to this section">#</a></h3>
 <p><code>struct Snapshot: Sendable</code> declares a crossing contract. Actor calls and child tasks create concurrency boundaries. Capture immutable values and return results instead of mutating shared containers from several tasks.</p>
-<p>Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.</p>
+<p>Each example ends with a trace; method: <a href="../STUDY-GUIDE.md.html#tracing-a-program">tracing a program</a>.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="example-a-send-an-immutable-snapshot">Example A: Send an immutable snapshot<a class="heading-anchor" href="#example-a-send-an-immutable-snapshot" aria-label="Link to this section">#</a></h4>
 <p>No mutable object identity is shared across the boundary.</p>
@@ -234,6 +234,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The task receives immutable value data and returns 6.</p>
+<p><strong>Trace.</strong> <code>snapshot</code> is a struct with two <code>let</code> properties, so it can never change after creation. The <code>Task</code> closure captures a copy of it, and because <code>Snapshot</code> is <code>Sendable</code> the compiler allows the capture to cross into concurrently executing code. The task reads quantity 3, returns 6, and <code>await task.value</code> delivers 6 to the parent. No mutable memory is shared between the two contexts, which is why no lock is needed.</p>
 <h4 id="example-b-return-values-to-the-owner">Example B: Return values to the owner<a class="heading-anchor" href="#example-b-return-values-to-the-owner" aria-label="Link to this section">#</a></h4>
 <p>Child tasks produce values instead of concurrently mutating one array.</p>
 <pre class="highlighted-code"><code class="language-swift"><span class="syntax-keyword">import</span> <span class="syntax-class">Foundation</span>
@@ -260,6 +261,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The parent owns result aggregation and sorts it deterministically.</p>
+<p><strong>Trace.</strong> The group adds two children, one returning snapshot b with quantity 2 and one returning a with quantity 1. The parent collects whatever order they finish in into its own local array, then sorts by name with a closure comparing <code>$0.name &lt; $1.name</code>. Mapping with the key path <code>\.name</code> extracts a then b. The children only return values; aggregation and ordering belong to the parent alone.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <ol>
 <li><strong>Predict and explain.</strong> Identify the owner of every value crossing a task boundary.</li>
@@ -279,10 +281,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <ol start="6">
 <li><strong>Transfer and justify.</strong> Design data exchange between a UI model and a background actor using immutable snapshots.</li>
 </ol>
-<p>For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.</p>
+<p>Log each task in the <a href="../STUDY-GUIDE.md.html#recording-exercise-evidence">evidence table</a> before opening the explanation.</p>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
 <p>Sendable does not mean every operation is cheap or atomic. Unchecked conformance requires a justified invariant and tests. MainActor protects UI isolation but does not make long CPU work appropriate on that actor.</p>
-<p>A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.</p>
+<p>Task 4&#x27;s annotation silences the checker: a class with a mutable array marked <code>@unchecked Sendable</code> compiles, and two tasks appending to it can corrupt the array or lose elements at runtime. The counterexample is many concurrent appends followed by a count check that sometimes fails. Replacing the class with a Sendable value returned to the parent removes the shared mutation entirely.</p>
+<p>Repair routine: <a href="../STUDY-GUIDE.md.html#building-a-regression-case">building a regression case</a>.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <ol>
 <li>Reproduce Example A (Send an immutable snapshot) before changing anything, and confirm its observation: The task receives immutable value data and returns 6.</li>
@@ -290,9 +293,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>Before opening the explanation, check your task 3 attempt (Replace a shared mutable result class with a sendable value result) against each pitfall listed above, and add one input that would expose the tempting wrong rule.</li>
 </ol>
 <h3 id="self-check-and-next-step">Self-check and next step<a class="heading-anchor" href="#self-check-and-next-step" aria-label="Link to this section">#</a></h3>
-<p>Explain Sendable, Isolation domain, Snapshot without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.</p>
+<p>State the rules that make a struct automatically eligible for <code>Sendable</code>. Explain what <code>@unchecked Sendable</code> promises and who is responsible for keeping that promise. Describe how a background actor could hand an immutable snapshot to a UI model without sharing mutable state.</p>
+<p>Then follow the general <a href="../STUDY-GUIDE.md.html#self-check-routine">self-check routine</a> and save your pad.</p>
 <h3 id="sources-and-execution-boundary">Sources and execution boundary<a class="heading-anchor" href="#sources-and-execution-boundary" aria-label="Link to this section">#</a></h3>
-<p><a href="https://docs.swift.org/swift-book/documentation/the-swift-programming-language/">Official language or framework documentation</a>. The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.</p>
+<p><a href="https://docs.swift.org/swift-book/documentation/the-swift-programming-language/">Documentation</a>: Sendable types are introduced in the book&#x27;s Concurrency chapter; the standard library reference documents the <code>Sendable</code> protocol and its checking rules.</p>
+<p>Provenance and limits: <a href="../STUDY-GUIDE.md.html#sources-and-execution-boundary">sources and execution boundary</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for swift-033: Sendable and strict concurrency boundaries.
 Read courses/swift/guides/swift-033.md and courses/swift/lessons/swift-033.swift. Prerequisites: swift-032.

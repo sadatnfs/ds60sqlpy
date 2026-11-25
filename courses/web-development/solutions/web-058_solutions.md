@@ -1,6 +1,6 @@
 # web-058: explanatory solutions
 
-Open this after your own attempt. Each answer explains the lesson's synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in `courses/web-development/guides/web-058.md`.
+Attempt each exercise before reading; the mechanism is in `courses/web-development/guides/web-058.md` ([using these answers](../STUDY-GUIDE.md#solutions)).
 
 ## Exercise 1: List the untrusted claims in an uploaded file request.
 
@@ -76,4 +76,6 @@ Open this after your own attempt. Each answer explains the lesson's synthetic fi
 
 ## Comparing your worksheet
 
-This lesson has no executable reference. Compare your worksheet with the answers above. The optional lab in `courses/web-development/fixtures/php-http-lab/` gives real request evidence only when you deliberately run it.
+Compare your boundaries with the solution's: where size and type are checked, who chooses the stored name and how retrieval authorizes the reader. The optional lab does not accept uploads, so your evidence here is the design and the tests you list, not a running service.
+
+This lesson has no executable reference ([worksheet rules](../STUDY-GUIDE.md#worksheets)).

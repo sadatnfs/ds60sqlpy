@@ -10,31 +10,19 @@ Intermediate. Direct catalog prerequisites: `python-pandas-03`, `python-23`. Thi
 
 ## Learning objectives
 
-By the end, explain the mechanism in your own words, implement each bounded contract, and use a counterexample to distinguish a correct result from a plausible mistake. The six exercises progress from inspection to transformation, edge handling and transfer.
+By the end, you can explain why averaging per-chunk means gives the wrong answer, carry exact sum and count state across chunks instead, and merge that state into one global result. You will detect conflicting repeated IDs across batches, keep rolling windows continuous over chunk boundaries, and parse CSV chunks into nullable integer columns so a missing amount stays missing.
 
 ## How to run this lesson
 
-**Primary browser route:** run `./classroom` from the repository root and
-choose **Python and data science** on `/classroom`. Open this lesson in the shared workspace,
-read its capability notice, and use its supported coding or reading workflow.
-The [classroom guide](../../../docs/classroom-experience.md) explains saved work, runtimes and switching subjects.
+The [learner script](../lessons/py_pandas_04.py) needs pandas and NumPy. Its worked examples average chunks `[1, 3]` and `[100]` two ways: the mean of chunk means is 51, while the global mean from total sum and count is 104 / 3, about 34.67. They then read a three-row CSV with `chunksize=2` into chunks of 2 and 1 rows whose missing amount stays `<NA>` under `Int64`.
 
-**Optional contributor route:** use the prepared environment in
-[CONTRIBUTING](../../../CONTRIBUTING.md) on Linux, macOS or Windows through
-WSL 2. The commands below assume its packages are already installed. They are
-not prerequisites for opening this lesson in the Docker classroom. Local
-`.learning/` files and CLI progress belong to this checkout; they do not read or
-update the Docker classroom's named learning volume.
-
-Open the [learner script](../lessons/py_pandas_04.py) in the prepared repository environment. In the Docker classroom, edit the saved learner pad; drafts, notes and results persist in the classroom learning volume. An ignored `.learning/` copy is a separate optional contributor workspace. Run from the repository root. The provided worked examples execute immediately; task functions intentionally raise `NotImplementedError` until you implement them. A successful example is not evidence that the six tasks are finished.
-
-Prepared POSIX/WSL contributor terminal:
+The [Python study guide](../../STUDY-GUIDE.md) covers the browser classroom and this prepared-checkout run:
 
 ```sh
 uv run --no-sync python python/professional/lessons/py_pandas_04.py
 ```
 
-Dependencies: pandas and NumPy. All fixtures are tiny and local. The terminal prints the worked results and stops without editing your files. Keep [explanatory solutions](../solutions/py_pandas_04_solutions.md) and [runnable reference](../solutions/py_pandas_04_solution.py) closed until an attempt or an explicit worked comparison.
+After your attempt, compare `rolling_means` and `unique_records` with the [runnable reference](../solutions/py_pandas_04_solution.py), checking what state each keeps between chunks. Use the [explanatory solutions](../solutions/py_pandas_04_solutions.md) to check the signed int64 range test in `customer_totals`.
 
 ## Vocabulary and mental model
 
@@ -127,11 +115,11 @@ If changing chunksize changes a mean, inspect whether chunk means were averaged 
 
 ## Self-check and retrieval
 
-Without copying code, explain which input property each function assumes, which observable result proves the normal case, and which counterexample would expose an incorrect implementation. Trace one boundary input by hand before running it. Keep the input and expected output beside your saved result so a reviewer can reproduce the evidence.
+Predict `rolling_means` with a window of 2 over chunks `[1, 3]` and `[5]`: the outputs are 2.0 and 4.0, and the second exists only if history carries over the chunk boundary. Then feed `unique_records` the same event ID twice, once with amount 0 and once missing; it must raise `ValueError` because a missing amount is not zero.
 
 ## Next steps
 
-Use these mechanisms in the next deepening lesson or return to the original prerequisite examples and explain precisely which new failure cases you can now diagnose. Review the [professional track](../README.md) for related modules.
+Next, [MultiIndex and lossless reshaping contracts](py_pandas_05.md) checks that a reshape keeps every row and value, the same no-loss standard this lesson applied to batch boundaries. The [professional track](../README.md) lists the other modules.
 
 ## Primary sources and official APIs
 

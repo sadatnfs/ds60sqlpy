@@ -3,11 +3,11 @@ package main
 import "fmt"
 
 func main() {
-	// Exercise 1: Register cleanup responsibility: predict an edited check: Copy worked example 1 into a scratch pad and change `check(finalAction(false, false, false, true) == "add-finalizer", "register")` to `check(finalAction(true, false, false, true) == "add-finalizer", "register")` inside its check. Before running, predict whether the check still passes and explain why; then restore it.
-	// Expected: The changed run panics with `register` because the edited check no longer holds. Restoring the original line brings back the worked observation: the next action is add-finalizer.
+	// Exercise 1: Register cleanup responsibility: predict an edited check: Copy worked example 1, change `check(finalAction(false, false, false, true) == "add-finalizer", "register")` to `check(finalAction(true, false, false, true) == "add-finalizer", "register")` inside its check and predict whether it still passes; then restore it.
+	// Expected: The edited check panics with `register` even though `finalAction(false, false, false, true) == "add-finalizer"` still holds.
 
-	// Exercise 2: Retain a healthy object: diagnose an edited check: A careless edit changed the check in worked example 2 so that it reads `check(finalAction(true, true, false, true) == "reconcile", "normal")`. Run worked example 2 with that line, explain why the edited check now fails for the same program state, and restore it.
-	// Expected: Before the repair the program panics with `normal`; after it the line reads `check(finalAction(false, true, false, true) == "reconcile", "normal")` again and the action is reconcile.
+	// Exercise 2: Retain a healthy object: diagnose an edited check: A careless edit rewrote the check in worked example 2 as `check(finalAction(true, true, false, true) == "reconcile", "normal")`. Explain the failure, then restore it.
+	// Expected: The defective run panics with `normal`; after restoring `check(finalAction(false, true, false, true) == "reconcile", "normal")`, the action is reconcile.
 
 	// Exercise 3: Clean before releasing deletion: Inspect a deleting object with outstanding owned cleanup.
 	// Expected: The action is cleanup.

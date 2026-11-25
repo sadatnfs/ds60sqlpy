@@ -45,7 +45,7 @@
   ],
   "evidence": "Prepared actual Hive4.2.1/JDK21/PostgreSQL project; live SQL, independent Java Thrift, lifecycle, Iceberg and restore observations remain distinct acceptance gates.",
   "sources": [
-    ["Hive4.2.1 preparation and components", "https://hive.apache.org/development/quickstart/"],
+    ["Hive 4.2.1 preparation and components", "https://hive.apache.org/development/quickstart/"],
     ["Hive DDL", "https://hive.apache.org/docs/latest/language/languagemanual-ddl/"],
     [
       "Hive Metastore administration",

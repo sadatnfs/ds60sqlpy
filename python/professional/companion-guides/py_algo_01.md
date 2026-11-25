@@ -10,31 +10,19 @@ Intermediate. Direct catalog prerequisites: `python-06`, `python-10`. This lesso
 
 ## Learning objectives
 
-By the end, explain the mechanism in your own words, implement each bounded contract, and use a counterexample to distinguish a correct result from a plausible mistake. The six exercises progress from inspection to transformation, edge handling and transfer.
+By the end, you can explain why a nested loop over n items performs n*(n-1)/2 comparisons, replace that scan with a dictionary or `Counter` index, and keep every duplicate match instead of collapsing each key to one row. You will also separate a duplicate whose value is zero from the absence of any duplicate, and report count differences in both directions.
 
 ## How to run this lesson
 
-**Primary browser route:** run `./classroom` from the repository root and
-choose **Python and data science** on `/classroom`. Open this lesson in the shared workspace,
-read its capability notice, and use its supported coding or reading workflow.
-The [classroom guide](../../../docs/classroom-experience.md) explains saved work, runtimes and switching subjects.
+The [learner script](../lessons/py_algo_01.py) needs only the standard library. Its worked examples count 6 pairs for 4 items and 28 for 8, so doubling the input roughly quadruples the work, and they show two bags with the same key set still differing by `{'a': 1, 'b': -1}`. That second result is why `bag_difference` must compare counts rather than sets.
 
-**Optional contributor route:** use the prepared environment in
-[CONTRIBUTING](../../../CONTRIBUTING.md) on Linux, macOS or Windows through
-WSL 2. The commands below assume its packages are already installed. They are
-not prerequisites for opening this lesson in the Docker classroom. Local
-`.learning/` files and CLI progress belong to this checkout; they do not read or
-update the Docker classroom's named learning volume.
-
-Open the [learner script](../lessons/py_algo_01.py) in the prepared repository environment. In the Docker classroom, edit the saved learner pad; drafts, notes and results persist in the classroom learning volume. An ignored `.learning/` copy is a separate optional contributor workspace. Run from the repository root. The provided worked examples execute immediately; task functions intentionally raise `NotImplementedError` until you implement them. A successful example is not evidence that the six tasks are finished.
-
-Prepared POSIX/WSL contributor terminal:
+The [Python study guide](../../STUDY-GUIDE.md) covers the browser classroom and this prepared-checkout run:
 
 ```sh
 uv run --no-sync python python/professional/lessons/py_algo_01.py
 ```
 
-Dependencies: Python standard library. All fixtures are tiny and local. The terminal prints the worked results and stops without editing your files. Keep [explanatory solutions](../solutions/py_algo_01_solutions.md) and [runnable reference](../solutions/py_algo_01_solution.py) closed until an attempt or an explicit worked comparison.
+After your attempt, compare `indexed_pairs` with the [runnable reference](../solutions/py_algo_01_solution.py): it indexes `right` by key and visits only matching positions, never every unrelated pair. The [explanatory solutions](../solutions/py_algo_01_solutions.md) show why `pair_comparisons` must still run the nested loop it is measuring rather than return the formula.
 
 ## Vocabulary and mental model
 
@@ -122,11 +110,11 @@ If a reconciliation says equal while counts differ, inspect whether a set replac
 
 ## Self-check and retrieval
 
-Without copying code, explain which input property each function assumes, which observable result proves the normal case, and which counterexample would expose an incorrect implementation. Trace one boundary input by hand before running it. Keep the input and expected output beside your saved result so a reviewer can reproduce the evidence.
+Trace `first_duplicate([0, 1, 0])` by hand: the answer is `0`, and a caller who tests the result with `if result:` would wrongly read it as no duplicate. Then predict `indexed_pairs(['a', 'a'], ['a', 'a', 'a'])`; six pairs from `(0, 0)` to `(1, 2)` are correct, and any smaller count means the index overwrote a position instead of appending it.
 
 ## Next steps
 
-Use these mechanisms in the next deepening lesson or return to the original prerequisite examples and explain precisely which new failure cases you can now diagnose. Review the [professional track](../README.md) for related modules.
+Next, [stable ordering and binary-search boundaries](py_algo_02.md) handles the same duplicate keys after sorting, where a run of equal values becomes a half-open index range instead of a dictionary entry. The [professional track](../README.md) lists the other modules.
 
 ## Primary sources and official APIs
 

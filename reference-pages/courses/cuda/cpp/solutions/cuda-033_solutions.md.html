@@ -196,7 +196,6 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <article class="document"><h2 id="cuda-033-explanatory-solutions">cuda-033: explanatory solutions<a class="heading-anchor" href="#cuda-033-explanatory-solutions" aria-label="Link to this section">#</a></h2>
 <h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
 <p>Kernel counters describe selected aspects of execution, often through replay or sampled collection. They require context: achieved occupancy is a residency measurement, memory throughput measures traffic, and eligible-warps metrics describe scheduling opportunity. High utilization can mean an inefficient algorithm is busy moving unnecessary data. Low utilization can be expected for tiny work. Counter permissions are separate from ordinary CUDA execution capability; a working kernel does not promise profiler access. Start with a small question and a few relevant metrics, keeping the baseline&#x27;s input, dtype and result contract fixed.</p>
-<p>The separate <a href="../references/cuda-033_cpu.py.html">CPU reference</a> checks the chapter&#x27;s bounded model. It does not execute CUDA or establish GPU timing. Compare after attempting the worksheet or explicitly choosing to reveal solutions.</p>
 <h3 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h3>
 <p>A synthetic kernel reads 400 useful bytes but causes 1,600 transferred bytes because of its access pattern. Useful-to-transferred ratio is 0.25. A high DRAM traffic counter does not imply useful data processing is efficient. Compare address patterns and a corrected layout before blaming arithmetic capacity.</p>
 <p><strong>Approach:</strong> Divide 400 useful bytes by 1,600 transferred bytes.</p>
@@ -233,11 +232,18 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Why it is correct:</strong> Address mapping predicts wasted bytes that memory metrics can confirm.</p>
 <p><strong>A plausible wrong approach:</strong> Comparing a strided kernel with a contiguous one doing less work credits layout for reduced work.</p>
 <p><strong>How to verify:</strong> Confirm both produce identical outputs before comparing metrics.</p>
+<h3 id="self-check-answers">Self-check answers<a class="heading-anchor" href="#self-check-answers" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>What fraction of transferred bytes is useful in worked example 1?</strong> 0.25, since 400 of 1,600 bytes are used.</li>
+<li><strong>Why can a profiled kernel run slower than in a normal timing run?</strong> Collecting many counters often replays the kernel and adds instrumentation overhead.</li>
+<li><strong>What does achieved occupancy measure?</strong> The average ratio of active warps to the maximum an SM supports, a residency figure, not speed.</li>
+<li><strong>What should you report if counter access is not permitted?</strong> That counters are unavailable, plus timing and correctness evidence, without invented counter values.</li>
+</ol>
 <h3 id="numerical-reference-and-its-limits">Numerical reference and its limits<a class="heading-anchor" href="#numerical-reference-and-its-limits" aria-label="Link to this section">#</a></h3>
-<p>The complete CPU model is <a href="../references/cuda-033_cpu.py.html">here</a>. Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It also asserts an exercise answer that the guide&#x27;s model leaves for you to derive: <code>assert 12_000_000 / 0.0002 == 60_000_000_000</code>. It does not claim CUDA execution, concurrency safety or a performance measurement.</p>
+<p>The <a href="../references/cuda-033_cpu.py.html">CPU reference</a> reproduces worked example 1 and prints <code>{&#x27;useful_fraction&#x27;: 0.25}</code>.</p>
+<p>It also asserts an exercise answer you derive yourself: <code>assert 12_000_000 / 0.0002 == 60_000_000_000</code></p>
 <h3 id="transfer-review">Transfer review<a class="heading-anchor" href="#transfer-review" aria-label="Link to this section">#</a></h3>
-<p>Compare equal useful work, map lane addresses, collect relevant memory metrics if permitted and test a contiguous alternative while preserving output.</p>
-<p>A complete explanation must name its inputs, the unchanged mathematical contract, the changed boundary or resource condition, and the evidence still needed on actual hardware. Preserve a CPU baseline even after a GPU path becomes available.</p></article>
+<p>Compare equal useful work, map lane addresses, collect relevant memory metrics if permitted and test a contiguous alternative while preserving output.</p></article>
   </main>
 </body>
 </html>

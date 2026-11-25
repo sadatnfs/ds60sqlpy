@@ -1,6 +1,8 @@
 # rust-019: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [rust-019_solution.rs](rust-019_solution.rs). It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.
+Executable reference: [rust-019_solution.rs](rust-019_solution.rs), which runs both examples and the coded answers.
+
+Open this only after [an attempt](../STUDY-GUIDE.md#attempt-a-lesson).
 
 ## Why the two examples differ
 
@@ -26,7 +28,7 @@ Draw the valid-use regions of both inputs and the output.
 
 Test the tie policy of longer.
 
-**Reference answer.** The same statements run as the `Task 2` block of the reference program; here they are wrapped in `main` as a complete file. It uses `longer` from the lesson's helpers, defined in the reference program.
+**Reference answer**, wrapped in `main`; the reference runs it as its `Task 2` block. Helpers used: `longer`.
 
 ```rust
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -52,7 +54,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 Write a borrowed prefix parser with the narrowest lifetime relationship.
 
-**Reference answer.** The same statements run as the `Task 3` block of the reference program; here they are wrapped in `main` as a complete file.
+**Reference answer**, wrapped in `main`; the reference runs it as its `Task 3` block.
 
 ```rust
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -89,7 +91,7 @@ Try returning a local reference and explain why annotations cannot make it valid
 
 Test empty inputs and use after one candidate owner leaves scope.
 
-**Reference answer.** The same statements run as the `Task 5` block of the reference program; here they are wrapped in `main` as a complete file. It uses `longer` from the lesson's helpers, defined in the reference program.
+**Reference answer**, wrapped in `main`; the reference runs it as its `Task 5` block. Helpers used: `longer`.
 
 ```rust
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -117,7 +119,7 @@ Returning `longer(&outer, &inner)` itself from the block is rejected with E0597,
 
 Choose a borrowed or owned result for a cache boundary and justify cost and lifetime.
 
-No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **Lifetime parameter**, and state one limitation of your choice.
+**Judging criteria.** A cache that returns `&V` borrowed from itself avoids copies, but the borrow freezes the cache: no insert or eviction can happen while a caller holds the reference. Returning an owned clone or an `Arc<V>` costs a copy or a reference-count update, and lets the cache change without invalidating results. A strong answer names how long callers keep results, how large `V` is and whether the cache mutates during use, then picks one. State one limitation: an `Arc<V>` keeps an evicted value alive until its last holder drops it.
 
 ## Mechanism and diagnostic reasoning
 
@@ -131,4 +133,6 @@ Lifetime names describe relationships, not durations in seconds. Static is not a
 
 ## Review before continuing
 
-Run the reference and confirm that it prints `rust-019: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.
+Rebuild Example B (Own a result when lifetime must separate) from a blank pad.
+
+Review routine: [Self-check and review](../STUDY-GUIDE.md#self-check-and-review).

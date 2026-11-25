@@ -2,7 +2,7 @@
 
 State the assumptions under which an incremental result equals a full recomputation.
 
-The executable reference contains the two complete worked cases with assertions. The changes below explain the independent practice and its limits.
+The reference runs a max-`updated_at` incremental model twice, appends a newer event, and checks that a rerun neither drops nor duplicates rows. It then inserts an event behind the watermark and shows that only `--full-refresh` recovers it. That proves the stated assumption fails here, not how often late data occurs. See [how these answers are laid out](../STUDY-GUIDE.md#answers-and-references).
 
 
 ## 1. Add a later event

@@ -2,24 +2,17 @@
 
 int main(void) {
   /* Exercise 1: Protect a shared count: predict an edited check
-     Copy worked example 1 into a scratch pad and change `CHECK(locked_total(4,
-     100) == 400);` to `CHECK(locked_total(5, 100) == 400);` inside its CHECK.
-     Before running, predict whether the CHECK still holds and explain why; then
-     restore it. Expected: With `CHECK(locked_total(5, 100) == 400);` the run
-     stops with `Check failed` at the CHECK on `locked_total(4, 100) == 400`,
-     because the "protect a shared count" case no longer shows that the final
-     count is 400. Restoring `CHECK(locked_total(4, 100) == 400);` brings that
-     observation back. */
+     In worked example 1, change `CHECK(locked_total(4, 100) == 400);` to
+     `CHECK(locked_total(5, 100) == 400);`. Predict whether the CHECK still
+     holds and why, then run and restore. Expected: `Check failed`:
+     `CHECK(locked_total(5, 100) == 400);` is false, although the final count is
+     400. */
 
   /* Exercise 2: Handle one worker: diagnose an edited check
-     A careless edit changed the CHECK in worked example 2, the "handle one
-     worker" case, so that it reads `CHECK(locked_total(2, 7) == 7);`. Run the
-     example with that line, explain why the edited CHECK now fails even though
-     the program state still means the result is 7, and restore it. Expected:
-     Before the repair the run stops with `Check failed` at the CHECK on
-     `locked_total(1, 7) == 7`. Once the line reads `CHECK(locked_total(1, 7) ==
-     7);` again, the "handle one worker" case again shows that the result is 7.
-   */
+     Worked example 2's CHECK now reads `CHECK(locked_total(2, 7) == 7);`.
+     Explain why it fails although the result is 7, then restore it. Expected:
+     `Check failed` until the CHECK reads `CHECK(locked_total(1, 7) == 7);`
+     again, though the result is 7. */
 
   /* Exercise 3: Handle zero loop iterations
      Run two workers whose increment loops are empty.

@@ -194,7 +194,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/rust/solutions/rust-021_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="rust-021-explanation-and-comparison">rust-021: explanation and comparison<a class="heading-anchor" href="#rust-021-explanation-and-comparison" aria-label="Link to this section">#</a></h2>
-<p>Attempt the six guide tasks before opening this comparison. The executable reference is <a href="rust-021_solution.rs.html">rust-021_solution.rs</a>. It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.</p>
+<p>Executable reference: <a href="rust-021_solution.rs.html">rust-021_solution.rs</a>, which runs both examples and the coded answers.</p>
+<p>Open this only after <a href="../STUDY-GUIDE.md.html#attempt-a-lesson">an attempt</a>.</p>
 <h3 id="why-the-two-examples-differ">Why the two examples differ<a class="heading-anchor" href="#why-the-two-examples-differ" aria-label="Link to this section">#</a></h3>
 <p><strong>Observe mutable capture:</strong> The scope makes the exclusive captured access visible. The closure updates its borrowed accumulator before the borrow ends.</p>
 <p><strong>Move owned data into a closure:</strong> Returning the owned capture makes this closure consuming rather than indefinitely repeatable. The closure transfers its captured String to the caller once.</p>
@@ -213,7 +214,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>How to verify.</strong> Define <code>fn twice(f: impl Fn(i32) -&gt; i32) -&gt; (i32, i32) { (f(2), f(2)) }</code> and assert <code>twice(scale) == (6, 6)</code>.</p>
 <h4 id="task-3-independent-construction">Task 3: Independent construction<a class="heading-anchor" href="#task-3-independent-construction" aria-label="Link to this section">#</a></h4>
 <p>Implement a helper accepting FnMut for repeated transformations.</p>
-<p><strong>Reference answer.</strong> The same statements run as the <code>Task 3</code> block of the reference program; here they are wrapped in <code>main</code> as a complete file.</p>
+<p><strong>Reference answer</strong>, wrapped in <code>main</code>; the reference runs it as its <code>Task 3</code> block.</p>
 <pre class="highlighted-code"><code class="language-rust"><span class="syntax-keyword">fn</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">-&gt;</span> <span class="syntax-builtin">Result</span><span class="syntax-operator">&lt;</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">Box</span><span class="syntax-operator">&lt;</span><span class="syntax-keyword">dyn</span> std<span class="syntax-punctuation">::</span>error<span class="syntax-punctuation">::</span>Error<span class="syntax-operator">&gt;</span><span class="syntax-operator">&gt;</span> <span class="syntax-punctuation">{</span>
     <span class="syntax-keyword">fn</span> <span class="syntax-function">apply_times</span><span class="syntax-punctuation">(</span>times<span class="syntax-punctuation">:</span> <span class="syntax-keyword">usize</span><span class="syntax-punctuation">,</span> <span class="syntax-keyword">mut</span> step<span class="syntax-punctuation">:</span> <span class="syntax-class">impl</span> <span class="syntax-builtin">FnMut</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span>
         <span class="syntax-keyword">for</span> _ <span class="syntax-keyword">in</span> <span class="syntax-number">0</span><span class="syntax-operator">..</span>times <span class="syntax-punctuation">{</span>
@@ -253,7 +254,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><code>|value| value * factor</code> declares a closure. <code>move || ...</code> transfers captures into it. A closure mutating a captured accumulator needs mutable calling access. A function accepting FnOnce can invoke consuming behavior once.</p>
 <p>Move does not imply deep copy. A moved reference still has a borrowed lifetime. Avoid adding static bounds when the real solution is scoped execution or owned data.</p>
 <h3 id="review-before-continuing">Review before continuing<a class="heading-anchor" href="#review-before-continuing" aria-label="Link to this section">#</a></h3>
-<p>Run the reference and confirm that it prints <code>rust-021: passed</code>, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.</p></article>
+<p>Rebuild Example B (Move owned data into a closure) from a blank pad.</p>
+<p>Review routine: <a href="../STUDY-GUIDE.md.html#self-check-and-review">Self-check and review</a>.</p></article>
   </main>
 </body>
 </html>

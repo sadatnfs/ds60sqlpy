@@ -1,6 +1,6 @@
 # go-020: explained solutions
 
-These are comparison material after an attempt or explicit reveal. The executable reference implements all six cases in one `main.go`.
+Compare after an attempt ([using solutions](../STUDY-GUIDE.md#use-the-solutions)). `courses/go/solutions/go-020_solution.go` implements all six cases.
 
 ## Mechanism
 
@@ -10,7 +10,7 @@ csv.NewReader accepts an io.Reader. Read returns one record or an error; ReadAll
 
 ## 1. Parse a quoted comma: predict an edited check
 
-Copy worked example 1 into a scratch pad and change `check(err == nil && len(v) == 2 && v[1] == "Springfield, West", "quoted comma")` to `check(err == nil && len(v) == 3 && v[1] == "Springfield, West", "quoted comma")` inside its check. Before running, predict whether the check still passes and explain why; then restore it.
+Copy worked example 1, change `check(err == nil && len(v) == 2 && v[1] == "Springfield, West", "quoted comma")` to `check(err == nil && len(v) == 3 && v[1] == "Springfield, West", "quoted comma")` inside its check and predict whether it still passes; then restore it.
 
 The unchanged code is worked example 1:
 
@@ -20,13 +20,15 @@ v, err := r.Read()
 check(err == nil && len(v) == 2 && v[1] == "Springfield, West", "quoted comma")
 ```
 
-**Expected:** The changed run panics with `quoted comma` because the edited check no longer holds. Restoring the original line brings back the worked observation: the record contains two fields.
+**Expected:** The edited check panics with `quoted comma` even though `err == nil && len(v) == 2 && v[1] == "Springfield, West"` still holds.
+
+**Verify:** Restoring `check(err == nil && len(v) == 2 && v[1] == "Springfield, West", "quoted comma")` makes the check pass again with the worked observation: the record contains two fields.
 
 A comma inside quotes belongs to the field. strings.Split would incorrectly create three fields.
 
 ## 2. Reject a ragged row: debug a regression
 
-A regression changed one token in worked example 2, so one line now reads `r.FieldsPerRecord = 3`. Run worked example 2 with that line, use the failure to locate the defect and repair it without changing the check.
+A one-token regression in worked example 2 makes a line read `r.FieldsPerRecord = 3`. Repair it without changing the check.
 
 The unchanged code is worked example 2:
 
@@ -37,7 +39,9 @@ _, err := r.Read()
 check(err != nil, "ragged row")
 ```
 
-**Expected:** Before the repair the program panics with `ragged row`; after it the line reads `r.FieldsPerRecord = 2` again and the reader reports a field-count error.
+**Expected:** The defective run panics with `ragged row`; after restoring `r.FieldsPerRecord = 2`, the reader reports a field-count error.
+
+**Verify:** The failing run shows message `ragged row`; after the repair `err != nil` holds again.
 
 Rejecting inconsistent shape prevents silent column shifts that can corrupt downstream type interpretation.
 
@@ -55,6 +59,8 @@ check(err == nil && n == 12, "numeric field")
 
 **Expected:** The numeric value is 12.
 
+**Verify:** Your solution must keep `err == nil && n == 12` true. Control: changing `r := csv.NewReader(strings.NewReader("item,12\n"))` to `r := csv.NewReader(strings.NewReader("item,13\n"))` panics with message `numeric field`; revert it.
+
 CSV parsing returns strings. Numeric conversion is a separate fallible schema operation.
 
 ## 4. Reject blank numeric content
@@ -67,6 +73,8 @@ check(err != nil, "blank number")
 ```
 
 **Expected:** The conversion fails rather than becoming zero.
+
+**Verify:** Your solution must keep `err != nil` true. Control: changing `check(err != nil, "blank number")` to `check(err == nil, "blank number")` panics with message `blank number`; revert it.
 
 Missingness requires a policy. Replacing every parse error with zero changes the data and hides the distinction between missing and measured zero.
 
@@ -86,6 +94,8 @@ check(err == nil && v[0] == "a,b", "round trip")
 
 **Expected:** The original field survives exactly.
 
+**Verify:** Your solution must keep `err == nil && v[0] == "a,b"` true. Control: changing `check(err == nil && v[0] == "a,b", "round trip")` to `check(err == nil && v[1] == "a,b", "round trip")` panics with message `round trip`; revert it.
+
 The writer chooses correct quoting. Hand-joining fields with commas cannot preserve this contract for arbitrary text.
 
 ## 6. Transfer header validation
@@ -99,8 +109,10 @@ check(err == nil && len(v) == 2 && v[0] == "name" && v[1] == "count", "header co
 
 **Expected:** The schema order is name then count.
 
+**Verify:** Your solution must keep `err == nil && len(v) == 2 && v[0] == "name" && v[1] == "count"` true. Control: changing `check(err == nil && len(v) == 2 && v[0] == "name" && v[1] == "count", "header contract")` to `check(err == nil && len(v) == 2 && v[1] == "name" && v[1] == "count", "header contract")` panics with message `header contract`; revert it.
+
 Matching a set of names is insufficient when later code indexes by position. Either validate order or construct an explicit name-to-index map.
 
 ## Transfer after comparison
 
-Return to your own pad and reproduce one check with a new input. Explain why the check rejects a plausible wrong implementation. Keep the distinction between a pure model, an in-process fake, and a real external system visible in your notes.
+CSV is the first data format here where syntax, shape and meaning are clearly separate layers. The same layering applies to log lines, metric exports and configuration tables later: a parser handles quoting, a shape rule rejects ragged records and domain validation checks types and ranges. Report errors with enough context, such as a row number, for a person to fix the data.

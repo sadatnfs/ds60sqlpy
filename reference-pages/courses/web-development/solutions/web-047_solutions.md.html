@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/web-development/solutions/web-047_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="web-047-explanatory-solutions">web-047: explanatory solutions<a class="heading-anchor" href="#web-047-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Open this after your own attempt. Each answer explains the lesson&#x27;s synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in <code>courses/web-development/guides/web-047.md</code>.</p>
+<p>Attempt each exercise before reading; the mechanism is in <code>courses/web-development/guides/web-047.md</code> (<a href="../STUDY-GUIDE.md.html#solutions">using these answers</a>).</p>
 <h3 id="exercise-1-predict-what-happens-when-a-caller-sends-topic-html">Exercise 1: Predict what happens when a caller sends topic[]=HTML.<a class="heading-anchor" href="#exercise-1-predict-what-happens-when-a-caller-sends-topic-html" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> The server can receive an array, so a string-shape check is required.</p>
 <p><strong>Approach:</strong> Recall that PHP turns <code>name[]=value</code> into an array element, so <code>$input[&#x27;topic&#x27;]</code> holds an array instead of a string.</p>
@@ -232,7 +232,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Plausible wrong approach:</strong> Treating the redirect as a defense against forged submissions fails because the original POST is still processed first.</p>
 <p><strong>How to verify:</strong> Your answer names authorization, a CSRF token check and an idempotency key as separate measures.</p>
 <h3 id="reference-comparison">Reference comparison<a class="heading-anchor" href="#reference-comparison" aria-label="Link to this section">#</a></h3>
-<p>Open <code>courses/web-development/solutions/web-047_solution.php</code> only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; server lifecycle, persistence, concurrency and security need their own integration evidence.</p></article>
+<p>The reference requires a valid plan to give integer minutes 30 and requires array input, missing input and the lowercase topic html to be rejected. That catches shape errors and a case-insensitive allow list. It does not test field-specific error text or redisplay, so read the printed 121 minute result.</p>
+<p>Open <code>courses/web-development/solutions/web-047_solution.php</code> after saving your attempt (<a href="../STUDY-GUIDE.md.html#references">comparing with the reference</a>).</p></article>
   </main>
 </body>
 </html>

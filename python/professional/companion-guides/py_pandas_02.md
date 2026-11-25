@@ -10,31 +10,19 @@ Intermediate. Direct catalog prerequisites: `python-pandas-01`, `python-21`. Thi
 
 ## Learning objectives
 
-By the end, explain the mechanism in your own words, implement each bounded contract, and use a counterexample to distinguish a correct result from a plausible mistake. The six exercises progress from inspection to transformation, edge handling and transfer.
+By the end, you can state a join's cardinality before running it, enforce it with `validate=` and an indicator column, and explain each unmatched row as a missing key or an unknown key. You will look up the latest value available at a request time without using later data, and attach versions from half-open validity intervals that may touch but never overlap.
 
 ## How to run this lesson
 
-**Primary browser route:** run `./classroom` from the repository root and
-choose **Python and data science** on `/classroom`. Open this lesson in the shared workspace,
-read its capability notice, and use its supported coding or reading workflow.
-The [classroom guide](../../../docs/classroom-experience.md) explains saved work, runtimes and switching subjects.
+The [learner script](../lessons/py_pandas_02.py) needs pandas and NumPy. Its worked examples left-join three events to a two-customer dimension and mark event 3 `left_only`, then use `merge_asof` with a 45-minute tolerance: the 10:30 request gets the 10:00 value 10.0, while the 12:00 request gets nothing because the 11:00 value is an hour old.
 
-**Optional contributor route:** use the prepared environment in
-[CONTRIBUTING](../../../CONTRIBUTING.md) on Linux, macOS or Windows through
-WSL 2. The commands below assume its packages are already installed. They are
-not prerequisites for opening this lesson in the Docker classroom. Local
-`.learning/` files and CLI progress belong to this checkout; they do not read or
-update the Docker classroom's named learning volume.
-
-Open the [learner script](../lessons/py_pandas_02.py) in the prepared repository environment. In the Docker classroom, edit the saved learner pad; drafts, notes and results persist in the classroom learning volume. An ignored `.learning/` copy is a separate optional contributor workspace. Run from the repository root. The provided worked examples execute immediately; task functions intentionally raise `NotImplementedError` until you implement them. A successful example is not evidence that the six tasks are finished.
-
-Prepared POSIX/WSL contributor terminal:
+The [Python study guide](../../STUDY-GUIDE.md) covers the browser classroom and this prepared-checkout run:
 
 ```sh
 uv run --no-sync python python/professional/lessons/py_pandas_02.py
 ```
 
-Dependencies: pandas and NumPy. All fixtures are tiny and local. The terminal prints the worked results and stops without editing your files. Keep [explanatory solutions](../solutions/py_pandas_02_solutions.md) and [runnable reference](../solutions/py_pandas_02_solution.py) closed until an attempt or an explicit worked comparison.
+After your attempt, compare `latest_available` and `validity_lookup` with the [runnable reference](../solutions/py_pandas_02_solution.py) on the boundary cases first: an event exactly at an interval's end and a request just outside the tolerance. Use the [explanatory solutions](../solutions/py_pandas_02_solutions.md) to check how `missing_key_report` separates null customers from unknown ones.
 
 ## Vocabulary and mental model
 
@@ -134,11 +122,11 @@ If output rows multiply, inspect dimension uniqueness and merge validation befor
 
 ## Self-check and retrieval
 
-Without copying code, explain which input property each function assumes, which observable result proves the normal case, and which counterexample would expose an incorrect implementation. Trace one boundary input by hand before running it. Keep the input and expected output beside your saved result so a reviewer can reproduce the evidence.
+Predict `missing_key_report` for events whose customers are `a`, missing and `c` against a dimension holding `a` and `b`: the second event is `missing_key` and the third is `unknown_key`. Then build intervals from 10:00 to 11:00 and 11:00 to 12:00; `validate_intervals` accepts them because they only touch, and an event at exactly 11:00 belongs to the second version.
 
 ## Next steps
 
-Use these mechanisms in the next deepening lesson or return to the original prerequisite examples and explain precisely which new failure cases you can now diagnose. Review the [professional track](../README.md) for related modules.
+Next, [grouped transforms, temporal windows, and session boundaries](py_pandas_03.md) keeps the point-in-time rule inside one table: each row may use only earlier rows from its own group. The [professional track](../README.md) lists the other modules.
 
 ## Primary sources and official APIs
 

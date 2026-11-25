@@ -3,11 +3,11 @@ package main
 import "fmt"
 
 func main() {
-	// Exercise 1: Find a lower boundary: change one input: Copy worked example 1 into a scratch pad and change `items := []int{2, 4, 6, 8}` to `items := []int{2, 5, 6, 8}`. Before running, predict which check fails and which value it now sees; then run it and restore the original line.
-	// Expected: The changed run panics with `boundary` because `i == 2` no longer holds. Restoring the original line brings back the worked observation: the index is 2.
+	// Exercise 1: Find a lower boundary: change one input: Copy worked example 1, change `items := []int{2, 4, 6, 8}` to `items := []int{2, 5, 6, 8}` and predict the failure before running; then restore the line.
+	// Expected: The edited run panics with `boundary` because `i == 2` no longer holds.
 
-	// Exercise 2: Represent no match: debug a regression: A regression changed one token in worked example 2, so one line now reads `items := []int{2, 4, 6, 9}`. Run worked example 2 with that line, use the failure to locate the defect and repair it without changing the check.
-	// Expected: Before the repair the program panics with `not found`; after it the line reads `items := []int{2, 4, 6, 8}` again and the index equals the collection length.
+	// Exercise 2: Represent no match: debug a regression: A one-token regression in worked example 2 makes a line read `items := []int{2, 4, 6, 9}`. Repair it without changing the check.
+	// Expected: The defective run panics with `not found`; after restoring `items := []int{2, 4, 6, 8}`, the index equals the collection length.
 
 	// Exercise 3: Separate length and capacity: Reserve capacity four, then append one value.
 	// Expected: Length is 1, capacity is 4.

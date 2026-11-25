@@ -2,6 +2,8 @@
 
 Open these answers only after attempting Loss functions, reductions and gradient scale yourself. They reuse the guide's literal inputs, starting from Example A, Compute residual reductions, so a discrepancy points at one step. The executable companion runs the assertions; this page explains why each one tests Reduction, Loss unit, Gradient scale. After a pass, choose a new input for exercise 6, Separate a metric from the objective, without looking.
 
+After comparing, follow the [review steps](../STUDY-GUIDE.md#after-the-solutions).
+
 ## Mechanism review
 
 A loss is a numerical objective with a declared unit and denominator. Squared residuals have squared target units. Summing losses makes the objective scale with the number of participating entries; averaging removes that count from the scalar but changes gradient magnitude. PyTorch MSELoss with reduction='mean' averages all tensor elements, not an abstract notion of records inferred from their meaning. If each record has several outputs, those outputs also enter the denominator.
@@ -139,6 +141,3 @@ assert residual.square().mean().item() == 2
 
 **Verify:** In a fresh process, the exercise checks confirm `residual.abs().mean().item()` matches `4 / 3` within 1e-12 and `residual.square().mean().item() == 2`.
 
-## Review after comparison
-
-Repeat exercise 4, Inspect a feature denominator, with one changed fixture value and predict the difference before running it. Keep your failing attempt at exercise 5, Mask numerator and denominator together, beside the repaired result. A missing framework is not a failing assertion. These solutions use only local fixtures.

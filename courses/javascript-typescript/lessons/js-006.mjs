@@ -1,18 +1,16 @@
 // Answer-free learner source. Save your own copy before editing.
 // Exercise 1: Distinguish own and inherited properties: predict an edited check
-// Copy Example A into a scratch `main.mjs` and change `assert.equal(Object.hasOwn(child,
-// 'name'), true);` to `assert.equal(Object.hasOwn(child, 'name!'), true);` inside its check.
-// Before running it, predict whether the check still passes and explain why; then restore
-// it.
-// Expected: The changed run fails with an `AssertionError` at
+// In a scratch copy of Example A, change `assert.equal(Object.hasOwn(child, 'name'), true);`
+// to `assert.equal(Object.hasOwn(child, 'name!'), true);` inside its check. Does the check
+// still pass?
+// Expected: The edited run fails with an `AssertionError` at
 // `assert.equal(Object.hasOwn(child, 'name!'), true);`. Restoring
 // `assert.equal(Object.hasOwn(child, 'name'), true);` brings back: kind found by in but not
 // hasOwn; name is own.
 
 // Exercise 2: Copy only own enumerable fields: diagnose an edited check
-// A careless edit changed a check in Example B so that it reads
-// `assert.deepEqual(Object.keys(copy), ['name!']);`. Run Example B with that line, explain
-// why the edited check now fails for the same program state, and restore it.
+// Example B's check was edited to read `assert.deepEqual(Object.keys(copy), ['name!']);`.
+// Run it, explain the failure and restore the original.
 // Expected: Before the repair the run fails with an `AssertionError` at
 // `assert.deepEqual(Object.keys(copy), ['name!']);`. Restoring
 // `assert.deepEqual(Object.keys(copy), ['name']);` brings back: only name copied.

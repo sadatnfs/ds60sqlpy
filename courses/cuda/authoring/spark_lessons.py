@@ -87,7 +87,7 @@ add(
     """SQL semantics include null propagation, three-valued predicates, decimal precision/scale, overflow policy, timezone interpretation and string ordering. GPU and CPU results should be compared under the query's declared semantics, not by assuming every numeric column is a floating array. An empty aggregate and an aggregate of only null values can differ from a sum initialized to zero in Python.
 
 Use explicit schemas and deterministic ordering for comparison. Floating aggregates may require a justified tolerance because reduction order can change; decimal and integer outputs often require exact equality under the selected SQL mode. Timestamp tests should name the session timezone and include boundary cases. Never hide a semantic mismatch by relaxing tolerance until the test passes.""",
-    "COUNT (*) over [2, null,5] is 3 while COUNT (value) is 2. SUM (value) is 7 under skip-null semantics. The two counts answer different questions.",
+    "COUNT(*) over [2, null, 5] is 3 while COUNT(value) is 2. SUM(value) is 7 under skip-null semantics. The two counts answer different questions.",
     "Decimal 1.10 plus 2.20 should preserve the chosen decimal contract. A binary floating approximation is not a substitute for testing a decimal expression.",
     "Calculate both counts;Handle all-null aggregate;Compare decimal values;Name timestamp timezone;Choose float tolerances;Design ordered result comparison",
     "Row count 3 and non-null count 2;Follow Spark SQL null-result semantics;Use exact decimal type and scale;Set and record session timezone;Tie tolerance to dtype algorithm and scale;Sort by stable keys without erasing duplicate rows",
@@ -200,7 +200,7 @@ assert seconds == 10
 kernel_saving = 0.05
 assert kernel_saving / seconds < 0.01
 print("CPU shuffle bound:", seconds, "seconds before additional overhead")""",
-    "Ten-second payload lower bound;50 ms kernel saving is below 1 percent of it.",
+    "Ten-second payload lower bound; 50 ms kernel saving is below 1 percent of it.",
 )
 
 add(
@@ -241,7 +241,7 @@ def expression(x):
 expected = [2, None, 6]
 assert [expression(x) for x in values] == expected
 print("CPU expression parity oracle:", expected)""",
-    "Null-preserving expression produces [2, None,6].",
+    "Null-preserving expression produces [2, None, 6].",
 )
 
 add(

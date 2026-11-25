@@ -195,7 +195,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="k8s-040-incident-response-and-bounded-fault-injection">k8s-040: Incident response and bounded fault injection<a class="heading-anchor" href="#k8s-040-incident-response-and-bounded-fault-injection" aria-label="Link to this section">#</a></h2>
 <h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
-<p>Advanced; about 150 minutes plus review. Direct prerequisites: <code>k8s-027</code>, <code>k8s-032</code>, <code>k8s-035</code>. The chapter separates desired configuration, API acceptance, controller observation and application evidence.</p>
+<p>Advanced; about 150 minutes plus review. Direct prerequisites: <code>k8s-027</code>, <code>k8s-032</code>, <code>k8s-035</code>.</p>
 <h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
 <p>Choose a reversible investigation from a specific symptom and preserve evidence.</p>
 <h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
@@ -226,18 +226,21 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Restore app=hello on Service UID svc-1 with a current version precondition. Then observe one selected endpoint and the expected payload through the Service at second 30. A replacement Service UID svc-2 would stop the operation instead.</p>
 <p><strong>Expected:</strong> The same owned route recovers. Identity replacement is a stop condition, not permission to apply the old repair blindly.</p>
 <h3 id="inspect-the-specific-owned-object">Inspect the specific owned object<a class="heading-anchor" href="#inspect-the-specific-owned-object" aria-label="Link to this section">#</a></h3>
-<p>Only after the chapter&#x27;s host capability is provisioned and its resources remain present, use the explicit receipt fields described in <a href="../host-labs.md.html">host-labs.md</a>. A completed one-shot browser Run has already cleaned its objects. The following read does not provision the missing capability and does not justify changing credentials after a Forbidden result.</p>
+<p>Read only while this lesson&#x27;s objects still exist (<a href="../STUDY-GUIDE.md.html#owned-live-reads">owned live reads</a>).</p>
 <p>Bash on Linux, macOS or Ubuntu under WSL 2:</p>
 <pre class="highlighted-code"><code class="language-bash">: <span class="syntax-string">&quot;</span><span class="syntax-string">${</span>LAB_KUBECONFIG<span class="syntax-punctuation">:</span><span class="syntax-punctuation">?Use the owned receipt path</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span>
 : <span class="syntax-string">&quot;</span><span class="syntax-string">${</span>LAB_CONTEXT<span class="syntax-punctuation">:</span><span class="syntax-punctuation">?Use the owned receipt context</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span>
 : <span class="syntax-string">&quot;</span><span class="syntax-string">${</span>LAB_NAMESPACE<span class="syntax-punctuation">:</span><span class="syntax-punctuation">?Use the owned receipt namespace</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span>
 kubectl --kubeconfig <span class="syntax-string">&quot;</span>$LAB_KUBECONFIG<span class="syntax-string">&quot;</span> --context <span class="syntax-string">&quot;</span>$LAB_CONTEXT<span class="syntax-string">&quot;</span> --namespace <span class="syntax-string">&quot;</span>$LAB_NAMESPACE<span class="syntax-string">&quot;</span> get endpointslices -l kubernetes.io/service-name<span class="syntax-operator">=</span>hello -o json</code></pre>
-<p>Windows uses the same Bash commands inside WSL 2. The lab adapter refuses native Windows credential handling, so do not run kubectl against the receipt from PowerShell. From PowerShell, only open your WSL 2 distribution (the name reported by <code>wsl.exe --list --verbose</code>), change to your checkout with its Linux path, then run the Bash block above unchanged:</p>
+<p>From PowerShell, only open WSL 2 and run the Bash block there (<a href="../STUDY-GUIDE.md.html#owned-live-reads">why</a>):</p>
 <pre class="highlighted-code"><code class="language-powershell">wsl<span class="syntax-punctuation">.</span>exe <span class="syntax-punctuation">-</span>-distribution Ubuntu</code></pre>
-<p>Retain only the fields needed by this chapter&#x27;s prediction. A NotFound result may be expected after one-shot cleanup; a Forbidden result may identify a deliberately absent advanced capability. Neither result authorizes an ambient-context fallback.</p>
+<p>Check <code>endpoints[].conditions.ready</code> in the hello slices against the Ready Pod count. Zero endpoints with one Ready Pod is the selector mismatch from Worked example 1; a changed Service UID stops the repair.</p>
 <h3 id="run-and-bounded-evidence">Run and bounded evidence<a class="heading-anchor" href="#run-and-bounded-evidence" aria-label="Link to this section">#</a></h3>
-<p>The app artifact is a reading worksheet, <code>courses/kubernetes/lessons/k8s-040.md</code>. The current browser adapter does not provide the full <strong>one fixed host fault with UID-bound restoration and timestamped application evidence</strong> operation. Use the synthetic fixture and offline check first. Live work follows <a href="../host-labs.md.html">the scoped host-lab guide</a> only when the named capability and owned target have been provisioned. A worksheet or static check is never a cluster execution receipt.</p>
-<p>The <a href="../solutions/k8s-040_solution.json.html">manifest example</a> is separate from the learner artifact. The <a href="../solutions/k8s-040_checks.py.html">offline reference check</a> evaluates explicitly synthetic facts and makes no API calls. Run it locally with <code>python courses/kubernetes/solutions/k8s-040_checks.py</code> after comparing your attempt. The <a href="../fixtures/k8s-040-cases.json.html">case ledger</a> is immutable teaching input.</p>
+<p>This worksheet, <code>courses/kubernetes/lessons/k8s-040.md</code>, does not provide the full <strong>one fixed host fault with UID-bound restoration and timestamped application evidence</strong> operation. On the host lease one fixed fault changes the hello Service selector; timestamped endpoint and client samples then show the outage and the UID-bound repair.</p>
+<p>Live reads need a provisioned, owned target (<a href="../host-labs.md.html">host-lab guide</a>).</p>
+<p>The <a href="../solutions/k8s-040_checks.py.html">offline reference check</a> makes no API calls; run it after your attempt:</p>
+<pre class="highlighted-code"><code class="language-bash">python courses/kubernetes/solutions/k8s-040_checks.py</code></pre>
+<p>Compare it with the <a href="../solutions/k8s-040_solution.json.html">manifest example</a> and <a href="../fixtures/k8s-040-cases.json.html">case ledger</a>.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-record-the-baseline">Exercise 1: Record the baseline<a class="heading-anchor" href="#exercise-1-record-the-baseline" aria-label="Link to this section">#</a></h4>
 <p>Capture selector, Pod label, endpoint count and fixed response before the fault.</p>
@@ -270,12 +273,12 @@ kubectl --kubeconfig <span class="syntax-string">&quot;</span>$LAB_KUBECONFIG<sp
 <p><strong>Verify:</strong> Check that the packet contains cause, evidence, repair, preserved state and remaining uncertainty.</p>
 <p><strong>Progressive hints:</strong> Include cancellation and restoration behavior.</p>
 <h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
-<p>Explain the mechanism behind the first example, then distinguish it from this boundary case: The same owned route recovers. Identity replacement is a stop condition, not permission to apply the old repair blindly. State which observations are synthetic and which, if any, were read from your owned runtime.</p>
+<p>The timeline shows the selector change at 10, zero endpoints at 15 and Ready Pods throughout. Why would restarting the Pods be the wrong first move, and what would you compare instead?</p>
 <h3 id="common-pitfalls">Common pitfalls<a class="heading-anchor" href="#common-pitfalls" aria-label="Link to this section">#</a></h3>
 <p>The host operation must know how to restore its own change, including on cancellation or deadline. It should stop if the target UID changes or unrelated state would be affected. Do not broaden the fault into a node outage, policy deletion or credential change to make the lesson more dramatic.</p>
 <p>The post-incident review explains contributing conditions and detection gaps without inventing a root cause unsupported by the trace. A finite recovery can validate this selector-repair path; it does not prove resilience to every outage or that the failure will never recur.</p>
 <h3 id="retrieval-and-transfer">Retrieval and transfer<a class="heading-anchor" href="#retrieval-and-transfer" aria-label="Link to this section">#</a></h3>
-<p>Close the answer and reconstruct the reasoning for Exercise 6 (Write the review and stop conditions). Name the exact source and observed identity you would require before claiming the changed case succeeded.</p>
+<p>From memory, list the three competing hypotheses from Exercise 2. Then write the stop condition that prevents applying the repair to a replaced Service.</p>
 <h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
 <p>Continue to <code>k8s-041</code> after preserving the six evidence records.</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>

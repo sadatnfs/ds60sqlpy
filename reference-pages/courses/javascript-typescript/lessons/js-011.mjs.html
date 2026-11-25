@@ -195,16 +195,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the classroom for supported runnable lessons, or follow the lesson's external project instructions.</div><pre class="source-code language-javascript"><code><span class="source-line"><span class="syntax-comment">// Answer-free learner source. Save your own copy before editing.</span></span>
 <span class="source-line"><span class="syntax-comment">// Exercise 1: Trace lazy execution: change one input</span></span>
-<span class="source-line"><span class="syntax-comment">// Copy Example A into a scratch `main.mjs` and change `trace.push(&#x27;started&#x27;);` to</span></span>
-<span class="source-line"><span class="syntax-comment">// `trace.push(&#x27;started!&#x27;);`. Before running it, predict which check fails and which value it</span></span>
-<span class="source-line"><span class="syntax-comment">// now sees; then run it and restore the original line.</span></span>
-<span class="source-line"><span class="syntax-comment">// Expected: The changed run fails with an `AssertionError` at `assert.deepEqual(trace,</span></span>
+<span class="source-line"><span class="syntax-comment">// In a scratch copy of Example A, change `trace.push(&#x27;started&#x27;);` to</span></span>
+<span class="source-line"><span class="syntax-comment">// `trace.push(&#x27;started!&#x27;);`. Which check fails, and what value does it see?</span></span>
+<span class="source-line"><span class="syntax-comment">// Expected: The edited run fails with an `AssertionError` at `assert.deepEqual(trace,</span></span>
 <span class="source-line"><span class="syntax-comment">// [&#x27;started&#x27;])`. Restoring `trace.push(&#x27;started&#x27;);` brings back: trace is empty before next;</span></span>
 <span class="source-line"><span class="syntax-comment">// then started, with value 2.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">// Exercise 2: Close on an early break: debug a regression</span></span>
-<span class="source-line"><span class="syntax-comment">// A regression changed `yield 1;` to `yield 2;` in Example B. Run Example B with that</span></span>
-<span class="source-line"><span class="syntax-comment">// change, use the failing check to explain the defect and repair it without changing the</span></span>
+<span class="source-line"><span class="syntax-comment">// A regression changed `yield 1;` to `yield 2;` in Example B. Repair it without editing the</span></span>
 <span class="source-line"><span class="syntax-comment">// check.</span></span>
 <span class="source-line"><span class="syntax-comment">// Expected: Before the repair the run fails with an `AssertionError` at</span></span>
 <span class="source-line"><span class="syntax-comment">// `assert.deepEqual(trace, [&#x27;opened&#x27;, 1, &#x27;closed&#x27;])`. Restoring `yield 1;` brings back:</span></span>

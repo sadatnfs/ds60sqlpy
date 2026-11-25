@@ -1,6 +1,6 @@
 # js-064: explanatory solutions
 
-Compare after your own attempt or an explicit reveal. The separate .js reference is a complete offline browser program. These explanations discuss the six practice tasks; a visual resemblance alone is not a data or behavior check.
+Compare after your own attempt; the separate `.js` file is the complete reference program.
 
 ## Mechanism review
 
@@ -49,3 +49,7 @@ Canvas can reduce mark rendering overhead while leaving aggregation or layout co
 Performance and accessibility are joint requirements. A faster unreadable bitmap is not a complete product improvement. Pair the canvas with a filter control and a table of the nearest records so keyboard users reach exact values.
 
 **Expected:** Canvas marks plus keyboard filtering, summary and exact-record access.
+
+## After comparison
+
+Scale the Canvas demo to 10,000 seeded points, time transformation and drawing separately with `performance.now()`, and compare with an SVG version at 1,000 points. Record which stage dominates and whether the quadtree hit test stays fast.

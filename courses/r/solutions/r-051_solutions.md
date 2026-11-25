@@ -1,6 +1,6 @@
 # r-051: reference reasoning
 
-Use the [complete reference](r-051_reference.R) with the guide's declared inputs and runtime. Every worked example is also a standalone script.
+Run the [complete reference](r-051_reference.R) under the [run rules](../STUDY-GUIDE.md#run-a-chapter).
 
 ## Why the implementation has this shape
 
@@ -108,4 +108,6 @@ Data assertions check values, signature checks file structure, and a browser ins
 
 ## What the checks establish
 
-The reference makes 5 `stopifnot()` checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.
+The assertions confirm that the plot region spans exactly 0 to 4 and 0 to 8 and that every y equals twice x, that rows reordered by time give values 10, 20 and 30 in order before a line is drawn, that the owned temporary file starts with the eight byte PNG signature and is not empty, and that the file no longer exists after cleanup. They do not show that a viewer can read the labels.
+
+The reference makes 5 `stopifnot()` checks; see [what a passing run proves](../STUDY-GUIDE.md#what-a-passing-run-proves).

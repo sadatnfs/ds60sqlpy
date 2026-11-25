@@ -87,7 +87,7 @@ bash run.sh initialize
 bash run.sh check
 ```
 
-Prepare builds a local layer on the already prepared native Scala/JVM Java17
+Prepare builds a local layer on the already prepared native Scala/JVM Java 17
 base. It downloads the exact 857,203,581-byte Apache 1.5.1 binary, verifies its
 published SHA512 before bounded path-safe extraction, and retains Apache license
 and notice files. It is a locally built workshop image, not an Apache-published

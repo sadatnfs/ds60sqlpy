@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cpp/solutions/cpp-005_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="cpp-005-explanations-and-reference-observations">cpp-005: explanations and reference observations<a class="heading-anchor" href="#cpp-005-explanations-and-reference-observations" aria-label="Link to this section">#</a></h2>
-<p>Attempt the learner tasks before opening this document. The executable reference checks the bounded normal and boundary examples; the six explanations below cover the deliberate changes and manual checks.</p>
+<p>The <a href="cpp-005_solution.cpp.html">executable reference</a> adds the degenerate range where low and high are both 3, which must return 3, and the Exercise 6 case that clamps 1250 cents to 1000. The explanations below cover why reversed bounds throw and why integer cents avoid rounding. How to compare: <a href="../STUDY-GUIDE.md.html#compare-with-the-solutions">study guide</a>.</p>
 <h3 id="mechanism">Mechanism<a class="heading-anchor" href="#mechanism" aria-label="Link to this section">#</a></h3>
 <p>A function names a computation with parameters as inputs and a return value as its output. A precondition is a promise the caller must satisfy. A postcondition describes the result. Pure functions avoid hidden state, so the same inputs produce the same value and small boundary tests are meaningful.</p>
 <h3 id="detailed-reasoning">Detailed reasoning<a class="heading-anchor" href="#detailed-reasoning" aria-label="Link to this section">#</a></h3>

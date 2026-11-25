@@ -3,22 +3,16 @@ public class Main {
 
   public static void main(String[] args) throws Exception {
     // Exercise 1: Establish a numerical oracle: predict an edited check
-    // Copy Example A into a scratch `Main.java` and change `assert sum(1000) == 500_500L &&
-    // sum(1000) == (1000L * 1001) / 2;` to `assert sum(1001) == 500_500L && sum(1000) == (1000L
-    // * 1001) / 2;` inside its assertion. Before running it with `java -ea Main`, predict
-    // whether the assertion still holds and explain why; then restore it.
-    // Expected: The changed run fails with an `AssertionError` from the assertion on `sum(1000)
-    // == 500_500L && sum(1000) == (1000L * 1001) / 2`. Restoring the original line brings back
-    // the worked observation: 500500.
+    // Change Example A's assertion to `assert sum(1001) == 500_500L && sum(1000) == (1000L *
+    // 1001) / 2;`, predict whether it holds, then run and restore it.
+    // Expected: The edited run fails with an `AssertionError` from the assertion on `sum(1000)
+    // == 500_500L && sum(1000) == (1000L * 1001) / 2`.
 
     // Exercise 2: Warm up without hiding results: debug a regression
-    // A regression changed one token in the code that Example B adds after Example A, so one
-    // line now reads `for (int i = 0; i < 100; i++) sink = sum(1001);`. Run Example B with that
-    // line, use the failing assertion to locate the defect and repair it without changing the
-    // assertion.
-    // Expected: Before the repair the run fails with an `AssertionError` from the assertion on
-    // `sink == 500_500L`; after it the line reads `for (int i = 0; i < 100; i++) sink =
-    // sum(1000);` again and sink 500500 after warmup.
+    // A regression in Example B's new code makes one line read `for (int i = 0; i < 100; i++)
+    // sink = sum(1001);`. Repair it using the failing assertion.
+    // Expected: The unrepaired run fails with an `AssertionError` from the assertion on `sink ==
+    // 500_500L`; the repaired line reads `for (int i = 0; i < 100; i++) sink = sum(1000);`.
 
     // Exercise 3: Measure repeated work with a checksum
     // Time 20 calculations and sum their outputs.

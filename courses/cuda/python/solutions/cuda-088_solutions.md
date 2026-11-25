@@ -1,6 +1,6 @@
 # cuda-088: explained solutions
 
-These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.
+Compare with your [worksheet](../lessons/cuda-088.md) attempt.
 
 ## Exercise 1: Compute serial time
 
@@ -74,8 +74,16 @@ Vary one worker or queue setting at a time.
 
 **How to verify.** Record step time and host memory for each setting. The best setting should be confirmed by repeating it.
 
+## Self-check answers
+
+1. **Why is ideal overlap 6 ms per batch rather than 4 ms?** Preparation takes 6 ms, so even with perfect overlap a new batch cannot arrive faster than the slowest stage.
+
+2. **What does a prefetch queue cost?** Memory for every queued batch, at least depth times payload, plus decoder state and framework overhead.
+
+3. **Why bound and clean up workers in a small lesson?** Unbounded workers can leave a large background process tree and exhaust host memory or I/O on a shared machine.
+
 ## Reference observation
 
 Serial 10 ms, ideal steady-state 6 ms, queued payload 25165824 bytes.
 
-The reference file is `courses/cuda/python/references/cuda-088_cpu.py`. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.
+Asserted by `courses/cuda/python/references/cuda-088_cpu.py`.

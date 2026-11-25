@@ -13,40 +13,39 @@ psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
   -f sql/postgres-60day/solutions/day44_solutions.sql
 ```
 
-`psql` prints each result/command tag in the terminal. Stop at the first
-unexpected `ERROR`; later output cannot repair an earlier failed invariant.
-Compare your own SQL, row grain, column names, row counts, `NULL` policy, and
-ordering with the explanation before comparing syntax.
+In our container `psql` printed `BEGIN`, `SET`, an empty active-session list,
+`CREATE TABLE` for `top_statement_stats`, the `NOTICE` that
+`pg_stat_statements` is not installed, `DO`, the empty ranking, an empty age
+list, a three-row connection summary, the empty ranking again, an empty
+idle-in-transaction list and `ROLLBACK`. Empty lists are the right answer on a
+quiet server; open a second session if you want rows to inspect. The `NOTICE`
+is expected, but an `ERROR` is not, because the handler catches only the
+not-preloaded case. The
+[solution reading notes](../../STUDY-GUIDE.md#read-a-solution) describe how to
+compare your attempt.
 
 ## Clause-by-clause reading map
 
-The lesson's main concepts are Wait event, Backend PID, Normalized statement. Its worked-model focus is:
-Query `pg_stat_activity`, exclude `pg_backend_pid()`, and calculate runtime only for active statements. For one row, read user, state, wait type/event, and query together; a long duration alone does not prove a fault or authorize termination.
+The file has two halves. The session half is four plain queries over
+`pg_stat_activity`; read each in
+[logical order](../../STUDY-GUIDE.md#reading-any-query-in-logical-order):
+`FROM` yields one row per process, `WHERE` picks the states, `SELECT` computes
+ages with `clock_timestamp()`, and `ORDER BY` puts the oldest first. The
+statistics half has three parts:
 
-- Start at `FROM`/`JOIN` and state the intermediate row grain. Inspect join keys
-  before adding aggregates; a one-to-many join is allowed to multiply rows only
-  when the later contract accounts for it.
-- Apply `WHERE` to input rows, `GROUP BY` to form buckets, and `HAVING` to
-  completed groups. Window functions run over the surviving relation and
-  normally preserve its row count.
-- Read the `SELECT` list as the public result contract: keys establish grain,
-  measures state calculations, and aliases explain meaning. `ORDER BY` is the
-  only output-order guarantee; add a unique tie-breaker before `LIMIT`.
-- Trace every common table expression (CTE) as a temporary named relation.
-  Execute or inspect one stage at a time while debugging, but compare the final
-  result with an independent control rather than trusting stage names.
-- Keep SQL `NULL` as “missing/unknown/not applicable” until the metric contract
-  chooses another representation. Guard division with `NULLIF`; disclose
-  exclusions and distinguish zero from no row.
-- For DDL/DML, a command tag proves only that PostgreSQL accepted a statement.
-  Catalog checks, negative cases, row-count reconciliation, and the declared
-  transaction boundary prove behavior and cleanup.
+- `CREATE TEMP TABLE top_statement_stats` declares the ten output columns, so
+  the result keeps one shape whether or not the extension exists.
+- A `DO` block asks `to_regclass('public.pg_stat_statements')` whether the
+  view exists and only then runs two `INSERT ... SELECT` statements through
+  `EXECUTE`: one ranked by `total_exec_time`, one by `mean_exec_time`, each
+  numbered with `row_number()` and cut to ten rows.
+- An inner `BEGIN ... EXCEPTION WHEN object_not_in_prerequisite_state` block
+  catches the SQLSTATE 55000 error an installed but unloaded extension raises,
+  empties the table and prints its own `NOTICE`. Any other error still stops
+  the run.
 
-The exact final queries are not the only valid syntax. A join, subquery, CTE,
-window, or conditional aggregate can be an alternative when it preserves the
-same grain, `NULL` semantics, deterministic ordering, and safety. Prefer the
-form whose intermediate relations a reviewer can verify; optimize only after
-correctness is established with evidence.
+Two final `SELECT`s read the table in `ranking, rank_position` order, once as
+`SELECT *` and once with every column named.
 
 The two deliverables inspect active work and, when available,
 `pg_stat_statements`. The solution remains runnable on a fresh PostgreSQL
@@ -84,12 +83,12 @@ locks, and the operation's purpose before intervening.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-44 Exercise 1, take a read-only snapshot of `pg_stat_activity`. Build the answer toward `pid`, `usename`, `datname`, `state`, `runtime`, `wait_event_type`, `wait_event`, and `query`; keep `pid` visible because the output grain is one backend session.
+- **Inputs/evidence:** For sql-44 Exercise 1, read `pg_stat_activity` once, keep backends with `state = 'active'` other than `pg_backend_pid()`, and compute `runtime` as `clock_timestamp() - query_start`, so the age is measured at read time rather than at the start of the lesson transaction; show `pid`, `usename`, `datname`, `state`, `runtime`, `wait_event_type`, `wait_event`, and `query`.
 - **Expected result/shape:** For sql-44 Exercise 1, expected output: zero or more currently active sessions, excluding the monitoring query itself. A long runtime can be normal; inspect wait events, locks, and the operation's purpose before intervening. The final columns are `pid`, `usename`, `datname`, `state`, `runtime`, `wait_event_type`, `wait_event`, and `query`. The final order is `runtime DESC NULLS LAST`.
-- **Independent verification:** For sql-44 Exercise 1, run an anti-check that counts rows where NOT (`state = 'active' AND pid <> pg_backend_pid()`); require unique `pid` and compare the projected `pid`, `usename`, `datname`, `state`, `runtime`, `wait_event_type`, `wait_event`, and `query` with a second read-only snapshot of `pg_stat_activity`. When practical, open a controlled second `psql` session that runs `SELECT pg_sleep(...)`, observe it as active, then confirm it disappears after the statement finishes; do not cancel or terminate a session as part of this exercise.
-- **Intermediate relation check:** For sql-44 Exercise 1, inspect the source keys that survive `WHERE`; then check `runtime DESC NULLS LAST` before applying the row cap.
-- **Clause check:** For sql-44 Exercise 1, the solution actually uses `FROM`, `WHERE`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `pg_stat_activity`, preserve one row per `pid`, and finish with `pid`, `usename`, `datname`, `state`, `runtime`, `wait_event_type`, `wait_event`, and `query` ordered by `runtime DESC NULLS LAST`.
-- **Alternative/trade-off:** For sql-44 Exercise 1, the chosen form is justified by this lesson-specific rationale: Expected shape: zero or more currently active sessions, excluding the monitoring query itself. Evaluate another form against the concrete expected result (zero or more currently active sessions, excluding the monitoring query itself. A long runtime can be normal; inspect wait events, locks, and the operation's purpose before intervening) and the verification above.
+- **Independent verification:** For sql-44 Exercise 1, on a quiet server confirm 0 rows while `SELECT count(*) FROM pg_stat_activity WHERE state = 'active' AND pid = pg_backend_pid()` returns 1, which proves the self-exclusion works; then, from a second `psql` session, run `BEGIN; SELECT pg_sleep(1); SELECT pg_sleep(6);` and while it sleeps confirm exactly one row with a unique `pid`, `wait_event` `PgSleep`, `query` `SELECT pg_sleep(6);`, and a `runtime` that counts only the current statement, not the earlier one-second sleep; rerun after it finishes and confirm the row is gone. Do not cancel or terminate the session.
+- **Intermediate relation check:** Run the `FROM` and `WHERE` alone with `SELECT pid, state` first. On a quiet server that returns nothing, which is right: the only active backend is the one running the check. Drop `pid <> pg_backend_pid()` and your own row appears, which proves the filter is doing the work.
+- **Clause check:** `clock_timestamp() - query_start` is evaluated as each row is produced, so the age is measured from the moment of reading, not from the file's `BEGIN`. `left(query, 160)` keeps enough text to recognize a statement without dumping a long one, and `NULLS LAST` is defensive: an active backend should always have a `query_start`, so its runtime should never be `NULL`.
+- **Alternative/trade-off:** Keeping the learner's `state <> 'idle'` would also list idle-in-transaction sessions, whose `query_start` belongs to a statement that already finished, so their "runtime" would measure idleness rather than work. Keeping `NOW()` would shorten every age by the time since the file's `BEGIN` and make the script's own row negative. `state = 'active'` with `clock_timestamp()` answers the exercise as written.
 - **Edge case:** A quiet local database can correctly return zero rows. Use a controlled `pg_sleep` session when you need a positive observation, and never manufacture a row in a system view.
 
 ## Exercise 2: Optional top statement statistics
@@ -192,10 +191,10 @@ contract explicit. Any unrelated error still propagates.
 - **Inputs/evidence:** For sql-44 Exercise 2, inspect `to_regclass('public.pg_stat_statements')`, then read the optional `public.pg_stat_statements` view into the course-owned temporary `top_statement_stats` table. Build `ranking`, `rank_position`, `userid`, `dbid`, `toplevel`, `queryid`, `query`, `calls`, `mean_exec_time`, and `total_exec_time`; do not install the extension or reset shared statistics.
 - **Expected result/shape:** For sql-44 Exercise 2, expected output: up to 20 rows when `pg_stat_statements` is installed and loaded, with at most 10 rows per ranking label (`total_exec_time` and `mean_exec_time`); otherwise emit an explanatory notice and return an empty result. Each row is one statement within a ranking, identified by (`ranking`, `userid`, `dbid`, `toplevel`, `queryid`). The final columns are `ranking`, `rank_position`, `userid`, `dbid`, `toplevel`, `queryid`, `query`, `calls`, `mean_exec_time`, and `total_exec_time`. The final order is `ranking, rank_position`.
 - **Independent verification:** For sql-44 Exercise 2, if the optional view is absent or raises `object_not_in_prerequisite_state` because the module was not preloaded, require an explanatory notice and an empty result. If it is readable, require only the `total_exec_time` and `mean_exec_time` labels, at most 10 rows per label, unique (`ranking`, `userid`, `dbid`, `toplevel`, `queryid`), consecutive `rank_position` values from 1 through N, nonincreasing `total_exec_time` order for its label, nonincreasing `mean_exec_time` order for its label, and values that match a fresh read of `public.pg_stat_statements`.
-- **Intermediate relation check:** For sql-44 Exercise 2, inspect the existence check first, then compare the by-total and by-mean selections separately before reading the combined temporary relation.
-- **Clause check:** For sql-44 Exercise 2, the solution uses dynamic `SELECT`, window `OVER`, `FROM`, `ORDER BY`, and `LIMIT` clauses. Each branch preserves one statement per (`userid`, `dbid`, `toplevel`, `queryid`) within its `ranking`, assigns `rank_position`, and limits that ranking to ten rows.
-- **Alternative/trade-off:** For sql-44 Exercise 2, the chosen form is justified by this lesson-specific rationale: Expected shape: up to ten rows when `pg_stat_statements` is installed and loaded; otherwise an explanatory notice and an empty result. Evaluate another form against the concrete expected result (up to ten rows when `pg_stat_statements` is installed and loaded; otherwise an explanatory notice and an empty result) and the verification above.
-- **Edge case:** The optional view can be absent, installed but not preloaded, readable but empty, or contain fewer than ten statements. All are valid optional-source states and leave the monitored statistics unchanged.
+- **Intermediate relation check:** Check the branch before the ranking: `SELECT to_regclass('public.pg_stat_statements')` returned `NULL` in our container, which sends the block straight to the not-installed `NOTICE`. When the view is readable, run each `INSERT`'s `SELECT` by itself and confirm that `rank_position` runs 1, 2, 3 without gaps in each list before reading the combined table.
+- **Clause check:** `row_number() OVER (ORDER BY total_exec_time DESC, userid, dbid, toplevel, queryid)` and the statement's own `ORDER BY ... LIMIT 10` use the same five keys, so the ten rows kept are exactly positions 1 to 10. The four tie-breakers are the view's identity: one normalized statement per user, database and top-level flag. `left(query, 200)` shortens the stored text, and the mean branch repeats the pattern with `mean_exec_time DESC` first.
+- **Alternative/trade-off:** A plain `SELECT ... FROM pg_stat_statements` is shorter, but on a server like ours it fails with `relation "pg_stat_statements" does not exist` and stops the file under `ON_ERROR_STOP`. Catching `WHEN OTHERS` would keep the file running too, but a typo in the ranking query would then hide behind the same friendly `NOTICE`. The narrow handler costs a few lines and keeps real errors visible; when readable, the result is up to 20 rows, at most ten per label.
+- **Edge case:** We exercised both empty branches in a private container. Absent gave `pg_stat_statements is not installed; optional result is empty`. In a throwaway transaction that ran `CREATE EXTENSION pg_stat_statements` and then rolled back, a direct read raised `pg_stat_statements must be loaded via "shared_preload_libraries"`, and the block printed `pg_stat_statements exists but is not loaded via shared_preload_libraries; optional result is empty` with a 0-row table. The lesson itself never installs the extension; a readable but nearly empty view simply yields fewer than ten rows per label.
 
 ## Reasoning, safety, and pitfalls
 
@@ -203,8 +202,12 @@ contract explicit. Any unrelated error still propagates.
   active-query list.
 - `clock_timestamp()` advances during the statement and is appropriate for an
   observed runtime.
-- Checking `to_regclass` avoids a parse-time reference to a missing extension
-  view; dynamic SQL defers that reference until the view is known to exist.
+- Checking `to_regclass` keeps a missing extension view from ever being read.
+  Inside PL/pgSQL the `IF` alone is enough, because a table name is resolved
+  only when its statement first runs (a static `PERFORM` on the view inside the
+  skipped branch ran cleanly in our container); `EXECUTE` makes that deferral
+  explicit. Outside a `DO` block, a plain query naming the view fails with
+  `relation "pg_stat_statements" does not exist`.
 - These are diagnostic reads. Do not cancel or terminate sessions without
   confirming ownership and operational impact.
 
@@ -216,13 +219,13 @@ or currently idle statement.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-44 Exercise 3, take a read-only snapshot of `pg_stat_activity`. Build the answer toward `pid`, `usename`, `state`, `transaction_age`, and `statement_age`; keep `pid` visible because the output grain is one backend session.
-- **Expected result/shape:** For sql-44 Exercise 3, expected output: one row per `pid`. The final columns are `pid`, `usename`, `state`, `transaction_age`, and `statement_age`. The final order is `transaction_age DESC NULLS LAST`.
-- **Independent verification:** For sql-44 Exercise 3, run an anti-check that counts rows where NOT (`pid <> pg_backend_pid() AND state <> 'idle'`); require unique `pid` and compare `pid`, `usename`, `state`, `transaction_age`, and `statement_age` with `pg_stat_activity`. Require nonnegative ages for non-NULL timestamps and `transaction_age >= statement_age` when both exist. When practical, use a controlled second `psql` session with `BEGIN`, wait, and then a long-running query to observe both clocks; finish that session with `ROLLBACK`.
-- **Intermediate relation check:** For sql-44 Exercise 3, inspect the source keys that survive `WHERE`; then check `transaction_age DESC NULLS LAST` before applying the row cap.
-- **Clause check:** For sql-44 Exercise 3, the solution actually uses `FROM`, `WHERE`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `pg_stat_activity`, preserve one row per `pid`, and finish with `pid`, `usename`, `state`, `transaction_age`, and `statement_age` ordered by `transaction_age DESC NULLS LAST`.
-- **Alternative/trade-off:** For sql-44 Exercise 3, the chosen form is justified by this lesson-specific rationale: `query_start` belongs to the current statement; `xact_start` belongs to its transaction. Evaluate another form against the concrete expected result (one row per `pid`) and the verification above.
-- **Edge case:** A backend outside an explicit transaction can have a NULL `xact_start`; preserve that NULL rather than converting it to a misleading zero duration.
+- **Inputs/evidence:** For sql-44 Exercise 3, read `pg_stat_activity` once, drop this session with `pid <> pg_backend_pid()` and idle sessions with `state <> 'idle'` (which also drops background processes, whose `state` is `NULL`), and compute `transaction_age` from `xact_start` and `statement_age` from `query_start`, both against `clock_timestamp()`.
+- **Expected result/shape:** For sql-44 Exercise 3, expected output: one row per `pid` for other non-idle client sessions, which is 0 rows on a quiet server; an open transaction shows a `transaction_age` at least as large as its `statement_age`, and an aborted transaction shows a `NULL` `transaction_age` and sorts last. The final columns are `pid`, `usename`, `state`, `transaction_age`, and `statement_age`. The final order is `transaction_age DESC NULLS LAST`.
+- **Independent verification:** For sql-44 Exercise 3, open three controlled sessions: `BEGIN; SELECT pg_sleep(1); SELECT pg_sleep(6);`, `BEGIN; SELECT 1;` left open, and `BEGIN; SELECT 1/0;` left open; confirm three rows with unique `pid`, the sleeper's `transaction_age` about one second above its `statement_age`, the open `SELECT 1` session with both ages almost equal, and the aborted session in state `idle in transaction (aborted)` with a `NULL` `transaction_age`. Check clock order with `xact_start <= query_start`, not `transaction_age >= statement_age`, because the two `clock_timestamp()` reads can make an autocommit statement's age one microsecond larger. Finish each session with `ROLLBACK`.
+- **Intermediate relation check:** Run the query once without `state <> 'idle'`. Idle sessions then appear with a `NULL` `xact_start`, because they have no open transaction, and a `statement_age` that only measures time since their last command started. The filter removes them, and with them every background process whose state is `NULL`.
+- **Clause check:** Both ages use `clock_timestamp()`, so `transaction_age` minus `statement_age` shows how long the transaction ran before its current statement began: about one second for our sleeping session, near zero for the session that ran `SELECT 1` right after `BEGIN`. `NULLS LAST` matters here, because the default `DESC` order would put a `NULL` transaction age first.
+- **Alternative/trade-off:** Showing only `xact_start` would hide the sleeping session's split (about 2.59 seconds of transaction against 1.58 of statement); showing only `query_start` would make the open `BEGIN; SELECT 1;` session look like an old statement when nothing is running. Computing both ages from one clock reading, for example `clock_timestamp()` in a `CROSS JOIN` subquery, would also remove the microsecond case where an autocommit statement's age edges past its transaction's.
+- **Edge case:** A transaction that already failed shows `idle in transaction (aborted)` and, in our PostgreSQL 17 run, a `NULL` `xact_start`, so its `transaction_age` is `NULL` while its `statement_age` still counts from the failed `SELECT 1/0`. Preserve that `NULL` rather than turning it into a zero duration.
 
 ## Exercise 4: Summarize connections safely
 
@@ -231,13 +234,13 @@ complete SQL text in a broadly shared report.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-44 Exercise 4, take a read-only snapshot of `pg_stat_activity`. Group by `datname`, `usename`, and `state`, and calculate `connections`; keep the complete three-column group key visible.
+- **Inputs/evidence:** For sql-44 Exercise 4, read `pg_stat_activity` once and group by `datname`, `usename`, and `state` with `COUNT(*) AS connections`, leaving out `query` so no statement text is exposed; background processes have `NULL` in some or all of the three key columns and form their own groups.
 - **Expected result/shape:** For sql-44 Exercise 4, expected output: one row per `datname`, `usename`, and `state`. The final columns are `datname`, `usename`, `state`, and `connections`. The final order is `datname, usename, state`.
-- **Independent verification:** For sql-44 Exercise 4, independently aggregate `pg_stat_activity` by `datname`, `usename`, and `state`; require one output row for every distinct tuple and compare `connections` tuple by tuple, using `IS NOT DISTINCT FROM` when matching nullable catalog values. Also require `SUM(connections)` to equal `COUNT(*)` from the same source snapshot and require the output tuples to be unique.
-- **Intermediate relation check:** For sql-44 Exercise 4, confirm the groups are `datname`, `usename`, and `state`; then check `datname, usename, state` before applying the row cap.
-- **Clause check:** For sql-44 Exercise 4, the solution actually uses `FROM`, `GROUP BY`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `pg_stat_activity`, preserve one row per `datname`, `usename`, and `state`, and finish with `datname`, `usename`, `state`, and `connections` ordered by `datname, usename, state`.
-- **Alternative/trade-off:** For sql-44 Exercise 4, the chosen form is justified by this lesson-specific rationale: Grouping by database, user, and state supports capacity triage without exposing complete SQL text in a broadly shared report. Evaluate another form against the concrete expected result (one row per `datname`, `usename`, and `state`) and the verification above.
-- **Edge case:** Background workers can expose NULL database or user values; grouped NULLs are legitimate categories and must survive verification.
+- **Independent verification:** For sql-44 Exercise 4, on a quiet container confirm three groups that sum to 6 and match `SELECT count(*) FROM pg_stat_activity` (6): (`advanced_sql_training`, `postgres`, `active`) with 1, which is this query itself, (`NULL`, `postgres`, `NULL`) with 1 for the logical replication launcher, and an all-`NULL` group with 4 for the checkpointer, background writer, WAL writer, and autovacuum launcher; then open one sleeping session, one open `BEGIN; SELECT 1;` session, and one aborted transaction and confirm five groups summing to 9, with `active` at 2 and separate `idle in transaction` and `idle in transaction (aborted)` rows of 1 connection each.
+- **Intermediate relation check:** Before grouping, list `backend_type, datname, usename, state` from the view. In our container that showed one `client backend` and five background processes, which explains both `NULL` groups before you aggregate anything.
+- **Clause check:** `COUNT(*)` counts processes, and `GROUP BY` puts all `NULL` values of a column in one group, which is why four different background processes collapse into one row of 4. `ORDER BY datname, usename, state` sorts those `NULL` groups last. Leaving `query` out of the `SELECT` keeps statement text out of a report meant for sharing.
+- **Alternative/trade-off:** Adding `backend_type` to the key, or filtering to `backend_type = 'client backend'`, would name or remove the anonymous `NULL` rows. Both change the contract's three-column grain, so run them as a side query when the `NULL` groups need explaining.
+- **Edge case:** This query does not exclude its own `pid`, so the `active` count for your database is never below 1 while you run it. Subtract that row before deciding the database is busy.
 
 ## Exercise 5: Retain mean and total workload views
 
@@ -247,12 +250,12 @@ universal “slow query” ranking.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-44 Exercise 5, read the course-owned temporary `top_statement_stats` table without changing the monitored server statistics. Build the answer toward `ranking`, `rank_position`, `userid`, `dbid`, `toplevel`, `queryid`, `query`, `calls`, `mean_exec_time`, and `total_exec_time`; keep the complete statement-within-ranking key visible.
+- **Inputs/evidence:** For sql-44 Exercise 5, read the temporary `top_statement_stats` table that Exercise 2 filled with up to 10 `total_exec_time` rows and up to 10 `mean_exec_time` rows from `pg_stat_statements` (0 rows and a NOTICE when the extension is not loaded, as on the course container), without resetting the monitored server statistics, and select `ranking`, `rank_position`, `userid`, `dbid`, `toplevel`, `queryid`, `query`, `calls`, `mean_exec_time`, and `total_exec_time` so each list keeps its full statement key.
 - **Expected result/shape:** For sql-44 Exercise 5, expected output: one row per (`ranking`, `userid`, `dbid`, `toplevel`, `queryid`), so each ranking label can contain multiple statements. The final columns are `ranking`, `rank_position`, `userid`, `dbid`, `toplevel`, `queryid`, `query`, `calls`, `mean_exec_time`, and `total_exec_time`. The final order is `ranking, rank_position`.
 - **Independent verification:** For sql-44 Exercise 5, require one row per (`ranking`, `userid`, `dbid`, `toplevel`, `queryid`) and compare `rank_position`, `query`, `calls`, `mean_exec_time`, and `total_exec_time` with `top_statement_stats`. When the optional source is available, require both ranking labels, at most 10 rows per label, consecutive `rank_position` values, `total_exec_time` order for that ranking, and `mean_exec_time` order for that ranking; `ranking` alone is deliberately non-unique.
-- **Intermediate relation check:** For sql-44 Exercise 5, inspect each ranking label separately and verify that its stored `rank_position` still matches the metric that produced the list.
-- **Clause check:** For sql-44 Exercise 5, the solution uses `FROM`, `SELECT`, and `ORDER BY`: it preserves one row per (`ranking`, `userid`, `dbid`, `toplevel`, `queryid`) and displays the two lists in `ranking, rank_position` order.
-- **Alternative/trade-off:** For sql-44 Exercise 5, the chosen form is justified by this lesson-specific rationale: Mean duration highlights individually expensive calls; total execution time highlights cumulative cost. Evaluate another form against the concrete statement-within-ranking grain and the verification above.
+- **Intermediate relation check:** Filter to `ranking = 'total_exec_time'` and confirm `total_exec_time` never increases as `rank_position` goes from 1 to 10; repeat for the mean list. Each list is sorted by its own metric, so the other metric's column can rise and fall within it.
+- **Clause check:** The `SELECT` names all ten columns rather than reusing `SELECT *`, so the report keeps its column order even if the temporary table is later widened. `ORDER BY ranking, rank_position` prints the `mean_exec_time` list first, because the labels sort alphabetically, and numbers the rows within each list.
+- **Alternative/trade-off:** Sorting the combined table by `mean_exec_time DESC` alone is the broken report the exercise describes. For example, a statement called once at 900 ms would outrank one called 50,000 times at 2 ms, which has cost 100 seconds in total. Two labeled lists show both the expensive call and the expensive habit without pretending one ranking covers both.
 - **Edge case:** The same statement can appear once in each ranking. That is expected because `ranking` is part of the identity; it is not a duplicate to remove.
 
 ## Exercise 6: Identify idle-in-transaction sessions
@@ -262,10 +265,10 @@ backend; ownership and operational impact must be confirmed first.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-44 Exercise 6, take a read-only snapshot of `pg_stat_activity`. Build the answer toward `pid`, `usename`, `datname`, `transaction_age`, `wait_event_type`, and `wait_event`; keep `pid` visible because the output grain is one backend session.
+- **Inputs/evidence:** For sql-44 Exercise 6, read `pg_stat_activity` once, keep only `state = 'idle in transaction'` (an equality test, so `idle in transaction (aborted)` is excluded), and compute `transaction_age` as `clock_timestamp() - xact_start`; show `pid`, `usename`, `datname`, `transaction_age`, `wait_event_type`, and `wait_event`.
 - **Expected result/shape:** For sql-44 Exercise 6, expected output: one row per `pid` whose state is `idle in transaction`. The final columns are `pid`, `usename`, `datname`, `transaction_age`, `wait_event_type`, and `wait_event`. The final order is `transaction_age DESC NULLS LAST`.
-- **Independent verification:** For sql-44 Exercise 6, run an anti-check for any row whose state is not `idle in transaction`; require unique `pid`, non-NULL transaction starts, and nonnegative `transaction_age`, and compare every projected value with `pg_stat_activity`. When practical, open a controlled second `psql` session, run `BEGIN`, wait without committing, observe the session, then run `ROLLBACK` and confirm that it disappears from this result.
-- **Intermediate relation check:** For sql-44 Exercise 6, inspect the source keys that survive `WHERE`; then check `transaction_age DESC NULLS LAST` before applying the row cap.
-- **Clause check:** For sql-44 Exercise 6, the solution actually uses `FROM`, `WHERE`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `pg_stat_activity`, preserve one row per `pid`, and finish with `pid`, `usename`, `datname`, `transaction_age`, `wait_event_type`, and `wait_event` ordered by `transaction_age DESC NULLS LAST`.
-- **Alternative/trade-off:** For sql-44 Exercise 6, the chosen form is justified by this lesson-specific rationale: The read-only diagnostic returns age and wait fields. Evaluate another form against the concrete expected result (one row per `pid`) and the verification above.
+- **Independent verification:** For sql-44 Exercise 6, confirm 0 rows on a quiet server; then open a second `psql` session, run `BEGIN; SELECT 1;`, and leave it open: confirm exactly one row with a unique `pid`, `wait_event_type` `Client`, `wait_event` `ClientRead`, and a growing `transaction_age`, while an aborted session (`BEGIN; SELECT 1/0;`) does not appear; run `ROLLBACK` in the open session and confirm the row disappears. Do not cancel or terminate the session.
+- **Intermediate relation check:** Before filtering, list `pid, state` for every `client backend`. With our controlled sessions that showed `idle in transaction`, `idle in transaction (aborted)` and two `active` rows (one of them the check itself), and the filter keeps only the first.
+- **Clause check:** The equality `state = 'idle in transaction'` does not match the aborted variant. `wait_event_type` `Client` with `wait_event` `ClientRead` means the server is waiting for the client to send something, not for a lock; the risk is in what the idle session holds, which other sessions may be waiting on. `clock_timestamp() - xact_start` measures how long it has held it.
+- **Alternative/trade-off:** Joining `pg_locks` on `pid` shows what an idle transaction holds: in our test, `AccessShareLock` on `training.customers` for a session that had run `LOCK TABLE`, and a `backend_xmin` snapshot plus locks on `orders` for a `REPEATABLE READ` session that had counted orders. That join changes the grain to one row per lock, so keep it as a follow-up query rather than the answer.
 - **Edge case:** A correct result may be empty. Create the state only in a controlled second session, then cleanly roll it back.

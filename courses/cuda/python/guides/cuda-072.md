@@ -1,10 +1,17 @@
 # cuda-072: Capability and failure diagnosis
 
-**Route:** CUDA Python and machine learning. **Stage:** beginner. **Prerequisites:** `cuda-003`, `cuda-065`, `cuda-071`. Allow several sessions when the hardware experiment is new; the chapter is not a deadline.
+**Route:** CUDA Python and machine learning. **Stage:** beginner. **Prerequisites:** `cuda-003`, `cuda-065`, `cuda-071`.
 
-## What you will be able to explain
+Pacing, evidence labels and platform rules: [CUDA study guide](../../STUDY-GUIDE.md).
 
-By the end, you can **order the evidence levels**, **design fail-closed device selection**, and **compare alternative backend labels** with evidence. Start with the two worked cases, then use the editable CPU model to make the quantities concrete.
+## Learning objectives
+
+- Order the evidence levels.
+- Classify missing device.
+- Classify wrong output.
+- Design fail-closed device selection.
+- Explain process restart after fatal device error.
+- Compare alternative backend labels.
 
 ## Mechanism and vocabulary
 
@@ -31,9 +38,13 @@ A probe that imports CuPy but reports no device establishes package installation
 
 A probe that launches but returns wrong values establishes execution, then fails correctness. It must not be summarized as ready simply because the exit status was zero.
 
-## Portable executable model
+## How to run the CPU model
 
-The **CPU reference model** variant runs this bounded worked example using `python-core`. It uses only the Python standard library, small synthetic values and no network. Its purpose is to expose the arithmetic or contract behind the chapter. The separate reference includes assertions for the stated observations.
+Edit the copy; the [reference](../references/cuda-072_cpu.py) adds assertions.
+
+```sh
+python courses/cuda/python/lessons/cuda-072_cpu.py
+```
 
 ```python
 stages = ["import", "visibility", "allocation", "launch", "completion", "correctness"]
@@ -53,76 +64,62 @@ print("CPU diagnostic fixture: failed at", failed)
 |---|---|
 | `failed` | `'correctness'` |
 
-Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.
-
 ## Practice and transfer
+
+Record each attempt in the [worksheet](../lessons/cuda-072.md) before opening hints.
 
 ### Exercise 1: Order the evidence levels
 
 **Trap to avoid:** Collapsing all stages into one boolean `gpu_ok` hides where a failure happened and makes a correctness failure look like a missing driver.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 2: Classify missing device
 
 **Trap to avoid:** Reinstalling CuPy treats the problem as a package issue when the package is fine; the missing piece is device exposure or hardware.
-
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 3: Classify wrong output
 
 **Trap to avoid:** Reporting the probe as ready because the exit code was zero ignores the value check. A probe that prints wrong numbers and exits normally is worse than one that crashes, because nothing downstream notices.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 4: Design fail-closed device selection
 
 **Trap to avoid:** Defaulting to CPU with a warning lets automated runs record a GPU pass for a CPU result.
-
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 5: Explain process restart after fatal device error
 
 **Trap to avoid:** Catching the exception and retrying in the same process often fails again, and if it seems to succeed the evidence is suspect.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 6: Compare alternative backend labels
 
 **Trap to avoid:** Calling any accelerator run a GPU pass loses which runtime produced it, so a CUDA requirement can be satisfied by an Apple run on paper.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ## Progressive hints
 
-Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.
+Hint *k* belongs to exercise *k*; open one at a time.
 
-1. Start from worked example 1 and mark the quantities needed for the task "Order the evidence levels".
-2. Change one assumption in worked example 2 while preserving the declared contract: classify missing device.
-3. Trace the CPU program's variables before adding hardware behavior: classify wrong output.
-4. Draw producers, consumers and the exact operation boundary for the task "Design fail-closed device selection".
-5. Separate what the small fixture establishes from what the real runtime must show: explain process restart after fatal device error.
-6. Write a counterexample to an overbroad claim before you compare alternative backend labels.
+1. Arrange the claims from weakest to strongest, asking for each what a success at that step still leaves unproven.
+2. Decide whether a missing device is a property of the package, the container runtime or the host, and what you would inspect first.
+3. The program launched and finished. Which claim in the ladder failed when the values came back wrong?
+4. Write the selection rule so that a missing requested backend ends the run with a clear error instead of switching processors.
+5. Ask whether operations queued after a device assertion in the same process can still be trusted.
+6. For each backend name, state what hardware and software it implies, then check that the label matches what actually ran.
 
-## Common mistakes and self-review
+## Common mistakes and self-check
 
-Confusing a correct tiny example with a general implementation is the central review risk. For this chapter, challenge the assumption in worked example 2, then ask whether your change preserves the mechanism described above. If you change dtype, layout, ordering, batch size or backend, update the acceptance contract rather than silently reusing the old observation. Explain an unexpected result before trying random configuration changes.
+A frequent mistake is summarizing a probe as ready because its exit status was zero. In worked example 2 the kernel launched and completed but returned wrong values, which is a correctness failure. Another is letting a GPU evidence run quietly fall back to CPU when no device is visible. Fix both by recording each evidence level separately, failing closed when the requested backend is absent, and restarting the process after a fatal device error.
 
-Keep a small evidence table with columns **claim**, **input**, **expected observation**, **actual observation** and **limit**. For the first claim use `Order the evidence levels`. For the final claim use `Compare alternative backend labels`. An unperformed GPU or cluster experiment remains pending even when the CPU model is correct.
+**Evidence limit:** The fixture stops at the correctness level on purpose and never touches real hardware. It teaches how to classify failures; it does not diagnose your driver, container runtime exposure or binary architecture, which need checks on the actual host.
 
-## Platform and evidence contract
+1. Why can a successful import not prove a device is usable?
+2. How do you classify an unsupported architecture binary versus an allocation failure?
+3. Is MPS or ROCm a way to emulate CUDA?
 
-The reading worksheet and CPU reference model work through the ordinary Linux Docker classroom on macOS, Linux and Windows using WSL 2. They do not require an NVIDIA GPU. Their results are labeled CPU models or semantic oracles, not simulated hardware performance.
-
-Real CUDA work needs supported NVIDIA hardware, a compatible host driver and an explicitly prepared GPU runtime. An Apple GPU does not execute CUDA kernels. PyTorch MPS on a supported native Mac, ROCm on supported AMD hardware, or other vendor backends can provide separate accelerator learning routes; they need their own package and operation qualification and are not CUDA evidence. The ordinary Linux Docker classroom does not expose native Mac MPS automatically.
-
-Do not download packages, models or data by opening this lesson. Do not attach an engine socket, ambient cluster credentials or an arbitrary remote endpoint. A CPU pass, imported package, successful compilation, real GPU result and measured performance are distinct observations. Record the actual backend, data shape/dtype, source revision, versions and pending checks. A saved completion marker records learning progress, not hardware certification.
+Answers: [self-check answers](../solutions/cuda-072_solutions.md#self-check-answers).
 
 ## Primary references
 
 - [CuPy array and installation documentation](https://docs.cupy.dev/en/v13.6.0/)
 
-Use the version-matched documentation of your prepared environment. These references describe interfaces and supported boundaries; the chapter's synthetic examples and CPU models are original teaching material.
+Full lists: [documentation and sources](../../STUDY-GUIDE.md#documentation-and-sources).
 
 ## Ask an AI tutor about this lesson
 

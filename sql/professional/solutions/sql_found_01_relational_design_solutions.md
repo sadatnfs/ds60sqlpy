@@ -13,40 +13,38 @@ psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
   -f sql/professional/solutions/sql_found_01_relational_design_solutions.sql
 ```
 
-`psql` prints each result/command tag in the terminal. Stop at the first
-unexpected `ERROR`; later output cannot repair an earlier failed invariant.
-Compare your own SQL, row grain, column names, row counts, `NULL` policy, and
-ordering with the explanation before comparing syntax.
+Compare the NOTICE lines before anything else. In this lesson most of the
+evidence is a constraint refusing a row, so a run where the negative-cost
+insert in Exercise 2 or the duplicate `VISIT-100` in Exercise 3 succeeds is
+wrong even if every `SELECT` afterward looks plausible. Then compare your
+`maintenance_visits` definition column by column with the one below.
 
-## Clause-by-clause reading map
+## Reading map for this lesson
 
-The lesson's main concepts are Grain, Cardinality, Natural key, Surrogate key, Primary key, Foreign key. Its worked-model focus is:
-The example begins with four requirements and turns each into a grain:
+Each solution below starts from a requirement sentence, names the grain it
+implies, and only then writes DDL. Read them in that order:
 
-- Start at `FROM`/`JOIN` and state the intermediate row grain. Inspect join keys
-  before adding aggregates; a one-to-many join is allowed to multiply rows only
-  when the later contract accounts for it.
-- Apply `WHERE` to input rows, `GROUP BY` to form buckets, and `HAVING` to
-  completed groups. Window functions run over the surviving relation and
-  normally preserve its row count.
-- Read the `SELECT` list as the public result contract: keys establish grain,
-  measures state calculations, and aliases explain meaning. `ORDER BY` is the
-  only output-order guarantee; add a unique tie-breaker before `LIMIT`.
-- Trace every common table expression (CTE) as a temporary named relation.
-  Execute or inspect one stage at a time while debugging, but compare the final
-  result with an independent control rather than trusting stage names.
-- Keep SQL `NULL` as “missing/unknown/not applicable” until the metric contract
-  chooses another representation. Guard division with `NULLIF`; disclose
-  exclusions and distinguish zero from no row.
-- For DDL/DML, a command tag proves only that PostgreSQL accepted a statement.
-  Catalog checks, negative cases, row-count reconciliation, and the declared
-  transaction boundary prove behavior and cleanup.
+- Grain and cardinality first. `maintenance_visits` is one visit of one item,
+  so the item foreign key lives on the visit; the provider and technician
+  tables in Exercise 5 each get their own grain and a bridge table for the
+  many-to-many link.
+- Then the rule each constraint encodes. A `CHECK` stops a negative cost,
+  `UNIQUE` on `external_reference` stops a duplicate non-NULL reference, and a
+  foreign key stops an orphan visit. The solution proves the negative cost with
+  SQLSTATE `23514`, and the Verify lines ask you to prove the others the same
+  way.
+- Then the history question. Exercise 4 keeps `daily_fee_at_checkout` because
+  the fee quoted at checkout is a different fact from the current catalog fee.
+- Finally the catalog evidence. Exercises 7 and 8 read `pg_constraint`,
+  `pg_attribute` and `pg_index`, so they check the definitions themselves
+  rather than constraint names PostgreSQL generated.
 
-The exact final queries are not the only valid syntax. A join, subquery, CTE,
-window, or conditional aggregate can be an alternative when it preserves the
-same grain, `NULL` semantics, deterministic ordering, and safety. Prefer the
-form whose intermediate relations a reviewer can verify; optimize only after
-correctness is established with evidence.
+Your DDL is equally valid if it enforces the same rules and rejects the same
+bad rows: for example, a named `CONSTRAINT ... CHECK` instead of an inline one,
+or a natural key on `external_reference` alongside a surrogate key, changes
+names but not behavior. A design that moves the item reference onto the item
+table, or stores technicians as delimited text, changes the grain and fails the
+exercise.
 
 Run the complete disposable solution with:
 

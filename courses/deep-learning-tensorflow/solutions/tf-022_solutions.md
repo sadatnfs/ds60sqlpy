@@ -1,6 +1,6 @@
 # tf-022: explanatory solutions
 
-Open these answers for Attention with an explicit information boundary after your own attempt at Example A, Calculate uniform mixtures, or after an explicit reveal. Each answer reuses the guide's literal inputs, so a mismatch points to one step. The companion script runs the assertions; this page explains why they test Query, Key, Causal mask. After matching exercise 6, Refuse malformed input, invent a new input without looking here.
+Open these answers after an attempt; they reuse the guide's inputs ([comparison steps](../STUDY-GUIDE.md#after-the-solutions)).
 
 ## Mechanism review
 
@@ -121,6 +121,3 @@ for args in [(np.empty((0, 2)), np.empty((0, 2)), np.empty((0, 2))), (q, q, v[:2
 
 **Verify:** In a fresh process, the exercise checks confirm for every `args` in `[(np.empty((0, 2)), np.empty((0, 2)), np.empty((0, 2))), (q, q, v[:2])]`, `attention(*args)` raises `ValueError`.
 
-## Review after comparison
-
-Change one fixture value in exercise 4, Expose post-softmax masking, and predict the new result before running it. Keep the failing version of exercise 5, Use nonuniform scores, next to its repair. A missing framework is an environment record, not a failed assertion. No solution downloads data, calls an online model, deploys a service or changes a database.

@@ -1,19 +1,6 @@
 # tf-002: worked solutions
 
-Open this reference after an attempt or an explicit reveal request. Preserve
-your own version beside it. The [learner guide](../guides/tf-002.md) contains
-the public fixture and its independent Expected/Verify contracts. These six
-sections correspond to the same six learner actions, rather than six answer
-steps for one task. A different implementation is acceptable when it preserves
-the stated input policy, observations and evidence boundary.
-
-The [executable reference](tf-002_solution.py) exposes a `verify()` helper for
-authors and later comparison. It uses only local literals and the declared
-Python/NumPy environment. An assertion failure should retain its actual input
-and smallest failing observation. A passing reference is evidence about these
-fixed cases; use a changed fixture and a closed-reference explanation before
-recommending progression. The reading worksheet remains a reading exercise,
-regardless of the optional arithmetic checker.
+Compare after an attempt with the [learner guide](../guides/tf-002.md) ([comparison steps](../STUDY-GUIDE.md#after-the-solutions)).
 
 ## Exercise 1: Trace compatible axes
 
@@ -65,9 +52,7 @@ Convert [100,200] centimeters to [1,2] meters by dividing by 100. Only then comp
 
 ## Inspectable reference functions
 
-The core functions below make the input and reduction policies explicit. The
-separate executable file adds all six exercise checks. Do not replace a failed
-assertion with a flattering default value or remove the invalid-input case.
+`paired_difference` refuses unequal shapes, empty vectors and nonfinite values instead of broadcasting a column against a vector. [tf-002_solution.py](tf-002_solution.py) also asserts the (3,3) grid and the centimeter-to-meter transfer.
 
 ```python
 from __future__ import annotations
@@ -89,9 +74,4 @@ def paired_difference(left, right):
 
 Without executing, predict the shape of a (2,) vector minus a (2,1) column. Explain why a pair guard should reject it even though NumPy can compute it. Then create a new paired centimeter/meter fixture and justify its conversion.
 
-After revealing this file, choose another fixture before treating the answer
-as independent retrieval evidence. Explain why the rejected case is invalid,
-not merely which exception class appeared. Alternative notation, array layout
-or a direct calculation is welcome when its domain meaning and denominator
-remain explicit. Keep implementation correctness separate from broad claims
-about unseen model quality, reliability or safety.
+Then follow the [after-solutions routine](../STUDY-GUIDE.md#after-the-solutions).

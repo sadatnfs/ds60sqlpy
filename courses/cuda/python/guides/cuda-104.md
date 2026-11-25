@@ -1,10 +1,17 @@
 # cuda-104: Capstone: an evidence-based GPU systems decision
 
-**Route:** CUDA Python and machine learning. **Stage:** advanced. **Prerequisites:** `cuda-085`, `cuda-092`, `cuda-096`. Allow several sessions when the hardware experiment is new; the chapter is not a deadline.
+**Route:** CUDA Python and machine learning. **Stage:** advanced. **Prerequisites:** `cuda-085`, `cuda-092`, `cuda-096`.
 
-## What you will be able to explain
+Pacing, evidence labels and platform rules: [CUDA study guide](../../STUDY-GUIDE.md).
 
-By the end, you can **write three constraints**, **preserve rollback**, and **state evidence gaps** with evidence. Start with the two worked cases, then use the editable CPU model to make the quantities concrete.
+## Learning objectives
+
+- Write three constraints.
+- Filter infeasible candidates.
+- Choose a bottleneck hypothesis.
+- Preserve rollback.
+- Design failure tests.
+- State evidence gaps.
 
 ## Mechanism and vocabulary
 
@@ -25,15 +32,19 @@ Retain source, environment, data recipe, checkpoint and rollback instructions. R
 
 ### Worked example 1
 
-CandidateA uses 8 GiB and meets a 20 ms latency target; candidate B uses 12 GiB on an 8 GiB device. B is infeasible regardless of its optimistic kernel timing.
+Candidate A uses 8 GiB and meets a 20 ms latency target; candidate B uses 12 GiB on an 8 GiB device. B is infeasible regardless of its optimistic kernel timing.
 
 ### Worked example 2
 
-CandidateC meets latency but reduces held-out accuracy below the required threshold. Performance and quality constraints both belong in acceptance.
+Candidate C meets latency but reduces held-out accuracy below the required threshold. Performance and quality constraints both belong in acceptance.
 
-## Portable executable model
+## How to run the CPU model
 
-The **CPU reference model** variant runs this bounded worked example using `python-core`. It uses only the Python standard library, small synthetic values and no network. Its purpose is to expose the arithmetic or contract behind the chapter. The separate reference includes assertions for the stated observations.
+Edit the copy; the [reference](../references/cuda-104_cpu.py) adds assertions.
+
+```sh
+python courses/cuda/python/lessons/cuda-104_cpu.py
+```
 
 ```python
 candidates = [
@@ -56,8 +67,6 @@ print("CPU decision fixture:", valid)
 |---|---|
 | `valid` | `['A']` |
 
-Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.
-
 ## Equal framework lanes
 
 ### PyTorch
@@ -68,77 +77,67 @@ Choose either a single-device or a separately qualified distributed/custom-op Py
 
 Choose the equivalent bounded TensorFlow path, preserve an eager baseline and report graph/placement changes. TensorFlow needs its own acceptance evidence, not a copied PyTorch benchmark.
 
-Choose either lane first, then compare the other using identical mathematical inputs. Framework-specific shape, mode and optimizer rules must be checked separately. Both use offline synthetic examples; no model hub or dataset download is triggered.
+Lane rules: [framework labs](../../STUDY-GUIDE.md#python-gpu-and-framework-labs).
 
 ## Practice and transfer
+
+Record each attempt in the [worksheet](../lessons/cuda-104.md) before opening hints.
 
 ### Exercise 1: Write three constraints
 
 **Trap to avoid:** Writing a single goal of maximizing speed ignores memory and quality, so the fastest candidate wins even when it cannot run on the device or produces worse answers.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 2: Filter infeasible candidates
 
 **Trap to avoid:** Ranking all candidates by latency first and picking B, then trying to make it fit later, wastes effort and treats a hard constraint as a preference.
-
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 3: Choose a bottleneck hypothesis
 
 **Trap to avoid:** Making several optimizations at once without a hypothesis means any improvement cannot be attributed to a cause, and regressions get hidden by gains elsewhere.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 4: Preserve rollback
 
 **Trap to avoid:** Replacing the baseline code in place leaves no way to reproduce earlier results or revert quickly.
-
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 5: Design failure tests
 
 **Trap to avoid:** Testing only valid inputs leaves error paths untested, and those paths are where GPU services typically fail in production.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 6: State evidence gaps
 
 **Trap to avoid:** Presenting fixture numbers such as 18 ms as measured performance claims evidence that does not exist.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ## Progressive hints
 
-Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.
+Hint *k* belongs to exercise *k*; open one at a time.
 
-1. Start from worked example 1 and mark the quantities needed for the task "Write three constraints".
-2. Change one assumption in worked example 2 while preserving the declared contract: filter infeasible candidates.
-3. Trace the CPU program's variables before adding hardware behavior: choose a bottleneck hypothesis.
-4. Draw producers, consumers and the exact operation boundary for the task "Preserve rollback".
-5. Separate what the small fixture establishes from what the real runtime must show: design failure tests.
-6. Write a counterexample to an overbroad claim before you state evidence gaps.
+1. Write each constraint as a number with a unit, such as a memory ceiling, a latency target and a quality floor.
+2. Check memory and quality against their limits first and drop any candidate that fails either one before comparing speed.
+3. Point to the part of a measured trace that shows where time goes, then pick the change that targets it.
+4. Ask how you would return to the baseline tomorrow if the new version fails in use.
+5. Send an unsupported shape and a request beyond the resource limit and describe the correct refusal.
+6. Mark each claim as measured live, measured on the CPU only or still a hypothesis.
 
-## Common mistakes and self-review
+## Common mistakes and self-check
 
-Confusing a correct tiny example with a general implementation is the central review risk. For this chapter, challenge the assumption in worked example 2, then ask whether your change preserves the mechanism described above. If you change dtype, layout, ordering, batch size or backend, update the acceptance contract rather than silently reusing the old observation. Explain an unexpected result before trying random configuration changes.
+A common mistake is ranking candidates by kernel speed before checking feasibility. Candidate B in worked example 1 needs 12 GiB on an 8 GiB device, so its timing is irrelevant, and candidate C misses the accuracy threshold. Another mistake is adding a custom kernel or more GPUs because they sound advanced. Fix both by filtering on every stated constraint first and choosing one optimization tied to a measured bottleneck, with the unchanged baseline kept runnable for rollback.
 
-Keep a small evidence table with columns **claim**, **input**, **expected observation**, **actual observation** and **limit**. For the first claim use `Write three constraints`. For the final claim use `State evidence gaps`. An unperformed GPU or cluster experiment remains pending even when the CPU model is correct.
+**Misconception:** A capstone decision must recommend some optimization, or the project has failed. **Correction:** Keeping the reproducible baseline is a valid outcome when no candidate meets every constraint. The acceptance matrix should show which claims have live evidence and which remain hypotheses, so a reviewer can see why the baseline was kept.
 
-## Platform and evidence contract
+**Evidence limit:** The reference filters three described candidates and accepts only candidate A. Its memory, latency and accuracy figures are given, not measured, so a real decision needs live evidence for each claim in the acceptance matrix.
 
-The reading worksheet and CPU reference model work through the ordinary Linux Docker classroom on macOS, Linux and Windows using WSL 2. They do not require an NVIDIA GPU. Their results are labeled CPU models or semantic oracles, not simulated hardware performance.
+1. Why must quality be part of acceptance?
+2. Which bottlenecks can an optimization target?
+3. What can CPU-only work honestly deliver?
 
-Real CUDA work needs supported NVIDIA hardware, a compatible host driver and an explicitly prepared GPU runtime. An Apple GPU does not execute CUDA kernels. PyTorch MPS on a supported native Mac, ROCm on supported AMD hardware, or other vendor backends can provide separate accelerator learning routes; they need their own package and operation qualification and are not CUDA evidence. The ordinary Linux Docker classroom does not expose native Mac MPS automatically.
-
-Do not download packages, models or data by opening this lesson. Do not attach an engine socket, ambient cluster credentials or an arbitrary remote endpoint. A CPU pass, imported package, successful compilation, real GPU result and measured performance are distinct observations. Record the actual backend, data shape/dtype, source revision, versions and pending checks. A saved completion marker records learning progress, not hardware certification.
+Answers: [self-check answers](../solutions/cuda-104_solutions.md#self-check-answers).
 
 ## Primary references
 
 - [PyTorch CUDA semantics](https://docs.pytorch.org/docs/2.9/notes/cuda.html)
 - [TensorFlow GPU guide](https://www.tensorflow.org/guide/gpu)
 
-Use the version-matched documentation of your prepared environment. These references describe interfaces and supported boundaries; the chapter's synthetic examples and CPU models are original teaching material.
+Full lists: [documentation and sources](../../STUDY-GUIDE.md#documentation-and-sources).
 
 ## Ask an AI tutor about this lesson
 

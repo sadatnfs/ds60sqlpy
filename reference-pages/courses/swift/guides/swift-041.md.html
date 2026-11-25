@@ -206,12 +206,12 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Deep link:</strong> An external address requesting a particular application location.</p>
 <p><strong>Navigation path:</strong> An ordered stack of route values.</p>
 <h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>The Linux Docker classroom compiles the saved pad as <code>main.swift</code> with Swift 6 language checking. An explicit <code>@main</code> type contains <code>static func main() async throws</code>; the fixed compiler uses <code>-parse-as-library -swift-version 6</code>. The examples use the standard library and portable Foundation. <code>precondition</code> makes a violated invariant fail the process. The fixed pad accepts one source file, without arbitrary command arguments, interactive input or dependency installation. SwiftUI, UIKit, Apple simulators and application signing belong to the separately prepared macOS/Xcode project labs, never the Linux pad.</p>
-<p>Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.</p>
+<p>Both examples declare <code>Route</code> and <code>parseRoute</code> above <code>LessonMain</code>. The parser is pure, so you can add more <code>precondition</code> lines for task 5&#x27;s inputs without any app. Tasks 3 and 5&#x27;s deleted-item case need JourneyApp&#x27;s NavigationStack on an Apple platform.</p>
+<p>Compile contract, starter stop and success marker: <a href="../STUDY-GUIDE.md.html#running-a-lesson">running a lesson</a>.</p>
 <p>The <a href="../fixtures/JourneyApp/README.md.html">JourneyApp project</a> includes a real NavigationStack and missing-item view. URL parsing in the pad is only the portable routing kernel.</p>
 <h3 id="syntax-anatomy-and-execution-trace">Syntax anatomy and execution trace<a class="heading-anchor" href="#syntax-anatomy-and-execution-trace" aria-label="Link to this section">#</a></h3>
 <p>A Hashable Route enum can back a NavigationStack path. URLComponents exposes parsed URL fields. A route parser should return an optional or error for unrecognized shapes.</p>
-<p>Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.</p>
+<p>Each example ends with a trace; method: <a href="../STUDY-GUIDE.md.html#tracing-a-program">tracing a program</a>.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="example-a-parse-an-admitted-route">Example A: Parse an admitted route<a class="heading-anchor" href="#example-a-parse-an-admitted-route" aria-label="Link to this section">#</a></h4>
 <p>The parser translates untrusted text into a limited domain route.</p>
@@ -238,6 +238,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The admitted scheme and host resolve to item one.</p>
+<p><strong>Trace.</strong> <code>URLComponents</code> splits the text into scheme journey, host item and path /one, with no query or fragment. The guard checks each against the allowlist and passes. Splitting the path on slashes drops the empty leading piece and gives one part, one. The count guard passes, and the function returns <code>.item(&quot;one&quot;)</code>, which equals the expected route because <code>Route</code> is <code>Hashable</code> and therefore <code>Equatable</code>.</p>
 <h4 id="example-b-reject-unrelated-or-incomplete-links">Example B: Reject unrelated or incomplete links<a class="heading-anchor" href="#example-b-reject-unrelated-or-incomplete-links" aria-label="Link to this section">#</a></h4>
 <p>A route parser is an allowlist, not a generic command interpreter.</p>
 <pre class="highlighted-code"><code class="language-swift"><span class="syntax-keyword">import</span> <span class="syntax-class">Foundation</span>
@@ -264,6 +265,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> Unrelated schemes, missing identity and unlisted actions are rejected.</p>
+<p><strong>Trace.</strong> For the https link the scheme check fails, so the parser returns nil before reading anything else. For journey://item/ the scheme and host pass, but the path is a single slash, which splits into zero parts, and the count guard returns nil. For journey://delete/one the host is delete, not item, so it fails the first guard. Every rejection is a nil result rather than a crash or a guessed route.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <ol>
 <li><strong>Predict and explain.</strong> Trace each URL component into the route decision.</li>
@@ -283,10 +285,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <ol start="6">
 <li><strong>Transfer and justify.</strong> Design a restoration format for navigation without storing view instances or private payloads.</li>
 </ol>
-<p>For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.</p>
+<p>Log each task in the <a href="../STUDY-GUIDE.md.html#recording-exercise-evidence">evidence table</a> before opening the explanation.</p>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
 <p>Parsing a URL does not authorize access. Array offsets are unstable identities. Never route arbitrary URL text directly into file access or shell commands.</p>
-<p>A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.</p>
+<p><code>URLComponents</code> preserves the case of the scheme, so <code>JOURNEY://item/one</code> is rejected by this exact comparison even though URL schemes are case-insensitive; decide whether to lowercase first and test it. journey://item/a/b has two path parts and must be rejected. For task 4, a route stored as an array position opens the wrong item after reordering, while one keyed by identity still opens the right one.</p>
+<p>Repair routine: <a href="../STUDY-GUIDE.md.html#building-a-regression-case">building a regression case</a>.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <ol>
 <li>Reproduce Example A (Parse an admitted route) before changing anything, and confirm its observation: The admitted scheme and host resolve to item one.</li>
@@ -294,9 +297,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>Before opening the explanation, check your task 3 attempt (Run JourneyApp and navigate by stable item identity) against each pitfall listed above, and add one input that would expose the tempting wrong rule.</li>
 </ol>
 <h3 id="self-check-and-next-step">Self-check and next step<a class="heading-anchor" href="#self-check-and-next-step" aria-label="Link to this section">#</a></h3>
-<p>Explain Route, Deep link, Navigation path without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.</p>
+<p>Trace journey://item/one?x=1 through the parser and state which guard rejects it. Explain why a parser for untrusted links should be an allowlist. Describe what the app should show when a route names an item that was deleted while its screen was open.</p>
+<p>Then follow the general <a href="../STUDY-GUIDE.md.html#self-check-routine">self-check routine</a> and save your pad.</p>
 <h3 id="sources-and-execution-boundary">Sources and execution boundary<a class="heading-anchor" href="#sources-and-execution-boundary" aria-label="Link to this section">#</a></h3>
-<p><a href="https://developer.apple.com/documentation/swiftui/navigationstack">Official language or framework documentation</a>. The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.</p>
+<p><a href="https://developer.apple.com/documentation/swiftui/navigationstack">Documentation</a>: Read Apple&#x27;s Foundation reference for <code>URLComponents</code> and SwiftUI&#x27;s <code>NavigationStack</code> and <code>NavigationPath</code> pages.</p>
+<p>Provenance and limits: <a href="../STUDY-GUIDE.md.html#sources-and-execution-boundary">sources and execution boundary</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for swift-041: Navigation, stable identity and deep-link validation.
 Read courses/swift/guides/swift-041.md and courses/swift/lessons/swift-041.swift. Prerequisites: swift-040.

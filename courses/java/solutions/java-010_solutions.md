@@ -1,6 +1,6 @@
 # java-010: explanatory solutions
 
-Open after an attempt or an explicit solution reveal. The executable reference runs the six exercise checks together as `Main.java`. The guide contains independent worked examples, while this file explains the choices and failure cases in the complete answer.
+Open this after an attempt; see [using the solutions](../STUDY-GUIDE.md#use-the-solutions).
 
 ## Mechanism review
 
@@ -20,7 +20,7 @@ An interface declares a method; implementing classes or lambdas supply its body.
 
 ## Exercise 1: Call through an interface: change one input
 
-Task: Copy Example A into a scratch `Main.java` and change `return amount / 2;` to `return amount / 3;`. Before running it with `java -ea Main`, predict which assertion fails and which value it now sees; then run it and restore the original line.
+Task: Change `return amount / 2;` to `return amount / 3;` in Example A and predict which assertion fails and why.
 
 The caller invokes the same method name while the concrete behavior differs. The shared nonnegative-input contract keeps both implementations substitutable.
 
@@ -38,13 +38,13 @@ Pricing half = amount -> {
 assert regular.price(100) == 100 && half.price(100) == 50;
 ```
 
-**Expected:** The changed run fails with an `AssertionError` from the assertion on `regular.price(100) == 100 && half.price(100) == 50`. Restoring the original line brings back the worked observation: 100 and 50.
+**Expected:** The edited run fails with an `AssertionError` from the assertion on `regular.price(100) == 100 && half.price(100) == 50`.
 
-**Verify:** Compare your written prediction with the reported `AssertionError` and its stack-trace line, and name the value that made `regular.price(100) == 100 && half.price(100) == 50` false. After restoring the line, the program completes without an `AssertionError` again.
+**Verify:** Name the value that makes `regular.price(100) == 100 && half.price(100) == 50` false, then restore the line.
 
 ## Exercise 2: Compose a fee policy: debug a regression
 
-Task: A regression changed one token in the code that Example B adds after Example A, so one line now reads `Pricing withFee = new Fee(half, 11);`. Run Example B with that line, use the failing assertion to locate the defect and repair it without changing the assertion.
+Task: A regression in Example B's new code makes one line read `Pricing withFee = new Fee(half, 11);`. Repair it using the failing assertion.
 
 The wrapper delegates first and then adds its policy. It does not duplicate the half-price calculation, so the two concerns can change independently.
 
@@ -55,9 +55,9 @@ Pricing withFee = new Fee(half, 10);
 assert withFee.price(100) == 60;
 ```
 
-**Expected:** Before the repair the run fails with an `AssertionError` from the assertion on `withFee.price(100) == 60`; after it the line reads `Pricing withFee = new Fee(half, 10);` again and price 100 becomes 60.
+**Expected:** The unrepaired run fails with an `AssertionError` from the assertion on `withFee.price(100) == 60`; the repaired line reads `Pricing withFee = new Fee(half, 10);`.
 
-**Verify:** Keep the failing and the repaired runs. Explain why the changed token alters the value tested by `withFee.price(100) == 60` for this input.
+**Verify:** Explain how the changed token alters the value that `withFee.price(100) == 60` tests.
 
 ## Exercise 3: Switch exhaustively over a sealed type
 
@@ -75,7 +75,7 @@ assert discountedPrices.equals(List.of(200, 150, 0));
 
 **Expected:** 200, 150 and 0.
 
-**Verify:** Keep an assertion equivalent to `discountedPrices.equals(List.of(200, 150, 0))`. As a control, change `for (Discount discount : List.of(new NoDiscount(), new Percent(25), new Fixed(250))) {` to `for (Discount discount : List.of(new NoDiscount(), new Percent(26), new Fixed(250))) {`: the run must fail with an `AssertionError` from the assertion on `discountedPrices.equals(List.of(200, 150, 0))`. Restore the line before continuing.
+**Verify:** Control: changing `for (Discount discount : List.of(new NoDiscount(), new Percent(25), new Fixed(250))) {` to `for (Discount discount : List.of(new NoDiscount(), new Percent(26), new Fixed(250))) {` must fail the assertion on `discountedPrices.equals(List.of(200, 150, 0))`.
 
 ## Exercise 4: Validate every implementation
 
@@ -97,7 +97,7 @@ for (Pricing policy : List.of(regular, half, withFee)) {
 
 **Expected:** all throw IllegalArgumentException.
 
-**Verify:** Keep an assertion equivalent to `rejected`. As a control, change `rejected = true;` to `rejected = false;`: the run must fail with an `AssertionError` from the assertion on `rejected`. Restore the line before continuing.
+**Verify:** Control: changing `rejected = true;` to `rejected = false;` must fail the assertion on `rejected`.
 
 ## Exercise 5: Change a collaborator without changing caller code
 
@@ -113,7 +113,7 @@ assert prices.equals(List.of(100, 50, 60));
 
 **Expected:** results 100, 50, 60.
 
-**Verify:** Keep an assertion equivalent to `prices.equals(List.of(100, 50, 60))`. As a control, change `for (Pricing policy : List.of(regular, half, withFee)) prices.add(policy.price(100));` to `for (Pricing policy : List.of(regular, half, withFee)) prices.add(policy.price(101));`: the run must fail with an `AssertionError` from the assertion on `prices.equals(List.of(100, 50, 60))`. Restore the line before continuing.
+**Verify:** Control: changing `for (Pricing policy : List.of(regular, half, withFee)) prices.add(policy.price(100));` to `for (Pricing policy : List.of(regular, half, withFee)) prices.add(policy.price(101));` must fail the assertion on `prices.equals(List.of(100, 50, 60))`.
 
 ## Exercise 6: Reject an invalid wrapper
 
@@ -139,8 +139,10 @@ assert feeRejected && delegateRejected;
 
 **Expected:** negative fee IllegalArgumentException; null delegate NullPointerException.
 
-**Verify:** Keep an assertion equivalent to `feeRejected && delegateRejected`. As a control, change `feeRejected = true;` to `feeRejected = false;`: the run must fail with an `AssertionError` from the assertion on `feeRejected && delegateRejected`. Restore the line before continuing.
+**Verify:** Control: changing `feeRejected = true;` to `feeRejected = false;` must fail the assertion on `feeRejected && delegateRejected`.
 
 ## After comparing the answer
 
-Run the complete reference with assertions enabled, then return to your own implementation. Recreate one check with different values and explain its expected result before execution. A compiler error, an expected domain exception and an assertion failure represent different stages and should be reported separately. Preserve ownership boundaries when adapting file, network or concurrency examples. The reference never authorizes access to a shared service or deletion of learner state. Use a fresh tiny fixture when you need to distinguish two interpretations of an API contract.
+Add a fourth `Discount` record to your copy, list it in `permits`, and read the compiler error from `discounted` before adding the missing case.
+
+Run the complete reference with `java -ea Main` first; the [review routine](../STUDY-GUIDE.md#use-the-solutions) covers the rest.

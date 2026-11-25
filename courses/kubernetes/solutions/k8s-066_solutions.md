@@ -1,6 +1,6 @@
 # k8s-066: explanatory solutions
 
-Compare after your own attempt or an explicit reveal. These explanations describe the synthetic topology and stated API contracts. They are not fabricated runtime receipts.
+Attempt each exercise first, then compare ([study guide](../STUDY-GUIDE.md#solutions-and-the-ai-tutor)).
 
 ## Mechanism review
 

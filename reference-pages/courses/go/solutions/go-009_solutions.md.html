@@ -194,36 +194,40 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/go/solutions/go-009_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="go-009-explained-solutions">go-009: explained solutions<a class="heading-anchor" href="#go-009-explained-solutions" aria-label="Link to this section">#</a></h2>
-<p>These are comparison material after an attempt or explicit reveal. The executable reference implements all six cases in one <code>main.go</code>.</p>
+<p>Compare after an attempt (<a href="../STUDY-GUIDE.md.html#use-the-solutions">using solutions</a>). <code>courses/go/solutions/go-009_solution.go</code> implements all six cases.</p>
 <h3 id="mechanism">Mechanism<a class="heading-anchor" href="#mechanism" aria-label="Link to this section">#</a></h3>
 <p>A pointer contains the address of a value. Passing a pointer still copies the pointer value, but both copies identify the same target. This is useful when mutation is the intended contract and dangerous when callers expect isolation. Go&#x27;s garbage collector keeps reachable objects alive, so returning a pointer to a local variable is valid; the compiler decides where storage must live. That does not make every pointer safe to use: nil has no target and dereferencing it panics. Ordinary Go pointers do not support arithmetic. Use a value receiver or an independent copy when shared mutation is unnecessary, and make optional pointer semantics explicit.</p>
 <p>&amp;value obtains an address and <em>pointer dereferences it. In a type, </em>Point means a pointer to Point. new(T) returns a pointer to a zero T; it does not initialize maps or channels stored inside T. Selectors automatically follow a pointer to a struct, so p.X is convenient syntax for field access through p. A nil check guards dereference only when no unsynchronized writer can change the state between those operations.</p>
 <h3 id="1-mutate-through-a-pointer-change-one-input">1. Mutate through a pointer: change one input<a class="heading-anchor" href="#1-mutate-through-a-pointer-change-one-input" aria-label="Link to this section">#</a></h3>
-<p>Copy worked example 1 into a scratch pad and change <code>n := 4</code> to <code>n := 5</code>. Before running, predict which check fails and which value it now sees; then run it and restore the original line.</p>
+<p>Copy worked example 1, change <code>n := 4</code> to <code>n := 5</code> and predict the failure before running; then restore the line.</p>
 <p>The unchanged code is worked example 1:</p>
 <pre class="highlighted-code"><code class="language-go">n <span class="syntax-operator">:=</span> <span class="syntax-number">4</span>
 increment<span class="syntax-punctuation">(</span><span class="syntax-operator">&amp;</span>n<span class="syntax-punctuation">)</span>
 check<span class="syntax-punctuation">(</span>n <span class="syntax-operator">==</span> <span class="syntax-number">5</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;pointer mutation&quot;</span><span class="syntax-punctuation">)</span></code></pre>
-<p><strong>Expected:</strong> The changed run panics with <code>pointer mutation</code> because <code>n == 5</code> no longer holds. Restoring the original line brings back the worked observation: the caller value becomes 5.</p>
+<p><strong>Expected:</strong> The edited run panics with <code>pointer mutation</code> because <code>n == 5</code> no longer holds.</p>
+<p><strong>Verify:</strong> Restoring <code>n := 4</code> makes the check pass again with the worked observation: the caller value becomes 5.</p>
 <p>The helper changes the shared target, not the caller variable that stores the pointer. The mutation contract must be visible at the call site.</p>
 <h3 id="2-return-a-live-value-diagnose-an-edited-check">2. Return a live value: diagnose an edited check<a class="heading-anchor" href="#2-return-a-live-value-diagnose-an-edited-check" aria-label="Link to this section">#</a></h3>
-<p>A careless edit changed the check in worked example 2 so that it reads <code>check(*p != 7, &quot;returned pointer&quot;)</code>. Run worked example 2 with that line, explain why the edited check now fails for the same program state, and restore it.</p>
+<p>A careless edit rewrote the check in worked example 2 as <code>check(*p != 7, &quot;returned pointer&quot;)</code>. Explain the failure, then restore it.</p>
 <p>The unchanged code is worked example 2:</p>
 <pre class="highlighted-code"><code class="language-go">p <span class="syntax-operator">:=</span> seven<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
 check<span class="syntax-punctuation">(</span><span class="syntax-operator">*</span>p <span class="syntax-operator">==</span> <span class="syntax-number">7</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;returned pointer&quot;</span><span class="syntax-punctuation">)</span></code></pre>
-<p><strong>Expected:</strong> Before the repair the program panics with <code>returned pointer</code>; after it the line reads <code>check(*p == 7, &quot;returned pointer&quot;)</code> again and the returned pointer remains valid and reads 7.</p>
+<p><strong>Expected:</strong> The defective run panics with <code>returned pointer</code>; after restoring <code>check(*p == 7, &quot;returned pointer&quot;)</code>, the returned pointer remains valid and reads 7.</p>
+<p><strong>Verify:</strong> The edited check fails with message <code>returned pointer</code> for a state that <code>*p == 7</code> accepts.</p>
 <p>Go extends storage lifetime as needed. Stack-versus-heap placement is an implementation decision and should not be guessed from the lexical block alone.</p>
 <h3 id="3-guard-absence">3. Guard absence<a class="heading-anchor" href="#3-guard-absence" aria-label="Link to this section">#</a></h3>
 <p>Represent an optional integer with a nil pointer and inspect it without dereferencing.</p>
 <pre class="highlighted-code"><code class="language-go"><span class="syntax-keyword">var</span> p <span class="syntax-operator">*</span><span class="syntax-keyword">int</span>
 check<span class="syntax-punctuation">(</span>p <span class="syntax-operator">==</span> <span class="syntax-keyword">nil</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;nil pointer&quot;</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> The pointer is absent.</p>
+<p><strong>Verify:</strong> Your solution must keep <code>p == nil</code> true. Control: changing <code>check(p == nil, &quot;nil pointer&quot;)</code> to <code>check(p != nil, &quot;nil pointer&quot;)</code> panics with message <code>nil pointer</code>; revert it.</p>
 <p>Nil is a useful absence marker only when callers check it. It is different from a pointer to an integer whose value is zero.</p>
 <h3 id="4-allocate-a-zero-target">4. Allocate a zero target<a class="heading-anchor" href="#4-allocate-a-zero-target" aria-label="Link to this section">#</a></h3>
 <p>Use new(int) and compare pointer presence with its stored value.</p>
 <pre class="highlighted-code"><code class="language-go">p <span class="syntax-operator">:=</span> <span class="syntax-builtin">new</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">int</span><span class="syntax-punctuation">)</span>
 check<span class="syntax-punctuation">(</span>p <span class="syntax-operator">!=</span> <span class="syntax-keyword">nil</span> <span class="syntax-operator">&amp;&amp;</span> <span class="syntax-operator">*</span>p <span class="syntax-operator">==</span> <span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;new zero&quot;</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> The pointer is non-nil and its target is 0.</p>
+<p><strong>Verify:</strong> Your solution must keep <code>p != nil &amp;&amp; *p == 0</code> true. Control: changing <code>check(p != nil &amp;&amp; *p == 0, &quot;new zero&quot;)</code> to <code>check(p == nil &amp;&amp; *p == 0, &quot;new zero&quot;)</code> panics with message <code>new zero</code>; revert it.</p>
 <p>Allocation and initialization are separate questions. A target can exist while carrying its type zero value.</p>
 <h3 id="5-separate-copy-and-target">5. Separate copy and target<a class="heading-anchor" href="#5-separate-copy-and-target" aria-label="Link to this section">#</a></h3>
 <p>Copy the integer behind a pointer, then change the original target.</p>
@@ -233,6 +237,7 @@ copied <span class="syntax-operator">:=</span> <span class="syntax-operator">*</
 <span class="syntax-operator">*</span>p <span class="syntax-punctuation">=</span> <span class="syntax-number">9</span>
 check<span class="syntax-punctuation">(</span>copied <span class="syntax-operator">==</span> <span class="syntax-number">3</span> <span class="syntax-operator">&amp;&amp;</span> n <span class="syntax-operator">==</span> <span class="syntax-number">9</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;copy target&quot;</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> The copied integer remains 3 while the target becomes 9.</p>
+<p><strong>Verify:</strong> Your solution must keep <code>copied == 3 &amp;&amp; n == 9</code> true. Control: changing <code>n := 3</code> to <code>n := 4</code> panics with message <code>copy target</code>; revert it.</p>
 <p>Dereferencing to obtain a scalar value copies that scalar. Retaining a pointer would instead retain access to the changing target.</p>
 <h3 id="6-transfer-an-optional-update">6. Transfer an optional update<a class="heading-anchor" href="#6-transfer-an-optional-update" aria-label="Link to this section">#</a></h3>
 <p>Implement setIfPresent so a nil pointer is a harmless no-op and a present pointer changes.</p>
@@ -240,9 +245,10 @@ check<span class="syntax-punctuation">(</span>copied <span class="syntax-operato
 n <span class="syntax-operator">:=</span> <span class="syntax-number">1</span>
 check<span class="syntax-punctuation">(</span>setIfPresent<span class="syntax-punctuation">(</span><span class="syntax-operator">&amp;</span>n<span class="syntax-punctuation">,</span> <span class="syntax-number">8</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&amp;&amp;</span> n <span class="syntax-operator">==</span> <span class="syntax-number">8</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;present update&quot;</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> The absent call returns false; the present value becomes 8.</p>
+<p><strong>Verify:</strong> Your solution must keep <code>setIfPresent(&amp;n, 8) &amp;&amp; n == 8</code> true. Control: changing <code>check(setIfPresent(&amp;n, 8) &amp;&amp; n == 8, &quot;present update&quot;)</code> to <code>check(setIfPresent(&amp;n, 9) &amp;&amp; n == 8, &quot;present update&quot;)</code> panics with message <code>present update</code>; revert it.</p>
 <p>An explicit boolean tells the caller whether the update happened. Silently treating absent and updated states as identical would hide useful information.</p>
 <h3 id="transfer-after-comparison">Transfer after comparison<a class="heading-anchor" href="#transfer-after-comparison" aria-label="Link to this section">#</a></h3>
-<p>Return to your own pad and reproduce one check with a new input. Explain why the check rejects a plausible wrong implementation. Keep the distinction between a pure model, an in-process fake, and a real external system visible in your notes.</p></article>
+<p>A pointer is a deliberate sharing decision. Each case here asked whether a change should be visible through another name: increment wants it, the copied scalar does not, and setIfPresent reports whether it happened. Later lessons use pointer receivers, optional fields in decoded JSON and errors.As targets; for each one, state who owns the target, who may write it and how absence is represented.</p></article>
   </main>
 </body>
 </html>

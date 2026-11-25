@@ -1,10 +1,17 @@
 # cuda-065: Which processor ran this line?
 
-**Route:** CUDA Python and machine learning. **Stage:** beginner. **Prerequisites:** `cuda-003`, `cuda-005`. Allow several sessions when the hardware experiment is new; the chapter is not a deadline.
+**Route:** CUDA Python and machine learning. **Stage:** beginner. **Prerequisites:** `cuda-003`, `cuda-005`.
 
-## What you will be able to explain
+Pacing, evidence labels and platform rules: [CUDA study guide](../../STUDY-GUIDE.md).
 
-By the end, you can **trace the five events**, **find the hidden transfer in scalar printing**, and **explain how a CPU fallback must be labeled** with evidence. Start with the two worked cases, then use the editable CPU model to make the quantities concrete.
+## Learning objectives
+
+- Trace the five events.
+- Explain why import is insufficient.
+- Change the input to an empty list.
+- Find the hidden transfer in scalar printing.
+- Design a residency ledger.
+- Explain how a CPU fallback must be labeled.
 
 ## Mechanism and vocabulary
 
@@ -31,9 +38,13 @@ A CPU list [1, 2, 3] is reduced by the Python process to 6. No driver, GPU alloc
 
 For a GPU sum, identify host construction, host-to-device copy, reduction launch, completion and device-to-host scalar retrieval as five events. A returned device scalar is not yet a host integer.
 
-## Portable executable model
+## How to run the CPU model
 
-The **CPU reference model** variant runs this bounded worked example using `python-core`. It uses only the Python standard library, small synthetic values and no network. Its purpose is to expose the arithmetic or contract behind the chapter. The separate reference includes assertions for the stated observations.
+Edit the copy; the [reference](../references/cuda-065_cpu.py) adds assertions.
+
+```sh
+python courses/cuda/python/lessons/cuda-065_cpu.py
+```
 
 ```python
 values = [1, 2, 3]
@@ -55,11 +66,9 @@ print("CPU reference:", result, ledger)
 | `result` | `6` |
 | `ledger` | `[('input', 'CPU'), ('sum', 'CPU'), ('result', 'CPU')]` |
 
-Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.
-
 ## Optional NVIDIA CUDA lab
 
-The **CuPy on NVIDIA CUDA** variant executes the actual operation with CuPy in the separately prepared `cuda-python` profile. It refuses a missing device instead of switching to CPU. Keep inputs bounded as supplied; inspect the device, synchronize and compare with the CPU reference. The profile must pass real host/device readiness checks. Successful syntax checking on a Mac is not GPU qualification.
+**CuPy on NVIDIA CUDA** needs the `cuda-python` profile; [lab rules](../../STUDY-GUIDE.md#python-gpu-and-framework-labs).
 
 ```python
 """Optional NVIDIA CUDA lab. No CPU fallback or external dataset."""
@@ -79,72 +88,60 @@ print("CUDA array sum:", float(y.get()), "device", x.device.id)
 
 ## Practice and transfer
 
+Record each attempt in the [worksheet](../lessons/cuda-065.md) before opening hints.
+
 ### Exercise 1: Trace the five events
 
 **Trap to avoid:** Listing only three events (build, sum, print) merges the upload into construction and the download into printing. That hides exactly the two transfers worked example 2 names, so a later timing or residency question has no event to attach to.
-
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 2: Explain why import is insufficient
 
 **Trap to avoid:** Treating a clean import as proof of GPU execution is the common shortcut. It fails on a CPU-only laptop where the import succeeds but the first allocation raises, and it fails silently when a framework falls back to CPU for unsupported work.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 3: Change the input to an empty list
 
 **Trap to avoid:** Launching a reduction with a grid computed from `n = 0` and then reading `out[0]` can return whatever bytes the allocation held. Another wrong move is raising an error, which breaks callers that legitimately pass empty batches.
-
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 4: Find the hidden transfer in scalar printing
 
 **Trap to avoid:** Assuming `print(total)` is free because it is one line leads to placing it inside a loop. Each iteration then stalls the host until the device catches up, and a timing taken around the loop measures synchronization rather than the reduction.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 5: Design a residency ledger
 
 **Trap to avoid:** A ledger keyed by package name ("numpy", "cupy") instead of by object fails as soon as one library holds both host and device arrays, and it cannot record whether the device result was actually ready when read.
-
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 6: Explain how a CPU fallback must be labeled
 
 **Trap to avoid:** Catching the CUDA error and silently computing with NumPy makes the program exit with status zero and the same answer. A dashboard reading only exit codes would then count a GPU lesson as qualified on a machine with no GPU.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ## Progressive hints
 
-Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.
+Hint *k* belongs to exercise *k*; open one at a time.
 
-1. Start from worked example 1 and mark the quantities needed for the task "Trace the five events".
-2. Change one assumption in worked example 2 while preserving the declared contract: explain why import is insufficient.
-3. Trace the CPU program's variables before adding hardware behavior: change the input to an empty list.
-4. Draw producers, consumers and the exact operation boundary for the task "Find the hidden transfer in scalar printing".
-5. Separate what the small fixture establishes from what the real runtime must show: design a residency ledger.
-6. Write a counterexample to an overbroad claim before you explain how a CPU fallback must be labeled.
+1. List each step of worked example 2 in order and ask, for each one, whose memory holds the value at that moment.
+2. Picture a laptop with no NVIDIA driver. What does a successful import line still let you conclude there?
+3. Ask what `sum` must return when nothing is added, then ask whether a zero-element launch could change that value.
+4. The printed digits must exist in host memory first. Which copy puts them there, and what must finish before it starts?
+5. Start from the reference ledger's three rows and add the columns a GPU run would need to tell two copies apart.
+6. Read the line the reference actually prints and decide which backend that sentence names.
 
-## Common mistakes and self-review
+## Common mistakes and self-check
 
-Confusing a correct tiny example with a general implementation is the central review risk. For this chapter, challenge the assumption in worked example 2, then ask whether your change preserves the mechanism described above. If you change dtype, layout, ordering, batch size or backend, update the acceptance contract rather than silently reusing the old observation. Explain an unexpected result before trying random configuration changes.
+The common mistake is reading a successful `import cupy`, or a GPU package in the environment, as proof that the arithmetic ran on a device. In this chapter the reference sums `[1, 2, 3]` entirely in the Python process. To fix the claim, record four facts per operation: the issuing process, the allocation holding the inputs, the processor running the arithmetic and the event that proves the result is ready. Leave a column blank rather than guess.
 
-Keep a small evidence table with columns **claim**, **input**, **expected observation**, **actual observation** and **limit**. For the first claim use `Trace the five events`. For the final claim use `Explain how a CPU fallback must be labeled`. An unperformed GPU or cluster experiment remains pending even when the CPU model is correct.
+**Evidence limit:** The reference prints `CPU reference: 6` with every ledger row on the CPU. That shows the arithmetic and the ledger format are right; it shows nothing about device residency, transfer cost or kernel completion on any GPU.
 
-## Platform and evidence contract
+1. Why can a statement that creates a CuPy result return before the answer exists?
+2. Which events in the five-event GPU sum belong to the host?
+3. Why can printing a device scalar change what you were trying to observe?
 
-The reading worksheet and CPU reference model work through the ordinary Linux Docker classroom on macOS, Linux and Windows using WSL 2. They do not require an NVIDIA GPU. Their results are labeled CPU models or semantic oracles, not simulated hardware performance.
-
-Real CUDA work needs supported NVIDIA hardware, a compatible host driver and an explicitly prepared GPU runtime. An Apple GPU does not execute CUDA kernels. PyTorch MPS on a supported native Mac, ROCm on supported AMD hardware, or other vendor backends can provide separate accelerator learning routes; they need their own package and operation qualification and are not CUDA evidence. The ordinary Linux Docker classroom does not expose native Mac MPS automatically.
-
-Do not download packages, models or data by opening this lesson. Do not attach an engine socket, ambient cluster credentials or an arbitrary remote endpoint. A CPU pass, imported package, successful compilation, real GPU result and measured performance are distinct observations. Record the actual backend, data shape/dtype, source revision, versions and pending checks. A saved completion marker records learning progress, not hardware certification.
+Answers: [self-check answers](../solutions/cuda-065_solutions.md#self-check-answers).
 
 ## Primary references
 
 - [CuPy array and installation documentation](https://docs.cupy.dev/en/v13.6.0/)
 
-Use the version-matched documentation of your prepared environment. These references describe interfaces and supported boundaries; the chapter's synthetic examples and CPU models are original teaching material.
+Full lists: [documentation and sources](../../STUDY-GUIDE.md#documentation-and-sources).
 
 ## Ask an AI tutor about this lesson
 

@@ -206,11 +206,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Closed range:</strong> A range including both endpoints.</p>
 <p><strong>Half-open range:</strong> A range excluding its upper endpoint.</p>
 <h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>The Linux Docker classroom compiles the saved pad as <code>main.swift</code> with Swift 6 language checking. An explicit <code>@main</code> type contains <code>static func main() async throws</code>; the fixed compiler uses <code>-parse-as-library -swift-version 6</code>. The examples use the standard library and portable Foundation. <code>precondition</code> makes a violated invariant fail the process. The fixed pad accepts one source file, without arbitrary command arguments, interactive input or dependency installation. SwiftUI, UIKit, Apple simulators and application signing belong to the separately prepared macOS/Xcode project labs, never the Linux pad.</p>
-<p>Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.</p>
+<p>Both examples declare their function inside <code>main</code>, so a copied function can be moved out to file scope without changing its behavior. Task 2 moves the pass boundary to 70, which changes two adjacent checks at once. Task 4 needs a deliberately wrong range, and that program still compiles, so only a boundary check will reveal it.</p>
+<p>Compile contract, starter stop and success marker: <a href="../STUDY-GUIDE.md.html#running-a-lesson">running a lesson</a>.</p>
 <h3 id="syntax-anatomy-and-execution-trace">Syntax anatomy and execution trace<a class="heading-anchor" href="#syntax-anatomy-and-execution-trace" aria-label="Link to this section">#</a></h3>
 <p><code>if</code> requires a Bool. <code>switch</code> matches cases without implicit fallthrough. <code>0..&lt;10</code> excludes ten; <code>0...10</code> includes it. A where clause narrows a matched case.</p>
-<p>Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.</p>
+<p>Each example ends with a trace; method: <a href="../STUDY-GUIDE.md.html#tracing-a-program">tracing a program</a>.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="example-a-classify-thresholds">Example A: Classify thresholds<a class="heading-anchor" href="#example-a-classify-thresholds" aria-label="Link to this section">#</a></h4>
 <p>The ranges express the inclusive boundary and keep out-of-domain values separate.</p>
@@ -234,6 +234,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> 59 retries, 60 passes and 101 is invalid.</p>
+<p><strong>Trace.</strong> <code>classify(59)</code> reaches the <code>switch</code>, tests 59 against <code>0..&lt;60</code>, which covers 0 through 59, and returns retry. <code>classify(60)</code> misses the first range because its half-open upper bound excludes 60, then matches <code>60...100</code>, whose closed bound includes both ends. <code>classify(101)</code> matches neither range and falls to <code>default</code>, which returns invalid. Swift tries cases from top to bottom, stops at the first match and never falls through implicitly, so each score returns exactly one label.</p>
 <h4 id="example-b-use-a-guard-for-a-required-value">Example B: Use a guard for a required value<a class="heading-anchor" href="#example-b-use-a-guard-for-a-required-value" aria-label="Link to this section">#</a></h4>
 <p>The unwrapped binding is available after the guard because every failing path has returned.</p>
 <pre class="highlighted-code"><code class="language-swift"><span class="syntax-keyword">import</span> <span class="syntax-class">Foundation</span>
@@ -253,6 +254,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The early exit excludes missing and empty values before the valid path.</p>
+<p><strong>Trace.</strong> <code>describe(nil)</code> reaches the guard, where optional binding fails and the else branch returns missing. <code>describe(&quot;&quot;)</code> binds successfully, but the second condition <code>!text.isEmpty</code> is false, so it also leaves through the else branch. <code>describe(&quot;x&quot;)</code> passes both conditions. After the guard, <code>text</code> is a non-optional <code>String</code> for the rest of the function, and the return builds value:x. The shorthand <code>guard let text</code> rebinds the same name, so the unwrapped value keeps its original name.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <ol>
 <li><strong>Predict and explain.</strong> Predict each threshold case before running.</li>
@@ -272,10 +274,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <ol start="6">
 <li><strong>Transfer and justify.</strong> Replace a broad default in an enum switch with explicit cases and explain the maintenance benefit.</li>
 </ol>
-<p>For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.</p>
+<p>Log each task in the <a href="../STUDY-GUIDE.md.html#recording-exercise-evidence">evidence table</a> before opening the explanation.</p>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
 <p>A default can hide future cases. Guard must actually exit on failure. Avoid treating every invalid value as the normal else category without a stated policy.</p>
-<p>A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.</p>
+<p>The counterexample for task 4&#x27;s range defect is the boundary value itself. If the retry case is written as <code>0...60</code>, scores 0 to 59 still behave and only 60 changes, returning retry instead of pass. That is why task 5 asks for both ends of the valid domain plus one value beyond each: checking -1, 0, 59, 60, 100 and 101 pins every edge.</p>
+<p>Repair routine: <a href="../STUDY-GUIDE.md.html#building-a-regression-case">building a regression case</a>.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <ol>
 <li>Reproduce Example A (Classify thresholds) before changing anything, and confirm its observation: 59 retries, 60 passes and 101 is invalid.</li>
@@ -283,9 +286,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>Before opening the explanation, check your task 3 attempt (Write a three-way classifier for negative, zero and positive quantities) against each pitfall listed above, and add one input that would expose the tempting wrong rule.</li>
 </ol>
 <h3 id="self-check-and-next-step">Self-check and next step<a class="heading-anchor" href="#self-check-and-next-step" aria-label="Link to this section">#</a></h3>
-<p>Explain Exhaustiveness, Closed range, Half-open range without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.</p>
+<p>Write a <code>switch</code> over an enum with three cases and no default, then add a fourth case and describe what the compiler reports. Explain <code>0..&lt;10</code> versus <code>0...10</code> with the one value that distinguishes them. Say why the guard in Example B must return, throw or otherwise leave in its else branch.</p>
+<p>Then follow the general <a href="../STUDY-GUIDE.md.html#self-check-routine">self-check routine</a> and save your pad.</p>
 <h3 id="sources-and-execution-boundary">Sources and execution boundary<a class="heading-anchor" href="#sources-and-execution-boundary" aria-label="Link to this section">#</a></h3>
-<p><a href="https://docs.swift.org/swift-book/documentation/the-swift-programming-language/">Official language or framework documentation</a>. The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.</p>
+<p><a href="https://docs.swift.org/swift-book/documentation/the-swift-programming-language/">Documentation</a>: The Control Flow chapter of the Swift book explains conditional statements, switch, interval matching, where clauses and early exit with guard.</p>
+<p>Provenance and limits: <a href="../STUDY-GUIDE.md.html#sources-and-execution-boundary">sources and execution boundary</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for swift-006: Branches, switch and exhaustive reasoning.
 Read courses/swift/guides/swift-006.md and courses/swift/lessons/swift-006.swift. Prerequisites: swift-005.

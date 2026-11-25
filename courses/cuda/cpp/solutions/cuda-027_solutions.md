@@ -4,8 +4,6 @@
 
 Warp collectives require agreement about participating lanes. A mask names lanes expected to take part in a synchronized intrinsic, and source lanes used by a shuffle must actually participate. Independent thread scheduling means a convenient source ordering is not a general synchronization guarantee. Partial warps and divergent predicates need explicit reasoning. One safe educational reduction pattern has all lanes in a full warp participate, assigns zero to invalid data lanes, and then uses a full mask. A genuinely partial group needs a suitable mask and algorithm, not the same mask pasted everywhere.
 
-The separate [CPU reference](../references/cuda-027_cpu.py) checks the chapter's bounded model. It does not execute CUDA or establish GPU timing. Compare after attempting the worksheet or explicitly choosing to reveal solutions.
-
 ## Exercise 1
 
 Eight selected lanes among a full 32-thread warp contribute values 1 through 8; other lanes contribute zero. All 32 lanes execute the collective, giving sum 36. This is different from launching only eight threads and pretending the absent 24 lanes participate.
@@ -78,12 +76,16 @@ Define membership separately for each segment, ensure each collective's source/d
 
 **How to verify:** Test segments that end inside a warp and one that crosses into the next warp.
 
+## Self-check answers
+
+1. **What ballot mask do predicates true at lanes 0 and 3 produce?** 1 plus 8, which is 9.
+2. **Why may a shuffle not read from lane seven in worked example 2?** Lane seven is outside the participating group, so its value is not defined for that collective.
+3. **Why is source order not a synchronization guarantee within a warp?** Independent thread scheduling lets lanes progress separately, so ordering needs explicit synchronization.
+
 ## Numerical reference and its limits
 
-The complete CPU model is [here](../references/cuda-027_cpu.py). Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It does not claim CUDA execution, concurrency safety or a performance measurement.
+The [CPU reference](../references/cuda-027_cpu.py) reproduces worked example 1 and prints `{'ballot_mask': 37, 'count': 3, 'sum': 36}`.
 
 ## Transfer review
 
 Define membership separately for each segment, ensure each collective's source/destination lanes belong to the group and test segments crossing warp boundaries.
-
-A complete explanation must name its inputs, the unchanged mathematical contract, the changed boundary or resource condition, and the evidence still needed on actual hardware. Preserve a CPU baseline even after a GPU path becomes available.

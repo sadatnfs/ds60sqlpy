@@ -1,6 +1,6 @@
 # java-036: explanatory solutions
 
-Open after an attempt or an explicit solution reveal. The executable reference runs the six exercise checks together as `Main.java`. The guide contains independent worked examples, while this file explains the choices and failure cases in the complete answer.
+Open this after an attempt; see [using the solutions](../STUDY-GUIDE.md#use-the-solutions).
 
 ## Mechanism review
 
@@ -22,7 +22,7 @@ Use the prepared compiler with --release 21, then inspect the class magic and ma
 
 ## Exercise 1: Verify the compiler target: predict an edited check
 
-Task: Copy Example A into a scratch `Main.java` and change `assert magic == 0xCAFEBABE && major == 65;` to `assert magic == 0xCAFEBABE && major == 66;` inside its assertion. Before running it with `java -ea Main`, predict whether the assertion still holds and explain why; then restore it.
+Task: Change Example A's assertion to `assert magic == 0xCAFEBABE && major == 66;`, predict whether it holds, then run and restore it.
 
 The header is direct evidence of the target bytecode level. A filename or README claim cannot replace it.
 
@@ -44,13 +44,13 @@ try (ReleaseFixture fixture = new ReleaseFixture()) {
 }
 ```
 
-**Expected:** The changed run fails with an `AssertionError` from the assertion on `magic == 0xCAFEBABE && major == 65`. Restoring the original line brings back the worked observation: magic CAFEBABE; major version 65.
+**Expected:** The edited run fails with an `AssertionError` from the assertion on `magic == 0xCAFEBABE && major == 65`.
 
-**Verify:** Compare your written prediction with the reported `AssertionError` and its stack-trace line, and explain why the edited condition is false for the values that satisfy `magic == 0xCAFEBABE && major == 65`. After restoring the line, the program completes without an `AssertionError` again.
+**Verify:** Explain why the edited assertion is false for the values that satisfy `magic == 0xCAFEBABE && major == 65`.
 
 ## Exercise 2: Inspect packaged launch metadata: diagnose an edited check
 
-Task: A careless edit changed the assertion that Example B adds after Example A so that it reads `assert jar.getManifest().getMainAttributes().getValue("Main-Class").equals("App!") &&`. Run Example B with that line, explain why the edited assertion now fails for the same program state, and restore it.
+Task: Example B's new assertion was edited to `assert jar.getManifest().getMainAttributes().getValue("Main-Class").equals("App!") &&`. Explain why it fails for unchanged state and restore it.
 
 Packaging can fail independently of compilation. The archive must contain the intended entrypoint and matching metadata.
 
@@ -66,9 +66,9 @@ try (ReleaseFixture fixture = new ReleaseFixture()) {
 }
 ```
 
-**Expected:** Before the repair the run fails with an `AssertionError` from the assertion on `jar.getManifest().getMainAttributes().getValue("Main-Class").equals("App") && jar.getJarEntry("App.class") != null`; after it the line reads `assert jar.getManifest().getMainAttributes().getValue("Main-Class").equals("App") &&` again and main-Class App; class entry present.
+**Expected:** The edited run fails with an `AssertionError` from the assertion on `jar.getManifest().getMainAttributes().getValue("Main-Class").equals("App") && jar.getJarEntry("App.class") != null`; the restored assertion passes.
 
-**Verify:** Keep the failing and the repaired runs. Explain why the edited assertion rejects the same program state that `jar.getManifest().getMainAttributes().getValue("Main-Class").equals("App") && jar.getJarEntry("App.class") != null` accepts.
+**Verify:** Explain why the edited assertion rejects the state that `jar.getManifest().getMainAttributes().getValue("Main-Class").equals("App") && jar.getJarEntry("App.class") != null` accepts.
 
 ## Exercise 3: Run a fresh-process self-test
 
@@ -86,7 +86,7 @@ try (ReleaseFixture fixture = new ReleaseFixture()) {
 
 **Expected:** exit 0 and output release-ok.
 
-**Verify:** Keep an assertion equivalent to `result.code() == 0 && result.output().strip().equals("release-ok")`. As a control, change `Run result = fixture.run("--self-test");` to `Run result = fixture.run("--self-test!");`: the run must fail with an `AssertionError` from the assertion on `result.code() == 0 && result.output().strip().equals("release-ok")`. Restore the line before continuing.
+**Verify:** Control: changing `Run result = fixture.run("--self-test");` to `Run result = fixture.run("--self-test!");` must fail the assertion on `result.code() == 0 && result.output().strip().equals("release-ok")`.
 
 ## Exercise 4: Verify an invalid launch fails clearly
 
@@ -104,7 +104,7 @@ try (ReleaseFixture fixture = new ReleaseFixture()) {
 
 **Expected:** exit 2 and unknown argument diagnostic.
 
-**Verify:** Keep an assertion equivalent to `result.code() == 2 && result.error().contains("unknown argument")`. As a control, change `assert result.code() == 2 && result.error().contains("unknown argument");` to `assert result.code() == 2 && result.error().contains("unknown argument!");` inside it: the run must fail with an `AssertionError`, which shows the assertion can fail. Restore it.
+**Verify:** Control: changing `assert result.code() == 2 && result.error().contains("unknown argument");` to `assert result.code() == 2 && result.error().contains("unknown argument!");` inside the assertion must make it fail.
 
 ## Exercise 5: Reject artifact tampering before execution
 
@@ -135,7 +135,7 @@ try (ReleaseFixture fixture = new ReleaseFixture()) {
 
 **Expected:** SecurityException; original bytes restored for cleanup.
 
-**Verify:** Keep an assertion equivalent to `rejected`. As a control, change `rejected = true;` to `rejected = false;`: the run must fail with an `AssertionError` from the assertion on `rejected`. Restore the line before continuing.
+**Verify:** Control: changing `rejected = true;` to `rejected = false;` must fail the assertion on `rejected`.
 
 ## Exercise 6: Record runtime-image scope and rollback identity
 
@@ -164,8 +164,10 @@ receipt.get("production_deployed").equals(false);
 
 **Expected:** previous artifact v1 retained; custom_runtime_built False.
 
-**Verify:** Keep an assertion equivalent to `receipt.get("previous_artifact").equals("v1") && receipt.get("custom_runtime_built").equals(false) && receipt.get("production_deployed").equals(false)`. As a control, change `"v1",` to `"v2",`: the run must fail with an `AssertionError` from the assertion on `receipt.get("previous_artifact").equals("v1") && receipt.get("custom_runtime_built").equals(false) && receipt.get("production_deployed").equals(false)`. Restore the line before continuing.
+**Verify:** Control: changing `"v1",` to `"v2",` must fail the assertion on `receipt.get("previous_artifact").equals("v1") && receipt.get("custom_runtime_built").equals(false) && receipt.get("production_deployed").equals(false)`.
 
 ## After comparing the answer
 
-Run the complete reference with assertions enabled, then return to your own implementation. Recreate one check with different values and explain its expected result before execution. A compiler error, an expected domain exception and an assertion failure represent different stages and should be reported separately. Preserve ownership boundaries when adapting file, network or concurrency examples. The reference never authorizes access to a shared service or deletion of learner state. Use a fresh tiny fixture when you need to distinguish two interpretations of an API contract.
+Add a `--version` argument to your copy of `App` that prints 1.0.0 and exits 0, rebuild, and add a fresh-process check for it next to the self-test.
+
+Run the complete reference with `java -ea Main` first; the [review routine](../STUDY-GUIDE.md#use-the-solutions) covers the rest.

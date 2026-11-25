@@ -1,6 +1,6 @@
 # web-002: explanatory solutions
 
-Open this after your own attempt. Each answer explains the lesson's synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in `courses/web-development/guides/web-002.md`.
+Attempt each exercise before reading; the mechanism is in `courses/web-development/guides/web-002.md` ([using these answers](../STUDY-GUIDE.md#solutions)).
 
 ## Exercise 1: Predict the text content after character references are parsed.
 
@@ -76,4 +76,6 @@ Open this after your own attempt. Each answer explains the lesson's synthetic fi
 
 ## Reference comparison
 
-Open `courses/web-development/solutions/web-002_solution.html` only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; its success message is not an accessibility audit or proof of responsive behavior at every size.
+The reference reads the text content of the element with id note and requires the literal string 2 < 3 & 3 > 2, so it fails if a character reference was left raw and parsed as markup or if the comparison was retyped. It does not check the lang attribute, unique ids or whether importance uses strong rather than b.
+
+Open `courses/web-development/solutions/web-002_solution.html` after saving your attempt ([comparing with the reference](../STUDY-GUIDE.md#references)).

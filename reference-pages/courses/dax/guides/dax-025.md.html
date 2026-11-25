@@ -194,10 +194,10 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/dax/guides/dax-025.md</code></p>
     </header>
     <article class="document"><h2 id="dax-025-values-distinct-and-the-model-s-unknown-member">dax-025: VALUES, DISTINCT and the model&#x27;s unknown member<a class="heading-anchor" href="#dax-025-values-distinct-and-the-model-s-unknown-member" aria-label="Link to this section">#</a></h2>
-<p><strong>Stage 5: Virtual tables, lineage and relationships.</strong> Level: intermediate. Read the mechanisms, trace the worked cases and retain your own draft. <strong>Direct prerequisites:</strong> <code>dax-004</code>, <code>dax-008</code>, <code>dax-010</code></p>
+<p><strong>Stage 5: Virtual tables, lineage and relationships.</strong> Level: intermediate. <strong>Direct prerequisites:</strong> <code>dax-004</code>, <code>dax-008</code>, <code>dax-010</code></p>
 <h3 id="how-to-use-this-offline-lesson">How to use this offline lesson<a class="heading-anchor" href="#how-to-use-this-offline-lesson" aria-label="Link to this section">#</a></h3>
-<p>This is an offline DAX editing lesson. No DAX compiler, semantic-model engine, Power BI account or network connection is required. Worked tables describe the named reference and model, not execution of your draft. Save, compare and export source; do not interpret a comparison or completion marker as a passed program run.</p>
-<p>Open the <a href="../lessons/dax-025.dax.html">starter</a>. Compare the <a href="../solutions/dax-025_reference.dax.html">named reference</a> and <a href="../solutions/dax-025_solutions.md.html">reasoning</a> when ready. The <a href="../models/unknown-member/model.json.html">model specification</a> identifies every fixture table, column type, key and relationship. The <a href="../models/README.md.html">fixture handbook</a> displays the original data and explains each table grain.</p>
+<p>The starter asks for stored product keys, relationship values and the unknown amount. Predict all three for the unknown-member model before reading the cases, and note which of your counts includes something that is not a stored row. The <a href="../STUDY-GUIDE.md.html#offline-study-boundary">offline study boundary</a> explains what a worked table can show.</p>
+<p>Files: <a href="../lessons/dax-025.dax.html">starter</a>, <a href="../solutions/dax-025_reference.dax.html">reference</a> and <a href="../solutions/dax-025_solutions.md.html">reasoning</a>.</p>
 <h3 id="the-question-and-the-mechanism">The question and the mechanism<a class="heading-anchor" href="#the-question-and-the-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Reconcile unmatched facts without confusing the stored dimension with its semantic blank member.</p>
 <p>VALUES and DISTINCT can look identical on clean data, which makes a missing-key fixture essential. On a column, VALUES can include the blank member introduced by a regular relationship when fact keys do not match its dimension. DISTINCT over the stored dimension column does not add that relationship-generated member. The difference concerns the model, not merely duplicated text values.</p>
@@ -207,7 +207,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>COUNTROWS exposes the size of the two returned value tables. The second query filters the semantic ProductKey to BLANK and separately returns the unfiltered fact amount. The source assumes the regular relationship and deliberately unmatched key declared in this model, not a limited relationship or a repaired source.</p>
 <p>Concepts to explain in your own words: <strong>VALUES</strong>, <strong>DISTINCT</strong>, <strong>blank member</strong>, <strong>referential integrity</strong>, <strong>reconciliation</strong>.</p>
 <h3 id="model-and-context-contract">Model and context contract<a class="heading-anchor" href="#model-and-context-contract" aria-label="Link to this section">#</a></h3>
-<p>The ordinary star follows Product → Sales, Customer → Sales and Date → Sales through OrderDate. The ShipDate relationship is inactive unless a case explicitly activates it. Filters flow from the one side to the many side. Additional analytical tables have only the relationships declared in their named model; a similar column name does not create a relationship.</p>
+<p>This lesson uses the unknown-member model: Product keys 1 to 4 are stored, and Sales line S9 carries ProductKey 999 for 7 USD. Because the relationship is regular, the engine adds a blank Product member that collects S9. See the <a href="../models/unknown-member/model.json.html">model specification</a> and the <a href="../STUDY-GUIDE.md.html#the-retail-star">shared star rules</a>.</p>
 <pre class="highlighted-code"><code class="language-text">Product (one)  --&gt; Sales (many) &lt;-- Customer (one)
                        ^
                        | active OrderDate
@@ -215,7 +215,6 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
                        | inactive ShipDate
                        +------&gt; Sales</code></pre>
 <p>This lesson uses the <code>unknown-member</code> model. It has the same star, but Sales row S9 carries ProductKey 999, which has no Product row. The relationship therefore groups S9 under a blank Product member instead of dropping it.</p>
-<p>All amounts in ordinary Sales are USD after the line discount, before tax and returns. The Date fixture is complete for 2024 and 2025; a short result table is a selected slice, not the whole calendar. JSON <code>null</code> in the worked-results sidecar means DAX BLANK, not the text &quot;null&quot;.</p>
 <h3 id="worked-cases">Worked cases<a class="heading-anchor" href="#worked-cases" aria-label="Link to this section">#</a></h3>
 <p>The following query-local declarations are shared by these cases. They do not create persisted measures in this classroom.</p>
 <pre class="highlighted-code"><code class="language-dax"><span class="syntax-keyword">DEFINE</span>
@@ -262,8 +261,10 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 </tbody></table></div>
 <p>An explicit unknown bucket preserves a useful data-quality signal. Replacing it with an invented valid product would conceal a modeling issue.</p>
 <p>Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table.</p>
+<h3 id="a-misconception-to-test">A misconception to test<a class="heading-anchor" href="#a-misconception-to-test" aria-label="Link to this section">#</a></h3>
+<p>In a clean model VALUES and DISTINCT return the same rows, so learners often treat them as synonyms. With an unmatched key they diverge: VALUES over ProductKey returns five members because it includes the relationship&#x27;s blank member, while DISTINCT over the stored column returns four. Another mistake is reading the five as five valid products, or reading the blank member as a count of bad codes. It is one bucket no matter how many unmatched keys exist, so a separate fact-minus-dimension query must count those.</p>
 <h3 id="practice-prediction-construction-and-diagnosis">Practice: prediction, construction and diagnosis<a class="heading-anchor" href="#practice-prediction-construction-and-diagnosis" aria-label="Link to this section">#</a></h3>
-<p>Retain your formula or written reasoning, the stated context, contributing rows or values, and a conclusion with its unit. These notes are your own study record; they do not show that a formula ran.</p>
+<p>Record each answer as the <a href="../STUDY-GUIDE.md.html#practice-routine">practice routine</a> describes.</p>
 <h4 id="exercise-1-predict">Exercise 1: Predict<a class="heading-anchor" href="#exercise-1-predict" aria-label="Link to this section">#</a></h4>
 <p>Predict these two counts in the clean retail model.</p>
 <h4 id="exercise-2-change-one-condition">Exercise 2: Change one condition<a class="heading-anchor" href="#exercise-2-change-one-condition" aria-label="Link to this section">#</a></h4>
@@ -286,14 +287,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>The fact may arrive before its descriptive record.</li>
 </ol>
 <h3 id="self-check-and-next-step">Self-check and next step<a class="heading-anchor" href="#self-check-and-next-step" aria-label="Link to this section">#</a></h3>
-<p>Explain one changed result without quoting the formula alone. Identify which rows, filters, relationship or evaluation scope changed, then construct a counterexample to a plausible wrong interpretation. Keep your draft separate from the supplied reference. A small correct derivation does not certify performance, model security or broad expertise.</p>
+<p>Suppose S10 arrives with ProductKey 998 and 5 USD. Predict both member counts and the unknown revenue, then write the query that would reveal the two distinct bad keys. The <a href="../STUDY-GUIDE.md.html#self-check-routine">self-check routine</a> applies too.</p>
 <p>Continue to <a href="dax-026.md.html">dax-026</a> when its prerequisites make sense, or revisit this stage from the <a href="../README.md.html">course map</a>.</p>
 <h3 id="official-references-and-evidence-limits">Official references and evidence limits<a class="heading-anchor" href="#official-references-and-evidence-limits" aria-label="Link to this section">#</a></h3>
 <ul>
 <li><a href="https://learn.microsoft.com/en-us/dax/values-function-dax">DAX function: VALUES</a></li>
 <li><a href="https://learn.microsoft.com/en-us/dax/distinct-function-dax">DAX function: DISTINCT</a></li>
 </ul>
-<p>Documentation was reviewed for this original course on 2026-10-25. Version-sensitive features have explicit notes. Source/model checks and independent fixture arithmetic are not a DAX parser, compiler, semantic engine, real RLS test or performance measurement.</p>
+<p>Review date and evidence limits: <a href="../STUDY-GUIDE.md.html#references-and-evidence-limits">study guide</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for dax-025. Read its guide and the named model.
 Review my draft and prediction. Ask me to enumerate the relevant rows and context.

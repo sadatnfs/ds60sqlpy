@@ -24,9 +24,9 @@ C# normally passes arguments by value. For a value type, that means a copied val
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles your saved pad as `Program.cs` in its fixed .NET 10 project. C# 14 is the matching language generation. This route uses the prepared framework libraries; it does not accept arbitrary project files, NuGet packages, command arguments or interactive input. The explicit `Program.Main` entrypoint makes compilation and execution visible. `Check` throws on a false condition in every build configuration, unlike conditional debugging assertions.
+`Double` and `DivideExact` are local functions declared inside their example blocks, so each example compiles on its own. `Double` multiplies inside `checked`, so `Double(int.MaxValue)` throws `OverflowException` instead of returning a negative number; try it while you write task 2's cases.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Compile contract, starter stop and success marker: [running a lesson](../STUDY-GUIDE.md#running-a-lesson).
 
 
 
@@ -34,7 +34,7 @@ Start with the answer-free learner artifact in your saved classroom pad. It deli
 
 `int Double(int value) => value * 2` declares a local function with a typed parameter and return. `return` ends the current method. `ref` and `out` are explicit parameter passing modes, not decorations; prefer ordinary return values until shared mutation is required.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+Each example ends with a trace; method: [tracing a program](../STUDY-GUIDE.md#tracing-a-program).
 
 ## Worked example / walkthrough
 
@@ -80,6 +80,8 @@ internal static class Program {
 ```
 
 **Observe:** The result is 14 and the caller still holds 7.
+
+**Trace.** `original` holds 7. The call `Double(original)` copies 7 into the parameter `value`. The function multiplies inside `checked` and returns 14, which is stored in `result`. Nothing assigns to `original`, and the parameter was a separate copy, so the caller's variable still holds 7. The second check runs `Double(0)` to show that zero needs no special handling.
 
 ### Example B: Expose rejection as part of the contract
 
@@ -132,6 +134,8 @@ internal static class Program {
 
 **Observe:** 12 divided by 3 returns 4; the exact-integer contract rejects 7 divided by 2.
 
+**Trace.** For 12 and 3, the guard tests `divisor == 0`, which is false, then `12 % 3 != 0`, also false, so the method returns 4. For 7 and 2 the remainder is 1, so the guard throws `ArgumentException` and the catch sets `rejected`. Because `||` short-circuits, a zero divisor is rejected before `%` runs, so the method never throws `DivideByZeroException`.
+
 ## Exercises
 
 1. **Predict and explain.** Trace the caller and parameter values through Double.
@@ -146,13 +150,15 @@ internal static class Program {
 
 6. **Transfer and justify.** Extract one computation from a larger program and state its input, output, mutation and failure contract.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Log each task in the [evidence table](../STUDY-GUIDE.md#recording-exercise-evidence) before opening the explanation.
 
 ## Common pitfalls and diagnosis
 
 A method name is part of the interface. A generic catch returning zero can make rejected input indistinguishable from a valid zero result. Prefer one clear responsibility over a long list of optional switches.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+Task 4's tempting wrong version returns `value / divisor` without the remainder test, so 7 and 2 quietly return 3. Task 5 needs separate cases because the failures have different causes: 5 and 0 must reject on the divisor test, while 7 and 2 reject on the remainder test. Swapping the guard's operands turns the zero case into a `DivideByZeroException`.
+
+Repair routine: [building a regression case](../STUDY-GUIDE.md#building-a-regression-case).
 
 ## Progressive hints
 
@@ -162,11 +168,15 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 ## Self-check and next step
 
-Explain Parameter, Argument, Pure function without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+Trace `original`, `value` and `result` through the call `Double(original)`. Explain why `DivideExact` throws rather than returning 0 for 7 and 2. For task 3's area method, list each rejected input, the exception type you throw and the message a caller would read.
+
+Then follow the general [self-check routine](../STUDY-GUIDE.md#self-check-routine) and save your pad.
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://learn.microsoft.com/en-us/dotnet/csharp/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+[Documentation](https://learn.microsoft.com/en-us/dotnet/csharp/): The C# programming guide covers methods, local functions, parameters and the `ref` and `out` modifiers.
+
+Provenance and limits: [sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

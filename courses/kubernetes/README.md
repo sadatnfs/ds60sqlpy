@@ -91,4 +91,6 @@ The extension traces Pod, node and Service addresses through CNI, DNS, EndpointS
 
 Read the guide, predict the stated case, write or edit your learner artifact, inspect one progressive hint at a time, then compare the separate solution after an attempt. A successful process or a manual read marker is not proof of understanding. Preserve actual learner edits in the app-owned workspace; the checked-in source is a starter.
 
+The [study guide](STUDY-GUIDE.md) holds the workflow every lesson shares: worksheets and checks, owned live reads, the networking boundary, diagnosis rules, retrieval, solutions and the AI tutor.
+
 The [portable authoring inputs](authoring/complete/README.md) regenerate the 38 added lesson bodies while preserving the four original pilots. Public synthetic signature material is immutable. No lesson downloads tools, starts a cluster or selects an ambient context when opened.

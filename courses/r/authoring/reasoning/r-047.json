@@ -36,5 +36,7 @@
       "wrong": "Reading the result as stronger evidence for high because 1000 is far beyond the cut. The tree gives x = 5 and x = 1000 an identical output, and no training row says anything about values that large.",
       "verify": "`as.character(predict_complete(1000)) == \"high\"` returns TRUE."
     }
-  ]
+  ],
+  "run_note": "The starter holds eight rows with x from 1 to 8, labeled low for the first four and high for the last four, and an empty results list. Run it and predict the split before fitting: any threshold between 4 and 5 separates the labels perfectly. Then fit the tree and compare its chosen split with yours, and ask what class it will assign to an x far beyond 8.",
+  "checks_note": "The assertions confirm that new points are classified low and high, that probability columns are named low and high and each row sums to 1, that pruning with cp 1 leaves one leaf, that a wrapper rejects a missing x, that an x of 1000 is still labeled high because the tree extends its last partition, and that the training rows are all classified correctly. Perfect training accuracy here is not evidence about held-out accuracy."
 }

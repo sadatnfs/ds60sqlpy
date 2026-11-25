@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/r/solutions/r-046_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="r-046-reference-reasoning">r-046: reference reasoning<a class="heading-anchor" href="#r-046-reference-reasoning" aria-label="Link to this section">#</a></h2>
-<p>Use the <a href="r-046_reference.R.html">complete reference</a> with the guide&#x27;s declared inputs and runtime. Every worked example is also a standalone script.</p>
+<p>Run the <a href="r-046_reference.R.html">complete reference</a> under the <a href="../STUDY-GUIDE.md.html#run-a-chapter">run rules</a>.</p>
 <h3 id="why-the-implementation-has-this-shape">Why the implementation has this shape<a class="heading-anchor" href="#why-the-implementation-has-this-shape" aria-label="Link to this section">#</a></h3>
 <p>The reference compares sign-invariant quantities and reconstructs the original data using saved preprocessing. It does not assume one implementation&#x27;s arbitrary loading signs are authoritative. The constant-feature failure and new-row transformation exercise the admission and application boundaries separately.</p>
 <p>Explained variance is computed from squared component standard deviations under the selected scaling. It describes this feature representation. A predictive or scientific interpretation must connect it to an independent question and evaluation design.</p>
@@ -248,7 +248,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Tempting mistake:</strong> Claiming that a component explaining 90 or 100 percent of input variance will predict a target well. A target could depend entirely on the 10 percent direction, and only a held out evaluation of that target can show it.</p>
 <p><strong>Verify:</strong> <code>sum(pc$sdev^2 / sum(pc$sdev^2))</code> returns 1 within 1e-12, and the printed shares show 0.9 and 0.1.</p>
 <h3 id="what-the-checks-establish">What the checks establish<a class="heading-anchor" href="#what-the-checks-establish" aria-label="Link to this section">#</a></h3>
-<p>The reference makes 7 <code>stopifnot()</code> checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.</p></article>
+<p>The checks confirm that the unscaled first loading on long has magnitude 10 over the square root of 101, that scaling gives both loadings magnitude one over the square root of 2, that scores times the transposed rotation rebuild the preprocessed data, including after flipping a loading and its scores together, that a constant column cannot be scaled, that a manual projection matches <code>predict()</code> on new rows, and that variance shares sum to 1. They do not assign meaning to a component.</p>
+<p>The reference makes 7 <code>stopifnot()</code> checks; see <a href="../STUDY-GUIDE.md.html#what-a-passing-run-proves">what a passing run proves</a>.</p></article>
   </main>
 </body>
 </html>

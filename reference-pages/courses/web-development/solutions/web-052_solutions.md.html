@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/web-development/solutions/web-052_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="web-052-explanatory-solutions">web-052: explanatory solutions<a class="heading-anchor" href="#web-052-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Open this after your own attempt. Each answer explains the lesson&#x27;s synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in <code>courses/web-development/guides/web-052.md</code>.</p>
+<p>Attempt each exercise before reading; the mechanism is in <code>courses/web-development/guides/web-052.md</code> (<a href="../STUDY-GUIDE.md.html#solutions">using these answers</a>).</p>
 <h3 id="exercise-1-explain-atomicity-without-claiming-every-transaction-is-serializable">Exercise 1: Explain atomicity without claiming every transaction is serializable.<a class="heading-anchor" href="#exercise-1-explain-atomicity-without-claiming-every-transaction-is-serializable" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Atomicity concerns all-or-nothing application; isolation is a separate property.</p>
 <p><strong>Approach:</strong> Define atomicity as all or nothing for one transaction&#x27;s writes, and isolation as how concurrent transactions see each other&#x27;s changes.</p>
@@ -232,7 +232,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Plausible wrong approach:</strong> Citing the sequential demo as proof that parallel requests are safe fails because no two transactions overlapped.</p>
 <p><strong>How to verify:</strong> Your answer describes a test with two connections or processes on the target engine.</p>
 <h3 id="reference-comparison">Reference comparison<a class="heading-anchor" href="#reference-comparison" aria-label="Link to this section">#</a></h3>
-<p>Open <code>courses/web-development/solutions/web-052_solution.php</code> only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; server lifecycle, persistence, concurrency and security need their own integration evidence.</p></article>
+<p>The reference requires the first versioned update to change one row, a stale update to change none and a rolled back write to leave minutes at 40. That catches ignored row counts and missing rollback. It does not test the nonnegative constraint, so insert a negative value and record the error.</p>
+<p>Open <code>courses/web-development/solutions/web-052_solution.php</code> after saving your attempt (<a href="../STUDY-GUIDE.md.html#references">comparing with the reference</a>).</p></article>
   </main>
 </body>
 </html>

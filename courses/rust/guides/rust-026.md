@@ -24,9 +24,11 @@ Define the grain of the result and the equality rule before choosing a container
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles the saved pad as `main.rs` with pinned Rust 1.99.1, edition 2024, and the prepared Arrow 60 library. `assert!` and `assert_eq!` remain active in normal builds. The fixed pad accepts one source file without arbitrary arguments, interactive input, Cargo manifests or package installation. The main function returns `Result<(), Box<dyn std::error::Error>>` so later examples can propagate errors with `?`; the final `Ok(())` means this fixture completed successfully. Standard library and Arrow examples remain offline after image preparation. Multi-file Cargo and external ecosystem projects have separate explicit preparation workflows.
+Beyond the prelude, this lesson's programs use `std::collections`. A passing run prints `rust-026: passed`.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Pad setup and limits: [Run a lesson](../STUDY-GUIDE.md#run-a-lesson).
+
+Before you run anything, follow [Attempt a lesson](../STUDY-GUIDE.md#attempt-a-lesson).
 
 
 
@@ -34,7 +36,9 @@ Start with the answer-free learner artifact in your saved classroom pad. It deli
 
 The entry API provides one lookup/update boundary. BTreeMap iteration is key-ordered. HashSet insert reports whether membership changed. Borrowed lookup can avoid allocating a new key.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+**Reading Example A (Count repeated identities, code below).** `BTreeMap::new()` creates an empty map whose key type is inferred later from the first insertion, here `&str`. `counts.entry(label)` looks up the key once and returns an `Entry`, which is either occupied or vacant. `or_insert(0)` inserts 0 when the key is vacant and in both cases returns a `&mut i32` to the stored count; the leading `*` dereferences it so `+= 1` updates the value inside the map. That single lookup replaces a separate `get` followed by `insert`. `counts.get("b")` returns `Option<&i32>`, which is why the expected value is written `Some(&2)`. `keys()` yields keys in sorted order because a `BTreeMap` is ordered by key, and `copied()` turns each `&&str` into `&str` before collecting.
+
+Method for tracing your own variants: [Trace a program](../STUDY-GUIDE.md#trace-a-program).
 
 ## Worked example / walkthrough
 
@@ -92,13 +96,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 6. **Transfer and justify.** Compare repeated linear membership checks with a built index, including construction and memory costs.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Record each task as in [Keep evidence for each task](../STUDY-GUIDE.md#keep-evidence-for-each-task).
 
 ## Common pitfalls and diagnosis
 
 Expected hash lookup cost is not a hard real-time guarantee. Do not persist hash values as stable identities. A collection choice does not by itself validate input or prevent overflow.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+To turn a pitfall into a test, see [Design a regression case](../STUDY-GUIDE.md#design-a-regression-case).
 
 ## Progressive hints
 
@@ -106,13 +110,25 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 2. Compare Example B (Distinguish first and duplicate insertion) with Example A and name the first line whose behavior differs. Its observation is: The set reports a duplicate without creating a second entry.
 3. Before opening the explanation, test your task 3 attempt against this lesson's main pitfall: Expected hash lookup cost is not a hard real-time guarantee.
 
+Tempting approaches to rule out before you compare:
+
+- **Task 1.** Calling Example A's grain one row per input record predicts three rows. Three labels produce two keys, because the second `"b"` updates the existing entry.
+- **Task 2.** Writing `counts.insert(label, 1)` is a replace policy, not rejection: the second `"b"` silently overwrites the first and nothing tells the caller a duplicate arrived.
+- **Task 3.** Writing `*counts.entry(word).or_insert(1) += 1` starts each new word at 1 and then adds 1, so every count is one too high and the assertion fails with `apple=2`, `fig=2`, `pear=3` on the left.
+- **Task 5.** Writing `let words = [];` without a type fails with E0282, type annotations needed, because an empty array literal gives no element type to infer.
+- **Task 6.** Building the `HashSet` inside the loop, once per SKU, pays the full construction for every lookup and ends up slower than the linear scan it was meant to replace.
+
 ## Self-check and next step
 
-Explain Identity policy, Complexity, Ordered map without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+In Example A, why does the `BTreeMap` count for `b` reach 2 while the key appears once, and why are the keys listed as a then b? What does `HashSet::insert` return for the second "pear", and why is that return value worth checking? When does building a set or map pay for itself compared with repeated linear `contains` scans of a `Vec`?
+
+Then work through [Self-check and review](../STUDY-GUIDE.md#self-check-and-review).
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://doc.rust-lang.org/book/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+Read [the `std::collections` overview](https://doc.rust-lang.org/std/collections/index.html) for the cost table of each map and set.
+
+What the classroom does and does not prove: [Sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

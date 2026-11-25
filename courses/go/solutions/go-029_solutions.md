@@ -1,6 +1,6 @@
 # go-029: explained solutions
 
-These are comparison material after an attempt or explicit reveal. The executable reference implements all six cases in one `main.go`.
+Compare after an attempt ([using solutions](../STUDY-GUIDE.md#use-the-solutions)). `courses/go/solutions/go-029_solution.go` implements all six cases.
 
 ## Mechanism
 
@@ -10,7 +10,7 @@ A channel send synchronizes with its corresponding receive. Closing a channel sy
 
 ## 1. Publish through a channel: change one input
 
-Copy worked example 1 into a scratch pad and change `go func() { ch <- Published{Count: 3, Ready: true} }()` to `go func() { ch <- Published{Count: 4, Ready: true} }()`. Before running, predict which check fails and which value it now sees; then run it and restore the original line.
+Copy worked example 1, change `go func() { ch <- Published{Count: 3, Ready: true} }()` to `go func() { ch <- Published{Count: 4, Ready: true} }()` and predict the failure before running; then restore the line.
 
 The unchanged code is worked example 1:
 
@@ -21,13 +21,15 @@ v := <-ch
 check(v.Ready && v.Count == 3, "publication")
 ```
 
-**Expected:** The changed run panics with `publication` because `v.Ready && v.Count == 3` no longer holds. Restoring the original line brings back the worked observation: the reader observes count 3 and ready true.
+**Expected:** The edited run panics with `publication` because `v.Ready && v.Count == 3` no longer holds.
+
+**Verify:** Restoring `go func() { ch <- Published{Count: 3, Ready: true} }()` makes the check pass again with the worked observation: the reader observes count 3 and ready true.
 
 The send and receive establish ordering without a timing guess.
 
 ## 2. Publish through closure: debug a regression
 
-A regression changed one token in worked example 2, so one line now reads `go func() { n = 8; close(done) }()`. Run worked example 2 with that line, use the failure to locate the defect and repair it without changing the check.
+A one-token regression in worked example 2 makes a line read `go func() { n = 8; close(done) }()`. Repair it without changing the check.
 
 The unchanged code is worked example 2:
 
@@ -39,7 +41,9 @@ go func() { n = 7; close(done) }()
 check(n == 7, "close publication")
 ```
 
-**Expected:** Before the repair the program panics with `close publication`; after it the line reads `go func() { n = 7; close(done) }()` again and the reader observes 7.
+**Expected:** The defective run panics with `close publication`; after restoring `go func() { n = 7; close(done) }()`, the reader observes 7.
+
+**Verify:** The failing run shows message `close publication`; after the repair `n == 7` holds again.
 
 Removing this synchronization would make the ordinary shared variable unsafe. The proof uses ordering, not elapsed time.
 
@@ -55,6 +59,8 @@ check(v.Count == 4 && v.Ready, "atomic value")
 ```
 
 **Expected:** The loaded record has count 4.
+
+**Verify:** Your solution must keep `v.Count == 4 && v.Ready` true. Control: changing `current.Store(Published{Count: 4, Ready: true})` to `current.Store(Published{Count: 5, Ready: true})` panics with message `atomic value`; revert it.
 
 Publishing a pointer does not make subsequent unsynchronized target mutation safe. This snapshot has scalar fields.
 
@@ -72,6 +78,8 @@ check(old.Count == 4 && current.Load().(Published).Count == 5, "replacement")
 
 **Expected:** The old copy remains 4 and the current value is 5.
 
+**Verify:** Your solution must keep `old.Count == 4 && current.Load().(Published).Count == 5` true. Control: changing `current.Store(Published{Count: 4})` to `current.Store(Published{Count: 5})` panics with message `replacement`; revert it.
+
 Value snapshots avoid shared mutable fields only when their contained values also have the intended ownership semantics.
 
 ## 5. Copy reference-containing data
@@ -87,6 +95,8 @@ check(snapshot[0] == 1, "independent data")
 
 **Expected:** The snapshot retains its original first element.
 
+**Verify:** Your solution must keep `snapshot[0] == 1` true. Control: changing `original := []int{1, 2}` to `original := []int{2, 2}` panics with message `independent data`; revert it.
+
 Copying can eliminate shared mutable storage. Synchronization instead orders accesses to storage that remains shared.
 
 ## 6. Transfer local construction
@@ -101,8 +111,10 @@ check(<-ch == "ready:3", "result")
 
 **Expected:** The reader receives `ready:3`.
 
+**Verify:** Your solution must keep `<-ch == "ready:3"` true. Control: changing `go func() { ch <- fmt.Sprintf("ready:%d", 3) }()` to `go func() { ch <- fmt.Sprintf("ready:%d", 4) }()` panics with message `result`; revert it.
+
 Keeping construction state local simplifies the argument compared with exposing several partially updated shared fields.
 
 ## Transfer after comparison
 
-Return to your own pad and reproduce one check with a new input. Explain why the check rejects a plausible wrong implementation. Keep the distinction between a pure model, an in-process fake, and a real external system visible in your notes.
+Controllers and servers publish state constantly: a cache filled by one goroutine and read by handlers, or configuration reloaded while requests run. Apply the same rule there: build the value completely, publish it through a channel, lock or atomic, and treat it as read-only afterward. Run go test -race in CI so a lucky schedule never stands in for evidence.

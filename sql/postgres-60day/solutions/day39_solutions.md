@@ -4,53 +4,41 @@
 <!-- beginner-solution-enrichment -->
 ## How to study and run this solution
 
-Open this explanation only after making an honest attempt. The executable
-companion runs solely against the disposable `advanced_sql_training` database:
+Run the two-terminal schedules yourself before reading these answers;
+the evidence that matters is the error text and the `pg_locks` rows you
+captured while a session waited. The executable answer covers the parts a
+single session can show, and it ends with `ROLLBACK`
+([reading solutions](../../STUDY-GUIDE.md#read-a-solution)):
 
 ```bash
-# Linux, macOS, or Windows through WSL 2, from the repository root
 psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
   -f sql/postgres-60day/solutions/day39_solutions.sql
 ```
 
-`psql` prints each result/command tag in the terminal. Stop at the first
-unexpected `ERROR`; later output cannot repair an earlier failed invariant.
-Compare your own SQL, row grain, column names, row counts, `NULL` policy, and
-ordering with the explanation before comparing syntax.
+It prints orders `1` and `2` from the ordered lock, jobs `(1, first)` and
+`(2, second)` from the `SKIP LOCKED` claim, a `LockRows` plan above an
+index scan on `orders_pkey`, the four claimed jobs with their new
+`processed_at` values and `UPDATE 4`, the five ordered keys `4`, `8`,
+`12`, `19`, `24`, and finally `first_attempt` and `same_owner_attempt`,
+both `t`. Because `processed_at` is set with `clock_timestamp()`, each
+claimed job gets a slightly later time than the one before.
 
-## Clause-by-clause reading map
+## How these answers fit together
 
-The lesson's main concepts are Blocking, Deadlock, Advisory lock. Its worked-model focus is:
-In two disposable sessions, lock test rows 1 and 2 in opposite orders and inspect the wait before PostgreSQL aborts one participant with `40P01`. Roll back, then repeat with both sessions ordering keys ascending to show the cycle cannot form.
+The [learner script](../day39_locks_deadlocks.sql) locked five rows in
+key order inside one session. These answers put a second session against
+those rows. A reversed lock order on orders 1 and 2 forms a cycle; on a
+test run, the session that requested the second row last received
+`deadlock detected`, with two `DETAIL` lines naming each process and the
+transaction it waited on, while the other session got its row. Locking
+both keys in one ascending statement turns that cycle into an ordinary
+wait.
 
-- Start at `FROM`/`JOIN` and state the intermediate row grain. Inspect join keys
-  before adding aggregates; a one-to-many join is allowed to multiply rows only
-  when the later contract accounts for it.
-- Apply `WHERE` to input rows, `GROUP BY` to form buckets, and `HAVING` to
-  completed groups. Window functions run over the surviving relation and
-  normally preserve its row count.
-- Read the `SELECT` list as the public result contract: keys establish grain,
-  measures state calculations, and aliases explain meaning. `ORDER BY` is the
-  only output-order guarantee; add a unique tie-breaker before `LIMIT`.
-- Trace every common table expression (CTE) as a temporary named relation.
-  Execute or inspect one stage at a time while debugging, but compare the final
-  result with an independent control rather than trusting stage names.
-- Keep SQL `NULL` as “missing/unknown/not applicable” until the metric contract
-  chooses another representation. Guard division with `NULLIF`; disclose
-  exclusions and distinguish zero from no row.
-- For DDL/DML, a command tag proves only that PostgreSQL accepted a statement.
-  Catalog checks, negative cases, row-count reconciliation, and the declared
-  transaction boundary prove behavior and cleanup.
-
-The exact final queries are not the only valid syntax. A join, subquery, CTE,
-window, or conditional aggregate can be an alternative when it preserves the
-same grain, `NULL` semantics, deterministic ordering, and safety. Prefer the
-form whose intermediate relations a reviewer can verify; optimize only after
-correctness is established with evidence.
-
-Deadlocks and lock waits require concurrent sessions. A single sequential
-solution file cannot fully execute these labs. Use two terminals for the
-staged commands and a third terminal when observing a wait.
+The queue answers replace waiting with skipping. `FOR UPDATE SKIP LOCKED`
+lets a second worker pass over jobs the first has claimed, and
+`NOWAIT` turns a wait into an immediate `55P03` error. The advisory answer
+locks a number instead of a row and relies on the transaction end to
+release it, which is why no unlock call appears.
 
 ## Exercise 1: Reproduce and observe a deadlock
 
@@ -116,7 +104,7 @@ the final cycle edge rather than promising to freeze a deadlock.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-39 Exercise 1, use two terminals on the seeded `training.orders` rows with `order_id` 1 and 2: Session A locks row 1 then row 2, Session B locks row 2 then row 1 (with `SELECT ... FOR UPDATE` or a no-op `UPDATE ... SET total_amount = total_amount`), and a third terminal reads `pg_locks` while a session waits.
+- **Inputs/evidence:** For sql-39 Exercise 1, use two terminals on the seeded `training.orders` rows with `order_id` 1 and 2: Session A locks row 1 with `SELECT ... FOR UPDATE` and then requests row 2 with the no-op `UPDATE ... SET total_amount = total_amount`, Session B does the same with row 2 and then row 1, and a third terminal reads `pg_locks` while a session waits.
 - **Expected result/shape:** For sql-39 Exercise 1, expected output: while Session A's second lock request waits, the third terminal shows one ungranted `transactionid` row (`mode = ShareLock`, `granted = false`) for Session A's `pid`; when Session B's second lock request closes the cycle, about one second later (`deadlock_timeout`) Session B fails with SQLSTATE `40P01` (`deadlock detected`) and Session A's waiting statement completes.
 - **Independent verification:** For sql-39 Exercise 1, record each session's `pg_backend_pid()`, the waiting `pid` from `pg_locks`, and the two `DETAIL` lines (`Process ... waits for ShareLock on transaction ...`); end both transactions with `ROLLBACK` and confirm that `SELECT order_id, status, total_amount FROM training.orders WHERE order_id IN (1, 2) ORDER BY order_id` returns the same values as before the experiment.
 - **Intermediate relation check:** For sql-39 Exercise 1, query `pg_locks` once after both first locks: each session holds its own `transactionid` lock (`ExclusiveLock`, granted) and nothing waits yet.
@@ -132,11 +120,8 @@ Every worker must acquire the same set of row locks in the same order:
 BEGIN;
 SET LOCAL search_path TO training, public;
 
-SET LOCAL lock_timeout = '5s';
-
 SELECT
-  order_id,
-  total_amount
+  order_id
 FROM
   orders
 WHERE
@@ -153,11 +138,11 @@ order 2 while requesting order 1, so this pair does not form a cycle.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-39 Exercise 2, repeat the Exercise 1 schedule, but let both sessions lock `order_id` 1 and 2 in ascending order with one statement such as `SELECT order_id FROM training.orders WHERE order_id IN (1, 2) ORDER BY order_id FOR UPDATE`.
+- **Inputs/evidence:** For sql-39 Exercise 2, repeat the Exercise 1 schedule, but let both sessions lock `order_id` 1 and 2 in ascending order with the one statement `SELECT order_id FROM training.orders WHERE order_id IN (1, 2) ORDER BY order_id FOR UPDATE`.
 - **Expected result/shape:** For sql-39 Exercise 2, expected output: Session A's locking `SELECT` returns two rows, `order_id` 1 and 2; Session B's identical statement waits instead of deadlocking and returns the same two rows after Session A ends. No session receives SQLSTATE `40P01`.
 - **Independent verification:** For sql-39 Exercise 2, while Session B waits, confirm in a third terminal that `SELECT locktype, mode FROM pg_locks WHERE NOT granted` returns exactly one row, a `transactionid` `ShareLock`; then rerun the opposite-order schedule from Exercise 1 to show that only the lock order changed.
 - **Intermediate relation check:** For sql-39 Exercise 2, run the locking `SELECT` alone in one session and list `SELECT order_id FROM training.orders WHERE order_id IN (1, 2) ORDER BY order_id` first, so you know the two keys it must lock.
-- **Clause check:** For sql-39 Exercise 2, the executable solution selects the first two `order_id` values in a `keys` CTE, joins them to `orders`, and keeps `ORDER BY o.order_id` in the locking `SELECT ... FOR UPDATE OF o`.
+- **Clause check:** For sql-39 Exercise 2, the statement names both keys in `WHERE order_id IN (1, 2)` and keeps `ORDER BY order_id` in the same `SELECT ... FOR UPDATE`. Its plan is a `LockRows` node over an index scan on `orders_pkey`, which returns order 1 before order 2, so every session requests the two row locks in ascending order.
 - **Alternative/trade-off:** For sql-39 Exercise 2, `pg_advisory_xact_lock` on a business key serializes the two workers without locking any row, but it works only if every writer takes the same advisory key first.
 - **Edge case:** Add a third key to only one session's list: ascending order still prevents a cycle, because every session acquires shared keys in the same global order.
 
@@ -222,8 +207,9 @@ read it.
 ## Exercise 4: Predict NOWAIT
 
 `FOR UPDATE NOWAIT` raises SQLSTATE `55P03` immediately when a conflicting lock
-already exists. The executable solution explains the two-session check without
-blocking automated validation.
+already exists. The solution file only plans the `NOWAIT` statement with
+`EXPLAIN`, so automated runs never block; the two-session check is done by
+hand.
 
 ### Reasoning and verification
 

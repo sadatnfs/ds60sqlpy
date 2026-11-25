@@ -194,7 +194,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/csharp/solutions/csharp-024_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="csharp-024-explanation-and-comparison">csharp-024: explanation and comparison<a class="heading-anchor" href="#csharp-024-explanation-and-comparison" aria-label="Link to this section">#</a></h2>
-<p>Attempt the six guide tasks before opening this comparison. The executable reference is <a href="csharp-024_solution.cs.html">csharp-024_solution.cs</a>. It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.</p>
+<p>Reference program: <a href="csharp-024_solution.cs.html">csharp-024_solution.cs</a>, covering both examples and the executed answers.</p>
+<p>Attempt the tasks first; see <a href="../STUDY-GUIDE.md.html#comparing-with-the-explanation">comparing with the explanation</a>.</p>
 <h3 id="why-the-two-examples-differ">Why the two examples differ<a class="heading-anchor" href="#why-the-two-examples-differ" aria-label="Link to this section">#</a></h3>
 <p><strong>Dispose on ordinary scope exit:</strong> Scope exit is the ownership boundary; no garbage-collector timing is needed. The resource is open inside and closed afterward.</p>
 <p><strong>Dispose after failure:</strong> The same cleanup contract applies to abnormal control flow, which is where manual release is often forgotten. The controlled exception still triggers cleanup.</p>
@@ -250,7 +251,7 @@ Check<span class="syntax-punctuation">(</span>source<span class="syntax-punctuat
 <p><code>using (var resource = ...) { ... }</code> scopes lifetime. <code>using var resource = ...</code> disposes at the end of the containing scope. <code>await using</code> supports IAsyncDisposable when cleanup itself is asynchronous.</p>
 <p>Dispose does not automatically make an object safe for concurrent callers. Never rely on finalizer timing for a lock or file release. Releasing a borrowed resource violates its caller ownership.</p>
 <h3 id="review-before-continuing">Review before continuing<a class="heading-anchor" href="#review-before-continuing" aria-label="Link to this section">#</a></h3>
-<p>Run the reference and confirm that it prints <code>csharp-024: passed</code>, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.</p></article>
+<p>Run the reference and confirm it prints <code>csharp-024: passed</code>, then rerun the guide&#x27;s counterexample.</p></article>
   </main>
 </body>
 </html>

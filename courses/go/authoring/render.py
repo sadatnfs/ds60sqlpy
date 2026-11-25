@@ -17,9 +17,31 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import variants  # noqa: E402
 from outcomes import MINUTES, OUTCOMES  # noqa: E402
 from reasoning import LABELS, REASONING  # noqa: E402
+from teaching import TEACHING  # noqa: E402
 
 BASE = Path(__file__).resolve().parents[1]
 SPECS = []
+STUDY = "../STUDY-GUIDE.md"
+SOURCE_LABELS = {
+    "https://go.dev/ref/spec": "The Go Programming Language Specification",
+    "https://go.dev/ref/spec#Channel_types": "Go specification: channel types",
+    "https://go.dev/ref/mem": "The Go Memory Model",
+    "https://go.dev/doc/tutorial/generics": "Go tutorial: getting started with generics",
+    "https://go.dev/doc/modules/managing-dependencies": "Go modules: managing dependencies",
+    "https://go.dev/doc/install/source#environment": "Go build environment variables",
+    "https://go.dev/doc/effective_go#concurrency": "Effective Go: concurrency",
+    "https://go.dev/doc/database/execute-transactions": "Go database guide: executing transactions",
+    "https://github.com/kubernetes/client-go": "client-go repository",
+    "https://github.com/kubernetes/client-go/tree/master/testing": "client-go testing package",
+    "https://kubernetes.io/docs/concepts/architecture/controller/": "Kubernetes controllers",
+    "https://kubernetes.io/docs/reference/using-api/api-concepts/#resource-versions": "Kubernetes API concepts: resource versions",
+    "https://kubernetes.io/docs/reference/using-api/api-concepts/#efficient-detection-of-changes": "Kubernetes API concepts: efficient detection of changes",
+    "https://kubernetes.io/docs/reference/access-authn-authz/rbac/": "Kubernetes RBAC authorization",
+    "https://kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers/": "Kubernetes dynamic admission control",
+    "https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/": "Kubernetes labels and selectors",
+    "https://kubernetes.io/docs/concepts/overview/working-with-objects/kubernetes-objects/": "Kubernetes objects",
+    "https://kubernetes.io/docs/concepts/overview/working-with-objects/finalizers/": "Kubernetes finalizers",
+}
 
 
 def case(title, task, expected, code, explanation):
@@ -69,6 +91,16 @@ def format_go(source):
 def format_snippet(source):
     wrapped = format_go("package main\n\nfunc main() {\n" + source + "\n}\n")
     return textwrap.dedent(wrapped.split("func main() {\n", 1)[1].rsplit("\n}", 1)[0]).strip()
+
+
+def source_label(url):
+    """A readable name for a primary-source link."""
+    if url in SOURCE_LABELS:
+        return SOURCE_LABELS[url]
+    if url.startswith("https://pkg.go.dev/"):
+        path = url.removeprefix("https://pkg.go.dev/").split("#", 1)[0]
+        return f"`{path}` package documentation"
+    raise ValueError("Add a label for source " + url)
 
 
 def needed_helper(s, count):
@@ -126,11 +158,17 @@ def _occurs(excerpt, code):
     return " ".join(excerpt.split()) in " ".join(code.split())
 
 
-def practice(ident, s):
+def _first_sentence(text):
+    return re.split(r"(?<=[.!?])\s+", text.strip(), maxsplit=1)[0]
+
+
+def practice(ident, s, nudges, steps):
     """Six exercises: two derived from the worked examples, four authored investigations.
 
-    Every Verify line and hint is built from the case's own check and the one-token
-    edit that qualify_variants.py observed making that check fail.
+    Expected and Verify lines are built from the case's own check and the one-token
+    edit that qualify_variants.py observed making that check fail. The shared exercise
+    contract and hint ladder are explained once in ../STUDY-GUIDE.md. The second hint
+    of every exercise, and the third hint of the first two, are authored in teaching.py.
     """
     span = variants.code_span
     records = variants.load_records()
@@ -153,31 +191,36 @@ def practice(ident, s):
         )
         if v:
             original, edited = span(v["line"]), span(v["broken"])
+        observed = _lower_first(c["expected"])
         if index == 0:
             row["title"] = c["title"] + (
                 ": predict an edited check" if v and v["in_check"] else ": change one input"
             )
             if v and v["in_check"]:
                 row["task"] = (
-                    f"Copy worked example 1 into a scratch pad and change {original} to {edited} inside its check. Before running, predict whether the check still passes and explain why; then restore it."
+                    f"Copy worked example 1, change {original} to {edited} inside its check and predict whether it still passes; then restore it."
+                )
+                row["expected"] = (
+                    f"The edited check panics with {panic} even though {cond} still holds."
                 )
             elif v:
                 row["task"] = (
-                    f"Copy worked example 1 into a scratch pad and change {original} to {edited}. Before running, predict which check fails and which value it now sees; then run it and restore the original line."
+                    f"Copy worked example 1, change {original} to {edited} and predict the failure before running; then restore the line."
+                )
+                row["expected"] = (
+                    f"The edited run panics with {panic} because {cond} no longer holds."
                 )
             else:
                 row["task"] = (
-                    f"Close worked example 1 and rebuild it in a fresh pad, keeping its check {cond}. Then propose one input change that would make that check fail and explain why before trying it."
+                    f"Copy worked example 1, then propose an input that makes {cond} false."
                 )
-            row["expected"] = (
-                f"The changed run panics with {panic} because "
-                + ("the edited check" if v["in_check"] else cond)
-                + f" no longer holds. Restoring the original line brings back the worked observation: {_lower_first(c['expected'])}"
-                if v
-                else f"Your rebuild passes with the original input ({_lower_first(c['expected'])}), and your proposed change makes the check panic with {panic}."
-            )
+                row["expected"] = (
+                    f"The original input passes ({observed.rstrip('.')}); yours panics with {panic}."
+                )
             row["verify"] = (
-                f"Compare your written prediction with the panic message {panic} and name the value that made {cond} false. After restoring the input, the program must print its success line again."
+                f"Restoring {original} makes the check pass again with the worked observation: {observed}"
+                if v
+                else f"The check fails with message {panic} once {cond} is false; restoring the input makes it pass."
             )
         elif index == 1:
             row["title"] = c["title"] + (
@@ -185,56 +228,42 @@ def practice(ident, s):
             )
             if v and v["in_check"]:
                 row["task"] = (
-                    f"A careless edit changed the check in worked example 2 so that it reads {edited}. Run worked example 2 with that line, explain why the edited check now fails for the same program state, and restore it."
+                    f"A careless edit rewrote the check in worked example 2 as {edited}. Explain the failure, then restore it."
                 )
             elif v and _occurs(v["broken"], rows[0]["shown"] + "\n" + shown):
                 row["task"] = (
-                    f"A regression changed {original} to {edited} in worked example 2. Run worked example 2 with that change, use the failure to explain the defect and repair it without changing the check."
+                    f"A regression changed {original} to {edited} in worked example 2. Repair it without changing the check."
                 )
             elif v:
                 row["task"] = (
-                    f"A regression changed one token in worked example 2, so one line now reads {edited}. Run worked example 2 with that line, use the failure to locate the defect and repair it without changing the check."
+                    f"A one-token regression in worked example 2 makes a line read {edited}. Repair it without changing the check."
                 )
             else:
                 row["task"] = (
-                    f"Introduce one deliberate defect into a copy of worked example 2 that makes {cond} fail, then explain how the panic message leads back to the faulty line."
+                    f"Break one line of worked example 2 so {cond} fails, then trace the panic back to it."
                 )
             row["expected"] = (
-                f"Before the repair the program panics with {panic}; after it the line reads {original} again and {_lower_first(c['expected'])}"
+                f"The defective run panics with {panic}; after restoring {original}, {observed}"
                 if v
-                else f"The defective copy panics with {panic}; the repaired copy reproduces the worked observation: {_lower_first(c['expected'])}"
+                else f"Your defect panics with {panic}; undoing it restores the worked observation: {observed}"
             )
             row["verify"] = (
-                f"Keep the failing and the repaired runs. Explain why the edited check rejects the same program state that {cond} accepts."
+                f"The edited check fails with message {panic} for a state that {cond} accepts."
                 if v and v["in_check"]
-                else f"Keep the failing and the repaired runs. Explain why the changed token alters the value tested by {cond} for this input."
-            )
-        elif v and not v["in_check"]:
-            row["verify"] = (
-                f"Keep a check equivalent to {cond}. As a control, change {original} to {edited}: the run must panic with {panic}. Restore the line before continuing."
+                else f"The failing run shows message {panic}; after the repair {cond} holds again."
             )
         elif v:
             row["verify"] = (
-                f"Keep a check equivalent to {cond}. As a control, change {original} to {edited} inside that check: it must panic with {panic}, which shows the check can fail. Restore it."
+                f"Your solution must keep {cond} true. Control: changing {original} to {edited} panics with message {panic}; revert it."
             )
         else:
             row["verify"] = (
-                f"Keep a check equivalent to {cond} and confirm the success line. Then name an input that would make it fail and the panic message ({panic}) you would expect."
+                f"Your solution must keep {cond} true. Control: an input that falsifies it fails with message {panic}; revert it."
             )
-        third = (
-            f"Predict the effect of changing {original} to {edited} before running anything. If the prediction is hard, trace that line again with the original input."
-            if v and not v["in_check"]
-            else f"Name one input that would make {cond} false. A check that no input can falsify is not evidence."
-        )
-        if index == 0 and v:
-            third = f"Compute the checked value with {edited} in place before running, then compare it with the value {cond} expects."
-        elif index == 1 and v:
-            third = f"Compare {edited} with the same line in worked example 2 and state the claim each version makes."
         row["hints"] = [
-            "Restate the expected observation: "
-            + (c["expected"] if index < 2 else row["expected"]),
-            f"The check {cond} decides this case. List the values it reads and trace each one back to the input before changing code.",
-            third,
+            "Restate the expected observation: " + c["expected"],
+            nudges[index],
+            steps[index] if index < 2 else _first_sentence(c["explanation"]),
         ]
         rows.append(row)
     return rows
@@ -267,7 +296,13 @@ def render():
             f"### Worked example {i + 1}: {c['title']}\n\n{c['task']}\n\n```go\n{program(s, i + 1)}\n```\n\n**Observe:** {c['expected']}\n\n{c['explanation']}"
             for i, c in enumerate(s["cases"][:2])
         )
-        rows = practice(ident, s)
+        teach = TEACHING[ident]
+        notes = REASONING.get(ident)
+        if len(teach["hints"]) != len(s["cases"]) or len(teach["steps"]) != 2:
+            raise ValueError(ident + " needs six authored hints and two near-answer steps")
+        if bool(notes) == ("transfer" in teach):
+            raise ValueError(ident + " needs exactly one transfer, in reasoning.py or teaching.py")
+        rows = practice(ident, s, teach["hints"], teach["steps"])
         exercises = "\n\n".join(
             f"### Exercise {i}: {r['title']}\n\n{r['task']}\n\n**Expected:** {r['expected']}\n\n**Verify:** {r['verify']}"
             for i, r in enumerate(rows, 1)
@@ -278,6 +313,14 @@ def render():
             for i, r in enumerate(rows, 1)
         )
         minutes = MINUTES.get(ident, 90 if n <= 16 else 120)
+        if n < len(SPECS):
+            next_step = (
+                f"Next: go-{n + 1:03d}, {SPECS[n]['title']} ([criteria]({STUDY}#when-to-move-on))."
+            )
+        else:
+            next_step = (
+                f"This is the final Go lesson ([completion criteria]({STUDY}#when-to-move-on))."
+            )
         outcome = OUTCOMES[ident]
         if outcome.lower().startswith("explain and implement"):
             raise ValueError(ident + " needs a specific outcome")
@@ -305,13 +348,7 @@ def render():
 
 ## Run this lesson
 
-Choose Go in the unified Docker classroom. Save your own pad before experimenting. The prepared worker stages it as `main.go`, compiles it, and executes the resulting program with bounded time and output. The pad is one source file. It does not supply interactive input, arbitrary command-line arguments, package installation, Kubernetes credentials or a host Docker socket. Every ordinary reference here uses the standard library, synthetic local data and explicit checks. A failed `check` panics and produces a nonzero process result; do not remove it to make the run appear successful.
-
-The explanatory solution snippets belong inside `func main()` unless they declare a helper. `check` is a tiny teaching helper that panics when a condition is false. The separate reference supplies required imports and helpers and implements all six cases. Use that complete source only after an attempt or an explicit reveal. For an independently prepared Go project, the equivalent local build is `go build -o lesson main.go`, followed by `./lesson`; use Linux or WSL 2 for that optional workflow. Compiling proves syntax and type consistency, while the executed checks establish the stated example contracts.
-
-{s["boundary"]}
-
-Each worked example below is a complete Go file. Copy one whole block into your saved pad and run it. Example 2 includes the first case as well as the second, so its setup is complete. Its supporting declarations may be reused in later investigations. The separate reference implements all six cases.
+{s["boundary"] + chr(10) + chr(10) if s["boundary"] else ""}Run each worked example as one complete file in your saved pad ([run steps]({STUDY}#run-a-lesson)).
 
 ## Worked example / walkthrough
 
@@ -319,19 +356,19 @@ Each worked example below is a complete Go file. Copy one whole block into your 
 
 ## Predict before running
 
-For each example, write the input values, the state that can change, and the expected observation. Explain which result would disprove your current interpretation. For concurrency, predict a guaranteed relationship rather than an arbitrary scheduling order. For an error case, identify whether it is rejected at compilation or returned during execution.
+{teach["predict"]}
 
 ## Exercises
 
 {exercises}
 
-Implement these in the answer-free learner source. Keep one independent check per claim. A task can require tracing, construction, a changed input or a deliberate safe failure. Do not run a data race, corrupt memory or contact a shared cluster merely to demonstrate why it would be wrong.
+Work in the answer-free learner source, `{paths["starter"]}` ([exercise contract]({STUDY}#work-an-exercise)).
 
 ## Common pitfalls and diagnosis
 
-Read a compiler error from the first location in your source, then fix one cause at a time. Unused imports and variables are errors in Go; add an import when its use exists, rather than copying a large unused import list. A panic from `check` identifies a violated example contract. Compare the actual value with the expected value and inspect the state transition that produced it. A returned `error` is a value that the caller must handle; an ignored error can make later output look plausible while the original operation failed.
+{teach["pitfall"]}
 
-The lesson-specific explanations in the two examples identify the important counterexamples. Extend that reasoning to every investigation: explain why a plausible alternative would fail, and preserve a tiny input that distinguishes it. Treat empty data, missing values and cancellation as domain cases with explicit policies. In concurrent work, replace sleeps used as synchronization with channels, mutexes or an explicit ownership protocol.
+General compiler, panic and error diagnosis is in the [study guide]({STUDY}#diagnose-a-failure).
 
 ## Progressive hints
 
@@ -339,11 +376,15 @@ The lesson-specific explanations in the two examples identify the important coun
 
 ## Self-check and retrieval
 
-Close the reference. Rebuild one normal case and one boundary case from a blank pad. Explain the role of {s["terms"][0][0].lower()} without using its name in the definition. Then change the domain while keeping the same invariant. Record the new input, your prediction and the observed output. If your program passes only because its input is hard-coded, explain which part would need a reusable function in a larger project.
+{teach["retrieval"]}
+
+The general [retrieval routine]({STUDY}#self-check-and-retrieval) still applies.
 
 ## Next step and sources
 
-[Primary language or library documentation]({s["source"]}), reviewed 2026-10-23. The teaching explanations and synthetic fixtures are original. Continue with the next lesson when you can explain the six observations and diagnose a changed case without copying its answer.
+Source: [{source_label(s["source"])}]({s["source"]}), reviewed 2026-10-23.
+
+{next_step}
 
 ## Ask an AI tutor about this lesson
 
@@ -357,15 +398,14 @@ Check compiler or runtime evidence, distinguish local models from real integrati
 and finish with a fresh boundary case about {s["terms"][-1][0].lower()}.
 ```
 """
-        answers = f"# {ident}: explained solutions\n\nThese are comparison material after an attempt or explicit reveal. The executable reference implements all six cases in one `main.go`.\n\n## Mechanism\n\n{s['model']}\n\n{s['anatomy']}\n\n"
-        notes = REASONING.get(ident)
+        answers = f"# {ident}: explained solutions\n\nCompare after an attempt ([using solutions]({STUDY}#use-the-solutions)). `{paths['reference']}` implements all six cases.\n\n## Mechanism\n\n{s['model']}\n\n{s['anatomy']}\n\n"
         if notes and len(notes["cases"]) != len(rows):
             raise ValueError(ident + " reasoning needs one entry per case")
         for i, r in enumerate(rows, 1):
             lead = ""
             if i <= 2:
                 lead = f"The unchanged code is worked example {i}:\n\n"
-            answers += f"## {i}. {r['title']}\n\n{r['task']}\n\n{lead}```go\n{r['shown']}\n```\n\n**Expected:** {r['expected']}\n\n{r['explanation']}\n\n"
+            answers += f"## {i}. {r['title']}\n\n{r['task']}\n\n{lead}```go\n{r['shown']}\n```\n\n**Expected:** {r['expected']}\n\n**Verify:** {r['verify']}\n\n{r['explanation']}\n\n"
             if notes:
                 answers += "".join(
                     f"**{label}.** {text}\n\n"
@@ -373,11 +413,7 @@ and finish with a fresh boundary case about {s["terms"][-1][0].lower()}.
                 )
         answers += (
             "## Transfer after comparison\n\n"
-            + (
-                notes["transfer"]
-                if notes
-                else "Return to your own pad and reproduce one check with a new input. Explain why the check rejects a plausible wrong implementation. Keep the distinction between a pure model, an in-process fake, and a real external system visible in your notes."
-            )
+            + (notes["transfer"] if notes else teach["transfer"])
             + "\n"
         )
         starter = (

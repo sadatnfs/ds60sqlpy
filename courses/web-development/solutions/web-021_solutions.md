@@ -1,6 +1,6 @@
 # web-021: explanatory solutions
 
-Open this after your own attempt. Each answer explains the lesson's synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in `courses/web-development/guides/web-021.md`.
+Attempt each exercise before reading; the mechanism is in `courses/web-development/guides/web-021.md` ([using these answers](../STUDY-GUIDE.md#solutions)).
 
 ## Exercise 1: Explain why two cards on the same viewport can use different layouts.
 
@@ -76,4 +76,6 @@ Open this after your own attempt. Each answer explains the lesson's synthetic fi
 
 ## Reference comparison
 
-Open `courses/web-development/solutions/web-021_solution.html` only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; its success message is not an accessibility audit or proof of responsive behavior at every size.
+The reference reads the computed container-type of the first slot and requires inline-size, so it catches a missing container declaration or one placed on the card itself. It does not measure either card's layout or confirm that the narrow slot keeps the stacked baseline, so resize the preview and compare both instances.
+
+Open `courses/web-development/solutions/web-021_solution.html` after saving your attempt ([comparing with the reference](../STUDY-GUIDE.md#references)).

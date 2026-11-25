@@ -194,12 +194,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/c/solutions/c-004_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="c-004-explained-solutions">c-004: explained solutions<a class="heading-anchor" href="#c-004-explained-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after an attempt or explicit reveal. The complete executable reference, <code>c-004_solution.c</code>, implements all six cases, from the &quot;trace a prefix sum&quot; case to the &quot;transfer reverse traversal safely&quot; case, in one <code>main.c</code>.</p>
+<p><code>c-004_solution.c</code> assembles the &quot;trace a prefix sum&quot; case through the &quot;transfer reverse traversal safely&quot; case in one <code>main.c</code>.</p>
+<p>Compare only after an attempt: <a href="../STUDY-GUIDE.md.html#compare-and-transfer">Compare and transfer</a>.</p>
 <h3 id="mechanism-and-assumptions">Mechanism and assumptions<a class="heading-anchor" href="#mechanism-and-assumptions" aria-label="Link to this section">#</a></h3>
 <p>Control flow chooses which operations execute. A loop invariant describes what remains true before and after each iteration, connecting repeated steps to the intended result. For summation, the accumulator equals the sum of elements already visited. Empty input is then handled by the initial state rather than a special fabricated element. Index-based loops should use a half-open range from zero to length. An off-by-one error in C can access memory outside the array without a guaranteed runtime exception. Prove the bound before access rather than relying on a crash to identify mistakes.</p>
 <p>if treats zero as false and nonzero as true. for combines initialization, condition and update. while checks before the body; do-while checks afterward. break exits the nearest loop or switch, while continue skips to the next iteration. switch cases fall through unless control exits explicitly. Use size_t for lengths and indices, and avoid decrement loops that accidentally wrap an unsigned counter below zero.</p>
 <h3 id="exercise-1-trace-a-prefix-sum-change-one-input">Exercise 1: Trace a prefix sum: change one input<a class="heading-anchor" href="#exercise-1-trace-a-prefix-sum-change-one-input" aria-label="Link to this section">#</a></h3>
-<p>Copy worked example 1, the &quot;trace a prefix sum&quot; case, into a scratch pad and change <code>int values[] = {2, 4, 6};</code> to <code>int values[] = {3, 4, 6};</code>. Before running, predict which CHECK fails and which value it sees in place of the worked result (the result is 12); then run it and restore the original line.</p>
+<p>In worked example 1, change <code>int values[] = {2, 4, 6};</code> to <code>int values[] = {3, 4, 6};</code>. Predict which value the CHECK on <code>sum == 12</code> sees, then run and restore.</p>
 <p>The unchanged code is worked example 1:</p>
 <pre class="highlighted-code"><code class="language-c"><span class="syntax-keyword">int</span> values<span class="syntax-punctuation">[</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">6</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span>
 <span class="syntax-keyword">int</span> sum <span class="syntax-operator">=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span>
@@ -207,10 +208,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   sum <span class="syntax-operator">+</span><span class="syntax-operator">=</span> values<span class="syntax-punctuation">[</span>i<span class="syntax-punctuation">]</span><span class="syntax-punctuation">;</span>
 <span class="syntax-punctuation">}</span>
 CHECK<span class="syntax-punctuation">(</span>sum <span class="syntax-operator">=</span><span class="syntax-operator">=</span> <span class="syntax-number">12</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
-<p><strong>Expected:</strong> With <code>int values[] = {3, 4, 6};</code> the run stops with <code>Check failed</code> at the CHECK on <code>sum == 12</code>, because the &quot;trace a prefix sum&quot; case no longer shows that the result is 12. Restoring <code>int values[] = {2, 4, 6};</code> brings that observation back.</p>
+<p><strong>Expected:</strong> <code>Check failed</code> at <code>sum == 12</code>; restoring <code>int values[] = {2, 4, 6};</code> passes again.</p>
+<p><strong>Verify:</strong> Name the value that made <code>sum == 12</code> false, where worked example 1 showed that the result is 12.</p>
 <p>Each iteration adds exactly one valid element. The index is proven less than the declared length before access.</p>
 <h3 id="exercise-2-handle-zero-iterations-debug-a-regression">Exercise 2: Handle zero iterations: debug a regression<a class="heading-anchor" href="#exercise-2-handle-zero-iterations-debug-a-regression" aria-label="Link to this section">#</a></h3>
-<p>A regression changed one token in worked example 2, the &quot;handle zero iterations&quot; case, so one line now reads <code>for (size_t i = 0; i &lt;= length; i++) {</code>. Run the example with that line, use the failing CHECK to find why the accumulator remains zero no longer holds and repair the line without changing the CHECK.</p>
+<p>Worked example 2 now has a line reading <code>for (size_t i = 0; i &lt;= length; i++) {</code>. Repair it so that the accumulator remains zero again.</p>
 <p>The unchanged code is worked example 2:</p>
 <pre class="highlighted-code"><code class="language-c"><span class="syntax-keyword">int</span> values<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span><span class="syntax-number">9</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span>
 <span class="syntax-keyword">size_t</span> length <span class="syntax-operator">=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">;</span>
@@ -219,7 +221,8 @@ CHECK<span class="syntax-punctuation">(</span>sum <span class="syntax-operator">
   sum <span class="syntax-operator">+</span><span class="syntax-operator">=</span> values<span class="syntax-punctuation">[</span>i<span class="syntax-punctuation">]</span><span class="syntax-punctuation">;</span>
 <span class="syntax-punctuation">}</span>
 CHECK<span class="syntax-punctuation">(</span>sum <span class="syntax-operator">=</span><span class="syntax-operator">=</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
-<p><strong>Expected:</strong> Before the repair the run stops with <code>Check failed</code> at the CHECK on <code>sum == 0</code>. Once the line reads <code>for (size_t i = 0; i &lt; length; i++) {</code> again, the &quot;handle zero iterations&quot; case again shows that the accumulator remains zero.</p>
+<p><strong>Expected:</strong> <code>Check failed</code> at <code>sum == 0</code> until the line reads <code>for (size_t i = 0; i &lt; length; i++) {</code> again.</p>
+<p><strong>Verify:</strong> Explain how <code>for (size_t i = 0; i &lt;= length; i++) {</code> changes the value <code>sum == 0</code> tests, using your failing and repaired runs.</p>
 <p>The example uses a real array because zero-length arrays are not standard C17. The logical length may still be zero.</p>
 <h3 id="exercise-3-find-the-first-match">Exercise 3: Find the first match<a class="heading-anchor" href="#exercise-3-find-the-first-match" aria-label="Link to this section">#</a></h3>
 <p>Search 3, 8, 8 and stop on the first 8.</p>
@@ -233,6 +236,7 @@ CHECK<span class="syntax-punctuation">(</span>sum <span class="syntax-operator">
 <span class="syntax-punctuation">}</span>
 CHECK<span class="syntax-punctuation">(</span>found <span class="syntax-operator">=</span><span class="syntax-operator">=</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> The index is 1.</p>
+<p><strong>Verify:</strong> Keep a CHECK equivalent to <code>found == 1</code>. Control edit: changing <code>if (values[i] == 8) {</code> to <code>if (values[i] != 8) {</code> must fail it; then restore it.</p>
 <p>The sentinel equals length and is never dereferenced. break preserves the first-match contract.</p>
 <h3 id="exercise-4-include-an-exact-threshold">Exercise 4: Include an exact threshold<a class="heading-anchor" href="#exercise-4-include-an-exact-threshold" aria-label="Link to this section">#</a></h3>
 <p>Classify score 60 with passing threshold 60.</p>
@@ -240,6 +244,7 @@ CHECK<span class="syntax-punctuation">(</span>found <span class="syntax-operator
 <span class="syntax-keyword">bool</span> passed <span class="syntax-operator">=</span> score <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-number">60</span><span class="syntax-punctuation">;</span>
 CHECK<span class="syntax-punctuation">(</span>passed<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> The boundary passes.</p>
+<p><strong>Verify:</strong> Keep a CHECK equivalent to <code>passed</code>. Control edit: changing <code>bool passed = score &gt;= 60;</code> to <code>bool passed = score &gt; 60;</code> must fail it; then restore it.</p>
 <p>This distinguishes an inclusive threshold from a strict comparison. The policy should be stated before choosing the operator.</p>
 <h3 id="exercise-5-terminate-a-switch-case">Exercise 5: Terminate a switch case<a class="heading-anchor" href="#exercise-5-terminate-a-switch-case" aria-label="Link to this section">#</a></h3>
 <p>Map code 2 to value 20 with explicit breaks.</p>
@@ -257,6 +262,7 @@ CHECK<span class="syntax-punctuation">(</span>passed<span class="syntax-punctuat
 <span class="syntax-punctuation">}</span>
 CHECK<span class="syntax-punctuation">(</span>result <span class="syntax-operator">=</span><span class="syntax-operator">=</span> <span class="syntax-number">20</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> The result is 20.</p>
+<p><strong>Verify:</strong> Keep a CHECK equivalent to <code>result == 20</code>. Control edit: changing <code>int code = 2, result = 0;</code> to <code>int code = 3, result = 0;</code> must fail it; then restore it.</p>
 <p>An omitted break can execute later case statements. Deliberate fallthrough needs a clear explanation and compiler-supported annotation policy.</p>
 <h3 id="exercise-6-transfer-reverse-traversal-safely">Exercise 6: Transfer reverse traversal safely<a class="heading-anchor" href="#exercise-6-transfer-reverse-traversal-safely" aria-label="Link to this section">#</a></h3>
 <p>Visit indices 2, 1 and 0 using a positive-count loop.</p>
@@ -268,9 +274,10 @@ CHECK<span class="syntax-punctuation">(</span>result <span class="syntax-operato
 <span class="syntax-punctuation">}</span>
 CHECK<span class="syntax-punctuation">(</span>out <span class="syntax-operator">=</span><span class="syntax-operator">=</span> <span class="syntax-number">321</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> The reversed number is 321.</p>
+<p><strong>Verify:</strong> Keep a CHECK equivalent to <code>out == 321</code>. Control edit: changing <code>out = out * 10 + values[i];</code> to <code>out = out + 10 + values[i];</code> must fail it; then restore it.</p>
 <p>The subtraction occurs only while remaining is positive. A condition i&gt;=0 on size_t would never become false after wraparound.</p>
 <h3 id="after-comparison">After comparison<a class="heading-anchor" href="#after-comparison" aria-label="Link to this section">#</a></h3>
-<p>Add a fresh distinguishing input for the &quot;transfer reverse traversal safely&quot; case to your own c-004 source. Explain why every access in the case code inside <code>main</code> stays within a live object and each owned resource is released. An expected loop invariant failure belongs in the test contract; undefined behavior does not. Keep diagnostics and sanitizer evidence for the &quot;handle zero iterations&quot; case apart from ordinary output: the fixture proves its stated loop invariant, half-open range and fallthrough assumptions, not universal safety.</p></article>
+<p>Search 5, 8, 8 for the last 8 by walking down with Exercise 6&#x27;s positive-count loop, <code>for (size_t remaining = 3; remaining &gt; 0; remaining--)</code> with <code>i = remaining - 1</code>. CHECK that the answer is index 2, and that a search for 9 reports the sentinel 3 after touching only indices 2, 1 and 0. Then explain why <code>for (size_t i = 2; i &gt;= 0; i--)</code> never ends: <code>i &gt;= 0</code> is always true for an unsigned type, so the decrement past 0 wraps to <code>SIZE_MAX</code>.</p></article>
   </main>
 </body>
 </html>

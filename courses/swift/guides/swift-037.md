@@ -24,9 +24,9 @@ Wrapper behavior is part of the containing type's semantics. Decide whether inva
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles the saved pad as `main.swift` with Swift 6 language checking. An explicit `@main` type contains `static func main() async throws`; the fixed compiler uses `-parse-as-library -swift-version 6`. The examples use the standard library and portable Foundation. `precondition` makes a violated invariant fail the process. The fixed pad accepts one source file, without arbitrary command arguments, interactive input or dependency installation. SwiftUI, UIKit, Apple simulators and application signing belong to the separately prepared macOS/Xcode project labs, never the Linux pad.
+Both examples repeat the `Clamped` wrapper and the `Control` struct above `LessonMain`. The projection is read-only because `projectedValue` has only a getter: assigning to `control.$level` fails to compile with a message that `$level` is immutable. Task 4 asks for a written argument rather than code.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Compile contract, starter stop and success marker: [running a lesson](../STUDY-GUIDE.md#running-a-lesson).
 
 
 
@@ -34,7 +34,7 @@ Start with the answer-free learner artifact in your saved classroom pad. It deli
 
 `@propertyWrapper` marks a wrapper type. wrappedValue supplies get/set behavior. `@Clamped var level` applies it. A projectedValue is read through `$level` when declared.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+Each example ends with a trace; method: [tracing a program](../STUDY-GUIDE.md#tracing-a-program).
 
 ## Worked example / walkthrough
 
@@ -77,6 +77,8 @@ struct LessonMain {
 
 **Observe:** Assignments are clamped into zero through ten.
 
+**Trace.** `Control()` runs the wrapper's `init(wrappedValue: 0, 0...10)`, because the default value 0 becomes `wrappedValue` and `(0...10)` supplies the second argument. The initializer clamps 0 into range and stores it. Assigning 12 calls the `wrappedValue` setter, which computes the maximum of 12 and 0, then the minimum of that and 10, and stores 10. Assigning -2 gives the maximum of -2 and 0, which is 0, and the minimum with 10 leaves 0.
+
 ### Example B: Retain valid interior values
 
 The projected information explains the policy without exposing mutable internal storage.
@@ -115,6 +117,8 @@ struct LessonMain {
 
 **Observe:** A valid interior value is unchanged and the projection exposes the range.
 
+**Trace.** Assigning 4 passes through the same setter: the maximum of 4 and 0 is 4 and the minimum of 4 and 10 is 4, so an interior value is stored unchanged. Reading `control.$level` calls the `projectedValue` getter, which returns the range 0...10. The projection lets callers inspect the policy, but it exposes neither the private stored `value` nor a way to change the range after construction.
+
 ## Exercises
 
 1. **Predict and explain.** Trace initialization and both setter calls.
@@ -129,13 +133,15 @@ struct LessonMain {
 
 6. **Transfer and justify.** Choose a wrapper or explicit validation method based on whether assignment can fail meaningfully.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Log each task in the [evidence table](../STUDY-GUIDE.md#recording-exercise-evidence) before opening the explanation.
 
 ## Common pitfalls and diagnosis
 
 A wrapper is not a substitute for validating external input. Hidden side effects make ordinary-looking assignment hard to reason about. Document projection and mutation semantics.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+The initializer clamps too, which matters for the memberwise path: `Control(level: 15)` stores 10, not 15. A wrapper that clamped only in the setter would let that out-of-range value in. Task 5's set is -1, 0, 10 and 11. For task 4, a payment of 120 against a limit of 100 must be rejected with an error, since silently charging 100 hides the problem from the user.
+
+Repair routine: [building a regression case](../STUDY-GUIDE.md#building-a-regression-case).
 
 ## Progressive hints
 
@@ -145,11 +151,15 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 ## Self-check and next step
 
-Explain Property wrapper, Wrapped value, Projection without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+Explain which wrapper initializer runs for `@Clamped(0...10) var level = 0` and how each argument is supplied. State what `$level` returns and why it cannot be assigned. Give one field where silent clamping is a sensible display policy and one where it would mislead.
+
+Then follow the general [self-check routine](../STUDY-GUIDE.md#self-check-routine) and save your pad.
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://docs.swift.org/swift-book/documentation/the-swift-programming-language/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+[Documentation](https://docs.swift.org/swift-book/documentation/the-swift-programming-language/): Property wrappers, wrapped values, projected values and their initializers are covered in the second half of the Properties chapter.
+
+Provenance and limits: [sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

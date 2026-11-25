@@ -196,7 +196,10 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <article class="document"><h2 id="r-060-capstone-an-analytical-visualization-with-an-evidence-record">r-060: Capstone: an analytical visualization with an evidence record<a class="heading-anchor" href="#r-060-capstone-an-analytical-visualization-with-an-evidence-record" aria-label="Link to this section">#</a></h2>
 <p><strong>Level:</strong> advanced. <strong>Direct prerequisites:</strong> <code>r-059</code>, <code>r-050</code></p>
 <h3 id="run-and-retain-your-work">Run and retain your work<a class="heading-anchor" href="#run-and-retain-your-work" aria-label="Link to this section">#</a></h3>
-<p>Open <code>r-060</code> in <code>/classroom</code> and use the prepared <code>r-statistics</code> profile. Each Run evaluates one <code>main.R</code> script in a fresh offline R process, so define every input in the script; an earlier Run leaves no variables behind. Work in the <a href="../lessons/r-060.R.html">starter</a>. The <a href="../solutions/r-060_reference.R.html">complete reference</a> ends by printing <code>r-060 reference checks passed</code>, and the <a href="../solutions/r-060_solutions.md.html">explained answers</a> are there for deliberate comparison after your own attempt. This chapter draws figures: base plots are captured as PNG, ggplot2 and Plotly objects must be printed explicitly, and the classroom keeps at most two figures per run. The <a href="../README.md.html">course overview</a> describes saved work, figure capture and the prepared package versions.</p>
+<p>The starter holds ten records, A1 to A5 and B1 to B5, with one missing value in each group, and an empty results list. Run it and build the eligibility ledger by hand: ten rows, eight observed and two missing. Then compute group means of 2.5 and 4.5 from the eight observed values, and derive every display from those two tables rather than from new calculations.</p>
+<p>Work in the <a href="../lessons/r-060.R.html">starter</a> under the <a href="../STUDY-GUIDE.md.html#run-a-chapter">run rules</a>.</p>
+<p>The <a href="../solutions/r-060_reference.R.html">complete reference</a> ends by printing <code>r-060 reference checks passed</code>.</p>
+<p>This chapter draws figures; read <a href="../STUDY-GUIDE.md.html#figures">figure capture</a> before printing them.</p>
 <h3 id="outcome-and-mechanism">Outcome and mechanism<a class="heading-anchor" href="#outcome-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Build a linked numerical, static and interactive analysis whose denominators, identities, uncertainty and delivery limits can be reviewed.</p>
 <p>An analytical visualization should connect its displayed marks to an explicit calculation. This capstone begins with identified synthetic records, a declared missing-value policy and two groups. The raw data, summary table and figures remain separate artifacts so a reviewer can reconstruct every value rather than trusting the appearance of a polished chart.</p>
@@ -287,7 +290,7 @@ trace <span class="syntax-operator">&lt;-</span> plotly<span class="syntax-opera
 <li><a href="https://stat.ethz.ch/R-manual/R-devel/library/stats/html/TDist.html">R Student t distribution</a></li>
 </ul>
 <h3 id="continue">Continue<a class="heading-anchor" href="#continue" aria-label="Link to this section">#</a></h3>
-<p>No later chapter lists <code>r-060</code> as a direct prerequisite; the <a href="../README.md.html">course map</a> lists every chapter with its prerequisites.</p>
+<p>No later chapter lists <code>r-060</code> as a direct prerequisite; see the <a href="../README.md.html">course map</a>.</p>
 <h3 id="ask-an-ai-tutor">Ask an AI tutor<a class="heading-anchor" href="#ask-an-ai-tutor" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for r-060 (Capstone: an analytical visualization with an evidence record).
 Read the guide and my saved attempt. Explain the relevant R mechanism,

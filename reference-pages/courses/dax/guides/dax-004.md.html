@@ -194,10 +194,10 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/dax/guides/dax-004.md</code></p>
     </header>
     <article class="document"><h2 id="dax-004-relationships-are-filter-rules-not-materialized-joins">dax-004: Relationships are filter rules, not materialized joins<a class="heading-anchor" href="#dax-004-relationships-are-filter-rules-not-materialized-joins" aria-label="Link to this section">#</a></h2>
-<p><strong>Stage 1: Models, grain and a first query.</strong> Level: beginner. Read the mechanisms, trace the worked cases and retain your own draft. <strong>Direct prerequisites:</strong> <code>dax-003</code></p>
+<p><strong>Stage 1: Models, grain and a first query.</strong> Level: beginner. <strong>Direct prerequisites:</strong> <code>dax-003</code></p>
 <h3 id="how-to-use-this-offline-lesson">How to use this offline lesson<a class="heading-anchor" href="#how-to-use-this-offline-lesson" aria-label="Link to this section">#</a></h3>
-<p>This is an offline DAX editing lesson. No DAX compiler, semantic-model engine, Power BI account or network connection is required. Worked tables describe the named reference and model, not execution of your draft. Save, compare and export source; do not interpret a comparison or completion marker as a passed program run.</p>
-<p>Open the <a href="../lessons/dax-004.dax.html">starter</a>. Compare the <a href="../solutions/dax-004_reference.dax.html">named reference</a> and <a href="../solutions/dax-004_solutions.md.html">reasoning</a> when ready. The <a href="../models/retail/model.json.html">model specification</a> identifies every fixture table, column type, key and relationship. The <a href="../models/README.md.html">fixture handbook</a> displays the original data and explains each table grain.</p>
+<p>The starter asks for two product counts that sound alike: products in the dimension and products that were sold. Predict both with no filter and again with a filter on the single line S4, and note which table each count reads. The <a href="../STUDY-GUIDE.md.html#offline-study-boundary">offline study boundary</a> explains what a worked table can show.</p>
+<p>Files: <a href="../lessons/dax-004.dax.html">starter</a>, <a href="../solutions/dax-004_reference.dax.html">reference</a> and <a href="../solutions/dax-004_solutions.md.html">reasoning</a>.</p>
 <h3 id="the-question-and-the-mechanism">The question and the mechanism<a class="heading-anchor" href="#the-question-and-the-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Predict asymmetric filter propagation and identify when a SQL join analogy breaks.</p>
 <p>A relationship connects typed columns and declares cardinality, active status and filter direction. The engine uses it when determining eligible rows. It does not promise that selecting any fact row will also shrink every connected dimension. In our single-direction star, a Product selection filters Sales, but a direct Sales filter does not flow backward to Product.</p>
@@ -207,14 +207,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The paired queries count Product and Sales in the same outer context. COUNTROWS(Product) is not a measure of sales activity. Filtering Sales[SaleID] leaves Product&#x27;s single-direction incoming eligibility unchanged. Bidirectional filtering would change this behavior and can introduce ambiguous paths, so do not enable it merely to make one number look convenient.</p>
 <p>Concepts to explain in your own words: <strong>relationship direction</strong>, <strong>one side</strong>, <strong>many side</strong>, <strong>relationship versus join</strong>.</p>
 <h3 id="model-and-context-contract">Model and context contract<a class="heading-anchor" href="#model-and-context-contract" aria-label="Link to this section">#</a></h3>
-<p>The ordinary star follows Product → Sales, Customer → Sales and Date → Sales through OrderDate. The ShipDate relationship is inactive unless a case explicitly activates it. Filters flow from the one side to the many side. Additional analytical tables have only the relationships declared in their named model; a similar column name does not create a relationship.</p>
+<p>Product to Sales is one-to-many and filters only from Product toward Sales. Blue covers the Notebook (key 1) and the Mug (key 3), whose six lines total 163 USD. The Bag (key 4) has no sales, so the dimension holds one more product than the fact references. See the <a href="../models/retail/model.json.html">model specification</a> and the <a href="../STUDY-GUIDE.md.html#the-retail-star">shared star rules</a>.</p>
 <pre class="highlighted-code"><code class="language-text">Product (one)  --&gt; Sales (many) &lt;-- Customer (one)
                        ^
                        | active OrderDate
                     Date (one)
                        | inactive ShipDate
                        +------&gt; Sales</code></pre>
-<p>All amounts in ordinary Sales are USD after the line discount, before tax and returns. The Date fixture is complete for 2024 and 2025; a short result table is a selected slice, not the whole calendar. JSON <code>null</code> in the worked-results sidecar means DAX BLANK, not the text &quot;null&quot;.</p>
 <h3 id="worked-cases">Worked cases<a class="heading-anchor" href="#worked-cases" aria-label="Link to this section">#</a></h3>
 <p>The following query-local declarations are shared by these cases. They do not create persisted measures in this classroom.</p>
 <pre class="highlighted-code"><code class="language-dax"><span class="syntax-keyword">DEFINE</span>
@@ -265,8 +264,10 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 </tbody></table></div>
 <p>A product-count card showing four is consistent with the declared model. The mistake would be naming that count &#x27;products sold in this line&#x27;.</p>
 <p>Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table.</p>
+<h3 id="a-misconception-to-test">A misconception to test<a class="heading-anchor" href="#a-misconception-to-test" aria-label="Link to this section">#</a></h3>
+<p>Learners who know SQL often expect a filter on Sales to shrink Product the way an inner join would. In this model it does not. Filtering SaleID to S4 leaves one Sales line worth 27 USD, yet COUNTROWS(Product) still returns 4, because single-direction relationships carry filters from the one side to the many side only. The count is correct for the question it answers, which is how many catalog products are visible. The error lies in labeling it as products sold. DISTINCTCOUNT over Sales[ProductKey] answers that question and returns 1 for S4.</p>
 <h3 id="practice-prediction-construction-and-diagnosis">Practice: prediction, construction and diagnosis<a class="heading-anchor" href="#practice-prediction-construction-and-diagnosis" aria-label="Link to this section">#</a></h3>
-<p>Retain your formula or written reasoning, the stated context, contributing rows or values, and a conclusion with its unit. These notes are your own study record; they do not show that a formula ran.</p>
+<p>Record each answer as the <a href="../STUDY-GUIDE.md.html#practice-routine">practice routine</a> describes.</p>
 <h4 id="exercise-1-predict">Exercise 1: Predict<a class="heading-anchor" href="#exercise-1-predict" aria-label="Link to this section">#</a></h4>
 <p>Predict DISTINCTCOUNT(Sales[ProductKey]) in the S4 context.</p>
 <h4 id="exercise-2-change-one-condition">Exercise 2: Change one condition<a class="heading-anchor" href="#exercise-2-change-one-condition" aria-label="Link to this section">#</a></h4>
@@ -289,13 +290,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>An inner join removes the unmatched event.</li>
 </ol>
 <h3 id="self-check-and-next-step">Self-check and next step<a class="heading-anchor" href="#self-check-and-next-step" aria-label="Link to this section">#</a></h3>
-<p>Explain one changed result without quoting the formula alone. Identify which rows, filters, relationship or evaluation scope changed, then construct a counterexample to a plausible wrong interpretation. Keep your draft separate from the supplied reference. A small correct derivation does not certify performance, model security or broad expertise.</p>
+<p>Under a Color = Green filter, predict COUNTROWS(Product), COUNTROWS(Sales) and NetRevenue, then explain why the fact results are empty even though the dimension result is not. Say what a bidirectional relationship would and would not change in this case. The <a href="../STUDY-GUIDE.md.html#self-check-routine">self-check routine</a> applies too.</p>
 <p>Continue to <a href="dax-005.md.html">dax-005</a> when its prerequisites make sense, or revisit this stage from the <a href="../README.md.html">course map</a>.</p>
 <h3 id="official-references-and-evidence-limits">Official references and evidence limits<a class="heading-anchor" href="#official-references-and-evidence-limits" aria-label="Link to this section">#</a></h3>
 <ul>
 <li><a href="https://learn.microsoft.com/en-us/power-bi/transform-model/desktop-relationships-understand">Power BI: model relationships</a></li>
 </ul>
-<p>Documentation was reviewed for this original course on 2026-10-25. Version-sensitive features have explicit notes. Source/model checks and independent fixture arithmetic are not a DAX parser, compiler, semantic engine, real RLS test or performance measurement.</p>
+<p>Review date and evidence limits: <a href="../STUDY-GUIDE.md.html#references-and-evidence-limits">study guide</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for dax-004. Read its guide and the named model.
 Review my draft and prediction. Ask me to enumerate the relevant rows and context.

@@ -4,18 +4,15 @@
 
 Intermediate; about 110 minutes, plus any optional hardware experiment. Direct prerequisites: `cuda-017`, `cuda-025`
 
-The order supports learning at your own pace. Reading and CPU reasoning remain
-available when NVIDIA hardware is absent. Advanced hardware features need their
-own capability checks and are not prerequisites for opening this chapter.
+Pacing, evidence labels and platform rules for every chapter are in the [CUDA study guide](../../STUDY-GUIDE.md).
 
 ## Learning objectives
 
 Run Compute Sanitizer on a broken fixture, confirm the intended diagnostic and verify that the repair passes numerical tests.
 
-Work through *Compute Sanitizer as evidence, with its limits* with the concrete cases below. Finish with this evidence:
-the broken fixture produces the intended diagnostic, the repair passes that check and numerical tests still pass. Distinguish an algorithmic
-calculation, a compiled artifact and an actual device observation when explaining
-what your work establishes.
+**Scope:** Distinguish memory-access, shared-memory hazard, initialization and synchronization checks.
+
+**Evidence to produce:** The broken fixture produces the intended diagnostic, the repair passes that check and numerical tests still pass.
 
 ## Purpose, vocabulary and mental model
 
@@ -31,28 +28,17 @@ Compute Sanitizer provides several checks with different scopes. Memcheck invest
 
 ## How to run and study this lesson
 
-Use the saved reading worksheet in `/classroom`; the reading pad does not execute
-CUDA. For the bounded calculation, select **CPU model (Python)**, whose
-answer-free starter supplies the literal fixtures and task contract. The
-[CUDA C++ study workflow](../README.md) covers platforms, optional GPU
-compilation and evidence labels. In a prepared Python environment you can also
-run the separate [CPU reference](../references/cuda-026_cpu.py) from the
-repository root:
+Trace worked example 1 by hand, then run the [CPU reference](../references/cuda-026_cpu.py) from the repository root:
 
 ```sh
 python courses/cuda/cpp/references/cuda-026_cpu.py
 ```
 
-Its assertions check the stated numerical result or model invariant; console
-text is evidence of this CPU model only, not of CUDA execution.
-
 ## Worked example 1: trace the mechanism
 
 For an array of four elements, valid indices are 0 through 3. A kernel that accesses index four has an off-by-one defect even if the returned allocation happens to contain readable bytes nearby. Memcheck is an appropriate additional diagnostic, while a CPU bounds model pinpoints the invalid logical access without a GPU.
 
-The complete CPU model below intentionally models only the named arithmetic,
-layout, dependency or capability decision. It does not model GPU scheduling,
-caches, instruction timing or device memory visibility.
+**Why:** Index 4 is outside the array whether or not nearby bytes happen to be readable.
 
 ```python
 n = 4
@@ -68,41 +54,37 @@ checker = {
 print({"CPU_bounds_audit": invalid, "tool_selection": checker})
 ```
 
-**Expected observation:** Every assertion succeeds. A representative CPU output is:
+**Expected observation:** every assertion succeeds, and the CPU model prints:
 
 ```text
 {'CPU_bounds_audit': [4], 'tool_selection': {'out_of_bounds': 'memcheck', 'shared_hazard': 'racecheck', 'uninitialized': 'initcheck', 'invalid_barrier': 'synccheck'}}
 ```
 
-Integers, shapes and ordering must match exactly; only assertions with an explicit
-tolerance accept small floating-point differences. A printed duration is a model
-output, not a measured GPU benchmark.
+**Check:** The reference asserts invalid == [4]; memcheck should report the access at index 4 on a GPU.
 
 ## Worked example 2: change a meaningful condition
 
 A consumer reads shared tile\([2]\) before its producer writes. Racecheck can add evidence about that hazard. Replacing the missing barrier with a host sleep does not establish an ordering relationship between those threads. Repair the dependency and still validate returned numerical values.
 
-Before applying this example to your own program, write down which inputs are
-read, which result is produced, and the condition that makes the comparison
-valid. Keep the original case as a regression check when changing a boundary.
+**Why:** Only a barrier orders the store to tile[2] before the load by another thread.
+
+**Check:** Run racecheck after the fix and also compare outputs to the CPU reference.
 
 ## Six progressive exercises
 
-Exercises 1 and 2 are guided reconstructions of the worked examples; exercises
-3-6 change an input, diagnose a defect, test a boundary and transfer the idea.
-For each one, keep the calculation, output, diagram or failure policy you
-produce so another reader can compare it with the worked cases. If the hint is
-not enough, reread the mechanism paragraph and the bounded CPU assertion.
-
 ### Exercise 1
 
-Predict and trace the first worked example before running its CPU reference. Write every intermediate quantity that leads to the stated result, including units or ownership where applicable.
+Reconstruct worked example 1 on paper before running its CPU reference. Audit indices 0 through 4 against n = 4 on the CPU and run memcheck on the GPU build.
+
+**Trap to avoid:** Treating a run that did not crash as proof of safety ignores that the slack after the allocation absorbed the bad read.
 
 **Hint:** Start with the literal input and intermediate quantities in worked example 1.
 
 ### Exercise 2
 
-Reconstruct the second worked example without copying its conclusion. Identify the changed input or condition, show the resulting calculation or dependency, and explain why it differs from the first example.
+Rework worked example 2 without copying its conclusion. Restore the barrier between producer and consumer and use racecheck as supporting evidence.
+
+**Trap to avoid:** A host sleep happens outside the kernel and creates no ordering between device threads.
 
 **Hint:** Identify exactly which condition changes in worked example 2.
 
@@ -110,11 +92,15 @@ Reconstruct the second worked example without copying its conclusion. Identify t
 
 Choose a checker for an uninitialized global output read.
 
+**Trap to avoid:** Memcheck alone accepts reads inside a valid allocation even if they were never written.
+
 **Hint:** Use the first worked example to establish the relevant quantities, then change only the requested input.
 
 ### Exercise 4
 
 Why should the command set --error-exitcode 99?
+
+**Trap to avoid:** Searching logs by hand for error text misses reports when log formats change.
 
 **Hint:** Locate the failed phase or violated dependency before proposing a repair.
 
@@ -122,35 +108,33 @@ Why should the command set --error-exitcode 99?
 
 Does a passing check at \(\mathrm{n}=32\) establish \(\mathrm{n}=33\) safety?
 
+**Trap to avoid:** Assuming a clean full-warp run covers every size skips exactly the guards most likely to be wrong.
+
 **Hint:** Check what the algorithm is allowed to read, write or assume at this boundary.
 
 ### Exercise 6
 
 Design an acceptance sequence after a shared-memory repair.
 
+**Trap to avoid:** Benchmarking under the sanitizer reports instrumented timings that do not reflect the real kernel.
+
 **Hint:** State the output contract and which observations are needed in the new application.
 
 ## Common mistakes and diagnosis
 
-A tempting but incorrect claim in this chapter is: **a sanitizer pass proves speed, all global ordering, or correctness for every input. .**
-
-For the concrete failure exercise, why should the command set --error-exitcode 99?
-Preserve the original input and the stage where behavior diverged, and compare
-with the CPU model before changing hardware configuration.
+A tempting but incorrect claim: **A sanitizer pass proves speed, all global ordering, or correctness for every input.** A sanitizer reports only problems that occurred in the inputs you ran, and it changes timing, so it says nothing about speed. It also checks access and hazard rules, not whether the arithmetic is correct. Worked example 1 pairs memcheck with a CPU bounds test because each covers what the other misses; worked example 2 still validates values after the race is repaired.
 
 ## Self-check, retrieval and transfer
 
-Explain the first example without its code, then use the second example to state
-one assumption that matters. Complete Exercise 3 independently, use Exercise 4 to
-diagnose a plausible defect, check the boundary in Exercise 5, and retain the
-application contract from Exercise 6. Compare the [separate explanations](../solutions/cuda-026_solutions.md)
-only after your attempt or a deliberate reveal. A reading marker records your
-choice; it does not certify hardware qualification or expert mastery.
+1. Which checker targets shared-memory hazards?
+2. Why are sanitizer runs not performance evidence?
+3. Why is a host sleep not a repair for a missing barrier?
+
+Short answers are in the [separate explanations](../solutions/cuda-026_solutions.md#self-check-answers); compare only after an attempt.
 
 ## Primary references
 
-Check the documentation that matches your prepared toolkit before optional
-hardware execution.
+Use the documentation that matches your prepared toolkit.
 
 - [Compute Sanitizer](https://docs.nvidia.com/compute-sanitizer/ComputeSanitizer/index.html)
 

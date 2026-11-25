@@ -1,10 +1,10 @@
 # spark-002: Scala values, types, expressions, and the REPL
 
-Authored classroom lesson. Content availability and runtime readiness are separate checks. Read the current capability notice before running. Opening or saving this lesson does not install tools, start a cluster or prove mastery.
+Scala programs are built from expressions that produce values, and every value has a type. This lesson prices a small basket with immutable `Long` values, shows where an `Int` would overflow, chooses a message with an `if` expression and repairs an attempt to reassign a `val`. It also explains what a REPL is, even though the classroom compiles the whole file and shows results through `println`.
 
 ## Level and prerequisites
 
-Beginner; 60 minutes. Direct prerequisites: `spark-001`. Use the subject browser to open prerequisite lessons or review their concepts. Runtime readiness is checked separately before execution.
+Beginner; 60 minutes. Direct prerequisites: `spark-001`. Pinned versions: [execution baseline](../execution-baseline.md). Shared run steps: [study guide](../STUDY-GUIDE.md#run-a-language-lesson).
 
 Learner artifact: [spark-002.scala](../lessons/spark-002.scala). Keep [solutions](../solutions/spark-002_solutions.md) closed until an attempt or explicit reveal.
 
@@ -155,8 +155,10 @@ Repeat the calculation with 350L and predict the sign.
 
 ## Self-check
 
-- Can you reproduce each exact observation without reading the official answer?
-- Can you explain a failed check using the lesson's model, rather than changing an expected value?
+- The basket total is `400L`. Why does `val total` keep that value even if a later line computes a different amount, and how would you show the new amount instead?
+- `2147483647L + 1L` gives `2147483648L`, but the same sum computed as `Int` wraps around to a negative number. Why is the `Long` result the right contract for money in cents?
+- `budget = 350L` after `val budget = 450L` fails to compile. Why is introducing `revisedBudget` a repair rather than a workaround?
+- With a 350L budget the remainder becomes `-50L` and the label switches to over budget. Which expression chose the label, and why does the total stay `400L`?
 
 ## Retrieval and transfer
 

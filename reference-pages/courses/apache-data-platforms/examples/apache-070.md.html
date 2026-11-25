@@ -194,14 +194,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/apache-data-platforms/examples/apache-070.md</code></p>
     </header>
     <article class="document"><h2 id="atlas-apache-070-prepared-command-notebook">Atlas apache-070 prepared command notebook<a class="heading-anchor" href="#atlas-apache-070-prepared-command-notebook" aria-label="Link to this section">#</a></h2>
-<p>Copy the owned Atlas project and read PREPARATION.md. Default local server execution is omitted until a supported native Java 8 graph/index stack exists.</p>
+<p>In the copied Atlas project, <code>plan</code> shows the <code>transform</code> process with <code>raw</code> as its input and <code>curated</code> as its output. The <code>unrecorded</code> dataset has no process at all, which makes it the negative case for lineage.</p>
 <pre class="highlighted-code"><code class="language-bash">bash run.sh prepare
 bash run.sh plan</code></pre>
-<p>These actions validate a portable native Docker client and print original payloads without contacting a server. For an explicitly prepared owned fixture server with untracked credentials, deliberate apply and read-only check are:</p>
+<p>With an owned Atlas server prepared through PREPARATION.md, these actions send the payloads and then ask for lineage around <code>curated</code> in both directions to depth 3:</p>
 <pre class="highlighted-code"><code class="language-bash">bash run.sh apply
 bash run.sh check</code></pre>
 <p>Check requires actual raw-to-process and process-to-curated edges and excludes the intentionally unrecorded asset from that path. This is explicit API lineage, not an automatic hook result.</p>
-<p>Prepared payloads are not actual Atlas observations. Never place credentials or Authorization headers in notebooks, source, command arguments or receipts.</p></article>
+<p>Until those calls run, the edges exist only in a payload. This lineage comes from explicit API entities, so no hook or crawler is being tested.</p></article>
   </main>
 </body>
 </html>

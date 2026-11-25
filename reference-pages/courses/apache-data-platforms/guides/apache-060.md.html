@@ -230,13 +230,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>For hybrid queries, inspect offline coverage, the selected time boundary, real-time consumption and event timestamps. For upserts, inspect key definition, comparison values, partitioning and active record state. Keep those diagnostic paths separate because changing a time boundary cannot fix a stale version choice.</p>
 <p><strong>Interview discussion: is a hybrid table equivalent to an upsert table?</strong> No. Hybrid routing divides historical and fresh coverage, while upsert chooses a current record for a key. The two cases show why overlap prevention and version resolution need different fixtures, independent oracles and lifecycle tests.</p>
 <h3 id="complete-worked-source">Complete worked source<a class="heading-anchor" href="#complete-worked-source" aria-label="Link to this section">#</a></h3>
-<p>This is a project-only command notebook. Read and edit it in the classroom; run its explicitly labeled commands from the copied owned Docker workshop. The classroom does not execute these service commands.</p>
+<p>The classroom does not execute these service commands. See the <a href="../STUDY-GUIDE.md.html#workshop-notebooks">workshop rules</a>.</p>
 <h2 id="pinot-apache-060-command-notebook">Pinot apache-060 command notebook<a class="heading-anchor" href="#pinot-apache-060-command-notebook" aria-label="Link to this section">#</a></h2>
-<p>Use these commands only from the copied owned Pinot project described in its README. The classroom Markdown pad does not execute Docker commands.</p>
+<p>These two files come from the copied Pinot project. <code>realtime-table.json</code> defines the stream table <code>ds60_orders_stream</code> with time column <code>event_ts</code>, and <code>schema.json</code> holds the field types; neither file declares primary key columns or an upsert mode.</p>
 <pre class="highlighted-code"><code class="language-bash">cat realtime-table.json
 cat schema.json</code></pre>
 <p>This displays a prepared real-time table, not a hybrid/upsert acceptance test. Create separately named hybrid and upsert experiments with explicit time boundaries, primary keys, comparison columns and source identities as described in the guide.</p>
-<p>Native service acceptance and each advanced extension have distinct entries in <code>QUALIFICATION.md</code>. Source/configuration presence is not an observed service result.</p>
+<p>Hybrid tables and upsert behavior appear in QUALIFICATION.md only as prepared extensions. A receipt for either needs the time boundary, the primary key and the comparison column that decided each duplicate.</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
 <ul>
 <li><a href="https://github.com/pinot-contrib/pinot-docs/blob/latest/basics/components/table/logical-table.md">Hybrid tables</a></li>

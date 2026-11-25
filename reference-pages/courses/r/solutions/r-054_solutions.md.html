@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/r/solutions/r-054_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="r-054-reference-reasoning">r-054: reference reasoning<a class="heading-anchor" href="#r-054-reference-reasoning" aria-label="Link to this section">#</a></h2>
-<p>Use the <a href="r-054_reference.R.html">complete reference</a> with the guide&#x27;s declared inputs and runtime. Every worked example is also a standalone script.</p>
+<p>Run the <a href="r-054_reference.R.html">complete reference</a> under the <a href="../STUDY-GUIDE.md.html#run-a-chapter">run rules</a>.</p>
 <h3 id="why-the-implementation-has-this-shape">Why the implementation has this shape<a class="heading-anchor" href="#why-the-implementation-has-this-shape" aria-label="Link to this section">#</a></h3>
 <p>The reference verifies the statistic applied by each geometry and includes a deliberate invalid count-layer specification. It keeps raw records and precomputed counts separate even when their final heights match.</p>
 <p>The line-group and histogram checks inspect transformed layer data, not just object classes. Exactly two plots are printed in the reference. Interpretation of patterns and visual accessibility still require the delivered figure to be reviewed.</p>
@@ -248,7 +248,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Tempting mistake:</strong> Trying several boundaries and keeping the one that shows the expected pattern. That treats the layer transformation as evidence about the data.</p>
 <p><strong>Verify:</strong> Rebuilding with boundary = 1 returns counts 2 and 2, and both versions return a count total of 4.</p>
 <h3 id="what-the-checks-establish">What the checks establish<a class="heading-anchor" href="#what-the-checks-establish" aria-label="Link to this section">#</a></h3>
-<p>The reference makes 5 <code>stopifnot()</code> checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.</p></article>
+<p>The checks confirm that counting raw records and drawing a precomputed table both give bar heights 2, 1 and 3, that <code>geom_bar()</code> with a y mapping fails to build, that two person-specific lines get two separate groups, and that the histogram&#x27;s bins hold four observations in total. They do not show that a chosen bin width supports a particular conclusion.</p>
+<p>The reference makes 5 <code>stopifnot()</code> checks; see <a href="../STUDY-GUIDE.md.html#what-a-passing-run-proves">what a passing run proves</a>.</p></article>
   </main>
 </body>
 </html>

@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/r/solutions/r-034_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="r-034-reference-reasoning">r-034: reference reasoning<a class="heading-anchor" href="#r-034-reference-reasoning" aria-label="Link to this section">#</a></h2>
-<p>Use the <a href="r-034_reference.R.html">complete reference</a> with the guide&#x27;s declared inputs and runtime. Every worked example is also a standalone script.</p>
+<p>Run the <a href="r-034_reference.R.html">complete reference</a> under the <a href="../STUDY-GUIDE.md.html#run-a-chapter">run rules</a>.</p>
 <h3 id="why-the-implementation-has-this-shape">Why the implementation has this shape<a class="heading-anchor" href="#why-the-implementation-has-this-shape" aria-label="Link to this section">#</a></h3>
 <p>The unique id/visit key determines one value per output cell. No aggregation is necessary.</p>
 <p>The missing B visit 2 cell means no supplied record here. Keeping the original long rows or a separate presence table preserves that distinction.</p>
@@ -242,7 +242,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Tempting mistake:</strong> Folding an aggregation into the reshape, such as averaging duplicates without saying so, and calling the result the same data.</p>
 <p><strong>Verify:</strong> <code>wide$value.2 - wide$value.1</code> returns 2 and 3, and <code>nrow(long)</code> returns 4 measurements.</p>
 <h3 id="what-the-checks-establish">What the checks establish<a class="heading-anchor" href="#what-the-checks-establish" aria-label="Link to this section">#</a></h3>
-<p>The reference makes 4 <code>stopifnot()</code> checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.</p></article>
+<p>The checks confirm that id and visit form a unique key, that reshaping to wide and back restores the original long table apart from attributes, that a duplicated key is detected before reshaping, and that removing B&#x27;s second visit produces an NA in its <code>value.2</code> cell rather than a dropped row. They do not decide whether such an NA should later be imputed.</p>
+<p>The reference makes 4 <code>stopifnot()</code> checks; see <a href="../STUDY-GUIDE.md.html#what-a-passing-run-proves">what a passing run proves</a>.</p></article>
   </main>
 </body>
 </html>

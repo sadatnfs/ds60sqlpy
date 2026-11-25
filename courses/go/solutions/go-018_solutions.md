@@ -1,6 +1,6 @@
 # go-018: explained solutions
 
-These are comparison material after an attempt or explicit reveal. The executable reference implements all six cases in one `main.go`.
+Compare after an attempt ([using solutions](../STUDY-GUIDE.md#use-the-solutions)). `courses/go/solutions/go-018_solution.go` implements all six cases.
 
 ## Mechanism
 
@@ -10,7 +10,7 @@ fs.ReadFile accepts an fs.FS and a slash-separated relative path. fs.ValidPath r
 
 ## 1. Read an in-memory file: change one input
 
-Copy worked example 1 into a scratch pad and change `files := fstest.MapFS{"data/input.txt": &fstest.MapFile{Data: []byte("red\n")}}` to `files := fstest.MapFS{"data/input.txt!": &fstest.MapFile{Data: []byte("red\n")}}`. Before running, predict which check fails and which value it now sees; then run it and restore the original line.
+Copy worked example 1, change `files := fstest.MapFS{"data/input.txt": &fstest.MapFile{Data: []byte("red\n")}}` to `files := fstest.MapFS{"data/input.txt!": &fstest.MapFile{Data: []byte("red\n")}}` and predict the failure before running; then restore the line.
 
 The unchanged code is worked example 1:
 
@@ -20,13 +20,15 @@ v, err := fs.ReadFile(files, "data/input.txt")
 check(err == nil && string(v) == "red\n", "file read")
 ```
 
-**Expected:** The changed run panics with `file read` because `err == nil && string(v) == "red\n"` no longer holds. Restoring the original line brings back the worked observation: the bytes decode to red followed by a newline.
+**Expected:** The edited run panics with `file read` because `err == nil && string(v) == "red\n"` no longer holds.
+
+**Verify:** Restoring `files := fstest.MapFS{"data/input.txt": &fstest.MapFile{Data: []byte("red\n")}}` makes the check pass again with the worked observation: the bytes decode to red followed by a newline.
 
 The algorithm uses the same filesystem interface without reaching the host disk. That isolates content behavior from permissions and mount configuration.
 
 ## 2. Observe a missing file: debug a regression
 
-Introduce one deliberate defect into a copy of worked example 2 that makes `errors.Is(err, fs.ErrNotExist)` fail, then explain how the panic message leads back to the faulty line.
+Break one line of worked example 2 so `errors.Is(err, fs.ErrNotExist)` fails, then trace the panic back to it.
 
 The unchanged code is worked example 2:
 
@@ -35,7 +37,9 @@ _, err := fs.ReadFile(fstest.MapFS{}, "absent.txt")
 check(errors.Is(err, fs.ErrNotExist), "missing file")
 ```
 
-**Expected:** The defective copy panics with `missing file`; the repaired copy reproduces the worked observation: the error matches fs.ErrNotExist.
+**Expected:** Your defect panics with `missing file`; undoing it restores the worked observation: the error matches fs.ErrNotExist.
+
+**Verify:** The failing run shows message `missing file`; after the repair `errors.Is(err, fs.ErrNotExist)` holds again.
 
 Preserving a typed cause lets a caller distinguish optional absence from unreadable or malformed content.
 
@@ -48,6 +52,8 @@ check(!fs.ValidPath("../private") && fs.ValidPath("data/input.txt"), "relative p
 ```
 
 **Expected:** The traversal path is invalid and the relative data path is valid.
+
+**Verify:** Your solution must keep `!fs.ValidPath("../private") && fs.ValidPath("data/input.txt")` true. Control: changing `check(!fs.ValidPath("../private") && fs.ValidPath("data/input.txt"), "relative paths")` to `check(fs.ValidPath("../private") && fs.ValidPath("data/input.txt"), "relative paths")` panics with message `relative paths`; revert it.
 
 This validates the logical naming grammar. Real disk confinement still needs a filesystem API that safely handles symlinks and concurrent changes.
 
@@ -72,6 +78,8 @@ check(err == nil && count == 2, "walk")
 
 **Expected:** Exactly two files are observed.
 
+**Verify:** Your solution must keep `err == nil && count == 2` true. Control: changing `if e != nil {` to `if e == nil {` panics with message `walk`; revert it.
+
 The callback must handle the supplied error before dereferencing the entry. Traversal order should not become an accidental business rule.
 
 ## 5. Separate empty content from absence
@@ -84,6 +92,8 @@ check(err == nil && len(v) == 0, "empty file")
 ```
 
 **Expected:** Reading succeeds and returns zero bytes.
+
+**Verify:** Your solution must keep `err == nil && len(v) == 0` true. Control: changing `v, err := fs.ReadFile(fstest.MapFS{"empty": &fstest.MapFile{}}, "empty")` to `v, err := fs.ReadFile(fstest.MapFS{"empty!": &fstest.MapFile{}}, "empty")` panics with message `empty file`; revert it.
 
 An empty file and a missing file are different states. Collapsing both into an empty string loses evidence needed for diagnosis.
 
@@ -107,8 +117,10 @@ check(err != nil, "escape rejected")
 
 **Expected:** item.txt is created inside the root and the escaping name is rejected.
 
+**Verify:** Your solution must keep `err != nil` true. Control: changing `check(err != nil, "escape rejected")` to `check(err == nil, "escape rejected")` panics with message `escape rejected`; revert it.
+
 os.Root, added in Go 1.24, resolves every name beneath the directory it was opened on and refuses names, including symbolic links, that would leave it. fs.ValidPath and fs.Sub only describe names; os.Root enforces confinement on the host filesystem. The deferred RemoveAll releases only the directory this case created.
 
 ## Transfer after comparison
 
-Return to your own pad and reproduce one check with a new input. Explain why the check rejects a plausible wrong implementation. Keep the distinction between a pure model, an in-process fake, and a real external system visible in your notes.
+Separate three questions whenever a program touches files: is the name syntactically valid, is it confined to the tree the program owns and may the program remove what it created? Later lessons read configuration and fixtures through io/fs and clean up temporary state. Depending on fs.FS instead of the os package also lets tests run against in-memory trees like these.

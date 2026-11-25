@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cuda/python/solutions/cuda-089_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="cuda-089-explained-solutions">cuda-089: explained solutions<a class="heading-anchor" href="#cuda-089-explained-solutions" aria-label="Link to this section">#</a></h2>
-<p>These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.</p>
+<p>Compare with your <a href="../lessons/cuda-089.md.html">worksheet</a> attempt.</p>
 <h3 id="exercise-1-build-a-parameter-ledger">Exercise 1: Build a parameter ledger<a class="heading-anchor" href="#exercise-1-build-a-parameter-ledger" aria-label="Link to this section">#</a></h3>
 <p>Count each actual array and its dtype.</p>
 <p><strong>Approach.</strong> Build a ledger of training state for 1000 float32 parameters: parameters, gradients and two Adam moment arrays, four arrays of <code>1000*4</code> bytes, for 16000 bytes total.</p>
@@ -231,9 +231,19 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Why it is correct here.</strong> Peak memory grows roughly linearly with batch size, so a few points allow extrapolation. Bounded steps avoid crashing a shared GPU.</p>
 <p><strong>A plausible wrong approach.</strong> Doubling until the program crashes uses an out-of-memory error as the measurement and can disrupt other users.</p>
 <p><strong>How to verify.</strong> Fit peak memory against batch size from the recorded points and check the slope matches the activation ledger.</p>
+<h3 id="self-check-answers">Self-check answers<a class="heading-anchor" href="#self-check-answers" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>Why does Adam need more memory than plain SGD?</strong> Adam typically keeps two moment tensors per parameter in addition to the parameters and gradients.</li>
+</ol>
+<ol start="2">
+<li><strong>What does TensorFlow memory growth change?</strong> How memory is reserved over time. It does not make a workload whose live bytes exceed the device fit.</li>
+</ol>
+<ol start="3">
+<li><strong>Does a container memory limit cap GPU memory?</strong> Not generally. Host container limits do not impose a per-process GPU memory quota, so plan bounded experiments explicitly.</li>
+</ol>
 <h3 id="reference-observation">Reference observation<a class="heading-anchor" href="#reference-observation" aria-label="Link to this section">#</a></h3>
 <p>State 16000 bytes and activation 4096 bytes for the example.</p>
-<p>The reference file is <code>courses/cuda/python/references/cuda-089_cpu.py</code>. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.</p></article>
+<p>Asserted by <code>courses/cuda/python/references/cuda-089_cpu.py</code>.</p></article>
   </main>
 </body>
 </html>

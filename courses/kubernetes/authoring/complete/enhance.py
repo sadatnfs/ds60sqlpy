@@ -1,4 +1,5 @@
 from author import BASE, ROOT, canonical_markdown, hello
+from notes import NOTES
 import copy, json
 
 # These are host-only finite commands, never admitted by the normal worker.
@@ -93,7 +94,7 @@ for n, resource in objects.items():
     text = path.read_text()
     block = f"""## Inspect the specific owned object
 
-Only after the chapter's host capability is provisioned and its resources remain present, use the explicit receipt fields described in [host-labs.md](../host-labs.md). A completed one-shot browser Run has already cleaned its objects. The following read does not provision the missing capability and does not justify changing credentials after a Forbidden result.
+Read only while this lesson's objects still exist ([owned live reads](../STUDY-GUIDE.md#owned-live-reads)).
 
 Bash on Linux, macOS or Ubuntu under WSL 2:
 
@@ -104,13 +105,13 @@ Bash on Linux, macOS or Ubuntu under WSL 2:
 kubectl --kubeconfig "$LAB_KUBECONFIG" --context "$LAB_CONTEXT" --namespace "$LAB_NAMESPACE" get {resource} -o {output}
 ```
 
-Windows uses the same Bash commands inside WSL 2. The lab adapter refuses native Windows credential handling, so do not run kubectl against the receipt from PowerShell. From PowerShell, only open your WSL 2 distribution (the name reported by `wsl.exe --list --verbose`), change to your checkout with its Linux path, then run the Bash block above unchanged:
+From PowerShell, only open WSL 2 and run the Bash block there ([why](../STUDY-GUIDE.md#owned-live-reads)):
 
 ```powershell
 wsl.exe --distribution Ubuntu
 ```
 
-Retain only the fields needed by this chapter's prediction. A NotFound result may be expected after one-shot cleanup; a Forbidden result may identify a deliberately absent advanced capability. Neither result authorizes an ambient-context fallback.
+{NOTES[n]["inspect"]}
 
 """
     if n in (22, 28):

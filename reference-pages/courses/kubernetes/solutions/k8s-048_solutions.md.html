@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/kubernetes/solutions/k8s-048_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="k8s-048-explanatory-solutions">k8s-048: explanatory solutions<a class="heading-anchor" href="#k8s-048-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit reveal. These explanations describe the synthetic topology and stated API contracts. They are not fabricated runtime receipts.</p>
+<p>Attempt each exercise first, then compare (<a href="../STUDY-GUIDE.md.html#solutions-and-the-ai-tutor">study guide</a>).</p>
 <h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
 <p>DNS maps names to records such as IP addresses. Kubernetes cluster DNS creates service records according to namespace and cluster domain. A short name can resolve differently depending on the caller’s namespace and search configuration. A fully qualified service name makes the intended scope clearer.</p>
 <p>For a typical cluster domain cluster.local, a Service named api in namespace study has a name like api.study.svc.cluster.local. The cluster domain is configurable, so do not hardcode it as a universal fact in a reusable client. A DNS answer establishes name resolution, not a listening process or healthy application.</p>

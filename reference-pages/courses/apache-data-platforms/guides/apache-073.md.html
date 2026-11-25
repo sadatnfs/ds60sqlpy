@@ -234,16 +234,16 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   region<span class="syntax-punctuation">;</span></code></pre>
 <p>Imagine the orders table carries a PII classification in Atlas. Whether this query succeeds depends on the engine and its authorizer, for example a Ranger tag policy that reads Atlas classifications, not on Atlas itself. To claim enforcement you need a recorded denial from the engine for a principal that lacks access, alongside a success for one that has it. Without that pair, the classification documents a decision but does not prove it is applied.</p>
 <h3 id="complete-worked-source">Complete worked source<a class="heading-anchor" href="#complete-worked-source" aria-label="Link to this section">#</a></h3>
-<p>This is a project-only command notebook. Read and edit it in the classroom; run its explicitly labeled commands from the copied owned Docker workshop. The classroom does not execute these service commands.</p>
+<p>The classroom does not execute these service commands. See the <a href="../STUDY-GUIDE.md.html#workshop-notebooks">workshop rules</a>.</p>
 <h2 id="atlas-apache-073-prepared-command-notebook">Atlas apache-073 prepared command notebook<a class="heading-anchor" href="#atlas-apache-073-prepared-command-notebook" aria-label="Link to this section">#</a></h2>
-<p>Copy the owned Atlas project and read PREPARATION.md. Default local server execution is omitted until a supported native Java 8 graph/index stack exists.</p>
+<p>In the copied Atlas project, <code>client.py</code> reads credentials only from the untracked environment file and refuses an endpoint URL carrying a user, password, path or query. <code>plan</code> needs no credentials at all.</p>
 <pre class="highlighted-code"><code class="language-bash">bash run.sh prepare
 bash run.sh plan</code></pre>
-<p>These actions validate a portable native Docker client and print original payloads without contacting a server. For an explicitly prepared owned fixture server with untracked credentials, deliberate apply and read-only check are:</p>
+<p>With fixture credentials for a prepared owned server, <code>check</code> also repeats one type lookup with a deliberately wrong password and expects 401 or 403:</p>
 <pre class="highlighted-code"><code class="language-bash">bash run.sh apply
 bash run.sh check</code></pre>
 <p>Check requires an actual 401 or 403 for a deliberately invalid fixture credential. A valid-principal authorization comparison and actual denied data-engine query remain independent tests.</p>
-<p>Prepared payloads are not actual Atlas observations. Never place credentials or Authorization headers in notebooks, source, command arguments or receipts.</p>
+<p>A rejected bad password shows that authentication works. It does not show what a valid but unprivileged user may do, and an Atlas metadata policy is not a data-engine denial.</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
 <ul>
 <li><a href="https://atlas.apache.org/api/v2/index.html">Atlas REST types/entities/lineage API</a></li>

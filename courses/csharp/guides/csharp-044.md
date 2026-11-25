@@ -24,9 +24,9 @@ Latency, throughput and failure rate describe different aspects of a service. A 
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles your saved pad as `Program.cs` in its fixed .NET 10 project. C# 14 is the matching language generation. This route uses the prepared framework libraries; it does not accept arbitrary project files, NuGet packages, command arguments or interactive input. The explicit `Program.Main` entrypoint makes compilation and execution visible. `Check` throws on a false condition in every build configuration, unlike conditional debugging assertions.
+`Event` is a record declared after `Main`, and the examples serialize it with `JsonSerializer` from `System.Text.Json`. No logger or metrics package is needed: the lesson is about what an event contains and how its counts add up, which the pad can check exactly without timing anything.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Compile contract, starter stop and success marker: [running a lesson](../STUDY-GUIDE.md#running-a-lesson).
 
 
 
@@ -34,7 +34,7 @@ Start with the answer-free learner artifact in your saved classroom pad. It deli
 
 Use a record for a stable event schema and serialize explicit safe fields. Stopwatch is appropriate for elapsed duration, but tests should not assert a narrow timing threshold. Keep correlation identity separate from user secrets.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+Each example ends with a trace; method: [tracing a program](../STUDY-GUIDE.md#tracing-a-program).
 
 ## Worked example / walkthrough
 
@@ -84,6 +84,8 @@ internal static class Program {
 
 **Observe:** The serialized event contains an explicit rejected outcome.
 
+**Trace.** `new Event("fixture-1", "validate", "rejected", 2)` fills four named fields. `JsonSerializer.Serialize` writes them under their C# names, producing an object with OperationId, Stage, Outcome and Count. Parsing that text and reading the Outcome property returns rejected. The default serializer keeps Pascal case, so `GetProperty("outcome")` would throw `KeyNotFoundException`. Readers of the event must use the exact field names it was written with.
+
 ### Example B: Keep outcome counts consistent
 
 The counts come from the emitted events, so a record that was never classified would make the first check fail. The denominator is stated explicitly; changing it changes the metric meaning.
@@ -131,6 +133,8 @@ internal static class Program {
 
 **Observe:** The accepted and rejected events account for all five submitted records, and the rejection rate is 0.4.
 
+**Trace.** Two events share operation op-7: accepted carries 3 and rejected carries 2. `events.Sum` adds the counts to 5, matching `submitted`, so every input is accounted for. The rate casts 2 to `double` before dividing by 5, giving exactly the 0.4 the check compares against. Without the cast, `2 / 5` is integer division and yields 0.
+
 ## Exercises
 
 1. **Predict and explain.** Identify safe fields and the event population.
@@ -145,13 +149,15 @@ internal static class Program {
 
 6. **Transfer and justify.** Design a latency report that includes percentiles, sample count and measurement boundaries.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Log each task in the [evidence table](../STUDY-GUIDE.md#recording-exercise-evidence) before opening the explanation.
 
 ## Common pitfalls and diagnosis
 
 Correlation identifiers should not contain credentials or private payloads. High-cardinality dimensions can overwhelm metric systems. Missing observations must not be silently counted as successful operations.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+For task 4, a counter incremented before the save completes reports success for writes that then fail; move it after the awaited persistence call. For task 5, zero submitted records gives NaN from `0.0 / 0` and `DivideByZeroException` from integer `0 / 0`, so choose an explicit no-data value instead of either one.
+
+Repair routine: [building a regression case](../STUDY-GUIDE.md#building-a-regression-case).
 
 ## Progressive hints
 
@@ -161,11 +167,15 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 ## Self-check and next step
 
-Explain Structured event, Correlation identity, Metric without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+List which `Event` fields are safe to log and which input content must never appear. Explain why the counts must sum to `submitted`. For task 6, describe a latency report with p50, p95 and p99, the number of samples behind each, and where the stopwatch starts and stops.
+
+Then follow the general [self-check routine](../STUDY-GUIDE.md#self-check-routine) and save your pad.
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://learn.microsoft.com/en-us/dotnet/csharp/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+[Documentation](https://learn.microsoft.com/en-us/dotnet/csharp/): The `System.Text.Json` serialization articles and the .NET diagnostics overview cover event shapes, naming and measurement.
+
+Provenance and limits: [sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

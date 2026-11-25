@@ -2,6 +2,8 @@
 
 Open these answers only after attempting state_dict, torch.export and inference parity yourself. They reuse the guide's literal inputs, starting from Example A, Create a known inference model, so a discrepancy points at one step. The executable companion runs the assertions; this page explains why each one tests state_dict, Exported program, Dynamic dimension. After a pass, choose a new input for exercise 6, Declare a bounded dynamic batch and clean up, without looking.
 
+After comparing, follow the [review steps](../STUDY-GUIDE.md#after-the-solutions).
+
 ## Mechanism review
 
 A state dictionary stores named parameters and buffers, not the complete Python architecture. Reconstruct the intended module and validate its configuration before loading state. torch.export captures a constrained tensor program for inference and records input-shape assumptions. These artifacts solve different problems. A default export can specialize to the example batch size; dynamic dimensions must be declared and tested if variable batches are required.
@@ -173,6 +175,3 @@ assert not folder.exists()
 
 **Verify:** In a fresh process, the exercise checks confirm `dynamic(three)` matches `restored(three)` within 1e-06 and `not folder.exists()`.
 
-## Review after comparison
-
-Repeat exercise 4, Check both artifacts in a fresh process, with one changed fixture value and predict the difference before running it. Keep your failing attempt at exercise 5, Expose static batch specialization, beside the repaired result. A missing framework is not a failing assertion. These solutions use only local fixtures.

@@ -1,19 +1,6 @@
 # tf-003: worked solutions
 
-Open this reference after an attempt or an explicit reveal request. Preserve
-your own version beside it. The [learner guide](../guides/tf-003.md) contains
-the public fixture and its independent Expected/Verify contracts. These six
-sections correspond to the same six learner actions, rather than six answer
-steps for one task. A different implementation is acceptable when it preserves
-the stated input policy, observations and evidence boundary.
-
-The [executable reference](tf-003_solution.py) exposes a `verify()` helper for
-authors and later comparison. It uses only local literals and the declared
-Python/NumPy environment. An assertion failure should retain its actual input
-and smallest failing observation. A passing reference is evidence about these
-fixed cases; use a changed fixture and a closed-reference explanation before
-recommending progression. The reading worksheet remains a reading exercise,
-regardless of the optional arithmetic checker.
+Compare after an attempt with the [learner guide](../guides/tf-003.md) ([comparison steps](../STUDY-GUIDE.md#after-the-solutions)).
 
 ## Exercise 1: Trace the product
 
@@ -65,9 +52,7 @@ The centimeter inputs are 100 times the meter values. To preserve the same weigh
 
 ## Inspectable reference functions
 
-The core functions below make the input and reduction policies explicit. The
-separate executable file adds all six exercise checks. Do not replace a failed
-assertion with a flattering default value or remove the invalid-input case.
+`affine` checks the input-feature dimension and refuses a bias that is neither scalar nor output-length, so the (3,) bias of Example B fails before addition. The [executable reference](tf-003_solution.py) adds all six exercise checks.
 
 ```python
 from __future__ import annotations
@@ -91,9 +76,4 @@ def affine(x, weight, bias):
 
 Close the code and state the three matrix dimensions in words. Then choose a two-feature, two-output fixture of your own and derive its first row. Explain why a correctly shaped matrix can still use the wrong feature order.
 
-After revealing this file, choose another fixture before treating the answer
-as independent retrieval evidence. Explain why the rejected case is invalid,
-not merely which exception class appeared. Alternative notation, array layout
-or a direct calculation is welcome when its domain meaning and denominator
-remain explicit. Keep implementation correctness separate from broad claims
-about unseen model quality, reliability or safety.
+Then follow the [after-solutions routine](../STUDY-GUIDE.md#after-the-solutions).

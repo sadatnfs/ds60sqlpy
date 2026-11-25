@@ -1,6 +1,6 @@
 # cuda-073: explained solutions
 
-These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.
+Compare with your [worksheet](../lessons/cuda-073.md) attempt.
 
 ## Exercise 1: Separate host and device statements
 
@@ -74,8 +74,16 @@ Record distribution, Python, toolkit, driver and device.
 
 **How to verify.** Fill the ledger from `numba -s` or the equivalent library info call plus the driver tool output, and attach it to the result. Another person should be able to tell from the ledger alone whether their host matches.
 
+## Self-check answers
+
+1. **Why can the same syntax be legal on the host and illegal in a device function?** Device code is compiled from a restricted typed subset. Arbitrary objects, file access and unsupported library calls exist only in the host interpreter.
+
+2. **What does a host wrapper do before launching the kernel?** It validates input lengths, allocates the output buffer, converts data to numeric buffers and copies them explicitly, so the kernel only reads fixed buffers and scalars.
+
+3. **Why does `numba.cuda` in an import line not identify the implementation?** The maintained numba-cuda distribution uses the same namespace, so the spelling alone does not tell you which package and version supplied it. Record the pinned distribution.
+
 ## Reference observation
 
 [2, -4, 6], with empty input accepted by the oracle.
 
-The reference file is `courses/cuda/python/references/cuda-073_cpu.py`. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.
+Asserted by `courses/cuda/python/references/cuda-073_cpu.py`.

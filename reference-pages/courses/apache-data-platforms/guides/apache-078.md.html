@@ -233,15 +233,15 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-string">&quot;</span>$SHARING_ENDPOINT<span class="syntax-string">/shares?maxResults=1</span><span class="syntax-string">&quot;</span></code></pre>
 <p>After rotating the fixture credential, this call with the old token should return 401 or 403, which shows that new control requests are blocked. It does not invalidate presigned file URLs already handed out; those stay valid until preSignedUrlTimeoutSeconds expires, which is 60 in the example config. Files already downloaded cannot be recalled at all, so revocation is a forward-looking control, and short URL lifetimes are what limit the exposure window.</p>
 <h3 id="complete-worked-source">Complete worked source<a class="heading-anchor" href="#complete-worked-source" aria-label="Link to this section">#</a></h3>
-<p>This is a project-only command notebook. Read and edit it in the classroom; run its explicitly labeled commands from the copied owned Docker workshop. The classroom does not execute these service commands.</p>
+<p>The classroom does not execute these service commands. See the <a href="../STUDY-GUIDE.md.html#workshop-notebooks">workshop rules</a>.</p>
 <h2 id="delta-sharing-apache-078-prepared-command-notebook">Delta Sharing apache-078 prepared command notebook<a class="heading-anchor" href="#delta-sharing-apache-078-prepared-command-notebook" aria-label="Link to this section">#</a></h2>
-<p>Copy the owned Delta Sharing project and follow PREPARATION.md. Delta Sharing belongs to Delta Lake/Linux Foundation. The offline preparation actions are:</p>
+<p>The copied Delta Sharing project never stores a recipient token, and these two actions work with no profile at all. That is the safe state to begin a rotation exercise from:</p>
 <pre class="highlighted-code"><code class="language-bash">bash run.sh prepare
 bash run.sh plan</code></pre>
-<p>For a separately prepared actual owned reference server and untracked recipient profile, the bounded native Docker protocol client runs with:</p>
+<p>Run <code>check</code> once with the old fixture profile and once with the rotated one, both against your prepared server:</p>
 <pre class="highlighted-code"><code class="language-bash">bash run.sh check</code></pre>
 <p>Rotate only fixture credentials via the real provider mechanism, then test old/new control access separately. Previously issued URLs and downloaded copies have different revocation boundaries.</p>
-<p>The classroom Markdown pad does not start a service. Source configuration and unit policy fixtures are not actual reference-server receipts. Keep credentials and signed URL query strings out of all published source and evidence.</p>
+<p>Rotation stops new control calls made with the old token. URLs already issued keep working until they expire, and copies already downloaded are beyond the provider&#x27;s reach.</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
 <ul>
 <li><a href="https://github.com/delta-io/delta-sharing/blob/v1.4.1/PROTOCOL.md">Delta Sharing protocol</a></li>

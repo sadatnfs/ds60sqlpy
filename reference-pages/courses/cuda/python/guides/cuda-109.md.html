@@ -194,9 +194,17 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cuda/python/guides/cuda-109.md</code></p>
     </header>
     <article class="document"><h2 id="cuda-109-deployment-runtimes-and-engine-building">cuda-109: Deployment runtimes and engine building<a class="heading-anchor" href="#cuda-109-deployment-runtimes-and-engine-building" aria-label="Link to this section">#</a></h2>
-<p><strong>Route:</strong> CUDA Python and machine learning. <strong>Stage:</strong> advanced. <strong>Prerequisites:</strong> <code>cuda-090</code>, <code>cuda-095</code>. Allow several sessions when the hardware experiment is new; the chapter is not a deadline.</p>
-<h3 id="what-you-will-be-able-to-explain">What you will be able to explain<a class="heading-anchor" href="#what-you-will-be-able-to-explain" aria-label="Link to this section">#</a></h3>
-<p>By the end, you can <strong>define the shape envelope</strong>, <strong>choose calibration data</strong>, and <strong>compare task quality</strong> with evidence. Start with the two worked cases, then use the editable CPU model to make the quantities concrete.</p>
+<p><strong>Route:</strong> CUDA Python and machine learning. <strong>Stage:</strong> advanced. <strong>Prerequisites:</strong> <code>cuda-090</code>, <code>cuda-095</code>.</p>
+<p>Pacing, evidence labels and platform rules: <a href="../../STUDY-GUIDE.md.html">CUDA study guide</a>.</p>
+<h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
+<ul>
+<li>Define the shape envelope.</li>
+<li>Reject an invalid request.</li>
+<li>Separate export build and execution.</li>
+<li>Choose calibration data.</li>
+<li>Record engine compatibility.</li>
+<li>Compare task quality.</li>
+</ul>
 <h3 id="mechanism-and-vocabulary">Mechanism and vocabulary<a class="heading-anchor" href="#mechanism-and-vocabulary" aria-label="Link to this section">#</a></h3>
 <p>Export translates a model into an interchange or runtime representation. Building an execution engine chooses supported implementations for target shapes, precision and hardware. Successful export is weaker evidence than successful execution, and one successful shape is weaker than a complete supported-shape contract. Calibration for selected quantization workflows must use representative data separate from evaluation.</p>
 <p>An optional TensorRT or another prepared runtime has its own operator, platform and version constraints. Engine caches may depend on hardware, toolkit and runtime versions. Preserve the source model and build recipe, then compare outputs and task quality over a bounded shape set. Report engine build, cold start and warm inference separately. The classroom&#x27;s default CPU workers do not imply an engine builder is installed.</p>
@@ -212,8 +220,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>A deployment accepts batch sizes 1 through 8 and sequence lengths up to 32. Batch 9 should be rejected or handled by a separately documented path rather than silently truncating input.</p>
 <h4 id="worked-example-2">Worked example 2<a class="heading-anchor" href="#worked-example-2" aria-label="Link to this section">#</a></h4>
 <p>A lower-precision engine that passes shape checks but changes classification quality beyond tolerance fails the application contract despite compiling successfully.</p>
-<h3 id="portable-executable-model">Portable executable model<a class="heading-anchor" href="#portable-executable-model" aria-label="Link to this section">#</a></h3>
-<p>The <strong>CPU reference model</strong> variant runs this bounded worked example using <code>python-core</code>. It uses only the Python standard library, small synthetic values and no network. Its purpose is to expose the arithmetic or contract behind the chapter. The separate reference includes assertions for the stated observations.</p>
+<h3 id="how-to-run-the-cpu-model">How to run the CPU model<a class="heading-anchor" href="#how-to-run-the-cpu-model" aria-label="Link to this section">#</a></h3>
+<p>Edit the copy; the <a href="../references/cuda-109_cpu.py.html">reference</a> adds assertions.</p>
+<pre class="highlighted-code"><code class="language-bash">python courses/cuda/python/lessons/cuda-109_cpu.py</code></pre>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">accepted</span><span class="syntax-punctuation">(</span>batch<span class="syntax-punctuation">,</span> sequence<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
     <span class="syntax-keyword">return</span> <span class="syntax-number">1</span> <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> batch <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-number">8</span> <span class="syntax-operator">and</span> <span class="syntax-number">1</span> <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> sequence <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-number">32</span>
 
@@ -223,49 +232,46 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="syntax-keyword">assert</span> <span class="syntax-operator">not</span> accepted<span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">0</span><span class="syntax-punctuation">)</span>
 <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">CPU deployment contract: supported shapes accepted; invalid shapes rejected</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation:</strong> Declared shape envelope enforced.</p>
-<p>Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.</p>
 <h3 id="practice-and-transfer">Practice and transfer<a class="heading-anchor" href="#practice-and-transfer" aria-label="Link to this section">#</a></h3>
+<p>Record each attempt in the <a href="../lessons/cuda-109.md.html">worksheet</a> before opening hints.</p>
 <h4 id="exercise-1-define-the-shape-envelope">Exercise 1: Define the shape envelope<a class="heading-anchor" href="#exercise-1-define-the-shape-envelope" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Leaving the envelope implicit means unsupported shapes reach the engine and fail with internal errors or are padded and truncated without notice.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-2-reject-an-invalid-request">Exercise 2: Reject an invalid request<a class="heading-anchor" href="#exercise-2-reject-an-invalid-request" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Splitting batch 9 into 8 and 1 automatically may be reasonable, but only as a documented path. Doing it implicitly changes latency and behavior without a contract.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-3-separate-export-build-and-execution">Exercise 3: Separate export build and execution<a class="heading-anchor" href="#exercise-3-separate-export-build-and-execution" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Reporting the deployment as working because the export succeeded skips build and execution, where unsupported operators and precision problems usually appear.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-4-choose-calibration-data">Exercise 4: Choose calibration data<a class="heading-anchor" href="#exercise-4-choose-calibration-data" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Calibrating on a handful of constant inputs gives ranges that clip real activations, which lowers accuracy. Values outside the calibrated range saturate at the limit, so large activations lose their differences entirely.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-5-record-engine-compatibility">Exercise 5: Record engine compatibility<a class="heading-anchor" href="#exercise-5-record-engine-compatibility" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Copying an engine file to a different GPU model or runtime release can fail to load or behave differently. Rebuilding per target from the same exported graph is the safer pattern.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-6-compare-task-quality">Exercise 6: Compare task quality<a class="heading-anchor" href="#exercise-6-compare-task-quality" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Comparing only a few output tensors for closeness can miss a quality drop concentrated in some classes.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
-<p>Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.</p>
+<p>Hint <em>k</em> belongs to exercise <em>k</em>; open one at a time.</p>
 <ol>
-<li>Start from worked example 1 and mark the quantities needed for the task &quot;Define the shape envelope&quot;.</li>
-<li>Change one assumption in worked example 2 while preserving the declared contract: reject an invalid request.</li>
-<li>Trace the CPU program&#x27;s variables before adding hardware behavior: separate export build and execution.</li>
-<li>Draw producers, consumers and the exact operation boundary for the task &quot;Choose calibration data&quot;.</li>
-<li>Separate what the small fixture establishes from what the real runtime must show: record engine compatibility.</li>
-<li>Write a counterexample to an overbroad claim before you compare task quality.</li>
+<li>Write the allowed range for every dimension, batch and sequence length included, together with the accepted dtypes.</li>
+<li>Check a batch of 9 against the envelope before any execution and decide what message the caller should receive.</li>
+<li>Ask what each step proves on its own: that the model exported, that an engine was built and that the engine produced correct outputs.</li>
+<li>Ask which data split calibration may read, and why it must not overlap the examples used for evaluation.</li>
+<li>List what a cached engine depends on, such as the device, toolkit and runtime versions, and record each one with the cache.</li>
+<li>Run the source model and the engine on the same held-out examples with the same metric, not only a shape check.</li>
 </ol>
-<h3 id="common-mistakes-and-self-review">Common mistakes and self-review<a class="heading-anchor" href="#common-mistakes-and-self-review" aria-label="Link to this section">#</a></h3>
-<p>Confusing a correct tiny example with a general implementation is the central review risk. For this chapter, challenge the assumption in worked example 2, then ask whether your change preserves the mechanism described above. If you change dtype, layout, ordering, batch size or backend, update the acceptance contract rather than silently reusing the old observation. Explain an unexpected result before trying random configuration changes.</p>
-<p>Keep a small evidence table with columns <strong>claim</strong>, <strong>input</strong>, <strong>expected observation</strong>, <strong>actual observation</strong> and <strong>limit</strong>. For the first claim use <code>Define the shape envelope</code>. For the final claim use <code>Compare task quality</code>. An unperformed GPU or cluster experiment remains pending even when the CPU model is correct.</p>
-<h3 id="platform-and-evidence-contract">Platform and evidence contract<a class="heading-anchor" href="#platform-and-evidence-contract" aria-label="Link to this section">#</a></h3>
-<p>The reading worksheet and CPU reference model work through the ordinary Linux Docker classroom on macOS, Linux and Windows using WSL 2. They do not require an NVIDIA GPU. Their results are labeled CPU models or semantic oracles, not simulated hardware performance.</p>
-<p>Real CUDA work needs supported NVIDIA hardware, a compatible host driver and an explicitly prepared GPU runtime. An Apple GPU does not execute CUDA kernels. PyTorch MPS on a supported native Mac, ROCm on supported AMD hardware, or other vendor backends can provide separate accelerator learning routes; they need their own package and operation qualification and are not CUDA evidence. The ordinary Linux Docker classroom does not expose native Mac MPS automatically.</p>
-<p>Do not download packages, models or data by opening this lesson. Do not attach an engine socket, ambient cluster credentials or an arbitrary remote endpoint. A CPU pass, imported package, successful compilation, real GPU result and measured performance are distinct observations. Record the actual backend, data shape/dtype, source revision, versions and pending checks. A saved completion marker records learning progress, not hardware certification.</p>
+<h3 id="common-mistakes-and-self-check">Common mistakes and self-check<a class="heading-anchor" href="#common-mistakes-and-self-check" aria-label="Link to this section">#</a></h3>
+<p>A common mistake is treating a successful export or engine build as proof that deployment works. Export can succeed while execution fails, and an engine can execute while a lower precision quietly degrades classification quality beyond tolerance. Another mistake is silently truncating a request outside the declared shapes, such as batch 9 when the envelope stops at 8. Fix both by enforcing the shape envelope with a clear error, keeping the source model and build recipe and comparing task quality on held-out data at every precision you ship.</p>
+<p><strong>Misconception:</strong> An engine built and cached on one machine can be copied to any other deployment host. <strong>Correction:</strong> Engine caches can depend on the GPU model, toolkit and runtime versions used at build time. Treat a cached engine as tied to its build environment: record that environment, rebuild from the preserved source model and recipe for each target, and recheck outputs and quality after every rebuild.</p>
+<p><strong>Evidence limit:</strong> The reference enforces a declared shape envelope in Python and rejects an out-of-range request. It does not export a model or build a TensorRT engine, so operator support, calibration effects, cache compatibility and timing need a prepared runtime on the target hardware, measured separately for build, cold start and warm inference.</p>
+<ol>
+<li>Why is one successful shape weak evidence for an engine?</li>
+<li>Why keep calibration data separate from evaluation data?</li>
+<li>Can an engine cache be copied to another machine safely?</li>
+</ol>
+<p>Answers: <a href="../solutions/cuda-109_solutions.md.html#self-check-answers">self-check answers</a>.</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
 <ul>
 <li><a href="https://docs.pytorch.org/docs/2.9/notes/cuda.html">PyTorch CUDA semantics</a></li>
 <li><a href="https://www.tensorflow.org/guide/gpu">TensorFlow GPU guide</a></li>
 </ul>
-<p>Use the version-matched documentation of your prepared environment. These references describe interfaces and supported boundaries; the chapter&#x27;s synthetic examples and CPU models are original teaching material.</p>
+<p>Full lists: <a href="../../STUDY-GUIDE.md.html#documentation-and-sources">documentation and sources</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning skill for cuda-109: Deployment runtimes and engine building.
 Read courses/cuda/python/guides/cuda-109.md and courses/cuda/python/lessons/cuda-109.md.

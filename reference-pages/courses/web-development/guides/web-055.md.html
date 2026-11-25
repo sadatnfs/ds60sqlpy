@@ -212,7 +212,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="syntax-anatomy-and-mechanism">Syntax anatomy and mechanism<a class="heading-anchor" href="#syntax-anatomy-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p>The reference demonstrates a bounded in-memory cursor over unique increasing ids. It validates the page size, selects ids greater than the cursor and takes only the requested count. This is an algorithm model, not a database query plan or distributed cache. A production query needs a matching index and engine-specific measurement.</p>
 <h3 id="classroom-execution-and-offline-inputs">Classroom execution and offline inputs<a class="heading-anchor" href="#classroom-execution-and-offline-inputs" aria-label="Link to this section">#</a></h3>
-<p>Choose the <strong>PHP CLI</strong> worker and work in <code>courses/web-development/lessons/web-055.php</code>, which runs as <code>main.php</code> in a bounded Linux process with PDO SQLite. Every input is a small synthetic value, and CLI runs are fresh processes, not persistent HTTP requests. Save your attempt before comparing it with <code>courses/web-development/solutions/web-055_solution.php</code>. <strong>How to run lessons</strong> in the <a href="../README.md.html">subject README</a> lists what the pad does not provide.</p>
+<p>The worked examples continue a page after the last seen id and build a cache key scoped by actor and data version. You implement pageAfter, a cursor slice over synthetic ordered rows with a maximum page size, and design a cache key that cannot leak between users.</p>
+<p>Run <code>courses/web-development/lessons/web-055.php</code> with <strong>PHP CLI</strong>: synthetic inputs, not persistent HTTP requests (<a href="../STUDY-GUIDE.md.html#php-cli">why</a>).</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1-a-stable-cursor-predicate">Worked example 1: A stable cursor predicate<a class="heading-anchor" href="#worked-example-1-a-stable-cursor-predicate" aria-label="Link to this section">#</a></h4>
 <p>The id is both unique and ordered in this small model.</p>
@@ -246,7 +247,7 @@ $cursorPage2 = array_slice(
 );</code></pre>
 <p>The first page is [1, 2]. After the deletion, offset 2 skips the first two remaining records, 2 and 3, so the offset page is [4, 5] and record 3 is never shown. The cursor version asks for ids greater than the last seen id, 2, so it returns [3, 4] and the deletion does not shift anything. An insertion at the front would cause the opposite problem for offsets: a repeated record. The cursor depends on ids being unique and ordered, which is why the reference sorts by id.</p>
 <h3 id="six-progressive-exercises">Six progressive exercises<a class="heading-anchor" href="#six-progressive-exercises" aria-label="Link to this section">#</a></h3>
-<p>Exercises that ask you to predict, explain, compare or diagnose keep their answers in the solutions file. The others show the evidence to look for.</p>
+<p>Exercises 1, 4 and 6 keep their expected answers in the solutions file.</p>
 <h4 id="exercise-1-explain-why-pagination-needs-an-explicit-stable-order">Exercise 1: Explain why pagination needs an explicit stable order.<a class="heading-anchor" href="#exercise-1-explain-why-pagination-needs-an-explicit-stable-order" aria-label="Link to this section">#</a></h4>
 <p><strong>Progressive hint:</strong> Run the same query twice without ORDER BY and compare the pages.</p>
 <h4 id="exercise-2-add-a-maximum-page-size-rule">Exercise 2: Add a maximum page-size rule.<a class="heading-anchor" href="#exercise-2-add-a-maximum-page-size-rule" aria-label="Link to this section">#</a></h4>
@@ -264,10 +265,11 @@ $cursorPage2 = array_slice(
 <p><strong>Progressive hint:</strong> Name what you would measure before and after adding an index.</p>
 <h3 id="debugging-and-common-mistakes">Debugging and common mistakes<a class="heading-anchor" href="#debugging-and-common-mistakes" aria-label="Link to this section">#</a></h3>
 <p>Do not claim a cursor guarantees a snapshot while records change unless the storage contract provides that guarantee. A cache hit can still be wrong. Bound work even for authenticated clients.</p>
-<p>Keep the failing source, its input and the exact output, then repair one cause at a time. PHP can produce correct-looking text while missing an invalid-input branch, so rerun the empty, wrong-type and boundary cases after every fix.</p>
+<p>When a page repeats or skips a record, check that rows are sorted by a unique, stable key before slicing; ties make cursors unreliable. When one user sees another&#x27;s cached data, the cache key is missing the actor id or the data version.</p>
+<p>The shared <a href="../STUDY-GUIDE.md.html#debugging-php">debugging routine</a> covers what to record before each repair.</p>
 <h3 id="retrieval-transfer-and-next-steps">Retrieval, transfer and next steps<a class="heading-anchor" href="#retrieval-transfer-and-next-steps" aria-label="Link to this section">#</a></h3>
-<p>Close the worked answers and explain pagination, cursor and stable ordering without using the terms as their own definitions. Rebuild worked example 1 (A stable cursor predicate) from a blank pad, then try one new value, one empty or missing case and one unusual boundary. State which result would disprove your explanation.</p>
-<p>If you can reproduce the output but cannot explain why it happens, revisit <code>web-054</code>. A saved completion marker records your own progress; it is not a certification.</p>
+<p>From memory, explain why pagination needs an explicit, stable order and why offset pages can skip a record when an earlier one is deleted. Then predict pageAfter for the first page, the page after id 2 and the page after id 4, and say what you would measure before claiming an endpoint is faster.</p>
+<p>Revisit <code>web-054</code> when an output is predictable but unexplained (<a href="../STUDY-GUIDE.md.html#review-loop">review loop</a>).</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
 <ul>
 <li><a href="https://www.php.net/manual/en/pdostatement.fetch.php">PDO fetch modes</a></li>

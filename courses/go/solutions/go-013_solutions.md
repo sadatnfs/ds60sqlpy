@@ -1,6 +1,6 @@
 # go-013: explained solutions
 
-These are comparison material after an attempt or explicit reveal. The executable reference implements all six cases in one `main.go`.
+Compare after an attempt ([using solutions](../STUDY-GUIDE.md#use-the-solutions)). `courses/go/solutions/go-013_solution.go` implements all six cases.
 
 ## Mechanism
 
@@ -10,7 +10,7 @@ The standard library already contains packages such as path, strings and strconv
 
 ## 1. Use a package boundary: predict an edited check
 
-Copy worked example 1 into a scratch pad and change `check(path.Join("reports", "daily.json") == "reports/daily.json", "path package")` to `check(path.Join("reports!", "daily.json") == "reports/daily.json", "path package")` inside its check. Before running, predict whether the check still passes and explain why; then restore it.
+Copy worked example 1, change `check(path.Join("reports", "daily.json") == "reports/daily.json", "path package")` to `check(path.Join("reports!", "daily.json") == "reports/daily.json", "path package")` inside its check and predict whether it still passes; then restore it.
 
 The unchanged code is worked example 1:
 
@@ -18,13 +18,15 @@ The unchanged code is worked example 1:
 check(path.Join("reports", "daily.json") == "reports/daily.json", "path package")
 ```
 
-**Expected:** The changed run panics with `path package` because the edited check no longer holds. Restoring the original line brings back the worked observation: the result is reports/daily.json.
+**Expected:** The edited check panics with `path package` even though `path.Join("reports", "daily.json") == "reports/daily.json"` still holds.
+
+**Verify:** Restoring `check(path.Join("reports", "daily.json") == "reports/daily.json", "path package")` makes the check pass again with the worked observation: the result is reports/daily.json.
 
 path works with slash-separated logical paths. filepath is a different package whose behavior follows the host operating system.
 
 ## 2. Compose standard-library APIs: debug a regression
 
-A regression changed one token in worked example 2, so one line now reads `v, err := strconv.Atoi(strings.TrimSpace(" 13 "))`. Run worked example 2 with that line, use the failure to locate the defect and repair it without changing the check.
+A one-token regression in worked example 2 makes a line read `v, err := strconv.Atoi(strings.TrimSpace(" 13 "))`. Repair it without changing the check.
 
 The unchanged code is worked example 2:
 
@@ -33,7 +35,9 @@ v, err := strconv.Atoi(strings.TrimSpace(" 12 "))
 check(err == nil && v == 12, "package composition")
 ```
 
-**Expected:** Before the repair the program panics with `package composition`; after it the line reads `v, err := strconv.Atoi(strings.TrimSpace(" 12 "))` again and the parsed value is 12.
+**Expected:** The defective run panics with `package composition`; after restoring `v, err := strconv.Atoi(strings.TrimSpace(" 12 "))`, the parsed value is 12.
+
+**Verify:** The failing run shows message `package composition`; after the repair `err == nil && v == 12` holds again.
 
 Each package contributes a small contract. Trimming is an explicit input policy, while numeric parsing remains independently fallible.
 
@@ -47,6 +51,8 @@ check(exported("ParseInt") && !exported("parseInt") && !exported(""), "export co
 ```
 
 **Expected:** Only ParseInt is exported.
+
+**Verify:** Your solution must keep `exported("ParseInt") && !exported("parseInt") && !exported("")` true. Control: changing `exported := func(name string) bool { return name != "" && unicode.IsUpper([]rune(name)[0]) }` to `exported := func(name string) bool { return name == "" && unicode.IsUpper([]rune(name)[0]) }` panics with message `export convention`; revert it.
 
 The rule is applied to three spellings instead of re-reading one literal. Actual visibility is enforced by the compiler across package boundaries: another package can call strconv.ParseInt, while a lower-case declaration stays private to its own package.
 
@@ -68,6 +74,8 @@ check(directives["module"] == "example.org/learning/report" && directives["go"] 
 
 **Expected:** The module requires Go 1.27 and suggests toolchain go1.27.3.
 
+**Verify:** Your solution must keep `directives["module"] == "example.org/learning/report" && directives["go"] == "1.27" && directives["toolchain"] == "go1.27.3"` true. Control: changing `if len(fields) == 2 {` to `if len(fields) == 3 {` panics with message `directives`; revert it.
+
 The go line is the minimum Go version the module requires. Since Go 1.21 an older go command does not build such a module with its own toolchain: it switches to a newer toolchain when GOTOOLCHAIN allows that, or stops with an error. The toolchain line suggests a specific newer toolchain for work inside this module. The classroom worker sets GOTOOLCHAIN=local, so a module that asks for a newer version fails with an explicit error instead of downloading anything.
 
 ## 5. Reject malformed input at an API boundary
@@ -80,6 +88,8 @@ check(err != nil, "boundary error")
 ```
 
 **Expected:** The numeric error remains non-nil.
+
+**Verify:** Your solution must keep `err != nil` true. Control: changing `check(err != nil, "boundary error")` to `check(err == nil, "boundary error")` panics with message `boundary error`; revert it.
 
 Packaging does not remove the need for validation. The wrapper should preserve a cause rather than return a plausible zero as if parsing succeeded.
 
@@ -96,8 +106,10 @@ check(name == "reports/day-3.json", "report name")
 
 **Expected:** The resulting logical name is reports/day-3.json.
 
+**Verify:** Your solution must keep `name == "reports/day-3.json"` true. Control: changing `day, err := strconv.Atoi("3")` to `day, err := strconv.Atoi("4")` panics with message `report name`; revert it.
+
 The boundary validates a domain value before formatting it into a path. Arbitrary user path fragments are not accepted by this contract.
 
 ## Transfer after comparison
 
-Return to your own pad and reproduce one check with a new input. Explain why the check rejects a plausible wrong implementation. Keep the distinction between a pure model, an in-process fake, and a real external system visible in your notes.
+Every later project in this track is a module with deliberate package boundaries. Before adding a file, decide which package owns it, what it exports and which packages may import it. When the Kubernetes lessons pull in client-go, the same questions apply to a large dependency: which version go.mod selects, what go.sum pins and which internal details your code must not rely on.

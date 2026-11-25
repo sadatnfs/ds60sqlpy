@@ -1,6 +1,6 @@
 # cuda-125: explained solutions
 
-These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.
+Compare with your [worksheet](../lessons/cuda-125.md) attempt.
 
 ## Exercise 1: Draw scheduler layers
 
@@ -74,8 +74,16 @@ Delete only resources created for this named lab and preserve requested logs.
 
 **How to verify.** List labeled resources before and after cleanup and confirm only those were removed and the logs remain saved.
 
+## Self-check answers
+
+1. **Does a pod's GPU resource limit prove the plugin can run?** No. The image, driver and native libraries must also support Spark GPU execution inside the container.
+
+2. **Can Docker Desktop on a Mac provide an NVIDIA GPU to Kubernetes?** No. It is useful for the CPU classroom but does not create an NVIDIA GPU.
+
+3. **What advertises GPU resources to the Kubernetes scheduler?** An installed and configured device plugin on the nodes that have GPUs.
+
 ## Reference observation
 
 Only the illustrative GPU node is eligible; no cluster operation occurs.
 
-The reference file is `courses/cuda/spark/references/cuda-125_cpu.py`. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.
+Asserted by `courses/cuda/spark/references/cuda-125_cpu.py`.

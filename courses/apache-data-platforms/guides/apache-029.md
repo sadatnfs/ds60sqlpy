@@ -103,11 +103,11 @@ cases show finite historical coverage and a targeted correction that proves
 unrelated output stayed unchanged, rather than treating a successful trigger
 response as proof of a completed data repair.
 
-The [complete Airflow workshop](../projects/airflow/README.md) provides the maintained files, preparation, lifecycle and exact qualification boundaries for these cases.
+The [Airflow workshop](../projects/airflow/README.md) action `backfill-check` triggers `classroom_correction` for the first day only, requires that partition's total to become 15, and checks that the second day's file is byte for byte unchanged.
 
 ## Complete worked source
 
-This is a project-only command notebook. Read and edit it in the classroom; run its explicitly labeled commands from the copied owned Docker workshop. The classroom does not execute these service commands.
+The classroom does not execute these service commands. See the [workshop rules](../STUDY-GUIDE.md#workshop-notebooks).
 
 # Historical coverage and one-day correction
 

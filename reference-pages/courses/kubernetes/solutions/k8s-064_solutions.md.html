@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/kubernetes/solutions/k8s-064_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="k8s-064-explanatory-solutions">k8s-064: explanatory solutions<a class="heading-anchor" href="#k8s-064-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit reveal. These explanations describe the synthetic topology and stated API contracts. They are not fabricated runtime receipts.</p>
+<p>Attempt each exercise first, then compare (<a href="../STUDY-GUIDE.md.html#solutions-and-the-ai-tutor">study guide</a>).</p>
 <h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
 <p>Troubleshooting is a sequence of discriminating observations. Start with the caller, intended name, protocol, port and expected application result. Then identify the first layer where actual behavior differs from the model. Changing several layers at once can make the symptom disappear without explaining the cause.</p>
 <p>A useful request ladder separates name resolution, route reachability, transport connection, TLS identity, proxy routing and application semantics. Kubernetes adds controller and endpoint state that helps explain those steps. A successful test at one layer should not be promoted into a claim about every later layer.</p>

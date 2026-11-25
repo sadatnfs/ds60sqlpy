@@ -6,6 +6,11 @@ worked cases and six varied practice tasks with hints and explained answers.
 `progression.py` owns direct prerequisite edges and chapter-specific starter pads.
 `fixtures.py` owns the tiny original models, including the complete date dimension.
 `build.py` emits all admitted Markdown, DAX, JSON and CSV artifacts deterministically.
+`focus.py` holds five lesson-specific fields per unit (draft, model, misconception,
+check and reference) that replace repeated guide and solution prose. Launch, run,
+save, hint, tutor and evidence-boundary guidance shared by every lesson lives once in
+the generated `courses/dax/STUDY-GUIDE.md`; lessons link to its anchors instead of
+restating it.
 
 From the repository root:
 

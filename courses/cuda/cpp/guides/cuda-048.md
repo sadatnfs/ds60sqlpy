@@ -4,18 +4,15 @@
 
 Advanced; about 130 minutes, plus any optional hardware experiment. Direct prerequisites: `cuda-005`, `cuda-018`, `cuda-037`
 
-The order supports learning at your own pace. Reading and CPU reasoning remain
-available when NVIDIA hardware is absent. Advanced hardware features need their
-own capability checks and are not prerequisites for opening this chapter.
+Pacing, evidence labels and platform rules for every chapter are in the [CUDA study guide](../../STUDY-GUIDE.md).
 
 ## Learning objectives
 
 Build a CSR matrix and decide whether sparse storage pays off after conversion, reuse and row distribution.
 
-Work through *cuSPARSE and sparsity as a data structure* with the concrete cases below. Finish with this evidence:
-correct result and a reasoned choice considering conversion, reuse and distribution. Distinguish an algorithmic
-calculation, a compiled artifact and an actual device observation when explaining
-what your work establishes.
+**Scope:** CSR/COO representations, index bases, duplicates, irregular rows, format conversion, fill ratio and preprocessing cost.
+
+**Evidence to produce:** Correct result and a reasoned choice considering conversion, reuse and distribution.
 
 ## Purpose, vocabulary and mental model
 
@@ -38,28 +35,17 @@ Offsets and columns here are zero-based. Empty rows have equal adjacent offsets 
 
 ## How to run and study this lesson
 
-Use the saved reading worksheet in `/classroom`; the reading pad does not execute
-CUDA. For the bounded calculation, select **CPU model (Python)**, whose
-answer-free starter supplies the literal fixtures and task contract. The
-[CUDA C++ study workflow](../README.md) covers platforms, optional GPU
-compilation and evidence labels. In a prepared Python environment you can also
-run the separate [CPU reference](../references/cuda-048_cpu.py) from the
-repository root:
+Trace worked example 1 by hand, then run the [CPU reference](../references/cuda-048_cpu.py) from the repository root:
 
 ```sh
 python courses/cuda/cpp/references/cuda-048_cpu.py
 ```
 
-Its assertions check the stated numerical result or model invariant; console
-text is evidence of this CPU model only, not of CUDA execution.
-
 ## Worked example 1: trace the mechanism
 
 Matrix \([[2,0,1],[0,3,0]]\) has CSR offsets \([0,2,3]\), columns \([0,2,1]\) and values \([2,1,3]\). Multiplying by \([4,5,6]\) gives \([14,15]\). The first row reads two entries; the second reads one. Offsets are boundaries, not per-row counts.
 
-The complete CPU model below intentionally models only the named arithmetic,
-layout, dependency or capability decision. It does not model GPU scheduling,
-caches, instruction timing or device memory visibility.
+**Why:** Row 0 spans entries 0 to 2: 2 times x[0] = 8 plus 1 times x[2] = 6 gives 14; row 1 has 3 times x[1] = 15.
 
 ```python
 offsets, columns, values = [0, 2, 3], [0, 2, 1], [2, 1, 3]
@@ -70,41 +56,37 @@ assert offsets[-1] == len(values) == len(columns)
 print({"CSR_product": y, "row_lengths": [offsets[i + 1] - offsets[i] for i in range(2)]})
 ```
 
-**Expected observation:** Every assertion succeeds. A representative CPU output is:
+**Expected observation:** every assertion succeeds, and the CPU model prints:
 
 ```text
 {'CSR_product': [14, 15], 'row_lengths': [2, 1]}
 ```
 
-Integers, shapes and ordering must match exactly; only assertions with an explicit
-tolerance accept small floating-point differences. A printed duration is a model
-output, not a measured GPU benchmark.
+**Check:** The reference asserts y == [14, 15] and that the final offset equals len(values) and len(columns).
 
 ## Worked example 2: change a meaningful condition
 
 An empty middle row repeats an offset. For lengths \([2,0,1]\), row boundaries are \([0,2,2,3]\). Repeated offsets are valid. A descending offset or a column outside the matrix width is invalid and must be rejected before device access.
 
-Before applying this example to your own program, write down which inputs are
-read, which result is produced, and the condition that makes the comparison
-valid. Keep the original case as a regression check when changing a boundary.
+**Why:** The repeated 2 marks an empty middle row whose span [2, 2) holds nothing.
+
+**Check:** Check offsets never decrease, every column is below the width, and the last offset equals the entry count.
 
 ## Six progressive exercises
 
-Exercises 1 and 2 are guided reconstructions of the worked examples; exercises
-3-6 change an input, diagnose a defect, test a boundary and transfer the idea.
-For each one, keep the calculation, output, diagram or failure policy you
-produce so another reader can compare it with the worked cases. If the hint is
-not enough, reread the mechanism paragraph and the bounded CPU assertion.
-
 ### Exercise 1
 
-Predict and trace the first worked example before running its CPU reference. Write every intermediate quantity that leads to the stated result, including units or ownership where applicable.
+Reconstruct worked example 1 on paper before running its CPU reference. Store [[2, 0, 1], [0, 3, 0]] as offsets [0, 2, 3], columns [0, 2, 1] and values [2, 1, 3], then sum per row.
+
+**Trap to avoid:** Treating offsets as row lengths makes row 0 read zero entries and row 1 read two, scrambling the products.
 
 **Hint:** Start with the literal input and intermediate quantities in worked example 1.
 
 ### Exercise 2
 
-Reconstruct the second worked example without copying its conclusion. Identify the changed input or condition, show the resulting calculation or dependency, and explain why it differs from the first example.
+Rework worked example 2 without copying its conclusion. Exclusive scan the lengths [2, 0, 1] and append the total, giving [0, 2, 2, 3], then validate offsets and columns.
+
+**Trap to avoid:** Rejecting repeated offsets as corrupt refuses a valid matrix with an empty row.
 
 **Hint:** Identify exactly which condition changes in worked example 2.
 
@@ -112,11 +94,15 @@ Reconstruct the second worked example without copying its conclusion. Identify t
 
 Build CSR row offsets from row lengths \([0,1,3]\).
 
+**Trap to avoid:** Using the inclusive scan [0, 1, 4] as offsets loses the leading zero, so row 1 would appear to start at entry 1.
+
 **Hint:** Use the first worked example to establish the relevant quantities, then change only the requested input.
 
 ### Exercise 4
 
 Why can 90% zeros still fail to improve runtime?
+
+**Trap to avoid:** Assuming 90 percent zeros means ten times faster ignores overhead per stored entry and small sizes.
 
 **Hint:** Locate the failed phase or violated dependency before proposing a repair.
 
@@ -124,35 +110,33 @@ Why can 90% zeros still fail to improve runtime?
 
 Define duplicate-coordinate handling.
 
+**Trap to avoid:** Assuming the library sums duplicates may silently keep one value or fail validation.
+
 **Hint:** Check what the algorithm is allowed to read, write or assume at this boundary.
 
 ### Exercise 6
 
 Transfer CSR to graph aggregation.
 
+**Trap to avoid:** Mixing source and destination orientation aggregates along reversed edges.
+
 **Hint:** State the output contract and which observations are needed in the new application.
 
 ## Common mistakes and diagnosis
 
-A tempting but incorrect claim in this chapter is: **a matrix containing many zero values is automatically stored sparsely or always runs faster. .**
-
-For the concrete failure exercise, why can 90% zeros still fail to improve runtime?
-Preserve the original input and the stage where behavior diverged, and compare
-with the CPU model before changing hardware configuration.
+A tempting but incorrect claim: **A matrix containing many zero values is automatically stored sparsely or always runs faster.** Dense storage keeps every zero; sparse formats must be chosen and built deliberately. Sparse kernels add indirect reads and uneven row work, so moderate sparsity may run slower than a dense routine. Conversion cost also counts unless the sparse form is reused.
 
 ## Self-check, retrieval and transfer
 
-Explain the first example without its code, then use the second example to state
-one assumption that matters. Complete Exercise 3 independently, use Exercise 4 to
-diagnose a plausible defect, check the boundary in Exercise 5, and retain the
-application contract from Exercise 6. Compare the [separate explanations](../solutions/cuda-048_solutions.md)
-only after your attempt or a deliberate reveal. A reading marker records your
-choice; it does not certify hardware qualification or expert mastery.
+1. What CSR offsets correspond to row lengths [1,0,2]?
+2. What does the final CSR offset equal?
+3. Name two inputs that must be rejected before device access.
+
+Short answers are in the [separate explanations](../solutions/cuda-048_solutions.md#self-check-answers); compare only after an attempt.
 
 ## Primary references
 
-Check the documentation that matches your prepared toolkit before optional
-hardware execution.
+Use the documentation that matches your prepared toolkit.
 
 - [cuSPARSE documentation](https://docs.nvidia.com/cuda/cusparse/index.html)
 

@@ -1,6 +1,8 @@
 # c-004: explained solutions
 
-Compare after an attempt or explicit reveal. The complete executable reference, `c-004_solution.c`, implements all six cases, from the "trace a prefix sum" case to the "transfer reverse traversal safely" case, in one `main.c`.
+`c-004_solution.c` assembles the "trace a prefix sum" case through the "transfer reverse traversal safely" case in one `main.c`.
+
+Compare only after an attempt: [Compare and transfer](../STUDY-GUIDE.md#compare-and-transfer).
 
 ## Mechanism and assumptions
 
@@ -10,7 +12,7 @@ if treats zero as false and nonzero as true. for combines initialization, condit
 
 ## Exercise 1: Trace a prefix sum: change one input
 
-Copy worked example 1, the "trace a prefix sum" case, into a scratch pad and change `int values[] = {2, 4, 6};` to `int values[] = {3, 4, 6};`. Before running, predict which CHECK fails and which value it sees in place of the worked result (the result is 12); then run it and restore the original line.
+In worked example 1, change `int values[] = {2, 4, 6};` to `int values[] = {3, 4, 6};`. Predict which value the CHECK on `sum == 12` sees, then run and restore.
 
 The unchanged code is worked example 1:
 
@@ -23,13 +25,15 @@ for (size_t i = 0; i < 3; i++) {
 CHECK(sum == 12);
 ```
 
-**Expected:** With `int values[] = {3, 4, 6};` the run stops with `Check failed` at the CHECK on `sum == 12`, because the "trace a prefix sum" case no longer shows that the result is 12. Restoring `int values[] = {2, 4, 6};` brings that observation back.
+**Expected:** `Check failed` at `sum == 12`; restoring `int values[] = {2, 4, 6};` passes again.
+
+**Verify:** Name the value that made `sum == 12` false, where worked example 1 showed that the result is 12.
 
 Each iteration adds exactly one valid element. The index is proven less than the declared length before access.
 
 ## Exercise 2: Handle zero iterations: debug a regression
 
-A regression changed one token in worked example 2, the "handle zero iterations" case, so one line now reads `for (size_t i = 0; i <= length; i++) {`. Run the example with that line, use the failing CHECK to find why the accumulator remains zero no longer holds and repair the line without changing the CHECK.
+Worked example 2 now has a line reading `for (size_t i = 0; i <= length; i++) {`. Repair it so that the accumulator remains zero again.
 
 The unchanged code is worked example 2:
 
@@ -43,7 +47,9 @@ for (size_t i = 0; i < length; i++) {
 CHECK(sum == 0);
 ```
 
-**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `sum == 0`. Once the line reads `for (size_t i = 0; i < length; i++) {` again, the "handle zero iterations" case again shows that the accumulator remains zero.
+**Expected:** `Check failed` at `sum == 0` until the line reads `for (size_t i = 0; i < length; i++) {` again.
+
+**Verify:** Explain how `for (size_t i = 0; i <= length; i++) {` changes the value `sum == 0` tests, using your failing and repaired runs.
 
 The example uses a real array because zero-length arrays are not standard C17. The logical length may still be zero.
 
@@ -65,6 +71,8 @@ CHECK(found == 1);
 
 **Expected:** The index is 1.
 
+**Verify:** Keep a CHECK equivalent to `found == 1`. Control edit: changing `if (values[i] == 8) {` to `if (values[i] != 8) {` must fail it; then restore it.
+
 The sentinel equals length and is never dereferenced. break preserves the first-match contract.
 
 ## Exercise 4: Include an exact threshold
@@ -78,6 +86,8 @@ CHECK(passed);
 ```
 
 **Expected:** The boundary passes.
+
+**Verify:** Keep a CHECK equivalent to `passed`. Control edit: changing `bool passed = score >= 60;` to `bool passed = score > 60;` must fail it; then restore it.
 
 This distinguishes an inclusive threshold from a strict comparison. The policy should be stated before choosing the operator.
 
@@ -103,6 +113,8 @@ CHECK(result == 20);
 
 **Expected:** The result is 20.
 
+**Verify:** Keep a CHECK equivalent to `result == 20`. Control edit: changing `int code = 2, result = 0;` to `int code = 3, result = 0;` must fail it; then restore it.
+
 An omitted break can execute later case statements. Deliberate fallthrough needs a clear explanation and compiler-supported annotation policy.
 
 ## Exercise 6: Transfer reverse traversal safely
@@ -121,8 +133,10 @@ CHECK(out == 321);
 
 **Expected:** The reversed number is 321.
 
+**Verify:** Keep a CHECK equivalent to `out == 321`. Control edit: changing `out = out * 10 + values[i];` to `out = out + 10 + values[i];` must fail it; then restore it.
+
 The subtraction occurs only while remaining is positive. A condition i>=0 on size_t would never become false after wraparound.
 
 ## After comparison
 
-Add a fresh distinguishing input for the "transfer reverse traversal safely" case to your own c-004 source. Explain why every access in the case code inside `main` stays within a live object and each owned resource is released. An expected loop invariant failure belongs in the test contract; undefined behavior does not. Keep diagnostics and sanitizer evidence for the "handle zero iterations" case apart from ordinary output: the fixture proves its stated loop invariant, half-open range and fallthrough assumptions, not universal safety.
+Search 5, 8, 8 for the last 8 by walking down with Exercise 6's positive-count loop, `for (size_t remaining = 3; remaining > 0; remaining--)` with `i = remaining - 1`. CHECK that the answer is index 2, and that a search for 9 reports the sentinel 3 after touching only indices 2, 1 and 0. Then explain why `for (size_t i = 2; i >= 0; i--)` never ends: `i >= 0` is always true for an unsigned type, so the decrement past 0 wraps to `SIZE_MAX`.

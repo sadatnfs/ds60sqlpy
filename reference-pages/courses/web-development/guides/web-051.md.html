@@ -211,7 +211,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="syntax-anatomy-and-mechanism">Syntax anatomy and mechanism<a class="heading-anchor" href="#syntax-anatomy-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Create a PDO connection with exception error mode, create a tiny schema and prepare an INSERT. Execute it with a parameter map, then prepare a SELECT using a value predicate. Keep the database handle local to this run. The example&#x27;s table is disposable in-memory state, not the learner&#x27;s persistent classroom database.</p>
 <h3 id="classroom-execution-and-offline-inputs">Classroom execution and offline inputs<a class="heading-anchor" href="#classroom-execution-and-offline-inputs" aria-label="Link to this section">#</a></h3>
-<p>Choose the <strong>PHP CLI</strong> worker and work in <code>courses/web-development/lessons/web-051.php</code>, which runs as <code>main.php</code> in a bounded Linux process with PDO SQLite. Every input is a small synthetic value, and CLI runs are fresh processes, not persistent HTTP requests. Save your attempt before comparing it with <code>courses/web-development/solutions/web-051_solution.php</code>. <strong>How to run lessons</strong> in the <a href="../README.md.html">subject README</a> lists what the pad does not provide.</p>
+<p>The worked examples bind a title with an apostrophe as a value parameter and allow only reviewed column names for sorting. You build a disposable SQLite note store with a prepared insert and lookup, plus an allow list for the one dynamic identifier.</p>
+<p>Run <code>courses/web-development/lessons/web-051.php</code> with <strong>PHP CLI</strong>: synthetic inputs, not persistent HTTP requests (<a href="../STUDY-GUIDE.md.html#php-cli">why</a>).</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1-a-value-parameter">Worked example 1: A value parameter<a class="heading-anchor" href="#worked-example-1-a-value-parameter" aria-label="Link to this section">#</a></h4>
 <p>The SQL structure is fixed before the name is supplied.</p>
@@ -236,7 +237,7 @@ $stmt-&gt;execute([&#x27;title&#x27; =&gt; $q]);
 $bound = $stmt-&gt;fetchAll();</code></pre>
 <p>In the first query the quote inside the search text closes the string literal, and the rest becomes SQL, so the WHERE clause reads title = &#x27;x&#x27; OR &#x27;1&#x27;=&#x27;1&#x27;. That condition is true for every row, so both notes come back even though neither has that title. In the second query the whole value travels as one parameter, the database compares it with each title as text, and the result is empty. The prepared statement keeps the query structure fixed before any value arrives, which is exactly what concatenation gives up.</p>
 <h3 id="six-progressive-exercises">Six progressive exercises<a class="heading-anchor" href="#six-progressive-exercises" aria-label="Link to this section">#</a></h3>
-<p>Exercises that ask you to predict, explain, compare or diagnose keep their answers in the solutions file. The others show the evidence to look for.</p>
+<p>Exercises 1, 4 and 6 keep their expected answers in the solutions file.</p>
 <h4 id="exercise-1-explain-what-a-prepared-value-parameter-can-and-cannot-replace">Exercise 1: Explain what a prepared value parameter can and cannot replace.<a class="heading-anchor" href="#exercise-1-explain-what-a-prepared-value-parameter-can-and-cannot-replace" aria-label="Link to this section">#</a></h4>
 <p><strong>Progressive hint:</strong> Try to bind a column name as a parameter and see what the query does.</p>
 <h4 id="exercise-2-insert-a-title-containing-an-apostrophe">Exercise 2: Insert a title containing an apostrophe.<a class="heading-anchor" href="#exercise-2-insert-a-title-containing-an-apostrophe" aria-label="Link to this section">#</a></h4>
@@ -254,10 +255,11 @@ $bound = $stmt-&gt;fetchAll();</code></pre>
 <p><strong>Progressive hint:</strong> List the behaviors that SQLite in memory cannot show for PostgreSQL.</p>
 <h3 id="debugging-and-common-mistakes">Debugging and common mistakes<a class="heading-anchor" href="#debugging-and-common-mistakes" aria-label="Link to this section">#</a></h3>
 <p>Do not concatenate values into SQL and call the result prepared merely because prepare() is used afterward. Avoid copying SQLite-specific assumptions into PostgreSQL without checking them. Database binding does not make fetched text safe for HTML.</p>
-<p>Keep the failing source, its input and the exact output, then repair one cause at a time. PHP can produce correct-looking text while missing an invalid-input branch, so rerun the empty, wrong-type and boundary cases after every fix.</p>
+<p>When a quote in the data breaks the query, a value was concatenated into the SQL string; replace it with a named placeholder. When a sort key from input fails or misbehaves, remember placeholders cannot bind identifiers, so map the requested key through an allow list.</p>
+<p>The shared <a href="../STUDY-GUIDE.md.html#debugging-php">debugging routine</a> covers what to record before each repair.</p>
 <h3 id="retrieval-transfer-and-next-steps">Retrieval, transfer and next steps<a class="heading-anchor" href="#retrieval-transfer-and-next-steps" aria-label="Link to this section">#</a></h3>
-<p>Close the worked answers and explain PDO, prepared statement and parameter without using the terms as their own definitions. Rebuild worked example 1 (A value parameter) from a blank pad, then try one new value, one empty or missing case and one unusual boundary. State which result would disprove your explanation.</p>
-<p>If you can reproduce the output but cannot explain why it happens, revisit <code>web-035</code>, <code>web-044</code>, <code>web-047</code>. A saved completion marker records your own progress; it is not a certification.</p>
+<p>From memory, explain what a prepared value parameter can replace and why it cannot replace a table name, column name or sort direction. Then predict what happens when a title containing an apostrophe and an attack-shaped string is inserted, and which checks you would repeat before moving this store to PostgreSQL.</p>
+<p>Revisit <code>web-035</code>, <code>web-044</code>, <code>web-047</code> when an output is predictable but unexplained (<a href="../STUDY-GUIDE.md.html#review-loop">review loop</a>).</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
 <ul>
 <li><a href="https://www.php.net/manual/en/book.pdo.php">PDO</a></li>

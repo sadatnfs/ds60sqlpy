@@ -1,6 +1,6 @@
 # cuda-126: explained solutions
 
-These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.
+Compare with your [worksheet](../lessons/cuda-126.md) attempt.
 
 ## Exercise 1: Classify failure layers
 
@@ -74,8 +74,16 @@ Keep sanitized config plans logs metrics and input identity.
 
 **How to verify.** Check the packet for secrets and confirm it contains each listed item. Record the input data identity as a path and version or checksum rather than copying sensitive data.
 
+## Self-check answers
+
+1. **Why preserve the first relevant error?** Later generic task retries can hide the original native failure that explains the incident.
+
+2. **Why can task retries duplicate side effects?** Spark may run a task again after it already wrote externally, so writes inside a UDF can happen twice.
+
+3. **Who may reset a device?** An administrator, because a device-wide reset can affect unrelated jobs; the classroom never does it automatically.
+
 ## Reference observation
 
 Two attempts can target one logical output key.
 
-The reference file is `courses/cuda/spark/references/cuda-126_cpu.py`. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.
+Asserted by `courses/cuda/spark/references/cuda-126_cpu.py`.

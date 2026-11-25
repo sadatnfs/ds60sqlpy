@@ -2,6 +2,8 @@
 
 Open these answers only after attempting Restartable training, optimizer state and RNG evidence yourself. They reuse the guide's literal inputs, starting from Example A, Create nontrivial training state, so a discrepancy points at one step. The executable companion runs the assertions; this page explains why each one tests Training checkpoint, RNG state, Data position. After a pass, choose a new input for exercise 6, Verify cleanup and bounded claims, without looking.
 
+After comparing, follow the [review steps](../STUDY-GUIDE.md#after-the-solutions).
+
 ## Mechanism review
 
 Restartable training requires the state that determines the next update, not merely weights that reproduce the current prediction. Adam stores moment estimates and a step counter. Random draws can affect the next batch or target perturbation. Data position determines which observation comes next. A checkpoint contract must name all of these components and define what is fixed or restored. A weights-only restart can match immediate predictions while taking a different subsequent step.
@@ -178,6 +180,3 @@ assert receipt["cpu_next_step_checked"] and not receipt["distributed_restart_ver
 
 **Verify:** In a fresh process, the exercise checks confirm `not folder.exists()`, `receipt['cpu_next_step_checked']` and `not receipt['distributed_restart_verified']`.
 
-## Review after comparison
-
-Repeat exercise 4, Restore in a fresh interpreter, with one changed fixture value and predict the difference before running it. Keep your failing attempt at exercise 5, Expose a weights-only restart, beside the repaired result. A missing framework is not a failing assertion. These solutions use only local fixtures.

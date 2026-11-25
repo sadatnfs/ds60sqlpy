@@ -4,18 +4,15 @@
 
 Intermediate; about 110 minutes, plus any optional hardware experiment. Direct prerequisites: `cuda-017`, `cuda-020`
 
-The order supports learning at your own pace. Reading and CPU reasoning remain
-available when NVIDIA hardware is absent. Advanced hardware features need their
-own capability checks and are not prerequisites for opening this chapter.
+Pacing, evidence labels and platform rules for every chapter are in the [CUDA study guide](../../STUDY-GUIDE.md).
 
 ## Learning objectives
 
 Compute exact histogram counts with atomics and explain two timing regimes through contention.
 
-Work through *Histograms, atomics and contention* with the concrete cases below. Finish with this evidence:
-exact counts and a contention-based explanation of two timing regimes. Distinguish an algorithmic
-calculation, a compiled artifact and an actual device observation when explaining
-what your work establishes.
+**Scope:** Conflicting writes, atomic updates, collision probability and block privatization.
+
+**Evidence to produce:** Exact counts and a contention-based explanation of two timing regimes.
 
 ## Purpose, vocabulary and mental model
 
@@ -30,24 +27,15 @@ A histogram counts values into bins. Several threads can increment the same bin,
 
 ## How to run and study this lesson
 
-Use the saved reading worksheet in `/classroom`; the reading pad does not execute
-CUDA. For the bounded calculation, select **CPU model (Python)**, whose
-answer-free starter supplies the literal fixtures and task contract. The
-[CUDA C++ study workflow](../README.md) covers platforms, optional GPU
-compilation and evidence labels. In a prepared Python environment you can also
-run the separate [CPU reference](../references/cuda-022_cpu.py) from the
-repository root:
+Trace worked example 1 by hand, then run the [CPU reference](../references/cuda-022_cpu.py) from the repository root:
 
 ```sh
 python courses/cuda/cpp/references/cuda-022_cpu.py
 ```
 
-Its assertions check the stated numerical result or model invariant; console
-text is evidence of this CPU model only, not of CUDA execution.
-
 ## CUDA C++ kernel listing
 
-The kernel below is an excerpt from the chapter's complete [GPU reference](../references/cuda-022_gpu.cu). The full program adds device discovery, checked allocation and launch, completion checks and host validation. Read it as CUDA C++ source; the classroom reading pad does not compile or run it.
+An excerpt from the chapter's complete [GPU reference](../references/cuda-022_gpu.cu); the reading pad does not compile it.
 
 ```cpp
 __global__ void count_bins(const int *input, unsigned *bins, std::size_t n) {
@@ -63,9 +51,7 @@ __global__ void count_bins(const int *input, unsigned *bins, std::size_t n) {
 
 Values \([0,2,2,1,2,0]\) with three bins produce \([2,1,3]\). The sum of bins is six. Two workers both reading an old count of zero and then each writing one lose a count; correct atomic accumulation produces two.
 
-The complete CPU model below intentionally models only the named arithmetic,
-layout, dependency or capability decision. It does not model GPU scheduling,
-caches, instruction timing or device memory visibility.
+**Why:** atomicAdd makes each read-modify-write indivisible, so two threads hitting bin 0 at once produce 2 instead of both writing 1.
 
 ```python
 values = [0, 2, 2, 1, 2, 0]
@@ -85,58 +71,44 @@ assert merged == [2, 1, 3] and sum(merged) == len(values)
 print({"partials": parts, "merged": merged})
 ```
 
-**Expected observation:** Every assertion succeeds. A representative CPU output is:
+**Expected observation:** every assertion succeeds, and the CPU model prints:
 
 ```text
 {'partials': [[1, 0, 2], [1, 1, 1]], 'merged': [2, 1, 3]}
 ```
 
-Integers, shapes and ordering must match exactly; only assertions with an explicit
-tolerance accept small floating-point differences. A printed duration is a model
-output, not a measured GPU benchmark.
+**Check:** The reference asserts the merged bins equal [2, 1, 3] and sum to six, the input length, which is the conservation check to keep on a GPU.
 
 ## Worked example 2: change a meaningful condition
 
 Split the values into two groups of three. Their private histograms are \([1,0,2]\) and \([1,1,1]\); merging gives \([2,1,3]\). This explains the algorithm without promising the private version is faster. For small inputs, initialization and merging may cost more than direct atomic updates.
 
-Before applying this example to your own program, write down which inputs are
-read, which result is produced, and the condition that makes the comparison
-valid. Keep the original case as a regression check when changing a boundary.
+**Why:** Addition is associative and commutative on integer counts, so merging private bins yields exactly the global histogram.
+
+**Check:** The reference prints partials [[1, 0, 2], [1, 1, 1]] and merged [2, 1, 3]; time each variant on a GPU before stating which wins.
 
 ## Optional CUDA C++ laboratory
 
-A complete [GPU reference](../references/cuda-022_gpu.cu) and separate
-[GPU learner source](../lessons/cuda-022_gpu.cu) accompany this chapter.
-They are standalone files with bounded fixtures, checked runtime calls and host
-validation. The learner source intentionally reports incomplete implementation
-until you add the chapter's algorithm and assertions. It must never return a
-fake GPU success on a CPU machine. Follow the [manual GPU workflow](../README.md)
-for exact compilation and execution paths. If the classroom offers the optional
-CUDA C++ variant, its capability notice must confirm actual runtime readiness.
+- [GPU learner source](../lessons/cuda-022_gpu.cu)
+- [GPU reference](../references/cuda-022_gpu.cu)
 
-The reference contains an explicit no-device failure, launch and completion
-checks, and returned-value validation. Source review and CPU reference checks do
-not qualify this .cu file on your hardware. Preserve compilation, actual device
-execution and sanitizer evidence separately. Exercise 4 is a reasoning diagnosis;
-do not deliberately launch a hanging kernel or reset a shared GPU to reproduce it.
+Read the [laboratory rules](../../STUDY-GUIDE.md#optional-native-cuda-laboratories) before compiling.
 
 ## Six progressive exercises
 
-Exercises 1 and 2 are guided reconstructions of the worked examples; exercises
-3-6 change an input, diagnose a defect, test a boundary and transfer the idea.
-For each one, keep the calculation, output, diagram or failure policy you
-produce so another reader can compare it with the worked cases. If the hint is
-not enough, reread the mechanism paragraph and the bounded CPU assertion.
-
 ### Exercise 1
 
-Predict and trace the first worked example before running its CPU reference. Write every intermediate quantity that leads to the stated result, including units or ownership where applicable.
+Reconstruct worked example 1 on paper before running its CPU reference. Count [0, 2, 2, 1, 2, 0] into three bins with an atomic increment per element, giving [2, 1, 3].
+
+**Trap to avoid:** A plain bins[v]++ looks atomic in source but compiles to separate load, add and store, and two workers reading the old zero both store one.
 
 **Hint:** Start with the literal input and intermediate quantities in worked example 1.
 
 ### Exercise 2
 
-Reconstruct the second worked example without copying its conclusion. Identify the changed input or condition, show the resulting calculation or dependency, and explain why it differs from the first example.
+Rework worked example 2 without copying its conclusion. Give each of two groups a private histogram, [1, 0, 2] for the first three values and [1, 1, 1] for the rest, then add them binwise.
+
+**Trap to avoid:** Claiming the privatized version must be faster ignores the cost of zeroing and merging private copies, which can dominate for six elements.
 
 **Hint:** Identify exactly which condition changes in worked example 2.
 
@@ -144,11 +116,15 @@ Reconstruct the second worked example without copying its conclusion. Identify t
 
 Build a four-bin histogram of \([3,3,0,1,3]\).
 
+**Trap to avoid:** Allocating max(values) bins from the observed data would still be four here but drops bins silently whenever the top category is absent.
+
 **Hint:** Use the first worked example to establish the relevant quantities, then change only the requested input.
 
 ### Exercise 4
 
 The input contains category -1. Define a safe contract.
+
+**Trap to avoid:** Casting the value to unsigned makes -1 a huge index that skips the lower check yet still writes far outside the allocation.
 
 **Hint:** Locate the failed phase or violated dependency before proposing a repair.
 
@@ -156,35 +132,33 @@ The input contains category -1. Define a safe contract.
 
 What fixture maximizes simple same-bin contention?
 
+**Trap to avoid:** Using random data alone measures an average case and never exposes the worst-case serialization a skewed real dataset can trigger.
+
 **Hint:** Check what the algorithm is allowed to read, write or assume at this boundary.
 
 ### Exercise 6
 
 Transfer histograms to quantized floating measurements.
 
+**Trap to avoid:** Computing int((x - lo) / width) without a policy sends the maximum value to a bin one past the end.
+
 **Hint:** State the output contract and which observations are needed in the new application.
 
 ## Common mistakes and diagnosis
 
-A tempting but incorrect claim in this chapter is: **an atomic operation is either always fast or always slow, independent of access pattern.**
-
-For the concrete failure exercise, the input contains category -1. Define a safe contract.
-Preserve the original input and the stage where behavior diverged, and compare
-with the CPU model before changing hardware configuration.
+A tempting but incorrect claim: **An atomic operation is either always fast or always slow, independent of access pattern.** Atomic cost depends on contention. Values spread over many bins rarely collide, while a skewed input that sends most values to one bin serializes updates. Worked example 2 shows block privatization, which reduces global contention but adds initialization and merging, so measure both input shapes before choosing.
 
 ## Self-check, retrieval and transfer
 
-Explain the first example without its code, then use the second example to state
-one assumption that matters. Complete Exercise 3 independently, use Exercise 4 to
-diagnose a plausible defect, check the boundary in Exercise 5, and retain the
-application contract from Exercise 6. Compare the [separate explanations](../solutions/cuda-022_solutions.md)
-only after your attempt or a deliberate reveal. A reading marker records your
-choice; it does not certify hardware qualification or expert mastery.
+1. Why must the bin counts in worked example 1 sum to six?
+2. What does an atomic add guarantee and what does it not?
+3. When might a private histogram be slower?
+
+Short answers are in the [separate explanations](../solutions/cuda-022_solutions.md#self-check-answers); compare only after an attempt.
 
 ## Primary references
 
-Check the documentation that matches your prepared toolkit before optional
-hardware execution.
+Use the documentation that matches your prepared toolkit.
 
 - [CUDA Programming Guide](https://docs.nvidia.com/cuda/cuda-programming-guide/)
 

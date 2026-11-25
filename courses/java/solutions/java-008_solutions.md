@@ -1,6 +1,6 @@
 # java-008: explanatory solutions
 
-Open after an attempt or an explicit solution reveal. The executable reference runs the six exercise checks together as `Main.java`. The guide contains independent worked examples, while this file explains the choices and failure cases in the complete answer.
+Open this after an attempt; see [using the solutions](../STUDY-GUIDE.md#use-the-solutions).
 
 ## Mechanism review
 
@@ -18,7 +18,7 @@ record Order(String id, List<String> items) declares component accessors id() an
 
 ## Exercise 1: Normalize at construction: change one input
 
-Task: Copy Example A into a scratch `Main.java` and change `Order order = new Order(" A ", List.of("x"));` to `Order order = new Order(" A !", List.of("x"));`. Before running it with `java -ea Main`, predict which assertion fails and which value it now sees; then run it and restore the original line.
+Task: Change `Order order = new Order(" A ", List.of("x"));` to `Order order = new Order(" A !", List.of("x"));` in Example A and predict which assertion fails and why.
 
 Normalization occurs once at the boundary. Every later accessor sees the canonical ID, rather than requiring callers to remember to trim it.
 
@@ -29,13 +29,13 @@ Order order = new Order(" A ", List.of("x"));
 assert order.id().equals("A") && order.items().equals(List.of("x"));
 ```
 
-**Expected:** The changed run fails with an `AssertionError` from the assertion on `order.id().equals("A") && order.items().equals(List.of("x"))`. Restoring the original line brings back the worked observation: ID A and items[x].
+**Expected:** The edited run fails with an `AssertionError` from the assertion on `order.id().equals("A") && order.items().equals(List.of("x"))`.
 
-**Verify:** Compare your written prediction with the reported `AssertionError` and its stack-trace line, and name the value that made `order.id().equals("A") && order.items().equals(List.of("x"))` false. After restoring the line, the program completes without an `AssertionError` again.
+**Verify:** Name the value that makes `order.id().equals("A") && order.items().equals(List.of("x"))` false, then restore the line.
 
 ## Exercise 2: Copy caller-owned collections: debug a regression
 
-Task: A regression changed one token in the code that Example B adds after Example A, so one line now reads `List<String> supplied = new ArrayList<>(List.of("x!"));`. Run Example B with that line, use the failing assertion to locate the defect and repair it without changing the assertion.
+Task: A regression in Example B's new code makes one line read `List<String> supplied = new ArrayList<>(List.of("x!"));`. Repair it using the failing assertion.
 
 Without the copy, a caller could change the record observed value after construction. Final component references alone would not prevent that mutation.
 
@@ -48,9 +48,9 @@ supplied.add("y");
 assert copied.items().equals(List.of("x"));
 ```
 
-**Expected:** Before the repair the run fails with an `AssertionError` from the assertion on `copied.items().equals(List.of("x"))`; after it the line reads `List<String> supplied = new ArrayList<>(List.of("x"));` again and record retains its original single item.
+**Expected:** The unrepaired run fails with an `AssertionError` from the assertion on `copied.items().equals(List.of("x"))`; the repaired line reads `List<String> supplied = new ArrayList<>(List.of("x"));`.
 
-**Verify:** Keep the failing and the repaired runs. Explain why the changed token alters the value tested by `copied.items().equals(List.of("x"))` for this input.
+**Verify:** Explain how the changed token alters the value that `copied.items().equals(List.of("x"))` tests.
 
 ## Exercise 3: Use value equality
 
@@ -65,7 +65,7 @@ assert order.equals(same) && order.hashCode() == same.hashCode();
 
 **Expected:** equals true and equal hashCode.
 
-**Verify:** Keep an assertion equivalent to `order.equals(same) && order.hashCode() == same.hashCode()`. As a control, change `Order same = new Order("A", List.of("x"));` to `Order same = new Order("A!", List.of("x"));`: the run must fail with an `AssertionError` from the assertion on `order.equals(same) && order.hashCode() == same.hashCode()`. Restore the line before continuing.
+**Verify:** Control: changing `Order same = new Order("A", List.of("x"));` to `Order same = new Order("A!", List.of("x"));` must fail the assertion on `order.equals(same) && order.hashCode() == same.hashCode()`.
 
 ## Exercise 4: Reject blank identity
 
@@ -85,7 +85,7 @@ assert blank;
 
 **Expected:** IllegalArgumentException.
 
-**Verify:** Keep an assertion equivalent to `blank`. As a control, change `blank = true;` to `blank = false;`: the run must fail with an `AssertionError` from the assertion on `blank`. Restore the line before continuing.
+**Verify:** Control: changing `blank = true;` to `blank = false;` must fail the assertion on `blank`.
 
 ## Exercise 5: Protect the exposed collection
 
@@ -105,7 +105,7 @@ assert protectedItems;
 
 **Expected:** UnsupportedOperationException.
 
-**Verify:** Keep an assertion equivalent to `protectedItems`. As a control, change `protectedItems = true;` to `protectedItems = false;`: the run must fail with an `AssertionError` from the assertion on `protectedItems`. Restore the line before continuing.
+**Verify:** Control: changing `protectedItems = true;` to `protectedItems = false;` must fail the assertion on `protectedItems`.
 
 ## Exercise 6: Reject null collection members
 
@@ -125,8 +125,10 @@ assert nullItem;
 
 **Expected:** NullPointerException from the declared copy policy.
 
-**Verify:** Keep an assertion equivalent to `nullItem`. As a control, change `nullItem = true;` to `nullItem = false;`: the run must fail with an `AssertionError` from the assertion on `nullItem`. Restore the line before continuing.
+**Verify:** Control: changing `nullItem = true;` to `nullItem = false;` must fail the assertion on `nullItem`.
 
 ## After comparing the answer
 
-Run the complete reference with assertions enabled, then return to your own implementation. Recreate one check with different values and explain its expected result before execution. A compiler error, an expected domain exception and an assertion failure represent different stages and should be reported separately. Preserve ownership boundaries when adapting file, network or concurrency examples. The reference never authorizes access to a shared service or deletion of learner state. Use a fresh tiny fixture when you need to distinguish two interpretations of an API contract.
+Add a `withItem(String item)` method to your copy that returns a new `Order` instead of mutating, and confirm that the original record still has one item.
+
+Run the complete reference with `java -ea Main` first; the [review routine](../STUDY-GUIDE.md#use-the-solutions) covers the rest.

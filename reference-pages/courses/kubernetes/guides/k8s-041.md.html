@@ -195,7 +195,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="k8s-041-recovery-objectives-and-reviewable-runbooks">k8s-041: Recovery objectives and reviewable runbooks<a class="heading-anchor" href="#k8s-041-recovery-objectives-and-reviewable-runbooks" aria-label="Link to this section">#</a></h2>
 <h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
-<p>Advanced; about 150 minutes plus review. Direct prerequisites: <code>k8s-036</code>, <code>k8s-037</code>, <code>k8s-040</code>. The chapter separates desired configuration, API acceptance, controller observation and application evidence.</p>
+<p>Advanced; about 150 minutes plus review. Direct prerequisites: <code>k8s-036</code>, <code>k8s-037</code>, <code>k8s-040</code>.</p>
 <h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
 <p>Measure a recovery objective with both service and data evidence.</p>
 <h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
@@ -226,18 +226,21 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>At second 40 the Pod is Ready. At second 60 the service responds. The marker hash has not been read. The finish predicate requires service_ok and data_ok, so the drill remains incomplete.</p>
 <p><strong>Expected:</strong> No finish time is claimed until both required observations exist. Ready or service success alone cannot close the data recovery objective.</p>
 <h3 id="inspect-the-specific-owned-object">Inspect the specific owned object<a class="heading-anchor" href="#inspect-the-specific-owned-object" aria-label="Link to this section">#</a></h3>
-<p>Only after the chapter&#x27;s host capability is provisioned and its resources remain present, use the explicit receipt fields described in <a href="../host-labs.md.html">host-labs.md</a>. A completed one-shot browser Run has already cleaned its objects. The following read does not provision the missing capability and does not justify changing credentials after a Forbidden result.</p>
+<p>Read only while this lesson&#x27;s objects still exist (<a href="../STUDY-GUIDE.md.html#owned-live-reads">owned live reads</a>).</p>
 <p>Bash on Linux, macOS or Ubuntu under WSL 2:</p>
 <pre class="highlighted-code"><code class="language-bash">: <span class="syntax-string">&quot;</span><span class="syntax-string">${</span>LAB_KUBECONFIG<span class="syntax-punctuation">:</span><span class="syntax-punctuation">?Use the owned receipt path</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span>
 : <span class="syntax-string">&quot;</span><span class="syntax-string">${</span>LAB_CONTEXT<span class="syntax-punctuation">:</span><span class="syntax-punctuation">?Use the owned receipt context</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span>
 : <span class="syntax-string">&quot;</span><span class="syntax-string">${</span>LAB_NAMESPACE<span class="syntax-punctuation">:</span><span class="syntax-punctuation">?Use the owned receipt namespace</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span>
 kubectl --kubeconfig <span class="syntax-string">&quot;</span>$LAB_KUBECONFIG<span class="syntax-string">&quot;</span> --context <span class="syntax-string">&quot;</span>$LAB_CONTEXT<span class="syntax-string">&quot;</span> --namespace <span class="syntax-string">&quot;</span>$LAB_NAMESPACE<span class="syntax-string">&quot;</span> get pvc data-store-0 -o json</code></pre>
-<p>Windows uses the same Bash commands inside WSL 2. The lab adapter refuses native Windows credential handling, so do not run kubectl against the receipt from PowerShell. From PowerShell, only open your WSL 2 distribution (the name reported by <code>wsl.exe --list --verbose</code>), change to your checkout with its Linux path, then run the Bash block above unchanged:</p>
+<p>From PowerShell, only open WSL 2 and run the Bash block there (<a href="../STUDY-GUIDE.md.html#owned-live-reads">why</a>):</p>
 <pre class="highlighted-code"><code class="language-powershell">wsl<span class="syntax-punctuation">.</span>exe <span class="syntax-punctuation">-</span>-distribution Ubuntu</code></pre>
-<p>Retain only the fields needed by this chapter&#x27;s prediction. A NotFound result may be expected after one-shot cleanup; a Forbidden result may identify a deliberately absent advanced capability. Neither result authorizes an ambient-context fallback.</p>
+<p>Read <code>status.phase</code> and <code>metadata.creationTimestamp</code> on data-store-0 next to the drill log. The claim&#x27;s timestamp places it in the timeline but does not mark the data finish; that needs the independent marker check.</p>
 <h3 id="run-and-bounded-evidence">Run and bounded evidence<a class="heading-anchor" href="#run-and-bounded-evidence" aria-label="Link to this section">#</a></h3>
-<p>The app artifact is a reading worksheet, <code>courses/kubernetes/lessons/k8s-041.md</code>. The current browser adapter does not provide the full <strong>qualified synthetic recovery drill with independent service/data acceptance and source timestamps</strong> operation. Use the synthetic fixture and offline check first. Live work follows <a href="../host-labs.md.html">the scoped host-lab guide</a> only when the named capability and owned target have been provisioned. A worksheet or static check is never a cluster execution receipt.</p>
-<p>The <a href="../solutions/k8s-041_solution.json.html">manifest example</a> is separate from the learner artifact. The <a href="../solutions/k8s-041_checks.py.html">offline reference check</a> evaluates explicitly synthetic facts and makes no API calls. Run it locally with <code>python courses/kubernetes/solutions/k8s-041_checks.py</code> after comparing your attempt. The <a href="../fixtures/k8s-041-cases.json.html">case ledger</a> is immutable teaching input.</p>
+<p>This worksheet, <code>courses/kubernetes/lessons/k8s-041.md</code>, does not provide the full <strong>qualified synthetic recovery drill with independent service/data acceptance and source timestamps</strong> operation. A qualified drill on the host produces source timestamps for the start, service recovery and data verification, so the recovery time and data-loss window can be recomputed from evidence.</p>
+<p>Live reads need a provisioned, owned target (<a href="../host-labs.md.html">host-lab guide</a>).</p>
+<p>The <a href="../solutions/k8s-041_checks.py.html">offline reference check</a> makes no API calls; run it after your attempt:</p>
+<pre class="highlighted-code"><code class="language-bash">python courses/kubernetes/solutions/k8s-041_checks.py</code></pre>
+<p>Compare it with the <a href="../solutions/k8s-041_solution.json.html">manifest example</a> and <a href="../fixtures/k8s-041-cases.json.html">case ledger</a>.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-define-start-and-finish">Exercise 1: Define start and finish<a class="heading-anchor" href="#exercise-1-define-start-and-finish" aria-label="Link to this section">#</a></h4>
 <p>Write the exact interruption start and required final gates.</p>
@@ -270,12 +273,12 @@ kubectl --kubeconfig <span class="syntax-string">&quot;</span>$LAB_KUBECONFIG<sp
 <p><strong>Verify:</strong> Confirm that the conclusion states the target, the observed value, the failed controls and the untested conditions.</p>
 <p><strong>Progressive hints:</strong> One rehearsal is one observation.</p>
 <h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
-<p>Explain the mechanism behind the first example, then distinguish it from this boundary case: No finish time is claimed until both required observations exist. Ready or service success alone cannot close the data recovery objective. State which observations are synthetic and which, if any, were read from your owned runtime.</p>
+<p>Service responses returned 90 seconds after the start, but the marker check never ran. Why can no recovery time be claimed, and what does the finish predicate require?</p>
 <h3 id="common-pitfalls">Common pitfalls<a class="heading-anchor" href="#common-pitfalls" aria-label="Link to this section">#</a></h3>
 <p>Meeting an objective once is a useful rehearsal result, not a guarantee that every future incident will recover within the same duration. Report the tested fault, data size, environment and operator procedure. Repeatability and broader failure coverage require additional independent drills.</p>
 <p>Do not export private backups or credentials to make the evidence packet self-contained. The packet can include synthetic marker hashes, timestamps, operation receipts and protected backup references while leaving sensitive payloads under the host&#x27;s access and retention policy.</p>
 <h3 id="retrieval-and-transfer">Retrieval and transfer<a class="heading-anchor" href="#retrieval-and-transfer" aria-label="Link to this section">#</a></h3>
-<p>Close the answer and reconstruct the reasoning for Exercise 6 (Write the objective conclusion). Name the exact source and observed identity you would require before claiming the changed case succeeded.</p>
+<p>Recompute the observed recovery time and data-loss boundary against the 120 and 30 second targets from memory. Then state the drill conclusion without a universal guarantee.</p>
 <h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
 <p>Continue to <code>k8s-042</code> after preserving the six evidence records.</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>

@@ -24,9 +24,9 @@ Bound retry attempts and use a failure policy that distinguishes transient, perm
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles your saved pad as `Program.cs` in its fixed .NET 10 project. C# 14 is the matching language generation. This route uses the prepared framework libraries; it does not accept arbitrary project files, NuGet packages, command arguments or interactive input. The explicit `Program.Main` entrypoint makes compilation and execution visible. `Check` throws on a false condition in every build configuration, unlike conditional debugging assertions.
+`Ledger` is declared after `Main` and keeps results in an in-memory dictionary, so it forgets everything when the process exits and is not safe for concurrent callers. Treat it as a model of the decision rule: a known identity replays its stored receipt, and a new identity applies once.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Compile contract, starter stop and success marker: [running a lesson](../STUDY-GUIDE.md#running-a-lesson).
 
 
 
@@ -34,7 +34,7 @@ Start with the answer-free learner artifact in your saved classroom pad. It deli
 
 A dictionary of operation identities records prior results. Check identity before applying a side effect, and store the result with the effect under a single atomic boundary in a real durable implementation.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+Each example ends with a trace; method: [tracing a program](../STUDY-GUIDE.md#tracing-a-program).
 
 ## Worked example / walkthrough
 
@@ -95,6 +95,8 @@ internal static class Program {
 ```
 
 **Observe:** The repeated identity returns its prior result without increasing the total.
+
+**Trace.** The first `Apply("op-1", 3)` finds no prior entry, so `Total` becomes 3 and the dictionary stores amount 3 with result 3. The second call with the same key finds that entry, sees an identical amount and returns the stored result 3 without touching `Total`. The check confirms both the replayed receipt and the unchanged total.
 
 ### Example B: Distinguish a new operation
 
@@ -161,6 +163,8 @@ internal static class Program {
 
 **Observe:** A new identity applies separately, while a changed payload under an old key is rejected.
 
+**Trace.** op-1 and op-2 each apply once, so `Total` is 6. The retry `Apply("op-1", 4)` finds op-1 recorded with amount 3, sees a different amount and throws `InvalidOperationException` with the message payload conflict. Replaying op-1 with 3 at that point would return 3, its original receipt, not the current total of 6.
+
 ## Exercises
 
 1. **Predict and explain.** Trace the effect and receipt for the repeated operation.
@@ -175,13 +179,15 @@ internal static class Program {
 
 6. **Transfer and justify.** Design durable atomic storage for an effect and its receipt and state remaining failure modes.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Log each task in the [evidence table](../STUDY-GUIDE.md#recording-exercise-evidence) before opening the explanation.
 
 ## Common pitfalls and diagnosis
 
 This in-memory ledger does not survive restart and is not concurrent. A production idempotency record needs retention and conflict policy. Do not describe retries as exactly-once delivery.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+For task 4, a retry that invents a fresh identity after a timeout looks new to the ledger, so a write that actually succeeded is applied twice; reuse the original identity for every retry. For task 2, adding op-3 with 5 after op-1 and op-2 brings the total to 11. For task 5, an identical replay returns the receipt and a conflicting one throws.
+
+Repair routine: [building a regression case](../STUDY-GUIDE.md#building-a-regression-case).
 
 ## Progressive hints
 
@@ -191,11 +197,15 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 ## Self-check and next step
 
-Explain Idempotency key, Transient failure, Reconciliation without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+Explain why the replay returns the stored result rather than the current total. Describe what goes wrong if the effect and the receipt are saved in two separate steps and the process stops between them. For task 6, name the store that commits both atomically and the failure modes it still leaves.
+
+Then follow the general [self-check routine](../STUDY-GUIDE.md#self-check-routine) and save your pad.
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://learn.microsoft.com/en-us/dotnet/csharp/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+[Documentation](https://learn.microsoft.com/en-us/dotnet/csharp/): The C# guide's dictionary and exception topics cover `TryGetValue` lookups and the conflict signal the ledger raises.
+
+Provenance and limits: [sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

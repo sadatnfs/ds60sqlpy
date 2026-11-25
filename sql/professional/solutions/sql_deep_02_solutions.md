@@ -1,6 +1,11 @@
 # sql-deep-02: Explained reference solutions
 
-Read [Metric Algebra Across Grains, Snapshots, and Weighted Bridges](../companion-guides/sql_deep_02.md) and attempt its six queries before comparing. The [complete reference script](sql_deep_02_solutions.sql) recreates the same temporary fixture, runs every answer inside its own savepoint, compares exact JSON row sets with fail-fast assertions, then rolls back. No permanent table, role or service is changed.
+Attempt the six queries in [Metric Algebra Across Grains, Snapshots, and
+Weighted Bridges](../companion-guides/sql_deep_02.md) first. The [complete
+reference script](sql_deep_02_solutions.sql) rebuilds the six `deep2_` tables
+and answers each exercise inside its own savepoint, which matters for Exercise
+5: its `UPDATE` of the order 3 `direct` weight to 0.3 is undone before Exercise
+6 runs.
 
 ## Exercises and reasoning
 
@@ -10,7 +15,7 @@ Return customer_id, revenue, visits, revenue_per_visit, ratio_defined from `deep
 
 **Inputs/evidence:** For sql-deep-02 Exercise 1, Return customer_id, revenue, visits, revenue_per_visit, ratio_defined from `deep2_usage`, one row per customer ordered by customer_id. Use NULLIF for a zero denominator and retain the zero-visit customer.
 
-**Expected result/shape:** For sql-deep-02 Exercise 1, Customer 1 ratio 10, true; customer 2 ratio 30, true; customer 3 ratioNULL, false. Revenue/visits remain 10/1,90/3,0/0.
+**Expected result/shape:** For sql-deep-02 Exercise 1, Customer 1 ratio 10, true; customer 2 ratio 30, true; customer 3 ratio NULL, false. Revenue/visits remain 10/1, 90/3, 0/0.
 
 **Verify:** For sql-deep-02 Exercise 1, recompute each numerator and denominator from its customer rows; retain a NULL ratio when the denominator is zero rather than substituting an observed zero.
 
@@ -35,7 +40,7 @@ Return one row keyed by metric_id=all_customers with columns metric_id, customer
 
 **Inputs/evidence:** For sql-deep-02 Exercise 2, Return one row keyed by metric_id=all_customers with columns metric_id, customer_count, defined_ratio_count, ratio_of_totals, mean_customer_ratio. Compute both ratio targets from the same source, retaining the denominator policy from Exercise 1.
 
-**Expected result/shape:** For sql-deep-02 Exercise 2, The row is all_customers,3,2,25,20. Ratio of totals uses 100 revenue/4 visits, while the mean customer ratio averages 10 and 30.
+**Expected result/shape:** For sql-deep-02 Exercise 2, The row is `all_customers`, 3, 2, 25, 20. Ratio of totals uses 100 revenue/4 visits, while the mean customer ratio averages 10 and 30.
 
 **Verify:** For sql-deep-02 Exercise 2, calculate the pooled numerator divided by the pooled denominator independently of the average of defined customer ratios; report how many customer ratios each calculation includes.
 
@@ -92,7 +97,7 @@ Return order_id, weight_sum only for orders whose total bridge weight is not exa
 
 **Inputs/evidence:** For sql-deep-02 Exercise 4, Return order_id, weight_sum only for orders whose total bridge weight is not exactly 1, including orders with no bridge rows. Preserve one diagnostic row per invalid order and order by order_id. Use exact numeric weights from the fixture.
 
-**Expected result/shape:** For sql-deep-02 Exercise 4, Only order 3 appears with weight_sum0.9. Orders 1 and 2 sum to 1. The diagnostic must exist before any channel totals are treated as complete allocations.
+**Expected result/shape:** For sql-deep-02 Exercise 4, Only order 3 appears with `weight_sum` 0.9. Orders 1 and 2 sum to 1. The diagnostic must exist before any channel totals are treated as complete allocations.
 
 **Verify:** For sql-deep-02 Exercise 4, sum the bridge weights separately for each source identity before multiplying amounts; inspect the per-source weight-sum output to identify the source whose weights fail conservation.
 
@@ -203,4 +208,13 @@ The left join retains unmatched events, while counting the nonnull version_id di
 
 ## Verification and transaction boundary
 
-Every answer is materialized into a temporary answer table and compared with a literal expected row set, including column names, NULL values and deterministic order. The assertion function rejects both false and unknown Boolean results, so a NULL comparison cannot silently pass. Each exercise rolls back to its own savepoint, ensuring mutations used for one boundary case do not alter the next. The final ROLLBACK removes the full fixture. Read the first error if a contract fails; a later row count or command tag cannot repair an earlier failed assertion.
+`pg_temp.assert_true` compares each ordered answer, aggregated into `jsonb`,
+with a literal expected row set and raises unless the comparison is exactly
+true. That catches the classic metric mistakes in this lesson: a dropped
+zero-visit customer changes Exercise 1, averaging unit ratios gives 20
+where Exercise 2 expects a ratio of totals of 25, the future 99-unit snapshot
+breaks Exercise 3, and a silently excluded order 3 leaves Exercise 5 short of the
+direct 12, email 120 and search 68 that add back to 200. After the rollback to
+each exercise savepoint the bridge again sums to 0.9 for order 3, and the final
+`ROLLBACK` drops the fixture. Repair the first failing assertion before reading
+any later output.

@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cpp/solutions/cpp-020_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="cpp-020-explanations-and-reference-observations">cpp-020: explanations and reference observations<a class="heading-anchor" href="#cpp-020-explanations-and-reference-observations" aria-label="Link to this section">#</a></h2>
-<p>Attempt the learner tasks before opening this document. The executable reference checks the bounded normal and boundary examples; the six explanations below cover the deliberate changes and manual checks.</p>
+<p>The <a href="cpp-020_solution.cpp.html">executable reference</a> checks the zero identity <code>7 + 0</code> for both int and long long. The explanations show where a constraint rejects a type and how deduction picks each instantiation. How to compare: <a href="../STUDY-GUIDE.md.html#compare-with-the-solutions">study guide</a>.</p>
 <h3 id="mechanism">Mechanism<a class="heading-anchor" href="#mechanism" aria-label="Link to this section">#</a></h3>
 <p>A template describes a family of functions parameterized by types. Deduction selects a type from arguments. A concept is a compile-time requirement that determines which template candidates are valid. A constraint improves the interface boundary, but it does not automatically prove arithmetic safety.</p>
 <h3 id="detailed-reasoning">Detailed reasoning<a class="heading-anchor" href="#detailed-reasoning" aria-label="Link to this section">#</a></h3>

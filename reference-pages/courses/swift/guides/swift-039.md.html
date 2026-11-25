@@ -206,12 +206,12 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Reducer:</strong> A function computing next state from current state and an action.</p>
 <p><strong>Presentation state:</strong> Values a view needs to explain current application behavior.</p>
 <h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>The Linux Docker classroom compiles the saved pad as <code>main.swift</code> with Swift 6 language checking. An explicit <code>@main</code> type contains <code>static func main() async throws</code>; the fixed compiler uses <code>-parse-as-library -swift-version 6</code>. The examples use the standard library and portable Foundation. <code>precondition</code> makes a violated invariant fail the process. The fixed pad accepts one source file, without arbitrary command arguments, interactive input or dependency installation. SwiftUI, UIKit, Apple simulators and application signing belong to the separately prepared macOS/Xcode project labs, never the Linux pad.</p>
-<p>Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.</p>
+<p>The pad runs only the portable domain kernel; the SwiftUI app is a separate Apple project lab. Task 3 runs <code>swift test</code> in a copied JourneyCore package before you open JourneyApp, so a domain failure is found without Xcode. <code>PlannerItem</code> and <code>toggled</code> are declared above <code>LessonMain</code> in both examples.</p>
+<p>Compile contract, starter stop and success marker: <a href="../STUDY-GUIDE.md.html#running-a-lesson">running a lesson</a>.</p>
 <p>Use <a href="../fixtures/JourneyCore/README.md.html">JourneyCore</a> for the complete portable package and <a href="../fixtures/JourneyApp/README.md.html">JourneyApp</a> for the real SwiftUI app files and Xcode workflow.</p>
 <h3 id="syntax-anatomy-and-execution-trace">Syntax anatomy and execution trace<a class="heading-anchor" href="#syntax-anatomy-and-execution-trace" aria-label="Link to this section">#</a></h3>
 <p>A struct model conforms to Identifiable, Codable, Equatable and Sendable where appropriate. A pure reducer maps a state plus action to a new state. The app owns presentation and storage adapters.</p>
-<p>Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.</p>
+<p>Each example ends with a trace; method: <a href="../STUDY-GUIDE.md.html#tracing-a-program">tracing a program</a>.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="example-a-apply-a-domain-action">Example A: Apply a domain action<a class="heading-anchor" href="#example-a-apply-a-domain-action" aria-label="Link to this section">#</a></h4>
 <p>A pure transition supports undo, testing and separate UI rendering.</p>
@@ -240,6 +240,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The transformed item changes completion while retaining the original value.</p>
+<p><strong>Trace.</strong> <code>original</code> is a struct with completed set to false. <code>toggled</code> receives a copy, makes a mutable local <code>result</code> from it, flips completed to true and returns that new value. Because <code>PlannerItem</code> is a value type, the function never touches the caller&#x27;s storage. The check confirms that <code>changed.completed</code> is true while <code>original.completed</code> is still false, so the old state remains available for undo or comparison.</p>
 <h4 id="example-b-keep-identity-stable-during-edits">Example B: Keep identity stable during edits<a class="heading-anchor" href="#example-b-keep-identity-stable-during-edits" aria-label="Link to this section">#</a></h4>
 <p>Stable identity lets navigation, persistence and UI reconciliation refer to the same domain item.</p>
 <pre class="highlighted-code"><code class="language-swift"><span class="syntax-keyword">import</span> <span class="syntax-class">Foundation</span>
@@ -267,6 +268,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> Completion changes do not manufacture a new identity.</p>
+<p><strong>Trace.</strong> The same toggle runs, and the check now compares the fields that should not change. <code>id</code> and <code>title</code> are <code>let</code> constants in the struct, so no transition can alter them after creation; <code>toggled</code> copies them across unchanged. The new value carries the identity one, so a list, a navigation path or a saved file can still recognize it as the same item even though one property differs.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <ol>
 <li><strong>Predict and explain.</strong> Identify domain and presentation responsibilities.</li>
@@ -286,10 +288,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <ol start="6">
 <li><strong>Transfer and justify.</strong> Draw the dependency direction among core, persistence adapter, view model and SwiftUI views.</li>
 </ol>
-<p>For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.</p>
+<p>Log each task in the <a href="../STUDY-GUIDE.md.html#recording-exercise-evidence">evidence table</a> before opening the explanation.</p>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
 <p>A successful core test does not prove app rendering. Stable identity must survive edits and reloads. Keep domain validation outside UI-only button enablement.</p>
-<p>A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.</p>
+<p>Task 2&#x27;s rename must reject an empty or all-whitespace title and leave the original untouched; the counterexample is a title of three spaces, which a plain <code>isEmpty</code> check accepts. For task 4, a model getter that reads a file runs whenever a view reads the property, so a missing file fails during rendering rather than during an explicit load step that can report the error.</p>
+<p>Repair routine: <a href="../STUDY-GUIDE.md.html#building-a-regression-case">building a regression case</a>.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <ol>
 <li>Reproduce Example A (Apply a domain action) before changing anything, and confirm its observation: The transformed item changes completion while retaining the original value.</li>
@@ -297,9 +300,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>Before opening the explanation, check your task 3 attempt (Build and test JourneyCore before opening the Apple app) against each pitfall listed above, and add one input that would expose the tempting wrong rule.</li>
 </ol>
 <h3 id="self-check-and-next-step">Self-check and next step<a class="heading-anchor" href="#self-check-and-next-step" aria-label="Link to this section">#</a></h3>
-<p>Explain Domain core, Reducer, Presentation state without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.</p>
+<p>Explain why returning a new value supports undo more easily than mutating the original in place. Say which fields of <code>PlannerItem</code> can change and how the declaration enforces that. Draw the dependency direction among the core, persistence, view model and views, and state which layer may import SwiftUI.</p>
+<p>Then follow the general <a href="../STUDY-GUIDE.md.html#self-check-routine">self-check routine</a> and save your pad.</p>
 <h3 id="sources-and-execution-boundary">Sources and execution boundary<a class="heading-anchor" href="#sources-and-execution-boundary" aria-label="Link to this section">#</a></h3>
-<p><a href="https://docs.swift.org/swift-book/documentation/the-swift-programming-language/">Official language or framework documentation</a>. The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.</p>
+<p><a href="https://docs.swift.org/swift-book/documentation/the-swift-programming-language/">Documentation</a>: Value semantics for structs are explained in Structures and Classes; Apple&#x27;s SwiftUI documentation covers the <code>Identifiable</code> protocol and list identity.</p>
+<p>Provenance and limits: <a href="../STUDY-GUIDE.md.html#sources-and-execution-boundary">sources and execution boundary</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for swift-039: App architecture: a portable domain core.
 Read courses/swift/guides/swift-039.md and courses/swift/lessons/swift-039.swift. Prerequisites: swift-038.

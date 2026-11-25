@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cuda/spark/solutions/cuda-118_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="cuda-118-explained-solutions">cuda-118: explained solutions<a class="heading-anchor" href="#cuda-118-explained-solutions" aria-label="Link to this section">#</a></h2>
-<p>These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.</p>
+<p>Compare with your <a href="../lessons/cuda-118.md.html">worksheet</a> attempt.</p>
 <h3 id="exercise-1-count-fixed-width-payload">Exercise 1: Count fixed-width payload<a class="heading-anchor" href="#exercise-1-count-fixed-width-payload" aria-label="Link to this section">#</a></h3>
 <p>Rows times element width.</p>
 <p><strong>Approach.</strong> Count fixed-width payload as rows times element width: 1000 float64 values occupy <code>1000*8 = 8000</code> bytes before masks and metadata.</p>
@@ -231,9 +231,19 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Why it is correct here.</strong> A conversion can drop null information, change types or reorder rows. Checking each property catches each failure.</p>
 <p><strong>A plausible wrong approach.</strong> Comparing only values with nulls replaced by zero erases the distinction the mask exists to keep. A conversion bug that turns nulls into zeros would then pass the test unnoticed.</p>
 <p><strong>How to verify.</strong> Use a key column, compare schemas exactly, and compare null positions as well as values.</p>
+<h3 id="self-check-answers">Self-check answers<a class="heading-anchor" href="#self-check-answers" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>Does using Arrow guarantee zero-copy GPU residency?</strong> No. Arrow defines interoperable columnar formats; residency and copying depend on each process and device boundary.</li>
+</ol>
+<ol start="2">
+<li><strong>Why can a larger batch raise spill risk?</strong> It improves amortization but increases peak memory, which can push data to a slower tier.</li>
+</ol>
+<ol start="3">
+<li><strong>What structures does a nullable string column need?</strong> Offsets to mark string boundaries, character storage and a validity mask for nulls.</li>
+</ol>
 <h3 id="reference-observation">Reference observation<a class="heading-anchor" href="#reference-observation" aria-label="Link to this section">#</a></h3>
 <p>Fixed payload 8000 bytes, nine-row mask 2 bytes, string characters 7 bytes.</p>
-<p>The reference file is <code>courses/cuda/spark/references/cuda-118_cpu.py</code>. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.</p></article>
+<p>Asserted by <code>courses/cuda/spark/references/cuda-118_cpu.py</code>.</p></article>
   </main>
 </body>
 </html>

@@ -24,9 +24,9 @@ Measure correctness separately from speed. A benchmark that computes a different
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles your saved pad as `Program.cs` in its fixed .NET 10 project. C# 14 is the matching language generation. This route uses the prepared framework libraries; it does not accept arbitrary project files, NuGet packages, command arguments or interactive input. The explicit `Program.Main` entrypoint makes compilation and execution visible. `Check` throws on a false condition in every build configuration, unlike conditional debugging assertions.
+Both examples are deterministic: they count comparisons and stored entries instead of timing anything, so the result is the same on a slow laptop and a fast server. The lesson needs no extra imports, since `HashSet<int>` lives in `System.Collections.Generic`, which the worked examples already include. Read the counts as a model of work, not a measurement of seconds.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Compile contract, starter stop and success marker: [running a lesson](../STUDY-GUIDE.md#running-a-lesson).
 
 
 
@@ -34,7 +34,7 @@ Start with the answer-free learner artifact in your saved classroom pad. It deli
 
 HashSet membership can avoid repeated linear scans. Distinct and grouping have equality-policy assumptions. Count comparisons in a fixture instead of asserting a fragile timing threshold.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+Each example ends with a trace; method: [tracing a program](../STUDY-GUIDE.md#tracing-a-program).
 
 ## Worked example / walkthrough
 
@@ -87,6 +87,8 @@ internal static class Program {
 
 **Observe:** Finding the last element needs four comparisons.
 
+**Trace.** `comparisons` starts at 0 and `found` at false. The loop visits 2, 4, 6 and 8 in order, adding one to the counter before each equality test. Only the fourth value equals 8, so the loop sets `found`, breaks, and leaves the counter at 4. Searching for 2 would stop after one comparison, while an absent 9 would visit all four values and finish with `found` still false.
+
 ### Example B: Trade memory for repeated membership
 
 Building and retaining the index has a cost that should be amortized across enough queries.
@@ -128,6 +130,8 @@ internal static class Program {
 
 **Observe:** The index answers membership while storing four identities.
 
+**Trace.** The `HashSet<int>` constructor hashes 2, 4, 6 and 8 once and stores each in a bucket. `Contains(8)` hashes 8 and inspects the matching bucket instead of walking the whole sequence, and `Contains(9)` finds no match there. `Count` reports four stored identities. Building the set cost one full pass plus memory, which pays off only after enough later lookups.
+
 ## Exercises
 
 1. **Predict and explain.** Count comparisons for first, last and absent targets.
@@ -142,13 +146,15 @@ internal static class Program {
 
 6. **Transfer and justify.** Write a benchmark plan specifying workload, correctness checks, warmup and allocation measurements.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Log each task in the [evidence table](../STUDY-GUIDE.md#recording-exercise-evidence) before opening the explanation.
 
 ## Common pitfalls and diagnosis
 
 A single stopwatch sample is not reliable evidence. Expected hash lookup cost depends on hashing behavior. Do not optimize a micro-operation before identifying the dominant algorithm or I/O cost.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+In task 4, a benchmark that builds the index outside the timed region and then runs a single query reports the cheap lookup while hiding the construction pass that a one-shot workload must also pay. In task 5, duplicate inputs collapse: a set built from 2, 2 and 4 holds only two entries, and any query against an empty set returns false without error.
+
+Repair routine: [building a regression case](../STUDY-GUIDE.md#building-a-regression-case).
 
 ## Progressive hints
 
@@ -158,11 +164,15 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 ## Self-check and next step
 
-Explain Complexity, Cost model, Benchmark without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+State the worst-case comparison count for a linear search over eight values, then over sixteen, and explain why it doubles. Describe when a single query makes building a `HashSet` a loss rather than a gain. For task 6, list the warmup, the correctness check run alongside each measurement, and the allocation figure you would report with the timing.
+
+Then follow the general [self-check routine](../STUDY-GUIDE.md#self-check-routine) and save your pad.
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://learn.microsoft.com/en-us/dotnet/csharp/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+[Documentation](https://learn.microsoft.com/en-us/dotnet/csharp/): The C# guide and the `HashSet<T>` reference describe collection lookup behavior and the equality comparers that hashing relies on.
+
+Provenance and limits: [sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

@@ -1,6 +1,6 @@
 # go-032: explained solutions
 
-These are comparison material after an attempt or explicit reveal. The executable reference implements all six cases in one `main.go`.
+Compare after an attempt ([using solutions](../STUDY-GUIDE.md#use-the-solutions)). `courses/go/solutions/go-032_solution.go` implements all six cases.
 
 ## Mechanism
 
@@ -10,7 +10,7 @@ html/template escapes according to HTML context; text/template does not supply t
 
 ## 1. Escape HTML data: predict an edited check
 
-Copy worked example 1 into a scratch pad and change `check(t.Execute(&b, "<script>alert(1)</script>") == nil, "render")` to `check(t.Execute(&b, "<script>alert(1)</script>") != nil, "render")` inside its check. Before running, predict whether the check still passes and explain why; then restore it.
+Copy worked example 1, change `check(t.Execute(&b, "<script>alert(1)</script>") == nil, "render")` to `check(t.Execute(&b, "<script>alert(1)</script>") != nil, "render")` inside its check and predict whether it still passes; then restore it.
 
 The unchanged code is worked example 1:
 
@@ -21,7 +21,9 @@ check(t.Execute(&b, "<script>alert(1)</script>") == nil, "render")
 check(strings.Contains(b.String(), "&lt;script&gt;"), "escape")
 ```
 
-**Expected:** The changed run panics with `render` because the edited check no longer holds. Restoring the original line brings back the worked observation: angle brackets become escaped text.
+**Expected:** The edited check panics with `render` even though `t.Execute(&b, "<script>alert(1)</script>") == nil` still holds.
+
+**Verify:** Restoring `check(t.Execute(&b, "<script>alert(1)</script>") == nil, "render")` makes the check pass again with the worked observation: angle brackets become escaped text.
 
 Marking untrusted input as template.HTML would bypass this boundary. Keep data as data.
 
@@ -35,7 +37,7 @@ Marking untrusted input as template.HTML would bypass this boundary. Keep data a
 
 ## 2. Encode a query value: diagnose an edited check
 
-A careless edit changed the check in worked example 2 so that it reads `check(err != nil && decoded == original && encoded != original, "query")`. Run worked example 2 with that line, explain why the edited check now fails for the same program state, and restore it.
+A careless edit rewrote the check in worked example 2 as `check(err != nil && decoded == original && encoded != original, "query")`. Explain the failure, then restore it.
 
 The unchanged code is worked example 2:
 
@@ -46,7 +48,9 @@ decoded, err := url.QueryUnescape(encoded)
 check(err == nil && decoded == original && encoded != original, "query")
 ```
 
-**Expected:** Before the repair the program panics with `query`; after it the line reads `check(err == nil && decoded == original && encoded != original, "query")` again and decoding recovers the original string.
+**Expected:** The defective run panics with `query`; after restoring `check(err == nil && decoded == original && encoded != original, "query")`, decoding recovers the original string.
+
+**Verify:** The edited check fails with message `query` for a state that `err == nil && decoded == original && encoded != original` accepts.
 
 Encoding prevents data from being interpreted as new query syntax. It does not authorize the resulting request.
 
@@ -68,6 +72,8 @@ check(!filepath.IsLocal("../outside") && filepath.IsLocal("reports/item.txt"), "
 
 **Expected:** Only the second path is lexically local.
 
+**Verify:** Your solution must keep `!filepath.IsLocal("../outside") && filepath.IsLocal("reports/item.txt")` true. Control: changing `check(!filepath.IsLocal("../outside") && filepath.IsLocal("reports/item.txt"), "local path")` to `check(filepath.IsLocal("../outside") && filepath.IsLocal("reports/item.txt"), "local path")` panics with message `local path`; revert it.
+
 Symlinks and concurrent filesystem changes require a stronger access boundary than lexical checks alone.
 
 **Approach.** Ask `filepath.IsLocal` about each path; it rejects empty, absolute and parent-escaping paths after lexical cleaning.
@@ -87,6 +93,8 @@ check(len([]byte("abc")) <= 4 && len([]byte("abcde")) > 4, "budget")
 ```
 
 **Expected:** Only the smaller value fits.
+
+**Verify:** Your solution must keep `len([]byte("abc")) <= 4 && len([]byte("abcde")) > 4` true. Control: changing `check(len([]byte("abc")) <= 4 && len([]byte("abcde")) > 4, "budget")` to `check(len([]byte("abc")) <= 4 && len([]byte("abcde")) > 5, "budget")` panics with message `budget`; revert it.
 
 Byte count matches encoded storage consumption. Rune count answers a different question.
 
@@ -109,6 +117,8 @@ check(subtle.ConstantTimeCompare([]byte("abcd"), []byte("abce")) == 0, "differen
 
 **Expected:** The helper returns 1 for equal and 0 for unequal.
 
+**Verify:** Your solution must keep `subtle.ConstantTimeCompare([]byte("abcd"), []byte("abcd")) == 1` true. Control: changing `check(subtle.ConstantTimeCompare([]byte("abcd"), []byte("abcd")) == 1, "equal")` to `check(subtle.ConstantTimeCompare([]byte("abcd!"), []byte("abcd")) == 1, "equal")` panics with message `equal`; revert it.
+
 This is an API demonstration with synthetic values. It is not a complete authentication design.
 
 **Approach.** Compare the equal and the unequal four-byte values with `subtle.ConstantTimeCompare`, which returns an `int`.
@@ -129,6 +139,8 @@ check(allowed["read"] && !allowed["exec"], "allowlist")
 ```
 
 **Expected:** read is accepted and exec is rejected.
+
+**Verify:** Your solution must keep `allowed["read"] && !allowed["exec"]` true. Control: changing `allowed := map[string]bool{"read": true, "list": true}` to `allowed := map[string]bool{"read": false, "list": true}` panics with message `allowlist`; revert it.
 
 Map accepted names to reviewed behavior. Do not turn input strings into shell commands or arbitrary endpoints.
 

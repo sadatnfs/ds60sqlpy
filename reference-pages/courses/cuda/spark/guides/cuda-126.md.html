@@ -194,9 +194,17 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cuda/spark/guides/cuda-126.md</code></p>
     </header>
     <article class="document"><h2 id="cuda-126-operational-diagnosis-metrics-and-recovery">cuda-126: Operational diagnosis, metrics and recovery<a class="heading-anchor" href="#cuda-126-operational-diagnosis-metrics-and-recovery" aria-label="Link to this section">#</a></h2>
-<p><strong>Route:</strong> CUDA Python and machine learning / GPU Spark specialization. <strong>Stage:</strong> advanced. <strong>Prerequisites:</strong> <code>cuda-120</code>, <code>cuda-122</code>, <code>cuda-125</code>. Allow several sessions when the hardware experiment is new; the chapter is not a deadline.</p>
-<h3 id="what-you-will-be-able-to-explain">What you will be able to explain<a class="heading-anchor" href="#what-you-will-be-able-to-explain" aria-label="Link to this section">#</a></h3>
-<p>By the end, you can <strong>classify failure layers</strong>, <strong>analyze retry side effects</strong>, and <strong>preserve an incident packet</strong> with evidence. Start with the two worked cases, then use the editable CPU model to make the quantities concrete.</p>
+<p><strong>Route:</strong> CUDA Python and machine learning / GPU Spark specialization. <strong>Stage:</strong> advanced. <strong>Prerequisites:</strong> <code>cuda-120</code>, <code>cuda-122</code>, <code>cuda-125</code>.</p>
+<p>Pacing, evidence labels and platform rules: <a href="../../STUDY-GUIDE.md.html">CUDA study guide</a>.</p>
+<h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
+<ul>
+<li>Classify failure layers.</li>
+<li>Correlate job identities.</li>
+<li>Budget before changing settings.</li>
+<li>Analyze retry side effects.</li>
+<li>Define process cleanup.</li>
+<li>Preserve an incident packet.</li>
+</ul>
 <h3 id="mechanism-and-vocabulary">Mechanism and vocabulary<a class="heading-anchor" href="#mechanism-and-vocabulary" aria-label="Link to this section">#</a></h3>
 <p>GPU Spark failures can originate in query semantics, JVM integration, native library loading, device memory, host memory, spill disk, network or scheduler state. Preserve the first relevant error and correlate it with executor, task and SQL execution identity. A later generic task retry may hide the original native failure. Repeatedly increasing memory without a budget can move the problem between tiers.</p>
 <p>Recovery should preserve input snapshots, output commit semantics and event logs. Retrying a task is safe only under the application&#x27;s side-effect contract; external writes inside a UDF can be duplicated. A poisoned device context may require a fresh owned process, while device-wide reset is an administrator operation that can affect unrelated jobs. The classroom must never reset a shared GPU automatically.</p>
@@ -212,8 +220,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>An executor fails with device OOM while JVM heap is below its limit. Increasing heap does not address the measured GPU live-set problem.</p>
 <h4 id="worked-example-2">Worked example 2<a class="heading-anchor" href="#worked-example-2" aria-label="Link to this section">#</a></h4>
 <p>A task writes an external message then fails before Spark commits its output. Retrying may send the message twice unless an idempotency or transactional design handles it.</p>
-<h3 id="portable-executable-model">Portable executable model<a class="heading-anchor" href="#portable-executable-model" aria-label="Link to this section">#</a></h3>
-<p>The <strong>CPU reference model</strong> variant runs this bounded worked example using <code>python-core</code>. It uses only the Python standard library, small synthetic values and no network. Its purpose is to expose the arithmetic or contract behind the chapter. The separate reference includes assertions for the stated observations.</p>
+<h3 id="how-to-run-the-cpu-model">How to run the CPU model<a class="heading-anchor" href="#how-to-run-the-cpu-model" aria-label="Link to this section">#</a></h3>
+<p>Edit the copy; the <a href="../references/cuda-126_cpu.py.html">reference</a> adds assertions.</p>
+<pre class="highlighted-code"><code class="language-bash">python courses/cuda/spark/lessons/cuda-126_cpu.py</code></pre>
 <pre class="highlighted-code"><code class="language-python">events <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">task1</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">write</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">key-7</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">task1-retry</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">write</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">key-7</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span>
 raw <span class="syntax-operator">=</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>events<span class="syntax-punctuation">)</span>
 idempotent <span class="syntax-operator">=</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span>key <span class="syntax-keyword">for</span> _<span class="syntax-punctuation">,</span> _<span class="syntax-punctuation">,</span> key <span class="syntax-operator">in</span> events<span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span>
@@ -234,52 +243,45 @@ idempotent <span class="syntax-operator">=</span> <span class="syntax-builtin">l
 <td><code>1</code></td>
 </tr>
 </tbody></table></div>
-<p>Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.</p>
 <h3 id="practice-and-transfer">Practice and transfer<a class="heading-anchor" href="#practice-and-transfer" aria-label="Link to this section">#</a></h3>
+<p>Record each attempt in the <a href="../lessons/cuda-126.md.html">worksheet</a> before opening hints.</p>
 <h4 id="exercise-1-classify-failure-layers">Exercise 1: Classify failure layers<a class="heading-anchor" href="#exercise-1-classify-failure-layers" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Increasing JVM heap after a device OOM changes an unrelated limit and leaves the GPU live set unchanged.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-2-correlate-job-identities">Exercise 2: Correlate job identities<a class="heading-anchor" href="#exercise-2-correlate-job-identities" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Matching logs by timestamp alone can mix events from concurrent tasks. Clock differences between hosts make timestamp matching even less reliable across executors.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-3-budget-before-changing-settings">Exercise 3: Budget before changing settings<a class="heading-anchor" href="#exercise-3-budget-before-changing-settings" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Trying random settings until the job passes may hide the cause and fail again on larger data. Several simultaneous changes also make it impossible to say which one fixed the failure.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-4-analyze-retry-side-effects">Exercise 4: Analyze retry side effects<a class="heading-anchor" href="#exercise-4-analyze-retry-side-effects" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Sending messages directly from tasks without idempotency produces duplicates after a retry. Speculative execution can run two attempts at once, duplicating writes even without any failure.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-5-define-process-cleanup">Exercise 5: Define process cleanup<a class="heading-anchor" href="#exercise-5-define-process-cleanup" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Killing all Java or Python processes on a node stops unrelated work. It can also kill the node&#x27;s own agents, which are often Java or Python processes.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-6-preserve-an-incident-packet">Exercise 6: Preserve an incident packet<a class="heading-anchor" href="#exercise-6-preserve-an-incident-packet" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Keeping raw configuration with credentials risks leaking secrets. Dropping configuration entirely, on the other hand, removes the settings needed to reproduce the failure.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
-<p>Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.</p>
+<p>Hint <em>k</em> belongs to exercise <em>k</em>; open one at a time.</p>
 <ol>
-<li>Start from worked example 1 and mark the quantities needed for the task &quot;Classify failure layers&quot;.</li>
-<li>Change one assumption in worked example 2 while preserving the declared contract: correlate job identities.</li>
-<li>Trace the CPU program&#x27;s variables before adding hardware behavior: budget before changing settings.</li>
-<li>Draw producers, consumers and the exact operation boundary for the task &quot;Analyze retry side effects&quot;.</li>
-<li>Separate what the small fixture establishes from what the real runtime must show: define process cleanup.</li>
-<li>Write a counterexample to an overbroad claim before you preserve an incident packet.</li>
+<li>Find the first error in the logs and decide which layer produced it, before reading any later retries.</li>
+<li>Link the application, executor, stage, task and SQL execution identifiers that belong to the same failure.</li>
+<li>Count the actual live set and spill categories before changing any memory setting.</li>
+<li>Ask what happens to an external write when the same task runs a second time.</li>
+<li>List the processes your job started and stop only those, leaving any shared device untouched.</li>
+<li>Gather sanitized configuration, plans, logs, metrics and the input identity into one packet.</li>
 </ol>
-<h3 id="common-mistakes-and-self-review">Common mistakes and self-review<a class="heading-anchor" href="#common-mistakes-and-self-review" aria-label="Link to this section">#</a></h3>
-<p>Confusing a correct tiny example with a general implementation is the central review risk. For this chapter, challenge the assumption in worked example 2, then ask whether your change preserves the mechanism described above. If you change dtype, layout, ordering, batch size or backend, update the acceptance contract rather than silently reusing the old observation. Explain an unexpected result before trying random configuration changes.</p>
-<p>Keep a small evidence table with columns <strong>claim</strong>, <strong>input</strong>, <strong>expected observation</strong>, <strong>actual observation</strong> and <strong>limit</strong>. For the first claim use <code>Classify failure layers</code>. For the final claim use <code>Preserve an incident packet</code>. An unperformed GPU or cluster experiment remains pending even when the CPU model is correct.</p>
-<h3 id="platform-and-evidence-contract">Platform and evidence contract<a class="heading-anchor" href="#platform-and-evidence-contract" aria-label="Link to this section">#</a></h3>
-<p>The reading worksheet and CPU reference model work through the ordinary Linux Docker classroom on macOS, Linux and Windows using WSL 2. They do not require an NVIDIA GPU. Their results are labeled CPU models or semantic oracles, not simulated hardware performance.</p>
-<p>Real CUDA work needs supported NVIDIA hardware, a compatible host driver and an explicitly prepared GPU runtime. An Apple GPU does not execute CUDA kernels. PyTorch MPS on a supported native Mac, ROCm on supported AMD hardware, or other vendor backends can provide separate accelerator learning routes; they need their own package and operation qualification and are not CUDA evidence. The ordinary Linux Docker classroom does not expose native Mac MPS automatically.</p>
-<p>Do not download packages, models or data by opening this lesson. Do not attach an engine socket, ambient cluster credentials or an arbitrary remote endpoint. A CPU pass, imported package, successful compilation, real GPU result and measured performance are distinct observations. Record the actual backend, data shape/dtype, source revision, versions and pending checks. A saved completion marker records learning progress, not hardware certification.</p>
-<p>GPU Spark is a separate owned external workflow. The ordinary <code>spark-local-scala</code> and <code>spark-local-python</code> profiles are CPU Spark. Keep the GPU plugin disabled or absent for a CPU-only baseline. Per-operator CPU fallback inside a working GPU plugin environment is a different condition from having no compatible GPU. Never mount a host Docker socket or ambient kubeconfig into an ordinary lesson worker.</p>
+<h3 id="common-mistakes-and-self-check">Common mistakes and self-check<a class="heading-anchor" href="#common-mistakes-and-self-check" aria-label="Link to this section">#</a></h3>
+<p>A common mistake is raising memory settings until an error disappears. A device out-of-memory error with JVM heap below its limit is a GPU live-set problem, so more heap changes nothing, and unbudgeted increases only move pressure between tiers. Another is resetting a shared GPU to recover, which can break unrelated jobs. Fix both by preserving the first relevant error, correlating it with executor, task and SQL identities, budgeting each memory category and stopping only processes the job owns. Treat retries as at-least-once execution, so external writes need idempotency.</p>
+<p><strong>Misconception:</strong> Raising the task retry count makes a failing GPU job more reliable. <strong>Correction:</strong> Retries help with transient faults such as a lost executor, but a deterministic failure, like a device out-of-memory error on the same skewed partition or a native library mismatch, fails the same way on every attempt. Extra retries then delay the report, repeat external side effects and can bury the first error under many copies. Classify the failure first; retry only transient causes, and fix deterministic ones by changing the data split, memory budget or environment.</p>
+<p><strong>Evidence limit:</strong> The reference shows two attempts targeting one logical output key. It does not produce real failures, so native library errors, device context poisoning and recovery behavior must be studied from preserved logs of an owned job, never by causing failures on shared hardware.</p>
+<ol>
+<li>Why preserve the first relevant error?</li>
+<li>Why can task retries duplicate side effects?</li>
+<li>Who may reset a device?</li>
+</ol>
+<p>Answers: <a href="../solutions/cuda-126_solutions.md.html#self-check-answers">self-check answers</a>.</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
 <ul>
-<li><a href="https://nvidia.github.io/cudf-spark/docs/download.html">cuDF Spark plugin release and compatibility matrix</a></li>
-<li><a href="https://nvidia.github.io/cudf-spark/docs/supported_ops.html">Supported Spark operators and expression types</a></li>
 <li><a href="https://docs.nvidia.com/cudf-spark/latest/tuning-guide.html">GPU Spark tuning guide</a></li>
-<li><a href="https://spark.apache.org/docs/latest/sql-performance-tuning.html">Apache Spark SQL performance tuning</a></li>
 </ul>
-<p>Use the version-matched documentation of your prepared environment. These references describe interfaces and supported boundaries; the chapter&#x27;s synthetic examples and CPU models are original teaching material.</p>
+<p>Full lists: <a href="../../STUDY-GUIDE.md.html#documentation-and-sources">documentation and sources</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning skill for cuda-126: Operational diagnosis, metrics and recovery.
 Read courses/cuda/spark/guides/cuda-126.md and courses/cuda/spark/lessons/cuda-126.md.

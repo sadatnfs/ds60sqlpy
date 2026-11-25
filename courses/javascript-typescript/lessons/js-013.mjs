@@ -1,20 +1,18 @@
 // Answer-free learner source. Save your own copy before editing.
 // Exercise 1: Cancel a pending timer: predict an edited check
-// Copy Example A into a scratch `main.mjs` and change `await assert.rejects(pending, error
-// => error.name === 'AbortError' && error.cause === reason);` to `await
-// assert.rejects(pending, error => error.name === 'AbortError!' && error.cause === reason);`
-// inside its check. Before running it, predict whether the check still passes and explain
-// why; then restore it.
-// Expected: The changed run fails with an `AssertionError` at `await assert.rejects(pending,
+// In a scratch copy of Example A, change `await assert.rejects(pending, error => error.name
+// === 'AbortError' && error.cause === reason);` to `await assert.rejects(pending, error =>
+// error.name === 'AbortError!' && error.cause === reason);` inside its check. Does the check
+// still pass?
+// Expected: The edited run fails with an `AssertionError` at `await assert.rejects(pending,
 // error => error.name === 'AbortError!' && error.cause === reason);`. Restoring `await
 // assert.rejects(pending, error => error.name === 'AbortError' && error.cause === reason);`
 // brings back: abortError with the original reason as cause.
 
 // Exercise 2: Reject an already aborted request before work: diagnose an edited check
-// A careless edit changed a check in Example B so that it reads `await
-// assert.rejects(cancellableValue(7, controller.signal, trace), error => error !==
-// reason);`. Run Example B with that line, explain why the edited check now fails for the
-// same program state, and restore it.
+// Example B's check was edited to read `await assert.rejects(cancellableValue(7,
+// controller.signal, trace), error => error !== reason);`. Run it, explain the failure and
+// restore the original.
 // Expected: Before the repair the run fails with an `AssertionError` at `await
 // assert.rejects(cancellableValue(7, controller.signal, trace), error => error !==
 // reason);`. Restoring `await assert.rejects(cancellableValue(7, controller.signal, trace),

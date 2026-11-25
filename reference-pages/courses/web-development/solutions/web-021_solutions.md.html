@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/web-development/solutions/web-021_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="web-021-explanatory-solutions">web-021: explanatory solutions<a class="heading-anchor" href="#web-021-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Open this after your own attempt. Each answer explains the lesson&#x27;s synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in <code>courses/web-development/guides/web-021.md</code>.</p>
+<p>Attempt each exercise before reading; the mechanism is in <code>courses/web-development/guides/web-021.md</code> (<a href="../STUDY-GUIDE.md.html#solutions">using these answers</a>).</p>
 <h3 id="exercise-1-explain-why-two-cards-on-the-same-viewport-can-use-different-layouts">Exercise 1: Explain why two cards on the same viewport can use different layouts.<a class="heading-anchor" href="#exercise-1-explain-why-two-cards-on-the-same-viewport-can-use-different-layouts" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Their query containers can have different widths.</p>
 <p><strong>Approach:</strong> Identify the query container for each card and compare the inline size of those two wrappers, not the width of the browser window.</p>
@@ -232,7 +232,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Plausible wrong approach:</strong> Using a viewport breakpoint for the sidebar card fails because a wide screen can still give the sidebar too little room for two columns.</p>
 <p><strong>How to verify:</strong> On a wide screen with a narrow sidebar, the container version stays stacked while a viewport version would squeeze two columns.</p>
 <h3 id="reference-comparison">Reference comparison<a class="heading-anchor" href="#reference-comparison" aria-label="Link to this section">#</a></h3>
-<p>Open <code>courses/web-development/solutions/web-021_solution.html</code> only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; its success message is not an accessibility audit or proof of responsive behavior at every size.</p></article>
+<p>The reference reads the computed container-type of the first slot and requires inline-size, so it catches a missing container declaration or one placed on the card itself. It does not measure either card&#x27;s layout or confirm that the narrow slot keeps the stacked baseline, so resize the preview and compare both instances.</p>
+<p>Open <code>courses/web-development/solutions/web-021_solution.html</code> after saving your attempt (<a href="../STUDY-GUIDE.md.html#references">comparing with the reference</a>).</p></article>
   </main>
 </body>
 </html>

@@ -1,6 +1,6 @@
 # web-010: explanatory solutions
 
-Open this after your own attempt. Each answer explains the lesson's synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in `courses/web-development/guides/web-010.md`.
+Attempt each exercise before reading; the mechanism is in `courses/web-development/guides/web-010.md` ([using these answers](../STUDY-GUIDE.md#solutions)).
 
 ## Exercise 1: Predict the winning color in the second example.
 
@@ -76,4 +76,6 @@ Open this after your own attempt. Each answer explains the lesson's synthetic fi
 
 ## Reference comparison
 
-Open `courses/web-development/solutions/web-010_solution.html` only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; its success message is not an accessibility audit or proof of responsive behavior at every size.
+The reference reads the computed padding of the first note and requires 16px, so it catches a missing rule or a selector that does not match the class. It does not compare colors, test inheritance or show which declaration was overridden, so use the Styles pane to compare those decisions.
+
+Open `courses/web-development/solutions/web-010_solution.html` after saving your attempt ([comparing with the reference](../STUDY-GUIDE.md#references)).

@@ -32,11 +32,9 @@ A permission denied error is a useful boundary. Inspect identity and path. Do no
 
 ## How to use this lesson
 
-The classroom displays this guide and saves your worksheet, `courses/docker/lessons/docker-020.md`. Its Run button does not control your Docker engine. Docker engine access is powerful host access, so the classroom deliberately receives no engine socket. Work through the supplied examples without starting anything, then use the optional host lab only in your own disposable project. Reading a command, parsing YAML and actually running the project are different forms of evidence.
+The classroom saves `courses/docker/lessons/docker-020.md` and holds no engine socket ([host-lab setup](../STUDY-GUIDE.md#host-lab-setup)).
 
-Use Bash in Linux, macOS Terminal, or Ubuntu under WSL 2 on Windows. The supported engine runs Linux containers. The maintained fixture is `courses/docker/fixtures/compose-lab/`; its README explains copying it into a new ignored learner directory, checking the engine, building locally with visible logs, and using the fixed project name `ds60-docker-study`. The fixture uses port 18080 on host loopback. Stop if that project name or port belongs to unrelated work; choose a new project name consistently in your own copy. Never paste a command against a remote Docker context simply because it is currently selected.
-
-For Dockerfile examples, create a file named `Dockerfile` in a scratch project. YAML snippets describe a fragment unless explicitly called a complete file. Text transcripts are synthetic illustrations, not claims about your machine. Do not substitute a real password, token or private registry into a checked-in example. **How to use the lessons** in the [subject README](../README.md) collects these rules in one place.
+**Host lab.** Run worked example 2, then override the identity at run time: `docker run --rm --pull never --user 0:0 ds60-docker-study:local python -c "import os; print(os.getuid())"` prints 0. `USER` in a Dockerfile is a default, and any `docker run` caller can change it. Next, make a scratch host folder with `mkdir hostdata`, record `ls -ldn hostdata`, and try to write into it from the fixture image with `-v "$PWD/hostdata:/data"`. On a native Linux engine the write is denied because UID 10001 does not own the folder; Docker Desktop's file sharing may translate ownership and allow it. Record which you saw. Repeat with `--user "$(id -u):$(id -g)"`, which matches the folder owner without widening permissions. Remove `hostdata` when you finish.
 
 ## Worked example / walkthrough
 
@@ -63,7 +61,7 @@ docker run --rm --pull never ds60-docker-study:local python -c "import os; print
 
 ## Six progressive exercises
 
-For each exercise, name the object involved and the phase of its lifetime before changing anything, then vary only the condition the task names. Exercises that ask you to predict, explain, compare or diagnose keep their answers in the solutions file; the others show the evidence to look for.
+Answer-type prompts keep their answers in the solutions file ([exercise rules](../STUDY-GUIDE.md#exercise-rules)).
 
 ### Exercise 1: Predict whether matching usernames guarantee file access.
 
@@ -99,13 +97,19 @@ For each exercise, name the object involved and the phase of its lifetime before
 
 Fixing permission errors with `chmod -R 777`. Running as root because a bind mount is owned by another UID. Placing writable data under the code directory.
 
-Exercise 4 is this chapter's boundary case: Diagnose a bind-mount permission failure. Record the effective UID and GID in the container, the owner and mode of the mounted path on the host, and the exact operation that was denied. Preserve the original failure and the exact changed field before retrying. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
+Exercise 4 is this chapter's boundary case: Diagnose a bind-mount permission failure. Record the effective UID and GID in the container, the owner and mode of the mounted path on the host, and the exact operation that was denied.
+
+A related surprise is that `COPY` ignores the current `USER`. Files copied into an image are owned by root unless the instruction says `--chown`, so a Dockerfile that switches to `USER 10001` and then copies a config file leaves the app unable to rewrite that file at runtime. In the fixture this behavior is intended: `/app/server.py` stays root owned and read-only to the app. Use `COPY --chown=10001:10001` only for a path the process must change, and prefer keeping such state under `/data`, where ownership was set on purpose.
+
+Never trade a safety control for a passing example ([safety rules](../STUDY-GUIDE.md#safety-rules)).
 
 ## Retrieval, transfer and next steps
 
-Close the explanations first. Recall the UID and GID the fixture image runs as and which host paths it may write. Then reconstruct worked example 2 (Inspect effective identity without secrets) with one different value, predict what changes, and name which of UID, USER, file ownership and writable data path the change touches.
+**Retrieval.** Recall the UID and GID the fixture image runs as and which host paths it may write.
 
-When a host session ends, run `docker compose -p ds60-docker-study down` from your fixture copy. It removes the project's containers and network but keeps named volumes; deleting a volume is a separate, deliberate reset described in the fixture README.
+**Transfer case.** A service used to run as root and now runs as UID 10001. Its existing named volume at `/data` was filled during the root era. After the change, writes fail with `PermissionError` on `counter.next`. Why did the Dockerfile's `chown` not help, and what is the repair?
+
+Then run the [retrieval loop](../STUDY-GUIDE.md#retrieval-and-cleanup) and end any host session with its cleanup.
 
 ## Primary references
 

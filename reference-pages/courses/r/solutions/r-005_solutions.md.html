@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/r/solutions/r-005_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="r-005-reference-reasoning">r-005: reference reasoning<a class="heading-anchor" href="#r-005-reference-reasoning" aria-label="Link to this section">#</a></h2>
-<p>Use the <a href="r-005_reference.R.html">complete reference</a> with the guide&#x27;s declared inputs and runtime. Every worked example is also a standalone script.</p>
+<p>Run the <a href="r-005_reference.R.html">complete reference</a> under the <a href="../STUDY-GUIDE.md.html#run-a-chapter">run rules</a>.</p>
 <h3 id="why-the-implementation-has-this-shape">Why the implementation has this shape<a class="heading-anchor" href="#why-the-implementation-has-this-shape" aria-label="Link to this section">#</a></h3>
 <p>The requested output order is C, A, A, and duplication is preserved. This is positional extraction, not a unique-key set operation.</p>
 <p>The first output preserves an unknown selected position. The second explicitly restricts selection to known TRUE predicates.</p>
@@ -243,7 +243,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Tempting mistake:</strong> Treating names like a primary key in a table. Nothing enforces uniqueness, and a missing name returns NA rather than an error.</p>
 <p><strong>Verify:</strong> <code>anyDuplicated(c(&quot;A&quot;, &quot;A&quot;))</code> returns 2, the position of the first repeat, so the reference check <code>&gt; 0L</code> is TRUE.</p>
 <h3 id="what-the-checks-establish">What the checks establish<a class="heading-anchor" href="#what-the-checks-establish" aria-label="Link to this section">#</a></h3>
-<p>The reference makes 6 <code>stopifnot()</code> checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.</p></article>
+<p>The checks confirm that repeated positions duplicate elements, that a negative index drops only the second value, that a key is unique and present before it is updated, that an update by name changes only the selected value, that the guarded failure case really raised an error, that an empty integer index returns nothing, and that <code>anyDuplicated()</code> flags repeated names. They do not cover vectors whose names are missing entirely.</p>
+<p>The reference makes 6 <code>stopifnot()</code> checks; see <a href="../STUDY-GUIDE.md.html#what-a-passing-run-proves">what a passing run proves</a>.</p></article>
   </main>
 </body>
 </html>

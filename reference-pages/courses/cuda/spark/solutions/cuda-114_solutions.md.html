@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cuda/spark/solutions/cuda-114_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="cuda-114-explained-solutions">cuda-114: explained solutions<a class="heading-anchor" href="#cuda-114-explained-solutions" aria-label="Link to this section">#</a></h2>
-<p>These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.</p>
+<p>Compare with your <a href="../lessons/cuda-114.md.html">worksheet</a> attempt.</p>
 <h3 id="exercise-1-list-matrix-axes">Exercise 1: List matrix axes<a class="heading-anchor" href="#exercise-1-list-matrix-axes" aria-label="Link to this section">#</a></h3>
 <p>Include Spark Scala Java plugin CUDA architecture driver GPU and OS.</p>
 <p><strong>Approach.</strong> List the compatibility matrix axes: Spark version, Scala binary line, Java version, plugin release, CUDA runtime, host architecture, driver, GPU model and operating system.</p>
@@ -231,9 +231,19 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Why it is correct here.</strong> Each step tests a deeper level of integration. A row in the matrix is accepted only when all steps pass there.</p>
 <p><strong>A plausible wrong approach.</strong> Accepting a host because the Spark session started with the plugin listed skips native library loading on executors and actual query execution.</p>
 <p><strong>How to verify.</strong> Store the result of each step for each row and accept the row only with all four passing.</p>
+<h3 id="self-check-answers">Self-check answers<a class="heading-anchor" href="#self-check-answers" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>Why is a nominal Spark version not enough to establish compatibility?</strong> Distributions can carry vendor patches, so binary compatibility must be checked against the exact distribution and release.</li>
+</ol>
+<ol start="2">
+<li><strong>What does the CUDA classifier on a plugin jar select?</strong> The native library packaging. It does not supply or replace a compatible NVIDIA driver on the host.</li>
+</ol>
+<ol start="3">
+<li><strong>Are a local ARM Mac image and an NVIDIA Linux host the same concern?</strong> No. Image architecture and the GPU host&#x27;s architecture are separate axes in the matrix.</li>
+</ol>
 <h3 id="reference-observation">Reference observation<a class="heading-anchor" href="#reference-observation" aria-label="Link to this section">#</a></h3>
 <p>Illustrative Scala/host-architecture predicate rejects mismatch; not a full compatibility probe.</p>
-<p>The reference file is <code>courses/cuda/spark/references/cuda-114_cpu.py</code>. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.</p></article>
+<p>Asserted by <code>courses/cuda/spark/references/cuda-114_cpu.py</code>.</p></article>
   </main>
 </body>
 </html>

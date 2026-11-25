@@ -1,22 +1,26 @@
 # spark-039: Resource budgets, spill and cost tradeoffs
 
-Authored paired Scala/PySpark teaching content. The default fixtures are tiny, local and deterministic. Runtime acceptance, logical correctness and learner understanding remain separate evidence.
+The same amount of work can be cheap or costly depending on how it is spread. Twenty thousand rows over 100 keys, with key 0 holding 16,040 of them, are repartitioned by key at two and at four partitions. Each run reports bucket sizes, files, shuffle bytes, spill and elapsed time, and a small cost model then prices the work within a fixed budget.
 
 ## Level and prerequisites
 
-Advanced; approximately 105 minutes. Direct prerequisites: `spark-038`. The prepared baseline is Spark 4.3.0, Scala binary 2.13, JDK 17 and Python 3.12. Read the [execution baseline](../execution-baseline.md).
+Advanced; approximately 105 minutes. Direct prerequisites: `spark-038`. Pinned versions: [execution baseline](../execution-baseline.md).
 
 ## How to run this lesson
 
-Open `spark-039` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile, save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`;Python stages as `main.py` with a main guard. Each program creates its own `local[2]` session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.
+Shared run steps and profile rules: [study guide](../STUDY-GUIDE.md#run-a-paired-lesson).
 
-The [Scala learner](../lessons/spark-039.scala) and [PySpark learner](../lessons/spark-039.py) run two complete demonstrations and retain six explicit task stubs. Use the [explained solutions](../solutions/spark-039_solutions.md) only after an attempt or an explicit worked comparison; the [Scala reference](../solutions/spark-039_solution.scala) and [PySpark reference](../solutions/spark-039_solution.py) contain complete assertions. A bounded collect is used only for the declared tiny fixture; do not copy it onto an unbounded or large production table.
+Learner pads: [Scala](../lessons/spark-039.scala) and [PySpark](../lessons/spark-039.py).
+
+Open the [explained solutions](../solutions/spark-039_solutions.md) after an attempt.
+
+The first worked example builds the expected list directly, key 0 with 16,040 rows and keys 1 to 99 with 40 each, and checks that the 100 pairs sum to 20,000. The second prices 2 vCPU for 3,600 seconds at 0.05 per vCPU hour and 2 GiB for 30 days at 0.02 per GiB month, which gives 0.10 plus 0.04, or 0.14.
 
 ## Learning objectives
 
 - Choose a resource-aware strategy from measured work rather than a single elapsed time.
-- State the input and output grain, schema, NULL policy and ordering before executing a transformation.
-- Compare each language implementation with independent literal expectations, not only with the other implementation.
+- Measure the same keyed repartition at 2 and 4 shuffle partitions under a job group, check that both runs persist the 100 exact `(key, count)` pairs, and read `dataSize`, `shuffleBytesWritten` and `spillSize` from the retained stage metrics instead of trusting elapsed time alone.
+- Compute work imbalance as the largest bucket over the mean bucket, price a run with `estimated_cost` at 0.05 per vCPU hour plus 0.02 per GiB month, and refuse any request above 20,000 rows or outside 1 to 8 partitions.
 
 ## Vocabulary and concepts
 
@@ -62,7 +66,7 @@ The stop budget is part of the experiment design: at most 20000 source rows and 
 
 ## Supplied local fixture
 
-The complete source creates the owned local session described above, then constructs this explicit fixture. The worked examples below run in that same main function; there is no hidden notebook state.
+The source is `spark.range(0, 20000, 1, 4)`: IDs below 16,000 get key 0 and the remaining 4,000 IDs get `id % 100`, so key 0 ends with 16,040 rows and every other key with 40. `measured` accepts 1 to 8 partitions, sets the shuffle partition count only for its own run and restores the previous value, tags the job with `setJobGroup`, writes Parquet with `errorifexists` and reads the output back before reporting any metric.
 
 ```scala
 import org.apache.spark.sql.functions._
@@ -134,11 +138,11 @@ The hypothetical cost calculation exposes time/storage unit conversions. It is d
 
 ### Exercise 1: Validate the generated skewed fixture
 
-Require 20000 rows, IDs 0..19999,100 keys and total ID sum 199990000. Explain key 0 occurs 16040 times.
+Require 20000 rows, IDs 0..19999, 100 keys and total ID sum 199990000. Explain key 0 occurs 16040 times.
 
-**Expected result/shape:** Exact population tuple 20000,20000,100,199990000; key 0 count 16040, other keys 40.
+**Expected result/shape:** Exact population tuple `20000, 20000, 100, 199990000`; key 0 count 16040, other keys 40.
 
-**Verify:** Compare aggregate counts and the independent formula 16000+4000/100.
+**Verify:** Compare aggregate counts and the independent formula 16000 + 4000/100.
 
 **Progressive hint:** The first 16000 rows intentionally share key 0.
 
@@ -198,11 +202,14 @@ Do not equate serialized dataSize with remote network traffic, absent spill metr
 
 ## Self-check
 
-Explain the contract of `fixtureMetrics` / `fixture_metrics` without reading its solution. Then, from memory, state what Exercise 6 (Enforce the stop budget before scaling data) must produce: `20000/4` accepted; `20001/4` and `20000/9` rejected. Say which part of that result is evidence and what it still cannot show. Name the action in your trace that actually runs the plan.
+- Key 0 holds 16,040 of 20,000 rows. Why does going from 2 to 4 partitions leave the imbalance ratio above 1, and which bucket sets how long the stage takes?
+- Elapsed time is printed but never asserted. Why is a single local timing weak evidence for choosing a partition count?
+- The write uses `errorifexists`. What mistake would `overwrite` hide if two measurements accidentally shared an output folder?
+- `estimated_cost` rejects a negative duration and `within_budget` rejects 20,001 rows and 9 partitions. Why check limits before running a job rather than after the bill arrives?
 
 ## Next step
 
-Use the [course route](../README.md) to continue. Paired-language agreement is useful only when both outputs also satisfy the independent fixture contract. A successful local run is not evidence of cluster performance or production recovery.
+Go on to [spark-040: SQL bridge, JDBC boundaries and data handling](spark-040.md). This lesson priced work that stayed inside Spark; the next one looks at the boundary between Spark SQL and an external database reached through JDBC, and at which data may cross it.
 
 ## Primary sources and official APIs
 

@@ -2,67 +2,20 @@
 
 ## How to run this lesson
 
-Start the Linux-container engine and run `./classroom` from the repository
-root. On Windows, use Ubuntu in WSL 2 or the thin
-`START_DOCKER_CLASSROOM.cmd` wrapper. Choose **PostgreSQL** on the shared
-`/classroom` home, then open **sql-sec-01**. The
-[launcher guide](../../../docs/one-command-classroom.md) covers first preparation, strict resume and
-the saved project selection. No host Python or PostgreSQL installation is
-required for this browser route.
+Start **sql-sec-01** from `./classroom` using the shared [run steps](../../STUDY-GUIDE.md#run-a-lesson-in-the-classroom).
 
-1. Read the prerequisite and fixture notes before running the file. Use only
-   the local disposable `advanced_sql_training` database.
-2. Choose **Whole SQL lesson (psql)** for the cataloged learner script. This
-   preserves the lesson's reviewed psql directives, relative includes and
-   transaction behavior. **SQL snippet** is appropriate for ordinary SQL
-   statements, but is not a replacement for an entire script's setup.
-3. The **Course database** panel above the code shows whether the course
-   training tables are loaded. Missing tables load automatically before your
-   first run (or choose **Load course tables**) and stay loaded for later
-   lessons. **Reset training data** restores the original rows only when your
-   own changes made results differ; it keeps your saved code and notes.
-4. Edit the learner copy in the classroom and save your prediction before
-   running. Its whole-script workspace is
-   `.learning/sql/sql-sec-01/lesson/workspace/sql/professional/lessons/sql_sec_01_roles_privileges_rls.sql`.
-   For browser work this path is inside the Docker learning volume, not a
-   newly created host folder beside your checkout. The checked-in source
-   remains the answer-free starting artifact.
-5. Run the whole script and inspect the full transcript. The runner uses
-   `psql -X -v ON_ERROR_STOP=1 -f`. SELECT output has columns, rows and a row
-   count; DDL/DML has command tags; intentional checks may produce NOTICE
-   messages. An unexpected ERROR or nonzero exit is a failure to diagnose,
-   even when an earlier query printed plausible values.
-6. Verify the lesson's expected grain, ordering, constraints and declared
-   transaction or cleanup outcome. Keep required ROLLBACK statements.
-   The warehouse sequence and other explicitly stateful exercises explain
-   when state is committed. Read saved output without rerunning it when
-   reviewing an earlier attempt.
+Choose **Whole SQL lesson (psql)**. In the classroom the `admin` login cannot
+create roles, so the script adopts the six NOLOGIN roles that `./classroom`
+prepares, builds `pro_security_lab` inside one transaction on
+`advanced_sql_training`, switches identity with `SET LOCAL ROLE`, and ends with
+`ROLLBACK`. Two NOTICE lines are the passing outcome:
+`Expected row-policy denial` when north inserts a south document, and
+`Expected DELETE privilege denial` when north tries to delete. A `SAFE SKIP`
+line means the prepared roles were missing, so only the role-free demonstration
+ran; restart with `./classroom` and rerun. Save attempts in
+`.learning/sql/sql-sec-01/lesson/workspace/sql/professional/lessons/sql_sec_01_roles_privileges_rls.sql`.
 
-If a relation is missing, inspect the lesson's required fixture and predecessor
-rather than guessing a new table definition. If authentication or runtime
-readiness fails, use `./classroom status` and the setup guide. Keep credentials
-out of SQL, notebooks, screenshots and committed files. Repair the first error
-before trusting partial output, and reveal separate solutions only when you
-want to compare after an attempt.
-
-### Optional contributor notebook route
-
-For notebook work, deliberately prepare the Linux/WSL contributor environment
-from [CONTRIBUTING.md](../../../CONTRIBUTING.md), including a compatible psql client and
-the notebook dependencies. Generate this lesson's private workspace through
-the maintained CLI:
-
-```sh
-uv run --no-sync python scripts/course.py sql notebook sql-sec-01
-```
-
-Open the printed notebook path in that environment's JupyterLab. It uses the
-same catalog-derived learner-copy layout in that contributor checkout and
-executes the complete script through psql. Its host-side state is separate
-from the Docker browser's named volume. Follow
-[guided SQL notebooks](../../../docs/guided-sql-notebooks.md) for explicit local connection
-selection and kernel setup. Notebook generation does not execute SQL or
-authorize a reset.
+The optional notebook route starts with `uv run --no-sync python scripts/course.py sql notebook sql-sec-01`; see the [study guide](../../STUDY-GUIDE.md#optional-contributor-notebook-route).
 
 ## Level and prerequisites
 
@@ -108,24 +61,30 @@ configuration, or grants broad access.
 
 ## A beginner's mental model for this lesson
 
-A **table** stores facts in named columns. A **row** is one occurrence at the
-table's declared grain. A query creates a temporary **result set**: rows printed
-on screen are not automatically stored. The key vocabulary for this lesson is Role, Owner, Privilege, Least privilege, Schema USAGE, Search path. Its worked SQL reads or creates `pg_catalog.pg_roles`, `pro_security_lab.documents`, `pro_security_lab.announcements`, `pro_security_lab.owner_context_documents`, `pro_security_lab.visible_documents`.
+Every query here has two answers: what the table holds, and what the current
+role may see of it. The vocabulary below (role, owner, privilege, schema
+`USAGE`, `search_path`, row-level security) names the separate checks
+PostgreSQL makes before a row of `pro_security_lab.documents` reaches you.
 
-Before writing a query, complete this sentence: “One output row represents
-___.” Joins can multiply rows, filters can remove them, grouping can collapse
-many rows into one, and window functions can add calculations while preserving
-row count. For a normal analytical `SELECT`, use this logical reading order:
-`FROM`/`JOIN` (including `ON`) → `WHERE` → `GROUP BY`/aggregates → `HAVING` →
-window calculations → `SELECT` → `ORDER BY` → `LIMIT`. PostgreSQL may execute a
-different physical plan while preserving those semantics.
+Ask the grain question with the role attached. One row of `documents` is one
+document for one `tenant_key`, but the same `visible_documents` query returns
+only north rows under `ds60_sec_north` and only south rows under
+`ds60_sec_south`, and the owner's count differs again. Note the effective role
+next to every row count you record. The general [reading
+order](../../STUDY-GUIDE.md#reading-any-query-in-logical-order) still applies
+inside each role.
 
-The worked walkthrough's lesson-specific task is: The script first queries `pg_roles` and stores a Boolean for a `psql` `\if`. Restricted installations print a safe skip and current capability summary. No attempted `CREATE ROLE` is used as feature detection, so an expected denial does not leave a failed transaction or noisy partial setup.
-The first runnable example has a concrete contract: Example 1 returns one row per `rolcreaterole` with columns `rolcreaterole` from `pg_catalog.pg_roles`. Compare the key set and row count with a simpler control over the same filter/window; inspect `NULL` versus zero/absent-row meaning and verify the final ordering/tie-breaker when present. Its final projection is `rolcreaterole`. Reselect the returned key columns from `pg_catalog.pg_roles`, reject duplicate keys when the grain is one row per entity, and check the stated row cap and sort direction only when this example includes them.
+The walkthrough starts before any lab object exists. Example 1, a count of
+usable prepared roles, and Example 2 each store one Boolean with `\gset`, and
+psql `\if` then picks a path: prepared course roles, roles created inside the
+transaction, or a `SAFE SKIP` with a role-free demonstration. No `CREATE ROLE`
+is attempted just to see whether it fails, so a missing capability never leaves
+an aborted transaction behind.
 
 ## Two worked SQL examples
 
-These worked excerpts come from `sql/professional/lessons/sql_sec_01_roles_privileges_rls.sql`. Use **Whole SQL lesson (psql)** in the unified classroom for the complete file, including its fixture and transaction context. The optional contributor notebook and prepared `psql` routes are described above.
+Both excerpts are capability probes that run before the script opens its
+transaction.
 
 ### Example 1
 
@@ -140,9 +99,15 @@ SELECT
       r.rolname = CURRENT_USER), false) AS ds60_can_manage_roles;
 ```
 
-**How to read it:** Example 1: Start with `pg_catalog.pg_roles` in `FROM`/`JOIN`; let `WHERE` remove nonqualifying rows. The final `SELECT` displays `rolcreaterole`. Before running, predict the row grain, row count, `NULL` positions, and first/last key; afterwards, compare each prediction with the transcript.
+**How to read it:** The scalar subquery finds the current login in `pg_roles`
+and asks whether it is a superuser or has `CREATEROLE`. `COALESCE(..., false)`
+turns a missing row into false rather than NULL, so the later `\if` always
+receives a Boolean.
 
-**Expected result/shape:** Example 1 returns one row per `rolcreaterole` with columns `rolcreaterole` from `pg_catalog.pg_roles`. Compare the key set and row count with a simpler control over the same filter/window; inspect `NULL` versus zero/absent-row meaning and verify the final ordering/tie-breaker when present.
+**Expected result/shape:** One row with one Boolean, `ds60_can_manage_roles`,
+which `\gset` stores as a psql variable instead of printing. For the classroom
+`admin` login it is false, which is why the script relies on the prepared
+roles.
 
 ### Example 2
 
@@ -157,9 +122,15 @@ SELECT
       r.rolname IN ('ds60_sec_owner', 'ds60_sec_north', 'ds60_sec_south')) AS ds60_role_names_available;
 ```
 
-**How to read it:** Example 2: Start with `pg_catalog.pg_roles` in `FROM`/`JOIN`; let `WHERE` remove nonqualifying rows. The final `SELECT` displays the columns written in the final `SELECT`. Before running, predict the row grain, row count, `NULL` positions, and first/last key; afterwards, compare each prediction with the transcript.
+**How to read it:** `NOT EXISTS` checks that none of the three core course role
+names is already taken. It only matters on the role-creating path, where the
+script refuses to create a role whose name exists and prints a `SAFE SKIP`
+instead.
 
-**Expected result/shape:** Example 2 returns one row per the primary/business key of `pg_catalog.pg_roles` from `pg_catalog.pg_roles`. Compare the key set and row count with a simpler control over the same filter/window; inspect `NULL` versus zero/absent-row meaning and verify the final ordering/tie-breaker when present.
+**Expected result/shape:** One row with one Boolean,
+`ds60_role_names_available`, again captured by `\gset`. In the classroom the
+prepared roles exist, so it is false, but the script has already chosen the
+prepared-roles branch and never consults it.
 
 ## Learning objectives
 
@@ -361,9 +332,8 @@ to see their planned order.
 
 ## Ask an AI tutor about this lesson
 
-An AI tutor is optional; the guide, learner SQL, PostgreSQL, and expected checks are
-enough to complete the lesson offline. If you want a patient tutor, copy this
-prompt after opening the repository in the AI tutor:
+The lesson and expected observations are sufficient offline. For optional
+coaching, copy:
 
 ```text
 Tutor me through sql-sec-01: Schemas, Roles, Privileges, and Row-Level Security.

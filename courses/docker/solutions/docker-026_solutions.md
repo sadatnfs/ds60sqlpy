@@ -1,6 +1,6 @@
 # docker-026: explanatory solutions
 
-Compare after your own attempt or an explicit reveal. These explain the supplied teaching fixtures; they are not engine results. The mechanism is explained in `courses/docker/guides/docker-026.md`.
+These answers explain teaching fixtures, not engine results; the mechanism is in [the guide](../guides/docker-026.md).
 
 ## Exercise 1: Distinguish profiles and overrides.
 
@@ -88,4 +88,4 @@ Compare after your own attempt or an explicit reveal. These explain the supplied
 
 ## Check your transfer
 
-A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.
+An empty list merges into the inherited one and adds nothing, so `config` still shows `127.0.0.1:18080` and the port stays published. Compose provides the `!reset` YAML tag for this case: `ports: !reset []` in the override clears the inherited list, and the rendered `app` service then has no `ports` key at all. Accept the change only when `config` shows that and, after `up`, `docker compose port app 8080` reports no mapping. If `config` still lists 18080, the override was not included or your Compose release predates `!reset`.

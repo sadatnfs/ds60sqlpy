@@ -196,7 +196,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <article class="document"><h2 id="r-020-debugging-regression-checks-and-reproducible-scripts">r-020: Debugging, regression checks and reproducible scripts<a class="heading-anchor" href="#r-020-debugging-regression-checks-and-reproducible-scripts" aria-label="Link to this section">#</a></h2>
 <p><strong>Level:</strong> intermediate. <strong>Direct prerequisites:</strong> <code>r-008</code>, <code>r-012</code>, <code>r-015</code>, <code>r-019</code></p>
 <h3 id="run-and-retain-your-work">Run and retain your work<a class="heading-anchor" href="#run-and-retain-your-work" aria-label="Link to this section">#</a></h3>
-<p>Open <code>r-020</code> in <code>/classroom</code> and use the prepared <code>r-statistics</code> profile. Each Run evaluates one <code>main.R</code> script in a fresh offline R process, so define every input in the script; an earlier Run leaves no variables behind. Work in the <a href="../lessons/r-020.R.html">starter</a>. The <a href="../solutions/r-020_reference.R.html">complete reference</a> ends by printing <code>r-020 reference checks passed</code>, and the <a href="../solutions/r-020_solutions.md.html">explained answers</a> are there for deliberate comparison after your own attempt. This chapter prints values only; when a chapter draws figures, the classroom keeps at most two figures per run. The <a href="../README.md.html">course overview</a> describes saved work, figure capture and the prepared package versions.</p>
+<p>The starter holds values 10 and 20 with weights 1 and 3, and prints them as a list. Run it and work out the expected weighted mean by hand first: 10 times 1 plus 20 times 3 is 70, divided by a total weight of 4 gives 17.5. Write that number down before coding, so the regression check compares against independent arithmetic.</p>
+<p>Work in the <a href="../lessons/r-020.R.html">starter</a> under the <a href="../STUDY-GUIDE.md.html#run-a-chapter">run rules</a>.</p>
+<p>The <a href="../solutions/r-020_reference.R.html">complete reference</a> ends by printing <code>r-020 reference checks passed</code>.</p>
 <h3 id="outcome-and-mechanism">Outcome and mechanism<a class="heading-anchor" href="#outcome-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Reduce a defect to a small case and build behavioral checks that cover ordinary, boundary and rejected inputs.</p>
 <p>Debugging begins by making the failure reproducible. Preserve the exact input, observed result and intended behavior before changing several things at once. A minimal example removes unrelated data and dependencies while retaining the failing mechanism. In a classroom pad, a self-contained script also avoids hidden session state from an earlier run.</p>
@@ -305,7 +307,47 @@ Session:  output of getRversion(); no packages attached</code></pre>
 <li><a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/stopifnot.html">R assertions</a></li>
 </ul>
 <h3 id="continue">Continue<a class="heading-anchor" href="#continue" aria-label="Link to this section">#</a></h3>
-<p>Chapters that list <code>r-020</code> as a direct prerequisite: <a href="r-021.md.html"><code>r-021</code></a>, <a href="r-026.md.html"><code>r-026</code></a>, <a href="r-027.md.html"><code>r-027</code></a>, <a href="r-028.md.html"><code>r-028</code></a>, <a href="r-029.md.html"><code>r-029</code></a>, <a href="r-031.md.html"><code>r-031</code></a>, <a href="r-033.md.html"><code>r-033</code></a>, <a href="r-037.md.html"><code>r-037</code></a>, <a href="r-039.md.html"><code>r-039</code></a>.</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Next chapter</th>
+<th>Title</th>
+</tr></thead><tbody>
+<tr>
+<td><a href="r-021.md.html"><code>r-021</code></a></td>
+<td>S3 value objects, validation and generic dispatch</td>
+</tr>
+<tr>
+<td><a href="r-026.md.html"><code>r-026</code></a></td>
+<td>Namespaces, dependency declarations and package boundaries</td>
+</tr>
+<tr>
+<td><a href="r-027.md.html"><code>r-027</code></a></td>
+<td>Profile equivalent work and account for allocations</td>
+</tr>
+<tr>
+<td><a href="r-028.md.html"><code>r-028</code></a></td>
+<td>Bounded local parallelism and task-owned random streams</td>
+</tr>
+<tr>
+<td><a href="r-029.md.html"><code>r-029</code></a></td>
+<td>Reproducibility, RNG scope and analysis metadata</td>
+</tr>
+<tr>
+<td><a href="r-031.md.html"><code>r-031</code></a></td>
+<td>Transform records with explicit selection and ordering</td>
+</tr>
+<tr>
+<td><a href="r-033.md.html"><code>r-033</code></a></td>
+<td>Joins, key uniqueness and unmatched records</td>
+</tr>
+<tr>
+<td><a href="r-037.md.html"><code>r-037</code></a></td>
+<td>Simulation, Monte Carlo error and reproducible randomness</td>
+</tr>
+<tr>
+<td><a href="r-039.md.html"><code>r-039</code></a></td>
+<td>Formulas, design matrices and identifiability</td>
+</tr>
+</tbody></table></div>
 <h3 id="ask-an-ai-tutor">Ask an AI tutor<a class="heading-anchor" href="#ask-an-ai-tutor" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for r-020 (Debugging, regression checks and reproducible scripts).
 Read the guide and my saved attempt. Explain the relevant R mechanism,

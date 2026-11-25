@@ -1,6 +1,6 @@
 # cuda-124: explained solutions
 
-These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.
+Compare with your [worksheet](../lessons/cuda-124.md) attempt.
 
 ## Exercise 1: Classify four APIs
 
@@ -74,8 +74,16 @@ Use same split target metric and preprocessing.
 
 **How to verify.** Fix the split by a seeded key, record preprocessing steps, and report both metrics with the tolerance used.
 
+## Self-check answers
+
+1. **Does Arrow make a pandas UDF's body run on the GPU?** No. Arrow improves interchange; the function body still runs wherever its code runs.
+
+2. **Why are SQL and ML acceleration validated separately?** They are separate integrations with their own estimator support, semantics and release compatibility.
+
+3. **Why compare model quality as well as elapsed time?** A faster training path is not acceptable if it changes results on the same split and metric.
+
 ## Reference observation
 
-Null-preserving expression produces [2, None,6].
+Null-preserving expression produces [2, None, 6].
 
-The reference file is `courses/cuda/spark/references/cuda-124_cpu.py`. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.
+Asserted by `courses/cuda/spark/references/cuda-124_cpu.py`.

@@ -42,5 +42,7 @@
       "wrong": "Quoting the `na.rm = TRUE` result as \"every amount is at least 5\". The third amount was never measured, so that sentence claims more than the data shows.",
       "verify": "The reference checks `is.na(all(c(TRUE, NA)))` and `isTRUE(all(c(TRUE, NA), na.rm = TRUE))`; `sum(is.na(amount))` reports the 1 unknown to cite alongside."
     }
-  ]
+  ],
+  "run_note": "The starter holds four amounts, the third of them `NA_real_`, and prints `is.na(amount)` so you can see which position is unknown before filtering. Run it and confirm the third element prints TRUE. Every selection you write afterward must decide explicitly what happens to that unknown amount, because comparing NA with a threshold returns NA, not FALSE.",
+  "checks_note": "The assertions pin three-valued logic directly: `TRUE & NA` is NA while `FALSE & NA` is FALSE, a mask built with `!is.na()` keeps only the known 20 at or above 15, the inclusive mask selects 12 and 20, `&&` short-circuits safely on an empty vector, and `all()` returns NA unless `na.rm = TRUE`. They do not show that dropping unknown amounts is the right policy for a real report."
 }

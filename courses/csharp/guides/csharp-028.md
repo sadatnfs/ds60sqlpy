@@ -24,9 +24,9 @@ The classroom uses framework-free throwing checks so the default route needs no 
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles your saved pad as `Program.cs` in its fixed .NET 10 project. C# 14 is the matching language generation. This route uses the prepared framework libraries; it does not accept arbitrary project files, NuGet packages, command arguments or interactive input. The explicit `Program.Main` entrypoint makes compilation and execution visible. `Check` throws on a false condition in every build configuration, unlike conditional debugging assertions.
+`ClampNonnegative` is declared after `Main`, and the test table in Example A is an array of named tuples. Each `Check` uses the same reason text, clamp contract, so if one row fails, print the row's input in your pad to find which case broke.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Compile contract, starter stop and success marker: [running a lesson](../STUDY-GUIDE.md#running-a-lesson).
 
 
 
@@ -34,7 +34,7 @@ Start with the answer-free learner artifact in your saved classroom pad. It deli
 
 A table of inputs and expected values separates cases from the loop executing them. An exception assertion should check the intended category. Avoid sleep-based timing tests; coordinate concurrent states with explicit signals.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+Each example ends with a trace; method: [tracing a program](../STUDY-GUIDE.md#tracing-a-program).
 
 ## Worked example / walkthrough
 
@@ -82,6 +82,8 @@ internal static class Program {
 
 **Observe:** Negative, zero and positive cases preserve their intended categories.
 
+**Trace.** The table lists three cases whose expected values come from the rule itself: anything below zero becomes zero, and anything else stays. The loop passes -2 and expects 0, passes 0 and expects 0, and passes 3 and expects 3. Each row reflects a separate region of the input, so a mistake in any region breaks at least one row.
+
 ### Example B: Detect a plausible wrong function
 
 A property complements examples but does not replace the domain-specific expected values.
@@ -126,6 +128,8 @@ internal static class Program {
 
 **Observe:** The zero case catches the incorrect default, and clamping twice changes nothing further.
 
+**Trace.** `Wrong` returns 1 for zero, which looks plausible but breaks the rule. The first check confirms that the zero boundary separates it from the real function: 1 differs from 0. The second check applies a property: clamping -4 gives 0, and clamping 0 again still gives 0, so applying the function twice changes nothing.
+
 ## Exercises
 
 1. **Predict and explain.** Explain which wrong implementations each case would reject.
@@ -140,13 +144,15 @@ internal static class Program {
 
 6. **Transfer and justify.** Separate unit and integration evidence for a JSON file importer.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Log each task in the [evidence table](../STUDY-GUIDE.md#recording-exercise-evidence) before opening the explanation.
 
 ## Common pitfalls and diagnosis
 
 Tests that always print success or catch their own assertion failures provide misleading evidence. A flaky test weakens trust even when production code is correct. Random generation requires a reproducible seed and a clear oracle.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+For task 4, `Check(ClampNonnegative(x) == ClampNonnegative(x), ...)` passes for every implementation, including a wrong one, because it compares the function with itself. For task 2, `int.MinValue` must clamp to 0 and `int.MaxValue` must come back unchanged; neither needs arithmetic that could overflow.
+
+Repair routine: [building a regression case](../STUDY-GUIDE.md#building-a-regression-case).
 
 ## Progressive hints
 
@@ -156,11 +162,15 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 ## Self-check and next step
 
-Explain Test oracle, Regression case, Boundary test without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+Name one wrong implementation that each of the three table rows rejects. Explain why idempotence alone would accept a function that returns 0 for every input. For task 6, list which checks of a JSON importer run without touching the disk and which ones need a real file.
+
+Then follow the general [self-check routine](../STUDY-GUIDE.md#self-check-routine) and save your pad.
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://learn.microsoft.com/en-us/dotnet/csharp/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+[Documentation](https://learn.microsoft.com/en-us/dotnet/csharp/): The .NET testing documentation describes unit testing practices, test organization and naming that keep each case focused.
+
+Provenance and limits: [sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

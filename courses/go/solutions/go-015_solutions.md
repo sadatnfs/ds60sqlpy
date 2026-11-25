@@ -1,6 +1,6 @@
 # go-015: explained solutions
 
-These are comparison material after an attempt or explicit reveal. The executable reference implements all six cases in one `main.go`.
+Compare after an attempt ([using solutions](../STUDY-GUIDE.md#use-the-solutions)). `courses/go/solutions/go-015_solution.go` implements all six cases.
 
 ## Mechanism
 
@@ -10,7 +10,7 @@ Generics express algorithms whose structure is shared across several types. A ty
 
 ## 1. Reuse an element contract: change one input
 
-Copy worked example 1 into a scratch pad and change `a, okA := first([]int{4, 5})` to `a, okA := first([]int{5, 5})`. Before running, predict which check fails and which value it now sees; then run it and restore the original line.
+Copy worked example 1, change `a, okA := first([]int{4, 5})` to `a, okA := first([]int{5, 5})` and predict the failure before running; then restore the line.
 
 The unchanged code is worked example 1:
 
@@ -20,7 +20,9 @@ b, okB := first([]string{"red", "blue"})
 check(okA && okB && a == 4 && b == "red", "generic first")
 ```
 
-**Expected:** The changed run panics with `generic first` because `okA && okB && a == 4 && b == "red"` no longer holds. Restoring the original line brings back the worked observation: the results are 4 and red with presence true.
+**Expected:** The edited run panics with `generic first` because `okA && okB && a == 4 && b == "red"` no longer holds.
+
+**Verify:** Restoring `a, okA := first([]int{4, 5})` makes the check pass again with the worked observation: the results are 4 and red with presence true.
 
 The algorithm needs indexing and length, not knowledge of the element representation. That makes any an honest constraint here.
 
@@ -34,7 +36,7 @@ The algorithm needs indexing and length, not knowledge of the element representa
 
 ## 2. Handle a generic empty value: diagnose an edited check
 
-A careless edit changed the check in worked example 2 so that it reads `check(v != 0 && !ok, "empty generic")`. Run worked example 2 with that line, explain why the edited check now fails for the same program state, and restore it.
+A careless edit rewrote the check in worked example 2 as `check(v != 0 && !ok, "empty generic")`. Explain the failure, then restore it.
 
 The unchanged code is worked example 2:
 
@@ -43,7 +45,9 @@ v, ok := first([]int{})
 check(v == 0 && !ok, "empty generic")
 ```
 
-**Expected:** Before the repair the program panics with `empty generic`; after it the line reads `check(v == 0 && !ok, "empty generic")` again and the result is zero with presence false.
+**Expected:** The defective run panics with `empty generic`; after restoring `check(v == 0 && !ok, "empty generic")`, the result is zero with presence false.
+
+**Verify:** The edited check fails with message `empty generic` for a state that `v == 0 && !ok` accepts.
 
 A zero value alone cannot distinguish an empty input from a first element equal to zero. The boolean preserves that information.
 
@@ -66,6 +70,8 @@ check(len(v) == 2 && v[0] == 2 && v[1] == 1, "unique order")
 
 **Expected:** The result is 2 then 1.
 
+**Verify:** Your solution must keep `len(v) == 2 && v[0] == 2 && v[1] == 1` true. Control: changing `v := unique([]int{2, 1, 2})` to `v := unique([]int{3, 1, 2})` panics with message `unique order`; revert it.
+
 A map tracks membership while the result slice preserves order. Returning map keys directly would lose the ordering contract.
 
 **Approach.** Walk the input once, record each value in the `seen` map and append it to `out` only the first time it appears.
@@ -85,6 +91,8 @@ check(sumInts([]Count{3, 4}) == Count(7), "underlying type")
 ```
 
 **Expected:** The result is Count(7).
+
+**Verify:** Your solution must keep `sumInts([]Count{3, 4}) == Count(7)` true. Control: changing `check(sumInts([]Count{3, 4}) == Count(7), "underlying type")` to `check(sumInts([]Count{4, 4}) == Count(7), "underlying type")` panics with message `underlying type`; revert it.
 
 The tilde constraint admits the underlying int representation while preserving the named result type.
 
@@ -106,6 +114,8 @@ check(sumInts([]int64{}) == 0, "generic identity")
 
 **Expected:** The result is int64 zero.
 
+**Verify:** Your solution must keep `sumInts([]int64{}) == 0` true. Control: changing `check(sumInts([]int64{}) == 0, "generic identity")` to `check(sumInts([]int64{}) != 0, "generic identity")` panics with message `generic identity`; revert it.
+
 The identity must make sense for every allowed type. Expanding a constraint to unrelated types can invalidate an otherwise convenient implementation.
 
 **Approach.** Call `sumInts` on an empty `[]int64`. The accumulator `var out T` starts at the zero value and the loop body never runs.
@@ -126,6 +136,8 @@ check(len(v) == 2, "case policy")
 ```
 
 **Expected:** Red and red remain distinct.
+
+**Verify:** Your solution must keep `len(v) == 2` true. Control: changing `v := unique([]string{"Red", "red", "Red"})` to `v := unique([]string{"Red!", "red", "Red"})` panics with message `case policy`; revert it.
 
 comparable uses the language equality operation. Case folding or domain normalization would need an explicit preprocessing policy, not a hidden generic assumption.
 

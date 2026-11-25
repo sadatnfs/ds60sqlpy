@@ -24,9 +24,11 @@ The three common vector forms make ownership visible: iter yields shared referen
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles the saved pad as `main.rs` with pinned Rust 1.99.1, edition 2024, and the prepared Arrow 60 library. `assert!` and `assert_eq!` remain active in normal builds. The fixed pad accepts one source file without arbitrary arguments, interactive input, Cargo manifests or package installation. The main function returns `Result<(), Box<dyn std::error::Error>>` so later examples can propagate errors with `?`; the final `Ok(())` means this fixture completed successfully. Standard library and Arrow examples remain offline after image preparation. Multi-file Cargo and external ecosystem projects have separate explicit preparation workflows.
+This lesson's programs need only the prelude and their own helpers. A passing run prints `rust-020: passed`.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Pad setup and limits: [Run a lesson](../STUDY-GUIDE.md#run-a-lesson).
+
+Before you run anything, follow [Attempt a lesson](../STUDY-GUIDE.md#attempt-a-lesson).
 
 
 
@@ -34,7 +36,9 @@ Start with the answer-free learner artifact in your saved classroom pad. It deli
 
 `iter().filter(...).map(...)` chains borrowed transformations. collect needs an inferred or annotated target. next advances one iterator instance. into_iter consumes the collection when the collection owns non-Copy elements.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+**Reading Example A (Consume a transformation recipe, code below).** The chain on line 2 reads left to right. `values.iter()` borrows the vector and yields `&i32` items. `copied()` turns each `&i32` into an `i32`, so later closures work with plain integers. `filter` keeps the items for which its closure returns `true`, and `value % 2 == 0` tests evenness. `map` transforms each kept item. Each adapter only wraps the one before it, and `collect` is the consumer that drives the whole chain, pulling one item at a time through every stage. The annotation `Vec<_>` tells `collect` which collection to build, and the `_` lets the compiler infer the element type. The final assertion shows the source vector is intact.
+
+Method for tracing your own variants: [Trace a program](../STUDY-GUIDE.md#trace-a-program).
 
 ## Worked example / walkthrough
 
@@ -95,13 +99,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 6. **Transfer and justify.** Choose iter, iter_mut or into_iter for three operations and justify ownership.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Record each task as in [Keep evidence for each task](../STUDY-GUIDE.md#keep-evidence-for-each-task).
 
 ## Common pitfalls and diagnosis
 
 Laziness does not mean no allocation if a later consumer collects. Reusing an exhausted iterator does not recreate it. A chain with hidden effects can execute at an unexpected boundary.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+To turn a pitfall into a test, see [Design a regression case](../STUDY-GUIDE.md#design-a-regression-case).
 
 ## Progressive hints
 
@@ -109,13 +113,25 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 2. Compare Example B (Observe iterator progress) with Example A and name the first line whose behavior differs. Its observation is: The iterator advances and eventually exhausts.
 3. Before opening the explanation, test your task 3 attempt against this lesson's main pitfall: Laziness does not mean no allocation if a later consumer collects.
 
+Tempting approaches to rule out before you compare:
+
+- **Task 1.** Calling `filter` the consumer because it removes items gets the roles backwards. Without `collect`, the filter never runs, and the compiler warns that iterators are lazy and do nothing unless consumed.
+- **Task 2.** Placing `take(1)` before `filter` takes only the first source item, 1, which is odd, so the result is empty. Adapter order changes which items the limit counts.
+- **Task 3.** Ending the function body at `.map(|name| name.to_uppercase())` without `collect` fails with E0308: the body is a lazy `Map` iterator, not the `Vec<String>` the signature promises.
+- **Task 5.** Expecting `collect` to restart and return `[2, 3, 4]` treats the iterator as the array. Calling `iterator.next()` after `collect` fails to compile with E0382, because `collect` took the iterator by value.
+- **Task 6.** Using `into_iter()` for the sum consumes `prices`, so the discount loop then fails with E0382. Using `iter()` for the discount fails instead, because `*price -= ...` cannot assign through a `&` reference.
+
 ## Self-check and next step
 
-Explain Adapter, Consumer, Exhaustion without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+Why does `values.iter().map(|v| v * 10);` on its own do no work and draw a compiler warning? Which call in Example A consumes the recipe, and why is the source still usable afterwards? In what order do the filter and map closures run for Example A's first two elements? Once Example B's iterator has returned `None`, what would collecting the rest produce?
+
+Then work through [Self-check and review](../STUDY-GUIDE.md#self-check-and-review).
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://doc.rust-lang.org/book/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+Read [The Rust Book, 13.2 Iterators](https://doc.rust-lang.org/book/ch13-02-iterators.html) for lazy adapters and consuming methods.
+
+What the classroom does and does not prove: [Sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

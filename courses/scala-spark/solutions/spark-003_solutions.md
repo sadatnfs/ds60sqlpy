@@ -1,6 +1,6 @@
 # spark-003: explanatory solutions
 
-Compare after an attempt or an explicit reveal. The [guide](../guides/spark-003.md) defines the learner contract. An authored reference is not a platform acceptance receipt.
+Compare with these notes once your fee function passes or fails the six [guide](../guides/spark-003.md) checks. They trace every branch and boundary of the rule, so a mismatch points to the guard order or the threshold rather than to the expected value.
 
 ## Vocabulary and concepts
 
@@ -44,7 +44,7 @@ assert(bonus(10L) == 2L)
 
 ### Exercise 1: Separate definition and call
 
-**Inputs/evidence:** `AddCents(100L, 25L)`, `addCents(0L, 25L)`.
+**Inputs/evidence:** `addCents(100L, 25L)`, `addCents(0L, 25L)`.
 
 **Expected result/shape:** 125L and 25L.
 
@@ -84,7 +84,7 @@ Named arguments bind by parameter name. Reordering them is a readability choice 
 
 ### Exercise 5: Reject hidden state
 
-**Inputs/evidence:** Two consecutive `feeCents(1000L, true)` calls and negative amount-1L.
+**Inputs/evidence:** Two consecutive `feeCents(1000L, true)` calls and the negative amount `-1L`.
 
 **Expected result/shape:** Both calls 50L; negative amount yields 0L even for a nonmember.
 

@@ -24,9 +24,9 @@ A complete capstone includes evidence and limits. Explain which invariants the L
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles the saved pad as `main.swift` with Swift 6 language checking. An explicit `@main` type contains `static func main() async throws`; the fixed compiler uses `-parse-as-library -swift-version 6`. The examples use the standard library and portable Foundation. `precondition` makes a violated invariant fail the process. The fixed pad accepts one source file, without arbitrary command arguments, interactive input or dependency installation. SwiftUI, UIKit, Apple simulators and application signing belong to the separately prepared macOS/Xcode project labs, never the Linux pad.
+The pad runs the identity kernel; the capstone itself is the JourneyCore package and the JourneyApp project. Task 3 runs `swift test` first, then the app on an Apple destination you actually have. Task 4 asks you to break the app on purpose in a copy, record the symptom and then repair it.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Compile contract, starter stop and success marker: [running a lesson](../STUDY-GUIDE.md#running-a-lesson).
 
 Start from the actual [JourneyCore](../fixtures/JourneyCore/README.md) and [JourneyApp](../fixtures/JourneyApp/README.md) project files. The app project includes working list, detail editing, navigation, save/load and platform text-bridge code.
 
@@ -34,7 +34,7 @@ Start from the actual [JourneyCore](../fixtures/JourneyCore/README.md) and [Jour
 
 A stable item identity connects domain actions, navigation and saved data. A reducer updates values; a MainActor presentation model owns view state; a persistence adapter encodes the versioned document. Each layer has its own test boundary.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+Each example ends with a trace; method: [tracing a program](../STUDY-GUIDE.md#tracing-a-program).
 
 ## Worked example / walkthrough
 
@@ -65,6 +65,8 @@ struct LessonMain {
 
 **Observe:** One of two uniquely identified items is complete.
 
+**Trace.** `items` holds a, which is complete, and b, which is not. `filter(\.complete)` keeps items whose complete property is true, leaving one. The second check maps items to their ids, builds a set of two and compares its count with the array's count of two; equal counts prove no identifier is repeated. Together the checks verify completion state and identity rather than a formatted label.
+
 ### Example B: Preserve identity across a value update
 
 These are the core semantics needed by undo, navigation and persistence.
@@ -93,6 +95,8 @@ struct LessonMain {
 
 **Observe:** The update retains identity and the prior snapshot.
 
+**Trace.** `original` is a with complete false. `var changed = original` copies the struct, and setting complete to true changes only the copy. The check confirms the copy kept id a, the original is still incomplete and the copy is complete. Undo can restore the old snapshot, navigation still finds a, and persistence writes the new value under the same id.
+
 ## Exercises
 
 1. **Predict and explain.** Trace one user action from view through model to domain state.
@@ -107,13 +111,15 @@ struct LessonMain {
 
 6. **Transfer and justify.** Deliver a project README with architecture, actual platform evidence, accessibility observations, recovery policy and one independently implemented extension.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Log each task in the [evidence table](../STUDY-GUIDE.md#recording-exercise-evidence) before opening the explanation.
 
 ## Common pitfalls and diagnosis
 
 A passing portable reference does not qualify simulator interaction or app signing. Preserve user data when testing failure recovery. Keep scope and evidence honest when adding new frameworks or deployment targets.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+For task 2, derive progress from the items rather than storing a counter; the counterexample toggles one item and checks the summary changes without any other update. For task 5, two items both with id a must be rejected on admission, since the uniqueness check above only detects them afterward. A malformed saved file must leave the source file in place and show an error.
+
+Repair routine: [building a regression case](../STUDY-GUIDE.md#building-a-regression-case).
 
 ## Progressive hints
 
@@ -123,11 +129,15 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 ## Self-check and next step
 
-Explain Offline-first, Acceptance evidence, Extension boundary without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+Trace one tap on a completion toggle from the view, through the presentation model, to the domain update and the save. Explain why progress is derived rather than stored. List the platform evidence your README will report as performed and anything still unverified.
+
+Then follow the general [self-check routine](../STUDY-GUIDE.md#self-check-routine) and save your pad.
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://docs.swift.org/swift-book/documentation/the-swift-programming-language/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+[Documentation](https://docs.swift.org/swift-book/documentation/the-swift-programming-language/): Read the JourneyCore and JourneyApp READMEs in this course alongside Apple's SwiftUI and Xcode documentation and the Swift Package Manager guide.
+
+Provenance and limits: [sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

@@ -209,9 +209,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="syntax-anatomy-and-reasoning">Syntax anatomy and reasoning<a class="heading-anchor" href="#syntax-anatomy-and-reasoning" aria-label="Link to this section">#</a></h3>
 <p>Separate the pure policy from the HTTP and AdmissionReview adapter. The fixture validates a replica range and preserves a synthetic request UID in its decision. A real adapter needs bounded body parsing, TLS, a configured timeout, correct response schema and no hidden external side effects. Rejection messages should identify the field and rule without exposing credentials or excessive source content.</p>
 <h3 id="run-this-lesson">Run this lesson<a class="heading-anchor" href="#run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>Choose Go in the unified Docker classroom. Save your own pad before experimenting. The prepared worker stages it as <code>main.go</code>, compiles it, and executes the resulting program with bounded time and output. The pad is one source file. It does not supply interactive input, arbitrary command-line arguments, package installation, Kubernetes credentials or a host Docker socket. Every ordinary reference here uses the standard library, synthetic local data and explicit checks. A failed <code>check</code> panics and produces a nonzero process result; do not remove it to make the run appear successful.</p>
-<p>The explanatory solution snippets belong inside <code>func main()</code> unless they declare a helper. <code>check</code> is a tiny teaching helper that panics when a condition is false. The separate reference supplies required imports and helpers and implements all six cases. Use that complete source only after an attempt or an explicit reveal. For an independently prepared Go project, the equivalent local build is <code>go build -o lesson main.go</code>, followed by <code>./lesson</code>; use Linux or WSL 2 for that optional workflow. Compiling proves syntax and type consistency, while the executed checks establish the stated example contracts.</p>
-<p>Each worked example below is a complete Go file. Copy one whole block into your saved pad and run it. Example 2 includes the first case as well as the second, so its setup is complete. Its supporting declarations may be reused in later investigations. The separate reference implements all six cases.</p>
+<p>Run each worked example as one complete file in your saved pad (<a href="../STUDY-GUIDE.md.html#run-a-lesson">run steps</a>).</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1-accept-a-valid-range">Worked example 1: Accept a valid range<a class="heading-anchor" href="#worked-example-1-accept-a-valid-range" aria-label="Link to this section">#</a></h4>
 <p>Validate replica count 3 under maximum 5.</p>
@@ -316,77 +314,79 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Observe:</strong> The decision denies it with a reason.</p>
 <p>Field-specific validation gives an actionable failure instead of an unexplained generic denial.</p>
 <h3 id="predict-before-running">Predict before running<a class="heading-anchor" href="#predict-before-running" aria-label="Link to this section">#</a></h3>
-<p>For each example, write the input values, the state that can change, and the expected observation. Explain which result would disprove your current interpretation. For concurrency, predict a guaranteed relationship rather than an arbitrary scheduling order. For an error case, identify whether it is rejected at compilation or returned during execution.</p>
+<p>Predict the decision for 3 replicas under a maximum of 5, for -1, and for exactly 5 and 6. Predict the UID copied into the response, and the SideEffects counter in dry-run and real mode. Then predict the decision for a request without a UID, and decide why the reason field matters to the person whose write was denied.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-accept-a-valid-range-change-one-input">Exercise 1: Accept a valid range: change one input<a class="heading-anchor" href="#exercise-1-accept-a-valid-range-change-one-input" aria-label="Link to this section">#</a></h4>
-<p>Copy worked example 1 into a scratch pad and change <code>d := admit(&quot;r1&quot;, 3, 5, false)</code> to <code>d := admit(&quot;r2&quot;, 3, 5, false)</code>. Before running, predict which check fails and which value it now sees; then run it and restore the original line.</p>
-<p><strong>Expected:</strong> The changed run panics with <code>allow</code> because <code>d.Allowed &amp;&amp; d.UID == &quot;r1&quot;</code> no longer holds. Restoring the original line brings back the worked observation: the decision allows the request.</p>
-<p><strong>Verify:</strong> Compare your written prediction with the panic message <code>allow</code> and name the value that made <code>d.Allowed &amp;&amp; d.UID == &quot;r1&quot;</code> false. After restoring the input, the program must print its success line again.</p>
+<p>Copy worked example 1, change <code>d := admit(&quot;r1&quot;, 3, 5, false)</code> to <code>d := admit(&quot;r2&quot;, 3, 5, false)</code> and predict the failure before running; then restore the line.</p>
+<p><strong>Expected:</strong> The edited run panics with <code>allow</code> because <code>d.Allowed &amp;&amp; d.UID == &quot;r1&quot;</code> no longer holds.</p>
+<p><strong>Verify:</strong> Restoring <code>d := admit(&quot;r1&quot;, 3, 5, false)</code> makes the check pass again with the worked observation: the decision allows the request.</p>
 <h4 id="exercise-2-reject-a-negative-value-diagnose-an-edited-check">Exercise 2: Reject a negative value: diagnose an edited check<a class="heading-anchor" href="#exercise-2-reject-a-negative-value-diagnose-an-edited-check" aria-label="Link to this section">#</a></h4>
-<p>A careless edit changed the check in worked example 2 so that it reads <code>check(!d.Allowed &amp;&amp; d.Reason == &quot;&quot;, &quot;negative&quot;)</code>. Run worked example 2 with that line, explain why the edited check now fails for the same program state, and restore it.</p>
-<p><strong>Expected:</strong> Before the repair the program panics with <code>negative</code>; after it the line reads <code>check(!d.Allowed &amp;&amp; d.Reason != &quot;&quot;, &quot;negative&quot;)</code> again and the decision denies it with a reason.</p>
-<p><strong>Verify:</strong> Keep the failing and the repaired runs. Explain why the edited check rejects the same program state that <code>!d.Allowed &amp;&amp; d.Reason != &quot;&quot;</code> accepts.</p>
+<p>A careless edit rewrote the check in worked example 2 as <code>check(!d.Allowed &amp;&amp; d.Reason == &quot;&quot;, &quot;negative&quot;)</code>. Explain the failure, then restore it.</p>
+<p><strong>Expected:</strong> The defective run panics with <code>negative</code>; after restoring <code>check(!d.Allowed &amp;&amp; d.Reason != &quot;&quot;, &quot;negative&quot;)</code>, the decision denies it with a reason.</p>
+<p><strong>Verify:</strong> The edited check fails with message <code>negative</code> for a state that <code>!d.Allowed &amp;&amp; d.Reason != &quot;&quot;</code> accepts.</p>
 <h4 id="exercise-3-check-the-exact-upper-boundary">Exercise 3: Check the exact upper boundary<a class="heading-anchor" href="#exercise-3-check-the-exact-upper-boundary" aria-label="Link to this section">#</a></h4>
 <p>Validate counts 5 and 6 against maximum 5.</p>
 <p><strong>Expected:</strong> Five is allowed and six is denied.</p>
-<p><strong>Verify:</strong> Keep a check equivalent to <code>admit(&quot;r3&quot;, 5, 5, false).Allowed &amp;&amp; !admit(&quot;r4&quot;, 6, 5, false).Allowed</code>. As a control, change <code>check(admit(&quot;r3&quot;, 5, 5, false).Allowed &amp;&amp; !admit(&quot;r4&quot;, 6, 5, false).Allowed, &quot;boundary&quot;)</code> to <code>check(admit(&quot;r3&quot;, 6, 5, false).Allowed &amp;&amp; !admit(&quot;r4&quot;, 6, 5, false).Allowed, &quot;boundary&quot;)</code> inside that check: it must panic with <code>boundary</code>, which shows the check can fail. Restore it.</p>
+<p><strong>Verify:</strong> Your solution must keep <code>admit(&quot;r3&quot;, 5, 5, false).Allowed &amp;&amp; !admit(&quot;r4&quot;, 6, 5, false).Allowed</code> true. Control: changing <code>check(admit(&quot;r3&quot;, 5, 5, false).Allowed &amp;&amp; !admit(&quot;r4&quot;, 6, 5, false).Allowed, &quot;boundary&quot;)</code> to <code>check(admit(&quot;r3&quot;, 6, 5, false).Allowed &amp;&amp; !admit(&quot;r4&quot;, 6, 5, false).Allowed, &quot;boundary&quot;)</code> panics with message <code>boundary</code>; revert it.</p>
 <h4 id="exercise-4-preserve-request-identity">Exercise 4: Preserve request identity<a class="heading-anchor" href="#exercise-4-preserve-request-identity" aria-label="Link to this section">#</a></h4>
 <p>Validate a request and inspect the response UID.</p>
 <p><strong>Expected:</strong> The exact request UID is copied.</p>
-<p><strong>Verify:</strong> Keep a check equivalent to <code>d.UID == &quot;request-42&quot;</code>. As a control, change <code>d := admit(&quot;request-42&quot;, 2, 5, false)</code> to <code>d := admit(&quot;request-43&quot;, 2, 5, false)</code>: the run must panic with <code>UID</code>. Restore the line before continuing.</p>
+<p><strong>Verify:</strong> Your solution must keep <code>d.UID == &quot;request-42&quot;</code> true. Control: changing <code>d := admit(&quot;request-42&quot;, 2, 5, false)</code> to <code>d := admit(&quot;request-43&quot;, 2, 5, false)</code> panics with message <code>UID</code>; revert it.</p>
 <h4 id="exercise-5-keep-dry-run-side-effects-absent">Exercise 5: Keep dry-run side effects absent<a class="heading-anchor" href="#exercise-5-keep-dry-run-side-effects-absent" aria-label="Link to this section">#</a></h4>
 <p>Evaluate the same allowed request once in dry-run mode and once for real.</p>
 <p><strong>Expected:</strong> Both decisions allow the request; only the real evaluation records a side effect.</p>
-<p><strong>Verify:</strong> Keep a check equivalent to <code>d.Allowed &amp;&amp; d.SideEffects == 0 &amp;&amp; live.Allowed &amp;&amp; live.SideEffects == 1</code>. As a control, change <code>d := admit(&quot;r5&quot;, 2, 5, true)</code> to <code>d := admit(&quot;r5&quot;, 2, 5, false)</code>: the run must panic with <code>dry run</code>. Restore the line before continuing.</p>
+<p><strong>Verify:</strong> Your solution must keep <code>d.Allowed &amp;&amp; d.SideEffects == 0 &amp;&amp; live.Allowed &amp;&amp; live.SideEffects == 1</code> true. Control: changing <code>d := admit(&quot;r5&quot;, 2, 5, true)</code> to <code>d := admit(&quot;r5&quot;, 2, 5, false)</code> panics with message <code>dry run</code>; revert it.</p>
 <h4 id="exercise-6-transfer-missing-identity-refusal">Exercise 6: Transfer missing identity refusal<a class="heading-anchor" href="#exercise-6-transfer-missing-identity-refusal" aria-label="Link to this section">#</a></h4>
 <p>Evaluate a request lacking its UID.</p>
 <p><strong>Expected:</strong> The decision is denied.</p>
-<p><strong>Verify:</strong> Keep a check equivalent to <code>!d.Allowed</code>. As a control, change <code>check(!d.Allowed, &quot;missing UID&quot;)</code> to <code>check(d.Allowed, &quot;missing UID&quot;)</code> inside that check: it must panic with <code>missing UID</code>, which shows the check can fail. Restore it.</p>
-<p>Implement these in the answer-free learner source. Keep one independent check per claim. A task can require tracing, construction, a changed input or a deliberate safe failure. Do not run a data race, corrupt memory or contact a shared cluster merely to demonstrate why it would be wrong.</p>
+<p><strong>Verify:</strong> Your solution must keep <code>!d.Allowed</code> true. Control: changing <code>check(!d.Allowed, &quot;missing UID&quot;)</code> to <code>check(d.Allowed, &quot;missing UID&quot;)</code> panics with message <code>missing UID</code>; revert it.</p>
+<p>Work in the answer-free learner source, <code>courses/go/lessons/go-046.go</code> (<a href="../STUDY-GUIDE.md.html#work-an-exercise">exercise contract</a>).</p>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
-<p>Read a compiler error from the first location in your source, then fix one cause at a time. Unused imports and variables are errors in Go; add an import when its use exists, rather than copying a large unused import list. A panic from <code>check</code> identifies a violated example contract. Compare the actual value with the expected value and inspect the state transition that produced it. A returned <code>error</code> is a value that the caller must handle; an ignored error can make later output look plausible while the original operation failed.</p>
-<p>The lesson-specific explanations in the two examples identify the important counterexamples. Extend that reasoning to every investigation: explain why a plausible alternative would fail, and preserve a tiny input that distinguishes it. Treat empty data, missing values and cancellation as domain cases with explicit policies. In concurrent work, replace sleeps used as synchronization with channels, mutexes or an explicit ownership protocol.</p>
+<p>A webhook that fails closed and then goes down blocks every write it covers, sometimes including the writes needed to repair it; one that fails open silently admits unchecked objects. Choose failurePolicy per webhook deliberately, scope it with selectors and keep its timeout short. A webhook with side effects must honor dryRun, and its response must echo the request UID.</p>
+<p>General compiler, panic and error diagnosis is in the <a href="../STUDY-GUIDE.md.html#diagnose-a-failure">study guide</a>.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <h4 id="hint-for-investigation-1-accept-a-valid-range-change-one-input">Hint for investigation 1: Accept a valid range: change one input<a class="heading-anchor" href="#hint-for-investigation-1-accept-a-valid-range-change-one-input" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The decision allows the request.</li>
-<li>The check <code>d.Allowed &amp;&amp; d.UID == &quot;r1&quot;</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Compute the checked value with <code>d := admit(&quot;r2&quot;, 3, 5, false)</code> in place before running, then compare it with the value <code>d.Allowed &amp;&amp; d.UID == &quot;r1&quot;</code> expects.</li>
+<li>3 lies within 0 to 5. What are Allowed and UID?</li>
+<li>The request UID is now r2, so the decision echoes r2 and <code>d.UID==&quot;r1&quot;</code> fails. Admission still allows the request; the identity changed.</li>
 </ol>
 <h4 id="hint-for-investigation-2-reject-a-negative-value-diagnose-an-edited-check">Hint for investigation 2: Reject a negative value: diagnose an edited check<a class="heading-anchor" href="#hint-for-investigation-2-reject-a-negative-value-diagnose-an-edited-check" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The decision denies it with a reason.</li>
-<li>The check <code>!d.Allowed &amp;&amp; d.Reason != &quot;&quot;</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Compare <code>check(!d.Allowed &amp;&amp; d.Reason == &quot;&quot;, &quot;negative&quot;)</code> with the same line in worked example 2 and state the claim each version makes.</li>
+<li>-1 is outside the range. Which reason is set?</li>
+<li>A denied decision carries a reason, so <code>d.Reason==&quot;&quot;</code> is false and the check fails. Restore <code>!=&quot;&quot;</code> so the test requires an explanation.</li>
 </ol>
 <h4 id="hint-for-investigation-3-check-the-exact-upper-boundary">Hint for investigation 3: Check the exact upper boundary<a class="heading-anchor" href="#hint-for-investigation-3-check-the-exact-upper-boundary" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: Five is allowed and six is denied.</li>
-<li>The check <code>admit(&quot;r3&quot;, 5, 5, false).Allowed &amp;&amp; !admit(&quot;r4&quot;, 6, 5, false).Allowed</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Name one input that would make <code>admit(&quot;r3&quot;, 5, 5, false).Allowed &amp;&amp; !admit(&quot;r4&quot;, 6, 5, false).Allowed</code> false. A check that no input can falsify is not evidence.</li>
+<li>The maximum itself is allowed. Is 6 within range?</li>
+<li>The inclusive bound must be clear.</li>
 </ol>
 <h4 id="hint-for-investigation-4-preserve-request-identity">Hint for investigation 4: Preserve request identity<a class="heading-anchor" href="#hint-for-investigation-4-preserve-request-identity" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The exact request UID is copied.</li>
-<li>The check <code>d.UID == &quot;request-42&quot;</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Predict the effect of changing <code>d := admit(&quot;request-42&quot;, 2, 5, false)</code> to <code>d := admit(&quot;request-43&quot;, 2, 5, false)</code> before running anything. If the prediction is hard, trace that line again with the original input.</li>
+<li>The decision starts from the request UID. What does the response carry?</li>
+<li>A response for another request must not be accepted as evidence for this one.</li>
 </ol>
 <h4 id="hint-for-investigation-5-keep-dry-run-side-effects-absent">Hint for investigation 5: Keep dry-run side effects absent<a class="heading-anchor" href="#hint-for-investigation-5-keep-dry-run-side-effects-absent" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: Both decisions allow the request; only the real evaluation records a side effect.</li>
-<li>The check <code>d.Allowed &amp;&amp; d.SideEffects == 0 &amp;&amp; live.Allowed &amp;&amp; live.SideEffects == 1</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Predict the effect of changing <code>d := admit(&quot;r5&quot;, 2, 5, true)</code> to <code>d := admit(&quot;r5&quot;, 2, 5, false)</code> before running anything. If the prediction is hard, trace that line again with the original input.</li>
+<li>dryRun skips the counter. What do the two SideEffects values show?</li>
+<li>This validator records one audit side effect for an allowed real request and none for dry run.</li>
 </ol>
 <h4 id="hint-for-investigation-6-transfer-missing-identity-refusal">Hint for investigation 6: Transfer missing identity refusal<a class="heading-anchor" href="#hint-for-investigation-6-transfer-missing-identity-refusal" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The decision is denied.</li>
-<li>The check <code>!d.Allowed</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Name one input that would make <code>!d.Allowed</code> false. A check that no input can falsify is not evidence.</li>
+<li>An empty UID is refused before range checks. Is the request allowed?</li>
+<li>A valid numeric object is insufficient if the adapter cannot bind the response to a request.</li>
 </ol>
 <h3 id="self-check-and-retrieval">Self-check and retrieval<a class="heading-anchor" href="#self-check-and-retrieval" aria-label="Link to this section">#</a></h3>
-<p>Close the reference. Rebuild one normal case and one boundary case from a blank pad. Explain the role of admission without using its name in the definition. Then change the domain while keeping the same invariant. Record the new input, your prediction and the observed output. If your program passes only because its input is hard-coded, explain which part would need a reusable function in a larger project.</p>
+<p>Write <code>validateLabels(uid string, labels map[string]string, dryRun bool) Decision</code> that requires an owner label, denies with a clear reason otherwise, echoes the UID and records a side effect only outside dry-run mode. Test allow, deny, missing UID and dry run. Then argue whether this webhook should fail open or closed, and why.</p>
+<p>The general <a href="../STUDY-GUIDE.md.html#self-check-and-retrieval">retrieval routine</a> still applies.</p>
 <h3 id="next-step-and-sources">Next step and sources<a class="heading-anchor" href="#next-step-and-sources" aria-label="Link to this section">#</a></h3>
-<p><a href="https://kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers/">Primary language or library documentation</a>, reviewed 2026-10-23. The teaching explanations and synthetic fixtures are original. Continue with the next lesson when you can explain the six observations and diagnose a changed case without copying its answer.</p>
+<p>Source: <a href="https://kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers/">Kubernetes dynamic admission control</a>, reviewed 2026-10-23.</p>
+<p>Next: go-047, Controller tests from pure functions to owned clusters (<a href="../STUDY-GUIDE.md.html#when-to-move-on">criteria</a>).</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for go-046: Admission decisions, webhook contracts and failure policy.
 Read courses/go/guides/go-046.md and my saved attempt based on courses/go/lessons/go-046.go.

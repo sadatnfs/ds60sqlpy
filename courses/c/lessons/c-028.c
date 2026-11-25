@@ -2,25 +2,16 @@
 
 int main(void) {
   /* Exercise 1: Call a declared API: change one input
-     Copy worked example 1, the "call a declared API" case, into a scratch pad
-     and change `int values[] = {2, 4, 6};` to `int values[] = {3, 4, 6};`.
-     Before running, predict which CHECK fails and which value it sees in place
-     of the worked result (summing 2, 4, 6 returns 12); then run it and restore
-     the original line. Expected: With `int values[] = {3, 4, 6};` the run stops
-     with `Check failed` at the CHECK on `stats_sum(values, 3) == 12`, because
-     the "call a declared API" case no longer shows that summing 2, 4, 6
-     returns 12. Restoring `int values[] = {2, 4, 6};` brings that observation
-     back. */
+     In worked example 1, change `int values[] = {2, 4, 6};` to `int values[] =
+     {3, 4, 6};`. Predict which value the CHECK on `stats_sum(values, 3) == 12`
+     sees, then run and restore. Expected: `Check failed` at `stats_sum(values,
+     3) == 12`; restoring `int values[] = {2, 4, 6};` passes again. */
 
   /* Exercise 2: Use an empty API contract: diagnose an edited check
-     A careless edit changed the CHECK in worked example 2, the "use an empty
-     API contract" case, so that it reads `CHECK(stats_sum(NULL, 0) != 0);`. Run
-     the example with that line, explain why the edited CHECK now fails even
-     though the program state still means the result is zero, and restore it.
-     Expected: Before the repair the run stops with `Check failed` at the CHECK
-     on `stats_sum(NULL, 0) == 0`. Once the line reads `CHECK(stats_sum(NULL, 0)
-     == 0);` again, the "use an empty API contract" case again shows that the
-     result is zero. */
+     Worked example 2's CHECK now reads `CHECK(stats_sum(NULL, 0) != 0);`.
+     Explain why it fails although the result is zero, then restore it.
+     Expected: `Check failed` until the CHECK reads `CHECK(stats_sum(NULL, 0) ==
+     0);` again, though the result is zero. */
 
   /* Exercise 3: Compare two callers
      Call the same helper with two separate arrays.

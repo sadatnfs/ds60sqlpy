@@ -2,96 +2,56 @@
 
 ## How to run this lesson
 
-Start the Linux-container engine and run `./classroom` from the repository
-root. On Windows, use Ubuntu in WSL 2 or the thin
-`START_DOCKER_CLASSROOM.cmd` wrapper. Choose **PostgreSQL** on the shared
-`/classroom` home, then open **sql-48**. The
-[launcher guide](../../../docs/one-command-classroom.md) covers first preparation, strict resume and
-the saved project selection. No host Python or PostgreSQL installation is
-required for this browser route.
-
-1. Read the prerequisite and fixture notes before running the file. Use only
-   the local disposable `advanced_sql_training` database.
-2. Choose **Whole SQL lesson (psql)** for the cataloged learner script. This
-   preserves the lesson's reviewed psql directives, relative includes and
-   transaction behavior. **SQL snippet** is appropriate for ordinary SQL
-   statements, but is not a replacement for an entire script's setup.
-3. The **Course database** panel above the code shows whether the course
-   training tables are loaded. Missing tables load automatically before your
-   first run (or choose **Load course tables**) and stay loaded for later
-   lessons. **Reset training data** restores the original rows only when your
-   own changes made results differ; it keeps your saved code and notes.
-4. Edit the learner copy in the classroom and save your prediction before
-   running. Its whole-script workspace is
-   `.learning/sql/sql-48/lesson/workspace/sql/postgres-60day/day48_project1_ecommerce_part3.sql`.
-   For browser work this path is inside the Docker learning volume, not a
-   newly created host folder beside your checkout. The checked-in source
-   remains the answer-free starting artifact.
-5. Run the whole script and inspect the full transcript. The runner uses
-   `psql -X -v ON_ERROR_STOP=1 -f`. SELECT output has columns, rows and a row
-   count; DDL/DML has command tags; intentional checks may produce NOTICE
-   messages. An unexpected ERROR or nonzero exit is a failure to diagnose,
-   even when an earlier query printed plausible values.
-6. Verify the lesson's expected grain, ordering, constraints and declared
-   transaction or cleanup outcome. Keep required ROLLBACK statements.
-   The warehouse sequence and other explicitly stateful exercises explain
-   when state is committed. Read saved output without rerunning it when
-   reviewing an earlier attempt.
-
-If a relation is missing, inspect the lesson's required fixture and predecessor
-rather than guessing a new table definition. If authentication or runtime
-readiness fails, use `./classroom status` and the setup guide. Keep credentials
-out of SQL, notebooks, screenshots and committed files. Repair the first error
-before trusting partial output, and reveal separate solutions only when you
-want to compare after an attempt.
-
-### Optional contributor notebook route
-
-For notebook work, deliberately prepare the Linux/WSL contributor environment
-from [CONTRIBUTING.md](../../../CONTRIBUTING.md), including a compatible psql client and
-the notebook dependencies. Generate this lesson's private workspace through
-the maintained CLI:
-
-```sh
-uv run --no-sync python scripts/course.py sql notebook sql-48
-```
-
-Open the printed notebook path in that environment's JupyterLab. It uses the
-same catalog-derived learner-copy layout in that contributor checkout and
-executes the complete script through psql. Its host-side state is separate
-from the Docker browser's named volume. Follow
-[guided SQL notebooks](../../../docs/guided-sql-notebooks.md) for explicit local connection
-selection and kernel setup. Notebook generation does not execute SQL or
-authorize a reset.
+Open **sql-48** from `./classroom` (PostgreSQL), choose **Whole SQL lesson
+(psql)** and work in your copy at
+`.learning/sql/sql-48/lesson/workspace/sql/postgres-60day/day48_project1_ecommerce_part3.sql`.
+The lesson reads `order_items` and `products` for the basket half and `events`
+plus `orders` for the attribution half, all in `advanced_sql_training`. The
+script runs inside `BEGIN` ... `ROLLBACK`, so nothing it does persists. A clean
+`psql` run prints the 50 most frequent product pairs, then a five-row
+first-touch/last-touch table, then your exercise results. The fixture spaces
+each customer's events and orders across that customer's lifetime, measured
+from the moment you loaded it, so a few attribution counts can differ by a
+handful from the numbers quoted here. Launcher and recovery steps are in the
+[SQL study guide](../../STUDY-GUIDE.md#run-a-lesson-in-the-classroom), and the
+notebook option is in its
+[notebook section](../../STUDY-GUIDE.md#optional-contributor-notebook-route).
 
 ## Level and prerequisites
 
 - **Level:** Advanced
-- **Prerequisites:** [Day 47; cohort retention](day47_project1_ecommerce_part2.md)
+- **Prerequisites:** [Day 47; cohort retention](day47_project1_ecommerce_part2.md) Day 47 gave you event and order timelines per customer; today you compare those timelines inside a seven-day window.
 - **Artifacts:** [learner SQL](../day48_project1_ecommerce_part3.sql) ·
   [solution reasoning](../solutions/day48_solutions.md) ·
   [executable solution](../solutions/day48_solutions.sql)
 
 ## A beginner's mental model for this lesson
 
-A **table** stores facts in named columns. A **row** is one occurrence at the
-table's declared grain. A query creates a temporary **result set**: rows printed
-on screen are not automatically stored. The key vocabulary for this lesson is Market basket, Attribution window, Fractional credit. Its worked SQL reads or creates `order_items`, `products`, `events`.
+The lesson has two halves that share one discipline: decide what a single row
+means before you count. In the basket half, one row of `items` is a distinct
+(order, product) membership. Joining `items` to itself on `order_id` makes one
+row per pair of products in the same order, and the condition
+`a.product_id < b.product_id` keeps each unordered pair once, so product 14
+with product 45 is never counted again as 45 with 14 or as 14 with itself. On
+the course data `order_items` already has no repeated (order, product) lines,
+13,085 lines across 4,362 orders, but the `GROUP BY` or `DISTINCT` step is what
+protects the count when a future order lists a product twice.
 
-Before writing a query, complete this sentence: “One output row represents
-___.” Joins can multiply rows, filters can remove them, grouping can collapse
-many rows into one, and window functions can add calculations while preserving
-row count. For a normal analytical `SELECT`, use this logical reading order:
-`FROM`/`JOIN` (including `ON`) → `WHERE` → `GROUP BY`/aggregates → `HAVING` →
-window calculations → `SELECT` → `ORDER BY` → `LIMIT`. PostgreSQL may execute a
-different physical plan while preserving those semantics.
-
-The worked walkthrough's lesson-specific task is: Deduplicate products within each order, self-join with `a.product_id < b.product_id`, and count orders per pair. For attribution, deduplicate campaigns per purchase before dividing one credit by the distinct campaign count; verify allocated credit sums to one for every assisted purchase.
-The first runnable example has a concrete contract: Example 1 returns one grouped row per `order_id`, and `product_id`, capped at 50 rows with columns `order_id`, `product_id`, `p1`, `p2`, `together`, and `product_a` from `order_items`, and `products`. Compare the key set and row count with a simpler control over the same filter/window; inspect `NULL` versus zero/absent-row meaning and verify the final ordering/tie-breaker when present. Its final projection is `product_a`, `product_b`, and `together`. Independently group `order_items`, `items`, `pairs`, and `products` by the shown grouping expressions and compare every displayed aggregate at that exact grain. For tied business values, inspect the final ordering expression and verify its last key makes the displayed order reproducible.
+In the attribution half the anchor is a `purchase` event, not an order. Every
+customer has 40 events that rotate through five types, so there are exactly
+4,000 purchase events. A touch is any other event by the same customer in the
+half-open window `[purchase_time - 7 days, purchase_time)`, and its campaign
+comes from `metadata ->> 'campaign'`. Because one purchase can have touches
+from several campaigns, counting purchases per campaign double-counts, while
+dividing one credit by the number of distinct campaigns makes the credits sum
+back to the number of assisted purchases. Read each query in
+[logical clause order](../../STUDY-GUIDE.md#reading-any-query-in-logical-order),
+naming the grain after every CTE.
 
 ## Two worked SQL examples
 
-These worked excerpts come from `sql/postgres-60day/day48_project1_ecommerce_part3.sql`. Use **Whole SQL lesson (psql)** in the unified classroom for the complete file, including its fixture and transaction context. The optional contributor notebook and prepared `psql` routes are described above.
+Both excerpts come from the learner script and run in order inside its
+transaction.
 
 ### Example 1
 
@@ -132,9 +92,15 @@ ORDER BY
 LIMIT 50;
 ```
 
-**How to read it:** Example 1: Start with `order_items`, and `products` in `FROM`/`JOIN`; let `GROUP BY` collapse rows to its grouping keys. The final `SELECT` displays `product_a`, `product_b`, and `together`. `ORDER BY` determines presentation order and the final `LIMIT 50` caps displayed rows. Before running, predict the row grain, row count, `NULL` positions, and first/last key; afterwards, compare each prediction with the transcript.
+**How to read it:** `items` collapses `order_items` to one row per (order, product). `pairs`
+self-joins it within each order, keeps `a.product_id < b.product_id`, and
+counts orders per pair in `together`. The outer query only swaps the two ids
+for product names and keeps the 50 largest counts.
 
-**Expected result/shape:** Example 1 returns one grouped row per `order_id`, and `product_id`, capped at 50 rows with columns `order_id`, `product_id`, `p1`, `p2`, `together`, and `product_a` from `order_items`, and `products`. Compare the key set and row count with a simpler control over the same filter/window; inspect `NULL` versus zero/absent-row meaning and verify the final ordering/tie-breaker when present.
+**Expected result/shape:** 50 rows of `product_a`, `product_b` and `together`. The largest count is 32,
+and 255 of the 770 pairs share it, so the 50 rows you see are an arbitrary
+slice of a large tie (Product 101 with Product 132 may appear on one run and
+not the next). Adding `p1, p2` to the `ORDER BY` makes the slice repeatable.
 
 ### Example 2
 
@@ -171,9 +137,15 @@ ORDER BY
 LIMIT 50;
 ```
 
-**How to read it:** Example 2: Start with `events` in `FROM`/`JOIN`; let `GROUP BY` collapse rows to its grouping keys. The final `SELECT` displays `first_touch`, and `last_touch`. `ORDER BY` determines presentation order and the final `LIMIT 50` caps displayed rows. Before running, predict the row grain, row count, `NULL` positions, and first/last key; afterwards, compare each prediction with the transcript.
+**How to read it:** `ev` turns every event into (customer, time, campaign), with `none` as the
+fallback label. `first_last` uses two ordered `ARRAY_AGG` calls per customer
+and takes element `[1]` of each, so it keeps the earliest and the latest
+campaign. The outer query counts customers per (first, last) combination.
 
-**Expected result/shape:** Example 2 returns one grouped row per `customer_id`, capped at 50 rows with columns `customer_id`, `event_time`, `campaign`, `first_touch`, and `last_touch` from `events`. Compare the key set and row count with a simpler control over the same filter/window; inspect `NULL` versus zero/absent-row meaning and verify the final ordering/tie-breaker when present.
+**Expected result/shape:** Five rows of exactly 100 customers each, such as `winter` to `fall` and
+`spring` to `none`. The fixture assigns campaigns by a formula on customer id
+and event number, so each first touch always leads to the same last touch;
+real data would spread across up to 25 combinations.
 
 ## Learning objectives
 
@@ -201,46 +173,57 @@ campaign count; verify allocated credit sums to one for every assisted purchase.
 Complete these in the [learner SQL](../day48_project1_ecommerce_part3.sql):
 
 1. Calculate seven-day assisted conversions.
-   **Inputs/evidence:** For sql-48 Exercise 1, read from `events`. Build the answer toward `campaign`, `assisted_conversions`, and `assisted_customers`; keep `campaign` visible whenever the result has row-level grain.
+   **Inputs/evidence:** For sql-48 Exercise 1, take the 4,000 `purchase` events from `events` as conversions and join each one to the same customer's non-purchase events in the half-open window `[purchase_time - interval '7 days', purchase_time)`, reading `metadata ->> 'campaign'` (with `COALESCE(..., 'none')`) as the touch's campaign.
    **Expected result/shape:** For sql-48 Exercise 1, expected output: one row per campaign. The final columns are `campaign`, `assisted_conversions`, and `assisted_customers`. The final order is `assisted_conversions DESC, campaign`.
-   **Verify:** For sql-48 Exercise 1, independently aggregate `events` by `campaign`; require one output row for every distinct `campaign` tuple and compare `assisted_customers` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `assisted_customers` for the existing `campaign` tuple and verify the new tuple appears exactly once.
+   **Verify:** For sql-48 Exercise 1, confirm 5 rows on our load (`none` and `summer` 264, `fall` 259, `spring` 253, `winter` 251), that `qualifying_touches` has 1,377 rows covering 702 distinct purchases, and that the five `assisted_conversions` add up to 1,291, the distinct (purchase, campaign) pairs, not 702. Then, in a transaction, add a customer whose `purchase` at 2026-01-08 10:00 has an `autumn` touch exactly 7 days earlier, two `summer` touches, and a `boundary` touch at the purchase timestamp; rerun and confirm a new `autumn` row with 1 and 1, `summer` rising to 265 and 35, no `boundary` row, and `ROLLBACK`.
+   **Data check:** Touches are non-purchase events in the seven days before a purchase. Expect five rows, one per stored campaign value (`fall`, `none`, `spring`, `summer`, `winter`), each with roughly 250 to 265 assisted purchases and about 34 customers. The five conversion counts add up to well over the roughly 700 assisted purchases, because a purchase with three campaigns appears in three rows.
 2. Allocate equal fractional multi-touch credit.
-   **Inputs/evidence:** For sql-48 Exercise 2, read from `events`. Build the answer toward `campaign`, `attributed_conversions`, and `touched_conversions`; keep `campaign` visible whenever the result has row-level grain.
+   **Inputs/evidence:** For sql-48 Exercise 2, start from the same purchases and seven-day non-purchase touches as Exercise 1, collapse them with `SELECT DISTINCT` to one row per (purchase, campaign) in `campaign_touches`, give each row `1.0 / COUNT(*) OVER (PARTITION BY purchase_event_id)`, and sum that credit by `campaign`.
    **Expected result/shape:** For sql-48 Exercise 2, expected output: one row per `campaign`. The final columns are `campaign`, `attributed_conversions`, and `touched_conversions`. The final order is `attributed_conversions DESC, campaign`.
-   **Verify:** For sql-48 Exercise 2, independently aggregate `events` by `campaign`; require one output row for every distinct `campaign` tuple and compare `attributed_conversions`, and `touched_conversions` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `attributed_conversions`, and `touched_conversions` for the existing `campaign` tuple and verify the new tuple appears exactly once.
+   **Verify:** For sql-48 Exercise 2, confirm `attributed_conversions` of 148.5 for `summer`, 141.25 for `fall`, 140.25 for `none`, 139.25 for `spring`, and 132.75 for `winter` on our load, that they add up to 702.0000 (one credit per assisted purchase), and that `touched_conversions` equals Exercise 1's `assisted_conversions` for every campaign. Then repeat the Exercise 1 transaction: the new purchase has two distinct campaigns, so `autumn` gets 0.5, `summer` rises by 0.5 to 149.0000 even though it touched twice, and the total becomes 703 before `ROLLBACK`.
+   **Data check:** Expect the same five campaigns. `touched_conversions` should match Exercise 1's assisted counts, while the five `attributed_conversions` values (around 133 to 149 each) must add up to the number of distinct assisted purchases, roughly 700. If the total is larger, a purchase is being credited per touch instead of per distinct campaign.
 3. Predict repeated-campaign behavior at touch versus campaign grain.
-   **Inputs/evidence:** For sql-48 Exercise 3, read from `events`. Build the answer toward `purchase_id`, `campaign`, and `campaign_credit`; keep `purchase_id` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-48 Exercise 3, expected output: one row per `purchase_id`. The final columns are `purchase_id`, `campaign`, and `campaign_credit`. The final order is `purchase_id, campaign`.
-   **Verify:** For sql-48 Exercise 3, choose one complete partition from `events`; hand-calculate its first, middle, and final window values for `campaign`, and `campaign_credit`, then verify output keys remain `purchase_id`. Test a one-row partition and a partition with at least three rows; verify the frame boundary and partition reset explicitly.
+   **Inputs/evidence:** For sql-48 Exercise 3, take `purchase` events as `purchases`, collect the distinct (`purchase_id`, `campaign`) pairs from the same customer's non-purchase events in the seven days before each purchase in `eligible_campaigns` (a missing campaign reads `(direct)`), and divide 1 by the number of campaigns in each purchase's partition.
+   **Expected result/shape:** For sql-48 Exercise 3, expected output: one row per (`purchase_id`, `campaign`) pair, 1,291 rows over 702 purchases on our load, with columns `purchase_id`, `campaign`, and `campaign_credit`, ordered by `purchase_id, campaign`.
+   **Verify:** For sql-48 Exercise 3, group the output by `purchase_id` and confirm every sum of `campaign_credit` is 1 and that summing it by `campaign` reproduces Exercise 2's `attributed_conversions`. Check purchase 8 by hand: its five touches are `none`, `summer`, `fall`, `winter`, and `none` again, so campaign grain gives 0.25 to each of four campaigns, while touch grain would give `none` 2/5 = 0.4 and the other three 0.2 each. Then check a one-campaign purchase, such as purchase 42 with `summer` alone, at credit 1 under both policies.
+   **Data check:** Expect 1,291 rows on the reference load, one per (purchase, campaign) pair. Purchase 3 splits 0.5 and 0.5 between `none` and `winter`; purchase 8 splits 0.25 four ways. Grouping your output by `purchase_id` and summing `campaign_credit` should return 1 for every purchase.
 4. Calculate product-pair support, bidirectional confidence, and lift.
-   **Inputs/evidence:** For sql-48 Exercise 4, read from `order_items`. Build the answer toward `product_a`, `product_b`, `support`, `confidence_a_to_b`, `confidence_b_to_a`, and `lift`; keep `order_item_id` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-48 Exercise 4, expected output: at most 20 rows keyed by `order_item_id`. The final columns are `product_a`, `product_b`, `support`, `confidence_a_to_b`, `confidence_b_to_a`, and `lift`. The final order is `lift DESC, product_a, product_b`.
-   **Verify:** For sql-48 Exercise 4, assert no more than 20 rows, no duplicate `order_item_id`, and no adjacent pair that violates `lift DESC, product_a, product_b`. Rejoin the returned keys to `order_items` to confirm `product_a`, `product_b`, `support`, `confidence_a_to_b`, `confidence_b_to_a`, and `lift` came from the same source rows. Run with 20 minus one and 20 plus one eligible rows; require the output cap of 20 while retaining `lift DESC, product_a, product_b`.
+   **Inputs/evidence:** For sql-48 Exercise 4, reduce `order_items` to distinct (`order_id`, `product_id`) baskets, count all 4,362 orders and each product's baskets, self-join baskets on `order_id` with `a.product_id < b.product_id` to count orders per pair, then compute support, both confidences, and lift from those counts.
+   **Expected result/shape:** For sql-48 Exercise 4, expected output: 20 rows out of 770 product pairs, one per (`product_a`, `product_b`) with `product_a < product_b`, with columns `product_a`, `product_b`, `support`, `confidence_a_to_b`, `confidence_b_to_a`, and `lift`, ordered by `lift DESC, product_a, product_b`.
+   **Verify:** For sql-48 Exercise 4, recompute the top row by hand: products 14 and 45 share 30 orders and appear in 45 and 46, so support is 30/4362 = 0.0069, confidences are 30/45 = 0.6667 and 30/46 = 0.6522, and lift is 30 * 4362 / (45 * 46) = 63.2174. Note that rows 9 to 20 are 12 of the 29 pairs tied at lift 62.5449, so the cap cuts through a tie that only `product_a, product_b` settles. Then, in a transaction, add a second product 14 line to an order that has both 14 and 45; confirm the pair count stays 30 with the `DISTINCT` baskets but becomes 31 without them, and `ROLLBACK`.
+   **Data check:** Expect exactly 20 rows, one per product pair rather than per order line. The baskets are the 4,362 orders, and the top pairs, such as 14 with 45, appear together in 30 orders while each product appears in only 45 or 46, which is why lift reaches about 63. Check that `product_a < product_b` on every row.
 5. Assign a touch only to the next purchase.
-   **Inputs/evidence:** For sql-48 Exercise 5, read from `events`, and `orders`. Build the answer toward `touch_id`, `campaign`, `order_id`, and `order_date`; keep `order_id` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-48 Exercise 5, expected output: one row per `order_id`. The final columns are `touch_id`, `campaign`, `order_id`, and `order_date`. The final order is `e.event_id`.
-   **Verify:** For sql-48 Exercise 5, project `order_id` plus the raw source columns from `events`, and `orders` at each join stage; record row count and distinct `order_id`, then assert the final `touch_id`, `campaign`, `order_id`, and `order_date` values match those staged rows without unintended fanout or loss. Add one row for which `(e.metadata ? 'campaign')` is true and one for which it is false; verify only the matching `order_id` value is returned.
+   **Inputs/evidence:** For sql-48 Exercise 5, start from all 20,000 `events` (every one carries a `campaign` key) and `LEFT JOIN LATERAL` a subquery over `orders` that keeps the same customer's orders after the touch and within 7 days, ordered by `order_date, order_id` with `LIMIT 1`, so each touch can reach only its next order.
+   **Expected result/shape:** For sql-48 Exercise 5, expected output: 20,000 rows, one per `touch_id`, with columns `touch_id`, `campaign`, `order_id`, and `order_date`, ordered by `e.event_id`; 3,025 touches carry an order (2,182 distinct orders) and the rest show `NULL` order columns.
+   **Verify:** For sql-48 Exercise 5, confirm 20,000 rows and 20,000 distinct `touch_id` values; then write the buggy plain `JOIN` of each event to every order within 7 days and confirm it returns 3,311 rows for the same 3,025 touches, with touch 10285 matching four orders (2245 to 2248). In a transaction, give a new customer one touch at 2026-01-01 10:00 and orders on 2026-01-02 and 2026-01-04; confirm the touch returns only the 2026-01-02 order, then `ROLLBACK`.
+   **Data check:** Every one of the 20,000 events carries a `campaign` key, so expect one row per touch, 20,000 in total, ordered by `touch_id`. Only 3,025 touches have an order in the following seven days on our load; the rest keep `NULL` order columns because the `LATERAL` subquery is joined with `LEFT JOIN ... ON true`.
 6. Add a direct bucket and reconcile credit to eligible purchases.
-   **Inputs/evidence:** For sql-48 Exercise 6, read from `orders`, and `events`. Build the answer toward `attribution_bucket`, and `purchases`; keep `attribution_bucket`, and `purchases` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-48 Exercise 6, expected output: one row per `attribution_bucket`, and `purchases`. The final columns are `attribution_bucket`, and `purchases`. The final order is `purchases DESC, attribution_bucket`.
-   **Verify:** For sql-48 Exercise 6, independently aggregate `orders`, and `events` by `attribution_bucket`, and `purchases`; require one output row for every distinct `attribution_bucket`, and `purchases` tuple and compare `row_count` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `row_count` for the existing `attribution_bucket`, and `purchases` tuple and verify the new tuple appears exactly once.
+   **Inputs/evidence:** For sql-48 Exercise 6, start from all 4,362 `orders`, `LEFT JOIN LATERAL` the same customer's latest event with a `campaign` key in the seven days before `order_date` (ordered by `event_time DESC, event_id DESC` with `LIMIT 1`), and label orders with no such event `(direct)`.
+   **Expected result/shape:** For sql-48 Exercise 6, expected output: one row per `attribution_bucket`, 6 rows on our load (`(direct)` 2,180, `winter` 440, `summer` 439, `spring` 438, `none` 434, `fall` 431), with columns `attribution_bucket` and `purchases`, ordered by `purchases DESC, attribution_bucket`.
+   **Verify:** For sql-48 Exercise 6, confirm the six `purchases` values add up to 4,362, and recount `(direct)` independently as the orders with no event by the same customer in the previous seven days (`NOT EXISTS`, 2,180). Then, in a transaction, add an order for customer 1 dated 2020-01-01 and a new customer with `spring` and `winter` touches at the same timestamp followed by two orders; confirm `(direct)` becomes 2,181, `winter` becomes 442 because the higher `event_id` wins the tie, the total becomes 4,365, and `ROLLBACK`.
+   **Data check:** Expect six rows: the five campaigns plus `(direct)`. The `purchases` column must add up to all 4,362 orders, because every order lands in exactly one bucket; on a fresh load about half of them are `(direct)` and the rest split almost evenly, around 430 to 440 per campaign.
 
 Test touches exactly at both seven-day boundaries.
 
 ## Common mistakes and how to recover
 
-- **Lesson-specific semantic mistake:** Enforce `product_id` ordering to avoid self-pairs and reversed duplicates.
-- **Unexpected row count:** display keys before aggregates, count rows after
-  each join/filter stage, and find the first stage whose grain differs from the
-  contract. Do not hide fanout with `DISTINCT`.
-- **Unexpected `NULL` or missing row:** decide whether the fact is unknown,
-  inapplicable, zero, or absent before using `COALESCE`; inspect outer-join
-  predicate placement and empty-input aggregate behavior.
-- **Unstable top/first/last output:** add `ORDER BY` with a unique final
-  tie-breaker before `LIMIT` or order-sensitive windows/aggregates.
-- **`psql` stops on an error:** fix the first error shown by
-  `ON_ERROR_STOP`, restore the declared transaction/setup state, and rerun the
-  complete file. A later successful statement does not validate a partial run.
+- **Lesson-specific semantic mistake:** Enforce `product_id` ordering to avoid
+  self-pairs and reversed duplicates. With `<>` instead of `<`, every pair
+  appears twice, once in each direction, so the list has 1,540 rows instead
+  of 770; with no condition at all, each product also pairs with itself.
+- **Credits that add up to more than the assisted purchases:** you divided by
+  the number of touches but grouped by campaign, or forgot `DISTINCT` on
+  (purchase, campaign). Sum `fractional_credit` per `purchase_event_id`; every
+  sum must be exactly 1.
+- **A purchase credited to itself:** Exercise 3 has no event-type filter, so
+  an upper bound of `<=` on `event_time` would let the purchase event count as
+  its own touch. Keep the bound strict and test a touch exactly seven days
+  before.
+- **Orders missing from the direct bucket:** an inner `JOIN LATERAL` drops
+  orders with no qualifying touch. Use `LEFT JOIN LATERAL ... ON true` and
+  confirm the bucket total is 4,362.
+- Generic recovery steps, including `psql` stopping on the first error, are
+  in the [study guide](../../STUDY-GUIDE.md#recover-from-common-failures).
 
 ## Self-check
 
@@ -273,7 +256,12 @@ table.
 
 ## Practice map
 
-Use the numbered **Exercises** section above as the single authoritative practice contract. Its prompts, expected shapes, and verification checks map one-for-one to the learner SQL and both solution companions.
+Exercises 1, 2, 3 and 6 build attribution step by step: count assisted
+purchases, split one credit across distinct campaigns, compare campaign grain
+with touch grain, and finally give every order exactly one bucket. Exercise 4
+returns to baskets with support, confidence and lift, and Exercise 5 shows how
+`LATERAL ... LIMIT 1` stops one touch from claiming several orders. The
+numbered list above is the contract, repeated unchanged in the learner SQL.
 
 ## Attribution reasoning
 
@@ -295,9 +283,10 @@ Use the numbered **Exercises** section above as the single authoritative practic
 
 ## Ask an AI tutor about this lesson
 
-An AI tutor is optional; the guide, learner SQL, PostgreSQL, and expected checks are
-enough to complete the lesson offline. If you want a patient tutor, copy this
-prompt after opening the repository in the AI tutor:
+Attribution rules invite opinions, so a tutor can be a useful sparring
+partner on first-touch versus split credit; the purchase counts still have to
+come from your own runs. Paste this prompt if you want one, and see the
+[study guide's tutor notes](../../STUDY-GUIDE.md#use-an-ai-tutor-optional):
 
 ```text
 Tutor me through sql-48: E-Commerce Project, Part 3: Product Affinity and Attribution.

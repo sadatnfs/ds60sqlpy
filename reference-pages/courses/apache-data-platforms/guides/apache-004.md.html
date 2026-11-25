@@ -236,7 +236,7 @@ bash run.sh start
 bash run.sh network-check</code></pre>
 <p>Run this only in an owned workshop. The network check should report service_dns_read_passed as true, meaning the client resolved the name server and fetched the east total of 11, and client_loopback_rejected as true, meaning grpc://127.0.0.1:8815 inside the client container found no listener. Both must hold. A loopback success would mean the client and server share a network namespace, which breaks the isolation claim.</p>
 <h3 id="complete-worked-source">Complete worked source<a class="heading-anchor" href="#complete-worked-source" aria-label="Link to this section">#</a></h3>
-<p>This is a project-only command notebook. Read and edit it in the classroom; run its explicitly labeled commands from the copied owned Docker workshop. The classroom does not execute these service commands.</p>
+<p>The classroom does not execute these service commands. See the <a href="../STUDY-GUIDE.md.html#workshop-notebooks">workshop rules</a>.</p>
 <h2 id="actual-namespace-and-flight-observations">Actual namespace and Flight observations<a class="heading-anchor" href="#actual-namespace-and-flight-observations" aria-label="Link to this section">#</a></h2>
 <p>From the repository root, copy the complete project into a fresh owned location. Prepare the native <code>data-platforms-python</code> image as documented in its README.</p>
 <pre class="highlighted-code"><code class="language-bash">mkdir -p work

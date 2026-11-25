@@ -1,6 +1,6 @@
 # r-014: reference reasoning
 
-Use the [complete reference](r-014_reference.R) with the guide's declared inputs and runtime. Every worked example is also a standalone script.
+Run the [complete reference](r-014_reference.R) under the [run rules](../STUDY-GUIDE.md#run-a-chapter).
 
 ## Why the implementation has this shape
 
@@ -96,4 +96,6 @@ Measure an actual equivalent workload before making a performance claim.
 
 ## What the checks establish
 
-The reference makes 5 `stopifnot()` checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.
+The checks pin `vapply()` returning a numeric vector of 3 and 3, the empty group summing to 0 by definition, a per-group summary where A has mean 1.5 and the empty group has an NA mean rather than NaN, a rejected template mismatch, an empty list mapping to `numeric(0)`, and a base pipe that sorts and keeps 1 and 2. They do not show how your summaries behave when a group holds NA values or a different type.
+
+The reference makes 5 `stopifnot()` checks; see [what a passing run proves](../STUDY-GUIDE.md#what-a-passing-run-proves).

@@ -13,40 +13,32 @@ psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
   -f sql/professional/solutions/sql_analytics_01_query_patterns_solutions.sql
 ```
 
-`psql` prints each result/command tag in the terminal. Stop at the first
-unexpected `ERROR`; later output cannot repair an earlier failed invariant.
-Compare your own SQL, row grain, column names, row counts, `NULL` policy, and
-ordering with the explanation before comparing syntax.
+The solution builds its own smaller fixtures per exercise, including
+`campaign_touches`, `user_tiers` and `event_probes`, so compare grains and
+boundary decisions rather than exact rows.
 
-## Clause-by-clause reading map
+## Reading map for this lesson
 
-The lesson's main concepts are Grain, Canonical row, Session, Gap/island, Funnel, Attribution window. Its worked-model focus is:
-The raw event grain is one ingestion attempt, so `source_event_id` can repeat. The canonical view partitions by source ID and chooses latest `ingested_at`, then identity as a final tie-break. Deduplication happens before every downstream pattern to avoid double-counting retries.
+For each exercise, find where the solution fixes the grain and where it handles
+a boundary:
 
-- Start at `FROM`/`JOIN` and state the intermediate row grain. Inspect join keys
-  before adding aggregates; a one-to-many join is allowed to multiply rows only
-  when the later contract accounts for it.
-- Apply `WHERE` to input rows, `GROUP BY` to form buckets, and `HAVING` to
-  completed groups. Window functions run over the surviving relation and
-  normally preserve its row count.
-- Read the `SELECT` list as the public result contract: keys establish grain,
-  measures state calculations, and aliases explain meaning. `ORDER BY` is the
-  only output-order guarantee; add a unique tie-breaker before `LIMIT`.
-- Trace every common table expression (CTE) as a temporary named relation.
-  Execute or inspect one stage at a time while debugging, but compare the final
-  result with an independent control rather than trusting stage names.
-- Keep SQL `NULL` as “missing/unknown/not applicable” until the metric contract
-  chooses another representation. Guard division with `NULLIF`; disclose
-  exclusions and distinguish zero from no row.
-- For DDL/DML, a command tag proves only that PostgreSQL accepted a statement.
-  Catalog checks, negative cases, row-count reconciliation, and the declared
-  transaction boundary prove behavior and cleanup.
+- Exercises 1 to 4 build on the dedup view: a uniqueness proof, sessions where
+  exactly 60 minutes stays in the same session, per-user funnel timestamps in
+  order, and islands derived only after reducing to one row per user and day.
+- Exercises 5 to 7 handle ties and edges: missing and same-instant touches, a
+  retention rate that shows its numerator and denominator, and an event exactly
+  at `valid_to` that joins the next tier, not the old one.
+- Exercises 8 to 13 keep calendar meaning: a dense date spine, one row per
+  session before `percentile_cont`, rank semantics before top-N, a visited path
+  that stops a recursive cycle, zero-activity dates kept by starting from
+  dates, and an exact distinct count beside the criteria for an approximate
+  one.
+- Exercise 14 wraps the half-open window in `valid_time_window`, which rejects
+  NULL, equal or reversed bounds before reading any facts.
 
-The exact final queries are not the only valid syntax. A join, subquery, CTE,
-window, or conditional aggregate can be an alternative when it preserves the
-same grain, `NULL` semantics, deterministic ordering, and safety. Prefer the
-form whose intermediate relations a reviewer can verify; optimize only after
-correctness is established with evidence.
+Different SQL is acceptable when it returns the same grain and makes the same
+boundary decisions; a query that double-counts the retried purchase or drops
+zero-activity dates is not.
 
 Run:
 

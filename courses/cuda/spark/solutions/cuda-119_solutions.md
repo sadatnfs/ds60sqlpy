@@ -1,6 +1,6 @@
 # cuda-119: explained solutions
 
-These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.
+Compare with your [worksheet](../lessons/cuda-119.md) attempt.
 
 ## Exercise 1: Compute resource-share slots
 
@@ -74,8 +74,16 @@ Too many live tasks can spill or fail without any syntax error.
 
 **How to verify.** Increase concurrency on a representative dataset and watch spill metrics and task failures to find the safe bound.
 
+## Self-check answers
+
+1. **Which controls limit GPU task concurrency?** CPU task slots, fractional GPU resource requests and the plugin's GPU admission concurrency, which together set the effective bound.
+
+2. **Why can raising concurrency fail without any syntax error?** More active tasks multiply live batches, so memory pressure can cause spills or failures at run time.
+
+3. **What should resource discovery evidence show?** The GPU addresses that were discovered and the address assigned to each executor.
+
 ## Reference observation
 
 Four scheduling shares with a two-task plugin admission bound.
 
-The reference file is `courses/cuda/spark/references/cuda-119_cpu.py`. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.
+Asserted by `courses/cuda/spark/references/cuda-119_cpu.py`.

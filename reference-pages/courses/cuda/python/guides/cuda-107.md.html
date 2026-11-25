@@ -194,9 +194,17 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cuda/python/guides/cuda-107.md</code></p>
     </header>
     <article class="document"><h2 id="cuda-107-python-accessible-cuda-library-algorithms">cuda-107: Python-accessible CUDA library algorithms<a class="heading-anchor" href="#cuda-107-python-accessible-cuda-library-algorithms" aria-label="Link to this section">#</a></h2>
-<p><strong>Route:</strong> CUDA Python and machine learning. <strong>Stage:</strong> advanced. <strong>Prerequisites:</strong> <code>cuda-082</code>, <code>cuda-085</code>. Allow several sessions when the hardware experiment is new; the chapter is not a deadline.</p>
-<h3 id="what-you-will-be-able-to-explain">What you will be able to explain<a class="heading-anchor" href="#what-you-will-be-able-to-explain" aria-label="Link to this section">#</a></h3>
-<p>By the end, you can <strong>trace stable sorting</strong>, <strong>account for temporary storage</strong>, and <strong>choose a release-specific contract</strong> with evidence. Start with the two worked cases, then use the editable CPU model to make the quantities concrete.</p>
+<p><strong>Route:</strong> CUDA Python and machine learning. <strong>Stage:</strong> advanced. <strong>Prerequisites:</strong> <code>cuda-082</code>, <code>cuda-085</code>.</p>
+<p>Pacing, evidence labels and platform rules: <a href="../../STUDY-GUIDE.md.html">CUDA study guide</a>.</p>
+<h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
+<ul>
+<li>Trace stable sorting.</li>
+<li>Specify duplicate semantics.</li>
+<li>Calculate output shape.</li>
+<li>Account for temporary storage.</li>
+<li>Separate plan creation.</li>
+<li>Choose a release-specific contract.</li>
+</ul>
 <h3 id="mechanism-and-vocabulary">Mechanism and vocabulary<a class="heading-anchor" href="#mechanism-and-vocabulary" aria-label="Link to this section">#</a></h3>
 <p>Library algorithms expose more than an operation name. Sorting needs comparator and stability semantics; reductions need identity and dtype rules; matrix operations need layout and leading dimensions; FFTs need normalization and transform conventions. Some APIs create reusable plans or request temporary storage. Plan lifetime, workspace ownership and stream association affect both correctness and performance.</p>
 <p>Choose a small release-pinned library family instead of installing every package. Compare an educational reference and a prepared library result on tiny fixtures, including empty or rejected cases and duplicate keys. Reuse plans only when their shape/dtype contract permits. Report plan creation separately from repeated execution. Python accessibility does not eliminate CUDA resource and compatibility requirements.</p>
@@ -212,8 +220,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>A stable sort of [(2, A),(1, B),(2, C)] by key retains A before C among equal keys. An unstable sort may legally change that relative order.</p>
 <h4 id="worked-example-2">Worked example 2<a class="heading-anchor" href="#worked-example-2" aria-label="Link to this section">#</a></h4>
 <p>A matrix multiply output shape follows contracted dimensions: a 2 by 3 matrix times 3 by 4 gives 2 by 4. A plan prepared for a different dtype or shape cannot be reused blindly.</p>
-<h3 id="portable-executable-model">Portable executable model<a class="heading-anchor" href="#portable-executable-model" aria-label="Link to this section">#</a></h3>
-<p>The <strong>CPU reference model</strong> variant runs this bounded worked example using <code>python-core</code>. It uses only the Python standard library, small synthetic values and no network. Its purpose is to expose the arithmetic or contract behind the chapter. The separate reference includes assertions for the stated observations.</p>
+<h3 id="how-to-run-the-cpu-model">How to run the CPU model<a class="heading-anchor" href="#how-to-run-the-cpu-model" aria-label="Link to this section">#</a></h3>
+<p>Edit the copy; the <a href="../references/cuda-107_cpu.py.html">reference</a> adds assertions.</p>
+<pre class="highlighted-code"><code class="language-bash">python courses/cuda/python/lessons/cuda-107_cpu.py</code></pre>
 <pre class="highlighted-code"><code class="language-python">records <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">A</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">B</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">C</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span>
 ordered <span class="syntax-operator">=</span> <span class="syntax-builtin">sorted</span><span class="syntax-punctuation">(</span>records<span class="syntax-punctuation">,</span> key<span class="syntax-operator">=</span><span class="syntax-keyword">lambda</span> row<span class="syntax-punctuation">:</span> row<span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
 <span class="syntax-keyword">assert</span> ordered <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">B</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">A</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">C</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span>
@@ -243,49 +252,46 @@ a<span class="syntax-punctuation">,</span> b <span class="syntax-operator">=</sp
 <td><code>(3, 4)</code></td>
 </tr>
 </tbody></table></div>
-<p>Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.</p>
 <h3 id="practice-and-transfer">Practice and transfer<a class="heading-anchor" href="#practice-and-transfer" aria-label="Link to this section">#</a></h3>
+<p>Record each attempt in the <a href="../lessons/cuda-107.md.html">worksheet</a> before opening hints.</p>
 <h4 id="exercise-1-trace-stable-sorting">Exercise 1: Trace stable sorting<a class="heading-anchor" href="#exercise-1-trace-stable-sorting" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Assuming every GPU sort is stable lets downstream code rely on an order an unstable sort may legally change, which then varies between runs or releases.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-2-specify-duplicate-semantics">Exercise 2: Specify duplicate semantics<a class="heading-anchor" href="#exercise-2-specify-duplicate-semantics" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Leaving the rule unstated passes tests on small inputs where an unstable algorithm happens to preserve order, then fails on larger inputs that use a different internal path.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-3-calculate-output-shape">Exercise 3: Calculate output shape<a class="heading-anchor" href="#exercise-3-calculate-output-shape" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Taking the output as 3 by 3 or 2 by 3 confuses contracted and kept dimensions, and allocating the wrong output buffer causes a library error or an out-of-bounds write.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-4-account-for-temporary-storage">Exercise 4: Account for temporary storage<a class="heading-anchor" href="#exercise-4-account-for-temporary-storage" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Budgeting only inputs and outputs leads to out-of-memory errors that appear only on large arrays.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-5-separate-plan-creation">Exercise 5: Separate plan creation<a class="heading-anchor" href="#exercise-5-separate-plan-creation" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Reusing a plan prepared for a different shape or dtype gives wrong results or errors, so caching must be keyed by both.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-6-choose-a-release-specific-contract">Exercise 6: Choose a release-specific contract<a class="heading-anchor" href="#exercise-6-choose-a-release-specific-contract" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Relying on the latest online docs while running an older release can promise features or guarantees the installed version does not have.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
-<p>Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.</p>
+<p>Hint <em>k</em> belongs to exercise <em>k</em>; open one at a time.</p>
 <ol>
-<li>Start from worked example 1 and mark the quantities needed for the task &quot;Trace stable sorting&quot;.</li>
-<li>Change one assumption in worked example 2 while preserving the declared contract: specify duplicate semantics.</li>
-<li>Trace the CPU program&#x27;s variables before adding hardware behavior: calculate output shape.</li>
-<li>Draw producers, consumers and the exact operation boundary for the task &quot;Account for temporary storage&quot;.</li>
-<li>Separate what the small fixture establishes from what the real runtime must show: separate plan creation.</li>
-<li>Write a counterexample to an overbroad claim before you choose a release-specific contract.</li>
+<li>Sort the records by key and keep the original order among records whose keys are equal.</li>
+<li>Ask whether the library documents a guaranteed order among duplicates, and what you may assume if it does not.</li>
+<li>Drop the contracted inner dimension and keep the two outer dimensions.</li>
+<li>Add the workspace the library requests to the inputs and outputs that are live at the same time.</li>
+<li>Time creating the plan separately from running it repeatedly.</li>
+<li>Read the documentation for the exact installed release rather than the newest online version.</li>
 </ol>
-<h3 id="common-mistakes-and-self-review">Common mistakes and self-review<a class="heading-anchor" href="#common-mistakes-and-self-review" aria-label="Link to this section">#</a></h3>
-<p>Confusing a correct tiny example with a general implementation is the central review risk. For this chapter, challenge the assumption in worked example 2, then ask whether your change preserves the mechanism described above. If you change dtype, layout, ordering, batch size or backend, update the acceptance contract rather than silently reusing the old observation. Explain an unexpected result before trying random configuration changes.</p>
-<p>Keep a small evidence table with columns <strong>claim</strong>, <strong>input</strong>, <strong>expected observation</strong>, <strong>actual observation</strong> and <strong>limit</strong>. For the first claim use <code>Trace stable sorting</code>. For the final claim use <code>Choose a release-specific contract</code>. An unperformed GPU or cluster experiment remains pending even when the CPU model is correct.</p>
-<h3 id="platform-and-evidence-contract">Platform and evidence contract<a class="heading-anchor" href="#platform-and-evidence-contract" aria-label="Link to this section">#</a></h3>
-<p>The reading worksheet and CPU reference model work through the ordinary Linux Docker classroom on macOS, Linux and Windows using WSL 2. They do not require an NVIDIA GPU. Their results are labeled CPU models or semantic oracles, not simulated hardware performance.</p>
-<p>Real CUDA work needs supported NVIDIA hardware, a compatible host driver and an explicitly prepared GPU runtime. An Apple GPU does not execute CUDA kernels. PyTorch MPS on a supported native Mac, ROCm on supported AMD hardware, or other vendor backends can provide separate accelerator learning routes; they need their own package and operation qualification and are not CUDA evidence. The ordinary Linux Docker classroom does not expose native Mac MPS automatically.</p>
-<p>Do not download packages, models or data by opening this lesson. Do not attach an engine socket, ambient cluster credentials or an arbitrary remote endpoint. A CPU pass, imported package, successful compilation, real GPU result and measured performance are distinct observations. Record the actual backend, data shape/dtype, source revision, versions and pending checks. A saved completion marker records learning progress, not hardware certification.</p>
+<h3 id="common-mistakes-and-self-check">Common mistakes and self-check<a class="heading-anchor" href="#common-mistakes-and-self-check" aria-label="Link to this section">#</a></h3>
+<p>A common mistake is assuming every sort is stable. An unstable sort may legally put record C before A when both have key 2, which breaks code that relies on input order. Another is reusing a plan built for a different shape or dtype, or forgetting the workspace it allocates. Fix both by stating duplicate semantics in the contract, testing duplicates and empty inputs on tiny fixtures and keeping plan creation, workspace and stream association explicit in the ledger.</p>
+<p><strong>Misconception:</strong> A library sum or FFT returns the same answer as NumPy as long as the inputs match. <strong>Correction:</strong> Library conventions differ. A reduction may accumulate in a different dtype or order, so a float32 sum can differ in its last digits, and an integer sum may overflow its type. Some FFT libraries leave both directions unnormalized, so a forward then inverse transform returns values n times larger than the input, while NumPy scales the inverse by 1/n by default. Read each function&#x27;s dtype, identity and normalization rules and compare on tiny fixtures with stated tolerances.</p>
+<p><strong>Evidence limit:</strong> The reference traces a stable sort and a <code>(2, 4)</code> output shape in Python. It calls no CUDA library, so plan lifetime, workspace size and release-specific behavior require the prepared library package.</p>
+<ol>
+<li>What does an FFT contract need besides the input array?</li>
+<li>Why does a plan have a shape and dtype contract?</li>
+<li>Why choose a small release-pinned library family?</li>
+</ol>
+<p>Answers: <a href="../solutions/cuda-107_solutions.md.html#self-check-answers">self-check answers</a>.</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
 <ul>
 <li><a href="https://docs.pytorch.org/docs/2.9/notes/cuda.html">PyTorch CUDA semantics</a></li>
 <li><a href="https://www.tensorflow.org/guide/gpu">TensorFlow GPU guide</a></li>
 </ul>
-<p>Use the version-matched documentation of your prepared environment. These references describe interfaces and supported boundaries; the chapter&#x27;s synthetic examples and CPU models are original teaching material.</p>
+<p>Full lists: <a href="../../STUDY-GUIDE.md.html#documentation-and-sources">documentation and sources</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning skill for cuda-107: Python-accessible CUDA library algorithms.
 Read courses/cuda/python/guides/cuda-107.md and courses/cuda/python/lessons/cuda-107.md.

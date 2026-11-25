@@ -196,7 +196,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <article class="document"><h2 id="r-007-names-attributes-and-ordinary-value-semantics">r-007: Names, attributes and ordinary value semantics<a class="heading-anchor" href="#r-007-names-attributes-and-ordinary-value-semantics" aria-label="Link to this section">#</a></h2>
 <p><strong>Level:</strong> beginner. <strong>Direct prerequisites:</strong> <code>r-003</code>, <code>r-005</code></p>
 <h3 id="run-and-retain-your-work">Run and retain your work<a class="heading-anchor" href="#run-and-retain-your-work" aria-label="Link to this section">#</a></h3>
-<p>Open <code>r-007</code> in <code>/classroom</code> and use the prepared <code>r-statistics</code> profile. Each Run evaluates one <code>main.R</code> script in a fresh offline R process, so define every input in the script; an earlier Run leaves no variables behind. Work in the <a href="../lessons/r-007.R.html">starter</a>. The <a href="../solutions/r-007_reference.R.html">complete reference</a> ends by printing <code>r-007 reference checks passed</code>, and the <a href="../solutions/r-007_solutions.md.html">explained answers</a> are there for deliberate comparison after your own attempt. This chapter prints values only; when a chapter draws figures, the classroom keeps at most two figures per run. The <a href="../README.md.html">course overview</a> describes saved work, figure capture and the prepared package versions.</p>
+<p>The starter copies a named vector and prints its attributes, which list only the names A and B. Run it, then change one element of <code>copy</code> and print both vectors: <code>original</code> keeps its values because ordinary vectors are copied on modification. That printed contrast is the baseline for the environment example, where a change made through one binding is visible through every other binding.</p>
+<p>Work in the <a href="../lessons/r-007.R.html">starter</a> under the <a href="../STUDY-GUIDE.md.html#run-a-chapter">run rules</a>.</p>
+<p>The <a href="../solutions/r-007_reference.R.html">complete reference</a> ends by printing <code>r-007 reference checks passed</code>.</p>
 <h3 id="outcome-and-mechanism">Outcome and mechanism<a class="heading-anchor" href="#outcome-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Explain why ordinary vector updates differ from mutations of reference objects and why attributes matter.</p>
 <p>An R object can carry attributes in addition to its underlying values. Names attach labels, dim gives an array shape, and class influences methods. Two vectors with the same numerical entries can differ as complete objects if their names or other attributes differ. Use unname only when the labels are genuinely irrelevant to the question.</p>
@@ -290,7 +292,7 @@ second$count &lt;- 2   2            2</code></pre>
 <li>Values alone may not preserve record identity.</li>
 </ol>
 <h3 id="reference-review">Reference review<a class="heading-anchor" href="#reference-review" aria-label="Link to this section">#</a></h3>
-<p>The reference applies the reasoning explained under the worked examples above; the <a href="../solutions/r-007_solutions.md.html">explained answers</a> add an answer for each exercise.</p>
+<p>The reference reuses the worked examples&#x27; reasoning; <a href="../solutions/r-007_solutions.md.html">explained answers</a> cover each exercise.</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
 <ul>
 <li><a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/attributes.html">R attributes</a></li>
@@ -298,7 +300,31 @@ second$count &lt;- 2   2            2</code></pre>
 <li><a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/identical.html">R object identity</a></li>
 </ul>
 <h3 id="continue">Continue<a class="heading-anchor" href="#continue" aria-label="Link to this section">#</a></h3>
-<p>Chapters that list <code>r-007</code> as a direct prerequisite: <a href="r-008.md.html"><code>r-008</code></a>, <a href="r-009.md.html"><code>r-009</code></a>, <a href="r-013.md.html"><code>r-013</code></a>, <a href="r-017.md.html"><code>r-017</code></a>, <a href="r-023.md.html"><code>r-023</code></a>.</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Next chapter</th>
+<th>Title</th>
+</tr></thead><tbody>
+<tr>
+<td><a href="r-008.md.html"><code>r-008</code></a></td>
+<td>Matrices, dimensions and linear algebra operators</td>
+</tr>
+<tr>
+<td><a href="r-009.md.html"><code>r-009</code></a></td>
+<td>Lists and nested records without accidental flattening</td>
+</tr>
+<tr>
+<td><a href="r-013.md.html"><code>r-013</code></a></td>
+<td>Lexical scope, closures and lazy arguments</td>
+</tr>
+<tr>
+<td><a href="r-017.md.html"><code>r-017</code></a></td>
+<td>Factors, levels and model interpretation</td>
+</tr>
+<tr>
+<td><a href="r-023.md.html"><code>r-023</code></a></td>
+<td>R6 identity, encapsulation and cloning</td>
+</tr>
+</tbody></table></div>
 <h3 id="ask-an-ai-tutor">Ask an AI tutor<a class="heading-anchor" href="#ask-an-ai-tutor" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for r-007 (Names, attributes and ordinary value semantics).
 Read the guide and my saved attempt. Explain the relevant R mechanism,

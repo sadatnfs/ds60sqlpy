@@ -12,6 +12,7 @@ DETAILS = {}
 for path in sorted(HERE.glob("details*.py")):
     DETAILS.update(runpy.run_path(str(path))["DETAILS"])
 VERIFY = runpy.run_path(str(HERE / "verify.py"))["VERIFY"]
+INTRO = runpy.run_path(str(HERE / "walkthrough.py"))["INTRO"]
 
 
 def apply_checks(text, marker, checks, label):
@@ -79,10 +80,7 @@ for record in programs:
             text = text.replace("## Worked example 1", answer + "## Worked example 1")
         text = apply_checks(text, "##", VERIFY[n], solution.name)
         solution.write_text(text)
-    chunks = [
-        "## Worked example / walkthrough",
-        "Each example below is a complete independent program. Copy one into `main.cpp`, or compile its linked checked-in source using [the compile and run tutorial](../compile-and-run.md). Do not concatenate the two programs: each defines its own `main`. Use C++20 and the shown warning/thread flags. The printed success line follows the displayed assertions; it is a bounded example check, not a substitute for the six learner tasks.",
-    ]
+    chunks = ["## Worked example / walkthrough", INTRO[n]]
     for index in (1, 2):
         name = f"{key}-example-{index}.cpp"
         code = (BASE / "examples" / name).read_text().rstrip()

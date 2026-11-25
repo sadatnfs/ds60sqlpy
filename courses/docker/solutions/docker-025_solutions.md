@@ -1,6 +1,6 @@
 # docker-025: explanatory solutions
 
-Compare after your own attempt or an explicit reveal. These explain the supplied teaching fixtures; they are not engine results. The mechanism is explained in `courses/docker/guides/docker-025.md`.
+These answers explain teaching fixtures, not engine results; the mechanism is in [the guide](../guides/docker-025.md).
 
 ## Exercise 1: Compare tag and digest identity.
 
@@ -88,4 +88,4 @@ Compare after your own attempt or an explicit reveal. These explain the supplied
 
 ## Check your transfer
 
-A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.
+The archive carries the image for the platform it was built on, linux/amd64. On an arm64 engine the run either goes through emulation, with a warning that the requested platform does not match the host, or fails with `exec format error` where no emulator is installed. `docker image inspect --format '{{.Os}}/{{.Architecture}}' ds60-docker-study:local` shows the mismatch. The handoff record needs a platform field, and a build for linux/arm64 when that is the target. If inspect already reports arm64 and the run still fails, the cause lies elsewhere.

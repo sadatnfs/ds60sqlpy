@@ -2,75 +2,28 @@
 
 ## How to run this lesson
 
-Start the Linux-container engine and run `./classroom` from the repository
-root. On Windows, use Ubuntu in WSL 2 or the thin
-`START_DOCKER_CLASSROOM.cmd` wrapper. Choose **PostgreSQL** on the shared
-`/classroom` home, then open **sql-concurrency-01**. The
-[launcher guide](../../../docs/one-command-classroom.md) covers first preparation, strict resume and
-the saved project selection. No host Python or PostgreSQL installation is
-required for this browser route.
+Start **sql-concurrency-01** from `./classroom` using the shared [run steps](../../STUDY-GUIDE.md#run-a-lesson-in-the-classroom).
 
-1. Read the prerequisite and fixture notes before running the file. Use only
-   the local disposable `advanced_sql_training` database.
-2. Choose **Whole SQL lesson (psql)** for the cataloged learner script. This
-   preserves the lesson's reviewed psql directives, relative includes and
-   transaction behavior. **SQL snippet** is appropriate for ordinary SQL
-   statements, but is not a replacement for an entire script's setup.
-3. The **Course database** panel above the code shows whether the course
-   training tables are loaded. Missing tables load automatically before your
-   first run (or choose **Load course tables**) and stay loaded for later
-   lessons. **Reset training data** restores the original rows only when your
-   own changes made results differ; it keeps your saved code and notes.
-4. Edit the learner copy in the classroom and save your prediction before
-   running. Its whole-script workspace is
-   `.learning/sql/sql-concurrency-01/lesson/workspace/sql/professional/lessons/sql_concurrency_01_isolation_and_versions.sql`.
-   For browser work this path is inside the Docker learning volume, not a
-   newly created host folder beside your checkout. The checked-in source
-   remains the answer-free starting artifact.
-5. Run the whole script and inspect the full transcript. The runner uses
-   `psql -X -v ON_ERROR_STOP=1 -f`. SELECT output has columns, rows and a row
-   count; DDL/DML has command tags; intentional checks may produce NOTICE
-   messages. An unexpected ERROR or nonzero exit is a failure to diagnose,
-   even when an earlier query printed plausible values.
-6. Verify the lesson's expected grain, ordering, constraints and declared
-   transaction or cleanup outcome. Keep required ROLLBACK statements.
-   The warehouse sequence and other explicitly stateful exercises explain
-   when state is committed. Read saved output without rerunning it when
-   reviewing an earlier attempt.
+Choose **Whole SQL lesson (psql)**. The default script is a single-session
+model: it guards `advanced_sql_training`, builds a two-row `concurrency_stock`
+temporary table (SKU A with 5 available at version 1, SKU B with 1 available at
+version 1), and ends with `ROLLBACK`. It needs no course tables and commits
+nothing. Save attempts in
+`.learning/sql/sql-concurrency-01/lesson/workspace/sql/professional/lessons/sql_concurrency_01_isolation_and_versions.sql`,
+and wrap each guarded `UPDATE` in a savepoint you roll back, as the exercises
+ask, so that every exercise starts from `(A,5,1)` and `(B,1,1)`. In the
+transcript, the `UPDATE 1` or `UPDATE 0` command tag is the evidence that a
+reservation succeeded or was refused; the SQL itself succeeds either way. Only
+the optional two-session lab later in this guide commits anything, and it has
+its own cleanup script.
 
-If a relation is missing, inspect the lesson's required fixture and predecessor
-rather than guessing a new table definition. If authentication or runtime
-readiness fails, use `./classroom status` and the setup guide. Keep credentials
-out of SQL, notebooks, screenshots and committed files. Repair the first error
-before trusting partial output, and reveal separate solutions only when you
-want to compare after an attempt.
-
-### Optional contributor notebook route
-
-For notebook work, deliberately prepare the Linux/WSL contributor environment
-from [CONTRIBUTING.md](../../../CONTRIBUTING.md), including a compatible psql client and
-the notebook dependencies. Generate this lesson's private workspace through
-the maintained CLI:
-
-```sh
-uv run --no-sync python scripts/course.py sql notebook sql-concurrency-01
-```
-
-Open the printed notebook path in that environment's JupyterLab. It uses the
-same catalog-derived learner-copy layout in that contributor checkout and
-executes the complete script through psql. Its host-side state is separate
-from the Docker browser's named volume. Follow
-[guided SQL notebooks](../../../docs/guided-sql-notebooks.md) for explicit local connection
-selection and kernel setup. Notebook generation does not execute SQL or
-authorize a reset.
+The optional notebook route starts with `uv run --no-sync python scripts/course.py sql notebook sql-concurrency-01`; see the [study guide](../../STUDY-GUIDE.md#optional-contributor-notebook-route).
 
 ## Level and prerequisites
 
 - **Level:** advanced
 - **Direct catalog prerequisites:** [`sql-39`](../../postgres-60day/companion-guides/day39_locks_deadlocks.md), [`sql-test-01`](sql_test_01_contracts_migrations.md)
 - **Artifacts:** [learner SQL](../lessons/sql_concurrency_01_isolation_and_versions.sql), [solution reasoning](../solutions/sql_concurrency_01_isolation_and_versions_solutions.md), [executable solution](../solutions/sql_concurrency_01_isolation_and_versions_solutions.sql).
-
-Direct prerequisites name the required boundary. The fixture setup is supplied; do not mistake its table-definition syntax for extra unstated prerequisite work.
 
 ## Learning objectives
 
@@ -148,7 +101,11 @@ bridge and replication tracks, rather than an unconditional retry.
 
 ## Worked example / walkthrough
 
-Run these in the complete learner file so the temporary fixture and transaction are present. The fixture values are fixed; the examples never depend on the current clock. Predict each result before running it.
+Example 1 reserves two units of A at version 1 and Example 2 retries with an
+expectation that is already out of date. Before running them, predict the
+command tag each `UPDATE` prints and the row you will see when you inspect A
+afterward; the second example is the first time a correct SQL statement
+deliberately changes nothing.
 
 ### Example 1: Guard an update and inspect its result
 
@@ -211,7 +168,12 @@ No row matches version 99, so PostgreSQL reports UPDATE 0 and RETURNING contains
 
 ## Exercises
 
-Attempt these in order in the ignored working copy, before its final rollback. Write the output grain and a prediction before execution. Compare the actual identities and values with each contract. A query merely running is not sufficient evidence. Hints are optional and leave the answer construction to you.
+All six exercises use SKU A or B from `concurrency_stock`. Exercises 1, 4 and 6
+write inside a savepoint that you roll back, while Exercises 2 and 3 should
+write nothing. For each guarded update, decide in advance whether the version
+check or the capacity check is the one that refuses it, and confirm from the
+`UPDATE` tag and a follow-up `SELECT`. The contract lines are explained in the
+[study guide](../../STUDY-GUIDE.md#work-an-exercise).
 
 1. **Perform a guarded reservation.**
 
@@ -229,7 +191,7 @@ Attempt these in order in the ignored working copy, before its final rollback. W
 
    **Expected result/shape:** For sql-concurrency-01 Exercise 2, Zero returned rows with columns sku, available, version. A remains available 5 and version 1; SQL execution itself succeeds with UPDATE 0.
 
-   **Verify:** For sql-concurrency-01 Exercise 2, Require zero RETURNING rows and unchanged A state available=5,version=1. Removing the version condition would discard the requested stale-write protection.
+   **Verify:** For sql-concurrency-01 Exercise 2, Require zero RETURNING rows and unchanged A state with `available` 5 and `version` 1. Removing the version condition would discard the requested stale-write protection.
 
    **Progressive hint:** A failed precondition is an ordinary zero-row outcome.
 
@@ -239,7 +201,7 @@ Attempt these in order in the ignored working copy, before its final rollback. W
 
    **Expected result/shape:** For sql-concurrency-01 Exercise 3, Zero returned rows, columns sku, available, version. B remains (B,1,1), proving the capacity condition can fail even with a current version.
 
-   **Verify:** For sql-concurrency-01 Exercise 3, Require zero RETURNING rows and unchanged B state available=1,version=1. The current version and failed capacity distinguish this outcome from the stale-version case.
+   **Verify:** For sql-concurrency-01 Exercise 3, Require zero RETURNING rows and unchanged B state with `available` 1 and `version` 1. The current version and failed capacity distinguish this outcome from the stale-version case.
 
    **Progressive hint:** Use a boundary that differs from the stale-version example.
 
@@ -383,7 +345,10 @@ configuration, roles, extensions, replication, or another database.
 - Which concurrency claims cannot be made from this deterministic model?
 - Why must a replenishment advance the same version used by a reservation?
 
-Keep your actual query and transcript. Explain one incorrect alternative and the exact fixture row that exposes it. A passing worked example does not prove an unattempted exercise. Revisit a failed prediction after taking a break, then answer the retrieval questions without looking at the code.
+For retrieval practice, explain without running why a caller who reads
+`(A,5,1)` and then sends `SET available = 4` with no `WHERE version = 1` would
+erase another caller's reservation, and predict the row A ends with if the
+replenishment in Exercise 6 forgot to increment `version`.
 
 ## Common pitfalls
 

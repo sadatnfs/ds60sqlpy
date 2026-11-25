@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/deep-learning-tensorflow/solutions/tf-022_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="tf-022-explanatory-solutions">tf-022: explanatory solutions<a class="heading-anchor" href="#tf-022-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Open these answers for Attention with an explicit information boundary after your own attempt at Example A, Calculate uniform mixtures, or after an explicit reveal. Each answer reuses the guide&#x27;s literal inputs, so a mismatch points to one step. The companion script runs the assertions; this page explains why they test Query, Key, Causal mask. After matching exercise 6, Refuse malformed input, invent a new input without looking here.</p>
+<p>Open these answers after an attempt; they reuse the guide&#x27;s inputs (<a href="../STUDY-GUIDE.md.html#after-the-solutions">comparison steps</a>).</p>
 <h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
 <p>Attention mixes value vectors using weights derived from query-key scores. A causal mask restricts each query to its current and earlier positions. The mask must act before the key-axis softmax, otherwise forbidden positions can consume probability mass or influence normalization. Equal scores make the allowed distribution easy to calculate: each legal key receives equal weight. Prefix invariance is a direct information-boundary test: recomputing a shorter prefix should reproduce the full computation early outputs. This property must hold across every decoder component, not just attention. A passing mask test cannot detect a contaminated training corpus or incorrect target shifting.</p>
 <p><strong>Query:</strong> A vector used to request information from keys.</p>
@@ -258,9 +258,7 @@ full <span class="syntax-operator">=</span> attention<span class="syntax-punctua
     <span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span>
         <span class="syntax-keyword">raise</span> AssertionError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">bad shape accepted</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> both raise ValueError.</p>
-<p><strong>Verify:</strong> In a fresh process, the exercise checks confirm for every <code>args</code> in <code>[(np.empty((0, 2)), np.empty((0, 2)), np.empty((0, 2))), (q, q, v[:2])]</code>, <code>attention(*args)</code> raises <code>ValueError</code>.</p>
-<h3 id="review-after-comparison">Review after comparison<a class="heading-anchor" href="#review-after-comparison" aria-label="Link to this section">#</a></h3>
-<p>Change one fixture value in exercise 4, Expose post-softmax masking, and predict the new result before running it. Keep the failing version of exercise 5, Use nonuniform scores, next to its repair. A missing framework is an environment record, not a failed assertion. No solution downloads data, calls an online model, deploys a service or changes a database.</p></article>
+<p><strong>Verify:</strong> In a fresh process, the exercise checks confirm for every <code>args</code> in <code>[(np.empty((0, 2)), np.empty((0, 2)), np.empty((0, 2))), (q, q, v[:2])]</code>, <code>attention(*args)</code> raises <code>ValueError</code>.</p></article>
   </main>
 </body>
 </html>

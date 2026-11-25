@@ -196,7 +196,6 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <article class="document"><h2 id="cuda-019-explanatory-solutions">cuda-019: explanatory solutions<a class="heading-anchor" href="#cuda-019-explanatory-solutions" aria-label="Link to this section">#</a></h2>
 <h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
 <p>Tiling loads small regions of A and B into shared memory and reuses each value across several output calculations. For each k-phase, threads cooperatively load both tiles, synchronize, accumulate from the tiles, then synchronize again before overwriting shared storage for the next phase. Partial tiles require zero-filled invalid positions. An early return by tail threads can break the barrier contract. Tile size trades global reuse against shared storage, registers, occupancy and unused tail work. A tiled learning kernel is a correctness and reuse experiment, not an automatic replacement for a mature GEMM library.</p>
-<p>The separate <a href="../references/cuda-019_cpu.py.html">CPU reference</a> checks the chapter&#x27;s bounded model. It does not execute CUDA or establish GPU timing. Compare after attempting the worksheet or explicitly choosing to reveal solutions.</p>
 <h3 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h3>
 <p>For a 2-by-2 output tile and <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="normal">k</mi><mo>=</mo><mn>2</mn></mrow><annotation encoding="application/x-tex">\mathrm{k}=2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.6944em;"></span><span class="mord mathrm">k</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">2</span></span></span></span>, the four outputs need eight products. Loading four A values and four B values allows reuse across outputs. The naive per-output scheme conceptually reads sixteen scalar operands; the tile loads eight. Cache behavior can change actual transactions.</p>
 <p><strong>Approach:</strong> Count loads per tile: two A values per row times two rows, and the same for B.</p>
@@ -233,11 +232,17 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Why it is correct:</strong> Small matrices leave many lanes idle and pay barrier costs that reuse cannot repay.</p>
 <p><strong>A plausible wrong approach:</strong> Calling it a bug and disabling tiling for all sizes discards gains on large shapes.</p>
 <p><strong>How to verify:</strong> Record measured times on an actual device for several sizes before choosing.</p>
+<h3 id="self-check-answers">Self-check answers<a class="heading-anchor" href="#self-check-answers" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>How many phases does k equal 7 need with tile width 4?</strong> Two, using ceiling division of 7 by 4.</li>
+<li><strong>Why are invalid tile entries filled with zero?</strong> Zero adds nothing to the dot product, so tail phases keep the sum correct.</li>
+<li><strong>Why is a second barrier needed at the end of each phase?</strong> It stops fast threads from overwriting the tile while slower threads are still reading it.</li>
+</ol>
 <h3 id="numerical-reference-and-its-limits">Numerical reference and its limits<a class="heading-anchor" href="#numerical-reference-and-its-limits" aria-label="Link to this section">#</a></h3>
-<p>The complete CPU model is <a href="../references/cuda-019_cpu.py.html">here</a>. Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It also asserts an exercise answer that the guide&#x27;s model leaves for you to derive: <code>assert 2 * 16 * 16 * 4 == 2048</code>. It does not claim CUDA execution, concurrency safety or a performance measurement.</p>
+<p>The <a href="../references/cuda-019_cpu.py.html">CPU reference</a> reproduces worked example 1 and prints <code>{&#x27;phases&#x27;: [(0, 2), (2, 4), (4, 5)]}</code>.</p>
+<p>It also asserts an exercise answer you derive yourself: <code>assert 2 * 16 * 16 * 4 == 2048</code></p>
 <h3 id="transfer-review">Transfer review<a class="heading-anchor" href="#transfer-review" aria-label="Link to this section">#</a></h3>
-<p>Not necessarily. Compare correctness first; setup, synchronization and unused lanes can outweigh reuse for small shapes.</p>
-<p>A complete explanation must name its inputs, the unchanged mathematical contract, the changed boundary or resource condition, and the evidence still needed on actual hardware. Preserve a CPU baseline even after a GPU path becomes available.</p></article>
+<p>Not necessarily. Compare correctness first; setup, synchronization and unused lanes can outweigh reuse for small shapes.</p></article>
   </main>
 </body>
 </html>

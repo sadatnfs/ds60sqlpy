@@ -1,6 +1,6 @@
 # java-035: explanatory solutions
 
-Open after an attempt or an explicit solution reveal. The executable reference runs the six exercise checks together as `Main.java`. The guide contains independent worked examples, while this file explains the choices and failure cases in the complete answer.
+Open this after an attempt; see [using the solutions](../STUDY-GUIDE.md#use-the-solutions).
 
 ## Mechanism review
 
@@ -22,7 +22,7 @@ A Repository port exposes an immutable row list. The pure summary function filte
 
 ## Exercise 1: Verify the domain summary: change one input
 
-Task: Copy Example A into a scratch `Main.java` and change `List.of(new Row("a1", "A", 10), new Row("a2", "A", 20), new Row("b1", "B", 5));` to `List.of(new Row("a1", "A", 10), new Row("a2", "A", 20), new Row("b1", "B", 6));`. Before running it with `java -ea Main`, predict which assertion fails and which value it now sees; then run it and restore the original line.
+Task: Change `List.of(new Row("a1", "A", 10), new Row("a2", "A", 20), new Row("b1", "B", 5));` to `List.of(new Row("a1", "A", 10), new Row("a2", "A", 20), new Row("b1", "B", 6));` in Example A and predict which assertion fails and why.
 
 The domain result has one object per requested group. It is checked independently of HTTP formatting and status handling.
 
@@ -35,13 +35,13 @@ assert summarize(repository, "A").equals(new Summary("A", 2, 30));
 assert summarize(repository, "B").equals(new Summary("B", 1, 5));
 ```
 
-**Expected:** The changed run fails with an `AssertionError` from the assertion on `summarize(repository, "B").equals(new Summary("B", 1, 5))`. Restoring the original line brings back the worked observation: A count 2, total 30; B count 1, total 5.
+**Expected:** The edited run fails with an `AssertionError` from the assertion on `summarize(repository, "B").equals(new Summary("B", 1, 5))`.
 
-**Verify:** Compare your written prediction with the reported `AssertionError` and its stack-trace line, and name the value that made `summarize(repository, "B").equals(new Summary("B", 1, 5))` false. After restoring the line, the program completes without an `AssertionError` again.
+**Verify:** Name the value that makes `summarize(repository, "B").equals(new Summary("B", 1, 5))` false, then restore the line.
 
 ## Exercise 2: Read a successful HTTP summary: diagnose an edited check
 
-Task: A careless edit changed the assertion that Example B adds after Example A so that it reads `\"count\":3`. Run Example B with that line, explain why the edited assertion now fails for the same program state, and restore it.
+Task: Example B's new assertion was edited to `\"count\":3`. Explain why it fails for unchanged state and restore it.
 
 The exact body check fixes the public schema and integer representation. The source counts remain independently known.
 
@@ -58,9 +58,9 @@ try (
 }
 ```
 
-**Expected:** Before the repair the run fails with an `AssertionError` from the assertion on `response.statusCode() == 200 && response.body().equals("{\"group\":\"A\",\"count\":2,\"total\":30}")`; after it the line reads `\"count\":2` again and status 200 and exact JSON with count 2, total 30.
+**Expected:** The edited run fails with an `AssertionError` from the assertion on `response.statusCode() == 200 && response.body().equals("{\"group\":\"A\",\"count\":2,\"total\":30}")`; the restored assertion passes.
 
-**Verify:** Keep the failing and the repaired runs. Explain why the edited assertion rejects the same program state that `response.statusCode() == 200 && response.body().equals("{\"group\":\"A\",\"count\":2,\"total\":30}")` accepts.
+**Verify:** Explain why the edited assertion rejects the state that `response.statusCode() == 200 && response.body().equals("{\"group\":\"A\",\"count\":2,\"total\":30}")` accepts.
 
 ## Exercise 3: Report an unknown valid group
 
@@ -80,7 +80,7 @@ try (
 
 **Expected:** status 404 with not_found error.
 
-**Verify:** Keep an assertion equivalent to `response.statusCode() == 404 && response.body().contains("not_found")`. As a control, change `var response = send(client, server.uri("/summary?group=C"), "GET");` to `var response = send(client, server.uri("/summary?group=C!"), "GET");`: the run must fail with an `AssertionError` from the assertion on `response.statusCode() == 404 && response.body().contains("not_found")`. Restore the line before continuing.
+**Verify:** Control: changing `var response = send(client, server.uri("/summary?group=C"), "GET");` to `var response = send(client, server.uri("/summary?group=C!"), "GET");` must fail the assertion on `response.statusCode() == 404 && response.body().contains("not_found")`.
 
 ## Exercise 4: Reject ambiguous or malformed queries
 
@@ -101,7 +101,7 @@ try (
 
 **Expected:** both status 400.
 
-**Verify:** Keep an assertion equivalent to `duplicate == 400 && lowercase == 400`. As a control, change `int duplicate = send(client, server.uri("/summary?group=A&group=B"), "GET").statusCode();` to `int duplicate = send(client, server.uri("/summary?group=A&group=B"), "GET!").statusCode();`: the run must fail with an `AssertionError` from the assertion on `duplicate == 400 && lowercase == 400`. Restore the line before continuing.
+**Verify:** Control: changing `int duplicate = send(client, server.uri("/summary?group=A&group=B"), "GET").statusCode();` to `int duplicate = send(client, server.uri("/summary?group=A&group=B"), "GET!").statusCode();` must fail the assertion on `duplicate == 400 && lowercase == 400`.
 
 ## Exercise 5: Reject unsupported methods and path lookalikes
 
@@ -122,7 +122,7 @@ try (
 
 **Expected:** 405 and 404 respectively.
 
-**Verify:** Keep an assertion equivalent to `post == 405 && lookalike == 404`. As a control, change `assert post == 405 && lookalike == 404;` to `assert post != 405 && lookalike == 404;` inside it: the run must fail with an `AssertionError`, which shows the assertion can fail. Restore it.
+**Verify:** Control: changing `assert post == 405 && lookalike == 404;` to `assert post != 405 && lookalike == 404;` inside the assertion must make it fail.
 
 ## Exercise 6: Preserve storage and close the owned listener
 
@@ -139,8 +139,10 @@ assert server.closed && repository.rows().equals(before) && repository.rows().si
 
 **Expected:** 3 unchanged records; closed flag true.
 
-**Verify:** Keep an assertion equivalent to `server.closed && repository.rows().equals(before) && repository.rows().size() == 3`. As a control, change `assert server.closed && repository.rows().equals(before) && repository.rows().size() == 3;` to `assert server.closed && repository.rows().equals(before) && repository.rows().size() != 3;` inside it: the run must fail with an `AssertionError`, which shows the assertion can fail. Restore it.
+**Verify:** Control: changing `assert server.closed && repository.rows().equals(before) && repository.rows().size() == 3;` to `assert server.closed && repository.rows().equals(before) && repository.rows().size() != 3;` inside the assertion must make it fail.
 
 ## After comparing the answer
 
-Run the complete reference with assertions enabled, then return to your own implementation. Recreate one check with different values and explain its expected result before execution. A compiler error, an expected domain exception and an assertion failure represent different stages and should be reported separately. Preserve ownership boundaries when adapting file, network or concurrency examples. The reference never authorizes access to a shared service or deletion of learner state. Use a fresh tiny fixture when you need to distinguish two interpretations of an API contract.
+Add a `GET /groups` route to your copy that returns the sorted distinct group names as a JSON array, and write one exact-body check and one 405 check for it.
+
+Run the complete reference with `java -ea Main` first; the [review routine](../STUDY-GUIDE.md#use-the-solutions) covers the rest.

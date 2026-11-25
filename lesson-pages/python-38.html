@@ -452,16 +452,7 @@ X_train<span class="syntax-punctuation">,</span> X_test<span class="syntax-punct
     <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span>depth<span class="syntax-punctuation">,</span> tree<span class="syntax-operator">.</span>score<span class="syntax-punctuation">(</span>X_train<span class="syntax-punctuation">,</span> y_train<span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> tree<span class="syntax-operator">.</span>score<span class="syntax-punctuation">(</span>X_test<span class="syntax-punctuation">,</span> y_test<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <p>The gap between training and held-out accuracy is one diagnostic, not a complete model-selection procedure. Choose complexity with validation or CV and report a separate test estimate.</p>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
-<p><strong>Primary browser route:</strong> run <code>./classroom</code> from the repository root and choose <strong>Python and data science</strong> on <code>/classroom</code>. Open this lesson in the shared workspace, read its capability notice, and use its supported coding or reading workflow. The <a href="../reference-pages/docs/classroom-experience.md.html">classroom guide</a> explains saved work, runtimes and switching subjects.</p>
-<p><strong>Optional native notebook/editor route:</strong> the instructions below describe separately prepared host tools. They are useful alternatives, not prerequisites for opening this lesson in the Docker classroom.</p>
-<ol>
-<li>Open the Day 38 learner notebook from this guide&#x27;s <strong>Next step</strong> section in VS Code or JupyterLab.</li>
-<li>Select the <code>Python (ds60sqlpy)</code> kernel. Start at the top and use <strong>Run All</strong> only after making the written predictions; every added worked example is bounded and offline after bootstrap.</li>
-<li>Keep experiments in new scratch cells. Do not edit the official solution while attempting the numbered practice.</li>
-<li>Restart the kernel and run from the first cell before calling the lesson complete. A clean run catches hidden state and stale variables.</li>
-</ol>
-<p>Linux, macOS, or Ubuntu in Windows WSL 2:</p>
-<pre class="highlighted-code"><code class="language-bash">.venv/bin/python -m jupyter lab</code></pre>
+<p>Open <code>python-38</code> in the classroom, or <code>python/ds-60day/notebooks/day38_tree_models_random_forest.ipynb</code> on a host; the <a href="../reference-pages/python/STUDY-GUIDE.md.html">Python study guide</a> explains both.</p>
 <h4 id="guide--concept-deep-dive-tree-splits-ensemble-variance-reduction-and-held-out-importance">Concept deep dive: tree splits, ensemble variance reduction, and held-out importance<a class="heading-anchor" href="#guide--concept-deep-dive-tree-splits-ensemble-variance-reduction-and-held-out-importance" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--the-mental-model">The mental model<a class="heading-anchor" href="#guide--the-mental-model" aria-label="Link to this section">#</a></h5>
 <p>A decision tree recursively partitions feature space. Each split asks a threshold question chosen to reduce impurity; each leaf stores a local prediction. Deep trees can represent fine interactions but also isolate noise. Depth, leaf size, and pruning control that capacity.</p>
@@ -473,7 +464,6 @@ X_train<span class="syntax-punctuation">,</span> X_test<span class="syntax-punct
 <li><strong><code>permutation_importance(model, X_valid, y_valid, ...)</code>:</strong> measures held-out score change under repeated feature shuffles.</li>
 </ul>
 <h5 id="guide--focused-example-a-make-the-depth-versus-generalization-gap-visible">Focused example A: make the depth-versus-generalization gap visible<a class="heading-anchor" href="#guide--focused-example-a-make-the-depth-versus-generalization-gap-visible" aria-label="Link to this section">#</a></h5>
-<p>Before running the example, predict the shape, type, or direction of the result. Write the prediction down so that a surprise becomes evidence rather than something to overlook.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> sklearn.datasets <span class="syntax-keyword">import</span> load_breast_cancer
 <span class="syntax-keyword">from</span> sklearn.model_selection <span class="syntax-keyword">import</span> train_test_split
 <span class="syntax-keyword">from</span> sklearn.tree <span class="syntax-keyword">import</span> DecisionTreeClassifier
@@ -565,7 +555,6 @@ noise_rank <span class="syntax-operator">=</span> <span class="syntax-builtin">i
 </ol>
 <h5 id="guide--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#guide--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
 <p>Diagnose tree capacity with train/validation evidence and inspect importance with methods that respect held-out data, correlation, and class costs.</p>
-<p>Predict or plan before you run code. Use the hint only after an honest attempt, and record the evidence that would prove your result correct.</p>
 <ol start="3">
 <li><strong>Pruning implementation:</strong> Use a decision tree&#x27;s cost-complexity pruning path to evaluate candidate <code>ccp_alpha</code> values with cross-validation. Freeze the chosen value before final holdout evaluation. <strong>Progressive hint:</strong> The path is derived from training data. Treat alpha selection as a hyperparameter search inside the development boundary.</li>
 </ol>
@@ -631,7 +620,7 @@ noise_rank <span class="syntax-operator">=</span> <span class="syntax-builtin">i
 <li>Continue to <a href="python-39.html#guide">Day 39; Gradient Boosting</a>.</li>
 </ul>
 <h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
-<p>The lesson is complete without an AI assistant. If you want optional coaching, copy this prompt into the AI tutor while the repository root is open:</p>
+<p>The lesson is complete without AI. For optional coaching, copy this prompt with the repository root open:</p>
 <pre class="highlighted-code"><code class="language-text">Tutor me through `python-38` (Day 38: Decision Trees and Random Forests).
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
@@ -938,9 +927,9 @@ order_imp<span class="syntax-punctuation">,</span> order_perm</code></pre>
 <li>Control overfitting via max_depth/min_samples_leaf and validate choices</li>
 </ul>
 <hr>
-<p><strong>Portable worker default:</strong> These reference runs use <code>n_jobs=1</code> so they behave predictably on Windows, CI runners, and constrained notebook environments. After correctness is established, benchmark a larger worker count on your own workload rather than assuming <code>n_jobs=1</code> is faster.</p>
+<p><strong>Portable worker default:</strong> these runs use <code>n_jobs=1</code> for predictable results; benchmark more workers only after correctness.</p>
 <h4 id="solution-1--solution-reasoning-lens">Solution reasoning lens<a class="heading-anchor" href="#solution-1--solution-reasoning-lens" aria-label="Link to this section">#</a></h4>
-<p>A strong solution is not merely code that produces one plausible output. It establishes a chain from input contract to operation to verification:</p>
+<p>Each decision below links an input contract to an operation and its evidence:</p>
 <ol>
 <li><strong><code>DecisionTreeClassifier(max_depth=..., min_samples_leaf=...)</code>:</strong> sets capacity controls before fitting and exposes tree-specific train/validation gaps.</li>
 <li><strong><code>RandomForestClassifier(n_estimators=..., random_state=...)</code>:</strong> averages bootstrapped, feature-subsampled trees; enough estimators stabilize rather than deepen the model.</li>
@@ -952,46 +941,38 @@ order_imp<span class="syntax-punctuation">,</span> order_perm</code></pre>
 <p><strong>Trade-off:</strong> More trees improve stability at computation cost; deeper trees increase interaction capacity and overfitting risk.</p>
 <p><strong>Edge case to test:</strong> Tiny classes, duplicated/correlated features, missing values, and high-cardinality identifiers can distort splits and importance.</p>
 <p><strong>Evidence of correctness:</strong> Report train and held-out scores across capacity settings, set seeds and <code>n_jobs</code>, test a noise feature, and include variability for permutation importance.</p>
-<p>When comparing your attempt with the reference, explain which of these decisions your code made explicitly. If the reference makes a different choice, compare the contracts and evidence before deciding that one version is universally better.</p>
 <h4 id="solution-1--exercise-by-exercise-reasoning-map">Exercise-by-exercise reasoning map<a class="heading-anchor" href="#solution-1--exercise-by-exercise-reasoning-map" aria-label="Link to this section">#</a></h4>
-<p>This map connects every learner prompt to a reasoning path. Read the explanation before copying code: the goal is to understand the assumptions, the evidence that validates the result, and the edge cases that can make an apparently correct implementation fail.</p>
 <h5 id="solution-1--exercise-1-original-lesson-practice">Exercise 1: Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Plot tree depth versus accuracy.</p>
 <p><strong>How to reason about it:</strong> Plot training and validation accuracy together across depth. An unbounded tree is a distinct setting, and one split is not enough to separate true capacity effects from sampling noise.</p>
-<p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
 <p><strong>Verify:</strong> For a declared depth grid including an unconstrained tree, print train and validation accuracy mean/std on identical folds and save the labeled depth curve; choose depth from validation evidence only.</p>
 <h5 id="solution-1--exercise-2-original-lesson-practice">Exercise 2: Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-2-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Inspect feature importances and discuss their reliability.</p>
 <p><strong>How to reason about it:</strong> Impurity importance is fast but biased toward high-cardinality and frequently split features. Compare held-out permutation importance, retain names, and discuss correlated-feature masking.</p>
-<p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
 <p><strong>Verify:</strong> Report impurity and seeded held-out permutation importance by feature, including a synthetic noise feature and permutation variability; flag any claim that treats impurity rank as causal or stable without the held-out check.</p>
 <h5 id="solution-1--exercise-3-pruning-implementation">Exercise 3: Pruning implementation<a class="heading-anchor" href="#solution-1--exercise-3-pruning-implementation" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Use a decision tree&#x27;s cost-complexity pruning path to evaluate candidate <code>ccp_alpha</code> values with cross-validation. Freeze the chosen value before final holdout evaluation.</p>
 <p><strong>Reasoning before implementation:</strong> The path is derived from training data. Treat alpha selection as a hyperparameter search inside the development boundary.</p>
 <p>Call <code>cost_complexity_pruning_path</code> on the current training fold, fit a tree for a bounded subset of alphas, and compare mean plus spread of validation scores. Very small alpha retains a complex tree; sufficiently large alpha collapses it toward the root.</p>
 <p>If the path is computed once using the entire dataset before CV, the candidate set itself has seen validation rows. A nested search or a fixed, documented alpha grid provides the cleanest evaluation.</p>
-<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
 <p><strong>Verify:</strong> Pruning implementation; print each ccp_alpha, tree size/depth, and cross-validation mean/std; freeze the selected alpha, fit once on all training rows, and report one holdout metric without retuning.</p>
 <h5 id="solution-1--exercise-4-out-of-bag-reasoning">Exercise 4: Out-of-bag reasoning<a class="heading-anchor" href="#solution-1--exercise-4-out-of-bag-reasoning" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Enable <code>oob_score=True</code> in a RandomForestClassifier and compare the out-of-bag estimate with held-out or cross-validated performance.</p>
 <p><strong>Reasoning before implementation:</strong> Each tree leaves out about 36.8% of bootstrap rows; aggregate predictions only from trees for which a row was out of bag.</p>
 <p>OOB evaluation reuses training data efficiently and can support fast iteration, but it is not a final untouched test. Confirm that bootstrapping is enabled and use enough trees so each row receives many OOB votes.</p>
 <p>Large discrepancies between OOB and held-out results can reveal distribution shift, grouping leakage, time ordering, or insufficient forest size. Do not average them into one reassuring number; investigate the boundary mismatch.</p>
-<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
 <p><strong>Verify:</strong> Out-of-bag reasoning; print oob_score_, held-out/cross-validation score, row counts, seed, and their difference; assert bootstrap and oob_score are enabled and avoid presenting OOB as an independent final test.</p>
 <h5 id="solution-1--exercise-5-imbalance-debugging">Exercise 5: Imbalance debugging<a class="heading-anchor" href="#solution-1--exercise-5-imbalance-debugging" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Train a tree on a 98:2 dataset, compare accuracy with minority recall and average precision, then test <code>class_weight=&#x27;balanced&#x27;</code>.</p>
 <p><strong>Reasoning before implementation:</strong> A majority-only classifier reaches 98% accuracy. Keep the split stratified and compare confusion matrices at a documented threshold.</p>
 <p>Class weights change the fitting objective, not merely the report. They can improve minority recall while reducing precision or overall accuracy. Evaluate both classes and use the metric tied to the real error cost.</p>
 <p>If probability quality matters, assess calibration after weighting. Never oversample or compute weights using the final holdout labels.</p>
-<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
 <p><strong>Verify:</strong> Imbalance debugging; on a seeded 98:2 dataset, print class support, accuracy, minority recall, average precision, and confusion counts for default and balanced weights using identical splits.</p>
 <h5 id="solution-1--exercise-6-correlated-importance-edge-case">Exercise 6: Correlated-importance edge case<a class="heading-anchor" href="#solution-1--exercise-6-correlated-importance-edge-case" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Duplicate one informative feature, refit the forest, and observe how impurity and single-feature permutation importance change.</p>
 <p><strong>Reasoning before implementation:</strong> The two columns can substitute for each other, splitting apparent importance and making either single-column permutation look weak.</p>
 <p>Correlated substitutes let the model recover from permuting only one column. Use domain-aware grouped permutation, conditional methods, or report the correlation cluster together. SHAP and impurity scores also require careful interpretation under dependence.</p>
 <p>An importance score answers how this fitted model used available inputs under a particular perturbation, not what would happen if the real-world feature were intervened upon.</p>
-<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
 <p><strong>Verify:</strong> Correlated-importance edge case; print original/duplicate correlation and before/after impurity plus held-out permutation importance means/std; report how combined credit and individual ranks change under one fixed seed/split.</p></div>
       </section>
 

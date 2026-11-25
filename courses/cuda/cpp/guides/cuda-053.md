@@ -4,18 +4,15 @@
 
 Advanced; about 130 minutes, plus any optional hardware experiment. Direct prerequisites: `cuda-019`, `cuda-029`, `cuda-036`, `cuda-046`
 
-The order supports learning at your own pace. Reading and CPU reasoning remain
-available when NVIDIA hardware is absent. Advanced hardware features need their
-own capability checks and are not prerequisites for opening this chapter.
+Pacing, evidence labels and platform rules for every chapter are in the [CUDA study guide](../../STUDY-GUIDE.md).
 
 ## Learning objectives
 
 Report the data type, compute mode, numerical error and confirmed execution path of a mixed-precision matrix multiply.
 
-Work through *Tensor cores and mixed precision from first principles* with the concrete cases below. Finish with this evidence:
-reported type and compute mode, numerical error and confirmed execution path where available. Distinguish an algorithmic
-calculation, a compiled artifact and an actual device observation when explaining
-what your work establishes.
+**Scope:** Matrix multiply-accumulate tiles, supported operand and accumulator types, alignment/layout constraints, range versus precision, and the difference between a tensor core operation and an ordinary scalar instruction.
+
+**Evidence to produce:** Reported type and compute mode, numerical error and confirmed execution path where available.
 
 ## Purpose, vocabulary and mental model
 
@@ -31,28 +28,17 @@ Tensor cores accelerate supported matrix multiply-accumulate tile operations. Op
 
 ## How to run and study this lesson
 
-Use the saved reading worksheet in `/classroom`; the reading pad does not execute
-CUDA. For the bounded calculation, select **CPU model (Python)**, whose
-answer-free starter supplies the literal fixtures and task contract. The
-[CUDA C++ study workflow](../README.md) covers platforms, optional GPU
-compilation and evidence labels. In a prepared Python environment you can also
-run the separate [CPU reference](../references/cuda-053_cpu.py) from the
-repository root:
+Trace worked example 1 by hand, then run the [CPU reference](../references/cuda-053_cpu.py) from the repository root:
 
 ```sh
 python courses/cuda/cpp/references/cuda-053_cpu.py
 ```
 
-Its assertions check the stated numerical result or model invariant; console
-text is evidence of this CPU model only, not of CUDA execution.
-
 ## Worked example 1: trace the mechanism
 
 A toy decimal format retaining three significant digits represents 1.001 as 1.00. Summing 1,000 such rounded inputs gives 1,000 rather than 1,001. This is a CPU quantization analogy, not an emulation of FP16 or a measured tensor-core error. Accumulating in a wider type cannot restore information already lost in the inputs.
 
-The complete CPU model below intentionally models only the named arithmetic,
-layout, dependency or capability decision. It does not model GPU scheduling,
-caches, instruction timing or device memory visibility.
+**Why:** Rounding gives 1.00, so the sum is 1,000 against an exact 1,001.
 
 ```python
 exact_input = 1.001
@@ -69,41 +55,37 @@ print(
 )
 ```
 
-**Expected observation:** Every assertion succeeds. A representative CPU output is:
+**Expected observation:** every assertion succeeds, and the CPU model prints:
 
 ```text
 {'toy_decimal_exact_sum': 1000.9999999999999, 'toy_quantized_sum': 1000.0, 'tensor_core_emulation': False}
 ```
 
-Integers, shapes and ordering must match exactly; only assertions with an explicit
-tolerance accept small floating-point differences. A printed duration is a model
-output, not a measured GPU benchmark.
+**Check:** The reference asserts the difference is 1 within 1e-9 and prints tensor_core_emulation False.
 
 ## Worked example 2: change a meaningful condition
 
 A matrix product can use low-precision operands with wider accumulation. Compare this with low-precision accumulation separately because the two introduce different errors. Include well-scaled and badly scaled matrices, and record actual compute mode plus a supported profiling or library-path observation when available.
 
-Before applying this example to your own program, write down which inputs are
-read, which result is produced, and the condition that makes the comparison
-valid. Keep the original case as a regression check when changing a boundary.
+**Why:** Input rounding and accumulation rounding produce different error growth.
+
+**Check:** Compare both modes on well-scaled and badly scaled matrices against a wide reference.
 
 ## Six progressive exercises
 
-Exercises 1 and 2 are guided reconstructions of the worked examples; exercises
-3-6 change an input, diagnose a defect, test a boundary and transfer the idea.
-For each one, keep the calculation, output, diagram or failure policy you
-produce so another reader can compare it with the worked cases. If the hint is
-not enough, reread the mechanism paragraph and the bounded CPU assertion.
-
 ### Exercise 1
 
-Predict and trace the first worked example before running its CPU reference. Write every intermediate quantity that leads to the stated result, including units or ownership where applicable.
+Reconstruct worked example 1 on paper before running its CPU reference. Round 1.001 to three significant digits, then sum 1,000 rounded copies and compare with the exact sum.
+
+**Trap to avoid:** Presenting this decimal toy as the measured error of FP16 tensor cores overstates what it shows.
 
 **Hint:** Start with the literal input and intermediate quantities in worked example 1.
 
 ### Exercise 2
 
-Reconstruct the second worked example without copying its conclusion. Identify the changed input or condition, show the resulting calculation or dependency, and explain why it differs from the first example.
+Rework worked example 2 without copying its conclusion. Test low-precision inputs with wide accumulation separately from low-precision accumulation.
+
+**Trap to avoid:** Reporting one combined error figure hides which choice causes it.
 
 **Hint:** Identify exactly which condition changes in worked example 2.
 
@@ -111,11 +93,15 @@ Reconstruct the second worked example without copying its conclusion. Identify t
 
 What information belongs in a tensor-core experiment record?
 
+**Trap to avoid:** Recording only the speedup makes the result unreproducible.
+
 **Hint:** Use the first worked example to establish the relevant quantities, then change only the requested input.
 
 ### Exercise 4
 
 A float16 GEMM ran successfully. Does that prove tensor-core use?
+
+**Trap to avoid:** Inferring tensor core use from a successful call confuses outcome with mechanism.
 
 **Hint:** Locate the failed phase or violated dependency before proposing a repair.
 
@@ -123,35 +109,33 @@ A float16 GEMM ran successfully. Does that prove tensor-core use?
 
 Why test extreme magnitudes?
 
+**Trap to avoid:** Testing only values near one passes while real data overflows.
+
 **Hint:** Check what the algorithm is allowed to read, write or assume at this boundary.
 
 ### Exercise 6
 
 Choose an accuracy policy for ML.
 
+**Trap to avoid:** Assuming lower precision is harmless because one layer looks fine skips the model check.
+
 **Hint:** State the output contract and which observations are needed in the new application.
 
 ## Common mistakes and diagnosis
 
-A tempting but incorrect claim in this chapter is: **every NVIDIA GPU supports every tensor format or lower precision is free accuracy-wise.**
-
-For the concrete failure exercise, a float16 GEMM ran successfully. Does that prove tensor-core use?
-Preserve the original input and the stage where behavior diverged, and compare
-with the CPU model before changing hardware configuration.
+A tempting but incorrect claim: **Every NVIDIA GPU supports every tensor format or lower precision is free accuracy-wise.** Tensor core formats depend on the architecture and library mode, and lower precision changes range and rounding. FP16 has 5 exponent and 10 fraction bits, while BF16 has 8 exponent and 7 fraction bits, so BF16 covers a far wider range with less precision. Worked example 1 shows rounding error accumulating, so record operand and accumulator types and set an accuracy policy before trusting speed.
 
 ## Self-check, retrieval and transfer
 
-Explain the first example without its code, then use the second example to state
-one assumption that matters. Complete Exercise 3 independently, use Exercise 4 to
-diagnose a plausible defect, check the boundary in Exercise 5, and retain the
-application contract from Exercise 6. Compare the [separate explanations](../solutions/cuda-053_solutions.md)
-only after your attempt or a deliberate reveal. A reading marker records your
-choice; it does not certify hardware qualification or expert mastery.
+1. In worked example 1, how far is the rounded sum from the exact sum?
+2. A float16 GEMM ran successfully. Does that prove tensor core use?
+3. Why test extreme magnitudes?
+
+Short answers are in the [separate explanations](../solutions/cuda-053_solutions.md#self-check-answers); compare only after an attempt.
 
 ## Primary references
 
-Check the documentation that matches your prepared toolkit before optional
-hardware execution.
+Use the documentation that matches your prepared toolkit.
 
 - [CUDA Programming Guide](https://docs.nvidia.com/cuda/cuda-programming-guide/)
 

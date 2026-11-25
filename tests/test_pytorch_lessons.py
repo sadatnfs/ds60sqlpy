@@ -352,11 +352,22 @@ def test_portable_authoring_recreates_all_published_artifacts(
 
 
 def test_worked_sequences_compile_and_share_the_reference_setup() -> None:
+    frozen = {
+        path.name.removesuffix(".md.snapshot")
+        for path in (BASE / "authoring/frozen_guides").glob("*.md.snapshot")
+    }
+    study_guide = (BASE / "STUDY-GUIDE.md").read_text()
+    assert "## Launch a lesson" in study_guide
+    assert "Run the three worked blocks in order in one scratch file" in study_guide
     for entry in ENTRIES:
         if entry["language"] != "python":
             continue
         guide = (ROOT / entry["guide_path"]).read_text()
-        assert "Run the three worked blocks in order in one scratch file" in guide
+        if entry["id"] in frozen:
+            assert "Run the three worked blocks in order in one scratch file" in guide
+        else:
+            assert "](../STUDY-GUIDE.md#launch-a-lesson)" in guide, entry["id"]
+            assert "Examples B and C " in guide, entry["id"]
         section = guide.split("## Worked example / walkthrough\n", 1)[1]
         section = section.split("## Prediction before your attempt", 1)[0]
         blocks = re.findall(r"```python\n(.*?)\n```", section, re.DOTALL)

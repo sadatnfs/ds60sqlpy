@@ -1,6 +1,6 @@
 # js-039: explanatory solutions
 
-Use these answers after an attempt or an explicit reveal. The reference uses the same literal fixtures as the guide and keeps the exercises in separate scopes. A successful run checks these examples; explaining a changed input is a separate learning goal.
+Open these after your own attempt; each exercise runs in its own scope in the reference.
 
 ## Mechanism review
 
@@ -26,7 +26,7 @@ Each state has kind plus common id and attempt fields. Events form another close
 
 ## Exercise 1: Complete one valid job lifecycle: change one input
 
-Task: Copy Example A into a scratch `main.mts` and change `const completed = transition(started, { type: 'complete', value: 7 });` to `const completed = transition(started, { type: 'complete', value: 8 });`. Before running it, predict which check fails and which value it now sees; then run it and restore the original line.
+Task: In a scratch copy of Example A, change `const completed = transition(started, { type: 'complete', value: 7 });` to `const completed = transition(started, { type: 'complete', value: 8 });`. Which check fails, and what value does it see?
 
 The transition sequence carries the attempt count forward. Completion is accepted only after a start established the running state.
 
@@ -38,13 +38,13 @@ const completed = transition(started, { type: 'complete', value: 7 });
 assert.deepEqual(completed, { id: 'A', attempt: 1, kind: 'succeeded', value: 7 });
 ```
 
-**Expected:** The changed run fails with an `AssertionError` at `assert.deepEqual(completed, { id: 'A', attempt: 1, kind: 'succeeded', value: 7 })`. Restoring `const completed = transition(started, { type: 'complete', value: 7 });` brings back: succeeded with attempt 1 and value 7.
+**Expected:** The edited run fails with an `AssertionError` at `assert.deepEqual(completed, { id: 'A', attempt: 1, kind: 'succeeded', value: 7 })`. Restoring `const completed = transition(started, { type: 'complete', value: 7 });` brings back: succeeded with attempt 1 and value 7.
 
-**Verify:** Compare your written prediction with the reported `AssertionError`, including its actual and expected values, and name the value that made `assert.deepEqual(completed, { id: 'A', attempt: 1, kind: 'succeeded', value: 7 })` fail. After restoring the line, the program prints its `{"checks":1,"status":"passed"}` receipt again.
+**Verify:** Compare the reported actual and expected values with your prediction, then restore `const completed = transition(started, { type: 'complete', value: 7 });`.
 
 ## Exercise 2: Reject a result arriving before start: diagnose an edited check
 
-Task: A careless edit changed a check in Example B so that it reads `assert.deepEqual(queued, { id: 'A', attempt: 1, kind: 'queued' });`. Run Example B with that line, explain why the edited check now fails for the same program state, and restore it.
+Task: Example B's check was edited to read `assert.deepEqual(queued, { id: 'A', attempt: 1, kind: 'queued' });`. Run it, explain the failure and restore the original.
 
 An unexpected event is visible rather than silently ignored. Ignoring it could hide ordering or duplicate-delivery defects in an outer integration.
 
@@ -58,7 +58,7 @@ assert.deepEqual(queued, { id: 'A', attempt: 0, kind: 'queued' });
 
 **Expected:** Before the repair the run fails with an `AssertionError` at `assert.deepEqual(queued, { id: 'A', attempt: 1, kind: 'queued' });`. Restoring `assert.deepEqual(queued, { id: 'A', attempt: 0, kind: 'queued' });` brings back: invalid transition error; original remains queued.
 
-**Verify:** Keep the failing and the repaired runs. Explain why the edited check rejects the same program state that `assert.deepEqual(queued, { id: 'A', attempt: 0, kind: 'queued' })` accepts.
+**Verify:** Keep the failing and repaired runs and name the first value that differs between them.
 
 ## Exercise 3: Enforce the retry budget
 
@@ -79,7 +79,7 @@ assert.throws(() => transition(state, { type: 'retry' }), /retry budget/u);
 
 **Expected:** attempt 3 remains failed; further retry rejects.
 
-**Verify:** Keep a check equivalent to `assert.equal(state.attempt, 3)`. As a control, change `for (let attempt = 1; attempt <= 3; attempt += 1) {` to `for (let attempt = 1; attempt < 3; attempt += 1) {`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
+**Verify:** Keep `assert.equal(state.attempt, 3)`. Control: changing `for (let attempt = 1; attempt <= 3; attempt += 1) {` to `for (let attempt = 1; attempt < 3; attempt += 1) {` must make that check fail; then restore it.
 
 ## Exercise 4: Keep cancellation terminal
 
@@ -98,7 +98,7 @@ assert.throws(() => transition(cancelled, { type: 'complete', value: 2 }), /term
 
 **Expected:** cancelled state remains; late completion rejects.
 
-**Verify:** Keep a check equivalent to `assert.equal(cancelled.kind, 'cancelled')`. As a control, change `assert.equal(cancelled.kind, 'cancelled');` to `assert.equal(cancelled.kind, 'cancelled!');` inside it: the run must fail with an `AssertionError`, which shows the check can fail. Restore it.
+**Verify:** Keep `assert.equal(cancelled.kind, 'cancelled')`. Control: editing it to `assert.equal(cancelled.kind, 'cancelled!');` must make the check fail; then restore it.
 
 ## Exercise 5: Replay deterministically from the same history
 
@@ -122,7 +122,7 @@ assert.deepEqual(first, { id: 'A', attempt: 2, kind: 'succeeded', value: 3 });
 
 **Expected:** both runs produce the same succeeded attempt-2 state.
 
-**Verify:** Keep a check equivalent to `assert.deepEqual(first, { id: 'A', attempt: 2, kind: 'succeeded', value: 3 })`. As a control, change `{ type: 'complete', value: 3 },` to `{ type: 'complete', value: 4 },`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
+**Verify:** Keep `assert.deepEqual(first, { id: 'A', attempt: 2, kind: 'succeeded', value: 3 })`. Control: changing `{ type: 'complete', value: 3 },` to `{ type: 'complete', value: 4 },` must make that check fail; then restore it.
 
 ## Exercise 6: Preserve input state and validate success values
 
@@ -141,8 +141,8 @@ assert.throws(() => transition(running, { type: 'complete', value: NaN }), Range
 
 **Expected:** input unchanged; new object returned; NaN rejects.
 
-**Verify:** Keep a check equivalent to `assert.throws(() => transition(running, { type: 'complete', value: NaN }), RangeError)` and confirm that the reference still passes. Then name an input that would make it fail and explain which value changes.
+**Verify:** Keep the check `assert.throws(() => transition(running, { type: 'complete', value: NaN }), RangeError)`; name an input that would make it fail and the value that changes.
 
 ## After comparison
 
-Return to your saved implementation and repeat a case with different values. Keep compiler diagnostics, process output and browser observations separate. Do not suppress a failing assertion or use a type assertion to declare an unvalidated value safe. Resource-owning examples must finish cleanup even when work fails. Describe each result with its actual host and fixture scope rather than as production acceptance.
+Fresh case: add a `paused` state reachable only from `running`. Predict which events become valid or invalid, then replay a history that pauses and resumes twice and confirm both runs agree. ([After comparing](../STUDY-GUIDE.md#after-comparing-with-the-solution).)

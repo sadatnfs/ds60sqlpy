@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/web-development/solutions/web-034_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="web-034-explanatory-solutions">web-034: explanatory solutions<a class="heading-anchor" href="#web-034-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Open this after your own attempt. Each answer explains the lesson&#x27;s synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in <code>courses/web-development/guides/web-034.md</code>.</p>
+<p>Attempt each exercise before reading; the mechanism is in <code>courses/web-development/guides/web-034.md</code> (<a href="../STUDY-GUIDE.md.html#solutions">using these answers</a>).</p>
 <h3 id="exercise-1-trace-the-accumulator-after-each-iteration">Exercise 1: Trace the accumulator after each iteration.<a class="heading-anchor" href="#exercise-1-trace-the-accumulator-after-each-iteration" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> It progresses through 20, 50 and 65.</p>
 <p><strong>Approach:</strong> Write a row per iteration with the current value and the running total, adding each element to the previous total.</p>
@@ -232,7 +232,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Plausible wrong approach:</strong> Treating them as interchangeable fails because <code>switch</code> matches &#x27;0&#x27; against <code>case false</code>, while <code>match</code> does not.</p>
 <p><strong>How to verify:</strong> Running the contrast case prints switch: false branch and match: string arm. Removing the string arm makes the <code>match</code> call throw an UnhandledMatchError for &#x27;0&#x27;.</p>
 <h3 id="reference-comparison">Reference comparison<a class="heading-anchor" href="#reference-comparison" aria-label="Link to this section">#</a></h3>
-<p>Open <code>courses/web-development/solutions/web-034_solution.php</code> only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; server lifecycle, persistence, concurrency and security need their own integration evidence.</p></article>
+<p>The reference requires the accumulated total to equal 65 and prints the label with the minutes. That catches an accumulator reset inside the loop or a skipped element. It does not test the negative guard, the empty week or the unknown-label path, so run each of those inputs yourself.</p>
+<p>Open <code>courses/web-development/solutions/web-034_solution.php</code> after saving your attempt (<a href="../STUDY-GUIDE.md.html#references">comparing with the reference</a>).</p></article>
   </main>
 </body>
 </html>

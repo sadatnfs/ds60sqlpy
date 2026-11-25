@@ -2,6 +2,8 @@
 
 Open these answers only after attempting Batches, zero_grad and repeated updates yourself. They reuse the guide's literal inputs, starting from Example A, Count batches and updates, so a discrepancy points at one step. The executable companion runs the assertions; this page explains why each one tests Epoch, Batch, Gradient reset. After a pass, choose a new input for exercise 6, Aggregate unequal batch means, without looking.
 
+After comparing, follow the [review steps](../STUDY-GUIDE.md#after-the-solutions).
+
 ## Mechanism review
 
 An epoch is a traversal of selected records; a batch is the set reduced before an update; an optimizer step changes parameters once. These counts differ. Six records with batch size 2 produce three updates per epoch, while batch size 1 produces six. Later batches see weights changed by earlier updates, so equal epochs do not imply equal trajectories. PyTorch also accumulates gradients unless they are cleared, which can accidentally turn a minibatch loop into an unplanned accumulation scheme.
@@ -151,6 +153,3 @@ assert (2 * 2 + 8 * 1) / 3 == 4 and (2 + 8) / 2 == 5
 
 **Verify:** In a fresh process, the exercise checks confirm `(2 * 2 + 8 * 1) / 3 == 4` and `(2 + 8) / 2 == 5`.
 
-## Review after comparison
-
-Repeat exercise 4, Expose accidental accumulation, with one changed fixture value and predict the difference before running it. Keep your failing attempt at exercise 5, Shuffle paired records together, beside the repaired result. A missing framework is not a failing assertion. These solutions use only local fixtures.

@@ -24,9 +24,9 @@ Localization separates user-facing text from program identity. Keep stable IDs i
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles the saved pad as `main.swift` with Swift 6 language checking. An explicit `@main` type contains `static func main() async throws`; the fixed compiler uses `-parse-as-library -swift-version 6`. The examples use the standard library and portable Foundation. `precondition` makes a violated invariant fail the process. The fixed pad accepts one source file, without arbitrary command arguments, interactive input or dependency installation. SwiftUI, UIKit, Apple simulators and application signing belong to the separately prepared macOS/Xcode project labs, never the Linux pad.
+The pad checks only the text policy, since speaking and rendering require the Apple app. Tasks 3 and 5 need JourneyApp on macOS with VoiceOver and large text; record what you actually heard and saw, including defects, rather than what the code suggests should happen.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Compile contract, starter stop and success marker: [running a lesson](../STUDY-GUIDE.md#running-a-lesson).
 
 The [JourneyApp acceptance guide](../fixtures/JourneyApp/README.md) includes keyboard, VoiceOver, large-text and reduced-motion observations to record.
 
@@ -34,7 +34,7 @@ The [JourneyApp acceptance guide](../fixtures/JourneyApp/README.md) includes key
 
 In SwiftUI, accessibilityLabel and accessibilityValue describe semantics; accessibilityIdentifier is a testing hook, not a spoken label substitute. Localized strings and format styles should preserve plural and locale rules.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+Each example ends with a trace; method: [tracing a program](../STUDY-GUIDE.md#tracing-a-program).
 
 ## Worked example / walkthrough
 
@@ -60,6 +60,8 @@ struct LessonMain {
 ```
 
 **Observe:** The label communicates completion without relying on color.
+
+**Trace.** `accessibilityText` takes a title and a Boolean. The conditional inside the interpolation picks complete for true, and the result is Read, complete. The check compares the exact string. A screen reader would speak this text, so the completion state reaches the user as a word even when the visual marker is a color or icon they cannot perceive.
 
 ### Example B: Keep identity separate from translation
 
@@ -88,6 +90,8 @@ struct LessonMain {
 
 **Observe:** Switching language changes the title from Read to Lire while the completion saved under lesson-one still shows complete.
 
+**Trace.** `saved` maps the stable identifier lesson-one to true. `row` looks up the completion state by identifier and the display title by language. For English, the title is Read and the state is complete. For French, the title is Lire, but the lookup still uses lesson-one and finds the same saved state. If the saved key had been the English title, switching to French would have lost the progress.
+
 ## Exercises
 
 1. **Predict and explain.** Identify which information would be lost without color.
@@ -102,13 +106,15 @@ struct LessonMain {
 
 6. **Transfer and justify.** Create a manual accessibility acceptance checklist with concrete observations and retained defects.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Log each task in the [evidence table](../STUDY-GUIDE.md#recording-exercise-evidence) before opening the explanation.
 
 ## Common pitfalls and diagnosis
 
 A label should not duplicate an entire surrounding screen. Fixed heights can clip large text. The portable string checks do not establish screen-reader order or keyboard focus behavior.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+For task 2, an incomplete item needs both a state and an action, such as Read, incomplete and a Mark complete button; a label without the action leaves the user unsure what activating it does. Task 4's identifier is never spoken, so a control labeled only by its testing identifier is announced without a meaningful name. Missing titles fall back to the identifier, which you should check deliberately.
+
+Repair routine: [building a regression case](../STUDY-GUIDE.md#building-a-regression-case).
 
 ## Progressive hints
 
@@ -118,11 +124,15 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 ## Self-check and next step
 
-Explain Accessible name, Dynamic Type, Localization without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+Explain the difference between an accessibility label, an accessibility value and an accessibility identifier. Say why saved progress must be keyed by a stable identifier. Name three observations your manual checklist must record for large text, and what to do with a defect you cannot fix now.
+
+Then follow the general [self-check routine](../STUDY-GUIDE.md#self-check-routine) and save your pad.
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://developer.apple.com/documentation/swiftui/accessibility). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+[Documentation](https://developer.apple.com/documentation/swiftui/accessibility): Apple's SwiftUI accessibility documentation covers labels, values and identifiers; the Human Interface Guidelines describe VoiceOver and Dynamic Type.
+
+Provenance and limits: [sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

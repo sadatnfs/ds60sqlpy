@@ -194,17 +194,19 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/scala-spark/guides/spark-023.md</code></p>
     </header>
     <article class="document"><h2 id="spark-023-broadcast-joins-statistics-and-strategy-evidence">spark-023: Broadcast joins, statistics and strategy evidence<a class="heading-anchor" href="#spark-023-broadcast-joins-statistics-and-strategy-evidence" aria-label="Link to this section">#</a></h2>
-<p>Authored paired Scala/PySpark teaching content. The default fixtures are tiny, local and deterministic. Runtime acceptance, logical correctness and learner understanding remain separate evidence.</p>
+<p>Joining 20,000 facts to a 20-row dimension is a textbook case for a broadcast join, but this lesson treats the textbook as a hypothesis. You will read the size estimate, watch the plan change when the automatic threshold is disabled or a hint is added, and check that the joined bag, with weighted total 839,916, never changes with the strategy.</p>
 <h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
-<p>Intermediate; approximately 105 minutes. Direct prerequisites: <code>spark-022</code>. The prepared baseline is Spark 4.3.0, Scala binary 2.13, JDK 17 and Python 3.12. Read the <a href="../execution-baseline.md.html">execution baseline</a>.</p>
+<p>Intermediate; approximately 105 minutes. Direct prerequisites: <code>spark-022</code>. Pinned versions: <a href="../execution-baseline.md.html">execution baseline</a>.</p>
 <h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>Open <code>spark-023</code> in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed <code>spark-local-scala</code> or <code>spark-local-python</code> profile, save your pad and run the complete source. Scala stages as <code>Main.scala</code> with <code>object Main</code>; Python stages as <code>main.py</code> with a main guard. Each program creates its own <code>local[2]</code> session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.</p>
-<p>The <a href="../lessons/spark-023.scala.html">Scala learner</a> and <a href="../lessons/spark-023.py.html">PySpark learner</a> run two complete demonstrations and retain six explicit task stubs. Use the <a href="../solutions/spark-023_solutions.md.html">explained solutions</a> only after an attempt or an explicit worked comparison; the <a href="../solutions/spark-023_solution.scala.html">Scala reference</a> and <a href="../solutions/spark-023_solution.py.html">PySpark reference</a> contain complete assertions. A bounded collect is used only for the declared tiny fixture; do not copy it onto an unbounded or large production table.</p>
+<p>Shared run steps and profile rules: <a href="../STUDY-GUIDE.md.html#run-a-paired-lesson">study guide</a>.</p>
+<p>Learner pads: <a href="../lessons/spark-023.scala.html">Scala</a> and <a href="../lessons/spark-023.py.html">PySpark</a>.</p>
+<p>Open the <a href="../solutions/spark-023_solutions.md.html">explained solutions</a> after an attempt.</p>
+<p>The first worked example counts the dimension&#x27;s distinct keys and prints <code>Known finite build side: 20 unique keys</code>. The second computes the weighted total independently of any Spark join and prints <code>Independent weighted-total oracle=</code> followed by 839916 (the Scala pad prints <code>oracle=839916</code>). That number is the target every join strategy in the exercises has to reproduce.</p>
 <h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
 <ul>
 <li>Choose and verify a join strategy without turning a hint into a correctness assumption.</li>
-<li>State the input and output grain, schema, NULL policy and ordering before executing a transformation.</li>
-<li>Compare each language implementation with independent literal expectations, not only with the other implementation.</li>
+<li>Compare the dimension&#x27;s estimated size with the 10,485,760-byte automatic threshold, then produce a shuffled plan with the threshold at -1 and a <code>BroadcastHashJoin</code> plan with an explicit hint, proving with <code>exceptAll</code> in both directions that the rows are identical.</li>
+<li>Explain why a broadcast hint is not honored for the full outer join in Exercise 5, and gate any broadcast candidate on a key-uniqueness check and a row bound that reject a duplicated key 0 or a 101-row table.</li>
 </ul>
 <h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
 <ul>
@@ -232,7 +234,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The final bounded-broadcast gate requires a batch relation, at most 100 rows, a nonnull unique key and an estimated size within 1 MiB before attaching the hint. Row validation uses a limit-plus-one count to reject an oversized candidate, then validates identities on the bounded population. The estimate remains only one signal. A production gate would also consider actual encoded sizes, peak build memory, concurrent queries and worker memory budgets. A successful 20-row broadcast on <code>local[2]</code> does not certify those production conditions.</p>
 <p>The lesson deliberately omits elapsed-time superiority claims. Tiny data, compilation and scheduler startup can dominate. Physical strategy evidence explains what was selected; duplicate-sensitive output comparison explains whether the choice preserved semantics. These are useful results even when neither establishes a meaningful speedup.</p>
 <h3 id="supplied-local-fixture">Supplied local fixture<a class="heading-anchor" href="#supplied-local-fixture" aria-label="Link to this section">#</a></h3>
-<p>The complete source creates the owned local session described above, then constructs this explicit fixture. The worked examples below run in that same main function; there is no hidden notebook state.</p>
+<p>Facts come from <code>spark.range(0, 20000, 1, 4)</code> renamed to <code>fact_id</code>, with <code>key = fact_id % 20</code> and <code>amount = fact_id % 7 + 1</code>. The dimension has keys 0 to 19 in two partitions with <code>factor = key + 1</code>, so every fact matches exactly one dimension row. The session pins the broadcast threshold at 10,485,760 bytes and prefers sort-merge joins, so any change of strategy comes from what an exercise sets.</p>
 <pre class="highlighted-code"><code class="language-scala"><span class="syntax-keyword">import</span> org<span class="syntax-punctuation">.</span>apache<span class="syntax-punctuation">.</span>spark<span class="syntax-punctuation">.</span>sql<span class="syntax-punctuation">.</span>functions<span class="syntax-punctuation">.</span>_
 
 <span class="syntax-keyword">val</span> facts <span class="syntax-operator">=</span> spark
@@ -308,9 +310,14 @@ println<span class="syntax-punctuation">(</span><span class="syntax-string">&quo
 <h3 id="common-pitfalls">Common pitfalls<a class="heading-anchor" href="#common-pitfalls" aria-label="Link to this section">#</a></h3>
 <p>Do not broadcast a relation just because it is named dimension. Do not treat a hint as a guarantee for every join type or as a uniqueness check. Statistics can be missing or stale, and in-memory build structures may exceed the estimated bytes. Disable or account for AQE when isolating static planning. Keep full-output reconciliation separate from the plan comparison. This local demonstration establishes strategy behavior and logical parity, not a cluster speedup or a safe production memory limit.</p>
 <h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
-<p>Explain the contract of <code>estimatedBytes</code> / <code>estimated_bytes</code> without reading its solution. Then, from memory, state what Exercise 6 (Gate a broadcast candidate on explicit bounded evidence) must produce: The 20-row dimension passes; the same dimension with a duplicate key and a 101-row candidate fail. No unbounded input is collected or materialized by the gate. Say which part of that result is evidence and what it still cannot show. Name the action in your trace that actually runs the plan.</p>
+<ul>
+<li>The automatic plan contains a join, but Exercise 2 does not require it to be a broadcast join. Why is the threshold comparison in Exercise 1 not enough to predict the strategy?</li>
+<li>With the threshold at -1, the plan has no <code>BroadcastHashJoin</code> and AQE is off. Why does the lesson switch AQE off before making that claim about the plan?</li>
+<li>Exercise 4 checks <code>exceptAll</code> in both directions. Describe an incorrect hinted result that a one-directional check would accept.</li>
+<li>The broadcast gate rejects a dimension in which key 0 appears twice. What would that duplicate do to the 20,000-row join and to its 839,916 total?</li>
+</ul>
 <h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
-<p>Use the <a href="../README.md.html">course route</a> to continue. Paired-language agreement is useful only when both outputs also satisfy the independent fixture contract. A successful local run is not evidence of cluster performance or production recovery.</p>
+<p>Go on to <a href="spark-024.md.html">spark-024: AQE, skew and bounded salting experiments</a>. Broadcasting helps when one side is small; the next lesson keeps both sides in a shuffle join and confronts the case where 90 percent of the facts share a single key.</p>
 <h3 id="primary-sources-and-official-apis">Primary sources and official APIs<a class="heading-anchor" href="#primary-sources-and-official-apis" aria-label="Link to this section">#</a></h3>
 <ul>
 <li><a href="https://spark.apache.org/docs/4.3.0/sql-performance-tuning.html">Spark 4.3.0 statistics, broadcast thresholds and hint eligibility</a></li>

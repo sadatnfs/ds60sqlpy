@@ -4,79 +4,46 @@
 
 ## How to run this lesson
 
-Start the Linux-container engine and run `./classroom` from the repository
-root. On Windows, use Ubuntu in WSL 2 or the thin
-`START_DOCKER_CLASSROOM.cmd` wrapper. Choose **PostgreSQL** on the shared
-`/classroom` home, then open **sql-deep-05**. The
-[launcher guide](../../../docs/one-command-classroom.md) covers first preparation, strict resume and
-the saved project selection. No host Python or PostgreSQL installation is
-required for this browser route.
+Start **sql-deep-05** from `./classroom` using the shared [run steps](../../STUDY-GUIDE.md#run-a-lesson-in-the-classroom).
 
-1. Read the prerequisite and fixture notes before running the file. Use only
-   the local disposable `advanced_sql_training` database.
-2. Choose **Whole SQL lesson (psql)** for the cataloged learner script. This
-   preserves the lesson's reviewed psql directives, relative includes and
-   transaction behavior. **SQL snippet** is appropriate for ordinary SQL
-   statements, but is not a replacement for an entire script's setup.
-3. The **Course database** panel above the code shows whether the course
-   training tables are loaded. Missing tables load automatically before your
-   first run (or choose **Load course tables**) and stay loaded for later
-   lessons. **Reset training data** restores the original rows only when your
-   own changes made results differ; it keeps your saved code and notes.
-4. Edit the learner copy in the classroom and save your prediction before
-   running. Its whole-script workspace is
-   `.learning/sql/sql-deep-05/lesson/workspace/sql/professional/lessons/sql_deep_05.sql`.
-   For browser work this path is inside the Docker learning volume, not a
-   newly created host folder beside your checkout. The checked-in source
-   remains the answer-free starting artifact.
-5. Run the whole script and inspect the full transcript. The runner uses
-   `psql -X -v ON_ERROR_STOP=1 -f`. SELECT output has columns, rows and a row
-   count; DDL/DML has command tags; intentional checks may produce NOTICE
-   messages. An unexpected ERROR or nonzero exit is a failure to diagnose,
-   even when an earlier query printed plausible values.
-6. Verify the lesson's expected grain, ordering, constraints and declared
-   transaction or cleanup outcome. Keep required ROLLBACK statements.
-   The warehouse sequence and other explicitly stateful exercises explain
-   when state is committed. Read saved output without rerunning it when
-   reviewing an earlier attempt.
+Choose **Whole SQL lesson (psql)**. Inside one transaction on
+`advanced_sql_training` (any other database is refused), the script builds
+`deep5_jobs` with seven jobs: four `ready` rows (three for tenant 1 and job 4
+for tenant 2), one `done`, one `blocked` and job 7 with a NULL status. It adds
+the partial index `deep5_ready_idx` on `(tenant_id, priority DESC, job_id)`
+restricted to `status = 'ready'`, and an empty `deep5_requests` table for
+idempotency keys. Only the two worked examples print: the ready and not-done
+predicates for jobs 1, 5 and 7, then the tenant 1 queue 1, 3, 6. No `NOTICE` is
+expected, and `ROLLBACK` drops the tables and the index. Save attempts in
+`.learning/sql/sql-deep-05/lesson/workspace/sql/professional/lessons/sql_deep_05.sql`.
 
-If a relation is missing, inspect the lesson's required fixture and predecessor
-rather than guessing a new table definition. If authentication or runtime
-readiness fails, use `./classroom status` and the setup guide. Keep credentials
-out of SQL, notebooks, screenshots and committed files. Repair the first error
-before trusting partial output, and reveal separate solutions only when you
-want to compare after an attempt.
-
-### Optional contributor notebook route
-
-For notebook work, deliberately prepare the Linux/WSL contributor environment
-from [CONTRIBUTING.md](../../../CONTRIBUTING.md), including a compatible psql client and
-the notebook dependencies. Generate this lesson's private workspace through
-the maintained CLI:
-
-```sh
-uv run --no-sync python scripts/course.py sql notebook sql-deep-05
-```
-
-Open the printed notebook path in that environment's JupyterLab. It uses the
-same catalog-derived learner-copy layout in that contributor checkout and
-executes the complete script through psql. Its host-side state is separate
-from the Docker browser's named volume. Follow
-[guided SQL notebooks](../../../docs/guided-sql-notebooks.md) for explicit local connection
-selection and kernel setup. Notebook generation does not execute SQL or
-authorize a reset.
+The optional notebook route starts with `uv run --no-sync python scripts/course.py sql notebook sql-deep-05`; see the [study guide](../../STUDY-GUIDE.md#optional-contributor-notebook-route).
 
 ## Level and prerequisites
 
-- **Level:** Advanced. The guide defines each new mechanism before relying on it.
-- **Prerequisites:** [`sql-ops-01`](sql_ops_01_indexes_statistics_maintenance.md), [`sql-concurrency-01`](sql_concurrency_01_isolation_and_versions.md).
-- **Artifacts:** [Learner SQL](../lessons/sql_deep_05.sql), [explained reference](../solutions/sql_deep_05_solutions.md), and [executable reference](../solutions/sql_deep_05_solutions.sql). Every fixture is local, deterministic and rolled back; no prior lesson state is required.
+- **Level:** Advanced. Predicate implication, optimistic versions, affected-row
+  receipts and idempotency keys are each defined before an exercise relies on
+  them.
+- **Prerequisites:**
+  [`sql-ops-01`](sql_ops_01_indexes_statistics_maintenance.md),
+  [`sql-concurrency-01`](sql_concurrency_01_isolation_and_versions.md): indexes
+  and statistics, then isolation levels and row versions.
+- **Artifacts:** [Learner SQL](../lessons/sql_deep_05.sql), [explained
+  reference](../solutions/sql_deep_05_solutions.md), and [executable
+  reference](../solutions/sql_deep_05_solutions.sql). The `deep5_` tables and
+  `deep5_ready_idx` are temporary and disappear at the final `ROLLBACK`, so no
+  earlier lesson state is needed.
 
 ## Learning objectives
 
-- State the output grain and identity before writing a query, including the NULL and duplicate policies.
-- Explain the new SQL mechanism, produce each exact projected result and expose the listed counterexample.
-- Verify rollback-safe behavior from inspected result rows and assertions without relying on a final success message.
+- Write the exact queue predicate a ready-only partial index can serve, and use
+  blocked job 5 as the counterexample that shows `status <> 'done'` does not
+  imply `status = 'ready'`.
+- Confirm from `pg_index` and `pg_class` that `deep5_ready_idx` is partial with
+  three key columns, without claiming the planner must choose it.
+- Combine the version check and the change in one `UPDATE`, read `ROW_COUNT` as
+  the receipt, and keep a retried request key from applying twice or with a
+  different payload.
 
 ## Vocabulary and concepts
 
@@ -136,7 +103,7 @@ ORDER BY
   job_id;
 ```
 
-The result grain is one eligible job with columns job_id and priority. IDs 1,3,6 appear with priorities 10,5,5; job_id resolves the equal-priority tie. This is a read-only ordered candidate list, not a claim that these jobs were locked or assigned to a worker.
+The result grain is one eligible job with columns job_id and priority. IDs 1, 3, 6 appear with priorities 10, 5, 5; job_id resolves the equal-priority tie. This is a read-only ordered candidate list, not a claim that these jobs were locked or assigned to a worker.
 
 ## Exercises
 
@@ -144,7 +111,7 @@ The result grain is one eligible job with columns job_id and priority. IDs 1,3,6
 
 **Inputs/evidence:** For sql-deep-05 Exercise 1, Return job_id, priority for tenant 1 jobs whose status equals ready, ordered by priority descending then job_id ascending. Preserve the three eligible job identities and exclude another tenant, blocked, done and unknown statuses.
 
-**Expected result/shape:** For sql-deep-05 Exercise 1, Rows are(1,10),(3,5),(6,5). The tie between 3 and 6 follows job identity, not unspecified physical row order.
+**Expected result/shape:** For sql-deep-05 Exercise 1, Rows are (1,10), (3,5), (6,5). The tie between 3 and 6 follows job identity, not unspecified physical row order.
 
 **Verify:** For sql-deep-05 Exercise 1, list eligible queue IDs from the status and attempt conditions, including the NULL-attempt case, before considering whether an index could support the predicate.
 
@@ -160,7 +127,7 @@ The result grain is one eligible job with columns job_id and priority. IDs 1,3,6
 
 **Inputs/evidence:** For sql-deep-05 Exercise 3, Return one row with index_name, is_partial, key_columns, ready_rows for the temporary `deep5_ready_idx`. Use pg_index and pg_class to verify a predicate exists and there are three key attributes; count ready source rows separately. Do not assert that the planner must choose this index.
 
-**Expected result/shape:** For sql-deep-05 Exercise 3, The row is `deep5_ready_idx`, true,3,4. The ready count includes tenant 2 job 4 because the index predicate restricts status, not tenant.
+**Expected result/shape:** For sql-deep-05 Exercise 3, The row is `deep5_ready_idx`, true, 3, 4. The ready count includes tenant 2 job 4 because the index predicate restricts status, not tenant.
 
 **Verify:** For sql-deep-05 Exercise 3, inspect the catalog index name, definition and predicate; confirm existence separately from planner choice, which would require actual EXPLAIN evidence.
 
@@ -168,7 +135,7 @@ The result grain is one eligible job with columns job_id and priority. IDs 1,3,6
 
 **Inputs/evidence:** For sql-deep-05 Exercise 4, Within the exercise savepoint, increment attempts and version for job 1 only when tenant 1, status ready and expected version 1 still match. Capture ROW_COUNT and return action, affected, job_id, attempts, version in one row. Roll back after checking.
 
-**Expected result/shape:** For sql-deep-05 Exercise 4, action first, affected 1, job_id1, attempts 1, version 2. A read followed by an unguarded update is not an acceptable substitute for the combined predicate.
+**Expected result/shape:** For sql-deep-05 Exercise 4, `action` first, `affected` 1, `job_id` 1, `attempts` 1, `version` 2. A read followed by an unguarded update is not an acceptable substitute for the combined predicate.
 
 **Verify:** For sql-deep-05 Exercise 4, read the original value and version before writing, inspect the RETURNING receipt, and verify the committed-in-transaction state equals one increment with one version increase.
 
@@ -184,7 +151,7 @@ The result grain is one eligible job with columns job_id and priority. IDs 1,3,6
 
 **Inputs/evidence:** For sql-deep-05 Exercise 6, Implement a temporary apply_request function that stores request_key, job_id, a positive delta and applies a tenant 1 ready-job increment only on a new key. Replay the same key/payload without applying again, then reject the same key with a changed delta using SQLSTATE 22023. Return one row with request_key, first_applied, replay_applied, conflict_rejected, attempts, version, request_count.
 
-**Expected result/shape:** For sql-deep-05 Exercise 6, request-a, true, false, true,1,2,1. The changed-payload attempt is caught as an expected error and must not change the job or create another request row.
+**Expected result/shape:** For sql-deep-05 Exercise 6, `request-a`, true, false, true, 1, 2, 1. The changed-payload attempt is caught as an expected error and must not change the job or create another request row.
 
 **Verify:** For sql-deep-05 Exercise 6, perform an identical idempotent retry and then a conflicting payload under the same key; verify one stored receipt row and one increment, while the conflicting request raises the declared error.
 
@@ -194,12 +161,24 @@ If a partial index seems unused, separate predicate implication from cost select
 
 ## Self-check
 
-- Explain the row grain after each FROM, JOIN, filter, grouping or window step. Name the identity columns that prove rows were neither lost nor multiplied.
-- Reconstruct a boundary result by hand, then compare with the query output. Explain why the tempting wrong query fails even if it returns the same total on an easier fixture.
+- Job 7 has a NULL status. Why does neither the ready nor the not-done
+  predicate select it, and why is job 5, not job 7, the counterexample
+  in Exercise 2?
+- Exercise 3 counts 4 ready rows although the tenant 1 queue has three. Which
+  job is the fourth, and what does that say about what the index predicate
+  restricts?
+- In Exercise 5 the stale replay reports `affected` 0. Why is that the success
+  signal for the guard, and what would `attempts` be if the version check were
+  done in a separate earlier `SELECT`?
 
 ## Next step
 
-Transfer the same reasoning to a new small fixture before using it on larger data, then continue with [the next deepening lesson](sql_deep_06.md). Keep the result columns, ordering, NULL policy and observation horizon explicit. The [professional SQL track](../README.md) provides the wider route.
+Before moving on, change the index predicate in a copy of the fixture to
+`status IN ('ready', 'blocked')` and decide which of the lesson's queries it
+could now serve and which it still cannot. [The next deepening
+lesson](sql_deep_06.md) turns to analytical correctness: cohort denominators,
+follow-up maturity and point-in-time quality. The [professional SQL
+track](../README.md) lists the wider route.
 
 ## Primary sources and official APIs
 

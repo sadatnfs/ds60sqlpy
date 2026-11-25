@@ -28,9 +28,9 @@ Build only the operations the small language needs. Supporting conditionals, loo
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles the saved pad as `main.swift` with Swift 6 language checking. An explicit `@main` type contains `static func main() async throws`; the fixed compiler uses `-parse-as-library -swift-version 6`. The examples use the standard library and portable Foundation. `precondition` makes a violated invariant fail the process. The fixed pad accepts one source file, without arbitrary command arguments, interactive input or dependency installation. SwiftUI, UIKit, Apple simulators and application signing belong to the separately prepared macOS/Xcode project labs, never the Linux pad.
+The builder is declared on one long line above `LessonMain`; reformat it across several lines in a scratch copy if that makes it easier to read. Task 4's `for` loop inside the closure fails to compile with a message that a closure containing a control flow statement cannot be used with the builder, because it lacks `buildArray`.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Compile contract, starter stop and success marker: [running a lesson](../STUDY-GUIDE.md#running-a-lesson).
 
 
 
@@ -38,7 +38,7 @@ Start with the answer-free learner artifact in your saved classroom pad. It deli
 
 `@resultBuilder` marks the builder. buildBlock combines expressions and buildOptional handles an if without else. A function parameter annotated with the builder accepts the transformed closure.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+Each example ends with a trace; method: [tracing a program](../STUDY-GUIDE.md#tracing-a-program).
 
 ## Worked example / walkthrough
 
@@ -66,6 +66,8 @@ struct LessonMain {
 
 **Observe:** Two expressions become an ordered array of sections.
 
+**Trace.** The `@SectionBuilder` attribute on the parameter tells the compiler to transform the closure. Each statement is an expression, so `"Overview"` becomes `buildExpression("Overview")`, returning a one-element array, and the same happens for `"Details"`. The compiler then calls `buildBlock` with both arrays. `buildBlock` flattens them into the ordered array of Overview and Details, which `sections` returns by calling `content()`.
+
 ### Example B: Include a conditional section
 
 The buildOptional method gives the conditional branch an explicit combination rule.
@@ -91,6 +93,8 @@ struct LessonMain {
 
 **Observe:** The conditional contributes its section when true.
 
+**Trace.** The block contains Overview and an `if` without `else`. The compiler wraps the `if` body: when `include` is true, the inner block produces the array holding Diagnostics, which is passed to `buildOptional` as a non-nil value and returned unchanged. `buildBlock` then flattens Overview and that array. If `include` were false, `buildOptional` would receive nil and return an empty array, so only Overview would remain.
+
 ## Exercises
 
 1. **Predict and explain.** Translate the first block into its builder calls.
@@ -105,13 +109,15 @@ struct LessonMain {
 
 6. **Transfer and justify.** Explain why a domain-specific builder may be clearer or less clear than an ordinary array literal.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Log each task in the [evidence table](../STUDY-GUIDE.md#recording-exercise-evidence) before opening the explanation.
 
 ## Common pitfalls and diagnosis
 
 A result builder is not runtime reflection or arbitrary syntax parsing. Type errors can surface inside generated combinations, so reduce the block to a small failing expression. Do not reinvent SwiftUI ViewBuilder for ordinary views.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+Each control-flow form needs its own builder method. A `for` loop needs `buildArray`, and an `if` with an `else` needs `buildEither(first:)` and `buildEither(second:)`; both fail with the same control-flow diagnostic until those methods exist. For task 5, an empty closure calls `buildBlock` with no arguments and returns an empty array, and a false optional contributes nothing.
+
+Repair routine: [building a regression case](../STUDY-GUIDE.md#building-a-regression-case).
 
 ## Progressive hints
 
@@ -121,11 +127,15 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 ## Self-check and next step
 
-Explain Result builder, Declarative composition, Intermediate result, Builder method, buildOptional without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+Write out the builder calls the compiler generates for `sections { "Overview"; "Details" }`. Name the builder method required for an `if` without `else`, for an `if` with `else` and for a `for` loop. Explain when an ordinary array literal would be clearer than this builder.
+
+Then follow the general [self-check routine](../STUDY-GUIDE.md#self-check-routine) and save your pad.
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://docs.swift.org/swift-book/documentation/the-swift-programming-language/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+[Documentation](https://docs.swift.org/swift-book/documentation/the-swift-programming-language/): Result builders are described near the end of the Advanced Operators chapter, and the language reference lists every builder method the compiler can call.
+
+Provenance and limits: [sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

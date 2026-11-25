@@ -1,6 +1,6 @@
 # cpp-031: explanations and reference observations
 
-Attempt the learner tasks before opening this document. The executable reference checks the bounded normal and boundary examples; the six explanations below cover the deliberate changes and manual checks.
+The [executable reference](cpp-031_solution.cpp) checks that zero workers leave the counter at 0. The explanations cover atomicity, release and acquire ordering, and publishing two fields together. How to compare: [study guide](../STUDY-GUIDE.md#compare-with-the-solutions).
 
 ## Mechanism
 

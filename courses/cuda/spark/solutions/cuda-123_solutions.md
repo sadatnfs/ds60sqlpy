@@ -1,6 +1,6 @@
 # cuda-123: explained solutions
 
-These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.
+Compare with your [worksheet](../lessons/cuda-123.md) attempt.
 
 ## Exercise 1: Calculate partition averages
 
@@ -74,8 +74,16 @@ Predictions remain predictions until executed.
 
 **How to verify.** Mark each speedup in the report as estimated or observed, and for observed values cite the run. If an observation disagrees with the estimate, keep both and note which model assumption failed.
 
+## Self-check answers
+
+1. **What can Adaptive Query Execution change at run time?** It can coalesce partitions, switch join strategy and split skewed partitions based on runtime statistics.
+
+2. **Is there a best partition count for all workloads?** No. Partition count trades task overhead against memory per task and concurrency, which depend on data and device.
+
+3. **Why keep semantic fixtures separate from performance datasets?** Tiny fixtures are ideal for exact correctness checks but their timings are dominated by startup, not by the work.
+
 ## Reference observation
 
 Partition averages 10000 and 100000; unmatched cache states rejected.
 
-The reference file is `courses/cuda/spark/references/cuda-123_cpu.py`. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.
+Asserted by `courses/cuda/spark/references/cuda-123_cpu.py`.

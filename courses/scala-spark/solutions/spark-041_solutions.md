@@ -1,6 +1,8 @@
 # spark-041: Explained paired reference solutions
 
-Read the [guide](../guides/spark-041.md) and attempt one language first. The [Scala reference](spark-041_solution.scala) and [PySpark reference](spark-041_solution.py) are complete single-file programs with explicit local sessions and finally-based stop. Each compares with literal expectations; matching two implementations alone would not rule out a shared mistake.
+Attempt the [guide](../guides/spark-041.md) exercises first.
+
+References: [Scala](spark-041_solution.scala), [PySpark](spark-041_solution.py).
 
 ## Exercises and reasoning
 
@@ -29,7 +31,7 @@ The receipt describes the runtime actually executing the tests. Scala probes the
 
 Evaluate the supplied four-row bag plus exact decimal and timezone expressions.
 
-**Expected:** 4 rows,3 known amounts, total 200,3 distinct IDs; decimal 12345678.90; instant 19:00UTC.
+**Expected:** 4 rows, 3 known amounts, total 200, 3 distinct IDs; decimal 12345678.90; instant 19:00 UTC.
 
 ```scala
 def goldenMetrics(frame: DataFrame): Seq[Long] = {
@@ -55,7 +57,7 @@ The fixture catches a migration that drops duplicate occurrences, replaces NULL 
 
 Run the baseline ID-only deduplication query, then reject a request to change its state keys to id, cents while retaining that checkpoint.
 
-**Expected:** Baseline output 1:100,2:200; preflight rejects changed keys before starting a new query.
+**Expected:** Baseline output `1:100, 2:200`; preflight rejects changed keys before starting a new query.
 
 ```scala
 def requireCompatible(oldKeys: Seq[String], newKeys: Seq[String]): Unit = {
@@ -77,7 +79,7 @@ This is an explicit application preflight refusal, not a fabricated Spark engine
 
 Add a new occurrence 1:999 and run id, cents deduplication using a new checkpoint/output.
 
-**Expected:** Candidate bag 1:100,1:999,2:200, which fails the baseline one-row-per-ID product gate.
+**Expected:** Candidate bag `1:100, 1:999, 2:200`, which fails the baseline one-row-per-ID product gate.
 
 ```scala
 def candidateRun(spark: SparkSession, root: Path, input: Path): RunReceipt = {
@@ -108,7 +110,7 @@ The changed state key admits a second amount for the same ID. That can be a vali
 
 Resume the original ID-only query with its original checkpoint after the candidate is rejected.
 
-**Expected:** The same baseline query ID resumes; the new occurrence of already-seen ID 1 does not add a row; baseline output stays 1:100,2:200.
+**Expected:** The same baseline query ID resumes; the new occurrence of already-seen ID 1 does not add a row; baseline output stays `1:100, 2:200`.
 
 ```scala
 def rollback(spark: SparkSession, input: Path, checkpoint: Path, output: Path): RunReceipt = {
@@ -153,6 +155,7 @@ The gate keeps missing evidence visible. Only the current Spark 4.3.0 stack is e
 
 ## Execution and interpretation
 
-Run the complete reference in its prepared fixed worker. Its first check (Capture the actual runtime tuple) is built inside the program, so opening the lesson fetches nothing; it expects: Spark 4.3.0, Scala 2.13 family, JDK 17; actual patch strings and explicit not-installed Arrow when absent. The final success line prints only after every reference assertion passes.
+`golden_metrics` must return `(4, 3, 200, 3)`, the decimal must come back as `12345678.90` and the timestamp as `2026-10-23 19:00:00`. The version receipt must show Spark 4.3.0, Scala 2.13, Java 17 and the Python version, printed after `actual_versions=`. The baseline query keyed on `id` commits `1:100, 2:200`. Calling `require_compatible(["id"], ["id", "cents"])` must raise with `State-key change requires separate checkpoint and output`, and no query may be active afterwards.
 
-Local plan, partition and resource evidence does not establish cluster-scale performance; session cleanup is explicit.
+After `batch-02.json` adds `(1, 999)`, the candidate keyed on `id, cents` runs in its own folders, gets a new query ID and commits `1:100, 1:999, 2:200`, while the baseline output stays `1:100, 2:200`. The rollback reuses the original checkpoint and query ID, still commits no `1:999` because ID 1 is already in state, and both checkpoints remain on disk. `may_promote` returns True only when all four flags are true. The program then prints `spark-041: six PySpark reference contracts passed; Spark=` and the version. A local rehearsal on one patch level does not certify every connector or a cluster upgrade.
+

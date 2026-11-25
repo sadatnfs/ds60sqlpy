@@ -116,12 +116,11 @@ When versions disagree, the metastore log names the expected and found schema ve
 
 ## Complete worked source
 
-This is a project-only command notebook. Read and edit it in the classroom; run its explicitly labeled commands from the copied owned Docker workshop. The classroom does not execute these service commands.
+The classroom does not execute these service commands. See the [workshop rules](../STUDY-GUIDE.md#workshop-notebooks).
 
 # Hive apache-068 command notebook
 
-Run from the copied owned Hive project, following its README. Native service
-acceptance is separately recorded in QUALIFICATION.md.
+`verify-schema` asks the Hive schema tool to compare the Metastore database with the Hive 4.2.1 schema, while `status` and `logs` only report container state and recent output. None of the three changes the database in the copied Hive project.
 
 ```bash
 bash run.sh verify-schema
@@ -131,12 +130,11 @@ bash run.sh logs
 
 Test upgrade/recovery only against a separate owned database copy with a retained consistent dump. Do not alter the live fixture version row or use automatic schema upgrades to suppress failure.
 
-The classroom does not execute these Docker commands. Retain source, schema,
-file identities, actual responses and failure scope in an independent receipt.
+Metadata upgrades and remote backup are prepared extensions in QUALIFICATION.md. Record the dump identity, the schema version before and after, and the name of the separate database copy, so recovery never touches the live fixture.
 
 ## Primary references
 
-- [Hive4.2.1 preparation and components](https://hive.apache.org/development/quickstart/)
+- [Hive 4.2.1 preparation and components](https://hive.apache.org/development/quickstart/)
 - [Hive DDL](https://hive.apache.org/docs/latest/language/languagemanual-ddl/)
 - [Hive Metastore administration](https://hive.apache.org/docs/latest/admin/adminmanual-metastore-administration/)
 - [Hive/Iceberg integration](https://iceberg.apache.org/docs/latest/hive/)

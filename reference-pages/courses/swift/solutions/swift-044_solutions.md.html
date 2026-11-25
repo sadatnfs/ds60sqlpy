@@ -194,7 +194,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/swift/solutions/swift-044_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="swift-044-explanation-and-comparison">swift-044: explanation and comparison<a class="heading-anchor" href="#swift-044-explanation-and-comparison" aria-label="Link to this section">#</a></h2>
-<p>Attempt the six guide tasks before opening this comparison. The executable reference is <a href="swift-044_solution.swift.html">swift-044_solution.swift</a>. It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.</p>
+<p>Reference program: <a href="swift-044_solution.swift.html">swift-044_solution.swift</a>, covering both examples and the executed answers.</p>
+<p>Attempt the tasks first; see <a href="../STUDY-GUIDE.md.html#comparing-with-the-explanation">comparing with the explanation</a>.</p>
 <h3 id="why-the-two-examples-differ">Why the two examples differ<a class="heading-anchor" href="#why-the-two-examples-differ" aria-label="Link to this section">#</a></h3>
 <p><strong>Describe state with words:</strong> A textual state remains meaningful when a visual marker is unavailable. The label communicates completion without relying on color.</p>
 <p><strong>Keep identity separate from translation:</strong> Saved work and navigation should not break when a learner changes language. Switching language changes the title from Read to Lire while the completion saved under lesson-one still shows complete.</p>
@@ -242,7 +243,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Written answer.</strong> These checks need the Apple project on a prepared Mac and were not run for this reference. Set Dynamic Type to the largest accessibility size and confirm row text wraps instead of clipping; delete every item and confirm the list and progress text still make sense; then enter a very long title and confirm it wraps in the row and the editor. Note each failure with the setting that caused it.</p>
 <h4 id="task-6-transfer-and-justify">Task 6: Transfer and justify<a class="heading-anchor" href="#task-6-transfer-and-justify" aria-label="Link to this section">#</a></h4>
 <p>Create a manual accessibility acceptance checklist with concrete observations and retained defects.</p>
-<p>No single reference answer exists: several designs can satisfy this transfer task. Build yours from the task 3 answer above (Run JourneyApp using keyboard navigation and VoiceOver on macOS) and the mechanism described below, and state one limitation of your choice.</p>
+<p>No single answer exists; extend task 3 using the <a href="../STUDY-GUIDE.md.html#open-transfer-tasks">open transfer routine</a>.</p>
 <h3 id="solution-reasoning">Solution reasoning<a class="heading-anchor" href="#solution-reasoning" aria-label="Link to this section">#</a></h3>
 <p><strong>Approach.</strong> Example A defines <code>accessibilityText</code>, which joins a title and the word complete or incomplete. Example B keeps translated titles in a dictionary keyed by language and saved completion in a dictionary keyed by a stable id, <code>lesson-one</code>, then builds a row for English and French.</p>
 <p><strong>Why it is correct.</strong> With title &quot;Read&quot; and <code>complete</code> true, the interpolation gives &quot;Read, complete&quot;, which states completion in words a screen reader can speak instead of relying on a check mark or color. In Example B the completion lookup uses <code>lesson-one</code>, not the displayed title, so switching from <code>en</code> to <code>fr</code> changes only the title lookup: &quot;Read: complete&quot; becomes &quot;Lire: complete&quot; and the saved state is unchanged.</p>
@@ -254,7 +255,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>In SwiftUI, accessibilityLabel and accessibilityValue describe semantics; accessibilityIdentifier is a testing hook, not a spoken label substitute. Localized strings and format styles should preserve plural and locale rules.</p>
 <p>A label should not duplicate an entire surrounding screen. Fixed heights can clip large text. The portable string checks do not establish screen-reader order or keyboard focus behavior.</p>
 <h3 id="review-before-continuing">Review before continuing<a class="heading-anchor" href="#review-before-continuing" aria-label="Link to this section">#</a></h3>
-<p>Run the reference and confirm that it prints <code>swift-044: passed</code>, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.</p></article>
+<p>Run the reference and confirm it prints <code>swift-044: passed</code>, then rerun the guide&#x27;s counterexample.</p></article>
   </main>
 </body>
 </html>

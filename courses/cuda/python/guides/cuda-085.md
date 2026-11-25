@@ -1,10 +1,17 @@
 # cuda-085: Choose a library before owning a kernel
 
-**Route:** CUDA Python and machine learning. **Stage:** intermediate. **Prerequisites:** `cuda-068`, `cuda-071`. Allow several sessions when the hardware experiment is new; the chapter is not a deadline.
+**Route:** CUDA Python and machine learning. **Stage:** intermediate. **Prerequisites:** `cuda-068`, `cuda-071`.
 
-## What you will be able to explain
+Pacing, evidence labels and platform rules: [CUDA study guide](../../STUDY-GUIDE.md).
 
-By the end, you can **compute complete latency**, **identify a maintenance cost**, and **write a keep-or-replace decision** with evidence. Start with the two worked cases, then use the editable CPU model to make the quantities concrete.
+## Learning objectives
+
+- Compute complete latency.
+- List a numerical contract.
+- Add temporary memory.
+- Identify a maintenance cost.
+- Choose two workload sizes.
+- Write a keep-or-replace decision.
 
 ## Mechanism and vocabulary
 
@@ -31,9 +38,13 @@ A library pipeline takes 8 ms of kernels and 2 ms of transfer. A custom kernel s
 
 A fused transformation reduces three launches to one and removes a large intermediate. It may win at some sizes while losing at tiny sizes where first-call compilation dominates.
 
-## Portable executable model
+## How to run the CPU model
 
-The **CPU reference model** variant runs this bounded worked example using `python-core`. It uses only the Python standard library, small synthetic values and no network. Its purpose is to expose the arithmetic or contract behind the chapter. The separate reference includes assertions for the stated observations.
+Edit the copy; the [reference](../references/cuda-085_cpu.py) adds assertions.
+
+```sh
+python courses/cuda/python/lessons/cuda-085_cpu.py
+```
 
 ```python
 library = {"kernel": 8, "transfer": 2, "packing": 0}
@@ -52,77 +63,64 @@ print("CPU decision model: library", sum(library.values()), "custom", sum(custom
 | `library` | `{'kernel': 8, 'transfer': 2, 'packing': 0}` |
 | `custom` | `{'kernel': 6, 'transfer': 2, 'packing': 3}` |
 
-Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.
-
 ## Practice and transfer
+
+Record each attempt in the [worksheet](../lessons/cuda-085.md) before opening hints.
 
 ### Exercise 1: Compute complete latency
 
 **Trap to avoid:** Comparing kernel times alone, 6 against 8 ms, declares the custom version a win while ignoring the new packing step.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 2: List a numerical contract
 
 **Trap to avoid:** Testing only that the shapes match accepts any numbers of the right size, so a kernel that returns zeros, or that silently turns NaN inputs into finite outputs, would pass every check.
-
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 3: Add temporary memory
 
 **Trap to avoid:** Summing only the input and output ignores intermediates, so the custom path can run out of memory at a size where the library path fit, even though both outputs are the same size.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 4: Identify a maintenance cost
 
 **Trap to avoid:** Counting only the development time ignores ongoing cost, which repeats every time the team adopts a new GPU or toolkit release and often exceeds the original effort.
-
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 5: Choose two workload sizes
 
 **Trap to avoid:** Benchmarking only at the largest size that fits hides the small-input behavior, which matters when production calls are mostly small batches.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 6: Write a keep-or-replace decision
 
 **Trap to avoid:** Choosing the custom kernel because its compute portion, 6 ms against 8 ms, is faster ignores the stated total and the packing step that the custom path requires.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ## Progressive hints
 
-Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.
+Hint *k* belongs to exercise *k*; open one at a time.
 
-1. Start from worked example 1 and mark the quantities needed for the task "Compute complete latency".
-2. Change one assumption in worked example 2 while preserving the declared contract: list a numerical contract.
-3. Trace the CPU program's variables before adding hardware behavior: add temporary memory.
-4. Draw producers, consumers and the exact operation boundary for the task "Identify a maintenance cost".
-5. Separate what the small fixture establishes from what the real runtime must show: choose two workload sizes.
-6. Write a counterexample to an overbroad claim before you write a keep-or-replace decision.
+1. Add every stage a request pays for, not only the kernel time, for both the library and the custom path.
+2. Write the shapes, dtypes, tolerance and edge inputs both implementations must accept before comparing them.
+3. Find the moment when the most buffers are alive together and add their sizes.
+4. Ask who requalifies the custom kernel when the GPU architecture or the compiler version changes.
+5. Pick one size where launch overhead dominates and one representative size where useful work dominates.
+6. State the measured benefit the custom path would need before its extra obligations are worth accepting.
 
-## Common mistakes and self-review
+## Common mistakes and self-check
 
-Confusing a correct tiny example with a general implementation is the central review risk. For this chapter, challenge the assumption in worked example 2, then ask whether your change preserves the mechanism described above. If you change dtype, layout, ordering, batch size or backend, update the acceptance contract rather than silently reusing the old observation. Explain an unexpected result before trying random configuration changes.
+A common mistake is comparing only kernel times. In worked example 1 the custom kernel saves 2 ms but adds 3 ms of packing, so complete latency worsens from 10 to 11 ms. Another mistake is presenting a slower teaching kernel as a production improvement. Fix both with a ledger that covers supported dtypes and layouts, temporary memory, numerical behavior, warmup, packaging and fallback, measured at a tiny and a representative size, and keep the library unless the full measurement favors the replacement.
 
-Keep a small evidence table with columns **claim**, **input**, **expected observation**, **actual observation** and **limit**. For the first claim use `Compute complete latency`. For the final claim use `Write a keep-or-replace decision`. An unperformed GPU or cluster experiment remains pending even when the CPU model is correct.
+**Misconception:** Writing a custom kernel is the more serious engineering choice, so a library call is only a stepping stone. **Correction:** A tuned library usually covers more shapes, dtypes and architectures, and its maintainers carry the testing and packaging burden. A custom kernel is justified only by a specific need such as fusion or an unusual layout, and it then becomes code you must test, package and maintain for every target you support.
 
-## Platform and evidence contract
+**Evidence limit:** The reference adds modeled milliseconds, 10 for the library and 11 for the custom path. These are illustrative numbers, not timings; a real decision needs both implementations measured on the target device with the same inputs and checked outputs.
 
-The reading worksheet and CPU reference model work through the ordinary Linux Docker classroom on macOS, Linux and Windows using WSL 2. They do not require an NVIDIA GPU. Their results are labeled CPU models or semantic oracles, not simulated hardware performance.
+1. When can a custom kernel be justified over a library call?
+2. Why include tiny inputs in the comparison?
+3. What is an educational kernel's honest success claim?
 
-Real CUDA work needs supported NVIDIA hardware, a compatible host driver and an explicitly prepared GPU runtime. An Apple GPU does not execute CUDA kernels. PyTorch MPS on a supported native Mac, ROCm on supported AMD hardware, or other vendor backends can provide separate accelerator learning routes; they need their own package and operation qualification and are not CUDA evidence. The ordinary Linux Docker classroom does not expose native Mac MPS automatically.
-
-Do not download packages, models or data by opening this lesson. Do not attach an engine socket, ambient cluster credentials or an arbitrary remote endpoint. A CPU pass, imported package, successful compilation, real GPU result and measured performance are distinct observations. Record the actual backend, data shape/dtype, source revision, versions and pending checks. A saved completion marker records learning progress, not hardware certification.
+Answers: [self-check answers](../solutions/cuda-085_solutions.md#self-check-answers).
 
 ## Primary references
 
-- [DLPack Python specification](https://dmlc.github.io/dlpack/latest/python_spec.html)
 - [CuPy interoperability](https://docs.cupy.dev/en/stable/user_guide/interoperability.html)
 
-Use the version-matched documentation of your prepared environment. These references describe interfaces and supported boundaries; the chapter's synthetic examples and CPU models are original teaching material.
+Full lists: [documentation and sources](../../STUDY-GUIDE.md#documentation-and-sources).
 
 ## Ask an AI tutor about this lesson
 

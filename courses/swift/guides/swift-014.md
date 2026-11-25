@@ -24,9 +24,9 @@ Computed setters translate an external representation back into stored state. Th
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles the saved pad as `main.swift` with Swift 6 language checking. An explicit `@main` type contains `static func main() async throws`; the fixed compiler uses `-parse-as-library -swift-version 6`. The examples use the standard library and portable Foundation. `precondition` makes a violated invariant fail the process. The fixed pad accepts one source file, without arbitrary command arguments, interactive input or dependency installation. SwiftUI, UIKit, Apple simulators and application signing belong to the separately prepared macOS/Xcode project labs, never the Linux pad.
+Both structs appear in both examples, so Example A compiles `Temperature` without using it and Example B does the same with `Rectangle`. That is harmless. Task 2 adds a perimeter as another computed property; if you write it as a stored `let` instead, task 4's stale-value bug appears as soon as the width changes.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Compile contract, starter stop and success marker: [running a lesson](../STUDY-GUIDE.md#running-a-lesson).
 
 
 
@@ -34,7 +34,7 @@ Start with the answer-free learner artifact in your saved classroom pad. It deli
 
 `var area: Int { width * height }` computes a value. `get` and `set` define two-way access; newValue names the assigned value. didSet observes assignments after the new value is stored.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+Each example ends with a trace; method: [tracing a program](../STUDY-GUIDE.md#tracing-a-program).
 
 ## Worked example / walkthrough
 
@@ -74,6 +74,8 @@ struct LessonMain {
 
 **Observe:** Area changes with width without a separately updated area field.
 
+**Trace.** `rectangle` is created with width 3 and height 4. Reading `area` runs the getter, which multiplies the current stored values and returns 12; nothing is cached. Assigning 5 to `width` changes one stored property. The next read of `area` runs the getter again, now computing 5 times 4, and returns 20. Because `area` has no storage of its own, there is no moment at which it can disagree with the dimensions, which is the single source of truth idea in this lesson.
+
 ### Example B: Expose a conversion property
 
 A computed property can expose a convenient representation while retaining one stored unit.
@@ -110,6 +112,8 @@ struct LessonMain {
 
 **Observe:** The getter and setter translate between temperature scales.
 
+**Trace.** `temperature` stores `celsius` 0. Reading `fahrenheit` runs the getter: 0 times 9 divided by 5 plus 32 gives exactly 32.0. Assigning 212 runs the setter with `newValue` 212, which computes (212 minus 32) times 5 divided by 9 and stores 100 in `celsius`. Only Celsius is ever stored. The check compares against 100 with a small tolerance, because a setter that converts through floating-point division may land a rounding error away from the exact value for other inputs.
+
 ## Exercises
 
 1. **Predict and explain.** Trace which properties are stored and which are derived.
@@ -124,13 +128,15 @@ struct LessonMain {
 
 6. **Transfer and justify.** Choose an explicit method instead of a setter for a state change with validation and failure.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Log each task in the [evidence table](../STUDY-GUIDE.md#recording-exercise-evidence) before opening the explanation.
 
 ## Common pitfalls and diagnosis
 
 Expensive computed properties can surprise callers who expect cheap access. Observers can hide cascading side effects. Avoid duplicating state unless there is a measured caching need and invalidation policy.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+For task 4, add `var storedArea: Int` initialized to 12 alongside the computed `area`. Set `width` to 5: the computed value becomes 20 while the stored one stays 12, and a check comparing them exposes the bug immediately. For task 5, a Fahrenheit value such as 100 converts to 37.777..., so an exact equality check on the Celsius result would fail there.
+
+Repair routine: [building a regression case](../STUDY-GUIDE.md#building-a-regression-case).
 
 ## Progressive hints
 
@@ -140,11 +146,15 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 ## Self-check and next step
 
-Explain Stored property, Computed property, Observer without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+Point to each stored and each computed property in both structs and say how you can tell from the syntax. Explain why `rectangle` must be declared with `var` before `rectangle.width = 5` compiles. Give one state change that should be a throwing method rather than a property setter, and say what the setter could not report.
+
+Then follow the general [self-check routine](../STUDY-GUIDE.md#self-check-routine) and save your pad.
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://docs.swift.org/swift-book/documentation/the-swift-programming-language/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+[Documentation](https://docs.swift.org/swift-book/documentation/the-swift-programming-language/): The Properties chapter of the Swift book covers stored properties, computed properties with getters and setters, read-only computed properties and property observers.
+
+Provenance and limits: [sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

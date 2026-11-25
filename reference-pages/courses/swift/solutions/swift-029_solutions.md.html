@@ -194,7 +194,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/swift/solutions/swift-029_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="swift-029-explanation-and-comparison">swift-029: explanation and comparison<a class="heading-anchor" href="#swift-029-explanation-and-comparison" aria-label="Link to this section">#</a></h2>
-<p>Attempt the six guide tasks before opening this comparison. The executable reference is <a href="swift-029_solution.swift.html">swift-029_solution.swift</a>. It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.</p>
+<p>Reference program: <a href="swift-029_solution.swift.html">swift-029_solution.swift</a>, covering both examples and the executed answers.</p>
+<p>Attempt the tasks first; see <a href="../STUDY-GUIDE.md.html#comparing-with-the-explanation">comparing with the explanation</a>.</p>
 <h3 id="why-the-two-examples-differ">Why the two examples differ<a class="heading-anchor" href="#why-the-two-examples-differ" aria-label="Link to this section">#</a></h3>
 <p><strong>Collect results without assuming order:</strong> Independent values cross the boundary, and the parent alone mutates the result array. Sorted results are deterministic despite unspecified completion order.</p>
 <p><strong>Handle an empty group:</strong> The empty path needs no special background work or timer. No admitted children produces the identity result zero.</p>
@@ -301,7 +302,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>for try await rethrows the first child error, and leaving the group by throwing cancels and awaits the remaining children, so no partial total escapes.</p>
 <h4 id="task-6-transfer-and-justify">Task 6: Transfer and justify<a class="heading-anchor" href="#task-6-transfer-and-justify" aria-label="Link to this section">#</a></h4>
 <p>Choose a concurrency bound for an I/O workload and explain its resource basis.</p>
-<p>No single reference answer exists: several designs can satisfy this transfer task. Build yours from the task 3 answer above (Implement bounded admission for a small list with at most two outstanding children) and the mechanism described below, and state one limitation of your choice.</p>
+<p>No single answer exists; extend task 3 using the <a href="../STUDY-GUIDE.md.html#open-transfer-tasks">open transfer routine</a>.</p>
 <h3 id="solution-reasoning">Solution reasoning<a class="heading-anchor" href="#solution-reasoning" aria-label="Link to this section">#</a></h3>
 <p><strong>Approach.</strong> Example A adds three child tasks to a task group, each doubling one input, and the parent collects results with <code>for await</code> before sorting. Example B iterates a group with no children. The task 3 answer limits admission so at most two children are outstanding while all five inputs are processed.</p>
 <p><strong>Why it is correct.</strong> Children may finish in any order, so the parent sorts before checking <code>[2, 4, 6]</code>. Only the parent appends to <code>results</code>, so no shared mutable array crosses task boundaries. An empty group ends its loop immediately and the sum stays 0. In task 3 all five inputs are processed and at most two child tasks were ever outstanding.</p>
@@ -313,7 +314,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>withTaskGroup creates a scoped group. addTask admits a child. for await consumes completed child results. A child captures only sendable data crossing the concurrency boundary.</p>
 <p>Group completion order is unspecified. Cancellation is cooperative and does not instantly kill children. Avoid unbounded child creation for large inputs.</p>
 <h3 id="review-before-continuing">Review before continuing<a class="heading-anchor" href="#review-before-continuing" aria-label="Link to this section">#</a></h3>
-<p>Run the reference and confirm that it prints <code>swift-029: passed</code>, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.</p></article>
+<p>Run the reference and confirm it prints <code>swift-029: passed</code>, then rerun the guide&#x27;s counterexample.</p></article>
   </main>
 </body>
 </html>

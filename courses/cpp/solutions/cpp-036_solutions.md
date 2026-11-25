@@ -1,6 +1,6 @@
 # cpp-036: explanations and reference observations
 
-Attempt the learner tasks before opening this document. The executable reference checks the bounded normal and boundary examples; the six explanations below cover the deliberate changes and manual checks.
+The [executable reference](cpp-036_solution.cpp) builds a `constexpr` table of squares and checks `square(0)`. The explanations cover compile-time evaluation limits and the table-size experiment in Exercise 6. How to compare: [study guide](../STUDY-GUIDE.md#compare-with-the-solutions).
 
 ## Mechanism
 

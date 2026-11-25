@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/docker/solutions/docker-001_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="docker-001-explanatory-solutions">docker-001: explanatory solutions<a class="heading-anchor" href="#docker-001-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit reveal. These explain the supplied teaching fixtures; they are not engine results. The mechanism is explained in <code>courses/docker/guides/docker-001.md</code>.</p>
+<p>These answers explain teaching fixtures, not engine results; the mechanism is in <a href="../guides/docker-001.md.html">the guide</a>.</p>
 <h3 id="exercise-1-predict-what-remains-after-the-short-process-exits">Exercise 1: Predict what remains after the short process exits.<a class="heading-anchor" href="#exercise-1-predict-what-remains-after-the-short-process-exits" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> The local image remains; the --rm container is removed.</p>
 <p><strong>Why:</strong> The removal flag applies to the created container, not to every object derived from its image. An image can be reused by another run without retaining that earlier process or writable layer.</p>
@@ -238,7 +238,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>A plausible wrong approach:</strong> Treating a running status from docker ps as proof skips the request. A server bound to the wrong interface or crashing per request still shows a running container.</p>
 <p><strong>How to verify:</strong> From the host, send curl --max-time 3 http://127.0.0.1:18080/ and confirm a 200 response whose message field matches the compose environment value.</p>
 <h3 id="check-your-transfer">Check your transfer<a class="heading-anchor" href="#check-your-transfer" aria-label="Link to this section">#</a></h3>
-<p>A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.</p></article>
+<p>There are two stopped containers, one image and two separate copies of <code>/tmp/n</code>, each in its own container&#x27;s writable layer. The image is unchanged because writes never flow back into it. The removal fails with a conflict that names a container still using the image, because stopped containers keep a reference to the image they were created from. Remove the two containers first, by ID, and the image removal then succeeds. If <code>docker ps -a --filter ancestor=ds60-docker-study:local</code> showed only one container, or a fresh container from the image could read <code>/tmp/n</code>, this explanation would be wrong.</p></article>
   </main>
 </body>
 </html>

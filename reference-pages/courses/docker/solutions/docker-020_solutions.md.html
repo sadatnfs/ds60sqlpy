@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/docker/solutions/docker-020_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="docker-020-explanatory-solutions">docker-020: explanatory solutions<a class="heading-anchor" href="#docker-020-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit reveal. These explain the supplied teaching fixtures; they are not engine results. The mechanism is explained in <code>courses/docker/guides/docker-020.md</code>.</p>
+<p>These answers explain teaching fixtures, not engine results; the mechanism is in <a href="../guides/docker-020.md.html">the guide</a>.</p>
 <h3 id="exercise-1-predict-whether-matching-usernames-guarantee-file-access">Exercise 1: Predict whether matching usernames guarantee file access.<a class="heading-anchor" href="#exercise-1-predict-whether-matching-usernames-guarantee-file-access" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> No; numeric identity and permission bits matter.</p>
 <p><strong>Why:</strong> Names are lookup labels. Compare numeric IDs and the actual mount ownership before diagnosing a cross-environment permission mismatch.</p>
@@ -238,7 +238,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>A plausible wrong approach:</strong> Checking only that the counter increments passes even if /app were writable.</p>
 <p><strong>How to verify:</strong> The increment returns the next value, and python -c writing /app/x reports a permission or read-only error.</p>
 <h3 id="check-your-transfer">Check your transfer<a class="heading-anchor" href="#check-your-transfer" aria-label="Link to this section">#</a></h3>
-<p>A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.</p></article>
+<p>The image&#x27;s <code>chown</code> only affects the image&#x27;s own <code>/data</code> directory and the copy into a brand new, empty volume. This volume already held root-owned files, so it was mounted as is. Repair it deliberately with a one-off container that runs as root, mounts only that volume, and changes ownership of <code>/data</code> to 10001, after taking a backup; or restore the data into a fresh volume. Expect <code>ls -ln /data</code> to show 10001 and the increment to succeed. If ownership already showed 10001, look instead for a read-only mount of <code>/data</code>.</p></article>
   </main>
 </body>
 </html>

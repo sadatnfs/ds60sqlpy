@@ -206,11 +206,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Filter mask:</strong> A Boolean decision per input row.</p>
 <p><strong>Take indices:</strong> Positions selecting and potentially reordering rows.</p>
 <h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>The Linux Docker classroom compiles the saved pad as <code>main.rs</code> with pinned Rust 1.99.1, edition 2024, and the prepared Arrow 60 library. <code>assert!</code> and <code>assert_eq!</code> remain active in normal builds. The fixed pad accepts one source file without arbitrary arguments, interactive input, Cargo manifests or package installation. The main function returns <code>Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt;</code> so later examples can propagate errors with <code>?</code>; the final <code>Ok(())</code> means this fixture completed successfully. Standard library and Arrow examples remain offline after image preparation. Multi-file Cargo and external ecosystem projects have separate explicit preparation workflows.</p>
-<p>Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.</p>
+<p>Beyond the prelude, this lesson&#x27;s programs use <code>arrow::array</code> and <code>arrow::compute</code>. A passing run prints <code>rust-040: passed</code>.</p>
+<p>Pad setup and limits: <a href="../STUDY-GUIDE.md.html#run-a-lesson">Run a lesson</a>.</p>
+<p>Before you run anything, follow <a href="../STUDY-GUIDE.md.html#attempt-a-lesson">Attempt a lesson</a>.</p>
 <h3 id="syntax-anatomy-and-execution-trace">Syntax anatomy and execution trace<a class="heading-anchor" href="#syntax-anatomy-and-execution-trace" aria-label="Link to this section">#</a></h3>
 <p>compute::filter accepts an array and BooleanArray mask. compute::take selects by integer indices. as_any().downcast_ref recovers a known concrete array after the type contract has been established.</p>
-<p>Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.</p>
+<p><strong>Reading Example A (Filter with an explicit mask, code below).</strong> <code>BooleanArray::from(vec![true, false, true])</code> builds the selection mask, one entry per row of <code>values</code>. <code>arrow::compute::filter(&amp;values, &amp;mask)</code> is a kernel: it takes any array and a mask and returns a new array containing only the rows whose mask entry is true, in their original order. Because it accepts any array type, its return type is <code>ArrayRef</code>, the type-erased <code>Arc&lt;dyn Array&gt;</code>. The <code>?</code> propagates an <code>ArrowError</code> if the kernel rejects its inputs. To read the result as integers, <code>as_any().downcast_ref::&lt;Int32Array&gt;()</code> recovers the concrete type; <code>unwrap</code> is safe here because filtering an <code>Int32Array</code> always yields one. <code>iter()</code> then yields <code>Option&lt;i32&gt;</code>, which is why the expected values are wrapped in <code>Some</code>.</p>
+<p>Method for tracing your own variants: <a href="../STUDY-GUIDE.md.html#trace-a-program">Trace a program</a>.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="example-a-filter-with-an-explicit-mask">Example A: Filter with an explicit mask<a class="heading-anchor" href="#example-a-filter-with-an-explicit-mask" aria-label="Link to this section">#</a></h4>
 <p>The mask expresses one admission decision for every original position.</p>
@@ -261,20 +263,28 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <ol start="6">
 <li><strong>Transfer and justify.</strong> Choose filter or take for a sampling procedure and explain duplicate-row consequences.</li>
 </ol>
-<p>For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.</p>
+<p>Record each task as in <a href="../STUDY-GUIDE.md.html#keep-evidence-for-each-task">Keep evidence for each task</a>.</p>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
 <p>Downcast failure is possible in generic code. A mask and array must have compatible lengths. A kernel result does not establish a domain-level ordering guarantee unless the operation contract does.</p>
-<p>A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.</p>
+<p>To turn a pitfall into a test, see <a href="../STUDY-GUIDE.md.html#design-a-regression-case">Design a regression case</a>.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <ol>
 <li>Reproduce Example A (Filter with an explicit mask) before changing anything, and confirm its observation: Filtering retains two and six in input order.</li>
 <li>Compare Example B (Reorder and repeat with take) with Example A and name the first line whose behavior differs. Its observation is: Take repeats and reorders values according to the index sequence.</li>
 <li>Before opening the explanation, test your task 3 attempt against this lesson&#x27;s main pitfall: Downcast failure is possible in generic code.</li>
 </ol>
+<p>Tempting approaches to rule out before you compare:</p>
+<ul>
+<li><strong>Task 1.</strong> Expecting <code>take</code> to deduplicate indices or to keep input order predicts [2, 6] for Example B and misses the repeated row that can double-count an aggregate.</li>
+<li><strong>Task 2.</strong> Changing only the expected vector and not the mask makes the test check your edit, not the kernel.</li>
+<li><strong>Task 5.</strong> Calling <code>take</code> with <code>None</code> options on indices from an untrusted source assumes they were already validated, so an out-of-range index is no longer reported as a handled error.</li>
+</ul>
 <h3 id="self-check-and-next-step">Self-check and next step<a class="heading-anchor" href="#self-check-and-next-step" aria-label="Link to this section">#</a></h3>
-<p>Explain Kernel, Filter mask, Take indices without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.</p>
+<p>Why does <code>filter</code> in Example A return [2, 6] in input order? In Example B, why does <code>take</code> return [6, 2, 6], and what would that repetition do to a sum? How should a sampling contract state each kernel&#x27;s treatment of a null in the mask or the index array?</p>
+<p>Then work through <a href="../STUDY-GUIDE.md.html#self-check-and-review">Self-check and review</a>.</p>
 <h3 id="sources-and-execution-boundary">Sources and execution boundary<a class="heading-anchor" href="#sources-and-execution-boundary" aria-label="Link to this section">#</a></h3>
-<p><a href="https://docs.rs/arrow/60.0.0/arrow/compute/">Official language or framework documentation</a>. The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.</p>
+<p>Read <a href="https://docs.rs/arrow/60.0.0/arrow/compute/">the <code>arrow::compute</code> documentation</a> for <code>filter</code>, <code>take</code> and their length rules.</p>
+<p>What the classroom does and does not prove: <a href="../STUDY-GUIDE.md.html#sources-and-execution-boundary">Sources and execution boundary</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for rust-040: Compute kernels, filtering and row selection.
 Read courses/rust/guides/rust-040.md and courses/rust/lessons/rust-040.rs. Prerequisites: rust-039.

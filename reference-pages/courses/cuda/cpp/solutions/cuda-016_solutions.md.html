@@ -196,7 +196,6 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <article class="document"><h2 id="cuda-016-explanatory-solutions">cuda-016: explanatory solutions<a class="heading-anchor" href="#cuda-016-explanatory-solutions" aria-label="Link to this section">#</a></h2>
 <h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
 <p>Storage spaces describe accessibility and lifetime as well as likely performance. Global allocations can hold data used by many kernels. Shared memory belongs to a block and lasts for that block&#x27;s execution. Registers hold thread-local values, but a large local array or register pressure can place values in local memory backed by device memory. Constant storage is useful for certain read-only patterns, especially broadcast-like access, but it is not an automatic speedup for arbitrary divergent addresses. A compiler resource report helps explain implementation choices; source variable scope alone does not prove where every value resides.</p>
-<p>The separate <a href="../references/cuda-016_cpu.py.html">CPU reference</a> checks the chapter&#x27;s bounded model. It does not execute CUDA or establish GPU timing. Compare after attempting the worksheet or explicitly choosing to reveal solutions.</p>
 <h3 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h3>
 <p>In a three-tap filter, the input and output images live in global allocations. A thread&#x27;s running sum is a scalar candidate for a register. A cooperatively loaded tile belongs in shared memory. Three common coefficients may use read-only or constant storage. These are choices to validate, not declarations that force a faster program.</p>
 <p><strong>Approach:</strong> Map each object to a space: images in global, sum in a register, tile in shared, taps in constant.</p>
@@ -233,11 +232,16 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Why it is correct:</strong> A 64-entry table fits easily, so the deciding factor is whether lanes read the same entry.</p>
 <p><strong>A plausible wrong approach:</strong> Choosing constant storage for data-dependent lookups serializes divergent reads in the warp.</p>
 <p><strong>How to verify:</strong> Measure both variants on inputs with uniform and divergent indices.</p>
+<h3 id="self-check-answers">Self-check answers<a class="heading-anchor" href="#self-check-answers" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>Which storage would you choose for three filter coefficients that every thread reads?</strong> Constant or read-only storage, because all threads read the same few values.</li>
+<li><strong>When does shared memory&#x27;s content disappear?</strong> When the block that owns it finishes executing.</li>
+<li><strong>Why can a per-thread array of 1,024 floats hurt occupancy?</strong> It needs 4 KB per thread, which spills to local memory and inflates per-thread resources.</li>
+</ol>
 <h3 id="numerical-reference-and-its-limits">Numerical reference and its limits<a class="heading-anchor" href="#numerical-reference-and-its-limits" aria-label="Link to this section">#</a></h3>
-<p>The complete CPU model is <a href="../references/cuda-016_cpu.py.html">here</a>. Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It does not claim CUDA execution, concurrency safety or a performance measurement.</p>
+<p>The <a href="../references/cuda-016_cpu.py.html">CPU reference</a> reproduces worked example 1 and prints <code>{&#x27;logical_temporary_bytes&#x27;: 524288, &#x27;storage_roles&#x27;: {&#x27;image&#x27;: &#x27;global&#x27;, &#x27;cooperative_tile&#x27;: &#x27;shared&#x27;, &#x27;sum&#x27;: &#x27;thread local&#x27;}}</code>.</p>
 <h3 id="transfer-review">Transfer review<a class="heading-anchor" href="#transfer-review" aria-label="Link to this section">#</a></h3>
-<p>Compare whether neighboring lanes read the same entries or divergent entries, access frequency and update needs; measure against a suitable read-only/global alternative.</p>
-<p>A complete explanation must name its inputs, the unchanged mathematical contract, the changed boundary or resource condition, and the evidence still needed on actual hardware. Preserve a CPU baseline even after a GPU path becomes available.</p></article>
+<p>Compare whether neighboring lanes read the same entries or divergent entries, access frequency and update needs; measure against a suitable read-only/global alternative.</p></article>
   </main>
 </body>
 </html>

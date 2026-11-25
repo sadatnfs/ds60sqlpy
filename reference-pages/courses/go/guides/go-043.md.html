@@ -209,9 +209,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="syntax-anatomy-and-reasoning">Syntax anatomy and reasoning<a class="heading-anchor" href="#syntax-anatomy-and-reasoning" aria-label="Link to this section">#</a></h3>
 <p>A finalizer is a qualified string in metadata.finalizers. The state machine first ensures the finalizer exists during normal operation, then observes deletion, performs bounded cleanup and removes its own entry. Preserve other controllers&#x27; entries. An already absent external resource can count as successful cleanup only when the ownership check and absence observation are reliable. Never remove unrelated finalizers as a generic repair shortcut.</p>
 <h3 id="run-this-lesson">Run this lesson<a class="heading-anchor" href="#run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>Choose Go in the unified Docker classroom. Save your own pad before experimenting. The prepared worker stages it as <code>main.go</code>, compiles it, and executes the resulting program with bounded time and output. The pad is one source file. It does not supply interactive input, arbitrary command-line arguments, package installation, Kubernetes credentials or a host Docker socket. Every ordinary reference here uses the standard library, synthetic local data and explicit checks. A failed <code>check</code> panics and produces a nonzero process result; do not remove it to make the run appear successful.</p>
-<p>The explanatory solution snippets belong inside <code>func main()</code> unless they declare a helper. <code>check</code> is a tiny teaching helper that panics when a condition is false. The separate reference supplies required imports and helpers and implements all six cases. Use that complete source only after an attempt or an explicit reveal. For an independently prepared Go project, the equivalent local build is <code>go build -o lesson main.go</code>, followed by <code>./lesson</code>; use Linux or WSL 2 for that optional workflow. Compiling proves syntax and type consistency, while the executed checks establish the stated example contracts.</p>
-<p>Each worked example below is a complete Go file. Copy one whole block into your saved pad and run it. Example 2 includes the first case as well as the second, so its setup is complete. Its supporting declarations may be reused in later investigations. The separate reference implements all six cases.</p>
+<p>Run each worked example as one complete file in your saved pad (<a href="../STUDY-GUIDE.md.html#run-a-lesson">run steps</a>).</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1-register-cleanup-responsibility">Worked example 1: Register cleanup responsibility<a class="heading-anchor" href="#worked-example-1-register-cleanup-responsibility" aria-label="Link to this section">#</a></h4>
 <p>Inspect a normal object without the controller finalizer.</p>
@@ -303,77 +301,79 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Observe:</strong> The action is reconcile.</p>
 <p>A finalizer does not itself request deletion. Normal desired-state work continues while deletion has not begun.</p>
 <h3 id="predict-before-running">Predict before running<a class="heading-anchor" href="#predict-before-running" aria-label="Link to this section">#</a></h3>
-<p>For each example, write the input values, the state that can change, and the expected observation. Explain which result would disprove your current interpretation. For concurrency, predict a guaranteed relationship rather than an arbitrary scheduling order. For an error case, identify whether it is rejected at compilation or returned during execution.</p>
+<p>Predict finalAction for each state: a live object without the finalizer, a live object with it, a deleting object with cleanup outstanding, one with cleanup confirmed and one whose UID no longer matches. Decide why the ownership test comes first. Then predict which entries survive when only the lesson finalizer is removed.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-register-cleanup-responsibility-predict-an-edited-check">Exercise 1: Register cleanup responsibility: predict an edited check<a class="heading-anchor" href="#exercise-1-register-cleanup-responsibility-predict-an-edited-check" aria-label="Link to this section">#</a></h4>
-<p>Copy worked example 1 into a scratch pad and change <code>check(finalAction(false, false, false, true) == &quot;add-finalizer&quot;, &quot;register&quot;)</code> to <code>check(finalAction(true, false, false, true) == &quot;add-finalizer&quot;, &quot;register&quot;)</code> inside its check. Before running, predict whether the check still passes and explain why; then restore it.</p>
-<p><strong>Expected:</strong> The changed run panics with <code>register</code> because the edited check no longer holds. Restoring the original line brings back the worked observation: the next action is add-finalizer.</p>
-<p><strong>Verify:</strong> Compare your written prediction with the panic message <code>register</code> and name the value that made <code>finalAction(false, false, false, true) == &quot;add-finalizer&quot;</code> false. After restoring the input, the program must print its success line again.</p>
+<p>Copy worked example 1, change <code>check(finalAction(false, false, false, true) == &quot;add-finalizer&quot;, &quot;register&quot;)</code> to <code>check(finalAction(true, false, false, true) == &quot;add-finalizer&quot;, &quot;register&quot;)</code> inside its check and predict whether it still passes; then restore it.</p>
+<p><strong>Expected:</strong> The edited check panics with <code>register</code> even though <code>finalAction(false, false, false, true) == &quot;add-finalizer&quot;</code> still holds.</p>
+<p><strong>Verify:</strong> Restoring <code>check(finalAction(false, false, false, true) == &quot;add-finalizer&quot;, &quot;register&quot;)</code> makes the check pass again with the worked observation: the next action is add-finalizer.</p>
 <h4 id="exercise-2-retain-a-healthy-object-diagnose-an-edited-check">Exercise 2: Retain a healthy object: diagnose an edited check<a class="heading-anchor" href="#exercise-2-retain-a-healthy-object-diagnose-an-edited-check" aria-label="Link to this section">#</a></h4>
-<p>A careless edit changed the check in worked example 2 so that it reads <code>check(finalAction(true, true, false, true) == &quot;reconcile&quot;, &quot;normal&quot;)</code>. Run worked example 2 with that line, explain why the edited check now fails for the same program state, and restore it.</p>
-<p><strong>Expected:</strong> Before the repair the program panics with <code>normal</code>; after it the line reads <code>check(finalAction(false, true, false, true) == &quot;reconcile&quot;, &quot;normal&quot;)</code> again and the action is reconcile.</p>
-<p><strong>Verify:</strong> Keep the failing and the repaired runs. Explain why the edited check rejects the same program state that <code>finalAction(false, true, false, true) == &quot;reconcile&quot;</code> accepts.</p>
+<p>A careless edit rewrote the check in worked example 2 as <code>check(finalAction(true, true, false, true) == &quot;reconcile&quot;, &quot;normal&quot;)</code>. Explain the failure, then restore it.</p>
+<p><strong>Expected:</strong> The defective run panics with <code>normal</code>; after restoring <code>check(finalAction(false, true, false, true) == &quot;reconcile&quot;, &quot;normal&quot;)</code>, the action is reconcile.</p>
+<p><strong>Verify:</strong> The edited check fails with message <code>normal</code> for a state that <code>finalAction(false, true, false, true) == &quot;reconcile&quot;</code> accepts.</p>
 <h4 id="exercise-3-clean-before-releasing-deletion">Exercise 3: Clean before releasing deletion<a class="heading-anchor" href="#exercise-3-clean-before-releasing-deletion" aria-label="Link to this section">#</a></h4>
 <p>Inspect a deleting object with outstanding owned cleanup.</p>
 <p><strong>Expected:</strong> The action is cleanup.</p>
-<p><strong>Verify:</strong> Keep a check equivalent to <code>finalAction(true, true, false, true) == &quot;cleanup&quot;</code>. As a control, change <code>check(finalAction(true, true, false, true) == &quot;cleanup&quot;, &quot;cleanup&quot;)</code> to <code>check(finalAction(false, true, false, true) == &quot;cleanup&quot;, &quot;cleanup&quot;)</code> inside that check: it must panic with <code>cleanup</code>, which shows the check can fail. Restore it.</p>
+<p><strong>Verify:</strong> Your solution must keep <code>finalAction(true, true, false, true) == &quot;cleanup&quot;</code> true. Control: changing <code>check(finalAction(true, true, false, true) == &quot;cleanup&quot;, &quot;cleanup&quot;)</code> to <code>check(finalAction(false, true, false, true) == &quot;cleanup&quot;, &quot;cleanup&quot;)</code> panics with message <code>cleanup</code>; revert it.</p>
 <h4 id="exercise-4-remove-only-after-success">Exercise 4: Remove only after success<a class="heading-anchor" href="#exercise-4-remove-only-after-success" aria-label="Link to this section">#</a></h4>
 <p>Inspect a deleting object with confirmed cleanup.</p>
 <p><strong>Expected:</strong> The action is remove-own-finalizer.</p>
-<p><strong>Verify:</strong> Keep a check equivalent to <code>finalAction(true, true, true, true) == &quot;remove-own-finalizer&quot;</code>. As a control, change <code>check(finalAction(true, true, true, true) == &quot;remove-own-finalizer&quot;, &quot;release&quot;)</code> to <code>check(finalAction(false, true, true, true) == &quot;remove-own-finalizer&quot;, &quot;release&quot;)</code> inside that check: it must panic with <code>release</code>, which shows the check can fail. Restore it.</p>
+<p><strong>Verify:</strong> Your solution must keep <code>finalAction(true, true, true, true) == &quot;remove-own-finalizer&quot;</code> true. Control: changing <code>check(finalAction(true, true, true, true) == &quot;remove-own-finalizer&quot;, &quot;release&quot;)</code> to <code>check(finalAction(false, true, true, true) == &quot;remove-own-finalizer&quot;, &quot;release&quot;)</code> panics with message <code>release</code>; revert it.</p>
 <h4 id="exercise-5-refuse-ownership-mismatch">Exercise 5: Refuse ownership mismatch<a class="heading-anchor" href="#exercise-5-refuse-ownership-mismatch" aria-label="Link to this section">#</a></h4>
 <p>Inspect a resource whose observed UID no longer matches the owned UID.</p>
 <p><strong>Expected:</strong> The action is ownership-error.</p>
-<p><strong>Verify:</strong> Keep a check equivalent to <code>finalAction(true, true, false, false) == &quot;ownership-error&quot;</code>. As a control, change <code>check(finalAction(true, true, false, false) == &quot;ownership-error&quot;, &quot;UID mismatch&quot;)</code> to <code>check(finalAction(true, true, false, true) == &quot;ownership-error&quot;, &quot;UID mismatch&quot;)</code> inside that check: it must panic with <code>UID mismatch</code>, which shows the check can fail. Restore it.</p>
+<p><strong>Verify:</strong> Your solution must keep <code>finalAction(true, true, false, false) == &quot;ownership-error&quot;</code> true. Control: changing <code>check(finalAction(true, true, false, false) == &quot;ownership-error&quot;, &quot;UID mismatch&quot;)</code> to <code>check(finalAction(true, true, false, true) == &quot;ownership-error&quot;, &quot;UID mismatch&quot;)</code> panics with message <code>UID mismatch</code>; revert it.</p>
 <h4 id="exercise-6-transfer-preservation-of-other-finalizers">Exercise 6: Transfer preservation of other finalizers<a class="heading-anchor" href="#exercise-6-transfer-preservation-of-other-finalizers" aria-label="Link to this section">#</a></h4>
 <p>Remove only lesson.example/cleanup from two entries.</p>
 <p><strong>Expected:</strong> The unrelated entry remains.</p>
-<p><strong>Verify:</strong> Keep a check equivalent to <code>len(out) == 1 &amp;&amp; out[0] == &quot;other.example/retain&quot;</code>. As a control, change <code>if v != &quot;lesson.example/cleanup&quot; {</code> to <code>if v == &quot;lesson.example/cleanup&quot; {</code>: the run must panic with <code>preserve others</code>. Restore the line before continuing.</p>
-<p>Implement these in the answer-free learner source. Keep one independent check per claim. A task can require tracing, construction, a changed input or a deliberate safe failure. Do not run a data race, corrupt memory or contact a shared cluster merely to demonstrate why it would be wrong.</p>
+<p><strong>Verify:</strong> Your solution must keep <code>len(out) == 1 &amp;&amp; out[0] == &quot;other.example/retain&quot;</code> true. Control: changing <code>if v != &quot;lesson.example/cleanup&quot; {</code> to <code>if v == &quot;lesson.example/cleanup&quot; {</code> panics with message <code>preserve others</code>; revert it.</p>
+<p>Work in the answer-free learner source, <code>courses/go/lessons/go-043.go</code> (<a href="../STUDY-GUIDE.md.html#work-an-exercise">exercise contract</a>).</p>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
-<p>Read a compiler error from the first location in your source, then fix one cause at a time. Unused imports and variables are errors in Go; add an import when its use exists, rather than copying a large unused import list. A panic from <code>check</code> identifies a violated example contract. Compare the actual value with the expected value and inspect the state transition that produced it. A returned <code>error</code> is a value that the caller must handle; an ignored error can make later output look plausible while the original operation failed.</p>
-<p>The lesson-specific explanations in the two examples identify the important counterexamples. Extend that reasoning to every investigation: explain why a plausible alternative would fail, and preserve a tiny input that distinguishes it. Treat empty data, missing values and cancellation as domain cases with explicit policies. In concurrent work, replace sleeps used as synchronization with channels, mutexes or an explicit ownership protocol.</p>
+<p>Removing the finalizer before cleanup succeeds is the orphaning bug: the API object disappears and nothing remembers the external resource. The opposite bug, never removing it, leaves the object stuck terminating. Remove only your own finalizer, never the whole list, and confirm the object is the incarnation you own; a recreated object with the same name has a different UID.</p>
+<p>General compiler, panic and error diagnosis is in the <a href="../STUDY-GUIDE.md.html#diagnose-a-failure">study guide</a>.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <h4 id="hint-for-investigation-1-register-cleanup-responsibility-predict-an-edited-check">Hint for investigation 1: Register cleanup responsibility: predict an edited check<a class="heading-anchor" href="#hint-for-investigation-1-register-cleanup-responsibility-predict-an-edited-check" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The next action is add-finalizer.</li>
-<li>The check <code>finalAction(false, false, false, true) == &quot;add-finalizer&quot;</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Compute the checked value with <code>check(finalAction(true, false, false, true) == &quot;add-finalizer&quot;, &quot;register&quot;)</code> in place before running, then compare it with the value <code>finalAction(false, false, false, true) == &quot;add-finalizer&quot;</code> expects.</li>
+<li>A live object without the finalizer needs registration. Which branch runs?</li>
+<li>With deleting set to true and no finalizer, finalAction returns done, so <code>==&quot;add-finalizer&quot;</code> fails. The function is right; the edited state describes a deleting object.</li>
 </ol>
 <h4 id="hint-for-investigation-2-retain-a-healthy-object-diagnose-an-edited-check">Hint for investigation 2: Retain a healthy object: diagnose an edited check<a class="heading-anchor" href="#hint-for-investigation-2-retain-a-healthy-object-diagnose-an-edited-check" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The action is reconcile.</li>
-<li>The check <code>finalAction(false, true, false, true) == &quot;reconcile&quot;</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Compare <code>check(finalAction(true, true, false, true) == &quot;reconcile&quot;, &quot;normal&quot;)</code> with the same line in worked example 2 and state the claim each version makes.</li>
+<li>The object is not deleting and the finalizer is present. What is the normal action?</li>
+<li>A deleting object with cleanup pending returns cleanup, so <code>==&quot;reconcile&quot;</code> fails. Restore deleting to false for the healthy case.</li>
 </ol>
 <h4 id="hint-for-investigation-3-clean-before-releasing-deletion">Hint for investigation 3: Clean before releasing deletion<a class="heading-anchor" href="#hint-for-investigation-3-clean-before-releasing-deletion" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The action is cleanup.</li>
-<li>The check <code>finalAction(true, true, false, true) == &quot;cleanup&quot;</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Name one input that would make <code>finalAction(true, true, false, true) == &quot;cleanup&quot;</code> false. A check that no input can falsify is not evidence.</li>
+<li>Deleting with cleanup outstanding. Which step must come before release?</li>
+<li>Removing the gate before cleanup succeeds can lose the only durable reminder of the external responsibility.</li>
 </ol>
 <h4 id="hint-for-investigation-4-remove-only-after-success">Hint for investigation 4: Remove only after success<a class="heading-anchor" href="#hint-for-investigation-4-remove-only-after-success" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The action is remove-own-finalizer.</li>
-<li>The check <code>finalAction(true, true, true, true) == &quot;remove-own-finalizer&quot;</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Name one input that would make <code>finalAction(true, true, true, true) == &quot;remove-own-finalizer&quot;</code> false. A check that no input can falsify is not evidence.</li>
+<li>Cleanup is confirmed. What may the controller remove now?</li>
+<li>Successful cleanup and removal are separate durable steps.</li>
 </ol>
 <h4 id="hint-for-investigation-5-refuse-ownership-mismatch">Hint for investigation 5: Refuse ownership mismatch<a class="heading-anchor" href="#hint-for-investigation-5-refuse-ownership-mismatch" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The action is ownership-error.</li>
-<li>The check <code>finalAction(true, true, false, false) == &quot;ownership-error&quot;</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Name one input that would make <code>finalAction(true, true, false, false) == &quot;ownership-error&quot;</code> false. A check that no input can falsify is not evidence.</li>
+<li>The ownership test runs before every other branch. What does a UID mismatch return?</li>
+<li>A replacement resource reusing a name is not owned merely because the name is familiar.</li>
 </ol>
 <h4 id="hint-for-investigation-6-transfer-preservation-of-other-finalizers">Hint for investigation 6: Transfer preservation of other finalizers<a class="heading-anchor" href="#hint-for-investigation-6-transfer-preservation-of-other-finalizers" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The unrelated entry remains.</li>
-<li>The check <code>len(out) == 1 &amp;&amp; out[0] == &quot;other.example/retain&quot;</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Predict the effect of changing <code>if v != &quot;lesson.example/cleanup&quot; {</code> to <code>if v == &quot;lesson.example/cleanup&quot; {</code> before running anything. If the prediction is hard, trace that line again with the original input.</li>
+<li>The filter skips one exact string. Which entry stays?</li>
+<li>Each controller owns its own finalizer entry.</li>
 </ol>
 <h3 id="self-check-and-retrieval">Self-check and retrieval<a class="heading-anchor" href="#self-check-and-retrieval" aria-label="Link to this section">#</a></h3>
-<p>Close the reference. Rebuild one normal case and one boundary case from a blank pad. Explain the role of finalizer without using its name in the definition. Then change the domain while keeping the same invariant. Record the new input, your prediction and the observed output. If your program passes only because its input is hard-coded, explain which part would need a reusable function in a larger project.</p>
+<p>Write <code>nextFinalizerStep(obj Object, cleanup func() error) (string, error)</code> that adds the finalizer to live objects, runs cleanup for deleting ones and removes only its own entry after success. Test cleanup that succeeds, fails and is already done, plus a list holding a foreign finalizer. Then explain what happens to the object if cleanup keeps failing.</p>
+<p>The general <a href="../STUDY-GUIDE.md.html#self-check-and-retrieval">retrieval routine</a> still applies.</p>
 <h3 id="next-step-and-sources">Next step and sources<a class="heading-anchor" href="#next-step-and-sources" aria-label="Link to this section">#</a></h3>
-<p><a href="https://kubernetes.io/docs/concepts/overview/working-with-objects/finalizers/">Primary language or library documentation</a>, reviewed 2026-10-23. The teaching explanations and synthetic fixtures are original. Continue with the next lesson when you can explain the six observations and diagnose a changed case without copying its answer.</p>
+<p>Source: <a href="https://kubernetes.io/docs/concepts/overview/working-with-objects/finalizers/">Kubernetes finalizers</a>, reviewed 2026-10-23.</p>
+<p>Next: go-044, Service accounts, RBAC and least-authority controllers (<a href="../STUDY-GUIDE.md.html#when-to-move-on">criteria</a>).</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for go-043: Finalizers, deletion and exact ownership.
 Read courses/go/guides/go-043.md and my saved attempt based on courses/go/lessons/go-043.go.

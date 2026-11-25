@@ -1,10 +1,17 @@
 # cuda-091: Layouts, convolutions and library algorithm selection
 
-**Route:** CUDA Python and machine learning. **Stage:** intermediate. **Prerequisites:** `cuda-066`, `cuda-087`, `cuda-090`. Allow several sessions when the hardware experiment is new; the chapter is not a deadline.
+**Route:** CUDA Python and machine learning. **Stage:** intermediate. **Prerequisites:** `cuda-066`, `cuda-087`, `cuda-090`.
 
-## What you will be able to explain
+Pacing, evidence labels and platform rules: [CUDA study guide](../../STUDY-GUIDE.md).
 
-By the end, you can **state cross-correlation convention**, **compare forward and backward**, and **design two shape cases** with evidence. Start with the two worked cases, then use the editable CPU model to make the quantities concrete.
+## Learning objectives
+
+- State cross-correlation convention.
+- Calculate output length.
+- Count layout conversion cost.
+- Compare forward and backward.
+- Explain algorithm warmup.
+- Design two shape cases.
 
 ## Mechanism and vocabulary
 
@@ -31,9 +38,13 @@ A one-dimensional valid convolution of [1,2,3,4] with kernel [1,-1], using cross
 
 A layout conversion costs 2 ms and saves 1 ms per convolution. It loses for one call but amortizes over repeated calls only if the converted data can be reused correctly.
 
-## Portable executable model
+## How to run the CPU model
 
-The **CPU reference model** variant runs this bounded worked example using `python-core`. It uses only the Python standard library, small synthetic values and no network. Its purpose is to expose the arithmetic or contract behind the chapter. The separate reference includes assertions for the stated observations.
+Edit the copy; the [reference](../references/cuda-091_cpu.py) adds assertions.
+
+```sh
+python courses/cuda/python/lessons/cuda-091_cpu.py
+```
 
 ```python
 x, k = [1, 2, 3, 4], [1, -1]
@@ -54,8 +65,6 @@ print("CPU convolution oracle:", out)
 | `k` | `[1, -1]` |
 | `out` | `[-1, -1, -1]` |
 
-Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.
-
 ## Equal framework lanes
 
 ### PyTorch
@@ -66,83 +75,69 @@ Understand NCHW shapes and channels-last memory format as separate concepts. Com
 
 Understand NHWC/NCHW data_format and the exact tensor shape expected by tf.nn or Keras layers. Preserve cross-correlation convention and include conversions in timing.
 
-Choose either lane first, then compare the other using identical mathematical inputs. Framework-specific shape, mode and optimizer rules must be checked separately. Both use offline synthetic examples; no model hub or dataset download is triggered.
+Lane rules: [framework labs](../../STUDY-GUIDE.md#python-gpu-and-framework-labs).
 
 ## Executable framework practice
 
-The variant chooser offers **PyTorch on CPU**, **TensorFlow on CPU**, and separate **NVIDIA CUDA** versions. CPU versions force CPU placement. CUDA versions require the named GPU profile and refuse to silently fall back. Each complete program uses the same tiny deterministic objective, bounded tensors and local synthetic data. Read its source before running; a framework pass establishes only that variant and environment.
-
-The checkpoint demonstration is in-memory. It teaches what state must be saved; it does not export a durable model artifact or preserve an in-flight device context. Advanced custom-op, distributed and engine-building projects remain separately prepared external workflows.
+Run the **PyTorch** and **TensorFlow** variants on CPU first; [lab rules](../../STUDY-GUIDE.md#python-gpu-and-framework-labs).
 
 ## Practice and transfer
+
+Record each attempt in the [worksheet](../lessons/cuda-091.md) before opening hints.
 
 ### Exercise 1: State cross-correlation convention
 
 **Trap to avoid:** Writing a reference with `k[len(k)-1-j]`, textbook convolution, flips every sign compared with the library, which looks like a broken GPU kernel.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 2: Calculate output length
 
 **Trap to avoid:** Using input length as output length assumes same padding, adding an output whose computation needs a value beyond the input.
-
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 3: Count layout conversion cost
 
 **Trap to avoid:** Counting only the faster convolution, 1 ms against 2, declares conversion a win even for a single call.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 4: Compare forward and backward
 
 **Trap to avoid:** Benchmarking only the forward pass and applying the result to training ignores roughly two thirds of the convolution work.
-
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 5: Explain algorithm warmup
 
 **Trap to avoid:** Timing the first iteration and concluding the configuration is slow measures the search.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 6: Design two shape cases
 
 **Trap to avoid:** Testing a single shape and generalizing the chosen layout risks regressions at other batch sizes. Production traffic that mixes sizes then sees the slow path.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ## Progressive hints
 
-Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.
+Hint *k* belongs to exercise *k*; open one at a time.
 
-1. Start from worked example 1 and mark the quantities needed for the task "State cross-correlation convention".
-2. Change one assumption in worked example 2 while preserving the declared contract: calculate output length.
-3. Trace the CPU program's variables before adding hardware behavior: count layout conversion cost.
-4. Draw producers, consumers and the exact operation boundary for the task "Compare forward and backward".
-5. Separate what the small fixture establishes from what the real runtime must show: explain algorithm warmup.
-6. Write a counterexample to an overbroad claim before you design two shape cases.
+1. Write output index i as a sum over kernel index k of input times kernel, without flipping the kernel.
+2. Count how many positions a length-2 kernel can occupy fully inside a length-4 input.
+3. Charge the conversion once per call that needs it, then ask how many convolutions must reuse the converted data.
+4. Ask which pass training runs after the forward pass and whether it uses the same layout and algorithm.
+5. Ask what the library may do on the first call for a new shape before it settles on an algorithm.
+6. Keep the mathematical operation fixed and change only the batch size between the two cases.
 
-## Common mistakes and self-review
+## Common mistakes and self-check
 
-Confusing a correct tiny example with a general implementation is the central review risk. For this chapter, challenge the assumption in worked example 2, then ask whether your change preserves the mechanism described above. If you change dtype, layout, ordering, batch size or backend, update the acceptance contract rather than silently reusing the old observation. Explain an unexpected result before trying random configuration changes.
+A common mistake is assuming one layout is always faster. NCHW and NHWC store the same axes in different orders, and a conversion is real work unless the consumer can use a view. Another mistake is timing only the forward pass or treating a profiler's kernel name as proof that results match. Fix both by checking outputs and gradients first, then timing complete latency with conversion, algorithm search and workspace included, across at least two shapes.
 
-Keep a small evidence table with columns **claim**, **input**, **expected observation**, **actual observation** and **limit**. For the first claim use `State cross-correlation convention`. For the final claim use `Design two shape cases`. An unperformed GPU or cluster experiment remains pending even when the CPU model is correct.
+**Evidence limit:** The reference computes the valid cross-correlation `[-1, -1, -1]` and a conversion amortization in plain Python. It cannot show which algorithm a library picks, the workspace it needs or real layout costs, which depend on shape, dtype and hardware.
 
-## Platform and evidence contract
+1. How does a deep learning convolution usually differ from the textbook definition?
+2. When does a layout conversion pay off?
+3. Why might the fastest algorithm for one shape lose on another?
 
-The reading worksheet and CPU reference model work through the ordinary Linux Docker classroom on macOS, Linux and Windows using WSL 2. They do not require an NVIDIA GPU. Their results are labeled CPU models or semantic oracles, not simulated hardware performance.
-
-Real CUDA work needs supported NVIDIA hardware, a compatible host driver and an explicitly prepared GPU runtime. An Apple GPU does not execute CUDA kernels. PyTorch MPS on a supported native Mac, ROCm on supported AMD hardware, or other vendor backends can provide separate accelerator learning routes; they need their own package and operation qualification and are not CUDA evidence. The ordinary Linux Docker classroom does not expose native Mac MPS automatically.
-
-Do not download packages, models or data by opening this lesson. Do not attach an engine socket, ambient cluster credentials or an arbitrary remote endpoint. A CPU pass, imported package, successful compilation, real GPU result and measured performance are distinct observations. Record the actual backend, data shape/dtype, source revision, versions and pending checks. A saved completion marker records learning progress, not hardware certification.
+Answers: [self-check answers](../solutions/cuda-091_solutions.md#self-check-answers).
 
 ## Primary references
 
 - [PyTorch CUDA semantics](https://docs.pytorch.org/docs/2.9/notes/cuda.html)
 - [TensorFlow GPU guide](https://www.tensorflow.org/guide/gpu)
 
-Use the version-matched documentation of your prepared environment. These references describe interfaces and supported boundaries; the chapter's synthetic examples and CPU models are original teaching material.
+Full lists: [documentation and sources](../../STUDY-GUIDE.md#documentation-and-sources).
 
 ## Ask an AI tutor about this lesson
 

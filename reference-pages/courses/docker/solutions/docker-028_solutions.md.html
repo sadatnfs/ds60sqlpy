@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/docker/solutions/docker-028_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="docker-028-explanatory-solutions">docker-028: explanatory solutions<a class="heading-anchor" href="#docker-028-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit reveal. These explain the supplied teaching fixtures; they are not engine results. The mechanism is explained in <code>courses/docker/guides/docker-028.md</code>.</p>
+<p>These answers explain teaching fixtures, not engine results; the mechanism is in <a href="../guides/docker-028.md.html">the guide</a>.</p>
 <h3 id="exercise-1-parse-the-components-of-an-image-reference">Exercise 1: Parse the components of an image reference.<a class="heading-anchor" href="#exercise-1-parse-the-components-of-an-image-reference" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Registry, repository, optional tag and optional digest.</p>
 <p><strong>Why:</strong> The registry location and image identity should be unambiguous before any authenticated operation. A familiar short tag can hide a different destination.</p>
@@ -238,7 +238,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>A plausible wrong approach:</strong> Approving publish the latest build lets a different image ship than the one reviewed.</p>
 <p><strong>How to verify:</strong> A reviewer can match the digest in the proposal with the accepted record before any push is approved.</p>
 <h3 id="check-your-transfer">Check your transfer<a class="heading-anchor" href="#check-your-transfer" aria-label="Link to this section">#</a></h3>
-<p>A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.</p></article>
+<p>Removing the first name only untags it; the image stays because the second reference still points at it, so <code>docker run --pull never registry.example.com/team/ds60-study:1.0</code> keeps working. A push would upload the image&#x27;s layers and manifest to <code>registry.example.com</code> under <code>team/ds60-study</code>, creating a remote copy whose visibility depends on that registry&#x27;s settings, and the push prints the digest that becomes the release identity. If <code>docker image rm</code> had printed <code>Deleted:</code> lines rather than only <code>Untagged:</code>, no other reference shared the image.</p></article>
   </main>
 </body>
 </html>

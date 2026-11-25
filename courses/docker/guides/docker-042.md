@@ -32,11 +32,9 @@ Your handoff should contain a diagram, command sequence, expected outputs, failu
 
 ## How to use this lesson
 
-The classroom displays this guide and saves your worksheet, `courses/docker/lessons/docker-042.md`. Its Run button does not control your Docker engine. Docker engine access is powerful host access, so the classroom deliberately receives no engine socket. Work through the supplied examples without starting anything, then use the optional host lab only in your own disposable project. Reading a command, parsing YAML and actually running the project are different forms of evidence.
+The classroom saves `courses/docker/lessons/docker-042.md` and holds no engine socket ([host-lab setup](../STUDY-GUIDE.md#host-lab-setup)).
 
-Use Bash in Linux, macOS Terminal, or Ubuntu under WSL 2 on Windows. The supported engine runs Linux containers. The maintained fixture is `courses/docker/fixtures/compose-lab/`; its README explains copying it into a new ignored learner directory, checking the engine, building locally with visible logs, and using the fixed project name `ds60-docker-study`. The fixture uses port 18080 on host loopback. Stop if that project name or port belongs to unrelated work; choose a new project name consistently in your own copy. Never paste a command against a remote Docker context simply because it is currently selected.
-
-For Dockerfile examples, create a file named `Dockerfile` in a scratch project. YAML snippets describe a fragment unless explicitly called a complete file. Text transcripts are synthetic illustrations, not claims about your machine. Do not substitute a real password, token or private registry into a checked-in example. **How to use the lessons** in the [subject README](../README.md) collects these rules in one place.
+**Host lab.** Run the final rehearsal as a prediction exercise. Before any command, write the expected result for the normal path, meaning the host request, the peer request and one increment; for one controlled failure, such as the client pointed at `app:9090` in a scratch copy; for container replacement with `up -d --force-recreate --wait app`, which should keep the counter; and for the README's export and separate restore. Then run each step, mark every prediction as matched or not, and for a mismatch write the first observation that differed before changing anything. Close by removing only what you created, the scratch copy, `counter-backup.json` and the restore volume, and copy `docker compose -p ds60-docker-study ps -a` and the project's volume list into the packet as proof of the final state.
 
 ## Worked example / walkthrough
 
@@ -70,7 +68,7 @@ peer client -> service DNS app -> app:8080
 
 ## Six progressive exercises
 
-For each exercise, name the object involved and the phase of its lifetime before changing anything, then vary only the condition the task names. Exercises that ask you to predict, explain, compare or diagnose keep their answers in the solutions file; the others show the evidence to look for.
+Answer-type prompts keep their answers in the solutions file ([exercise rules](../STUDY-GUIDE.md#exercise-rules)).
 
 ### Exercise 1: Predict all outcomes before running the final project.
 
@@ -108,13 +106,19 @@ For each exercise, name the object involved and the phase of its lifetime before
 
 Running the final project before writing predictions. Rebuilding when only configuration changed, or only recreating when the image changed. Presenting the handoff without its limits.
 
-Exercise 4 is this chapter's boundary case: Diagnose a deliberate single-layer failure. Write down the single layer you changed, the first observation that failed, and the request that proves the repair, before running the full acceptance again. Preserve the original failure and the exact changed field before retrying. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
+Exercise 4 is this chapter's boundary case: Diagnose a deliberate single-layer failure. Write down the single layer you changed, the first observation that failed, and the request that proves the repair, before running the full acceptance again.
+
+A handoff that lists every command reads as complete, yet a new operator follows commands in order and cannot tell a normal pause from a failure. Without the expected observation beside each step, `--wait` taking twenty seconds, an empty `docker compose ps` after `down`, or a 404 from an unknown route can each be mistaken for breakage, and a real failure can be accepted as normal. Put the expected output, or its shape, next to every command, mark which steps change state and which only read, and test the handoff by having someone else follow it on a clean engine while you watch silently and note where they hesitate.
+
+Never trade a safety control for a passing example ([safety rules](../STUDY-GUIDE.md#safety-rules)).
 
 ## Retrieval, transfer and next steps
 
-Close the explanations first. Trace one browser request through the system and one peer request, naming every port. Then reconstruct worked example 2 (Explain one complete request) with one different value, predict what changes, and name which of release record, recovery rehearsal, handoff and acceptance evidence the change touches.
+**Retrieval.** Trace one browser request through the system and one peer request, naming every port.
 
-When a host session ends, run `docker compose -p ds60-docker-study down` from your fixture copy. It removes the project's containers and network but keeps named volumes; deleting a volume is a separate, deliberate reset described in the fixture README.
+**Transfer case.** While preparing the release packet you change `APP_MESSAGE` in `compose.yaml`. Do you rebuild the image or recreate the container, and which observation proves you picked correctly?
+
+Then run the [retrieval loop](../STUDY-GUIDE.md#retrieval-and-cleanup) and end any host session with its cleanup.
 
 ## Primary references
 

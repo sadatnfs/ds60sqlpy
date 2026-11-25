@@ -42,5 +42,7 @@
       "wrong": "Timing each spelling once on three numbers and reporting the faster one. The difference is noise, and no algorithm changed.",
       "verify": "`identical(c(3, 1, 2) |> sort() |> head(2), head(sort(c(3, 1, 2)), 2))` returns TRUE."
     }
-  ]
+  ],
+  "run_note": "The starter holds three named groups, A with 1 and 2, B with 4 and 6, and `empty` with no values, and prints only the names. Run it, then predict what `sum()` and `mean()` return for the empty group before mapping. The empty group is the case that decides whether your declared `vapply()` result type actually holds.",
+  "checks_note": "The checks pin `vapply()` returning a numeric vector of 3 and 3, the empty group summing to 0 by definition, a per-group summary where A has mean 1.5 and the empty group has an NA mean rather than NaN, a rejected template mismatch, an empty list mapping to `numeric(0)`, and a base pipe that sorts and keeps 1 and 2. They do not show how your summaries behave when a group holds NA values or a different type."
 }

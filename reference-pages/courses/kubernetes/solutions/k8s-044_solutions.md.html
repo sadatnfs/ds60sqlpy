@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/kubernetes/solutions/k8s-044_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="k8s-044-explanatory-solutions">k8s-044: explanatory solutions<a class="heading-anchor" href="#k8s-044-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit reveal. These explanations describe the synthetic topology and stated API contracts. They are not fabricated runtime receipts.</p>
+<p>Attempt each exercise first, then compare (<a href="../STUDY-GUIDE.md.html#solutions-and-the-ai-tutor">study guide</a>).</p>
 <h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
 <p>CIDR notation combines an address with a prefix length, such as 10.244.0.0/16. The prefix describes which leading bits identify the network. A longer prefix describes a smaller address set. CIDR membership is a binary relationship, not a string-prefix test.</p>
 <p>Clusters need address planning for nodes, Pods and Services, and may interact with a host LAN, VPN or cloud network. Overlapping ranges can make a destination ambiguous or route traffic to the wrong place. A configuration can be valid YAML while its network plan is unusable in the actual environment.</p>

@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cuda/python/solutions/cuda-097_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="cuda-097-explained-solutions">cuda-097: explained solutions<a class="heading-anchor" href="#cuda-097-explained-solutions" aria-label="Link to this section">#</a></h2>
-<p>These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.</p>
+<p>Compare with your <a href="../lessons/cuda-097.md.html">worksheet</a> attempt.</p>
 <h3 id="exercise-1-write-the-operator-schema">Exercise 1: Write the operator schema<a class="heading-anchor" href="#exercise-1-write-the-operator-schema" aria-label="Link to this section">#</a></h3>
 <p>Name tensor inputs scalar parameters and output.</p>
 <p><strong>Approach.</strong> Write the operator schema: one input tensor <code>x</code> of float32, scalar parameters <code>scale</code> and <code>bias</code> as floats, and one output tensor of the same shape and dtype, for example <code>fused_affine_relu(Tensor x, float scale, float bias) -&gt; Tensor</code>.</p>
@@ -231,9 +231,19 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Why it is correct here.</strong> Extensions are tied to the framework build and ABI. A binary built against one version may fail to load against another.</p>
 <p><strong>A plausible wrong approach.</strong> Recording only that the build succeeded omits whether the kernel ran on a real device. A build can succeed on a machine with no GPU at all, so the record proves compilation only.</p>
 <p><strong>How to verify.</strong> Reload the built extension in a clean environment matching the record and rerun the forward tests.</p>
+<h3 id="self-check-answers">Self-check answers<a class="heading-anchor" href="#self-check-answers" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>What belongs in an operator contract besides argument types?</strong> Dtype, shape, device, layout, aliasing and mutation, plus how output structure is derived for compilation systems.</li>
+</ol>
+<ol start="2">
+<li><strong>Why can a Python pad accepting a source string not stand in for a registered operator?</strong> Framework registration needs a separately built project with a matching compiler, toolkit and framework ABI.</li>
+</ol>
+<ol start="3">
+<li><strong>Why is backward treated as a separate contract?</strong> A correct forward pass does not imply correct gradients; backward has its own mathematics and tests.</li>
+</ol>
 <h3 id="reference-observation">Reference observation<a class="heading-anchor" href="#reference-observation" aria-label="Link to this section">#</a></h3>
 <p>Fused affine-ReLU output [0,1,7].</p>
-<p>The reference file is <code>courses/cuda/python/references/cuda-097_cpu.py</code>. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.</p></article>
+<p>Asserted by <code>courses/cuda/python/references/cuda-097_cpu.py</code>.</p></article>
   </main>
 </body>
 </html>

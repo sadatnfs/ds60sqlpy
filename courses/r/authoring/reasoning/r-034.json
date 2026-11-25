@@ -42,5 +42,7 @@
       "wrong": "Folding an aggregation into the reshape, such as averaging duplicates without saying so, and calling the result the same data.",
       "verify": "`wide$value.2 - wide$value.1` returns 2 and 3, and `nrow(long)` returns 4 measurements."
     }
-  ]
+  ],
+  "run_note": "The starter prints a long table of two ids, A and B, each measured at visits 1 and 2, with values 10, 12, 20 and 23. Run it and confirm that the pair of id and visit identifies each row before reshaping. If that pair repeats, a wide table has two candidate values for one cell, and the reshape would have to choose one silently.",
+  "checks_note": "The checks confirm that id and visit form a unique key, that reshaping to wide and back restores the original long table apart from attributes, that a duplicated key is detected before reshaping, and that removing B's second visit produces an NA in its `value.2` cell rather than a dropped row. They do not decide whether such an NA should later be imputed."
 }

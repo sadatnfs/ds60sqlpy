@@ -196,7 +196,10 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <article class="document"><h2 id="r-051-base-graphics-coordinates-and-owned-devices">r-051: Base graphics, coordinates and owned devices<a class="heading-anchor" href="#r-051-base-graphics-coordinates-and-owned-devices" aria-label="Link to this section">#</a></h2>
 <p><strong>Level:</strong> advanced. <strong>Direct prerequisites:</strong> <code>r-041</code></p>
 <h3 id="run-and-retain-your-work">Run and retain your work<a class="heading-anchor" href="#run-and-retain-your-work" aria-label="Link to this section">#</a></h3>
-<p>Open <code>r-051</code> in <code>/classroom</code> and use the prepared <code>r-statistics</code> profile. Each Run evaluates one <code>main.R</code> script in a fresh offline R process, so define every input in the script; an earlier Run leaves no variables behind. Work in the <a href="../lessons/r-051.R.html">starter</a>. The <a href="../solutions/r-051_reference.R.html">complete reference</a> ends by printing <code>r-051 reference checks passed</code>, and the <a href="../solutions/r-051_solutions.md.html">explained answers</a> are there for deliberate comparison after your own attempt. This chapter draws figures: base plots are captured as PNG, ggplot2 and Plotly objects must be printed explicitly, and the classroom keeps at most two figures per run. The <a href="../README.md.html">course overview</a> describes saved work, figure capture and the prepared package versions.</p>
+<p>The starter holds five points with x from 0 to 4 and y equal to twice x, and an empty results list. Run it and confirm the rule by eye in the printed frame before drawing. When you set limits of 0 to 4 and 0 to 8, also set <code>xaxs</code> and <code>yaxs</code> to &quot;i&quot;, or base graphics pads each axis and <code>par(&quot;usr&quot;)</code> will not report the limits you asked for.</p>
+<p>Work in the <a href="../lessons/r-051.R.html">starter</a> under the <a href="../STUDY-GUIDE.md.html#run-a-chapter">run rules</a>.</p>
+<p>The <a href="../solutions/r-051_reference.R.html">complete reference</a> ends by printing <code>r-051 reference checks passed</code>.</p>
+<p>This chapter draws figures; read <a href="../STUDY-GUIDE.md.html#figures">figure capture</a> before printing them.</p>
 <h3 id="outcome-and-mechanism">Outcome and mechanism<a class="heading-anchor" href="#outcome-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Construct a labeled base-R graphic and manage an explicitly owned file device without confusing drawing with browser delivery.</p>
 <p>Base graphics draws into the active graphics device. A high-level plot establishes a coordinate system and axes, while lower-level functions such as points, lines, segments and text add marks to that existing plot. Calling another high-level plot usually starts a new plot rather than adding a layer to the current one.</p>
@@ -291,7 +294,15 @@ write_owned <span class="syntax-operator">&lt;-</span> <span class="syntax-keywo
 <li><a href="https://stat.ethz.ch/R-manual/R-devel/library/grDevices/html/png.html">R PNG devices</a></li>
 </ul>
 <h3 id="continue">Continue<a class="heading-anchor" href="#continue" aria-label="Link to this section">#</a></h3>
-<p>Chapters that list <code>r-051</code> as a direct prerequisite: <a href="r-052.md.html"><code>r-052</code></a>.</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Next chapter</th>
+<th>Title</th>
+</tr></thead><tbody>
+<tr>
+<td><a href="r-052.md.html"><code>r-052</code></a></td>
+<td>Multiple panels, uncertainty and scale contracts</td>
+</tr>
+</tbody></table></div>
 <h3 id="ask-an-ai-tutor">Ask an AI tutor<a class="heading-anchor" href="#ask-an-ai-tutor" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for r-051 (Base graphics, coordinates and owned devices).
 Read the guide and my saved attempt. Explain the relevant R mechanism,

@@ -1,6 +1,8 @@
 # c-036: explained solutions
 
-Compare after an attempt or explicit reveal. The complete executable reference, `c-036_solution.c`, implements all six cases, from the "join one calculation" case to the "transfer reusable execution" case, in one `main.c`.
+`c-036_solution.c` assembles the "join one calculation" case through the "transfer reusable execution" case in one `main.c`.
+
+Compare only after an attempt: [Compare and transfer](../STUDY-GUIDE.md#compare-and-transfer).
 
 ## Mechanism and assumptions
 
@@ -10,7 +12,7 @@ pthread_create takes a pointer to a pthread_t, optional attributes, a function v
 
 ## Exercise 1: Join one calculation: change one input
 
-Copy worked example 1, the "join one calculation" case, into a scratch pad and change `struct Work work = {.input = 7, .output = 0};` to `struct Work work = {.input = 8, .output = 0};`. Before running, predict which CHECK fails and which value it sees in place of the worked result (the retained result is 49); then run it and restore the original line.
+In worked example 1, change `struct Work work = {.input = 7, .output = 0};` to `struct Work work = {.input = 8, .output = 0};`. Predict which value the CHECK on `work.output == 49` sees, then run and restore.
 
 The unchanged code is worked example 1:
 
@@ -22,13 +24,15 @@ CHECK(pthread_join(thread, NULL) == 0);
 CHECK(work.output == 49);
 ```
 
-**Expected:** With `struct Work work = {.input = 8, .output = 0};` the run stops with `Check failed` at the CHECK on `work.output == 49`, because the "join one calculation" case no longer shows that the retained result is 49. Restoring `struct Work work = {.input = 7, .output = 0};` brings that observation back.
+**Expected:** `Check failed` at `work.output == 49`; restoring `struct Work work = {.input = 7, .output = 0};` passes again.
+
+**Verify:** Name the value that made `work.output == 49` false, where worked example 1 showed that the retained result is 49.
 
 The stack argument remains alive until after join. Reading output before synchronization would not have this contract.
 
 ## Exercise 2: Keep separate arguments: debug a regression
 
-A regression changed one token in worked example 2, the "keep separate arguments" case, so one line now reads `struct Work work[2] = {{3, 0}, {3, 0}};`. Run the example with that line, use the failing CHECK to find why their independent outputs are 4 and 9 no longer holds and repair the line without changing the CHECK.
+Worked example 2 now has a line reading `struct Work work[2] = {{3, 0}, {3, 0}};`. Repair it so that their independent outputs are 4 and 9 again.
 
 The unchanged code is worked example 2:
 
@@ -42,7 +46,9 @@ for (size_t i = 0; i < 2; i++)
 CHECK(work[0].output == 4 && work[1].output == 9);
 ```
 
-**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `work[0].output == 4 && work[1].output == 9`. Once the line reads `struct Work work[2] = {{2, 0}, {3, 0}};` again, the "keep separate arguments" case again shows that their independent outputs are 4 and 9.
+**Expected:** `Check failed` at `work[0].output == 4 && work[1].output == 9` until the line reads `struct Work work[2] = {{2, 0}, {3, 0}};` again.
+
+**Verify:** Explain how `struct Work work[2] = {{3, 0}, {3, 0}};` changes the value `work[0].output == 4 && work[1].output == 9` tests, using your failing and repaired runs.
 
 Each worker receives its own stable object rather than the address of one changing loop variable.
 
@@ -61,6 +67,8 @@ CHECK(returned == &work && work.output == 25);
 
 **Expected:** Join returns that same live object address.
 
+**Verify:** Keep a CHECK equivalent to `returned == &work && work.output == 25`. Control edit: changing `struct Work work = {5, 0};` to `struct Work work = {6, 0};` must fail it; then restore it.
+
 The returned pointer is valid because the caller still owns its storage. Returning a pointer to a worker-local automatic object would be invalid.
 
 ## Exercise 4: Handle a zero input
@@ -76,6 +84,8 @@ CHECK(work.output == 0);
 ```
 
 **Expected:** The output is zero.
+
+**Verify:** Keep a CHECK equivalent to `work.output == 0`. Control edit: changing `struct Work work = {0, 9};` to `struct Work work = {1, 9};` must fail it; then restore it.
 
 The result demonstrates real computation rather than relying on the initial output field.
 
@@ -98,6 +108,8 @@ CHECK(sum == 30);
 
 **Expected:** The total is 30.
 
+**Verify:** Keep a CHECK equivalent to `sum == 30`. Control edit: changing `sum += work[i].output;` to `sum -= work[i].output;` must fail it; then restore it.
+
 Only the parent mutates the aggregate. Worker completion order does not change the integer result.
 
 ## Exercise 6: Transfer reusable execution
@@ -117,8 +129,10 @@ CHECK(work.output == 16);
 
 **Expected:** The second input produces its own output 16.
 
+**Verify:** Keep a CHECK equivalent to `work.output == 16`. Control edit: changing `work.input = 4;` to `work.input = 5;` must fail it; then restore it.
+
 Reusing storage is safe after the previous worker has finished. Overlapping invocations on the same mutable argument would need synchronization.
 
 ## After comparison
 
-Add a fresh distinguishing input for the "transfer reusable execution" case to your own c-036 source. Explain why every access in `square_worker` stays within a live object and each owned resource is released. An expected thread argument lifetime failure belongs in the test contract; undefined behavior does not. Keep diagnostics and sanitizer evidence for the "keep separate arguments" case apart from ordinary output: the fixture proves its stated thread argument lifetime, join and disjoint result storage assumptions, not universal safety.
+Start two threads, each with its own `struct Work` holding 5 and 6, join both and CHECK the outputs 25 and 36. Then explain as text why a loop that reuses one `struct Work` for both `pthread_create` calls races: the second iteration can overwrite `input` before the first worker reads it. Give each thread its own object, as Exercise 2 does, or join before reusing one.

@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cuda/python/solutions/cuda-107_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="cuda-107-explained-solutions">cuda-107: explained solutions<a class="heading-anchor" href="#cuda-107-explained-solutions" aria-label="Link to this section">#</a></h2>
-<p>These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.</p>
+<p>Compare with your <a href="../lessons/cuda-107.md.html">worksheet</a> attempt.</p>
 <h3 id="exercise-1-trace-stable-sorting">Exercise 1: Trace stable sorting<a class="heading-anchor" href="#exercise-1-trace-stable-sorting" aria-label="Link to this section">#</a></h3>
 <p>Equal-key records preserve input order.</p>
 <p><strong>Approach.</strong> Trace a stable sort of <code>[(2, A), (1, B), (2, C)]</code> by key: B moves first, then A and C keep their input order, giving <code>[(1, B), (2, A), (2, C)]</code>.</p>
@@ -231,9 +231,19 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Why it is correct here.</strong> Function behavior, defaults and supported types differ between releases. Citing the matching documentation ties the contract to the tested code.</p>
 <p><strong>A plausible wrong approach.</strong> Relying on the latest online docs while running an older release can promise features or guarantees the installed version does not have.</p>
 <p><strong>How to verify.</strong> Record the installed version at runtime and link the documentation page for that version in the notes.</p>
+<h3 id="self-check-answers">Self-check answers<a class="heading-anchor" href="#self-check-answers" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>What does an FFT contract need besides the input array?</strong> The normalization and transform conventions, because libraries differ in where they scale the result.</li>
+</ol>
+<ol start="2">
+<li><strong>Why does a plan have a shape and dtype contract?</strong> It is prepared for specific sizes and types, so reusing it outside that contract can give wrong results or fail.</li>
+</ol>
+<ol start="3">
+<li><strong>Why choose a small release-pinned library family?</strong> Each package carries CUDA compatibility requirements, and pinning keeps behavior and documentation matched.</li>
+</ol>
 <h3 id="reference-observation">Reference observation<a class="heading-anchor" href="#reference-observation" aria-label="Link to this section">#</a></h3>
 <p>Stable duplicate order and matrix output shape (2,4).</p>
-<p>The reference file is <code>courses/cuda/python/references/cuda-107_cpu.py</code>. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.</p></article>
+<p>Asserted by <code>courses/cuda/python/references/cuda-107_cpu.py</code>.</p></article>
   </main>
 </body>
 </html>

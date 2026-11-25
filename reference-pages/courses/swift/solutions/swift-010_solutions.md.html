@@ -194,7 +194,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/swift/solutions/swift-010_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="swift-010-explanation-and-comparison">swift-010: explanation and comparison<a class="heading-anchor" href="#swift-010-explanation-and-comparison" aria-label="Link to this section">#</a></h2>
-<p>Attempt the six guide tasks before opening this comparison. The executable reference is <a href="swift-010_solution.swift.html">swift-010_solution.swift</a>. It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.</p>
+<p>Reference program: <a href="swift-010_solution.swift.html">swift-010_solution.swift</a>, covering both examples and the executed answers.</p>
+<p>Attempt the tasks first; see <a href="../STUDY-GUIDE.md.html#comparing-with-the-explanation">comparing with the explanation</a>.</p>
 <h3 id="why-the-two-examples-differ">Why the two examples differ<a class="heading-anchor" href="#why-the-two-examples-differ" aria-label="Link to this section">#</a></h3>
 <p><strong>Preserve absence and zero:</strong> Optional lookup prevents missing information from being confused with a stored value. Pear is present with zero and apple is absent.</p>
 <p><strong>Deduplicate and order deliberately:</strong> Set semantics establish uniqueness while sorting separately establishes order. Duplicate red is not inserted and sorted output is deterministic.</p>
@@ -252,7 +253,7 @@ stock<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;
 <p>Assigning to an existing key replaces its value, and Dictionary(_:uniquingKeysWith:) makes the duplicate-key policy explicit instead of trapping.</p>
 <h4 id="task-6-transfer-and-justify">Task 6: Transfer and justify<a class="heading-anchor" href="#task-6-transfer-and-justify" aria-label="Link to this section">#</a></h4>
 <p>Design a custom Hashable key using only stable identity fields.</p>
-<p>No single reference answer exists: several designs can satisfy this transfer task. Build yours from the task 3 answer above (Build a unique sorted list of accepted inventory names) and the mechanism described below, and state one limitation of your choice.</p>
+<p>No single answer exists; extend task 3 using the <a href="../STUDY-GUIDE.md.html#open-transfer-tasks">open transfer routine</a>.</p>
 <h3 id="solution-reasoning">Solution reasoning<a class="heading-anchor" href="#solution-reasoning" aria-label="Link to this section">#</a></h3>
 <p><strong>Approach.</strong> Example A stores pear with a count of zero and reads both pear and the missing apple through the dictionary subscript, which returns <code>Int?</code>. Example B inserts into a <code>Set&lt;String&gt;</code> and reads the <code>inserted</code> flag, then sorts for a stable order. The task 3 answer builds a unique sorted list of accepted inventory names.</p>
 <p><strong>Why it is correct.</strong> <code>counts[&quot;pear&quot;]</code> is <code>.some(0)</code> and <code>counts[&quot;apple&quot;]</code> is nil, so absence and a stored zero stay distinct. Inserting red a second time returns <code>inserted == false</code> because sets keep one copy per equal element. Sorting turns the unordered set into <code>[&quot;blue&quot;, &quot;red&quot;]</code>, a deterministic report order.</p>
@@ -264,7 +265,7 @@ stock<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;
 <p><code>[String: Int]</code> declares a dictionary. <code>counts[key, default: 0] += 1</code> inserts a default only for that mutation. Set.insert returns whether an element was newly inserted. sorted establishes presentation order.</p>
 <p>Hash collisions do not mean values are equal; equality resolves them. Dictionary order should not be treated as a report contract. A default subscript can insert values during mutation, so inspect side effects.</p>
 <h3 id="review-before-continuing">Review before continuing<a class="heading-anchor" href="#review-before-continuing" aria-label="Link to this section">#</a></h3>
-<p>Run the reference and confirm that it prints <code>swift-010: passed</code>, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.</p></article>
+<p>Run the reference and confirm it prints <code>swift-010: passed</code>, then rerun the guide&#x27;s counterexample.</p></article>
   </main>
 </body>
 </html>

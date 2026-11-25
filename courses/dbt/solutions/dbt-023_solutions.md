@@ -2,7 +2,7 @@
 
 Measure database work with a correctness oracle and a clearly defined interval.
 
-The executable reference contains the two complete worked cases with assertions. The changes below explain the independent practice and its limits.
+The reference builds a ten-thousand-row table, queries ids under 1000 grouped by `id % 5`, compares every total with Python, takes three timings and reads `explain`. The median describes this machine and run only. The distinct rewrite fails the correctness oracle before speed matters. See [how these answers are laid out](../STUDY-GUIDE.md#answers-and-references).
 
 
 ## 1. Change measured scope

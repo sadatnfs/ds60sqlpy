@@ -1,6 +1,6 @@
 # cpp-001: explanatory solutions
 
-Compare after an attempt or an explicit reveal. The [guide](../guides/cpp-001.md) defines the learner contract. An authored reference is not a platform acceptance receipt.
+Compare after an attempt or an explicit reveal. These explanations walk the same `hello` transcripts phase by phase, so check that your compile, link and run labels agree before you compare wording. The [guide](../guides/cpp-001.md) defines the learner contract. How to compare: [study guide](../STUDY-GUIDE.md#compare-with-the-solutions).
 
 ## Vocabulary and concepts
 

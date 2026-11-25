@@ -2,6 +2,8 @@
 
 Open these answers only after attempting Capstone: a small classifier with honest evaluation yourself. They reuse the guide's literal inputs, starting from Example A, Freeze the geometric task, so a discrepancy points at one step. The executable companion runs the assertions; this page explains why each one tests Confusion matrix, Frozen threshold, Population standard deviation. After a pass, choose a new input for exercise 6, Reveal a group-specific failure, without looking.
 
+After comparing, follow the [review steps](../STUDY-GUIDE.md#after-the-solutions).
+
 ## Mechanism review
 
 A classifier capstone must connect the task definition to training and evaluation evidence. The literal fixture classifies the sign of a scalar coordinate. Training and test IDs are fixed before fitting. Normalization statistics use only training rows, and the decision threshold is declared before test scoring. Aone-weight logistic model is sufficient for the fixture; unnecessary depth would obscure the experiment rather than improve its meaning.
@@ -160,6 +162,3 @@ assert report == {"negative": (0, 1), "positive": (1, 1)}
 
 **Verify:** In a fresh process, the exercise checks confirm `report == {'negative': (0, 1), 'positive': (1, 1)}`.
 
-## Review after comparison
-
-Repeat exercise 4, Account for every test prediction, with one changed fixture value and predict the difference before running it. Keep your failing attempt at exercise 5, Compare a constant baseline, beside the repaired result. A missing framework is not a failing assertion. These solutions use only local fixtures.

@@ -24,9 +24,9 @@ Enumeration assumes a stable collection structure. Removing items during foreach
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles your saved pad as `Program.cs` in its fixed .NET 10 project. C# 14 is the matching language generation. This route uses the prepared framework libraries; it does not accept arbitrary project files, NuGet packages, command arguments or interactive input. The explicit `Program.Main` entrypoint makes compilation and execution visible. `Check` throws on a false condition in every build configuration, unlike conditional debugging assertions.
+`List<T>`, `ToArray` and `SequenceEqual` need no extra using directives in the classroom project. Task 4's removal inside `foreach` throws `InvalidOperationException` saying the collection was modified, so wrap it in a `try` if you want the rest of your pad to keep running.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Compile contract, starter stop and success marker: [running a lesson](../STUDY-GUIDE.md#running-a-lesson).
 
 
 
@@ -34,7 +34,7 @@ Start with the answer-free learner artifact in your saved classroom pad. It deli
 
 `new List<int> { ... }` uses a collection initializer. `Add` changes Count; an indexer replaces an existing element. `RemoveAll(predicate)` expresses structural removal as one owned operation. `ToArray` creates a snapshot of the element references or values.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+Each example ends with a trace; method: [tracing a program](../STUDY-GUIDE.md#tracing-a-program).
 
 ## Worked example / walkthrough
 
@@ -82,6 +82,8 @@ internal static class Program {
 
 **Observe:** Reserving ten slots leaves Count at zero; two appends produce Count two.
 
+**Trace.** `new List<int>(10)` reserves an internal array of ten slots but holds no elements, so `Count` is 0 and `Capacity` is at least 10. Each `Add` writes the next slot and increments Count: after adding 3 and 5, Count is 2 and index 1 holds 5. Reading index 2 throws `ArgumentOutOfRangeException` even though storage exists, because the indexer checks Count, not Capacity.
+
 ### Example B: Remove under one mutation policy
 
 A bulk operation owns traversal and mutation, avoiding an invalidated external enumerator.
@@ -126,6 +128,8 @@ internal static class Program {
 
 **Observe:** Two entries are removed while the earlier integer snapshot keeps four values.
 
+**Trace.** `ToArray()` copies the four integers into a new array before anything changes. `RemoveAll` then visits every element once, keeps those for which the predicate is false and compacts them, so the list becomes 2 and 4. It returns 2, the number removed. The snapshot `before` is separate storage and still holds all four values.
+
 ## Exercises
 
 1. **Predict and explain.** Predict Count and Capacity before and after appends.
@@ -140,13 +144,15 @@ internal static class Program {
 
 6. **Transfer and justify.** Choose mutation or a new sequence for an undoable editor operation and explain who observes the change.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Log each task in the [evidence table](../STUDY-GUIDE.md#recording-exercise-evidence) before opening the explanation.
 
 ## Common pitfalls and diagnosis
 
 Capacity is not an index boundary. A snapshot of objects still shares those objects. Repeated front insertion can turn an apparently simple loop into quadratic work.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+Adding an eleventh element to a list created with capacity 10 grows Capacity to 20 in this runtime, but no contract promises that growth factor, so never test for it. For task 5, an all-negative input must leave an empty list and return its original count, and an empty list must return 0 without throwing.
+
+Repair routine: [building a regression case](../STUDY-GUIDE.md#building-a-regression-case).
 
 ## Progressive hints
 
@@ -156,11 +162,15 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 ## Self-check and next step
 
-Explain Count, Capacity, Snapshot without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+Predict Count and Capacity after constructing `new List<int>(4)` and adding five values, and say which of those two numbers your code may rely on. Explain why `RemoveAll` is safe where removing inside `foreach` is not. For task 6, say who observes an in-place change and who observes a new list.
+
+Then follow the general [self-check routine](../STUDY-GUIDE.md#self-check-routine) and save your pad.
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://learn.microsoft.com/en-us/dotnet/csharp/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+[Documentation](https://learn.microsoft.com/en-us/dotnet/csharp/): The `List<T>` API reference documents `Capacity`, `Count`, `RemoveAll` and how its enumerator reacts when the list changes.
+
+Provenance and limits: [sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

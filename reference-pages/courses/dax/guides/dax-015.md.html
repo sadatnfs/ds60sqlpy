@@ -194,10 +194,10 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/dax/guides/dax-015.md</code></p>
     </header>
     <article class="document"><h2 id="dax-015-calculate-replaces-a-filter-on-the-same-column">dax-015: CALCULATE replaces a filter on the same column<a class="heading-anchor" href="#dax-015-calculate-replaces-a-filter-on-the-same-column" aria-label="Link to this section">#</a></h2>
-<p><strong>Stage 3: Row context, filter context and CALCULATE.</strong> Level: intermediate. Read the mechanisms, trace the worked cases and retain your own draft. <strong>Direct prerequisites:</strong> <code>dax-012</code>, <code>dax-014</code></p>
+<p><strong>Stage 3: Row context, filter context and CALCULATE.</strong> Level: intermediate. <strong>Direct prerequisites:</strong> <code>dax-012</code>, <code>dax-014</code></p>
 <h3 id="how-to-use-this-offline-lesson">How to use this offline lesson<a class="heading-anchor" href="#how-to-use-this-offline-lesson" aria-label="Link to this section">#</a></h3>
-<p>This is an offline DAX editing lesson. No DAX compiler, semantic-model engine, Power BI account or network connection is required. Worked tables describe the named reference and model, not execution of your draft. Save, compare and export source; do not interpret a comparison or completion marker as a passed program run.</p>
-<p>Open the <a href="../lessons/dax-015.dax.html">starter</a>. Compare the <a href="../solutions/dax-015_reference.dax.html">named reference</a> and <a href="../solutions/dax-015_solutions.md.html">reasoning</a> when ready. The <a href="../models/retail/model.json.html">model specification</a> identifies every fixture table, column type, key and relationship. The <a href="../models/README.md.html">fixture handbook</a> displays the original data and explains each table grain.</p>
+<p>The starter wraps a BLANK draft measure in a Blue context. Predict what the selected amount should be for Blue, then predict what happens to it when an inner CALCULATE sets the same Color column to Red. The <a href="../STUDY-GUIDE.md.html#offline-study-boundary">offline study boundary</a> explains what a worked table can show.</p>
+<p>Files: <a href="../lessons/dax-015.dax.html">starter</a>, <a href="../solutions/dax-015_reference.dax.html">reference</a> and <a href="../solutions/dax-015_solutions.md.html">reasoning</a>.</p>
 <h3 id="the-question-and-the-mechanism">The question and the mechanism<a class="heading-anchor" href="#the-question-and-the-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Predict replacement on one column while retaining unrelated filters.</p>
 <p>CALCULATE evaluates a scalar expression in a modified filter context. A simple Boolean filter on a column normally replaces an existing filter on that same column. If the column was not filtered, the new filter is added. Other filters are not erased merely because CALCULATE appears in the expression.</p>
@@ -207,14 +207,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Read the outer CALCULATETABLE as the starting question and the inner CALCULATE as a measure-specific change. A Boolean filter must obey DAX&#x27;s restrictions, including referencing columns from one table and not referring directly to a measure. The output names distinguish the original and modified contexts.</p>
 <p>Concepts to explain in your own words: <strong>CALCULATE</strong>, <strong>Boolean filter</strong>, <strong>replacement</strong>, <strong>added filter</strong>.</p>
 <h3 id="model-and-context-contract">Model and context contract<a class="heading-anchor" href="#model-and-context-contract" aria-label="Link to this section">#</a></h3>
-<p>The ordinary star follows Product → Sales, Customer → Sales and Date → Sales through OrderDate. The ShipDate relationship is inactive unless a case explicitly activates it. Filters flow from the one side to the many side. Additional analytical tables have only the relationships declared in their named model; a similar column name does not create a relationship.</p>
+<p>Every filter in this lesson sits on Product columns, and all reach Sales through one active relationship. Blue holds the Notebook and the Mug (163 USD), Red holds only the Pen (24 USD), Green holds only the unsold Bag, and Paper holds the Notebook and the Pen (91 USD). See the <a href="../models/retail/model.json.html">model specification</a> and the <a href="../STUDY-GUIDE.md.html#the-retail-star">shared star rules</a>.</p>
 <pre class="highlighted-code"><code class="language-text">Product (one)  --&gt; Sales (many) &lt;-- Customer (one)
                        ^
                        | active OrderDate
                     Date (one)
                        | inactive ShipDate
                        +------&gt; Sales</code></pre>
-<p>All amounts in ordinary Sales are USD after the line discount, before tax and returns. The Date fixture is complete for 2024 and 2025; a short result table is a selected slice, not the whole calendar. JSON <code>null</code> in the worked-results sidecar means DAX BLANK, not the text &quot;null&quot;.</p>
 <h3 id="worked-cases">Worked cases<a class="heading-anchor" href="#worked-cases" aria-label="Link to this section">#</a></h3>
 <p>The following query-local declarations are shared by these cases. They do not create persisted measures in this classroom.</p>
 <pre class="highlighted-code"><code class="language-dax"><span class="syntax-keyword">DEFINE</span>
@@ -261,8 +260,10 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 </tbody></table></div>
 <p>Replacing one column&#x27;s selection and retaining a different column&#x27;s selection are compatible behaviors. Always specify which column the expression modifies.</p>
 <p>Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table.</p>
+<h3 id="a-misconception-to-test">A misconception to test<a class="heading-anchor" href="#a-misconception-to-test" aria-label="Link to this section">#</a></h3>
+<p>There are two opposite misreadings of CALCULATE. The first says that adding a Red filter inside a Blue context should intersect the two, leaving no product and a BLANK result. The fixture returns 24 instead: a Boolean filter on Product[Color] replaces the existing Color selection rather than joining it. The second misreading overcorrects and says CALCULATE wipes every incoming filter. Case B refutes that: with Paper selected, adding Blue gives 67, the Notebook alone, not the all-Blue 163, because Category is a different column and survives untouched. Replacement is column by column. To keep an earlier selection on the same column, wrap the new filter in KEEPFILTERS, which a later lesson covers.</p>
 <h3 id="practice-prediction-construction-and-diagnosis">Practice: prediction, construction and diagnosis<a class="heading-anchor" href="#practice-prediction-construction-and-diagnosis" aria-label="Link to this section">#</a></h3>
-<p>Retain your formula or written reasoning, the stated context, contributing rows or values, and a conclusion with its unit. These notes are your own study record; they do not show that a formula ran.</p>
+<p>Record each answer as the <a href="../STUDY-GUIDE.md.html#practice-routine">practice routine</a> describes.</p>
 <h4 id="exercise-1-predict">Exercise 1: Predict<a class="heading-anchor" href="#exercise-1-predict" aria-label="Link to this section">#</a></h4>
 <p>Predict setting Color = Green inside the Blue context.</p>
 <h4 id="exercise-2-change-one-condition">Exercise 2: Change one condition<a class="heading-anchor" href="#exercise-2-change-one-condition" aria-label="Link to this section">#</a></h4>
@@ -285,13 +286,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>Choose exactly which selection should be removed or replaced.</li>
 </ol>
 <h3 id="self-check-and-next-step">Self-check and next step<a class="heading-anchor" href="#self-check-and-next-step" aria-label="Link to this section">#</a></h3>
-<p>Explain one changed result without quoting the formula alone. Identify which rows, filters, relationship or evaluation scope changed, then construct a counterexample to a plausible wrong interpretation. Keep your draft separate from the supplied reference. A small correct derivation does not certify performance, model security or broad expertise.</p>
+<p>Start from a Home context and add an inner filter Color = Blue, then Color = Red. Predict both results and say which incoming filter survived each time. Then explain why the Red result being BLANK is a correct answer rather than a broken relationship. The <a href="../STUDY-GUIDE.md.html#self-check-routine">self-check routine</a> applies too.</p>
 <p>Continue to <a href="dax-016.md.html">dax-016</a> when its prerequisites make sense, or revisit this stage from the <a href="../README.md.html">course map</a>.</p>
 <h3 id="official-references-and-evidence-limits">Official references and evidence limits<a class="heading-anchor" href="#official-references-and-evidence-limits" aria-label="Link to this section">#</a></h3>
 <ul>
 <li><a href="https://learn.microsoft.com/en-us/dax/calculate-function-dax">DAX function: CALCULATE</a></li>
 </ul>
-<p>Documentation was reviewed for this original course on 2026-10-25. Version-sensitive features have explicit notes. Source/model checks and independent fixture arithmetic are not a DAX parser, compiler, semantic engine, real RLS test or performance measurement.</p>
+<p>Review date and evidence limits: <a href="../STUDY-GUIDE.md.html#references-and-evidence-limits">study guide</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for dax-015. Read its guide and the named model.
 Review my draft and prediction. Ask me to enumerate the relevant rows and context.

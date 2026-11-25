@@ -4,18 +4,15 @@
 
 Intermediate; about 110 minutes, plus any optional hardware experiment. Direct prerequisites: `cuda-015`, `cuda-017`, `cuda-006`
 
-The order supports learning at your own pace. Reading and CPU reasoning remain
-available when NVIDIA hardware is absent. Advanced hardware features need their
-own capability checks and are not prerequisites for opening this chapter.
+Pacing, evidence labels and platform rules for every chapter are in the [CUDA study guide](../../STUDY-GUIDE.md).
 
 ## Learning objectives
 
 Verify a one-thread-per-output matrix multiplication across a rectangular shape suite and estimate its operations and bytes.
 
-Work through *A simple matrix multiplication with a complete specification* with the concrete cases below. Finish with this evidence:
-correctness across the shape suite and a transparent operation/byte estimate. Distinguish an algorithmic
-calculation, a compiled artifact and an actual device observation when explaining
-what your work establishes.
+**Scope:** Matrix dimensions, contraction, row-major offsets, accumulation type and numerical tolerance.
+
+**Evidence to produce:** Correctness across the shape suite and a transparent operation/byte estimate.
 
 ## Purpose, vocabulary and mental model
 
@@ -38,24 +35,15 @@ Rows r and columns c identify the output, while k is the contracted dimension. E
 
 ## How to run and study this lesson
 
-Use the saved reading worksheet in `/classroom`; the reading pad does not execute
-CUDA. For the bounded calculation, select **CPU model (Python)**, whose
-answer-free starter supplies the literal fixtures and task contract. The
-[CUDA C++ study workflow](../README.md) covers platforms, optional GPU
-compilation and evidence labels. In a prepared Python environment you can also
-run the separate [CPU reference](../references/cuda-018_cpu.py) from the
-repository root:
+Trace worked example 1 by hand, then run the [CPU reference](../references/cuda-018_cpu.py) from the repository root:
 
 ```sh
 python courses/cuda/cpp/references/cuda-018_cpu.py
 ```
 
-Its assertions check the stated numerical result or model invariant; console
-text is evidence of this CPU model only, not of CUDA execution.
-
 ## CUDA C++ kernel listing
 
-This is the baseline kernel the chapter specifies: one thread per output coordinate, explicit row-major offsets and a bounds check before any read. The early return is safe only because the kernel has no barrier. Read it as CUDA C++ source; the classroom reading pad does not compile or run it.
+This is the baseline kernel the chapter specifies: one thread per output coordinate, explicit row-major offsets and a bounds check before any read. The early return is safe only because the kernel has no barrier.
 
 ```cpp
 // One thread computes one C[row, col]. A is M-by-K, B is K-by-N and C is
@@ -79,9 +67,7 @@ __global__ void matmul_naive(const float *A, const float *B, float *C, int M,
 
 Multiply \([[1,2,3],[4,5,6]]\) by \([[1,2],[0,1],[2,0]]\). The output is \([[7,4],[16,13]]\). Entry (1,0) is \(4\times 1+5\times 0+6\times 2=16\). Explicitly name every dimension before translating the three scalar indices into flat offsets.
 
-The complete CPU model below intentionally models only the named arithmetic,
-layout, dependency or capability decision. It does not model GPU scheduling,
-caches, instruction timing or device memory visibility.
+**Why:** Entry (1, 0) pairs row 1 of A with column 0 of B: 4 + 0 + 12 = 16.
 
 ```python
 A = [[1, 2, 3], [4, 5, 6]]
@@ -91,41 +77,37 @@ assert C == [[7, 4], [16, 13]]
 print(C)
 ```
 
-**Expected observation:** Every assertion succeeds. A representative CPU output is:
+**Expected observation:** every assertion succeeds, and the CPU model prints:
 
 ```text
 [[7, 4], [16, 13]]
 ```
 
-Integers, shapes and ordering must match exactly; only assertions with an explicit
-tolerance accept small floating-point differences. A printed duration is a model
-output, not a measured GPU benchmark.
+**Check:** The reference asserts C == [[7, 4], [16, 13]].
 
 ## Worked example 2: change a meaningful condition
 
 Multiplying by an identity matrix preserves input, but that test alone can miss some errors. A 3-by-5 times 5-by-2 case exercises tails and asymmetric dimensions. If \(\mathrm{k}=0\), define the sum of zero products as zero and decide how the host handles the empty inputs without invalid launches.
 
-Before applying this example to your own program, write down which inputs are
-read, which result is produced, and the condition that makes the comparison
-valid. Keep the original case as a regression check when changing a boundary.
+**Why:** Unequal dimensions catch swapped strides that a square identity case tolerates.
+
+**Check:** Compare every entry of the 3-by-2 output with the host triple loop.
 
 ## Six progressive exercises
 
-Exercises 1 and 2 are guided reconstructions of the worked examples; exercises
-3-6 change an input, diagnose a defect, test a boundary and transfer the idea.
-For each one, keep the calculation, output, diagram or failure policy you
-produce so another reader can compare it with the worked cases. If the hint is
-not enough, reread the mechanism paragraph and the bounded CPU assertion.
-
 ### Exercise 1
 
-Predict and trace the first worked example before running its CPU reference. Write every intermediate quantity that leads to the stated result, including units or ownership where applicable.
+Reconstruct worked example 1 on paper before running its CPU reference. Name m = 2, k = 3, n = 2, then compute each C[r][c] as a sum over k.
+
+**Trap to avoid:** Indexing B as B[c][k] uses rows of B instead of columns and gives wrong entries.
 
 **Hint:** Start with the literal input and intermediate quantities in worked example 1.
 
 ### Exercise 2
 
-Reconstruct the second worked example without copying its conclusion. Identify the changed input or condition, show the resulting calculation or dependency, and explain why it differs from the first example.
+Rework worked example 2 without copying its conclusion. Add a 3-by-5 times 5-by-2 fixture with distinct values beside the identity test.
+
+**Trap to avoid:** Relying on identity multiplication lets an implementation that transposes B still pass.
 
 **Hint:** Identify exactly which condition changes in worked example 2.
 
@@ -133,11 +115,15 @@ Reconstruct the second worked example without copying its conclusion. Identify t
 
 Compute entry (0,1) in the worked product.
 
+**Trap to avoid:** Summing across output columns instead of k adds unrelated products.
+
 **Hint:** Use the first worked example to establish the relevant quantities, then change only the requested input.
 
 ### Exercise 4
 
 An implementation swaps m and n yet passes a square test. Add a counterexample.
+
+**Trap to avoid:** Adding more square tests of other sizes never distinguishes m from n.
 
 **Hint:** Locate the failed phase or violated dependency before proposing a repair.
 
@@ -145,35 +131,33 @@ An implementation swaps m and n yet passes a square test. Add a counterexample.
 
 What happens when m or n is zero?
 
+**Trap to avoid:** Launching with ceil(0 / 16) blocks still produces an invalid configuration.
+
 **Hint:** Check what the algorithm is allowed to read, write or assume at this boundary.
 
 ### Exercise 6
 
 Estimate multiply-add work for \(\mathrm{m}=2\),\(\mathrm{k}=3\),\(\mathrm{n}=2\).
 
+**Trap to avoid:** Counting only m * n = 4 outputs understates work by the factor k.
+
 **Hint:** State the output contract and which observations are needed in the new application.
 
 ## Common mistakes and diagnosis
 
-A tempting but incorrect claim in this chapter is: **passing a square all-ones example establishes layout correctness.**
-
-For the concrete failure exercise, an implementation swaps m and n yet passes a square test. Add a counterexample.
-Preserve the original input and the stage where behavior diverged, and compare
-with the CPU model before changing hardware configuration.
+A tempting but incorrect claim: **Passing a square all-ones example establishes layout correctness.** A square all-ones input yields the same output under swapped indices or transposed layouts, so layout mistakes cannot appear. Worked example 2 recommends a 3-by-5 times 5-by-2 product with distinct values, which makes swapped m and n or wrong offsets produce visibly wrong entries.
 
 ## Self-check, retrieval and transfer
 
-Explain the first example without its code, then use the second example to state
-one assumption that matters. Complete Exercise 3 independently, use Exercise 4 to
-diagnose a plausible defect, check the boundary in Exercise 5, and retain the
-application contract from Exercise 6. Compare the [separate explanations](../solutions/cuda-018_solutions.md)
-only after your attempt or a deliberate reveal. A reading marker records your
-choice; it does not certify hardware qualification or expert mastery.
+1. Give the flat offset of A(1,2) when A is 2-by-3 row-major.
+2. How many multiply-adds does an m-by-k times k-by-n product need?
+3. Why record the accumulation type with the test?
+
+Short answers are in the [separate explanations](../solutions/cuda-018_solutions.md#self-check-answers); compare only after an attempt.
 
 ## Primary references
 
-Check the documentation that matches your prepared toolkit before optional
-hardware execution.
+Use the documentation that matches your prepared toolkit.
 
 - [CUDA Programming Guide](https://docs.nvidia.com/cuda/cuda-programming-guide/)
 

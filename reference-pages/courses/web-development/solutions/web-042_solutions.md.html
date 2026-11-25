@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/web-development/solutions/web-042_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="web-042-explanatory-solutions">web-042: explanatory solutions<a class="heading-anchor" href="#web-042-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Open this after your own attempt. Each answer explains the lesson&#x27;s synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in <code>courses/web-development/guides/web-042.md</code>.</p>
+<p>Attempt each exercise before reading; the mechanism is in <code>courses/web-development/guides/web-042.md</code> (<a href="../STUDY-GUIDE.md.html#solutions">using these answers</a>).</p>
 <h3 id="exercise-1-explain-what-a-namespace-does-and-does-not-install">Exercise 1: Explain what a namespace does and does not install.<a class="heading-anchor" href="#exercise-1-explain-what-a-namespace-does-and-does-not-install" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> It groups names; it does not fetch code or create an autoloader by itself.</p>
 <p><strong>Approach:</strong> Separate naming from loading: a namespace prefixes class names, while files reach the process only through <code>require</code>, <code>include</code> or an autoloader.</p>
@@ -232,7 +232,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Plausible wrong approach:</strong> Running an update directly on the production server fails because the installed set is never reviewed or reproducible.</p>
 <p><strong>How to verify:</strong> The commit contains the lockfile diff, the test run result and a note for each new package.</p>
 <h3 id="reference-comparison">Reference comparison<a class="heading-anchor" href="#reference-comparison" aria-label="Link to this section">#</a></h3>
-<p>Open <code>courses/web-development/solutions/web-042_solution.php</code> only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; server lifecycle, persistence, concurrency and security need their own integration evidence.</p></article>
+<p>The reference resolves a qualified DateTimeImmutable and checks that composer.lock is not inside public, then prints the layout. That catches public dependency metadata. It is not an installed Composer project, so compare your layout&#x27;s public boundary and autoload mapping rather than its file count.</p>
+<p>Open <code>courses/web-development/solutions/web-042_solution.php</code> after saving your attempt (<a href="../STUDY-GUIDE.md.html#references">comparing with the reference</a>).</p></article>
   </main>
 </body>
 </html>

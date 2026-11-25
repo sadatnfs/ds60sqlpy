@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/r/solutions/r-006_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="r-006-reference-reasoning">r-006: reference reasoning<a class="heading-anchor" href="#r-006-reference-reasoning" aria-label="Link to this section">#</a></h2>
-<p>Use the <a href="r-006_reference.R.html">complete reference</a> with the guide&#x27;s declared inputs and runtime. Every worked example is also a standalone script.</p>
+<p>Run the <a href="r-006_reference.R.html">complete reference</a> under the <a href="../STUDY-GUIDE.md.html#run-a-chapter">run rules</a>.</p>
 <h3 id="why-the-implementation-has-this-shape">Why the implementation has this shape<a class="heading-anchor" href="#why-the-implementation-has-this-shape" aria-label="Link to this section">#</a></h3>
 <p>A finite-value mask is stricter than a missing-value mask. It rejects infinities as well as missing and undefined results.</p>
 <p>The reporting policy preserves no observed sum instead of interpreting the empty-sum arithmetic convention as a measurement.</p>
@@ -243,7 +243,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Tempting mistake:</strong> Replacing every non-finite ratio with 0. That claims a measured zero rate for a case that had no denominator.</p>
 <p><strong>Verify:</strong> The reference checks that <code>ratio(1, 0)</code> returns NA and <code>ratio(4, 2)</code> returns 2.</p>
 <h3 id="what-the-checks-establish">What the checks establish<a class="heading-anchor" href="#what-the-checks-establish" aria-label="Link to this section">#</a></h3>
-<p>The reference makes 5 <code>stopifnot()</code> checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.</p></article>
+<p>The checks pin that <code>c(NULL, NA_real_)</code> has length one because NULL contributes nothing, that a vector with one known zero has an <code>na.rm</code> mean of 0, that <code>is.finite()</code> keeps 2 and 4, that <code>is.na()</code> is TRUE for NA and NaN while <code>is.nan()</code> is TRUE only for NaN, and that the guarded ratio returns NA for a zero denominator. They do not decide which missing values your report should count.</p>
+<p>The reference makes 5 <code>stopifnot()</code> checks; see <a href="../STUDY-GUIDE.md.html#what-a-passing-run-proves">what a passing run proves</a>.</p></article>
   </main>
 </body>
 </html>

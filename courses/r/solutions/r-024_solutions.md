@@ -1,6 +1,6 @@
 # r-024: reference reasoning
 
-Use the [complete reference](r-024_reference.R) with the guide's declared inputs and runtime. Every worked example is also a standalone script.
+Run the [complete reference](r-024_reference.R) under the [run rules](../STUDY-GUIDE.md#run-a-chapter).
 
 ## Why the implementation has this shape
 
@@ -108,4 +108,6 @@ Use the public S7 interface and explicit adapters rather than assuming S4 slot i
 
 ## What the checks establish
 
-The reference makes 6 `stopifnot()` checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.
+The assertions confirm that an invalid replacement fails with the expected message, that the series totals `c(ms = 10)`, that joining a 5 ms series gives values 3, 7 and 5 and a total of 15, that the new count generic returns 3L, that the unit stays ms after a failed replacement, and that an empty series counts 0 and totals 0. They do not test dispatch on classes beyond `Series`.
+
+The reference makes 6 `stopifnot()` checks; see [what a passing run proves](../STUDY-GUIDE.md#what-a-passing-run-proves).

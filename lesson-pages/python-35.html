@@ -460,16 +460,7 @@ scores <span class="syntax-operator">=</span> cross_validate<span class="syntax-
 <span class="syntax-punctuation">)</span></code></pre>
 <p>The metric arrays describe variation across these particular folds; their standard deviation is not automatically a confidence interval. Report how the folds were formed so someone else can reproduce the estimate.</p>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
-<p><strong>Primary browser route:</strong> run <code>./classroom</code> from the repository root and choose <strong>Python and data science</strong> on <code>/classroom</code>. Open this lesson in the shared workspace, read its capability notice, and use its supported coding or reading workflow. The <a href="../reference-pages/docs/classroom-experience.md.html">classroom guide</a> explains saved work, runtimes and switching subjects.</p>
-<p><strong>Optional native notebook/editor route:</strong> the instructions below describe separately prepared host tools. They are useful alternatives, not prerequisites for opening this lesson in the Docker classroom.</p>
-<ol>
-<li>Open the Day 35 learner notebook from this guide&#x27;s <strong>Next step</strong> section in VS Code or JupyterLab.</li>
-<li>Select the <code>Python (ds60sqlpy)</code> kernel. Start at the top and use <strong>Run All</strong> only after making the written predictions; every added worked example is bounded and offline after bootstrap.</li>
-<li>Keep experiments in new scratch cells. Do not edit the official solution while attempting the numbered practice.</li>
-<li>Restart the kernel and run from the first cell before calling the lesson complete. A clean run catches hidden state and stale variables.</li>
-</ol>
-<p>Linux, macOS, or Ubuntu in Windows WSL 2:</p>
-<pre class="highlighted-code"><code class="language-bash">.venv/bin/python -m jupyter lab</code></pre>
+<p>Open <code>python-35</code> in the classroom, or <code>python/ds-60day/notebooks/day35_model_evaluation_cv.ipynb</code> on a host; the <a href="../reference-pages/python/STUDY-GUIDE.md.html">Python study guide</a> explains both.</p>
 <h4 id="guide--concept-deep-dive-metrics-resampling-design-and-honest-generalization-estimates">Concept deep dive: metrics, resampling design, and honest generalization estimates<a class="heading-anchor" href="#guide--concept-deep-dive-metrics-resampling-design-and-honest-generalization-estimates" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--the-mental-model">The mental model<a class="heading-anchor" href="#guide--the-mental-model" aria-label="Link to this section">#</a></h5>
 <p>Evaluation begins with the decision, not a convenient default metric. A confusion matrix records counts at one decision threshold; precision asks whether positive predictions are reliable, while recall asks how many actual positives were found. Ranking metrics such as ROC AUC and average precision evaluate scores across thresholds but do not select an operating threshold for you.</p>
@@ -481,7 +472,6 @@ scores <span class="syntax-operator">=</span> cross_validate<span class="syntax-
 <li><strong>splitter objects:</strong> encode random, stratified, grouped, or temporal assumptions; <code>cv=5</code> is not a universal design.</li>
 </ul>
 <h5 id="guide--focused-example-a-derive-precision-and-recall-from-outcome-counts">Focused example A: derive precision and recall from outcome counts<a class="heading-anchor" href="#guide--focused-example-a-derive-precision-and-recall-from-outcome-counts" aria-label="Link to this section">#</a></h5>
-<p>Before running the example, predict the shape, type, or direction of the result. Write the prediction down so that a surprise becomes evidence rather than something to overlook.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
 <span class="syntax-keyword">from</span> sklearn.metrics <span class="syntax-keyword">import</span> confusion_matrix<span class="syntax-punctuation">,</span> precision_score<span class="syntax-punctuation">,</span> recall_score
 
@@ -568,7 +558,6 @@ splitter <span class="syntax-operator">=</span> GroupKFold<span class="syntax-pu
 </ol>
 <h5 id="guide--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#guide--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
 <p>Match metrics and resampling to the decision being modeled. Keep thresholds, groups, time, and hyperparameter selection inside honest validation boundaries.</p>
-<p>Predict or plan before you run code. Use the hint only after an honest attempt, and record the evidence that would prove your result correct.</p>
 <ol start="4">
 <li><strong>Threshold analysis:</strong> Using one fixed validation score vector, compare confusion matrices at thresholds 0.2, 0.5, and 0.8. Explain which errors increase as the threshold rises and why ROC AUC stays unchanged. <strong>Progressive hint:</strong> A higher positive threshold generally reduces predicted positives: false positives fall while false negatives rise. Ranking scores do not change.</li>
 </ol>
@@ -630,7 +619,7 @@ splitter <span class="syntax-operator">=</span> GroupKFold<span class="syntax-pu
 <li>Continue to <a href="python-36.html#guide">Day 36; PCA and Feature Selection</a>.</li>
 </ul>
 <h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
-<p>The lesson is complete without an AI assistant. If you want optional coaching, copy this prompt into the AI tutor while the repository root is open:</p>
+<p>The lesson is complete without AI. For optional coaching, copy this prompt with the repository root open:</p>
 <pre class="highlighted-code"><code class="language-text">Tutor me through `python-35` (Day 35: Model Evaluation and Cross-Validation).
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
@@ -952,7 +941,7 @@ mean_spread <span class="syntax-operator">=</span> <span class="syntax-punctuati
 </ul>
 <hr>
 <h4 id="solution-1--solution-reasoning-lens">Solution reasoning lens<a class="heading-anchor" href="#solution-1--solution-reasoning-lens" aria-label="Link to this section">#</a></h4>
-<p>A strong solution is not merely code that produces one plausible output. It establishes a chain from input contract to operation to verification:</p>
+<p>Each decision below links an input contract to an operation and its evidence:</p>
 <ol>
 <li><strong><code>confusion_matrix(y_true, y_pred)</code>:</strong> returns outcome counts at the selected threshold; inspect label order before unpacking.</li>
 <li><strong><code>cross_validate(estimator, X, y, cv=..., scoring=...)</code>:</strong> fits a fresh estimator per fold and can report multiple metrics and timing.</li>
@@ -964,30 +953,24 @@ mean_spread <span class="syntax-operator">=</span> <span class="syntax-punctuati
 <p><strong>Trade-off:</strong> More folds train on more data per fold but increase compute and correlation between fold estimates.</p>
 <p><strong>Edge case to test:</strong> A fold with one class, a group that dominates the dataset, or time leakage can make a nominal score undefined or misleading.</p>
 <p><strong>Evidence of correctness:</strong> Recompute metrics from outcome counts, prove split-unit disjointness, report every fold score plus variability, and preserve a separate final-evaluation boundary.</p>
-<p>When comparing your attempt with the reference, explain which of these decisions your code made explicitly. If the reference makes a different choice, compare the contracts and evidence before deciding that one version is universally better.</p>
 <h4 id="solution-1--exercise-by-exercise-reasoning-map">Exercise-by-exercise reasoning map<a class="heading-anchor" href="#solution-1--exercise-by-exercise-reasoning-map" aria-label="Link to this section">#</a></h4>
-<p>This map connects every learner prompt to a reasoning path. Read the explanation before copying code: the goal is to understand the assumptions, the evidence that validates the result, and the edge cases that can make an apparently correct implementation fail.</p>
 <h5 id="solution-1--exercise-1-original-lesson-practice">Exercise 1: Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Evaluate the pipeline with <code>accuracy</code>, <code>f1</code>, and <code>roc_auc</code>.</p>
 <p><strong>How to reason about it:</strong> Accuracy and F1 use thresholded labels, while ROC AUC uses ranking scores. Keep folds identical and report class prevalence so readers can understand why the metrics may disagree.</p>
-<p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
 <p><strong>Verify:</strong> On the same declared stratified folds, print every accuracy, F1, and ROC-AUC fold score plus mean and standard deviation; include positive-class support and use probability/decision scores, not hard labels, for ROC AUC.</p>
 <h5 id="solution-1--exercise-2-original-lesson-practice">Exercise 2: Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-2-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Compare the variability from 5-fold and 10-fold cross-validation.</p>
 <p><strong>How to reason about it:</strong> Ten folds give each model more training rows and cost twice the fits, but each validation fold is half as large, so single fold scores are noisier. Judge the designs by how much their mean score moves across repeated shuffle seeds rather than announcing a universal winner from one split.</p>
-<p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
 <p><strong>Verify:</strong> Use identical data, estimator, scorer, and shuffle policy for 5 and 10 folds; print both score vectors with their means and fold standard deviations, and confirm every row appears in validation exactly once per run. Then rerun each design over at least ten shuffle seeds and compare how much the mean moves: the fold spread within one run is not the variance of the cross-validation estimate.</p>
 <h5 id="solution-1--exercise-3-original-lesson-practice">Exercise 3: Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-3-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Explain leakage risks and how placing preprocessing in a pipeline helps.</p>
 <p><strong>How to reason about it:</strong> Any transform learned before cross-validation leaks validation-fold information. A pipeline causes preprocessing to be cloned and refit inside every fold, but it cannot repair leakage already baked into features.</p>
-<p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
 <p><strong>Verify:</strong> Show fold indices or a fit counter proving preprocessing is fitted separately inside each training fold; contrast with one deliberately pre-fitted transformation and explain why its validation score is contaminated.</p>
 <h5 id="solution-1--exercise-4-threshold-analysis">Exercise 4: Threshold analysis<a class="heading-anchor" href="#solution-1--exercise-4-threshold-analysis" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Using one fixed validation score vector, compare confusion matrices at thresholds 0.2, 0.5, and 0.8. Explain which errors increase as the threshold rises and why ROC AUC stays unchanged.</p>
 <p><strong>Reasoning before implementation:</strong> A higher positive threshold generally reduces predicted positives: false positives fall while false negatives rise. Ranking scores do not change.</p>
 <p>Build the matrix with an explicit label order such as <code>[0, 1]</code> and record support beside rates. Threshold selection is a policy decision; choose it on validation data using error costs or a documented constraint, then evaluate that frozen threshold once on the final holdout.</p>
 <p>ROC AUC is unchanged because it considers ranking across all possible thresholds. Precision, recall, F1, and the confusion matrix do change because they consume the thresholded labels.</p>
-<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
 <p><strong>Verify:</strong> Threshold analysis; for one fixed validation score vector, print TP/FP/TN/FN at 0.2, 0.5, and 0.8; assert predicted-positive count cannot rise with threshold and ROC AUC is identical because scores did not change.</p>
 <h5 id="solution-1--exercise-5-grouped-resampling">Exercise 5: Grouped resampling<a class="heading-anchor" href="#solution-1--exercise-5-grouped-resampling" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Design cross-validation for repeated measurements from the same patient or customer. Demonstrate how ordinary StratifiedKFold can place one entity in both training and validation.</p>
@@ -1005,7 +988,6 @@ splitter <span class="syntax-operator">=</span> StratifiedGroupKFold<span class=
     valid_groups <span class="syntax-operator">=</span> <span class="syntax-builtin">set</span><span class="syntax-punctuation">(</span>entity_ids<span class="syntax-punctuation">[</span>valid_index<span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span>
     <span class="syntax-keyword">assert</span> train_groups<span class="syntax-operator">.</span>isdisjoint<span class="syntax-punctuation">(</span>valid_groups<span class="syntax-punctuation">)</span></code></pre>
 <p>If deployment predicts future rows for already-known entities, a different split may be appropriate; align the split with that real decision explicitly.</p>
-<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
 <p><strong>Verify:</strong> Grouped resampling; print train/validation entity IDs for every grouped fold and assert their intersections are empty; also exhibit at least one ordinary StratifiedKFold split where the same entity appears on both sides.</p>
 <h5 id="solution-1--exercise-6-selection-bias-debugging">Exercise 6: Selection-bias debugging<a class="heading-anchor" href="#solution-1--exercise-6-selection-bias-debugging" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Explain why reporting <code>GridSearchCV.best_score_</code> as final performance is optimistic. Sketch a nested cross-validation design and distinguish it from out-of-fold predictions for one fixed model.</p>
@@ -1017,7 +999,6 @@ splitter <span class="syntax-operator">=</span> StratifiedGroupKFold<span class=
 <li>outer scores summarize the complete model-selection procedure.</li>
 </ol>
 <p><code>cross_val_predict</code> can generate out-of-fold predictions for a fixed estimator, but it is not automatically nested. Passing the entire search object to the outer loop is what repeats selection honestly.</p>
-<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
 <p><strong>Verify:</strong> Selection-bias debugging; print nested outer-fold scores plus mean/std and the inner best parameters per outer fold; contrast with best_score_ and state that one fixed model&#x27;s out-of-fold predictions do not evaluate the selection procedure.</p></div>
       </section>
 

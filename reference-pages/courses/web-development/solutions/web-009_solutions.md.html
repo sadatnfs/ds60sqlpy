@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/web-development/solutions/web-009_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="web-009-explanatory-solutions">web-009: explanatory solutions<a class="heading-anchor" href="#web-009-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Open this after your own attempt. Each answer explains the lesson&#x27;s synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in <code>courses/web-development/guides/web-009.md</code>.</p>
+<p>Attempt each exercise before reading; the mechanism is in <code>courses/web-development/guides/web-009.md</code> (<a href="../STUDY-GUIDE.md.html#solutions">using these answers</a>).</p>
 <h3 id="exercise-1-predict-required-minimum-and-maximum-outcomes-for-empty-4-30-and-121">Exercise 1: Predict required, minimum and maximum outcomes for empty, 4, 30 and 121.<a class="heading-anchor" href="#exercise-1-predict-required-minimum-and-maximum-outcomes-for-empty-4-30-and-121" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Empty, 4 and 121 fail; 30 satisfies the numeric bounds.</p>
 <p><strong>Approach:</strong> Check each value against <code>required</code>, <code>min=&quot;5&quot;</code> and <code>max=&quot;120&quot;</code> separately, then combine the results.</p>
@@ -232,7 +232,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Plausible wrong approach:</strong> Removing the server check because the form already validates fails because a request sent without the form skips every browser rule.</p>
 <p><strong>How to verify:</strong> Your list shows the range rule present on both the client and the server, with authorization only on the server.</p>
 <h3 id="reference-comparison">Reference comparison<a class="heading-anchor" href="#reference-comparison" aria-label="Link to this section">#</a></h3>
-<p>Open <code>courses/web-development/solutions/web-009_solution.html</code> only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; its success message is not an accessibility audit or proof of responsive behavior at every size.</p></article>
+<p>The reference calls checkValidity on the minutes input and requires the starting value to pass, which catches an initial value outside 5 to 120 or a missing value. It does not test the failing values, the linked help or the error text, so try empty, 4 and 121 by hand.</p>
+<p>Open <code>courses/web-development/solutions/web-009_solution.html</code> after saving your attempt (<a href="../STUDY-GUIDE.md.html#references">comparing with the reference</a>).</p></article>
   </main>
 </body>
 </html>

@@ -194,10 +194,10 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/dax/guides/dax-035.md</code></p>
     </header>
     <article class="document"><h2 id="dax-035-fiscal-labels-boundaries-and-as-of-totals">dax-035: Fiscal labels, boundaries and as-of totals<a class="heading-anchor" href="#dax-035-fiscal-labels-boundaries-and-as-of-totals" aria-label="Link to this section">#</a></h2>
-<p><strong>Stage 6: Dates, periods and temporal meaning.</strong> Level: intermediate. Read the mechanisms, trace the worked cases and retain your own draft. <strong>Direct prerequisites:</strong> <code>dax-032</code>, <code>dax-033</code></p>
+<p><strong>Stage 6: Dates, periods and temporal meaning.</strong> Level: intermediate. <strong>Direct prerequisites:</strong> <code>dax-032</code>, <code>dax-033</code></p>
 <h3 id="how-to-use-this-offline-lesson">How to use this offline lesson<a class="heading-anchor" href="#how-to-use-this-offline-lesson" aria-label="Link to this section">#</a></h3>
-<p>This is an offline DAX editing lesson. No DAX compiler, semantic-model engine, Power BI account or network connection is required. Worked tables describe the named reference and model, not execution of your draft. Save, compare and export source; do not interpret a comparison or completion marker as a passed program run.</p>
-<p>Open the <a href="../lessons/dax-035.dax.html">starter</a>. Compare the <a href="../solutions/dax-035_reference.dax.html">named reference</a> and <a href="../solutions/dax-035_solutions.md.html">reasoning</a> when ready. The <a href="../models/retail/model.json.html">model specification</a> identifies every fixture table, column type, key and relationship. The <a href="../models/README.md.html">fixture handbook</a> displays the original data and explains each table grain.</p>
+<p>The starter names a June 30 boundary and leaves the fiscal amount BLANK. Write the fiscal year label for June 30, 2024 and for July 1, 2024 first, then decide which Sales lines belong to FY 2025 under that rule. The <a href="../STUDY-GUIDE.md.html#offline-study-boundary">offline study boundary</a> explains what a worked table can show.</p>
+<p>Files: <a href="../lessons/dax-035.dax.html">starter</a>, <a href="../solutions/dax-035_reference.dax.html">reference</a> and <a href="../solutions/dax-035_solutions.md.html">reasoning</a>.</p>
 <h3 id="the-question-and-the-mechanism">The question and the mechanism<a class="heading-anchor" href="#the-question-and-the-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Define a fiscal year explicitly and distinguish fiscal-to-date from a completed fiscal year.</p>
 <p>A fiscal-year label is a convention over dates, not an intrinsic property of an integer called Year. Our ordinary FiscalYear ends in June: July 1, 2024 begins FY 2025, while June 30, 2024 ends FY 2024. Labeling a fiscal year by its ending year is a deliberate rule that should be written in the date dictionary.</p>
@@ -207,14 +207,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Case A inspects two neighboring boundary dates and their stored FiscalYear labels. Case B applies an explicit fiscal-year filter and a maximum available date. The code does not infer a financial reporting standard from the word fiscal; the fixture&#x27;s convention is the authority.</p>
 <p>Concepts to explain in your own words: <strong>fiscal year</strong>, <strong>date role</strong>, <strong>year label</strong>, <strong>as-of boundary</strong>, <strong>calendar policy</strong>.</p>
 <h3 id="model-and-context-contract">Model and context contract<a class="heading-anchor" href="#model-and-context-contract" aria-label="Link to this section">#</a></h3>
-<p>The ordinary star follows Product → Sales, Customer → Sales and Date → Sales through OrderDate. The ShipDate relationship is inactive unless a case explicitly activates it. Filters flow from the one side to the many side. Additional analytical tables have only the relationships declared in their named model; a similar column name does not create a relationship.</p>
+<p>FiscalYear starts on July 1 and is named by the year in which it ends. Every 2024 sale in the fixture (S1 to S3, 64 USD) falls in January 2024 and so belongs to FY 2024. The 2025 lines S4 to S8 (123 USD) fall in FY 2025. See the <a href="../models/retail/model.json.html">model specification</a> and the <a href="../STUDY-GUIDE.md.html#the-retail-star">shared star rules</a>.</p>
 <pre class="highlighted-code"><code class="language-text">Product (one)  --&gt; Sales (many) &lt;-- Customer (one)
                        ^
                        | active OrderDate
                     Date (one)
                        | inactive ShipDate
                        +------&gt; Sales</code></pre>
-<p>All amounts in ordinary Sales are USD after the line discount, before tax and returns. The Date fixture is complete for 2024 and 2025; a short result table is a selected slice, not the whole calendar. JSON <code>null</code> in the worked-results sidecar means DAX BLANK, not the text &quot;null&quot;.</p>
 <h3 id="worked-cases">Worked cases<a class="heading-anchor" href="#worked-cases" aria-label="Link to this section">#</a></h3>
 <p>The following query-local declarations are shared by these cases. They do not create persisted measures in this classroom.</p>
 <pre class="highlighted-code"><code class="language-dax"><span class="syntax-keyword">DEFINE</span>
@@ -264,8 +263,10 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 </tbody></table></div>
 <p>There happen to be no second-half 2024 sales in this fixture. That does not make Gregorian and fiscal-year measures generally equivalent.</p>
 <p>Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table.</p>
+<h3 id="a-misconception-to-test">A misconception to test<a class="heading-anchor" href="#a-misconception-to-test" aria-label="Link to this section">#</a></h3>
+<p>Because FY 2025 to date and calendar 2025 to date both return 123 here, it is easy to conclude that the fiscal column is decoration. The match is an accident of the fixture: no sales fall between July and December 2024. Add a single hypothetical sale on 2024-09-10 and the fiscal figure rises while the calendar figure does not, since September 2024 is in FY 2025 but outside calendar 2025. A second confusion is the label convention itself. Naming by ending year puts July 2024 into FY 2025; naming by starting year would call the same months FY 2024. The rows stay the same; only the caption changes, so the convention must be written beside the number. Finally, 123 covers July through February only, so comparing it with all twelve months of FY 2024 mixes coverage with performance.</p>
 <h3 id="practice-prediction-construction-and-diagnosis">Practice: prediction, construction and diagnosis<a class="heading-anchor" href="#practice-prediction-construction-and-diagnosis" aria-label="Link to this section">#</a></h3>
-<p>Retain your formula or written reasoning, the stated context, contributing rows or values, and a conclusion with its unit. These notes are your own study record; they do not show that a formula ran.</p>
+<p>Record each answer as the <a href="../STUDY-GUIDE.md.html#practice-routine">practice routine</a> describes.</p>
 <h4 id="exercise-1-predict">Exercise 1: Predict<a class="heading-anchor" href="#exercise-1-predict" aria-label="Link to this section">#</a></h4>
 <p>Predict FiscalYear for January 3, 2025.</p>
 <h4 id="exercise-2-change-one-condition">Exercise 2: Change one condition<a class="heading-anchor" href="#exercise-2-change-one-condition" aria-label="Link to this section">#</a></h4>
@@ -288,14 +289,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>A posted period and an event date can have distinct meanings.</li>
 </ol>
 <h3 id="self-check-and-next-step">Self-check and next step<a class="heading-anchor" href="#self-check-and-next-step" aria-label="Link to this section">#</a></h3>
-<p>Explain one changed result without quoting the formula alone. Identify which rows, filters, relationship or evaluation scope changed, then construct a counterexample to a plausible wrong interpretation. Keep your draft separate from the supplied reference. A small correct derivation does not certify performance, model security or broad expertise.</p>
+<p>Predict FY 2024 revenue and FY 2025 revenue through February 28 if a 30 USD sale is added on 2024-11-15. Then say which of the two totals a calendar-year report would move. The <a href="../STUDY-GUIDE.md.html#self-check-routine">self-check routine</a> applies too.</p>
 <p>Continue to <a href="dax-036.md.html">dax-036</a> when its prerequisites make sense, or revisit this stage from the <a href="../README.md.html">course map</a>.</p>
 <h3 id="official-references-and-evidence-limits">Official references and evidence limits<a class="heading-anchor" href="#official-references-and-evidence-limits" aria-label="Link to this section">#</a></h3>
 <ul>
 <li><a href="https://learn.microsoft.com/en-us/dax/datesytd-function-dax">DAX function: DATESYTD</a></li>
 <li><a href="https://learn.microsoft.com/en-us/power-bi/guidance/model-date-tables">Power BI guidance: date tables</a></li>
 </ul>
-<p>Documentation was reviewed for this original course on 2026-10-25. Version-sensitive features have explicit notes. Source/model checks and independent fixture arithmetic are not a DAX parser, compiler, semantic engine, real RLS test or performance measurement.</p>
+<p>Review date and evidence limits: <a href="../STUDY-GUIDE.md.html#references-and-evidence-limits">study guide</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for dax-035. Read its guide and the named model.
 Review my draft and prediction. Ask me to enumerate the relevant rows and context.

@@ -197,19 +197,17 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">export</span> <span class="syntax-punctuation">{</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-comment">// Exercise 1: Complete one valid job lifecycle: change one input</span></span>
-<span class="source-line"><span class="syntax-comment">// Copy Example A into a scratch `main.mts` and change `const completed = transition(started,</span></span>
-<span class="source-line"><span class="syntax-comment">// { type: &#x27;complete&#x27;, value: 7 });` to `const completed = transition(started, { type:</span></span>
-<span class="source-line"><span class="syntax-comment">// &#x27;complete&#x27;, value: 8 });`. Before running it, predict which check fails and which value it</span></span>
-<span class="source-line"><span class="syntax-comment">// now sees; then run it and restore the original line.</span></span>
-<span class="source-line"><span class="syntax-comment">// Expected: The changed run fails with an `AssertionError` at `assert.deepEqual(completed, {</span></span>
+<span class="source-line"><span class="syntax-comment">// In a scratch copy of Example A, change `const completed = transition(started, { type:</span></span>
+<span class="source-line"><span class="syntax-comment">// &#x27;complete&#x27;, value: 7 });` to `const completed = transition(started, { type: &#x27;complete&#x27;,</span></span>
+<span class="source-line"><span class="syntax-comment">// value: 8 });`. Which check fails, and what value does it see?</span></span>
+<span class="source-line"><span class="syntax-comment">// Expected: The edited run fails with an `AssertionError` at `assert.deepEqual(completed, {</span></span>
 <span class="source-line"><span class="syntax-comment">// id: &#x27;A&#x27;, attempt: 1, kind: &#x27;succeeded&#x27;, value: 7 })`. Restoring `const completed =</span></span>
 <span class="source-line"><span class="syntax-comment">// transition(started, { type: &#x27;complete&#x27;, value: 7 });` brings back: succeeded with attempt</span></span>
 <span class="source-line"><span class="syntax-comment">// 1 and value 7.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">// Exercise 2: Reject a result arriving before start: diagnose an edited check</span></span>
-<span class="source-line"><span class="syntax-comment">// A careless edit changed a check in Example B so that it reads `assert.deepEqual(queued, {</span></span>
-<span class="source-line"><span class="syntax-comment">// id: &#x27;A&#x27;, attempt: 1, kind: &#x27;queued&#x27; });`. Run Example B with that line, explain why the</span></span>
-<span class="source-line"><span class="syntax-comment">// edited check now fails for the same program state, and restore it.</span></span>
+<span class="source-line"><span class="syntax-comment">// Example B&#x27;s check was edited to read `assert.deepEqual(queued, { id: &#x27;A&#x27;, attempt: 1,</span></span>
+<span class="source-line"><span class="syntax-comment">// kind: &#x27;queued&#x27; });`. Run it, explain the failure and restore the original.</span></span>
 <span class="source-line"><span class="syntax-comment">// Expected: Before the repair the run fails with an `AssertionError` at</span></span>
 <span class="source-line"><span class="syntax-comment">// `assert.deepEqual(queued, { id: &#x27;A&#x27;, attempt: 1, kind: &#x27;queued&#x27; });`. Restoring</span></span>
 <span class="source-line"><span class="syntax-comment">// `assert.deepEqual(queued, { id: &#x27;A&#x27;, attempt: 0, kind: &#x27;queued&#x27; });` brings back: invalid</span></span>

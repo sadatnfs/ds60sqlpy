@@ -232,16 +232,16 @@ curl -s -u <span class="syntax-string">&quot;</span>$ATLAS_USER<span class="synt
   <span class="syntax-string">&quot;</span>$DS60_ATLAS_ENDPOINT<span class="syntax-string">/api/atlas/v2/search/basic?typeName=ds60_&lt;owner&gt;_dataset</span><span class="syntax-string">&quot;</span></code></pre>
 <p>The first call reads from the graph store; the second goes through the Solr or Elasticsearch index. If the GUID read succeeds while search returns fewer entities, the data survived and the index is behind or needs a rebuild. If both fail, the graph is the problem. Keeping the two observations separate prevents a full restore when a reindex would have been enough.</p>
 <h3 id="complete-worked-source">Complete worked source<a class="heading-anchor" href="#complete-worked-source" aria-label="Link to this section">#</a></h3>
-<p>This is a project-only command notebook. Read and edit it in the classroom; run its explicitly labeled commands from the copied owned Docker workshop. The classroom does not execute these service commands.</p>
+<p>The classroom does not execute these service commands. See the <a href="../STUDY-GUIDE.md.html#workshop-notebooks">workshop rules</a>.</p>
 <h2 id="atlas-apache-074-prepared-command-notebook">Atlas apache-074 prepared command notebook<a class="heading-anchor" href="#atlas-apache-074-prepared-command-notebook" aria-label="Link to this section">#</a></h2>
-<p>Copy the owned Atlas project and read PREPARATION.md. Default local server execution is omitted until a supported native Java 8 graph/index stack exists.</p>
+<p>Run <code>plan</code> in the copied Atlas project and keep its output; the qualified names it prints are the keys you look up after each lifecycle change. Step 5 of PREPARATION.md gives the stop, resume and replacement order.</p>
 <pre class="highlighted-code"><code class="language-bash">bash run.sh prepare
 bash run.sh plan</code></pre>
-<p>These actions validate a portable native Docker client and print original payloads without contacting a server. For an explicitly prepared owned fixture server with untracked credentials, deliberate apply and read-only check are:</p>
+<p>Run <code>apply</code> once before any lifecycle change, then use <code>check</code> alone after each stop, resume or replacement on the prepared server:</p>
 <pre class="highlighted-code"><code class="language-bash">bash run.sh apply
 bash run.sh check</code></pre>
 <p>Record actual GUIDs/edges before lifecycle changes on the separately prepared server, then run check without apply. Search/index catch-up and graph/index restore require their own bounded observations.</p>
-<p>Prepared payloads are not actual Atlas observations. Never place credentials or Authorization headers in notebooks, source, command arguments or receipts.</p>
+<p>Matching GUIDs and edges after replacement show the graph store kept its state. Search can lag the graph, so index catch-up and a graph and index restore are separate bounded tests.</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
 <ul>
 <li><a href="https://atlas.apache.org/api/v2/index.html">Atlas REST types/entities/lineage API</a></li>

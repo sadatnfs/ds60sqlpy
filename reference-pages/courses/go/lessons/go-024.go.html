@@ -198,11 +198,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-keyword">import</span> <span class="syntax-string">&quot;fmt&quot;</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">func</span> main<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span></span>
-<span class="source-line">	<span class="syntax-comment">// Exercise 1: Join a produced result: change one input: Copy worked example 1 into a scratch pad and change `go func() { result &lt;- 6 * 7 }()` to `go func() { result &lt;- 7 * 7 }()`. Before running, predict which check fails and which value it now sees; then run it and restore the original line.</span></span>
-<span class="source-line">	<span class="syntax-comment">// Expected: The changed run panics with `goroutine result` because `&lt;-result == 42` no longer holds. Restoring the original line brings back the worked observation: the received value is 42.</span></span>
+<span class="source-line">	<span class="syntax-comment">// Exercise 1: Join a produced result: change one input: Copy worked example 1, change `go func() { result &lt;- 6 * 7 }()` to `go func() { result &lt;- 7 * 7 }()` and predict the failure before running; then restore the line.</span></span>
+<span class="source-line">	<span class="syntax-comment">// Expected: The edited run panics with `goroutine result` because `&lt;-result == 42` no longer holds.</span></span>
 <span class="source-line"></span>
-<span class="source-line">	<span class="syntax-comment">// Exercise 2: Wait for several tasks: debug a regression: A regression changed one token in worked example 2, so one line now reads `for i := 1; i &lt; 3; i++ {`. Run worked example 2 with that line, use the failure to locate the defect and repair it without changing the check.</span></span>
-<span class="source-line">	<span class="syntax-comment">// Expected: Before the repair the program panics with `joined tasks`; after it the line reads `for i := 0; i &lt; 3; i++ {` again and exactly three completion markers are received.</span></span>
+<span class="source-line">	<span class="syntax-comment">// Exercise 2: Wait for several tasks: debug a regression: A one-token regression in worked example 2 makes a line read `for i := 1; i &lt; 3; i++ {`. Repair it without changing the check.</span></span>
+<span class="source-line">	<span class="syntax-comment">// Expected: The defective run panics with `joined tasks`; after restoring `for i := 0; i &lt; 3; i++ {`, exactly three completion markers are received.</span></span>
 <span class="source-line"></span>
 <span class="source-line">	<span class="syntax-comment">// Exercise 3: Keep state task-local: Have two goroutines compute from explicit arguments.</span></span>
 <span class="source-line">	<span class="syntax-comment">// Expected: The results sum to 13.</span></span>

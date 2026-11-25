@@ -32,11 +32,9 @@ Use a synthetic configuration review and diagrams here. The course does not regi
 
 ## How to use this lesson
 
-The classroom displays this guide and saves your worksheet, `courses/docker/lessons/docker-037.md`. Its Run button does not control your Docker engine. Docker engine access is powerful host access, so the classroom deliberately receives no engine socket. Work through the supplied examples without starting anything, then use the optional host lab only in your own disposable project. Reading a command, parsing YAML and actually running the project are different forms of evidence.
+The classroom saves `courses/docker/lessons/docker-037.md` and holds no engine socket ([host-lab setup](../STUDY-GUIDE.md#host-lab-setup)).
 
-Use Bash in Linux, macOS Terminal, or Ubuntu under WSL 2 on Windows. The supported engine runs Linux containers. The maintained fixture is `courses/docker/fixtures/compose-lab/`; its README explains copying it into a new ignored learner directory, checking the engine, building locally with visible logs, and using the fixed project name `ds60-docker-study`. The fixture uses port 18080 on host loopback. Stop if that project name or port belongs to unrelated work; choose a new project name consistently in your own copy. Never paste a command against a remote Docker context simply because it is currently selected.
-
-For Dockerfile examples, create a file named `Dockerfile` in a scratch project. YAML snippets describe a fragment unless explicitly called a complete file. Text transcripts are synthetic illustrations, not claims about your machine. Do not substitute a real password, token or private registry into a checked-in example. **How to use the lessons** in the [subject README](../README.md) collects these rules in one place.
+**Host lab.** Read what the fixture tells clients about itself, then sketch the TLS hop it lacks. Run `curl -sv http://127.0.0.1:18080/ 2>&1 | grep '^< '` and read the response headers: `Cache-Control: no-store`, a JSON content type, and a `Server` header naming Python's built-in HTTP server. There is no TLS, no authentication and no forwarded-header handling, which is why the fixture publishes only on loopback. Next run `curl -sv https://127.0.0.1:18080/` and read the failure: the client opens a TLS handshake that a plain HTTP listener cannot answer, an SSL protocol error rather than a certificate problem. Draw the design real exposure would need, browser to a proxy holding a certificate for a DNS name, proxy to `app:8080` on a private network, and label each hop with its identity and timeout.
 
 ## Worked example / walkthrough
 
@@ -65,7 +63,7 @@ HTTP 401 from app: application authentication requirement
 
 ## Six progressive exercises
 
-For each exercise, name the object involved and the phase of its lifetime before changing anything, then vary only the condition the task names. Exercises that ask you to predict, explain, compare or diagnose keep their answers in the solutions file; the others show the evidence to look for.
+Answer-type prompts keep their answers in the solutions file ([exercise rules](../STUDY-GUIDE.md#exercise-rules)).
 
 ### Exercise 1: Distinguish TLS and application authorization.
 
@@ -97,13 +95,19 @@ For each exercise, name the object involved and the phase of its lifetime before
 
 Treating HTTPS as authorization. Trusting forwarded headers from any client. Publishing the learning server to the internet.
 
-Exercise 4 is this chapter's boundary case: Diagnose a proxy 502 separately from an app 404. Read the proxy log for the upstream it contacted and request the app route directly from an owned vantage point before changing either side. Preserve the original failure and the exact changed field before retrying. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
+Exercise 4 is this chapter's boundary case: Diagnose a proxy 502 separately from an app 404. Read the proxy log for the upstream it contacted and request the app route directly from an owned vantage point before changing either side.
+
+A proxy in front of an app often keeps its default upstream timeout, and the resulting symptom is misread as an app bug. When the app is slow, the proxy gives up first and returns `504`, while the app finishes the request and, for a `POST /increment`, commits it. The client sees a failure, retries, and the counter moves twice. When the proxy cannot reach the app at all, because of a refused connection or a failed name lookup, it returns `502` instead. Set upstream timeouts deliberately against the app's own limits, log the upstream status beside the proxy status, and treat a proxy `504` on a non-idempotent route as an unknown outcome to reconcile.
+
+Never trade a safety control for a passing example ([safety rules](../STUDY-GUIDE.md#safety-rules)).
 
 ## Retrieval, transfer and next steps
 
-Close the explanations first. Match a certificate mismatch, a proxy 502 and an app 401 to the layer that failed. Then reconstruct worked example 2 (Compare identity and routing failures) with one different value, predict what changes, and name which of TLS, reverse proxy, certificate and public exposure the change touches.
+**Retrieval.** Match a certificate mismatch, a proxy 502 and an app 401 to the layer that failed.
 
-When a host session ends, run `docker compose -p ds60-docker-study down` from your fixture copy. It removes the project's containers and network but keeps named volumes; deleting a volume is a separate, deliberate reset described in the fixture README.
+**Transfer case.** Users see a browser warning that the certificate is not valid for the site name, and someone suggests changing the app's container port from 8080 to 443. What is wrong with that plan, and what fixes the warning?
+
+Then run the [retrieval loop](../STUDY-GUIDE.md#retrieval-and-cleanup) and end any host session with its cleanup.
 
 ## Primary references
 

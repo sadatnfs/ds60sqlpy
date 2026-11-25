@@ -194,17 +194,19 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/scala-spark/guides/spark-016.md</code></p>
     </header>
     <article class="document"><h2 id="spark-016-join-cardinality-fanout-semi-joins-and-null-safe-keys">spark-016: Join cardinality, fanout, semi joins and NULL-safe keys<a class="heading-anchor" href="#spark-016-join-cardinality-fanout-semi-joins-and-null-safe-keys" aria-label="Link to this section">#</a></h2>
-<p>Authored paired Scala/PySpark teaching content. The default fixtures are tiny, local and deterministic. Runtime acceptance, logical correctness and learner understanding remain separate evidence.</p>
+<p>A join can create rows that never existed. Six facts meet a dimension in which key A appears three times, key E has no fact and one entry has a NULL key. You will predict the joined row count before running the join, watch 60 cents of real facts turn into 120 cents of joined amounts, and decide when enrichment is safe.</p>
 <h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
-<p>Intermediate; approximately 105 minutes. Direct prerequisites: <code>spark-015</code>. The prepared baseline is Spark 4.3.0, Scala binary 2.13, JDK 17 and Python 3.12. Read the <a href="../execution-baseline.md.html">execution baseline</a>.</p>
+<p>Intermediate; approximately 105 minutes. Direct prerequisites: <code>spark-015</code>. Pinned versions: <a href="../execution-baseline.md.html">execution baseline</a>.</p>
 <h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>Open <code>spark-016</code> in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed <code>spark-local-scala</code> or <code>spark-local-python</code> profile, save your pad and run the complete source. Scala stages as <code>Main.scala</code> with <code>object Main</code>; Python stages as <code>main.py</code> with a main guard. Each program creates its own <code>local[2]</code> session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.</p>
-<p>The <a href="../lessons/spark-016.scala.html">Scala learner</a> and <a href="../lessons/spark-016.py.html">PySpark learner</a> run two complete demonstrations and retain six explicit task stubs. Use the <a href="../solutions/spark-016_solutions.md.html">explained solutions</a> only after an attempt or an explicit worked comparison; the <a href="../solutions/spark-016_solution.scala.html">Scala reference</a> and <a href="../solutions/spark-016_solution.py.html">PySpark reference</a> contain complete assertions. A bounded collect is used only for the declared tiny fixture; do not copy it onto an unbounded or large production table.</p>
+<p>Shared run steps and profile rules: <a href="../STUDY-GUIDE.md.html#run-a-paired-lesson">study guide</a>.</p>
+<p>Learner pads: <a href="../lessons/spark-016.scala.html">Scala</a> and <a href="../lessons/spark-016.py.html">PySpark</a>.</p>
+<p>Open the <a href="../solutions/spark-016_solutions.md.html">explained solutions</a> after an attempt.</p>
+<p>The first worked example counts two A facts and three A dimension rows, multiplies them and prints <code>A predicts 6 joined pairs</code> before any join exists. The second runs <code>NULL = NULL</code> and <code>NULL &lt;=&gt; NULL</code> in SQL, gets NULL and true, and prints <code>Ordinary equality is unknown; explicit NULL-safe equality is true</code>.</p>
 <h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
 <ul>
 <li>Predict join output counts from key multiplicities before running a join.</li>
-<li>State the input and output grain, schema, NULL policy and ordering before executing a transformation.</li>
-<li>Compare each language implementation with independent literal expectations, not only with the other implementation.</li>
+<li>Build a per-key multiplicity ledger of <code>(facts, dimension rows, predicted pairs)</code> and use it to predict 7 inner-join pairs before any join runs.</li>
+<li>Choose between inner, left, semi, anti and NULL-safe joins on purpose, and allow left enrichment only after the dimension passes a nonnull, unique-key check.</li>
 </ul>
 <h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
 <ul>
@@ -230,7 +232,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The final enrichment gate requires a nonnull unique dimension key. The original dimension is rejected because A repeats and a NULL key exists. A supplied reviewed subset of rows 103,104,106 is then accepted. Selecting those rows is an explicit fixture decision, not a general instruction to choose the largest ingestion ID or dropDuplicates arbitrarily. The resulting left enrichment preserves all six facts and their 210-cent total.</p>
 <p>Both DataFrame and SQL forms are checked against literal pair identities. Matching aggregate counts alone would not reveal swapped dimension labels or a wrong NULL policy. The lesson is about relational correctness; broadcasting or repartitioning cannot repair an ambiguous dimension contract.</p>
 <h3 id="supplied-local-fixture">Supplied local fixture<a class="heading-anchor" href="#supplied-local-fixture" aria-label="Link to this section">#</a></h3>
-<p>The complete source creates the owned local session described above, then constructs this explicit fixture. The worked examples below run in that same main function; there is no hidden notebook state.</p>
+<p>The fact table holds six rows: two for key A (10 and 20 cents), one each for B, C and D, and fact 5 with a NULL key and 50 cents. The dimension has three A rows (101 to 103), one B, one NULL-key row labeled <code>unknown</code> and one E row that no fact uses. Keys C and D have no dimension match at all.</p>
 <pre class="highlighted-code"><code class="language-scala"><span class="syntax-keyword">import</span> org<span class="syntax-punctuation">.</span>apache<span class="syntax-punctuation">.</span>spark<span class="syntax-punctuation">.</span>sql<span class="syntax-punctuation">.</span><span class="syntax-class">Row</span>
 <span class="syntax-keyword">import</span> org<span class="syntax-punctuation">.</span>apache<span class="syntax-punctuation">.</span>spark<span class="syntax-punctuation">.</span>sql<span class="syntax-punctuation">.</span>functions<span class="syntax-punctuation">.</span>_
 <span class="syntax-keyword">import</span> org<span class="syntax-punctuation">.</span>apache<span class="syntax-punctuation">.</span>spark<span class="syntax-punctuation">.</span>sql<span class="syntax-punctuation">.</span>types<span class="syntax-punctuation">.</span>_
@@ -368,9 +370,14 @@ println<span class="syntax-punctuation">(</span><span class="syntax-string">&quo
 <h3 id="common-pitfalls">Common pitfalls<a class="heading-anchor" href="#common-pitfalls" aria-label="Link to this section">#</a></h3>
 <p>If a joined amount doubles, calculate key multiplicities before adding distinct. If COUNT(*) suggests a right match for every left row, inspect the right identity and NULL-extended placeholders. If semi/anti results disagree with an inner-join-derived membership set, check the NULL equality policy. If a NULL-safe join merges unknown entities, review whether NULL denotes a category or missing identity. If a duplicate dimension has conflicting labels, obtain a valid business/version rule or reject it; broadcasting the ambiguity only makes the wrong join faster.</p>
 <h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
-<p>Explain the contract of <code>multiplicity</code> / <code>multiplicity</code> without reading its solution. Then, from memory, state what Exercise 6 (Gate enrichment on a reviewed unique dimension) must produce: The raw dimension fails. The reviewed subset yields six facts, total 210, and labels alpha 3, alpha 3, beta, NULL, NULL, NULL for IDs 1..6. Say which part of that result is evidence and what it still cannot show. Name the action in your trace that actually runs the plan.</p>
+<ul>
+<li>Without running anything, how many rows does an inner join produce, and which key contributes most of them?</li>
+<li>Exercise 2 reports a joined amount of 120 while the matched facts total 60. Explain where the extra 60 comes from and which report would be wrong if it summed the joined column.</li>
+<li>A semi join keeps facts 1, 2 and 3. Why does key A contribute two rows instead of six?</li>
+<li>Fact 5 and dimension row 105 both have a NULL key. Which join pairs them, and why should that pairing be a deliberate choice instead of the default?</li>
+</ul>
 <h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
-<p>Use the <a href="../README.md.html">course route</a> to continue. Paired-language agreement is useful only when both outputs also satisfy the independent fixture contract. A successful local run is not evidence of cluster performance or production recovery.</p>
+<p>Go on to <a href="spark-017.md.html">spark-017: Nested records, JSON and explode row accounting</a>. Joins changed row counts by matching two tables; the next lesson changes them from inside one record, by turning an array of items into one row per item.</p>
 <h3 id="primary-sources-and-official-apis">Primary sources and official APIs<a class="heading-anchor" href="#primary-sources-and-official-apis" aria-label="Link to this section">#</a></h3>
 <ul>
 <li><a href="https://spark.apache.org/docs/4.3.0/sql-ref-syntax-qry-select-join.html">Spark 4.3.0 join types</a>.</li>

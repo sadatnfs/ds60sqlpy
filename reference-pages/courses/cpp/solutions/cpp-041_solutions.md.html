@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cpp/solutions/cpp-041_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="cpp-041-explanations-and-reference-observations">cpp-041: explanations and reference observations<a class="heading-anchor" href="#cpp-041-explanations-and-reference-observations" aria-label="Link to this section">#</a></h2>
-<p>Attempt the learner tasks before opening this document. The executable reference checks the bounded normal and boundary examples; the six explanations below cover the deliberate changes and manual checks.</p>
+<p>The <a href="cpp-041_solution.cpp.html">executable reference</a> repeats the fixture check with a <code>0LL</code> initial value, so the total is accumulated as long long. The explanations cover release checks, evidence lines and rollback. How to compare: <a href="../STUDY-GUIDE.md.html#compare-with-the-solutions">study guide</a>.</p>
 <h3 id="mechanism">Mechanism<a class="heading-anchor" href="#mechanism" aria-label="Link to this section">#</a></h3>
 <p>A release packet connects source identity to a tested binary and a documented platform. Portability is demonstrated by execution on each claimed environment. Reproducibility records enough inputs to repeat a build, while performance evidence states workload, limits and measurements. A release checklist must keep untested platforms visible.</p>
 <h3 id="detailed-reasoning">Detailed reasoning<a class="heading-anchor" href="#detailed-reasoning" aria-label="Link to this section">#</a></h3>

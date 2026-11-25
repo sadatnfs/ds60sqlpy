@@ -1,6 +1,8 @@
 # spark-027: Explained paired reference solutions
 
-Read the [guide](../guides/spark-027.md) and attempt one language first. The [Scala reference](spark-027_solution.scala) and [PySpark reference](spark-027_solution.py) are complete single-file programs with explicit local sessions and finally-based stop. Each compares with literal expectations; matching two implementations alone would not rule out a shared mistake.
+Attempt the [guide](../guides/spark-027.md) exercises first.
+
+References: [Scala](spark-027_solution.scala), [PySpark](spark-027_solution.py).
 
 ## Exercises and reasoning
 
@@ -170,6 +172,7 @@ The negative control proves that the oracle protects occurrence multiplicity rat
 
 ## Execution and interpretation
 
-Run the complete reference in its prepared fixed worker. Its first check (Transform without collapsing occurrences or unknowns) is built inside the program, so opening the lesson fetches nothing; it expects: Seven rows, known total 130 and one NULL doubled value. The negative entity 6 row is excluded. The final success line prints only after every reference assertion passes.
+The references require the transform to produce `(7, 130, 6)` for row count, doubled total and known values, and the schema contract to be `(entity_id, bigint)`, `(segment, string)`, `(doubled, bigint)`; the string-cast copy must differ from the golden contract. The bag check must accept both the transform and a three-way repartition of it, and must reject the string identity with a message containing `schema contract`. The cached summary must return 7 and 130 with `InMemoryTableScan` in its plan, and the storage level must be `NONE` afterward. The injected failure must surface as `injected_after_materialize`, again leaving the level at `NONE`, and a fresh transform must still match the golden bag.
 
-Local plan, partition and resource evidence does not establish cluster-scale performance; session cleanup is explicit.
+The distinct counterexample must have 5 rows, zero extra and two missing occurrences, and the bag check must reject it with a `bag contract` message. The program prints the cached evidence and then `spark-027: six PySpark reference contracts passed; Spark=` with the version; Scala prints the matching line. The cache checks prove that this code releases what it persisted on success and on failure; they do not measure whether caching was worth it.
+

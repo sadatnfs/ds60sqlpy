@@ -197,19 +197,17 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">export</span> <span class="syntax-punctuation">{</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-comment">// Exercise 1: Compile and run a two-module project: predict an edited check</span></span>
-<span class="source-line"><span class="syntax-comment">// Copy Example A into a scratch `main.mts` and change `assert.equal(await</span></span>
-<span class="source-line"><span class="syntax-comment">// exists(join(directory, &#x27;compiled&#x27;, &#x27;math.mjs&#x27;)), true);` to `assert.equal(await</span></span>
-<span class="source-line"><span class="syntax-comment">// exists(join(directory, &#x27;compiled!&#x27;, &#x27;math.mjs&#x27;)), true);` inside its check. Before running</span></span>
-<span class="source-line"><span class="syntax-comment">// it, predict whether the check still passes and explain why; then restore it.</span></span>
-<span class="source-line"><span class="syntax-comment">// Expected: The changed run fails with an `AssertionError` at `assert.equal(await</span></span>
+<span class="source-line"><span class="syntax-comment">// In a scratch copy of Example A, change `assert.equal(await exists(join(directory,</span></span>
+<span class="source-line"><span class="syntax-comment">// &#x27;compiled&#x27;, &#x27;math.mjs&#x27;)), true);` to `assert.equal(await exists(join(directory,</span></span>
+<span class="source-line"><span class="syntax-comment">// &#x27;compiled!&#x27;, &#x27;math.mjs&#x27;)), true);` inside its check. Does the check still pass?</span></span>
+<span class="source-line"><span class="syntax-comment">// Expected: The edited run fails with an `AssertionError` at `assert.equal(await</span></span>
 <span class="source-line"><span class="syntax-comment">// exists(join(directory, &#x27;compiled!&#x27;, &#x27;math.mjs&#x27;)), true);`. Restoring `assert.equal(await</span></span>
 <span class="source-line"><span class="syntax-comment">// exists(join(directory, &#x27;compiled&#x27;, &#x27;math.mjs&#x27;)), true);` brings back: both processes</span></span>
 <span class="source-line"><span class="syntax-comment">// succeed; output 8; math.mjs is emitted.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">// Exercise 2: Inspect type-only erasure: debug a regression</span></span>
-<span class="source-line"><span class="syntax-comment">// A regression changed one token in Example B, so one line now reads `&#x27;model.mts!&#x27;: &#x27;export</span></span>
-<span class="source-line"><span class="syntax-comment">// type Item = { id: string };&#x27;,`. Run Example B with that line, use the failing check to</span></span>
-<span class="source-line"><span class="syntax-comment">// locate the defect and repair it without changing the check.</span></span>
+<span class="source-line"><span class="syntax-comment">// A regression made one Example B line read `&#x27;model.mts!&#x27;: &#x27;export type Item = { id: string</span></span>
+<span class="source-line"><span class="syntax-comment">// };&#x27;,`. Locate and repair it without editing the check.</span></span>
 <span class="source-line"><span class="syntax-comment">// Expected: Before the repair the run fails with an `AssertionError` at</span></span>
 <span class="source-line"><span class="syntax-comment">// `assert.equal(compiled.status, 0, compiled.stdout + compiled.stderr)`. Restoring</span></span>
 <span class="source-line"><span class="syntax-comment">// `&#x27;model.mts&#x27;: &#x27;export type Item = { id: string };&#x27;,` brings back: no model import in</span></span>

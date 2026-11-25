@@ -1,6 +1,6 @@
 # js-033: explanatory solutions
 
-Use these answers after an attempt or an explicit reveal. The reference uses the same literal fixtures as the guide and keeps the exercises in separate scopes. A successful run checks these examples; explaining a changed input is a separate learning goal.
+Open these after your own attempt; each exercise runs in its own scope in the reference.
 
 ## Mechanism review
 
@@ -26,7 +26,7 @@ new Worker creates the thread. workerData supplies a cloned or transferred initi
 
 ## Exercise 1: Perform bounded CPU work in a real worker: change one input
 
-Task: Copy Example A into a scratch `main.mjs` and change `10000,` to `10001,`. Before running it, predict which check fails and which value it now sees; then run it and restore the original line.
+Task: In a scratch copy of Example A, change `10000,` to `10001,`. Which check fails, and what value does it see?
 
 The result came through an actual worker message. The tiny workload illustrates mechanics and may be slower than a direct loop because startup costs dominate.
 
@@ -43,13 +43,13 @@ assert.equal(result.sum, 50005000);
 assert.ok(result.threadId > 0);
 ```
 
-**Expected:** The changed run fails with an `AssertionError` at `assert.equal(result.sum, 50005000)`. Restoring `10000,` brings back: sum 50005000; worker thread id positive.
+**Expected:** The edited run fails with an `AssertionError` at `assert.equal(result.sum, 50005000)`. Restoring `10000,` brings back: sum 50005000; worker thread id positive.
 
-**Verify:** Compare your written prediction with the reported `AssertionError`, including its actual and expected values, and name the value that made `assert.equal(result.sum, 50005000)` fail. After restoring the line, the program prints its `{"checks":1,"status":"passed"}` receipt again.
+**Verify:** Compare the reported actual and expected values with your prediction, then restore `10000,`.
 
 ## Exercise 2: Transfer a buffer and observe detachment: debug a regression
 
-Task: A regression changed one token in Example B, so one line now reads `const buffer = Uint8Array.from([1, 3, 3]).buffer;`. Run Example B with that line, use the failing check to locate the defect and repair it without changing the check.
+Task: A regression made one Example B line read `const buffer = Uint8Array.from([1, 3, 3]).buffer;`. Locate and repair it without editing the check.
 
 The sender loses access because ownership moved. Treating a detached buffer as still usable would create an invalid lifetime assumption.
 
@@ -69,7 +69,7 @@ assert.deepEqual(result, [9, 2, 3]);
 
 **Expected:** Before the repair the run fails with an `AssertionError` at `assert.deepEqual(result, [9, 2, 3])`. Restoring `const buffer = Uint8Array.from([1, 2, 3]).buffer;` brings back: parent byteLength 0; returned bytes 9,2,3.
 
-**Verify:** Keep the failing and the repaired runs. Explain why the changed token alters the value tested by `assert.deepEqual(result, [9, 2, 3])` for this input.
+**Verify:** Keep the failing and repaired runs and name the first value that differs between them.
 
 ## Exercise 3: Distinguish cloning from shared mutation
 
@@ -90,7 +90,7 @@ assert.equal(original.value, 1);
 
 **Expected:** worker returns 9; parent remains 1.
 
-**Verify:** Keep a check equivalent to `assert.equal(original.value, 1)`. As a control, change `const original = { value: 1 };` to `const original = { value: 2 };`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
+**Verify:** Keep `assert.equal(original.value, 1)`. Control: changing `const original = { value: 1 };` to `const original = { value: 2 };` must make that check fail; then restore it.
 
 ## Exercise 4: Propagate an actual worker exception
 
@@ -107,7 +107,7 @@ await assert.rejects(
 
 **Expected:** parent Promise rejects with worker fixture failed.
 
-**Verify:** Keep a check equivalent to ``assert.rejects(runWorker(`throw new Error('worker fixture failed');`, null), /worker fixture failed/u)`` and confirm that the reference still passes. Then name an input that would make it fail and explain which value changes.
+**Verify:** Keep the check ``assert.rejects(runWorker(`throw new Error('worker fixture failed');`, null), /worker fixture failed/u)``; name an input that would make it fail and the value that changes.
 
 ## Exercise 5: Terminate an owned worker that remains alive
 
@@ -136,7 +136,7 @@ try {
 
 **Expected:** ready observed; terminate resolves with an exit code.
 
-**Verify:** Keep a check equivalent to `assert.equal(typeof code, 'number')`. As a control, change `worker.once('error', reject); }), 'ready'` to `worker.once('error', reject); }), 'ready!'` inside it: the run must fail with an `AssertionError`, which shows the check can fail. Restore it.
+**Verify:** Keep `assert.equal(typeof code, 'number')`. Control: editing it to `worker.once('error', reject); }), 'ready!'` must make the check fail; then restore it.
 
 ## Exercise 6: Reject data that cannot be cloned
 
@@ -156,8 +156,8 @@ await assert.rejects(
 
 **Expected:** DataCloneError before useful worker execution.
 
-**Verify:** Keep a check equivalent to ``assert.rejects(runWorker(`const { parentPort } = require('node:worker_threads'); parentPort.postMessage('unused');`, { callback: () => 1 }), (error) => error.name === 'DataCloneError')``. As a control, change `error => error.name === 'DataCloneError'` to `error => error.name !== 'DataCloneError'` inside it: the run must fail with an `AssertionError`, which shows the check can fail. Restore it.
+**Verify:** Keep ``assert.rejects(runWorker(`const { parentPort } = require('node:worker_threads'); parentPort.postMessage('unused');`, { callback: () => 1 }), (error) => error.name === 'DataCloneError')``. Control: editing it to `error => error.name !== 'DataCloneError'` must make the check fail; then restore it.
 
 ## After comparison
 
-Return to your saved implementation and repeat a case with different values. Keep compiler diagnostics, process output and browser observations separate. Do not suppress a failing assertion or use a type assertion to declare an unvalidated value safe. Resource-owning examples must finish cleanup even when work fails. Describe each result with its actual host and fixture scope rather than as production acceptance.
+Fresh case: split the sum of 1 to 1,000,000 across two workers by range. Predict each partial sum and the total, and decide which side closes each worker when one of them throws. ([After comparing](../STUDY-GUIDE.md#after-comparing-with-the-solution).)

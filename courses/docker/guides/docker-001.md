@@ -32,11 +32,9 @@ Use the maintained fixture image after its explicit build. The examples use `ds6
 
 ## How to use this lesson
 
-The classroom displays this guide and saves your worksheet, `courses/docker/lessons/docker-001.md`. Its Run button does not control your Docker engine. Docker engine access is powerful host access, so the classroom deliberately receives no engine socket. Work through the supplied examples without starting anything, then use the optional host lab only in your own disposable project. Reading a command, parsing YAML and actually running the project are different forms of evidence.
+The classroom saves `courses/docker/lessons/docker-001.md` and holds no engine socket ([host-lab setup](../STUDY-GUIDE.md#host-lab-setup)).
 
-Use Bash in Linux, macOS Terminal, or Ubuntu under WSL 2 on Windows. The supported engine runs Linux containers. The maintained fixture is `courses/docker/fixtures/compose-lab/`; its README explains copying it into a new ignored learner directory, checking the engine, building locally with visible logs, and using the fixed project name `ds60-docker-study`. The fixture uses port 18080 on host loopback. Stop if that project name or port belongs to unrelated work; choose a new project name consistently in your own copy. Never paste a command against a remote Docker context simply because it is currently selected.
-
-For Dockerfile examples, create a file named `Dockerfile` in a scratch project. YAML snippets describe a fragment unless explicitly called a complete file. Text transcripts are synthetic illustrations, not claims about your machine. Do not substitute a real password, token or private registry into a checked-in example. **How to use the lessons** in the [subject README](../README.md) collects these rules in one place.
+**Host lab.** Build the fixture image once from your copy of `compose-lab`, run worked example 1, then repeat the arithmetic run without `--rm`: `docker run --pull never ds60-docker-study:local python -c "print('kept')"`. Now `docker ps -a --filter ancestor=ds60-docker-study:local` lists one Exited container with a generated name, while the `--rm` run left nothing behind. Remove only that container by its ID with `docker rm`, then confirm with `docker image ls ds60-docker-study` that the image is still there. You have watched three separate lifetimes: the process ended when `print` returned, the container stayed until you removed it, and the image outlives both. Nothing here publishes a port or creates a volume, so the only object left is the local image, which later lessons reuse.
 
 ## Worked example / walkthrough
 
@@ -64,7 +62,7 @@ docker ps -a --filter ancestor=ds60-docker-study:local
 
 ## Six progressive exercises
 
-For each exercise, name the object involved and the phase of its lifetime before changing anything, then vary only the condition the task names. Exercises that ask you to predict, explain, compare or diagnose keep their answers in the solutions file; the others show the evidence to look for.
+Answer-type prompts keep their answers in the solutions file ([exercise rules](../STUDY-GUIDE.md#exercise-rules)).
 
 ### Exercise 1: Predict what remains after the short process exits.
 
@@ -94,13 +92,19 @@ For each exercise, name the object involved and the phase of its lifetime before
 
 Treating the image as the running program, so removing an image looks like a way to delete data. Expecting `--rm` to remove the image as well as the container. Assuming a container on macOS or Windows runs on the host's own kernel.
 
-Exercise 4 is this chapter's boundary case: Explain why an exited container can still appear in docker ps -a. Compare `docker ps` with `docker ps -a` for the same container ID before deciding anything was deleted, and read the STATUS column rather than the name. Preserve the original failure and the exact changed field before retrying. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
+Exercise 4 is this chapter's boundary case: Explain why an exited container can still appear in docker ps -a. Compare `docker ps` with `docker ps -a` for the same container ID before deciding anything was deleted, and read the STATUS column rather than the name.
+
+A related misconception is that every container boots its own small operating system. If that were true, `uname -r` inside the fixture would report a Debian kernel. Run `docker run --rm --pull never ds60-docker-study:local uname -r` and compare it with `docker info --format '{{.KernelVersion}}'`: the two match, because the container's system calls go to the engine's Linux kernel. What the `python:3.12-slim` base provides is a Debian userland, meaning files such as libraries, a shell and package metadata. So "this image is Debian" describes its files, never its kernel, and a kernel feature the engine lacks cannot be added by choosing a different base image.
+
+Never trade a safety control for a passing example ([safety rules](../STUDY-GUIDE.md#safety-rules)).
 
 ## Retrieval, transfer and next steps
 
-Close the explanations first. From memory, give one creation event and one removal event for each of image, container and writable layer. Then reconstruct worked example 2 (Compare image and process inventories) with one different value, predict what changes, and name which of process, image, container, writable layer and shared kernel the change touches.
+**Retrieval.** From memory, give one creation event and one removal event for each of image, container and writable layer.
 
-When a host session ends, run `docker compose -p ds60-docker-study down` from your fixture copy. It removes the project's containers and network but keeps named volumes; deleting a volume is a separate, deliberate reset described in the fixture README.
+**Transfer case.** A teammate runs `docker run --pull never ds60-docker-study:local python -c "open('/tmp/n','w').write('1')"` twice without `--rm`. How many containers, images and copies of `/tmp/n` exist afterwards, and what happens if they now try `docker image rm ds60-docker-study:local`?
+
+Then run the [retrieval loop](../STUDY-GUIDE.md#retrieval-and-cleanup) and end any host session with its cleanup.
 
 ## Primary references
 

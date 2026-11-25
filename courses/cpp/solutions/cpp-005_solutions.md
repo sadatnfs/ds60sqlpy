@@ -1,6 +1,6 @@
 # cpp-005: explanations and reference observations
 
-Attempt the learner tasks before opening this document. The executable reference checks the bounded normal and boundary examples; the six explanations below cover the deliberate changes and manual checks.
+The [executable reference](cpp-005_solution.cpp) adds the degenerate range where low and high are both 3, which must return 3, and the Exercise 6 case that clamps 1250 cents to 1000. The explanations below cover why reversed bounds throw and why integer cents avoid rounding. How to compare: [study guide](../STUDY-GUIDE.md#compare-with-the-solutions).
 
 ## Mechanism
 

@@ -4,18 +4,15 @@
 
 Intermediate; about 110 minutes, plus any optional hardware experiment. Direct prerequisites: `cuda-010`, `cuda-028`, `cuda-039`
 
-The order supports learning at your own pace. Reading and CPU reasoning remain
-available when NVIDIA hardware is absent. Advanced hardware features need their
-own capability checks and are not prerequisites for opening this chapter.
+Pacing, evidence labels and platform rules for every chapter are in the [CUDA study guide](../../STUDY-GUIDE.md).
 
 ## Learning objectives
 
 Verify that stream-ordered allocations have no use-after-free and explain retained versus live pool memory.
 
-Work through *Stream-ordered allocation and memory pools* with the concrete cases below. Finish with this evidence:
-no use-after-free, correct event ordering and an explained retained-versus-live memory report. Distinguish an algorithmic
-calculation, a compiled artifact and an actual device observation when explaining
-what your work establishes.
+**Scope:** Allocation/free order, pool reuse, cross-stream lifetime, allocation overhead and memory retained for reuse.
+
+**Evidence to produce:** No use-after-free, correct event ordering and an explained retained-versus-live memory report.
 
 ## Purpose, vocabulary and mental model
 
@@ -30,28 +27,17 @@ A stream-ordered allocator treats allocation and free as operations with orderin
 
 ## How to run and study this lesson
 
-Use the saved reading worksheet in `/classroom`; the reading pad does not execute
-CUDA. For the bounded calculation, select **CPU model (Python)**, whose
-answer-free starter supplies the literal fixtures and task contract. The
-[CUDA C++ study workflow](../README.md) covers platforms, optional GPU
-compilation and evidence labels. In a prepared Python environment you can also
-run the separate [CPU reference](../references/cuda-041_cpu.py) from the
-repository root:
+Trace worked example 1 by hand, then run the [CPU reference](../references/cuda-041_cpu.py) from the repository root:
 
 ```sh
 python courses/cuda/cpp/references/cuda-041_cpu.py
 ```
 
-Its assertions check the stated numerical result or model invariant; console
-text is evidence of this CPU model only, not of CUDA execution.
-
 ## Worked example 1: trace the mechanism
 
 Stream A allocates X, writes X and records ready. Stream B waits, reads X and records done. Before A frees X, A waits for done. This closes both the producer-to-consumer edge and the consumer-to-reuse edge. The first event alone is insufficient for lifetime safety.
 
-The complete CPU model below intentionally models only the named arithmetic,
-layout, dependency or capability decision. It does not model GPU scheduling,
-caches, instruction timing or device memory visibility.
+**Why:** Ready guards the read and done guards the free, closing both edges.
 
 ```python
 events = [
@@ -70,41 +56,37 @@ assert reserved_mib >= live_mib
 print({"lifetime_order": events, "reserved_MiB": reserved_mib, "live_MiB": live_mib})
 ```
 
-**Expected observation:** Every assertion succeeds. A representative CPU output is:
+**Expected observation:** every assertion succeeds, and the CPU model prints:
 
 ```text
 {'lifetime_order': ['allocate_A', 'write_A', 'ready', 'wait_ready_B', 'read_B', 'done', 'wait_done_A', 'free_A'], 'reserved_MiB': 64, 'live_MiB': 0}
 ```
 
-Integers, shapes and ordering must match exactly; only assertions with an explicit
-tolerance accept small floating-point differences. A printed duration is a model
-output, not a measured GPU benchmark.
+**Check:** The reference asserts read_B comes before free_A in the event list.
 
 ## Worked example 2: change a meaningful condition
 
 A pool reserves 64 MiB and the application currently uses 16 MiB. After freeing that allocation back to the pool, live usage may be zero while reservation remains 64 MiB. Calling this a leak without examining ownership and retention policy confuses two different measurements.
 
-Before applying this example to your own program, write down which inputs are
-read, which result is produced, and the condition that makes the comparison
-valid. Keep the original case as a regression check when changing a boundary.
+**Why:** After the free, live is 0 MiB while the pool keeps 64 MiB reserved for reuse.
+
+**Check:** The reference prints reserved_MiB 64 and live_MiB 0; trim the pool and confirm release.
 
 ## Six progressive exercises
 
-Exercises 1 and 2 are guided reconstructions of the worked examples; exercises
-3-6 change an input, diagnose a defect, test a boundary and transfer the idea.
-For each one, keep the calculation, output, diagram or failure policy you
-produce so another reader can compare it with the worked cases. If the hint is
-not enough, reread the mechanism paragraph and the bounded CPU assertion.
-
 ### Exercise 1
 
-Predict and trace the first worked example before running its CPU reference. Write every intermediate quantity that leads to the stated result, including units or ownership where applicable.
+Reconstruct worked example 1 on paper before running its CPU reference. Order allocate, write, ready, wait in B, read, done, wait in A, then free X.
+
+**Trap to avoid:** Using only the ready event lets A free X while B may still be reading.
 
 **Hint:** Start with the literal input and intermediate quantities in worked example 1.
 
 ### Exercise 2
 
-Reconstruct the second worked example without copying its conclusion. Identify the changed input or condition, show the resulting calculation or dependency, and explain why it differs from the first example.
+Rework worked example 2 without copying its conclusion. Report live and reserved bytes separately and check pool retention policy.
+
+**Trap to avoid:** Calling the reserved 64 MiB a leak ignores that the pool intentionally holds it.
 
 **Hint:** Identify exactly which condition changes in worked example 2.
 
@@ -112,11 +94,15 @@ Reconstruct the second worked example without copying its conclusion. Identify t
 
 Name both event dependencies in the cross-stream example.
 
+**Trap to avoid:** Treating one event as covering both directions leaves the reuse hazard open.
+
 **Hint:** Use the first worked example to establish the relevant quantities, then change only the requested input.
 
 ### Exercise 4
 
 A buffer is freed immediately after enqueuing work in another stream. Diagnose it.
+
+**Trap to avoid:** Synchronizing the freeing stream alone does not wait for the other stream.
 
 **Hint:** Locate the failed phase or violated dependency before proposing a repair.
 
@@ -124,35 +110,33 @@ A buffer is freed immediately after enqueuing work in another stream. Diagnose i
 
 What should allocation failure preserve?
 
+**Trap to avoid:** Continuing with a null pointer as if allocation succeeded produces invalid output.
+
 **Hint:** Check what the algorithm is allowed to read, write or assume at this boundary.
 
 ### Exercise 6
 
 Design a repeated temporary-buffer workload.
 
+**Trap to avoid:** An unbounded pool can grow until other work cannot allocate.
+
 **Hint:** State the output contract and which observations are needed in the new application.
 
 ## Common mistakes and diagnosis
 
-A tempting but incorrect claim in this chapter is: **returning memory to a pool means the GPU's visible memory usage must immediately fall to zero. .**
-
-For the concrete failure exercise, a buffer is freed immediately after enqueuing work in another stream. Diagnose it.
-Preserve the original input and the stage where behavior diverged, and compare
-with the CPU model before changing hardware configuration.
+A tempting but incorrect claim: **Returning memory to a pool means the GPU's visible memory usage must immediately fall to zero.** A pool keeps freed memory reserved so later allocations are fast, so the device report can stay high while live usage is zero. Worked example 2 shows a 64 MiB reservation with nothing live, which is a retention policy, not a leak. Confirm a leak by tracking live allocations and their owners, and use the release threshold if the reserved memory must return to the system sooner. Report reserved and live bytes separately, since worked example 2 ends with 64 MiB reserved and nothing live.
 
 ## Self-check, retrieval and transfer
 
-Explain the first example without its code, then use the second example to state
-one assumption that matters. Complete Exercise 3 independently, use Exercise 4 to
-diagnose a plausible defect, check the boundary in Exercise 5, and retain the
-application contract from Exercise 6. Compare the [separate explanations](../solutions/cuda-041_solutions.md)
-only after your attempt or a deliberate reveal. A reading marker records your
-choice; it does not certify hardware qualification or expert mastery.
+1. Which two edges make the cross-stream allocation in worked example 1 safe?
+2. Why is freeing right after enqueuing work in another stream unsafe?
+3. What does a stream-ordered free promise?
+
+Short answers are in the [separate explanations](../solutions/cuda-041_solutions.md#self-check-answers); compare only after an attempt.
 
 ## Primary references
 
-Check the documentation that matches your prepared toolkit before optional
-hardware execution.
+Use the documentation that matches your prepared toolkit.
 
 - [Allocator chapter](https://docs.nvidia.com/cuda/cuda-programming-guide/04-special-topics/stream-ordered-memory-allocation.html)
 

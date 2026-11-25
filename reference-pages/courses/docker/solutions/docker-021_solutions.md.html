@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/docker/solutions/docker-021_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="docker-021-explanatory-solutions">docker-021: explanatory solutions<a class="heading-anchor" href="#docker-021-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit reveal. These explain the supplied teaching fixtures; they are not engine results. The mechanism is explained in <code>courses/docker/guides/docker-021.md</code>.</p>
+<p>These answers explain teaching fixtures, not engine results; the mechanism is in <a href="../guides/docker-021.md.html">the guide</a>.</p>
 <h3 id="exercise-1-distinguish-backup-creation-and-restore-acceptance">Exercise 1: Distinguish backup creation and restore acceptance.<a class="heading-anchor" href="#exercise-1-distinguish-backup-creation-and-restore-acceptance" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> An archive exists versus a new instance can use recovered data.</p>
 <p><strong>Why:</strong> The latter catches missing files, invalid formats and wrong ownership that a successful copy can hide.</p>
@@ -238,7 +238,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>A plausible wrong approach:</strong> Deleting the restore volume before review leaves nothing to check if someone questions the result.</p>
 <p><strong>How to verify:</strong> A reviewer can match each field and see that only the restore volume was removed after sign-off.</p>
 <h3 id="check-your-transfer">Check your transfer<a class="heading-anchor" href="#check-your-transfer" aria-label="Link to this section">#</a></h3>
-<p>A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.</p></article>
+<p>For this single file, yes. <code>increment</code> writes <code>counter.next</code> and then atomically replaces <code>counter.json</code>, so a reader sees either the old complete file or the new one, never a half write. The export can still miss increments that land after the copy, which is the recovery point objective, and the guarantee does not extend to a database whose state spans several files written at different moments; that needs a stopped writer or the database&#x27;s own export. A parse failure or a truncated export would disprove the atomic replacement assumption.</p></article>
   </main>
 </body>
 </html>

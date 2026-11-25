@@ -1,10 +1,17 @@
 # cuda-095: Inference has a different performance contract
 
-**Route:** CUDA Python and machine learning. **Stage:** intermediate. **Prerequisites:** `cuda-087`, `cuda-090`, `cuda-092`. Allow several sessions when the hardware experiment is new; the chapter is not a deadline.
+**Route:** CUDA Python and machine learning. **Stage:** intermediate. **Prerequisites:** `cuda-087`, `cuda-090`, `cuda-092`.
 
-## What you will be able to explain
+Pacing, evidence labels and platform rules: [CUDA study guide](../../STUDY-GUIDE.md).
 
-By the end, you can **compute throughput**, **specify TensorFlow training behavior**, and **test an exported signature boundary** with evidence. Start with the two worked cases, then use the editable CPU model to make the quantities concrete.
+## Learning objectives
+
+- Compute throughput.
+- Separate per-item cost and request latency.
+- Set both PyTorch inference controls.
+- Specify TensorFlow training behavior.
+- Measure cold start.
+- Test an exported signature boundary.
 
 ## Mechanism and vocabulary
 
@@ -32,9 +39,13 @@ A batch of 32 completes in 8 ms, giving 4000 items per second. That does not imp
 
 Dropout randomly removes activations during training but should follow the framework's inference contract at evaluation. Disabling gradients alone does not necessarily switch module training behavior.
 
-## Portable executable model
+## How to run the CPU model
 
-The **CPU reference model** variant runs this bounded worked example using `python-core`. It uses only the Python standard library, small synthetic values and no network. Its purpose is to expose the arithmetic or contract behind the chapter. The separate reference includes assertions for the stated observations.
+Edit the copy; the [reference](../references/cuda-095_cpu.py) adds assertions.
+
+```sh
+python courses/cuda/python/lessons/cuda-095_cpu.py
+```
 
 ```python
 batch, seconds = 32, 0.008
@@ -56,8 +67,6 @@ print("CPU serving model:", throughput, "items/s; batch latency", seconds, "s")
 | `throughput` | `4000.0` |
 | `amortized` | `0.00025` |
 
-Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.
-
 ## Equal framework lanes
 
 ### PyTorch
@@ -68,83 +77,69 @@ Use model.eval to select evaluation behavior and torch.inference_mode to avoid a
 
 Call relevant layers with training=False and define a SavedModel serving signature for the external deployment route. Check output dtypes/shapes and first-call versus warm behavior.
 
-Choose either lane first, then compare the other using identical mathematical inputs. Framework-specific shape, mode and optimizer rules must be checked separately. Both use offline synthetic examples; no model hub or dataset download is triggered.
+Lane rules: [framework labs](../../STUDY-GUIDE.md#python-gpu-and-framework-labs).
 
 ## Executable framework practice
 
-The variant chooser offers **PyTorch on CPU**, **TensorFlow on CPU**, and separate **NVIDIA CUDA** versions. CPU versions force CPU placement. CUDA versions require the named GPU profile and refuse to silently fall back. Each complete program uses the same tiny deterministic objective, bounded tensors and local synthetic data. Read its source before running; a framework pass establishes only that variant and environment.
-
-The checkpoint demonstration is in-memory. It teaches what state must be saved; it does not export a durable model artifact or preserve an in-flight device context. Advanced custom-op, distributed and engine-building projects remain separately prepared external workflows.
+Run the **PyTorch** and **TensorFlow** variants on CPU first; [lab rules](../../STUDY-GUIDE.md#python-gpu-and-framework-labs).
 
 ## Practice and transfer
+
+Record each attempt in the [worksheet](../lessons/cuda-095.md) before opening hints.
 
 ### Exercise 1: Compute throughput
 
 **Trap to avoid:** Dividing by the time until the batch was enqueued rather than completed inflates throughput, because GPU work is asynchronous and the enqueue returns almost immediately.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 2: Separate per-item cost and request latency
 
 **Trap to avoid:** Reporting 0.25 ms as request latency promises response times that no request experiences, and service level objectives built on it will fail.
-
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 3: Set both PyTorch inference controls
 
 **Trap to avoid:** Using only `torch.no_grad()` keeps dropout active, so predictions vary between calls, and batch normalization keeps updating running statistics.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 4: Specify TensorFlow training behavior
 
 **Trap to avoid:** Assuming `model.predict` and `model(x)` behave the same in every custom layer is risky when a layer reads `training` differently.
-
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 5: Measure cold start
 
 **Trap to avoid:** Averaging cold start into steady-state latency hides a multi-second first response. Autoscaling services start new replicas often, so cold start can affect many users.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 6: Test an exported signature boundary
 
 **Trap to avoid:** Letting the runtime cast silently makes accepted inputs ambiguous. A float64 request cast to float32 loses precision without anyone noticing.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ## Progressive hints
 
-Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.
+Hint *k* belongs to exercise *k*; open one at a time.
 
-1. Start from worked example 1 and mark the quantities needed for the task "Compute throughput".
-2. Change one assumption in worked example 2 while preserving the declared contract: separate per-item cost and request latency.
-3. Trace the CPU program's variables before adding hardware behavior: set both PyTorch inference controls.
-4. Draw producers, consumers and the exact operation boundary for the task "Specify TensorFlow training behavior".
-5. Separate what the small fixture establishes from what the real runtime must show: measure cold start.
-6. Write a counterexample to an overbroad claim before you test an exported signature boundary.
+1. Divide the batch size by the completed batch time in seconds.
+2. Ask how long a single request in that batch waits from arrival to answer.
+3. Name what `eval` changes in module behavior and what `inference_mode` changes in autograd bookkeeping.
+4. Find the layers whose call signature accepts a training flag and decide what to pass.
+5. Time model loading and the first execution separately from warm requests.
+6. Send a shape or dtype the exported signature does not accept and decide what should happen.
 
-## Common mistakes and self-review
+## Common mistakes and self-check
 
-Confusing a correct tiny example with a general implementation is the central review risk. For this chapter, challenge the assumption in worked example 2, then ask whether your change preserves the mechanism described above. If you change dtype, layout, ordering, batch size or backend, update the acceptance contract rather than silently reusing the old observation. Explain an unexpected result before trying random configuration changes.
+A common mistake is treating amortized cost per item as request latency. A batch of 32 that takes 8 ms gives 4000 items per second, but each request still waits the whole 8 ms, not 0.25 ms. Another mistake is disabling gradients and assuming dropout and normalization switched to inference behavior. Fix both by reporting latency, throughput, tail latency, cold start and memory separately, and by setting the framework's evaluation mode explicitly.
 
-Keep a small evidence table with columns **claim**, **input**, **expected observation**, **actual observation** and **limit**. For the first claim use `Compute throughput`. For the final claim use `Test an exported signature boundary`. An unperformed GPU or cluster experiment remains pending even when the CPU model is correct.
+**Evidence limit:** The reference computes 4000 items per second and an 8 ms batch latency from given numbers. It runs no model, so queueing, output materialization and cold start must be measured on the serving path.
 
-## Platform and evidence contract
+1. Why can a larger batch hurt an interactive service?
+2. Why measure cold start separately?
+3. Why include output materialization in latency?
 
-The reading worksheet and CPU reference model work through the ordinary Linux Docker classroom on macOS, Linux and Windows using WSL 2. They do not require an NVIDIA GPU. Their results are labeled CPU models or semantic oracles, not simulated hardware performance.
-
-Real CUDA work needs supported NVIDIA hardware, a compatible host driver and an explicitly prepared GPU runtime. An Apple GPU does not execute CUDA kernels. PyTorch MPS on a supported native Mac, ROCm on supported AMD hardware, or other vendor backends can provide separate accelerator learning routes; they need their own package and operation qualification and are not CUDA evidence. The ordinary Linux Docker classroom does not expose native Mac MPS automatically.
-
-Do not download packages, models or data by opening this lesson. Do not attach an engine socket, ambient cluster credentials or an arbitrary remote endpoint. A CPU pass, imported package, successful compilation, real GPU result and measured performance are distinct observations. Record the actual backend, data shape/dtype, source revision, versions and pending checks. A saved completion marker records learning progress, not hardware certification.
+Answers: [self-check answers](../solutions/cuda-095_solutions.md#self-check-answers).
 
 ## Primary references
 
 - [PyTorch CUDA semantics](https://docs.pytorch.org/docs/2.9/notes/cuda.html)
 - [TensorFlow GPU guide](https://www.tensorflow.org/guide/gpu)
 
-Use the version-matched documentation of your prepared environment. These references describe interfaces and supported boundaries; the chapter's synthetic examples and CPU models are original teaching material.
+Full lists: [documentation and sources](../../STUDY-GUIDE.md#documentation-and-sources).
 
 ## Ask an AI tutor about this lesson
 

@@ -196,7 +196,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <article class="document"><h2 id="r-038-finite-probability-tables-and-conditional-reasoning">r-038: Finite probability tables and conditional reasoning<a class="heading-anchor" href="#r-038-finite-probability-tables-and-conditional-reasoning" aria-label="Link to this section">#</a></h2>
 <p><strong>Level:</strong> intermediate. <strong>Direct prerequisites:</strong> <code>r-008</code>, <code>r-032</code>, <code>r-037</code></p>
 <h3 id="run-and-retain-your-work">Run and retain your work<a class="heading-anchor" href="#run-and-retain-your-work" aria-label="Link to this section">#</a></h3>
-<p>Open <code>r-038</code> in <code>/classroom</code> and use the prepared <code>r-statistics</code> profile. Each Run evaluates one <code>main.R</code> script in a fresh offline R process, so define every input in the script; an earlier Run leaves no variables behind. Work in the <a href="../lessons/r-038.R.html">starter</a>. The <a href="../solutions/r-038_reference.R.html">complete reference</a> ends by printing <code>r-038 reference checks passed</code>, and the <a href="../solutions/r-038_solutions.md.html">explained answers</a> are there for deliberate comparison after your own attempt. This chapter prints values only; when a chapter draws figures, the classroom keeps at most two figures per run. The <a href="../README.md.html">course overview</a> describes saved work, figure capture and the prepared package versions.</p>
+<p>The starter prints a two by two count table: group A has 30 yes and 70 no, group B has 10 yes and 90 no. Run it and compute two different conditionals by hand: the share of A that says yes is 0.3, while the share of yes answers that come from A is 30 of 40, which is 0.75. Name the conditioning event in every variable.</p>
+<p>Work in the <a href="../lessons/r-038.R.html">starter</a> under the <a href="../STUDY-GUIDE.md.html#run-a-chapter">run rules</a>.</p>
+<p>The <a href="../solutions/r-038_reference.R.html">complete reference</a> ends by printing <code>r-038 reference checks passed</code>.</p>
 <h3 id="outcome-and-mechanism">Outcome and mechanism<a class="heading-anchor" href="#outcome-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Compute and reconcile conditional probabilities from a finite original table without confusing the conditioning direction.</p>
 <p>A finite probability table makes the population and denominator visible. The joint cells describe combinations of two variables, such as segment and alert status. Marginal probabilities sum over one variable. A conditional probability restricts the population first, then renormalizes within that selected event.</p>
@@ -288,14 +290,14 @@ by_col <span class="syntax-operator">&lt;-</span> <span class="syntax-function">
 <li>The table may not represent that population.</li>
 </ol>
 <h3 id="reference-review">Reference review<a class="heading-anchor" href="#reference-review" aria-label="Link to this section">#</a></h3>
-<p>The reference applies the reasoning explained under the worked examples above; the <a href="../solutions/r-038_solutions.md.html">explained answers</a> add an answer for each exercise.</p>
+<p>The reference reuses the worked examples&#x27; reasoning; <a href="../solutions/r-038_solutions.md.html">explained answers</a> cover each exercise.</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
 <ul>
 <li><a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/proportions.html">R table proportions</a></li>
 <li><a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/colSums.html">R row and column sums</a></li>
 </ul>
 <h3 id="continue">Continue<a class="heading-anchor" href="#continue" aria-label="Link to this section">#</a></h3>
-<p>No later chapter lists <code>r-038</code> as a direct prerequisite; the <a href="../README.md.html">course map</a> lists every chapter with its prerequisites.</p>
+<p>No later chapter lists <code>r-038</code> as a direct prerequisite; see the <a href="../README.md.html">course map</a>.</p>
 <h3 id="ask-an-ai-tutor">Ask an AI tutor<a class="heading-anchor" href="#ask-an-ai-tutor" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for r-038 (Finite probability tables and conditional reasoning).
 Read the guide and my saved attempt. Explain the relevant R mechanism,

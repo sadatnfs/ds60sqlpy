@@ -1,10 +1,17 @@
 # cuda-093: Graphs, compilation and shape behavior
 
-**Route:** CUDA Python and machine learning. **Stage:** intermediate. **Prerequisites:** `cuda-087`, `cuda-092`. Allow several sessions when the hardware experiment is new; the chapter is not a deadline.
+**Route:** CUDA Python and machine learning. **Stage:** intermediate. **Prerequisites:** `cuda-087`, `cuda-092`.
 
-## What you will be able to explain
+Pacing, evidence labels and platform rules: [CUDA study guide](../../STUDY-GUIDE.md).
 
-By the end, you can **count specializations**, **specify an accepted shape set**, and **separate compilation and replay** with evidence. Start with the two worked cases, then use the editable CPU model to make the quantities concrete.
+## Learning objectives
+
+- Count specializations.
+- Calculate break-even calls.
+- Describe a graph break.
+- Specify an accepted shape set.
+- Compare gradients.
+- Separate compilation and replay.
 
 ## Mechanism and vocabulary
 
@@ -31,9 +38,13 @@ A specialization cache sees shapes (4,8),(4,8),(8,8) and compiles twice in a sim
 
 A compiled model saves 1 ms per call after a 500 ms compile. More than 500 equivalent calls are needed to repay that startup cost under this simple model.
 
-## Portable executable model
+## How to run the CPU model
 
-The **CPU reference model** variant runs this bounded worked example using `python-core`. It uses only the Python standard library, small synthetic values and no network. Its purpose is to expose the arithmetic or contract behind the chapter. The separate reference includes assertions for the stated observations.
+Edit the copy; the [reference](../references/cuda-093_cpu.py) adds assertions.
+
+```sh
+python courses/cuda/python/lessons/cuda-093_cpu.py
+```
 
 ```python
 shapes = [(4, 8), (4, 8), (8, 8)]
@@ -43,7 +54,7 @@ assert compile_ms / saving_ms == 500
 print("CPU compilation model:", len(set(shapes)), "specializations; break-even", 500)
 ```
 
-**Expected observation:** Two modeled specializations;500-call break-even.
+**Expected observation:** Two modeled specializations; 500-call break-even.
 
 **Variable trace.** Before running the model, predict these final values; then compare:
 
@@ -52,8 +63,6 @@ print("CPU compilation model:", len(set(shapes)), "specializations; break-even",
 | `shapes` | `[(4, 8), (4, 8), (8, 8)]` |
 | `compile_ms` | `500` |
 | `saving_ms` | `1` |
-
-Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.
 
 ## Equal framework lanes
 
@@ -65,77 +74,67 @@ Compare eager and torch.compile with the same initial state. Record compilation 
 
 Compare eager and tf.function with a stated input signature. Count retraces, then evaluate XLA as a separate configuration and preserve both outputs and gradients.
 
-Choose either lane first, then compare the other using identical mathematical inputs. Framework-specific shape, mode and optimizer rules must be checked separately. Both use offline synthetic examples; no model hub or dataset download is triggered.
+Lane rules: [framework labs](../../STUDY-GUIDE.md#python-gpu-and-framework-labs).
 
 ## Practice and transfer
+
+Record each attempt in the [worksheet](../lessons/cuda-093.md) before opening hints.
 
 ### Exercise 1: Count specializations
 
 **Trap to avoid:** Counting one compilation per call, three here, ignores the cache and overestimates startup cost. Counting one compilation total assumes the compiler generalizes across shapes, which static specialization does not.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 2: Calculate break-even calls
 
 **Trap to avoid:** Assuming compilation pays off immediately because each call is faster ignores the startup cost. A short-lived job of 100 calls loses 400 ms overall.
-
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 3: Describe a graph break
 
 **Trap to avoid:** Assuming a program that ran without errors under the compiler was compiled as one graph overlooks silent breaks, which are reported only when logging is enabled.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 4: Specify an accepted shape set
 
 **Trap to avoid:** Accepting arbitrary shapes in production lets each new batch size trigger a recompilation, causing latency spikes.
-
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 5: Compare gradients
 
 **Trap to avoid:** Checking only that forward outputs match and assuming gradients follow can miss a backward bug that shows up only as slower training.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 6: Separate compilation and replay
 
 **Trap to avoid:** Expecting graph replay to speed up compute-bound kernels confuses launch overhead with kernel time.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ## Progressive hints
 
-Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.
+Hint *k* belongs to exercise *k*; open one at a time.
 
-1. Start from worked example 1 and mark the quantities needed for the task "Count specializations".
-2. Change one assumption in worked example 2 while preserving the declared contract: calculate break-even calls.
-3. Trace the CPU program's variables before adding hardware behavior: describe a graph break.
-4. Draw producers, consumers and the exact operation boundary for the task "Specify an accepted shape set".
-5. Separate what the small fixture establishes from what the real runtime must show: compare gradients.
-6. Write a counterexample to an overbroad claim before you separate compilation and replay.
+1. List the shape signatures in order and count how many are new when they arrive.
+2. Divide the compile time by the per-call saving, then check the calls just below and above that number.
+3. Ask what happens when compiled code meets a Python side effect or a data-dependent branch it cannot capture.
+4. Write the dimensions and dtypes the compiled path must accept, with explicit bounds.
+5. Ask whether matching forward outputs guarantees that the backward pass matches too.
+6. Ask which step generates code and which step only reuses a recorded execution schedule.
 
-## Common mistakes and self-review
+## Common mistakes and self-check
 
-Confusing a correct tiny example with a general implementation is the central review risk. For this chapter, challenge the assumption in worked example 2, then ask whether your change preserves the mechanism described above. If you change dtype, layout, ordering, batch size or backend, update the acceptance contract rather than silently reusing the old observation. Explain an unexpected result before trying random configuration changes.
+A common mistake is enabling compilation for a short job and reporting a speedup from warm calls only. With a 500 ms compile and a 1 ms saving per call, the first 500 calls are slower in total. Another mistake is feeding many distinct shapes, which triggers new specializations or graph breaks. Fix both by stating an accepted shape set, measuring compile time separately and comparing eager and compiled outputs and gradients across that set.
 
-Keep a small evidence table with columns **claim**, **input**, **expected observation**, **actual observation** and **limit**. For the first claim use `Count specializations`. For the final claim use `Separate compilation and replay`. An unperformed GPU or cluster experiment remains pending even when the CPU model is correct.
+**Misconception:** A compiled function always computes exactly the same values as its eager version. **Correction:** Compilation can fuse operations and reorder floating-point arithmetic, and Python side effects in traced code may run once at trace time rather than on every call. Compare compiled and eager outputs and gradients with a stated tolerance over the accepted shape set, and keep side effects outside compiled regions.
 
-## Platform and evidence contract
+**Evidence limit:** The reference counts two specializations and a 500-call break-even with a simplified cache. Real frameworks use guards, graph breaks and recompilation limits of their own, so actual behavior must be observed with the pinned PyTorch or TensorFlow release.
 
-The reading worksheet and CPU reference model work through the ordinary Linux Docker classroom on macOS, Linux and Windows using WSL 2. They do not require an NVIDIA GPU. Their results are labeled CPU models or semantic oracles, not simulated hardware performance.
+1. How do tracing, compilation and replay differ?
+2. Why can changing shapes slow a compiled model?
+3. Is using a generic graph API proof that CUDA Graph replay happened?
 
-Real CUDA work needs supported NVIDIA hardware, a compatible host driver and an explicitly prepared GPU runtime. An Apple GPU does not execute CUDA kernels. PyTorch MPS on a supported native Mac, ROCm on supported AMD hardware, or other vendor backends can provide separate accelerator learning routes; they need their own package and operation qualification and are not CUDA evidence. The ordinary Linux Docker classroom does not expose native Mac MPS automatically.
-
-Do not download packages, models or data by opening this lesson. Do not attach an engine socket, ambient cluster credentials or an arbitrary remote endpoint. A CPU pass, imported package, successful compilation, real GPU result and measured performance are distinct observations. Record the actual backend, data shape/dtype, source revision, versions and pending checks. A saved completion marker records learning progress, not hardware certification.
+Answers: [self-check answers](../solutions/cuda-093_solutions.md#self-check-answers).
 
 ## Primary references
 
 - [PyTorch CUDA semantics](https://docs.pytorch.org/docs/2.9/notes/cuda.html)
 - [TensorFlow GPU guide](https://www.tensorflow.org/guide/gpu)
 
-Use the version-matched documentation of your prepared environment. These references describe interfaces and supported boundaries; the chapter's synthetic examples and CPU models are original teaching material.
+Full lists: [documentation and sources](../../STUDY-GUIDE.md#documentation-and-sources).
 
 ## Ask an AI tutor about this lesson
 

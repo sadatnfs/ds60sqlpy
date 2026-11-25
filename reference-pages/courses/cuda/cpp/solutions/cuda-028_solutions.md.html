@@ -196,7 +196,6 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <article class="document"><h2 id="cuda-028-explanatory-solutions">cuda-028: explanatory solutions<a class="heading-anchor" href="#cuda-028-explanatory-solutions" aria-label="Link to this section">#</a></h2>
 <h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
 <p>Atomicity means one operation is indivisible with respect to competing operations at its scope. Ordering specifies how memory operations relate; visibility concerns which observer can see writes. Publishing a payload through a flag requires a protocol that orders the payload write before a release operation and the consumer&#x27;s payload read after an appropriate acquire. Both sides must use compatible synchronization and scope. A relaxed atomic counter can correctly count events without publishing unrelated payloads. A fence orders operations but does not force another block to run, so it cannot repair a residency deadlock in an improvised global barrier.</p>
-<p>The separate <a href="../references/cuda-028_cpu.py.html">CPU reference</a> checks the chapter&#x27;s bounded model. It does not execute CUDA or establish GPU timing. Compare after attempting the worksheet or explicitly choosing to reveal solutions.</p>
 <h3 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h3>
 <p>A producer writes payload 42, then releases a ready flag. A consumer acquires that publication before reading the payload. The happens-before chain connects payload write to payload read. This is a conceptual protocol; an actual CUDA implementation must use supported atomic types, scope and participating execution conditions.</p>
 <p><strong>Approach:</strong> Order four events: write payload 42, release the ready flag, acquire the flag in the consumer, then read the payload.</p>
@@ -233,11 +232,16 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Why it is correct:</strong> Both directions need publication, and the producer must not reuse a slot until it sees empty.</p>
 <p><strong>A plausible wrong approach:</strong> Indexing slots with head mod capacity but not tracking fullness overwrites unread data on wraparound.</p>
 <p><strong>How to verify:</strong> Test a capacity-2 ring with three items and confirm the third waits for the first.</p>
+<h3 id="self-check-answers">Self-check answers<a class="heading-anchor" href="#self-check-answers" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>What are the four events in worked example 1&#x27;s publication chain?</strong> Payload write, release of the flag, acquire of the flag, then payload read.</li>
+<li><strong>Why can block scope be too narrow?</strong> If producer and consumer sit in different blocks, block-scope ordering does not reach the consumer; device scope is needed.</li>
+<li><strong>What is the difference between visibility and atomicity?</strong> Atomicity makes one operation indivisible; visibility concerns when other observers can see a write.</li>
+</ol>
 <h3 id="numerical-reference-and-its-limits">Numerical reference and its limits<a class="heading-anchor" href="#numerical-reference-and-its-limits" aria-label="Link to this section">#</a></h3>
-<p>The complete CPU model is <a href="../references/cuda-028_cpu.py.html">here</a>. Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It does not claim CUDA execution, concurrency safety or a performance measurement.</p>
+<p>The <a href="../references/cuda-028_cpu.py.html">CPU reference</a> reproduces worked example 1 and prints <code>{&#x27;conceptual_happens_before&#x27;: [&#x27;payload_write&#x27;, &#x27;release_flag&#x27;, &#x27;acquire_flag&#x27;, &#x27;payload_read&#x27;], &#x27;GPU_memory_model_test&#x27;: False}</code>.</p>
 <h3 id="transfer-review">Transfer review<a class="heading-anchor" href="#transfer-review" aria-label="Link to this section">#</a></h3>
-<p>Publish data and ownership only after writing completes; consumers acknowledge completion before producers reuse the slot. Account for wraparound and capacity.</p>
-<p>A complete explanation must name its inputs, the unchanged mathematical contract, the changed boundary or resource condition, and the evidence still needed on actual hardware. Preserve a CPU baseline even after a GPU path becomes available.</p></article>
+<p>Publish data and ownership only after writing completes; consumers acknowledge completion before producers reuse the slot. Account for wraparound and capacity.</p></article>
   </main>
 </body>
 </html>

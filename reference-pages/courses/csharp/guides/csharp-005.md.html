@@ -206,11 +206,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Short circuit:</strong> Skipping an unnecessary right-hand expression.</p>
 <p><strong>Boundary:</strong> An input where a classification changes.</p>
 <h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>The Linux Docker classroom compiles your saved pad as <code>Program.cs</code> in its fixed .NET 10 project. C# 14 is the matching language generation. This route uses the prepared framework libraries; it does not accept arbitrary project files, NuGet packages, command arguments or interactive input. The explicit <code>Program.Main</code> entrypoint makes compilation and execution visible. <code>Check</code> throws on a false condition in every build configuration, unlike conditional debugging assertions.</p>
-<p>Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.</p>
+<p>With nullable analysis on, Example A compiles without warnings because the compiler follows the <code>label != null</code> test across <code>&amp;&amp;</code>. Task 4&#x27;s version using <code>&amp;</code> compiles with warning CS8602 and, when label is null, throws <code>NullReferenceException</code>, so you see the static warning and the runtime failure together.</p>
+<p>Compile contract, starter stop and success marker: <a href="../STUDY-GUIDE.md.html#running-a-lesson">running a lesson</a>.</p>
 <h3 id="syntax-anatomy-and-execution-trace">Syntax anatomy and execution trace<a class="heading-anchor" href="#syntax-anatomy-and-execution-trace" aria-label="Link to this section">#</a></h3>
 <p><code>&amp;&amp;</code> requires both conditions and stops after false; <code>||</code> stops after true. A switch expression returns one value from its matching arm. The discard pattern <code>_</code> can provide an explicit fallback but must not conceal invalid input.</p>
-<p>Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.</p>
+<p>Each example ends with a trace; method: <a href="../STUDY-GUIDE.md.html#tracing-a-program">tracing a program</a>.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="example-a-a-guard-prevents-unsafe-access">Example A: A guard prevents unsafe access<a class="heading-anchor" href="#example-a-a-guard-prevents-unsafe-access" aria-label="Link to this section">#</a></h4>
 <p>The left operand establishes the precondition needed by the right operand.</p>
@@ -248,6 +248,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The missing value is handled without dereferencing null.</p>
+<p><strong>Trace.</strong> With <code>label</code> null, <code>label != null</code> is false. <code>&amp;&amp;</code> stops there, so <code>label.Length</code> never runs, the whole condition is false and the negated check passes. After <code>label = &quot;ok&quot;</code>, the left operand is true, so the right operand runs: Length is 2 and the second check passes. The order of the operands is what makes the guard work.</p>
 <h4 id="example-b-classify-a-threshold">Example B: Classify a threshold<a class="heading-anchor" href="#example-b-classify-a-threshold" aria-label="Link to this section">#</a></h4>
 <p>Ordered relational patterns make the inclusive boundary visible and preserve the invalid-input category.</p>
 <pre class="highlighted-code"><code class="language-csharp"><span class="syntax-keyword">using</span> System<span class="syntax-punctuation">;</span>
@@ -290,6 +291,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> 59 retries, 60 passes, and 101 is rejected.</p>
+<p><strong>Trace.</strong> The switch expression tests its arms from top to bottom and returns the first match. For 59, <code>&lt; 0</code> fails and <code>&lt; 60</code> matches, giving retry. For 60, <code>&lt; 60</code> fails and <code>&lt;= 100</code> matches, giving pass. For 101, every relational arm fails and the discard <code>_</code> returns invalid. Because the arms are ordered, each one needs only its upper bound.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <ol>
 <li><strong>Predict and explain.</strong> Trace which operands execute when label is null.</li>
@@ -309,10 +311,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <ol start="6">
 <li><strong>Transfer and justify.</strong> Choose a routing policy with three mutually exclusive outcomes and explain how invalid values are represented.</li>
 </ol>
-<p>For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.</p>
+<p>Log each task in the <a href="../STUDY-GUIDE.md.html#recording-exercise-evidence">evidence table</a> before opening the explanation.</p>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
 <p>An else branch can accidentally classify every invalid value as valid. Test domain validity independently from success thresholds. Do not use a fallback to hide an impossible state without explaining recovery.</p>
-<p>A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.</p>
+<p>The boundary set for task 5 is -1, 0, 100 and 101: -1 and 101 must be invalid, 0 is retry and 100 is pass. A tempting wrong version drops the <code>&lt; 0</code> arm, so -1 becomes retry and a corrupt score asks the student to try again. For task 2, moving the threshold to 70 makes 69 and 70 the new pair to check.</p>
+<p>Repair routine: <a href="../STUDY-GUIDE.md.html#building-a-regression-case">building a regression case</a>.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <ol>
 <li>Reproduce Example A (A guard prevents unsafe access) before changing anything, and confirm its observation: The missing value is handled without dereferencing null.</li>
@@ -320,9 +323,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>Before opening the explanation, test your task 3 attempt against this lesson&#x27;s main pitfall: An else branch can accidentally classify every invalid value as valid.</li>
 </ol>
 <h3 id="self-check-and-next-step">Self-check and next step<a class="heading-anchor" href="#self-check-and-next-step" aria-label="Link to this section">#</a></h3>
-<p>Explain Predicate, Short circuit, Boundary without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.</p>
+<p>Trace which operands run for <code>label != null &amp;&amp; label.Length &gt; 0</code> when label is null and when it is empty. Predict what the compiler reports if the <code>&lt;= 100</code> arm is moved above <code>&lt; 60</code>; it is error CS8510, an unreachable arm. Describe how your temperature classifier represents a reading that is not a number at all.</p>
+<p>Then follow the general <a href="../STUDY-GUIDE.md.html#self-check-routine">self-check routine</a> and save your pad.</p>
 <h3 id="sources-and-execution-boundary">Sources and execution boundary<a class="heading-anchor" href="#sources-and-execution-boundary" aria-label="Link to this section">#</a></h3>
-<p><a href="https://learn.microsoft.com/en-us/dotnet/csharp/">Official language or framework documentation</a>. The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.</p>
+<p><a href="https://learn.microsoft.com/en-us/dotnet/csharp/">Documentation</a>: The reference articles on Boolean logical operators and on the switch expression describe short-circuit evaluation and relational patterns.</p>
+<p>Provenance and limits: <a href="../STUDY-GUIDE.md.html#sources-and-execution-boundary">sources and execution boundary</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for csharp-005: Boolean decisions and exhaustive alternatives.
 Read courses/csharp/guides/csharp-005.md and courses/csharp/lessons/csharp-005.cs. Prerequisites: csharp-004.

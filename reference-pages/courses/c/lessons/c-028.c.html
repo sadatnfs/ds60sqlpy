@@ -197,25 +197,16 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">int</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">void</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span></span>
 <span class="source-line">  <span class="syntax-comment">/* Exercise 1: Call a declared API: change one input</span></span>
-<span class="source-line"><span class="syntax-comment">     Copy worked example 1, the &quot;call a declared API&quot; case, into a scratch pad</span></span>
-<span class="source-line"><span class="syntax-comment">     and change `int values[] = {2, 4, 6};` to `int values[] = {3, 4, 6};`.</span></span>
-<span class="source-line"><span class="syntax-comment">     Before running, predict which CHECK fails and which value it sees in place</span></span>
-<span class="source-line"><span class="syntax-comment">     of the worked result (summing 2, 4, 6 returns 12); then run it and restore</span></span>
-<span class="source-line"><span class="syntax-comment">     the original line. Expected: With `int values[] = {3, 4, 6};` the run stops</span></span>
-<span class="source-line"><span class="syntax-comment">     with `Check failed` at the CHECK on `stats_sum(values, 3) == 12`, because</span></span>
-<span class="source-line"><span class="syntax-comment">     the &quot;call a declared API&quot; case no longer shows that summing 2, 4, 6</span></span>
-<span class="source-line"><span class="syntax-comment">     returns 12. Restoring `int values[] = {2, 4, 6};` brings that observation</span></span>
-<span class="source-line"><span class="syntax-comment">     back. */</span></span>
+<span class="source-line"><span class="syntax-comment">     In worked example 1, change `int values[] = {2, 4, 6};` to `int values[] =</span></span>
+<span class="source-line"><span class="syntax-comment">     {3, 4, 6};`. Predict which value the CHECK on `stats_sum(values, 3) == 12`</span></span>
+<span class="source-line"><span class="syntax-comment">     sees, then run and restore. Expected: `Check failed` at `stats_sum(values,</span></span>
+<span class="source-line"><span class="syntax-comment">     3) == 12`; restoring `int values[] = {2, 4, 6};` passes again. */</span></span>
 <span class="source-line"></span>
 <span class="source-line">  <span class="syntax-comment">/* Exercise 2: Use an empty API contract: diagnose an edited check</span></span>
-<span class="source-line"><span class="syntax-comment">     A careless edit changed the CHECK in worked example 2, the &quot;use an empty</span></span>
-<span class="source-line"><span class="syntax-comment">     API contract&quot; case, so that it reads `CHECK(stats_sum(NULL, 0) != 0);`. Run</span></span>
-<span class="source-line"><span class="syntax-comment">     the example with that line, explain why the edited CHECK now fails even</span></span>
-<span class="source-line"><span class="syntax-comment">     though the program state still means the result is zero, and restore it.</span></span>
-<span class="source-line"><span class="syntax-comment">     Expected: Before the repair the run stops with `Check failed` at the CHECK</span></span>
-<span class="source-line"><span class="syntax-comment">     on `stats_sum(NULL, 0) == 0`. Once the line reads `CHECK(stats_sum(NULL, 0)</span></span>
-<span class="source-line"><span class="syntax-comment">     == 0);` again, the &quot;use an empty API contract&quot; case again shows that the</span></span>
-<span class="source-line"><span class="syntax-comment">     result is zero. */</span></span>
+<span class="source-line"><span class="syntax-comment">     Worked example 2&#x27;s CHECK now reads `CHECK(stats_sum(NULL, 0) != 0);`.</span></span>
+<span class="source-line"><span class="syntax-comment">     Explain why it fails although the result is zero, then restore it.</span></span>
+<span class="source-line"><span class="syntax-comment">     Expected: `Check failed` until the CHECK reads `CHECK(stats_sum(NULL, 0) ==</span></span>
+<span class="source-line"><span class="syntax-comment">     0);` again, though the result is zero. */</span></span>
 <span class="source-line"></span>
 <span class="source-line">  <span class="syntax-comment">/* Exercise 3: Compare two callers</span></span>
 <span class="source-line"><span class="syntax-comment">     Call the same helper with two separate arrays.</span></span>

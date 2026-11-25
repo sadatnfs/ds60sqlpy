@@ -1,10 +1,17 @@
 # cuda-077: Reduction, ordering and numerical error
 
-**Route:** CUDA Python and machine learning. **Stage:** intermediate. **Prerequisites:** `cuda-006`, `cuda-074`, `cuda-076`. Allow several sessions when the hardware experiment is new; the chapter is not a deadline.
+**Route:** CUDA Python and machine learning. **Stage:** intermediate. **Prerequisites:** `cuda-006`, `cuda-074`, `cuda-076`.
 
-## What you will be able to explain
+Pacing, evidence labels and platform rules: [CUDA study guide](../../STUDY-GUIDE.md).
 
-By the end, you can **compute a tree by hand**, **choose absolute and relative tolerance**, and **explain deterministic settings limits** with evidence. Start with the two worked cases, then use the editable CPU model to make the quantities concrete.
+## Learning objectives
+
+- Compute a tree by hand.
+- Test the odd tail.
+- Construct cancellation.
+- Choose absolute and relative tolerance.
+- Compare atomics with staged reduction.
+- Explain deterministic settings limits.
 
 ## Mechanism and vocabulary
 
@@ -31,9 +38,13 @@ For [1e16,1,-1e16], a naive left sum loses the one on common binary 64 arithmeti
 
 For [1,2,3,4,5], a padded pair tree produces 15. A faulty tree that ignores the fifth value produces 10, which is an indexing bug rather than rounding noise.
 
-## Portable executable model
+## How to run the CPU model
 
-The **CPU reference model** variant runs this bounded worked example using `python-core`. It uses only the Python standard library, small synthetic values and no network. Its purpose is to expose the arithmetic or contract behind the chapter. The separate reference includes assertions for the stated observations.
+Edit the copy; the [reference](../references/cuda-077_cpu.py) adds assertions.
+
+```sh
+python courses/cuda/python/lessons/cuda-077_cpu.py
+```
 
 ```python
 import math
@@ -56,11 +67,9 @@ print("CPU reduction reference:", math.fsum(values), items[0])
 | `values` | `[1e+16, 1.0, -1e+16]` |
 | `items` | `[15]` |
 
-Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.
-
 ## Optional NVIDIA CUDA lab
 
-The **CuPy on NVIDIA CUDA** variant executes the actual operation with CuPy in the separately prepared `cuda-python` profile. It refuses a missing device instead of switching to CPU. Keep inputs bounded as supplied; inspect the device, synchronize and compare with the CPU reference. The profile must pass real host/device readiness checks. Successful syntax checking on a Mac is not GPU qualification.
+**CuPy on NVIDIA CUDA** needs the `cuda-python` profile; [lab rules](../../STUDY-GUIDE.md#python-gpu-and-framework-labs).
 
 ```python
 """Optional NVIDIA CUDA lab. No CPU fallback or external dataset."""
@@ -83,73 +92,60 @@ print("CUDA library reduction:", result, "; order-sensitive cases need a documen
 
 ## Practice and transfer
 
+Record each attempt in the [worksheet](../lessons/cuda-077.md) before opening hints.
+
 ### Exercise 1: Compute a tree by hand
 
 **Trap to avoid:** Pairing only `range(0, len(items) - 1, 2)` drops the odd element at each odd level. For this input the result becomes 10 and the error looks small enough to mistake for rounding.
-
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 2: Test the odd tail
 
 **Trap to avoid:** Using a tolerance like `abs(result - 15) < 10` would accept 10. Picking tolerances that wide hides structural bugs inside numerical noise.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 3: Construct cancellation
 
 **Trap to avoid:** Using `[1.0, 2.0, 3.0]` as the cancellation test shows nothing, since every order gives 6 exactly. A test needs magnitudes far enough apart to exceed the mantissa.
-
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 4: Choose absolute and relative tolerance
 
 **Trap to avoid:** Using relative tolerance alone with an expected value of 0 requires exact equality. Any reordering then fails, even though both answers are within normal rounding of the large terms.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 5: Compare atomics with staged reduction
 
 **Trap to avoid:** Claiming the atomic version is deterministic because each update is indivisible confuses atomicity with order. Each addition is safe, but the sequence of additions still varies.
-
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 6: Explain deterministic settings limits
 
 **Trap to avoid:** Treating a deterministic flag as a promise of identical results across machines leads to bit-exact comparisons between environments that fail for legitimate reasons.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ## Progressive hints
 
-Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.
+Hint *k* belongs to exercise *k*; open one at a time.
 
-1. Start from worked example 1 and mark the quantities needed for the task "Compute a tree by hand".
-2. Change one assumption in worked example 2 while preserving the declared contract: test the odd tail.
-3. Trace the CPU program's variables before adding hardware behavior: construct cancellation.
-4. Draw producers, consumers and the exact operation boundary for the task "Choose absolute and relative tolerance".
-5. Separate what the small fixture establishes from what the real runtime must show: compare atomics with staged reduction.
-6. Write a counterexample to an overbroad claim before you explain deterministic settings limits.
+1. Pair adjacent values of `[1,2,3,4,5]`, add each pair, and carry the unpaired element to the next level.
+2. Check whether your tree still contains the fifth value after the first level.
+3. Add a very large number, its negative and a small residual, then compare a left-to-right sum with `math.fsum`.
+4. Ask what a purely relative tolerance allows when the expected answer is close to zero.
+5. Compare one global counter that every thread updates with per-block partial sums combined later.
+6. Ask whether repeating a run on the same machine says anything about a different GPU or library version.
 
-## Common mistakes and self-review
+## Common mistakes and self-check
 
-Confusing a correct tiny example with a general implementation is the central review risk. For this chapter, challenge the assumption in worked example 2, then ask whether your change preserves the mechanism described above. If you change dtype, layout, ordering, batch size or backend, update the acceptance contract rather than silently reusing the old observation. Explain an unexpected result before trying random configuration changes.
+A common mistake is treating every mismatch between a parallel sum and a sequential loop as harmless rounding. In worked example 2 a faulty tree returns 10 instead of 15 because it drops the fifth value; that is an indexing bug, not rounding noise. The opposite mistake is demanding bitwise identity across orderings. Fix both by testing odd tails explicitly, comparing with a higher-accuracy CPU sum and setting absolute and relative tolerances from the data's scale.
 
-Keep a small evidence table with columns **claim**, **input**, **expected observation**, **actual observation** and **limit**. For the first claim use `Compute a tree by hand`. For the final claim use `Explain deterministic settings limits`. An unperformed GPU or cluster experiment remains pending even when the CPU model is correct.
+**Evidence limit:** The reference uses `math.fsum` and a padded tree on tiny inputs. It shows the expected values; it cannot show the error a real float32 tree or atomic accumulator produces, which depends on the device's grouping and arrival order.
 
-## Platform and evidence contract
+1. Why can a tree reduction differ from a left-to-right loop?
+2. How do you tell rounding noise from a missing element?
+3. Why does a sum near zero need an absolute tolerance?
 
-The reading worksheet and CPU reference model work through the ordinary Linux Docker classroom on macOS, Linux and Windows using WSL 2. They do not require an NVIDIA GPU. Their results are labeled CPU models or semantic oracles, not simulated hardware performance.
-
-Real CUDA work needs supported NVIDIA hardware, a compatible host driver and an explicitly prepared GPU runtime. An Apple GPU does not execute CUDA kernels. PyTorch MPS on a supported native Mac, ROCm on supported AMD hardware, or other vendor backends can provide separate accelerator learning routes; they need their own package and operation qualification and are not CUDA evidence. The ordinary Linux Docker classroom does not expose native Mac MPS automatically.
-
-Do not download packages, models or data by opening this lesson. Do not attach an engine socket, ambient cluster credentials or an arbitrary remote endpoint. A CPU pass, imported package, successful compilation, real GPU result and measured performance are distinct observations. Record the actual backend, data shape/dtype, source revision, versions and pending checks. A saved completion marker records learning progress, not hardware certification.
+Answers: [self-check answers](../solutions/cuda-077_solutions.md#self-check-answers).
 
 ## Primary references
 
 - [NVIDIA CUDA Python introduction](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/intro-to-cuda-python.html)
-- [Maintained numba-cuda project](https://github.com/NVIDIA/numba-cuda)
 
-Use the version-matched documentation of your prepared environment. These references describe interfaces and supported boundaries; the chapter's synthetic examples and CPU models are original teaching material.
+Full lists: [documentation and sources](../../STUDY-GUIDE.md#documentation-and-sources).
 
 ## Ask an AI tutor about this lesson
 

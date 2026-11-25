@@ -2,7 +2,7 @@
 
 Create a staging boundary with complete record accounting.
 
-The executable reference contains the two complete worked cases with assertions. The changes below explain the independent practice and its limits.
+The reference loads a CSV seed, stages it with explicit casts and uses `try_cast` to keep ids 1 and 3 with amounts 5 and 9. It also counts the malformed raw row, so rejection is measured rather than assumed. The result covers this three-row fixture, not every malformed input pattern. See [how these answers are laid out](../STUDY-GUIDE.md#answers-and-references).
 
 
 ## 1. Add a valid row

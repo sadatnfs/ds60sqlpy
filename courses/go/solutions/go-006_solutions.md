@@ -1,6 +1,6 @@
 # go-006: explained solutions
 
-These are comparison material after an attempt or explicit reveal. The executable reference implements all six cases in one `main.go`.
+Compare after an attempt ([using solutions](../STUDY-GUIDE.md#use-the-solutions)). `courses/go/solutions/go-006_solution.go` implements all six cases.
 
 ## Mechanism
 
@@ -10,7 +10,7 @@ map[string]int declares string keys and integer values. value, ok := counts[key]
 
 ## 1. Distinguish zero from missing: change one input
 
-Copy worked example 1 into a scratch pad and change `m := map[string]int{"zero": 0}` to `m := map[string]int{"zero": 1}`. Before running, predict which check fails and which value it now sees; then run it and restore the original line.
+Copy worked example 1, change `m := map[string]int{"zero": 0}` to `m := map[string]int{"zero": 1}` and predict the failure before running; then restore the line.
 
 The unchanged code is worked example 1:
 
@@ -21,13 +21,15 @@ b, okB := m["missing"]
 check(a == b && okA && !okB, "presence")
 ```
 
-**Expected:** The changed run panics with `presence` because `a == b && okA && !okB` no longer holds. Restoring the original line brings back the worked observation: both values are 0, but only zero is present.
+**Expected:** The edited run panics with `presence` because `a == b && okA && !okB` no longer holds.
+
+**Verify:** Restoring `m := map[string]int{"zero": 0}` makes the check pass again with the worked observation: both values are 0, but only zero is present.
 
 A numeric value alone cannot represent both absence and an intentional zero without losing information.
 
 ## 2. Build a frequency table: debug a regression
 
-A regression changed one token in worked example 2, so one line now reads `for _, v := range []string{"red!", "blue", "red"} {`. Run worked example 2 with that line, use the failure to locate the defect and repair it without changing the check.
+A one-token regression in worked example 2 makes a line read `for _, v := range []string{"red!", "blue", "red"} {`. Repair it without changing the check.
 
 The unchanged code is worked example 2:
 
@@ -39,7 +41,9 @@ for _, v := range []string{"red", "blue", "red"} {
 check(m["red"] == 2 && m["blue"] == 1, "counts")
 ```
 
-**Expected:** Before the repair the program panics with `counts`; after it the line reads `for _, v := range []string{"red", "blue", "red"} {` again and red has count 2 and blue has count 1.
+**Expected:** The defective run panics with `counts`; after restoring `for _, v := range []string{"red", "blue", "red"} {`, red has count 2 and blue has count 1.
+
+**Verify:** The failing run shows message `counts`; after the repair `m["red"] == 2 && m["blue"] == 1` holds again.
 
 Missing counts start at the zero value, which is useful here because zero is the correct additive identity.
 
@@ -59,6 +63,8 @@ check(keys[0] == "alpha" && keys[1] == "beta", "sorted keys")
 
 **Expected:** The first output key is alpha.
 
+**Verify:** Your solution must keep `keys[0] == "alpha" && keys[1] == "beta"` true. Control: changing `check(keys[0] == "alpha" && keys[1] == "beta", "sorted keys")` to `check(keys[1] == "alpha" && keys[1] == "beta", "sorted keys")` panics with message `sorted keys`; revert it.
+
 Sorting makes the presentation contract explicit. Repeatedly observing one map order never makes it guaranteed.
 
 ## 4. Observe assigned map aliasing
@@ -73,6 +79,8 @@ check(a["x"] == 2, "map alias")
 ```
 
 **Expected:** Both names observe the changed entry.
+
+**Verify:** Your solution must keep `a["x"] == 2` true. Control: changing `b["x"] = 2` to `b["x"] = 3` panics with message `map alias`; revert it.
 
 The assignment does not recursively clone map entries. Independent snapshots require a deliberate copy and a policy for nested mutable values.
 
@@ -89,6 +97,8 @@ check(len(m) == 0, "delete")
 
 **Expected:** The map ends empty without a failure.
 
+**Verify:** Your solution must keep `len(m) == 0` true. Control: changing `m := map[string]int{"x": 1}` to `m := map[string]int{"x!": 1}` panics with message `delete`; revert it.
+
 Idempotent deletion is helpful for cleanup: repeating the same intent does not introduce a new error for an already absent entry.
 
 ## 6. Transfer nil read behavior
@@ -103,8 +113,10 @@ check(v == 0 && !ok, "nil read")
 
 **Expected:** The value is 0 and presence is false.
 
+**Verify:** Your solution must keep `v == 0 && !ok` true. Control: changing `check(v == 0 && !ok, "nil read")` to `check(v != 0 && !ok, "nil read")` panics with message `nil read`; revert it.
+
 This safe read does not mean a nil map is writable. Initialize storage before assignment instead of using a panic as ordinary control flow.
 
 ## Transfer after comparison
 
-Return to your own pad and reproduce one check with a new input. Explain why the check rejects a plausible wrong implementation. Keep the distinction between a pure model, an in-process fake, and a real external system visible in your notes.
+A map read answers two questions, the stored value and whether the key exists, and only the comma-ok form keeps both. Order and concurrency work the same way: Go provides neither, so the code must add them. When later lessons build caches, label selectors and configuration overlays, decide explicitly how a missing key differs from a zero value and how output order is made deterministic.

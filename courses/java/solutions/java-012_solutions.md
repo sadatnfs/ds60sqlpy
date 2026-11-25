@@ -1,6 +1,6 @@
 # java-012: explanatory solutions
 
-Open after an attempt or an explicit solution reveal. The executable reference runs the six exercise checks together as `Main.java`. The guide contains independent worked examples, while this file explains the choices and failure cases in the complete answer.
+Open this after an attempt; see [using the solutions](../STUDY-GUIDE.md#use-the-solutions).
 
 ## Mechanism review
 
@@ -18,7 +18,7 @@ The<T> before a method return type declares a method type parameter. List<?exten
 
 ## Exercise 1: Read from a producer: predict an edited check
 
-Task: Copy Example A into a scratch `Main.java` and change `assert sum(List.of(1, 2, 3)) == 6.0;` to `assert sum(List.of(2, 2, 3)) == 6.0;` inside its assertion. Before running it with `java -ea Main`, predict whether the assertion still holds and explain why; then restore it.
+Task: Change Example A's assertion to `assert sum(List.of(2, 2, 3)) == 6.0;`, predict whether it holds, then run and restore it.
 
 The method needs only to read Number values, so an extends bound accepts both integer and double lists without permitting unsafe insertion.
 
@@ -29,13 +29,13 @@ assert sum(List.of(1, 2, 3)) == 6.0;
 assert sum(List.of(1.5, 2.5)) == 4.0;
 ```
 
-**Expected:** The changed run fails with an `AssertionError` from the assertion on `sum(List.of(1, 2, 3)) == 6.0`. Restoring the original line brings back the worked observation: sums 6.0 and 4.0.
+**Expected:** The edited run fails with an `AssertionError` from the assertion on `sum(List.of(1, 2, 3)) == 6.0`.
 
-**Verify:** Compare your written prediction with the reported `AssertionError` and its stack-trace line, and explain why the edited condition is false for the values that satisfy `sum(List.of(1, 2, 3)) == 6.0`. After restoring the line, the program completes without an `AssertionError` again.
+**Verify:** Explain why the edited assertion is false for the values that satisfy `sum(List.of(1, 2, 3)) == 6.0`.
 
 ## Exercise 2: Write to a consumer: diagnose an edited check
 
-Task: A careless edit changed the assertion that Example B adds after Example A so that it reads `assert numbers.equals(List.of(2, 2));`. Run Example B with that line, explain why the edited assertion now fails for the same program state, and restore it.
+Task: Example B's new assertion was edited to `assert numbers.equals(List.of(2, 2));`. Explain why it fails for unchanged state and restore it.
 
 A Number list can safely receive Integer values. Reading through the super-bounded reference offers less precise type information because the actual list may contain other supertypes.
 
@@ -47,9 +47,9 @@ addTwo(numbers);
 assert numbers.equals(List.of(1, 2));
 ```
 
-**Expected:** Before the repair the run fails with an `AssertionError` from the assertion on `numbers.equals(List.of(1, 2))`; after it the line reads `assert numbers.equals(List.of(1, 2));` again and list contains 1, 2.
+**Expected:** The edited run fails with an `AssertionError` from the assertion on `numbers.equals(List.of(1, 2))`; the restored assertion passes.
 
-**Verify:** Keep the failing and the repaired runs. Explain why the edited assertion rejects the same program state that `numbers.equals(List.of(1, 2))` accepts.
+**Verify:** Explain why the edited assertion rejects the state that `numbers.equals(List.of(1, 2))` accepts.
 
 ## Exercise 3: Connect source and destination types
 
@@ -65,7 +65,7 @@ assert destination.equals(List.of(3, 4));
 
 **Expected:** destination contains 3, 4.
 
-**Verify:** Keep an assertion equivalent to `destination.equals(List.of(3, 4))`. As a control, change `copy(List.of(3, 4), destination);` to `copy(List.of(4, 4), destination);`: the run must fail with an `AssertionError` from the assertion on `destination.equals(List.of(3, 4))`. Restore the line before continuing.
+**Verify:** Control: changing `copy(List.of(3, 4), destination);` to `copy(List.of(4, 4), destination);` must fail the assertion on `destination.equals(List.of(3, 4))`.
 
 ## Exercise 4: Preserve generic return type
 
@@ -80,7 +80,7 @@ assert value.equals("alpha");
 
 **Expected:** result alpha.
 
-**Verify:** Keep an assertion equivalent to `value.equals("alpha")`. As a control, change `String value = first(List.of("alpha", "beta"));` to `String value = first(List.of("alpha!", "beta"));`: the run must fail with an `AssertionError` from the assertion on `value.equals("alpha")`. Restore the line before continuing.
+**Verify:** Control: changing `String value = first(List.of("alpha", "beta"));` to `String value = first(List.of("alpha!", "beta"));` must fail the assertion on `value.equals("alpha")`.
 
 ## Exercise 5: Handle an empty input contract
 
@@ -100,7 +100,7 @@ assert empty;
 
 **Expected:** NoSuchElementException.
 
-**Verify:** Keep an assertion equivalent to `empty`. As a control, change `empty = true;` to `empty = false;`: the run must fail with an `AssertionError` from the assertion on `empty`. Restore the line before continuing.
+**Verify:** Control: changing `empty = true;` to `empty = false;` must fail the assertion on `empty`.
 
 ## Exercise 6: Observe erasure carefully
 
@@ -117,8 +117,10 @@ assert strings.isEmpty() && integers.isEmpty();
 
 **Expected:** runtime classes equal; compile-time contracts remain distinct.
 
-**Verify:** Keep an assertion equivalent to `strings.isEmpty() && integers.isEmpty()` and confirm that `java -ea Main` completes. Then name an input that would make it fail and explain which value changes.
+**Verify:** Name an input that would make `strings.isEmpty() && integers.isEmpty()` false and the value that changes.
 
 ## After comparing the answer
 
-Run the complete reference with assertions enabled, then return to your own implementation. Recreate one check with different values and explain its expected result before execution. A compiler error, an expected domain exception and an assertion failure represent different stages and should be reported separately. Preserve ownership boundaries when adapting file, network or concurrency examples. The reference never authorizes access to a shared service or deletion of learner state. Use a fresh tiny fixture when you need to distinguish two interpretations of an API contract.
+Try to call `sum` on a `List<String>` in your copy, read the compiler error, and explain which bound rejected it.
+
+Run the complete reference with `java -ea Main` first; the [review routine](../STUDY-GUIDE.md#use-the-solutions) covers the rest.

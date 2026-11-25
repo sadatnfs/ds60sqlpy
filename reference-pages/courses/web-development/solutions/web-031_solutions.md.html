@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/web-development/solutions/web-031_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="web-031-explanatory-solutions">web-031: explanatory solutions<a class="heading-anchor" href="#web-031-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Open this after your own attempt. Each answer explains the lesson&#x27;s synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in <code>courses/web-development/guides/web-031.md</code>.</p>
+<p>Attempt each exercise before reading; the mechanism is in <code>courses/web-development/guides/web-031.md</code> (<a href="../STUDY-GUIDE.md.html#solutions">using these answers</a>).</p>
 <h3 id="exercise-1-predict-which-characters-in-the-greeting-source-appear-in-output">Exercise 1: Predict which characters in the greeting source appear in output.<a class="heading-anchor" href="#exercise-1-predict-which-characters-in-the-greeting-source-appear-in-output" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> The opening tag and echo keyword do not appear; the string content does.</p>
 <p><strong>Approach:</strong> Separate the PHP syntax from the data: the tag and the <code>echo</code> keyword are instructions, while the quoted string is what gets written.</p>
@@ -232,7 +232,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Plausible wrong approach:</strong> Assuming <code>$_GET</code> is filled when running the CLI worker fails because no HTTP request exists, so those arrays stay empty.</p>
 <p><strong>How to verify:</strong> Dumping <code>$_GET</code> in the CLI worker prints an empty array, while the program&#x27;s prepared input values are present.</p>
 <h3 id="reference-comparison">Reference comparison<a class="heading-anchor" href="#reference-comparison" aria-label="Link to this section">#</a></h3>
-<p>Open <code>courses/web-development/solutions/web-031_solution.php</code> only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; server lifecycle, persistence, concurrency and security need their own integration evidence.</p></article>
+<p>The reference checks that the computed minutes equal 30, then echoes the topic and minutes lines. That catches an arithmetic slip in the duration. It does not compare your label wording, test literal angle brackets or show a server lifecycle, so compare the printed lines with your own prediction.</p>
+<p>Open <code>courses/web-development/solutions/web-031_solution.php</code> after saving your attempt (<a href="../STUDY-GUIDE.md.html#references">comparing with the reference</a>).</p></article>
   </main>
 </body>
 </html>

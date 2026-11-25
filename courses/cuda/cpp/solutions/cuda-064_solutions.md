@@ -4,8 +4,6 @@
 
 A custom ML operator has a forward contract and, when differentiable, a backward contract. State supported shape, strides, dtype, device, aliasing and stream behavior. Reject unsupported inputs before unsafe access. The operator must integrate with the framework's ownership and current-stream rules, not merely return plausible numbers. Compare against a readable framework reference and the framework's optimized or compiled path where available. Measure full training or inference scope, including backward, transfers and launch overhead. A faster forward kernel can still make training slower or produce wrong gradients.
 
-The separate [CPU reference](../references/cuda-064_cpu.py) checks the chapter's bounded model. It does not execute CUDA or establish GPU timing. Compare after attempting the worksheet or explicitly choosing to reveal solutions.
-
 ## Exercise 1
 
 For affine \(y=ax+b\) with a=3, b=1 and x=\([-1,0,2]\), forward output is \([-2,1,7]\). If a scalar loss sums outputs, each input gradient is three. A custom forward that returns the right values but backward returns one is mathematically wrong despite passing the forward fixture.
@@ -78,12 +76,16 @@ Forward/reference parity, backward checks, boundary and invalid-input tests, str
 
 **How to verify:** Run each check and record results before adoption.
 
+## Self-check answers
+
+1. **What are the input gradients for loss = sum(3x+1)?** 3 for every element.
+2. **A kernel assumes contiguous tensors but accepts transposed views. What is wrong?** It reads with the wrong strides; it must check strides and reject or convert noncontiguous input.
+3. **What should an unsupported dtype do?** Raise a clear error before any device access.
+
 ## Numerical reference and its limits
 
-The complete CPU model is [here](../references/cuda-064_cpu.py). Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It does not claim CUDA execution, concurrency safety or a performance measurement.
+The [CPU reference](../references/cuda-064_cpu.py) reproduces worked example 1 and prints `{'forward': [-2.0, 1.0, 7.0], 'CPU_finite_difference_gradients': [3.000000000019653, 2.9999999999752442, 3.000000000064062]}`.
 
 ## Transfer review
 
 Forward/reference parity, backward checks, boundary and invalid-input tests, stream/lifetime correctness, real GPU evidence when claimed and end-to-end comparison against a strong framework baseline.
-
-A complete explanation must name its inputs, the unchanged mathematical contract, the changed boundary or resource condition, and the evidence still needed on actual hardware. Preserve a CPU baseline even after a GPU path becomes available.

@@ -117,21 +117,18 @@ The dictionaries stand in for the entity_guids field that two check receipts pro
 
 ## Complete worked source
 
-This is a project-only command notebook. Read and edit it in the classroom; run its explicitly labeled commands from the copied owned Docker workshop. The classroom does not execute these service commands.
+The classroom does not execute these service commands. See the [workshop rules](../STUDY-GUIDE.md#workshop-notebooks).
 
 # Atlas apache-072 prepared command notebook
 
-Copy the owned Atlas project and read PREPARATION.md. Default local server
-execution is omitted until a supported native Java 8 graph/index stack exists.
+Each `plan` run from the copied Atlas project prints the same qualified names, because they derive from the owner value rather than a counter. That stable key is what turns a repeated `apply` into an update instead of a duplicate.
 
 ```bash
 bash run.sh prepare
 bash run.sh plan
 ```
 
-These actions validate a portable native Docker client and print original
-payloads without contacting a server. For an explicitly prepared owned fixture
-server with untracked credentials, deliberate apply and read-only check are:
+On a prepared owned server, run `apply` a deliberate number of times, and use `check` alone when you only want to read state back:
 
 ```bash
 bash run.sh apply
@@ -140,8 +137,7 @@ bash run.sh check
 
 Repeat only deliberate apply operations when studying delivery/idempotency. For persistence readback use check alone. Record source payload/revision, logical run key, actual GUIDs and notification provenance separately.
 
-Prepared payloads are not actual Atlas observations. Never place credentials or
-Authorization headers in notebooks, source, command arguments or receipts.
+Count the apply calls you made and compare them with the GUIDs that check returns. One GUID per qualified name after several applies is the idempotent result; notification provenance is a separate observation.
 
 ## Primary references
 

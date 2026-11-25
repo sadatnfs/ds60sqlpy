@@ -64,31 +64,7 @@ not as a replacement for the formulas.
 
 ## How to run this lesson
 
-**Primary browser route:** run `./classroom` from the repository root and
-choose **Python and data science** on `/classroom`. Open this lesson in the shared workspace,
-read its capability notice, and use its supported coding or reading workflow.
-The [classroom guide](../../../docs/classroom-experience.md) explains saved work, runtimes and switching subjects.
-
-**Optional native notebook/editor route:** the instructions below describe
-separately prepared host tools. They are useful alternatives, not prerequisites
-for opening this lesson in the Docker classroom.
-
-1. Open the Day 31 learner notebook from this guide's **Next
-   step** section in VS Code or JupyterLab.
-2. Select the `Python (ds60sqlpy)` kernel. Start at the top and use
-   **Run All** only after making the written predictions; every added
-   worked example is bounded and offline after bootstrap.
-3. Keep experiments in new scratch cells. Do not edit the official
-   solution while attempting the numbered practice.
-4. Restart the kernel and run from the first cell before calling the
-   lesson complete. A clean run catches hidden state and stale
-   variables.
-
-Linux, macOS, or Ubuntu in Windows WSL 2:
-
-```bash
-.venv/bin/python -m jupyter lab
-```
+Open `python-31` in the classroom, or `python/ds-60day/notebooks/day31_probability_basics.ipynb` on a host; the [Python study guide](../../STUDY-GUIDE.md) explains both.
 
 ## Concept deep dive: probability models, conditional evidence, and simulation error
 
@@ -113,10 +89,6 @@ accuracy depends on the number and independence of simulated runs.
 - **`event.mean()`:** estimates a probability only when the Boolean or 0/1 array represents the event at the intended experimental grain.
 
 ### Focused example A: solve an at-least-one event by its complement
-
-Before running the example, predict the shape, type, or direction of the
-result. Write the prediction down so that a surprise becomes evidence
-rather than something to overlook.
 
 ```python
 import numpy as np
@@ -215,9 +187,6 @@ Complete these in the learner notebook:
 
 Move between probability models, seeded simulation, and diagnostics. A simulation is useful only when its sample space and uncertainty are explicit.
 
-Predict or plan before you run code. Use the hint only after an honest
-attempt, and record the evidence that would prove your result correct.
-
 4. **Prediction and uncertainty:** For an event with probability 0.002 observed in 1,000 independent trials, predict the chance of at least one occurrence, simulate it 20,000 times, and quantify Monte Carlo uncertainty.
    **Progressive hint:** Compute \(1-(1-p)^n\) first. Treat each simulated experiment as one Bernoulli outcome and use \(\sqrt{\frac{\widehat p(1-\widehat p)}{\mathrm{runs}}}\) for its standard error.
 
@@ -268,8 +237,7 @@ ones. Do not require exact equality from random draws.
 
 ## Ask an AI tutor about this lesson
 
-The lesson is complete without an AI assistant. If you want optional
-coaching, copy this prompt into the AI tutor while the repository root is open:
+The lesson is complete without AI. For optional coaching, copy this prompt with the repository root open:
 
 ```text
 Tutor me through `python-31` (Day 31: Probability Basics).

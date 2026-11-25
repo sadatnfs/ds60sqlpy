@@ -213,7 +213,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li><strong>exit status:</strong> the process result code, with 0 normally signaling success</li>
 </ul>
 <h3 id="compile-and-run-reference">Compile and run reference<a class="heading-anchor" href="#compile-and-run-reference" aria-label="Link to this section">#</a></h3>
-<p>Read <a href="../compile-and-run.md.html">the compile and run tutorial</a> for <code>main.cpp</code>, the Docker route, native compiler flags, paths, exit codes, compilation versus linking, stale binaries and single-file limits. Record the displayed build and run phases separately.</p>
+<p>This lesson runs no code in the browser: the worksheet asks you to read build transcripts. Use the phases as your map. <code>hello.cpp</code> compiles to <code>hello.o</code>, the linker produces <code>hello</code>, and only then can a run print <code>hello, learner</code> and exit 0. Label each transcript line with the phase that produced it before deciding what went wrong. Commands and flags: <a href="../compile-and-run.md.html">compile and run tutorial</a>.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1-follow-one-successful-request">Worked example 1: Follow one successful request<a class="heading-anchor" href="#worked-example-1-follow-one-successful-request" aria-label="Link to this section">#</a></h4>
 <p>Changing hello.cpp affects a future build. It cannot alter a previous stdout transcript.</p>
@@ -299,11 +299,11 @@ process: not run</code></pre>
 </ol>
 <h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
 <ul>
-<li>Can you reproduce each exact observation without reading the official answer?</li>
-<li>Can you explain a failed check using the lesson&#x27;s model, rather than changing an expected value?</li>
+<li>Which file exists after each phase of the <code>hello</code> build, and which phases never happen in Worked example 2?</li>
+<li>Why can a stale <code>hello</code> print <code>hello, learner</code> after the source says <code>hello, reviewer</code>, and which check rules that out?</li>
 </ul>
 <h3 id="retrieval-and-transfer">Retrieval and transfer<a class="heading-anchor" href="#retrieval-and-transfer" aria-label="Link to this section">#</a></h3>
-<p>Close the source. Explain the mechanism in your own words, name the boundary that a plausible wrong answer crosses, and predict a changed fixture before running again.</p>
+<p>Close the worksheet. From memory, list <code>hello.cpp</code>, <code>hello.o</code> and <code>hello</code> with the phase that creates each, then explain how a missing semicolon, an undefined function and a runtime failure each stop the chain at a different point. Predict what a stale binary would print before you check the timestamps.</p>
 <h3 id="common-pitfalls">Common pitfalls<a class="heading-anchor" href="#common-pitfalls" aria-label="Link to this section">#</a></h3>
 <p>Do not paste a diagnostic as though it were a command. Do not infer a successful link from one existing object file, or a correct program from exit 0 alone. Avoid overwriting source when choosing an executable output path.</p>
 <p>A frequent mix-up is reading a stale executable. If the compile step fails but an older <code>hello</code> from a previous build is still on disk, running it prints the old greeting and exits 0, which looks like success for the new source. Check the timestamp of the compile output, or delete <code>hello</code> before rebuilding, so that a run transcript can only come from the build you just traced. The same reasoning explains Worked example 2: no new object file means no new evidence about the program.</p>

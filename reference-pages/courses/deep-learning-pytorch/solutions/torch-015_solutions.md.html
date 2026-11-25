@@ -195,6 +195,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="torch-015-explanatory-solutions">torch-015: explanatory solutions<a class="heading-anchor" href="#torch-015-explanatory-solutions" aria-label="Link to this section">#</a></h2>
 <p>Open these answers only after attempting Dataset, DataLoader, collation and reproducible sampling yourself. They reuse the guide&#x27;s literal inputs, starting from Example A, Inspect retained batches, so a discrepancy points at one step. The executable companion runs the assertions; this page explains why each one tests DataLoader, Collation, Sampler generator. After a pass, choose a new input for exercise 6, Reject invalid sequence records, without looking.</p>
+<p>After comparing, follow the <a href="../STUDY-GUIDE.md.html#after-the-solutions">review steps</a>.</p>
 <h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
 <p>Dataset defines how to retrieve an observation, while DataLoader defines batching, sampling and collation. The default collator stacks compatible tensors and groups compatible structures; variable-length records may need a custom collate_fn. A loader&#x27;s batch count differs from the number of records, and drop_last can omit a tail. Shuffling needs a controlled generator if the ordering itself is part of a reproducible experiment.</p>
 <p>This course uses num_workers=0 so all loading occurs in the same process and requires no extra worker startup or shared-memory assumptions. Multiple workers introduce additional random state, serialization, lifetime and platform considerations that need separate testing. A local generator separates sampler randomness from unrelated global random draws. Record IDs remain in each batch so ordering, duplication and pairing can be checked independently of loss.</p>
@@ -278,9 +279,7 @@ batches <span class="syntax-operator">=</span> <span class="syntax-builtin">list
     <span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span>
         <span class="syntax-keyword">raise</span> AssertionError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">invalid token ID accepted</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> ValueError before padding; token IDs must be nonnegative int64 integers.</p>
-<p><strong>Verify:</strong> In a fresh process, the exercise checks confirm <code>collate([[], [1]])</code> raises <code>ValueError</code> and for every <code>invalid</code> in <code>[[[2.7]], [[True]], [[-1]], [[2 ** 63]]]</code>, <code>collate(invalid)</code> raises <code>ValueError</code>.</p>
-<h3 id="review-after-comparison">Review after comparison<a class="heading-anchor" href="#review-after-comparison" aria-label="Link to this section">#</a></h3>
-<p>Repeat exercise 4, Collate variable-length sequences, with one changed fixture value and predict the difference before running it. Keep your failing attempt at exercise 5, Preserve pairing after shuffle, beside the repaired result. A missing framework is not a failing assertion. These solutions use only local fixtures.</p></article>
+<p><strong>Verify:</strong> In a fresh process, the exercise checks confirm <code>collate([[], [1]])</code> raises <code>ValueError</code> and for every <code>invalid</code> in <code>[[[2.7]], [[True]], [[-1]], [[2 ** 63]]]</code>, <code>collate(invalid)</code> raises <code>ValueError</code>.</p></article>
   </main>
 </body>
 </html>

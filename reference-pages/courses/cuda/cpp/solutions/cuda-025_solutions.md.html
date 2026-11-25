@@ -196,7 +196,6 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <article class="document"><h2 id="cuda-025-explanatory-solutions">cuda-025: explanatory solutions<a class="heading-anchor" href="#cuda-025-explanatory-solutions" aria-label="Link to this section">#</a></h2>
 <h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
 <p>Debugging starts by placing a failure in its phase. A source error prevents compilation; a missing symbol prevents linking; incompatible device code can prevent loading; invalid launch parameters can reject submission; an illegal access can fail asynchronous execution; and a completed kernel can still calculate the wrong answer. Later CUDA calls may surface an earlier asynchronous failure, so the line reporting an error is not always the line that caused it. Use checked phase boundaries in a debug configuration and retain the earliest meaningful diagnostic. Avoid reinstalling tools before a small reproducer isolates the responsible layer.</p>
-<p>The separate <a href="../references/cuda-025_cpu.py.html">CPU reference</a> checks the chapter&#x27;s bounded model. It does not execute CUDA or establish GPU timing. Compare after attempting the worksheet or explicitly choosing to reveal solutions.</p>
 <h3 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h3>
 <p>A misspelled identifier in main.cu produces a compiler error before any device work. Fixing bounds checks cannot help until the file compiles. Record the diagnostic with source line and build command, and rerun the smallest compilation step.</p>
 <p><strong>Approach:</strong> Classify the misspelled identifier as a compile failure and fix it at the reported source line.</p>
@@ -233,11 +232,16 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Why it is correct:</strong> Shape dependence means another engineer needs the exact shape and geometry to reproduce it.</p>
 <p><strong>A plausible wrong approach:</strong> Writing only &#x27;wrong answer on large inputs&#x27; gives no reproducer and no index to inspect.</p>
 <p><strong>How to verify:</strong> Ask a colleague to reproduce from the report alone and confirm they see the same index.</p>
+<h3 id="self-check-answers">Self-check answers<a class="heading-anchor" href="#self-check-answers" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>Why can an error appear at a line far from the faulty kernel?</strong> Asynchronous execution errors surface at the next synchronizing call, which may be later in the program.</li>
+<li><strong>What is a sticky error?</strong> An error that corrupts the context so later calls keep failing until the process ends.</li>
+<li><strong>What should a minimal reproducer contain?</strong> The smallest input and build command that still fails, the observed and expected output, and the versions used.</li>
+</ol>
 <h3 id="numerical-reference-and-its-limits">Numerical reference and its limits<a class="heading-anchor" href="#numerical-reference-and-its-limits" aria-label="Link to this section">#</a></h3>
-<p>The complete CPU model is <a href="../references/cuda-025_cpu.py.html">here</a>. Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It does not claim CUDA execution, concurrency safety or a performance measurement.</p>
+<p>The <a href="../references/cuda-025_cpu.py.html">CPU reference</a> reproduces worked example 1 and prints <code>{&#x27;unknown identifier&#x27;: &#x27;compile&#x27;, &#x27;undefined reference&#x27;: &#x27;link&#x27;, &#x27;illegal access at completion&#x27;: &#x27;execute&#x27;, &#x27;wrong sum&#x27;: &#x27;validate&#x27;}</code>.</p>
 <h3 id="transfer-review">Transfer review<a class="heading-anchor" href="#transfer-review" aria-label="Link to this section">#</a></h3>
-<p>Include source revision, exact shape/dtype/data generator, expected and observed values, launch geometry, device/software identity and smallest failing index.</p>
-<p>A complete explanation must name its inputs, the unchanged mathematical contract, the changed boundary or resource condition, and the evidence still needed on actual hardware. Preserve a CPU baseline even after a GPU path becomes available.</p></article>
+<p>Include source revision, exact shape/dtype/data generator, expected and observed values, launch geometry, device/software identity and smallest failing index.</p></article>
   </main>
 </body>
 </html>

@@ -1,6 +1,6 @@
 # java-026: explanatory solutions
 
-Open after an attempt or an explicit solution reveal. The executable reference runs the six exercise checks together as `Main.java`. The guide contains independent worked examples, while this file explains the choices and failure cases in the complete answer.
+Open this after an attempt; see [using the solutions](../STUDY-GUIDE.md#use-the-solutions).
 
 ## Mechanism review
 
@@ -22,7 +22,7 @@ The source root contains one directory per module, each with module-info.java an
 
 ## Exercise 1: Inspect a platform module: predict an edited check
 
-Task: Copy Example A into a scratch `Main.java` and change `assert String.class.getPackageName().equals("java.lang");` to `assert String.class.getPackageName().equals("java.lang!");` inside its assertion. Before running it with `java -ea Main`, predict whether the assertion still holds and explain why; then restore it.
+Task: Change Example A's assertion to `assert String.class.getPackageName().equals("java.lang!");`, predict whether it holds, then run and restore it.
 
 The fully qualified class name, package and module are distinct identities. A package name alone does not establish module membership.
 
@@ -33,13 +33,13 @@ assert String.class.getModule().getName().equals("java.base");
 assert String.class.getPackageName().equals("java.lang");
 ```
 
-**Expected:** The changed run fails with an `AssertionError` from the assertion on `String.class.getPackageName().equals("java.lang")`. Restoring the original line brings back the worked observation: module `java.base`; package `java.lang`.
+**Expected:** The edited run fails with an `AssertionError` from the assertion on `String.class.getPackageName().equals("java.lang")`.
 
-**Verify:** Compare your written prediction with the reported `AssertionError` and its stack-trace line, and explain why the edited condition is false for the values that satisfy `String.class.getPackageName().equals("java.lang")`. After restoring the line, the program completes without an `AssertionError` again.
+**Verify:** Explain why the edited assertion is false for the values that satisfy `String.class.getPackageName().equals("java.lang")`.
 
 ## Exercise 2: Inspect the classroom classpath context: diagnose an edited check
 
-Task: A careless edit changed the assertion that Example B adds after Example A so that it reads `assert Main.class.getModule().isNamed();`. Run Example B with that line, explain why the edited assertion now fails for the same program state, and restore it.
+Task: Example B's new assertion was edited to `assert Main.class.getModule().isNamed();`. Explain why it fails for unchanged state and restore it.
 
 The classroom compiles a single Main.java and launches it by classpath. The separate fixture demonstrates named-module execution rather than pretending the pad itself is modular.
 
@@ -49,9 +49,9 @@ The unchanged code is the part that Example B adds:
 assert !Main.class.getModule().isNamed();
 ```
 
-**Expected:** Before the repair the run fails with an `AssertionError` from the assertion on `!Main.class.getModule().isNamed()`; after it the line reads `assert !Main.class.getModule().isNamed();` again and main belongs to the unnamed module in the standard classpath launch.
+**Expected:** The edited run fails with an `AssertionError` from the assertion on `!Main.class.getModule().isNamed()`; the restored assertion passes.
 
-**Verify:** Keep the failing and the repaired runs. Explain why the edited assertion rejects the same program state that `!Main.class.getModule().isNamed()` accepts.
+**Verify:** Explain why the edited assertion rejects the state that `!Main.class.getModule().isNamed()` accepts.
 
 ## Exercise 3: Compile two real modules
 
@@ -74,7 +74,7 @@ try (ModuleFixture fixture = new ModuleFixture()) {
 
 **Expected:** compiler exit 0 and module-info.class files present.
 
-**Verify:** Keep an assertion equivalent to `java.nio.file.Files.isRegularFile(fixture.output.resolve("course.app/module-info.class"))`. As a control, change `fixture.output.resolve("course.app/module-info.class")` to `fixture.output.resolve("course.app/module-info.class!")` inside it: the run must fail with an `AssertionError`, which shows the assertion can fail. Restore it.
+**Verify:** Control: changing `fixture.output.resolve("course.app/module-info.class")` to `fixture.output.resolve("course.app/module-info.class!")` inside the assertion must make it fail.
 
 ## Exercise 4: Inspect declared dependencies and exports
 
@@ -102,7 +102,7 @@ try (ModuleFixture fixture = new ModuleFixture()) {
 
 **Expected:** app requires course.greeting; library exports edu.example.greeting.
 
-**Verify:** Keep an assertion equivalent to `library.exports().stream().anyMatch(item -> item.source().equals("edu.example.greeting"))`. As a control, change `.anyMatch(item -> item.source().equals("edu.example.greeting"));` to `.anyMatch(item -> item.source().equals("edu.example.greeting!"));` inside it: the run must fail with an `AssertionError`, which shows the assertion can fail. Restore it.
+**Verify:** Control: changing `.anyMatch(item -> item.source().equals("edu.example.greeting"));` to `.anyMatch(item -> item.source().equals("edu.example.greeting!"));` inside the assertion must make it fail.
 
 ## Exercise 5: Run the modular application
 
@@ -121,7 +121,7 @@ try (ModuleFixture fixture = new ModuleFixture()) {
 
 **Expected:** stdout Hello, modules! and exit 0.
 
-**Verify:** Keep an assertion equivalent to `output.strip().equals("Hello, modules!")`. As a control, change `assert output.strip().equals("Hello, modules!");` to `assert output.strip().equals("Hello, modules!!");` inside it: the run must fail with an `AssertionError`, which shows the assertion can fail. Restore it.
+**Verify:** Control: changing `assert output.strip().equals("Hello, modules!");` to `assert output.strip().equals("Hello, modules!!");` inside the assertion must make it fail.
 
 ## Exercise 6: Reject a missing module dependency
 
@@ -142,8 +142,10 @@ try (ModuleFixture fixture = new ModuleFixture()) {
 
 **Expected:** nonzero compiler exit and captured diagnostic.
 
-**Verify:** Keep an assertion equivalent to `compiled != 0 && !fixture.diagnostics.isBlank()`. As a control, change `fixture.source.resolve("course.app/module-info.java"),` to `fixture.source.resolve("course.app/module-info.java!"),`: the run must fail with an `AssertionError` from the assertion on `compiled != 0 && !fixture.diagnostics.isBlank()`. Restore the line before continuing.
+**Verify:** Control: changing `fixture.source.resolve("course.app/module-info.java"),` to `fixture.source.resolve("course.app/module-info.java!"),` must fail the assertion on `compiled != 0 && !fixture.diagnostics.isBlank()`.
 
 ## After comparing the answer
 
-Run the complete reference with assertions enabled, then return to your own implementation. Recreate one check with different values and explain its expected result before execution. A compiler error, an expected domain exception and an assertion failure represent different stages and should be reported separately. Preserve ownership boundaries when adapting file, network or concurrency examples. The reference never authorizes access to a shared service or deletion of learner state. Use a fresh tiny fixture when you need to distinguish two interpretations of an API contract.
+Remove the `exports` line from the library descriptor in your copy of the fixture and recompile; read the diagnostic and identify the sentence that names the package that is no longer visible.
+
+Run the complete reference with `java -ea Main` first; the [review routine](../STUDY-GUIDE.md#use-the-solutions) covers the rest.

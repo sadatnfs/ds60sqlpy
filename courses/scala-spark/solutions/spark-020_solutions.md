@@ -1,6 +1,8 @@
 # spark-020: Explained paired reference solutions
 
-Read the [guide](../guides/spark-020.md) and attempt one language first. The [Scala reference](spark-020_solution.scala) and [PySpark reference](spark-020_solution.py) are complete single-file programs with explicit local sessions and finally-based stop. Each compares with literal expectations; matching two implementations alone would not rule out a shared mistake.
+Attempt the [guide](../guides/spark-020.md) exercises first.
+
+References: [Scala](spark-020_solution.scala), [PySpark](spark-020_solution.py).
 
 ## Exercises and reasoning
 
@@ -156,6 +158,7 @@ The complete ordering converts a relation into a specified display sequence befo
 
 ## Execution and interpretation
 
-Run the complete reference in its prepared fixed worker. Its first check (Establish logical content independently of layout) is built inside the program, so opening the lesson fetches nothing; it expects: IDs 0..23 appear once, `key = id % 4`, `value = 10 * id`. Metrics are `24, 24, 276, 2760`. The final success line prints only after every reference assertion passes.
+The references compare the canonical relation and the four metrics after each layout change, assert six requested partitions with each key observed in one partition, assert two partitions after `coalesce(2)` and four after the attempted increase, reconcile the partition ledger to 24 rows and ID total 276 with every partition ID inside the valid range, check that each partition sequence is sorted, and assert the bounded preview IDs `[3, 7, 11, 15, 19]` with values `[30, 70, 110, 150, 190]`.
 
-Local plan, partition and resource evidence does not establish cluster-scale performance; session cleanup is explicit.
+`spark-020: six PySpark reference contracts passed; Spark=` with the version, or the Scala line, confirms layout and content were kept apart on two local cores. It deliberately asserts no raw collect order, because that order depends on task timing and would make a passing test flaky rather than informative.
+

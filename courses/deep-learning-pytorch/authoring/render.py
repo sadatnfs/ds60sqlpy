@@ -1,4 +1,6 @@
 from pathlib import Path
+import ast
+import builtins
 import json, textwrap, re
 import sys
 
@@ -78,10 +80,62 @@ def sentence(text):
     return text if text[-1:] in ".?!" else text + "."
 
 
+STUDY_GUIDE = "../STUDY-GUIDE.md"
+
+
 def practice_note(lesson_id):
     if lesson_id in FROZEN_REFERENCES:
-        return "Exercises 1-3 repeat the worked examples as guided reconstructions; exercises 4-6 change the fixture or expose a failure."
-    return "The worked examples demonstrate the mechanism; exercises 1-3 transfer it to new inputs and exercises 4-6 extend it to failures and boundary cases."
+        return "\n\nExercises 1-3 repeat the worked examples as guided reconstructions; exercises 4-6 change the fixture or expose a failure."
+    return ""
+
+
+def _bound_names(tree):
+    names = set()
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Name) and isinstance(node.ctx, ast.Store):
+            names.add(node.id)
+        elif isinstance(node, (ast.FunctionDef, ast.ClassDef)):
+            names.add(node.name)
+        elif isinstance(node, (ast.Import, ast.ImportFrom)):
+            names.update((alias.asname or alias.name).split(".")[0] for alias in node.names)
+        elif isinstance(node, ast.arg):
+            names.add(node.arg)
+        elif isinstance(node, ast.ExceptHandler) and node.name:
+            names.add(node.name)
+    return names
+
+
+def carried_names(spec):
+    """Names that Examples B and C read from the helper or an earlier worked block."""
+    imports = _bound_names(ast.parse(spec["imports"]))
+    earlier = _bound_names(ast.parse(spec["helper"])) | _bound_names(
+        ast.parse(spec["exercises"][0]["code"])
+    )
+    names = []
+    for example in spec["exercises"][1:3]:
+        tree = ast.parse(example["code"])
+        own = _bound_names(tree)
+        for node in ast.walk(tree):
+            if (
+                isinstance(node, ast.Name)
+                and isinstance(node.ctx, ast.Load)
+                and node.id in earlier
+                and node.id not in own | imports
+                and not hasattr(builtins, node.id)
+                and node.id not in names
+            ):
+                names.append(node.id)
+        earlier |= own
+    return names
+
+
+def run_order(spec):
+    names = carried_names(spec)
+    if not names:
+        return "Examples B and C need only the imports at the top of Example A."
+    listed = [f"`{name}`" for name in names]
+    joined = listed[0] if len(listed) == 1 else ", ".join(listed[:-1]) + " and " + listed[-1]
+    return f"Examples B and C reuse {joined} from earlier blocks; run all three in order."
 
 
 def write_all(only=None, markdown_only=False):
@@ -129,12 +183,12 @@ def write_all(only=None, markdown_only=False):
             runtime = (
                 "Use the reading worksheet. Write a reasoned response for each case; no execution or model download is required."
                 if reading
-                else f"Start or resume the Docker classroom with `./classroom` from the repository root. On Windows, run that command in WSL 2. In the shared home, choose the **{plan['title']}** subject and select `{id}`. Use its `{p['runtime']}` worker and wait for readiness before choosing **Run**; the [classroom instructions](../../../docs/one-command-classroom.md) explain how to prepare a missing profile. The worker supplies the declared packages and starts a fresh Python process, so no host Python or framework installation is needed. Save your current attempt before replacing the pad with a complete worked example. Keep the example sequence specified below together. Inputs are small local fixtures, with no package installation, dataset or model download, or online service call. For an optional contributor workflow on Linux, macOS or Windows through WSL 2, deliberately prepare an interpreter with the same declared dependencies, then invoke that interpreter on an owned copy of `{learner}` under `.learning/expansion/{id}/`. The general contributor uv environment does not imply that TensorFlow or PyTorch is installed. The Docker profile is the default execution route."
+                else f"Run `{id}` on the `{p['runtime']}` worker ([launch, save and tolerance rules]({STUDY_GUIDE}#launch-a-lesson))."
             )
             study_guidance = (
                 "Read the three worked cases in order and write the assumptions, intermediate reasoning and conclusion for each one. These are text cases, not programs to execute. Compare your written interpretation with the stated expected observations, then answer the six exercises in your saved worksheet. A correct argument must state its evidence boundary; source presence does not establish a model run."
                 if reading
-                else "Run the three worked blocks in order in one scratch file; later blocks reuse the earlier helper and fixture state. To reproduce a later block in a fresh process, include its preceding blocks. Start by reading Example A without running it. Write the intermediate quantities and their units on paper. Run the entire example in a fresh process, not only the final line in a notebook with hidden variables. Examples B and C change assumptions that matter to this mechanism. Compare value, gradient and state contracts separately. Equal forward numbers do not prove equal optimizer or training-mode behavior. Compare both observations before starting independent work. An assertion failure is a request to inspect an assumption, not a reason to widen every tolerance. Use the explicit tolerance in each assertion. Several analytic float64 fixtures use 1e-12 and float32 fixtures use 1e-6, but dtype alone is not a universal numerical-error bound. Finite differences, reductions and conditioning can require different justified tolerances. Integer counts, identities and boolean decisions should be exact."
+                else run_order(s)
             )
             code_anatomy = s["anatomy"]
             prompt = f"""Use the checked-in $guide-ds60sqlpy-learning skill for {id}, {p["title"]}.
@@ -158,14 +212,25 @@ and evidence about generalization. Done when I can derive the worked values, pas
             prediction = f"Derive Example A again with its **Expected** line covered: {w[0]}. Predict exercise 6, {x[5]}, from its prompt alone: {sentence(exercises[5]['prompt'])} Then explain why this finish condition holds: {p['verification']} Keep each prediction beside the observed value."
             hints = f"Hint 1: Example B ({w[1]}) alters one assumption of Example A ({w[0]}). Hint 2: exercise 4, {x[3]}, should end at {sentence(exercises[3]['expected'])} Work backward from it. Hint 3: exercise 5, {x[4]}, changes one input; predict which value moves first."
             self_check = f"Close the worked examples and rebuild Example C, {w[2]}, from its inputs alone. Predict whether exercise 3, {x[2]}, survives one changed input. Then explain {term_list} in terms of that fixture; say which claims the code guarantees and which need new observations."
-            next_step = f"If Example A ({w[0]}) cannot be rebuilt without help, revisit {prereq} first. Otherwise keep your exercise 2 attempt, {x[1]}, as a regression case alongside a fresh transfer input, then continue along the course plan."
+            if p["prerequisites"]:
+                next_step = (
+                    f"If Example A ({w[0]}) cannot be rebuilt without help, revisit {prereq} first."
+                )
+            else:
+                next_step = f"If Example A ({w[0]}) cannot be argued without help, reread this guide's mental model before continuing."
+            dependents = [
+                f"`{q['id']}` ({q['title']})" for q in plan["lessons"] if id in q["prerequisites"]
+            ]
+            if dependents:
+                verb = "builds" if len(dependents) == 1 else "build"
+                next_step += f" {'; '.join(dependents)} {verb} directly on this lesson."
             if "capstone" in p["title"].lower():
-                next_step += " In a capstone, a failed acceptance condition is a valid no-go decision; state what evidence would reopen it."
+                next_step += " A failed acceptance condition in this capstone is a valid no-go decision; state what evidence would reopen it."
             document = f"""# {id}: {p["title"]}
 
 ## Level and prerequisites
 
-{p["level"].capitalize()}; approximately {p["minutes"]} minutes. Direct prerequisites: {prereq}. The prerequisite sequence introduces the notation used here; revisit its worked examples if an axis, probability or gradient is unfamiliar.
+{p["level"].capitalize()}; approximately {p["minutes"]} minutes. {f"Direct prerequisites: {prereq}." if prereq else "No course prerequisites."}
 
 ## Learning objectives
 
@@ -173,9 +238,7 @@ and evidence about generalization. Done when I can derive the worked values, pas
 
 Central investigation: {p["lab"]}
 
-Finish condition: {p["verification"]}
-
-{practice_note(id)} A useful explanation connects the calculation to the reason it is needed, rather than treating a function name as a definition.
+Finish condition: {p["verification"]}{practice_note(id)}
 
 ## Purpose and mental model
 
@@ -237,7 +300,7 @@ Compare [{paired}](../../deep-learning-tensorflow/guides/{paired}.md) after deri
 
 ## Sources and verification status
 
-API and mechanism reference: [{s["source"][0]}]({s["source"][1]}), reviewed 2026-10-22. The fixture, examples, counterexamples and exercise design are original course material. See [validation](../../../docs/validation.md) for execution gates. Check CI artifacts for the exact revision and platform to determine which runtime checks actually ran; authored content alone does not establish runtime execution.
+API and mechanism reference: [{s["source"][0]}]({s["source"][1]}), reviewed 2026-10-22 for the {term_list} behavior these fixtures check ([verification status]({STUDY_GUIDE}#sources-and-verification-status)).
 
 ## Interview reasoning with worked answers
 
@@ -254,6 +317,8 @@ API and mechanism reference: [{s["source"][0]}]({s["source"][1]}), reviewed 2026
             explanation_doc = f"""# {id}: explanatory solutions
 
 Open these answers only after attempting {p["title"]} yourself. They reuse the guide's literal inputs, starting from Example A, {w[0]}, so a discrepancy points at one step. The executable companion runs the assertions; this page explains why each one tests {term_list}. After a pass, choose a new input for exercise 6, {x[5]}, without looking.
+
+After comparing, follow the [review steps]({STUDY_GUIDE}#after-the-solutions).
 
 ## Mechanism review
 
@@ -296,7 +361,6 @@ The question is: {e["prompt"]}
                     e["code"], "    "
                 )
             blocks.extend(exercise_blocks[index] for index in reference_order)
-            explanation_doc += f"## Review after comparison\n\nRepeat exercise 4, {x[3]}, with one changed fixture value and predict the difference before running it. Keep your failing attempt at exercise 5, {x[4]}, beside the repaired result. A missing framework is not a failing assertion. These solutions use only local fixtures.\n"
             if id in FROZEN_GUIDES:
                 (ROOT / guide).write_bytes(
                     (AUTHORING / "frozen_guides" / f"{id}.md.snapshot").read_bytes()

@@ -194,9 +194,17 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cuda/python/guides/cuda-090.md</code></p>
     </header>
     <article class="document"><h2 id="cuda-090-mixed-precision-as-a-numerical-experiment">cuda-090: Mixed precision as a numerical experiment<a class="heading-anchor" href="#cuda-090-mixed-precision-as-a-numerical-experiment" aria-label="Link to this section">#</a></h2>
-<p><strong>Route:</strong> CUDA Python and machine learning. <strong>Stage:</strong> intermediate. <strong>Prerequisites:</strong> <code>cuda-006</code>, <code>cuda-087</code>, <code>cuda-089</code>. Allow several sessions when the hardware experiment is new; the chapter is not a deadline.</p>
-<h3 id="what-you-will-be-able-to-explain">What you will be able to explain<a class="heading-anchor" href="#what-you-will-be-able-to-explain" aria-label="Link to this section">#</a></h3>
-<p>By the end, you can <strong>calculate scaled and unscaled values</strong>, <strong>compare fp16 and bf16 concepts</strong>, and <strong>record quality and throughput separately</strong> with evidence. Start with the two worked cases, then use the editable CPU model to make the quantities concrete.</p>
+<p><strong>Route:</strong> CUDA Python and machine learning. <strong>Stage:</strong> intermediate. <strong>Prerequisites:</strong> <code>cuda-006</code>, <code>cuda-087</code>, <code>cuda-089</code>.</p>
+<p>Pacing, evidence labels and platform rules: <a href="../../STUDY-GUIDE.md.html">CUDA study guide</a>.</p>
+<h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
+<ul>
+<li>Calculate scaled and unscaled values.</li>
+<li>Explain overflow detection.</li>
+<li>Place clipping correctly.</li>
+<li>Compare fp16 and bf16 concepts.</li>
+<li>Design a full-precision baseline.</li>
+<li>Record quality and throughput separately.</li>
+</ul>
 <h3 id="mechanism-and-vocabulary">Mechanism and vocabulary<a class="heading-anchor" href="#mechanism-and-vocabulary" aria-label="Link to this section">#</a></h3>
 <p>Lower precision trades representable range and significant digits against memory and arithmetic capability. Mixed precision deliberately assigns different operations or accumulations to different dtypes. It is not the same as converting every tensor to half. Reductions, normalization and small gradients often need special care; bf16 and fp16 have different range/precision tradeoffs even though both use 16 bits.</p>
 <p>PyTorch autocast selects operation dtypes, and gradient scaling is appropriate for supported fp16 training workflows. Unscale before clipping so the clipping threshold has its intended meaning. TensorFlow mixed-precision policies and loss-scaling optimizers provide the corresponding framework mechanisms, with APIs tied to the pinned Keras release. Validate finite gradients and held-out behavior before comparing memory or speed.</p>
@@ -220,8 +228,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Multiplying a small gradient by scale 1024 before backpropagation can keep intermediate values away from underflow. Dividing the computed gradient by 1024 before the optimizer restores the intended update.</p>
 <h4 id="worked-example-2">Worked example 2<a class="heading-anchor" href="#worked-example-2" aria-label="Link to this section">#</a></h4>
 <p>Clipping a scaled gradient of 512 with threshold 1 and then unscaling produces 1/1024, not the intended clipped original gradient 0.5. Operation order changes training.</p>
-<h3 id="portable-executable-model">Portable executable model<a class="heading-anchor" href="#portable-executable-model" aria-label="Link to this section">#</a></h3>
-<p>The <strong>CPU reference model</strong> variant runs this bounded worked example using <code>python-core</code>. It uses only the Python standard library, small synthetic values and no network. Its purpose is to expose the arithmetic or contract behind the chapter. The separate reference includes assertions for the stated observations.</p>
+<h3 id="how-to-run-the-cpu-model">How to run the CPU model<a class="heading-anchor" href="#how-to-run-the-cpu-model" aria-label="Link to this section">#</a></h3>
+<p>Edit the copy; the <a href="../references/cuda-090_cpu.py.html">reference</a> adds assertions.</p>
+<pre class="highlighted-code"><code class="language-bash">python courses/cuda/python/lessons/cuda-090_cpu.py</code></pre>
 <pre class="highlighted-code"><code class="language-python">gradient <span class="syntax-operator">=</span> <span class="syntax-number">0.5</span>
 scale <span class="syntax-operator">=</span> <span class="syntax-number">1024</span>
 scaled <span class="syntax-operator">=</span> gradient <span class="syntax-operator">*</span> scale
@@ -256,55 +265,51 @@ wrong <span class="syntax-operator">=</span> <span class="syntax-builtin">min</s
 <td><code>0.0009765625</code></td>
 </tr>
 </tbody></table></div>
-<p>Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.</p>
 <h3 id="equal-framework-lanes">Equal framework lanes<a class="heading-anchor" href="#equal-framework-lanes" aria-label="Link to this section">#</a></h3>
 <h4 id="pytorch">PyTorch<a class="heading-anchor" href="#pytorch" aria-label="Link to this section">#</a></h4>
 <p>Use torch.autocast around supported forward/loss operations. The CUDA fp16 workflow can use torch.amp.GradScaler; unscale before gradient clipping, then step and update the scaler.</p>
 <h4 id="tensorflow">TensorFlow<a class="heading-anchor" href="#tensorflow" aria-label="Link to this section">#</a></h4>
 <p>Select a Keras mixed-precision policy before building layers. Use the pinned release&#x27;s loss-scaling optimizer contract and inspect variable, compute and output dtypes separately.</p>
-<p>Choose either lane first, then compare the other using identical mathematical inputs. Framework-specific shape, mode and optimizer rules must be checked separately. Both use offline synthetic examples; no model hub or dataset download is triggered.</p>
+<p>Lane rules: <a href="../../STUDY-GUIDE.md.html#python-gpu-and-framework-labs">framework labs</a>.</p>
 <h3 id="practice-and-transfer">Practice and transfer<a class="heading-anchor" href="#practice-and-transfer" aria-label="Link to this section">#</a></h3>
+<p>Record each attempt in the <a href="../lessons/cuda-090.md.html">worksheet</a> before opening hints.</p>
 <h4 id="exercise-1-calculate-scaled-and-unscaled-values">Exercise 1: Calculate scaled and unscaled values<a class="heading-anchor" href="#exercise-1-calculate-scaled-and-unscaled-values" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Unscaling twice, once manually and once by the scaler, produces <code>0.5/1024</code>, an update so small that training appears to stall without any error.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-2-explain-overflow-detection">Exercise 2: Explain overflow detection<a class="heading-anchor" href="#exercise-2-explain-overflow-detection" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Replacing infinities with zero, or clipping them, so the step can proceed corrupts the update with values unrelated to the true gradient.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-3-place-clipping-correctly">Exercise 3: Place clipping correctly<a class="heading-anchor" href="#exercise-3-place-clipping-correctly" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Clipping the scaled 512 to 1 and then unscaling gives <code>1/1024 = 0.0009765625</code>, the wrong value the reference asserts for the reversed order. Training then barely moves.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-4-compare-fp16-and-bf16-concepts">Exercise 4: Compare fp16 and bf16 concepts<a class="heading-anchor" href="#exercise-4-compare-fp16-and-bf16-concepts" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Assuming both 16-bit formats behave the same leads to dropping loss scaling for float16, where small gradients flush to zero.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-5-design-a-full-precision-baseline">Exercise 5: Design a full-precision baseline<a class="heading-anchor" href="#exercise-5-design-a-full-precision-baseline" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Comparing the mixed-precision run with an older float32 run using a different seed attributes noise to precision.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-6-record-quality-and-throughput-separately">Exercise 6: Record quality and throughput separately<a class="heading-anchor" href="#exercise-6-record-quality-and-throughput-separately" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Reporting the speedup without the quality comparison can justify a configuration that fails to train properly.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
-<p>Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.</p>
+<p>Hint <em>k</em> belongs to exercise <em>k</em>; open one at a time.</p>
 <ol>
-<li>Start from worked example 1 and mark the quantities needed for the task &quot;Calculate scaled and unscaled values&quot;.</li>
-<li>Change one assumption in worked example 2 while preserving the declared contract: explain overflow detection.</li>
-<li>Trace the CPU program&#x27;s variables before adding hardware behavior: place clipping correctly.</li>
-<li>Draw producers, consumers and the exact operation boundary for the task &quot;Compare fp16 and bf16 concepts&quot;.</li>
-<li>Separate what the small fixture establishes from what the real runtime must show: design a full-precision baseline.</li>
-<li>Write a counterexample to an overbroad claim before you record quality and throughput separately.</li>
+<li>Multiply the gradient by the scale before the backward pass, then divide by the same scale once.</li>
+<li>Ask what a supported scaler does when the scaled gradient becomes infinite or not a number.</li>
+<li>Decide which representation the clipping threshold refers to, scaled or original.</li>
+<li>Compare how many bits fp16 and bf16 spend on the exponent and on the fraction.</li>
+<li>Run the same initialization, batch and loss at full precision as your reference.</li>
+<li>Report accuracy and gradient checks separately from memory and speed.</li>
 </ol>
-<h3 id="common-mistakes-and-self-review">Common mistakes and self-review<a class="heading-anchor" href="#common-mistakes-and-self-review" aria-label="Link to this section">#</a></h3>
-<p>Confusing a correct tiny example with a general implementation is the central review risk. For this chapter, challenge the assumption in worked example 2, then ask whether your change preserves the mechanism described above. If you change dtype, layout, ordering, batch size or backend, update the acceptance contract rather than silently reusing the old observation. Explain an unexpected result before trying random configuration changes.</p>
-<p>Keep a small evidence table with columns <strong>claim</strong>, <strong>input</strong>, <strong>expected observation</strong>, <strong>actual observation</strong> and <strong>limit</strong>. For the first claim use <code>Calculate scaled and unscaled values</code>. For the final claim use <code>Record quality and throughput separately</code>. An unperformed GPU or cluster experiment remains pending even when the CPU model is correct.</p>
-<h3 id="platform-and-evidence-contract">Platform and evidence contract<a class="heading-anchor" href="#platform-and-evidence-contract" aria-label="Link to this section">#</a></h3>
-<p>The reading worksheet and CPU reference model work through the ordinary Linux Docker classroom on macOS, Linux and Windows using WSL 2. They do not require an NVIDIA GPU. Their results are labeled CPU models or semantic oracles, not simulated hardware performance.</p>
-<p>Real CUDA work needs supported NVIDIA hardware, a compatible host driver and an explicitly prepared GPU runtime. An Apple GPU does not execute CUDA kernels. PyTorch MPS on a supported native Mac, ROCm on supported AMD hardware, or other vendor backends can provide separate accelerator learning routes; they need their own package and operation qualification and are not CUDA evidence. The ordinary Linux Docker classroom does not expose native Mac MPS automatically.</p>
-<p>Do not download packages, models or data by opening this lesson. Do not attach an engine socket, ambient cluster credentials or an arbitrary remote endpoint. A CPU pass, imported package, successful compilation, real GPU result and measured performance are distinct observations. Record the actual backend, data shape/dtype, source revision, versions and pending checks. A saved completion marker records learning progress, not hardware certification.</p>
+<h3 id="common-mistakes-and-self-check">Common mistakes and self-check<a class="heading-anchor" href="#common-mistakes-and-self-check" aria-label="Link to this section">#</a></h3>
+<p>A common mistake is clipping gradients while they are still scaled. In worked example 2 a scaled gradient of 512 clipped at threshold 1 and then unscaled becomes 0.0009765625 instead of the intended 0.5. Another mistake is converting every tensor to half precision and calling it mixed precision, which can break reductions and normalization. Fix both by unscaling before clipping and by letting the framework&#x27;s autocast or policy choose operation dtypes.</p>
+<p><strong>Evidence limit:</strong> The reference reproduces 0.5 for the correct order and 0.0009765625 for the wrong one with ordinary Python floats. It does not run autocast, a gradient scaler or a Keras policy, so dtype choices and overflow handling need the pinned framework.</p>
+<ol>
+<li>Why scale the loss in fp16 training?</li>
+<li>How do fp16 and bf16 differ although both use 16 bits?</li>
+<li>Can a speedup excuse a numerical failure?</li>
+</ol>
+<p>Answers: <a href="../solutions/cuda-090_solutions.md.html#self-check-answers">self-check answers</a>.</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
 <ul>
 <li><a href="https://docs.pytorch.org/docs/2.9/notes/cuda.html">PyTorch CUDA semantics</a></li>
 <li><a href="https://www.tensorflow.org/guide/gpu">TensorFlow GPU guide</a></li>
 </ul>
-<p>Use the version-matched documentation of your prepared environment. These references describe interfaces and supported boundaries; the chapter&#x27;s synthetic examples and CPU models are original teaching material.</p>
+<p>Full lists: <a href="../../STUDY-GUIDE.md.html#documentation-and-sources">documentation and sources</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning skill for cuda-090: Mixed precision as a numerical experiment.
 Read courses/cuda/python/guides/cuda-090.md and courses/cuda/python/lessons/cuda-090.md.

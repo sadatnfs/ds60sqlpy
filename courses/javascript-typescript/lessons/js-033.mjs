@@ -1,15 +1,13 @@
 // Answer-free learner source. Save your own copy before editing.
 // Exercise 1: Perform bounded CPU work in a real worker: change one input
-// Copy Example A into a scratch `main.mjs` and change `10000,` to `10001,`. Before running
-// it, predict which check fails and which value it now sees; then run it and restore the
-// original line.
-// Expected: The changed run fails with an `AssertionError` at `assert.equal(result.sum,
+// In a scratch copy of Example A, change `10000,` to `10001,`. Which check fails, and what
+// value does it see?
+// Expected: The edited run fails with an `AssertionError` at `assert.equal(result.sum,
 // 50005000)`. Restoring `10000,` brings back: sum 50005000; worker thread id positive.
 
 // Exercise 2: Transfer a buffer and observe detachment: debug a regression
-// A regression changed one token in Example B, so one line now reads `const buffer =
-// Uint8Array.from([1, 3, 3]).buffer;`. Run Example B with that line, use the failing check
-// to locate the defect and repair it without changing the check.
+// A regression made one Example B line read `const buffer = Uint8Array.from([1, 3,
+// 3]).buffer;`. Locate and repair it without editing the check.
 // Expected: Before the repair the run fails with an `AssertionError` at
 // `assert.deepEqual(result, [9, 2, 3])`. Restoring `const buffer = Uint8Array.from([1, 2,
 // 3]).buffer;` brings back: parent byteLength 0; returned bytes 9,2,3.

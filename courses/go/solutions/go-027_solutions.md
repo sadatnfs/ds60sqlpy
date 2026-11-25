@@ -1,6 +1,6 @@
 # go-027: explained solutions
 
-These are comparison material after an attempt or explicit reveal. The executable reference implements all six cases in one `main.go`.
+Compare after an attempt ([using solutions](../STUDY-GUIDE.md#use-the-solutions)). `courses/go/solutions/go-027_solution.go` implements all six cases.
 
 ## Mechanism
 
@@ -10,7 +10,7 @@ sync.Mutex uses Lock and Unlock; defer Unlock after acquisition handles early re
 
 ## 1. Protect a concurrent count: change one input
 
-Copy worked example 1 into a scratch pad and change `for i := 0; i < 4; i++ {` to `for i := 1; i < 4; i++ {`. Before running, predict which check fails and which value it now sees; then run it and restore the original line.
+Copy worked example 1, change `for i := 0; i < 4; i++ {` to `for i := 1; i < 4; i++ {` and predict the failure before running; then restore the line.
 
 The unchanged code is worked example 1:
 
@@ -30,7 +30,9 @@ wg.Wait()
 check(c.Value() == 400, "count")
 ```
 
-**Expected:** The changed run panics with `count` because `c.Value() == 400` no longer holds. Restoring the original line brings back the worked observation: the joined final count is 400.
+**Expected:** The edited run panics with `count` because `c.Value() == 400` no longer holds.
+
+**Verify:** Restoring `for i := 0; i < 4; i++ {` makes the check pass again with the worked observation: the joined final count is 400.
 
 Reads and writes use the same lock. The join establishes task completion before inspection.
 
@@ -44,7 +46,7 @@ Reads and writes use the same lock. The join establishes task completion before 
 
 ## 2. Use a typed atomic: debug a regression
 
-A regression changed `n.Add(3)` to `n.Add(4)` in worked example 2. Run worked example 2 with that change, use the failure to explain the defect and repair it without changing the check.
+A regression changed `n.Add(3)` to `n.Add(4)` in worked example 2. Repair it without changing the check.
 
 The unchanged code is worked example 2:
 
@@ -55,7 +57,9 @@ n.Add(4)
 check(n.Load() == 7, "atomic")
 ```
 
-**Expected:** Before the repair the program panics with `atomic`; after it the line reads `n.Add(3)` again and load returns 7.
+**Expected:** The defective run panics with `atomic`; after restoring `n.Add(3)`, load returns 7.
+
+**Verify:** The failing run shows message `atomic`; after the repair `n.Load() == 7` holds again.
 
 Use the atomic access API consistently. Mixing it with ordinary conflicting accesses undermines the protocol.
 
@@ -79,6 +83,8 @@ check(a == 2 && b == 8 && a+b == 10, "pair")
 ```
 
 **Expected:** The balances become 2 and 8; their sum remains 10.
+
+**Verify:** Your solution must keep `a == 2 && b == 8 && a+b == 10` true. Control: changing `check(a == 2 && b == 8 && a+b == 10, "pair")` to `check(a == 2 && b == 8 && a-b == 10, "pair")` panics with message `pair`; revert it.
 
 One lock protects both fields. Independent updates could expose an intermediate state with the wrong total.
 
@@ -105,6 +111,8 @@ check(n == 1, "once")
 
 **Expected:** Its body runs once.
 
+**Verify:** Your solution must keep `n == 1` true. Control: changing `n := 0` to `n := 1` panics with message `once`; revert it.
+
 Once is not a retry mechanism. Fallible initialization requiring retries needs a separately designed state machine.
 
 **Approach.** Call `once.Do` three times with the same `sync.Once`; only the first call runs the function.
@@ -128,6 +136,8 @@ check(!n.CompareAndSwap(2, 4) && n.Load() == 3, "stale")
 
 **Expected:** The first succeeds and the second fails.
 
+**Verify:** Your solution must keep `!n.CompareAndSwap(2, 4) && n.Load() == 3` true. Control: changing `check(n.CompareAndSwap(2, 3), "CAS")` to `check(n.CompareAndSwap(2, 4), "CAS")` panics with message `stale`; revert it.
+
 A stale expectation detects changed state. A single-value CAS does not validate unrelated fields.
 
 **Approach.** Store 2, swap it for 3 with `CompareAndSwap(2, 3)`, then try `CompareAndSwap(2, 4)` with the now stale expectation.
@@ -150,6 +160,8 @@ check(a+b == 10 && c+d == 10, "snapshot")
 ```
 
 **Expected:** Both snapshots preserve total 10.
+
+**Verify:** Your solution must keep `a+b == 10 && c+d == 10` true. Control: changing `check(a+b == 10 && c+d == 10, "snapshot")` to `check(a-b == 10 && c+d == 10, "snapshot")` panics with message `snapshot`; revert it.
 
 An accessor hides locking without exposing mutable internals. Returning pointers to fields would bypass that boundary.
 

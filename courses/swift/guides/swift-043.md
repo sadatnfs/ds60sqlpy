@@ -24,9 +24,9 @@ URLSession is a Foundation API with platform differences: Linux networking code 
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles the saved pad as `main.swift` with Swift 6 language checking. An explicit `@main` type contains `static func main() async throws`; the fixed compiler uses `-parse-as-library -swift-version 6`. The examples use the standard library and portable Foundation. `precondition` makes a violated invariant fail the process. The fixed pad accepts one source file, without arbitrary command arguments, interactive input or dependency installation. SwiftUI, UIKit, Apple simulators and application signing belong to the separately prepared macOS/Xcode project labs, never the Linux pad.
+The pad stays offline; `LoadState` is a pure kernel declared above `LessonMain`. Task 3 uses a fake transport that returns canned values, so every test is deterministic. Task 5's network cases belong in a separately prepared adapter, and on Linux `URLSession` requires `import FoundationNetworking`.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Compile contract, starter stop and success marker: [running a lesson](../STUDY-GUIDE.md#running-a-lesson).
 
 The [JourneyApp project notes](../fixtures/JourneyApp/README.md) provide the exact seam for a separately prepared network adapter. The default app and pad remain offline.
 
@@ -34,7 +34,7 @@ The [JourneyApp project notes](../fixtures/JourneyApp/README.md) provide the exa
 
 A request generation increments when intent changes. Accept a result only if its generation still matches current state. A transport protocol can return Data for a validated decoder while keeping the UI model independent of URLSession.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+Each example ends with a trace; method: [tracing a program](../STUDY-GUIDE.md#tracing-a-program).
 
 ## Worked example / walkthrough
 
@@ -69,6 +69,8 @@ struct LessonMain {
 
 **Observe:** The matching generation updates current state.
 
+**Trace.** `state` starts at generation 2 with no title. The call `accept("new", generation: 2)` reaches the guard, which compares the candidate 2 with the current 2 and passes. The method stores new as the title. The check confirms it. The generation number represents the most recent intent, such as the latest search text, and only a result tagged with that number may change state.
+
 ### Example B: Ignore a superseded result
 
 Cancellation alone would not establish this guarantee because an operation may still complete.
@@ -100,6 +102,8 @@ struct LessonMain {
 
 **Observe:** The stale response cannot overwrite the newer value.
 
+**Trace.** `state` is at generation 2 and already shows new. A late reply from an earlier request arrives tagged with generation 1. The guard sees 1 differs from 2 and returns without changing anything, so the title stays new. Cancelling the old request would not have been enough: it might complete anyway, and this guard makes a late arrival harmless whatever the network did.
+
 ## Exercises
 
 1. **Predict and explain.** Trace current intent and result identity.
@@ -114,13 +118,15 @@ struct LessonMain {
 
 6. **Transfer and justify.** Design a URLSession boundary with explicit FoundationNetworking import on Linux, request timeout, size bound and schema validation.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Log each task in the [evidence table](../STUDY-GUIDE.md#recording-exercise-evidence) before opening the explanation.
 
 ## Common pitfalls and diagnosis
 
 An awaited response is not automatically a successful HTTP status. Never assume cancellation prevents all late callbacks. Avoid logging authorization headers or raw private response bodies.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+Task 4's bug appears when replies arrive out of order: start a search for a, then for ab, and let the reply for a arrive last. Without the guard the screen shows results for a while the field says ab. The counterexample delivers the newer reply first, then the older one, and checks the newer value survives. For task 2, advance to 3 and confirm a reply tagged 2 is ignored.
+
+Repair routine: [building a regression case](../STUDY-GUIDE.md#building-a-regression-case).
 
 ## Progressive hints
 
@@ -130,11 +136,15 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 ## Self-check and next step
 
-Explain Loading state, Stale result, Transport adapter without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+Explain why a generation check is needed even when the old request is cancelled. Describe what a fake transport must return to test success, failure and malformed data separately. List the timeout, size limit and validation steps a real `URLSession` adapter should apply before decoding.
+
+Then follow the general [self-check routine](../STUDY-GUIDE.md#self-check-routine) and save your pad.
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://developer.apple.com/documentation/foundation/urlsession). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+[Documentation](https://developer.apple.com/documentation/foundation/urlsession): The Foundation reference documents `URLSession` and `URLRequest`; swift-corelibs-foundation explains the separate FoundationNetworking module on Linux.
+
+Provenance and limits: [sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

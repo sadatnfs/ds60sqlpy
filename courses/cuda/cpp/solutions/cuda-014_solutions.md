@@ -4,8 +4,6 @@
 
 A one-dimensional launch gives a thread the starting index blockIdx.x*blockDim.x+threadIdx.x. A grid-stride loop advances that index by blockDim.x*gridDim.x until it reaches n. Every nonnegative index has one remainder modulo the positive stride, so exactly one starting thread owns it. Cast to a sufficiently wide integer before multiplying dimensions; widening after an overflow is too late. Ceiling division supplies enough threads for one-element mapping, but a grid-stride loop also allows a bounded grid to cover a much larger input. A bounds test is required even when most demonstration sizes divide evenly.
 
-The separate [CPU reference](../references/cuda-014_cpu.py) checks the chapter's bounded model. It does not execute CUDA or establish GPU timing. Compare after attempting the worksheet or explicitly choosing to reveal solutions.
-
 ## Exercise 1
 
 Use two blocks of four threads for \(\mathrm{n}=19\). Thread 0 owns indices 0,8,16; thread 1 owns 1,9,17; thread 2 owns 2,10,18; thread 3 owns 3,11. Every element has exactly one owner. This ownership trace is CPU reasoning, not a simulator of warp scheduling or GPU timing.
@@ -78,12 +76,16 @@ Compute a local bounded index first, then add a validated chunk offset. Preserve
 
 **How to verify:** Test a final chunk shorter than the rest and confirm no write past its local capacity.
 
+## Self-check answers
+
+1. **In worked example 1, why does thread 3 own only two indices?** Its next index, 19, equals n, so the loop stops after 3 and 11.
+2. **Why cast to a wide integer before multiplying block index by block size?** The product can overflow a 32-bit int for large grids, and widening after the overflow cannot recover the lost value.
+3. **What does a grid-stride loop give you that a one-element mapping does not?** Correct coverage of any n with a fixed grid size, so the launch need not grow with the input.
+
 ## Numerical reference and its limits
 
-The complete CPU model is [here](../references/cuda-014_cpu.py). Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It does not claim CUDA execution, concurrency safety or a performance measurement.
+The [CPU reference](../references/cuda-014_cpu.py) reproduces worked example 1 and prints `{'thread_0': [0, 8, 16], 'all_elements_written_once': True}`.
 
 ## Transfer review
 
 Compute a local bounded index first, then add a validated chunk offset. Preserve both local capacity and global destination bounds.
-
-A complete explanation must name its inputs, the unchanged mathematical contract, the changed boundary or resource condition, and the evidence still needed on actual hardware. Preserve a CPU baseline even after a GPU path becomes available.

@@ -1,67 +1,23 @@
 # Day 20 solutions: FIRST_VALUE, LAST_VALUE, and Window Frames
 
-
 <!-- beginner-solution-enrichment -->
 ## How to study and run this solution
 
-Open this explanation only after making an honest attempt. The executable
-companion runs solely against the disposable `advanced_sql_training` database:
+Five answers use `FIRST_VALUE` and `LAST_VALUE` over a full frame: per customer's orders (Exercises 1 and 5), per category's prices (Exercise 2) and per order's payments (Exercise 3). Exercise 4 shows the default frame failing on three numbers, and Exercise 6 swaps windows for PostgreSQL's `DISTINCT ON`. Attempt each yourself, then run:
 
 ```bash
-# Linux, macOS, or Windows through WSL 2, from the repository root
 psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
   -f sql/postgres-60day/solutions/day20_solutions.sql
 ```
 
-`psql` prints each result/command tag in the terminal. Stop at the first
-unexpected `ERROR`; later output cannot repair an earlier failed invariant.
-Compare your own SQL, row grain, column names, row counts, `NULL` policy, and
-ordering with the explanation before comparing syntax.
-
-## Clause-by-clause reading map
-
-The lesson's main concepts are Boundary value, Current-row frame, Full-partition frame. Its worked-model focus is:
-Order a customer's orders by date and compare default `LAST_VALUE(total_amount)` with the same function over `ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING`. The default often returns the current row's value; the full frame exposes the true final value.
-
-- Start at `FROM`/`JOIN` and state the intermediate row grain. Inspect join keys
-  before adding aggregates; a one-to-many join is allowed to multiply rows only
-  when the later contract accounts for it.
-- Apply `WHERE` to input rows, `GROUP BY` to form buckets, and `HAVING` to
-  completed groups. Window functions run over the surviving relation and
-  normally preserve its row count.
-- Read the `SELECT` list as the public result contract: keys establish grain,
-  measures state calculations, and aliases explain meaning. `ORDER BY` is the
-  only output-order guarantee; add a unique tie-breaker before `LIMIT`.
-- Trace every common table expression (CTE) as a temporary named relation.
-  Execute or inspect one stage at a time while debugging, but compare the final
-  result with an independent control rather than trusting stage names.
-- Keep SQL `NULL` as “missing/unknown/not applicable” until the metric contract
-  chooses another representation. Guard division with `NULLIF`; disclose
-  exclusions and distinguish zero from no row.
-- For DDL/DML, a command tag proves only that PostgreSQL accepted a statement.
-  Catalog checks, negative cases, row-count reconciliation, and the declared
-  transaction boundary prove behavior and cleanup.
-
-The exact final queries are not the only valid syntax. A join, subquery, CTE,
-window, or conditional aggregate can be an alternative when it preserves the
-same grain, `NULL` semantics, deterministic ordering, and safety. Prefer the
-form whose intermediate relations a reviewer can verify; optimize only after
-correctness is established with evidence.
-
-These answers align one-for-one with [day20_first_last_value.sql](../day20_first_last_value.sql).
-Run only against the disposable `advanced_sql_training` database.
-The executable companion wraps every answer in `BEGIN`/`ROLLBACK`.
-The snippets below assume the lesson's
-`SET search_path TO training, public;` statement. Run the complete
-executable companion when you want a self-contained check.
+Expect 4,362, 300, 3,836, 3, 438 and 438 rows. The script only reads and finishes with `ROLLBACK`; the excerpts below skip its `SET search_path` line. They correspond to [the learner file](../day20_first_last_value.sql), and the study guide has advice on [comparing a worked answer with yours](../../STUDY-GUIDE.md#read-a-solution).
 
 ## Reading contract
 
 - **Focus:** Use `FIRST_VALUE` and `LAST_VALUE` only with an ordering and frame that covers the intended partition.
 - **Assumptions:** First/last refer to ordered rows, not minimum/maximum values unless ordering states that. Ties need unique keys for deterministic row identity.
 - **Primary pitfall:** The default `LAST_VALUE` frame ends at the current row/peer group, often making it return the current value rather than the partition's final value.
-- **Safety:** all writes are bounded and rollback-protected; read-only
-  queries still use deterministic ordering whenever row order is claimed.
+- **Safety:** read-only; every statement is a `SELECT` inside a transaction that ends in `ROLLBACK`.
 
 ## Exercise 1: Query writing
 
@@ -71,11 +27,10 @@ executable companion when you want a self-contained check.
 
 **Clause-by-clause reading:**
 
-- `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
-- `FROM`: establishes the starting relation and therefore the initial row grain.
-- `PARTITION BY`: restarts a window calculation independently for each partition key.
-- window frame: states exactly which rows or peers contribute to the current row's window result.
-- `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
+- `WINDOW customer_orders AS (PARTITION BY o.customer_id ORDER BY o.order_date, o.order_id ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING)`: one named window, used by both functions.
+- `FIRST_VALUE(o.order_date) OVER customer_orders AS first_order_date`: the earliest order's date for the row's customer.
+- `LAST_VALUE(o.order_date) OVER customer_orders AS last_order_date`: the latest, which needs the full frame.
+- `ORDER BY o.customer_id, o.order_date, o.order_id`: the customer's orders in sequence.
 
 ```sql
 SELECT
@@ -95,19 +50,15 @@ ORDER BY
 
 **Expected shape:** One row per order with constant first/last values per customer.
 
-Check the result at the stated grain. An alternative formulation is
-valid only if it preserves the same NULL, ordering, time, money, and
-cardinality contract.
-
 ### Reasoning and verification
 
 - **Inputs/evidence:** For sql-20 Exercise 1, read from `orders` and return, for every order, its customer's first and last `order_date` with `FIRST_VALUE` and `LAST_VALUE` over a named window partitioned by `customer_id`, ordered by `order_date, order_id`, with the frame `ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING`.
-- **Expected result/shape:** For sql-20 Exercise 1, expected output: One row per order with constant first/last values per customer. The final columns are `order_id`, `customer_id`, `order_date`, `first_order_date`, and `last_order_date`. The final order is `o.customer_id, o.order_date, o.order_id`.
+- **Expected result/shape:** For sql-20 Exercise 1, return 4,362 rows, one per order, where both dates stay constant within each of the 438 customers; customer 1's five rows all show order 1's date as `first_order_date` and order 5's date as `last_order_date`. The final columns are `order_id`, `customer_id`, `order_date`, `first_order_date`, and `last_order_date`. The final order is `o.customer_id, o.order_date, o.order_id`.
 - **Independent verification:** For sql-20 Exercise 1, confirm 4362 rows and compare them with `SELECT customer_id, MIN(order_date), MAX(order_date) FROM orders GROUP BY customer_id` (438 customers): no row may differ. With the default frame instead, `LAST_VALUE` returns each row's own `order_date` on all 4362 rows.
-- **Intermediate relation check:** For sql-20 Exercise 1, write the window with an explicit full frame first, then remove the frame clause once and watch `LAST_VALUE` change.
-- **Clause check:** For sql-20 Exercise 1, the solution actually uses `FROM`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `orders`, preserve one row per order, and finish with `order_id`, `customer_id`, `order_date`, `first_order_date`, and `last_order_date` ordered by `o.customer_id, o.order_date, o.order_id`.
-- **Alternative/trade-off:** For sql-20 Exercise 1, the chosen form is justified by this lesson-specific rationale: Use one full-partition frame from unbounded preceding through unbounded following. Evaluate another form against the concrete expected result (One row per order with constant first/last values per customer) and the verification above.
-- **Edge case:** The default frame ends at the current row and its peers, so `LAST_VALUE` without a full frame returns the current row's value rather than the partition's last value.
+- **What prints:** 4,362 rows, one per order, for the 438 customers who have orders. Customer 1's five rows all show order 1's date as first and order 5's as last.
+- **A grouped cross-check:** `MIN(order_date)` and `MAX(order_date)` per customer must equal the two window columns, because here the ordering column and the reported value are the same.
+- **Without the frame:** `LAST_VALUE` returns each row's own `order_date` on all 4,362 rows, since no customer has two orders with the same timestamp.
+- **Why a named window:** writing the partition, order and frame once guarantees both functions read the same rows; a typo in one of two copies would be easy to miss.
 
 ## Exercise 2: Query writing
 
@@ -117,11 +68,10 @@ cardinality contract.
 
 **Clause-by-clause reading:**
 
-- `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
-- `FROM`: establishes the starting relation and therefore the initial row grain.
-- `PARTITION BY`: restarts a window calculation independently for each partition key.
-- window frame: states exactly which rows or peers contribute to the current row's window result.
-- `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
+- `WINDOW category_prices AS (PARTITION BY p.category ORDER BY p.price, p.product_id ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING)`: products within a category from cheapest to dearest.
+- `FIRST_VALUE(p.price)`: the first price under that order, the category's cheapest.
+- `LAST_VALUE(p.price)`: the last price, the dearest, thanks to the full frame.
+- `ORDER BY p.category, p.price, p.product_id`: categories alphabetically, cheapest product first.
 
 ```sql
 SELECT
@@ -141,19 +91,15 @@ ORDER BY
 
 **Expected shape:** One row per product.
 
-Check the result at the stated grain. An alternative formulation is
-valid only if it preserves the same NULL, ordering, time, money, and
-cardinality contract.
-
 ### Reasoning and verification
 
 - **Inputs/evidence:** For sql-20 Exercise 2, read from `products` and show each product with the lowest and highest `price` in its `category`, using `FIRST_VALUE` and `LAST_VALUE` over a window ordered by `price, product_id` with a full frame.
-- **Expected result/shape:** For sql-20 Exercise 2, expected output: One row per product. The final columns are `product_id`, `category`, `price`, `category_min_price`, and `category_max_price`. The final order is `p.category, p.price, p.product_id`.
+- **Expected result/shape:** For sql-20 Exercise 2, return 300 rows, one per product, with two values per category; `Apparel` rows all show 10.37 and 119.15, `Books` rows show 12.22 and 121.00, and `Sports` rows show 11.85 and 120.63. The final columns are `product_id`, `category`, `price`, `category_min_price`, and `category_max_price`. The final order is `p.category, p.price, p.product_id`.
 - **Independent verification:** For sql-20 Exercise 2, confirm 300 rows and compare the two window columns with `SELECT category, MIN(price), MAX(price) FROM products GROUP BY category`; for example, every `Apparel` row must show 10.37 and 119.15.
-- **Intermediate relation check:** For sql-20 Exercise 2, compute `MIN(price)` and `MAX(price)` per category with `GROUP BY` first; the window columns must repeat those values on every product row.
-- **Clause check:** For sql-20 Exercise 2, the solution actually uses `FROM`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `products`, preserve one row per product, and finish with `product_id`, `category`, `price`, `category_min_price`, and `category_max_price` ordered by `p.category, p.price, p.product_id`.
-- **Alternative/trade-off:** For sql-20 Exercise 2, the chosen form is justified by this lesson-specific rationale: Order by price and use a full frame; values tie without needing row identity. Evaluate another form against the concrete expected result (One row per product) and the verification above.
-- **Edge case:** If two products tie on the lowest price, `FIRST_VALUE` still returns that price; the `product_id` tiebreaker only decides which tied row comes first.
+- **What prints:** 300 rows, 50 per category. Every Apparel row shows 10.37 and 119.15; the other categories run from about 11 to 121.
+- **First equals minimum here:** because the window is ordered by `p.price` itself, the first and last values are the minimum and maximum. `MIN(p.price) OVER (PARTITION BY p.category)` would give the same column without any frame.
+- **Ties:** each category's 50 prices are all different in this fixture, so `p.product_id` never decides anything; if two products shared the lowest price, it would only choose which row is first, not the value.
+- **When the window version is worth it:** use `FIRST_VALUE` when you need another column of the boundary row, such as `FIRST_VALUE(p.product_id)` for the cheapest product's ID, which `MIN` cannot return.
 
 ## Exercise 3: Query writing
 
@@ -163,11 +109,9 @@ cardinality contract.
 
 **Clause-by-clause reading:**
 
-- `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
-- `FROM`: establishes the starting relation and therefore the initial row grain.
-- `PARTITION BY`: restarts a window calculation independently for each partition key.
-- window frame: states exactly which rows or peers contribute to the current row's window result.
-- `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
+- `WINDOW payment_sequence AS (PARTITION BY p.order_id ORDER BY p.payment_date, p.payment_id ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING)`: each order's payments in time order.
+- `FIRST_VALUE(p.amount)` and `LAST_VALUE(p.amount)`: the amounts of the earliest and latest payment.
+- `ORDER BY p.order_id, p.payment_date, p.payment_id`: payments grouped by order.
 
 ```sql
 SELECT
@@ -188,19 +132,15 @@ ORDER BY
 
 **Expected shape:** One row per payment.
 
-Check the result at the stated grain. An alternative formulation is
-valid only if it preserves the same NULL, ordering, time, money, and
-cardinality contract.
-
 ### Reasoning and verification
 
 - **Inputs/evidence:** For sql-20 Exercise 3, read from `payments` and compare every payment with the first and last payment `amount` of its order, using a window partitioned by `order_id`, ordered by `payment_date, payment_id`, with a full frame.
-- **Expected result/shape:** For sql-20 Exercise 3, expected output: One row per payment. The final columns are `payment_id`, `order_id`, `payment_date`, `amount`, `first_payment_amount`, and `last_payment_amount`. The final order is `p.order_id, p.payment_date, p.payment_id`.
+- **Expected result/shape:** For sql-20 Exercise 3, return 3,836 rows, one per payment; on the 3,142 single-payment orders both window columns repeat the payment's own `amount`, while order 10's two payments show a first amount of 71.72 and a last of 71.71. The final columns are `payment_id`, `order_id`, `payment_date`, `amount`, `first_payment_amount`, and `last_payment_amount`. The final order is `p.order_id, p.payment_date, p.payment_id`.
 - **Independent verification:** For sql-20 Exercise 3, confirm 3836 rows, one per `payment_id`; 3489 orders have payments, 347 of them have two payments, and only 20 orders have a first amount that differs from the last, so check one of those 20 orders by hand.
-- **Intermediate relation check:** For sql-20 Exercise 3, count payments per `order_id` first; only orders with two payments can show different first and last amounts.
-- **Clause check:** For sql-20 Exercise 3, the solution actually uses `FROM`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `payments`, preserve one row per payment, and finish with `payment_id`, `order_id`, `payment_date`, `amount`, `first_payment_amount`, and `last_payment_amount` ordered by `p.order_id, p.payment_date, p.payment_id`.
-- **Alternative/trade-off:** For sql-20 Exercise 3, the chosen form is justified by this lesson-specific rationale: Partition by order, order by timestamp/payment ID, and keep the full frame. Evaluate another form against the concrete expected result (One row per payment) and the verification above.
-- **Edge case:** For an order with a single payment, the first and last amounts come from the same row; the window matters only for split payments.
+- **What prints:** 3,836 rows, one per payment, covering 3,489 orders. 3,142 orders have one payment and 347 have two; no order has more.
+- **Single-payment orders:** the frame holds one row, so both columns equal that payment's own amount.
+- **Split payments:** only 20 orders have a first amount different from the last. Order 10 is one: its 143.43 total was paid as 71.72 by bank and then 71.71 by credit six hours later, so both rows show 71.72 and 71.71.
+- **Unpaid orders are absent:** the query starts from `payments`, so the 873 orders with no payment produce no rows at all.
 
 ## Exercise 4: Prediction
 
@@ -210,12 +150,10 @@ cardinality contract.
 
 **Clause-by-clause reading:**
 
-- `VALUES`: constructs a small relation explicitly, which makes examples and expected cardinality inspectable.
-- `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
-- `FROM`: establishes the starting relation and therefore the initial row grain.
-- `OVER (...)`: computes an analytic value while preserving detail rows; partition, order, and frame define its peer set.
-- window frame: states exactly which rows or peers contribute to the current row's window result.
-- `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
+- `FROM (VALUES (10), (20), (30)) AS sample (value)`: three distinct numbers, no table needed.
+- `LAST_VALUE(value) OVER (ORDER BY value) AS default_last_value`: no frame clause, so the frame ends at the current row.
+- `LAST_VALUE(value) OVER (ORDER BY value ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING) AS partition_last_value`: the full frame.
+- No `PARTITION BY`: all three rows form one partition.
 
 ```sql
 SELECT
@@ -232,19 +170,15 @@ ORDER BY
 
 **Expected shape:** Three rows showing default current value and full-frame 30.
 
-Check the result at the stated grain. An alternative formulation is
-valid only if it preserves the same NULL, ordering, time, money, and
-cardinality contract.
-
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-20 Exercise 4, read from the inline `VALUES` fixture. Build the answer toward `value`, `default_last_value`, and `partition_last_value`; keep `value` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-20 Exercise 4, expected output: Three rows showing default current value and full-frame 30. The final columns are `value`, `default_last_value`, and `partition_last_value`. The final order is `value`.
-- **Independent verification:** For sql-20 Exercise 4, choose one complete partition from the inline `VALUES` fixture; hand-calculate its first, middle, and final window values for `value`, `default_last_value`, and `partition_last_value`, then verify output keys remain `value`. Use a one-row partition and a partition tied on `value`; verify `value` and `value` preserve the intended first/last row.
-- **Intermediate relation check:** For sql-20 Exercise 4, inspect one window partition before projecting; then check `value` before applying the row cap.
-- **Clause check:** For sql-20 Exercise 4, the solution actually uses `FROM`, window `OVER`, `SELECT`, and `ORDER BY`. Read only those operations: begin at the inline `VALUES` fixture, preserve one row per `value`, and finish with `value`, `default_last_value`, and `partition_last_value` ordered by `value`.
-- **Alternative/trade-off:** For sql-20 Exercise 4, the chosen form is justified by this lesson-specific rationale: The default ends at the current row; explicit following reaches the true last row. Evaluate another form against the concrete expected result (Three rows showing default current value and full-frame 30) and the verification above.
-- **Edge case:** Use a one-row partition and a partition tied on `value`; verify `value` and `value` preserve the intended first/last row.
+- **Inputs/evidence:** For sql-20 Exercise 4, apply `LAST_VALUE(value)` to the three-row `VALUES` fixture `(10), (20), (30)` twice: once over `ORDER BY value` with the default frame, and once with `ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING`.
+- **Expected result/shape:** For sql-20 Exercise 4, return three rows: values 10, 20, and 30 with `default_last_value` 10, 20, and 30 and `partition_last_value` 30 on every row. The final columns are `value`, `default_last_value`, and `partition_last_value`. The final order is `value`.
+- **Independent verification:** For sql-20 Exercise 4, check by hand that the default frame stops at the current row, so `default_last_value` repeats `value`, while the full frame reaches 30. Add `(NULL::int)` to the fixture; ascending order puts `NULL` last, so all four rows must then show `NULL` as `partition_last_value`, while the first three keep `default_last_value` 10, 20, and 30.
+- **What prints:** 10 / 10 / 30, 20 / 20 / 30 and 30 / 30 / 30. The default column copies `value`; the full-frame column is 30 on every row.
+- **Only the last row agrees:** at 30 the default frame already reaches the end of the partition, so both columns match there and nowhere else.
+- **With a tie:** add a second 20 and both 20 rows still show 20 in the default column, because tied rows are peers that share one frame end.
+- **Seeing the peer effect:** with a label column, `(20, 'b')` and `(20, 'c')`, `LAST_VALUE(tag) OVER (ORDER BY value)` shows `c` on both 20 rows, the last peer, not the row's own `b`.
 
 ## Exercise 5: Debugging
 
@@ -254,12 +188,9 @@ cardinality contract.
 
 **Clause-by-clause reading:**
 
-- `WITH`: names an intermediate relation so its grain can be checked before later joins or aggregation.
-- `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
-- `FROM`: establishes the starting relation and therefore the initial row grain.
-- `PARTITION BY`: restarts a window calculation independently for each partition key.
-- window frame: states exactly which rows or peers contribute to the current row's window result.
-- `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
+- `WITH annotated AS (...)`: one row per order, carrying the customer's `first_order_id` and `last_order_id` from full-frame windows.
+- `SELECT DISTINCT customer_id, first_order_id, last_order_id`: all three columns repeat within a customer, so each customer collapses to one row.
+- `ORDER BY customer_id`: one line per customer.
 
 ```sql
 WITH annotated AS (
@@ -283,19 +214,15 @@ ORDER BY
 
 **Expected shape:** One row per customer with orders.
 
-Check the result at the stated grain. An alternative formulation is
-valid only if it preserves the same NULL, ordering, time, money, and
-cardinality contract.
-
 ### Reasoning and verification
 
 - **Inputs/evidence:** For sql-20 Exercise 5, read from `orders`, compute each customer's first and last `order_id` with full-frame `FIRST_VALUE` and `LAST_VALUE` windows ordered by `order_date, order_id` in the CTE `annotated`, then return one row per customer with `SELECT DISTINCT`.
-- **Expected result/shape:** For sql-20 Exercise 5, expected output: One row per customer with orders. The final columns are `customer_id`, `first_order_id`, and `last_order_id`. The final order is `customer_id`.
+- **Expected result/shape:** For sql-20 Exercise 5, return 438 rows, one per customer with orders; customer 1 shows orders 1 and 5, customer 2 shows 6 and 11, and customer 500 shows 4353 and 4362. The final columns are `customer_id`, `first_order_id`, and `last_order_id`. The final order is `customer_id`.
 - **Independent verification:** For sql-20 Exercise 5, confirm 438 rows, one per customer with orders, equal to `SELECT COUNT(DISTINCT customer_id) FROM orders`; without `DISTINCT`, the same query returns 4362 rows, one per order, with each customer's values repeated.
-- **Intermediate relation check:** For sql-20 Exercise 5, run `annotated` alone and count its rows (4362) before you collapse it to one row per `customer_id`.
-- **Clause check:** For sql-20 Exercise 5, the solution actually uses `WITH`, `FROM`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `orders`, preserve one row per customer with orders, and finish with `customer_id`, `first_order_id`, and `last_order_id` ordered by `customer_id`.
-- **Alternative/trade-off:** For sql-20 Exercise 5, the chosen form is justified by this lesson-specific rationale: Compute first/last IDs with full-frame windows, then select distinct customer-level output. Evaluate another form against the concrete expected result (One row per customer with orders) and the verification above.
-- **Edge case:** `DISTINCT` works here only because the window values are constant within each customer; selecting a column that varies per order, such as `order_id`, would bring the duplicates back.
+- **What prints:** 438 rows, matching `SELECT COUNT(DISTINCT customer_id) FROM orders`. Customer 1 shows orders 1 and 5, customer 2 orders 6 and 11, customer 12 orders 99 and 114.
+- **Without `DISTINCT`:** 4,362 rows, one per order, with each customer's pair repeated.
+- **Why it works:** `DISTINCT` can merge rows only because the CTE selects no per-order column. Add `o.order_id` to `annotated`'s output and pass it through, and the duplicates come back.
+- **A grouped alternative:** `GROUP BY customer_id` with `MIN(order_id)` and `MAX(order_id)` gives the same pairs here only because order IDs rise with dates in this fixture; the window version follows `order_date` no matter how IDs were assigned.
 
 ## Exercise 6: Extension
 
@@ -305,10 +232,9 @@ cardinality contract.
 
 **Clause-by-clause reading:**
 
-- `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
-- `DISTINCT ON`: keeps the first row in each declared group, so its matching leading sort keys determine which row wins.
-- `FROM`: establishes the starting relation and therefore the initial row grain.
-- `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
+- `SELECT DISTINCT ON (o.customer_id)`: keep one row per customer, the first one under the query's `ORDER BY`.
+- `ORDER BY o.customer_id, o.order_date DESC, o.order_id DESC`: must start with the `DISTINCT ON` key; the later keys put each customer's newest order first.
+- The selected columns come straight from that winning row.
 
 ```sql
 SELECT DISTINCT ON (o.customer_id)
@@ -326,24 +252,21 @@ ORDER BY
 
 **Expected shape:** At most one latest order per customer.
 
-Check the result at the stated grain. An alternative formulation is
-valid only if it preserves the same NULL, ordering, time, money, and
-cardinality contract.
-
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-20 Exercise 6, read from `orders`. Build the answer toward `customer_id`, `order_id`, `order_date`, and `total_amount`; keep `order_id` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-20 Exercise 6, expected output: At most one latest order per customer. The final columns are `customer_id`, `order_id`, `order_date`, and `total_amount`. The final order is `o.customer_id, o.order_date DESC, o.order_id DESC`.
-- **Independent verification:** For sql-20 Exercise 6, reselect the returned keys directly from the source; require unique `order_id` where the expected grain is one row per key and confirm the projected `customer_id`, `order_id`, `order_date`, and `total_amount` against `orders`. Tie two rows on `o.customer_id` and give them different `o.order_id DESC` values; verify `o.customer_id, o.order_date DESC, o.order_id DESC` chooses a stable first/last row.
-- **Intermediate relation check:** For sql-20 Exercise 6, check `o.customer_id, o.order_date DESC, o.order_id DESC` before applying the row cap.
-- **Clause check:** For sql-20 Exercise 6, the solution actually uses `FROM`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `orders`, preserve one row per `order_id`, and finish with `customer_id`, `order_id`, `order_date`, and `total_amount` ordered by `o.customer_id, o.order_date DESC, o.order_id DESC`.
-- **Alternative/trade-off:** For sql-20 Exercise 6, the chosen form is justified by this lesson-specific rationale: `DISTINCT ON` keeps the first row under its mandatory leading order keys. Evaluate another form against the concrete expected result (At most one latest order per customer) and the verification above.
-- **Edge case:** Tie two rows on `o.customer_id` and give them different `o.order_id DESC` values; verify `o.customer_id, o.order_date DESC, o.order_id DESC` chooses a stable first/last row.
+- **Inputs/evidence:** For sql-20 Exercise 6, keep one row per customer from the 4,362 `orders` rows with `SELECT DISTINCT ON (o.customer_id)`, where `ORDER BY o.order_date DESC, o.order_id DESC` decides which row survives.
+- **Expected result/shape:** For sql-20 Exercise 6, return 438 rows, one latest order per customer with orders; customer 1 returns order 5 for 105.84, customer 2 returns order 11 for 680.50, and customer 500 returns order 4362 for 951.76. The final columns are `customer_id`, `order_id`, `order_date`, and `total_amount`. The final order is `o.customer_id, o.order_date DESC, o.order_id DESC`.
+- **Independent verification:** For sql-20 Exercise 6, confirm 438 distinct `customer_id` values, that every `order_id` equals the `last_order_id` from Exercise 5, and that the kept `total_amount` values add up to 252375.44. Inside a rolled-back transaction, set order 5's `order_date` to order 4's; customer 1 must still return order 5 because `o.order_id DESC` breaks the tie, and changing that key to `o.order_id ASC` must return order 4 for 1155.92.
+- **What prints:** 438 rows. Customer 1's latest order is order 5 at 105.84, and customer 2's is order 11 at 680.50.
+- **Same answer as Exercise 5's last ID:** each `order_id` here matches `last_order_id` there, a quick consistency check.
+- **Compared with `ROW_NUMBER()`:** a CTE with `ROW_NUMBER() OVER (PARTITION BY customer_id ORDER BY order_date DESC, order_id DESC)` and an outer `WHERE rn = 1` gives the same rows. That version works in any SQL database; `DISTINCT ON` is PostgreSQL-only but shorter.
+- **The tie-breaker:** no customer has two orders at the same timestamp, but `o.order_id DESC` keeps the choice fixed if that ever changes.
+- **Customers without orders:** the 62 BR customers do not appear, because the query reads only `orders`.
 
 ## Final self-check
 
-- Can you explain the logical grain before and after every aggregation?
-- Are missing values preserved or converted only by an explicit rule?
-- Does every ordered result have a deterministic final tie-breaker?
-- Are money and time assumptions visible beside the calculation?
-- Does the complete executable solution finish with `ROLLBACK`?
+- Why does Example 1 show customer 12's last amount even though `LIMIT 100` cuts off order 114?
+- In Exercise 2, why does `FIRST_VALUE(p.price)` equal the minimum, and when would it not?
+- What do the two payment columns show for an order with one payment, and for order 10?
+- In Exercise 4, why does the default column match the full-frame column only at 30?
+- Which error appears if Exercise 6's `ORDER BY` does not start with `o.customer_id`?

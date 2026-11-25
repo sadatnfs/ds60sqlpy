@@ -1,6 +1,6 @@
 # web-028: explanatory solutions
 
-Open this after your own attempt. Each answer explains the lesson's synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in `courses/web-development/guides/web-028.md`.
+Attempt each exercise before reading; the mechanism is in `courses/web-development/guides/web-028.md` ([using these answers](../STUDY-GUIDE.md#solutions)).
 
 ## Exercise 1: Predict the rows retained for a forty-minute threshold.
 
@@ -76,4 +76,6 @@ Open this after your own attempt. Each answer explains the lesson's synthetic fi
 
 ## Reference comparison
 
-Open `courses/web-development/solutions/web-028_solution.html` only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; its success message is not an accessibility audit or proof of responsive behavior at every size.
+The reference checks three initial rows, sets the threshold to 100 and requires zero rows, then resets to 0. That catches a broken render and a filter with no empty case. It does not check the empty state message, the result count or that the source array survived, so switch thresholds back and forth yourself.
+
+Open `courses/web-development/solutions/web-028_solution.html` after saving your attempt ([comparing with the reference](../STUDY-GUIDE.md#references)).

@@ -4,8 +4,6 @@
 
 A defensible benchmark holds the problem contract fixed while changing one implementation decision. Record dtype, layout, supported shapes, numerical tolerance, data residency and required output. Compare against a competent baseline, not a deliberately poor CPU loop. Retain cold and warm measurements separately, avoid reporting only the fastest observation, and disclose device sharing, clocks and thermal conditions when relevant. A performance regression can coexist with improved kernel time if another phase grows. Report uncertainty and supported scope; no universal speed threshold is valid across every GPU and workload.
 
-The separate [CPU reference](../references/cuda-038_cpu.py) checks the chapter's bounded model. It does not execute CUDA or establish GPU timing. Compare after attempting the worksheet or explicitly choosing to reveal solutions.
-
 ## Exercise 1
 
 Baseline times are \([10,11,10,9,10]\) ms and candidate times \([8,8,9,8,7]\) ms. Median ratio is \(\frac{10}{8}=1.25\). This suggests an improvement for the measured fixture, but five synthetic samples do not establish stability across hardware, sizes or operating conditions.
@@ -78,12 +76,16 @@ Ship only if it satisfies a documented application error budget and supported-in
 
 **How to verify:** Test inputs at the edge of the supported range against the budget.
 
+## Self-check answers
+
+1. **Why compare medians rather than the fastest run of each version?** The median resists outliers and reflects typical behavior; the minimum rewards luck.
+2. **What makes a CPU baseline competent?** It uses a reasonable algorithm, optimization flags and threading for the same problem contract.
+3. **Why record thermal state and device sharing?** Clocks drop when hot and shared devices add interference, so timings may not repeat elsewhere.
+
 ## Numerical reference and its limits
 
-The complete CPU model is [here](../references/cuda-038_cpu.py). Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It does not claim CUDA execution, concurrency safety or a performance measurement.
+The [CPU reference](../references/cuda-038_cpu.py) reproduces worked example 1 and prints `{'synthetic_median_speedup': 1.25, 'baseline_samples_ms': [10, 11, 10, 9, 10], 'candidate_samples_ms': [8, 8, 9, 8, 7]}`.
 
 ## Transfer review
 
 Ship only if it satisfies a documented application error budget and supported-input policy, with a fallback or rejection outside that contract.
-
-A complete explanation must name its inputs, the unchanged mathematical contract, the changed boundary or resource condition, and the evidence still needed on actual hardware. Preserve a CPU baseline even after a GPU path becomes available.

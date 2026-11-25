@@ -1,6 +1,8 @@
 # c-008: explained solutions
 
-Compare after an attempt or explicit reveal. The complete executable reference, `c-008_solution.c`, implements all six cases, from the "change a caller-owned value" case to the "transfer a swap contract" case, in one `main.c`.
+`c-008_solution.c` assembles the "change a caller-owned value" case through the "transfer a swap contract" case in one `main.c`.
+
+Compare only after an attempt: [Compare and transfer](../STUDY-GUIDE.md#compare-and-transfer).
 
 ## Mechanism and assumptions
 
@@ -10,7 +12,7 @@ A pointer identifies an object or function, or holds a null value. Dereferencing
 
 ## Exercise 1: Change a caller-owned value: change one input
 
-Copy worked example 1, the "change a caller-owned value" case, into a scratch pad and change `int n = 4;` to `int n = 5;`. Before running, predict which CHECK fails and which value it sees in place of the worked result (the caller value becomes 5); then run it and restore the original line.
+In worked example 1, change `int n = 4;` to `int n = 5;`. Predict which value the CHECK on `n == 5` sees, then run and restore.
 
 The unchanged code is worked example 1:
 
@@ -20,7 +22,7 @@ increment(&n);
 CHECK(n == 5);
 ```
 
-**Expected:** With `int n = 5;` the run stops with `Check failed` at the CHECK on `n == 5`, because the "change a caller-owned value" case no longer shows that the caller value becomes 5. Restoring `int n = 4;` brings that observation back.
+**Expected:** `Check failed` at `n == 5`; restoring `int n = 4;` passes again.
 
 The helper receives a pointer copy, but that copy still designates the original integer.
 
@@ -34,7 +36,7 @@ The helper receives a pointer copy, but that copy still designates the original 
 
 ## Exercise 2: Read a target copy: debug a regression
 
-A regression changed `int n = 3;` to `int n = 4;` in worked example 2, the "read a target copy" case. Run the example with that change, use the failing CHECK to explain why the copied value stays 3 and the target becomes 9 no longer holds and repair it without changing the CHECK.
+In worked example 2, `int n = 3;` now reads `int n = 4;`. Repair it so that the copied value stays 3 and the target becomes 9 again.
 
 The unchanged code is worked example 2:
 
@@ -46,7 +48,7 @@ int copy = *p;
 CHECK(copy == 3 && n == 9);
 ```
 
-**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `copy == 3 && n == 9`. Once the line reads `int n = 3;` again, the "read a target copy" case again shows that the copied value stays 3 and the target becomes 9.
+**Expected:** `Check failed` at `copy == 3 && n == 9` until the line reads `int n = 3;` again.
 
 Dereferencing to obtain an int copies that scalar value. Retaining the pointer would retain access to future target changes.
 

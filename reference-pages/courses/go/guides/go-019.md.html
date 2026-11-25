@@ -209,9 +209,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="syntax-anatomy-and-reasoning">Syntax anatomy and reasoning<a class="heading-anchor" href="#syntax-anatomy-and-reasoning" aria-label="Link to this section">#</a></h3>
 <p>json:&quot;name&quot; maps a field to its wire name. json.Marshal returns bytes and an error. Decoder.DisallowUnknownFields rejects fields missing from a target struct. A second Decode should return io.EOF when exactly one JSON value is required. omitempty omits zero-like fields during encoding; it does not validate mandatory fields. Use pointers or explicit presence types when absent and zero differ.</p>
 <h3 id="run-this-lesson">Run this lesson<a class="heading-anchor" href="#run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>Choose Go in the unified Docker classroom. Save your own pad before experimenting. The prepared worker stages it as <code>main.go</code>, compiles it, and executes the resulting program with bounded time and output. The pad is one source file. It does not supply interactive input, arbitrary command-line arguments, package installation, Kubernetes credentials or a host Docker socket. Every ordinary reference here uses the standard library, synthetic local data and explicit checks. A failed <code>check</code> panics and produces a nonzero process result; do not remove it to make the run appear successful.</p>
-<p>The explanatory solution snippets belong inside <code>func main()</code> unless they declare a helper. <code>check</code> is a tiny teaching helper that panics when a condition is false. The separate reference supplies required imports and helpers and implements all six cases. Use that complete source only after an attempt or an explicit reveal. For an independently prepared Go project, the equivalent local build is <code>go build -o lesson main.go</code>, followed by <code>./lesson</code>; use Linux or WSL 2 for that optional workflow. Compiling proves syntax and type consistency, while the executed checks establish the stated example contracts.</p>
-<p>Each worked example below is a complete Go file. Copy one whole block into your saved pad and run it. Example 2 includes the first case as well as the second, so its setup is complete. Its supporting declarations may be reused in later investigations. The separate reference implements all six cases.</p>
+<p>Run each worked example as one complete file in your saved pad (<a href="../STUDY-GUIDE.md.html#run-a-lesson">run steps</a>).</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1-decode-a-typed-object">Worked example 1: Decode a typed object<a class="heading-anchor" href="#worked-example-1-decode-a-typed-object" aria-label="Link to this section">#</a></h4>
 <p>Decode a name and count into Config.</p>
@@ -285,77 +283,79 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Observe:</strong> Decoding returns an error.</p>
 <p>Strict rejection catches misspelled configuration keys instead of silently ignoring a learner or operator mistake.</p>
 <h3 id="predict-before-running">Predict before running<a class="heading-anchor" href="#predict-before-running" aria-label="Link to this section">#</a></h3>
-<p>For each example, write the input values, the state that can change, and the expected observation. Explain which result would disprove your current interpretation. For concurrency, predict a guaranteed relationship rather than an arbitrary scheduling order. For an error case, identify whether it is rejected at compilation or returned during execution.</p>
+<p>Predict what json.Unmarshal does with an unknown field by default, and what a decoder with DisallowUnknownFields does instead. For the text containing two objects, predict what a second Decode call returns. For 9007199254740993, predict whether decoding into a float64 would preserve it exactly, and what UseNumber changes.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-decode-a-typed-object-change-one-input">Exercise 1: Decode a typed object: change one input<a class="heading-anchor" href="#exercise-1-decode-a-typed-object-change-one-input" aria-label="Link to this section">#</a></h4>
-<p>Copy worked example 1 into a scratch pad and change <code>err := json.Unmarshal([]byte(`{&quot;name&quot;:&quot;sample&quot;,&quot;count&quot;:3}`), &amp;c)</code> to <code>err := json.Unmarshal([]byte(`{&quot;name&quot;:&quot;sample&quot;,&quot;count&quot;:4}`), &amp;c)</code>. Before running, predict which check fails and which value it now sees; then run it and restore the original line.</p>
-<p><strong>Expected:</strong> The changed run panics with <code>typed JSON</code> because <code>err == nil &amp;&amp; c.Name == &quot;sample&quot; &amp;&amp; c.Count == 3</code> no longer holds. Restoring the original line brings back the worked observation: the fields become sample and 3.</p>
-<p><strong>Verify:</strong> Compare your written prediction with the panic message <code>typed JSON</code> and name the value that made <code>err == nil &amp;&amp; c.Name == &quot;sample&quot; &amp;&amp; c.Count == 3</code> false. After restoring the input, the program must print its success line again.</p>
+<p>Copy worked example 1, change <code>err := json.Unmarshal([]byte(`{&quot;name&quot;:&quot;sample&quot;,&quot;count&quot;:3}`), &amp;c)</code> to <code>err := json.Unmarshal([]byte(`{&quot;name&quot;:&quot;sample&quot;,&quot;count&quot;:4}`), &amp;c)</code> and predict the failure before running; then restore the line.</p>
+<p><strong>Expected:</strong> The edited run panics with <code>typed JSON</code> because <code>err == nil &amp;&amp; c.Name == &quot;sample&quot; &amp;&amp; c.Count == 3</code> no longer holds.</p>
+<p><strong>Verify:</strong> Restoring <code>err := json.Unmarshal([]byte(`{&quot;name&quot;:&quot;sample&quot;,&quot;count&quot;:3}`), &amp;c)</code> makes the check pass again with the worked observation: the fields become sample and 3.</p>
 <h4 id="exercise-2-reject-an-unknown-property-diagnose-an-edited-check">Exercise 2: Reject an unknown property: diagnose an edited check<a class="heading-anchor" href="#exercise-2-reject-an-unknown-property-diagnose-an-edited-check" aria-label="Link to this section">#</a></h4>
-<p>A careless edit changed the check in worked example 2 so that it reads <code>check(d.Decode(&amp;c) == nil, &quot;unknown field&quot;)</code>. Run worked example 2 with that line, explain why the edited check now fails for the same program state, and restore it.</p>
-<p><strong>Expected:</strong> Before the repair the program panics with <code>unknown field</code>; after it the line reads <code>check(d.Decode(&amp;c) != nil, &quot;unknown field&quot;)</code> again and decoding returns an error.</p>
-<p><strong>Verify:</strong> Keep the failing and the repaired runs. Explain why the edited check rejects the same program state that <code>d.Decode(&amp;c) != nil</code> accepts.</p>
+<p>A careless edit rewrote the check in worked example 2 as <code>check(d.Decode(&amp;c) == nil, &quot;unknown field&quot;)</code>. Explain the failure, then restore it.</p>
+<p><strong>Expected:</strong> The defective run panics with <code>unknown field</code>; after restoring <code>check(d.Decode(&amp;c) != nil, &quot;unknown field&quot;)</code>, decoding returns an error.</p>
+<p><strong>Verify:</strong> The edited check fails with message <code>unknown field</code> for a state that <code>d.Decode(&amp;c) != nil</code> accepts.</p>
 <h4 id="exercise-3-detect-a-second-document">Exercise 3: Detect a second document<a class="heading-anchor" href="#exercise-3-detect-a-second-document" aria-label="Link to this section">#</a></h4>
 <p>Decode two adjacent JSON objects and check whether another value exists.</p>
 <p><strong>Expected:</strong> A second value is observable, so the single-document contract fails.</p>
-<p><strong>Verify:</strong> Keep a check equivalent to <code>d.Decode(&amp;a) == nil &amp;&amp; d.Decode(&amp;b) == nil</code>. As a control, change <code>check(d.Decode(&amp;a) == nil &amp;&amp; d.Decode(&amp;b) == nil, &quot;trailing document&quot;)</code> to <code>check(d.Decode(&amp;a) != nil &amp;&amp; d.Decode(&amp;b) == nil, &quot;trailing document&quot;)</code> inside that check: it must panic with <code>trailing document</code>, which shows the check can fail. Restore it.</p>
+<p><strong>Verify:</strong> Your solution must keep <code>d.Decode(&amp;a) == nil &amp;&amp; d.Decode(&amp;b) == nil</code> true. Control: changing <code>check(d.Decode(&amp;a) == nil &amp;&amp; d.Decode(&amp;b) == nil, &quot;trailing document&quot;)</code> to <code>check(d.Decode(&amp;a) != nil &amp;&amp; d.Decode(&amp;b) == nil, &quot;trailing document&quot;)</code> panics with message <code>trailing document</code>; revert it.</p>
 <h4 id="exercise-4-confirm-exact-completion">Exercise 4: Confirm exact completion<a class="heading-anchor" href="#exercise-4-confirm-exact-completion" aria-label="Link to this section">#</a></h4>
 <p>Decode one object, then require EOF.</p>
 <p><strong>Expected:</strong> The second decode returns io.EOF.</p>
-<p><strong>Verify:</strong> Keep a check equivalent to <code>d.Decode(&amp;extra) == io.EOF</code>. As a control, change <code>check(d.Decode(&amp;extra) == io.EOF, &quot;exact end&quot;)</code> to <code>check(d.Decode(&amp;extra) != io.EOF, &quot;exact end&quot;)</code> inside that check: it must panic with <code>exact end</code>, which shows the check can fail. Restore it.</p>
+<p><strong>Verify:</strong> Your solution must keep <code>d.Decode(&amp;extra) == io.EOF</code> true. Control: changing <code>check(d.Decode(&amp;extra) == io.EOF, &quot;exact end&quot;)</code> to <code>check(d.Decode(&amp;extra) != io.EOF, &quot;exact end&quot;)</code> panics with message <code>exact end</code>; revert it.</p>
 <h4 id="exercise-5-preserve-a-large-integer-token">Exercise 5: Preserve a large integer token<a class="heading-anchor" href="#exercise-5-preserve-a-large-integer-token" aria-label="Link to this section">#</a></h4>
 <p>Use UseNumber while decoding 9007199254740993 into any.</p>
 <p><strong>Expected:</strong> The exact decimal token is retained.</p>
-<p><strong>Verify:</strong> Keep a check equivalent to <code>d.Decode(&amp;v) == nil &amp;&amp; v.(json.Number).String() == &quot;9007199254740993&quot;</code>. As a control, change <code>d := json.NewDecoder(strings.NewReader(`9007199254740993`))</code> to <code>d := json.NewDecoder(strings.NewReader(`9007199254740994`))</code>: the run must panic with <code>number token</code>. Restore the line before continuing.</p>
+<p><strong>Verify:</strong> Your solution must keep <code>d.Decode(&amp;v) == nil &amp;&amp; v.(json.Number).String() == &quot;9007199254740993&quot;</code> true. Control: changing <code>d := json.NewDecoder(strings.NewReader(`9007199254740993`))</code> to <code>d := json.NewDecoder(strings.NewReader(`9007199254740994`))</code> panics with message <code>number token</code>; revert it.</p>
 <h4 id="exercise-6-transfer-domain-validation">Exercise 6: Transfer domain validation<a class="heading-anchor" href="#exercise-6-transfer-domain-validation" aria-label="Link to this section">#</a></h4>
 <p>Decode a negative count successfully, then reject it as a domain error.</p>
 <p><strong>Expected:</strong> JSON syntax is valid but count validation fails.</p>
-<p><strong>Verify:</strong> Keep a check equivalent to <code>err == nil &amp;&amp; c.Count &lt; 0</code>. As a control, change <code>check(err == nil &amp;&amp; c.Count &lt; 0, &quot;domain invalid&quot;)</code> to <code>check(err != nil &amp;&amp; c.Count &lt; 0, &quot;domain invalid&quot;)</code> inside that check: it must panic with <code>domain invalid</code>, which shows the check can fail. Restore it.</p>
-<p>Implement these in the answer-free learner source. Keep one independent check per claim. A task can require tracing, construction, a changed input or a deliberate safe failure. Do not run a data race, corrupt memory or contact a shared cluster merely to demonstrate why it would be wrong.</p>
+<p><strong>Verify:</strong> Your solution must keep <code>err == nil &amp;&amp; c.Count &lt; 0</code> true. Control: changing <code>check(err == nil &amp;&amp; c.Count &lt; 0, &quot;domain invalid&quot;)</code> to <code>check(err != nil &amp;&amp; c.Count &lt; 0, &quot;domain invalid&quot;)</code> panics with message <code>domain invalid</code>; revert it.</p>
+<p>Work in the answer-free learner source, <code>courses/go/lessons/go-019.go</code> (<a href="../STUDY-GUIDE.md.html#work-an-exercise">exercise contract</a>).</p>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
-<p>Read a compiler error from the first location in your source, then fix one cause at a time. Unused imports and variables are errors in Go; add an import when its use exists, rather than copying a large unused import list. A panic from <code>check</code> identifies a violated example contract. Compare the actual value with the expected value and inspect the state transition that produced it. A returned <code>error</code> is a value that the caller must handle; an ignored error can make later output look plausible while the original operation failed.</p>
-<p>The lesson-specific explanations in the two examples identify the important counterexamples. Extend that reasoning to every investigation: explain why a plausible alternative would fail, and preserve a tiny input that distinguishes it. Treat empty data, missing values and cancellation as domain cases with explicit policies. In concurrent work, replace sleeps used as synchronization with channels, mutexes or an explicit ownership protocol.</p>
+<p>Accepting any syntactically valid JSON is the main mistake: unknown fields are ignored by default, a misspelled key silently leaves its field at the zero value and trailing documents go unnoticed after one Decode call. Strict decoding addresses only the wire shape; a negative count is still valid JSON. Validate domain rules after decoding, and keep large integers as json.Number when exactness matters.</p>
+<p>General compiler, panic and error diagnosis is in the <a href="../STUDY-GUIDE.md.html#diagnose-a-failure">study guide</a>.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <h4 id="hint-for-investigation-1-decode-a-typed-object-change-one-input">Hint for investigation 1: Decode a typed object: change one input<a class="heading-anchor" href="#hint-for-investigation-1-decode-a-typed-object-change-one-input" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The fields become sample and 3.</li>
-<li>The check <code>err == nil &amp;&amp; c.Name == &quot;sample&quot; &amp;&amp; c.Count == 3</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Compute the checked value with <code>err := json.Unmarshal([]byte(`{&quot;name&quot;:&quot;sample&quot;,&quot;count&quot;:4}`), &amp;c)</code> in place before running, then compare it with the value <code>err == nil &amp;&amp; c.Name == &quot;sample&quot; &amp;&amp; c.Count == 3</code> expects.</li>
+<li>Struct tags map JSON keys to fields. Which key fills Count?</li>
+<li>The edited document sets count to 4, so <code>c.Count==3</code> fails while the name still decodes. Decoding is correct; the input changed.</li>
 </ol>
 <h4 id="hint-for-investigation-2-reject-an-unknown-property-diagnose-an-edited-check">Hint for investigation 2: Reject an unknown property: diagnose an edited check<a class="heading-anchor" href="#hint-for-investigation-2-reject-an-unknown-property-diagnose-an-edited-check" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: Decoding returns an error.</li>
-<li>The check <code>d.Decode(&amp;c) != nil</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Compare <code>check(d.Decode(&amp;c) == nil, &quot;unknown field&quot;)</code> with the same line in worked example 2 and state the claim each version makes.</li>
+<li>DisallowUnknownFields turns an extra key into an error. Which key is unexpected?</li>
+<li>The strict decoder rejects the extra field, so Decode returns an error and <code>==nil</code> is false. The original check asserted that rejection with <code>!=nil</code>.</li>
 </ol>
 <h4 id="hint-for-investigation-3-detect-a-second-document">Hint for investigation 3: Detect a second document<a class="heading-anchor" href="#hint-for-investigation-3-detect-a-second-document" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: A second value is observable, so the single-document contract fails.</li>
-<li>The check <code>d.Decode(&amp;a) == nil &amp;&amp; d.Decode(&amp;b) == nil</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Name one input that would make <code>d.Decode(&amp;a) == nil &amp;&amp; d.Decode(&amp;b) == nil</code> false. A check that no input can falsify is not evidence.</li>
+<li>A Decoder reads one value per call. What remains after the first object?</li>
+<li>One successful Decode consumes one value.</li>
 </ol>
 <h4 id="hint-for-investigation-4-confirm-exact-completion">Hint for investigation 4: Confirm exact completion<a class="heading-anchor" href="#hint-for-investigation-4-confirm-exact-completion" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The second decode returns io.EOF.</li>
-<li>The check <code>d.Decode(&amp;extra) == io.EOF</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Name one input that would make <code>d.Decode(&amp;extra) == io.EOF</code> false. A check that no input can falsify is not evidence.</li>
+<li>After the only value, Decode reports the end of input. Which sentinel is that?</li>
+<li>The second read establishes the single-document boundary.</li>
 </ol>
 <h4 id="hint-for-investigation-5-preserve-a-large-integer-token">Hint for investigation 5: Preserve a large integer token<a class="heading-anchor" href="#hint-for-investigation-5-preserve-a-large-integer-token" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The exact decimal token is retained.</li>
-<li>The check <code>d.Decode(&amp;v) == nil &amp;&amp; v.(json.Number).String() == &quot;9007199254740993&quot;</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Predict the effect of changing <code>d := json.NewDecoder(strings.NewReader(`9007199254740993`))</code> to <code>d := json.NewDecoder(strings.NewReader(`9007199254740994`))</code> before running anything. If the prediction is hard, trace that line again with the original input.</li>
+<li>UseNumber keeps the original token. Why can float64 not hold this integer exactly?</li>
+<li>Keeping the token avoids an early float64 conversion.</li>
 </ol>
 <h4 id="hint-for-investigation-6-transfer-domain-validation">Hint for investigation 6: Transfer domain validation<a class="heading-anchor" href="#hint-for-investigation-6-transfer-domain-validation" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: JSON syntax is valid but count validation fails.</li>
-<li>The check <code>err == nil &amp;&amp; c.Count &lt; 0</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Name one input that would make <code>err == nil &amp;&amp; c.Count &lt; 0</code> false. A check that no input can falsify is not evidence.</li>
+<li>Syntax and domain are separate checks. Which rule does -1 violate?</li>
+<li>Separating syntax and semantics yields better diagnostics.</li>
 </ol>
 <h3 id="self-check-and-retrieval">Self-check and retrieval<a class="heading-anchor" href="#self-check-and-retrieval" aria-label="Link to this section">#</a></h3>
-<p>Close the reference. Rebuild one normal case and one boundary case from a blank pad. Explain the role of wire schema without using its name in the definition. Then change the domain while keeping the same invariant. Record the new input, your prediction and the observed output. If your program passes only because its input is hard-coded, explain which part would need a reusable function in a larger project.</p>
+<p>Define a struct for an object with an id string and a limit integer, decode it strictly and require EOF after the object. Add checks that reject an unknown key, a second object and a limit of zero. Then explain which of those rejections came from the decoder and which came from your own validation code.</p>
+<p>The general <a href="../STUDY-GUIDE.md.html#self-check-and-retrieval">retrieval routine</a> still applies.</p>
 <h3 id="next-step-and-sources">Next step and sources<a class="heading-anchor" href="#next-step-and-sources" aria-label="Link to this section">#</a></h3>
-<p><a href="https://pkg.go.dev/encoding/json">Primary language or library documentation</a>, reviewed 2026-10-23. The teaching explanations and synthetic fixtures are original. Continue with the next lesson when you can explain the six observations and diagnose a changed case without copying its answer.</p>
+<p>Source: <a href="https://pkg.go.dev/encoding/json"><code>encoding/json</code> package documentation</a>, reviewed 2026-10-23.</p>
+<p>Next: go-020, CSV, record shape and data-quality contracts (<a href="../STUDY-GUIDE.md.html#when-to-move-on">criteria</a>).</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for go-019: JSON schemas, strict decoding and unknown input.
 Read courses/go/guides/go-019.md and my saved attempt based on courses/go/lessons/go-019.go.

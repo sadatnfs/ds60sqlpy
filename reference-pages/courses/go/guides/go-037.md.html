@@ -209,9 +209,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="syntax-anatomy-and-reasoning">Syntax anatomy and reasoning<a class="heading-anchor" href="#syntax-anatomy-and-reasoning" aria-label="Link to this section">#</a></h3>
 <p>Represent desired and observed state as small values, then return a typed action such as create, update or none. Avoid embedding API calls inside every conditional. The adapter performs an action, records evidence and schedules another observation. A real controller often converges over several reconciliations rather than blocking until every resource becomes ready. Status should describe observed facts, including the generation to which they apply.</p>
 <h3 id="run-this-lesson">Run this lesson<a class="heading-anchor" href="#run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>Choose Go in the unified Docker classroom. Save your own pad before experimenting. The prepared worker stages it as <code>main.go</code>, compiles it, and executes the resulting program with bounded time and output. The pad is one source file. It does not supply interactive input, arbitrary command-line arguments, package installation, Kubernetes credentials or a host Docker socket. Every ordinary reference here uses the standard library, synthetic local data and explicit checks. A failed <code>check</code> panics and produces a nonzero process result; do not remove it to make the run appear successful.</p>
-<p>The explanatory solution snippets belong inside <code>func main()</code> unless they declare a helper. <code>check</code> is a tiny teaching helper that panics when a condition is false. The separate reference supplies required imports and helpers and implements all six cases. Use that complete source only after an attempt or an explicit reveal. For an independently prepared Go project, the equivalent local build is <code>go build -o lesson main.go</code>, followed by <code>./lesson</code>; use Linux or WSL 2 for that optional workflow. Compiling proves syntax and type consistency, while the executed checks establish the stated example contracts.</p>
-<p>Each worked example below is a complete Go file. Copy one whole block into your saved pad and run it. Example 2 includes the first case as well as the second, so its setup is complete. Its supporting declarations may be reused in later investigations. The separate reference implements all six cases.</p>
+<p>Run each worked example as one complete file in your saved pad (<a href="../STUDY-GUIDE.md.html#run-a-lesson">run steps</a>).</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1-plan-a-missing-child">Worked example 1: Plan a missing child<a class="heading-anchor" href="#worked-example-1-plan-a-missing-child" aria-label="Link to this section">#</a></h4>
 <p>Observe no child for a desired replica count of 3.</p>
@@ -291,77 +289,79 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Observe:</strong> The action is update.</p>
 <p>The update is justified by a current difference, not by assuming a prior event was delivered once.</p>
 <h3 id="predict-before-running">Predict before running<a class="heading-anchor" href="#predict-before-running" aria-label="Link to this section">#</a></h3>
-<p>For each example, write the input values, the state that can change, and the expected observation. Explain which result would disprove your current interpretation. For concurrency, predict a guaranteed relationship rather than an arbitrary scheduling order. For an error case, identify whether it is rejected at compilation or returned during execution.</p>
+<p>Predict plan&#x27;s action for each observation: no child, a child at 2, a child already at 3 and a negative request. Then predict the second plan after an update is applied, and the two plans for scaling an existing child to zero. Decide which result shows that running reconcile twice is safe.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-plan-a-missing-child-predict-an-edited-check">Exercise 1: Plan a missing child: predict an edited check<a class="heading-anchor" href="#exercise-1-plan-a-missing-child-predict-an-edited-check" aria-label="Link to this section">#</a></h4>
-<p>Copy worked example 1 into a scratch pad and change <code>check(plan(3, false, 0) == &quot;create&quot;, &quot;missing child&quot;)</code> to <code>check(plan(3, true, 0) == &quot;create&quot;, &quot;missing child&quot;)</code> inside its check. Before running, predict whether the check still passes and explain why; then restore it.</p>
-<p><strong>Expected:</strong> The changed run panics with <code>missing child</code> because the edited check no longer holds. Restoring the original line brings back the worked observation: the action is create.</p>
-<p><strong>Verify:</strong> Compare your written prediction with the panic message <code>missing child</code> and name the value that made <code>plan(3, false, 0) == &quot;create&quot;</code> false. After restoring the input, the program must print its success line again.</p>
+<p>Copy worked example 1, change <code>check(plan(3, false, 0) == &quot;create&quot;, &quot;missing child&quot;)</code> to <code>check(plan(3, true, 0) == &quot;create&quot;, &quot;missing child&quot;)</code> inside its check and predict whether it still passes; then restore it.</p>
+<p><strong>Expected:</strong> The edited check panics with <code>missing child</code> even though <code>plan(3, false, 0) == &quot;create&quot;</code> still holds.</p>
+<p><strong>Verify:</strong> Restoring <code>check(plan(3, false, 0) == &quot;create&quot;, &quot;missing child&quot;)</code> makes the check pass again with the worked observation: the action is create.</p>
 <h4 id="exercise-2-plan-a-changed-child-diagnose-an-edited-check">Exercise 2: Plan a changed child: diagnose an edited check<a class="heading-anchor" href="#exercise-2-plan-a-changed-child-diagnose-an-edited-check" aria-label="Link to this section">#</a></h4>
-<p>A careless edit changed the check in worked example 2 so that it reads <code>check(plan(3, true, 3) == &quot;update&quot;, &quot;changed child&quot;)</code>. Run worked example 2 with that line, explain why the edited check now fails for the same program state, and restore it.</p>
-<p><strong>Expected:</strong> Before the repair the program panics with <code>changed child</code>; after it the line reads <code>check(plan(3, true, 2) == &quot;update&quot;, &quot;changed child&quot;)</code> again and the action is update.</p>
-<p><strong>Verify:</strong> Keep the failing and the repaired runs. Explain why the edited check rejects the same program state that <code>plan(3, true, 2) == &quot;update&quot;</code> accepts.</p>
+<p>A careless edit rewrote the check in worked example 2 as <code>check(plan(3, true, 3) == &quot;update&quot;, &quot;changed child&quot;)</code>. Explain the failure, then restore it.</p>
+<p><strong>Expected:</strong> The defective run panics with <code>changed child</code>; after restoring <code>check(plan(3, true, 2) == &quot;update&quot;, &quot;changed child&quot;)</code>, the action is update.</p>
+<p><strong>Verify:</strong> The edited check fails with message <code>changed child</code> for a state that <code>plan(3, true, 2) == &quot;update&quot;</code> accepts.</p>
 <h4 id="exercise-3-make-convergence-a-no-op">Exercise 3: Make convergence a no-op<a class="heading-anchor" href="#exercise-3-make-convergence-a-no-op" aria-label="Link to this section">#</a></h4>
 <p>Observe an existing child already at count 3.</p>
 <p><strong>Expected:</strong> The action is none.</p>
-<p><strong>Verify:</strong> Keep a check equivalent to <code>plan(3, true, 3) == &quot;none&quot;</code>. As a control, change <code>check(plan(3, true, 3) == &quot;none&quot;, &quot;converged&quot;)</code> to <code>check(plan(4, true, 3) == &quot;none&quot;, &quot;converged&quot;)</code> inside that check: it must panic with <code>converged</code>, which shows the check can fail. Restore it.</p>
+<p><strong>Verify:</strong> Your solution must keep <code>plan(3, true, 3) == &quot;none&quot;</code> true. Control: changing <code>check(plan(3, true, 3) == &quot;none&quot;, &quot;converged&quot;)</code> to <code>check(plan(4, true, 3) == &quot;none&quot;, &quot;converged&quot;)</code> panics with message <code>converged</code>; revert it.</p>
 <h4 id="exercise-4-reject-invalid-desired-state">Exercise 4: Reject invalid desired state<a class="heading-anchor" href="#exercise-4-reject-invalid-desired-state" aria-label="Link to this section">#</a></h4>
 <p>Supply a negative desired count.</p>
 <p><strong>Expected:</strong> The planner returns invalid.</p>
-<p><strong>Verify:</strong> Keep a check equivalent to <code>plan(-1, true, 2) == &quot;invalid&quot;</code>. As a control, change <code>check(plan(-1, true, 2) == &quot;invalid&quot;, &quot;invalid intent&quot;)</code> to <code>check(plan(-1, true, 2) != &quot;invalid&quot;, &quot;invalid intent&quot;)</code> inside that check: it must panic with <code>invalid intent</code>, which shows the check can fail. Restore it.</p>
+<p><strong>Verify:</strong> Your solution must keep <code>plan(-1, true, 2) == &quot;invalid&quot;</code> true. Control: changing <code>check(plan(-1, true, 2) == &quot;invalid&quot;, &quot;invalid intent&quot;)</code> to <code>check(plan(-1, true, 2) != &quot;invalid&quot;, &quot;invalid intent&quot;)</code> panics with message <code>invalid intent</code>; revert it.</p>
 <h4 id="exercise-5-simulate-a-converging-step">Exercise 5: Simulate a converging step<a class="heading-anchor" href="#exercise-5-simulate-a-converging-step" aria-label="Link to this section">#</a></h4>
 <p>Start at count 1, apply the planned update to 3 and plan again.</p>
 <p><strong>Expected:</strong> The next plan is none.</p>
-<p><strong>Verify:</strong> Keep a check equivalent to <code>plan(3, true, current) == &quot;none&quot;</code>. As a control, change <code>current = 3</code> to <code>current = 4</code>: the run must panic with <code>second plan</code>. Restore the line before continuing.</p>
+<p><strong>Verify:</strong> Your solution must keep <code>plan(3, true, current) == &quot;none&quot;</code> true. Control: changing <code>current = 3</code> to <code>current = 4</code> panics with message <code>second plan</code>; revert it.</p>
 <h4 id="exercise-6-transfer-scale-to-zero">Exercise 6: Transfer scale-to-zero<a class="heading-anchor" href="#exercise-6-transfer-scale-to-zero" aria-label="Link to this section">#</a></h4>
 <p>Request zero for an existing child with count 2.</p>
 <p><strong>Expected:</strong> The planner requests update, then converges at zero.</p>
-<p><strong>Verify:</strong> Keep a check equivalent to <code>plan(0, true, 2) == &quot;update&quot; &amp;&amp; plan(0, true, 0) == &quot;none&quot;</code>. As a control, change <code>check(plan(0, true, 2) == &quot;update&quot; &amp;&amp; plan(0, true, 0) == &quot;none&quot;, &quot;zero scale&quot;)</code> to <code>check(plan(0, true, 2) == &quot;update&quot; &amp;&amp; plan(1, true, 0) == &quot;none&quot;, &quot;zero scale&quot;)</code> inside that check: it must panic with <code>zero scale</code>, which shows the check can fail. Restore it.</p>
-<p>Implement these in the answer-free learner source. Keep one independent check per claim. A task can require tracing, construction, a changed input or a deliberate safe failure. Do not run a data race, corrupt memory or contact a shared cluster merely to demonstrate why it would be wrong.</p>
+<p><strong>Verify:</strong> Your solution must keep <code>plan(0, true, 2) == &quot;update&quot; &amp;&amp; plan(0, true, 0) == &quot;none&quot;</code> true. Control: changing <code>check(plan(0, true, 2) == &quot;update&quot; &amp;&amp; plan(0, true, 0) == &quot;none&quot;, &quot;zero scale&quot;)</code> to <code>check(plan(0, true, 2) == &quot;update&quot; &amp;&amp; plan(1, true, 0) == &quot;none&quot;, &quot;zero scale&quot;)</code> panics with message <code>zero scale</code>; revert it.</p>
+<p>Work in the answer-free learner source, <code>courses/go/lessons/go-037.go</code> (<a href="../STUDY-GUIDE.md.html#work-an-exercise">exercise contract</a>).</p>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
-<p>Read a compiler error from the first location in your source, then fix one cause at a time. Unused imports and variables are errors in Go; add an import when its use exists, rather than copying a large unused import list. A panic from <code>check</code> identifies a violated example contract. Compare the actual value with the expected value and inspect the state transition that produced it. A returned <code>error</code> is a value that the caller must handle; an ignored error can make later output look plausible while the original operation failed.</p>
-<p>The lesson-specific explanations in the two examples identify the important counterexamples. Extend that reasoning to every investigation: explain why a plausible alternative would fail, and preserve a tiny input that distinguishes it. Treat empty data, missing values and cancellation as domain cases with explicit policies. In concurrent work, replace sleeps used as synchronization with channels, mutexes or an explicit ownership protocol.</p>
+<p>Edge-triggered thinking is the trap: a reconciler that acts on what an event says happened, such as replica added, instead of reading current state. Events can be dropped, merged or replayed, so the loop must compute from observation every time. Validate intent before acting, and treat an existing child as normal; a reconcile that always creates fails on its second run.</p>
+<p>General compiler, panic and error diagnosis is in the <a href="../STUDY-GUIDE.md.html#diagnose-a-failure">study guide</a>.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <h4 id="hint-for-investigation-1-plan-a-missing-child-predict-an-edited-check">Hint for investigation 1: Plan a missing child: predict an edited check<a class="heading-anchor" href="#hint-for-investigation-1-plan-a-missing-child-predict-an-edited-check" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The action is create.</li>
-<li>The check <code>plan(3, false, 0) == &quot;create&quot;</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Compute the checked value with <code>check(plan(3, true, 0) == &quot;create&quot;, &quot;missing child&quot;)</code> in place before running, then compare it with the value <code>plan(3, false, 0) == &quot;create&quot;</code> expects.</li>
+<li>No child exists yet. Which branch of plan runs after validation?</li>
+<li>With exists set to true, plan compares 3 with 0 and returns update, so <code>==&quot;create&quot;</code> fails. The planner is right; the edited observation claims a child already exists.</li>
 </ol>
 <h4 id="hint-for-investigation-2-plan-a-changed-child-diagnose-an-edited-check">Hint for investigation 2: Plan a changed child: diagnose an edited check<a class="heading-anchor" href="#hint-for-investigation-2-plan-a-changed-child-diagnose-an-edited-check" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The action is update.</li>
-<li>The check <code>plan(3, true, 2) == &quot;update&quot;</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Compare <code>check(plan(3, true, 3) == &quot;update&quot;, &quot;changed child&quot;)</code> with the same line in worked example 2 and state the claim each version makes.</li>
+<li>The child exists but holds 2. Which comparison decides the action?</li>
+<li>A child at 3 already matches desired, so plan returns none and <code>==&quot;update&quot;</code> fails. Restore the observed count of 2.</li>
 </ol>
 <h4 id="hint-for-investigation-3-make-convergence-a-no-op">Hint for investigation 3: Make convergence a no-op<a class="heading-anchor" href="#hint-for-investigation-3-make-convergence-a-no-op" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The action is none.</li>
-<li>The check <code>plan(3, true, 3) == &quot;none&quot;</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Name one input that would make <code>plan(3, true, 3) == &quot;none&quot;</code> false. A check that no input can falsify is not evidence.</li>
+<li>Observed equals desired. What does a converged plan return?</li>
+<li>A repeated event should not produce duplicate writes after convergence.</li>
 </ol>
 <h4 id="hint-for-investigation-4-reject-invalid-desired-state">Hint for investigation 4: Reject invalid desired state<a class="heading-anchor" href="#hint-for-investigation-4-reject-invalid-desired-state" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The planner returns invalid.</li>
-<li>The check <code>plan(-1, true, 2) == &quot;invalid&quot;</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Name one input that would make <code>plan(-1, true, 2) == &quot;invalid&quot;</code> false. A check that no input can falsify is not evidence.</li>
+<li>Validation runs before existence is checked. What does a negative count produce?</li>
+<li>A persistent validation error should be surfaced to the user rather than retried forever as if it were a transient API outage.</li>
 </ol>
 <h4 id="hint-for-investigation-5-simulate-a-converging-step">Hint for investigation 5: Simulate a converging step<a class="heading-anchor" href="#hint-for-investigation-5-simulate-a-converging-step" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The next plan is none.</li>
-<li>The check <code>plan(3, true, current) == &quot;none&quot;</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Predict the effect of changing <code>current = 3</code> to <code>current = 4</code> before running anything. If the prediction is hard, trace that line again with the original input.</li>
+<li>After the update is applied, current equals desired. What is the second plan?</li>
+<li>The state transition shows convergence for this simple model.</li>
 </ol>
 <h4 id="hint-for-investigation-6-transfer-scale-to-zero">Hint for investigation 6: Transfer scale-to-zero<a class="heading-anchor" href="#hint-for-investigation-6-transfer-scale-to-zero" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The planner requests update, then converges at zero.</li>
-<li>The check <code>plan(0, true, 2) == &quot;update&quot; &amp;&amp; plan(0, true, 0) == &quot;none&quot;</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Name one input that would make <code>plan(0, true, 2) == &quot;update&quot; &amp;&amp; plan(0, true, 0) == &quot;none&quot;</code> false. A check that no input can falsify is not evidence.</li>
+<li>Zero is valid desired state. Which actions take 2 to 0 and then settle?</li>
+<li>Zero can be a valid desired value.</li>
 </ol>
 <h3 id="self-check-and-retrieval">Self-check and retrieval<a class="heading-anchor" href="#self-check-and-retrieval" aria-label="Link to this section">#</a></h3>
-<p>Close the reference. Rebuild one normal case and one boundary case from a blank pad. Explain the role of reconciliation without using its name in the definition. Then change the domain while keeping the same invariant. Record the new input, your prediction and the observed output. If your program passes only because its input is hard-coded, explain which part would need a reusable function in a larger project.</p>
+<p>Write <code>planConfig(want string, exists bool, current string) string</code> returning create, update, none, or invalid for an empty want. Test all four results, and a sequence that applies each plan and plans again until it reaches none. Then explain why scale-to-zero is an update rather than a delete in this model, and what would change if deletion were intended.</p>
+<p>The general <a href="../STUDY-GUIDE.md.html#self-check-and-retrieval">retrieval routine</a> still applies.</p>
 <h3 id="next-step-and-sources">Next step and sources<a class="heading-anchor" href="#next-step-and-sources" aria-label="Link to this section">#</a></h3>
-<p><a href="https://kubernetes.io/docs/concepts/architecture/controller/">Primary language or library documentation</a>, reviewed 2026-10-23. The teaching explanations and synthetic fixtures are original. Continue with the next lesson when you can explain the six observations and diagnose a changed case without copying its answer.</p>
+<p>Source: <a href="https://kubernetes.io/docs/concepts/architecture/controller/">Kubernetes controllers</a>, reviewed 2026-10-23.</p>
+<p>Next: go-038, Resource versions and optimistic concurrency (<a href="../STUDY-GUIDE.md.html#when-to-move-on">criteria</a>).</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for go-037: Reconciliation as an idempotent control loop.
 Read courses/go/guides/go-037.md and my saved attempt based on courses/go/lessons/go-037.go.

@@ -232,15 +232,15 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="syntax-punctuation">}</span></code></pre>
 <p>A server may use hints to skip files whose statistics cannot match, but it is allowed to ignore them, and the reference configuration sets evaluatePredicateHints to false. The client must therefore apply the filter itself after reading. If a recipient relied on hints to hide west rows, it would receive them anyway, so hints are an optimization and never an access boundary.</p>
 <h3 id="complete-worked-source">Complete worked source<a class="heading-anchor" href="#complete-worked-source" aria-label="Link to this section">#</a></h3>
-<p>This is a project-only command notebook. Read and edit it in the classroom; run its explicitly labeled commands from the copied owned Docker workshop. The classroom does not execute these service commands.</p>
+<p>The classroom does not execute these service commands. See the <a href="../STUDY-GUIDE.md.html#workshop-notebooks">workshop rules</a>.</p>
 <h2 id="delta-sharing-apache-077-prepared-command-notebook">Delta Sharing apache-077 prepared command notebook<a class="heading-anchor" href="#delta-sharing-apache-077-prepared-command-notebook" aria-label="Link to this section">#</a></h2>
-<p>Copy the owned Delta Sharing project and follow PREPARATION.md. Delta Sharing belongs to Delta Lake/Linux Foundation. The offline preparation actions are:</p>
+<p><code>fixture-contract.json</code> in the copied Delta Sharing project pins version 0. These two actions confirm the client image and print the rows that version should hold:</p>
 <pre class="highlighted-code"><code class="language-bash">bash run.sh prepare
 bash run.sh plan</code></pre>
-<p>For a separately prepared actual owned reference server and untracked recipient profile, the bounded native Docker protocol client runs with:</p>
+<p>Against an owned server prepared at version 0, <code>check</code> sends that version with an empty <code>predicateHints</code> list and confirms the <code>delta-table-version</code> header before accepting rows:</p>
 <pre class="highlighted-code"><code class="language-bash">bash run.sh check</code></pre>
 <p>The fixture contract pins version 0. Append/current-versus-history and predicate-hint experiments require a compatible actual writer/server/client and separate oracles; no hint is treated as an access policy.</p>
-<p>The classroom Markdown pad does not start a service. Source configuration and unit policy fixtures are not actual reference-server receipts. Keep credentials and signed URL query strings out of all published source and evidence.</p>
+<p>Predicate hints let a server skip files; they never filter rows for security. A history test needs a writer that commits version 1 and a separate oracle for each version you read.</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
 <ul>
 <li><a href="https://github.com/delta-io/delta-sharing/blob/v1.4.1/PROTOCOL.md">Delta Sharing protocol</a></li>

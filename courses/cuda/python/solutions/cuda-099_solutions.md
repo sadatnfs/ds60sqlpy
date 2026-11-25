@@ -1,6 +1,6 @@
 # cuda-099: explained solutions
 
-These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.
+Compare with your [worksheet](../lessons/cuda-099.md) attempt.
 
 ## Exercise 1: Compute weighted accumulation
 
@@ -74,8 +74,16 @@ Match data order loss reduction state and random behavior.
 
 **How to verify.** Assert weights after one effective step agree within float tolerance, and repeat with an uneven final microbatch.
 
+## Self-check answers
+
+1. **When is dividing by the microbatch count correct?** Only when every microbatch has the same number of examples; otherwise weights must follow example counts.
+
+2. **What does activation checkpointing trade?** Memory for compute: discarded intermediates are recomputed during backward, so arithmetic increases.
+
+3. **Can accumulation still differ from a full batch when weights are right?** Yes. Batch-dependent layers such as batch normalization, random state and optimizer timing can break the equivalence.
+
 ## Reference observation
 
 Correct weighted gradient 3.5 versus incorrect 5.
 
-The reference file is `courses/cuda/python/references/cuda-099_cpu.py`. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.
+Asserted by `courses/cuda/python/references/cuda-099_cpu.py`.

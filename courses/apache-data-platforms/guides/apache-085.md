@@ -117,31 +117,27 @@ The Delta Sharing client reads each file footer and rejects files with too many 
 
 ## Complete worked source
 
-This is a project-only command notebook. Read and edit it in the classroom; run its explicitly labeled commands from the copied owned Docker workshop. The classroom does not execute these service commands.
+The classroom does not execute these service commands. See the [workshop rules](../STUDY-GUIDE.md#workshop-notebooks).
 
 # Integration apache-085 complete worked notebook
 
 Prepare the real reference server and supported table store. Read the fixed version with exact rows, reject invalid recipient credentials and measure revocation/issued-URL limits without saving capabilities.
 
-## Receipt fields and independent oracle
+## What this sharing receipt must hold
 
-- Source revision/hashes and exact declared input IDs, values, schema and time units.
-- Actual native platform, package/image identities and owned resource namespace.
-- Selected table snapshot/version, source positions or process/lineage identity as appropriate.
-- Positive result against an independent oracle and a typed negative observation.
-- Read-only retained-state comparison after the selected lifecycle transition.
-- Cleanup/evidence-storage result and any separate prepared or unavailable feature.
+- The share, schema, table and version requested, matching `fixture-contract.json`.
+- The Delta table version, protocol and metadata responses the server returned.
+- The data file identities read through signed URLs, recorded without query strings.
+- Rows 1/2/3 with amounts 4/9/7, and regional totals 11 and 9.
+- The status code for an invalid or revoked fixture recipient, with its error body.
+- The observed lifetime of a URL issued before revocation, with the signing policy.
 
-For the common three-order fixture, require IDs 1/2/3 with amounts 4/9/7, total 20,
-east 11 and west 9. A later fourth west order of 2 changes the current total to 22 and west
-to 11 while an earlier pinned snapshot remains unchanged. Do not use this simple
-oracle to claim correctness for a different pipeline without defining its
-deduplication, correction and visibility semantics.
-
-Read the selected project README and qualification ledger before commands. The
-classroom does not execute Docker commands in this Markdown pad. Prepared
-configuration, unit policy fixtures, successful compilation and actual service
-acceptance remain different observations. Never include credentials or signed URLs.
+Status codes carry the oracle for this route. A 200 with exact rows for the valid
+recipient and a 401 or 403 for the revoked one together show authorization at
+the server. A 404 or connection error for the revoked recipient shows nothing
+about authorization. An old signed URL that still returns bytes after revocation
+is the expected boundary, not a failure, as long as its expiry is recorded. The
+[shared receipt rules](../STUDY-GUIDE.md#evidence-receipts) cover naming and storage.
 
 ## Concrete source inspection
 
@@ -152,14 +148,14 @@ cat ../delta-sharing/fixture-contract.json
 cat ../delta-sharing/PREPARATION.md
 ```
 
-These inspections do not start or qualify a service. Execute only the chosen
-project's complete documented owned route and retain its actual receipt.
+The contract names share `ds60_fixture`, schema `tutorial`, table `orders` and
+version 0, so a version 0 request with any other name is a different product.
+`PREPARATION.md` explains why no local 1.4.1 server acceptance exists: the release
+ships source archives without a prebuilt server, so the server must be built from
+the pinned tag before any revocation test is meaningful.
 
 ## Primary references
 
-- [Iceberg reliability and table state](https://iceberg.apache.org/docs/latest/reliability/)
-- [Arrow data format](https://arrow.apache.org/docs/format/Columnar.html)
-- [Flink stateful stream processing](https://nightlies.apache.org/flink/flink-docs-release-2.3/docs/concepts/stateful-stream-processing/)
-- [Kafka delivery/transaction design](https://kafka.apache.org/44/design/design/)
-- [Atlas API and metadata boundaries](https://atlas.apache.org/api/v2/index.html)
-- [Delta Sharing protocol](https://github.com/delta-io/delta-sharing/blob/v1.4.1/PROTOCOL.md)
+- [Delta Sharing protocol at v1.4.1](https://github.com/delta-io/delta-sharing/blob/v1.4.1/PROTOCOL.md)
+- [Reference server signed URL generation](https://github.com/delta-io/delta-sharing/blob/v1.4.1/server/src/main/scala/io/delta/sharing/server/common/CloudFileSigner.scala)
+- [Reference server share configuration](https://github.com/delta-io/delta-sharing/blob/v1.4.1/server/src/universal/conf/delta-sharing-server.yaml.template)

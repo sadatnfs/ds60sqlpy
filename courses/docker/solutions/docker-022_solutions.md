@@ -1,6 +1,6 @@
 # docker-022: explanatory solutions
 
-Compare after your own attempt or an explicit reveal. These explain the supplied teaching fixtures; they are not engine results. The mechanism is explained in `courses/docker/guides/docker-022.md`.
+These answers explain teaching fixtures, not engine results; the mechanism is in [the guide](../guides/docker-022.md).
 
 ## Exercise 1: Compare a CPU limit with dedicated hardware.
 
@@ -88,4 +88,4 @@ Compare after your own attempt or an explicit reveal. These explain the supplied
 
 ## Check your transfer
 
-A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.
+The PID limit counts tasks in the container's cgroup, and every thread is a task, so 64 threads across all processes exhausts it even though each thread needs little memory or CPU. Confirm by reading `/sys/fs/cgroup/pids.current` and `pids.max` inside the container during load, or the PIDS column of `docker stats`, which should sit at the limit. The fix is a bounded worker pool, or a deliberately raised limit with a stated reason. If the count stayed well below 64 during the failures, the limit is not the cause and memory mapping limits deserve a look.

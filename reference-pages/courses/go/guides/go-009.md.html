@@ -209,9 +209,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="syntax-anatomy-and-reasoning">Syntax anatomy and reasoning<a class="heading-anchor" href="#syntax-anatomy-and-reasoning" aria-label="Link to this section">#</a></h3>
 <p>&amp;value obtains an address and <em>pointer dereferences it. In a type, </em>Point means a pointer to Point. new(T) returns a pointer to a zero T; it does not initialize maps or channels stored inside T. Selectors automatically follow a pointer to a struct, so p.X is convenient syntax for field access through p. A nil check guards dereference only when no unsynchronized writer can change the state between those operations.</p>
 <h3 id="run-this-lesson">Run this lesson<a class="heading-anchor" href="#run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>Choose Go in the unified Docker classroom. Save your own pad before experimenting. The prepared worker stages it as <code>main.go</code>, compiles it, and executes the resulting program with bounded time and output. The pad is one source file. It does not supply interactive input, arbitrary command-line arguments, package installation, Kubernetes credentials or a host Docker socket. Every ordinary reference here uses the standard library, synthetic local data and explicit checks. A failed <code>check</code> panics and produces a nonzero process result; do not remove it to make the run appear successful.</p>
-<p>The explanatory solution snippets belong inside <code>func main()</code> unless they declare a helper. <code>check</code> is a tiny teaching helper that panics when a condition is false. The separate reference supplies required imports and helpers and implements all six cases. Use that complete source only after an attempt or an explicit reveal. For an independently prepared Go project, the equivalent local build is <code>go build -o lesson main.go</code>, followed by <code>./lesson</code>; use Linux or WSL 2 for that optional workflow. Compiling proves syntax and type consistency, while the executed checks establish the stated example contracts.</p>
-<p>Each worked example below is a complete Go file. Copy one whole block into your saved pad and run it. Example 2 includes the first case as well as the second, so its setup is complete. Its supporting declarations may be reused in later investigations. The separate reference implements all six cases.</p>
+<p>Run each worked example as one complete file in your saved pad (<a href="../STUDY-GUIDE.md.html#run-a-lesson">run steps</a>).</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1-mutate-through-a-pointer">Worked example 1: Mutate through a pointer<a class="heading-anchor" href="#worked-example-1-mutate-through-a-pointer" aria-label="Link to this section">#</a></h4>
 <p>Create an integer 4 and increment it through a helper receiving its address.</p>
@@ -290,77 +288,79 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Observe:</strong> The returned pointer remains valid and reads 7.</p>
 <p>Go extends storage lifetime as needed. Stack-versus-heap placement is an implementation decision and should not be guessed from the lexical block alone.</p>
 <h3 id="predict-before-running">Predict before running<a class="heading-anchor" href="#predict-before-running" aria-label="Link to this section">#</a></h3>
-<p>For each example, write the input values, the state that can change, and the expected observation. Explain which result would disprove your current interpretation. For concurrency, predict a guaranteed relationship rather than an arbitrary scheduling order. For an error case, identify whether it is rejected at compilation or returned during execution.</p>
+<p>Predict which variable each pointer refers to and what a write through it changes. Decide whether returning <code>&amp;n</code> from <code>seven</code> is valid after the function returns. For <code>new(int)</code>, predict whether the pointer and its target are each zero, and for <code>setIfPresent</code>, predict the return value and the caller&#x27;s variable for a nil and a non-nil pointer.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-mutate-through-a-pointer-change-one-input">Exercise 1: Mutate through a pointer: change one input<a class="heading-anchor" href="#exercise-1-mutate-through-a-pointer-change-one-input" aria-label="Link to this section">#</a></h4>
-<p>Copy worked example 1 into a scratch pad and change <code>n := 4</code> to <code>n := 5</code>. Before running, predict which check fails and which value it now sees; then run it and restore the original line.</p>
-<p><strong>Expected:</strong> The changed run panics with <code>pointer mutation</code> because <code>n == 5</code> no longer holds. Restoring the original line brings back the worked observation: the caller value becomes 5.</p>
-<p><strong>Verify:</strong> Compare your written prediction with the panic message <code>pointer mutation</code> and name the value that made <code>n == 5</code> false. After restoring the input, the program must print its success line again.</p>
+<p>Copy worked example 1, change <code>n := 4</code> to <code>n := 5</code> and predict the failure before running; then restore the line.</p>
+<p><strong>Expected:</strong> The edited run panics with <code>pointer mutation</code> because <code>n == 5</code> no longer holds.</p>
+<p><strong>Verify:</strong> Restoring <code>n := 4</code> makes the check pass again with the worked observation: the caller value becomes 5.</p>
 <h4 id="exercise-2-return-a-live-value-diagnose-an-edited-check">Exercise 2: Return a live value: diagnose an edited check<a class="heading-anchor" href="#exercise-2-return-a-live-value-diagnose-an-edited-check" aria-label="Link to this section">#</a></h4>
-<p>A careless edit changed the check in worked example 2 so that it reads <code>check(*p != 7, &quot;returned pointer&quot;)</code>. Run worked example 2 with that line, explain why the edited check now fails for the same program state, and restore it.</p>
-<p><strong>Expected:</strong> Before the repair the program panics with <code>returned pointer</code>; after it the line reads <code>check(*p == 7, &quot;returned pointer&quot;)</code> again and the returned pointer remains valid and reads 7.</p>
-<p><strong>Verify:</strong> Keep the failing and the repaired runs. Explain why the edited check rejects the same program state that <code>*p == 7</code> accepts.</p>
+<p>A careless edit rewrote the check in worked example 2 as <code>check(*p != 7, &quot;returned pointer&quot;)</code>. Explain the failure, then restore it.</p>
+<p><strong>Expected:</strong> The defective run panics with <code>returned pointer</code>; after restoring <code>check(*p == 7, &quot;returned pointer&quot;)</code>, the returned pointer remains valid and reads 7.</p>
+<p><strong>Verify:</strong> The edited check fails with message <code>returned pointer</code> for a state that <code>*p == 7</code> accepts.</p>
 <h4 id="exercise-3-guard-absence">Exercise 3: Guard absence<a class="heading-anchor" href="#exercise-3-guard-absence" aria-label="Link to this section">#</a></h4>
 <p>Represent an optional integer with a nil pointer and inspect it without dereferencing.</p>
 <p><strong>Expected:</strong> The pointer is absent.</p>
-<p><strong>Verify:</strong> Keep a check equivalent to <code>p == nil</code>. As a control, change <code>check(p == nil, &quot;nil pointer&quot;)</code> to <code>check(p != nil, &quot;nil pointer&quot;)</code> inside that check: it must panic with <code>nil pointer</code>, which shows the check can fail. Restore it.</p>
+<p><strong>Verify:</strong> Your solution must keep <code>p == nil</code> true. Control: changing <code>check(p == nil, &quot;nil pointer&quot;)</code> to <code>check(p != nil, &quot;nil pointer&quot;)</code> panics with message <code>nil pointer</code>; revert it.</p>
 <h4 id="exercise-4-allocate-a-zero-target">Exercise 4: Allocate a zero target<a class="heading-anchor" href="#exercise-4-allocate-a-zero-target" aria-label="Link to this section">#</a></h4>
 <p>Use new(int) and compare pointer presence with its stored value.</p>
 <p><strong>Expected:</strong> The pointer is non-nil and its target is 0.</p>
-<p><strong>Verify:</strong> Keep a check equivalent to <code>p != nil &amp;&amp; *p == 0</code>. As a control, change <code>check(p != nil &amp;&amp; *p == 0, &quot;new zero&quot;)</code> to <code>check(p == nil &amp;&amp; *p == 0, &quot;new zero&quot;)</code> inside that check: it must panic with <code>new zero</code>, which shows the check can fail. Restore it.</p>
+<p><strong>Verify:</strong> Your solution must keep <code>p != nil &amp;&amp; *p == 0</code> true. Control: changing <code>check(p != nil &amp;&amp; *p == 0, &quot;new zero&quot;)</code> to <code>check(p == nil &amp;&amp; *p == 0, &quot;new zero&quot;)</code> panics with message <code>new zero</code>; revert it.</p>
 <h4 id="exercise-5-separate-copy-and-target">Exercise 5: Separate copy and target<a class="heading-anchor" href="#exercise-5-separate-copy-and-target" aria-label="Link to this section">#</a></h4>
 <p>Copy the integer behind a pointer, then change the original target.</p>
 <p><strong>Expected:</strong> The copied integer remains 3 while the target becomes 9.</p>
-<p><strong>Verify:</strong> Keep a check equivalent to <code>copied == 3 &amp;&amp; n == 9</code>. As a control, change <code>n := 3</code> to <code>n := 4</code>: the run must panic with <code>copy target</code>. Restore the line before continuing.</p>
+<p><strong>Verify:</strong> Your solution must keep <code>copied == 3 &amp;&amp; n == 9</code> true. Control: changing <code>n := 3</code> to <code>n := 4</code> panics with message <code>copy target</code>; revert it.</p>
 <h4 id="exercise-6-transfer-an-optional-update">Exercise 6: Transfer an optional update<a class="heading-anchor" href="#exercise-6-transfer-an-optional-update" aria-label="Link to this section">#</a></h4>
 <p>Implement setIfPresent so a nil pointer is a harmless no-op and a present pointer changes.</p>
 <p><strong>Expected:</strong> The absent call returns false; the present value becomes 8.</p>
-<p><strong>Verify:</strong> Keep a check equivalent to <code>setIfPresent(&amp;n, 8) &amp;&amp; n == 8</code>. As a control, change <code>check(setIfPresent(&amp;n, 8) &amp;&amp; n == 8, &quot;present update&quot;)</code> to <code>check(setIfPresent(&amp;n, 9) &amp;&amp; n == 8, &quot;present update&quot;)</code> inside that check: it must panic with <code>present update</code>, which shows the check can fail. Restore it.</p>
-<p>Implement these in the answer-free learner source. Keep one independent check per claim. A task can require tracing, construction, a changed input or a deliberate safe failure. Do not run a data race, corrupt memory or contact a shared cluster merely to demonstrate why it would be wrong.</p>
+<p><strong>Verify:</strong> Your solution must keep <code>setIfPresent(&amp;n, 8) &amp;&amp; n == 8</code> true. Control: changing <code>check(setIfPresent(&amp;n, 8) &amp;&amp; n == 8, &quot;present update&quot;)</code> to <code>check(setIfPresent(&amp;n, 9) &amp;&amp; n == 8, &quot;present update&quot;)</code> panics with message <code>present update</code>; revert it.</p>
+<p>Work in the answer-free learner source, <code>courses/go/lessons/go-009.go</code> (<a href="../STUDY-GUIDE.md.html#work-an-exercise">exercise contract</a>).</p>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
-<p>Read a compiler error from the first location in your source, then fix one cause at a time. Unused imports and variables are errors in Go; add an import when its use exists, rather than copying a large unused import list. A panic from <code>check</code> identifies a violated example contract. Compare the actual value with the expected value and inspect the state transition that produced it. A returned <code>error</code> is a value that the caller must handle; an ignored error can make later output look plausible while the original operation failed.</p>
-<p>The lesson-specific explanations in the two examples identify the important counterexamples. Extend that reasoning to every investigation: explain why a plausible alternative would fail, and preserve a tiny input that distinguishes it. Treat empty data, missing values and cancellation as domain cases with explicit policies. In concurrent work, replace sleeps used as synchronization with channels, mutexes or an explicit ownership protocol.</p>
+<p>The two classic pointer bugs are dereferencing nil, which panics, and sharing a target when the caller expected an independent value. A pointer parameter announces mutation, so reviewers should look for <code>&amp;</code> at the call site. Conversely, copying <code>*p</code> takes a snapshot that does not follow later changes. Do not reason about stack versus heap from the source; Go keeps any reachable value alive.</p>
+<p>General compiler, panic and error diagnosis is in the <a href="../STUDY-GUIDE.md.html#diagnose-a-failure">study guide</a>.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <h4 id="hint-for-investigation-1-mutate-through-a-pointer-change-one-input">Hint for investigation 1: Mutate through a pointer: change one input<a class="heading-anchor" href="#hint-for-investigation-1-mutate-through-a-pointer-change-one-input" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The caller value becomes 5.</li>
-<li>The check <code>n == 5</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Compute the checked value with <code>n := 5</code> in place before running, then compare it with the value <code>n == 5</code> expects.</li>
+<li>increment receives the address of n. Which variable does <code>*p = *p + 1</code> change?</li>
+<li>Starting from 5, increment makes n equal 6, so <code>n==5</code> fails. The pointer worked; the starting value no longer matches the expectation.</li>
 </ol>
 <h4 id="hint-for-investigation-2-return-a-live-value-diagnose-an-edited-check">Hint for investigation 2: Return a live value: diagnose an edited check<a class="heading-anchor" href="#hint-for-investigation-2-return-a-live-value-diagnose-an-edited-check" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The returned pointer remains valid and reads 7.</li>
-<li>The check <code>*p == 7</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Compare <code>check(*p != 7, &quot;returned pointer&quot;)</code> with the same line in worked example 2 and state the claim each version makes.</li>
+<li>Go keeps any reachable value alive. Does returning <code>&amp;n</code> leave the caller with a dangling pointer?</li>
+<li>seven returns a pointer to 7, so <code>*p!=7</code> is false and check panics. The pointer is valid; the edited condition asserts the opposite of the contract.</li>
 </ol>
 <h4 id="hint-for-investigation-3-guard-absence">Hint for investigation 3: Guard absence<a class="heading-anchor" href="#hint-for-investigation-3-guard-absence" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The pointer is absent.</li>
-<li>The check <code>p == nil</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Name one input that would make <code>p == nil</code> false. A check that no input can falsify is not evidence.</li>
+<li>A nil pointer has no target. Compare it with nil instead of dereferencing it.</li>
+<li>Nil is a useful absence marker only when callers check it.</li>
 </ol>
 <h4 id="hint-for-investigation-4-allocate-a-zero-target">Hint for investigation 4: Allocate a zero target<a class="heading-anchor" href="#hint-for-investigation-4-allocate-a-zero-target" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The pointer is non-nil and its target is 0.</li>
-<li>The check <code>p != nil &amp;&amp; *p == 0</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Name one input that would make <code>p != nil &amp;&amp; *p == 0</code> false. A check that no input can falsify is not evidence.</li>
+<li>new(int) allocates a zero int and returns its address. Which check concerns the pointer, and which the target?</li>
+<li>Allocation and initialization are separate questions.</li>
 </ol>
 <h4 id="hint-for-investigation-5-separate-copy-and-target">Hint for investigation 5: Separate copy and target<a class="heading-anchor" href="#hint-for-investigation-5-separate-copy-and-target" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The copied integer remains 3 while the target becomes 9.</li>
-<li>The check <code>copied == 3 &amp;&amp; n == 9</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Predict the effect of changing <code>n := 3</code> to <code>n := 4</code> before running anything. If the prediction is hard, trace that line again with the original input.</li>
+<li><code>copied := *p</code> reads the current value. Does copied change when <code>*p</code> is assigned later?</li>
+<li>Dereferencing to obtain a scalar value copies that scalar.</li>
 </ol>
 <h4 id="hint-for-investigation-6-transfer-an-optional-update">Hint for investigation 6: Transfer an optional update<a class="heading-anchor" href="#hint-for-investigation-6-transfer-an-optional-update" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The absent call returns false; the present value becomes 8.</li>
-<li>The check <code>setIfPresent(&amp;n, 8) &amp;&amp; n == 8</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Name one input that would make <code>setIfPresent(&amp;n, 8) &amp;&amp; n == 8</code> false. A check that no input can falsify is not evidence.</li>
+<li>Handle nil before any dereference. What should the function return in each case?</li>
+<li>An explicit boolean tells the caller whether the update happened.</li>
 </ol>
 <h3 id="self-check-and-retrieval">Self-check and retrieval<a class="heading-anchor" href="#self-check-and-retrieval" aria-label="Link to this section">#</a></h3>
-<p>Close the reference. Rebuild one normal case and one boundary case from a blank pad. Explain the role of pointer without using its name in the definition. Then change the domain while keeping the same invariant. Record the new input, your prediction and the observed output. If your program passes only because its input is hard-coded, explain which part would need a reusable function in a larger project.</p>
+<p>From a blank pad, write <code>swap(a, b *int)</code> and check that it exchanges two caller variables. Write a version taking values instead of pointers and explain why its exchange is invisible to the caller. Then call the pointer version with a nil argument behind an explicit guard and report whether the swap happened.</p>
+<p>The general <a href="../STUDY-GUIDE.md.html#self-check-and-retrieval">retrieval routine</a> still applies.</p>
 <h3 id="next-step-and-sources">Next step and sources<a class="heading-anchor" href="#next-step-and-sources" aria-label="Link to this section">#</a></h3>
-<p><a href="https://go.dev/ref/spec">Primary language or library documentation</a>, reviewed 2026-10-23. The teaching explanations and synthetic fixtures are original. Continue with the next lesson when you can explain the six observations and diagnose a changed case without copying its answer.</p>
+<p>Source: <a href="https://go.dev/ref/spec">The Go Programming Language Specification</a>, reviewed 2026-10-23.</p>
+<p>Next: go-010, Methods, interfaces and the typed-nil trap (<a href="../STUDY-GUIDE.md.html#when-to-move-on">criteria</a>).</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for go-009: Pointers, mutation and allocation lifetimes.
 Read courses/go/guides/go-009.md and my saved attempt based on courses/go/lessons/go-009.go.

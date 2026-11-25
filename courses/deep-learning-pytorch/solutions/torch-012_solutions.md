@@ -2,6 +2,8 @@
 
 Open these answers only after attempting Capstone: an auditable tiny PyTorch regressor yourself. They reuse the guide's literal inputs, starting from Example A, Create the three-feature fixture, so a discrepancy points at one step. The executable companion runs the assertions; this page explains why each one tests Experiment manifest, Training baseline, Frozen assessment. After a pass, choose a new input for exercise 6, Write the bounded evidence report, without looking.
 
+After comparing, follow the [review steps](../STUDY-GUIDE.md#after-the-solutions).
+
 ## Mechanism review
 
 An auditable regressor combines data identity, a baseline, an explicit training loop and separate assessment. The three-feature fixture uses target `2a - b + c`, so every row can be checked by hand. Four rows are used for fitting and two are reserved for assessment. A training-mean baseline provides a comparison that ignores features. The learned linear model updates under a fixed 100-step budget without using the holdout to choose settings.
@@ -177,6 +179,3 @@ assert not set(train) & set(test) and len(report["test_ids"]) == 2 and report["s
 
 **Verify:** In a fresh process, the exercise checks confirm `not set(train) & set(test)`, `len(report['test_ids']) == 2` and `report['steps'] == 100`.
 
-## Review after comparison
-
-Repeat exercise 4, Open the holdout after fitting, with one changed fixture value and predict the difference before running it. Keep your failing attempt at exercise 5, Retain an independent pilot oracle, beside the repaired result. A missing framework is not a failing assertion. These solutions use only local fixtures.

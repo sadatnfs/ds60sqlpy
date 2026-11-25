@@ -1,22 +1,26 @@
 # spark-016: Join cardinality, fanout, semi joins and NULL-safe keys
 
-Authored paired Scala/PySpark teaching content. The default fixtures are tiny, local and deterministic. Runtime acceptance, logical correctness and learner understanding remain separate evidence.
+A join can create rows that never existed. Six facts meet a dimension in which key A appears three times, key E has no fact and one entry has a NULL key. You will predict the joined row count before running the join, watch 60 cents of real facts turn into 120 cents of joined amounts, and decide when enrichment is safe.
 
 ## Level and prerequisites
 
-Intermediate; approximately 105 minutes. Direct prerequisites: `spark-015`. The prepared baseline is Spark 4.3.0, Scala binary 2.13, JDK 17 and Python 3.12. Read the [execution baseline](../execution-baseline.md).
+Intermediate; approximately 105 minutes. Direct prerequisites: `spark-015`. Pinned versions: [execution baseline](../execution-baseline.md).
 
 ## How to run this lesson
 
-Open `spark-016` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile, save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`; Python stages as `main.py` with a main guard. Each program creates its own `local[2]` session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.
+Shared run steps and profile rules: [study guide](../STUDY-GUIDE.md#run-a-paired-lesson).
 
-The [Scala learner](../lessons/spark-016.scala) and [PySpark learner](../lessons/spark-016.py) run two complete demonstrations and retain six explicit task stubs. Use the [explained solutions](../solutions/spark-016_solutions.md) only after an attempt or an explicit worked comparison; the [Scala reference](../solutions/spark-016_solution.scala) and [PySpark reference](../solutions/spark-016_solution.py) contain complete assertions. A bounded collect is used only for the declared tiny fixture; do not copy it onto an unbounded or large production table.
+Learner pads: [Scala](../lessons/spark-016.scala) and [PySpark](../lessons/spark-016.py).
+
+Open the [explained solutions](../solutions/spark-016_solutions.md) after an attempt.
+
+The first worked example counts two A facts and three A dimension rows, multiplies them and prints `A predicts 6 joined pairs` before any join exists. The second runs `NULL = NULL` and `NULL <=> NULL` in SQL, gets NULL and true, and prints `Ordinary equality is unknown; explicit NULL-safe equality is true`.
 
 ## Learning objectives
 
 - Predict join output counts from key multiplicities before running a join.
-- State the input and output grain, schema, NULL policy and ordering before executing a transformation.
-- Compare each language implementation with independent literal expectations, not only with the other implementation.
+- Build a per-key multiplicity ledger of `(facts, dimension rows, predicted pairs)` and use it to predict 7 inner-join pairs before any join runs.
+- Choose between inner, left, semi, anti and NULL-safe joins on purpose, and allow left enrichment only after the dimension passes a nonnull, unique-key check.
 
 ## Vocabulary and concepts
 
@@ -46,7 +50,7 @@ Both DataFrame and SQL forms are checked against literal pair identities. Matchi
 
 ## Supplied local fixture
 
-The complete source creates the owned local session described above, then constructs this explicit fixture. The worked examples below run in that same main function; there is no hidden notebook state.
+The fact table holds six rows: two for key A (10 and 20 cents), one each for B, C and D, and fact 5 with a NULL key and 50 cents. The dimension has three A rows (101 to 103), one B, one NULL-key row labeled `unknown` and one E row that no fact uses. Keys C and D have no dimension match at all.
 
 ```scala
 import org.apache.spark.sql.Row
@@ -242,11 +246,14 @@ If a joined amount doubles, calculate key multiplicities before adding distinct.
 
 ## Self-check
 
-Explain the contract of `multiplicity` / `multiplicity` without reading its solution. Then, from memory, state what Exercise 6 (Gate enrichment on a reviewed unique dimension) must produce: The raw dimension fails. The reviewed subset yields six facts, total 210, and labels alpha 3, alpha 3, beta, NULL, NULL, NULL for IDs 1..6. Say which part of that result is evidence and what it still cannot show. Name the action in your trace that actually runs the plan.
+- Without running anything, how many rows does an inner join produce, and which key contributes most of them?
+- Exercise 2 reports a joined amount of 120 while the matched facts total 60. Explain where the extra 60 comes from and which report would be wrong if it summed the joined column.
+- A semi join keeps facts 1, 2 and 3. Why does key A contribute two rows instead of six?
+- Fact 5 and dimension row 105 both have a NULL key. Which join pairs them, and why should that pairing be a deliberate choice instead of the default?
 
 ## Next step
 
-Use the [course route](../README.md) to continue. Paired-language agreement is useful only when both outputs also satisfy the independent fixture contract. A successful local run is not evidence of cluster performance or production recovery.
+Go on to [spark-017: Nested records, JSON and explode row accounting](spark-017.md). Joins changed row counts by matching two tables; the next lesson changes them from inside one record, by turning an array of items into one row per item.
 
 ## Primary sources and official APIs
 

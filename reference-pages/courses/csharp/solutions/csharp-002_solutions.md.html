@@ -194,7 +194,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/csharp/solutions/csharp-002_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="csharp-002-explanation-and-comparison">csharp-002: explanation and comparison<a class="heading-anchor" href="#csharp-002-explanation-and-comparison" aria-label="Link to this section">#</a></h2>
-<p>Attempt the six guide tasks before opening this comparison. The executable reference is <a href="csharp-002_solution.cs.html">csharp-002_solution.cs</a>. It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.</p>
+<p>Reference program: <a href="csharp-002_solution.cs.html">csharp-002_solution.cs</a>, covering both examples and the executed answers.</p>
+<p>Attempt the tasks first; see <a href="../STUDY-GUIDE.md.html#comparing-with-the-explanation">comparing with the explanation</a>.</p>
 <h3 id="why-the-two-examples-differ">Why the two examples differ<a class="heading-anchor" href="#why-the-two-examples-differ" aria-label="Link to this section">#</a></h3>
 <p><strong>Division depends on operand types:</strong> Converting after integer division would preserve the already truncated result. Operand conversion must happen before division. The integer result is 3 and the floating result is 3.5.</p>
 <p><strong>Parse an external representation:</strong> The success flag carries information that a default integer cannot. Validation belongs where text becomes a typed value. 42 parses successfully; words fail without an exception.</p>
@@ -257,14 +258,14 @@ Check<span class="syntax-punctuation">(</span>TryCount<span class="syntax-punctu
 <p><strong>How to verify.</strong> Add <code>TryCount(&quot; 7&quot;, out _)</code> and decide the policy: <code>NumberStyles.Integer</code> allows surrounding spaces, so it is accepted. If quantities must be bare digits, switch to <code>NumberStyles.None</code> and confirm the check flips.</p>
 <h4 id="task-6-transfer-and-justify">Task 6: Transfer and justify<a class="heading-anchor" href="#task-6-transfer-and-justify" aria-label="Link to this section">#</a></h4>
 <p>Design an input boundary for a percentage and document its accepted textual and numeric ranges.</p>
-<p>No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry <strong>Static type</strong>, and state one limitation of your choice.</p>
+<p>No single answer exists; extend task 3 using the <a href="../STUDY-GUIDE.md.html#open-transfer-tasks">open transfer routine</a>.</p>
 <h3 id="mechanism-and-diagnostic-reasoning">Mechanism and diagnostic reasoning<a class="heading-anchor" href="#mechanism-and-diagnostic-reasoning" aria-label="Link to this section">#</a></h3>
 <p>A type describes the values an expression may hold and the operations available on those values. <code>int</code> represents a bounded whole number; <code>double</code> represents a binary floating-point approximation; <code>bool</code> represents a logical decision. A variable is a named storage location. Reassigning a variable changes its stored value, not its declared type.</p>
 <p><code>var</code> asks the compiler to infer a static type from the initializer. It does not make the variable dynamically typed. Conversions deserve attention because they can widen a range, lose fractional information, or fail. Put conversion at a visible boundary rather than scattering casts through a formula. First choose the meaning and units of the result, then choose its type.</p>
 <p><code>int count = 7</code> declares and initializes. <code>var inferred = 7</code> also produces an int. <code>(double)count</code> converts before an operator uses the value. <code>int.TryParse(text, out int parsed)</code> returns success separately from the output value; a failed parse must not silently mean a real zero.</p>
 <p>An inferred type is still static. A cast is not a validation policy. <code>TryParse</code> alone accepts negative integers, so domain rules such as nonnegative quantities need a second condition.</p>
 <h3 id="review-before-continuing">Review before continuing<a class="heading-anchor" href="#review-before-continuing" aria-label="Link to this section">#</a></h3>
-<p>Run the reference and confirm that it prints <code>csharp-002: passed</code>, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.</p></article>
+<p>Run the reference and confirm it prints <code>csharp-002: passed</code>, then rerun the guide&#x27;s counterexample.</p></article>
   </main>
 </body>
 </html>

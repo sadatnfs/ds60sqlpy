@@ -195,7 +195,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="dbt-011-explained-reference">dbt-011: explained reference<a class="heading-anchor" href="#dbt-011-explained-reference" aria-label="Link to this section">#</a></h2>
 <p>Define a model schema contract and verify both accepted and rejected changes.</p>
-<p>The executable reference contains the two complete worked cases with assertions. The changes below explain the independent practice and its limits.</p>
+<p>The reference enforces a contract on a table model with declared integer and bigint columns, builds a compatible version and then a version that casts <code>amount</code> to varchar. The rejected run leaves 42 in place for this DuckDB table; other adapters and materializations may fail differently. See <a href="../STUDY-GUIDE.md.html#answers-and-references">how these answers are laid out</a>.</p>
 <h3 id="1-remove-a-declared-column">1. Remove a declared column<a class="heading-anchor" href="#1-remove-a-declared-column" aria-label="Link to this section">#</a></h3>
 <p>A consumer cannot safely assume the missing field exists. Treat removal as a compatibility change rather than silently updating the contract.</p>
 <p><strong>Why it holds here:</strong> contract.enforced compares the model&#x27;s actual columns to the declared id and amount list before building. Dropping amount makes the actual list shorter than the declared one, so dbt refuses the run.</p>

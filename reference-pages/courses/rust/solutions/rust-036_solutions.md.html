@@ -194,7 +194,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/rust/solutions/rust-036_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="rust-036-explanation-and-comparison">rust-036: explanation and comparison<a class="heading-anchor" href="#rust-036-explanation-and-comparison" aria-label="Link to this section">#</a></h2>
-<p>Attempt the six guide tasks before opening this comparison. The executable reference is <a href="rust-036_solution.rs.html">rust-036_solution.rs</a>. It runs both worked examples, and its assertions are always active under the prepared classroom compile settings.</p>
+<p>Executable reference: <a href="rust-036_solution.rs.html">rust-036_solution.rs</a>, which runs both examples.</p>
+<p>Open this only after <a href="../STUDY-GUIDE.md.html#attempt-a-lesson">an attempt</a>.</p>
 <h3 id="why-the-two-examples-differ">Why the two examples differ<a class="heading-anchor" href="#why-the-two-examples-differ" aria-label="Link to this section">#</a></h3>
 <p><strong>Observe an edition 2024 scope rule:</strong> Edition 2024 drops a temporary in a block&#x27;s tail expression before the block&#x27;s local variables, so the Ref returned by borrow() no longer outlives cell. The edition selects this rule; the compiler version only has to implement it. name_length compiles and returns 4 under edition 2024; edition 2021 rejects the same function with E0597.</p>
 <p><strong>Iterate a boxed slice by value:</strong> Edition 2024 changes which IntoIterator implementation a method call on Box&lt;[T]&gt; selects. Code can change meaning or stop compiling across editions, which is why Cargo.toml records the edition explicitly and why an upgrade deserves review. into_iter on a Box&lt;[String]&gt; yields owned Strings under edition 2024; under edition 2021 the same call yields &amp;String and the collect fails with E0277.</p>
@@ -231,7 +232,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>How to verify.</strong> List the directory before and after <code>cargo clean</code>: only <code>target</code> disappears, and <code>cargo run --locked --offline</code> again prints <code>apple=3;pear=6;rejected=1</code>.</p>
 <h4 id="task-6-transfer-and-justify">Task 6: Transfer and justify<a class="heading-anchor" href="#task-6-transfer-and-justify" aria-label="Link to this section">#</a></h4>
 <p>Design a dependency upgrade review including lock diff, licenses, compile tests and runtime evidence.</p>
-<p>No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry <strong>Edition</strong>, and state one limitation of your choice.</p>
+<p><strong>Judging criteria.</strong> A strong review reads the <code>Cargo.lock</code> diff to list every crate whose version changes, including transitive ones; checks each new or changed license against the project&#x27;s policy; builds and runs the full test suite with <code>--locked</code> on the pinned toolchain and edition; and compares runtime evidence, such as output, timing or error behavior on a fixed input, before and after. It records which changes were reviewed and which were accepted on trust. State one limitation: a passing suite shows only the paths its tests cover.</p>
 <h3 id="mechanism-and-diagnostic-reasoning">Mechanism and diagnostic reasoning<a class="heading-anchor" href="#mechanism-and-diagnostic-reasoning" aria-label="Link to this section">#</a></h3>
 <p>Cargo describes packages, targets, dependencies and build profiles. A Rust edition selects language compatibility rules while the compiler version selects available implementations and library APIs. These are related but distinct. Pinning an edition does not pin a dependency graph or a compiler toolchain.</p>
 <p>Cargo.lock records selected dependency versions for reproducible resolution under a project policy. Locked and offline modes answer different questions: locked rejects graph changes, while offline forbids network access and requires prepared assets. The classroom bypasses per-attempt Cargo resolution by linking a reviewed read-only Arrow library. External projects use their own explicit preparation and lock review.</p>
@@ -239,7 +240,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Cargo.toml declares package and dependency intent, including edition = &quot;2024&quot;. Cargo.lock records a resolved graph. cargo build --locked checks lock consistency; --offline requires cached dependencies. cargo test and cargo clippy are distinct verification tools. cargo fix --edition migrates code mechanically, but the migrated code still needs review.</p>
 <p>A successful dependency download is not successful compilation. Do not edit checksums manually to force a lockfile pass. A native binary is platform- and architecture-specific.</p>
 <h3 id="review-before-continuing">Review before continuing<a class="heading-anchor" href="#review-before-continuing" aria-label="Link to this section">#</a></h3>
-<p>Run the reference and confirm that it prints <code>rust-036: passed</code>, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.</p></article>
+<p>Rebuild Example B (Iterate a boxed slice by value) from a blank pad.</p>
+<p>Review routine: <a href="../STUDY-GUIDE.md.html#self-check-and-review">Self-check and review</a>.</p></article>
   </main>
 </body>
 </html>

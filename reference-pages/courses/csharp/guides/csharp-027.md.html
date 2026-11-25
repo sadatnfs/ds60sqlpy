@@ -206,11 +206,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Offset:</strong> A displacement from UTC at one observation.</p>
 <p><strong>Duration:</strong> An elapsed interval between instants.</p>
 <h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>The Linux Docker classroom compiles your saved pad as <code>Program.cs</code> in its fixed .NET 10 project. C# 14 is the matching language generation. This route uses the prepared framework libraries; it does not accept arbitrary project files, NuGet packages, command arguments or interactive input. The explicit <code>Program.Main</code> entrypoint makes compilation and execution visible. <code>Check</code> throws on a false condition in every build configuration, unlike conditional debugging assertions.</p>
-<p>Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.</p>
+<p>Both examples pass <code>CultureInfo.InvariantCulture</code> and use ISO 8601 text with explicit offsets, so the results do not depend on the machine&#x27;s time zone or language. Example B builds its timestamps from fixed numbers instead of reading the clock, which keeps every run identical.</p>
+<p>Compile contract, starter stop and success marker: <a href="../STUDY-GUIDE.md.html#running-a-lesson">running a lesson</a>.</p>
 <h3 id="syntax-anatomy-and-execution-trace">Syntax anatomy and execution trace<a class="heading-anchor" href="#syntax-anatomy-and-execution-trace" aria-label="Link to this section">#</a></h3>
 <p><code>DateTimeOffset.Parse</code> with an explicit round-trip string creates a known instant. <code>ToUniversalTime</code> changes its display offset while retaining the instant. Subtraction produces TimeSpan. InvariantCulture avoids environment-dependent machine-data parsing.</p>
-<p>Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.</p>
+<p>Each example ends with a trace; method: <a href="../STUDY-GUIDE.md.html#tracing-a-program">tracing a program</a>.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="example-a-different-offsets-same-instant">Example A: Different offsets, same instant<a class="heading-anchor" href="#example-a-different-offsets-same-instant" aria-label="Link to this section">#</a></h4>
 <p>Comparing wall-clock components would miss the offset information.</p>
@@ -250,6 +250,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The values denote the same instant despite different offsets.</p>
+<p><strong>Trace.</strong> Noon at +02:00 and 10:00 at Z (UTC) name the same moment, because subtracting two hours from noon gives 10:00 UTC. <code>DateTimeOffset</code> equality compares the UTC instants, so <code>a == b</code> is true. The offsets themselves differ, so the second check passes. <code>a.EqualsExact(b)</code> compares offsets too and returns false, and the local clock values, 12:00 and 10:00, differ.</p>
 <h4 id="example-b-measure-a-fixed-duration">Example B: Measure a fixed duration<a class="heading-anchor" href="#example-b-measure-a-fixed-duration" aria-label="Link to this section">#</a></h4>
 <p>A fixed fixture keeps evidence independent of the host clock and locale.</p>
 <pre class="highlighted-code"><code class="language-csharp"><span class="syntax-keyword">using</span> System<span class="syntax-punctuation">;</span>
@@ -289,6 +290,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The elapsed duration is 90 minutes and the timestamp round-trips.</p>
+<p><strong>Trace.</strong> <code>start</code> is midnight on January 1, 2025, at offset zero. <code>AddMinutes(90)</code> returns a new value 90 minutes later; <code>DateTimeOffset</code> is immutable. Subtracting gives a <code>TimeSpan</code> whose <code>TotalMinutes</code> is 90. The round-trip O format writes the full precision and offset, and parsing that text recovers an equal instant, with no culture-specific separators involved.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <ol>
 <li><strong>Predict and explain.</strong> Explain why the two offset timestamps compare equal.</li>
@@ -308,10 +310,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <ol start="6">
 <li><strong>Transfer and justify.</strong> Design storage and display policies for appointments in a named time zone.</li>
 </ol>
-<p>For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.</p>
+<p>Log each task in the <a href="../STUDY-GUIDE.md.html#recording-exercise-evidence">evidence table</a> before opening the explanation.</p>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
 <p>DateTime kind and unspecified local values can introduce ambiguity. Daylight-saving transitions can produce invalid or repeated local times. Use elapsed-time clocks for performance measurement, not wall-clock timestamps.</p>
-<p>A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.</p>
+<p>For task 5, an interval from 23:30 to 00:15 the next day still subtracts to 45 minutes, because the values carry their dates. Reversing the operands yields a negative <code>TimeSpan</code> rather than an error, so an end-before-start rule must be checked explicitly. For task 2, moving one instant by a minute makes the equality false.</p>
+<p>Repair routine: <a href="../STUDY-GUIDE.md.html#building-a-regression-case">building a regression case</a>.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <ol>
 <li>Reproduce Example A (Different offsets, same instant) before changing anything, and confirm its observation: The values denote the same instant despite different offsets.</li>
@@ -319,9 +322,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>Before opening the explanation, test your task 3 attempt against this lesson&#x27;s main pitfall: DateTime kind and unspecified local values can introduce ambiguity.</li>
 </ol>
 <h3 id="self-check-and-next-step">Self-check and next step<a class="heading-anchor" href="#self-check-and-next-step" aria-label="Link to this section">#</a></h3>
-<p>Explain Instant, Offset, Duration without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.</p>
+<p>Explain why <code>a == b</code> is true while <code>a.EqualsExact(b)</code> is false. State what <code>end - start</code> returns when end is earlier than start. For task 6, decide what you store for a recurring appointment in a named time zone and what you compute only when you display it.</p>
+<p>Then follow the general <a href="../STUDY-GUIDE.md.html#self-check-routine">self-check routine</a> and save your pad.</p>
 <h3 id="sources-and-execution-boundary">Sources and execution boundary<a class="heading-anchor" href="#sources-and-execution-boundary" aria-label="Link to this section">#</a></h3>
-<p><a href="https://learn.microsoft.com/en-us/dotnet/csharp/">Official language or framework documentation</a>. The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.</p>
+<p><a href="https://learn.microsoft.com/en-us/dotnet/csharp/">Documentation</a>: The .NET guide to dates and times compares <code>DateTime</code>, <code>DateTimeOffset</code> and <code>TimeZoneInfo</code> and explains round-trip formats.</p>
+<p>Provenance and limits: <a href="../STUDY-GUIDE.md.html#sources-and-execution-boundary">sources and execution boundary</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for csharp-027: Dates, durations and culture-independent data.
 Read courses/csharp/guides/csharp-027.md and courses/csharp/lessons/csharp-027.cs. Prerequisites: csharp-026.

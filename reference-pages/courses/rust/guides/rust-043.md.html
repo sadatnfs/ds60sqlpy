@@ -206,11 +206,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>NDJSON:</strong> JSON objects separated by newlines for record-oriented streaming.</p>
 <p><strong>Batch size:</strong> The maximum records targeted in one reader output batch.</p>
 <h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>The Linux Docker classroom compiles the saved pad as <code>main.rs</code> with pinned Rust 1.99.1, edition 2024, and the prepared Arrow 60 library. <code>assert!</code> and <code>assert_eq!</code> remain active in normal builds. The fixed pad accepts one source file without arbitrary arguments, interactive input, Cargo manifests or package installation. The main function returns <code>Result&lt;(), Box&lt;dyn std::error::Error&gt;&gt;</code> so later examples can propagate errors with <code>?</code>; the final <code>Ok(())</code> means this fixture completed successfully. Standard library and Arrow examples remain offline after image preparation. Multi-file Cargo and external ecosystem projects have separate explicit preparation workflows.</p>
-<p>Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.</p>
+<p>Beyond the prelude, this lesson&#x27;s programs use <code>arrow::array</code>, <code>arrow::csv</code>, <code>arrow::datatypes</code>, <code>arrow::json</code>, <code>std::io</code> and <code>std::sync</code>. A passing run prints <code>rust-043: passed</code>.</p>
+<p>Pad setup and limits: <a href="../STUDY-GUIDE.md.html#run-a-lesson">Run a lesson</a>.</p>
+<p>Before you run anything, follow <a href="../STUDY-GUIDE.md.html#attempt-a-lesson">Attempt a lesson</a>.</p>
 <h3 id="syntax-anatomy-and-execution-trace">Syntax anatomy and execution trace<a class="heading-anchor" href="#syntax-anatomy-and-execution-trace" aria-label="Link to this section">#</a></h3>
 <p>CSV ReaderBuilder takes a schema and with_header policy. JSON ReaderBuilder consumes newline-delimited object records. Both readers yield fallible RecordBatch values, and batch size bounds one produced chunk.</p>
-<p>Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.</p>
+<p><strong>Reading Example A (Read CSV through its real parser, code below).</strong> The schema is built before any data is read: two non-nullable fields, <code>name</code> as <code>Utf8</code> and <code>quantity</code> as <code>Int32</code>. <code>ReaderBuilder::new(schema)</code> starts a reader configuration from that schema, so the parser does not infer types from the text. <code>with_header(true)</code> says the first line holds column names rather than data, and <code>with_batch_size(8)</code> caps each batch at eight rows. <code>build(Cursor::new(input))</code> accepts any <code>Read</code> source; the byte string literal <code>b&quot;...&quot;</code> has type <code>&amp;[u8; N]</code>, and the <code>Cursor</code> makes it readable. Each call to <code>next</code> returns an <code>Option</code> wrapping a parse result, so <code>unwrap()</code> takes the first batch and <code>?</code> surfaces a parse failure.</p>
+<p>Method for tracing your own variants: <a href="../STUDY-GUIDE.md.html#trace-a-program">Trace a program</a>.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="example-a-read-csv-through-its-real-parser">Example A: Read CSV through its real parser<a class="heading-anchor" href="#example-a-read-csv-through-its-real-parser" aria-label="Link to this section">#</a></h4>
 <p>Header handling and column types are deliberate rather than guessed from a hand-written split.</p>
@@ -277,20 +279,28 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <ol start="6">
 <li><strong>Transfer and justify.</strong> Design an inference-to-reviewed-schema workflow with checks for later type and nullability drift.</li>
 </ol>
-<p>For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.</p>
+<p>Record each task as in <a href="../STUDY-GUIDE.md.html#keep-evidence-for-each-task">Keep evidence for each task</a>.</p>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
 <p>NDJSON is not a single enclosing JSON array. Reader success does not establish domain validity. Always handle each yielded batch error rather than counting only successful batches.</p>
-<p>A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.</p>
+<p>To turn a pitfall into a test, see <a href="../STUDY-GUIDE.md.html#design-a-regression-case">Design a regression case</a>.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <ol>
 <li>Reproduce Example A (Read CSV through its real parser) before changing anything, and confirm its observation: The parser produces two rows under the explicit schema.</li>
 <li>Compare Example B (Read newline-delimited JSON) with Example A and name the first line whose behavior differs. Its observation is: JSON null becomes Arrow null under the declared nullable field.</li>
 <li>Before opening the explanation, test your task 3 attempt against this lesson&#x27;s main pitfall: NDJSON is not a single enclosing JSON array.</li>
 </ol>
+<p>Tempting approaches to rule out before you compare:</p>
+<ul>
+<li><strong>Task 1.</strong> Passing a JSON array such as <code>[{&quot;quantity&quot;:2}]</code> to the newline-delimited reader assumes the two JSON formats are interchangeable; it expects separate objects, not one enclosing array.</li>
+<li><strong>Task 2.</strong> Expecting three fields from the first record counts every comma, as a plain split would; the parser would instead report an error if a row truly had an extra field.</li>
+<li><strong>Task 5.</strong> Reading only the first batch and reporting 2 rows treats the first chunk as the whole file.</li>
+</ul>
 <h3 id="self-check-and-next-step">Self-check and next step<a class="heading-anchor" href="#self-check-and-next-step" aria-label="Link to this section">#</a></h3>
-<p>Explain Schema inference, NDJSON, Batch size without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.</p>
+<p>Why does Example A pass an explicit schema to the CSV reader rather than inferring one from two rows? In Example B, how does a JSON <code>null</code> become an Arrow null, and what would you expect if the field were declared non-nullable? How does newline-delimited JSON differ from a single JSON array?</p>
+<p>Then work through <a href="../STUDY-GUIDE.md.html#self-check-and-review">Self-check and review</a>.</p>
 <h3 id="sources-and-execution-boundary">Sources and execution boundary<a class="heading-anchor" href="#sources-and-execution-boundary" aria-label="Link to this section">#</a></h3>
-<p><a href="https://docs.rs/arrow/60.0.0/arrow/">Official language or framework documentation</a>. The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.</p>
+<p>Read <a href="https://docs.rs/arrow/60.0.0/arrow/">the Arrow 60 crate documentation</a> for the CSV and JSON reader builders and <code>with_batch_size</code>.</p>
+<p>What the classroom does and does not prove: <a href="../STUDY-GUIDE.md.html#sources-and-execution-boundary">Sources and execution boundary</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for rust-043: CSV and JSON readers with explicit schemas.
 Read courses/rust/guides/rust-043.md and courses/rust/lessons/rust-043.rs. Prerequisites: rust-042.

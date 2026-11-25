@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cpp/solutions/cpp-008_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="cpp-008-explanations-and-reference-observations">cpp-008: explanations and reference observations<a class="heading-anchor" href="#cpp-008-explanations-and-reference-observations" aria-label="Link to this section">#</a></h2>
-<p>Attempt the learner tasks before opening this document. The executable reference checks the bounded normal and boundary examples; the six explanations below cover the deliberate changes and manual checks.</p>
+<p>The <a href="cpp-008_solution.cpp.html">executable reference</a> adds an observer lambda that takes a vector by const reference and reports sizes 2 and 0, and checks that <code>doubled({5})</code> returns <code>{10}</code> from a temporary. The explanations contrast returning by value with returning a view into the argument. How to compare: <a href="../STUDY-GUIDE.md.html#compare-with-the-solutions">study guide</a>.</p>
 <h3 id="mechanism">Mechanism<a class="heading-anchor" href="#mechanism" aria-label="Link to this section">#</a></h3>
 <p>A value copy has its own state. A reference is another name for an existing object and does not own its lifetime. <code>const</code> blocks mutation through that access path. A const reference can avoid copying a large vector, but it does not keep the vector alive after its owner is destroyed.</p>
 <h3 id="detailed-reasoning">Detailed reasoning<a class="heading-anchor" href="#detailed-reasoning" aria-label="Link to this section">#</a></h3>

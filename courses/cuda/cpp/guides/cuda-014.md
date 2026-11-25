@@ -4,18 +4,15 @@
 
 Beginner; about 90 minutes, plus any optional hardware experiment. Direct prerequisites: `cuda-004`, `cuda-013`
 
-The order supports learning at your own pace. Reading and CPU reasoning remain
-available when NVIDIA hardware is absent. Advanced hardware features need their
-own capability checks and are not prerequisites for opening this chapter.
+Pacing, evidence labels and platform rules for every chapter are in the [CUDA study guide](../../STUDY-GUIDE.md).
 
 ## Learning objectives
 
 Prove that a grid-stride loop writes every output element exactly once, including the tail.
 
-Work through *One-dimensional indexing that survives awkward sizes* with the concrete cases below. Finish with this evidence:
-every output element is written exactly once and tails match the CPU reference. Distinguish an algorithmic
-calculation, a compiled artifact and an actual device observation when explaining
-what your work establishes.
+**Scope:** Global thread index, ceiling division, bounds predicates and grid-stride loops.
+
+**Evidence to produce:** Every output element is written exactly once and tails match the CPU reference.
 
 ## Purpose, vocabulary and mental model
 
@@ -38,24 +35,15 @@ G is the positive grid stride and t is a unique starting thread index. Each vali
 
 ## How to run and study this lesson
 
-Use the saved reading worksheet in `/classroom`; the reading pad does not execute
-CUDA. For the bounded calculation, select **CPU model (Python)**, whose
-answer-free starter supplies the literal fixtures and task contract. The
-[CUDA C++ study workflow](../README.md) covers platforms, optional GPU
-compilation and evidence labels. In a prepared Python environment you can also
-run the separate [CPU reference](../references/cuda-014_cpu.py) from the
-repository root:
+Trace worked example 1 by hand, then run the [CPU reference](../references/cuda-014_cpu.py) from the repository root:
 
 ```sh
 python courses/cuda/cpp/references/cuda-014_cpu.py
 ```
 
-Its assertions check the stated numerical result or model invariant; console
-text is evidence of this CPU model only, not of CUDA execution.
-
 ## CUDA C++ kernel listing
 
-The kernel below is an excerpt from the chapter's complete [GPU reference](../references/cuda-014_gpu.cu). The full program adds device discovery, checked allocation and launch, completion checks and host validation. Read it as CUDA C++ source; the classroom reading pad does not compile or run it.
+An excerpt from the chapter's complete [GPU reference](../references/cuda-014_gpu.cu); the reading pad does not compile it.
 
 ```cpp
 __global__ void vector_add(const int *a, const int *b, int *out,
@@ -72,9 +60,7 @@ __global__ void vector_add(const int *a, const int *b, int *out,
 
 Use two blocks of four threads for \(\mathrm{n}=19\). Thread 0 owns indices 0,8,16; thread 1 owns 1,9,17; thread 2 owns 2,10,18; thread 3 owns 3,11. Every element has exactly one owner. This ownership trace is CPU reasoning, not a simulator of warp scheduling or GPU timing.
 
-The complete CPU model below intentionally models only the named arithmetic,
-layout, dependency or capability decision. It does not model GPU scheduling,
-caches, instruction timing or device memory visibility.
+**Why:** Indices congruent to t modulo 8 belong to thread t only, so the eight lists partition 0 to 18.
 
 ```python
 n, stride = 19, 8
@@ -85,58 +71,44 @@ assert owners[0] == [0, 8, 16]
 print({"thread_0": owners[0], "all_elements_written_once": True})
 ```
 
-**Expected observation:** Every assertion succeeds. A representative CPU output is:
+**Expected observation:** every assertion succeeds, and the CPU model prints:
 
 ```text
 {'thread_0': [0, 8, 16], 'all_elements_written_once': True}
 ```
 
-Integers, shapes and ordering must match exactly; only assertions with an explicit
-tolerance accept small floating-point differences. A printed duration is a model
-output, not a measured GPU benchmark.
+**Check:** The reference asserts the sorted union equals range(19) with 19 unique entries, and thread 0 owns [0, 8, 16].
 
 ## Worked example 2: change a meaningful condition
 
 For x=\([0,1,2,3,4]\) and y=\([5,4,3,2,1]\), vector addition returns five fives. Extend the fixture to \(\mathrm{n}=33\) with distinct values to expose a tail just beyond a warp boundary. Test empty, singleton and a larger odd prime as well.
 
-Before applying this example to your own program, write down which inputs are
-read, which result is produced, and the condition that makes the comparison
-valid. Keep the original case as a regression check when changing a boundary.
+**Why:** Every pair sums to five, and 33 places one element past the first 32-lane warp.
+
+**Check:** Compare all 33 outputs with a host loop and confirm index 32 holds its own distinct sum.
 
 ## Optional CUDA C++ laboratory
 
-A complete [GPU reference](../references/cuda-014_gpu.cu) and separate
-[GPU learner source](../lessons/cuda-014_gpu.cu) accompany this chapter.
-They are standalone files with bounded fixtures, checked runtime calls and host
-validation. The learner source intentionally reports incomplete implementation
-until you add the chapter's algorithm and assertions. It must never return a
-fake GPU success on a CPU machine. Follow the [manual GPU workflow](../README.md)
-for exact compilation and execution paths. If the classroom offers the optional
-CUDA C++ variant, its capability notice must confirm actual runtime readiness.
+- [GPU learner source](../lessons/cuda-014_gpu.cu)
+- [GPU reference](../references/cuda-014_gpu.cu)
 
-The reference contains an explicit no-device failure, launch and completion
-checks, and returned-value validation. Source review and CPU reference checks do
-not qualify this .cu file on your hardware. Preserve compilation, actual device
-execution and sanitizer evidence separately. Exercise 4 is a reasoning diagnosis;
-do not deliberately launch a hanging kernel or reset a shared GPU to reproduce it.
+Read the [laboratory rules](../../STUDY-GUIDE.md#optional-native-cuda-laboratories) before compiling.
 
 ## Six progressive exercises
 
-Exercises 1 and 2 are guided reconstructions of the worked examples; exercises
-3-6 change an input, diagnose a defect, test a boundary and transfer the idea.
-For each one, keep the calculation, output, diagram or failure policy you
-produce so another reader can compare it with the worked cases. If the hint is
-not enough, reread the mechanism paragraph and the bounded CPU assertion.
-
 ### Exercise 1
 
-Predict and trace the first worked example before running its CPU reference. Write every intermediate quantity that leads to the stated result, including units or ownership where applicable.
+Reconstruct worked example 1 on paper before running its CPU reference. Set stride to the total thread count 2 * 4 = 8 and list i, i + 8, i + 16 below 19 for each thread.
+
+**Trap to avoid:** Using blockDim.x = 4 as the stride makes block 1 revisit indices block 0 already owns.
 
 **Hint:** Start with the literal input and intermediate quantities in worked example 1.
 
 ### Exercise 2
 
-Reconstruct the second worked example without copying its conclusion. Identify the changed input or condition, show the resulting calculation or dependency, and explain why it differs from the first example.
+Rework worked example 2 without copying its conclusion. Add [0, 1, 2, 3, 4] and [5, 4, 3, 2, 1], then repeat with 33 distinct values and empty and singleton inputs.
+
+**Trap to avoid:** Testing only with five elements never crosses a block or warp edge, so a dropped tail stays hidden.
 
 **Hint:** Identify exactly which condition changes in worked example 2.
 
@@ -144,11 +116,15 @@ Reconstruct the second worked example without copying its conclusion. Identify t
 
 Give the indices owned by starting thread 5 when \(\mathrm{stride}=8\) and \(\mathrm{n}=22\).
 
+**Trap to avoid:** Stopping at i <= n would admit 22 if it appeared, one past the last element.
+
 **Hint:** Use the first worked example to establish the relevant quantities, then change only the requested input.
 
 ### Exercise 4
 
 A kernel tests `i <= n` instead of `i < n`. Diagnose it.
+
+**Trap to avoid:** Allocating n + 1 elements hides the write but leaves the logical contract broken.
 
 **Hint:** Locate the failed phase or violated dependency before proposing a repair.
 
@@ -156,35 +132,33 @@ A kernel tests `i <= n` instead of `i < n`. Diagnose it.
 
 How many blocks are required for \(\mathrm{n}=33\) with 32 threads under one-element mapping?
 
+**Trap to avoid:** Using 33 / 32 with integer division gives one block and loses element 32.
+
 **Hint:** Check what the algorithm is allowed to read, write or assume at this boundary.
 
 ### Exercise 6
 
 Transfer the proof to a streaming chunk with a global offset.
 
+**Trap to avoid:** Adding the offset first and checking only the global bound can overrun a shorter final chunk.
+
 **Hint:** State the output contract and which observations are needed in the new application.
 
 ## Common mistakes and diagnosis
 
-A tempting but incorrect claim in this chapter is: **removing the bounds condition is harmless because a chosen demo length is divisible by the block size.**
-
-For the concrete failure exercise, a kernel tests `i <= n` instead of `i < n`. Diagnose it.
-Preserve the original input and the stage where behavior diverged, and compare
-with the CPU model before changing hardware configuration.
+A tempting but incorrect claim: **Removing the bounds condition is harmless because a chosen demo length is divisible by the block size.** A demo length is not the contract. Real inputs arrive at sizes such as 19 or 33, and worked example 1 shows the final pass of a grid-stride loop covering only part of the stride. Without `i < n` the extra threads read and write past the allocation, which may corrupt memory silently.
 
 ## Self-check, retrieval and transfer
 
-Explain the first example without its code, then use the second example to state
-one assumption that matters. Complete Exercise 3 independently, use Exercise 4 to
-diagnose a plausible defect, check the boundary in Exercise 5, and retain the
-application contract from Exercise 6. Compare the [separate explanations](../solutions/cuda-014_solutions.md)
-only after your attempt or a deliberate reveal. A reading marker records your
-choice; it does not certify hardware qualification or expert mastery.
+1. In worked example 1, why does thread 3 own only two indices?
+2. Why cast to a wide integer before multiplying block index by block size?
+3. What does a grid-stride loop give you that a one-element mapping does not?
+
+Short answers are in the [separate explanations](../solutions/cuda-014_solutions.md#self-check-answers); compare only after an attempt.
 
 ## Primary references
 
-Check the documentation that matches your prepared toolkit before optional
-hardware execution.
+Use the documentation that matches your prepared toolkit.
 
 - [CUDA Programming Guide](https://docs.nvidia.com/cuda/cuda-programming-guide/)
 

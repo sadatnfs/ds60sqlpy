@@ -1,6 +1,8 @@
 # c-016: explained solutions
 
-Compare after an attempt or explicit reveal. The complete executable reference, `c-016_solution.c`, implements all six cases, from the "push into an empty vector" case to the "transfer reserve failure atomicity" case, in one `main.c`.
+`c-016_solution.c` assembles the "push into an empty vector" case through the "transfer reserve failure atomicity" case in one `main.c`.
+
+Compare only after an attempt: [Compare and transfer](../STUDY-GUIDE.md#compare-and-transfer).
 
 ## Mechanism and assumptions
 
@@ -10,7 +12,7 @@ A vector stores data, len and cap. reserve ensures capacity without changing len
 
 ## Exercise 1: Push into an empty vector: predict an edited check
 
-Copy worked example 1 into a scratch pad and change `CHECK(vector_push(&v, 3) && vector_push(&v, 5));` to `CHECK(vector_push(&v, 4) && vector_push(&v, 5));` inside its CHECK. Before running, predict whether the CHECK still holds and explain why; then restore it.
+In worked example 1, change `CHECK(vector_push(&v, 3) && vector_push(&v, 5));` to `CHECK(vector_push(&v, 4) && vector_push(&v, 5));`. Predict whether the CHECK still holds and why, then run and restore.
 
 The unchanged code is worked example 1:
 
@@ -21,13 +23,15 @@ CHECK(v.len == 2 && v.data[0] == 3 && v.data[1] == 5);
 vector_destroy(&v);
 ```
 
-**Expected:** With `CHECK(vector_push(&v, 4) && vector_push(&v, 5));` the run stops with `Check failed` at the CHECK on `v.len == 2 && v.data[0] == 3 && v.data[1] == 5`, because the "push into an empty vector" case no longer shows that length is 2 and values are retained. Restoring `CHECK(vector_push(&v, 3) && vector_push(&v, 5));` brings that observation back.
+**Expected:** `Check failed`: `CHECK(vector_push(&v, 4) && vector_push(&v, 5));` is false, although length is 2 and values are retained.
+
+**Verify:** Explain which claim `CHECK(vector_push(&v, 4) && vector_push(&v, 5));` makes that the state fails; restoring `CHECK(vector_push(&v, 3) && vector_push(&v, 5));` passes again.
 
 The zero state is a usable empty vector. Growth happens before the first write.
 
 ## Exercise 2: Reserve without adding elements: diagnose an edited check
 
-A careless edit changed the CHECK in worked example 2, the "reserve without adding elements" case, so that it reads `CHECK(v.cap > 8 && v.len == 0);`. Run the example with that line, explain why the edited CHECK now fails even though the program state still means capacity is at least eight while length stays zero, and restore it.
+Worked example 2's CHECK now reads `CHECK(v.cap > 8 && v.len == 0);`. Explain why it fails although capacity is at least eight while length stays zero, then restore it.
 
 The unchanged code is worked example 2:
 
@@ -38,7 +42,9 @@ CHECK(v.cap >= 8 && v.len == 0);
 vector_destroy(&v);
 ```
 
-**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `v.cap >= 8 && v.len == 0`. Once the line reads `CHECK(v.cap >= 8 && v.len == 0);` again, the "reserve without adding elements" case again shows that capacity is at least eight while length stays zero.
+**Expected:** `Check failed` until the CHECK reads `CHECK(v.cap >= 8 && v.len == 0);` again, though capacity is at least eight while length stays zero.
+
+**Verify:** Explain why `CHECK(v.cap > 8 && v.len == 0);` rejects a state that `v.cap >= 8 && v.len == 0` accepts, using your failing and repaired runs.
 
 Reservation is storage preparation, not logical insertion. Treating capacity as length would expose uninitialized elements.
 
@@ -57,6 +63,8 @@ vector_destroy(&v);
 
 **Expected:** Every stored value matches its index.
 
+**Verify:** Keep a CHECK equivalent to `v.data[i] == (int)i`. Control edit: changing `for (size_t i = 0; i < v.len; i++)` to `for (size_t i = 0; i <= v.len; i++)` must fail it; then restore it.
+
 Each successful growth preserves the previously initialized prefix. Old element pointers must not be used after a possible move.
 
 ## Exercise 4: Pop from a nonempty vector
@@ -73,6 +81,8 @@ vector_destroy(&v);
 
 **Expected:** The returned value is 7 and length becomes zero.
 
+**Verify:** Keep a CHECK equivalent to `vector_pop(&v, &out) && out == 7 && v.len == 0`. Control edit: `CHECK(vector_push(&v, 8));` must fail; then restore it.
+
 The vector retains capacity after removal, which can make later pushes cheap without changing the empty logical state.
 
 ## Exercise 5: Reject an empty pop
@@ -87,6 +97,8 @@ vector_destroy(&v);
 ```
 
 **Expected:** The operation fails and output stays 9.
+
+**Verify:** Keep a CHECK equivalent to `!vector_pop(&v, &out) && out == 9`. Control edit: changing `int out = 9;` to `int out = 10;` must fail it; then restore it.
 
 The failure path performs no decrement and no out-of-bounds read.
 
@@ -104,8 +116,10 @@ vector_destroy(&v);
 
 **Expected:** The original value and length remain intact.
 
+**Verify:** Keep a CHECK equivalent to `v.len == 1 && v.data[0] == 4`. Control edit: `CHECK(vector_push(&v, 5));` must fail; then restore it.
+
 Arithmetic rejection happens before realloc. This deterministic case tests state preservation without depending on host memory exhaustion.
 
 ## After comparison
 
-Add a fresh distinguishing input for the "transfer reserve failure atomicity" case to your own c-016 source. Explain why every access in `vector_reserve` or `vector_push` or `vector_pop` stays within a live object and each owned resource is released. An expected length failure belongs in the test contract; undefined behavior does not. Keep diagnostics and sanitizer evidence for the "reserve without adding elements" case apart from ordinary output: the fixture proves its stated length, capacity and reallocation assumptions, not universal safety.
+Push 1 through 5 into an empty vector, record `cap`, then pop all five. CHECK that `vector_pop` writes 5, 4, 3, 2 and 1 through its output in that order, that `len` ends at 0 and that `cap` is unchanged. A sixth pop must return false and leave its output untouched. Then explain why a pointer saved to `data[0]` before the pushes may be stale afterward, even though `len` is back to 0.

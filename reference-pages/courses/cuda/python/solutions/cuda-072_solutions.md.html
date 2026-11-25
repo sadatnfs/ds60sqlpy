@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cuda/python/solutions/cuda-072_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="cuda-072-explained-solutions">cuda-072: explained solutions<a class="heading-anchor" href="#cuda-072-explained-solutions" aria-label="Link to this section">#</a></h2>
-<p>These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.</p>
+<p>Compare with your <a href="../lessons/cuda-072.md.html">worksheet</a> attempt.</p>
 <h3 id="exercise-1-order-the-evidence-levels">Exercise 1: Order the evidence levels<a class="heading-anchor" href="#exercise-1-order-the-evidence-levels" aria-label="Link to this section">#</a></h3>
 <p>Import, visibility, allocation, launch, completion and correctness.</p>
 <p><strong>Approach.</strong> Order the evidence as import, device visibility, allocation, kernel launch, completion and correctness, and record each as passed, failed or not attempted.</p>
@@ -231,9 +231,19 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Why it is correct here.</strong> Each backend has its own runtime, operator coverage and numerical behavior. A result on Apple MPS or AMD ROCm can be correct and useful, but it is not evidence that the CUDA path works.</p>
 <p><strong>A plausible wrong approach.</strong> Calling any accelerator run a GPU pass loses which runtime produced it, so a CUDA requirement can be satisfied by an Apple run on paper.</p>
 <p><strong>How to verify.</strong> Check the device object&#x27;s type string (for example <code>cuda:0</code> or <code>mps</code>) and record it beside every result.</p>
+<h3 id="self-check-answers">Self-check answers<a class="heading-anchor" href="#self-check-answers" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>Why can a successful import not prove a device is usable?</strong> Import only resolves the Python package. Device visibility, allocation, launch, completion and correctness are later claims that each need their own test.</li>
+</ol>
+<ol start="2">
+<li><strong>How do you classify an unsupported architecture binary versus an allocation failure?</strong> The first is a build issue: the compiled code does not target the device. The second is a workload budget issue: the request exceeds the memory available to the job.</li>
+</ol>
+<ol start="3">
+<li><strong>Is MPS or ROCm a way to emulate CUDA?</strong> No. They are separate accelerator backends with their own packages and supported operations, so their results must be labeled by name, not reported as CUDA evidence.</li>
+</ol>
 <h3 id="reference-observation">Reference observation<a class="heading-anchor" href="#reference-observation" aria-label="Link to this section">#</a></h3>
 <p>Fixture fails at correctness, not readiness success.</p>
-<p>The reference file is <code>courses/cuda/python/references/cuda-072_cpu.py</code>. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.</p></article>
+<p>Asserted by <code>courses/cuda/python/references/cuda-072_cpu.py</code>.</p></article>
   </main>
 </body>
 </html>

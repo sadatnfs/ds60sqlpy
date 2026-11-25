@@ -1,67 +1,23 @@
 # Day 02 solutions: Aggregations, GROUP BY, HAVING, Grouping Sets
 
-
 <!-- beginner-solution-enrichment -->
 ## How to study and run this solution
 
-Open this explanation only after making an honest attempt. The executable
-companion runs solely against the disposable `advanced_sql_training` database:
+All six answers group rows and then report one row per group. Exercises 1 and 3 count rows per country or status, Exercises 2 and 5 add money per category and filter the totals with `HAVING`, Exercise 4 compares three kinds of count over the whole table, and Exercise 6 groups orders by calendar month. Write your own versions first, then run:
 
 ```bash
-# Linux, macOS, or Windows through WSL 2, from the repository root
 psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
   -f sql/postgres-60day/solutions/day02_solutions.sql
 ```
 
-`psql` prints each result/command tag in the terminal. Stop at the first
-unexpected `ERROR`; later output cannot repair an earlier failed invariant.
-Compare your own SQL, row grain, column names, row counts, `NULL` policy, and
-ordering with the explanation before comparing syntax.
-
-## Clause-by-clause reading map
-
-The lesson's main concepts are Aggregate, Group grain, Grouping set. Its worked-model focus is:
-In the category-revenue query, first identify one joined row as an order line. Next group those rows by product category, calculate the revenue aggregate, and only then apply `HAVING`. Compare that flow with a date predicate in `WHERE`, which removes rows before the category totals are computed.
-
-- Start at `FROM`/`JOIN` and state the intermediate row grain. Inspect join keys
-  before adding aggregates; a one-to-many join is allowed to multiply rows only
-  when the later contract accounts for it.
-- Apply `WHERE` to input rows, `GROUP BY` to form buckets, and `HAVING` to
-  completed groups. Window functions run over the surviving relation and
-  normally preserve its row count.
-- Read the `SELECT` list as the public result contract: keys establish grain,
-  measures state calculations, and aliases explain meaning. `ORDER BY` is the
-  only output-order guarantee; add a unique tie-breaker before `LIMIT`.
-- Trace every common table expression (CTE) as a temporary named relation.
-  Execute or inspect one stage at a time while debugging, but compare the final
-  result with an independent control rather than trusting stage names.
-- Keep SQL `NULL` as “missing/unknown/not applicable” until the metric contract
-  chooses another representation. Guard division with `NULLIF`; disclose
-  exclusions and distinguish zero from no row.
-- For DDL/DML, a command tag proves only that PostgreSQL accepted a statement.
-  Catalog checks, negative cases, row-count reconciliation, and the declared
-  transaction boundary prove behavior and cleanup.
-
-The exact final queries are not the only valid syntax. A join, subquery, CTE,
-window, or conditional aggregate can be an alternative when it preserves the
-same grain, `NULL` semantics, deterministic ordering, and safety. Prefer the
-form whose intermediate relations a reviewer can verify; optimize only after
-correctness is established with evidence.
-
-These answers align one-for-one with [day02_aggregates_groupby_having.sql](../day02_aggregates_groupby_having.sql).
-Run only against the disposable `advanced_sql_training` database.
-The executable companion wraps every answer in `BEGIN`/`ROLLBACK`.
-The snippets below assume the lesson's
-`SET search_path TO training, public;` statement. Run the complete
-executable companion when you want a self-contained check.
+Row counts to expect: 8, 6, 5, 1, 5, and 12 in our check (Exercise 6 depends on today's date). Nothing is written; the file ends with `ROLLBACK`, and the excerpts below leave out its `SET search_path` line. The exercises follow [the learner file](../day02_aggregates_groupby_having.sql), and the study guide gives [suggestions for checking your answer against this one](../../STUDY-GUIDE.md#read-a-solution).
 
 ## Reading contract
 
 - **Focus:** Aggregate rows only after naming the grouping grain, then filter groups with `HAVING` and preserve numeric meaning.
 - **Assumptions:** Money columns are exact `numeric`; round only presentation values. `COUNT(column)` excludes NULL while `COUNT(*)` counts rows.
 - **Primary pitfall:** Selecting a non-grouped, non-aggregated column or using `WHERE` for an aggregate condition changes or invalidates the question.
-- **Safety:** all writes are bounded and rollback-protected; read-only
-  queries still use deterministic ordering whenever row order is claimed.
+- **Safety:** read-only; the six statements are plain `SELECT`s, wrapped in a transaction that ends in `ROLLBACK`.
 
 ## Exercise 1: Query writing
 
@@ -71,10 +27,10 @@ executable companion when you want a self-contained check.
 
 **Clause-by-clause reading:**
 
-- `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
-- `FROM`: establishes the starting relation and therefore the initial row grain.
-- `GROUP BY`: collapses input rows to the listed key grain; every non-aggregated selected value must belong to that grain.
-- `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
+- `FROM customers AS c`: all 500 customers, one row each.
+- `GROUP BY c.country`: one bucket per country; `c.country` may appear in the `SELECT` list because it is the grouping key.
+- `COUNT(*) AS customer_count`: the number of rows in each bucket.
+- `ORDER BY customer_count DESC, c.country`: largest count first, alphabetical within a tie. `ORDER BY` may use the alias because it runs after the `SELECT` list.
 
 ```sql
 SELECT
@@ -91,19 +47,15 @@ ORDER BY
 
 **Expected shape:** One row per country.
 
-Check the result at the stated grain. An alternative formulation is
-valid only if it preserves the same NULL, ordering, time, money, and
-cardinality contract.
-
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-02 Exercise 1, read from `customers`. Build the answer toward `country`, and `customer_count`; keep `country` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-02 Exercise 1, expected output: One row per country. The final columns are `country`, and `customer_count`. The final order is `customer_count DESC, c.country`.
-- **Independent verification:** For sql-02 Exercise 1, independently aggregate `customers` by `country`; require one output row for every distinct `country` tuple and compare `customer_count` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `customer_count` for the existing `country` tuple and verify the new tuple appears exactly once.
-- **Intermediate relation check:** For sql-02 Exercise 1, confirm the groups are `country`; then check `customer_count DESC, c.country` before applying the row cap.
-- **Clause check:** For sql-02 Exercise 1, the solution actually uses `FROM`, `GROUP BY`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `customers`, preserve one row per `country`, and finish with `country`, and `customer_count` ordered by `customer_count DESC, c.country`.
-- **Alternative/trade-off:** For sql-02 Exercise 1, the chosen form is justified by this lesson-specific rationale: The output grain is one row per country; include a deterministic secondary sort. Evaluate another form against the concrete expected result (One row per country) and the verification above.
-- **Edge case:** Add one row to an existing group and one row for a new group; recompute `customer_count` for the existing `country` tuple and verify the new tuple appears exactly once.
+- **Inputs/evidence:** For sql-02 Exercise 1, read all 500 `customers` rows; `country` is `NOT NULL` and takes 8 values. Return `country` and `customer_count`.
+- **Expected result/shape:** For sql-02 Exercise 1, return 8 rows, one per country: `CA`, `DE`, `GB`, and `US` with 63 customers each, then `AU`, `BR`, `FR`, and `IN` with 62 each. The final columns are `country`, and `customer_count`. The final order is `customer_count DESC, c.country`.
+- **Independent verification:** For sql-02 Exercise 1, confirm the 8 counts sum to 500, matching `SELECT COUNT(*) FROM customers`, and that the four-way tie at 63 is listed alphabetically. Inside a rolled-back transaction, move customer 1 from `US` to `NZ`; the result must grow to 9 rows, with `US` falling to 62 and `NZ` appearing last with 1.
+- **What prints:** eight rows. CA, DE, GB and US each have 63 customers; AU, BR, FR and IN each have 62.
+- **Ties decide the layout:** every row ties with three others, so without `c.country` the order within each count would be arbitrary.
+- **Checking the total:** the eight counts add to 500, which equals `SELECT COUNT(*) FROM customers`. A country with no customers cannot appear, because groups come only from existing rows.
+- **Customers, not buyers:** BR's 62 customers count here even though none of them has an order. Counting buyers per country would mean joining to `orders` and using `COUNT(DISTINCT o.customer_id)`.
 
 ## Exercise 2: Query writing
 
@@ -113,12 +65,11 @@ cardinality contract.
 
 **Clause-by-clause reading:**
 
-- `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
-- `FROM`: establishes the starting relation and therefore the initial row grain.
-- `JOIN ... ON`: combines relations and may multiply rows; the match predicate and each input's grain must agree.
-- `GROUP BY`: collapses input rows to the listed key grain; every non-aggregated selected value must belong to that grain.
-- `HAVING`: filters completed groups after aggregation, unlike `WHERE`, which filters source rows first.
-- `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
+- `JOIN products AS p ON p.product_id = oi.product_id`: attaches a category to each of the 13,085 order lines without changing the row count, since every line has exactly one product.
+- `ROUND(SUM(oi.unit_price * oi.quantity * (1 - oi.discount)), 2) AS net_revenue`: line value after discount, added up per category and rounded once.
+- `ROUND(AVG(oi.unit_price), 2) AS average_unit_price`: the mean list price over the category's lines.
+- `HAVING SUM(...) > 100000`: the same net expression, unrounded, tested after grouping.
+- `ORDER BY net_revenue DESC, p.category`: highest revenue first.
 
 ```sql
 SELECT
@@ -139,19 +90,16 @@ ORDER BY
 
 **Expected shape:** One row per qualifying category.
 
-Check the result at the stated grain. An alternative formulation is
-valid only if it preserves the same NULL, ordering, time, money, and
-cardinality contract.
-
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-02 Exercise 2, read from `order_items`, and `products`. Build the answer toward `category`, `net_revenue`, and `average_unit_price`; keep `category` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-02 Exercise 2, expected output: One row per qualifying category. The final columns are `category`, `net_revenue`, and `average_unit_price`. The final order is `net_revenue DESC, p.category`.
-- **Independent verification:** For sql-02 Exercise 2, independently aggregate `order_items`, and `products` by `category`; require one output row for every distinct `category` tuple and compare `net_revenue`, and `average_unit_price` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `net_revenue`, and `average_unit_price` for the existing `category` tuple and verify the new tuple appears exactly once.
-- **Intermediate relation check:** For sql-02 Exercise 2, start with the first relation in `order_items`, and `products`; after each join, record total rows and distinct `category` so the exact fanout or loss is visible.
-- **Clause check:** For sql-02 Exercise 2, the solution actually uses `FROM`, `JOIN ... ON`, `GROUP BY`, `HAVING`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `order_items`, and `products`, preserve one row per `category`, and finish with `category`, `net_revenue`, and `average_unit_price` ordered by `net_revenue DESC, p.category`.
-- **Alternative/trade-off:** For sql-02 Exercise 2, the chosen form is justified by this lesson-specific rationale: Join at line grain, aggregate once per category, and place the aggregate predicate in `HAVING`. Evaluate another form against the concrete expected result (One row per qualifying category) and the verification above.
-- **Edge case:** Add one row to an existing group and one row for a new group; recompute `net_revenue`, and `average_unit_price` for the existing `category` tuple and verify the new tuple appears exactly once.
+- **Inputs/evidence:** For sql-02 Exercise 2, join the 13,085 `order_items` rows to `products` on `product_id`; every item finds its product, and the 6 categories hold between 2,145 and 2,192 items each. Return `category`, `net_revenue`, and `average_unit_price`.
+- **Expected result/shape:** For sql-02 Exercise 2, return 6 rows, because every category clears the 100,000 `HAVING` threshold; `Sports` leads at 397427.70 and `Books` is last at 386192.77. The final columns are `category`, `net_revenue`, and `average_unit_price`. The final order is `net_revenue DESC, p.category`.
+- **Independent verification:** For sql-02 Exercise 2, confirm the 6 `net_revenue` values sum to 2355647.12, the same total that `SUM(unit_price * quantity * (1 - discount))` gives over all of `order_items`. Raise the threshold to 395000 and only `Sports` must remain, which proves `HAVING` filters groups after they are summed.
+- **What prints:** six rows, from Sports at 397,427.70 down to Books at 386,192.77. Average unit prices sit between 60.40 (Apparel) and 61.78 (Sports).
+- **The threshold keeps everything:** the smallest category still clears 100,000 almost four times over. Raise it to 390,000 and Books disappears; raise it to 395,000 and only Sports is left.
+- **Average per line, not per unit:** `AVG(oi.unit_price)` counts a line of one unit and a line of five units equally and ignores discounts. Net revenue divided by `SUM(oi.quantity)` would give the price actually paid per unit, 60.66 for Sports.
+- **`HAVING` before rounding:** the filter compares the exact sum, so a category at 100,000.004 would pass even though its displayed value rounds to 100,000.00.
+- **Line counts behind each total:** Books has the fewest lines, 2,145, against 2,186 to 2,192 elsewhere, which explains most of its gap to Sports. `COUNT(*)` beside the revenue makes that visible.
 
 ## Exercise 3: Query writing
 
@@ -161,11 +109,10 @@ cardinality contract.
 
 **Clause-by-clause reading:**
 
-- `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
-- `FROM`: establishes the starting relation and therefore the initial row grain.
-- `GROUP BY`: collapses input rows to the listed key grain; every non-aggregated selected value must belong to that grain.
-- `HAVING`: filters completed groups after aggregation, unlike `WHERE`, which filters source rows first.
-- `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
+- `GROUP BY o.status`: one bucket for each of the five statuses.
+- `COUNT(*) AS order_count` and `ROUND(AVG(o.total_amount), 2) AS average_order_total`: the size and mean order value of each bucket.
+- `HAVING COUNT(*) >= 100`: drops any status with fewer than 100 orders, after counting.
+- `ORDER BY order_count DESC, o.status`: busiest status first, alphabetical within a tie.
 
 ```sql
 SELECT
@@ -185,19 +132,16 @@ ORDER BY
 
 **Expected shape:** One row per qualifying order status.
 
-Check the result at the stated grain. An alternative formulation is
-valid only if it preserves the same NULL, ordering, time, money, and
-cardinality contract.
-
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-02 Exercise 3, read from `orders`. Build the answer toward `status`, `order_count`, and `average_order_total`; keep `status` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-02 Exercise 3, expected output: One row per qualifying order status. The final columns are `status`, `order_count`, and `average_order_total`. The final order is `order_count DESC, o.status`.
-- **Independent verification:** For sql-02 Exercise 3, independently aggregate `orders` by `status`; require one output row for every distinct `status` tuple and compare `order_count`, and `average_order_total` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `order_count`, and `average_order_total` for the existing `status` tuple and verify the new tuple appears exactly once.
-- **Intermediate relation check:** For sql-02 Exercise 3, confirm the groups are `status`; then check `order_count DESC, o.status` before applying the row cap.
-- **Clause check:** For sql-02 Exercise 3, the solution actually uses `FROM`, `GROUP BY`, `HAVING`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `orders`, preserve one row per `status`, and finish with `status`, `order_count`, and `average_order_total` ordered by `order_count DESC, o.status`.
-- **Alternative/trade-off:** For sql-02 Exercise 3, the chosen form is justified by this lesson-specific rationale: Filter groups after aggregation with `HAVING COUNT(*)`. Evaluate another form against the concrete expected result (One row per qualifying order status) and the verification above.
-- **Edge case:** Add one row to an existing group and one row for a new group; recompute `order_count`, and `average_order_total` for the existing `status` tuple and verify the new tuple appears exactly once.
+- **Inputs/evidence:** For sql-02 Exercise 3, read all 4,362 `orders` rows across 5 `status` values. Return `status`, `order_count`, and `average_order_total`.
+- **Expected result/shape:** For sql-02 Exercise 3, return 5 rows, since every status has far more than 100 orders: `placed` and `shipped` with 873 each, then `delivered`, `paid`, and `returned` with 872 each. The final columns are `status`, `order_count`, and `average_order_total`. The final order is `order_count DESC, o.status`.
+- **Independent verification:** For sql-02 Exercise 3, confirm the 5 counts sum to 4,362 and that `paid` has the highest average at 548.24. Change the filter to `HAVING COUNT(*) >= 873`; only `placed` and `shipped` must remain, so the tie at 873 is broken by `status` name.
+- **What prints:** five rows: placed and shipped with 873 orders, then delivered, paid and returned with 872. The average order total ranges from 536.79 (returned) to 548.24 (paid).
+- **No status is dropped:** each status holds about a fifth of the 4,362 orders, so the `HAVING` bar of 100 is far below every group.
+- **Total check:** 873 + 873 + 872 + 872 + 872 = 4,362, every order exactly once.
+- **Reading the averages:** paid orders average 548.24, about eight above the overall 540.04, while returned orders sit lowest at 536.79. With roughly 870 orders per status, gaps this small are not worth a business conclusion.
+- **Why not `WHERE`:** `WHERE COUNT(*) >= 100` is rejected, and `WHERE status <> 'returned'` would answer a different question by removing orders before they are counted.
 
 ## Exercise 4: Prediction
 
@@ -207,9 +151,10 @@ cardinality contract.
 
 **Clause-by-clause reading:**
 
-- `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
-- `FROM`: establishes the starting relation and therefore the initial row grain.
-- `FILTER (WHERE ...)`: limits one aggregate without removing rows needed by neighboring aggregates.
+- `COUNT(*) AS all_rows`: every customer row, whatever its columns contain.
+- `COUNT(c.email) AS nonnull_email_rows`: only rows whose `email` is not `NULL`.
+- `COUNT(*) FILTER (WHERE c.email IS NULL) AS missing_email_rows`: counts only the rows that pass the `FILTER` condition.
+- No `GROUP BY`: the whole table is one group, so exactly one row comes back.
 
 ```sql
 SELECT
@@ -222,19 +167,15 @@ FROM
 
 **Expected shape:** One row; present plus missing equals total.
 
-Check the result at the stated grain. An alternative formulation is
-valid only if it preserves the same NULL, ordering, time, money, and
-cardinality contract.
-
 ### Reasoning and verification
 
 - **Inputs/evidence:** For sql-02 Exercise 4, read from `customers` and count, in one aggregate query, all rows as `all_rows`, rows with a non-null `email` as `nonnull_email_rows`, and rows whose `email` is NULL as `missing_email_rows`.
 - **Expected result/shape:** For sql-02 Exercise 4, expected output: One row; present plus missing equals total. The final columns are `all_rows`, `nonnull_email_rows`, and `missing_email_rows`.
 - **Independent verification:** For sql-02 Exercise 4, confirm `nonnull_email_rows + missing_email_rows = all_rows`; the seed returns 500, 500, and 0 because every seeded customer has an email. In a transaction you roll back, set one customer's `email` to NULL and rerun: expect 500, 499, and 1.
-- **Intermediate relation check:** For sql-02 Exercise 4, write `COUNT(*)` and `COUNT(email)` first and compare them; their difference is the number of NULL emails.
-- **Clause check:** For sql-02 Exercise 4, the solution actually uses `FROM`, `WHERE`, aggregate `FILTER`, and `SELECT`. Read only those operations: begin at `customers`, preserve exactly one summary row, and finish with `all_rows`, `nonnull_email_rows`, and `missing_email_rows`.
-- **Alternative/trade-off:** For sql-02 Exercise 4, the chosen form is justified by this lesson-specific rationale: `COUNT(email)` ignores NULL, while a filtered count makes missingness explicit. Evaluate another form against the concrete expected result (One row; present plus missing equals total) and the verification above.
-- **Edge case:** `COUNT(email)` skips NULL, so a NULL email lowers `nonnull_email_rows` but not `all_rows`; `COUNT(*) FILTER (WHERE email IS NULL)` counts the missing rows explicitly.
+- **What prints:** one row: 500, 500 and 0. Every seeded customer has an email, and all 500 addresses are distinct.
+- **The relationship:** `nonnull_email_rows + missing_email_rows = all_rows` holds for any data, because each row is counted in exactly one of the last two columns.
+- **Empty string versus `NULL`:** an email of `''` is not `NULL`, so `COUNT(c.email)` counts it. To treat blanks as missing, test `NULLIF(btrim(c.email), '') IS NULL`.
+- **`FILTER` versus `CASE`:** `SUM(CASE WHEN c.email IS NULL THEN 1 ELSE 0 END)` gives the same number; `FILTER` states the intent more directly.
 
 ## Exercise 5: Debugging
 
@@ -244,11 +185,11 @@ cardinality contract.
 
 **Clause-by-clause reading:**
 
-- `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
-- `FROM`: establishes the starting relation and therefore the initial row grain.
-- `GROUP BY`: collapses input rows to the listed key grain; every non-aggregated selected value must belong to that grain.
-- `HAVING`: filters completed groups after aggregation, unlike `WHERE`, which filters source rows first.
-- `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
+- `FROM expenses AS e`: 10,000 expense rows, from 100.51 to 9,998.28 each.
+- `GROUP BY e.category`: five buckets of 2,000 rows.
+- `ROUND(SUM(e.amount), 2) AS total_expense`: each category's spend.
+- `HAVING SUM(e.amount) > 1000000`: the repaired filter, applied to finished category totals instead of single rows.
+- `ORDER BY total_expense DESC, e.category`: biggest spender first.
 
 ```sql
 SELECT
@@ -267,19 +208,15 @@ ORDER BY
 
 **Expected shape:** One row per expense category over the threshold.
 
-Check the result at the stated grain. An alternative formulation is
-valid only if it preserves the same NULL, ordering, time, money, and
-cardinality contract.
-
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-02 Exercise 5, read from `expenses`. Build the answer toward `category`, and `total_expense`; keep `category` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-02 Exercise 5, expected output: One row per expense category over the threshold. The final columns are `category`, and `total_expense`. The final order is `total_expense DESC, e.category`.
-- **Independent verification:** For sql-02 Exercise 5, independently aggregate `expenses` by `category`; require one output row for every distinct `category` tuple and compare `total_expense` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `total_expense` for the existing `category` tuple and verify the new tuple appears exactly once.
-- **Intermediate relation check:** For sql-02 Exercise 5, confirm the groups are `category`; then check `total_expense DESC, e.category` before applying the row cap.
-- **Clause check:** For sql-02 Exercise 5, the solution actually uses `FROM`, `GROUP BY`, `HAVING`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `expenses`, preserve one row per `category`, and finish with `category`, and `total_expense` ordered by `total_expense DESC, e.category`.
-- **Alternative/trade-off:** For sql-02 Exercise 5, the chosen form is justified by this lesson-specific rationale: `WHERE` filters expense rows before grouping; `HAVING` filters category groups afterward. Evaluate another form against the concrete expected result (One row per expense category over the threshold) and the verification above.
-- **Edge case:** Add one row to an existing group and one row for a new group; recompute `total_expense` for the existing `category` tuple and verify the new tuple appears exactly once.
+- **Inputs/evidence:** For sql-02 Exercise 5, read the 10,000 `expenses` rows, 2,000 in each of 5 categories, with amounts from 100.51 to 9998.28. Return `category` and `total_expense`.
+- **Expected result/shape:** For sql-02 Exercise 5, return 5 rows, because every category total is above 1,000,000: `Marketing` first at 10108910.00 and `Infrastructure` last at 10080670.00. The final columns are `category`, and `total_expense`. The final order is `total_expense DESC, e.category`.
+- **Independent verification:** For sql-02 Exercise 5, rerun the grouping without `HAVING` and confirm the same 5 totals, each over 2,000 rows. Raise the threshold to 10100000; only `Marketing` and `COGS` (10103230.00) must remain.
+- **What prints:** five rows: Marketing 10,108,910.00, COGS 10,103,230.00, G&A 10,096,250.00, Payroll 10,094,790.00 and Infrastructure 10,080,670.00.
+- **The original error:** with `SUM(amount)` in `WHERE`, PostgreSQL stops at `aggregate functions are not allowed in WHERE`, because no category total exists while rows are still being filtered.
+- **Threshold scale:** every category passes the 1,000,000 bar about ten times over, and the five totals add to 50,483,850.00, the sum of the whole table.
+- **Mixing both filters:** a row test such as `WHERE e.amount >= 500` can stay in `WHERE` alongside the `HAVING`; it shrinks each category total before the group test runs.
 
 ## Exercise 6: Extension
 
@@ -289,13 +226,11 @@ cardinality contract.
 
 **Clause-by-clause reading:**
 
-- `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
-- `FROM`: establishes the starting relation and therefore the initial row grain.
-- `WHERE`: filters source rows before grouping and window calculation; SQL's unknown NULL comparisons do not pass.
-- `GROUP BY`: collapses input rows to the listed key grain; every non-aggregated selected value must belong to that grain.
-- `FILTER (WHERE ...)`: limits one aggregate without removing rows needed by neighboring aggregates.
-- time normalization: makes reporting boundaries explicit; UTC is applied before deriving calendar buckets where required.
-- `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
+- `WHERE o.order_date >= date_trunc('month', CURRENT_TIMESTAMP) - INTERVAL '11 months'`: keeps orders from the first day of the month eleven months back. It compares the bare column, so an index on `order_date` can be used.
+- `GROUP BY date_trunc('month', o.order_date)`: one bucket per calendar month, computed in the session time zone (UTC here).
+- `COUNT(*)`, `ROUND(SUM(o.total_amount), 2)`: orders and revenue per month.
+- `COUNT(*) FILTER (WHERE o.status = 'returned')`: returned orders per month, in the same pass.
+- `::date` in the `SELECT` list and `ORDER BY order_month`: shows the month as a plain date, oldest first.
 
 ```sql
 SELECT
@@ -315,24 +250,20 @@ ORDER BY
 
 **Expected shape:** Up to 12 month rows in chronological order.
 
-Check the result at the stated grain. An alternative formulation is
-valid only if it preserves the same NULL, ordering, time, money, and
-cardinality contract.
-
 ### Reasoning and verification
 
 - **Inputs/evidence:** For sql-02 Exercise 6, read from `orders` placed on or after `date_trunc('month', CURRENT_TIMESTAMP) - INTERVAL '11 months'`, group them by `date_trunc('month', order_date)`, and return each month's order count, summed `total_amount`, and count of `returned` orders.
-- **Expected result/shape:** For sql-02 Exercise 6, expected output: Up to 12 month rows in chronological order. The final columns are `order_month`, `order_count`, `order_revenue`, and `returned_orders`. The final order is `order_month`.
+- **Expected result/shape:** For sql-02 Exercise 6, return 12 month rows in chronological order, since every month of the window has orders; the first `order_month` is the first day of the month eleven months before the current one, and the last is the current month. The final columns are `order_month`, `order_count`, `order_revenue`, and `returned_orders`. The final order is `order_month`.
 - **Independent verification:** For sql-02 Exercise 6, confirm that `order_month` values are unique and that `SUM(order_count)` equals `SELECT COUNT(*) FROM orders WHERE order_date >= date_trunc('month', CURRENT_TIMESTAMP) - INTERVAL '11 months'`; for one month, recount its `returned` orders directly and compare the result with `returned_orders`.
-- **Intermediate relation check:** For sql-02 Exercise 6, run the `WHERE` filter alone and check the earliest `order_date` it keeps before you group by month.
-- **Clause check:** For sql-02 Exercise 6, the solution actually uses `FROM`, `WHERE`, aggregate `FILTER`, `GROUP BY`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `orders`, preserve one row per `order_month`, and finish with `order_month`, `order_count`, `order_revenue`, and `returned_orders` ordered by `order_month`.
-- **Alternative/trade-off:** For sql-02 Exercise 6, the chosen form is justified by this lesson-specific rationale: Group by a month expression, use conditional aggregation, and keep the timestamp predicate sargable. Evaluate another form against the concrete expected result (Up to 12 month rows in chronological order) and the verification above.
-- **Edge case:** The window starts on the first day of the month eleven months ago, so the current, partial month is included; at most 12 rows appear, and a month without orders is absent rather than shown with zero.
+- **What prints, in our check:** 12 rows from 2025-12-01 to 2026-11-01. Monthly orders climb from 142 to 313 in October, and November, the month still in progress, has 151 so far.
+- **Totals for the window:** in our check the 12 months hold 2,535 of the 4,362 orders and 1,365,406.78 in revenue; recent months are busier because the fixture's order dates cluster toward the present.
+- **Returned orders:** they range from 26 to 61 a month in our check. Because `FILTER` counts inside the same group, a month with no returns would show 0, not disappear.
+- **"Up to" 12 rows:** a month with no orders at all would have no row. To force twelve rows, start from `generate_series` over the months and left join the orders.
 
 ## Final self-check
 
-- Can you explain the logical grain before and after every aggregation?
-- Are missing values preserved or converted only by an explicit rule?
-- Does every ordered result have a deterministic final tie-breaker?
-- Are money and time assumptions visible beside the calculation?
-- Does the complete executable solution finish with `ROLLBACK`?
+- Why can Example 1's `ORDER BY` use the alias `customers` while `HAVING customer_count > 62` fails?
+- In Example 2, which number does `HAVING` test, and which does the query print?
+- What three values does Exercise 4 return, and which identity links them on any data?
+- Which error does the broken Exercise 5 raise, and why does `HAVING` fix it?
+- Why might Exercise 6 return fewer than 12 rows on another dataset?

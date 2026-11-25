@@ -206,11 +206,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Hashing:</strong> A mapping that narrows candidate equality comparisons.</p>
 <p><strong>Membership:</strong> Whether an equivalent element belongs to a set.</p>
 <h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>The Linux Docker classroom compiles your saved pad as <code>Program.cs</code> in its fixed .NET 10 project. C# 14 is the matching language generation. This route uses the prepared framework libraries; it does not accept arbitrary project files, NuGet packages, command arguments or interactive input. The explicit <code>Program.Main</code> entrypoint makes compilation and execution visible. <code>Check</code> throws on a false condition in every build configuration, unlike conditional debugging assertions.</p>
-<p>Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.</p>
+<p>Both examples pass an explicit comparer to the collection constructor, and every later lookup uses it. For task 2, construct the dictionary without a comparer, which defaults to ordinal case-sensitive equality, and run the same <code>TryGetValue(&quot;OAK&quot;, ...)</code> call; it then returns false.</p>
+<p>Compile contract, starter stop and success marker: <a href="../STUDY-GUIDE.md.html#running-a-lesson">running a lesson</a>.</p>
 <h3 id="syntax-anatomy-and-execution-trace">Syntax anatomy and execution trace<a class="heading-anchor" href="#syntax-anatomy-and-execution-trace" aria-label="Link to this section">#</a></h3>
 <p><code>Dictionary&lt;string,int&gt;(StringComparer.OrdinalIgnoreCase)</code> defines key identity. <code>TryGetValue(key, out value)</code> separates absence from a stored zero. <code>HashSet&lt;T&gt;.Add</code> returns whether membership changed.</p>
-<p>Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.</p>
+<p>Each example ends with a trace; method: <a href="../STUDY-GUIDE.md.html#tracing-a-program">tracing a program</a>.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="example-a-preserve-absence-information">Example A: Preserve absence information<a class="heading-anchor" href="#example-a-preserve-absence-information" aria-label="Link to this section">#</a></h4>
 <p>The comparer belongs to the collection contract. A missing value cannot be inferred from the integer alone.</p>
@@ -249,6 +249,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> OAK finds a present zero; Pine is absent.</p>
+<p><strong>Trace.</strong> The initializer stores the key Oak with the value 0 under <code>OrdinalIgnoreCase</code>. <code>TryGetValue(&quot;OAK&quot;, out int zero)</code> hashes OAK with that comparer, finds Oak, writes 0 into <code>zero</code> and returns true. For Pine it finds nothing, still writes 0 to the output and returns false. Only the Boolean separates a stored zero from an absent key.</p>
 <h4 id="example-b-deduplicate-by-an-explicit-policy">Example B: Deduplicate by an explicit policy<a class="heading-anchor" href="#example-b-deduplicate-by-an-explicit-policy" aria-label="Link to this section">#</a></h4>
 <p>Deduplication is meaningful only after defining equality. Case-insensitive comparison is appropriate for this fixture, not for every identifier.</p>
 <pre class="highlighted-code"><code class="language-csharp"><span class="syntax-keyword">using</span> System<span class="syntax-punctuation">;</span>
@@ -286,6 +287,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> RED is a duplicate under the selected comparer.</p>
+<p><strong>Trace.</strong> The set uses the case-insensitive comparer. <code>Add(&quot;red&quot;)</code> inserts the label and returns true. <code>Add(&quot;RED&quot;)</code> finds an equal element, leaves the set unchanged and returns false. <code>Add(&quot;blue&quot;)</code> inserts a second identity, so Count is 2. Under the default ordinal comparer, RED would have become a third member. The comparer is fixed at construction, so it cannot be changed later.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <ol>
 <li><strong>Predict and explain.</strong> Predict the difference between absent Pine and present-zero Oak.</li>
@@ -305,10 +307,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <ol start="6">
 <li><strong>Transfer and justify.</strong> Design stable identity for records and explain which fields may change without invalidating lookup.</li>
 </ol>
-<p>For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.</p>
+<p>Log each task in the <a href="../STUDY-GUIDE.md.html#recording-exercise-evidence">evidence table</a> before opening the explanation.</p>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
 <p>Changing a key field after insertion can break hash-based lookup for mutable custom keys. Distinct text spellings are not always distinct identities. Do not rely on incidental traversal order for reports.</p>
-<p>A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.</p>
+<p>Task 4&#x27;s direct indexer <code>counts[&quot;Pine&quot;]</code> throws <code>KeyNotFoundException</code>, saying the key was not present. Returning 0 there instead would make Pine look counted. For task 5, the tags a, A and a should produce one key with count 3 under the case-insensitive comparer and two keys under the default comparer.</p>
+<p>Repair routine: <a href="../STUDY-GUIDE.md.html#building-a-regression-case">building a regression case</a>.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <ol>
 <li>Reproduce Example A (Preserve absence information) before changing anything, and confirm its observation: OAK finds a present zero; Pine is absent.</li>
@@ -316,9 +319,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>Before opening the explanation, test your task 3 attempt against this lesson&#x27;s main pitfall: Changing a key field after insertion can break hash-based lookup for mutable custom keys.</li>
 </ol>
 <h3 id="self-check-and-next-step">Self-check and next step<a class="heading-anchor" href="#self-check-and-next-step" aria-label="Link to this section">#</a></h3>
-<p>Explain Key, Hashing, Membership without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.</p>
+<p>Explain why <code>TryGetValue</code> returns a Boolean when its output value is filled in either way. Predict <code>Count</code> after adding red, RED, Red and blue to a case-insensitive set and to a default set. Describe what breaks if a custom key changes a field used by its hash code after insertion.</p>
+<p>Then follow the general <a href="../STUDY-GUIDE.md.html#self-check-routine">self-check routine</a> and save your pad.</p>
 <h3 id="sources-and-execution-boundary">Sources and execution boundary<a class="heading-anchor" href="#sources-and-execution-boundary" aria-label="Link to this section">#</a></h3>
-<p><a href="https://learn.microsoft.com/en-us/dotnet/csharp/">Official language or framework documentation</a>. The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.</p>
+<p><a href="https://learn.microsoft.com/en-us/dotnet/csharp/">Documentation</a>: The <code>Dictionary&lt;TKey,TValue&gt;</code> and <code>HashSet&lt;T&gt;</code> reference pages describe comparers, <code>TryGetValue</code> and the return value of <code>Add</code>.</p>
+<p>Provenance and limits: <a href="../STUDY-GUIDE.md.html#sources-and-execution-boundary">sources and execution boundary</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for csharp-010: Dictionaries, sets and identity policies.
 Read courses/csharp/guides/csharp-010.md and courses/csharp/lessons/csharp-010.cs. Prerequisites: csharp-009.

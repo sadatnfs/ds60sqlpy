@@ -1,10 +1,17 @@
 # cuda-084: CuPy raw kernels and the language boundary
 
-**Route:** CUDA Python and machine learning. **Stage:** intermediate. **Prerequisites:** `cuda-009`, `cuda-011`, `cuda-073`, `cuda-082`. Allow several sessions when the hardware experiment is new; the chapter is not a deadline.
+**Route:** CUDA Python and machine learning. **Stage:** intermediate. **Prerequisites:** `cuda-009`, `cuda-011`, `cuda-073`, `cuda-082`.
 
-## What you will be able to explain
+Pacing, evidence labels and platform rules: [CUDA study guide](../../STUDY-GUIDE.md).
 
-By the end, you can **derive expected affine output**, **reject noncontiguous input or support strides**, and **compare raw and library paths** with evidence. Start with the two worked cases, then use the editable CPU model to make the quantities concrete.
+## Learning objectives
+
+- Derive expected affine output.
+- Calculate a nonmultiple launch.
+- Explain symbol lookup.
+- Reject noncontiguous input or support strides.
+- Separate compile timing.
+- Compare raw and library paths.
 
 ## Mechanism and vocabulary
 
@@ -31,9 +38,13 @@ A float32 affine kernel computes `y[i] = 2*x[i] + 1`. For [-1,0,3] it returns [-
 
 A launch for 257 elements using 128 threads requires three blocks. The last 127 valid-tail decisions belong in the kernel, even though the source is embedded in Python.
 
-## Portable executable model
+## How to run the CPU model
 
-The **CPU reference model** variant runs this bounded worked example using `python-core`. It uses only the Python standard library, small synthetic values and no network. Its purpose is to expose the arithmetic or contract behind the chapter. The separate reference includes assertions for the stated observations.
+Edit the copy; the [reference](../references/cuda-084_cpu.py) adds assertions.
+
+```sh
+python courses/cuda/python/lessons/cuda-084_cpu.py
+```
 
 ```python
 def affine(values):
@@ -56,11 +67,9 @@ print("CPU raw-kernel oracle:", affine([-1, 0, 3]))
 | `n` | `257` |
 | `threads` | `128` |
 
-Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.
-
 ## Optional NVIDIA CUDA lab
 
-The **CuPy on NVIDIA CUDA** variant executes the actual operation with CuPy in the separately prepared `cuda-python` profile. It refuses a missing device instead of switching to CPU. Keep inputs bounded as supplied; inspect the device, synchronize and compare with the CPU reference. The profile must pass real host/device readiness checks. Successful syntax checking on a Mac is not GPU qualification.
+**CuPy on NVIDIA CUDA** needs the `cuda-python` profile; [lab rules](../../STUDY-GUIDE.md#python-gpu-and-framework-labs).
 
 ```python
 """Optional NVIDIA CUDA lab. No CPU fallback or external dataset."""
@@ -90,73 +99,60 @@ print("CUDA raw affine:", cp.asnumpy(y).tolist())
 
 ## Practice and transfer
 
+Record each attempt in the [worksheet](../lessons/cuda-084.md) before opening hints.
+
 ### Exercise 1: Derive expected affine output
 
 **Trap to avoid:** Comparing against `2*(x+1)` by mistake gives `[0, 2, 8]` and suggests the kernel is wrong when the oracle is.
-
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 2: Calculate a nonmultiple launch
 
 **Trap to avoid:** Using `257 // 128 = 2` blocks loses the final element silently, a bug invisible on sizes like 256.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 3: Explain symbol lookup
 
 **Trap to avoid:** Assuming a lookup error means the source failed to compile misdirects debugging to the kernel body.
-
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 4: Reject noncontiguous input or support strides
 
 **Trap to avoid:** Silently calling `cupy.ascontiguousarray` inside the wrapper fixes correctness but hides a copy, and with in-place updates it writes to the copy instead of the caller's array.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 5: Separate compile timing
 
 **Trap to avoid:** Timing a single call and reporting it as kernel speed mostly measures the compiler.
-
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 6: Compare raw and library paths
 
 **Trap to avoid:** Comparing a float32 raw kernel against a float64 library expression measures dtype rather than implementation.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ## Progressive hints
 
-Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.
+Hint *k* belongs to exercise *k*; open one at a time.
 
-1. Start from worked example 1 and mark the quantities needed for the task "Derive expected affine output".
-2. Change one assumption in worked example 2 while preserving the declared contract: calculate a nonmultiple launch.
-3. Trace the CPU program's variables before adding hardware behavior: explain symbol lookup.
-4. Draw producers, consumers and the exact operation boundary for the task "Reject noncontiguous input or support strides".
-5. Separate what the small fixture establishes from what the real runtime must show: separate compile timing.
-6. Write a counterexample to an overbroad claim before you compare raw and library paths.
+1. Apply `2*x + 1` to each of `-1`, `0` and `3`.
+2. Divide 257 by 128 and round up, then count how many lanes the last block holds beyond the data.
+3. Ask what name the compiled module exports for the entry point and what `extern C` changes about it.
+4. Decide whether the kernel will index with real strides or reject any input that is not contiguous.
+5. Run the same kernel once before timing, then time repeated warm calls separately.
+6. Compute the same affine result with a CuPy expression and compare outputs under one tolerance.
 
-## Common mistakes and self-review
+## Common mistakes and self-check
 
-Confusing a correct tiny example with a general implementation is the central review risk. For this chapter, challenge the assumption in worked example 2, then ask whether your change preserves the mechanism described above. If you change dtype, layout, ordering, batch size or backend, update the acceptance contract rather than silently reusing the old observation. Explain an unexpected result before trying random configuration changes.
+A common mistake is expecting a raw kernel to behave like a CuPy expression. The CUDA C++ inside the string has no broadcasting, dtype promotion or stride support; a float64 or sliced input is simply read as raw bytes. Another mistake is timing the first call, which includes compilation. Fix both by validating dtype, contiguity and length in Python before launching, guarding the tail in the kernel, and warming up before collecting steady-state samples.
 
-Keep a small evidence table with columns **claim**, **input**, **expected observation**, **actual observation** and **limit**. For the first claim use `Derive expected affine output`. For the final claim use `Compare raw and library paths`. An unperformed GPU or cluster experiment remains pending even when the CPU model is correct.
+**Evidence limit:** The reference checks the affine values `[-1, 1, 7]` and the three-block launch count with plain Python. It never compiles CUDA C++, so symbol lookup, compiler flags and warm execution time remain unverified.
 
-## Platform and evidence contract
+1. Which side controls what in a raw kernel?
+2. Why is a high-level CuPy expression still a strong baseline?
+3. What happens on the first invocation of a raw kernel?
 
-The reading worksheet and CPU reference model work through the ordinary Linux Docker classroom on macOS, Linux and Windows using WSL 2. They do not require an NVIDIA GPU. Their results are labeled CPU models or semantic oracles, not simulated hardware performance.
-
-Real CUDA work needs supported NVIDIA hardware, a compatible host driver and an explicitly prepared GPU runtime. An Apple GPU does not execute CUDA kernels. PyTorch MPS on a supported native Mac, ROCm on supported AMD hardware, or other vendor backends can provide separate accelerator learning routes; they need their own package and operation qualification and are not CUDA evidence. The ordinary Linux Docker classroom does not expose native Mac MPS automatically.
-
-Do not download packages, models or data by opening this lesson. Do not attach an engine socket, ambient cluster credentials or an arbitrary remote endpoint. A CPU pass, imported package, successful compilation, real GPU result and measured performance are distinct observations. Record the actual backend, data shape/dtype, source revision, versions and pending checks. A saved completion marker records learning progress, not hardware certification.
+Answers: [self-check answers](../solutions/cuda-084_solutions.md#self-check-answers).
 
 ## Primary references
 
-- [DLPack Python specification](https://dmlc.github.io/dlpack/latest/python_spec.html)
 - [CuPy interoperability](https://docs.cupy.dev/en/stable/user_guide/interoperability.html)
 
-Use the version-matched documentation of your prepared environment. These references describe interfaces and supported boundaries; the chapter's synthetic examples and CPU models are original teaching material.
+Full lists: [documentation and sources](../../STUDY-GUIDE.md#documentation-and-sources).
 
 ## Ask an AI tutor about this lesson
 

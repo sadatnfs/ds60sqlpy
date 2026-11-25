@@ -1,6 +1,6 @@
 # js-063: explanatory solutions
 
-Compare after your own attempt or an explicit reveal. The separate .js reference is a complete offline browser program. These explanations discuss the six practice tasks; a visual resemblance alone is not a data or behavior check.
+Compare after your own attempt; the separate `.js` file is the complete reference program.
 
 ## Mechanism review
 
@@ -49,3 +49,7 @@ An invalid denominator cannot support a meaningful color. The chart should expos
 Aggregation can create or reverse relationships. State the unit of analysis and avoid unsupported individual conclusions. A 20% regional rate does not say any individual in B has a 20% chance; the unit is the region. Note that the reference has only three synthetic regions, too few for any conclusion about association across areas.
 
 **Expected:** Regional summaries do not automatically describe individuals.
+
+## After comparison
+
+Mark regions whose denominator is under 50 as unstable with a pattern and a note. Then switch the palette to a five-class `scaleQuantize` and record how the class breaks change the visual story of the same rates.

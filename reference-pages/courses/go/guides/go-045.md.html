@@ -209,9 +209,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="syntax-anatomy-and-reasoning">Syntax anatomy and reasoning<a class="heading-anchor" href="#syntax-anatomy-and-reasoning" aria-label="Link to this section">#</a></h3>
 <p>A lease model records holder and expiry. A current holder can renew, another candidate must wait until expiry, and a candidate must stop leader-only work when renewal is lost. Real lease acquisition requires optimistic concurrency at the API server, not a local map assignment. A monotonically enforced fencing token belongs at the protected external system; Kubernetes resourceVersion should not be repurposed as a numeric application token.</p>
 <h3 id="run-this-lesson">Run this lesson<a class="heading-anchor" href="#run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>Choose Go in the unified Docker classroom. Save your own pad before experimenting. The prepared worker stages it as <code>main.go</code>, compiles it, and executes the resulting program with bounded time and output. The pad is one source file. It does not supply interactive input, arbitrary command-line arguments, package installation, Kubernetes credentials or a host Docker socket. Every ordinary reference here uses the standard library, synthetic local data and explicit checks. A failed <code>check</code> panics and produces a nonzero process result; do not remove it to make the run appear successful.</p>
-<p>The explanatory solution snippets belong inside <code>func main()</code> unless they declare a helper. <code>check</code> is a tiny teaching helper that panics when a condition is false. The separate reference supplies required imports and helpers and implements all six cases. Use that complete source only after an attempt or an explicit reveal. For an independently prepared Go project, the equivalent local build is <code>go build -o lesson main.go</code>, followed by <code>./lesson</code>; use Linux or WSL 2 for that optional workflow. Compiling proves syntax and type consistency, while the executed checks establish the stated example contracts.</p>
-<p>Each worked example below is a complete Go file. Copy one whole block into your saved pad and run it. Example 2 includes the first case as well as the second, so its setup is complete. Its supporting declarations may be reused in later investigations. The separate reference implements all six cases.</p>
+<p>Run each worked example as one complete file in your saved pad (<a href="../STUDY-GUIDE.md.html#run-a-lesson">run steps</a>).</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1-acquire-an-empty-lease">Worked example 1: Acquire an empty lease<a class="heading-anchor" href="#worked-example-1-acquire-an-empty-lease" aria-label="Link to this section">#</a></h4>
 <p>Let candidate a acquire at logical time 10 for five units.</p>
@@ -302,77 +300,79 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Observe:</strong> The request fails and a remains holder.</p>
 <p>The contender waits while the current claim remains valid under this model.</p>
 <h3 id="predict-before-running">Predict before running<a class="heading-anchor" href="#predict-before-running" aria-label="Link to this section">#</a></h3>
-<p>For each example, write the input values, the state that can change, and the expected observation. Explain which result would disprove your current interpretation. For concurrency, predict a guaranteed relationship rather than an arbitrary scheduling order. For an error case, identify whether it is rejected at compilation or returned during execution.</p>
+<p>Predict the holder and expiry after a acquires an empty lease at time 10 for five units. Predict whether b can take a lease held by a at time 12, whether a can renew at 13 and whether b can take over at exactly 15. Then predict which fencing token the destination accepts and what a zero duration does.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-acquire-an-empty-lease-predict-an-edited-check">Exercise 1: Acquire an empty lease: predict an edited check<a class="heading-anchor" href="#exercise-1-acquire-an-empty-lease-predict-an-edited-check" aria-label="Link to this section">#</a></h4>
-<p>Copy worked example 1 into a scratch pad and change <code>check(acquire(&amp;l, &quot;a&quot;, 10, 5) &amp;&amp; l.Holder == &quot;a&quot; &amp;&amp; l.Expires == 15, &quot;acquire&quot;)</code> to <code>check(acquire(&amp;l, &quot;a&quot;, 11, 5) &amp;&amp; l.Holder == &quot;a&quot; &amp;&amp; l.Expires == 15, &quot;acquire&quot;)</code> inside its check. Before running, predict whether the check still passes and explain why; then restore it.</p>
-<p><strong>Expected:</strong> The changed run panics with <code>acquire</code> because the edited check no longer holds. Restoring the original line brings back the worked observation: holder becomes a and expiry 15.</p>
-<p><strong>Verify:</strong> Compare your written prediction with the panic message <code>acquire</code> and name the value that made <code>acquire(&amp;l, &quot;a&quot;, 10, 5) &amp;&amp; l.Holder == &quot;a&quot; &amp;&amp; l.Expires == 15</code> false. After restoring the input, the program must print its success line again.</p>
+<p>Copy worked example 1, change <code>check(acquire(&amp;l, &quot;a&quot;, 10, 5) &amp;&amp; l.Holder == &quot;a&quot; &amp;&amp; l.Expires == 15, &quot;acquire&quot;)</code> to <code>check(acquire(&amp;l, &quot;a&quot;, 11, 5) &amp;&amp; l.Holder == &quot;a&quot; &amp;&amp; l.Expires == 15, &quot;acquire&quot;)</code> inside its check and predict whether it still passes; then restore it.</p>
+<p><strong>Expected:</strong> The edited check panics with <code>acquire</code> even though <code>acquire(&amp;l, &quot;a&quot;, 10, 5) &amp;&amp; l.Holder == &quot;a&quot; &amp;&amp; l.Expires == 15</code> still holds.</p>
+<p><strong>Verify:</strong> Restoring <code>check(acquire(&amp;l, &quot;a&quot;, 10, 5) &amp;&amp; l.Holder == &quot;a&quot; &amp;&amp; l.Expires == 15, &quot;acquire&quot;)</code> makes the check pass again with the worked observation: holder becomes a and expiry 15.</p>
 <h4 id="exercise-2-reject-a-competing-candidate-debug-a-regression">Exercise 2: Reject a competing candidate: debug a regression<a class="heading-anchor" href="#exercise-2-reject-a-competing-candidate-debug-a-regression" aria-label="Link to this section">#</a></h4>
-<p>A regression changed one token in worked example 2, so one line now reads <code>l := Lease{Holder: &quot;a!&quot;, Expires: 15}</code>. Run worked example 2 with that line, use the failure to locate the defect and repair it without changing the check.</p>
-<p><strong>Expected:</strong> Before the repair the program panics with <code>contender</code>; after it the line reads <code>l := Lease{Holder: &quot;a&quot;, Expires: 15}</code> again and the request fails and a remains holder.</p>
-<p><strong>Verify:</strong> Keep the failing and the repaired runs. Explain why the changed token alters the value tested by <code>!acquire(&amp;l, &quot;b&quot;, 12, 5) &amp;&amp; l.Holder == &quot;a&quot;</code> for this input.</p>
+<p>A one-token regression in worked example 2 makes a line read <code>l := Lease{Holder: &quot;a!&quot;, Expires: 15}</code>. Repair it without changing the check.</p>
+<p><strong>Expected:</strong> The defective run panics with <code>contender</code>; after restoring <code>l := Lease{Holder: &quot;a&quot;, Expires: 15}</code>, the request fails and a remains holder.</p>
+<p><strong>Verify:</strong> The failing run shows message <code>contender</code>; after the repair <code>!acquire(&amp;l, &quot;b&quot;, 12, 5) &amp;&amp; l.Holder == &quot;a&quot;</code> holds again.</p>
 <h4 id="exercise-3-renew-current-leadership">Exercise 3: Renew current leadership<a class="heading-anchor" href="#exercise-3-renew-current-leadership" aria-label="Link to this section">#</a></h4>
 <p>Let a renew its lease before expiry.</p>
 <p><strong>Expected:</strong> Expiry advances to 18.</p>
-<p><strong>Verify:</strong> Keep a check equivalent to <code>acquire(&amp;l, &quot;a&quot;, 13, 5) &amp;&amp; l.Expires == 18</code>. As a control, change <code>check(acquire(&amp;l, &quot;a&quot;, 13, 5) &amp;&amp; l.Expires == 18, &quot;renew&quot;)</code> to <code>check(acquire(&amp;l, &quot;a&quot;, 14, 5) &amp;&amp; l.Expires == 18, &quot;renew&quot;)</code> inside that check: it must panic with <code>renew</code>, which shows the check can fail. Restore it.</p>
+<p><strong>Verify:</strong> Your solution must keep <code>acquire(&amp;l, &quot;a&quot;, 13, 5) &amp;&amp; l.Expires == 18</code> true. Control: changing <code>check(acquire(&amp;l, &quot;a&quot;, 13, 5) &amp;&amp; l.Expires == 18, &quot;renew&quot;)</code> to <code>check(acquire(&amp;l, &quot;a&quot;, 14, 5) &amp;&amp; l.Expires == 18, &quot;renew&quot;)</code> panics with message <code>renew</code>; revert it.</p>
 <h4 id="exercise-4-take-over-after-expiry">Exercise 4: Take over after expiry<a class="heading-anchor" href="#exercise-4-take-over-after-expiry" aria-label="Link to this section">#</a></h4>
 <p>Let b acquire at the exact expiry boundary.</p>
 <p><strong>Expected:</strong> Holder becomes b.</p>
-<p><strong>Verify:</strong> Keep a check equivalent to <code>acquire(&amp;l, &quot;b&quot;, 15, 5) &amp;&amp; l.Holder == &quot;b&quot;</code>. As a control, change <code>l := Lease{Holder: &quot;a&quot;, Expires: 15}</code> to <code>l := Lease{Holder: &quot;a&quot;, Expires: 16}</code>: the run must panic with <code>takeover</code>. Restore the line before continuing.</p>
+<p><strong>Verify:</strong> Your solution must keep <code>acquire(&amp;l, &quot;b&quot;, 15, 5) &amp;&amp; l.Holder == &quot;b&quot;</code> true. Control: changing <code>l := Lease{Holder: &quot;a&quot;, Expires: 15}</code> to <code>l := Lease{Holder: &quot;a&quot;, Expires: 16}</code> panics with message <code>takeover</code>; revert it.</p>
 <h4 id="exercise-5-reject-a-stale-fenced-operation">Exercise 5: Reject a stale fenced operation<a class="heading-anchor" href="#exercise-5-reject-a-stale-fenced-operation" aria-label="Link to this section">#</a></h4>
 <p>Compare an old authority token 4 with current token 5.</p>
 <p><strong>Expected:</strong> Only token 5 is accepted by the destination model.</p>
-<p><strong>Verify:</strong> Keep a check equivalent to <code>!accept(4) &amp;&amp; accept(5)</code>. As a control, change <code>accept := func(token int) bool { return token == current }</code> to <code>accept := func(token int) bool { return token != current }</code>: the run must panic with <code>fencing</code>. Restore the line before continuing.</p>
+<p><strong>Verify:</strong> Your solution must keep <code>!accept(4) &amp;&amp; accept(5)</code> true. Control: changing <code>accept := func(token int) bool { return token == current }</code> to <code>accept := func(token int) bool { return token != current }</code> panics with message <code>fencing</code>; revert it.</p>
 <h4 id="exercise-6-transfer-invalid-duration-refusal">Exercise 6: Transfer invalid-duration refusal<a class="heading-anchor" href="#exercise-6-transfer-invalid-duration-refusal" aria-label="Link to this section">#</a></h4>
 <p>Attempt a lease with a nonpositive duration.</p>
 <p><strong>Expected:</strong> No lease is acquired.</p>
-<p><strong>Verify:</strong> Keep a check equivalent to <code>!acquire(&amp;l, &quot;a&quot;, 10, 0) &amp;&amp; l.Holder == &quot;&quot;</code>. As a control, change <code>check(!acquire(&amp;l, &quot;a&quot;, 10, 0) &amp;&amp; l.Holder == &quot;&quot;, &quot;duration&quot;)</code> to <code>check(!acquire(&amp;l, &quot;a&quot;, 10, 1) &amp;&amp; l.Holder == &quot;&quot;, &quot;duration&quot;)</code> inside that check: it must panic with <code>duration</code>, which shows the check can fail. Restore it.</p>
-<p>Implement these in the answer-free learner source. Keep one independent check per claim. A task can require tracing, construction, a changed input or a deliberate safe failure. Do not run a data race, corrupt memory or contact a shared cluster merely to demonstrate why it would be wrong.</p>
+<p><strong>Verify:</strong> Your solution must keep <code>!acquire(&amp;l, &quot;a&quot;, 10, 0) &amp;&amp; l.Holder == &quot;&quot;</code> true. Control: changing <code>check(!acquire(&amp;l, &quot;a&quot;, 10, 0) &amp;&amp; l.Holder == &quot;&quot;, &quot;duration&quot;)</code> to <code>check(!acquire(&amp;l, &quot;a&quot;, 10, 1) &amp;&amp; l.Holder == &quot;&quot;, &quot;duration&quot;)</code> panics with message <code>duration</code>; revert it.</p>
+<p>Work in the answer-free learner source, <code>courses/go/lessons/go-045.go</code> (<a href="../STUDY-GUIDE.md.html#work-an-exercise">exercise contract</a>).</p>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
-<p>Read a compiler error from the first location in your source, then fix one cause at a time. Unused imports and variables are errors in Go; add an import when its use exists, rather than copying a large unused import list. A panic from <code>check</code> identifies a violated example contract. Compare the actual value with the expected value and inspect the state transition that produced it. A returned <code>error</code> is a value that the caller must handle; an ignored error can make later output look plausible while the original operation failed.</p>
-<p>The lesson-specific explanations in the two examples identify the important counterexamples. Extend that reasoning to every investigation: explain why a plausible alternative would fail, and preserve a tiny input that distinguishes it. Treat empty data, missing values and cancellation as domain cases with explicit policies. In concurrent work, replace sleeps used as synchronization with channels, mutexes or an explicit ownership protocol.</p>
+<p>Treating leadership as exclusive is the dangerous assumption: a leader that pauses past its lease, for garbage collection or a network stall, wakes up still believing it leads while another replica acts. Leases reduce overlap but cannot prevent it. Protect external side effects with fencing tokens or idempotent writes, and stop work promptly when renewal fails.</p>
+<p>General compiler, panic and error diagnosis is in the <a href="../STUDY-GUIDE.md.html#diagnose-a-failure">study guide</a>.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <h4 id="hint-for-investigation-1-acquire-an-empty-lease-predict-an-edited-check">Hint for investigation 1: Acquire an empty lease: predict an edited check<a class="heading-anchor" href="#hint-for-investigation-1-acquire-an-empty-lease-predict-an-edited-check" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: Holder becomes a and expiry 15.</li>
-<li>The check <code>acquire(&amp;l, &quot;a&quot;, 10, 5) &amp;&amp; l.Holder == &quot;a&quot; &amp;&amp; l.Expires == 15</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Compute the checked value with <code>check(acquire(&amp;l, &quot;a&quot;, 11, 5) &amp;&amp; l.Holder == &quot;a&quot; &amp;&amp; l.Expires == 15, &quot;acquire&quot;)</code> in place before running, then compare it with the value <code>acquire(&amp;l, &quot;a&quot;, 10, 5) &amp;&amp; l.Holder == &quot;a&quot; &amp;&amp; l.Expires == 15</code> expects.</li>
+<li>The lease is empty. What do Holder and Expires become?</li>
+<li>Acquiring at 11 sets Expires to 16, so <code>l.Expires==15</code> fails while the holder is still a. The acquisition works; the start time changed.</li>
 </ol>
 <h4 id="hint-for-investigation-2-reject-a-competing-candidate-debug-a-regression">Hint for investigation 2: Reject a competing candidate: debug a regression<a class="heading-anchor" href="#hint-for-investigation-2-reject-a-competing-candidate-debug-a-regression" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The request fails and a remains holder.</li>
-<li>The check <code>!acquire(&amp;l, &quot;b&quot;, 12, 5) &amp;&amp; l.Holder == &quot;a&quot;</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Compare <code>l := Lease{Holder: &quot;a!&quot;, Expires: 15}</code> with the same line in worked example 2 and state the claim each version makes.</li>
+<li>a holds the lease until 15. Can b acquire at 12?</li>
+<li>The lease holder is now a!, so b is still refused but <code>l.Holder==&quot;a&quot;</code> fails. Restore the holder name a.</li>
 </ol>
 <h4 id="hint-for-investigation-3-renew-current-leadership">Hint for investigation 3: Renew current leadership<a class="heading-anchor" href="#hint-for-investigation-3-renew-current-leadership" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: Expiry advances to 18.</li>
-<li>The check <code>acquire(&amp;l, &quot;a&quot;, 13, 5) &amp;&amp; l.Expires == 18</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Name one input that would make <code>acquire(&amp;l, &quot;a&quot;, 13, 5) &amp;&amp; l.Expires == 18</code> false. A check that no input can falsify is not evidence.</li>
+<li>The holder may renew early. What is the new expiry?</li>
+<li>Renewal extends a claim; it does not prove a formerly paused process cannot still perform external work.</li>
 </ol>
 <h4 id="hint-for-investigation-4-take-over-after-expiry">Hint for investigation 4: Take over after expiry<a class="heading-anchor" href="#hint-for-investigation-4-take-over-after-expiry" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: Holder becomes b.</li>
-<li>The check <code>acquire(&amp;l, &quot;b&quot;, 15, 5) &amp;&amp; l.Holder == &quot;b&quot;</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Predict the effect of changing <code>l := Lease{Holder: &quot;a&quot;, Expires: 15}</code> to <code>l := Lease{Holder: &quot;a&quot;, Expires: 16}</code> before running anything. If the prediction is hard, trace that line again with the original input.</li>
+<li>The lease protects its holder only while now is below Expires. Can b acquire at 15?</li>
+<li>The boundary policy is explicit.</li>
 </ol>
 <h4 id="hint-for-investigation-5-reject-a-stale-fenced-operation">Hint for investigation 5: Reject a stale fenced operation<a class="heading-anchor" href="#hint-for-investigation-5-reject-a-stale-fenced-operation" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: Only token 5 is accepted by the destination model.</li>
-<li>The check <code>!accept(4) &amp;&amp; accept(5)</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Predict the effect of changing <code>accept := func(token int) bool { return token == current }</code> to <code>accept := func(token int) bool { return token != current }</code> before running anything. If the prediction is hard, trace that line again with the original input.</li>
+<li>The destination accepts only the current token. Which of 4 and 5 passes?</li>
+<li>The protected destination enforces the token.</li>
 </ol>
 <h4 id="hint-for-investigation-6-transfer-invalid-duration-refusal">Hint for investigation 6: Transfer invalid-duration refusal<a class="heading-anchor" href="#hint-for-investigation-6-transfer-invalid-duration-refusal" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: No lease is acquired.</li>
-<li>The check <code>!acquire(&amp;l, &quot;a&quot;, 10, 0) &amp;&amp; l.Holder == &quot;&quot;</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Name one input that would make <code>!acquire(&amp;l, &quot;a&quot;, 10, 0) &amp;&amp; l.Holder == &quot;&quot;</code> false. A check that no input can falsify is not evidence.</li>
+<li>A nonpositive duration is refused first. Does the holder change?</li>
+<li>Invalid timing configuration must fail before coordination starts.</li>
 </ol>
 <h3 id="self-check-and-retrieval">Self-check and retrieval<a class="heading-anchor" href="#self-check-and-retrieval" aria-label="Link to this section">#</a></h3>
-<p>Close the reference. Rebuild one normal case and one boundary case from a blank pad. Explain the role of lease without using its name in the definition. Then change the domain while keeping the same invariant. Record the new input, your prediction and the observed output. If your program passes only because its input is hard-coded, explain which part would need a reusable function in a larger project.</p>
+<p>Write a lease simulation with acquire and a store that accepts writes only with the current fencing token, which increments on each takeover. Simulate a paused leader a, a takeover by b and a late write from a, and check that the store rejects it. Then explain why the lease alone would have let both writes through.</p>
+<p>The general <a href="../STUDY-GUIDE.md.html#self-check-and-retrieval">retrieval routine</a> still applies.</p>
 <h3 id="next-step-and-sources">Next step and sources<a class="heading-anchor" href="#next-step-and-sources" aria-label="Link to this section">#</a></h3>
-<p><a href="https://pkg.go.dev/k8s.io/client-go/tools/leaderelection">Primary language or library documentation</a>, reviewed 2026-10-23. The teaching explanations and synthetic fixtures are original. Continue with the next lesson when you can explain the six observations and diagnose a changed case without copying its answer.</p>
+<p>Source: <a href="https://pkg.go.dev/k8s.io/client-go/tools/leaderelection"><code>k8s.io/client-go/tools/leaderelection</code> package documentation</a>, reviewed 2026-10-23.</p>
+<p>Next: go-046, Admission decisions, webhook contracts and failure policy (<a href="../STUDY-GUIDE.md.html#when-to-move-on">criteria</a>).</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for go-045: Leader election, leases and fencing limits.
 Read courses/go/guides/go-045.md and my saved attempt based on courses/go/lessons/go-045.go.

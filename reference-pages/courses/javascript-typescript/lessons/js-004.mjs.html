@@ -195,16 +195,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the classroom for supported runnable lessons, or follow the lesson's external project instructions.</div><pre class="source-code language-javascript"><code><span class="source-line"><span class="syntax-comment">// Answer-free learner source. Save your own copy before editing.</span></span>
 <span class="source-line"><span class="syntax-comment">// Exercise 1: Call a pure function: predict an edited check</span></span>
-<span class="source-line"><span class="syntax-comment">// Copy Example A into a scratch `main.mjs` and change `assert.equal(add(-1, 1), 0);` to</span></span>
-<span class="source-line"><span class="syntax-comment">// `assert.equal(add(-2, 1), 0);` inside its check. Before running it, predict whether the</span></span>
-<span class="source-line"><span class="syntax-comment">// check still passes and explain why; then restore it.</span></span>
-<span class="source-line"><span class="syntax-comment">// Expected: The changed run fails with an `AssertionError` at `assert.equal(add(-2, 1),</span></span>
-<span class="source-line"><span class="syntax-comment">// 0);`. Restoring `assert.equal(add(-1, 1), 0);` brings back: 5 and 0.</span></span>
+<span class="source-line"><span class="syntax-comment">// In a scratch copy of Example A, change `assert.equal(add(-1, 1), 0);` to</span></span>
+<span class="source-line"><span class="syntax-comment">// `assert.equal(add(-2, 1), 0);` inside its check. Does the check still pass?</span></span>
+<span class="source-line"><span class="syntax-comment">// Expected: The edited run fails with an `AssertionError` at `assert.equal(add(-2, 1), 0);`.</span></span>
+<span class="source-line"><span class="syntax-comment">// Restoring `assert.equal(add(-1, 1), 0);` brings back: 5 and 0.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">// Exercise 2: Build independent closures: diagnose an edited check</span></span>
-<span class="source-line"><span class="syntax-comment">// A careless edit changed a check in Example B so that it reads `assert.equal(second(),</span></span>
-<span class="source-line"><span class="syntax-comment">// 2);`. Run Example B with that line, explain why the edited check now fails for the same</span></span>
-<span class="source-line"><span class="syntax-comment">// program state, and restore it.</span></span>
+<span class="source-line"><span class="syntax-comment">// Example B&#x27;s check was edited to read `assert.equal(second(), 2);`. Run it, explain the</span></span>
+<span class="source-line"><span class="syntax-comment">// failure and restore the original.</span></span>
 <span class="source-line"><span class="syntax-comment">// Expected: Before the repair the run fails with an `AssertionError` at</span></span>
 <span class="source-line"><span class="syntax-comment">// `assert.equal(second(), 2);`. Restoring `assert.equal(second(), 1);` brings back: first 1,</span></span>
 <span class="source-line"><span class="syntax-comment">// 2; second 1.</span></span>

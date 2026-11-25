@@ -194,20 +194,21 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/go/solutions/go-024_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="go-024-explained-solutions">go-024: explained solutions<a class="heading-anchor" href="#go-024-explained-solutions" aria-label="Link to this section">#</a></h2>
-<p>These are comparison material after an attempt or explicit reveal. The executable reference implements all six cases in one <code>main.go</code>.</p>
+<p>Compare after an attempt (<a href="../STUDY-GUIDE.md.html#use-the-solutions">using solutions</a>). <code>courses/go/solutions/go-024_solution.go</code> implements all six cases.</p>
 <h3 id="mechanism">Mechanism<a class="heading-anchor" href="#mechanism" aria-label="Link to this section">#</a></h3>
 <p>A goroutine is a concurrently scheduled execution of a function. Starting one does not make the caller wait for it, and returning from main ends the program even if other goroutines still have work. Concurrency introduces partial ordering: some events must happen before others, while unrelated scheduling remains unspecified. Use communication or synchronization to establish the relationships required by the algorithm. A sleep is a delay, not proof that another goroutine has completed. Every started goroutine needs an owner responsible for its completion or cancellation, otherwise blocked tasks can leak resources and make shutdown unpredictable.</p>
 <p>go function() starts a goroutine. A channel send and receive can transfer a result and establish an ordering relationship. sync.WaitGroup tracks a known set of tasks; Add must happen before a concurrent Wait can conclude. Defer Done inside each task. Do not write a shared ordinary variable concurrently merely because a later print appears to observe the expected value.</p>
 <h3 id="1-join-a-produced-result-change-one-input">1. Join a produced result: change one input<a class="heading-anchor" href="#1-join-a-produced-result-change-one-input" aria-label="Link to this section">#</a></h3>
-<p>Copy worked example 1 into a scratch pad and change <code>go func() { result &lt;- 6 * 7 }()</code> to <code>go func() { result &lt;- 7 * 7 }()</code>. Before running, predict which check fails and which value it now sees; then run it and restore the original line.</p>
+<p>Copy worked example 1, change <code>go func() { result &lt;- 6 * 7 }()</code> to <code>go func() { result &lt;- 7 * 7 }()</code> and predict the failure before running; then restore the line.</p>
 <p>The unchanged code is worked example 1:</p>
 <pre class="highlighted-code"><code class="language-go">result <span class="syntax-operator">:=</span> <span class="syntax-builtin">make</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">chan</span> <span class="syntax-keyword">int</span><span class="syntax-punctuation">)</span>
 <span class="syntax-keyword">go</span> <span class="syntax-keyword">func</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span> result <span class="syntax-operator">&lt;-</span> <span class="syntax-number">6</span> <span class="syntax-operator">*</span> <span class="syntax-number">7</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
 check<span class="syntax-punctuation">(</span><span class="syntax-operator">&lt;-</span>result <span class="syntax-operator">==</span> <span class="syntax-number">42</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;goroutine result&quot;</span><span class="syntax-punctuation">)</span></code></pre>
-<p><strong>Expected:</strong> The changed run panics with <code>goroutine result</code> because <code>&lt;-result == 42</code> no longer holds. Restoring the original line brings back the worked observation: the received value is 42.</p>
+<p><strong>Expected:</strong> The edited run panics with <code>goroutine result</code> because <code>&lt;-result == 42</code> no longer holds.</p>
+<p><strong>Verify:</strong> Restoring <code>go func() { result &lt;- 6 * 7 }()</code> makes the check pass again with the worked observation: the received value is 42.</p>
 <p>The receive waits for the send. The program does not assume the worker has completed merely because enough wall-clock time passed.</p>
 <h3 id="2-wait-for-several-tasks-debug-a-regression">2. Wait for several tasks: debug a regression<a class="heading-anchor" href="#2-wait-for-several-tasks-debug-a-regression" aria-label="Link to this section">#</a></h3>
-<p>A regression changed one token in worked example 2, so one line now reads <code>for i := 1; i &lt; 3; i++ {</code>. Run worked example 2 with that line, use the failure to locate the defect and repair it without changing the check.</p>
+<p>A one-token regression in worked example 2 makes a line read <code>for i := 1; i &lt; 3; i++ {</code>. Repair it without changing the check.</p>
 <p>The unchanged code is worked example 2:</p>
 <pre class="highlighted-code"><code class="language-go">done <span class="syntax-operator">:=</span> <span class="syntax-builtin">make</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">chan</span> <span class="syntax-keyword">struct</span><span class="syntax-punctuation">{</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span>
 <span class="syntax-keyword">var</span> wg sync<span class="syntax-punctuation">.</span>WaitGroup
@@ -217,7 +218,8 @@ check<span class="syntax-punctuation">(</span><span class="syntax-operator">&lt;
 <span class="syntax-punctuation">}</span>
 wg<span class="syntax-punctuation">.</span>Wait<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
 check<span class="syntax-punctuation">(</span><span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>done<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;joined tasks&quot;</span><span class="syntax-punctuation">)</span></code></pre>
-<p><strong>Expected:</strong> Before the repair the program panics with <code>joined tasks</code>; after it the line reads <code>for i := 0; i &lt; 3; i++ {</code> again and exactly three completion markers are received.</p>
+<p><strong>Expected:</strong> The defective run panics with <code>joined tasks</code>; after restoring <code>for i := 0; i &lt; 3; i++ {</code>, exactly three completion markers are received.</p>
+<p><strong>Verify:</strong> The failing run shows message <code>joined tasks</code>; after the repair <code>len(done) == 3</code> holds again.</p>
 <p>The buffer avoids blocking completion before the parent reads. WaitGroup joins the tasks; the channel stores inspectable completion evidence.</p>
 <h3 id="3-keep-state-task-local">3. Keep state task-local<a class="heading-anchor" href="#3-keep-state-task-local" aria-label="Link to this section">#</a></h3>
 <p>Have two goroutines compute from explicit arguments.</p>
@@ -228,6 +230,7 @@ check<span class="syntax-punctuation">(</span><span class="syntax-builtin">len</
 a<span class="syntax-punctuation">,</span> b <span class="syntax-operator">:=</span> <span class="syntax-operator">&lt;-</span>out<span class="syntax-punctuation">,</span> <span class="syntax-operator">&lt;-</span>out
 check<span class="syntax-punctuation">(</span>a<span class="syntax-operator">+</span>b <span class="syntax-operator">==</span> <span class="syntax-number">13</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;local inputs&quot;</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> The results sum to 13.</p>
+<p><strong>Verify:</strong> Your solution must keep <code>a+b == 13</code> true. Control: changing <code>go func(x int) { out &lt;- x * x }(n)</code> to <code>go func(x int) { out &lt;- x + x }(n)</code> panics with message <code>local inputs</code>; revert it.</p>
 <p>The order of a and b is unspecified, so the assertion checks an order-independent property. Explicit arguments make each input ownership clear.</p>
 <h3 id="4-establish-a-start-boundary">4. Establish a start boundary<a class="heading-anchor" href="#4-establish-a-start-boundary" aria-label="Link to this section">#</a></h3>
 <p>Block a worker on a start channel, then release it.</p>
@@ -237,6 +240,7 @@ out <span class="syntax-operator">:=</span> <span class="syntax-builtin">make</s
 <span class="syntax-builtin">close</span><span class="syntax-punctuation">(</span>start<span class="syntax-punctuation">)</span>
 check<span class="syntax-punctuation">(</span><span class="syntax-operator">&lt;-</span>out <span class="syntax-operator">==</span> <span class="syntax-string">&quot;ready&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;start boundary&quot;</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> The worker returns ready only after release.</p>
+<p><strong>Verify:</strong> Your solution must keep <code>&lt;-out == &quot;ready&quot;</code> true. Control: changing <code>go func() { &lt;-start; out &lt;- &quot;ready&quot; }()</code> to <code>go func() { &lt;-start; out &lt;- &quot;ready!&quot; }()</code> panics with message <code>start boundary</code>; revert it.</p>
 <p>Closing a channel can broadcast a one-time event. It does not carry a payload, and ownership must ensure it is closed only once.</p>
 <h3 id="5-reject-premature-completion">5. Reject premature completion<a class="heading-anchor" href="#5-reject-premature-completion" aria-label="Link to this section">#</a></h3>
 <p>Keep a worker blocked behind a start channel and test whether its result is available before release.</p>
@@ -253,6 +257,7 @@ check<span class="syntax-punctuation">(</span><span class="syntax-punctuation">!
 <span class="syntax-builtin">close</span><span class="syntax-punctuation">(</span>start<span class="syntax-punctuation">)</span>
 check<span class="syntax-punctuation">(</span><span class="syntax-operator">&lt;-</span>out <span class="syntax-operator">==</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;released result&quot;</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> The result is unavailable before release and equals 1 afterward.</p>
+<p><strong>Verify:</strong> Your solution must keep <code>&lt;-out == 1</code> true. Control: changing <code>go func() { &lt;-start; out &lt;- 1 }()</code> to <code>go func() { &lt;-start; out &lt;- 2 }()</code> panics with message <code>released result</code>; revert it.</p>
 <p>The blocked worker cannot send before the start boundary. This negative case rejects the assumption that starting a goroutine means its work has already completed, without relying on a sleep.</p>
 <h3 id="6-transfer-deterministic-aggregation">6. Transfer deterministic aggregation<a class="heading-anchor" href="#6-transfer-deterministic-aggregation" aria-label="Link to this section">#</a></h3>
 <p>Collect squares from four workers and sum them in the receiving goroutine.</p>
@@ -266,9 +271,10 @@ sum <span class="syntax-operator">:=</span> <span class="syntax-number">0</span>
 <span class="syntax-punctuation">}</span>
 check<span class="syntax-punctuation">(</span>sum <span class="syntax-operator">==</span> <span class="syntax-number">30</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;aggregation&quot;</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> The sum is 30.</p>
+<p><strong>Verify:</strong> Your solution must keep <code>sum == 30</code> true. Control: changing <code>go func(x int) { out &lt;- x * x }(n)</code> to <code>go func(x int) { out &lt;- x + x }(n)</code> panics with message <code>aggregation</code>; revert it.</p>
 <p>Only the receiver mutates sum, so no mutex is required for that accumulator. Channel result order is irrelevant to integer addition in this bounded example.</p>
 <h3 id="transfer-after-comparison">Transfer after comparison<a class="heading-anchor" href="#transfer-after-comparison" aria-label="Link to this section">#</a></h3>
-<p>Return to your own pad and reproduce one check with a new input. Explain why the check rejects a plausible wrong implementation. Keep the distinction between a pure model, an in-process fake, and a real external system visible in your notes.</p></article>
+<p>Every concurrent design in later lessons needs an explicit answer to the question: who waits for this goroutine, and how does its result become visible? Channels, WaitGroups, errgroup and contexts are all answers to it. When a controller starts informers or a server starts handlers, trace the join and the shutdown path before trusting the happy path.</p></article>
   </main>
 </body>
 </html>

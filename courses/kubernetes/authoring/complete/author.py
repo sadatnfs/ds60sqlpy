@@ -7,8 +7,10 @@ ROOT = Path(__file__).resolve().parents[4]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from key_terms import render as key_terms_block  # noqa: E402
+from notes import NOTES  # noqa: E402
 from reasoning import render as reasoning_block  # noqa: E402
 
 from scripts.format_inline_code import canonical_markdown  # noqa: E402
@@ -67,7 +69,7 @@ def author(
     lines = [
         f"# {key}: {plan['title']}",
         "## Level and prerequisites",
-        f"{plan['level'].capitalize()}; about {plan['minutes']} minutes plus review. Direct prerequisites: {prereq}. The chapter separates desired configuration, API acceptance, controller observation and application evidence.",
+        f"{plan['level'].capitalize()}; about {plan['minutes']} minutes plus review. Direct prerequisites: {prereq}.",
         "## Learning objectives",
         plan["outcome"],
         "## Vocabulary and concepts",
@@ -80,14 +82,23 @@ def author(
     lines += ["## Worked example / walkthrough"]
     for i, (title, body, expected) in enumerate(examples, 1):
         lines += [f"### Worked example {i}: {title}", body, f"**Expected:** {expected}"]
+    note = NOTES[n]
     if browser:
-        run = f"This lesson supplies an allowlisted `k8s-kind` source. Use `{source}` in the prepared module pad and inspect the current fixture-0.2 qualification receipt before Run. {starter_note}The app binds the owned namespace, creates fixed resources, observes its bounded checks and performs UID-aware cleanup. A one-shot Run does not execute the separate stateful host exercises or automatically grade explanations. [The run/host-lab guide](../host-labs.md) explains the precise boundary and explicit targeting with Bash on Linux, macOS or WSL 2."
+        run = [
+            f"Run `{source}` under the `k8s-kind` profile ([Run boundary](../host-labs.md#the-current-bounded-browser-operation)).",
+            f"{starter_note}{note['run']}",
+        ]
     else:
-        run = f"The app artifact is a reading worksheet, `{source}`. The current browser adapter does not provide the full **{capability}** operation. Use the synthetic fixture and offline check first. Live work follows [the scoped host-lab guide](../host-labs.md) only when the named capability and owned target have been provisioned. A worksheet or static check is never a cluster execution receipt."
+        run = [
+            f"This worksheet, `{source}`, does not provide the full **{capability}** operation. {note['run']}",
+            "Live reads need a provisioned, owned target ([host-lab guide](../host-labs.md)).",
+        ]
     lines += [
         "## Run and bounded evidence",
-        run,
-        f"The [manifest example](../solutions/{key}_solution.{'yaml' if browser else 'json'}) is separate from the learner artifact. The [offline reference check](../solutions/{key}_checks.py) evaluates explicitly synthetic facts and makes no API calls. Run it locally with `python courses/kubernetes/solutions/{key}_checks.py` after comparing your attempt. The [case ledger](../fixtures/{key}-cases.json) is immutable teaching input.",
+        *run,
+        f"The [offline reference check](../solutions/{key}_checks.py) makes no API calls; run it after your attempt:",
+        f"```sh\npython courses/kubernetes/solutions/{key}_checks.py\n```",
+        f"Compare it with the [manifest example](../solutions/{key}_solution.{'yaml' if browser else 'json'}) and [case ledger](../fixtures/{key}-cases.json).",
         "## Exercises",
     ]
     for i, (title, prompt, expected, hints, answer, verify) in enumerate(tasks, 1):
@@ -100,11 +111,11 @@ def author(
         ]
     lines += [
         "## Self-check",
-        f"Explain the mechanism behind the first example, then distinguish it from this boundary case: {examples[1][2]} State which observations are synthetic and which, if any, were read from your owned runtime.",
+        note["selfcheck"],
         "## Common pitfalls",
         sections[-1][1],
         "## Retrieval and transfer",
-        f"Close the answer and reconstruct the reasoning for Exercise 6 ({tasks[-1][0]}). Name the exact source and observed identity you would require before claiming the changed case succeeded.",
+        note["retrieval"],
         "## Next step",
         f"Continue to `k8s-{n + 1:03d}` after preserving the six evidence records."
         if n < 42

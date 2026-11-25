@@ -194,7 +194,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/scala-spark/solutions/spark-019_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="spark-019-explained-paired-reference-solutions">spark-019: Explained paired reference solutions<a class="heading-anchor" href="#spark-019-explained-paired-reference-solutions" aria-label="Link to this section">#</a></h2>
-<p>Read the <a href="../guides/spark-019.md.html">guide</a> and attempt one language first. The <a href="spark-019_solution.scala.html">Scala reference</a> and <a href="spark-019_solution.py.html">PySpark reference</a> are complete single-file programs with explicit local sessions and finally-based stop. Each compares with literal expectations; matching two implementations alone would not rule out a shared mistake.</p>
+<p>Attempt the <a href="../guides/spark-019.md.html">guide</a> exercises first.</p>
+<p>References: <a href="spark-019_solution.scala.html">Scala</a>, <a href="spark-019_solution.py.html">PySpark</a>.</p>
 <h3 id="exercises-and-reasoning">Exercises and reasoning<a class="heading-anchor" href="#exercises-and-reasoning" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-validate-identities-before-defining-a-winner">Exercise 1: Validate identities before defining a winner<a class="heading-anchor" href="#exercise-1-validate-identities-before-defining-a-winner" aria-label="Link to this section">#</a></h4>
 <p>Reject an input unless event_id is known, positive and unique and entity is known. Allow missing event_time under the declared last-priority policy. Return Unit/None on success.</p>
@@ -325,8 +326,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The previous identity proves which occurrence supplied the lagged field. Zero gaps expose tied timestamps rather than pretending the ID order supplies elapsed time. Entity C shows that a known predecessor does not guarantee a known duration. Prediction features would additionally need event-time and availability-time eligibility; this reproducible lag alone does not establish a leakage-free historical feature.</p>
 <p><strong>Verification evidence:</strong> Assert the complete identity/gap rows and explain zero gaps and the known previous ID with unknown duration.</p>
 <h3 id="execution-and-interpretation">Execution and interpretation<a class="heading-anchor" href="#execution-and-interpretation" aria-label="Link to this section">#</a></h3>
-<p>Run the complete reference in its prepared fixed worker. Its first check (Validate identities before defining a winner) is built inside the program, so opening the lesson fetches nothing; it expects: The eight-event fixture passes; adding another copy of event 1 fails. Missing-time event 7 is allowed. The final success line prints only after every reference assertion passes.</p>
-<p>Local plan, partition and resource evidence does not establish cluster-scale performance; session cleanup is explicit.</p></article>
+<p>The references validate the eight identities, then assert every rank <code>1:3, 2:2, 3:1, 4:3, 5:2, 6:1, 7:2, 8:1</code>, the winners <code>[3, 6, 8]</code> after several repartition counts and through SQL, the incomplete-order candidates <code>[2, 3, 5, 6, 8]</code>, both running totals for every event, and each <code>(previous_id, gap)</code> pair from the lag exercise. Adding a second copy of event 1 is expected to fail validation before any ranking.</p>
+<p>The output <code>spark-019: six PySpark reference contracts passed; Spark=</code> plus the version, or the Scala line, shows the policy produced stable winners on this fixture. It does not make the window cheap: every entity&#x27;s rows are shuffled to one task, which matters once an entity holds millions of events.</p></article>
   </main>
 </body>
 </html>

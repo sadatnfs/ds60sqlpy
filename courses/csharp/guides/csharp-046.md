@@ -24,9 +24,9 @@ C# 14 accompanies .NET 10 and is the default for the classroom's net10.0 target.
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles your saved pad as `Program.cs` in its fixed .NET 10 project. C# 14 is the matching language generation. This route uses the prepared framework libraries; it does not accept arbitrary project files, NuGet packages, command arguments or interactive input. The explicit `Program.Main` entrypoint makes compilation and execution visible. `Check` throws on a false condition in every build configuration, unlike conditional debugging assertions.
+The net10.0 target selects C# 14 by default, which this lesson needs. Rebuilding the same file with `LangVersion` set to 12 fails with CS9202 for `nameof(List<>)`, and the message names version 14. A bare `var x = [];` fails at any version with CS9176, because a collection expression needs a target type.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Compile contract, starter stop and success marker: [running a lesson](../STUDY-GUIDE.md#running-a-lesson).
 
 
 
@@ -34,7 +34,7 @@ Start with the answer-free learner artifact in your saved classroom pad. It deli
 
 A collection expression such as `[1, 2, 3]` is target-typed. A primary constructor supplies parameters used by members. `nameof` produces a symbol name while retaining compile-time refactoring support; since C# 14 it also accepts an unbound generic type such as `nameof(List<>)`. `missing?.Capacity = 32` assigns only when `missing` is not null, and `\e` is the escape character U+001B.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+Each example ends with a trace; method: [tracing a program](../STUDY-GUIDE.md#tracing-a-program).
 
 ## Worked example / walkthrough
 
@@ -82,6 +82,8 @@ internal static class Program {
 ```
 
 **Observe:** The target types select array and list representations.
+
+**Trace.** `int[] values = [1, 2, 3];` builds an array because the declared type is `int[]`. `List<int> list = [.. values, 4];` creates a list, copies the three elements through the spread `..`, then adds 4. `SequenceEqual` compares positions one by one and finds 1, 2, 3, 4. The same bracket syntax produced two different concrete types.
 
 ### Example B: Keep constructor policy visible
 
@@ -132,6 +134,8 @@ internal static class Program
 
 **Observe:** The supplied factor is used by the instance operation, nameof(List<>) is List, missing?.Capacity = 32 leaves the null builder alone, and \e is the escape character.
 
+**Trace.** `Scale(3)` captures `factor` as 3, and `Apply(4)` returns the checked product 12. `nameof(List<>)` yields List with no type argument. `missing?.Capacity = 32` evaluates `missing`, finds null and skips the assignment, so no exception occurs. `\e` and `\u001b` both denote the escape character, so the two strings compare equal and the final check passes.
+
 ## Exercises
 
 1. **Predict and explain.** Identify the target type of each collection expression.
@@ -146,13 +150,15 @@ internal static class Program
 
 6. **Transfer and justify.** Review a proposed new feature and justify adopting it using readability, compatibility and tooling evidence.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Log each task in the [evidence table](../STUDY-GUIDE.md#recording-exercise-evidence) before opening the explanation.
 
 ## Common pitfalls and diagnosis
 
 Newer syntax is not inherently better. A collection expression is not universally lazy. Do not use latest or preview as an unexplained fix for a compiler error.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+For task 5, an empty spread such as `[.. Array.Empty<int>()]` gives an empty list, and `Scale(0).Apply(5)` returns 0. `Scale(int.MaxValue).Apply(2)` throws `OverflowException` because `Apply` multiplies inside `checked`. For task 4, the CS9202 message names the required version; raise it deliberately or keep the older syntax.
+
+Repair routine: [building a regression case](../STUDY-GUIDE.md#building-a-regression-case).
 
 ## Progressive hints
 
@@ -162,11 +168,15 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 ## Self-check and next step
 
-Explain Language version, Target typing, Primary constructor without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+Name the concrete type each collection expression creates in Example A. Explain what the null-conditional assignment does when `missing` refers to a real builder. For task 6, judge one newer feature by three tests: whether the team's target framework compiles it, whether readers recognize it, and whether tooling formats it.
+
+Then follow the general [self-check routine](../STUDY-GUIDE.md#self-check-routine) and save your pad.
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://learn.microsoft.com/en-us/dotnet/csharp/whats-new/csharp-14). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+[Documentation](https://learn.microsoft.com/en-us/dotnet/csharp/whats-new/csharp-14): What's new in C# 14 lists the unbound generic `nameof`, null-conditional assignment and the other features available to net10.0 projects.
+
+Provenance and limits: [sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

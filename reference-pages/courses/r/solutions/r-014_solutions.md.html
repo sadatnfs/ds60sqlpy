@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/r/solutions/r-014_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="r-014-reference-reasoning">r-014: reference reasoning<a class="heading-anchor" href="#r-014-reference-reasoning" aria-label="Link to this section">#</a></h2>
-<p>Use the <a href="r-014_reference.R.html">complete reference</a> with the guide&#x27;s declared inputs and runtime. Every worked example is also a standalone script.</p>
+<p>Run the <a href="r-014_reference.R.html">complete reference</a> under the <a href="../STUDY-GUIDE.md.html#run-a-chapter">run rules</a>.</p>
 <h3 id="why-the-implementation-has-this-shape">Why the implementation has this shape<a class="heading-anchor" href="#why-the-implementation-has-this-shape" aria-label="Link to this section">#</a></h3>
 <p>The prototype states that every group produces one numeric total. Group names remain available for interpretation.</p>
 <p>A list is appropriate for structured group outputs. The pipe is ordinary sequential evaluation with an inspectable intermediate order.</p>
@@ -242,7 +242,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Tempting mistake:</strong> Timing each spelling once on three numbers and reporting the faster one. The difference is noise, and no algorithm changed.</p>
 <p><strong>Verify:</strong> <code>identical(c(3, 1, 2) |&gt; sort() |&gt; head(2), head(sort(c(3, 1, 2)), 2))</code> returns TRUE.</p>
 <h3 id="what-the-checks-establish">What the checks establish<a class="heading-anchor" href="#what-the-checks-establish" aria-label="Link to this section">#</a></h3>
-<p>The reference makes 5 <code>stopifnot()</code> checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.</p></article>
+<p>The checks pin <code>vapply()</code> returning a numeric vector of 3 and 3, the empty group summing to 0 by definition, a per-group summary where A has mean 1.5 and the empty group has an NA mean rather than NaN, a rejected template mismatch, an empty list mapping to <code>numeric(0)</code>, and a base pipe that sorts and keeps 1 and 2. They do not show how your summaries behave when a group holds NA values or a different type.</p>
+<p>The reference makes 5 <code>stopifnot()</code> checks; see <a href="../STUDY-GUIDE.md.html#what-a-passing-run-proves">what a passing run proves</a>.</p></article>
   </main>
 </body>
 </html>

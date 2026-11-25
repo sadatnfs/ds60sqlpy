@@ -1,6 +1,8 @@
 # spark-015: Explained paired reference solutions
 
-Read the [guide](../guides/spark-015.md) and attempt one language first. The [Scala reference](spark-015_solution.scala) and [PySpark reference](spark-015_solution.py) are complete single-file programs with explicit local sessions and finally-based stop. Each compares with literal expectations; matching two implementations alone would not rule out a shared mistake.
+Attempt the [guide](../guides/spark-015.md) exercises first.
+
+References: [Scala](spark-015_solution.scala), [PySpark](spark-015_solution.py).
 
 ## Exercises and reasoning
 
@@ -156,6 +158,7 @@ The domain rule is applied after conversion and retains its own rejected populat
 
 ## Execution and interpretation
 
-Run the complete reference in its prepared fixed worker. Its first check (Add an explicit tolerant parse column) is built inside the program, so opening the lesson fetches nothing; it expects: Ordered parsed values are `100, 0, 25, NULL, NULL, NULL, -5, 50`. The output parsed type is bigint. The final success line prints only after every reference assertion passes.
+The references assert the exact parsed sequence `100, 0, 25, NULL, NULL, NULL, -5, 50`, the category counts 5, 1 and 2, the six parse-accepted rows with total 170, the identical SQL result, and the final nonnegative set `[1, 2, 3, 4, 8]` with total 175. For the strict branch they run the ANSI cast on the valid subset, which succeeds, and then collect ID 5 alone and require an error whose message contains `CAST_INVALID_INPUT`; any other exception counts as a failure, and the PySpark reference prints the diagnostic it observed.
 
-Local plan, partition and resource evidence does not establish cluster-scale performance; session cleanup is explicit.
+The success line, `spark-015: six PySpark reference contracts passed; Spark=` plus the version in Python or its Scala twin, shows that each of the eight strings went to the bucket you predicted. It does not show that every locale-formatted or decimal amount would be handled, because the contract deliberately accepts only integer text.
+

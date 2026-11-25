@@ -24,9 +24,11 @@ Failure atomicity means a rejected operation leaves the prior valid state unchan
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles the saved pad as `main.rs` with pinned Rust 1.99.1, edition 2024, and the prepared Arrow 60 library. `assert!` and `assert_eq!` remain active in normal builds. The fixed pad accepts one source file without arbitrary arguments, interactive input, Cargo manifests or package installation. The main function returns `Result<(), Box<dyn std::error::Error>>` so later examples can propagate errors with `?`; the final `Ok(())` means this fixture completed successfully. Standard library and Arrow examples remain offline after image preparation. Multi-file Cargo and external ecosystem projects have separate explicit preparation workflows.
+This lesson's programs need only the prelude and their own helpers. A passing run prints `rust-012: passed`.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Pad setup and limits: [Run a lesson](../STUDY-GUIDE.md#run-a-lesson).
+
+Before you run anything, follow [Attempt a lesson](../STUDY-GUIDE.md#attempt-a-lesson).
 
 
 
@@ -34,7 +36,9 @@ Start with the answer-free learner artifact in your saved classroom pad. It deli
 
 `impl Inventory` contains associated functions and methods. `&self` reads, `&mut self` mutates, and `self` consumes. An associated constructor such as new can return Option or Result.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+**Reading Example A (Reserve within an invariant, code below).** The helpers declare `struct Inventory { stock: u32 }` and an `impl` block with three methods whose receivers state their capabilities. `new` has no receiver, so it is called as `Inventory::new(5)` and returns `Self`. `stock(&self)` only reads. `reserve(&mut self, amount)` may change the field, so the caller's binding must be `let mut inventory`. Inside `reserve`, an early `return false` refuses a request larger than the stock and leaves the field unchanged; otherwise the method subtracts and returns `true`. `assert!` checks that boolean directly, and `assert_eq!` reads the remaining stock through the read-only method rather than the private field.
+
+Method for tracing your own variants: [Trace a program](../STUDY-GUIDE.md#trace-a-program).
 
 ## Worked example / walkthrough
 
@@ -127,13 +131,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 6. **Transfer and justify.** Choose a consuming method when an operation should make the prior state unavailable.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Record each task as in [Keep evidence for each task](../STUDY-GUIDE.md#keep-evidence-for-each-task).
 
 ## Common pitfalls and diagnosis
 
 Public writable fields can bypass invariants. Unsigned types prevent negative representation but do not prevent overflow. A method taking &mut self is not automatically safe for unsynchronized sharing across threads.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+To turn a pitfall into a test, see [Design a regression case](../STUDY-GUIDE.md#design-a-regression-case).
 
 ## Progressive hints
 
@@ -141,13 +145,25 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 2. Compare Example B (Reject without partial mutation) with Example A and name the first line whose behavior differs. Its observation is: Excess demand is rejected and zero is an allowed no-op.
 3. Before opening the explanation, test your task 3 attempt against this lesson's main pitfall: Public writable fields can bypass invariants.
 
+Tempting approaches to rule out before you compare:
+
+- **Task 1.** Dropping `mut` from `let mut inventory` because only methods touch the stock fails at the first `reserve` call with E0596, cannot borrow `inventory` as mutable. Calls to `stock()` on the same binding still compile.
+- **Task 2.** Writing `self.stock += amount;` panics with `attempt to add with overflow` when overflow checks are enabled and silently wraps to a tiny stock when they are not. Either way the method cannot report the rejection.
+- **Task 3.** Testing the limit with `self.value > self.limit` is an off-by-one: at 2 of 2 the test is false, so the third call increments to 3 and returns true, and `assert!(!counter.increment())` panics. The `==` check stops exactly at the limit.
+- **Task 5.** Writing the guard as `amount >= self.stock` refuses the exact-stock reservation, so `reserve(3)` returns false and the last three units can never be sold.
+- **Task 6.** Using `fn submit(&mut self)` with a `submitted: bool` field leaves `order` usable, so `add_item` after `submit` compiles and every method needs its own runtime check.
+
 ## Self-check and next step
 
-Explain Struct, Receiver, Invariant without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+What capability does each receiver grant: `self`, `&self` and `&mut self`? Why does `Inventory::new(3)` followed by `reserve(4)` return false and leave the stock at 3, and what would a version that subtracted before checking do to an unsigned `stock`? Why does a private `stock` field matter when the type already uses `u32`?
+
+Then work through [Self-check and review](../STUDY-GUIDE.md#self-check-and-review).
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://doc.rust-lang.org/book/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+Read [The Rust Book, 5.3 Methods](https://doc.rust-lang.org/book/ch05-03-method-syntax.html) for `self`, `&self` and `&mut self` receivers.
+
+What the classroom does and does not prove: [Sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

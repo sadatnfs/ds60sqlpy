@@ -24,9 +24,11 @@ Prefer simple ownership first. Lifetime annotations become useful when an API de
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles the saved pad as `main.rs` with pinned Rust 1.99.1, edition 2024, and the prepared Arrow 60 library. `assert!` and `assert_eq!` remain active in normal builds. The fixed pad accepts one source file without arbitrary arguments, interactive input, Cargo manifests or package installation. The main function returns `Result<(), Box<dyn std::error::Error>>` so later examples can propagate errors with `?`; the final `Ok(())` means this fixture completed successfully. Standard library and Arrow examples remain offline after image preparation. Multi-file Cargo and external ecosystem projects have separate explicit preparation workflows.
+This lesson's programs need only the prelude and their own helpers. A passing run prints `rust-019: passed`.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Pad setup and limits: [Run a lesson](../STUDY-GUIDE.md#run-a-lesson).
+
+Before you run anything, follow [Attempt a lesson](../STUDY-GUIDE.md#attempt-a-lesson).
 
 
 
@@ -34,7 +36,9 @@ Start with the answer-free learner artifact in your saved classroom pad. It deli
 
 `fn choose<'a>(left: &'a str, right: &'a str) -> &'a str` relates the output borrow to both inputs. Elision handles common simple cases automatically. A struct field containing a reference also needs its lifetime relationship.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+**Reading Example A (Return one input view, code below).** `fn longer<'a>(left: &'a str, right: &'a str) -> &'a str` introduces one lifetime parameter, `'a`, and attaches it to both inputs and the output. The annotation does not change how long anything lives. It states a relationship the compiler checks at every call: the returned reference is valid only while both arguments are still valid. At the call in Example A, `&left` and `&right` borrow two owned `String` values and coerce to `&str`. The compiler picks `'a` as the region where both borrows are live, so the result may be used until either owner ends. The body only compares byte lengths and returns one of its inputs unchanged; it never creates new text, which is why a borrowed return type is possible here at all.
+
+Method for tracing your own variants: [Trace a program](../STUDY-GUIDE.md#trace-a-program).
 
 ## Worked example / walkthrough
 
@@ -106,13 +110,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 6. **Transfer and justify.** Choose a borrowed or owned result for a cache boundary and justify cost and lifetime.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Record each task as in [Keep evidence for each task](../STUDY-GUIDE.md#keep-evidence-for-each-task).
 
 ## Common pitfalls and diagnosis
 
 Lifetime names describe relationships, not durations in seconds. Static is not a universal fix. A lifetime annotation cannot rescue a reference to destroyed local storage.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+To turn a pitfall into a test, see [Design a regression case](../STUDY-GUIDE.md#design-a-regression-case).
 
 ## Progressive hints
 
@@ -120,13 +124,23 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 2. Compare Example B (Own a result when lifetime must separate) with Example A and name the first line whose behavior differs. Its observation is: The independent owned result survives the temporary scope.
 3. Before opening the explanation, test your task 3 attempt against this lesson's main pitfall: Lifetime names describe relationships, not durations in seconds.
 
+Tempting approaches to rule out before you compare:
+
+- **Task 1.** Drawing the output region as the whole region of `right` because the longer string happens to be `right` ignores that the signature cannot know which input is returned.
+- **Task 2.** Testing with `longer("pear", "pear")` and `assert_eq!` passes whichever argument is returned, so it says nothing about the policy.
+- **Task 5.** Assuming the borrow checker sees at run time that `outer` won and allows the view to escape treats lifetimes as a dynamic property. They are decided from the signature alone.
+
 ## Self-check and next step
 
-Explain Lifetime parameter, Elision, Borrowed result without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+Why does `longer` need one named lifetime tying both inputs to its result, when a one-input function gets its lifetime by elision? What stops a caller from dropping `right` while the view returned by `longer(&left, &right)` is still in use? Why does Example B return an owned `String` so that "retained" survives the inner scope?
+
+Then work through [Self-check and review](../STUDY-GUIDE.md#self-check-and-review).
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://doc.rust-lang.org/book/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+Read [The Rust Book, 10.3 Lifetimes](https://doc.rust-lang.org/book/ch10-03-lifetime-syntax.html) for the three elision rules.
+
+What the classroom does and does not prove: [Sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

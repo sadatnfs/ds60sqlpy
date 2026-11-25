@@ -194,9 +194,17 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cuda/python/guides/cuda-071.md</code></p>
     </header>
     <article class="document"><h2 id="cuda-071-a-timing-experiment-that-measures-the-right-thing">cuda-071: A timing experiment that measures the right thing<a class="heading-anchor" href="#cuda-071-a-timing-experiment-that-measures-the-right-thing" aria-label="Link to this section">#</a></h2>
-<p><strong>Route:</strong> CUDA Python and machine learning. <strong>Stage:</strong> beginner. <strong>Prerequisites:</strong> <code>cuda-007</code>, <code>cuda-008</code>, <code>cuda-067</code>, <code>cuda-070</code>. Allow several sessions when the hardware experiment is new; the chapter is not a deadline.</p>
-<h3 id="what-you-will-be-able-to-explain">What you will be able to explain<a class="heading-anchor" href="#what-you-will-be-able-to-explain" aria-label="Link to this section">#</a></h3>
-<p>By the end, you can <strong>identify the timing boundary</strong>, <strong>separate first-call compile time</strong>, and <strong>explain why CPU trace is not a benchmark</strong> with evidence. Start with the two worked cases, then use the editable CPU model to make the quantities concrete.</p>
+<p><strong>Route:</strong> CUDA Python and machine learning. <strong>Stage:</strong> beginner. <strong>Prerequisites:</strong> <code>cuda-007</code>, <code>cuda-008</code>, <code>cuda-067</code>, <code>cuda-070</code>.</p>
+<p>Pacing, evidence labels and platform rules: <a href="../../STUDY-GUIDE.md.html">CUDA study guide</a>.</p>
+<h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
+<ul>
+<li>Identify the timing boundary.</li>
+<li>Compute the median.</li>
+<li>Add transfer cost.</li>
+<li>Separate first-call compile time.</li>
+<li>Design equal-work comparison.</li>
+<li>Explain why CPU trace is not a benchmark.</li>
+</ul>
 <h3 id="mechanism-and-vocabulary">Mechanism and vocabulary<a class="heading-anchor" href="#mechanism-and-vocabulary" aria-label="Link to this section">#</a></h3>
 <p>A host timer around an asynchronous launch may measure enqueue latency rather than completed arithmetic. GPU events delimit work in a stream; host end-to-end timing must wait for all work needed by the output. These boundaries answer different questions. Warmup can include context creation, library initialization, compilation and allocator population, so report cold-start cost separately from repeated steady-state samples.</p>
 <p>Use a distribution rather than one flattering minimum. Median summarizes the middle observation, while a tail statistic describes slow requests. Record sample count, workload size, dtype, transfer policy, synchronization and competing load. A speedup should compare equal outputs and equally complete work. This chapter&#x27;s CPU trace arithmetic is deliberately a model: it cannot establish a GPU speedup.</p>
@@ -212,8 +220,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>A launch returns at 2 microseconds but the output finishes at 102 microseconds. A host timer stopped at return undercounts the operation by a factor of 51.</p>
 <h4 id="worked-example-2">Worked example 2<a class="heading-anchor" href="#worked-example-2" aria-label="Link to this section">#</a></h4>
 <p>For completed times [10,11,10,12,100] milliseconds, the median is 11 while the maximum is 100. Removing the last sample without explaining its cause hides tail behavior.</p>
-<h3 id="portable-executable-model">Portable executable model<a class="heading-anchor" href="#portable-executable-model" aria-label="Link to this section">#</a></h3>
-<p>The <strong>CPU reference model</strong> variant runs this bounded worked example using <code>python-core</code>. It uses only the Python standard library, small synthetic values and no network. Its purpose is to expose the arithmetic or contract behind the chapter. The separate reference includes assertions for the stated observations.</p>
+<h3 id="how-to-run-the-cpu-model">How to run the CPU model<a class="heading-anchor" href="#how-to-run-the-cpu-model" aria-label="Link to this section">#</a></h3>
+<p>Edit the copy; the <a href="../references/cuda-071_cpu.py.html">reference</a> adds assertions.</p>
+<pre class="highlighted-code"><code class="language-bash">python courses/cuda/python/lessons/cuda-071_cpu.py</code></pre>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> statistics
 
 samples <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-number">10</span><span class="syntax-punctuation">,</span> <span class="syntax-number">11</span><span class="syntax-punctuation">,</span> <span class="syntax-number">10</span><span class="syntax-punctuation">,</span> <span class="syntax-number">12</span><span class="syntax-punctuation">,</span> <span class="syntax-number">100</span><span class="syntax-punctuation">]</span>
@@ -240,9 +249,8 @@ submit_us<span class="syntax-punctuation">,</span> finish_us <span class="syntax
 <td><code>102</code></td>
 </tr>
 </tbody></table></div>
-<p>Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.</p>
 <h3 id="optional-nvidia-cuda-lab">Optional NVIDIA CUDA lab<a class="heading-anchor" href="#optional-nvidia-cuda-lab" aria-label="Link to this section">#</a></h3>
-<p>The <strong>CuPy on NVIDIA CUDA</strong> variant executes the actual operation with CuPy in the separately prepared <code>cuda-python</code> profile. It refuses a missing device instead of switching to CPU. Keep inputs bounded as supplied; inspect the device, synchronize and compare with the CPU reference. The profile must pass real host/device readiness checks. Successful syntax checking on a Mac is not GPU qualification.</p>
+<p><strong>CuPy on NVIDIA CUDA</strong> needs the <code>cuda-python</code> profile; <a href="../../STUDY-GUIDE.md.html#python-gpu-and-framework-labs">lab rules</a>.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-string">&quot;&quot;&quot;Optional NVIDIA CUDA lab. No CPU fallback or external dataset.&quot;&quot;&quot;</span>
 
 <span class="syntax-keyword">import</span> cupy <span class="syntax-keyword">as</span> cp
@@ -267,46 +275,43 @@ cp<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</
     <span class="syntax-string">&quot;</span><span class="syntax-string">ms; excludes transfers and initial compilation</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
 <span class="syntax-punctuation">)</span></code></pre>
 <h3 id="practice-and-transfer">Practice and transfer<a class="heading-anchor" href="#practice-and-transfer" aria-label="Link to this section">#</a></h3>
+<p>Record each attempt in the <a href="../lessons/cuda-071.md.html">worksheet</a> before opening hints.</p>
 <h4 id="exercise-1-identify-the-timing-boundary">Exercise 1: Identify the timing boundary<a class="heading-anchor" href="#exercise-1-identify-the-timing-boundary" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Stopping the timer at the return reports 2 microseconds and undercounts by the factor of 51 the reference computes.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-2-compute-the-median">Exercise 2: Compute the median<a class="heading-anchor" href="#exercise-2-compute-the-median" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Reporting the mean, 28.6 ms, mixes the tail into the center and overstates the typical case by a factor of about 2.6.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-3-add-transfer-cost">Exercise 3: Add transfer cost<a class="heading-anchor" href="#exercise-3-add-transfer-cost" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Reporting only the kernel interval as latency makes a GPU path look faster than a CPU path that includes its own I/O.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-4-separate-first-call-compile-time">Exercise 4: Separate first-call compile time<a class="heading-anchor" href="#exercise-4-separate-first-call-compile-time" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Discarding the first call without reporting it hides a cost a real user pays at process start.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-5-design-equal-work-comparison">Exercise 5: Design equal-work comparison<a class="heading-anchor" href="#exercise-5-design-equal-work-comparison" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Comparing a float32 GPU run with a float64 CPU run reports a speedup that is partly a precision change.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-6-explain-why-cpu-trace-is-not-a-benchmark">Exercise 6: Explain why CPU trace is not a benchmark<a class="heading-anchor" href="#exercise-6-explain-why-cpu-trace-is-not-a-benchmark" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Copying the 11 ms median into a report as GPU latency misrepresents a CPU script&#x27;s constant as a hardware result.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
-<p>Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.</p>
+<p>Hint <em>k</em> belongs to exercise <em>k</em>; open one at a time.</p>
 <ol>
-<li>Start from worked example 1 and mark the quantities needed for the task &quot;Identify the timing boundary&quot;.</li>
-<li>Change one assumption in worked example 2 while preserving the declared contract: compute the median.</li>
-<li>Trace the CPU program&#x27;s variables before adding hardware behavior: add transfer cost.</li>
-<li>Draw producers, consumers and the exact operation boundary for the task &quot;Separate first-call compile time&quot;.</li>
-<li>Separate what the small fixture establishes from what the real runtime must show: design equal-work comparison.</li>
-<li>Write a counterexample to an overbroad claim before you explain why CPU trace is not a benchmark.</li>
+<li>Mark the moment the launch call returns and the moment the output is ready. Which interval contains the arithmetic?</li>
+<li>Sort the five synthetic samples and pick the middle one.</li>
+<li>Draw the caller&#x27;s timeline from host input to host output and place both copies on it.</li>
+<li>Separate the first call&#x27;s context, compilation and allocator setup from the later repeated samples.</li>
+<li>List what must be identical on both sides before a ratio of times means anything: data, dtype, outputs and tolerance.</li>
+<li>Ask where the trace numbers came from. Were they measured on any device, or written into the program?</li>
 </ol>
-<h3 id="common-mistakes-and-self-review">Common mistakes and self-review<a class="heading-anchor" href="#common-mistakes-and-self-review" aria-label="Link to this section">#</a></h3>
-<p>Confusing a correct tiny example with a general implementation is the central review risk. For this chapter, challenge the assumption in worked example 2, then ask whether your change preserves the mechanism described above. If you change dtype, layout, ordering, batch size or backend, update the acceptance contract rather than silently reusing the old observation. Explain an unexpected result before trying random configuration changes.</p>
-<p>Keep a small evidence table with columns <strong>claim</strong>, <strong>input</strong>, <strong>expected observation</strong>, <strong>actual observation</strong> and <strong>limit</strong>. For the first claim use <code>Identify the timing boundary</code>. For the final claim use <code>Explain why CPU trace is not a benchmark</code>. An unperformed GPU or cluster experiment remains pending even when the CPU model is correct.</p>
-<h3 id="platform-and-evidence-contract">Platform and evidence contract<a class="heading-anchor" href="#platform-and-evidence-contract" aria-label="Link to this section">#</a></h3>
-<p>The reading worksheet and CPU reference model work through the ordinary Linux Docker classroom on macOS, Linux and Windows using WSL 2. They do not require an NVIDIA GPU. Their results are labeled CPU models or semantic oracles, not simulated hardware performance.</p>
-<p>Real CUDA work needs supported NVIDIA hardware, a compatible host driver and an explicitly prepared GPU runtime. An Apple GPU does not execute CUDA kernels. PyTorch MPS on a supported native Mac, ROCm on supported AMD hardware, or other vendor backends can provide separate accelerator learning routes; they need their own package and operation qualification and are not CUDA evidence. The ordinary Linux Docker classroom does not expose native Mac MPS automatically.</p>
-<p>Do not download packages, models or data by opening this lesson. Do not attach an engine socket, ambient cluster credentials or an arbitrary remote endpoint. A CPU pass, imported package, successful compilation, real GPU result and measured performance are distinct observations. Record the actual backend, data shape/dtype, source revision, versions and pending checks. A saved completion marker records learning progress, not hardware certification.</p>
+<h3 id="common-mistakes-and-self-check">Common mistakes and self-check<a class="heading-anchor" href="#common-mistakes-and-self-check" aria-label="Link to this section">#</a></h3>
+<p>The mistake this chapter targets is stopping a host timer when an asynchronous launch returns. That measures enqueue latency, 2 microseconds in worked example 1, not the 102 microseconds until the output exists. Another is reporting only the fastest sample, or deleting the 100 ms outlier without explaining it. Fix the boundary with a synchronization or GPU events, report the median with a tail statistic and the sample count, and keep cold-start time in a separate row.</p>
+<p><strong>Evidence limit:</strong> Every value in this chapter&#x27;s trace is invented for teaching. The median and maximum arithmetic is exact, but it cannot support any speedup claim; a real comparison needs measured, synchronized samples of equal work on named hardware.</p>
+<ol>
+<li>Why can a first call be much slower than later ones?</li>
+<li>What does the median hide that the maximum reveals?</li>
+<li>What makes two timings an equal-work comparison?</li>
+</ol>
+<p>Answers: <a href="../solutions/cuda-071_solutions.md.html#self-check-answers">self-check answers</a>.</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
 <ul>
 <li><a href="https://docs.cupy.dev/en/v13.6.0/">CuPy array and installation documentation</a></li>
 </ul>
-<p>Use the version-matched documentation of your prepared environment. These references describe interfaces and supported boundaries; the chapter&#x27;s synthetic examples and CPU models are original teaching material.</p>
+<p>Full lists: <a href="../../STUDY-GUIDE.md.html#documentation-and-sources">documentation and sources</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning skill for cuda-071: A timing experiment that measures the right thing.
 Read courses/cuda/python/guides/cuda-071.md and courses/cuda/python/lessons/cuda-071.md.

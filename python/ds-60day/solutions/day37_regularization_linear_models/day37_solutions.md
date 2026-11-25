@@ -84,9 +84,7 @@ Takeaways
 
 ## Solution reasoning lens
 
-A strong solution is not merely code that produces one plausible
-output. It establishes a chain from input contract to operation to
-verification:
+Each decision below links an input contract to an operation and its evidence:
 
 1. **`Pipeline([('scale', StandardScaler()), ('model', Ridge(...))])`:** learns scaling inside each training boundary before applying the penalty.
 2. **`alpha`:** controls penalty strength; compare it on a logarithmic scale with cross-validation.
@@ -103,29 +101,15 @@ verification:
 
 **Evidence of correctness:** Keep scaling inside the pipeline, report fold metrics and convergence state, compare coefficient norms/nonzero counts, and repeat selection across resamples.
 
-When comparing your attempt with the reference, explain which of these
-decisions your code made explicitly. If the reference makes a different
-choice, compare the contracts and evidence before deciding that one
-version is universally better.
-
 <!-- END ADVANCED PYTHON CONCEPT ENRICHMENT -->
 
 ## Exercise-by-exercise reasoning map
-
-This map connects every learner prompt to a reasoning path. Read the
-explanation before copying code: the goal is to understand the assumptions,
-the evidence that validates the result, and the edge cases that can make an
-apparently correct implementation fail.
 
 ### Exercise 1: Original lesson practice
 
 **Prompt:** Sweep `alpha` values and plot validation scores for Ridge and Lasso.
 
 **How to reason about it:** Use a logarithmic alpha grid because meaningful penalty strengths span orders of magnitude. Reuse folds, plot uncertainty, and include an unregularized or very-weak-penalty baseline for context.
-
-Use the worked reference earlier in this file, then change one boundary
-condition and rerun the stated checks. A copied output is not evidence
-unless you can explain why that output follows from the inputs.
 
 **Verify:** Evaluate Ridge and Lasso over one declared logarithmic alpha grid with identical folds; save a labeled validation-score curve, print the selected alpha/mean/std for each model, and leave the final test set untouched.
 
@@ -134,10 +118,6 @@ unless you can explain why that output follows from the inputs.
 **Prompt:** Inspect fitted coefficients and compare their sparsity. The separate solution also demonstrates Elastic Net as a useful extension.
 
 **How to reason about it:** L1 can set coefficients exactly to zero; L2 usually shrinks all of them. Compare coefficients only after identical scaling and remember that correlated predictors can exchange weight.
-
-Use the worked reference earlier in this file, then change one boundary
-condition and rerun the stated checks. A copied output is not evidence
-unless you can explain why that output follows from the inputs.
 
 **Verify:** Print a feature-aligned coefficient table for Ridge and Lasso, define the near-zero tolerance used for sparsity, and report each nonzero count plus validation metric from the same scaled pipeline.
 
@@ -155,10 +135,6 @@ to represent the target mean when the estimator does not penalize it.
 Validation error can have a U shape: moderate shrinkage may reduce variance,
 while excessive shrinkage underfits. Confirm the estimator's intercept policy
 rather than assuming every implementation uses the same objective.
-
-**Why this matters:** The result should survive a fresh-kernel rerun and
-a deliberately chosen boundary case. If it does not, revisit the
-assumption or data boundary rather than hiding the failure.
 
 **Verify:** Prediction; print Ridge coefficients, intercept, and training error for alpha near 0, 1, and 1e6; verify slopes shrink toward zero, the unpenalized intercept remains free, and training error does not improve as the penalty dominates.
 
@@ -195,10 +171,6 @@ Fit only on training data, then report the selected parameters, held-out error,
 and near-zero coefficient count. Selection stability across folds matters more
 than presenting zeros as automatic feature discovery.
 
-**Why this matters:** The result should survive a fresh-kernel rerun and
-a deliberately chosen boundary case. If it does not, revisit the
-assumption or data boundary rather than hiding the failure.
-
 **Verify:** Elastic Net implementation; print ElasticNetCV selected alpha/l1_ratio, every validation score summary, coefficient table, and nonzero count under a declared tolerance; assert scaling is inside the fitted pipeline.
 
 ### Exercise 5: Scaling bug
@@ -217,10 +189,6 @@ If a sparse matrix is used, choose a scaler compatible with sparsity (often
 interpretation, translate standardized coefficients back carefully or explain
 their standardized unit.
 
-**Why this matters:** The result should survive a fresh-kernel rerun and
-a deliberately chosen boundary case. If it does not, revisit the
-assumption or data boundary rather than hiding the failure.
-
 **Verify:** Scaling bug; fit the same Lasso problem before/after scaling, print feature scales and original-unit coefficients, and show the scaled pipeline removes unit-dependent penalty unfairness while producing finite validation metrics.
 
 ### Exercise 6: Stability investigation
@@ -237,9 +205,5 @@ claiming that only one “matters” is not supported.
 Elastic Net can encourage grouped behavior, and domain-driven feature grouping
 can improve interpretation. Always separate predictive usefulness from causal
 importance.
-
-**Why this matters:** The result should survive a fresh-kernel rerun and
-a deliberately chosen boundary case. If it does not, revisit the
-assumption or data boundary rather than hiding the failure.
 
 **Verify:** Stability investigation; over declared bootstrap seeds, print Lasso selected-feature indicators/frequencies and Ridge prediction variability; report the predictor correlation and show whether Lasso selection swaps while Ridge predictions remain comparatively stable.

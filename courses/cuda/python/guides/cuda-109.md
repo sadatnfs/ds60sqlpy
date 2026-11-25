@@ -1,10 +1,17 @@
 # cuda-109: Deployment runtimes and engine building
 
-**Route:** CUDA Python and machine learning. **Stage:** advanced. **Prerequisites:** `cuda-090`, `cuda-095`. Allow several sessions when the hardware experiment is new; the chapter is not a deadline.
+**Route:** CUDA Python and machine learning. **Stage:** advanced. **Prerequisites:** `cuda-090`, `cuda-095`.
 
-## What you will be able to explain
+Pacing, evidence labels and platform rules: [CUDA study guide](../../STUDY-GUIDE.md).
 
-By the end, you can **define the shape envelope**, **choose calibration data**, and **compare task quality** with evidence. Start with the two worked cases, then use the editable CPU model to make the quantities concrete.
+## Learning objectives
+
+- Define the shape envelope.
+- Reject an invalid request.
+- Separate export build and execution.
+- Choose calibration data.
+- Record engine compatibility.
+- Compare task quality.
 
 ## Mechanism and vocabulary
 
@@ -31,9 +38,13 @@ A deployment accepts batch sizes 1 through 8 and sequence lengths up to 32. Batc
 
 A lower-precision engine that passes shape checks but changes classification quality beyond tolerance fails the application contract despite compiling successfully.
 
-## Portable executable model
+## How to run the CPU model
 
-The **CPU reference model** variant runs this bounded worked example using `python-core`. It uses only the Python standard library, small synthetic values and no network. Its purpose is to expose the arithmetic or contract behind the chapter. The separate reference includes assertions for the stated observations.
+Edit the copy; the [reference](../references/cuda-109_cpu.py) adds assertions.
+
+```sh
+python courses/cuda/python/lessons/cuda-109_cpu.py
+```
 
 ```python
 def accepted(batch, sequence):
@@ -48,77 +59,65 @@ print("CPU deployment contract: supported shapes accepted; invalid shapes reject
 
 **Expected observation:** Declared shape envelope enforced.
 
-Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.
-
 ## Practice and transfer
+
+Record each attempt in the [worksheet](../lessons/cuda-109.md) before opening hints.
 
 ### Exercise 1: Define the shape envelope
 
 **Trap to avoid:** Leaving the envelope implicit means unsupported shapes reach the engine and fail with internal errors or are padded and truncated without notice.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 2: Reject an invalid request
 
 **Trap to avoid:** Splitting batch 9 into 8 and 1 automatically may be reasonable, but only as a documented path. Doing it implicitly changes latency and behavior without a contract.
-
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 3: Separate export build and execution
 
 **Trap to avoid:** Reporting the deployment as working because the export succeeded skips build and execution, where unsupported operators and precision problems usually appear.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 4: Choose calibration data
 
 **Trap to avoid:** Calibrating on a handful of constant inputs gives ranges that clip real activations, which lowers accuracy. Values outside the calibrated range saturate at the limit, so large activations lose their differences entirely.
-
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 5: Record engine compatibility
 
 **Trap to avoid:** Copying an engine file to a different GPU model or runtime release can fail to load or behave differently. Rebuilding per target from the same exported graph is the safer pattern.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 6: Compare task quality
 
 **Trap to avoid:** Comparing only a few output tensors for closeness can miss a quality drop concentrated in some classes.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ## Progressive hints
 
-Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.
+Hint *k* belongs to exercise *k*; open one at a time.
 
-1. Start from worked example 1 and mark the quantities needed for the task "Define the shape envelope".
-2. Change one assumption in worked example 2 while preserving the declared contract: reject an invalid request.
-3. Trace the CPU program's variables before adding hardware behavior: separate export build and execution.
-4. Draw producers, consumers and the exact operation boundary for the task "Choose calibration data".
-5. Separate what the small fixture establishes from what the real runtime must show: record engine compatibility.
-6. Write a counterexample to an overbroad claim before you compare task quality.
+1. Write the allowed range for every dimension, batch and sequence length included, together with the accepted dtypes.
+2. Check a batch of 9 against the envelope before any execution and decide what message the caller should receive.
+3. Ask what each step proves on its own: that the model exported, that an engine was built and that the engine produced correct outputs.
+4. Ask which data split calibration may read, and why it must not overlap the examples used for evaluation.
+5. List what a cached engine depends on, such as the device, toolkit and runtime versions, and record each one with the cache.
+6. Run the source model and the engine on the same held-out examples with the same metric, not only a shape check.
 
-## Common mistakes and self-review
+## Common mistakes and self-check
 
-Confusing a correct tiny example with a general implementation is the central review risk. For this chapter, challenge the assumption in worked example 2, then ask whether your change preserves the mechanism described above. If you change dtype, layout, ordering, batch size or backend, update the acceptance contract rather than silently reusing the old observation. Explain an unexpected result before trying random configuration changes.
+A common mistake is treating a successful export or engine build as proof that deployment works. Export can succeed while execution fails, and an engine can execute while a lower precision quietly degrades classification quality beyond tolerance. Another mistake is silently truncating a request outside the declared shapes, such as batch 9 when the envelope stops at 8. Fix both by enforcing the shape envelope with a clear error, keeping the source model and build recipe and comparing task quality on held-out data at every precision you ship.
 
-Keep a small evidence table with columns **claim**, **input**, **expected observation**, **actual observation** and **limit**. For the first claim use `Define the shape envelope`. For the final claim use `Compare task quality`. An unperformed GPU or cluster experiment remains pending even when the CPU model is correct.
+**Misconception:** An engine built and cached on one machine can be copied to any other deployment host. **Correction:** Engine caches can depend on the GPU model, toolkit and runtime versions used at build time. Treat a cached engine as tied to its build environment: record that environment, rebuild from the preserved source model and recipe for each target, and recheck outputs and quality after every rebuild.
 
-## Platform and evidence contract
+**Evidence limit:** The reference enforces a declared shape envelope in Python and rejects an out-of-range request. It does not export a model or build a TensorRT engine, so operator support, calibration effects, cache compatibility and timing need a prepared runtime on the target hardware, measured separately for build, cold start and warm inference.
 
-The reading worksheet and CPU reference model work through the ordinary Linux Docker classroom on macOS, Linux and Windows using WSL 2. They do not require an NVIDIA GPU. Their results are labeled CPU models or semantic oracles, not simulated hardware performance.
+1. Why is one successful shape weak evidence for an engine?
+2. Why keep calibration data separate from evaluation data?
+3. Can an engine cache be copied to another machine safely?
 
-Real CUDA work needs supported NVIDIA hardware, a compatible host driver and an explicitly prepared GPU runtime. An Apple GPU does not execute CUDA kernels. PyTorch MPS on a supported native Mac, ROCm on supported AMD hardware, or other vendor backends can provide separate accelerator learning routes; they need their own package and operation qualification and are not CUDA evidence. The ordinary Linux Docker classroom does not expose native Mac MPS automatically.
-
-Do not download packages, models or data by opening this lesson. Do not attach an engine socket, ambient cluster credentials or an arbitrary remote endpoint. A CPU pass, imported package, successful compilation, real GPU result and measured performance are distinct observations. Record the actual backend, data shape/dtype, source revision, versions and pending checks. A saved completion marker records learning progress, not hardware certification.
+Answers: [self-check answers](../solutions/cuda-109_solutions.md#self-check-answers).
 
 ## Primary references
 
 - [PyTorch CUDA semantics](https://docs.pytorch.org/docs/2.9/notes/cuda.html)
 - [TensorFlow GPU guide](https://www.tensorflow.org/guide/gpu)
 
-Use the version-matched documentation of your prepared environment. These references describe interfaces and supported boundaries; the chapter's synthetic examples and CPU models are original teaching material.
+Full lists: [documentation and sources](../../STUDY-GUIDE.md#documentation-and-sources).
 
 ## Ask an AI tutor about this lesson
 

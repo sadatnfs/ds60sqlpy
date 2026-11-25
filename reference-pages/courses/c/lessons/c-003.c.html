@@ -197,24 +197,16 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">int</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">void</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span></span>
 <span class="source-line">  <span class="syntax-comment">/* Exercise 1: Group before calculating: predict an edited check</span></span>
-<span class="source-line"><span class="syntax-comment">     Copy worked example 1 into a scratch pad and change `CHECK((2 + 3) * 4 ==</span></span>
-<span class="source-line"><span class="syntax-comment">     20);` to `CHECK((3 + 3) * 4 == 20);` inside its CHECK. Before running,</span></span>
-<span class="source-line"><span class="syntax-comment">     predict whether the CHECK still holds and explain why; then restore it.</span></span>
-<span class="source-line"><span class="syntax-comment">     Expected: With `CHECK((3 + 3) * 4 == 20);` the run stops with `Check</span></span>
-<span class="source-line"><span class="syntax-comment">     failed` at the CHECK on `(2 + 3) * 4 == 20`, because the &quot;group before</span></span>
-<span class="source-line"><span class="syntax-comment">     calculating&quot; case no longer shows that the values are 14 and 20. Restoring</span></span>
-<span class="source-line"><span class="syntax-comment">     `CHECK((2 + 3) * 4 == 20);` brings that observation back. */</span></span>
+<span class="source-line"><span class="syntax-comment">     In worked example 1, change `CHECK((2 + 3) * 4 == 20);` to `CHECK((3 + 3) *</span></span>
+<span class="source-line"><span class="syntax-comment">     4 == 20);`. Predict whether the CHECK still holds and why, then run and</span></span>
+<span class="source-line"><span class="syntax-comment">     restore. Expected: `Check failed`: `CHECK((3 + 3) * 4 == 20);` is false,</span></span>
+<span class="source-line"><span class="syntax-comment">     although the values are 14 and 20. */</span></span>
 <span class="source-line"></span>
 <span class="source-line">  <span class="syntax-comment">/* Exercise 2: Use a short-circuit guard: debug a regression</span></span>
-<span class="source-line"><span class="syntax-comment">     A regression changed one token in worked example 2, the &quot;use a</span></span>
-<span class="source-line"><span class="syntax-comment">     short-circuit guard&quot; case, so one line now reads `bool found = length &gt;= 0</span></span>
-<span class="source-line"><span class="syntax-comment">     &amp;&amp; values[0] == 7;`. Run the example with that line, use the failing CHECK</span></span>
-<span class="source-line"><span class="syntax-comment">     to find why the access is skipped and the condition is false no longer</span></span>
-<span class="source-line"><span class="syntax-comment">     holds and repair the line without changing the CHECK. Expected: Before the</span></span>
-<span class="source-line"><span class="syntax-comment">     repair the run stops with `Check failed` at the CHECK on `!found`. Once the</span></span>
-<span class="source-line"><span class="syntax-comment">     line reads `bool found = length &gt; 0 &amp;&amp; values[0] == 7;` again, the &quot;use a</span></span>
-<span class="source-line"><span class="syntax-comment">     short-circuit guard&quot; case again shows that the access is skipped and the</span></span>
-<span class="source-line"><span class="syntax-comment">     condition is false. */</span></span>
+<span class="source-line"><span class="syntax-comment">     Worked example 2 now has a line reading `bool found = length &gt;= 0 &amp;&amp;</span></span>
+<span class="source-line"><span class="syntax-comment">     values[0] == 7;`. Repair it so that the access is skipped and the condition</span></span>
+<span class="source-line"><span class="syntax-comment">     is false again. Expected: `Check failed` at `!found` until the line reads</span></span>
+<span class="source-line"><span class="syntax-comment">     `bool found = length &gt; 0 &amp;&amp; values[0] == 7;` again. */</span></span>
 <span class="source-line"></span>
 <span class="source-line">  <span class="syntax-comment">/* Exercise 3: Sequence updates explicitly</span></span>
 <span class="source-line"><span class="syntax-comment">     Increment x and then calculate twice its updated value.</span></span>

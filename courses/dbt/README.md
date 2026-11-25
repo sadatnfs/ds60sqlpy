@@ -44,3 +44,7 @@ Maintained prose is in `authoring/units.json`; complete programs are in `referen
 The maintained retail project contains actual SQL models, seeds, macros, local packages, tests, snapshots and target configuration. Copy it to an owned working directory and use its Docker launcher to inspect durable artifacts and evolve a complete project.
 
 Follow the [complete project instructions](projects/retail/README.md).
+
+## Study guide
+
+The [study guide](STUDY-GUIDE.md) holds the routine shared by every lesson: running a case, the case harness, the SQL model pad, practice, explained answers and tutoring.

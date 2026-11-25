@@ -32,11 +32,9 @@ The fixture writes concise HTTP access observations to standard error and JSON r
 
 ## How to use this lesson
 
-The classroom displays this guide and saves your worksheet, `courses/docker/lessons/docker-010.md`. Its Run button does not control your Docker engine. Docker engine access is powerful host access, so the classroom deliberately receives no engine socket. Work through the supplied examples without starting anything, then use the optional host lab only in your own disposable project. Reading a command, parsing YAML and actually running the project are different forms of evidence.
+The classroom saves `courses/docker/lessons/docker-010.md` and holds no engine socket ([host-lab setup](../STUDY-GUIDE.md#host-lab-setup)).
 
-Use Bash in Linux, macOS Terminal, or Ubuntu under WSL 2 on Windows. The supported engine runs Linux containers. The maintained fixture is `courses/docker/fixtures/compose-lab/`; its README explains copying it into a new ignored learner directory, checking the engine, building locally with visible logs, and using the fixed project name `ds60-docker-study`. The fixture uses port 18080 on host loopback. Stop if that project name or port belongs to unrelated work; choose a new project name consistently in your own copy. Never paste a command against a remote Docker context simply because it is currently selected.
-
-For Dockerfile examples, create a file named `Dockerfile` in a scratch project. YAML snippets describe a fragment unless explicitly called a complete file. Text transcripts are synthetic illustrations, not claims about your machine. Do not substitute a real password, token or private registry into a checked-in example. **How to use the lessons** in the [subject README](../README.md) collects these rules in one place.
+**Host lab.** Run worked example 2, then repeat each program without `--rm` and with names such as `ds60-ok` and `ds60-fail`. `docker ps -a --filter name=ds60-` shows `Exited (0)` and `Exited (1)`, and `docker logs ds60-fail` replays the traceback, because logs belong to the container, not the process. Separate the streams on the host with `docker logs ds60-fail 2>/dev/null`, which prints nothing because the traceback went to stderr. Next, start the project, request an unknown route such as `/missing`, and read `docker compose -p ds60-docker-study logs --tail 5 app`: the 404 appears as a request line while the container stays Up. Save each exit code and log line in the worksheet, then remove the two named containers with `docker rm ds60-ok ds60-fail`.
 
 ## Worked example / walkthrough
 
@@ -64,7 +62,7 @@ docker run --rm --pull never ds60-docker-study:local python -c "raise ValueError
 
 ## Six progressive exercises
 
-For each exercise, name the object involved and the phase of its lifetime before changing anything, then vary only the condition the task names. Exercises that ask you to predict, explain, compare or diagnose keep their answers in the solutions file; the others show the evidence to look for.
+Answer-type prompts keep their answers in the solutions file ([exercise rules](../STUDY-GUIDE.md#exercise-rules)).
 
 ### Exercise 1: Predict the streams used by the two short programs.
 
@@ -98,13 +96,19 @@ For each exercise, name the object involved and the phase of its lifetime before
 
 Restarting a failing container before saving its logs and exit status. Reading the whole log history instead of a bounded tail. Logging tokens or request bodies to make debugging easier.
 
-Exercise 4 is this chapter's boundary case: Diagnose a running container that returns errors. Send one request to the application and read its status code and log line; a container STATUS of Up only reports that the main process exists. Preserve the original failure and the exact changed field before retrying. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
+Exercise 4 is this chapter's boundary case: Diagnose a running container that returns errors. Send one request to the application and read its status code and log line; a container STATUS of Up only reports that the main process exists.
+
+A further trap is reading `docker logs` on a service that writes to a log file instead of the standard streams. The command then shows only startup lines, and the learner concludes that no requests arrived. The engine's logging driver captures only stdout and stderr of the main process, so a file such as `/var/log/app.log` is invisible to it and also disappears with the writable layer. Configure the application to log to stdout or stderr, as the fixture's HTTP server does, and keep any log file you truly need on a volume with its own retention plan.
+
+Never trade a safety control for a passing example ([safety rules](../STUDY-GUIDE.md#safety-rules)).
 
 ## Retrieval, transfer and next steps
 
-Close the explanations first. Recall which exit code each program produced and which log line identified the failure. Then reconstruct worked example 2 (Compare successful and failing short programs) with one different value, predict what changes, and name which of standard streams, container logs, exit status, container state and events the change touches.
+**Retrieval.** Recall which exit code each program produced and which log line identified the failure.
 
-When a host session ends, run `docker compose -p ds60-docker-study down` from your fixture copy. It removes the project's containers and network but keeps named volumes; deleting a volume is a separate, deliberate reset described in the fixture README.
+**Transfer case.** After a deployment, `docker compose ps` shows the app as `Up 3 minutes`, but users report errors. A teammate proposes `docker compose restart app` immediately. What should be captured first, and why is the restart weak evidence of a fix?
+
+Then run the [retrieval loop](../STUDY-GUIDE.md#retrieval-and-cleanup) and end any host session with its cleanup.
 
 ## Primary references
 

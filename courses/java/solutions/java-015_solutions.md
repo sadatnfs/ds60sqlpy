@@ -1,6 +1,6 @@
 # java-015: explanatory solutions
 
-Open after an attempt or an explicit solution reveal. The executable reference runs the six exercise checks together as `Main.java`. The guide contains independent worked examples, while this file explains the choices and failure cases in the complete answer.
+Open this after an attempt; see [using the solutions](../STUDY-GUIDE.md#use-the-solutions).
 
 ## Mechanism review
 
@@ -18,7 +18,7 @@ Instant.parse accepts ISO 8601 UTC text. atZone converts an instant to a regiona
 
 ## Exercise 1: Preserve an instant across zones: predict an edited check
 
-Task: Copy Example A into a scratch `Main.java` and change `ny.toLocalDate().equals(java.time.LocalDate.of(2023, 12, 31));` to `ny.toLocalDate().equals(java.time.LocalDate.of(2024, 12, 31));` inside its assertion. Before running it with `java -ea Main`, predict whether the assertion still holds and explain why; then restore it.
+Task: Change Example A's assertion to `ny.toLocalDate().equals(java.time.LocalDate.of(2024, 12, 31));`, predict whether it holds, then run and restore it.
 
 Changing the display zone does not move the event. A date-only grouping can nevertheless change because calendar boundaries differ by zone.
 
@@ -32,13 +32,13 @@ assert utc.toInstant().equals(ny.toInstant()) &&
 ny.toLocalDate().equals(java.time.LocalDate.of(2023, 12, 31));
 ```
 
-**Expected:** The changed run fails with an `AssertionError` from the assertion on `utc.toInstant().equals(ny.toInstant()) && ny.toLocalDate().equals(java.time.LocalDate.of(2023, 12, 31))`. Restoring the original line brings back the worked observation: same instant; New York local date 2023-12-31.
+**Expected:** The edited run fails with an `AssertionError` from the assertion on `utc.toInstant().equals(ny.toInstant()) && ny.toLocalDate().equals(java.time.LocalDate.of(2023, 12, 31))`.
 
-**Verify:** Compare your written prediction with the reported `AssertionError` and its stack-trace line, and explain why the edited condition is false for the values that satisfy `utc.toInstant().equals(ny.toInstant()) && ny.toLocalDate().equals(java.time.LocalDate.of(2023, 12, 31))`. After restoring the line, the program completes without an `AssertionError` again.
+**Verify:** Explain why the edited assertion is false for the values that satisfy `utc.toInstant().equals(ny.toInstant()) && ny.toLocalDate().equals(java.time.LocalDate.of(2023, 12, 31))`.
 
 ## Exercise 2: Compare calendar and elapsed days: debug a regression
 
-Task: A regression changed one token in the code that Example B adds after Example A, so one line now reads `13,`. Run Example B with that line, use the failing assertion to locate the defect and repair it without changing the assertion.
+Task: A regression in Example B's new code makes one line read `13,`. Repair it using the failing assertion.
 
 A day in the local calendar crosses a daylight-saving gap here. Duration and calendar arithmetic answer different questions.
 
@@ -61,9 +61,9 @@ assert java.time.Duration.between(start, nextDay).toHours() == 23;
 assert nextDay.getHour() == 12 && next24.getHour() == 13;
 ```
 
-**Expected:** Before the repair the run fails with an `AssertionError` from the assertion on `nextDay.getHour() == 12 && next24.getHour() == 13`; after it the line reads `12,` again and calendar next noon is 23 elapsed hours later; 24 hours reaches 13:00.
+**Expected:** The unrepaired run fails with an `AssertionError` from the assertion on `nextDay.getHour() == 12 && next24.getHour() == 13`; the repaired line reads `12,`.
 
-**Verify:** Keep the failing and the repaired runs. Explain why the changed token alters the value tested by `nextDay.getHour() == 12 && next24.getHour() == 13` for this input.
+**Verify:** Explain how the changed token alters the value that `nextDay.getHour() == 12 && next24.getHour() == 13` tests.
 
 ## Exercise 3: Detect a nonexistent local time
 
@@ -79,7 +79,7 @@ assert zone.getRules().getValidOffsets(gap).isEmpty();
 
 **Expected:** zero valid offsets.
 
-**Verify:** Keep an assertion equivalent to `zone.getRules().getValidOffsets(gap).isEmpty()`. As a control, change `var gap = java.time.LocalDateTime.of(2024, 3, 10, 2, 30);` to `var gap = java.time.LocalDateTime.of(2025, 3, 10, 2, 30);`: the run must fail with an `AssertionError` from the assertion on `zone.getRules().getValidOffsets(gap).isEmpty()`. Restore the line before continuing.
+**Verify:** Control: changing `var gap = java.time.LocalDateTime.of(2024, 3, 10, 2, 30);` to `var gap = java.time.LocalDateTime.of(2025, 3, 10, 2, 30);` must fail the assertion on `zone.getRules().getValidOffsets(gap).isEmpty()`.
 
 ## Exercise 4: Detect an ambiguous local time
 
@@ -94,7 +94,7 @@ assert zone.getRules().getValidOffsets(overlap).size() == 2;
 
 **Expected:** two valid offsets.
 
-**Verify:** Keep an assertion equivalent to `zone.getRules().getValidOffsets(overlap).size() == 2`. As a control, change `var overlap = java.time.LocalDateTime.of(2024, 11, 3, 1, 30);` to `var overlap = java.time.LocalDateTime.of(2025, 11, 3, 1, 30);`: the run must fail with an `AssertionError` from the assertion on `zone.getRules().getValidOffsets(overlap).size() == 2`. Restore the line before continuing.
+**Verify:** Control: changing `var overlap = java.time.LocalDateTime.of(2024, 11, 3, 1, 30);` to `var overlap = java.time.LocalDateTime.of(2025, 11, 3, 1, 30);` must fail the assertion on `zone.getRules().getValidOffsets(overlap).size() == 2`.
 
 ## Exercise 5: Parse a strict calendar date
 
@@ -115,7 +115,7 @@ assert invalid;
 
 **Expected:** leap-day accepted only for 2024.
 
-**Verify:** Keep an assertion equivalent to `invalid`. As a control, change `java.time.LocalDate.parse("2023-02-29");` to `java.time.LocalDate.parse("2024-02-29");`: the run must fail with an `AssertionError` from the assertion on `invalid`. Restore the line before continuing.
+**Verify:** Control: changing `java.time.LocalDate.parse("2023-02-29");` to `java.time.LocalDate.parse("2024-02-29");` must fail the assertion on `invalid`.
 
 ## Exercise 6: Use a half-open time window
 
@@ -131,8 +131,10 @@ assert !(!end.isBefore(instant) && end.isBefore(end));
 
 **Expected:** start included; end excluded.
 
-**Verify:** Keep an assertion equivalent to `!(!end.isBefore(instant) && end.isBefore(end))`. As a control, change `assert !(!end.isBefore(instant) && end.isBefore(end));` to `assert !(!end.isBefore(instant) || end.isBefore(end));` inside it: the run must fail with an `AssertionError`, which shows the assertion can fail. Restore it.
+**Verify:** Control: changing `assert !(!end.isBefore(instant) && end.isBefore(end));` to `assert !(!end.isBefore(instant) || end.isBefore(end));` inside the assertion must make it fail.
 
 ## After comparing the answer
 
-Run the complete reference with assertions enabled, then return to your own implementation. Recreate one check with different values and explain its expected result before execution. A compiler error, an expected domain exception and an assertion failure represent different stages and should be reported separately. Preserve ownership boundaries when adapting file, network or concurrency examples. The reference never authorizes access to a shared service or deletion of learner state. Use a fresh tiny fixture when you need to distinguish two interpretations of an API contract.
+Repeat Exercise 2 in your copy for the fall transition on 2024-11-02 and predict the elapsed hours between noon and the next day's noon (25).
+
+Run the complete reference with `java -ea Main` first; the [review routine](../STUDY-GUIDE.md#use-the-solutions) covers the rest.

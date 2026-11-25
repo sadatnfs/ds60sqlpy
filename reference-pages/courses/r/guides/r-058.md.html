@@ -196,7 +196,10 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <article class="document"><h2 id="r-058-hover-view-controls-and-accessible-alternatives">r-058: Hover, view controls and accessible alternatives<a class="heading-anchor" href="#r-058-hover-view-controls-and-accessible-alternatives" aria-label="Link to this section">#</a></h2>
 <p><strong>Level:</strong> advanced. <strong>Direct prerequisites:</strong> <code>r-057</code></p>
 <h3 id="run-and-retain-your-work">Run and retain your work<a class="heading-anchor" href="#run-and-retain-your-work" aria-label="Link to this section">#</a></h3>
-<p>Open <code>r-058</code> in <code>/classroom</code> and use the prepared <code>r-statistics</code> profile. Each Run evaluates one <code>main.R</code> script in a fresh offline R process, so define every input in the script; an earlier Run leaves no variables behind. Work in the <a href="../lessons/r-058.R.html">starter</a>. The <a href="../solutions/r-058_reference.R.html">complete reference</a> ends by printing <code>r-058 reference checks passed</code>, and the <a href="../solutions/r-058_solutions.md.html">explained answers</a> are there for deliberate comparison after your own attempt. This chapter draws figures: base plots are captured as PNG, ggplot2 and Plotly objects must be printed explicitly, and the classroom keeps at most two figures per run. The <a href="../README.md.html">course overview</a> describes saved work, figure capture and the prepared package versions.</p>
+<p>The starter holds four observations, A1 and A2 in group A and B1 and B2 in group B, with x values 1 and 2 and y values 2, 3, 4 and 6, and an empty results list. Run it and compute the overall mean, 3.75, and the group A mean, 2.5. Attach ids as <code>customdata</code> so hover text names each point regardless of its coordinates.</p>
+<p>Work in the <a href="../lessons/r-058.R.html">starter</a> under the <a href="../STUDY-GUIDE.md.html#run-a-chapter">run rules</a>.</p>
+<p>The <a href="../solutions/r-058_reference.R.html">complete reference</a> ends by printing <code>r-058 reference checks passed</code>.</p>
+<p>This chapter draws figures; read <a href="../STUDY-GUIDE.md.html#figures">figure capture</a> before printing them.</p>
 <h3 id="outcome-and-mechanism">Outcome and mechanism<a class="heading-anchor" href="#outcome-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Encode a bounded interactive view while preserving observation identity and a non-hover-dependent explanation.</p>
 <p>Interaction can help a reader inspect a figure, but it should not be the only way to obtain essential information. Hover text can expose observation identity and units, while a printed table or concise static summary provides an alternative for readers who cannot use the same pointer interaction.</p>
@@ -287,7 +290,15 @@ built <span class="syntax-operator">&lt;-</span> plotly<span class="syntax-opera
 <li><a href="https://cran.r-project.org/web/packages/plotly/plotly.pdf">Plotly R package manual</a></li>
 </ul>
 <h3 id="continue">Continue<a class="heading-anchor" href="#continue" aria-label="Link to this section">#</a></h3>
-<p>Chapters that list <code>r-058</code> as a direct prerequisite: <a href="r-059.md.html"><code>r-059</code></a>.</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Next chapter</th>
+<th>Title</th>
+</tr></thead><tbody>
+<tr>
+<td><a href="r-059.md.html"><code>r-059</code></a></td>
+<td>ggplotly translation and validation boundaries</td>
+</tr>
+</tbody></table></div>
 <h3 id="ask-an-ai-tutor">Ask an AI tutor<a class="heading-anchor" href="#ask-an-ai-tutor" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for r-058 (Hover, view controls and accessible alternatives).
 Read the guide and my saved attempt. Explain the relevant R mechanism,

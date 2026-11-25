@@ -1,8 +1,6 @@
 # dax-006: explained reference and practice reasoning
 
-This is an offline DAX editing lesson. No DAX compiler, semantic-model engine, Power BI account or network connection is required. Worked tables describe the named reference and model, not execution of your draft. Save, compare and export source; do not interpret a comparison or completion marker as a passed program run.
-
-The complete [reference source](dax-006_reference.dax) and [named model](../models/unknown-member/model.json) belong together. The reference-results sidecar binds both exact files by SHA-256. Those hashes identify bytes; they do not certify DAX execution.
+The reference pairs a row count against a distinct-key count (3 against 2) with an EXCEPT that returns 999. Verify that your ledger cites each result as evidence for a different defect rather than one combined error. Read it beside the [reference source](dax-006_reference.dax); the [study guide](../STUDY-GUIDE.md#answers-and-references) explains how the sidecar binds it to the model.
 
 ## Worked-case reconciliation
 

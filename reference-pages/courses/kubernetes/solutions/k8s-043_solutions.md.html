@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/kubernetes/solutions/k8s-043_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="k8s-043-explanatory-solutions">k8s-043: explanatory solutions<a class="heading-anchor" href="#k8s-043-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit reveal. These explanations describe the synthetic topology and stated API contracts. They are not fabricated runtime receipts.</p>
+<p>Attempt each exercise first, then compare (<a href="../STUDY-GUIDE.md.html#solutions-and-the-ai-tutor">study guide</a>).</p>
 <h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
 <p>An IP address identifies a network destination within a routing context. Kubernetes commonly exposes three distinct address roles. A Pod IP reaches a particular Pod network endpoint. A node IP reaches a machine participating in the cluster. A Service ClusterIP is a virtual destination whose implementation selects eligible service endpoints. These addresses are not interchangeable names for the same object.</p>
 <p>A Pod can be replaced and receive a different IP and UID. A Service can keep its identity and virtual address while its backend Pods change. A node can host many Pods, and its address is not automatically the public address of every application on it. The correct destination depends on the caller and the intended traffic path.</p>

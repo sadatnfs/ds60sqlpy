@@ -195,24 +195,23 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="integration-apache-081-complete-worked-notebook">Integration apache-081 complete worked notebook<a class="heading-anchor" href="#integration-apache-081-complete-worked-notebook" aria-label="Link to this section">#</a></h2>
 <p>Run the actual bounded PyIceberg/Arrow/DataFusion program in the prepared Python profile. Retain old/new snapshot and materialization identities. A Spark read is a separately prepared connector/export path.</p>
-<h3 id="receipt-fields-and-independent-oracle">Receipt fields and independent oracle<a class="heading-anchor" href="#receipt-fields-and-independent-oracle" aria-label="Link to this section">#</a></h3>
+<h3 id="what-this-batch-receipt-must-hold">What this batch receipt must hold<a class="heading-anchor" href="#what-this-batch-receipt-must-hold" aria-label="Link to this section">#</a></h3>
 <ul>
-<li>Source revision/hashes and exact declared input IDs, values, schema and time units.</li>
-<li>Actual native platform, package/image identities and owned resource namespace.</li>
-<li>Selected table snapshot/version, source positions or process/lineage identity as appropriate.</li>
-<li>Positive result against an independent oracle and a typed negative observation.</li>
-<li>Read-only retained-state comparison after the selected lifecycle transition.</li>
-<li>Cleanup/evidence-storage result and any separate prepared or unavailable feature.</li>
+<li>The two Iceberg snapshot IDs, in commit order, from the local SQL catalog.</li>
+<li>The Arrow schema string that DataFusion registered, including the integer amount type.</li>
+<li>Original rows 1/2/3 and current rows 1/2/3/4, saved as primitive values.</li>
+<li>Original totals east 11 and west 9, and current totals east 11 and west 11.</li>
+<li>A fresh catalog readback and the rejected wrong logical catalog name.</li>
+<li>An explicit false for direct Spark or Iceberg/DataFusion connector acceptance.</li>
 </ul>
-<p>For the common three-order fixture, require IDs 1/2/3 with amounts 4/9/7, total 20, east 11 and west 9. A later fourth west order of 2 changes the current total to 22 and west to 11 while an earlier pinned snapshot remains unchanged. Do not use this simple oracle to claim correctness for a different pipeline without defining its deduplication, correction and visibility semantics.</p>
-<p>Read the selected project README and qualification ledger before commands. The classroom does not execute Docker commands in this Markdown pad. Prepared configuration, unit policy fixtures, successful compilation and actual service acceptance remain different observations. Never include credentials or signed URLs.</p>
+<p>The receipt is a dossier only when those fields agree with each other. If the second snapshot ID equals the first, the correction never committed and the west 11 total came from somewhere else. If the pinned scan returns four rows, the program read current state instead of the selected snapshot. The <a href="../STUDY-GUIDE.md.html#evidence-receipts">shared receipt rules</a> cover naming and storage.</p>
 <h3 id="concrete-source-inspection">Concrete source inspection<a class="heading-anchor" href="#concrete-source-inspection" aria-label="Link to this section">#</a></h3>
 <p>From the copied integration directory, with sibling project copies when selected:</p>
 <pre class="highlighted-code"><code class="language-bash">mkdir -p .workshop
 <span class="syntax-comment"># From the copied integration project; use the complete Docker command in README.</span>
 cat batch_snapshot.py
 cat README.md</code></pre>
-<p>These inspections do not start or qualify a service. Execute only the chosen project&#x27;s complete documented owned route and retain its actual receipt.</p></article>
+<p>In <code>batch_snapshot.py</code>, find <code>BASE_ROWS</code> and <code>EXTRA</code> first; they are the whole input contract. Then find where <code>expected_old</code> is written by hand rather than computed by the same query. That separation is what makes the regional totals an independent check. <code>run.sh batch batch-1</code> refuses an existing output directory, so a second experiment needs a new name such as <code>batch-2</code>.</p></article>
   </main>
 </body>
 </html>

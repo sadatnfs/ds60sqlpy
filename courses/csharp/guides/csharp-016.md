@@ -24,9 +24,9 @@ This project uses in-memory fixture lines so it runs offline without interactive
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles your saved pad as `Program.cs` in its fixed .NET 10 project. C# 14 is the matching language generation. This route uses the prepared framework libraries; it does not accept arbitrary project files, NuGet packages, command arguments or interactive input. The explicit `Program.Main` entrypoint makes compilation and execution visible. `Check` throws on a false condition in every build configuration, unlike conditional debugging assertions.
+The project's `Import` helper is a single long line after `Main`; reformat a copy in your pad if you want to trace it. It returns a tuple, so `totals.Counts` and `totals.Rejected` are tuple element names, not properties of a class. The dictionary uses `StringComparer.Ordinal`, so Pear and pear count separately.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Compile contract, starter stop and success marker: [running a lesson](../STUDY-GUIDE.md#running-a-lesson).
 
 
 
@@ -34,7 +34,7 @@ Start with the answer-free learner artifact in your saved classroom pad. It deli
 
 `Split` produces fields; check the field count before indexing. `TryParse` separates syntax from a valid integer. `TryGetValue` supports accumulating repeated keys. Sorting keys before display gives a stable report.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+Each example ends with a trace; method: [tracing a program](../STUDY-GUIDE.md#tracing-a-program).
 
 ## Worked example / walkthrough
 
@@ -97,6 +97,8 @@ internal static class Program {
 
 **Observe:** Pear totals 6 and apple totals 3.
 
+**Trace.** For pear,2, `Split` gives two fields, the name is not blank, `TryParse` yields 2 and the quantity is not negative. `TryGetValue` finds no pear, writes 0 into `before`, and the indexer stores 2. Apple,3 stores 3. Pear,4 finds the earlier 2 and stores the checked sum 6. Nothing was rejected.
+
 ### Example B: Retain rejection evidence
 
 Malformed and negative quantities remain excluded, and empty input produces an empty report rather than an invented item.
@@ -157,6 +159,8 @@ internal static class Program {
 
 **Observe:** Three rejected lines do not alter the valid pear total.
 
+**Trace.** Pear,2 is accepted. Pear,no splits into two fields but fails `TryParse`, so `rejected` becomes 1. Apple,-1 parses, then fails `quantity < 0`, giving 2. Broken has one field and is rejected before any indexing, giving 3. Only pear survives with 2, and an empty array returns an empty dictionary with zero rejections.
+
 ## Exercises
 
 1. **Predict and explain.** Trace each input through validation and accumulation.
@@ -171,13 +175,15 @@ internal static class Program {
 
 6. **Transfer and justify.** Design a reusable import result that retains per-line rejection reasons without exposing sensitive raw input.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Log each task in the [evidence table](../STUDY-GUIDE.md#recording-exercise-evidence) before opening the explanation.
 
 ## Common pitfalls and diagnosis
 
 Checking field count after indexing is too late. Case policy affects identity and must be documented. Extremely large totals can overflow, so checked accumulation belongs in a production input contract.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+For task 4, an importer that ignores the `TryParse` result stores 0 for pear,no, so a corrupt line becomes a legitimate looking item with zero stock. For task 5, include a blank name such as a line starting with a comma, a line with three fields and pear,0; `int.TryParse` also accepts a space before the 2 in pear, 2.
+
+Repair routine: [building a regression case](../STUDY-GUIDE.md#building-a-regression-case).
 
 ## Progressive hints
 
@@ -187,11 +193,15 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 ## Self-check and next step
 
-Explain Pipeline, Rejection, Aggregation without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+Trace the dictionary after each line of pear,2 then Pear,3 then pear,1 under the ordinal comparer. Explain why the field count is checked before `fields[1]` is read. For task 6, describe what a per-line rejection record stores and which raw text it should leave out.
+
+Then follow the general [self-check routine](../STUDY-GUIDE.md#self-check-routine) and save your pad.
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://learn.microsoft.com/en-us/dotnet/csharp/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+[Documentation](https://learn.microsoft.com/en-us/dotnet/csharp/): The `String.Split` and `Int32.TryParse` API pages, together with the dictionary reference, cover the parsing and accumulation steps used here.
+
+Provenance and limits: [sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

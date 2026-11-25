@@ -194,10 +194,10 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/dax/guides/dax-042.md</code></p>
     </header>
     <article class="document"><h2 id="dax-042-currency-conversion-belongs-at-the-rate-s-grain">dax-042: Currency conversion belongs at the rate&#x27;s grain<a class="heading-anchor" href="#dax-042-currency-conversion-belongs-at-the-rate-s-grain" aria-label="Link to this section">#</a></h2>
-<p><strong>Stage 7: Analytical patterns and decision units.</strong> Level: advanced. Read the mechanisms, trace the worked cases and retain your own draft. <strong>Direct prerequisites:</strong> <code>dax-011</code>, <code>dax-013</code>, <code>dax-021</code></p>
+<p><strong>Stage 7: Analytical patterns and decision units.</strong> Level: advanced. <strong>Direct prerequisites:</strong> <code>dax-011</code>, <code>dax-013</code>, <code>dax-021</code></p>
 <h3 id="how-to-use-this-offline-lesson">How to use this offline lesson<a class="heading-anchor" href="#how-to-use-this-offline-lesson" aria-label="Link to this section">#</a></h3>
-<p>This is an offline DAX editing lesson. No DAX compiler, semantic-model engine, Power BI account or network connection is required. Worked tables describe the named reference and model, not execution of your draft. Save, compare and export source; do not interpret a comparison or completion marker as a passed program run.</p>
-<p>Open the <a href="../lessons/dax-042.dax.html">starter</a>. Compare the <a href="../solutions/dax-042_reference.dax.html">named reference</a> and <a href="../solutions/dax-042_solutions.md.html">reasoning</a> when ready. The <a href="../models/analytics/model.json.html">model specification</a> identifies every fixture table, column type, key and relationship. The <a href="../models/README.md.html">fixture handbook</a> displays the original data and explains each table grain.</p>
+<p>The starter asks for local transactions, converted USD and missing rates. Before reading the cases, multiply each ForeignSales row by the rate for its own date and currency, and note what a plain sum of LocalAmount would be. The <a href="../STUDY-GUIDE.md.html#offline-study-boundary">offline study boundary</a> explains what a worked table can show.</p>
+<p>Files: <a href="../lessons/dax-042.dax.html">starter</a>, <a href="../solutions/dax-042_reference.dax.html">reference</a> and <a href="../solutions/dax-042_solutions.md.html">reasoning</a>.</p>
 <h3 id="the-question-and-the-mechanism">The question and the mechanism<a class="heading-anchor" href="#the-question-and-the-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Convert compatible transactions before aggregation and diagnose a misleading latest-rate shortcut.</p>
 <p>Amounts in different currencies cannot be added into a meaningful monetary total without a conversion policy. The ordinary retail Sales table is already USD; this lesson instead uses the separate ForeignSales fixture. Its LocalAmount must be paired with Currency and SaleDate before selecting the rate expressed as USD per local currency unit.</p>
@@ -207,7 +207,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>SUMX supplies each ForeignSales row&#x27;s amount, date and currency. LOOKUPVALUE matches both rate-key columns. The second case intentionally computes a wrong latest-rate comparison under an EUR-only selection and exposes the exact ten-USD discrepancy derived below. Keep that arithmetic explicit rather than relying on a reassuring formatted total.</p>
 <p>Concepts to explain in your own words: <strong>exchange rate</strong>, <strong>LOOKUPVALUE</strong>, <strong>currency unit</strong>, <strong>rate date</strong>, <strong>quality gate</strong>.</p>
 <h3 id="model-and-context-contract">Model and context contract<a class="heading-anchor" href="#model-and-context-contract" aria-label="Link to this section">#</a></h3>
-<p>The ordinary star follows Product → Sales, Customer → Sales and Date → Sales through OrderDate. The ShipDate relationship is inactive unless a case explicitly activates it. Filters flow from the one side to the many side. Additional analytical tables have only the relationships declared in their named model; a similar column name does not create a relationship.</p>
+<p>This lesson uses the analytics model. ForeignSales has F1 (100 USD on 2025-01-02), F2 (100 EUR the same day) and F3 (50 EUR on 2025-02-03). ExchangeRate holds one row per date and currency: USD at 1, EUR at 1.1 in January and 1.2 in February. See the <a href="../models/analytics/model.json.html">model specification</a> and the <a href="../STUDY-GUIDE.md.html#the-retail-star">shared star rules</a>.</p>
 <pre class="highlighted-code"><code class="language-text">Product (one)  --&gt; Sales (many) &lt;-- Customer (one)
                        ^
                        | active OrderDate
@@ -215,7 +215,6 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
                        | inactive ShipDate
                        +------&gt; Sales</code></pre>
 <p>This lesson also uses the <code>analytics</code> model&#x27;s <code>ExchangeRate</code> and <code>ForeignSales</code> tables. <code>ExchangeRate</code> and <code>ForeignSales</code> have no relationship, so a filter on another table reaches them only if the expression transfers the filter explicitly.</p>
-<p>All amounts in ordinary Sales are USD after the line discount, before tax and returns. The Date fixture is complete for 2024 and 2025; a short result table is a selected slice, not the whole calendar. JSON <code>null</code> in the worked-results sidecar means DAX BLANK, not the text &quot;null&quot;.</p>
 <h3 id="worked-cases">Worked cases<a class="heading-anchor" href="#worked-cases" aria-label="Link to this section">#</a></h3>
 <h4 id="case-a-convert-each-transaction-before-adding">Case A: Convert each transaction before adding<a class="heading-anchor" href="#case-a-convert-each-transaction-before-adding" aria-label="Link to this section">#</a></h4>
 <p><strong>Starting context:</strong> Analytics model; three ForeignSales rows; each date/currency rate key exists exactly once.</p>
@@ -259,8 +258,10 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 </tbody></table></div>
 <p>MAX rate happens to equal the latest rate in this fixture. A real latest-date policy must select by date, not assume rates increase monotonically.</p>
 <p>Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table.</p>
+<h3 id="a-misconception-to-test">A misconception to test<a class="heading-anchor" href="#a-misconception-to-test" aria-label="Link to this section">#</a></h3>
+<p>Summing LocalAmount first and converting afterward feels efficient, but the 250 it produces adds dollars to euros and has no unit. Conversion has to happen per row, at the grain of the rate key: 100 plus 110 plus 60 gives 270 USD. The EUR case shows a subtler version of the same error. Taking the highest rate and applying it to all 150 EUR gives 180, while the transaction-date rates give 170, because F2 was booked when the euro was worth 1.1. The shortcut only looks like a latest-rate policy because rates happen to rise in this fixture; a falling rate would make MAX pick January.</p>
 <h3 id="practice-prediction-construction-and-diagnosis">Practice: prediction, construction and diagnosis<a class="heading-anchor" href="#practice-prediction-construction-and-diagnosis" aria-label="Link to this section">#</a></h3>
-<p>Retain your formula or written reasoning, the stated context, contributing rows or values, and a conclusion with its unit. These notes are your own study record; they do not show that a formula ran.</p>
+<p>Record each answer as the <a href="../STUDY-GUIDE.md.html#practice-routine">practice routine</a> describes.</p>
 <h4 id="exercise-1-predict">Exercise 1: Predict<a class="heading-anchor" href="#exercise-1-predict" aria-label="Link to this section">#</a></h4>
 <p>Predict the converted amount for F 3 alone.</p>
 <h4 id="exercise-2-change-one-condition">Exercise 2: Change one condition<a class="heading-anchor" href="#exercise-2-change-one-condition" aria-label="Link to this section">#</a></h4>
@@ -283,14 +284,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>A rate can depend on jurisdiction, date and transaction type.</li>
 </ol>
 <h3 id="self-check-and-next-step">Self-check and next step<a class="heading-anchor" href="#self-check-and-next-step" aria-label="Link to this section">#</a></h3>
-<p>Explain one changed result without quoting the formula alone. Identify which rows, filters, relationship or evaluation scope changed, then construct a counterexample to a plausible wrong interpretation. Keep your draft separate from the supplied reference. A small correct derivation does not certify performance, model security or broad expertise.</p>
+<p>Add a row F4 for 20 EUR on 2025-02-04 with no matching rate. Predict what LOOKUPVALUE returns for it and what a responsible total and missing-rate count would show. The <a href="../STUDY-GUIDE.md.html#self-check-routine">self-check routine</a> applies too.</p>
 <p>Continue to <a href="dax-043.md.html">dax-043</a> when its prerequisites make sense, or revisit this stage from the <a href="../README.md.html">course map</a>.</p>
 <h3 id="official-references-and-evidence-limits">Official references and evidence limits<a class="heading-anchor" href="#official-references-and-evidence-limits" aria-label="Link to this section">#</a></h3>
 <ul>
 <li><a href="https://learn.microsoft.com/en-us/dax/lookupvalue-function-dax">DAX function: LOOKUPVALUE</a></li>
 <li><a href="https://learn.microsoft.com/en-us/dax/sumx-function-dax">DAX function: SUMX</a></li>
 </ul>
-<p>Documentation was reviewed for this original course on 2026-10-25. Version-sensitive features have explicit notes. Source/model checks and independent fixture arithmetic are not a DAX parser, compiler, semantic engine, real RLS test or performance measurement.</p>
+<p>Review date and evidence limits: <a href="../STUDY-GUIDE.md.html#references-and-evidence-limits">study guide</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for dax-042. Read its guide and the named model.
 Review my draft and prediction. Ask me to enumerate the relevant rows and context.

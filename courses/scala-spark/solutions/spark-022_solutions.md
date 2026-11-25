@@ -1,6 +1,8 @@
 # spark-022: Explained paired reference solutions
 
-Read the [guide](../guides/spark-022.md) and attempt one language first. The [Scala reference](spark-022_solution.scala) and [PySpark reference](spark-022_solution.py) are complete single-file programs with explicit local sessions and finally-based stop. Each compares with literal expectations; matching two implementations alone would not rule out a shared mistake.
+Attempt the [guide](../guides/spark-022.md) exercises first.
+
+References: [Scala](spark-022_solution.scala), [PySpark](spark-022_solution.py).
 
 ## Exercises and reasoning
 
@@ -30,7 +32,7 @@ These checks establish the exact population before changing execution settings. 
 
 Require 1..16 shuffle partitions, set that configuration in the owned session and return key, n from groupBy/count. Execute the two-partition case under the supplied unique job group.
 
-**Expected:** Sorted output [`(0, 20)`, ...,`(999, 20)`], with total counts 20000 and an Exchange in the executed plan.
+**Expected:** Sorted output [`(0, 20)`, ..., `(999, 20)`], with total counts 20000 and an Exchange in the executed plan.
 
 ```scala
 def buildGrouped(source: DataFrame, partitions: Int): DataFrame = {
@@ -56,7 +58,7 @@ The controlled setting is applied to a newly built query in an owned session, th
 
 Traverse the executed classic Spark plan, collecting each Exchange metric map. Use the version-pinned internal diagnostic API only for evidence after collection.
 
-**Expected:** One exchange map for this aggregate, with numPartitions 2 and dataSize>0. Record other available metrics without inventing units or missing values.
+**Expected:** One exchange map for this aggregate, with numPartitions 2 and dataSize > 0. Record other available metrics without inventing units or missing values.
 
 ```scala
 def exchangeMetrics(frame: DataFrame): Seq[Map[String, Long]] = {
@@ -161,9 +163,9 @@ The comparison changes a single distribution setting while preserving the entire
 
 ### Exercise 6: Separate a workload model from measured evidence
 
-For the declared 20000-row,1000-key, four-mapper fixture, return source_rows_per_mapper, partial_group_upper and average_output_groups_per_reducer for a positive reducer count. Label them as arithmetic estimates and print version/configuration beside the actual metrics.
+For the declared 20000-row, 1000-key, four-mapper fixture, return source_rows_per_mapper, partial_group_upper and average_output_groups_per_reducer for a positive reducer count. Label them as arithmetic estimates and print version/configuration beside the actual metrics.
 
-**Expected:** For reducers 2:5000,4000,500. For reducers 5:5000,4000,200. These values do not assert actual balanced hash buckets or network bytes.
+**Expected:** For 2 reducers: (5000, 4000, 500). For 5 reducers: (5000, 4000, 200). These values do not assert actual balanced hash buckets or network bytes.
 
 ```scala
 def workModel(reducers: Int): (Long, Long, Double) = {
@@ -185,6 +187,7 @@ The arithmetic explains why local aggregation and reduce partition count can mat
 
 ## Execution and interpretation
 
-Run the complete reference in its prepared fixed worker. Its first check (Establish the high-cardinality fixture oracle) is built inside the program, so opening the lesson fetches nothing; it expects: `Metrics(20000, 1000, 199990000)`; keys 0..999 each occur 20 times by construction. The final success line prints only after every reference assertion passes.
+The references first assert the source oracle `(20000, 1000, 199990000)`: row count, distinct keys and the sum of IDs. With 2 reducers they require the sorted result to be the 1,000 pairs `(k, 20)` totaling 20,000, an `Exchange` in the executed plan, exactly one exchange metric map with `numPartitions` 2 and positive `dataSize`, and a stage with 2 tasks under the job group `ds60-spark-022-p2`. The 5-reducer run repeats every check with 5 in place of 2. A reducer count of 0 must raise `ValueError` before any job starts, and the work model must return `(5000, 4000, 500)` and `(5000, 4000, 200)`.
 
-Local plan, partition and resource evidence does not establish cluster-scale performance; session cleanup is explicit.
+A passing run prints the exchange and stage evidence, a receipt with the version, AQE setting, master and a `model_only` flag, and finally `spark-022: six PySpark reference contracts passed; Spark=` with the version, or its Scala counterpart. Keep the scope in mind: on `local[2]` the shuffle never crosses a network, so the measured `dataSize` is the engine's own size metric for this exchange, not evidence about cluster traffic.
+

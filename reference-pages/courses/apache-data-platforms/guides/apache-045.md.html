@@ -262,9 +262,9 @@ table<span class="syntax-punctuation">.</span><span class="syntax-attribute">exe
 <p>Inspect client compilation, submission response, actual job state, TaskManager registration and data readback separately. Keep the selected Java and Flink versions in the receipt. A healthy REST endpoint does not establish that the job had a slot, completed its sink or produced the intended population.</p>
 <p><strong>Interview discussion: what changes when moving from a stream of updates to a final SQL table?</strong> The result contract changes: intermediate changes can be represented as inserts, updates or retractions, while a bounded final table contains the final grouped values. These two actual execution routes use one small source to make that distinction precise before introducing event time, state recovery and external transactional sinks.</p>
 <h3 id="complete-worked-source">Complete worked source<a class="heading-anchor" href="#complete-worked-source" aria-label="Link to this section">#</a></h3>
-<p>This is a project-only command notebook. Read and edit it in the classroom; run its explicitly labeled commands from the copied owned Docker workshop. The classroom does not execute these service commands.</p>
+<p>The classroom does not execute these service commands. See the <a href="../STUDY-GUIDE.md.html#workshop-notebooks">workshop rules</a>.</p>
 <h2 id="real-flink-stream-and-sql-entry-points">Real Flink stream and SQL entry points<a class="heading-anchor" href="#real-flink-stream-and-sql-entry-points" aria-label="Link to this section">#</a></h2>
-<p>From the repository root, copy the complete project into a fresh owned directory. Prepare the native Java17 base and selected pinned runtime as documented there.</p>
+<p>From the repository root, copy the complete project into a fresh owned directory. Prepare the native Java 17 base and selected pinned runtime as documented there.</p>
 <pre class="highlighted-code"><code class="language-bash">mkdir -p work
 cp -R courses/apache-data-platforms/projects/flink work/flink
 <span class="syntax-builtin">cd</span> work/flink

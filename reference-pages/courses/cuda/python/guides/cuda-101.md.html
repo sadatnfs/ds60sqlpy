@@ -194,9 +194,17 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cuda/python/guides/cuda-101.md</code></p>
     </header>
     <article class="document"><h2 id="cuda-101-llm-training-fine-tuning-and-gpu-memory">cuda-101: LLM training, fine-tuning and GPU memory<a class="heading-anchor" href="#cuda-101-llm-training-fine-tuning-and-gpu-memory" aria-label="Link to this section">#</a></h2>
-<p><strong>Route:</strong> CUDA Python and machine learning. <strong>Stage:</strong> advanced. <strong>Prerequisites:</strong> <code>cuda-094</code>, <code>cuda-099</code>, <code>cuda-100</code>. Allow several sessions when the hardware experiment is new; the chapter is not a deadline.</p>
-<h3 id="what-you-will-be-able-to-explain">What you will be able to explain<a class="heading-anchor" href="#what-you-will-be-able-to-explain" aria-label="Link to this section">#</a></h3>
-<p>By the end, you can <strong>count low-rank parameters</strong>, <strong>compare sequence-length budgets</strong>, and <strong>define held-out evaluation</strong> with evidence. Start with the two worked cases, then use the editable CPU model to make the quantities concrete.</p>
+<p><strong>Route:</strong> CUDA Python and machine learning. <strong>Stage:</strong> advanced. <strong>Prerequisites:</strong> <code>cuda-094</code>, <code>cuda-099</code>, <code>cuda-100</code>.</p>
+<p>Pacing, evidence labels and platform rules: <a href="../../STUDY-GUIDE.md.html">CUDA study guide</a>.</p>
+<h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
+<ul>
+<li>Count low-rank parameters.</li>
+<li>Include base storage.</li>
+<li>Inspect optimizer membership.</li>
+<li>Compare sequence-length budgets.</li>
+<li>Design tiny offline training.</li>
+<li>Define held-out evaluation.</li>
+</ul>
 <h3 id="mechanism-and-vocabulary">Mechanism and vocabulary<a class="heading-anchor" href="#mechanism-and-vocabulary" aria-label="Link to this section">#</a></h3>
 <p>Full fine-tuning updates all selected model parameters. Adapter methods train additional small structures while retaining the base weights. Low-rank updates factor a matrix update into two thinner matrices, reducing trainable parameter count, but the base model still occupies memory and activations still flow through it. Optimizer membership should match the intended trainable set exactly.</p>
 <p>Sequence length, padding, batch size, precision, saved activations and optimizer state can dominate different workloads. Build a tiny transformer locally with synthetic tokens before considering downloads. Compare full and adapter training on a held-out synthetic task with equal data accounting. Parameter efficiency is not a guarantee of lower total runtime memory or better quality. Both PyTorch and TensorFlow lanes should report their actual variable census and optimizer state.</p>
@@ -215,11 +223,12 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 </ul>
 <h3 id="worked-examples">Worked examples<a class="heading-anchor" href="#worked-examples" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
-<p>A 1024 by 1024 matrix has 1,048,576 parameters. A rank 8 update uses<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>8</mn><mo stretchy="false">(</mo><mn>1024</mn><mo>+</mo><mn>1024</mn><mo stretchy="false">)</mo><mo>=</mo><mn>16,384</mn></mrow><annotation encoding="application/x-tex">8(1024+1024)=16{,}384</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">8</span><span class="mopen">(</span><span class="mord">1024</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">1024</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.8389em;vertical-align:-0.1944em;"></span><span class="mord">16</span><span class="mord"><span class="mpunct">,</span></span><span class="mord">384</span></span></span></span> trainable parameters while the original matrix remains present.</p>
+<p>A 1024 by 1024 matrix has 1,048,576 parameters. A rank 8 update uses <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>8</mn><mo stretchy="false">(</mo><mn>1024</mn><mo>+</mo><mn>1024</mn><mo stretchy="false">)</mo><mo>=</mo><mn>16,384</mn></mrow><annotation encoding="application/x-tex">8(1024+1024)=16{,}384</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">8</span><span class="mopen">(</span><span class="mord">1024</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">1024</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.8389em;vertical-align:-0.1944em;"></span><span class="mord">16</span><span class="mord"><span class="mpunct">,</span></span><span class="mord">384</span></span></span></span> trainable parameters while the original matrix remains present.</p>
 <h4 id="worked-example-2">Worked example 2<a class="heading-anchor" href="#worked-example-2" aria-label="Link to this section">#</a></h4>
 <p>Freezing the base matrix removes its gradient and optimizer-update requirement under the chosen implementation, but downstream training can still need intermediate activations.</p>
-<h3 id="portable-executable-model">Portable executable model<a class="heading-anchor" href="#portable-executable-model" aria-label="Link to this section">#</a></h3>
-<p>The <strong>CPU reference model</strong> variant runs this bounded worked example using <code>python-core</code>. It uses only the Python standard library, small synthetic values and no network. Its purpose is to expose the arithmetic or contract behind the chapter. The separate reference includes assertions for the stated observations.</p>
+<h3 id="how-to-run-the-cpu-model">How to run the CPU model<a class="heading-anchor" href="#how-to-run-the-cpu-model" aria-label="Link to this section">#</a></h3>
+<p>Edit the copy; the <a href="../references/cuda-101_cpu.py.html">reference</a> adds assertions.</p>
+<pre class="highlighted-code"><code class="language-bash">python courses/cuda/python/lessons/cuda-101_cpu.py</code></pre>
 <pre class="highlighted-code"><code class="language-python">rows<span class="syntax-punctuation">,</span> cols<span class="syntax-punctuation">,</span> rank <span class="syntax-operator">=</span> <span class="syntax-number">1024</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1024</span><span class="syntax-punctuation">,</span> <span class="syntax-number">8</span>
 base <span class="syntax-operator">=</span> rows <span class="syntax-operator">*</span> cols
 adapter <span class="syntax-operator">=</span> rank <span class="syntax-operator">*</span> <span class="syntax-punctuation">(</span>rows <span class="syntax-operator">+</span> cols<span class="syntax-punctuation">)</span>
@@ -253,58 +262,53 @@ adapter <span class="syntax-operator">=</span> rank <span class="syntax-operator
 <td><code>16384</code></td>
 </tr>
 </tbody></table></div>
-<p>Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.</p>
 <h3 id="equal-framework-lanes">Equal framework lanes<a class="heading-anchor" href="#equal-framework-lanes" aria-label="Link to this section">#</a></h3>
 <h4 id="pytorch">PyTorch<a class="heading-anchor" href="#pytorch" aria-label="Link to this section">#</a></h4>
 <p>Freeze base parameters explicitly and construct the optimizer from intended trainable tensors. The included low-rank matrix example demonstrates storage and trainability separately before any full transformer adaptation.</p>
 <h4 id="tensorflow">TensorFlow<a class="heading-anchor" href="#tensorflow" aria-label="Link to this section">#</a></h4>
 <p>Set base variables nontrainable, track adapter variables and pass the intended gradient-variable pairs to the optimizer. Report all resident variables as well as trainable counts.</p>
-<p>Choose either lane first, then compare the other using identical mathematical inputs. Framework-specific shape, mode and optimizer rules must be checked separately. Both use offline synthetic examples; no model hub or dataset download is triggered.</p>
+<p>Lane rules: <a href="../../STUDY-GUIDE.md.html#python-gpu-and-framework-labs">framework labs</a>.</p>
 <h3 id="executable-framework-practice">Executable framework practice<a class="heading-anchor" href="#executable-framework-practice" aria-label="Link to this section">#</a></h3>
-<p>The variant chooser offers <strong>PyTorch on CPU</strong>, <strong>TensorFlow on CPU</strong>, and separate <strong>NVIDIA CUDA</strong> versions. CPU versions force CPU placement. CUDA versions require the named GPU profile and refuse to silently fall back. Each complete program uses the same tiny deterministic objective, bounded tensors and local synthetic data. Read its source before running; a framework pass establishes only that variant and environment.</p>
-<p>The checkpoint demonstration is in-memory. It teaches what state must be saved; it does not export a durable model artifact or preserve an in-flight device context. Advanced custom-op, distributed and engine-building projects remain separately prepared external workflows.</p>
+<p>Run the <strong>PyTorch</strong> and <strong>TensorFlow</strong> variants on CPU first; <a href="../../STUDY-GUIDE.md.html#python-gpu-and-framework-labs">lab rules</a>.</p>
 <h3 id="practice-and-transfer">Practice and transfer<a class="heading-anchor" href="#practice-and-transfer" aria-label="Link to this section">#</a></h3>
+<p>Record each attempt in the <a href="../lessons/cuda-101.md.html">worksheet</a> before opening hints.</p>
 <h4 id="exercise-1-count-low-rank-parameters">Exercise 1: Count low-rank parameters<a class="heading-anchor" href="#exercise-1-count-low-rank-parameters" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Computing rank times the product of dimensions, <code>8*1024*1024</code>, gives eight times the original matrix. That figure would make the adapter larger than the weight it adapts, which should immediately signal an error.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-2-include-base-storage">Exercise 2: Include base storage<a class="heading-anchor" href="#exercise-2-include-base-storage" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Budgeting memory from adapter parameters alone underestimates by the full base model. For this matrix the adapter is about 1.6 percent of the total, so the omitted base dominates the real footprint.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-3-inspect-optimizer-membership">Exercise 3: Inspect optimizer membership<a class="heading-anchor" href="#exercise-3-inspect-optimizer-membership" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Assuming freezing alone excludes parameters from the optimizer can waste memory. Some optimizers skip parameters whose <code>.grad</code> is None, but weight decay or other per-parameter bookkeeping may still allocate state, so membership should be explicit rather than implied.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-4-compare-sequence-length-budgets">Exercise 4: Compare sequence-length budgets<a class="heading-anchor" href="#exercise-4-compare-sequence-length-budgets" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Assuming adapters make long-sequence fine-tuning cheap confuses parameter savings with activation savings. Gradients must still flow back through the frozen layers to reach adapters in earlier layers, so those activations are kept during the forward pass.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-5-design-tiny-offline-training">Exercise 5: Design tiny offline training<a class="heading-anchor" href="#exercise-5-design-tiny-offline-training" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Using a full public model and dataset for a first test risks long downloads and exhausting memory. A failure in that setting is also harder to localize, because data, model size and wiring all vary at once.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-6-define-held-out-evaluation">Exercise 6: Define held-out evaluation<a class="heading-anchor" href="#exercise-6-define-held-out-evaluation" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Reporting the training loss as model quality overstates performance. Choosing the rank or learning rate by repeatedly looking at the evaluation set leaks it into tuning in the same way.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
-<p>Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.</p>
+<p>Hint <em>k</em> belongs to exercise <em>k</em>; open one at a time.</p>
 <ol>
-<li>Start from worked example 1 and mark the quantities needed for the task &quot;Count low-rank parameters&quot;.</li>
-<li>Change one assumption in worked example 2 while preserving the declared contract: include base storage.</li>
-<li>Trace the CPU program&#x27;s variables before adding hardware behavior: inspect optimizer membership.</li>
-<li>Draw producers, consumers and the exact operation boundary for the task &quot;Compare sequence-length budgets&quot;.</li>
-<li>Separate what the small fixture establishes from what the real runtime must show: design tiny offline training.</li>
-<li>Write a counterexample to an overbroad claim before you define held-out evaluation.</li>
+<li>Multiply the rank by the sum of the matrix&#x27;s two dimensions.</li>
+<li>Add the frozen base matrix to the adapter parameters when estimating storage.</li>
+<li>List the tensors the optimizer holds and compare that list with the ones you meant to train.</li>
+<li>Ask how attention intermediates and caches grow when sequence length doubles.</li>
+<li>Generate synthetic tokens locally and bound the number of steps before training anything.</li>
+<li>Set aside validation data before fitting and keep it out of tuning decisions.</li>
 </ol>
-<h3 id="common-mistakes-and-self-review">Common mistakes and self-review<a class="heading-anchor" href="#common-mistakes-and-self-review" aria-label="Link to this section">#</a></h3>
-<p>Confusing a correct tiny example with a general implementation is the central review risk. For this chapter, challenge the assumption in worked example 2, then ask whether your change preserves the mechanism described above. If you change dtype, layout, ordering, batch size or backend, update the acceptance contract rather than silently reusing the old observation. Explain an unexpected result before trying random configuration changes.</p>
-<p>Keep a small evidence table with columns <strong>claim</strong>, <strong>input</strong>, <strong>expected observation</strong>, <strong>actual observation</strong> and <strong>limit</strong>. For the first claim use <code>Count low-rank parameters</code>. For the final claim use <code>Define held-out evaluation</code>. An unperformed GPU or cluster experiment remains pending even when the CPU model is correct.</p>
-<h3 id="platform-and-evidence-contract">Platform and evidence contract<a class="heading-anchor" href="#platform-and-evidence-contract" aria-label="Link to this section">#</a></h3>
-<p>The reading worksheet and CPU reference model work through the ordinary Linux Docker classroom on macOS, Linux and Windows using WSL 2. They do not require an NVIDIA GPU. Their results are labeled CPU models or semantic oracles, not simulated hardware performance.</p>
-<p>Real CUDA work needs supported NVIDIA hardware, a compatible host driver and an explicitly prepared GPU runtime. An Apple GPU does not execute CUDA kernels. PyTorch MPS on a supported native Mac, ROCm on supported AMD hardware, or other vendor backends can provide separate accelerator learning routes; they need their own package and operation qualification and are not CUDA evidence. The ordinary Linux Docker classroom does not expose native Mac MPS automatically.</p>
-<p>Do not download packages, models or data by opening this lesson. Do not attach an engine socket, ambient cluster credentials or an arbitrary remote endpoint. A CPU pass, imported package, successful compilation, real GPU result and measured performance are distinct observations. Record the actual backend, data shape/dtype, source revision, versions and pending checks. A saved completion marker records learning progress, not hardware certification.</p>
+<h3 id="common-mistakes-and-self-check">Common mistakes and self-check<a class="heading-anchor" href="#common-mistakes-and-self-check" aria-label="Link to this section">#</a></h3>
+<p>A common mistake is assuming a parameter-efficient method uses little memory. A rank 8 adapter on a 1024 by 1024 matrix trains 16,384 parameters, but the 1,048,576 base parameters stay in memory and activations still flow through them. Another mistake is building the optimizer over all parameters, which adds state for frozen weights. Fix both by counting the variables and optimizer state each framework actually holds and comparing methods on the same held-out synthetic task.</p>
+<p><strong>Evidence limit:</strong> The reference counts 1,048,576 base and 16,384 adapter parameters. It trains no model, so real memory, quality and runtime differences between full and adapter fine-tuning need the framework lanes on a bounded synthetic task.</p>
+<ol>
+<li>How does a low-rank update reduce trainable parameters?</li>
+<li>Does freezing the base remove its memory cost?</li>
+<li>Why build a tiny transformer with synthetic tokens first?</li>
+</ol>
+<p>Answers: <a href="../solutions/cuda-101_solutions.md.html#self-check-answers">self-check answers</a>.</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
 <ul>
 <li><a href="https://docs.pytorch.org/docs/2.9/notes/cuda.html">PyTorch CUDA semantics</a></li>
 <li><a href="https://www.tensorflow.org/guide/gpu">TensorFlow GPU guide</a></li>
 </ul>
-<p>Use the version-matched documentation of your prepared environment. These references describe interfaces and supported boundaries; the chapter&#x27;s synthetic examples and CPU models are original teaching material.</p>
+<p>Full lists: <a href="../../STUDY-GUIDE.md.html#documentation-and-sources">documentation and sources</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning skill for cuda-101: LLM training, fine-tuning and GPU memory.
 Read courses/cuda/python/guides/cuda-101.md and courses/cuda/python/lessons/cuda-101.md.

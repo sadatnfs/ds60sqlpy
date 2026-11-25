@@ -24,9 +24,11 @@ Rust resource ownership closes a File when its owner drops, but deleting a tempo
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles the saved pad as `main.rs` with pinned Rust 1.99.1, edition 2024, and the prepared Arrow 60 library. `assert!` and `assert_eq!` remain active in normal builds. The fixed pad accepts one source file without arbitrary arguments, interactive input, Cargo manifests or package installation. The main function returns `Result<(), Box<dyn std::error::Error>>` so later examples can propagate errors with `?`; the final `Ok(())` means this fixture completed successfully. Standard library and Arrow examples remain offline after image preparation. Multi-file Cargo and external ecosystem projects have separate explicit preparation workflows.
+Beyond the prelude, this lesson's programs use `std::env`, `std::fs`, `std::io` and `std::process`. A passing run prints `rust-025: passed`.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Pad setup and limits: [Run a lesson](../STUDY-GUIDE.md#run-a-lesson).
+
+Before you run anything, follow [Attempt a lesson](../STUDY-GUIDE.md#attempt-a-lesson).
 
 
 
@@ -34,7 +36,9 @@ Start with the answer-free learner artifact in your saved classroom pad. It deli
 
 OpenOptions::create_new rejects an existing path. Read and Write traits provide byte operations. write_all handles short writes, and read_to_string validates UTF-8. Drop ends handle ownership while remove_file changes the filesystem namespace.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+**Reading Example A (Round-trip owned text, code below).** `use std::io::{Read, Write};` brings two traits into scope; `write_all` and `read_to_string` are trait methods and cannot be called unless their trait is imported. `std::env::temp_dir().join(...)` builds an absolute path, and the process id in the file name keeps concurrent runs from colliding. `OpenOptions` collects flags before anything touches the file system: `create_new(true)` makes the open fail if the file already exists rather than truncate someone else's data. Every `?` returns early from `main`, converting the `std::io::Error` into the boxed error type. `"café".as_bytes()` exposes the UTF-8 encoding, five bytes for four characters, and `read_to_string` checks that the bytes read back are valid UTF-8.
+
+Method for tracing your own variants: [Trace a program](../STUDY-GUIDE.md#trace-a-program).
 
 ## Worked example / walkthrough
 
@@ -98,13 +102,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 6. **Transfer and justify.** Design cleanup on every failure path using a small owned temporary-resource wrapper.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Record each task as in [Keep evidence for each task](../STUDY-GUIDE.md#keep-evidence-for-each-task).
 
 ## Common pitfalls and diagnosis
 
 This small example removes its file on the normal path; the transfer task adds RAII cleanup for early errors. Never delete arbitrary user-provided directories. Create_new avoids overwrite but is not a complete untrusted-path security model.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+To turn a pitfall into a test, see [Design a regression case](../STUDY-GUIDE.md#design-a-regression-case).
 
 ## Progressive hints
 
@@ -112,13 +116,23 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 2. Compare Example B (Distinguish bytes from valid text) with Example A and name the first line whose behavior differs. Its observation is: Valid UTF-8 decodes while an invalid byte sequence is rejected.
 3. Before opening the explanation, test your task 3 attempt against this lesson's main pitfall: This small example removes its file on the normal path; the transfer task adds RAII cleanup for early errors.
 
+Tempting approaches to rule out before you compare:
+
+- **Task 1.** Believing `drop(file)` removes the temporary file leaves a stray file in the temporary directory after every run.
+- **Task 2.** Joining with `lines.join("\n")` writes no final newline, so appending a third line later glues it onto `fig,7`.
+- **Task 5.** Treating an empty file as an error, or using `from_utf8_lossy` everywhere to avoid errors, either rejects valid data or hides corruption.
+
 ## Self-check and next step
 
-Explain File handle, Path, Cleanup ownership without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+Why does Example A open the path with `create_new(true)`, and what does `open` return if the file already exists? Why does it call `drop(file)` before reading the path again, and what would leave the file behind if a `?` between `open` and `remove_file` returned early? Why does `String::from_utf8(vec![0xff])` return an error instead of replacing the byte?
+
+Then work through [Self-check and review](../STUDY-GUIDE.md#self-check-and-review).
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://doc.rust-lang.org/book/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+Read [the `std::fs::OpenOptions` documentation](https://doc.rust-lang.org/std/fs/struct.OpenOptions.html) for `create_new` and the error it returns when the path exists.
+
+What the classroom does and does not prove: [Sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

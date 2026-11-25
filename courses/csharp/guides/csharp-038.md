@@ -24,9 +24,9 @@ Backtracking expressions can require excessive work on adversarial inputs. Use a
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles your saved pad as `Program.cs` in its fixed .NET 10 project. C# 14 is the matching language generation. This route uses the prepared framework libraries; it does not accept arbitrary project files, NuGet packages, command arguments or interactive input. The explicit `Program.Main` entrypoint makes compilation and execution visible. `Check` throws on a false condition in every build configuration, unlike conditional debugging assertions.
+The regex type comes from `System.Text.RegularExpressions`, imported for the worked examples. Both patterns use `RegexOptions.NonBacktracking`, a linear-time engine that rejects some constructs: a backreference such as `(a)\1` throws `NotSupportedException` when the regex is constructed, so that failure appears before any input is matched.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Compile contract, starter stop and success marker: [running a lesson](../STUDY-GUIDE.md#running-a-lesson).
 
 
 
@@ -34,7 +34,7 @@ Start with the answer-free learner artifact in your saved classroom pad. It deli
 
 `RegexOptions.NonBacktracking` supports a bounded engine for compatible patterns. Anchors constrain the entire input. Regex.Escape treats input as literal pattern text. Domain validation follows a successful shape match.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+Each example ends with a trace; method: [tracing a program](../STUDY-GUIDE.md#tracing-a-program).
 
 ## Worked example / walkthrough
 
@@ -82,6 +82,8 @@ internal static class Program {
 
 **Observe:** The identifier begins with a lowercase letter and uses only admitted characters.
 
+**Trace.** The pattern starts with `\A`, so matching must begin at the first character, and ends with `\z`, so it must finish at the last. report_2 starts with a lowercase letter and continues with seven admitted characters, so it matches. 2report fails the first character class, and report! fails because the exclamation mark is outside the class and `\z` forbids stopping early.
+
 ### Example B: Keep literal user text literal
 
 Escaping preserves data meaning instead of accidentally granting regex syntax authority.
@@ -126,6 +128,8 @@ internal static class Program {
 
 **Observe:** The plus sign is matched literally.
 
+**Trace.** `Regex.Escape("a+b")` returns `a\+b`, so the plus sign becomes a literal character instead of a one-or-more operator. Wrapped in the anchors, the pattern accepts only the exact three-character text a+b. The input aaab fails, although the unescaped pattern a+b would match it, because a+ consumes the repeated letters before b and then finds the final b.
+
 ## Exercises
 
 1. **Predict and explain.** Explain every part of the identifier pattern.
@@ -140,13 +144,15 @@ internal static class Program {
 
 6. **Transfer and justify.** Choose a parser or regex for a nested format and justify complexity and error reporting.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Log each task in the [evidence table](../STUDY-GUIDE.md#recording-exercise-evidence) before opening the explanation.
 
 ## Common pitfalls and diagnosis
 
 A timeout is a fallback, not a substitute for a simple pattern and bounded input. Regex does not make a path, SQL query or HTML context safe. Validate according to the destination meaning.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+Task 4 reproduces itself if you drop the anchors: the unanchored class pattern finds a valid run inside 2report and inside report!, so both invalid inputs report a match. For task 5, the `\z` anchor rejects report followed by a newline, while a `$` anchor accepts it, because `$` may match just before a final newline. Empty input and a seventeen-character identifier both fail.
+
+Repair routine: [building a regression case](../STUDY-GUIDE.md#building-a-regression-case).
 
 ## Progressive hints
 
@@ -156,11 +162,15 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 ## Self-check and next step
 
-Explain Syntax validation, Semantic validation, ReDoS without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+Name the shortest and longest identifiers the pattern accepts and give their lengths. Explain why escaping user text keeps its meaning as data. For task 6, compare a regex with a small hand-written parser for a nested format, judging which one can report where the input went wrong and which one bounds its running time.
+
+Then follow the general [self-check routine](../STUDY-GUIDE.md#self-check-routine) and save your pad.
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://learn.microsoft.com/en-us/dotnet/csharp/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+[Documentation](https://learn.microsoft.com/en-us/dotnet/csharp/): The .NET regular expression articles cover anchors, `Regex.Escape`, match timeouts and the nonbacktracking option.
+
+Provenance and limits: [sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

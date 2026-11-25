@@ -1,22 +1,26 @@
 # spark-023: Broadcast joins, statistics and strategy evidence
 
-Authored paired Scala/PySpark teaching content. The default fixtures are tiny, local and deterministic. Runtime acceptance, logical correctness and learner understanding remain separate evidence.
+Joining 20,000 facts to a 20-row dimension is a textbook case for a broadcast join, but this lesson treats the textbook as a hypothesis. You will read the size estimate, watch the plan change when the automatic threshold is disabled or a hint is added, and check that the joined bag, with weighted total 839,916, never changes with the strategy.
 
 ## Level and prerequisites
 
-Intermediate; approximately 105 minutes. Direct prerequisites: `spark-022`. The prepared baseline is Spark 4.3.0, Scala binary 2.13, JDK 17 and Python 3.12. Read the [execution baseline](../execution-baseline.md).
+Intermediate; approximately 105 minutes. Direct prerequisites: `spark-022`. Pinned versions: [execution baseline](../execution-baseline.md).
 
 ## How to run this lesson
 
-Open `spark-023` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile, save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`; Python stages as `main.py` with a main guard. Each program creates its own `local[2]` session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.
+Shared run steps and profile rules: [study guide](../STUDY-GUIDE.md#run-a-paired-lesson).
 
-The [Scala learner](../lessons/spark-023.scala) and [PySpark learner](../lessons/spark-023.py) run two complete demonstrations and retain six explicit task stubs. Use the [explained solutions](../solutions/spark-023_solutions.md) only after an attempt or an explicit worked comparison; the [Scala reference](../solutions/spark-023_solution.scala) and [PySpark reference](../solutions/spark-023_solution.py) contain complete assertions. A bounded collect is used only for the declared tiny fixture; do not copy it onto an unbounded or large production table.
+Learner pads: [Scala](../lessons/spark-023.scala) and [PySpark](../lessons/spark-023.py).
+
+Open the [explained solutions](../solutions/spark-023_solutions.md) after an attempt.
+
+The first worked example counts the dimension's distinct keys and prints `Known finite build side: 20 unique keys`. The second computes the weighted total independently of any Spark join and prints `Independent weighted-total oracle=` followed by 839916 (the Scala pad prints `oracle=839916`). That number is the target every join strategy in the exercises has to reproduce.
 
 ## Learning objectives
 
 - Choose and verify a join strategy without turning a hint into a correctness assumption.
-- State the input and output grain, schema, NULL policy and ordering before executing a transformation.
-- Compare each language implementation with independent literal expectations, not only with the other implementation.
+- Compare the dimension's estimated size with the 10,485,760-byte automatic threshold, then produce a shuffled plan with the threshold at -1 and a `BroadcastHashJoin` plan with an explicit hint, proving with `exceptAll` in both directions that the rows are identical.
+- Explain why a broadcast hint is not honored for the full outer join in Exercise 5, and gate any broadcast candidate on a key-uniqueness check and a row bound that reject a duplicated key 0 or a 101-row table.
 
 ## Vocabulary and concepts
 
@@ -50,7 +54,7 @@ The lesson deliberately omits elapsed-time superiority claims. Tiny data, compil
 
 ## Supplied local fixture
 
-The complete source creates the owned local session described above, then constructs this explicit fixture. The worked examples below run in that same main function; there is no hidden notebook state.
+Facts come from `spark.range(0, 20000, 1, 4)` renamed to `fact_id`, with `key = fact_id % 20` and `amount = fact_id % 7 + 1`. The dimension has keys 0 to 19 in two partitions with `factor = key + 1`, so every fact matches exactly one dimension row. The session pins the broadcast threshold at 10,485,760 bytes and prefers sort-merge joins, so any change of strategy comes from what an exercise sets.
 
 ```scala
 import org.apache.spark.sql.functions._
@@ -184,11 +188,14 @@ Do not broadcast a relation just because it is named dimension. Do not treat a h
 
 ## Self-check
 
-Explain the contract of `estimatedBytes` / `estimated_bytes` without reading its solution. Then, from memory, state what Exercise 6 (Gate a broadcast candidate on explicit bounded evidence) must produce: The 20-row dimension passes; the same dimension with a duplicate key and a 101-row candidate fail. No unbounded input is collected or materialized by the gate. Say which part of that result is evidence and what it still cannot show. Name the action in your trace that actually runs the plan.
+- The automatic plan contains a join, but Exercise 2 does not require it to be a broadcast join. Why is the threshold comparison in Exercise 1 not enough to predict the strategy?
+- With the threshold at -1, the plan has no `BroadcastHashJoin` and AQE is off. Why does the lesson switch AQE off before making that claim about the plan?
+- Exercise 4 checks `exceptAll` in both directions. Describe an incorrect hinted result that a one-directional check would accept.
+- The broadcast gate rejects a dimension in which key 0 appears twice. What would that duplicate do to the 20,000-row join and to its 839,916 total?
 
 ## Next step
 
-Use the [course route](../README.md) to continue. Paired-language agreement is useful only when both outputs also satisfy the independent fixture contract. A successful local run is not evidence of cluster performance or production recovery.
+Go on to [spark-024: AQE, skew and bounded salting experiments](spark-024.md). Broadcasting helps when one side is small; the next lesson keeps both sides in a shuffle join and confronts the case where 90 percent of the facts share a single key.
 
 ## Primary sources and official APIs
 

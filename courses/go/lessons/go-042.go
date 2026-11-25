@@ -3,11 +3,11 @@ package main
 import "fmt"
 
 func main() {
-	// Exercise 1: Copy before changing labels: change one input: Copy worked example 1 into a scratch pad and change `cached := Cached{Labels: map[string]string{"app": "web"}, Version: "a"}` to `cached := Cached{Labels: map[string]string{"app!": "web"}, Version: "a"}`. Before running, predict which check fails and which value it now sees; then run it and restore the original line.
-	// Expected: The changed run panics with `copy` because `cached.Labels["app"] == "web" && copy.Labels["app"] == "api"` no longer holds. Restoring the original line brings back the worked observation: the cache still contains the original label.
+	// Exercise 1: Copy before changing labels: change one input: Copy worked example 1, change `cached := Cached{Labels: map[string]string{"app": "web"}, Version: "a"}` to `cached := Cached{Labels: map[string]string{"app!": "web"}, Version: "a"}` and predict the failure before running; then restore the line.
+	// Expected: The edited run panics with `copy` because `cached.Labels["app"] == "web" && copy.Labels["app"] == "api"` no longer holds.
 
-	// Exercise 2: Expose a shallow-copy defect safely: debug a regression: A regression changed one token in worked example 2, so one line now reads `shallow.Labels["app!"] = "bad"`. Run worked example 2 with that line, use the failure to locate the defect and repair it without changing the check.
-	// Expected: Before the repair the program panics with `shallow counterexample`; after it the line reads `shallow.Labels["app"] = "bad"` again and the original observes the unintended change.
+	// Exercise 2: Expose a shallow-copy defect safely: debug a regression: A one-token regression in worked example 2 makes a line read `shallow.Labels["app!"] = "bad"`. Repair it without changing the check.
+	// Expected: The defective run panics with `shallow counterexample`; after restoring `shallow.Labels["app"] = "bad"`, the original observes the unintended change.
 
 	// Exercise 3: Represent a stale view: Deliver only the first of two watch events to a cache that starts at version a.
 	// Expected: The cache shows b while the server's latest version is already c.

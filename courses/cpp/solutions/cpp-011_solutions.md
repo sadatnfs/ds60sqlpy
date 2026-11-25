@@ -1,6 +1,6 @@
 # cpp-011: explanations and reference observations
 
-Attempt the learner tasks before opening this document. The executable reference checks the bounded normal and boundary examples; the six explanations below cover the deliberate changes and manual checks.
+The [executable reference](cpp-011_solution.cpp) writes `cpp-011-owned-example.txt`, closes it, reopens and reads it back, then removes it, so the round trip leaves nothing behind. The explanations cover relative paths, the working directory and closing a stream before reading it again. How to compare: [study guide](../STUDY-GUIDE.md#compare-with-the-solutions).
 
 ## Mechanism
 

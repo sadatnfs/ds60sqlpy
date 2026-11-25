@@ -211,10 +211,10 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="syntax-and-data-contract">Syntax and data contract<a class="heading-anchor" href="#syntax-and-data-contract" aria-label="Link to this section">#</a></h3>
 <p>Group definitions include an owner label. Model config declares group and access, and ref creates the dependency evaluated by that policy. The example compares a same-group reference with a cross-group reference to a private model. It then distinguishes the dbt dependency rule from direct database querying.</p>
 <h3 id="run-the-lesson">Run the lesson<a class="heading-anchor" href="#run-the-lesson" aria-label="Link to this section">#</a></h3>
-<p>Open <code>dbt-024</code> in <code>/classroom</code>. Its starter <code>main.py</code> contains both worked cases, &quot;Use a private model within its group&quot; and &quot;Reject an unapproved cross-group dependency&quot;, and prints the dictionary each case returns. The prepared <code>data-engineering</code> worker runs it in a fresh temporary directory. An <code>AssertionError</code> means that an observation differs from the case&#x27;s stated contract. Each case writes its dbt project and DuckDB database into its own temporary directory, runs real dbt commands through dbt&#x27;s Python entry point and removes the directory when it returns. No account, warehouse, network request or package download is involved. Save source and notes before switching lessons.</p>
+<p>In the same-group case the consumer builds and returns 42. In the cross-group case dbt rejects the build, because <code>consumer</code> refers to the private <code>internal</code> model from another group. Either way the last flag stands: anyone with SQL access could still query both relations directly. See the <a href="../STUDY-GUIDE.md.html#run-a-lesson">run routine</a>.</p>
 <h3 id="worked-case-1-use-a-private-model-within-its-group">Worked case 1: Use a private model within its group<a class="heading-anchor" href="#worked-case-1-use-a-private-model-within-its-group" aria-label="Link to this section">#</a></h3>
 <p>The internal model returns 41 and its same-group consumer returns 42. Both are real relations in the local fixture. A direct query of the internal relation still works under the owned database connection.</p>
-<p><strong>Project files.</strong> The case writes these files before its first dbt command. YAML is shown in conventional key order; dbt reads the same mappings.</p>
+<p><strong>Project files</strong>, written before the first dbt command:</p>
 <p><code>models/internal.sql</code></p>
 <pre class="highlighted-code"><code class="language-sql">{{ config<span class="syntax-punctuation">(</span>materialized<span class="syntax-operator">=</span><span class="syntax-string">&#x27;table&#x27;</span><span class="syntax-punctuation">)</span> }} <span class="syntax-keyword">select</span> <span class="syntax-number">41</span> <span class="syntax-keyword">as</span> value</code></pre>
 <p><code>models/consumer.sql</code></p>
@@ -237,10 +237,10 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <span class="syntax-tag">config</span><span class="syntax-punctuation">:</span>
       <span class="syntax-tag">group</span><span class="syntax-punctuation">:</span> commerce
       <span class="syntax-tag">access</span><span class="syntax-punctuation">:</span> public</code></pre>
-<p><strong>Commands and changes, in order.</strong> Each <code>dbt</code> line is one <code>invoke(...)</code> call; the harness adds <code>--project-dir</code> and <code>--profiles-dir</code> for the temporary project.</p>
+<p><strong>Commands, in order.</strong> Each <code>dbt</code> line is one <code>invoke(...)</code> call.</p>
 <pre class="highlighted-code"><code class="language-bash">dbt build</code></pre>
 <p><strong>Expected evidence:</strong> The build succeeds, while direct SQL visibility remains a separate fact.</p>
-<p>The program below shows only this case&#x27;s own functions. They call the shared helpers <code>project</code>, <code>invoke</code> and <code>rows</code>, which write the files above, run dbt through <code>dbtRunner</code> and read the results; the helpers are explained in <a href="dbt-001.md.html">dbt-001</a> and appear in full at the top of this lesson&#x27;s <a href="../lessons/dbt-024.py.html">starter</a>.</p>
+<p>Helpers <code>project</code>, <code>invoke</code> and <code>rows</code>: see the <a href="../STUDY-GUIDE.md.html#case-harness">case harness</a>.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> tempfile
 
 
@@ -286,7 +286,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <span class="syntax-keyword">return</span> governance_case<span class="syntax-punctuation">(</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">)</span></code></pre>
 <h3 id="worked-case-2-reject-an-unapproved-cross-group-dependency">Worked case 2: Reject an unapproved cross-group dependency<a class="heading-anchor" href="#worked-case-2-reject-an-unapproved-cross-group-dependency" aria-label="Link to this section">#</a></h3>
 <p>The second project places the consumer in another group while retaining private access on the producer. The build is expected to fail under dbt&#x27;s reference policy.</p>
-<p><strong>Project files.</strong> The case writes these files before its first dbt command. YAML is shown in conventional key order; dbt reads the same mappings.</p>
+<p><strong>Project files</strong>, written before the first dbt command:</p>
 <p><code>models/internal.sql</code></p>
 <pre class="highlighted-code"><code class="language-sql">{{ config<span class="syntax-punctuation">(</span>materialized<span class="syntax-operator">=</span><span class="syntax-string">&#x27;table&#x27;</span><span class="syntax-punctuation">)</span> }} <span class="syntax-keyword">select</span> <span class="syntax-number">41</span> <span class="syntax-keyword">as</span> value</code></pre>
 <p><code>models/consumer.sql</code></p>
@@ -309,10 +309,10 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <span class="syntax-tag">config</span><span class="syntax-punctuation">:</span>
       <span class="syntax-tag">group</span><span class="syntax-punctuation">:</span> analysis
       <span class="syntax-tag">access</span><span class="syntax-punctuation">:</span> public</code></pre>
-<p><strong>Commands and changes, in order.</strong> Each <code>dbt</code> line is one <code>invoke(...)</code> call; the harness adds <code>--project-dir</code> and <code>--profiles-dir</code> for the temporary project.</p>
+<p><strong>Commands, in order.</strong> Each <code>dbt</code> line is one <code>invoke(...)</code> call.</p>
 <pre class="highlighted-code"><code class="language-bash">dbt build # expected to fail</code></pre>
 <p><strong>Expected evidence:</strong> The cross-group private-model reference is rejected.</p>
-<p>The program below shows only this case&#x27;s own functions. They call the shared helpers <code>project</code>, <code>invoke</code> and <code>rows</code>, which write the files above, run dbt through <code>dbtRunner</code> and read the results; the helpers are explained in <a href="dbt-001.md.html">dbt-001</a> and appear in full at the top of this lesson&#x27;s <a href="../lessons/dbt-024.py.html">starter</a>.</p>
+<p>Helpers <code>project</code>, <code>invoke</code> and <code>rows</code>: see the <a href="../STUDY-GUIDE.md.html#case-harness">case harness</a>.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> tempfile
 
 
@@ -357,7 +357,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="syntax-keyword">def</span> <span class="syntax-function">example_two</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
     <span class="syntax-keyword">return</span> governance_case<span class="syntax-punctuation">(</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></code></pre>
 <h3 id="practice">Practice<a class="heading-anchor" href="#practice" aria-label="Link to this section">#</a></h3>
-<p>The starter contains both worked cases, so a task can change either one. Make each change in a saved copy, run it, and compare the printed result with the task&#x27;s check before opening the separate explained answers.</p>
+<p>Use the <a href="../STUDY-GUIDE.md.html#practice-routine">practice routine</a>.</p>
 <h4 id="1-identify-the-owner">1. Identify the owner<a class="heading-anchor" href="#1-identify-the-owner" aria-label="Link to this section">#</a></h4>
 <p>Locate the group and owner metadata for a model.</p>
 <p><strong>Check:</strong> Responsibility is explicitly declared.</p>
@@ -392,7 +392,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li><a href="https://github.com/duckdb/dbt-duckdb">dbt-duckdb repository README</a></li>
 </ul>
 <h3 id="tutor-guidance">Tutor guidance<a class="heading-anchor" href="#tutor-guidance" aria-label="Link to this section">#</a></h3>
-<p>Use the repository&#x27;s <code>$guide-ds60sqlpy-learning</code> skill (<code>.agents/skills/guide-ds60sqlpy-learning/SKILL.md</code>) for <code>dbt-024</code>. Inspect the learner&#x27;s own source and printed output first. Ask for an explanation of group, model access, ownership, reference policy and database permissions in their own words, then give one focused hint at a time. Keep an assertion on this synthetic fixture separate from a claim about an external dataset or deployed service.</p></article>
+<p>Ask the learner what a private model protects against and what it does not. Then ask how they would enforce read access in the database itself, and who owns each group&#x27;s public interface. See the <a href="../STUDY-GUIDE.md.html#tutor-guidance">tutor routine</a>.</p></article>
   </main>
 </body>
 </html>

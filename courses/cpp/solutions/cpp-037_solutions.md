@@ -1,6 +1,6 @@
 # cpp-037: explanations and reference observations
 
-Attempt the learner tasks before opening this document. The executable reference checks the bounded normal and boundary examples; the six explanations below cover the deliberate changes and manual checks.
+The [executable reference](cpp-037_solution.cpp) passes an empty span to the generic filter. The explanations cover generic interfaces, owned results and filtering whole records. How to compare: [study guide](../STUDY-GUIDE.md#compare-with-the-solutions).
 
 ## Mechanism
 

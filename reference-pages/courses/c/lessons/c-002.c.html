@@ -197,24 +197,15 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">int</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">void</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span></span>
 <span class="source-line">  <span class="syntax-comment">/* Exercise 1: Compare integer and floating division: change one input</span></span>
-<span class="source-line"><span class="syntax-comment">     Copy worked example 1, the &quot;compare integer and floating division&quot; case,</span></span>
-<span class="source-line"><span class="syntax-comment">     into a scratch pad and change `int whole = 7 / 2;` to `int whole = 8 / 2;`.</span></span>
-<span class="source-line"><span class="syntax-comment">     Before running, predict which CHECK fails and which value it sees in place</span></span>
-<span class="source-line"><span class="syntax-comment">     of the worked result (the results are 3 and 3.5); then run it and restore</span></span>
-<span class="source-line"><span class="syntax-comment">     the original line. Expected: With `int whole = 8 / 2;` the run stops with</span></span>
-<span class="source-line"><span class="syntax-comment">     `Check failed` at the CHECK on `whole == 3 &amp;&amp; fraction == 3.5`, because the</span></span>
-<span class="source-line"><span class="syntax-comment">     &quot;compare integer and floating division&quot; case no longer shows that the</span></span>
-<span class="source-line"><span class="syntax-comment">     results are 3 and 3.5. Restoring `int whole = 7 / 2;` brings that</span></span>
-<span class="source-line"><span class="syntax-comment">     observation back. */</span></span>
+<span class="source-line"><span class="syntax-comment">     In worked example 1, change `int whole = 7 / 2;` to `int whole = 8 / 2;`.</span></span>
+<span class="source-line"><span class="syntax-comment">     Predict which value the CHECK on `whole == 3 &amp;&amp; fraction == 3.5` sees, then</span></span>
+<span class="source-line"><span class="syntax-comment">     run and restore. Expected: `Check failed` at `whole == 3 &amp;&amp; fraction</span></span>
+<span class="source-line"><span class="syntax-comment">     == 3.5`; restoring `int whole = 7 / 2;` passes again. */</span></span>
 <span class="source-line"></span>
 <span class="source-line">  <span class="syntax-comment">/* Exercise 2: Observe defined unsigned wrap: debug a regression</span></span>
-<span class="source-line"><span class="syntax-comment">     A regression changed one token in worked example 2, the &quot;observe defined</span></span>
-<span class="source-line"><span class="syntax-comment">     unsigned wrap&quot; case, so one line now reads `n -= 1U;`. Run the example with</span></span>
-<span class="source-line"><span class="syntax-comment">     that line, use the failing CHECK to find why the result is zero no longer</span></span>
-<span class="source-line"><span class="syntax-comment">     holds and repair the line without changing the CHECK. Expected: Before the</span></span>
-<span class="source-line"><span class="syntax-comment">     repair the run stops with `Check failed` at the CHECK on `n == 0U`. Once</span></span>
-<span class="source-line"><span class="syntax-comment">     the line reads `n += 1U;` again, the &quot;observe defined unsigned wrap&quot; case</span></span>
-<span class="source-line"><span class="syntax-comment">     again shows that the result is zero. */</span></span>
+<span class="source-line"><span class="syntax-comment">     Worked example 2 now has a line reading `n -= 1U;`. Repair it so that the</span></span>
+<span class="source-line"><span class="syntax-comment">     result is zero again. Expected: `Check failed` at `n == 0U` until the line</span></span>
+<span class="source-line"><span class="syntax-comment">     reads `n += 1U;` again. */</span></span>
 <span class="source-line"></span>
 <span class="source-line">  <span class="syntax-comment">/* Exercise 3: Inspect representation facts</span></span>
 <span class="source-line"><span class="syntax-comment">     Check sizeof(char) and minimum CHAR_BIT.</span></span>

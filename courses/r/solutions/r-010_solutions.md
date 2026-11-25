@@ -1,6 +1,6 @@
 # r-010: reference reasoning
 
-Use the [complete reference](r-010_reference.R) with the guide's declared inputs and runtime. Every worked example is also a standalone script.
+Run the [complete reference](r-010_reference.R) under the [run rules](../STUDY-GUIDE.md#run-a-chapter).
 
 ## Why the implementation has this shape
 
@@ -96,4 +96,6 @@ A multi-line order can repeat OrderID while each LineID must remain unique.
 
 ## What the checks establish
 
-The reference makes 6 `stopifnot()` checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.
+The checks confirm a three row by two column table, a derived fee column reading 22, 12 and 32 in the original row order, ids that are present and unique, an amount sort yielding 10, 20 and 30, an empty selection that keeps the column names, and line ids that are unique while order ids repeat. They do not prove that a key stays unique across future data loads.
+
+The reference makes 6 `stopifnot()` checks; see [what a passing run proves](../STUDY-GUIDE.md#what-a-passing-run-proves).

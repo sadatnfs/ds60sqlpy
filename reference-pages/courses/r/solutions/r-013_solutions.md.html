@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/r/solutions/r-013_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="r-013-reference-reasoning">r-013: reference reasoning<a class="heading-anchor" href="#r-013-reference-reasoning" aria-label="Link to this section">#</a></h2>
-<p>Use the <a href="r-013_reference.R.html">complete reference</a> with the guide&#x27;s declared inputs and runtime. Every worked example is also a standalone script.</p>
+<p>Run the <a href="r-013_reference.R.html">complete reference</a> under the <a href="../STUDY-GUIDE.md.html#run-a-chapter">run rules</a>.</p>
 <h3 id="why-the-implementation-has-this-shape">Why the implementation has this shape<a class="heading-anchor" href="#why-the-implementation-has-this-shape" aria-label="Link to this section">#</a></h3>
 <p>Each returned function retains its own configured factor. No global factor is needed at call time.</p>
 <p>The unforced promise looks up rate on first use after the change. The forced closure retained the value two during construction.</p>
@@ -242,7 +242,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Tempting mistake:</strong> A closure that increments a counter with <code>&lt;&lt;-</code> to label runs. Rerunning a pipeline in the same session gives different labels than a fresh session, so results cannot be reproduced.</p>
 <p><strong>Verify:</strong> Calling <code>fixed(3)</code> before and after <code>rate &lt;- 5</code> returns 6 both times.</p>
 <h3 id="what-the-checks-establish">What the checks establish<a class="heading-anchor" href="#what-the-checks-establish" aria-label="Link to this section">#</a></h3>
-<p>The reference makes 6 <code>stopifnot()</code> checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.</p></article>
+<p>The assertions confirm that the factory validates a finite numeric scalar, that <code>make_multiplier(4)(2)</code> is 8, that two closures built with different factors return 10 and 15 for the same input, that the captured predicate still accepts 20, that a lazy argument is evaluated when first used so <code>lazy(3)</code> gives 15, and that invalid configuration is rejected. They pin capture-time behavior only for these inputs; they cannot detect a closure in your own code that still reads a mutable global you forgot about, or a promise that a later change to a default argument would alter.</p>
+<p>The reference makes 6 <code>stopifnot()</code> checks; see <a href="../STUDY-GUIDE.md.html#what-a-passing-run-proves">what a passing run proves</a>.</p></article>
   </main>
 </body>
 </html>

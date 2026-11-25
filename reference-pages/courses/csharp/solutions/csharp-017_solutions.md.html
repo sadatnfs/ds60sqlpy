@@ -194,7 +194,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/csharp/solutions/csharp-017_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="csharp-017-explanation-and-comparison">csharp-017: explanation and comparison<a class="heading-anchor" href="#csharp-017-explanation-and-comparison" aria-label="Link to this section">#</a></h2>
-<p>Attempt the six guide tasks before opening this comparison. The executable reference is <a href="csharp-017_solution.cs.html">csharp-017_solution.cs</a>. It runs both worked examples, and its assertions are always active under the prepared classroom compile settings.</p>
+<p>Reference program: <a href="csharp-017_solution.cs.html">csharp-017_solution.cs</a>, covering both examples.</p>
+<p>Attempt the tasks first; see <a href="../STUDY-GUIDE.md.html#comparing-with-the-explanation">comparing with the explanation</a>.</p>
 <h3 id="why-the-two-examples-differ">Why the two examples differ<a class="heading-anchor" href="#why-the-two-examples-differ" aria-label="Link to this section">#</a></h3>
 <p><strong>Use a declared contract:</strong> The consumer depends on the interface rather than the concrete class. Four units cost 12 and zero units cost zero.</p>
 <p><strong>Change policy without changing the consumer:</strong> An implementation can change the pricing rule while preserving units and accepted inputs. The same consumer applies a capped or uncapped policy.</p>
@@ -241,7 +242,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><code>interface IRate</code> declares a method contract. A class implements that interface and supplies the method body. A variable typed as the interface exposes the contract, while dynamic dispatch chooses the implementation.</p>
 <p>Identical signatures do not imply compatible semantics. Avoid interfaces that expose every private implementation detail. Validate domain ranges consistently across implementations.</p>
 <h3 id="review-before-continuing">Review before continuing<a class="heading-anchor" href="#review-before-continuing" aria-label="Link to this section">#</a></h3>
-<p>Run the reference and confirm that it prints <code>csharp-017: passed</code>, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.</p></article>
+<p>Run the reference and confirm it prints <code>csharp-017: passed</code>, then rerun the guide&#x27;s counterexample.</p></article>
   </main>
 </body>
 </html>

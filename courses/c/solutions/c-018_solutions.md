@@ -1,6 +1,8 @@
 # c-018: explained solutions
 
-Compare after an attempt or explicit reveal. The complete executable reference, `c-018_solution.c`, implements all six cases, from the "round-trip an owned stream" case to the "transfer binary zero bytes" case, in one `main.c`.
+`c-018_solution.c` assembles the "round-trip an owned stream" case through the "transfer binary zero bytes" case in one `main.c`.
+
+Compare only after an attempt: [Compare and transfer](../STUDY-GUIDE.md#compare-and-transfer).
 
 ## Mechanism and assumptions
 
@@ -10,7 +12,7 @@ fwrite and fread return element counts, not necessarily byte counts unless eleme
 
 ## Exercise 1: Round-trip an owned stream: predict an edited check
 
-Copy worked example 1 into a scratch pad and change `CHECK(fwrite("abc", 1, 3, f) == 3);` to `CHECK(fwrite("abc", 1, 4, f) == 3);` inside its CHECK. Before running, predict whether the CHECK still holds and explain why; then restore it.
+In worked example 1, change `CHECK(fwrite("abc", 1, 3, f) == 3);` to `CHECK(fwrite("abc", 1, 4, f) == 3);`. Predict whether the CHECK still holds and why, then run and restore.
 
 The unchanged code is worked example 1:
 
@@ -24,13 +26,15 @@ CHECK(fread(data, 1, 3, f) == 3 && strcmp(data, "abc") == 0);
 CHECK(fclose(f) == 0);
 ```
 
-**Expected:** With `CHECK(fwrite("abc", 1, 4, f) == 3);` the run stops with `Check failed` at the CHECK on `fwrite("abc", 1, 3, f) == 3`, because the "round-trip an owned stream" case no longer shows that three bytes return and match abc. Restoring `CHECK(fwrite("abc", 1, 3, f) == 3);` brings that observation back.
+**Expected:** `Check failed`: `CHECK(fwrite("abc", 1, 4, f) == 3);` is false, although three bytes return and match abc.
+
+**Verify:** Explain which claim `CHECK(fwrite("abc", 1, 4, f) == 3);` makes that the state fails; restoring `CHECK(fwrite("abc", 1, 3, f) == 3);` passes again.
 
 The terminator comes from initialized output storage, not from fread. Binary reads do not automatically append a string terminator.
 
 ## Exercise 2: Observe a short read: diagnose an edited check
 
-A careless edit changed the CHECK in worked example 2, the "observe a short read" case, so that it reads `CHECK(fwrite("ab", 1, 3, f) == 2);`. Run the example with that line, explain why the edited CHECK now fails even though the program state still means two bytes return and EOF becomes set, and restore it.
+Worked example 2's CHECK now reads `CHECK(fwrite("ab", 1, 3, f) == 2);`. Explain why it fails although two bytes return and EOF becomes set, then restore it.
 
 The unchanged code is worked example 2:
 
@@ -45,7 +49,9 @@ CHECK(n == 2 && feof(f) && !ferror(f));
 CHECK(fclose(f) == 0);
 ```
 
-**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `fwrite("ab", 1, 2, f) == 2`. Once the line reads `CHECK(fwrite("ab", 1, 2, f) == 2);` again, the "observe a short read" case again shows that two bytes return and EOF becomes set.
+**Expected:** `Check failed` until the CHECK reads `CHECK(fwrite("ab", 1, 2, f) == 2);` again, though two bytes return and EOF becomes set.
+
+**Verify:** Explain why `CHECK(fwrite("ab", 1, 3, f) == 2);` rejects a state that `fwrite("ab", 1, 2, f) == 2` accepts, using your failing and repaired runs.
 
 The count is the primary evidence. EOF explains why the remaining requested bytes were unavailable.
 
@@ -62,6 +68,8 @@ CHECK(fclose(f) == 0);
 ```
 
 **Expected:** EOF is false before the read and true afterward.
+
+**Verify:** Keep a CHECK equivalent to `fclose(f) == 0`. Control edit: `CHECK(fclose(f) != 0);` must fail; then restore it.
 
 A while(!feof(f)) loop can process a nonexistent final record because EOF is discovered by reading.
 
@@ -80,6 +88,8 @@ CHECK(fclose(f) == 0);
 ```
 
 **Expected:** The newline remains in the result.
+
+**Verify:** Keep a CHECK equivalent to `fgets(line, sizeof line, f) != NULL && strcmp(line, "red\n") == 0`. Control edit: `CHECK(fgets(line, sizeof line, f) != NULL && strcmp(line, "red\n!") == 0);` must fail; then restore it.
 
 Trimming a newline is a separate application policy. A full buffer without newline may indicate a partial line rather than a complete record.
 
@@ -100,6 +110,8 @@ CHECK(fclose(f) == 0);
 
 **Expected:** The first character is available again.
 
+**Verify:** Keep a CHECK equivalent to `fgetc(f) == 'x' && fgetc(f) == EOF`. Control edit: `CHECK(fputc('x!', f) != EOF);` must fail; then restore it.
+
 Stream state changes with positioning operations. A prior EOF is not a permanent property of the underlying content.
 
 ## Exercise 6: Transfer binary zero bytes
@@ -118,8 +130,10 @@ CHECK(fclose(f) == 0);
 
 **Expected:** All three bytes survive, including the middle zero.
 
+**Verify:** Keep a CHECK equivalent to `fread(out, 1, 3, f) == 3 && memcmp(source, out, 3) == 0`. Control edit: `CHECK(fread(out, 2, 3, f) == 3 && memcmp(source, out, 3) == 0);` must fail; then restore it.
+
 Binary data is length-delimited, not terminated by zero. String functions would incorrectly treat the middle zero as an endpoint.
 
 ## After comparison
 
-Add a fresh distinguishing input for the "transfer binary zero bytes" case to your own c-018 source. Explain why every access in the case code inside `main` stays within a live object and each owned resource is released. An expected stream state failure belongs in the test contract; undefined behavior does not. Keep diagnostics and sanitizer evidence for the "observe a short read" case apart from ordinary output: the fixture proves its stated stream state, short read and EOF indicator assumptions, not universal safety.
+Write the six bytes `ab\ncd\n` to a `tmpfile()`, rewind, and read with `fgets` into `char line[3]`. Predict the pieces: `ab`, then the newline alone, then `cd`, then the second newline, then NULL at end of file. CHECK that four calls succeed for two lines, and explain why counting `fgets` calls is not counting lines when the buffer is shorter than a line.

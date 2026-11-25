@@ -30,6 +30,11 @@ needed. Inspect compiler messages before changing code. The app saves your pad,
 notes and job history in its learning volume. Reference programs remain separate
 and are revealed for comparison; a passing example does not establish mastery.
 
+The [C++ study guide](STUDY-GUIDE.md) describes the routine every lesson shares:
+lesson files, running a pad, host projects, worked examples, the six exercises,
+self-check and retrieval, and comparing with the solutions. Each lesson guide
+links to the step it needs instead of repeating it.
+
 ## Lesson sequence
 
 | Lesson | Level | Runtime |

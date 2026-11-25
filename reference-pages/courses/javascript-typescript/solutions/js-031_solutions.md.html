@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/javascript-typescript/solutions/js-031_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="js-031-explanatory-solutions">js-031: explanatory solutions<a class="heading-anchor" href="#js-031-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Use these answers after an attempt or an explicit reveal. The reference uses the same literal fixtures as the guide and keeps the exercises in separate scopes. A successful run checks these examples; explaining a changed input is a separate learning goal.</p>
+<p>Open these after your own attempt; each exercise runs in its own scope in the reference.</p>
 <h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
 <p>Rendering untrusted text is a data-versus-code boundary. textContent inserts characters as text. innerHTML parses a string as markup and can create active elements or unsafe attributes. A report title containing angle brackets should usually remain a title, not become a document fragment. Escaping for one context does not automatically make a value safe in another context: HTML text, URL attributes, CSS and JavaScript each have different parsing rules.</p>
 <p>URLs need semantic validation after parsing. A link that begins with javascript: is not an ordinary navigation to a document. A relative URL can resolve against the current page, while an absolute URL can point to another origin. The fixture accepts only http/https links to the same origin and rejects embedded credentials. That is a deliberately narrow local-navigation policy, not a universal URL sanitizer. It compares parsed origins rather than unsafe string prefixes.</p>
@@ -207,7 +207,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="reading-the-implementation">Reading the implementation<a class="heading-anchor" href="#reading-the-implementation" aria-label="Link to this section">#</a></h3>
 <p>Create elements with document.createElement, set textContent for untrusted visible text, and assign a URL only after a parsed policy check. new URL(candidate, location.href) resolves relative values before inspecting protocol, username, password and origin. Do not compare raw prefixes such as startsWith(&#x27;https://trusted.example&#x27;), which can match an attacker-controlled suffix. A meta CSP must appear before the resources it governs, and the external script uses addEventListener rather than inline onclick attributes.</p>
 <h3 id="exercise-1-render-a-markup-looking-title-as-literal-text-change-one-input">Exercise 1: Render a markup-looking title as literal text: change one input<a class="heading-anchor" href="#exercise-1-render-a-markup-looking-title-as-literal-text-change-one-input" aria-label="Link to this section">#</a></h3>
-<p>Task: Rebuild Example A in your copy of the lesson&#x27;s browser fixture without looking at it. Then change one attribute, label or handler and write down the visible, focus or announcement change you expect before reloading.</p>
+<p>Task: Save the snippet and inspect the resulting DOM and visible title. Then change one attribute, label or handler in your copy and predict the visible difference before reloading.</p>
 <p>The suspicious-looking string is a local inert test value. textContent preserves it as characters, so the browser does not create the image or interpret its event attribute.</p>
 <p>The unchanged code is the exercise block of Example A:</p>
 <pre class="highlighted-code"><code class="language-html"><span class="syntax-comment">&lt;!doctype html&gt;</span>
@@ -222,10 +222,10 @@ title<span class="syntax-punctuation">.</span>textContent <span class="syntax-op
 <span class="syntax-builtin">document</span><span class="syntax-punctuation">.</span>querySelector<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;#status&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>textContent <span class="syntax-operator">=</span> <span class="syntax-string">`</span><span class="syntax-string">Image elements: </span><span class="syntax-string">${</span>title<span class="syntax-punctuation">.</span>querySelectorAll<span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;img&#x27;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">.</span>length<span class="syntax-string">}</span><span class="syntax-string">`</span><span class="syntax-punctuation">;</span>
 <span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">script</span><span class="syntax-punctuation">&gt;</span><span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">html</span>
 <span class="syntax-punctuation">&gt;</span></code></pre>
-<p><strong>Expected:</strong> Your rebuild reproduces the worked observation (the angle-bracket text is visible; no img element is created), and the changed copy shows the difference you predicted.</p>
-<p><strong>Verify:</strong> Record the browser observation before and after your change, including where focus lands and any live-region text, and explain which line caused the difference.</p>
+<p><strong>Expected:</strong> The rebuild reproduces the observation: the angle-bracket text is visible; no img element is created. The changed copy differs as you predicted.</p>
+<p><strong>Verify:</strong> Record the browser observation, then explain it: The suspicious-looking string is a local inert test value. textContent preserves it as characters, so the browser does not create the image or interpret its event attribute.</p>
 <h3 id="exercise-2-validate-a-url-before-creating-a-link-debug-a-regression">Exercise 2: Validate a URL before creating a link: debug a regression<a class="heading-anchor" href="#exercise-2-validate-a-url-before-creating-a-link-debug-a-regression" aria-label="Link to this section">#</a></h3>
-<p>Task: Introduce one deliberate defect into a copy of Example B, such as a wrong selector, a missing attribute or a handler on the wrong element. Predict which browser behavior will expose it, confirm that prediction, then repair it.</p>
+<p>Task: Use a same-origin relative link and reject a javascript URL under the shown policy. Then break one selector or attribute in a copy, predict which behavior exposes it, and repair it.</p>
 <p>The policy acts on parsed components rather than textual resemblance. Serve this example over loopback HTTP; a file origin does not satisfy its HTTP navigation contract.</p>
 <p>The unchanged code is the exercise block of Example B:</p>
 <pre class="highlighted-code"><code class="language-html"><span class="syntax-comment">&lt;!doctype html&gt;</span>
@@ -245,8 +245,8 @@ title<span class="syntax-punctuation">.</span>textContent <span class="syntax-op
 <span class="syntax-keyword">catch</span> <span class="syntax-punctuation">{</span> result<span class="syntax-punctuation">.</span>textContent <span class="syntax-operator">+=</span> <span class="syntax-string">&#x27;\nRejected javascript URL&#x27;</span><span class="syntax-punctuation">;</span> <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">script</span><span class="syntax-punctuation">&gt;</span><span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">html</span>
 <span class="syntax-punctuation">&gt;</span></code></pre>
-<p><strong>Expected:</strong> The defective copy no longer shows: local help is accepted; javascript: is rejected. The repaired copy shows it again.</p>
-<p><strong>Verify:</strong> Keep notes on the failing and the repaired behavior and name the first browser observation that differed between them.</p>
+<p><strong>Expected:</strong> The broken copy no longer shows that local help is accepted; javascript: is rejected. The repair restores it.</p>
+<p><strong>Verify:</strong> Record the first browser observation that differed, then explain the repair: The policy acts on parsed components rather than textual resemblance.</p>
 <h3 id="exercise-3-install-the-complete-fixture-csp">Exercise 3: Install the complete fixture CSP<a class="heading-anchor" href="#exercise-3-install-the-complete-fixture-csp" aria-label="Link to this section">#</a></h3>
 <p>Task: Inspect the reference HTML and load its external script and stylesheet under the meta policy.</p>
 <p>The policy permits only the local resource categories the fixture requires. It is a second layer around correct DOM code, not a substitute for that code.</p>
@@ -257,7 +257,7 @@ title<span class="syntax-punctuation">.</span>textContent <span class="syntax-op
 <span class="syntax-punctuation">&lt;</span><span class="syntax-tag">link</span> <span class="syntax-attribute">rel</span><span class="syntax-operator">=</span><span class="syntax-string">&#x27;stylesheet&#x27;</span> <span class="syntax-attribute">href</span><span class="syntax-operator">=</span><span class="syntax-string">&#x27;style.css&#x27;</span> <span class="syntax-punctuation">/</span><span class="syntax-punctuation">&gt;</span>
 <span class="syntax-punctuation">&lt;</span><span class="syntax-tag">script</span> <span class="syntax-attribute">src</span><span class="syntax-operator">=</span><span class="syntax-string">&#x27;app.js&#x27;</span> <span class="syntax-attribute">defer</span><span class="syntax-punctuation">&gt;</span><span class="syntax-punctuation">&lt;</span><span class="syntax-punctuation">/</span><span class="syntax-tag">script</span><span class="syntax-punctuation">&gt;</span></code></pre>
 <p><strong>Expected:</strong> local resources load; no inline handlers or eval are needed.</p>
-<p><strong>Verify:</strong> In the browser fixture, record the observation that shows: local resources load; no inline handlers or eval are needed. Then change one input and record what changes, keeping keyboard and pointer results separate.</p>
+<p><strong>Verify:</strong> Record the browser observation that shows it, then explain why: The policy permits only the local resource categories the fixture requires.</p>
 <h3 id="exercise-4-reject-origin-and-credential-tricks">Exercise 4: Reject origin and credential tricks<a class="heading-anchor" href="#exercise-4-reject-origin-and-credential-tricks" aria-label="Link to this section">#</a></h3>
 <p>Task: Try a different port, an external origin, a data URL and embedded credentials.</p>
 <p>Changing the port changes origin. Credentials and non-HTTP schemes are rejected independently. The task inspects decisions without sending requests to the candidate destinations.</p>
@@ -268,7 +268,7 @@ for (const candidate of [&#x27;http://127.0.0.1:1/&#x27;, &#x27;https://example.
   // Call the policy and record its rejection; do not navigate to these values.
 }</code></pre>
 <p><strong>Expected:</strong> every candidate is rejected by the local-link policy.</p>
-<p><strong>Verify:</strong> In the browser fixture, record the observation that shows: every candidate is rejected by the local-link policy. Then change one input and record what changes, keeping keyboard and pointer results separate.</p>
+<p><strong>Verify:</strong> Record the browser observation that shows it, then explain why: Changing the port changes origin.</p>
 <h3 id="exercise-5-inspect-dynamic-text-without-changing-policy">Exercise 5: Inspect dynamic text without changing policy<a class="heading-anchor" href="#exercise-5-inspect-dynamic-text-without-changing-policy" aria-label="Link to this section">#</a></h3>
 <p>Task: Enter strong-tag-looking text, render it, then inspect child element count.</p>
 <p>An allowlisted script can still be unsafe if it uses an injection sink. Correct text insertion remains necessary even with a restrictive CSP.</p>
@@ -276,16 +276,16 @@ for (const candidate of [&#x27;http://127.0.0.1:1/&#x27;, &#x27;https://example.
 const count = output.childElementCount;
 // Expected count: 0, even when userText contains angle brackets.</code></pre>
 <p><strong>Expected:</strong> text remains literal and child element count stays zero.</p>
-<p><strong>Verify:</strong> In the browser fixture, record the observation that shows: text remains literal and child element count stays zero. Then change one input and record what changes, keeping keyboard and pointer results separate.</p>
+<p><strong>Verify:</strong> Record the browser observation that shows it, then explain why: An allowlisted script can still be unsafe if it uses an injection sink.</p>
 <h3 id="exercise-6-explain-the-actual-policy-boundary">Exercise 6: Explain the actual policy boundary<a class="heading-anchor" href="#exercise-6-explain-the-actual-policy-boundary" aria-label="Link to this section">#</a></h3>
 <p>Task: Record what the meta policy proves and what needs headers or server authorization.</p>
 <p>Browser restrictions and server decisions solve different problems. An accurate security explanation names which component enforces each claim and avoids inferring deployment protection from a local fixture.</p>
 <pre class="highlighted-code"><code class="language-html">// Inspect browser console policy messages and the loaded resource list.
 // Keep document-policy observations separate from server authentication claims.</code></pre>
 <p><strong>Expected:</strong> no claim that CSP authenticates callers, CORS authorizes actions, or meta implements frame-ancestors.</p>
-<p><strong>Verify:</strong> In the browser fixture, record the observation that shows: no claim that CSP authenticates callers, CORS authorizes actions, or meta implements frame-ancestors. Then change one input and record what changes, keeping keyboard and pointer results separate.</p>
+<p><strong>Verify:</strong> Record the browser observation that shows it, then explain why: Browser restrictions and server decisions solve different problems.</p>
 <h3 id="after-comparison">After comparison<a class="heading-anchor" href="#after-comparison" aria-label="Link to this section">#</a></h3>
-<p>Return to your saved implementation and repeat a case with different values. Keep compiler diagnostics, process output and browser observations separate. Do not suppress a failing assertion or use a type assertion to declare an unvalidated value safe. Resource-owning examples must finish cleanup even when work fails. Describe each result with its actual host and fixture scope rather than as production acceptance.</p></article>
+<p>Fresh case: render a user comment that contains a link. Decide which characters stay literal and predict the policy result for <code>HTTPS://EXAMPLE.COM</code>, <code>/help#top</code> and <code>data:text/html,hi</code>. (<a href="../STUDY-GUIDE.md.html#after-comparing-with-the-solution">After comparing</a>.)</p></article>
   </main>
 </body>
 </html>

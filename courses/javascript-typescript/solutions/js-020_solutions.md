@@ -1,6 +1,6 @@
 # js-020: explanatory solutions
 
-Use these answers after an attempt or an explicit reveal. The reference uses the same literal fixtures as the guide and keeps the exercises in separate scopes. A successful run checks these examples; explaining a changed input is a separate learning goal.
+Open these after your own attempt; each exercise runs in its own scope in the reference.
 
 ## Mechanism review
 
@@ -24,7 +24,7 @@ Use a union operator between alternatives, then compare a literal discriminant w
 
 ## Exercise 1: Handle a result union: predict an edited check
 
-Task: Copy Example A into a scratch `main.mts` and change `assert.equal(formatResult({ kind: 'failure', message: 'offline' }), 'error:offline');` to `assert.equal(formatResult({ kind: 'failure', message: 'offline!' }), 'error:offline');` inside its check. Before running it, predict whether the check still passes and explain why; then restore it.
+Task: In a scratch copy of Example A, change `assert.equal(formatResult({ kind: 'failure', message: 'offline' }), 'error:offline');` to `assert.equal(formatResult({ kind: 'failure', message: 'offline!' }), 'error:offline');` inside its check. Does the check still pass?
 
 The kind check determines which payload exists. A failure result cannot accidentally be read as if it contained the success value.
 
@@ -35,13 +35,13 @@ assert.equal(formatResult({ kind: 'success', value: 7 }), 'value:7');
 assert.equal(formatResult({ kind: 'failure', message: 'offline' }), 'error:offline');
 ```
 
-**Expected:** The changed run fails with an `AssertionError` at `assert.equal(formatResult({ kind: 'failure', message: 'offline!' }), 'error:offline');`. Restoring `assert.equal(formatResult({ kind: 'failure', message: 'offline' }), 'error:offline');` brings back: `value:7` and `error:offline`.
+**Expected:** The edited run fails with an `AssertionError` at `assert.equal(formatResult({ kind: 'failure', message: 'offline!' }), 'error:offline');`. Restoring `assert.equal(formatResult({ kind: 'failure', message: 'offline' }), 'error:offline');` brings back: `value:7` and `error:offline`.
 
-**Verify:** Compare your written prediction with the reported `AssertionError`, including its actual and expected values, and explain why the edited check rejects the values that `assert.equal(formatResult({ kind: 'failure', message: 'offline' }), 'error:offline')` accepts. After restoring the line, the program prints its `{"checks":1,"status":"passed"}` receipt again.
+**Verify:** Compare the reported actual and expected values with your prediction, then restore `assert.equal(formatResult({ kind: 'failure', message: 'offline' }), 'error:offline');`.
 
 ## Exercise 2: Preserve an empty string during narrowing: diagnose an edited check
 
-Task: A careless edit changed a check in Example B so that it reads `assert.equal(describe(undefined), 'missing!');`. Run Example B with that line, explain why the edited check now fails for the same program state, and restore it.
+Task: Example B's check was edited to read `assert.equal(describe(undefined), 'missing!');`. Run it, explain the failure and restore the original.
 
 if(value) would merge the empty-string case with absence. A guard should encode the domain distinction, not merely satisfy the checker.
 
@@ -57,7 +57,7 @@ assert.equal(describe(undefined), 'missing');
 
 **Expected:** Before the repair the run fails with an `AssertionError` at `assert.equal(describe(undefined), 'missing!');`. Restoring `assert.equal(describe(undefined), 'missing');` brings back: empty string has length 0; absent value returns missing.
 
-**Verify:** Keep the failing and the repaired runs. Explain why the edited check rejects the same program state that `assert.equal(describe(undefined), 'missing')` accepts.
+**Verify:** Keep the failing and repaired runs and name the first value that differs between them.
 
 ## Exercise 3: Reject access to another variant payload
 
@@ -78,7 +78,7 @@ assert.equal(formatResult({ kind: 'failure', message: 'bad' }), 'error:bad');
 
 **Expected:** expected compiler error on value; valid failure formatting remains unchanged.
 
-**Verify:** Keep a check equivalent to `assert.equal(formatResult({ kind: 'failure', message: 'bad' }), 'error:bad')`. As a control, change `assert.equal(formatResult({ kind: 'failure', message: 'bad' }), 'error:bad');` to `assert.equal(formatResult({ kind: 'failure', message: 'bad!' }), 'error:bad');` inside it: the run must fail with an `AssertionError`, which shows the check can fail. Restore it.
+**Verify:** Keep `assert.equal(formatResult({ kind: 'failure', message: 'bad' }), 'error:bad')`. Control: editing it to `assert.equal(formatResult({ kind: 'failure', message: 'bad!' }), 'error:bad');` must make the check fail; then restore it.
 
 ## Exercise 4: Catch an unhandled new variant at compile time
 
@@ -105,7 +105,7 @@ assert.equal(formatResult({ kind: 'success', value: 0 }), 'value:0');
 
 **Expected:** expected compiler error at assertNever for pending.
 
-**Verify:** Keep a check equivalent to `assert.equal(formatResult({ kind: 'success', value: 0 }), 'value:0')`. As a control, change `assert.equal(formatResult({ kind: 'success', value: 0 }), 'value:0');` to `assert.equal(formatResult({ kind: 'success', value: 1 }), 'value:0');` inside it: the run must fail with an `AssertionError`, which shows the check can fail. Restore it.
+**Verify:** Keep `assert.equal(formatResult({ kind: 'success', value: 0 }), 'value:0')`. Control: editing it to `assert.equal(formatResult({ kind: 'success', value: 1 }), 'value:0');` must make the check fail; then restore it.
 
 ## Exercise 5: Use an honest unknown-value predicate
 
@@ -131,7 +131,7 @@ for (const value of [null, [], { value: '2' }, { value: NaN }])
 
 **Expected:** valid record accepted; null, arrays and string-valued records rejected.
 
-**Verify:** Keep a check equivalent to `assert.equal(hasFiniteValue({ value: 2 }), true)`. As a control, change `&& 'value' in value && typeof value.value === 'number' && Number.isFinite(value.value);` to `&& 'value' in value && typeof value.value !== 'number' && Number.isFinite(value.value);`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
+**Verify:** Keep `assert.equal(hasFiniteValue({ value: 2 }), true)`. Control: changing `&& 'value' in value && typeof value.value === 'number' && Number.isFinite(value.value);` to `&& 'value' in value && typeof value.value !== 'number' && Number.isFinite(value.value);` must make that check fail; then restore it.
 
 ## Exercise 6: Expose the runtime limit of an asserted union
 
@@ -146,8 +146,8 @@ assert.throws(() => formatResult(malformed as Result), /unhandled variant/u);
 
 **Expected:** runtime fallback throws rather than fabricating success.
 
-**Verify:** Keep a check equivalent to `assert.throws(() => formatResult(malformed as Result), /unhandled variant/u)` and confirm that the reference still passes. Then name an input that would make it fail and explain which value changes.
+**Verify:** Keep the check `assert.throws(() => formatResult(malformed as Result), /unhandled variant/u)`; name an input that would make it fail and the value that changes.
 
 ## After comparison
 
-Return to your saved implementation and repeat a case with different values. Keep compiler diagnostics, process output and browser observations separate. Do not suppress a failing assertion or use a type assertion to declare an unvalidated value safe. Resource-owning examples must finish cleanup even when work fails. Describe each result with its actual host and fixture scope rather than as production acceptance.
+Fresh case: add `{ kind: 'retrying'; attempt: number }` to the result union. Predict every place the compiler now flags, update the formatter, and write a type guard that accepts the new variant from `unknown` input. ([After comparing](../STUDY-GUIDE.md#after-comparing-with-the-solution).)

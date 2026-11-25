@@ -36,5 +36,7 @@
       "wrong": "Treating a clean Rscript exit as proof that the figure works for students. The script can pass while labels overlap or the image fails to load in the classroom.",
       "verify": "Running the reference prints r-051 reference checks passed, and a separate browser screenshot shows the labels readable."
     }
-  ]
+  ],
+  "run_note": "The starter holds five points with x from 0 to 4 and y equal to twice x, and an empty results list. Run it and confirm the rule by eye in the printed frame before drawing. When you set limits of 0 to 4 and 0 to 8, also set `xaxs` and `yaxs` to \"i\", or base graphics pads each axis and `par(\"usr\")` will not report the limits you asked for.",
+  "checks_note": "The assertions confirm that the plot region spans exactly 0 to 4 and 0 to 8 and that every y equals twice x, that rows reordered by time give values 10, 20 and 30 in order before a line is drawn, that the owned temporary file starts with the eight byte PNG signature and is not empty, and that the file no longer exists after cleanup. They do not show that a viewer can read the labels."
 }

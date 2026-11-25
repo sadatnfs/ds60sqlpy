@@ -1,22 +1,26 @@
 # spark-032: Event time, watermarks and late-data policy
 
-Authored paired Scala/PySpark teaching content. The default fixtures are tiny, local and deterministic. Runtime acceptance, logical correctness and learner understanding remain separate evidence.
+Seven events arrive in four files, and their timestamps do not arrive in order. Five-minute windows with a five-minute watermark decide which late events still count: an event two minutes behind is accepted, one that arrives after its window has been finalized is dropped, and a final advancing event shows exactly when results become visible.
 
 ## Level and prerequisites
 
-Advanced; approximately 120 minutes. Direct prerequisites: `spark-031`. The prepared baseline is Spark 4.3.0, Scala binary 2.13, JDK 17 and Python 3.12. Read the [execution baseline](../execution-baseline.md).
+Advanced; approximately 120 minutes. Direct prerequisites: `spark-031`. Pinned versions: [execution baseline](../execution-baseline.md).
 
 ## How to run this lesson
 
-Open `spark-032` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile, save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`; Python stages as `main.py` with a main guard. Each program creates its own `local[2]` session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.
+Shared run steps and profile rules: [study guide](../STUDY-GUIDE.md#run-a-paired-lesson).
 
-The [Scala learner](../lessons/spark-032.scala) and [PySpark learner](../lessons/spark-032.py) run two complete demonstrations and retain six explicit task stubs. Use the [explained solutions](../solutions/spark-032_solutions.md) only after an attempt or an explicit worked comparison; the [Scala reference](../solutions/spark-032_solution.scala) and [PySpark reference](../solutions/spark-032_solution.py) contain complete assertions. A bounded collect is used only for the declared tiny fixture; do not copy it onto an unbounded or large production table.
+Learner pads: [Scala](../lessons/spark-032.scala) and [PySpark](../lessons/spark-032.py).
+
+Open the [explained solutions](../solutions/spark-032_solutions.md) after an attempt.
+
+The first worked example adds the amounts of IDs 1, 2 and 3, which all fall in the 00:00 window, and prints `Retained out-of-order event contributes to 35, not 30`. The second subtracts five minutes from the 00:30 advancer and prints `Five-minute delay is event-time arithmetic; actual watermark still needs a receipt`, a reminder that the arithmetic is a prediction and the progress report is the evidence.
 
 ## Learning objectives
 
 - State what a watermark does and test a declared late-event policy with controlled event-time progression.
-- State the input and output grain, schema, NULL policy and ordering before executing a transformation.
-- Compare each language implementation with independent literal expectations, not only with the other implementation.
+- Attach the watermark to `event_time` before grouping into five-minute windows, then record the watermark reported in streaming progress after each phase instead of assuming when it moves.
+- Show that an append-mode file sink emits a window only after the watermark passes its end, count the far-late row through `numRowsDroppedByWatermark`, and confirm that update mode on a file sink and an unwatermarked append aggregate both raise `AnalysisException`.
 
 ## Vocabulary and concepts
 
@@ -54,7 +58,7 @@ All queries have bounded awaits and stop in finally. Checkpoint schema, source p
 
 ## Supplied local fixture
 
-The complete source creates the owned local session described above, then constructs this explicit fixture. The worked examples below run in that same main function; there is no hidden notebook state.
+File 0 holds team A at 00:01 (10) and 00:04 (20). File 1 brings an out-of-order A at 00:03 (5) and an A at 00:12 (30). File 2 brings a far-late A at 00:02 with amount 999 and a B at 00:13 (7). File 3 holds one `__advance__` event at 00:30 with amount 0. Each file is published through `staging`, and every phase is an `AvailableNow` run into the same Parquet sink and checkpoint.
 
 ```scala
 import org.apache.spark.sql.functions._
@@ -218,11 +222,14 @@ Do not translate watermark delay into a wall-clock sleep deadline. Do not assume
 
 ## Self-check
 
-Explain the contract of `windowed` / `windowed` without reading its solution. Then, from memory, state what Exercise 6 (Verify output-mode and sink eligibility through explicit failures) must produce: Both configurations raise `AnalysisException`; no active query remains. The valid windowed append sink stays intact. Say which part of that result is evidence and what it still cannot show. Name the action in your trace that actually runs the plan.
+- After the second phase the sink holds only `(00:00, A, 3, 35)`, even though ID 4 at 00:12 has also been read. Why is the 00:10 window not in the sink yet?
+- ID 5 at 00:02 carries amount 999. Which watermark value makes it too late, and which progress field shows that it was dropped rather than silently lost?
+- The final watermark is at least 00:25. Which windows does that finalize, and why does the 00:30 advancer window stay pending?
+- The ledger is `(7, 1, 5)`. Explain each number, and why the finalized record count is 5 rather than 6.
 
 ## Next step
 
-Use the [course route](../README.md) to continue. Paired-language agreement is useful only when both outputs also satisfy the independent fixture contract. A successful local run is not evidence of cluster performance or production recovery.
+Go on to [spark-033: Stateful deduplication and event identity](spark-033.md). Watermarks bounded how long window state is kept; the next lesson uses the same bound to decide how long Spark remembers event IDs when it drops repeated deliveries.
 
 ## Primary sources and official APIs
 

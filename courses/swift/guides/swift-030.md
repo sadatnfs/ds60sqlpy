@@ -24,9 +24,9 @@ Use cancellation checks before admitting expensive work and at meaningful loop b
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles the saved pad as `main.swift` with Swift 6 language checking. An explicit `@main` type contains `static func main() async throws`; the fixed compiler uses `-parse-as-library -swift-version 6`. The examples use the standard library and portable Foundation. `precondition` makes a violated invariant fail the process. The fixed pad accepts one source file, without arbitrary command arguments, interactive input or dependency installation. SwiftUI, UIKit, Apple simulators and application signing belong to the separately prepared macOS/Xcode project labs, never the Linux pad.
+Example A's task loops until it observes cancellation, so if the `task.cancel()` line is removed the program never finishes; run that experiment only with a timeout in mind. Example B is deterministic because its body ignores cancellation. Task 4 is about a remote write whose result is unknown, so describe it in prose rather than code.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Compile contract, starter stop and success marker: [running a lesson](../STUDY-GUIDE.md#running-a-lesson).
 
 
 
@@ -34,7 +34,7 @@ Start with the answer-free learner artifact in your saved classroom pad. It deli
 
 Task.isCancelled inspects state and Task.checkCancellation throws CancellationError. A task handle can be cancelled and then awaited to observe its actual completion. Cancellation handlers require careful sendable state ownership.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+Each example ends with a trace; method: [tracing a program](../STUDY-GUIDE.md#tracing-a-program).
 
 ## Worked example / walkthrough
 
@@ -67,6 +67,8 @@ struct LessonMain {
 
 **Observe:** The task acknowledges cancellation and its completion is awaited.
 
+**Trace.** `Task { ... }` starts unstructured work whose body loops while `Task.isCancelled` is false, yielding on each pass. The parent immediately calls `task.cancel()`, which sets the flag; it does not stop the task. Whenever the body next checks, the loop ends. `Task.checkCancellation()` then throws `CancellationError`, the matching catch returns true, and `await task.value` delivers that acknowledgment to the parent, whose check passes. Cancellation here is cooperative: the task decided how to respond.
+
 ### Example B: Cancellation need not prevent a result
 
 A cancellation request alone is not proof that an operation failed to execute.
@@ -90,6 +92,8 @@ struct LessonMain {
 
 **Observe:** This task still returns 9 because its body does not check cancellation.
 
+**Trace.** This task's body returns 9 and never checks cancellation. The parent cancels it, perhaps before the body even starts, but the flag only matters to code that reads it. The body runs anyway and returns 9, and `await task.value` delivers 9. So the effect of a cancellation request on a given operation can be anything from immediate acknowledgment to no effect at all, depending on what the operation checks.
+
 ## Exercises
 
 1. **Predict and explain.** Separate cancellation request from acknowledged completion.
@@ -104,13 +108,15 @@ struct LessonMain {
 
 6. **Transfer and justify.** Design a receipt distinguishing success, confirmed cancellation and unknown outcome.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Log each task in the [evidence table](../STUDY-GUIDE.md#recording-exercise-evidence) before opening the explanation.
 
 ## Common pitfalls and diagnosis
 
 Polling cancellation in a tight CPU loop without yielding can waste resources. A cancellation handler must not race unsafely with the operation. Preserve result identity when deciding whether replay is safe.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+Task 4's mistake is resending a payment because the caller stopped waiting. A cancelled waiter does not tell you whether the server applied the first write. The counterexample is a write that was applied and whose reply was lost: a blind retry applies it twice. A receipt with a stable operation identity, as in swift-032, makes the retry safe to check rather than repeat.
+
+Repair routine: [building a regression case](../STUDY-GUIDE.md#building-a-regression-case).
 
 ## Progressive hints
 
@@ -120,11 +126,15 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 ## Self-check and next step
 
-Explain Cooperative cancellation, CancellationError, Operation outcome without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+Explain the difference between requesting cancellation and observing it. Name two ways a task body can notice cancellation. For task 5, predict the result when a task is cancelled after it has already returned a value. List the three states an operation receipt needs and why unknown must be one of them.
+
+Then follow the general [self-check routine](../STUDY-GUIDE.md#self-check-routine) and save your pad.
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://docs.swift.org/swift-book/documentation/the-swift-programming-language/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+[Documentation](https://docs.swift.org/swift-book/documentation/the-swift-programming-language/): Cooperative cancellation is explained in the book's Concurrency chapter; the standard library documents `Task.isCancelled`, `checkCancellation()` and `CancellationError`.
+
+Provenance and limits: [sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

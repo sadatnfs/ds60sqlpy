@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/r/solutions/r-012_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="r-012-reference-reasoning">r-012: reference reasoning<a class="heading-anchor" href="#r-012-reference-reasoning" aria-label="Link to this section">#</a></h2>
-<p>Use the <a href="r-012_reference.R.html">complete reference</a> with the guide&#x27;s declared inputs and runtime. Every worked example is also a standalone script.</p>
+<p>Run the <a href="r-012_reference.R.html">complete reference</a> under the <a href="../STUDY-GUIDE.md.html#run-a-chapter">run rules</a>.</p>
 <h3 id="why-the-implementation-has-this-shape">Why the implementation has this shape<a class="heading-anchor" href="#why-the-implementation-has-this-shape" aria-label="Link to this section">#</a></h3>
 <p>The default and explicit-rate calls share one declared policy. The amount vector is allowed to vary in length, while the rate is scalar.</p>
 <p>The result is a structured object, so downstream code can use its fields without parsing console text.</p>
@@ -242,7 +242,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Tempting mistake:</strong> Rerunning only tests that pass rate explicitly. They never exercise the default, so all of them stay green while every default caller changes.</p>
 <p><strong>Verify:</strong> The reference check <code>after_fee(50, rate = 0.2) != after_fee(50)</code> returns TRUE today; with a default of 0.2 it would return FALSE and stop.</p>
 <h3 id="what-the-checks-establish">What the checks establish<a class="heading-anchor" href="#what-the-checks-establish" aria-label="Link to this section">#</a></h3>
-<p>The reference makes 5 <code>stopifnot()</code> checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.</p></article>
+<p>The checks pin <code>after_fee(50)</code> at 45 with the default rate and 50 at rate 0, a summary list of count 2L and total 6, a rejected invalid rate, an empty input returning <code>numeric(0)</code>, a changed rate producing a different result, and a rejected non-numeric amount. They cannot show that the default rate is the right business rule, only that the function honors it.</p>
+<p>The reference makes 5 <code>stopifnot()</code> checks; see <a href="../STUDY-GUIDE.md.html#what-a-passing-run-proves">what a passing run proves</a>.</p></article>
   </main>
 </body>
 </html>

@@ -2,67 +2,28 @@
 
 ## How to run this lesson
 
-Start the Linux-container engine and run `./classroom` from the repository
-root. On Windows, use Ubuntu in WSL 2 or the thin
-`START_DOCKER_CLASSROOM.cmd` wrapper. Choose **PostgreSQL** on the shared
-`/classroom` home, then open **sql-37**. The
-[launcher guide](../../../docs/one-command-classroom.md) covers first preparation, strict resume and
-the saved project selection. No host Python or PostgreSQL installation is
-required for this browser route.
+Start `./classroom`, pick **sql-37** and run **Whole SQL lesson (psql)**.
+The learner file creates `big_events` with a January and a February 2025
+partition, loads 1,000 rows, prints two plans and then rolls back, so no
+partition survives the run. Your editable copy lives at
+`.learning/sql/sql-37/lesson/workspace/sql/postgres-60day/day37_partitioning_sharding.sql`
+and connects to `advanced_sql_training`. Launch details are in
+[Run a lesson in the classroom](../../STUDY-GUIDE.md#run-a-lesson-in-the-classroom).
 
-1. Read the prerequisite and fixture notes before running the file. Use only
-   the local disposable `advanced_sql_training` database.
-2. Choose **Whole SQL lesson (psql)** for the cataloged learner script. This
-   preserves the lesson's reviewed psql directives, relative includes and
-   transaction behavior. **SQL snippet** is appropriate for ordinary SQL
-   statements, but is not a replacement for an entire script's setup.
-3. The **Course database** panel above the code shows whether the course
-   training tables are loaded. Missing tables load automatically before your
-   first run (or choose **Load course tables**) and stay loaded for later
-   lessons. **Reset training data** restores the original rows only when your
-   own changes made results differ; it keeps your saved code and notes.
-4. Edit the learner copy in the classroom and save your prediction before
-   running. Its whole-script workspace is
-   `.learning/sql/sql-37/lesson/workspace/sql/postgres-60day/day37_partitioning_sharding.sql`.
-   For browser work this path is inside the Docker learning volume, not a
-   newly created host folder beside your checkout. The checked-in source
-   remains the answer-free starting artifact.
-5. Run the whole script and inspect the full transcript. The runner uses
-   `psql -X -v ON_ERROR_STOP=1 -f`. SELECT output has columns, rows and a row
-   count; DDL/DML has command tags; intentional checks may produce NOTICE
-   messages. An unexpected ERROR or nonzero exit is a failure to diagnose,
-   even when an earlier query printed plausible values.
-6. Verify the lesson's expected grain, ordering, constraints and declared
-   transaction or cleanup outcome. Keep required ROLLBACK statements.
-   The warehouse sequence and other explicitly stateful exercises explain
-   when state is committed. Read saved output without rerunning it when
-   reviewing an earlier attempt.
-
-If a relation is missing, inspect the lesson's required fixture and predecessor
-rather than guessing a new table definition. If authentication or runtime
-readiness fails, use `./classroom status` and the setup guide. Keep credentials
-out of SQL, notebooks, screenshots and committed files. Repair the first error
-before trusting partial output, and reveal separate solutions only when you
-want to compare after an attempt.
+Nothing in this lesson reads the course tables; the fixture is built
+inside the transaction. If `CREATE TABLE big_events` fails because the name
+already exists, an earlier run committed by mistake, so drop that table
+before trusting any plan.
 
 ### Optional contributor notebook route
 
-For notebook work, deliberately prepare the Linux/WSL contributor environment
-from [CONTRIBUTING.md](../../../CONTRIBUTING.md), including a compatible psql client and
-the notebook dependencies. Generate this lesson's private workspace through
-the maintained CLI:
+A notebook is handy for editing one bound and replanning without rerunning
+the load
+([notebook setup](../../STUDY-GUIDE.md#optional-contributor-notebook-route)):
 
 ```sh
 uv run --no-sync python scripts/course.py sql notebook sql-37
 ```
-
-Open the printed notebook path in that environment's JupyterLab. It uses the
-same catalog-derived learner-copy layout in that contributor checkout and
-executes the complete script through psql. Its host-side state is separate
-from the Docker browser's named volume. Follow
-[guided SQL notebooks](../../../docs/guided-sql-notebooks.md) for explicit local connection
-selection and kernel setup. Notebook generation does not execute SQL or
-authorize a reset.
 
 ## Level and prerequisites
 
@@ -74,27 +35,27 @@ authorize a reset.
 
 ## A beginner's mental model for this lesson
 
-A **table** stores facts in named columns. A **row** is one occurrence at the
-table's declared grain. A query creates a temporary **result set**: rows printed
-on screen are not automatically stored. The key vocabulary for this lesson is Partition bound, Partition pruning, Sharding. Its worked SQL reads or creates `big_events`, `big_events_2025_01`, `big_events_2025_02`.
+A partitioned table such as `big_events` holds no rows itself. It is a
+router: every insert is sent to the one child table whose bound contains
+the row's `event_time`, and every query is answered by the children the
+planner keeps. The children are ordinary tables, so you can count them
+directly or ask any row where it lives with `tableoid::regclass`.
 
-Before writing a query, complete this sentence: “One output row represents
-___.” Joins can multiply rows, filters can remove them, grouping can collapse
-many rows into one, and window functions can add calculations while preserving
-row count. For a normal analytical `SELECT`, use this logical reading order:
-`FROM`/`JOIN` (including `ON`) → `WHERE` → `GROUP BY`/aggregates → `HAVING` →
-window calculations → `SELECT` → `ORDER BY` → `LIMIT`. PostgreSQL may execute a
-different physical plan while preserving those semantics.
+The learner load steps forward 83 minutes per row from midnight on
+January 1, which places 537 rows in `big_events_2025_01` and 463 in
+`big_events_2025_02`; the last one lands on February 27 at 15:20 UTC. The
+two planned counts differ only in their upper bound. Mid-January to
+mid-February crosses the partition line and returns 538. Stopping on
+January 20 keeps the range inside one child and returns 87.
 
-The worked walkthrough's lesson-specific task is: Map the January and February bounds on a timeline, then plan a January-15-to-February-15 query. Both partitions are required. Change the range to a January-only half-open interval and inspect `EXPLAIN` to prove February is pruned rather than assuming it.
-The learner script loads 1,000 rows, 537 in January and 463 in February, then
-plans two counts. The first worked example spans both months, so neither
-partition can be pruned; the second stays inside January, so the plan reads
-only the January partition.
+A **partition bound** decides placement, and **partition pruning** is the
+planner reading those bounds against your `WHERE` clause. Pruning needs
+the raw key: `WHERE date_trunc('month', event_time) = '2025-01-01'` still
+scans both children, because the planner cannot invert the function to
+compare it with a bound. Rewrite it as a half-open range on `event_time`
+and February disappears from the plan.
 
 ## Two worked SQL examples
-
-These worked excerpts come from `sql/postgres-60day/day37_partitioning_sharding.sql`. Use **Whole SQL lesson (psql)** in the unified classroom for the complete file, including its fixture and transaction context. The optional contributor notebook and prepared `psql` routes are described above.
 
 ### Example 1: a range that needs both partitions
 
@@ -235,7 +196,12 @@ query.
 
 ## Practice map
 
-Use the numbered **Exercises** section above as the single authoritative practice contract. Its prompts, expected shapes, and verification checks map one-for-one to the learner SQL and both solution companions.
+The exercises switch to a second table, `solution_events`, so your
+answers never collide with the demo. Its loader steps 47 minutes per row
+over a 120-day window and wraps once after about row 3,676, so January ends
+up with 1,899 rows while March has 950 and April 919. Expect lopsided
+months, and use the March count of 950 as your anchor across the first
+three prompts.
 
 ## Pitfalls and validation
 
@@ -262,9 +228,11 @@ also needs monitoring so unexpected dates do not accumulate unnoticed.
 
 ## Ask an AI tutor about this lesson
 
-An AI tutor is optional; the guide, learner SQL, PostgreSQL, and expected checks are
-enough to complete the lesson offline. If you want a patient tutor, copy this
-prompt after opening the repository in the AI tutor:
+A tutor can hand you a date range and ask which partitions it needs
+before you plan it, or pose a bound such as midnight on March 1 and ask
+which child gets it. Set one up with the
+[AI tutor notes](../../STUDY-GUIDE.md#use-an-ai-tutor-optional) and paste
+this prompt:
 
 ```text
 Tutor me through sql-37: Partitioning and Sharding.

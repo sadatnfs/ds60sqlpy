@@ -1,6 +1,6 @@
 # js-018: explanatory solutions
 
-Use these answers after an attempt or an explicit reveal. The reference uses the same literal fixtures as the guide and keeps the exercises in separate scopes. A successful run checks these examples; explaining a changed input is a separate learning goal.
+Open these after your own attempt; each exercise runs in its own scope in the reference.
 
 ## Mechanism review
 
@@ -24,7 +24,7 @@ process.argv.slice(2) exposes user arguments after the executable and script pat
 
 ## Exercise 1: Aggregate valid rows through a real child process: change one input
 
-Task: Copy Example A into a scratch `main.mjs` and change `{ id: 'A', quantity: 2, priceCents: 125 },` to `{ id: 'A', quantity: 3, priceCents: 125 },`. Before running it, predict which check fails and which value it now sees; then run it and restore the original line.
+Task: In a scratch copy of Example A, change `{ id: 'A', quantity: 2, priceCents: 125 },` to `{ id: 'A', quantity: 3, priceCents: 125 },`. Which check fails, and what value does it see?
 
 The check uses the actual process contract, not a direct call to an internal aggregate function. Exact separation of result data and diagnostics makes the tool composable with another program.
 
@@ -44,13 +44,13 @@ assert.equal(result.stderr, '');
 assert.equal(result.stdout.trim().split('\n').length, 1);
 ```
 
-**Expected:** The changed run fails with an `AssertionError` at `assert.deepEqual(JSON.parse(result.stdout), { rows: 2, totalCents: 550 })`. Restoring `{ id: 'A', quantity: 2, priceCents: 125 },` brings back: exit 0; stdout is exactly one JSON result with 2 rows and 550 cents; stderr empty.
+**Expected:** The edited run fails with an `AssertionError` at `assert.deepEqual(JSON.parse(result.stdout), { rows: 2, totalCents: 550 })`. Restoring `{ id: 'A', quantity: 2, priceCents: 125 },` brings back: exit 0; stdout is exactly one JSON result with 2 rows and 550 cents; stderr empty.
 
-**Verify:** Compare your written prediction with the reported `AssertionError`, including its actual and expected values, and name the value that made `assert.deepEqual(JSON.parse(result.stdout), { rows: 2, totalCents: 550 })` fail. After restoring the line, the program prints its `{"checks":1,"status":"passed"}` receipt again.
+**Verify:** Compare the reported actual and expected values with your prediction, then restore `{ id: 'A', quantity: 2, priceCents: 125 },`.
 
 ## Exercise 2: Reject unknown arguments before consuming data: diagnose an edited check
 
-Task: A careless edit changed a check in Example B so that it reads `assert.equal(result.status, 3);`. Run Example B with that line, explain why the edited check now fails for the same program state, and restore it.
+Task: Example B's check was edited to read `assert.equal(result.status, 3);`. Run it, explain the failure and restore the original.
 
 A strict argument contract catches misspellings. Silently ignoring an unknown option can make a caller believe an important behavior was enabled when it was not.
 
@@ -65,7 +65,7 @@ assert.match(result.stderr, /usage/u);
 
 **Expected:** Before the repair the run fails with an `AssertionError` at `assert.equal(result.status, 3);`. Restoring `assert.equal(result.status, 2);` brings back: exit 2; stdout empty; stderr includes usage.
 
-**Verify:** Keep the failing and the repaired runs. Explain why the edited check rejects the same program state that `assert.equal(result.status, 2)` accepts.
+**Verify:** Keep the failing and repaired runs and name the first value that differs between them.
 
 ## Exercise 3: Report the first invalid row without a partial result
 
@@ -82,7 +82,7 @@ assert.match(result.stderr, /line 2/u);
 
 **Expected:** exit 2; stdout empty; stderr identifies line 2.
 
-**Verify:** Keep a check equivalent to `assert.match(result.stderr, /line 2/u)`. As a control, change `const result = await runCli(['--sum'], '{"id":"A","quantity":1,"priceCents":5}\n{broken');` to `const result = await runCli(['--sum!'], '{"id":"A","quantity":1,"priceCents":5}\n{broken');`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
+**Verify:** Keep `assert.match(result.stderr, /line 2/u)`. Control: changing `const result = await runCli(['--sum'], '{"id":"A","quantity":1,"priceCents":5}\n{broken');` to `const result = await runCli(['--sum!'], '{"id":"A","quantity":1,"priceCents":5}\n{broken');` must make that check fail; then restore it.
 
 ## Exercise 4: Reject duplicate business identifiers
 
@@ -100,7 +100,7 @@ assert.match(result.stderr, /duplicate id/u);
 
 **Expected:** exit 2 with duplicate id diagnostic.
 
-**Verify:** Keep a check equivalent to `assert.match(result.stderr, /duplicate id/u)`. As a control, change `const result = await runCli(['--sum'], row + '\n' + row);` to `const result = await runCli(['--sum'], row - '\n' + row);`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
+**Verify:** Keep `assert.match(result.stderr, /duplicate id/u)`. Control: changing `const result = await runCli(['--sum'], row + '\n' + row);` to `const result = await runCli(['--sum'], row - '\n' + row);` must make that check fail; then restore it.
 
 ## Exercise 5: Define empty input deliberately
 
@@ -116,7 +116,7 @@ assert.deepEqual(JSON.parse(result.stdout), { rows: 0, totalCents: 0 });
 
 **Expected:** exit 0 with rows 0 and totalCents 0.
 
-**Verify:** Keep a check equivalent to `assert.equal(result.status, 0, result.stderr)`. As a control, change `const result = await runCli(['--sum'], '\n \n');` to `const result = await runCli(['--sum!'], '\n \n');`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
+**Verify:** Keep `assert.equal(result.status, 0, result.stderr)`. Control: changing `const result = await runCli(['--sum'], '\n \n');` to `const result = await runCli(['--sum!'], '\n \n');` must make that check fail; then restore it.
 
 ## Exercise 6: Enforce an input budget before retaining all data
 
@@ -133,8 +133,8 @@ assert.match(result.stderr, /input limit/u);
 
 **Expected:** exit 2 with input limit diagnostic; stdout empty.
 
-**Verify:** Keep a check equivalent to `assert.match(result.stderr, /input limit/u)`. As a control, change `const result = await runCli(['--sum'], 'x'.repeat(4097));` to `const result = await runCli(['--sum!'], 'x'.repeat(4097));`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
+**Verify:** Keep `assert.match(result.stderr, /input limit/u)`. Control: changing `const result = await runCli(['--sum'], 'x'.repeat(4097));` to `const result = await runCli(['--sum!'], 'x'.repeat(4097));` must make that check fail; then restore it.
 
 ## After comparison
 
-Return to your saved implementation and repeat a case with different values. Keep compiler diagnostics, process output and browser observations separate. Do not suppress a failing assertion or use a type assertion to declare an unvalidated value safe. Resource-owning examples must finish cleanup even when work fails. Describe each result with its actual host and fixture scope rather than as production acceptance.
+Fresh case: add a `--currency` option that accepts only `USD` or `EUR`. Predict the exit code and channel contents for `--currency GBP`, for a flag with no value and for a valid one-row run. ([After comparing](../STUDY-GUIDE.md#after-comparing-with-the-solution).)

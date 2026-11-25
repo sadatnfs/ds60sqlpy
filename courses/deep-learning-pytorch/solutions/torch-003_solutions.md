@@ -2,6 +2,8 @@
 
 Open these answers only after attempting Linear modules, parameters and matrix contracts yourself. They reuse the guide's literal inputs, starting from Example A, Calculate a known affine layer, so a discrepancy points at one step. The executable companion runs the assertions; this page explains why each one tests Affine map, Parameter registration, Weight layout. After a pass, choose a new input for exercise 6, Reject wrong feature width, without looking.
 
+After comparing, follow the [review steps](../STUDY-GUIDE.md#after-the-solutions).
+
 ## Mechanism review
 
 A linear layer computes an affine transformation from input features to output features. For a batch X shaped (B, I), PyTorch nn.Linear(I, O) stores weight shaped (O, I) and computes X@weight.T+bias. This storage orientation differs from the common mathematical W shaped (I, O) and from a Keras Dense kernel. The batch axis is not part of the parameter shape. Bias has one value per output feature and is shared across observations.
@@ -153,6 +155,3 @@ else:
 
 **Verify:** In a fresh process, the exercise checks confirm `layer(torch.ones((1, 2), dtype=torch.float64))` raises `RuntimeError`.
 
-## Review after comparison
-
-Repeat exercise 4, Remove the intercept explicitly, with one changed fixture value and predict the difference before running it. Keep your failing attempt at exercise 5, Expose an unregistered tensor, beside the repaired result. A missing framework is not a failing assertion. These solutions use only local fixtures.

@@ -1,6 +1,8 @@
 # rust-045: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [rust-045_solution.rs](rust-045_solution.rs). It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.
+Executable reference: [rust-045_solution.rs](rust-045_solution.rs), which runs both examples and the coded answers.
+
+Open this only after [an attempt](../STUDY-GUIDE.md#attempt-a-lesson).
 
 ## Why the two examples differ
 
@@ -26,7 +28,7 @@ Trace chunk sizes and cumulative row counts.
 
 Change the chunk size without changing the final result.
 
-**Reference answer.** The same statements run as the `Task 2` block of the reference program; here they are wrapped in `main` as a complete file.
+**Reference answer**, wrapped in `main`; the reference runs it as its `Task 2` block.
 
 ```rust
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -61,7 +63,7 @@ Chunk size changes how many steps run and how large each step is, never which va
 
 Apply the same accounting to an Arrow batch reader.
 
-**Reference answer.** The same statements run as the `Task 3` block of the reference program; here they are wrapped in `main` as a complete file.
+**Reference answer**, wrapped in `main`; the reference runs it as its `Task 3` block.
 
 ```rust
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -108,7 +110,7 @@ Diagnose collecting all batches before claiming bounded-memory processing.
 
 Test empty input, an all-rejected batch and a partial final batch.
 
-**Reference answer.** The same statements run as the `Task 5` block of the reference program; here they are wrapped in `main` as a complete file.
+**Reference answer**, wrapped in `main`; the reference runs it as its `Task 5` block.
 
 ```rust
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -140,7 +142,7 @@ Every case keeps rows equal to accepted plus rejected. The empty case shows the 
 
 Design cancellation and partial-output semantics for a long-running import.
 
-No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **Admission bound**, and state one limitation of your choice.
+**Judging criteria.** A strong design checks for cancellation between chunks, never inside one, so each committed chunk is complete. It states what a cancelled run leaves behind: either nothing, by writing to a temporary output that is renamed only on success, or a result marked partial with the number of rows processed. Example B's invariant, accepted plus rejected equals rows read, must hold for a partial result too. State one limitation: checking only between chunks delays cancellation by up to one chunk's processing time.
 
 ## Mechanism and diagnostic reasoning
 
@@ -154,4 +156,6 @@ Batch size alone does not bound total memory or individual value size. A partial
 
 ## Review before continuing
 
-Run the reference and confirm that it prints `rust-045: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.
+Rebuild Example B (Account for rejected rows) from a blank pad.
+
+Review routine: [Self-check and review](../STUDY-GUIDE.md#self-check-and-review).

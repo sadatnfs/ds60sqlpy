@@ -2,67 +2,21 @@
 
 ## How to run this lesson
 
-Start the Linux-container engine and run `./classroom` from the repository
-root. On Windows, use Ubuntu in WSL 2 or the thin
-`START_DOCKER_CLASSROOM.cmd` wrapper. Choose **PostgreSQL** on the shared
-`/classroom` home, then open **sql-temporal-01**. The
-[launcher guide](../../../docs/one-command-classroom.md) covers first preparation, strict resume and
-the saved project selection. No host Python or PostgreSQL installation is
-required for this browser route.
+Start **sql-temporal-01** from `./classroom` using the shared [run steps](../../STUDY-GUIDE.md#run-a-lesson-in-the-classroom).
 
-1. Read the prerequisite and fixture notes before running the file. Use only
-   the local disposable `advanced_sql_training` database.
-2. Choose **Whole SQL lesson (psql)** for the cataloged learner script. This
-   preserves the lesson's reviewed psql directives, relative includes and
-   transaction behavior. **SQL snippet** is appropriate for ordinary SQL
-   statements, but is not a replacement for an entire script's setup.
-3. The **Course database** panel above the code shows whether the course
-   training tables are loaded. Missing tables load automatically before your
-   first run (or choose **Load course tables**) and stay loaded for later
-   lessons. **Reset training data** restores the original rows only when your
-   own changes made results differ; it keeps your saved code and notes.
-4. Edit the learner copy in the classroom and save your prediction before
-   running. Its whole-script workspace is
-   `.learning/sql/sql-temporal-01/lesson/workspace/sql/professional/lessons/sql_temporal_01_domain_modelling.sql`.
-   For browser work this path is inside the Docker learning volume, not a
-   newly created host folder beside your checkout. The checked-in source
-   remains the answer-free starting artifact.
-5. Run the whole script and inspect the full transcript. The runner uses
-   `psql -X -v ON_ERROR_STOP=1 -f`. SELECT output has columns, rows and a row
-   count; DDL/DML has command tags; intentional checks may produce NOTICE
-   messages. An unexpected ERROR or nonzero exit is a failure to diagnose,
-   even when an earlier query printed plausible values.
-6. Verify the lesson's expected grain, ordering, constraints and declared
-   transaction or cleanup outcome. Keep required ROLLBACK statements.
-   The warehouse sequence and other explicitly stateful exercises explain
-   when state is committed. Read saved output without rerunning it when
-   reviewing an earlier attempt.
+Choose **Whole SQL lesson (psql)**. The script opens one transaction on
+`advanced_sql_training`, builds `pro_temporal_lab` and uses fixed timestamps,
+so its output does not depend on today's date. It records three term versions
+for customer `CUS-100`, two adjacent maintenance windows, a two-entry change
+ledger and three retained records. Four `NOTICE` lines are intended: an
+overlapping current term is rejected, and the ledger refuses an update, a
+delete and a duplicate idempotency key. The final check requires exactly one
+term for February 15 as known on March 15 and exactly 2 ledger entries;
+`ROLLBACK` then removes the schema. The script reads `pg_available_extensions`
+for `btree_gist` but never enables it. Save attempts in
+`.learning/sql/sql-temporal-01/lesson/workspace/sql/professional/lessons/sql_temporal_01_domain_modelling.sql`.
 
-If a relation is missing, inspect the lesson's required fixture and predecessor
-rather than guessing a new table definition. If authentication or runtime
-readiness fails, use `./classroom status` and the setup guide. Keep credentials
-out of SQL, notebooks, screenshots and committed files. Repair the first error
-before trusting partial output, and reveal separate solutions only when you
-want to compare after an attempt.
-
-### Optional contributor notebook route
-
-For notebook work, deliberately prepare the Linux/WSL contributor environment
-from [CONTRIBUTING.md](../../../CONTRIBUTING.md), including a compatible psql client and
-the notebook dependencies. Generate this lesson's private workspace through
-the maintained CLI:
-
-```sh
-uv run --no-sync python scripts/course.py sql notebook sql-temporal-01
-```
-
-Open the printed notebook path in that environment's JupyterLab. It uses the
-same catalog-derived learner-copy layout in that contributor checkout and
-executes the complete script through psql. Its host-side state is separate
-from the Docker browser's named volume. Follow
-[guided SQL notebooks](../../../docs/guided-sql-notebooks.md) for explicit local connection
-selection and kernel setup. Notebook generation does not execute SQL or
-authorize a reset.
+The optional notebook route starts with `uv run --no-sync python scripts/course.py sql notebook sql-temporal-01`; see the [study guide](../../STUDY-GUIDE.md#optional-contributor-notebook-route).
 
 ## Level and prerequisites
 
@@ -89,24 +43,35 @@ enables `btree_gist`.
 
 ## A beginner's mental model for this lesson
 
-A **table** stores facts in named columns. A **row** is one occurrence at the
-table's declared grain. A query creates a temporary **result set**: rows printed
-on screen are not automatically stored. The key vocabulary for this lesson is Valid time, System time, Bitemporal, As-of query, Half-open interval, Exclusion constraint. Its worked SQL reads or creates `pro_temporal_lab.customer_terms`, `pro_temporal_lab.global_maintenance_windows`, `pg_catalog.pg_available_extensions`, `pro_temporal_lab.change_ledger`, `pro_temporal_lab.retention_classes`.
+A temporal table keeps more than one version of a fact and says when each
+version applies. This lesson uses two clocks: valid time is when the rate
+applied to the customer, and system time is when the database knew it. Every
+period is half-open, `[lower, upper)`, so one period can end exactly where the
+next begins without overlapping. The vocabulary below (valid time, system time,
+bitemporal, as-of query, half-open interval, exclusion constraint) names those
+ideas.
 
-Before writing a query, complete this sentence: “One output row represents
-___.” Joins can multiply rows, filters can remove them, grouping can collapse
-many rows into one, and window functions can add calculations while preserving
-row count. For a normal analytical `SELECT`, use this logical reading order:
-`FROM`/`JOIN` (including `ON`) → `WHERE` → `GROUP BY`/aggregates → `HAVING` →
-window calculations → `SELECT` → `ORDER BY` → `LIMIT`. PostgreSQL may execute a
-different physical plan while preserving those semantics.
+One `customer_terms` row is one recorded version of one customer's rate for one
+valid period. An as-of query fixes one valid date and one system instant and
+must return at most one row for each customer; the self-check proves that for
+February 15 as known March 15. One `change_ledger` row is one appended event,
+and a correction is a new row that points at the entry it reverses. The
+retention report returns one row per retained record.
 
-The worked walkthrough's lesson-specific task is: The term-version grain is one recorded version of one customer's fact. A February-valid rate first enters the system March 1. On March 10, the old system period is closed and a corrected row begins. Querying valid February 15 as known March 5 returns 10; as known March 15 returns 12. History is appended/closed, not overwritten.
-The first runnable example has a concrete contract: Example 1 must print the expected DDL command tag for `pro_temporal_lab.customer_terms`. Verify the object in `pg_catalog.pg_class`, run one accepted behavior and one rejected boundary behavior, and confirm the lesson rollback/cleanup removes only course-owned state.
+`CUS-100` starts at a rate of 10 for January through March, recorded March 1.
+On March 10 the system period of that row is closed and a corrected row at 12
+is appended, together with a rate of 15 for April through June. So February 15
+as known on March 5 returns 10, and as known on March 15 returns 12. No row is
+overwritten: history is closed and appended. The other parts follow the same
+rule. The ledger's `credit.reversed` entry cancels `LEDGER-100` instead of
+editing it, and the retention report on March 15 marks only `REC-100` as
+eligible for review: `REC-101` is on legal hold and `REC-102` has a 365-day
+minimum.
 
 ## Two worked SQL examples
 
-These worked excerpts come from `sql/professional/lessons/sql_temporal_01_domain_modelling.sql`. Use **Whole SQL lesson (psql)** in the unified classroom for the complete file, including its fixture and transaction context. The optional contributor notebook and prepared `psql` routes are described above.
+Example 1 defines the term-version table and Example 2 records its first
+version.
 
 ### Example 1
 
@@ -121,9 +86,14 @@ CREATE TABLE pro_temporal_lab.customer_terms (
 );
 ```
 
-**How to read it:** Example 1 is data definition language (DDL). `psql` prints a command tag when PostgreSQL accepts the definition; a later catalog or behavior check must prove that the intended rule exists.
+**How to read it:** Both periods are ranges, and each `CHECK` requires a
+non-empty range with an inclusive lower bound and an exclusive upper bound, so
+every row is half-open. There is no overlap constraint here; the trigger
+`prevent_current_term_overlap` adds that rule for current rows only.
 
-**Expected result/shape:** Example 1 must print the expected DDL command tag for `pro_temporal_lab.customer_terms`. Verify the object in `pg_catalog.pg_class`, run one accepted behavior and one rejected boundary behavior, and confirm the lesson rollback/cleanup removes only course-owned state.
+**Expected result/shape:** `CREATE TABLE`. The later DO block proves the
+trigger works: a second current term for `CUS-100` that overlaps an existing
+one fails with `exclusion_violation`, reported as a `NOTICE`.
 
 ### Example 2
 
@@ -132,9 +102,13 @@ INSERT INTO pro_temporal_lab.customer_terms (customer_key, valid_period, system_
   VALUES ('CUS-100', daterange(DATE '2026-01-01', DATE '2026-04-01', '[)'), tstzrange(TIMESTAMPTZ '2026-03-01 00:00:00+00', NULL, '[)'), 10.00, 'initial import');
 ```
 
-**How to read it:** Example 2 changes rows inside the lesson's declared transaction. The command tag reports affected rows, but a follow-up query must prove the intended before/after invariant.
+**How to read it:** `daterange(..., '[)')` makes January 1 through March 31
+valid, with April 1 excluded. `tstzrange(..., NULL, '[)')` leaves the system
+period open, so the row stays current until a later correction closes it.
 
-**Expected result/shape:** Example 2 must complete through `psql` with its documented command tag or notice for `pro_temporal_lab.customer_terms`. Treat an unexpected error as failure, and prove the stated catalog/behavior invariant plus cleanup.
+**Expected result/shape:** `INSERT 0 1`. After the March 10 correction this row
+is still in the table, with its system period ending at
+`2026-03-10 00:00:00+00`.
 
 ## Learning objectives
 
@@ -306,9 +280,8 @@ professional specialization path.
 
 ## Ask an AI tutor about this lesson
 
-An AI tutor is optional; the guide, learner SQL, PostgreSQL, and expected checks are
-enough to complete the lesson offline. If you want a patient tutor, copy this
-prompt after opening the repository in the AI tutor:
+The lesson and expected observations are sufficient offline. For optional
+coaching, copy:
 
 ```text
 Tutor me through sql-temporal-01: Temporal Data and Domain Modelling.

@@ -2,24 +2,15 @@
 
 int main(void) {
   /* Exercise 1: Trace block shadowing: change one input
-     Copy worked example 1, the "trace block shadowing" case, into a scratch pad
-     and change `int value = 3;` to `int value = 4;`. Before running, predict
-     which CHECK fails and which value it sees in place of the worked result
-     (after the inner block, the outer remains 3); then run it and restore the
-     original line. Expected: With `int value = 4;` the run stops with `Check
-     failed` at the CHECK on `value == 3`, because the "trace block shadowing"
-     case no longer shows that after the inner block, the outer remains 3.
-     Restoring `int value = 3;` brings that observation back. */
+     In worked example 1, change `int value = 3;` to `int value = 4;`. Predict
+     which value the CHECK on `value == 3` sees, then run and restore. Expected:
+     `Check failed` at `value == 3`; restoring `int value = 3;` passes again. */
 
   /* Exercise 2: Retain static state: diagnose an edited check
-     A careless edit changed the CHECK in worked example 2, the "retain static
-     state" case, so that it reads `CHECK(next_count() != 2);`. Run the example
-     with that line, explain why the edited CHECK now fails even though the
-     program state still means it returns 1 and then 2, and restore it.
-     Expected: Before the repair the run stops with `Check failed` at the CHECK
-     on `next_count() == 2`. Once the line reads `CHECK(next_count() == 2);`
-     again, the "retain static state" case again shows that it returns 1 and
-     then 2. */
+     Worked example 2's CHECK now reads `CHECK(next_count() != 2);`. Explain why
+     it fails although it returns 1 and then 2, then restore it. Expected:
+     `Check failed` until the CHECK reads `CHECK(next_count() == 2);` again,
+     though it returns 1 and then 2. */
 
   /* Exercise 3: Return a static address
      Get a pointer to a static read-only value.

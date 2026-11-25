@@ -4,18 +4,15 @@
 
 Advanced; about 130 minutes, plus any optional hardware experiment. Direct prerequisites: `cuda-006`, `cuda-029`, `cuda-046`
 
-The order supports learning at your own pace. Reading and CPU reasoning remain
-available when NVIDIA hardware is absent. Advanced hardware features need their
-own capability checks and are not prerequisites for opening this chapter.
+Pacing, evidence labels and platform rules for every chapter are in the [CUDA study guide](../../STUDY-GUIDE.md).
 
 ## Learning objectives
 
 Check solver status and report residual and condition estimates to interpret the accuracy of a linear solve.
 
-Work through *cuSOLVER, conditioning and robust linear algebra* with the concrete cases below. Finish with this evidence:
-checked solver status, residual report and a numerically justified interpretation. Distinguish an algorithmic
-calculation, a compiled artifact and an actual device observation when explaining
-what your work establishes.
+**Scope:** Factorization versus explicit inversion, solver status, workspace, residuals, rank and conditioning.
+
+**Evidence to produce:** Checked solver status, residual report and a numerically justified interpretation.
 
 ## Purpose, vocabulary and mental model
 
@@ -38,28 +35,17 @@ The residual r measures equation satisfaction by the computed x-hat. Small resid
 
 ## How to run and study this lesson
 
-Use the saved reading worksheet in `/classroom`; the reading pad does not execute
-CUDA. For the bounded calculation, select **CPU model (Python)**, whose
-answer-free starter supplies the literal fixtures and task contract. The
-[CUDA C++ study workflow](../README.md) covers platforms, optional GPU
-compilation and evidence labels. In a prepared Python environment you can also
-run the separate [CPU reference](../references/cuda-049_cpu.py) from the
-repository root:
+Trace worked example 1 by hand, then run the [CPU reference](../references/cuda-049_cpu.py) from the repository root:
 
 ```sh
 python courses/cuda/cpp/references/cuda-049_cpu.py
 ```
 
-Its assertions check the stated numerical result or model invariant; console
-text is evidence of this CPU model only, not of CUDA execution.
-
 ## Worked example 1: trace the mechanism
 
 For A=\([[3,1],[1,2]]\) and b=\([9,8]\), x=\([2,3]\) gives A*x=\([9,8]\), so residual is zero in this exact fixture. This is a good first layout and status test, but it does not exercise singular or poorly conditioned problems.
 
-The complete CPU model below intentionally models only the named arithmetic,
-layout, dependency or capability decision. It does not model GPU scheduling,
-caches, instruction timing or device memory visibility.
+**Why:** x = [2, 3] gives 3 * 2 + 3 = 9 and 2 + 2 * 3 = 8, so the residual is exactly [0, 0].
 
 ```python
 A, b, x = [[3, 1], [1, 2]], [9, 8], [2, 3]
@@ -71,41 +57,37 @@ assert [rhs - value for rhs, value in zip(b, wrong)] == [1, 2]
 print({"solution": x, "residual": residual})
 ```
 
-**Expected observation:** Every assertion succeeds. A representative CPU output is:
+**Expected observation:** every assertion succeeds, and the CPU model prints:
 
 ```text
 {'solution': [2, 3], 'residual': [0, 0]}
 ```
 
-Integers, shapes and ordering must match exactly; only assertions with an explicit
-tolerance accept small floating-point differences. A printed duration is a model
-output, not a measured GPU benchmark.
+**Check:** The reference asserts residual == [0, 0]; add a nonsymmetric fixture so a layout error changes the answer.
 
 ## Worked example 2: change a meaningful condition
 
 For A=\([[1,1],[1,1.000001]]\), small changes in the second component of b can produce large changes in the two components of x. The nearly dependent rows provide little independent information. A solver returning numbers cannot remove that uncertainty; inspect conditioning and the problem specification.
 
-Before applying this example to your own program, write down which inputs are
-read, which result is produced, and the condition that makes the comparison
-valid. Keep the original case as a regression check when changing a boundary.
+**Why:** The rows are nearly parallel, so the condition number is large and tiny data changes swing x widely.
+
+**Check:** Compute the condition number and report it with the residual and the solution change under perturbation.
 
 ## Six progressive exercises
 
-Exercises 1 and 2 are guided reconstructions of the worked examples; exercises
-3-6 change an input, diagnose a defect, test a boundary and transfer the idea.
-For each one, keep the calculation, output, diagram or failure policy you
-produce so another reader can compare it with the worked cases. If the hint is
-not enough, reread the mechanism paragraph and the bounded CPU assertion.
-
 ### Exercise 1
 
-Predict and trace the first worked example before running its CPU reference. Write every intermediate quantity that leads to the stated result, including units or ownership where applicable.
+Reconstruct worked example 1 on paper before running its CPU reference. Solve A = [[3, 1], [1, 2]] against b = [9, 8] with a factorization routine, then compute b minus A times x.
+
+**Trap to avoid:** Passing the row-major A to a column-major solver solves the transpose, which here is the same symmetric matrix and hides the bug.
 
 **Hint:** Start with the literal input and intermediate quantities in worked example 1.
 
 ### Exercise 2
 
-Reconstruct the second worked example without copying its conclusion. Identify the changed input or condition, show the resulting calculation or dependency, and explain why it differs from the first example.
+Rework worked example 2 without copying its conclusion. Perturb the second entry of b slightly for A = [[1, 1], [1, 1.000001]] and compare the two solutions.
+
+**Trap to avoid:** Reporting the solver's x to many digits as if it were precise ignores that the problem itself is unstable.
 
 **Hint:** Identify exactly which condition changes in worked example 2.
 
@@ -113,11 +95,15 @@ Reconstruct the second worked example without copying its conclusion. Identify t
 
 Compute the residual for candidate x=\([2,2]\) in the first system.
 
+**Trap to avoid:** Trusting a success status from the solver call without checking the residual accepts this wrong answer.
+
 **Hint:** Use the first worked example to establish the relevant quantities, then change only the requested input.
 
 ### Exercise 4
 
 Why avoid solving by explicitly computing A inverse?
+
+**Trap to avoid:** Computing the inverse and multiplying by b adds work and amplifies error on ill-conditioned input.
 
 **Hint:** Locate the failed phase or violated dependency before proposing a repair.
 
@@ -125,35 +111,33 @@ Why avoid solving by explicitly computing A inverse?
 
 What should a singular-matrix status produce?
 
+**Trap to avoid:** Returning whatever numbers the factorization left in the buffer fabricates a solution.
+
 **Hint:** Check what the algorithm is allowed to read, write or assume at this boundary.
 
 ### Exercise 6
 
 Transfer the idea to least squares.
 
+**Trap to avoid:** Solving the normal equations by default squares the condition number.
+
 **Hint:** State the output contract and which observations are needed in the new application.
 
 ## Common mistakes and diagnosis
 
-A tempting but incorrect claim in this chapter is: **obtaining a vector from a solver proves that the original problem was well-posed. .**
-
-For the concrete failure exercise, why avoid solving by explicitly computing A inverse?
-Preserve the original input and the stage where behavior diverged, and compare
-with the CPU model before changing hardware configuration.
+A tempting but incorrect claim: **Obtaining a vector from a solver proves that the original problem was well-posed.** A solver returns numbers even when the problem is nearly singular. Check the status, compute the residual and consider conditioning: worked example 2 shows nearly dependent rows where tiny changes in b swing x widely. A small residual then does not mean an accurate x.
 
 ## Self-check, retrieval and transfer
 
-Explain the first example without its code, then use the second example to state
-one assumption that matters. Complete Exercise 3 independently, use Exercise 4 to
-diagnose a plausible defect, check the boundary in Exercise 5, and retain the
-application contract from Exercise 6. Compare the [separate explanations](../solutions/cuda-049_solutions.md)
-only after your attempt or a deliberate reveal. A reading marker records your
-choice; it does not certify hardware qualification or expert mastery.
+1. What is the residual of x = [2,3] in worked example 1?
+2. Why prefer factorization over computing the inverse?
+3. What does an ill-conditioned matrix mean for the answer?
+
+Short answers are in the [separate explanations](../solutions/cuda-049_solutions.md#self-check-answers); compare only after an attempt.
 
 ## Primary references
 
-Check the documentation that matches your prepared toolkit before optional
-hardware execution.
+Use the documentation that matches your prepared toolkit.
 
 - [cuSOLVER documentation](https://docs.nvidia.com/cuda/cusolver/index.html)
 

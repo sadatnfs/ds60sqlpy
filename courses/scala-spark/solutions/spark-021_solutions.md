@@ -1,6 +1,8 @@
 # spark-021: Explained paired reference solutions
 
-Read the [guide](../guides/spark-021.md) and attempt one language first. The [Scala reference](spark-021_solution.scala) and [PySpark reference](spark-021_solution.py) are complete single-file programs with explicit local sessions and finally-based stop. Each compares with literal expectations; matching two implementations alone would not rule out a shared mistake.
+Attempt the [guide](../guides/spark-021.md) exercises first.
+
+References: [Scala](spark-021_solution.scala), [PySpark](spark-021_solution.py).
 
 ## Exercises and reasoning
 
@@ -74,7 +76,7 @@ The check targets the file-scan field requirement, which is where pruning is obs
 
 Execute the grouped aggregate and capture its FORMATTED plan. Return group_id, n, total and locate aggregate plus Exchange operators under the fixed AQE-disabled configuration.
 
-**Expected:** Groups 0,1,2 each have n = 3 with totals 180,210,240. The plan shows aggregation and an Exchange.
+**Expected:** Groups 0, 1 and 2 each have n = 3 with totals 180, 210 and 240. The plan shows aggregation and an Exchange.
 
 ```scala
 def aggregateResult(spark: SparkSession, query: String): Seq[(Long, Long, Long)] = {
@@ -150,6 +152,7 @@ Semantic equality is established with concrete rows, and configuration is attach
 
 ## Execution and interpretation
 
-Run the complete reference in its prepared fixed worker. Its first check (Check the query meaning before its execution plan) is built inside the program, so opening the lesson fetches nothing; it expects: Nine tuples from `(3, 60)` through `(11, 220)`, with no missing or extra identities. The final success line prints only after every reference assertion passes.
+Both references check results before plans. The projection must equal the nine literal pairs `(3, 60)` through `(11, 220)`, and the grouped query must equal `(0, 3, 180)`, `(1, 3, 210)` and `(2, 3, 240)`. Only then do they search plan text: the Parsed, Analyzed and Optimized Logical Plan headings and the Physical Plan heading in EXTENDED output, an error for the unsupported mode, `id:bigint` and `amount:bigint` in `ReadSchema` with neither `unused_payload` nor `group_id`, `Filter` and `Project` operators, and `Aggregate` with `Exchange` while AQE is off. The nested query form must return the same nine rows, and the normalizer must turn `Project id#123L at <root>` into `Project id#IDL at <owned-root>`.
 
-Local plan, partition and resource evidence does not establish cluster-scale performance; session cleanup is explicit.
+The final receipt prints Spark 4.3.0 with ANSI on, AQE off and two shuffle partitions, followed by `spark-021: six PySpark reference contracts passed; Spark=` and the version (Scala prints its own matching line). Plan text is version-specific evidence, so these checks look for operators and fields rather than whole plan strings; a later Spark release may format the same plan differently without changing its meaning.
+

@@ -2,67 +2,25 @@
 
 ## How to run this lesson
 
-Start the Linux-container engine and run `./classroom` from the repository
-root. On Windows, use Ubuntu in WSL 2 or the thin
-`START_DOCKER_CLASSROOM.cmd` wrapper. Choose **PostgreSQL** on the shared
-`/classroom` home, then open **sql-23**. The
-[launcher guide](../../../docs/one-command-classroom.md) covers first preparation, strict resume and
-the saved project selection. No host Python or PostgreSQL installation is
-required for this browser route.
-
-1. Read the prerequisite and fixture notes before running the file. Use only
-   the local disposable `advanced_sql_training` database.
-2. Choose **Whole SQL lesson (psql)** for the cataloged learner script. This
-   preserves the lesson's reviewed psql directives, relative includes and
-   transaction behavior. **SQL snippet** is appropriate for ordinary SQL
-   statements, but is not a replacement for an entire script's setup.
-3. The **Course database** panel above the code shows whether the course
-   training tables are loaded. Missing tables load automatically before your
-   first run (or choose **Load course tables**) and stay loaded for later
-   lessons. **Reset training data** restores the original rows only when your
-   own changes made results differ; it keeps your saved code and notes.
-4. Edit the learner copy in the classroom and save your prediction before
-   running. Its whole-script workspace is
-   `.learning/sql/sql-23/lesson/workspace/sql/postgres-60day/day23_ctes_intro.sql`.
-   For browser work this path is inside the Docker learning volume, not a
-   newly created host folder beside your checkout. The checked-in source
-   remains the answer-free starting artifact.
-5. Run the whole script and inspect the full transcript. The runner uses
-   `psql -X -v ON_ERROR_STOP=1 -f`. SELECT output has columns, rows and a row
-   count; DDL/DML has command tags; intentional checks may produce NOTICE
-   messages. An unexpected ERROR or nonzero exit is a failure to diagnose,
-   even when an earlier query printed plausible values.
-6. Verify the lesson's expected grain, ordering, constraints and declared
-   transaction or cleanup outcome. Keep required ROLLBACK statements.
-   The warehouse sequence and other explicitly stateful exercises explain
-   when state is committed. Read saved output without rerunning it when
-   reviewing an earlier attempt.
-
-If a relation is missing, inspect the lesson's required fixture and predecessor
-rather than guessing a new table definition. If authentication or runtime
-readiness fails, use `./classroom status` and the setup guide. Keep credentials
-out of SQL, notebooks, screenshots and committed files. Repair the first error
-before trusting partial output, and reveal separate solutions only when you
-want to compare after an attempt.
+Choose **sql-23** in `./classroom` (PostgreSQL track) and press **Whole SQL
+lesson (psql)**. The classroom copies the lesson to
+`.learning/sql/sql-23/lesson/workspace/sql/postgres-60day/day23_ctes_intro.sql`
+and runs it against `advanced_sql_training`. The learner file only reads:
+both statements are the same two-stage revenue pipeline, first as rows and
+then under `EXPLAIN (COSTS OFF)`, between `BEGIN` and `ROLLBACK`. The `psql`
+transcript therefore holds one 20-row table followed by a plan tree. The
+solution's Exercise 6 is the only place this lesson writes, and it undoes its
+own update with a savepoint. Saving, resetting and launcher help live in
+[Run a lesson in the classroom](../../STUDY-GUIDE.md#run-a-lesson-in-the-classroom).
 
 ### Optional contributor notebook route
 
-For notebook work, deliberately prepare the Linux/WSL contributor environment
-from [CONTRIBUTING.md](../../../CONTRIBUTING.md), including a compatible psql client and
-the notebook dependencies. Generate this lesson's private workspace through
-the maintained CLI:
+A notebook lets you run each CTE body as its own cell before adding the next
+stage ([notebook setup](../../STUDY-GUIDE.md#optional-contributor-notebook-route)):
 
 ```sh
 uv run --no-sync python scripts/course.py sql notebook sql-23
 ```
-
-Open the printed notebook path in that environment's JupyterLab. It uses the
-same catalog-derived learner-copy layout in that contributor checkout and
-executes the complete script through psql. Its host-side state is separate
-from the Docker browser's named volume. Follow
-[guided SQL notebooks](../../../docs/guided-sql-notebooks.md) for explicit local connection
-selection and kernel setup. Notebook generation does not execute SQL or
-authorize a reset.
 
 ## Level and prerequisites
 
@@ -74,28 +32,36 @@ authorize a reset.
 
 ## A beginner's mental model for this lesson
 
-A **table** stores facts in named columns. A **row** is one occurrence at the
-table's declared grain. A query creates a temporary **result set**: rows printed
-on screen are not automatically stored. The key vocabulary for this lesson is CTE, Inlining, Materialization. Its worked SQL reads or creates `orders`, `order_items`.
+A common table expression gives a subquery a name for the length of one
+statement. `WITH order_lines AS (...)` does not create a table; it lets the
+next stage say `FROM order_lines` instead of nesting the whole aggregate in
+parentheses. The value of the name is that you can state its grain and check
+it on its own.
 
-Before writing a query, complete this sentence: “One output row represents
-___.” Joins can multiply rows, filters can remove them, grouping can collapse
-many rows into one, and window functions can add calculations while preserving
-row count. For a normal analytical `SELECT`, use this logical reading order:
-`FROM`/`JOIN` (including `ON`) → `WHERE` → `GROUP BY`/aggregates → `HAVING` →
-window calculations → `SELECT` → `ORDER BY` → `LIMIT`. PostgreSQL may execute a
-different physical plan while preserving those semantics.
+The lesson's pipeline has three stages, and each one has a different grain:
 
-The worked walkthrough's lesson-specific task is: Trace `order_lines` at one row per order, then `top_customers` at one row per customer, then the final top-N presentation. Run each CTE body independently while developing and verify its key uniqueness before adding the next stage.
-Exercise 1 expects this result: one row per ordering customer. Predict keys, row count, `NULL` behavior,
-and ordering before running. Afterwards, compare keys/counts/totals with an
-independent control. A blank string, SQL `NULL`, numeric zero, and a missing row
-are different facts; use `COALESCE` only after choosing which meaning the
-business question requires.
+- `order_lines` joins 4,362 orders to their 13,085 `order_items` rows and
+  groups back to one row per order. Every order has at least one item, so the
+  stage returns exactly 4,362 rows.
+- `top_customers` sums those order totals per customer: 438 rows, because 62
+  of the 500 customers (all of them in Brazil) never ordered.
+- The final `SELECT` sorts by lifetime revenue with `customer_id` as the tie
+  breaker and keeps 20 rows.
+
+Two separate questions apply to every CTE. The logical one: what is one row,
+and is its key unique? The physical one: does PostgreSQL compute the CTE
+separately or fold it into the outer query? Since PostgreSQL 12, a
+side-effect-free CTE referenced once is inlined, so Example 2's plan shows two
+stacked `HashAggregate` nodes and no CTE step at all. A CTE referenced twice,
+like `category_revenue` in Exercise 2, is computed once and read through
+`CTE Scan` nodes. `MATERIALIZED` and `NOT MATERIALIZED` override that default,
+and Exercise 4 shows both plans side by side.
+
+A data-modifying CTE (`UPDATE ... RETURNING` inside `WITH`) adds a third rule:
+the rest of the statement still reads the snapshot taken before the update,
+so the changed values are visible only through the `RETURNING` relation.
 
 ## Two worked SQL examples
-
-These worked excerpts come from `sql/postgres-60day/day23_ctes_intro.sql`. Use **Whole SQL lesson (psql)** in the unified classroom for the complete file, including its fixture and transaction context. The optional contributor notebook and prepared `psql` routes are described above.
 
 ### Example 1
 
@@ -132,9 +98,20 @@ ORDER BY
 LIMIT 20;
 ```
 
-**How to read it:** Example 1: Start with `orders`, and `order_items` in `FROM`/`JOIN`; let `GROUP BY` collapse rows to its grouping keys. The final `SELECT` displays `customer_id`, and `lifetime_revenue`. `ORDER BY` determines presentation order and the final `LIMIT 20` caps displayed rows. Before running, predict the row grain, row count, `NULL` positions, and first/last key; afterwards, compare each prediction with the transcript.
+**How to read it:** Read the two CTEs top to bottom, then the outer
+query. `order_lines` groups by `order_id` and `customer_id` together; including
+`customer_id` in the key is safe because each order has one customer, and it
+carries the customer forward without a second join. `top_customers` regroups
+by `customer_id` alone, which is the grain change the lesson is about. The
+outer query sorts by `lifetime_revenue DESC` and uses `tc.customer_id` to make
+ties deterministic before `LIMIT 20`.
 
-**Expected result/shape:** Example 1 returns one grouped row per `customer_id`, capped at 20 rows with columns `customer_id`, and `lifetime_revenue` from `orders`, and `order_items`. Use a direct count or grouped aggregate over those same source relations as the control; check ordering only when this query has an `ORDER BY`, and inspect `NULL` only for columns this example can produce.
+**Expected result/shape:** 20 customer rows. Customer 181 leads with
+9,502.22 from 16 orders, then customer 12 (9,244.26) and customer 25
+(9,196.96); the twentieth row is customer 259 at 8,760.17. The revenue column
+is unrounded `numeric`, so expect long decimals in the transcript. Running
+`SELECT COUNT(*) FROM order_lines` with the same CTE header should print
+4,362, and the same check on `top_customers` should print 438.
 
 ### Example 2
 
@@ -173,9 +150,19 @@ EXPLAIN (
   LIMIT 20;
 ```
 
-**How to read it:** Example 2 is executed by `psql` as part of the complete lesson. Expected notices are evidence; an unexpected error stops the script.
+**How to read it:** `EXPLAIN (COSTS OFF)` prints the plan for the
+Example 1 query without running it or showing cost estimates. Read the tree
+from the innermost node outward: two sequential scans feed a `Hash Join` on
+`order_id`, a `HashAggregate` keyed on `o.order_id` builds the order grain, a
+second `HashAggregate` keyed on `o.customer_id` builds the customer grain, and
+`Sort` plus `Limit` produce the top 20.
 
-**Expected result/shape:** Example 2 prints a plan tree, not business rows. Run the underlying `SELECT` separately and reconcile its `customer_id` key set and row count over `orders`, and `order_items`; then compare node estimates, actual rows × loops, buffers, and timing without requiring one fixed plan.
+**Expected result/shape:** A 12-line plan tree, not customer rows.
+Neither CTE name appears in it: there is no `CTE order_lines` step and no
+`CTE Scan`, which is how you can tell both single-use CTEs were inlined. Add
+`AS MATERIALIZED` to `order_lines` and the plan gains a `CTE order_lines`
+section read by `CTE Scan on order_lines`, while the rows returned stay the
+same.
 
 ## Learning objectives
 
@@ -200,62 +187,75 @@ while developing and verify its key uniqueness before adding the next stage.
 - **Focus:** Use CTEs to name grains and decisions in a multi-stage query, while understanding that readability, not forced materialization, is the default goal.
 - **Assumptions:** Each CTE declares its output grain. PostgreSQL inlines a side-effect-free CTE that is referenced once unless `MATERIALIZED` is requested; a CTE referenced more than once is materialized (computed once) by default.
 - **Failure to watch for:** A CTE does not automatically improve performance; duplicated rows or ambiguous names remain logical bugs even when split into stages.
-- **Review loop:** predict the row grain and NULL/order behavior, run the
-  query, inspect a bounded sample, and reconcile counts or totals before
-  accepting the result.
+- **Review loop:** write the grain of each CTE as a comment above it, run
+  `SELECT COUNT(*), COUNT(DISTINCT key)` against that stage alone, and only
+  then add the next stage. For this fixture the counts to expect are 4,362
+  orders, 438 ordering customers and 6 categories.
 
 ## Exercises
 
 Use CTEs to name grains and decisions in a multi-stage query, while understanding that readability, not forced materialization, is the default goal.
 
-Attempt each prompt in a scratch SQL file before opening the solution.
-For every result, write its row grain and expected shape first.
+Exercises 1, 3 and 5 each build at least two stages, so write down the
+row count you expect from every stage before running anything. Exercise 2 must
+end with a single row, Exercise 4 with two rows holding the same count, and
+Exercise 6 should leave `products` exactly as it found it.
 
 1. **Query writing:** Build order-level net value in one CTE and summarize it by customer in the outer query.
    **Progressive hint:** Name the one-row-per-order grain before changing to customer grain.
-   **Inputs/evidence:** For sql-23 Exercise 1, read from `orders`, and `order_items`. Build the answer toward `customer_id`, `order_count`, and `net_revenue`; keep `customer_id` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-23 Exercise 1, expected output: One row per ordering customer. The final columns are `customer_id`, `order_count`, and `net_revenue`. The final order is `net_revenue DESC, ov.customer_id`.
-   **Verify:** For sql-23 Exercise 1, independently aggregate `orders`, and `order_items` by `customer_id`; require one output row for every distinct `customer_id` tuple and compare `order_count`, and `net_revenue` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `order_count`, and `net_revenue` for the existing `customer_id` tuple and verify the new tuple appears exactly once.
+   **Inputs/evidence:** For sql-23 Exercise 1, read `orders` joined to `order_items`, build the `order_values` CTE at one row per `order_id` with net value `unit_price * quantity * (1 - discount)`, then group that CTE by `customer_id`; `order_id` disappears in the outer aggregate.
+   **Expected result/shape:** For sql-23 Exercise 1, expected output: 438 rows, one per ordering customer, led by customer 181 with 16 orders and 9502.22 of item-level net revenue. The final columns are `customer_id`, `order_count`, and `net_revenue`. The final order is `net_revenue DESC, ov.customer_id`.
+   **Verify:** For sql-23 Exercise 1, confirm `SUM(order_count)` is 4362 and matches `SELECT COUNT(*) FROM orders`, and that the unrounded revenue total equals `SELECT ROUND(SUM(unit_price * quantity * (1 - discount)), 2) FROM order_items` (2355647.12); then count joined rows for customer 181 without the CTE, `SELECT COUNT(*) FROM orders o JOIN order_items oi USING (order_id) WHERE o.customer_id = 181`, and see 50 item rows instead of 16 orders, which is the fanout the order-grain CTE prevents.
 2. **Query writing:** Use one category-revenue CTE twice to return the highest category and total revenue.
    **Progressive hint:** A named aggregate can support multiple scalar reads without repeating the business formula.
-   **Inputs/evidence:** For sql-23 Exercise 2, read from `order_items`, and `products`. Compute `top_category`, and `all_revenue` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.
-   **Expected result/shape:** For sql-23 Exercise 2, expected output: One summary row. The final columns are `top_category`, and `all_revenue`.
-   **Verify:** For sql-23 Exercise 2, evaluate each of `all_revenue` in a separate control `SELECT` over `order_items`, and `products`; require one final row and compare every value. Add one source row with a new `order_item_id`; verify the result gains exactly one row carrying that `order_item_id` value.
+   **Inputs/evidence:** For sql-23 Exercise 2, read `order_items` joined to `products`, aggregate net item revenue by `category` once in `category_revenue`, and read that CTE twice: once in a scalar subquery ordered by revenue then category with `LIMIT 1`, and once in a scalar `SUM`; there is no outer `FROM` or `GROUP BY`.
+   **Expected result/shape:** For sql-23 Exercise 2, expected output: exactly one row, `top_category` `Sports` and `all_revenue` 2355647.12. The final columns are `top_category`, and `all_revenue`.
+   **Verify:** For sql-23 Exercise 2, run the CTE body alone and confirm six category rows led by Sports at 397427.70 ahead of Electronics at 394424.39, and that they add to the same 2355647.12 as `SELECT ROUND(SUM(unit_price * quantity * (1 - discount)), 2) FROM order_items`; then add `WHERE false` inside `category_revenue` and confirm the query still returns one row, now with both values NULL, because scalar subqueries over an empty CTE yield NULL rather than no row.
 3. **Query writing:** Create staged payment reconciliation CTEs at order grain.
    **Progressive hint:** Aggregate payment detail before joining to orders and preserve unpaid orders with a left join.
-   **Inputs/evidence:** For sql-23 Exercise 3, read from `payments`, and `orders`. Build the answer toward `order_id`, `order_total`, `paid_amount`, and `unpaid_balance`; keep `order_id` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-23 Exercise 3, expected output: One row per order. The final columns are `order_id`, `order_total`, `paid_amount`, and `unpaid_balance`. The final order is `ABS(total_amount - paid_amount) DESC, order_id`.
-   **Verify:** For sql-23 Exercise 3, project `order_id` plus the raw source columns from `payments`, and `orders` at each join stage; record row count and distinct `order_id`, then assert the final `order_id`, `order_total`, `paid_amount`, and `unpaid_balance` values match those staged rows without unintended fanout or loss. Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
+   **Inputs/evidence:** For sql-23 Exercise 3, read `payments` (3836 rows for 3489 orders) and pre-aggregate them to one `paid_amount` per `order_id` in `paid`, then `LEFT JOIN` that CTE to all 4362 `orders` in `reconciled` and turn a missing payment into 0 with `COALESCE`.
+   **Expected result/shape:** For sql-23 Exercise 3, expected output: 4362 rows, one per order; 873 orders have no payment, 199 more are partly paid, none is overpaid, and the first rows are orders 2029, 3129, and 3679 each with 1432.49 unpaid. The final columns are `order_id`, `order_total`, `paid_amount`, and `unpaid_balance`. The final order is `ABS(total_amount - paid_amount) DESC, order_id`.
+   **Verify:** For sql-23 Exercise 3, confirm the row count equals `SELECT COUNT(*) FROM orders` (4362), that `SUM(paid_amount)` equals `SELECT SUM(amount) FROM payments` (1831900.81), and that the 873 zero-paid rows are exactly the `placed` orders; then join `payments` to `orders` without the `paid` CTE and see 4709 rows, because 347 orders have more than one payment.
 4. **Prediction:** Compare `MATERIALIZED` and `NOT MATERIALIZED` syntax on a side-effect-free filtered order CTE without claiming one is universally faster.
    **Progressive hint:** Both return the same rows; planning effects require `EXPLAIN` evidence in a representative environment.
    **Inputs/evidence:** For sql-23 Exercise 4, read from `orders` through two side-effect-free CTEs that both keep `delivered` orders, one declared `AS MATERIALIZED` and one `AS NOT MATERIALIZED`, and count the rows each returns.
-   **Expected result/shape:** For sql-23 Exercise 4, expected output: Two count rows with equal values. The final columns are `variant`, and `row_count`. The final order is `variant`.
+   **Expected result/shape:** For sql-23 Exercise 4, expected output: two rows, `materialized` and `not_materialized`, each with `row_count` 872. The final columns are `variant`, and `row_count`. The final order is `variant`.
    **Verify:** For sql-23 Exercise 4, confirm both `row_count` values are 872, equal to `SELECT COUNT(*) FROM orders WHERE status = 'delivered'`; then run `EXPLAIN` on the query: the `MATERIALIZED` CTE appears as a separate `CTE materialized_orders` step read through a `CTE Scan`, while the `NOT MATERIALIZED` CTE is folded into a `Seq Scan on orders` with the status filter.
 5. **Debugging:** Repair a multi-stage query whose repeated `total` column names are ambiguous by assigning grain-specific aliases.
    **Progressive hint:** Name measures `order_value`, `customer_revenue`, and similar rather than carrying generic `total`.
-   **Inputs/evidence:** For sql-23 Exercise 5, read from `orders`, `order_items`, and `customers`. Build the answer toward `country`, and `country_revenue`; keep `country` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-23 Exercise 5, expected output: One row per country. The final columns are `country`, and `country_revenue`. The final order is `country_revenue DESC, c.country`.
-   **Verify:** For sql-23 Exercise 5, independently aggregate `orders`, `order_items`, and `customers` by `country`; require one output row for every distinct `country` tuple and compare `country_revenue` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `country_revenue` for the existing `country` tuple and verify the new tuple appears exactly once.
+   **Inputs/evidence:** For sql-23 Exercise 5, read `orders` and `order_items` into the order-grain CTE `order_values`, roll it up to one `customer_revenue` per customer, and only then join `customers` and group by `country`, giving each stage its own alias instead of a reused `total`.
+   **Expected result/shape:** For sql-23 Exercise 5, expected output: 7 rows, one per country with orders, from FR at 343290.13 down to IN at 329081.73; BR's 62 customers place no orders, so BR is absent. The final columns are `country`, and `country_revenue`. The final order is `country_revenue DESC, c.country`.
+   **Verify:** For sql-23 Exercise 5, confirm the seven values add to the item-level total `SELECT ROUND(SUM(unit_price * quantity * (1 - discount)), 2) FROM order_items` (2355647.12) within one cent of rounding, and that `SELECT country, COUNT(*) FROM customers GROUP BY country` lists eight countries; change the final join to `customers LEFT JOIN customer_revenue` and BR appears with a NULL revenue, which shows why the inner join drops it.
 6. **Extension:** Use a data-modifying CTE to demonstrate an update and inspect its returned rows without persistence.
    **Progressive hint:** The outer lesson transaction rolls back; the CTE exposes changed rows as a relation.
-   **Inputs/evidence:** For sql-23 Exercise 6, read the target keys from `products` before writing. Keep the change inside the lesson transaction and capture the command tag or `RETURNING` values.
-   **Expected result/shape:** For sql-23 Exercise 6, expected output: One summary row for a bounded three-product update. The final columns are `updated_rows`, `first_updated_product`, and `last_updated_product`.
-   **Verify:** For sql-23 Exercise 6, materialize the intended `product_id` target set first; require the command tag/`RETURNING` set to match it, then query `products` again and prove rollback or idempotent retry. Use an empty target set and a multi-row target set; reconcile the affected `product_id` values in both cases.
+   **Inputs/evidence:** For sql-23 Exercise 6, read `products` in the `candidates` CTE to pick the three lowest `product_id` values (1, 2, 3, priced 10.37, 10.74, and 11.11), update only those rows in the data-modifying CTE `updated`, and read its `RETURNING` rows; `SAVEPOINT exercise_6` and `ROLLBACK TO SAVEPOINT` undo the change.
+   **Expected result/shape:** For sql-23 Exercise 6, expected output: one summary row with `updated_rows` 3, `first_updated_product` 1, and `last_updated_product` 3. The final columns are `updated_rows`, `first_updated_product`, and `last_updated_product`.
+   **Verify:** For sql-23 Exercise 6, add `string_agg(price::text, ',' ORDER BY product_id)` to the outer query and confirm the returned new prices are 10.47, 10.85, and 11.22; after `ROLLBACK TO SAVEPOINT exercise_6`, `SELECT product_id, price FROM products WHERE product_id <= 3` must show 10.37, 10.74, and 11.11 again. With `LIMIT 0` in `candidates` the summary row still appears, with 0 updated rows and NULL first and last products.
 
 ## Common mistakes and how to recover
 
-- **Lesson-specific semantic mistake:** A CTE does not automatically improve performance; duplicated rows or ambiguous names remain logical bugs even when split into stages.
-- **Unexpected row count:** display keys before aggregates, count rows after
-  each join/filter stage, and find the first stage whose grain differs from the
-  contract. Do not hide fanout with `DISTINCT`.
-- **Unexpected `NULL` or missing row:** decide whether the fact is unknown,
-  inapplicable, zero, or absent before using `COALESCE`; inspect outer-join
-  predicate placement and empty-input aggregate behavior.
-- **Unstable top/first/last output:** add `ORDER BY` with a unique final
-  tie-breaker before `LIMIT` or order-sensitive windows/aggregates.
-- **`psql` stops on an error:** fix the first error shown by
-  `ON_ERROR_STOP`, restore the declared transaction/setup state, and rerun the
-  complete file. A later successful statement does not validate a partial run.
+- **Expecting a CTE to make a query faster.** A single-use CTE is inlined, so
+  Example 1 runs the same plan as the nested-subquery version. Splitting a
+  query into stages is a readability decision; only `EXPLAIN` evidence shows
+  whether forcing `MATERIALIZED` helps.
+- **Joining detail rows before aggregating them.** Joining `orders` directly
+  to `payments` gives 4,709 rows, because 347 orders have two payments, and
+  `SUM(total_amount)` over that join reports 2,396,554.68 instead of
+  2,355,646.89. Exercise 3 sums payments per order in its own CTE first.
+- **Turning a left join into an inner join.** The 873 orders with no payment
+  (every one has status `placed`) disappear if `paid` is joined with `JOIN`,
+  and the largest unpaid balances go with them.
+- **Reusing a generic column name in every stage.** If two CTEs both expose
+  `total` and the final query joins them, PostgreSQL stops with
+  `column reference "total" is ambiguous`. Exercise 5 names each measure for
+  its grain: `order_value`, `customer_revenue`, `country_revenue`.
+- **Reading an updated row back in the same statement.** Inside Exercise 6,
+  a plain `SELECT price FROM products WHERE product_id = 1` placed in the same
+  statement still returns 10.37, the pre-update value. Use the `RETURNING`
+  rows instead.
+- For the general recovery steps (count each stage, rerun the whole file after
+  the first `psql` error), see
+  [Recover from common failures](../../STUDY-GUIDE.md#recover-from-common-failures).
 
 ## Self-check
 
@@ -304,9 +304,9 @@ Further reading
 
 ## Ask an AI tutor about this lesson
 
-An AI tutor is optional; the guide, learner SQL, PostgreSQL, and expected checks are
-enough to complete the lesson offline. If you want a patient tutor, copy this
-prompt after opening the repository in the AI tutor:
+A tutor can help you predict the row count of each CTE stage before you
+run it; the prompt below points it at the guide and the answer-free learner
+file only ([optional tutor notes](../../STUDY-GUIDE.md#use-an-ai-tutor-optional)).
 
 ```text
 Tutor me through sql-23: Common Table Expressions (CTEs).

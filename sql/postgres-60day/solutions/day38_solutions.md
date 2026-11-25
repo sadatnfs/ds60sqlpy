@@ -4,53 +4,45 @@
 <!-- beginner-solution-enrichment -->
 ## How to study and run this solution
 
-Open this explanation only after making an honest attempt. The executable
-companion runs solely against the disposable `advanced_sql_training` database:
+Try the schedules in two terminals before reading on; the values you
+predicted for Session A are the thing to check. The executable answer
+covers only the single-session prompts and ends with `ROLLBACK`
+([reading solutions](../../STUDY-GUIDE.md#read-a-solution)):
 
 ```bash
-# Linux, macOS, or Windows through WSL 2, from the repository root
 psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
   -f sql/postgres-60day/solutions/day38_solutions.sql
 ```
 
-`psql` prints each result/command tag in the terminal. Stop at the first
-unexpected `ERROR`; later output cannot repair an earlier failed invariant.
-Compare your own SQL, row grain, column names, row counts, `NULL` policy, and
-ordering with the explanation before comparing syntax.
+The run prints `read committed` from `SHOW transaction_isolation`, then
+`isolation_solution` twice: `(1, 15)` and `(2, 20)` inside the savepoint,
+and `(1, 10)` and `(2, 20)` after rolling back. Exercise 4 prints the same
+two original rows, the transfer prints `conserved_total` = `140.00`, and
+the duplicate insert prints a `NOTICE` followed by `still_usable` = `2`.
+Exercises 1 to 3 appear in that file only as comments, because they need
+two sessions.
 
-## Clause-by-clause reading map
+## How these answers fit together
 
-The lesson's main concepts are MVCC, Isolation level, Serialization failure. Its worked-model focus is:
-Open two disposable sessions and write down each statement before running it. Under `READ COMMITTED`, have session A read a count, session B commit a matching insert, and session A read again. Repeat at `REPEATABLE READ` and explain the snapshot difference; clean up the shared disposable table afterward.
+The [learner script](../day38_transactions_isolation.sql) showed a
+savepoint undoing one update. These answers extend that in two directions.
+Exercises 1 to 3 move to a committed `isolation_lab` table so a second
+terminal can change it: one row read twice, one count repeated around an
+insert, and two `SERIALIZABLE` transactions that each update a different
+row after reading the same sum. Exercises 4 to 6 stay in one session and
+practise recovery: a savepoint that survives `ROLLBACK TO` until it is
+released, a transfer whose debit row is locked with `FOR UPDATE` before
+either balance changes, and a unique violation caught by a PL/pgSQL
+exception block. The last prompt is a written decision whose evidence
+is the count schedule rerun with a `SUM(qty)` added.
 
-- Start at `FROM`/`JOIN` and state the intermediate row grain. Inspect join keys
-  before adding aggregates; a one-to-many join is allowed to multiply rows only
-  when the later contract accounts for it.
-- Apply `WHERE` to input rows, `GROUP BY` to form buckets, and `HAVING` to
-  completed groups. Window functions run over the surviving relation and
-  normally preserve its row count.
-- Read the `SELECT` list as the public result contract: keys establish grain,
-  measures state calculations, and aliases explain meaning. `ORDER BY` is the
-  only output-order guarantee; add a unique tie-breaker before `LIMIT`.
-- Trace every common table expression (CTE) as a temporary named relation.
-  Execute or inspect one stage at a time while debugging, but compare the final
-  result with an independent control rather than trusting stage names.
-- Keep SQL `NULL` as “missing/unknown/not applicable” until the metric contract
-  chooses another representation. Guard division with `NULLIF`; disclose
-  exclusions and distinguish zero from no row.
-- For DDL/DML, a command tag proves only that PostgreSQL accepted a statement.
-  Catalog checks, negative cases, row-count reconciliation, and the declared
-  transaction boundary prove behavior and cleanup.
-
-The exact final queries are not the only valid syntax. A join, subquery, CTE,
-window, or conditional aggregate can be an alternative when it preserves the
-same grain, `NULL` semantics, deterministic ordering, and safety. Prefer the
-form whose intermediate relations a reviewer can verify; optimize only after
-correctness is established with evidence.
-
-Isolation anomalies require genuinely concurrent database sessions. They cannot
-be proven by running one `.sql` file serially. Open two VS Code terminals, name
-them Session A and Session B, and paste each step only when instructed.
+The expected values for the schedules are `10` then `15` for the single
+row under `READ COMMITTED` and `10` twice under `REPEATABLE READ`; `1`
+then `2` for the count of rows with `qty >= 20` under `READ COMMITTED` and
+`1` twice under `REPEATABLE READ`; and a `40001` failure on Session B's
+`COMMIT` in the serializable case. Neither session can see the other's
+uncommitted update, so the conflict only surfaces when the second one
+tries to commit.
 
 The following single-session check is safe to run independently and demonstrates
 transaction-local isolation plus savepoint rollback:

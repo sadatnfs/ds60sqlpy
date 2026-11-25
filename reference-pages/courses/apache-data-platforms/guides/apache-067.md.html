@@ -244,16 +244,16 @@ snapshot <span class="syntax-operator">=</span> table<span class="syntax-operato
 <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">sorted</span><span class="syntax-punctuation">(</span>table<span class="syntax-operator">.</span>scan<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>to_arrow<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">id</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>to_pylist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <p>This PyIceberg fragment assumes a catalog object already configured against the same Hive metastore. A compatible second reader should print the same metadata_location that Hive stored and the IDs [1, 2, 3]. Matching rows with a different metadata location means the reader used another catalog or a stale pointer. Treat this as a prepared extension until both readers have actually run against the owned table.</p>
 <h3 id="complete-worked-source">Complete worked source<a class="heading-anchor" href="#complete-worked-source" aria-label="Link to this section">#</a></h3>
-<p>This is a project-only command notebook. Read and edit it in the classroom; run its explicitly labeled commands from the copied owned Docker workshop. The classroom does not execute these service commands.</p>
+<p>The classroom does not execute these service commands. See the <a href="../STUDY-GUIDE.md.html#workshop-notebooks">workshop rules</a>.</p>
 <h2 id="hive-apache-067-command-notebook">Hive apache-067 command notebook<a class="heading-anchor" href="#hive-apache-067-command-notebook" aria-label="Link to this section">#</a></h2>
-<p>Run from the copied owned Hive project, following its README. Native service acceptance is separately recorded in QUALIFICATION.md.</p>
+<p>Both files are read-only here. <code>iceberg.hql</code> creates <code>ds60.orders_iceberg</code> at <code>file:///warehouse/orders_iceberg</code> and inserts the three orders, while <code>conf/hive-site.xml</code> shows the catalog settings that statement would depend on in the copied Hive project.</p>
 <pre class="highlighted-code"><code class="language-bash">cat iceberg.hql
 cat conf/hive-site.xml</code></pre>
 <p>This is a prepared Iceberg extension, not an executed default reference. Prepare and test the exact bundled Hive integration, metadata/snapshot identity and second reader before asserting cross-engine compatibility.</p>
-<p>The classroom does not execute these Docker commands. Retain source, schema, file identities, actual responses and failure scope in an independent receipt.</p>
+<p>QUALIFICATION.md lists Iceberg integration among the Hive extensions that the default Parquet and Thrift path does not qualify. Its receipt needs the metadata file, the snapshot ID and a second engine reading that same snapshot.</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
 <ul>
-<li><a href="https://hive.apache.org/development/quickstart/">Hive4.2.1 preparation and components</a></li>
+<li><a href="https://hive.apache.org/development/quickstart/">Hive 4.2.1 preparation and components</a></li>
 <li><a href="https://hive.apache.org/docs/latest/language/languagemanual-ddl/">Hive DDL</a></li>
 <li><a href="https://hive.apache.org/docs/latest/admin/adminmanual-metastore-administration/">Hive Metastore administration</a></li>
 <li><a href="https://iceberg.apache.org/docs/latest/hive/">Hive/Iceberg integration</a></li>

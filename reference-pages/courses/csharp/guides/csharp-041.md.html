@@ -206,12 +206,12 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Status mapping:</strong> Translation of a domain outcome into HTTP semantics.</p>
 <p><strong>Idempotency:</strong> Repeating a request has the same intended effect as one request.</p>
 <h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>The Linux Docker classroom compiles your saved pad as <code>Program.cs</code> in its fixed .NET 10 project. C# 14 is the matching language generation. This route uses the prepared framework libraries; it does not accept arbitrary project files, NuGet packages, command arguments or interactive input. The explicit <code>Program.Main</code> entrypoint makes compilation and execution visible. <code>Check</code> throws on a false condition in every build configuration, unlike conditional debugging assertions.</p>
-<p>Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.</p>
+<p><code>ApiDecision</code> and <code>ValidateCreate</code> sit after <code>Main</code>, so the portable pad tests the decision logic without starting a web host. The note below links to ApiLab, a separate ASP.NET project with its own preparation steps; it maps routes with <code>MapGet</code> and <code>MapPost</code> and keeps inventory in memory, so restarting it resets the sample data.</p>
+<p>Compile contract, starter stop and success marker: <a href="../STUDY-GUIDE.md.html#running-a-lesson">running a lesson</a>.</p>
 <p>Continue with <a href="../fixtures/ApiLab/README.md.html">ApiLab preparation and commands</a>. Its complete project is separate from the classroom pad and needs a prepared .NET 10 SDK.</p>
 <h3 id="syntax-anatomy-and-execution-trace">Syntax anatomy and execution trace<a class="heading-anchor" href="#syntax-anatomy-and-execution-trace" aria-label="Link to this section">#</a></h3>
 <p>A pure mapping can return a status and body record. In the external project, MapGet and MapPost connect routes to handlers. Results.Ok, BadRequest and NotFound make transport outcomes explicit.</p>
-<p>Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.</p>
+<p>Each example ends with a trace; method: <a href="../STUDY-GUIDE.md.html#tracing-a-program">tracing a program</a>.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="example-a-map-a-valid-request">Example A: Map a valid request<a class="heading-anchor" href="#example-a-map-a-valid-request" aria-label="Link to this section">#</a></h4>
 <p>The kernel isolates validation and status selection from host configuration.</p>
@@ -253,6 +253,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
                                                       <span class="syntax-punctuation">:</span> <span class="syntax-keyword">new</span><span class="syntax-punctuation">(</span><span class="syntax-number">201</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;accepted&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> Valid input maps to the created outcome.</p>
+<p><strong>Trace.</strong> <code>ValidateCreate(&quot;pear&quot;, 3)</code> evaluates the guard: the name is not blank and the quantity is not negative, so the conditional takes its second branch and returns <code>new(201, &quot;accepted&quot;)</code>. The record exposes <code>Status</code> 201 and <code>Message</code> accepted, and the check reads both fields. Record value equality would also make it equal to a freshly built <code>ApiDecision(201, &quot;accepted&quot;)</code>.</p>
 <h4 id="example-b-reject-before-claiming-success">Example B: Reject before claiming success<a class="heading-anchor" href="#example-b-reject-before-claiming-success" aria-label="Link to this section">#</a></h4>
 <p>The response category is part of the public contract and must not disagree with domain acceptance.</p>
 <pre class="highlighted-code"><code class="language-csharp"><span class="syntax-keyword">using</span> System<span class="syntax-punctuation">;</span>
@@ -292,6 +293,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
                                                       <span class="syntax-punctuation">:</span> <span class="syntax-keyword">new</span><span class="syntax-punctuation">(</span><span class="syntax-number">201</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;accepted&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> Invalid requests produce 400 decisions.</p>
+<p><strong>Trace.</strong> An empty name makes <code>string.IsNullOrWhiteSpace</code> true, and the <code>||</code> short-circuits straight to the 400 decision. With pear and -1, the name test is false but <code>quantity &lt; 0</code> is true, so the result is again 400 with invalid. Neither call reaches the 201 branch, which is the property the check protects: rejection is decided before success is claimed.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <ol>
 <li><strong>Predict and explain.</strong> Describe the valid request and its status/body contract.</li>
@@ -311,10 +313,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <ol start="6">
 <li><strong>Transfer and justify.</strong> Design idempotent update behavior and explain how duplicate creation differs.</li>
 </ol>
-<p>For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.</p>
+<p>Log each task in the <a href="../STUDY-GUIDE.md.html#recording-exercise-evidence">evidence table</a> before opening the explanation.</p>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
 <p>An offline kernel test does not prove endpoint routing, serialization or host startup. The external project intentionally uses in-memory state, so restarting loses its sample inventory. It is not a persistence claim.</p>
-<p>A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.</p>
+<p>For task 5, quantity 0 is accepted under the current rule, because the guard rejects only negative values; if zero should fail, change the comparison and add a test that pins it. A null name also takes the 400 branch, although the compiler warns about passing null to a non-nullable string. For task 4, compute the decision first and build the response from it.</p>
+<p>Repair routine: <a href="../STUDY-GUIDE.md.html#building-a-regression-case">building a regression case</a>.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <ol>
 <li>Reproduce Example A (Map a valid request) before changing anything, and confirm its observation: Valid input maps to the created outcome.</li>
@@ -322,9 +325,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>Before opening the explanation, test your task 3 attempt against this lesson&#x27;s main pitfall: An offline kernel test does not prove endpoint routing, serialization or host startup.</li>
 </ol>
 <h3 id="self-check-and-next-step">Self-check and next step<a class="heading-anchor" href="#self-check-and-next-step" aria-label="Link to this section">#</a></h3>
-<p>Explain Endpoint, Status mapping, Idempotency without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.</p>
+<p>Write the status and message for pear with 0, for a name of spaces with 5, and for pear with -2. Explain what the kernel test proves and what only a running ApiLab request can prove. For task 6, describe what a repeated PUT with the same body returns and how a repeated create differs.</p>
+<p>Then follow the general <a href="../STUDY-GUIDE.md.html#self-check-routine">self-check routine</a> and save your pad.</p>
 <h3 id="sources-and-execution-boundary">Sources and execution boundary<a class="heading-anchor" href="#sources-and-execution-boundary" aria-label="Link to this section">#</a></h3>
-<p><a href="https://learn.microsoft.com/en-us/dotnet/csharp/">Official language or framework documentation</a>. The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.</p>
+<p><a href="https://learn.microsoft.com/en-us/dotnet/csharp/">Documentation</a>: The C# guide covers records and conditional expressions; the ApiLab README covers the ASP.NET routing it uses.</p>
+<p>Provenance and limits: <a href="../STUDY-GUIDE.md.html#sources-and-execution-boundary">sources and execution boundary</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for csharp-041: API design and the prepared ASP.NET project.
 Read courses/csharp/guides/csharp-041.md and courses/csharp/lessons/csharp-041.cs. Prerequisites: csharp-040.

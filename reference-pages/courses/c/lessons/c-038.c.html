@@ -197,28 +197,19 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">int</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">void</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span></span>
 <span class="source-line">  <span class="syntax-comment">/* Exercise 1: Inspect fetch-add semantics: change one input</span></span>
-<span class="source-line"><span class="syntax-comment">     Copy worked example 1, the &quot;inspect fetch-add semantics&quot; case, into a</span></span>
-<span class="source-line"><span class="syntax-comment">     scratch pad and change `atomic_init(&amp;value, 2);` to `atomic_init(&amp;value,</span></span>
-<span class="source-line"><span class="syntax-comment">     3);`. Before running, predict which CHECK fails and which value it sees in</span></span>
-<span class="source-line"><span class="syntax-comment">     place of the worked result (the returned old value is 2 and current value</span></span>
-<span class="source-line"><span class="syntax-comment">     is 5); then run it and restore the original line. Expected: With</span></span>
-<span class="source-line"><span class="syntax-comment">     `atomic_init(&amp;value, 3);` the run stops with `Check failed` at the CHECK on</span></span>
-<span class="source-line"><span class="syntax-comment">     `old == 2 &amp;&amp; atomic_load(&amp;value) == 5`, because the &quot;inspect fetch-add</span></span>
-<span class="source-line"><span class="syntax-comment">     semantics&quot; case no longer shows that the returned old value is 2 and</span></span>
-<span class="source-line"><span class="syntax-comment">     current value is 5. Restoring `atomic_init(&amp;value, 2);` brings that</span></span>
-<span class="source-line"><span class="syntax-comment">     observation back. */</span></span>
+<span class="source-line"><span class="syntax-comment">     In worked example 1, change `atomic_init(&amp;value, 2);` to</span></span>
+<span class="source-line"><span class="syntax-comment">     `atomic_init(&amp;value, 3);`. Predict which value the CHECK on `old == 2 &amp;&amp;</span></span>
+<span class="source-line"><span class="syntax-comment">     atomic_load(&amp;value) == 5` sees, then run and restore. Expected: `Check</span></span>
+<span class="source-line"><span class="syntax-comment">     failed` at `old == 2 &amp;&amp; atomic_load(&amp;value) == 5`; restoring</span></span>
+<span class="source-line"><span class="syntax-comment">     `atomic_init(&amp;value, 2);` passes again. */</span></span>
 <span class="source-line"></span>
 <span class="source-line">  <span class="syntax-comment">/* Exercise 2: Compare and exchange successfully: diagnose an edited check</span></span>
-<span class="source-line"><span class="syntax-comment">     A careless edit changed the CHECK in worked example 2, the &quot;compare and</span></span>
-<span class="source-line"><span class="syntax-comment">     exchange successfully&quot; case, so that it reads</span></span>
-<span class="source-line"><span class="syntax-comment">     `CHECK(atomic_compare_exchange_strong(&amp;value, &amp;expected, 8));`. Run the</span></span>
-<span class="source-line"><span class="syntax-comment">     example with that line, explain why the edited CHECK now fails even though</span></span>
-<span class="source-line"><span class="syntax-comment">     the program state still means the operation succeeds and stores 7, and</span></span>
-<span class="source-line"><span class="syntax-comment">     restore it. Expected: Before the repair the run stops with `Check failed`</span></span>
-<span class="source-line"><span class="syntax-comment">     at the CHECK on `atomic_load(&amp;value) == 7`. Once the line reads</span></span>
-<span class="source-line"><span class="syntax-comment">     `CHECK(atomic_compare_exchange_strong(&amp;value, &amp;expected, 7));` again, the</span></span>
-<span class="source-line"><span class="syntax-comment">     &quot;compare and exchange successfully&quot; case again shows that the operation</span></span>
-<span class="source-line"><span class="syntax-comment">     succeeds and stores 7. */</span></span>
+<span class="source-line"><span class="syntax-comment">     Worked example 2&#x27;s CHECK now reads</span></span>
+<span class="source-line"><span class="syntax-comment">     `CHECK(atomic_compare_exchange_strong(&amp;value, &amp;expected, 8));`. Explain why</span></span>
+<span class="source-line"><span class="syntax-comment">     it fails although the operation succeeds and stores 7, then restore it.</span></span>
+<span class="source-line"><span class="syntax-comment">     Expected: `Check failed` until the CHECK reads</span></span>
+<span class="source-line"><span class="syntax-comment">     `CHECK(atomic_compare_exchange_strong(&amp;value, &amp;expected, 7));` again,</span></span>
+<span class="source-line"><span class="syntax-comment">     though the operation succeeds and stores 7. */</span></span>
 <span class="source-line"></span>
 <span class="source-line">  <span class="syntax-comment">/* Exercise 3: Inspect failed compare-exchange</span></span>
 <span class="source-line"><span class="syntax-comment">     Attempt replacement with stale expected value 2 when current is 3.</span></span>

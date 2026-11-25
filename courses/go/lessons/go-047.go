@@ -3,11 +3,11 @@ package main
 import "fmt"
 
 func main() {
-	// Exercise 1: Verify one successful API call: change one input: Copy worked example 1 into a scratch pad and change `f := &FakeReader{Value: 3}` to `f := &FakeReader{Value: 4}`. Before running, predict which check fails and which value it now sees; then run it and restore the original line.
-	// Expected: The changed run panics with `success` because `err == nil && v == 3 && f.Calls == 1` no longer holds. Restoring the original line brings back the worked observation: the result is retained and exactly one call occurs.
+	// Exercise 1: Verify one successful API call: change one input: Copy worked example 1, change `f := &FakeReader{Value: 3}` to `f := &FakeReader{Value: 4}` and predict the failure before running; then restore the line.
+	// Expected: The edited run panics with `success` because `err == nil && v == 3 && f.Calls == 1` no longer holds.
 
-	// Exercise 2: Preserve a forbidden error: diagnose an edited check: A careless edit changed the check in worked example 2 so that it reads `check(errors.Is(err, ErrForbidden) && f.Calls != 1, "forbidden")`. Run worked example 2 with that line, explain why the edited check now fails for the same program state, and restore it.
-	// Expected: Before the repair the program panics with `forbidden`; after it the line reads `check(errors.Is(err, ErrForbidden) && f.Calls == 1, "forbidden")` again and the exact cause is visible and only one call occurs.
+	// Exercise 2: Preserve a forbidden error: diagnose an edited check: A careless edit rewrote the check in worked example 2 as `check(errors.Is(err, ErrForbidden) && f.Calls != 1, "forbidden")`. Explain the failure, then restore it.
+	// Expected: The defective run panics with `forbidden`; after restoring `check(errors.Is(err, ErrForbidden) && f.Calls == 1, "forbidden")`, the exact cause is visible and only one call occurs.
 
 	// Exercise 3: Stop before a canceled call: Cancel context before invoking the adapter.
 	// Expected: No API call is made.

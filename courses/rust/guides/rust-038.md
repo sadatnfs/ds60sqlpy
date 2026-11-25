@@ -24,9 +24,11 @@ NaN is a floating-point value category, not an Arrow null. It can represent an u
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles the saved pad as `main.rs` with pinned Rust 1.99.1, edition 2024, and the prepared Arrow 60 library. `assert!` and `assert_eq!` remain active in normal builds. The fixed pad accepts one source file without arbitrary arguments, interactive input, Cargo manifests or package installation. The main function returns `Result<(), Box<dyn std::error::Error>>` so later examples can propagate errors with `?`; the final `Ok(())` means this fixture completed successfully. Standard library and Arrow examples remain offline after image preparation. Multi-file Cargo and external ecosystem projects have separate explicit preparation workflows.
+Beyond the prelude, this lesson's programs use `arrow::array`. A passing run prints `rust-038: passed`.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Pad setup and limits: [Run a lesson](../STUDY-GUIDE.md#run-a-lesson).
+
+Before you run anything, follow [Attempt a lesson](../STUDY-GUIDE.md#attempt-a-lesson).
 
 
 
@@ -34,7 +36,9 @@ Start with the answer-free learner artifact in your saved classroom pad. It deli
 
 Array::is_null and is_valid inspect validity. Int32Array::iter yields Option<i32>. Float64Array can contain both Some(NaN) and None. null_count counts absence, not non-finite values.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+**Reading Example A (Preserve null versus zero, code below).** `Int32Array::from(vec![Some(0), None, Some(4)])` builds the column from `Option<i32>` values. Arrow stores it as two buffers: a values buffer with one 32-bit slot per row, and a validity bitmap with one bit per row, set for valid and clear for null. The `None` row still occupies a slot in the values buffer; the bitmap is what marks it as missing. `null_count` reports how many bits are clear. `is_valid(0)` and `is_null(1)` read single bits, so a stored zero and a missing value are told apart by the bitmap, not by the number in the slot. `values.iter()` combines both buffers and yields an `Option<i32>` for each row, which is why collecting it reproduces the input exactly. The `&&` in the second assertion requires both checks to hold.
+
+Method for tracing your own variants: [Trace a program](../STUDY-GUIDE.md#trace-a-program).
 
 ## Worked example / walkthrough
 
@@ -92,13 +96,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 6. **Transfer and justify.** Define missingness and non-finite policies for a sensor dataset before calculating a mean.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Record each task as in [Keep evidence for each task](../STUDY-GUIDE.md#keep-evidence-for-each-task).
 
 ## Common pitfalls and diagnosis
 
 Null positions can contain arbitrary physical values. NaN is not equal to itself under ordinary floating equality. Do not replace every null with zero without a domain justification.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+To turn a pitfall into a test, see [Design a regression case](../STUDY-GUIDE.md#design-a-regression-case).
 
 ## Progressive hints
 
@@ -106,13 +110,23 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 2. Compare Example B (Keep NaN separate from null) with Example A and name the first line whose behavior differs. Its observation is: The column contains one null, one present NaN and one finite value.
 3. Before opening the explanation, test your task 3 attempt against this lesson's main pitfall: Null positions can contain arbitrary physical values.
 
+Tempting approaches to rule out before you compare:
+
+- **Task 1.** Treating NaN as missing because both look empty in a report gives `null_count() == 2` in your head while Arrow reports 1, and a mean that drops NaN silently hides a failed calculation.
+- **Task 2.** Counting finite values as `len() - null_count()` gives 3 and treats NaN and infinity as usable measurements.
+- **Task 5.** Reporting the all-null sum as 0.0 claims a measurement that no row provided.
+
 ## Self-check and next step
 
-Explain Null bitmap, NaN, Logical value without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+How does Example A keep the valid zero distinct from the null in the same column? In Example B, why does `null_count()` count the null but not the NaN? What should a sensor mean do with each of them, and why is filling nulls with 0.0 a change of meaning rather than a cleanup?
+
+Then work through [Self-check and review](../STUDY-GUIDE.md#self-check-and-review).
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://arrow.apache.org/docs/format/Columnar.html). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+Read [the Arrow columnar format specification](https://arrow.apache.org/docs/format/Columnar.html) for validity bitmaps and how nulls differ from NaN.
+
+What the classroom does and does not prove: [Sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

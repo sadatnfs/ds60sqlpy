@@ -1,6 +1,6 @@
 # web-033: explanatory solutions
 
-Open this after your own attempt. Each answer explains the lesson's synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in `courses/web-development/guides/web-033.md`.
+Attempt each exercise before reading; the mechanism is in `courses/web-development/guides/web-033.md` ([using these answers](../STUDY-GUIDE.md#solutions)).
 
 ## Exercise 1: Predict 125 cents times three units.
 
@@ -8,7 +8,7 @@ Open this after your own attempt. Each answer explains the lesson's synthetic fi
 
 **Approach:** Multiply the integer unit price in cents by the integer quantity, which keeps the whole calculation in exact integer arithmetic.
 
-**Why:** 125 × 3 is 375 cents; keeping integer minor units avoids binary floating-point rounding.
+**Why:** Three items at 125 cents each make 375 cents; keeping integer minor units avoids binary floating-point rounding.
 
 **Plausible wrong approach:** Computing 1.25 times 3 as floats and then multiplying by 100 fails because float rounding can produce a value just under 375.
 
@@ -76,4 +76,6 @@ Open this after your own attempt. Each answer explains the lesson's synthetic fi
 
 ## Reference comparison
 
-Open `courses/web-development/solutions/web-033_solution.php` only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; server lifecycle, persistence, concurrency and security need their own integration evidence.
+The reference requires 125 cents times three to equal 375 and requires a zero quantity to give 0, then formats the total with intdiv and a padded remainder. That catches float money and a zero bug. It does not test the fee, negative rejection or the upper bound, so add those checks yourself.
+
+Open `courses/web-development/solutions/web-033_solution.php` after saving your attempt ([comparing with the reference](../STUDY-GUIDE.md#references)).

@@ -196,7 +196,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <article class="document"><h2 id="r-021-s3-value-objects-validation-and-generic-dispatch">r-021: S3 value objects, validation and generic dispatch<a class="heading-anchor" href="#r-021-s3-value-objects-validation-and-generic-dispatch" aria-label="Link to this section">#</a></h2>
 <p><strong>Level:</strong> intermediate. <strong>Direct prerequisites:</strong> <code>r-012</code>, <code>r-017</code>, <code>r-020</code></p>
 <h3 id="run-and-retain-your-work">Run and retain your work<a class="heading-anchor" href="#run-and-retain-your-work" aria-label="Link to this section">#</a></h3>
-<p>Open <code>r-021</code> in <code>/classroom</code> and use the prepared <code>r-statistics</code> profile. Each Run evaluates one <code>main.R</code> script in a fresh offline R process, so define every input in the script; an earlier Run leaves no variables behind. Work in the <a href="../lessons/r-021.R.html">starter</a>. The <a href="../solutions/r-021_reference.R.html">complete reference</a> ends by printing <code>r-021 reference checks passed</code>, and the <a href="../solutions/r-021_solutions.md.html">explained answers</a> are there for deliberate comparison after your own attempt. This chapter prints values only; when a chapter draws figures, the classroom keeps at most two figures per run. The <a href="../README.md.html">course overview</a> describes saved work, figure capture and the prepared package versions.</p>
+<p>The starter supplies only the values 3 and 7 with the unit ms, plus one TODO comment per exercise, and prints a scaffold message. Run it to confirm the inputs, then write the <code>measurement()</code> constructor and validator before any generic. Exercise 4 builds an object with <code>structure()</code> directly, and only a validator you call explicitly will reject its infinite value.</p>
+<p>Work in the <a href="../lessons/r-021.R.html">starter</a> under the <a href="../STUDY-GUIDE.md.html#run-a-chapter">run rules</a>.</p>
+<p>The <a href="../solutions/r-021_reference.R.html">complete reference</a> ends by printing <code>r-021 reference checks passed</code>.</p>
 <h3 id="outcome-and-mechanism">Outcome and mechanism<a class="heading-anchor" href="#outcome-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Build a validated S3 measurement value, dispatch a domain-specific generic and reject malformed objects at the public boundary.</p>
 <p>An S3 object is an ordinary R value with a class attribute. A numeric vector, list or other underlying representation can carry that attribute. Assigning a class does not install a schema or prove an invariant. For an analytical measurement, the contract must state what the values represent, which units accompany them and how missing or infinite values are handled.</p>
@@ -346,7 +348,23 @@ forged <span class="syntax-operator">&lt;-</span> <span class="syntax-function">
 <li><a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/class.html">R class attributes</a></li>
 </ul>
 <h3 id="continue">Continue<a class="heading-anchor" href="#continue" aria-label="Link to this section">#</a></h3>
-<p>Chapters that list <code>r-021</code> as a direct prerequisite: <a href="r-022.md.html"><code>r-022</code></a>, <a href="r-023.md.html"><code>r-023</code></a>, <a href="r-024.md.html"><code>r-024</code></a>.</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Next chapter</th>
+<th>Title</th>
+</tr></thead><tbody>
+<tr>
+<td><a href="r-022.md.html"><code>r-022</code></a></td>
+<td>S4 slots, validity and multiple dispatch</td>
+</tr>
+<tr>
+<td><a href="r-023.md.html"><code>r-023</code></a></td>
+<td>R6 identity, encapsulation and cloning</td>
+</tr>
+<tr>
+<td><a href="r-024.md.html"><code>r-024</code></a></td>
+<td>S7 properties, validators and generic methods</td>
+</tr>
+</tbody></table></div>
 <h3 id="ask-an-ai-tutor">Ask an AI tutor<a class="heading-anchor" href="#ask-an-ai-tutor" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for r-021 (S3 value objects, validation and generic dispatch).
 Read the guide and my saved attempt. Explain the relevant R mechanism,

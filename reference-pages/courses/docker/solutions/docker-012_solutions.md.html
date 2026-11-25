@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/docker/solutions/docker-012_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="docker-012-explanatory-solutions">docker-012: explanatory solutions<a class="heading-anchor" href="#docker-012-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit reveal. These explain the supplied teaching fixtures; they are not engine results. The mechanism is explained in <code>courses/docker/guides/docker-012.md</code>.</p>
+<p>These answers explain teaching fixtures, not engine results; the mechanism is in <a href="../guides/docker-012.md.html">the guide</a>.</p>
 <h3 id="exercise-1-compare-running-and-healthy">Exercise 1: Compare running and healthy.<a class="heading-anchor" href="#exercise-1-compare-running-and-healthy" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> A lifecycle state versus a defined repeated behavioral check.</p>
 <p><strong>Why:</strong> A running process may not be ready. A healthy classification is only as meaningful as its check, so review what the command actually observes.</p>
@@ -238,7 +238,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>A plausible wrong approach:</strong> Putting the full acceptance flow into the healthcheck makes it slow and write-heavy, and may mark a working app unhealthy.</p>
 <p><strong>How to verify:</strong> Acceptance passes only when the message, the counter increment and the post-recreation value all match their contracts.</p>
 <h3 id="check-your-transfer">Check your transfer<a class="heading-anchor" href="#check-your-transfer" aria-label="Link to this section">#</a></h3>
-<p>A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.</p></article>
+<p><code>depends_on</code> only orders startup; it does not watch the dependency afterwards, so no extra condition can cover a restart an hour later. The web service itself must handle a temporarily unavailable database, with bounded retries, timeouts and clear error responses while the database is down, and its own health check should report that state if traffic should stop. The expected result is a short period of controlled errors followed by recovery without a restart of the web container. Needing to restart the web service after every database restart would show that its reconnect logic is still missing.</p></article>
   </main>
 </body>
 </html>

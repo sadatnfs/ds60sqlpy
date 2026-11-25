@@ -1,6 +1,6 @@
 # docker-040: explanatory solutions
 
-Compare after your own attempt or an explicit reveal. These explain the supplied teaching fixtures; they are not engine results. The mechanism is explained in `courses/docker/guides/docker-040.md`.
+These answers explain teaching fixtures, not engine results; the mechanism is in [the guide](../guides/docker-040.md).
 
 ## Exercise 1: Compare build and runtime secrets.
 
@@ -88,4 +88,4 @@ Compare after your own attempt or an explicit reveal. These explain the supplied
 
 ## Check your transfer
 
-A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.
+`ENV` values become part of the image configuration, so anyone who can pull or inspect the image reads the password with `docker image inspect`, it travels to every registry and archive the image reaches, and rotating it requires a rebuild. Propose a runtime secret file granted only to the service, read from `/run/secrets` and validated without printing it. Acceptance is that `docker image inspect` and `docker inspect` show no password while the app connects. If the value still appears in either output, it enters through image or environment configuration.

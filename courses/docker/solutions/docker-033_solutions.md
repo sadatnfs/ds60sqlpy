@@ -1,6 +1,6 @@
 # docker-033: explanatory solutions
 
-Compare after your own attempt or an explicit reveal. These explain the supplied teaching fixtures; they are not engine results. The mechanism is explained in `courses/docker/guides/docker-033.md`.
+These answers explain teaching fixtures, not engine results; the mechanism is in [the guide](../guides/docker-033.md).
 
 ## Exercise 1: Predict a restart loop with invalid configuration.
 
@@ -88,4 +88,4 @@ Compare after your own attempt or an explicit reveal. These explain the supplied
 
 ## Check your transfer
 
-A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.
+The first request probably committed before the client gave up, because the fixture replaces the file and only then responds, and `/increment` is not idempotent, so the retry added a second increment. `docker compose -p ds60-docker-study logs app` shows one line per handled request; two `POST /increment` lines with status 200 confirm it. A safer client reads `/counter` before retrying, or the protocol carries an idempotency key the server records. If the log shows a single POST, the extra increment came from another caller.

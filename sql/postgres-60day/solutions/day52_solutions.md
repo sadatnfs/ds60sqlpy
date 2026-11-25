@@ -13,40 +13,35 @@ psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
   -f sql/postgres-60day/solutions/day52_solutions.sql
 ```
 
-`psql` prints each result/command tag in the terminal. Stop at the first
-unexpected `ERROR`; later output cannot repair an earlier failed invariant.
-Compare your own SQL, row grain, column names, row counts, `NULL` policy, and
-ordering with the explanation before comparing syntax.
+The solution includes the learner file first, so its opening transaction
+prints the same tags and revenue table and commits the base warehouse. A
+second `BEGIN` then adds the exercise objects and prints, in order:
+`INSERT 0 8`, `UPDATE 500` and `INSERT 0 3836` with the 8 / 3,836 / 3,836
+check row; the 13,085 / 4,362 / 13,085 grain row; three `INSERT 0 1` tags and
+the routed -1; the reconciliation row with its 1.01 gap; and an empty
+late-date list before the second `COMMIT`. Because both transactions commit,
+a rerun resets `dwh` and rebuilds all of it. The
+[solution-reading steps](../../STUDY-GUIDE.md#read-a-solution) show how to set
+your transcript beside this one.
 
 ## Clause-by-clause reading map
 
-The lesson's main concepts are Fact table, Dimension, Surrogate key. Its worked-model focus is:
-Write the grain beside every table before loading it. Load `dim_date` and the customer/product dimensions, then map each source order item to exactly one date, customer, and product key in `fact_sales`. Compare fact row count with source `order_items` and check every key resolves once before committing Day 52.
+Each warehouse answer begins at the table whose grain its output keeps, so
+name that table and its row meaning first, then trace the statement in
+[logical clause order](../../STUDY-GUIDE.md#reading-any-query-in-logical-order).
+Three warehouse rules tie the six answers together:
 
-- Start at `FROM`/`JOIN` and state the intermediate row grain. Inspect join keys
-  before adding aggregates; a one-to-many join is allowed to multiply rows only
-  when the later contract accounts for it.
-- Apply `WHERE` to input rows, `GROUP BY` to form buckets, and `HAVING` to
-  completed groups. Window functions run over the surviving relation and
-  normally preserve its row count.
-- Read the `SELECT` list as the public result contract: keys establish grain,
-  measures state calculations, and aliases explain meaning. `ORDER BY` is the
-  only output-order guarantee; add a unique tie-breaker before `LIMIT`.
-- Trace every common table expression (CTE) as a temporary named relation.
-  Execute or inspect one stage at a time while debugging, but compare the final
-  result with an independent control rather than trusting stage names.
-- Keep SQL `NULL` as “missing/unknown/not applicable” until the metric contract
-  chooses another representation. Guard division with `NULLIF`; disclose
-  exclusions and distinguish zero from no row.
-- For DDL/DML, a command tag proves only that PostgreSQL accepted a statement.
-  Catalog checks, negative cases, row-count reconciliation, and the declared
-  transaction boundary prove behavior and cleanup.
-
-The exact final queries are not the only valid syntax. A join, subquery, CTE,
-window, or conditional aggregate can be an alternative when it preserves the
-same grain, `NULL` semantics, deterministic ordering, and safety. Prefer the
-form whose intermediate relations a reviewer can verify; optimize only after
-correctness is established with evidence.
+- **Grain is a count you can repeat.** The grain and reconciliation queries
+  set `COUNT(*)` beside `COUNT(DISTINCT order_item_id)` and beside
+  `training.order_items`, and the payment check repeats that comparison
+  against `training.payments`.
+- **A dimension join must hit exactly one row.** The payment load joins
+  `dim_customer` on `customer_id` plus a `valid_from`/`valid_to` range, so
+  each payment finds the one version valid on its date even after Day 53
+  adds more.
+- **A missing key is a policy, not an accident.** The unknown-member answer
+  reserves -1 and routes to it explicitly with `COALESCE`, while the late-date
+  answer refuses that shortcut for dates and lists the misses instead.
 
 Day 52 is intentionally stateful. Unlike most course files, it commits a
 course-owned `dwh` schema so Days 53 and 54 can use it. Re-running the learner
@@ -175,8 +170,8 @@ zero.
 - **Expected result/shape:** For sql-52 Exercise 2, expected output: `INSERT 0 3836`, one fact row per source payment, then a check row with `countries` 8, `fact_payment_rows` 3836, and `source_payment_rows` 3836. The fact columns are `payment_id`, `order_id`, `date_key`, `customer_sk`, `amount`, and `method`.
 - **Independent verification:** For sql-52 Exercise 2, confirm that `fact_payment_rows` equals `source_payment_rows` (3836) and that `SELECT SUM(amount) FROM fact_payments` equals `SELECT SUM(amount) FROM training.payments` (1831900.81); a join that lost payments would lower the count, and a join to every customer version would raise it.
 - **Intermediate relation check:** For sql-52 Exercise 2, join `training.payments` to `orders`, `dim_date`, and `dim_customer` one table at a time and check that the row count stays 3836 after each join.
-- **Clause check:** For sql-52 Exercise 2, the solution actually uses `CREATE TABLE` with `PRIMARY KEY` and `REFERENCES`, then `INSERT INTO ... SELECT` with `FROM` and `JOIN ... ON`. Read only those operations: begin at `training.payments`, `training.orders`, `dim_date`, and `dim_customer`, preserve one row per source payment, and finish with `payment_id`, `order_id`, `date_key`, `customer_sk`, `amount`, and `method` loaded into `fact_payments`.
-- **Alternative/trade-off:** For sql-52 Exercise 2, the chosen form is justified by this lesson-specific rationale: The answer creates one row per source payment with: - `payment_id` as the idempotent fact key; - `order_id` as a degenerate operational reference; - the payment-day `date_key`; - the customer version whose vali. Evaluate another form against the concrete expected result (one row per source payment with: - `payment_id` as the idempotent fact key; - `order_id` as a degenerate operational reference; - the payment-) and the verification above.
+- **Clause check:** `CREATE TABLE fact_payments` declares `payment_id bigint PRIMARY KEY`, so loading the same payment twice fails instead of doubling cash. The `INSERT ... SELECT` reads `training.payments`, joins `training.orders` `USING (order_id)` to learn the customer, joins `dim_date` on `date_actual = p.payment_date::date`, and joins `dim_customer` on `customer_id` with the payment date between `valid_from` and `COALESCE(valid_to, 'infinity'::date)`. The check is three scalar subqueries in one `SELECT`, which is why it prints a single row.
+- **Alternative/trade-off:** Filtering on `dc.is_current`, as the `fact_sales` load does, gives the same 3,836 rows today but would tie a 2023 payment to whichever version is current on the day you reload. The date-range join costs one extra predicate and stays right after Day 53 closes old versions. A `LEFT JOIN` with `COALESCE(..., -1)` would also keep every payment, yet it would hide a broken customer mapping behind the unknown member.
 - **Edge case:** A payment whose date falls outside `dim_date` would be dropped silently by the inner join; Exercise 6 lists such payments with a `LEFT JOIN ... WHERE d.date_key IS NULL` check.
 
 ## Required Days 52 to 54 sequence
@@ -213,8 +208,8 @@ Day 54 solutions also accept a warehouse built by the Day 52 learner file alone.
 - **Expected result/shape:** For sql-52 Exercise 3, expected output: one row with `fact_rows` 13085, `orders` 4362, and `distinct_order_items` 13085, which shows that `fact_sales` has one row per order line and that `order_id` alone does not identify a row. The final columns are `fact_rows`, `orders`, and `distinct_order_items`.
 - **Independent verification:** For sql-52 Exercise 3, confirm that `fact_rows` and `distinct_order_items` both equal `SELECT COUNT(*) FROM training.order_items` (13085) while `orders` is only 4362; `SELECT order_id FROM fact_sales GROUP BY order_id HAVING COUNT(*) > 1` returns 3490 orders, which proves that `order_id` repeats.
 - **Intermediate relation check:** For sql-52 Exercise 3, compare `COUNT(*)` with `COUNT(DISTINCT order_id)` and `COUNT(DISTINCT order_item_id)`; the key is the column whose distinct count equals the row count.
-- **Clause check:** For sql-52 Exercise 3, the solution actually uses `FROM`, and `SELECT`. Read only those operations: begin at `fact_sales`, preserve exactly one summary row, and finish with `fact_rows`, `orders`, and `distinct_order_items`.
-- **Alternative/trade-off:** For sql-52 Exercise 3, the chosen form is justified by this lesson-specific rationale: `COUNT()`, distinct orders, and distinct order-item keys prove that `fact_sales` is one row per order line. Evaluate another form against the concrete expected result (one row per order line) and the verification above.
+- **Clause check:** One `SELECT` over `fact_sales` with three aggregates and no `GROUP BY`, so it returns one row even on an empty table, where it would print 0, 0, 0. `COUNT(DISTINCT order_item_id)` carries the proof: it equals `COUNT(*)` only when no line was loaded twice.
+- **Alternative/trade-off:** `SELECT order_item_id FROM fact_sales GROUP BY order_item_id HAVING COUNT(*) > 1` lists the duplicates themselves rather than a summary, which helps more once the counts disagree; on this load it returns zero rows. A `UNIQUE (order_item_id)` constraint would make the check permanent, and the base `fact_sales` definition has none, only its three foreign keys.
 - **Edge case:** Matching counts on today's data do not stop a later duplicate load; only a unique constraint on `order_item_id` enforces the grain.
 
 ## Exercise 4: Route unknown members deliberately
@@ -229,8 +224,8 @@ required mapping.
 - **Expected result/shape:** For sql-52 Exercise 4, expected output: three `INSERT 0 1` commands and one row whose `routed_customer_sk` is -1. The final columns are `routed_customer_sk`.
 - **Independent verification:** For sql-52 Exercise 4, confirm that `SELECT customer_sk FROM dim_customer WHERE customer_sk = -1` returns one row and that the routing query returns -1 for `customer_id` -999; replace -999 with 1 and confirm that it returns that customer's real `customer_sk` (1) instead.
 - **Intermediate relation check:** For sql-52 Exercise 4, insert the unknown members first and query each one by its -1 key before you test the routing `LEFT JOIN`.
-- **Clause check:** For sql-52 Exercise 4, the solution actually uses `FROM`, `JOIN ... ON`, and `SELECT`. Read only those operations: begin at `dim_country`, `dim_customer`, and `dim_product`, preserve one routed row, and finish with `routed_customer_sk`.
-- **Alternative/trade-off:** For sql-52 Exercise 4, the chosen form is justified by this lesson-specific rationale: The solution reserves surrogate key `-1` in referenced dimensions and shows a missing natural customer key mapping to it. Evaluate another form against the concrete expected result (one row per `routed_customer_sk`) and the verification above.
+- **Clause check:** The three `INSERT ... VALUES` statements write -1 straight into each key column. `dim_country` needs `OVERRIDING SYSTEM VALUE` because its key is an identity column, and the customer row also sets `country_sk = -1` so the new `NOT NULL` rule holds. The routing query left-joins a one-row `VALUES (-999)` source to `dim_customer` `USING (customer_id)`, and `COALESCE(dc.customer_sk, -1)` turns the unmatched NULL into the reserved key.
+- **Alternative/trade-off:** Rejecting the row with an inner join plus a count check is the stricter policy, and it is the one the late-date answer picks for dates. An unknown member suits facts that must be counted before their dimension catches up; a regular count of facts on `customer_sk = -1` keeps that bucket visible instead of letting it absorb real mapping errors.
 - **Edge case:** `dim_country.country_sk` is `GENERATED ALWAYS AS IDENTITY`, so inserting -1 needs `OVERRIDING SYSTEM VALUE`; the other dimensions accept -1 directly because their keys only default from a sequence.
 
 ## Exercise 5: Reconcile completeness and amount
@@ -244,8 +239,8 @@ or amount difference blocks trust in the warehouse load.
 - **Expected result/shape:** For sql-52 Exercise 5, expected output: one row with `fact_rows` and `source_rows` both 13085, `fact_amount` 2355648.13, and `source_amount` 2355647.12; the 1.01 gap comes from rounding each fact line to cents. The final columns are `fact_rows`, `source_rows`, `fact_amount`, and `source_amount`.
 - **Independent verification:** For sql-52 Exercise 5, confirm equal row counts, then recompute the source with the fact's rounding rule, `SELECT SUM(ROUND(quantity * unit_price * (1 - discount), 2)) FROM training.order_items`, and expect 2355648.13, exactly `fact_amount`; a gap that remains after that would be a real load error.
 - **Intermediate relation check:** For sql-52 Exercise 5, count rows first, then compare totals; when the totals differ, check whether the fact rounds each line before summing.
-- **Clause check:** For sql-52 Exercise 5, the solution actually uses `FROM`, and `SELECT`. Read only those operations: begin at `fact_sales`, and `training.order_items`, preserve exactly one summary row, and finish with `fact_rows`, `source_rows`, `fact_amount`, and `source_amount`.
-- **Alternative/trade-off:** For sql-52 Exercise 5, the chosen form is justified by this lesson-specific rationale: Fact/source row counts and rounded line amounts appear together. Evaluate another form against the concrete expected result (exactly one aggregate summary row) and the verification above.
+- **Clause check:** Four scalar subqueries in one `SELECT`: two `COUNT(*)` values and two sums. The fact side sums the stored `amount`, already rounded to cents per line by its `numeric(12, 2)` column, while the source side sums the raw `quantity * unit_price * (1 - discount)` and rounds once at the end, which is where the 1.01 difference comes from.
+- **Alternative/trade-off:** Recomputing the source as `SUM(ROUND(quantity * unit_price * (1 - discount), 2))` makes both totals 2,355,648.13, and a `FULL JOIN` on `order_item_id` that compares each line's amount would name the exact lines if they ever drifted. The one-row form is enough for a load gate; the line-level join is what you run after the gate fails.
 - **Edge case:** Rounding per line and rounding the total once are both defensible, but a reconciliation must apply the same rule on both sides before it calls a difference an error.
 
 ## Exercise 6: Handle late dates explicitly
@@ -256,10 +251,10 @@ would destroy time analysis.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-52 Exercise 6, read from `training.payments`, and `dim_date`. Build the answer toward `payment_id`, and `date`; keep `payment_id` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-52 Exercise 6, expected output: one row per `payment_id`. The final columns are `payment_id`, and `date`. The final order is `p.payment_id`.
-- **Independent verification:** For sql-52 Exercise 6, project `payment_id` plus the raw source columns from `training.payments`, and `dim_date` at each join stage; record row count and distinct `payment_id`, then assert the final `payment_id`, and `date` values match those staged rows without unintended fanout or loss. Add one row for which `(d.date_key IS NULL)` is true and one for which it is false; verify only the matching `payment_id` value is returned.
-- **Intermediate relation check:** For sql-52 Exercise 6, start with the first relation in `training.payments`, and `dim_date`; after each join, record total rows and distinct `payment_id` so the exact fanout or loss is visible.
-- **Clause check:** For sql-52 Exercise 6, the solution actually uses `FROM`, `JOIN ... ON`, `WHERE`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `training.payments`, and `dim_date`, preserve one row per `payment_id`, and finish with `payment_id`, and `date` ordered by `p.payment_id`.
-- **Alternative/trade-off:** For sql-52 Exercise 6, the chosen form is justified by this lesson-specific rationale: The query lists payments outside `dim_date`. Evaluate another form against the concrete expected result (one row per `payment_id`) and the verification above.
-- **Edge case:** Add one row for which `(d.date_key IS NULL)` is true and one for which it is false; verify only the matching `payment_id` value is returned.
+- **Inputs/evidence:** For sql-52 Exercise 6, left join the 3,836 `training.payments` rows to `dwh.dim_date` on `d.date_actual = p.payment_date::date` and keep only the payments with no calendar row (`d.date_key IS NULL`); the calendar runs from two years before today to one year after today (2023-02-13 to 2027-11-25 on our run).
+- **Expected result/shape:** For sql-52 Exercise 6, expected output: zero rows on the course data, because every payment date falls inside the calendar; a late payment would appear as one row per `payment_id`. The final columns are `payment_id` and `payment_date` (the `::date` cast keeps the source column name). The final order is `p.payment_id`.
+- **Independent verification:** For sql-52 Exercise 6, confirm that the left join without the `WHERE` returns 3,836 rows and 3,836 distinct `payment_id` values, so the calendar adds no fanout, and that the `NOT EXISTS` form also returns 0 rows. Then, in a transaction, insert a payment for order 1 dated 2028-01-01: the query returns exactly that new `payment_id` with `payment_date` 2028-01-01, and the unfiltered join rises to 3,837 rows; `ROLLBACK`.
+- **Intermediate relation check:** Start from `SELECT COUNT(*) FROM training.payments` (3,836), then add the left join to `dim_date` on the cast date: it must still return 3,836 rows, because the calendar holds one row per day. Only then does `WHERE d.date_key IS NULL` filter, and on our run it removes all 3,836.
+- **Clause check:** `FROM training.payments p LEFT JOIN dim_date d ON d.date_actual = p.payment_date::date`, then `WHERE d.date_key IS NULL` keeps payments with no calendar row, and `ORDER BY p.payment_id` makes the list stable. The NULL test sits in `WHERE`, after the join, which is what makes this an anti-join; moved into `ON`, it would keep every payment instead.
+- **Alternative/trade-off:** `WHERE NOT EXISTS (SELECT 1 FROM dim_date d WHERE d.date_actual = p.payment_date::date)` states the same anti-join directly and also returns zero rows here. The policy matters more than the syntax: this answer fails the load and extends the calendar, whereas routing late dates to an unknown date key would keep the payment but drop its month from every report.
+- **Edge case:** `payment_date` is a `timestamptz`, and the `::date` cast uses the session time zone (UTC on our run). The 202 payments stamped at 23:00 UTC or later would move to the next day in a zone east of UTC, so check `SHOW timezone` before trusting a boundary day. A far-future test row such as `VALUES (date '2028-01-01')` left-joined to `dim_date` proves the query can report a miss at all.

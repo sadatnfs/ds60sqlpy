@@ -196,7 +196,10 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <article class="document"><h2 id="r-054-ggplot2-statistics-geometries-and-grouping">r-054: ggplot2 statistics, geometries and grouping<a class="heading-anchor" href="#r-054-ggplot2-statistics-geometries-and-grouping" aria-label="Link to this section">#</a></h2>
 <p><strong>Level:</strong> advanced. <strong>Direct prerequisites:</strong> <code>r-053</code></p>
 <h3 id="run-and-retain-your-work">Run and retain your work<a class="heading-anchor" href="#run-and-retain-your-work" aria-label="Link to this section">#</a></h3>
-<p>Open <code>r-054</code> in <code>/classroom</code> and use the prepared <code>r-statistics</code> profile. Each Run evaluates one <code>main.R</code> script in a fresh offline R process, so define every input in the script; an earlier Run leaves no variables behind. Work in the <a href="../lessons/r-054.R.html">starter</a>. The <a href="../solutions/r-054_reference.R.html">complete reference</a> ends by printing <code>r-054 reference checks passed</code>, and the <a href="../solutions/r-054_solutions.md.html">explained answers</a> are there for deliberate comparison after your own attempt. This chapter draws figures: base plots are captured as PNG, ggplot2 and Plotly objects must be printed explicitly, and the classroom keeps at most two figures per run. The <a href="../README.md.html">course overview</a> describes saved work, figure capture and the prepared package versions.</p>
+<p>The starter holds six raw category records, A twice, B once and C three times, declared with levels A, B and C, and an empty results list. Run it and count the categories yourself first: 2, 1 and 3. That count is what <code>geom_bar()</code> computes from raw rows with its default count statistic. If you already have a summary table with a column <code>n</code>, use <code>geom_col()</code> instead, because it draws the values it is given. Mapping <code>n</code> to y inside <code>geom_bar()</code> asks the count statistic to accept a y aesthetic it does not use, and the build fails. Before the histogram, choose <code>binwidth</code> and <code>boundary</code> explicitly and check that its total count equals the number of observations.</p>
+<p>Work in the <a href="../lessons/r-054.R.html">starter</a> under the <a href="../STUDY-GUIDE.md.html#run-a-chapter">run rules</a>.</p>
+<p>The <a href="../solutions/r-054_reference.R.html">complete reference</a> ends by printing <code>r-054 reference checks passed</code>.</p>
+<p>This chapter draws figures; read <a href="../STUDY-GUIDE.md.html#figures">figure capture</a> before printing them.</p>
 <h3 id="outcome-and-mechanism">Outcome and mechanism<a class="heading-anchor" href="#outcome-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Choose a statistic and grouping contract that matches whether the input contains raw observations or precomputed summaries.</p>
 <p>A ggplot layer may transform data before drawing marks. geom_bar normally counts observations by category, while geom_col uses supplied heights. They can look similar when both happen to produce the same bars, but they expect different data contracts. Confusing raw records with preaggregated counts can count groups twice or discard the intended values.</p>
@@ -287,7 +290,15 @@ built <span class="syntax-operator">&lt;-</span> ggplot2<span class="syntax-oper
 <li><a href="https://ggplot2.tidyverse.org/reference/geom_histogram.html">Histogram binning</a></li>
 </ul>
 <h3 id="continue">Continue<a class="heading-anchor" href="#continue" aria-label="Link to this section">#</a></h3>
-<p>Chapters that list <code>r-054</code> as a direct prerequisite: <a href="r-055.md.html"><code>r-055</code></a>.</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Next chapter</th>
+<th>Title</th>
+</tr></thead><tbody>
+<tr>
+<td><a href="r-055.md.html"><code>r-055</code></a></td>
+<td>Scales, coordinates and facets change different contracts</td>
+</tr>
+</tbody></table></div>
 <h3 id="ask-an-ai-tutor">Ask an AI tutor<a class="heading-anchor" href="#ask-an-ai-tutor" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for r-054 (ggplot2 statistics, geometries and grouping).
 Read the guide and my saved attempt. Explain the relevant R mechanism,

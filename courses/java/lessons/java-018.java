@@ -3,19 +3,15 @@ public class Main {
 
   public static void main(String[] args) throws Exception {
     // Exercise 1: Use independent table cases: change one input
-    // Copy Example A into a scratch `Main.java` and change `int[][] cases = { { -2, 0 }, { 0, 0
-    // }, { 3, 3 }, { 9, 5 } };` to `int[][] cases = { { -2, 1 }, { 0, 0 }, { 3, 3 }, { 9, 5 }
-    // };`. Before running it with `java -ea Main`, predict which assertion fails and which value
-    // it now sees; then run it and restore the original line.
-    // Expected: The changed run fails with an `AssertionError` from the assertion on
-    // `clamp(row[0], 0, 5) == row[1]`. Restoring the original line brings back the worked
-    // observation: outputs 0, 0, 3, 5.
+    // Change `int[][] cases = { { -2, 0 }, { 0, 0 }, { 3, 3 }, { 9, 5 } };` to `int[][] cases =
+    // { { -2, 1 }, { 0, 0 }, { 3, 3 }, { 9, 5 } };` in Example A and predict which assertion
+    // fails and why.
+    // Expected: The edited run fails with an `AssertionError` from the assertion on
+    // `clamp(row[0], 0, 5) == row[1]`.
 
     // Exercise 2: Check a boundary failure: debug a regression
-    // Introduce one deliberate defect into the code that Example B adds after Example A and
-    // explain which observation exposes it, then repair it.
-    // Expected: The defective copy changes the observation; the repaired copy reproduces the
-    // worked observation: exception observed.
+    // Add one defect to Example B's new code that changes its observation, then repair it.
+    // Expected: The defective copy fails its assertion and the repaired copy passes.
 
     // Exercise 3: Test an idempotence property
     // For values -10 through 10, clamping an already clamped value leaves it unchanged.

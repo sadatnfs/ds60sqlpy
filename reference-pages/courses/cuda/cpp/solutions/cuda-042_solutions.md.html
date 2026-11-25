@@ -196,7 +196,6 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <article class="document"><h2 id="cuda-042-explanatory-solutions">cuda-042: explanatory solutions<a class="heading-anchor" href="#cuda-042-explanatory-solutions" aria-label="Link to this section">#</a></h2>
 <h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
 <p>Unified virtual addressing concerns address-space organization; managed memory provides an allocation model whose residency and migration are managed under supported platform rules. Neither term promises uniform access cost. First touch can trigger movement, alternating host/device access can cause repeated migration, and prefetch is a placement hint with its own ordering requirements. Coherent systems, discrete GPUs and WSL can have different capabilities. Query support and use the selected platform&#x27;s documented contract. A single pointer does not erase the need to reason about which processor owns useful work at each phase.</p>
-<p>The separate <a href="../references/cuda-042_cpu.py.html">CPU reference</a> checks the chapter&#x27;s bounded model. It does not execute CUDA or establish GPU timing. Compare after attempting the worksheet or explicitly choosing to reveal solutions.</p>
 <h3 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h3>
 <p>A 64 MiB managed array is initialized by the CPU and then processed repeatedly on a GPU. The first GPU pass may include migration costs that later resident passes do not. Report the first pass separately rather than using a warm result to promise cold-start latency.</p>
 <p><strong>Approach:</strong> Time the first GPU pass over the CPU-initialized 64 MiB managed array separately from later passes.</p>
@@ -233,11 +232,16 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Why it is correct:</strong> Fewer handoffs mean fewer migrations of the working set.</p>
 <p><strong>A plausible wrong approach:</strong> Adding prefetch calls inside the alternating loop still moves the data every round.</p>
 <p><strong>How to verify:</strong> Count transitions in the new design and check latency and memory limits still fit.</p>
+<h3 id="self-check-answers">Self-check answers<a class="heading-anchor" href="#self-check-answers" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>Why report the first GPU pass of worked example 1 separately?</strong> It includes migration from host to device that later resident passes do not pay.</li>
+<li><strong>What does unified virtual addressing promise?</strong> One address space for host and device pointers, not uniform access cost or residency.</li>
+<li><strong>What is prefetch?</strong> A placement hint that moves data ahead of use; it must still be ordered with the work that uses it.</li>
+</ol>
 <h3 id="numerical-reference-and-its-limits">Numerical reference and its limits<a class="heading-anchor" href="#numerical-reference-and-its-limits" aria-label="Link to this section">#</a></h3>
-<p>The complete CPU model is <a href="../references/cuda-042_cpu.py.html">here</a>. Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It does not claim CUDA execution, concurrency safety or a performance measurement.</p>
+<p>The <a href="../references/cuda-042_cpu.py.html">CPU reference</a> reproduces worked example 1 and prints <code>{&#x27;simplified_transition_volume_MiB&#x27;: 1280, &#x27;actual_migration_measured&#x27;: False}</code>.</p>
 <h3 id="transfer-review">Transfer review<a class="heading-anchor" href="#transfer-review" aria-label="Link to this section">#</a></h3>
-<p>Group dependent operations on one processor while data is resident, then transfer ownership deliberately; verify latency and memory constraints still fit.</p>
-<p>A complete explanation must name its inputs, the unchanged mathematical contract, the changed boundary or resource condition, and the evidence still needed on actual hardware. Preserve a CPU baseline even after a GPU path becomes available.</p></article>
+<p>Group dependent operations on one processor while data is resident, then transfer ownership deliberately; verify latency and memory constraints still fit.</p></article>
   </main>
 </body>
 </html>

@@ -2,22 +2,15 @@
 
 int main(void) {
   /* Exercise 1: Derive a local element count: predict an edited check
-     Copy worked example 1 into a scratch pad and change `CHECK(n == 3);` to
-     `CHECK(n == 4);` inside its CHECK. Before running, predict whether the
-     CHECK still holds and explain why; then restore it. Expected: With `CHECK(n
-     == 4);` the run stops with `Check failed` at the CHECK on `n == 3`, because
-     the "derive a local element count" case no longer shows that the count
-     is 3. Restoring `CHECK(n == 3);` brings that observation back. */
+     In worked example 1, change `CHECK(n == 3);` to `CHECK(n == 4);`. Predict
+     whether the CHECK still holds and why, then run and restore. Expected:
+     `Check failed`: `CHECK(n == 4);` is false, although the count is 3. */
 
   /* Exercise 2: Pass an explicit length: debug a regression
-     A regression changed one token in worked example 2, the "pass an explicit
-     length" case, so one line now reads `int values[] = {3, 4, 6};`. Run the
-     example with that line, use the failing CHECK to find why the result is 12
-     no longer holds and repair the line without changing the CHECK. Expected:
-     Before the repair the run stops with `Check failed` at the CHECK on
-     `sum_items(values, 3) == 12`. Once the line reads `int values[] = {2, 4,
-     6};` again, the "pass an explicit length" case again shows that the result
-     is 12. */
+     Worked example 2 now has a line reading `int values[] = {3, 4, 6};`. Repair
+     it so that the result is 12 again. Expected: `Check failed` at
+     `sum_items(values, 3) == 12` until the line reads `int values[] = {2, 4,
+     6};` again. */
 
   /* Exercise 3: Inspect partial initialization
      Initialize only the first element of a three-element array.

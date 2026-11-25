@@ -32,11 +32,9 @@ For a safe experiment, compare a short CPU computation at two modest limits in t
 
 ## How to use this lesson
 
-The classroom displays this guide and saves your worksheet, `courses/docker/lessons/docker-022.md`. Its Run button does not control your Docker engine. Docker engine access is powerful host access, so the classroom deliberately receives no engine socket. Work through the supplied examples without starting anything, then use the optional host lab only in your own disposable project. Reading a command, parsing YAML and actually running the project are different forms of evidence.
+The classroom saves `courses/docker/lessons/docker-022.md` and holds no engine socket ([host-lab setup](../STUDY-GUIDE.md#host-lab-setup)).
 
-Use Bash in Linux, macOS Terminal, or Ubuntu under WSL 2 on Windows. The supported engine runs Linux containers. The maintained fixture is `courses/docker/fixtures/compose-lab/`; its README explains copying it into a new ignored learner directory, checking the engine, building locally with visible logs, and using the fixed project name `ds60-docker-study`. The fixture uses port 18080 on host loopback. Stop if that project name or port belongs to unrelated work; choose a new project name consistently in your own copy. Never paste a command against a remote Docker context simply because it is currently selected.
-
-For Dockerfile examples, create a file named `Dockerfile` in a scratch project. YAML snippets describe a fragment unless explicitly called a complete file. Text transcripts are synthetic illustrations, not claims about your machine. Do not substitute a real password, token or private registry into a checked-in example. **How to use the lessons** in the [subject README](../README.md) collects these rules in one place.
+**Host lab.** Compare two CPU limits with the same small workload: run `docker run --rm --pull never --cpus 1 ds60-docker-study:local python -c "import time; t=time.time(); sum(range(30_000_000)); print(round(time.time()-t,2))"` three times, then three times with `--cpus 0.25`, and record all six numbers. The limited runs take longer, but the ratio is rarely exactly four. Add `print(open('/sys/fs/cgroup/cpu.stat').read())` to one limited run on a cgroup v2 engine and look for a nonzero `nr_throttled`. Next, start a named container with `--memory 64m` that allocates `bytearray(200_000_000)`, then read `docker inspect --format '{{.State.OOMKilled}} {{.State.ExitCode}}'` on it. Expect `true 137`. Remove the named container when you finish.
 
 ## Worked example / walkthrough
 
@@ -64,7 +62,7 @@ docker stats --no-stream "$(docker compose -p ds60-docker-study ps -q app)"
 
 ## Six progressive exercises
 
-For each exercise, name the object involved and the phase of its lifetime before changing anything, then vary only the condition the task names. Exercises that ask you to predict, explain, compare or diagnose keep their answers in the solutions file; the others show the evidence to look for.
+Answer-type prompts keep their answers in the solutions file ([exercise rules](../STUDY-GUIDE.md#exercise-rules)).
 
 ### Exercise 1: Compare a CPU limit with dedicated hardware.
 
@@ -98,13 +96,19 @@ For each exercise, name the object involved and the phase of its lifetime before
 
 Reading `cpus: 0.5` as half of a dedicated core. Raising container limits when the engine VM itself is short of memory. Drawing a conclusion from one `docker stats` sample.
 
-Exercise 4 is this chapter's boundary case: Diagnose slowness without assuming memory failure. Check `docker stats` CPU% against the cpus quota and the cgroup `cpu.stat` `nr_throttled` count before reading memory usage. Preserve the original failure and the exact changed field before retrying. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
+Exercise 4 is this chapter's boundary case: Diagnose slowness without assuming memory failure. Check `docker stats` CPU% against the cpus quota and the cgroup `cpu.stat` `nr_throttled` count before reading memory usage.
+
+A common misreading is that exit code 137 always means the container ran out of memory. The code only says the main process was ended by SIGKILL, and that signal also arrives when a stop exceeds its grace period, when someone runs `docker kill`, or when the host kernel kills a process for its own reasons. Before raising a memory limit, read `.State.OOMKilled` in `docker inspect`, which is set when the container's memory limit was the cause, and compare the time of death with the logs of any stop or deploy command that ran then.
+
+Never trade a safety control for a passing example ([safety rules](../STUDY-GUIDE.md#safety-rules)).
 
 ## Retrieval, transfer and next steps
 
-Close the explanations first. Say which column in a `docker stats` sample would rise first under CPU contention and which under a memory leak. Then reconstruct worked example 2 (Read a bounded resource sample) with one different value, predict what changes, and name which of memory limit, CPU limit, PID limit, contention and measurement the change touches.
+**Retrieval.** Say which column in a `docker stats` sample would rise first under CPU contention and which under a memory leak.
 
-When a host session ends, run `docker compose -p ds60-docker-study down` from your fixture copy. It removes the project's containers and network but keeps named volumes; deleting a volume is a separate, deliberate reset described in the fixture README.
+**Transfer case.** A worker has `pids_limit: 64` and starts one thread per job. Under load it fails with `can't start new thread` while memory and CPU look normal in `docker stats`. Explain the failure and how you would confirm it.
+
+Then run the [retrieval loop](../STUDY-GUIDE.md#retrieval-and-cleanup) and end any host session with its cleanup.
 
 ## Primary references
 

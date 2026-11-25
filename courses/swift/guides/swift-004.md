@@ -24,9 +24,9 @@ Text processing must choose its unit. A network payload limit is often measured 
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles the saved pad as `main.swift` with Swift 6 language checking. An explicit `@main` type contains `static func main() async throws`; the fixed compiler uses `-parse-as-library -swift-version 6`. The examples use the standard library and portable Foundation. `precondition` makes a violated invariant fail the process. The fixed pad accepts one source file, without arbitrary command arguments, interactive input or dependency installation. SwiftUI, UIKit, Apple simulators and application signing belong to the separately prepared macOS/Xcode project labs, never the Linux pad.
+Unicode surprises show up as runtime values, not compile errors, so predict every count in task 1 on paper before pasting Example A. Task 4 asks you to misuse an integer position: `text[1]` does not compile, because `String` has no integer subscript, and that diagnostic belongs in your evidence.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Compile contract, starter stop and success marker: [running a lesson](../STUDY-GUIDE.md#running-a-lesson).
 
 
 
@@ -34,7 +34,7 @@ Start with the answer-free learner artifact in your saved classroom pad. It deli
 
 `text.count` counts Characters. `text.utf8.count` counts bytes. `index(after:)` advances a valid String.Index. Slices produce Substring values that may retain the original storage until converted to String.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+Each example ends with a trace; method: [tracing a program](../STUDY-GUIDE.md#tracing-a-program).
 
 ## Worked example / walkthrough
 
@@ -62,6 +62,8 @@ struct LessonMain {
 
 **Observe:** Both spellings contain one Character but differ in UTF-8 bytes.
 
+**Trace.** The first literal is the single precomposed scalar U+00E9. It forms one Character, and UTF-8 encodes it in two bytes, so the counts are 1 and 2. `combined` is the letter e followed by U+0301, the combining acute accent. Swift's grapheme rules join the two scalars into one Character, so `count` is still 1, while UTF-8 needs one byte for the e and two for the accent: 3 in total. The glyph looks the same both times; `count` follows what a reader sees, and `utf8.count` follows storage.
+
 ### Example B: Slice with a valid index
 
 A valid index belongs to the source string and respects its representation boundaries.
@@ -85,6 +87,8 @@ struct LessonMain {
 
 **Observe:** The split preserves the emoji as a complete Character.
 
+**Trace.** `text` holds A, a grinning-face emoji (one scalar, four UTF-8 bytes) and B. `startIndex` points at A, and `index(after:)` moves past one whole Character, landing at the start of the emoji rather than one byte later. `text[..<firstEnd]` is the Substring containing only A, and `String(...)` copies it into new storage. `text[firstEnd...]` runs from the emoji to the end. Because the index came from `text` itself, the slice boundary cannot split the emoji's bytes.
+
 ## Exercises
 
 1. **Predict and explain.** Predict Character and byte counts for both accent spellings.
@@ -99,13 +103,15 @@ struct LessonMain {
 
 6. **Transfer and justify.** Design a text-field limit and document whether it counts bytes or visible characters.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Log each task in the [evidence table](../STUDY-GUIDE.md#recording-exercise-evidence) before opening the explanation.
 
 ## Common pitfalls and diagnosis
 
 Indices from one string are not arbitrary positions in another. Keeping a small Substring can retain a large source buffer. Case conversion and identity comparison require deliberate language or machine-key policies.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+For the first-Character function in task 3, the decisive inputs are the empty string and a first Character built from several scalars. Empty text must return nil rather than trap on `text[text.startIndex]`. A flag emoji is two regional-indicator scalars forming one Character, so returning `text.unicodeScalars.first` gives only half of it. Compare both inputs against `text.first` before trusting your version.
+
+Repair routine: [building a regression case](../STUDY-GUIDE.md#building-a-regression-case).
 
 ## Progressive hints
 
@@ -115,11 +121,15 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 ## Self-check and next step
 
-Explain Grapheme cluster, String.Index, Substring without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+For the word naïve, state its Character count and explain why its UTF-8 byte count depends on how the ï was entered. Explain why an index taken from one string must not be used on another, and when you would convert a `Substring` back to `String` before storing it in a long-lived property.
+
+Then follow the general [self-check routine](../STUDY-GUIDE.md#self-check-routine) and save your pad.
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://docs.swift.org/swift-book/documentation/the-swift-programming-language/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+[Documentation](https://docs.swift.org/swift-book/documentation/the-swift-programming-language/): The Strings and Characters chapter of the Swift book covers extended grapheme clusters, counting characters, string indices and substrings.
+
+Provenance and limits: [sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

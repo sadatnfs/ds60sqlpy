@@ -4,8 +4,6 @@
 
 Shared memory is organized into banks. Different lanes accessing different words in the same bank can serialize under the relevant hardware rules, while some same-address reads can broadcast. Global coalescing and shared-bank behavior are different layers. A transpose benefits from loading rows coalesced into a tile and storing columns through a coordinated layout. Padding can alter the bank mapping of columns, but it also changes storage usage and is not a universal speed rule. Use a simplified bank model to reason, then check the actual element width and architecture before treating the model as a performance prediction.
 
-The separate [CPU reference](../references/cuda-035_cpu.py) checks the chapter's bounded model. It does not execute CUDA or establish GPU timing. Compare after attempting the worksheet or explicitly choosing to reveal solutions.
-
 ## Exercise 1
 
 In a simplified 32-bank, one-word-per-bank model, a column of a 32-word-wide tile maps every row to bank zero because (row*32) mod 32 is zero. With width 33, row r maps to bank r mod 32. This explains the common padding experiment without promising every architecture uses this exact cost model.
@@ -78,12 +76,16 @@ Reassess bank width and multiword accesses on the selected architecture. Do not 
 
 **How to verify:** Model eight-byte addresses for 32 lanes and confirm with a profiler where available.
 
+## Self-check answers
+
+1. **In the 32-bank model, which bank does row 5 of a column use at width 33?** Bank 5, since 5 times 33 mod 32 is 5.
+2. **Why can a same-address read avoid a conflict?** Lanes reading the identical word can receive it by broadcast.
+3. **What must a padded transpose never output?** The padding column; it is internal storage, not data.
+
 ## Numerical reference and its limits
 
-The complete CPU model is [here](../references/cuda-035_cpu.py). Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It does not claim CUDA execution, concurrency safety or a performance measurement.
+The [CPU reference](../references/cuda-035_cpu.py) reproduces worked example 1 and prints `{'model_unique_banks': [1, 32]}`.
 
 ## Transfer review
 
 Reassess bank width and multiword accesses on the selected architecture. Do not reuse the float32 one-word model unchanged.
-
-A complete explanation must name its inputs, the unchanged mathematical contract, the changed boundary or resource condition, and the evidence still needed on actual hardware. Preserve a CPU baseline even after a GPU path becomes available.

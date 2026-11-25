@@ -2,6 +2,8 @@
 
 Open these answers only after attempting Derivatives, `requires_grad` and finite-difference checks yourself. They reuse the guide's literal inputs, starting from Example A, Derive a scalar slope, so a discrepancy points at one step. The executable companion runs the assertions; this page explains why each one tests Derivative, Finite difference, Learning rate. After a pass, choose a new input for exercise 6, Reject invalid probes, without looking.
 
+After comparing, follow the [review steps](../STUDY-GUIDE.md#after-the-solutions).
+
 ## Mechanism review
 
 A derivative measures local sensitivity: how much a function changes for a small input change. It is not itself a new parameter value. Gradient descent combines the derivative with a learning rate and a subtraction rule. PyTorch tracks operations involving tensors with `requires_grad=True` and can calculate a derivative through `autograd.grad`. A central finite difference estimates the same slope by evaluating the function at nearby inputs, providing an independent numerical check.
@@ -144,6 +146,3 @@ else:
 
 **Verify:** In a fresh process, the exercise checks confirm for every looped case, `central(function, 0.0, h)` raises `ValueError` and `central(lambda value: 0.0, float('nan'), 0.1)` raises `ValueError`.
 
-## Review after comparison
-
-Repeat exercise 4, Inspect a stationary point, with one changed fixture value and predict the difference before running it. Keep your failing attempt at exercise 5, Observe grad-return behavior, beside the repaired result. A missing framework is not a failing assertion. These solutions use only local fixtures.

@@ -196,7 +196,6 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <article class="document"><h2 id="cuda-002-explanatory-solutions">cuda-002: explanatory solutions<a class="heading-anchor" href="#cuda-002-explanatory-solutions" aria-label="Link to this section">#</a></h2>
 <h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
 <p>An SM, or streaming multiprocessor, schedules groups of GPU threads and owns finite execution and storage resources. A block is a cooperating group in your program; it is not a physical processor. Blocks can wait for resources and need not run in index order. Within a block, threads are organized into warps, normally 32 threads in CUDA. A warp issues instructions with a set of participating lanes. Registers hold per-thread working values, shared memory supports block cooperation, and device DRAM holds larger arrays. Copy engines may transfer data while computation proceeds, but concurrency depends on hardware and dependencies. Compute capability identifies a hardware feature family; toolkit version identifies software.</p>
-<p>The separate <a href="../references/cuda-002_cpu.py.html">CPU reference</a> checks the chapter&#x27;s bounded model. It does not execute CUDA or establish GPU timing. Compare after attempting the worksheet or explicitly choosing to reveal solutions.</p>
 <h3 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h3>
 <p>Draw four SM boxes and a grid of ten blocks. Under the deliberately simplified assumption of one resident block per SM, the grid needs at least three waves: four, four and two blocks. This is an occupancy illustration, not a runtime prediction. Real residency depends on registers, shared memory, threads and architectural limits.</p>
 <p><strong>Approach:</strong> Assign ten blocks to four SM boxes one at a time under the stated one-resident-block rule and count rounds until every block has run.</p>
@@ -233,11 +232,16 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Why it is correct:</strong> Each hop is a distinct memory space with its own ownership; the SM can only load what the device allocation already holds.</p>
 <p><strong>A plausible wrong approach:</strong> Passing the host pointer straight to a kernel assumes unified addressing makes host data resident; without managed memory that is an illegal access.</p>
 <p><strong>How to verify:</strong> Draw the path with explicit copy calls and confirm the returned buffer is copied back only after the kernel completes.</p>
+<h3 id="self-check-answers">Self-check answers<a class="heading-anchor" href="#self-check-answers" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>How many warps does a block of 65 threads occupy, and how many lanes sit idle?</strong> Three warps; the last warp holds one valid thread and 31 unused lanes.</li>
+<li><strong>Why is a block not the same thing as an SM?</strong> A block is a cooperating group in your program; the SM is the hardware that hosts one or more resident blocks as resources allow.</li>
+<li><strong>What does the copy engine add to the hardware picture?</strong> It moves data between host and device memory, so transfers can overlap with kernel execution when streams and pinned memory permit.</li>
+</ol>
 <h3 id="numerical-reference-and-its-limits">Numerical reference and its limits<a class="heading-anchor" href="#numerical-reference-and-its-limits" aria-label="Link to this section">#</a></h3>
-<p>The complete CPU model is <a href="../references/cuda-002_cpu.py.html">here</a>. Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It does not claim CUDA execution, concurrency safety or a performance measurement.</p>
+<p>The <a href="../references/cuda-002_cpu.py.html">CPU reference</a> reproduces worked example 1 and prints <code>{&#x27;simplified_waves&#x27;: 3, &#x27;warps_for_100_threads&#x27;: 4}</code>.</p>
 <h3 id="transfer-review">Transfer review<a class="heading-anchor" href="#transfer-review" aria-label="Link to this section">#</a></h3>
-<p>Data starts in host storage, is transferred to device allocation, and loads feed SM registers or shared memory. Returned output needs an explicit or framework-managed dependency and transfer.</p>
-<p>A complete explanation must name its inputs, the unchanged mathematical contract, the changed boundary or resource condition, and the evidence still needed on actual hardware. Preserve a CPU baseline even after a GPU path becomes available.</p></article>
+<p>Data starts in host storage, is transferred to device allocation, and loads feed SM registers or shared memory. Returned output needs an explicit or framework-managed dependency and transfer.</p></article>
   </main>
 </body>
 </html>

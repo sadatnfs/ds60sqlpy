@@ -95,9 +95,7 @@ Discussion
 
 ## Solution reasoning lens
 
-A strong solution is not merely code that produces one plausible
-output. It establishes a chain from input contract to operation to
-verification:
+Each decision below links an input contract to an operation and its evidence:
 
 1. **`KMeans(n_clusters=k, n_init=..., random_state=...)`:** declares cluster count and repeated initialization so a local optimum is not mistaken for truth.
 2. **`silhouette_score(X, labels)`:** compares cohesion and separation under the selected distance; it needs at least two nontrivial clusters.
@@ -114,29 +112,15 @@ verification:
 
 **Evidence of correctness:** Compare scaled/unscaled results, repeat seeds, report cluster sizes and stability, retain continuous anomaly scores, and review synthetic plus domain controls.
 
-When comparing your attempt with the reference, explain which of these
-decisions your code made explicitly. If the reference makes a different
-choice, compare the contracts and evidence before deciding that one
-version is universally better.
-
 <!-- END ADVANCED PYTHON CONCEPT ENRICHMENT -->
 
 ## Exercise-by-exercise reasoning map
-
-This map connects every learner prompt to a reasoning path. Read the
-explanation before copying code: the goal is to understand the assumptions,
-the evidence that validates the result, and the edge cases that can make an
-apparently correct implementation fail.
 
 ### Exercise 1: Original lesson practice
 
 **Prompt:** Try several values of `k` and plot inertia versus `k` (the elbow plot).
 
 **How to reason about it:** Inertia always falls as k increases, so the elbow is a judgment rather than an optimizer. Fit each candidate on the same scaled representation and inspect stability and usefulness alongside the curve.
-
-Use the worked reference earlier in this file, then change one boundary
-condition and rerun the stated checks. A copied output is not evidence
-unless you can explain why that output follows from the inputs.
 
 **Verify:** For each declared k, print inertia, cluster sizes, and seed and save a labeled elbow curve; assert inertia is non-increasing and do not call the visual bend proof of true classes.
 
@@ -146,10 +130,6 @@ unless you can explain why that output follows from the inputs.
 
 **How to reason about it:** Silhouette requires at least two clusters and rewards compact separation under its distance metric. A maximum is a candidate, not proof that the data contains that many real-world groups.
 
-Use the worked reference earlier in this file, then change one boundary
-condition and rerun the stated checks. A copied output is not evidence
-unless you can explain why that output follows from the inputs.
-
 **Verify:** For k=2..6 on identical scaled rows, print silhouette score and cluster sizes, choose the largest score only after checking no tiny/empty cluster, and repeat with at least three seeds to report stability.
 
 ### Exercise 3: Original lesson practice
@@ -157,10 +137,6 @@ unless you can explain why that output follows from the inputs.
 **Prompt:** Compare Isolation Forest with Local Outlier Factor.
 
 **How to reason about it:** Isolation Forest and LOF use different notions of unusualness. Match contamination, understand LOF's novelty mode, and compare known synthetic outliers or reviewed cases instead of label overlap alone.
-
-Use the worked reference earlier in this file, then change one boundary
-condition and rerun the stated checks. A copied output is not evidence
-unless you can explain why that output follows from the inputs.
 
 **Verify:** On identical scaled data and declared contamination/neighbors, print each method's continuous anomaly score and top-n row IDs; report overlap and inspect injected normal/outlier controls instead of equating labels blindly.
 
@@ -179,10 +155,6 @@ Standardization is not automatically correct: a domain-approved unit or
 feature weight can be meaningful. State why the chosen metric represents
 similarity for this problem.
 
-**Why this matters:** The result should survive a fresh-kernel rerun and
-a deliberately chosen boundary case. If it does not, revisit the
-assumption or data boundary rather than hiding the failure.
-
 **Verify:** Scaling sensitivity; print feature ranges and K-Means assignments before/after StandardScaler, then report adjusted Rand agreement; verify the 10,000-scale feature dominates the unscaled distance calculation.
 
 ### Exercise 5: Cluster stability
@@ -199,10 +171,6 @@ High stability still does not prove business meaning; it only shows the
 algorithm consistently finds the same geometry. Validate profiles with domain
 knowledge and downstream usefulness.
 
-**Why this matters:** The result should survive a fresh-kernel rerun and
-a deliberately chosen boundary case. If it does not, revisit the
-assumption or data boundary rather than hiding the failure.
-
 **Verify:** Cluster stability; over at least ten seeds and bootstrap samples, print inertia, silhouette, cluster sizes, and label-aligned adjusted Rand scores; report distributions rather than comparing raw numeric labels.
 
 ### Exercise 6: Anomaly validation without labels
@@ -218,9 +186,5 @@ cost. Sweep contamination and report how the review queue changes.
 
 Preserve raw scores so policy thresholds can change without refitting. Never
 describe the detector's `-1` output as a confirmed incident.
-
-**Why this matters:** The result should survive a fresh-kernel rerun and
-a deliberately chosen boundary case. If it does not, revisit the
-assumption or data boundary rather than hiding the failure.
 
 **Verify:** Anomaly validation without labels; deliver an evaluation table naming synthetic anomaly fixtures, domain-review sample/precision-at-k, review capacity, contamination sweep, stability metric, owner, and a stop threshold for each check.

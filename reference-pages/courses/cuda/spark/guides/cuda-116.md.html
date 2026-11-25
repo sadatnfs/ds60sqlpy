@@ -194,9 +194,17 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cuda/spark/guides/cuda-116.md</code></p>
     </header>
     <article class="document"><h2 id="cuda-116-supported-operations-fallback-and-semantic-boundaries">cuda-116: Supported operations, fallback and semantic boundaries<a class="heading-anchor" href="#cuda-116-supported-operations-fallback-and-semantic-boundaries" aria-label="Link to this section">#</a></h2>
-<p><strong>Route:</strong> CUDA Python and machine learning / GPU Spark specialization. <strong>Stage:</strong> advanced. <strong>Prerequisites:</strong> <code>cuda-115</code>. Allow several sessions when the hardware experiment is new; the chapter is not a deadline.</p>
-<h3 id="what-you-will-be-able-to-explain">What you will be able to explain<a class="heading-anchor" href="#what-you-will-be-able-to-explain" aria-label="Link to this section">#</a></h3>
-<p>By the end, you can <strong>classify fallback versus unavailable device</strong>, <strong>rewrite an opaque function declaratively</strong>, and <strong>design a mixed-plan report</strong> with evidence. Start with the two worked cases, then use the editable CPU model to make the quantities concrete.</p>
+<p><strong>Route:</strong> CUDA Python and machine learning / GPU Spark specialization. <strong>Stage:</strong> advanced. <strong>Prerequisites:</strong> <code>cuda-115</code>.</p>
+<p>Pacing, evidence labels and platform rules: <a href="../../STUDY-GUIDE.md.html">CUDA study guide</a>.</p>
+<h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
+<ul>
+<li>Classify fallback versus unavailable device.</li>
+<li>Find an unsupported expression.</li>
+<li>Count boundary costs.</li>
+<li>Rewrite an opaque function declaratively.</li>
+<li>Preserve edge semantics.</li>
+<li>Design a mixed-plan report.</li>
+</ul>
 <h3 id="mechanism-and-vocabulary">Mechanism and vocabulary<a class="heading-anchor" href="#mechanism-and-vocabulary" aria-label="Link to this section">#</a></h3>
 <p>Support depends on operator, expression, dtype and configuration. A supported aggregate on one type may fall back on another expression or precision requirement. CPU fallback means a compatible plugin environment selects CPU execution for an unsupported part of a query. It does not mean a missing NVIDIA GPU can always initialize the enabled plugin and run normally.</p>
 <p>For CPU-only study, use ordinary Spark with the GPU plugin disabled or absent. For GPU study, inspect supported-operator documentation for the chosen release and capture reasons such as NOT_ON_GPU diagnostics. A mixed plan may pay row/columnar conversions and device transfers repeatedly. Do not force an incompatible operator merely to increase GPU coverage; preserve semantics and measure the whole query.</p>
@@ -217,8 +225,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>GPU aggregate -&gt; CPU UDF -&gt; GPU projection crosses the boundary twice around the UDF. Replacing the UDF with an equivalent supported expression might reduce transitions after parity tests.</p>
 <h4 id="worked-example-2">Worked example 2<a class="heading-anchor" href="#worked-example-2" aria-label="Link to this section">#</a></h4>
 <p>A machine with no GPU should use the CPU baseline configuration. This differs from a GPU machine where one unsupported expression falls back inside an otherwise valid plugin job.</p>
-<h3 id="portable-executable-model">Portable executable model<a class="heading-anchor" href="#portable-executable-model" aria-label="Link to this section">#</a></h3>
-<p>The <strong>CPU reference model</strong> variant runs this bounded worked example using <code>python-core</code>. It uses only the Python standard library, small synthetic values and no network. Its purpose is to expose the arithmetic or contract behind the chapter. The separate reference includes assertions for the stated observations.</p>
+<h3 id="how-to-run-the-cpu-model">How to run the CPU model<a class="heading-anchor" href="#how-to-run-the-cpu-model" aria-label="Link to this section">#</a></h3>
+<p>Edit the copy; the <a href="../references/cuda-116_cpu.py.html">reference</a> adds assertions.</p>
+<pre class="highlighted-code"><code class="language-bash">python courses/cuda/spark/lessons/cuda-116_cpu.py</code></pre>
 <pre class="highlighted-code"><code class="language-python">states <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span>
     <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">gpu_visible</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">False</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">plugin_enabled</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">False</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span>
     <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">gpu_visible</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">plugin_enabled</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">True</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">cpu_operator</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">True</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">,</span>
@@ -227,52 +236,44 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="syntax-keyword">assert</span> states<span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">cpu_operator</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">is</span> <span class="syntax-keyword">True</span>
 <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">CPU configuration worksheet: CPU baseline and GPU mixed plan are distinct</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation:</strong> CPU-only baseline and per-operator fallback are modeled separately.</p>
-<p>Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.</p>
 <h3 id="practice-and-transfer">Practice and transfer<a class="heading-anchor" href="#practice-and-transfer" aria-label="Link to this section">#</a></h3>
+<p>Record each attempt in the <a href="../lessons/cuda-116.md.html">worksheet</a> before opening hints.</p>
 <h4 id="exercise-1-classify-fallback-versus-unavailable-device">Exercise 1: Classify fallback versus unavailable device<a class="heading-anchor" href="#exercise-1-classify-fallback-versus-unavailable-device" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Calling a GPU-less run a fallback suggests the plugin was active and made per-operator choices, when actually it never started.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-2-find-an-unsupported-expression">Exercise 2: Find an unsupported expression<a class="heading-anchor" href="#exercise-2-find-an-unsupported-expression" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Assuming support from the operator name alone misses expression-level and type-level restrictions, which are the usual cause of fallback.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-3-count-boundary-costs">Exercise 3: Count boundary costs<a class="heading-anchor" href="#exercise-3-count-boundary-costs" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Assuming only the UDF runs slower and the rest stays fast ignores that the transitions stall the GPU sections on both sides.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-4-rewrite-an-opaque-function-declaratively">Exercise 4: Rewrite an opaque function declaratively<a class="heading-anchor" href="#exercise-4-rewrite-an-opaque-function-declaratively" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Rewriting with a built-in that differs on edge cases, such as whitespace or null handling, changes results while appearing equivalent.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-5-preserve-edge-semantics">Exercise 5: Preserve edge semantics<a class="heading-anchor" href="#exercise-5-preserve-edge-semantics" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Testing only typical values passes implementations that disagree exactly where production data is unusual.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-6-design-a-mixed-plan-report">Exercise 6: Design a mixed-plan report<a class="heading-anchor" href="#exercise-6-design-a-mixed-plan-report" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Reporting only the percentage of GPU operators hides which fallback is expensive. One fallback on a small lookup table may be harmless, while one on the widest projection can dominate the job.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
-<p>Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.</p>
+<p>Hint <em>k</em> belongs to exercise <em>k</em>; open one at a time.</p>
 <ol>
-<li>Start from worked example 1 and mark the quantities needed for the task &quot;Classify fallback versus unavailable device&quot;.</li>
-<li>Change one assumption in worked example 2 while preserving the declared contract: find an unsupported expression.</li>
-<li>Trace the CPU program&#x27;s variables before adding hardware behavior: count boundary costs.</li>
-<li>Draw producers, consumers and the exact operation boundary for the task &quot;Rewrite an opaque function declaratively&quot;.</li>
-<li>Separate what the small fixture establishes from what the real runtime must show: preserve edge semantics.</li>
-<li>Write a counterexample to an overbroad claim before you design a mixed-plan report.</li>
+<li>Ask whether the plugin environment is valid and chose the CPU for one operator, or whether no usable GPU exists at all.</li>
+<li>Check the operator, the expression and the data type against the release&#x27;s supported-operator documentation.</li>
+<li>Count each crossing between columnar GPU execution and row-based CPU execution, both into and out of the UDF.</li>
+<li>Find a built-in expression with the same meaning as the UDF, and prove equivalence before replacing it.</li>
+<li>Include nulls, overflow, strings and timestamps in the parity tests for any rewrite.</li>
+<li>For each operator that stayed on the CPU, record the diagnostic reason and the transitions it caused.</li>
 </ol>
-<h3 id="common-mistakes-and-self-review">Common mistakes and self-review<a class="heading-anchor" href="#common-mistakes-and-self-review" aria-label="Link to this section">#</a></h3>
-<p>Confusing a correct tiny example with a general implementation is the central review risk. For this chapter, challenge the assumption in worked example 2, then ask whether your change preserves the mechanism described above. If you change dtype, layout, ordering, batch size or backend, update the acceptance contract rather than silently reusing the old observation. Explain an unexpected result before trying random configuration changes.</p>
-<p>Keep a small evidence table with columns <strong>claim</strong>, <strong>input</strong>, <strong>expected observation</strong>, <strong>actual observation</strong> and <strong>limit</strong>. For the first claim use <code>Classify fallback versus unavailable device</code>. For the final claim use <code>Design a mixed-plan report</code>. An unperformed GPU or cluster experiment remains pending even when the CPU model is correct.</p>
-<h3 id="platform-and-evidence-contract">Platform and evidence contract<a class="heading-anchor" href="#platform-and-evidence-contract" aria-label="Link to this section">#</a></h3>
-<p>The reading worksheet and CPU reference model work through the ordinary Linux Docker classroom on macOS, Linux and Windows using WSL 2. They do not require an NVIDIA GPU. Their results are labeled CPU models or semantic oracles, not simulated hardware performance.</p>
-<p>Real CUDA work needs supported NVIDIA hardware, a compatible host driver and an explicitly prepared GPU runtime. An Apple GPU does not execute CUDA kernels. PyTorch MPS on a supported native Mac, ROCm on supported AMD hardware, or other vendor backends can provide separate accelerator learning routes; they need their own package and operation qualification and are not CUDA evidence. The ordinary Linux Docker classroom does not expose native Mac MPS automatically.</p>
-<p>Do not download packages, models or data by opening this lesson. Do not attach an engine socket, ambient cluster credentials or an arbitrary remote endpoint. A CPU pass, imported package, successful compilation, real GPU result and measured performance are distinct observations. Record the actual backend, data shape/dtype, source revision, versions and pending checks. A saved completion marker records learning progress, not hardware certification.</p>
-<p>GPU Spark is a separate owned external workflow. The ordinary <code>spark-local-scala</code> and <code>spark-local-python</code> profiles are CPU Spark. Keep the GPU plugin disabled or absent for a CPU-only baseline. Per-operator CPU fallback inside a working GPU plugin environment is a different condition from having no compatible GPU. Never mount a host Docker socket or ambient kubeconfig into an ordinary lesson worker.</p>
+<h3 id="common-mistakes-and-self-check">Common mistakes and self-check<a class="heading-anchor" href="#common-mistakes-and-self-check" aria-label="Link to this section">#</a></h3>
+<p>A common mistake is assuming CPU fallback means a machine without a GPU can run with the plugin enabled. Fallback is a per-operator choice inside a valid plugin environment; a machine with no GPU should use the plain CPU baseline. Another mistake is forcing an incompatible operator onto the GPU to raise coverage. Fix both by keeping the two cases separate, preserving semantics with parity tests and measuring the whole query, transitions included.</p>
+<p><strong>Evidence limit:</strong> The reference models a CPU-only baseline and per-operator fallback as separate cases. It cannot produce NOT_ON_GPU diagnostics or measure conversion costs, which need the selected plugin release on a GPU host.</p>
+<ol>
+<li>What does support depend on in the plugin?</li>
+<li>Why can a mixed plan be slower than expected?</li>
+<li>How should CPU-only learners run Spark in this course?</li>
+</ol>
+<p>Answers: <a href="../solutions/cuda-116_solutions.md.html#self-check-answers">self-check answers</a>.</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
 <ul>
-<li><a href="https://nvidia.github.io/cudf-spark/docs/download.html">cuDF Spark plugin release and compatibility matrix</a></li>
 <li><a href="https://nvidia.github.io/cudf-spark/docs/supported_ops.html">Supported Spark operators and expression types</a></li>
-<li><a href="https://docs.nvidia.com/cudf-spark/latest/tuning-guide.html">GPU Spark tuning guide</a></li>
-<li><a href="https://spark.apache.org/docs/latest/sql-performance-tuning.html">Apache Spark SQL performance tuning</a></li>
 </ul>
-<p>Use the version-matched documentation of your prepared environment. These references describe interfaces and supported boundaries; the chapter&#x27;s synthetic examples and CPU models are original teaching material.</p>
+<p>Full lists: <a href="../../STUDY-GUIDE.md.html#documentation-and-sources">documentation and sources</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning skill for cuda-116: Supported operations, fallback and semantic boundaries.
 Read courses/cuda/spark/guides/cuda-116.md and courses/cuda/spark/lessons/cuda-116.md.

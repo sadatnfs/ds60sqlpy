@@ -24,9 +24,9 @@ Schema evolution requires deciding what happens when fields are added, removed o
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles your saved pad as `Program.cs` in its fixed .NET 10 project. C# 14 is the matching language generation. This route uses the prepared framework libraries; it does not accept arbitrary project files, NuGet packages, command arguments or interactive input. The explicit `Program.Main` entrypoint makes compilation and execution visible. `Check` throws on a false condition in every build configuration, unlike conditional debugging assertions.
+`ItemDto` and `Valid` are declared after `Main`. Default `System.Text.Json` options match property names case-sensitively, so JSON with lowercase name and quantity keys decodes into an `ItemDto` whose Name is null and Quantity is 0, without any exception. That silent default is the subject of task 4.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Compile contract, starter stop and success marker: [running a lesson](../STUDY-GUIDE.md#running-a-lesson).
 
 
 
@@ -34,7 +34,7 @@ Start with the answer-free learner artifact in your saved classroom pad. It deli
 
 `JsonSerializer.Serialize` creates JSON text. `Deserialize<T>` maps it into T and can return null. Records provide compact transport shapes. Serialization options control naming and formatting but do not replace domain validation.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+Each example ends with a trace; method: [tracing a program](../STUDY-GUIDE.md#tracing-a-program).
 
 ## Worked example / walkthrough
 
@@ -85,6 +85,8 @@ internal static class Program {
 
 **Observe:** The restored name and quantity match the original record.
 
+**Trace.** `Serialize` writes the record's public properties in declaration order, producing the text with Name pear and Quantity 3. `Deserialize<ItemDto>` reads that text, matches both keys to the constructor parameters and builds a new record. Record equality compares the two property values, so `restored == original` is true even though they are different objects.
+
 ### Example B: Validate after structural decoding
 
 Parsing answers whether the representation is understood. Validation answers whether the application may use it.
@@ -133,6 +135,8 @@ internal static class Program {
 
 **Observe:** Valid JSON can decode into a rejected domain value.
 
+**Trace.** The JSON text is well formed, and -2 is a valid JSON number, so decoding succeeds and returns a record with Quantity -2. `Valid` then checks the domain rules: the name is not blank, but the quantity is negative, so it returns false. A record with an empty name decodes just as easily and also fails validation.
+
 ## Exercises
 
 1. **Predict and explain.** Predict what round-trip equality establishes and what it does not.
@@ -147,13 +151,15 @@ internal static class Program {
 
 6. **Transfer and justify.** Design a migration from a renamed quantity field while retaining old saved records.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Log each task in the [evidence table](../STUDY-GUIDE.md#recording-exercise-evidence) before opening the explanation.
 
 ## Common pitfalls and diagnosis
 
 JSON text equality is sensitive to formatting and property ordering. Structural decoding does not enforce every domain invariant. Keep public transport models separate from internal objects carrying credentials or resources.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+For task 4, the text with only a Name key decodes with Quantity 0, because the missing constructor parameter receives its default; a validator cannot tell that from an explicit zero unless the contract makes Quantity nullable or required. For task 5, malformed text throws `JsonException`, the literal null returns a null reference and an unknown extra key is ignored.
+
+Repair routine: [building a regression case](../STUDY-GUIDE.md#building-a-regression-case).
 
 ## Progressive hints
 
@@ -163,11 +169,15 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 ## Self-check and next step
 
-Explain Serialization, Schema, Migration without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+Explain why comparing JSON strings is a weaker round-trip test than comparing records. List what `Deserialize<ItemDto>` returns or throws for null, for a missing Quantity and for a syntax error. For task 6, describe how old records with a renamed field stay readable after the rename.
+
+Then follow the general [self-check routine](../STUDY-GUIDE.md#self-check-routine) and save your pad.
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://learn.microsoft.com/en-us/dotnet/csharp/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+[Documentation](https://learn.microsoft.com/en-us/dotnet/csharp/): The `System.Text.Json` serialization overview describes `JsonSerializer`, naming policies, case sensitivity and missing-member handling.
+
+Provenance and limits: [sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

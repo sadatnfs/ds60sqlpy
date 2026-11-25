@@ -206,11 +206,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Alias:</strong> Another reference to the same storage.</p>
 <p><strong>Shape:</strong> The size and organization of dimensions.</p>
 <h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>The Linux Docker classroom compiles your saved pad as <code>Program.cs</code> in its fixed .NET 10 project. C# 14 is the matching language generation. This route uses the prepared framework libraries; it does not accept arbitrary project files, NuGet packages, command arguments or interactive input. The explicit <code>Program.Main</code> entrypoint makes compilation and execution visible. <code>Check</code> throws on a false condition in every build configuration, unlike conditional debugging assertions.</p>
-<p>Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.</p>
+<p>Example B&#x27;s nested loop sits on one line of source; rewrite it across several lines in a scratch pad if that is easier to trace. For task 5, an empty rectangular array such as <code>new int[0, 3]</code> is legal: its <code>Length</code> is 0 while <code>GetLength(1)</code> still reports 3.</p>
+<p>Compile contract, starter stop and success marker: <a href="../STUDY-GUIDE.md.html#running-a-lesson">running a lesson</a>.</p>
 <h3 id="syntax-anatomy-and-execution-trace">Syntax anatomy and execution trace<a class="heading-anchor" href="#syntax-anatomy-and-execution-trace" aria-label="Link to this section">#</a></h3>
 <p><code>new int[3]</code> creates three zero-initialized entries. <code>values[0]</code> addresses the first. <code>int[,] grid</code> has rank two and GetLength selects a dimension. <code>int[][]</code> contains separate row arrays.</p>
-<p>Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.</p>
+<p>Each example ends with a trace; method: <a href="../STUDY-GUIDE.md.html#tracing-a-program">tracing a program</a>.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="example-a-copy-the-storage-deliberately">Example A: Copy the storage deliberately<a class="heading-anchor" href="#example-a-copy-the-storage-deliberately" aria-label="Link to this section">#</a></h4>
 <p>Primitive elements are values, so cloning this array provides independent element storage.</p>
@@ -249,6 +249,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The alias changes source; the copied integer array retains 2.</p>
+<p><strong>Trace.</strong> <code>source</code> refers to a new array holding 2 and 4. <code>alias = source</code> copies the reference, so both names point to one array. <code>Clone()</code> allocates a second array and copies the two integers into it, and the cast restores the <code>int[]</code> type. Writing 9 through <code>alias</code> changes the shared array, so <code>source[0]</code> reads 9 while <code>copy[0]</code> still reads 2.</p>
 <h4 id="example-b-respect-distinct-dimensions">Example B: Respect distinct dimensions<a class="heading-anchor" href="#example-b-respect-distinct-dimensions" aria-label="Link to this section">#</a></h4>
 <p>Different dimension sizes expose swapped-boundary mistakes that a square fixture can hide.</p>
 <pre class="highlighted-code"><code class="language-csharp"><span class="syntax-keyword">using</span> System<span class="syntax-punctuation">;</span>
@@ -289,6 +290,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The shape is two by three and the sum is 21.</p>
+<p><strong>Trace.</strong> <code>GetLength(0)</code> returns 2 rows and <code>GetLength(1)</code> returns 3 columns. The outer loop fixes a row and the inner loop visits each column of it: 1, 2 and 3 give 6, then 4, 5 and 6 add 15, so <code>sum</code> ends at 21. Using <code>grid.Length</code>, which is 6, as the bound for either loop would run past that dimension.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <ol>
 <li><strong>Predict and explain.</strong> Predict source and copy after alias mutation.</li>
@@ -308,10 +310,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <ol start="6">
 <li><strong>Transfer and justify.</strong> Choose rectangular or jagged storage for variable-length sensor histories and justify the choice.</li>
 </ol>
-<p>For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.</p>
+<p>Log each task in the <a href="../STUDY-GUIDE.md.html#recording-exercise-evidence">evidence table</a> before opening the explanation.</p>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
 <p>Clone is shallow for referenced elements. Length of a rectangular array is total cells, not the number of rows. Validate an index before using it, including results returned by searches.</p>
-<p>A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.</p>
+<p>Task 4&#x27;s loop that uses <code>GetLength(0)</code> for both bounds visits only columns 0 and 1 of the two-by-three grid; it misses 3 and 6 and returns 12 without throwing. A three-by-two grid throws instead, so test both shapes. For task 1, remember that cloning an array of objects copies only the references, so a shared object would still change.</p>
+<p>Repair routine: <a href="../STUDY-GUIDE.md.html#building-a-regression-case">building a regression case</a>.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <ol>
 <li>Reproduce Example A (Copy the storage deliberately) before changing anything, and confirm its observation: The alias changes source; the copied integer array retains 2.</li>
@@ -319,9 +322,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>Before opening the explanation, test your task 3 attempt against this lesson&#x27;s main pitfall: Clone is shallow for referenced elements.</li>
 </ol>
 <h3 id="self-check-and-next-step">Self-check and next step<a class="heading-anchor" href="#self-check-and-next-step" aria-label="Link to this section">#</a></h3>
-<p>Explain Array, Alias, Shape without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.</p>
+<p>Draw <code>source</code>, <code>alias</code> and <code>copy</code> after <code>alias[0] = 9</code>, showing which names share storage. Give <code>Length</code> and both <code>GetLength</code> values for a three-by-four rectangular array. Explain when a jagged <code>int[][]</code> fits variable-length rows better than <code>int[,]</code>, and what a jagged array costs when every row has the same length.</p>
+<p>Then follow the general <a href="../STUDY-GUIDE.md.html#self-check-routine">self-check routine</a> and save your pad.</p>
 <h3 id="sources-and-execution-boundary">Sources and execution boundary<a class="heading-anchor" href="#sources-and-execution-boundary" aria-label="Link to this section">#</a></h3>
-<p><a href="https://learn.microsoft.com/en-us/dotnet/csharp/">Official language or framework documentation</a>. The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.</p>
+<p><a href="https://learn.microsoft.com/en-us/dotnet/csharp/">Documentation</a>: The reference article on arrays covers single-dimensional, multidimensional and jagged arrays and their properties.</p>
+<p>Provenance and limits: <a href="../STUDY-GUIDE.md.html#sources-and-execution-boundary">sources and execution boundary</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for csharp-008: Arrays, indices and rectangular data.
 Read courses/csharp/guides/csharp-008.md and courses/csharp/lessons/csharp-008.cs. Prerequisites: csharp-007.

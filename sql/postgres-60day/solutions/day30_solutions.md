@@ -4,56 +4,24 @@
 <!-- beginner-solution-enrichment -->
 ## How to study and run this solution
 
-Open this explanation only after making an honest attempt. The executable
-companion runs solely against the disposable `advanced_sql_training` database:
+All six answers read `customers`, `orders` and `order_items` and change
+nothing. The shared approach is in
+[Read a solution](../../STUDY-GUIDE.md#read-a-solution).
 
 ```bash
-# Linux, macOS, or Windows through WSL 2, from the repository root
 psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
   -f sql/postgres-60day/solutions/day30_solutions.sql
 ```
 
-`psql` prints each result/command tag in the terminal. Stop at the first
-unexpected `ERROR`; later output cannot repair an earlier failed invariant.
-Compare your own SQL, row grain, column names, row counts, `NULL` policy, and
-ordering with the explanation before comparing syntax.
+## How these answers fit together
 
-## Clause-by-clause reading map
-
-The lesson's main concepts are Cohort, Retention denominator, Calendar spine. Its worked-model focus is:
-Calculate cohort size directly from customers at one row per signup cohort. Separately deduplicate activity to one row per customer/order month, derive month offset, and count active customers. Join numerator to denominator only after both relations are stable, then guard and range-check the retention rate.
-
-- Start at `FROM`/`JOIN` and state the intermediate row grain. Inspect join keys
-  before adding aggregates; a one-to-many join is allowed to multiply rows only
-  when the later contract accounts for it.
-- Apply `WHERE` to input rows, `GROUP BY` to form buckets, and `HAVING` to
-  completed groups. Window functions run over the surviving relation and
-  normally preserve its row count.
-- Read the `SELECT` list as the public result contract: keys establish grain,
-  measures state calculations, and aliases explain meaning. `ORDER BY` is the
-  only output-order guarantee; add a unique tie-breaker before `LIMIT`.
-- Trace every common table expression (CTE) as a temporary named relation.
-  Execute or inspect one stage at a time while debugging, but compare the final
-  result with an independent control rather than trusting stage names.
-- Keep SQL `NULL` as “missing/unknown/not applicable” until the metric contract
-  chooses another representation. Guard division with `NULLIF`; disclose
-  exclusions and distinguish zero from no row.
-- For DDL/DML, a command tag proves only that PostgreSQL accepted a statement.
-  Catalog checks, negative cases, row-count reconciliation, and the declared
-  transaction boundary prove behavior and cleanup.
-
-The exact final queries are not the only valid syntax. A join, subquery, CTE,
-window, or conditional aggregate can be an alternative when it preserves the
-same grain, `NULL` semantics, deterministic ordering, and safety. Prefer the
-form whose intermediate relations a reviewer can verify; optimize only after
-correctness is established with evidence.
-
-These answers align one-for-one with [day30_phase2_project.sql](../day30_phase2_project.sql).
-Run only against the disposable `advanced_sql_training` database.
-The executable companion wraps every answer in `BEGIN`/`ROLLBACK`.
-The snippets below assume the lesson's
-`SET search_path TO training, public;` statement. Run the complete
-executable companion when you want a self-contained check.
+Each answer repeats the CTEs it needs so it can run alone, but together they
+build one analysis. The first answer fixes the denominator, the second adds
+revenue at order grain, and the third turns months into offsets and rates.
+The fourth fills the calendar, the fifth adds a clearly limited projection,
+and the sixth proves the pieces agree. The counts below come from one load;
+cohort months shift slightly with the load date. The learner file is
+[day30_phase2_project.sql](../day30_phase2_project.sql).
 
 ## Reading contract
 
@@ -68,15 +36,6 @@ executable companion when you want a self-contained check.
 **Prompt:** Calculate original customer count for each UTC signup cohort month.
 
 **Reasoning:** Build the denominator from customers, including customers who never order.
-
-**Clause-by-clause reading:**
-
-- `WITH`: names an intermediate relation so its grain can be checked before later joins or aggregation.
-- `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
-- `FROM`: establishes the starting relation and therefore the initial row grain.
-- `GROUP BY`: collapses input rows to the listed key grain; every non-aggregated selected value must belong to that grain.
-- time normalization: makes reporting boundaries explicit; UTC is applied before deriving calendar buckets where required.
-- `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 
 ```sql
 WITH cohorts AS (
@@ -99,35 +58,21 @@ ORDER BY
 
 **Expected shape:** One row per cohort month.
 
-Check the result at the stated grain. An alternative formulation is
-valid only if it preserves the same NULL, ordering, time, money, and
-cardinality contract.
-
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-30 Exercise 1, read from `customers`. Build the answer toward `cohort_month`, and `cohort_size`; keep `cohort_month` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-30 Exercise 1, expected output: One row per cohort month. The final columns are `cohort_month`, and `cohort_size`. The final order is `cohort_month`.
-- **Independent verification:** For sql-30 Exercise 1, independently aggregate `customers` by `cohort_month`; require one output row for every distinct `cohort_month` tuple and compare `cohort_size` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `cohort_size` for the existing `cohort_month` tuple and verify the new tuple appears exactly once.
-- **Intermediate relation check:** For sql-30 Exercise 1, run `cohorts` one at a time. Record each CTE's row count and `cohort_month` uniqueness before the next stage uses it.
-- **Clause check:** For sql-30 Exercise 1, the solution actually uses `WITH`, `FROM`, `GROUP BY`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `customers`, preserve one row per `cohort_month`, and finish with `cohort_month`, and `cohort_size` ordered by `cohort_month`.
-- **Alternative/trade-off:** For sql-30 Exercise 1, the chosen form is justified by this lesson-specific rationale: Build the denominator from customers, including customers who never order. Evaluate another form against the concrete expected result (One row per cohort month) and the verification above.
-- **Edge case:** Add one row to an existing group and one row for a new group; recompute `cohort_size` for the existing `cohort_month` tuple and verify the new tuple appears exactly once.
+- **Inputs/evidence:** For sql-30 Exercise 1, read the 500 rows of `customers`, assign each one a `cohort_month` with `date_trunc('month', created_at AT TIME ZONE 'UTC')::date` in the `cohorts` CTE, and count customers per month.
+- **Expected result/shape:** For sql-30 Exercise 1, expected output: one row per UTC signup month, 48 on this load (from 2022-11-01 through 2026-10-01), with `cohort_size` between 7 and 12 and a total of 500. The final columns are `cohort_month`, and `cohort_size`. The final order is `cohort_month`.
+- **Independent verification:** For sql-30 Exercise 1, confirm `SUM(cohort_size)` is 500, the `customers` row count, so no customer is dropped by the UTC conversion; then, inside `BEGIN ... ROLLBACK`, insert one customer with the default `created_at` (now) and confirm a new cohort for the current month appears with size 1 while every older cohort keeps its count.
+- **Intermediate relation check:** `cohorts` has 500 rows, one per customer, because it reads only `customers`. No customer is lost for lacking orders.
+- **Clause check:** `date_trunc('month', c.created_at AT TIME ZONE 'UTC')::date` gives each customer a first-of-month date, and `COUNT(*)` per month gives 48 cohorts of 7 to 12 customers. The sizes sum to 500.
+- **Alternative/trade-off:** Counting from `orders` instead would return cohort sizes of customers who ordered, 438 in total, and every later rate would be too high. Starting from `customers` is the whole point.
+- **Edge case:** Without `AT TIME ZONE 'UTC'`, the session time zone decides the month, and a signup late on the last day of a month can move cohorts. The fixture times are on the hour, so the shift is real if your session is not UTC.
 
 ## Exercise 2: Query writing
 
 **Prompt:** Calculate active customers and net line revenue for each cohort/order month.
 
 **Reasoning:** Aggregate line items to order grain before cohort joins, then count distinct active customers.
-
-**Clause-by-clause reading:**
-
-- `WITH`: names an intermediate relation so its grain can be checked before later joins or aggregation.
-- `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
-- `FROM`: establishes the starting relation and therefore the initial row grain.
-- `JOIN ... ON`: combines relations and may multiply rows; the match predicate and each input's grain must agree.
-- `GROUP BY`: collapses input rows to the listed key grain; every non-aggregated selected value must belong to that grain.
-- time normalization: makes reporting boundaries explicit; UTC is applied before deriving calendar buckets where required.
-- `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 
 ```sql
 WITH order_values AS (
@@ -169,36 +114,21 @@ ORDER BY
 
 **Expected shape:** One row per observed cohort/order month.
 
-Check the result at the stated grain. An alternative formulation is
-valid only if it preserves the same NULL, ordering, time, money, and
-cardinality contract.
-
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-30 Exercise 2, read from `orders`, `order_items`, and `customers`. Build the answer toward `cohort_month`, `order_month`, `active_customers`, and `net_revenue`; keep `cohort_month`, and `order_month` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-30 Exercise 2, expected output: One row per observed cohort/order month. The final columns are `cohort_month`, `order_month`, `active_customers`, and `net_revenue`. The final order is `c.cohort_month, ov.order_month`.
-- **Independent verification:** For sql-30 Exercise 2, independently aggregate `orders`, `order_items`, and `customers` by `cohort_month`, and `order_month`; require one output row for every distinct `cohort_month`, and `order_month` tuple and compare `order_month`, `active_customers`, and `net_revenue` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `active_customers`, and `net_revenue` for the existing `cohort_month`, and `order_month` tuple and verify the new tuple appears exactly once.
-- **Intermediate relation check:** For sql-30 Exercise 2, run `order_values`, and `cohorts` one at a time. Record each CTE's row count and `cohort_month`, and `order_month` uniqueness before the next stage uses it.
-- **Clause check:** For sql-30 Exercise 2, the solution actually uses `WITH`, `FROM`, `JOIN ... ON`, `GROUP BY`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `orders`, `order_items`, and `customers`, preserve one row per `cohort_month`, and `order_month`, and finish with `cohort_month`, `order_month`, `active_customers`, and `net_revenue` ordered by `c.cohort_month, ov.order_month`.
-- **Alternative/trade-off:** For sql-30 Exercise 2, the chosen form is justified by this lesson-specific rationale: Aggregate line items to order grain before cohort joins, then count distinct active customers. Evaluate another form against the concrete expected result (One row per observed cohort/order month) and the verification above.
-- **Edge case:** Add one row to an existing group and one row for a new group; recompute `active_customers`, and `net_revenue` for the existing `cohort_month`, and `order_month` tuple and verify the new tuple appears exactly once.
+- **Inputs/evidence:** For sql-30 Exercise 2, read `orders` and `order_items` to build one net value per order and UTC `order_month` in `order_values`, read `customers` for each signup `cohort_month` in `cohorts`, then join the two on `customer_id` and group by cohort and order month.
+- **Expected result/shape:** For sql-30 Exercise 2, expected output: one row per cohort and order month with activity, 1060 rows on this load across all 48 cohorts; the first is cohort 2022-11-01 in order month 2023-02-01 with 2 active customers and 1203.26 of revenue. The final columns are `cohort_month`, `order_month`, `active_customers`, and `net_revenue`. The final order is `c.cohort_month, ov.order_month`.
+- **Independent verification:** For sql-30 Exercise 2, confirm `SUM(active_customers)` is 3912, equal to `COUNT(DISTINCT (customer_id, order_month))` over `order_values`, and that `SUM(net_revenue)` is 2355647.39, a few cents above the unrounded 2355647.12 because each cell is rounded; also confirm 0 rows have `order_month < cohort_month`, so no order predates its customer's signup.
+- **Intermediate relation check:** `order_values` has 4,362 rows, one per order, totalling 2,355,647.12 from the line-item formula. That is 0.23 more than `SUM(orders.total_amount)`, which comes from rounding in the stored header totals.
+- **Clause check:** Grouping by cohort and order month gives about 1,060 rows. `COUNT(DISTINCT ov.customer_id)` is needed because 286 customer and month pairs hold more than one order; the largest count is 10.
+- **Alternative/trade-off:** Joining `order_items` directly to `cohorts` and summing lines gives the same revenue but makes `COUNT(*)` count lines. The order-grain CTE removes that temptation.
+- **Edge case:** The revenue across all rows is again 2,355,647.12, so nothing was duplicated by the join. If it were higher, the join key would be wrong.
 
 ## Exercise 3: Query writing
 
 **Prompt:** Calculate cohort month offset and retention using original cohort size.
 
 **Reasoning:** Use year-plus-month age components and guard the denominator.
-
-**Clause-by-clause reading:**
-
-- `WITH`: names an intermediate relation so its grain can be checked before later joins or aggregation.
-- `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
-- `FROM`: establishes the starting relation and therefore the initial row grain.
-- `JOIN ... ON`: combines relations and may multiply rows; the match predicate and each input's grain must agree.
-- `NULLIF`: turns a prohibited denominator into NULL so division reports unknown instead of raising an error.
-- `GROUP BY`: collapses input rows to the listed key grain; every non-aggregated selected value must belong to that grain.
-- time normalization: makes reporting boundaries explicit; UTC is applied before deriving calendar buckets where required.
-- `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 
 ```sql
 WITH cohorts AS (
@@ -244,36 +174,21 @@ ORDER BY
 
 **Expected shape:** Observed cohort/offset rows with retention from 0 to 1.
 
-Check the result at the stated grain. An alternative formulation is
-valid only if it preserves the same NULL, ordering, time, money, and
-cardinality contract.
-
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-30 Exercise 3, read from `customers`, and `orders`. Build the answer toward `cohort_month`, `month_offset`, `cohort_size`, `active_customers`, and `retention_rate`; keep `cohort_month` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-30 Exercise 3, expected output: Observed cohort/offset rows with retention from 0 to 1. The final columns are `cohort_month`, `month_offset`, `cohort_size`, `active_customers`, and `retention_rate`. The final order is `a.cohort_month, month_offset`.
-- **Independent verification:** For sql-30 Exercise 3, project `cohort_month` plus the raw source columns from `customers`, and `orders` at each join stage; record row count and distinct `cohort_month`, then assert the final `cohort_month`, `month_offset`, `cohort_size`, `active_customers`, and `retention_rate` values match those staged rows without unintended fanout or loss. Add one source row with a new `cohort_month`; verify the result gains exactly one row carrying that `cohort_month` value.
-- **Intermediate relation check:** For sql-30 Exercise 3, run `cohorts`, `cohort_sizes`, and `activity` one at a time. Record each CTE's row count and `cohort_month` uniqueness before the next stage uses it.
-- **Clause check:** For sql-30 Exercise 3, the solution actually uses `WITH`, `FROM`, `JOIN ... ON`, `GROUP BY`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `customers`, and `orders`, preserve one row per `cohort_month`, and finish with `cohort_month`, `month_offset`, `cohort_size`, `active_customers`, and `retention_rate` ordered by `a.cohort_month, month_offset`.
-- **Alternative/trade-off:** For sql-30 Exercise 3, the chosen form is justified by this lesson-specific rationale: Use year-plus-month age components and guard the denominator. Evaluate another form against the concrete expected result (Observed cohort/offset rows with retention from 0 to 1) and the verification above.
-- **Edge case:** Add one source row with a new `cohort_month`; verify the result gains exactly one row carrying that `cohort_month` value.
+- **Inputs/evidence:** For sql-30 Exercise 3, read `customers` for each signup `cohort_month` and its `cohort_size`, read `orders` for distinct active customers per cohort and UTC order month in `activity`, then compute `month_offset` with `age()` and divide active customers by the original cohort size.
+- **Expected result/shape:** For sql-30 Exercise 3, expected output: 1060 observed cohort and offset rows on this load, with `month_offset` from 0 to 45 and `retention_rate` between 0.0833 and 0.9091; only 12 cohorts have an offset 0 row, and the first cohort, 2022-11-01, starts at offset 3. The final columns are `cohort_month`, `month_offset`, `cohort_size`, `active_customers`, and `retention_rate`. The final order is `a.cohort_month, month_offset`.
+- **Independent verification:** For sql-30 Exercise 3, confirm no row has `active_customers > cohort_size` and that the 2022-11-01 cohort shows sizes of 10 with 2, 1, and 2 active customers at offsets 3, 4, and 5; then, inside `BEGIN ... ROLLBACK`, insert a customer with no orders and confirm the row count stays 1060, because the inner join to `activity` hides cohorts with no orders.
+- **Intermediate relation check:** `activity` has the same 1,060 cohort and month rows as the second answer, but reads `orders` alone because it needs only customers, not revenue.
+- **Clause check:** The `age` arithmetic turns two first-of-month dates into whole months, from 0 up to 45. The highest retention is 0.9091, 10 of 11 customers, and no row reaches 1.
+- **Alternative/trade-off:** `(order_month - cohort_month) / 30` looks simpler but drifts: 31-day and 28-day months put some orders in the wrong offset. The year and month parts of `age` are exact.
+- **Edge case:** No order happens before its customer's signup in this data, so there are no negative offsets. In real data a backfilled signup date can create them; filter or flag them instead of averaging them in.
 
 ## Exercise 4: Prediction
 
 **Prompt:** Create a dense cohort/offset spine from offset 0 through 12 and show missing activity as zero.
 
 **Reasoning:** Cross join cohort months with generate_series, then left join observed activity at the same offset grain.
-
-**Clause-by-clause reading:**
-
-- `WITH`: names an intermediate relation so its grain can be checked before later joins or aggregation.
-- `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
-- `FROM`: establishes the starting relation and therefore the initial row grain.
-- `JOIN ... ON`: combines relations and may multiply rows; the match predicate and each input's grain must agree.
-- `COALESCE`: replaces NULL only where the lesson explicitly defines a missing value as a concrete fallback.
-- `GROUP BY`: collapses input rows to the listed key grain; every non-aggregated selected value must belong to that grain.
-- time normalization: makes reporting boundaries explicit; UTC is applied before deriving calendar buckets where required.
-- `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 
 ```sql
 WITH cohorts AS (
@@ -328,40 +243,21 @@ FROM
 
 **Expected shape:** Thirteen rows per cohort.
 
-Check the result at the stated grain. An alternative formulation is
-valid only if it preserves the same NULL, ordering, time, money, and
-cardinality contract.
-
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-30 Exercise 4, read from `customers`, `orders`, and `generate_series`. Build the answer toward `cohort_month`, `month_offset`, `cohort_size`, and `active_customers`; keep `cohort_month` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-30 Exercise 4, expected output: Thirteen rows per cohort. The final columns are `cohort_month`, `month_offset`, `cohort_size`, and `active_customers`. The final order is `s.cohort_month, s.month_offset`.
-- **Independent verification:** For sql-30 Exercise 4, project `cohort_month` plus the raw source columns from `customers`, `orders`, and `generate_series` at each join stage; record row count and distinct `cohort_month`, then assert the final `cohort_month`, `month_offset`, `cohort_size`, and `active_customers` values match those staged rows without unintended fanout or loss. Add one source row with a new `cohort_month`; verify the result gains exactly one row carrying that `cohort_month` value.
-- **Intermediate relation check:** For sql-30 Exercise 4, run `cohorts`, `cohort_sizes`, `activity`, and `spine` one at a time. Record each CTE's row count and `cohort_month` uniqueness before the next stage uses it.
-- **Clause check:** For sql-30 Exercise 4, the solution actually uses `WITH`, `FROM`, `JOIN ... ON`, `GROUP BY`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `customers`, `orders`, and `generate_series`, preserve one row per `cohort_month`, and finish with `cohort_month`, `month_offset`, `cohort_size`, and `active_customers` ordered by `s.cohort_month, s.month_offset`.
-- **Alternative/trade-off:** For sql-30 Exercise 4, the chosen form is justified by this lesson-specific rationale: Cross join cohort months with generate_series, then left join observed activity at the same offset grain. Evaluate another form against the concrete expected result (Thirteen rows per cohort) and the verification above.
-- **Edge case:** Add one source row with a new `cohort_month`; verify the result gains exactly one row carrying that `cohort_month` value.
+- **Inputs/evidence:** For sql-30 Exercise 4, read `customers` for cohort sizes and `orders` for active customers per cohort and `month_offset`, build a `spine` by crossing every cohort with `generate_series(0, 12)`, and `LEFT JOIN` the activity onto it with `COALESCE(..., 0)`.
+- **Expected result/shape:** For sql-30 Exercise 4, expected output: exactly 13 rows per cohort, 624 rows for the 48 cohorts on this load, of which 137 carry a zero-filled `active_customers`; cohort 2022-11-01 shows 0, 0, 0 at offsets 0 to 2 and then 2 at offset 3. The final columns are `cohort_month`, `month_offset`, `cohort_size`, and `active_customers`. The final order is `s.cohort_month, s.month_offset`.
+- **Independent verification:** For sql-30 Exercise 4, confirm `COUNT(*) = 13 * COUNT(DISTINCT cohort_month)` and that the 487 nonzero rows match the offset 0 to 12 rows of Exercise 3; then, inside `BEGIN ... ROLLBACK`, insert a customer with no orders and confirm 637 rows, 150 of them zero, and 49 cohorts, because the spine keeps the new cohort that the inner join in Exercise 3 dropped.
+- **Intermediate relation check:** `spine` has 48 cohorts times 13 offsets, 624 rows, before any orders are joined.
+- **Clause check:** The `LEFT JOIN` on both cohort and offset keeps every spine row. 487 slots find activity and 137 do not; `COALESCE` shows those as 0 active customers.
+- **Alternative/trade-off:** Building the spine from observed offsets would miss a month where no cohort member ordered. `generate_series(0, 12)` makes the 13 slots a fixed promise.
+- **Edge case:** For the newest cohorts, offsets beyond today are also 0, though they have not happened yet. A report should mark those as future months rather than as zero retention.
 
 ## Exercise 5: Debugging
 
 **Prompt:** Calculate revenue per active customer and a trailing three-observation annualized teaching projection.
 
 **Reasoning:** Compute stable cohort metrics before applying the window; disclose that observed rows may have month gaps.
-
-**Clause-by-clause reading:**
-
-- `WITH`: names an intermediate relation so its grain can be checked before later joins or aggregation.
-- `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
-- `FROM`: establishes the starting relation and therefore the initial row grain.
-- `JOIN ... ON`: combines relations and may multiply rows; the match predicate and each input's grain must agree.
-- `WHERE`: filters source rows before grouping and window calculation; SQL's unknown NULL comparisons do not pass.
-- `NULLIF`: turns a prohibited denominator into NULL so division reports unknown instead of raising an error.
-- `GROUP BY`: collapses input rows to the listed key grain; every non-aggregated selected value must belong to that grain.
-- `OVER (...)`: computes an analytic value while preserving detail rows; partition, order, and frame define its peer set.
-- `PARTITION BY`: restarts a window calculation independently for each partition key.
-- window frame: states exactly which rows or peers contribute to the current row's window result.
-- time normalization: makes reporting boundaries explicit; UTC is applied before deriving calendar buckets where required.
-- `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 
 ```sql
 WITH order_values AS (
@@ -425,36 +321,21 @@ ORDER BY
 
 **Expected shape:** One row per observed cohort/month with nullable guarded measures.
 
-Check the result at the stated grain. An alternative formulation is
-valid only if it preserves the same NULL, ordering, time, money, and
-cardinality contract.
-
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-30 Exercise 5, read from `orders`, `order_items`, and `customers`. Build the answer toward `cohort_month`, `order_month`, `month_offset`, `active_customers`, `revenue`, `revenue_per_active`, and `illustrative_annualized_clv`; keep `cohort_month` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-30 Exercise 5, expected output: One row per observed cohort/month with nullable guarded measures. The final columns are `cohort_month`, `order_month`, `month_offset`, `active_customers`, `revenue`, `revenue_per_active`, and `illustrative_annualized_clv`. The final order is `cohort_month, month_offset`.
-- **Independent verification:** For sql-30 Exercise 5, choose one complete partition from `orders`, `order_items`, and `customers`; hand-calculate its first, middle, and final window values for `order_month`, `active_customers`, `revenue`, and `revenue_per_active`, then verify output keys remain `cohort_month`. Test a one-row partition and a partition with at least three rows; verify the frame boundary and partition reset explicitly.
-- **Intermediate relation check:** For sql-30 Exercise 5, run `order_values`, `cohorts`, `metrics`, and `per_active` one at a time. Record each CTE's row count and `cohort_month` uniqueness before the next stage uses it.
-- **Clause check:** For sql-30 Exercise 5, the solution actually uses `WITH`, `FROM`, `JOIN ... ON`, `WHERE`, `GROUP BY`, window `OVER`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `orders`, `order_items`, and `customers`, preserve one row per `cohort_month`, and finish with `cohort_month`, `order_month`, `month_offset`, `active_customers`, `revenue`, `revenue_per_active`, and `illustrative_annualized_clv` ordered by `cohort_month, month_offset`.
-- **Alternative/trade-off:** For sql-30 Exercise 5, the chosen form is justified by this lesson-specific rationale: Compute stable cohort metrics before applying the window; disclose that observed rows may have month gaps. Evaluate another form against the concrete expected result (One row per observed cohort/month with nullable guarded measures) and the verification above.
-- **Edge case:** Test a one-row partition and a partition with at least three rows; verify the frame boundary and partition reset explicitly.
+- **Inputs/evidence:** For sql-30 Exercise 5, read `orders` and `order_items` for net order values, read `customers` for cohorts, then aggregate active customers and revenue per cohort and order month in `metrics`, divide them in `per_active` with `NULLIF`, and average the last three `revenue_per_active` values per cohort with a `ROWS BETWEEN 2 PRECEDING AND CURRENT ROW` frame.
+- **Expected result/shape:** For sql-30 Exercise 5, expected output: 487 rows on this load, all with `month_offset` from 0 to 12 and no NULL `revenue_per_active`; the first cohort's rows show `revenue_per_active` 601.63, 656.19, 660.47, and 76.67, with `illustrative_annualized_clv` 7219.56, 7546.92, 7673.15, and 5573.32. The final columns are `cohort_month`, `order_month`, `month_offset`, `active_customers`, `revenue`, `revenue_per_active`, and `illustrative_annualized_clv`. The final order is `cohort_month, month_offset`.
+- **Independent verification:** For sql-30 Exercise 5, confirm the first cohort by hand: 601.63 times 12 is 7219.56 for its first row, the second row averages two values, and the fourth row, 5573.32, drops the first value because the frame holds only three rows; also confirm that the first row of the next cohort equals its own `revenue_per_active` times 12, which shows the frame resets at each `cohort_month`.
+- **Intermediate relation check:** `metrics` is filtered to offsets 0 to 12, leaving 487 rows, the same observed slots the fourth answer found.
+- **Clause check:** `revenue_per_active` is computed before the window, so the window averages per-customer values. For the newest cohort, offset 0 is 17,152.37 over 8 customers, or 2,144.05 each.
+- **Alternative/trade-off:** Running the window over the dense spine from the fourth answer would make each frame exactly three months. Here, 7 rows in 6 cohorts follow a gap, so their frame stretches further back.
+- **Edge case:** Multiplying a three-row average by 12 assumes every month looks like the recent ones. That ignores churn, margin and seasonality, which is why the column is named `illustrative_annualized_clv`.
 
 ## Exercise 6: Extension
 
 **Prompt:** Audit cohort constraints and reconcile cohort revenue to net line revenue for offsets 0-12.
 
 **Reasoning:** Calculate violations and compare totals at the same scoped population.
-
-**Clause-by-clause reading:**
-
-- `WITH`: names an intermediate relation so its grain can be checked before later joins or aggregation.
-- `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
-- `FROM`: establishes the starting relation and therefore the initial row grain.
-- `JOIN ... ON`: combines relations and may multiply rows; the match predicate and each input's grain must agree.
-- `WHERE`: filters source rows before grouping and window calculation; SQL's unknown NULL comparisons do not pass.
-- `GROUP BY`: collapses input rows to the listed key grain; every non-aggregated selected value must belong to that grain.
-- `FILTER (WHERE ...)`: limits one aggregate without removing rows needed by neighboring aggregates.
-- time normalization: makes reporting boundaries explicit; UTC is applied before deriving calendar buckets where required.
 
 ```sql
 WITH order_values AS (
@@ -532,24 +413,19 @@ FROM
 
 **Expected shape:** One row with zero retention violations and zero revenue difference.
 
-Check the result at the stated grain. An alternative formulation is
-valid only if it preserves the same NULL, ordering, time, money, and
-cardinality contract.
-
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-30 Exercise 6, read from `orders`, `order_items`, and `customers`. Build the answer toward `active_exceeds_cohort_violations`, `cohort_revenue`, `independent_revenue`, and `revenue_difference`; keep `order_id` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-30 Exercise 6, expected output: One row with zero retention violations and zero revenue difference. The final columns are `active_exceeds_cohort_violations`, `cohort_revenue`, `independent_revenue`, and `revenue_difference`.
-- **Independent verification:** For sql-30 Exercise 6, project `order_id` plus the raw source columns from `orders`, `order_items`, and `customers` at each join stage; record row count and distinct `order_id`, then assert the final `active_exceeds_cohort_violations`, `cohort_revenue`, `independent_revenue`, and `revenue_difference` values match those staged rows without unintended fanout or loss. Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
-- **Intermediate relation check:** For sql-30 Exercise 6, run `order_values`, `cohorts`, `cohort_sizes`, `metrics`, and `scoped` one at a time. Record each CTE's row count and `order_id` uniqueness before the next stage uses it.
-- **Clause check:** For sql-30 Exercise 6, the solution actually uses `WITH`, `FROM`, `JOIN ... ON`, `WHERE`, aggregate `FILTER`, `GROUP BY`, and `SELECT`. Read only those operations: begin at `orders`, `order_items`, and `customers`, preserve one row per `order_id`, and finish with `active_exceeds_cohort_violations`, `cohort_revenue`, `independent_revenue`, and `revenue_difference`.
-- **Alternative/trade-off:** For sql-30 Exercise 6, the chosen form is justified by this lesson-specific rationale: Calculate violations and compare totals at the same scoped population. Evaluate another form against the concrete expected result (One row with zero retention violations and zero revenue difference) and the verification above.
-- **Edge case:** Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
+- **Inputs/evidence:** For sql-30 Exercise 6, read `orders`, `order_items`, and `customers` to rebuild `order_values`, `cohorts`, `cohort_sizes`, and `metrics`, keep offsets 0 to 12 in `scoped`, then count rows where active customers exceed the cohort size and compare their revenue with a subquery that sums `order_values` directly for the same offsets.
+- **Expected result/shape:** For sql-30 Exercise 6, expected output: exactly one row: 0 violations, `cohort_revenue` 1410578.66, `independent_revenue` 1410578.66, and `revenue_difference` 0.00 on this load. The final columns are `active_exceeds_cohort_violations`, `cohort_revenue`, `independent_revenue`, and `revenue_difference`.
+- **Independent verification:** For sql-30 Exercise 6, confirm that the 1410578.66 is less than the full net revenue of 2355647.12 because orders after offset 12 are left out on purpose; then change `COUNT(DISTINCT ov.customer_id)` to `COUNT(*)` in `metrics` and confirm the audit reports 37 violations, because counting orders instead of customers lets activity exceed cohort size.
+- **Intermediate relation check:** `scoped` keeps the 487 observed rows with offsets 0 to 12, each carrying its cohort size.
+- **Clause check:** The answer is one row: 0 violations, 1,410,578.66 in cohort revenue on this load, the same total from the independent subquery, and a difference of 0.00.
+- **Alternative/trade-off:** Comparing against all 2,355,647.12 would fail, because orders after offset 12 are outside the scope. Both sides must use the same offset filter.
+- **Edge case:** A violation count above 0 would mean `active_customers` counted lines or orders instead of distinct customers. A revenue difference other than 0 would point to a duplicated or dropped order in a join.
 
 ## Final self-check
 
-- Can you explain the logical grain before and after every aggregation?
-- Are missing values preserved or converted only by an explicit rule?
-- Does every ordered result have a deterministic final tie-breaker?
-- Are money and time assumptions visible beside the calculation?
-- Does the complete executable solution finish with `ROLLBACK`?
+- Why is the cohort size counted from `customers` and not from `orders`?
+- How many rows should the dense spine have, and why?
+- What does a difference of 0.00 in the sixth answer prove?
+- Why is the projection in the fifth answer labelled illustrative?

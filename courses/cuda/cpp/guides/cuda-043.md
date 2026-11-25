@@ -4,18 +4,15 @@
 
 Intermediate; about 110 minutes, plus any optional hardware experiment. Direct prerequisites: `cuda-020`, `cuda-031`, `cuda-039`, `cuda-041`
 
-The order supports learning at your own pace. Reading and CPU reasoning remain
-available when NVIDIA hardware is absent. Advanced hardware features need their
-own capability checks and are not prerequisites for opening this chapter.
+Pacing, evidence labels and platform rules for every chapter are in the [CUDA study guide](../../STUDY-GUIDE.md).
 
 ## Learning objectives
 
 Capture and replay a CUDA Graph correctly and compare its submission cost against ordinary stream launches.
 
-Work through *CUDA Graphs for repeated workflows* with the concrete cases below. Finish with this evidence:
-correct replay, safe resource lifetimes, a scoped comparison and explicit unsupported changes. Distinguish an algorithmic
-calculation, a compiled artifact and an actual device observation when explaining
-what your work establishes.
+**Scope:** Define, instantiate and replay a dependency graph; stream capture, lifetime of referenced resources, launch overhead and update constraints.
+
+**Evidence to produce:** Correct replay, safe resource lifetimes, a scoped comparison and explicit unsupported changes.
 
 ## Purpose, vocabulary and mental model
 
@@ -38,24 +35,15 @@ The denominator must be positive and the compared iteration work must be equival
 
 ## How to run and study this lesson
 
-Use the saved reading worksheet in `/classroom`; the reading pad does not execute
-CUDA. For the bounded calculation, select **CPU model (Python)**, whose
-answer-free starter supplies the literal fixtures and task contract. The
-[CUDA C++ study workflow](../README.md) covers platforms, optional GPU
-compilation and evidence labels. In a prepared Python environment you can also
-run the separate [CPU reference](../references/cuda-043_cpu.py) from the
-repository root:
+Trace worked example 1 by hand, then run the [CPU reference](../references/cuda-043_cpu.py) from the repository root:
 
 ```sh
 python courses/cuda/cpp/references/cuda-043_cpu.py
 ```
 
-Its assertions check the stated numerical result or model invariant; console
-text is evidence of this CPU model only, not of CUDA execution.
-
 ## CUDA C++ kernel listing
 
-The kernel below is an excerpt from the chapter's complete [GPU reference](../references/cuda-043_gpu.cu). The full program adds device discovery, checked allocation and launch, completion checks and host validation. Read it as CUDA C++ source; the classroom reading pad does not compile or run it.
+An excerpt from the chapter's complete [GPU reference](../references/cuda-043_gpu.cu); the reading pad does not compile it.
 
 ```cpp
 __global__ void write_indices(int *values, std::size_t n) {
@@ -77,9 +65,7 @@ __global__ void increment(int *values, std::size_t n) {
 
 A synthetic pipeline spends 20 microseconds submitting each ordinary iteration. Graph replay reduces this to 5 microseconds, but setup costs 300 microseconds. Ignoring other equal costs, break-even is more than twenty repeats. At exactly twenty, the submission savings merely repay setup.
 
-The complete CPU model below intentionally models only the named arithmetic,
-layout, dependency or capability decision. It does not model GPU scheduling,
-caches, instruction timing or device memory visibility.
+**Why:** Break-even is 20 replays, so 21 replays give 300 + 105 = 405 against 420 ordinary.
 
 ```python
 setup_us, ordinary_us, replay_us = 300, 20, 5
@@ -89,58 +75,44 @@ assert setup_us + 21 * replay_us < 21 * ordinary_us
 print({"synthetic_break_even_replays": break_even})
 ```
 
-**Expected observation:** Every assertion succeeds. A representative CPU output is:
+**Expected observation:** every assertion succeeds, and the CPU model prints:
 
 ```text
 {'synthetic_break_even_replays': 20.0}
 ```
 
-Integers, shapes and ordering must match exactly; only assertions with an explicit
-tolerance accept small floating-point differences. A printed duration is a model
-output, not a measured GPU benchmark.
+**Check:** The reference asserts break_even == 20 and that 21 replays cost less than 21 ordinary iterations.
 
 ## Worked example 2: change a meaningful condition
 
 A graph contains fill, affine transform and download nodes with dependencies. Replay uses the same valid storage but new input contents. Changing the input shape beyond allocation capacity is not just a new value; rebuild or perform a supported update after validating all node contracts.
 
-Before applying this example to your own program, write down which inputs are
-read, which result is produced, and the condition that makes the comparison
-valid. Keep the original case as a regression check when changing a boundary.
+**Why:** Graph nodes bake in addresses and sizes, so contents can change but capacity cannot grow.
+
+**Check:** Replay with new values and same shape, then with a larger shape, and confirm a rebuild occurs.
 
 ## Optional CUDA C++ laboratory
 
-A complete [GPU reference](../references/cuda-043_gpu.cu) and separate
-[GPU learner source](../lessons/cuda-043_gpu.cu) accompany this chapter.
-They are standalone files with bounded fixtures, checked runtime calls and host
-validation. The learner source intentionally reports incomplete implementation
-until you add the chapter's algorithm and assertions. It must never return a
-fake GPU success on a CPU machine. Follow the [manual GPU workflow](../README.md)
-for exact compilation and execution paths. If the classroom offers the optional
-CUDA C++ variant, its capability notice must confirm actual runtime readiness.
+- [GPU learner source](../lessons/cuda-043_gpu.cu)
+- [GPU reference](../references/cuda-043_gpu.cu)
 
-The reference contains an explicit no-device failure, launch and completion
-checks, and returned-value validation. Source review and CPU reference checks do
-not qualify this .cu file on your hardware. Preserve compilation, actual device
-execution and sanitizer evidence separately. Exercise 4 is a reasoning diagnosis;
-do not deliberately launch a hanging kernel or reset a shared GPU to reproduce it.
+Read the [laboratory rules](../../STUDY-GUIDE.md#optional-native-cuda-laboratories) before compiling.
 
 ## Six progressive exercises
 
-Exercises 1 and 2 are guided reconstructions of the worked examples; exercises
-3-6 change an input, diagnose a defect, test a boundary and transfer the idea.
-For each one, keep the calculation, output, diagram or failure policy you
-produce so another reader can compare it with the worked cases. If the hint is
-not enough, reread the mechanism paragraph and the bounded CPU assertion.
-
 ### Exercise 1
 
-Predict and trace the first worked example before running its CPU reference. Write every intermediate quantity that leads to the stated result, including units or ownership where applicable.
+Reconstruct worked example 1 on paper before running its CPU reference. Divide 300 microseconds of setup by 15 microseconds saved per replay.
+
+**Trap to avoid:** Comparing one replay at 5 microseconds with one ordinary iteration at 20 ignores the setup.
 
 **Hint:** Start with the literal input and intermediate quantities in worked example 1.
 
 ### Exercise 2
 
-Reconstruct the second worked example without copying its conclusion. Identify the changed input or condition, show the resulting calculation or dependency, and explain why it differs from the first example.
+Rework worked example 2 without copying its conclusion. Update input contents in place for replay and rebuild the graph when the shape exceeds capacity.
+
+**Trap to avoid:** Writing a larger input into the captured buffer overruns the allocation the nodes reference.
 
 **Hint:** Identify exactly which condition changes in worked example 2.
 
@@ -148,11 +120,15 @@ Reconstruct the second worked example without copying its conclusion. Identify t
 
 Compute break-even if setup is 600 microseconds and savings 10 per replay.
 
+**Trap to avoid:** Halving the earlier answer because savings doubled ignores that setup doubled too.
+
 **Hint:** Use the first worked example to establish the relevant quantities, then change only the requested input.
 
 ### Exercise 4
 
 A captured graph references a destroyed temporary buffer. Diagnose it.
+
+**Trap to avoid:** Reallocating a new buffer at the same size does not update the address held by the graph.
 
 **Hint:** Locate the failed phase or violated dependency before proposing a repair.
 
@@ -160,35 +136,33 @@ A captured graph references a destroyed temporary buffer. Diagnose it.
 
 What if the pipeline runs only once?
 
+**Trap to avoid:** Capturing anyway because graphs are faster per replay adds pure overhead.
+
 **Hint:** Check what the algorithm is allowed to read, write or assume at this boundary.
 
 ### Exercise 6
 
 Transfer the idea to model inference.
 
+**Trap to avoid:** Capturing a model with data-dependent control flow freezes one path for all inputs.
+
 **Hint:** State the output contract and which observations are needed in the new application.
 
 ## Common mistakes and diagnosis
 
-A tempting but incorrect claim in this chapter is: **a graph automatically fuses kernels or accepts arbitrary dynamic control flow without further design. .**
-
-For the concrete failure exercise, a captured graph references a destroyed temporary buffer. Diagnose it.
-Preserve the original input and the stage where behavior diverged, and compare
-with the CPU model before changing hardware configuration.
+A tempting but incorrect claim: **A graph automatically fuses kernels or accepts arbitrary dynamic control flow without further design.** A graph replays the nodes you captured or defined, kernel by kernel; it does not merge them into one kernel. Its structure is fixed at instantiation, so data-dependent control flow or a shape beyond the allocation needs a supported update or a rebuild, as worked example 2 explains.
 
 ## Self-check, retrieval and transfer
 
-Explain the first example without its code, then use the second example to state
-one assumption that matters. Complete Exercise 3 independently, use Exercise 4 to
-diagnose a plausible defect, check the boundary in Exercise 5, and retain the
-application contract from Exercise 6. Compare the [separate explanations](../solutions/cuda-043_solutions.md)
-only after your attempt or a deliberate reveal. A reading marker records your
-choice; it does not certify hardware qualification or expert mastery.
+1. Where is break-even in worked example 1?
+2. What must stay valid across graph replays?
+3. Why can a graph lose for a pipeline that runs once?
+
+Short answers are in the [separate explanations](../solutions/cuda-043_solutions.md#self-check-answers); compare only after an attempt.
 
 ## Primary references
 
-Check the documentation that matches your prepared toolkit before optional
-hardware execution.
+Use the documentation that matches your prepared toolkit.
 
 - [CUDA Graphs](https://docs.nvidia.com/cuda/cuda-programming-guide/04-special-topics/cuda-graphs.html)
 

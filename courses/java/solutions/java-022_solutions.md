@@ -1,6 +1,6 @@
 # java-022: explanatory solutions
 
-Open after an attempt or an explicit solution reveal. The executable reference runs the six exercise checks together as `Main.java`. The guide contains independent worked examples, while this file explains the choices and failure cases in the complete answer.
+Open this after an attempt; see [using the solutions](../STUDY-GUIDE.md#use-the-solutions).
 
 ## Mechanism review
 
@@ -20,7 +20,7 @@ submit returns a Future; get(timeout, unit) returns a value or throws a named co
 
 ## Exercise 1: Retrieve a bounded result: change one input
 
-Task: Copy Example A into a scratch `Main.java` and change `var future = executor.submit(() -> 42);` to `var future = executor.submit(() -> 43);`. Before running it with `java -ea Main`, predict which assertion fails and which value it now sees; then run it and restore the original line.
+Task: Change `var future = executor.submit(() -> 42);` to `var future = executor.submit(() -> 43);` in Example A and predict which assertion fails and why.
 
 The executor owns worker lifetime. The timeout makes the caller waiting policy explicit even though this fixture should finish immediately.
 
@@ -34,13 +34,13 @@ try (var executor = java.util.concurrent.Executors.newFixedThreadPool(2)) {
 }
 ```
 
-**Expected:** The changed run fails with an `AssertionError` from the assertion on `value == 42`. Restoring the original line brings back the worked observation: result 42.
+**Expected:** The edited run fails with an `AssertionError` from the assertion on `value == 42`.
 
-**Verify:** Compare your written prediction with the reported `AssertionError` and its stack-trace line, and name the value that made `value == 42` false. After restoring the line, the program completes without an `AssertionError` again.
+**Verify:** Name the value that makes `value == 42` false, then restore the line.
 
 ## Exercise 2: Preserve task failure identity: debug a regression
 
-Task: Introduce one deliberate defect into a copy of Example B that makes the assertion on `observed` fail, then explain how the stack trace leads back to the faulty statement.
+Task: Add one defect to Example B's new code that fails the assertion on `observed`, then repair it.
 
 The asynchronous boundary wraps the failure but retains its cause. Replacing it with a generic successful default would hide the task outcome.
 
@@ -61,9 +61,9 @@ try (var executor = java.util.concurrent.Executors.newSingleThreadExecutor()) {
 }
 ```
 
-**Expected:** The defective copy fails the assertion on `observed`; the repaired copy reproduces the worked observation: executionException cause is IllegalArgumentException.
+**Expected:** The defective copy fails its assertion and the repaired copy passes.
 
-**Verify:** Keep the failing and the repaired runs and name the first statement whose value differs between them.
+**Verify:** Name the first statement whose value differs between the failing and repaired runs.
 
 ## Exercise 3: Separate wait timeout from task completion
 
@@ -93,7 +93,7 @@ try (var executor = java.util.concurrent.Executors.newSingleThreadExecutor()) {
 
 **Expected:** TimeoutException first; later result 7.
 
-**Verify:** Keep an assertion equivalent to `timedOut && value == 7`. As a control, change `return 7;` to `return 8;`: the run must fail with an `AssertionError` from the assertion on `timedOut && value == 7`. Restore the line before continuing.
+**Verify:** Control: changing `return 7;` to `return 8;` must fail the assertion on `timedOut && value == 7`.
 
 ## Exercise 4: Cancel cooperatively
 
@@ -126,7 +126,7 @@ try (var executor = java.util.concurrent.Executors.newSingleThreadExecutor()) {
 
 **Expected:** Future cancelled and task catches interruption.
 
-**Verify:** Keep an assertion equivalent to `finished && future.isCancelled()`. As a control, change `var exited = new java.util.concurrent.CountDownLatch(1);` to `var exited = new java.util.concurrent.CountDownLatch(2);`: the run must fail with an `AssertionError` from the assertion on `finished && future.isCancelled()`. Restore the line before continuing.
+**Verify:** Control: changing `var exited = new java.util.concurrent.CountDownLatch(1);` to `var exited = new java.util.concurrent.CountDownLatch(2);` must fail the assertion on `finished && future.isCancelled()`.
 
 ## Exercise 5: Reject work after shutdown
 
@@ -149,7 +149,7 @@ assert rejected && terminated;
 
 **Expected:** RejectedExecutionException.
 
-**Verify:** Keep an assertion equivalent to `rejected && terminated`. As a control, change `rejected = true;` to `rejected = false;`: the run must fail with an `AssertionError` from the assertion on `rejected && terminated`. Restore the line before continuing.
+**Verify:** Control: changing `rejected = true;` to `rejected = false;` must fail the assertion on `rejected && terminated`.
 
 ## Exercise 6: Enforce a bounded queue
 
@@ -194,8 +194,10 @@ try (
 
 **Expected:** third submission rejected; admitted tasks finish after release.
 
-**Verify:** Keep an assertion equivalent to `overloaded && first.get(2, java.util.concurrent.TimeUnit.SECONDS) == 1 && second.get(2, java.util.concurrent.TimeUnit.SECONDS) == 2`. As a control, change `1,` to `2,`: the run must fail with an `AssertionError` from the assertion on `overloaded && first.get(2, java.util.concurrent.TimeUnit.SECONDS) == 1 && second.get(2, java.util.concurrent.TimeUnit.SECONDS) == 2`. Restore the line before continuing.
+**Verify:** Control: changing `1,` to `2,` must fail the assertion on `overloaded && first.get(2, java.util.concurrent.TimeUnit.SECONDS) == 1 && second.get(2, java.util.concurrent.TimeUnit.SECONDS) == 2`.
 
 ## After comparing the answer
 
-Run the complete reference with assertions enabled, then return to your own implementation. Recreate one check with different values and explain its expected result before execution. A compiler error, an expected domain exception and an assertion failure represent different stages and should be reported separately. Preserve ownership boundaries when adapting file, network or concurrency examples. The reference never authorizes access to a shared service or deletion of learner state. Use a fresh tiny fixture when you need to distinguish two interpretations of an API contract.
+Swap `AbortPolicy` in your copy of Exercise 6 for `CallerRunsPolicy` and predict which thread runs the third task; then confirm it by recording `Thread.currentThread()` inside that task.
+
+Run the complete reference with `java -ea Main` first; the [review routine](../STUDY-GUIDE.md#use-the-solutions) covers the rest.

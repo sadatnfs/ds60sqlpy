@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cuda/spark/solutions/cuda-119_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="cuda-119-explained-solutions">cuda-119: explained solutions<a class="heading-anchor" href="#cuda-119-explained-solutions" aria-label="Link to this section">#</a></h2>
-<p>These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.</p>
+<p>Compare with your <a href="../lessons/cuda-119.md.html">worksheet</a> attempt.</p>
 <h3 id="exercise-1-compute-resource-share-slots">Exercise 1: Compute resource-share slots<a class="heading-anchor" href="#exercise-1-compute-resource-share-slots" aria-label="Link to this section">#</a></h3>
 <p>One divided by 0.25 gives four accounting slots.</p>
 <p><strong>Approach.</strong> Compute resource-share slots: an executor with one GPU and tasks requesting <code>spark.task.resource.gpu.amount = 0.25</code> admits <code>1/0.25 = 4</code> tasks by GPU accounting.</p>
@@ -231,9 +231,19 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Why it is correct here.</strong> Memory demand appears only at runtime, so a configuration that looks valid can fail on larger data.</p>
 <p><strong>A plausible wrong approach.</strong> Concluding from a successful small test that a concurrency setting is safe misses failures that appear with real data volumes.</p>
 <p><strong>How to verify.</strong> Increase concurrency on a representative dataset and watch spill metrics and task failures to find the safe bound.</p>
+<h3 id="self-check-answers">Self-check answers<a class="heading-anchor" href="#self-check-answers" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>Which controls limit GPU task concurrency?</strong> CPU task slots, fractional GPU resource requests and the plugin&#x27;s GPU admission concurrency, which together set the effective bound.</li>
+</ol>
+<ol start="2">
+<li><strong>Why can raising concurrency fail without any syntax error?</strong> More active tasks multiply live batches, so memory pressure can cause spills or failures at run time.</li>
+</ol>
+<ol start="3">
+<li><strong>What should resource discovery evidence show?</strong> The GPU addresses that were discovered and the address assigned to each executor.</li>
+</ol>
 <h3 id="reference-observation">Reference observation<a class="heading-anchor" href="#reference-observation" aria-label="Link to this section">#</a></h3>
 <p>Four scheduling shares with a two-task plugin admission bound.</p>
-<p>The reference file is <code>courses/cuda/spark/references/cuda-119_cpu.py</code>. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.</p></article>
+<p>Asserted by <code>courses/cuda/spark/references/cuda-119_cpu.py</code>.</p></article>
   </main>
 </body>
 </html>

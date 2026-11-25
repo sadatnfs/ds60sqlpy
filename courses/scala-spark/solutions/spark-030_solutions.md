@@ -16,7 +16,7 @@ A collect action sends results to the driver, not necessarily to the user's lapt
 
 ### Exercise 2: Repair a driver-only input path assumption
 
-**Expected:** An explicit data-location/distribution contract naming driver and executor visibility, authorization,30-row fixture identity and readback verification.
+**Expected:** An explicit data-location/distribution contract naming driver and executor visibility, authorization, 30-row fixture identity and readback verification.
 
 The submitted path is insufficient because neither the cluster driver nor the executors are known to share the submitting host's local filesystem. Do not replace it with an invented production bucket or claim that a cluster manager copies arbitrary paths. The review should propose an authorized shared URI or an explicit distribution mechanism suitable for this bounded fixture, with an owner and a content identifier.
 

@@ -24,9 +24,11 @@ Clone explicitly asks for a value-level duplication defined by the type. Cloning
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles the saved pad as `main.rs` with pinned Rust 1.99.1, edition 2024, and the prepared Arrow 60 library. `assert!` and `assert_eq!` remain active in normal builds. The fixed pad accepts one source file without arbitrary arguments, interactive input, Cargo manifests or package installation. The main function returns `Result<(), Box<dyn std::error::Error>>` so later examples can propagate errors with `?`; the final `Ok(())` means this fixture completed successfully. Standard library and Arrow examples remain offline after image preparation. Multi-file Cargo and external ecosystem projects have separate explicit preparation workflows.
+This lesson's programs need only the prelude and their own helpers. A passing run prints `rust-008: passed`.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Pad setup and limits: [Run a lesson](../STUDY-GUIDE.md#run-a-lesson).
+
+Before you run anything, follow [Attempt a lesson](../STUDY-GUIDE.md#attempt-a-lesson).
 
 
 
@@ -34,7 +36,9 @@ Start with the answer-free learner artifact in your saved classroom pad. It deli
 
 Assignment of String moves ownership. `.clone()` requests the type's duplication behavior. A function taking String owns its argument and may retain or release it. Returning the String transfers ownership back.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+**Reading Example A (Move ownership to a new binding, code below).** `String::from("pear")` creates a value with three parts on the stack, a pointer, a length and a capacity, plus a heap buffer holding the four bytes. `first` owns that value, which means `first` is responsible for freeing the buffer when it goes out of scope. `let second = first;` moves the three stack fields into `second` and marks `first` as moved. The heap buffer is not copied, and there is still exactly one owner, so the buffer is freed exactly once, when `second` goes out of scope at the end of the block. The comment marks the line to try: a use such as `println!("{first}")` after the move is rejected at compile time with E0382, borrow of moved value, and the diagnostic points back at the move. Nothing runs at run time to enforce this. The compiler tracks ownership statically, so a moved-from binding costs nothing and simply cannot be read.
+
+Method for tracing your own variants: [Trace a program](../STUDY-GUIDE.md#trace-a-program).
 
 ## Worked example / walkthrough
 
@@ -91,13 +95,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 6. **Transfer and justify.** Explain whether a function should borrow, clone or take ownership when retaining data for later use.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Record each task as in [Keep evidence for each task](../STUDY-GUIDE.md#keep-evidence-for-each-task).
 
 ## Common pitfalls and diagnosis
 
 Clone does not universally mean deep copy. A move can be optimized without changing its ownership semantics. Compiler rejection of a use-after-move is useful evidence, not an obstacle to suppress.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+To turn a pitfall into a test, see [Design a regression case](../STUDY-GUIDE.md#design-a-regression-case).
 
 ## Progressive hints
 
@@ -105,13 +109,23 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 2. Compare Example B (Clone only when two owners are needed) with Example A and name the first line whose behavior differs. Its observation is: The cloned String can change independently.
 3. Before opening the explanation, test your task 3 attempt against this lesson's main pitfall: Clone does not universally mean deep copy.
 
+Tempting approaches to rule out before you compare:
+
+- **Task 1.** Drawing two arrows to the buffer, one from each name, describes a double free waiting to happen. Drawing two buffers describes `clone`, which Example B does explicitly.
+- **Task 2.** Accepting the suggested `.clone()` reflexively makes the error disappear but changes the design to two buffers; if only reading was needed, borrowing with `let second = &first;` is the honest fix.
+- **Task 5.** Assuming `let moved = name;` copies the text predicts a new address after the move; the address equality check shows it does not.
+
 ## Self-check and next step
 
-Explain Owner, Move, Clone without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+After `let second = first;` with `first: String`, which binding owns the heap buffer, and what does the compiler report if you read `first` afterwards? Why does the same assignment between two `i32` bindings leave both usable? When is `clone` the right repair, and when does a borrow state the requirement better?
+
+Then work through [Self-check and review](../STUDY-GUIDE.md#self-check-and-review).
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://doc.rust-lang.org/book/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+Read [The Rust Book, 4.1 What is Ownership?](https://doc.rust-lang.org/book/ch04-01-what-is-ownership.html) for moves, `Clone` and `Copy`.
+
+What the classroom does and does not prove: [Sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

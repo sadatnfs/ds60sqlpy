@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/web-development/solutions/web-015_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="web-015-explanatory-solutions">web-015: explanatory solutions<a class="heading-anchor" href="#web-015-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Open this after your own attempt. Each answer explains the lesson&#x27;s synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in <code>courses/web-development/guides/web-015.md</code>.</p>
+<p>Attempt each exercise before reading; the mechanism is in <code>courses/web-development/guides/web-015.md</code> (<a href="../STUDY-GUIDE.md.html#solutions">using these answers</a>).</p>
 <h3 id="exercise-1-name-the-axes-for-flex-direction-column">Exercise 1: Name the axes for flex-direction:column.<a class="heading-anchor" href="#exercise-1-name-the-axes-for-flex-direction-column" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> The main axis is vertical in the usual horizontal writing mode; the cross axis is horizontal.</p>
 <p><strong>Approach:</strong> Note that <code>flex-direction: column</code> sets the main axis along the block direction, so in horizontal writing it runs top to bottom.</p>
@@ -232,7 +232,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Plausible wrong approach:</strong> Using Flexbox for a card grid with aligned columns fails because each wrapped row sizes independently, so columns drift.</p>
 <p><strong>How to verify:</strong> In a wrapped flex row of unequal cards, edges in different rows do not line up, while Grid aligns them.</p>
 <h3 id="reference-comparison">Reference comparison<a class="heading-anchor" href="#reference-comparison" aria-label="Link to this section">#</a></h3>
-<p>Open <code>courses/web-development/solutions/web-015_solution.html</code> only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; its success message is not an accessibility audit or proof of responsive behavior at every size.</p></article>
+<p>The reference reads the computed display of the cards container and requires flex, which catches a missing or misspelled container rule. It does not test wrapping, the long label or the navigation list, and it cannot tell whether visual order still matches keyboard order, so resize and tab through the page.</p>
+<p>Open <code>courses/web-development/solutions/web-015_solution.html</code> after saving your attempt (<a href="../STUDY-GUIDE.md.html#references">comparing with the reference</a>).</p></article>
   </main>
 </body>
 </html>

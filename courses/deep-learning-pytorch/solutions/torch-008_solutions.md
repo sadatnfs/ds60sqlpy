@@ -2,6 +2,8 @@
 
 Open these answers only after attempting One optimizer step you can audit yourself. They reuse the guide's literal inputs, starting from Example A, Calculate the initial loss, so a discrepancy points at one step. The executable companion runs the assertions; this page explains why each one tests Optimizer membership, SGD step, Independent oracle. After a pass, choose a new input for exercise 6, Clear the consumed gradient, without looking.
 
+After comparing, follow the [review steps](../STUDY-GUIDE.md#after-the-solutions).
+
 ## Mechanism review
 
 One optimizer step is the smallest complete training experiment. Specify inputs, targets, initial weight, dtype, loss reduction, learning rate and optimizer rule. Calculate the forward loss, derive the gradient, apply the update and recompute the loss at the new state. A PyTorch optimizer does not calculate gradients itself: backward populates the parameter.grad fields and optimizer.step consumes them. zero_grad establishes which contributions belong to the next step.
@@ -148,6 +150,3 @@ assert w.grad is None and w.item() == saved
 
 **Verify:** In a fresh process, the exercise checks confirm `w.grad is None` and `w.item() == saved`.
 
-## Review after comparison
-
-Repeat exercise 4, Expose the broadcast counterexample, with one changed fixture value and predict the difference before running it. Keep your failing attempt at exercise 5, Check a finite-difference gradient, beside the repaired result. A missing framework is not a failing assertion. These solutions use only local fixtures.

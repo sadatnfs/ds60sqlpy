@@ -2,67 +2,30 @@
 
 ## How to run this lesson
 
-Start the Linux-container engine and run `./classroom` from the repository
-root. On Windows, use Ubuntu in WSL 2 or the thin
-`START_DOCKER_CLASSROOM.cmd` wrapper. Choose **PostgreSQL** on the shared
-`/classroom` home, then open **sql-38**. The
-[launcher guide](../../../docs/one-command-classroom.md) covers first preparation, strict resume and
-the saved project selection. No host Python or PostgreSQL installation is
-required for this browser route.
+Start `./classroom`, pick **sql-38** and run **Whole SQL lesson (psql)**.
+That runs the single-session half of the lesson: it reports the starting
+isolation level, builds a temporary `txn_demo` table, rolls one update back
+to a savepoint and ends with `ROLLBACK`. Edit your copy at
+`.learning/sql/sql-38/lesson/workspace/sql/postgres-60day/day38_transactions_isolation.sql`;
+it runs against `advanced_sql_training`. See
+[Run a lesson in the classroom](../../STUDY-GUIDE.md#run-a-lesson-in-the-classroom)
+for launch details.
 
-1. Read the prerequisite and fixture notes before running the file. Use only
-   the local disposable `advanced_sql_training` database.
-2. Choose **Whole SQL lesson (psql)** for the cataloged learner script. This
-   preserves the lesson's reviewed psql directives, relative includes and
-   transaction behavior. **SQL snippet** is appropriate for ordinary SQL
-   statements, but is not a replacement for an entire script's setup.
-3. The **Course database** panel above the code shows whether the course
-   training tables are loaded. Missing tables load automatically before your
-   first run (or choose **Load course tables**) and stay loaded for later
-   lessons. **Reset training data** restores the original rows only when your
-   own changes made results differ; it keeps your saved code and notes.
-4. Edit the learner copy in the classroom and save your prediction before
-   running. Its whole-script workspace is
-   `.learning/sql/sql-38/lesson/workspace/sql/postgres-60day/day38_transactions_isolation.sql`.
-   For browser work this path is inside the Docker learning volume, not a
-   newly created host folder beside your checkout. The checked-in source
-   remains the answer-free starting artifact.
-5. Run the whole script and inspect the full transcript. The runner uses
-   `psql -X -v ON_ERROR_STOP=1 -f`. SELECT output has columns, rows and a row
-   count; DDL/DML has command tags; intentional checks may produce NOTICE
-   messages. An unexpected ERROR or nonzero exit is a failure to diagnose,
-   even when an earlier query printed plausible values.
-6. Verify the lesson's expected grain, ordering, constraints and declared
-   transaction or cleanup outcome. Keep required ROLLBACK statements.
-   The warehouse sequence and other explicitly stateful exercises explain
-   when state is committed. Read saved output without rerunning it when
-   reviewing an earlier attempt.
-
-If a relation is missing, inspect the lesson's required fixture and predecessor
-rather than guessing a new table definition. If authentication or runtime
-readiness fails, use `./classroom status` and the setup guide. Keep credentials
-out of SQL, notebooks, screenshots and committed files. Repair the first error
-before trusting partial output, and reveal separate solutions only when you
-want to compare after an attempt.
+The other half needs two live connections. Exercises 1 to 3 are schedules
+you type by hand into two `psql` terminals against a committed
+`training.isolation_lab` table, described under "Important two-session
+limitation" below. A whole-file run is one session, so it can never show
+another transaction's commit landing between two of its reads.
 
 ### Optional contributor notebook route
 
-For notebook work, deliberately prepare the Linux/WSL contributor environment
-from [CONTRIBUTING.md](../../../CONTRIBUTING.md), including a compatible psql client and
-the notebook dependencies. Generate this lesson's private workspace through
-the maintained CLI:
+A notebook holds one connection, so it suits the savepoint half; keep two
+terminals for the schedules
+([notebook setup](../../STUDY-GUIDE.md#optional-contributor-notebook-route)):
 
 ```sh
 uv run --no-sync python scripts/course.py sql notebook sql-38
 ```
-
-Open the printed notebook path in that environment's JupyterLab. It uses the
-same catalog-derived learner-copy layout in that contributor checkout and
-executes the complete script through psql. Its host-side state is separate
-from the Docker browser's named volume. Follow
-[guided SQL notebooks](../../../docs/guided-sql-notebooks.md) for explicit local connection
-selection and kernel setup. Notebook generation does not execute SQL or
-authorize a reset.
 
 ## Level and prerequisites
 
@@ -74,27 +37,31 @@ authorize a reset.
 
 ## A beginner's mental model for this lesson
 
-A **table** stores facts in named columns. A **row** is one occurrence at the
-table's declared grain. A query creates a temporary **result set**: rows printed
-on screen are not automatically stored. The key vocabulary for this lesson is MVCC, Isolation level, Serialization failure. Its worked SQL reads or creates `txn_demo`.
+A transaction groups statements so they commit or vanish together. Under
+**MVCC**, PostgreSQL never overwrites a row in place for readers; it keeps
+old versions so each transaction can read from a snapshot. The
+**isolation level** decides how often that snapshot is taken.
+`READ COMMITTED`, the default the learner file reports first, takes a
+fresh one for every statement. `REPEATABLE READ` takes one at the first
+query and keeps it until the transaction ends.
 
-Before writing a query, complete this sentence: “One output row represents
-___.” Joins can multiply rows, filters can remove them, grouping can collapse
-many rows into one, and window functions can add calculations while preserving
-row count. For a normal analytical `SELECT`, use this logical reading order:
-`FROM`/`JOIN` (including `ON`) → `WHERE` → `GROUP BY`/aggregates → `HAVING` →
-window calculations → `SELECT` → `ORDER BY` → `LIMIT`. PostgreSQL may execute a
-different physical plan while preserving those semantics.
+That timing explains an ordering rule in the learner file.
+`SET TRANSACTION ISOLATION LEVEL REPEATABLE READ` comes after `SHOW` but
+before the first `SELECT`. `SHOW` reads a setting and takes no snapshot,
+so the switch is still allowed; put it after the `SELECT` and PostgreSQL
+answers `SET TRANSACTION ISOLATION LEVEL must be called before any query`.
 
-The worked walkthrough's lesson-specific task is: Open two disposable sessions and write down each statement before running it. Under `READ COMMITTED`, have session A read a count, session B commit a matching insert, and session A read again. Repeat at `REPEATABLE READ` and explain the snapshot difference; clean up the shared disposable table afterward.
-The first worked example is a single-session savepoint: it proves that part of a
-transaction can be undone while the rest continues. The second is a two-terminal
-schedule, because isolation is only observable when another session commits
-between two of your statements.
+The `txn_demo` rows are `(1, 10)`, `(2, 20)` and `(3, 30)`. A savepoint is
+a bookmark inside one transaction: adding 100 to row 1 shows `110`, and
+`ROLLBACK TO SAVEPOINT sp1` puts it back to `10` while the transaction
+stays open. A **serialization failure** is the opposite case: PostgreSQL
+cannot keep the promise of the level, aborts the whole transaction with
+SQLSTATE `40001`, and the only correct response is to run all of it
+again.
 
 ## Two worked SQL examples
 
-Example 1 comes from `sql/postgres-60day/day38_transactions_isolation.sql`; Example 2 is a manual two-terminal schedule. Use **Whole SQL lesson (psql)** in the unified classroom for the complete file, including its fixture and transaction context. The optional contributor notebook and prepared `psql` routes are described above.
+Example 1 is copied from the learner file and runs inside its transaction. Example 2 is the first hand-typed schedule: type each `Session A` line in one terminal and each `Session B` line in the other, in the order shown.
 
 ### Example 1: undo part of one transaction with a savepoint
 
@@ -250,7 +217,13 @@ PostgreSQL uses MVCC snapshots:
 
 ## Practice map
 
-Use the numbered **Exercises** section above as the single authoritative practice contract. Its prompts, expected shapes, and verification checks map one-for-one to the learner SQL and both solution companions.
+The prompts split cleanly. The first three are two-terminal schedules on
+`isolation_lab`, so reset `qty` to `10` and `20` between attempts and write
+your predicted values before Session B commits. The last four run in one
+session against temporary tables: a savepoint reused and released, a
+`25.00` transfer that must keep the two balances summing to `140.00`, a
+duplicate key caught without aborting the transaction, and a written choice
+of isolation level for a two-statement report.
 
 ## Important two-session limitation
 
@@ -300,9 +273,11 @@ that total money is unchanged. A multi-query read-only report can still need
 
 ## Ask an AI tutor about this lesson
 
-An AI tutor is optional; the guide, learner SQL, PostgreSQL, and expected checks are
-enough to complete the lesson offline. If you want a patient tutor, copy this
-prompt after opening the repository in the AI tutor:
+A tutor can play Session B for you: it names the statement it would
+commit next, and you predict what your Session A read returns at each
+level before running it. Setup is in the
+[AI tutor notes](../../STUDY-GUIDE.md#use-an-ai-tutor-optional); start
+with this prompt:
 
 ```text
 Tutor me through sql-38: Transactions and Isolation Levels.

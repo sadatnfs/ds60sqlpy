@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/web-development/solutions/web-025_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="web-025-explanatory-solutions">web-025: explanatory solutions<a class="heading-anchor" href="#web-025-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Open this after your own attempt. Each answer explains the lesson&#x27;s synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in <code>courses/web-development/guides/web-025.md</code>.</p>
+<p>Attempt each exercise before reading; the mechanism is in <code>courses/web-development/guides/web-025.md</code> (<a href="../STUDY-GUIDE.md.html#solutions">using these answers</a>).</p>
 <h3 id="exercise-1-predict-when-the-registered-callback-executes">Exercise 1: Predict when the registered callback executes.<a class="heading-anchor" href="#exercise-1-predict-when-the-registered-callback-executes" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> It runs on a matching event, not merely because the listener was registered.</p>
 <p><strong>Approach:</strong> Separate registration from execution: <code>addEventListener</code> stores the function now, and the browser calls it later each time a click happens.</p>
@@ -232,7 +232,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Plausible wrong approach:</strong> Reading <code>parseInt(output.textContent)</code> fails as soon as the text becomes Total: 3 or uses a localized format such as 1.000.</p>
 <p><strong>How to verify:</strong> Change the display format to Total: 3 and confirm the next click still shows Total: 4.</p>
 <h3 id="reference-comparison">Reference comparison<a class="heading-anchor" href="#reference-comparison" aria-label="Link to this section">#</a></h3>
-<p>Open <code>courses/web-development/solutions/web-025_solution.html</code> only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; its success message is not an accessibility audit or proof of responsive behavior at every size.</p></article>
+<p>The reference clicks Add, requires the output to read 1, clicks reset and requires 0, then confirms the label has no child elements. That catches a broken increment, a missing reset and text inserted as markup. It does not test keyboard activation or the live region announcement, so use Tab and Space yourself.</p>
+<p>Open <code>courses/web-development/solutions/web-025_solution.html</code> after saving your attempt (<a href="../STUDY-GUIDE.md.html#references">comparing with the reference</a>).</p></article>
   </main>
 </body>
 </html>

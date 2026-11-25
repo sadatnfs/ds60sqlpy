@@ -1,6 +1,8 @@
 # spark-038: Explained paired reference solutions
 
-Read the [guide](../guides/spark-038.md) and attempt one language first. The [Scala reference](spark-038_solution.scala) and [PySpark reference](spark-038_solution.py) are complete single-file programs with explicit local sessions and finally-based stop. Each compares with literal expectations; matching two implementations alone would not rule out a shared mistake.
+Attempt the [guide](../guides/spark-038.md) exercises first.
+
+References: [Scala](spark-038_solution.scala), [PySpark](spark-038_solution.py).
 
 ## Exercises and reasoning
 
@@ -8,7 +10,7 @@ Read the [guide](../guides/spark-038.md) and attempt one language first. The [Sc
 
 Run the supplied three-occurrence stream with ID deduplication and return a bounded observation record.
 
-**Expected:** Input count 3, state rows 2 and exact committed bag 1:100,2:200.
+**Expected:** Input count 3, state rows 2 and exact committed bag `1:100, 2:200`.
 
 ```scala
 def capture(spark: SparkSession, input: Path, checkpoint: Path, output: Path): Observation = {
@@ -157,6 +159,7 @@ Event logs, plans and configuration can contain paths, SQL text or application d
 
 ## Execution and interpretation
 
-Run the complete reference in its prepared fixed worker. Its first check (Capture actual finite streaming progress) is built inside the program, so opening the lesson fetches nothing; it expects: Input count 3, state rows 2 and exact committed bag `1:100, 2:200`. The final success line prints only after every reference assertion passes.
+The first observation must read 3 rows, hold 2 state rows and commit `1:100, 2:200`. The progress must list at least one operator and a state memory value of 0 or more, and `known_metric` must map None and `-1` to None while keeping 0; the program prints `actual_state_rows=`, `state_bytes=` and `sink_rows=`. After `batch-02.json` with `(3, 300)`, the rerun reads 1 row, state grows to 3, the query ID is unchanged and the bag gains `3:300`.
 
-Local plan, partition and resource evidence does not establish cluster-scale performance; session cleanup is explicit.
+A query over an empty input folder reads 0 rows and stops, printed as `empty_input_rows=` with `state_rows=`. `next_check` must return `inspect_partition_keys` for skew, `inspect_watermark_and_key_growth` for state and `inspect_source_discovery` for input, and the skew ratio must be 100. `sanitize` keeps only the four allowed fields, so the dummy password and token disappear. The run ends with `spark-038: six PySpark reference contracts passed; Spark=` and the version. State memory figures come from one local executor and are approximate; they point to a next check rather than proving a leak.
+

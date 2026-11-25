@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cuda/python/solutions/cuda-069_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="cuda-069-explained-solutions">cuda-069: explained solutions<a class="heading-anchor" href="#cuda-069-explained-solutions" aria-label="Link to this section">#</a></h2>
-<p>These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.</p>
+<p>Compare with your <a href="../lessons/cuda-069.md.html">worksheet</a> attempt.</p>
 <h3 id="exercise-1-predict-repeated-seeding">Exercise 1: Predict repeated seeding<a class="heading-anchor" href="#exercise-1-predict-repeated-seeding" aria-label="Link to this section">#</a></h3>
 <p>Repeated initialization repeats the sequence.</p>
 <p><strong>Approach.</strong> Predict that two fresh generators seeded with 7, or one generator reseeded with 7, produce the same first draws. Reseeding resets the stream to its start.</p>
@@ -231,9 +231,19 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Why it is correct here.</strong> Training uses several generators at once. Restoring only the Python state, as in this chapter&#x27;s reference, replays Python draws but not GPU dropout or the order the sampler yields batches.</p>
 <p><strong>A plausible wrong approach.</strong> Saving only the initial seed and reseeding on resume restarts the streams at the beginning, so the resumed run repeats the first epoch&#x27;s shuffles instead of continuing.</p>
 <p><strong>How to verify.</strong> Checkpoint, resume, and compare the next batch indices and a dropout mask with an uninterrupted run under the same backend. Both must match for the checkpoint to be complete.</p>
+<h3 id="self-check-answers">Self-check answers<a class="heading-anchor" href="#self-check-answers" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>Why does a shared seed not guarantee identical numbers across CPU and GPU libraries?</strong> Each library uses its own generator algorithm, stream partitioning and version-specific details. A seed selects a starting state within one generator design, not a cross-library agreement on bytes.</li>
+</ol>
+<ol start="2">
+<li><strong>What is the difference between restoring saved state and reseeding?</strong> Restoring resumes exactly where the stream was when the state was saved, so the replayed batch matches. Reseeding returns to the start of the stream, which repeats earlier draws.</li>
+</ol>
+<ol start="3">
+<li><strong>Name three scopes of reproducibility a report should distinguish.</strong> Same code and environment, same backend and hardware, and cross-backend numerical agreement within a stated tolerance. Each scope needs its own evidence.</li>
+</ol>
 <h3 id="reference-observation">Reference observation<a class="heading-anchor" href="#reference-observation" aria-label="Link to this section">#</a></h3>
 <p>Restored batch matches and continued batch differs.</p>
-<p>The reference file is <code>courses/cuda/python/references/cuda-069_cpu.py</code>. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.</p></article>
+<p>Asserted by <code>courses/cuda/python/references/cuda-069_cpu.py</code>.</p></article>
   </main>
 </body>
 </html>

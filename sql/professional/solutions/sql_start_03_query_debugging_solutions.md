@@ -1,22 +1,21 @@
 # SQL-START-03: solution reasoning
 
-Use this after an honest attempt at the [guide](../companion-guides/sql_start_03_query_debugging.md)
-and [learner script](../lessons/sql_start_03_query_debugging.sql). The separate
-[executable solution](sql_start_03_query_debugging_solutions.sql) runs all six answers and independent
-fail-fast checks with `psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/solutions/sql_start_03_query_debugging_solutions.sql`.
-It uses only temporary fixtures, starts a transaction, and ends in rollback.
-It must exit 0 with no contract failures. Each answer has a savepoint so an
-experiment cannot silently change a later exercise's starting conditions.
-The assertion helper treats false and unknown as failures, rather than allowing
-a NULL assertion to pass accidentally. Keep the original fixture unchanged
-when comparing your work so the stated identities remain a reliable oracle.
+Open this after attempting the
+[guide](../companion-guides/sql_start_03_query_debugging.md) and your [learner
+script](../lessons/sql_start_03_query_debugging.sql). The [executable
+solution](sql_start_03_query_debugging_solutions.sql) contains only the
+repaired queries, so it runs to the end without the 42703 errors that Exercises
+2 and 4 ask you to capture. It rebuilds the six `start_tasks` rows, puts each
+answer in its own savepoint and `solution_answer_N` table, and uses
+`pg_temp.assert_true` to compare the exact task IDs. Run it as the [study
+guide](../../STUDY-GUIDE.md#read-a-solution) shows, with
+`-f sql/professional/solutions/sql_start_03_query_debugging_solutions.sql`.
 
-The code below is the answer for each numbered prompt, followed by its
-reasoning. Inspect the first discrepancy in your own transcript before reading
-a different answer. A solution is one defensible implementation of this contract;
-an alternative is valid if its identities, values, missingness, ordering, and
-transaction behavior match. Tests constrain the actual returned relation,
-rather than assuming a familiar-looking query must be right.
+A different repair is just as valid if it returns the same task IDs and values.
+For example, Exercise 2 could repeat `effort * 2` in `WHERE` or test
+`effort >= 3`; both keep the boundary rows 4 and 5. What matters is that tasks
+2 and 6 are excluded for the right reason, and that task 3's NULL effort stays
+visible where the contract keeps it.
 
 ## Exercise solutions
 
@@ -162,4 +161,9 @@ FROM introduces tasks, WHERE keeps only open ones, SELECT chooses three output f
 
 ## Cleanup and evidence boundary
 
-The final rollback removes every temporary table, helper function, index, and modeled change. Running this file twice starts from the same fixture and should produce the same logical evidence. No extension, external dataset, current timestamp, or administrator capability is required. For the optional two-session concurrency lab, use its separate explicit cleanup because that fixture is deliberately committed; the default script never prepares that shared state. A static content check can validate contracts and file structure, while only a live PostgreSQL transcript validates SQL execution. Retain that distinction when reporting completion.
+Each `ROLLBACK TO SAVEPOINT` discards that exercise's `solution_answer_N`
+table, and the closing `ROLLBACK` drops `start_tasks` and the assertion helper.
+Because none of the repaired queries change a stored row, every exercise starts
+from the same six tasks and a second run prints the same evidence. The faulty
+queries are deliberately absent, so a clean run here says nothing about the
+error messages you captured; those belong in your own transcript.

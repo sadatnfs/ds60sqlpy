@@ -1,6 +1,8 @@
 # rust-028: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [rust-028_solution.rs](rust-028_solution.rs). It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.
+Executable reference: [rust-028_solution.rs](rust-028_solution.rs), which runs both examples and the coded answers.
+
+Open this only after [an attempt](../STUDY-GUIDE.md#attempt-a-lesson).
 
 ## Why the two examples differ
 
@@ -26,7 +28,7 @@ Draw shared ownership separately from mutable access.
 
 Add another worker while keeping the exact expected total.
 
-**Reference answer.** The same statements run as the `Task 2` block of the reference program; here they are wrapped in `main` as a complete file.
+**Reference answer**, wrapped in `main`; the reference runs it as its `Task 2` block.
 
 ```rust
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -62,7 +64,7 @@ The expected total is computed from the same two numbers that drive the loops, s
 
 Implement a locked bounded reservation operation.
 
-**Reference answer.** The same statements run as the `Task 3` block of the reference program; here they are wrapped in `main` as a complete file.
+**Reference answer**, wrapped in `main`; the reference runs it as its `Task 3` block.
 
 ```rust
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -108,7 +110,7 @@ Diagnose protecting each half of a transfer with unrelated locks.
 
 Test zero operations and an explicitly handled poisoned lock in a separate controlled case.
 
-**Reference answer.** The same statements run as the `Task 5` block of the reference program; here they are wrapped in `main` as a complete file.
+**Reference answer**, wrapped in `main`; the reference runs it as its `Task 5` block.
 
 ```rust
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -156,7 +158,7 @@ Zero workers is a legal workload, so the result must be the initial value, not a
 
 Choose message passing or shared locking for a service and justify the invariant owner.
 
-No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **Arc**, and state one limitation of your choice.
+**Judging criteria.** A strong answer names the invariant first, such as Example B's pair keeping its total of 10, and then the owner that enforces it. With message passing, one task owns the state and others send requests, so the invariant lives in one loop and needs no lock. With shared locking, every holder of the `Arc<Mutex<_>>` must update both fields under one guard. Prefer the design in which the fewest places can break the invariant. State one limitation: a single owner task serializes every request and adds a channel hop to each read.
 
 ## Mechanism and diagnostic reasoning
 
@@ -170,4 +172,6 @@ Arc is not a lock and clone does not copy its inner state. Holding a guard longe
 
 ## Review before continuing
 
-Run the reference and confirm that it prints `rust-028: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.
+Rebuild Example B (Protect a relationship in one value) from a blank pad.
+
+Review routine: [Self-check and review](../STUDY-GUIDE.md#self-check-and-review).

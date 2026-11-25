@@ -1,6 +1,8 @@
 # spark-011: Explained paired reference solutions
 
-Read the [guide](../guides/spark-011.md) and attempt one language first. The [Scala reference](spark-011_solution.scala) and [PySpark reference](spark-011_solution.py) are complete single-file programs with explicit local sessions and finally-based stop. Each compares with literal expectations; matching two implementations alone would not rule out a shared mistake.
+Attempt the [guide](../guides/spark-011.md) exercises first.
+
+References: [Scala](spark-011_solution.scala), [PySpark](spark-011_solution.py).
 
 ## Exercises and reasoning
 
@@ -154,6 +156,7 @@ The temporary view provides a name for the same local DataFrame plan inside this
 
 ## Execution and interpretation
 
-Run the complete reference in its prepared fixed worker. Its first check (Construct a predicate without collapsing it to a driver Boolean) is built inside the program, so opening the lesson fetches nothing; it expects: Passing the predicate to `raw.filter` retains IDs 2 and 4. In Python, `bool(predicate)` raises `ValueError` rather than choosing one row's truth value. The final success line prints only after every reference assertion passes.
+Both references assert literal ID lists for every contract: `[2, 4]` for the predicate and for the SQL view, `[3]` for missingness, `[2]` for the combined condition with the ID bound, and the four ordered pairs `(1, 1)`, `(2, 21)`, `(3, NULL)`, `(4, 21)` for the derived column. The PySpark reference also catches the `ValueError` raised by `bool(predicate)`, which is the only way to prove that the predicate was never turned into one Python Boolean.
 
-Local plan, partition and resource evidence does not establish cluster-scale performance; session cleanup is explicit.
+On success the PySpark program prints `spark-011: six PySpark reference contracts passed; Spark=` followed by the running version, and the Scala program prints the matching Scala line with the Scala version appended. Those lines show that four rows behaved as specified; they say nothing about how predicate pushdown would treat the same expression over a Parquet source, which comes later in the route.
+

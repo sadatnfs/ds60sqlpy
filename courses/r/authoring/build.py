@@ -93,26 +93,47 @@ def draws_figures(unit):
     return False
 
 
+STUDY = "../STUDY-GUIDE.md"
+NOTE_FIELDS = ("run_note", "checks_note")
+
+
+def notes(key):
+    "Lesson-specific run and check notes; shared routines live in STUDY-GUIDE.md."
+    data = reasoning(key)
+    for field in NOTE_FIELDS:
+        value = data.get(field, "")
+        if (
+            not isinstance(value, str)
+            or len(re.findall(r"[A-Za-z]+", value)) < 30
+            or "\n" in value
+            or re.search("[\u2013\u2014]", value)
+            or not value.rstrip().endswith((".", "?"))
+        ):
+            raise ValueError(f"{key}: reasoning field {field} needs lesson-specific prose")
+    return data
+
+
 def run_section(unit):
     key = unit["id"]
-    figures = (
-        "This chapter draws figures: base plots are captured as PNG, ggplot2 and Plotly "
-        "objects must be printed explicitly, and the classroom keeps at most two figures "
-        "per run."
-        if draws_figures(unit)
-        else "This chapter prints values only; when a chapter draws figures, the classroom "
-        "keeps at most two figures per run."
-    )
-    return (
-        f"Open `{key}` in `/classroom` and use the prepared `r-statistics` profile. Each Run "
-        "evaluates one `main.R` script in a fresh offline R process, so define every input "
-        "in the script; an earlier Run leaves no variables behind. Work in the "
-        f"[starter](../lessons/{key}.R). The [complete reference](../solutions/{key}_reference.R) "
-        f"ends by printing `{key} reference checks passed`, and the [explained "
-        f"answers](../solutions/{key}_solutions.md) are there for deliberate comparison "
-        f"after your own attempt. {figures} The [course overview](../README.md) describes "
-        "saved work, figure capture and the prepared package versions."
-    )
+    text = [
+        notes(key)["run_note"],
+        "",
+        f"Work in the [starter](../lessons/{key}.R) under the [run rules]({STUDY}#run-a-chapter).",
+        "",
+        (
+            f"The [complete reference](../solutions/{key}_reference.R) ends by printing "
+            f"`{key} reference checks passed`."
+        ),
+    ]
+    if draws_figures(unit):
+        text += [
+            "",
+            (
+                f"This chapter draws figures; read [figure capture]({STUDY}#figures) "
+                "before printing them."
+            ),
+        ]
+    return "\n".join(text)
 
 
 def guide(unit, successors=()):
@@ -163,30 +184,29 @@ def guide(unit, successors=()):
     text += [f"{i}. {task['hint']}" for i, task in enumerate(unit["exercises"], 1)]
     worked = {e["explanation"].strip() for e in unit["worked_examples"]}
     review = (
-        "The reference applies the reasoning explained under the worked examples above; "
-        f"the [explained answers](../solutions/{key}_solutions.md) add an answer for each "
-        "exercise."
+        "The reference reuses the worked examples' reasoning; "
+        f"[explained answers](../solutions/{key}_solutions.md) cover each exercise."
         if set(unit["solution_explanation"].strip().split("\n\n")) <= worked
         else unit["solution_explanation"]
     )
     text += ["", "## Reference review", "", review, "", "## Primary references", ""]
     text += [f"- [{source['title']}]({source['url']})" for source in unit["sources"]]
+    titles = {other["id"]: other["title"] for other in successors}
     followers = [other["id"] for other in successors if key in other["prerequisites"]]
     if followers:
-        onward = (
-            f"Chapters that list `{key}` as a direct prerequisite: "
-            + ", ".join(f"[`{other}`]({other}.md)" for other in followers)
-            + "."
+        onward = "\n".join(
+            ["| Next chapter | Title |", "| --- | --- |"]
+            + [f"| [`{other}`]({other}.md) | {titles[other]} |" for other in followers]
         )
     else:
         onward = (
-            f"No later chapter lists `{key}` as a direct prerequisite; the "
-            "[course map](../README.md) lists every chapter with its prerequisites."
+            f"No later chapter lists `{key}` as a direct prerequisite; see the "
+            "[course map](../README.md)."
         )
     if 41 <= int(key.split("-")[1]) <= 50:
         onward += (
-            " For the modeling assumptions behind these examples, read the "
-            "[statistics tutorial](../../statistics-ml/README.md) alongside the R code."
+            "\n\nModeling assumptions behind these examples are in the "
+            "[statistics tutorial](../../statistics-ml/README.md)."
         )
     text += [
         "",
@@ -217,9 +237,8 @@ def solution(unit):
         f"# {key}: reference reasoning",
         "",
         (
-            f"Use the [complete reference]({key}_reference.R) with the "
-            f"guide's declared inputs and runtime. Every worked "
-            f"example is also a standalone script."
+            f"Run the [complete reference]({key}_reference.R) under the "
+            f"[run rules]({STUDY}#run-a-chapter)."
         ),
         "",
         "## Why the implementation has this shape",
@@ -255,14 +274,11 @@ def solution(unit):
     text += [
         "## What the checks establish",
         "",
+        notes(key)["checks_note"],
+        "",
         (
-            f"The reference makes {unit['reference'].count('stopifnot(')} `stopifnot()` "
-            "checks on its small synthetic inputs. A passing run "
-            "establishes those assertions in the reported "
-            "environment. It does not prove correctness for every "
-            "input, statistical validity for an unrelated "
-            "population, or compatibility with untested package "
-            "versions."
+            f"The reference makes {unit['reference'].count('stopifnot(')} `stopifnot()` checks; "
+            f"see [what a passing run proves]({STUDY}#what-a-passing-run-proves)."
         ),
         "",
     ]
@@ -307,6 +323,11 @@ def readme(records):
         COMPARE,
         "",
         VERSIONS,
+        "",
+        (
+            "The [study guide](STUDY-GUIDE.md) collects the run rules, figure capture "
+            "and comparison routine that every chapter links to."
+        ),
         "",
         (
             "Each guide ends with an optional prompt for a repository-aware AI tutor "

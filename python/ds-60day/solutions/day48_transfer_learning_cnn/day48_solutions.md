@@ -252,9 +252,7 @@ Takeaways
 
 ## Solution reasoning lens
 
-A strong solution is not merely code that produces one plausible
-output. It establishes a chain from input contract to operation to
-verification:
+Each decision below links an input contract to an operation and its evidence:
 
 1. **`models.resnet18(weights=...)`:** constructs the architecture and optionally loads a specific versioned weight bundle.
 2. **`parameter.requires_grad = False`:** excludes a parameter from autograd updates but does not change module mode.
@@ -271,29 +269,15 @@ verification:
 
 **Evidence of correctness:** Prove whether a download can occur, list trainable parameters and optimizer membership, assert transforms/class mapping, compare frozen and fine-tuned validation, and save provenance.
 
-When comparing your attempt with the reference, explain which of these
-decisions your code made explicitly. If the reference makes a different
-choice, compare the contracts and evidence before deciding that one
-version is universally better.
-
 <!-- END ADVANCED PYTHON CONCEPT ENRICHMENT -->
 
 ## Exercise-by-exercise reasoning map
-
-This map connects every learner prompt to a reasoning path. Read the
-explanation before copying code: the goal is to understand the assumptions,
-the evidence that validates the result, and the edge cases that can make an
-apparently correct implementation fail.
 
 ### Exercise 1: Original lesson practice
 
 **Prompt:** Load a small image folder with `ImageFolder` and `DataLoader`.
 
 **How to reason about it:** ImageFolder derives class IDs from sorted directory names; preserve `class_to_idx`, use the selected weights' documented transforms, and start with `num_workers=0` for a portable first run.
-
-Use the worked reference earlier in this file, then change one boundary
-condition and rerun the stated checks. A copied output is not evidence
-unless you can explain why that output follows from the inputs.
 
 **Verify:** Print train/validation class_to_idx mappings, dataset sizes, batch image/label shapes, and transform sizes; assert mappings agree and handle a missing image folder with the documented local FakeData fallback.
 
@@ -303,10 +287,6 @@ unless you can explain why that output follows from the inputs.
 
 **How to reason about it:** When training only the classifier head, pass only trainable head parameters to the optimizer and monitor validation loss and accuracy. Frozen parameters should have no gradients.
 
-Use the worked reference earlier in this file, then change one boundary
-condition and rerun the stated checks. A copied output is not evidence
-unless you can explain why that output follows from the inputs.
-
 **Verify:** Freeze all backbone parameters, assert only classifier-head parameters enter the optimizer, print train/validation loss and accuracy per epoch, and save artifact/weight provenance.
 
 ### Exercise 3: Original lesson practice
@@ -314,10 +294,6 @@ unless you can explain why that output follows from the inputs.
 **Prompt:** Unfreeze the final ResNet block and fine-tune it with a lower learning rate.
 
 **How to reason about it:** Unfreezing the final block increases trainable capacity. Use a smaller backbone learning rate, keep the head rate explicit, and compare against the frozen baseline on the same split.
-
-Use the worked reference earlier in this file, then change one boundary
-condition and rerun the stated checks. A copied output is not evidence
-unless you can explain why that output follows from the inputs.
 
 **Verify:** Unfreeze only the final ResNet block plus head, print every trainable parameter and its learning rate, and compare frozen versus fine-tuned validation metrics from the same split while recording the best checkpoint.
 
@@ -335,10 +311,6 @@ they read the same directory structure.
 Record transform configuration with the artifact; serving must reproduce the
 deterministic inference transform exactly.
 
-**Why this matters:** The result should survive a fresh-kernel rerun and
-a deliberately chosen boundary case. If it does not, revisit the
-assumption or data boundary rather than hiding the failure.
-
 **Verify:** Transform mismatch diagnosis; evaluate the same validation images repeatedly under random training transforms and deterministic validation transforms; print prediction variance and metric samples, and assert the deterministic path is repeatable.
 
 ### Exercise 5: Frozen-state edge case
@@ -354,10 +326,6 @@ unchanged.
 
 When partially unfreezing, set modes deliberately rather than calling one
 global `model.train()` and assuming freeze semantics are complete.
-
-**Why this matters:** The result should survive a fresh-kernel rerun and
-a deliberately chosen boundary case. If it does not, revisit the
-assumption or data boundary rather than hiding the failure.
 
 **Verify:** Frozen-state edge case; print every requires_grad flag and BatchNorm training flag/running-stat checksum before/after an epoch; assert frozen weights do not change and document whether frozen BatchNorm statistics remain fixed.
 
@@ -375,9 +343,5 @@ weight version once and documents the cache location.
 On later offline runs, request that exact weight enum rather than an ambiguous
 “latest” default. If absent, fail with a helpful message or select the clearly
 labeled smoke fallback, never silently change the experiment.
-
-**Why this matters:** The result should survive a fresh-kernel rerun and
-a deliberately chosen boundary case. If it does not, revisit the
-assumption or data boundary rather than hiding the failure.
 
 **Verify:** Offline fallback design; print cached-weight capability without downloading; test cached pretrained, explicit connected-preload instruction, and random-CNN fallback branches, each producing a batch-shape/prediction smoke result.

@@ -1,6 +1,6 @@
 # docker-003: explanatory solutions
 
-Compare after your own attempt or an explicit reveal. These explain the supplied teaching fixtures; they are not engine results. The mechanism is explained in `courses/docker/guides/docker-003.md`.
+These answers explain teaching fixtures, not engine results; the mechanism is in [the guide](../guides/docker-003.md).
 
 ## Exercise 1: Classify /app/server.py in the fixture.
 
@@ -88,4 +88,4 @@ Compare after your own attempt or an explicit reveal. These explain the supplied
 
 ## Check your transfer
 
-A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.
+`restart` stops and starts the same container, so its writable layer, including `/app/uploads`, survives. Editing the service configuration makes `up -d` recreate the service: a new container ID with a fresh, empty writable layer on top of the image, so the uploads are not there. The fix is a named volume mounted at `/app/uploads`, ideally with a read-only root and a tmpfs for scratch. Record `docker compose ps -q app` before and after `up`; different IDs confirm recreation. Seeing the same ID with the files missing would disprove this explanation and point at the application deleting them.

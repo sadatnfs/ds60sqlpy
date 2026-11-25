@@ -194,9 +194,17 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cuda/python/guides/cuda-110.md</code></p>
     </header>
     <article class="document"><h2 id="cuda-110-custom-operator-packaging-and-binary-portability">cuda-110: Custom operator packaging and binary portability<a class="heading-anchor" href="#cuda-110-custom-operator-packaging-and-binary-portability" aria-label="Link to this section">#</a></h2>
-<p><strong>Route:</strong> CUDA Python and machine learning. <strong>Stage:</strong> advanced. <strong>Prerequisites:</strong> <code>cuda-061</code>, <code>cuda-097</code>, <code>cuda-098</code>. Allow several sessions when the hardware experiment is new; the chapter is not a deadline.</p>
-<h3 id="what-you-will-be-able-to-explain">What you will be able to explain<a class="heading-anchor" href="#what-you-will-be-able-to-explain" aria-label="Link to this section">#</a></h3>
-<p>By the end, you can <strong>list compatibility axes</strong>, <strong>design a build ledger</strong>, and <strong>define a package release gate</strong> with evidence. Start with the two worked cases, then use the editable CPU model to make the quantities concrete.</p>
+<p><strong>Route:</strong> CUDA Python and machine learning. <strong>Stage:</strong> advanced. <strong>Prerequisites:</strong> <code>cuda-061</code>, <code>cuda-097</code>, <code>cuda-098</code>.</p>
+<p>Pacing, evidence labels and platform rules: <a href="../../STUDY-GUIDE.md.html">CUDA study guide</a>.</p>
+<h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
+<ul>
+<li>List compatibility axes.</li>
+<li>Separate import and execution.</li>
+<li>Explain native code versus intermediate code.</li>
+<li>Design a build ledger.</li>
+<li>Test unsupported dtype.</li>
+<li>Define a package release gate.</li>
+</ul>
 <h3 id="mechanism-and-vocabulary">Mechanism and vocabulary<a class="heading-anchor" href="#mechanism-and-vocabulary" aria-label="Link to this section">#</a></h3>
 <p>A native extension package combines Python compatibility, framework ABI, host compiler, CUDA toolkit, architecture targets and system libraries. A wheel filename alone does not promise every GPU can execute its embedded code. Native device binaries target architectures; intermediate representations can provide a JIT path only within supported compatibility rules. Record what was built and what was actually executed.</p>
 <p>Use a fixed project with reviewed build dependencies and reproducible metadata. Test import, operator registration, forward/backward behavior and unsupported-input failure in each declared environment. Keep build-time downloads explicit and separate from classroom reading. The browser&#x27;s single-file pad does not become a general package manager. Publishing packages or using external registries is a separately authorized workflow.</p>
@@ -213,8 +221,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>A package can import because its host shared library loads, then fail when the first kernel lacks compatible device code. Import is only the first qualification step.</p>
 <h4 id="worked-example-2">Worked example 2<a class="heading-anchor" href="#worked-example-2" aria-label="Link to this section">#</a></h4>
 <p>Two environments with the same Python version but different framework ABI or CUDA assumptions may need separate builds. Preserve a matrix rather than claiming universal portability.</p>
-<h3 id="portable-executable-model">Portable executable model<a class="heading-anchor" href="#portable-executable-model" aria-label="Link to this section">#</a></h3>
-<p>The <strong>CPU reference model</strong> variant runs this bounded worked example using <code>python-core</code>. It uses only the Python standard library, small synthetic values and no network. Its purpose is to expose the arithmetic or contract behind the chapter. The separate reference includes assertions for the stated observations.</p>
+<h3 id="how-to-run-the-cpu-model">How to run the CPU model<a class="heading-anchor" href="#how-to-run-the-cpu-model" aria-label="Link to this section">#</a></h3>
+<p>Edit the copy; the <a href="../references/cuda-110_cpu.py.html">reference</a> adds assertions.</p>
+<pre class="highlighted-code"><code class="language-bash">python courses/cuda/python/lessons/cuda-110_cpu.py</code></pre>
 <pre class="highlighted-code"><code class="language-python">required <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">python</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">framework</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">toolkit</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">host_arch</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">device_targets</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">}</span>
 manifest <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span>
     <span class="syntax-string">&quot;</span><span class="syntax-string">python</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">pinned</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span>
@@ -227,49 +236,46 @@ manifest <span class="syntax-operator">=</span> <span class="syntax-punctuation"
 <span class="syntax-keyword">assert</span> <span class="syntax-string">&quot;</span><span class="syntax-string">driver</span><span class="syntax-string">&quot;</span> <span class="syntax-operator">not</span> <span class="syntax-operator">in</span> manifest
 <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">CPU package ledger: build metadata complete; runtime driver still separate</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation:</strong> Build ledger completeness does not establish runtime driver or GPU acceptance.</p>
-<p>Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.</p>
 <h3 id="practice-and-transfer">Practice and transfer<a class="heading-anchor" href="#practice-and-transfer" aria-label="Link to this section">#</a></h3>
+<p>Record each attempt in the <a href="../lessons/cuda-110.md.html">worksheet</a> before opening hints.</p>
 <h4 id="exercise-1-list-compatibility-axes">Exercise 1: List compatibility axes<a class="heading-anchor" href="#exercise-1-list-compatibility-axes" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Recording only the Python version suggests one wheel works everywhere that Python runs, while a framework ABI change alone can break the import.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-2-separate-import-and-execution">Exercise 2: Separate import and execution<a class="heading-anchor" href="#exercise-2-separate-import-and-execution" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Treating a successful import as proof of portability passes packages that cannot run any kernel on the target GPU.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-3-explain-native-code-versus-intermediate-code">Exercise 3: Explain native code versus intermediate code<a class="heading-anchor" href="#exercise-3-explain-native-code-versus-intermediate-code" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Shipping native code only for the build machine&#x27;s GPU makes the package fail on any older or newer architecture.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-4-design-a-build-ledger">Exercise 4: Design a build ledger<a class="heading-anchor" href="#exercise-4-design-a-build-ledger" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Building from a developer machine without recording flags yields an artifact nobody can reproduce or audit.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-5-test-unsupported-dtype">Exercise 5: Test unsupported dtype<a class="heading-anchor" href="#exercise-5-test-unsupported-dtype" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Silently casting to float32 hides precision loss and gives callers a different result from what they requested.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-6-define-a-package-release-gate">Exercise 6: Define a package release gate<a class="heading-anchor" href="#exercise-6-define-a-package-release-gate" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Testing one environment and declaring the whole matrix supported presents untested claims as verified.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
-<p>Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.</p>
+<p>Hint <em>k</em> belongs to exercise <em>k</em>; open one at a time.</p>
 <ol>
-<li>Start from worked example 1 and mark the quantities needed for the task &quot;List compatibility axes&quot;.</li>
-<li>Change one assumption in worked example 2 while preserving the declared contract: separate import and execution.</li>
-<li>Trace the CPU program&#x27;s variables before adding hardware behavior: explain native code versus intermediate code.</li>
-<li>Draw producers, consumers and the exact operation boundary for the task &quot;Design a build ledger&quot;.</li>
-<li>Separate what the small fixture establishes from what the real runtime must show: test unsupported dtype.</li>
-<li>Write a counterexample to an overbroad claim before you define a package release gate.</li>
+<li>List every axis a native extension depends on, from the Python version to the driver on the host.</li>
+<li>Ask what loads when the package imports and what is only exercised when the first kernel actually runs.</li>
+<li>Compare code compiled for specific GPU architectures with intermediate code that a driver can compile later.</li>
+<li>Write what a reviewer needs to rebuild the same artifact: input versions, hashes and compiler flags.</li>
+<li>Call the operator with a dtype it does not support and describe the error the user should see.</li>
+<li>For each environment you claim to support, list the tests that must pass before release.</li>
 </ol>
-<h3 id="common-mistakes-and-self-review">Common mistakes and self-review<a class="heading-anchor" href="#common-mistakes-and-self-review" aria-label="Link to this section">#</a></h3>
-<p>Confusing a correct tiny example with a general implementation is the central review risk. For this chapter, challenge the assumption in worked example 2, then ask whether your change preserves the mechanism described above. If you change dtype, layout, ordering, batch size or backend, update the acceptance contract rather than silently reusing the old observation. Explain an unexpected result before trying random configuration changes.</p>
-<p>Keep a small evidence table with columns <strong>claim</strong>, <strong>input</strong>, <strong>expected observation</strong>, <strong>actual observation</strong> and <strong>limit</strong>. For the first claim use <code>List compatibility axes</code>. For the final claim use <code>Define a package release gate</code>. An unperformed GPU or cluster experiment remains pending even when the CPU model is correct.</p>
-<h3 id="platform-and-evidence-contract">Platform and evidence contract<a class="heading-anchor" href="#platform-and-evidence-contract" aria-label="Link to this section">#</a></h3>
-<p>The reading worksheet and CPU reference model work through the ordinary Linux Docker classroom on macOS, Linux and Windows using WSL 2. They do not require an NVIDIA GPU. Their results are labeled CPU models or semantic oracles, not simulated hardware performance.</p>
-<p>Real CUDA work needs supported NVIDIA hardware, a compatible host driver and an explicitly prepared GPU runtime. An Apple GPU does not execute CUDA kernels. PyTorch MPS on a supported native Mac, ROCm on supported AMD hardware, or other vendor backends can provide separate accelerator learning routes; they need their own package and operation qualification and are not CUDA evidence. The ordinary Linux Docker classroom does not expose native Mac MPS automatically.</p>
-<p>Do not download packages, models or data by opening this lesson. Do not attach an engine socket, ambient cluster credentials or an arbitrary remote endpoint. A CPU pass, imported package, successful compilation, real GPU result and measured performance are distinct observations. Record the actual backend, data shape/dtype, source revision, versions and pending checks. A saved completion marker records learning progress, not hardware certification.</p>
+<h3 id="common-mistakes-and-self-check">Common mistakes and self-check<a class="heading-anchor" href="#common-mistakes-and-self-check" aria-label="Link to this section">#</a></h3>
+<p>A common mistake is treating a successful import as proof that the package works on a machine. The host shared library can load while the first kernel fails because the wheel has no compatible device code for that GPU. Another mistake is claiming universal portability from one build; two environments with the same Python version but a different framework ABI or CUDA assumption may need separate builds. Fix both by maintaining a tested compatibility matrix and running import, registration, forward, backward and unsupported-input tests in every declared environment.</p>
+<p><strong>Misconception:</strong> Embedding PTX in a wheel means the operator will run on every current and future GPU. <strong>Correction:</strong> The driver can compile intermediate PTX at load time only within compatibility rules. The driver must understand that PTX version, and PTX targets a minimum architecture, so it can run on that architecture and newer ones but not on older ones. Just-in-time compilation also adds a first-launch delay that depends on the installed driver. Record which native architectures and PTX targets the build contains, test the first kernel launch on each declared GPU and mark untested devices as untested.</p>
+<p><strong>Evidence limit:</strong> The reference checks that a build ledger is complete. A complete ledger does not show that a driver accepts the binaries or that a GPU runs the kernels; that requires executing real kernel work in each declared environment, which this lesson cannot do on a classroom worker.</p>
+<ol>
+<li>Why does a wheel filename not guarantee GPU support?</li>
+<li>When can intermediate device code help portability?</li>
+<li>Is publishing a package part of this lesson&#x27;s workflow?</li>
+</ol>
+<p>Answers: <a href="../solutions/cuda-110_solutions.md.html#self-check-answers">self-check answers</a>.</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
 <ul>
 <li><a href="https://docs.pytorch.org/docs/2.9/notes/cuda.html">PyTorch CUDA semantics</a></li>
 <li><a href="https://www.tensorflow.org/guide/gpu">TensorFlow GPU guide</a></li>
 </ul>
-<p>Use the version-matched documentation of your prepared environment. These references describe interfaces and supported boundaries; the chapter&#x27;s synthetic examples and CPU models are original teaching material.</p>
+<p>Full lists: <a href="../../STUDY-GUIDE.md.html#documentation-and-sources">documentation and sources</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning skill for cuda-110: Custom operator packaging and binary portability.
 Read courses/cuda/python/guides/cuda-110.md and courses/cuda/python/lessons/cuda-110.md.

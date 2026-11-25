@@ -235,15 +235,15 @@ protocols <span class="syntax-operator">=</span> <span class="syntax-punctuation
 <p>Record whether failure occurred during authorization, metadata parsing, protocol validation, file retrieval or Parquet decoding. Keep selected version and schema with the business result. Do not bypass TLS or forward service credentials to storage in response to an access failure; identify the actual protected boundary.</p>
 <p><strong>Interview discussion: why can list and metadata requests pass while reading the table fails?</strong> The later object-store and format paths have separate availability, authorization and compatibility requirements. The two cases require exact rows for success and preserve the distinct missing-file failure when only the control path remains healthy.</p>
 <h3 id="complete-worked-source">Complete worked source<a class="heading-anchor" href="#complete-worked-source" aria-label="Link to this section">#</a></h3>
-<p>This is a project-only command notebook. Read and edit it in the classroom; run its explicitly labeled commands from the copied owned Docker workshop. The classroom does not execute these service commands.</p>
+<p>The classroom does not execute these service commands. See the <a href="../STUDY-GUIDE.md.html#workshop-notebooks">workshop rules</a>.</p>
 <h2 id="delta-sharing-apache-076-prepared-command-notebook">Delta Sharing apache-076 prepared command notebook<a class="heading-anchor" href="#delta-sharing-apache-076-prepared-command-notebook" aria-label="Link to this section">#</a></h2>
-<p>Copy the owned Delta Sharing project and follow PREPARATION.md. Delta Sharing belongs to Delta Lake/Linux Foundation. The offline preparation actions are:</p>
+<p>In the copied Delta Sharing project, <code>plan</code> prints the three expected rows that the later file reads must reproduce, without contacting any server:</p>
 <pre class="highlighted-code"><code class="language-bash">bash run.sh prepare
 bash run.sh plan</code></pre>
-<p>For a separately prepared actual owned reference server and untracked recipient profile, the bounded native Docker protocol client runs with:</p>
+<p>During <code>check</code> against your prepared server, every signed data URL must point at a host listed in <code>DS60_SHARING_DATA_HOSTS</code>, and the recipient token is never sent to that host:</p>
 <pre class="highlighted-code"><code class="language-bash">bash run.sh check</code></pre>
 <p>Check separates metadata from file retrieval, never forwards recipient Authorization to storage, and withholds signed URLs. Use a separately copied owned table for the missing-file negative experiment.</p>
-<p>The classroom Markdown pad does not start a service. Source configuration and unit policy fixtures are not actual reference-server receipts. Keep credentials and signed URL query strings out of all published source and evidence.</p>
+<p>A signed URL grants temporary storage access, so the receipt keeps only the data host and file sizes or hashes. A missing file belongs in its own copied table, never in the fixture.</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
 <ul>
 <li><a href="https://github.com/delta-io/delta-sharing/blob/v1.4.1/PROTOCOL.md">Delta Sharing protocol</a></li>

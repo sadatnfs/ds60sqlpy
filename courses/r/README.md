@@ -20,6 +20,8 @@ Compare your implementation with the reference only after retaining your own att
 
 The prepared environment uses R 4.6.1, R6 2.6.1, S7 0.2.2, ggplot2 4.0.3 and Plotly 4.12.1. These original examples use the checked-in dependency contract; external package changes require a fresh compatibility check.
 
+The [study guide](STUDY-GUIDE.md) collects the run rules, figure capture and comparison routine that every chapter links to.
+
 Each guide ends with an optional prompt for a repository-aware AI tutor that names the chapter and its concepts; the guides are complete without it.
 
 ## Course map

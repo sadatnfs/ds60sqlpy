@@ -1,6 +1,6 @@
 # cuda-093: explained solutions
 
-These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.
+Compare with your [worksheet](../lessons/cuda-093.md) attempt.
 
 ## Exercise 1: Count specializations
 
@@ -74,8 +74,16 @@ Compilation creates code while replay reuses an execution schedule.
 
 **How to verify.** Profile a step before and after enabling graph capture and compare host launch time and kernel time separately.
 
+## Self-check answers
+
+1. **How do tracing, compilation and replay differ?** Tracing records operations, compilation transforms that record into code and replay reuses prepared work without rebuilding it.
+
+2. **Why can changing shapes slow a compiled model?** New shapes can fail the guards and trigger another specialization, paying compile time again.
+
+3. **Is using a generic graph API proof that CUDA Graph replay happened?** No. CUDA Graph replay has its own restrictions on allocations and stable execution, so it needs separate evidence.
+
 ## Reference observation
 
-Two modeled specializations;500-call break-even.
+Two modeled specializations; 500-call break-even.
 
-The reference file is `courses/cuda/python/references/cuda-093_cpu.py`. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.
+Asserted by `courses/cuda/python/references/cuda-093_cpu.py`.

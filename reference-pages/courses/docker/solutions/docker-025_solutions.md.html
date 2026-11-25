@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/docker/solutions/docker-025_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="docker-025-explanatory-solutions">docker-025: explanatory solutions<a class="heading-anchor" href="#docker-025-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit reveal. These explain the supplied teaching fixtures; they are not engine results. The mechanism is explained in <code>courses/docker/guides/docker-025.md</code>.</p>
+<p>These answers explain teaching fixtures, not engine results; the mechanism is in <a href="../guides/docker-025.md.html">the guide</a>.</p>
 <h3 id="exercise-1-compare-tag-and-digest-identity">Exercise 1: Compare tag and digest identity.<a class="heading-anchor" href="#exercise-1-compare-tag-and-digest-identity" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> A movable label versus content identity.</p>
 <p><strong>Why:</strong> A tag can resolve to new bytes later. Preserve immutable identity when you need to tie execution evidence to a specific artifact.</p>
@@ -238,7 +238,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>A plausible wrong approach:</strong> Accepting the transfer after offline ready alone says nothing about whether server.py runs without the network.</p>
 <p><strong>How to verify:</strong> In the offline container, the health and counter routes respond over loopback with the expected JSON.</p>
 <h3 id="check-your-transfer">Check your transfer<a class="heading-anchor" href="#check-your-transfer" aria-label="Link to this section">#</a></h3>
-<p>A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.</p></article>
+<p>The archive carries the image for the platform it was built on, linux/amd64. On an arm64 engine the run either goes through emulation, with a warning that the requested platform does not match the host, or fails with <code>exec format error</code> where no emulator is installed. <code>docker image inspect --format &#x27;{{.Os}}/{{.Architecture}}&#x27; ds60-docker-study:local</code> shows the mismatch. The handoff record needs a platform field, and a build for linux/arm64 when that is the target. If inspect already reports arm64 and the run still fails, the cause lies elsewhere.</p></article>
   </main>
 </body>
 </html>

@@ -20,6 +20,7 @@ if str(HERE) not in sys.path:
 
 from answers import ANSWERS  # noqa: E402
 from outcomes import MINUTES, OUTCOMES  # noqa: E402
+from practice import CHECK, READ, TRANSFER, WALK  # noqa: E402
 
 TASK_NAMES = (
     "Predict and explain",
@@ -115,15 +116,14 @@ def answer_text(number, task, spec, identity):
         uses = ""
         if used:
             names = ", ".join(used[:-1]) + " and " + used[-1] if len(used) > 1 else used[0]
-            uses = f" It uses {names} from the lesson's helpers, defined in the reference program."
+            uses = f" Helpers used: {names}."
         wrapped = (
             "fn main() -> Result<(), Box<dyn std::error::Error>> {\n"
             + textwrap.indent(code, "    ")
             + "\n    Ok(())\n}"
         )
         return (
-            f"**Reference answer.** The same statements run as the `Task {task}` block of the "
-            f"reference program; here they are wrapped in `main` as a complete file.{uses}\n\n"
+            f"**Reference answer**, wrapped in `main`; the reference runs it as its `Task {task}` block.{uses}\n\n"
             f"```{LANGUAGE}\n{wrapped}\n```\n\n"
             f"**Observe:** {answer['observe']}\n\n{answer['explain']}" + reasoning(answer)
         )
@@ -136,8 +136,28 @@ def answer_text(number, task, spec, identity):
         3: f"No reference answer has been written for this task yet. It needs a project or platform outside the single-file pad, so record your own build and run evidence and judge it against the vocabulary entry **{spec['terms'][0][0]}** and the lesson notes.",
         4: f"No reference answer has been written for this task yet. The wrong assumptions to look for are this lesson's pitfalls: {spec['pitfalls']}",
         5: f"No reference answer has been written for this task yet. Write the expected value or documented rejection for each boundary before running it, and compare with the checks in Example A ({a[0]}) and Example B ({b[0]}).",
-        6: f"No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **{spec['terms'][0][0]}**, and state one limitation of your choice.",
+        6: f"**Judging criteria.** {TRANSFER[number]}",
     }[task]
+
+
+def modules(spec):
+    """The standard library and Arrow modules a lesson's programs name, as a sentence."""
+    text = "\n".join((spec["helpers"], spec["a"][1], spec["b"][1]))
+    found = sorted(set(re.findall(r"\b((?:std|arrow)::[a-z_]+)\b", text)))
+    if not found:
+        return "This lesson's programs need only the prelude and their own helpers."
+    named = [f"`{name}`" for name in found]
+    listed = ", ".join(named[:-1]) + " and " + named[-1] if len(named) > 1 else named[0]
+    return f"Beyond the prelude, this lesson's programs use {listed}."
+
+
+def tempting(number):
+    """Wrong approaches recorded for the construction and evidence tasks, as hint bullets."""
+    return "\n".join(
+        f"- **Task {task}.** {answer['wrong']}"
+        for task, answer in sorted(ANSWERS.get(number, {}).items())
+        if task != 4 and answer.get("wrong")
+    )
 
 
 def write(path, value):
@@ -194,16 +214,6 @@ def build():
                 "verification_id": None,
             }
         )
-        run = (
-            "The Linux Docker classroom compiles the saved pad as `main.rs` with pinned Rust 1.99.1, "
-            "edition 2024, and the prepared Arrow 60 library. `assert!` and `assert_eq!` remain active "
-            "in normal builds. The fixed pad accepts one source file without arbitrary arguments, "
-            "interactive input, Cargo manifests or package installation. The main function returns "
-            "`Result<(), Box<dyn std::error::Error>>` so later examples can propagate errors with `?`; "
-            "the final `Ok(())` means this fixture completed successfully. Standard library and Arrow "
-            "examples remain offline after image preparation. Multi-file Cargo and external ecosystem "
-            "projects have separate explicit preparation workflows."
-        )
         terms = "\n\n".join(f"**{term}:** {definition}" for term, definition in spec["terms"])
         examples = "\n\n".join(
             f"### Example {label}: {example[0]}\n\n{example[3]}\n\n```{LANGUAGE}\n{program(spec, [example], identity).rstrip()}\n```\n\n**Observe:** {example[2]}"
@@ -217,7 +227,10 @@ def build():
             f"### Task {i}: {name}\n\n{task}\n\n{answer_text(number, i, spec, identity)}"
             for i, (name, task) in enumerate(zip(TASK_NAMES, spec["tasks"], strict=True), 1)
         )
-        official = spec["source"] or "https://doc.rust-lang.org/book/"
+        url, label, focus = READ[number]
+        reading = f"Read [{label}]({url}) {focus}."
+        if spec["source"] and spec["source"] != url:
+            reading += f" The broader reference is [{spec['source']}]({spec['source']})."
         prompt = f"""Use $guide-ds60sqlpy-learning for {identity}: {spec["title"]}.
 Read {guide} and {starter}. Prerequisites: {", ".join(prior) or "none"}.
 Teach the vocabulary and trace one example. Ask for my prediction before running.
@@ -247,9 +260,11 @@ mechanism and all six task outcomes, not merely copying the success marker."""
 
 ## How to run this lesson
 
-{run}
+{modules(spec)} A passing run prints `{identity}: passed`.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Pad setup and limits: [Run a lesson](../STUDY-GUIDE.md#run-a-lesson).
+
+Before you run anything, follow [Attempt a lesson](../STUDY-GUIDE.md#attempt-a-lesson).
 
 {spec["notes"]}
 
@@ -257,7 +272,9 @@ Start with the answer-free learner artifact in your saved classroom pad. It deli
 
 {spec["anatomy"]}
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+**Reading Example A ({spec["a"][0]}, code below).** {WALK[number]}
+
+Method for tracing your own variants: [Trace a program](../STUDY-GUIDE.md#trace-a-program).
 
 ## Worked example / walkthrough
 
@@ -267,13 +284,13 @@ Read the operations in dependency order. Record which values exist before each l
 
 {exercises}
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Record each task as in [Keep evidence for each task](../STUDY-GUIDE.md#keep-evidence-for-each-task).
 
 ## Common pitfalls and diagnosis
 
 {spec["pitfalls"]}
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+To turn a pitfall into a test, see [Design a regression case](../STUDY-GUIDE.md#design-a-regression-case).
 
 ## Progressive hints
 
@@ -281,13 +298,21 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 2. Compare Example B ({spec["b"][0]}) with Example A and name the first line whose behavior differs. Its observation is: {spec["b"][2]}
 3. Before opening the explanation, test your task 3 attempt against this lesson's main pitfall: {first_sentence(spec["pitfalls"])}
 
+Tempting approaches to rule out before you compare:
+
+{tempting(number)}
+
 ## Self-check and next step
 
-Explain {", ".join(term[0] for term in spec["terms"])} without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+{CHECK[number]}
+
+Then work through [Self-check and review](../STUDY-GUIDE.md#self-check-and-review).
 
 ## Sources and execution boundary
 
-[Official language or framework documentation]({official}). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+{reading}
+
+What the classroom does and does not prove: [Sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 
@@ -308,7 +333,9 @@ Explain {", ".join(term[0] for term in spec["terms"])} without reading the defin
         )
         explanation = f"""# {identity}: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [{identity}_solution.{EXT}]({identity}_solution.{EXT}). It runs both worked examples{" and the reference answers below" if answered else ""}, and its assertions are always active under the prepared classroom compile settings.
+Executable reference: [{identity}_solution.{EXT}]({identity}_solution.{EXT}), which runs both examples{" and the coded answers" if answered else ""}.
+
+Open this only after [an attempt](../STUDY-GUIDE.md#attempt-a-lesson).
 
 ## Why the two examples differ
 
@@ -330,7 +357,9 @@ Attempt the six guide tasks before opening this comparison. The executable refer
 
 ## Review before continuing
 
-Run the reference and confirm that it prints `{identity}: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.
+Rebuild Example B ({spec["b"][0]}) from a blank pad.
+
+Review routine: [Self-check and review](../STUDY-GUIDE.md#self-check-and-review).
 """
         write(BASE / "solutions" / f"{identity}_solutions.md", explanation)
     title = "Rust: ownership, reliable systems and Arrow data engineering"

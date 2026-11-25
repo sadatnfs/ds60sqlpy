@@ -268,3 +268,18 @@ def test_introductory_streams_have_explicit_bounded_query_lifecycle(number: int)
         assert "preserve scratch" in source
         assert "time.sleep(" not in source and "Thread.sleep(" not in source
         assert '.format("socket")' not in source and '.format("kafka")' not in source
+
+
+def test_guides_link_shared_study_guide_sections_that_exist() -> None:
+    study = (COURSE / "STUDY-GUIDE.md").read_text()
+    anchors = {
+        re.sub(r"[^a-z0-9 -]", "", line[3:].strip().lower()).replace(" ", "-")
+        for line in study.splitlines()
+        if line.startswith("## ")
+    }
+    linked = set()
+    for path in sorted((COURSE / "guides").glob("spark-*.md")):
+        for anchor in re.findall(r"\.\./STUDY-GUIDE\.md#([a-z0-9-]+)", path.read_text()):
+            assert anchor in anchors, (path.name, anchor)
+            linked.add(path.name)
+    assert len(linked) == 41

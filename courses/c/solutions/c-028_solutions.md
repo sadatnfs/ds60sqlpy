@@ -1,6 +1,8 @@
 # c-028: explained solutions
 
-Compare after an attempt or explicit reveal. The complete executable reference, `c-028_solution.c`, implements all six cases, from the "call a declared API" case to the "transfer repeatable builds to repeatable behavior" case, in one `main.c`.
+`c-028_solution.c` assembles the "call a declared API" case through the "transfer repeatable builds to repeatable behavior" case in one `main.c`.
+
+Compare only after an attempt: [Compare and transfer](../STUDY-GUIDE.md#compare-and-transfer).
 
 ## Mechanism and assumptions
 
@@ -10,7 +12,7 @@ A header declares a function prototype under an include guard. One .c file defin
 
 ## Exercise 1: Call a declared API: change one input
 
-Copy worked example 1, the "call a declared API" case, into a scratch pad and change `int values[] = {2, 4, 6};` to `int values[] = {3, 4, 6};`. Before running, predict which CHECK fails and which value it sees in place of the worked result (summing 2, 4, 6 returns 12); then run it and restore the original line.
+In worked example 1, change `int values[] = {2, 4, 6};` to `int values[] = {3, 4, 6};`. Predict which value the CHECK on `stats_sum(values, 3) == 12` sees, then run and restore.
 
 The unchanged code is worked example 1:
 
@@ -19,7 +21,7 @@ int values[] = {2, 4, 6};
 CHECK(stats_sum(values, 3) == 12);
 ```
 
-**Expected:** With `int values[] = {3, 4, 6};` the run stops with `Check failed` at the CHECK on `stats_sum(values, 3) == 12`, because the "call a declared API" case no longer shows that summing 2, 4, 6 returns 12. Restoring `int values[] = {2, 4, 6};` brings that observation back.
+**Expected:** `Check failed` at `stats_sum(values, 3) == 12`; restoring `int values[] = {2, 4, 6};` passes again.
 
 A compatible declaration lets the compiler validate the call independently of where the definition appears.
 
@@ -33,7 +35,7 @@ A compatible declaration lets the compiler validate the call independently of wh
 
 ## Exercise 2: Use an empty API contract: diagnose an edited check
 
-A careless edit changed the CHECK in worked example 2, the "use an empty API contract" case, so that it reads `CHECK(stats_sum(NULL, 0) != 0);`. Run the example with that line, explain why the edited CHECK now fails even though the program state still means the result is zero, and restore it.
+Worked example 2's CHECK now reads `CHECK(stats_sum(NULL, 0) != 0);`. Explain why it fails although the result is zero, then restore it.
 
 The unchanged code is worked example 2:
 
@@ -41,7 +43,7 @@ The unchanged code is worked example 2:
 CHECK(stats_sum(NULL, 0) == 0);
 ```
 
-**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `stats_sum(NULL, 0) == 0`. Once the line reads `CHECK(stats_sum(NULL, 0) == 0);` again, the "use an empty API contract" case again shows that the result is zero.
+**Expected:** `Check failed` until the CHECK reads `CHECK(stats_sum(NULL, 0) == 0);` again, though the result is zero.
 
 The interface explicitly permits this empty case and the implementation makes no pointer access.
 

@@ -1,10 +1,17 @@
 # cuda-082: Streams and events across library boundaries
 
-**Route:** CUDA Python and machine learning. **Stage:** intermediate. **Prerequisites:** `cuda-067`, `cuda-071`, `cuda-081`. Allow several sessions when the hardware experiment is new; the chapter is not a deadline.
+**Route:** CUDA Python and machine learning. **Stage:** intermediate. **Prerequisites:** `cuda-067`, `cuda-071`, `cuda-081`.
 
-## What you will be able to explain
+Pacing, evidence labels and platform rules: [CUDA study guide](../../STUDY-GUIDE.md).
 
-By the end, you can **draw the dependency graph**, **trace storage reuse**, and **explain why global synchronization can mask bugs** with evidence. Start with the two worked cases, then use the editable CPU model to make the quantities concrete.
+## Learning objectives
+
+- Draw the dependency graph.
+- Locate a missing wait.
+- Separate host wait and stream wait.
+- Trace storage reuse.
+- Design non-default stream test.
+- Explain why global synchronization can mask bugs.
 
 ## Mechanism and vocabulary
 
@@ -41,9 +48,13 @@ Upload precedes transform, which precedes download. Independent preprocessing fo
 
 Producer A writes buffer X and records event E. Consumer B waits for E before reading X. The graph has an explicit edge even if host Python already returned from A.
 
-## Portable executable model
+## How to run the CPU model
 
-The **CPU reference model** variant runs this bounded worked example using `python-core`. It uses only the Python standard library, small synthetic values and no network. Its purpose is to expose the arithmetic or contract behind the chapter. The separate reference includes assertions for the stated observations.
+Edit the copy; the [reference](../references/cuda-082_cpu.py) adds assertions.
+
+```sh
+python courses/cuda/python/lessons/cuda-082_cpu.py
+```
 
 ```python
 edges = [("upload", "transform"), ("transform", "download")]
@@ -66,77 +77,62 @@ print("CPU dependency model: ordered pipeline accepted; premature download rejec
 | `positions` | `{'upload': 0, 'transform': 1, 'download': 2}` |
 | `bad` | `['download', 'upload', 'transform']` |
 
-Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.
-
 ## Practice and transfer
+
+Record each attempt in the [worksheet](../lessons/cuda-082.md) before opening hints.
 
 ### Exercise 1: Draw the dependency graph
 
 **Trap to avoid:** Drawing edges from code order instead of data flow invents dependencies between unrelated work and hides real ones crossing library calls.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 2: Locate a missing wait
 
 **Trap to avoid:** Assuming the host Python call to A finishing means A's kernel finished confuses queuing with completion.
-
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 3: Separate host wait and stream wait
 
 **Trap to avoid:** Using a host synchronize everywhere fixes correctness but serializes host and device.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 4: Trace storage reuse
 
 **Trap to avoid:** Freeing a buffer as soon as the host is done with its Python object assumes device work is done too.
-
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 5: Design non-default stream test
 
 **Trap to avoid:** Testing only on the default stream passes even with the wait removed.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 6: Explain why global synchronization can mask bugs
 
 **Trap to avoid:** Treating a correct result with global waits as proof that dependencies are complete hides the missing event.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ## Progressive hints
 
-Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.
+Hint *k* belongs to exercise *k*; open one at a time.
 
-1. Start from worked example 1 and mark the quantities needed for the task "Draw the dependency graph".
-2. Change one assumption in worked example 2 while preserving the declared contract: locate a missing wait.
-3. Trace the CPU program's variables before adding hardware behavior: separate host wait and stream wait.
-4. Draw producers, consumers and the exact operation boundary for the task "Trace storage reuse".
-5. Separate what the small fixture establishes from what the real runtime must show: design non-default stream test.
-6. Write a counterexample to an overbroad claim before you explain why global synchronization can mask bugs.
+1. Draw one node per operation and an edge only where one operation reads what another wrote.
+2. Find the read of a buffer whose producer has no recorded event that the consumer waits on.
+3. Ask which call stops Python and which only tells the device queue to wait.
+4. Follow buffer X after its last consumer is enqueued and ask when the allocator may hand it out again.
+5. Use two streams and inputs with known outputs, so a missing wait shows up as a wrong value.
+6. Ask which dependency a device-wide synchronization adds that your intended graph never declared.
 
-## Common mistakes and self-review
+## Common mistakes and self-check
 
-Confusing a correct tiny example with a general implementation is the central review risk. For this chapter, challenge the assumption in worked example 2, then ask whether your change preserves the mechanism described above. If you change dtype, layout, ordering, batch size or backend, update the acceptance contract rather than silently reusing the old observation. Explain an unexpected result before trying random configuration changes.
+A frequent mistake is assuming that operations on two streams run in the order they were written in Python. Without an event and a wait, a consumer on stream B may read buffer X before the producer on stream A finishes. Another mistake is adding a device-wide synchronization to make a bug vanish, which hides the missing edge and removes overlap. Fix both by drawing the dependency graph, recording an event after each producer and making each consumer wait on it.
 
-Keep a small evidence table with columns **claim**, **input**, **expected observation**, **actual observation** and **limit**. For the first claim use `Draw the dependency graph`. For the final claim use `Explain why global synchronization can mask bugs`. An unperformed GPU or cluster experiment remains pending even when the CPU model is correct.
+**Evidence limit:** The reference accepts a valid dependency order and rejects a premature download in a sequential model. It cannot reproduce real stream timing, library current-stream conventions or allocator reuse while a kernel is still running.
 
-## Platform and evidence contract
+1. What does an event record?
+2. Why is a correct pointer not enough for interop?
+3. Why test with a non-default stream?
 
-The reading worksheet and CPU reference model work through the ordinary Linux Docker classroom on macOS, Linux and Windows using WSL 2. They do not require an NVIDIA GPU. Their results are labeled CPU models or semantic oracles, not simulated hardware performance.
-
-Real CUDA work needs supported NVIDIA hardware, a compatible host driver and an explicitly prepared GPU runtime. An Apple GPU does not execute CUDA kernels. PyTorch MPS on a supported native Mac, ROCm on supported AMD hardware, or other vendor backends can provide separate accelerator learning routes; they need their own package and operation qualification and are not CUDA evidence. The ordinary Linux Docker classroom does not expose native Mac MPS automatically.
-
-Do not download packages, models or data by opening this lesson. Do not attach an engine socket, ambient cluster credentials or an arbitrary remote endpoint. A CPU pass, imported package, successful compilation, real GPU result and measured performance are distinct observations. Record the actual backend, data shape/dtype, source revision, versions and pending checks. A saved completion marker records learning progress, not hardware certification.
+Answers: [self-check answers](../solutions/cuda-082_solutions.md#self-check-answers).
 
 ## Primary references
 
-- [DLPack Python specification](https://dmlc.github.io/dlpack/latest/python_spec.html)
 - [CuPy interoperability](https://docs.cupy.dev/en/stable/user_guide/interoperability.html)
 
-Use the version-matched documentation of your prepared environment. These references describe interfaces and supported boundaries; the chapter's synthetic examples and CPU models are original teaching material.
+Full lists: [documentation and sources](../../STUDY-GUIDE.md#documentation-and-sources).
 
 ## Ask an AI tutor about this lesson
 

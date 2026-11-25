@@ -1,6 +1,8 @@
 # csharp-007: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [csharp-007_solution.cs](csharp-007_solution.cs). It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.
+Reference program: [csharp-007_solution.cs](csharp-007_solution.cs), covering both examples and the executed answers.
+
+Attempt the tasks first; see [comparing with the explanation](../STUDY-GUIDE.md#comparing-with-the-explanation).
 
 ## Why the two examples differ
 
@@ -125,7 +127,7 @@ The two failures have different causes, so each gets its own exception and its o
 
 Extract one computation from a larger program and state its input, output, mutation and failure contract.
 
-No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **Parameter**, and state one limitation of your choice.
+No single answer exists; extend task 3 using the [open transfer routine](../STUDY-GUIDE.md#open-transfer-tasks).
 
 ## Mechanism and diagnostic reasoning
 
@@ -139,4 +141,4 @@ A method name is part of the interface. A generic catch returning zero can make 
 
 ## Review before continuing
 
-Run the reference and confirm that it prints `csharp-007: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.
+Run the reference and confirm it prints `csharp-007: passed`, then rerun the guide's counterexample.

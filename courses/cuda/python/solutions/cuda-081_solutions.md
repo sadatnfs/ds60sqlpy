@@ -1,6 +1,6 @@
 # cuda-081: explained solutions
 
-These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.
+Compare with your [worksheet](../lessons/cuda-081.md) attempt.
 
 ## Exercise 1: Distinguish copy and alias
 
@@ -74,8 +74,16 @@ Change one view and inspect the other without unsafe concurrent writes.
 
 **How to verify.** Record whether the mutation was visible and compare with the documented behavior of the exchange.
 
+## Self-check answers
+
+1. **Why is a zero-copy exchange not the same as two independent values?** Both views share one allocation, so a mutation through one is visible through the other, and the consumer depends on the owner's lifetime.
+
+2. **Does sharing a physical GPU let two separate workers share a buffer?** No. Zero-copy exchange here happens inside one process. Separate workers or containers cannot simply pass a live pointer.
+
+3. **What does the modern exchange interface add over legacy capsules?** It can negotiate stream readiness between producer and consumer. Legacy capsules have their own ownership rules and must be followed exactly.
+
 ## Reference observation
 
 Alias changes to 9 while copied value remains 1.
 
-The reference file is `courses/cuda/python/references/cuda-081_cpu.py`. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.
+Asserted by `courses/cuda/python/references/cuda-081_cpu.py`.

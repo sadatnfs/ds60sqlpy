@@ -4,8 +4,6 @@
 
 Thread-block clusters and tensor memory accelerator mechanisms expand cooperation and data movement on supported newer architectures. Distributed shared memory changes which participating blocks can access certain shared regions, but introduces cluster lifetime and synchronization requirements. TMA transfers use descriptors and completion protocols; they are not ordinary memcpy calls with a new name. Different instructions can require architecture-specific targets beyond a broad compute-capability family. Maintain a feature table for the exact operation, compiler and GPU, and retain a portable fallback. Learning the ownership diagram is useful without executing architecture-specific code.
 
-The separate [CPU reference](../references/cuda-057_cpu.py) checks the chapter's bounded model. It does not execute CUDA or establish GPU timing. Compare after attempting the worksheet or explicitly choosing to reveal solutions.
-
 ## Exercise 1
 
 A cluster-assisted histogram can combine partial bins across cooperating blocks before global output. Before a remote shared-memory read, the producing block's storage must be initialized and remain alive through the required cluster synchronization. A block exiting early can invalidate the assumed lifetime.
@@ -78,12 +76,16 @@ Preserve input/bin/output semantics and return the same validated counts, while 
 
 **How to verify:** Run both paths on the same input where supported and compare every bin.
 
+## Self-check answers
+
+1. **Name four fields of a capability record.** Device and compute capability, toolkit and driver versions, the feature probed and the probe result.
+2. **What should an unavailable cluster feature do to reading progress?** Nothing; the lesson remains complete, and only the optional lab stays unqualified.
+3. **When may a block read another block's distributed shared memory?** After the producer initialized it, within the required cluster synchronization, while that block is still alive.
+
 ## Numerical reference and its limits
 
-The complete CPU model is [here](../references/cuda-057_cpu.py). Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It does not claim CUDA execution, concurrency safety or a performance measurement.
+The [CPU reference](../references/cuda-057_cpu.py) reproduces worked example 1 and prints `{'selected_implementation': 'baseline', 'specialized_execution_verified': False}`.
 
 ## Transfer review
 
 Preserve input/bin/output semantics and return the same validated counts, while recording which implementation ran and comparing performance only within supported conditions.
-
-A complete explanation must name its inputs, the unchanged mathematical contract, the changed boundary or resource condition, and the evidence still needed on actual hardware. Preserve a CPU baseline even after a GPU path becomes available.

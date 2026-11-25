@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/r/solutions/r-028_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="r-028-reference-reasoning">r-028: reference reasoning<a class="heading-anchor" href="#r-028-reference-reasoning" aria-label="Link to this section">#</a></h2>
-<p>Use the <a href="r-028_reference.R.html">complete reference</a> with the guide&#x27;s declared inputs and runtime. Every worked example is also a standalone script.</p>
+<p>Run the <a href="r-028_reference.R.html">complete reference</a> under the <a href="../STUDY-GUIDE.md.html#run-a-chapter">run rules</a>.</p>
 <h3 id="why-the-implementation-has-this-shape">Why the implementation has this shape<a class="heading-anchor" href="#why-the-implementation-has-this-shape" aria-label="Link to this section">#</a></h3>
 <p>The reference uses three tasks while keeping concurrency fixed at two. It compares a structured result with a sequential oracle and independent arithmetic 14,77,8. The RNG comparison changes both schedule policy and task order, then compares by explicit identifier.</p>
 <p>A deliberately failed task is propagated through the owning function, exercising ordinary on.exit cleanup. The separate runtime qualification covers forced timeout and descendant reaping; this script does not claim that catching an error or reaching a final marker proves that every external termination path is safe. Small fixtures demonstrate contracts rather than parallel speed.</p>
@@ -248,7 +248,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Tempting mistake:</strong> Wrapping each task in tryCatch that returns 0 on error. The results look complete, and any average over them is wrong with no sign of the failure.</p>
 <p><strong>Verify:</strong> The handler returns a message containing &quot;deliberate task failure&quot;, which shows the error propagated instead of being replaced.</p>
 <h3 id="what-the-checks-establish">What the checks establish<a class="heading-anchor" href="#what-the-checks-establish" aria-label="Link to this section">#</a></h3>
-<p>The reference makes 6 <code>stopifnot()</code> checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.</p></article>
+<p>The assertions confirm that a bad task produces the expected diagnostic, that the parallel results are identical to the serial ones, that the squared sums are 14, 77 and 8 with a count of 3 for the first task, that per-task random streams reproduce exactly across scheduling orders, and that different tasks still draw different values. They cannot prove cleanup after an external kill.</p>
+<p>The reference makes 6 <code>stopifnot()</code> checks; see <a href="../STUDY-GUIDE.md.html#what-a-passing-run-proves">what a passing run proves</a>.</p></article>
   </main>
 </body>
 </html>

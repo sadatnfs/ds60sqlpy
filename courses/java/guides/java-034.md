@@ -6,7 +6,16 @@ Advanced, approximately 120 minutes. Direct prerequisites: `java-033`
 
 ## Learning objectives
 
-Separate pure domain logic from infrastructure so validation and failures are testable before any repository call. Along the way, explain port, adapter, pure core, dependency inversion using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. Exercises 1 and 2 start from the worked examples; the authored investigations begin with this task: Request missing and inspect the audit list. The final exercise transfers the mechanism to detect arithmetic overflow without an event.
+Separate pure domain logic from infrastructure so validation and failures are testable before any repository call.
+
+The six exercises practice these steps:
+
+- Test the pure calculation.
+- Compose a deterministic service.
+- Reject an unknown catalog item.
+- Propagate an infrastructure failure.
+- Prove invalid quantity fails before a repository call.
+- Detect arithmetic overflow without an event.
 
 ## Purpose and mental model
 
@@ -26,16 +35,9 @@ This lesson builds a small quote service. A catalog port supplies integer-cent p
 
 ## How to run this lesson
 
-Open the Docker classroom, choose the prepared Java 21 profile and save a learner pad. The pad is compiled as `Main.java` with `javac --release 21` and executed with `java -ea Main`. Assertions are enabled deliberately. A successful assertion has no output; a failed assertion throws `AssertionError` and the process should fail. Do not remove assertions to obtain a green result.
+The quote service takes three plain Java ports, a `Catalog` lambda, a clock `Supplier` and an audit `Consumer`, so every check runs in memory with a fixed instant and no database, network or system clock.
 
-For a prepared native JDK, copy a worked example into your own `Main.java` under ignored `.learning/expansion/java-034/`. From that directory run the same two commands on PowerShell, macOS or Linux:
-
-```text
-javac --release 21 Main.java
-java -ea Main
-```
-
-The public class name and source filename must agree. Each worked example below is a complete file. Example B includes the setup it needs from Example A, so it can be compiled by itself. The six exercise reference blocks form one complete program in the separate solution. Keep your original prediction, source and diagnostic text together. Most examples use prepared JDK libraries and tiny local fixtures; any additional dependency is specified in the lesson notes below. Any lesson-specific library or additional file is named explicitly; do not download packages from inside a learner program. Resource examples close their owned files, executors or loopback servers.
+Classroom and native JDK steps, the exercise controls and the hint routine are in the [Java study guide](../STUDY-GUIDE.md).
 
 
 
@@ -181,62 +183,62 @@ public class Main {
 
 ## Prediction before your attempt
 
-Read the source from the entry point and name each value before executing it. Identify which operations create new values, which mutate existing state and which can fail. Predict the first observable output or assertion result. For a compile-time failure, explain which source rule is violated before discussing runtime state: a program that did not compile never reached its main method. Keep normal, boundary and invalid inputs separate so each check has a clear purpose.
+Before running Example A, compute `total(3, 125)` and decide what `total(0, 125)` does. For Example B, predict the total, the timestamp and the audit list after `quote("item-a", 2)` with a fixed clock. Before Exercise 5, decide how many times the catalog is called when the quantity is -1, given the order of checks inside `quote`.
 
 ## Exercises
 
-1. **Test the pure calculation: change one input.** Copy Example A into a scratch `Main.java` and change `total(0, 125);` to `total(1, 125);`. Before running it with `java -ea Main`, predict which assertion fails and which value it now sees; then run it and restore the original line.
-   **Expected:** The changed run fails with an `AssertionError` from the assertion on `invalid`. Restoring the original line brings back the worked observation: 375 cents; nonpositive quantity rejected.
-   **Verify:** Compare your written prediction with the reported `AssertionError` and its stack-trace line, and name the value that made `invalid` false. After restoring the line, the program completes without an `AssertionError` again.
+1. **Test the pure calculation: change one input.** Change `total(0, 125);` to `total(1, 125);` in Example A and predict which assertion fails and why.
+   **Expected:** The edited run fails with an `AssertionError` from the assertion on `invalid`.
+   **Verify:** Name the value that makes `invalid` false, then restore the line.
 
-2. **Compose a deterministic service: debug a regression.** A regression changed one token in the code that Example B adds after Example A, so one line now reads `id.equals("item-a") ? java.util.OptionalLong.of(126) : java.util.OptionalLong.empty();`. Run Example B with that line, use the failing assertion to locate the defect and repair it without changing the assertion.
-   **Expected:** Before the repair the run fails with an `AssertionError` from the assertion on `quote.totalCents() == 250 && quote.created().equals(instant) && audit.equals(List.of("quoted:item-a"))`; after it the line reads `id.equals("item-a") ? java.util.OptionalLong.of(125) : java.util.OptionalLong.empty();` again and total 250, time 2026-01-01T00:00:00Z, one audit event.
-   **Verify:** Keep the failing and the repaired runs. Explain why the changed token alters the value tested by `quote.totalCents() == 250 && quote.created().equals(instant) && audit.equals(List.of("quoted:item-a"))` for this input.
+2. **Compose a deterministic service: debug a regression.** A regression in Example B's new code makes one line read `id.equals("item-a") ? java.util.OptionalLong.of(126) : java.util.OptionalLong.empty();`. Repair it using the failing assertion.
+   **Expected:** The unrepaired run fails with an `AssertionError` from the assertion on `quote.totalCents() == 250 && quote.created().equals(instant) && audit.equals(List.of("quoted:item-a"))`; the repaired line reads `id.equals("item-a") ? java.util.OptionalLong.of(125) : java.util.OptionalLong.empty();`.
+   **Verify:** Explain how the changed token alters the value that `quote.totalCents() == 250 && quote.created().equals(instant) && audit.equals(List.of("quoted:item-a"))` tests.
 
 3. **Reject an unknown catalog item.** Request missing and inspect the audit list.
    **Expected:** NoSuchElementException; no additional audit.
-   **Verify:** Keep an assertion equivalent to `missing && audit.size() == 1`. As a control, change `missing = true;` to `missing = false;`: the run must fail with an `AssertionError` from the assertion on `missing && audit.size() == 1`. Restore the line before continuing.
+   **Verify:** Control: changing `missing = true;` to `missing = false;` must fail the assertion on `missing && audit.size() == 1`.
 
 4. **Propagate an infrastructure failure.** Inject a Catalog thatthrowsIOException.
    **Expected:** same failure type; no success audit.
-   **Verify:** Keep an assertion equivalent to `propagated && failures.isEmpty()`. As a control, change `throw new java.io.IOException("catalog unavailable");` to `throw new java.io.IOException("catalog unavailable!");`: the run must fail with an `AssertionError` from the assertion on `propagated && failures.isEmpty()`. Restore the line before continuing.
+   **Verify:** Control: changing `throw new java.io.IOException("catalog unavailable");` to `throw new java.io.IOException("catalog unavailable!");` must fail the assertion on `propagated && failures.isEmpty()`.
 
 5. **Prove invalid quantity fails before a repository call.** Use a counting catalog and request negative quantity.
    **Expected:** repository call count 0.
-   **Verify:** Keep an assertion equivalent to `rejected && calls.get() == 0`. As a control, change `rejected = true;` to `rejected = false;`: the run must fail with an `AssertionError` from the assertion on `rejected && calls.get() == 0`. Restore the line before continuing.
+   **Verify:** Control: changing `rejected = true;` to `rejected = false;` must fail the assertion on `rejected && calls.get() == 0`.
 
 6. **Detect arithmetic overflow without an event.** Use a Long.MAX_VALUE unit price and quantity 2.
    **Expected:** ArithmeticException; audit sink unused.
-   **Verify:** Keep an assertion equivalent to `overflow && overflowAudit.isEmpty()`. As a control, change `overflow = true;` to `overflow = false;`: the run must fail with an `AssertionError` from the assertion on `overflow && overflowAudit.isEmpty()`. Restore the line before continuing.
+   **Verify:** Control: changing `overflow = true;` to `overflow = false;` must fail the assertion on `overflow && overflowAudit.isEmpty()`.
 
 ## Common pitfalls and diagnosis
 
-When a check fails, keep the smallest source file that still demonstrates the failure. Read the first relevant compiler diagnostic before editing several lines; later diagnostics can be consequences of the same missing delimiter or wrong type. For a runtime exception, identify the first frame belonging to your code and compare its input with the method contract. For an assertion failure, inspect the actual value and the independent expected value. A passing process exit is weaker than a checked invariant, and a checked invariant applies only under its stated assumptions.
+A service that calls `Instant.now()` or opens its own connection cannot be tested deterministically; inject the clock and the catalog instead. Turning a missing item into a zero price hides a real outcome, and catching an `IOException` to return a default hides an outage. Writing the audit event before the arithmetic finishes records success for a failed request. And plain `*` on `long` wraps silently on overflow, while `Math.multiplyExact` throws.
 
-Do not replace a precise exception with a catch-all that returns a plausible default. That can hide an invalid input or an unfinished operation. If an example owns a resource, verify its lifetime on both the success and failure paths. If an operation is concurrent, use ordering primitives to establish the relationship you need; an observed timing coincidence is not a synchronization guarantee. The solution explanations identify the specific alternative that would break each exercise.
+General compiler, runtime and assertion triage: [diagnose a failure](../STUDY-GUIDE.md#diagnose-a-failure).
 
 ## Progressive hints
 
-Read one hint at a time and attempt the exercise again before reading the next. Keep a small table of input, expected value, actual value and exception type. Ask for one hint about the first incorrect assumption before requesting the entire reference implementation.
+Read one rung at a time, as described in [using hints](../STUDY-GUIDE.md#use-hints-one-at-a-time).
 
-- **Exercise 1:** First restate the expected observation: 375 cents; nonpositive quantity rejected. Then list the values read by `invalid` and trace each one from its declaration. Finally, compute the asserted value with `total(1, 125);` in place before running.
-- **Exercise 2:** First restate the expected observation: total 250, time 2026-01-01T00:00:00Z, one audit event. Then list the values read by `quote.totalCents() == 250 && quote.created().equals(instant) && audit.equals(List.of("quoted:item-a"))` and trace each one from its declaration. Finally, compare `id.equals("item-a") ? java.util.OptionalLong.of(126) : java.util.OptionalLong.empty();` with the same line in Example B and state the claim each version makes.
-- **Exercise 3:** First restate the expected observation: noSuchElementException; no additional audit. Then list the values read by `missing && audit.size() == 1` and trace each one from its declaration. Finally, predict the effect of changing `missing = true;` to `missing = false;` before running anything.
-- **Exercise 4:** First restate the expected observation: same failure type; no success audit. Then list the values read by `propagated && failures.isEmpty()` and trace each one from its declaration. Finally, predict the effect of changing `throw new java.io.IOException("catalog unavailable");` to `throw new java.io.IOException("catalog unavailable!");` before running anything.
-- **Exercise 5:** First restate the expected observation: repository call count 0. Then list the values read by `rejected && calls.get() == 0` and trace each one from its declaration. Finally, predict the effect of changing `rejected = true;` to `rejected = false;` before running anything.
-- **Exercise 6:** First restate the expected observation: arithmeticException; audit sink unused. Then list the values read by `overflow && overflowAudit.isEmpty()` and trace each one from its declaration. Finally, predict the effect of changing `overflow = true;` to `overflow = false;` before running anything.
+- **Exercise 1:** First note that the edit calls `total(1, 125)` inside the `try` block. Then decide whether a quantity of 1 passes the positive quantity rule. Finally, explain why nothing is thrown, `invalid` stays false and the assertion fails.
+- **Exercise 2:** First note that the edit makes the fake catalog return 126 cents for "item-a". Then compute two items at that price, 252. Finally, explain why the clock and audit parts still match and only the total comparison fails.
+- **Exercise 3:** First call `service.quote("missing", 2)` and catch `NoSuchElementException`. Then inspect the audit list from Example B. Finally, assert that it still holds exactly one event, because the failed lookup never reached the audit call.
+- **Exercise 4:** First build a `Service` whose catalog lambda throws `IOException("catalog unavailable")`. Then call `quote` and catch that exception, checking its message. Finally, assert that the separate audit list stayed empty and the failure was not converted into a price.
+- **Exercise 5:** First wrap the catalog in a lambda that increments an `AtomicInteger` on every lookup. Then request a quantity of -1 and catch `IllegalArgumentException`. Finally, assert that the counter is still 0 and explain the order of checks in `quote`.
+- **Exercise 6:** First inject a catalog that returns `Long.MAX_VALUE` for every item. Then request two items and catch `ArithmeticException` from `Math.multiplyExact`. Finally, assert that the overflow audit list is empty because the event comes after the calculation.
 
 ## Self-check and retrieval
 
-Close the solution and explain Port, Adapter, Pure core in your own words. Reconstruct one example from a blank `Main.java`, then add a new boundary input. Explain why the new case should pass or fail before compiling it. Identify a situation where this technique is appropriate and one where a different data structure, lifetime policy or abstraction would be clearer. This is a reasoning check, not a memorization test for an API spelling.
+From memory, explain what a port and an adapter are in this lesson, why `quote` validates input before calling the catalog, how a missing item differs from an unavailable catalog, and why the audit event is written only after the total and timestamp exist.
 
 ## Next step
 
-Preserve the saved pad and the six exercise observations. Continue to the next lesson only when you can explain the invariants without reading the answer. Later chapters reuse these contracts in larger programs, so keep a failing counterexample as well as a repaired result. A reference implementation demonstrates one valid design under the stated assumptions; it is not a universal design rule.
+Continue with `java-035`: Build a tested local data service. Keep your six observations; see [moving on](../STUDY-GUIDE.md#move-to-the-next-lesson).
 
 ## Sources and verification status
 
-[Official Java 21 API or language reference](https://docs.oracle.com/en/java/javase/21/docs/api/index.html), reviewed 2026-10-22. Examples and exercise fixtures are original course material. Use the [validation guide](../../../docs/validation.md) and CI artifacts for the exact revision and platform to inspect actual compile/run results. Authoring, parsing, compilation, execution and learner mastery are separate forms of evidence.
+[Official Java 21 API or language reference](https://docs.oracle.com/en/java/javase/21/docs/api/index.html), reviewed 2026-10-22. Evidence levels: [sources and evidence](../STUDY-GUIDE.md#sources-and-evidence).
 
 ## Ask an AI tutor about this lesson
 

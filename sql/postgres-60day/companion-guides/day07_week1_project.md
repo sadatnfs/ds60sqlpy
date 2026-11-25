@@ -2,67 +2,13 @@
 
 ## How to run this lesson
 
-Start the Linux-container engine and run `./classroom` from the repository
-root. On Windows, use Ubuntu in WSL 2 or the thin
-`START_DOCKER_CLASSROOM.cmd` wrapper. Choose **PostgreSQL** on the shared
-`/classroom` home, then open **sql-07**. The
-[launcher guide](../../../docs/one-command-classroom.md) covers first preparation, strict resume and
-the saved project selection. No host Python or PostgreSQL installation is
-required for this browser route.
+Launch `./classroom`, pick PostgreSQL, open **sql-07** and press **Whole SQL lesson (psql)**. `psql` sends the file to `advanced_sql_training`, where it opens a transaction, sets `search_path` to `training`, prints a single starter report (net revenue, buyers and revenue per buyer for each country and product category over the last 90 days) and closes with `ROLLBACK`. The six project prompts sit underneath as comments, ready for your queries.
 
-1. Read the prerequisite and fixture notes before running the file. Use only
-   the local disposable `advanced_sql_training` database.
-2. Choose **Whole SQL lesson (psql)** for the cataloged learner script. This
-   preserves the lesson's reviewed psql directives, relative includes and
-   transaction behavior. **SQL snippet** is appropriate for ordinary SQL
-   statements, but is not a replacement for an entire script's setup.
-3. The **Course database** panel above the code shows whether the course
-   training tables are loaded. Missing tables load automatically before your
-   first run (or choose **Load course tables**) and stay loaded for later
-   lessons. **Reset training data** restores the original rows only when your
-   own changes made results differ; it keeps your saved code and notes.
-4. Edit the learner copy in the classroom and save your prediction before
-   running. Its whole-script workspace is
-   `.learning/sql/sql-07/lesson/workspace/sql/postgres-60day/day07_week1_project.sql`.
-   For browser work this path is inside the Docker learning volume, not a
-   newly created host folder beside your checkout. The checked-in source
-   remains the answer-free starting artifact.
-5. Run the whole script and inspect the full transcript. The runner uses
-   `psql -X -v ON_ERROR_STOP=1 -f`. SELECT output has columns, rows and a row
-   count; DDL/DML has command tags; intentional checks may produce NOTICE
-   messages. An unexpected ERROR or nonzero exit is a failure to diagnose,
-   even when an earlier query printed plausible values.
-6. Verify the lesson's expected grain, ordering, constraints and declared
-   transaction or cleanup outcome. Keep required ROLLBACK statements.
-   The warehouse sequence and other explicitly stateful exercises explain
-   when state is committed. Read saved output without rerunning it when
-   reviewing an earlier attempt.
+Type your answers into
+`.learning/sql/sql-07/lesson/workspace/sql/postgres-60day/day07_week1_project.sql`,
+each under its prompt and above the final `ROLLBACK`. The starter report filters on `now() - interval '90 days'`, so its numbers shift as the loaded data ages; the exercises read the whole history and stay fixed. A typo in Exercise 3 stops the run there and hides Exercises 4 to 6, so fix the earliest error first.
 
-If a relation is missing, inspect the lesson's required fixture and predecessor
-rather than guessing a new table definition. If authentication or runtime
-readiness fails, use `./classroom status` and the setup guide. Keep credentials
-out of SQL, notebooks, screenshots and committed files. Repair the first error
-before trusting partial output, and reveal separate solutions only when you
-want to compare after an attempt.
-
-### Optional contributor notebook route
-
-For notebook work, deliberately prepare the Linux/WSL contributor environment
-from [CONTRIBUTING.md](../../../CONTRIBUTING.md), including a compatible psql client and
-the notebook dependencies. Generate this lesson's private workspace through
-the maintained CLI:
-
-```sh
-uv run --no-sync python scripts/course.py sql notebook sql-07
-```
-
-Open the printed notebook path in that environment's JupyterLab. It uses the
-same catalog-derived learner-copy layout in that contributor checkout and
-executes the complete script through psql. Its host-side state is separate
-from the Docker browser's named volume. Follow
-[guided SQL notebooks](../../../docs/guided-sql-notebooks.md) for explicit local connection
-selection and kernel setup. Notebook generation does not execute SQL or
-authorize a reset.
+Classroom loading and resets: [study guide steps](../../STUDY-GUIDE.md#run-a-lesson-in-the-classroom). Notebook users: [contributor route](../../STUDY-GUIDE.md#optional-contributor-notebook-route).
 
 ## Level and prerequisites
 
@@ -75,28 +21,13 @@ authorize a reset.
 
 ## A beginner's mental model for this lesson
 
-A **table** stores facts in named columns. A **row** is one occurrence at the
-table's declared grain. A query creates a temporary **result set**: rows printed
-on screen are not automatically stored. The key vocabulary for this lesson is Report grain, Reconciliation, Allocation rule. Its worked SQL reads or creates `orders`, `customers`, `order_items`, `products`.
+This week's project asks one question in six shapes: what does a single output row stand for, and can you prove its numbers? That first half is the **report grain**. The starter report's grain is one country and one category, so 7 countries times 6 categories gives 42 rows; Brazil is missing because its 62 customers never ordered, and `LIMIT 50` therefore trims nothing.
 
-Before writing a query, complete this sentence: “One output row represents
-___.” Joins can multiply rows, filters can remove them, grouping can collapse
-many rows into one, and window functions can add calculations while preserving
-row count. For a normal analytical `SELECT`, use this logical reading order:
-`FROM`/`JOIN` (including `ON`) → `WHERE` → `GROUP BY`/aggregates → `HAVING` →
-window calculations → `SELECT` → `ORDER BY` → `LIMIT`. PostgreSQL may execute a
-different physical plan while preserving those semantics.
+The proof is **reconciliation**: an independent number your result must add back to. Every exercise has one. The five status rows of Exercise 1 must sum to 4,362 orders and 2,355,646.89 in stored revenue; Exercise 3 must return all 500 customers; Exercise 5's months must add to the same two totals; Exercise 6 prints the raw counts (500, 4,362, 13,085, 3,836) that the others lean on.
 
-The worked walkthrough's lesson-specific task is: Build the report in checkpoints: aggregate net line revenue to order/category, reduce payments to the declared order/method grain, join those stable inputs, and only then roll up country, category, and method. Reconcile revenue before adding cohort month so a new dimension cannot hide fanout.
-Exercise 1 expects this result: one row per order status. Predict keys, row count, `NULL` behavior,
-and ordering before running. Afterwards, compare keys/counts/totals with an
-independent control. A blank string, SQL `NULL`, numeric zero, and a missing row
-are different facts; use `COALESCE` only after choosing which meaning the
-business question requires.
+An **allocation rule** matters as soon as a shared amount meets a finer dimension. In this fixture 347 orders were paid in two parts, each part with a different method. Report revenue by payment method and those orders land in two method rows; without a stated rule (split by payment amount, or credit the first method) the same revenue is counted twice. Exercise 4 sidesteps the question by reducing payments to one row per order before joining.
 
 ## Two worked SQL examples
-
-These worked excerpts come from `sql/postgres-60day/day07_week1_project.sql`. Use **Whole SQL lesson (psql)** in the unified classroom for the complete file, including its fixture and transaction context. The optional contributor notebook and prepared `psql` routes are described above.
 
 ### Example 1
 
@@ -140,9 +71,9 @@ ORDER BY
 LIMIT 50;
 ```
 
-**How to read it:** Example 1: Start with `orders`, `customers`, `order_items`, and `products` in `FROM`/`JOIN`; let `WHERE` remove nonqualifying rows; let `GROUP BY` collapse rows to its grouping keys. The final `SELECT` displays `country`, `category`, `revenue`, `buyers`, and `rev_per_buyer`. `ORDER BY` determines presentation order and the final `LIMIT 50` caps displayed rows. Before running, predict the row grain, row count, `NULL` positions, and first/last key; afterwards, compare each prediction with the transcript.
+**How to read it:** `recent_orders` keeps orders from the last 90 days, measured from the moment you run it. `line` joins those orders to their customers, order lines and products, so it holds one row per order line carrying the buyer's country and the product's category. The outer query groups the lines by country and category, sums net line revenue and counts each buyer once with `COUNT(DISTINCT customer_id)`. `NULLIF` turns a zero buyer count into NULL so the division could never fail, although every group that exists has at least one buyer.
 
-**Expected result/shape:** Example 1 returns one grouped row per `country`, and `category`, capped at 50 rows with columns `country`, `category`, `revenue`, `buyers`, and `rev_per_buyer` from `orders`, `customers`, `order_items`, and `products`. Use a direct count or grouped aggregate over those same source relations as the control; check ordering only when this query has an `ORDER BY`, and inspect `NULL` only for columns this example can produce.
+**Expected result/shape:** On the load used here the window holds 807 orders from 290 buyers and 2,448 order lines worth 437,431.95. They form 42 country and category groups, all of which fit under `LIMIT 50`. US Home leads with 13,627.14 from 29 buyers (469.90 each), followed by CA Apparel at 13,524.80; CA Beauty is last at 7,627.64. Because the window slides with the clock, rerunning on a later day returns smaller figures; the 42-row shape holds as long as every country keeps buying in every category.
 
 ### Example 2
 
@@ -187,9 +118,9 @@ ORDER BY
 LIMIT 50;
 ```
 
-**How to read it:** Example 2 is executed by `psql` as part of the complete lesson. Expected notices are evidence; an unexpected error stops the script.
+**How to read it:** This variant is only in the guide; the learner file runs the report itself. Paste it as an **SQL snippet** to see how PostgreSQL executes the query without fetching any rows. Both CTEs disappear into the plan: `recent_orders` becomes a `Filter` on the scan of `orders`, and `line` becomes three hash joins.
 
-**Expected result/shape:** Example 2 prints a plan tree, not business rows. Run the underlying `SELECT` separately and reconcile its `country`, and `category` key set and row count over `orders`, `customers`, `order_items`, and `products`; then compare node estimates, actual rows × loops, buffers, and timing without requiring one fixed plan.
+**Expected result/shape:** About 21 plan lines. From the bottom: `Seq Scan on orders` with the 90-day filter, hashed and joined to `order_items`, then to `customers`, then to `products`. A `Sort` on country, category and customer feeds a `GroupAggregate`, because `COUNT(DISTINCT customer_id)` needs each group's buyers in order. A second `Sort` puts revenue first, and `Limit` sits on top. Exact node choices can change with table sizes and PostgreSQL version.
 
 ## Learning objectives
 
@@ -207,72 +138,67 @@ LIMIT 50;
 
 ## Worked example / walkthrough
 
-Build the report in checkpoints: aggregate net line revenue to order/category,
-reduce payments to the declared order/method grain, join those stable inputs,
-and only then roll up country, category, and method. Reconcile revenue before
-adding cohort month so a new dimension cannot hide fanout.
+Build the report in checkpoints. First reduce order lines to net revenue per order and category, then reduce payments to one row per order and method, join those two stable inputs, and only then roll up to country, category and method. Check the revenue total at each checkpoint before adding a cohort month, because a new dimension can hide a fanout that already happened.
 
 ## Practice assumptions and review method
 
 - **Focus:** Integrate foundational SELECT, aggregation, joins, NULL handling, and set reasoning into reconciled business outputs.
 - **Assumptions:** Revenue means exact net line revenue unless a prompt explicitly asks for stored order totals. Every ranked output has a deterministic tie-breaker.
 - **Failure to watch for:** A polished result is not trustworthy until its grain, denominator, missing-row policy, and reconciliation are explicit.
-- **Review loop:** predict the row grain and NULL/order behavior, run the
-  query, inspect a bounded sample, and reconcile counts or totals before
-  accepting the result.
+- **Review loop:** write the control total you expect beside each query (4,362 orders, 500 customers or 2,355,646.89), run it, and compare before moving to the next prompt.
 
 ## Exercises
 
 Integrate foundational SELECT, aggregation, joins, NULL handling, and set reasoning into reconciled business outputs.
 
-Attempt each prompt in a scratch SQL file before opening the solution.
-For every result, write its row grain and expected shape first.
+Do the prompts in order: Exercises 1 to 3 each read one or two tables, Exercise 4 is the fanout trap, and Exercise 6 prints the raw row counts the other answers should agree with.
 
 1. **Query writing:** Build an order KPI table by status with order count, revenue, average order value, and distinct customers.
    **Progressive hint:** Aggregate orders at status grain and round only displayed monetary values.
-   **Inputs/evidence:** For sql-07 Exercise 1, read from `orders`. Build the answer toward `status`, `order_count`, `customer_count`, `revenue`, and `average_order_value`; keep `status` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-07 Exercise 1, expected output: One row per order status. The final columns are `status`, `order_count`, `customer_count`, `revenue`, and `average_order_value`. The final order is `revenue DESC, o.status`.
-   **Verify:** For sql-07 Exercise 1, independently aggregate `orders` by `status`; require one output row for every distinct `status` tuple and compare `order_count`, `customer_count`, `revenue`, and `average_order_value` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `order_count`, `customer_count`, and `revenue` for the existing `status` tuple and verify the new tuple appears exactly once.
+   **Guess first:** five statuses hold roughly equal order counts; will `customer_count` across the five rows add to 438 buyers or to far more?
+   **Inputs/evidence:** For sql-07 Exercise 1, group the 4,362 `orders` rows by `status`; there are five statuses, `placed` and `shipped` with 873 orders each and `delivered`, `paid`, and `returned` with 872 each.
+   **Expected result/shape:** For sql-07 Exercise 1, return 5 rows, one per status, led by `paid` with 872 orders, 432 customers, and 478068.36 revenue, and ending with `returned` at 468083.26. The final columns are `status`, `order_count`, `customer_count`, `revenue`, and `average_order_value`. The final order is `revenue DESC, o.status`.
+   **Verify:** For sql-07 Exercise 1, confirm the five `order_count` values sum to 4362 and the five `revenue` values sum to 2355646.89, the same as `SELECT ROUND(SUM(total_amount), 2) FROM orders`. Inside a rolled-back transaction, set order 21's status to `cancelled`; the result must grow to 6 rows, with `cancelled` showing 1 order and `paid` dropping to 871.
 2. **Query writing:** Return the 20 products with the highest net line revenue.
    **Progressive hint:** Aggregate order items by product before ranking; use product ID as tie-breaker.
-   **Inputs/evidence:** For sql-07 Exercise 2, read from `products`, and `order_items`. Build the answer toward `product_id`, `name`, `category`, and `net_revenue`; keep `product_id`, `name`, and `category` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-07 Exercise 2, expected output: At most 20 product rows. The final columns are `product_id`, `name`, `category`, and `net_revenue`. The final order is `net_revenue DESC, p.product_id`.
-   **Verify:** For sql-07 Exercise 2, assert no more than 20 rows, no duplicate `product_id`, `name`, and `category`, and no adjacent pair that violates `net_revenue DESC, p.product_id`. Rejoin the returned keys to `products`, and `order_items` to confirm `product_id`, `name`, `category`, and `net_revenue` came from the same source rows. Run with 20 minus one and 20 plus one eligible rows; require the output cap of 20 while retaining `net_revenue DESC, p.product_id`.
+   **Guess first:** does any product outside the catalog's top 40 IDs make the list, given that higher-numbered products carry higher prices?
+   **Inputs/evidence:** For sql-07 Exercise 2, join the 13,085 `order_items` rows to `products`, sum `unit_price * quantity * (1 - discount)` per product across the 275 products that have sold, and keep the top 20.
+   **Expected result/shape:** For sql-07 Exercise 2, return 20 rows, one per product, from product 271 (Apparel, 17643.20) down to product 260 (Electronics, 15292.80). The final columns are `product_id`, `name`, `category`, and `net_revenue`. The final order is `net_revenue DESC, p.product_id`.
+   **Verify:** For sql-07 Exercise 2, confirm 20 distinct `product_id` values with `net_revenue` never rising from one row to the next. Rerun with `LIMIT 21`; the only added row must be product 231 at 15275.20, which is below product 260, so the cutoff falls between two different values rather than inside a tie.
 3. **Query writing:** Create a customer summary that retains customers with no orders.
    **Progressive hint:** Left join from customers and count/order-sum nullable matches with `COALESCE` only where zero has clear meaning.
-   **Inputs/evidence:** For sql-07 Exercise 3, read from `customers`, and `orders`. Build the answer toward `customer_id`, `full_name`, `country`, `order_count`, and `stored_order_total`; keep `customer_id`, `full_name`, and `country` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-07 Exercise 3, expected output: One row per customer. The final columns are `customer_id`, `full_name`, `country`, `order_count`, and `stored_order_total`. The final order is `stored_order_total DESC, c.customer_id`.
-   **Verify:** For sql-07 Exercise 3, independently aggregate `customers`, and `orders` by `customer_id`, `full_name`, and `country`; require one output row for every distinct `customer_id`, `full_name`, and `country` tuple and compare `order_count`, and `stored_order_total` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `order_count`, and `stored_order_total` for the existing `customer_id`, and `full_name` tuple and verify the new tuple appears exactly once.
+   **Guess first:** which country fills the bottom of this list, and what does `order_count` show for those rows?
+   **Inputs/evidence:** For sql-07 Exercise 3, `LEFT JOIN` the 500 `customers` rows to `orders`, count `o.order_id` and sum `total_amount` per customer, and turn a missing sum into 0 with `COALESCE`.
+   **Expected result/shape:** For sql-07 Exercise 3, return 500 rows, one per customer, led by customer 181 (FR, 16 orders, 9502.21); the 62 customers without orders sort last with 0 orders and a 0 total. The final columns are `customer_id`, `full_name`, `country`, `order_count`, and `stored_order_total`. The final order is `stored_order_total DESC, c.customer_id`.
+   **Verify:** For sql-07 Exercise 3, confirm the `order_count` column sums to 4362, `stored_order_total` sums to 2355646.89, and exactly 62 rows show 0 orders. An inner join must return only 438 rows, and counting `*` instead of `o.order_id` must wrongly give those 62 customers an `order_count` of 1.
 4. **Debugging:** Reconcile stored order totals, computed line totals, and payments without multiplying item and payment rows.
    **Progressive hint:** Aggregate each detail table to order grain first, then join the one-row-per-order relations.
-   **Inputs/evidence:** For sql-07 Exercise 4, read from `order_items`, `payments`, and `orders`. Build the answer toward `order_id`, `status`, `stored_total`, `line_total`, `storage_difference`, `paid_total`, and `unpaid_balance`; keep `order_id` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-07 Exercise 4, expected output: One row per order with signed differences. The final columns are `order_id`, `status`, `stored_total`, `line_total`, `storage_difference`, `paid_total`, and `unpaid_balance`. The final order is `ABS(o.total_amount - it.line_total) DESC, o.order_id`.
-   **Verify:** For sql-07 Exercise 4, project `order_id` plus the raw source columns from `order_items`, `payments`, and `orders` at each join stage; record row count and distinct `order_id`, then assert the final `order_id`, `status`, `stored_total`, `line_total`, `storage_difference`, `paid_total`, and `unpaid_balance` values match those staged rows without unintended fanout or loss. Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
+   **Guess first:** after rounding, how large can `storage_difference` get when every stored total was computed from the same lines?
+   **Inputs/evidence:** For sql-07 Exercise 4, pre-aggregate `order_items` to one `line_total` per order and `payments` to one `paid_total` per order, then join both to the 4,362 `orders` rows, with `LEFT JOIN` for payments because 873 orders have none.
+   **Expected result/shape:** For sql-07 Exercise 4, return 4,362 rows, one per order; every `storage_difference` rounds to 0.00 (the largest raw gap is 0.0045), while 1,072 rows have a nonzero `unpaid_balance` of up to 1432.49. The final columns are `order_id`, `status`, `stored_total`, `line_total`, `storage_difference`, `paid_total`, and `unpaid_balance`. The final order is `ABS(o.total_amount - it.line_total) DESC, o.order_id`.
+   **Verify:** For sql-07 Exercise 4, confirm 4,362 distinct `order_id` values and that the 1,072 nonzero balances split into 873 orders with `paid_total` 0.00 and 199 paid orders whose payments differ from `total_amount`. Joining raw `order_items` and `payments` to `orders` without pre-aggregation returns 13,432 rows and inflates the summed `total_amount` to 8673949.32.
 5. **Prediction:** Build a monthly order trend and explain which months are absent rather than zero.
    **Progressive hint:** Grouping observed orders alone cannot create empty calendar months.
+   **Guess first:** is the newest month as busy as the one before it, and why might it not be?
    **Inputs/evidence:** For sql-07 Exercise 5, read from `orders`, group by `date_trunc('month', order_date)`, and return each month's `order_count` and `stored_revenue` (`SUM(total_amount)` rounded to 2 places).
-   **Expected result/shape:** For sql-07 Exercise 5, expected output: One row per observed order month. The final columns are `order_month`, `order_count`, and `stored_revenue`. The final order is `order_month`.
+   **Expected result/shape:** For sql-07 Exercise 5, return 46 rows, one per calendar month with orders, from 2023-02-01 with 2 orders to the current month, which has 151 orders on a freshly loaded fixture. The final columns are `order_month`, `order_count`, and `stored_revenue`. The final order is `order_month`.
    **Verify:** For sql-07 Exercise 5, confirm that `order_month` is unique, that `SUM(order_count)` equals `SELECT COUNT(*) FROM orders` (4362), and that the monthly `stored_revenue` values add up to `SELECT ROUND(SUM(total_amount), 2) FROM orders` (2355646.89).
 6. **Extension:** Create a compact one-row audit of customer, order, item, and payment coverage.
    **Progressive hint:** Use scalar subqueries for independent counts; this avoids accidental cross multiplication.
+   **Guess first:** you already know four of the five numbers from earlier prompts; which one is new?
    **Inputs/evidence:** For sql-07 Exercise 6, read from `customers`, `orders`, `order_items`, and `payments`. Compute `customer_rows`, `order_rows`, `order_item_rows`, `payment_rows`, and `customers_without_orders` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.
-   **Expected result/shape:** For sql-07 Exercise 6, expected output: Exactly one audit row. The final columns are `customer_rows`, `order_rows`, `order_item_rows`, `payment_rows`, and `customers_without_orders`.
-   **Verify:** For sql-07 Exercise 6, evaluate each of `customer_rows`, `order_rows`, `order_item_rows`, `payment_rows`, and `customers_without_orders` in a separate control `SELECT` over `customers`, `orders`, `order_items`, and `payments`; require one final row and compare every value. Add one source row with a new `customer_id`; verify the result gains exactly one row carrying that `customer_id` value.
+   **Expected result/shape:** For sql-07 Exercise 6, return one row: 500 customer rows, 4,362 order rows, 13,085 order item rows, 3,836 payment rows, and 62 customers without orders. The final columns are `customer_rows`, `order_rows`, `order_item_rows`, `payment_rows`, and `customers_without_orders`.
+   **Verify:** For sql-07 Exercise 6, confirm each value equals its own standalone `COUNT(*)`, and that 62 matches Exercise 3's count of zero-order customers. Inside a rolled-back transaction, insert one customer with no orders; the result must stay one row, with `customer_rows` at 501 and `customers_without_orders` at 63.
 
 ## Common mistakes and how to recover
 
-- **Lesson-specific semantic mistake:** A polished result is not trustworthy until its grain, denominator, missing-row policy, and reconciliation are explicit.
-- **Unexpected row count:** display keys before aggregates, count rows after
-  each join/filter stage, and find the first stage whose grain differs from the
-  contract. Do not hide fanout with `DISTINCT`.
-- **Unexpected `NULL` or missing row:** decide whether the fact is unknown,
-  inapplicable, zero, or absent before using `COALESCE`; inspect outer-join
-  predicate placement and empty-input aggregate behavior.
-- **Unstable top/first/last output:** add `ORDER BY` with a unique final
-  tie-breaker before `LIMIT` or order-sensitive windows/aggregates.
-- **`psql` stops on an error:** fix the first error shown by
-  `ON_ERROR_STOP`, restore the declared transaction/setup state, and rerun the
-  complete file. A later successful statement does not validate a partial run.
+- **Joining payments to order lines directly:** `order_items JOIN payments` yields 10,816 rows instead of 13,085 lines. The 873 placed orders vanish (no payments) while the lines of the 347 split-payment orders appear twice, and revenue lands at 1,926,711.90. Aggregate each side to one row per order first, as Exercise 4 does.
+- **Counting buyers with `COUNT(*)`:** in the starter report that counts order lines, 2,448 of them, not the 290 people who bought. Buyers need `COUNT(DISTINCT customer_id)`.
+- **Turning every NULL into zero:** in Exercise 3 a customer with no orders genuinely spent 0, so `COALESCE` is right. Wrapping `latest_order_date` or an average in the same fallback would invent a date or an average for 62 people who have none.
+- **Reading Exercise 5 as a calendar:** grouping orders returns only months that have orders. On this load all 46 months from February 2023 to November 2026 have some, but a quiet month would simply be missing rather than show 0.
+- **Cutting a ranking on ties:** `ORDER BY net_revenue DESC LIMIT 20` with no `product_id` could pick a different 20th product on another run if two products ever tie.
+
+When a run stops on an error or a table is missing, the study guide's [recovery steps](../../STUDY-GUIDE.md#recover-from-common-failures) apply.
 
 ## Self-check
 
@@ -316,9 +242,7 @@ Rubric
 
 ## Ask an AI tutor about this lesson
 
-An AI tutor is optional; the guide, learner SQL, PostgreSQL, and expected checks are
-enough to complete the lesson offline. If you want a patient tutor, copy this
-prompt after opening the repository in the AI tutor:
+You can finish this project without a tutor. If you want one, paste the prompt below and ask it to test your allocation rule: how should an order paid half by card and half by PayPal appear in a revenue-by-method report? Keep `solutions/` closed until you have an answer; see [tutor notes](../../STUDY-GUIDE.md#use-an-ai-tutor-optional).
 
 ```text
 Tutor me through sql-07: Week 1 Project: From Questions to Queries.

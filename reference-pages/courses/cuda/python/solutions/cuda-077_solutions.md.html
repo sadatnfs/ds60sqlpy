@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cuda/python/solutions/cuda-077_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="cuda-077-explained-solutions">cuda-077: explained solutions<a class="heading-anchor" href="#cuda-077-explained-solutions" aria-label="Link to this section">#</a></h2>
-<p>These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.</p>
+<p>Compare with your <a href="../lessons/cuda-077.md.html">worksheet</a> attempt.</p>
 <h3 id="exercise-1-compute-a-tree-by-hand">Exercise 1: Compute a tree by hand<a class="heading-anchor" href="#exercise-1-compute-a-tree-by-hand" aria-label="Link to this section">#</a></h3>
 <p>Combine pairs and carry the leftover value.</p>
 <p><strong>Approach.</strong> Compute the pair tree for <code>[1, 2, 3, 4, 5]</code> by hand: level one gives <code>[3, 7, 5]</code> with 5 carried, level two gives <code>[10, 5]</code>, level three gives <code>[15]</code>.</p>
@@ -231,9 +231,19 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Why it is correct here.</strong> Determinism guarantees repeatable results on the same software, hardware and inputs. Different hardware can choose different kernels, block counts or fused multiply-add usage, which changes rounding.</p>
 <p><strong>A plausible wrong approach.</strong> Treating a deterministic flag as a promise of identical results across machines leads to bit-exact comparisons between environments that fail for legitimate reasons.</p>
 <p><strong>How to verify.</strong> Record the environment with each result. Expect bit-identical answers only within one environment, and use a tolerance when comparing across environments.</p>
+<h3 id="self-check-answers">Self-check answers<a class="heading-anchor" href="#self-check-answers" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>Why can a tree reduction differ from a left-to-right loop?</strong> Floating-point addition is not associative, and the tree groups additions differently. Both can be valid implementations with different rounding.</li>
+</ol>
+<ol start="2">
+<li><strong>How do you tell rounding noise from a missing element?</strong> Rounding noise is small relative to the data&#x27;s scale. A missing element changes the sum by that element&#x27;s value, like 10 instead of 15.</li>
+</ol>
+<ol start="3">
+<li><strong>Why does a sum near zero need an absolute tolerance?</strong> A relative tolerance scales with the expected value, so it shrinks to almost nothing near zero and rejects acceptable rounding.</li>
+</ol>
 <h3 id="reference-observation">Reference observation<a class="heading-anchor" href="#reference-observation" aria-label="Link to this section">#</a></h3>
 <p>Accurate cancellation sum 1 and tail-preserving sum 15.</p>
-<p>The reference file is <code>courses/cuda/python/references/cuda-077_cpu.py</code>. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.</p></article>
+<p>Asserted by <code>courses/cuda/python/references/cuda-077_cpu.py</code>.</p></article>
   </main>
 </body>
 </html>

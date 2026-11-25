@@ -13,40 +13,36 @@ psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
   -f sql/professional/solutions/sql_ops_01_indexes_statistics_maintenance_solutions.sql
 ```
 
-`psql` prints each result/command tag in the terminal. Stop at the first
-unexpected `ERROR`; later output cannot repair an earlier failed invariant.
-Compare your own SQL, row grain, column names, row counts, `NULL` policy, and
-ordering with the explanation before comparing syntax.
+The solution builds its own 3,000-row `events` table with 20 devices and a
+`category` column, so its counts and plans differ from the learner script.
+Plans are compared by shape (which index, if any, and why), not by exact cost
+numbers.
 
-## Clause-by-clause reading map
+## Reading map for this lesson
 
-The lesson's main concepts are Access method, Operator class, Partial index, Expression index, Covering index, BRIN range. Its worked-model focus is:
-The fixture inserts 6,000 events in timestamp order. That physical correlation makes time a plausible BRIN candidate in a much larger append-oriented table. The teaching table is intentionally small, so PostgreSQL may still prefer a sequential scan; that is a valid cost decision.
+Read each solution as a match between a query and an index, then check the
+evidence that the match holds:
 
-- Start at `FROM`/`JOIN` and state the intermediate row grain. Inspect join keys
-  before adding aggregates; a one-to-many join is allowed to multiply rows only
-  when the later contract accounts for it.
-- Apply `WHERE` to input rows, `GROUP BY` to form buckets, and `HAVING` to
-  completed groups. Window functions run over the surviving relation and
-  normally preserve its row count.
-- Read the `SELECT` list as the public result contract: keys establish grain,
-  measures state calculations, and aliases explain meaning. `ORDER BY` is the
-  only output-order guarantee; add a unique tie-breaker before `LIMIT`.
-- Trace every common table expression (CTE) as a temporary named relation.
-  Execute or inspect one stage at a time while debugging, but compare the final
-  result with an independent control rather than trusting stage names.
-- Keep SQL `NULL` as “missing/unknown/not applicable” until the metric contract
-  chooses another representation. Guard division with `NULLIF`; disclose
-  exclusions and distinguish zero from no row.
-- For DDL/DML, a command tag proves only that PostgreSQL accepted a statement.
-  Catalog checks, negative cases, row-count reconciliation, and the declared
-  transaction boundary prove behavior and cleanup.
+- Exercise 1 pairs one query with a partial covering index whose
+  `WHERE severity >= 4` predicate is implied by the query's filter; without
+  that match the planner cannot use the index.
+- Exercises 2 and 8 are about operators. GIN, GiST, SP-GiST and BRIN each serve
+  specific operators, and the `lower(device_id)` index helps only when the
+  query uses that exact expression and collation.
+- Exercise 3 adds dependency and MCV statistics on `category` and `severity`,
+  which the fixture makes correlated (`urgent` is exactly severity 4 and 5).
+  Statistics change estimates, not plans directly.
+- Exercises 4 and 7 inventory index usage and overlap for a human decision
+  rather than producing a drop list.
+- Exercises 5, 6 and 12 stay read-only: a maintenance matrix, a capability
+  probe for `pg_stat_statements` that enables nothing, and an owned scorecard.
+- Exercise 9 observes HOT updates without asserting a rate, Exercise 10 proves
+  pruning on a two-month partitioned table, and Exercise 11 runs
+  `EXPLAIN ANALYZE` only on a read.
 
-The exact final queries are not the only valid syntax. A join, subquery, CTE,
-window, or conditional aggregate can be an alternative when it preserves the
-same grain, `NULL` semantics, deterministic ordering, and safety. Prefer the
-form whose intermediate relations a reviewer can verify; optimize only after
-correctness is established with evidence.
+Another index design is acceptable when the same query can use it and you show
+the plan. A different plan on your machine is not a failure; an index whose
+predicate or expression the query cannot match is.
 
 Run:
 

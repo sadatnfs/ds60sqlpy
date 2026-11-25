@@ -212,7 +212,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="syntax-anatomy-and-mechanism">Syntax anatomy and mechanism<a class="heading-anchor" href="#syntax-anatomy-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Parse a documented ISO-like timestamp with an explicit offset for the basic example. Convert to another zone for display without changing the represented instant. A duration measured in elapsed seconds differs from a calendar operation such as next day in a region. Validate parsing failures and inspect warnings when accepting externally formatted dates.</p>
 <h3 id="classroom-execution-and-offline-inputs">Classroom execution and offline inputs<a class="heading-anchor" href="#classroom-execution-and-offline-inputs" aria-label="Link to this section">#</a></h3>
-<p>Choose the <strong>PHP CLI</strong> worker and work in <code>courses/web-development/lessons/web-043.php</code>, which runs as <code>main.php</code> in a bounded Linux process with PDO SQLite. Every input is a small synthetic value, and CLI runs are fresh processes, not persistent HTTP requests. Save your attempt before comparing it with <code>courses/web-development/solutions/web-043_solution.php</code>. <strong>How to run lessons</strong> in the <a href="../README.md.html">subject README</a> lists what the pad does not provide.</p>
+<p>The worked examples fix one instant at noon UTC and display it in a named time zone. You build a deterministic report that converts a fixed instant, adds a duration and shows that the zone change never moved the underlying timestamp.</p>
+<p>Run <code>courses/web-development/lessons/web-043.php</code> with <strong>PHP CLI</strong>: synthetic inputs, not persistent HTTP requests (<a href="../STUDY-GUIDE.md.html#php-cli">why</a>).</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1-a-fixed-instant">Worked example 1: A fixed instant<a class="heading-anchor" href="#worked-example-1-a-fixed-instant" aria-label="Link to this section">#</a></h4>
 <p>The offset removes ambiguity from this example.</p>
@@ -235,7 +236,7 @@ echo $nextDay-&gt;format(&#x27;Y-m-d H:i T&#x27;), &quot;\n&quot;;
 echo $plus86400-&gt;format(&#x27;Y-m-d H:i T&#x27;), &quot;\n&quot;;</code></pre>
 <p>The calendar step keeps the local wall clock reading, so it prints 2024-03-10 12:00 EDT, which is only 23 hours of elapsed time after the start. Adding 86400 seconds to the timestamp moves exactly one day of elapsed time, which lands on 2024-03-10 13:00 EDT. Neither result is wrong. A reminder for noon tomorrow needs the first, while a 24 hour lockout needs the second. A fixed offset such as -05:00 could not produce either answer correctly, because the region&#x27;s offset changed in between.</p>
 <h3 id="six-progressive-exercises">Six progressive exercises<a class="heading-anchor" href="#six-progressive-exercises" aria-label="Link to this section">#</a></h3>
-<p>Exercises that ask you to predict, explain, compare or diagnose keep their answers in the solutions file. The others show the evidence to look for.</p>
+<p>Exercises 1, 4, 5 and 6 keep their expected answers in the solutions file.</p>
 <h4 id="exercise-1-explain-an-instant-versus-a-local-clock-reading">Exercise 1: Explain an instant versus a local clock reading.<a class="heading-anchor" href="#exercise-1-explain-an-instant-versus-a-local-clock-reading" aria-label="Link to this section">#</a></h4>
 <p><strong>Progressive hint:</strong> Ask whether the value would be the same moment everywhere on Earth.</p>
 <h4 id="exercise-2-convert-a-fixed-instant-to-a-named-time-zone">Exercise 2: Convert a fixed instant to a named time zone.<a class="heading-anchor" href="#exercise-2-convert-a-fixed-instant-to-a-named-time-zone" aria-label="Link to this section">#</a></h4>
@@ -252,10 +253,11 @@ echo $plus86400-&gt;format(&#x27;Y-m-d H:i T&#x27;), &quot;\n&quot;;</code></pre
 <p><strong>Progressive hint:</strong> Look up how a region&#x27;s offset changed over the last decades.</p>
 <h3 id="debugging-and-common-mistakes">Debugging and common mistakes<a class="heading-anchor" href="#debugging-and-common-mistakes" aria-label="Link to this section">#</a></h3>
 <p>Do not hardcode a region&#x27;s current offset as a permanent rule. Avoid using the current date in a test that claims deterministic output. Parsing a date-looking string successfully does not prove it matched the application&#x27;s intended format.</p>
-<p>Keep the failing source, its input and the exact output, then repair one cause at a time. PHP can produce correct-looking text while missing an invalid-input branch, so rerun the empty, wrong-type and boundary cases after every fix.</p>
+<p>When a test fails only near midnight or in another location, find the call that reads the current clock and inject a fixed instant instead. When a conversion is off by an hour, check whether you used a numeric offset where a named zone with daylight rules was needed.</p>
+<p>The shared <a href="../STUDY-GUIDE.md.html#debugging-php">debugging routine</a> covers what to record before each repair.</p>
 <h3 id="retrieval-transfer-and-next-steps">Retrieval, transfer and next steps<a class="heading-anchor" href="#retrieval-transfer-and-next-steps" aria-label="Link to this section">#</a></h3>
-<p>Close the worked answers and explain instant, time zone and DateTimeImmutable without using the terms as their own definitions. Rebuild worked example 1 (A fixed instant) from a blank pad, then try one new value, one empty or missing case and one unusual boundary. State which result would disprove your explanation.</p>
-<p>If you can reproduce the output but cannot explain why it happens, revisit <code>web-042</code>. A saved completion marker records your own progress; it is not a certification.</p>
+<p>Without notes, explain the difference between an instant and a local clock reading, and predict noon UTC on 1 January in America/New_York. Then explain why adding 30 minutes is exact, why adding one calendar day can be 23 hours near a clock change and why a fixed offset cannot stand in for a region&#x27;s rules.</p>
+<p>Revisit <code>web-042</code> when an output is predictable but unexplained (<a href="../STUDY-GUIDE.md.html#review-loop">review loop</a>).</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
 <ul>
 <li><a href="https://www.php.net/manual/en/class.datetimeimmutable.php">DateTimeImmutable</a></li>

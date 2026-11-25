@@ -24,9 +24,9 @@ Writing a file creates a side effect with a lifetime. Tiny examples should creat
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles your saved pad as `Program.cs` in its fixed .NET 10 project. C# 14 is the matching language generation. This route uses the prepared framework libraries; it does not accept arbitrary project files, NuGet packages, command arguments or interactive input. The explicit `Program.Main` entrypoint makes compilation and execution visible. `Check` throws on a false condition in every build configuration, unlike conditional debugging assertions.
+Example A creates a fresh directory under the system temporary folder with a random name and deletes it in `finally`, so repeated runs never collide or leave files behind. A relative path such as note.txt resolves against `Environment.CurrentDirectory`, the process working directory, not against the folder that holds Program.cs.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Compile contract, starter stop and success marker: [running a lesson](../STUDY-GUIDE.md#running-a-lesson).
 
 
 
@@ -34,7 +34,7 @@ Start with the answer-free learner artifact in your saved classroom pad. It deli
 
 `Path.Combine` constructs a platform path. `File.WriteAllText` encodes text; `ReadAllText` decodes it. A try/finally protects cleanup, while recursive removal is safe only for a directory this operation uniquely owns.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+Each example ends with a trace; method: [tracing a program](../STUDY-GUIDE.md#tracing-a-program).
 
 ## Worked example / walkthrough
 
@@ -89,6 +89,8 @@ internal static class Program {
 
 **Observe:** The file holds exactly five bytes, the Unicode text round-trips and the owned directory is removed.
 
+**Trace.** `root` combines the temporary folder with lesson- and a random hexadecimal suffix, and `CreateDirectory` makes it. `WriteAllText` encodes café with the no-BOM UTF-8 encoding: four ASCII-range bytes would be four, but é needs two, so the file holds five bytes. `ReadAllText` with the same encoding decodes café again. `finally` deletes the directory recursively, which is safe only because this run created it.
+
 ### Example B: Separate logical and filesystem names
 
 These lexical checks teach path structure; they are not a complete traversal or symlink security boundary.
@@ -132,6 +134,8 @@ internal static class Program {
 
 **Observe:** A simple leaf name and a nested path are recognized as different shapes.
 
+**Trace.** `Path.GetFileName("report.csv")` returns the whole string, because it has no directory part. For nested/report.csv the method returns only report.csv, which differs from the input, so the second check passes. `GetExtension` returns .csv including the dot. These calls inspect the text of a path; none of them touches the disk or checks that the file exists.
+
 ## Exercises
 
 1. **Predict and explain.** Trace directory creation, write, read and cleanup ownership.
@@ -146,13 +150,15 @@ internal static class Program {
 
 6. **Transfer and justify.** Explain what must change to make a persistent report update crash-recoverable.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Log each task in the [evidence table](../STUDY-GUIDE.md#recording-exercise-evidence) before opening the explanation.
 
 ## Common pitfalls and diagnosis
 
 Path normalization alone does not solve symlink attacks or concurrent replacement. Do not delete arbitrary user-provided directories. Worker temporary files are not the durable learner progress store.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+For task 4, remember that `Path.Combine(root, "/etc/y")` returns /etc/y: a rooted second argument discards the first, so combining a base folder with user text is not containment. For task 5, writing empty text produces a zero-byte file, while `GetExtension` on a name with two dots, such as a.tar.gz, returns only .gz.
+
+Repair routine: [building a regression case](../STUDY-GUIDE.md#building-a-regression-case).
 
 ## Progressive hints
 
@@ -162,11 +168,15 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 ## Self-check and next step
 
-Explain Working directory, Encoding, Owned temporary directory without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+Predict the byte count of the file after writing café with `Encoding.UTF8` instead of the no-BOM encoding, and explain the difference. Say which directories your code may delete and why. For task 6, describe a write to a temporary file followed by a replace, and what a crash leaves behind at each step.
+
+Then follow the general [self-check routine](../STUDY-GUIDE.md#self-check-routine) and save your pad.
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://learn.microsoft.com/en-us/dotnet/csharp/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+[Documentation](https://learn.microsoft.com/en-us/dotnet/csharp/): The .NET file and stream I/O articles, along with the `Path` class reference, cover path composition, encodings and directory operations.
+
+Provenance and limits: [sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/docker/solutions/docker-005_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="docker-005-explanatory-solutions">docker-005: explanatory solutions<a class="heading-anchor" href="#docker-005-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit reveal. These explain the supplied teaching fixtures; they are not engine results. The mechanism is explained in <code>courses/docker/guides/docker-005.md</code>.</p>
+<p>These answers explain teaching fixtures, not engine results; the mechanism is in <a href="../guides/docker-005.md.html">the guide</a>.</p>
 <h3 id="exercise-1-sort-run-and-cmd-into-lifecycle-phases">Exercise 1: Sort RUN and CMD into lifecycle phases.<a class="heading-anchor" href="#exercise-1-sort-run-and-cmd-into-lifecycle-phases" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> RUN executes at build time; CMD describes later startup.</p>
 <p><strong>Why:</strong> Putting a long-running server in RUN can hang a build and does not preserve a running process inside the finished image. An image contains files and configuration, not a saved live server.</p>
@@ -238,7 +238,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>A plausible wrong approach:</strong> Stopping at a green build misses errors that appear only at runtime, such as a permission failure when the non-root user writes to a mounted volume.</p>
 <p><strong>How to verify:</strong> After compose up, POST /increment returns a counter of 1 on a fresh volume, and GET /healthz returns status ready.</p>
 <h3 id="check-your-transfer">Check your transfer<a class="heading-anchor" href="#check-your-transfer" aria-label="Link to this section">#</a></h3>
-<p>A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.</p></article>
+<p><code>built</code> appears once in the build log, because RUN executes during the build and its result is stored in a layer; a cached rebuild may not print it again at all. <code>started</code> appears in the output of each container, because CMD is the default command of every new container, so three runs print it three times and the build log never shows it. The observation that would disprove this is <code>started</code> in the build output, which would mean the command was placed in a RUN step rather than CMD.</p></article>
   </main>
 </body>
 </html>

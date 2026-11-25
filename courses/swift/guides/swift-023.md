@@ -24,9 +24,9 @@ Schema evolution needs explicit choices about renamed fields, defaults and versi
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles the saved pad as `main.swift` with Swift 6 language checking. An explicit `@main` type contains `static func main() async throws`; the fixed compiler uses `-parse-as-library -swift-version 6`. The examples use the standard library and portable Foundation. `precondition` makes a violated invariant fail the process. The fixed pad accepts one source file, without arbitrary command arguments, interactive input or dependency installation. SwiftUI, UIKit, Apple simulators and application signing belong to the separately prepared macOS/Xcode project labs, never the Linux pad.
+Both examples use `JSONEncoder` and `JSONDecoder` from Foundation, which the Linux classroom provides. Decoding failures throw, and the throwing `main` would end the program, so wrap the malformed cases for task 5 in `do` and `catch` and record which `DecodingError` case each produces.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Compile contract, starter stop and success marker: [running a lesson](../STUDY-GUIDE.md#running-a-lesson).
 
 
 
@@ -34,7 +34,7 @@ Start with the answer-free learner artifact in your saved classroom pad. It deli
 
 JSONEncoder produces Data; JSONDecoder reconstructs a Codable type. CodingKeys maps property names. A DecodingError describes a structural mismatch, while domain validation has its own error policy.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+Each example ends with a trace; method: [tracing a program](../STUDY-GUIDE.md#tracing-a-program).
 
 ## Worked example / walkthrough
 
@@ -67,6 +67,8 @@ struct LessonMain {
 
 **Observe:** The modeled fields round-trip through JSON.
 
+**Trace.** `original` is an `Item` with name pear and quantity 3. `JSONEncoder().encode` uses the compiler-synthesized `Codable` conformance to produce a UTF-8 JSON object with the two keys. `JSONDecoder().decode(Item.self, from:)` reads that data back and builds a new `Item`. The check uses `Equatable`, also synthesized, so it compares field values. The order of keys in the JSON text is never inspected, which is deliberate, because the encoder does not promise any particular order.
+
 ### Example B: Reject a decoded domain violation
 
 Structural decoding and domain admission are separate responsibilities.
@@ -96,6 +98,8 @@ struct LessonMain {
 
 **Observe:** Valid JSON can still describe an invalid item.
 
+**Trace.** The literal JSON has both required keys with correct types, so decoding succeeds and produces an item whose quantity is -2. Synthesized `Decodable` checks structure and types only; it knows nothing about the rule that quantities are nonnegative. The `isValid` computed property expresses that rule, and it returns false. The last check shows the other half of the rule: an empty name with quantity 1 is also invalid, even though it would encode and decode without error.
+
 ## Exercises
 
 1. **Predict and explain.** State what the round-trip check proves.
@@ -110,13 +114,15 @@ struct LessonMain {
 
 6. **Transfer and justify.** Plan migration of a renamed field without discarding existing saved records.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Log each task in the [evidence table](../STUDY-GUIDE.md#recording-exercise-evidence) before opening the explanation.
 
 ## Common pitfalls and diagnosis
 
 JSON key order is not a semantic equality rule. Defaults can hide missing required information. Do not decode directly into a complex object with side effects.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+Task 4's misconception is that decoding success implies a trusted value. The counterexample is Example B's own input: quantity -2 decodes successfully, so a function that returns the decoded value directly admits it. The fix in task 3 checks `isValid` and throws when it fails. For task 5, a missing quantity throws `keyNotFound`, broken JSON throws `dataCorrupted`, and an unknown extra key is silently ignored.
+
+Repair routine: [building a regression case](../STUDY-GUIDE.md#building-a-regression-case).
 
 ## Progressive hints
 
@@ -126,11 +132,15 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 ## Self-check and next step
 
-Explain Codable, Coding key, Schema evolution without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+Explain what a round-trip check proves and what it does not prove about invalid data. Say how an optional description field behaves when the key is missing versus present with null. Outline how a custom `init(from:)` could accept an old field name while writing only the new one.
+
+Then follow the general [self-check routine](../STUDY-GUIDE.md#self-check-routine) and save your pad.
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://docs.swift.org/swift-book/documentation/the-swift-programming-language/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+[Documentation](https://docs.swift.org/swift-book/documentation/the-swift-programming-language/): The Foundation reference article Encoding and Decoding Custom Types explains synthesized Codable conformance, coding keys and custom decoding.
+
+Provenance and limits: [sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

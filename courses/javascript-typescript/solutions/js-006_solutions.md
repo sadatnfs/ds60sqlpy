@@ -1,6 +1,6 @@
 # js-006: explanatory solutions
 
-Use these answers after an attempt or an explicit reveal. The reference uses the same literal fixtures as the guide and keeps the exercises in separate scopes. A successful run checks these examples; explaining a changed input is a separate learning goal.
+Open these after your own attempt; each exercise runs in its own scope in the reference.
 
 ## Mechanism review
 
@@ -22,7 +22,7 @@ Object.create(proto) sets a chosen prototype. The in operator checks inherited a
 
 ## Exercise 1: Distinguish own and inherited properties: predict an edited check
 
-Task: Copy Example A into a scratch `main.mjs` and change `assert.equal(Object.hasOwn(child, 'name'), true);` to `assert.equal(Object.hasOwn(child, 'name!'), true);` inside its check. Before running it, predict whether the check still passes and explain why; then restore it.
+Task: In a scratch copy of Example A, change `assert.equal(Object.hasOwn(child, 'name'), true);` to `assert.equal(Object.hasOwn(child, 'name!'), true);` inside its check. Does the check still pass?
 
 Property lookup and record schema inspection answer different questions. Accepting inherited fields as request data can violate a boundary contract.
 
@@ -37,13 +37,13 @@ assert.equal(Object.hasOwn(child, 'kind'), false);
 assert.equal(Object.hasOwn(child, 'name'), true);
 ```
 
-**Expected:** The changed run fails with an `AssertionError` at `assert.equal(Object.hasOwn(child, 'name!'), true);`. Restoring `assert.equal(Object.hasOwn(child, 'name'), true);` brings back: kind found by in but not hasOwn; name is own.
+**Expected:** The edited run fails with an `AssertionError` at `assert.equal(Object.hasOwn(child, 'name!'), true);`. Restoring `assert.equal(Object.hasOwn(child, 'name'), true);` brings back: kind found by in but not hasOwn; name is own.
 
-**Verify:** Compare your written prediction with the reported `AssertionError`, including its actual and expected values, and explain why the edited check rejects the values that `assert.equal(Object.hasOwn(child, 'name'), true)` accepts. After restoring the line, the program prints its `{"checks":1,"status":"passed"}` receipt again.
+**Verify:** Compare the reported actual and expected values with your prediction, then restore `assert.equal(Object.hasOwn(child, 'name'), true);`.
 
 ## Exercise 2: Copy only own enumerable fields: diagnose an edited check
 
-Task: A careless edit changed a check in Example B so that it reads `assert.deepEqual(Object.keys(copy), ['name!']);`. Run Example B with that line, explain why the edited check now fails for the same program state, and restore it.
+Task: Example B's check was edited to read `assert.deepEqual(Object.keys(copy), ['name!']);`. Run it, explain the failure and restore the original.
 
 Spread does not reproduce the prototype chain. It copies the declared enumerable own surface, which still may contain mutable nested references.
 
@@ -59,7 +59,7 @@ assert.equal(copy.kind, undefined);
 
 **Expected:** Before the repair the run fails with an `AssertionError` at `assert.deepEqual(Object.keys(copy), ['name!']);`. Restoring `assert.deepEqual(Object.keys(copy), ['name']);` brings back: only name copied.
 
-**Verify:** Keep the failing and the repaired runs. Explain why the edited check rejects the same program state that `assert.deepEqual(Object.keys(copy), ['name'])` accepts.
+**Verify:** Keep the failing and repaired runs and name the first value that differs between them.
 
 ## Exercise 3: Use destructuring defaults carefully
 
@@ -76,7 +76,7 @@ assert.equal(explicit, null);
 
 **Expected:** missing becomes 0; null remains null.
 
-**Verify:** Keep a check equivalent to `assert.equal(absent, 0)`. As a control, change `const { count: absent = 0 } = {};` to `const { count: absent = 1 } = {};`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
+**Verify:** Keep `assert.equal(absent, 0)`. Control: changing `const { count: absent = 0 } = {};` to `const { count: absent = 1 } = {};` must make that check fail; then restore it.
 
 ## Exercise 4: Use a null-prototype dictionary for arbitrary keys
 
@@ -94,7 +94,7 @@ assert.equal(Object.hasOwn(dictionary, '__proto__'), true);
 
 **Expected:** own value preserved; prototype remains null.
 
-**Verify:** Keep a check equivalent to `assert.equal(Object.hasOwn(dictionary, '__proto__'), true)`. As a control, change `assert.equal(Object.hasOwn(dictionary, '__proto__'), true);` to `assert.equal(Object.hasOwn(dictionary, '__proto__!'), true);` inside it: the run must fail with an `AssertionError`, which shows the check can fail. Restore it.
+**Verify:** Keep `assert.equal(Object.hasOwn(dictionary, '__proto__'), true)`. Control: editing it to `assert.equal(Object.hasOwn(dictionary, '__proto__!'), true);` must make the check fail; then restore it.
 
 ## Exercise 5: Expose shallow freeze
 
@@ -113,7 +113,7 @@ assert.equal(value.nested.count, 2);
 
 **Expected:** outer reassignment throws; inner value can change.
 
-**Verify:** Keep a check equivalent to `assert.equal(value.nested.count, 2)`. As a control, change `value.nested.count = 2;` to `value.nested.count = 3;`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
+**Verify:** Keep `assert.equal(value.nested.count, 2)`. Control: changing `value.nested.count = 2;` to `value.nested.count = 3;` must make that check fail; then restore it.
 
 ## Exercise 6: Observe a getter side effect
 
@@ -136,8 +136,8 @@ assert.equal(calls, 2);
 
 **Expected:** values 1 then 2; getter executed twice.
 
-**Verify:** Keep a check equivalent to `assert.equal(value.next, 1)`. As a control, change `calls += 1;` to `calls -= 1;`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
+**Verify:** Keep `assert.equal(value.next, 1)`. Control: changing `calls += 1;` to `calls -= 1;` must make that check fail; then restore it.
 
 ## After comparison
 
-Return to your saved implementation and repeat a case with different values. Keep compiler diagnostics, process output and browser observations separate. Do not suppress a failing assertion or use a type assertion to declare an unvalidated value safe. Resource-owning examples must finish cleanup even when work fails. Describe each result with its actual host and fixture scope rather than as production acceptance.
+Fresh case: deep-freeze a configuration with one nested level and prove that both levels reject writes. Then read a missing nested field once with a destructuring default and once with `?.`, and compare the values. ([After comparing](../STUDY-GUIDE.md#after-comparing-with-the-solution).)

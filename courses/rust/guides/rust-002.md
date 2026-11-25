@@ -24,9 +24,11 @@ Type inference remains static: the compiler determines a concrete type from cont
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles the saved pad as `main.rs` with pinned Rust 1.99.1, edition 2024, and the prepared Arrow 60 library. `assert!` and `assert_eq!` remain active in normal builds. The fixed pad accepts one source file without arbitrary arguments, interactive input, Cargo manifests or package installation. The main function returns `Result<(), Box<dyn std::error::Error>>` so later examples can propagate errors with `?`; the final `Ok(())` means this fixture completed successfully. Standard library and Arrow examples remain offline after image preparation. Multi-file Cargo and external ecosystem projects have separate explicit preparation workflows.
+This lesson's programs need only the prelude and their own helpers. A passing run prints `rust-002: passed`.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Pad setup and limits: [Run a lesson](../STUDY-GUIDE.md#run-a-lesson).
+
+Before you run anything, follow [Attempt a lesson](../STUDY-GUIDE.md#attempt-a-lesson).
 
 
 
@@ -34,7 +36,9 @@ Start with the answer-free learner artifact in your saved classroom pad. It deli
 
 `let count: i32 = 3` annotates a type. `let mut total = 0` allows reassignment. `let text = text.len()` shadows the earlier name with a new binding. Integer suffixes such as `3_u64` constrain inference.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+**Reading Example A (Expose an accumulator, code below).** Neither `per_box` nor `total` has a type annotation, so the compiler infers one from use; with no other constraint, an integer literal defaults to `i32`. `per_box` is bound once and only read. `total` is declared with `let mut`, and `mut` is a property of the binding, not of the value: it is what permits the two `+=` lines, each of which reads `total`, adds `per_box` and stores the sum back in the same place. Track `total` by hand through the block before you run it. The final `assert_eq!` checks the accumulated value, and because `per_box` is never reassigned, nothing in the block can have changed the input.
+
+Method for tracing your own variants: [Trace a program](../STUDY-GUIDE.md#trace-a-program).
 
 ## Worked example / walkthrough
 
@@ -92,13 +96,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 6. **Transfer and justify.** Choose shadowing or distinct names for parsing stages and justify readability.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Record each task as in [Keep evidence for each task](../STUDY-GUIDE.md#keep-evidence-for-each-task).
 
 ## Common pitfalls and diagnosis
 
 Immutable does not mean every object reachable through a type is deeply frozen. Shadowing can conceal a units change. Type inference is not dynamic typing.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+To turn a pitfall into a test, see [Design a regression case](../STUDY-GUIDE.md#design-a-regression-case).
 
 ## Progressive hints
 
@@ -106,13 +110,25 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 2. Compare Example B (Shadow after a representation change) with Example A and name the first line whose behavior differs. Its observation is: The new count is the text length, not the number twelve.
 3. Before opening the explanation, test your task 3 attempt against this lesson's main pitfall: Immutable does not mean every object reachable through a type is deeply frozen.
 
+Tempting approaches to rule out before you compare:
+
+- **Task 1.** Describing `count` as one variable that changed from text to a number misreads shadowing. The second `let` creates a new binding and neither is mutable; writing `count = count.len();` without `let` would be rejected with a type mismatch.
+- **Task 2.** Removing `mut` from every binding also strips it from `total`, and `total += per_box` then fails with E0384, cannot assign twice to an immutable variable. Silencing the warning with `#[allow(unused_mut)]` keeps the unneeded permission.
+- **Task 3.** Switching the input to `let deliveries = vec![3, 5, 2];` with the same loop fails to compile: `for amount in deliveries` moves the `Vec`, so the later `assert_eq!(deliveries, ...)` is E0382, borrow of moved value. The array version works because `[i32; 3]` is `Copy`; the `Vec` version needs `for amount in &deliveries`.
+- **Task 5.** Expecting `"".parse::<i32>()` to give 0 confuses empty with zero. It returns an `Err` whose kind is `Empty`, and calling `.unwrap()` on it panics with `ParseIntError { kind: Empty }`.
+- **Task 6.** Following Example B literally, `let quantity = quantity_text.len();` compiles and yields 2, the number of digits, instead of 12. Both are `usize`-compatible values, so only a check on the value exposes the mix-up.
+
 ## Self-check and next step
 
-Explain Binding, Mutability, Shadowing without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+Which binding in Example A stops compiling if you delete its `mut`, and what does the compiler suggest? After `let count = count.len();`, what is the type of the new `count`, and what happened to the earlier text binding? Explain why that is still static typing even though the name changed type.
+
+Then work through [Self-check and review](../STUDY-GUIDE.md#self-check-and-review).
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://doc.rust-lang.org/book/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+Read [The Rust Book, 3.1 Variables and Mutability](https://doc.rust-lang.org/book/ch03-01-variables-and-mutability.html) for `mut` and shadowing side by side.
+
+What the classroom does and does not prove: [Sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

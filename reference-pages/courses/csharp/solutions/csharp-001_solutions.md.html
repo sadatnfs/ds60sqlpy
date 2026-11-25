@@ -194,7 +194,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/csharp/solutions/csharp-001_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="csharp-001-explanation-and-comparison">csharp-001: explanation and comparison<a class="heading-anchor" href="#csharp-001-explanation-and-comparison" aria-label="Link to this section">#</a></h2>
-<p>Attempt the six guide tasks before opening this comparison. The executable reference is <a href="csharp-001_solution.cs.html">csharp-001_solution.cs</a>. It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.</p>
+<p>Reference program: <a href="csharp-001_solution.cs.html">csharp-001_solution.cs</a>, covering both examples and the executed answers.</p>
+<p>Attempt the tasks first; see <a href="../STUDY-GUIDE.md.html#comparing-with-the-explanation">comparing with the explanation</a>.</p>
 <h3 id="why-the-two-examples-differ">Why the two examples differ<a class="heading-anchor" href="#why-the-two-examples-differ" aria-label="Link to this section">#</a></h3>
 <p><strong>A checked greeting:</strong> The length check establishes a specific claim before printing. Spaces and punctuation count as characters in this ASCII fixture. Hello, C# appears before the lesson marker.</p>
 <p><strong>A calculation instead of a hardcoded message:</strong> The second condition rejects a plausible wrong operator. This is stronger evidence than printing an unexplained success word. The total is 12, while adding the two inputs gives 7.</p>
@@ -243,14 +244,14 @@ Check<span class="syntax-punctuation">(</span>oneRow <span class="syntax-operato
 <p><strong>How to verify.</strong> Also check two rows: <code>2 * seatsPerRow</code> must be 12. If the three results 0, 6 and 12 grow by the same step, the formula is linear in rows, as the seat plan expects.</p>
 <h4 id="task-6-transfer-and-justify">Task 6: Transfer and justify<a class="heading-anchor" href="#task-6-transfer-and-justify" aria-label="Link to this section">#</a></h4>
 <p>Model boxes containing packets containing items. Explain each intermediate value and check the final product.</p>
-<p>No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry <strong>Source</strong>, and state one limitation of your choice.</p>
+<p>No single answer exists; extend task 3 using the <a href="../STUDY-GUIDE.md.html#open-transfer-tasks">open transfer routine</a>.</p>
 <h3 id="mechanism-and-diagnostic-reasoning">Mechanism and diagnostic reasoning<a class="heading-anchor" href="#mechanism-and-diagnostic-reasoning" aria-label="Link to this section">#</a></h3>
 <p>A program is text until a compiler translates it into a form the runtime can execute. In .NET, the SDK supplies build tools; the runtime loads managed code and supplies services such as allocation and exceptions. Installing only a runtime is insufficient for compiling new source. The classroom prepares the SDK inside Linux Docker, so the host browser does not need a C# compiler.</p>
 <p>The first skill is distinguishing three outcomes: a compiler diagnostic means the program did not start; an exception means execution reached a failing operation; the expected printed result means a particular path completed. A message saying success proves nothing about an unchecked calculation. We therefore attach a small explicit condition to every reference and make false conditions terminate unsuccessfully.</p>
 <p><code>using System;</code> makes framework names available without their namespace prefix. <code>class Program</code> groups members. <code>static Main</code> is an entrypoint that needs no object instance. Braces delimit a body; a semicolon ends a statement. <code>Console.WriteLine</code> prints one line. The wrapper uses <code>async Task Main</code> to keep one entrypoint shape throughout the route; asynchronous work is explained later. For now, trace the statements from top to bottom.</p>
 <p>Printing a copied expected number skips the calculation. A missing brace can produce several later diagnostics, so repair the first structural problem before interpreting the rest. Do not treat the lesson marker as a replacement for inspecting the greeting or invariant.</p>
 <h3 id="review-before-continuing">Review before continuing<a class="heading-anchor" href="#review-before-continuing" aria-label="Link to this section">#</a></h3>
-<p>Run the reference and confirm that it prints <code>csharp-001: passed</code>, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.</p></article>
+<p>Run the reference and confirm it prints <code>csharp-001: passed</code>, then rerun the guide&#x27;s counterexample.</p></article>
   </main>
 </body>
 </html>

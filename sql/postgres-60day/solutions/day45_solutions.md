@@ -13,40 +13,26 @@ psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
   -f sql/postgres-60day/solutions/day45_solutions.sql
 ```
 
-`psql` prints each result/command tag in the terminal. Stop at the first
-unexpected `ERROR`; later output cannot repair an earlier failed invariant.
-Compare your own SQL, row grain, column names, row counts, `NULL` policy, and
-ordering with the explanation before comparing syntax.
+The `.sql` file runs in one transaction and rolls back both indexes it
+creates. In order, it prints the baseline plan, two `CREATE INDEX` tags, the
+optimized plan, the Exercise 1 plan, a single JSON plan row for Exercise 2, an
+empty Exercise 3 result, Exercise 4's lone 0 and Exercise 5's two index rows. Exercise 6 is a comment, not a query. The baseline is the slow statement,
+around half a second on our run. The general routine is in
+[reading a solution](../../STUDY-GUIDE.md#read-a-solution).
 
 ## Clause-by-clause reading map
 
-The lesson's main concepts are Experimental control, Buffer evidence, Regression check. Its worked-model focus is:
-Capture the function-wrapped date baseline, rewrite it as a raw half-open range, and add one candidate index inside the rollback transaction. Run both forms several times, reconcile country/unit results, and calculate percentage change from comparable observations without promising 70%.
-
-- Start at `FROM`/`JOIN` and state the intermediate row grain. Inspect join keys
-  before adding aggregates; a one-to-many join is allowed to multiply rows only
-  when the later contract accounts for it.
-- Apply `WHERE` to input rows, `GROUP BY` to form buckets, and `HAVING` to
-  completed groups. Window functions run over the surviving relation and
-  normally preserve its row count.
-- Read the `SELECT` list as the public result contract: keys establish grain,
-  measures state calculations, and aliases explain meaning. `ORDER BY` is the
-  only output-order guarantee; add a unique tie-breaker before `LIMIT`.
-- Trace every common table expression (CTE) as a temporary named relation.
-  Execute or inspect one stage at a time while debugging, but compare the final
-  result with an independent control rather than trusting stage names.
-- Keep SQL `NULL` as “missing/unknown/not applicable” until the metric contract
-  chooses another representation. Guard division with `NULLIF`; disclose
-  exclusions and distinguish zero from no row.
-- For DDL/DML, a command tag proves only that PostgreSQL accepted a statement.
-  Catalog checks, negative cases, row-count reconciliation, and the declared
-  transaction boundary prove behavior and cleanup.
-
-The exact final queries are not the only valid syntax. A join, subquery, CTE,
-window, or conditional aggregate can be an alternative when it preserves the
-same grain, `NULL` semantics, deterministic ordering, and safety. Prefer the
-form whose intermediate relations a reviewer can verify; optimize only after
-correctness is established with evidence.
+Read each statement in
+[logical clause order](../../STUDY-GUIDE.md#reading-any-query-in-logical-order).
+The project has two layers. The first is a before-and-after pair: a baseline
+that totals `order_items.quantity` through a correlated subquery, once per
+recent order, and an optimized query that filters `orders` in a
+`recent_orders` CTE, totals items per recent order in `item_totals` and joins
+both to `customers`. The second layer, Exercises 1 to 5, isolates one claim
+each: the sargable range, structured plan output, equal results, the empty
+window and the index inventory. For every plan, note the scan on `orders`,
+the scan on `order_items`, the loop counts and the buffer totals before
+looking at time.
 
 The deliverable is evidence, not merely a rewritten query: capture a baseline,
 add plausible indexes, use a sargable predicate and set-based aggregation, then
@@ -159,13 +145,13 @@ eligible while preserving a clear time boundary.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-45 Exercise 1, run the underlying read-only query over `orders` before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison.
-- **Expected result/shape:** For sql-45 Exercise 1, expected output: one row per `order_id`. The final columns are `order_id`.
-- **Independent verification:** For sql-45 Exercise 1, run the underlying query without `EXPLAIN` and preserve its `order_id` rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.
-- **Intermediate relation check:** For sql-45 Exercise 1, run the underlying query without `EXPLAIN` and preserve its `order_id` rows.
-- **Clause check:** For sql-45 Exercise 1, the solution actually uses `FROM`, `WHERE`, and `SELECT`. Read only those operations: begin at `orders`, preserve one row per `order_id`, and finish with `order_id`.
-- **Alternative/trade-off:** For sql-45 Exercise 1, the chosen form is justified by this lesson-specific rationale: The direct half-open range leaves `order_date` unwrapped, making the B-tree eligible while preserving a clear time boundary. Evaluate another form against the concrete expected result (one row per `order_id`) and the verification above.
-- **Edge case:** Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.
+- **Inputs/evidence:** For sql-45 Exercise 1, compare the learner baseline predicate `date_trunc('day', o.order_date) >= date_trunc('day', now() - interval '180 days')` with the half-open range `order_date >= date_trunc('day', CURRENT_TIMESTAMP) - interval '180 days' AND order_date < date_trunc('day', CURRENT_TIMESTAMP) + interval '1 day'` on `orders`, reading each through `EXPLAIN (ANALYZE, BUFFERS)` after the solution indexes are built.
+- **Expected result/shape:** For sql-45 Exercise 1, expected output: a text plan, not rows. With `idx_orders_recent_customer_solution` on (`order_date`, `customer_id`, `order_id`) in place, the half-open range becomes an `Index Only Scan` with an `Index Cond` on both `order_date` bounds, while the wrapped baseline stays a `Seq Scan on orders` with a `Filter`, because no index stores `date_trunc('day', order_date)`. Run without `EXPLAIN`, the range returns one row per `order_id`; its only column is `order_id`.
+- **Independent verification:** For sql-45 Exercise 1, run both predicates without `EXPLAIN` and confirm that `EXCEPT` in each direction returns 0 rows, so the rewrite keeps exactly the same `order_id` set (1,539 orders on our load); then run `EXPLAIN (COSTS OFF)` on each with the solution indexes present and confirm `Index Cond` for the range and `Filter: (date_trunc('day'::text, order_date) >= ...)` for the baseline. The plans may differ by machine; the predicate form decides eligibility, not the timing.
+- **Intermediate relation check:** Run the `SELECT order_id ...` without `EXPLAIN`: on a fresh load it returns 1,539 rows and 1,539 distinct `order_id` values, matching the learner's day-aligned window. The solution's other queries use `CURRENT_TIMESTAMP - interval '180 days'` without truncation and keep 1,538, so the two windows differ by one order at the edge.
+- **Clause check:** The `WHERE` clause compares bare `order_date` with two constants: midnight 180 days back and the next midnight. `date_trunc` still appears, but only on the constant side, where it runs once per statement instead of once per row. The `SELECT` list needs only `order_id`, the third column of `idx_orders_recent_customer_solution`, so on our run the plan never visited the table.
+- **Alternative/trade-off:** `date_trunc('day', order_date) >= ...` with a matching upper bound returns the same orders and brings back the sequential scan: 65 pages and 2,823 discarded rows on our run, against 9 pages for the range form. An expression index cannot rescue the wrapped version, since `date_trunc` on a `timestamptz` is not `IMMUTABLE` and `CREATE INDEX` refuses it.
+- **Edge case:** A 7-day window keeps the `Index Only Scan` and reads 19 rows from 3 pages; a 1,000-day window is still an `Index Only Scan`, now 4,160 rows from 19 pages. A covering index can beat a sequential scan even for most of a table. `Heap Fetches: 0` relies on a current visibility map, so a table that has not been vacuumed may show heap visits instead.
 
 ## Exercise 2: Capture structured evidence
 
@@ -174,13 +160,13 @@ machine-readable. It still describes only this run and environment.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-45 Exercise 2, run the underlying read-only query over `orders` before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison.
-- **Expected result/shape:** For sql-45 Exercise 2, expected output: one row per `customer_id`. The final columns are `customer_id`, and `revenue`.
-- **Independent verification:** For sql-45 Exercise 2, run the underlying query without `EXPLAIN` and preserve its `customer_id` rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.
-- **Intermediate relation check:** For sql-45 Exercise 2, run the underlying query without `EXPLAIN` and preserve its `customer_id` rows.
-- **Clause check:** For sql-45 Exercise 2, the solution actually uses `FROM`, `WHERE`, `GROUP BY`, and `SELECT`. Read only those operations: begin at `orders`, preserve one row per `customer_id`, and finish with `customer_id`, and `revenue`.
-- **Alternative/trade-off:** For sql-45 Exercise 2, the chosen form is justified by this lesson-specific rationale: `FORMAT JSON` keeps plan nodes, estimates, actual rows, buffers, and timing machine-readable. Evaluate another form against the concrete expected result (one row per `customer_id`) and the verification above.
-- **Edge case:** Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.
+- **Inputs/evidence:** For sql-45 Exercise 2, wrap `SELECT customer_id, SUM(total_amount) AS revenue FROM orders WHERE order_date >= CURRENT_TIMESTAMP - interval '180 days' GROUP BY customer_id` in `EXPLAIN (ANALYZE, BUFFERS, FORMAT JSON)`; the solution captures this rewrite, and the baseline is captured the same way for the comparison.
+- **Expected result/shape:** For sql-45 Exercise 2, expected output: one row with one `QUERY PLAN` value holding a JSON array; its first element has `Plan` with `"Node Type": "Aggregate"`, `"Strategy": "Hashed"`, `Actual Rows` equal to the number of customers, and `Shared Hit Blocks`, while `Execution Time` sits beside `Plan`, not inside it. Run without `EXPLAIN`, the query returns one row per `customer_id` with columns `customer_id` and `revenue`.
+- **Independent verification:** For sql-45 Exercise 2, run the query without `EXPLAIN` and confirm that its row count equals the root `Actual Rows` (410 on our load) and that `SUM(revenue)` equals `SELECT SUM(total_amount) FROM orders` under the same filter; then confirm that `Plans[0]` is a `Bitmap Heap Scan` fed by a `Bitmap Index Scan` on `idx_orders_recent_customer_solution`, and that without the solution indexes (after `ROLLBACK`) the same query plans a `Seq Scan on orders`.
+- **Intermediate relation check:** Without `EXPLAIN`, the query returns 410 `customer_id` rows whose `revenue` adds up to 834,482.51 on a fresh load. That total must equal `SUM(total_amount)` over the same window with no grouping, which shows the grouping neither lost nor duplicated an order.
+- **Clause check:** `FORMAT JSON` changes only the printing: one row, one column, holding an array with a single object. Its `Plan` key holds the root node, an `Aggregate` with `"Strategy": "Hashed"` and 410 actual rows on our run, and `Execution Time` is a sibling of `Plan`. `total_amount` is not in the composite index, so the scan under the aggregate has to visit the heap; on our run it was a bitmap heap scan over 34 pages.
+- **Alternative/trade-off:** Text output is easier to read by eye, but comparing runs then means scraping numbers out of lines such as `Execution Time: 0.4 ms`. The JSON fields, like `Shared Hit Blocks` and `Actual Total Time`, can be saved and diffed by a script across repeated runs. Neither format turns one run into a representative one.
+- **Edge case:** A 7-day window shrinks the answer to 13 customers and 11,773.31 of revenue. Compare `Plan Rows` with `Actual Rows` at the root for both windows; a large gap on the narrow window points at statistics, not at the query text.
 
 ## Exercise 3: Prove semantic equivalence
 
@@ -189,13 +175,13 @@ directions. Both difference sets must be empty before performance matters.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-45 Exercise 3, read from `orders`, `customers`, and `order_items`. Build the answer toward `order_id`, `customer_id`, `order_date`, `status`, and `total_amount`; keep `order_id` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-45 Exercise 3, expected output: one row per `order_id`. The final columns are `order_id`, `customer_id`, `order_date`, `status`, and `total_amount`.
-- **Independent verification:** For sql-45 Exercise 3, project `order_id` plus the raw source columns from `orders`, `customers`, and `order_items` at each join stage; record row count and distinct `order_id`, then assert the final `order_id`, `customer_id`, `order_date`, `status`, and `total_amount` values match those staged rows without unintended fanout or loss. Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
-- **Intermediate relation check:** For sql-45 Exercise 3, run `direct`, `items`, and `preaggregated` one at a time. Record each CTE's row count and `order_id` uniqueness before the next stage uses it.
-- **Clause check:** For sql-45 Exercise 3, the solution actually uses `WITH`, `FROM`, `JOIN ... ON`, `WHERE`, `GROUP BY`, and `SELECT`. Read only those operations: begin at `orders`, `customers`, and `order_items`, preserve one row per `order_id`, and finish with `order_id`, `customer_id`, `order_date`, `status`, and `total_amount`.
-- **Alternative/trade-off:** For sql-45 Exercise 3, the chosen form is justified by this lesson-specific rationale: Direct and pre-aggregated country totals are compared with `EXCEPT` in both directions. Evaluate another form against the concrete expected result (one row per `order_id`) and the verification above.
-- **Edge case:** Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
+- **Inputs/evidence:** For sql-45 Exercise 3, build `direct` (orders joined to customers and `order_items`, last 180 days, `SUM(quantity)` by `country`), `items` (`order_items` summed by `order_id`), and `preaggregated` (orders joined to `items` and customers with the same filter, summed by `country`), then compare `direct EXCEPT preaggregated` and `preaggregated EXCEPT direct`, labeling each side with `difference_side`.
+- **Expected result/shape:** For sql-45 Exercise 3, expected output: 0 rows with columns `difference_side`, `country`, and `units`, because both CTEs return the same 7 country totals (BR has no orders); any disagreement would appear as a labeled row, one per differing country on each side.
+- **Independent verification:** For sql-45 Exercise 3, run `direct` and `preaggregated` alone and confirm 7 rows each with identical (`country`, `units`) pairs, such as AU with 1947 on our load; confirm `items` returns 4,362 rows with unique `order_id` and `SUM(units)` of 39257, equal to `SELECT SUM(quantity) FROM order_items`; then change only the `preaggregated` interval to `'179 days'` and confirm rows appear in pairs, one from each `difference_side` for every country whose total moved.
+- **Intermediate relation check:** `direct` joins about 4,665 recent order lines to customers and returns 7 country rows. `items` ignores the date and collapses all 13,085 lines into 4,362 per-order totals, and `preaggregated` joins those to the 1,538 recent orders, again returning 7. Each `EXCEPT` therefore compares 7 `(country, units)` pairs, and both differences come back empty.
+- **Clause check:** `EXCEPT` compares whole rows and removes duplicates, which is a fair test only because each side has one row per country. `UNION ALL` stacks the two directions, and `difference_side` labels which CTE contributed an unmatched row; an empty result means every pair appears on both sides.
+- **Alternative/trade-off:** `FROM direct d FULL JOIN preaggregated p USING (country) WHERE d.units IS DISTINCT FROM p.units` reports the same mismatches with both totals in one row, which is easier to read. `EXCEPT ALL` would also expose a duplicated row, which matters once a side can return more than one row per country.
+- **Edge case:** Shorten only the `preaggregated` window to 179 days and the query returns 12 rows on our run, one from each side for every country whose total moved. A one-day slip in a boundary is exactly what a fast plan can hide, and this check exposes it.
 
 ## Exercise 4: Test the empty-window boundary
 
@@ -207,10 +193,10 @@ shape. An optimization must not manufacture a zero-valued group.
 - **Inputs/evidence:** For sql-45 Exercise 4, read from `orders` with a window that matches no rows, `order_date >= TIMESTAMPTZ '1900-01-01 00:00:00+00' AND order_date < TIMESTAMPTZ '1900-01-02 00:00:00+00'`, and count the matching orders.
 - **Expected result/shape:** For sql-45 Exercise 4, expected output: one row with `impossible_window_rows` 0. The final columns are `impossible_window_rows`.
 - **Independent verification:** For sql-45 Exercise 4, confirm the count is 0, then run a grouped form of the same filter, such as `SELECT c.country, COUNT(*) FROM orders o JOIN customers c USING (customer_id) WHERE <same window> GROUP BY c.country`, and confirm it returns no rows: an ungrouped aggregate always returns one row, while a grouped query over empty input returns none, so every rewrite of the report must keep the same shape.
-- **Intermediate relation check:** For sql-45 Exercise 4, run the window predicate with `SELECT COUNT(*)` and with a `GROUP BY` version, and compare the number of result rows.
-- **Clause check:** For sql-45 Exercise 4, the solution actually uses `FROM`, `WHERE`, and `SELECT`. Read only those operations: begin at `orders`, preserve exactly one summary row, and finish with `impossible_window_rows`.
-- **Alternative/trade-off:** For sql-45 Exercise 4, the chosen form is justified by this lesson-specific rationale: An impossible historical window should return no rows for every equivalent shape. Evaluate another form against the concrete expected result (one row per `order_id`) and the verification above.
-- **Edge case:** An ungrouped `COUNT(*)` over zero rows returns 0, but `SUM` returns NULL; a rewrite that switches between them changes what an empty window looks like.
+- **Intermediate relation check:** Run the window as written and again as `SELECT c.country, COUNT(*) ... GROUP BY c.country`: the first prints one row holding 0 and the second prints no rows. Nothing in the fixture predates early 2023 on a fresh load, so 1 January 1900 is safely empty.
+- **Clause check:** With no `GROUP BY`, `COUNT(*)` collapses the filtered input into exactly one row even when that input is empty. Both `timestamptz` literals carry `+00`, which pins the window to UTC midnight whatever the session's `TimeZone`.
+- **Alternative/trade-off:** `SELECT EXISTS (SELECT 1 FROM orders WHERE ...)` answers the same yes-or-no question with `false` and could stop at the first match. The count is kept because it behaves like the report's own aggregate on empty input.
+- **Edge case:** Over the same empty window `SUM(quantity)` and `SUM(total_amount)` return `NULL`, not 0. If one version of the report wraps them in `COALESCE(..., 0)` and another does not, the two disagree on exactly this input, so settle the empty case before optimizing.
 
 ## Exercise 5: Document index tradeoffs
 
@@ -219,13 +205,13 @@ writes more expensive. Production creation needs a reviewed migration.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-45 Exercise 5, read from `pg_indexes`. Build the answer toward `indexname`, and `indexdef`; keep `indexname` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-45 Exercise 5, expected output: one row per `indexname`. The final columns are `indexname`, and `indexdef`. The final order is `indexname`.
-- **Independent verification:** For sql-45 Exercise 5, run an anti-check that counts rows where NOT ((schemaname = 'training' AND indexname LIKE '%solution')); require unique `indexname` where the expected grain is one row per key and confirm the projected `indexname`, and `indexdef` against `pg_indexes`. Add one row for which `(schemaname = 'training' AND indexname LIKE '%solution')` is true and one for which it is false; verify only the matching `indexname` value is returned.
-- **Intermediate relation check:** For sql-45 Exercise 5, inspect the source keys that survive `WHERE`; then check `indexname` before applying the row cap.
-- **Clause check:** For sql-45 Exercise 5, the solution actually uses `FROM`, `WHERE`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `pg_indexes`, preserve one row per `indexname`, and finish with `indexname`, and `indexdef` ordered by `indexname`.
-- **Alternative/trade-off:** For sql-45 Exercise 5, the chosen form is justified by this lesson-specific rationale: The candidate serves date-bounded customer work but consumes storage and makes writes more expensive. Evaluate another form against the concrete expected result (one row per `indexname`) and the verification above.
-- **Edge case:** Add one row for which `(schemaname = 'training' AND indexname LIKE '%solution')` is true and one for which it is false; verify only the matching `indexname` value is returned.
+- **Inputs/evidence:** For sql-45 Exercise 5, inside the lesson transaction, after `idx_orders_recent_customer_solution` on `orders (order_date, customer_id, order_id)` and `idx_order_items_order_quantity_solution` on `order_items (order_id) INCLUDE (quantity)` are built, read `pg_indexes` where `schemaname = 'training'` and `indexname LIKE '%solution'`.
+- **Expected result/shape:** For sql-45 Exercise 5, expected output: 2 rows, one per `indexname`: `idx_order_items_order_quantity_solution`, then `idx_orders_recent_customer_solution`, each with its full `CREATE INDEX` text in `indexdef`. The final columns are `indexname` and `indexdef`. The final order is `indexname`.
+- **Independent verification:** For sql-45 Exercise 5, confirm the 2 rows and that `training` holds 16 indexes at that moment, so the `LIKE '%solution'` filter removed 14; read `pg_size_pretty(pg_relation_size(indexname::regclass))` for each (304 kB for the `INCLUDE` index and 152 kB for the composite one on our load) as the storage cost; then, after `ROLLBACK`, rerun the query and confirm 0 rows, proving the candidates were not left behind.
+- **Intermediate relation check:** Inside the transaction, after both `CREATE INDEX` statements, `pg_indexes` lists 16 indexes in `training` on our run, and `LIKE '%solution'` keeps 2. After `ROLLBACK` the same query returns none, which proves the experiment left nothing behind.
+- **Clause check:** `pg_indexes` is a catalog view with one row per index, so `indexname` is already unique within a schema and needs no `DISTINCT`. `schemaname = 'training'` keeps system indexes out, and `ORDER BY indexname` puts the `order_items` index before the `orders` one.
+- **Alternative/trade-off:** Adding `pg_relation_size(indexname::regclass)` shows what each candidate costs: 304 kB for the `INCLUDE` index and 152 kB for the composite one on our run, against 520 kB for `orders` itself. `pg_index` exposes flags such as `indisunique`, but `indexdef` already spells out the full definition.
+- **Edge case:** `idx_solution_orders` would fail the pattern, because `'%solution'` requires the word at the end, and an index in another schema would fail the `schemaname` test. A stray `idx_old_solution` would match even if another lesson made it, so the suffix is a naming convention, not a guarantee.
 
 ## Exercise 6: Write the decision record
 
@@ -234,10 +220,10 @@ as separate claims. The compact seed cannot support a universal speed promise.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-45 Exercise 6, complete the write an optimization report separating semantics plans and  written analysis and support its claims with read-only evidence from `customers`, `orders`, and `order_items`. Mark unverified assumptions explicitly.
-- **Expected result/shape:** For sql-45 Exercise 6, expected output: a completed the write an optimization report separating semantics plans and  written analysis with explicit `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit` fields. The final columns are `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit`.
-- **Independent verification:** For sql-45 Exercise 6, check the write an optimization report separating semantics plans and  written analysis against `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit`. Each recommendation must cite an observed catalog/query result or be labeled an assumption, and must name an owner, failure response, fallback, and rollback/rebuild limit. Add one counterexample that invalidates the preferred decision and show which `fallback` and `rollback_limit` entries govern it.
-- **Intermediate relation check:** For sql-45 Exercise 6, check the write an optimization report separating semantics plans and  written analysis against `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit`.
-- **Clause check:** For sql-45 Exercise 6, the solution actually uses `WITH`, and `FROM`. Read only those operations: begin at `customers`, `orders`, and `order_items`, preserve one row per `customer_id`, and finish with `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit`.
-- **Alternative/trade-off:** For sql-45 Exercise 6, the chosen form is justified by this lesson-specific rationale: Report correctness, plan evidence, observed timing, operational cost, and limits as separate claims. Evaluate another form against the concrete expected result (a completed the write an optimization report separating semantics plans and  written analysis with explicit `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit` fields) and the verification above.
-- **Edge case:** Add one counterexample that invalidates the preferred decision and show which `fallback` and `rollback_limit` entries govern it.
+- **Inputs/evidence:** For sql-45 Exercise 6, write a short report with three labeled parts, semantic equivalence, planner evidence, and environment-dependent timing, and support each claim with read-only output from this lesson: the empty two-way `EXCEPT` from Exercise 3, the plan nodes and buffer counts from Exercises 1 and 2, the index sizes from Exercise 5, and several timings of each form.
+- **Expected result/shape:** For sql-45 Exercise 6, expected output: a written report, not a result set, with one entry per recommendation carrying `decision`, `evidence`, `owner`, `failure_response`, `fallback`, and `rollback_limit`; for example, keep the half-open range (evidence: the same `order_id` set and an `Index Cond` in place of a `Filter`) and keep or drop the `INCLUDE` index (evidence: 304 kB of storage against the time it saves).
+- **Independent verification:** For sql-45 Exercise 6, check that each equivalence claim cites the empty `EXCEPT` result, each plan claim names a node type and buffer count you printed, and each timing claim reports several runs of each form; then test the counterexample that `idx_order_items_order_quantity_solution` alone takes the correlated baseline from hundreds of milliseconds (about 380 ms on our load) to a few milliseconds, and state which `fallback` and `rollback_limit` entries apply when the index, not the rewrite, earns most of the speedup.
+- **Intermediate relation check:** Exercise 6 has no query of its own; its evidence comes from earlier output. Gather the empty Exercise 3 difference, both plans' buffer totals (about 149,000 shared hits for the correlated baseline against about 118 for the optimized query on our run), several timings of each and the index sizes behind Exercise 5.
+- **Clause check:** Each report row pairs a `decision` with its `evidence`. A defensible set for this fixture: keep the rewrite (equal results, far fewer buffers), and mark `idx_order_items_order_quantity_solution` unproven, because the optimized plan still scans all 97 pages of `order_items`. Give `fallback` and `rollback_limit` real content, such as `DROP INDEX CONCURRENTLY` and the time a rebuild would take.
+- **Alternative/trade-off:** A bare `improvement_pct` would be simpler and misleading. On our run the baseline-to-optimized change is above 99%, but that baseline is pathological: its correlated subquery scans `order_items` once for each of 1,538 orders. Against the learner's plain join the rewrite gained closer to 60%. Name the comparison behind every percentage.
+- **Edge case:** Counterexample: create only the `INCLUDE` index and rerun the correlated baseline. On our run it fell from roughly 450 ms to about 2 ms, close to the optimized query, so the index rather than the rewrite did most of the work. The `fallback` entry must say what happens if that index is later dropped.

@@ -165,3 +165,25 @@ def test_server_models_and_optional_lab_do_not_claim_http_execution_from_cli() -
     compose = (fixture / "compose.yaml").read_text(encoding="utf-8")
     assert "127.0.0.1:18088:8080" in compose
     assert "docker.sock" not in compose
+
+
+def test_lessons_link_shared_study_guide_sections_that_exist() -> None:
+    import re
+
+    study = (COURSE / "STUDY-GUIDE.md").read_text(encoding="utf-8")
+    anchors = {
+        re.sub(r"[^a-z0-9 -]", "", line[3:].strip().lower()).replace(" ", "-")
+        for line in study.splitlines()
+        if line.startswith("## ")
+    }
+    manifest = json.loads((COURSE / "lessons.json").read_text(encoding="utf-8"))
+    for row in manifest["lessons"]:
+        guide = (ROOT / row["guide_path"]).read_text(encoding="utf-8")
+        linked = set(re.findall(r"\.\./STUDY-GUIDE\.md#([a-z0-9-]+)", guide))
+        assert "review-loop" in linked, row["id"]
+        for path in row["solution_paths"]:
+            if path.endswith(".md"):
+                solution = (ROOT / path).read_text(encoding="utf-8")
+                linked |= set(re.findall(r"\.\./STUDY-GUIDE\.md#([a-z0-9-]+)", solution))
+        assert "solutions" in linked, row["id"]
+        assert linked <= anchors, (row["id"], linked - anchors)

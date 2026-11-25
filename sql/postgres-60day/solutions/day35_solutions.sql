@@ -15,38 +15,103 @@
 BEGIN;
 SET search_path TO training, public;
 
--- Exercise 1: three sargable rewrites.
--- 1a. Range bounds instead of date_trunc(order_date).
+-- Exercise 1: three sargable rewrites of a date filter on order_date.
+-- 1. One calendar day
+EXPLAIN (
+  ANALYZE,
+  BUFFERS
+)
 SELECT
-  COUNT(*)
+  order_id
 FROM
   orders
 WHERE
-  order_date >= date_trunc('month', CURRENT_TIMESTAMP)
-  AND order_date < date_trunc('month', CURRENT_TIMESTAMP) + interval '1 month';
+  date_trunc('day', order_date) = date_trunc('day', CURRENT_TIMESTAMP);
 
--- 1b. Exact comparison can use the unique email B-tree.
+EXPLAIN (
+  ANALYZE,
+  BUFFERS
+)
 SELECT
-  customer_id
+  order_id
 FROM
-  customers
+  orders
 WHERE
-  email = 'customer100@example.com';
+  order_date >= date_trunc('day', CURRENT_TIMESTAMP)
+  AND order_date < date_trunc('day', CURRENT_TIMESTAMP) + interval '1 day';
 
--- 1c. country is NOT NULL, so COALESCE is unnecessary.
+-- 2. Current calendar year
+EXPLAIN (
+  ANALYZE,
+  BUFFERS
+)
 SELECT
-  COUNT(*)
+  order_id
 FROM
-  customers
+  orders
 WHERE
-  country = 'US';
+  EXTRACT(year FROM order_date) = EXTRACT(year FROM CURRENT_DATE);
 
--- Exercise 2: replace a per-customer correlated aggregate with one grouped CTE.
-WITH order_totals AS (
+EXPLAIN (
+  ANALYZE,
+  BUFFERS
+)
+SELECT
+  order_id
+FROM
+  orders
+WHERE
+  order_date >= date_trunc('year', CURRENT_DATE)
+  AND order_date < date_trunc('year', CURRENT_DATE) + interval '1 year';
+
+-- 3. Last seven calendar dates, including today
+EXPLAIN (
+  ANALYZE,
+  BUFFERS
+)
+SELECT
+  order_id
+FROM
+  orders
+WHERE
+  order_date::date >= CURRENT_DATE -6;
+
+EXPLAIN (
+  ANALYZE,
+  BUFFERS
+)
+SELECT
+  order_id
+FROM
+  orders
+WHERE
+  order_date >= (CURRENT_DATE -6)::timestamptz
+  AND order_date < (CURRENT_DATE +1)::timestamptz;
+
+-- Exercise 2: compare a correlated per-customer SUM with one grouped CTE.
+EXPLAIN (
+  ANALYZE,
+  BUFFERS
+)
+SELECT
+  c.customer_id,
+  (
+    SELECT
+      SUM(o.total_amount)
+    FROM
+      orders o
+    WHERE
+      o.customer_id = c.customer_id) AS lifetime_revenue
+FROM
+  customers c;
+
+EXPLAIN (
+  ANALYZE,
+  BUFFERS
+) WITH order_totals AS (
   SELECT
     customer_id,
-    COUNT(*) AS orders,
-    SUM(total_amount) AS revenue
+    SUM(total_amount) AS lifetime_revenue
   FROM
     orders
   GROUP BY
@@ -54,15 +119,10 @@ WITH order_totals AS (
 )
 SELECT
   c.customer_id,
-  c.full_name,
-  COALESCE(ot.orders, 0) AS orders,
-  COALESCE(ot.revenue, 0) AS revenue
+  ot.lifetime_revenue
 FROM
   customers c
-  LEFT JOIN order_totals ot USING (customer_id)
-ORDER BY
-  revenue DESC,
-  c.customer_id;
+  LEFT JOIN order_totals ot ON ot.customer_id = c.customer_id;
 
 -- Exercise 3: a prefix has a searchable starting point; a leading wildcard
 -- generally cannot seek into a normal B-tree text index.

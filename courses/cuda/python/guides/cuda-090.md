@@ -1,10 +1,17 @@
 # cuda-090: Mixed precision as a numerical experiment
 
-**Route:** CUDA Python and machine learning. **Stage:** intermediate. **Prerequisites:** `cuda-006`, `cuda-087`, `cuda-089`. Allow several sessions when the hardware experiment is new; the chapter is not a deadline.
+**Route:** CUDA Python and machine learning. **Stage:** intermediate. **Prerequisites:** `cuda-006`, `cuda-087`, `cuda-089`.
 
-## What you will be able to explain
+Pacing, evidence labels and platform rules: [CUDA study guide](../../STUDY-GUIDE.md).
 
-By the end, you can **calculate scaled and unscaled values**, **compare fp16 and bf16 concepts**, and **record quality and throughput separately** with evidence. Start with the two worked cases, then use the editable CPU model to make the quantities concrete.
+## Learning objectives
+
+- Calculate scaled and unscaled values.
+- Explain overflow detection.
+- Place clipping correctly.
+- Compare fp16 and bf16 concepts.
+- Design a full-precision baseline.
+- Record quality and throughput separately.
 
 ## Mechanism and vocabulary
 
@@ -47,9 +54,13 @@ Multiplying a small gradient by scale 1024 before backpropagation can keep inter
 
 Clipping a scaled gradient of 512 with threshold 1 and then unscaling produces 1/1024, not the intended clipped original gradient 0.5. Operation order changes training.
 
-## Portable executable model
+## How to run the CPU model
 
-The **CPU reference model** variant runs this bounded worked example using `python-core`. It uses only the Python standard library, small synthetic values and no network. Its purpose is to expose the arithmetic or contract behind the chapter. The separate reference includes assertions for the stated observations.
+Edit the copy; the [reference](../references/cuda-090_cpu.py) adds assertions.
+
+```sh
+python courses/cuda/python/lessons/cuda-090_cpu.py
+```
 
 ```python
 gradient = 0.5
@@ -73,8 +84,6 @@ print("CPU scaling model:", correct, wrong)
 | `correct` | `0.5` |
 | `wrong` | `0.0009765625` |
 
-Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.
-
 ## Equal framework lanes
 
 ### PyTorch
@@ -85,77 +94,65 @@ Use torch.autocast around supported forward/loss operations. The CUDA fp16 workf
 
 Select a Keras mixed-precision policy before building layers. Use the pinned release's loss-scaling optimizer contract and inspect variable, compute and output dtypes separately.
 
-Choose either lane first, then compare the other using identical mathematical inputs. Framework-specific shape, mode and optimizer rules must be checked separately. Both use offline synthetic examples; no model hub or dataset download is triggered.
+Lane rules: [framework labs](../../STUDY-GUIDE.md#python-gpu-and-framework-labs).
 
 ## Practice and transfer
+
+Record each attempt in the [worksheet](../lessons/cuda-090.md) before opening hints.
 
 ### Exercise 1: Calculate scaled and unscaled values
 
 **Trap to avoid:** Unscaling twice, once manually and once by the scaler, produces `0.5/1024`, an update so small that training appears to stall without any error.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 2: Explain overflow detection
 
 **Trap to avoid:** Replacing infinities with zero, or clipping them, so the step can proceed corrupts the update with values unrelated to the true gradient.
-
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 3: Place clipping correctly
 
 **Trap to avoid:** Clipping the scaled 512 to 1 and then unscaling gives `1/1024 = 0.0009765625`, the wrong value the reference asserts for the reversed order. Training then barely moves.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 4: Compare fp16 and bf16 concepts
 
 **Trap to avoid:** Assuming both 16-bit formats behave the same leads to dropping loss scaling for float16, where small gradients flush to zero.
-
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 5: Design a full-precision baseline
 
 **Trap to avoid:** Comparing the mixed-precision run with an older float32 run using a different seed attributes noise to precision.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 6: Record quality and throughput separately
 
 **Trap to avoid:** Reporting the speedup without the quality comparison can justify a configuration that fails to train properly.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ## Progressive hints
 
-Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.
+Hint *k* belongs to exercise *k*; open one at a time.
 
-1. Start from worked example 1 and mark the quantities needed for the task "Calculate scaled and unscaled values".
-2. Change one assumption in worked example 2 while preserving the declared contract: explain overflow detection.
-3. Trace the CPU program's variables before adding hardware behavior: place clipping correctly.
-4. Draw producers, consumers and the exact operation boundary for the task "Compare fp16 and bf16 concepts".
-5. Separate what the small fixture establishes from what the real runtime must show: design a full-precision baseline.
-6. Write a counterexample to an overbroad claim before you record quality and throughput separately.
+1. Multiply the gradient by the scale before the backward pass, then divide by the same scale once.
+2. Ask what a supported scaler does when the scaled gradient becomes infinite or not a number.
+3. Decide which representation the clipping threshold refers to, scaled or original.
+4. Compare how many bits fp16 and bf16 spend on the exponent and on the fraction.
+5. Run the same initialization, batch and loss at full precision as your reference.
+6. Report accuracy and gradient checks separately from memory and speed.
 
-## Common mistakes and self-review
+## Common mistakes and self-check
 
-Confusing a correct tiny example with a general implementation is the central review risk. For this chapter, challenge the assumption in worked example 2, then ask whether your change preserves the mechanism described above. If you change dtype, layout, ordering, batch size or backend, update the acceptance contract rather than silently reusing the old observation. Explain an unexpected result before trying random configuration changes.
+A common mistake is clipping gradients while they are still scaled. In worked example 2 a scaled gradient of 512 clipped at threshold 1 and then unscaled becomes 0.0009765625 instead of the intended 0.5. Another mistake is converting every tensor to half precision and calling it mixed precision, which can break reductions and normalization. Fix both by unscaling before clipping and by letting the framework's autocast or policy choose operation dtypes.
 
-Keep a small evidence table with columns **claim**, **input**, **expected observation**, **actual observation** and **limit**. For the first claim use `Calculate scaled and unscaled values`. For the final claim use `Record quality and throughput separately`. An unperformed GPU or cluster experiment remains pending even when the CPU model is correct.
+**Evidence limit:** The reference reproduces 0.5 for the correct order and 0.0009765625 for the wrong one with ordinary Python floats. It does not run autocast, a gradient scaler or a Keras policy, so dtype choices and overflow handling need the pinned framework.
 
-## Platform and evidence contract
+1. Why scale the loss in fp16 training?
+2. How do fp16 and bf16 differ although both use 16 bits?
+3. Can a speedup excuse a numerical failure?
 
-The reading worksheet and CPU reference model work through the ordinary Linux Docker classroom on macOS, Linux and Windows using WSL 2. They do not require an NVIDIA GPU. Their results are labeled CPU models or semantic oracles, not simulated hardware performance.
-
-Real CUDA work needs supported NVIDIA hardware, a compatible host driver and an explicitly prepared GPU runtime. An Apple GPU does not execute CUDA kernels. PyTorch MPS on a supported native Mac, ROCm on supported AMD hardware, or other vendor backends can provide separate accelerator learning routes; they need their own package and operation qualification and are not CUDA evidence. The ordinary Linux Docker classroom does not expose native Mac MPS automatically.
-
-Do not download packages, models or data by opening this lesson. Do not attach an engine socket, ambient cluster credentials or an arbitrary remote endpoint. A CPU pass, imported package, successful compilation, real GPU result and measured performance are distinct observations. Record the actual backend, data shape/dtype, source revision, versions and pending checks. A saved completion marker records learning progress, not hardware certification.
+Answers: [self-check answers](../solutions/cuda-090_solutions.md#self-check-answers).
 
 ## Primary references
 
 - [PyTorch CUDA semantics](https://docs.pytorch.org/docs/2.9/notes/cuda.html)
 - [TensorFlow GPU guide](https://www.tensorflow.org/guide/gpu)
 
-Use the version-matched documentation of your prepared environment. These references describe interfaces and supported boundaries; the chapter's synthetic examples and CPU models are original teaching material.
+Full lists: [documentation and sources](../../STUDY-GUIDE.md#documentation-and-sources).
 
 ## Ask an AI tutor about this lesson
 

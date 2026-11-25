@@ -208,11 +208,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Builder method:</strong> A static function such as buildExpression or buildBlock that the compiler calls to convert and combine the block&#x27;s expressions.</p>
 <p><strong>buildOptional:</strong> The builder method that turns an if without else into a component, supplying an empty contribution when the condition is false.</p>
 <h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>The Linux Docker classroom compiles the saved pad as <code>main.swift</code> with Swift 6 language checking. An explicit <code>@main</code> type contains <code>static func main() async throws</code>; the fixed compiler uses <code>-parse-as-library -swift-version 6</code>. The examples use the standard library and portable Foundation. <code>precondition</code> makes a violated invariant fail the process. The fixed pad accepts one source file, without arbitrary command arguments, interactive input or dependency installation. SwiftUI, UIKit, Apple simulators and application signing belong to the separately prepared macOS/Xcode project labs, never the Linux pad.</p>
-<p>Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.</p>
+<p>The builder is declared on one long line above <code>LessonMain</code>; reformat it across several lines in a scratch copy if that makes it easier to read. Task 4&#x27;s <code>for</code> loop inside the closure fails to compile with a message that a closure containing a control flow statement cannot be used with the builder, because it lacks <code>buildArray</code>.</p>
+<p>Compile contract, starter stop and success marker: <a href="../STUDY-GUIDE.md.html#running-a-lesson">running a lesson</a>.</p>
 <h3 id="syntax-anatomy-and-execution-trace">Syntax anatomy and execution trace<a class="heading-anchor" href="#syntax-anatomy-and-execution-trace" aria-label="Link to this section">#</a></h3>
 <p><code>@resultBuilder</code> marks the builder. buildBlock combines expressions and buildOptional handles an if without else. A function parameter annotated with the builder accepts the transformed closure.</p>
-<p>Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.</p>
+<p>Each example ends with a trace; method: <a href="../STUDY-GUIDE.md.html#tracing-a-program">tracing a program</a>.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="example-a-compose-report-sections">Example A: Compose report sections<a class="heading-anchor" href="#example-a-compose-report-sections" aria-label="Link to this section">#</a></h4>
 <p>The builder supplies the combining mechanism; the block supplies domain content.</p>
@@ -232,6 +232,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> Two expressions become an ordered array of sections.</p>
+<p><strong>Trace.</strong> The <code>@SectionBuilder</code> attribute on the parameter tells the compiler to transform the closure. Each statement is an expression, so <code>&quot;Overview&quot;</code> becomes <code>buildExpression(&quot;Overview&quot;)</code>, returning a one-element array, and the same happens for <code>&quot;Details&quot;</code>. The compiler then calls <code>buildBlock</code> with both arrays. <code>buildBlock</code> flattens them into the ordered array of Overview and Details, which <code>sections</code> returns by calling <code>content()</code>.</p>
 <h4 id="example-b-include-a-conditional-section">Example B: Include a conditional section<a class="heading-anchor" href="#example-b-include-a-conditional-section" aria-label="Link to this section">#</a></h4>
 <p>The buildOptional method gives the conditional branch an explicit combination rule.</p>
 <pre class="highlighted-code"><code class="language-swift"><span class="syntax-keyword">import</span> <span class="syntax-class">Foundation</span>
@@ -251,6 +252,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The conditional contributes its section when true.</p>
+<p><strong>Trace.</strong> The block contains Overview and an <code>if</code> without <code>else</code>. The compiler wraps the <code>if</code> body: when <code>include</code> is true, the inner block produces the array holding Diagnostics, which is passed to <code>buildOptional</code> as a non-nil value and returned unchanged. <code>buildBlock</code> then flattens Overview and that array. If <code>include</code> were false, <code>buildOptional</code> would receive nil and return an empty array, so only Overview would remain.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <ol>
 <li><strong>Predict and explain.</strong> Translate the first block into its builder calls.</li>
@@ -270,10 +272,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <ol start="6">
 <li><strong>Transfer and justify.</strong> Explain why a domain-specific builder may be clearer or less clear than an ordinary array literal.</li>
 </ol>
-<p>For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.</p>
+<p>Log each task in the <a href="../STUDY-GUIDE.md.html#recording-exercise-evidence">evidence table</a> before opening the explanation.</p>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
 <p>A result builder is not runtime reflection or arbitrary syntax parsing. Type errors can surface inside generated combinations, so reduce the block to a small failing expression. Do not reinvent SwiftUI ViewBuilder for ordinary views.</p>
-<p>A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.</p>
+<p>Each control-flow form needs its own builder method. A <code>for</code> loop needs <code>buildArray</code>, and an <code>if</code> with an <code>else</code> needs <code>buildEither(first:)</code> and <code>buildEither(second:)</code>; both fail with the same control-flow diagnostic until those methods exist. For task 5, an empty closure calls <code>buildBlock</code> with no arguments and returns an empty array, and a false optional contributes nothing.</p>
+<p>Repair routine: <a href="../STUDY-GUIDE.md.html#building-a-regression-case">building a regression case</a>.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <ol>
 <li>Reproduce Example A (Compose report sections) before changing anything, and confirm its observation: Two expressions become an ordered array of sections.</li>
@@ -281,9 +284,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>Before opening the explanation, check your task 3 attempt (Build a small report declaration using the existing builder) against each pitfall listed above, and add one input that would expose the tempting wrong rule.</li>
 </ol>
 <h3 id="self-check-and-next-step">Self-check and next step<a class="heading-anchor" href="#self-check-and-next-step" aria-label="Link to this section">#</a></h3>
-<p>Explain Result builder, Declarative composition, Intermediate result, Builder method, buildOptional without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.</p>
+<p>Write out the builder calls the compiler generates for <code>sections { &quot;Overview&quot;; &quot;Details&quot; }</code>. Name the builder method required for an <code>if</code> without <code>else</code>, for an <code>if</code> with <code>else</code> and for a <code>for</code> loop. Explain when an ordinary array literal would be clearer than this builder.</p>
+<p>Then follow the general <a href="../STUDY-GUIDE.md.html#self-check-routine">self-check routine</a> and save your pad.</p>
 <h3 id="sources-and-execution-boundary">Sources and execution boundary<a class="heading-anchor" href="#sources-and-execution-boundary" aria-label="Link to this section">#</a></h3>
-<p><a href="https://docs.swift.org/swift-book/documentation/the-swift-programming-language/">Official language or framework documentation</a>. The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.</p>
+<p><a href="https://docs.swift.org/swift-book/documentation/the-swift-programming-language/">Documentation</a>: Result builders are described near the end of the Advanced Operators chapter, and the language reference lists every builder method the compiler can call.</p>
+<p>Provenance and limits: <a href="../STUDY-GUIDE.md.html#sources-and-execution-boundary">sources and execution boundary</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for swift-038: Result builders and declarative composition.
 Read courses/swift/guides/swift-038.md and courses/swift/lessons/swift-038.swift. Prerequisites: swift-037.

@@ -2,7 +2,7 @@
 
 Build documentation that joins observed structure with authored meaning and ownership.
 
-The executable reference contains the two complete worked cases with assertions. The changes below explain the independent practice and its limits.
+The reference runs `dbt docs generate`, then reads catalog.json for observed columns and types and manifest.json for authored descriptions and the `decision_report` exposure owned by Classroom team. Generated docs prove structure and declared ownership, not that the descriptions are accurate. See [how these answers are laid out](../STUDY-GUIDE.md#answers-and-references).
 
 
 ## 1. Write a complete definition

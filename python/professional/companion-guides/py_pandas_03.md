@@ -10,31 +10,19 @@ Intermediate. Direct catalog prerequisites: `python-pandas-02`. This lesson deep
 
 ## Learning objectives
 
-By the end, explain the mechanism in your own words, implement each bounded contract, and use a counterexample to distinguish a correct result from a plausible mistake. The six exercises progress from inspection to transformation, edge handling and transfer.
+By the end, you can keep group results aligned with their source rows by using `transform` instead of an aggregate, order events deterministically within each customer, and compute lags and prior windows that never read the current or a later row. You will cut sessions at a strict gap, pick each customer's latest event, and report declared categories even when no rows observe them.
 
 ## How to run this lesson
 
-**Primary browser route:** run `./classroom` from the repository root and
-choose **Python and data science** on `/classroom`. Open this lesson in the shared workspace,
-read its capability notice, and use its supported coding or reading workflow.
-The [classroom guide](../../../docs/classroom-experience.md) explains saved work, runtimes and switching subjects.
+The [learner script](../lessons/py_pandas_03.py) needs pandas and NumPy. Its worked examples divide each amount by its customer total from `transform('sum')`, giving `[0.25, 0.75, 1.0]` in the original row order, then split events at 10:00, 10:30 and 11:01 into sessions `[1, 1, 2]` with a 30-minute gap: exactly 30 minutes continues a session and 31 starts a new one.
 
-**Optional contributor route:** use the prepared environment in
-[CONTRIBUTING](../../../CONTRIBUTING.md) on Linux, macOS or Windows through
-WSL 2. The commands below assume its packages are already installed. They are
-not prerequisites for opening this lesson in the Docker classroom. Local
-`.learning/` files and CLI progress belong to this checkout; they do not read or
-update the Docker classroom's named learning volume.
-
-Open the [learner script](../lessons/py_pandas_03.py) in the prepared repository environment. In the Docker classroom, edit the saved learner pad; drafts, notes and results persist in the classroom learning volume. An ignored `.learning/` copy is a separate optional contributor workspace. Run from the repository root. The provided worked examples execute immediately; task functions intentionally raise `NotImplementedError` until you implement them. A successful example is not evidence that the six tasks are finished.
-
-Prepared POSIX/WSL contributor terminal:
+The [Python study guide](../../STUDY-GUIDE.md) covers the browser classroom and this prepared-checkout run:
 
 ```sh
 uv run --no-sync python python/professional/lessons/py_pandas_03.py
 ```
 
-Dependencies: pandas and NumPy. All fixtures are tiny and local. The terminal prints the worked results and stops without editing your files. Keep [explanatory solutions](../solutions/py_pandas_03_solutions.md) and [runnable reference](../solutions/py_pandas_03_solution.py) closed until an attempt or an explicit worked comparison.
+After your attempt, compare `prior_window_sum` and `session_ids` with the [runnable reference](../solutions/py_pandas_03_solution.py), checking how each handles equal timestamps. Use the [explanatory solutions](../solutions/py_pandas_03_solutions.md) to check why `group_shares` returns missing shares for an all-zero customer instead of dividing zero by zero.
 
 ## Vocabulary and mental model
 
@@ -125,11 +113,11 @@ If a group calculation changes row count, inspect whether agg was used where tra
 
 ## Self-check and retrieval
 
-Without copying code, explain which input property each function assumes, which observable result proves the normal case, and which counterexample would expose an incorrect implementation. Trace one boundary input by hand before running it. Keep the input and expected output beside your saved result so a reviewer can reproduce the evidence.
+Trace `prior_window_sum` with a one-hour window for one customer with events at 10:00 (amount 5) and two at 10:30 (amounts 2 and 4): the first gets 0, and both 10:30 events get 5, because the interval excludes the current instant. Then confirm `ordered_lag` breaks the 10:30 tie by `event_id`, so the later ID sees the earlier ID's amount.
 
 ## Next steps
 
-Use these mechanisms in the next deepening lesson or return to the original prerequisite examples and explain precisely which new failure cases you can now diagnose. Review the [professional track](../README.md) for related modules.
+Next, [chunked data, global reductions, and cross-batch state](py_pandas_04.md) asks what happens to those windows and group totals when the rows arrive in separate batches. The [professional track](../README.md) lists the other modules.
 
 ## Primary sources and official APIs
 

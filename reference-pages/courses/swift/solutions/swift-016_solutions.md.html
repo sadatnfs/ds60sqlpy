@@ -194,7 +194,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/swift/solutions/swift-016_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="swift-016-explanation-and-comparison">swift-016: explanation and comparison<a class="heading-anchor" href="#swift-016-explanation-and-comparison" aria-label="Link to this section">#</a></h2>
-<p>Attempt the six guide tasks before opening this comparison. The executable reference is <a href="swift-016_solution.swift.html">swift-016_solution.swift</a>. It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.</p>
+<p>Reference program: <a href="swift-016_solution.swift.html">swift-016_solution.swift</a>, covering both examples and the executed answers.</p>
+<p>Attempt the tasks first; see <a href="../STUDY-GUIDE.md.html#comparing-with-the-explanation">comparing with the explanation</a>.</p>
 <h3 id="why-the-two-examples-differ">Why the two examples differ<a class="heading-anchor" href="#why-the-two-examples-differ" aria-label="Link to this section">#</a></h3>
 <p><strong>Combine repeated valid names:</strong> Duplicate names are deliberately accumulated after validation. Pear totals 6 and apple totals 3.</p>
 <p><strong>Keep rejection separate from zero:</strong> This result preserves the difference between accepted zero, absence and invalid input. The valid zero remains present while three records are rejected.</p>
@@ -245,7 +246,7 @@ lines<span class="syntax-punctuation">.</span>append<span class="syntax-punctuat
 <p>omittingEmptySubsequences: false keeps the empty name and the extra field visible to the field-count and name checks, and an empty list simply never enters the loop.</p>
 <h4 id="task-6-transfer-and-justify">Task 6: Transfer and justify<a class="heading-anchor" href="#task-6-transfer-and-justify" aria-label="Link to this section">#</a></h4>
 <p>Design a reusable result that retains safe line-specific reasons without storing raw sensitive input.</p>
-<p>No single reference answer exists: several designs can satisfy this transfer task. Build yours from the task 3 answer above (Produce a sorted text report with accepted totals and rejected count) and the mechanism described below, and state one limitation of your choice.</p>
+<p>No single answer exists; extend task 3 using the <a href="../STUDY-GUIDE.md.html#open-transfer-tasks">open transfer routine</a>.</p>
 <h3 id="solution-reasoning">Solution reasoning<a class="heading-anchor" href="#solution-reasoning" aria-label="Link to this section">#</a></h3>
 <p><strong>Approach.</strong> The helper <code>importRows</code> splits each line on commas without dropping empty fields, then admits a row only if it has exactly two fields, a non-empty name and a nonnegative integer quantity. Admitted rows are added into a dictionary with a default of 0; everything else increments <code>rejected</code>. The task 3 answer turns the result into a sorted text report.</p>
 <p><strong>Why it is correct.</strong> In Example A, pear appears twice with 2 and 4, so the dictionary accumulates 6, and apple holds 3 with nothing rejected. In Example B, <code>pear,0</code> is admitted as a real zero, while <code>bad</code> has one field, <code>apple,-1</code> is negative and <code>pear,no</code> does not parse, giving 3 rejections. An empty input yields an empty dictionary.</p>
@@ -257,7 +258,7 @@ lines<span class="syntax-punctuation">.</span>append<span class="syntax-punctuat
 <p>Split creates field substrings; convert them deliberately when storing long-lived names. Int parsing returns an optional. Dictionary default mutation accumulates admitted duplicates. sorted fixes presentation order.</p>
 <p>Check field count before indexing. String splitting can omit empty fields unless configured, so this fixture preserves them deliberately. Production totals also need an overflow policy.</p>
 <h3 id="review-before-continuing">Review before continuing<a class="heading-anchor" href="#review-before-continuing" aria-label="Link to this section">#</a></h3>
-<p>Run the reference and confirm that it prints <code>swift-016: passed</code>, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.</p></article>
+<p>Run the reference and confirm it prints <code>swift-016: passed</code>, then rerun the guide&#x27;s counterexample.</p></article>
   </main>
 </body>
 </html>

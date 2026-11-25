@@ -36,5 +36,7 @@
       "wrong": "Stating that the computation peaks at about 48 kilobytes. The growing version creates up to 300 intermediate vectors, and how many are alive at once depends on when garbage collection runs.",
       "verify": "`result$input_bytes` returns a value a little above 48000 and stays the same whichever implementation runs."
     }
-  ]
+  ],
+  "run_note": "The starter supplies a small 2 by 3 matrix and a 300 by 20 workload of `seq_len(6000) / 100`. Run it, then predict the row means of the small matrix by hand: columns are filled first, so the rows hold 1, 3, 5 and 2, 4, 6, giving means 3 and 4. Prove equivalence on the small case before timing anything on the workload.",
+  "checks_note": "The checks confirm finite numeric input, agreement between the loop and vectorized versions within 1e-12, row means of 3 and 4 for the small matrix, equal results from the growing and preallocated loops and `rowMeans()`, NA propagation unless `na.rm = TRUE`, and nonnegative timing and profile fields. They deliberately do not assert which version is faster, because timings vary between runs and machines."
 }

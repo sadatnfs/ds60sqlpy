@@ -1,67 +1,23 @@
 # Day 16 solutions: Window Functions Fundamentals: OVER, PARTITION BY, ORDER BY, Frames
 
-
 <!-- beginner-solution-enrichment -->
 ## How to study and run this solution
 
-Open this explanation only after making an honest attempt. The executable
-companion runs solely against the disposable `advanced_sql_training` database:
+Each of the six answers places an aggregate inside `OVER (...)` and then decides what to partition by: customer in Exercises 1, 3 and 5, department in Exercise 2, and customer and country side by side in Exercise 6. Exercise 4 sets a window against `GROUP BY` so you can see the row counts differ. Try each prompt first, then run:
 
 ```bash
-# Linux, macOS, or Windows through WSL 2, from the repository root
 psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
   -f sql/postgres-60day/solutions/day16_solutions.sql
 ```
 
-`psql` prints each result/command tag in the terminal. Stop at the first
-unexpected `ERROR`; later output cannot repair an earlier failed invariant.
-Compare your own SQL, row grain, column names, row counts, `NULL` policy, and
-ordering with the explanation before comparing syntax.
-
-## Clause-by-clause reading map
-
-The lesson's main concepts are Window, Partition, Frame. Its worked-model focus is:
-Pre-aggregate net revenue to one row per category, then calculate `SUM(revenue) OVER ()` beside each category. The ordinary aggregate establishes the category grain; the window exposes the grand total without removing those category rows.
-
-- Start at `FROM`/`JOIN` and state the intermediate row grain. Inspect join keys
-  before adding aggregates; a one-to-many join is allowed to multiply rows only
-  when the later contract accounts for it.
-- Apply `WHERE` to input rows, `GROUP BY` to form buckets, and `HAVING` to
-  completed groups. Window functions run over the surviving relation and
-  normally preserve its row count.
-- Read the `SELECT` list as the public result contract: keys establish grain,
-  measures state calculations, and aliases explain meaning. `ORDER BY` is the
-  only output-order guarantee; add a unique tie-breaker before `LIMIT`.
-- Trace every common table expression (CTE) as a temporary named relation.
-  Execute or inspect one stage at a time while debugging, but compare the final
-  result with an independent control rather than trusting stage names.
-- Keep SQL `NULL` as “missing/unknown/not applicable” until the metric contract
-  chooses another representation. Guard division with `NULLIF`; disclose
-  exclusions and distinguish zero from no row.
-- For DDL/DML, a command tag proves only that PostgreSQL accepted a statement.
-  Catalog checks, negative cases, row-count reconciliation, and the declared
-  transaction boundary prove behavior and cleanup.
-
-The exact final queries are not the only valid syntax. A join, subquery, CTE,
-window, or conditional aggregate can be an alternative when it preserves the
-same grain, `NULL` semantics, deterministic ordering, and safety. Prefer the
-form whose intermediate relations a reviewer can verify; optimize only after
-correctness is established with evidence.
-
-These answers align one-for-one with [day16_window_functions_fundamentals.sql](../day16_window_functions_fundamentals.sql).
-Run only against the disposable `advanced_sql_training` database.
-The executable companion wraps every answer in `BEGIN`/`ROLLBACK`.
-The snippets below assume the lesson's
-`SET search_path TO training, public;` statement. Run the complete
-executable companion when you want a self-contained check.
+Expected row counts are 4,362, 100, 4,362, 2, 2,249 and 4,362. All statements only read, the file ends in `ROLLBACK`, and the excerpts below omit its `SET search_path` line. The numbering matches [the learner file](../day16_window_functions_fundamentals.sql); the study guide's [advice on studying a worked answer](../../STUDY-GUIDE.md#read-a-solution) suggests how to compare without copying.
 
 ## Reading contract
 
 - **Focus:** Use window functions to add partition-level context while preserving row grain, with explicit partition and ordering semantics.
 - **Assumptions:** Window aggregates do not collapse rows. When order matters, use a unique tie-breaker and declare the frame in later cumulative lessons.
 - **Primary pitfall:** Filtering a window result in the same query level is invalid; compute it in a subquery or CTE first.
-- **Safety:** all writes are bounded and rollback-protected; read-only
-  queries still use deterministic ordering whenever row order is claimed.
+- **Safety:** read-only; the six statements are all `SELECT`s or `WITH ... SELECT`s inside a transaction that ends in `ROLLBACK`.
 
 ## Exercise 1: Query writing
 
@@ -71,11 +27,10 @@ executable companion when you want a self-contained check.
 
 **Clause-by-clause reading:**
 
-- `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
-- `FROM`: establishes the starting relation and therefore the initial row grain.
-- `OVER (...)`: computes an analytic value while preserving detail rows; partition, order, and frame define its peer set.
-- `PARTITION BY`: restarts a window calculation independently for each partition key.
-- `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
+- `AVG(o.total_amount) OVER (PARTITION BY o.customer_id)`: the average of all orders that share this row's `customer_id`, repeated on each of them.
+- `ROUND(..., 2)`: rounds the displayed average to cents; the window itself averages exact values.
+- `FROM orders AS o` with no `GROUP BY`: every order stays a separate row.
+- `ORDER BY o.customer_id, o.order_date, o.order_id`: each customer's orders in date order, with the order ID as the final tie-breaker.
 
 ```sql
 SELECT
@@ -93,19 +48,15 @@ ORDER BY
 
 **Expected shape:** One row per order.
 
-Check the result at the stated grain. An alternative formulation is
-valid only if it preserves the same NULL, ordering, time, money, and
-cardinality contract.
-
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-16 Exercise 1, read from `orders`. Build the answer toward `order_id`, `customer_id`, `total_amount`, and `customer_average`; keep `order_id` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-16 Exercise 1, expected output: One row per order. The final columns are `order_id`, `customer_id`, `total_amount`, and `customer_average`. The final order is `o.customer_id, o.order_date, o.order_id`.
-- **Independent verification:** For sql-16 Exercise 1, choose one complete partition from `orders`; hand-calculate its first, middle, and final window values for `total_amount`, and `customer_average`, then verify output keys remain `order_id`. Test a one-row partition and a partition with at least three rows; verify the frame boundary and partition reset explicitly.
-- **Intermediate relation check:** For sql-16 Exercise 1, inspect one window partition before projecting; then check `o.customer_id, o.order_date, o.order_id` before applying the row cap.
-- **Clause check:** For sql-16 Exercise 1, the solution actually uses `FROM`, window `OVER`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `orders`, preserve one row per `order_id`, and finish with `order_id`, `customer_id`, `total_amount`, and `customer_average` ordered by `o.customer_id, o.order_date, o.order_id`.
-- **Alternative/trade-off:** For sql-16 Exercise 1, the chosen form is justified by this lesson-specific rationale: Partition by customer ID and keep one output row per order. Evaluate another form against the concrete expected result (One row per order) and the verification above.
-- **Edge case:** Test a one-row partition and a partition with at least three rows; verify the frame boundary and partition reset explicitly.
+- **Inputs/evidence:** For sql-16 Exercise 1, attach `ROUND(AVG(o.total_amount) OVER (PARTITION BY o.customer_id), 2)` to each of the 4,362 `orders` rows; the 438 buyers have between 4 and 16 orders each.
+- **Expected result/shape:** For sql-16 Exercise 1, return 4,362 rows, one per order, grouped by customer; customer 1's five orders (1 to 5) all show `customer_average` 504.33, and customer 500's ten orders show 613.75. The final columns are `order_id`, `customer_id`, `total_amount`, and `customer_average`. The final order is `o.customer_id, o.order_date, o.order_id`.
+- **Independent verification:** For sql-16 Exercise 1, confirm 4,362 distinct `order_id` values and that customer 1's value equals 2521.63 / 5 = 504.33 from `SELECT SUM(total_amount), COUNT(*) FROM orders WHERE customer_id = 1`. Inside a rolled-back transaction, add one order of 100.00 for customer 8, who has none; that new one-row partition must show `customer_average` 100.00 while customer 1's rows stay at 504.33.
+- **What prints:** 4,362 rows. Customer 1 comes first with orders 1 to 5, all showing 504.33; customer 2's orders 6 to 11 all show 602.72.
+- **Partition sizes:** the 438 customers with orders have between 4 and 16 each, so there is no one-row partition in this data. A one-order customer would simply see its own total as the average.
+- **No `ORDER BY` inside `OVER`:** that is deliberate. Adding `ORDER BY o.order_date` there would make customer 1's values climb from 240.20 to 504.33 as a running average.
+- **Same number, other routes:** `AVG(total_amount)` grouped by customer and joined back on `customer_id` gives identical averages, but needs a second pass over `orders` and a join.
 
 ## Exercise 2: Query writing
 
@@ -115,11 +66,10 @@ cardinality contract.
 
 **Clause-by-clause reading:**
 
-- `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
-- `FROM`: establishes the starting relation and therefore the initial row grain.
-- `OVER (...)`: computes an analytic value while preserving detail rows; partition, order, and frame define its peer set.
-- `PARTITION BY`: restarts a window calculation independently for each partition key.
-- `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
+- `AVG(e.salary) OVER (PARTITION BY e.department_id)`: the department's mean salary on every employee row, rounded to cents.
+- `MIN(e.salary) OVER (...)` and `MAX(e.salary) OVER (...)`: the lowest and highest salary in the same department.
+- All three use the identical partition. Writing `WINDOW d AS (PARTITION BY e.department_id)` once and then `OVER d` would say the same thing more briefly.
+- `ORDER BY e.department_id, e.employee_id`: department 1's employees first, by ID.
 
 ```sql
 SELECT
@@ -138,19 +88,15 @@ ORDER BY
 
 **Expected shape:** One row per employee.
 
-Check the result at the stated grain. An alternative formulation is
-valid only if it preserves the same NULL, ordering, time, money, and
-cardinality contract.
-
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-16 Exercise 2, read from `employees`. Build the answer toward `employee_id`, `department_id`, `salary`, `department_average`, `department_minimum`, and `department_maximum`; keep `employee_id` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-16 Exercise 2, expected output: One row per employee. The final columns are `employee_id`, `department_id`, `salary`, `department_average`, `department_minimum`, and `department_maximum`. The final order is `e.department_id, e.employee_id`.
-- **Independent verification:** For sql-16 Exercise 2, choose one complete partition from `employees`; hand-calculate its first, middle, and final window values for `department_average`, then verify output keys remain `employee_id`. Test a one-row partition and a partition with at least three rows; verify the frame boundary and partition reset explicitly.
-- **Intermediate relation check:** For sql-16 Exercise 2, inspect one window partition before projecting; then check `e.department_id, e.employee_id` before applying the row cap.
-- **Clause check:** For sql-16 Exercise 2, the solution actually uses `FROM`, window `OVER`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `employees`, preserve one row per `employee_id`, and finish with `employee_id`, `department_id`, `salary`, `department_average`, `department_minimum`, and `department_maximum` ordered by `e.department_id, e.employee_id`.
-- **Alternative/trade-off:** For sql-16 Exercise 2, the chosen form is justified by this lesson-specific rationale: Partition all three window aggregates by department. Evaluate another form against the concrete expected result (One row per employee) and the verification above.
-- **Edge case:** Test a one-row partition and a partition with at least three rows; verify the frame boundary and partition reset explicitly.
+- **Inputs/evidence:** For sql-16 Exercise 2, attach the department's `AVG`, `MIN`, and `MAX` salary to each of the 100 `employees` rows with three `OVER (PARTITION BY e.department_id)` windows.
+- **Expected result/shape:** For sql-16 Exercise 2, return 100 rows, one per employee; department 1's 17 rows all carry average 43880.31, minimum 40079.19, and maximum 47681.43, and departments 5 and 6 have 16 rows each. The final columns are `employee_id`, `department_id`, `salary`, `department_average`, `department_minimum`, and `department_maximum`. The final order is `e.department_id, e.employee_id`.
+- **Independent verification:** For sql-16 Exercise 2, confirm 100 rows and that each department's three values match `SELECT department_id, ROUND(AVG(salary), 2), MIN(salary), MAX(salary) FROM employees GROUP BY department_id`. Inside a rolled-back transaction, set employee 1's salary to 50000; department 1 must change to 44463.89, 40554.33, and 50000.00 on all 17 rows, while department 2 stays at 43959.50, 40158.38, and 47760.62.
+- **What prints:** 100 rows in six departments. Departments 1 to 4 have 17 employees each and departments 5 and 6 have 16.
+- **First row:** employee 1 earns 40,079.19, which is also the department 1 minimum; the average is 43,880.31 and the maximum 47,681.43, earned by employee 97.
+- **A regular fixture:** employee *n* sits in department ((*n* - 1) mod 6) + 1 and earns 40,000 + 79.19 * *n*. That is why departments 2 and 5 share an average of 43,959.50, and 3 and 6 share 44,038.69: their employee IDs have the same mean.
+- **No gaps:** no employee has a `NULL` salary or department, so every row belongs to one of six partitions. A `NULL` department would form its own partition rather than disappearing.
 
 ## Exercise 3: Query writing
 
@@ -160,12 +106,10 @@ cardinality contract.
 
 **Clause-by-clause reading:**
 
-- `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
-- `FROM`: establishes the starting relation and therefore the initial row grain.
-- `NULLIF`: turns a prohibited denominator into NULL so division reports unknown instead of raising an error.
-- `OVER (...)`: computes an analytic value while preserving detail rows; partition, order, and frame define its peer set.
-- `PARTITION BY`: restarts a window calculation independently for each partition key.
-- `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
+- `SUM(o.total_amount) OVER (PARTITION BY o.customer_id)`: the customer's lifetime revenue, placed on each of that customer's orders.
+- `o.total_amount / NULLIF(..., 0)`: the order's share of that revenue; a customer whose orders all totalled 0 would get `NULL` instead of an error.
+- `ROUND(..., 4)`: four decimal places, so 0.4584 reads as 45.84%.
+- `ORDER BY o.customer_id, o.order_date, o.order_id`: the same order as Exercise 1.
 
 ```sql
 SELECT
@@ -183,19 +127,15 @@ ORDER BY
 
 **Expected shape:** One row per order with shares summing near one per customer.
 
-Check the result at the stated grain. An alternative formulation is
-valid only if it preserves the same NULL, ordering, time, money, and
-cardinality contract.
-
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-16 Exercise 3, read from `orders`. Build the answer toward `order_id`, `customer_id`, `total_amount`, and `customer_revenue_share`; keep `order_id` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-16 Exercise 3, expected output: One row per order with shares summing near one per customer. The final columns are `order_id`, `customer_id`, `total_amount`, and `customer_revenue_share`. The final order is `o.customer_id, o.order_date, o.order_id`.
-- **Independent verification:** For sql-16 Exercise 3, choose one complete partition from `orders`; hand-calculate its first, middle, and final window values for `total_amount`, and `customer_revenue_share`, then verify output keys remain `order_id`. Test a one-row partition and a partition with at least three rows; verify the frame boundary and partition reset explicitly.
-- **Intermediate relation check:** For sql-16 Exercise 3, inspect one window partition before projecting; then check `o.customer_id, o.order_date, o.order_id` before applying the row cap.
-- **Clause check:** For sql-16 Exercise 3, the solution actually uses `FROM`, window `OVER`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `orders`, preserve one row per `order_id`, and finish with `order_id`, `customer_id`, `total_amount`, and `customer_revenue_share` ordered by `o.customer_id, o.order_date, o.order_id`.
-- **Alternative/trade-off:** For sql-16 Exercise 3, the chosen form is justified by this lesson-specific rationale: Use a partition total denominator and guard it with `NULLIF`. Evaluate another form against the concrete expected result (One row per order with shares summing near one per customer) and the verification above.
-- **Edge case:** Test a one-row partition and a partition with at least three rows; verify the frame boundary and partition reset explicitly.
+- **Inputs/evidence:** For sql-16 Exercise 3, divide each order's `total_amount` by `SUM(o.total_amount) OVER (PARTITION BY o.customer_id)`, guarded with `NULLIF(..., 0)`, and round the share to 4 places.
+- **Expected result/shape:** For sql-16 Exercise 3, return 4,362 rows, one per order; customer 1's five shares are 0.0953, 0.1657, 0.2386, 0.4584, and 0.0420, which add to exactly 1.0000. The final columns are `order_id`, `customer_id`, `total_amount`, and `customer_revenue_share`. The final order is `o.customer_id, o.order_date, o.order_id`.
+- **Independent verification:** For sql-16 Exercise 3, sum the shares per customer: all 438 totals must be within 0.0003 of 1, and 231 of them miss 1 exactly only because of rounding to 4 places. Inside a rolled-back transaction, add one order for customer 8, who has none; that one-row partition must show a share of 1.0000.
+- **What prints:** 4,362 rows. Customer 1's shares are 0.0953, 0.1657, 0.2386, 0.4584 and 0.0420.
+- **Summing near one:** customer 1's five shares add to exactly 1.0000, as do those of 207 customers. The other 231 land between 0.9997 and 1.0002, because each share was rounded on its own.
+- **Largest share:** order 3074 makes up 0.5320 of customer 351's revenue, the highest in the table.
+- **Why a window here:** the denominator is a per-customer total but the numerator is per order. With `GROUP BY` you would need a second query and a join to bring them together.
 
 ## Exercise 4: Prediction
 
@@ -205,14 +145,10 @@ cardinality contract.
 
 **Clause-by-clause reading:**
 
-- `WITH`: names an intermediate relation so its grain can be checked before later joins or aggregation.
-- `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
-- `FROM`: establishes the starting relation and therefore the initial row grain.
-- `GROUP BY`: collapses input rows to the listed key grain; every non-aggregated selected value must belong to that grain.
-- set operation: combines compatible result shapes; the presence or absence of `ALL` controls duplicate preservation.
-- `OVER (...)`: computes an analytic value while preserving detail rows; partition, order, and frame define its peer set.
-- `PARTITION BY`: restarts a window calculation independently for each partition key.
-- `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
+- `grouped`: `AVG(o.total_amount)` with `GROUP BY o.customer_id`, one row per customer who ordered.
+- `windowed`: `AVG(o.total_amount) OVER (PARTITION BY o.customer_id)`, one row per order.
+- `SELECT 'grouped' ..., COUNT(*) ... UNION ALL SELECT 'windowed' ...`: one labelled count from each CTE, stacked into a two-row result.
+- `ORDER BY method`: alphabetical, so `grouped` comes first.
 
 ```sql
 WITH grouped AS (
@@ -248,19 +184,15 @@ ORDER BY
 
 **Expected shape:** Two labeled count rows.
 
-Check the result at the stated grain. An alternative formulation is
-valid only if it preserves the same NULL, ordering, time, money, and
-cardinality contract.
-
 ### Reasoning and verification
 
 - **Inputs/evidence:** For sql-16 Exercise 4, compare a `grouped` CTE (`AVG(o.total_amount) ... GROUP BY o.customer_id`) with a `windowed` CTE (`AVG(o.total_amount) OVER (PARTITION BY o.customer_id)`) over `orders`, then count the rows of each.
 - **Expected result/shape:** For sql-16 Exercise 4, expected output: two rows ordered by `method`, with columns `method` and `row_count`: `('grouped', 438)` and `('windowed', 4362)` on the course seed.
 - **Independent verification:** For sql-16 Exercise 4, confirm that the `grouped` count equals `SELECT COUNT(DISTINCT customer_id) FROM orders` and the `windowed` count equals `SELECT COUNT(*) FROM orders`; grouping keeps one row per ordering customer, while the window keeps every order row.
-- **Intermediate relation check:** For sql-16 Exercise 4, run each CTE body alone: `grouped` has unique `customer_id` values, while `windowed` repeats each customer's average on every one of that customer's orders.
-- **Clause check:** For sql-16 Exercise 4, the solution uses two CTEs, one `GROUP BY` and one `AVG(...) OVER (PARTITION BY ...)`, and combines two labeled `COUNT(*)` rows with `UNION ALL` before `ORDER BY method`.
-- **Alternative/trade-off:** For sql-16 Exercise 4, `SELECT COUNT(DISTINCT customer_id), COUNT(*) FROM orders` returns the same two numbers in one row, but it does not show that the window query itself preserves row count.
-- **Edge case:** A customer with no orders appears in neither CTE, because both read `orders`; joining from `customers` first would be needed to report that customer.
+- **What prints:** `grouped` 438 and `windowed` 4,362.
+- **Same averages, different grain:** both CTEs compute the identical 438 averages. The window version just repeats each one on every order, about ten times per customer on average.
+- **Missing customers:** the 62 BR customers have no orders, so neither CTE mentions them. The table holds 500 customers, but both counts are driven by `orders`.
+- **`UNION ALL`:** the two branches can never produce duplicate rows because their labels differ, so `UNION` would give the same output at the cost of a needless duplicate check.
 
 ## Exercise 5: Debugging
 
@@ -270,13 +202,10 @@ cardinality contract.
 
 **Clause-by-clause reading:**
 
-- `WITH`: names an intermediate relation so its grain can be checked before later joins or aggregation.
-- `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
-- `FROM`: establishes the starting relation and therefore the initial row grain.
-- `WHERE`: filters source rows before grouping and window calculation; SQL's unknown NULL comparisons do not pass.
-- `OVER (...)`: computes an analytic value while preserving detail rows; partition, order, and frame define its peer set.
-- `PARTITION BY`: restarts a window calculation independently for each partition key.
-- `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
+- `scored` CTE: `SELECT o.*, AVG(o.total_amount) OVER (PARTITION BY o.customer_id) AS customer_average`, so every order gains a named column holding its customer's average.
+- Outer `WHERE total_amount > customer_average`: legal here, because by now `customer_average` is an ordinary column of `scored`.
+- `ROUND(customer_average, 2)` in the outer `SELECT`: rounding only for display, after the comparison used the exact average.
+- `ORDER BY customer_id, total_amount DESC, order_id`: each customer's largest qualifying order first.
 
 ```sql
 WITH scored AS (
@@ -303,19 +232,15 @@ ORDER BY
 
 **Expected shape:** Order rows above their customer mean.
 
-Check the result at the stated grain. An alternative formulation is
-valid only if it preserves the same NULL, ordering, time, money, and
-cardinality contract.
-
 ### Reasoning and verification
 
 - **Inputs/evidence:** For sql-16 Exercise 5, compute `AVG(o.total_amount) OVER (PARTITION BY o.customer_id)` as `customer_average` in a `scored` CTE over `orders`, then filter `total_amount > customer_average` in the outer query.
 - **Expected result/shape:** For sql-16 Exercise 5, expected output: one row per `order_id` whose `total_amount` is strictly above its customer's mean (2,249 rows on the course seed), with columns `order_id`, `customer_id`, `total_amount`, and `customer_average` (rounded to 2 places), ordered by `customer_id, total_amount DESC, order_id`.
 - **Independent verification:** For sql-16 Exercise 5, compare the row count with `SELECT COUNT(*) FROM orders o WHERE o.total_amount > (SELECT AVG(i.total_amount) FROM orders i WHERE i.customer_id = o.customer_id)` (2,249), require unique `order_id`, and confirm that moving the window expression into `WHERE` fails with `window functions are not allowed in WHERE`.
-- **Intermediate relation check:** For sql-16 Exercise 5, `SELECT COUNT(*) FROM scored` returns 4,362, one row per order, before the outer filter keeps the 2,249 above-average orders.
-- **Clause check:** For sql-16 Exercise 5, the solution uses a `scored` CTE with `AVG(...) OVER (PARTITION BY o.customer_id)`, an outer `WHERE total_amount > customer_average`, and `ORDER BY customer_id, total_amount DESC, order_id`.
-- **Alternative/trade-off:** For sql-16 Exercise 5, a correlated subquery returns the same rows, but it restates the average for every order; the window computes each customer's average once per partition.
-- **Edge case:** An order whose total equals its customer's average is excluded by the strict `>`; a customer with a single order can never qualify, because that order is its own average.
+- **What prints:** 2,249 rows. First come customer 1's orders 4 (1,155.92) and 3 (601.73), both above 504.33, then customer 2's order 8 at 917.69.
+- **Every customer qualifies:** all 438 customers have at least one order above their own average, and no order equals its customer's average exactly, so the strict `>` drops nothing by accident here.
+- **The error being fixed:** putting the window in `WHERE` raises `window functions are not allowed in WHERE`, because PostgreSQL filters rows before it computes windows.
+- **Compare before rounding:** filtering on the rounded value could misjudge an order within half a cent of the average. This query compares first and rounds afterwards.
 
 ## Exercise 6: Extension
 
@@ -325,12 +250,10 @@ cardinality contract.
 
 **Clause-by-clause reading:**
 
-- `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
-- `FROM`: establishes the starting relation and therefore the initial row grain.
-- `JOIN ... ON`: combines relations and may multiply rows; the match predicate and each input's grain must agree.
-- `OVER (...)`: computes an analytic value while preserving detail rows; partition, order, and frame define its peer set.
-- `PARTITION BY`: restarts a window calculation independently for each partition key.
-- `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
+- `JOIN customers AS c ON c.customer_id = o.customer_id`: brings in `country`. Each order matches exactly one customer, so the join keeps 4,362 rows.
+- `COUNT(*)` and `SUM(o.total_amount)` `OVER (PARTITION BY o.customer_id)`: the customer's order count and revenue.
+- `SUM(o.total_amount) OVER (PARTITION BY c.country)`: a different partition in the same `SELECT`, giving the revenue of the customer's whole country.
+- `ORDER BY c.country, o.customer_id, o.order_date, o.order_id`: grouped by country, then customer, then date.
 
 ```sql
 SELECT
@@ -352,24 +275,20 @@ ORDER BY
 
 **Expected shape:** One row per order with customer and country totals.
 
-Check the result at the stated grain. An alternative formulation is
-valid only if it preserves the same NULL, ordering, time, money, and
-cardinality contract.
-
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-16 Exercise 6, read from `orders`, and `customers`. Build the answer toward `order_id`, `customer_id`, `country`, `customer_order_count`, `customer_revenue`, and `country_revenue`; keep `order_id` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-16 Exercise 6, expected output: One row per order with customer and country totals. The final columns are `order_id`, `customer_id`, `country`, `customer_order_count`, `customer_revenue`, and `country_revenue`. The final order is `c.country, o.customer_id, o.order_date, o.order_id`.
-- **Independent verification:** For sql-16 Exercise 6, choose one complete partition from `orders`, and `customers`; hand-calculate its first, middle, and final window values for `customer_order_count`, `customer_revenue`, and `country_revenue`, then verify output keys remain `order_id`. Test a one-row partition and a partition with at least three rows; verify the frame boundary and partition reset explicitly.
-- **Intermediate relation check:** For sql-16 Exercise 6, start with the first relation in `orders`, and `customers`; after each join, record total rows and distinct `order_id` so the exact fanout or loss is visible.
-- **Clause check:** For sql-16 Exercise 6, the solution actually uses `FROM`, `JOIN ... ON`, window `OVER`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `orders`, and `customers`, preserve one row per `order_id`, and finish with `order_id`, `customer_id`, `country`, `customer_order_count`, `customer_revenue`, and `country_revenue` ordered by `c.country, o.customer_id, o.order_date, o.order_id`.
-- **Alternative/trade-off:** For sql-16 Exercise 6, the chosen form is justified by this lesson-specific rationale: Use different partitions for independent analytical contexts. Evaluate another form against the concrete expected result (One row per order with customer and country totals) and the verification above.
-- **Edge case:** Test a one-row partition and a partition with at least three rows; verify the frame boundary and partition reset explicitly.
+- **Inputs/evidence:** For sql-16 Exercise 6, join `orders` to `customers` and attach three windows to each order: `COUNT(*)` and `SUM(total_amount)` partitioned by `o.customer_id`, and `SUM(total_amount)` partitioned by `c.country`.
+- **Expected result/shape:** For sql-16 Exercise 6, return 4,362 rows, one per order, across 7 countries (`BR` has no orders); the first rows are customer 7's 11 orders in `AU`, each with `customer_revenue` 5274.48 and `country_revenue` 330947.62. The final columns are `order_id`, `customer_id`, `country`, `customer_order_count`, `customer_revenue`, and `country_revenue`. The final order is `c.country, o.customer_id, o.order_date, o.order_id`.
+- **Independent verification:** For sql-16 Exercise 6, confirm that the 7 distinct `country_revenue` values match `SELECT c.country, SUM(o.total_amount) FROM orders o JOIN customers c USING (customer_id) GROUP BY c.country` (from 329081.73 for `IN` to 343290.09 for `FR`) and add up to 2355646.89. Inside a rolled-back transaction, add one 100.00 order for customer 8; a `BR` row must appear with a count of 1 and both revenues at 100.00.
+- **What prints:** 4,362 rows. The first is order 46 for customer 7 in AU: 11 orders, 5,274.48 in customer revenue and 330,947.62 for AU.
+- **Seven countries, not eight:** BR customers placed no orders, so `country_revenue` takes only seven values, from 329,081.73 (IN) to 343,290.09 (FR). They add up to 2,355,646.89, the sum of all order totals.
+- **Partitions are independent:** each window is computed separately, so the country window does not need the customer window and the two can use different keys in one pass.
+- **Country share:** `customer_revenue / country_revenue` would show how much of AU's revenue customer 7 accounts for, with no extra join.
 
 ## Final self-check
 
-- Can you explain the logical grain before and after every aggregation?
-- Are missing values preserved or converted only by an explicit rule?
-- Does every ordered result have a deterministic final tie-breaker?
-- Are money and time assumptions visible beside the calculation?
-- Does the complete executable solution finish with `ROLLBACK`?
+- Why do all five of customer 1's rows show 504.33 in Exercise 1, and what would change if `ORDER BY order_date` went inside the `OVER`?
+- Which two departments share an average salary in Exercise 2, and why?
+- How can a customer's rounded shares in Exercise 3 add up to 0.9997?
+- Where do the 438 and 4,362 in Exercise 4 come from, and why do neither of them include the 62 BR customers?
+- Why does Exercise 5 need a CTE, and what error appears without one?

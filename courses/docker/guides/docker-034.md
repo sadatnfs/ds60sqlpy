@@ -32,11 +32,9 @@ Atomic file replacement can prevent a partially written JSON file from appearing
 
 ## How to use this lesson
 
-The classroom displays this guide and saves your worksheet, `courses/docker/lessons/docker-034.md`. Its Run button does not control your Docker engine. Docker engine access is powerful host access, so the classroom deliberately receives no engine socket. Work through the supplied examples without starting anything, then use the optional host lab only in your own disposable project. Reading a command, parsing YAML and actually running the project are different forms of evidence.
+The classroom saves `courses/docker/lessons/docker-034.md` and holds no engine socket ([host-lab setup](../STUDY-GUIDE.md#host-lab-setup)).
 
-Use Bash in Linux, macOS Terminal, or Ubuntu under WSL 2 on Windows. The supported engine runs Linux containers. The maintained fixture is `courses/docker/fixtures/compose-lab/`; its README explains copying it into a new ignored learner directory, checking the engine, building locally with visible logs, and using the fixed project name `ds60-docker-study`. The fixture uses port 18080 on host loopback. Stop if that project name or port belongs to unrelated work; choose a new project name consistently in your own copy. Never paste a command against a remote Docker context simply because it is currently selected.
-
-For Dockerfile examples, create a file named `Dockerfile` in a scratch project. YAML snippets describe a fragment unless explicitly called a complete file. Text transcripts are synthetic illustrations, not claims about your machine. Do not substitute a real password, token or private registry into a checked-in example. **How to use the lessons** in the [subject README](../README.md) collects these rules in one place.
+**Host lab.** Practice reading the version marker without changing live data. After at least one increment, print the stored record with `docker compose -p ds60-docker-study exec app python -c "print(open('/data/counter.json').read())"`; it shows `{"schema_version": 1, "counter": N}`. Then rehearse a v1-to-v2 conversion on a copy only: take the README export into `counter-backup.json`, and on the host run `python3 -c "import json; v=json.load(open('counter-backup.json')); assert v['schema_version'] == 1; print(json.dumps({'schema_version': 2, 'counter': v['counter'], 'unit': 'increments'}))"`. The fixture's `read_counter()` accepts only `schema_version` 1, so it would refuse this v2 record with its invalid-state error, which is exactly what a rolled-back v1 reader does when it meets migrated data. Nothing here wrote to `study-data`; delete `counter-backup.json` afterward.
 
 ## Worked example / walkthrough
 
@@ -63,7 +61,7 @@ v1 reader/writer -> v2 reader accepts v1 and v2 -> migrate owned data
 
 ## Six progressive exercises
 
-For each exercise, name the object involved and the phase of its lifetime before changing anything, then vary only the condition the task names. Exercises that ask you to predict, explain, compare or diagnose keep their answers in the solutions file; the others show the evidence to look for.
+Answer-type prompts keep their answers in the solutions file ([exercise rules](../STUDY-GUIDE.md#exercise-rules)).
 
 ### Exercise 1: Predict whether image rollback reverses a schema change.
 
@@ -97,13 +95,19 @@ For each exercise, name the object involved and the phase of its lifetime before
 
 Rolling back the image and expecting the data to roll back too. Migrating without a verified backup. Letting old and new writers run against incompatible formats.
 
-Exercise 4 is this chapter's boundary case: Diagnose an old reader failing after deployment rollback. Read the version marker in the stored data and compare it with the versions the rolled-back reader accepts before restarting it again. Preserve the original failure and the exact changed field before retrying. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
+Exercise 4 is this chapter's boundary case: Diagnose an old reader failing after deployment rollback. Read the version marker in the stored data and compare it with the versions the rolled-back reader accepts before restarting it again.
+
+A migration that runs automatically when a container starts looks convenient: every new image upgrades whatever it finds. With more than one container able to start against the same volume, two migrators can read v1 at once and both write, and a crashed half-migration is retried on every restart with nobody watching. It also ties an irreversible data step to an image rollout that people expect to be cheap to undo. Run the migration as a separate, explicit one-off job, for example a `run --rm --no-deps` command while the service is stopped and after the backup is verified, and let the application at startup only check that the version it finds is one it supports.
+
+Never trade a safety control for a passing example ([safety rules](../STUDY-GUIDE.md#safety-rules)).
 
 ## Retrieval, transfer and next steps
 
-Close the explanations first. Recall the order of the compatible transition and the point after which rollback needs a migration back. Then reconstruct worked example 2 (Plan a compatible transition) with one different value, predict what changes, and name which of migration, schema version, rollback and durable state the change touches.
+**Retrieval.** Recall the order of the compatible transition and the point after which rollback needs a migration back.
 
-When a host session ends, run `docker compose -p ds60-docker-study down` from your fixture copy. It removes the project's containers and network but keeps named volumes; deleting a volume is a separate, deliberate reset described in the fixture README.
+**Transfer case.** A v2 release migrated the counter file, then a bug forced a rollback to the v1 image, which now exits at startup. What are your options, and which one keeps every write?
+
+Then run the [retrieval loop](../STUDY-GUIDE.md#retrieval-and-cleanup) and end any host session with its cleanup.
 
 ## Primary references
 

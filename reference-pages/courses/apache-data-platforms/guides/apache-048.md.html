@@ -243,11 +243,12 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Inspect checkpoint completion, source position, operator state, sink commits and actual restored metadata. Bound retry and recovery waits, preserve a failed or unknown outcome, and do not silently resubmit an old job as a new one to make the example appear successful. A retained checkpoint can become unusable if referenced files or compatible code are removed.</p>
 <p><strong>Interview discussion: does enabling checkpointing make every pipeline exactly once?</strong> No. The source, state and destination must support the required recovery and commit behavior, while outside side effects need their own protection. These cases connect a concrete recovery experiment to a separately observed Kafka transaction and explain why the two guarantees cannot be combined by assumption.</p>
 <h3 id="complete-worked-source">Complete worked source<a class="heading-anchor" href="#complete-worked-source" aria-label="Link to this section">#</a></h3>
-<p>This is a project-only command notebook. Read and edit it in the classroom; run its explicitly labeled commands from the copied owned Docker workshop. The classroom does not execute these service commands.</p>
+<p>The classroom does not execute these service commands. See the <a href="../STUDY-GUIDE.md.html#workshop-notebooks">workshop rules</a>.</p>
 <h2 id="checkpoint-recovery-and-bounded-guarantee-claims">Checkpoint recovery and bounded guarantee claims<a class="heading-anchor" href="#checkpoint-recovery-and-bounded-guarantee-claims" aria-label="Link to this section">#</a></h2>
 <pre class="highlighted-code"><code class="language-bash">bash run.sh checkpoint
 bash run.sh readback</code></pre>
 <p>The checkpoint route must observe completion before interruption, identify an actual restoration and reconcile all final IDs and state. Read the qualification ledger for the precise exercised topology.</p>
+<p>Inside <code>checkpoint</code>, the launcher submits the job, waits until the REST API reports at least one completed checkpoint, then stops and starts the single <code>taskmanager</code> container. The finishing step fails unless the job&#x27;s latest checkpoint record says it was restored. <code>readback</code> only lists saved receipts and requests; it submits nothing.</p>
 <p>For the independent real Kafka transaction observation, use its separately copied workshop after stopping this pack:</p>
 <pre class="highlighted-code"><code class="language-bash">bash run.sh stop</code></pre>
 <p>The Kafka project&#x27;s <code>check-transactions</code> result is not a Flink Kafka-sink receipt. The compatible connector/sink preparation and recovery boundary are documented separately; no package is fetched by opening this lesson.</p>

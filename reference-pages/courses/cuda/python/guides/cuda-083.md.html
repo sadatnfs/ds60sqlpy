@@ -194,9 +194,17 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cuda/python/guides/cuda-083.md</code></p>
     </header>
     <article class="document"><h2 id="cuda-083-python-controls-cuda-executes">cuda-083: Python controls, CUDA executes<a class="heading-anchor" href="#cuda-083-python-controls-cuda-executes" aria-label="Link to this section">#</a></h2>
-<p><strong>Route:</strong> CUDA Python and machine learning. <strong>Stage:</strong> intermediate. <strong>Prerequisites:</strong> <code>cuda-003</code>, <code>cuda-073</code>, <code>cuda-082</code>. Allow several sessions when the hardware experiment is new; the chapter is not a deadline.</p>
-<h3 id="what-you-will-be-able-to-explain">What you will be able to explain<a class="heading-anchor" href="#what-you-will-be-able-to-explain" aria-label="Link to this section">#</a></h3>
-<p>By the end, you can <strong>specify the kernel signature</strong>, <strong>design cleanup order</strong>, and <strong>define release-pinned evidence</strong> with evidence. Start with the two worked cases, then use the editable CPU model to make the quantities concrete.</p>
+<p><strong>Route:</strong> CUDA Python and machine learning. <strong>Stage:</strong> intermediate. <strong>Prerequisites:</strong> <code>cuda-003</code>, <code>cuda-073</code>, <code>cuda-082</code>.</p>
+<p>Pacing, evidence labels and platform rules: <a href="../../STUDY-GUIDE.md.html">CUDA study guide</a>.</p>
+<h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
+<ul>
+<li>Specify the kernel signature.</li>
+<li>Count allocation bytes.</li>
+<li>Classify compile versus launch errors.</li>
+<li>Design cleanup order.</li>
+<li>Explain ABI mismatch.</li>
+<li>Define release-pinned evidence.</li>
+</ul>
 <h3 id="mechanism-and-vocabulary">Mechanism and vocabulary<a class="heading-anchor" href="#mechanism-and-vocabulary" aria-label="Link to this section">#</a></h3>
 <p>Python host code can select a device, allocate memory, prepare compiled code and submit a kernel. These are resource-management operations, distinct from device arithmetic. Low-level CUDA bindings expose handles, status values and byte counts that higher-level arrays normally hide. A kernel launch also needs argument layout, grid/block geometry and a stream, all matched to the compiled function signature.</p>
 <p>Keep beginners on a small reviewed host wrapper before exposing every binding. The wrapper validates input, owns resources and checks both submission errors and later completion errors. CUDA Python components are independently versioned; use release-matched examples rather than copying a moving development API. For this chapter the CPU contract lab checks argument and lifetime reasoning; a prepared external CUDA Python driver lab requires its own version ledger.</p>
@@ -212,8 +220,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>A kernel expecting float32 input plus a 32-bit length cannot safely receive a float64 allocation plus a pointer where an integer belongs. Values need ABI-correct representation.</p>
 <h4 id="worked-example-2">Worked example 2<a class="heading-anchor" href="#worked-example-2" aria-label="Link to this section">#</a></h4>
 <p>Compilation success is recorded separately from launch success and readback equality. A program can compile for a device architecture absent on the current machine.</p>
-<h3 id="portable-executable-model">Portable executable model<a class="heading-anchor" href="#portable-executable-model" aria-label="Link to this section">#</a></h3>
-<p>The <strong>CPU reference model</strong> variant runs this bounded worked example using <code>python-core</code>. It uses only the Python standard library, small synthetic values and no network. Its purpose is to expose the arithmetic or contract behind the chapter. The separate reference includes assertions for the stated observations.</p>
+<h3 id="how-to-run-the-cpu-model">How to run the CPU model<a class="heading-anchor" href="#how-to-run-the-cpu-model" aria-label="Link to this section">#</a></h3>
+<p>Edit the copy; the <a href="../references/cuda-083_cpu.py.html">reference</a> adds assertions.</p>
+<pre class="highlighted-code"><code class="language-bash">python courses/cuda/python/lessons/cuda-083_cpu.py</code></pre>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">validate_contract</span><span class="syntax-punctuation">(</span>count<span class="syntax-punctuation">,</span> itemsize<span class="syntax-punctuation">,</span> allocated<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
     <span class="syntax-keyword">if</span> count <span class="syntax-operator">&lt;</span> <span class="syntax-number">0</span> <span class="syntax-operator">or</span> itemsize <span class="syntax-operator">&lt;</span><span class="syntax-operator">=</span> <span class="syntax-number">0</span> <span class="syntax-operator">or</span> allocated <span class="syntax-operator">&lt;</span> count <span class="syntax-operator">*</span> itemsize<span class="syntax-punctuation">:</span>
         <span class="syntax-keyword">raise</span> ValueError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">invalid buffer contract</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span>
@@ -227,49 +236,45 @@ validate_contract<span class="syntax-punctuation">(</span><span class="syntax-nu
 <span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span>
     <span class="syntax-keyword">raise</span> AssertionError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">expected rejection</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation:</strong> Insufficient storage for five float64 values is rejected.</p>
-<p>Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.</p>
 <h3 id="practice-and-transfer">Practice and transfer<a class="heading-anchor" href="#practice-and-transfer" aria-label="Link to this section">#</a></h3>
+<p>Record each attempt in the <a href="../lessons/cuda-083.md.html">worksheet</a> before opening hints.</p>
 <h4 id="exercise-1-specify-the-kernel-signature">Exercise 1: Specify the kernel signature<a class="heading-anchor" href="#exercise-1-specify-the-kernel-signature" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Passing a plain Python <code>int</code> for <code>n</code> and letting the wrapper guess the width may package it as 64 bits. On some interfaces that shifts the following arguments or truncates the value.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-2-count-allocation-bytes">Exercise 2: Count allocation bytes<a class="heading-anchor" href="#exercise-2-count-allocation-bytes" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Sizing a buffer by element count alone, as if every element were one byte, under-allocates by the itemsize factor and lets the kernel write past the end.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-3-classify-compile-versus-launch-errors">Exercise 3: Classify compile versus launch errors<a class="heading-anchor" href="#exercise-3-classify-compile-versus-launch-errors" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Reporting compile success as working code treats the first stage as the whole contract. A module built for one architecture may still fail to load on another.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-4-design-cleanup-order">Exercise 4: Design cleanup order<a class="heading-anchor" href="#exercise-4-design-cleanup-order" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Releasing resources in reverse creation order without waiting looks tidy, but order of creation says nothing about device completion.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-5-explain-abi-mismatch">Exercise 5: Explain ABI mismatch<a class="heading-anchor" href="#exercise-5-explain-abi-mismatch" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Expecting a type error from the device is the mistake: device code has no runtime type information about its arguments.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-6-define-release-pinned-evidence">Exercise 6: Define release-pinned evidence<a class="heading-anchor" href="#exercise-6-define-release-pinned-evidence" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Recording only the Python package version omits the toolkit, driver and architecture, which are the usual causes of cross-machine failures.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
-<p>Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.</p>
+<p>Hint <em>k</em> belongs to exercise <em>k</em>; open one at a time.</p>
 <ol>
-<li>Start from worked example 1 and mark the quantities needed for the task &quot;Specify the kernel signature&quot;.</li>
-<li>Change one assumption in worked example 2 while preserving the declared contract: count allocation bytes.</li>
-<li>Trace the CPU program&#x27;s variables before adding hardware behavior: classify compile versus launch errors.</li>
-<li>Draw producers, consumers and the exact operation boundary for the task &quot;Design cleanup order&quot;.</li>
-<li>Separate what the small fixture establishes from what the real runtime must show: explain ABI mismatch.</li>
-<li>Write a counterexample to an overbroad claim before you define release-pinned evidence.</li>
+<li>For each kernel parameter, write the element type behind the pointer and the exact width of each scalar.</li>
+<li>Multiply the element count by the itemsize of the declared dtype and compare it with the allocated bytes.</li>
+<li>Ask what each stage needs: compiling only needs source and target, while launching needs a compatible device.</li>
+<li>List the resources in creation order, then ask what must complete before each one is released.</li>
+<li>Pass a float64 buffer where float32 is expected and write down how the kernel would read the first element.</li>
+<li>List every independently versioned component between your source and the device, and the target architecture.</li>
 </ol>
-<h3 id="common-mistakes-and-self-review">Common mistakes and self-review<a class="heading-anchor" href="#common-mistakes-and-self-review" aria-label="Link to this section">#</a></h3>
-<p>Confusing a correct tiny example with a general implementation is the central review risk. For this chapter, challenge the assumption in worked example 2, then ask whether your change preserves the mechanism described above. If you change dtype, layout, ordering, batch size or backend, update the acceptance contract rather than silently reusing the old observation. Explain an unexpected result before trying random configuration changes.</p>
-<p>Keep a small evidence table with columns <strong>claim</strong>, <strong>input</strong>, <strong>expected observation</strong>, <strong>actual observation</strong> and <strong>limit</strong>. For the first claim use <code>Specify the kernel signature</code>. For the final claim use <code>Define release-pinned evidence</code>. An unperformed GPU or cluster experiment remains pending even when the CPU model is correct.</p>
-<h3 id="platform-and-evidence-contract">Platform and evidence contract<a class="heading-anchor" href="#platform-and-evidence-contract" aria-label="Link to this section">#</a></h3>
-<p>The reading worksheet and CPU reference model work through the ordinary Linux Docker classroom on macOS, Linux and Windows using WSL 2. They do not require an NVIDIA GPU. Their results are labeled CPU models or semantic oracles, not simulated hardware performance.</p>
-<p>Real CUDA work needs supported NVIDIA hardware, a compatible host driver and an explicitly prepared GPU runtime. An Apple GPU does not execute CUDA kernels. PyTorch MPS on a supported native Mac, ROCm on supported AMD hardware, or other vendor backends can provide separate accelerator learning routes; they need their own package and operation qualification and are not CUDA evidence. The ordinary Linux Docker classroom does not expose native Mac MPS automatically.</p>
-<p>Do not download packages, models or data by opening this lesson. Do not attach an engine socket, ambient cluster credentials or an arbitrary remote endpoint. A CPU pass, imported package, successful compilation, real GPU result and measured performance are distinct observations. Record the actual backend, data shape/dtype, source revision, versions and pending checks. A saved completion marker records learning progress, not hardware certification.</p>
+<h3 id="common-mistakes-and-self-check">Common mistakes and self-check<a class="heading-anchor" href="#common-mistakes-and-self-check" aria-label="Link to this section">#</a></h3>
+<p>The chapter&#x27;s key mistake is passing arguments that do not match the compiled signature, such as a float64 allocation where the kernel expects float32, or a pointer where a 32-bit length belongs. The launch may not fail; it reads wrong bytes. Another mistake is checking only the launch status, which misses errors reported at completion. Fix both by validating dtype, size and argument layout in a small host wrapper, and by checking errors at submission and again after synchronization.</p>
+<p><strong>Misconception:</strong> Once a kernel compiles and the launch call returns without an error, the device has finished the computation correctly. <strong>Correction:</strong> A kernel launch is asynchronous: the call queues work on a stream and returns before the device runs it. Errors from an invalid memory access or a bad configuration can surface only at a later synchronization or copy, sometimes reported by an unrelated call. Compilation proves only that source was translated, possibly for an architecture this machine lacks. Treat compilation, submission, completion and readback equality as four separate checks, and synchronize before reading results on the host.</p>
+<p><strong>Evidence limit:</strong> The reference rejects storage too small for five float64 values in a CPU contract check. It does not load a driver, compile a module or launch anything, so binding behavior and release-specific API details need a prepared CUDA Python environment.</p>
+<ol>
+<li>Why must compile success be recorded separately from launch success?</li>
+<li>What does a launch need besides the compiled function?</li>
+<li>Why use release-matched examples for CUDA Python?</li>
+</ol>
+<p>Answers: <a href="../solutions/cuda-083_solutions.md.html#self-check-answers">self-check answers</a>.</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
 <ul>
 <li><a href="https://dmlc.github.io/dlpack/latest/python_spec.html">DLPack Python specification</a></li>
-<li><a href="https://docs.cupy.dev/en/stable/user_guide/interoperability.html">CuPy interoperability</a></li>
 </ul>
-<p>Use the version-matched documentation of your prepared environment. These references describe interfaces and supported boundaries; the chapter&#x27;s synthetic examples and CPU models are original teaching material.</p>
+<p>Full lists: <a href="../../STUDY-GUIDE.md.html#documentation-and-sources">documentation and sources</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning skill for cuda-083: Python controls, CUDA executes.
 Read courses/cuda/python/guides/cuda-083.md and courses/cuda/python/lessons/cuda-083.md.

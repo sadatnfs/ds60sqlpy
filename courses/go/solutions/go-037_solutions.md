@@ -1,6 +1,6 @@
 # go-037: explained solutions
 
-These are comparison material after an attempt or explicit reveal. The executable reference implements all six cases in one `main.go`.
+Compare after an attempt ([using solutions](../STUDY-GUIDE.md#use-the-solutions)). `courses/go/solutions/go-037_solution.go` implements all six cases.
 
 ## Mechanism
 
@@ -10,7 +10,7 @@ Represent desired and observed state as small values, then return a typed action
 
 ## 1. Plan a missing child: predict an edited check
 
-Copy worked example 1 into a scratch pad and change `check(plan(3, false, 0) == "create", "missing child")` to `check(plan(3, true, 0) == "create", "missing child")` inside its check. Before running, predict whether the check still passes and explain why; then restore it.
+Copy worked example 1, change `check(plan(3, false, 0) == "create", "missing child")` to `check(plan(3, true, 0) == "create", "missing child")` inside its check and predict whether it still passes; then restore it.
 
 The unchanged code is worked example 1:
 
@@ -18,7 +18,9 @@ The unchanged code is worked example 1:
 check(plan(3, false, 0) == "create", "missing child")
 ```
 
-**Expected:** The changed run panics with `missing child` because the edited check no longer holds. Restoring the original line brings back the worked observation: the action is create.
+**Expected:** The edited check panics with `missing child` even though `plan(3, false, 0) == "create"` still holds.
+
+**Verify:** Restoring `check(plan(3, false, 0) == "create", "missing child")` makes the check pass again with the worked observation: the action is create.
 
 The planner reports intent without performing a cluster mutation. The adapter still needs an exact owner identity.
 
@@ -32,7 +34,7 @@ The planner reports intent without performing a cluster mutation. The adapter st
 
 ## 2. Plan a changed child: diagnose an edited check
 
-A careless edit changed the check in worked example 2 so that it reads `check(plan(3, true, 3) == "update", "changed child")`. Run worked example 2 with that line, explain why the edited check now fails for the same program state, and restore it.
+A careless edit rewrote the check in worked example 2 as `check(plan(3, true, 3) == "update", "changed child")`. Explain the failure, then restore it.
 
 The unchanged code is worked example 2:
 
@@ -40,7 +42,9 @@ The unchanged code is worked example 2:
 check(plan(3, true, 2) == "update", "changed child")
 ```
 
-**Expected:** Before the repair the program panics with `changed child`; after it the line reads `check(plan(3, true, 2) == "update", "changed child")` again and the action is update.
+**Expected:** The defective run panics with `changed child`; after restoring `check(plan(3, true, 2) == "update", "changed child")`, the action is update.
+
+**Verify:** The edited check fails with message `changed child` for a state that `plan(3, true, 2) == "update"` accepts.
 
 The update is justified by a current difference, not by assuming a prior event was delivered once.
 
@@ -62,6 +66,8 @@ check(plan(3, true, 3) == "none", "converged")
 
 **Expected:** The action is none.
 
+**Verify:** Your solution must keep `plan(3, true, 3) == "none"` true. Control: changing `check(plan(3, true, 3) == "none", "converged")` to `check(plan(4, true, 3) == "none", "converged")` panics with message `converged`; revert it.
+
 A repeated event should not produce duplicate writes after convergence. No-op behavior also reduces control-plane load.
 
 **Approach.** Call `plan(3, true, 3)`, where desired and observed state agree, and expect the planner's no-op result.
@@ -81,6 +87,8 @@ check(plan(-1, true, 2) == "invalid", "invalid intent")
 ```
 
 **Expected:** The planner returns invalid.
+
+**Verify:** Your solution must keep `plan(-1, true, 2) == "invalid"` true. Control: changing `check(plan(-1, true, 2) == "invalid", "invalid intent")` to `check(plan(-1, true, 2) != "invalid", "invalid intent")` panics with message `invalid intent`; revert it.
 
 A persistent validation error should be surfaced to the user rather than retried forever as if it were a transient API outage.
 
@@ -105,6 +113,8 @@ check(plan(3, true, current) == "none", "second plan")
 
 **Expected:** The next plan is none.
 
+**Verify:** Your solution must keep `plan(3, true, current) == "none"` true. Control: changing `current = 3` to `current = 4` panics with message `second plan`; revert it.
+
 The state transition shows convergence for this simple model. Distributed delays and conflicts belong to adapter-level integration tests.
 
 **Approach.** Plan from current 1, apply the action by setting `current` to the desired 3, and plan again from the new observation.
@@ -124,6 +134,8 @@ check(plan(0, true, 2) == "update" && plan(0, true, 0) == "none", "zero scale")
 ```
 
 **Expected:** The planner requests update, then converges at zero.
+
+**Verify:** Your solution must keep `plan(0, true, 2) == "update" && plan(0, true, 0) == "none"` true. Control: changing `check(plan(0, true, 2) == "update" && plan(0, true, 0) == "none", "zero scale")` to `check(plan(0, true, 2) == "update" && plan(1, true, 0) == "none", "zero scale")` panics with message `zero scale`; revert it.
 
 Zero can be a valid desired value. Confusing it with absence would prevent a legitimate scale-to-zero operation.
 

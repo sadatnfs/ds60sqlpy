@@ -2,28 +2,19 @@
 
 int main(void) {
   /* Exercise 1: Parse a valid list: predict an edited check
-     Copy worked example 1 into a scratch pad and change
-     `CHECK(parse_list("1,20,3", out, 3, &count) && count == 3 && out[0] == 1
-     &&` to `CHECK(parse_list("1,20,3", out, 3, &count) && count == 3 && out[1]
-     == 1 &&` inside its CHECK. Before running, predict whether the CHECK still
-     holds and explain why; then restore it. Expected: With
+     In worked example 1, change `CHECK(parse_list("1,20,3", out, 3, &count) &&
+     count == 3 && out[0] == 1 &&` to `CHECK(parse_list("1,20,3", out, 3,
+     &count) && count == 3 && out[1] == 1 &&`. Predict whether the CHECK still
+     holds and why, then run and restore. Expected: `Check failed`:
      `CHECK(parse_list("1,20,3", out, 3, &count) && count == 3 && out[1] == 1
-     &&` the run stops with `Check failed` at the CHECK on `parse_list("1,20,3",
-     out, 3, &count) && count == 3 && out[0] == 1 && out[1] == 20 && out[2] ==
-     3`, because the "parse a valid list" case no longer shows that three values
-     are returned in order. Restoring `CHECK(parse_list("1,20,3", out, 3,
-     &count) && count == 3 && out[0] == 1 &&` brings that observation back. */
+     &&` is false, although three values are returned in order. */
 
   /* Exercise 2: Reject an empty field: debug a regression
-     A regression changed one token in worked example 2, the "reject an empty
-     field" case, so one line now reads `unsigned out[3] = {10, 9, 9};`. Run the
-     example with that line, use the failing CHECK to find why the parse fails
-     and prior output is unchanged no longer holds and repair the line without
-     changing the CHECK. Expected: Before the repair the run stops with `Check
-     failed` at the CHECK on `!parse_list("1,,3", out, 3, &count) && out[0] == 9
-     && count == 7`. Once the line reads `unsigned out[3] = {9, 9, 9};` again,
-     the "reject an empty field" case again shows that the parse fails and prior
-     output is unchanged. */
+     Worked example 2 now has a line reading `unsigned out[3] = {10, 9, 9};`.
+     Repair it so that the parse fails and prior output is unchanged again.
+     Expected: `Check failed` at `!parse_list("1,,3", out, 3, &count) && out[0]
+     == 9 && count == 7` until the line reads `unsigned out[3] = {9, 9, 9};`
+     again. */
 
   /* Exercise 3: Reject a trailing separator
      Parse 1,2,.

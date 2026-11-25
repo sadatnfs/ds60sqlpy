@@ -2,7 +2,7 @@
 
 Recover a data product through explicit accepted versions and a tested pointer mechanism.
 
-The executable reference contains the two complete worked cases with assertions. The changes below explain the independent practice and its limits.
+The reference swaps a `published.current_product` view inside a DuckDB transaction and rolls it back, then fails a singular test on values above 50 while `accepted_release` keeps 42. It proves pointer rollback in one local database, not recovery across systems or after a commit. See [how these answers are laid out](../STUDY-GUIDE.md#answers-and-references).
 
 
 ## 1. Inspect both states

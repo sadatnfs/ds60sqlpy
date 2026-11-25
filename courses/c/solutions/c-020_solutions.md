@@ -1,6 +1,8 @@
 # c-020: explained solutions
 
-Compare after an attempt or explicit reveal. The complete executable reference, `c-020_solution.c`, implements all six cases, from the "invoke through a function pointer" case to the "transfer an empty callback traversal" case, in one `main.c`.
+`c-020_solution.c` assembles the "invoke through a function pointer" case through the "transfer an empty callback traversal" case in one `main.c`.
+
+Compare only after an attempt: [Compare and transfer](../STUDY-GUIDE.md#compare-and-transfer).
 
 ## Mechanism and assumptions
 
@@ -10,7 +12,7 @@ int (*compare)(const void *,const void *) declares a function pointer rather tha
 
 ## Exercise 1: Invoke through a function pointer: predict an edited check
 
-Copy worked example 1 into a scratch pad and change `CHECK(transform(4) == 8);` to `CHECK(transform(5) == 8);` inside its CHECK. Before running, predict whether the CHECK still holds and explain why; then restore it.
+In worked example 1, change `CHECK(transform(4) == 8);` to `CHECK(transform(5) == 8);`. Predict whether the CHECK still holds and why, then run and restore.
 
 The unchanged code is worked example 1:
 
@@ -19,7 +21,7 @@ int (*transform)(int) = double_value;
 CHECK(transform(4) == 8);
 ```
 
-**Expected:** With `CHECK(transform(5) == 8);` the run stops with `Check failed` at the CHECK on `transform(4) == 8`, because the "invoke through a function pointer" case no longer shows that the result is 8. Restoring `CHECK(transform(4) == 8);` brings that observation back.
+**Expected:** `Check failed`: `CHECK(transform(5) == 8);` is false, although the result is 8.
 
 The pointer type agrees with the function declaration, so the compiler can check the call.
 
@@ -33,7 +35,7 @@ The pointer type agrees with the function declaration, so the compiler can check
 
 ## Exercise 2: Sort integers safely: debug a regression
 
-A regression changed one token in worked example 2, the "sort integers safely" case, so one line now reads `int values[] = {4, 1, 2};`. Run the example with that line, use the failing CHECK to find why the order becomes 1, 2, 3 no longer holds and repair the line without changing the CHECK.
+Worked example 2 now has a line reading `int values[] = {4, 1, 2};`. Repair it so that the order becomes 1, 2, 3 again.
 
 The unchanged code is worked example 2:
 
@@ -43,7 +45,7 @@ qsort(values, 3, sizeof values[0], compare_ints);
 CHECK(values[0] == 1 && values[1] == 2 && values[2] == 3);
 ```
 
-**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `values[0] == 1 && values[1] == 2 && values[2] == 3`. Once the line reads `int values[] = {3, 1, 2};` again, the "sort integers safely" case again shows that the order becomes 1, 2, 3.
+**Expected:** `Check failed` at `values[0] == 1 && values[1] == 2 && values[2] == 3` until the line reads `int values[] = {3, 1, 2};` again.
 
 The comparator reports ordering rather than a numeric distance between elements.
 

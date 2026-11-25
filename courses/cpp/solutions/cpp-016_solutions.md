@@ -1,6 +1,6 @@
 # cpp-016: explanations and reference observations
 
-Attempt the learner tasks before opening this document. The executable reference checks the bounded normal and boundary examples; the six explanations below cover the deliberate changes and manual checks.
+The [executable reference](cpp-016_solution.cpp) adds `make_batch`, a factory that returns a `Batch` holding `{8, 9}` by value. The explanations show when copying, moving and elision happen, and why the rule of zero holds. How to compare: [study guide](../STUDY-GUIDE.md#compare-with-the-solutions).
 
 ## Mechanism
 

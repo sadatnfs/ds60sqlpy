@@ -206,11 +206,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Constraint:</strong> A required capability for a type argument.</p>
 <p><strong>Type relationship:</strong> A connection between input, stored and output types.</p>
 <h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>The Linux Docker classroom compiles the saved pad as <code>main.swift</code> with Swift 6 language checking. An explicit <code>@main</code> type contains <code>static func main() async throws</code>; the fixed compiler uses <code>-parse-as-library -swift-version 6</code>. The examples use the standard library and portable Foundation. <code>precondition</code> makes a violated invariant fail the process. The fixed pad accepts one source file, without arbitrary command arguments, interactive input or dependency installation. SwiftUI, UIKit, Apple simulators and application signing belong to the separately prepared macOS/Xcode project labs, never the Linux pad.</p>
-<p>Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.</p>
+<p>Every call to <code>larger</code> lets the compiler infer <code>T</code>, so task 1 is done on paper before running anything. Task 4 adds a method call on an unconstrained <code>T</code>; the compiler rejects it with a message that the value has no such member, and that message belongs in your evidence table.</p>
+<p>Compile contract, starter stop and success marker: <a href="../STUDY-GUIDE.md.html#running-a-lesson">running a lesson</a>.</p>
 <h3 id="syntax-anatomy-and-execution-trace">Syntax anatomy and execution trace<a class="heading-anchor" href="#syntax-anatomy-and-execution-trace" aria-label="Link to this section">#</a></h3>
 <p><code>func larger&lt;T: Comparable&gt;</code> introduces a constrained type parameter. The return type T preserves the input relationship. Generic structs use the same parameter syntax.</p>
-<p>Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.</p>
+<p>Each example ends with a trace; method: <a href="../STUDY-GUIDE.md.html#tracing-a-program">tracing a program</a>.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="example-a-reuse-an-ordering-mechanism">Example A: Reuse an ordering mechanism<a class="heading-anchor" href="#example-a-reuse-an-ordering-mechanism" aria-label="Link to this section">#</a></h4>
 <p>The Comparable requirement makes ordering available without dynamic casts.</p>
@@ -234,6 +234,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> One implementation preserves Int and String results.</p>
+<p><strong>Trace.</strong> In <code>larger(3, 8)</code>, both arguments are <code>Int</code>, so <code>T</code> is inferred as <code>Int</code>. The body compares 3 with 8, finds <code>3 &gt;= 8</code> false and returns the right argument, 8. In <code>larger(&quot;apple&quot;, &quot;pear&quot;)</code>, <code>T</code> is <code>String</code>, and the comparison is lexicographic: apple sorts before pear, so pear is returned. One function body serves both types because <code>Comparable</code> guarantees that <code>&gt;=</code> exists. When the arguments are equal, the <code>&gt;=</code> test is true and the left argument is returned, which matters only when equal values can be told apart.</p>
 <h4 id="example-b-preserve-container-element-type">Example B: Preserve container element type<a class="heading-anchor" href="#example-b-preserve-container-element-type" aria-label="Link to this section">#</a></h4>
 <p>The relationship is encoded in the type rather than a runtime convention.</p>
 <pre class="highlighted-code"><code class="language-swift"><span class="syntax-keyword">import</span> <span class="syntax-class">Foundation</span>
@@ -257,6 +258,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> Swapping retains the same concrete element type.</p>
+<p><strong>Trace.</strong> <code>Pair(first: &quot;left&quot;, second: &quot;right&quot;)</code> infers <code>T</code> as <code>String</code>. <code>swapped()</code> constructs a new <code>Pair&lt;T&gt;</code> with the fields exchanged, so the result is a <code>Pair&lt;String&gt;</code> holding right and left. The original <code>pair</code> is a <code>let</code> and is not modified; the method returns a fresh value. Because the return type mentions the same <code>T</code>, the compiler knows <code>swapped.first</code> is a <code>String</code> without a cast, which is the relationship this example is about.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <ol>
 <li><strong>Predict and explain.</strong> Identify inferred generic types at every call.</li>
@@ -276,10 +278,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <ol start="6">
 <li><strong>Transfer and justify.</strong> Choose generic or existential abstraction for an API that must preserve concrete result type.</li>
 </ol>
-<p>For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.</p>
+<p>Log each task in the <a href="../STUDY-GUIDE.md.html#recording-exercise-evidence">evidence table</a> before opening the explanation.</p>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
 <p>Any discards useful type information. Excessively broad constraints make reuse harder. A generic algorithm still needs domain-specific failure and ordering policies.</p>
-<p>A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.</p>
+<p>Tie behavior is the counterexample for task 5: <code>larger</code> returns the left argument for equal inputs, so a version written with <code>&gt;</code> instead of <code>&gt;=</code> returns the right one. With plain integers both answers print the same value. Use a type whose equal values remain distinguishable, such as a struct compared only by score but carrying a name, and check which name comes back.</p>
+<p>Repair routine: <a href="../STUDY-GUIDE.md.html#building-a-regression-case">building a regression case</a>.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <ol>
 <li>Reproduce Example A (Reuse an ordering mechanism) before changing anything, and confirm its observation: One implementation preserves Int and String results.</li>
@@ -287,9 +290,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>Before opening the explanation, check your task 3 attempt (Create a generic immutable triple with a rotation operation) against each pitfall listed above, and add one input that would expose the tempting wrong rule.</li>
 </ol>
 <h3 id="self-check-and-next-step">Self-check and next step<a class="heading-anchor" href="#self-check-and-next-step" aria-label="Link to this section">#</a></h3>
-<p>Explain Generic parameter, Constraint, Type relationship without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.</p>
+<p>State what the constraint <code>T: Comparable</code> allows inside <code>larger</code> and what it forbids. Explain why <code>larger(3, 2.5)</code> infers <code>Double</code> for <code>T</code>, while passing an <code>Int</code> variable and a <code>Double</code> variable fails to compile. Describe one API that should return a generic <code>T</code> rather than <code>any Comparable</code>, and the reason.</p>
+<p>Then follow the general <a href="../STUDY-GUIDE.md.html#self-check-routine">self-check routine</a> and save your pad.</p>
 <h3 id="sources-and-execution-boundary">Sources and execution boundary<a class="heading-anchor" href="#sources-and-execution-boundary" aria-label="Link to this section">#</a></h3>
-<p><a href="https://docs.swift.org/swift-book/documentation/the-swift-programming-language/">Official language or framework documentation</a>. The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.</p>
+<p><a href="https://docs.swift.org/swift-book/documentation/the-swift-programming-language/">Documentation</a>: The Generics chapter of the Swift book covers generic functions, generic types, type constraints and type inference at call sites.</p>
+<p>Provenance and limits: <a href="../STUDY-GUIDE.md.html#sources-and-execution-boundary">sources and execution boundary</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for swift-018: Generics and relationships between types.
 Read courses/swift/guides/swift-018.md and courses/swift/lessons/swift-018.swift. Prerequisites: swift-017.

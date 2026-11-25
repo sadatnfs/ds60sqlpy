@@ -4,8 +4,6 @@
 
 A pipeline is more than a list of correct kernels. Each stage has a shape, ownership and validity contract that must match its consumer. Filtering changes count; normalization changes numeric range; histogramming assumes valid bins. Keep the count with the output buffer, and do not pass allocation capacity as the number of valid elements. First build a tiny CPU oracle, then introduce one GPU stage at a time. A useful capstone report includes cases where a CPU is preferable, because proving that a GPU exists is different from proving it helps the application.
 
-The separate [CPU reference](../references/cuda-024_cpu.py) checks the chapter's bounded model. It does not execute CUDA or establish GPU timing. Compare after attempting the worksheet or explicitly choosing to reveal solutions.
-
 ## Exercise 1
 
 A synthetic event pipeline keeps nonnegative values from \([-2,1,3,-1,2]\), producing \([1,3,2]\). It computes count three, sum six and mean two. A histogram over bins 0 through 3 gives \([0,1,1,1]\). This ties compaction output count to every downstream stage.
@@ -78,12 +76,16 @@ Use identical selection, aggregation and result semantics; include required tran
 
 **How to verify:** Check outputs agree first, then record repeated samples for each with the same inputs.
 
+## Self-check answers
+
+1. **What must travel with a compacted buffer to the next stage?** Its valid count, not its allocated capacity.
+2. **What does the pipeline return for an empty selection?** Count zero, sum zero, a named empty status instead of a mean, and an all-zero histogram.
+3. **Why introduce GPU stages one at a time?** Each stage can then be compared against the CPU oracle, so a mismatch points at one stage.
+
 ## Numerical reference and its limits
 
-The complete CPU model is [here](../references/cuda-024_cpu.py). Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It does not claim CUDA execution, concurrency safety or a performance measurement.
+The [CPU reference](../references/cuda-024_cpu.py) reproduces worked example 1 and prints `{'count': 3, 'sum': 6, 'mean': 2.0} [0, 1, 1, 1]`.
 
 ## Transfer review
 
 Use identical selection, aggregation and result semantics; include required transfers and allocation or document reused state, retain samples and compare numerical outputs first.
-
-A complete explanation must name its inputs, the unchanged mathematical contract, the changed boundary or resource condition, and the evidence still needed on actual hardware. Preserve a CPU baseline even after a GPU path becomes available.

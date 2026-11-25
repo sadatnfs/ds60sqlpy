@@ -2,67 +2,13 @@
 
 ## How to run this lesson
 
-Start the Linux-container engine and run `./classroom` from the repository
-root. On Windows, use Ubuntu in WSL 2 or the thin
-`START_DOCKER_CLASSROOM.cmd` wrapper. Choose **PostgreSQL** on the shared
-`/classroom` home, then open **sql-12**. The
-[launcher guide](../../../docs/one-command-classroom.md) covers first preparation, strict resume and
-the saved project selection. No host Python or PostgreSQL installation is
-required for this browser route.
+Open `./classroom`, pick the PostgreSQL track and lesson **sql-12**, and press **Whole SQL lesson (psql)**. The file opens a transaction on `advanced_sql_training`, sets the search path, and has `psql` print two 50-row result blocks: customers 1 to 50 with a cleaned email and its domain, then products 1 to 50 with a renamed and a ten-character label. It finishes with `ROLLBACK`, and nothing in it writes.
 
-1. Read the prerequisite and fixture notes before running the file. Use only
-   the local disposable `advanced_sql_training` database.
-2. Choose **Whole SQL lesson (psql)** for the cataloged learner script. This
-   preserves the lesson's reviewed psql directives, relative includes and
-   transaction behavior. **SQL snippet** is appropriate for ordinary SQL
-   statements, but is not a replacement for an entire script's setup.
-3. The **Course database** panel above the code shows whether the course
-   training tables are loaded. Missing tables load automatically before your
-   first run (or choose **Load course tables**) and stay loaded for later
-   lessons. **Reset training data** restores the original rows only when your
-   own changes made results differ; it keeps your saved code and notes.
-4. Edit the learner copy in the classroom and save your prediction before
-   running. Its whole-script workspace is
-   `.learning/sql/sql-12/lesson/workspace/sql/postgres-60day/day12_string_functions.sql`.
-   For browser work this path is inside the Docker learning volume, not a
-   newly created host folder beside your checkout. The checked-in source
-   remains the answer-free starting artifact.
-5. Run the whole script and inspect the full transcript. The runner uses
-   `psql -X -v ON_ERROR_STOP=1 -f`. SELECT output has columns, rows and a row
-   count; DDL/DML has command tags; intentional checks may produce NOTICE
-   messages. An unexpected ERROR or nonzero exit is a failure to diagnose,
-   even when an earlier query printed plausible values.
-6. Verify the lesson's expected grain, ordering, constraints and declared
-   transaction or cleanup outcome. Keep required ROLLBACK statements.
-   The warehouse sequence and other explicitly stateful exercises explain
-   when state is committed. Read saved output without rerunning it when
-   reviewing an earlier attempt.
+The copy you can edit lives at
+`.learning/sql/sql-12/lesson/workspace/sql/postgres-60day/day12_string_functions.sql`.
+Change a function argument there (for example the `10` in `substr`) and rerun the whole file to see the effect on every row at once.
 
-If a relation is missing, inspect the lesson's required fixture and predecessor
-rather than guessing a new table definition. If authentication or runtime
-readiness fails, use `./classroom status` and the setup guide. Keep credentials
-out of SQL, notebooks, screenshots and committed files. Repair the first error
-before trusting partial output, and reveal separate solutions only when you
-want to compare after an attempt.
-
-### Optional contributor notebook route
-
-For notebook work, deliberately prepare the Linux/WSL contributor environment
-from [CONTRIBUTING.md](../../../CONTRIBUTING.md), including a compatible psql client and
-the notebook dependencies. Generate this lesson's private workspace through
-the maintained CLI:
-
-```sh
-uv run --no-sync python scripts/course.py sql notebook sql-12
-```
-
-Open the printed notebook path in that environment's JupyterLab. It uses the
-same catalog-derived learner-copy layout in that contributor checkout and
-executes the complete script through psql. Its host-side state is separate
-from the Docker browser's named volume. Follow
-[guided SQL notebooks](../../../docs/guided-sql-notebooks.md) for explicit local connection
-selection and kernel setup. Notebook generation does not execute SQL or
-authorize a reset.
+If the customers and products tables are missing, so that `lower`, `split_part` and `substr` have nothing to read, the study guide's [notes on preparing the classroom](../../STUDY-GUIDE.md#run-a-lesson-in-the-classroom) cover loading them; the [notebook path for contributors](../../STUDY-GUIDE.md#optional-contributor-notebook-route) is not needed for this lesson.
 
 ## Level and prerequisites
 
@@ -74,28 +20,13 @@ authorize a reset.
 
 ## A beginner's mental model for this lesson
 
-A **table** stores facts in named columns. A **row** is one occurrence at the
-table's declared grain. A query creates a temporary **result set**: rows printed
-on screen are not automatically stored. The key vocabulary for this lesson is Normalization, Delimiter, Regular expression. Its worked SQL reads or creates `customers`, `products`.
+Every string function in this lesson returns a new value and leaves the column alone. `lower(trim(email))` does not change `customers.email`; it computes a cleaned copy for this one result set. That is why the lesson keeps the raw column beside the cleaned one: when the two differ you can see exactly what changed, and nothing is lost. Turning text into one comparable form like this is **normalization**.
 
-Before writing a query, complete this sentence: “One output row represents
-___.” Joins can multiply rows, filters can remove them, grouping can collapse
-many rows into one, and window functions can add calculations while preserving
-row count. For a normal analytical `SELECT`, use this logical reading order:
-`FROM`/`JOIN` (including `ON`) → `WHERE` → `GROUP BY`/aggregates → `HAVING` →
-window calculations → `SELECT` → `ORDER BY` → `LIMIT`. PostgreSQL may execute a
-different physical plan while preserving those semantics.
+The course fixture is unusually tidy. All 500 customers are named `Customer N`, all 500 emails look like `customerN@example.com` in lower case with no spaces, and all 300 products are named `Product N`. So many of today's cleanups change nothing, and that is useful evidence in itself: a query that reports zero changed rows tells you the data was already clean, as long as you check that zero deliberately.
 
-The worked walkthrough's lesson-specific task is: Compare a raw email with `lower(trim(email))`. Use the normalized expression for duplicate grouping, but keep the original column visible so a reviewer can audit what changed. Explain why silently overwriting the raw value would lose evidence.
-Exercise 1 expects this result: one row per customer. Predict keys, row count, `NULL` behavior,
-and ordering before running. Afterwards, compare keys/counts/totals with an
-independent control. A blank string, SQL `NULL`, numeric zero, and a missing row
-are different facts; use `COALESCE` only after choosing which meaning the
-business question requires.
+Two kinds of tool appear. Positional and **delimiter** functions (`split_part`, `substr`, `replace`) work on fixed characters such as `@` or a position count. A **regular expression** describes a pattern, such as "one or more whitespace characters" or "digits at the end", and is used with `~`, `regexp_replace` and `substring(... FROM ...)`. Patterns are more flexible but easier to get subtly wrong, so each exercise pairs them with a check you can count.
 
 ## Two worked SQL examples
-
-These worked excerpts come from `sql/postgres-60day/day12_string_functions.sql`. Use **Whole SQL lesson (psql)** in the unified classroom for the complete file, including its fixture and transaction context. The optional contributor notebook and prepared `psql` routes are described above.
 
 ### Example 1
 
@@ -112,9 +43,9 @@ ORDER BY
 LIMIT 50;
 ```
 
-**How to read it:** Example 1: Start with `customers` in `FROM`/`JOIN`. The final `SELECT` displays `customer_id`, `email`, `email_clean`, and `domain`. `ORDER BY` determines presentation order and the final `LIMIT 50` caps displayed rows. Before running, predict the row grain, row count, `NULL` positions, and first/last key; afterwards, compare each prediction with the transcript.
+**How to read it:** `trim` removes leading and trailing spaces and `lower` folds upper case, so `email_clean` is the comparison form of the address. `split_part(email, '@', 2)` cuts the string at each `@` and returns the second piece, the domain. `ORDER BY customer_id LIMIT 50` shows customers 1 to 50.
 
-**Expected result/shape:** Example 1 returns one row per `customer_id`, capped at 50 rows with columns `customer_id`, `email`, `email_clean`, and `domain` from `customers`. Use a direct count or grouped aggregate over those same source relations as the control; check ordering only when this query has an `ORDER BY`, and inspect `NULL` only for columns this example can produce.
+**Expected result/shape:** 50 rows, from `customer1@example.com` to `customer50@example.com`. `email_clean` is identical to `email` in every row, and `domain` is `example.com` every time. That holds for the full table too: no email of the 500 changes under `lower(trim(email))`, and there are 500 distinct addresses before and after cleaning. A transformation that changes nothing is still worth running once, because it proves there are no case or spacing duplicates hiding in the column.
 
 ### Example 2
 
@@ -131,9 +62,9 @@ ORDER BY
 LIMIT 50;
 ```
 
-**How to read it:** Example 2: Start with `products` in `FROM`/`JOIN`. The final `SELECT` displays `product_id`, `name`, `renamed`, and `short_name`. `ORDER BY` determines presentation order and the final `LIMIT 50` caps displayed rows. Before running, predict the row grain, row count, `NULL` positions, and first/last key; afterwards, compare each prediction with the transcript.
+**How to read it:** `replace(name, 'Product', 'Item')` swaps every occurrence of the word, and `substr(name, 1, 10)` keeps characters 1 to 10. Both return new text; `name` is still printed unchanged so you can compare.
 
-**Expected result/shape:** Example 2 returns one row per `product_id`, capped at 50 rows with columns `product_id`, `name`, `renamed`, and `short_name` from `products`. Use a direct count or grouped aggregate over those same source relations as the control; check ordering only when this query has an `ORDER BY`, and inspect `NULL` only for columns this example can produce.
+**Expected result/shape:** 50 rows: `Product 1` becomes `Item 1`, and so on. `short_name` matches `name` in all 50 rows, because the longest name shown, `Product 50`, is exactly ten characters. The cut only bites later in the table: product 100 becomes `Product 10`, which is also product 10's full name. Across all 300 products there are only 99 distinct short names, so a ten-character label could never serve as a key.
 
 ## Learning objectives
 
@@ -159,62 +90,61 @@ evidence.
 - **Focus:** Normalize and parse text with explicit locale/case assumptions, preserving original values when a transformation may be lossy.
 - **Assumptions:** Course emails use one `@`; Unicode/collation behavior can vary. Text ordering is deterministic only with an explicit sort and tie-breaker.
 - **Failure to watch for:** Regex is not a complete email or HTML parser; leading-wildcard searches may not use a normal b-tree index.
-- **Review loop:** predict the row grain and NULL/order behavior, run the
-  query, inspect a bounded sample, and reconcile counts or totals before
-  accepting the result.
+- **Review loop:** pick two or three rows, work out by hand what each function should return for them, then find those rows in the output; after that, count how many rows the transformation actually changed.
 
 ## Exercises
 
 Normalize and parse text with explicit locale/case assumptions, preserving original values when a transformation may be lossy.
 
-Attempt each prompt in a scratch SQL file before opening the solution.
-For every result, write its row grain and expected shape first.
+Most of these answers can be checked by counting: how many rows changed, how many matched, how many groups formed. Before running each one, write down the count you expect, especially for Exercise 5, whose correct answer on this fixture is surprising.
 
 1. **Query writing:** Return normalized customer names and lowercase emails.
+   **Estimate:** the fixture names are all `Customer N`. In how many of the 500 rows will `trimmed_name` differ from `original_name`?
    **Progressive hint:** Use `btrim` for outer whitespace and `lower` for a declared case-normalized display value.
-   **Inputs/evidence:** For sql-12 Exercise 1, read from `customers`. Build the answer toward `customer_id`, `original_name`, `trimmed_name`, and `normalized_email`; keep `customer_id` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-12 Exercise 1, expected output: One row per customer. The final columns are `customer_id`, `original_name`, `trimmed_name`, and `normalized_email`. The final order is `c.customer_id`.
-   **Verify:** For sql-12 Exercise 1, reselect the returned keys directly from the source; require unique `customer_id` where the expected grain is one row per key and confirm the projected `customer_id`, `original_name`, `trimmed_name`, and `normalized_email` against `customers`. Add one source row with a new `customer_id`; verify the result gains exactly one row carrying that `customer_id` value.
+   **Inputs/evidence:** For sql-12 Exercise 1, read `full_name` and `email` from the 500 `customers` rows, wrapping the name in `btrim` and the email in `lower`.
+   **Expected result/shape:** For sql-12 Exercise 1, return 500 rows, one per customer, from customer 1 (`Customer 1`, `customer1@example.com`) to customer 500; on the fixture no name has extra spaces and no email has uppercase letters, so the cleaned columns match the originals. The final columns are `customer_id`, `original_name`, `trimmed_name`, and `normalized_email`. The final order is `c.customer_id`.
+   **Verify:** For sql-12 Exercise 1, confirm 500 rows and 0 rows where `full_name <> btrim(full_name)` or `email <> lower(email)`. Inside a rolled-back transaction, set customer 1's name to `' Customer 1 '` and email to `Customer1@EXAMPLE.com`; the row must still show `Customer 1` and `customer1@example.com` in the cleaned columns.
 2. **Query writing:** Extract the email domain and count customers by domain, preserving missing emails.
+   **Estimate:** every address ends in the same domain. How many rows will this print, and will a `(missing)` row appear?
    **Progressive hint:** `split_part` parses the second component; CASE keeps NULL distinct.
-   **Inputs/evidence:** For sql-12 Exercise 2, read from `customers`. Build the answer toward `email_domain`, and `customer_count`; keep `email_domain` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-12 Exercise 2, expected output: One row per domain label. The final columns are `email_domain`, and `customer_count`. The final order is `customer_count DESC, email_domain`.
-   **Verify:** For sql-12 Exercise 2, independently aggregate `customers` by `email_domain`; require one output row for every distinct `email_domain` tuple and compare `customer_count` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `customer_count` for the existing `email_domain` tuple and verify the new tuple appears exactly once.
+   **Inputs/evidence:** For sql-12 Exercise 2, take the part of each `customers.email` after `@` with `split_part`, lower-case it, label a `NULL` email as `(missing)`, and count customers per resulting domain.
+   **Expected result/shape:** For sql-12 Exercise 2, return one row, `example.com` with 500 customers, because every fixture email uses that domain and none is `NULL`. The final columns are `email_domain`, and `customer_count`. The final order is `customer_count DESC, email_domain`.
+   **Verify:** For sql-12 Exercise 2, confirm the single count equals `SELECT COUNT(*) FROM customers` (500). Inside a rolled-back transaction, set customer 1's email to `Customer1@EXAMPLE.com` and customer 2's email to `NULL`; the result must become two rows, `example.com` 499 and `(missing)` 1, so the uppercase domain still groups with the rest.
 3. **Query writing:** Create an ordered comma-separated list of department employee names.
+   **Estimate:** the names are sorted as text, not as numbers. Which employee name will come second in the Sales list, `Employee 7` or `Employee 13`?
    **Progressive hint:** Put `ORDER BY` inside `string_agg` so concatenation order is deliberate.
    **Inputs/evidence:** For sql-12 Exercise 3, read from `departments` left-joined to `employees` and list each department's employee names with `string_agg(e.full_name, ', ' ORDER BY e.full_name, e.employee_id)`.
-   **Expected result/shape:** For sql-12 Exercise 3, expected output: One row per department. The final columns are `department_id`, `department_name`, and `employees`. The final order is `d.department_id`.
+   **Expected result/shape:** For sql-12 Exercise 3, return 6 rows, `Sales` through `Operations`; names are sorted as text, so department 1's list runs `Employee 1, Employee 13, Employee 19, ...` with `Employee 7` after `Employee 67`. The final columns are `department_id`, `department_name`, and `employees`. The final order is `d.department_id`.
    **Verify:** For sql-12 Exercise 3, confirm 6 rows, one per `department_id`, matching `SELECT COUNT(*) FROM departments`; for one department, compare the number of names in `employees` with `SELECT COUNT(*) FROM employees WHERE department_id = <that id>` (17 for departments 1 to 4 and 16 for departments 5 and 6).
 4. **Prediction:** Normalize repeated internal whitespace in sample text and predict how tabs/newlines are handled.
+   **Estimate:** which of the three inputs gets shorter, and by how many characters?
    **Progressive hint:** Use a POSIX whitespace class and the global regex flag.
-   **Inputs/evidence:** For sql-12 Exercise 4, read from the inline `VALUES` fixture. Build the answer toward `source_text`, and `normalized_text`; keep `source_text` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-12 Exercise 4, expected output: Three input/output rows. The final columns are `source_text`, and `normalized_text`.
-   **Verify:** For sql-12 Exercise 4, reselect the returned keys directly from the source; require unique `source_text` where the expected grain is one row per key and confirm the projected `source_text`, and `normalized_text` against the inline `VALUES` fixture. Add one source row with a new `source_text`; verify the result gains exactly one row carrying that `source_text` value.
+   **Inputs/evidence:** For sql-12 Exercise 4, normalize three strings in an inline `VALUES` fixture (`Data Tools` with two spaces on each side and three between the words, `E'one\ttwo'`, and `E'line1\nline2'`) with `regexp_replace(source_text, '[[:space:]]+', ' ', 'g')` wrapped in `btrim`.
+   **Expected result/shape:** For sql-12 Exercise 4, return 3 rows with `normalized_text` values `Data Tools`, `one two`, and `line1 line2`; the query has no `ORDER BY`. The final columns are `source_text`, and `normalized_text`.
+   **Verify:** For sql-12 Exercise 4, confirm 3 rows with no tab, newline, or double space left in `normalized_text`. Change the pattern to `' +'` and the tab row must come back unchanged; drop `btrim` and the first row must keep one space at each end of `Data Tools`.
 5. **Debugging:** Safely find customer names containing a literal percent or underscore rather than treating them as wildcards.
+   **Estimate:** no customer name contains `%` or `_`. How many rows should the correct query return, and how many would `LIKE '%_%'` without an escape return?
    **Progressive hint:** Escape wildcard characters and declare the escape character.
-   **Inputs/evidence:** For sql-12 Exercise 5, read from `customers`. Build the answer toward `customer_id`, and `full_name`; keep `customer_id` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-12 Exercise 5, expected output: Rows only when the literal character occurs. The final columns are `customer_id`, and `full_name`. The final order is `c.customer_id`.
-   **Verify:** For sql-12 Exercise 5, run an anti-check that counts rows where NOT ((c.full_name LIKE '%\%%' ESCAPE '\' OR c.full_name LIKE '%\_%' ESCAPE '\')); require unique `customer_id` where the expected grain is one row per key and confirm the projected `customer_id`, and `full_name` against `customers`. Add one row for which `(c.full_name LIKE '%\%%' ESCAPE '\' OR c.full_name LIKE '%\_%' ESCAPE '\')` is true and one for which it is false; verify only the matching `customer_id` value is returned.
+   **Inputs/evidence:** For sql-12 Exercise 5, search the 500 `customers.full_name` values for a literal `%` or `_` with `LIKE '%\%%' ESCAPE '\'` and `LIKE '%\_%' ESCAPE '\'`.
+   **Expected result/shape:** For sql-12 Exercise 5, return 0 rows, because every fixture name has the form `Customer N`. The final columns are `customer_id`, and `full_name`. The final order is `c.customer_id`.
+   **Verify:** For sql-12 Exercise 5, confirm the unescaped pattern `LIKE '%_%'` matches all 500 names, because `_` alone is a one-character wildcard. Inside a rolled-back transaction, rename customer 3 to `Customer_3`; the escaped query must return exactly that 1 row.
 6. **Extension:** Parse the numeric suffix from names like `Customer 42`, returning NULL for nonmatching text.
+   **Estimate:** will `parsed_customer_number` ever differ from `customer_id` on this fixture?
    **Progressive hint:** Use a captured regex replacement only after a match predicate establishes the format.
-   **Inputs/evidence:** For sql-12 Exercise 6, read from `customers`. Build the answer toward `customer_id`, `full_name`, and `parsed_customer_number`; keep `customer_id` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-12 Exercise 6, expected output: One row per customer with a numeric suffix. The final columns are `customer_id`, `full_name`, and `parsed_customer_number`. The final order is `c.customer_id`.
-   **Verify:** For sql-12 Exercise 6, reselect the returned keys directly from the source; require unique `customer_id` where the expected grain is one row per key and confirm the projected `customer_id`, `full_name`, and `parsed_customer_number` against `customers`. Repeat with `NULL` in `customer_id`, and `full_name` and state whether the row is kept, rejected, or classified.
+   **Inputs/evidence:** For sql-12 Exercise 6, test each of the 500 `customers.full_name` values against `'^Customer [0-9]+$'` and, only when it matches, cast `substring(full_name FROM '([0-9]+)$')` to `integer`.
+   **Expected result/shape:** For sql-12 Exercise 6, return 500 rows, one per customer, where `parsed_customer_number` equals `customer_id`, from 1 to 500. The final columns are `customer_id`, `full_name`, and `parsed_customer_number`. The final order is `c.customer_id`.
+   **Verify:** For sql-12 Exercise 6, confirm 500 rows where `parsed_customer_number = customer_id`. Inside a rolled-back transaction, rename customer 3 to `Customer_3` and customer 4 to `Customer 4b`; both rows must stay in the result with a `NULL` `parsed_customer_number` instead of raising a cast error.
 
 ## Common mistakes and how to recover
 
-- **Lesson-specific semantic mistake:** Regex is not a complete email or HTML parser; leading-wildcard searches may not use a normal b-tree index.
-- **Unexpected row count:** display keys before aggregates, count rows after
-  each join/filter stage, and find the first stage whose grain differs from the
-  contract. Do not hide fanout with `DISTINCT`.
-- **Unexpected `NULL` or missing row:** decide whether the fact is unknown,
-  inapplicable, zero, or absent before using `COALESCE`; inspect outer-join
-  predicate placement and empty-input aggregate behavior.
-- **Unstable top/first/last output:** add `ORDER BY` with a unique final
-  tie-breaker before `LIMIT` or order-sensitive windows/aggregates.
-- **`psql` stops on an error:** fix the first error shown by
-  `ON_ERROR_STOP`, restore the declared transaction/setup state, and rerun the
-  complete file. A later successful statement does not validate a partial run.
+- **Overwriting the raw text:** an `UPDATE customers SET email = lower(trim(email))` destroys the evidence of what the address looked like. Keep the cleaned form in a separate column or a view until you have proved the rule is right.
+- **Forgetting that `_` is a wildcard:** in `LIKE`, `_` matches any single character, so `full_name LIKE '%_%'` matches all 500 customers. Write `'%\_%' ESCAPE '\'` to look for a real underscore.
+- **Assuming `split_part` returns NULL:** for an address with no `@`, `split_part(email, '@', 2)` returns an empty string, not `NULL`. A malformed address then lands in a group with a blank label rather than in a missing group.
+- **Sorting numbers stored in text:** `ORDER BY full_name` puts `Employee 100` right after `Employee 10` and before `Employee 16`. Order by the numeric key when you mean numeric order.
+- **Collapsing only spaces:** the pattern `' +'` leaves tabs and newlines alone. `[[:space:]]+` covers all of them.
+- **Truncating labels into keys:** `substr(name, 1, 10)` maps 300 product names onto only 99 short names.
+
+When `psql` stops on an error partway through, use the study guide's [failure recovery notes](../../STUDY-GUIDE.md#recover-from-common-failures).
 
 ## Self-check
 
@@ -251,9 +181,7 @@ Further reading
 
 ## Ask an AI tutor about this lesson
 
-An AI tutor is optional; the guide, learner SQL, PostgreSQL, and expected checks are
-enough to complete the lesson offline. If you want a patient tutor, copy this
-prompt after opening the repository in the AI tutor:
+You can finish this lesson without a tutor. If you use one, a productive request is to have it invent a few messy strings (mixed case, a tab, a stray `%`) and ask you what each function returns before checking in `psql`. The prompt below keeps the answers out of the session; setup is in the study guide's [tutor section](../../STUDY-GUIDE.md#use-an-ai-tutor-optional).
 
 ```text
 Tutor me through sql-12: String Functions and Text Processing.

@@ -1,6 +1,6 @@
 # tf-031: explanatory solutions
 
-Open these answers for Graphs, retracing and measurement after your own attempt at Example A, Check eager arithmetic, or after an explicit reveal. Each answer reuses the guide's literal inputs, so a mismatch points to one step. The companion script runs the assertions; this page explains why they test Trace, Signature, Warmup. After matching exercise 6, Separate shape contracts, invent a new input without looking here.
+Open these answers after an attempt; they reuse the guide's inputs ([comparison steps](../STUDY-GUIDE.md#after-the-solutions)).
 
 ## Mechanism review
 
@@ -156,6 +156,3 @@ for incompatible in [
 
 **Verify:** In a fresh process, the exercise checks confirm `tuple(output.shape) == (3,)`; `g.experimental_get_tracing_count() == count` and for every looped case, `g(incompatible)` raises `(TypeError, ValueError)`.
 
-## Review after comparison
-
-Change one fixture value in exercise 4, Change dtype deliberately, and predict the new result before running it. Keep the failing version of exercise 5, Measure only warmed calls, next to its repair. A missing framework is an environment record, not a failed assertion. No solution downloads data, calls an online model, deploys a service or changes a database.

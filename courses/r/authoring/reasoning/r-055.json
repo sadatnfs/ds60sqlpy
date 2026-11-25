@@ -36,5 +36,7 @@
       "wrong": "Reading the free panels side by side as a magnitude comparison. Free scales suit shape within a panel; magnitude across panels needs fixed scales or an explicit annotation of each range.",
       "verify": "`diff(range(f$y[f$group == \"B\"])) / diff(range(f$y[f$group == \"A\"]))` returns 100."
     }
-  ]
+  ],
+  "run_note": "The starter holds four points with x from 1 to 4 and y values 1, 2, 3 and 100, and an empty results list. Run it and notice the single extreme value. Zooming with `coord_cartesian()` only changes what is visible, so a fitted line still uses all four points and climbs steeply toward 100. Setting scale limits removes the out-of-range row before the statistic runs, so the fitted line changes. Decide which of those two contracts matches your question before choosing between them, and check facet scales the same way.",
+  "checks_note": "The assertions confirm that the zoomed fit still rises above 4 because the extreme row is kept, that the limited fit stays at or below 4 because that row is dropped, that fixed facets share one y scale while free facets get two, that only positive values reach the log axis and 1, 10 and 100 map to 0, 1 and 2, and that a palette missing a category name is detected. They do not judge whether free scales mislead a reader."
 }

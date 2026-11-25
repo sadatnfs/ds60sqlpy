@@ -1,6 +1,8 @@
 # c-038: explained solutions
 
-Compare after an attempt or explicit reveal. The complete executable reference, `c-038_solution.c`, implements all six cases, from the "inspect fetch-add semantics" case to the "transfer an atomic exchange" case, in one `main.c`.
+`c-038_solution.c` assembles the "inspect fetch-add semantics" case through the "transfer an atomic exchange" case in one `main.c`.
+
+Compare only after an attempt: [Compare and transfer](../STUDY-GUIDE.md#compare-and-transfer).
 
 ## Mechanism and assumptions
 
@@ -10,7 +12,7 @@ atomic_int declares an atomic integer and atomic_init initializes it before shar
 
 ## Exercise 1: Inspect fetch-add semantics: change one input
 
-Copy worked example 1, the "inspect fetch-add semantics" case, into a scratch pad and change `atomic_init(&value, 2);` to `atomic_init(&value, 3);`. Before running, predict which CHECK fails and which value it sees in place of the worked result (the returned old value is 2 and current value is 5); then run it and restore the original line.
+In worked example 1, change `atomic_init(&value, 2);` to `atomic_init(&value, 3);`. Predict which value the CHECK on `old == 2 && atomic_load(&value) == 5` sees, then run and restore.
 
 The unchanged code is worked example 1:
 
@@ -21,13 +23,15 @@ int old = atomic_fetch_add(&value, 3);
 CHECK(old == 2 && atomic_load(&value) == 5);
 ```
 
-**Expected:** With `atomic_init(&value, 3);` the run stops with `Check failed` at the CHECK on `old == 2 && atomic_load(&value) == 5`, because the "inspect fetch-add semantics" case no longer shows that the returned old value is 2 and current value is 5. Restoring `atomic_init(&value, 2);` brings that observation back.
+**Expected:** `Check failed` at `old == 2 && atomic_load(&value) == 5`; restoring `atomic_init(&value, 2);` passes again.
+
+**Verify:** Name the value that made `old == 2 && atomic_load(&value) == 5` false, where worked example 1 showed that the returned old value is 2 and current value is 5.
 
 The return value is the prior state. Confusing it with the new value can create off-by-one ticketing logic.
 
 ## Exercise 2: Compare and exchange successfully: diagnose an edited check
 
-A careless edit changed the CHECK in worked example 2, the "compare and exchange successfully" case, so that it reads `CHECK(atomic_compare_exchange_strong(&value, &expected, 8));`. Run the example with that line, explain why the edited CHECK now fails even though the program state still means the operation succeeds and stores 7, and restore it.
+Worked example 2's CHECK now reads `CHECK(atomic_compare_exchange_strong(&value, &expected, 8));`. Explain why it fails although the operation succeeds and stores 7, then restore it.
 
 The unchanged code is worked example 2:
 
@@ -39,7 +43,9 @@ CHECK(atomic_compare_exchange_strong(&value, &expected, 7));
 CHECK(atomic_load(&value) == 7);
 ```
 
-**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `atomic_load(&value) == 7`. Once the line reads `CHECK(atomic_compare_exchange_strong(&value, &expected, 7));` again, the "compare and exchange successfully" case again shows that the operation succeeds and stores 7.
+**Expected:** `Check failed` until the CHECK reads `CHECK(atomic_compare_exchange_strong(&value, &expected, 7));` again, though the operation succeeds and stores 7.
+
+**Verify:** Explain why `CHECK(atomic_compare_exchange_strong(&value, &expected, 8));` rejects a state that `atomic_load(&value) == 7` accepts, using your failing and repaired runs.
 
 The update is conditional on the observed state, not an unconditional assignment.
 
@@ -57,6 +63,8 @@ CHECK(expected == 3 && atomic_load(&value) == 3);
 
 **Expected:** It fails and expected becomes 3.
 
+**Verify:** Keep a CHECK equivalent to `expected == 3 && atomic_load(&value) == 3`. Control edit: changing `atomic_init(&value, 3);` to `atomic_init(&value, 4);` must fail it; then restore it.
+
 The API returns current observation through expected, which a retry loop must handle deliberately.
 
 ## Exercise 4: Count independent events
@@ -72,6 +80,8 @@ CHECK(atomic_load_explicit(&count, memory_order_relaxed) == 10);
 ```
 
 **Expected:** The count is 10.
+
+**Verify:** Keep a CHECK equivalent to `atomic_load_explicit(&count, memory_order_relaxed) == 10`. Control edit: changing `for (int i = 0; i < 10; i++)` to `for (int i = 0; i <= 10; i++)` must fail it; then restore it.
 
 This fixture demonstrates the counter API, not publication of unrelated memory. A concurrent relaxed counter has a different reasoning purpose from a readiness flag.
 
@@ -94,6 +104,8 @@ CHECK(pthread_join(worker, NULL) == 0);
 
 **Expected:** The payload is 42.
 
+**Verify:** Keep a CHECK equivalent to `p.value == 42`. Control edit: changing `atomic_init(&p.ready, false);` to `atomic_init(&p.ready, true);` must fail it; then restore it.
+
 The payload read follows the acquire observation of the release store. Changing the flag to an ordinary or merely volatile object would remove the required synchronization.
 
 ## Exercise 6: Transfer an atomic exchange
@@ -109,8 +121,10 @@ CHECK(!old && atomic_load(&ready));
 
 **Expected:** The old state is false and the new state true.
 
+**Verify:** Keep a CHECK equivalent to `!old && atomic_load(&ready)`. Control edit: changing `atomic_init(&ready, false);` to `atomic_init(&ready, true);` must fail it; then restore it.
+
 Exchange is one atomic operation. A separate load then store would not provide the same indivisible state transition under concurrent access.
 
 ## After comparison
 
-Add a fresh distinguishing input for the "transfer an atomic exchange" case to your own c-038 source. Explain why every access in `atomic_publisher` stays within a live object and each owned resource is released. An expected atomic object failure belongs in the test contract; undefined behavior does not. Keep diagnostics and sanitizer evidence for the "compare and exchange successfully" case apart from ordinary output: the fixture proves its stated atomic object, memory order and publication assumptions, not universal safety.
+Call `atomic_fetch_sub` on an `atomic_int` holding 3 and CHECK that it returns 3 and leaves 2. Then call `atomic_compare_exchange_strong` with `expected` set to 3 while the value is 2, and CHECK that it fails and writes 2 into `expected`. Explain how a retry loop uses that updated `expected` instead of reloading the value separately.

@@ -42,5 +42,7 @@
       "wrong": "Checking `nchar(text) <= 4` for a four-byte column. café passes, then overflows the column or is cut in the middle of é, leaving the lone byte c3, which is not valid UTF-8 on its own.",
       "verify": "`nchar(text, type = \"bytes\")` returns 5 while `nchar(text)` returns 4."
     }
-  ]
+  ],
+  "run_note": "The starter holds three raw identifiers, \" 0017 \" with surrounding spaces, \"A17\" and \"17x\", and prints them with quotes so the spaces are visible. Run it and decide which of the three is valid under a digits-only rule before writing a pattern. Trimming is safe here; converting to a number is not, because it would erase the leading zeros.",
+  "checks_note": "The checks pin that a fixed pattern matches a literal dot only, that an anchored five-digit pattern accepts \"00123\" but rejects \"123\", that splitting \"A|12\" on a literal pipe gives \"A\" and \"12\", that an unanchored digit test cannot wrongly accept \"ID12bad\", that a trailing empty field is dropped by `strsplit()`, and that a four-character accented word occupies five bytes in UTF-8. They do not cover other normalization forms or right-to-left text, and they do not show what happens when your own input arrives in a different encoding."
 }

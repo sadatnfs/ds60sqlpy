@@ -24,9 +24,9 @@ Existential `any` values erase more concrete information and can hold different 
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles the saved pad as `main.swift` with Swift 6 language checking. An explicit `@main` type contains `static func main() async throws`; the fixed compiler uses `-parse-as-library -swift-version 6`. The examples use the standard library and portable Foundation. `precondition` makes a violated invariant fail the process. The fixed pad accepts one source file, without arbitrary command arguments, interactive input or dependency installation. SwiftUI, UIKit, Apple simulators and application signing belong to the separately prepared macOS/Xcode project labs, never the Linux pad.
+Both examples share the `Producer` protocol, `IntegerSource`, `read` and `makeLabels`, all declared above `LessonMain`. Task 2 adds a conformer that produces a `String`. Task 4 asks you to return two different concrete types from one `some` function; the compiler rejects it because an opaque result must have a single underlying type.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Compile contract, starter stop and success marker: [running a lesson](../STUDY-GUIDE.md#running-a-lesson).
 
 
 
@@ -34,7 +34,7 @@ Start with the answer-free learner artifact in your saved classroom pad. It deli
 
 `associatedtype Item` names a conformer-selected type. `P.Item` refers to that relationship in generic code. `some Protocol` hides one concrete return type; `any Protocol` stores an existential value.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+Each example ends with a trace; method: [tracing a program](../STUDY-GUIDE.md#tracing-a-program).
 
 ## Worked example / walkthrough
 
@@ -68,6 +68,8 @@ struct LessonMain {
 
 **Observe:** The generic consumer knows the produced value is an Int.
 
+**Trace.** `IntegerSource` conforms to `Producer` by implementing `produce()` returning `Int`, so the compiler infers its associated `Item` as `Int`. Calling `read(source)` binds `P` to `IntegerSource`, so the return type `P.Item` resolves to `Int`. The annotation `let value: Int` therefore needs no cast. The body calls `produce()`, which returns 7, and the check confirms it. With an existential parameter instead of a generic one, the item type would be erased and the caller would no longer know it receives an `Int`.
+
 ### Example B: Hide representation with an opaque result
 
 The function selects one underlying result type while exposing its element relationship.
@@ -97,6 +99,8 @@ struct LessonMain {
 
 **Observe:** The caller uses sequence behavior without naming the concrete array type.
 
+**Trace.** `makeLabels()` declares an opaque result, `some Sequence<String>`. Inside, it returns an array literal, so the hidden underlying type is `[String]`, but callers see only a sequence whose elements are strings. The caller can iterate it or pass it to `Array(...)`, which collects a and b, but it cannot call array-only operations such as subscripting. Changing the body to return a `Set` later would not break callers, because they never relied on the concrete type.
+
 ## Exercises
 
 1. **Predict and explain.** Trace the associated Item type through read.
@@ -111,13 +115,15 @@ struct LessonMain {
 
 6. **Transfer and justify.** Choose opaque output or existential storage for an API and document the preserved relationships.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Log each task in the [evidence table](../STUDY-GUIDE.md#recording-exercise-evidence) before opening the explanation.
 
 ## Common pitfalls and diagnosis
 
 Some does not mean any arbitrary type at each return. Existential containers can lose relationships needed by generic operations. Compiler diagnostics often point to a missing type relationship rather than a missing cast.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+Task 4's invalid function has an if-else returning an array in one branch and a `Set` in the other. Keep the compiler error in your notes: it says the return statements do not have matching underlying types. For task 5, an opaque sequence of zero labels must still type-check and produce an empty array, so test `Array(labels).isEmpty` as well as the two-element case.
+
+Repair routine: [building a regression case](../STUDY-GUIDE.md#building-a-regression-case).
 
 ## Progressive hints
 
@@ -127,11 +133,15 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 ## Self-check and next step
 
-Explain Associated type, Opaque type, Type erasure without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+Explain who chooses the concrete type for a generic parameter, an opaque result and an existential value. Say why `read` can return `P.Item` but a function taking `any Producer` cannot easily promise a specific item type. Name one API where hiding the concrete collection type is worth the restriction.
+
+Then follow the general [self-check routine](../STUDY-GUIDE.md#self-check-routine) and save your pad.
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://docs.swift.org/swift-book/documentation/the-swift-programming-language/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+[Documentation](https://docs.swift.org/swift-book/documentation/the-swift-programming-language/): The Swift book chapters Generics, on associated types, and Opaque and Boxed Protocol Types explain the relationship between `some` and `any`.
+
+Provenance and limits: [sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

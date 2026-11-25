@@ -206,11 +206,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Reference semantics:</strong> Assignment copies a reference to shared identity.</p>
 <p><strong>Ownership:</strong> The responsibility for permitted mutation and lifetime.</p>
 <h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>The Linux Docker classroom compiles your saved pad as <code>Program.cs</code> in its fixed .NET 10 project. C# 14 is the matching language generation. This route uses the prepared framework libraries; it does not accept arbitrary project files, NuGet packages, command arguments or interactive input. The explicit <code>Program.Main</code> entrypoint makes compilation and execution visible. <code>Check</code> throws on a false condition in every build configuration, unlike conditional debugging assertions.</p>
-<p>Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.</p>
+<p><code>Point</code> and <code>Counter</code> are helper types declared after <code>Main</code>, and both examples use them. Example A assigns the public field <code>X</code> directly; a struct with mutable public fields appears here only to make copying visible, not as a recommended design.</p>
+<p>Compile contract, starter stop and success marker: <a href="../STUDY-GUIDE.md.html#running-a-lesson">running a lesson</a>.</p>
 <h3 id="syntax-anatomy-and-execution-trace">Syntax anatomy and execution trace<a class="heading-anchor" href="#syntax-anatomy-and-execution-trace" aria-label="Link to this section">#</a></h3>
 <p><code>struct</code> introduces a value type; <code>class</code> introduces a reference type. Assignment has the same spelling for both, so inspect the declared type. <code>ReferenceEquals</code> asks whether references identify the same object, not whether their properties happen to match.</p>
-<p>Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.</p>
+<p>Each example ends with a trace; method: <a href="../STUDY-GUIDE.md.html#tracing-a-program">tracing a program</a>.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="example-a-copy-a-value">Example A: Copy a value<a class="heading-anchor" href="#example-a-copy-a-value" aria-label="Link to this section">#</a></h4>
 <p>The struct contains only integer fields, so its copied state is independently mutable.</p>
@@ -260,6 +260,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> Changing the copied point leaves the original X at 2.</p>
+<p><strong>Trace.</strong> <code>new Point(2, 3)</code> creates a value whose fields hold 2 and 3. <code>var second = first;</code> copies both fields into a separate value. Setting <code>second.X = 9</code> changes only that copy. The check reads <code>first.X</code> as 2 and <code>second.X</code> as 9: two variables, two independent sets of fields. No heap object is shared between them.</p>
 <h4 id="example-b-share-an-object-identity">Example B: Share an object identity<a class="heading-anchor" href="#example-b-share-an-object-identity" aria-label="Link to this section">#</a></h4>
 <p>Passing or assigning a reference by value does not clone the referenced object.</p>
 <pre class="highlighted-code"><code class="language-csharp"><span class="syntax-keyword">using</span> System<span class="syntax-punctuation">;</span>
@@ -309,6 +310,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> Both references observe the same counter increment.</p>
+<p><strong>Trace.</strong> <code>new Counter()</code> allocates one object whose <code>Value</code> is 0, and <code>first</code> stores a reference to it. <code>second = first</code> copies the reference, not the object. <code>second.Value++</code> reads 0 and writes 1 into the shared object, so <code>first.Value</code> also reads 1. <code>ReferenceEquals</code> returns true because both variables identify the same instance.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <ol>
 <li><strong>Predict and explain.</strong> Draw the values and references after each assignment.</li>
@@ -328,10 +330,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <ol start="6">
 <li><strong>Transfer and justify.</strong> Design a data boundary that prevents callers from mutating an internal collection.</li>
 </ol>
-<p>For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.</p>
+<p>Log each task in the <a href="../STUDY-GUIDE.md.html#recording-exercise-evidence">evidence table</a> before opening the explanation.</p>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
 <p>A struct containing a reference copies that reference, so value semantics do not imply a recursive deep copy. Equality and identity are separate questions. Avoid reasoning about correctness from presumed stack placement.</p>
-<p>A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.</p>
+<p>For task 5, give <code>Point</code> a <code>List&lt;int&gt;</code> field: copying the struct copies the list reference, so an item added through one copy appears in the other. For task 2, two separate <code>Counter</code> objects with <code>Value</code> 1 are not <code>ReferenceEquals</code>, and because Counter does not override equality, <code>==</code> also compares references and returns false.</p>
+<p>Repair routine: <a href="../STUDY-GUIDE.md.html#building-a-regression-case">building a regression case</a>.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <ol>
 <li>Reproduce Example A (Copy a value) before changing anything, and confirm its observation: Changing the copied point leaves the original X at 2.</li>
@@ -339,9 +342,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>Before opening the explanation, test your task 3 attempt against this lesson&#x27;s main pitfall: A struct containing a reference copies that reference, so value semantics do not imply a recursive deep copy.</li>
 </ol>
 <h3 id="self-check-and-next-step">Self-check and next step<a class="heading-anchor" href="#self-check-and-next-step" aria-label="Link to this section">#</a></h3>
-<p>Explain Value semantics, Reference semantics, Ownership without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.</p>
+<p>Draw boxes for <code>first</code> and <code>second</code> after each assignment in both examples and mark which ones share storage. Explain why equal property values do not imply the same object. For task 6, describe how your type hands out its internal list so that a caller cannot add to it.</p>
+<p>Then follow the general <a href="../STUDY-GUIDE.md.html#self-check-routine">self-check routine</a> and save your pad.</p>
 <h3 id="sources-and-execution-boundary">Sources and execution boundary<a class="heading-anchor" href="#sources-and-execution-boundary" aria-label="Link to this section">#</a></h3>
-<p><a href="https://learn.microsoft.com/en-us/dotnet/csharp/">Official language or framework documentation</a>. The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.</p>
+<p><a href="https://learn.microsoft.com/en-us/dotnet/csharp/">Documentation</a>: The reference articles on value types, reference types and equality comparisons separate copying, identity and equality.</p>
+<p>Provenance and limits: <a href="../STUDY-GUIDE.md.html#sources-and-execution-boundary">sources and execution boundary</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for csharp-012: Value copies, references and mutation ownership.
 Read courses/csharp/guides/csharp-012.md and courses/csharp/lessons/csharp-012.cs. Prerequisites: csharp-011.

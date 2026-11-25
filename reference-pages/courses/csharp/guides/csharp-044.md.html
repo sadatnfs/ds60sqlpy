@@ -206,11 +206,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Correlation identity:</strong> A value linking observations of one operation.</p>
 <p><strong>Metric:</strong> An aggregated numerical observation over a defined population.</p>
 <h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>The Linux Docker classroom compiles your saved pad as <code>Program.cs</code> in its fixed .NET 10 project. C# 14 is the matching language generation. This route uses the prepared framework libraries; it does not accept arbitrary project files, NuGet packages, command arguments or interactive input. The explicit <code>Program.Main</code> entrypoint makes compilation and execution visible. <code>Check</code> throws on a false condition in every build configuration, unlike conditional debugging assertions.</p>
-<p>Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.</p>
+<p><code>Event</code> is a record declared after <code>Main</code>, and the examples serialize it with <code>JsonSerializer</code> from <code>System.Text.Json</code>. No logger or metrics package is needed: the lesson is about what an event contains and how its counts add up, which the pad can check exactly without timing anything.</p>
+<p>Compile contract, starter stop and success marker: <a href="../STUDY-GUIDE.md.html#running-a-lesson">running a lesson</a>.</p>
 <h3 id="syntax-anatomy-and-execution-trace">Syntax anatomy and execution trace<a class="heading-anchor" href="#syntax-anatomy-and-execution-trace" aria-label="Link to this section">#</a></h3>
 <p>Use a record for a stable event schema and serialize explicit safe fields. Stopwatch is appropriate for elapsed duration, but tests should not assert a narrow timing threshold. Keep correlation identity separate from user secrets.</p>
-<p>Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.</p>
+<p>Each example ends with a trace; method: <a href="../STUDY-GUIDE.md.html#tracing-a-program">tracing a program</a>.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="example-a-emit-a-safe-result-record">Example A: Emit a safe result record<a class="heading-anchor" href="#example-a-emit-a-safe-result-record" aria-label="Link to this section">#</a></h4>
 <p>Named fields retain meaning without depending on a fragile formatted sentence.</p>
@@ -252,6 +252,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
                       <span class="syntax-keyword">int</span> Count<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The serialized event contains an explicit rejected outcome.</p>
+<p><strong>Trace.</strong> <code>new Event(&quot;fixture-1&quot;, &quot;validate&quot;, &quot;rejected&quot;, 2)</code> fills four named fields. <code>JsonSerializer.Serialize</code> writes them under their C# names, producing an object with OperationId, Stage, Outcome and Count. Parsing that text and reading the Outcome property returns rejected. The default serializer keeps Pascal case, so <code>GetProperty(&quot;outcome&quot;)</code> would throw <code>KeyNotFoundException</code>. Readers of the event must use the exact field names it was written with.</p>
 <h4 id="example-b-keep-outcome-counts-consistent">Example B: Keep outcome counts consistent<a class="heading-anchor" href="#example-b-keep-outcome-counts-consistent" aria-label="Link to this section">#</a></h4>
 <p>The counts come from the emitted events, so a record that was never classified would make the first check fail. The denominator is stated explicitly; changing it changes the metric meaning.</p>
 <pre class="highlighted-code"><code class="language-csharp"><span class="syntax-keyword">using</span> System<span class="syntax-punctuation">;</span>
@@ -293,6 +294,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
                       <span class="syntax-keyword">int</span> Count<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The accepted and rejected events account for all five submitted records, and the rejection rate is 0.4.</p>
+<p><strong>Trace.</strong> Two events share operation op-7: accepted carries 3 and rejected carries 2. <code>events.Sum</code> adds the counts to 5, matching <code>submitted</code>, so every input is accounted for. The rate casts 2 to <code>double</code> before dividing by 5, giving exactly the 0.4 the check compares against. Without the cast, <code>2 / 5</code> is integer division and yields 0.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <ol>
 <li><strong>Predict and explain.</strong> Identify safe fields and the event population.</li>
@@ -312,10 +314,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <ol start="6">
 <li><strong>Transfer and justify.</strong> Design a latency report that includes percentiles, sample count and measurement boundaries.</li>
 </ol>
-<p>For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.</p>
+<p>Log each task in the <a href="../STUDY-GUIDE.md.html#recording-exercise-evidence">evidence table</a> before opening the explanation.</p>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
 <p>Correlation identifiers should not contain credentials or private payloads. High-cardinality dimensions can overwhelm metric systems. Missing observations must not be silently counted as successful operations.</p>
-<p>A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.</p>
+<p>For task 4, a counter incremented before the save completes reports success for writes that then fail; move it after the awaited persistence call. For task 5, zero submitted records gives NaN from <code>0.0 / 0</code> and <code>DivideByZeroException</code> from integer <code>0 / 0</code>, so choose an explicit no-data value instead of either one.</p>
+<p>Repair routine: <a href="../STUDY-GUIDE.md.html#building-a-regression-case">building a regression case</a>.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <ol>
 <li>Reproduce Example A (Emit a safe result record) before changing anything, and confirm its observation: The serialized event contains an explicit rejected outcome.</li>
@@ -323,9 +326,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>Before opening the explanation, test your task 3 attempt against this lesson&#x27;s main pitfall: Correlation identifiers should not contain credentials or private payloads.</li>
 </ol>
 <h3 id="self-check-and-next-step">Self-check and next step<a class="heading-anchor" href="#self-check-and-next-step" aria-label="Link to this section">#</a></h3>
-<p>Explain Structured event, Correlation identity, Metric without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.</p>
+<p>List which <code>Event</code> fields are safe to log and which input content must never appear. Explain why the counts must sum to <code>submitted</code>. For task 6, describe a latency report with p50, p95 and p99, the number of samples behind each, and where the stopwatch starts and stops.</p>
+<p>Then follow the general <a href="../STUDY-GUIDE.md.html#self-check-routine">self-check routine</a> and save your pad.</p>
 <h3 id="sources-and-execution-boundary">Sources and execution boundary<a class="heading-anchor" href="#sources-and-execution-boundary" aria-label="Link to this section">#</a></h3>
-<p><a href="https://learn.microsoft.com/en-us/dotnet/csharp/">Official language or framework documentation</a>. The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.</p>
+<p><a href="https://learn.microsoft.com/en-us/dotnet/csharp/">Documentation</a>: The <code>System.Text.Json</code> serialization articles and the .NET diagnostics overview cover event shapes, naming and measurement.</p>
+<p>Provenance and limits: <a href="../STUDY-GUIDE.md.html#sources-and-execution-boundary">sources and execution boundary</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for csharp-044: Diagnostics, structured events and operational evidence.
 Read courses/csharp/guides/csharp-044.md and courses/csharp/lessons/csharp-044.cs. Prerequisites: csharp-043.

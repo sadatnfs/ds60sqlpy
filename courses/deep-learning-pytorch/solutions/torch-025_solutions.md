@@ -2,6 +2,8 @@
 
 Open these answers only after attempting Contrastive embeddings and negative sampling yourself. They reuse the guide's literal inputs, starting from Example A, Compare dot and cosine scores, so a discrepancy points at one step. The executable companion runs the assertions; this page explains why each one tests Contrastive objective, Cosine similarity, False negative. After a pass, choose a new input for exercise 6, Separate temperature from ranking, without looking.
 
+After comparing, follow the [review steps](../STUDY-GUIDE.md#after-the-solutions).
+
 ## Mechanism review
 
 Embedding objectives teach a representation to preserve selected relationships. A positive pair is declared related under a task definition, while a negative pair is declared unrelated. Those labels are assumptions supplied by the dataset, not facts inferred from a similarity score. Dot products depend on vector magnitude and direction. Cosine similarity divides by both norms and compares direction. A high score can still belong to an irrelevant or duplicated example.
@@ -142,6 +144,3 @@ assert cool[0, 0] > warm[0, 0] and warm.argmax(1).item() == cool.argmax(1).item(
 
 **Verify:** In a fresh process, the exercise checks confirm `cool[0, 0] > warm[0, 0]` and `warm.argmax(1).item() == cool.argmax(1).item() == 0`.
 
-## Review after comparison
-
-Repeat exercise 4, Inspect a projection gradient, with one changed fixture value and predict the difference before running it. Keep your failing attempt at exercise 5, Detect contradictory candidate identity, beside the repaired result. A missing framework is not a failing assertion. These solutions use only local fixtures.

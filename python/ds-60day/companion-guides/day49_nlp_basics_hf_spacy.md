@@ -87,33 +87,13 @@ sarcasm, dialect, negation, or domain-specific language.
 
 ## How to run this lesson
 
-**Default Docker classroom:** open `python-49` for its guide, notebook and capability notice. The default Core does not include the `nlp` extra, so the complete legacy notebook is unavailable there until that app environment is deliberately prepared. Pressing Run or choosing a notebook kernel does not install packages.
+**Default Docker classroom:** `python-49` opens for reading, but the default Core does not include the `nlp` extra. Add `nlp` using the [contributor setup](../../../CONTRIBUTING.md) when you want to tokenize locally; a host notebook environment and a Docker app image are separate.
 
-**Prepared browser alternative:** use the [offline NLP course](../../../courses/nlp/guides/nlp-001.md) in its declared runtime. Its supported examples have their own package and execution contract; this does not qualify every legacy optional extension.
-
-**Explicit legacy preparation:** retain the contributor extras in [CONTRIBUTING](../../../CONTRIBUTING.md) and add `nlp` only when needed. See [dependency profiles](../../../docs/dependency-profiles.md) and [Docker app package options](../../../docs/docker-profiles.md) for deliberate preparation. A host notebook environment and a Docker app image are separate. Do not install packages inside a learner pad.
+**Prepared browser alternative:** The [offline NLP course](../../../courses/nlp/guides/nlp-001.md) starts from the same question of units, documents versus tokens, with a small corpus in its own runtime.
 
 The default tokenizer examples need spaCy; they do not contain a trained sentiment or POS model. Cached Transformers inference and the IMDB training reference are explicitly enabled local-asset extensions. Prepare Torch as well as the nlp extra for those extensions.
 
-**Optional native notebook/editor route:** the instructions below describe
-separately prepared host tools. They are useful alternatives, not prerequisites
-for opening this lesson in the Docker classroom.
-
-1. Open the Day 49 learner notebook from this guide's **Next
-   step** section in VS Code or JupyterLab.
-2. Select the `Python (ds60sqlpy)` kernel. Start at the top and use
-   **Run All** only after making the written predictions; the default data examples are offline once the declared packages are prepared. Optional services and model assets have separate requirements.
-3. Keep experiments in new scratch cells. Do not edit the official
-   solution while attempting the numbered practice.
-4. Restart the kernel and run from the first cell before calling the
-   lesson complete. A clean run catches hidden state and stale
-   variables.
-
-Linux, macOS, or Ubuntu in Windows WSL 2:
-
-```bash
-.venv/bin/python -m jupyter lab
-```
+The [Python study guide](../../STUDY-GUIDE.md) covers the notebook route and preparing optional extras.
 
 ## Concept deep dive: tokenization contracts, cached NLP models, and sensitive-text evaluation
 
@@ -137,10 +117,6 @@ privacy boundary.
 - **token offsets and truncation:** connect tokens back to original text and define what content the model actually saw.
 
 ### Focused example A: inspect an offline spaCy token boundary
-
-Before running the example, predict the shape, type, or direction of the
-result. Write the prediction down so that a surprise becomes evidence
-rather than something to overlook.
 
 ```python
 import spacy
@@ -215,9 +191,6 @@ fine-tune and a spaCy matcher. That local project requires separately prepared d
 
 Treat tokenization, model identity, cache state, evaluation boundaries, and sensitive text handling as first-class NLP pipeline metadata.
 
-Predict or plan before you run code. Use the hint only after an honest
-attempt, and record the evidence that would prove your result correct.
-
 3. **Truncation debugging:** Create a text longer than the model limit and inspect token count, special tokens, truncation, attention mask, and which part of the document is lost.
    **Progressive hint:** Request truncation and max_length explicitly. The tokenizer can report overflowing tokens or support sliding windows.
 
@@ -275,8 +248,7 @@ often easier to audit.
 
 ## Ask an AI tutor about this lesson
 
-The lesson is complete without an AI assistant. If you want optional
-coaching, copy this prompt into the AI tutor while the repository root is open:
+The lesson is complete without AI. For optional coaching, copy this prompt with the repository root open:
 
 ```text
 Tutor me through `python-49` (Day 49: NLP Basics with Hugging Face and spaCy).

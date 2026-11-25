@@ -92,4 +92,4 @@ cases show finite historical coverage and a targeted correction that proves
 unrelated output stayed unchanged, rather than treating a successful trigger
 response as proof of a completed data repair.
 
-The [complete Airflow workshop](../../projects/airflow/README.md) provides the maintained files, preparation, lifecycle and exact qualification boundaries for these cases.
+The [Airflow workshop](../../projects/airflow/README.md) action `backfill-check` triggers `classroom_correction` for the first day only, requires that partition's total to become 15, and checks that the second day's file is byte for byte unchanged.

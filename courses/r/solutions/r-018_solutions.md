@@ -1,6 +1,6 @@
 # r-018: reference reasoning
 
-Use the [complete reference](r-018_reference.R) with the guide's declared inputs and runtime. Every worked example is also a standalone script.
+Run the [complete reference](r-018_reference.R) under the [run rules](../STUDY-GUIDE.md#run-a-chapter).
 
 ## Why the implementation has this shape
 
@@ -96,4 +96,6 @@ Keep both representations with their meanings stated.
 
 ## What the checks establish
 
-The reference makes 6 `stopifnot()` checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.
+The checks pin that adding one day to 2024-02-28 lands on February 29, that `difftime()` reports exactly 2 hours for a 7200 second gap, that a parsed date inherits `Date`, that the same UTC instant formats as 07:00 in America/New_York, that an impossible date parses to NA, and that one second later is numerically later. They do not test daylight saving transitions in other zones.
+
+The reference makes 6 `stopifnot()` checks; see [what a passing run proves](../STUDY-GUIDE.md#what-a-passing-run-proves).

@@ -1,6 +1,6 @@
 # go-025: explained solutions
 
-These are comparison material after an attempt or explicit reveal. The executable reference implements all six cases in one `main.go`.
+Compare after an attempt ([using solutions](../STUDY-GUIDE.md#use-the-solutions)). `courses/go/solutions/go-025_solution.go` implements all six cases.
 
 ## Mechanism
 
@@ -10,7 +10,7 @@ make(chan int, 2) creates a two-element buffer. value, ok := <-ch distinguishes 
 
 ## 1. Drain before iteration ends: change one input
 
-Copy worked example 1 into a scratch pad and change `ch <- 2` to `ch <- 3`. Before running, predict which check fails and which value it now sees; then run it and restore the original line.
+Copy worked example 1, change `ch <- 2` to `ch <- 3` and predict the failure before running; then restore the line.
 
 The unchanged code is worked example 1:
 
@@ -26,7 +26,9 @@ for v := range ch {
 check(sum == 5, "drain")
 ```
 
-**Expected:** The changed run panics with `drain` because `sum == 5` no longer holds. Restoring the original line brings back the worked observation: both values arrive and the sum is 5.
+**Expected:** The edited run panics with `drain` because `sum == 5` no longer holds.
+
+**Verify:** Restoring `ch <- 2` makes the check pass again with the worked observation: both values arrive and the sum is 5.
 
 Close does not erase buffered values. Iteration ends after those values have been received.
 
@@ -40,7 +42,7 @@ Close does not erase buffered values. Iteration ends after those values have bee
 
 ## 2. Distinguish zero from closed: debug a regression
 
-A regression changed one token in worked example 2, so one line now reads `ch <- 1`. Run worked example 2 with that line, use the failure to locate the defect and repair it without changing the check.
+A one-token regression in worked example 2 makes a line read `ch <- 1`. Repair it without changing the check.
 
 The unchanged code is worked example 2:
 
@@ -53,7 +55,9 @@ b, okB := <-ch
 check(a == 0 && b == 0 && okA && !okB, "closed presence")
 ```
 
-**Expected:** Before the repair the program panics with `closed presence`; after it the line reads `ch <- 0` again and the first zero has ok true; the second has ok false.
+**Expected:** The defective run panics with `closed presence`; after restoring `ch <- 0`, the first zero has ok true; the second has ok false.
+
+**Verify:** The failing run shows message `closed presence`; after the repair `a == 0 && b == 0 && okA && !okB` holds again.
 
 Value equality cannot distinguish a delivered zero from the post-closure zero. The boolean carries completion information.
 
@@ -81,6 +85,8 @@ check(count == 2, "producer close")
 
 **Expected:** The consumer receives exactly two values.
 
+**Verify:** Your solution must keep `count == 2` true. Control: changing `count := 0` to `count := 1` panics with message `producer close`; revert it.
+
 The producer knows all sends are finished. A receiver closing early could race with a later send.
 
 **Approach.** Let `produce` own the channel: it sends 1 and 2 on the unbuffered channel and its deferred `close` runs after the last send, which ends the consumer's `range`.
@@ -105,6 +111,8 @@ check(len(ch) == 2 && cap(ch) == 2, "buffer")
 ```
 
 **Expected:** Its buffered length is two.
+
+**Verify:** Your solution must keep `len(ch) == 2 && cap(ch) == 2` true. Control: changing `ch := make(chan int, 2)` to `ch := make(chan int, 3)` panics with message `buffer`; revert it.
 
 This sequential fixture has an exact count. Concurrent length checks cannot prove a later send will be nonblocking.
 
@@ -136,6 +144,8 @@ check(selected, "nil arm")
 
 **Expected:** Only the ready arm can proceed.
 
+**Verify:** Your solution must keep `selected` true. Control: changing `selected = true` to `selected = false` panics with message `nil arm`; revert it.
+
 Nil can deliberately disable an unneeded select case. It does not signal completion like a closed channel.
 
 **Approach.** Use a nil receive channel as the disabled arm and a closed `ready` channel as the live one.
@@ -160,6 +170,8 @@ check(received[0] == 1, "copy")
 ```
 
 **Expected:** The received copy stays 1.
+
+**Verify:** Your solution must keep `received[0] == 1` true. Control: changing `original := []int{1}` to `original := []int{2}` panics with message `copy`; revert it.
 
 A channel sends the slice descriptor. The explicit copy establishes independent storage before communication.
 

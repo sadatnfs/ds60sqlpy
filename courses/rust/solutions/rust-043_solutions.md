@@ -1,6 +1,8 @@
 # rust-043: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [rust-043_solution.rs](rust-043_solution.rs). It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.
+Executable reference: [rust-043_solution.rs](rust-043_solution.rs), which runs both examples and the coded answers.
+
+Open this only after [an attempt](../STUDY-GUIDE.md#attempt-a-lesson).
 
 ## Why the two examples differ
 
@@ -26,7 +28,7 @@ State the schema and framing expected by each reader.
 
 Add a CSV quoted field containing a comma and inspect its single parsed value.
 
-**Reference answer.** The same statements run as the `Task 2` block of the reference program; here they are wrapped in `main` as a complete file.
+**Reference answer**, wrapped in `main`; the reference runs it as its `Task 2` block.
 
 ```rust
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -62,7 +64,7 @@ The CSV parser treats a comma inside double quotes as part of the value and remo
 
 Read a small nullable dataset and validate its domain ranges afterward.
 
-**Reference answer.** The same statements run as the `Task 3` block of the reference program; here they are wrapped in `main` as a complete file.
+**Reference answer**, wrapped in `main`; the reference runs it as its `Task 3` block.
 
 ```rust
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -101,7 +103,7 @@ Diagnose using the foundation split_once parser for general quoted CSV.
 
 Test malformed numeric text, explicit null and records spanning more than one batch.
 
-**Reference answer.** The same statements run as the `Task 5` block of the reference program; here they are wrapped in `main` as a complete file.
+**Reference answer**, wrapped in `main`; the reference runs it as its `Task 5` block.
 
 ```rust
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -148,7 +150,7 @@ A parse error is reported for the batch containing it, so the caller must decide
 
 Design an inference-to-reviewed-schema workflow with checks for later type and nullability drift.
 
-No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **Schema inference**, and state one limitation of your choice.
+**Judging criteria.** A strong workflow runs inference once on a representative sample, saves the inferred schema as a reviewed file, and from then on reads with that explicit schema as Example A does, never re-inferring in production. Every run checks for drift: a value that no longer parses as its declared type, or a null in a field declared non-nullable, is an error naming the row and field. Schema changes go through review like code. State one limitation: a sample can miss rare values, so the first reviewed schema may still be too narrow.
 
 ## Mechanism and diagnostic reasoning
 
@@ -162,4 +164,6 @@ NDJSON is not a single enclosing JSON array. Reader success does not establish d
 
 ## Review before continuing
 
-Run the reference and confirm that it prints `rust-043: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.
+Rebuild Example B (Read newline-delimited JSON) from a blank pad.
+
+Review routine: [Self-check and review](../STUDY-GUIDE.md#self-check-and-review).

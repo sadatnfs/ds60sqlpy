@@ -2,67 +2,20 @@
 
 ## How to run this lesson
 
-Start the Linux-container engine and run `./classroom` from the repository
-root. On Windows, use Ubuntu in WSL 2 or the thin
-`START_DOCKER_CLASSROOM.cmd` wrapper. Choose **PostgreSQL** on the shared
-`/classroom` home, then open **sql-test-01**. The
-[launcher guide](../../../docs/one-command-classroom.md) covers first preparation, strict resume and
-the saved project selection. No host Python or PostgreSQL installation is
-required for this browser route.
+Start **sql-test-01** from `./classroom` using the shared [run steps](../../STUDY-GUIDE.md#run-a-lesson-in-the-classroom).
 
-1. Read the prerequisite and fixture notes before running the file. Use only
-   the local disposable `advanced_sql_training` database.
-2. Choose **Whole SQL lesson (psql)** for the cataloged learner script. This
-   preserves the lesson's reviewed psql directives, relative includes and
-   transaction behavior. **SQL snippet** is appropriate for ordinary SQL
-   statements, but is not a replacement for an entire script's setup.
-3. The **Course database** panel above the code shows whether the course
-   training tables are loaded. Missing tables load automatically before your
-   first run (or choose **Load course tables**) and stay loaded for later
-   lessons. **Reset training data** restores the original rows only when your
-   own changes made results differ; it keeps your saved code and notes.
-4. Edit the learner copy in the classroom and save your prediction before
-   running. Its whole-script workspace is
-   `.learning/sql/sql-test-01/lesson/workspace/sql/professional/lessons/sql_test_01_contracts_migrations.sql`.
-   For browser work this path is inside the Docker learning volume, not a
-   newly created host folder beside your checkout. The checked-in source
-   remains the answer-free starting artifact.
-5. Run the whole script and inspect the full transcript. The runner uses
-   `psql -X -v ON_ERROR_STOP=1 -f`. SELECT output has columns, rows and a row
-   count; DDL/DML has command tags; intentional checks may produce NOTICE
-   messages. An unexpected ERROR or nonzero exit is a failure to diagnose,
-   even when an earlier query printed plausible values.
-6. Verify the lesson's expected grain, ordering, constraints and declared
-   transaction or cleanup outcome. Keep required ROLLBACK statements.
-   The warehouse sequence and other explicitly stateful exercises explain
-   when state is committed. Read saved output without rerunning it when
-   reviewing an earlier attempt.
+Choose **Whole SQL lesson (psql)**. The script runs on `advanced_sql_training`
+in one transaction. It creates the `assert_true` helper, a two-step migration
+ledger, 2 customers, 2 orders, 3 order lines and a fixture manifest, then runs
+five assertions. A clean run prints five `PASS [...]` notices
+(`orders column contract`, `ordered migration manifest`, `no order orphans`,
+`reported totals reconcile`, `fixture manifest counts`) followed by
+`Expected assertion failure was observed` from the negative control. Any
+`FAIL [...]` error stops the script, because the runner uses `ON_ERROR_STOP=1`.
+`ROLLBACK` then removes `pro_contract_test_lab`. Save attempts in
+`.learning/sql/sql-test-01/lesson/workspace/sql/professional/lessons/sql_test_01_contracts_migrations.sql`.
 
-If a relation is missing, inspect the lesson's required fixture and predecessor
-rather than guessing a new table definition. If authentication or runtime
-readiness fails, use `./classroom status` and the setup guide. Keep credentials
-out of SQL, notebooks, screenshots and committed files. Repair the first error
-before trusting partial output, and reveal separate solutions only when you
-want to compare after an attempt.
-
-### Optional contributor notebook route
-
-For notebook work, deliberately prepare the Linux/WSL contributor environment
-from [CONTRIBUTING.md](../../../CONTRIBUTING.md), including a compatible psql client and
-the notebook dependencies. Generate this lesson's private workspace through
-the maintained CLI:
-
-```sh
-uv run --no-sync python scripts/course.py sql notebook sql-test-01
-```
-
-Open the printed notebook path in that environment's JupyterLab. It uses the
-same catalog-derived learner-copy layout in that contributor checkout and
-executes the complete script through psql. Its host-side state is separate
-from the Docker browser's named volume. Follow
-[guided SQL notebooks](../../../docs/guided-sql-notebooks.md) for explicit local connection
-selection and kernel setup. Notebook generation does not execute SQL or
-authorize a reset.
+The optional notebook route starts with `uv run --no-sync python scripts/course.py sql notebook sql-test-01`; see the [study guide](../../STUDY-GUIDE.md#optional-contributor-notebook-route).
 
 ## Level and prerequisites
 
@@ -85,24 +38,33 @@ The harness needs no third-party framework and rolls back its test schema.
 
 ## A beginner's mental model for this lesson
 
-A **table** stores facts in named columns. A **row** is one occurrence at the
-table's declared grain. A query creates a temporary **result set**: rows printed
-on screen are not automatically stored. The key vocabulary for this lesson is Assertion, Fixture, Negative control, Contract, Invariant test, Reconciliation. Its worked SQL reads or creates `pro_contract_test_lab.schema_migrations`, `pro_contract_test_lab.customers`, `pro_contract_test_lab.orders`, `pro_contract_test_lab.order_lines`, `pro_contract_test_lab.fixture_manifest`.
+A SQL test is a query whose answer must be true. This lesson turns schema
+contracts, invariants and reconciliations into calls to one helper that raises
+an error when the answer is false or unknown, so a broken rule stops the run
+instead of printing a row someone has to notice. The vocabulary below
+(assertion, fixture, negative control, contract, invariant test,
+reconciliation) names the parts of that harness.
 
-Before writing a query, complete this sentence: “One output row represents
-___.” Joins can multiply rows, filters can remove them, grouping can collapse
-many rows into one, and window functions can add calculations while preserving
-row count. For a normal analytical `SELECT`, use this logical reading order:
-`FROM`/`JOIN` (including `ON`) → `WHERE` → `GROUP BY`/aggregates → `HAVING` →
-window calculations → `SELECT` → `ORDER BY` → `LIMIT`. PostgreSQL may execute a
-different physical plan while preserving those semantics.
+Here most output is notices rather than rows. Each `assert_true` call evaluates
+one boolean over the whole fixture, usually `NOT EXISTS (...)`, so "one
+assertion" is the grain. The `orders_contract_mismatches` view is the
+exception: it full-joins actual and expected columns by position and returns
+one row per position whose name, type or nullability differs from
+`expected_orders_contract`, so a correct schema returns zero rows.
 
-The worked walkthrough's lesson-specific task is: `assert_true(name, condition, detail)` treats both false and NULL as failure, raises an exception, and emits a PASS notice only after success. With `ON_ERROR_STOP=1`, an uncaught failed assertion gives the command a nonzero exit status, CI cannot mistake printed warnings for success.
-The first runnable example has a concrete contract: Example 1 must print the expected DDL command tag for `pro_contract_test_lab.schema_migrations`. Verify the object in `pg_catalog.pg_class`, run one accepted behavior and one rejected boundary behavior, and confirm the lesson rollback/cleanup removes only course-owned state.
+`assert_true(name, condition, detail)` tests
+`p_condition IS DISTINCT FROM true`, so both `false` and `NULL` fail. That
+matters because a comparison against a missing value is `NULL`, and a helper
+that only rejected `false` would let it pass silently. Under `ON_ERROR_STOP=1`
+an uncaught failure gives `psql` a nonzero exit status, which is what CI needs.
+The negative control then calls the helper with `false` on purpose and catches
+only the expected `FAIL [negative control]` message, proving the helper can
+fail.
 
 ## Two worked SQL examples
 
-These worked excerpts come from `sql/professional/lessons/sql_test_01_contracts_migrations.sql`. Use **Whole SQL lesson (psql)** in the unified classroom for the complete file, including its fixture and transaction context. The optional contributor notebook and prepared `psql` routes are described above.
+Examples 1 and 2 are the first two tables of the fixture that the assertions
+check.
 
 ### Example 1
 
@@ -113,9 +75,13 @@ CREATE TABLE pro_contract_test_lab.schema_migrations (
 );
 ```
 
-**How to read it:** Example 1 is data definition language (DDL). `psql` prints a command tag when PostgreSQL accepts the definition; a later catalog or behavior check must prove that the intended rule exists.
+**How to read it:** `migration_id` orders the steps and `migration_name` is
+unique, so the same migration cannot be recorded twice under different numbers.
+The `ordered migration manifest` assertion later checks the ledger holds
+exactly steps 1 and 2.
 
-**Expected result/shape:** Example 1 must print the expected DDL command tag for `pro_contract_test_lab.schema_migrations`. Verify the object in `pg_catalog.pg_class`, run one accepted behavior and one rejected boundary behavior, and confirm the lesson rollback/cleanup removes only course-owned state.
+**Expected result/shape:** `CREATE TABLE`. Two rows follow:
+`create_order_model` and `require_order_status`.
 
 ### Example 2
 
@@ -127,9 +93,14 @@ CREATE TABLE pro_contract_test_lab.customers (
 );
 ```
 
-**How to read it:** Example 2 is data definition language (DDL). `psql` prints a command tag when PostgreSQL accepts the definition; a later catalog or behavior check must prove that the intended rule exists.
+**How to read it:** The identity key is internal, `customer_key` is the stable
+business key, and the `CHECK` rejects a blank or all-space name. Orders are
+later loaded by joining on `customer_key`, so the fixture never hard-codes
+generated ids.
 
-**Expected result/shape:** Example 2 must print the expected DDL command tag for `pro_contract_test_lab.customers`. Verify the object in `pg_catalog.pg_class`, run one accepted behavior and one rejected boundary behavior, and confirm the lesson rollback/cleanup removes only course-owned state.
+**Expected result/shape:** `CREATE TABLE`, then two customers, `CUS-100`
+(Avery) and `CUS-101` (Morgan). Their orders reconcile exactly: ORD-100 lines
+total 1 x 10.00 + 3 x 5.00 = 25.00 and ORD-101 totals 2 x 7.00 = 14.00.
 
 ## Learning objectives
 
@@ -284,9 +255,8 @@ upgrades.
 
 ## Ask an AI tutor about this lesson
 
-An AI tutor is optional; the guide, learner SQL, PostgreSQL, and expected checks are
-enough to complete the lesson offline. If you want a patient tutor, copy this
-prompt after opening the repository in the AI tutor:
+The lesson and expected observations are sufficient offline. For optional
+coaching, copy:
 
 ```text
 Tutor me through sql-test-01: SQL Tests, Migration Checks, and Data Contracts.

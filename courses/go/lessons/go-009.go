@@ -3,11 +3,11 @@ package main
 import "fmt"
 
 func main() {
-	// Exercise 1: Mutate through a pointer: change one input: Copy worked example 1 into a scratch pad and change `n := 4` to `n := 5`. Before running, predict which check fails and which value it now sees; then run it and restore the original line.
-	// Expected: The changed run panics with `pointer mutation` because `n == 5` no longer holds. Restoring the original line brings back the worked observation: the caller value becomes 5.
+	// Exercise 1: Mutate through a pointer: change one input: Copy worked example 1, change `n := 4` to `n := 5` and predict the failure before running; then restore the line.
+	// Expected: The edited run panics with `pointer mutation` because `n == 5` no longer holds.
 
-	// Exercise 2: Return a live value: diagnose an edited check: A careless edit changed the check in worked example 2 so that it reads `check(*p != 7, "returned pointer")`. Run worked example 2 with that line, explain why the edited check now fails for the same program state, and restore it.
-	// Expected: Before the repair the program panics with `returned pointer`; after it the line reads `check(*p == 7, "returned pointer")` again and the returned pointer remains valid and reads 7.
+	// Exercise 2: Return a live value: diagnose an edited check: A careless edit rewrote the check in worked example 2 as `check(*p != 7, "returned pointer")`. Explain the failure, then restore it.
+	// Expected: The defective run panics with `returned pointer`; after restoring `check(*p == 7, "returned pointer")`, the returned pointer remains valid and reads 7.
 
 	// Exercise 3: Guard absence: Represent an optional integer with a nil pointer and inspect it without dereferencing.
 	// Expected: The pointer is absent.

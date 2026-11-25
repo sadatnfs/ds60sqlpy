@@ -283,7 +283,7 @@ result <span class="syntax-operator">=</span> windows<span class="syntax-punctua
 <p>Record source timestamps, watermark progress, window boundaries, lateness policy and output identities. Inspect partition-level progress and idleness when a window appears stuck. A quiet input may be delaying progress without any record being invalid. A final maximum watermark from a bounded source is different from an unbounded production source promising completeness forever.</p>
 <p><strong>Interview discussion: can an out-of-order event still be on time?</strong> Yes. It can arrive before the relevant watermark/lateness boundary closes its window. The two cases use real Flink window processing to distinguish an older record accepted before progress from a later arrival routed after closure, with exact interval and identity checks.</p>
 <h3 id="complete-worked-source">Complete worked source<a class="heading-anchor" href="#complete-worked-source" aria-label="Link to this section">#</a></h3>
-<p>This is a project-only command notebook. Read and edit it in the classroom; run its explicitly labeled commands from the copied owned Docker workshop. The classroom does not execute these service commands.</p>
+<p>The classroom does not execute these service commands. See the <a href="../STUDY-GUIDE.md.html#workshop-notebooks">workshop rules</a>.</p>
 <h2 id="actual-controlled-event-time-windows">Actual controlled event-time windows<a class="heading-anchor" href="#actual-controlled-event-time-windows" aria-label="Link to this section">#</a></h2>
 <pre class="highlighted-code"><code class="language-bash">bash run.sh event-time
 bash run.sh readback</code></pre>

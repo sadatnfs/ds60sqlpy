@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cuda/python/solutions/cuda-110_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="cuda-110-explained-solutions">cuda-110: explained solutions<a class="heading-anchor" href="#cuda-110-explained-solutions" aria-label="Link to this section">#</a></h2>
-<p>These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.</p>
+<p>Compare with your <a href="../lessons/cuda-110.md.html">worksheet</a> attempt.</p>
 <h3 id="exercise-1-list-compatibility-axes">Exercise 1: List compatibility axes<a class="heading-anchor" href="#exercise-1-list-compatibility-axes" aria-label="Link to this section">#</a></h3>
 <p>Python framework compiler toolkit OS architecture and driver.</p>
 <p><strong>Approach.</strong> List compatibility axes for a custom operator: Python version, framework version and ABI, compiler, CUDA toolkit, operating system, host architecture, driver and device targets.</p>
@@ -231,9 +231,19 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Why it is correct here.</strong> The compatibility matrix is a claim, and only tests in each environment support it. A gate stops a release with untested combinations.</p>
 <p><strong>A plausible wrong approach.</strong> Testing one environment and declaring the whole matrix supported presents untested claims as verified.</p>
 <p><strong>How to verify.</strong> Store test results per environment with the release and reject it if any declared row lacks a passing result.</p>
+<h3 id="self-check-answers">Self-check answers<a class="heading-anchor" href="#self-check-answers" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>Why does a wheel filename not guarantee GPU support?</strong> It encodes Python and platform tags, not every device architecture the embedded code was compiled for.</li>
+</ol>
+<ol start="2">
+<li><strong>When can intermediate device code help portability?</strong> It can be compiled by a driver for a newer device, but only within the documented compatibility rules.</li>
+</ol>
+<ol start="3">
+<li><strong>Is publishing a package part of this lesson&#x27;s workflow?</strong> No. Publishing or using external registries is a separately authorized workflow, kept apart from classroom reading.</li>
+</ol>
 <h3 id="reference-observation">Reference observation<a class="heading-anchor" href="#reference-observation" aria-label="Link to this section">#</a></h3>
 <p>Build ledger completeness does not establish runtime driver or GPU acceptance.</p>
-<p>The reference file is <code>courses/cuda/python/references/cuda-110_cpu.py</code>. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.</p></article>
+<p>Asserted by <code>courses/cuda/python/references/cuda-110_cpu.py</code>.</p></article>
   </main>
 </body>
 </html>

@@ -1,6 +1,6 @@
 # r-005: reference reasoning
 
-Use the [complete reference](r-005_reference.R) with the guide's declared inputs and runtime. Every worked example is also a standalone script.
+Run the [complete reference](r-005_reference.R) under the [run rules](../STUDY-GUIDE.md#run-a-chapter).
 
 ## Why the implementation has this shape
 
@@ -98,4 +98,6 @@ Check uniqueness and missing names explicitly before keyed alignment.
 
 ## What the checks establish
 
-The reference makes 6 `stopifnot()` checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.
+The checks confirm that repeated positions duplicate elements, that a negative index drops only the second value, that a key is unique and present before it is updated, that an update by name changes only the selected value, that the guarded failure case really raised an error, that an empty integer index returns nothing, and that `anyDuplicated()` flags repeated names. They do not cover vectors whose names are missing entirely.
+
+The reference makes 6 `stopifnot()` checks; see [what a passing run proves](../STUDY-GUIDE.md#what-a-passing-run-proves).

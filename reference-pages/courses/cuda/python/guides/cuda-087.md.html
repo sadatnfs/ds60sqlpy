@@ -194,9 +194,17 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cuda/python/guides/cuda-087.md</code></p>
     </header>
     <article class="document"><h2 id="cuda-087-device-placement-and-one-auditable-training-step">cuda-087: Device placement and one auditable training step<a class="heading-anchor" href="#cuda-087-device-placement-and-one-auditable-training-step" aria-label="Link to this section">#</a></h2>
-<p><strong>Route:</strong> CUDA Python and machine learning. <strong>Stage:</strong> intermediate. <strong>Prerequisites:</strong> <code>cuda-066</code>, <code>cuda-067</code>, <code>cuda-072</code>. Allow several sessions when the hardware experiment is new; the chapter is not a deadline.</p>
-<h3 id="what-you-will-be-able-to-explain">What you will be able to explain<a class="heading-anchor" href="#what-you-will-be-able-to-explain" aria-label="Link to this section">#</a></h3>
-<p>By the end, you can <strong>derive the scalar gradient</strong>, <strong>inspect every tensor device</strong>, and <strong>distinguish correctness and performance</strong> with evidence. Start with the two worked cases, then use the editable CPU model to make the quantities concrete.</p>
+<p><strong>Route:</strong> CUDA Python and machine learning. <strong>Stage:</strong> intermediate. <strong>Prerequisites:</strong> <code>cuda-066</code>, <code>cuda-067</code>, <code>cuda-072</code>.</p>
+<p>Pacing, evidence labels and platform rules: <a href="../../STUDY-GUIDE.md.html">CUDA study guide</a>.</p>
+<h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
+<ul>
+<li>Derive the scalar gradient.</li>
+<li>Calculate the update.</li>
+<li>Compare sum and mean.</li>
+<li>Inspect every tensor device.</li>
+<li>Write equal PyTorch and TensorFlow contracts.</li>
+<li>Distinguish correctness and performance.</li>
+</ul>
 <h3 id="mechanism-and-vocabulary">Mechanism and vocabulary<a class="heading-anchor" href="#mechanism-and-vocabulary" aria-label="Link to this section">#</a></h3>
 <p>A training step includes forward computation, scalar loss, gradients and an optimizer update. Moving only inputs to a GPU while leaving parameters on CPU violates the intended placement contract. Frameworks differ in idiom: PyTorch explicitly moves tensors and modules to a device; TensorFlow uses device scopes, placement rules and tracked variables. Inspect actual placement and fail clearly if an explicitly requested GPU is unavailable.</p>
 <p>For a one-parameter regressor <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>y</mi><mo>=</mo><mi>w</mi><mi>x</mi></mrow><annotation encoding="application/x-tex">y=wx</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.625em;vertical-align:-0.1944em;"></span><span class="mord mathnormal" style="margin-right:0.0359em;">y</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal" style="margin-right:0.0269em;">w</span><span class="mord mathnormal">x</span></span></span></span> with mean squared error, derive the derivative before trusting autograd. Both framework lanes should reproduce this tiny update and compare to the same CPU arithmetic. Keep initialization, examples, loss reduction and learning rate identical. A correct one-step update establishes a bounded behavior, not model quality or GPU performance.</p>
@@ -219,11 +227,12 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 </ul>
 <h3 id="worked-examples">Worked examples<a class="heading-anchor" href="#worked-examples" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
-<p>With x=[1,2], target=[2,4], <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>w</mi><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">w=0</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal" style="margin-right:0.0269em;">w</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">0</span></span></span></span>, mean loss is 10 and derivative is-10. SGD with learning rate 0.1 updates w to 1.</p>
+<p>With x=[1,2], target=[2,4], <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>w</mi><mo>=</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">w=0</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathnormal" style="margin-right:0.0269em;">w</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">0</span></span></span></span>, mean loss is 10 and derivative is -10. SGD with learning rate 0.1 updates w to 1.</p>
 <h4 id="worked-example-2">Worked example 2<a class="heading-anchor" href="#worked-example-2" aria-label="Link to this section">#</a></h4>
 <p>Using sum loss instead of mean doubles the derivative for this batch and changes the update to 2. A faster run with a different loss normalization is not an equivalent training comparison.</p>
-<h3 id="portable-executable-model">Portable executable model<a class="heading-anchor" href="#portable-executable-model" aria-label="Link to this section">#</a></h3>
-<p>The <strong>CPU reference model</strong> variant runs this bounded worked example using <code>python-core</code>. It uses only the Python standard library, small synthetic values and no network. Its purpose is to expose the arithmetic or contract behind the chapter. The separate reference includes assertions for the stated observations.</p>
+<h3 id="how-to-run-the-cpu-model">How to run the CPU model<a class="heading-anchor" href="#how-to-run-the-cpu-model" aria-label="Link to this section">#</a></h3>
+<p>Edit the copy; the <a href="../references/cuda-087_cpu.py.html">reference</a> adds assertions.</p>
+<pre class="highlighted-code"><code class="language-bash">python courses/cuda/python/lessons/cuda-087_cpu.py</code></pre>
 <pre class="highlighted-code"><code class="language-python">x<span class="syntax-punctuation">,</span> y <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2.0</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">2.0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4.0</span><span class="syntax-punctuation">]</span>
 w <span class="syntax-operator">=</span> <span class="syntax-number">0.0</span>
 loss <span class="syntax-operator">=</span> <span class="syntax-builtin">sum</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>w <span class="syntax-operator">*</span> a <span class="syntax-operator">-</span> b<span class="syntax-punctuation">)</span> <span class="syntax-operator">*</span><span class="syntax-operator">*</span> <span class="syntax-number">2</span> <span class="syntax-keyword">for</span> a<span class="syntax-punctuation">,</span> b <span class="syntax-operator">in</span> <span class="syntax-builtin">zip</span><span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">,</span> y<span class="syntax-punctuation">,</span> strict<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>x<span class="syntax-punctuation">)</span>
@@ -231,7 +240,7 @@ grad <span class="syntax-operator">=</span> <span class="syntax-builtin">sum</sp
 w <span class="syntax-operator">-</span><span class="syntax-operator">=</span> <span class="syntax-number">0.1</span> <span class="syntax-operator">*</span> grad
 <span class="syntax-keyword">assert</span> loss <span class="syntax-operator">==</span> <span class="syntax-number">10</span> <span class="syntax-operator">and</span> grad <span class="syntax-operator">==</span> <span class="syntax-operator">-</span><span class="syntax-number">10</span> <span class="syntax-operator">and</span> w <span class="syntax-operator">==</span> <span class="syntax-number">1</span>
 <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">CPU training oracle:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> loss<span class="syntax-punctuation">,</span> grad<span class="syntax-punctuation">,</span> w<span class="syntax-punctuation">)</span></code></pre>
-<p><strong>Expected observation:</strong> Loss 10, gradient-10, new weight 1.</p>
+<p><strong>Expected observation:</strong> Loss 10, gradient -10, new weight 1.</p>
 <p><strong>Variable trace.</strong> Before running the model, predict these final values; then compare:</p>
 <div class="table-wrap"><table><thead><tr>
 <th>Variable</th>
@@ -258,58 +267,53 @@ w <span class="syntax-operator">-</span><span class="syntax-operator">=</span> <
 <td><code>-10.0</code></td>
 </tr>
 </tbody></table></div>
-<p>Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.</p>
 <h3 id="equal-framework-lanes">Equal framework lanes<a class="heading-anchor" href="#equal-framework-lanes" aria-label="Link to this section">#</a></h3>
 <h4 id="pytorch">PyTorch<a class="heading-anchor" href="#pytorch" aria-label="Link to this section">#</a></h4>
 <p>Create tensors and parameters on the chosen torch.device, zero gradients, compute mean loss, call backward and step. Inspect w.device and compare the derived gradient before changing the model.</p>
 <h4 id="tensorflow">TensorFlow<a class="heading-anchor" href="#tensorflow" aria-label="Link to this section">#</a></h4>
 <p>Create variables and operations in an explicit tf.device scope, use GradientTape, and apply the resulting gradients. Inspect variable placement and compare the same mean-loss derivative.</p>
-<p>Choose either lane first, then compare the other using identical mathematical inputs. Framework-specific shape, mode and optimizer rules must be checked separately. Both use offline synthetic examples; no model hub or dataset download is triggered.</p>
+<p>Lane rules: <a href="../../STUDY-GUIDE.md.html#python-gpu-and-framework-labs">framework labs</a>.</p>
 <h3 id="executable-framework-practice">Executable framework practice<a class="heading-anchor" href="#executable-framework-practice" aria-label="Link to this section">#</a></h3>
-<p>The variant chooser offers <strong>PyTorch on CPU</strong>, <strong>TensorFlow on CPU</strong>, and separate <strong>NVIDIA CUDA</strong> versions. CPU versions force CPU placement. CUDA versions require the named GPU profile and refuse to silently fall back. Each complete program uses the same tiny deterministic objective, bounded tensors and local synthetic data. Read its source before running; a framework pass establishes only that variant and environment.</p>
-<p>The checkpoint demonstration is in-memory. It teaches what state must be saved; it does not export a durable model artifact or preserve an in-flight device context. Advanced custom-op, distributed and engine-building projects remain separately prepared external workflows.</p>
+<p>Run the <strong>PyTorch</strong> and <strong>TensorFlow</strong> variants on CPU first; <a href="../../STUDY-GUIDE.md.html#python-gpu-and-framework-labs">lab rules</a>.</p>
 <h3 id="practice-and-transfer">Practice and transfer<a class="heading-anchor" href="#practice-and-transfer" aria-label="Link to this section">#</a></h3>
+<p>Record each attempt in the <a href="../lessons/cuda-087.md.html">worksheet</a> before opening hints.</p>
 <h4 id="exercise-1-derive-the-scalar-gradient">Exercise 1: Derive the scalar gradient<a class="heading-anchor" href="#exercise-1-derive-the-scalar-gradient" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Dropping the factor 2 from the derivative, a common slip when writing it by hand, gives -5 and a half-size update. Autograd would then disagree with the hand derivation.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-2-calculate-the-update">Exercise 2: Calculate the update<a class="heading-anchor" href="#exercise-2-calculate-the-update" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Adding the gradient instead of subtracting it gives <code>w = -1</code>, which raises the loss to <code>((-1-2)**2 + (-2-4)**2)/2 = 22.5</code>. The sign error is easy to miss when only the update size is checked.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-3-compare-sum-and-mean">Exercise 3: Compare sum and mean<a class="heading-anchor" href="#exercise-3-compare-sum-and-mean" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Comparing a sum-loss run with a mean-loss run and attributing the speed or convergence difference to the GPU confounds hardware with loss normalization.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-4-inspect-every-tensor-device">Exercise 4: Inspect every tensor device<a class="heading-anchor" href="#exercise-4-inspect-every-tensor-device" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Checking only the model parameters misses inputs and targets, and moving the model after creating the optimizer can leave the optimizer holding stale references in some setups.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-5-write-equal-pytorch-and-tensorflow-contracts">Exercise 5: Write equal PyTorch and TensorFlow contracts<a class="heading-anchor" href="#exercise-5-write-equal-pytorch-and-tensorflow-contracts" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Letting each framework use its default initializer or loss reduction makes the numbers differ for reasons unrelated to correctness.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-6-distinguish-correctness-and-performance">Exercise 6: Distinguish correctness and performance<a class="heading-anchor" href="#exercise-6-distinguish-correctness-and-performance" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Reporting a speedup from a run that silently used a sum loss, or ran partly on the CPU, compares different computations.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
-<p>Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.</p>
+<p>Hint <em>k</em> belongs to exercise <em>k</em>; open one at a time.</p>
 <ol>
-<li>Start from worked example 1 and mark the quantities needed for the task &quot;Derive the scalar gradient&quot;.</li>
-<li>Change one assumption in worked example 2 while preserving the declared contract: calculate the update.</li>
-<li>Trace the CPU program&#x27;s variables before adding hardware behavior: compare sum and mean.</li>
-<li>Draw producers, consumers and the exact operation boundary for the task &quot;Inspect every tensor device&quot;.</li>
-<li>Separate what the small fixture establishes from what the real runtime must show: write equal PyTorch and TensorFlow contracts.</li>
-<li>Write a counterexample to an overbroad claim before you distinguish correctness and performance.</li>
+<li>Differentiate the mean of <code>(w*x - y)**2</code> with respect to <code>w</code> and evaluate it at <code>w = 0</code> for the batch.</li>
+<li>Subtract the learning rate times the gradient from the current weight.</li>
+<li>Replace the mean with a sum and ask how the gradient changes with batch size.</li>
+<li>Check parameters, inputs, targets and optimizer state, not just the batch you moved.</li>
+<li>List each value both frameworks must share: data, initial weight, loss reduction and learning rate.</li>
+<li>Ask what must already agree before any timing number means anything.</li>
 </ol>
-<h3 id="common-mistakes-and-self-review">Common mistakes and self-review<a class="heading-anchor" href="#common-mistakes-and-self-review" aria-label="Link to this section">#</a></h3>
-<p>Confusing a correct tiny example with a general implementation is the central review risk. For this chapter, challenge the assumption in worked example 2, then ask whether your change preserves the mechanism described above. If you change dtype, layout, ordering, batch size or backend, update the acceptance contract rather than silently reusing the old observation. Explain an unexpected result before trying random configuration changes.</p>
-<p>Keep a small evidence table with columns <strong>claim</strong>, <strong>input</strong>, <strong>expected observation</strong>, <strong>actual observation</strong> and <strong>limit</strong>. For the first claim use <code>Derive the scalar gradient</code>. For the final claim use <code>Distinguish correctness and performance</code>. An unperformed GPU or cluster experiment remains pending even when the CPU model is correct.</p>
-<h3 id="platform-and-evidence-contract">Platform and evidence contract<a class="heading-anchor" href="#platform-and-evidence-contract" aria-label="Link to this section">#</a></h3>
-<p>The reading worksheet and CPU reference model work through the ordinary Linux Docker classroom on macOS, Linux and Windows using WSL 2. They do not require an NVIDIA GPU. Their results are labeled CPU models or semantic oracles, not simulated hardware performance.</p>
-<p>Real CUDA work needs supported NVIDIA hardware, a compatible host driver and an explicitly prepared GPU runtime. An Apple GPU does not execute CUDA kernels. PyTorch MPS on a supported native Mac, ROCm on supported AMD hardware, or other vendor backends can provide separate accelerator learning routes; they need their own package and operation qualification and are not CUDA evidence. The ordinary Linux Docker classroom does not expose native Mac MPS automatically.</p>
-<p>Do not download packages, models or data by opening this lesson. Do not attach an engine socket, ambient cluster credentials or an arbitrary remote endpoint. A CPU pass, imported package, successful compilation, real GPU result and measured performance are distinct observations. Record the actual backend, data shape/dtype, source revision, versions and pending checks. A saved completion marker records learning progress, not hardware certification.</p>
+<h3 id="common-mistakes-and-self-check">Common mistakes and self-check<a class="heading-anchor" href="#common-mistakes-and-self-check" aria-label="Link to this section">#</a></h3>
+<p>A common mistake is moving only the inputs to the GPU while parameters, targets or optimizer state stay on the CPU, which raises a device mismatch error or forces hidden copies. Another is comparing frameworks whose loss reductions differ: a sum loss doubles this batch&#x27;s gradient and changes the update. Fix both by inspecting every tensor&#x27;s device, failing clearly when an explicitly requested GPU is missing, and keeping data, initialization, reduction and learning rate identical.</p>
+<p><strong>Evidence limit:</strong> The reference reproduces loss 10, gradient -10 and new weight 1 with CPU arithmetic. It does not run PyTorch or TensorFlow, so actual device placement and autograd results need the framework lanes.</p>
+<ol>
+<li>Why derive the gradient by hand before trusting autograd?</li>
+<li>How do PyTorch and TensorFlow differ in placement idiom?</li>
+<li>What does a correct one-step update establish?</li>
+</ol>
+<p>Answers: <a href="../solutions/cuda-087_solutions.md.html#self-check-answers">self-check answers</a>.</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
 <ul>
 <li><a href="https://docs.pytorch.org/docs/2.9/notes/cuda.html">PyTorch CUDA semantics</a></li>
 <li><a href="https://www.tensorflow.org/guide/gpu">TensorFlow GPU guide</a></li>
 </ul>
-<p>Use the version-matched documentation of your prepared environment. These references describe interfaces and supported boundaries; the chapter&#x27;s synthetic examples and CPU models are original teaching material.</p>
+<p>Full lists: <a href="../../STUDY-GUIDE.md.html#documentation-and-sources">documentation and sources</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning skill for cuda-087: Device placement and one auditable training step.
 Read courses/cuda/python/guides/cuda-087.md and courses/cuda/python/lessons/cuda-087.md.

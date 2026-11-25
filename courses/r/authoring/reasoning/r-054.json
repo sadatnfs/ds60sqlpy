@@ -36,5 +36,7 @@
       "wrong": "Trying several boundaries and keeping the one that shows the expected pattern. That treats the layer transformation as evidence about the data.",
       "verify": "Rebuilding with boundary = 1 returns counts 2 and 2, and both versions return a count total of 4."
     }
-  ]
+  ],
+  "run_note": "The starter holds six raw category records, A twice, B once and C three times, declared with levels A, B and C, and an empty results list. Run it and count the categories yourself first: 2, 1 and 3. That count is what `geom_bar()` computes from raw rows with its default count statistic. If you already have a summary table with a column `n`, use `geom_col()` instead, because it draws the values it is given. Mapping `n` to y inside `geom_bar()` asks the count statistic to accept a y aesthetic it does not use, and the build fails. Before the histogram, choose `binwidth` and `boundary` explicitly and check that its total count equals the number of observations.",
+  "checks_note": "The checks confirm that counting raw records and drawing a precomputed table both give bar heights 2, 1 and 3, that `geom_bar()` with a y mapping fails to build, that two person-specific lines get two separate groups, and that the histogram's bins hold four observations in total. They do not show that a chosen bin width supports a particular conclusion."
 }

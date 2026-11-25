@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/r/solutions/r-043_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="r-043-reference-reasoning">r-043: reference reasoning<a class="heading-anchor" href="#r-043-reference-reasoning" aria-label="Link to this section">#</a></h2>
-<p>Use the <a href="r-043_reference.R.html">complete reference</a> with the guide&#x27;s declared inputs and runtime. Every worked example is also a standalone script.</p>
+<p>Run the <a href="r-043_reference.R.html">complete reference</a> under the <a href="../STUDY-GUIDE.md.html#run-a-chapter">run rules</a>.</p>
 <h3 id="why-the-implementation-has-this-shape">Why the implementation has this shape<a class="heading-anchor" href="#why-the-implementation-has-this-shape" aria-label="Link to this section">#</a></h3>
 <p>The design-matrix reconstruction connects formula notation to the actual numerical fit. The interaction example fixes the factor reference level so the coefficient names have a defined interpretation; the two group-specific slopes remain the substantive quantities.</p>
 <p>The alias example intentionally separates identifiable fitted values from nonunique parameter coordinates. Residual orthogonality is an algebraic least-squares property, while uncertainty intervals rely on further assumptions. The reference reports extrapolation and interval targets explicitly rather than treating predict as a scientific interpretation engine.</p>
@@ -248,7 +248,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Tempting mistake:</strong> Comparing the prediction interval at x = 5 with the confidence interval at x = 2. The larger leverage at 5 widens any interval there, so the comparison mixes location with target.</p>
 <p><strong>Verify:</strong> <code>diff(pi[1, c(&quot;lwr&quot;, &quot;upr&quot;)]) &gt; diff(ci[1, c(&quot;lwr&quot;, &quot;upr&quot;)])</code> returns TRUE, and both <code>fit</code> columns show 4.6.</p>
 <h3 id="what-the-checks-establish">What the checks establish<a class="heading-anchor" href="#what-the-checks-establish" aria-label="Link to this section">#</a></h3>
-<p>The reference makes 7 <code>stopifnot()</code> checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.</p></article>
+<p>The assertions confirm a 5 by 2 design whose first column is all ones, fitted values equal to the design times the coefficients, a prediction of 10 at x equal to 5, interaction coefficients 1, 2, 3 and -1 recovering the lines 1 plus 2x and 4 plus x, an aliased design that loses rank and reports an NA coefficient, residuals orthogonal to the design columns, and a prediction interval wider than the confidence interval. They do not check normality or constant variance.</p>
+<p>The reference makes 7 <code>stopifnot()</code> checks; see <a href="../STUDY-GUIDE.md.html#what-a-passing-run-proves">what a passing run proves</a>.</p></article>
   </main>
 </body>
 </html>

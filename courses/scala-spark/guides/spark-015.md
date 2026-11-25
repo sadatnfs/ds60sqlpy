@@ -1,22 +1,26 @@
 # spark-015: SQL and DataFrame expressions with ANSI boundaries
 
-Authored paired Scala/PySpark teaching content. The default fixtures are tiny, local and deterministic. Runtime acceptance, logical correctness and learner understanding remain separate evidence.
+Amounts now arrive as text: a clean number, a zero, a padded number, a missing value, the word `bad`, a value one larger than the biggest `BIGINT`, a negative number and another clean number. You will parse them once, keep every failure visible, and see where ANSI mode turns a quiet NULL into a loud error.
 
 ## Level and prerequisites
 
-Intermediate; approximately 90 minutes. Direct prerequisites: `spark-014`. The prepared baseline is Spark 4.3.0, Scala binary 2.13, JDK 17 and Python 3.12. Read the [execution baseline](../execution-baseline.md).
+Intermediate; approximately 90 minutes. Direct prerequisites: `spark-014`. Pinned versions: [execution baseline](../execution-baseline.md).
 
 ## How to run this lesson
 
-Open `spark-015` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile, save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`; Python stages as `main.py` with a main guard. Each program creates its own `local[2]` session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.
+Shared run steps and profile rules: [study guide](../STUDY-GUIDE.md#run-a-paired-lesson).
 
-The [Scala learner](../lessons/spark-015.scala) and [PySpark learner](../lessons/spark-015.py) run two complete demonstrations and retain six explicit task stubs. Use the [explained solutions](../solutions/spark-015_solutions.md) only after an attempt or an explicit worked comparison; the [Scala reference](../solutions/spark-015_solution.scala) and [PySpark reference](../solutions/spark-015_solution.py) contain complete assertions. A bounded collect is used only for the declared tiny fixture; do not copy it onto an unbounded or large production table.
+Learner pads: [Scala](../lessons/spark-015.scala) and [PySpark](../lessons/spark-015.py).
+
+Open the [explained solutions](../solutions/spark-015_solutions.md) after an attempt.
+
+The first worked example parses tolerantly and shows that IDs 4, 5 and 6 all produce NULL: one because the text was missing, two because the text could not be read. It prints `Parse NULLs include both source missingness and rejected text`. The second casts ID 7 alone, gets `-5`, confirms ANSI is still on and prints `A signed integer can be cast-valid while domain-invalid`.
 
 ## Learning objectives
 
 - Express the same relational result with SQL and Columns and make casting/error policy explicit.
-- State the input and output grain, schema, NULL policy and ordering before executing a transformation.
-- Compare each language implementation with independent literal expectations, not only with the other implementation.
+- Use `try_cast` to parse `amount_text` into a `bigint` column and classify each of the eight IDs as valid, missing or rejected, with counts 5, 1 and 2 that add up to the input.
+- Explain why `-5` is a successful parse but still fails the separate nonnegative rule, and reconcile the final 5 accepted rows, 2 parse rejections and 1 domain rejection back to 8.
 
 ## Vocabulary and concepts
 
@@ -44,7 +48,7 @@ All data remain in a local explicit-schema fixture. No external SQL service is o
 
 ## Supplied local fixture
 
-The complete source creates the owned local session described above, then constructs this explicit fixture. The worked examples below run in that same main function; there is no hidden notebook state.
+Eight rows, each a deliberate case: `"100"`, `"0"`, `" 25 "` with spaces, a NULL, `"bad"`, `"9223372036854775808"` (one past the largest `BIGINT`), `"-5"` and `"50"`. The session runs with ANSI enabled, so an ordinary `CAST` of IDs 5 or 6 fails when an action evaluates it, while `try_cast` returns NULL.
 
 ```scala
 import org.apache.spark.sql.Row
@@ -214,11 +218,14 @@ If try_cast produces NULL, inspect the original token before deciding whether th
 
 ## Self-check
 
-Explain the contract of `withParsed` / `with_parsed` without reading its solution. Then, from memory, state what Exercise 6 (Apply a separate nonnegative domain policy) must produce: Final IDs `[1, 2, 3, 4, 8]` have 5 rows, 4 known values, total 175. The full source reconciles as 5 final accepted + 2 parse rejected + 1 negative-domain rejected. Say which part of that result is evidence and what it still cannot show. Name the action in your trace that actually runs the plan.
+- IDs 4, 5 and 6 all have a NULL `parsed_amount`. What extra column or condition do you need to tell the missing one from the two rejected ones?
+- Exercise 5 says the strict cast fails "at evaluation". Where in your code does that failure appear, and why does building the projection not raise?
+- ID 3 is written `" 25 "`. The strict projection calls `trim` before its cast. Why is it better to state the whitespace rule in your own code than to rely on whatever the cast happens to tolerate?
+- The final total is 175 but the parse-accepted total was 170. Which row explains the difference, and why does dropping a negative raise the total?
 
 ## Next step
 
-Use the [course route](../README.md) to continue. Paired-language agreement is useful only when both outputs also satisfy the independent fixture contract. A successful local run is not evidence of cluster performance or production recovery.
+Go on to [spark-016: Join cardinality, fanout, semi joins and NULL-safe keys](spark-016.md). One table at a time is now under control; the next lesson joins two tables and shows how a duplicated key quietly multiplies rows and revenue unless you count matches before you join.
 
 ## Primary sources and official APIs
 

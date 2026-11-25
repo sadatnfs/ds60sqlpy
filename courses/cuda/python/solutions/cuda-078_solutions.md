@@ -1,6 +1,6 @@
 # cuda-078: explained solutions
 
-These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.
+Compare with your [worksheet](../lessons/cuda-078.md) attempt.
 
 ## Exercise 1: Trace a lost update
 
@@ -74,8 +74,16 @@ Wait for all updates and merges before host retrieval.
 
 **How to verify.** Assert that the copied bins sum to the input length. A smaller total signals that the read happened before all updates completed.
 
+## Self-check answers
+
+1. **What exactly does an atomic addition protect?** One supported memory location against lost updates from competing atomic operations. It does not make a multi-location update transactional.
+
+2. **What does privatization trade away to reduce contention?** Extra storage for per-block or per-warp histograms and an additional merge step.
+
+3. **Why can floating-point atomic sums vary between runs?** Atomicity prevents lost updates, but the order of additions follows thread arrival, and floating-point rounding depends on that order.
+
 ## Reference observation
 
 Histogram bins [2,1,3].
 
-The reference file is `courses/cuda/python/references/cuda-078_cpu.py`. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.
+Asserted by `courses/cuda/python/references/cuda-078_cpu.py`.

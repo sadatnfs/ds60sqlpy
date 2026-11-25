@@ -32,11 +32,9 @@ Cache entries can improve speed but should not be the only copy of a required so
 
 ## How to use this lesson
 
-The classroom displays this guide and saves your worksheet, `courses/docker/lessons/docker-015.md`. Its Run button does not control your Docker engine. Docker engine access is powerful host access, so the classroom deliberately receives no engine socket. Work through the supplied examples without starting anything, then use the optional host lab only in your own disposable project. Reading a command, parsing YAML and actually running the project are different forms of evidence.
+The classroom saves `courses/docker/lessons/docker-015.md` and holds no engine socket ([host-lab setup](../STUDY-GUIDE.md#host-lab-setup)).
 
-Use Bash in Linux, macOS Terminal, or Ubuntu under WSL 2 on Windows. The supported engine runs Linux containers. The maintained fixture is `courses/docker/fixtures/compose-lab/`; its README explains copying it into a new ignored learner directory, checking the engine, building locally with visible logs, and using the fixed project name `ds60-docker-study`. The fixture uses port 18080 on host loopback. Stop if that project name or port belongs to unrelated work; choose a new project name consistently in your own copy. Never paste a command against a remote Docker context simply because it is currently selected.
-
-For Dockerfile examples, create a file named `Dockerfile` in a scratch project. YAML snippets describe a fragment unless explicitly called a complete file. Text transcripts are synthetic illustrations, not claims about your machine. Do not substitute a real password, token or private registry into a checked-in example. **How to use the lessons** in the [subject README](../README.md) collects these rules in one place.
+**Host lab.** In a scratch directory, write a Dockerfile with `FROM python:3.12-slim`, which is already local from the fixture build, followed by the secret step from worked example 2. Build it once without `--secret` and read the failure; the step refuses to run because the mount is required. Put a synthetic value such as `not-a-real-secret` in `demo.txt`, then build with `--secret id=demo,src=demo.txt -t ds60-secret-demo`. Check two places for leaks: `docker history --no-trunc ds60-secret-demo` shows the RUN line but not the value, and `docker save ds60-secret-demo | grep -a -c not-a-real-secret` should print 0. Delete `demo.txt` and remove the image when you finish. Never rehearse this with a real token, even though nothing is printed.
 
 ## Worked example / walkthrough
 
@@ -65,7 +63,7 @@ RUN --mount=type=secret,id=demo,required=true \
 
 ## Six progressive exercises
 
-For each exercise, name the object involved and the phase of its lifetime before changing anything, then vary only the condition the task names. Exercises that ask you to predict, explain, compare or diagnose keep their answers in the solutions file; the others show the evidence to look for.
+Answer-type prompts keep their answers in the solutions file ([exercise rules](../STUDY-GUIDE.md#exercise-rules)).
 
 ### Exercise 1: Compare a cache mount and a secret mount.
 
@@ -97,13 +95,19 @@ For each exercise, name the object involved and the phase of its lifetime before
 
 Passing a password with `--build-arg` or `ENV`. Printing or copying a mounted secret into an image file. Treating the cache mount as the only copy of a dependency.
 
-Exercise 4 is this chapter's boundary case: Diagnose a secret copied into an output file. Search the build output and the final image layers for the secret value's location, not the value itself, before blaming the secret mount option. Preserve the original failure and the exact changed field before retrying. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
+Exercise 4 is this chapter's boundary case: Diagnose a secret copied into an output file. Search the build output and the final image layers for the secret value's location, not the value itself, before blaming the secret mount option.
+
+Another trap is expecting a new secret value to trigger a rebuild. The contents of a secret are deliberately not part of the cache key, so if you rotate a token and rebuild, an unchanged RUN step that used the secret is served from cache, and its output still reflects whatever the old token fetched. That is usually what you want for speed, but it means a rotated credential does not prove that dependencies were downloaded again. When the step must run with the new secret, force it explicitly with `--no-cache-filter` for that stage or `--no-cache`, and confirm in the plain log that the step ran.
+
+Never trade a safety control for a passing example ([safety rules](../STUDY-GUIDE.md#safety-rules)).
 
 ## Retrieval, transfer and next steps
 
-Close the explanations first. Explain where the secret is visible during a `RUN --mount=type=secret` step and where it must not appear afterward. Then reconstruct worked example 2 (Require a synthetic build secret without printing it) with one different value, predict what changes, and name which of BuildKit, cache mount, secret mount, --secret and cold build the change touches.
+**Retrieval.** Explain where the secret is visible during a `RUN --mount=type=secret` step and where it must not appear afterward.
 
-When a host session ends, run `docker compose -p ds60-docker-study down` from your fixture copy. It removes the project's containers and network but keeps named volumes; deleting a volume is a separate, deliberate reset described in the fixture README.
+**Transfer case.** A Dockerfile switches to `USER 10001` and then runs `RUN --mount=type=cache,target=/root/.cache/pip pip install -r requirements.txt`. Every build downloads everything again. Explain why the cache mount is not helping and how to fix it.
+
+Then run the [retrieval loop](../STUDY-GUIDE.md#retrieval-and-cleanup) and end any host session with its cleanup.
 
 ## Primary references
 

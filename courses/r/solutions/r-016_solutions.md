@@ -1,6 +1,6 @@
 # r-016: reference reasoning
 
-Use the [complete reference](r-016_reference.R) with the guide's declared inputs and runtime. Every worked example is also a standalone script.
+Run the [complete reference](r-016_reference.R) under the [run rules](../STUDY-GUIDE.md#run-a-chapter).
 
 ## Why the implementation has this shape
 
@@ -96,4 +96,6 @@ State encoding and byte/character units separately and test multibyte input.
 
 ## What the checks establish
 
-The reference makes 6 `stopifnot()` checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.
+The checks pin that a fixed pattern matches a literal dot only, that an anchored five-digit pattern accepts "00123" but rejects "123", that splitting "A|12" on a literal pipe gives "A" and "12", that an unanchored digit test cannot wrongly accept "ID12bad", that a trailing empty field is dropped by `strsplit()`, and that a four-character accented word occupies five bytes in UTF-8. They do not cover other normalization forms or right-to-left text, and they do not show what happens when your own input arrives in a different encoding.
+
+The reference makes 6 `stopifnot()` checks; see [what a passing run proves](../STUDY-GUIDE.md#what-a-passing-run-proves).

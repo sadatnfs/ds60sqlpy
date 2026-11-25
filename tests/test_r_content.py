@@ -73,8 +73,23 @@ def test_generated_source_and_markdown_are_exactly_bound_to_units() -> None:
         assert (COURSE / f"lessons/{key}.R").read_text() == unit["starter"].rstrip() + "\n"
         reference = (COURSE / f"solutions/{key}_reference.R").read_text()
         assert reference.endswith(unit["reference"].rstrip() + "\n")
-        assert "fresh offline R process" in guide
-        assert "at most two" in guide
+        assert "../STUDY-GUIDE.md#run-a-chapter" in guide
+    study = (COURSE / "STUDY-GUIDE.md").read_text()
+    assert "fresh offline R process" in study
+    assert "at most two" in study
+
+
+def test_lessons_link_shared_study_guide_sections_that_exist() -> None:
+    study = (COURSE / "STUDY-GUIDE.md").read_text()
+    anchors = {
+        re.sub(r"[^a-z0-9 -]", "", line[3:].strip().lower()).replace(" ", "-")
+        for line in study.splitlines()
+        if line.startswith("## ")
+    }
+    pages = [*(COURSE / "guides").glob("r-*.md"), *(COURSE / "solutions").glob("r-*.md")]
+    for path in sorted(pages):
+        for anchor in re.findall(r"\.\./STUDY-GUIDE\.md#([a-z0-9-]+)", path.read_text()):
+            assert anchor in anchors, (path.name, anchor)
 
 
 def test_required_language_and_analysis_mechanisms_remain_explicit() -> None:

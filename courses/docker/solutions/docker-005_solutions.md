@@ -1,6 +1,6 @@
 # docker-005: explanatory solutions
 
-Compare after your own attempt or an explicit reveal. These explain the supplied teaching fixtures; they are not engine results. The mechanism is explained in `courses/docker/guides/docker-005.md`.
+These answers explain teaching fixtures, not engine results; the mechanism is in [the guide](../guides/docker-005.md).
 
 ## Exercise 1: Sort RUN and CMD into lifecycle phases.
 
@@ -88,4 +88,4 @@ Compare after your own attempt or an explicit reveal. These explain the supplied
 
 ## Check your transfer
 
-A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.
+`built` appears once in the build log, because RUN executes during the build and its result is stored in a layer; a cached rebuild may not print it again at all. `started` appears in the output of each container, because CMD is the default command of every new container, so three runs print it three times and the build log never shows it. The observation that would disprove this is `started` in the build output, which would mean the command was placed in a RUN step rather than CMD.

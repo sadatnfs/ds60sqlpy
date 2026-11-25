@@ -1,6 +1,6 @@
 # java-014: explanatory solutions
 
-Open after an attempt or an explicit solution reveal. The executable reference runs the six exercise checks together as `Main.java`. The guide contains independent worked examples, while this file explains the choices and failure cases in the complete answer.
+Open this after an attempt; see [using the solutions](../STUDY-GUIDE.md#use-the-solutions).
 
 ## Mechanism review
 
@@ -18,7 +18,7 @@ stream() creates a pipeline, filter keeps matching elements, and mapToInt select
 
 ## Exercise 1: Filter and sum: change one input
 
-Task: Copy Example A into a scratch `Main.java` and change `int total = List.of(1, 2, 3, 4)` to `int total = List.of(2, 2, 3, 4)`. Before running it with `java -ea Main`, predict which assertion fails and which value it now sees; then run it and restore the original line.
+Task: Change `int total = List.of(1, 2, 3, 4)` to `int total = List.of(2, 2, 3, 4)` in Example A and predict which assertion fails and why.
 
 The pipeline preserves the order of conceptual operations: selection happens before squaring and reduction. The result is a scalar rather than a modified source list.
 
@@ -33,13 +33,13 @@ int total = List.of(1, 2, 3, 4)
 assert total == 20;
 ```
 
-**Expected:** The changed run fails with an `AssertionError` from the assertion on `total == 20`. Restoring the original line brings back the worked observation: 20.
+**Expected:** The edited run fails with an `AssertionError` from the assertion on `total == 20`.
 
-**Verify:** Compare your written prediction with the reported `AssertionError` and its stack-trace line, and name the value that made `total == 20` false. After restoring the line, the program completes without an `AssertionError` again.
+**Verify:** Name the value that makes `total == 20` false, then restore the line.
 
 ## Exercise 2: Observe laziness with an explicit terminal: debug a regression
 
-Task: A regression changed one token in the code that Example B adds after Example A, so one line now reads `return value + 2;`. Run Example B with that line, use the failing assertion to locate the defect and repair it without changing the assertion.
+Task: A regression in Example B's new code makes one line read `return value + 2;`. Repair it using the failing assertion.
 
 The counter is a teaching probe, not a recommended business side effect. toList requires mapped values, while some terminals may optimize away unnecessary stages.
 
@@ -57,9 +57,9 @@ assert calls.get() == 0;
 assert pipeline.toList().equals(List.of(2, 4, 6)) && calls.get() == 3;
 ```
 
-**Expected:** Before the repair the run fails with an `AssertionError` from the assertion on `pipeline.toList().equals(List.of(2, 4, 6)) && calls.get() == 3`; after it the line reads `return value * 2;` again and counter 0 before terminal and 3 after.
+**Expected:** The unrepaired run fails with an `AssertionError` from the assertion on `pipeline.toList().equals(List.of(2, 4, 6)) && calls.get() == 3`; the repaired line reads `return value * 2;`.
 
-**Verify:** Keep the failing and the repaired runs. Explain why the changed token alters the value tested by `pipeline.toList().equals(List.of(2, 4, 6)) && calls.get() == 3` for this input.
+**Verify:** Explain how the changed token alters the value that `pipeline.toList().equals(List.of(2, 4, 6)) && calls.get() == 3` tests.
 
 ## Exercise 3: Group with a collector
 
@@ -81,7 +81,7 @@ assert counts.equals(Map.of("red", 2L, "blue", 1L));
 
 **Expected:** red 2L, blue 1L.
 
-**Verify:** Keep an assertion equivalent to `counts.equals(Map.of("red", 2L, "blue", 1L))`. As a control, change `Map<String, Long> counts = List.of("red", "blue", "red")` to `Map<String, Long> counts = List.of("red!", "blue", "red")`: the run must fail with an `AssertionError` from the assertion on `counts.equals(Map.of("red", 2L, "blue", 1L))`. Restore the line before continuing.
+**Verify:** Control: changing `Map<String, Long> counts = List.of("red", "blue", "red")` to `Map<String, Long> counts = List.of("red!", "blue", "red")` must fail the assertion on `counts.equals(Map.of("red", 2L, "blue", 1L))`.
 
 ## Exercise 4: Reject stream reuse
 
@@ -104,7 +104,7 @@ assert reused;
 
 **Expected:** IllegalStateException.
 
-**Verify:** Keep an assertion equivalent to `reused`. As a control, change `reused = true;` to `reused = false;`: the run must fail with an `AssertionError` from the assertion on `reused`. Restore the line before continuing.
+**Verify:** Control: changing `reused = true;` to `reused = false;` must fail the assertion on `reused`.
 
 ## Exercise 5: Check the reduction identity
 
@@ -120,7 +120,7 @@ assert correct == 6 && wrong == 16;
 
 **Expected:** correct 6; wrong 16 in the sequential fixture.
 
-**Verify:** Keep an assertion equivalent to `correct == 6 && wrong == 16`. As a control, change `int correct = List.of(1, 2, 3).stream().reduce(0, Integer::sum);` to `int correct = List.of(2, 2, 3).stream().reduce(0, Integer::sum);`: the run must fail with an `AssertionError` from the assertion on `correct == 6 && wrong == 16`. Restore the line before continuing.
+**Verify:** Control: changing `int correct = List.of(1, 2, 3).stream().reduce(0, Integer::sum);` to `int correct = List.of(2, 2, 3).stream().reduce(0, Integer::sum);` must fail the assertion on `correct == 6 && wrong == 16`.
 
 ## Exercise 6: Expose nonassociative subtraction
 
@@ -135,8 +135,10 @@ assert java.util.stream.IntStream.rangeClosed(1, 100).parallel().sum() == 5050;
 
 **Expected:** 5 versus 9; parallel sum 5050.
 
-**Verify:** Keep an assertion equivalent to `(10 - 3) - 2 == 5 && 10 - (3 - 2) == 9`. As a control, change `assert (10 - 3) - 2 == 5 && 10 - (3 - 2) == 9;` to `assert (10 + 3) - 2 == 5 && 10 - (3 - 2) == 9;` inside it: the run must fail with an `AssertionError`, which shows the assertion can fail. Restore it.
+**Verify:** Control: changing `assert (10 - 3) - 2 == 5 && 10 - (3 - 2) == 9;` to `assert (10 + 3) - 2 == 5 && 10 - (3 - 2) == 9;` inside the assertion must make it fail.
 
 ## After comparing the answer
 
-Run the complete reference with assertions enabled, then return to your own implementation. Recreate one check with different values and explain its expected result before execution. A compiler error, an expected domain exception and an assertion failure represent different stages and should be reported separately. Preserve ownership boundaries when adapting file, network or concurrency examples. The reference never authorizes access to a shared service or deletion of learner state. Use a fresh tiny fixture when you need to distinguish two interpretations of an API contract.
+Run your reduction from Exercise 5 with the wrong identity on a parallel stream in your copy, and observe that the result can exceed 16 because each partition adds its own 10.
+
+Run the complete reference with `java -ea Main` first; the [review routine](../STUDY-GUIDE.md#use-the-solutions) covers the rest.

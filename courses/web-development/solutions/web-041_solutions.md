@@ -1,6 +1,6 @@
 # web-041: explanatory solutions
 
-Open this after your own attempt. Each answer explains the lesson's synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in `courses/web-development/guides/web-041.md`.
+Attempt each exercise before reading; the mechanism is in `courses/web-development/guides/web-041.md` ([using these answers](../STUDY-GUIDE.md#solutions)).
 
 ## Exercise 1: Identify the dependency hidden by the interface.
 
@@ -76,4 +76,6 @@ Open this after your own attempt. Each answer explains the lesson's synthetic fi
 
 ## Reference comparison
 
-Open `courses/web-development/solutions/web-041_solution.php` only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; server lifecycle, persistence, concurrency and security need their own integration evidence.
+The reference requires an empty store to give 0 complete and two lesson ids to give 2 complete. That catches a summary that ignores its injected store. It does not exercise a real database or a malformed id, so state which evidence would show the production repository behaves the same.
+
+Open `courses/web-development/solutions/web-041_solution.php` after saving your attempt ([comparing with the reference](../STUDY-GUIDE.md#references)).

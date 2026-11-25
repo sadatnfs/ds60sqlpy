@@ -195,7 +195,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="k8s-023-gateway-ingress-and-the-external-route">k8s-023: Gateway, Ingress and the external route<a class="heading-anchor" href="#k8s-023-gateway-ingress-and-the-external-route" aria-label="Link to this section">#</a></h2>
 <h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
-<p>Intermediate; about 120 minutes plus review. Direct prerequisites: <code>k8s-013</code>, <code>k8s-017</code>, <code>k8s-020</code>. The chapter separates desired configuration, API acceptance, controller observation and application evidence.</p>
+<p>Intermediate; about 120 minutes plus review. Direct prerequisites: <code>k8s-013</code>, <code>k8s-017</code>, <code>k8s-020</code>.</p>
 <h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
 <p>Distinguish an internal Service from a host-facing HTTP route and the controller that implements it.</p>
 <h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
@@ -242,18 +242,21 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Synthetic status: Accepted=True, ResolvedRefs=True for the current generation. A matching client still receives 503 because the backend has no ready endpoints.</p>
 <p><strong>Expected:</strong> Route acceptance and reference resolution do not establish backend application readiness.</p>
 <h3 id="inspect-the-specific-owned-object">Inspect the specific owned object<a class="heading-anchor" href="#inspect-the-specific-owned-object" aria-label="Link to this section">#</a></h3>
-<p>Only after the chapter&#x27;s host capability is provisioned and its resources remain present, use the explicit receipt fields described in <a href="../host-labs.md.html">host-labs.md</a>. A completed one-shot browser Run has already cleaned its objects. The following read does not provision the missing capability and does not justify changing credentials after a Forbidden result.</p>
+<p>Read only while this lesson&#x27;s objects still exist (<a href="../STUDY-GUIDE.md.html#owned-live-reads">owned live reads</a>).</p>
 <p>Bash on Linux, macOS or Ubuntu under WSL 2:</p>
 <pre class="highlighted-code"><code class="language-bash">: <span class="syntax-string">&quot;</span><span class="syntax-string">${</span>LAB_KUBECONFIG<span class="syntax-punctuation">:</span><span class="syntax-punctuation">?Use the owned receipt path</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span>
 : <span class="syntax-string">&quot;</span><span class="syntax-string">${</span>LAB_CONTEXT<span class="syntax-punctuation">:</span><span class="syntax-punctuation">?Use the owned receipt context</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span>
 : <span class="syntax-string">&quot;</span><span class="syntax-string">${</span>LAB_NAMESPACE<span class="syntax-punctuation">:</span><span class="syntax-punctuation">?Use the owned receipt namespace</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span>
 kubectl --kubeconfig <span class="syntax-string">&quot;</span>$LAB_KUBECONFIG<span class="syntax-string">&quot;</span> --context <span class="syntax-string">&quot;</span>$LAB_CONTEXT<span class="syntax-string">&quot;</span> --namespace <span class="syntax-string">&quot;</span>$LAB_NAMESPACE<span class="syntax-string">&quot;</span> get httproute hello-route -o json</code></pre>
-<p>Windows uses the same Bash commands inside WSL 2. The lab adapter refuses native Windows credential handling, so do not run kubectl against the receipt from PowerShell. From PowerShell, only open your WSL 2 distribution (the name reported by <code>wsl.exe --list --verbose</code>), change to your checkout with its Linux path, then run the Bash block above unchanged:</p>
+<p>From PowerShell, only open WSL 2 and run the Bash block there (<a href="../STUDY-GUIDE.md.html#owned-live-reads">why</a>):</p>
 <pre class="highlighted-code"><code class="language-powershell">wsl<span class="syntax-punctuation">.</span>exe <span class="syntax-punctuation">-</span>-distribution Ubuntu</code></pre>
-<p>Retain only the fields needed by this chapter&#x27;s prediction. A NotFound result may be expected after one-shot cleanup; a Forbidden result may identify a deliberately absent advanced capability. Neither result authorizes an ambient-context fallback.</p>
+<p>Read <code>spec.parentRefs</code>, <code>spec.hostnames</code>, <code>spec.rules</code> and <code>status.parents[].conditions</code>. Accepted and ResolvedRefs true for lesson-gateway show configuration acceptance; a missing hello backend turns ResolvedRefs false, and delivery still needs a request.</p>
 <h3 id="run-and-bounded-evidence">Run and bounded evidence<a class="heading-anchor" href="#run-and-bounded-evidence" aria-label="Link to this section">#</a></h3>
-<p>The app artifact is a reading worksheet, <code>courses/kubernetes/lessons/k8s-023.md</code>. The current browser adapter does not provide the full <strong>host-provisioned Gateway/Ingress controller and loopback TLS listener</strong> operation. Use the synthetic fixture and offline check first. Live work follows <a href="../host-labs.md.html">the scoped host-lab guide</a> only when the named capability and owned target have been provisioned. A worksheet or static check is never a cluster execution receipt.</p>
-<p>The <a href="../solutions/k8s-023_solution.json.html">manifest example</a> is separate from the learner artifact. The <a href="../solutions/k8s-023_checks.py.html">offline reference check</a> evaluates explicitly synthetic facts and makes no API calls. Run it locally with <code>python courses/kubernetes/solutions/k8s-023_checks.py</code> after comparing your attempt. The <a href="../fixtures/k8s-023-cases.json.html">case ledger</a> is immutable teaching input.</p>
+<p>This worksheet, <code>courses/kubernetes/lessons/k8s-023.md</code>, does not provide the full <strong>host-provisioned Gateway/Ingress controller and loopback TLS listener</strong> operation. A host-provisioned Gateway controller is needed to see Accepted and ResolvedRefs on hello-route and to send matching and unmatched requests through the loopback TLS listener.</p>
+<p>Live reads need a provisioned, owned target (<a href="../host-labs.md.html">host-lab guide</a>).</p>
+<p>The <a href="../solutions/k8s-023_checks.py.html">offline reference check</a> makes no API calls; run it after your attempt:</p>
+<pre class="highlighted-code"><code class="language-bash">python courses/kubernetes/solutions/k8s-023_checks.py</code></pre>
+<p>Compare it with the <a href="../solutions/k8s-023_solution.json.html">manifest example</a> and <a href="../fixtures/k8s-023-cases.json.html">case ledger</a>.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-draw-the-ownership-layers">Exercise 1: Draw the ownership layers<a class="heading-anchor" href="#exercise-1-draw-the-ownership-layers" aria-label="Link to this section">#</a></h4>
 <p>Connect GatewayClass, Gateway, HTTPRoute, Service and Pods.</p>
@@ -286,12 +289,12 @@ kubectl --kubeconfig <span class="syntax-string">&quot;</span>$LAB_KUBECONFIG<sp
 <p><strong>Verify:</strong> List what the Ingress needs that the Gateway fixture does not provide, and confirm that cleanup names exact route UIDs.</p>
 <p><strong>Progressive hints:</strong> An API kind does not identify every implementation behavior.</p>
 <h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
-<p>Explain the mechanism behind the first example, then distinguish it from this boundary case: Route acceptance and reference resolution do not establish backend application readiness. State which observations are synthetic and which, if any, were read from your owned runtime.</p>
+<p>hello-route shows Accepted and ResolvedRefs true, yet requests to lesson.example.test return 503. Which layer is failing, and why do route conditions not prove the backend can serve?</p>
 <h3 id="common-pitfalls">Common pitfalls<a class="heading-anchor" href="#common-pitfalls" aria-label="Link to this section">#</a></h3>
 <p>A Kubernetes API object is not a running controller. An Ingress class or GatewayClass name must correspond to an installed, qualified implementation. A Service of type ClusterIP does not expose a host port by itself.</p>
 <p>Keep listener ownership and cleanup separate from the namespaced route. The learner should remove only its recorded route UID unless the host capability explicitly owns the Gateway/controller lifecycle. Never disable TLS verification or install a remote controller automatically to make the example pass.</p>
 <h3 id="retrieval-and-transfer">Retrieval and transfer<a class="heading-anchor" href="#retrieval-and-transfer" aria-label="Link to this section">#</a></h3>
-<p>Close the answer and reconstruct the reasoning for Exercise 6 (Compare Ingress and cleanup scope). Name the exact source and observed identity you would require before claiming the changed case succeeded.</p>
+<p>From memory, write the declared contract: hostname, path, gateway, backend and port. Then explain how you verify TLS against a wrong hostname without any insecure bypass flag.</p>
 <h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
 <p>Continue to <code>k8s-024</code> after preserving the six evidence records.</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>

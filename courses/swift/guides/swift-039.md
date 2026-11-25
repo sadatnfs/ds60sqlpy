@@ -24,9 +24,9 @@ The JourneyCore package and JourneyApp fixture implement this separation with a 
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles the saved pad as `main.swift` with Swift 6 language checking. An explicit `@main` type contains `static func main() async throws`; the fixed compiler uses `-parse-as-library -swift-version 6`. The examples use the standard library and portable Foundation. `precondition` makes a violated invariant fail the process. The fixed pad accepts one source file, without arbitrary command arguments, interactive input or dependency installation. SwiftUI, UIKit, Apple simulators and application signing belong to the separately prepared macOS/Xcode project labs, never the Linux pad.
+The pad runs only the portable domain kernel; the SwiftUI app is a separate Apple project lab. Task 3 runs `swift test` in a copied JourneyCore package before you open JourneyApp, so a domain failure is found without Xcode. `PlannerItem` and `toggled` are declared above `LessonMain` in both examples.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Compile contract, starter stop and success marker: [running a lesson](../STUDY-GUIDE.md#running-a-lesson).
 
 Use [JourneyCore](../fixtures/JourneyCore/README.md) for the complete portable package and [JourneyApp](../fixtures/JourneyApp/README.md) for the real SwiftUI app files and Xcode workflow.
 
@@ -34,7 +34,7 @@ Use [JourneyCore](../fixtures/JourneyCore/README.md) for the complete portable p
 
 A struct model conforms to Identifiable, Codable, Equatable and Sendable where appropriate. A pure reducer maps a state plus action to a new state. The app owns presentation and storage adapters.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+Each example ends with a trace; method: [tracing a program](../STUDY-GUIDE.md#tracing-a-program).
 
 ## Worked example / walkthrough
 
@@ -71,6 +71,8 @@ struct LessonMain {
 
 **Observe:** The transformed item changes completion while retaining the original value.
 
+**Trace.** `original` is a struct with completed set to false. `toggled` receives a copy, makes a mutable local `result` from it, flips completed to true and returns that new value. Because `PlannerItem` is a value type, the function never touches the caller's storage. The check confirms that `changed.completed` is true while `original.completed` is still false, so the old state remains available for undo or comparison.
+
 ### Example B: Keep identity stable during edits
 
 Stable identity lets navigation, persistence and UI reconciliation refer to the same domain item.
@@ -104,6 +106,8 @@ struct LessonMain {
 
 **Observe:** Completion changes do not manufacture a new identity.
 
+**Trace.** The same toggle runs, and the check now compares the fields that should not change. `id` and `title` are `let` constants in the struct, so no transition can alter them after creation; `toggled` copies them across unchanged. The new value carries the identity one, so a list, a navigation path or a saved file can still recognize it as the same item even though one property differs.
+
 ## Exercises
 
 1. **Predict and explain.** Identify domain and presentation responsibilities.
@@ -118,13 +122,15 @@ struct LessonMain {
 
 6. **Transfer and justify.** Draw the dependency direction among core, persistence adapter, view model and SwiftUI views.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Log each task in the [evidence table](../STUDY-GUIDE.md#recording-exercise-evidence) before opening the explanation.
 
 ## Common pitfalls and diagnosis
 
 A successful core test does not prove app rendering. Stable identity must survive edits and reloads. Keep domain validation outside UI-only button enablement.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+Task 2's rename must reject an empty or all-whitespace title and leave the original untouched; the counterexample is a title of three spaces, which a plain `isEmpty` check accepts. For task 4, a model getter that reads a file runs whenever a view reads the property, so a missing file fails during rendering rather than during an explicit load step that can report the error.
+
+Repair routine: [building a regression case](../STUDY-GUIDE.md#building-a-regression-case).
 
 ## Progressive hints
 
@@ -134,11 +140,15 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 ## Self-check and next step
 
-Explain Domain core, Reducer, Presentation state without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+Explain why returning a new value supports undo more easily than mutating the original in place. Say which fields of `PlannerItem` can change and how the declaration enforces that. Draw the dependency direction among the core, persistence, view model and views, and state which layer may import SwiftUI.
+
+Then follow the general [self-check routine](../STUDY-GUIDE.md#self-check-routine) and save your pad.
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://docs.swift.org/swift-book/documentation/the-swift-programming-language/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+[Documentation](https://docs.swift.org/swift-book/documentation/the-swift-programming-language/): Value semantics for structs are explained in Structures and Classes; Apple's SwiftUI documentation covers the `Identifiable` protocol and list identity.
+
+Provenance and limits: [sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

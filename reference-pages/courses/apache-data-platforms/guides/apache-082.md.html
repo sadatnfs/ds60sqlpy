@@ -238,34 +238,32 @@ totals <span class="syntax-operator">=</span> <span class="syntax-punctuation">{
   --describe --group <span class="syntax-string">&quot;</span>$GROUP_ID<span class="syntax-string">&quot;</span></code></pre>
 <p>With GROUP_ID set to the Flink consumer group, the output lists each partition with CURRENT-OFFSET, LOG-END-OFFSET and LAG. Flink stores its real source positions in checkpoints and only commits offsets to Kafka for monitoring, so these numbers can trail what a restore would use. Record both the checkpoint ID and the committed offsets in the receipt, and compare serving row IDs against the source range they claim to cover.</p>
 <h3 id="complete-worked-source">Complete worked source<a class="heading-anchor" href="#complete-worked-source" aria-label="Link to this section">#</a></h3>
-<p>This is a project-only command notebook. Read and edit it in the classroom; run its explicitly labeled commands from the copied owned Docker workshop. The classroom does not execute these service commands.</p>
+<p>The classroom does not execute these service commands. See the <a href="../STUDY-GUIDE.md.html#workshop-notebooks">workshop rules</a>.</p>
 <h2 id="integration-apache-082-complete-worked-notebook">Integration apache-082 complete worked notebook<a class="heading-anchor" href="#integration-apache-082-complete-worked-notebook" aria-label="Link to this section">#</a></h2>
 <p>Prepare a separately owned combined Kafka/Flink/Pinot route. Capture actual connector versions, private DNS, source offsets, checkpoint/sink state and exact serving IDs. Exercise duplicate and late-correction rules; component receipts alone do not qualify the whole path.</p>
-<h3 id="receipt-fields-and-independent-oracle">Receipt fields and independent oracle<a class="heading-anchor" href="#receipt-fields-and-independent-oracle" aria-label="Link to this section">#</a></h3>
+<h3 id="what-this-streaming-receipt-must-hold">What this streaming receipt must hold<a class="heading-anchor" href="#what-this-streaming-receipt-must-hold" aria-label="Link to this section">#</a></h3>
 <ul>
-<li>Source revision/hashes and exact declared input IDs, values, schema and time units.</li>
-<li>Actual native platform, package/image identities and owned resource namespace.</li>
-<li>Selected table snapshot/version, source positions or process/lineage identity as appropriate.</li>
-<li>Positive result against an independent oracle and a typed negative observation.</li>
-<li>Read-only retained-state comparison after the selected lifecycle transition.</li>
-<li>Cleanup/evidence-storage result and any separate prepared or unavailable feature.</li>
+<li>The integration topic name, partition count and end offsets after the single produce.</li>
+<li>The Flink job ID, parallelism, watermark policy and the last completed checkpoint ID.</li>
+<li>The sink connector name and version, and whether it joins the checkpoint commit.</li>
+<li>The Pinot table name, decoder class, offset reset policy and consuming segment names.</li>
+<li>The broker query result as stable event IDs with amounts, not only a row count.</li>
+<li>The duplicate ID, the correction version and what serving returned for each.</li>
 </ul>
-<p>For the common three-order fixture, require IDs 1/2/3 with amounts 4/9/7, total 20, east 11 and west 9. A later fourth west order of 2 changes the current total to 22 and west to 11 while an earlier pinned snapshot remains unchanged. Do not use this simple oracle to claim correctness for a different pipeline without defining its deduplication, correction and visibility semantics.</p>
-<p>Read the selected project README and qualification ledger before commands. The classroom does not execute Docker commands in this Markdown pad. Prepared configuration, unit policy fixtures, successful compilation and actual service acceptance remain different observations. Never include credentials or signed URLs.</p>
+<p>Reconcile three ledgers before writing any verdict: Kafka offsets, Flink checkpoint state and Pinot query rows. Producing the three orders once should leave three offsets, three logical events and a total of 20. After the duplicate, Kafka holds four records while a deduplicating route still serves three IDs. A served total of 29 means the duplicate of order 2 was counted. The <a href="../STUDY-GUIDE.md.html#evidence-receipts">shared receipt rules</a> cover naming and storage.</p>
 <h3 id="concrete-source-inspection">Concrete source inspection<a class="heading-anchor" href="#concrete-source-inspection" aria-label="Link to this section">#</a></h3>
 <p>From the copied integration directory, with sibling project copies when selected:</p>
 <pre class="highlighted-code"><code class="language-bash">cat ../pinot/realtime-table.json
 cat ../flink/README.md
 cat ../streaming/README.md</code></pre>
-<p>These inspections do not start or qualify a service. Execute only the chosen project&#x27;s complete documented owned route and retain its actual receipt.</p>
+<p>In <code>realtime-table.json</code>, the topic <code>ds60-orders</code>, the broker list <code>kafka:9092</code> and <code>auto.offset.reset</code> set to <code>smallest</code> decide where Pinot starts reading. A combined route needs its own topic name so that the Pinot table never consumes the streaming workshop&#x27;s retained records. None of these files proves a combined topology ran; they show which settings must agree across the three projects.</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
 <ul>
-<li><a href="https://iceberg.apache.org/docs/latest/reliability/">Iceberg reliability and table state</a></li>
-<li><a href="https://arrow.apache.org/docs/format/Columnar.html">Arrow data format</a></li>
-<li><a href="https://nightlies.apache.org/flink/flink-docs-release-2.3/docs/concepts/stateful-stream-processing/">Flink stateful stream processing</a></li>
-<li><a href="https://kafka.apache.org/44/design/design/">Kafka delivery/transaction design</a></li>
-<li><a href="https://atlas.apache.org/api/v2/index.html">Atlas API and metadata boundaries</a></li>
-<li><a href="https://github.com/delta-io/delta-sharing/blob/v1.4.1/PROTOCOL.md">Delta Sharing protocol</a></li>
+<li><a href="https://kafka.apache.org/44/design/design/">Kafka offsets, producers and transactions</a></li>
+<li><a href="https://nightlies.apache.org/flink/flink-docs-release-2.3/docs/dev/datastream/fault-tolerance/checkpointing/">Flink checkpoints and sink participation</a></li>
+<li><a href="https://nightlies.apache.org/flink/flink-docs-release-2.3/docs/dev/datastream/event-time/generating_watermarks/">Flink watermarks for late corrections</a></li>
+<li><a href="https://github.com/pinot-contrib/pinot-docs/blob/latest/build-with-pinot/ingestion/stream-ingestion/import-from-apache-kafka.md">Pinot ingestion from a Kafka topic</a></li>
+<li><a href="https://github.com/pinot-contrib/pinot-docs/blob/latest/build-with-pinot/ingestion/upsert-and-dedup/upsert.md">Pinot upsert for current-state serving</a></li>
 </ul></article>
   </main>
 </body>

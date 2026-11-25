@@ -4,8 +4,6 @@
 
 Multiple GPUs have distinct allocations, execution contexts and communication paths. Peer access may be available for a pair, but it must be supported and explicitly configured under the platform's rules. Topology affects whether traffic uses PCIe, NVLink or other paths. A collective such as all-reduce combines values and makes the result available to every participant. Participants must agree on communicator, datatype, count and collective order; mismatches can hang or fail. Multi-GPU within one machine does not prove multi-node operation, which adds network, process-launch and failure concerns.
 
-The separate [CPU reference](../references/cuda-060_cpu.py) checks the chapter's bounded model. It does not execute CUDA or establish GPU timing. Compare after attempting the worksheet or explicitly choosing to reveal solutions.
-
 ## Exercise 1
 
 Split \([1,2,3,4,5]\) across two devices as \([1,2,3]\) and \([4,5]\). Local sums are six and nine; a combined sum is fifteen. A gather gives the final result to one destination, whereas all-reduce gives fifteen to both participants. A CPU partition model demonstrates semantics only.
@@ -78,12 +76,18 @@ Strong scaling fixes total work while adding devices; weak scaling grows total w
 
 **How to verify:** Label each experiment's total and per-device problem sizes.
 
+## Self-check answers
+
+1. **What is strong-scaling efficiency for speedup 1.6 on two GPUs?** 0.8, or 80 percent, because 1.6 divided by 2 is 0.8.
+2. **Rank zero calls all-reduce while rank one calls broadcast. What happens?** The collectives do not match, so the ranks usually hang waiting for each other.
+3. **What does all-reduce give in worked example 1 that a gather does not?** The total 15 on both devices instead of one destination.
+
 ## Numerical reference and its limits
 
-The complete CPU model is [here](../references/cuda-060_cpu.py). Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It also asserts an exercise answer that the guide's model leaves for you to derive: `assert 1.6 / 2 == 0.8`. It does not claim CUDA execution, concurrency safety or a performance measurement.
+The [CPU reference](../references/cuda-060_cpu.py) reproduces worked example 1 and prints `{'CPU_collective_model': [15, 15], 'multi_GPU_executed': False}`.
+
+It also asserts an exercise answer you derive yourself: `assert 1.6 / 2 == 0.8`
 
 ## Transfer review
 
 Strong scaling fixes total work while adding devices; weak scaling grows total work with device count while keeping work per device roughly fixed.
-
-A complete explanation must name its inputs, the unchanged mathematical contract, the changed boundary or resource condition, and the evidence still needed on actual hardware. Preserve a CPU baseline even after a GPU path becomes available.

@@ -2,67 +2,27 @@
 
 ## How to run this lesson
 
-Start the Linux-container engine and run `./classroom` from the repository
-root. On Windows, use Ubuntu in WSL 2 or the thin
-`START_DOCKER_CLASSROOM.cmd` wrapper. Choose **PostgreSQL** on the shared
-`/classroom` home, then open **sql-31**. The
-[launcher guide](../../../docs/one-command-classroom.md) covers first preparation, strict resume and
-the saved project selection. No host Python or PostgreSQL installation is
-required for this browser route.
+Open **sql-31** in `./classroom` and run **Whole SQL lesson (psql)** against
+`advanced_sql_training`. The file prints three plans and no business rows:
+two over `orders` alone and one that joins `orders`, `customers` and
+`order_items`. Only the second plan executes its query, and the whole file
+ends in `ROLLBACK`. Your editable copy is
+`.learning/sql/sql-31/lesson/workspace/sql/postgres-60day/day31_explain_analyze.sql`.
+The shared launch steps are in
+[Run a lesson in the classroom](../../STUDY-GUIDE.md#run-a-lesson-in-the-classroom).
 
-1. Read the prerequisite and fixture notes before running the file. Use only
-   the local disposable `advanced_sql_training` database.
-2. Choose **Whole SQL lesson (psql)** for the cataloged learner script. This
-   preserves the lesson's reviewed psql directives, relative includes and
-   transaction behavior. **SQL snippet** is appropriate for ordinary SQL
-   statements, but is not a replacement for an entire script's setup.
-3. The **Course database** panel above the code shows whether the course
-   training tables are loaded. Missing tables load automatically before your
-   first run (or choose **Load course tables**) and stay loaded for later
-   lessons. **Reset training data** restores the original rows only when your
-   own changes made results differ; it keeps your saved code and notes.
-4. Edit the learner copy in the classroom and save your prediction before
-   running. Its whole-script workspace is
-   `.learning/sql/sql-31/lesson/workspace/sql/postgres-60day/day31_explain_analyze.sql`.
-   For browser work this path is inside the Docker learning volume, not a
-   newly created host folder beside your checkout. The checked-in source
-   remains the answer-free starting artifact.
-5. Run the whole script and inspect the full transcript. The runner uses
-   `psql -X -v ON_ERROR_STOP=1 -f`. SELECT output has columns, rows and a row
-   count; DDL/DML has command tags; intentional checks may produce NOTICE
-   messages. An unexpected ERROR or nonzero exit is a failure to diagnose,
-   even when an earlier query printed plausible values.
-6. Verify the lesson's expected grain, ordering, constraints and declared
-   transaction or cleanup outcome. Keep required ROLLBACK statements.
-   The warehouse sequence and other explicitly stateful exercises explain
-   when state is committed. Read saved output without rerunning it when
-   reviewing an earlier attempt.
-
-If a relation is missing, inspect the lesson's required fixture and predecessor
-rather than guessing a new table definition. If authentication or runtime
-readiness fails, use `./classroom status` and the setup guide. Keep credentials
-out of SQL, notebooks, screenshots and committed files. Repair the first error
-before trusting partial output, and reveal separate solutions only when you
-want to compare after an attempt.
+Plan text lines are long. Widen the transcript pane or scroll sideways
+before deciding that a `Filter:` or `Buffers:` line is missing.
 
 ### Optional contributor notebook route
 
-For notebook work, deliberately prepare the Linux/WSL contributor environment
-from [CONTRIBUTING.md](../../../CONTRIBUTING.md), including a compatible psql client and
-the notebook dependencies. Generate this lesson's private workspace through
-the maintained CLI:
+A notebook keeps each plan in its own cell, which makes it easy to rerun
+one `EXPLAIN` after an `ANALYZE orders;`
+([notebook setup](../../STUDY-GUIDE.md#optional-contributor-notebook-route)):
 
 ```sh
 uv run --no-sync python scripts/course.py sql notebook sql-31
 ```
-
-Open the printed notebook path in that environment's JupyterLab. It uses the
-same catalog-derived learner-copy layout in that contributor checkout and
-executes the complete script through psql. Its host-side state is separate
-from the Docker browser's named volume. Follow
-[guided SQL notebooks](../../../docs/guided-sql-notebooks.md) for explicit local connection
-selection and kernel setup. Notebook generation does not execute SQL or
-authorize a reset.
 
 ## Level and prerequisites
 
@@ -75,24 +35,31 @@ authorize a reset.
 
 ## A beginner's mental model for this lesson
 
-A **table** stores facts in named columns. A **row** is one occurrence at the
-table's declared grain. A query creates a temporary **result set**: rows printed
-on screen are not automatically stored. The key vocabulary for this lesson is Plan node, Cost estimate, Loop count. Its worked SQL reads or creates `orders`, `customers`, `order_items`.
+`EXPLAIN` asks PostgreSQL how it would run a query; `EXPLAIN ANALYZE` runs
+the query and reports what happened. Each output line with `->` is a plan
+node, and indentation shows which node feeds which. Rows flow upward: the
+most indented scans produce rows, and every parent consumes its children.
 
-Before writing a query, complete this sentence: “One output row represents
-___.” Joins can multiply rows, filters can remove them, grouping can collapse
-many rows into one, and window functions can add calculations while preserving
-row count. For a normal analytical `SELECT`, use this logical reading order:
-`FROM`/`JOIN` (including `ON`) → `WHERE` → `GROUP BY`/aggregates → `HAVING` →
-window calculations → `SELECT` → `ORDER BY` → `LIMIT`. PostgreSQL may execute a
-different physical plan while preserving those semantics.
+Three numbers on each node carry most of the meaning:
 
-The worked walkthrough's lesson-specific task is: Run the same safe filter first with `EXPLAIN` and then with `EXPLAIN (ANALYZE, BUFFERS)`. Start at the scan leaf, compare estimated rows with `actual rows × loops`, note rows removed by the filter, and only then read the parent `LIMIT` or aggregate node.
-The first runnable example has a concrete contract: Example 1 prints a plan tree, not business rows. Run the underlying `SELECT` separately and reconcile its `order_id` key set and row count over `orders`; then compare node estimates, actual rows × loops, buffers, and timing without requiring one fixed plan. Its final projection is `order_id`, and `total_amount`. Run the underlying query without `EXPLAIN` first; preserve its keys and row count, then compare estimates with actual rows × loops and read buffer/timing evidence without requiring one fixed node type.
+| On the node | What it tells you | In the first plan of this lesson |
+|---|---|---|
+| `cost=a..b` | planner units for first row and all rows | `0.00..119.53` |
+| `rows=` (estimate) | how many rows the planner expects | `2410` |
+| `actual ... rows= loops=` | what really came out, per loop | only with `ANALYZE` |
+
+Costs are not milliseconds. They are relative units built from page reads
+and per-row CPU charges, useful only for comparing plans of the same query.
+In the first plan, 65 of the 119.53 units are the 65 pages of `orders`;
+the rest is per-row CPU for 4,362 rows and their filter checks.
+
+The trap to avoid is comparing a plan to a different query. Every
+comparison in this lesson keeps the `SELECT`, the tables and the data fixed
+and changes one thing: a predicate, `ANALYZE`, or `LIMIT`. When rows look
+wrong, run the same `SELECT` without `EXPLAIN` and count; the plan never
+replaces that check.
 
 ## Two worked SQL examples
-
-These worked excerpts come from `sql/postgres-60day/day31_explain_analyze.sql`. Use **Whole SQL lesson (psql)** in the unified classroom for the complete file, including its fixture and transaction context. The optional contributor notebook and prepared `psql` routes are described above.
 
 ### Example 1
 
@@ -107,9 +74,15 @@ WHERE
   o.total_amount > 500;
 ```
 
-**How to read it:** Example 1 returns plan rows rather than business rows. The node tree is evidence about one execution strategy; it does not replace a correctness check on the underlying query.
+**How to read it:** One node, `Seq Scan on orders o`, with a
+`Filter: (total_amount > '500'::numeric)` line beneath it. PostgreSQL has no
+index on `total_amount`, so reading all 65 pages is the only option. The
+query itself does not run, so the plan shows estimates and nothing else.
 
-**Expected result/shape:** Example 1 prints a plan tree, not business rows. Run the underlying `SELECT` separately and reconcile its `order_id` key set and row count over `orders`; then compare node estimates, actual rows × loops, buffers, and timing without requiring one fixed plan.
+**Expected result/shape:** A two-line plan with an estimate of
+`rows=2410`. Running `SELECT COUNT(*) FROM orders WHERE total_amount > 500`
+also returns 2,410 on a fresh load, so the statistics are accurate here. A
+very different estimate usually means `orders` has not been analyzed yet.
 
 ### Example 2
 
@@ -125,9 +98,16 @@ WHERE
 LIMIT 100;
 ```
 
-**How to read it:** Example 2 returns plan rows rather than business rows. The node tree is evidence about one execution strategy; it does not replace a correctness check on the underlying query.
+**How to read it:** Now `Limit` sits above the scan, and
+`ANALYZE` adds an `actual` section to each node. The scan's estimate still
+says 2,410 rows, but its actual count is only 100, because `Limit` stops
+asking for rows once it has enough.
 
-**Expected result/shape:** Example 2 prints a plan tree, not business rows. Run the underlying `SELECT` separately and reconcile its `order_id` key set and row count over `orders`; then compare node estimates, actual rows × loops, buffers, and timing without requiring one fixed plan.
+**Expected result/shape:** About `actual ... rows=100` on both
+nodes and `Rows Removed by Filter: 83` on the scan: PostgreSQL read 183
+orders, kept the first 100 that passed the filter, and stopped. The plan
+cost drops to about 4.96 for the same reason. Which 100 orders you get is
+not defined, because there is no `ORDER BY`.
 
 ## Learning objectives
 
@@ -220,7 +200,9 @@ read-only statements.
 
 ## Practice map
 
-Use the numbered **Exercises** section above as the single authoritative practice contract. Its prompts, expected shapes, and verification checks map one-for-one to the learner SQL and both solution companions.
+The six numbered prompts above are the full practice set, and the
+solution walks through each one; the third plan in the learner file (the
+90-day join) is a warm-up for the fourth.
 
 ## Pitfalls and validation
 
@@ -245,9 +227,9 @@ outdated table statistics.
 
 ## Ask an AI tutor about this lesson
 
-An AI tutor is optional; the guide, learner SQL, PostgreSQL, and expected checks are
-enough to complete the lesson offline. If you want a patient tutor, copy this
-prompt after opening the repository in the AI tutor:
+If a plan confuses you, a tutor can walk through it one node at a
+time while you keep the actual row counts in front of you
+([optional tutor notes](../../STUDY-GUIDE.md#use-an-ai-tutor-optional)).
 
 ```text
 Tutor me through sql-31: Reading Plans with EXPLAIN and EXPLAIN ANALYZE.

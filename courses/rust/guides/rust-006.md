@@ -24,9 +24,11 @@ For-in consumes an iterable, so ownership of the sequence or its borrowed view m
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles the saved pad as `main.rs` with pinned Rust 1.99.1, edition 2024, and the prepared Arrow 60 library. `assert!` and `assert_eq!` remain active in normal builds. The fixed pad accepts one source file without arbitrary arguments, interactive input, Cargo manifests or package installation. The main function returns `Result<(), Box<dyn std::error::Error>>` so later examples can propagate errors with `?`; the final `Ok(())` means this fixture completed successfully. Standard library and Arrow examples remain offline after image preparation. Multi-file Cargo and external ecosystem projects have separate explicit preparation workflows.
+This lesson's programs need only the prelude and their own helpers. A passing run prints `rust-006: passed`.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Pad setup and limits: [Run a lesson](../STUDY-GUIDE.md#run-a-lesson).
+
+Before you run anything, follow [Attempt a lesson](../STUDY-GUIDE.md#attempt-a-lesson).
 
 
 
@@ -34,7 +36,9 @@ Start with the answer-free learner artifact in your saved classroom pad. It deli
 
 `for value in &values` borrows elements. `enumerate` supplies traversal positions. `break` exits a loop, and loop itself can return a value through break value. An exclusive range uses `0..n`.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+**Reading Example A (Maintain a sum invariant, code below).** `vec![2, 4, 6]` allocates a vector of three `i32` values on the heap. The loop header `for value in &values` iterates over a shared reference, so the loop borrows the vector instead of consuming it, and each `value` has type `&i32`. `total += value` still compiles because `i32` implements `AddAssign<&i32>`, so no explicit `*value` is needed. The loop has no index and no explicit condition: it asks the iterator for the next item and stops when the iterator returns `None`, which must happen after the last element of a finite vector. That is the termination argument. Write down what `total` holds at the top of each iteration; that relationship is the invariant. The last line checks that the vector still exists with its length unchanged. Writing `for value in values` would move the vector into the loop, and that line would fail with E0382, borrow of moved value.
+
+Method for tracing your own variants: [Trace a program](../STUDY-GUIDE.md#trace-a-program).
 
 ## Worked example / walkthrough
 
@@ -92,13 +96,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 6. **Transfer and justify.** Design a bounded retry loop and state both its progress measure and its effect policy.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Record each task as in [Keep evidence for each task](../STUDY-GUIDE.md#keep-evidence-for-each-task).
 
 ## Common pitfalls and diagnosis
 
 An iterator can consume values or borrow them depending on its construction. A position is not automatically a valid index in a different collection. Avoid unbounded loops without a deliberate stop and cancellation policy.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+To turn a pitfall into a test, see [Design a regression case](../STUDY-GUIDE.md#design-a-regression-case).
 
 ## Progressive hints
 
@@ -106,13 +110,23 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 2. Compare Example B (Find the first position) with Example A and name the first line whose behavior differs. Its observation is: The first match is position one and absence stays explicit.
 3. Before opening the explanation, test your task 3 attempt against this lesson's main pitfall: An iterator can consume values or borrow them depending on its construction.
 
+Tempting approaches to rule out before you compare:
+
+- **Task 1.** Listing the values 2, 4, 6 as the accumulator's states confuses the element with the running total. Writing `for value in values` would also change the answer to the later check: it moves the vector, and `values.len()` becomes E0382.
+- **Task 2.** Clamping with `total += value.max(0)` gets the same 10 but loses the count of discarded readings, so a batch that was mostly negative looks as healthy as a clean one.
+- **Task 5.** Returning the last matching index by keeping a `found = Some(index)` variable without stopping passes the empty and singleton cases but returns Some(2) for the repeated case.
+
 ## Self-check and next step
 
-Explain Invariant, Iterator, Termination without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+State Example A's loop invariant in one sentence. Why does `for value in &values` leave `values` usable after the loop while `for value in values` does not? What should the first-match search return for an empty slice, and why is position 0 the wrong answer? Name the quantity that strictly decreases in a bounded retry loop.
+
+Then work through [Self-check and review](../STUDY-GUIDE.md#self-check-and-review).
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://doc.rust-lang.org/book/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+Read [The Rust Book, 13.2 Iterators](https://doc.rust-lang.org/book/ch13-02-iterators.html) for the difference between `iter`, `iter_mut` and `into_iter`.
+
+What the classroom does and does not prove: [Sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

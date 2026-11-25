@@ -1,6 +1,6 @@
 # go-026: explained solutions
 
-These are comparison material after an attempt or explicit reveal. The executable reference implements all six cases in one `main.go`.
+Compare after an attempt ([using solutions](../STUDY-GUIDE.md#use-the-solutions)). `courses/go/solutions/go-026_solution.go` implements all six cases.
 
 ## Mechanism
 
@@ -10,7 +10,7 @@ context.WithCancel returns a child and cancel function. Done closes on cancellat
 
 ## 1. Cancel a child: predict an edited check
 
-Copy worked example 1 into a scratch pad and change `check(ctx.Err() == context.Canceled, "cancel")` to `check(ctx.Err() != context.Canceled, "cancel")` inside its check. Before running, predict whether the check still passes and explain why; then restore it.
+Copy worked example 1, change `check(ctx.Err() == context.Canceled, "cancel")` to `check(ctx.Err() != context.Canceled, "cancel")` inside its check and predict whether it still passes; then restore it.
 
 The unchanged code is worked example 1:
 
@@ -20,7 +20,9 @@ cancel()
 check(ctx.Err() == context.Canceled, "cancel")
 ```
 
-**Expected:** The changed run panics with `cancel` because the edited check no longer holds. Restoring the original line brings back the worked observation: err returns context.Canceled.
+**Expected:** The edited check panics with `cancel` even though `ctx.Err() == context.Canceled` still holds.
+
+**Verify:** Restoring `check(ctx.Err() == context.Canceled, "cancel")` makes the check pass again with the worked observation: err returns context.Canceled.
 
 Cancellation is visible through Err and the closed Done channel. Repeated cancel calls are safe.
 
@@ -34,7 +36,7 @@ Cancellation is visible through Err and the closed Done channel. Repeated cancel
 
 ## 2. Propagate parent cancellation: diagnose an edited check
 
-A careless edit changed the check in worked example 2 so that it reads `check(parent.Err() != context.Canceled && child.Err() == context.Canceled, "tree")`. Run worked example 2 with that line, explain why the edited check now fails for the same program state, and restore it.
+A careless edit rewrote the check in worked example 2 as `check(parent.Err() != context.Canceled && child.Err() == context.Canceled, "tree")`. Explain the failure, then restore it.
 
 The unchanged code is worked example 2:
 
@@ -46,7 +48,9 @@ cancel()
 check(parent.Err() == context.Canceled && child.Err() == context.Canceled, "tree")
 ```
 
-**Expected:** Before the repair the program panics with `tree`; after it the line reads `check(parent.Err() == context.Canceled && child.Err() == context.Canceled, "tree")` again and both contexts become canceled.
+**Expected:** The defective run panics with `tree`; after restoring `check(parent.Err() == context.Canceled && child.Err() == context.Canceled, "tree")`, both contexts become canceled.
+
+**Verify:** The edited check fails with message `tree` for a state that `parent.Err() == context.Canceled && child.Err() == context.Canceled` accepts.
 
 A child cannot extend work beyond the lifetime requested by its parent.
 
@@ -71,6 +75,8 @@ check(child.Err() != nil && parent.Err() == nil, "child")
 
 **Expected:** The child is canceled; the parent is unchanged.
 
+**Verify:** Your solution must keep `child.Err() != nil && parent.Err() == nil` true. Control: changing `check(child.Err() != nil && parent.Err() == nil, "child")` to `check(child.Err() == nil && parent.Err() == nil, "child")` panics with message `child`; revert it.
+
 Cancellation propagates downward. One sub-operation can end without canceling unrelated siblings.
 
 **Approach.** Cancel a child derived from `context.Background()` and compare the two errors.
@@ -92,6 +98,8 @@ check(ctx.Err() == context.DeadlineExceeded, "deadline")
 ```
 
 **Expected:** Err is context.DeadlineExceeded.
+
+**Verify:** Your solution must keep `ctx.Err() == context.DeadlineExceeded` true. Control: changing `check(ctx.Err() == context.DeadlineExceeded, "deadline")` to `check(ctx.Err() != context.DeadlineExceeded, "deadline")` panics with message `deadline`; revert it.
 
 The past deadline avoids flaky sleeps. Real work also needs a separate cleanup allowance after its budget expires.
 
@@ -116,6 +124,8 @@ check(v == 0 && err == context.Canceled, "refusal")
 
 **Expected:** It returns cancellation without a result.
 
+**Verify:** Your solution must keep `v == 0 && err == context.Canceled` true. Control: changing `check(v == 0 && err == context.Canceled, "refusal")` to `check(v != 0 && err == context.Canceled, "refusal")` panics with message `refusal`; revert it.
+
 A preflight check expresses the already-canceled policy. A later select alone cannot guarantee cancellation wins over another ready arm.
 
 **Approach.** Have `contextValue` check `ctx.Err()` before doing any work and return 0 with that error when the context is already done.
@@ -136,6 +146,8 @@ check(err == nil && v == 8, "live")
 ```
 
 **Expected:** It returns 8 without error.
+
+**Verify:** Your solution must keep `err == nil && v == 8` true. Control: changing `v, err := contextValue(context.Background(), 4)` to `v, err := contextValue(context.Background(), 5)` panics with message `live`; revert it.
 
 Long loops or I/O must cooperate during work as well. One entry check is sufficient only for this tiny immediate calculation.
 

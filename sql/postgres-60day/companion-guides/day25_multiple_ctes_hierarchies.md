@@ -2,67 +2,23 @@
 
 ## How to run this lesson
 
-Start the Linux-container engine and run `./classroom` from the repository
-root. On Windows, use Ubuntu in WSL 2 or the thin
-`START_DOCKER_CLASSROOM.cmd` wrapper. Choose **PostgreSQL** on the shared
-`/classroom` home, then open **sql-25**. The
-[launcher guide](../../../docs/one-command-classroom.md) covers first preparation, strict resume and
-the saved project selection. No host Python or PostgreSQL installation is
-required for this browser route.
-
-1. Read the prerequisite and fixture notes before running the file. Use only
-   the local disposable `advanced_sql_training` database.
-2. Choose **Whole SQL lesson (psql)** for the cataloged learner script. This
-   preserves the lesson's reviewed psql directives, relative includes and
-   transaction behavior. **SQL snippet** is appropriate for ordinary SQL
-   statements, but is not a replacement for an entire script's setup.
-3. The **Course database** panel above the code shows whether the course
-   training tables are loaded. Missing tables load automatically before your
-   first run (or choose **Load course tables**) and stay loaded for later
-   lessons. **Reset training data** restores the original rows only when your
-   own changes made results differ; it keeps your saved code and notes.
-4. Edit the learner copy in the classroom and save your prediction before
-   running. Its whole-script workspace is
-   `.learning/sql/sql-25/lesson/workspace/sql/postgres-60day/day25_multiple_ctes_hierarchies.sql`.
-   For browser work this path is inside the Docker learning volume, not a
-   newly created host folder beside your checkout. The checked-in source
-   remains the answer-free starting artifact.
-5. Run the whole script and inspect the full transcript. The runner uses
-   `psql -X -v ON_ERROR_STOP=1 -f`. SELECT output has columns, rows and a row
-   count; DDL/DML has command tags; intentional checks may produce NOTICE
-   messages. An unexpected ERROR or nonzero exit is a failure to diagnose,
-   even when an earlier query printed plausible values.
-6. Verify the lesson's expected grain, ordering, constraints and declared
-   transaction or cleanup outcome. Keep required ROLLBACK statements.
-   The warehouse sequence and other explicitly stateful exercises explain
-   when state is committed. Read saved output without rerunning it when
-   reviewing an earlier attempt.
-
-If a relation is missing, inspect the lesson's required fixture and predecessor
-rather than guessing a new table definition. If authentication or runtime
-readiness fails, use `./classroom status` and the setup guide. Keep credentials
-out of SQL, notebooks, screenshots and committed files. Repair the first error
-before trusting partial output, and reveal separate solutions only when you
-want to compare after an attempt.
+Open `./classroom`, pick **sql-25** under PostgreSQL and choose
+**Whole SQL lesson (psql)**. The launcher runs your workspace copy,
+`.learning/sql/sql-25/lesson/workspace/sql/postgres-60day/day25_multiple_ctes_hierarchies.sql`,
+against `advanced_sql_training`. The file only reads `employees` and
+`departments` inside `BEGIN`/`ROLLBACK`, and its second statement is an
+`EXPLAIN` of the first, so the transcript ends with a plan tree instead of a
+result grid. Launcher and transcript details are in
+[Run a lesson in the classroom](../../STUDY-GUIDE.md#run-a-lesson-in-the-classroom).
 
 ### Optional contributor notebook route
 
-For notebook work, deliberately prepare the Linux/WSL contributor environment
-from [CONTRIBUTING.md](../../../CONTRIBUTING.md), including a compatible psql client and
-the notebook dependencies. Generate this lesson's private workspace through
-the maintained CLI:
+The notebook is handy for running each CTE on its own before chaining them
+([notebook setup](../../STUDY-GUIDE.md#optional-contributor-notebook-route)):
 
 ```sh
 uv run --no-sync python scripts/course.py sql notebook sql-25
 ```
-
-Open the printed notebook path in that environment's JupyterLab. It uses the
-same catalog-derived learner-copy layout in that contributor checkout and
-executes the complete script through psql. Its host-side state is separate
-from the Docker browser's named volume. Follow
-[guided SQL notebooks](../../../docs/guided-sql-notebooks.md) for explicit local connection
-selection and kernel setup. Notebook generation does not execute SQL or
-authorize a reset.
 
 ## Level and prerequisites
 
@@ -74,28 +30,36 @@ authorize a reset.
 
 ## A beginner's mental model for this lesson
 
-A **table** stores facts in named columns. A **row** is one occurrence at the
-table's declared grain. A query creates a temporary **result set**: rows printed
-on screen are not automatically stored. The key vocabulary for this lesson is CTE pipeline, Hierarchy enrichment, Stage invariant. Its worked SQL reads or creates `employees`, `departments`.
+One `WITH` clause can hold several CTEs separated by commas. Each one is a
+named stage, and a later stage can read any earlier one. Writing
+`WITH RECURSIVE` once at the top allows any of them to be recursive; the
+others behave like ordinary CTEs.
 
-Before writing a query, complete this sentence: “One output row represents
-___.” Joins can multiply rows, filters can remove them, grouping can collapse
-many rows into one, and window functions can add calculations while preserving
-row count. For a normal analytical `SELECT`, use this logical reading order:
-`FROM`/`JOIN` (including `ON`) → `WHERE` → `GROUP BY`/aggregates → `HAVING` →
-window calculations → `SELECT` → `ORDER BY` → `LIMIT`. PostgreSQL may execute a
-different physical plan while preserving those semantics.
+Example 1 has two stages over the same org chart used in sql-24:
 
-The worked walkthrough's lesson-specific task is: Build the employee hierarchy separately and validate `(employee_id, depth)`. Build department aggregates separately at one row per department. Join them only after both grains are stable, so a department measure is not accidentally re-aggregated across hierarchy paths.
-Exercise 1 expects this result: one row per hierarchy depth. Predict keys, row count, `NULL` behavior,
-and ordering before running. Afterwards, compare keys/counts/totals with an
-independent control. A blank string, SQL `NULL`, numeric zero, and a missing row
-are different facts; use `COALESCE` only after choosing which meaning the
-business question requires.
+- `base_org` walks the hierarchy from the six roots and yields 100 employee
+  rows, each with `department_id`, `salary` and `depth`.
+- `dept_counts` groups those 100 rows by department: Sales, Engineering, HR
+  and Finance have 17 employees each, and Marketing and Operations have 16.
+  Every department reaches depth 3, because the 92 people under employee 8
+  are spread across all six departments.
+- The final `SELECT` starts from `departments` and left joins the counts, so
+  a department with no reachable employees would still appear with 0.
+
+The main risk in this lesson is fanout. A full-subtree relation, which pairs
+each manager with every descendant, lists employees 9 to 100 twice: once
+under employee 8 and once under employee 1. Summing salaries over those
+pairs gives 8,235,305.17, while the whole company's payroll is only
+4,399,909.50. Decide first whether a measure belongs to a depth, a direct
+team or a full subtree, and aggregate at that grain.
+
+Example 2 shows how PostgreSQL treats the two stages differently. The
+recursive `base_org` always appears as its own `CTE base_org` node, built by
+a `Recursive Union` over a `WorkTable Scan`, and is read once through
+`CTE Scan on base_org`. The plain `dept_counts` is folded into the main query
+and shows up only as `Subquery Scan on dc` above a `HashAggregate`.
 
 ## Two worked SQL examples
-
-These worked excerpts come from `sql/postgres-60day/day25_multiple_ctes_hierarchies.sql`. Use **Whole SQL lesson (psql)** in the unified classroom for the complete file, including its fixture and transaction context. The optional contributor notebook and prepared `psql` routes are described above.
 
 ### Example 1
 
@@ -153,9 +117,17 @@ ORDER BY
   d.department_id;
 ```
 
-**How to read it:** Example 1: Start with `employees`, `base_org`, and `departments` in `FROM`/`JOIN`; let `WHERE` remove nonqualifying rows; let `GROUP BY` collapse rows to its grouping keys; append branches with `UNION ALL` (duplicates are retained). The final `SELECT` displays `department_id`, `department`, `reachable_headcount`, `avg_salary`, and `deepest_level`. `ORDER BY` determines presentation order. Before running, predict the row grain, row count, `NULL` positions, and first/last key; afterwards, compare each prediction with the transcript.
+**How to read it:** Read the stages top to bottom. `base_org` carries
+`department_id` and `salary` through recursion so nothing needs to be looked
+up later. `dept_counts` collapses its 100 rows to one per department with a
+count, an average rounded to cents and the deepest level. The outer query
+puts `departments` on the left side of the join, and `COALESCE` turns a
+missing count into 0 before the sort uses it.
 
-**Expected result/shape:** Example 1 returns one grouped row per `department_id` with columns `department_id`, `department`, `reachable_headcount`, `avg_salary`, and `deepest_level` from `employees`, `base_org`, and `departments`. Use a direct count or grouped aggregate over those same source relations as the control; check ordering only when this query has an `ORDER BY`, and inspect `NULL` only for columns this example can produce.
+**Expected result/shape:** Six rows, one per department. Sales,
+Engineering, HR and Finance have 17 employees and come first in id order;
+Marketing and Operations follow with 16. `deepest_level` is 3 on every row,
+and `avg_salary` ranges from 43,880.31 for Sales to 44,117.88 for Finance.
 
 ### Example 2
 
@@ -215,9 +187,17 @@ ORDER BY
   d.department_id;
 ```
 
-**How to read it:** Example 2 is executed by `psql` as part of the complete lesson. Expected notices are evidence; an unexpected error stops the script.
+**How to read it:** Read the plan from the innermost nodes out. The
+`CTE base_org` block runs the anchor as `Seq Scan on employees e` with
+`Filter: (manager_id IS NULL)`, then repeats a `Hash Join` against the
+`WorkTable Scan`, applying the path guard as a `Join Filter`. The main branch
+hashes the aggregated counts and left joins them to `departments`.
 
-**Expected result/shape:** Example 2 prints a plan tree, not business rows. Run the underlying `SELECT` separately and reconcile its `department_id` key set and row count over `employees`, `base_org`, and `departments`; then compare node estimates, actual rows × loops, buffers, and timing without requiring one fixed plan.
+**Expected result/shape:** A plan of about 20 lines with `Sort` at
+the top, keyed on `COALESCE(dc.reachable_headcount, '0'::bigint) DESC` and
+`d.department_id`. There is a `CTE base_org` node, a `CTE Scan on base_org`
+and no separate node named `dept_counts`. `COSTS OFF` removes the estimates,
+so the text is the same on every run.
 
 ## Learning objectives
 
@@ -245,62 +225,70 @@ re-aggregated across hierarchy paths.
 - **Focus:** Compose multiple CTEs so hierarchy traversal, employee grain, and management summaries remain individually testable.
 - **Assumptions:** The employee graph can have multiple roots. Payroll uses exact salary numeric and each employee should contribute once per intended output grain.
 - **Failure to watch for:** Joining ancestor-descendant pairs to employee facts can count one employee multiple times; state whether output is direct-team or full-subtree grain.
-- **Review loop:** predict the row grain and NULL/order behavior, run the
-  query, inspect a bounded sample, and reconcile counts or totals before
-  accepting the result.
+- **Review loop:** run each CTE alone with `SELECT * FROM stage` and note
+  its row count; the total headcount should stay 100 and the total payroll
+  4,399,909.50 at every stage that is meant to be one row per employee.
 
 ## Exercises
 
 Compose multiple CTEs so hierarchy traversal, employee grain, and management summaries remain individually testable.
 
-Attempt each prompt in a scratch SQL file before opening the solution.
-For every result, write its row grain and expected shape first.
+Before running anything, decide which of the six answers needs
+recursion: depth and full-subtree questions do, while direct teams, roots,
+leaves and the manager split need only a self join or `EXISTS`. Write the
+row count you expect for each, then check it.
 
 1. **Query writing:** Build a root-based organization CTE and report headcount and payroll by depth.
    **Progressive hint:** Assign depth during recursion, then aggregate employee rows once.
-   **Inputs/evidence:** For sql-25 Exercise 1, read from `employees`, and `organization`. Build the answer toward `depth`, `headcount`, and `payroll`; keep `depth` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-25 Exercise 1, expected output: One row per hierarchy depth. The final columns are `depth`, `headcount`, and `payroll`. The final order is `depth`.
-   **Verify:** For sql-25 Exercise 1, independently aggregate `employees`, and `organization` by `depth`; require one output row for every distinct `depth` tuple and compare `headcount`, and `payroll` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `headcount`, and `payroll` for the existing `depth` tuple and verify the new tuple appears exactly once.
+   **Inputs/evidence:** For sql-25 Exercise 1, read `employees`: the recursive `organization` CTE starts at the 6 roots with `manager_id IS NULL`, carries each child's `salary` and `depth`, and guards against cycles with `path`; the outer query groups that CTE by `depth`.
+   **Expected result/shape:** For sql-25 Exercise 1, expected output: exactly 3 rows, depth 0 with 6 people and 241662.99 payroll, depth 1 with 2 and 81187.85, and depth 2 with 92 and 4077058.66. The final columns are `depth`, `headcount`, and `payroll`. The final order is `depth`.
+   **Verify:** For sql-25 Exercise 1, confirm the headcounts add to 100 and the payrolls to 4399909.50, matching `SELECT COUNT(*), ROUND(SUM(salary), 2) FROM employees`, and that the depth-1 payroll equals the two single-report payrolls in Exercise 2 (40633.52 + 40554.33); then, inside `BEGIN ... ROLLBACK`, set `manager_id = 9` for employee 1 and confirm only 5 people remain at depth 0 and 1 at depth 1.
 2. **Query writing:** Report each manager's direct-report count and payroll.
    **Progressive hint:** Direct-team grain needs one self join, not full recursive descendants.
-   **Inputs/evidence:** For sql-25 Exercise 2, read from `employees`. Build the answer toward `employee_id`, `full_name`, `direct_reports`, and `direct_report_payroll`; keep `employee_id` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-25 Exercise 2, expected output: One row per manager with at least one direct report. The final columns are `employee_id`, `full_name`, `direct_reports`, and `direct_report_payroll`. The final order is `dt.direct_reports DESC, manager.employee_id`.
-   **Verify:** For sql-25 Exercise 2, project `employee_id` plus the raw source columns from `employees` at each join stage; record row count and distinct `employee_id`, then assert the final `employee_id`, `full_name`, `direct_reports`, and `direct_report_payroll` values match those staged rows without unintended fanout or loss. Add one source row with a new `employee_id`; verify the result gains exactly one row carrying that `employee_id` value.
+   **Inputs/evidence:** For sql-25 Exercise 2, read `employees` once in `direct_teams`, grouping the 94 rows with a non-NULL `manager_id` by that `manager_id`, then join the CTE back to `employees` as `manager` to fetch `full_name`.
+   **Expected result/shape:** For sql-25 Exercise 2, expected output: exactly 3 rows, employee 8 with 92 direct reports and 4077058.66 of payroll, then employees 1 and 2 with 1 report each (40633.52 and 40554.33). The final columns are `employee_id`, `full_name`, `direct_reports`, and `direct_report_payroll`. The final order is `dt.direct_reports DESC, manager.employee_id`.
+   **Verify:** For sql-25 Exercise 2, confirm the `direct_reports` values add to 94 and the payrolls to 4158246.51, matching `SELECT COUNT(*), ROUND(SUM(salary), 2) FROM employees WHERE manager_id IS NOT NULL`, and that `SELECT COUNT(DISTINCT manager_id) FROM employees` also returns 3; employees 1 and 2 tie at one report, so only the `manager.employee_id` tiebreaker keeps employee 1 ahead.
 3. **Query writing:** Identify hierarchy roots and leaves in one report.
    **Progressive hint:** Create root and leaf CTEs at employee grain, then union compatible labeled rows.
-   **Inputs/evidence:** For sql-25 Exercise 3, read from `employees`. Build the answer toward `node_type`, `employee_id`, and `full_name`; keep `employee_id` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-25 Exercise 3, expected output: One labeled row per root or leaf employee. The final columns are `node_type`, `employee_id`, and `full_name`. The final order is `node_type, employee_id`.
-   **Verify:** For sql-25 Exercise 3, reselect the returned keys directly from the source; require unique `employee_id` where the expected grain is one row per key and confirm the projected `node_type`, `employee_id`, and `full_name` against `employees`. Add one source row with a new `employee_id`; verify the result gains exactly one row carrying that `employee_id` value.
+   **Inputs/evidence:** For sql-25 Exercise 3, read `employees` in two CTEs: `roots` keeps the 6 rows with `manager_id IS NULL`, and `leaves` keeps rows for which `NOT EXISTS` finds no child pointing at them; the outer query labels each CTE and stacks them with `UNION ALL`.
+   **Expected result/shape:** For sql-25 Exercise 3, expected output: 103 rows, 97 `leaf` rows followed by 6 `root` rows (employees 1 through 6); employees 3, 4, 5, and 6 appear twice because they have no manager and no reports. The final columns are `node_type`, `employee_id`, and `full_name`. The final order is `node_type, employee_id`.
+   **Verify:** For sql-25 Exercise 3, count rows by `node_type` and confirm 97 and 6, and that `SELECT employee_id FROM employees e WHERE manager_id IS NULL AND NOT EXISTS (SELECT 1 FROM employees c WHERE c.manager_id = e.employee_id)` returns exactly 3, 4, 5, and 6; then rewrite the leaf test as `employee_id NOT IN (SELECT manager_id FROM employees)` and confirm it returns 0 leaves, because the 6 NULL `manager_id` values make every `NOT IN` test unknown.
 4. **Prediction:** Count employees reachable from roots and compare with total employees.
    **Progressive hint:** A correct acyclic traversal should reach every employee exactly once in this parent-pointer schema.
-   **Inputs/evidence:** For sql-25 Exercise 4, read from `employees`, and `organization`. Build the answer toward `all_employees`, `reachable_employees`, and `unreachable_employees`; keep `employee_id` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-25 Exercise 4, expected output: One row with zero unreachable employees. The final columns are `all_employees`, `reachable_employees`, and `unreachable_employees`.
-   **Verify:** For sql-25 Exercise 4, project `employee_id` plus the raw source columns from `employees`, and `organization` at each join stage; record row count and distinct `employee_id`, then assert the final `all_employees`, `reachable_employees`, and `unreachable_employees` values match those staged rows without unintended fanout or loss. Add one source row with a new `employee_id`; verify the result gains exactly one row carrying that `employee_id` value.
+   **Inputs/evidence:** For sql-25 Exercise 4, read `employees` twice: the recursive `organization` CTE walks down from the 6 roots with a `path` guard, and two scalar subqueries count the full table; the outer query compares `COUNT(DISTINCT employee_id)` from the CTE with that total and has no `GROUP BY`.
+   **Expected result/shape:** For sql-25 Exercise 4, expected output: exactly one row, 100 `all_employees`, 100 `reachable_employees`, and 0 `unreachable_employees`. The final columns are `all_employees`, `reachable_employees`, and `unreachable_employees`.
+   **Verify:** For sql-25 Exercise 4, confirm the CTE returns 100 rows and 100 distinct `employee_id` values, so no employee is reached twice; then, inside `BEGIN ... ROLLBACK`, run `UPDATE employees SET manager_id = 9 WHERE employee_id = 1` and confirm the row changes to 100, 6, and 94, because employee 1, employee 8, and the 92 reports under 8 form a loop with no root.
 5. **Debugging:** Calculate full-subtree report counts per manager without counting the manager as their own report.
    **Progressive hint:** Seed direct edges and recurse descendants while carrying the original manager.
-   **Inputs/evidence:** For sql-25 Exercise 5, read from `employees`, and `descendants`. Build the answer toward `manager_id`, and `all_descendant_reports`; keep `manager_id` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-25 Exercise 5, expected output: One row per manager with descendant count. The final columns are `manager_id`, and `all_descendant_reports`. The final order is `all_descendant_reports DESC, manager_id`.
-   **Verify:** For sql-25 Exercise 5, independently aggregate `employees`, and `descendants` by `manager_id`; require one output row for every distinct `manager_id` tuple and compare `all_descendant_reports` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `all_descendant_reports` for the existing `manager_id` tuple and verify the new tuple appears exactly once.
+   **Inputs/evidence:** For sql-25 Exercise 5, read `employees` twice in the anchor of the recursive `descendants` CTE (each manager joined to direct children, with `path` seeded as `ARRAY[parent, child]`), then keep joining children of `report_id`; the outer query groups by `manager_id`.
+   **Expected result/shape:** For sql-25 Exercise 5, expected output: exactly 3 rows, manager 1 with 93 descendants, manager 8 with 92, and manager 2 with 1. The final columns are `manager_id`, and `all_descendant_reports`. The final order is `all_descendant_reports DESC, manager_id`.
+   **Verify:** For sql-25 Exercise 5, confirm manager 8's 92 matches `SELECT COUNT(*) FROM employees WHERE manager_id = 8`, manager 1's 93 is that 92 plus employee 8 itself, `COUNT(*)` equals `COUNT(DISTINCT report_id)` for each manager, and no row has `report_id = manager_id`; then, inside `BEGIN ... ROLLBACK`, set `manager_id = 9` for employee 1 and confirm managers 1, 8, and 9 each return 93 and still never count themselves.
 6. **Extension:** Report department headcount split between managers and nonmanagers.
    **Progressive hint:** First derive the manager ID set, then conditionally aggregate employees once.
-   **Inputs/evidence:** For sql-25 Exercise 6, read from `employees`, and `departments`. Build the answer toward `department_id`, `name`, `headcount`, `managers`, and `nonmanagers`; keep `department_id`, and `name` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-25 Exercise 6, expected output: One row per department. The final columns are `department_id`, `name`, `headcount`, `managers`, and `nonmanagers`. The final order is `d.department_id`.
-   **Verify:** For sql-25 Exercise 6, independently aggregate `employees`, and `departments` by `department_id`, and `name`; require one output row for every distinct `department_id`, and `name` tuple and compare `headcount`, `managers`, and `nonmanagers` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `headcount`, `managers`, and `nonmanagers` for the existing `department_id`, and `name` tuple and verify the new tuple appears exactly once.
+   **Inputs/evidence:** For sql-25 Exercise 6, read all 6 `departments`, `LEFT JOIN` their 100 `employees`, and `LEFT JOIN` the `managers` CTE, which holds the 3 distinct non-NULL `manager_id` values; the `FILTER` clauses split each department's count on whether that join found a match.
+   **Expected result/shape:** For sql-25 Exercise 6, expected output: exactly 6 rows; Sales has 17 people (1 manager), Engineering 17 (2 managers), HR and Finance 17 each, and Marketing and Operations 16 each, all with 0 managers. The final columns are `department_id`, `name`, `headcount`, `managers`, and `nonmanagers`. The final order is `d.department_id`.
+   **Verify:** For sql-25 Exercise 6, confirm `headcount` adds to 100, `managers` adds to 3, and `managers + nonmanagers = headcount` on every row; then, inside `BEGIN ... ROLLBACK`, run `INSERT INTO departments (department_id, name) VALUES (7, 'Legal')` and confirm a seventh row with 0, 0, and 0, while `COUNT(*)` would wrongly report 1 for that empty department.
 
 ## Common mistakes and how to recover
 
-- **Lesson-specific semantic mistake:** Joining ancestor-descendant pairs to employee facts can count one employee multiple times; state whether output is direct-team or full-subtree grain.
-- **Unexpected row count:** display keys before aggregates, count rows after
-  each join/filter stage, and find the first stage whose grain differs from the
-  contract. Do not hide fanout with `DISTINCT`.
-- **Unexpected `NULL` or missing row:** decide whether the fact is unknown,
-  inapplicable, zero, or absent before using `COALESCE`; inspect outer-join
-  predicate placement and empty-input aggregate behavior.
-- **Unstable top/first/last output:** add `ORDER BY` with a unique final
-  tie-breaker before `LIMIT` or order-sensitive windows/aggregates.
-- **`psql` stops on an error:** fix the first error shown by
-  `ON_ERROR_STOP`, restore the declared transaction/setup state, and rerun the
-  complete file. A later successful statement does not validate a partial run.
+- **Summing over ancestor-descendant pairs.** Joining Exercise 5's 186 pairs
+  to salaries counts employees 9 to 100 under both employee 8 and employee 1.
+  Subtree payrolls then total 8,235,305.17, almost twice the 4,158,246.51 paid
+  to non-root employees.
+- **Forgetting `DISTINCT` in a manager list.** If Exercise 6's `managers` CTE
+  keeps all 94 `manager_id` values, employee 8 matches 92 rows and
+  Engineering's headcount jumps from 17 to 108.
+- **Using `NOT IN` to find leaves.** `employee_id NOT IN (SELECT manager_id
+  FROM employees)` returns no rows at all, because the six root rows put
+  `NULL` in that list. `NOT EXISTS` returns the 97 leaves.
+- **Assuming roots and leaves are disjoint.** Employees 3, 4, 5 and 6 have no
+  manager and no reports, so they are both. A report that lists both labels
+  has 103 rows for 99 distinct employees.
+- **Recursing when one join is enough.** A direct-team count needs a single
+  `GROUP BY manager_id`. Walking the full tree there gives employee 1 a team of
+  93 instead of 1.
+- General recovery steps are in
+  [Recover from common failures](../../STUDY-GUIDE.md#recover-from-common-failures).
 
 ## Self-check
 
@@ -340,9 +328,9 @@ Further reading
 
 ## Ask an AI tutor about this lesson
 
-An AI tutor is optional; the guide, learner SQL, PostgreSQL, and expected checks are
-enough to complete the lesson offline. If you want a patient tutor, copy this
-prompt after opening the repository in the AI tutor:
+Ask a tutor to quiz you on which grain each CTE in your answer has
+and how many rows it should return. The prompt below keeps it on this lesson
+([optional tutor notes](../../STUDY-GUIDE.md#use-an-ai-tutor-optional)).
 
 ```text
 Tutor me through sql-25: Multiple CTEs and Hierarchies.

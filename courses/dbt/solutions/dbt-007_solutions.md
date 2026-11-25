@@ -2,7 +2,7 @@
 
 Review a macro through its source, emitted SQL and actual result.
 
-The executable reference contains the two complete worked cases with assertions. The changes below explain the independent practice and its limits.
+The reference compiles the safe_ratio macro, checks that compiled SQL contains `case when` and no longer mentions the macro name, and compares the materialized rates with 0.25 and null. The undefined-macro case shows failure before execution; it does not test numeric edge cases beyond a zero denominator. See [how these answers are laid out](../STUDY-GUIDE.md#answers-and-references).
 
 
 ## 1. Change the zero policy

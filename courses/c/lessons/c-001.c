@@ -2,25 +2,17 @@
 
 int main(void) {
   /* Exercise 1: Check a first value: change one input
-     Copy worked example 1, the "check a first value" case, into a scratch pad
-     and change `int total = 2 + 3;` to `int total = 3 + 3;`. Before running,
-     predict which CHECK fails and which value it sees in place of the worked
-     result (the stored value is 5); then run it and restore the original line.
-     Expected: With `int total = 3 + 3;` the run stops with `Check failed` at
-     the CHECK on `total == 5`, because the "check a first value" case no longer
-     shows that the stored value is 5. Restoring `int total = 2 + 3;` brings
-     that observation back. */
+     In worked example 1, change `int total = 2 + 3;` to `int total = 3 + 3;`.
+     Predict which value the CHECK on `total == 5` sees, then run and restore.
+     Expected: `Check failed` at `total == 5`; restoring `int total = 2 + 3;`
+     passes again. */
 
   /* Exercise 2: Format a checked result: debug a regression
-     A regression changed one token in worked example 2, the "format a checked
-     result" case, so one line now reads `int n = snprintf(out, sizeof out,
-     "total=%d", 6);`. Run the example with that line, use the failing CHECK to
-     find why the result length is 7 and text is total=5 no longer holds and
-     repair the line without changing the CHECK. Expected: Before the repair the
-     run stops with `Check failed` at the CHECK on `strcmp(out, "total=5") ==
-     0`. Once the line reads `int n = snprintf(out, sizeof out, "total=%d", 5);`
-     again, the "format a checked result" case again shows that the result
-     length is 7 and text is total=5. */
+     Worked example 2 now has a line reading `int n = snprintf(out, sizeof out,
+     "total=%d", 6);`. Repair it so that the result length is 7 and text is
+     total=5 again. Expected: `Check failed` at `strcmp(out, "total=5") == 0`
+     until the line reads `int n = snprintf(out, sizeof out, "total=%d", 5);`
+     again. */
 
   /* Exercise 3: Trace statement order
      Start at 1, increment, then multiply by 3.

@@ -1,6 +1,6 @@
 # docker-009: explanatory solutions
 
-Compare after your own attempt or an explicit reveal. These explain the supplied teaching fixtures; they are not engine results. The mechanism is explained in `courses/docker/guides/docker-009.md`.
+These answers explain teaching fixtures, not engine results; the mechanism is in [the guide](../guides/docker-009.md).
 
 ## Exercise 1: Label every component of the mapping.
 
@@ -88,4 +88,4 @@ Compare after your own attempt or an explicit reveal. These explain the supplied
 
 ## Check your transfer
 
-A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.
+It should use `http://app:8080/`. Inside the second container, `localhost` is that container's own loopback interface, and port 18080 exists only as a mapping on the host, so nothing listens there. Compose puts both services on a project network where the service name `app` resolves to the app container, and the app listens on its container port 8080. The expected result is the same JSON the browser receives. If `app:8080` also failed while the host URL worked, the services would likely be on different networks, which `docker network inspect` would show.

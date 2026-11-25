@@ -36,5 +36,7 @@
       "wrong": "Treating the closing cat line as proof that the interactive page works. The script reaches that line even when the widget later fails to load its JavaScript in the browser.",
       "verify": "The reference prints r-057 reference checks passed, and a separate browser session shows both figures with working hover text."
     }
-  ]
+  ],
+  "run_note": "The starter holds three x values, 1 to 3, observed values 2, 4 and 3, and a rule column equal to twice x, and an empty results list. Run it and decide which column becomes a marker trace and which becomes a line trace before calling `plot_ly()`. The observed pairs are measurements, so they are drawn as markers; the rule is a function of x, so it is drawn as a named line. Sort a line trace by x first, because Plotly connects points in row order and an unsorted trace zigzags. Put axis titles in `layout()`, then inspect the built figure with `plotly_build()` and compare its trace data with the frame.",
+  "checks_note": "The assertions confirm two traces with a scatter first, marker y values equal to the observed column, line y values equal to the rule column, an ordered trace with x 1, 2 and 3 and y 2, 4 and 6, and a bar figure whose categories and heights equal the supplied count table. They check the figure specification, not how a browser renders or animates it."
 }

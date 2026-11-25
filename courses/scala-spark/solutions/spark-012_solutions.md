@@ -1,6 +1,8 @@
 # spark-012: Explained paired reference solutions
 
-Read the [guide](../guides/spark-012.md) and attempt one language first. The [Scala reference](spark-012_solution.scala) and [PySpark reference](spark-012_solution.py) are complete single-file programs with explicit local sessions and finally-based stop. Each compares with literal expectations; matching two implementations alone would not rule out a shared mistake.
+Attempt the [guide](../guides/spark-012.md) exercises first.
+
+References: [Scala](spark-012_solution.scala), [PySpark](spark-012_solution.py).
 
 ## Exercises and reasoning
 
@@ -176,6 +178,7 @@ Actual readback can detect an unexpected reused or differently configured sessio
 
 ## Execution and interpretation
 
-Run the complete reference in its prepared fixed worker. Its first check (Inspect the complete schema contract) is built inside the program, so opening the lesson fetches nothing; it expects: The triples are `(event_id, bigint, false)`, `(team, string, true)`, `(amount_cents, bigint, true)`. The final success line prints only after every reference assertion passes.
+The references compare every result with literals rather than with each other: the three schema triples, `[1, 3]` for team A, the budget cases (limit 4 accepted, limit 3 rejected, limit 0 on an empty filter accepted, limit 21 rejected before any job), the observed rows with total 65, and the canonical four-row relation after several repartition counts. The `settings` check reads the live session back instead of trusting the builder code: `local[2]`, UTC, two shuffle partitions, ANSI on, AQE off, UI off, both driver addresses `127.0.0.1` and Spark 4.3.0.
 
-Local plan, partition and resource evidence does not establish cluster-scale performance; session cleanup is explicit.
+Seeing `spark-012: six PySpark reference contracts passed; Spark=4.3.0` or the Scala equivalent tells you the session you created is the session you described. It does not tell you how a shared cluster session would be configured, which is exactly why Exercise 6 reads the settings from the running object.
+

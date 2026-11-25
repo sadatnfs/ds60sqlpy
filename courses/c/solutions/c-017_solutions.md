@@ -1,6 +1,8 @@
 # c-017: explained solutions
 
-Compare after an attempt or explicit reveal. The complete executable reference, `c-017_solution.c`, implements all six cases, from the "create an owned string" case to the "transfer a deliberate move" case, in one `main.c`.
+`c-017_solution.c` assembles the "create an owned string" case through the "transfer a deliberate move" case in one `main.c`.
+
+Compare only after an attempt: [Compare and transfer](../STUDY-GUIDE.md#compare-and-transfer).
 
 ## Mechanism and assumptions
 
@@ -10,7 +12,7 @@ The owner struct contains a char pointer and length. create allocates length plu
 
 ## Exercise 1: Create an owned string: predict an edited check
 
-Copy worked example 1 into a scratch pad and change `CHECK(text_create(&t, "alpha"));` to `CHECK(text_create(&t, "alpha!"));` inside its CHECK. Before running, predict whether the CHECK still holds and explain why; then restore it.
+In worked example 1, change `CHECK(text_create(&t, "alpha"));` to `CHECK(text_create(&t, "alpha!"));`. Predict whether the CHECK still holds and why, then run and restore.
 
 The unchanged code is worked example 1:
 
@@ -21,13 +23,15 @@ CHECK(t.len == 5 && strcmp(t.data, "alpha") == 0);
 text_destroy(&t);
 ```
 
-**Expected:** With `CHECK(text_create(&t, "alpha!"));` the run stops with `Check failed` at the CHECK on `t.len == 5 && strcmp(t.data, "alpha") == 0`, because the "create an owned string" case no longer shows that length is 5 and content is alpha. Restoring `CHECK(text_create(&t, "alpha"));` brings that observation back.
+**Expected:** `Check failed`: `CHECK(text_create(&t, "alpha!"));` is false, although length is 5 and content is alpha.
+
+**Verify:** Explain which claim `CHECK(text_create(&t, "alpha!"));` makes that the state fails; restoring `CHECK(text_create(&t, "alpha"));` passes again.
 
 The owner contains both storage and logical length. The terminator is additional storage, not part of len.
 
 ## Exercise 2: Clone independent storage: debug a regression
 
-A regression changed one token in worked example 2, the "clone independent storage" case, so one line now reads `b.data[1] = 'b';`. Run the example with that line, use the failing CHECK to find why the original remains cat no longer holds and repair the line without changing the CHECK.
+Worked example 2 now has a line reading `b.data[1] = 'b';`. Repair it so that the original remains cat again.
 
 The unchanged code is worked example 2:
 
@@ -40,7 +44,9 @@ text_destroy(&a);
 text_destroy(&b);
 ```
 
-**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `strcmp(a.data, "cat") == 0 && strcmp(b.data, "bat") == 0`. Once the line reads `b.data[0] = 'b';` again, the "clone independent storage" case again shows that the original remains cat.
+**Expected:** `Check failed` at `strcmp(a.data, "cat") == 0 && strcmp(b.data, "bat") == 0` until the line reads `b.data[0] = 'b';` again.
+
+**Verify:** Explain how `b.data[1] = 'b';` changes the value `strcmp(a.data, "cat") == 0 && strcmp(b.data, "bat") == 0` tests, using your failing and repaired runs.
 
 Two independently allocated owners can be destroyed separately. A plain struct assignment would share the pointer and make that unsafe.
 
@@ -58,6 +64,8 @@ text_destroy(&t);
 
 **Expected:** The borrowed content is ready.
 
+**Verify:** Keep a CHECK equivalent to `strcmp(view, "ready") == 0`. Control edit: `CHECK(text_create(&t, "ready!"));` must fail; then restore it.
+
 The view must not be used after destruction. Only the owning object performs release.
 
 ## Exercise 4: Represent an owned empty string
@@ -72,6 +80,8 @@ text_destroy(&t);
 ```
 
 **Expected:** Length is zero but a valid terminator exists.
+
+**Verify:** Keep a CHECK equivalent to `t.len == 0 && t.data != NULL && t.data[0] == '\0'`. Control edit: `CHECK(t.len != 0 && t.data != NULL && t.data[0] == '\0');` must fail; then restore it.
 
 An empty string still needs one byte under this contract. It differs from an uninitialized or destroyed owner.
 
@@ -88,6 +98,8 @@ CHECK(t.data == NULL && t.len == 0);
 ```
 
 **Expected:** The owner stays empty.
+
+**Verify:** Keep a CHECK equivalent to `t.data == NULL && t.len == 0`. Control edit: `CHECK(t.data != NULL && t.len == 0);` must fail; then restore it.
 
 Resetting the owning fields makes this API safe for repeated cleanup. Other stale aliases are not made safe automatically.
 
@@ -106,8 +118,10 @@ text_destroy(&destination);
 
 **Expected:** Only the destination retains the allocation.
 
+**Verify:** Keep a CHECK equivalent to `source.data == NULL && strcmp(destination.data, "move") == 0`. Control edit: `CHECK(text_create(&source, "move!"));` must fail; then restore it.
+
 The explicit source reset is the manual move protocol. Leaving two apparent owners would make destruction ambiguous.
 
 ## After comparison
 
-Add a fresh distinguishing input for the "transfer a deliberate move" case to your own c-017 source. Explain why every access in `text_create` or `text_destroy` stays within a live object and each owned resource is released. An expected borrow failure belongs in the test contract; undefined behavior does not. Keep diagnostics and sanitizer evidence for the "clone independent storage" case apart from ordinary output: the fixture proves its stated borrow, owned result and clone assumptions, not universal safety.
+Create `original` from `alpha`, create a second owner from `original.data` and destroy `original`. CHECK that the clone still reads `alpha` with length 5. Then explain as text why `struct Text alias = original;` followed by `text_destroy(&original)` leaves `alias.data` dangling, and why destroying both would free one allocation twice. Only a clone has storage of its own.

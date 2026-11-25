@@ -198,20 +198,16 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"></span>
 <span class="source-line">  <span class="syntax-keyword">public</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">void</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span>String<span class="syntax-operator">[</span><span class="syntax-operator">]</span> args<span class="syntax-punctuation">)</span> <span class="syntax-keyword">throws</span> Exception <span class="syntax-punctuation">{</span></span>
 <span class="source-line">    <span class="syntax-comment">// Exercise 1: Print a first result: change one input</span></span>
-<span class="source-line">    <span class="syntax-comment">// Copy Example A into a scratch `Main.java` and change `String message = &quot;Hello, Java&quot;;` to</span></span>
-<span class="source-line">    <span class="syntax-comment">// `String message = &quot;Hello, Java!&quot;;`. Before running it with `java -ea Main`, predict which</span></span>
-<span class="source-line">    <span class="syntax-comment">// assertion fails and which value it now sees; then run it and restore the original line.</span></span>
-<span class="source-line">    <span class="syntax-comment">// Expected: The changed run fails with an `AssertionError` from the assertion on</span></span>
-<span class="source-line">    <span class="syntax-comment">// `message.equals(&quot;Hello, Java&quot;)`. Restoring the original line brings back the worked</span></span>
-<span class="source-line">    <span class="syntax-comment">// observation: one line Hello, Java.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Change `String message = &quot;Hello, Java&quot;;` to `String message = &quot;Hello, Java!&quot;;` in Example</span></span>
+<span class="source-line">    <span class="syntax-comment">// A and predict which assertion fails and why.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Expected: The edited run fails with an `AssertionError` from the assertion on</span></span>
+<span class="source-line">    <span class="syntax-comment">// `message.equals(&quot;Hello, Java&quot;)`.</span></span>
 <span class="source-line"></span>
 <span class="source-line">    <span class="syntax-comment">// Exercise 2: Evaluate before printing: diagnose an edited check</span></span>
-<span class="source-line">    <span class="syntax-comment">// A careless edit changed the assertion that Example B adds after Example A so that it reads</span></span>
-<span class="source-line">    <span class="syntax-comment">// `assert line.equals(&quot;total=6&quot;);`. Run Example B with that line, explain why the edited</span></span>
-<span class="source-line">    <span class="syntax-comment">// assertion now fails for the same program state, and restore it.</span></span>
-<span class="source-line">    <span class="syntax-comment">// Expected: Before the repair the run fails with an `AssertionError` from the assertion on</span></span>
-<span class="source-line">    <span class="syntax-comment">// `line.equals(&quot;total=5&quot;)`; after it the line reads `assert line.equals(&quot;total=5&quot;);` again</span></span>
-<span class="source-line">    <span class="syntax-comment">// and integer 5 and text total=5.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Example B&#x27;s new assertion was edited to `assert line.equals(&quot;total=6&quot;);`. Explain why it</span></span>
+<span class="source-line">    <span class="syntax-comment">// fails for unchanged state and restore it.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Expected: The edited run fails with an `AssertionError` from the assertion on</span></span>
+<span class="source-line">    <span class="syntax-comment">// `line.equals(&quot;total=5&quot;)`; the restored assertion passes.</span></span>
 <span class="source-line"></span>
 <span class="source-line">    <span class="syntax-comment">// Exercise 3: Trace sequential state</span></span>
 <span class="source-line">    <span class="syntax-comment">// Start count 1, increment it, then multiply it by 3.</span></span>

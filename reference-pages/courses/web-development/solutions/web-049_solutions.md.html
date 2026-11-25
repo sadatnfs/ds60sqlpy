@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/web-development/solutions/web-049_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="web-049-explanatory-solutions">web-049: explanatory solutions<a class="heading-anchor" href="#web-049-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Open this after your own attempt. Each answer explains the lesson&#x27;s synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in <code>courses/web-development/guides/web-049.md</code>.</p>
+<p>Attempt each exercise before reading; the mechanism is in <code>courses/web-development/guides/web-049.md</code> (<a href="../STUDY-GUIDE.md.html#solutions">using these answers</a>).</p>
 <h3 id="exercise-1-explain-why-a-hidden-form-field-alone-does-not-prevent-csrf">Exercise 1: Explain why a hidden form field alone does not prevent CSRF.<a class="heading-anchor" href="#exercise-1-explain-why-a-hidden-form-field-alone-does-not-prevent-csrf" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> The server must verify an unpredictable session-bound value, not merely the presence of a field.</p>
 <p><strong>Approach:</strong> Ask what an attacker&#x27;s page can include: it can add any hidden field, so only an unpredictable value tied to the session proves intent.</p>
@@ -232,7 +232,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Plausible wrong approach:</strong> Saying SameSite cookies remove the need for tokens fails because some browsers and request types still send them.</p>
 <p><strong>How to verify:</strong> Your answer explains that injected script can read the token, so XSS defeats CSRF defenses.</p>
 <h3 id="reference-comparison">Reference comparison<a class="heading-anchor" href="#reference-comparison" aria-label="Link to this section">#</a></h3>
-<p>Open <code>courses/web-development/solutions/web-049_solution.php</code> only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; server lifecycle, persistence, concurrency and security need their own integration evidence.</p></article>
+<p>The reference accepts a matching token, rejects a wrong token, an array and empty tokens, then requires mayChange to refuse GET, a wrong token and another owner. That catches type confusion and ordering mistakes. It does not test a token placed in a URL or log, so explain why that leaks it.</p>
+<p>Open <code>courses/web-development/solutions/web-049_solution.php</code> after saving your attempt (<a href="../STUDY-GUIDE.md.html#references">comparing with the reference</a>).</p></article>
   </main>
 </body>
 </html>

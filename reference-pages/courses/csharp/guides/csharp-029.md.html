@@ -206,11 +206,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Await:</strong> An asynchronous wait that observes the task result.</p>
 <p><strong>Composition:</strong> Combining smaller asynchronous operations into an owned result.</p>
 <h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>The Linux Docker classroom compiles your saved pad as <code>Program.cs</code> in its fixed .NET 10 project. C# 14 is the matching language generation. This route uses the prepared framework libraries; it does not accept arbitrary project files, NuGet packages, command arguments or interactive input. The explicit <code>Program.Main</code> entrypoint makes compilation and execution visible. <code>Check</code> throws on a false condition in every build configuration, unlike conditional debugging assertions.</p>
-<p>Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.</p>
+<p><code>Main</code> is declared <code>async</code> in this lesson so that the examples can use <code>await</code> at the top level of each block. Every task in the examples is already complete when it is created, through <code>Task.FromResult</code> or <code>Task.FromException</code>, so the run is fast and deterministic and no real waiting happens.</p>
+<p>Compile contract, starter stop and success marker: <a href="../STUDY-GUIDE.md.html#running-a-lesson">running a lesson</a>.</p>
 <h3 id="syntax-anatomy-and-execution-trace">Syntax anatomy and execution trace<a class="heading-anchor" href="#syntax-anatomy-and-execution-trace" aria-label="Link to this section">#</a></h3>
 <p><code>async Task&lt;int&gt;</code> declares an asynchronous result. <code>await</code> obtains the completed result or rethrows the task failure. Task.WhenAll combines completion of several tasks; its result order follows the input task order, not completion order.</p>
-<p>Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.</p>
+<p>Each example ends with a trace; method: <a href="../STUDY-GUIDE.md.html#tracing-a-program">tracing a program</a>.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="example-a-await-values-explicitly">Example A: Await values explicitly<a class="heading-anchor" href="#example-a-await-values-explicitly" aria-label="Link to this section">#</a></h4>
 <p>The task handle and the eventual integer are distinct values even when this fixture completes immediately.</p>
@@ -248,6 +248,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> Await yields 7 and confirms successful completion.</p>
+<p><strong>Trace.</strong> <code>Task.FromResult(7)</code> returns a <code>Task&lt;int&gt;</code> that has already completed with 7. <code>pending</code> holds the task, not the integer. <code>await pending</code> finds the task complete, extracts 7 and assigns it to <code>value</code>. <code>IsCompletedSuccessfully</code> is true because the task ended with a result rather than an exception or cancellation. Awaiting a completed task continues without suspending.</p>
 <h4 id="example-b-compose-and-observe-failure">Example B: Compose and observe failure<a class="heading-anchor" href="#example-b-compose-and-observe-failure" aria-label="Link to this section">#</a></h4>
 <p>Awaiting establishes ownership of both success and failure instead of losing an unobserved background result.</p>
 <pre class="highlighted-code"><code class="language-csharp"><span class="syntax-keyword">using</span> System<span class="syntax-punctuation">;</span>
@@ -289,6 +290,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> WhenAll retains input order and await exposes the task exception.</p>
+<p><strong>Trace.</strong> <code>Task.WhenAll</code> receives two completed tasks and returns a task whose result is an array in input order, 2 then 3. The second part awaits a task created already faulted with <code>InvalidOperationException</code>; <code>await</code> rethrows that exception, and the catch sets <code>observed</code>. The failure surfaced only because something awaited the task and caught it.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <ol>
 <li><strong>Predict and explain.</strong> Distinguish the Task&lt;int&gt; handle from its awaited integer.</li>
@@ -308,10 +310,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <ol start="6">
 <li><strong>Transfer and justify.</strong> Explain when CPU work might need scheduling separately from an asynchronous I/O API.</li>
 </ol>
-<p>For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.</p>
+<p>Log each task in the <a href="../STUDY-GUIDE.md.html#recording-exercise-evidence">evidence table</a> before opening the explanation.</p>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
 <p>Async void is mainly for required event-handler signatures, not general composable methods. Blocking with Result can deadlock in synchronization contexts. Task.Run does not make a blocking external API inherently scalable.</p>
-<p>A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.</p>
+<p>For task 5, <code>Task.WhenAll</code> over an empty array completes at once with an empty result. When two inputs both fail, <code>await</code> rethrows only the first exception, while the combined task&#x27;s <code>Exception.InnerExceptions</code> holds both, here 2. For task 4, a task that is never awaited can fail without anyone seeing the exception.</p>
+<p>Repair routine: <a href="../STUDY-GUIDE.md.html#building-a-regression-case">building a regression case</a>.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <ol>
 <li>Reproduce Example A (Await values explicitly) before changing anything, and confirm its observation: Await yields 7 and confirms successful completion.</li>
@@ -319,9 +322,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>Before opening the explanation, test your task 3 attempt against this lesson&#x27;s main pitfall: Async void is mainly for required event-handler signatures, not general composable methods.</li>
 </ol>
 <h3 id="self-check-and-next-step">Self-check and next step<a class="heading-anchor" href="#self-check-and-next-step" aria-label="Link to this section">#</a></h3>
-<p>Explain Task, Await, Composition without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.</p>
+<p>Give the types of <code>pending</code> and <code>value</code> in Example A. Explain the order of results from <code>WhenAll</code> when the second task finishes first. For task 6, describe a CPU-heavy computation that belongs on <code>Task.Run</code> and an I/O call that should be awaited directly without it.</p>
+<p>Then follow the general <a href="../STUDY-GUIDE.md.html#self-check-routine">self-check routine</a> and save your pad.</p>
 <h3 id="sources-and-execution-boundary">Sources and execution boundary<a class="heading-anchor" href="#sources-and-execution-boundary" aria-label="Link to this section">#</a></h3>
-<p><a href="https://learn.microsoft.com/en-us/dotnet/csharp/">Official language or framework documentation</a>. The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.</p>
+<p><a href="https://learn.microsoft.com/en-us/dotnet/csharp/">Documentation</a>: The asynchronous programming articles in the C# guide explain <code>async</code>, <code>await</code>, <code>Task</code> composition and exception propagation.</p>
+<p>Provenance and limits: <a href="../STUDY-GUIDE.md.html#sources-and-execution-boundary">sources and execution boundary</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for csharp-029: Async, await and task completion.
 Read courses/csharp/guides/csharp-029.md and courses/csharp/lessons/csharp-029.cs. Prerequisites: csharp-028.

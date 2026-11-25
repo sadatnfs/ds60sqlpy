@@ -2,67 +2,18 @@
 
 ## How to run this lesson
 
-Start the Linux-container engine and run `./classroom` from the repository
-root. On Windows, use Ubuntu in WSL 2 or the thin
-`START_DOCKER_CLASSROOM.cmd` wrapper. Choose **PostgreSQL** on the shared
-`/classroom` home, then open **sql-types-01**. The
-[launcher guide](../../../docs/one-command-classroom.md) covers first preparation, strict resume and
-the saved project selection. No host Python or PostgreSQL installation is
-required for this browser route.
+Start **sql-types-01** from `./classroom` using the shared [run steps](../../STUDY-GUIDE.md#run-a-lesson-in-the-classroom).
 
-1. Read the prerequisite and fixture notes before running the file. Use only
-   the local disposable `advanced_sql_training` database.
-2. Choose **Whole SQL lesson (psql)** for the cataloged learner script. This
-   preserves the lesson's reviewed psql directives, relative includes and
-   transaction behavior. **SQL snippet** is appropriate for ordinary SQL
-   statements, but is not a replacement for an entire script's setup.
-3. The **Course database** panel above the code shows whether the course
-   training tables are loaded. Missing tables load automatically before your
-   first run (or choose **Load course tables**) and stay loaded for later
-   lessons. **Reset training data** restores the original rows only when your
-   own changes made results differ; it keeps your saved code and notes.
-4. Edit the learner copy in the classroom and save your prediction before
-   running. Its whole-script workspace is
-   `.learning/sql/sql-types-01/lesson/workspace/sql/professional/lessons/sql_types_01_native_types_search.sql`.
-   For browser work this path is inside the Docker learning volume, not a
-   newly created host folder beside your checkout. The checked-in source
-   remains the answer-free starting artifact.
-5. Run the whole script and inspect the full transcript. The runner uses
-   `psql -X -v ON_ERROR_STOP=1 -f`. SELECT output has columns, rows and a row
-   count; DDL/DML has command tags; intentional checks may produce NOTICE
-   messages. An unexpected ERROR or nonzero exit is a failure to diagnose,
-   even when an earlier query printed plausible values.
-6. Verify the lesson's expected grain, ordering, constraints and declared
-   transaction or cleanup outcome. Keep required ROLLBACK statements.
-   The warehouse sequence and other explicitly stateful exercises explain
-   when state is committed. Read saved output without rerunning it when
-   reviewing an earlier attempt.
+Choose **Whole SQL lesson (psql)**. The script opens one transaction on
+`advanced_sql_training`, creates `pro_types_lab` with a domain, an enum, three
+documents and four GIN or GiST indexes, prints one result per type family, and
+ends with `ROLLBACK`. It only reads `pg_available_extensions` for `pg_trgm`; it
+never runs `CREATE EXTENSION`. The final `DO` check requires three documents
+and exactly one match for `plainto_tsquery('english', 'migrations')` in the
+generated `search_vector`. Save attempts in
+`.learning/sql/sql-types-01/lesson/workspace/sql/professional/lessons/sql_types_01_native_types_search.sql`.
 
-If a relation is missing, inspect the lesson's required fixture and predecessor
-rather than guessing a new table definition. If authentication or runtime
-readiness fails, use `./classroom status` and the setup guide. Keep credentials
-out of SQL, notebooks, screenshots and committed files. Repair the first error
-before trusting partial output, and reveal separate solutions only when you
-want to compare after an attempt.
-
-### Optional contributor notebook route
-
-For notebook work, deliberately prepare the Linux/WSL contributor environment
-from [CONTRIBUTING.md](../../../CONTRIBUTING.md), including a compatible psql client and
-the notebook dependencies. Generate this lesson's private workspace through
-the maintained CLI:
-
-```sh
-uv run --no-sync python scripts/course.py sql notebook sql-types-01
-```
-
-Open the printed notebook path in that environment's JupyterLab. It uses the
-same catalog-derived learner-copy layout in that contributor checkout and
-executes the complete script through psql. Its host-side state is separate
-from the Docker browser's named volume. Follow
-[guided SQL notebooks](../../../docs/guided-sql-notebooks.md) for explicit local connection
-selection and kernel setup. Notebook generation does not execute SQL or
-authorize a reset.
+The optional notebook route starts with `uv run --no-sync python scripts/course.py sql notebook sql-types-01`; see the [study guide](../../STUDY-GUIDE.md#optional-contributor-notebook-route).
 
 ## Level and prerequisites
 
@@ -86,24 +37,30 @@ Only built-in PostgreSQL 16 features are used. The script inspects
 
 ## A beginner's mental model for this lesson
 
-A **table** stores facts in named columns. A **row** is one occurrence at the
-table's declared grain. A query creates a temporary **result set**: rows printed
-on screen are not automatically stored. The key vocabulary for this lesson is Domain, Enum, UUID, Array, Range/multirange, JSONB. Its worked SQL reads or creates `pro_types_lab.documents`, `pg_catalog.pg_indexes`, `pg_catalog.pg_available_extensions`.
+Every column in `pro_types_lab.documents` uses a type that knows its own
+operators: an array answers containment with `@>`, a `daterange` answers "does
+it include this date", `jsonb` answers JSONPath predicates, and a `tsvector`
+answers full-text matches with `@@`. The vocabulary below (domain, enum, UUID,
+array, range and multirange, JSONB) is the list of those types.
 
-Before writing a query, complete this sentence: “One output row represents
-___.” Joins can multiply rows, filters can remove them, grouping can collapse
-many rows into one, and window functions can add calculations while preserving
-row count. For a normal analytical `SELECT`, use this logical reading order:
-`FROM`/`JOIN` (including `ON`) → `WHERE` → `GROUP BY`/aggregates → `HAVING` →
-window calculations → `SELECT` → `ORDER BY` → `LIMIT`. PostgreSQL may execute a
-different physical plan while preserving those semantics.
+Each query in this lesson keeps one row per document, keyed by its UUID, so
+what changes from query to query is the type-specific operator (`@>`, `&&`,
+`@?` or `@@`), not the grain. With three documents you can predict every
+answer: `sql` and `postgresql` tags match documents 101 and 102, all three are
+available in June 2026, only 101 is in a blackout on 2026-07-03, the `analyst`
+audience matches only 102, and `safe migration` matches only 101.
 
-The worked walkthrough's lesson-specific task is: The model uses a domain for a reusable email-shape rule and an enum for a small database-owned lifecycle. Enums are compact and clear, but adding/removing labels is migration work; a reference table is more flexible when labels carry metadata or change frequently.
-The first runnable example has a concrete contract: Example 1 must print the expected DDL command tag for `pro_types_lab.documents`. Verify the object in `pg_catalog.pg_class`, and `information_schema.columns`, run one accepted behavior and one rejected boundary behavior, and confirm the lesson rollback/cleanup removes only course-owned state.
+The walkthrough starts with two type choices made before the table exists.
+`email_address` is a domain over `text` with a `CHECK` pattern, so every column
+that uses it shares one rule. `document_state` is an enum of `draft`,
+`published` and `retired`: compact and self-documenting, but adding or removing
+a label is a migration, so a reference table fits better when labels carry
+metadata or change often.
 
 ## Two worked SQL examples
 
-These worked excerpts come from `sql/professional/lessons/sql_types_01_native_types_search.sql`. Use **Whole SQL lesson (psql)** in the unified classroom for the complete file, including its fixture and transaction context. The optional contributor notebook and prepared `psql` routes are described above.
+Example 1 defines the table every query reads, and Example 2 loads its three
+documents.
 
 ### Example 1
 
@@ -122,9 +79,15 @@ CREATE TABLE pro_types_lab.documents (
 );
 ```
 
-**How to read it:** Example 1 is data definition language (DDL). `psql` prints a command tag when PostgreSQL accepts the definition; a later catalog or behavior check must prove that the intended rule exists.
+**How to read it:** Read the column list as a list of types. `state` uses the
+enum with a `draft` default, `availability` must not be an empty range,
+`metadata` must be a JSON object, and `search_vector` is a stored generated
+column that weights title lexemes `A` and body lexemes `B`.
 
-**Expected result/shape:** Example 1 must print the expected DDL command tag for `pro_types_lab.documents`. Verify the object in `pg_catalog.pg_class`, and `information_schema.columns`, run one accepted behavior and one rejected boundary behavior, and confirm the lesson rollback/cleanup removes only course-owned state.
+**Expected result/shape:** `CREATE TABLE`, followed by four `CREATE INDEX`
+statements: GIN on `tags`, GIN with `jsonb_path_ops` on `metadata`, GIN on
+`search_vector`, and GiST on `availability`. The index catalog query later
+lists them with the primary key index.
 
 ### Example 2
 
@@ -136,9 +99,14 @@ VALUES
   ('00000000-0000-0000-0000-000000000103', 'taylor@example.test', 'draft', 'Python service notes', 'Validate configuration and add request identifiers to structured logs.', ARRAY['python', 'services'], daterange(DATE '2026-05-01', DATE '2026-12-01', '[)'), datemultirange (daterange(DATE '2026-08-10', DATE '2026-08-12', '[)'), daterange(DATE '2026-09-03', DATE '2026-09-05', '[)')), '{"audience":["developer"],"difficulty":"intermediate","minutes":25}');
 ```
 
-**How to read it:** Example 2 changes rows inside the lesson's declared transaction. The command tag reports affected rows, but a follow-up query must prove the intended before/after invariant.
+**How to read it:** The three rows exercise each type: half-open `[)` ranges, a
+multirange with one or two blackout windows or none, and JSON metadata with an
+`audience` array and a numeric `minutes`. You never supply `search_vector`;
+PostgreSQL computes it from title and body.
 
-**Expected result/shape:** Example 2 must complete through `psql` with its documented command tag or notice for `pro_types_lab.documents`. Treat an unexpected error as failure, and prove the stated catalog/behavior invariant plus cleanup.
+**Expected result/shape:** `INSERT 0 3`. Document 103 is a `draft`, the other
+two are `published`, and only 101 contains the word "migrations", which is what
+the final self-check relies on.
 
 ## Learning objectives
 
@@ -309,9 +277,8 @@ cross-row invariant.
 
 ## Ask an AI tutor about this lesson
 
-An AI tutor is optional; the guide, learner SQL, PostgreSQL, and expected checks are
-enough to complete the lesson offline. If you want a patient tutor, copy this
-prompt after opening the repository in the AI tutor:
+The lesson and expected observations are sufficient offline. For optional
+coaching, copy:
 
 ```text
 Tutor me through sql-types-01: Native PostgreSQL Types and Full-Text Search.

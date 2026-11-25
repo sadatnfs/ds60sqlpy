@@ -206,11 +206,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Borrowed access:</strong> Temporary access without taking ownership.</p>
 <p><strong>Undefined behavior:</strong> Behavior outside the guarantees of the language or memory contract.</p>
 <h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>The Linux Docker classroom compiles the saved pad as <code>main.swift</code> with Swift 6 language checking. An explicit <code>@main</code> type contains <code>static func main() async throws</code>; the fixed compiler uses <code>-parse-as-library -swift-version 6</code>. The examples use the standard library and portable Foundation. <code>precondition</code> makes a violated invariant fail the process. The fixed pad accepts one source file, without arbitrary command arguments, interactive input or dependency installation. SwiftUI, UIKit, Apple simulators and application signing belong to the separately prepared macOS/Xcode project labs, never the Linux pad.</p>
-<p>Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.</p>
+<p>Both examples call <code>withUnsafeBufferPointer</code> and return an owned result. Task 4 returns <code>baseAddress</code> out of the closure; that compiles, but using the pointer afterward is undefined behavior that may appear to work in one run and fail in another, so write it up instead of relying on output.</p>
+<p>Compile contract, starter stop and success marker: <a href="../STUDY-GUIDE.md.html#running-a-lesson">running a lesson</a>.</p>
 <h3 id="syntax-anatomy-and-execution-trace">Syntax anatomy and execution trace<a class="heading-anchor" href="#syntax-anatomy-and-execution-trace" aria-label="Link to this section">#</a></h3>
 <p>withUnsafeBufferPointer temporarily borrows contiguous elements. The pointer count states initialized accessible elements. Return a copied result from the closure, never the borrowed pointer itself.</p>
-<p>Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.</p>
+<p>Each example ends with a trace; method: <a href="../STUDY-GUIDE.md.html#tracing-a-program">tracing a program</a>.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="example-a-borrow-only-within-the-closure">Example A: Borrow only within the closure<a class="heading-anchor" href="#example-a-borrow-only-within-the-closure" aria-label="Link to this section">#</a></h4>
 <p>Scoped access limits the lifetime reasoning to one visible closure.</p>
@@ -228,6 +228,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The result escapes as an integer while the borrowed pointer does not.</p>
+<p><strong>Trace.</strong> <code>values</code> is a three-element array. <code>withUnsafeBufferPointer</code> gives the closure an <code>UnsafeBufferPointer&lt;Int&gt;</code> over the array&#x27;s contiguous storage, valid only during the call. <code>reduce(0, +)</code> reads 2, 3 and 4 through the buffer and returns 9. The closure returns that plain <code>Int</code>, which is copied out, and the pointer stops being valid when the closure ends. What escapes is the computed value, never the pointer.</p>
 <h4 id="example-b-handle-empty-storage-without-dereferencing">Example B: Handle empty storage without dereferencing<a class="heading-anchor" href="#example-b-handle-empty-storage-without-dereferencing" aria-label="Link to this section">#</a></h4>
 <p>No base-address dereference is needed, avoiding assumptions about a pointer for empty storage.</p>
 <pre class="highlighted-code"><code class="language-swift"><span class="syntax-keyword">import</span> <span class="syntax-class">Foundation</span>
@@ -244,6 +245,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> An empty buffer is valid to inspect by count.</p>
+<p><strong>Trace.</strong> <code>values</code> is empty. The method still calls the closure, passing a buffer of count 0 whose <code>baseAddress</code> may be nil. Reading <code>buffer.count</code> is always safe, so the closure returns 0 without ever touching the base address. Code that assumed a non-nil <code>baseAddress</code>, for example by force-unwrapping it to pass to a C function, would crash on exactly this input, which is why the empty case is checked separately.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <ol>
 <li><strong>Predict and explain.</strong> Identify the pointer lifetime and the returned owned result.</li>
@@ -263,10 +265,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <ol start="6">
 <li><strong>Transfer and justify.</strong> Write an interoperability checklist covering ownership, alignment, initialization and error reporting.</li>
 </ol>
-<p>For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.</p>
+<p>Log each task in the <a href="../STUDY-GUIDE.md.html#recording-exercise-evidence">evidence table</a> before opening the explanation.</p>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
 <p>Unsafe does not disable all runtime checks or make an operation faster. Never infer lifetime from a pointer value remaining numerically unchanged. Keep native API ownership documented and avoid unsafe code when safe collections suffice.</p>
-<p>A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.</p>
+<p>For task 2, a maximum over an empty buffer has no answer, so a version that starts from <code>buffer[0]</code> traps on empty input. The counterexample set is empty, a singleton and an array whose maximum is last. The safe contract returns nil for empty storage, the only element for a singleton and the true maximum otherwise, all without escaping the buffer.</p>
+<p>Repair routine: <a href="../STUDY-GUIDE.md.html#building-a-regression-case">building a regression case</a>.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <ol>
 <li>Reproduce Example A (Borrow only within the closure) before changing anything, and confirm its observation: The result escapes as an integer while the borrowed pointer does not.</li>
@@ -274,9 +277,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>Before opening the explanation, check your task 3 attempt (Wrap a scoped read-only buffer operation behind a safe function contract) against each pitfall listed above, and add one input that would expose the tempting wrong rule.</li>
 </ol>
 <h3 id="self-check-and-next-step">Self-check and next step<a class="heading-anchor" href="#self-check-and-next-step" aria-label="Link to this section">#</a></h3>
-<p>Explain Pointer, Borrowed access, Undefined behavior without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.</p>
+<p>Explain why the pointer is valid only inside the closure and what could invalidate the storage afterward. Say why reading the count is safe for an empty buffer while dereferencing the base address is not. For task 6, list four questions about ownership, alignment, initialization and errors to ask before calling a C function.</p>
+<p>Then follow the general <a href="../STUDY-GUIDE.md.html#self-check-routine">self-check routine</a> and save your pad.</p>
 <h3 id="sources-and-execution-boundary">Sources and execution boundary<a class="heading-anchor" href="#sources-and-execution-boundary" aria-label="Link to this section">#</a></h3>
-<p><a href="https://docs.swift.org/swift-book/documentation/the-swift-programming-language/">Official language or framework documentation</a>. The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.</p>
+<p><a href="https://docs.swift.org/swift-book/documentation/the-swift-programming-language/">Documentation</a>: The Swift standard library reference documents <code>withUnsafeBufferPointer(_:)</code> and <code>UnsafeBufferPointer</code>; the Memory Safety chapter explains Swift&#x27;s safety rules.</p>
+<p>Provenance and limits: <a href="../STUDY-GUIDE.md.html#sources-and-execution-boundary">sources and execution boundary</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for swift-035: Unsafe memory, buffers and scope-limited access.
 Read courses/swift/guides/swift-035.md and courses/swift/lessons/swift-035.swift. Prerequisites: swift-034.

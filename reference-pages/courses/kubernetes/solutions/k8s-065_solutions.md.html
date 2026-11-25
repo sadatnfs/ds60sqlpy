@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/kubernetes/solutions/k8s-065_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="k8s-065-explanatory-solutions">k8s-065: explanatory solutions<a class="heading-anchor" href="#k8s-065-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit reveal. These explanations describe the synthetic topology and stated API contracts. They are not fabricated runtime receipts.</p>
+<p>Attempt each exercise first, then compare (<a href="../STUDY-GUIDE.md.html#solutions-and-the-ai-tutor">study guide</a>).</p>
 <h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
 <p>A service mesh adds traffic-management, identity or observability capabilities around application communication through a particular implementation. It may use sidecar proxies, node-level components or other designs. It does not remove the underlying need for Pod networking, Service discovery, healthy endpoints and application correctness.</p>
 <p>Mutual TLS authenticates both ends of a connection under an identity system. It is not the same as application authorization for a business action. A mesh can establish workload identities while the application still needs to decide whether a caller may read a specific record.</p>

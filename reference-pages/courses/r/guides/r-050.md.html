@@ -196,7 +196,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <article class="document"><h2 id="r-050-scientific-synthesis-and-reproducible-model-comparison">r-050: Scientific synthesis and reproducible model comparison<a class="heading-anchor" href="#r-050-scientific-synthesis-and-reproducible-model-comparison" aria-label="Link to this section">#</a></h2>
 <p><strong>Level:</strong> advanced. <strong>Direct prerequisites:</strong> <code>r-045</code></p>
 <h3 id="run-and-retain-your-work">Run and retain your work<a class="heading-anchor" href="#run-and-retain-your-work" aria-label="Link to this section">#</a></h3>
-<p>Open <code>r-050</code> in <code>/classroom</code> and use the prepared <code>r-statistics</code> profile. Each Run evaluates one <code>main.R</code> script in a fresh offline R process, so define every input in the script; an earlier Run leaves no variables behind. Work in the <a href="../lessons/r-050.R.html">starter</a>. The <a href="../solutions/r-050_reference.R.html">complete reference</a> ends by printing <code>r-050 reference checks passed</code>, and the <a href="../solutions/r-050_solutions.md.html">explained answers</a> are there for deliberate comparison after your own attempt. This chapter prints values only; when a chapter draws figures, the classroom keeps at most two figures per run. The <a href="../README.md.html">course overview</a> describes saved work, figure capture and the prepared package versions.</p>
+<p>The starter holds a training frame with x values -2, -1, 0, 1 and 2 and an empty results list. Run it, then state the scientific question and the comparison metric in writing before fitting either candidate. The reference truth is the curve 1 plus 2x minus half of x squared, so a quadratic should fit exactly, and any score you report must come from rows aligned by id, never by row position.</p>
+<p>Work in the <a href="../lessons/r-050.R.html">starter</a> under the <a href="../STUDY-GUIDE.md.html#run-a-chapter">run rules</a>.</p>
+<p>The <a href="../solutions/r-050_reference.R.html">complete reference</a> ends by printing <code>r-050 reference checks passed</code>.</p>
 <h3 id="outcome-and-mechanism">Outcome and mechanism<a class="heading-anchor" href="#outcome-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Produce a small analytical report that connects the scientific question, model comparison, numerical evidence and limits.</p>
 <p>An analysis is more than a fitted object. A reviewer needs to know the question, the observations used, the model choices, the evaluation design and the numerical evidence supporting each conclusion. A reproducible report preserves those relationships rather than displaying only a favorable score.</p>
@@ -288,7 +290,16 @@ restored <span class="syntax-operator">&lt;-</span> <span class="syntax-function
 <li><a href="https://cran.r-project.org/package=jsonlite">jsonlite package</a></li>
 </ul>
 <h3 id="continue">Continue<a class="heading-anchor" href="#continue" aria-label="Link to this section">#</a></h3>
-<p>Chapters that list <code>r-050</code> as a direct prerequisite: <a href="r-060.md.html"><code>r-060</code></a>. For the modeling assumptions behind these examples, read the <a href="../../statistics-ml/README.md.html">statistics tutorial</a> alongside the R code.</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Next chapter</th>
+<th>Title</th>
+</tr></thead><tbody>
+<tr>
+<td><a href="r-060.md.html"><code>r-060</code></a></td>
+<td>Capstone: an analytical visualization with an evidence record</td>
+</tr>
+</tbody></table></div>
+<p>Modeling assumptions behind these examples are in the <a href="../../statistics-ml/README.md.html">statistics tutorial</a>.</p>
 <h3 id="ask-an-ai-tutor">Ask an AI tutor<a class="heading-anchor" href="#ask-an-ai-tutor" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for r-050 (Scientific synthesis and reproducible model comparison).
 Read the guide and my saved attempt. Explain the relevant R mechanism,

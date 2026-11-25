@@ -1,10 +1,17 @@
 # cuda-067: Transfers have cost and lifetime
 
-**Route:** CUDA Python and machine learning. **Stage:** beginner. **Prerequisites:** `cuda-066`. Allow several sessions when the hardware experiment is new; the chapter is not a deadline.
+**Route:** CUDA Python and machine learning. **Stage:** beginner. **Prerequisites:** `cuda-066`.
 
-## What you will be able to explain
+Pacing, evidence labels and platform rules: [CUDA study guide](../../STUDY-GUIDE.md).
 
-By the end, you can **count bytes for ten iterations**, **explain pinned-memory lifetime**, and **identify an intentionally CPU-friendly workload** with evidence. Start with the two worked cases, then use the editable CPU model to make the quantities concrete.
+## Learning objectives
+
+- Count bytes for ten iterations.
+- Model a batched transfer.
+- Find premature source reuse.
+- Explain pinned-memory lifetime.
+- Design an end-to-end timer.
+- Identify an intentionally CPU-friendly workload.
 
 ## Mechanism and vocabulary
 
@@ -31,9 +38,13 @@ Copying 100 rows separately at 10 microseconds submission cost spends at least 1
 
 Over K iterations, a transformation that copies input and output every iteration moves \(2KB\) bytes. Uploading once and downloading once moves \(2B\) bytes if all intermediates stay device-resident.
 
-## Portable executable model
+## How to run the CPU model
 
-The **CPU reference model** variant runs this bounded worked example using `python-core`. It uses only the Python standard library, small synthetic values and no network. Its purpose is to expose the arithmetic or contract behind the chapter. The separate reference includes assertions for the stated observations.
+Edit the copy; the [reference](../references/cuda-067_cpu.py) adds assertions.
+
+```sh
+python courses/cuda/python/lessons/cuda-067_cpu.py
+```
 
 ```python
 size = 4096
@@ -63,76 +74,62 @@ print("CPU cost model:", round_trip, resident, "bytes")
 | `latency` | `1e-05` |
 | `bandwidth` | `1000000000.0` |
 
-Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.
-
 ## Practice and transfer
+
+Record each attempt in the [worksheet](../lessons/cuda-067.md) before opening hints.
 
 ### Exercise 1: Count bytes for ten iterations
 
 **Trap to avoid:** Counting only uploads (`10B`) treats the output copy as free. Many real pipelines download a result every step for logging, so omitting it halves the modeled traffic.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 2: Model a batched transfer
 
 **Trap to avoid:** Expecting batching to reduce the payload is the mistake. The bytes are the same; if your model shows the bandwidth term shrinking, you have double-counted or dropped rows.
-
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 3: Find premature source reuse
 
 **Trap to avoid:** Adding a sleep after the copy call seems to fix it in testing because the copy usually finishes. It is timing luck: a larger batch or a busy bus makes the race reappear.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 4: Explain pinned-memory lifetime
 
 **Trap to avoid:** Pinning every array in the program to be safe consumes host memory the OS cannot page out, which can starve other processes. Pinning is a bounded resource, not a free speedup.
-
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 5: Design an end-to-end timer
 
 **Trap to avoid:** Stopping the timer right after the kernel call returns measures submission only, because the call is asynchronous; it reports a tiny number regardless of the 81920 versus 8192 byte difference.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 6: Identify an intentionally CPU-friendly workload
 
 **Trap to avoid:** Assuming the GPU always wins because it has more cores ignores the fixed costs. A benchmark on one tiny array would show the CPU ahead, and the conclusion that the GPU is slow would also be wrong.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ## Progressive hints
 
-Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.
+Hint *k* belongs to exercise *k*; open one at a time.
 
-1. Start from worked example 1 and mark the quantities needed for the task "Count bytes for ten iterations".
-2. Change one assumption in worked example 2 while preserving the declared contract: model a batched transfer.
-3. Trace the CPU program's variables before adding hardware behavior: find premature source reuse.
-4. Draw producers, consumers and the exact operation boundary for the task "Explain pinned-memory lifetime".
-5. Separate what the small fixture establishes from what the real runtime must show: design an end-to-end timer.
-6. Write a counterexample to an overbroad claim before you identify an intentionally CPU-friendly workload.
+1. Count bytes per iteration in the round-trip version and multiply by ten; then count the upload-once, download-once version.
+2. Hold the 4000-byte payload fixed and ask which part of the transfer model, latency or bandwidth, changes with batching.
+3. Mark when Python regains control after the asynchronous upload and when the copy engine finishes reading the host buffer.
+4. Ask who owns the page-locked buffer while a copy is pending, and what happens if that owner is garbage collected.
+5. Write where the caller's clock starts and stops, then check whether both transfers fall inside that interval.
+6. Compare about 10 microseconds of submission latency with the time a CPU needs for ten float additions.
 
-## Common mistakes and self-review
+## Common mistakes and self-check
 
-Confusing a correct tiny example with a general implementation is the central review risk. For this chapter, challenge the assumption in worked example 2, then ask whether your change preserves the mechanism described above. If you change dtype, layout, ordering, batch size or backend, update the acceptance contract rather than silently reusing the old observation. Explain an unexpected result before trying random configuration changes.
+The mistake this chapter targets is tuning the arithmetic while ignoring how many times data crosses the bus. Copying input and output on every one of K iterations moves 2KB bytes; keeping intermediates resident moves 2B. A second mistake is overwriting or freeing a host buffer while an asynchronous copy still reads it. Fix both by counting transfers before tuning kernels, and by waiting on the copy's event before reusing or releasing the source.
 
-Keep a small evidence table with columns **claim**, **input**, **expected observation**, **actual observation** and **limit**. For the first claim use `Count bytes for ten iterations`. For the final claim use `Identify an intentionally CPU-friendly workload`. An unperformed GPU or cluster experiment remains pending even when the CPU model is correct.
+**Evidence limit:** The 81920 and 8192 byte counts come from the transfer model, not from a timer. Real effective bandwidth, pinned versus pageable behavior and copy and compute overlap must be measured on the target system before you claim a latency saving.
 
-## Platform and evidence contract
+1. In the model latency plus B divided by W, which term does batching reduce?
+2. Why is pinning every host array a poor default?
+3. What must an end-to-end timer include in this chapter?
 
-The reading worksheet and CPU reference model work through the ordinary Linux Docker classroom on macOS, Linux and Windows using WSL 2. They do not require an NVIDIA GPU. Their results are labeled CPU models or semantic oracles, not simulated hardware performance.
-
-Real CUDA work needs supported NVIDIA hardware, a compatible host driver and an explicitly prepared GPU runtime. An Apple GPU does not execute CUDA kernels. PyTorch MPS on a supported native Mac, ROCm on supported AMD hardware, or other vendor backends can provide separate accelerator learning routes; they need their own package and operation qualification and are not CUDA evidence. The ordinary Linux Docker classroom does not expose native Mac MPS automatically.
-
-Do not download packages, models or data by opening this lesson. Do not attach an engine socket, ambient cluster credentials or an arbitrary remote endpoint. A CPU pass, imported package, successful compilation, real GPU result and measured performance are distinct observations. Record the actual backend, data shape/dtype, source revision, versions and pending checks. A saved completion marker records learning progress, not hardware certification.
+Answers: [self-check answers](../solutions/cuda-067_solutions.md#self-check-answers).
 
 ## Primary references
 
 - [CuPy array and installation documentation](https://docs.cupy.dev/en/v13.6.0/)
 
-Use the version-matched documentation of your prepared environment. These references describe interfaces and supported boundaries; the chapter's synthetic examples and CPU models are original teaching material.
+Full lists: [documentation and sources](../../STUDY-GUIDE.md#documentation-and-sources).
 
 ## Ask an AI tutor about this lesson
 

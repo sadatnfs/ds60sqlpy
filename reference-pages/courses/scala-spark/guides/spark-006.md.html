@@ -194,16 +194,19 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/scala-spark/guides/spark-006.md</code></p>
     </header>
     <article class="document"><h2 id="spark-006-case-classes-pattern-matching-and-domain-states">spark-006: Case classes, pattern matching, and domain states<a class="heading-anchor" href="#spark-006-case-classes-pattern-matching-and-domain-states" aria-label="Link to this section">#</a></h2>
-<p>Authored tutorial and practice content. The prepared Scala/JVM worker executes a bounded program; process success and understanding remain distinct. No source file installs a tool or downloads a dependency.</p>
+<p>Two payments of 100 cents are still two payments. This lesson models payment events as a sealed trait with <code>Paid</code>, <code>Voided</code> and <code>Refunded</code> cases, keeps each event&#x27;s ID separate from its amount, and uses an exhaustive match so a new state cannot slip into a total unnoticed.</p>
 <h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
-<p>Beginner; approximately 75 minutes. Direct prerequisites: <code>spark-005</code>. The lesson uses Scala 2.13 syntax and the prepared JDK 17 worker. The <a href="../execution-baseline.md.html">execution baseline</a> lists the exact Scala, JDK and Spark versions.</p>
+<p>Beginner; approximately 75 minutes. Direct prerequisites: <code>spark-005</code>. Pinned versions: <a href="../execution-baseline.md.html">execution baseline</a>.</p>
 <h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>Open <code>spark-006</code> in the classroom, select the Scala source, prepare the <code>scala-jvm</code> profile and run the saved pad. The worker stages the single source as <code>Main.scala</code> and invokes <code>object Main</code>. Read the terminal output and exact assertions. The <a href="../lessons/spark-006.scala.html">learner source</a> runs two complete demonstrations; its six task functions remain explicit stubs until you implement them. Preserve your saved attempt. The <a href="../solutions/spark-006_solution.scala.html">reference program</a> and <a href="../solutions/spark-006_solutions.md.html">explained solutions</a> are separate and should be opened after an attempt or an explicit worked-comparison request. If the profile is unavailable, reading and saving remain available; opening this guide does not prepare a runtime.</p>
+<p>Shared run steps and profile rules: <a href="../STUDY-GUIDE.md.html#run-a-language-lesson">study guide</a>.</p>
+<p>Learner pad: <a href="../lessons/spark-006.scala.html">spark-006.scala</a>.</p>
+<p>Open the <a href="../solutions/spark-006_solutions.md.html">explained solutions</a> after an attempt.</p>
+<p>The pad first prints <code>original=Paid(p1,100) revised=Paid(p1,125)</code>, which shows that <code>copy(cents = 125L)</code> returns a new value and leaves the original alone. The second example prints <code>paid:p1:0</code> from a <code>describe</code> match that names all three cases; a zero-cent payment is still a payment, not a void. Compare that match with the <code>kind</code> function you write in Exercise 2, which must also avoid a catch-all case.</p>
 <h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
 <ul>
 <li>Model a small event domain with case classes and exhaustive pattern matching.</li>
-<li>Explain the result of both worked examples before running them.</li>
-<li>Implement the six contracts, inspect normal and boundary evidence, and explain a counterexample in your own words.</li>
+<li>Explain why <code>Paid(p1, 100)</code> and <code>Paid(p2, 100)</code> are different events with equal cents, and why <code>copy</code> produces a revised event while the original keeps its 100 cents.</li>
+<li>Compute the signed net of the four-event fixture (175 cents) without dropping the zero-valued voided event, and reject a repeated event ID even when both copies agree on amount.</li>
 </ul>
 <h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
 <ul>
@@ -279,9 +282,15 @@ println<span class="syntax-punctuation">(</span>describe<span class="syntax-punc
 <h3 id="common-pitfalls">Common pitfalls<a class="heading-anchor" href="#common-pitfalls" aria-label="Link to this section">#</a></h3>
 <p>If two equal payments collapse, inspect whether a projection or Set discarded their IDs. If a match throws MatchError after a domain extension, review every sealed-state branch and add a corresponding assertion. If copy appears to change the original, check whether a mutable field was introduced rather than assuming case-class structure deep-copies objects. If a zero total hides missing events, reconcile identities and state counts as well. Expected malformed raw data belongs in a validation ledger, the next lesson&#x27;s subject, not in an unhandled constructor exception.</p>
 <h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
-<p>Explain one input-to-output trace without reading your code. Identify which function preserves repeated values, which condition distinguishes an invalid or missing input, and which assertion would fail for the tempting incorrect implementation. A printed success line alone is not the evidence; retain the exact values and the reasoning that connect them to the contract.</p>
+<ul>
+<li>List the IDs and kinds for the fixture <code>Paid(p1, 100)</code>, <code>Paid(p2, 100)</code>, <code>Voided(v1, duplicate)</code>, <code>Refunded(r1, 25)</code>. Which two events would a deduplication on cents alone merge by mistake?</li>
+<li>Give the signed contribution of each fixture event. Why does <code>Refunded(r0, 0)</code> contribute 0 but still count as a refund?</li>
+<li>What happens at compile time if you add a fourth case to the sealed trait and your <code>kind</code> match has no wildcard? Why is that warning the point of sealing the trait?</li>
+<li><code>revisePaid</code> rejects 1,000,001 cents. Where should that bound be enforced so that an invalid <code>Paid</code> value cannot exist at all?</li>
+<li><code>audit</code> returns IDs <code>[p1, p2, v1, r1]</code>, net 175 and counts paid 2, voided 1, refunded 1. Which part of that result proves no event was lost, and which part proves the money adds up?</li>
+</ul>
 <h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
-<p>Continue to the next lesson only after you can explain the boundary behavior. The <a href="../README.md.html">course route</a> shows authored material and runtime evidence separately.</p>
+<p>Go on to <a href="spark-007.md.html">spark-007: Either and validation without hidden data loss</a>. Your events here were constructed from trusted literals; next, records arrive as raw text, and <code>Either</code> carries a named reason for each rejected field so the rejection ledger can account for every input line.</p>
 <h3 id="primary-sources-and-official-apis">Primary sources and official APIs<a class="heading-anchor" href="#primary-sources-and-official-apis" aria-label="Link to this section">#</a></h3>
 <ul>
 <li><a href="https://docs.scala-lang.org/tour/case-classes.html">Scala 2 case classes</a>.</li>

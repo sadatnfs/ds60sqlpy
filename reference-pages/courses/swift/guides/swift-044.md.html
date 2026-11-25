@@ -206,12 +206,12 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Dynamic Type:</strong> User-selected text sizing supported by Apple UI systems.</p>
 <p><strong>Localization:</strong> Adapting text and presentation to a language and region.</p>
 <h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>The Linux Docker classroom compiles the saved pad as <code>main.swift</code> with Swift 6 language checking. An explicit <code>@main</code> type contains <code>static func main() async throws</code>; the fixed compiler uses <code>-parse-as-library -swift-version 6</code>. The examples use the standard library and portable Foundation. <code>precondition</code> makes a violated invariant fail the process. The fixed pad accepts one source file, without arbitrary command arguments, interactive input or dependency installation. SwiftUI, UIKit, Apple simulators and application signing belong to the separately prepared macOS/Xcode project labs, never the Linux pad.</p>
-<p>Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.</p>
+<p>The pad checks only the text policy, since speaking and rendering require the Apple app. Tasks 3 and 5 need JourneyApp on macOS with VoiceOver and large text; record what you actually heard and saw, including defects, rather than what the code suggests should happen.</p>
+<p>Compile contract, starter stop and success marker: <a href="../STUDY-GUIDE.md.html#running-a-lesson">running a lesson</a>.</p>
 <p>The <a href="../fixtures/JourneyApp/README.md.html">JourneyApp acceptance guide</a> includes keyboard, VoiceOver, large-text and reduced-motion observations to record.</p>
 <h3 id="syntax-anatomy-and-execution-trace">Syntax anatomy and execution trace<a class="heading-anchor" href="#syntax-anatomy-and-execution-trace" aria-label="Link to this section">#</a></h3>
 <p>In SwiftUI, accessibilityLabel and accessibilityValue describe semantics; accessibilityIdentifier is a testing hook, not a spoken label substitute. Localized strings and format styles should preserve plural and locale rules.</p>
-<p>Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.</p>
+<p>Each example ends with a trace; method: <a href="../STUDY-GUIDE.md.html#tracing-a-program">tracing a program</a>.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="example-a-describe-state-with-words">Example A: Describe state with words<a class="heading-anchor" href="#example-a-describe-state-with-words" aria-label="Link to this section">#</a></h4>
 <p>A textual state remains meaningful when a visual marker is unavailable.</p>
@@ -230,6 +230,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The label communicates completion without relying on color.</p>
+<p><strong>Trace.</strong> <code>accessibilityText</code> takes a title and a Boolean. The conditional inside the interpolation picks complete for true, and the result is Read, complete. The check compares the exact string. A screen reader would speak this text, so the completion state reaches the user as a word even when the visual marker is a color or icon they cannot perceive.</p>
 <h4 id="example-b-keep-identity-separate-from-translation">Example B: Keep identity separate from translation<a class="heading-anchor" href="#example-b-keep-identity-separate-from-translation" aria-label="Link to this section">#</a></h4>
 <p>Saved work and navigation should not break when a learner changes language.</p>
 <pre class="highlighted-code"><code class="language-swift"><span class="syntax-keyword">import</span> <span class="syntax-class">Foundation</span>
@@ -251,6 +252,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> Switching language changes the title from Read to Lire while the completion saved under lesson-one still shows complete.</p>
+<p><strong>Trace.</strong> <code>saved</code> maps the stable identifier lesson-one to true. <code>row</code> looks up the completion state by identifier and the display title by language. For English, the title is Read and the state is complete. For French, the title is Lire, but the lookup still uses lesson-one and finds the same saved state. If the saved key had been the English title, switching to French would have lost the progress.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <ol>
 <li><strong>Predict and explain.</strong> Identify which information would be lost without color.</li>
@@ -270,10 +272,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <ol start="6">
 <li><strong>Transfer and justify.</strong> Create a manual accessibility acceptance checklist with concrete observations and retained defects.</li>
 </ol>
-<p>For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.</p>
+<p>Log each task in the <a href="../STUDY-GUIDE.md.html#recording-exercise-evidence">evidence table</a> before opening the explanation.</p>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
 <p>A label should not duplicate an entire surrounding screen. Fixed heights can clip large text. The portable string checks do not establish screen-reader order or keyboard focus behavior.</p>
-<p>A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.</p>
+<p>For task 2, an incomplete item needs both a state and an action, such as Read, incomplete and a Mark complete button; a label without the action leaves the user unsure what activating it does. Task 4&#x27;s identifier is never spoken, so a control labeled only by its testing identifier is announced without a meaningful name. Missing titles fall back to the identifier, which you should check deliberately.</p>
+<p>Repair routine: <a href="../STUDY-GUIDE.md.html#building-a-regression-case">building a regression case</a>.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <ol>
 <li>Reproduce Example A (Describe state with words) before changing anything, and confirm its observation: The label communicates completion without relying on color.</li>
@@ -281,9 +284,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>Before opening the explanation, check your task 3 attempt (Run JourneyApp using keyboard navigation and VoiceOver on macOS) against each pitfall listed above, and add one input that would expose the tempting wrong rule.</li>
 </ol>
 <h3 id="self-check-and-next-step">Self-check and next step<a class="heading-anchor" href="#self-check-and-next-step" aria-label="Link to this section">#</a></h3>
-<p>Explain Accessible name, Dynamic Type, Localization without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.</p>
+<p>Explain the difference between an accessibility label, an accessibility value and an accessibility identifier. Say why saved progress must be keyed by a stable identifier. Name three observations your manual checklist must record for large text, and what to do with a defect you cannot fix now.</p>
+<p>Then follow the general <a href="../STUDY-GUIDE.md.html#self-check-routine">self-check routine</a> and save your pad.</p>
 <h3 id="sources-and-execution-boundary">Sources and execution boundary<a class="heading-anchor" href="#sources-and-execution-boundary" aria-label="Link to this section">#</a></h3>
-<p><a href="https://developer.apple.com/documentation/swiftui/accessibility">Official language or framework documentation</a>. The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.</p>
+<p><a href="https://developer.apple.com/documentation/swiftui/accessibility">Documentation</a>: Apple&#x27;s SwiftUI accessibility documentation covers labels, values and identifiers; the Human Interface Guidelines describe VoiceOver and Dynamic Type.</p>
+<p>Provenance and limits: <a href="../STUDY-GUIDE.md.html#sources-and-execution-boundary">sources and execution boundary</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for swift-044: Accessibility, localization and inclusive interaction.
 Read courses/swift/guides/swift-044.md and courses/swift/lessons/swift-044.swift. Prerequisites: swift-043.

@@ -1,6 +1,6 @@
 # tf-018: explanatory solutions
 
-Open these answers for Normalization state and batch dependence after your own attempt at Example A, Update and inspect moving state, or after an explicit reveal. Each answer reuses the guide's literal inputs, so a mismatch points to one step. The companion script runs the assertions; this page explains why they test Channel axis, Reduction axis, Moving statistics. After matching exercise 6, Handle constant rows and frozen BatchNorm, invent a new input without looking here.
+Open these answers after an attempt; they reuse the guide's inputs ([comparison steps](../STUDY-GUIDE.md#after-the-solutions)).
 
 ## Mechanism review
 
@@ -198,6 +198,3 @@ np.testing.assert_allclose(output, expected, atol=2e-5, rtol=0)
 
 **Verify:** In a fresh process, the exercise checks confirm `np.isfinite(constant).all()`; `constant` matches `[[0, 0]]` within 1e-6; `bn.moving_mean.numpy()` equals `before_mean`; `bn.moving_variance.numpy()` equals `before_variance` and 1 further check.
 
-## Review after comparison
-
-Change one fixture value in exercise 4, Expose actual BatchNorm batch dependence, and predict the new result before running it. Keep the failing version of exercise 5, Repeat updates and translate asymmetric momentum, next to its repair. A missing framework is an environment record, not a failed assertion. No solution downloads data, calls an online model, deploys a service or changes a database.

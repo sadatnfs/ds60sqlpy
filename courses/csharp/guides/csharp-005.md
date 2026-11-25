@@ -24,9 +24,9 @@ For mutually exclusive categories, put the cases in an order that matches the do
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles your saved pad as `Program.cs` in its fixed .NET 10 project. C# 14 is the matching language generation. This route uses the prepared framework libraries; it does not accept arbitrary project files, NuGet packages, command arguments or interactive input. The explicit `Program.Main` entrypoint makes compilation and execution visible. `Check` throws on a false condition in every build configuration, unlike conditional debugging assertions.
+With nullable analysis on, Example A compiles without warnings because the compiler follows the `label != null` test across `&&`. Task 4's version using `&` compiles with warning CS8602 and, when label is null, throws `NullReferenceException`, so you see the static warning and the runtime failure together.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Compile contract, starter stop and success marker: [running a lesson](../STUDY-GUIDE.md#running-a-lesson).
 
 
 
@@ -34,7 +34,7 @@ Start with the answer-free learner artifact in your saved classroom pad. It deli
 
 `&&` requires both conditions and stops after false; `||` stops after true. A switch expression returns one value from its matching arm. The discard pattern `_` can provide an explicit fallback but must not conceal invalid input.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+Each example ends with a trace; method: [tracing a program](../STUDY-GUIDE.md#tracing-a-program).
 
 ## Worked example / walkthrough
 
@@ -79,6 +79,8 @@ internal static class Program {
 ```
 
 **Observe:** The missing value is handled without dereferencing null.
+
+**Trace.** With `label` null, `label != null` is false. `&&` stops there, so `label.Length` never runs, the whole condition is false and the negated check passes. After `label = "ok"`, the left operand is true, so the right operand runs: Length is 2 and the second check passes. The order of the operands is what makes the guard work.
 
 ### Example B: Classify a threshold
 
@@ -128,6 +130,8 @@ internal static class Program {
 
 **Observe:** 59 retries, 60 passes, and 101 is rejected.
 
+**Trace.** The switch expression tests its arms from top to bottom and returns the first match. For 59, `< 0` fails and `< 60` matches, giving retry. For 60, `< 60` fails and `<= 100` matches, giving pass. For 101, every relational arm fails and the discard `_` returns invalid. Because the arms are ordered, each one needs only its upper bound.
+
 ## Exercises
 
 1. **Predict and explain.** Trace which operands execute when label is null.
@@ -142,13 +146,15 @@ internal static class Program {
 
 6. **Transfer and justify.** Choose a routing policy with three mutually exclusive outcomes and explain how invalid values are represented.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Log each task in the [evidence table](../STUDY-GUIDE.md#recording-exercise-evidence) before opening the explanation.
 
 ## Common pitfalls and diagnosis
 
 An else branch can accidentally classify every invalid value as valid. Test domain validity independently from success thresholds. Do not use a fallback to hide an impossible state without explaining recovery.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+The boundary set for task 5 is -1, 0, 100 and 101: -1 and 101 must be invalid, 0 is retry and 100 is pass. A tempting wrong version drops the `< 0` arm, so -1 becomes retry and a corrupt score asks the student to try again. For task 2, moving the threshold to 70 makes 69 and 70 the new pair to check.
+
+Repair routine: [building a regression case](../STUDY-GUIDE.md#building-a-regression-case).
 
 ## Progressive hints
 
@@ -158,11 +164,15 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 ## Self-check and next step
 
-Explain Predicate, Short circuit, Boundary without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+Trace which operands run for `label != null && label.Length > 0` when label is null and when it is empty. Predict what the compiler reports if the `<= 100` arm is moved above `< 60`; it is error CS8510, an unreachable arm. Describe how your temperature classifier represents a reading that is not a number at all.
+
+Then follow the general [self-check routine](../STUDY-GUIDE.md#self-check-routine) and save your pad.
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://learn.microsoft.com/en-us/dotnet/csharp/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+[Documentation](https://learn.microsoft.com/en-us/dotnet/csharp/): The reference articles on Boolean logical operators and on the switch expression describe short-circuit evaluation and relational patterns.
+
+Provenance and limits: [sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

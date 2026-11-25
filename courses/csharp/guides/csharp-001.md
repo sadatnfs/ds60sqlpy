@@ -24,9 +24,9 @@ The first skill is distinguishing three outcomes: a compiler diagnostic means th
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles your saved pad as `Program.cs` in its fixed .NET 10 project. C# 14 is the matching language generation. This route uses the prepared framework libraries; it does not accept arbitrary project files, NuGet packages, command arguments or interactive input. The explicit `Program.Main` entrypoint makes compilation and execution visible. `Check` throws on a false condition in every build configuration, unlike conditional debugging assertions.
+Example A prints the greeting, while Example B prints nothing of its own, so the only line B adds to the output is the lesson marker. For task 4, delete one semicolon in a scratch copy: the build stops with CS1002 and no statement of the program runs.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Compile contract, starter stop and success marker: [running a lesson](../STUDY-GUIDE.md#running-a-lesson).
 
 
 
@@ -34,7 +34,7 @@ Start with the answer-free learner artifact in your saved classroom pad. It deli
 
 `using System;` makes framework names available without their namespace prefix. `class Program` groups members. `static Main` is an entrypoint that needs no object instance. Braces delimit a body; a semicolon ends a statement. `Console.WriteLine` prints one line. The wrapper uses `async Task Main` to keep one entrypoint shape throughout the route; asynchronous work is explained later. For now, trace the statements from top to bottom.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+Each example ends with a trace; method: [tracing a program](../STUDY-GUIDE.md#tracing-a-program).
 
 ## Worked example / walkthrough
 
@@ -66,6 +66,8 @@ internal static class Program {
 
 **Observe:** Hello, C# appears before the lesson marker.
 
+**Trace.** `greeting` is bound to the literal `"Hello, C#"`. Count its characters: H, e, l, l and o make five, the comma makes six, the space seven, and C and # bring it to nine. `Check` receives `greeting.Length == 9`, which is true, so it returns without throwing. Only then does `Console.WriteLine` print the greeting, so a wrong count stops the program before any output appears.
+
 ### Example B: A calculation instead of a hardcoded message
 
 The second condition rejects a plausible wrong operator. This is stronger evidence than printing an unexplained success word.
@@ -96,6 +98,8 @@ internal static class Program {
 
 **Observe:** The total is 12, while adding the two inputs gives 7.
 
+**Trace.** `boxes` holds 3 and `itemsPerBox` holds 4. The expression `boxes * itemsPerBox` evaluates to 12, which is stored in `total`. The first check compares `total` with 12. The second compares it with `boxes + itemsPerBox`, which is 7, and requires the two to differ. If someone typed `+` instead of `*`, total would be 7 and the first check would throw with the reason computed total.
+
 ## Exercises
 
 1. **Predict and explain.** Predict the greeting length, including its space and punctuation, before running Example A.
@@ -110,13 +114,15 @@ internal static class Program {
 
 6. **Transfer and justify.** Model boxes containing packets containing items. Explain each intermediate value and check the final product.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Log each task in the [evidence table](../STUDY-GUIDE.md#recording-exercise-evidence) before opening the explanation.
 
 ## Common pitfalls and diagnosis
 
 Printing a copied expected number skips the calculation. A missing brace can produce several later diagnostics, so repair the first structural problem before interpreting the rest. Do not treat the lesson marker as a replacement for inspecting the greeting or invariant.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+Task 3's check `seats == 24` on its own is weak, because a hardcoded 24 also passes. Add the operator check from Example B: for four rows of six, the sum 10 must differ from the product. For task 5, zero rows give zero seats and one row gives six from the same formula. A missing closing brace is reported as CS1513 at the end of the file, far from where the brace belonged.
+
+Repair routine: [building a regression case](../STUDY-GUIDE.md#building-a-regression-case).
 
 ## Progressive hints
 
@@ -126,11 +132,15 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 ## Self-check and next step
 
-Explain Source, Compiler, Entrypoint without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+Without running anything, state the length of `"Hi, C#!"` and explain how you counted it. Explain why Example B's second check makes the program stronger evidence than printing 12. Classify a missing semicolon and a failed `Check` as compile or runtime failures, and say what output each one produces.
+
+Then follow the general [self-check routine](../STUDY-GUIDE.md#self-check-routine) and save your pad.
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://learn.microsoft.com/en-us/dotnet/csharp/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+[Documentation](https://learn.microsoft.com/en-us/dotnet/csharp/): The C# documentation's tour of the language introduces program structure, the `Main` method and `Console.WriteLine`.
+
+Provenance and limits: [sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

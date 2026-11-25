@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/docker/solutions/docker-036_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="docker-036-explanatory-solutions">docker-036: explanatory solutions<a class="heading-anchor" href="#docker-036-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit reveal. These explain the supplied teaching fixtures; they are not engine results. The mechanism is explained in <code>courses/docker/guides/docker-036.md</code>.</p>
+<p>These answers explain teaching fixtures, not engine results; the mechanism is in <a href="../guides/docker-036.md.html">the guide</a>.</p>
 <h3 id="exercise-1-predict-whether-compose-survives-host-loss-automatically">Exercise 1: Predict whether Compose survives host loss automatically.<a class="heading-anchor" href="#exercise-1-predict-whether-compose-survives-host-loss-automatically" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Not without an external recovery design.</p>
 <p><strong>Why:</strong> Restarting a process on a live host differs from replacing a failed host and recovering its data. State the actual failure domain.</p>
@@ -238,7 +238,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>A plausible wrong approach:</strong> Choosing a platform first and adjusting needs to match it leaves failures and recovery undesigned.</p>
 <p><strong>How to verify:</strong> The recommendation lists each requirement with the feature that meets it and the matching failure-table row.</p>
 <h3 id="check-your-transfer">Check your transfer<a class="heading-anchor" href="#check-your-transfer" aria-label="Link to this section">#</a></h3>
-<p>A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.</p></article>
+<p>For a single-host teaching fixture used by two classes, Compose remains the better fit: the workload is one process with one small volume, nobody needs failover, and learners benefit from seeing every resource. The recommendation changes if the app must survive host loss, serve many concurrent users, or be run by a team already operating a cluster; then the work is a storage, recovery and traffic design, not a file conversion. A measured outage or a load that one host cannot carry would be the evidence against the current choice.</p></article>
   </main>
 </body>
 </html>

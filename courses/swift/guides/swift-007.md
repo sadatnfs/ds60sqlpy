@@ -24,9 +24,9 @@ For-in traversal expresses iteration over a sequence. Use enumerated when the tr
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles the saved pad as `main.swift` with Swift 6 language checking. An explicit `@main` type contains `static func main() async throws`; the fixed compiler uses `-parse-as-library -swift-version 6`. The examples use the standard library and portable Foundation. `precondition` makes a violated invariant fail the process. The fixed pad accepts one source file, without arbitrary command arguments, interactive input or dependency installation. SwiftUI, UIKit, Apple simulators and application signing belong to the separately prepared macOS/Xcode project labs, never the Linux pad.
+Task 1 wants the accumulator written out for every iteration, so keep a paper table beside Example A while it runs. Task 4 studies a loop whose progress variable never changes; run that experiment with an explicit iteration cap in the condition rather than waiting on a program that never reaches its marker.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Compile contract, starter stop and success marker: [running a lesson](../STUDY-GUIDE.md#running-a-lesson).
 
 
 
@@ -34,7 +34,7 @@ Start with the answer-free learner artifact in your saved classroom pad. It deli
 
 `for value in values` traverses elements. `for (offset, value) in values.enumerated()` adds a traversal counter. `break` stops the loop; `continue` skips the remaining body. A while loop needs an explicit progress step.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+Each example ends with a trace; method: [tracing a program](../STUDY-GUIDE.md#tracing-a-program).
 
 ## Worked example / walkthrough
 
@@ -61,6 +61,8 @@ struct LessonMain {
 ```
 
 **Observe:** The total is 12 and the empty total is zero.
+
+**Trace.** Before the loop, `total` is 0 and nothing has been visited. The first iteration reads 2 and stores 2; the second reads 4 and stores 6; the third reads 6 and stores 12. At the start of every iteration the invariant holds: `total` equals the sum of the elements already seen. The second check covers the empty array, where `reduce(0, +)` returns its starting value 0 without calling `+` at all. An empty input is the case most likely to expose an accumulator seeded with the first element.
 
 ### Example B: Stop at the first match
 
@@ -91,6 +93,8 @@ struct LessonMain {
 
 **Observe:** The first 8 appears at offset 1 and 9 is absent.
 
+**Trace.** `found` starts as nil. At offset 0 the value is 3, so the body does nothing. At offset 1 the value is 8; `found` becomes 1 and `break` leaves the loop at once, so offset 2, which also holds 8, is never examined. Without the `break`, the loop would overwrite `found` with 2 and report the last match. The final check uses `firstIndex(of:)`, which already implements first-match search, to show that an absent value yields nil rather than a sentinel such as -1.
+
 ## Exercises
 
 1. **Predict and explain.** Write the accumulator trace for every iteration.
@@ -105,13 +109,15 @@ struct LessonMain {
 
 6. **Transfer and justify.** Design a bounded retry loop and explain both its invariant and its stop condition.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Log each task in the [evidence table](../STUDY-GUIDE.md#recording-exercise-evidence) before opening the explanation.
 
 ## Common pitfalls and diagnosis
 
 An enumerated offset is not universally a collection index. A not-found sentinel should never be used as an index. Mutating traversal state in several places makes termination difficult to establish.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+A first-match search that forgets `break` passes on any input with a single match, which makes the bug easy to miss. The counterexample is a repeated-match input such as `[5, 7, 7]` searched for 7: the correct offset is 1 and the buggy one is 2. Add the empty array and a singleton as well; neither may touch an index outside the array.
+
+Repair routine: [building a regression case](../STUDY-GUIDE.md#building-a-regression-case).
 
 ## Progressive hints
 
@@ -121,11 +127,15 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 ## Self-check and next step
 
-Explain Invariant, Accumulator, Termination argument without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+Describe the invariant of Example A in one sentence that stays true at the start of any iteration. Explain why the offset from `enumerated()` equals the index for an `Array` but not for an `ArraySlice`. Write the stop condition of a bounded retry loop and name the value that changes on every pass.
+
+Then follow the general [self-check routine](../STUDY-GUIDE.md#self-check-routine) and save your pad.
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://docs.swift.org/swift-book/documentation/the-swift-programming-language/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+[Documentation](https://docs.swift.org/swift-book/documentation/the-swift-programming-language/): See the Control Flow chapter of the Swift book for for-in loops, while loops and control transfer statements such as break and continue.
+
+Provenance and limits: [sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

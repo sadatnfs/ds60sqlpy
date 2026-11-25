@@ -194,11 +194,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/apache-data-platforms/examples/apache-060.md</code></p>
     </header>
     <article class="document"><h2 id="pinot-apache-060-command-notebook">Pinot apache-060 command notebook<a class="heading-anchor" href="#pinot-apache-060-command-notebook" aria-label="Link to this section">#</a></h2>
-<p>Use these commands only from the copied owned Pinot project described in its README. The classroom Markdown pad does not execute Docker commands.</p>
+<p>These two files come from the copied Pinot project. <code>realtime-table.json</code> defines the stream table <code>ds60_orders_stream</code> with time column <code>event_ts</code>, and <code>schema.json</code> holds the field types; neither file declares primary key columns or an upsert mode.</p>
 <pre class="highlighted-code"><code class="language-bash">cat realtime-table.json
 cat schema.json</code></pre>
 <p>This displays a prepared real-time table, not a hybrid/upsert acceptance test. Create separately named hybrid and upsert experiments with explicit time boundaries, primary keys, comparison columns and source identities as described in the guide.</p>
-<p>Native service acceptance and each advanced extension have distinct entries in <code>QUALIFICATION.md</code>. Source/configuration presence is not an observed service result.</p></article>
+<p>Hybrid tables and upsert behavior appear in QUALIFICATION.md only as prepared extensions. A receipt for either needs the time boundary, the primary key and the comparison column that decided each duplicate.</p></article>
   </main>
 </body>
 </html>

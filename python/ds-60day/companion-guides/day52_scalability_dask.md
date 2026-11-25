@@ -71,33 +71,13 @@ triggering it.
 
 ## How to run this lesson
 
-**Default Docker classroom:** open `python-52` for its guide, notebook and capability notice. The default Core does not include the `production` extra, so the complete legacy notebook is unavailable there until that app environment is deliberately prepared. Pressing Run or choosing a notebook kernel does not install packages.
+**Default Docker classroom:** Dask cannot import in `python-52`; the default Core does not include the `production` extra. Prepare it through the [contributor setup](../../../CONTRIBUTING.md) to partition frames on your own machine; a host notebook environment and a Docker app image are separate.
 
-**Prepared browser alternative:** use the [data and ML engineering course](../../../courses/data-ml-engineering/guides/dme-001.md) in its declared runtime. Its supported examples have their own package and execution contract; this does not qualify every legacy optional extension.
-
-**Explicit legacy preparation:** retain the contributor extras in [CONTRIBUTING](../../../CONTRIBUTING.md) and add `production` only when needed. See [dependency profiles](../../../docs/dependency-profiles.md) and [Docker app package options](../../../docs/docker-profiles.md) for deliberate preparation. A host notebook environment and a Docker app image are separate. Do not install packages inside a learner pad.
+**Prepared browser alternative:** Partitioned computation still needs a clear record and metric contract, which the [data and ML engineering course](../../../courses/data-ml-engineering/guides/dme-001.md) builds in Core without a scheduler.
 
 The complete example needs Dask DataFrame; the distributed reference also needs dask.distributed. A chunked Python reduction illustrates the algebra without proving a Dask execution. Local scheduler and dashboard processes require a separately prepared project environment.
 
-**Optional native notebook/editor route:** the instructions below describe
-separately prepared host tools. They are useful alternatives, not prerequisites
-for opening this lesson in the Docker classroom.
-
-1. Open the Day 52 learner notebook from this guide's **Next
-   step** section in VS Code or JupyterLab.
-2. Select the `Python (ds60sqlpy)` kernel. Start at the top and use
-   **Run All** only after making the written predictions; the default data examples are offline once the declared packages are prepared. Optional services and model assets have separate requirements.
-3. Keep experiments in new scratch cells. Do not edit the official
-   solution while attempting the numbered practice.
-4. Restart the kernel and run from the first cell before calling the
-   lesson complete. A clean run catches hidden state and stale
-   variables.
-
-Linux, macOS, or Ubuntu in Windows WSL 2:
-
-```bash
-.venv/bin/python -m jupyter lab
-```
+The [Python study guide](../../STUDY-GUIDE.md) covers the notebook route and preparing optional extras.
 
 ## Concept deep dive: lazy task graphs, partitions, bounded reducers, and scale evidence
 
@@ -121,10 +101,6 @@ more than merely importing Dask.
 - **chunk state + combine:** keeps sufficient statistics such as sum/count rather than averaging chunk averages incorrectly.
 
 ### Focused example A: combine chunk sums and counts correctly
-
-Before running the example, predict the shape, type, or direction of the
-result. Write the prediction down so that a surprise becomes evidence
-rather than something to overlook.
 
 ```python
 chunks = [[1.0, 2.0, 3.0], [100.0]]
@@ -219,9 +195,6 @@ notebook's generated frame.
 
 Reason about partitions, task graphs, materialization, and associative reductions before scaling. Validate distributed results against a small exact baseline.
 
-Predict or plan before you run code. Use the hint only after an honest
-attempt, and record the evidence that would prove your result correct.
-
 4. **Task-graph tracing:** Build two aggregations from the same lazy Dask DataFrame, inspect their task graphs, and compare separate computes with one combined `dask.compute` call.
    **Progressive hint:** Building an expression does not read all data. Combining terminal computations can share upstream work without persisting the entire frame.
 
@@ -274,8 +247,7 @@ data over the Internet. Close the client to release processes.
 
 ## Ask an AI tutor about this lesson
 
-The lesson is complete without an AI assistant. If you want optional
-coaching, copy this prompt into the AI tutor while the repository root is open:
+The lesson is complete without AI. For optional coaching, copy this prompt with the repository root open:
 
 ```text
 Tutor me through `python-52` (Day 52: Scalability with Dask and Chunked pandas).

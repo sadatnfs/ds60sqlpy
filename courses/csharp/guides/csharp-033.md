@@ -24,9 +24,9 @@ A lock establishes mutual exclusion and ordering for code using the same lock ob
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles your saved pad as `Program.cs` in its fixed .NET 10 project. C# 14 is the matching language generation. This route uses the prepared framework libraries; it does not accept arbitrary project files, NuGet packages, command arguments or interactive input. The explicit `Program.Main` entrypoint makes compilation and execution visible. `Check` throws on a false condition in every build configuration, unlike conditional debugging assertions.
+`LockedCounter` uses `System.Threading.Lock`, the dedicated lock type. Example A starts four tasks with `Task.Run`, so increments really do interleave across threads. If you store a `Lock` in an `object` variable and lock that, the compiler issues warning CS9216 about monitor-based locking.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Compile contract, starter stop and success marker: [running a lesson](../STUDY-GUIDE.md#running-a-lesson).
 
 
 
@@ -34,7 +34,7 @@ Start with the answer-free learner artifact in your saved classroom pad. It deli
 
 `lock (gate)` enters a protected region and exits even on exceptions. All accesses participating in the invariant must use the same gate. Since .NET 9 and C# 13, `System.Threading.Lock` is the dedicated lock type: `lock` on a `Lock` uses its scope API, and the compiler warns when a `Lock` is converted to `object`. Task.WhenAll observes the completion of the scheduled work.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+Each example ends with a trace; method: [tracing a program](../STUDY-GUIDE.md#tracing-a-program).
 
 ## Worked example / walkthrough
 
@@ -92,6 +92,8 @@ internal static class Program {
 
 **Observe:** Four tasks produce exactly 400 increments.
 
+**Trace.** `count++` without protection is three steps: read the value, add one, write it back. Two threads can both read 10 and both write 11, losing an increment. Inside `lock (gate)`, only one thread at a time runs those steps, so every increment is applied once. Four tasks of 100 increments each produce exactly 400.
+
 ### Example B: Protect a multi-field invariant
 
 A synchronized writer with an unsynchronized reader does not establish the same contract.
@@ -144,6 +146,8 @@ internal static class Program {
 
 **Observe:** The reader uses the same gate as mutation.
 
+**Trace.** `Add` runs twice under the gate, so the stored value is 2. The `Value` getter also takes the gate before reading, so a reader never sees a value in the middle of an update. The checks confirm 2 and a nonnegative state. The same gate protects reads and writes, which makes them part of one contract.
+
 ## Exercises
 
 1. **Predict and explain.** Decompose an increment into its logical steps.
@@ -158,13 +162,15 @@ internal static class Program {
 
 6. **Transfer and justify.** Choose immutable snapshots or a lock for a shared report cache and justify the ownership model.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Log each task in the [evidence table](../STUDY-GUIDE.md#recording-exercise-evidence) before opening the explanation.
 
 ## Common pitfalls and diagnosis
 
 A passing unsynchronized stress run does not prove absence of races. Locking a different object in the reader does not protect the writer invariant. Never await inside a synchronous lock.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+For task 4, the classic cycle is one thread holding the lock for account A while waiting for B, and another holding B while waiting for A; both wait forever. The repair is a global order, such as always locking the lower account id first. A stress run that passes without locks proves nothing, because races depend on timing.
+
+Repair routine: [building a regression case](../STUDY-GUIDE.md#building-a-regression-case).
 
 ## Progressive hints
 
@@ -174,11 +180,15 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 ## Self-check and next step
 
-Explain Atomicity, Mutual exclusion, Deadlock without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+Write the three steps of an unsynchronized increment and show one interleaving that loses an update. Explain why the getter also takes the lock. For task 3, describe the lock order your transfer uses and how it keeps the sum of the two balances constant.
+
+Then follow the general [self-check routine](../STUDY-GUIDE.md#self-check-routine) and save your pad.
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://learn.microsoft.com/en-us/dotnet/csharp/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+[Documentation](https://learn.microsoft.com/en-us/dotnet/csharp/): The .NET threading articles cover the `lock` statement, the `System.Threading.Lock` type and best practices for managed threading.
+
+Provenance and limits: [sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

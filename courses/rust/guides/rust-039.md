@@ -24,9 +24,11 @@ A batch is not the entire dataset and does not imply a global uniqueness or orde
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles the saved pad as `main.rs` with pinned Rust 1.99.1, edition 2024, and the prepared Arrow 60 library. `assert!` and `assert_eq!` remain active in normal builds. The fixed pad accepts one source file without arbitrary arguments, interactive input, Cargo manifests or package installation. The main function returns `Result<(), Box<dyn std::error::Error>>` so later examples can propagate errors with `?`; the final `Ok(())` means this fixture completed successfully. Standard library and Arrow examples remain offline after image preparation. Multi-file Cargo and external ecosystem projects have separate explicit preparation workflows.
+Beyond the prelude, this lesson's programs use `arrow::array`, `arrow::datatypes`, `arrow::record_batch` and `std::sync`. A passing run prints `rust-039: passed`.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Pad setup and limits: [Run a lesson](../STUDY-GUIDE.md#run-a-lesson).
+
+Before you run anything, follow [Attempt a lesson](../STUDY-GUIDE.md#attempt-a-lesson).
 
 
 
@@ -34,7 +36,9 @@ Start with the answer-free learner artifact in your saved classroom pad. It deli
 
 Field::new records name, DataType and nullable policy. Schema::new groups fields. RecordBatch::try_new validates arrays against an Arc<Schema>. ArrayRef stores different concrete arrays behind one shared interface.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+**Reading Example A (Build an aligned batch, code below).** `Field::new("name", DataType::Utf8, false)` declares one column: its name, its Arrow type and whether it may contain nulls. `Schema::new` collects the fields in order, and `Arc::new` wraps the schema so many batches can share it cheaply. The `columns` vector holds `ArrayRef` values, which are `Arc<dyn Array>`: each concrete array sits behind a shared trait object, so arrays of different types fit in one vector. `RecordBatch::try_new` validates the pairing of schema and columns and returns a `Result`, and `?` propagates a mismatch as an error. The last line reads the first column back: `as_any().downcast_ref::<StringArray>()` recovers the concrete type from the trait object and would return `None` if the type were wrong.
+
+Method for tracing your own variants: [Trace a program](../STUDY-GUIDE.md#trace-a-program).
 
 ## Worked example / walkthrough
 
@@ -98,13 +102,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 6. **Transfer and justify.** Design a schema evolution policy that preserves names, units and saved data meaning.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Record each task as in [Keep evidence for each task](../STUDY-GUIDE.md#keep-evidence-for-each-task).
 
 ## Common pitfalls and diagnosis
 
 A nullable field permits nulls; it does not require them. Schema validation does not establish unique keys or domain ranges. Do not infer whole-dataset row count from one batch.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+To turn a pitfall into a test, see [Design a regression case](../STUDY-GUIDE.md#design-a-regression-case).
 
 ## Progressive hints
 
@@ -112,13 +116,23 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 2. Compare Example B (Reject incompatible lengths) with Example A and name the first line whose behavior differs. Its observation is: Unequal column lengths are rejected.
 3. Before opening the explanation, test your task 3 attempt against this lesson's main pitfall: A nullable field permits nulls; it does not require them.
 
+Tempting approaches to rule out before you compare:
+
+- **Task 1.** Calling this batch the inventory reads more into it than it says: it is one two-row chunk, and nothing in it proves that names are unique or that there are no other batches.
+- **Task 2.** Declaring `price` as non-nullable while the array contains a null fails `try_new` with an error that the column is declared non-nullable but contains a null.
+- **Task 5.** Treating the zero-row batch as an error, or skipping its schema, loses the column definitions a later empty result still needs.
+
 ## Self-check and next step
 
-Explain Schema, RecordBatch, ArrayRef without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+What `num_rows()` and `num_columns()` does Example A's batch report, and where does "pear" appear? What error does `RecordBatch::try_new` return in Example B, and why is rejecting it better than padding the shorter column with nulls? Why does a field's `nullable` flag belong in the schema rather than in a comment?
+
+Then work through [Self-check and review](../STUDY-GUIDE.md#self-check-and-review).
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://docs.rs/arrow/60.0.0/arrow/record_batch/struct.RecordBatch.html). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+Read [the `RecordBatch` documentation](https://docs.rs/arrow/60.0.0/arrow/record_batch/struct.RecordBatch.html) for the checks `try_new` performs.
+
+What the classroom does and does not prove: [Sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

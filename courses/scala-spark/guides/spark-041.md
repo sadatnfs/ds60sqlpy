@@ -1,22 +1,26 @@
 # spark-041: Compatibility and recovery change rehearsal
 
-Authored paired Scala/PySpark teaching content. The default fixtures are tiny, local and deterministic. Runtime acceptance, logical correctness and learner understanding remain separate evidence.
+Upgrading Spark or changing a streaming query can quietly break the state stored in an old checkpoint. This rehearsal pins the runtime versions, checks a small golden fixture, then changes the deduplication key from `id` to `id, cents`. The change is refused on the old checkpoint, run against a fresh one, compared with the baseline and rolled back without losing either history.
 
 ## Level and prerequisites
 
-Advanced; approximately 120 minutes. Direct prerequisites: `spark-040`. The prepared baseline is Spark 4.3.0, Scala binary 2.13, JDK 17 and Python 3.12. Read the [execution baseline](../execution-baseline.md).
+Advanced; approximately 120 minutes. Direct prerequisites: `spark-040`. Pinned versions: [execution baseline](../execution-baseline.md).
 
 ## How to run this lesson
 
-Open `spark-041` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile, save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`;Python stages as `main.py` with a main guard. Each program creates its own `local[2]` session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.
+Shared run steps and profile rules: [study guide](../STUDY-GUIDE.md#run-a-paired-lesson).
 
-The [Scala learner](../lessons/spark-041.scala) and [PySpark learner](../lessons/spark-041.py) run two complete demonstrations and retain six explicit task stubs. Use the [explained solutions](../solutions/spark-041_solutions.md) only after an attempt or an explicit worked comparison; the [Scala reference](../solutions/spark-041_solution.scala) and [PySpark reference](../solutions/spark-041_solution.py) contain complete assertions. A bounded collect is used only for the declared tiny fixture; do not copy it onto an unbounded or large production table.
+Learner pads: [Scala](../lessons/spark-041.scala) and [PySpark](../lessons/spark-041.py).
+
+Open the [explained solutions](../solutions/spark-041_solutions.md) after an attempt.
+
+The first worked example only compares two key lists, `["id"]` and `["id", "cents"]`, and asserts that they differ, which is the fact the compatibility gate acts on. The second runs `to_timestamp('2026-10-23T12:00:00-07:00')` in Spark SQL and requires the string `2026-10-23 19:00:00`, confirming that the session time zone is UTC.
 
 ## Learning objectives
 
 - Assess a Spark/runtime change without reusing incompatible state or trusting a version string alone.
-- State the input and output grain, schema, NULL policy and ordering before executing a transformation.
-- Compare each language implementation with independent literal expectations, not only with the other implementation.
+- Record the actual Spark, Scala, Java and Python versions and run golden checks on NULL counting, `DECIMAL(10,2)` and a UTC timestamp conversion before accepting any change, since a version string alone does not prove behavior.
+- Refuse a state-key change on an existing checkpoint, run the candidate with `id, cents` keys in its own checkpoint and output, roll back to the original `id` key on the old checkpoint, and promote only when all four review conditions hold.
 
 ## Vocabulary and concepts
 
@@ -50,9 +54,9 @@ A rejected incompatible reuse must not be repaired by deleting checkpoint intern
 
 ## Run a candidate without modifying the baseline
 
-The fixture first processes 1:100 and 2:200 under ID-only deduplication. It then publishes a new occurrence 1:999. The candidate uses id, cents keys with a new checkpoint and output namespace, so replay produces 1:100,1:999,2:200. That is a real observed product difference, not a checkpoint corruption. It fails the existing one-row-per-ID product gate and is not promoted.
+The fixture first processes 1:100 and 2:200 under ID-only deduplication. It then publishes a new occurrence 1:999. The candidate uses `id, cents` keys with a new checkpoint and output namespace, so replay produces `1:100, 1:999, 2:200`. That is a real observed product difference, not a checkpoint corruption. It fails the existing one-row-per-ID product gate and is not promoted.
 
-The baseline checkpoint and sink remain available. Resuming the original ID-only query processes the new source occurrence under its existing policy and does not append another ID 1 row. Its query identity persists and its output remains 1:100,2:200. This is an explicit rollback rehearsal within one runtime. It does not establish cross-version state migration or decide how a real application should resolve conflicting event payloads.
+The baseline checkpoint and sink remain available. Resuming the original ID-only query processes the new source occurrence under its existing policy and does not append another ID 1 row. Its query identity persists and its output remains `1:100, 2:200`. This is an explicit rollback rehearsal within one runtime. It does not establish cross-version state migration or decide how a real application should resolve conflicting event payloads.
 
 A production first-seen policy may itself be insufficient when conflicting updates matter. This fixture uses the difference to expose a changed contract. A real migration review must state whether it preserves append events, latest updates, corrections or one canonical record per ID, including tie-breaking and late-data rules. The next capstone defines those decisions more explicitly in a bounded application ledger.
 
@@ -64,7 +68,7 @@ The final packet records source and target claims separately. For this run, the 
 
 ## Supplied local fixture
 
-The complete source creates the owned local session described above, then constructs this explicit fixture. The worked examples below run in that same main function; there is no hidden notebook state.
+The golden fixture has four rows: ID 1 twice with 100 cents, ID 2 with a NULL amount and ID 3 with 0, so a correct summary reports 4 rows, 3 known amounts, a total of 200 and 3 distinct IDs. The streaming baseline reads `batch-01.json`, with IDs 1 and 2 at 100 and 200 cents, into its own checkpoint and output, and a later `batch-02.json` adds `(1, 999)`. The candidate writes only to `candidate-checkpoint` and `candidate-output`.
 
 ```scala prelude=../solutions/spark-041_solution.scala
 import org.apache.spark.sql.Row
@@ -166,7 +170,7 @@ Record Spark, Scala binary and patch, JDK major and patch, Python version and op
 
 Evaluate the supplied four-row bag plus exact decimal and timezone expressions.
 
-**Expected result/shape:** 4 rows,3 known amounts, total 200,3 distinct IDs; decimal 12345678.90; instant 19:00UTC.
+**Expected result/shape:** 4 rows, 3 known amounts, total 200, 3 distinct IDs; decimal 12345678.90; instant 19:00 UTC.
 
 **Verify:** Compare exact metrics and rendered values under the UTC baseline.
 
@@ -176,7 +180,7 @@ Evaluate the supplied four-row bag plus exact decimal and timezone expressions.
 
 Run the baseline ID-only deduplication query, then reject a request to change its state keys to id, cents while retaining that checkpoint.
 
-**Expected result/shape:** Baseline output 1:100,2:200; preflight rejects changed keys before starting a new query.
+**Expected result/shape:** Baseline output `1:100, 2:200`; preflight rejects changed keys before starting a new query.
 
 **Verify:** Compare owned-query count before/after the refusal and confirm the old checkpoint/output remain present and unchanged.
 
@@ -186,7 +190,7 @@ Run the baseline ID-only deduplication query, then reject a request to change it
 
 Add a new occurrence 1:999 and run id, cents deduplication using a new checkpoint/output.
 
-**Expected result/shape:** Candidate bag 1:100,1:999,2:200, which fails the baseline one-row-per-ID product gate.
+**Expected result/shape:** Candidate bag `1:100, 1:999, 2:200`, which fails the baseline one-row-per-ID product gate.
 
 **Verify:** Compare candidate and baseline exact bags and preserve old checkpoint/output.
 
@@ -196,7 +200,7 @@ Add a new occurrence 1:999 and run id, cents deduplication using a new checkpoin
 
 Resume the original ID-only query with its original checkpoint after the candidate is rejected.
 
-**Expected result/shape:** The same baseline query ID resumes; the new occurrence of already-seen ID 1 does not add a row; baseline output stays 1:100,2:200.
+**Expected result/shape:** The same baseline query ID resumes; the new occurrence of already-seen ID 1 does not add a row; baseline output stays `1:100, 2:200`.
 
 **Verify:** Check query identity and exact sink bag without deleting either checkpoint.
 
@@ -218,11 +222,14 @@ Do not compare only version strings, assume Scala binary compatibility implies c
 
 ## Self-check
 
-Explain the contract of `versionReceipt` / `version_receipt` without reading its solution. Then, from memory, state what Exercise 6 (Gate a proposed runtime change on actual evidence) must produce: The supplied unqualified target or failed candidate is rejected; all four true permits a proposal in this pure decision model. Say which part of that result is evidence and what it still cannot show. Name the action in your trace that actually runs the plan.
+- The golden summary counts 3 known amounts out of 4 rows. Which row is excluded, and how would treating NULL as 0 change the reported numbers?
+- Why does `require_compatible` raise before any query starts, instead of letting Spark discover the mismatch when it reads the old state?
+- The candidate commits `1:999`, but the rollback on the old checkpoint does not. Which stored state explains the difference?
+- `may_promote` needs four true inputs. Give one case in which the product check passes but promotion must still be refused.
 
 ## Next step
 
-Use the [course route](../README.md) to continue. Paired-language agreement is useful only when both outputs also satisfy the independent fixture contract. A successful local run is not evidence of cluster performance or production recovery.
+Go on to [spark-042: Capstone: a recoverable late-event data product](spark-042.md). The capstone combines the pieces of this unit: canonical input, a frozen lateness cutoff, a replay-safe sink, failure injection and a handoff packet for a reviewer.
 
 ## Primary sources and official APIs
 

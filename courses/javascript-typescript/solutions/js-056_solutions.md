@@ -1,6 +1,6 @@
 # js-056: explanatory solutions
 
-Compare after your own attempt or an explicit reveal. The separate .js reference is a complete offline browser program. These explanations discuss the six practice tasks; a visual resemblance alone is not a data or behavior check.
+Compare after your own attempt; the separate `.js` file is the complete reference program.
 
 ## Mechanism review
 
@@ -49,3 +49,7 @@ Hover is not universal. Touch, keyboard and assistive-technology users need a re
 Avoid moving focus on every hover or announcing a large changing DOM. Test the actual keyboard sequence rather than assuming ARIA alone implements it. Tab to each button and listen: aria-live="polite" should read "B: 7" once per selection, and focus should stay on the button you pressed.
 
 **Expected:** Focus stays predictable and the live summary is concise.
+
+## After comparison
+
+Add a tooltip that follows the pointer and a details panel driven by focus. Test at two SVG widths to confirm the tooltip stays beside the hovered mark, and check that the details panel alone exposes every value the tooltip shows.

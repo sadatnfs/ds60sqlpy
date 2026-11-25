@@ -13,40 +13,20 @@ psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
   -f sql/postgres-60day/solutions/day49_solutions.sql
 ```
 
-`psql` prints each result/command tag in the terminal. Stop at the first
-unexpected `ERROR`; later output cannot repair an earlier failed invariant.
-Compare your own SQL, row grain, column names, row counts, `NULL` policy, and
-ordering with the explanation before comparing syntax.
+Six read-only queries: four over `orders` grouped into 46 months and two over
+small `VALUES` lists. The `.sql` file prints 4, 3, 46, 46, 1 and 1 rows; its Exercise 2 differs from the one printed below, and the Exercise 2 notes cover
+both versions. Each query finishes in milliseconds. The general routine is in
+[reading a solution](../../STUDY-GUIDE.md#read-a-solution).
 
 ## Clause-by-clause reading map
 
-The lesson's main concepts are Backtest, Target leakage, MAPE. Its worked-model focus is:
-At complete monthly grain, compute MA(6) with a frame ending at `1 PRECEDING`, place it beside actual revenue, and score only months with a forecast and nonzero actual. Compare seasonal naive on that same scoring set and retain the number of evaluated months.
-
-- Start at `FROM`/`JOIN` and state the intermediate row grain. Inspect join keys
-  before adding aggregates; a one-to-many join is allowed to multiply rows only
-  when the later contract accounts for it.
-- Apply `WHERE` to input rows, `GROUP BY` to form buckets, and `HAVING` to
-  completed groups. Window functions run over the surviving relation and
-  normally preserve its row count.
-- Read the `SELECT` list as the public result contract: keys establish grain,
-  measures state calculations, and aliases explain meaning. `ORDER BY` is the
-  only output-order guarantee; add a unique tie-breaker before `LIMIT`.
-- Trace every common table expression (CTE) as a temporary named relation.
-  Execute or inspect one stage at a time while debugging, but compare the final
-  result with an independent control rather than trusting stage names.
-- Keep SQL `NULL` as “missing/unknown/not applicable” until the metric contract
-  chooses another representation. Guard division with `NULLIF`; disclose
-  exclusions and distinguish zero from no row.
-- For DDL/DML, a command tag proves only that PostgreSQL accepted a statement.
-  Catalog checks, negative cases, row-count reconciliation, and the declared
-  transaction boundary prove behavior and cleanup.
-
-The exact final queries are not the only valid syntax. A join, subquery, CTE,
-window, or conditional aggregate can be an alternative when it preserves the
-same grain, `NULL` semantics, deterministic ordering, and safety. Prefer the
-form whose intermediate relations a reviewer can verify; optimize only after
-correctness is established with evidence.
+Read each statement in
+[logical clause order](../../STUDY-GUIDE.md#reading-any-query-in-logical-order).
+Two questions apply to every forecast here: which months could the model see
+when it was made, and which months is it graded on? The frame answers the
+first (`... AND 1 PRECEDING`), and a shared filter on history counts answers
+the second. The monthly CTE always comes first, so confirm it returns 46 rows
+with no repeated month before reading further.
 
 The exercises compare moving-average and seasonal-naive forecasts, then inspect
 a 50/50 blend. These are historical backtests, not a production forecasting
@@ -149,10 +129,10 @@ set. `scored_rows` and `zero_actual_rows` make the MAPE denominator explicit.
 - **Inputs/evidence:** For sql-49 Exercise 1, aggregate `orders` by observed month, left-join to `month_spine`, compute full-window history counts, and reshape four forecasts over `common_scoring_rows`.
 - **Expected result/shape:** For sql-49 Exercise 1, expected output: exactly four rows keyed by `model`, with `scored_rows`, `zero_actual_rows`, and `mape`, ordered by `model`.
 - **Independent verification:** For sql-49 Exercise 1, require `ma6_history_rows = 6`, `ma12_history_rows = 12`, and a non-NULL twelve-month seasonal value before any model is scored. All four models must have identical eligible months and equal `scored_rows`; independently recompute each MAPE.
-- **Intermediate relation check:** For sql-49 Exercise 1, inspect `month_spine`, `monthly_complete`, `forecast_rows`, and `common_scoring_rows`; prove no calendar month is missing and warm-up rows are excluded.
-- **Clause check:** For sql-49 Exercise 1, full `ROWS` frames provide prior observations, the counts reject partial warm-up frames, `LAG(..., 12)` now means twelve calendar months because the spine is dense, and the lateral `VALUES` block establishes model grain.
-- **Alternative/trade-off:** For sql-49 Exercise 1, the chosen form is justified by this lesson-specific rationale: Expected shape: four model rows. Evaluate another form against the concrete expected result (four model rows. Lower MAPE is better on the months each model can score) and the verification above.
-- **Edge case:** Remove an observed month; `monthly_complete` must retain it as zero revenue, and all four models must still use the same complete-history scoring months.
+- **Intermediate relation check:** `monthly_observed` has 46 rows and `bounds` one (2023-02-01 to 2026-11-01). `month_spine` and `monthly_complete` also have 46, all with `had_source_rows` true. `forecast_rows` keeps 46, `common_scoring_rows` keeps 34 (2024-02 onward), and the `LATERAL` list turns those into 136 rows, four per month. `GROUP BY model` returns 4.
+- **Clause check:** Each `AVG ... ROWS BETWEEN n PRECEDING AND 1 PRECEDING` sits beside a `COUNT` over the same frame. Early frames are short, so `ma6_history_rows` and `ma12_history_rows` say whether an average used a full window, and the `WHERE` in `common_scoring_rows` demands 6 and 12. `NULLIF(revenue, 0)` and the two `FILTER` counts keep a zero month out of MAPE but visible in the output.
+- **Alternative/trade-off:** On this dense spine the `ma12_history_rows = 12` test is redundant: a non-NULL `LAG(revenue, 12)` already needs 12 earlier rows, and removing the test leaves all four results unchanged. It still earns its place by stating the rule outright. Grading each model on its own available months instead gives MA(6) 40 months and 0.2519, a number that cannot be compared with the others.
+- **Edge case:** Filter June 2025 out of `monthly_observed` and the spine brings it back with revenue 0. Each model then reports 33 `scored_rows` and 1 `zero_actual_rows`, and every MAPE rises (MA(6) to 0.2533) because the zero sits inside later averaging windows. The partial final month matters too: without it MA(6) scores 0.2151.
 
 ## Exercise 2: Month-by-month blended forecast
 
@@ -193,13 +173,13 @@ ORDER BY
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-49 Exercise 2, read from `orders`. Build the answer toward `month`, `actual`, `seasonal_naive`, `ma6_forecast`, and `blended_forecast`; keep `month` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-49 Exercise 2, expected output: one row per `month`. The final columns are `month`, `actual`, `seasonal_naive`, `ma6_forecast`, and `blended_forecast`. The final order is `month DESC`.
-- **Independent verification:** For sql-49 Exercise 2, run an anti-check that counts rows where NOT ((seasonal_naive IS NOT NULL)); require unique `month` where the expected grain is one row per key and confirm the projected `month`, `actual`, `seasonal_naive`, `ma6_forecast`, and `blended_forecast` against `orders`. Add one row for which `(seasonal_naive IS NOT NULL)` is true and one for which it is false; verify only the matching `month` value is returned.
-- **Intermediate relation check:** For sql-49 Exercise 2, run `monthly`, and `forecasted` one at a time. Record each CTE's row count and `month` uniqueness before the next stage uses it.
-- **Clause check:** For sql-49 Exercise 2, the solution actually uses `WITH`, `FROM`, `WHERE`, `GROUP BY`, window `OVER`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `orders`, preserve one row per `month`, and finish with `month`, `actual`, `seasonal_naive`, `ma6_forecast`, and `blended_forecast` ordered by `month DESC`.
-- **Alternative/trade-off:** For sql-49 Exercise 2, the chosen form is justified by this lesson-specific rationale: Produce a 50/50 seasonal/MA(6) forecast.. Evaluate another form against the concrete expected result (one row per `month`) and the verification above.
-- **Edge case:** Add one row for which `(seasonal_naive IS NOT NULL)` is true and one for which it is false; verify only the matching `month` value is returned.
+- **Inputs/evidence:** For sql-49 Exercise 2, aggregate `orders` into 46 calendar months in `monthly`, then in `forecasted` add `LAG(revenue, 12)` as `seasonal_naive` and `AVG(revenue)` over `ROWS BETWEEN 6 PRECEDING AND 1 PRECEDING` as `ma6_forecast`, and blend them 50/50 for every month that has a value a year earlier.
+- **Expected result/shape:** For sql-49 Exercise 2, expected output: 34 rows, one per `month` from 2024-02-01 to 2026-11-01, with columns `month`, `actual`, `seasonal_naive`, `ma6_forecast`, and `blended_forecast`, ordered by `month DESC`, so the partial current month comes first.
+- **Independent verification:** For sql-49 Exercise 2, confirm 34 distinct months and that `forecasted` holds exactly 12 rows with a `NULL` `seasonal_naive` (2023-02 to 2024-01), which the `WHERE` removes. Recompute the oldest row by hand: 2024-02 has `actual` 14,823.22, `seasonal_naive` 1,203.26 from 2023-02, `ma6_forecast` 11,859.69 (the mean of 2023-08 to 2024-01), and `blended_forecast` 6,531.47, their average. Then, in a transaction, delete the 91 orders from 2025-03, rerun, and confirm 33 rows and that 2026-03 now takes 33,302.51 from 2025-02 as its "seasonal" value, a 13-month lag; `ROLLBACK`.
+- **Intermediate relation check:** `monthly` has 46 rows and `forecasted` keeps all 46, adding `seasonal_naive` (`NULL` for the first 12) and `ma6_forecast` (`NULL` only for February 2023, then averaging whatever earlier months exist, up to six). The `WHERE` keeps 34 rows.
+- **Clause check:** `WHERE seasonal_naive IS NOT NULL` is the only filter. Seasonal naive needs 12 earlier months, so every surviving row also has a full six-month MA window and no separate count check is needed. `ROUND(..., 2)` is applied only in the final `SELECT`, after the blend is computed from unrounded inputs, and `ORDER BY month DESC` puts the partial month first.
+- **Alternative/trade-off:** A forward version would forecast the next three calendar months after `CURRENT_DATE`, holding the latest six-month average flat and blending it with each month a year earlier. That answers a planning question, but it cannot be scored yet, its numbers move with the run date, and the flat average includes the partial current month. The month-by-month backtest used here and in the `.sql` file shows the blend's past errors, which is what the comparison needs.
+- **Edge case:** The blend inherits both models' lag. In October 2026 it forecast about 97,200 for an actual of 170,179.13; on the partial November row it overshoots instead (about 111,500 against 85,364.67). A month with no orders would vanish from `monthly` entirely, and every 12-row lag after it would then reach back 13 months; Exercise 4's spine prevents that.
 
 ## Reasoning, safety, and pitfalls
 
@@ -219,13 +199,13 @@ rows and stops at `1 PRECEDING`. Side-by-side output makes the bias visible.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-49 Exercise 3, read from `orders`. Build the answer toward `month`, `revenue`, `leaky_ma6`, and `honest_ma6`; keep `month` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-49 Exercise 3, expected output: one row per `month`. The final columns are `month`, `revenue`, `leaky_ma6`, and `honest_ma6`. The final order is `month`.
-- **Independent verification:** For sql-49 Exercise 3, choose one complete partition from `orders`; hand-calculate its first, middle, and final window values for `revenue`, `leaky_ma6`, and `honest_ma6`, then verify output keys remain `month`. Test a one-row partition and a partition with at least three rows; verify the frame boundary and partition reset explicitly.
-- **Intermediate relation check:** For sql-49 Exercise 3, run `monthly` one at a time. Record each CTE's row count and `month` uniqueness before the next stage uses it.
-- **Clause check:** For sql-49 Exercise 3, the solution actually uses `WITH`, `FROM`, `GROUP BY`, window `OVER`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `orders`, preserve one row per `month`, and finish with `month`, `revenue`, `leaky_ma6`, and `honest_ma6` ordered by `month`.
-- **Alternative/trade-off:** For sql-49 Exercise 3, the chosen form is justified by this lesson-specific rationale: The leaky frame includes `CURRENT ROW`; the honest MA(6) frame uses six preceding rows and stops at `1 PRECEDING`. Evaluate another form against the concrete expected result (one row per `month`) and the verification above.
-- **Edge case:** Test a one-row partition and a partition with at least three rows; verify the frame boundary and partition reset explicitly.
+- **Inputs/evidence:** For sql-49 Exercise 3, aggregate `orders` into 46 calendar months in `monthly` and compute two six-month averages over the same `ORDER BY month` window: `leaky_ma6` with `ROWS BETWEEN 5 PRECEDING AND CURRENT ROW`, and `honest_ma6` with `ROWS BETWEEN 6 PRECEDING AND 1 PRECEDING`.
+- **Expected result/shape:** For sql-49 Exercise 3, expected output: 46 rows, one per `month` from 2023-02-01 to 2026-11-01, with columns `month`, `revenue`, `leaky_ma6`, and `honest_ma6`, ordered by `month`; only the first row has a `NULL` `honest_ma6`.
+- **Independent verification:** For sql-49 Exercise 3, recompute the first three months by hand: 2023-02 has `leaky_ma6` 1,203.26 (its own revenue) and `honest_ma6` `NULL`; 2023-03 has 1,503.345 and 1,203.26; 2023-04 has 2,197.18 and 1,503.345. Then confirm with `LAG(leaky_ma6) OVER (ORDER BY month)` that every row's `honest_ma6` equals the previous row's `leaky_ma6` (0 mismatches over 46 rows), which shows the leaky forecast for a month is the honest one shifted to include the month being forecast. There is no `PARTITION BY`, so there is no partition reset to test; the frame first holds six rows at 2023-07 (leaky) and 2023-08 (honest).
+- **Intermediate relation check:** `monthly` has 46 rows, and the final query returns all of them in month order. Nothing is filtered, so the warm-up rows stay visible, including the first, where the honest forecast does not exist yet.
+- **Clause check:** `5 PRECEDING AND CURRENT ROW` and `6 PRECEDING AND 1 PRECEDING` both span six rows, but only the second stops before the month being forecast. In the first row the honest frame is empty, so `AVG` returns `NULL`, while the leaky frame averages the month with itself.
+- **Alternative/trade-off:** `LAG(leaky_ma6) OVER (ORDER BY month)` reproduces `honest_ma6` on every row, since one month's leaky window is the next month's honest one. The learner file's trailing three-month average is the leaky kind too (it includes the current month): fine as a smoothed line on a chart, wrong as a forecast.
+- **Edge case:** In the last row the leaky value (137,336.56) sits below the honest one (141,322.32), because it includes the partial November. Over the 34 common months the leaky frame's MAPE is 0.1696 against 0.2281 for the honest frame; all of that improvement comes from seeing the answer.
 
 ## Exercise 4: Build a monthly spine
 
@@ -234,13 +214,13 @@ The separate source-present flag distinguishes no row from a chosen zero policy.
 
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-49 Exercise 4, read from `orders`. Build the answer toward `month`, `revenue`, `had_source_rows`, and `seasonal_forecast`; keep `month` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-49 Exercise 4, expected output: one row per calendar month before the 12-row lag. The final columns are `month`, `revenue`, `had_source_rows`, and `seasonal_forecast`. The final order is `month`.
-- **Independent verification:** For sql-49 Exercise 4, choose one complete partition from `orders`; hand-calculate its first, middle, and final window values for `revenue`, and `had_source_rows`, then verify output keys remain `month`. Test a one-row partition and a partition with at least three rows; verify the frame boundary and partition reset explicitly.
-- **Intermediate relation check:** For sql-49 Exercise 4, run `bounds`, `spine`, `actual`, and `complete` one at a time. Record each CTE's row count and `month` uniqueness before the next stage uses it.
-- **Clause check:** For sql-49 Exercise 4, the solution actually uses `WITH`, `FROM`, `JOIN ... ON`, `GROUP BY`, window `OVER`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `orders`, preserve one row per `month`, and finish with `month`, `revenue`, `had_source_rows`, and `seasonal_forecast` ordered by `month`.
-- **Alternative/trade-off:** For sql-49 Exercise 4, the chosen form is justified by this lesson-specific rationale: `generate_series` establishes one row per calendar month before the 12-row lag. Evaluate another form against the concrete expected result (one row per calendar month before the 12-row lag) and the verification above.
-- **Edge case:** Test a one-row partition and a partition with at least three rows; verify the frame boundary and partition reset explicitly.
+- **Inputs/evidence:** For sql-49 Exercise 4, take the first and last order months from `orders` in `bounds`, build every calendar month between them with `generate_series` in `spine`, `LEFT JOIN` the monthly revenue in `actual` to it in `complete`, and apply `LAG(revenue, 12)` to the spine rather than to the observed months.
+- **Expected result/shape:** For sql-49 Exercise 4, expected output: 46 rows, one per calendar `month` from 2023-02-01 to 2026-11-01, with columns `month`, `revenue`, `had_source_rows`, and `seasonal_forecast`, ordered by `month`; `seasonal_forecast` is `NULL` for the first 12 months.
+- **Independent verification:** For sql-49 Exercise 4, confirm `had_source_rows` is true on all 46 rows today and that 2024-02 takes 1,203.26 from 2023-02. Then, in a transaction, delete the 91 orders from 2025-03 and rerun: the spine still has 46 rows, 2025-03 shows `revenue` `NULL` and `had_source_rows` false, 2026-03 gets a `NULL` `seasonal_forecast` instead of February's 33,302.51, and `ROLLBACK`. Repeat with `UPDATE ... SET total_amount = 0` for those orders instead: 2025-03 shows `revenue` 0.00 with `had_source_rows` true, and 2026-03 gets 0.00.
+- **Intermediate relation check:** `bounds` is one row, `spine` 46 months, `actual` 46 grouped rows and `complete` 46 after the `LEFT JOIN`. No month is missing in this fixture, so `had_source_rows` is true throughout and the lag matches one taken over observed months.
+- **Clause check:** `generate_series(first_month, last_month, interval '1 month')` returns timestamps, cast back to `date` so `USING (month)` matches `actual.month`. `a.month IS NOT NULL` is evaluated after the outer join, which makes it a reliable "had orders" flag. `revenue` is not wrapped in `COALESCE`, so a missing month stays `NULL`.
+- **Alternative/trade-off:** Exercise 1 makes the opposite choice: `COALESCE(observed.revenue, 0)` treats a missing month as zero sales so it can be graded. Which is right depends on whether no orders means no revenue or no data; the flag column lets a reader tell the two apart either way.
+- **Edge case:** Filter June 2025 out of `actual`: the spine still prints it, with `NULL` revenue and `had_source_rows` false, and June 2026's `seasonal_forecast` becomes `NULL`. Without the spine, each month from July 2025 to June 2026 would borrow the value from 13 months back, so June 2026 would receive May 2025's 52,788.19.
 
 ## Exercise 5: Report the MAPE denominator
 
@@ -252,10 +232,10 @@ both scored and excluded observations. Never publish MAPE without that context.
 - **Inputs/evidence:** For sql-49 Exercise 5, use the `toy` `VALUES` fixture `(100, 90), (0, 10), (50, 60)` of `actual` and `forecast` and compute MAPE as `AVG(ABS(actual - forecast) / NULLIF(actual, 0))`, counting scored rows and excluded zero actuals.
 - **Expected result/shape:** For sql-49 Exercise 5, expected output: one row with `mape` 0.1500, `scored_rows` 2, and `excluded_zero_actuals` 1. The final columns are `mape`, `scored_rows`, and `excluded_zero_actuals`.
 - **Independent verification:** For sql-49 Exercise 5, confirm by hand that the two scored errors are 10/100 = 0.10 and 10/50 = 0.20, whose mean is 0.15, and that the zero-actual row adds nothing because `NULLIF(actual, 0)` makes its ratio NULL, which `AVG` skips.
-- **Intermediate relation check:** For sql-49 Exercise 5, compute each row's ratio `ABS(actual - forecast) / NULLIF(actual, 0)` in a plain `SELECT` before you average it.
-- **Clause check:** For sql-49 Exercise 5, the solution actually uses `WITH`, `FROM`, `WHERE`, aggregate `FILTER`, and `SELECT`. Read only those operations: begin at `toy`, preserve exactly one summary row, and finish with `mape`, `scored_rows`, and `excluded_zero_actuals`.
-- **Alternative/trade-off:** For sql-49 Exercise 5, the chosen form is justified by this lesson-specific rationale: `NULLIF(actual, 0)` excludes undefined percentage errors, and FILTER counts both scored and excluded observations. Evaluate another form against the concrete expected result (one row per `mape`) and the verification above.
-- **Edge case:** Without `NULLIF`, the zero-actual row raises `division by zero`; with it, MAPE silently ignores that row, so report `excluded_zero_actuals` beside the percentage.
+- **Intermediate relation check:** `toy` holds three rows. Before averaging, list `ABS(actual - forecast) / NULLIF(actual, 0)` per row: 0.10, `NULL` and 0.20. `AVG` skips the `NULL`, so it divides 0.30 by 2, not by 3.
+- **Clause check:** The two `FILTER` counts split the same three rows by `actual <> 0` and `actual = 0`, so together they equal the input size. A `NULL` actual would fall into neither count, which is worth a third counter on real data.
+- **Alternative/trade-off:** `WHERE actual <> 0` gives the same 0.1500 but drops the zero row before counting, so `excluded_zero_actuals` could no longer come from the same query. Weighted MAPE, `SUM(ABS(actual - forecast)) / SUM(actual)`, avoids per-row division: here 30 / 150 = 0.2000, and the zero month's miss of 10 counts instead of vanishing.
+- **Edge case:** Without `NULLIF`, PostgreSQL stops with `ERROR: division by zero`, and under `ON_ERROR_STOP` the rest of the file never runs. With it the zero month drops out silently. No month of order data has zero revenue, so Exercise 1 reports `zero_actual_rows` 0 for all four models.
 
 ## Exercise 6: Compare MAE and MAPE
 
@@ -267,7 +247,7 @@ MAPE can be dominated by a modest miss on a very small actual.
 - **Inputs/evidence:** For sql-49 Exercise 6, use the `toy` fixture `(1000, 900), (10, 20)` and compute MAE, `AVG(ABS(actual - forecast))`, and MAPE, `AVG(ABS(actual - forecast) / NULLIF(actual, 0))`.
 - **Expected result/shape:** For sql-49 Exercise 6, expected output: one row with `mae` 55 and `mape` 0.55. The final columns are `mae` and `mape`.
 - **Independent verification:** For sql-49 Exercise 6, confirm by hand that the absolute errors are 100 and 10 (mean 55) and the percentage errors are 0.10 and 1.00 (mean 0.55); the output shows that the small month's modest miss dominates MAPE, while the large month dominates MAE.
-- **Intermediate relation check:** For sql-49 Exercise 6, list each row's absolute and percentage error in a plain `SELECT` before you average them.
-- **Clause check:** For sql-49 Exercise 6, the solution actually uses `WITH`, `FROM`, and `SELECT`. Read only those operations: begin at `toy`, preserve exactly one summary row, and finish with `mae`, and `mape`.
-- **Alternative/trade-off:** For sql-49 Exercise 6, the chosen form is justified by this lesson-specific rationale: The deterministic fixture shows that MAE reflects currency-scale error while MAPE can be dominated by a modest miss on a very small actual. Evaluate another form against the concrete expected result (one row per `mae`) and the verification above.
-- **Edge case:** MAPE weights each row by the inverse of its actual value, so low-revenue months can dominate it; report MAE beside MAPE when months differ widely in size.
+- **Intermediate relation check:** `toy` has two rows. Listing them first shows absolute errors of 100 and 10 and percentage errors of 0.10 and 1.00; the single output row averages each pair.
+- **Clause check:** `AVG(ABS(actual - forecast))` keeps the currency unit, so 55 means 55 revenue units. Dividing by `NULLIF(actual, 0)` before averaging turns each row into a ratio and gives every row equal weight, whatever its size. Nothing is rounded, so `psql` prints 55.0000000000000000 and 0.55000000000000000000.
+- **Alternative/trade-off:** Weighted MAPE, `SUM(ABS(actual - forecast)) / SUM(actual)`, sits between the two: 110 / 1,010 = 0.1089, dominated by the large month as MAE is but still free of units. Report it, or MAE, beside plain MAPE when month sizes differ.
+- **Edge case:** Monthly revenue in the fixture runs from 1,203.26 to 170,179.13, so the same effect shapes Exercise 1. In February 2024 MA(6) missed by 2,963.53, which is 0.1999 of that month's revenue; the same miss in October 2026 would be 0.0174.

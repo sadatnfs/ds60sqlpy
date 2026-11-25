@@ -2,67 +2,27 @@
 
 ## How to run this lesson
 
-Start the Linux-container engine and run `./classroom` from the repository
-root. On Windows, use Ubuntu in WSL 2 or the thin
-`START_DOCKER_CLASSROOM.cmd` wrapper. Choose **PostgreSQL** on the shared
-`/classroom` home, then open **sql-33**. The
-[launcher guide](../../../docs/one-command-classroom.md) covers first preparation, strict resume and
-the saved project selection. No host Python or PostgreSQL installation is
-required for this browser route.
+Open `./classroom`, select **sql-33** and run **Whole SQL lesson (psql)**.
+The learner file builds a composite index, a covering index and a partial
+index, plans two queries against them, and rolls everything back. Your copy
+lives at
+`.learning/sql/sql-33/lesson/workspace/sql/postgres-60day/day33_index_optimization_strategies.sql`
+and runs against `advanced_sql_training`. General launch help is in
+[Run a lesson in the classroom](../../STUDY-GUIDE.md#run-a-lesson-in-the-classroom).
 
-1. Read the prerequisite and fixture notes before running the file. Use only
-   the local disposable `advanced_sql_training` database.
-2. Choose **Whole SQL lesson (psql)** for the cataloged learner script. This
-   preserves the lesson's reviewed psql directives, relative includes and
-   transaction behavior. **SQL snippet** is appropriate for ordinary SQL
-   statements, but is not a replacement for an entire script's setup.
-3. The **Course database** panel above the code shows whether the course
-   training tables are loaded. Missing tables load automatically before your
-   first run (or choose **Load course tables**) and stay loaded for later
-   lessons. **Reset training data** restores the original rows only when your
-   own changes made results differ; it keeps your saved code and notes.
-4. Edit the learner copy in the classroom and save your prediction before
-   running. Its whole-script workspace is
-   `.learning/sql/sql-33/lesson/workspace/sql/postgres-60day/day33_index_optimization_strategies.sql`.
-   For browser work this path is inside the Docker learning volume, not a
-   newly created host folder beside your checkout. The checked-in source
-   remains the answer-free starting artifact.
-5. Run the whole script and inspect the full transcript. The runner uses
-   `psql -X -v ON_ERROR_STOP=1 -f`. SELECT output has columns, rows and a row
-   count; DDL/DML has command tags; intentional checks may produce NOTICE
-   messages. An unexpected ERROR or nonzero exit is a failure to diagnose,
-   even when an earlier query printed plausible values.
-6. Verify the lesson's expected grain, ordering, constraints and declared
-   transaction or cleanup outcome. Keep required ROLLBACK statements.
-   The warehouse sequence and other explicitly stateful exercises explain
-   when state is committed. Read saved output without rerunning it when
-   reviewing an earlier attempt.
-
-If a relation is missing, inspect the lesson's required fixture and predecessor
-rather than guessing a new table definition. If authentication or runtime
-readiness fails, use `./classroom status` and the setup guide. Keep credentials
-out of SQL, notebooks, screenshots and committed files. Repair the first error
-before trusting partial output, and reveal separate solutions only when you
-want to compare after an attempt.
+Day 32's indexes were rolled back, so none of them are present here. If
+`\di training.idx_*` lists anything before you start, an earlier experiment
+was committed; drop it so it cannot compete with this lesson's indexes.
 
 ### Optional contributor notebook route
 
-For notebook work, deliberately prepare the Linux/WSL contributor environment
-from [CONTRIBUTING.md](../../../CONTRIBUTING.md), including a compatible psql client and
-the notebook dependencies. Generate this lesson's private workspace through
-the maintained CLI:
+A notebook helps for the fifth prompt, where you plan two predicates side by
+side against one partial index
+([notebook setup](../../STUDY-GUIDE.md#optional-contributor-notebook-route)):
 
 ```sh
 uv run --no-sync python scripts/course.py sql notebook sql-33
 ```
-
-Open the printed notebook path in that environment's JupyterLab. It uses the
-same catalog-derived learner-copy layout in that contributor checkout and
-executes the complete script through psql. Its host-side state is separate
-from the Docker browser's named volume. Follow
-[guided SQL notebooks](../../../docs/guided-sql-notebooks.md) for explicit local connection
-selection and kernel setup. Notebook generation does not execute SQL or
-authorize a reset.
 
 ## Level and prerequisites
 
@@ -74,24 +34,30 @@ authorize a reset.
 
 ## A beginner's mental model for this lesson
 
-A **table** stores facts in named columns. A **row** is one occurrence at the
-table's declared grain. A query creates a temporary **result set**: rows printed
-on screen are not automatically stored. The key vocabulary for this lesson is Leftmost prefix, Included column, Partial index. Its worked SQL reads or creates `orders`, `order_items`.
+A composite index sorts its entries by the first key, then by the second key
+inside each value of the first. In `(customer_id, order_date)`, all orders
+for customer 1 sit next to each other in date order, so "customer 1 in the
+last year" is one short slice of the index. Reverse the keys to
+`(order_date, customer_id)` and the same five orders are scattered across a
+year of dates, mixed with every other customer's.
 
-Before writing a query, complete this sentence: “One output row represents
-___.” Joins can multiply rows, filters can remove them, grouping can collapse
-many rows into one, and window functions can add calculations while preserving
-row count. For a normal analytical `SELECT`, use this logical reading order:
-`FROM`/`JOIN` (including `ON`) → `WHERE` → `GROUP BY`/aggregates → `HAVING` →
-window calculations → `SELECT` → `ORDER BY` → `LIMIT`. PostgreSQL may execute a
-different physical plan while preserving those semantics.
+Two more tools change what the index stores rather than its order. An
+`INCLUDE` list adds payload columns to each entry without sorting by them,
+so a query can read them from the index. A `WHERE` clause on the index
+keeps only some rows, which makes it a partial index. The three learner
+indexes show the size effect:
 
-The worked walkthrough's lesson-specific task is: For a query filtering `customer_id` and a date range, compare `(customer_id, order_date)` with the reversed key order. Then check whether the query predicate logically implies a partial-index predicate; mere overlap is not enough for PostgreSQL to use that index safely.
-The first runnable example has a concrete contract: Example 1 must print the expected DDL command tag for `idx_orders_customer_date`, and `orders`. Verify the object in `pg_catalog.pg_index`, and `pg_catalog.pg_indexes`, run one accepted behavior and one rejected boundary behavior, and confirm the lesson rollback/cleanup removes only course-owned state.
+| Index | Table pages | Index pages | Rows indexed |
+|---|---|---|---|
+| `idx_orders_customer_date` | 65 | 19 | all 4,362 orders |
+| `idx_oi_order_product_inc` | 97 | 67 | all 13,085 items |
+| `idx_orders_open` | 65 | 7 | 1,745 placed or paid orders |
+
+The covering index is two thirds the size of `order_items` itself, because
+it repeats five of its columns. The partial index holds only the 873 placed
+and 872 paid orders, so it is the smallest of the three.
 
 ## Two worked SQL examples
-
-These worked excerpts come from `sql/postgres-60day/day33_index_optimization_strategies.sql`. Use **Whole SQL lesson (psql)** in the unified classroom for the complete file, including its fixture and transaction context. The optional contributor notebook and prepared `psql` routes are described above.
 
 ### Example 1
 
@@ -99,9 +65,16 @@ These worked excerpts come from `sql/postgres-60day/day33_index_optimization_str
 CREATE INDEX idx_orders_customer_date ON orders (customer_id, order_date);
 ```
 
-**How to read it:** Example 1 is data definition language (DDL). `psql` prints a command tag when PostgreSQL accepts the definition; a later catalog or behavior check must prove that the intended rule exists.
+**How to read it:** The composite index puts `customer_id`
+first because the query that follows filters it by equality, and
+`order_date` second because the same query bounds it by a range. A range
+key in first place would stop the seek from narrowing on the
+customer.
 
-**Expected result/shape:** Example 1 must print the expected DDL command tag for `idx_orders_customer_date`, and `orders`. Verify the object in `pg_catalog.pg_index`, and `pg_catalog.pg_indexes`, run one accepted behavior and one rejected boundary behavior, and confirm the lesson rollback/cleanup removes only course-owned state.
+**Expected result/shape:** The `CREATE INDEX` tag, then a plan
+for customer 1's last 365 days that reads `Index Scan using
+idx_orders_customer_date` with both conditions in one `Index Cond`. It
+returns 5 rows, all of customer 1's orders.
 
 ### Example 2
 
@@ -109,9 +82,16 @@ CREATE INDEX idx_orders_customer_date ON orders (customer_id, order_date);
 CREATE INDEX idx_oi_order_product_inc ON order_items (order_id, product_id) INCLUDE (quantity, unit_price, discount);
 ```
 
-**How to read it:** Example 2 is data definition language (DDL). `psql` prints a command tag when PostgreSQL accepts the definition; a later catalog or behavior check must prove that the intended rule exists.
+**How to read it:** The covering index searches `order_items`
+by `(order_id, product_id)` and carries `quantity`, `unit_price` and
+`discount` as payload. The learner query that follows asks for items of
+open orders from the last 90 days through an `IN` subquery.
 
-**Expected result/shape:** Example 2 must print the expected DDL command tag for `idx_oi_order_product_inc`, and `order_items`. Verify the object in `pg_catalog.pg_index`, and `pg_catalog.pg_indexes`, run one accepted behavior and one rejected boundary behavior, and confirm the lesson rollback/cleanup removes only course-owned state.
+**Expected result/shape:** The tag, then a plan that does not
+use the covering index at all: a `Hash Join` over a `Seq Scan on
+order_items` (13,085 rows) and a hash of 322 orders. Those 322 orders come
+from a `Bitmap Index Scan on idx_orders_open`, so the partial index is the
+one doing the work. The join returns 962 item rows.
 
 ## Learning objectives
 
@@ -138,25 +118,25 @@ Complete these in the
 [learner SQL](../day33_index_optimization_strategies.sql):
 
 1. Test `(category, created_at)` on products.
-   **Inputs/evidence:** For sql-33 Exercise 1, run the underlying read-only query over `products`, `training.idx_products_category_created_solution`, and `idx_products_category_created_solution` before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison.
-   **Expected result/shape:** For sql-33 Exercise 1, expected output: one row per `product_id`. The final columns are `product_id`, `name`, and `created_at`. The final order is `created_at DESC`.
-   **Verify:** For sql-33 Exercise 1, run the underlying query without `EXPLAIN` and preserve its `product_id` rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.
+   **Inputs/evidence:** For sql-33 Exercise 1, read `products` (300 rows, 50 per category), create `idx_products_category_created_solution` on `(category, created_at)`, and plan `SELECT product_id, name, created_at ... WHERE category = 'Home' AND created_at >= CURRENT_TIMESTAMP - interval '1 year' ORDER BY created_at` with `EXPLAIN (ANALYZE, BUFFERS)`.
+   **Expected result/shape:** For sql-33 Exercise 1, expected output: 4 Home rows on this load, oldest first, from a `Sort` on `created_at` above a `Bitmap Heap Scan` whose `Bitmap Index Scan on idx_products_category_created_solution` holds both predicates in its `Index Cond`. The final columns are `product_id`, `name`, and `created_at`. The final order is `created_at`.
+   **Verify:** For sql-33 Exercise 1, confirm `COUNT(*)` with the same `WHERE` clause and no `EXPLAIN` returns 4, the plan's actual rows, and that the rows come back as `product_id` 279, 297, 291, and 285; then, inside `BEGIN ... ROLLBACK`, set the oldest Home product's (201, created 2020-12-07) `created_at` to `CURRENT_TIMESTAMP - interval '1 day'` and confirm the query returns 5 rows with 201 last.
 2. Build/test a partial index for orders above 1000.
-   **Inputs/evidence:** For sql-33 Exercise 2, run the underlying read-only query over `orders`, `training.idx_orders_high_value_solution`, and `idx_orders_high_value_solution` before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison.
-   **Expected result/shape:** For sql-33 Exercise 2, expected output: one row per `order_id`. The final columns are `order_id`, `total_amount`, and `order_date`. The final order is `total_amount DESC`.
-   **Verify:** For sql-33 Exercise 2, run the underlying query without `EXPLAIN` and preserve its `order_id` rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.
+   **Inputs/evidence:** For sql-33 Exercise 2, read `orders` (4,362 rows, 334 above 1,000), create the partial index `idx_orders_high_value_solution` on `(total_amount, order_date) WHERE total_amount > 1000`, and plan `SELECT order_id, order_date, total_amount` for `total_amount > 1000` and an `order_date` lower bound of 90 days, sorted by `total_amount DESC`.
+   **Expected result/shape:** For sql-33 Exercise 2, expected output: a `Sort` on `total_amount DESC` above a `Bitmap Index Scan on idx_orders_high_value_solution` whose `Index Cond` holds only the `order_date` bound, returning 65 rows on this load led by order 2304 at 1432.49. The final columns are `order_id`, `order_date`, and `total_amount`. The final order is `total_amount DESC`.
+   **Verify:** For sql-33 Exercise 2, confirm `COUNT(*) FILTER (WHERE total_amount > 1000 AND order_date >= CURRENT_TIMESTAMP - interval '90 days')` returns 65, the plan's actual rows, and note that orders 39, 864, 3064, and 3339 tie at 1322.97, so `total_amount DESC` alone does not fix their relative order; then, inside `BEGIN ... ROLLBACK`, set order 2304 to exactly 1000 and confirm the 90-day result drops to 64 rows and now starts with the 1322.97 tie.
 3. Predict how the product composite index behaves for `created_at` alone.
-   **Inputs/evidence:** For sql-33 Exercise 3, run the underlying read-only query over `products` before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison.
-   **Expected result/shape:** For sql-33 Exercise 3, expected output: one row per `product_id`. The final columns are `product_id`, and `created_at`.
-   **Verify:** For sql-33 Exercise 3, run the underlying query without `EXPLAIN` and preserve its `product_id` rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.
+   **Inputs/evidence:** For sql-33 Exercise 3, read `products` with only `created_at >= CURRENT_TIMESTAMP - interval '1 year'`, while the composite index on `(category, created_at)` from the first answer still exists in the transaction.
+   **Expected result/shape:** For sql-33 Exercise 3, expected output: a `Seq Scan on products` with 25 actual rows on this load, `Rows Removed by Filter: 275`, and about 4 shared buffers; the composite index is not chosen because `created_at` is not its leading key. The final columns are `product_id`, and `created_at`.
+   **Verify:** For sql-33 Exercise 3, confirm `SELECT COUNT(*) FROM products WHERE created_at >= CURRENT_TIMESTAMP - interval '1 year'` returns 25 and that actual plus removed rows equal 300; then, inside `BEGIN ... ROLLBACK`, create an index on `products (created_at)` alone and confirm the same query switches to a `Bitmap Index Scan` on that new index.
 4. Design an `INCLUDE` index for customer order history.
-   **Inputs/evidence:** For sql-33 Exercise 4, run the underlying read-only query over `orders`, and `idx_orders_history_cover_solution` before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison.
-   **Expected result/shape:** For sql-33 Exercise 4, expected output: one row per `order_id`. The final columns are `order_id`, `order_date`, `status`, and `total_amount`. The final order is `order_date DESC`.
-   **Verify:** For sql-33 Exercise 4, run the underlying query without `EXPLAIN` and preserve its `order_id` rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.
+   **Inputs/evidence:** For sql-33 Exercise 4, read `orders`, create `idx_orders_history_cover_solution` on `(customer_id, order_date DESC) INCLUDE (status, total_amount)`, and plan the order history of `customer_id = 1`.
+   **Expected result/shape:** For sql-33 Exercise 4, expected output: an `Index Scan using idx_orders_history_cover_solution` with `Index Cond: (customer_id = 1)`, no `Sort` node, and 5 actual rows, orders 5, 4, 3, 2, and 1 from newest to oldest. The final columns are `order_id`, `order_date`, `status`, and `total_amount`. The final order is `order_date DESC`.
+   **Verify:** For sql-33 Exercise 4, confirm `SELECT COUNT(*) FROM orders WHERE customer_id = 1` returns 5 and that the returned `order_date` values strictly decrease; then plan `customer_id = -1` and confirm the same `Index Scan` with 0 actual rows, the empty case for a customer with no orders (62 real customers have none).
 5. Compare a query that implies a partial predicate with one that does not.
-   **Inputs/evidence:** For sql-33 Exercise 5, run the underlying read-only query over `orders` before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison.
-   **Expected result/shape:** For sql-33 Exercise 5, expected output: one row per `order_id`. The final columns are `order_id`.
-   **Verify:** For sql-33 Exercise 5, run the underlying query without `EXPLAIN` and preserve its `order_id` rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.
+   **Inputs/evidence:** For sql-33 Exercise 5, read `orders` with the partial index on `total_amount > 1000` still present, and plan `SELECT order_id` twice with plain `EXPLAIN`: once for `total_amount > 1200` and once for `total_amount > 500`.
+   **Expected result/shape:** For sql-33 Exercise 5, expected output: for `> 1200`, a `Bitmap Index Scan on idx_orders_high_value_solution` estimated at 144 rows; for `> 500`, a `Seq Scan on orders` estimated at 2,410 rows, because `> 500` does not imply the index predicate. The final columns are `order_id`.
+   **Verify:** For sql-33 Exercise 5, confirm the actual counts with `COUNT(*) FILTER (WHERE total_amount > 1200)` and `COUNT(*) FILTER (WHERE total_amount > 500)`, which return 142 and 2,410; then plan `total_amount > 1000.01`, which implies the predicate and uses the partial index, and `total_amount >= 1000`, which does not and falls back to a `Seq Scan`.
 6. Evaluate a NULL-only partial index for `customers.segment`.
    **Inputs/evidence:** For sql-33 Exercise 6, count all customers and those with `segment IS NULL`, create the partial index `idx_customers_null_segment_solution ON customers (customer_id) WHERE segment IS NULL`, and read the plan of `SELECT customer_id FROM customers WHERE segment IS NULL`.
    **Expected result/shape:** For sql-33 Exercise 6, expected output: one row with `all_customers` 500 and `null_segments` 0, then a plan for the `IS NULL` query that can use the partial index (a `Bitmap Index Scan on idx_customers_null_segment_solution` on the course data). The final columns of the count are `all_customers` and `null_segments`.
@@ -205,9 +185,29 @@ cannot appear in a partial-index definition.
 - Index-only scans are possible, not guaranteed; visibility and cost still
   matter.
 
+## Why the second learner plan skips the covering index
+
+It looks like a failure that `idx_oi_order_product_inc` goes unused, but
+the numbers explain it. The subquery finds 322 recent open orders, and
+those orders own 962 of the 13,085 order items. Using the covering index
+would mean 322 separate descents into a 67-page B-tree. Reading all 97
+pages of `order_items` once and keeping the matches through a hash table
+is cheaper, so the planner picks the hash join.
+
+The partial index earns its place in the same plan. Its `Index Cond`
+mentions only `order_date`; the status test is already guaranteed by the
+index's own `WHERE` clause, so the 7-page index is searched by date alone.
+Notice also that the learner query selects `oi.quantity` but not
+`unit_price`; a covering index helps only when every selected column is a
+key or included column, and even then only if the planner chooses an
+index path.
+
 ## Practice map
 
-Use the numbered **Exercises** section above as the single authoritative practice contract. Its prompts, expected shapes, and verification checks map one-for-one to the learner SQL and both solution companions.
+The six prompts above pair one index with one query each. For every
+prompt, write down the index definition, the query and the plan line that
+shows whether that index was used; the solution notes list what the course
+seed produces.
 
 ## Pitfalls and validation
 
@@ -233,9 +233,10 @@ partial index earns its write and maintenance cost.
 
 ## Ask an AI tutor about this lesson
 
-An AI tutor is optional; the guide, learner SQL, PostgreSQL, and expected checks are
-enough to complete the lesson offline. If you want a patient tutor, copy this
-prompt after opening the repository in the AI tutor:
+A tutor is most useful for testing your partial-index reasoning: give it an
+index predicate and several query predicates, and ask it to make you say
+which ones imply the index condition
+([optional tutor notes](../../STUDY-GUIDE.md#use-an-ai-tutor-optional)).
 
 ```text
 Tutor me through sql-33: Composite, Covering, and Partial Indexes.

@@ -1,6 +1,6 @@
 # js-028: explanatory solutions
 
-Use these answers after an attempt or an explicit reveal. The reference uses the same literal fixtures as the guide and keeps the exercises in separate scopes. A successful run checks these examples; explaining a changed input is a separate learning goal.
+Open these after your own attempt; each exercise runs in its own scope in the reference.
 
 ## Mechanism review
 
@@ -24,7 +24,7 @@ ReadonlyMap<string, readonly string[]> states that search consumes the graph wit
 
 ## Exercise 1: Find a shortest unweighted path: change one input
 
-Task: Close Example A and rebuild it in a fresh `main.mts`, keeping the check `assert.deepEqual(shortestPath(graph, 'A', 'D'), ['A', 'B', 'D'])`. Then propose one input change that would make that check fail and explain why before trying it.
+Task: Rebuild Example A from memory, keeping the check `assert.deepEqual(shortestPath(graph, 'A', 'D'), ['A', 'B', 'D'])`, then propose one input change that should make it fail.
 
 Both two-edge routes are shortest. The implementation chooses the first discovered route rather than claiming the answer is mathematically unique.
 
@@ -40,13 +40,13 @@ const graph: Graph = new Map([
 assert.deepEqual(shortestPath(graph, 'A', 'D'), ['A', 'B', 'D']);
 ```
 
-**Expected:** Your rebuild reproduces the worked observation (A,B,D under the stated neighbor order), and your proposed change makes the check `assert.deepEqual(shortestPath(graph, 'A', 'D'), ['A', 'B', 'D'])` fail.
+**Expected:** The rebuild reproduces: A,B,D under the stated neighbor order. Your proposed change makes `assert.deepEqual(shortestPath(graph, 'A', 'D'), ['A', 'B', 'D'])` fail.
 
-**Verify:** Run the rebuild first and confirm the `{"checks":1,"status":"passed"}` receipt, then the changed copy. Name the value that makes `assert.deepEqual(shortestPath(graph, 'A', 'D'), ['A', 'B', 'D'])` fail in the changed copy.
+**Verify:** Name the value that makes `assert.deepEqual(shortestPath(graph, 'A', 'D'), ['A', 'B', 'D'])` fail in your changed copy.
 
 ## Exercise 2: Beat greedy coin selection: diagnose an edited check
 
-Task: A careless edit changed a check in Example B so that it reads `assert.equal(minCoins([1, 3, 4], 1), 0);`. Run Example B with that line, explain why the edited check now fails for the same program state, and restore it.
+Task: Example B's check was edited to read `assert.equal(minCoins([1, 3, 4], 1), 0);`. Run it, explain the failure and restore the original.
 
 The recurrence evaluates every possible final coin. It avoids the attractive local choice of 4 that leads to a worse total count.
 
@@ -59,7 +59,7 @@ assert.equal(minCoins([1, 3, 4], 0), 0);
 
 **Expected:** Before the repair the run fails with an `AssertionError` at `assert.equal(minCoins([1, 3, 4], 1), 0);`. Restoring `assert.equal(minCoins([1, 3, 4], 0), 0);` brings back: two coins; amount zero needs zero coins.
 
-**Verify:** Keep the failing and the repaired runs. Explain why the edited check rejects the same program state that `assert.equal(minCoins([1, 3, 4], 0), 0)` accepts.
+**Verify:** Keep the failing and repaired runs and name the first value that differs between them.
 
 ## Exercise 3: Terminate on a cyclic graph
 
@@ -79,7 +79,7 @@ assert.deepEqual(shortestPath(graph, 'A', 'A'), ['A']);
 
 **Expected:** A,B,C and A.
 
-**Verify:** Keep a check equivalent to `assert.deepEqual(shortestPath(graph, 'A', 'A'), ['A'])` and confirm that the reference still passes. Then name an input that would make it fail and explain which value changes.
+**Verify:** Keep the check `assert.deepEqual(shortestPath(graph, 'A', 'A'), ['A'])`; name an input that would make it fail and the value that changes.
 
 ## Exercise 4: Separate disconnection from malformed input
 
@@ -104,7 +104,7 @@ assert.throws(() => shortestPath(new Map([['A', ['missing']]]), 'A', 'A'), Range
 
 **Expected:** undefined for no path; RangeError for invalid graph.
 
-**Verify:** Keep a check equivalent to `assert.throws(() => shortestPath(new Map([['A', ['missing']]]), 'A', 'A'), RangeError)` and confirm that the reference still passes. Then name an input that would make it fail and explain which value changes.
+**Verify:** Keep the check `assert.throws(() => shortestPath(new Map([['A', ['missing']]]), 'A', 'A'), RangeError)`; name an input that would make it fail and the value that changes.
 
 ## Exercise 5: Represent unreachable coin amounts
 
@@ -119,7 +119,7 @@ assert.equal(minCoins([2], 4), 2);
 
 **Expected:** undefined and 2.
 
-**Verify:** Keep a check equivalent to `assert.equal(minCoins([2], 4), 2)`. As a control, change `assert.equal(minCoins([2], 4), 2);` to `assert.equal(minCoins([3], 4), 2);` inside it: the run must fail with an `AssertionError`, which shows the check can fail. Restore it.
+**Verify:** Keep `assert.equal(minCoins([2], 4), 2)`. Control: editing it to `assert.equal(minCoins([3], 4), 2);` must make the check fail; then restore it.
 
 ## Exercise 6: Reject invalid recurrence configurations
 
@@ -135,8 +135,8 @@ assert.equal(minCoins([], 1), undefined);
 
 **Expected:** RangeError for all invalid configurations; empty denominations cannot make 1.
 
-**Verify:** Keep a check equivalent to `assert.throws(() => minCoins(coins, 5), RangeError)`. As a control, change `for (const coins of [[0], [-1], [1.5]]) assert.throws(() => minCoins(coins, 5), RangeError);` to `for (const coins of [[1], [-1], [1.5]]) assert.throws(() => minCoins(coins, 5), RangeError);`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
+**Verify:** Keep `assert.throws(() => minCoins(coins, 5), RangeError)`. Control: changing `for (const coins of [[0], [-1], [1.5]]) assert.throws(() => minCoins(coins, 5), RangeError);` to `for (const coins of [[1], [-1], [1.5]]) assert.throws(() => minCoins(coins, 5), RangeError);` must make that check fail; then restore it.
 
 ## After comparison
 
-Return to your saved implementation and repeat a case with different values. Keep compiler diagnostics, process output and browser observations separate. Do not suppress a failing assertion or use a type assertion to declare an unvalidated value safe. Resource-owning examples must finish cleanup even when work fails. Describe each result with its actual host and fixture scope rather than as production acceptance.
+Fresh case: add an isolated node E and a self-loop on B. Predict the paths from A to E and from B to B, then compute the fewest coins for amount 7 with denominations 2 and 5. ([After comparing](../STUDY-GUIDE.md#after-comparing-with-the-solution).)

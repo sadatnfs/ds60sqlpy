@@ -2,6 +2,8 @@
 
 Open these answers only after attempting Robustness, privacy and evidence beyond a score yourself. They reuse the guide's literal inputs, starting from Example A, Count group errors, so a discrepancy points at one step. The executable companion runs the assertions; this page explains why each one tests Subgroup denominator, Robustness condition, Finite safety evidence. After a pass, choose a new input for exercise 6, Write a bounded card, without looking.
 
+After comparing, follow the [review steps](../STUDY-GUIDE.md#after-the-solutions).
+
 ## Mechanism review
 
 A reliability report should preserve the conditions and denominators behind a score. Group A with zero errors in one case does not provide the same evidence as zero errors in hundreds of independent cases. Duplicate records can improve an apparent rate without testing new conditions. Perturbation tests need a label policy: crossing a legitimate decision boundary may change the correct target rather than reveal a robustness failure.
@@ -150,6 +152,3 @@ assert card["unique_units"] == 3 and not card["differential_privacy_established"
 
 **Verify:** In a fresh process, the exercise checks confirm `card['unique_units'] == 3` and `not card['differential_privacy_established']`.
 
-## Review after comparison
-
-Repeat exercise 4, Keep severe failures visible, with one changed fixture value and predict the difference before running it. Keep your failing attempt at exercise 5, Represent an untested group, beside the repaired result. A missing framework is not a failing assertion. These solutions use only local fixtures.

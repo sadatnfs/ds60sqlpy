@@ -1,6 +1,8 @@
 # rust-036: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [rust-036_solution.rs](rust-036_solution.rs). It runs both worked examples, and its assertions are always active under the prepared classroom compile settings.
+Executable reference: [rust-036_solution.rs](rust-036_solution.rs), which runs both examples.
+
+Open this only after [an attempt](../STUDY-GUIDE.md#attempt-a-lesson).
 
 ## Why the two examples differ
 
@@ -74,7 +76,7 @@ Remove only owned target output and perform a clean build.
 
 Design a dependency upgrade review including lock diff, licenses, compile tests and runtime evidence.
 
-No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **Edition**, and state one limitation of your choice.
+**Judging criteria.** A strong review reads the `Cargo.lock` diff to list every crate whose version changes, including transitive ones; checks each new or changed license against the project's policy; builds and runs the full test suite with `--locked` on the pinned toolchain and edition; and compares runtime evidence, such as output, timing or error behavior on a fixed input, before and after. It records which changes were reviewed and which were accepted on trust. State one limitation: a passing suite shows only the paths its tests cover.
 
 ## Mechanism and diagnostic reasoning
 
@@ -90,4 +92,6 @@ A successful dependency download is not successful compilation. Do not edit chec
 
 ## Review before continuing
 
-Run the reference and confirm that it prints `rust-036: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.
+Rebuild Example B (Iterate a boxed slice by value) from a blank pad.
+
+Review routine: [Self-check and review](../STUDY-GUIDE.md#self-check-and-review).

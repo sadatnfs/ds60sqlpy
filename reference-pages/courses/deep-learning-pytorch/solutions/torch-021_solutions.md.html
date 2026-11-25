@@ -195,6 +195,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="torch-021-explanatory-solutions">torch-021: explanatory solutions<a class="heading-anchor" href="#torch-021-explanatory-solutions" aria-label="Link to this section">#</a></h2>
 <p>Open these answers only after attempting Embeddings, padded sequences and recurrent models yourself. They reuse the guide&#x27;s literal inputs, starting from Example A, Lookup and mark padding, so a discrepancy points at one step. The executable companion runs the assertions; this page explains why each one tests Padding index, Packed sequence, Final valid state. After a pass, choose a new input for exercise 6, Reject zero-length recurrent input, without looking.</p>
+<p>After comparing, follow the <a href="../STUDY-GUIDE.md.html#after-the-solutions">review steps</a>.</p>
 <h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
 <p>A padded sequence contains real positions and artificial storage positions. Embedding lookup takes token IDs to feature vectors, but padding does not become an observation merely because it has a vector. PyTorch Embedding can use <code>padding_idx</code> to prevent gradient updates for that row, but a recurrent network still needs length or mask information to avoid processing padding as real time steps.</p>
 <p>pack_padded_sequence lets an RNN or GRU process the valid prefixes and return a final state after the last real position. Without packing, a GRU can continue to update on padding because its biases and recurrent state are still active, even when padding embeddings are zero. Loss averages must also divide by valid target count, not padded width. The lesson uses a literal embedding table and fixed GRU weights so the distinction is observable.</p>
@@ -278,9 +279,7 @@ np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</
 <span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span>
     <span class="syntax-keyword">raise</span> AssertionError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">zero-length packed sequence accepted</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> RuntimeError for invalid length.</p>
-<p><strong>Verify:</strong> In a fresh process, the exercise checks confirm the invalid call raises <code>RuntimeError</code>.</p>
-<h3 id="review-after-comparison">Review after comparison<a class="heading-anchor" href="#review-after-comparison" aria-label="Link to this section">#</a></h3>
-<p>Repeat exercise 4, Expose an unmasked recurrent tail, with one changed fixture value and predict the difference before running it. Keep your failing attempt at exercise 5, Average only valid token losses, beside the repaired result. A missing framework is not a failing assertion. These solutions use only local fixtures.</p></article>
+<p><strong>Verify:</strong> In a fresh process, the exercise checks confirm the invalid call raises <code>RuntimeError</code>.</p></article>
   </main>
 </body>
 </html>

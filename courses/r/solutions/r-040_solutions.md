@@ -1,6 +1,6 @@
 # r-040: reference reasoning
 
-Use the [complete reference](r-040_reference.R) with the guide's declared inputs and runtime. Every worked example is also a standalone script.
+Run the [complete reference](r-040_reference.R) under the [run rules](../STUDY-GUIDE.md#run-a-chapter).
 
 ## Why the implementation has this shape
 
@@ -96,4 +96,6 @@ State source, grain, admission, join policy, metric definitions, actual checks a
 
 ## What the checks establish
 
-The reference makes 12 `stopifnot()` checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.
+The assertions confirm types, required columns and unique keys, a complete lookup, group counts and totals that reconcile with the admitted rows, 3 admitted and 1 rejected with overall mean 70/3, a changed input giving 25, rejection of invalid or wrongly typed input, and an empty input that returns an NA overall mean with the `label`, `count`, `total` and `mean` columns. They do not prove the conclusion generalizes beyond these records.
+
+The reference makes 12 `stopifnot()` checks; see [what a passing run proves](../STUDY-GUIDE.md#what-a-passing-run-proves).

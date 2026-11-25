@@ -1,6 +1,6 @@
 # cuda-107: explained solutions
 
-These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.
+Compare with your [worksheet](../lessons/cuda-107.md) attempt.
 
 ## Exercise 1: Trace stable sorting
 
@@ -74,8 +74,16 @@ Use the documentation matching the prepared package.
 
 **How to verify.** Record the installed version at runtime and link the documentation page for that version in the notes.
 
+## Self-check answers
+
+1. **What does an FFT contract need besides the input array?** The normalization and transform conventions, because libraries differ in where they scale the result.
+
+2. **Why does a plan have a shape and dtype contract?** It is prepared for specific sizes and types, so reusing it outside that contract can give wrong results or fail.
+
+3. **Why choose a small release-pinned library family?** Each package carries CUDA compatibility requirements, and pinning keeps behavior and documentation matched.
+
 ## Reference observation
 
 Stable duplicate order and matrix output shape (2,4).
 
-The reference file is `courses/cuda/python/references/cuda-107_cpu.py`. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.
+Asserted by `courses/cuda/python/references/cuda-107_cpu.py`.

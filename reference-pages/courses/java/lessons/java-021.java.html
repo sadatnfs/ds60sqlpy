@@ -198,22 +198,17 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"></span>
 <span class="source-line">  <span class="syntax-keyword">public</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">void</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span>String<span class="syntax-operator">[</span><span class="syntax-operator">]</span> args<span class="syntax-punctuation">)</span> <span class="syntax-keyword">throws</span> Exception <span class="syntax-punctuation">{</span></span>
 <span class="source-line">    <span class="syntax-comment">// Exercise 1: Publish a result through join: change one input</span></span>
-<span class="source-line">    <span class="syntax-comment">// Copy Example A into a scratch `Main.java` and change `Thread worker =</span></span>
-<span class="source-line">    <span class="syntax-comment">// Thread.ofPlatform().start(() -&gt; result[0] = 42);` to `Thread worker =</span></span>
-<span class="source-line">    <span class="syntax-comment">// Thread.ofPlatform().start(() -&gt; result[1] = 42);`. Before running it with `java -ea Main`,</span></span>
-<span class="source-line">    <span class="syntax-comment">// predict which assertion fails and which value it now sees; then run it and restore the</span></span>
-<span class="source-line">    <span class="syntax-comment">// original line.</span></span>
-<span class="source-line">    <span class="syntax-comment">// Expected: The changed run fails with an `AssertionError` from the assertion on `result[0]</span></span>
-<span class="source-line">    <span class="syntax-comment">// == 42`. Restoring the original line brings back the worked observation: worker terminated;</span></span>
-<span class="source-line">    <span class="syntax-comment">// result 42.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Change `Thread worker = Thread.ofPlatform().start(() -&gt; result[0] = 42);` to `Thread</span></span>
+<span class="source-line">    <span class="syntax-comment">// worker = Thread.ofPlatform().start(() -&gt; result[1] = 42);` in Example A and predict which</span></span>
+<span class="source-line">    <span class="syntax-comment">// assertion fails and why.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Expected: The edited run fails with an `AssertionError` from the assertion on `result[0]</span></span>
+<span class="source-line">    <span class="syntax-comment">// == 42`.</span></span>
 <span class="source-line"></span>
 <span class="source-line">    <span class="syntax-comment">// Exercise 2: Publish initial state through start: debug a regression</span></span>
-<span class="source-line">    <span class="syntax-comment">// A regression changed one token in the code that Example B adds after Example A, so one</span></span>
-<span class="source-line">    <span class="syntax-comment">// line now reads `int[] input = { 8 };`. Run Example B with that line, use the failing</span></span>
-<span class="source-line">    <span class="syntax-comment">// assertion to locate the defect and repair it without changing the assertion.</span></span>
-<span class="source-line">    <span class="syntax-comment">// Expected: Before the repair the run fails with an `AssertionError` from the assertion on</span></span>
-<span class="source-line">    <span class="syntax-comment">// `observed.get() == 7`; after it the line reads `int[] input = { 7 };` again and worker</span></span>
-<span class="source-line">    <span class="syntax-comment">// observes 7.</span></span>
+<span class="source-line">    <span class="syntax-comment">// A regression in Example B&#x27;s new code makes one line read `int[] input = { 8 };`. Repair it</span></span>
+<span class="source-line">    <span class="syntax-comment">// using the failing assertion.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Expected: The unrepaired run fails with an `AssertionError` from the assertion on</span></span>
+<span class="source-line">    <span class="syntax-comment">// `observed.get() == 7`; the repaired line reads `int[] input = { 7 };`.</span></span>
 <span class="source-line"></span>
 <span class="source-line">    <span class="syntax-comment">// Exercise 3: Force a lost update</span></span>
 <span class="source-line">    <span class="syntax-comment">// Make two workers read counter 0, wait at a barrier, then each write its saved value plus</span></span>

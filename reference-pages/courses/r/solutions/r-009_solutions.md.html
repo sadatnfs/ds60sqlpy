@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/r/solutions/r-009_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="r-009-reference-reasoning">r-009: reference reasoning<a class="heading-anchor" href="#r-009-reference-reasoning" aria-label="Link to this section">#</a></h2>
-<p>Use the <a href="r-009_reference.R.html">complete reference</a> with the guide&#x27;s declared inputs and runtime. Every worked example is also a standalone script.</p>
+<p>Run the <a href="r-009_reference.R.html">complete reference</a> under the <a href="../STUDY-GUIDE.md.html#run-a-chapter">run rules</a>.</p>
 <h3 id="why-the-implementation-has-this-shape">Why the implementation has this shape<a class="heading-anchor" href="#why-the-implementation-has-this-shape" aria-label="Link to this section">#</a></h3>
 <p>The one-element list and the numeric measurement vector are different objects. Exact nested names retain the unit contract.</p>
 <p>Single-bracket replacement retains the field with a NULL value; dollar replacement by NULL deletes the field.</p>
@@ -242,7 +242,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Tempting mistake:</strong> Flattening and then calling <code>as.numeric()</code> to recover the numbers. The id becomes NA with a coercion warning, so one field is destroyed to repair another.</p>
 <p><strong>Verify:</strong> The reference asserts <code>is.character(unlist(record[c(&quot;id&quot;, &quot;values&quot;)]))</code>, and the flattened result has length 3 from two fields.</p>
 <h3 id="what-the-checks-establish">What the checks establish<a class="heading-anchor" href="#what-the-checks-establish" aria-label="Link to this section">#</a></h3>
-<p>The reference makes 6 <code>stopifnot()</code> checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.</p></article>
+<p>The assertions confirm that <code>record[1]</code> is still a list while <code>record[[&quot;values&quot;]][[1]]</code> is the number 2, that <code>id</code> and <code>values</code> are present with the right types and <code>id</code> has length one, that the mean of <code>values</code> is 3, that a missing <code>note</code> field reads as NULL, and that <code>unlist()</code> on <code>id</code> and <code>values</code> coerces everything to character. They do not validate deeper nesting or fields added later.</p>
+<p>The reference makes 6 <code>stopifnot()</code> checks; see <a href="../STUDY-GUIDE.md.html#what-a-passing-run-proves">what a passing run proves</a>.</p></article>
   </main>
 </body>
 </html>

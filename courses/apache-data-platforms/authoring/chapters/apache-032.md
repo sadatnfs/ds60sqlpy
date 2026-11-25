@@ -72,4 +72,4 @@ service was unavailable during interruption. These cases separate actual local
 persistence and task diagnosis from a broad unsupported claim of production
 resilience.
 
-The [complete Airflow workshop](../../projects/airflow/README.md) provides the maintained files, preparation, lifecycle and exact qualification boundaries for these cases.
+The [Airflow workshop](../../projects/airflow/README.md) actions `stop`, `resume`, `readback` and `health` let you compare saved runs, outputs and observations before and after a restart without triggering new work.

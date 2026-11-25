@@ -34,9 +34,12 @@ solution 700 words). R8 compares the track's current `templated_words` total
 with its `templated_baseline`, the per-track sum at commit
 `b1847ca7e6f36bc851f39daa8e98a96770d371dc` (the first commit carrying the
 metric, catalog total 835280). Each record cites that source in
-`templated_baseline_source`. The baseline is a ceiling, not a target: R8 stops a
-track from adding boilerplate but does not prove the remaining templated prose is
-gone.
+`templated_baseline_source`. Phase 11 (plan 11-07) rewrote repeated scaffold
+paragraphs as lesson-specific teaching and lowered each affected baseline to its
+new per-track total, so the catalog total fell from 835161 to 71137; the source
+text of each lowered record says so. The baseline is a ceiling, not a target: R8
+stops a track from adding boilerplate but does not prove the remaining templated
+prose is gone.
 
 ## Statuses
 

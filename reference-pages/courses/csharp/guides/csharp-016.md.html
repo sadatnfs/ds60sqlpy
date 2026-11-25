@@ -206,11 +206,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Rejection:</strong> An input excluded under an explicit rule.</p>
 <p><strong>Aggregation:</strong> Combining accepted records into a summary.</p>
 <h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>The Linux Docker classroom compiles your saved pad as <code>Program.cs</code> in its fixed .NET 10 project. C# 14 is the matching language generation. This route uses the prepared framework libraries; it does not accept arbitrary project files, NuGet packages, command arguments or interactive input. The explicit <code>Program.Main</code> entrypoint makes compilation and execution visible. <code>Check</code> throws on a false condition in every build configuration, unlike conditional debugging assertions.</p>
-<p>Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.</p>
+<p>The project&#x27;s <code>Import</code> helper is a single long line after <code>Main</code>; reformat a copy in your pad if you want to trace it. It returns a tuple, so <code>totals.Counts</code> and <code>totals.Rejected</code> are tuple element names, not properties of a class. The dictionary uses <code>StringComparer.Ordinal</code>, so Pear and pear count separately.</p>
+<p>Compile contract, starter stop and success marker: <a href="../STUDY-GUIDE.md.html#running-a-lesson">running a lesson</a>.</p>
 <h3 id="syntax-anatomy-and-execution-trace">Syntax anatomy and execution trace<a class="heading-anchor" href="#syntax-anatomy-and-execution-trace" aria-label="Link to this section">#</a></h3>
 <p><code>Split</code> produces fields; check the field count before indexing. <code>TryParse</code> separates syntax from a valid integer. <code>TryGetValue</code> supports accumulating repeated keys. Sorting keys before display gives a stable report.</p>
-<p>Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.</p>
+<p>Each example ends with a trace; method: <a href="../STUDY-GUIDE.md.html#tracing-a-program">tracing a program</a>.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="example-a-aggregate-repeated-valid-items">Example A: Aggregate repeated valid items<a class="heading-anchor" href="#example-a-aggregate-repeated-valid-items" aria-label="Link to this section">#</a></h4>
 <p>Repeated identities accumulate after validation rather than creating ambiguous duplicate dictionary entries.</p>
@@ -265,6 +265,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> Pear totals 6 and apple totals 3.</p>
+<p><strong>Trace.</strong> For pear,2, <code>Split</code> gives two fields, the name is not blank, <code>TryParse</code> yields 2 and the quantity is not negative. <code>TryGetValue</code> finds no pear, writes 0 into <code>before</code>, and the indexer stores 2. Apple,3 stores 3. Pear,4 finds the earlier 2 and stores the checked sum 6. Nothing was rejected.</p>
 <h4 id="example-b-retain-rejection-evidence">Example B: Retain rejection evidence<a class="heading-anchor" href="#example-b-retain-rejection-evidence" aria-label="Link to this section">#</a></h4>
 <p>Malformed and negative quantities remain excluded, and empty input produces an empty report rather than an invented item.</p>
 <pre class="highlighted-code"><code class="language-csharp"><span class="syntax-keyword">using</span> System<span class="syntax-punctuation">;</span>
@@ -319,6 +320,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> Three rejected lines do not alter the valid pear total.</p>
+<p><strong>Trace.</strong> Pear,2 is accepted. Pear,no splits into two fields but fails <code>TryParse</code>, so <code>rejected</code> becomes 1. Apple,-1 parses, then fails <code>quantity &lt; 0</code>, giving 2. Broken has one field and is rejected before any indexing, giving 3. Only pear survives with 2, and an empty array returns an empty dictionary with zero rejections.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <ol>
 <li><strong>Predict and explain.</strong> Trace each input through validation and accumulation.</li>
@@ -338,10 +340,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <ol start="6">
 <li><strong>Transfer and justify.</strong> Design a reusable import result that retains per-line rejection reasons without exposing sensitive raw input.</li>
 </ol>
-<p>For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.</p>
+<p>Log each task in the <a href="../STUDY-GUIDE.md.html#recording-exercise-evidence">evidence table</a> before opening the explanation.</p>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
 <p>Checking field count after indexing is too late. Case policy affects identity and must be documented. Extremely large totals can overflow, so checked accumulation belongs in a production input contract.</p>
-<p>A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.</p>
+<p>For task 4, an importer that ignores the <code>TryParse</code> result stores 0 for pear,no, so a corrupt line becomes a legitimate looking item with zero stock. For task 5, include a blank name such as a line starting with a comma, a line with three fields and pear,0; <code>int.TryParse</code> also accepts a space before the 2 in pear, 2.</p>
+<p>Repair routine: <a href="../STUDY-GUIDE.md.html#building-a-regression-case">building a regression case</a>.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <ol>
 <li>Reproduce Example A (Aggregate repeated valid items) before changing anything, and confirm its observation: Pear totals 6 and apple totals 3.</li>
@@ -349,9 +352,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>Before opening the explanation, test your task 3 attempt against this lesson&#x27;s main pitfall: Checking field count after indexing is too late.</li>
 </ol>
 <h3 id="self-check-and-next-step">Self-check and next step<a class="heading-anchor" href="#self-check-and-next-step" aria-label="Link to this section">#</a></h3>
-<p>Explain Pipeline, Rejection, Aggregation without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.</p>
+<p>Trace the dictionary after each line of pear,2 then Pear,3 then pear,1 under the ordinal comparer. Explain why the field count is checked before <code>fields[1]</code> is read. For task 6, describe what a per-line rejection record stores and which raw text it should leave out.</p>
+<p>Then follow the general <a href="../STUDY-GUIDE.md.html#self-check-routine">self-check routine</a> and save your pad.</p>
 <h3 id="sources-and-execution-boundary">Sources and execution boundary<a class="heading-anchor" href="#sources-and-execution-boundary" aria-label="Link to this section">#</a></h3>
-<p><a href="https://learn.microsoft.com/en-us/dotnet/csharp/">Official language or framework documentation</a>. The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.</p>
+<p><a href="https://learn.microsoft.com/en-us/dotnet/csharp/">Documentation</a>: The <code>String.Split</code> and <code>Int32.TryParse</code> API pages, together with the dictionary reference, cover the parsing and accumulation steps used here.</p>
+<p>Provenance and limits: <a href="../STUDY-GUIDE.md.html#sources-and-execution-boundary">sources and execution boundary</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for csharp-016: Foundation project: a validated inventory report.
 Read courses/csharp/guides/csharp-016.md and courses/csharp/lessons/csharp-016.cs. Prerequisites: csharp-015.

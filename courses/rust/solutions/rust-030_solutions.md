@@ -1,6 +1,8 @@
 # rust-030: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [rust-030_solution.rs](rust-030_solution.rs). It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.
+Executable reference: [rust-030_solution.rs](rust-030_solution.rs), which runs both examples and the coded answers.
+
+Open this only after [an attempt](../STUDY-GUIDE.md#attempt-a-lesson).
 
 ## Why the two examples differ
 
@@ -26,7 +28,7 @@ Separate ownership transfer from shared access.
 
 Move a Vec into a worker and return a derived value.
 
-**Reference answer.** The same statements run as the `Task 2` block of the reference program; here they are wrapped in `main` as a complete file.
+**Reference answer**, wrapped in `main`; the reference runs it as its `Task 2` block.
 
 ```rust
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -52,7 +54,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 Choose a safe shared-state type for a small concurrent counter.
 
-**Reference answer.** The same statements run as the `Task 3` block of the reference program; here they are wrapped in `main` as a complete file.
+**Reference answer**, wrapped in `main`; the reference runs it as its `Task 3` block.
 
 ```rust
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -96,7 +98,7 @@ Try sending Rc across threads and explain the diagnostic rather than adding unsa
 
 Test a scoped borrowed input and compare its lifetime requirement with spawn.
 
-**Reference answer.** The same statements run as the `Task 5` block of the reference program; here they are wrapped in `main` as a complete file.
+**Reference answer**, wrapped in `main`; the reference runs it as its `Task 5` block.
 
 ```rust
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -126,7 +128,7 @@ A scoped thread may borrow `rows` because the scope cannot return until the thre
 
 Document why a proposed custom type is or is not Send and Sync from its members.
 
-No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **Send**, and state one limitation of your choice.
+**Judging criteria.** A strong document lists each field of the proposed type with its own status, for example `String` is both `Send` and `Sync`, `Rc<T>` is neither, and `Cell<T>` is `Send` but not `Sync`, and concludes that the type gets only what every field has, because the compiler derives these auto traits from members. It confirms the claim with checks like the lesson's `require_send` and `require_sync`, including one that should fail to compile. State one limitation: an `unsafe impl Send` overrides that derivation and needs a written proof.
 
 ## Mechanism and diagnostic reasoning
 
@@ -140,4 +142,6 @@ Send does not mean simultaneous mutation is safe. Static does not mean allocated
 
 ## Review before continuing
 
-Run the reference and confirm that it prints `rust-030: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.
+Rebuild Example B (Check capabilities at compile time) from a blank pad.
+
+Review routine: [Self-check and review](../STUDY-GUIDE.md#self-check-and-review).

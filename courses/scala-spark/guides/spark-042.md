@@ -1,22 +1,26 @@
 # spark-042: Capstone: a recoverable late-event data product
 
-Authored paired Scala/PySpark teaching content. The default fixtures are tiny, local and deterministic. Runtime acceptance, logical correctness and learner understanding remain separate evidence.
+The capstone runs a small late-event data product from raw input to handoff. Three input batches carry duplicates, a missing ID, a late event, a boundary event and a conflicting value. A frozen cutoff decides lateness, a failure is injected right after the first publication, and the final packet must account for every one of the ten deliveries.
 
 ## Level and prerequisites
 
-Advanced; approximately 180 minutes. Direct prerequisites: `spark-041`. The prepared baseline is Spark 4.3.0, Scala binary 2.13, JDK 17 and Python 3.12. Read the [execution baseline](../execution-baseline.md).
+Advanced; approximately 180 minutes. Direct prerequisites: `spark-041`. Pinned versions: [execution baseline](../execution-baseline.md).
 
 ## How to run this lesson
 
-Open `spark-042` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile, save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`;Python stages as `main.py` with a main guard. Each program creates its own `local[2]` session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.
+Shared run steps and profile rules: [study guide](../STUDY-GUIDE.md#run-a-paired-lesson).
 
-The [Scala learner](../lessons/spark-042.scala) and [PySpark learner](../lessons/spark-042.py) run two complete demonstrations and retain six explicit task stubs. Use the [explained solutions](../solutions/spark-042_solutions.md) only after an attempt or an explicit worked comparison; the [Scala reference](../solutions/spark-042_solution.scala) and [PySpark reference](../solutions/spark-042_solution.py) contain complete assertions. A bounded collect is used only for the declared tiny fixture; do not copy it onto an unbounded or large production table.
+Learner pads: [Scala](../lessons/spark-042.scala) and [PySpark](../lessons/spark-042.py).
+
+Open the [explained solutions](../solutions/spark-042_solutions.md) after an attempt.
+
+The first worked example freezes the cutoff at 105 minus 10, or 95, and filters the seconds 120, 95 and 94 against it, keeping 120 and 95. Raising the cutoff to 110 after seeing 120 would have rejected 95. The second checks the final oracle in plain Python: the counts 5, 2, 1 and 2 add up to 10 deliveries, and the five accepted amounts sum to 75 cents.
 
 ## Learning objectives
 
 - Deliver a bounded streaming product with credible correctness, recovery and operational evidence.
-- State the input and output grain, schema, NULL policy and ordering before executing a transformation.
-- Compare each language implementation with independent literal expectations, not only with the other implementation.
+- Apply one state policy to each microbatch: a cutoff equal to the previous committed maximum minus 10 that stays fixed for the whole batch, equal repeats counted as duplicates, a known ID with a different value counted as invalid, and at most 12 occurrences per batch.
+- Inject `injected_after_publication` after batch 0 is committed, recover on the same checkpoint without changing the committed bytes, and hand off a packet in which attempts `[0, 0, 1, 2]`, callback rows `[4, 4, 4, 2]` and a ledger of 10 logical deliveries agree.
 
 ## Vocabulary and concepts
 
@@ -76,7 +80,7 @@ A reviewer should be able to explain the cutoff boundary, zero retention, confli
 
 ## Supplied local fixture
 
-The complete source creates the owned local session described above, then constructs this explicit fixture. The worked examples below run in that same main function; there is no hidden notebook state.
+Batch A holds deliveries d1 (`A`, second 100, 10 cents), d2 (`B`, 105, 20), d3, an exact repeat of d1, and d4 with no ID at second 106. Batch B adds d5 (`E`, 120, 40), d6 (`D`, 95, 0), d7 (`C`, 94, 7) and d8, a repeat of `B`. Batch C sends d9 (`B` at 105 with 999 cents), which conflicts with the stored value, and d10 (`F`, 110, 5). A valid ID is one capital letter, and seconds and cents must both lie between 0 and 1,000.
 
 ```scala prelude=../solutions/spark-042_solution.scala
 import org.apache.spark.sql.functions._
@@ -207,7 +211,7 @@ Run the actual foreachBatch query with one injected exception after the atomic c
 
 Restart the same compatible query and checkpoint. Validate the existing batch input/content/chain and reuse its state.
 
-**Expected result/shape:** Attempts 0,0 and callback rows 4,4; commit 0 bytes and logical state remain unchanged.
+**Expected result/shape:** Attempts `0, 0` and callback rows `4, 4`; commit 0 bytes and logical state remain unchanged.
 
 **Verify:** Compare query/run identities, exact bytes and all first-state counters.
 
@@ -227,7 +231,7 @@ Publish Batch B then Batch C as separate immutable files and run each finite inv
 
 Return the exact final canonical state, record callback work 14 versus logical occurrences 10, and reject binding the existing sink to a different checkpoint.
 
-**Expected result/shape:** Literal golden state matches; attempt IDs 0,0,1,2; callback rows 4,4,4,2; only owned inactive queries are eligible for cleanup.
+**Expected result/shape:** Literal golden state matches; attempt IDs `0, 0, 1, 2`; callback rows `4, 4, 4, 2`; only owned inactive queries are eligible for cleanup.
 
 **Verify:** Compare the complete state JSON and namespace-refusal negative; state the single-writer/local-filesystem limitations.
 
@@ -239,11 +243,14 @@ Do not call a repeated callback exactly-once computation, advance the cutoff wit
 
 ## Self-check
 
-Explain the contract of `canonicalProductInput` / `canonical_product_input` without reading its solution. Then, from memory, state what Exercise 6 (Hand off correctness, recovery and resource evidence) must produce: Literal golden state matches; attempt IDs `0, 0, 1, 2`; callback rows `4, 4, 4, 2`; only owned inactive queries are eligible for cleanup. Say which part of that result is evidence and what it still cannot show. Name the action in your trace that actually runs the plan.
+- d7 at second 94 is late but d6 at 95 is accepted in the same batch. Which committed maximum sets the cutoff, and why must the cutoff not move while that batch is processed?
+- d10 arrives at second 110 after the maximum has reached 120. Why is it accepted, and what makes it a boundary case?
+- d9 repeats ID `B` with 999 cents. Why is it counted as invalid rather than as a duplicate or an update?
+- The callbacks handled 14 rows but the ledger reports 10 deliveries. Where do the extra 4 rows come from, and why does the committed product not change?
 
 ## Next step
 
-Use the [course route](../README.md) to continue. Paired-language agreement is useful only when both outputs also satisfy the independent fixture contract. A successful local run is not evidence of cluster performance or production recovery.
+This is the last lesson in the course. Return to the [practice routine](../STUDY-GUIDE.md#practice-routine) and rework one earlier streaming lesson from a blank file, or open the [course README](../README.md) to pick another route. A successful local run is not evidence of cluster performance or production recovery.
 
 ## Primary sources and official APIs
 

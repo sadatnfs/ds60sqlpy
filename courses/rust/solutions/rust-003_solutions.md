@@ -1,6 +1,8 @@
 # rust-003: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [rust-003_solution.rs](rust-003_solution.rs). It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.
+Executable reference: [rust-003_solution.rs](rust-003_solution.rs), which runs both examples and the coded answers.
+
+Open this only after [an attempt](../STUDY-GUIDE.md#attempt-a-lesson).
 
 ## Why the two examples differ
 
@@ -26,7 +28,7 @@ Predict the three overflow policies.
 
 Repeat the investigation with subtraction at zero.
 
-**Reference answer.** The same statements run as the `Task 2` block of the reference program; here they are wrapped in `main` as a complete file.
+**Reference answer**, wrapped in `main`; the reference runs it as its `Task 2` block.
 
 ```rust
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -53,7 +55,7 @@ Below zero mirrors the overflow case at the top: wrapping jumps to `u8::MAX`, sa
 
 Write a checked quantity-total calculation returning an explicit failure.
 
-**Reference answer.** The same statements run as the `Task 3` block of the reference program; here they are wrapped in `main` as a complete file.
+**Reference answer**, wrapped in `main`; the reference runs it as its `Task 3` block.
 
 ```rust
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -88,7 +90,7 @@ Diagnose relying on debug-mode overflow behavior in production logic.
 
 Test zero, maximum and one beyond an accepted application range.
 
-**Reference answer.** The same statements run as the `Task 5` block of the reference program; here they are wrapped in `main` as a complete file.
+**Reference answer**, wrapped in `main`; the reference runs it as its `Task 5` block.
 
 ```rust
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -124,7 +126,7 @@ The application range 0 to 1000 is narrower than `u32`, so it needs its own chec
 
 Choose numeric representation, units and rounding rules for a pricing contract.
 
-No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **Overflow**, and state one limitation of your choice.
+**Judging criteria.** Judge the design on four points. Stored amounts should be integer minor units, such as `i64` cents, with the currency named beside the amount. Totals and quantity multiplication should use checked arithmetic and return an error on overflow. One rounding rule, such as half-even, should be applied at a stated step, for example once per line item. `f64` should be rejected for stored money; note the limit that tax rates still need a documented decimal policy.
 
 ## Mechanism and diagnostic reasoning
 
@@ -138,4 +140,6 @@ Wrapping is usually wrong for counts even when it avoids a panic. A tolerance do
 
 ## Review before continuing
 
-Run the reference and confirm that it prints `rust-003: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.
+Rebuild Example B (Keep numeric units explicit) from a blank pad.
+
+Review routine: [Self-check and review](../STUDY-GUIDE.md#self-check-and-review).

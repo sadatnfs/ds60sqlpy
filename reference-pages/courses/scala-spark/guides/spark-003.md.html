@@ -194,9 +194,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/scala-spark/guides/spark-003.md</code></p>
     </header>
     <article class="document"><h2 id="spark-003-functions-arguments-and-explicit-return-contracts">spark-003: Functions, arguments, and explicit return contracts<a class="heading-anchor" href="#spark-003-functions-arguments-and-explicit-return-contracts" aria-label="Link to this section">#</a></h2>
-<p>Authored classroom lesson. Content availability and runtime readiness are separate checks. Read the current capability notice before running. Opening or saving this lesson does not install tools, start a cluster or prove mastery.</p>
+<p>A function turns a rule into something you can call, test and reuse. This lesson writes a small fee function with explicit parameter and return types, orders its branches so that nonpositive amounts are handled first, tests the 500-cent membership threshold on both sides and checks that the function stays pure when it is called twice with the same arguments.</p>
 <h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
-<p>Beginner; 60 minutes. Direct prerequisites: <code>spark-002</code>. Use the subject browser to open prerequisite lessons or review their concepts. Runtime readiness is checked separately before execution.</p>
+<p>Beginner; 60 minutes. Direct prerequisites: <code>spark-002</code>. Pinned versions: <a href="../execution-baseline.md.html">execution baseline</a>. Shared run steps: <a href="../STUDY-GUIDE.md.html#run-a-language-lesson">study guide</a>.</p>
 <p>Learner artifact: <a href="../lessons/spark-003.scala.html">spark-003.scala</a>. Keep <a href="../solutions/spark-003_solutions.md.html">solutions</a> closed until an attempt or explicit reveal.</p>
 <h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
 <ul>
@@ -229,7 +229,7 @@ assert<span class="syntax-punctuation">(</span>bonus<span class="syntax-punctuat
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-separate-definition-and-call">Exercise 1: Separate definition and call<a class="heading-anchor" href="#exercise-1-separate-definition-and-call" aria-label="Link to this section">#</a></h4>
 <p>Explain addCents then evaluate two calls.</p>
-<p><strong>Inputs/evidence:</strong> <code>AddCents(100L, 25L)</code>, <code>addCents(0L, 25L)</code>.</p>
+<p><strong>Inputs/evidence:</strong> <code>addCents(100L, 25L)</code>, <code>addCents(0L, 25L)</code>.</p>
 <p><strong>Expected result/shape:</strong> 125L and 25L.</p>
 <p><strong>Verify:</strong> Assert both returned values; distinguish parameter names from arguments.</p>
 <p><strong>Progressive hints:</strong></p>
@@ -273,7 +273,7 @@ assert<span class="syntax-punctuation">(</span>bonus<span class="syntax-punctuat
 </ol>
 <h4 id="exercise-5-reject-hidden-state">Exercise 5: Reject hidden state<a class="heading-anchor" href="#exercise-5-reject-hidden-state" aria-label="Link to this section">#</a></h4>
 <p>Compare a proposed call counter with the fee contract.</p>
-<p><strong>Inputs/evidence:</strong> Two consecutive <code>feeCents(1000L, true)</code> calls and negative amount-1L.</p>
+<p><strong>Inputs/evidence:</strong> Two consecutive <code>feeCents(1000L, true)</code> calls and the negative amount <code>-1L</code>.</p>
 <p><strong>Expected result/shape:</strong> Both calls 50L; negative amount yields 0L even for a nonmember.</p>
 <p><strong>Verify:</strong> Repeat exact calls and explain why a call counter must not alter the returned fee.</p>
 <p><strong>Progressive hints:</strong></p>
@@ -295,8 +295,10 @@ assert<span class="syntax-punctuation">(</span>bonus<span class="syntax-punctuat
 </ol>
 <h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
 <ul>
-<li>Can you reproduce each exact observation without reading the official answer?</li>
-<li>Can you explain a failed check using the lesson&#x27;s model, rather than changing an expected value?</li>
+<li>Exercise 1 returns <code>125L</code> and <code>25L</code> from one <code>addCents</code> definition. Which names in your code are parameters, and which values are arguments?</li>
+<li>The fee rule checks for a nonpositive amount before it looks at membership. What would a nonmember with <code>-1L</code> pay if the membership branch came first?</li>
+<li>Member amounts 499L, 500L and 501L give 0L, 25L and 25L. Why does integer division give 25L for 501L, and why must 500 itself be one of the tested inputs?</li>
+<li>A call counter would let the second <code>feeCents(1000L, true)</code> call depend on the first. Why must both calls still return <code>50L</code>, and what does the bound of 1,000,000 cents protect against?</li>
 </ul>
 <h3 id="retrieval-and-transfer">Retrieval and transfer<a class="heading-anchor" href="#retrieval-and-transfer" aria-label="Link to this section">#</a></h3>
 <p>Close the source. Explain the mechanism in your own words, name the boundary that a plausible wrong answer crosses, and predict a changed fixture before running again.</p>

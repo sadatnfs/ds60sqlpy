@@ -4,18 +4,15 @@
 
 Intermediate; about 110 minutes, plus any optional hardware experiment. Direct prerequisites: `cuda-002`, `cuda-007`, `cuda-031`
 
-The order supports learning at your own pace. Reading and CPU reasoning remain
-available when NVIDIA hardware is absent. Advanced hardware features need their
-own capability checks and are not prerequisites for opening this chapter.
+Pacing, evidence labels and platform rules for every chapter are in the [CUDA study guide](../../STUDY-GUIDE.md).
 
 ## Learning objectives
 
 Interpret Nsight Compute counters to support two claims and state one unresolved hypothesis.
 
-Work through *Nsight Compute: interpret kernel counters carefully* with the concrete cases below. Finish with this evidence:
-two supported claims and one explicitly unresolved hypothesis. Distinguish an algorithmic
-calculation, a compiled artifact and an actual device observation when explaining
-what your work establishes.
+**Scope:** Requested versus measured work, memory throughput, occupancy, eligible warps, instruction mix, replay and sampling overhead.
+
+**Evidence to produce:** Two supported claims and one explicitly unresolved hypothesis.
 
 ## Purpose, vocabulary and mental model
 
@@ -30,28 +27,17 @@ Kernel counters describe selected aspects of execution, often through replay or 
 
 ## How to run and study this lesson
 
-Use the saved reading worksheet in `/classroom`; the reading pad does not execute
-CUDA. For the bounded calculation, select **CPU model (Python)**, whose
-answer-free starter supplies the literal fixtures and task contract. The
-[CUDA C++ study workflow](../README.md) covers platforms, optional GPU
-compilation and evidence labels. In a prepared Python environment you can also
-run the separate [CPU reference](../references/cuda-033_cpu.py) from the
-repository root:
+Trace worked example 1 by hand, then run the [CPU reference](../references/cuda-033_cpu.py) from the repository root:
 
 ```sh
 python courses/cuda/cpp/references/cuda-033_cpu.py
 ```
 
-Its assertions check the stated numerical result or model invariant; console
-text is evidence of this CPU model only, not of CUDA execution.
-
 ## Worked example 1: trace the mechanism
 
 A synthetic kernel reads 400 useful bytes but causes 1,600 transferred bytes because of its access pattern. Useful-to-transferred ratio is 0.25. A high DRAM traffic counter does not imply useful data processing is efficient. Compare address patterns and a corrected layout before blaming arithmetic capacity.
 
-The complete CPU model below intentionally models only the named arithmetic,
-layout, dependency or capability decision. It does not model GPU scheduling,
-caches, instruction timing or device memory visibility.
+**Why:** Only a quarter of moved bytes do useful work, so the access pattern wastes bandwidth.
 
 ```python
 useful, transferred = 400, 1600
@@ -59,41 +45,37 @@ assert useful / transferred == 0.25
 print({"useful_fraction": useful / transferred})
 ```
 
-**Expected observation:** Every assertion succeeds. A representative CPU output is:
+**Expected observation:** every assertion succeeds, and the CPU model prints:
 
 ```text
 {'useful_fraction': 0.25}
 ```
 
-Integers, shapes and ordering must match exactly; only assertions with an explicit
-tolerance accept small floating-point differences. A printed duration is a model
-output, not a measured GPU benchmark.
+**Check:** The reference asserts useful / transferred == 0.25.
 
 ## Worked example 2: change a meaningful condition
 
 Two kernels show 50% and 75% occupancy, yet times are 2 and 3 ms. Occupancy alone cannot rank them. The second may do more instructions, spill registers or repeat loads. Keep both correctness and selected counters with the timings, and state which causal explanation remains a hypothesis.
 
-Before applying this example to your own program, write down which inputs are
-read, which result is produced, and the condition that makes the comparison
-valid. Keep the original case as a regression check when changing a boundary.
+**Why:** The 75 percent kernel takes 3 ms against 2 ms, so occupancy did not predict speed.
+
+**Check:** Keep correctness checks and counters next to each timing.
 
 ## Six progressive exercises
 
-Exercises 1 and 2 are guided reconstructions of the worked examples; exercises
-3-6 change an input, diagnose a defect, test a boundary and transfer the idea.
-For each one, keep the calculation, output, diagram or failure policy you
-produce so another reader can compare it with the worked cases. If the hint is
-not enough, reread the mechanism paragraph and the bounded CPU assertion.
-
 ### Exercise 1
 
-Predict and trace the first worked example before running its CPU reference. Write every intermediate quantity that leads to the stated result, including units or ownership where applicable.
+Reconstruct worked example 1 on paper before running its CPU reference. Divide 400 useful bytes by 1,600 transferred bytes.
+
+**Trap to avoid:** Reading high DRAM throughput as efficient processing ignores that most bytes are unused.
 
 **Hint:** Start with the literal input and intermediate quantities in worked example 1.
 
 ### Exercise 2
 
-Reconstruct the second worked example without copying its conclusion. Identify the changed input or condition, show the resulting calculation or dependency, and explain why it differs from the first example.
+Rework worked example 2 without copying its conclusion. Rank by measured time and use occupancy only to explain differences.
+
+**Trap to avoid:** Picking the higher-occupancy kernel as faster contradicts the measured times.
 
 **Hint:** Identify exactly which condition changes in worked example 2.
 
@@ -101,11 +83,15 @@ Reconstruct the second worked example without copying its conclusion. Identify t
 
 Calculate useful throughput for 12 MB processed in 0.2 ms.
 
+**Trap to avoid:** Using binary units here gives about 55.9 GiB/s and a mismatched label.
+
 **Hint:** Use the first worked example to establish the relevant quantities, then change only the requested input.
 
 ### Exercise 4
 
 Why can a profiler run differ from an ordinary timing run?
+
+**Trap to avoid:** Quoting a kernel time from an instrumented replay as normal runtime overstates cost.
 
 **Hint:** Locate the failed phase or violated dependency before proposing a repair.
 
@@ -113,35 +99,34 @@ Why can a profiler run differ from an ordinary timing run?
 
 What if hardware counters are unavailable?
 
+**Trap to avoid:** Estimating counter values and presenting them as measured fabricates evidence.
+
 **Hint:** Check what the algorithm is allowed to read, write or assume at this boundary.
 
 ### Exercise 6
 
 Design a counter-based investigation for strided reads.
 
+**Trap to avoid:** Comparing a strided kernel with a contiguous one doing less work credits layout for reduced work.
+
 **Hint:** State the output contract and which observations are needed in the new application.
 
 ## Common mistakes and diagnosis
 
-A tempting but incorrect claim in this chapter is: **a high utilization percentage proves the algorithm is efficient or any single metric diagnoses all bottlenecks. .**
-
-For the concrete failure exercise, why can a profiler run differ from an ordinary timing run?
-Preserve the original input and the stage where behavior diverged, and compare
-with the CPU model before changing hardware configuration.
+A tempting but incorrect claim: **A high utilization percentage proves the algorithm is efficient or any single metric diagnoses all bottlenecks.** A utilization percentage measures how busy a unit is, not whether the work is useful. Worked example 1 shows high DRAM traffic where only a quarter of the bytes are used, and worked example 2 shows higher occupancy with a slower kernel. Each counter answers a narrow question, so combine several counters with correctness checks and timing before naming a bottleneck, and label untested explanations as hypotheses. Here the counter points at the access pattern: a layout that transfers close to the 400 useful bytes could cut DRAM traffic by up to four times, while faster arithmetic would leave the 0.25 ratio unchanged.
 
 ## Self-check, retrieval and transfer
 
-Explain the first example without its code, then use the second example to state
-one assumption that matters. Complete Exercise 3 independently, use Exercise 4 to
-diagnose a plausible defect, check the boundary in Exercise 5, and retain the
-application contract from Exercise 6. Compare the [separate explanations](../solutions/cuda-033_solutions.md)
-only after your attempt or a deliberate reveal. A reading marker records your
-choice; it does not certify hardware qualification or expert mastery.
+1. What fraction of transferred bytes is useful in worked example 1?
+2. Why can a profiled kernel run slower than in a normal timing run?
+3. What does achieved occupancy measure?
+4. What should you report if counter access is not permitted?
+
+Short answers are in the [separate explanations](../solutions/cuda-033_solutions.md#self-check-answers); compare only after an attempt.
 
 ## Primary references
 
-Check the documentation that matches your prepared toolkit before optional
-hardware execution.
+Use the documentation that matches your prepared toolkit.
 
 - [Nsight Compute profiling](https://docs.nvidia.com/nsight-compute/ProfilingGuide/index.html)
 

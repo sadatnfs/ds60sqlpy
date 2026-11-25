@@ -195,7 +195,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="k8s-035-watches-and-optimistic-concurrency">k8s-035: Watches and optimistic concurrency<a class="heading-anchor" href="#k8s-035-watches-and-optimistic-concurrency" aria-label="Link to this section">#</a></h2>
 <h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
-<p>Advanced; about 120 minutes plus review. Direct prerequisites: <code>k8s-003</code>, <code>k8s-018</code>, <code>k8s-030</code>. The chapter separates desired configuration, API acceptance, controller observation and application evidence.</p>
+<p>Advanced; about 120 minutes plus review. Direct prerequisites: <code>k8s-003</code>, <code>k8s-018</code>, <code>k8s-030</code>.</p>
 <h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
 <p>Handle resource-version conflicts and watch expiration without losing state.</p>
 <h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
@@ -226,18 +226,21 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Local cache holds hello-config UID u1. Watch reports 410. A fresh list now contains hello-config UID u2, message reviewer. Replace the cache from the snapshot, then resume observation with its list token.</p>
 <p><strong>Expected:</strong> The current cache contains u2 only; no invented intermediate event or old-UID mutation is permitted.</p>
 <h3 id="inspect-the-specific-owned-object">Inspect the specific owned object<a class="heading-anchor" href="#inspect-the-specific-owned-object" aria-label="Link to this section">#</a></h3>
-<p>Only after the chapter&#x27;s host capability is provisioned and its resources remain present, use the explicit receipt fields described in <a href="../host-labs.md.html">host-labs.md</a>. A completed one-shot browser Run has already cleaned its objects. The following read does not provision the missing capability and does not justify changing credentials after a Forbidden result.</p>
+<p>Read only while this lesson&#x27;s objects still exist (<a href="../STUDY-GUIDE.md.html#owned-live-reads">owned live reads</a>).</p>
 <p>Bash on Linux, macOS or Ubuntu under WSL 2:</p>
 <pre class="highlighted-code"><code class="language-bash">: <span class="syntax-string">&quot;</span><span class="syntax-string">${</span>LAB_KUBECONFIG<span class="syntax-punctuation">:</span><span class="syntax-punctuation">?Use the owned receipt path</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span>
 : <span class="syntax-string">&quot;</span><span class="syntax-string">${</span>LAB_CONTEXT<span class="syntax-punctuation">:</span><span class="syntax-punctuation">?Use the owned receipt context</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span>
 : <span class="syntax-string">&quot;</span><span class="syntax-string">${</span>LAB_NAMESPACE<span class="syntax-punctuation">:</span><span class="syntax-punctuation">?Use the owned receipt namespace</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span>
 kubectl --kubeconfig <span class="syntax-string">&quot;</span>$LAB_KUBECONFIG<span class="syntax-string">&quot;</span> --context <span class="syntax-string">&quot;</span>$LAB_CONTEXT<span class="syntax-string">&quot;</span> --namespace <span class="syntax-string">&quot;</span>$LAB_NAMESPACE<span class="syntax-string">&quot;</span> get configmap hello-config -o json</code></pre>
-<p>Windows uses the same Bash commands inside WSL 2. The lab adapter refuses native Windows credential handling, so do not run kubectl against the receipt from PowerShell. From PowerShell, only open your WSL 2 distribution (the name reported by <code>wsl.exe --list --verbose</code>), change to your checkout with its Linux path, then run the Bash block above unchanged:</p>
+<p>From PowerShell, only open WSL 2 and run the Bash block there (<a href="../STUDY-GUIDE.md.html#owned-live-reads">why</a>):</p>
 <pre class="highlighted-code"><code class="language-powershell">wsl<span class="syntax-punctuation">.</span>exe <span class="syntax-punctuation">-</span>-distribution Ubuntu</code></pre>
-<p>Retain only the fields needed by this chapter&#x27;s prediction. A NotFound result may be expected after one-shot cleanup; a Forbidden result may identify a deliberately absent advanced capability. Neither result authorizes an ambient-context fallback.</p>
+<p>Read <code>metadata.uid</code>, <code>metadata.resourceVersion</code> and <code>data</code>. A conditional update must carry the resourceVersion you just read; if the UID differs from your receipt, the object was replaced and Exercise 4 requires refusal.</p>
 <h3 id="run-and-bounded-evidence">Run and bounded evidence<a class="heading-anchor" href="#run-and-bounded-evidence" aria-label="Link to this section">#</a></h3>
-<p>The app artifact is a reading worksheet, <code>courses/kubernetes/lessons/k8s-035.md</code>. The current browser adapter does not provide the full <strong>owned-object conditional update and bounded watch/relist observer</strong> operation. Use the synthetic fixture and offline check first. Live work follows <a href="../host-labs.md.html">the scoped host-lab guide</a> only when the named capability and owned target have been provisioned. A worksheet or static check is never a cluster execution receipt.</p>
-<p>The <a href="../solutions/k8s-035_solution.json.html">manifest example</a> is separate from the learner artifact. The <a href="../solutions/k8s-035_checks.py.html">offline reference check</a> evaluates explicitly synthetic facts and makes no API calls. Run it locally with <code>python courses/kubernetes/solutions/k8s-035_checks.py</code> after comparing your attempt. The <a href="../fixtures/k8s-035-cases.json.html">case ledger</a> is immutable teaching input.</p>
+<p>This worksheet, <code>courses/kubernetes/lessons/k8s-035.md</code>, does not provide the full <strong>owned-object conditional update and bounded watch/relist observer</strong> operation. The owned observer performs a real conditional update against hello-config and a bounded watch with relist, so a live conflict and an expired watch can be recorded instead of replayed.</p>
+<p>Live reads need a provisioned, owned target (<a href="../host-labs.md.html">host-lab guide</a>).</p>
+<p>The <a href="../solutions/k8s-035_checks.py.html">offline reference check</a> makes no API calls; run it after your attempt:</p>
+<pre class="highlighted-code"><code class="language-bash">python courses/kubernetes/solutions/k8s-035_checks.py</code></pre>
+<p>Compare it with the <a href="../solutions/k8s-035_solution.json.html">manifest example</a> and <a href="../fixtures/k8s-035-cases.json.html">case ledger</a>.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-separate-name-uid-and-version">Exercise 1: Separate name, UID and version<a class="heading-anchor" href="#exercise-1-separate-name-uid-and-version" aria-label="Link to this section">#</a></h4>
 <p>Explain the role of hello-config, u1 and rv-A.</p>
@@ -270,12 +273,12 @@ kubectl --kubeconfig <span class="syntax-string">&quot;</span>$LAB_KUBECONFIG<sp
 <p><strong>Verify:</strong> Check that the duplicate event triggers no second external effect.</p>
 <p><strong>Progressive hints:</strong> Observation events are not a transaction log.</p>
 <h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
-<p>Explain the mechanism behind the first example, then distinguish it from this boundary case: The current cache contains u2 only; no invented intermediate event or old-UID mutation is permitted. State which observations are synthetic and which, if any, were read from your owned runtime.</p>
+<p>Your watch failed because its history expired. Why do you relist rather than replay the missing events, and how does a bookmark help a watcher avoid that failure?</p>
 <h3 id="common-pitfalls">Common pitfalls<a class="heading-anchor" href="#common-pitfalls" aria-label="Link to this section">#</a></h3>
 <p>A conditional replace, a patch with appropriate preconditions and server-side apply have different merge/ownership semantics. This lesson models compare-and-swap on a tiny object; it does not teach that every PATCH automatically prevents lost updates. Specify the actual API operation and precondition when reviewing a live client.</p>
 <p>A supplied 409 or 410 trace is a deterministic teaching fixture. A live receipt must include the exact owned identity, request outcome and bounded recovery observation without exposing credentials. Do not enable broad watch or write permissions merely to make a reading exercise runnable in the normal module pad.</p>
 <h3 id="retrieval-and-transfer">Retrieval and transfer<a class="heading-anchor" href="#retrieval-and-transfer" aria-label="Link to this section">#</a></h3>
-<p>Close the answer and reconstruct the reasoning for Exercise 6 (Handle bookmarks and duplicates). Name the exact source and observed identity you would require before claiming the changed case succeeded.</p>
+<p>From memory, contrast name, UID and resourceVersion. Then describe the bounded retry after a conflict: reread, recompute and resubmit with a capped count.</p>
 <h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
 <p>Continue to <code>k8s-036</code> after preserving the six evidence records.</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>

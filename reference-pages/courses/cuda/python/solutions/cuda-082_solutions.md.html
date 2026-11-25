@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cuda/python/solutions/cuda-082_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="cuda-082-explained-solutions">cuda-082: explained solutions<a class="heading-anchor" href="#cuda-082-explained-solutions" aria-label="Link to this section">#</a></h2>
-<p>These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.</p>
+<p>Compare with your <a href="../lessons/cuda-082.md.html">worksheet</a> attempt.</p>
 <h3 id="exercise-1-draw-the-dependency-graph">Exercise 1: Draw the dependency graph<a class="heading-anchor" href="#exercise-1-draw-the-dependency-graph" aria-label="Link to this section">#</a></h3>
 <p>Edges encode actual data dependencies.</p>
 <p><strong>Approach.</strong> Draw the dependency graph for one batch as nodes upload, transform and download with edges upload to transform and transform to download, matching the <code>edges</code> list in the reference.</p>
@@ -231,9 +231,19 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Why it is correct here.</strong> The program then works only because of an extra global ordering, not because of explicit data edges. Removing the global wait later for performance exposes the bug.</p>
 <p><strong>A plausible wrong approach.</strong> Treating a correct result with global waits as proof that dependencies are complete hides the missing event.</p>
 <p><strong>How to verify.</strong> Remove global waits one at a time in a test and keep only explicit events. Outputs must stay correct.</p>
+<h3 id="self-check-answers">Self-check answers<a class="heading-anchor" href="#self-check-answers" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>What does an event record?</strong> A point in one stream. Another stream can wait on it, adding a dependency without necessarily blocking the host.</li>
+</ol>
+<ol start="2">
+<li><strong>Why is a correct pointer not enough for interop?</strong> The write may still be in flight, or the storage may be recycled before the consumer finishes. Readiness and lifetime are separate from the address.</li>
+</ol>
+<ol start="3">
+<li><strong>Why test with a non-default stream?</strong> Default-stream execution can serialize work and hide missing dependencies that appear once operations run on independent streams.</li>
+</ol>
 <h3 id="reference-observation">Reference observation<a class="heading-anchor" href="#reference-observation" aria-label="Link to this section">#</a></h3>
 <p>Valid dependency order accepted; premature download rejected.</p>
-<p>The reference file is <code>courses/cuda/python/references/cuda-082_cpu.py</code>. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.</p></article>
+<p>Asserted by <code>courses/cuda/python/references/cuda-082_cpu.py</code>.</p></article>
   </main>
 </body>
 </html>

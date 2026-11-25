@@ -1,6 +1,6 @@
 # js-009: explanatory solutions
 
-Use these answers after an attempt or an explicit reveal. The reference uses the same literal fixtures as the guide and keeps the exercises in separate scopes. A successful run checks these examples; explaining a changed input is a separate learning goal.
+Open these after your own attempt; each exercise runs in its own scope in the reference.
 
 ## Mechanism review
 
@@ -22,7 +22,7 @@ Use try/catch around the operation whose failure you intend to handle. Check obj
 
 ## Exercise 1: Accept a valid order: change one input
 
-Task: Copy Example A into a scratch `main.mjs` and change `const raw = { id: 'A', quantity: 2, priceCents: 125 };` to `const raw = { id: 'A', quantity: 3, priceCents: 125 };`. Before running it, predict which check fails and which value it now sees; then run it and restore the original line.
+Task: In a scratch copy of Example A, change `const raw = { id: 'A', quantity: 2, priceCents: 125 };` to `const raw = { id: 'A', quantity: 3, priceCents: 125 };`. Which check fails, and what value does it see?
 
 The accepted record is a copy with a known schema. It does not expose a reference that an external caller can later edit to invalidate the already checked value.
 
@@ -35,13 +35,13 @@ assert.equal(total(order), 250);
 assert.notEqual(order, raw);
 ```
 
-**Expected:** The changed run fails with an `AssertionError` at `assert.equal(total(order), 250)`. Restoring `const raw = { id: 'A', quantity: 2, priceCents: 125 };` brings back: total 250; fresh accepted object.
+**Expected:** The edited run fails with an `AssertionError` at `assert.equal(total(order), 250)`. Restoring `const raw = { id: 'A', quantity: 2, priceCents: 125 };` brings back: total 250; fresh accepted object.
 
-**Verify:** Compare your written prediction with the reported `AssertionError`, including its actual and expected values, and name the value that made `assert.equal(total(order), 250)` fail. After restoring the line, the program prints its `{"checks":1,"status":"passed"}` receipt again.
+**Verify:** Compare the reported actual and expected values with your prediction, then restore `const raw = { id: 'A', quantity: 2, priceCents: 125 };`.
 
 ## Exercise 2: Reject syntactically valid but wrong-shaped JSON: debug a regression
 
-Task: A regression changed one token in Example B, so one line now reads `for (const text of ['null!', '[]', '{"id":"A","quantity":1,"priceCents":2,"extra":true}']) {`. Run Example B with that line, use the failing check to locate the defect and repair it without changing the check.
+Task: A regression made one Example B line read `for (const text of ['null!', '[]', '{"id":"A","quantity":1,"priceCents":2,"extra":true}']) {`. Locate and repair it without editing the check.
 
 JSON.parse proves only syntax. It does not know the domain fields or reject a valid JSON value of the wrong kind.
 
@@ -55,7 +55,7 @@ for (const text of ['null', '[]', '{"id":"A","quantity":1,"priceCents":2,"extra"
 
 **Expected:** Before the repair the run fails with an `AssertionError` at `assert.throws(() => validateOrder(JSON.parse(text)), TypeError)`. Restoring `for (const text of ['null', '[]', '{"id":"A","quantity":1,"priceCents":2,"extra":true}']) {` brings back: typeError for each shape violation.
 
-**Verify:** Keep the failing and the repaired runs. Explain why the changed token alters the value tested by `assert.throws(() => validateOrder(JSON.parse(text)), TypeError)` for this input.
+**Verify:** Keep the failing and repaired runs and name the first value that differs between them.
 
 ## Exercise 3: Reject invalid numeric domain values
 
@@ -75,7 +75,7 @@ for (const raw of [
 
 **Expected:** RangeError for each.
 
-**Verify:** Keep a check equivalent to `assert.throws(() => validateOrder(raw), RangeError)`. As a control, change `{ id: 'A', quantity: 0, priceCents: 2 },` to `{ id: 'A', quantity: 1, priceCents: 2 },`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
+**Verify:** Keep `assert.throws(() => validateOrder(raw), RangeError)`. Control: changing `{ id: 'A', quantity: 0, priceCents: 2 },` to `{ id: 'A', quantity: 1, priceCents: 2 },` must make that check fail; then restore it.
 
 ## Exercise 4: Prevent unsafe integer multiplication
 
@@ -90,7 +90,7 @@ assert.throws(() => total(order), RangeError);
 
 **Expected:** RangeError from total.
 
-**Verify:** Keep a check equivalent to `assert.throws(() => total(order), RangeError)` and confirm that the reference still passes. Then name an input that would make it fail and explain which value changes.
+**Verify:** Keep the check `assert.throws(() => total(order), RangeError)`; name an input that would make it fail and the value that changes.
 
 ## Exercise 5: Preserve a translated cause
 
@@ -107,7 +107,7 @@ assert.match(contextual.message, /order fixture/u);
 
 **Expected:** cause identity retained.
 
-**Verify:** Keep a check equivalent to `assert.match(contextual.message, /order fixture/u)` and confirm that the reference still passes. Then name an input that would make it fail and explain which value changes.
+**Verify:** Keep the check `assert.match(contextual.message, /order fixture/u)`; name an input that would make it fail and the value that changes.
 
 ## Exercise 6: Prove rejected input caused no mutation
 
@@ -124,8 +124,8 @@ assert.deepEqual(raw, before);
 
 **Expected:** input unchanged.
 
-**Verify:** Keep a check equivalent to `assert.deepEqual(raw, before)` and confirm that the reference still passes. Then name an input that would make it fail and explain which value changes.
+**Verify:** Keep the check `assert.deepEqual(raw, before)`; name an input that would make it fail and the value that changes.
 
 ## After comparison
 
-Return to your saved implementation and repeat a case with different values. Keep compiler diagnostics, process output and browser observations separate. Do not suppress a failing assertion or use a type assertion to declare an unvalidated value safe. Resource-owning examples must finish cleanup even when work fails. Describe each result with its actual host and fixture scope rather than as production acceptance.
+Fresh case: add a `discount` field that must be an integer from 0 up to the price. Predict the error class for `-1`, for `'5'` and for a discount larger than the price, and confirm that a rejected order leaves the input untouched. ([After comparing](../STUDY-GUIDE.md#after-comparing-with-the-solution).)

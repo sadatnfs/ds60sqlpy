@@ -2,6 +2,8 @@
 
 Open these answers only after attempting Paired model comparisons and uncertainty yourself. They reuse the guide's literal inputs, starting from Example A, Align predictions by ID, so a discrepancy points at one step. The executable companion runs the assertions; this page explains why each one tests Paired difference, Resampling unit, Selection bias. After a pass, choose a new input for exercise 6, Preserve a final-test boundary, without looking.
 
+After comparing, follow the [review steps](../STUDY-GUIDE.md#after-the-solutions).
+
 ## Mechanism review
 
 Model comparisons should preserve the pairing between predictions on the same held-out identities. Subtract per-record losses before averaging, so shared case difficulty remains represented. A bootstrap resamples observed units with replacement and estimates variability under a stated sampling model. It cannot repair biased data or create independent units from many duplicates. Related records may need group-level resampling rather than row-level draws.
@@ -156,6 +158,3 @@ assert ("choose", "test")[1] != "validation"
 
 **Verify:** In a fresh process, the exercise checks confirm `all((partition == 'validation' for action, partition in ledger if action == 'choose'))` and `('choose', 'test')[1] != 'validation'`.
 
-## Review after comparison
-
-Repeat exercise 4, Replay the local random stream, with one changed fixture value and predict the difference before running it. Keep your failing attempt at exercise 5, Reject missing assessment identities, beside the repaired result. A missing framework is not a failing assertion. These solutions use only local fixtures.

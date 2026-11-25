@@ -382,7 +382,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
         </header>
 
         <div class="artifact-content"><h3 id="guide--day-18-loading-and-cleaning-data-with-pandas">Day 18: Loading and Cleaning Data with pandas<a class="heading-anchor" href="#guide--day-18-loading-and-cleaning-data-with-pandas" aria-label="Link to this section">#</a></h3>
-<p><strong>Offline teaching data:</strong> The <a href="../reference-pages/python/fixtures/README.md.html">original synthetic fixtures</a> replace first-run sample-data downloads. Their values are not historical or observational evidence. Keep numerical conclusions scoped to the declared teaching input.</p>
+<p><strong>Offline teaching data:</strong> the <code>passenger-outcomes</code> <a href="../reference-pages/python/fixtures/README.md.html">synthetic fixture</a> is invented, so its numbers prove methods, not facts.</p>
 <p><strong>Level:</strong> Intermediate</p>
 <p>Cleaning is a documented conversion from messy input to a predictable table. Never hide destructive assumptions inside a long notebook cell.</p>
 <h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
@@ -397,25 +397,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="guide--prerequisites">Prerequisites<a class="heading-anchor" href="#guide--prerequisites" aria-label="Link to this section">#</a></h4>
 <p>Complete Day 17 (<code>python-17</code>): DataFrames, selection, dtypes, and copies.</p>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
-<p><strong>Primary browser route:</strong> run <code>./classroom</code> from the repository root and choose <strong>Python and data science</strong> on <code>/classroom</code>. Open this lesson in the shared workspace, read its capability notice and use its supported coding or reading workflow. The <a href="../reference-pages/docs/classroom-experience.md.html">classroom guide</a> explains saved work, runtimes and switching subjects. No host notebook setup is needed for this route.</p>
-<h5 id="guide--optional-contributor-notebook-route">Optional contributor notebook route<a class="heading-anchor" href="#guide--optional-contributor-notebook-route" aria-label="Link to this section">#</a></h5>
-<p>Use a separately prepared POSIX environment on Linux/macOS or Ubuntu in Windows WSL 2. Complete <a href="../reference-pages/CONTRIBUTING.md.html">contributor setup</a> once, including the notebook and data dependencies. Docker&#x27;s Python worker does not install packages into this host interpreter. Run the following commands from the repository root using that prepared environment.</p>
-<ol>
-<li>Check the interpreter and register its notebook kernel. Registration is needed once for this environment, or again after moving/replacing it:</li>
-</ol>
-<pre class="highlighted-code"><code class="language-bash">   uv run --no-sync python scripts/course.py doctor --no-database
-   uv run --no-sync python -m ipykernel install --user --name ds60sqlpy --display-name <span class="syntax-string">&quot;Python (ds60sqlpy)&quot;</span></code></pre>
-<p><code>--no-database</code> keeps this Python setup check local and does not require PostgreSQL. Do not install packages with <code>%pip</code> in a lesson. Use the declared dependency group when an optional import needs preparation.</p>
-<ol start="2">
-<li>Read <code>python/ds-60day/companion-guides/day18_pandas_io_cleaning.md</code>, then launch the notebook directory:</li>
-</ol>
-<pre class="highlighted-code"><code class="language-bash">   uv run --no-sync python -m jupyter lab python/ds-60day/notebooks</code></pre>
-<p>Open <code>python/ds-60day/notebooks/day18_pandas_io_cleaning.ipynb</code> and select <strong>Python (ds60sqlpy)</strong>. The friendly name alone is insufficient if you use several checkouts: confirm that the kernel&#x27;s <code>sys.executable</code> points to this checkout&#x27;s <code>.venv/bin/python</code>. <a href="../reference-pages/docs/vscode.md.html">VS Code guidance</a> explains the alternative editor route; Windows users open that editor in WSL with the same Linux environment.</p>
-<ol start="3">
-<li>Restart the kernel and run cells from the top. Notebook cells share kernel state; each browser Run starts a fresh process. Before every example, predict its result, then compare the actual value, type, shape or side effect.</li>
-<li>Attempt the numbered exercises in your own work cells and keep a backup of your notebook edits. Follow each example&#x27;s file and working-directory instructions. Keep <code>solutions/</code> separate until you want reference comparison.</li>
-</ol>
-<p>Notebook files and contributor CLI progress belong to this host checkout. They are separate from the browser&#x27;s saved pads, notes and progress in Docker volumes. Neither route automatically copies attempts or completion markers to the other; record progress in the interface you actually used.</p>
+<p>Open <code>python-18</code> in the classroom, or <code>python/ds-60day/notebooks/day18_pandas_io_cleaning.ipynb</code> on a host; the <a href="../reference-pages/python/STUDY-GUIDE.md.html">Python study guide</a> explains both.</p>
 <p><strong>Outcome:</strong> Load a dataset, profile it, and clean it without changing the raw data.</p>
 <h4 id="guide--beginner-deep-dive-build-the-idea-before-the-syntax">Beginner deep dive: build the idea before the syntax<a class="heading-anchor" href="#guide--beginner-deep-dive-build-the-idea-before-the-syntax" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--start-with-one-mental-picture">Start with one mental picture<a class="heading-anchor" href="#guide--start-with-one-mental-picture" aria-label="Link to this section">#</a></h5>
@@ -472,14 +454,7 @@ twice <span class="syntax-operator">=</span> clean_people<span class="syntax-pun
 <li>Re-read saved output and reconcile row count, schema, and key totals with the in-memory clean frame.</li>
 </ol>
 <h5 id="guide--practice-ramp">Practice ramp<a class="heading-anchor" href="#guide--practice-ramp" aria-label="Link to this section">#</a></h5>
-<p>Work through the numbered exercises in five modes rather than treating all of them as blank-code prompts:</p>
-<ol>
-<li><strong>Prediction:</strong> state the value, type, shape, rows, or side effect before execution.</li>
-<li><strong>Guided modification:</strong> change one part of a worked example and explain which part of the result must change.</li>
-<li><strong>Independent application:</strong> implement the same idea with a new input and an explicit contract.</li>
-<li><strong>Debugging and edge cases:</strong> reproduce a failure, identify the violated assumption, and prove the repair at a boundary.</li>
-<li><strong>Retrieval:</strong> close the guide and explain the core model from memory before moving on.</li>
-</ol>
+<p>Work this lesson&#x27;s exercises in the five practice modes from the <a href="../reference-pages/python/STUDY-GUIDE.md.html">Python study guide</a>.</p>
 <p><strong>Useful alternative:</strong> Use pandas for tabular batch cleaning, the <code>csv</code> module for simple streaming, and a database when constraints/transactions belong at storage.</p>
 <p><strong>Boundary to remember:</strong> Blank strings versus nulls, locale-formatted numbers, duplicate keys with conflicting fields, empty input, and dtype drift need policy.</p>
 <h4 id="guide--vocabulary-and-mental-model">Vocabulary and mental model<a class="heading-anchor" href="#guide--vocabulary-and-mental-model" aria-label="Link to this section">#</a></h4>
@@ -526,9 +501,8 @@ reloaded <span class="syntax-operator">=</span> pd<span class="syntax-operator">
 <span class="syntax-punctuation">(</span>orders<span class="syntax-operator">.</span>dtypes<span class="syntax-operator">.</span>astype<span class="syntax-punctuation">(</span><span class="syntax-builtin">str</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>to_dict<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">int</span><span class="syntax-punctuation">(</span>orders<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">amount</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span><span class="syntax-operator">.</span>isna<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>sum<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> reloaded<span class="syntax-operator">.</span>equals<span class="syntax-punctuation">(</span>orders<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation:</strong> <code>({&#x27;order_id&#x27;: &#x27;string&#x27;, &#x27;amount&#x27;: &#x27;float64&#x27;, &#x27;city&#x27;: &#x27;string&#x27;, &#x27;ordered_on&#x27;: &#x27;datetime64[ns]&#x27;}, 1, True)</code>. Exactly one amount became missing because <code>n/a</code> was declared as a missing marker, and the written CSV stores it as an empty field, which the reader treats as missing again. Without <code>dtype=</code>, the text columns would be <code>object</code>; without <code>parse_dates=</code>, <code>ordered_on</code> would stay text. <code>city</code> still contains both <code>NY</code> and <code>ny</code>: reading a file does not clean it, which is the next step.</p>
 <h4 id="guide--dataset-and-format-notes">Dataset and format notes<a class="heading-anchor" href="#guide--dataset-and-format-notes" aria-label="Link to this section">#</a></h4>
-<p>The checked-in synthetic teaching fixtures load without network access. Their generated values demonstrate programming methods, not real-world population facts.</p>
+<p>The checked-in <code>passenger-outcomes</code> fixture loads offline; its generated values illustrate methods, not real populations.</p>
 <h4 id="guide--exercises-and-progressive-hints">Exercises and progressive hints<a class="heading-anchor" href="#guide--exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
-<p>Each item is a complete mini-contract. Before writing code, copy its input, expected behavior, constraints, and verification into your work cell. A result is not complete merely because it “looks right”; run the stated assertion or inspection and explain what it proves.</p>
 <p><strong>Dataset:</strong> the exercises use the offline <code>passenger-outcomes</code> fixture, loaded with <code>from ds60sqlpy.teaching_data import load_teaching_frame</code> and <code>df = load_teaching_frame(&quot;passenger-outcomes&quot;)</code>. Its 360 synthetic rows have 15 columns, including <code>survived</code>, <code>pclass</code>, <code>sex</code>, <code>age</code>, <code>fare</code>, <code>embarked</code>, and <code>deck</code>; <code>age</code> is missing in 28 rows, <code>fare</code> in 12, <code>embarked</code> in 10, and <code>deck</code> in 270.</p>
 <ol>
 <li>Load a local CSV into pandas, recording path, encoding, row grain, shape, columns, dtypes, missing counts, and duplicate-key counts before changing anything. <strong>Expected behavior:</strong> produce a compact profile, not a full data dump. <strong>Constraint:</strong> use repository-relative <code>Path</code> objects and no network source. <strong>Verify:</strong> save the first profile values, restart the kernel, and assert the second shape, columns, dtypes, missing counts, and duplicate-key counts exactly match.</li>
@@ -574,7 +548,7 @@ reloaded <span class="syntax-operator">=</span> pd<span class="syntax-operator">
 <li><a href="python-19.html#guide">Next: Day 19; Grouping and reshaping</a></li>
 </ul>
 <h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
-<p>AI coaching is optional; the guide and notebook above contain the full lesson. If you want a patient tutor, copy this prompt from the repository root:</p>
+<p>AI coaching is optional. To use a tutor, copy this prompt from the repository root:</p>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning to tutor me through `python-18`
 (Day 18: pandas I/O and Data Cleaning). Direct catalog prerequisites: `python-17`.
 I have completed the direct prerequisites: `python-17`. Emphasize pandas input boundaries, explicit cleaning, and reproducible output.
@@ -897,7 +871,7 @@ prompt&#x27;s verification evidence from my notebook.</code></pre></div>
         </header>
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
         <div class="artifact-content"><h3 id="solution-1--day-18-solutions-loading-and-cleaning-data-with-pandas">Day 18 Solutions: Loading and Cleaning Data with pandas<a class="heading-anchor" href="#solution-1--day-18-solutions-loading-and-cleaning-data-with-pandas" aria-label="Link to this section">#</a></h3>
-<p><strong>Offline teaching data:</strong> The <a href="../reference-pages/python/fixtures/README.md.html">original synthetic fixtures</a> replace first-run sample-data downloads. Their values are not historical or observational evidence. Keep numerical conclusions scoped to the declared teaching input.</p>
+<p><strong>Offline teaching data:</strong> the <code>passenger-outcomes</code> <a href="../reference-pages/python/fixtures/README.md.html">synthetic fixture</a> is invented, so its numbers prove methods, not facts.</p>
 <h4 id="solution-1--concept-review-before-comparing-answers">Concept review before comparing answers<a class="heading-anchor" href="#solution-1--concept-review-before-comparing-answers" aria-label="Link to this section">#</a></h4>
 <p>These worked answers demonstrate <strong>pandas input boundaries, explicit cleaning, and reproducible output</strong>. Predict each named result before comparing your attempt with its matching assertions.</p>
 <p>Reading a file creates a DataFrame but does not prove its schema. External columns may have missing values, inconsistent spellings, numeric text, impossible values, or duplicate records. Profile those conditions before converting types, because conversion can hide which representations arrived.</p>

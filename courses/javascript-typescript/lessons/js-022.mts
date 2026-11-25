@@ -2,17 +2,15 @@
 
 export {};
 // Exercise 1: Preserve identity type and object identity: change one input
-// Copy Example A into a scratch `main.mts` and change `const value: number = identity(7);`
-// to `const value: number = identity(8);`. Before running it, predict which check fails and
-// which value it now sees; then run it and restore the original line.
-// Expected: The changed run fails with an `AssertionError` at `assert.equal(value, 7)`.
+// In a scratch copy of Example A, change `const value: number = identity(7);` to `const
+// value: number = identity(8);`. Which check fails, and what value does it see?
+// Expected: The edited run fails with an `AssertionError` at `assert.equal(value, 7)`.
 // Restoring `const value: number = identity(7);` brings back: number remains 7; object is
 // the same reference.
 
 // Exercise 2: Connect a key to its exact result type: debug a regression
-// A regression changed one token in Example B, so one line now reads `const row = { id: 'A',
-// count: 3 };`. Run Example B with that line, use the failing check to locate the defect and
-// repair it without changing the check.
+// A regression made one Example B line read `const row = { id: 'A', count: 3 };`. Locate and
+// repair it without editing the check.
 // Expected: Before the repair the run fails with an `AssertionError` at `assert.equal(count,
 // 2)`. Restoring `const row = { id: 'A', count: 2 };` brings back: id is string A; count is
 // number 2.

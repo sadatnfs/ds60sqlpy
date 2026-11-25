@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/docker/solutions/docker-024_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="docker-024-explanatory-solutions">docker-024: explanatory solutions<a class="heading-anchor" href="#docker-024-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit reveal. These explain the supplied teaching fixtures; they are not engine results. The mechanism is explained in <code>courses/docker/guides/docker-024.md</code>.</p>
+<p>These answers explain teaching fixtures, not engine results; the mechanism is in <a href="../guides/docker-024.md.html">the guide</a>.</p>
 <h3 id="exercise-1-distinguish-rootless-mode-from-a-non-root-app-user">Exercise 1: Distinguish rootless mode from a non-root app USER.<a class="heading-anchor" href="#exercise-1-distinguish-rootless-mode-from-a-non-root-app-user" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Engine privilege versus process identity inside one container.</p>
 <p><strong>Why:</strong> Both can be useful, but they apply at different layers. An app USER instruction does not change the daemon installation.</p>
@@ -238,7 +238,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>A plausible wrong approach:</strong> Announcing rootless support because the engine&#x27;s docs list it skips the networking and storage checks that may fail.</p>
 <p><strong>How to verify:</strong> Each claim in the support note links to one observed result on that host and engine version.</p>
 <h3 id="check-your-transfer">Check your transfer<a class="heading-anchor" href="#check-your-transfer" aria-label="Link to this section">#</a></h3>
-<p>A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.</p></article>
+<p>The job gains full control of the host engine, which in practice means root on that host: it can start a privileged container that mounts <code>/</code>, read other jobs&#x27; containers and volumes, and change images that later deployments use. Alternatives include a rootless BuildKit builder, a remote buildx builder dedicated to CI, or a disposable virtual machine per job. Acceptance should show the job can build and push its image yet cannot list unrelated containers. If the job could not list containers through the socket, the socket would not be the real engine endpoint.</p></article>
   </main>
 </body>
 </html>

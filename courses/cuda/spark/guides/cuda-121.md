@@ -1,10 +1,17 @@
 # cuda-121: Joins, skew and broadcast decisions
 
-**Route:** CUDA Python and machine learning / GPU Spark specialization. **Stage:** advanced. **Prerequisites:** `cuda-117`, `cuda-120`. Allow several sessions when the hardware experiment is new; the chapter is not a deadline.
+**Route:** CUDA Python and machine learning / GPU Spark specialization. **Stage:** advanced. **Prerequisites:** `cuda-117`, `cuda-120`.
 
-## What you will be able to explain
+Pacing, evidence labels and platform rules: [CUDA study guide](../../STUDY-GUIDE.md).
 
-By the end, you can **calculate duplicate join output**, **compare broadcast and shuffle**, and **inspect final AQE decision** with evidence. Start with the two worked cases, then use the editable CPU model to make the quantities concrete.
+## Learning objectives
+
+- Calculate duplicate join output.
+- Add unmatched keys.
+- Identify skew.
+- Compare broadcast and shuffle.
+- Design a safe rewrite.
+- Inspect final AQE decision.
 
 ## Mechanism and vocabulary
 
@@ -44,9 +51,13 @@ Left keys [A, A, B] and right keys [A, A, C] produce four matches for A in an in
 
 If one partition holds 900 rows and nine others hold roughly 11, the maximum task dominates the barrier despite a small average partition size.
 
-## Portable executable model
+## How to run the CPU model
 
-The **CPU reference model** variant runs this bounded worked example using `python-core`. It uses only the Python standard library, small synthetic values and no network. Its purpose is to expose the arithmetic or contract behind the chapter. The separate reference includes assertions for the stated observations.
+Edit the copy; the [reference](../references/cuda-121_cpu.py) adds assertions.
+
+```sh
+python courses/cuda/spark/lessons/cuda-121_cpu.py
+```
 
 ```python
 left = [("A", 1), ("A", 2), ("B", 3)]
@@ -67,87 +78,66 @@ print("CPU join oracle:", joined)
 | `right` | `[('A', 10), ('A', 20), ('C', 30)]` |
 | `joined` | `[('A', 1, 10), ('A', 1, 20), ('A', 2, 10), ('A', 2, 20)]` |
 
-Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.
-
 ## Scala and PySpark parity lab
 
-Choose **Scala Spark on CPU** or **PySpark on CPU** to run the same bounded query in the ordinary Spark workers. Both use explicit schemas, local fixtures, at most two local threads, a disabled GPU SQL setting and a finally-block session stop. They assert the same expected result. These are CPU Spark observations, not GPU plugin qualification.
-
-For external GPU comparison, retain the same relational expressions and expected result but use a separately reviewed launcher and compatibility matrix. Do not change the classroom source into an arbitrary cluster connection.
+Both CPU variants assert one expected result. Read the [parity rules](../../STUDY-GUIDE.md#spark-parity-and-gpu-spark).
 
 ## Practice and transfer
+
+Record each attempt in the [worksheet](../lessons/cuda-121.md) before opening hints.
 
 ### Exercise 1: Calculate duplicate join output
 
 **Trap to avoid:** Expecting the output size to be at most the smaller input underestimates joins with duplicate keys, which can grow much larger than either input.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 2: Add unmatched keys
 
 **Trap to avoid:** Using an inner join where unmatched records must be preserved silently drops them. Downstream totals then shrink without any error, which is harder to detect than a failure.
-
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 3: Identify skew
 
 **Trap to avoid:** Reporting the average partition size of about 100 rows hides the 900-row partition.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 4: Compare broadcast and shuffle
 
 **Trap to avoid:** Broadcasting a table that is large after a filter misestimate can exhaust executor memory. The driver also collects the broadcast side before sending it, so a too-large table can fail on the driver first.
-
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 5: Design a safe rewrite
 
 **Trap to avoid:** Dropping null keys or deduplicating to reduce skew changes results. Salting only one side without replicating the other loses matches, which reduces output silently rather than raising an error.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 6: Inspect final AQE decision
 
 **Trap to avoid:** Citing the pre-execution plan reports a strategy that may not have run. Skew handling in particular appears only in the final plan, so the initial plan cannot show whether a skewed partition was split.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ## Progressive hints
 
-Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.
+Hint *k* belongs to exercise *k*; open one at a time.
 
-1. Start from worked example 1 and mark the quantities needed for the task "Calculate duplicate join output".
-2. Change one assumption in worked example 2 while preserving the declared contract: add unmatched keys.
-3. Trace the CPU program's variables before adding hardware behavior: identify skew.
-4. Draw producers, consumers and the exact operation boundary for the task "Compare broadcast and shuffle".
-5. Separate what the small fixture establishes from what the real runtime must show: design a safe rewrite.
-6. Write a counterexample to an overbroad claim before you inspect final AQE decision.
+1. Multiply how many times a key appears on the left by how many times it appears on the right.
+2. Decide what each join type does with a key that appears on only one side.
+3. Compare the largest partition with the typical ones, not only the average size.
+4. Ask which strategy copies one side to every worker and which redistributes records by key.
+5. Check that a salted or repartitioned version returns the same duplicates and null-key rows as the CPU oracle.
+6. Run an action and read the final adaptive plan to see which join strategy actually ran.
 
-## Common mistakes and self-review
+## Common mistakes and self-check
 
-Confusing a correct tiny example with a general implementation is the central review risk. For this chapter, challenge the assumption in worked example 2, then ask whether your change preserves the mechanism described above. If you change dtype, layout, ordering, batch size or backend, update the acceptance contract rather than silently reusing the old observation. Explain an unexpected result before trying random configuration changes.
+A common mistake is expecting a join's output to be at most as large as its inputs. Duplicate keys multiply: two A rows on each side produce four matches. Another is broadcasting a side that looks small only because statistics are stale, or salting skewed keys in a way that changes multiplicity or outer-join rows. Fix both by checking cardinality against a CPU oracle with duplicate and missing keys, and by inspecting partition sizes and the final executed plan.
 
-Keep a small evidence table with columns **claim**, **input**, **expected observation**, **actual observation** and **limit**. For the first claim use `Calculate duplicate join output`. For the final claim use `Inspect final AQE decision`. An unperformed GPU or cluster experiment remains pending even when the CPU model is correct.
+**Evidence limit:** The reference counts four A matches from two-by-two duplicate keys. It does not execute Spark joins, so broadcast choices, skew handling and memory pressure need the final adaptive plan from a real run.
 
-## Platform and evidence contract
+1. Can GPU acceleration reduce a join's output rows?
+2. Why does skew lengthen a stage?
+3. Why keep a simple CPU oracle for joins?
 
-The reading worksheet and CPU reference model work through the ordinary Linux Docker classroom on macOS, Linux and Windows using WSL 2. They do not require an NVIDIA GPU. Their results are labeled CPU models or semantic oracles, not simulated hardware performance.
-
-Real CUDA work needs supported NVIDIA hardware, a compatible host driver and an explicitly prepared GPU runtime. An Apple GPU does not execute CUDA kernels. PyTorch MPS on a supported native Mac, ROCm on supported AMD hardware, or other vendor backends can provide separate accelerator learning routes; they need their own package and operation qualification and are not CUDA evidence. The ordinary Linux Docker classroom does not expose native Mac MPS automatically.
-
-Do not download packages, models or data by opening this lesson. Do not attach an engine socket, ambient cluster credentials or an arbitrary remote endpoint. A CPU pass, imported package, successful compilation, real GPU result and measured performance are distinct observations. Record the actual backend, data shape/dtype, source revision, versions and pending checks. A saved completion marker records learning progress, not hardware certification.
-
-GPU Spark is a separate owned external workflow. The ordinary `spark-local-scala` and `spark-local-python` profiles are CPU Spark. Keep the GPU plugin disabled or absent for a CPU-only baseline. Per-operator CPU fallback inside a working GPU plugin environment is a different condition from having no compatible GPU. Never mount a host Docker socket or ambient kubeconfig into an ordinary lesson worker.
+Answers: [self-check answers](../solutions/cuda-121_solutions.md#self-check-answers).
 
 ## Primary references
 
-- [cuDF Spark plugin release and compatibility matrix](https://nvidia.github.io/cudf-spark/docs/download.html)
-- [Supported Spark operators and expression types](https://nvidia.github.io/cudf-spark/docs/supported_ops.html)
-- [GPU Spark tuning guide](https://docs.nvidia.com/cudf-spark/latest/tuning-guide.html)
 - [Apache Spark SQL performance tuning](https://spark.apache.org/docs/latest/sql-performance-tuning.html)
 
-Use the version-matched documentation of your prepared environment. These references describe interfaces and supported boundaries; the chapter's synthetic examples and CPU models are original teaching material.
+Full lists: [documentation and sources](../../STUDY-GUIDE.md#documentation-and-sources).
 
 ## Ask an AI tutor about this lesson
 

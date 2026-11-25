@@ -1,6 +1,6 @@
 # docker-018: explanatory solutions
 
-Compare after your own attempt or an explicit reveal. These explain the supplied teaching fixtures; they are not engine results. The mechanism is explained in `courses/docker/guides/docker-018.md`.
+These answers explain teaching fixtures, not engine results; the mechanism is in [the guide](../guides/docker-018.md).
 
 ## Exercise 1: Predict the name a peer uses for the app.
 
@@ -88,4 +88,4 @@ Compare after your own attempt or an explicit reveal. These explain the supplied
 
 ## Check your transfer
 
-A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.
+Each project gets its own default network, and service names resolve only to containers on a network the caller shares. The probe sits on the monitoring network, so `app` is unknown there. The smallest change is to declare the study network in the monitoring project as an external network named `ds60-docker-study_default` and attach only the probe to it. The expected result is that the probe receives the app's JSON. If the name still failed, `docker network inspect` on that network should list the probe container; its absence would show the attachment did not apply.

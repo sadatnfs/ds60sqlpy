@@ -2,24 +2,16 @@
 
 int main(void) {
   /* Exercise 1: Compare length and storage: change one input
-     Copy worked example 1, the "compare length and storage" case, into a
-     scratch pad and change `char word[] = "cat";` to `char word[] = "cat!";`.
-     Before running, predict which CHECK fails and which value it sees in place
-     of the worked result (strlen is 3 while array size is 4); then run it and
-     restore the original line. Expected: With `char word[] = "cat!";` the run
-     stops with `Check failed` at the CHECK on `strlen(word) == 3 && sizeof word
-     == 4`, because the "compare length and storage" case no longer shows that
-     strlen is 3 while array size is 4. Restoring `char word[] = "cat";` brings
-     that observation back. */
+     In worked example 1, change `char word[] = "cat";` to `char word[] =
+     "cat!";`. Predict which value the CHECK on `strlen(word) == 3 && sizeof
+     word == 4` sees, then run and restore. Expected: `Check failed` at
+     `strlen(word) == 3 && sizeof word == 4`; restoring `char word[] = "cat";`
+     passes again. */
 
   /* Exercise 2: Modify owned text: debug a regression
-     A regression changed one token in worked example 2, the "modify owned text"
-     case, so one line now reads `word[1] = 'b';`. Run the example with that
-     line, use the failing CHECK to find why the result is bat no longer holds
-     and repair the line without changing the CHECK. Expected: Before the repair
-     the run stops with `Check failed` at the CHECK on `strcmp(word, "bat") ==
-     0`. Once the line reads `word[0] = 'b';` again, the "modify owned text"
-     case again shows that the result is bat. */
+     Worked example 2 now has a line reading `word[1] = 'b';`. Repair it so that
+     the result is bat again. Expected: `Check failed` at `strcmp(word, "bat")
+     == 0` until the line reads `word[0] = 'b';` again. */
 
   /* Exercise 3: Detect bounded truncation
      Format hello into a four-character buffer.

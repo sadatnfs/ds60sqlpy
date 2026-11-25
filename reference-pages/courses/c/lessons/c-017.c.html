@@ -197,24 +197,17 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">int</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">void</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span></span>
 <span class="source-line">  <span class="syntax-comment">/* Exercise 1: Create an owned string: predict an edited check</span></span>
-<span class="source-line"><span class="syntax-comment">     Copy worked example 1 into a scratch pad and change `CHECK(text_create(&amp;t,</span></span>
-<span class="source-line"><span class="syntax-comment">     &quot;alpha&quot;));` to `CHECK(text_create(&amp;t, &quot;alpha!&quot;));` inside its CHECK. Before</span></span>
-<span class="source-line"><span class="syntax-comment">     running, predict whether the CHECK still holds and explain why; then</span></span>
-<span class="source-line"><span class="syntax-comment">     restore it. Expected: With `CHECK(text_create(&amp;t, &quot;alpha!&quot;));` the run</span></span>
-<span class="source-line"><span class="syntax-comment">     stops with `Check failed` at the CHECK on `t.len == 5 &amp;&amp; strcmp(t.data,</span></span>
-<span class="source-line"><span class="syntax-comment">     &quot;alpha&quot;) == 0`, because the &quot;create an owned string&quot; case no longer shows</span></span>
-<span class="source-line"><span class="syntax-comment">     that length is 5 and content is alpha. Restoring `CHECK(text_create(&amp;t,</span></span>
-<span class="source-line"><span class="syntax-comment">     &quot;alpha&quot;));` brings that observation back. */</span></span>
+<span class="source-line"><span class="syntax-comment">     In worked example 1, change `CHECK(text_create(&amp;t, &quot;alpha&quot;));` to</span></span>
+<span class="source-line"><span class="syntax-comment">     `CHECK(text_create(&amp;t, &quot;alpha!&quot;));`. Predict whether the CHECK still holds</span></span>
+<span class="source-line"><span class="syntax-comment">     and why, then run and restore. Expected: `Check failed`:</span></span>
+<span class="source-line"><span class="syntax-comment">     `CHECK(text_create(&amp;t, &quot;alpha!&quot;));` is false, although length is 5 and</span></span>
+<span class="source-line"><span class="syntax-comment">     content is alpha. */</span></span>
 <span class="source-line"></span>
 <span class="source-line">  <span class="syntax-comment">/* Exercise 2: Clone independent storage: debug a regression</span></span>
-<span class="source-line"><span class="syntax-comment">     A regression changed one token in worked example 2, the &quot;clone independent</span></span>
-<span class="source-line"><span class="syntax-comment">     storage&quot; case, so one line now reads `b.data[1] = &#x27;b&#x27;;`. Run the example</span></span>
-<span class="source-line"><span class="syntax-comment">     with that line, use the failing CHECK to find why the original remains cat</span></span>
-<span class="source-line"><span class="syntax-comment">     no longer holds and repair the line without changing the CHECK. Expected:</span></span>
-<span class="source-line"><span class="syntax-comment">     Before the repair the run stops with `Check failed` at the CHECK on</span></span>
-<span class="source-line"><span class="syntax-comment">     `strcmp(a.data, &quot;cat&quot;) == 0 &amp;&amp; strcmp(b.data, &quot;bat&quot;) == 0`. Once the line</span></span>
-<span class="source-line"><span class="syntax-comment">     reads `b.data[0] = &#x27;b&#x27;;` again, the &quot;clone independent storage&quot; case again</span></span>
-<span class="source-line"><span class="syntax-comment">     shows that the original remains cat. */</span></span>
+<span class="source-line"><span class="syntax-comment">     Worked example 2 now has a line reading `b.data[1] = &#x27;b&#x27;;`. Repair it so</span></span>
+<span class="source-line"><span class="syntax-comment">     that the original remains cat again. Expected: `Check failed` at</span></span>
+<span class="source-line"><span class="syntax-comment">     `strcmp(a.data, &quot;cat&quot;) == 0 &amp;&amp; strcmp(b.data, &quot;bat&quot;) == 0` until the line</span></span>
+<span class="source-line"><span class="syntax-comment">     reads `b.data[0] = &#x27;b&#x27;;` again. */</span></span>
 <span class="source-line"></span>
 <span class="source-line">  <span class="syntax-comment">/* Exercise 3: Borrow without releasing</span></span>
 <span class="source-line"><span class="syntax-comment">     Read through a const pointer borrowed from an owner.</span></span>

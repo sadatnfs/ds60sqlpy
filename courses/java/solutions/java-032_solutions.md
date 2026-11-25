@@ -1,6 +1,6 @@
 # java-032: explanatory solutions
 
-Open after an attempt or an explicit solution reveal. The executable reference runs the six exercise checks together as `Main.java`. The guide contains independent worked examples, while this file explains the choices and failure cases in the complete answer.
+Open this after an attempt; see [using the solutions](../STUDY-GUIDE.md#use-the-solutions).
 
 ## Mechanism review
 
@@ -22,7 +22,7 @@ System.nanoTime measures elapsed intervals, not wall-clock dates. Keep a checksu
 
 ## Exercise 1: Establish a numerical oracle: predict an edited check
 
-Task: Copy Example A into a scratch `Main.java` and change `assert sum(1000) == 500_500L && sum(1000) == (1000L * 1001) / 2;` to `assert sum(1001) == 500_500L && sum(1000) == (1000L * 1001) / 2;` inside its assertion. Before running it with `java -ea Main`, predict whether the assertion still holds and explain why; then restore it.
+Task: Change Example A's assertion to `assert sum(1001) == 500_500L && sum(1000) == (1000L * 1001) / 2;`, predict whether it holds, then run and restore it.
 
 Correctness is checked independently before timing. A faster wrong computation is not a useful optimization.
 
@@ -32,13 +32,13 @@ The unchanged code is the part that Example A adds:
 assert sum(1000) == 500_500L && sum(1000) == (1000L * 1001) / 2;
 ```
 
-**Expected:** The changed run fails with an `AssertionError` from the assertion on `sum(1000) == 500_500L && sum(1000) == (1000L * 1001) / 2`. Restoring the original line brings back the worked observation: 500500.
+**Expected:** The edited run fails with an `AssertionError` from the assertion on `sum(1000) == 500_500L && sum(1000) == (1000L * 1001) / 2`.
 
-**Verify:** Compare your written prediction with the reported `AssertionError` and its stack-trace line, and explain why the edited condition is false for the values that satisfy `sum(1000) == 500_500L && sum(1000) == (1000L * 1001) / 2`. After restoring the line, the program completes without an `AssertionError` again.
+**Verify:** Explain why the edited assertion is false for the values that satisfy `sum(1000) == 500_500L && sum(1000) == (1000L * 1001) / 2`.
 
 ## Exercise 2: Warm up without hiding results: debug a regression
 
-Task: A regression changed one token in the code that Example B adds after Example A, so one line now reads `for (int i = 0; i < 100; i++) sink = sum(1001);`. Run Example B with that line, use the failing assertion to locate the defect and repair it without changing the assertion.
+Task: A regression in Example B's new code makes one line read `for (int i = 0; i < 100; i++) sink = sum(1001);`. Repair it using the failing assertion.
 
 The sink makes the result observable. This is a teaching safeguard, not a replacement for a dedicated benchmark harness such as JMH.
 
@@ -49,9 +49,9 @@ for (int i = 0; i < 100; i++) sink = sum(1000);
 assert sink == 500_500L;
 ```
 
-**Expected:** Before the repair the run fails with an `AssertionError` from the assertion on `sink == 500_500L`; after it the line reads `for (int i = 0; i < 100; i++) sink = sum(1000);` again and sink 500500 after warmup.
+**Expected:** The unrepaired run fails with an `AssertionError` from the assertion on `sink == 500_500L`; the repaired line reads `for (int i = 0; i < 100; i++) sink = sum(1000);`.
 
-**Verify:** Keep the failing and the repaired runs. Explain why the changed token alters the value tested by `sink == 500_500L` for this input.
+**Verify:** Explain how the changed token alters the value that `sink == 500_500L` tests.
 
 ## Exercise 3: Measure repeated work with a checksum
 
@@ -69,7 +69,7 @@ assert checksum == 10_010_000L && elapsed >= 0;
 
 **Expected:** checksum 10010000; elapsed nanoseconds nonnegative.
 
-**Verify:** Keep an assertion equivalent to `checksum == 10_010_000L && elapsed >= 0`. As a control, change `for (int i = 0; i < 20; i++) checksum += sum(1000);` to `for (int i = 0; i <= 20; i++) checksum += sum(1000);`: the run must fail with an `AssertionError` from the assertion on `checksum == 10_010_000L && elapsed >= 0`. Restore the line before continuing.
+**Verify:** Control: changing `for (int i = 0; i < 20; i++) checksum += sum(1000);` to `for (int i = 0; i <= 20; i++) checksum += sum(1000);` must fail the assertion on `checksum == 10_010_000L && elapsed >= 0`.
 
 ## Exercise 4: Record and read an actual JFR event
 
@@ -109,7 +109,7 @@ try {
 
 **Expected:** one matching event with the declared fields.
 
-**Verify:** Keep an assertion equivalent to `events.size() == 1 && events.get(0).getLong("input") == 100 && events.get(0).getLong("output") == 5050`. As a control, change `event.input = 100;` to `event.input = 101;`: the run must fail with an `AssertionError` from the assertion on `events.size() == 1 && events.get(0).getLong("input") == 100 && events.get(0).getLong("output") == 5050`. Restore the line before continuing.
+**Verify:** Control: changing `event.input = 100;` to `event.input = 101;` must fail the assertion on `events.size() == 1 && events.get(0).getLong("input") == 100 && events.get(0).getLong("output") == 5050`.
 
 ## Exercise 5: Collect a small timing distribution
 
@@ -131,7 +131,7 @@ assert samples.length == 5 && samples[0] >= 0 && samples[0] <= samples[4];
 
 **Expected:** five nonnegative samples; minimum<=maximum; checksums preserved.
 
-**Verify:** Keep an assertion equivalent to `samples.length == 5 && samples[0] >= 0 && samples[0] <= samples[4]`. As a control, change `long[] samples = new long[5];` to `long[] samples = new long[6];`: the run must fail with an `AssertionError` from the assertion on `samples.length == 5 && samples[0] >= 0 && samples[0] <= samples[4]`. Restore the line before continuing.
+**Verify:** Control: changing `long[] samples = new long[5];` to `long[] samples = new long[6];` must fail the assertion on `samples.length == 5 && samples[0] >= 0 && samples[0] <= samples[4]`.
 
 ## Exercise 6: Keep instrumented and uninstrumented claims separate
 
@@ -158,8 +158,10 @@ receipt.get("universal_speedup_claim").equals(false);
 
 **Expected:** metadata names 100 warmups and profiling false; universal claim false.
 
-**Verify:** Keep an assertion equivalent to `receipt.get("warmup_iterations").equals(100) && receipt.get("universal_speedup_claim").equals(false)`. As a control, change `100,` to `101,`: the run must fail with an `AssertionError` from the assertion on `receipt.get("warmup_iterations").equals(100) && receipt.get("universal_speedup_claim").equals(false)`. Restore the line before continuing.
+**Verify:** Control: changing `100,` to `101,` must fail the assertion on `receipt.get("warmup_iterations").equals(100) && receipt.get("universal_speedup_claim").equals(false)`.
 
 ## After comparing the answer
 
-Run the complete reference with assertions enabled, then return to your own implementation. Recreate one check with different values and explain its expected result before execution. A compiler error, an expected domain exception and an assertion failure represent different stages and should be reported separately. Preserve ownership boundaries when adapting file, network or concurrency examples. The reference never authorizes access to a shared service or deletion of learner state. Use a fresh tiny fixture when you need to distinguish two interpretations of an API contract.
+Change your copy of Exercise 5 to collect 20 samples and print the minimum, median and maximum; run it twice and note how much the median moves between runs.
+
+Run the complete reference with `java -ea Main` first; the [review routine](../STUDY-GUIDE.md#use-the-solutions) covers the rest.

@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cpp/solutions/cpp-026_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="cpp-026-explanations-and-reference-observations">cpp-026: explanations and reference observations<a class="heading-anchor" href="#cpp-026-explanations-and-reference-observations" aria-label="Link to this section">#</a></h2>
-<p>Attempt the learner tasks before opening this document. The executable reference checks the bounded normal and boundary examples; the six explanations below cover the deliberate changes and manual checks.</p>
+<p>The <a href="cpp-026_solution.cpp.html">executable reference</a> adds the oracle cases <code>total({}) == 0</code> and <code>total({-1, 0, 1}) == 0</code>. The explanations cover measurement hypotheses and why timing is observed rather than asserted. How to compare: <a href="../STUDY-GUIDE.md.html#compare-with-the-solutions">study guide</a>.</p>
 <h3 id="mechanism">Mechanism<a class="heading-anchor" href="#mechanism" aria-label="Link to this section">#</a></h3>
 <p>A debugger pauses a process so its call stack and local values can be inspected. A profile measures where work was spent. A hypothesis predicts an observation that can be checked. Debugging starts with the smallest reproducible discrepancy, while performance measurement needs a correctness check and a fixed workload.</p>
 <h3 id="detailed-reasoning">Detailed reasoning<a class="heading-anchor" href="#detailed-reasoning" aria-label="Link to this section">#</a></h3>

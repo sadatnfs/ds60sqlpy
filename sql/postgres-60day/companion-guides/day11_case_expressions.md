@@ -2,67 +2,13 @@
 
 ## How to run this lesson
 
-Start the Linux-container engine and run `./classroom` from the repository
-root. On Windows, use Ubuntu in WSL 2 or the thin
-`START_DOCKER_CLASSROOM.cmd` wrapper. Choose **PostgreSQL** on the shared
-`/classroom` home, then open **sql-11**. The
-[launcher guide](../../../docs/one-command-classroom.md) covers first preparation, strict resume and
-the saved project selection. No host Python or PostgreSQL installation is
-required for this browser route.
+Launch `./classroom` from the repository root, pick PostgreSQL and **sql-11**, and choose **Whole SQL lesson (psql)**. The lesson file opens a transaction on `advanced_sql_training`, points `search_path` at `training`, runs two queries and rolls back. The first labels the 50 largest orders with a size from `XL` down to `S`; the second counts units sold per product category in the last 30 and 90 days.
 
-1. Read the prerequisite and fixture notes before running the file. Use only
-   the local disposable `advanced_sql_training` database.
-2. Choose **Whole SQL lesson (psql)** for the cataloged learner script. This
-   preserves the lesson's reviewed psql directives, relative includes and
-   transaction behavior. **SQL snippet** is appropriate for ordinary SQL
-   statements, but is not a replacement for an entire script's setup.
-3. The **Course database** panel above the code shows whether the course
-   training tables are loaded. Missing tables load automatically before your
-   first run (or choose **Load course tables**) and stay loaded for later
-   lessons. **Reset training data** restores the original rows only when your
-   own changes made results differ; it keeps your saved code and notes.
-4. Edit the learner copy in the classroom and save your prediction before
-   running. Its whole-script workspace is
-   `.learning/sql/sql-11/lesson/workspace/sql/postgres-60day/day11_case_expressions.sql`.
-   For browser work this path is inside the Docker learning volume, not a
-   newly created host folder beside your checkout. The checked-in source
-   remains the answer-free starting artifact.
-5. Run the whole script and inspect the full transcript. The runner uses
-   `psql -X -v ON_ERROR_STOP=1 -f`. SELECT output has columns, rows and a row
-   count; DDL/DML has command tags; intentional checks may produce NOTICE
-   messages. An unexpected ERROR or nonzero exit is a failure to diagnose,
-   even when an earlier query printed plausible values.
-6. Verify the lesson's expected grain, ordering, constraints and declared
-   transaction or cleanup outcome. Keep required ROLLBACK statements.
-   The warehouse sequence and other explicitly stateful exercises explain
-   when state is committed. Read saved output without rerunning it when
-   reviewing an earlier attempt.
+Your editable copy is
+`.learning/sql/sql-11/lesson/workspace/sql/postgres-60day/day11_case_expressions.sql`.
+A quick experiment worth doing there: swap the first two `WHEN` lines of Example 1 so `>= 300` comes before `>= 1000`, rerun, and watch every `XL` turn into `L`.
 
-If a relation is missing, inspect the lesson's required fixture and predecessor
-rather than guessing a new table definition. If authentication or runtime
-readiness fails, use `./classroom status` and the setup guide. Keep credentials
-out of SQL, notebooks, screenshots and committed files. Repair the first error
-before trusting partial output, and reveal separate solutions only when you
-want to compare after an attempt.
-
-### Optional contributor notebook route
-
-For notebook work, deliberately prepare the Linux/WSL contributor environment
-from [CONTRIBUTING.md](../../../CONTRIBUTING.md), including a compatible psql client and
-the notebook dependencies. Generate this lesson's private workspace through
-the maintained CLI:
-
-```sh
-uv run --no-sync python scripts/course.py sql notebook sql-11
-```
-
-Open the printed notebook path in that environment's JupyterLab. It uses the
-same catalog-derived learner-copy layout in that contributor checkout and
-executes the complete script through psql. Its host-side state is separate
-from the Docker browser's named volume. Follow
-[guided SQL notebooks](../../../docs/guided-sql-notebooks.md) for explicit local connection
-selection and kernel setup. Notebook generation does not execute SQL or
-authorize a reset.
+If the classroom does not start, see the study guide on [how to open a lesson in the classroom](../../STUDY-GUIDE.md#run-a-lesson-in-the-classroom). The [notebook setup intended for contributors](../../STUDY-GUIDE.md#optional-contributor-notebook-route) is not needed for this lesson.
 
 ## Level and prerequisites
 
@@ -74,28 +20,13 @@ authorize a reset.
 
 ## A beginner's mental model for this lesson
 
-A **table** stores facts in named columns. A **row** is one occurrence at the
-table's declared grain. A query creates a temporary **result set**: rows printed
-on screen are not automatically stored. The key vocabulary for this lesson is Searched CASE, Simple CASE, Short-circuit ordering. Its worked SQL reads or creates `orders`, `order_items`, `products`.
+`CASE` is an expression, not a statement: it produces one value per row, so it can sit in the `SELECT` list, inside `SUM(...)`, in `ORDER BY` or in `WHERE`. It never changes how many rows a query returns. Example 1 still prints 50 rows and the Exercise 1 answer still prints all 4,362 orders, each with one extra label column.
 
-Before writing a query, complete this sentence: “One output row represents
-___.” Joins can multiply rows, filters can remove them, grouping can collapse
-many rows into one, and window functions can add calculations while preserving
-row count. For a normal analytical `SELECT`, use this logical reading order:
-`FROM`/`JOIN` (including `ON`) → `WHERE` → `GROUP BY`/aggregates → `HAVING` →
-window calculations → `SELECT` → `ORDER BY` → `LIMIT`. PostgreSQL may execute a
-different physical plan while preserving those semantics.
+A **searched CASE** lists conditions, `CASE WHEN o.total_amount >= 1000 THEN 'XL' WHEN ...`, and PostgreSQL tests them top to bottom. **First match wins**: as soon as one condition is true, the rest are skipped, which is why the highest threshold must come first. A **simple CASE**, `CASE p.method WHEN 'card' THEN 'Card' ...`, compares one expression with a list of values using `=`. Because `NULL = NULL` is not true, a simple `CASE` can never match a `NULL`; test `IS NULL` in a searched branch instead.
 
-The worked walkthrough's lesson-specific task is: Take a three-tier amount classification and test values just below, exactly at, and just above each boundary. Because `CASE` stops at the first match, place the most specific or highest-threshold conditions before broader ones.
-Exercise 1 expects this result: one row per order with exactly one size label. Predict keys, row count, `NULL` behavior,
-and ordering before running. Afterwards, compare keys/counts/totals with an
-independent control. A blank string, SQL `NULL`, numeric zero, and a missing row
-are different facts; use `COALESCE` only after choosing which meaning the
-business question requires.
+If no branch matches and there is no `ELSE`, the result is `NULL`. Writing `CASE WHEN o.total_amount >= 500 THEN 'large' END` over `orders` leaves 1,952 orders with no label at all. Every branch must also produce the same type: mixing `'missing'` with the integer `0` makes PostgreSQL try to read `'missing'` as an integer and fail.
 
 ## Two worked SQL examples
-
-These worked excerpts come from `sql/postgres-60day/day11_case_expressions.sql`. Use **Whole SQL lesson (psql)** in the unified classroom for the complete file, including its fixture and transaction context. The optional contributor notebook and prepared `psql` routes are described above.
 
 ### Example 1
 
@@ -120,9 +51,9 @@ ORDER BY
 LIMIT 50;
 ```
 
-**How to read it:** Example 1: Start with `orders` in `FROM`/`JOIN`. The final `SELECT` displays `order_id`, `total_amount`, and `order_size`. `ORDER BY` determines presentation order and the final `LIMIT 50` caps displayed rows. Before running, predict the row grain, row count, `NULL` positions, and first/last key; afterwards, compare each prediction with the transcript.
+**How to read it:** The searched `CASE` checks 1,000, then 300, then 100, and anything below falls to `ELSE 'S'`. Because the order is descending, an order of 1,312.39 matches the first branch and never reaches the others. `ORDER BY o.total_amount DESC, o.order_id` with `LIMIT 50` keeps the 50 largest orders.
 
-**Expected result/shape:** Example 1 returns one row per `order_id`, capped at 50 rows with columns `order_id`, `total_amount`, and `order_size` from `orders`. Use a direct count or grouped aggregate over those same source relations as the control; check ordering only when this query has an `ORDER BY`, and inspect `NULL` only for columns this example can produce.
+**Expected result/shape:** 50 rows, all labeled `XL`: the largest total is 1,432.49 and the 50th is 1,312.39, both above 1,000. Sixteen orders share the top amount of 1,432.49 (order 104 first), so the `o.order_id` tie-breaker decides which of them print first. Across all 4,362 orders the same rule gives 334 `XL`, 2,807 `L`, 872 `M` and 349 `S`; remove the `LIMIT` and group by the label to see that.
 
 ### Example 2
 
@@ -152,9 +83,9 @@ ORDER BY
   p.category;
 ```
 
-**How to read it:** Example 2: Start with `order_items`, `orders`, and `products` in `FROM`/`JOIN`; let `GROUP BY` collapse rows to its grouping keys. The final `SELECT` displays `category`, `qty_30d`, and `qty_90d`. `ORDER BY` determines presentation order. Before running, predict the row grain, row count, `NULL` positions, and first/last key; afterwards, compare each prediction with the transcript.
+**How to read it:** Each joined row is one order line with its order date and product category. The first `CASE` returns the line's quantity when the order is less than 30 days old and 0 otherwise, so `SUM` adds only recent units; the second does the same for 90 days. Both totals come from one pass over the 13,085 lines, grouped into six categories.
 
-**Expected result/shape:** Example 2 returns one grouped row per `category` with columns `category`, `qty_30d`, and `qty_90d` from `order_items`, `orders`, and `products`. Use a direct count or grouped aggregate over those same source relations as the control; check ordering only when this query has an `ORDER BY`, and inspect `NULL` only for columns this example can produce.
+**Expected result/shape:** Six rows, one per category. In our check Sports led with 347 units in 30 days and 1,251 in 90, and Beauty was last with 290 and 1,217. Every 90-day figure is at least the 30-day figure, because a 30-day-old line also passes the 90-day test. `now()` moves, so your numbers will differ from ours; the `ELSE 0` keeps a quiet category at 0 instead of `NULL`.
 
 ## Learning objectives
 
@@ -169,71 +100,67 @@ ORDER BY
 
 ## Worked example / walkthrough
 
-Take a three-tier amount classification and test values just below, exactly at,
-and just above each boundary. Because `CASE` stops at the first match, place the
-most specific or highest-threshold conditions before broader ones.
+Test any tiered `CASE` on values just below, exactly at, and just above each threshold before trusting it on real rows. For the Exercise 1 rule, `VALUES (99.99), (100), (499.99), (500)` should give `small`, `medium`, `medium` and `large`. No order in the fixture costs exactly 100 or 500, so the table alone would never reveal whether you wrote `>` where `>=` was meant; the four test values do.
 
 ## Practice assumptions and review method
 
 - **Focus:** Use `CASE` to encode mutually exclusive business rules in deliberate order while preserving NULL as a distinct state when required.
 - **Assumptions:** Searched `CASE` uses first-match wins. Status/category labels are illustrative course rules, not universal business definitions.
 - **Failure to watch for:** Overlapping broad conditions placed first make later branches unreachable; an omitted `ELSE` produces NULL.
-- **Review loop:** predict the row grain and NULL/order behavior, run the
-  query, inspect a bounded sample, and reconcile counts or totals before
-  accepting the result.
+- **Review loop:** after each labeling query, count rows per label and check that the counts add up to the unlabeled row count, then confirm no label is `NULL` unless the rule says it should be.
 
 ## Exercises
 
 Use `CASE` to encode mutually exclusive business rules in deliberate order while preserving NULL as a distinct state when required.
 
-Attempt each prompt in a scratch SQL file before opening the solution.
-For every result, write its row grain and expected shape first.
+For each prompt, list the labels the `CASE` can produce and the order its branches must be tested in before writing any SQL. Then guess how many rows each label will get, and decide what a `NULL` input should become.
 
 1. **Query writing:** Classify orders as small, medium, or large by total amount.
+   **Wager:** which label will be the most common across 4,362 orders?
    **Progressive hint:** Validate boundaries and place the highest threshold first.
    **Inputs/evidence:** For sql-11 Exercise 1, read from `orders` and label every order with a searched `CASE`: `large` when `total_amount >= 500`, `medium` when it is at least 100, otherwise `small`; no `GROUP BY` is needed.
-   **Expected result/shape:** For sql-11 Exercise 1, expected output: One row per order with exactly one size label. The final columns are `order_id`, `total_amount`, and `order_size`. The final order is `o.order_id`.
+   **Expected result/shape:** For sql-11 Exercise 1, return 4,362 rows, one per order, each with exactly one label; order 1 (240.20) is `medium`, order 3 (601.73) is `large`, and order 5 (105.84) is `medium`. The final columns are `order_id`, `total_amount`, and `order_size`. The final order is `o.order_id`.
    **Verify:** For sql-11 Exercise 1, confirm 4362 rows, one per `order_id`, and that counting the labels gives 2410 `large`, 1603 `medium`, and 349 `small`; then evaluate the same `CASE` on `VALUES (99.99), (100), (499.99), (500)` and expect `small`, `medium`, `medium`, and `large`.
 2. **Query writing:** Count order statuses in paid-like, open, returned, and other buckets with conditional aggregation.
+   **Wager:** do the first three counts add up to the fourth?
    **Progressive hint:** Each `COUNT(*) FILTER` or `SUM(CASE...)` should state its denominator.
-   **Inputs/evidence:** For sql-11 Exercise 2, read from `orders`. Compute `paid_like`, `open_orders`, `returned_orders`, and `all_orders` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.
-   **Expected result/shape:** For sql-11 Exercise 2, expected output: One summary row. The final columns are `paid_like`, `open_orders`, `returned_orders`, and `all_orders`.
-   **Verify:** For sql-11 Exercise 2, evaluate each of `open_orders`, `returned_orders`, and `all_orders` in a separate control `SELECT` over `orders`; require one final row and compare every value. Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
+   **Inputs/evidence:** For sql-11 Exercise 2, count the 4,362 `orders` rows four ways in one pass with `COUNT(*) FILTER (WHERE ...)`: `paid`, `shipped`, or `delivered` as `paid_like`, `placed` as `open_orders`, `returned` as `returned_orders`, and all rows as `all_orders`.
+   **Expected result/shape:** For sql-11 Exercise 2, return one row: `paid_like` 2617, `open_orders` 873, `returned_orders` 872, and `all_orders` 4362. The final columns are `paid_like`, `open_orders`, `returned_orders`, and `all_orders`.
+   **Verify:** For sql-11 Exercise 2, confirm `GROUP BY status` returns shipped 873, paid 872, and delivered 872 (adding up to 2617), placed 873, and returned 872, and that the three filtered counts add up to `all_orders`. Inside a rolled-back transaction, set order 1 from `paid` to `cancelled`; `paid_like` must drop to 2616 while `all_orders` stays 4362.
 3. **Query writing:** Label missing customer segments separately from known segment values.
+   **Wager:** how many of the four seeded segments count as premium?
    **Progressive hint:** Test `IS NULL` before comparing text values.
    **Inputs/evidence:** For sql-11 Exercise 3, read from `customers` and label each `segment` as `missing` when it is NULL, `premium` for `gold` or `platinum`, and `core` otherwise; return one row per customer.
-   **Expected result/shape:** For sql-11 Exercise 3, expected output: One row per customer with an explicit segment label. The final columns are `customer_id`, `segment`, and `segment_group`. The final order is `c.customer_id`.
+   **Expected result/shape:** For sql-11 Exercise 3, return 500 rows, one per customer: customer 1 (`standard`) and customer 2 (`silver`) map to `core`, customer 3 (`gold`) and customer 4 (`platinum`) map to `premium`. The final columns are `customer_id`, `segment`, and `segment_group`. The final order is `c.customer_id`.
    **Verify:** For sql-11 Exercise 3, confirm 500 rows, one per `customer_id`; the seed gives 250 `premium` and 250 `core` rows and no `missing` row because every seeded customer has a segment. In a transaction you roll back, set one `segment` to NULL and confirm that customer becomes `missing`, not `core`.
 4. **Prediction:** Predict the label for 500 when `>= 100` appears before `>= 500`, then repair the branch order.
+   **Wager:** with the branches in the wrong order, how many of 50, 100 and 500 get the right label?
    **Progressive hint:** First-match wins, so specific/high thresholds must precede broader/lower ones.
-   **Inputs/evidence:** For sql-11 Exercise 4, read from the inline `VALUES` fixture. Build the answer toward `amount`, and `corrected_label`; keep `corrected_label` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-11 Exercise 4, expected output: A value of 500 is labeled high. The final columns are `amount`, and `corrected_label`. The final order is `amount`.
-   **Verify:** For sql-11 Exercise 4, reselect the returned keys directly from the source; require unique `corrected_label` where the expected grain is one row per key and confirm the projected `amount`, and `corrected_label` against the inline `VALUES` fixture. Add one source row with a new `corrected_label`; verify the result gains exactly one row carrying that `corrected_label` value.
+   **Inputs/evidence:** For sql-11 Exercise 4, label the three amounts in the inline `VALUES (50), (100), (500)` fixture with a searched `CASE` that tests `amount >= 500` before `amount >= 100`, so the first matching branch is the most specific.
+   **Expected result/shape:** For sql-11 Exercise 4, return 3 rows: 50 is `low`, 100 is `medium`, and 500 is `high`. The final columns are `amount`, and `corrected_label`. The final order is `amount`.
+   **Verify:** For sql-11 Exercise 4, confirm the 3 labels above, then swap the two `WHEN` branches so `amount >= 100` is tested first; 500 must come back as `medium`, which is the bug being corrected. Add `499.99` and `99.99` to the fixture; the corrected `CASE` must return `medium` and `low`.
 5. **Debugging:** Replace a CASE expression that returns mixed numeric and text types with one consistent output type.
+   **Wager:** run the broken version and guess whether the error names `'missing'` or the number.
    **Progressive hint:** All result branches must resolve to a compatible PostgreSQL type.
-   **Inputs/evidence:** For sql-11 Exercise 5, read from the inline `VALUES` fixture. Build the answer toward `value`, and `value_state`; keep `value` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-11 Exercise 5, expected output: Three rows with text labels. The final columns are `value`, and `value_state`. The final order is `value NULLS FIRST`.
-   **Verify:** For sql-11 Exercise 5, reselect the returned keys directly from the source; require unique `value` where the expected grain is one row per key and confirm the projected `value`, and `value_state` against the inline `VALUES` fixture. Add one source row with a new `value`; verify the result gains exactly one row carrying that `value` value.
+   **Inputs/evidence:** For sql-11 Exercise 5, classify the three values in the inline `VALUES (NULL::integer), (0), (2)` fixture with a `CASE` whose first branch is `value IS NULL`.
+   **Expected result/shape:** For sql-11 Exercise 5, return 3 rows: `NULL` is `missing`, 0 is `zero`, and 2 is `nonzero`, with the `NULL` row first. The final columns are `value`, and `value_state`. The final order is `value NULLS FIRST`.
+   **Verify:** For sql-11 Exercise 5, confirm 3 rows with three different `value_state` labels. Remove the `IS NULL` branch and the `NULL` row must fall through to `ELSE` as `nonzero`, because `NULL = 0` is unknown rather than true; drop `NULLS FIRST` and the `NULL` row must sort last.
 6. **Extension:** Create payment-method display labels and preserve unknown future methods with an explicit fallback.
+   **Wager:** which method has the most payments?
    **Progressive hint:** A simple CASE fits equality mapping; `ELSE` prevents silent NULL labels.
    **Inputs/evidence:** For sql-11 Exercise 6, read from `payments`, group by `method`, count payments per method, and map each method to a display label with a simple `CASE p.method WHEN ... END` that keeps an `ELSE 'Other'` fallback.
-   **Expected result/shape:** For sql-11 Exercise 6, expected output: One row per payment method and display label. The final columns are `method`, `method_label`, and `payment_count`. The final order is `p.method`.
+   **Expected result/shape:** For sql-11 Exercise 6, return 4 rows, one per payment method: `bank` as `Bank transfer` (886), `card` as `Card` (860), `credit` as `Store credit` (1050), and `paypal` as `PayPal` (1040). The final columns are `method`, `method_label`, and `payment_count`. The final order is `p.method`.
    **Verify:** For sql-11 Exercise 6, confirm 4 rows (`bank` 886, `card` 860, `credit` 1050, `paypal` 1040) whose counts add up to `SELECT COUNT(*) FROM payments` (3836); then evaluate the same `CASE` on `VALUES ('crypto')` and confirm it returns `Other`, not NULL.
 
 ## Common mistakes and how to recover
 
-- **Lesson-specific semantic mistake:** Overlapping broad conditions placed first make later branches unreachable; an omitted `ELSE` produces NULL.
-- **Unexpected row count:** display keys before aggregates, count rows after
-  each join/filter stage, and find the first stage whose grain differs from the
-  contract. Do not hide fanout with `DISTINCT`.
-- **Unexpected `NULL` or missing row:** decide whether the fact is unknown,
-  inapplicable, zero, or absent before using `COALESCE`; inspect outer-join
-  predicate placement and empty-input aggregate behavior.
-- **Unstable top/first/last output:** add `ORDER BY` with a unique final
-  tie-breaker before `LIMIT` or order-sensitive windows/aggregates.
-- **`psql` stops on an error:** fix the first error shown by
-  `ON_ERROR_STOP`, restore the declared transaction/setup state, and rerun the
-  complete file. A later successful statement does not validate a partial run.
+- **A broad branch first:** `CASE WHEN amount >= 100 THEN 'medium' WHEN amount >= 500 THEN 'high' ...` labels 500 as `medium`; the second branch can never fire. Put the highest threshold first, or write closed ranges such as `amount >= 100 AND amount < 500`.
+- **Forgetting `ELSE`:** unmatched rows get `NULL`. Over `orders`, a `CASE` with only the `>= 500` branch leaves 1,952 rows unlabeled. Add an explicit `ELSE`, even one like `'Other'`, so new values stay visible.
+- **Mixed branch types:** `THEN 'missing' ... THEN 0` fails with `invalid input syntax for type integer: "missing"`; casting the text gives `CASE types integer and text cannot be matched`. Make every branch text, as Exercise 5 does.
+- **`NULL` in a simple CASE:** `CASE segment WHEN NULL THEN ...` never matches, because it compares with `=`. Use a searched branch, `WHEN segment IS NULL`.
+- **Expecting `CASE` to guard constants:** `CASE WHEN total_amount > 0 THEN 1 ELSE 1/0 END` raises `division by zero` even though no order reaches the `ELSE`, because PostgreSQL folds the constant `1/0` before reading rows. Guarding a column division such as `CASE WHEN v = 0 THEN NULL ELSE 10 / v END` does work.
+
+When the file stops on an error, fix that first error and rerun the whole file; the study guide's [advice for runs that stop early](../../STUDY-GUIDE.md#recover-from-common-failures) has the details.
 
 ## Self-check
 
@@ -271,9 +198,7 @@ Further reading
 
 ## Ask an AI tutor about this lesson
 
-An AI tutor is optional; the guide, learner SQL, PostgreSQL, and expected checks are
-enough to complete the lesson offline. If you want a patient tutor, copy this
-prompt after opening the repository in the AI tutor:
+You can finish this lesson without a tutor. If you use one, ask it to predict the Exercise 4 labels with the branches in the wrong order, then check its answer against `psql`. The study guide's [guidance on AI tutoring](../../STUDY-GUIDE.md#use-an-ai-tutor-optional) explains how to ask for hints instead of complete queries.
 
 ```text
 Tutor me through sql-11: CASE Expressions and Conditional Logic.

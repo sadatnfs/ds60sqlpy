@@ -113,21 +113,18 @@ Imagine the orders table carries a PII classification in Atlas. Whether this que
 
 ## Complete worked source
 
-This is a project-only command notebook. Read and edit it in the classroom; run its explicitly labeled commands from the copied owned Docker workshop. The classroom does not execute these service commands.
+The classroom does not execute these service commands. See the [workshop rules](../STUDY-GUIDE.md#workshop-notebooks).
 
 # Atlas apache-073 prepared command notebook
 
-Copy the owned Atlas project and read PREPARATION.md. Default local server
-execution is omitted until a supported native Java 8 graph/index stack exists.
+In the copied Atlas project, `client.py` reads credentials only from the untracked environment file and refuses an endpoint URL carrying a user, password, path or query. `plan` needs no credentials at all.
 
 ```bash
 bash run.sh prepare
 bash run.sh plan
 ```
 
-These actions validate a portable native Docker client and print original
-payloads without contacting a server. For an explicitly prepared owned fixture
-server with untracked credentials, deliberate apply and read-only check are:
+With fixture credentials for a prepared owned server, `check` also repeats one type lookup with a deliberately wrong password and expects 401 or 403:
 
 ```bash
 bash run.sh apply
@@ -136,8 +133,7 @@ bash run.sh check
 
 Check requires an actual 401 or 403 for a deliberately invalid fixture credential. A valid-principal authorization comparison and actual denied data-engine query remain independent tests.
 
-Prepared payloads are not actual Atlas observations. Never place credentials or
-Authorization headers in notebooks, source, command arguments or receipts.
+A rejected bad password shows that authentication works. It does not show what a valid but unprivileged user may do, and an Atlas metadata policy is not a data-engine denial.
 
 ## Primary references
 

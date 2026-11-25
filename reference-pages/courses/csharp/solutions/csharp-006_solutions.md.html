@@ -194,7 +194,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/csharp/solutions/csharp-006_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="csharp-006-explanation-and-comparison">csharp-006: explanation and comparison<a class="heading-anchor" href="#csharp-006-explanation-and-comparison" aria-label="Link to this section">#</a></h2>
-<p>Attempt the six guide tasks before opening this comparison. The executable reference is <a href="csharp-006_solution.cs.html">csharp-006_solution.cs</a>. It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.</p>
+<p>Reference program: <a href="csharp-006_solution.cs.html">csharp-006_solution.cs</a>, covering both examples and the executed answers.</p>
+<p>Attempt the tasks first; see <a href="../STUDY-GUIDE.md.html#comparing-with-the-explanation">comparing with the explanation</a>.</p>
 <h3 id="why-the-two-examples-differ">Why the two examples differ<a class="heading-anchor" href="#why-the-two-examples-differ" aria-label="Link to this section">#</a></h3>
 <p><strong>Sum with a maintained invariant:</strong> Before each iteration, sum equals the sum of values already visited. Zero is the identity that makes the invariant true initially. The sum is 12 and the empty sum is zero.</p>
 <p><strong>Locate the first match:</strong> Stopping at the first match is part of the contract. Without break, the same loop could return the last match. The first 8 is at index 1; 9 is absent.</p>
@@ -270,14 +271,14 @@ Check<span class="syntax-punctuation">(</span>FirstIndex<span class="syntax-punc
 <p><strong>How to verify.</strong> Change <code>return i;</code> to remember <code>i</code> and continue the loop; the repeated check must then fail with index 2. Restore the early return and all four checks pass.</p>
 <h4 id="task-6-transfer-and-justify">Task 6: Transfer and justify<a class="heading-anchor" href="#task-6-transfer-and-justify" aria-label="Link to this section">#</a></h4>
 <p>Design a bounded retry loop and explain both its invariant and its stopping argument.</p>
-<p>No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry <strong>Invariant</strong>, and state one limitation of your choice.</p>
+<p>No single answer exists; extend task 3 using the <a href="../STUDY-GUIDE.md.html#open-transfer-tasks">open transfer routine</a>.</p>
 <h3 id="mechanism-and-diagnostic-reasoning">Mechanism and diagnostic reasoning<a class="heading-anchor" href="#mechanism-and-diagnostic-reasoning" aria-label="Link to this section">#</a></h3>
 <p>A loop repeats a state transition. To understand it, state what is true before the first iteration and what remains true after each iteration. This repeated truth is an invariant. A second argument explains termination: some bounded quantity moves toward a stopping condition. A correct-looking body can still fail because its boundary executes once too often or never stops.</p>
 <p><code>foreach</code> expresses traversal of an existing sequence and usually avoids manual index bookkeeping. Use an index when the position itself matters, but relate the valid index range to the collection length. Empty inputs are especially revealing because the initial state becomes the final result without any iteration.</p>
 <p><code>for (initial; condition; update)</code> initializes once, checks before each body, and updates after each body. For an array of Length n, valid indices are zero through n minus one. <code>break</code> exits the loop; <code>continue</code> skips the remainder of one iteration.</p>
 <p>Loop indices count from zero while lengths count elements. A sentinel such as -1 must be checked before indexing. Mutating a collection during enumeration can invalidate the traversal contract.</p>
 <h3 id="review-before-continuing">Review before continuing<a class="heading-anchor" href="#review-before-continuing" aria-label="Link to this section">#</a></h3>
-<p>Run the reference and confirm that it prints <code>csharp-006: passed</code>, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.</p></article>
+<p>Run the reference and confirm it prints <code>csharp-006: passed</code>, then rerun the guide&#x27;s counterexample.</p></article>
   </main>
 </body>
 </html>

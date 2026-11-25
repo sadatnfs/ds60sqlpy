@@ -239,15 +239,15 @@ supported <span class="syntax-operator">=</span> protocol<span class="syntax-pun
     <span class="syntax-tag">historyShared</span><span class="syntax-punctuation">:</span> true</code></pre>
 <p>From server-config.example.yaml, historyShared true lets recipients request older versions and change data feed ranges. Without it, a query with a version or timestamp is refused even if the client supports it. Capability is the intersection of three things: the server version, the table settings and the client implementation, so check each one before blaming the others.</p>
 <h3 id="complete-worked-source">Complete worked source<a class="heading-anchor" href="#complete-worked-source" aria-label="Link to this section">#</a></h3>
-<p>This is a project-only command notebook. Read and edit it in the classroom; run its explicitly labeled commands from the copied owned Docker workshop. The classroom does not execute these service commands.</p>
+<p>The classroom does not execute these service commands. See the <a href="../STUDY-GUIDE.md.html#workshop-notebooks">workshop rules</a>.</p>
 <h2 id="delta-sharing-apache-079-prepared-command-notebook">Delta Sharing apache-079 prepared command notebook<a class="heading-anchor" href="#delta-sharing-apache-079-prepared-command-notebook" aria-label="Link to this section">#</a></h2>
-<p>Copy the owned Delta Sharing project and follow PREPARATION.md. Delta Sharing belongs to Delta Lake/Linux Foundation. The offline preparation actions are:</p>
+<p>In the copied Delta Sharing project, <code>plan</code> prints <code>basic Parquet/minReaderVersion1</code> as the supported protocol before any network call. That string is the whole compatibility promise of this client:</p>
 <pre class="highlighted-code"><code class="language-bash">bash run.sh prepare
 bash run.sh plan</code></pre>
-<p>For a separately prepared actual owned reference server and untracked recipient profile, the bounded native Docker protocol client runs with:</p>
+<p>On a prepared reference server, <code>check</code> refuses any reader version other than 1, partitioned files and deletion vector entries before it materializes a single row:</p>
 <pre class="highlighted-code"><code class="language-bash">bash run.sh check</code></pre>
 <p>The portable client rejects unsupported protocol/features before data reads. Advanced CDF/Delta/deletion-vector behavior is omitted until a supported native client and real server exchange are qualified.</p>
-<p>The classroom Markdown pad does not start a service. Source configuration and unit policy fixtures are not actual reference-server receipts. Keep credentials and signed URL query strings out of all published source and evidence.</p>
+<p>Change data feed, deletion vectors and Delta format responses stay outside this client. For those tables a refusal is the correct result, not a failure to work around.</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
 <ul>
 <li><a href="https://github.com/delta-io/delta-sharing/blob/v1.4.1/PROTOCOL.md">Delta Sharing protocol</a></li>

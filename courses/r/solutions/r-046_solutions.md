@@ -1,6 +1,6 @@
 # r-046: reference reasoning
 
-Use the [complete reference](r-046_reference.R) with the guide's declared inputs and runtime. Every worked example is also a standalone script.
+Run the [complete reference](r-046_reference.R) under the [run rules](../STUDY-GUIDE.md#run-a-chapter).
 
 ## Why the implementation has this shape
 
@@ -108,4 +108,6 @@ PCA optimizes representation variance, not target prediction or causal identific
 
 ## What the checks establish
 
-The reference makes 7 `stopifnot()` checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.
+The checks confirm that the unscaled first loading on long has magnitude 10 over the square root of 101, that scaling gives both loadings magnitude one over the square root of 2, that scores times the transposed rotation rebuild the preprocessed data, including after flipping a loading and its scores together, that a constant column cannot be scaled, that a manual projection matches `predict()` on new rows, and that variance shares sum to 1. They do not assign meaning to a component.
+
+The reference makes 7 `stopifnot()` checks; see [what a passing run proves](../STUDY-GUIDE.md#what-a-passing-run-proves).

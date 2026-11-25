@@ -4,8 +4,6 @@
 
 A .cu translation unit can contain ordinary host functions and CUDA device functions. nvcc coordinates separate compilation paths, invokes a supported host compiler and links the CUDA runtime. PTX is a virtual instruction representation; a cubin holds device machine code for a target architecture. An executable can package several device images in a fat binary. Loading may select a compatible image or invoke supported JIT compilation of PTX. This explains why source compilation, host linking, device loading and kernel execution can fail at different times. Header suffix .cuh is a convention, not an instruction that executes anything.
 
-The separate [CPU reference](../references/cuda-011_cpu.py) checks the chapter's bounded model. It does not execute CUDA or establish GPU timing. Compare after attempting the worksheet or explicitly choosing to reveal solutions.
-
 ## Exercise 1
 
 The manual lab command is `nvcc -std=c++17 -O2 -lineinfo main.cu -o main`. The input is main.cu; `-o main` names the executable. `./main` runs that file from the current directory. The toolkit's default target must support the actual device. A release build later needs deliberately selected architecture targets, not guessed values from a tutorial.
@@ -78,12 +76,16 @@ Record toolkit and host compiler, target architectures/PTX policy, linked librar
 
 **How to verify:** Compare the recorded targets with a fresh device's compute capability before deploying.
 
+## Self-check answers
+
+1. **What is the difference between PTX and a cubin?** PTX is a virtual instruction form that can be JIT compiled; a cubin is machine code for one target architecture.
+2. **Which diagnostic class is an undefined host function?** A host link error, not a device or loading problem.
+3. **What should a release record include for a CUDA binary?** Toolkit version, target architectures, host compiler, build flags and the commit, plus later runtime receipts per device.
+
 ## Numerical reference and its limits
 
-The complete CPU model is [here](../references/cuda-011_cpu.py). Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It does not claim CUDA execution, concurrency safety or a performance measurement.
+The [CPU reference](../references/cuda-011_cpu.py) reproduces worked example 1 and prints `source -> host/device compilation -> link -> load -> execute -> validate`.
 
 ## Transfer review
 
 Record toolkit and host compiler, target architectures/PTX policy, linked library versions, source revision and actual device runtime tests.
-
-A complete explanation must name its inputs, the unchanged mathematical contract, the changed boundary or resource condition, and the evidence still needed on actual hardware. Preserve a CPU baseline even after a GPU path becomes available.

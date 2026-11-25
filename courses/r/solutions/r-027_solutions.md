@@ -1,6 +1,6 @@
 # r-027: reference reasoning
 
-Use the [complete reference](r-027_reference.R) with the guide's declared inputs and runtime. Every worked example is also a standalone script.
+Run the [complete reference](r-027_reference.R) under the [run rules](../STUDY-GUIDE.md#run-a-chapter).
 
 ## Why the implementation has this shape
 
@@ -108,4 +108,6 @@ It estimates the R object size, excluding a complete process/peak/shared-memory 
 
 ## What the checks establish
 
-The reference makes 8 `stopifnot()` checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.
+The checks confirm finite numeric input, agreement between the loop and vectorized versions within 1e-12, row means of 3 and 4 for the small matrix, equal results from the growing and preallocated loops and `rowMeans()`, NA propagation unless `na.rm = TRUE`, and nonnegative timing and profile fields. They deliberately do not assert which version is faster, because timings vary between runs and machines.
+
+The reference makes 8 `stopifnot()` checks; see [what a passing run proves](../STUDY-GUIDE.md#what-a-passing-run-proves).

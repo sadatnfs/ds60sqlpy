@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cuda/python/solutions/cuda-075_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="cuda-075-explained-solutions">cuda-075: explained solutions<a class="heading-anchor" href="#cuda-075-explained-solutions" aria-label="Link to this section">#</a></h2>
-<p>These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.</p>
+<p>Compare with your <a href="../lessons/cuda-075.md.html">worksheet</a> attempt.</p>
 <h3 id="exercise-1-trace-a-rectangular-tile">Exercise 1: Trace a rectangular tile<a class="heading-anchor" href="#exercise-1-trace-a-rectangular-tile" aria-label="Link to this section">#</a></h3>
 <p>List rows and columns independently.</p>
 <p><strong>Approach.</strong> Pick a small tile, for example two rows by three columns starting at row 0 column 0, and write the row list <code>[0, 1]</code> and the column list <code>[0, 1, 2]</code> separately before forming the six coordinate pairs.</p>
@@ -231,9 +231,19 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Why it is correct here.</strong> A 2D launch rounds the number of blocks up in both x and y. Threads past the last column exist in every block row, and threads past the last row exist in every block column, so each coordinate needs its own bound.</p>
 <p><strong>A plausible wrong approach.</strong> Guarding only the flat offset with <code>offset &lt; height*width</code> lets a thread with column 3 and row 0 in a width-3 image pass, because its offset 3 is valid. It then writes into row 1, column 0, corrupting another pixel.</p>
 <p><strong>How to verify.</strong> Use a 5 by 5 image with 4 by 4 blocks so both tails exist. Count the threads that pass the guard: it must be exactly 25, and the set of offsets must be 0 to 24 with no duplicates.</p>
+<h3 id="self-check-answers">Self-check answers<a class="heading-anchor" href="#self-check-answers" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>Why must the boundary policy be stated as part of correctness?</strong> Clamp, zero padding, reflect and valid-only output give different answers at the edges; <code>[3,6,9]</code> becomes <code>[4,6,8]</code> with clamping but <code>[3,6,5]</code> with zero padding.</li>
+</ol>
+<ol start="2">
+<li><strong>What is the flat offset of row 1, column 2 in a row-major 2 by 3 image?</strong> <code>1 * 3 + 2 = 5</code>. Swapping row and column would compute a different address that can fall outside the allocation.</li>
+</ol>
+<ol start="3">
+<li><strong>Why does a rectangular launch need two independent guards?</strong> Height and width can each leave a different partial tail, so a thread may be valid in one coordinate and out of range in the other.</li>
+</ol>
 <h3 id="reference-observation">Reference observation<a class="heading-anchor" href="#reference-observation" aria-label="Link to this section">#</a></h3>
 <p>Clamped horizontal average [4, 6, 8].</p>
-<p>The reference file is <code>courses/cuda/python/references/cuda-075_cpu.py</code>. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.</p></article>
+<p>Asserted by <code>courses/cuda/python/references/cuda-075_cpu.py</code>.</p></article>
   </main>
 </body>
 </html>

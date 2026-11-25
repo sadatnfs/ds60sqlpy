@@ -1,6 +1,6 @@
 # go-003: explained solutions
 
-These are comparison material after an attempt or explicit reveal. The executable reference implements all six cases in one `main.go`.
+Compare after an attempt ([using solutions](../STUDY-GUIDE.md#use-the-solutions)). `courses/go/solutions/go-003_solution.go` implements all six cases.
 
 ## Mechanism
 
@@ -10,7 +10,7 @@ if condition { ... } selects a branch. && skips the right operand when the left 
 
 ## 1. Trace a prefix sum: change one input
 
-Copy worked example 1 into a scratch pad and change `items := []int{2, 4, 6}` to `items := []int{3, 4, 6}`. Before running, predict which check fails and which value it now sees; then run it and restore the original line.
+Copy worked example 1, change `items := []int{2, 4, 6}` to `items := []int{3, 4, 6}` and predict the failure before running; then restore the line.
 
 The unchanged code is worked example 1:
 
@@ -23,13 +23,15 @@ for _, x := range items {
 check(sum == 12 && len(items) == 3, "sum")
 ```
 
-**Expected:** The changed run panics with `sum` because `sum == 12 && len(items) == 3` no longer holds. Restoring the original line brings back the worked observation: the final sum is 12 and three elements were visited.
+**Expected:** The edited run panics with `sum` because `sum == 12 && len(items) == 3` no longer holds.
+
+**Verify:** Restoring `items := []int{2, 4, 6}` makes the check pass again with the worked observation: the final sum is 12 and three elements were visited.
 
 The accumulator starts at the additive identity. Each iteration includes exactly one new value; double addition or a skipped element breaks the independently known total.
 
 ## 2. Handle empty data: debug a regression
 
-A regression changed one token in worked example 2, so one line now reads `sum := 1`. Run worked example 2 with that line, use the failure to locate the defect and repair it without changing the check.
+A one-token regression in worked example 2 makes a line read `sum := 1`. Repair it without changing the check.
 
 The unchanged code is worked example 2:
 
@@ -41,7 +43,9 @@ for _, x := range []int{} {
 check(sum == 0, "empty sum")
 ```
 
-**Expected:** Before the repair the program panics with `empty sum`; after it the line reads `sum := 0` again and the result is 0 with no special invented element.
+**Expected:** The defective run panics with `empty sum`; after restoring `sum := 0`, the result is 0 with no special invented element.
+
+**Verify:** The failing run shows message `empty sum`; after the repair `sum == 0` holds again.
 
 The loop body never runs. A correct initial state makes the empty case follow from the same algorithm rather than a separate patch.
 
@@ -56,6 +60,8 @@ check(!positive, "guard")
 ```
 
 **Expected:** The condition is false and no indexing occurs.
+
+**Verify:** Your solution must keep `!positive` true. Control: changing `check(!positive, "guard")` to `check(positive, "guard")` panics with message `guard`; revert it.
 
 Reversing the operands would index before proving a valid position. Short-circuit behavior is part of this safety argument.
 
@@ -76,6 +82,8 @@ check(found == 1, "first match")
 
 **Expected:** Its index is 1.
 
+**Verify:** Your solution must keep `found == 1` true. Control: changing `if x == 8 {` to `if x != 8 {` panics with message `first match`; revert it.
+
 Without break, the later match replaces the first one. The -1 sentinel distinguishes absence from a valid first index of zero.
 
 ## 5. Classify an exact boundary
@@ -92,6 +100,8 @@ check(label == "pass", "inclusive boundary")
 ```
 
 **Expected:** The boundary belongs to the passing branch.
+
+**Verify:** Your solution must keep `label == "pass"` true. Control: changing `if score >= 60 {` to `if score > 60 {` panics with message `inclusive boundary`; revert it.
 
 Boundary tests distinguish >= from >. Natural-language requirements should make inclusion explicit rather than leaving it to an arbitrary operator choice.
 
@@ -112,8 +122,10 @@ check(count == 2, "filtered count")
 
 **Expected:** Exactly 2 values satisfy the predicate.
 
+**Verify:** Your solution must keep `count == 2` true. Control: changing `if x < 0 {` to `if x <= 0 {` panics with message `filtered count`; revert it.
+
 continue avoids the increment for negative inputs. Zero is included deliberately, so the boundary case rejects a mistakenly positive-only predicate.
 
 ## Transfer after comparison
 
-Return to your own pad and reproduce one check with a new input. Explain why the check rejects a plausible wrong implementation. Keep the distinction between a pure model, an in-process fake, and a real external system visible in your notes.
+The habit to keep is naming the invariant before writing the loop. A prefix sum, a first-match search and a filtered count all start from a state that is already correct for zero elements, and each iteration preserves it. When later lessons loop over channels, informer events or retry attempts, state what is true before the first iteration and after each one, then test the empty and exact-boundary inputs first.

@@ -1,6 +1,8 @@
 # spark-006: Explained reference solutions
 
-Read the [guide](../guides/spark-006.md) and attempt the [learner source](../lessons/spark-006.scala) first. The [complete reference](spark-006_solution.scala) contains each implementation and its assertions. Values, identity, missingness and failure behavior are separate checks; compilation alone does not establish any of them.
+Attempt the [guide](../guides/spark-006.md) exercises first.
+
+Reference: [complete Scala program](spark-006_solution.scala).
 
 ## Exercises and reasoning
 
@@ -163,4 +165,7 @@ expectIllegalArgument(audit(Seq(Paid("same", 10L), Paid("same", 10L))))
 
 ## Evidence and scope
 
-Run the complete reference using the same prepared profile as the learner source. Its assertions check normal values, malformed or boundary inputs and conservation where relevant. The final version line records the actual compiler/runtime family used. The reference is an executable explanation, not a hidden grading service or proof that a distributed Spark job would have the same performance characteristics.
+The reference asserts identity, state and value separately against the literal fixture. It checks the four IDs in source order, the kinds paid, paid, voided and refunded, the signed contributions 100, 100, 0 and -25, the net 175, and the per-kind counts. It verifies that `revisePaid` leaves the original `Paid(p1, 100)` unchanged, that a blank ID or a negative amount cannot be constructed, and that `audit` rejects two events sharing ID `same` even though their amounts agree.
+
+After those checks the program prints `spark-006: six reference contracts passed` and the versions it ran with. The checks establish that this sealed domain keeps identity and value apart on these events; they cannot show that a future fourth case is handled, which is why the compiler's exhaustiveness warning matters more than any single test. When you later read the same events as Spark rows, the case class becomes a schema with a status column, and the exhaustive match becomes a `CASE WHEN` that you must keep complete by review and by tests.
+

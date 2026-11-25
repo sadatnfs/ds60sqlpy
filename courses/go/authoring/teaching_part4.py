@@ -1,0 +1,145 @@
+"""Lesson-specific teaching text for go-029 to go-036 (see teaching.py)."""
+
+PART4 = {
+    "go-029": dict(
+        predict="Predict what the reader observes in each publication example, and which line establishes the ordering that makes its read safe. For the atomic.Value replacement, predict both the old copy and the current value. Then decide whether a program that prints the right number once can still contain a data race, and which tool would show it.",
+        pitfall="The most dangerous race is one that passes: a goroutine writes a value and then a flag, and a reader polls the flag without synchronization, sometimes seeing the flag first. Run tests with -race to collect evidence. Another mistake is publishing a struct that holds a slice or map and then mutating it; the receiver shares that storage, so copy it or never change it after publication.",
+        retrieval="Write a config loader that builds a map in a goroutine, publishes a copy through atomic.Value and later replaces it with a new map. Check that a reader holding the first copy still sees the old value. Then list the publication boundaries this lesson used and explain what each one guarantees about the writes made before it.",
+        transfer="Controllers and servers publish state constantly: a cache filled by one goroutine and read by handlers, or configuration reloaded while requests run. Apply the same rule there: build the value completely, publish it through a channel, lock or atomic, and treat it as read-only afterward. Run go test -race in CI so a lucky schedule never stands in for evidence.",
+        hints=(
+            "The record is fully built before the send. What does the receiver observe?",
+            "Closing done happens after the write. Which value does the reader see after receiving?",
+            "atomic.Value stores the whole record. Which count does Load return?",
+            "Store replaces the shared value but not copies already loaded. What do old and current hold?",
+            "The snapshot gets its own backing array. Does writing original[0] reach it?",
+            "The worker builds the string locally and sends it finished. What does the reader receive?",
+        ),
+        steps=(
+            "The goroutine now publishes Count 4, so the reader sees 4 and `v.Count==3` fails. Publication through the channel still works; the published value changed.",
+            "The goroutine writes 8 before closing done, so the reader correctly sees 8 and `n==7` fails. Restore the write of 7; the close still orders it before the read.",
+        ),
+    ),
+    "go-030": dict(
+        predict="Predict the index sort.Search returns for the first value at least 5 in 2, 4, 6, 8, and the index when no value qualifies. Predict length and capacity after one append to make([]int,0,4), and how many times the predicate runs on an empty interval. Then predict which of two duplicates the lower boundary finds.",
+        pitfall="sort.Search requires a monotone predicate over sorted data: once true, it must stay true. Searching unsorted data, or using an equality predicate, returns a plausible but wrong index. Also handle the not-found case, where the result equals len(items) and indexing it panics. In benchmarks, use representative inputs, exclude setup from timing and keep the result so the compiler cannot discard the work.",
+        retrieval="Write `firstAtLeast(items []int, x int) (int, bool)` using sort.Search that also reports whether a match exists. Test it on 1, 3, 3, 5 for the targets 0, 3, 4 and 6, and on an empty slice. Then write a benchmark for it with testing.B and explain what the benchmark measures that complexity analysis does not.",
+        hints=(
+            "The predicate is false for 2 and 4 and true from 6 on. Which index is first true?",
+            "No element reaches 9. What does sort.Search return when the predicate is never true?",
+            "make sets length 0 and capacity 4. What does one append change?",
+            "The loop visits each element once. How many visits, and what sum?",
+            "Search over zero elements has nothing to test. How many predicate calls occur?",
+            "The predicate is true for both 3s. Which index is the first true one?",
+        ),
+        steps=(
+            "With 5 at index 1, the first value at least 5 is now at index 1, so `i==2` fails. The search is correct; the data moved the boundary.",
+            "Changing 8 to 9 makes the last element qualify, so Search returns 3 and `i==len(items)` fails. Restore 8 so no element reaches 9.",
+        ),
+    ),
+    "go-031": dict(
+        predict="Predict the type of the count field after the JSON record is parsed back into a map, and why the check compares it with float64(3). Predict whether the time key is present in the fixture output and why the helper removes it. Then decide which fields an operator could filter on in each example without parsing the message text.",
+        pitfall="Building messages with fmt.Sprintf, such as processed 3 items for lesson-7, hides the fields operators need and makes every line unique. Put values in attributes with stable keys. Never log credentials, tokens or whole request bodies; redact before the call, because handlers write exactly what they receive. Logging an error is not handling it: still return it or act on it.",
+        retrieval="Write a helper that logs a request completion with slog using request_id, status, duration_ms and bytes attributes, writing JSON to a buffer. Parse the result and check each field and its type. Then add a token attribute, redact it before logging, and explain why redaction belongs before the handler rather than in a log viewer.",
+        hints=(
+            "JSON numbers decode into float64 in a map. What do msg and count hold?",
+            "The key is passed through as written. Which value does request_id carry?",
+            "ReplaceAttr drops the time key. Is it present in the parsed record?",
+            "Status is its own attribute, apart from the message. What is its value?",
+            "The caller replaced the secret before logging. What does credential contain?",
+            "The byte count is passed as an int. What type does the parsed field have?",
+        ),
+        steps=(
+            "The logged count is now 4, so the parsed field is float64(4) and the comparison with float64(3) fails. The handler is fine; the logged value changed.",
+            'The key is now request_id!, so `v["request_id"]` is nil and the comparison fails. Restore the exact key; field names are the contract operators query.',
+        ),
+    ),
+    "go-032": dict(
+        predict="Predict what html/template writes for the script text, and whether the output could run in a browser. Predict the encoded query value and whether decoding recovers the original. For the two paths, decide which one filepath.IsLocal accepts. Then predict why the comparison uses crypto/subtle instead of the == operator on strings.",
+        pitfall="Using one escaping function for every context is the core mistake: HTML escaping does not make a value safe in a URL, a shell command or SQL. Use the mechanism that belongs to the output context, such as html/template, url.QueryEscape or bound SQL parameters. Hand-written replacement filters miss encodings, and blocklists of dangerous actions age badly; allowlist the operations a caller may request.",
+        retrieval="Write `safeJoin(root, name string) (string, error)` that rejects names failing filepath.IsLocal and returns the joined path otherwise. Test it with reports/a.txt, ../x, an absolute path and an empty name. Then explain which mechanism from this lesson you would use for an HTML page, a query string and a requested action name.",
+        hints=(
+            "html/template escapes data placed in HTML text. What does the < in the script tag become?",
+            "QueryEscape encodes & and =. Does QueryUnescape return the same string?",
+            "IsLocal rejects a path whose first element is the parent directory. Which path stays inside?",
+            "The budget compares byte lengths with 4. Which value fits?",
+            "ConstantTimeCompare returns 1 for equal slices. What does it return when one byte differs?",
+            "An allowlist accepts only listed keys. Is exec listed?",
+        ),
+        steps=(
+            "Execute succeeds on this template, so it returns nil and `!=nil` is false. Rendering works; the edited check asserts an error that does not occur.",
+            "QueryUnescape succeeds, so err is nil and `err!=nil` is false. The round trip is correct; restore `err==nil`.",
+        ),
+    ),
+    "go-033": dict(
+        predict="Predict the balances after a successful staged transfer, and after a function that changes its copy and then returns an error. For the insufficient-funds case, predict whether any field changes. Then predict the state after a failed attempt followed by a new valid transaction, and decide why the second one never sees the 99.",
+        pitfall="The classic transaction bug is mixing handles: starting a Tx and then calling the outer DB for one statement, which runs outside the transaction and survives a rollback. Another is ignoring the Commit error. If Commit fails or the connection drops during it, the outcome may be unknown, so a blind retry can apply a change twice. Use idempotency keys or a read-back check there.",
+        retrieval="Write a `Store` interface with `Transfer(ctx, from, to string, amount int) error` and an in-memory implementation that stages changes on a copy and commits only on success. Test a valid transfer, an insufficient balance and a failure after the first write. Then explain what a database adapter for the same interface must do with tx.Rollback and tx.Commit.",
+        transfer="The Kubernetes lessons use the same staging idea: a controller computes a desired object, writes it once and treats a conflict as a reason to re-read rather than to patch blindly. Whenever a write can fail halfway, decide which state the caller may observe, and make retries safe by checking what actually committed before trying again.",
+        hints=(
+            "transact copies the state and assigns it back on success. What are A and B afterward?",
+            "The function edits the copy and returns an error. Is the outer value replaced?",
+            "The guard fails before any change. What do both balances remain?",
+            "Each transfer moves one unit between fields. Does the sum change?",
+            "The failed attempt never assigns back. From which A does the second start?",
+            "A function returning nil with no edits still commits. What is the state?",
+        ),
+        steps=(
+            "Starting A at 6 commits A=3, so `s.A==2` fails while B is still 8. The transaction works; the initial balance changed.",
+            "Starting A at 6 means the rollback correctly keeps 6, so `s.A==5` fails. Restore the initial 5; the failing function still leaves the state untouched.",
+        ),
+    ),
+    "go-034": dict(
+        predict="Predict the values of runtime.GOOS and runtime.GOARCH inside the lesson worker, and whether that tuple is in the allowed set. For the drain model, predict what Admit returns after Drain and how many tasks remain after two Finish calls. Then predict how much work is left when the shutdown budget allows only one completion.",
+        pitfall="Assuming a binary built on a laptop runs in a cluster is a frequent deployment failure: an arm64 Mac produces an arm64 binary unless GOOS and GOARCH say otherwise, and cgo needs a matching C toolchain. At shutdown, a server that exits on SIGTERM without first refusing new work and draining active requests drops them. Give the drain a deadline and report what remains.",
+        retrieval="Write a `Server` model with Accepting, Active and a Shutdown(budget int) method that stops admitting, finishes up to budget tasks and returns how many remain. Test it with zero, one and three active tasks. Then write the go build command that produces a linux/amd64 binary on your machine and explain how you would confirm its target.",
+        transfer="A Kubernetes Pod receives SIGTERM, then a grace period, then SIGKILL. Map this lesson onto it: stop accepting, let readiness fail so traffic moves elsewhere, finish in-flight work within the budget and log what was abandoned. Build images for the cluster's architecture, and embed a version and revision so a running Pod can report which build it is.",
+        hints=(
+            "The worker reports its own target. Are both strings nonempty?",
+            "The key joins GOOS and GOARCH with a slash. Is the worker's tuple in the set?",
+            "Lookups use the same joined key. Which of the three tuples is listed?",
+            "Drain stops admission but not running work. What do Admit and Active report?",
+            "The budget allows one Finish after the drain. How many tasks are left?",
+            "Sprintf fills three placeholders in order. What label results?",
+        ),
+        steps=(
+            'GOOS is never empty, so `runtime.GOOS==""` is false and the target check fails. The runtime is fine; the edited condition contradicts it.',
+            "The typo replaces linux/arm64 with linux/arm65, so an arm64 worker's tuple is missing and `allowed[target]` is false. Restore arm64.",
+        ),
+    ),
+    "go-035": dict(
+        predict="Predict the desired and ready replica counts in the decoded fixture, and why they can differ. For the presence case, predict which Replicas pointer is nil. Predict whether two objects with the same name but different UIDs are the same object. Then decide whether comparing resourceVersion strings with < says anything about which one is newer.",
+        pitfall="Treating spec as fact is the main error: spec is what someone asked for, while status is what a controller observed, and the two lag each other. Another is using a non-pointer field for an optional value, so an absent field and an explicit zero look identical. Object keys must include the namespace, and resourceVersion is an opaque token: compare it only for equality.",
+        retrieval="Write a Service struct with metadata, a spec holding an optional *int port and a status holding a ready flag. Decode three fixtures: port absent, port 0 and port 80, and check presence and values. Then write a key function and explain why a name alone cannot identify an object and how a UID separates two incarnations.",
+        transfer="Every controller and client-go call in the remaining lessons reads objects shaped like this one. Before acting, decide which fields are desired and which are observed, whether a missing field means a default or unset, and which identity you are tracking. A reconcile loop that confuses spec with status, or name with UID, acts on the wrong fact or the wrong object.",
+        hints=(
+            "spec and status decode into separate fields. Which number does each hold?",
+            "A pointer stays nil when its key is absent. Which decode sets it?",
+            "The names match but the UIDs differ. Are these the same incarnation?",
+            "The key joins namespace and name. Do alpha and beta produce the same key?",
+            "The tokens are strings. Which one does byte order place first?",
+            "The predicate requires ready to equal desired. Which state satisfies it?",
+        ),
+        steps=(
+            "The fixture now requests 4 replicas, so `*d.Spec.Replicas==3` fails while ready is still 2. Decoding works; the desired count changed.",
+            "The second fixture now carries replicas 1, so b's pointer is non-nil but points at 1 and `*b.Spec.Replicas==0` fails. Restore the explicit zero.",
+        ),
+    ),
+    "go-036": dict(
+        predict="Predict whether each selector matches: a Pod with both required labels, a Pod missing tier, and a Pod with an empty-valued label compared with one lacking it. For readiness, predict how many matching Pods are usable. Then predict what an empty selector matches, and whether adding a revision label breaks a selector that requires only app.",
+        pitfall="A broad selector silently merges workloads: app=web on two Deployments sends traffic to both, and an empty selector matches every Pod in its namespace. Selectors express membership, not ownership, so use owner references to find a controller's Pods. Matching labels also do not mean ready; a Service routes only to ready endpoints, so test readiness separately.",
+        retrieval="Write `backends(pods []PodView, selector map[string]string) int` that counts Pods that both match and are ready. Test it with ready and unready matching Pods, a Pod missing one label and an empty selector. Then explain why a rollout that adds a revision label keeps the Service stable, and which label change would break it.",
+        transfer="Service routing, Deployment ownership, NetworkPolicy and the controller watches in later lessons all depend on selectors. When a Service has no endpoints, check the namespace, the exact label keys and values, and readiness, in that order. When writing a controller, filter by owner reference too, so two workloads that share labels never claim each other's Pods.",
+        hints=(
+            "Every selector key must be present with an equal value. Does the Pod have both?",
+            "The Pod lacks tier. What does the loop return for that key?",
+            "Presence and value are both tested. Does an empty value satisfy an empty requirement?",
+            "Labels and readiness are separate tests. How many Pods pass both?",
+            "A nil selector has no keys that can fail. What does matches return?",
+            "The selector ignores keys it does not name. Does revision affect the result?",
+        ),
+        steps=(
+            "The labels now spell the key app!, so app is absent and matches returns false. The function is right; the edited Pod labels lost a required key.",
+            "The Pod lacks tier, so matches returns false and the check without negation fails. Restore the `!` so the test asserts rejection.",
+        ),
+    ),
+}

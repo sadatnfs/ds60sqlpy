@@ -194,10 +194,10 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/dax/guides/dax-040.md</code></p>
     </header>
     <article class="document"><h2 id="dax-040-cohorts-retention-denominators-and-unobserved-ages">dax-040: Cohorts, retention denominators and unobserved ages<a class="heading-anchor" href="#dax-040-cohorts-retention-denominators-and-unobserved-ages" aria-label="Link to this section">#</a></h2>
-<p><strong>Stage 7: Analytical patterns and decision units.</strong> Level: advanced. Read the mechanisms, trace the worked cases and retain your own draft. <strong>Direct prerequisites:</strong> <code>dax-011</code>, <code>dax-027</code>, <code>dax-034</code></p>
+<p><strong>Stage 7: Analytical patterns and decision units.</strong> Level: advanced. <strong>Direct prerequisites:</strong> <code>dax-011</code>, <code>dax-027</code>, <code>dax-034</code></p>
 <h3 id="how-to-use-this-offline-lesson">How to use this offline lesson<a class="heading-anchor" href="#how-to-use-this-offline-lesson" aria-label="Link to this section">#</a></h3>
-<p>This is an offline DAX editing lesson. No DAX compiler, semantic-model engine, Power BI account or network connection is required. Worked tables describe the named reference and model, not execution of your draft. Save, compare and export source; do not interpret a comparison or completion marker as a passed program run.</p>
-<p>Open the <a href="../lessons/dax-040.dax.html">starter</a>. Compare the <a href="../solutions/dax-040_reference.dax.html">named reference</a> and <a href="../solutions/dax-040_solutions.md.html">reasoning</a> when ready. The <a href="../models/analytics/model.json.html">model specification</a> identifies every fixture table, column type, key and relationship. The <a href="../models/README.md.html">fixture handbook</a> displays the original data and explains each table grain.</p>
+<p>The starter wants eligible members, observed active members and retention. Using CohortMember and Activity, compute those for the January cohort at age one before reading the cases, and decide what the February cohort can report. The <a href="../STUDY-GUIDE.md.html#offline-study-boundary">offline study boundary</a> explains what a worked table can show.</p>
+<p>Files: <a href="../lessons/dax-040.dax.html">starter</a>, <a href="../solutions/dax-040_reference.dax.html">reference</a> and <a href="../solutions/dax-040_solutions.md.html">reasoning</a>.</p>
 <h3 id="the-question-and-the-mechanism">The question and the mechanism<a class="heading-anchor" href="#the-question-and-the-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Separate enrolled members, active members and unavailable follow-up periods.</p>
 <p>A cohort groups units by an entry event or date. Retention compares later activity with a specified eligible cohort population. It is not automatically a count of events divided by another event count. Repeated activity must not turn one member into several retained units, and inactive but eligible members must not disappear from the denominator.</p>
@@ -207,7 +207,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The CohortMember-to-Activity relationship restricts the activity fact to the selected cohort. DISTINCTCOUNT counts active member identities, not activity rows. A declared LastObservedMonth guards an unavailable future result. The examples use literal month keys; do not implement month arithmetic by adding one to a YYYYMM integer across December.</p>
 <p>Concepts to explain in your own words: <strong>cohort</strong>, <strong>retention</strong>, <strong>eligibility</strong>, <strong>observation age</strong>, <strong>censoring</strong>.</p>
 <h3 id="model-and-context-contract">Model and context contract<a class="heading-anchor" href="#model-and-context-contract" aria-label="Link to this section">#</a></h3>
-<p>The ordinary star follows Product → Sales, Customer → Sales and Date → Sales through OrderDate. The ShipDate relationship is inactive unless a case explicitly activates it. Filters flow from the one side to the many side. Additional analytical tables have only the relationships declared in their named model; a similar column name does not create a relationship.</p>
+<p>This lesson uses the analytics model. Members 100 and 200 joined in January 2025 and members 300 and 400 in February. Activity rows: 100 in January and February, 200 in January only, and 300 in February. Observation ends with February 2025. See the <a href="../models/analytics/model.json.html">model specification</a> and the <a href="../STUDY-GUIDE.md.html#the-retail-star">shared star rules</a>.</p>
 <pre class="highlighted-code"><code class="language-text">Product (one)  --&gt; Sales (many) &lt;-- Customer (one)
                        ^
                        | active OrderDate
@@ -215,7 +215,6 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
                        | inactive ShipDate
                        +------&gt; Sales</code></pre>
 <p>This lesson also uses the <code>analytics</code> model&#x27;s <code>Activity</code> and <code>CohortMember</code> tables. Its declared one-to-many relationships are <code>CohortMember[MemberKey]</code> → <code>Activity[MemberKey]</code>.</p>
-<p>All amounts in ordinary Sales are USD after the line discount, before tax and returns. The Date fixture is complete for 2024 and 2025; a short result table is a selected slice, not the whole calendar. JSON <code>null</code> in the worked-results sidecar means DAX BLANK, not the text &quot;null&quot;.</p>
 <h3 id="worked-cases">Worked cases<a class="heading-anchor" href="#worked-cases" aria-label="Link to this section">#</a></h3>
 <p>The following query-local declarations are shared by these cases. They do not create persisted measures in this classroom.</p>
 <pre class="highlighted-code"><code class="language-dax"><span class="syntax-keyword">DEFINE</span>
@@ -270,8 +269,10 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 </tbody></table></div>
 <p>The two 50-percent values in the lesson have different ages and meanings. A matrix must expose both cohort month and observation age.</p>
 <p>Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table.</p>
+<h3 id="a-misconception-to-test">A misconception to test<a class="heading-anchor" href="#a-misconception-to-test" aria-label="Link to this section">#</a></h3>
+<p>Two cells showing 50 percent invite a direct comparison, but they measure different things. January&#x27;s 1 of 2 is retention at age one: member 100 returned in February while 200 did not. February&#x27;s 1 of 2 is entry-month activity, since member 300 was active on joining and 400 was not. February&#x27;s age-one retention is BLANK, because March lies beyond observed data. Coalescing it to zero would claim both February members churned when nobody has looked yet.</p>
 <h3 id="practice-prediction-construction-and-diagnosis">Practice: prediction, construction and diagnosis<a class="heading-anchor" href="#practice-prediction-construction-and-diagnosis" aria-label="Link to this section">#</a></h3>
-<p>Retain your formula or written reasoning, the stated context, contributing rows or values, and a conclusion with its unit. These notes are your own study record; they do not show that a formula ran.</p>
+<p>Record each answer as the <a href="../STUDY-GUIDE.md.html#practice-routine">practice routine</a> describes.</p>
 <h4 id="exercise-1-predict">Exercise 1: Predict<a class="heading-anchor" href="#exercise-1-predict" aria-label="Link to this section">#</a></h4>
 <p>Predict January retention if member 100 has three February events.</p>
 <h4 id="exercise-2-change-one-condition">Exercise 2: Change one condition<a class="heading-anchor" href="#exercise-2-change-one-condition" aria-label="Link to this section">#</a></h4>
@@ -294,14 +295,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>Incomplete follow-up is not automatically a failure event.</li>
 </ol>
 <h3 id="self-check-and-next-step">Self-check and next step<a class="heading-anchor" href="#self-check-and-next-step" aria-label="Link to this section">#</a></h3>
-<p>Explain one changed result without quoting the formula alone. Identify which rows, filters, relationship or evaluation scope changed, then construct a counterexample to a plausible wrong interpretation. Keep your draft separate from the supplied reference. A small correct derivation does not certify performance, model security or broad expertise.</p>
+<p>Add a March 2025 activity row for member 300 and extend observation through March. Predict the February cohort&#x27;s retention at age one and which January figure stays unchanged. The <a href="../STUDY-GUIDE.md.html#self-check-routine">self-check routine</a> applies too.</p>
 <p>Continue to <a href="dax-041.md.html">dax-041</a> when its prerequisites make sense, or revisit this stage from the <a href="../README.md.html">course map</a>.</p>
 <h3 id="official-references-and-evidence-limits">Official references and evidence limits<a class="heading-anchor" href="#official-references-and-evidence-limits" aria-label="Link to this section">#</a></h3>
 <ul>
 <li><a href="https://learn.microsoft.com/en-us/dax/distinctcount-function-dax">DAX function: DISTINCTCOUNT</a></li>
 <li><a href="https://learn.microsoft.com/en-us/dax/edate-function-dax">DAX function: EDATE</a></li>
 </ul>
-<p>Documentation was reviewed for this original course on 2026-10-25. Version-sensitive features have explicit notes. Source/model checks and independent fixture arithmetic are not a DAX parser, compiler, semantic engine, real RLS test or performance measurement.</p>
+<p>Review date and evidence limits: <a href="../STUDY-GUIDE.md.html#references-and-evidence-limits">study guide</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for dax-040. Read its guide and the named model.
 Review my draft and prediction. Ask me to enumerate the relevant rows and context.

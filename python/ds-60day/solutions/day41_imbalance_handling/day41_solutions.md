@@ -120,15 +120,13 @@ Notes
 
 ---
 
-**Portable worker default:** These reference runs use `n_jobs=1` so they behave predictably on Windows, CI runners, and constrained notebook environments. After correctness is established, benchmark a larger worker count on your own workload rather than assuming `n_jobs=1` is faster.
+**Portable worker default:** these runs use `n_jobs=1` for predictable results; benchmark more workers only after correctness.
 
 <!-- BEGIN ADVANCED PYTHON CONCEPT ENRICHMENT -->
 
 ## Solution reasoning lens
 
-A strong solution is not merely code that produces one plausible
-output. It establishes a chain from input contract to operation to
-verification:
+Each decision below links an input contract to an operation and its evidence:
 
 1. **`np.bincount(y)` / prevalence:** establishes class support before modeling and must be reported for every evaluation split.
 2. **`class_weight='balanced'`:** reweights training loss; it does not make the observed population balanced.
@@ -145,29 +143,15 @@ verification:
 
 **Evidence of correctness:** Report class counts, confusion outcomes, PR metrics and threshold, prove resampling is training-only, and recheck calibration under the deployment prevalence.
 
-When comparing your attempt with the reference, explain which of these
-decisions your code made explicitly. If the reference makes a different
-choice, compare the contracts and evidence before deciding that one
-version is universally better.
-
 <!-- END ADVANCED PYTHON CONCEPT ENRICHMENT -->
 
 ## Exercise-by-exercise reasoning map
-
-This map connects every learner prompt to a reasoning path. Read the
-explanation before copying code: the goal is to understand the assumptions,
-the evidence that validates the result, and the edge cases that can make an
-apparently correct implementation fail.
 
 ### Exercise 1: Original lesson practice
 
 **Prompt:** Compare `class_weight="balanced"` with a SMOTE strategy.
 
 **How to reason about it:** Class weights change the loss; SMOTE changes the training sample. Resample only within each training fold and compare precision, recall, average precision, calibration, and runtime on untouched validation rows.
-
-Use the worked reference earlier in this file, then change one boundary
-condition and rerun the stated checks. A copied output is not evidence
-unless you can explain why that output follows from the inputs.
 
 **Verify:** Compare class_weight='balanced' and SMOTE using identical stratified folds, estimator, threshold, and metrics; prove SMOTE is inside the training pipeline and print class support, confusion counts, PR AUC, and minority F1 for both.
 
@@ -177,10 +161,6 @@ unless you can explain why that output follows from the inputs.
 
 **How to reason about it:** Threshold optimization consumes validation data. Align the shorter threshold array from `precision_recall_curve`, state the target metric or constraint, and freeze the threshold before final testing.
 
-Use the worked reference earlier in this file, then change one boundary
-condition and rerun the stated checks. A copied output is not evidence
-unless you can explain why that output follows from the inputs.
-
 **Verify:** Choose the threshold from validation predictions only; print the selected threshold, precision, recall, F1, and TP/FP/FN counts, then evaluate that frozen threshold once on untouched test predictions.
 
 ### Exercise 3: Original lesson practice
@@ -188,10 +168,6 @@ unless you can explain why that output follows from the inputs.
 **Prompt:** Plot precision-recall curves and discuss the tradeoff.
 
 **How to reason about it:** A precision-recall curve should include class prevalence and support. Use model scores rather than hard labels and do not compare curves drawn from different evaluation populations without labeling that difference.
-
-Use the worked reference earlier in this file, then change one boundary
-condition and rerun the stated checks. A copied output is not evidence
-unless you can explain why that output follows from the inputs.
 
 **Verify:** Save a labeled precision-recall curve with no-skill prevalence baseline and chosen threshold marker; print average precision and the marker's precision/recall rather than judging the plot alone.
 
@@ -211,10 +187,6 @@ This is why a threshold tuned on a balanced development sample may not deliver
 the expected precision after deployment. Re-estimate operating metrics for the
 deployment base rate and monitor it over time.
 
-**Why this matters:** The result should survive a fresh-kernel rerun and
-a deliberately chosen boundary case. If it does not, revisit the
-assumption or data boundary rather than hiding the failure.
-
 **Verify:** Prevalence-shift reasoning; choose and state sensitivity/specificity, compute precision at prevalence 0.20 and 0.02 with Bayes' rule, and verify both against a hand-built confusion table; the 2% precision must be lower.
 
 ### Exercise 5: Grouped imbalance split
@@ -231,10 +203,6 @@ If a fold has zero positives, recall and average precision are not meaningful;
 do not replace that condition with a reassuring zero. Consider repeated
 grouped holdouts or a time-aware group design that matches deployment.
 
-**Why this matters:** The result should survive a fresh-kernel rerun and
-a deliberately chosen boundary case. If it does not, revisit the
-assumption or data boundary rather than hiding the failure.
-
 **Verify:** Grouped imbalance split; print account IDs and positive counts for every train/validation fold; assert zero group overlap and enforce a declared minimum number of positives or report that the requested fold count is infeasible.
 
 ### Exercise 6: Calibration after resampling
@@ -250,9 +218,5 @@ cross-validated calibrator after the resampling pipeline has been selected.
 
 Also compare ranking metrics: calibration can improve probability meaning
 without changing rank-based AUC very much.
-
-**Why this matters:** The result should survive a fresh-kernel rerun and
-a deliberately chosen boundary case. If it does not, revisit the
-assumption or data boundary rather than hiding the failure.
 
 **Verify:** Calibration after resampling; fit calibration only on unresampled validation data, print calibration-bin support/event rate/mean probability plus Brier score before/after, and evaluate on the original deployment prevalence.

@@ -2,67 +2,27 @@
 
 ## How to run this lesson
 
-Start the Linux-container engine and run `./classroom` from the repository
-root. On Windows, use Ubuntu in WSL 2 or the thin
-`START_DOCKER_CLASSROOM.cmd` wrapper. Choose **PostgreSQL** on the shared
-`/classroom` home, then open **sql-40**. The
-[launcher guide](../../../docs/one-command-classroom.md) covers first preparation, strict resume and
-the saved project selection. No host Python or PostgreSQL installation is
-required for this browser route.
+Start `./classroom`, pick **sql-40** and run **Whole SQL lesson (psql)**.
+The learner file opens a transaction, prints three read-only result sets
+(60 daily rolling-statistics rows, 12 monthly percentile rows and 6
+category shares) and rolls back. Your editable copy is
+`.learning/sql/sql-40/lesson/workspace/sql/postgres-60day/day40_analytic_functions_advanced.sql`,
+and it runs against `advanced_sql_training`. Launch details are in
+[Run a lesson in the classroom](../../STUDY-GUIDE.md#run-a-lesson-in-the-classroom).
 
-1. Read the prerequisite and fixture notes before running the file. Use only
-   the local disposable `advanced_sql_training` database.
-2. Choose **Whole SQL lesson (psql)** for the cataloged learner script. This
-   preserves the lesson's reviewed psql directives, relative includes and
-   transaction behavior. **SQL snippet** is appropriate for ordinary SQL
-   statements, but is not a replacement for an entire script's setup.
-3. The **Course database** panel above the code shows whether the course
-   training tables are loaded. Missing tables load automatically before your
-   first run (or choose **Load course tables**) and stay loaded for later
-   lessons. **Reset training data** restores the original rows only when your
-   own changes made results differ; it keeps your saved code and notes.
-4. Edit the learner copy in the classroom and save your prediction before
-   running. Its whole-script workspace is
-   `.learning/sql/sql-40/lesson/workspace/sql/postgres-60day/day40_analytic_functions_advanced.sql`.
-   For browser work this path is inside the Docker learning volume, not a
-   newly created host folder beside your checkout. The checked-in source
-   remains the answer-free starting artifact.
-5. Run the whole script and inspect the full transcript. The runner uses
-   `psql -X -v ON_ERROR_STOP=1 -f`. SELECT output has columns, rows and a row
-   count; DDL/DML has command tags; intentional checks may produce NOTICE
-   messages. An unexpected ERROR or nonzero exit is a failure to diagnose,
-   even when an earlier query printed plausible values.
-6. Verify the lesson's expected grain, ordering, constraints and declared
-   transaction or cleanup outcome. Keep required ROLLBACK statements.
-   The warehouse sequence and other explicitly stateful exercises explain
-   when state is committed. Read saved output without rerunning it when
-   reviewing an earlier attempt.
-
-If a relation is missing, inspect the lesson's required fixture and predecessor
-rather than guessing a new table definition. If authentication or runtime
-readiness fails, use `./classroom status` and the setup guide. Keep credentials
-out of SQL, notebooks, screenshots and committed files. Repair the first error
-before trusting partial output, and reveal separate solutions only when you
-want to compare after an attempt.
+The dates you see depend on when your database was loaded, because the seed
+places orders relative to the load time. The figures quoted below come from
+a late-2026 load; compare shapes and relationships, not the exact dates.
 
 ### Optional contributor notebook route
 
-For notebook work, deliberately prepare the Linux/WSL contributor environment
-from [CONTRIBUTING.md](../../../CONTRIBUTING.md), including a compatible psql client and
-the notebook dependencies. Generate this lesson's private workspace through
-the maintained CLI:
+A notebook is convenient here for plotting the z-score series next to the
+raw daily revenue
+([notebook setup](../../STUDY-GUIDE.md#optional-contributor-notebook-route)):
 
 ```sh
 uv run --no-sync python scripts/course.py sql notebook sql-40
 ```
-
-Open the printed notebook path in that environment's JupyterLab. It uses the
-same catalog-derived learner-copy layout in that contributor checkout and
-executes the complete script through psql. Its host-side state is separate
-from the Docker browser's named volume. Follow
-[guided SQL notebooks](../../../docs/guided-sql-notebooks.md) for explicit local connection
-selection and kernel setup. Notebook generation does not execute SQL or
-authorize a reset.
 
 ## Level and prerequisites
 
@@ -78,27 +38,30 @@ authorize a reset.
 
 ## A beginner's mental model for this lesson
 
-A **table** stores facts in named columns. A **row** is one occurrence at the
-table's declared grain. A query creates a temporary **result set**: rows printed
-on screen are not automatically stored. The key vocabulary for this lesson is Ordered-set aggregate, Z-score, Interpolation. Its worked SQL reads or creates `orders`, `order_items`, `products`.
+The learner file asks three questions of the same order data, each at its
+own grain. The first collapses the 4,362 orders into one revenue figure per
+order day and slides a 15-row frame along that series. The second keeps
+every order and groups them by month, so each percentile sees that month's
+individual totals. The third sums line revenue per category and divides
+each sum by the grand total from an empty `OVER ()`.
 
-Before writing a query, complete this sentence: “One output row represents
-___.” Joins can multiply rows, filters can remove them, grouping can collapse
-many rows into one, and window functions can add calculations while preserving
-row count. For a normal analytical `SELECT`, use this logical reading order:
-`FROM`/`JOIN` (including `ON`) → `WHERE` → `GROUP BY`/aggregates → `HAVING` →
-window calculations → `SELECT` → `ORDER BY` → `LIMIT`. PostgreSQL may execute a
-different physical plan while preserving those semantics.
+A **z-score** answers "how unusual is this day?" as
+`(revenue - avg15) / sd15`, and it is only as good as its frame.
+`ROWS BETWEEN 14 PRECEDING AND CURRENT ROW` counts the 14 previous *order
+days*, not calendar days. Early in the series orders are sparse: on a
+late-2026 load the first 15 order days stretch across 99 calendar days, so
+a "15-day" window there really covers more than three months.
+`STDDEV_SAMP` and `VAR_SAMP` divide by n - 1, so `var15` is `sd15` squared
+up to rounding; `STDDEV_POP` and `VAR_POP` divide by n, and mixing the two
+families makes the columns disagree.
 
-The worked walkthrough's lesson-specific task is: Aggregate to one row per observed order date, calculate a 15-observation mean and standard deviation, then derive `(revenue - avg15) / NULLIF(sd15, 0)`. Keep the observation count beside the score so early, undersized windows are visible.
-The first worked example aggregates orders to one row per day and adds three
-15-observation window statistics. `STDDEV_SAMP` and `VAR_SAMP` both divide by
-n - 1, so `var15` is `sd15` squared up to rounding; `STDDEV_POP` and `VAR_POP`
-divide by n instead, and mixing the two families makes the columns disagree.
+An **ordered-set aggregate** such as
+`PERCENTILE_CONT(0.9) WITHIN GROUP (ORDER BY amt)` sorts a group's values
+and reads a position from that order. The continuous version uses
+**interpolation** between neighbors, so a median can be a value no order
+has, while `PERCENTILE_DISC` always returns one that exists.
 
 ## Two worked SQL examples
-
-These worked excerpts come from `sql/postgres-60day/day40_analytic_functions_advanced.sql`. Use **Whole SQL lesson (psql)** in the unified classroom for the complete file, including its fixture and transaction context. The optional contributor notebook and prepared `psql` routes are described above.
 
 ### Example 1
 
@@ -125,9 +88,22 @@ ORDER BY
 LIMIT 60;
 ```
 
-**How to read it:** Example 1: Start with `orders` in `FROM`/`JOIN`; let `GROUP BY` collapse rows to its grouping keys; let each `OVER` expression calculate across related rows without collapsing them. The final `SELECT` displays `d`, `revenue`, `ma15`, `sd15`, and `var15`. `ORDER BY` determines presentation order and the final `LIMIT 60` caps displayed rows. Before running, predict the row grain, row count, `NULL` positions, and first/last key; afterwards, compare each prediction with the transcript.
+**How to read it:** `daily` turns the orders into one row per calendar
+day that has orders. All three window calls share one frame, the current day
+plus the 14 order days before it, so the mean, deviation and variance always
+describe the same rows; a `WINDOW w AS (...)` clause could name that frame
+once. The windows are computed over the whole ascending series before the
+outer `ORDER BY d DESC LIMIT 60` keeps the newest 60 rows, so even the
+oldest displayed day still has 14 predecessors in its frame.
 
-**Expected result/shape:** Example 1 returns 60 rows, one per observed order date `d`, newest first, with columns `d`, `revenue`, `ma15`, `sd15`, and `var15`. Every displayed date has 14 earlier dates, so no statistic is NULL. Check one row by recomputing `AVG`, `STDDEV_SAMP`, and `VAR_SAMP` over that date and the 14 previous dates, and confirm that `var15` is close to `sd15 * sd15`.
+**Expected result/shape:** 60 rows, newest first. On a late-2026 load
+the top row is 2026-11-23 with `revenue` 742.14, `ma15` 3245.49 and `sd15`
+1724.57. `d` prints as `2026-11-23 00:00:00+00` because `date_trunc` on a
+`timestamptz` keeps that type. `var15` reads 2974133.16, a little off
+1724.57 squared (2974141.68), because the two columns are rounded
+separately from unrounded values. No statistic is NULL, since every
+displayed date has a full 15-row frame. The newest date is the load day
+itself, so its revenue may be partial.
 
 ### Example 2
 
@@ -153,9 +129,20 @@ ORDER BY
 LIMIT 12;
 ```
 
-**How to read it:** Example 2: Start with `orders` in `FROM`/`JOIN`; let `GROUP BY` collapse rows to its grouping keys. The final `SELECT` displays `m`, `p50`, `p90`, and `p99`. `ORDER BY` determines presentation order and the final `LIMIT 12` caps displayed rows. Before running, predict the row grain, row count, `NULL` positions, and first/last key; afterwards, compare each prediction with the transcript.
+**How to read it:** `monthly` does no aggregation; it only labels each
+order with the first day of its month. `GROUP BY m` then hands each month's
+`amt` values to three ordered-set aggregates, each of which sorts them with
+`WITHIN GROUP (ORDER BY amt)` and reads the 50th, 90th and 99th percentile
+positions. There is no `OVER` here: unlike Example 1's windows, these
+aggregates collapse a month to a single row.
 
-**Expected result/shape:** Example 2 returns one grouped row per `m`, `amt`, and `p50`, capped at 12 rows with columns `m`, `amt`, `p50`, `p90`, and `p99` from `orders`. Compare the key set and row count with a simpler control over the same filter/window; inspect `NULL` versus zero/absent-row meaning and verify the final ordering/tie-breaker when present.
+**Expected result/shape:** 12 rows, one per month, newest first, with
+columns `m`, `p50`, `p90` and `p99`. On a late-2026 load they run from
+November 2026, a partial month of 151 orders, back to December 2025. Some
+values print with float noise, such as October's `p90` of
+944.6360000000001, because `PERCENTILE_CONT` returns `double precision`;
+the exercises cast to `numeric` before `ROUND` for that reason. Every row
+should satisfy `p50 <= p90 <= p99`.
 
 ## Learning objectives
 
@@ -184,28 +171,28 @@ Complete these in the
 
 1. Calculate a trailing daily-revenue z-score.
    **Inputs/evidence:** For sql-40 Exercise 1, read from `orders`, sum `total_amount` per UTC day in the CTE `daily`, then compute a trailing 15-row mean and sample standard deviation (`ROWS BETWEEN 14 PRECEDING AND CURRENT ROW`) in `rolling` and the z-score `(revenue - avg15) / NULLIF(sd15, 0)`.
-   **Expected result/shape:** For sql-40 Exercise 1, expected output: one row per day with orders. A positive z-score is above the rolling mean; a negative score is below it. The final columns are `order_day`, `revenue`, `avg15`, `sd15`, and `z_score`. The final order is `order_day`.
+   **Expected result/shape:** For sql-40 Exercise 1, expected output: 1,080 rows on this load, one per UTC day with orders from 2023-02-13 to 2026-11-23; the second row, 2023-03-07, has `revenue` 1,034.00 against `avg15` 1,118.63 and `z_score` -0.7071. A positive z-score is above the rolling mean; a negative score is below it. The final columns are `order_day`, `revenue`, `avg15`, `sd15`, and `z_score`. The final order is `order_day`.
    **Verify:** For sql-40 Exercise 1, confirm one row per `order_day`, so the row count equals `SELECT COUNT(DISTINCT date_trunc('day', order_date)) FROM orders`; the first row has NULL `sd15` and `z_score` because a one-row sample has no standard deviation, and for one later day recompute `avg15` as the mean of that day's and the 14 previous days' `revenue` in `daily`.
 2. Calculate category order-total P50/P90.
    **Inputs/evidence:** For sql-40 Exercise 2, read from `order_items` joined to `products`, sum each order's net lines per category in `category_order_values`, then compute `PERCENTILE_CONT(0.5)` and `PERCENTILE_CONT(0.9)` of those per-order category values and count them per category.
-   **Expected result/shape:** For sql-40 Exercise 2, expected output: one row per sold category. `PERCENTILE_CONT` can interpolate between observed values, so a percentile need not equal an actual order value. The final columns are `category`, `p50_order_value`, `p90_order_value`, and `category_orders`. The final order is `category`.
+   **Expected result/shape:** For sql-40 Exercise 2, expected output: 6 rows, one per category, whose `category_orders` run from 2,145 for Books to 2,192 for Apparel and sum to 13,085, more than the 4,362 orders because an order with lines in several categories counts once in each; `p50_order_value` runs from 146.54 for Home to 150.24 for Electronics on this load. `PERCENTILE_CONT` can interpolate between observed values, so a percentile need not equal an actual order value. The final columns are `category`, `p50_order_value`, `p90_order_value`, and `category_orders`. The final order is `category`.
    **Verify:** For sql-40 Exercise 2, confirm 6 rows, one per category, and that `category_orders` equals `SELECT COUNT(DISTINCT oi.order_id) FROM order_items oi JOIN products p USING (product_id) WHERE p.category = <that category>` (for example 2192 for `Apparel`); `p90_order_value` must be at least `p50_order_value` in every row.
 3. Predict `percentile_disc` versus `percentile_cont` on four values.
    **Inputs/evidence:** For sql-40 Exercise 3, use the inline `VALUES` fixture 10, 20, 100, 200 and compute `percentile_disc(0.5)` and `percentile_cont(0.5)` over it.
    **Expected result/shape:** For sql-40 Exercise 3, expected output: one row with `discrete_median` 20 and `continuous_median` 60. The final columns are `discrete_median` and `continuous_median`.
    **Verify:** For sql-40 Exercise 3, confirm by hand that `percentile_disc(0.5)` returns the first value whose cumulative share reaches 0.5, the second of four values (20), while `percentile_cont(0.5)` interpolates halfway between 20 and 100 (60); add the value 300 and expect both medians to become 100.
 4. Calculate monthly category revenue share and deterministic rank.
-   **Inputs/evidence:** For sql-40 Exercise 4, read from `orders`, `order_items`, and `products`. Build the answer toward `month`, `category`, `revenue`, `month_share`, and `category_rank`; keep `month`, and `category` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-40 Exercise 4, expected output: one row per `month`, and `category`. The final columns are `month`, `category`, `revenue`, `month_share`, and `category_rank`. The final order is `month DESC, category_rank`.
-   **Verify:** For sql-40 Exercise 4, choose one complete partition from `orders`, `order_items`, and `products`; hand-calculate its first, middle, and final window values for `revenue`, `month_share`, and `category_rank`, then verify output keys remain `month`, and `category`. Give two rows the same `month DESC` value and different `category_rank` values; verify `month DESC, category_rank` produces the intended rank and display order.
+   **Inputs/evidence:** For sql-40 Exercise 4, read `orders` for the month, `order_items` for net line revenue `quantity * unit_price * (1 - discount)`, and `products` for `category`; the CTE `category_month` sums revenue per month and category, `SUM(revenue) OVER (PARTITION BY month)` supplies the share denominator, and `ROW_NUMBER() OVER (PARTITION BY month ORDER BY revenue DESC, category)` supplies the rank.
+   **Expected result/shape:** For sql-40 Exercise 4, expected output: 276 rows on this load, 46 months from 2023-02-01 to 2026-11-01 times all 6 categories, with `category_rank` 1 to 6 in every month; the newest month starts with Sports at 16,427.31 and a `month_share` of 0.1924 and ends with Home at rank 6. The final columns are `month`, `category`, `revenue`, `month_share`, and `category_rank`. The final order is `month DESC, category_rank`.
+   **Verify:** For sql-40 Exercise 4, confirm 276 distinct `(month, category)` pairs, that the unrounded shares sum to exactly 1 in each of the 46 months while the rounded `month_share` values sum to between 0.9998 and 1.0002, and that `SUM(revenue)` over all rows is 2,355,647.1235, the `order_items` line total; this load has no revenue ties, so `RANK()` matches `ROW_NUMBER()` in every row, but on `VALUES ('Books', 100.00), ('Apparel', 100.00), ('Home', 90.00)` the `category` tiebreaker ranks Apparel 1 and Books 2 where `RANK()` gives both 1.
 5. Repair a forecasting frame that includes the current row.
-   **Inputs/evidence:** For sql-40 Exercise 5, read from `orders`. Build the answer toward `day`, `revenue`, and `prior_seven_forecast`; keep `day` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-40 Exercise 5, expected output: at most 20 rows keyed by `day`. The final columns are `day`, `revenue`, and `prior_seven_forecast`. The final order is `day DESC`.
-   **Verify:** For sql-40 Exercise 5, assert no more than 20 rows, no duplicate `day`, and no adjacent pair that violates `day DESC`. Rejoin the returned keys to `orders` to confirm `day`, `revenue`, and `prior_seven_forecast` came from the same source rows. Run with 20 minus one and 20 plus one eligible rows; require the output cap of 20 while retaining `day DESC`.
+   **Inputs/evidence:** For sql-40 Exercise 5, read `orders`, sum `total_amount` per `order_date::date` in the CTE `daily`, then average the seven previous order days with `AVG(revenue) OVER (ORDER BY day ROWS BETWEEN 7 PRECEDING AND 1 PRECEDING)`, so a day's own revenue never feeds its forecast.
+   **Expected result/shape:** For sql-40 Exercise 5, expected output: exactly 20 rows on this load, the consecutive days from 2026-11-23 back to 2026-11-04, each with a non-NULL forecast; the top row is 2026-11-23 with `revenue` 742.14 and `prior_seven_forecast` 2,300.43. The final columns are `day`, `revenue`, and `prior_seven_forecast`. The final order is `day DESC`.
+   **Verify:** For sql-40 Exercise 5, confirm 2,300.43 by averaging the seven `daily` rows before 2026-11-23 (`ORDER BY day DESC LIMIT 7`), and that the leaky frame `ROWS BETWEEN 6 PRECEDING AND CURRENT ROW` reports 2,079.31 for that day; then, inside `BEGIN ... ROLLBACK`, insert a 500.00 order on 2026-11-24 and confirm it becomes the top row with forecast 2,079.31, the leaky value shifted one day, while the 20-row window now starts at 2026-11-05.
 6. Preserve NULL z-scores for a constant series.
-   **Inputs/evidence:** For sql-40 Exercise 6, read from `constant`. Build the answer toward `value`, and `z_score`; keep `value` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-40 Exercise 6, expected output: one row per `value`. The final columns are `value`, and `z_score`.
-   **Verify:** For sql-40 Exercise 6, reselect the returned keys directly from the source; require unique `value` where the expected grain is one row per key and confirm the projected `value`, and `z_score` against `constant`. Repeat with `NULL` in `value`, and `z_score` and state whether the row is kept, rejected, or classified.
+   **Inputs/evidence:** For sql-40 Exercise 6, use the inline `VALUES` fixture `constant`, three rows of 5; `moments` adds `AVG(value) OVER ()` and `STDDEV_SAMP(value) OVER ()` to every row, and the outer query divides `value - mean_value` by `NULLIF(sd_value, 0)`.
+   **Expected result/shape:** For sql-40 Exercise 6, expected output: three rows, each with `value` 5 and a NULL `z_score`, because the sample standard deviation is 0 and `NULLIF` turns that 0 into NULL. The final columns are `value`, and `z_score`.
+   **Verify:** For sql-40 Exercise 6, confirm that dividing by `sd_value` without `NULLIF` fails with `division by zero`, that the fixture 5, 5, 6 gives `z_score` values -0.5774, -0.5774, and 1.1547, and that adding a `NULL` row returns four rows with every `z_score` NULL: `STDDEV_SAMP` skips the NULL, so the 5s still have zero spread, and the NULL row's own difference is NULL.
 
 Verify that the undefined constant-series z-score remains `NULL`.
 
@@ -247,7 +234,12 @@ precisely 15 observed order dates.
 
 ## Practice map
 
-Use the numbered **Exercises** section above as the single authoritative practice contract. Its prompts, expected shapes, and verification checks map one-for-one to the learner SQL and both solution companions.
+The six prompts move between grains, so name the grain before writing
+each query. The first and fifth work on one row per order day, the second on
+one row per category and order, and the fourth on one row per month and
+category. The third and sixth use tiny inline fixtures, four values and three
+identical fives, so you can work out the answer with pencil and paper first
+and then check that PostgreSQL agrees.
 
 ## Pitfalls and validation
 
@@ -271,9 +263,11 @@ uses `NULLIF(sd, 0)` so “undefined” is not mislabeled as a score of zero.
 
 ## Ask an AI tutor about this lesson
 
-An AI tutor is optional; the guide, learner SQL, PostgreSQL, and expected checks are
-enough to complete the lesson offline. If you want a patient tutor, copy this
-prompt after opening the repository in the AI tutor:
+A tutor is handy for the hand calculations: ask it to quiz you on what
+`percentile_disc` and `percentile_cont` return for a short list, or on why a
+two-day frame always scores plus or minus 0.7071. Setup is in the
+[AI tutor notes](../../STUDY-GUIDE.md#use-an-ai-tutor-optional); start
+with this prompt:
 
 ```text
 Tutor me through sql-40: Advanced Analytic Functions.

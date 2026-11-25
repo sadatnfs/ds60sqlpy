@@ -4,7 +4,7 @@ This architecture lesson uses fixed, sanitized reasoning fixtures. It does not c
 
 ## Level and prerequisites
 
-Advanced; approximately 105 minutes. Direct prerequisite: `spark-039`. The prepared execution baseline elsewhere in this course is classic Spark 4.3.0, Scala binary 2.13 and JDK 17. This reading lesson distinguishes that actual local boundary from proposed remote designs.
+Advanced; approximately 105 minutes. Direct prerequisite: `spark-039`. The prepared execution baseline elsewhere in this course is classic Spark 4.3.0, Scala binary 2.13 and JDK 17. This reading lesson distinguishes that actual local boundary from proposed remote designs. For what a local run can and cannot show, see the [study guide](../STUDY-GUIDE.md#three-kinds-of-evidence).
 
 ## How to use this lesson
 
@@ -75,7 +75,7 @@ Illustrative partition 1: id >= 5
 Configured lowerBound=0, upperBound=10, numPartitions=2
 ```
 
-Partition 0 includes -10,0, NULL; partition 1 includes 5,10,99. All six source rows can be read. To select only [0, 10), the reviewed SQL must contain that population predicate and a deliberate NULL policy. This is a reasoning fixture, not an executed JDBC query.
+Partition 0 includes -10, 0 and NULL; partition 1 includes 5, 10 and 99. All six source rows can be read. To select only [0, 10), the reviewed SQL must contain that population predicate and a deliberate NULL policy. This is a reasoning fixture, not an executed JDBC query.
 
 ### Worked example 2: Map an exact decimal, instant and missing field
 

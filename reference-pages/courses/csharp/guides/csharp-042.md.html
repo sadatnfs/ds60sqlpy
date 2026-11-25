@@ -206,11 +206,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Authorization:</strong> Deciding permitted actions for an established identity.</p>
 <p><strong>Default deny:</strong> Rejecting access unless an explicit policy permits it.</p>
 <h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>The Linux Docker classroom compiles your saved pad as <code>Program.cs</code> in its fixed .NET 10 project. C# 14 is the matching language generation. This route uses the prepared framework libraries; it does not accept arbitrary project files, NuGet packages, command arguments or interactive input. The explicit <code>Program.Main</code> entrypoint makes compilation and execution visible. <code>Check</code> throws on a false condition in every build configuration, unlike conditional debugging assertions.</p>
-<p>Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.</p>
+<p>Both examples are pure policy code with no network, file or credential store. The permission set uses <code>StringComparer.Ordinal</code>, so letter case is part of an action&#x27;s identity. The value synthetic-secret is a made-up placeholder; never paste a real token into the pad, a test or a tutor prompt.</p>
+<p>Compile contract, starter stop and success marker: <a href="../STUDY-GUIDE.md.html#running-a-lesson">running a lesson</a>.</p>
 <h3 id="syntax-anatomy-and-execution-trace">Syntax anatomy and execution trace<a class="heading-anchor" href="#syntax-anatomy-and-execution-trace" aria-label="Link to this section">#</a></h3>
 <p>Use exact identity comparisons and explicit permission mappings. A default-deny decision rejects absent policy entries. Parsing and authorization should remain separate methods with separately testable outcomes.</p>
-<p>Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.</p>
+<p>Each example ends with a trace; method: <a href="../STUDY-GUIDE.md.html#tracing-a-program">tracing a program</a>.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="example-a-evaluate-an-explicit-permission-policy">Example A: Evaluate an explicit permission policy<a class="heading-anchor" href="#example-a-evaluate-an-explicit-permission-policy" aria-label="Link to this section">#</a></h4>
 <p>Absence of an entry does not become implicit permission.</p>
@@ -248,6 +248,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> Read is allowed and delete is denied.</p>
+<p><strong>Trace.</strong> <code>rights</code> holds the single string report:read, compared ordinally. <code>Contains(&quot;report:read&quot;)</code> finds that exact entry and returns true. <code>Contains(&quot;report:delete&quot;)</code> finds nothing, and because the code treats absence as refusal, delete is denied without any rule having to mention it. Report:Read with capital letters would also return false under the ordinal comparer, so case variants grant nothing.</p>
 <h4 id="example-b-redact-before-producing-diagnostics">Example B: Redact before producing diagnostics<a class="heading-anchor" href="#example-b-redact-before-producing-diagnostics" aria-label="Link to this section">#</a></h4>
 <p>A minimal example makes the diagnostic contract explicit; production structured logging should use an allowlist of safe fields.</p>
 <pre class="highlighted-code"><code class="language-csharp"><span class="syntax-keyword">using</span> System<span class="syntax-punctuation">;</span>
@@ -287,6 +288,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The token is replaced while a status remains visible.</p>
+<p><strong>Trace.</strong> <code>Redact</code> compares the key with token using <code>OrdinalIgnoreCase</code>. TOKEN matches, so the function returns the marker [redacted] instead of the secret. The key status does not match, so its value failed passes through unchanged and the log remains useful. The comparison is exact equality, which matters for keys that merely contain the word token.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <ol>
 <li><strong>Predict and explain.</strong> Separate identity from permission in a request trace.</li>
@@ -306,10 +308,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <ol start="6">
 <li><strong>Transfer and justify.</strong> Describe authorization checks for a resource owned by another user and the evidence each check needs.</li>
 </ol>
-<p>For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.</p>
+<p>Log each task in the <a href="../STUDY-GUIDE.md.html#recording-exercise-evidence">evidence table</a> before opening the explanation.</p>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
 <p>This fixture is policy reasoning, not a complete authentication system. Do not invent cryptography or store passwords in reversible form. Parameter binding and destination-specific APIs are preferable to manual escaping.</p>
-<p>A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.</p>
+<p>Task 4 is the classic bypass: a handler that reads <code>isAdmin</code> from the request body lets the caller grant itself rights, so derive roles from the authenticated identity instead. For task 3, notice that <code>Redact(&quot;access_token&quot;, value)</code> returns the secret unchanged, since only the exact key token is caught; an allowlist of safe fields avoids that denylist gap.</p>
+<p>Repair routine: <a href="../STUDY-GUIDE.md.html#building-a-regression-case">building a regression case</a>.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <ol>
 <li>Reproduce Example A (Evaluate an explicit permission policy) before changing anything, and confirm its observation: Read is allowed and delete is denied.</li>
@@ -317,9 +320,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>Before opening the explanation, test your task 3 attempt against this lesson&#x27;s main pitfall: This fixture is policy reasoning, not a complete authentication system.</li>
 </ol>
 <h3 id="self-check-and-next-step">Self-check and next step<a class="heading-anchor" href="#self-check-and-next-step" aria-label="Link to this section">#</a></h3>
-<p>Explain Authentication, Authorization, Default deny without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.</p>
+<p>Explain why absence from <code>rights</code> must mean denial rather than permission. Predict what <code>Redact</code> returns for the keys Token, auth and access_token. For task 6, list the checks for reading another user&#x27;s resource: who the caller is, who owns the resource, which permission applies, and which log entry records the decision.</p>
+<p>Then follow the general <a href="../STUDY-GUIDE.md.html#self-check-routine">self-check routine</a> and save your pad.</p>
 <h3 id="sources-and-execution-boundary">Sources and execution boundary<a class="heading-anchor" href="#sources-and-execution-boundary" aria-label="Link to this section">#</a></h3>
-<p><a href="https://learn.microsoft.com/en-us/dotnet/csharp/">Official language or framework documentation</a>. The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.</p>
+<p><a href="https://learn.microsoft.com/en-us/dotnet/csharp/">Documentation</a>: The .NET security articles and the C# guide&#x27;s string comparison topics explain ordinal comparison, secret handling and validation boundaries.</p>
+<p>Provenance and limits: <a href="../STUDY-GUIDE.md.html#sources-and-execution-boundary">sources and execution boundary</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for csharp-042: Security boundaries, secrets and untrusted data.
 Read courses/csharp/guides/csharp-042.md and courses/csharp/lessons/csharp-042.cs. Prerequisites: csharp-041.

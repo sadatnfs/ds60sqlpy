@@ -194,16 +194,19 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/scala-spark/guides/spark-009.md</code></p>
     </header>
     <article class="document"><h2 id="spark-009-packages-build-inputs-and-closure-serialization">spark-009: Packages, build inputs, and closure serialization<a class="heading-anchor" href="#spark-009-packages-build-inputs-and-closure-serialization" aria-label="Link to this section">#</a></h2>
-<p>Authored tutorial and practice content. The prepared Scala/JVM worker executes a bounded program; process success and understanding remain distinct. No source file installs a tool or downloads a dependency.</p>
+<p>Spark runs your function on executors, so the function and everything it refers to must be serializable and built for the same Scala binary as Spark. This lesson checks a build coordinate against the prepared <code>_2.13:4.3.0</code> family, limits the master to <code>local[2]</code>, and rewrites a closure that drags a nonserializable owner along.</p>
 <h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
-<p>Beginner; approximately 75 minutes. Direct prerequisites: <code>spark-008</code>. The lesson uses Scala 2.13 syntax and the prepared JDK 17 worker. The <a href="../execution-baseline.md.html">execution baseline</a> lists the exact Scala, JDK and Spark versions.</p>
+<p>Beginner; approximately 75 minutes. Direct prerequisites: <code>spark-008</code>. Pinned versions: <a href="../execution-baseline.md.html">execution baseline</a>.</p>
 <h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>Open <code>spark-009</code> in the classroom, select the Scala source, prepare the <code>scala-jvm</code> profile and run the saved pad. The worker stages the single source as <code>Main.scala</code> and invokes <code>object Main</code>. Read the terminal output and exact assertions. The <a href="../lessons/spark-009.scala.html">learner source</a> runs two complete demonstrations; its six task functions remain explicit stubs until you implement them. Preserve your saved attempt. The <a href="../solutions/spark-009_solution.scala.html">reference program</a> and <a href="../solutions/spark-009_solutions.md.html">explained solutions</a> are separate and should be opened after an attempt or an explicit worked-comparison request. If the profile is unavailable, reading and saving remain available; opening this guide does not prepare a runtime.</p>
+<p>Shared run steps and profile rules: <a href="../STUDY-GUIDE.md.html#run-a-language-lesson">study guide</a>.</p>
+<p>Learner pad: <a href="../lessons/spark-009.scala.html">spark-009.scala</a>.</p>
+<p>Open the <a href="../solutions/spark-009_solutions.md.html">explained solutions</a> after an attempt.</p>
+<p>The first worked example prints <code>org.apache.spark:spark-sql_2.13:4.3.0</code>, built from the binary version <code>2.13</code>; the <code>_2.13</code> suffix must match the Scala binary that compiles your code. The second prints <code>The closure needs the immutable numeric offset</code> after showing that <code>value =&gt; value + offset</code> captures only a <code>Long</code>. Nothing is downloaded: the coordinate is checked as text, not resolved.</p>
 <h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
 <ul>
 <li>Separate source code, compiled artifacts and dependency coordinates before distributing functions.</li>
-<li>Explain the result of both worked examples before running them.</li>
-<li>Implement the six contracts, inspect normal and boundary evidence, and explain a counterexample in your own words.</li>
+<li>Explain why <code>Owner.bad</code> fails to serialize (it reads the field <code>factor</code>, so it captures the whole <code>Owner</code>) and why copying <code>factor</code> into a local value first fixes it.</li>
+<li>Separate what the program reads back at runtime (<code>scala_actual</code>, <code>java_actual</code>) from what the build declares (<code>spark_target</code>), and say which of the three a learner can verify from one run.</li>
 </ul>
 <h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
 <ul>
@@ -273,9 +276,15 @@ println<span class="syntax-punctuation">(</span><span class="syntax-string">&quo
 <h3 id="common-pitfalls">Common pitfalls<a class="heading-anchor" href="#common-pitfalls" aria-label="Link to this section">#</a></h3>
 <p>If a closure fails serialization, inspect the owner object it captures rather than only the arithmetic line. If a local round trip succeeds but executor loading fails, check code distribution and binary compatibility. If a coordinate ends in_3 or_2.12, do not substitute it for the declared_2.13 artifact. If a version report prints a hardcoded value, rename it as a target and add actual readback. If a source suggests downloading dependencies on Run, return to explicit preparation instead; the fixed lesson does not resolve arbitrary artifacts.</p>
 <h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
-<p>Without opening the reference, trace the listed boundary case through <code>artifactCoordinate</code>. Then explain why <code>versionReport</code> needs its declared invariant or input restriction. Name the exact assertion that would reject one tempting wrong implementation. Retain the observed values and explain how they support the lesson outcome: Separate source code, compiled artifacts and dependency coordinates before distributing functions.</p>
+<ul>
+<li>What coordinate does <code>artifactCoordinate(&quot;spark-sql&quot;, &quot;2.13&quot;, &quot;4.3.0&quot;)</code> return, and why are binary <code>3</code>, binary <code>2.12</code> and version <code>4.2.0</code> outside the prepared target?</li>
+<li>Why does <code>localMaster</code> reject <code>local[*]</code> and a <code>spark://</code> URL? What would each one change about where your code runs?</li>
+<li><code>captureValue(owner)</code> with factor 3 maps 7 to 21. Write the one-line change that turns a closure capturing <code>owner</code> into one capturing only the factor.</li>
+<li><code>serializedSize</code> returns a positive byte count for the safe closure. Why is a nonzero byte count alone weaker evidence than the round-trip check in Exercise 5?</li>
+<li><code>versionReport</code> returns <code>java_actual</code> 17 and a <code>scala_actual</code> that starts with <code>2.13.</code>. Which value comes from the running JVM, and which is only a declaration?</li>
+</ul>
 <h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
-<p>Continue to the next lesson only after you can explain the boundary behavior. The <a href="../README.md.html">course route</a> shows authored material and runtime evidence separately.</p>
+<p>Go on to <a href="spark-010.md.html">spark-010: Laziness, iterators, and safe side effects</a>. Shipping a closure is one half of how Spark runs code; the other half is when it runs. The next lesson traces lazy iterators and shows why a side effect inside a transformation can run zero, one or several times.</p>
 <h3 id="primary-sources-and-official-apis">Primary sources and official APIs<a class="heading-anchor" href="#primary-sources-and-official-apis" aria-label="Link to this section">#</a></h3>
 <ul>
 <li><a href="https://docs.scala-lang.org/overviews/core/binary-compatibility-for-library-authors.html">Scala binary compatibility</a>.</li>

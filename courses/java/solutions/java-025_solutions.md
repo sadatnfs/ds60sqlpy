@@ -1,6 +1,6 @@
 # java-025: explanatory solutions
 
-Open after an attempt or an explicit solution reveal. The executable reference runs the six exercise checks together as `Main.java`. The guide contains independent worked examples, while this file explains the choices and failure cases in the complete answer.
+Open this after an attempt; see [using the solutions](../STUDY-GUIDE.md#use-the-solutions).
 
 ## Mechanism review
 
@@ -22,7 +22,7 @@ A collection holding an array retains a strong reference. Clearing the collectio
 
 ## Exercise 1: Expose a strong retention path: change one input
 
-Task: Copy Example A into a scratch `Main.java` and change `byte[] payload = new byte[1024];` to `byte[] payload = new byte[1025];`. Before running it with `java -ea Main`, predict which assertion fails and which value it now sees; then run it and restore the original line.
+Task: Change `byte[] payload = new byte[1024];` to `byte[] payload = new byte[1025];` in Example A and predict which assertion fails and why.
 
 The local reference disappearing does not remove the list's ownership path. This is a common source of unbounded cache or listener retention.
 
@@ -37,13 +37,13 @@ payload = null;
 assert retained.get(0)[0] == 7 && retained.get(0).length == 1024;
 ```
 
-**Expected:** The changed run fails with an `AssertionError` from the assertion on `retained.get(0)[0] == 7 && retained.get(0).length == 1024`. Restoring the original line brings back the worked observation: list still exposes the same array contents.
+**Expected:** The edited run fails with an `AssertionError` from the assertion on `retained.get(0)[0] == 7 && retained.get(0).length == 1024`.
 
-**Verify:** Compare your written prediction with the reported `AssertionError` and its stack-trace line, and name the value that made `retained.get(0)[0] == 7 && retained.get(0).length == 1024` false. After restoring the line, the program completes without an `AssertionError` again.
+**Verify:** Name the value that makes `retained.get(0)[0] == 7 && retained.get(0).length == 1024` false, then restore the line.
 
 ## Exercise 2: Remove one ownership path deliberately: diagnose an edited check
 
-Task: A careless edit changed the assertion that Example B adds after Example A so that it reads `assert retained.isEmpty() && separate[1] == 7;`. Run Example B with that line, explain why the edited assertion now fails for the same program state, and restore it.
+Task: Example B's new assertion was edited to `assert retained.isEmpty() && separate[1] == 7;`. Explain why it fails for unchanged state and restore it.
 
 Clearing a container removes its references, but another strong reference can keep the object reachable. Reachability is a graph property.
 
@@ -55,9 +55,9 @@ retained.clear();
 assert retained.isEmpty() && separate[0] == 7;
 ```
 
-**Expected:** Before the repair the run fails with an `AssertionError` from the assertion on `retained.isEmpty() && separate[0] == 7`; after it the line reads `assert retained.isEmpty() && separate[0] == 7;` again and list empty; separate array still valid.
+**Expected:** The edited run fails with an `AssertionError` from the assertion on `retained.isEmpty() && separate[0] == 7`; the restored assertion passes.
 
-**Verify:** Keep the failing and the repaired runs. Explain why the edited assertion rejects the same program state that `retained.isEmpty() && separate[0] == 7` accepts.
+**Verify:** Explain why the edited assertion rejects the state that `retained.isEmpty() && separate[0] == 7` accepts.
 
 ## Exercise 3: Inspect a weak reference without timing assumptions
 
@@ -73,7 +73,7 @@ java.lang.ref.Reference.reachabilityFence(separate);
 
 **Expected:** weak get returns the same object while strong reference exists.
 
-**Verify:** Keep an assertion equivalent to `weak.get() == separate`. As a control, change `assert weak.get() == separate;` to `assert weak.get() != separate;` inside it: the run must fail with an `AssertionError`, which shows the assertion can fail. Restore it.
+**Verify:** Control: changing `assert weak.get() == separate;` to `assert weak.get() != separate;` inside the assertion must make it fail.
 
 ## Exercise 4: Separate value size from allocation count
 
@@ -93,7 +93,7 @@ assert logical == 1280;
 
 **Expected:** 1280 logical bytes; no exact heap-overhead claim.
 
-**Verify:** Keep an assertion equivalent to `logical == 1280`. As a control, change `for (int i = 0; i < 10; i++) blocks.add(new byte[128]);` to `for (int i = 0; i <= 10; i++) blocks.add(new byte[128]);`: the run must fail with an `AssertionError` from the assertion on `logical == 1280`. Restore the line before continuing.
+**Verify:** Control: changing `for (int i = 0; i < 10; i++) blocks.add(new byte[128]);` to `for (int i = 0; i <= 10; i++) blocks.add(new byte[128]);` must fail the assertion on `logical == 1280`.
 
 ## Exercise 5: Reuse a bounded working buffer
 
@@ -110,7 +110,7 @@ assert System.identityHashCode(buffer) == identity && buffer[0] == 9;
 
 **Expected:** same buffer identity; final value 9.
 
-**Verify:** Keep an assertion equivalent to `System.identityHashCode(buffer) == identity && buffer[0] == 9`. As a control, change `for (int i = 0; i < 10; i++) Arrays.fill(buffer, (byte) i);` to `for (int i = 0; i <= 10; i++) Arrays.fill(buffer, (byte) i);`: the run must fail with an `AssertionError` from the assertion on `System.identityHashCode(buffer) == identity && buffer[0] == 9`. Restore the line before continuing.
+**Verify:** Control: changing `for (int i = 0; i < 10; i++) Arrays.fill(buffer, (byte) i);` to `for (int i = 0; i <= 10; i++) Arrays.fill(buffer, (byte) i);` must fail the assertion on `System.identityHashCode(buffer) == identity && buffer[0] == 9`.
 
 ## Exercise 6: Record process memory cautiously
 
@@ -128,8 +128,10 @@ assert total >= 0 && free >= 0 && maximum >= total;
 
 **Expected:** nonnegative counters; max at least total; no claim of exact object size.
 
-**Verify:** Keep an assertion equivalent to `total >= 0 && free >= 0 && maximum >= total` and confirm that `java -ea Main` completes. Then name an input that would make it fail and explain which value changes.
+**Verify:** Name an input that would make `total >= 0 && free >= 0 && maximum >= total` false and the value that changes.
 
 ## After comparing the answer
 
-Run the complete reference with assertions enabled, then return to your own implementation. Recreate one check with different values and explain its expected result before execution. A compiler error, an expected domain exception and an assertion failure represent different stages and should be reported separately. Preserve ownership boundaries when adapting file, network or concurrency examples. The reference never authorizes access to a shared service or deletion of learner state. Use a fresh tiny fixture when you need to distinguish two interpretations of an API contract.
+In your copy, put the array from Example A into a `HashMap` stored in a static field and trace the path that keeps it reachable after `main` drops every local reference.
+
+Run the complete reference with `java -ea Main` first; the [review routine](../STUDY-GUIDE.md#use-the-solutions) covers the rest.

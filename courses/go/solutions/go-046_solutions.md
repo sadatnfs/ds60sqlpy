@@ -1,6 +1,6 @@
 # go-046: explained solutions
 
-These are comparison material after an attempt or explicit reveal. The executable reference implements all six cases in one `main.go`.
+Compare after an attempt ([using solutions](../STUDY-GUIDE.md#use-the-solutions)). `courses/go/solutions/go-046_solution.go` implements all six cases.
 
 ## Mechanism
 
@@ -10,7 +10,7 @@ Separate the pure policy from the HTTP and AdmissionReview adapter. The fixture 
 
 ## 1. Accept a valid range: change one input
 
-Copy worked example 1 into a scratch pad and change `d := admit("r1", 3, 5, false)` to `d := admit("r2", 3, 5, false)`. Before running, predict which check fails and which value it now sees; then run it and restore the original line.
+Copy worked example 1, change `d := admit("r1", 3, 5, false)` to `d := admit("r2", 3, 5, false)` and predict the failure before running; then restore the line.
 
 The unchanged code is worked example 1:
 
@@ -19,13 +19,15 @@ d := admit("r1", 3, 5, false)
 check(d.Allowed && d.UID == "r1", "allow")
 ```
 
-**Expected:** The changed run panics with `allow` because `d.Allowed && d.UID == "r1"` no longer holds. Restoring the original line brings back the worked observation: the decision allows the request.
+**Expected:** The edited run panics with `allow` because `d.Allowed && d.UID == "r1"` no longer holds.
+
+**Verify:** Restoring `d := admit("r1", 3, 5, false)` makes the check pass again with the worked observation: the decision allows the request.
 
 The pure rule is independently testable. The HTTP adapter still needs protocol and transport validation.
 
 ## 2. Reject a negative value: diagnose an edited check
 
-A careless edit changed the check in worked example 2 so that it reads `check(!d.Allowed && d.Reason == "", "negative")`. Run worked example 2 with that line, explain why the edited check now fails for the same program state, and restore it.
+A careless edit rewrote the check in worked example 2 as `check(!d.Allowed && d.Reason == "", "negative")`. Explain the failure, then restore it.
 
 The unchanged code is worked example 2:
 
@@ -34,7 +36,9 @@ d := admit("r2", -1, 5, false)
 check(!d.Allowed && d.Reason != "", "negative")
 ```
 
-**Expected:** Before the repair the program panics with `negative`; after it the line reads `check(!d.Allowed && d.Reason != "", "negative")` again and the decision denies it with a reason.
+**Expected:** The defective run panics with `negative`; after restoring `check(!d.Allowed && d.Reason != "", "negative")`, the decision denies it with a reason.
+
+**Verify:** The edited check fails with message `negative` for a state that `!d.Allowed && d.Reason != ""` accepts.
 
 Field-specific validation gives an actionable failure instead of an unexplained generic denial.
 
@@ -48,6 +52,8 @@ check(admit("r3", 5, 5, false).Allowed && !admit("r4", 6, 5, false).Allowed, "bo
 
 **Expected:** Five is allowed and six is denied.
 
+**Verify:** Your solution must keep `admit("r3", 5, 5, false).Allowed && !admit("r4", 6, 5, false).Allowed` true. Control: changing `check(admit("r3", 5, 5, false).Allowed && !admit("r4", 6, 5, false).Allowed, "boundary")` to `check(admit("r3", 6, 5, false).Allowed && !admit("r4", 6, 5, false).Allowed, "boundary")` panics with message `boundary`; revert it.
+
 The inclusive bound must be clear. Boundary tests catch a common off-by-one policy defect.
 
 ## 4. Preserve request identity
@@ -60,6 +66,8 @@ check(d.UID == "request-42", "UID")
 ```
 
 **Expected:** The exact request UID is copied.
+
+**Verify:** Your solution must keep `d.UID == "request-42"` true. Control: changing `d := admit("request-42", 2, 5, false)` to `d := admit("request-43", 2, 5, false)` panics with message `UID`; revert it.
 
 A response for another request must not be accepted as evidence for this one. Identity binding is part of the webhook protocol.
 
@@ -75,6 +83,8 @@ check(d.Allowed && d.SideEffects == 0 && live.Allowed && live.SideEffects == 1, 
 
 **Expected:** Both decisions allow the request; only the real evaluation records a side effect.
 
+**Verify:** Your solution must keep `d.Allowed && d.SideEffects == 0 && live.Allowed && live.SideEffects == 1` true. Control: changing `d := admit("r5", 2, 5, true)` to `d := admit("r5", 2, 5, false)` panics with message `dry run`; revert it.
+
 This validator records one audit side effect for an allowed real request and none for dry run. Real webhooks must declare their side-effect class accurately and skip side effects when the request is a dry run.
 
 ## 6. Transfer missing identity refusal
@@ -88,8 +98,10 @@ check(!d.Allowed, "missing UID")
 
 **Expected:** The decision is denied.
 
+**Verify:** Your solution must keep `!d.Allowed` true. Control: changing `check(!d.Allowed, "missing UID")` to `check(d.Allowed, "missing UID")` panics with message `missing UID`; revert it.
+
 A valid numeric object is insufficient if the adapter cannot bind the response to a request. Protocol validation precedes domain success.
 
 ## Transfer after comparison
 
-Return to your own pad and reproduce one check with a new input. Explain why the check rejects a plausible wrong implementation. Keep the distinction between a pure model, an in-process fake, and a real external system visible in your notes.
+Admission sits between authorization and storage, so policy engines, defaulting webhooks and validating admission policies all follow this contract. When a deploy fails with a denied request, the reason should name the field and rule. When you write one, test boundaries, dry run and the unavailable case, and measure latency, because it sits on every write path it covers.

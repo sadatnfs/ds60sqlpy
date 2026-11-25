@@ -1,6 +1,6 @@
 # cuda-110: explained solutions
 
-These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.
+Compare with your [worksheet](../lessons/cuda-110.md) attempt.
 
 ## Exercise 1: List compatibility axes
 
@@ -74,8 +74,16 @@ Require functional tests in every declared supported environment.
 
 **How to verify.** Store test results per environment with the release and reject it if any declared row lacks a passing result.
 
+## Self-check answers
+
+1. **Why does a wheel filename not guarantee GPU support?** It encodes Python and platform tags, not every device architecture the embedded code was compiled for.
+
+2. **When can intermediate device code help portability?** It can be compiled by a driver for a newer device, but only within the documented compatibility rules.
+
+3. **Is publishing a package part of this lesson's workflow?** No. Publishing or using external registries is a separately authorized workflow, kept apart from classroom reading.
+
 ## Reference observation
 
 Build ledger completeness does not establish runtime driver or GPU acceptance.
 
-The reference file is `courses/cuda/python/references/cuda-110_cpu.py`. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.
+Asserted by `courses/cuda/python/references/cuda-110_cpu.py`.

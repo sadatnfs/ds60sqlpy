@@ -1,6 +1,6 @@
 # docker-007: explanatory solutions
 
-Compare after your own attempt or an explicit reveal. These explain the supplied teaching fixtures; they are not engine results. The mechanism is explained in `courses/docker/guides/docker-007.md`.
+These answers explain teaching fixtures, not engine results; the mechanism is in [the guide](../guides/docker-007.md).
 
 ## Exercise 1: Predict the first invalidated step after editing server.py.
 
@@ -88,4 +88,4 @@ Compare after your own attempt or an explicit reveal. These explain the supplied
 
 ## Check your transfer
 
-A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.
+Editing `app/views.py` changes only the input to the final source COPY, so the base, the requirements COPY and the `pip install` step are all served from cache and only the source copy and later steps rerun. Adding a package changes the bytes of `requirements.txt`, which invalidates that COPY, the install that follows it, and every later step, including the source copy. In plain logs the first build shows `CACHED` on the install step and the second does not. If the install step reran after a source-only edit, the source must be copied before the requirements, which is the ordering this lesson warns against.

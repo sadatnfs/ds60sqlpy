@@ -2,6 +2,8 @@
 
 Open these answers only after attempting Leaf tensors, detach, no_grad and gradient accumulation yourself. They reuse the guide's literal inputs, starting from Example A, Inspect leaf and nonleaf state, so a discrepancy points at one step. The executable companion runs the assertions; this page explains why each one tests Leaf tensor, Detach, Gradient accumulation. After a pass, choose a new input for exercise 6, Show eval is separate, without looking.
 
+After comparing, follow the [review steps](../STUDY-GUIDE.md#after-the-solutions).
+
 ## Mechanism review
 
 PyTorch distinguishes graph tracking from gradient storage. A leaf tensor is a graph input created by the user or a registered parameter, while intermediate tensors have operation history. backward accumulates gradients into `leaf.grad` by default. Calling backward twice on newly computed losses without clearing gradients adds the contributions. A nonleaf can retain its gradient when retain_grad is requested, but that is a diagnostic choice rather than the default storage policy.
@@ -154,6 +156,3 @@ assert result.requires_grad and model.training is False
 
 **Verify:** In a fresh process, the exercise checks confirm `result.requires_grad` and `model.training is False`.
 
-## Review after comparison
-
-Repeat exercise 4, Separate detach from ownership, with one changed fixture value and predict the difference before running it. Keep your failing attempt at exercise 5, Use no_grad for an observation, beside the repaired result. A missing framework is not a failing assertion. These solutions use only local fixtures.

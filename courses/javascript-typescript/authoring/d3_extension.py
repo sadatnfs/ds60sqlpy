@@ -18,6 +18,7 @@ if str(HERE) not in sys.path:
     sys.path.insert(0, str(HERE))
 
 from d3_solution_notes import NOTES  # noqa: E402
+from guidance import D3_GUIDANCE  # noqa: E402
 from outcomes import MINUTES, OUTCOMES  # noqa: E402
 
 _NAMESPACE = runpy.run_path(str(Path(__file__).with_name("d3_specs.py")))
@@ -111,15 +112,16 @@ def build():
         if outcome in {tasks[-1][0], mental.split(".")[0] + "."}:
             raise ValueError(key + " needs a specific outcome")
         minutes = MINUTES.get(key, 110)
+        guidance = D3_GUIDANCE[key]
         text = f"""# {key}: {title}
 
 ## Level and prerequisites
 
-{level.capitalize()}; about {minutes} minutes plus independent practice. Direct prerequisites: {prerequisites}. This is the D3.js specialization within the JavaScript path. Use the original language and browser lessons whenever syntax or DOM behavior is unfamiliar.
+{level.capitalize()}; about {minutes} minutes plus independent practice. Direct prerequisites: {prerequisites}.
 
 ## Learning objectives
 
-{outcome} The central exercise is: {tasks[2][0]} Produce a chart whose data transformation, visual encoding and interaction can be explained and checked independently.
+{outcome} The central exercise is: {tasks[2][0]}
 
 ## Purpose, vocabulary and mental model
 
@@ -135,11 +137,9 @@ def build():
 
 ## Browser execution and offline inputs
 
-Use the classroom's JavaScript browser preview. The prepared preview supplies D3 7.9.0 as the global `d3`, an empty `#chart` container and a `#output` text region. It supports top-level `await` through an asynchronous wrapper. Worked example 2 is a complete program: paste the whole block into the preview and its marks appear in `#chart`. Worked example 1 is a short self-contained snippet whose result appears in the console. These examples do not import modules, fetch datasets, use a CDN or contact an external service. All data is small, synthetic and present in the source. Node has no DOM and is not the execution host for these lessons.
+Run both worked examples in the browser preview ([setup](../STUDY-GUIDE.md#d3-browser-preview)).
 
-Save your own pad before editing. Run the learner source after implementing its tasks. A completed reference prints `{key} D3 complete` only after its executable checks finish. A thrown Error signals a failed check; `console.assert` alone is not a reliable completion contract. A browser observation proves this source ran in this preview. It is not a trusted backend verifier or a guarantee of statistical correctness, accessibility or mastery.
-
-The visual output belongs inside `#chart`. Use `.text()` or `textContent` for untrusted labels, never HTML interpolation. The preview is recreated for a new run, so long-lived listeners and animations should still be bounded and cleaned up in reusable components. No reference needs cookies, credentials, host files or engine access.
+The `{key} D3 complete` marker is not a trusted backend verifier ([why](../STUDY-GUIDE.md#d3-completion-and-checks)).
 
 ## Worked example / walkthrough
 """
@@ -149,31 +149,34 @@ The visual output belongs inside `#chart`. Use `.text()` or `textContent` for un
             text += f"\n### Worked example {i}: {heading}\n\n{body}\n\n```javascript\n{code}\n```\n\n**Expected observation:** {expected}\n"
         text += "\n## Six progressive exercises\n"
         starter = f"// {key}: {title}\n// D3 7.9.0 is supplied as global d3. Render only inside #chart.\n// Answer-free learner artifact. Save your own copy before editing.\n\n"
-        answer = f"# {key}: explanatory solutions\n\nCompare after your own attempt or an explicit reveal. The separate .js reference is a complete offline browser program. These explanations discuss the six practice tasks; a visual resemblance alone is not a data or behavior check.\n\n## Mechanism review\n\n{mental}\n\n{anatomy}\n"
+        answer = f"# {key}: explanatory solutions\n\nCompare after your own attempt; the separate `.js` file is the complete reference program.\n\n## Mechanism review\n\n{mental}\n\n{anatomy}\n"
         for i, (prompt, expected, reason) in enumerate(tasks, 1):
             text += f"\n### Exercise {i}: {prompt}\n\n**Expected evidence:** {expected}\n\n**Progressive hint:** {first_sentence(reason)}\n"
             starter += f"// Exercise {i}: {prompt}\n// Expected: {expected}\n\n"
             note = NOTES.get(key, {}).get(i)
             body = f"{reason} {' '.join(note.split())}" if note else reason
             answer += f"\n## Exercise {i}: {prompt}\n\n{body}\n\n**Expected:** {expected}\n"
+        answer += f"\n## After comparison\n\n{guidance['transfer']}\n"
         starter += 'throw new Error("Implement the six D3 practice tasks in your saved pad before claiming completion.");\n'
         text += (
             f"""
 ## Debugging and common mistakes
 
-Keep three checkpoints separate: the records after parsing, the domain and geometry after transformation, and the visible marks after rendering. A chart can look plausible while silently dropping records or assigning the wrong scale. Inspect counts, IDs, finite coordinates and meaningful expected values before adjusting colors. A missing mark may come from invalid input, a missing selection, an undefined scale result or clipping outside the viewBox.
+{guidance["debug"]} ([checkpoints](../STUDY-GUIDE.md#d3-debugging-checkpoints))
 
-The controlled failure for this lesson is: {tasks[3][0]} Its distinguishing evidence is {tasks[3][1]} Preserve that failing case when repairing your program. Do not remove an assertion or broaden a scale merely to hide a wrong input. Explain whether a changed value should affect the data, an encoding, a layout or only presentation.
+Exercise 4 is the controlled failure: {tasks[3][0]} Distinguishing evidence: {tasks[3][1]}
 
 ## Accessibility and interpretation
 
-Give the visualization a descriptive title and a short textual summary of the main result. Keep a table or list when exact values matter. Do not encode a critical category only through color; use labels, shapes or position as appropriate. Interactive controls need keyboard operation and clear focus, and motion should respect the user's reduced-motion preference. Automated DOM checks support, but do not replace, a real keyboard and assistive-technology review.
+{guidance["access"]} ([accessibility review](../STUDY-GUIDE.md#d3-accessibility-review))
 
-A data scientist must also defend the statistical meaning. State the population, units, aggregation, missing-value policy and uncertainty where relevant. Synthetic points illustrate a mechanism and do not establish a real-world finding. A beautiful visualization should make a valid claim easier to inspect, not make a weak claim appear certain.
+{guidance["meaning"]} ([statistical meaning](../STUDY-GUIDE.md#d3-statistical-meaning))
 
 ## Retrieval and transfer
 
-Close the solution and explain {", ".join(concepts[:3])} using a new small dataset. Reconstruct one example from a blank pad. Predict the effect of one missing value, empty input or reordered record before execution. Retain the source and observation separately from the explanation so a future reader can reproduce the case.
+{guidance["retrieve"]} ([retrieval practice](../STUDY-GUIDE.md#retrieval-practice))
+
+After comparing with the solutions, attempt the transfer case at their end.
 
 ## Primary references
 

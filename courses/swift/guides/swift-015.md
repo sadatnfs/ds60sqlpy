@@ -24,9 +24,9 @@ Map transforms each element while filter selects elements. These operations expr
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles the saved pad as `main.swift` with Swift 6 language checking. An explicit `@main` type contains `static func main() async throws`; the fixed compiler uses `-parse-as-library -swift-version 6`. The examples use the standard library and portable Foundation. `precondition` makes a violated invariant fail the process. The fixed pad accepts one source file, without arbitrary command arguments, interactive input or dependency installation. SwiftUI, UIKit, Apple simulators and application signing belong to the separately prepared macOS/Xcode project labs, never the Linux pad.
+Example B's closure uses an explicit capture list, so its result does not depend on later changes to `factor`. For task 4, delete `[factor]` and run again before predicting: the check on 6 fails at runtime because the closure now reads the variable when it is called. Task 2 chains `filter` before `map` on the same array.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Compile contract, starter stop and success marker: [running a lesson](../STUDY-GUIDE.md#running-a-lesson).
 
 
 
@@ -34,7 +34,7 @@ Start with the answer-free learner artifact in your saved classroom pad. It deli
 
 `{ value in value * 2 }` is a closure. `$0` abbreviates its first argument. A capture list such as `[factor]` captures the current value. Function types use `(Input) -> Output`.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+Each example ends with a trace; method: [tracing a program](../STUDY-GUIDE.md#tracing-a-program).
 
 ## Worked example / walkthrough
 
@@ -61,6 +61,8 @@ struct LessonMain {
 
 **Observe:** Map creates transformed values while retaining the original array.
 
+**Trace.** `values` is `[1, 2, 3]`. `map` creates a new array by calling the closure once per element in order: 1 gives 2, 2 gives 4 and 3 gives 6. The closure only reads its parameter and returns a value, so the source array is untouched, which the second check confirms. `map` always returns exactly as many elements as it receives; a step that can drop elements needs `filter` or `compactMap` instead.
+
 ### Example B: Freeze a captured value deliberately
 
 This differs from a closure observing a mutable captured variable later.
@@ -84,6 +86,8 @@ struct LessonMain {
 
 **Observe:** The explicit capture list retains factor 2 for the closure.
 
+**Trace.** `factor` starts at 2. The capture list `[factor]` copies the current value, 2, into the closure when the closure expression is evaluated. Reassigning `factor` to 5 afterward changes the variable but not that copy. Calling `scale(3)` multiplies 3 by the captured 2 and returns 6, while `factor` itself now reads 5. Without the capture list, the closure would capture the variable and read 5 at call time, returning 15 instead.
+
 ## Exercises
 
 1. **Predict and explain.** Predict the mapped result and unchanged source.
@@ -98,13 +102,15 @@ struct LessonMain {
 
 6. **Transfer and justify.** Choose a named function or closure for a reusable domain transformation and explain readability and capture policy.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Log each task in the [evidence table](../STUDY-GUIDE.md#recording-exercise-evidence) before opening the explanation.
 
 ## Common pitfalls and diagnosis
 
 An escaping closure can outlive its creating scope. Capturing self strongly can create a retain cycle, covered in ARC. A short expression is not automatically clearer than a named intermediate.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+The regression for task 4 is a pair of runs that differ only in whether `[factor]` is present. Keep both versions in your notes with the observed 6 and 15. For task 5, an empty array must map to an empty array without calling the closure, and a closure returning `Int?` used with plain `map` produces `[Int?]`, whereas `compactMap` drops the nil results.
+
+Repair routine: [building a regression case](../STUDY-GUIDE.md#building-a-regression-case).
 
 ## Progressive hints
 
@@ -114,11 +120,15 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 ## Self-check and next step
 
-Explain Closure, Capture list, Higher-order function without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+Explain the difference between capturing a variable and capturing its value through a capture list. Rewrite Example A's closure in shorthand form with `$0`. Say when a named function is clearer than an inline closure for a reusable domain transformation, and what a reader gains from the name.
+
+Then follow the general [self-check routine](../STUDY-GUIDE.md#self-check-routine) and save your pad.
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://docs.swift.org/swift-book/documentation/the-swift-programming-language/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+[Documentation](https://docs.swift.org/swift-book/documentation/the-swift-programming-language/): The Closures chapter of the Swift book covers closure expression syntax, shorthand argument names, trailing closures and capturing values.
+
+Provenance and limits: [sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

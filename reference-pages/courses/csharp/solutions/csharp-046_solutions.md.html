@@ -194,7 +194,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/csharp/solutions/csharp-046_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="csharp-046-explanation-and-comparison">csharp-046: explanation and comparison<a class="heading-anchor" href="#csharp-046-explanation-and-comparison" aria-label="Link to this section">#</a></h2>
-<p>Attempt the six guide tasks before opening this comparison. The executable reference is <a href="csharp-046_solution.cs.html">csharp-046_solution.cs</a>. It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.</p>
+<p>Reference program: <a href="csharp-046_solution.cs.html">csharp-046_solution.cs</a>, covering both examples and the executed answers.</p>
+<p>Attempt the tasks first; see <a href="../STUDY-GUIDE.md.html#comparing-with-the-explanation">comparing with the explanation</a>.</p>
 <h3 id="why-the-two-examples-differ">Why the two examples differ<a class="heading-anchor" href="#why-the-two-examples-differ" aria-label="Link to this section">#</a></h3>
 <p><strong>Use a target-typed collection:</strong> The compact syntax still creates concrete storage according to its target. The target types select array and list representations.</p>
 <p><strong>Keep constructor policy visible:</strong> Concise construction should preserve a clear relationship between input parameters and behavior. The three newer checks compile only with C# 13 or 14, which the net10.0 target selects by default; an older target would reject them at compile time. The supplied factor is used by the instance operation, nameof(List&lt;&gt;) is List, missing?.Capacity = 32 leaves the null builder alone, and \e is the escape character.</p>
@@ -265,14 +266,14 @@ Check<span class="syntax-punctuation">(</span>zero<span class="syntax-punctuatio
 <p><strong>How to verify.</strong> Spread <code>nothing</code> twice into the same list and confirm the count is still the number of literal elements.</p>
 <h4 id="task-6-transfer-and-justify">Task 6: Transfer and justify<a class="heading-anchor" href="#task-6-transfer-and-justify" aria-label="Link to this section">#</a></h4>
 <p>Review a proposed new feature and justify adopting it using readability, compatibility and tooling evidence.</p>
-<p>No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry <strong>Language version</strong>, and state one limitation of your choice.</p>
+<p>No single answer exists; extend task 3 using the <a href="../STUDY-GUIDE.md.html#open-transfer-tasks">open transfer routine</a>.</p>
 <h3 id="mechanism-and-diagnostic-reasoning">Mechanism and diagnostic reasoning<a class="heading-anchor" href="#mechanism-and-diagnostic-reasoning" aria-label="Link to this section">#</a></h3>
 <p>Language evolution adds concise ways to express familiar contracts. Primary constructors, collection expressions and improved patterns can reduce noise, but unfamiliar syntax should be introduced by its meaning rather than used to make code look advanced. Version-aware code records the target language generation and avoids accidentally relying on a preview feature.</p>
 <p>C# 14 accompanies .NET 10 and is the default for the classroom&#x27;s net10.0 target. C# 13 (.NET 9) added params collections, the System.Threading.Lock type for lock statements and the \e escape sequence. C# 14 adds the field keyword in property accessors, extension members, null-conditional assignment such as a?.B = c, nameof for unbound generic types such as List&lt;&gt; and implicit span conversions. Example B exercises three of these features. New syntax does not relax nullability, ownership or equality rules. A code review should ask whether a feature makes the domain relationship easier to see and whether contributors can diagnose its errors.</p>
 <p>A collection expression such as <code>[1, 2, 3]</code> is target-typed. A primary constructor supplies parameters used by members. <code>nameof</code> produces a symbol name while retaining compile-time refactoring support; since C# 14 it also accepts an unbound generic type such as <code>nameof(List&lt;&gt;)</code>. <code>missing?.Capacity = 32</code> assigns only when <code>missing</code> is not null, and <code>\e</code> is the escape character U+001B.</p>
 <p>Newer syntax is not inherently better. A collection expression is not universally lazy. Do not use latest or preview as an unexplained fix for a compiler error.</p>
 <h3 id="review-before-continuing">Review before continuing<a class="heading-anchor" href="#review-before-continuing" aria-label="Link to this section">#</a></h3>
-<p>Run the reference and confirm that it prints <code>csharp-046: passed</code>, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.</p></article>
+<p>Run the reference and confirm it prints <code>csharp-046: passed</code>, then rerun the guide&#x27;s counterexample.</p></article>
   </main>
 </body>
 </html>

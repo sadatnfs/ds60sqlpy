@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/web-development/solutions/web-048_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="web-048-explanatory-solutions">web-048: explanatory solutions<a class="heading-anchor" href="#web-048-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Open this after your own attempt. Each answer explains the lesson&#x27;s synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in <code>courses/web-development/guides/web-048.md</code>.</p>
+<p>Attempt each exercise before reading; the mechanism is in <code>courses/web-development/guides/web-048.md</code> (<a href="../STUDY-GUIDE.md.html#solutions">using these answers</a>).</p>
 <h3 id="exercise-1-explain-which-data-is-in-the-browser-and-which-is-on-the-server">Exercise 1: Explain which data is in the browser and which is on the server.<a class="heading-anchor" href="#exercise-1-explain-which-data-is-in-the-browser-and-which-is-on-the-server" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> The browser normally holds an identifier while server storage holds the associated session state.</p>
 <p><strong>Approach:</strong> Place each item: the browser stores the session identifier cookie, while the server stores the session data that identifier points to.</p>
@@ -232,7 +232,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Plausible wrong approach:</strong> Citing the CLI state test as proof of session security fails because no cookie or HTTP header was ever sent.</p>
 <p><strong>How to verify:</strong> Your checklist includes identifier rotation after login and a rejected request after logout. The test also confirms that the cookie carries the HttpOnly and Secure attributes.</p>
 <h3 id="reference-comparison">Reference comparison<a class="heading-anchor" href="#reference-comparison" aria-label="Link to this section">#</a></h3>
-<p>Open <code>courses/web-development/solutions/web-048_solution.php</code> only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; server lifecycle, persistence, concurrency and security need their own integration evidence.</p></article>
+<p>The reference requires activity at 2800 to succeed, 2801 to expire and a backward clock at 999 to be rejected, then states that no HTTP session was created. That catches an off-by-one timeout. It does not set cookies or start a session, so describe the HTTP test that would.</p>
+<p>Open <code>courses/web-development/solutions/web-048_solution.php</code> after saving your attempt (<a href="../STUDY-GUIDE.md.html#references">comparing with the reference</a>).</p></article>
   </main>
 </body>
 </html>

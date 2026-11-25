@@ -195,7 +195,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="dbt-007-explained-reference">dbt-007: explained reference<a class="heading-anchor" href="#dbt-007-explained-reference" aria-label="Link to this section">#</a></h2>
 <p>Review a macro through its source, emitted SQL and actual result.</p>
-<p>The executable reference contains the two complete worked cases with assertions. The changes below explain the independent practice and its limits.</p>
+<p>The reference compiles the safe_ratio macro, checks that compiled SQL contains <code>case when</code> and no longer mentions the macro name, and compares the materialized rates with 0.25 and null. The undefined-macro case shows failure before execution; it does not test numeric edge cases beyond a zero denominator. See <a href="../STUDY-GUIDE.md.html#answers-and-references">how these answers are laid out</a>.</p>
 <h3 id="1-change-the-zero-policy">1. Change the zero policy<a class="heading-anchor" href="#1-change-the-zero-policy" aria-label="Link to this section">#</a></h3>
 <p>Publish both the rate and a named status or denominator. Consumers can then distinguish no observations from missing source counts.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-comment"># Uses the tempfile import and the project(), invoke() and rows() helpers in main.py.</span>

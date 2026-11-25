@@ -1,6 +1,6 @@
 # cuda-084: explained solutions
 
-These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.
+Compare with your [worksheet](../lessons/cuda-084.md) attempt.
 
 ## Exercise 1: Derive expected affine output
 
@@ -74,8 +74,16 @@ Compare outputs and complete work under the same tolerance.
 
 **How to verify.** Assert both outputs are equal for the test input, record dtype, size and the timing method, and report the result as measured on a named device.
 
+## Self-check answers
+
+1. **Which side controls what in a raw kernel?** Python controls allocation, validation and launch geometry. CUDA C++ in the string controls each thread's arithmetic and its tail guard.
+
+2. **Why is a high-level CuPy expression still a strong baseline?** It already handles dtype, broadcasting and strides with tested code. A raw kernel must match it and show a measured benefit, such as fusing operations.
+
+3. **What happens on the first invocation of a raw kernel?** The source may be compiled and cached, so the first call includes compilation latency that later warm calls do not.
+
 ## Reference observation
 
 Affine result [-1,1,7], with three blocks for 257 elements.
 
-The reference file is `courses/cuda/python/references/cuda-084_cpu.py`. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.
+Asserted by `courses/cuda/python/references/cuda-084_cpu.py`.

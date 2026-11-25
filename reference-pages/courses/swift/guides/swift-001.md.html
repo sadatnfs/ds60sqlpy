@@ -206,11 +206,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Entrypoint:</strong> The operation called to begin execution.</p>
 <p><strong>Precondition:</strong> A required condition checked during execution.</p>
 <h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>The Linux Docker classroom compiles the saved pad as <code>main.swift</code> with Swift 6 language checking. An explicit <code>@main</code> type contains <code>static func main() async throws</code>; the fixed compiler uses <code>-parse-as-library -swift-version 6</code>. The examples use the standard library and portable Foundation. <code>precondition</code> makes a violated invariant fail the process. The fixed pad accepts one source file, without arbitrary command arguments, interactive input or dependency installation. SwiftUI, UIKit, Apple simulators and application signing belong to the separately prepared macOS/Xcode project labs, never the Linux pad.</p>
-<p>Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.</p>
+<p>Paste Example A first. It is the smallest complete program in the track, and a missing brace or a statement placed outside <code>LessonMain</code> produces a compile diagnostic rather than a runtime failure. Tasks 1 to 3 fit in one pad; task 4 deliberately breaks the brace structure, so save a working copy before you try it.</p>
+<p>Compile contract, starter stop and success marker: <a href="../STUDY-GUIDE.md.html#running-a-lesson">running a lesson</a>.</p>
 <h3 id="syntax-anatomy-and-execution-trace">Syntax anatomy and execution trace<a class="heading-anchor" href="#syntax-anatomy-and-execution-trace" aria-label="Link to this section">#</a></h3>
 <p><code>@main</code> marks the entrypoint type. <code>struct LessonMain</code> names that type. <code>static func main() async throws</code> declares its entry method; async and throws are explained in later chapters. <code>let</code> binds a value that cannot be reassigned. <code>print</code> produces visible output.</p>
-<p>Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.</p>
+<p>Each example ends with a trace; method: <a href="../STUDY-GUIDE.md.html#tracing-a-program">tracing a program</a>.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="example-a-check-before-printing">Example A: Check before printing<a class="heading-anchor" href="#example-a-check-before-printing" aria-label="Link to this section">#</a></h4>
 <p>The check establishes a specific observation before the program claims completion.</p>
@@ -228,6 +228,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> Hello, Swift appears before the lesson marker.</p>
+<p><strong>Trace.</strong> Before <code>main</code> runs, nothing exists. The first <code>let</code> binds <code>greeting</code> to a string of 12 Characters: five letters, the comma, the space and five more letters. The <code>precondition</code> evaluates <code>greeting.count == 12</code>, finds it true and does nothing visible. Only then does <code>print</code> write <code>Hello, Swift</code>. Change the literal to <code>Hello, Swift!</code> and the check sees 13, the process stops with a precondition failure, and the print never happens. That ordering is why the greeting appears only when its count has been verified.</p>
 <h4 id="example-b-compute-an-observable-result">Example B: Compute an observable result<a class="heading-anchor" href="#example-b-compute-an-observable-result" aria-label="Link to this section">#</a></h4>
 <p>The second condition rejects the plausible mistake of adding dimensions instead of multiplying them.</p>
 <pre class="highlighted-code"><code class="language-swift"><span class="syntax-keyword">import</span> <span class="syntax-class">Foundation</span>
@@ -246,6 +247,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The computed seat count is 24.</p>
+<p><strong>Trace.</strong> <code>rows</code> is 4 and <code>seatsPerRow</code> is 6, both inferred as <code>Int</code> from their literals. The multiplication produces 24 and binds it to <code>seats</code>. The first check confirms the product. The second compares 24 with <code>rows + seatsPerRow</code>, which is 10, so the inequality holds. It exists to document the plausible slip of typing <code>+</code> for <code>*</code>: with addition, <code>seats</code> would be 10 and the first check would already stop the program. Neither line prints anything; this example&#x27;s only visible output would be the final marker.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <ol>
 <li><strong>Predict and explain.</strong> Predict the greeting count before execution.</li>
@@ -265,10 +267,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <ol start="6">
 <li><strong>Transfer and justify.</strong> Model a three-level capacity calculation and explain every intermediate value.</li>
 </ol>
-<p>For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.</p>
+<p>Log each task in the <a href="../STUDY-GUIDE.md.html#recording-exercise-evidence">evidence table</a> before opening the explanation.</p>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
 <p>Do not delete a failed precondition to reach the marker. Preserve the first compiler diagnostic before interpreting later errors. The entrypoint wrapper is required by this classroom compile contract.</p>
-<p>A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.</p>
+<p>The tempting wrong belief in this lesson is that a program which compiles has done its job. A one-character counterexample settles it: compute shelf capacity with <code>+</code> instead of <code>*</code> and the program still compiles and runs, and only a check on the expected 24 stops it. For task 5, zero shelves should give 0 and one shelf should give 8; the addition bug gives 8 and 9, so both boundaries expose it.</p>
+<p>Repair routine: <a href="../STUDY-GUIDE.md.html#building-a-regression-case">building a regression case</a>.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <ol>
 <li>Reproduce Example A (Check before printing) before changing anything, and confirm its observation: Hello, Swift appears before the lesson marker.</li>
@@ -276,9 +279,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>Before opening the explanation, check your task 3 attempt (Compute the capacity of three shelves holding eight books each) against each pitfall listed above, and add one input that would expose the tempting wrong rule.</li>
 </ol>
 <h3 id="self-check-and-next-step">Self-check and next step<a class="heading-anchor" href="#self-check-and-next-step" aria-label="Link to this section">#</a></h3>
-<p>Explain Source, Entrypoint, Precondition without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.</p>
+<p>Without looking, write the lines that make a valid entry point for this classroom and say which one the compiler needs because of <code>-parse-as-library</code>. Explain why <code>let</code> suits every binding in Example B, what <code>precondition</code> does when its condition is false, and why the marker must be the last statement in <code>main</code>.</p>
+<p>Then follow the general <a href="../STUDY-GUIDE.md.html#self-check-routine">self-check routine</a> and save your pad.</p>
 <h3 id="sources-and-execution-boundary">Sources and execution boundary<a class="heading-anchor" href="#sources-and-execution-boundary" aria-label="Link to this section">#</a></h3>
-<p><a href="https://docs.swift.org/swift-book/documentation/the-swift-programming-language/">Official language or framework documentation</a>. The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.</p>
+<p><a href="https://docs.swift.org/swift-book/documentation/the-swift-programming-language/">Documentation</a>: The Swift book chapter The Basics covers constants, type inference and printing, and the Attributes reference page documents <code>@main</code>.</p>
+<p>Provenance and limits: <a href="../STUDY-GUIDE.md.html#sources-and-execution-boundary">sources and execution boundary</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for swift-001: A Swift source file and its explicit entrypoint.
 Read courses/swift/guides/swift-001.md and courses/swift/lessons/swift-001.swift. Prerequisites: none.

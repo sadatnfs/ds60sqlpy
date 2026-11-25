@@ -4,8 +4,6 @@
 
 Scaled dot-product attention forms scores from queries and keys, normalizes each score row with softmax and combines values using those weights. Materializing the entire score matrix costs storage proportional to sequence length squared. Tiling can avoid retaining that large intermediate by maintaining an online maximum, normalization sum and weighted output accumulator. When a new tile raises the maximum, rescale earlier accumulators before combining them. Masking and training's backward needs add contracts. A tiny educational online algorithm demonstrates memory-aware mathematics; it is not a production replacement for specialized attention libraries.
 
-The separate [CPU reference](../references/cuda-054_cpu.py) checks the chapter's bounded model. It does not execute CUDA or establish GPU timing. Compare after attempting the worksheet or explicitly choosing to reveal solutions.
-
 ## Exercise 1
 
 With query \([1,0]\), keys \([[1,0],[0,1]]\) and values \([[2,0],[0,4]]\), unscaled scores are \([1,0]\). Softmax weights are approximately \([0.731059,0.268941]\), giving output \([1.462117,1.075766]\). A real scaled attention contract also divides scores by square root of key dimension.
@@ -78,12 +76,16 @@ State batch/head/sequence dimensions, dtype, scaling, masks, forward/backward sc
 
 **How to verify:** Validate against a library baseline with matching settings before timing.
 
+## Self-check answers
+
+1. **With a causal mask that keeps only the first key, what output does worked example 1 give?** [2,0], the first value row, because its weight becomes one.
+2. **How large is a 2,048 token score matrix at four bytes per element?** 2,048 squared is 4,194,304 elements, which is 16 MiB per head and batch item.
+3. **Why must online accumulators rescale when the maximum increases?** Earlier terms were computed against the old maximum, so they must be multiplied by the exponential of old maximum minus new maximum.
+
 ## Numerical reference and its limits
 
-The complete CPU model is [here](../references/cuda-054_cpu.py). Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It does not claim CUDA execution, concurrency safety or a performance measurement.
+The [CPU reference](../references/cuda-054_cpu.py) reproduces worked example 1 and prints `{'unscaled_tiny_attention': [1.4621171572600098, 1.0757656854799804], 'score_matrix_MiB': 64}`.
 
 ## Transfer review
 
 State batch/head/sequence dimensions, dtype, scaling, masks, forward/backward scope, output tolerance and memory accounting, then compare an appropriate library baseline.
-
-A complete explanation must name its inputs, the unchanged mathematical contract, the changed boundary or resource condition, and the evidence still needed on actual hardware. Preserve a CPU baseline even after a GPU path becomes available.

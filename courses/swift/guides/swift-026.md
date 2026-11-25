@@ -24,9 +24,9 @@ The single-file pad cannot accept Package.swift or install dependencies. The che
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles the saved pad as `main.swift` with Swift 6 language checking. An explicit `@main` type contains `static func main() async throws`; the fixed compiler uses `-parse-as-library -swift-version 6`. The examples use the standard library and portable Foundation. `precondition` makes a violated invariant fail the process. The fixed pad accepts one source file, without arbitrary command arguments, interactive input or dependency installation. SwiftUI, UIKit, Apple simulators and application signing belong to the separately prepared macOS/Xcode project labs, never the Linux pad.
+Tasks 2 to 5 run in the separate JourneyCore package lab rather than the pad, so copy the fixture into your own ignored workspace first and keep its build products inside that copy. The two pad examples here show the split between a pure calculation and its presentation; paste them first to confirm the idea before building the package.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Compile contract, starter stop and success marker: [running a lesson](../STUDY-GUIDE.md#running-a-lesson).
 
 Use the complete [JourneyCore project](../fixtures/JourneyCore/README.md). It contains real Package.swift, source and test files and no external package dependencies.
 
@@ -34,7 +34,7 @@ Use the complete [JourneyCore project](../fixtures/JourneyCore/README.md). It co
 
 Package.swift declares a tools-version header and target graph. import exposes another module public API. Internal is the usual default access level, while public members define cross-module contracts.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+Each example ends with a trace; method: [tracing a program](../STUDY-GUIDE.md#tracing-a-program).
 
 ## Worked example / walkthrough
 
@@ -60,6 +60,8 @@ struct LessonMain {
 
 **Observe:** The pure kernel is suitable for a reusable library.
 
+**Trace.** `total` is declared inside `main` and depends only on its argument. `[2, 3].reduce(0, +)` starts at 0, adds 2 and then 3, and returns 5. The empty array returns the initial 0 without calling `+`. Because the function reads no global state and performs no input or output, the same call returns the same value in a test target, a command-line executable or an app, which is what makes it a good candidate for a reusable library module.
+
 ### Example B: Separate presentation from calculation
 
 Moving this function into another target requires a deliberate public interface rather than copying implementation text.
@@ -81,6 +83,8 @@ struct LessonMain {
 
 **Observe:** Presentation is independently testable.
 
+**Trace.** `render` takes an already computed total and builds the string total=5 through interpolation. It performs no arithmetic, so a wrong total cannot be hidden inside formatting code, and a formatting change cannot alter the number. The check compares the exact string. In the package lab the same split appears as a library target for the calculation and an executable target for printing, and moving `render` between targets would require marking what it uses as `public`.
+
 ## Exercises
 
 1. **Predict and explain.** Identify the core and presentation responsibilities.
@@ -95,13 +99,15 @@ struct LessonMain {
 
 6. **Transfer and justify.** Add a new target only when it creates a useful dependency boundary and document that direction.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Log each task in the [evidence table](../STUDY-GUIDE.md#recording-exercise-evidence) before opening the explanation.
 
 ## Common pitfalls and diagnosis
 
 A manifest is not executed by the classroom source pad. Do not assume adding a dependency is offline. Public API choices become compatibility obligations.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+Task 4's failure appears only across a module boundary: inside one file every declaration is visible, so the pad cannot reproduce it. In the package, call a JourneyCore function declared without an access modifier from the demo executable. For a top-level function the compiler reports that it cannot find the name in scope; for a method on a public type it says the method is inaccessible due to its `internal` protection level. Adding `public` to that declaration, and only that one, fixes it.
+
+Repair routine: [building a regression case](../STUDY-GUIDE.md#building-a-regression-case).
 
 ## Progressive hints
 
@@ -111,11 +117,15 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 ## Self-check and next step
 
-Explain Package, Target, Module without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+Name the three kinds of target in JourneyCore and which one may depend on which. Explain the difference between `internal` and `public` and why `internal` is the default. Say what `swift package clean` removes and what it never touches, and why the build directory belongs inside the copied package.
+
+Then follow the general [self-check routine](../STUDY-GUIDE.md#self-check-routine) and save your pad.
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://www.swift.org/documentation/package-manager/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+[Documentation](https://www.swift.org/documentation/package-manager/): The Swift Package Manager documentation on swift.org explains package manifests, targets and products; the Swift book's Access Control chapter covers modules.
+
+Provenance and limits: [sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

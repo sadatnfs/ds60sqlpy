@@ -209,9 +209,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="syntax-anatomy-and-reasoning">Syntax anatomy and reasoning<a class="heading-anchor" href="#syntax-anatomy-and-reasoning" aria-label="Link to this section">#</a></h3>
 <p>A queue key usually names a namespace and object name, not a pointer to a stale object. The worker gets a key, defers Done, reconciles and either Forget on success or schedules a rate-limited retry. The fixture uses integer delay units to test a capped exponential policy deterministically. Production jitter should be tested with an injected source rather than a fixed assumption about wall-clock timing.</p>
 <h3 id="run-this-lesson">Run this lesson<a class="heading-anchor" href="#run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>Choose Go in the unified Docker classroom. Save your own pad before experimenting. The prepared worker stages it as <code>main.go</code>, compiles it, and executes the resulting program with bounded time and output. The pad is one source file. It does not supply interactive input, arbitrary command-line arguments, package installation, Kubernetes credentials or a host Docker socket. Every ordinary reference here uses the standard library, synthetic local data and explicit checks. A failed <code>check</code> panics and produces a nonzero process result; do not remove it to make the run appear successful.</p>
-<p>The explanatory solution snippets belong inside <code>func main()</code> unless they declare a helper. <code>check</code> is a tiny teaching helper that panics when a condition is false. The separate reference supplies required imports and helpers and implements all six cases. Use that complete source only after an attempt or an explicit reveal. For an independently prepared Go project, the equivalent local build is <code>go build -o lesson main.go</code>, followed by <code>./lesson</code>; use Linux or WSL 2 for that optional workflow. Compiling proves syntax and type consistency, while the executed checks establish the stated example contracts.</p>
-<p>Each worked example below is a complete Go file. Copy one whole block into your saved pad and run it. Example 2 includes the first case as well as the second, so its setup is complete. Its supporting declarations may be reused in later investigations. The separate reference implements all six cases.</p>
+<p>Run each worked example as one complete file in your saved pad (<a href="../STUDY-GUIDE.md.html#run-a-lesson">run steps</a>).</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1-calculate-increasing-delay">Worked example 1: Calculate increasing delay<a class="heading-anchor" href="#worked-example-1-calculate-increasing-delay" aria-label="Link to this section">#</a></h4>
 <p>Inspect attempts 0, 1 and 2.</p>
@@ -287,77 +285,79 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Observe:</strong> The delay never exceeds 8 units.</p>
 <p>A cap prevents exponential growth from becoming impractical or overflowing. It does not replace a total retry budget.</p>
 <h3 id="predict-before-running">Predict before running<a class="heading-anchor" href="#predict-before-running" aria-label="Link to this section">#</a></h3>
-<p>For each example, write the input values, the state that can change, and the expected observation. Explain which result would disprove your current interpretation. For concurrency, predict a guaranteed relationship rather than an arbitrary scheduling order. For an error case, identify whether it is rejected at compilation or returned during execution.</p>
+<p>Predict the delay for attempts 0, 1 and 2, and for attempts 3 and 10. Predict how many pending identities remain after enqueuing alpha, alpha and beta into a set. Predict which failure classes are retried, the delay after a key&#x27;s history is cleared, and how many retries fit in a total budget of 10 units.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-calculate-increasing-delay-predict-an-edited-check">Exercise 1: Calculate increasing delay: predict an edited check<a class="heading-anchor" href="#exercise-1-calculate-increasing-delay-predict-an-edited-check" aria-label="Link to this section">#</a></h4>
-<p>Copy worked example 1 into a scratch pad and change <code>check(delay(0) == 1 &amp;&amp; delay(1) == 2 &amp;&amp; delay(2) == 4, &quot;growth&quot;)</code> to <code>check(delay(1) == 1 &amp;&amp; delay(1) == 2 &amp;&amp; delay(2) == 4, &quot;growth&quot;)</code> inside its check. Before running, predict whether the check still passes and explain why; then restore it.</p>
-<p><strong>Expected:</strong> The changed run panics with <code>growth</code> because the edited check no longer holds. Restoring the original line brings back the worked observation: the delays are 1, 2 and 4 units.</p>
-<p><strong>Verify:</strong> Compare your written prediction with the panic message <code>growth</code> and name the value that made <code>delay(0) == 1 &amp;&amp; delay(1) == 2 &amp;&amp; delay(2) == 4</code> false. After restoring the input, the program must print its success line again.</p>
+<p>Copy worked example 1, change <code>check(delay(0) == 1 &amp;&amp; delay(1) == 2 &amp;&amp; delay(2) == 4, &quot;growth&quot;)</code> to <code>check(delay(1) == 1 &amp;&amp; delay(1) == 2 &amp;&amp; delay(2) == 4, &quot;growth&quot;)</code> inside its check and predict whether it still passes; then restore it.</p>
+<p><strong>Expected:</strong> The edited check panics with <code>growth</code> even though <code>delay(0) == 1 &amp;&amp; delay(1) == 2 &amp;&amp; delay(2) == 4</code> still holds.</p>
+<p><strong>Verify:</strong> Restoring <code>check(delay(0) == 1 &amp;&amp; delay(1) == 2 &amp;&amp; delay(2) == 4, &quot;growth&quot;)</code> makes the check pass again with the worked observation: the delays are 1, 2 and 4 units.</p>
 <h4 id="exercise-2-cap-the-delay-diagnose-an-edited-check">Exercise 2: Cap the delay: diagnose an edited check<a class="heading-anchor" href="#exercise-2-cap-the-delay-diagnose-an-edited-check" aria-label="Link to this section">#</a></h4>
-<p>A careless edit changed the check in worked example 2 so that it reads <code>check(delay(3) != 8 &amp;&amp; delay(10) == 8, &quot;cap&quot;)</code>. Run worked example 2 with that line, explain why the edited check now fails for the same program state, and restore it.</p>
-<p><strong>Expected:</strong> Before the repair the program panics with <code>cap</code>; after it the line reads <code>check(delay(3) == 8 &amp;&amp; delay(10) == 8, &quot;cap&quot;)</code> again and the delay never exceeds 8 units.</p>
-<p><strong>Verify:</strong> Keep the failing and the repaired runs. Explain why the edited check rejects the same program state that <code>delay(3) == 8 &amp;&amp; delay(10) == 8</code> accepts.</p>
+<p>A careless edit rewrote the check in worked example 2 as <code>check(delay(3) != 8 &amp;&amp; delay(10) == 8, &quot;cap&quot;)</code>. Explain the failure, then restore it.</p>
+<p><strong>Expected:</strong> The defective run panics with <code>cap</code>; after restoring <code>check(delay(3) == 8 &amp;&amp; delay(10) == 8, &quot;cap&quot;)</code>, the delay never exceeds 8 units.</p>
+<p><strong>Verify:</strong> The edited check fails with message <code>cap</code> for a state that <code>delay(3) == 8 &amp;&amp; delay(10) == 8</code> accepts.</p>
 <h4 id="exercise-3-coalesce-duplicate-keys">Exercise 3: Coalesce duplicate keys<a class="heading-anchor" href="#exercise-3-coalesce-duplicate-keys" aria-label="Link to this section">#</a></h4>
 <p>Enqueue alpha twice and beta once in a set model.</p>
 <p><strong>Expected:</strong> There are two pending identities.</p>
-<p><strong>Verify:</strong> Keep a check equivalent to <code>len(pending) == 2</code>. As a control, change <code>for _, key := range []string{&quot;alpha&quot;, &quot;alpha&quot;, &quot;beta&quot;} {</code> to <code>for _, key := range []string{&quot;alpha!&quot;, &quot;alpha&quot;, &quot;beta&quot;} {</code>: the run must panic with <code>coalesce</code>. Restore the line before continuing.</p>
+<p><strong>Verify:</strong> Your solution must keep <code>len(pending) == 2</code> true. Control: changing <code>for _, key := range []string{&quot;alpha&quot;, &quot;alpha&quot;, &quot;beta&quot;} {</code> to <code>for _, key := range []string{&quot;alpha!&quot;, &quot;alpha&quot;, &quot;beta&quot;} {</code> panics with message <code>coalesce</code>; revert it.</p>
 <h4 id="exercise-4-separate-invalid-from-transient">Exercise 4: Separate invalid from transient<a class="heading-anchor" href="#exercise-4-separate-invalid-from-transient" aria-label="Link to this section">#</a></h4>
 <p>Classify a validation failure and a timeout-like failure.</p>
 <p><strong>Expected:</strong> Only the transient class is retried.</p>
-<p><strong>Verify:</strong> Keep a check equivalent to <code>!retryable(&quot;invalid&quot;) &amp;&amp; retryable(&quot;transient&quot;)</code>. As a control, change <code>check(!retryable(&quot;invalid&quot;) &amp;&amp; retryable(&quot;transient&quot;), &quot;classification&quot;)</code> to <code>check(!retryable(&quot;invalid&quot;) &amp;&amp; retryable(&quot;transient!&quot;), &quot;classification&quot;)</code> inside that check: it must panic with <code>classification</code>, which shows the check can fail. Restore it.</p>
+<p><strong>Verify:</strong> Your solution must keep <code>!retryable(&quot;invalid&quot;) &amp;&amp; retryable(&quot;transient&quot;)</code> true. Control: changing <code>check(!retryable(&quot;invalid&quot;) &amp;&amp; retryable(&quot;transient&quot;), &quot;classification&quot;)</code> to <code>check(!retryable(&quot;invalid&quot;) &amp;&amp; retryable(&quot;transient!&quot;), &quot;classification&quot;)</code> panics with message <code>classification</code>; revert it.</p>
 <h4 id="exercise-5-reset-successful-history">Exercise 5: Reset successful history<a class="heading-anchor" href="#exercise-5-reset-successful-history" aria-label="Link to this section">#</a></h4>
 <p>Clear a key after successful reconciliation.</p>
 <p><strong>Expected:</strong> Its next failure starts at the first delay.</p>
-<p><strong>Verify:</strong> Keep a check equivalent to <code>delay(attempts[&quot;demo&quot;]) == 1</code>. As a control, change <code>check(delay(attempts[&quot;demo&quot;]) == 1, &quot;reset&quot;)</code> to <code>check(delay(attempts[&quot;demo&quot;]) != 1, &quot;reset&quot;)</code> inside that check: it must panic with <code>reset</code>, which shows the check can fail. Restore it.</p>
+<p><strong>Verify:</strong> Your solution must keep <code>delay(attempts[&quot;demo&quot;]) == 1</code> true. Control: changing <code>check(delay(attempts[&quot;demo&quot;]) == 1, &quot;reset&quot;)</code> to <code>check(delay(attempts[&quot;demo&quot;]) != 1, &quot;reset&quot;)</code> panics with message <code>reset</code>; revert it.</p>
 <h4 id="exercise-6-transfer-a-total-budget">Exercise 6: Transfer a total budget<a class="heading-anchor" href="#exercise-6-transfer-a-total-budget" aria-label="Link to this section">#</a></h4>
 <p>Spend a total waiting budget of 10 units on retries whose delays come from delay(attempt).</p>
 <p><strong>Expected:</strong> Three retries fit (1+2+4=7 units); the fourth delay of 8 would exceed the budget.</p>
-<p><strong>Verify:</strong> Keep a check equivalent to <code>attempts == 3 &amp;&amp; spent == 7</code>. As a control, change <code>if spent+d &gt; 10 {</code> to <code>if spent-d &gt; 10 {</code>: the run must panic with <code>budget</code>. Restore the line before continuing.</p>
-<p>Implement these in the answer-free learner source. Keep one independent check per claim. A task can require tracing, construction, a changed input or a deliberate safe failure. Do not run a data race, corrupt memory or contact a shared cluster merely to demonstrate why it would be wrong.</p>
+<p><strong>Verify:</strong> Your solution must keep <code>attempts == 3 &amp;&amp; spent == 7</code> true. Control: changing <code>if spent+d &gt; 10 {</code> to <code>if spent-d &gt; 10 {</code> panics with message <code>budget</code>; revert it.</p>
+<p>Work in the answer-free learner source, <code>courses/go/lessons/go-040.go</code> (<a href="../STUDY-GUIDE.md.html#work-an-exercise">exercise contract</a>).</p>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
-<p>Read a compiler error from the first location in your source, then fix one cause at a time. Unused imports and variables are errors in Go; add an import when its use exists, rather than copying a large unused import list. A panic from <code>check</code> identifies a violated example contract. Compare the actual value with the expected value and inspect the state transition that produced it. A returned <code>error</code> is a value that the caller must handle; an ignored error can make later output look plausible while the original operation failed.</p>
-<p>The lesson-specific explanations in the two examples identify the important counterexamples. Extend that reasoning to every investigation: explain why a plausible alternative would fail, and preserve a tiny input that distinguishes it. Treat empty data, missing values and cancellation as domain cases with explicit policies. In concurrent work, replace sleeps used as synchronization with channels, mutexes or an explicit ownership protocol.</p>
+<p>Retrying every error is the classic queue bug: a validation failure retried forever burns API quota and fills logs with no chance of success. Classify errors, retry only transient ones and surface the rest. Uncapped exponential delay grows without bound, and forgetting to reset a key after success makes its next unrelated failure start at the maximum delay.</p>
+<p>General compiler, panic and error diagnosis is in the <a href="../STUDY-GUIDE.md.html#diagnose-a-failure">study guide</a>.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <h4 id="hint-for-investigation-1-calculate-increasing-delay-predict-an-edited-check">Hint for investigation 1: Calculate increasing delay: predict an edited check<a class="heading-anchor" href="#hint-for-investigation-1-calculate-increasing-delay-predict-an-edited-check" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The delays are 1, 2 and 4 units.</li>
-<li>The check <code>delay(0) == 1 &amp;&amp; delay(1) == 2 &amp;&amp; delay(2) == 4</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Compute the checked value with <code>check(delay(1) == 1 &amp;&amp; delay(1) == 2 &amp;&amp; delay(2) == 4, &quot;growth&quot;)</code> in place before running, then compare it with the value <code>delay(0) == 1 &amp;&amp; delay(1) == 2 &amp;&amp; delay(2) == 4</code> expects.</li>
+<li>delay shifts 1 left by the attempt. What are the first three values?</li>
+<li>delay(1) is 2, so <code>delay(1)==1</code> is false and the growth check fails. The function is right; the edited check reads the wrong attempt.</li>
 </ol>
 <h4 id="hint-for-investigation-2-cap-the-delay-diagnose-an-edited-check">Hint for investigation 2: Cap the delay: diagnose an edited check<a class="heading-anchor" href="#hint-for-investigation-2-cap-the-delay-diagnose-an-edited-check" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The delay never exceeds 8 units.</li>
-<li>The check <code>delay(3) == 8 &amp;&amp; delay(10) == 8</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Compare <code>check(delay(3) != 8 &amp;&amp; delay(10) == 8, &quot;cap&quot;)</code> with the same line in worked example 2 and state the claim each version makes.</li>
+<li>Attempts at or beyond 3 return the cap. What are delay(3) and delay(10)?</li>
+<li>delay(3) returns the cap of 8, so <code>delay(3)!=8</code> is false and the cap check fails. Restore <code>==</code>.</li>
 </ol>
 <h4 id="hint-for-investigation-3-coalesce-duplicate-keys">Hint for investigation 3: Coalesce duplicate keys<a class="heading-anchor" href="#hint-for-investigation-3-coalesce-duplicate-keys" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: There are two pending identities.</li>
-<li>The check <code>len(pending) == 2</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Predict the effect of changing <code>for _, key := range []string{&quot;alpha&quot;, &quot;alpha&quot;, &quot;beta&quot;} {</code> to <code>for _, key := range []string{&quot;alpha!&quot;, &quot;alpha&quot;, &quot;beta&quot;} {</code> before running anything. If the prediction is hard, trace that line again with the original input.</li>
+<li>A set keeps one entry per key. How many keys remain?</li>
+<li>This model demonstrates identity coalescing only.</li>
 </ol>
 <h4 id="hint-for-investigation-4-separate-invalid-from-transient">Hint for investigation 4: Separate invalid from transient<a class="heading-anchor" href="#hint-for-investigation-4-separate-invalid-from-transient" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: Only the transient class is retried.</li>
-<li>The check <code>!retryable(&quot;invalid&quot;) &amp;&amp; retryable(&quot;transient&quot;)</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Name one input that would make <code>!retryable(&quot;invalid&quot;) &amp;&amp; retryable(&quot;transient&quot;)</code> false. A check that no input can falsify is not evidence.</li>
+<li>Only the transient class returns true. Which class is retried?</li>
+<li>Blindly retrying invalid desired state wastes resources and delays useful feedback to the user.</li>
 </ol>
 <h4 id="hint-for-investigation-5-reset-successful-history">Hint for investigation 5: Reset successful history<a class="heading-anchor" href="#hint-for-investigation-5-reset-successful-history" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: Its next failure starts at the first delay.</li>
-<li>The check <code>delay(attempts[&quot;demo&quot;]) == 1</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Name one input that would make <code>delay(attempts[&quot;demo&quot;]) == 1</code> false. A check that no input can falsify is not evidence.</li>
+<li>A missing key reads as attempt 0. What delay does that give?</li>
+<li>Success ends the current failure sequence.</li>
 </ol>
 <h4 id="hint-for-investigation-6-transfer-a-total-budget">Hint for investigation 6: Transfer a total budget<a class="heading-anchor" href="#hint-for-investigation-6-transfer-a-total-budget" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: Three retries fit (1+2+4=7 units); the fourth delay of 8 would exceed the budget.</li>
-<li>The check <code>attempts == 3 &amp;&amp; spent == 7</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Predict the effect of changing <code>if spent+d &gt; 10 {</code> to <code>if spent-d &gt; 10 {</code> before running anything. If the prediction is hard, trace that line again with the original input.</li>
+<li>The loop stops when the next delay would pass 10. Which delays fit?</li>
+<li>A delay cap bounds waiting per retry, while an attempt or elapsed-time budget bounds total work.</li>
 </ol>
 <h3 id="self-check-and-retrieval">Self-check and retrieval<a class="heading-anchor" href="#self-check-and-retrieval" aria-label="Link to this section">#</a></h3>
-<p>Close the reference. Rebuild one normal case and one boundary case from a blank pad. Explain the role of coalescing without using its name in the definition. Then change the domain while keeping the same invariant. Record the new input, your prediction and the observed output. If your program passes only because its input is hard-coded, explain which part would need a reusable function in a larger project.</p>
+<p>Write <code>nextDelay(attempt, base, max int) int</code> with doubling and a cap, and <code>shouldRetry(err error) bool</code> that retries only errors wrapping a transient sentinel. Test delays for attempts 0 through 5 and classification for wrapped and unwrapped errors. Then explain why coalescing duplicate keys is safe for a level-based reconciler.</p>
+<p>The general <a href="../STUDY-GUIDE.md.html#self-check-and-retrieval">retrieval routine</a> still applies.</p>
 <h3 id="next-step-and-sources">Next step and sources<a class="heading-anchor" href="#next-step-and-sources" aria-label="Link to this section">#</a></h3>
-<p><a href="https://pkg.go.dev/k8s.io/client-go/util/workqueue">Primary language or library documentation</a>, reviewed 2026-10-23. The teaching explanations and synthetic fixtures are original. Continue with the next lesson when you can explain the six observations and diagnose a changed case without copying its answer.</p>
+<p>Source: <a href="https://pkg.go.dev/k8s.io/client-go/util/workqueue"><code>k8s.io/client-go/util/workqueue</code> package documentation</a>, reviewed 2026-10-23.</p>
+<p>Next: go-041, A real client-go project and explicit cluster configuration (<a href="../STUDY-GUIDE.md.html#when-to-move-on">criteria</a>).</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for go-040: Work queues, retry budgets and error classification.
 Read courses/go/guides/go-040.md and my saved attempt based on courses/go/lessons/go-040.go.

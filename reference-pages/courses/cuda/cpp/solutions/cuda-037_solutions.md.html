@@ -196,7 +196,6 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <article class="document"><h2 id="cuda-037-explanatory-solutions">cuda-037: explanatory solutions<a class="heading-anchor" href="#cuda-037-explanatory-solutions" aria-label="Link to this section">#</a></h2>
 <h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
 <p>Divergence occurs when lanes in a warp follow different control-flow paths. It can reduce useful parallel execution, but branches that are uniform across a warp or skip substantial work can be beneficial. Irregular workloads also suffer from imbalance when some lanes have much longer loops. Reordering or compacting work can improve grouping at the cost of an extra pass and changed order. Preserve semantic ordering where required and include preprocessing in end-to-end measurement. Branch elimination that evaluates both expensive sides can make the program slower even when it reduces control flow.</p>
-<p>The separate <a href="../references/cuda-037_cpu.py.html">CPU reference</a> checks the chapter&#x27;s bounded model. It does not execute CUDA or establish GPU timing. Compare after attempting the worksheet or explicitly choosing to reveal solutions.</p>
 <h3 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h3>
 <p>Four conceptual lanes process workloads <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">[</mo><mn>1</mn><mo separator="true">,</mo><mn>1</mn><mo separator="true">,</mo><mn>1</mn><mo separator="true">,</mo><mn>9</mn><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">[1,1,1,9]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">[</span><span class="mord">1</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">1</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">1</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord">9</span><span class="mclose">]</span></span></span></span>. A simplified lockstep cost is nine rounds, with 12 useful lane-rounds out of 36 available positions, or one third utilization. This is a pedagogical model, not an actual CUDA timing prediction.</p>
 <p><strong>Approach:</strong> Take the longest workload 9 as rounds, sum useful work 12, and divide by 4 lanes times 9 rounds.</p>
@@ -233,11 +232,16 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Why it is correct:</strong> Similar lengths in one warp reduce idle lanes, and the index map preserves output order.</p>
 <p><strong>A plausible wrong approach:</strong> Bucketing without saving original indices returns correct rows in the wrong order.</p>
 <p><strong>How to verify:</strong> Validate every row, including empty ones, and count grouping time in totals.</p>
+<h3 id="self-check-answers">Self-check answers<a class="heading-anchor" href="#self-check-answers" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>What utilization does the lockstep model give for workloads [2,2,2,8]?</strong> 14 useful lane-rounds out of 32, about 0.44.</li>
+<li><strong>When is a branch warp-uniform?</strong> When every lane of the warp takes the same path, so no divergence occurs.</li>
+<li><strong>Why might reordering work change results?</strong> It can change output order or arithmetic order unless order is restored or proven irrelevant.</li>
+</ol>
 <h3 id="numerical-reference-and-its-limits">Numerical reference and its limits<a class="heading-anchor" href="#numerical-reference-and-its-limits" aria-label="Link to this section">#</a></h3>
-<p>The complete CPU model is <a href="../references/cuda-037_cpu.py.html">here</a>. Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It does not claim CUDA execution, concurrency safety or a performance measurement.</p>
+<p>The <a href="../references/cuda-037_cpu.py.html">CPU reference</a> reproduces worked example 1 and prints <code>{&#x27;synthetic_lockstep_useful_fraction&#x27;: 0.3333333333333333, &#x27;preprocess_ms_minus_saved_ms&#x27;: 1}</code>.</p>
 <h3 id="transfer-review">Transfer review<a class="heading-anchor" href="#transfer-review" aria-label="Link to this section">#</a></h3>
-<p>Group similar lengths, preserve a mapping back to original rows, include grouping cost and validate every output and empty row.</p>
-<p>A complete explanation must name its inputs, the unchanged mathematical contract, the changed boundary or resource condition, and the evidence still needed on actual hardware. Preserve a CPU baseline even after a GPU path becomes available.</p></article>
+<p>Group similar lengths, preserve a mapping back to original rows, include grouping cost and validate every output and empty row.</p></article>
   </main>
 </body>
 </html>

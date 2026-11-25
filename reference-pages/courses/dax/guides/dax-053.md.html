@@ -194,10 +194,10 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/dax/guides/dax-053.md</code></p>
     </header>
     <article class="document"><h2 id="dax-053-read-timing-evidence-without-inventing-a-benchmark">dax-053: Read timing evidence without inventing a benchmark<a class="heading-anchor" href="#dax-053-read-timing-evidence-without-inventing-a-benchmark" aria-label="Link to this section">#</a></h2>
-<p><strong>Stage 9: Performance interpretation and equivalent rewrites.</strong> Level: advanced. Read the mechanisms, trace the worked cases and retain your own draft. <strong>Direct prerequisites:</strong> <code>dax-049</code>, <code>dax-050</code>, <code>dax-051</code></p>
+<p><strong>Stage 9: Performance interpretation and equivalent rewrites.</strong> Level: advanced. <strong>Direct prerequisites:</strong> <code>dax-049</code>, <code>dax-050</code>, <code>dax-051</code></p>
 <h3 id="how-to-use-this-offline-lesson">How to use this offline lesson<a class="heading-anchor" href="#how-to-use-this-offline-lesson" aria-label="Link to this section">#</a></h3>
-<p>This is an offline DAX editing lesson. No DAX compiler, semantic-model engine, Power BI account or network connection is required. Worked tables describe the named reference and model, not execution of your draft. Save, compare and export source; do not interpret a comparison or completion marker as a passed program run.</p>
-<p>Open the <a href="../lessons/dax-053.dax.html">starter</a>. Compare the <a href="../solutions/dax-053_reference.dax.html">named reference</a> and <a href="../solutions/dax-053_solutions.md.html">reasoning</a> when ready. The <a href="../models/retail/model.json.html">model specification</a> identifies every fixture table, column type, key and relationship. The <a href="../models/README.md.html">fixture handbook</a> displays the original data and explains each table grain.</p>
+<p>The starter shows three supplied trial timings, 20, 21 and 19 ms. Compute their mean and median, then compute the same for the cold and warm sets in the first case, and label each as synthetic. The <a href="../STUDY-GUIDE.md.html#offline-study-boundary">offline study boundary</a> explains what a worked table can show.</p>
+<p>Files: <a href="../lessons/dax-053.dax.html">starter</a>, <a href="../solutions/dax-053_reference.dax.html">reference</a> and <a href="../solutions/dax-053_solutions.md.html">reasoning</a>.</p>
 <h3 id="the-question-and-the-mechanism">The question and the mechanism<a class="heading-anchor" href="#the-question-and-the-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Interpret a supplied timing scenario while separating it from an actual DAX execution receipt.</p>
 <p>Performance evidence needs provenance: exact source, model, engine/version, hardware, workload filters, cache state and repeated measurements. Cold and warm queries can measure different work. Comparing one cold result with another warm result is not a fair formula comparison. A screenshot of a small duration without its context cannot establish a general speedup.</p>
@@ -207,7 +207,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>AVERAGEX, MINX and MEDIANX summarize literal trial tables. These functions are used to analyze provided values, not to time the current query. A real Performance Analyzer or server-timing trace would need its own recorded provenance and distinction between visual rendering, query time and other work.</p>
 <p>Concepts to explain in your own words: <strong>cache state</strong>, <strong>repeated trials</strong>, <strong>median</strong>, <strong>variance</strong>, <strong>synthetic evidence</strong>.</p>
 <h3 id="model-and-context-contract">Model and context contract<a class="heading-anchor" href="#model-and-context-contract" aria-label="Link to this section">#</a></h3>
-<p>The ordinary star follows Product → Sales, Customer → Sales and Date → Sales through OrderDate. The ShipDate relationship is inactive unless a case explicitly activates it. Filters flow from the one side to the many side. Additional analytical tables have only the relationships declared in their named model; a similar column name does not create a relationship.</p>
+<p>All timings in this lesson are invented scenario values. Cold trials are 100, 120 and 110 ms; warm trials are 20, 25 and 21. Candidate A runs 20, 21 and 19; candidate B runs 18, 60 and 18. See the <a href="../models/retail/model.json.html">model specification</a> and the <a href="../STUDY-GUIDE.md.html#the-retail-star">shared star rules</a>.</p>
 <pre class="highlighted-code"><code class="language-text">Product (one)  --&gt; Sales (many) &lt;-- Customer (one)
                        ^
                        | active OrderDate
@@ -215,7 +215,6 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
                        | inactive ShipDate
                        +------&gt; Sales</code></pre>
 <p>A case builds a query-local <code>DATATABLE</code>. That table exists only inside its query and has no relationship to any model table.</p>
-<p>All amounts in ordinary Sales are USD after the line discount, before tax and returns. The Date fixture is complete for 2024 and 2025; a short result table is a selected slice, not the whole calendar. JSON <code>null</code> in the worked-results sidecar means DAX BLANK, not the text &quot;null&quot;.</p>
 <h3 id="worked-cases">Worked cases<a class="heading-anchor" href="#worked-cases" aria-label="Link to this section">#</a></h3>
 <h4 id="case-a-cold-and-warm-are-different-conditions">Case A: Cold and warm are different conditions<a class="heading-anchor" href="#case-a-cold-and-warm-are-different-conditions" aria-label="Link to this section">#</a></h4>
 <p><strong>Starting context:</strong> Original synthetic trial scenario, not measured engine output; three supplied values per cache-state label.</p>
@@ -273,8 +272,10 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 </tbody></table></div>
 <p>Three invented trials cannot estimate production tail latency. The point is to inspect the full evidence and design an adequate real measurement procedure.</p>
 <p>Synthetic scenario summary only; these values are not DS60 runtime performance receipts.</p>
+<h3 id="a-misconception-to-test">A misconception to test<a class="heading-anchor" href="#a-misconception-to-test" aria-label="Link to this section">#</a></h3>
+<p>Shown that B&#x27;s best trial is 18 ms against A&#x27;s 19, a reader may declare B faster. B&#x27;s three trials include a 60 ms outlier, so its mean is 32 against A&#x27;s 20, even though its median of 18 beats A&#x27;s 20. Best, median and mean answer different questions, and three trials support none of them for production. Comparing a cold run of one candidate with a warm run of another is worse still: the 110 versus 22 gap in the first case is cache state, not formula quality.</p>
 <h3 id="practice-prediction-construction-and-diagnosis">Practice: prediction, construction and diagnosis<a class="heading-anchor" href="#practice-prediction-construction-and-diagnosis" aria-label="Link to this section">#</a></h3>
-<p>Retain your formula or written reasoning, the stated context, contributing rows or values, and a conclusion with its unit. These notes are your own study record; they do not show that a formula ran.</p>
+<p>Record each answer as the <a href="../STUDY-GUIDE.md.html#practice-routine">practice routine</a> describes.</p>
 <h4 id="exercise-1-predict">Exercise 1: Predict<a class="heading-anchor" href="#exercise-1-predict" aria-label="Link to this section">#</a></h4>
 <p>Predict the mean if the warm 25 ms value is replaced by 40 ms.</p>
 <h4 id="exercise-2-change-one-condition">Exercise 2: Change one condition<a class="heading-anchor" href="#exercise-2-change-one-condition" aria-label="Link to this section">#</a></h4>
@@ -297,14 +298,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>Separate model loading, compilation, warmup, batch size and synchronization.</li>
 </ol>
 <h3 id="self-check-and-next-step">Self-check and next step<a class="heading-anchor" href="#self-check-and-next-step" aria-label="Link to this section">#</a></h3>
-<p>Explain one changed result without quoting the formula alone. Identify which rows, filters, relationship or evaluation scope changed, then construct a counterexample to a plausible wrong interpretation. Keep your draft separate from the supplied reference. A small correct derivation does not certify performance, model security or broad expertise.</p>
+<p>Replace B&#x27;s 60 ms trial with 19 ms and recompute mean, median and best for B. Then state what evidence you would need before calling either candidate faster. The <a href="../STUDY-GUIDE.md.html#self-check-routine">self-check routine</a> applies too.</p>
 <p>Continue to <a href="dax-054.md.html">dax-054</a> when its prerequisites make sense, or revisit this stage from the <a href="../README.md.html">course map</a>.</p>
 <h3 id="official-references-and-evidence-limits">Official references and evidence limits<a class="heading-anchor" href="#official-references-and-evidence-limits" aria-label="Link to this section">#</a></h3>
 <ul>
 <li><a href="https://learn.microsoft.com/en-us/power-bi/create-reports/desktop-performance-analyzer">Power BI: Performance Analyzer</a></li>
 <li><a href="https://daxstudio.org/docs/features/traces/server-timings-options/">DAX Studio: server timings</a></li>
 </ul>
-<p>Documentation was reviewed for this original course on 2026-10-25. Version-sensitive features have explicit notes. Source/model checks and independent fixture arithmetic are not a DAX parser, compiler, semantic engine, real RLS test or performance measurement.</p>
+<p>Review date and evidence limits: <a href="../STUDY-GUIDE.md.html#references-and-evidence-limits">study guide</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for dax-053. Read its guide and the named model.
 Review my draft and prediction. Ask me to enumerate the relevant rows and context.

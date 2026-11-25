@@ -395,25 +395,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h4 id="guide--prerequisites">Prerequisites<a class="heading-anchor" href="#guide--prerequisites" aria-label="Link to this section">#</a></h4>
 <p>Complete Day 2 (<code>python-02</code>): types, conversions, comparisons, and truthiness.</p>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
-<p><strong>Primary browser route:</strong> run <code>./classroom</code> from the repository root and choose <strong>Python and data science</strong> on <code>/classroom</code>. Open this lesson in the shared workspace, read its capability notice and use its supported coding or reading workflow. The <a href="../reference-pages/docs/classroom-experience.md.html">classroom guide</a> explains saved work, runtimes and switching subjects. No host notebook setup is needed for this route.</p>
-<h5 id="guide--optional-contributor-notebook-route">Optional contributor notebook route<a class="heading-anchor" href="#guide--optional-contributor-notebook-route" aria-label="Link to this section">#</a></h5>
-<p>Use a separately prepared POSIX environment on Linux/macOS or Ubuntu in Windows WSL 2. Complete <a href="../reference-pages/CONTRIBUTING.md.html">contributor setup</a> once, including the notebook and data dependencies. Docker&#x27;s Python worker does not install packages into this host interpreter. Run the following commands from the repository root using that prepared environment.</p>
-<ol>
-<li>Check the interpreter and register its notebook kernel. Registration is needed once for this environment, or again after moving/replacing it:</li>
-</ol>
-<pre class="highlighted-code"><code class="language-bash">   uv run --no-sync python scripts/course.py doctor --no-database
-   uv run --no-sync python -m ipykernel install --user --name ds60sqlpy --display-name <span class="syntax-string">&quot;Python (ds60sqlpy)&quot;</span></code></pre>
-<p><code>--no-database</code> keeps this Python setup check local and does not require PostgreSQL. Do not install packages with <code>%pip</code> in a lesson. Use the declared dependency group when an optional import needs preparation.</p>
-<ol start="2">
-<li>Read <code>python/ds-60day/companion-guides/day03_control_flow_exceptions.md</code>, then launch the notebook directory:</li>
-</ol>
-<pre class="highlighted-code"><code class="language-bash">   uv run --no-sync python -m jupyter lab python/ds-60day/notebooks</code></pre>
-<p>Open <code>python/ds-60day/notebooks/day03_control_flow_exceptions.ipynb</code> and select <strong>Python (ds60sqlpy)</strong>. The friendly name alone is insufficient if you use several checkouts: confirm that the kernel&#x27;s <code>sys.executable</code> points to this checkout&#x27;s <code>.venv/bin/python</code>. <a href="../reference-pages/docs/vscode.md.html">VS Code guidance</a> explains the alternative editor route; Windows users open that editor in WSL with the same Linux environment.</p>
-<ol start="3">
-<li>Restart the kernel and run cells from the top. Notebook cells share kernel state; each browser Run starts a fresh process. Before every example, predict its result, then compare the actual value, type, shape or side effect.</li>
-<li>Attempt the numbered exercises in your own work cells and keep a backup of your notebook edits. Follow each example&#x27;s file and working-directory instructions. Keep <code>solutions/</code> separate until you want reference comparison.</li>
-</ol>
-<p>Notebook files and contributor CLI progress belong to this host checkout. They are separate from the browser&#x27;s saved pads, notes and progress in Docker volumes. Neither route automatically copies attempts or completion markers to the other; record progress in the interface you actually used.</p>
+<p>Open <code>python-03</code> in the classroom, or <code>python/ds-60day/notebooks/day03_control_flow_exceptions.ipynb</code> on a host; the <a href="../reference-pages/python/STUDY-GUIDE.md.html">Python study guide</a> explains both.</p>
 <p><strong>Outcome:</strong> Order branches correctly and catch only the errors you can handle.</p>
 <h4 id="guide--beginner-deep-dive-build-the-idea-before-the-syntax">Beginner deep dive: build the idea before the syntax<a class="heading-anchor" href="#guide--beginner-deep-dive-build-the-idea-before-the-syntax" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--start-with-one-mental-picture">Start with one mental picture<a class="heading-anchor" href="#guide--start-with-one-mental-picture" aria-label="Link to this section">#</a></h5>
@@ -468,14 +450,7 @@ grade</code></pre>
 <li>Replace bare <code>except:</code> or <code>except Exception:</code> with the narrow type you can recover from.</li>
 </ol>
 <h5 id="guide--practice-ramp">Practice ramp<a class="heading-anchor" href="#guide--practice-ramp" aria-label="Link to this section">#</a></h5>
-<p>Work through the numbered exercises in five modes rather than treating all of them as blank-code prompts:</p>
-<ol>
-<li><strong>Prediction:</strong> state the value, type, shape, rows, or side effect before execution.</li>
-<li><strong>Guided modification:</strong> change one part of a worked example and explain which part of the result must change.</li>
-<li><strong>Independent application:</strong> implement the same idea with a new input and an explicit contract.</li>
-<li><strong>Debugging and edge cases:</strong> reproduce a failure, identify the violated assumption, and prove the repair at a boundary.</li>
-<li><strong>Retrieval:</strong> close the guide and explain the core model from memory before moving on.</li>
-</ol>
+<p>Work this lesson&#x27;s exercises in the five practice modes from the <a href="../reference-pages/python/STUDY-GUIDE.md.html">Python study guide</a>.</p>
 <p><strong>Useful alternative:</strong> Use a placeholder such as <code>None</code> only when &quot;no value&quot; is a legitimate outcome; otherwise raise a specific exception so the failure cannot be mistaken for data.</p>
 <p><strong>Boundary to remember:</strong> Boundary values such as 0, 1, 59, 60, 89, 90, and 100 expose gaps and overlaps in ordered conditions.</p>
 <h4 id="guide--vocabulary-and-mental-model">Vocabulary and mental model<a class="heading-anchor" href="#guide--vocabulary-and-mental-model" aria-label="Link to this section">#</a></h4>
@@ -502,7 +477,6 @@ grade</code></pre>
 value</code></pre>
 <p>With <code>raw = &quot;42&quot;</code> the cell displays <code>42</code>. With <code>raw = &quot;forty&quot;</code>, the conversion fails and the new message <code>expected an integer, received &#x27;forty&#x27;</code> is raised; <code>from exc</code> keeps the original <code>invalid literal for int()</code> error in the traceback. With <code>raw = &quot;-4&quot;</code>, the conversion succeeds and the domain rule raises <code>value must be non-negative, received -4</code>. The two failures have different causes, and the messages make both diagnosable.</p>
 <h4 id="guide--exercises-and-progressive-hints">Exercises and progressive hints<a class="heading-anchor" href="#guide--exercises-and-progressive-hints" aria-label="Link to this section">#</a></h4>
-<p>Each item is a complete mini-contract. Before writing code, copy its input, expected behavior, constraints, and verification into your work cell. A result is not complete merely because it “looks right”; run the stated assertion or inspection and explain what it proves.</p>
 <ol>
 <li>Given <code>number = 15</code>, write one ordered <code>if</code>/<code>elif</code>/<code>else</code> chain that sets <code>label</code> to <code>&quot;FizzBuzz&quot;</code> for multiples of both 3 and 5, <code>&quot;Fizz&quot;</code> for multiples of 3 only, <code>&quot;Buzz&quot;</code> for multiples of 5 only, and <code>str(number)</code> otherwise. <strong>Constraints:</strong> test divisibility with <code>%</code> and keep all four outcomes in one chain. <strong>Verify:</strong> rerun with <code>number</code> set to 3, 5, 15, 16, and 30 and assert the labels <code>&quot;Fizz&quot;</code>, <code>&quot;Buzz&quot;</code>, <code>&quot;FizzBuzz&quot;</code>, <code>&quot;16&quot;</code>, and <code>&quot;FizzBuzz&quot;</code>. Day 4 repeats this decision for 1 through 30 with a <code>for</code> loop.</li>
 </ol>
@@ -546,7 +520,7 @@ value</code></pre>
 <li><a href="python-04.html#guide">Next: Day 4; Loops, comprehensions, and generators</a></li>
 </ul>
 <h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
-<p>AI coaching is optional; the guide and notebook above contain the full lesson. If you want a patient tutor, copy this prompt from the repository root:</p>
+<p>AI coaching is optional. To use a tutor, copy this prompt from the repository root:</p>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning to tutor me through `python-03`
 (Day 3: Control Flow, Truthiness, and Exceptions). Direct catalog prerequisites: `python-02`.
 I have completed the direct prerequisites: `python-02`. Emphasize branch selection, truthiness in conditions, and narrow exception boundaries.

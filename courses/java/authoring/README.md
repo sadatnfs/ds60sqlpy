@@ -56,10 +56,12 @@ still performs every operation.
 Exercises 1 and 2 are derived from Examples A and B instead of repeating them:
 exercise 1 changes one input of Example A and asks for a prediction, exercise 2
 presents a one-token regression (or an edited assertion) in the code that
-Example B adds. Every `Verify` line and progressive hint names that exercise's
-own assertion and a one-token edit that was executed and observed to make that
-assertion fail. The renderer locates the edit in the formatted snippet that
-learners see, so it calls the same `canonical_markdown` adapter on the six
+Example B adds. Every `Verify` line names that exercise's own assertion and a
+one-token edit that was executed and observed to make that assertion fail, and
+the hints for exercises 1 and 2 walk through that edit, or through an executed
+example defect when the exercise asks the learner to inject one. The renderer
+locates the edit in the formatted snippet that learners see, so it calls the
+same `canonical_markdown` adapter on the six
 exercise fences. The observations live in `variants.json` and are refreshed
 after any exercise change:
 
@@ -74,6 +76,25 @@ and a mutant counts only when the targeted exercise's own assertion fails; a
 timeout, compile error or other exception is not counted. Edits outside an
 assertion are preferred. Rendering never executes code and stops with a clear
 message if an exercise changed after its record was made.
+
+## Lesson-specific teaching text and the shared study guide
+
+Operating instructions that are the same for every lesson (classroom and native
+JDK steps, how the six exercises are built, the hint routine, failure triage,
+when to open solutions, moving on and evidence levels) live once in
+[`../STUDY-GUIDE.md`](../STUDY-GUIDE.md); every guide and explanatory solution
+links to its anchors instead of repeating them.
+
+The per-lesson prose for how to run, prediction, pitfalls, the six progressive
+hints, retrieval and the after-comparison follow-up lives in `teaching.txt`, one
+`== java-NNN` block per lesson with one `field: text` line per field.
+`teaching.py` loads it into `TEACHING` and refuses a duplicate lesson or a
+missing, duplicate or unknown field. Each hint is a three-rung ladder whose
+sentences start with `First`, `Then` and `Finally,` (no other sentence may start
+with a sequencing word), so the classroom can reveal one rung at a time. Write
+every field about that lesson's own code and failure modes; text that would
+still be true after swapping in another lesson's topic belongs in the study
+guide.
 
 Use [CONTRIBUTING](../../../CONTRIBUTING.md) and the
 [validation guide](../../../docs/validation.md) for shared checks. Refresh shared

@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/docker/solutions/docker-039_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="docker-039-explanatory-solutions">docker-039: explanatory solutions<a class="heading-anchor" href="#docker-039-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit reveal. These explain the supplied teaching fixtures; they are not engine results. The mechanism is explained in <code>courses/docker/guides/docker-039.md</code>.</p>
+<p>These answers explain teaching fixtures, not engine results; the mechanism is in <a href="../guides/docker-039.md.html">the guide</a>.</p>
 <h3 id="exercise-1-distinguish-namespace-and-cgroup">Exercise 1: Distinguish namespace and cgroup.<a class="heading-anchor" href="#exercise-1-distinguish-namespace-and-cgroup" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Object visibility versus grouping and resource controls.</p>
 <p><strong>Why:</strong> Both influence container behavior but solve different problems. A memory limit does not define which network interfaces a process can see.</p>
@@ -238,7 +238,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>A plausible wrong approach:</strong> Running untrusted code because it is in a container treats namespaces as a full sandbox.</p>
 <p><strong>How to verify:</strong> The trust note lists the fixture&#x27;s least-privilege settings and kernel patching as required parts.</p>
 <h3 id="check-your-transfer">Check your transfer<a class="heading-anchor" href="#check-your-transfer" aria-label="Link to this section">#</a></h3>
-<p>A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.</p></article>
+<p>On Linux the kernel release printed inside the container matched the host&#x27;s, so every container shares that kernel; namespaces only limit what each process can see, and cgroups only meter what it can use. A kernel vulnerability reachable from inside one container can therefore affect the host and its neighbors. Mitigations are a patched kernel, dropped capabilities, the default seccomp profile and no-new-privileges as the fixture uses, or a stronger boundary such as a VM per tenant. A differing release on a Linux host would mean a VM-based runtime.</p></article>
   </main>
 </body>
 </html>

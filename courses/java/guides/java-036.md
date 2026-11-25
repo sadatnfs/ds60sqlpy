@@ -6,7 +6,16 @@ Advanced, approximately 120 minutes. Direct prerequisites: `java-035`
 
 ## Learning objectives
 
-Package, self-test and verify a release artifact, rejecting tampering before execution and recording its runtime scope. Along the way, explain release artifact, class-file version, integrity gate, custom runtime image using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. Exercises 1 and 2 start from the worked examples; the authored investigations begin with this task: Launch the JAR with --self-test through a bounded child JVM. The final exercise transfers the mechanism to record runtime-image scope and rollback identity.
+Package, self-test and verify a release artifact, rejecting tampering before execution and recording its runtime scope.
+
+The six exercises practice these steps:
+
+- Verify the compiler target.
+- Inspect packaged launch metadata.
+- Run a fresh-process self-test.
+- Verify an invalid launch fails clearly.
+- Reject artifact tampering before execution.
+- Record runtime-image scope and rollback identity.
 
 ## Purpose and mental model
 
@@ -26,16 +35,9 @@ This capstone builds a small Java 21 JAR with a fixed timestamp, checks class-fi
 
 ## How to run this lesson
 
-Open the Docker classroom, choose the prepared Java 21 profile and save a learner pad. The pad is compiled as `Main.java` with `javac --release 21` and executed with `java -ea Main`. Assertions are enabled deliberately. A successful assertion has no output; a failed assertion throws `AssertionError` and the process should fail. Do not remove assertions to obtain a green result.
+`ReleaseFixture` writes `App.java` into an owned temporary directory, compiles it with `--release 21`, packages a JAR with a fixed timestamp, launches it in a child JVM with a five-second limit, and deletes everything in `close`.
 
-For a prepared native JDK, copy a worked example into your own `Main.java` under ignored `.learning/expansion/java-036/`. From that directory run the same two commands on PowerShell, macOS or Linux:
-
-```text
-javac --release 21 Main.java
-java -ea Main
-```
-
-The public class name and source filename must agree. Each worked example below is a complete file. Example B includes the setup it needs from Example A, so it can be compiled by itself. The six exercise reference blocks form one complete program in the separate solution. Keep your original prediction, source and diagnostic text together. Most examples use prepared JDK libraries and tiny local fixtures; any additional dependency is specified in the lesson notes below. Any lesson-specific library or additional file is named explicitly; do not download packages from inside a learner program. Resource examples close their owned files, executors or loopback servers.
+Classroom and native JDK steps, the exercise controls and the hint routine are in the [Java study guide](../STUDY-GUIDE.md).
 
 ## Packaging scope
 
@@ -302,62 +304,62 @@ public class Main {
 
 ## Prediction before your attempt
 
-Read the source from the entry point and name each value before executing it. Identify which operations create new values, which mutate existing state and which can fail. Predict the first observable output or assertion result. For a compile-time failure, explain which source rule is violated before discussing runtime state: a program that did not compile never reached its main method. Keep normal, boundary and invalid inputs separate so each check has a clear purpose.
+Before running Example A, decide which bytes start every class file and which major version `--release 21` produces. For Example B, predict the `Main-Class` value in the manifest and whether `App.class` is a JAR entry. Before Exercise 3, decide the exit code and output when the child JVM runs the JAR with `--self-test`, and what changes for any other argument.
 
 ## Exercises
 
-1. **Verify the compiler target: predict an edited check.** Copy Example A into a scratch `Main.java` and change `assert magic == 0xCAFEBABE && major == 65;` to `assert magic == 0xCAFEBABE && major == 66;` inside its assertion. Before running it with `java -ea Main`, predict whether the assertion still holds and explain why; then restore it.
-   **Expected:** The changed run fails with an `AssertionError` from the assertion on `magic == 0xCAFEBABE && major == 65`. Restoring the original line brings back the worked observation: magic CAFEBABE; major version 65.
-   **Verify:** Compare your written prediction with the reported `AssertionError` and its stack-trace line, and explain why the edited condition is false for the values that satisfy `magic == 0xCAFEBABE && major == 65`. After restoring the line, the program completes without an `AssertionError` again.
+1. **Verify the compiler target: predict an edited check.** Change Example A's assertion to `assert magic == 0xCAFEBABE && major == 66;`, predict whether it holds, then run and restore it.
+   **Expected:** The edited run fails with an `AssertionError` from the assertion on `magic == 0xCAFEBABE && major == 65`.
+   **Verify:** Explain why the edited assertion is false for the values that satisfy `magic == 0xCAFEBABE && major == 65`.
 
-2. **Inspect packaged launch metadata: diagnose an edited check.** A careless edit changed the assertion that Example B adds after Example A so that it reads `assert jar.getManifest().getMainAttributes().getValue("Main-Class").equals("App!") &&`. Run Example B with that line, explain why the edited assertion now fails for the same program state, and restore it.
-   **Expected:** Before the repair the run fails with an `AssertionError` from the assertion on `jar.getManifest().getMainAttributes().getValue("Main-Class").equals("App") && jar.getJarEntry("App.class") != null`; after it the line reads `assert jar.getManifest().getMainAttributes().getValue("Main-Class").equals("App") &&` again and main-Class App; class entry present.
-   **Verify:** Keep the failing and the repaired runs. Explain why the edited assertion rejects the same program state that `jar.getManifest().getMainAttributes().getValue("Main-Class").equals("App") && jar.getJarEntry("App.class") != null` accepts.
+2. **Inspect packaged launch metadata: diagnose an edited check.** Example B's new assertion was edited to `assert jar.getManifest().getMainAttributes().getValue("Main-Class").equals("App!") &&`. Explain why it fails for unchanged state and restore it.
+   **Expected:** The edited run fails with an `AssertionError` from the assertion on `jar.getManifest().getMainAttributes().getValue("Main-Class").equals("App") && jar.getJarEntry("App.class") != null`; the restored assertion passes.
+   **Verify:** Explain why the edited assertion rejects the state that `jar.getManifest().getMainAttributes().getValue("Main-Class").equals("App") && jar.getJarEntry("App.class") != null` accepts.
 
 3. **Run a fresh-process self-test.** Launch the JAR with --self-test through a bounded child JVM.
    **Expected:** exit 0 and output release-ok.
-   **Verify:** Keep an assertion equivalent to `result.code() == 0 && result.output().strip().equals("release-ok")`. As a control, change `Run result = fixture.run("--self-test");` to `Run result = fixture.run("--self-test!");`: the run must fail with an `AssertionError` from the assertion on `result.code() == 0 && result.output().strip().equals("release-ok")`. Restore the line before continuing.
+   **Verify:** Control: changing `Run result = fixture.run("--self-test");` to `Run result = fixture.run("--self-test!");` must fail the assertion on `result.code() == 0 && result.output().strip().equals("release-ok")`.
 
 4. **Verify an invalid launch fails clearly.** Run the same JAR with an unsupported argument.
    **Expected:** exit 2 and unknown argument diagnostic.
-   **Verify:** Keep an assertion equivalent to `result.code() == 2 && result.error().contains("unknown argument")`. As a control, change `assert result.code() == 2 && result.error().contains("unknown argument");` to `assert result.code() == 2 && result.error().contains("unknown argument!");` inside it: the run must fail with an `AssertionError`, which shows the assertion can fail. Restore it.
+   **Verify:** Control: changing `assert result.code() == 2 && result.error().contains("unknown argument");` to `assert result.code() == 2 && result.error().contains("unknown argument!");` inside the assertion must make it fail.
 
 5. **Reject artifact tampering before execution.** Hash the JAR, flip one byte, and call the integrity gate.
    **Expected:** SecurityException; original bytes restored for cleanup.
-   **Verify:** Keep an assertion equivalent to `rejected`. As a control, change `rejected = true;` to `rejected = false;`: the run must fail with an `AssertionError` from the assertion on `rejected`. Restore the line before continuing.
+   **Verify:** Control: changing `rejected = true;` to `rejected = false;` must fail the assertion on `rejected`.
 
 6. **Record runtime-image scope and rollback identity.** Inspect whether jlink exists, and write a record distinguishing local JAR acceptance from an unbuilt custom runtime.
    **Expected:** previous artifact v1 retained; custom_runtime_built False.
-   **Verify:** Keep an assertion equivalent to `receipt.get("previous_artifact").equals("v1") && receipt.get("custom_runtime_built").equals(false) && receipt.get("production_deployed").equals(false)`. As a control, change `"v1",` to `"v2",`: the run must fail with an `AssertionError` from the assertion on `receipt.get("previous_artifact").equals("v1") && receipt.get("custom_runtime_built").equals(false) && receipt.get("production_deployed").equals(false)`. Restore the line before continuing.
+   **Verify:** Control: changing `"v1",` to `"v2",` must fail the assertion on `receipt.get("previous_artifact").equals("v1") && receipt.get("custom_runtime_built").equals(false) && receipt.get("production_deployed").equals(false)`.
 
 ## Common pitfalls and diagnosis
 
-When a check fails, keep the smallest source file that still demonstrates the failure. Read the first relevant compiler diagnostic before editing several lines; later diagnostics can be consequences of the same missing delimiter or wrong type. For a runtime exception, identify the first frame belonging to your code and compare its input with the method contract. For an assertion failure, inspect the actual value and the independent expected value. A passing process exit is weaker than a checked invariant, and a checked invariant applies only under its stated assumptions.
+A successful `javac` does not prove that the JAR has the right entrypoint, so inspect the manifest. Compiling with a newer JDK without `--release` produces class files an older runtime refuses with `UnsupportedClassVersionError`. Running the self-test in the same JVM can reuse already loaded classes, so launch a fresh process. A matching hash proves the bytes, not the behavior. And a tool being present is not proof that a `jlink` image was built.
 
-Do not replace a precise exception with a catch-all that returns a plausible default. That can hide an invalid input or an unfinished operation. If an example owns a resource, verify its lifetime on both the success and failure paths. If an operation is concurrent, use ordering primitives to establish the relationship you need; an observed timing coincidence is not a synchronization guarantee. The solution explanations identify the specific alternative that would break each exercise.
+General compiler, runtime and assertion triage: [diagnose a failure](../STUDY-GUIDE.md#diagnose-a-failure).
 
 ## Progressive hints
 
-Read one hint at a time and attempt the exercise again before reading the next. Keep a small table of input, expected value, actual value and exception type. Ask for one hint about the first incorrect assumption before requesting the entire reference implementation.
+Read one rung at a time, as described in [using hints](../STUDY-GUIDE.md#use-hints-one-at-a-time).
 
-- **Exercise 1:** First restate the expected observation: magic CAFEBABE; major version 65. Then list the values read by `magic == 0xCAFEBABE && major == 65` and trace each one from its declaration. Finally, compute the asserted value with `assert magic == 0xCAFEBABE && major == 66;` in place before running.
-- **Exercise 2:** First restate the expected observation: main-Class App; class entry present. Then list the values read by `jar.getManifest().getMainAttributes().getValue("Main-Class").equals("App") && jar.getJarEntry("App.class") != null` and trace each one from its declaration. Finally, compare `assert jar.getManifest().getMainAttributes().getValue("Main-Class").equals("App!") &&` with the same line in Example B and state the claim each version makes.
-- **Exercise 3:** First restate the expected observation: exit 0 and output release-ok. Then list the values read by `result.code() == 0 && result.output().strip().equals("release-ok")` and trace each one from its declaration. Finally, predict the effect of changing `Run result = fixture.run("--self-test");` to `Run result = fixture.run("--self-test!");` before running anything.
-- **Exercise 4:** First restate the expected observation: exit 2 and unknown argument diagnostic. Then list the values read by `result.code() == 2 && result.error().contains("unknown argument")` and trace each one from its declaration. Finally, name one input that would make `result.code() == 2 && result.error().contains("unknown argument")` false.
-- **Exercise 5:** First restate the expected observation: securityException; original bytes restored for cleanup. Then list the values read by `rejected` and trace each one from its declaration. Finally, predict the effect of changing `rejected = true;` to `rejected = false;` before running anything.
-- **Exercise 6:** First restate the expected observation: previous artifact v1 retained; custom_runtime_built False. Then list the values read by `receipt.get("previous_artifact").equals("v1") && receipt.get("custom_runtime_built").equals(false) && receipt.get("production_deployed").equals(false)` and trace each one from its declaration. Finally, predict the effect of changing `"v1",` to `"v2",` before running anything.
+- **Exercise 1:** First note that the in-check edit expects major version 66. Then recall that `--release 21` writes major version 65, and 66 belongs to Java 22. Finally, explain why the magic number matched and only the version comparison fails.
+- **Exercise 2:** First note that the in-check edit expects the `Main-Class` attribute to be "App!". Then read the value the `jar --main-class App` option wrote. Finally, explain why the JAR and its `App.class` entry are fine and only the expected text is wrong.
+- **Exercise 3:** First build the fixture and call `fixture.run("--self-test")`, which starts a separate `java -jar` process. Then read its exit code and standard output. Finally, assert 0 and `release-ok` after stripping the trailing newline.
+- **Exercise 4:** First run the same JAR with an argument that `App` does not recognize. Then read the exit code and standard error from the `Run` record. Finally, assert exit code 2 and the `unknown argument` message, and say why misuse must not exit 0.
+- **Exercise 5:** First hash the JAR, flip one bit of the first byte and write it back. Then call `verify` and catch `SecurityException`, restoring the original bytes in `finally`. Finally, assert the rejection and confirm that the restored JAR passes `verify`.
+- **Exercise 6:** First check whether `jlink` is executable under `java.home`. Then write a receipt that keeps `v1` as the previous artifact and records the custom runtime and production deployment as false. Finally, assert those three values and explain what tool presence does not prove.
 
 ## Self-check and retrieval
 
-Close the solution and explain Release artifact, Class-file version, Integrity gate in your own words. Reconstruct one example from a blank `Main.java`, then add a new boundary input. Explain why the new case should pass or fail before compiling it. Identify a situation where this technique is appropriate and one where a different data structure, lifetime policy or abstraction would be clearer. This is a reasoning check, not a memorization test for an API spelling.
+From memory, explain what class-file major version 65 means, why the self-test runs in a child JVM with a timeout, why the hash check runs before execution, and why the release record keeps the previous artifact and marks the custom runtime as not built.
 
 ## Next step
 
-Preserve the saved pad and the six exercise observations. Continue to the next lesson only when you can explain the invariants without reading the answer. Later chapters reuse these contracts in larger programs, so keep a failing counterexample as well as a repaired result. A reference implementation demonstrates one valid design under the stated assumptions; it is not a universal design rule.
+This is the last Java lesson; revisit any lesson whose contracts you cannot yet explain. Keep your six observations; see [moving on](../STUDY-GUIDE.md#move-to-the-next-lesson).
 
 ## Sources and verification status
 
-[Official Java 21 API or language reference](https://docs.oracle.com/en/java/javase/21/docs/specs/man/jlink.html), reviewed 2026-10-22. Examples and exercise fixtures are original course material. Use the [validation guide](../../../docs/validation.md) and CI artifacts for the exact revision and platform to inspect actual compile/run results. Authoring, parsing, compilation, execution and learner mastery are separate forms of evidence.
+[Official Java 21 API or language reference](https://docs.oracle.com/en/java/javase/21/docs/specs/man/jlink.html), reviewed 2026-10-22. Evidence levels: [sources and evidence](../STUDY-GUIDE.md#sources-and-evidence).
 
 ## Ask an AI tutor about this lesson
 

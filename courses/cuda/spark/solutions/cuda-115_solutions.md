@@ -1,6 +1,6 @@
 # cuda-115: explained solutions
 
-These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.
+Compare with your [worksheet](../lessons/cuda-115.md) attempt.
 
 ## Exercise 1: Draw logical versus physical plan
 
@@ -74,8 +74,16 @@ Use rows batches time spill and device observations together.
 
 **How to verify.** Collect metrics for each GPU operator from the SQL view after the action and check row counts against expectations.
 
+## Self-check answers
+
+1. **What is the difference between explain output and the executed SQL view?** Explain shows what Spark planned; the executed view and its metrics show what happened for a completed action.
+
+2. **Can a CPU node coexist with useful GPU computation?** Yes. Metadata or coordination nodes can stay on the CPU while the heavy operators run on the GPU.
+
+3. **Why count transitions in a mixed plan?** Each transition may copy data or change its representation, and that cost belongs in the measurement.
+
 ## Reference observation
 
 Synthetic plan has two GPU nodes and two backend transitions.
 
-The reference file is `courses/cuda/spark/references/cuda-115_cpu.py`. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.
+Asserted by `courses/cuda/spark/references/cuda-115_cpu.py`.

@@ -2,67 +2,13 @@
 
 ## How to run this lesson
 
-Start the Linux-container engine and run `./classroom` from the repository
-root. On Windows, use Ubuntu in WSL 2 or the thin
-`START_DOCKER_CLASSROOM.cmd` wrapper. Choose **PostgreSQL** on the shared
-`/classroom` home, then open **sql-09**. The
-[launcher guide](../../../docs/one-command-classroom.md) covers first preparation, strict resume and
-the saved project selection. No host Python or PostgreSQL installation is
-required for this browser route.
+Open `./classroom`, choose PostgreSQL and **sql-09**, then run **Whole SQL lesson (psql)**. The script sets `search_path` to `training` inside a `BEGIN`/`ROLLBACK` pair on `advanced_sql_training` and prints two lists: the 432 customers who have bought at least one Electronics item, then the products sold in the last 30 days (256 in our check; that count drifts with the date the fixture was loaded and the date you run it).
 
-1. Read the prerequisite and fixture notes before running the file. Use only
-   the local disposable `advanced_sql_training` database.
-2. Choose **Whole SQL lesson (psql)** for the cataloged learner script. This
-   preserves the lesson's reviewed psql directives, relative includes and
-   transaction behavior. **SQL snippet** is appropriate for ordinary SQL
-   statements, but is not a replacement for an entire script's setup.
-3. The **Course database** panel above the code shows whether the course
-   training tables are loaded. Missing tables load automatically before your
-   first run (or choose **Load course tables**) and stay loaded for later
-   lessons. **Reset training data** restores the original rows only when your
-   own changes made results differ; it keeps your saved code and notes.
-4. Edit the learner copy in the classroom and save your prediction before
-   running. Its whole-script workspace is
-   `.learning/sql/sql-09/lesson/workspace/sql/postgres-60day/day09_correlated_subqueries.sql`.
-   For browser work this path is inside the Docker learning volume, not a
-   newly created host folder beside your checkout. The checked-in source
-   remains the answer-free starting artifact.
-5. Run the whole script and inspect the full transcript. The runner uses
-   `psql -X -v ON_ERROR_STOP=1 -f`. SELECT output has columns, rows and a row
-   count; DDL/DML has command tags; intentional checks may produce NOTICE
-   messages. An unexpected ERROR or nonzero exit is a failure to diagnose,
-   even when an earlier query printed plausible values.
-6. Verify the lesson's expected grain, ordering, constraints and declared
-   transaction or cleanup outcome. Keep required ROLLBACK statements.
-   The warehouse sequence and other explicitly stateful exercises explain
-   when state is committed. Read saved output without rerunning it when
-   reviewing an earlier attempt.
+Your working copy lives at
+`.learning/sql/sql-09/lesson/workspace/sql/postgres-60day/day09_correlated_subqueries.sql`.
+A good first edit: change `'Electronics'` to `'Books'`; the list becomes 429 customers in our check and still holds one row per customer. A second: replace `EXISTS` with a plain three-table join and customer 12 prints eight times, once per Electronics line item.
 
-If a relation is missing, inspect the lesson's required fixture and predecessor
-rather than guessing a new table definition. If authentication or runtime
-readiness fails, use `./classroom status` and the setup guide. Keep credentials
-out of SQL, notebooks, screenshots and committed files. Repair the first error
-before trusting partial output, and reveal separate solutions only when you
-want to compare after an attempt.
-
-### Optional contributor notebook route
-
-For notebook work, deliberately prepare the Linux/WSL contributor environment
-from [CONTRIBUTING.md](../../../CONTRIBUTING.md), including a compatible psql client and
-the notebook dependencies. Generate this lesson's private workspace through
-the maintained CLI:
-
-```sh
-uv run --no-sync python scripts/course.py sql notebook sql-09
-```
-
-Open the printed notebook path in that environment's JupyterLab. It uses the
-same catalog-derived learner-copy layout in that contributor checkout and
-executes the complete script through psql. Its host-side state is separate
-from the Docker browser's named volume. Follow
-[guided SQL notebooks](../../../docs/guided-sql-notebooks.md) for explicit local connection
-selection and kernel setup. Notebook generation does not execute SQL or
-authorize a reset.
+Stuck on setup? The study guide explains [the classroom workflow](../../STUDY-GUIDE.md#run-a-lesson-in-the-classroom) and an optional [notebook route for contributors](../../STUDY-GUIDE.md#optional-contributor-notebook-route).
 
 ## Level and prerequisites
 
@@ -74,28 +20,13 @@ authorize a reset.
 
 ## A beginner's mental model for this lesson
 
-A **table** stores facts in named columns. A **row** is one occurrence at the
-table's declared grain. A query creates a temporary **result set**: rows printed
-on screen are not automatically stored. The key vocabulary for this lesson is Correlation, Semi-join, Anti-join. Its worked SQL reads or creates `customers`, `orders`, `order_items`, `products`.
+A correlated subquery is a query nested inside another that refers to the outer row. In Example 1 the inner query mentions `c.customer_id`, which belongs to the outer `customers` row, so PostgreSQL logically answers it once per customer: does this customer have any order line in Electronics? That outer reference is the **correlation**.
 
-Before writing a query, complete this sentence: “One output row represents
-___.” Joins can multiply rows, filters can remove them, grouping can collapse
-many rows into one, and window functions can add calculations while preserving
-row count. For a normal analytical `SELECT`, use this logical reading order:
-`FROM`/`JOIN` (including `ON`) → `WHERE` → `GROUP BY`/aggregates → `HAVING` →
-window calculations → `SELECT` → `ORDER BY` → `LIMIT`. PostgreSQL may execute a
-different physical plan while preserving those semantics.
+`EXISTS (subquery)` turns the inner query into true or false. It only checks whether at least one row comes back; the `SELECT 1` inside is a placeholder, and no inner column reaches the output. Keeping the outer rows that have a match is a **semi-join**: each customer prints at most once, however many matches exist, so customer 12 appears once despite eight Electronics line items. `NOT EXISTS` is the reverse, an **anti-join**: keep the outer row only when the inner query finds nothing, as in Exercise 4's 62 customers without orders.
 
-The worked walkthrough's lesson-specific task is: Read `WHERE EXISTS (...)` as a yes/no question for one outer customer. The subquery may stop after its first qualifying order, and it never adds order columns or duplicates the customer. Replace it temporarily with a join to see why `DISTINCT` may become necessary in the join form.
-Exercise 1 expects this result: one row per qualifying customer. Predict keys, row count, `NULL` behavior,
-and ordering before running. Afterwards, compare keys/counts/totals with an
-independent control. A blank string, SQL `NULL`, numeric zero, and a missing row
-are different facts; use `COALESCE` only after choosing which meaning the
-business question requires.
+A correlated subquery can also return a value instead of true or false. Exercise 3 compares each order with `AVG(peer.total_amount)` over that same customer's orders, so the bar moves from row to row: 504.33 for customer 1, 602.72 for customer 2. The column to watch is the one in the correlation. Tie the inner query to the wrong outer column and it still runs without complaint, but it answers a different question.
 
 ## Two worked SQL examples
-
-These worked excerpts come from `sql/postgres-60day/day09_correlated_subqueries.sql`. Use **Whole SQL lesson (psql)** in the unified classroom for the complete file, including its fixture and transaction context. The optional contributor notebook and prepared `psql` routes are described above.
 
 ### Example 1
 
@@ -119,9 +50,9 @@ ORDER BY
   c.customer_id;
 ```
 
-**How to read it:** Example 1: Start with `customers`, `orders`, `order_items`, and `products` in `FROM`/`JOIN`; let `WHERE` remove nonqualifying rows. The final `SELECT` displays the columns written in the final `SELECT`. `ORDER BY` determines presentation order. Before running, predict the row grain, row count, `NULL` positions, and first/last key; afterwards, compare each prediction with the transcript.
+**How to read it:** For each customer, the inner query walks from that customer's orders through `order_items` to `products` and looks for any line whose product is in Electronics. `WHERE o.customer_id = c.customer_id` is the correlation that ties it to the outer row. `EXISTS` needs only one such line, so the joins inside never multiply customers, and `SELECT c.*` prints all seven `customers` columns.
 
-**Expected result/shape:** Example 1 returns one row per the primary/business key of `customers` from `customers`, `orders`, `order_items`, and `products`. Use a direct count or grouped aggregate over those same source relations as the control; check ordering only when this query has an `ORDER BY`, and inspect `NULL` only for columns this example can produce.
+**Expected result/shape:** 432 rows, one per customer, in ID order. The 68 missing customers are the 62 Brazilian ones, who have no orders at all, and six more (13, 52, 299, 364, 390 and 429) whose four orders contain no Electronics item. Written as a plain join with the same filter, the query returns 2,187 rows, one per Electronics line item.
 
 ### Example 2
 
@@ -143,9 +74,9 @@ ORDER BY
   p.product_id;
 ```
 
-**How to read it:** Example 2: Start with `products`, `order_items`, and `orders` in `FROM`/`JOIN`; let `WHERE` remove nonqualifying rows. The final `SELECT` displays `product_id`. `ORDER BY` determines presentation order. Before running, predict the row grain, row count, `NULL` positions, and first/last key; afterwards, compare each prediction with the transcript.
+**How to read it:** This is the `IN` form of a semi-join, and it is not correlated: the inner query lists every `product_id` on a line item from an order placed in the last 30 days without looking at the outer row. `IN` then keeps each product whose ID is somewhere in that list. The `DISTINCT` inside does no harm but changes nothing, because `IN` cannot return a product twice.
 
-**Expected result/shape:** Example 2 returns one row per `product_id` with columns `product_id` from `products`, `order_items`, and `orders`. Use a direct count or grouped aggregate over those same source relations as the control; check ordering only when this query has an `ORDER BY`, and inspect `NULL` only for columns this example can produce.
+**Expected result/shape:** 256 products in our check, all with IDs between 1 and 275, printed by `product_id`. That 30-day window held 209 orders with 642 line items. Because the window is measured from `now()`, expect a slightly different count on your run. Products 276 to 300 can never appear: they have never been sold.
 
 ## Learning objectives
 
@@ -170,62 +101,60 @@ why `DISTINCT` may become necessary in the join form.
 - **Focus:** Use correlated subqueries for row-specific existence or comparison while keeping correlation keys and NULL behavior explicit.
 - **Assumptions:** `EXISTS` tests whether at least one row qualifies and ignores selected values. `NOT EXISTS` remains safe when inner columns can be NULL.
 - **Failure to watch for:** A correlated subquery can run conceptually per outer row; do not use it when a join or pre-aggregation states the grain more clearly.
-- **Review loop:** predict the row grain and NULL/order behavior, run the
-  query, inspect a bounded sample, and reconcile counts or totals before
-  accepting the result.
+- **Review loop:** count the result, then run the opposite test (`NOT EXISTS` for `EXISTS`, or the reverse); the two counts should add up to the whole outer table, 500 customers, 300 products or 4,362 orders.
 
 ## Exercises
 
 Use correlated subqueries for row-specific existence or comparison while keeping correlation keys and NULL behavior explicit.
 
-Attempt each prompt in a scratch SQL file before opening the solution.
-For every result, write its row grain and expected shape first.
+Before writing each query, say in one sentence what the inner query asks about a single outer row, and name the column that ties it to that row.
 
 1. **Query writing:** Return customers who have at least one delivered order.
+   **Your call:** how many of the 500 customers will be left out, and which group must be among them?
    **Progressive hint:** `EXISTS` expresses the yes/no question without multiplying customer rows.
-   **Inputs/evidence:** For sql-09 Exercise 1, read from `customers`, and `orders`. Build the answer toward `customer_id`, and `full_name`; keep `customer_id` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-09 Exercise 1, expected output: One row per qualifying customer. The final columns are `customer_id`, and `full_name`. The final order is `c.customer_id`.
-   **Verify:** For sql-09 Exercise 1, run an anti-check that counts rows where NOT ((EXISTS ( SELECT 1 FROM orders AS o WHERE o.customer_id = c.customer_id AND o.status = 'delivered' ))); require unique `customer_id` where the expected grain is one row per key and confirm the projected `customer_id`, and `full_name` against `customers`, and `orders`. Add one row for which `(EXISTS ( SELECT 1 FROM orders AS o WHERE o.customer_id = c.customer_id AND o.status = 'delivered' ))` is true and one for which it is false; verify only the matching `customer_id` value is returned.
+   **Inputs/evidence:** For sql-09 Exercise 1, keep each of the 500 `customers` rows for which a correlated `EXISTS` finds at least one `orders` row with `status = 'delivered'`; 872 orders are delivered.
+   **Expected result/shape:** For sql-09 Exercise 1, return 431 rows, one per customer with a delivered order, from customer 1 to customer 500; the 62 customers without orders and 7 buyers with no delivered order (39, 169, 234, 299, 364, 429, 494) are missing. The final columns are `customer_id`, and `full_name`. The final order is `c.customer_id`.
+   **Verify:** For sql-09 Exercise 1, confirm 431 equals `SELECT COUNT(DISTINCT customer_id) FROM orders WHERE status = 'delivered'`; a plain `JOIN` on the same condition returns 872 rows because it repeats customers. Inside a rolled-back transaction, set customer 38's 4 delivered orders to `shipped`; the result must drop to 430 rows.
 2. **Query writing:** Return products that have never been sold.
+   **Your call:** Day 04 found unsold products with an outer join. Should this query return the same count?
    **Progressive hint:** `NOT EXISTS` correlates on product ID and is not confused by NULL membership.
-   **Inputs/evidence:** For sql-09 Exercise 2, read from `products`, and `order_items`. Build the answer toward `product_id`, `name`, and `category`; keep `product_id` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-09 Exercise 2, expected output: One row per unsold product. The final columns are `product_id`, `name`, and `category`. The final order is `p.product_id`.
-   **Verify:** For sql-09 Exercise 2, run an anti-check that counts rows where NOT ((NOT EXISTS ( SELECT 1 FROM order_items AS oi WHERE oi.product_id = p.product_id ))); require unique `product_id` where the expected grain is one row per key and confirm the projected `product_id`, `name`, and `category` against `products`, and `order_items`. Add one row for which `(NOT EXISTS ( SELECT 1 FROM order_items AS oi WHERE oi.product_id = p.product_id ))` is true and one for which it is false; verify only the matching `product_id` value is returned.
+   **Inputs/evidence:** For sql-09 Exercise 2, keep each of the 300 `products` rows for which `NOT EXISTS` finds no `order_items` row with the same `product_id`.
+   **Expected result/shape:** For sql-09 Exercise 2, return 25 rows, one per never-sold product, products 276 through 300, from Product 276 (Books) to Product 300 (Books). The final columns are `product_id`, `name`, and `category`. The final order is `p.product_id`.
+   **Verify:** For sql-09 Exercise 2, confirm `NOT IN (SELECT product_id FROM order_items)` and a `LEFT JOIN ... WHERE oi.product_id IS NULL` both return the same 25 products, which is safe here because `order_items.product_id` is `NOT NULL`. Inside a rolled-back transaction, insert one `order_items` row for product 276; the result must drop to 24 rows.
 3. **Query writing:** Return each customer's orders that are above that customer's average order total.
+   **Your call:** customer 1's orders are 240.20, 417.94, 601.73, 1,155.92 and 105.84. Which of them beat that customer's own average?
    **Progressive hint:** Correlate the average to the current order's customer, not to the current order ID.
-   **Inputs/evidence:** For sql-09 Exercise 3, read from `orders`. Build the answer toward `order_id`, `customer_id`, and `total_amount`; keep `order_id` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-09 Exercise 3, expected output: Order rows above their own customer average. The final columns are `order_id`, `customer_id`, and `total_amount`. The final order is `o.customer_id, o.total_amount DESC, o.order_id`.
-   **Verify:** For sql-09 Exercise 3, run an anti-check that counts rows where NOT ((o.total_amount > ( SELECT AVG(peer.total_amount) FROM orders AS peer WHERE peer.customer_id = o.customer_id ))); require unique `order_id` where the expected grain is one row per key and confirm the projected `order_id`, `customer_id`, and `total_amount` against `orders`. Add one row for which `(o.total_amount > ( SELECT AVG(peer.total_amount) FROM orders AS peer WHERE peer.customer_id = o.customer_id ))` is true and one for which it is false; verify only the matching `order_id` value is returned.
+   **Inputs/evidence:** For sql-09 Exercise 3, compare each of the 4,362 `orders` rows with a correlated subquery that averages `total_amount` over the same customer's orders.
+   **Expected result/shape:** For sql-09 Exercise 3, return 2,249 rows, one per order above its own customer's average, covering all 438 buyers; customer 1 contributes orders 4 (1155.92) and 3 (601.73). The final columns are `order_id`, `customer_id`, and `total_amount`. The final order is `o.customer_id, o.total_amount DESC, o.order_id`.
+   **Verify:** For sql-09 Exercise 3, confirm 2,249 distinct `order_id` values and that filtering on `total_amount > AVG(total_amount) OVER (PARTITION BY customer_id)` returns the same 2,249 orders. Comparing with the global average instead, as in sql-08, returns 2,269 rows, so a correlation mistake changes the count.
 4. **Prediction:** Explain and avoid the `NOT IN` plus NULL trap by finding customers without orders using `NOT EXISTS`.
+   **Your call:** if one `NULL` slipped into the list that `NOT IN` compares against, how many customers would come back?
    **Progressive hint:** Correlate on the customer key; a matching row alone determines exclusion.
-   **Inputs/evidence:** For sql-09 Exercise 4, read from `customers`, and `orders`. Build the answer toward `customer_id`, and `full_name`; keep `customer_id` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-09 Exercise 4, expected output: One row per customer with no order. The final columns are `customer_id`, and `full_name`. The final order is `c.customer_id`.
-   **Verify:** For sql-09 Exercise 4, run an anti-check that counts rows where NOT ((NOT EXISTS ( SELECT 1 FROM orders AS o WHERE o.customer_id = c.customer_id ))); require unique `customer_id` where the expected grain is one row per key and confirm the projected `customer_id`, and `full_name` against `customers`, and `orders`. Repeat with `NULL` in `customer_id`, and `full_name` and state whether the row is kept, rejected, or classified.
+   **Inputs/evidence:** For sql-09 Exercise 4, keep each of the 500 `customers` rows for which `NOT EXISTS` finds no matching `orders` row.
+   **Expected result/shape:** For sql-09 Exercise 4, return 62 rows, one per customer with no orders, from customer 8 to customer 496 in steps of 8. The final columns are `customer_id`, and `full_name`. The final order is `c.customer_id`.
+   **Verify:** For sql-09 Exercise 4, confirm the same 62 customers as the sql-06 `EXCEPT` result. Rewrite the filter as `customer_id NOT IN (SELECT customer_id FROM orders UNION ALL SELECT NULL)` and it must return 0 rows, which is why `NOT EXISTS` is used instead of `NOT IN` against a column that can contain `NULL`.
 5. **Debugging:** Return only each customer's most recent order without an arbitrary `LIMIT 1`.
+   **Your call:** 438 customers have orders. How many rows should print?
    **Progressive hint:** Compare to the correlated `MAX(order_date)` and break timestamp ties with the maximum ID at that timestamp.
-   **Inputs/evidence:** For sql-09 Exercise 5, read from `orders`. Build the answer toward `order_id`, `customer_id`, and `order_date`; keep `order_id` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-09 Exercise 5, expected output: At most one deterministic order per customer. The final columns are `order_id`, `customer_id`, and `order_date`. The final order is `o.customer_id`.
-   **Verify:** For sql-09 Exercise 5, run an anti-check that counts rows where NOT ((o.order_id = ( SELECT candidate.order_id FROM orders AS candidate WHERE candidate.customer_id = o.customer_id ORDER BY candidate.order_date DESC, candidate.order_id DESC LIMIT 1 ))); require unique `order_id` where the expected grain is one row per key and confirm the projected `order_id`, `customer_id`, and `order_date` against `orders`. Add one row for which `(o.order_id = ( SELECT candidate.order_id FROM orders AS candidate WHERE candidate.customer_id = o.customer_id ORDER BY candidate.order_date DESC, candidate.order_id DESC LIMIT 1 ))` is true and one for which it is false; verify only the matching `order_id` value is returned.
+   **Inputs/evidence:** For sql-09 Exercise 5, keep each `orders` row whose `order_id` equals a correlated subquery that picks the same customer's order by `order_date DESC, order_id DESC` with `LIMIT 1`.
+   **Expected result/shape:** For sql-09 Exercise 5, return 438 rows, one latest order per buyer, starting with order 5 for customer 1 and ending with order 4362 for customer 500. The final columns are `order_id`, `customer_id`, and `order_date`. The final order is `o.customer_id`.
+   **Verify:** For sql-09 Exercise 5, confirm 438 distinct `customer_id` values and that `DISTINCT ON (customer_id)` with the same ordering returns the same 438 orders. Inside a rolled-back transaction, insert a new order for customer 1 with the default `order_date` of `now()`; customer 1's row must switch from order 5 to the new order.
 6. **Extension:** Return customers for whom every order has at least one payment, excluding customers with no orders.
+   **Your call:** none of the 873 placed orders has a payment. What order history would a customer need in order to qualify?
    **Progressive hint:** Require an order to exist, then prove no order lacks a payment using double `NOT EXISTS`.
-   **Inputs/evidence:** For sql-09 Exercise 6, read from `customers`, `orders`, and `payments`. Build the answer toward `customer_id`, and `full_name`; keep `customer_id` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-09 Exercise 6, expected output: One row per customer satisfying the universal condition. The final columns are `customer_id`, and `full_name`. The final order is `c.customer_id`.
-   **Verify:** For sql-09 Exercise 6, run an anti-check that counts rows where NOT ((EXISTS ( SELECT 1 FROM orders AS any_order WHERE any_order.customer_id = c.customer_id ) AND NOT EXISTS ( SELECT 1 FROM orders AS o WHERE o.customer_id = c.customer_id AND NOT EXISTS ( SELECT 1 FROM payments AS p WHERE p.order_id = o.order_)); require unique `customer_id` where the expected grain is one row per key and confirm the projected `customer_id`, and `full_name` against `customers`, `orders`, and `payments`. Add one row for which `(EXISTS ( SELECT 1 FROM orders AS any_order WHERE any_order.customer_id = c.customer_id ) AND NOT EXISTS ( SELECT 1 FROM orders AS o WHERE o.customer_id = c.customer_id AND NOT EXISTS ( SELECT 1 FROM payments AS p WHERE p.order_id = o.order_)` is true and one for which it is false; verify only the matching `customer_id` value is returned.
+   **Inputs/evidence:** For sql-09 Exercise 6, keep each `customers` row that has at least one order and no order lacking a `payments` row, using `EXISTS` plus a doubly nested `NOT EXISTS`; 873 of the 4,362 orders have no payment.
+   **Expected result/shape:** For sql-09 Exercise 6, return 7 rows, one per customer whose every order is paid: customers 26, 91, 156, 221, 286, 351, and 481, each with 4 orders. The final columns are `customer_id`, and `full_name`. The final order is `c.customer_id`.
+   **Verify:** For sql-09 Exercise 6, confirm each of the 7 customers has 0 orders without a payment. Dropping the `EXISTS` guard must return 69 rows, because the 62 customers with no orders satisfy the universal condition vacuously. Inside a rolled-back transaction, delete the payments for order 223; customer 26 must leave the result, leaving 6 rows.
 
 ## Common mistakes and how to recover
 
-- **Lesson-specific semantic mistake:** A correlated subquery can run conceptually per outer row; do not use it when a join or pre-aggregation states the grain more clearly.
-- **Unexpected row count:** display keys before aggregates, count rows after
-  each join/filter stage, and find the first stage whose grain differs from the
-  contract. Do not hide fanout with `DISTINCT`.
-- **Unexpected `NULL` or missing row:** decide whether the fact is unknown,
-  inapplicable, zero, or absent before using `COALESCE`; inspect outer-join
-  predicate placement and empty-input aggregate behavior.
-- **Unstable top/first/last output:** add `ORDER BY` with a unique final
-  tie-breaker before `LIMIT` or order-sensitive windows/aggregates.
-- **`psql` stops on an error:** fix the first error shown by
-  `ON_ERROR_STOP`, restore the declared transaction/setup state, and rerun the
-  complete file. A later successful statement does not validate a partial run.
+- **Correlating on the wrong column:** in Exercise 3, writing `peer.order_id = o.order_id` makes each order's "average" its own amount. No order is greater than itself, so the query returns 0 rows and raises no error.
+- **Trusting `NOT IN` with a list that can hold `NULL`:** `customer_id NOT IN (SELECT customer_id FROM orders)` gives 62 rows only because `orders.customer_id` is declared `NOT NULL`. Add one `NULL` to the list, for example with `UNION ALL SELECT NULL`, and it returns 0 rows, since a comparison with `NULL` is unknown rather than false. `NOT EXISTS` returns 62 either way.
+- **Forgetting the empty case in an "every" question:** Exercise 6 without its first `EXISTS` returns 69 customers instead of 7. The extra 62 have no orders, so "none of their orders lacks a payment" is true for them by default.
+- **Joining when you meant to test:** a join to `orders` repeats each customer once per matching order, 872 rows for delivered orders instead of 431 customers. Patching that with `DISTINCT` hides the cause; `EXISTS` asks the question directly.
+- **A per-row subquery in the `SELECT` list:** harmless for a few hundred customers, but on a big table it means one inner lookup for every output row. Aggregating once and joining the result is usually clearer and faster.
+
+When `psql` halts partway, the study guide's [recovery steps](../../STUDY-GUIDE.md#recover-from-common-failures) cover the usual fixes.
 
 ## Self-check
 
@@ -261,9 +190,7 @@ Further reading
 
 ## Ask an AI tutor about this lesson
 
-An AI tutor is optional; the guide, learner SQL, PostgreSQL, and expected checks are
-enough to complete the lesson offline. If you want a patient tutor, copy this
-prompt after opening the repository in the AI tutor:
+You can finish this lesson without a tutor. If you want one, ask it to describe a customer with three orders and have you say, before anything runs, whether `EXISTS`, a join and `NOT IN` would each return that customer once, several times or not at all. Setup and ground rules are in the study guide's [tutor section](../../STUDY-GUIDE.md#use-an-ai-tutor-optional).
 
 ```text
 Tutor me through sql-09: Correlated Subqueries and EXISTS.

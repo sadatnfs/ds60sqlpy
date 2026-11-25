@@ -1,67 +1,23 @@
 # Day 14 solutions: Numeric Types, Casting, and Precision
 
-
 <!-- beginner-solution-enrichment -->
 ## How to study and run this solution
 
-Open this explanation only after making an honest attempt. The executable
-companion runs solely against the disposable `advanced_sql_training` database:
+All six answers turn on two questions: what type each expression has, and where the rounding happens. Exercises 1 and 5 guard a denominator, Exercise 2 checks text before casting it, Exercises 3 and 6 decide where `ROUND` goes, and Exercise 4 shows what happens when nothing is cast. Attempt the prompts, then run:
 
 ```bash
-# Linux, macOS, or Windows through WSL 2, from the repository root
 psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
   -f sql/postgres-60day/solutions/day14_solutions.sql
 ```
 
-`psql` prints each result/command tag in the terminal. Stop at the first
-unexpected `ERROR`; later output cannot repair an earlier failed invariant.
-Compare your own SQL, row grain, column names, row counts, `NULL` policy, and
-ordering with the explanation before comparing syntax.
-
-## Clause-by-clause reading map
-
-The lesson's main concepts are Exact numeric, Scale, Type coercion. Its worked-model focus is:
-Evaluate `1 / 3`, `1::numeric / 3`, and `ROUND(1::numeric / NULLIF(3, 0), 2)`. Explain the result type at each step and why guarding the denominator belongs before rounding.
-
-- Start at `FROM`/`JOIN` and state the intermediate row grain. Inspect join keys
-  before adding aggregates; a one-to-many join is allowed to multiply rows only
-  when the later contract accounts for it.
-- Apply `WHERE` to input rows, `GROUP BY` to form buckets, and `HAVING` to
-  completed groups. Window functions run over the surviving relation and
-  normally preserve its row count.
-- Read the `SELECT` list as the public result contract: keys establish grain,
-  measures state calculations, and aliases explain meaning. `ORDER BY` is the
-  only output-order guarantee; add a unique tie-breaker before `LIMIT`.
-- Trace every common table expression (CTE) as a temporary named relation.
-  Execute or inspect one stage at a time while debugging, but compare the final
-  result with an independent control rather than trusting stage names.
-- Keep SQL `NULL` as “missing/unknown/not applicable” until the metric contract
-  chooses another representation. Guard division with `NULLIF`; disclose
-  exclusions and distinguish zero from no row.
-- For DDL/DML, a command tag proves only that PostgreSQL accepted a statement.
-  Catalog checks, negative cases, row-count reconciliation, and the declared
-  transaction boundary prove behavior and cleanup.
-
-The exact final queries are not the only valid syntax. A join, subquery, CTE,
-window, or conditional aggregate can be an alternative when it preserves the
-same grain, `NULL` semantics, deterministic ordering, and safety. Prefer the
-form whose intermediate relations a reviewer can verify; optimize only after
-correctness is established with evidence.
-
-These answers align one-for-one with [day14_numeric_and_casting.sql](../day14_numeric_and_casting.sql).
-Run only against the disposable `advanced_sql_training` database.
-The executable companion wraps every answer in `BEGIN`/`ROLLBACK`.
-The snippets below assume the lesson's
-`SET search_path TO training, public;` statement. Run the complete
-executable companion when you want a self-contained check.
+Row counts to expect: 300, 5, 4,362, 1, 1 and 1. Every query only reads, the file closes each block with `ROLLBACK`, and the excerpts leave out the `SET search_path` line. Exercise numbers follow [the learner file](../day14_numeric_and_casting.sql); to compare your answer with these without copying, see the study guide's [solution-comparison tips](../../STUDY-GUIDE.md#read-a-solution).
 
 ## Reading contract
 
 - **Focus:** Choose numeric types and casts from domain precision, validate text before casting, and postpone rounding until presentation.
 - **Assumptions:** Money is exact `numeric`; division casts denominators to numeric where fractions matter. NULL/zero denominators return NULL through `NULLIF`.
 - **Primary pitfall:** Integer division truncates, unsafe text casts abort the statement, and repeated early rounding introduces avoidable error.
-- **Safety:** all writes are bounded and rollback-protected; read-only
-  queries still use deterministic ordering whenever row order is claimed.
+- **Safety:** read-only; all six statements are `SELECT`s, and each block still ends in `ROLLBACK`.
 
 ## Exercise 1: Query writing
 
@@ -71,10 +27,10 @@ executable companion when you want a self-contained check.
 
 **Clause-by-clause reading:**
 
-- `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
-- `FROM`: establishes the starting relation and therefore the initial row grain.
-- `NULLIF`: turns a prohibited denominator into NULL so division reports unknown instead of raising an error.
-- `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
+- `p.price - p.cost AS margin_amount`: both columns are `numeric`, so the difference is exact to the cent, 24.80 - 8.68 = 16.12 for product 40.
+- `(p.price - p.cost) / NULLIF(p.price, 0)`: numeric division. A price of 0 would make the divisor `NULL` and the rate `NULL` instead of raising `division by zero`.
+- `ROUND(..., 4)`: four decimal places, so 0.6500 reads as 65%.
+- `ORDER BY margin_rate DESC NULLS LAST, p.product_id`: highest rate first, any `NULL` rate at the bottom, and the product ID to order equal rates.
 
 ```sql
 SELECT
@@ -92,19 +48,15 @@ ORDER BY
 
 **Expected shape:** One row per product.
 
-Check the result at the stated grain. An alternative formulation is
-valid only if it preserves the same NULL, ordering, time, money, and
-cardinality contract.
-
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-14 Exercise 1, read from `products`. Build the answer toward `product_id`, `price`, `cost`, `margin_amount`, and `margin_rate`; keep `product_id` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-14 Exercise 1, expected output: One row per product. The final columns are `product_id`, `price`, `cost`, `margin_amount`, and `margin_rate`. The final order is `margin_rate DESC NULLS LAST, p.product_id`.
-- **Independent verification:** For sql-14 Exercise 1, reselect the returned keys directly from the source; require unique `product_id` where the expected grain is one row per key and confirm the projected `product_id`, `price`, `cost`, `margin_amount`, and `margin_rate` against `products`. Repeat with `NULL` in `product_id`, and `price` and state whether the row is kept, rejected, or classified.
-- **Intermediate relation check:** For sql-14 Exercise 1, check `margin_rate DESC NULLS LAST, p.product_id` before applying the row cap.
-- **Clause check:** For sql-14 Exercise 1, the solution actually uses `FROM`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `products`, preserve one row per `product_id`, and finish with `product_id`, `price`, `cost`, `margin_amount`, and `margin_rate` ordered by `margin_rate DESC NULLS LAST, p.product_id`.
-- **Alternative/trade-off:** For sql-14 Exercise 1, the chosen form is justified by this lesson-specific rationale: Keep exact numeric arithmetic and guard the denominator with `NULLIF`. Evaluate another form against the concrete expected result (One row per product) and the verification above.
-- **Edge case:** Repeat with `NULL` in `product_id`, and `price` and state whether the row is kept, rejected, or classified.
+- **Inputs/evidence:** For sql-14 Exercise 1, compute `price - cost` and `ROUND((price - cost) / NULLIF(price, 0), 4)` for each of the 300 `products`; no fixture price is 0 or `NULL`.
+- **Expected result/shape:** For sql-14 Exercise 1, return 300 rows, one per product, led by seven products tied at a `margin_rate` of 0.6500 (40, 80, 120, 160, 200, 240, 280, in `product_id` order) and ending with product 83 at 0.2599. The final columns are `product_id`, `price`, `cost`, `margin_amount`, and `margin_rate`. The final order is `margin_rate DESC NULLS LAST, p.product_id`.
+- **Independent verification:** For sql-14 Exercise 1, confirm 300 distinct `product_id` values and that product 40 shows 24.80 - 8.68 = 16.12 and 16.12 / 24.80 = 0.6500. Inside a rolled-back transaction, set product 40's price to 0; the query must not raise a division error, product 40 must move to row 300 with `margin_amount` -8.68 and a `NULL` `margin_rate`, and product 80 must lead.
+- **What prints:** 300 rows. No product has a zero price or a missing cost, so no rate is `NULL`; the guard protects against data that might arrive later.
+- **Top and bottom:** seven products share the top rate of 0.6500, starting with product 40 (Beauty, 24.80 against a cost of 8.68), then 80 and 120. The lowest is product 83 (Sports, 40.71 against 30.13) at 0.2599. The mean rate is 0.4530.
+- **Rounding merges rates:** the 300 products have 274 distinct raw rates but only 116 after rounding to four places. Products 157, 197, 237 and 277 all print 0.6400 although their raw rates run from 0.640035 to 0.639968, so inside such a group `p.product_id`, not the true rate, sets the order.
+- **Percent display:** for a report showing 65.00, compute `ROUND(100 * (p.price - p.cost) / NULLIF(p.price, 0), 2)`. Rounding to two places first and then multiplying turns product 83's 0.2599 into 26%.
 
 ## Exercise 2: Query writing
 
@@ -114,11 +66,10 @@ cardinality contract.
 
 **Clause-by-clause reading:**
 
-- `VALUES`: constructs a small relation explicitly, which makes examples and expected cardinality inspectable.
-- `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
-- `FROM`: establishes the starting relation and therefore the initial row grain.
-- `CASE`: encodes ordered business conditions; the first true branch wins and `ELSE` defines the remainder.
-- pattern predicate: matches text according to the chosen operator; escaping and case sensitivity are intentional semantics.
+- `FROM (VALUES ('42'), (' 3.14 '), ...) AS sample (raw_value)`: builds a five-row table inline, with one `text` column named `raw_value`.
+- `btrim(raw_value)`: removes leading and trailing spaces, so `' 3.14 '` is tested and cast as `'3.14'`.
+- `~ '^[+-]?([0-9]+([.][0-9]*)?|[.][0-9]+)$'`: an optional sign, then digits with an optional decimal part, or a point followed by digits. `^` and `$` force the whole string to match.
+- `CASE WHEN ... THEN btrim(raw_value)::numeric ELSE NULL END`: the cast runs only on rows that passed the test.
 
 ```sql
 SELECT
@@ -138,19 +89,16 @@ FROM (
 
 **Expected shape:** One row per sample text.
 
-Check the result at the stated grain. An alternative formulation is
-valid only if it preserves the same NULL, ordering, time, money, and
-cardinality contract.
-
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-14 Exercise 2, read from the inline `VALUES` fixture. Build the answer toward `raw_value`, and `parsed_numeric`; keep `parsed_numeric` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-14 Exercise 2, expected output: One row per sample text. The final columns are `raw_value`, and `parsed_numeric`.
-- **Independent verification:** For sql-14 Exercise 2, reselect the returned keys directly from the source; require unique `parsed_numeric` where the expected grain is one row per key and confirm the projected `raw_value`, and `parsed_numeric` against the inline `VALUES` fixture. Add one source row with a new `parsed_numeric`; verify the result gains exactly one row carrying that `parsed_numeric` value.
-- **Intermediate relation check:** For sql-14 Exercise 2, select `parsed_numeric` from the inline `VALUES` fixture before adding derived columns.
-- **Clause check:** For sql-14 Exercise 2, the solution actually uses `FROM`, and `SELECT`. Read only those operations: begin at the inline `VALUES` fixture, preserve one row per `parsed_numeric`, and finish with `raw_value`, and `parsed_numeric`.
-- **Alternative/trade-off:** For sql-14 Exercise 2, the chosen form is justified by this lesson-specific rationale: Validate with a regex before casting; otherwise return NULL. Evaluate another form against the concrete expected result (One row per sample text) and the verification above.
-- **Edge case:** Add one source row with a new `parsed_numeric`; verify the result gains exactly one row carrying that `parsed_numeric` value.
+- **Inputs/evidence:** For sql-14 Exercise 2, test five inline `VALUES` strings (`'42'`, `' 3.14 '`, `'-0.5'`, `'many'`, and the empty string) against `'^[+-]?([0-9]+([.][0-9]*)?|[.][0-9]+)$'` after `btrim`, casting to `numeric` only when the pattern matches.
+- **Expected result/shape:** For sql-14 Exercise 2, return 5 rows in `VALUES` order: 42, 3.14, -0.5, then `NULL` for `many` and `NULL` for the empty string; the query has no `ORDER BY`. The final columns are `raw_value`, and `parsed_numeric`.
+- **Independent verification:** For sql-14 Exercise 2, confirm 5 rows with exactly 2 `NULL` values in `parsed_numeric`. Run `SELECT 'many'::numeric` and `SELECT ''::numeric` on their own; both must fail with `invalid input syntax for type numeric`, which the guard avoids. Note that `'1e3'::numeric` succeeds (1000) but the pattern rejects it, so the guard is stricter than the cast.
+- **What prints:** five rows: 42, 3.14 and -0.5 are parsed, while `'many'` and the empty string come back `NULL`.
+- **Why the `CASE` matters:** `'many'::numeric` on its own raises `invalid input syntax for type numeric: "many"` and stops the statement, so one bad value would hide the three good ones.
+- **Stricter than PostgreSQL:** `'1e3'` and `'NaN'` are valid numeric input (1000 and NaN) but fail this pattern and come back `NULL`, as does `'1,234.50'`. The pattern states what this report accepts; `to_number('1,234.50', '9,999.99')` would read the last one as 1234.50.
+- **Built-in test:** on PostgreSQL 16 and later, `pg_input_is_valid(btrim(raw_value), 'numeric')` checks castability without a pattern, but it accepts `'1e3'` and `'NaN'`.
+- **Empty versus unreadable:** `''` and `'many'` both end up `NULL`. If a report must tell a blank field from a bad one, add a separate flag column.
 
 ## Exercise 3: Query writing
 
@@ -160,10 +108,10 @@ cardinality contract.
 
 **Clause-by-clause reading:**
 
-- `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
-- `FROM`: establishes the starting relation and therefore the initial row grain.
-- `GROUP BY`: collapses input rows to the listed key grain; every non-aggregated selected value must belong to that grain.
-- `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
+- `oi.unit_price * oi.quantity * (1 - oi.discount)`: one line's net revenue. `numeric` times `integer` times `numeric` stays `numeric` with four decimals, for example 27.76 * 3 * 1.00 = 83.2800.
+- `SUM(...)`: adds an order's lines at full precision.
+- `ROUND(..., 2)`: rounds once per order, after the sum.
+- `GROUP BY oi.order_id` and `ORDER BY oi.order_id`: one row per order, lowest ID first.
 
 ```sql
 SELECT
@@ -179,19 +127,17 @@ ORDER BY
 
 **Expected shape:** One row per order.
 
-Check the result at the stated grain. An alternative formulation is
-valid only if it preserves the same NULL, ordering, time, money, and
-cardinality contract.
-
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-14 Exercise 3, read from `order_items`. Build the answer toward `order_id`, and `net_order_revenue`; keep `order_id` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-14 Exercise 3, expected output: One row per order. The final columns are `order_id`, and `net_order_revenue`. The final order is `oi.order_id`.
-- **Independent verification:** For sql-14 Exercise 3, independently aggregate `order_items` by `order_id`; require one output row for every distinct `order_id` tuple and compare `net_order_revenue` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `net_order_revenue` for the existing `order_id` tuple and verify the new tuple appears exactly once.
-- **Intermediate relation check:** For sql-14 Exercise 3, confirm the groups are `order_id`; then check `oi.order_id` before applying the row cap.
-- **Clause check:** For sql-14 Exercise 3, the solution actually uses `FROM`, `GROUP BY`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `order_items`, preserve one row per `order_id`, and finish with `order_id`, and `net_order_revenue` ordered by `oi.order_id`.
-- **Alternative/trade-off:** For sql-14 Exercise 3, the chosen form is justified by this lesson-specific rationale: Aggregate exact line expressions first; round the final display value. Evaluate another form against the concrete expected result (One row per order) and the verification above.
-- **Edge case:** Add one row to an existing group and one row for a new group; recompute `net_order_revenue` for the existing `order_id` tuple and verify the new tuple appears exactly once.
+- **Inputs/evidence:** For sql-14 Exercise 3, sum `unit_price * quantity * (1 - discount)` over the 13,085 `order_items` rows per `order_id` and round each order total to 2 places.
+- **Expected result/shape:** For sql-14 Exercise 3, return 4,362 rows, one per order, starting with order 1 at 240.20 (two item lines) and order 2 at 417.94. The final columns are `order_id`, and `net_order_revenue`. The final order is `oi.order_id`.
+- **Independent verification:** For sql-14 Exercise 3, confirm 4,362 distinct `order_id` values, matching `SELECT COUNT(DISTINCT order_id) FROM order_items`, and 0 rows where `net_order_revenue` differs from `orders.total_amount` after joining on `order_id`; the returned values add up to 2355646.89, the same as `SELECT SUM(total_amount) FROM orders`.
+- **What prints:** 4,362 rows, one per order. Orders have one to five lines, with 872 or 873 orders at each size.
+- **First rows:** order 1 is 83.28 + 156.92 = 240.20, then order 2 at 417.94 and order 3 at 601.73, which are customer 1's first three order totals.
+- **Matches the stored totals:** joined to `orders`, all 4,362 values equal `total_amount` to the cent, so the fixture's totals follow the same rule: add the exact lines, then round once per order.
+- **A discounted line:** order 2's third line is 56.99 * 1 * 0.95 = 54.1405. Added exactly to 136.20 and 227.60 it gives 417.9405, which rounds to 417.94. Rounding every line before adding would shift the cents of 156 orders in this table.
+- **Discounts:** 9,517 of the 13,085 lines carry no discount, 2,380 take 0.05 and 1,188 take 0.15.
+- **A third grand total:** these per-order values add up to 2,355,646.89. Exercise 6 rounds per line and gets 2,355,648.13, or once overall and gets 2,355,647.12. The grain at which you round changes the total.
 
 ## Exercise 4: Prediction
 
@@ -201,7 +147,9 @@ cardinality contract.
 
 **Clause-by-clause reading:**
 
-- `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
+- `1 / 4 AS integer_division`: two integer literals, so integer division drops the fraction and returns 0.
+- `1::numeric / 4 AS numeric_division`: casting one side is enough; the 4 is promoted, the division is numeric and prints 0.25000000000000000000.
+- No `FROM`: both columns are constant expressions, so the query returns a single row.
 
 ```sql
 SELECT
@@ -211,19 +159,16 @@ SELECT
 
 **Expected shape:** One row showing 0 and 0.25.
 
-Check the result at the stated grain. An alternative formulation is
-valid only if it preserves the same NULL, ordering, time, money, and
-cardinality contract.
-
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-14 Exercise 4, read from `orders`, `order_items`, and `products`. Compute `integer_division`, and `numeric_division` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.
-- **Expected result/shape:** For sql-14 Exercise 4, expected output: One row showing 0 and 0.25. The final columns are `integer_division`, and `numeric_division`.
-- **Independent verification:** For sql-14 Exercise 4, evaluate each of `integer_division`, and `numeric_division` in a separate control `SELECT` over `orders`, `order_items`, and `products`; require one final row and compare every value. Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
-- **Intermediate relation check:** For sql-14 Exercise 4, select `order_id` from `orders`, `order_items`, and `products` before adding derived columns.
-- **Clause check:** For sql-14 Exercise 4, the solution actually uses `SELECT`. Read only those operations: begin at `orders`, `order_items`, and `products`, preserve exactly one summary row, and finish with `integer_division`, and `numeric_division`.
-- **Alternative/trade-off:** For sql-14 Exercise 4, the chosen form is justified by this lesson-specific rationale: At least one operand must be numeric to preserve the fraction. Evaluate another form against the concrete expected result (One row showing 0 and 0.25) and the verification above.
-- **Edge case:** Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
+- **Inputs/evidence:** For sql-14 Exercise 4, evaluate the two constant expressions `1 / 4` and `1::numeric / 4` with no `FROM` clause; no table is read.
+- **Expected result/shape:** For sql-14 Exercise 4, return one row: `integer_division` 0 and `numeric_division` 0.25000000000000000000. The final columns are `integer_division`, and `numeric_division`.
+- **Independent verification:** For sql-14 Exercise 4, confirm one row with 0 and 0.25000000000000000000. Run `SELECT 7 / 2, -7 / 2, 1 / 4.0` and expect 3, -3, and 0.25000000000000000000, which shows integer division truncates toward zero; `SELECT 1 / 0` must fail with `division by zero`.
+- **What prints:** one row with 0 and 0.25000000000000000000. `pg_typeof` reports `integer` and `numeric`.
+- **No table involved:** without a `FROM`, the result is one row whatever `orders`, `order_items` and `products` contain; adding rows to them leaves the output unchanged.
+- **Toward zero, not down:** `7 / 2` is 3 and `-7 / 2` is -3. Integer division truncates toward zero rather than taking the floor.
+- **Twenty decimals:** numeric division of small values returns scale 20, for both 1/4 and 1/3. Wrap it in `ROUND` to choose the display scale.
+- **`1.0 / 4`:** a literal with a decimal point is already `numeric`, so it gives the same 0.25 without a cast.
 
 ## Exercise 5: Debugging
 
@@ -233,9 +178,10 @@ cardinality contract.
 
 **Clause-by-clause reading:**
 
-- `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
-- `FROM`: establishes the starting relation and therefore the initial row grain.
-- `NULLIF`: turns a prohibited denominator into NULL so division reports unknown instead of raising an error.
+- `SUM(p.amount)`: 1,831,900.81 across all 3,836 payment rows.
+- `COUNT(DISTINCT p.order_id)`: 3,489 orders; 3,142 were paid in one payment and 347 in two.
+- `NULLIF(..., 0)`: an empty `payments` table gives a `NULL` average instead of an error.
+- `ROUND(..., 2)`: applied once, to the final ratio.
 
 ```sql
 SELECT
@@ -246,19 +192,15 @@ FROM
 
 **Expected shape:** Exactly one summary row.
 
-Check the result at the stated grain. An alternative formulation is
-valid only if it preserves the same NULL, ordering, time, money, and
-cardinality contract.
-
 ### Reasoning and verification
 
 - **Inputs/evidence:** For sql-14 Exercise 5, read from `payments` and divide the total paid amount by the number of distinct paid orders, `SUM(amount) / NULLIF(COUNT(DISTINCT order_id), 0)`, rounded to 2 places.
-- **Expected result/shape:** For sql-14 Exercise 5, expected output: Exactly one summary row. The final columns are `average_paid_amount_per_order`.
+- **Expected result/shape:** For sql-14 Exercise 5, return one row, `average_paid_amount_per_order` 525.05. The final columns are `average_paid_amount_per_order`.
 - **Independent verification:** For sql-14 Exercise 5, confirm one row with 525.05, which is 1831900.81 divided by 3489 distinct paid orders; compare it with `ROUND(AVG(amount), 2)` (477.55), which divides by the 3836 payment rows instead.
-- **Intermediate relation check:** For sql-14 Exercise 5, compute `COUNT(*)` and `COUNT(DISTINCT order_id)` from `payments` first; a per-order average needs the distinct count as its denominator.
-- **Clause check:** For sql-14 Exercise 5, the solution actually uses `FROM`, and `SELECT`. Read only those operations: begin at `payments`, preserve exactly one summary row, and finish with `average_paid_amount_per_order`.
-- **Alternative/trade-off:** For sql-14 Exercise 5, the chosen form is justified by this lesson-specific rationale: Aggregate payment amount and count distinct order IDs at one common scope. Evaluate another form against the concrete expected result (Exactly one summary row) and the verification above.
-- **Edge case:** `NULLIF(COUNT(DISTINCT order_id), 0)` turns an empty `payments` table into a NULL average instead of a division-by-zero error.
+- **What prints:** one row, 525.05.
+- **The bug it fixes:** order 10 was paid as 71.72 + 71.71. `AVG(amount)` counts it twice, which is how 3,836 rows produce 477.55 instead of 525.05.
+- **Unpaid orders:** 873 orders have no payment row and stay out of the denominator. The question asks per paid order, so that is right; an average over all orders would start from `orders` with a `LEFT JOIN`.
+- **Why no cast is needed:** `COUNT` returns `bigint`, but `SUM(amount)` is `numeric`, so the division keeps its fraction. Dividing two counts would not.
 
 ## Exercise 6: Extension
 
@@ -268,8 +210,9 @@ cardinality contract.
 
 **Clause-by-clause reading:**
 
-- `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
-- `FROM`: establishes the starting relation and therefore the initial row grain.
+- `SUM(ROUND(line, 2)) AS sum_of_rounded_lines`: rounds each of the 13,085 lines to the cent, then adds.
+- `ROUND(SUM(line), 2) AS rounded_exact_total`: adds the exact line values, then rounds once.
+- The third column repeats both expressions and subtracts, because a `SELECT` list cannot refer to its own aliases.
 
 ```sql
 SELECT
@@ -282,24 +225,20 @@ FROM
 
 **Expected shape:** One row with two totals and their signed difference.
 
-Check the result at the stated grain. An alternative formulation is
-valid only if it preserves the same NULL, ordering, time, money, and
-cardinality contract.
-
 ### Reasoning and verification
 
 - **Inputs/evidence:** For sql-14 Exercise 6, read from `order_items` and compare the sum of line totals rounded per line, `SUM(ROUND(unit_price * quantity * (1 - discount), 2))`, with the exact sum rounded once, `ROUND(SUM(unit_price * quantity * (1 - discount)), 2)`.
-- **Expected result/shape:** For sql-14 Exercise 6, expected output: One row with two totals and their signed difference. The final columns are `sum_of_rounded_lines`, `rounded_exact_total`, and `rounding_difference`.
+- **Expected result/shape:** For sql-14 Exercise 6, return one row: `sum_of_rounded_lines` 2355648.13, `rounded_exact_total` 2355647.12, and `rounding_difference` 1.01. The final columns are `sum_of_rounded_lines`, `rounded_exact_total`, and `rounding_difference`.
 - **Independent verification:** For sql-14 Exercise 6, confirm one row with 2355648.13, 2355647.12, and a `rounding_difference` of 1.01; the difference is the per-line rounding accumulated over 13085 lines, so a report must state which rounding rule it uses.
-- **Intermediate relation check:** For sql-14 Exercise 6, compute both totals in separate `SELECT` statements first; round inside the `SUM` for one and outside it for the other.
-- **Clause check:** For sql-14 Exercise 6, the solution actually uses `FROM`, and `SELECT`. Read only those operations: begin at `order_items`, preserve exactly one summary row, and finish with `sum_of_rounded_lines`, `rounded_exact_total`, and `rounding_difference`.
-- **Alternative/trade-off:** For sql-14 Exercise 6, the chosen form is justified by this lesson-specific rationale: This diagnostic makes the consequence of early rounding visible. Evaluate another form against the concrete expected result (One row with two totals and their signed difference) and the verification above.
-- **Edge case:** Rounding each line first can move each line by up to half a cent in either direction, so over 13085 lines a difference of about one dollar is expected, not an error.
+- **What prints:** one row: 2,355,648.13, 2,355,647.12 and a difference of 1.01.
+- **The exact figure:** the unrounded sum is 2,355,647.1235, so rounding once lands closest to it. Rounding each line drifts up by about a dollar.
+- **Per-order rounding:** Exercise 3 rounds per order and its values add up to 2,355,646.89, the sum of `orders.total_amount`. Three rounding grains give three totals within 1.24 of each other.
+- **Writing it once:** a CTE that computes the two totals and an outer `SELECT` that subtracts them avoids typing the line formula four times.
 
 ## Final self-check
 
-- Can you explain the logical grain before and after every aggregation?
-- Are missing values preserved or converted only by an explicit rule?
-- Does every ordered result have a deterministic final tie-breaker?
-- Are money and time assumptions visible beside the calculation?
-- Does the complete executable solution finish with `ROLLBACK`?
+- Why does `cast(total_amount AS int)` never differ from `round(total_amount, 0)` in Example 1?
+- What does `1 / 4` return, and what is the smallest change that makes it 0.25?
+- Which of the five strings in Exercise 2 would abort a plain `::numeric` cast?
+- Why does `AVG(amount)` give 477.55 when the average per paid order is 525.05?
+- Which total from Exercise 6 would you publish, and how would you explain the 1.01 gap?

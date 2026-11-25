@@ -194,9 +194,17 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cuda/python/guides/cuda-065.md</code></p>
     </header>
     <article class="document"><h2 id="cuda-065-which-processor-ran-this-line">cuda-065: Which processor ran this line?<a class="heading-anchor" href="#cuda-065-which-processor-ran-this-line" aria-label="Link to this section">#</a></h2>
-<p><strong>Route:</strong> CUDA Python and machine learning. <strong>Stage:</strong> beginner. <strong>Prerequisites:</strong> <code>cuda-003</code>, <code>cuda-005</code>. Allow several sessions when the hardware experiment is new; the chapter is not a deadline.</p>
-<h3 id="what-you-will-be-able-to-explain">What you will be able to explain<a class="heading-anchor" href="#what-you-will-be-able-to-explain" aria-label="Link to this section">#</a></h3>
-<p>By the end, you can <strong>trace the five events</strong>, <strong>find the hidden transfer in scalar printing</strong>, and <strong>explain how a CPU fallback must be labeled</strong> with evidence. Start with the two worked cases, then use the editable CPU model to make the quantities concrete.</p>
+<p><strong>Route:</strong> CUDA Python and machine learning. <strong>Stage:</strong> beginner. <strong>Prerequisites:</strong> <code>cuda-003</code>, <code>cuda-005</code>.</p>
+<p>Pacing, evidence labels and platform rules: <a href="../../STUDY-GUIDE.md.html">CUDA study guide</a>.</p>
+<h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
+<ul>
+<li>Trace the five events.</li>
+<li>Explain why import is insufficient.</li>
+<li>Change the input to an empty list.</li>
+<li>Find the hidden transfer in scalar printing.</li>
+<li>Design a residency ledger.</li>
+<li>Explain how a CPU fallback must be labeled.</li>
+</ul>
 <h3 id="mechanism-and-vocabulary">Mechanism and vocabulary<a class="heading-anchor" href="#mechanism-and-vocabulary" aria-label="Link to this section">#</a></h3>
 <p>Python is a host language in this lesson: its interpreter evaluates names, calls library functions and schedules work. A NumPy array owns CPU-accessible storage. A CuPy array normally owns device storage while its Python object keeps shape, dtype and ownership information on the host. The statement that creates a result may return before its GPU kernel completes. Printing a scalar can force a transfer and a wait, so observation can change the schedule you are observing.</p>
 <p>Use four separate questions: which process issued the operation, which allocation contains its inputs, which processor executes the arithmetic, and which event proves the output is ready. A package import answers none of the last three. A GPU-enabled framework can also place unsupported or deliberately selected work on the CPU. Record actual tensor residency and synchronization instead of inferring placement from the package name.</p>
@@ -212,8 +220,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>A CPU list [1, 2, 3] is reduced by the Python process to 6. No driver, GPU allocation or kernel is involved. The host result is immediately available after sum returns.</p>
 <h4 id="worked-example-2">Worked example 2<a class="heading-anchor" href="#worked-example-2" aria-label="Link to this section">#</a></h4>
 <p>For a GPU sum, identify host construction, host-to-device copy, reduction launch, completion and device-to-host scalar retrieval as five events. A returned device scalar is not yet a host integer.</p>
-<h3 id="portable-executable-model">Portable executable model<a class="heading-anchor" href="#portable-executable-model" aria-label="Link to this section">#</a></h3>
-<p>The <strong>CPU reference model</strong> variant runs this bounded worked example using <code>python-core</code>. It uses only the Python standard library, small synthetic values and no network. Its purpose is to expose the arithmetic or contract behind the chapter. The separate reference includes assertions for the stated observations.</p>
+<h3 id="how-to-run-the-cpu-model">How to run the CPU model<a class="heading-anchor" href="#how-to-run-the-cpu-model" aria-label="Link to this section">#</a></h3>
+<p>Edit the copy; the <a href="../references/cuda-065_cpu.py.html">reference</a> adds assertions.</p>
+<pre class="highlighted-code"><code class="language-bash">python courses/cuda/python/lessons/cuda-065_cpu.py</code></pre>
 <pre class="highlighted-code"><code class="language-python">values <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">]</span>
 result <span class="syntax-operator">=</span> <span class="syntax-builtin">sum</span><span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">)</span>
 <span class="syntax-keyword">assert</span> result <span class="syntax-operator">==</span> <span class="syntax-number">6</span>
@@ -240,9 +249,8 @@ ledger <span class="syntax-operator">=</span> <span class="syntax-punctuation">[
 <td><code>[(&#x27;input&#x27;, &#x27;CPU&#x27;), (&#x27;sum&#x27;, &#x27;CPU&#x27;), (&#x27;result&#x27;, &#x27;CPU&#x27;)]</code></td>
 </tr>
 </tbody></table></div>
-<p>Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.</p>
 <h3 id="optional-nvidia-cuda-lab">Optional NVIDIA CUDA lab<a class="heading-anchor" href="#optional-nvidia-cuda-lab" aria-label="Link to this section">#</a></h3>
-<p>The <strong>CuPy on NVIDIA CUDA</strong> variant executes the actual operation with CuPy in the separately prepared <code>cuda-python</code> profile. It refuses a missing device instead of switching to CPU. Keep inputs bounded as supplied; inspect the device, synchronize and compare with the CPU reference. The profile must pass real host/device readiness checks. Successful syntax checking on a Mac is not GPU qualification.</p>
+<p><strong>CuPy on NVIDIA CUDA</strong> needs the <code>cuda-python</code> profile; <a href="../../STUDY-GUIDE.md.html#python-gpu-and-framework-labs">lab rules</a>.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-string">&quot;&quot;&quot;Optional NVIDIA CUDA lab. No CPU fallback or external dataset.&quot;&quot;&quot;</span>
 
 <span class="syntax-keyword">import</span> cupy <span class="syntax-keyword">as</span> cp
@@ -257,46 +265,43 @@ cp<span class="syntax-operator">.</span>cuda<span class="syntax-operator">.</spa
 <span class="syntax-keyword">assert</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>y<span class="syntax-operator">.</span>get<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">6.0</span>
 <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">CUDA array sum:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">float</span><span class="syntax-punctuation">(</span>y<span class="syntax-operator">.</span>get<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">device</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> x<span class="syntax-operator">.</span>device<span class="syntax-operator">.</span>id<span class="syntax-punctuation">)</span></code></pre>
 <h3 id="practice-and-transfer">Practice and transfer<a class="heading-anchor" href="#practice-and-transfer" aria-label="Link to this section">#</a></h3>
+<p>Record each attempt in the <a href="../lessons/cuda-065.md.html">worksheet</a> before opening hints.</p>
 <h4 id="exercise-1-trace-the-five-events">Exercise 1: Trace the five events<a class="heading-anchor" href="#exercise-1-trace-the-five-events" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Listing only three events (build, sum, print) merges the upload into construction and the download into printing. That hides exactly the two transfers worked example 2 names, so a later timing or residency question has no event to attach to.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-2-explain-why-import-is-insufficient">Exercise 2: Explain why import is insufficient<a class="heading-anchor" href="#exercise-2-explain-why-import-is-insufficient" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Treating a clean import as proof of GPU execution is the common shortcut. It fails on a CPU-only laptop where the import succeeds but the first allocation raises, and it fails silently when a framework falls back to CPU for unsupported work.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-3-change-the-input-to-an-empty-list">Exercise 3: Change the input to an empty list<a class="heading-anchor" href="#exercise-3-change-the-input-to-an-empty-list" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Launching a reduction with a grid computed from <code>n = 0</code> and then reading <code>out[0]</code> can return whatever bytes the allocation held. Another wrong move is raising an error, which breaks callers that legitimately pass empty batches.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-4-find-the-hidden-transfer-in-scalar-printing">Exercise 4: Find the hidden transfer in scalar printing<a class="heading-anchor" href="#exercise-4-find-the-hidden-transfer-in-scalar-printing" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Assuming <code>print(total)</code> is free because it is one line leads to placing it inside a loop. Each iteration then stalls the host until the device catches up, and a timing taken around the loop measures synchronization rather than the reduction.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-5-design-a-residency-ledger">Exercise 5: Design a residency ledger<a class="heading-anchor" href="#exercise-5-design-a-residency-ledger" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> A ledger keyed by package name (&quot;numpy&quot;, &quot;cupy&quot;) instead of by object fails as soon as one library holds both host and device arrays, and it cannot record whether the device result was actually ready when read.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-6-explain-how-a-cpu-fallback-must-be-labeled">Exercise 6: Explain how a CPU fallback must be labeled<a class="heading-anchor" href="#exercise-6-explain-how-a-cpu-fallback-must-be-labeled" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Catching the CUDA error and silently computing with NumPy makes the program exit with status zero and the same answer. A dashboard reading only exit codes would then count a GPU lesson as qualified on a machine with no GPU.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
-<p>Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.</p>
+<p>Hint <em>k</em> belongs to exercise <em>k</em>; open one at a time.</p>
 <ol>
-<li>Start from worked example 1 and mark the quantities needed for the task &quot;Trace the five events&quot;.</li>
-<li>Change one assumption in worked example 2 while preserving the declared contract: explain why import is insufficient.</li>
-<li>Trace the CPU program&#x27;s variables before adding hardware behavior: change the input to an empty list.</li>
-<li>Draw producers, consumers and the exact operation boundary for the task &quot;Find the hidden transfer in scalar printing&quot;.</li>
-<li>Separate what the small fixture establishes from what the real runtime must show: design a residency ledger.</li>
-<li>Write a counterexample to an overbroad claim before you explain how a CPU fallback must be labeled.</li>
+<li>List each step of worked example 2 in order and ask, for each one, whose memory holds the value at that moment.</li>
+<li>Picture a laptop with no NVIDIA driver. What does a successful import line still let you conclude there?</li>
+<li>Ask what <code>sum</code> must return when nothing is added, then ask whether a zero-element launch could change that value.</li>
+<li>The printed digits must exist in host memory first. Which copy puts them there, and what must finish before it starts?</li>
+<li>Start from the reference ledger&#x27;s three rows and add the columns a GPU run would need to tell two copies apart.</li>
+<li>Read the line the reference actually prints and decide which backend that sentence names.</li>
 </ol>
-<h3 id="common-mistakes-and-self-review">Common mistakes and self-review<a class="heading-anchor" href="#common-mistakes-and-self-review" aria-label="Link to this section">#</a></h3>
-<p>Confusing a correct tiny example with a general implementation is the central review risk. For this chapter, challenge the assumption in worked example 2, then ask whether your change preserves the mechanism described above. If you change dtype, layout, ordering, batch size or backend, update the acceptance contract rather than silently reusing the old observation. Explain an unexpected result before trying random configuration changes.</p>
-<p>Keep a small evidence table with columns <strong>claim</strong>, <strong>input</strong>, <strong>expected observation</strong>, <strong>actual observation</strong> and <strong>limit</strong>. For the first claim use <code>Trace the five events</code>. For the final claim use <code>Explain how a CPU fallback must be labeled</code>. An unperformed GPU or cluster experiment remains pending even when the CPU model is correct.</p>
-<h3 id="platform-and-evidence-contract">Platform and evidence contract<a class="heading-anchor" href="#platform-and-evidence-contract" aria-label="Link to this section">#</a></h3>
-<p>The reading worksheet and CPU reference model work through the ordinary Linux Docker classroom on macOS, Linux and Windows using WSL 2. They do not require an NVIDIA GPU. Their results are labeled CPU models or semantic oracles, not simulated hardware performance.</p>
-<p>Real CUDA work needs supported NVIDIA hardware, a compatible host driver and an explicitly prepared GPU runtime. An Apple GPU does not execute CUDA kernels. PyTorch MPS on a supported native Mac, ROCm on supported AMD hardware, or other vendor backends can provide separate accelerator learning routes; they need their own package and operation qualification and are not CUDA evidence. The ordinary Linux Docker classroom does not expose native Mac MPS automatically.</p>
-<p>Do not download packages, models or data by opening this lesson. Do not attach an engine socket, ambient cluster credentials or an arbitrary remote endpoint. A CPU pass, imported package, successful compilation, real GPU result and measured performance are distinct observations. Record the actual backend, data shape/dtype, source revision, versions and pending checks. A saved completion marker records learning progress, not hardware certification.</p>
+<h3 id="common-mistakes-and-self-check">Common mistakes and self-check<a class="heading-anchor" href="#common-mistakes-and-self-check" aria-label="Link to this section">#</a></h3>
+<p>The common mistake is reading a successful <code>import cupy</code>, or a GPU package in the environment, as proof that the arithmetic ran on a device. In this chapter the reference sums <code>[1, 2, 3]</code> entirely in the Python process. To fix the claim, record four facts per operation: the issuing process, the allocation holding the inputs, the processor running the arithmetic and the event that proves the result is ready. Leave a column blank rather than guess.</p>
+<p><strong>Evidence limit:</strong> The reference prints <code>CPU reference: 6</code> with every ledger row on the CPU. That shows the arithmetic and the ledger format are right; it shows nothing about device residency, transfer cost or kernel completion on any GPU.</p>
+<ol>
+<li>Why can a statement that creates a CuPy result return before the answer exists?</li>
+<li>Which events in the five-event GPU sum belong to the host?</li>
+<li>Why can printing a device scalar change what you were trying to observe?</li>
+</ol>
+<p>Answers: <a href="../solutions/cuda-065_solutions.md.html#self-check-answers">self-check answers</a>.</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
 <ul>
 <li><a href="https://docs.cupy.dev/en/v13.6.0/">CuPy array and installation documentation</a></li>
 </ul>
-<p>Use the version-matched documentation of your prepared environment. These references describe interfaces and supported boundaries; the chapter&#x27;s synthetic examples and CPU models are original teaching material.</p>
+<p>Full lists: <a href="../../STUDY-GUIDE.md.html#documentation-and-sources">documentation and sources</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning skill for cuda-065: Which processor ran this line?.
 Read courses/cuda/python/guides/cuda-065.md and courses/cuda/python/lessons/cuda-065.md.

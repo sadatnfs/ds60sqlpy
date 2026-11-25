@@ -30,6 +30,22 @@ contain `:` or `*`, and `lang` is one of html, css, js, php, text, http, sh,
 sql or yaml. Write each entry for its own lesson rather than reusing a
 sentence frame across chapters.
 
+Each chapter also holds four prose fields of at least 20 words each, with the
+same string rules:
+
+- `workspace`: what the starter or worksheet gives the learner and what they
+  build in it, rendered in the guide's execution section.
+- `debugging`: the lesson's own diagnostic routine, rendered after `mistakes`.
+- `retrieval`: a closed-notes recall and transfer task for this lesson.
+- `reference_note`: what the reference's checks catch and what they leave
+  untested, or for worksheets what to compare and what lab evidence counts.
+
+Rules that apply to every lesson (offline preview, PHP CLI lifecycle, worksheet
+and lab boundaries, generic debugging habits, the review loop and how to compare
+with a reference) live once in the hand-written
+[study guide](../STUDY-GUIDE.md). The build links to its section anchors, so
+keep those headings stable when editing it.
+
 From the repository root:
 
 ```sh

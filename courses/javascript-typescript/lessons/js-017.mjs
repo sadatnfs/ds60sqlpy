@@ -1,16 +1,14 @@
 // Answer-free learner source. Save your own copy before editing.
 // Exercise 1: Request a valid local calculation: change one input
-// Copy Example A into a scratch `main.mjs` and change `new URL('/sum?a=2&b=3', base)` to
-// `new URL('/sum?a=3&b=3', base)`. Before running it, predict which check fails and which
-// value it now sees; then run it and restore the original line.
-// Expected: The changed run fails with an `AssertionError` at `assert.deepEqual(await
+// In a scratch copy of Example A, change `new URL('/sum?a=2&b=3', base)` to `new
+// URL('/sum?a=3&b=3', base)`. Which check fails, and what value does it see?
+// Expected: The edited run fails with an `AssertionError` at `assert.deepEqual(await
 // response.json(), { total: 5 })`. Restoring `new URL('/sum?a=2&b=3', base)` brings back:
 // status 200; application/json; total 5.
 
 // Exercise 2: Inspect an HTTP error without expecting fetch rejection: diagnose an edited check
-// A careless edit changed a check in Example B so that it reads `assert.deepEqual(await
-// response.json(), { error: 'not_found!' });`. Run Example B with that line, explain why the
-// edited check now fails for the same program state, and restore it.
+// Example B's check was edited to read `assert.deepEqual(await response.json(), { error:
+// 'not_found!' });`. Run it, explain the failure and restore the original.
 // Expected: Before the repair the run fails with an `AssertionError` at
 // `assert.deepEqual(await response.json(), { error: 'not_found!' });`. Restoring
 // `assert.deepEqual(await response.json(), { error: 'not_found' });` brings back: fetch

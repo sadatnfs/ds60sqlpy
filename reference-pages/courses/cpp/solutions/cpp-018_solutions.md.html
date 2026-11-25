@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cpp/solutions/cpp-018_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="cpp-018-explanations-and-reference-observations">cpp-018: explanations and reference observations<a class="heading-anchor" href="#cpp-018-explanations-and-reference-observations" aria-label="Link to this section">#</a></h2>
-<p>Attempt the learner tasks before opening this document. The executable reference checks the bounded normal and boundary examples; the six explanations below cover the deliberate changes and manual checks.</p>
+<p>The <a href="cpp-018_solution.cpp.html">executable reference</a> adds <code>slice_ok(size, offset, count)</code>, which rejects a 2-element slice at offset 2 of a 3-element buffer, accepts it at offset 1, and accepts the empty slice of an empty buffer. The explanations cover borrowing, owner lifetime and the dangling view in Exercise 6. How to compare: <a href="../STUDY-GUIDE.md.html#compare-with-the-solutions">study guide</a>.</p>
 <h3 id="mechanism">Mechanism<a class="heading-anchor" href="#mechanism" aria-label="Link to this section">#</a></h3>
 <p>A view borrows a region owned elsewhere. span observes contiguous elements and string_view observes characters. An iterator can be invalidated when its container reallocates or erases elements. None of these lightweight handles extends the owner lifetime, and const views do not prevent the owner from changing through another path.</p>
 <h3 id="detailed-reasoning">Detailed reasoning<a class="heading-anchor" href="#detailed-reasoning" aria-label="Link to this section">#</a></h3>

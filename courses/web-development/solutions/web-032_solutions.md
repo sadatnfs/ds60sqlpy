@@ -1,6 +1,6 @@
 # web-032: explanatory solutions
 
-Open this after your own attempt. Each answer explains the lesson's synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in `courses/web-development/guides/web-032.md`.
+Attempt each exercise before reading; the mechanism is in `courses/web-development/guides/web-032.md` ([using these answers](../STUDY-GUIDE.md#solutions)).
 
 ## Exercise 1: Predict strict equality for '0', 0 and false.
 
@@ -76,4 +76,6 @@ Open this after your own attempt. Each answer explains the lesson's synthetic fi
 
 ## Reference comparison
 
-Open `courses/web-development/solutions/web-032_solution.php` only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; server lifecycle, persistence, concurrency and security need their own integration evidence.
+The reference requires zero minutes to stay the integer 0, requires the note key to exist while isset reports it unset and requires '0' !== 0. That catches lost zeros and isset confusion. It does not test your typed diagnostic or empty(), so check those outputs against your own predictions.
+
+Open `courses/web-development/solutions/web-032_solution.php` after saving your attempt ([comparing with the reference](../STUDY-GUIDE.md#references)).

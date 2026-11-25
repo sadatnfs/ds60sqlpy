@@ -196,7 +196,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <article class="document"><h2 id="r-026-namespaces-dependency-declarations-and-package-boundaries">r-026: Namespaces, dependency declarations and package boundaries<a class="heading-anchor" href="#r-026-namespaces-dependency-declarations-and-package-boundaries" aria-label="Link to this section">#</a></h2>
 <p><strong>Level:</strong> intermediate. <strong>Direct prerequisites:</strong> <code>r-020</code>, <code>r-025</code></p>
 <h3 id="run-and-retain-your-work">Run and retain your work<a class="heading-anchor" href="#run-and-retain-your-work" aria-label="Link to this section">#</a></h3>
-<p>Open <code>r-026</code> in <code>/classroom</code> and use the prepared <code>r-statistics</code> profile. Each Run evaluates one <code>main.R</code> script in a fresh offline R process, so define every input in the script; an earlier Run leaves no variables behind. Work in the <a href="../lessons/r-026.R.html">starter</a>. The <a href="../solutions/r-026_reference.R.html">complete reference</a> ends by printing <code>r-026 reference checks passed</code>, and the <a href="../solutions/r-026_solutions.md.html">explained answers</a> are there for deliberate comparison after your own attempt. This chapter prints values only; when a chapter draws figures, the classroom keeps at most two figures per run. The <a href="../README.md.html">course overview</a> describes saved work, figure capture and the prepared package versions.</p>
+<p>The starter supplies the values 1, 4 and 9 and the package name measurekit. Run it, then define a global function named <code>median</code> that returns -999 and compare it with <code>stats::median()</code>, which still returns 4. Build the DESCRIPTION, NAMESPACE and R source files under a <code>tempfile()</code> directory only, never in your project tree.</p>
+<p>Work in the <a href="../lessons/r-026.R.html">starter</a> under the <a href="../STUDY-GUIDE.md.html#run-a-chapter">run rules</a>.</p>
+<p>The <a href="../solutions/r-026_reference.R.html">complete reference</a> ends by printing <code>r-026 reference checks passed</code>.</p>
 <h3 id="outcome-and-mechanism">Outcome and mechanism<a class="heading-anchor" href="#outcome-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Use exported namespace-qualified functions and inspect a local package source layout without confusing sourced definitions with an installed package.</p>
 <p>A package namespace separates names that belong to one package from names in the current workspace. stats::median selects an exported function even when another function called median is present in the global environment. library attaches exported names to the search path for convenience; it does not make every unqualified name immune to masking. Namespace qualification is useful when the originating dependency is part of the analytical contract.</p>
@@ -309,7 +311,19 @@ result <span class="syntax-operator">&lt;-</span> <span class="syntax-function">
 <li><a href="https://cran.r-project.org/doc/manuals/r-release/R-exts.html#Creating-R-packages">Writing R Extensions: package structure</a></li>
 </ul>
 <h3 id="continue">Continue<a class="heading-anchor" href="#continue" aria-label="Link to this section">#</a></h3>
-<p>Chapters that list <code>r-026</code> as a direct prerequisite: <a href="r-027.md.html"><code>r-027</code></a>, <a href="r-030.md.html"><code>r-030</code></a>.</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Next chapter</th>
+<th>Title</th>
+</tr></thead><tbody>
+<tr>
+<td><a href="r-027.md.html"><code>r-027</code></a></td>
+<td>Profile equivalent work and account for allocations</td>
+</tr>
+<tr>
+<td><a href="r-030.md.html"><code>r-030</code></a></td>
+<td>Analytical-package capstone with explicit value and data contracts</td>
+</tr>
+</tbody></table></div>
 <h3 id="ask-an-ai-tutor">Ask an AI tutor<a class="heading-anchor" href="#ask-an-ai-tutor" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for r-026 (Namespaces, dependency declarations and package boundaries).
 Read the guide and my saved attempt. Explain the relevant R mechanism,

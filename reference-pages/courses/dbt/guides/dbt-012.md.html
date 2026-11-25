@@ -212,10 +212,10 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="syntax-and-data-contract">Syntax and data contract<a class="heading-anchor" href="#syntax-and-data-contract" aria-label="Link to this section">#</a></h3>
 <p>The model metadata declares latest_version and its versions, with defined_in pointing to the implementation files. ref(&#x27;customer_value&#x27;, version=1) selects an explicit contract. A plain ref follows the declared latest version. Inspect both the resolved database result and manifest dependency information.</p>
 <h3 id="run-the-lesson">Run the lesson<a class="heading-anchor" href="#run-the-lesson" aria-label="Link to this section">#</a></h3>
-<p>Open <code>dbt-012</code> in <code>/classroom</code>. Its starter <code>main.py</code> contains both worked cases, &quot;Resolve explicit and latest consumers&quot; and &quot;Name the semantic difference&quot;, and prints the dictionary each case returns. The prepared <code>data-engineering</code> worker runs it in a fresh temporary directory. An <code>AssertionError</code> means that an observation differs from the case&#x27;s stated contract. Each case writes its dbt project and DuckDB database into its own temporary directory, runs real dbt commands through dbt&#x27;s Python entry point and removes the directory when it returns. No account, warehouse, network request or package download is involved. Save source and notes before switching lessons.</p>
+<p>Case 1 prints <code>explicit_v1: 100</code> and <code>latest_v2: 80</code>: the consumer pinned to version 1 still reads gross value while the unpinned one follows the latest version. Case 2 names the change as gross to net, reports 80, and confirms that the manifest recorded the dependency. A consumer that silently moved from 100 to 80 is exactly the break versioning is meant to prevent, so check which ref each consumer uses. See the <a href="../STUDY-GUIDE.md.html#run-a-lesson">run routine</a>.</p>
 <h3 id="worked-case-1-resolve-explicit-and-latest-consumers">Worked case 1: Resolve explicit and latest consumers<a class="heading-anchor" href="#worked-case-1-resolve-explicit-and-latest-consumers" aria-label="Link to this section">#</a></h3>
 <p>The first project builds both versions and two consumers. Their results demonstrate the consequence of version selection while keeping the output type unchanged. The example avoids implying that a version number automatically guarantees compatibility.</p>
-<p><strong>Project files.</strong> The case writes these files before its first dbt command. YAML is shown in conventional key order; dbt reads the same mappings.</p>
+<p><strong>Project files</strong>, written before the first dbt command:</p>
 <p><code>models/customer_value_v1.sql</code></p>
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">select</span> <span class="syntax-number">100</span> <span class="syntax-keyword">as</span> value</code></pre>
 <p><code>models/customer_value_v2.sql</code></p>
@@ -234,10 +234,10 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
         <span class="syntax-tag">defined_in</span><span class="syntax-punctuation">:</span> customer_value_v1
       <span class="syntax-punctuation">-</span> <span class="syntax-tag">v</span><span class="syntax-punctuation">:</span> 2
         <span class="syntax-tag">defined_in</span><span class="syntax-punctuation">:</span> customer_value_v2</code></pre>
-<p><strong>Commands and changes, in order.</strong> Each <code>dbt</code> line is one <code>invoke(...)</code> call; the harness adds <code>--project-dir</code> and <code>--profiles-dir</code> for the temporary project.</p>
+<p><strong>Commands, in order.</strong> Each <code>dbt</code> line is one <code>invoke(...)</code> call.</p>
 <pre class="highlighted-code"><code class="language-bash">dbt build</code></pre>
 <p><strong>Expected evidence:</strong> The explicit v1 consumer returns 100; the latest v2 consumer returns 80.</p>
-<p>The program below shows only this case&#x27;s own functions. They call the shared helpers <code>project</code>, <code>invoke</code> and <code>rows</code>, which write the files above, run dbt through <code>dbtRunner</code> and read the results; the helpers are explained in <a href="dbt-001.md.html">dbt-001</a> and appear in full at the top of this lesson&#x27;s <a href="../lessons/dbt-012.py.html">starter</a>.</p>
+<p>Helpers <code>project</code>, <code>invoke</code> and <code>rows</code>: see the <a href="../STUDY-GUIDE.md.html#case-harness">case harness</a>.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> tempfile
 
 
@@ -271,15 +271,15 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
         <span class="syntax-keyword">return</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">explicit_v1</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">100</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">latest_v2</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">80</span><span class="syntax-punctuation">}</span></code></pre>
 <h3 id="worked-case-2-name-the-semantic-difference">Worked case 2: Name the semantic difference<a class="heading-anchor" href="#worked-case-2-name-the-semantic-difference" aria-label="Link to this section">#</a></h3>
 <p>The second project computes a net quantity from its defined components and records the dependency edge. It provides enough meaning to explain why a consumer might need a different version or retraining.</p>
-<p><strong>Project files.</strong> The case writes these files before its first dbt command. YAML is shown in conventional key order; dbt reads the same mappings.</p>
+<p><strong>Project files</strong>, written before the first dbt command:</p>
 <p><code>models/base.sql</code></p>
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">select</span> <span class="syntax-number">100</span> <span class="syntax-keyword">as</span> gross<span class="syntax-punctuation">,</span> <span class="syntax-number">20</span> <span class="syntax-keyword">as</span> <span class="syntax-keyword">returns</span></code></pre>
 <p><code>models/net.sql</code></p>
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">select</span> gross <span class="syntax-operator">-</span> <span class="syntax-keyword">returns</span> <span class="syntax-keyword">as</span> net <span class="syntax-keyword">from</span> {{ <span class="syntax-keyword">ref</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;base&#x27;</span><span class="syntax-punctuation">)</span> }}</code></pre>
-<p><strong>Commands and changes, in order.</strong> Each <code>dbt</code> line is one <code>invoke(...)</code> call; the harness adds <code>--project-dir</code> and <code>--profiles-dir</code> for the temporary project.</p>
+<p><strong>Commands, in order.</strong> Each <code>dbt</code> line is one <code>invoke(...)</code> call.</p>
 <pre class="highlighted-code"><code class="language-bash">dbt build</code></pre>
 <p><strong>Expected evidence:</strong> Net is 80, derived from gross 100 and returns 20.</p>
-<p>The program below shows only this case&#x27;s own functions. They call the shared helpers <code>project</code>, <code>invoke</code>, <code>rows</code> and <code>artifact</code>, which write the files above, run dbt through <code>dbtRunner</code> and read the results; the helpers are explained in <a href="dbt-001.md.html">dbt-001</a> and appear in full at the top of this lesson&#x27;s <a href="../lessons/dbt-012.py.html">starter</a>.</p>
+<p>Helpers <code>project</code>, <code>invoke</code>, <code>rows</code> and <code>artifact</code>: see the <a href="../STUDY-GUIDE.md.html#case-harness">case harness</a>.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> tempfile
 
 
@@ -300,7 +300,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
         <span class="syntax-punctuation">]</span>
         <span class="syntax-keyword">return</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">semantic_change</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-string">&quot;</span><span class="syntax-string">gross to net</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">net</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">80</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">dependency_recorded</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-keyword">True</span><span class="syntax-punctuation">}</span></code></pre>
 <h3 id="practice">Practice<a class="heading-anchor" href="#practice" aria-label="Link to this section">#</a></h3>
-<p>The starter contains both worked cases, so a task can change either one. Make each change in a saved copy, run it, and compare the printed result with the task&#x27;s check before opening the separate explained answers.</p>
+<p>Use the <a href="../STUDY-GUIDE.md.html#practice-routine">practice routine</a>.</p>
 <h4 id="1-pin-a-consumer">1. Pin a consumer<a class="heading-anchor" href="#1-pin-a-consumer" aria-label="Link to this section">#</a></h4>
 <p>Change the latest consumer to request version 1 explicitly.</p>
 <p><strong>Check:</strong> It returns 100.</p>
@@ -335,7 +335,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li><a href="https://github.com/duckdb/dbt-duckdb">dbt-duckdb repository README</a></li>
 </ul>
 <h3 id="tutor-guidance">Tutor guidance<a class="heading-anchor" href="#tutor-guidance" aria-label="Link to this section">#</a></h3>
-<p>Use the repository&#x27;s <code>$guide-ds60sqlpy-learning</code> skill (<code>.agents/skills/guide-ds60sqlpy-learning/SKILL.md</code>) for <code>dbt-012</code>. Inspect the learner&#x27;s own source and printed output first. Ask for an explanation of versioned ref, latest version, semantic change, consumer contract and migration in their own words, then give one focused hint at a time. Keep an assertion on this synthetic fixture separate from a claim about an external dataset or deployed service.</p></article>
+<p>Ask the learner why both 100 and 80 are correct answers to different questions, and which consumer should follow latest. Then ask how they would announce the gross-to-net change, how long version 1 should stay available, and what evidence would show that every pinned consumer has migrated before that version is removed. See the <a href="../STUDY-GUIDE.md.html#tutor-guidance">tutor routine</a>.</p></article>
   </main>
 </body>
 </html>

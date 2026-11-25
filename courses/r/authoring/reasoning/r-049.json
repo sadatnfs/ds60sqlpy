@@ -36,5 +36,7 @@
       "wrong": "Reading forecast plus or minus 2 SE as covering all future error. Here phi was fixed rather than estimated, so the SE leaves out coefficient uncertainty entirely, along with any change in the process after time 8.",
       "verify": "`all(is.finite(f$se))` and `all(f$se >= 0)` return TRUE."
     }
-  ]
+  ],
+  "run_note": "The starter holds an eight point series, 2, 1.2, 0.8, 0.1, -0.2, 0.3, 0.1 and 0.4, and an empty results list. Run it and plot or print it in order before modeling, since order is the information. With a coefficient of 0.5 and mean zero, each forecast halves the previous value, so from the last value 0.4 the next three forecasts are 0.2, 0.1 and 0.05. Every evaluation origin must use only values observed up to that origin.",
+  "checks_note": "The assertions confirm forecasts of 0.2, 0.1 and 0.05 with finite, nonnegative standard errors, rolling-origin naive predictions on 1 to 8 whose errors are all 1 with mean squared error 1, a full-series mean that differs from the mean available at an early origin, five unit changes in a differenced trend, and origins that always precede their targets. They do not show that the series is stationary or that the model is well chosen."
 }

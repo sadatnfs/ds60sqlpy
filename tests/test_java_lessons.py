@@ -47,6 +47,21 @@ def test_authored_java_bundles_follow_reviewed_plan_and_preserve_solutions() -> 
                 assert re.findall(r"^## Exercise ([1-6]):", text, re.MULTILINE) == list("123456")
 
 
+def test_java_lessons_link_to_existing_study_guide_sections() -> None:
+    headings = re.findall(r"^#+ (.+)$", (BASE / "STUDY-GUIDE.md").read_text(), re.MULTILINE)
+    anchors = {
+        re.sub(r"[^a-z0-9 -]", "", heading.lower()).replace(" ", "-") for heading in headings
+    }
+    for entry in ENTRIES:
+        for relative in [entry["guide_path"], *entry["solution_paths"]]:
+            if not relative.endswith(".md"):
+                continue
+            text = (ROOT / relative).read_text()
+            links = re.findall(r"\]\(\.\./STUDY-GUIDE\.md(?:#([a-z0-9-]+))?\)", text)
+            assert links, relative
+            assert {anchor for anchor in links if anchor} <= anchors, relative
+
+
 @pytest.mark.skipif(
     os.environ.get("DS60_TEST_JAVA") != "1",
     reason="Requires an explicitly prepared JDK21 environment",

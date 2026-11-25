@@ -1,6 +1,8 @@
 # c-009: explained solutions
 
-Compare after an attempt or explicit reveal. The complete executable reference, `c-009_solution.c`, implements all six cases, from the "relate indexing and arithmetic" case to the "transfer mutation through a subview" case, in one `main.c`.
+`c-009_solution.c` assembles the "relate indexing and arithmetic" case through the "transfer mutation through a subview" case in one `main.c`.
+
+Compare only after an attempt: [Compare and transfer](../STUDY-GUIDE.md#compare-and-transfer).
 
 ## Mechanism and assumptions
 
@@ -10,7 +12,7 @@ values+i points to element i and *(values+i) is equivalent to values[i] within v
 
 ## Exercise 1: Relate indexing and arithmetic: change one input
 
-Copy worked example 1, the "relate indexing and arithmetic" case, into a scratch pad and change `int values[] = {2, 4, 6};` to `int values[] = {2, 5, 6};`. Before running, predict which CHECK fails and which value it sees in place of the worked result (both yield 4); then run it and restore the original line.
+In worked example 1, change `int values[] = {2, 4, 6};` to `int values[] = {2, 5, 6};`. Predict which value the CHECK on `values[1] == *(values + 1) && *(values + 1) == 4` sees, then run and restore.
 
 The unchanged code is worked example 1:
 
@@ -19,13 +21,15 @@ int values[] = {2, 4, 6};
 CHECK(values[1] == *(values + 1) && *(values + 1) == 4);
 ```
 
-**Expected:** With `int values[] = {2, 5, 6};` the run stops with `Check failed` at the CHECK on `values[1] == *(values + 1) && *(values + 1) == 4`, because the "relate indexing and arithmetic" case no longer shows that both yield 4. Restoring `int values[] = {2, 4, 6};` brings that observation back.
+**Expected:** `Check failed` at `values[1] == *(values + 1) && *(values + 1) == 4`; restoring `int values[] = {2, 4, 6};` passes again.
+
+**Verify:** Name the value that made `values[1] == *(values + 1) && *(values + 1) == 4` false, where worked example 1 showed that both yield 4.
 
 The equivalence applies because the computed pointer remains within the live array.
 
 ## Exercise 2: Measure an array interval: debug a regression
 
-A regression changed one token in worked example 2, the "measure an array interval" case, so one line now reads `int *end = values - 3;`. Run the example with that line, use the failing CHECK to find why the difference is 3 elements no longer holds and repair the line without changing the CHECK.
+Worked example 2 now has a line reading `int *end = values - 3;`. Repair it so that the difference is 3 elements again.
 
 The unchanged code is worked example 2:
 
@@ -37,7 +41,9 @@ ptrdiff_t n = end - begin;
 CHECK(n == 3);
 ```
 
-**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `n == 3`. Once the line reads `int *end = values + 3;` again, the "measure an array interval" case again shows that the difference is 3 elements.
+**Expected:** `Check failed` at `n == 3` until the line reads `int *end = values + 3;` again.
+
+**Verify:** Explain how `int *end = values - 3;` changes the value `n == 3` tests, using your failing and repaired runs.
 
 The result counts int elements. Multiplying by sizeof(int) would be a separate byte-size calculation.
 
@@ -56,6 +62,8 @@ CHECK(sum == 12);
 
 **Expected:** The result is 12.
 
+**Verify:** Keep a CHECK equivalent to `sum == 12`. Control edit: changing `for (const int *p = values; p != values + 3; p++) {` to `for (const int *p = values; p == values + 3; p++) {` must fail it; then restore it.
+
 The condition proves p is not one-past before dereference. Incrementing the final valid pointer reaches the end marker safely.
 
 ## Exercise 4: Construct a subview
@@ -70,6 +78,8 @@ CHECK(n == 2 && view[0] == 4 && view[1] == 6);
 ```
 
 **Expected:** The subview contains 4 and 6.
+
+**Verify:** Keep a CHECK equivalent to `n == 2 && view[0] == 4 && view[1] == 6`. Control edit: changing `int values[] = {2, 4, 6};` to `int values[] = {2, 5, 6};` must fail it; then restore it.
 
 The subview borrows the original array. It must not outlive that array or expand beyond its remaining extent.
 
@@ -89,6 +99,8 @@ CHECK(visits == 0);
 
 **Expected:** The traversal performs zero accesses.
 
+**Verify:** Keep a CHECK equivalent to `visits == 0`. Control edit: changing `for (const int *p = begin; p != end; p++) {` to `for (const int *p = begin; p == end; p++) {` must fail it; then restore it.
+
 This empty interval uses valid pointers into a real object. It avoids inventing a zero-sized array or arithmetic on NULL.
 
 ## Exercise 6: Transfer mutation through a subview
@@ -104,8 +116,10 @@ CHECK(values[1] == 8 && values[0] == 1);
 
 **Expected:** The corresponding original element changes.
 
+**Verify:** Keep a CHECK equivalent to `values[1] == 8 && values[0] == 1`. Control edit: changing `int values[] = {1, 2, 3};` to `int values[] = {2, 2, 3};` must fail it; then restore it.
+
 A view does not copy storage. The shared mutation must be part of the API contract.
 
 ## After comparison
 
-Add a fresh distinguishing input for the "transfer mutation through a subview" case to your own c-009 source. Explain why every access in the case code inside `main` stays within a live object and each owned resource is released. An expected one-past pointer failure belongs in the test contract; undefined behavior does not. Keep diagnostics and sanitizer evidence for the "measure an array interval" case apart from ordinary output: the fixture proves its stated one-past pointer, pointer difference and borrowed view assumptions, not universal safety.
+Given `int values[] = {2, 4, 6, 8};`, build the subview `int *begin = values + 1, *end = values + 3;`. CHECK that `end - begin == 2` and that `for (int *p = begin; p != end; p++)` sums to 10. Then explain as text why `values + 5` is undefined even if it is never dereferenced, while `values + 4` is the valid one-past pointer that may be compared but not read.

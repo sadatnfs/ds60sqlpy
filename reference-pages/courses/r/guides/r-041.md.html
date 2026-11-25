@@ -196,7 +196,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <article class="document"><h2 id="r-041-explore-distributions-and-preserve-missingness">r-041: Explore distributions and preserve missingness<a class="heading-anchor" href="#r-041-explore-distributions-and-preserve-missingness" aria-label="Link to this section">#</a></h2>
 <p><strong>Level:</strong> intermediate. <strong>Direct prerequisites:</strong> <code>r-040</code></p>
 <h3 id="run-and-retain-your-work">Run and retain your work<a class="heading-anchor" href="#run-and-retain-your-work" aria-label="Link to this section">#</a></h3>
-<p>Open <code>r-041</code> in <code>/classroom</code> and use the prepared <code>r-statistics</code> profile. Each Run evaluates one <code>main.R</code> script in a fresh offline R process, so define every input in the script; an earlier Run leaves no variables behind. Work in the <a href="../lessons/r-041.R.html">starter</a>. The <a href="../solutions/r-041_reference.R.html">complete reference</a> ends by printing <code>r-041 reference checks passed</code>, and the <a href="../solutions/r-041_solutions.md.html">explained answers</a> are there for deliberate comparison after your own attempt. This chapter prints values only; when a chapter draws figures, the classroom keeps at most two figures per run. The <a href="../README.md.html">course overview</a> describes saved work, figure capture and the prepared package versions.</p>
+<p>The starter holds five values, 1, NA, 4, 6 and NA, and an empty results list. Run it and count by hand before summarizing: five rows, three observed, two missing, and an observed mean of 11/3. Report all four numbers together, because a mean printed without its observed count hides that two fifths of the rows contributed nothing.</p>
+<p>Work in the <a href="../lessons/r-041.R.html">starter</a> under the <a href="../STUDY-GUIDE.md.html#run-a-chapter">run rules</a>.</p>
+<p>The <a href="../solutions/r-041_reference.R.html">complete reference</a> ends by printing <code>r-041 reference checks passed</code>.</p>
 <h3 id="outcome-and-mechanism">Outcome and mechanism<a class="heading-anchor" href="#outcome-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Produce a descriptive summary whose observation counts, missing-value policy and distributional limits are explicit.</p>
 <p>An exploratory summary starts with the unit represented by each row. A value may describe one measurement, one person or one aggregated group. Those units determine what a count or mean means. Before choosing a plot or model, record the eligible rows and the distinction between an observed zero and an absent measurement.</p>
@@ -279,7 +281,20 @@ without_extreme <span class="syntax-operator">&lt;-</span> x<span class="syntax-
 <li><a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/NA.html">R missing values</a></li>
 </ul>
 <h3 id="continue">Continue<a class="heading-anchor" href="#continue" aria-label="Link to this section">#</a></h3>
-<p>Chapters that list <code>r-041</code> as a direct prerequisite: <a href="r-042.md.html"><code>r-042</code></a>, <a href="r-051.md.html"><code>r-051</code></a>. For the modeling assumptions behind these examples, read the <a href="../../statistics-ml/README.md.html">statistics tutorial</a> alongside the R code.</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Next chapter</th>
+<th>Title</th>
+</tr></thead><tbody>
+<tr>
+<td><a href="r-042.md.html"><code>r-042</code></a></td>
+<td>Estimation, standard errors and resampling targets</td>
+</tr>
+<tr>
+<td><a href="r-051.md.html"><code>r-051</code></a></td>
+<td>Base graphics, coordinates and owned devices</td>
+</tr>
+</tbody></table></div>
+<p>Modeling assumptions behind these examples are in the <a href="../../statistics-ml/README.md.html">statistics tutorial</a>.</p>
 <h3 id="ask-an-ai-tutor">Ask an AI tutor<a class="heading-anchor" href="#ask-an-ai-tutor" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for r-041 (Explore distributions and preserve missingness).
 Read the guide and my saved attempt. Explain the relevant R mechanism,

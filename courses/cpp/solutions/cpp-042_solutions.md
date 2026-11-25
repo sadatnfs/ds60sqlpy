@@ -1,6 +1,6 @@
 # cpp-042: explanations and reference observations
 
-Attempt the learner tasks before opening this document. The executable reference checks the bounded normal and boundary examples; the six explanations below cover the deliberate changes and manual checks.
+The [executable reference](cpp-042_solution.cpp) checks an uneven split, `first(2)` plus `subspan(2)`, against the same oracle. The explanations cover per-thread ownership of results and the reviewer packet. How to compare: [study guide](../STUDY-GUIDE.md#compare-with-the-solutions).
 
 ## Mechanism
 

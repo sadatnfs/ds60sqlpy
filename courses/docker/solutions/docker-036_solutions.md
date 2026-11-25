@@ -1,6 +1,6 @@
 # docker-036: explanatory solutions
 
-Compare after your own attempt or an explicit reveal. These explain the supplied teaching fixtures; they are not engine results. The mechanism is explained in `courses/docker/guides/docker-036.md`.
+These answers explain teaching fixtures, not engine results; the mechanism is in [the guide](../guides/docker-036.md).
 
 ## Exercise 1: Predict whether Compose survives host loss automatically.
 
@@ -88,4 +88,4 @@ Compare after your own attempt or an explicit reveal. These explain the supplied
 
 ## Check your transfer
 
-A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.
+For a single-host teaching fixture used by two classes, Compose remains the better fit: the workload is one process with one small volume, nobody needs failover, and learners benefit from seeing every resource. The recommendation changes if the app must survive host loss, serve many concurrent users, or be run by a team already operating a cluster; then the work is a storage, recovery and traffic design, not a file conversion. A measured outage or a load that one host cannot carry would be the evidence against the current choice.

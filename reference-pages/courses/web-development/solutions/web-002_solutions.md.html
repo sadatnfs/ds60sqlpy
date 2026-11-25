@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/web-development/solutions/web-002_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="web-002-explanatory-solutions">web-002: explanatory solutions<a class="heading-anchor" href="#web-002-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Open this after your own attempt. Each answer explains the lesson&#x27;s synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in <code>courses/web-development/guides/web-002.md</code>.</p>
+<p>Attempt each exercise before reading; the mechanism is in <code>courses/web-development/guides/web-002.md</code> (<a href="../STUDY-GUIDE.md.html#solutions">using these answers</a>).</p>
 <h3 id="exercise-1-predict-the-text-content-after-character-references-are-parsed">Exercise 1: Predict the text content after character references are parsed.<a class="heading-anchor" href="#exercise-1-predict-the-text-content-after-character-references-are-parsed" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> The browser displays comparison signs and an ampersand, not the entity source.</p>
 <p><strong>Approach:</strong> Replace each reference in the example with the character it names: <code>&amp;lt;</code> becomes &lt;, <code>&amp;amp;</code> becomes &amp; and <code>&amp;gt;</code> becomes &gt;.</p>
@@ -232,7 +232,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Plausible wrong approach:</strong> Escaping a <code>javascript:</code> URL fails as a defense because escaping only changes how characters print; the dangerous scheme is still a valid link target.</p>
 <p><strong>How to verify:</strong> The escaped text shows angle brackets as characters, and a <code>javascript:</code> URL is rejected by the scheme check rather than rendered as a link.</p>
 <h3 id="reference-comparison">Reference comparison<a class="heading-anchor" href="#reference-comparison" aria-label="Link to this section">#</a></h3>
-<p>Open <code>courses/web-development/solutions/web-002_solution.html</code> only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; its success message is not an accessibility audit or proof of responsive behavior at every size.</p></article>
+<p>The reference reads the text content of the element with id note and requires the literal string 2 &lt; 3 &amp; 3 &gt; 2, so it fails if a character reference was left raw and parsed as markup or if the comparison was retyped. It does not check the lang attribute, unique ids or whether importance uses strong rather than b.</p>
+<p>Open <code>courses/web-development/solutions/web-002_solution.html</code> after saving your attempt (<a href="../STUDY-GUIDE.md.html#references">comparing with the reference</a>).</p></article>
   </main>
 </body>
 </html>

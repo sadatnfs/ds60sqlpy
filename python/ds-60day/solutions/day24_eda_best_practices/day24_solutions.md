@@ -1,6 +1,6 @@
 # Day 24 Solutions: Exploratory Data Analysis Best Practices
 
-**Offline teaching data:** The [original synthetic fixtures](../../../fixtures/README.md) replace first-run sample-data downloads. Their values are not historical or observational evidence. Keep numerical conclusions scoped to the declared teaching input.
+**Offline teaching data:** the `bird-measurements` [synthetic fixture](../../../fixtures/README.md) is invented, so its numbers prove methods, not facts.
 
 
 <!-- BEGIN BEGINNER SOLUTION REVIEW -->

@@ -24,9 +24,9 @@ A binding grants read and write access to state owned elsewhere. It does not cre
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles the saved pad as `main.swift` with Swift 6 language checking. An explicit `@main` type contains `static func main() async throws`; the fixed compiler uses `-parse-as-library -swift-version 6`. The examples use the standard library and portable Foundation. `precondition` makes a violated invariant fail the process. The fixed pad accepts one source file, without arbitrary command arguments, interactive input or dependency installation. SwiftUI, UIKit, Apple simulators and application signing belong to the separately prepared macOS/Xcode project labs, never the Linux pad.
+Only the `FormState` kernel runs here, and the property wrappers named in the notes belong to the Apple app. Tasks 3 and 5 need JourneyApp on macOS with Xcode; on Linux, record them as not performed rather than reasoning from the kernel. Tasks 1 and 2 work in the pad.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Compile contract, starter stop and success marker: [running a lesson](../STUDY-GUIDE.md#running-a-lesson).
 
 Apple-only project lab: [JourneyApp state and editing workflow](../fixtures/JourneyApp/README.md). Linux verifies the domain kernel only.
 
@@ -34,7 +34,7 @@ Apple-only project lab: [JourneyApp state and editing workflow](../fixtures/Jour
 
 In the external app, @State retains the model reference, @Observable tracks relevant property access, and @Bindable creates bindings to editable model properties. The Linux kernel models the same single-source rule without importing SwiftUI.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+Each example ends with a trace; method: [tracing a program](../STUDY-GUIDE.md#tracing-a-program).
 
 ## Worked example / walkthrough
 
@@ -65,6 +65,8 @@ struct LessonMain {
 
 **Observe:** The label follows the stored completion state.
 
+**Trace.** `FormState` has two stored properties, title and completed, and one computed property, `buttonLabel`. Nothing stores a label. Reading `buttonLabel` evaluates the conditional at that moment: completed is false, so it returns Mark complete. Because the label is computed on each read, no code path can update the state and forget to update the label, which is the bug a separate stored label field invites.
+
 ### Example B: A state change updates its derived view
 
 The transition has one source of truth and independent fields remain unchanged.
@@ -94,6 +96,8 @@ struct LessonMain {
 
 **Observe:** Changing completion changes the derived label while retaining the title.
 
+**Trace.** `state` is declared with `var` so its stored property can change. Setting completed to true is the only mutation. The next read of `buttonLabel` evaluates the conditional again and now returns Mark incomplete. The second check confirms title is still Read, so changing one stored field did not reset its neighbor. In SwiftUI the same rule appears as one source of truth with views computed from it.
+
 ## Exercises
 
 1. **Predict and explain.** Identify stored and derived state in the kernel.
@@ -108,13 +112,15 @@ struct LessonMain {
 
 6. **Transfer and justify.** Decide whether a piece of state belongs to the view, model or domain core and justify its lifetime.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Log each task in the [evidence table](../STUDY-GUIDE.md#recording-exercise-evidence) before opening the explanation.
 
 ## Common pitfalls and diagnosis
 
 A binding is not a cloned value. Recreating a model in a transient view computation can discard edits. UI disablement does not replace domain validation.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+For task 2, a disabled state must be derived from title, and the boundary is a title of only spaces: decide whether trimming applies and test it. Task 4's child view copies the parent's value into its own state once, so later parent changes never reach it. The counterexample is changing the title in the parent after the child appears and seeing the child still show the old text.
+
+Repair routine: [building a regression case](../STUDY-GUIDE.md#building-a-regression-case).
 
 ## Progressive hints
 
@@ -124,11 +130,15 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 ## Self-check and next step
 
-Explain Source of truth, Binding, View identity without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+Name the stored and derived properties of `FormState` and explain why the label must not be stored. Describe what `@State`, `@Observable` and `@Bindable` each contribute in the app. For one piece of form state, decide whether it belongs to the view, the model or the domain core and justify its lifetime.
+
+Then follow the general [self-check routine](../STUDY-GUIDE.md#self-check-routine) and save your pad.
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://developer.apple.com/documentation/swiftui/managing-model-data-in-your-app). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+[Documentation](https://developer.apple.com/documentation/swiftui/managing-model-data-in-your-app): Apple's SwiftUI documentation covers `State`, `Bindable` and the Observation framework; the Swift book's Properties chapter covers computed properties.
+
+Provenance and limits: [sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

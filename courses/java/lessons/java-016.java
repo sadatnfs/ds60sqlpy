@@ -3,23 +3,18 @@ public class Main {
 
   public static void main(String[] args) throws Exception {
     // Exercise 1: Round-trip explicit UTF-8: change one input
-    // Close Example A and rebuild it in a fresh `Main.java`, keeping the assertion on
+    // Rebuild Example A from memory and propose one input change that makes the assertion on
     // `java.nio.file.Files.readString(path,
-    // java.nio.charset.StandardCharsets.UTF_8).equals(text)`. Then propose one input change that
-    // would make that assertion fail and explain why before trying it.
-    // Expected: Your rebuild reproduces the worked observation (exact text equality), and your
-    // proposed change makes the assertion on `java.nio.file.Files.readString(path,
     // java.nio.charset.StandardCharsets.UTF_8).equals(text)` fail.
+    // Expected: The rebuild passes and the changed copy fails as predicted.
 
     // Exercise 2: Distinguish a path from existence: debug a regression
-    // A regression changed one token in the code that Example B adds after Example A, so one
-    // line now reads `var missing = root.resolve("missing.txt!");`. Run Example B with that
-    // line, use the failing assertion to locate the defect and repair it without changing the
-    // assertion.
-    // Expected: Before the repair the run fails with an `AssertionError` from the assertion on
+    // A regression in Example B's new code makes one line read `var missing =
+    // root.resolve("missing.txt!");`. Repair it using the failing assertion.
+    // Expected: The unrepaired run fails with an `AssertionError` from the assertion on
     // `missing.getFileName().toString().equals("missing.txt") &&
-    // !java.nio.file.Files.exists(missing)`; after it the line reads `var missing =
-    // root.resolve("missing.txt");` again and path object exists; filesystem entry absent.
+    // !java.nio.file.Files.exists(missing)`; the repaired line reads `var missing =
+    // root.resolve("missing.txt");`.
 
     // Exercise 3: Close a directory stream
     // Create two files and count them through a try-with-resources Files.list stream.

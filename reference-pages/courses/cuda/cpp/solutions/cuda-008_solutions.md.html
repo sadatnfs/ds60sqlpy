@@ -196,7 +196,6 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <article class="document"><h2 id="cuda-008-explanatory-solutions">cuda-008: explanatory solutions<a class="heading-anchor" href="#cuda-008-explanatory-solutions" aria-label="Link to this section">#</a></h2>
 <h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
 <p>A reproducible experiment records enough context to explain why a result happened. An input seed is useful only alongside the generator, dtype, shape and distribution. A benchmark needs timing scope, warm-up policy and retained samples, while a correctness result needs an independent expected answer. Hardware access, successful compilation, successful execution and acceptable numerical output are four distinct observations. A resource budget limits input size and repeated work before running. On a shared GPU, reserve only the memory and compute time that the owner has authorized; do not use unbounded spin loops as teaching fixtures.</p>
-<p>The separate <a href="../references/cuda-008_cpu.py.html">CPU reference</a> checks the chapter&#x27;s bounded model. It does not execute CUDA or establish GPU timing. Compare after attempting the worksheet or explicitly choosing to reveal solutions.</p>
 <h3 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h3>
 <p>Report A says &#x27;GPU: 0.2 ms&#x27;. Report B records a synthetic float32 vector of 1,024 elements, seed 7, upload excluded, five warm-ups, twenty event-timed samples, device/toolkit identities and an absolute error bound. B is interpretable, but it still needs raw samples and CPU comparison before supporting a speedup claim.</p>
 <p><strong>Approach:</strong> List what Report B records that Report A lacks: data type, size, seed, warm-ups, sample count, identities and an error bound.</p>
@@ -233,11 +232,17 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Why it is correct:</strong> The 12 MB payload is exact; extra allocations depend on libraries and must be budgeted as distinct lines.</p>
 <p><strong>A plausible wrong approach:</strong> Budgeting exactly 12 MB of free memory fails when the runtime context and alignment add their own usage.</p>
 <p><strong>How to verify:</strong> The reference asserts 3 <em> 1_000_000 </em> 4 == 12_000_000; test that oversized requests are rejected before allocation.</p>
+<h3 id="self-check-answers">Self-check answers<a class="heading-anchor" href="#self-check-answers" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>Which four observations must stay separate in a receipt?</strong> Hardware access, successful compilation, successful execution and acceptable numerical output.</li>
+<li><strong>Why does a seed alone not reproduce an input?</strong> The generator, dtype, shape and distribution must also be recorded to regenerate the same values.</li>
+<li><strong>Why add a 33-element fixture to the vector-add oracle?</strong> It crosses a 32-thread boundary, exposing tail and bounds assumptions that a three-element case cannot.</li>
+</ol>
 <h3 id="numerical-reference-and-its-limits">Numerical reference and its limits<a class="heading-anchor" href="#numerical-reference-and-its-limits" aria-label="Link to this section">#</a></h3>
-<p>The complete CPU model is <a href="../references/cuda-008_cpu.py.html">here</a>. Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It also asserts an exercise answer that the guide&#x27;s model leaves for you to derive: <code>assert 3 * 1_000_000 * 4 == 12_000_000</code>. It does not claim CUDA execution, concurrency safety or a performance measurement.</p>
+<p>The <a href="../references/cuda-008_cpu.py.html">CPU reference</a> reproduces worked example 1 and prints <code>{&#x27;surface&#x27;: &#x27;CPU reference&#x27;, &#x27;shape&#x27;: [3], &#x27;result&#x27;: [3, 0, 4], &#x27;gpu_executed&#x27;: False}</code>.</p>
+<p>It also asserts an exercise answer you derive yourself: <code>assert 3 * 1_000_000 * 4 == 12_000_000</code></p>
 <h3 id="transfer-review">Transfer review<a class="heading-anchor" href="#transfer-review" aria-label="Link to this section">#</a></h3>
-<p>Their raw payload is 12 MB total. Add library workspace and runtime overhead separately and reject larger input before allocation.</p>
-<p>A complete explanation must name its inputs, the unchanged mathematical contract, the changed boundary or resource condition, and the evidence still needed on actual hardware. Preserve a CPU baseline even after a GPU path becomes available.</p></article>
+<p>Their raw payload is 12 MB total. Add library workspace and runtime overhead separately and reject larger input before allocation.</p></article>
   </main>
 </body>
 </html>

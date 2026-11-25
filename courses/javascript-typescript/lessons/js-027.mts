@@ -2,19 +2,17 @@
 
 export {};
 // Exercise 1: Await and narrow a result: predict an edited check
-// Copy Example A into a scratch `main.mts` and change `assert.deepEqual(await
-// lookup('missing'), { ok: false, error: 'not_found' });` to `assert.deepEqual(await
-// lookup('missing'), { ok: true, error: 'not_found' });` inside its check. Before running
-// it, predict whether the check still passes and explain why; then restore it.
-// Expected: The changed run fails with an `AssertionError` at `assert.deepEqual(await
+// In a scratch copy of Example A, change `assert.deepEqual(await lookup('missing'), { ok:
+// false, error: 'not_found' });` to `assert.deepEqual(await lookup('missing'), { ok: true,
+// error: 'not_found' });` inside its check. Does the check still pass?
+// Expected: The edited run fails with an `AssertionError` at `assert.deepEqual(await
 // lookup('missing'), { ok: true, error: 'not_found' });`. Restoring `assert.deepEqual(await
 // lookup('missing'), { ok: false, error: 'not_found' });` brings back: known value 7; absent
 // error not_found.
 
 // Exercise 2: Show a failure result does not invoke catch: debug a regression
-// A regression changed one token in Example B, so one line now reads `let caught = 1;`. Run
-// Example B with that line, use the failing check to locate the defect and repair it without
-// changing the check.
+// A regression made one Example B line read `let caught = 1;`. Locate and repair it without
+// editing the check.
 // Expected: Before the repair the run fails with an `AssertionError` at
 // `assert.equal(caught, 0)`. Restoring `let caught = 0;` brings back: catch count 0; result
 // still not_found.

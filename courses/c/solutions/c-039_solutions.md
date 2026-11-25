@@ -1,6 +1,8 @@
 # c-039: explained solutions
 
-Compare after an attempt or explicit reveal. The complete executable reference, `c-039_solution.c`, implements all six cases, from the "sum one field in records" case to the "transfer a partial block" case, in one `main.c`.
+`c-039_solution.c` assembles the "sum one field in records" case through the "transfer a partial block" case in one `main.c`.
+
+Compare only after an attempt: [Compare and transfer](../STUDY-GUIDE.md#compare-and-transfer).
 
 ## Mechanism and assumptions
 
@@ -10,7 +12,7 @@ sizeof reports actual object size including padding. offsetof gives a field offs
 
 ## Exercise 1: Sum one field in records: change one input
 
-Copy worked example 1, the "sum one field in records" case, into a scratch pad and change `struct Point records[] = {{1, 10}, {2, 20}, {3, 30}};` to `struct Point records[] = {{2, 10}, {2, 20}, {3, 30}};`. Before running, predict which CHECK fails and which value it sees in place of the worked result (the result is 6); then run it and restore the original line.
+In worked example 1, change `struct Point records[] = {{1, 10}, {2, 20}, {3, 30}};` to `struct Point records[] = {{2, 10}, {2, 20}, {3, 30}};`. Predict which value the CHECK on `sum == 6` sees, then run and restore.
 
 The unchanged code is worked example 1:
 
@@ -22,13 +24,15 @@ for (size_t i = 0; i < 3; i++)
 CHECK(sum == 6);
 ```
 
-**Expected:** With `struct Point records[] = {{2, 10}, {2, 20}, {3, 30}};` the run stops with `Check failed` at the CHECK on `sum == 6`, because the "sum one field in records" case no longer shows that the result is 6. Restoring `struct Point records[] = {{1, 10}, {2, 20}, {3, 30}};` brings that observation back.
+**Expected:** `Check failed` at `sum == 6`; restoring `struct Point records[] = {{1, 10}, {2, 20}, {3, 30}};` passes again.
+
+**Verify:** Name the value that made `sum == 6` false, where worked example 1 showed that the result is 6.
 
 This traversal touches a selected field in each record. Whether unused fields waste bandwidth depends on the real layout and workload.
 
 ## Exercise 2: Compute the same result by columns: debug a regression
 
-A regression changed one token in worked example 2, the "compute the same result by columns" case, so one line now reads `sum -= x[i];`. Run the example with that line, use the failing CHECK to find why the result is also 6 no longer holds and repair the line without changing the CHECK.
+Worked example 2 now has a line reading `sum -= x[i];`. Repair it so that the result is also 6 again.
 
 The unchanged code is worked example 2:
 
@@ -41,7 +45,9 @@ for (size_t i = 0; i < 3; i++)
 CHECK(sum == 6 && y[2] == 30);
 ```
 
-**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `sum == 6 && y[2] == 30`. Once the line reads `sum += x[i];` again, the "compute the same result by columns" case again shows that the result is also 6.
+**Expected:** `Check failed` at `sum == 6 && y[2] == 30` until the line reads `sum += x[i];` again.
+
+**Verify:** Explain how `sum -= x[i];` changes the value `sum == 6 && y[2] == 30` tests, using your failing and repaired runs.
 
 Equivalent semantics must be established before comparing timings. The y column remains independent storage.
 
@@ -55,6 +61,8 @@ CHECK(offsetof(struct Point, y) > offsetof(struct Point, x));
 ```
 
 **Expected:** Offsets are within the struct and preserve declaration order.
+
+**Verify:** Keep a CHECK equivalent to `offsetof(struct Point, y) > offsetof(struct Point, x)` and name a defined input that would make it fail.
 
 The check does not assume an exact padding count. Layout is an ABI property that may vary by implementation.
 
@@ -75,6 +83,8 @@ CHECK(visits == 6 && sum == 21);
 
 **Expected:** Exactly six visits occur.
 
+**Verify:** Keep a CHECK equivalent to `visits == 6 && sum == 21`. Control edit: changing `sum += values[i];` to `sum -= values[i];` must fail it; then restore it.
+
 Deterministic operation evidence is different from elapsed-time measurement, which needs repeated controlled experiments.
 
 ## Exercise 5: Preserve result under blocking
@@ -91,6 +101,8 @@ CHECK(sum == 21);
 ```
 
 **Expected:** The total remains 21.
+
+**Verify:** Keep a CHECK equivalent to `sum == 21`. Control edit: changing `for (size_t block = 0; block < 6; block += 2)` to `for (size_t block = 0; block < 6; block -= 2)` must fail it; then restore it.
 
 This toy blocking change preserves bounds exactly. Real blocked loops must handle a final partial block.
 
@@ -113,8 +125,10 @@ CHECK(sum == 15);
 
 **Expected:** The total is 15 without a sixth access.
 
+**Verify:** Keep a CHECK equivalent to `sum == 15`. Control edit: changing `for (size_t block = 0; block < 5; block += 2) {` to `for (size_t block = 0; block < 5; block -= 2) {` must fail it; then restore it.
+
 The incomplete final block is a correctness case that an optimization must retain. Timing only even-sized inputs would miss it.
 
 ## After comparison
 
-Add a fresh distinguishing input for the "transfer a partial block" case to your own c-039 source. Explain why every access in the case code inside `main` stays within a live object and each owned resource is released. An expected locality failure belongs in the test contract; undefined behavior does not. Keep diagnostics and sanitizer evidence for the "compute the same result by columns" case apart from ordinary output: the fixture proves its stated locality, array of structs and struct of arrays assumptions, not universal safety.
+Sum `y` over four `struct Point` records and over a separate `int ys[4]` column holding the same values, and CHECK that the totals match. The records span 32 bytes, assuming 4-byte `int` and no padding, while the column spans 16. Explain why that count predicts better cache use for the column, and why it is still not a timing measurement on your host.

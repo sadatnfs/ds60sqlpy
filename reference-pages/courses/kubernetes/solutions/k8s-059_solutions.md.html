@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/kubernetes/solutions/k8s-059_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="k8s-059-explanatory-solutions">k8s-059: explanatory solutions<a class="heading-anchor" href="#k8s-059-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit reveal. These explanations describe the synthetic topology and stated API contracts. They are not fabricated runtime receipts.</p>
+<p>Attempt each exercise first, then compare (<a href="../STUDY-GUIDE.md.html#solutions-and-the-ai-tutor">study guide</a>).</p>
 <h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
 <p>Egress policy controls selected Pods&#x27; outgoing traffic under an enforcing implementation. A deny-by-default design begins by selecting the workloads and then allowing the dependencies they actually require. It can expose hidden dependencies such as DNS, metadata endpoints, package downloads or external APIs.</p>
 <p>DNS is itself network traffic. Blocking it can make every named dependency fail even while a direct allowed IP connection works. UDP is common for DNS, but TCP can also be required. The correct DNS target and policy depend on the cluster’s DNS deployment and any node-local cache.</p>

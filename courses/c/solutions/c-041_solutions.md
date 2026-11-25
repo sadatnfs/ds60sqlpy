@@ -1,6 +1,8 @@
 # c-041: explained solutions
 
-Compare after an attempt or explicit reveal. The complete executable reference, `c-041_solution.c`, implements all six cases, from the "parse a valid list" case to the "transfer exact grammar boundaries" case, in one `main.c`.
+`c-041_solution.c` assembles the "parse a valid list" case through the "transfer exact grammar boundaries" case in one `main.c`.
+
+Compare only after an attempt: [Compare and transfer](../STUDY-GUIDE.md#compare-and-transfer).
 
 ## Mechanism and assumptions
 
@@ -10,7 +12,7 @@ The parser alternates between expecting a digit and accepting further digits or 
 
 ## Exercise 1: Parse a valid list: predict an edited check
 
-Copy worked example 1 into a scratch pad and change `CHECK(parse_list("1,20,3", out, 3, &count) && count == 3 && out[0] == 1 &&` to `CHECK(parse_list("1,20,3", out, 3, &count) && count == 3 && out[1] == 1 &&` inside its CHECK. Before running, predict whether the CHECK still holds and explain why; then restore it.
+In worked example 1, change `CHECK(parse_list("1,20,3", out, 3, &count) && count == 3 && out[0] == 1 &&` to `CHECK(parse_list("1,20,3", out, 3, &count) && count == 3 && out[1] == 1 &&`. Predict whether the CHECK still holds and why, then run and restore.
 
 The unchanged code is worked example 1:
 
@@ -21,13 +23,15 @@ CHECK(parse_list("1,20,3", out, 3, &count) && count == 3 && out[0] == 1 &&
       out[1] == 20 && out[2] == 3);
 ```
 
-**Expected:** With `CHECK(parse_list("1,20,3", out, 3, &count) && count == 3 && out[1] == 1 &&` the run stops with `Check failed` at the CHECK on `parse_list("1,20,3", out, 3, &count) && count == 3 && out[0] == 1 && out[1] == 20 && out[2] == 3`, because the "parse a valid list" case no longer shows that three values are returned in order. Restoring `CHECK(parse_list("1,20,3", out, 3, &count) && count == 3 && out[0] == 1 &&` brings that observation back.
+**Expected:** `Check failed`: `CHECK(parse_list("1,20,3", out, 3, &count) && count == 3 && out[1] == 1 &&` is false, although three values are returned in order.
+
+**Verify:** Explain which claim `CHECK(parse_list("1,20,3", out, 3, &count) && count == 3 && out[1] == 1 &&` makes that the state fails; restoring `CHECK(parse_list("1,20,3", out, 3, &count) && count == 3 && out[0] == 1 &&` passes again.
 
 The parser validates the entire grammar before publishing output.
 
 ## Exercise 2: Reject an empty field: debug a regression
 
-A regression changed one token in worked example 2, the "reject an empty field" case, so one line now reads `unsigned out[3] = {10, 9, 9};`. Run the example with that line, use the failing CHECK to find why the parse fails and prior output is unchanged no longer holds and repair the line without changing the CHECK.
+Worked example 2 now has a line reading `unsigned out[3] = {10, 9, 9};`. Repair it so that the parse fails and prior output is unchanged again.
 
 The unchanged code is worked example 2:
 
@@ -37,7 +41,9 @@ size_t count = 7;
 CHECK(!parse_list("1,,3", out, 3, &count) && out[0] == 9 && count == 7);
 ```
 
-**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `!parse_list("1,,3", out, 3, &count) && out[0] == 9 && count == 7`. Once the line reads `unsigned out[3] = {9, 9, 9};` again, the "reject an empty field" case again shows that the parse fails and prior output is unchanged.
+**Expected:** `Check failed` at `!parse_list("1,,3", out, 3, &count) && out[0] == 9 && count == 7` until the line reads `unsigned out[3] = {9, 9, 9};` again.
+
+**Verify:** Explain how `unsigned out[3] = {10, 9, 9};` changes the value `!parse_list("1,,3", out, 3, &count) && out[0] == 9 && count == 7` tests, using your failing and repaired runs.
 
 Two separators in a row violate the required-digit state.
 
@@ -53,6 +59,8 @@ CHECK(!parse_list("1,2,", out, 3, &count));
 
 **Expected:** The parse fails.
 
+**Verify:** Keep a CHECK equivalent to `!parse_list("1,2,", out, 3, &count)`. Control edit: `CHECK(parse_list("1,2,", out, 3, &count));` must fail; then restore it.
+
 The final comma requires another number. Accepting it silently would change the declared grammar.
 
 ## Exercise 4: Enforce output capacity
@@ -67,6 +75,8 @@ CHECK(!parse_list("1,2,3", out, 2, &count) && out[0] == 9 && count == 7);
 
 **Expected:** The operation fails without an overflow.
 
+**Verify:** Keep a CHECK equivalent to `!parse_list("1,2,3", out, 2, &count) && out[0] == 9 && count == 7`. Control edit: changing `unsigned out[2] = {9, 9};` to `unsigned out[2] = {10, 9};` must fail it; then restore it.
+
 The destination capacity is a hard bound, not a suggestion. The staged parser rejects excess before copying.
 
 ## Exercise 5: Reject numeric overflow
@@ -80,6 +90,8 @@ CHECK(!parse_list("999999999999999999999999", out, 1, &count));
 ```
 
 **Expected:** The range check rejects it.
+
+**Verify:** Keep a CHECK equivalent to `!parse_list("999999999999999999999999", out, 1, &count)`. Control edit: `CHECK(parse_list("999999999999999999999999", out, 1, &count));` must fail; then restore it.
 
 The arithmetic check occurs before the overflowing multiplication.
 
@@ -96,8 +108,10 @@ CHECK(!parse_list(" 1", out, 1, &count));
 
 **Expected:** Zero is valid; space-prefixed input is not.
 
+**Verify:** Keep a CHECK equivalent to `parse_list("0", out, 1, &count) && out[0] == 0 && count == 1`. Control edit: `CHECK(parse_list("1", out, 1, &count) && out[0] == 0 && count == 1);` must fail; then restore it.
+
 Whitespace handling is a deliberate grammar choice. A higher-level input layer can normalize it explicitly if the product requires that policy.
 
 ## After comparison
 
-Add a fresh distinguishing input for the "transfer exact grammar boundaries" case to your own c-041 source. Explain why every access in `parse_list` stays within a live object and each owned resource is released. An expected grammar failure belongs in the test contract; undefined behavior does not. Keep diagnostics and sanitizer evidence for the "reject an empty field" case apart from ordinary output: the fixture proves its stated grammar, parser state and staged output assumptions, not universal safety.
+Parse `"7,08"` into two slots and CHECK that this grammar, as written, accepts the leading zero and stores 8. Then parse `"4294967296"` and CHECK the rejection while `out` keeps its previous contents, because values are staged in `temporary`. Explain which branch rejects the overflow before `value * 10U + digit` can wrap, and decide whether your own grammar should accept `08`.

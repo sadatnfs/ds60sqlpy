@@ -1,6 +1,6 @@
 # docker-041: explanatory solutions
 
-Compare after your own attempt or an explicit reveal. These explain the supplied teaching fixtures; they are not engine results. The mechanism is explained in `courses/docker/guides/docker-041.md`.
+These answers explain teaching fixtures, not engine results; the mechanism is in [the guide](../guides/docker-041.md).
 
 ## Exercise 1: Predict the lost-update result.
 
@@ -88,4 +88,4 @@ Compare after your own attempt or an explicit reveal. These explain the supplied
 
 ## Check your transfer
 
-A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.
+Three replicas need a routing layer instead of the fixed host port, and the counter needs a shared store with transactions, such as a database that increments in one statement, because file replacement and an in-process lock cannot serialize writers in different containers. The simplest correct alternative is one replica with an explicit single writer, measured first: a standard-library server answering small JSON requests may well carry two hundred learners. A load test showing that one replica saturates is the evidence that would justify the larger design.

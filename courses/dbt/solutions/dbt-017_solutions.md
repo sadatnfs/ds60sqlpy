@@ -2,7 +2,7 @@
 
 Produce a historical feature relation with explicit entity, time and version semantics.
 
-The executable reference contains the two complete worked cases with assertions. The changes below explain the independent practice and its limits.
+The reference joins requests to features where both `event_at` and `known_at` precede the cutoff and keeps the latest row per request. The event-time-only version returns 999 for request 1. The proof covers this ordering rule on three events, not clock skew or corrections that arrive later. See [how these answers are laid out](../STUDY-GUIDE.md#answers-and-references).
 
 
 ## 1. Add an unmatched request

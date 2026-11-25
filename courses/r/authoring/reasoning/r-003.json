@@ -42,5 +42,7 @@
       "wrong": "Calling `as.numeric()` on the combined vector to rescue the number. That produces NA for \"A\" with a coercion warning, so one value is lost to fix the other.",
       "verify": "`is.double(c(1, 2))` returns TRUE for the separate measurement vector, and `c(\"A\", 2)[2] + 1` fails with a non-numeric argument error."
     }
-  ]
+  ],
+  "run_note": "The starter pairs three amounts (10, 20 and 30) with only two fees (1 and 2) and prints both lengths. Run it before writing any arithmetic. R would recycle the shorter fee vector with only a warning, so the printed lengths 3 and 2 are the evidence your guard must act on before any fee is added to an amount.",
+  "checks_note": "The checks confirm scalar multiplication over `c(2, 4, 6)`, that the corrected fees match the amounts in length and give 11, 22 and 33, that the guard accepts one fee or one fee per amount but rejects two fees for three amounts, that adding to `numeric(0)` stays empty, and that mixing `\"A\"` with 2 coerces to character. They cannot catch recycling in a calculation the guard never sees."
 }

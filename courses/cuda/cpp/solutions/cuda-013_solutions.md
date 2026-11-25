@@ -4,8 +4,6 @@
 
 cudaMalloc requests a number of bytes and returns a device allocation handle through a pointer argument. For n float elements, calculate n*sizeof(float), checking multiplication bounds for externally supplied sizes. cudaMemcpy also takes bytes and an explicit direction in the simple runtime API. The input owner must remain alive until the transfer finishes, and the device output must remain allocated until its final consumer completes. Host-to-device transfer supplies input; device-to-host transfer produces an observable result. A pointer is not a container with a length field, so the surrounding program must preserve size and lifetime metadata.
 
-The separate [CPU reference](../references/cuda-013_cpu.py) checks the chapter's bounded model. It does not execute CUDA or establish GPU timing. Compare after attempting the worksheet or explicitly choosing to reveal solutions.
-
 ## Exercise 1
 
 Copy \([2,4,6,8]\) as float32. Four elements require 16 bytes. A request for four bytes copies only one float. Zero-initialized test data can hide that error, so use distinct nonzero entries and validate the entire result after the round trip.
@@ -78,12 +76,18 @@ Release every earlier owned allocation and preserve the original error. Do not r
 
 **How to verify:** Inject an output allocation failure and check that inputs are freed and the error is reported.
 
+## Self-check answers
+
+1. **Why does worked example 1 use distinct nonzero values?** Zero-initialized data can hide a short copy, while distinct values reveal exactly which elements arrived.
+2. **What do the sentinel values in worked example 2 detect?** Writes beyond the intended range, though they cannot rule out every invalid access.
+3. **When may the host input buffer be freed after a copy to the device?** Only after the transfer has completed, which a blocking `cudaMemcpy` guarantees on return.
+
 ## Numerical reference and its limits
 
-The complete CPU model is [here](../references/cuda-013_cpu.py). Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It also asserts an exercise answer that the guide's model leaves for you to derive: `assert 33 * 8 == 264`. It does not claim CUDA execution, concurrency safety or a performance measurement.
+The [CPU reference](../references/cuda-013_cpu.py) reproduces worked example 1 and prints `{'guarded_output': [-99, 2, 4, 6, -99], 'four_float32_bytes': 16}`.
+
+It also asserts an exercise answer you derive yourself: `assert 33 * 8 == 264`
 
 ## Transfer review
 
 Release every earlier owned allocation and preserve the original error. Do not read nonexistent output or report a successful numerical comparison.
-
-A complete explanation must name its inputs, the unchanged mathematical contract, the changed boundary or resource condition, and the evidence still needed on actual hardware. Preserve a CPU baseline even after a GPU path becomes available.

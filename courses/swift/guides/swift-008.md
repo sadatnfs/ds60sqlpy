@@ -24,9 +24,9 @@ Ordinary value arguments are passed with value semantics. An inout parameter exp
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles the saved pad as `main.swift` with Swift 6 language checking. An explicit `@main` type contains `static func main() async throws`; the fixed compiler uses `-parse-as-library -swift-version 6`. The examples use the standard library and portable Foundation. `precondition` makes a violated invariant fail the process. The fixed pad accepts one source file, without arbitrary command arguments, interactive input or dependency installation. SwiftUI, UIKit, Apple simulators and application signing belong to the separately prepared macOS/Xcode project labs, never the Linux pad.
+Example B compiles only with the ampersand at the call site. Remove it in task 4 and the compiler reports that passing a value to an inout parameter requires an explicit `&`; copy that diagnostic into your notes. Tasks 2 and 3 change function signatures, so update every call site before running.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Compile contract, starter stop and success marker: [running a lesson](../STUDY-GUIDE.md#running-a-lesson).
 
 
 
@@ -34,7 +34,7 @@ Start with the answer-free learner artifact in your saved classroom pad. It deli
 
 `func area(width: Int, height: Int) -> Int` exposes labels. `_ value` removes the external label. `inout` in a declaration pairs with `&` at the call site. `return` supplies the result and exits.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+Each example ends with a trace; method: [tracing a program](../STUDY-GUIDE.md#tracing-a-program).
 
 ## Worked example / walkthrough
 
@@ -60,6 +60,8 @@ struct LessonMain {
 
 **Observe:** Labels show which dimension each argument supplies.
 
+**Trace.** `area(width:height:)` has two labeled parameters and a single-expression body, so the product is returned implicitly. The call `area(width: 3, height: 4)` binds 3 to `width` and 4 to `height` and returns 12. The second call passes 0 for the width; the product is 0, and the check records that the function currently accepts a zero dimension. Writing the labels in the other order, `area(height: 4, width: 3)`, is a compile error, because labeled arguments must appear in declaration order.
+
 ### Example B: Make mutation explicit
 
 The ampersand makes the mutation boundary visible instead of hiding it behind a normal-looking value call.
@@ -83,6 +85,8 @@ struct LessonMain {
 
 **Observe:** The caller explicitly grants mutation and observes 5.
 
+**Trace.** `count` is a `var` holding 4. The call `increment(&count)` gives the function access to that variable's storage for the duration of the call: inside, `value += 1` reads 4 and writes 5 back. When the function returns, `count` holds 5, which the check confirms. The `&` is required so that mutation is visible where it happens, and the argument must be a variable. Passing a `let` constant or a literal is a compile error, because neither has storage the function could write.
+
 ## Exercises
 
 1. **Predict and explain.** Explain each argument label and local parameter name.
@@ -97,13 +101,15 @@ struct LessonMain {
 
 6. **Transfer and justify.** Choose return values or inout for an API and justify who owns state changes.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Log each task in the [evidence table](../STUDY-GUIDE.md#recording-exercise-evidence) before opening the explanation.
 
 ## Common pitfalls and diagnosis
 
 Labels are part of API usability. Inout access cannot overlap conflicting access to the same storage. Do not use mutation merely to avoid returning a small value.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+For task 3, an inout normalizer works too, so the useful counterexample is about the caller. A pure function can normalize `let original = -5` and leave the constant untouched, while an inout version refuses a `let` and forces the caller to make it mutable. Then test 0 and a negative dimension under the validation policy you documented for task 5.
+
+Repair routine: [building a regression case](../STUDY-GUIDE.md#building-a-regression-case).
 
 ## Progressive hints
 
@@ -113,11 +119,15 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 ## Self-check and next step
 
-Explain Argument label, Parameter, Inout without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+Using `func move(from start: Int)`, explain the difference between an argument label and a parameter name. Say when `_` is a reasonable label. Explain why `swap(&a, &a)` fails to compile with the message that inout arguments are not allowed to alias, and what Swift's exclusive-access rule protects.
+
+Then follow the general [self-check routine](../STUDY-GUIDE.md#self-check-routine) and save your pad.
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://docs.swift.org/swift-book/documentation/the-swift-programming-language/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+[Documentation](https://docs.swift.org/swift-book/documentation/the-swift-programming-language/): The Functions chapter of the Swift book covers argument labels, omitted labels and in-out parameters; Memory Safety explains conflicting access.
+
+Provenance and limits: [sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

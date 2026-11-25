@@ -24,9 +24,9 @@ An inner join drops keys with no partner. A left join needs an explicit absence 
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles your saved pad as `Program.cs` in its fixed .NET 10 project. C# 14 is the matching language generation. This route uses the prepared framework libraries; it does not accept arbitrary project files, NuGet packages, command arguments or interactive input. The explicit `Program.Main` entrypoint makes compilation and execution visible. `Check` throws on a false condition in every build configuration, unlike conditional debugging assertions.
+Both examples use tuples with named elements, such as `Kind` and `Amount`, instead of declaring row classes. For task 4, `ToDictionary` over duplicate keys throws `ArgumentException` with the message that an item with the same key has already been added, which is usually the first sign of an unexpected duplicate.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Compile contract, starter stop and success marker: [running a lesson](../STUDY-GUIDE.md#running-a-lesson).
 
 
 
@@ -34,7 +34,7 @@ Start with the answer-free learner artifact in your saved classroom pad. It deli
 
 `GroupBy(keySelector)` returns groups with Key and enumerable members. `Join` uses one key selector per side. A grouped lookup such as ToLookup preserves all matches, while ToDictionary requires unique keys.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+Each example ends with a trace; method: [tracing a program](../STUDY-GUIDE.md#tracing-a-program).
 
 ## Worked example / walkthrough
 
@@ -82,6 +82,8 @@ internal static class Program {
 
 **Observe:** Three event rows become two category totals.
 
+**Trace.** The input grain is one row per event: three rows. `GroupBy(row => row.Kind)` forms group a with amounts 2 and 3 and group b with 4. `ToDictionary` takes each group's Key and the sum of its amounts, giving 5 for a and 4 for b. The output grain is one row per kind, and the grand total, 9, is unchanged.
+
 ### Example B: Expose duplicate-key multiplication
 
 A key relationship does not imply one-to-one cardinality. Validate uniqueness if the domain requires exactly one match.
@@ -126,6 +128,8 @@ internal static class Program {
 
 **Observe:** One left row becomes two joined rows.
 
+**Trace.** `left` has one row with key 1, and `right` has two rows with key 1. `Join` pairs each left row with every right row whose key matches, so it produces two results, Lx and Ly. The output has more rows than the left input, and summing a left-side amount after this join would count it twice.
+
 ## Exercises
 
 1. **Predict and explain.** State the input and output grain for each example.
@@ -140,13 +144,15 @@ internal static class Program {
 
 6. **Transfer and justify.** Design checks that distinguish one-to-one, one-to-many and many-to-many joins before aggregation.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Log each task in the [evidence table](../STUDY-GUIDE.md#recording-exercise-evidence) before opening the explanation.
 
 ## Common pitfalls and diagnosis
 
 Aggregating after an unintended many-to-many join can inflate totals. ToDictionary throws on duplicate keys rather than choosing a winner. Sorting is needed when presentation order is part of the contract.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+For task 4, duplicate metadata rows for one item turn a single total into two joined rows, so a sum after the join doubles. Check `GroupBy(key).Any(g => g.Count() > 1)` on the side that should be unique. For task 5, `Join` drops an unmatched key silently, while `ToLookup` returns an empty group for a missing key instead of throwing.
+
+Repair routine: [building a regression case](../STUDY-GUIDE.md#building-a-regression-case).
 
 ## Progressive hints
 
@@ -156,11 +162,15 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 ## Self-check and next step
 
-Explain Grain, Cardinality, Join key without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+State the input and output grain for both examples and the total that must be conserved in Example A. Explain why `Join` can return more rows than either input. For task 6, describe one check that tells a one-to-many relationship from a many-to-many one before you aggregate.
+
+Then follow the general [self-check routine](../STUDY-GUIDE.md#self-check-routine) and save your pad.
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://learn.microsoft.com/en-us/dotnet/csharp/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+[Documentation](https://learn.microsoft.com/en-us/dotnet/csharp/): LINQ's grouping and join operations are covered in the standard query operator articles, including `GroupBy`, `Join` and `ToLookup`.
+
+Provenance and limits: [sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

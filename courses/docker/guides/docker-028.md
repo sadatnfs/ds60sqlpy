@@ -32,11 +32,9 @@ The examples below inspect local metadata and a conceptual release record. They 
 
 ## How to use this lesson
 
-The classroom displays this guide and saves your worksheet, `courses/docker/lessons/docker-028.md`. Its Run button does not control your Docker engine. Docker engine access is powerful host access, so the classroom deliberately receives no engine socket. Work through the supplied examples without starting anything, then use the optional host lab only in your own disposable project. Reading a command, parsing YAML and actually running the project are different forms of evidence.
+The classroom saves `courses/docker/lessons/docker-028.md` and holds no engine socket ([host-lab setup](../STUDY-GUIDE.md#host-lab-setup)).
 
-Use Bash in Linux, macOS Terminal, or Ubuntu under WSL 2 on Windows. The supported engine runs Linux containers. The maintained fixture is `courses/docker/fixtures/compose-lab/`; its README explains copying it into a new ignored learner directory, checking the engine, building locally with visible logs, and using the fixed project name `ds60-docker-study`. The fixture uses port 18080 on host loopback. Stop if that project name or port belongs to unrelated work; choose a new project name consistently in your own copy. Never paste a command against a remote Docker context simply because it is currently selected.
-
-For Dockerfile examples, create a file named `Dockerfile` in a scratch project. YAML snippets describe a fragment unless explicitly called a complete file. Text transcripts are synthetic illustrations, not claims about your machine. Do not substitute a real password, token or private registry into a checked-in example. **How to use the lessons** in the [subject README](../README.md) collects these rules in one place.
+**Host lab.** Give the existing image a second name without contacting any registry: `docker image tag ds60-docker-study:local localhost:5000/ds60-study:rehearsal`. Run `docker image ls --format '{{.Repository}}:{{.Tag}} {{.ID}}'` and find both names beside one ID, because tagging only adds a reference. Read the new reference from left to right: `localhost:5000` is the registry, since a first component holding a port, a dot or the word `localhost` names a host; `ds60-study` is the repository; `rehearsal` is the tag. Compare `python:3.12-slim`, which expands to `docker.io/library/python:3.12-slim`, and the README's mirror reference, whose registry is `mirror.gcr.io`. Do not push. Remove the extra name with `docker image rm localhost:5000/ds60-study:rehearsal`; the engine prints `Untagged:` and keeps the image, which `docker image ls ds60-docker-study` confirms. Nothing else was created.
 
 ## Worked example / walkthrough
 
@@ -67,7 +65,7 @@ Use real verified values in a private or public record as appropriate.
 
 ## Six progressive exercises
 
-For each exercise, name the object involved and the phase of its lifetime before changing anything, then vary only the condition the task names. Exercises that ask you to predict, explain, compare or diagnose keep their answers in the solutions file; the others show the evidence to look for.
+Answer-type prompts keep their answers in the solutions file ([exercise rules](../STUDY-GUIDE.md#exercise-rules)).
 
 ### Exercise 1: Parse the components of an image reference.
 
@@ -101,13 +99,19 @@ For each exercise, name the object involved and the phase of its lifetime before
 
 Publishing by reusing a mutable tag such as `latest`. Leaving credentials in the build context. Assuming a local tag was uploaded.
 
-Exercise 4 is this chapter's boundary case: Diagnose an overwritten mutable release tag. Resolve the tag to its current digest and compare it with the digest recorded beside the earlier acceptance evidence. Preserve the original failure and the exact changed field before retrying. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
+Exercise 4 is this chapter's boundary case: Diagnose an overwritten mutable release tag. Resolve the tag to its current digest and compare it with the digest recorded beside the earlier acceptance evidence.
+
+A reference can carry a tag and a digest at once, such as `ds60-study:1.0@sha256:` followed by the hash, and it reads as if the engine checks both. It does not: when a digest is present, the pull resolves by digest alone and the tag plays no part in resolution, so a stale tag beside a correct digest still pulls the right bytes, and a familiar tag beside a wrong digest pulls whatever that digest names or fails. Reviewers who glance at the tag can approve an artifact they never meant to ship. In release records and deployment files, treat the digest as the identity and the tag as a label for people, and check the digest character by character against the release record, since nothing else in the reference is enforced.
+
+Never trade a safety control for a passing example ([safety rules](../STUDY-GUIDE.md#safety-rules)).
 
 ## Retrieval, transfer and next steps
 
-Close the explanations first. List the fields a release identity record needs and say which one never changes after publication. Then reconstruct worked example 2 (Design a release identity record) with one different value, predict what changes, and name which of registry, repository, tag, digest and publication review the change touches.
+**Retrieval.** List the fields a release identity record needs and say which one never changes after publication.
 
-When a host session ends, run `docker compose -p ds60-docker-study down` from your fixture copy. It removes the project's containers and network but keeps named volumes; deleting a volume is a separate, deliberate reset described in the fixture README.
+**Transfer case.** `ds60-docker-study:local` and `registry.example.com/team/ds60-study:1.0` show the same image ID. If you remove the first name, does the second still run, and what would pushing the second create?
+
+Then run the [retrieval loop](../STUDY-GUIDE.md#retrieval-and-cleanup) and end any host session with its cleanup.
 
 ## Primary references
 

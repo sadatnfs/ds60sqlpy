@@ -194,7 +194,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/swift/solutions/swift-003_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="swift-003-explanation-and-comparison">swift-003: explanation and comparison<a class="heading-anchor" href="#swift-003-explanation-and-comparison" aria-label="Link to this section">#</a></h2>
-<p>Attempt the six guide tasks before opening this comparison. The executable reference is <a href="swift-003_solution.swift.html">swift-003_solution.swift</a>. It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.</p>
+<p>Reference program: <a href="swift-003_solution.swift.html">swift-003_solution.swift</a>, covering both examples and the executed answers.</p>
+<p>Attempt the tasks first; see <a href="../STUDY-GUIDE.md.html#comparing-with-the-explanation">comparing with the explanation</a>.</p>
 <h3 id="why-the-two-examples-differ">Why the two examples differ<a class="heading-anchor" href="#why-the-two-examples-differ" aria-label="Link to this section">#</a></h3>
 <p><strong>Observe overflow without crashing:</strong> The flag is essential: the partial result alone cannot identify the intended mathematical sum. 255 plus one reports overflow and a wrapped partial result of zero.</p>
 <p><strong>Use a numerical comparison policy:</strong> The force unwrap is limited to authored literal fixtures known to parse; external text needs conditional handling. The floating result meets the stated tolerance and the decimal fixture retains decimal intent.</p>
@@ -256,7 +257,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The maximum itself is still a valid sum; only the step past 255 overflows, so testing 255 + 0 and 255 + 1 pins the boundary from both sides.</p>
 <h4 id="task-6-transfer-and-justify">Task 6: Transfer and justify<a class="heading-anchor" href="#task-6-transfer-and-justify" aria-label="Link to this section">#</a></h4>
 <p>Choose a numeric representation and rounding policy for a price calculation.</p>
-<p>No single reference answer exists: several designs can satisfy this transfer task. Build yours from the task 3 answer above (Write checked quantity addition that returns an explicit rejected outcome) and the mechanism described below, and state one limitation of your choice.</p>
+<p>No single answer exists; extend task 3 using the <a href="../STUDY-GUIDE.md.html#open-transfer-tasks">open transfer routine</a>.</p>
 <h3 id="solution-reasoning">Solution reasoning<a class="heading-anchor" href="#solution-reasoning" aria-label="Link to this section">#</a></h3>
 <p><strong>Approach.</strong> Example A calls <code>addingReportingOverflow</code> on <code>UInt8.max</code> and reads both the <code>partialValue</code> and the <code>overflow</code> flag. Example B compares <code>0.1 + 0.2</code> with 0.3 under an explicit tolerance of <code>1e-12</code> and repeats the sum with <code>Decimal</code> parsed from literal strings. The task 3 answer rejects a quantity sum that overflows instead of wrapping it.</p>
 <p><strong>Why it is correct.</strong> <code>UInt8</code> holds 0 through 255, so 255 + 1 has no representation; the reporting call returns 0 as the wrapped bits and sets <code>overflow</code> to true. The ordinary sum 2 + 3 stays in range with partial value 5. Binary <code>Double</code> cannot store 0.1 exactly, so a tolerance is the honest comparison, while <code>Decimal</code> keeps base-ten digits.</p>
@@ -268,7 +269,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><code>addingReportingOverflow</code> returns a tuple with partialValue and overflow. <code>&amp;+</code> explicitly wraps. <code>abs(actual - expected) &lt; tolerance</code> expresses a simple absolute error bound appropriate only to the stated scale.</p>
 <p>A tolerance that hides a unit error is not a numerical policy. Avoid wrapping operators for business totals unless modulo behavior is intended. Never force-unwrap untrusted numeric text.</p>
 <h3 id="review-before-continuing">Review before continuing<a class="heading-anchor" href="#review-before-continuing" aria-label="Link to this section">#</a></h3>
-<p>Run the reference and confirm that it prints <code>swift-003: passed</code>, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.</p></article>
+<p>Run the reference and confirm it prints <code>swift-003: passed</code>, then rerun the guide&#x27;s counterexample.</p></article>
   </main>
 </body>
 </html>

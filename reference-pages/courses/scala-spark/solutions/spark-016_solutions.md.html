@@ -194,7 +194,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/scala-spark/solutions/spark-016_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="spark-016-explained-paired-reference-solutions">spark-016: Explained paired reference solutions<a class="heading-anchor" href="#spark-016-explained-paired-reference-solutions" aria-label="Link to this section">#</a></h2>
-<p>Read the <a href="../guides/spark-016.md.html">guide</a> and attempt one language first. The <a href="spark-016_solution.scala.html">Scala reference</a> and <a href="spark-016_solution.py.html">PySpark reference</a> are complete single-file programs with explicit local sessions and finally-based stop. Each compares with literal expectations; matching two implementations alone would not rule out a shared mistake.</p>
+<p>Attempt the <a href="../guides/spark-016.md.html">guide</a> exercises first.</p>
+<p>References: <a href="spark-016_solution.scala.html">Scala</a>, <a href="spark-016_solution.py.html">PySpark</a>.</p>
 <h3 id="exercises-and-reasoning">Exercises and reasoning<a class="heading-anchor" href="#exercises-and-reasoning" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-build-a-multiplicity-ledger-before-joining-facts">Exercise 1: Build a multiplicity ledger before joining facts<a class="heading-anchor" href="#exercise-1-build-a-multiplicity-ledger-before-joining-facts" aria-label="Link to this section">#</a></h4>
 <p>Return key, fact_rows, dimension_rows, predicted_inner for the union of key buckets. Merge NULL diagnostic buckets explicitly, but predict zero ordinary-equality pairs for NULL. Order keys with NULL last.</p>
@@ -313,8 +314,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>COUNT DISTINCT ignores NULL and collapses duplicates, so equality with total row count establishes the declared nonnull unique-key condition. The reviewed subset is supplied as a business decision for this fixture, not inferred from ingestion order. Once the dimension satisfies that contract, the left enrichment preserves one row per fact and its additive amount. Unmatched labels remain visible for a separate coverage policy.</p>
 <p><strong>Verification evidence:</strong> Catch raw-dimension rejection, assert every enriched row and reconcile count 6, total 210.</p>
 <h3 id="execution-and-interpretation">Execution and interpretation<a class="heading-anchor" href="#execution-and-interpretation" aria-label="Link to this section">#</a></h3>
-<p>Run the complete reference in its prepared fixed worker. Its first check (Build a multiplicity ledger before joining facts) is built inside the program, so opening the lesson fetches nothing; it expects: <code>A:(2, 3, 6)</code>, <code>B:(1, 1, 1)</code>, <code>C:(1, 0, 0)</code>, <code>D:(1, 0, 0)</code>, <code>E:(0, 1, 0)</code>, <code>NULL:(1, 1, 0)</code>. Predicted inner rows sum to 7. The final success line prints only after every reference assertion passes.</p>
-<p>Local plan, partition and resource evidence does not establish cluster-scale performance; session cleanup is explicit.</p></article>
+<p>The references check the multiplicity ledger key by key, the seven equality pairs, the ten-row left join with exactly seven matched dimension rows, the semi and anti partitions <code>[1, 2, 3]</code> and <code>[4, 5, 6]</code>, and the eight-pair NULL-safe join that adds only <code>(5, 105)</code>. For enrichment they expect the raw dimension to be rejected and then join the reviewed rows 103, 104 and 106, checking six facts, total 210 and each label.</p>
+<p>The final print, <code>spark-016: six PySpark reference contracts passed; Spark=</code> with the version, or the Scala equivalent, confirms these counts for a seven-row dimension. It does not tell you how the planner would choose a join strategy for large tables; that is the subject of the plan and broadcast lessons that follow.</p></article>
   </main>
 </body>
 </html>

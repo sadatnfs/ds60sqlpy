@@ -28,6 +28,7 @@ if PACKAGE not in sys.modules:
     package_spec.loader.exec_module(package)
 common = importlib.import_module(f"{PACKAGE}.common")
 fixtures = importlib.import_module(f"{PACKAGE}.fixtures")
+focus_notes = importlib.import_module(f"{PACKAGE}.focus").FOCUS
 BASE, STAGES = common.BASE, common.STAGES
 model_artifacts, dump = fixtures.artifacts, fixtures.dump
 
@@ -39,6 +40,9 @@ BOUNDARY = (
     "compare and export source; do not interpret a comparison "
     "or completion marker as a passed program run."
 )
+
+
+STUDY = "../STUDY-GUIDE.md"
 
 
 REFERENCE_TOPICS = {
@@ -273,8 +277,17 @@ def starter_source(spec):
     )
 
 
+def focus(spec):
+    "Return the lesson-specific draft, model, misconception, check and reference notes."
+
+    note = focus_notes[spec["id"]]
+    assert set(note) == {"draft", "model", "misconception", "check", "reference"}, spec["id"]
+    return note
+
+
 def guide(spec):
     key = spec["id"]
+    note = focus(spec)
     level = (
         "beginner" if spec["stage"] <= 2 else "intermediate" if spec["stage"] <= 6 else "advanced"
     )
@@ -285,25 +298,20 @@ def guide(spec):
     content = [
         f"# {key}: {spec['title']}",
         "",
-        (
-            f"**Stage {spec['stage']}: {STAGES[spec['stage'] - 1]}.** Level: "
-            f"{level}. Read the mechanisms, trace the worked cases and retain "
-            f"your own draft."
-        ),
+        (f"**Stage {spec['stage']}: {STAGES[spec['stage'] - 1]}.** Level: {level}."),
         f"**Direct prerequisites:** {prereqs}",
         "",
         "## How to use this offline lesson",
         "",
-        BOUNDARY,
+        (
+            f"{note['draft']} The [offline study boundary]"
+            f"({STUDY}#offline-study-boundary) explains what a worked table can show."
+        ),
         "",
         (
-            f"Open the [starter](../lessons/{key}.dax). Compare the [named "
-            f"reference](../solutions/{key}_reference.dax) and "
-            f"[reasoning](../solutions/{key}_solutions.md) when ready. The "
-            f"[model specification](../models/{spec['model']}/model.json) "
-            f"identifies every fixture table, column type, key and relationship. "
-            f"The [fixture handbook](../models/README.md) displays the original "
-            f"data and explains each table grain."
+            f"Files: [starter](../lessons/{key}.dax), "
+            f"[reference](../solutions/{key}_reference.dax) and "
+            f"[reasoning](../solutions/{key}_solutions.md)."
         ),
         "",
         "## The question and the mechanism",
@@ -323,13 +331,9 @@ def guide(spec):
         "## Model and context contract",
         "",
         (
-            "The ordinary star follows Product → Sales, Customer → "
-            "Sales and Date → Sales through OrderDate. The ShipDate "
-            "relationship is inactive unless a case explicitly "
-            "activates it. Filters flow from the one side to the many "
-            "side. Additional analytical tables have only the "
-            "relationships declared in their named model; a similar "
-            "column name does not create a relationship."
+            f"{note['model']} See the [model specification]"
+            f"(../models/{spec['model']}/model.json) and the "
+            f"[shared star rules]({STUDY}#the-retail-star)."
         ),
         "",
         (
@@ -340,16 +344,7 @@ def guide(spec):
             "+------> Sales\n```"
         ),
         "",
-        *[line for note in model_note(spec, model_spec(spec["model"])) for line in (note, "")],
-        (
-            "All amounts in ordinary Sales are USD after the line "
-            "discount, before tax and returns. The Date fixture is "
-            "complete for 2024 and 2025; a short result table is a "
-            "selected slice, not the whole calendar. JSON `null` in "
-            "the worked-results sidecar means DAX BLANK, not the text "
-            '"null".'
-        ),
-        "",
+        *[line for text in model_note(spec, model_spec(spec["model"])) for line in (text, "")],
         "## Worked cases",
         "",
     ]
@@ -400,15 +395,11 @@ def guide(spec):
         ]
     if spec["extra"]:
         content += ["## A deeper model or scope review", "", spec["extra"], ""]
+    content += ["## A misconception to test", "", note["misconception"], ""]
     content += [
         "## Practice: prediction, construction and diagnosis",
         "",
-        (
-            "Retain your formula or written reasoning, the stated "
-            "context, contributing rows or values, and a conclusion "
-            "with its unit. These notes are your own study record; "
-            "they do not show that a formula ran."
-        ),
+        f"Record each answer as the [practice routine]({STUDY}#practice-routine) describes.",
         "",
     ]
     labels = [
@@ -427,15 +418,7 @@ def guide(spec):
         "",
         "## Self-check and next step",
         "",
-        (
-            "Explain one changed result without quoting the formula "
-            "alone. Identify which rows, filters, relationship or "
-            "evaluation scope changed, then construct a counterexample "
-            "to a plausible wrong interpretation. Keep your draft "
-            "separate from the supplied reference. A small correct "
-            "derivation does not certify performance, model security "
-            "or broad expertise."
-        ),
+        f"{note['check']} The [self-check routine]({STUDY}#self-check-routine) applies too.",
         "",
     ]
     if spec["number"] < 60:
@@ -459,13 +442,7 @@ def guide(spec):
     content += [f"- [{reference_label(url)}]({url})" for url in spec["sources"]]
     content += [
         "",
-        (
-            "Documentation was reviewed for this original course on "
-            "2026-10-25. Version-sensitive features have explicit "
-            "notes. Source/model checks and independent fixture "
-            "arithmetic are not a DAX parser, compiler, semantic "
-            "engine, real RLS test or performance measurement."
-        ),
+        f"Review date and evidence limits: [study guide]({STUDY}#references-and-evidence-limits).",
         "",
         "## Ask an AI tutor about this lesson",
         "",
@@ -487,13 +464,10 @@ def solution(spec):
     content = [
         f"# {key}: explained reference and practice reasoning",
         "",
-        BOUNDARY,
-        "",
         (
-            f"The complete [reference source]({key}_reference.dax) and [named "
-            f"model](../models/{spec['model']}/model.json) belong together. The "
-            f"reference-results sidecar binds both exact files by SHA-256. Those "
-            f"hashes identify bytes; they do not certify DAX execution."
+            f"{focus(spec)['reference']} Read it beside the [reference source]"
+            f"({key}_reference.dax); the [study guide]({STUDY}#answers-and-references) "
+            f"explains how the sidecar binds it to the model."
         ),
         "",
         "## Worked-case reconciliation",
@@ -621,8 +595,119 @@ def artifacts():
         {"schema_version": 1, "track_id": "dax", "lessons": records}
     )
     files["courses/dax/README.md"] = course_readme(lessons)
+    files["courses/dax/STUDY-GUIDE.md"] = study_guide()
     files["courses/dax/models/README.md"] = model_handbook(files)
     return files
+
+
+def study_guide():
+    "Shared routine that every lesson guide and solution links instead of repeating."
+
+    text = [
+        "# DAX study guide",
+        "",
+        (
+            "This page holds the routine shared by every DAX lesson. Each guide "
+            "links here instead of repeating it, and keeps its own question, model "
+            "notes, worked cases, misconception, practice and self-check. Return to "
+            "the [course map](README.md) to choose a lesson."
+        ),
+        "",
+        "## Offline study boundary",
+        "",
+        BOUNDARY,
+        "",
+        (
+            "Each lesson has three files. The editable starter lives in `lessons/`, "
+            "and the named reference (`.dax`) and explained reasoning (`.md`) live "
+            "in `solutions/`. Read the mechanisms, trace the worked cases and retain "
+            "your own draft before you open the reference. Every worked table is "
+            "hand-derived for the named reference and fixture, so editing a draft "
+            "never recalculates it."
+        ),
+        "",
+        "## The retail star",
+        "",
+        (
+            "The ordinary star follows Product → Sales, Customer → Sales and "
+            "Date → Sales through OrderDate. The ShipDate relationship is inactive "
+            "unless a case explicitly activates it. Filters flow from the one side "
+            "to the many side. Additional analytical tables have only the "
+            "relationships declared in their named model; a similar column name "
+            "does not create a relationship."
+        ),
+        "",
+        "```text\nProduct (one)  --> Sales (many) <-- Customer (one)\n"
+        "                       ^\n                       | active OrderDate\n"
+        "                    Date (one)\n                       | inactive ShipDate\n"
+        "                       +------> Sales\n```",
+        "",
+        (
+            "All amounts in ordinary Sales are USD after the line discount, before "
+            "tax and returns. The Date fixture is complete for 2024 and 2025; a "
+            "short result table is a selected slice, not the whole calendar. JSON "
+            '`null` in the worked-results sidecar means DAX BLANK, not the text "null".'
+        ),
+        "",
+        (
+            "Each lesson links its model specification, which identifies every "
+            "fixture table, column type, key and relationship. The [fixture "
+            "handbook](models/README.md) displays the original data and explains "
+            "each table grain."
+        ),
+        "",
+        "## Practice routine",
+        "",
+        (
+            "Retain your formula or written reasoning, the stated context, "
+            "contributing rows or values, and a conclusion with its unit. These "
+            "notes are your own study record; they do not show that a formula ran. "
+            "Read the progressive hints one at a time and retry between them."
+        ),
+        "",
+        "## Self-check routine",
+        "",
+        (
+            "Explain one changed result without quoting the formula alone. Identify "
+            "which rows, filters, relationship or evaluation scope changed, then "
+            "construct a counterexample to a plausible wrong interpretation. Keep "
+            "your draft separate from the supplied reference. A small correct "
+            "derivation does not certify performance, model security or broad "
+            "expertise."
+        ),
+        "",
+        "## Answers and references",
+        "",
+        (
+            "Each lesson's solutions page reconciles the worked cases and explains "
+            "every practice answer. The complete reference source and the named "
+            "model belong together. The [reference-results "
+            "sidecar](reference-results.json) binds both exact files by SHA-256. "
+            "Those hashes identify bytes; they do not certify DAX execution."
+        ),
+        "",
+        "## References and evidence limits",
+        "",
+        (
+            "Documentation was reviewed for this original course on 2026-10-25. "
+            "Version-sensitive features have explicit notes in their lessons. "
+            "Source/model checks and independent fixture arithmetic are not a DAX "
+            "parser, compiler, semantic engine, real RLS test or performance "
+            "measurement."
+        ),
+        "",
+        "## Tutor guidance",
+        "",
+        (
+            "Each guide ends with a prompt for `$guide-ds60sqlpy-learning`. The "
+            "tutor reviews your draft and prediction, asks you to enumerate rows "
+            "and context, and gives one progressive hint before any reference "
+            "comparison. It must not claim to execute or compile DAX, connect to "
+            "Power BI or mark mastery from a matching source string."
+        ),
+        "",
+    ]
+    return "\n".join(text)
 
 
 def course_readme(lessons):
@@ -675,6 +760,12 @@ def course_readme(lessons):
             "and binds the exact reference and model bytes with "
             "SHA-256. No checked-in file is evidence that a DAX "
             "engine, model role or external service was executed."
+        ),
+        "",
+        (
+            "The [study guide](STUDY-GUIDE.md) collects the routine every "
+            "lesson shares: the offline boundary, the retail star rules, the "
+            "practice and self-check routines and how references are bound."
         ),
         "",
         "## Course map",

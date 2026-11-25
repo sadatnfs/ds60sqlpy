@@ -1,6 +1,6 @@
 # cpp-021: explanations and reference observations
 
-Attempt the learner tasks before opening this document. The executable reference checks the bounded normal and boundary examples; the six explanations below cover the deliberate changes and manual checks.
+The [executable reference](cpp-021_solution.cpp) checks that `Cents` equality is symmetric and transitive. The explanations cover strong types, the zero identity and the checked addition near `LLONG_MAX` in Exercise 6. How to compare: [study guide](../STUDY-GUIDE.md#compare-with-the-solutions).
 
 ## Mechanism
 

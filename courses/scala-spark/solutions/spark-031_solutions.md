@@ -1,6 +1,8 @@
 # spark-031: Explained paired reference solutions
 
-Read the [guide](../guides/spark-031.md) and attempt one language first. The [Scala reference](spark-031_solution.scala) and [PySpark reference](spark-031_solution.py) are complete single-file programs with explicit local sessions and finally-based stop. Each compares with literal expectations; matching two implementations alone would not rule out a shared mistake.
+Attempt the [guide](../guides/spark-031.md) exercises first.
+
+References: [Scala](spark-031_solution.scala), [PySpark](spark-031_solution.py).
 
 ## Exercises and reasoning
 
@@ -202,6 +204,7 @@ The final table is checked against an independent value contract as well as the 
 
 ## Execution and interpretation
 
-Run the complete reference in its prepared fixed worker. Its first check (Publish complete input files atomically) is built inside the program, so opening the lesson fetches nothing; it expects: Three input files, each with 3 complete JSON records; no staging temporary file remains. Reusing `batch-0.json` is rejected. The final success line prints only after every reference assertion passes.
+The references publish the three files, require exactly 3 JSON files in `input`, and require a second `batch-0.json` to raise `ValueError`. The unstarted stream must be streaming with fields `(id, bigint)`, `(team, string)` and `(amount, bigint)` while no query is active, and the summary must keep the columns `team`, `row_count`, `known_amounts` and `total_amount`. After the `AvailableNow` run, the query must be inactive, the progress rows must have unique batch IDs, a total input of 9, and exactly three positive batches of 3 rows each.
 
-Local plan, partition and resource evidence does not establish cluster-scale performance; session cleanup is explicit.
+The memory table must equal `(A, 4, 3, 15)`, `(B, 3, 2, 35)` and `(C, 2, 2, 30)`, and a plain batch read of the same input folder must produce the same three rows; across teams the counts sum to 9 rows, 7 known amounts and 80. The run prints the `input_progress=` pairs and then `spark-031: six PySpark reference contracts passed; Spark=` with the version, or the Scala line. A finite file stream on one machine shows the bookkeeping of a streaming query; it does not test sources that never stop or failures in the middle of a batch.
+

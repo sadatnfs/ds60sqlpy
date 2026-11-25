@@ -42,5 +42,7 @@
       "wrong": "Setting `tolerance = 0.1` so a stubborn check passes. `all.equal(0.31, 0.3, tolerance = 0.1)` returns TRUE, silently accepting a 3 percent error in an amount that should have been exact to the cent.",
       "verify": "Run both tolerances on 0.31 versus 0.3: 1e-12 gives a difference message, while 0.1 gives TRUE. That contrast is the evidence that a loose tolerance can hide a defect."
     }
-  ]
+  ],
+  "run_note": "The starter holds 19 items, a group size of 5 and the identifier `\"0017\"` stored as text, and prints only the item count. Before adding anything, predict the type of each input and check with `typeof()`. The identifier must stay character, because converting it to a number would drop the leading zeros that make it an identifier rather than a quantity.",
+  "checks_note": "The assertions confirm that combining `1L` with 2.5 yields a double, that `\"0017\"` keeps four characters, that `19 %/% 5` is 3 with 4 left over, that `2L == 2` holds while `identical(2L, 2)` does not, and that `all.equal()` accepts 0.1 + 0.2 as 0.3 but rejects 0.31. They do not choose a tolerance for your own measurements; that remains a decision about the data."
 }

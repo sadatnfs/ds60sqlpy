@@ -24,9 +24,11 @@ Use enums for meaningful alternatives, not merely to avoid strings. Adding a sta
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles the saved pad as `main.rs` with pinned Rust 1.99.1, edition 2024, and the prepared Arrow 60 library. `assert!` and `assert_eq!` remain active in normal builds. The fixed pad accepts one source file without arbitrary arguments, interactive input, Cargo manifests or package installation. The main function returns `Result<(), Box<dyn std::error::Error>>` so later examples can propagate errors with `?`; the final `Ok(())` means this fixture completed successfully. Standard library and Arrow examples remain offline after image preparation. Multi-file Cargo and external ecosystem projects have separate explicit preparation workflows.
+This lesson's programs need only the prelude and their own helpers. A passing run prints `rust-013: passed`.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Pad setup and limits: [Run a lesson](../STUDY-GUIDE.md#run-a-lesson).
+
+Before you run anything, follow [Attempt a lesson](../STUDY-GUIDE.md#attempt-a-lesson).
 
 
 
@@ -34,7 +36,9 @@ Start with the answer-free learner artifact in your saved classroom pad. It deli
 
 `enum Outcome { Ready(u32), Failed(String) }` declares alternatives. `match value` consumes or borrows according to the matched expression. Matching `&value` can inspect owned payloads without moving them.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+**Reading Example A (Render a success payload, code below).** `enum Outcome { Ready(u32), Failed(String) }` declares a type with exactly two variants, and each variant carries its own payload: a `u32` count for `Ready` and a `String` reason for `Failed`. A value is always exactly one variant, so an `Outcome` can never hold both a count and a reason. `render(value: &Outcome)` borrows the value and uses `match` to choose an arm. The patterns `Outcome::Ready(count)` and `Outcome::Failed(reason)` both test the variant and bind its payload to a name that is in scope only inside that arm. Because `value` is a reference, match ergonomics make those bindings references too, and nothing is moved out. `format!` builds a new `String` in each arm. The `match` is exhaustive: adding a third variant without a new arm is rejected with E0004, non-exhaustive patterns. Example A constructs `Outcome::Ready(4)`, so only the first arm runs.
+
+Method for tracing your own variants: [Trace a program](../STUDY-GUIDE.md#trace-a-program).
 
 ## Worked example / walkthrough
 
@@ -109,13 +113,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 6. **Transfer and justify.** Design valid transitions between states and explain which transitions should be rejected.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Record each task as in [Keep evidence for each task](../STUDY-GUIDE.md#keep-evidence-for-each-task).
 
 ## Common pitfalls and diagnosis
 
 Matching an owned enum can move its String payload. Use a borrowed match when retaining the original is intended. Avoid a wildcard that silently renders new domain states as success.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+To turn a pitfall into a test, see [Design a regression case](../STUDY-GUIDE.md#design-a-regression-case).
 
 ## Progressive hints
 
@@ -123,13 +127,23 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 2. Compare Example B (Render a distinct failure) with Example A and name the first line whose behavior differs. Its observation is: Failure preserves its reason and remains a distinct state.
 3. Before opening the explanation, test your task 3 attempt against this lesson's main pitfall: Matching an owned enum can move its String payload.
 
+Tempting approaches to rule out before you compare:
+
+- **Task 1.** Assuming every `Outcome` has both a count and a reason, with one of them empty, describes a struct with optional fields rather than this enum.
+- **Task 2.** Adding `_ => String::from("count:0")` instead of a `Loading` arm compiles but reports an unfinished import as a successful one with zero rows.
+- **Task 5.** Testing only `Outcome::Ready(4)` and calling the enum covered leaves the `Failed` arm unexercised, so a typo such as `eror:` would ship unnoticed.
+
 ## Self-check and next step
 
-Explain Enum variant, Payload, Exhaustive match without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+Which payload does each variant of the lesson's enum carry, and why can a failed outcome never also report a count? After adding a `Loading` variant, which code does the compiler force you to revisit, and which code would a `_` arm hide? Why does matching on an owned enum value move its `String` payload?
+
+Then work through [Self-check and review](../STUDY-GUIDE.md#self-check-and-review).
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://doc.rust-lang.org/book/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+Read [The Rust Book, 6.1 Defining an Enum](https://doc.rust-lang.org/book/ch06-01-defining-an-enum.html) for variants that carry different payloads.
+
+What the classroom does and does not prove: [Sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

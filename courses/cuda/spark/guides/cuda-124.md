@@ -1,10 +1,17 @@
 # cuda-124: Python UDFs, pandas APIs and GPU-aware ML boundaries
 
-**Route:** CUDA Python and machine learning / GPU Spark specialization. **Stage:** advanced. **Prerequisites:** `cuda-116`, `cuda-118`. Allow several sessions when the hardware experiment is new; the chapter is not a deadline.
+**Route:** CUDA Python and machine learning / GPU Spark specialization. **Stage:** advanced. **Prerequisites:** `cuda-116`, `cuda-118`.
 
-## What you will be able to explain
+Pacing, evidence labels and platform rules: [CUDA study guide](../../STUDY-GUIDE.md).
 
-By the end, you can **classify four APIs**, **define GPU-aware UDF ownership**, and **design quality parity tests** with evidence. Start with the two worked cases, then use the editable CPU model to make the quantities concrete.
+## Learning objectives
+
+- Classify four APIs.
+- Replace an equivalent simple UDF.
+- Explain Arrow limits.
+- Define GPU-aware UDF ownership.
+- Distinguish SQL and ML acceleration.
+- Design quality parity tests.
 
 ## Mechanism and vocabulary
 
@@ -40,9 +47,13 @@ A built-in multiplication expression is visible in the relational plan. A Python
 
 Calling a GPU library from every partition does not automatically coordinate multi-GPU training. Each task needs a defined device share and bounded memory contract.
 
-## Portable executable model
+## How to run the CPU model
 
-The **CPU reference model** variant runs this bounded worked example using `python-core`. It uses only the Python standard library, small synthetic values and no network. Its purpose is to expose the arithmetic or contract behind the chapter. The separate reference includes assertions for the stated observations.
+Edit the copy; the [reference](../references/cuda-124_cpu.py) adds assertions.
+
+```sh
+python courses/cuda/spark/lessons/cuda-124_cpu.py
+```
 
 ```python
 values = [1, None, 3]
@@ -57,7 +68,7 @@ assert [expression(x) for x in values] == expected
 print("CPU expression parity oracle:", expected)
 ```
 
-**Expected observation:** Null-preserving expression produces [2, None,6].
+**Expected observation:** Null-preserving expression produces [2, None, 6].
 
 **Variable trace.** Before running the model, predict these final values; then compare:
 
@@ -66,81 +77,62 @@ print("CPU expression parity oracle:", expected)
 | `values` | `[1, None, 3]` |
 | `expected` | `[2, None, 6]` |
 
-Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.
-
 ## Practice and transfer
+
+Record each attempt in the [worksheet](../lessons/cuda-124.md) before opening hints.
 
 ### Exercise 1: Classify four APIs
 
 **Trap to avoid:** Treating a pandas UDF as equivalent to a built-in because it is vectorized ignores the process boundary and serialization that still surround it.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 2: Replace an equivalent simple UDF
 
 **Trap to avoid:** Replacing a UDF that maps null to 0 with the built-in, which keeps null, changes results while appearing to be the same arithmetic.
-
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 3: Explain Arrow limits
 
 **Trap to avoid:** Assuming that enabling Arrow moves UDF work to the GPU confuses data format with execution location.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 4: Define GPU-aware UDF ownership
 
 **Trap to avoid:** Calling a GPU library from every partition with no device assignment risks oversubscription and out-of-memory errors that appear only at higher concurrency.
-
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 5: Distinguish SQL and ML acceleration
 
 **Trap to avoid:** Reporting the whole pipeline as accelerated because the SQL plan shows GPU operators omits the training step.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 6: Design quality parity tests
 
 **Trap to avoid:** Comparing a GPU model trained on a different split with a CPU model attributes data differences to the backend.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ## Progressive hints
 
-Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.
+Hint *k* belongs to exercise *k*; open one at a time.
 
-1. Start from worked example 1 and mark the quantities needed for the task "Classify four APIs".
-2. Change one assumption in worked example 2 while preserving the declared contract: replace an equivalent simple UDF.
-3. Trace the CPU program's variables before adding hardware behavior: explain Arrow limits.
-4. Draw producers, consumers and the exact operation boundary for the task "Define GPU-aware UDF ownership".
-5. Separate what the small fixture establishes from what the real runtime must show: distinguish SQL and ML acceleration.
-6. Write a counterexample to an overbroad claim before you design quality parity tests.
+1. List the execution surfaces and say for each whether the work runs as Spark operators, a Python process or a local library.
+2. Check that the built-in expression returns null for a null input and keeps the same result type as the UDF.
+3. Ask what Arrow changes about moving data into a pandas UDF and what it leaves unchanged about where the body runs.
+4. Write down which device a GPU-aware UDF uses, how large each batch is and how memory is released afterward.
+5. Ask whether enabling SQL operator acceleration also accelerates a machine learning estimator.
+6. Use the same split, target, metric and preprocessing for both training paths before comparing time.
 
-## Common mistakes and self-review
+## Common mistakes and self-check
 
-Confusing a correct tiny example with a general implementation is the central review risk. For this chapter, challenge the assumption in worked example 2, then ask whether your change preserves the mechanism described above. If you change dtype, layout, ordering, batch size or backend, update the acceptance contract rather than silently reusing the old observation. Explain an unexpected result before trying random configuration changes.
+A common mistake is wrapping simple algebra such as `x*2` in a Python UDF. The expression disappears behind a process boundary and blocks optimization that a built-in expression would allow. Another is calling a GPU library from every partition without a resource contract, which can oversubscribe a device. Fix both by preferring built-in expressions whose null and type semantics match, and by giving GPU-aware UDFs an explicit device share, batch size and cleanup plan.
 
-Keep a small evidence table with columns **claim**, **input**, **expected observation**, **actual observation** and **limit**. For the first claim use `Classify four APIs`. For the final claim use `Design quality parity tests`. An unperformed GPU or cluster experiment remains pending even when the CPU model is correct.
+**Evidence limit:** The reference produces the null-preserving result `[2, None, 6]` in Python. It does not run pandas UDFs, Spark RAPIDS ML or a GPU library, so their execution surfaces and compatibility must be validated separately.
 
-## Platform and evidence contract
+1. Does Arrow make a pandas UDF's body run on the GPU?
+2. Why are SQL and ML acceleration validated separately?
+3. Why compare model quality as well as elapsed time?
 
-The reading worksheet and CPU reference model work through the ordinary Linux Docker classroom on macOS, Linux and Windows using WSL 2. They do not require an NVIDIA GPU. Their results are labeled CPU models or semantic oracles, not simulated hardware performance.
-
-Real CUDA work needs supported NVIDIA hardware, a compatible host driver and an explicitly prepared GPU runtime. An Apple GPU does not execute CUDA kernels. PyTorch MPS on a supported native Mac, ROCm on supported AMD hardware, or other vendor backends can provide separate accelerator learning routes; they need their own package and operation qualification and are not CUDA evidence. The ordinary Linux Docker classroom does not expose native Mac MPS automatically.
-
-Do not download packages, models or data by opening this lesson. Do not attach an engine socket, ambient cluster credentials or an arbitrary remote endpoint. A CPU pass, imported package, successful compilation, real GPU result and measured performance are distinct observations. Record the actual backend, data shape/dtype, source revision, versions and pending checks. A saved completion marker records learning progress, not hardware certification.
-
-GPU Spark is a separate owned external workflow. The ordinary `spark-local-scala` and `spark-local-python` profiles are CPU Spark. Keep the GPU plugin disabled or absent for a CPU-only baseline. Per-operator CPU fallback inside a working GPU plugin environment is a different condition from having no compatible GPU. Never mount a host Docker socket or ambient kubeconfig into an ordinary lesson worker.
+Answers: [self-check answers](../solutions/cuda-124_solutions.md#self-check-answers).
 
 ## Primary references
 
-- [cuDF Spark plugin release and compatibility matrix](https://nvidia.github.io/cudf-spark/docs/download.html)
 - [Supported Spark operators and expression types](https://nvidia.github.io/cudf-spark/docs/supported_ops.html)
-- [GPU Spark tuning guide](https://docs.nvidia.com/cudf-spark/latest/tuning-guide.html)
-- [Apache Spark SQL performance tuning](https://spark.apache.org/docs/latest/sql-performance-tuning.html)
 
-Use the version-matched documentation of your prepared environment. These references describe interfaces and supported boundaries; the chapter's synthetic examples and CPU models are original teaching material.
+Full lists: [documentation and sources](../../STUDY-GUIDE.md#documentation-and-sources).
 
 ## Ask an AI tutor about this lesson
 

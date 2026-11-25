@@ -256,7 +256,8 @@ def test_owned_generation_drift_and_literal_safety() -> None:
         assert "TODO" not in reference
         assert reference != build.starter_source(s)
         assert "have not been executed" in reference
-        assert "Worked tables describe" in build.guide(s)
+        assert "../STUDY-GUIDE.md#offline-study-boundary" in build.guide(s)
+    assert "Worked tables describe" in build.artifacts()["courses/dax/STUDY-GUIDE.md"]
     assert "synthetic timing data" in RECORDS[52]["cases"][0]["note"]
 
 

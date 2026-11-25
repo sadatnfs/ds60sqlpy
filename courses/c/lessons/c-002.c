@@ -2,24 +2,15 @@
 
 int main(void) {
   /* Exercise 1: Compare integer and floating division: change one input
-     Copy worked example 1, the "compare integer and floating division" case,
-     into a scratch pad and change `int whole = 7 / 2;` to `int whole = 8 / 2;`.
-     Before running, predict which CHECK fails and which value it sees in place
-     of the worked result (the results are 3 and 3.5); then run it and restore
-     the original line. Expected: With `int whole = 8 / 2;` the run stops with
-     `Check failed` at the CHECK on `whole == 3 && fraction == 3.5`, because the
-     "compare integer and floating division" case no longer shows that the
-     results are 3 and 3.5. Restoring `int whole = 7 / 2;` brings that
-     observation back. */
+     In worked example 1, change `int whole = 7 / 2;` to `int whole = 8 / 2;`.
+     Predict which value the CHECK on `whole == 3 && fraction == 3.5` sees, then
+     run and restore. Expected: `Check failed` at `whole == 3 && fraction
+     == 3.5`; restoring `int whole = 7 / 2;` passes again. */
 
   /* Exercise 2: Observe defined unsigned wrap: debug a regression
-     A regression changed one token in worked example 2, the "observe defined
-     unsigned wrap" case, so one line now reads `n -= 1U;`. Run the example with
-     that line, use the failing CHECK to find why the result is zero no longer
-     holds and repair the line without changing the CHECK. Expected: Before the
-     repair the run stops with `Check failed` at the CHECK on `n == 0U`. Once
-     the line reads `n += 1U;` again, the "observe defined unsigned wrap" case
-     again shows that the result is zero. */
+     Worked example 2 now has a line reading `n -= 1U;`. Repair it so that the
+     result is zero again. Expected: `Check failed` at `n == 0U` until the line
+     reads `n += 1U;` again. */
 
   /* Exercise 3: Inspect representation facts
      Check sizeof(char) and minimum CHAR_BIT.

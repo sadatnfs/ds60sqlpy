@@ -1,22 +1,26 @@
 # spark-033: Stateful deduplication and event identity
 
-Authored paired Scala/PySpark teaching content. The default fixtures are tiny, local and deterministic. Runtime acceptance, logical correctness and learner understanding remain separate evidence.
+Six deliveries describe four business events. One event is delivered twice, two different events carry the same amount, and one delivery has no event ID at all. Deduplication must keep `e1`, `e2` and `e3`, drop the replay of `e1`, send the missing identity to quarantine, and state how long Spark remembers which IDs it has seen.
 
 ## Level and prerequisites
 
-Advanced; approximately 105 minutes. Direct prerequisites: `spark-032`. The prepared baseline is Spark 4.3.0, Scala binary 2.13, JDK 17 and Python 3.12. Read the [execution baseline](../execution-baseline.md).
+Advanced; approximately 105 minutes. Direct prerequisites: `spark-032`. Pinned versions: [execution baseline](../execution-baseline.md).
 
 ## How to run this lesson
 
-Open `spark-033` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile, save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`; Python stages as `main.py` with a main guard. Each program creates its own `local[2]` session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.
+Shared run steps and profile rules: [study guide](../STUDY-GUIDE.md#run-a-paired-lesson).
 
-The [Scala learner](../lessons/spark-033.scala) and [PySpark learner](../lessons/spark-033.py) run two complete demonstrations and retain six explicit task stubs. Use the [explained solutions](../solutions/spark-033_solutions.md) only after an attempt or an explicit worked comparison; the [Scala reference](../solutions/spark-033_solution.scala) and [PySpark reference](../solutions/spark-033_solution.py) contain complete assertions. A bounded collect is used only for the declared tiny fixture; do not copy it onto an unbounded or large production table.
+Learner pads: [Scala](../lessons/spark-033.scala) and [PySpark](../lessons/spark-033.py).
+
+Open the [explained solutions](../solutions/spark-033_solutions.md) after an attempt.
+
+The first worked example lists four occurrences with three distinct IDs and a single amount value, and prints `Equal amounts are not equal event identities`. The second checks the planned files, three, two and one deliveries for six in total, and prints `Six source deliveries feed two independently checkpointed branches`.
 
 ## Learning objectives
 
 - Bound deduplication state while distinguishing duplicate delivery from legitimate equal-valued events.
-- State the input and output grain, schema, NULL policy and ordering before executing a transformation.
-- Compare each language implementation with independent literal expectations, not only with the other implementation.
+- Classify rows with a NULL `event_id` as `missing_event_id` before deduplication, and write the accepted and quarantine branches to separate Parquet sinks with separate checkpoints.
+- Deduplicate on `event_id` with `dropDuplicatesWithinWatermark` and a five-minute watermark, keep three distinct events that all have amount 10, and use `numRowsRemoved` to show that old ID state is eventually discarded.
 
 ## Vocabulary and concepts
 
@@ -52,7 +56,7 @@ All source files are atomically published under fresh owned scratch, each phase 
 
 ## Supplied local fixture
 
-The complete source creates the owned local session described above, then constructs this explicit fixture. The worked examples below run in that same main function; there is no hidden notebook state.
+File 0 holds delivery 1 (`e1`, 10, 00:01), delivery 2 (`e2`, 10, 00:02) and delivery 3 (NULL ID, 99, 00:02). File 1 holds delivery 4, a replay of `e1` at 00:01, and delivery 5 (`e3`, 10, 00:03). File 2 holds delivery 6, an `__advance__` event at 00:20 whose only job is to move the watermark. The source is read with `FAILFAST`, so malformed JSON stops the run instead of turning into NULL rows.
 
 ```scala
 import org.apache.spark.sql.functions._
@@ -210,11 +214,14 @@ Do not deduplicate by amount when identity is the contract. Do not merge all NUL
 
 ## Self-check
 
-Explain the contract of `classify` / `classify` without reading its solution. Then, from memory, state what Exercise 6 (Reconcile deliveries, quarantine, replay suppression and business totals) must produce: `Ledger(6, 5, 1, 4, 30)`. One known-ID delivery is suppressed as an in-horizon replay; three distinct equal-valued business events remain. Say which part of that result is evidence and what it still cannot show. Name the action in your trace that actually runs the plan.
+- Delivery 3 has amount 99. Why is it quarantined before deduplication instead of being treated as one more event with an unknown ID?
+- Deliveries 2 and 5 both have amount 10. Which column decides that both are kept, and what would deduplicating on `amount` remove?
+- Delivery 4 is a replay of `e1`. Why is it suppressed in this run, and under what condition could a much later replay of `e1` be accepted again?
+- The ledger is `(6, 5, 1, 4, 30)`. Explain each number and say which one includes the advancer.
 
 ## Next step
 
-Use the [course route](../README.md) to continue. Paired-language agreement is useful only when both outputs also satisfy the independent fixture contract. A successful local run is not evidence of cluster performance or production recovery.
+Go on to [spark-034: Stream-stream joins and bounded state](spark-034.md). Deduplication kept state for one stream; the next lesson joins two streams, where each side must remember the other's rows only for a bounded time.
 
 ## Primary sources and official APIs
 

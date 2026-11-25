@@ -1,6 +1,6 @@
 # web-039: explanatory solutions
 
-Open this after your own attempt. Each answer explains the lesson's synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in `courses/web-development/guides/web-039.md`.
+Attempt each exercise before reading; the mechanism is in `courses/web-development/guides/web-039.md` ([using these answers](../STUDY-GUIDE.md#solutions)).
 
 ## Exercise 1: Trace the statements executed after requirePositive(0).
 
@@ -76,4 +76,6 @@ Open this after your own attempt. Each answer explains the lesson's synthetic fi
 
 ## Reference comparison
 
-Open `courses/web-development/solutions/web-039_solution.php` only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; server lifecycle, persistence, concurrency and security need their own integration evidence.
+The reference requires that the failure was caught and cleanup ran, then requires requirePositive(3) to return 3. That catches a missing finally and a guard that rejects valid input. It does not test your parser's error text or a second exception type, so trigger each path yourself.
+
+Open `courses/web-development/solutions/web-039_solution.php` after saving your attempt ([comparing with the reference](../STUDY-GUIDE.md#references)).

@@ -194,8 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/deep-learning-tensorflow/solutions/tf-002_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="tf-002-worked-solutions">tf-002: worked solutions<a class="heading-anchor" href="#tf-002-worked-solutions" aria-label="Link to this section">#</a></h2>
-<p>Open this reference after an attempt or an explicit reveal request. Preserve your own version beside it. The <a href="../guides/tf-002.md.html">learner guide</a> contains the public fixture and its independent Expected/Verify contracts. These six sections correspond to the same six learner actions, rather than six answer steps for one task. A different implementation is acceptable when it preserves the stated input policy, observations and evidence boundary.</p>
-<p>The <a href="tf-002_solution.py.html">executable reference</a> exposes a <code>verify()</code> helper for authors and later comparison. It uses only local literals and the declared Python/NumPy environment. An assertion failure should retain its actual input and smallest failing observation. A passing reference is evidence about these fixed cases; use a changed fixture and a closed-reference explanation before recommending progression. The reading worksheet remains a reading exercise, regardless of the optional arithmetic checker.</p>
+<p>Compare after an attempt with the <a href="../guides/tf-002.md.html">learner guide</a> (<a href="../STUDY-GUIDE.md.html#after-the-solutions">comparison steps</a>).</p>
 <h3 id="exercise-1-trace-compatible-axes">Exercise 1: Trace compatible axes<a class="heading-anchor" href="#exercise-1-trace-compatible-axes" aria-label="Link to this section">#</a></h3>
 <p>Two vectors of shape (3,) align their single observation axes, so each input is subtracted from its paired target. The result is [-1,-2,-3]. A column target has shape (3,1); aligning it with a vector creates a (3,3) grid. Its rows are [-1,0,1], [-3,-2,-1], [-5,-4,-3]. This operation is legal broadcasting. The failure is the changed pairing meaning, which a later aggregate cannot infer or undo.</p>
 <p><strong>Expected:</strong> Vector residual shape (3,) with [-1,-2,-3]; column broadcast shape (3,3) with the displayed nine values.</p>
@@ -221,7 +220,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Expected:</strong> After dividing centimeters by 100, residuals are [0,0] meters; unconverted subtraction gives [99,198] and is semantically wrong.</p>
 <p><strong>Verify:</strong> Assert the converted result and name the meter unit explicitly in a comment or evidence note.</p>
 <h3 id="inspectable-reference-functions">Inspectable reference functions<a class="heading-anchor" href="#inspectable-reference-functions" aria-label="Link to this section">#</a></h3>
-<p>The core functions below make the input and reduction policies explicit. The separate executable file adds all six exercise checks. Do not replace a failed assertion with a flattering default value or remove the invalid-input case.</p>
+<p><code>paired_difference</code> refuses unequal shapes, empty vectors and nonfinite values instead of broadcasting a column against a vector. <a href="tf-002_solution.py.html">tf-002_solution.py</a> also asserts the (3,3) grid and the centimeter-to-meter transfer.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> __future__ <span class="syntax-keyword">import</span> annotations
 <span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
 
@@ -237,7 +236,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <span class="syntax-keyword">return</span> left <span class="syntax-operator">-</span> right</code></pre>
 <h3 id="retrieval-and-alternatives">Retrieval and alternatives<a class="heading-anchor" href="#retrieval-and-alternatives" aria-label="Link to this section">#</a></h3>
 <p>Without executing, predict the shape of a (2,) vector minus a (2,1) column. Explain why a pair guard should reject it even though NumPy can compute it. Then create a new paired centimeter/meter fixture and justify its conversion.</p>
-<p>After revealing this file, choose another fixture before treating the answer as independent retrieval evidence. Explain why the rejected case is invalid, not merely which exception class appeared. Alternative notation, array layout or a direct calculation is welcome when its domain meaning and denominator remain explicit. Keep implementation correctness separate from broad claims about unseen model quality, reliability or safety.</p></article>
+<p>Then follow the <a href="../STUDY-GUIDE.md.html#after-the-solutions">after-solutions routine</a>.</p></article>
   </main>
 </body>
 </html>

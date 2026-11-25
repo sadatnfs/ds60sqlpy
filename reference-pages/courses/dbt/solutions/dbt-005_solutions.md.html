@@ -195,7 +195,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="dbt-005-explained-reference">dbt-005: explained reference<a class="heading-anchor" href="#dbt-005-explained-reference" aria-label="Link to this section">#</a></h2>
 <p>Define and test a source freshness policy with an explicit clock and response.</p>
-<p>The executable reference contains the two complete worked cases with assertions. The changes below explain the independent practice and its limits.</p>
+<p>The reference declares a <code>landing.events</code> source with <code>loaded_at_field</code> and a one-hour <code>error_after</code>, seeds a single timestamp and runs <code>dbt source freshness</code>. It proves the policy compares that column with the current clock, not that the upstream system actually delivered on time. See <a href="../STUDY-GUIDE.md.html#answers-and-references">how these answers are laid out</a>.</p>
 <h3 id="1-change-the-threshold">1. Change the threshold<a class="heading-anchor" href="#1-change-the-threshold" aria-label="Link to this section">#</a></h3>
 <p>The outcome changes because the policy changed. Document who accepts that age and what decisions use the data.</p>
 <p><strong>Why it holds here:</strong> The stale fixture writes loaded_at as now minus two days while error_after is one hour, so sources.json reports error. Raising error_after to three days moves the boundary past the fixture&#x27;s 48 hour age without touching the data.</p>

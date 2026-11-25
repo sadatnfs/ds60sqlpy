@@ -73,33 +73,13 @@ small dataset does not establish a universal library winner.
 
 ## How to run this lesson
 
-**Default Docker classroom:** open `python-39` for its guide, notebook and capability notice. The default Core does not include the `ml` extra, so the complete legacy notebook is unavailable there until that app environment is deliberately prepared. Pressing Run or choosing a notebook kernel does not install packages.
+**Default Docker classroom:** XGBoost and LightGBM are absent from `python-39`, because the default Core does not include the `ml` extra. Fitting boosted trees yourself means adding `ml` via [CONTRIBUTING](../../../CONTRIBUTING.md); the host notebook environment and a Docker app image are separate, so neither install reaches the other.
 
-**Prepared browser alternative:** use the [ML engineering course](../../../courses/ml-engineering/guides/mle-001.md) in its declared runtime. Its supported examples have their own package and execution contract; this does not qualify every legacy optional extension.
-
-**Explicit legacy preparation:** retain the contributor extras in [CONTRIBUTING](../../../CONTRIBUTING.md) and add `ml` only when needed. See [dependency profiles](../../../docs/dependency-profiles.md) and [Docker app package options](../../../docs/docker-profiles.md) for deliberate preparation. A host notebook environment and a Docker app image are separate. Do not install packages inside a learner pad.
+**Prepared browser alternative:** The [model decision contract chapter](../../../courses/ml-engineering/guides/mle-001.md) asks which decision a boosted classifier would serve, and it runs in its own declared runtime.
 
 The complete starter imports XGBoost; LightGBM is an optional comparison. The later scikit-learn mechanism cells can run independently in a prepared data environment, but that does not qualify the XGBoost or LightGBM path.
 
-**Optional native notebook/editor route:** the instructions below describe
-separately prepared host tools. They are useful alternatives, not prerequisites
-for opening this lesson in the Docker classroom.
-
-1. Open the Day 39 learner notebook from this guide's **Next
-   step** section in VS Code or JupyterLab.
-2. Select the `Python (ds60sqlpy)` kernel. Start at the top and use
-   **Run All** only after making the written predictions; the default data examples are offline once the declared packages are prepared. Optional services and model assets have separate requirements.
-3. Keep experiments in new scratch cells. Do not edit the official
-   solution while attempting the numbered practice.
-4. Restart the kernel and run from the first cell before calling the
-   lesson complete. A clean run catches hidden state and stale
-   variables.
-
-Linux, macOS, or Ubuntu in Windows WSL 2:
-
-```bash
-.venv/bin/python -m jupyter lab
-```
+The [Python study guide](../../STUDY-GUIDE.md) covers the notebook route and preparing optional extras.
 
 ## Concept deep dive: sequential boosting, learning-rate budgets, and validation control
 
@@ -124,10 +104,6 @@ them.
 - **validation/early stopping:** uses a training-external validation boundary to choose round count; the final test remains untouched.
 
 ### Focused example A: watch staged predictions reduce residual error
-
-Before running the example, predict the shape, type, or direction of the
-result. Write the prediction down so that a surprise becomes evidence
-rather than something to overlook.
 
 ```python
 import numpy as np
@@ -211,9 +187,6 @@ for rate, rounds in ((0.2, 30), (0.03, 200)):
 
 Control boosting capacity with honest validation, early stopping, and reproducible optional backends. Ranking, calibration, and runtime are separate outcomes.
 
-Predict or plan before you run code. Use the hint only after an honest
-attempt, and record the evidence that would prove your result correct.
-
 3. **Early-stopping design:** Create train, validation, and final test boundaries for early stopping. Explain why using the test set as the early-stopping evaluation set invalidates the final score.
    **Progressive hint:** The stopping iteration is a selected hyperparameter. Only the validation set may guide it; the test set remains untouched.
 
@@ -271,8 +244,7 @@ matter alongside a validation score.
 
 ## Ask an AI tutor about this lesson
 
-The lesson is complete without an AI assistant. If you want optional
-coaching, copy this prompt into the AI tutor while the repository root is open:
+The lesson is complete without AI. For optional coaching, copy this prompt with the repository root open:
 
 ```text
 Tutor me through `python-39` (Day 39: Gradient Boosting, XGBoost, and LightGBM).

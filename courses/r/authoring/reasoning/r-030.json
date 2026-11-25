@@ -36,5 +36,7 @@
       "wrong": "Using an exportPattern that matches every name, which publishes validate_batch too, or saying the passing checks show latency improved.",
       "verify": "`grepl(\"validate_batch\", namespace, fixed = TRUE)` returns FALSE for all three lines."
     }
-  ]
+  ],
+  "run_note": "The starter supplies ids a, b and c, values 2, NA and 6, and the unit ms. Run it and predict the summary before building anything: three rows, two observed values, one missing and a mean of 4 over the observed denominator. Keeping rows and observed counts separate is what lets an all-missing batch report NA instead of a misleading zero.",
+  "checks_note": "The assertions confirm a summary of 3 rows, 2 observed, 1 missing and mean 4 in ms, an extended batch of 4 rows with mean 16/3, an all-missing batch with an NA mean, an empty batch with zero rows and an NA mean, an unchanged original after extension, a rejected forged or incompatible object, and a NAMESPACE that keeps the validator unexported. They do not establish any inference about the population behind these values."
 }

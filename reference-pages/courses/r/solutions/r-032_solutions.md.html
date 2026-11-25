@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/r/solutions/r-032_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="r-032-reference-reasoning">r-032: reference reasoning<a class="heading-anchor" href="#r-032-reference-reasoning" aria-label="Link to this section">#</a></h2>
-<p>Use the <a href="r-032_reference.R.html">complete reference</a> with the guide&#x27;s declared inputs and runtime. Every worked example is also a standalone script.</p>
+<p>Run the <a href="r-032_reference.R.html">complete reference</a> under the <a href="../STUDY-GUIDE.md.html#run-a-chapter">run rules</a>.</p>
 <h3 id="why-the-implementation-has-this-shape">Why the implementation has this shape<a class="heading-anchor" href="#why-the-implementation-has-this-shape" aria-label="Link to this section">#</a></h3>
 <p>The observation mean counts four measurements equally. The equal-group mean gives A and B equal influence despite their unequal sizes.</p>
 <p>The declared C category remains visible with zero rows and no observed mean. A missing measurement within A is separately counted.</p>
@@ -242,7 +242,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Tempting mistake:</strong> Averaging the group medians to get 50.25. The result lies in the gap between groups, where no observation exists.</p>
 <p><strong>Verify:</strong> <code>median(c(0, 100, 101))</code> returns 100, while the mean of the group medians returns 50.25.</p>
 <h3 id="what-the-checks-establish">What the checks establish<a class="heading-anchor" href="#what-the-checks-establish" aria-label="Link to this section">#</a></h3>
-<p>The reference makes 5 <code>stopifnot()</code> checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.</p></article>
+<p>The checks pin the pooled mean of 25 from sums and counts, a summary of an all-missing group that reports zero observed values, an NA mean for an empty group, distinct counts that cannot be added across groups because a shared value is counted twice, and a median of medians that differs from the median of the pooled data. They do not cover weighted or trimmed summaries.</p>
+<p>The reference makes 5 <code>stopifnot()</code> checks; see <a href="../STUDY-GUIDE.md.html#what-a-passing-run-proves">what a passing run proves</a>.</p></article>
   </main>
 </body>
 </html>

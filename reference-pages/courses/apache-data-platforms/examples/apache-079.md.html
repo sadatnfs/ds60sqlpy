@@ -194,13 +194,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/apache-data-platforms/examples/apache-079.md</code></p>
     </header>
     <article class="document"><h2 id="delta-sharing-apache-079-prepared-command-notebook">Delta Sharing apache-079 prepared command notebook<a class="heading-anchor" href="#delta-sharing-apache-079-prepared-command-notebook" aria-label="Link to this section">#</a></h2>
-<p>Copy the owned Delta Sharing project and follow PREPARATION.md. Delta Sharing belongs to Delta Lake/Linux Foundation. The offline preparation actions are:</p>
+<p>In the copied Delta Sharing project, <code>plan</code> prints <code>basic Parquet/minReaderVersion1</code> as the supported protocol before any network call. That string is the whole compatibility promise of this client:</p>
 <pre class="highlighted-code"><code class="language-bash">bash run.sh prepare
 bash run.sh plan</code></pre>
-<p>For a separately prepared actual owned reference server and untracked recipient profile, the bounded native Docker protocol client runs with:</p>
+<p>On a prepared reference server, <code>check</code> refuses any reader version other than 1, partitioned files and deletion vector entries before it materializes a single row:</p>
 <pre class="highlighted-code"><code class="language-bash">bash run.sh check</code></pre>
 <p>The portable client rejects unsupported protocol/features before data reads. Advanced CDF/Delta/deletion-vector behavior is omitted until a supported native client and real server exchange are qualified.</p>
-<p>The classroom Markdown pad does not start a service. Source configuration and unit policy fixtures are not actual reference-server receipts. Keep credentials and signed URL query strings out of all published source and evidence.</p></article>
+<p>Change data feed, deletion vectors and Delta format responses stay outside this client. For those tables a refusal is the correct result, not a failure to work around.</p></article>
   </main>
 </body>
 </html>

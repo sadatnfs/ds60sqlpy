@@ -97,9 +97,7 @@ Worked reference for Exercise 3: Model card template
 
 ## Solution reasoning lens
 
-A strong solution is not merely code that produces one plausible
-output. It establishes a chain from input contract to operation to
-verification:
+Each decision below links an input contract to an operation and its evidence:
 
 1. **allowlist output fields:** starts from data that is necessary rather than trying to detect every sensitive field after collection.
 2. **detection → review → action:** treats regex/PII scanners as bounded signals with false positives and false negatives.
@@ -116,29 +114,15 @@ verification:
 
 **Evidence of correctness:** Prove forbidden fields never cross the boundary, test scanner misses/false hits, report group numerators/denominators and uncertainty, and assign owners/retention/incident actions.
 
-When comparing your attempt with the reference, explain which of these
-decisions your code made explicitly. If the reference makes a different
-choice, compare the contracts and evidence before deciding that one
-version is universally better.
-
 <!-- END ADVANCED PYTHON CONCEPT ENRICHMENT -->
 
 ## Exercise-by-exercise reasoning map
-
-This map connects every learner prompt to a reasoning path. Read the
-explanation before copying code: the goal is to understand the assumptions,
-the evidence that validates the result, and the edge cases that can make an
-apparently correct implementation fail.
 
 ### Exercise 1: Original lesson practice
 
 **Prompt:** Build a DataFrame PII scanner covering column names and free text.
 
 **How to reason about it:** A PII scanner should return finding type, safe row identifier, column, and count, not the matched secret. Test false positives, missed formats, Unicode, nulls, and nested/free-text fields.
-
-Use the worked reference earlier in this file, then change one boundary
-condition and rerun the stated checks. A copied output is not evidence
-unless you can explain why that output follows from the inputs.
 
 **Verify:** Run the scanner on named columns and free-text fixtures containing email, phone, clean text, and a deliberate false positive; print row/field/finding type without raw PII and report misses/false hits.
 
@@ -148,10 +132,6 @@ unless you can explain why that output follows from the inputs.
 
 **How to reason about it:** Masking must preserve only the minimum structure needed for the stated purpose and be idempotent. Regex is incomplete, so pair it with minimization, access controls, retention, and review.
 
-Use the worked reference earlier in this file, then change one boundary
-condition and rerun the stated checks. A copied output is not evidence
-unless you can explain why that output follows from the inputs.
-
 **Verify:** Assert masking replaces complete email and phone fixtures with declared placeholders, preserves surrounding non-PII text, is idempotent on a second pass, and handles malformed/boundary strings explicitly.
 
 ### Exercise 3: Original lesson practice
@@ -160,10 +140,6 @@ unless you can explain why that output follows from the inputs.
 
 **How to reason about it:** Subgroup precision/recall requires support, positive counts, uncertainty, and consistent thresholds. Avoid conclusions for tiny groups and distinguish observed disparity from a causal explanation.
 
-Use the worked reference earlier in this file, then change one boundary
-condition and rerun the stated checks. A copied output is not evidence
-unless you can explain why that output follows from the inputs.
-
 **Verify:** For each subgroup, print TP/FP/FN, support, precision, recall, and uncertainty or minimum-support warning; verify each rate from its counts and avoid ranking groups with insufficient denominators.
 
 ### Exercise 4: Original lesson practice
@@ -171,10 +147,6 @@ unless you can explain why that output follows from the inputs.
 **Prompt:** Draft a one-page data-ethics checklist for your project.
 
 **How to reason about it:** An ethics checklist names intended use, excluded use, stakeholders, harms, data rights, fairness evaluation, human oversight, monitoring, appeals, owners, and stop/rollback criteria.
-
-Use the worked reference earlier in this file, then change one boundary
-condition and rerun the stated checks. A copied output is not evidence
-unless you can explain why that output follows from the inputs.
 
 **Verify:** Save a one-page Markdown checklist file with owner and evidence for collection purpose, minimization, consent/legal basis, access, retention/deletion, security, bias evaluation, incident response, and stop/go approval.
 
@@ -192,10 +164,6 @@ A diagram is not a security guarantee. Record residual risk and an accountable
 owner; risks beyond the project's authority require escalation rather than a
 checkbox marked complete.
 
-**Why this matters:** The result should survive a fresh-kernel rerun and
-a deliberately chosen boundary case. If it does not, revisit the
-assumption or data boundary rather than hiding the failure.
-
 **Verify:** Threat modeling; save a data-flow diagram/table covering collection, notebook, artifacts, API, logs, and backups; each boundary must name asset, actor, threat, preventive/detective control, residual risk, owner, and verification test.
 
 ### Exercise 6: Re-identification reasoning
@@ -211,10 +179,6 @@ Unmodeled external data can also re-identify records.
 Use the exercise to understand limits, not to certify a dataset as safe.
 Privacy review may require stronger techniques, restricted access, synthetic
 data, or differential privacy with an explicit threat model and privacy budget.
-
-**Why this matters:** The result should survive a fresh-kernel rerun and
-a deliberately chosen boundary case. If it does not, revisit the
-assumption or data boundary rather than hiding the failure.
 
 **Verify:** Re-identification reasoning; print equivalence-class sizes proving the chosen k target, then construct a homogeneous sensitive-attribute class and an outside-information linkage example that still discloses information.
 
@@ -233,10 +197,6 @@ Metric parity choices can conflict and depend on base rates and harm. Select
 the monitored criterion with affected stakeholders and domain/legal review,
 not by whichever metric looks most favorable.
 
-**Why this matters:** The result should survive a fresh-kernel rerun and
-a deliberately chosen boundary case. If it does not, revisit the
-assumption or data boundary rather than hiding the failure.
-
 **Verify:** Fairness uncertainty; with declared bootstrap seed/resamples, print subgroup TP/FP/FN, support, precision/recall intervals, gap and ratio; when a denominator is near zero, return an insufficient-support warning instead of an unstable rank.
 
 ### Exercise 8: Incident response
@@ -253,9 +213,5 @@ affected parties according to policy.
 Add preventive controls: clean-output notebook validation, secret/PII scans,
 synthetic fixtures, `.gitignore`, review checks, and least-privilege data
 access. Do not reproduce the sensitive value in tickets or logs.
-
-**Why this matters:** The result should survive a fresh-kernel rerun and
-a deliberately chosen boundary case. If it does not, revisit the
-assumption or data boundary rather than hiding the failure.
 
 **Verify:** Incident response; produce a timestamped incident record with containment, notification owner, credential assessment, history-rewrite decision, post-clean scan/hash, and prevention test; verify the raw email sentinel no longer appears in current artifacts.

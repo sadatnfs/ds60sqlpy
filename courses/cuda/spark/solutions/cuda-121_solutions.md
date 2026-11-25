@@ -1,6 +1,6 @@
 # cuda-121: explained solutions
 
-These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.
+Compare with your [worksheet](../lessons/cuda-121.md) attempt.
 
 ## Exercise 1: Calculate duplicate join output
 
@@ -74,8 +74,16 @@ Capture executed plan after action.
 
 **How to verify.** Compare the initial explain output with the final plan in the SQL tab. Record the AQE settings with the plan, since disabling adaptive execution changes which plan runs.
 
+## Self-check answers
+
+1. **Can GPU acceleration reduce a join's output rows?** No. The semantic expansion from duplicate keys is the same on any backend.
+
+2. **Why does skew lengthen a stage?** One large partition creates a long task, and the stage cannot finish until that task does.
+
+3. **Why keep a simple CPU oracle for joins?** It catches fast but incorrect rewrites that drop duplicates or mishandle missing and null keys.
+
 ## Reference observation
 
 Four A matches from two-by-two duplicate keys.
 
-The reference file is `courses/cuda/spark/references/cuda-121_cpu.py`. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.
+Asserted by `courses/cuda/spark/references/cuda-121_cpu.py`.

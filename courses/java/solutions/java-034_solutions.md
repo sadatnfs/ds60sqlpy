@@ -1,6 +1,6 @@
 # java-034: explanatory solutions
 
-Open after an attempt or an explicit solution reveal. The executable reference runs the six exercise checks together as `Main.java`. The guide contains independent worked examples, while this file explains the choices and failure cases in the complete answer.
+Open this after an attempt; see [using the solutions](../STUDY-GUIDE.md#use-the-solutions).
 
 ## Mechanism review
 
@@ -22,7 +22,7 @@ Define a Catalog interface returning OptionalLong and declaring IOException for 
 
 ## Exercise 1: Test the pure calculation: change one input
 
-Task: Copy Example A into a scratch `Main.java` and change `total(0, 125);` to `total(1, 125);`. Before running it with `java -ea Main`, predict which assertion fails and which value it now sees; then run it and restore the original line.
+Task: Change `total(0, 125);` to `total(1, 125);` in Example A and predict which assertion fails and why.
 
 The core arithmetic needs no repository or clock. Isolating it makes domain boundaries and overflow behavior easy to check.
 
@@ -39,13 +39,13 @@ try {
 assert invalid;
 ```
 
-**Expected:** The changed run fails with an `AssertionError` from the assertion on `invalid`. Restoring the original line brings back the worked observation: 375 cents; nonpositive quantity rejected.
+**Expected:** The edited run fails with an `AssertionError` from the assertion on `invalid`.
 
-**Verify:** Compare your written prediction with the reported `AssertionError` and its stack-trace line, and name the value that made `invalid` false. After restoring the line, the program completes without an `AssertionError` again.
+**Verify:** Name the value that makes `invalid` false, then restore the line.
 
 ## Exercise 2: Compose a deterministic service: debug a regression
 
-Task: A regression changed one token in the code that Example B adds after Example A, so one line now reads `id.equals("item-a") ? java.util.OptionalLong.of(126) : java.util.OptionalLong.empty();`. Run Example B with that line, use the failing assertion to locate the defect and repair it without changing the assertion.
+Task: A regression in Example B's new code makes one line read `id.equals("item-a") ? java.util.OptionalLong.of(126) : java.util.OptionalLong.empty();`. Repair it using the failing assertion.
 
 A fixed clock removes timing nondeterminism. The audit event is a local test double, not a message sent to another person or service.
 
@@ -63,9 +63,9 @@ quote.created().equals(instant) &&
 audit.equals(List.of("quoted:item-a"));
 ```
 
-**Expected:** Before the repair the run fails with an `AssertionError` from the assertion on `quote.totalCents() == 250 && quote.created().equals(instant) && audit.equals(List.of("quoted:item-a"))`; after it the line reads `id.equals("item-a") ? java.util.OptionalLong.of(125) : java.util.OptionalLong.empty();` again and total 250, time 2026-01-01T00:00:00Z, one audit event.
+**Expected:** The unrepaired run fails with an `AssertionError` from the assertion on `quote.totalCents() == 250 && quote.created().equals(instant) && audit.equals(List.of("quoted:item-a"))`; the repaired line reads `id.equals("item-a") ? java.util.OptionalLong.of(125) : java.util.OptionalLong.empty();`.
 
-**Verify:** Keep the failing and the repaired runs. Explain why the changed token alters the value tested by `quote.totalCents() == 250 && quote.created().equals(instant) && audit.equals(List.of("quoted:item-a"))` for this input.
+**Verify:** Explain how the changed token alters the value that `quote.totalCents() == 250 && quote.created().equals(instant) && audit.equals(List.of("quoted:item-a"))` tests.
 
 ## Exercise 3: Reject an unknown catalog item
 
@@ -85,7 +85,7 @@ assert missing && audit.size() == 1;
 
 **Expected:** NoSuchElementException; no additional audit.
 
-**Verify:** Keep an assertion equivalent to `missing && audit.size() == 1`. As a control, change `missing = true;` to `missing = false;`: the run must fail with an `AssertionError` from the assertion on `missing && audit.size() == 1`. Restore the line before continuing.
+**Verify:** Control: changing `missing = true;` to `missing = false;` must fail the assertion on `missing && audit.size() == 1`.
 
 ## Exercise 4: Propagate an infrastructure failure
 
@@ -113,7 +113,7 @@ assert propagated && failures.isEmpty();
 
 **Expected:** same failure type; no success audit.
 
-**Verify:** Keep an assertion equivalent to `propagated && failures.isEmpty()`. As a control, change `throw new java.io.IOException("catalog unavailable");` to `throw new java.io.IOException("catalog unavailable!");`: the run must fail with an `AssertionError` from the assertion on `propagated && failures.isEmpty()`. Restore the line before continuing.
+**Verify:** Control: changing `throw new java.io.IOException("catalog unavailable");` to `throw new java.io.IOException("catalog unavailable!");` must fail the assertion on `propagated && failures.isEmpty()`.
 
 ## Exercise 5: Prove invalid quantity fails before a repository call
 
@@ -142,7 +142,7 @@ assert rejected && calls.get() == 0;
 
 **Expected:** repository call count 0.
 
-**Verify:** Keep an assertion equivalent to `rejected && calls.get() == 0`. As a control, change `rejected = true;` to `rejected = false;`: the run must fail with an `AssertionError` from the assertion on `rejected && calls.get() == 0`. Restore the line before continuing.
+**Verify:** Control: changing `rejected = true;` to `rejected = false;` must fail the assertion on `rejected && calls.get() == 0`.
 
 ## Exercise 6: Detect arithmetic overflow without an event
 
@@ -168,8 +168,10 @@ assert overflow && overflowAudit.isEmpty();
 
 **Expected:** ArithmeticException; audit sink unused.
 
-**Verify:** Keep an assertion equivalent to `overflow && overflowAudit.isEmpty()`. As a control, change `overflow = true;` to `overflow = false;`: the run must fail with an `AssertionError` from the assertion on `overflow && overflowAudit.isEmpty()`. Restore the line before continuing.
+**Verify:** Control: changing `overflow = true;` to `overflow = false;` must fail the assertion on `overflow && overflowAudit.isEmpty()`.
 
 ## After comparing the answer
 
-Run the complete reference with assertions enabled, then return to your own implementation. Recreate one check with different values and explain its expected result before execution. A compiler error, an expected domain exception and an assertion failure represent different stages and should be reported separately. Preserve ownership boundaries when adapting file, network or concurrency examples. The reference never authorizes access to a shared service or deletion of learner state. Use a fresh tiny fixture when you need to distinguish two interpretations of an API contract.
+Add a discount port to your copy that returns a percentage per item, apply it inside `quote` after the overflow-safe total, and test it with a fixed fake.
+
+Run the complete reference with `java -ea Main` first; the [review routine](../STUDY-GUIDE.md#use-the-solutions) covers the rest.

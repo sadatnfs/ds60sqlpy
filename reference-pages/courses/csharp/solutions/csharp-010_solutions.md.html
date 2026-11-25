@@ -194,7 +194,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/csharp/solutions/csharp-010_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="csharp-010-explanation-and-comparison">csharp-010: explanation and comparison<a class="heading-anchor" href="#csharp-010-explanation-and-comparison" aria-label="Link to this section">#</a></h2>
-<p>Attempt the six guide tasks before opening this comparison. The executable reference is <a href="csharp-010_solution.cs.html">csharp-010_solution.cs</a>. It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.</p>
+<p>Reference program: <a href="csharp-010_solution.cs.html">csharp-010_solution.cs</a>, covering both examples and the executed answers.</p>
+<p>Attempt the tasks first; see <a href="../STUDY-GUIDE.md.html#comparing-with-the-explanation">comparing with the explanation</a>.</p>
 <h3 id="why-the-two-examples-differ">Why the two examples differ<a class="heading-anchor" href="#why-the-two-examples-differ" aria-label="Link to this section">#</a></h3>
 <p><strong>Preserve absence information:</strong> The comparer belongs to the collection contract. A missing value cannot be inferred from the integer alone. OAK finds a present zero; Pine is absent.</p>
 <p><strong>Deduplicate by an explicit policy:</strong> Deduplication is meaningful only after defining equality. Case-insensitive comparison is appropriate for this fixture, not for every identifier. RED is a duplicate under the selected comparer.</p>
@@ -250,7 +251,7 @@ Check<span class="syntax-punctuation">(</span>counts<span class="syntax-punctuat
 <p><code>Dictionary&lt;string,int&gt;(StringComparer.OrdinalIgnoreCase)</code> defines key identity. <code>TryGetValue(key, out value)</code> separates absence from a stored zero. <code>HashSet&lt;T&gt;.Add</code> returns whether membership changed.</p>
 <p>Changing a key field after insertion can break hash-based lookup for mutable custom keys. Distinct text spellings are not always distinct identities. Do not rely on incidental traversal order for reports.</p>
 <h3 id="review-before-continuing">Review before continuing<a class="heading-anchor" href="#review-before-continuing" aria-label="Link to this section">#</a></h3>
-<p>Run the reference and confirm that it prints <code>csharp-010: passed</code>, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.</p></article>
+<p>Run the reference and confirm it prints <code>csharp-010: passed</code>, then rerun the guide&#x27;s counterexample.</p></article>
   </main>
 </body>
 </html>

@@ -236,16 +236,16 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-string">&quot;</span>$DS60_ATLAS_ENDPOINT<span class="syntax-string">/api/atlas/v2/lineage/&lt;curated-guid&gt;?direction=BOTH&amp;depth=3</span><span class="syntax-string">&quot;</span></code></pre>
 <p>The response holds a guidEntityMap and a relations list of fromEntityId and toEntityId pairs. The check route requires the pairs raw to transform and transform to curated, and requires that the unrecorded dataset appears in no pair. That third rule matters: an asset that was really used but never registered stays invisible, so a clean lineage graph can still be incomplete. Use the credentials from your untracked environment, never a literal in shell history.</p>
 <h3 id="complete-worked-source">Complete worked source<a class="heading-anchor" href="#complete-worked-source" aria-label="Link to this section">#</a></h3>
-<p>This is a project-only command notebook. Read and edit it in the classroom; run its explicitly labeled commands from the copied owned Docker workshop. The classroom does not execute these service commands.</p>
+<p>The classroom does not execute these service commands. See the <a href="../STUDY-GUIDE.md.html#workshop-notebooks">workshop rules</a>.</p>
 <h2 id="atlas-apache-070-prepared-command-notebook">Atlas apache-070 prepared command notebook<a class="heading-anchor" href="#atlas-apache-070-prepared-command-notebook" aria-label="Link to this section">#</a></h2>
-<p>Copy the owned Atlas project and read PREPARATION.md. Default local server execution is omitted until a supported native Java 8 graph/index stack exists.</p>
+<p>In the copied Atlas project, <code>plan</code> shows the <code>transform</code> process with <code>raw</code> as its input and <code>curated</code> as its output. The <code>unrecorded</code> dataset has no process at all, which makes it the negative case for lineage.</p>
 <pre class="highlighted-code"><code class="language-bash">bash run.sh prepare
 bash run.sh plan</code></pre>
-<p>These actions validate a portable native Docker client and print original payloads without contacting a server. For an explicitly prepared owned fixture server with untracked credentials, deliberate apply and read-only check are:</p>
+<p>With an owned Atlas server prepared through PREPARATION.md, these actions send the payloads and then ask for lineage around <code>curated</code> in both directions to depth 3:</p>
 <pre class="highlighted-code"><code class="language-bash">bash run.sh apply
 bash run.sh check</code></pre>
 <p>Check requires actual raw-to-process and process-to-curated edges and excludes the intentionally unrecorded asset from that path. This is explicit API lineage, not an automatic hook result.</p>
-<p>Prepared payloads are not actual Atlas observations. Never place credentials or Authorization headers in notebooks, source, command arguments or receipts.</p>
+<p>Until those calls run, the edges exist only in a payload. This lineage comes from explicit API entities, so no hook or crawler is being tested.</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
 <ul>
 <li><a href="https://atlas.apache.org/api/v2/index.html">Atlas REST types/entities/lineage API</a></li>

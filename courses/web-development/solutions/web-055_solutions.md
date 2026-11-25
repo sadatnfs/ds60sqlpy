@@ -1,6 +1,6 @@
 # web-055: explanatory solutions
 
-Open this after your own attempt. Each answer explains the lesson's synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in `courses/web-development/guides/web-055.md`.
+Attempt each exercise before reading; the mechanism is in `courses/web-development/guides/web-055.md` ([using these answers](../STUDY-GUIDE.md#solutions)).
 
 ## Exercise 1: Explain why pagination needs an explicit stable order.
 
@@ -76,4 +76,6 @@ Open this after your own attempt. Each answer explains the lesson's synthetic fi
 
 ## Reference comparison
 
-Open `courses/web-development/solutions/web-055_solution.php` only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; server lifecycle, persistence, concurrency and security need their own integration evidence.
+The reference requires ids 1 and 2 on the first page, 3 and 4 on the second and an empty page after id 4. That catches off-by-one cursors and unstable slicing. It does not test the page-size limit or cache keys, so add an oversized request and two actors yourself.
+
+Open `courses/web-development/solutions/web-055_solution.php` after saving your attempt ([comparing with the reference](../STUDY-GUIDE.md#references)).

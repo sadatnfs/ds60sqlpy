@@ -195,7 +195,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="dbt-022-explained-reference">dbt-022: explained reference<a class="heading-anchor" href="#dbt-022-explained-reference" aria-label="Link to this section">#</a></h2>
 <p>Diagnose failures using the layer that actually rejected the work.</p>
-<p>The executable reference contains the two complete worked cases with assertions. The changes below explain the independent practice and its limits.</p>
+<p>The reference compiles <code>bad.sql</code> successfully, then runs it and reads status error from run_results.json. Its second case multiplies a sum by 2, and a singular test comparing with 12 catches the wrong 24. The semantic error is caught only because the test states the expected quantity independently. See <a href="../STUDY-GUIDE.md.html#answers-and-references">how these answers are laid out</a>.</p>
 <h3 id="1-classify-the-first-failure">1. Classify the first failure<a class="heading-anchor" href="#1-classify-the-first-failure" aria-label="Link to this section">#</a></h3>
 <p>Inspect the actual relation schema and generated column name. Changing package configuration would not address this specific defect.</p>
 <p><strong>Expected:</strong> It is database binding/execution.</p>

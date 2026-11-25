@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/kubernetes/solutions/k8s-054_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="k8s-054-explanatory-solutions">k8s-054: explanatory solutions<a class="heading-anchor" href="#k8s-054-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit reveal. These explanations describe the synthetic topology and stated API contracts. They are not fabricated runtime receipts.</p>
+<p>Attempt each exercise first, then compare (<a href="../STUDY-GUIDE.md.html#solutions-and-the-ai-tutor">study guide</a>).</p>
 <h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
 <p>Gateway API separates infrastructure selection, traffic listeners and application routes into distinct resources. A GatewayClass describes a controller-managed class. A Gateway asks for listeners and an entrypoint. An HTTPRoute attaches routing rules to an allowed parent Gateway. This can separate platform responsibilities from application routing ownership.</p>
 <p>The resources still require installed APIs and a compatible controller. Status conditions such as Accepted, Programmed and ResolvedRefs describe different aspects of reconciliation. A route being accepted does not prove an actual client request reached the expected application.</p>

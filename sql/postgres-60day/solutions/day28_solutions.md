@@ -4,56 +4,25 @@
 <!-- beginner-solution-enrichment -->
 ## How to study and run this solution
 
-Open this explanation only after making an honest attempt. The executable
-companion runs solely against the disposable `advanced_sql_training` database:
+The answers read `customers.attributes`, `events.metadata` and
+`xml_docs.payload`, and the last one uses three inline sample payloads.
+Nothing is written, and there is no index on the JSON columns, so every
+filter is a sequential scan. [Read a solution](../../STUDY-GUIDE.md#read-a-solution)
+covers the general approach.
 
 ```bash
-# Linux, macOS, or Windows through WSL 2, from the repository root
 psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
   -f sql/postgres-60day/solutions/day28_solutions.sql
 ```
 
-`psql` prints each result/command tag in the terminal. Stop at the first
-unexpected `ERROR`; later output cannot repair an earlier failed invariant.
-Compare your own SQL, row grain, column names, row counts, `NULL` policy, and
-ordering with the explanation before comparing syntax.
+## How these answers fit together
 
-## Clause-by-clause reading map
-
-The lesson's main concepts are JSONB, Containment, Path extraction. Its worked-model focus is:
-Extract `metadata->>'campaign'` as text, keep the raw JSONB beside it, and group missing values separately. For XML, extract the first XPath result, validate its text form, cast to integer, and left-join orders so malformed or unmatched documents remain visible.
-
-- Start at `FROM`/`JOIN` and state the intermediate row grain. Inspect join keys
-  before adding aggregates; a one-to-many join is allowed to multiply rows only
-  when the later contract accounts for it.
-- Apply `WHERE` to input rows, `GROUP BY` to form buckets, and `HAVING` to
-  completed groups. Window functions run over the surviving relation and
-  normally preserve its row count.
-- Read the `SELECT` list as the public result contract: keys establish grain,
-  measures state calculations, and aliases explain meaning. `ORDER BY` is the
-  only output-order guarantee; add a unique tie-breaker before `LIMIT`.
-- Trace every common table expression (CTE) as a temporary named relation.
-  Execute or inspect one stage at a time while debugging, but compare the final
-  result with an independent control rather than trusting stage names.
-- Keep SQL `NULL` as “missing/unknown/not applicable” until the metric contract
-  chooses another representation. Guard division with `NULLIF`; disclose
-  exclusions and distinguish zero from no row.
-- For DDL/DML, a command tag proves only that PostgreSQL accepted a statement.
-  Catalog checks, negative cases, row-count reconciliation, and the declared
-  transaction boundary prove behavior and cleanup.
-
-The exact final queries are not the only valid syntax. A join, subquery, CTE,
-window, or conditional aggregate can be an alternative when it preserves the
-same grain, `NULL` semantics, deterministic ordering, and safety. Prefer the
-form whose intermediate relations a reviewer can verify; optimize only after
-correctness is established with evidence.
-
-These answers align one-for-one with [day28_json_xml.sql](../day28_json_xml.sql).
-Run only against the disposable `advanced_sql_training` database.
-The executable companion wraps every answer in `BEGIN`/`ROLLBACK`.
-The snippets below assume the lesson's
-`SET search_path TO training, public;` statement. Run the complete
-executable companion when you want a self-contained check.
+The first three answers ask whether a key or value is present: `->>` returns
+it or `NULL`, `@>` tests containment, and `?` tests that a key exists. The
+fourth builds JSON instead of reading it. The fifth does the same extraction
+work for XML, where every result arrives as an array. The sixth adds the
+guard you need before turning extracted text into a number. The learner
+file is [day28_json_xml.sql](../day28_json_xml.sql).
 
 ## Reading contract
 
@@ -69,12 +38,6 @@ executable companion when you want a self-contained check.
 
 **Reasoning:** `->>` returns text and naturally yields NULL for a missing key.
 
-**Clause-by-clause reading:**
-
-- `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
-- `FROM`: establishes the starting relation and therefore the initial row grain.
-- `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
-
 ```sql
 SELECT
   c.customer_id,
@@ -88,32 +51,21 @@ ORDER BY
 
 **Expected shape:** One row per customer.
 
-Check the result at the stated grain. An alternative formulation is
-valid only if it preserves the same NULL, ordering, time, money, and
-cardinality contract.
-
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-28 Exercise 1, read from `customers`. Build the answer toward `customer_id`, `channel`, and `referrer`; keep `customer_id` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-28 Exercise 1, expected output: One row per customer. The final columns are `customer_id`, `channel`, and `referrer`. The final order is `c.customer_id`.
-- **Independent verification:** For sql-28 Exercise 1, reselect the returned keys directly from the source; require unique `customer_id` where the expected grain is one row per key and confirm the projected `customer_id`, `channel`, and `referrer` against `customers`. Add one source row with a new `customer_id`; verify the result gains exactly one row carrying that `customer_id` value.
-- **Intermediate relation check:** For sql-28 Exercise 1, check `c.customer_id` before applying the row cap.
-- **Clause check:** For sql-28 Exercise 1, the solution actually uses `FROM`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `customers`, preserve one row per `customer_id`, and finish with `customer_id`, `channel`, and `referrer` ordered by `c.customer_id`.
-- **Alternative/trade-off:** For sql-28 Exercise 1, the chosen form is justified by this lesson-specific rationale: `->>` returns text and naturally yields NULL for a missing key. Evaluate another form against the concrete expected result (One row per customer) and the verification above.
-- **Edge case:** Add one source row with a new `customer_id`; verify the result gains exactly one row carrying that `customer_id` value.
+- **Inputs/evidence:** For sql-28 Exercise 1, read the 500 rows of `customers` and pull two text values out of the `attributes` JSONB column with `->>`: `attributes ->> 'channel'` and `attributes ->> 'referrer'`.
+- **Expected result/shape:** For sql-28 Exercise 1, expected output: exactly 500 rows, one per customer, with no NULL in either extracted column; `channel` splits into 167 `mobile`, 166 `store`, and 167 `web`, and `referrer` into 125 each of `ad`, `direct`, `email`, and `seo`. The final columns are `customer_id`, `channel`, and `referrer`. The final order is `c.customer_id`.
+- **Independent verification:** For sql-28 Exercise 1, confirm 500 rows and that customer 1 shows `web` and `seo`, matching `SELECT attributes FROM customers WHERE customer_id = 1`; then compare `'{"channel": "web"}'::jsonb ->> 'referrer'`, which returns NULL for the missing key, with `-> 'channel'`, which returns the JSONB value `"web"` with its quotes instead of plain text.
+- **Intermediate relation check:** `customers` has 500 rows, and the result has one row per customer, ordered by `customer_id`. Customer 1 is `web` with referrer `seo`, and customer 2 is `mobile` with `email`.
+- **Clause check:** `->>` returns text and gives `NULL` for a key that is absent. In this fixture every customer has both `channel` and `referrer`, so neither column contains `NULL`; the channels split 167 mobile, 166 store and 167 web.
+- **Alternative/trade-off:** `c.attributes -> 'channel'` returns `jsonb` and prints `"web"` with quotes. Use it when you want to pass the value on as JSON, and `->>` when you want text to compare or display.
+- **Edge case:** A key stored as JSON `null` and a missing key both come out as `NULL` with `->>`. If the difference matters, check `c.attributes ? 'referrer'` as well.
 
 ## Exercise 2: Query writing
 
 **Prompt:** Find mobile-channel customers using JSONB containment.
 
 **Reasoning:** `@>` tests whether the left JSONB contains the declared object.
-
-**Clause-by-clause reading:**
-
-- `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
-- `FROM`: establishes the starting relation and therefore the initial row grain.
-- `WHERE`: filters source rows before grouping and window calculation; SQL's unknown NULL comparisons do not pass.
-- `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 
 ```sql
 SELECT
@@ -130,31 +82,21 @@ ORDER BY
 
 **Expected shape:** Customer rows whose channel is mobile.
 
-Check the result at the stated grain. An alternative formulation is
-valid only if it preserves the same NULL, ordering, time, money, and
-cardinality contract.
-
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-28 Exercise 2, read from `customers`. Build the answer toward `customer_id`, `full_name`, and `attributes`; keep `customer_id` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-28 Exercise 2, expected output: Customer rows whose channel is mobile. The final columns are `customer_id`, `full_name`, and `attributes`. The final order is `c.customer_id`.
-- **Independent verification:** For sql-28 Exercise 2, run an anti-check that counts rows where NOT ((c.attributes @> '{"channel": "mobile"}'::jsonb)); require unique `customer_id` where the expected grain is one row per key and confirm the projected `customer_id`, `full_name`, and `attributes` against `customers`. Add one row for which `(c.attributes @> '{"channel": "mobile"}'::jsonb)` is true and one for which it is false; verify only the matching `customer_id` value is returned.
-- **Intermediate relation check:** For sql-28 Exercise 2, inspect the source keys that survive `WHERE`; then check `c.customer_id` before applying the row cap.
-- **Clause check:** For sql-28 Exercise 2, the solution actually uses `FROM`, `WHERE`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `customers`, preserve one row per `customer_id`, and finish with `customer_id`, `full_name`, and `attributes` ordered by `c.customer_id`.
-- **Alternative/trade-off:** For sql-28 Exercise 2, the chosen form is justified by this lesson-specific rationale: `@>` tests whether the left JSONB contains the declared object. Evaluate another form against the concrete expected result (Customer rows whose channel is mobile) and the verification above.
-- **Edge case:** Add one row for which `(c.attributes @> '{"channel": "mobile"}'::jsonb)` is true and one for which it is false; verify only the matching `customer_id` value is returned.
+- **Inputs/evidence:** For sql-28 Exercise 2, read `customers` and keep the rows whose `attributes` JSONB contains the pair `{"channel": "mobile"}`, tested with the containment operator `@>`.
+- **Expected result/shape:** For sql-28 Exercise 2, expected output: exactly 167 rows, customer IDs 2 through 500, each with `attributes ->> 'channel'` equal to `mobile`. The final columns are `customer_id`, `full_name`, and `attributes`. The final order is `c.customer_id`.
+- **Independent verification:** For sql-28 Exercise 2, confirm that the text filter `WHERE attributes ->> 'channel' = 'mobile'` also returns 167 rows and that `WHERE NOT attributes @> '{"channel": "mobile"}'` returns the other 333; then check that containment is exact: `'{"channel": "Mobile"}'` matches 0 customers, and `'{"channel": ["mobile", "web"]}'::jsonb @> '{"channel": "mobile"}'` returns false because an array does not contain a bare string.
+- **Intermediate relation check:** All 500 customers are tested, and 167 have `channel` set to `mobile`, from customer 2 up to customer 500.
+- **Clause check:** `@>` is true when the left document contains every key and value of the right one. `'{"channel": "mobile"}'` matches any customer with that pair, whatever else is in `attributes`; the result keeps `full_name` and the whole document.
+- **Alternative/trade-off:** `c.attributes ->> 'channel' = 'mobile'` returns the same 167 rows. `@>` is the form a GIN index on `attributes` can use; with no such index today, the plan is a `Seq Scan` with the containment test as its filter.
+- **Edge case:** Containment compares JSON values exactly, so `"Mobile"` finds nothing, and `{"channel": "mobile", "referrer": "ad"}` would require both pairs.
 
 ## Exercise 3: Query writing
 
 **Prompt:** Count event rows with missing device metadata separately from present values.
 
 **Reasoning:** Use `?` to test key existence rather than comparing extracted text to NULL.
-
-**Clause-by-clause reading:**
-
-- `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
-- `FROM`: establishes the starting relation and therefore the initial row grain.
-- `FILTER (WHERE ...)`: limits one aggregate without removing rows needed by neighboring aggregates.
 
 ```sql
 SELECT
@@ -167,33 +109,21 @@ FROM
 
 **Expected shape:** One summary row.
 
-Check the result at the stated grain. An alternative formulation is
-valid only if it preserves the same NULL, ordering, time, money, and
-cardinality contract.
-
 ### Reasoning and verification
 
 - **Inputs/evidence:** For sql-28 Exercise 3, read from `events` and count rows whose `metadata` contains the key `device` (`metadata ? 'device'`), rows without that key, and all rows.
 - **Expected result/shape:** For sql-28 Exercise 3, expected output: One summary row. The final columns are `has_device_key`, `missing_device_key`, and `all_events`.
 - **Independent verification:** For sql-28 Exercise 3, confirm one row with `has_device_key` 20000, `missing_device_key` 0, and `all_events` 20000; then test `VALUES ('{"device": null}'::jsonb), ('{}'::jsonb)`: `?` returns true and false, while `->> 'device' IS NULL` is true for both, so only `?` separates a present JSON null from a missing key.
-- **Intermediate relation check:** For sql-28 Exercise 3, count `metadata ? 'device'` and `NOT metadata ? 'device'` separately first; together they must equal the event count.
-- **Clause check:** For sql-28 Exercise 3, the solution actually uses `FROM`, `WHERE`, aggregate `FILTER`, and `SELECT`. Read only those operations: begin at `events`, preserve exactly one summary row, and finish with `has_device_key`, `missing_device_key`, and `all_events`.
-- **Alternative/trade-off:** For sql-28 Exercise 3, the chosen form is justified by this lesson-specific rationale: Use `?` to test key existence rather than comparing extracted text to NULL. Evaluate another form against the concrete expected result (One summary row) and the verification above.
-- **Edge case:** `metadata ->> 'device' IS NULL` cannot tell a missing key from a key whose value is JSON null; the `?` operator tests key existence.
+- **Intermediate relation check:** The query has no `GROUP BY`, so all 20,000 events become one row with three counts.
+- **Clause check:** `metadata ? 'device'` is true for all 20,000 events, so `has_device_key` is 20,000, `missing_device_key` is 0 and the two add to `all_events`. Checking that sum is the point of the third column.
+- **Alternative/trade-off:** `metadata ->> 'device' IS NULL` also returns 0 here, but it cannot tell a missing key from a key whose value is JSON `null`. `?` answers only the existence question, which is what the prompt asks.
+- **Edge case:** `NOT e.metadata ? 'device'` relies on `metadata` never being `NULL`. The column is `NOT NULL` with a default of `'{}'`, so every row is counted in exactly one of the two filtered columns.
 
 ## Exercise 4: Prediction
 
 **Prompt:** Aggregate event-type counts into a JSONB object per customer and predict key ordering expectations.
 
 **Reasoning:** JSON objects are mappings; do not treat key order as a semantic contract.
-
-**Clause-by-clause reading:**
-
-- `WITH`: names an intermediate relation so its grain can be checked before later joins or aggregation.
-- `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
-- `FROM`: establishes the starting relation and therefore the initial row grain.
-- `GROUP BY`: collapses input rows to the listed key grain; every non-aggregated selected value must belong to that grain.
-- `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 
 ```sql
 WITH event_counts AS (
@@ -220,31 +150,21 @@ ORDER BY
 
 **Expected shape:** One row per customer with events.
 
-Check the result at the stated grain. An alternative formulation is
-valid only if it preserves the same NULL, ordering, time, money, and
-cardinality contract.
-
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-28 Exercise 4, read from `events`. Build the answer toward `customer_id`, and `counts_by_type`; keep `customer_id` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-28 Exercise 4, expected output: One row per customer with events. The final columns are `customer_id`, and `counts_by_type`. The final order is `customer_id`.
-- **Independent verification:** For sql-28 Exercise 4, independently aggregate `events` by `customer_id`; require one output row for every distinct `customer_id` tuple and compare `counts_by_type` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `counts_by_type` for the existing `customer_id` tuple and verify the new tuple appears exactly once.
-- **Intermediate relation check:** For sql-28 Exercise 4, run `event_counts` one at a time. Record each CTE's row count and `customer_id` uniqueness before the next stage uses it.
-- **Clause check:** For sql-28 Exercise 4, the solution actually uses `WITH`, `FROM`, `GROUP BY`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `events`, preserve one row per `customer_id`, and finish with `customer_id`, and `counts_by_type` ordered by `customer_id`.
-- **Alternative/trade-off:** For sql-28 Exercise 4, the chosen form is justified by this lesson-specific rationale: JSON objects are mappings; do not treat key order as a semantic contract. Evaluate another form against the concrete expected result (One row per customer with events) and the verification above.
-- **Edge case:** Add one row to an existing group and one row for a new group; recompute `counts_by_type` for the existing `customer_id` tuple and verify the new tuple appears exactly once.
+- **Inputs/evidence:** For sql-28 Exercise 4, read the 20000 `events` rows, count them per `customer_id` and `event_type` in `event_counts`, then fold each customer's counts into one JSONB object with `jsonb_object_agg(event_type, event_count ORDER BY event_type)`.
+- **Expected result/shape:** For sql-28 Exercise 4, expected output: exactly 500 rows, and in this seed all 500 objects are the same, `{"support": 8, "checkout": 8, "purchase": 8, "page_view": 8, "add_to_cart": 8}`, because every customer has 8 events of each of the 5 types; JSONB stores shorter keys first, so the `ORDER BY` does not fix the printed key order. The final columns are `customer_id`, and `counts_by_type`. The final order is `customer_id`.
+- **Independent verification:** For sql-28 Exercise 4, confirm every object has 5 keys and that summing `jsonb_each_text` values over all rows gives 20000, the `events` row count; then, inside `BEGIN ... ROLLBACK`, insert `(1, 'refund')` and `(NULL, 'page_view')` into `events (customer_id, event_type)` and confirm 501 rows: customer 1 gains `"refund": 1`, and a NULL `customer_id` row appears holding `{"page_view": 1}`.
+- **Intermediate relation check:** `event_counts` has 2,500 rows: 500 customers times 5 event types, each with exactly 8 events. Every event has a `customer_id`, so no `NULL` group appears.
+- **Clause check:** `jsonb_object_agg` turns each customer's five rows into one object with five keys, so the result has 500 rows. Customer 1 shows 8 for each of `support`, `checkout`, `purchase`, `page_view` and `add_to_cart`.
+- **Alternative/trade-off:** The `ORDER BY event_type` inside the aggregate does not set the printed order, because `jsonb` stores keys shortest first. `json_object_agg` keeps the insertion order if a human will read the output.
+- **Edge case:** A customer with no events gets no row at all. A customer missing one event type gets an object with four keys, not a key with 0, so readers should treat an absent key as zero.
 
 ## Exercise 5: Debugging
 
 **Prompt:** Extract order ID and status text from XML documents without assuming XPath returns a scalar.
 
 **Reasoning:** Index the XML array returned by `xpath`, cast through text, and strip element markup with `string(...)` XPath.
-
-**Clause-by-clause reading:**
-
-- `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
-- `FROM`: establishes the starting relation and therefore the initial row grain.
-- `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
 
 ```sql
 SELECT
@@ -259,34 +179,21 @@ ORDER BY
 
 **Expected shape:** One row per XML document.
 
-Check the result at the stated grain. An alternative formulation is
-valid only if it preserves the same NULL, ordering, time, money, and
-cardinality contract.
-
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-28 Exercise 5, read from `xml_docs`. Build the answer toward `doc_id`, `order_id`, and `order_status`; keep `doc_id` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-28 Exercise 5, expected output: One row per XML document. The final columns are `doc_id`, `order_id`, and `order_status`. The final order is `xd.doc_id`.
-- **Independent verification:** For sql-28 Exercise 5, reselect the returned keys directly from the source; require unique `doc_id` where the expected grain is one row per key and confirm the projected `doc_id`, `order_id`, and `order_status` against `xml_docs`. Add one source row with a new `doc_id`; verify the result gains exactly one row carrying that `doc_id` value.
-- **Intermediate relation check:** For sql-28 Exercise 5, check `xd.doc_id` before applying the row cap.
-- **Clause check:** For sql-28 Exercise 5, the solution actually uses `FROM`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `xml_docs`, preserve one row per `doc_id`, and finish with `doc_id`, `order_id`, and `order_status` ordered by `xd.doc_id`.
-- **Alternative/trade-off:** For sql-28 Exercise 5, the chosen form is justified by this lesson-specific rationale: Index the XML array returned by `xpath`, cast through text, and strip element markup with `string(...)` XPath. Evaluate another form against the concrete expected result (One row per XML document) and the verification above.
-- **Edge case:** Add one source row with a new `doc_id`; verify the result gains exactly one row carrying that `doc_id` value.
+- **Inputs/evidence:** For sql-28 Exercise 5, read the 1000 rows of `xml_docs`, take the first element of `xpath('string(/order/id)', payload)` and of `xpath('string(/order/status)', payload)`, and cast the XML results through `text` to `integer` and `text`.
+- **Expected result/shape:** For sql-28 Exercise 5, expected output: exactly 1000 rows, where `order_id` equals `doc_id` in every row and `order_status` splits into 199 `delivered`, 201 `paid`, 202 `placed`, 199 `returned`, and 199 `shipped`. The final columns are `doc_id`, `order_id`, and `order_status`. The final order is `xd.doc_id`.
+- **Independent verification:** For sql-28 Exercise 5, confirm that joining the result to `orders` on `order_id` matches all 1000 rows with `o.status = order_status`; then show why the subscript matters: `xpath('/order/id/text()', payload)::text::integer` fails with `invalid input syntax for type integer: "{1}"`, and `string(/order/missing)` returns an empty string, so its integer cast fails with `invalid input syntax for type integer: ""`.
+- **Intermediate relation check:** `xml_docs` has 1,000 documents, and the result has one row per `doc_id`. Document 1 is `<order><id>1</id><status>paid</status></order>`.
+- **Clause check:** `xpath('string(/order/id)', ...)` returns a one-element array holding the text `1`; `[1]` takes that element and `::text::integer` turns it into a number. The order ids run from 1 to 1,000, and the statuses split 202 placed, 201 paid and 199 each for shipped, delivered and returned.
+- **Alternative/trade-off:** `xpath('/order/status/text()', payload)` also returns bare text. Without `string(...)` or `text()`, `[1]::text` is `<status>paid</status>`, and casting `<id>1</id>` to `integer` fails.
+- **Edge case:** For a missing element, `string(...)` returns an empty string, and `''::integer` fails. Wrap the cast in `NULLIF(..., '')` if documents may lack an `<id>`.
 
 ## Exercise 6: Extension
 
 **Prompt:** Safely cast a numeric JSON text field from sample payloads, returning NULL for missing or malformed values.
 
 **Reasoning:** Validate extracted text with a numeric regex before casting.
-
-**Clause-by-clause reading:**
-
-- `WITH`: names an intermediate relation so its grain can be checked before later joins or aggregation.
-- `VALUES`: constructs a small relation explicitly, which makes examples and expected cardinality inspectable.
-- `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
-- `FROM`: establishes the starting relation and therefore the initial row grain.
-- `CASE`: encodes ordered business conditions; the first true branch wins and `ELSE` defines the remainder.
-- pattern predicate: matches text according to the chosen operator; escaping and case sensitivity are intentional semantics.
 
 ```sql
 WITH payloads (
@@ -308,24 +215,19 @@ FROM
 
 **Expected shape:** One row per sample payload.
 
-Check the result at the stated grain. An alternative formulation is
-valid only if it preserves the same NULL, ordering, time, money, and
-cardinality contract.
-
 ### Reasoning and verification
 
 - **Inputs/evidence:** For sql-28 Exercise 6, read three sample documents from the inline `payloads` relation: `{"amount": "12.50"}`, `{"amount": "bad"}`, and `{}`, and cast `payload ->> 'amount'` to `numeric` only when the text passes the numeric pattern.
 - **Expected result/shape:** For sql-28 Exercise 6, expected output: three rows with columns `payload` and `safe_amount`, one per sample document: `12.50`, `NULL`, and `NULL`. No row is removed, and no cast error stops the query.
 - **Independent verification:** For sql-28 Exercise 6, confirm that a bare `(payload ->> 'amount')::numeric` over the same rows fails with SQLSTATE `22P02` (`invalid input syntax for type numeric: "bad"`); then add `{"amount": "1e3"}` and observe that the pattern returns `NULL` although `pg_input_is_valid('1e3', 'numeric')` returns `true`.
-- **Intermediate relation check:** For sql-28 Exercise 6, select `payload ->> 'amount'` alone first: it returns `'12.50'`, `'bad'`, and `NULL`, the three cases the `CASE` must handle.
-- **Clause check:** For sql-28 Exercise 6, the solution uses a `payloads` CTE built from `VALUES`, then a `CASE WHEN payload ->> 'amount' ~ '...' THEN (payload ->> 'amount')::numeric ELSE NULL END` in the `SELECT` list.
-- **Alternative/trade-off:** For sql-28 Exercise 6, `CASE WHEN pg_input_is_valid(payload ->> 'amount', 'numeric') THEN (payload ->> 'amount')::numeric END` (PostgreSQL 16 and later) asks the numeric input function itself, so it also accepts `1e3` and surrounding spaces that the pattern rejects. On PostgreSQL 17, `JSON_VALUE(payload, '$.amount' RETURNING numeric)` returns `NULL` for both missing and invalid values by default.
-- **Edge case:** The pattern rejects valid numeric input such as `1e3`, ` 7 `, and `NaN`; decide whether those count as malformed for your source before choosing the pattern or `pg_input_is_valid`.
+- **Intermediate relation check:** `payloads` is three inline rows: a good amount, a bad one and an empty object.
+- **Clause check:** The `CASE` casts only when the extracted text matches the decimal pattern. The result is 12.50, then `NULL` for `"bad"`, then `NULL` for `{}`, where `->>` already returns `NULL` and the regex test is not true.
+- **Alternative/trade-off:** On PostgreSQL 16 and later, `pg_input_is_valid(payload ->> 'amount', 'numeric')` checks the text with the real numeric parser. It also accepts `1e3`, which the regex rejects.
+- **Edge case:** If the JSON stores a number instead of a string, `->>` still returns its text, such as `12.5`, and the same guard works. Check `jsonb_typeof` when you must know which form the producer sent.
 
 ## Final self-check
 
-- Can you explain the logical grain before and after every aggregation?
-- Are missing values preserved or converted only by an explicit rule?
-- Does every ordered result have a deterministic final tie-breaker?
-- Are money and time assumptions visible beside the calculation?
-- Does the complete executable solution finish with `ROLLBACK`?
+- Which operator returns `jsonb` and which returns `text`?
+- Why does `?` answer a different question from `->> ... IS NULL`?
+- What extra step does an `xpath` result need before you can cast it?
+- Which input in the last answer would raise an error without the guard?

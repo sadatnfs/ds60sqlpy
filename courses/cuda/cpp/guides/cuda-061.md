@@ -4,18 +4,15 @@
 
 Advanced; about 130 minutes, plus any optional hardware experiment. Direct prerequisites: `cuda-010`, `cuda-011`, `cuda-024`, `cuda-025`
 
-The order supports learning at your own pace. Reading and CPU reasoning remain
-available when NVIDIA hardware is absent. Advanced hardware features need their
-own capability checks and are not prerequisites for opening this chapter.
+Pacing, evidence labels and platform rules for every chapter are in the [CUDA study guide](../../STUDY-GUIDE.md).
 
 ## Learning objectives
 
 Build a CMake CUDA project cleanly from source and pass its runtime tests on a declared target architecture.
 
-Work through *From one pad to a maintainable CUDA project* with the concrete cases below. Finish with this evidence:
-a clean reproducible build and actual runtime tests on a declared target. Distinguish an algorithmic
-calculation, a compiled artifact and an actual device observation when explaining
-what your work establishes.
+**Scope:** `.cu` versus host `.cpp` translation units, headers, separable compilation, device linking, CMake targets, architecture lists, dependencies, tests and installable artifacts.
+
+**Evidence to produce:** A clean reproducible build and actual runtime tests on a declared target.
 
 ## Purpose, vocabulary and mental model
 
@@ -30,28 +27,17 @@ A maintainable CUDA project separates interfaces, host orchestration and device 
 
 ## How to run and study this lesson
 
-Use the saved reading worksheet in `/classroom`; the reading pad does not execute
-CUDA. For the bounded calculation, select **CPU model (Python)**, whose
-answer-free starter supplies the literal fixtures and task contract. The
-[CUDA C++ study workflow](../README.md) covers platforms, optional GPU
-compilation and evidence labels. In a prepared Python environment you can also
-run the separate [CPU reference](../references/cuda-061_cpu.py) from the
-repository root:
+Trace worked example 1 by hand, then run the [CPU reference](../references/cuda-061_cpu.py) from the repository root:
 
 ```sh
 python courses/cuda/cpp/references/cuda-061_cpu.py
 ```
 
-Its assertions check the stated numerical result or model invariant; console
-text is evidence of this CPU model only, not of CUDA execution.
-
 ## Worked example 1: trace the mechanism
 
 A three-file design has include/transform.hpp declaring a host launch function, src/transform.cu defining its kernel and launch wrapper, and src/main.cpp building fixtures and validating output. The caller sees an ordinary host interface, while the implementation owns its CUDA dependencies.
 
-The complete CPU model below intentionally models only the named arithmetic,
-layout, dependency or capability decision. It does not model GPU scheduling,
-caches, instruction timing or device memory visibility.
+**Why:** main.cpp sees only an ordinary host function, so it compiles with a host compiler and never touches kernel syntax.
 
 ```python
 project = {
@@ -64,41 +50,37 @@ assert len(project) == 4
 print(project)
 ```
 
-**Expected observation:** Every assertion succeeds. A representative CPU output is:
+**Expected observation:** every assertion succeeds, and the CPU model prints:
 
 ```text
 {'include/transform.hpp': 'host interface', 'src/transform.cu': 'kernel and launcher', 'src/main.cpp': 'fixture and validation', 'build/': 'generated artifacts'}
 ```
 
-Integers, shapes and ordering must match exactly; only assertions with an explicit
-tolerance accept small floating-point differences. A printed duration is a model
-output, not a measured GPU benchmark.
+**Check:** The reference asserts the four-entry project layout; also build and confirm main.cpp compiles as plain C++.
 
 ## Worked example 2: change a meaningful condition
 
 An undefined host launch function usually means its object was not linked or its declaration/definition disagree. An unresolved device function in another .cu file concerns device compilation/linking. These failures occur before mathematical validation and require different build fixes.
 
-Before applying this example to your own program, write down which inputs are
-read, which result is produced, and the condition that makes the comparison
-valid. Keep the original case as a regression check when changing a boundary.
+**Why:** An undefined host symbol is a link problem, separate from device-code linking errors.
+
+**Check:** Run the linker with verbose output and confirm the symbol resolves.
 
 ## Six progressive exercises
 
-Exercises 1 and 2 are guided reconstructions of the worked examples; exercises
-3-6 change an input, diagnose a defect, test a boundary and transfer the idea.
-For each one, keep the calculation, output, diagram or failure policy you
-produce so another reader can compare it with the worked cases. If the hint is
-not enough, reread the mechanism paragraph and the bounded CPU assertion.
-
 ### Exercise 1
 
-Predict and trace the first worked example before running its CPU reference. Write every intermediate quantity that leads to the stated result, including units or ownership where applicable.
+Reconstruct worked example 1 on paper before running its CPU reference. Declare the host launch function in include/transform.hpp, define kernel and launcher in src/transform.cu, and validate fixtures in src/main.cpp.
+
+**Trap to avoid:** Putting the kernel declaration with triple-angle launch syntax in the header forces every includer to be compiled by nvcc.
 
 **Hint:** Start with the literal input and intermediate quantities in worked example 1.
 
 ### Exercise 2
 
-Reconstruct the second worked example without copying its conclusion. Identify the changed input or condition, show the resulting calculation or dependency, and explain why it differs from the first example.
+Rework worked example 2 without copying its conclusion. Check that the object defining the launcher is linked and that declaration and definition signatures match.
+
+**Trap to avoid:** Rewriting kernel math to fix a link error changes code that was never the cause.
 
 **Hint:** Identify exactly which condition changes in worked example 2.
 
@@ -106,11 +88,15 @@ Reconstruct the second worked example without copying its conclusion. Identify t
 
 Name source and build directories in a clean out-of-source project.
 
+**Trap to avoid:** Building in the source tree mixes artifacts with maintained files.
+
 **Hint:** Use the first worked example to establish the relevant quantities, then change only the requested input.
 
 ### Exercise 4
 
 Why should architecture targets not come from lesson metadata argv?
+
+**Trap to avoid:** Accepting flags from learner-controlled manifests lets arbitrary commands into builds.
 
 **Hint:** Locate the failed phase or violated dependency before proposing a repair.
 
@@ -118,35 +104,33 @@ Why should architecture targets not come from lesson metadata argv?
 
 What does a successful CMake configure prove?
 
+**Trap to avoid:** Calling the project working after configure skips compile errors.
+
 **Hint:** Check what the algorithm is allowed to read, write or assume at this boundary.
 
 ### Exercise 6
 
 Design a project test split.
 
+**Trap to avoid:** Combining them means a missing GPU fails every test.
+
 **Hint:** State the output contract and which observations are needed in the new application.
 
 ## Common mistakes and diagnosis
 
-A tempting but incorrect claim in this chapter is: **a Makefile or CMake project can simply be pasted into the existing single-source pad.**
-
-For the concrete failure exercise, why should architecture targets not come from lesson metadata argv?
-Preserve the original input and the stage where behavior diverged, and compare
-with the CPU model before changing hardware configuration.
+A tempting but incorrect claim: **A Makefile or CMake project can simply be pasted into the existing single-source pad.** The pad compiles one source file through a fixed command, so it cannot run a build system. A real project lives in its own repository with an out-of-source build directory, explicit targets and an architecture policy. Worked example 1 sketches the three-file layout to create there, not inside the pad. Split tests into fast CPU reference checks and optional GPU checks that run only where a device exists.
 
 ## Self-check, retrieval and transfer
 
-Explain the first example without its code, then use the second example to state
-one assumption that matters. Complete Exercise 3 independently, use Exercise 4 to
-diagnose a plausible defect, check the boundary in Exercise 5, and retain the
-application contract from Exercise 6. Compare the [separate explanations](../solutions/cuda-061_solutions.md)
-only after your attempt or a deliberate reveal. A reading marker records your
-choice; it does not certify hardware qualification or expert mastery.
+1. What are typical source and build directories for a clean project?
+2. Why should architecture targets not come from lesson metadata argv?
+3. What does a successful CMake configure prove?
+
+Short answers are in the [separate explanations](../solutions/cuda-061_solutions.md#self-check-answers); compare only after an attempt.
 
 ## Primary references
 
-Check the documentation that matches your prepared toolkit before optional
-hardware execution.
+Use the documentation that matches your prepared toolkit.
 
 - [CUDA Programming Guide](https://docs.nvidia.com/cuda/cuda-programming-guide/)
 

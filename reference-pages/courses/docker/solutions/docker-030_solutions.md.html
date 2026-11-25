@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/docker/solutions/docker-030_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="docker-030-explanatory-solutions">docker-030: explanatory solutions<a class="heading-anchor" href="#docker-030-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit reveal. These explain the supplied teaching fixtures; they are not engine results. The mechanism is explained in <code>courses/docker/guides/docker-030.md</code>.</p>
+<p>These answers explain teaching fixtures, not engine results; the mechanism is in <a href="../guides/docker-030.md.html">the guide</a>.</p>
 <h3 id="exercise-1-separate-vulnerability-presence-and-exploitability">Exercise 1: Separate vulnerability presence and exploitability.<a class="heading-anchor" href="#exercise-1-separate-vulnerability-presence-and-exploitability" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> A matched affected component versus a demonstrated reachable exploit condition.</p>
 <p><strong>Why:</strong> Both matter, but neither should be fabricated. A finding needs triage even when immediate exploitability is uncertain.</p>
@@ -238,7 +238,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>A plausible wrong approach:</strong> Writing just patched, all safe hides which image changed and what was left unresolved.</p>
 <p><strong>How to verify:</strong> Each field links to the scan output, the rebuild and a test receipt for the new digest.</p>
 <h3 id="check-your-transfer">Check your transfer<a class="heading-anchor" href="#check-your-transfer" aria-label="Link to this section">#</a></h3>
-<p>A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.</p></article>
+<p>Presence is established; reachability is weak, because <code>server.py</code> opens no TLS and the healthcheck uses HTTP. Since a base refresh is cheap and reversible here, a reasonable decision is to rebuild from a refreshed base, rerun the health, peer and counter checks, and record the old and new image IDs with the version printed by <code>ssl.OPENSSL_VERSION</code>. The record states the residual risk if no fixed version exists yet. If the rebuilt image still prints the old OpenSSL version, the refresh did not take effect and the finding stays open.</p></article>
   </main>
 </body>
 </html>

@@ -197,26 +197,16 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">int</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">void</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span></span>
 <span class="source-line">  <span class="syntax-comment">/* Exercise 1: Sum one field in records: change one input</span></span>
-<span class="source-line"><span class="syntax-comment">     Copy worked example 1, the &quot;sum one field in records&quot; case, into a scratch</span></span>
-<span class="source-line"><span class="syntax-comment">     pad and change `struct Point records[] = {{1, 10}, {2, 20}, {3, 30}};` to</span></span>
-<span class="source-line"><span class="syntax-comment">     `struct Point records[] = {{2, 10}, {2, 20}, {3, 30}};`. Before running,</span></span>
-<span class="source-line"><span class="syntax-comment">     predict which CHECK fails and which value it sees in place of the worked</span></span>
-<span class="source-line"><span class="syntax-comment">     result (the result is 6); then run it and restore the original line.</span></span>
-<span class="source-line"><span class="syntax-comment">     Expected: With `struct Point records[] = {{2, 10}, {2, 20}, {3, 30}};` the</span></span>
-<span class="source-line"><span class="syntax-comment">     run stops with `Check failed` at the CHECK on `sum == 6`, because the &quot;sum</span></span>
-<span class="source-line"><span class="syntax-comment">     one field in records&quot; case no longer shows that the result is 6. Restoring</span></span>
-<span class="source-line"><span class="syntax-comment">     `struct Point records[] = {{1, 10}, {2, 20}, {3, 30}};` brings that</span></span>
-<span class="source-line"><span class="syntax-comment">     observation back. */</span></span>
+<span class="source-line"><span class="syntax-comment">     In worked example 1, change `struct Point records[] = {{1, 10}, {2, 20},</span></span>
+<span class="source-line"><span class="syntax-comment">     {3, 30}};` to `struct Point records[] = {{2, 10}, {2, 20}, {3, 30}};`.</span></span>
+<span class="source-line"><span class="syntax-comment">     Predict which value the CHECK on `sum == 6` sees, then run and restore.</span></span>
+<span class="source-line"><span class="syntax-comment">     Expected: `Check failed` at `sum == 6`; restoring `struct Point records[] =</span></span>
+<span class="source-line"><span class="syntax-comment">     {{1, 10}, {2, 20}, {3, 30}};` passes again. */</span></span>
 <span class="source-line"></span>
 <span class="source-line">  <span class="syntax-comment">/* Exercise 2: Compute the same result by columns: debug a regression</span></span>
-<span class="source-line"><span class="syntax-comment">     A regression changed one token in worked example 2, the &quot;compute the same</span></span>
-<span class="source-line"><span class="syntax-comment">     result by columns&quot; case, so one line now reads `sum -= x[i];`. Run the</span></span>
-<span class="source-line"><span class="syntax-comment">     example with that line, use the failing CHECK to find why the result is</span></span>
-<span class="source-line"><span class="syntax-comment">     also 6 no longer holds and repair the line without changing the CHECK.</span></span>
-<span class="source-line"><span class="syntax-comment">     Expected: Before the repair the run stops with `Check failed` at the CHECK</span></span>
-<span class="source-line"><span class="syntax-comment">     on `sum == 6 &amp;&amp; y[2] == 30`. Once the line reads `sum += x[i];` again, the</span></span>
-<span class="source-line"><span class="syntax-comment">     &quot;compute the same result by columns&quot; case again shows that the result is</span></span>
-<span class="source-line"><span class="syntax-comment">     also 6. */</span></span>
+<span class="source-line"><span class="syntax-comment">     Worked example 2 now has a line reading `sum -= x[i];`. Repair it so that</span></span>
+<span class="source-line"><span class="syntax-comment">     the result is also 6 again. Expected: `Check failed` at `sum == 6 &amp;&amp; y[2]</span></span>
+<span class="source-line"><span class="syntax-comment">     == 30` until the line reads `sum += x[i];` again. */</span></span>
 <span class="source-line"></span>
 <span class="source-line">  <span class="syntax-comment">/* Exercise 3: Inspect legal field offsets</span></span>
 <span class="source-line"><span class="syntax-comment">     Inspect x and y offsets in Point.</span></span>

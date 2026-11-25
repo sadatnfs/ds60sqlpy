@@ -8,7 +8,7 @@
     "introduced_in": "dbt-001",
     "first_note": "This first lesson shows the complete program once. `project` writes the files listed above, `invoke` passes the listed arguments to dbt's programmatic `dbtRunner` and checks its success flag, `rows` queries the DuckDB file directly, and `artifact` reads a JSON file from `target/`. Later lessons show only their case functions.",
     "introduced_note": "The program below shows only this case's own functions. They call the shared helpers {helpers}, which write the files above, run dbt through `dbtRunner` and read the results; the helpers are listed in full in Worked case 1 above and at the top of this lesson's [starter](../lessons/{key}.py).",
-    "note": "The program below shows only this case's own functions. They call the shared helpers {helpers}, which write the files above, run dbt through `dbtRunner` and read the results; the helpers are explained in [dbt-001](dbt-001.md) and appear in full at the top of this lesson's [starter](../lessons/{key}.py)."
+    "note": "Helpers {helpers}: see the [case harness](../STUDY-GUIDE.md#case-harness)."
   },
   "units": [
     {
@@ -104,6 +104,9 @@
       "diagnosis": "A missing profile error usually means the project profile name and profiles.yml key disagree. A missing relation after compile is expected unless the model was run. A successful run with no tests is not a quality certificate. Inspect the command, selected resources, result status and actual database contents before deciding what was established.",
       "transfer": "Keep parsing, compilation, materialization and validation distinct. This gives you a reliable basis for the later incremental, contract and publication lessons without depending on a hosted warehouse.",
       "lab": "Parse, build and query a one-model project to confirm the value 42 in DuckDB, then compile a second model and show that its relation exists only after dbt run.",
+      "run_focus": "Two dictionaries should print. The first names the parsed model `answer` and reports 42 read back from the DuckDB file after `dbt build`. The second shows compiled text containing `6 * 7` and `True` for a relation that existed only once `dbt run` had executed, which is the difference between compiling a model and materializing it.",
+      "reference_focus": "The reference parses and builds the one-model project, then checks the manifest node `model.classroom.answer`, the stored row 42 and the run result status. Its second case proves only that compilation renders SQL without creating a relation; it says nothing about adapters other than the local DuckDB one.",
+      "tutor_probe": "Ask the learner which of parse, compile, run and build touched the database, and how the printed dictionaries prove it. A learner who says compile created the relation should rerun case 2 and look for the relation before `dbt run`. Keep the roles of the dbt project and the profile distinct.",
       "references": [
         [
           "dbt reference: Programmatic invocations",
@@ -209,6 +212,9 @@
       "diagnosis": "A seed can load successfully while a staging cast fails. Conversely, permissive SQL can succeed while excluding important records. Inspect the raw relation, parsed field and rejection count. Do not repair an error by silently widening every field to text or swallowing all conversion failures.",
       "transfer": "State which invalid inputs block publication and which are quarantined, then test both paths using identified records. The same contract will later protect model features from silent data changes.",
       "lab": "Seed raw orders, stage them with explicit casts, and show that try_cast accepts two of three rows while the malformed record stays visible in the raw seed.",
+      "run_focus": "Case 1 should report three seed rows and an amount total of 21. Case 2 reports two accepted rows, one rejected row and three raw rows. Those last three numbers form an accounting identity: if accepted plus rejected stops equaling raw, a staging filter is losing or inventing records.",
+      "reference_focus": "The reference loads a CSV seed, stages it with explicit casts and uses `try_cast` to keep ids 1 and 3 with amounts 5 and 9. It also counts the malformed raw row, so rejection is measured rather than assumed. The result covers this three-row fixture, not every malformed input pattern.",
+      "tutor_probe": "Have the learner explain where the seed ends and the staging model begins, and why the rejected `bad` amount still appears in the raw relation. Ask which count would reveal a silently dropped record, and whether a cast that fails loudly would be a better staging choice for their own data.",
       "references": [
         ["dbt docs: Add Seeds to your DAG", "https://docs.getdbt.com/docs/build/seeds"],
         ["dbt-duckdb repository README", "https://github.com/duckdb/dbt-duckdb"]
@@ -309,6 +315,9 @@
       "diagnosis": "A relation-not-found error can come from a missing graph edge or an unbuilt dependency. An absent ephemeral relation is expected. A fast view query on tiny data does not establish production performance. Inspect compilation and actual object types before changing orchestration order.",
       "transfer": "Retain ref-based dependencies and test the resulting graph, values and freshness expectations. This supports reliable selection and deployment when the project grows.",
       "lab": "Build a view and a table that depends on it, read the manifest dependency and the DuckDB object types, then inline an ephemeral model and confirm that no relation is created for it.",
+      "run_focus": "Look for the dependency string `raw_orders -> staging -> customer_total` with a total of 12, then `inlined_dependency: True` with the answer 42. The first case also checks that staging is a view and the total is a base table, so changing a materialization shows up as a failed object-type assertion.",
+      "reference_focus": "The reference reads `depends_on` from the manifest, checks information_schema for a VIEW and a BASE TABLE, and confirms that an ephemeral model becomes the `__dbt__cte__base` CTE inside compiled SQL. It does not measure query speed, so it cannot settle which materialization is cheaper.",
+      "tutor_probe": "Ask the learner to draw the DAG for case 1 and label each node as view, table or ephemeral. Then ask why no relation exists for the ephemeral model and what ref adds that a hardcoded table name would lose. Push for a workload reason, not a habit, behind each materialization.",
       "references": [
         ["dbt docs: Materializations", "https://docs.getdbt.com/docs/build/materializations"],
         ["dbt-duckdb repository README", "https://github.com/duckdb/dbt-duckdb"]
@@ -405,6 +414,9 @@
       "diagnosis": "When a build fails, distinguish compilation, model execution and test failure. Check which relations were already materialized and whether publication was blocked. Avoid treating warning severity as an automatic acceptable outcome; it should follow a reviewed policy, not a desire for successful status.",
       "transfer": "Demonstrate a known violation, inspect the materialized state and repair the source or transformation without weakening the assertion. Carry test outcomes into the later publication decision.",
       "lab": "Declare not_null and unique tests on an order key, build a passing and a duplicated fixture, and repair the duplicate so a full-refresh build passes.",
+      "run_focus": "The passing fixture should report two passing tests over two rows. In the duplicate fixture, the useful surprise is that the build fails while the orders table still holds two rows: the model ran before its unique test rejected it. The repaired seed then passes with `--full-refresh`.",
+      "reference_focus": "The reference declares not_null and unique on `orders.id`, counts the pass statuses in run_results.json, and checks that a duplicate key fails the build yet leaves the materialized table in place. It shows what a failed test reports, not that downstream consumers were protected from the duplicate.",
+      "tutor_probe": "Ask what the learner believes a failed data test does to a table that was already materialized, then have them check the row count after the failing build. A good answer separates the test's verdict from the relation's existence and names who should act on the failure.",
       "references": [
         ["dbt docs: Add data tests to your DAG", "https://docs.getdbt.com/docs/build/data-tests"],
         ["dbt-duckdb repository README", "https://github.com/duckdb/dbt-duckdb"]
@@ -532,6 +544,9 @@
       "diagnosis": "A stale-source error can be correct behavior under the declared threshold. Check timestamp parsing, timezone, clock skew and the meaning of loaded_at before increasing the limit. If the source passes but users see missing data, investigate completeness rather than claiming freshness proved everything.",
       "transfer": "Pair it with batch completeness and time-coverage checks appropriate to the consumer. Keep the local fixture evidence separate from claims about an actual upstream service.",
       "lab": "Configure a source with a one-hour error_after freshness policy and run dbt source freshness against a current and a two-day-old loaded_at timestamp.",
+      "run_focus": "The run prints one result per freshness case: a fresh stamp gives status pass, and a stamp two days old gives error with `stale` set to True. Because the stamps are computed from the real clock, a later rerun still works; hardcoding a date would make the fresh case decay into a stale one.",
+      "reference_focus": "The reference declares a `landing.events` source with `loaded_at_field` and a one-hour `error_after`, seeds a single timestamp and runs `dbt source freshness`. It proves the policy compares that column with the current clock, not that the upstream system actually delivered on time.",
+      "tutor_probe": "Ask the learner what clock dbt compared `loaded_at` against and what would happen if the source wrote timestamps in another time zone. Then ask who receives the error and what they should do, since a freshness threshold is a policy decision as much as a query.",
       "references": [
         ["dbt docs: Source freshness", "https://docs.getdbt.com/docs/deploy/source-freshness"],
         ["dbt-duckdb repository README", "https://github.com/duckdb/dbt-duckdb"]
@@ -659,6 +674,9 @@
       "diagnosis": "An empty selected test set is not a passing unit test. Check how many results were returned and their identifiers. Schema preparation errors should be distinguished from a wrong expected row. Do not change expected output merely because the current implementation produced something else.",
       "transfer": "Include at least one counterexample that would detect a plausible defect, and retain the source and expected rows needed to explain the result.",
       "lab": "Run a YAML unit test with its own two-row input, confirm that the production seed is unchanged, and make a deliberately wrong expected row fail.",
+      "run_focus": "Each run reports the unit fixture total 5, and the production seed amount stays 100. Flip the expectation to 99 and the status becomes fail while the seed is still untouched, which shows that the unit test read only its own `given` rows.",
+      "reference_focus": "The reference defines a YAML unit test on `totals` with its own `given` input for `ref('raw_orders')`, runs `dbt test --select test_type:unit`, and confirms the real seed still holds 100. It verifies transformation logic on controlled rows, not that production data meets the same contract.",
+      "tutor_probe": "Ask the learner what data the unit test actually read and how the unchanged 100 proves it. Then contrast a unit fixture with an integration test on the real seed: which failure would each catch, and which would each miss?",
       "references": [
         ["dbt docs: Unit tests", "https://docs.getdbt.com/docs/build/unit-tests"],
         ["dbt-duckdb repository README", "https://github.com/duckdb/dbt-duckdb"]
@@ -757,6 +775,9 @@
       "diagnosis": "If compilation fails, inspect macro discovery, names and argument syntax. If results are wrong, inspect the compiled SQL and numeric domain. Do not patch a macro by suppressing undefined names or replacing every exceptional denominator with zero. That can produce clean output while changing the analytical question.",
       "transfer": "Keep domain assumptions explicit and test contrasting numeric cases. Use abstraction to make a calculation consistent without hiding the evidence needed to validate it.",
       "lab": "Write a safe_ratio macro, compare its compiled CASE expression with the materialized rates 0.25 and null, and confirm that an undefined macro fails at compilation.",
+      "run_focus": "Case 1 should print the rates `[0.25, None]` and `macro_expanded: True`; the None comes from the zero-denominator row. Case 2 prints a single flag confirming that a model calling an undefined macro was rejected during compilation, so no compiled `bad.sql` exists.",
+      "reference_focus": "The reference compiles the safe_ratio macro, checks that compiled SQL contains `case when` and no longer mentions the macro name, and compares the materialized rates with 0.25 and null. The undefined-macro case shows failure before execution; it does not test numeric edge cases beyond a zero denominator.",
+      "tutor_probe": "Ask the learner to read the compiled SQL aloud and point at the expression that produced null. Then ask why reviewing the macro source alone is not enough evidence, and at which stage an undefined macro stops the run.",
       "references": [
         ["dbt docs: Jinja and macros", "https://docs.getdbt.com/docs/build/jinja-macros"],
         ["dbt-duckdb repository README", "https://github.com/duckdb/dbt-duckdb"]
@@ -857,6 +878,9 @@
       "diagnosis": "If an incremental run succeeds but records are missing, inspect the target watermark and arrival pattern. If duplicates appear, inspect both the source predicate and write strategy. Keep an independently recomputed small fixture to detect divergence instead of relying only on the incremental table's own counts.",
       "transfer": "Test both a valid append and a late-arrival violation, then define the required repair or stronger strategy. The next lesson adds keyed updates with an explicit lookback bound and compares it with dbt's microbatch strategy.",
       "lab": "Run a max-watermark incremental model through an append and a repeat run, then add a late record behind the watermark and compare the incremental result with a full refresh.",
+      "run_focus": "The append case should report two rows and no duplicates after the repeat run. The late case reports that the watermark missed an event and that a full refresh produced three rows. If those counts hold, the incremental and full results differ by exactly the late record.",
+      "reference_focus": "The reference runs a max-`updated_at` incremental model twice, appends a newer event, and checks that a rerun neither drops nor duplicates rows. It then inserts an event behind the watermark and shows that only `--full-refresh` recovers it. That proves the stated assumption fails here, not how often late data occurs.",
+      "tutor_probe": "Ask the learner to state the exact condition under which this incremental model equals a full recomputation. Then ask how they would detect a late event in production, and what that detection would cost compared with a periodic full refresh.",
       "references": [
         [
           "dbt docs: Configure incremental models",
@@ -957,6 +981,9 @@
       "diagnosis": "If a keyed update creates duplicates, inspect selected-source uniqueness rather than assuming unique_key enforced it. If old corrections are missed, inspect the lookback bound. If a rerun changes results without source changes, inspect ordering, nondeterministic expressions and external state.",
       "transfer": "Explain which late arrivals it accepts, which require repair and how the result is reconciled with a full recomputation. Keep the policy explicit as data volume grows.",
       "lab": "Apply a delete+insert model with a ten-unit lookback to a correction and a late insert, rerun it without duplicates, and show that a record outside the window needs a full refresh.",
+      "run_focus": "Expect `keyed_update_and_late_insert: True` with three rows after the rerun, where ids 1, 2 and 3 hold 6, 7 and 9. The second case should show one row before and two after `--full-refresh`; the missing record's timestamp fell outside the ten-unit lookback.",
+      "reference_focus": "The reference applies a delete+insert model keyed on `id` with a ten-unit lookback, checks that a correction replaces its old value without duplication, and shows that an older record needs a declared backfill. The lookback width is a fixture assumption; choosing one for real data needs measured lateness.",
+      "tutor_probe": "Ask the learner why `unique_key` prevents duplicates on rerun and what the lookback adds that a strict watermark lacks. Then ask what idempotency means here, and how they would choose the lookback width from evidence rather than a guess.",
       "references": [
         [
           "dbt reference: unique_key",
@@ -1091,6 +1118,9 @@
       "diagnosis": "Unexpected history growth may come from unstable keys or noisy tracked columns. Unexpected open records may come from the deletion policy. A historical result can also be temporally wrong even when its interval columns are well-formed. Inspect source completeness and time semantics before changing snapshot configuration.",
       "transfer": "Verify current and closed versions, define deletion handling, and preserve identity and clock contracts before using the history for features or analysis.",
       "lab": "Snapshot a customer seed with the check strategy and hard_deletes set to invalidate, change one region, and compare history rows with current rows after a deletion.",
+      "run_focus": "Both snapshot cases should report three history rows. The active rows tell them apart: with the customer kept, `(1, west)` and `(2, south)` are both current; with customer 2 deleted and hard_deletes set to invalidate, only `(1, west)` remains current.",
+      "reference_focus": "The reference snapshots the customer seed with the check strategy on `region`, reruns after a change, and reads current rows where `dbt_valid_to` is null. The history covers only the moments when dbt snapshot ran; a change that happened and reverted between runs is invisible to it.",
+      "tutor_probe": "Ask the learner what the snapshot observed, when, and what it could never have seen between runs. Then ask how invalidated deletes change the current view, and why a snapshot is not the same as a source system's audit log.",
       "references": [
         ["dbt docs: Add snapshots to your DAG", "https://docs.getdbt.com/docs/build/snapshots"],
         ["dbt-duckdb repository README", "https://github.com/duckdb/dbt-duckdb"]
@@ -1220,6 +1250,9 @@
       "diagnosis": "A contract error may be the correct protection against an incompatible model. Inspect declared and actual column names/types instead of disabling enforcement. After failure, inspect the database and invocation artifacts; do not assume every relation reverted to a prior state.",
       "transfer": "Keep the observed failure timing separate from broader transaction claims, and combine structural compatibility with semantic and publication checks.",
       "lab": "Enforce a model contract with declared column types, build a compatible model, then change its output type and confirm that the run fails while the earlier relation keeps 42.",
+      "run_focus": "Case 1 prints the declared columns `id:integer` and `amount:bigint` and the row `[1, 42]`. Case 2 prints two flags: the incompatible string `amount` was rejected, and the earlier relation still returned 42 after the failure. If that second flag were False, the failed run would have replaced data it should have kept, so inspect how the model was materialized before trusting any downstream reader.",
+      "reference_focus": "The reference enforces a contract on a table model with declared integer and bigint columns, builds a compatible version and then a version that casts `amount` to varchar. The rejected run leaves 42 in place for this DuckDB table; other adapters and materializations may fail differently.",
+      "tutor_probe": "Ask the learner to name each declared column and type and explain why the varchar change was refused. Then ask what the contract does not check, such as the business meaning of amount or the range of its values, and where those checks belong. Finally, ask whether keeping the old relation after a failure holds for every materialization or was verified only for this table.",
       "references": [
         ["dbt docs: Model contracts", "https://docs.getdbt.com/docs/mesh/govern/model-contracts"],
         ["dbt-duckdb repository README", "https://github.com/duckdb/dbt-duckdb"]
@@ -1324,6 +1357,9 @@
       "diagnosis": "If a result changes without a schema error, inspect semantic definitions and version resolution. An unversioned ref can follow a new latest contract intentionally. If a pinned consumer fails after removal of an old version, follow the migration policy instead of silently retargeting it.",
       "transfer": "Demonstrate the changed result, identify affected consumers and define validation and rollback requirements. Carry the same discipline into ML feature and model artifact versions.",
       "lab": "Publish two versions of a model, query a consumer pinned to version 1 and one that follows the latest version, and name the gross-to-net change that separates 100 from 80.",
+      "run_focus": "Case 1 prints `explicit_v1: 100` and `latest_v2: 80`: the consumer pinned to version 1 still reads gross value while the unpinned one follows the latest version. Case 2 names the change as gross to net, reports 80, and confirms that the manifest recorded the dependency. A consumer that silently moved from 100 to 80 is exactly the break versioning is meant to prevent, so check which ref each consumer uses.",
+      "reference_focus": "The reference declares `latest_version: 2` with versions defined in `customer_value_v1` and `customer_value_v2`, queries a pinned and a latest consumer, and computes net as gross 100 minus returns 20. It proves how versioned refs route, not that consumers were told about the semantic change.",
+      "tutor_probe": "Ask the learner why both 100 and 80 are correct answers to different questions, and which consumer should follow latest. Then ask how they would announce the gross-to-net change, how long version 1 should stay available, and what evidence would show that every pinned consumer has migrated before that version is removed.",
       "references": [
         ["dbt docs: Model versions", "https://docs.getdbt.com/docs/mesh/govern/model-versions"],
         ["dbt-duckdb repository README", "https://github.com/duckdb/dbt-duckdb"]
@@ -1451,6 +1487,9 @@
       "diagnosis": "Unexpectedly small selections can result from tags, graph direction, indirect-test rules or an overwritten baseline. Inspect ls output before executing a destructive or expensive command. A successful selector command with zero intended resources is not a completed validation.",
       "transfer": "Explain which dependencies and tests are included and which data changes are outside the comparison. The later CI lessons connect that selection to real execution and deferral.",
       "lab": "List the models selected by tag:feature+, then save a manifest, change one model and select state:modified+ against that saved baseline.",
+      "run_focus": "The tag selection should list `base` and `child` but not `unrelated`. The state case also lists `base` and `child`, because base changed and child depends on it. The final flag is a reminder that being selected as modified says nothing about whether the change is correct.",
+      "reference_focus": "The reference parses the project and reads model names from `dbt ls` output for `tag:feature+` and for `state:modified+` against a copied manifest. It proves which nodes each selector expands to for this graph; it does not build or test them.",
+      "tutor_probe": "Ask the learner to predict each selection before running `dbt ls`, including what the trailing plus adds. Then ask which baseline the state comparison used, how it was saved, and why a stale baseline would select the wrong models.",
       "references": [
         [
           "dbt reference: Syntax overview",
@@ -1581,6 +1620,9 @@
       "diagnosis": "A missing catalog node may mean the model was not materialized or the wrong environment was inspected. An empty description is an authored-content gap. An exposure pointing to the wrong model is a lineage defect even if the database query succeeds. Diagnose these separately.",
       "transfer": "Review a consumer's dependency and record which claims are declarations versus runtime evidence. This creates a useful handoff for analysts, data scientists and operators.",
       "lab": "Generate documentation for a described mart with an exposure, read the catalog and manifest, and detect a model whose type is known but whose description is missing.",
+      "run_focus": "Case 1 reports the catalog column `total` and an exposure that depends on `mart`. Case 2 shows a gap that generated documentation can hide: the column type is known from the database, yet the business description is missing because nobody wrote one.",
+      "reference_focus": "The reference runs `dbt docs generate`, then reads catalog.json for observed columns and types and manifest.json for authored descriptions and the `decision_report` exposure owned by Classroom team. Generated docs prove structure and declared ownership, not that the descriptions are accurate.",
+      "tutor_probe": "Ask the learner which facts came from the database catalog and which came from YAML that someone wrote. Then ask who owns the exposure, what a consumer would lose without the missing description, and how they would review descriptions for accuracy.",
       "references": [
         ["dbt docs: Documentation", "https://docs.getdbt.com/docs/build/documentation"],
         ["dbt-duckdb repository README", "https://github.com/duckdb/dbt-duckdb"]
@@ -1710,6 +1752,9 @@
       "diagnosis": "If invalid data appears despite a failed build, inspect the consumer-facing boundary. If publication is missing after success, check the exact selected statuses and artifact path. Keep failures visible and reconcile uncertain outcomes before retrying. A gate that simply ignores failed tests is not recovery.",
       "transfer": "Demonstrate both paths and retain a source-bound decision record. Extend the mechanism to an atomic version pointer and a tested recovery plan in a durable owned environment.",
       "lab": "Build a candidate relation and record publication only when every test passes, then show that a failed uniqueness test leaves the candidate built but unpublished.",
+      "run_focus": "In both cases `ready` materializes two rows. The difference is publication: the clean seed writes `published.json`, while the duplicate id makes the unique test fail and leaves no published file, even though the candidate relation exists.",
+      "reference_focus": "The reference builds a candidate model, reads every status in run_results.json, and writes the publication file only when the build succeeded and all statuses are pass or success. It shows a gate after materialization; it does not stop consumers who query the candidate relation directly.",
+      "tutor_probe": "Ask the learner to separate three states: computed, tested and published. Then ask what a consumer reading the candidate table directly would see after a failed test, and how they would make the published location the only supported one.",
       "references": [
         [
           "dbt reference: Run results JSON file",
@@ -1817,6 +1862,9 @@
       "diagnosis": "A large rate change may come from a changed denominator rather than a changed phenomenon. Inspect grouping, source coverage and join multiplicities. A query that compiles and passes key tests can still implement the wrong estimand. Make the metric definition and independent fixture arithmetic part of review.",
       "transfer": "Carry it across SQL, Polars and downstream model dashboards without changing its meaning. Treat semantic-layer adoption as an additional implementation to qualify against that contract.",
       "lab": "Compute pooled cohort rates in SQL from success and trial counts, check them against independent arithmetic, and compare an equal-row average that differs by more than 0.4.",
+      "run_focus": "Case 1 prints the pooled rates A 0.1 and B 0.5 with denominators 100 and 2. Read them together: B's high rate rests on two trials, which a published metric must disclose. Case 2 prints an equal-row average far from 0.1, the trial-weighted rate for the same rows, so averaging row ratios answers a different question. If you change the seed, recompute both rates by hand before trusting the printed values.",
+      "reference_focus": "The reference sums successes and trials per cohort before dividing, uses nullif to guard a zero denominator, and checks the result against 10 of 100 and 1 of 2. The equal-row case shows that averaging ratios gives a rate more than 0.4 away from 0.1. Neither case tests uncertainty or sample-size rules.",
+      "tutor_probe": "Ask the learner to write the metric's numerator and denominator in words before reading any SQL. Then ask why the equal-row average weights a one-trial row as heavily as a 99-trial row, and what a reader should be told about cohort B's two trials. A strong answer names the population each rate describes and an independent check that does not reuse the model's SQL.",
       "references": [
         ["dbt docs: Creating metrics", "https://docs.getdbt.com/docs/build/metrics-overview"],
         ["dbt-duckdb repository README", "https://github.com/duckdb/dbt-duckdb"]
@@ -1918,6 +1966,9 @@
       "diagnosis": "If a historical score is suspiciously good, inspect availability and label timing before interpreting model quality. If rows disappear, reconcile request coverage. If results vary on rerun, inspect version ties and ordering. Fix the temporal data contract before adjusting the model.",
       "transfer": "Demonstrate a late-known counterexample and retain request coverage. This prepares the feature-store and ML engineering route to test actual retrieval against a meaningful temporal oracle.",
       "lab": "Build a point-in-time feature model that requires event and known times to precede each request cutoff, and compare it with an event-time-only model that returns 999.",
+      "run_focus": "With availability checked, request 1 at cutoff 5 gets value 10 and request 2 at cutoff 9 gets 30. Without that check, request 1 gets 999 from an event at time 4 that was not known until time 7, which leaks future knowledge into a training row.",
+      "reference_focus": "The reference joins requests to features where both `event_at` and `known_at` precede the cutoff and keeps the latest row per request. The event-time-only version returns 999 for request 1. The proof covers this ordering rule on three events, not clock skew or corrections that arrive later.",
+      "tutor_probe": "Ask the learner to explain, for request 1, why the event at time 4 must be excluded even though it happened before the cutoff. Then ask what entity, event time and knowledge time mean in their own data, and how they would test a feature table for leakage.",
       "references": [
         ["dbt docs: Add snapshots to your DAG", "https://docs.getdbt.com/docs/build/snapshots"],
         ["dbt-duckdb repository README", "https://github.com/duckdb/dbt-duckdb"]
@@ -2013,6 +2064,9 @@
       "diagnosis": "An undefined package macro can result from missing preparation, a wrong package name or an unavailable resource. Check the dependency declaration, installed paths and manifest before modifying the consumer's SQL. Do not solve a local preparation problem by enabling unrelated network access inside the classroom.",
       "transfer": "Demonstrate its missing-dependency failure and a reviewed source change. Extend the same discipline to external packages only in a deliberately prepared project with suitable version and trust controls.",
       "lab": "Prepare a local package with dbt deps, use its add_one macro in a model that returns 42, and show that compiling before the package is prepared fails.",
+      "run_focus": "Case 1 should show that the local package was used, the model answer is 42 and `package-lock.yml` was written. Case 2 shows compilation failing before `dbt deps`, then succeeding afterward with compiled SQL that contains 41 and `+ 1` from the package macro.",
+      "reference_focus": "The reference declares a local package, runs `dbt deps`, and checks the manifest for `macro.classroom_utils.add_one`, the lock file and the value 42. It proves preparation of a local path dependency only; hub and git packages also involve network access and version resolution.",
+      "tutor_probe": "Ask the learner what `dbt deps` copied, where the lock file records it, and why compile failed beforehand. Then ask how they would review a package's macros before trusting them, and what changes when a package comes from a remote source.",
       "references": [
         ["dbt docs: Packages", "https://docs.getdbt.com/docs/build/packages"],
         ["dbt-duckdb repository README", "https://github.com/duckdb/dbt-duckdb"]
@@ -2133,6 +2187,9 @@
       "diagnosis": "If a model appears in the wrong place, inspect target selection and generated schema naming before editing SQL. If credentials are missing in an external project, use the approved environment setup rather than copying secrets into the model. Stop when destination ownership is unclear.",
       "transfer": "Preserve calculation semantics across routing changes, reject unknown environments and document the additional isolation requirements of real deployments.",
       "lab": "Add dev and prod outputs to the profile, build one model into both schemas with its target name, and confirm that an unknown target is rejected before any model runs.",
+      "run_focus": "Case 1 should confirm that one profile file routed the same model into two schemas of one test database, printing `dev` and `prod` as the separate schemas. The model selects `target.name`, so each relation records which target built it. Case 2 shows `--target missing` rejected before any model ran, with no run_results.json written. If either case reports a schema you did not expect, read profiles.yml again before changing the model, because routing is decided there.",
+      "reference_focus": "The reference rewrites profiles.yml so the `dev` and `prod` outputs differ only in schema, builds into each, and reads the target name stored by the model. The unknown target leaves no run results. All schemas sit in one local DuckDB file, so this proves routing, not isolation between real environments.",
+      "tutor_probe": "Ask the learner where the target name came from, which file decided the schema, and how they confirmed the destination from the database rather than from the command line. Then ask why an unknown target should fail instead of falling back to a default. A complete answer also explains what separate schemas in one file do not isolate, such as credentials, compute and access rights, and what a real environment boundary would need instead.",
       "references": [
         [
           "dbt reference: About target variables",
@@ -2229,6 +2286,9 @@
       "diagnosis": "Unexpected values can come from an existing target relation rather than a wrong SQL formula. Inspect selected resources, state identity, favor-state behavior and compiled relation names. If the baseline is unavailable or unqualified, stop instead of silently selecting another environment.",
       "transfer": "Demonstrate how target residue changes resolution and choose a reviewed policy for a clean or deliberately state-preferring CI environment. Validate actual results after compilation.",
       "lab": "Build a prod baseline, save its manifest and run a dev child with --defer and --state, then add a stale dev parent and compare the default result with --favor-state.",
+      "run_focus": "Case 1 prints `prod.base` as the deferred parent and 11 for the child, and confirms that the dev parent was never built. Case 2 starts with a stale dev parent: plain `--defer` reads it and gives 101, while `--favor-state` reads the production parent and gives 2.",
+      "reference_focus": "The reference saves a prod manifest, runs a dev child with `--defer --state`, and checks that compiled SQL names `\"prod\".\"base\"`. The second case shows that an existing dev relation wins unless `--favor-state` is set. It proves which parent was read, not that production was correct.",
+      "tutor_probe": "Ask the learner to say which parent the child read in each run and how compiled SQL proves it. Then ask when reading a stale dev relation is the right choice, when it is a hidden risk, and who owns the production state being deferred to.",
       "references": [
         ["dbt reference: Defer", "https://docs.getdbt.com/reference/node-selection/defer"],
         [
@@ -2336,6 +2396,9 @@
       "diagnosis": "A fast CI run can be empty or incomplete. Check resource counts, test selection and the baseline before interpreting its result. A failed test is useful evidence, not a reason to remove the assertion. Keep cleanup scoped to the owned CI target and preserve the accepted baseline.",
       "transfer": "Demonstrate that a meaningful defect fails and that accepted data remains intact. Explain when the change requires a broader validation scope.",
       "lab": "Build a prod baseline, save its manifest, change the child model and run a state:modified+ build in dev for a compatible change and for a change that duplicates rows.",
+      "run_focus": "The compatible change reports no failing status and one protected baseline row. The duplicating change makes a unique test fail in dev, and `prod.child` still has one row afterward, because the slim build compared against the saved prod manifest and wrote only to dev.",
+      "reference_focus": "The reference builds a prod baseline, copies its manifest, edits `child`, and runs `state:modified+` with `--defer` in dev. It checks the prod row count and whether fail appears in run_results.json. It proves that this selection and test caught one duplicate, not that unselected models are safe.",
+      "tutor_probe": "Ask the learner which models the slim build selected and why the unchanged `base` was not rebuilt. Then ask what the CI baseline is, who updates it after a merge, and which kinds of breakage a modified-only selection cannot see.",
       "references": [
         [
           "dbt docs: Continuous integration jobs in dbt",
@@ -2445,6 +2508,9 @@
       "diagnosis": "Start with the first relevant diagnostic rather than the last cascade of skipped resources. Inspect actual selected nodes and database state. A model success followed by a test failure calls for semantic investigation, while a missing relation may indicate preparation or routing. Do not report a skipped downstream resource as a passing result.",
       "transfer": "Preserve bounded before/after evidence and verify a focused correction with an independent oracle. Apply the same method to feature and model pipelines where an apparently healthy process can still produce an invalid product.",
       "lab": "Compile a model whose SQL the database rejects and read its error status, then build a model with a wrong factor of 2 and catch it with a singular reconciliation test.",
+      "run_focus": "Case 1 should show that the template compiled but the database rejected the binding: `missing_column` does not exist, and the run result status is error. Case 2 shows SQL that ran successfully and produced 24, while an independent reconciliation test expected 12 and failed. Those are three different layers: Jinja, the database and the meaning of the result. Name the layer before editing anything, since each needs a different fix and different evidence.",
+      "reference_focus": "The reference compiles `bad.sql` successfully, then runs it and reads status error from run_results.json. Its second case multiplies a sum by 2, and a singular test comparing with 12 catches the wrong 24. The semantic error is caught only because the test states the expected quantity independently.",
+      "tutor_probe": "Ask the learner to classify each failure by the layer that rejected it and to show the evidence: compiled file, run status or test result. Then ask why the 24 passed compilation and execution, and how they would write an independent expectation for a quantity in their own model. Ask too which of these failures a review of the SQL text alone would have caught.",
       "references": [
         [
           "dbt reference: Run results JSON file",
@@ -2541,6 +2607,9 @@
       "diagnosis": "Near-zero lazy or compile timings may not include query execution. A faster result with different counts or totals is not an equivalent replacement. Check the dataset, cache regime, selected work and result contract before attributing performance to a tool or setting.",
       "transfer": "Review plans as evidence about this query and version, retain multiset/ordering semantics and include the complete refresh/read workload when choosing materializations.",
       "lab": "Time a grouped query whose five totals are checked against Python arithmetic, then show that a select distinct rewrite changes the total from 17 to 12.",
+      "run_focus": "Case 1 prints the five segment totals checked against Python arithmetic, a median of three query timings, and confirmation that a plan was available. The timing covers only the DuckDB query, not dbt build. Case 2 shows `select distinct` turning a total of 17 into 12 by removing the duplicate `(1, 5)`, so a faster rewrite that changes the answer is not a valid comparison. Expect the timing to vary between runs; the totals must not.",
+      "reference_focus": "The reference builds a ten-thousand-row table, queries ids under 1000 grouped by `id % 5`, compares every total with Python, takes three timings and reads `explain`. The median describes this machine and run only. The distinct rewrite fails the correctness oracle before speed matters.",
+      "tutor_probe": "Ask the learner what interval the timer measured and what it excluded, such as dbt startup and materialization. Then ask why the Python oracle runs before any speed comparison, and what makes the distinct rewrite invalid even if it were faster. Ask how many repetitions and how small a spread they would need before calling one query faster than another.",
       "references": [
         [
           "DuckDB docs: EXPLAIN: Inspect Query Plans",
@@ -2670,6 +2739,9 @@
       "diagnosis": "A private-reference error can be correct governance behavior. Do not bypass it by hardcoding a relation name and claiming the policy passed. Conversely, a private model that is readable through direct SQL is not surprising: inspect database permissions as a different layer.",
       "transfer": "Test both allowed and rejected dependencies and record who owns semantic compatibility and external access controls.",
       "lab": "Declare two groups and a private model, build a consumer in the same group, and confirm that dbt rejects a consumer in another group that references the private model.",
+      "run_focus": "In the same-group case the consumer builds and returns 42. In the cross-group case dbt rejects the build, because `consumer` refers to the private `internal` model from another group. Either way the last flag stands: anyone with SQL access could still query both relations directly.",
+      "reference_focus": "The reference declares commerce and analysis groups, marks `internal` private, and builds a consumer in one group or the other. dbt accepts the same-group ref and rejects the cross-group one at build time. It proves a project interface rule, not database authorization.",
+      "tutor_probe": "Ask the learner what a private model protects against and what it does not. Then ask how they would enforce read access in the database itself, and who owns each group's public interface.",
       "references": [
         ["dbt docs: Model access", "https://docs.getdbt.com/docs/mesh/govern/model-access"],
         ["dbt-duckdb repository README", "https://github.com/duckdb/dbt-duckdb"]
@@ -2767,6 +2839,9 @@
       "diagnosis": "If recovery changes more than intended, stop and identify the candidate, accepted version and actual consumer pointer. A failed test may leave materialized data. A timeout may leave an unknown commit outcome. Reconcile state before retrying or deleting evidence.",
       "transfer": "Demonstrate a failed candidate and a reversible local promotion, then describe which distributed or operational guarantees still need separate implementation and qualification.",
       "lab": "Change an accepted-version pointer inside a DuckDB transaction and roll it back, then reject a candidate that fails a value test while the accepted value stays 42.",
+      "run_focus": "Case 1 should show the pointer view returning 99 inside the transaction and `[1, 42]` again after rollback. Case 2 rejects a candidate with value 99 through the value_policy test, while the accepted release keeps 42. In both cases the accepted version survives a bad candidate.",
+      "reference_focus": "The reference swaps a `published.current_product` view inside a DuckDB transaction and rolls it back, then fails a singular test on values above 50 while `accepted_release` keeps 42. It proves pointer rollback in one local database, not recovery across systems or after a commit.",
+      "tutor_probe": "Ask the learner to name the accepted version, the candidate and the pointer in each case. Then ask what would happen if the pointer change had been committed before the test ran, and how they would return to the previous release.",
       "references": [
         [
           "DuckDB docs: Transaction Management",
@@ -2878,6 +2953,9 @@
       "diagnosis": "If the product differs from its expected total, follow the pipeline from raw parsing through key relationships and aggregation. If the build fails, inspect which resources ran and whether publication was prevented. If a receipt is stale, do not update its hash without re-establishing the candidate's source and validation evidence.",
       "transfer": "Extend it with a controlled schema or timing change, run its negative cases and explain how a consumer can select a valid version. Use the ML engineering path to connect that product to features, model training and serving contracts.",
       "lab": "Build staging and mart models with key tests, write a publication receipt for customer totals 12 and 9, and block publication when the customer dimension has a duplicate key.",
+      "run_focus": "The good run prints a publication with total 21, one quarantined row, a receipt, and rows for customer 10 in north with 12 from two orders and customer 20 in south with 9 from one. The bad-dimension run writes no `published.json`, because a duplicate customer key fails its unique test.",
+      "reference_focus": "The reference stages four raw orders into three accepted rows, joins them to the customer dimension and tests both keys. It writes a receipt only when the build passes, and a duplicate customer key blocks publication. The decision covers this fixture's tests, not quality rules nobody stated.",
+      "tutor_probe": "Ask the learner to account for all four raw orders, then explain why a duplicate customer would double a total if the key test were missing. Ask what the receipt records and who should review it before the product is accepted.",
       "references": [
         [
           "dbt reference: About dbt artifacts",

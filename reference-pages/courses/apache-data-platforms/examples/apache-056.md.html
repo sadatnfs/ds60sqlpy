@@ -204,6 +204,7 @@ bash run.sh start
 bash run.sh identity</code></pre>
 <p><code>check-backup</code> snapshots the known source table, stages its compatible SSTable components, imports into a distinct restore table with extended verification, and checks every key/value. It retains a source-bound receipt and the restore target while removing only its exact staging and snapshot. At most four restore targets are allowed. Export receipts before explicitly destroying synthetic state.</p>
 <p>Compare the same host UUID and retained orders at each lifecycle boundary. Read-only identity calls do not replay writes or recreate an empty fixture.</p>
+<p>Each <code>identity</code> call reads <code>host_id</code> and <code>cluster_name</code> from <code>system.local</code> and the order rows sorted by <code>order_id</code>. After <code>stop</code> and <code>resume</code> the containers are the same ones, so a changed <code>host_id</code> is a failure. After <code>down</code> and <code>start</code> the containers are new but the volume is kept, so the same <code>host_id</code> and orders show that state survived on disk rather than in the container.</p>
 <pre class="highlighted-code"><code class="language-bash">bash run.sh destroy --confirm-owned-data-loss</code></pre>
 <p>This final command deletes only verified workshop-owned synthetic data. It is optional cleanup after evidence export, not part of ordinary resume.</p></article>
   </main>

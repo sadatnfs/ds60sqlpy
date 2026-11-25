@@ -206,11 +206,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Collection:</strong> A sequence with reusable traversal and indices.</p>
 <p><strong>Materialization:</strong> Creating stored elements from a sequence.</p>
 <h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>The Linux Docker classroom compiles the saved pad as <code>main.swift</code> with Swift 6 language checking. An explicit <code>@main</code> type contains <code>static func main() async throws</code>; the fixed compiler uses <code>-parse-as-library -swift-version 6</code>. The examples use the standard library and portable Foundation. <code>precondition</code> makes a violated invariant fail the process. The fixed pad accepts one source file, without arbitrary command arguments, interactive input or dependency installation. SwiftUI, UIKit, Apple simulators and application signing belong to the separately prepared macOS/Xcode project labs, never the Linux pad.</p>
-<p>Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.</p>
+<p>Predict <code>count</code> and <code>startIndex</code> of the slice separately before running Example A; task 1 asks for both. Task 4 indexes the slice from 0, which compiles and then traps at runtime with an index out of range, so run it in a scratch pad. Task 3 needs a constraint such as <code>AdditiveArithmetic</code> on the element type.</p>
+<p>Compile contract, starter stop and success marker: <a href="../STUDY-GUIDE.md.html#running-a-lesson">running a lesson</a>.</p>
 <h3 id="syntax-anatomy-and-execution-trace">Syntax anatomy and execution trace<a class="heading-anchor" href="#syntax-anatomy-and-execution-trace" aria-label="Link to this section">#</a></h3>
 <p><code>collection.indices</code> supplies valid positions. <code>lazy.map</code> creates deferred transformation. <code>Array(sequence)</code> materializes. reduce summarizes a sequence without requiring indexing.</p>
-<p>Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.</p>
+<p>Each example ends with a trace; method: <a href="../STUDY-GUIDE.md.html#tracing-a-program">tracing a program</a>.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="example-a-use-slice-indices-honestly">Example A: Use slice indices honestly<a class="heading-anchor" href="#example-a-use-slice-indices-honestly" aria-label="Link to this section">#</a></h4>
 <p>Element count and index origin are different properties.</p>
@@ -229,6 +229,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The slice starts at index 1 while traversal still produces two elements.</p>
+<p><strong>Trace.</strong> <code>values</code> holds four elements at indices 0 to 3. <code>values[1...2]</code> creates an <code>ArraySlice</code> that shares the original storage and keeps the original positions: its <code>startIndex</code> is 1, its <code>endIndex</code> is 3 and its count is 2. <code>map</code> traverses by position from start to end, reading 20 and 30 and dividing each by 10, which yields <code>[2, 3]</code>. The traversal never touches indices 0 or 3, and it would be wrong to assume <code>slice[0]</code> refers to 20.</p>
 <h4 id="example-b-materialize-a-lazy-transformation">Example B: Materialize a lazy transformation<a class="heading-anchor" href="#example-b-materialize-a-lazy-transformation" aria-label="Link to this section">#</a></h4>
 <p>Pure transformations keep delayed execution understandable and reproducible.</p>
 <pre class="highlighted-code"><code class="language-swift"><span class="syntax-keyword">import</span> <span class="syntax-class">Foundation</span>
@@ -245,6 +246,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The lazy recipe produces 20 and 30 when consumed.</p>
+<p><strong>Trace.</strong> <code>[1, 2, 3].lazy</code> wraps the array so that <code>filter</code> and <code>map</code> build a recipe instead of new arrays. Nothing runs until <code>Array(transformed)</code> iterates the recipe. Then each element flows through both steps: 1 fails the filter, 2 passes and becomes 20, 3 passes and becomes 30. Iterating <code>transformed</code> again would run both closures again, so they must be pure. The second check is an unrelated reminder that reducing an empty array returns its initial value.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <ol>
 <li><strong>Predict and explain.</strong> Predict slice count and startIndex separately.</li>
@@ -264,10 +266,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <ol start="6">
 <li><strong>Transfer and justify.</strong> Choose lazy or materialized processing for a large input and explain repeatability and memory costs.</li>
 </ol>
-<p>For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.</p>
+<p>Log each task in the <a href="../STUDY-GUIDE.md.html#recording-exercise-evidence">evidence table</a> before opening the explanation.</p>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
 <p>Not every Sequence can be traversed repeatedly. Index movement may be linear. Side effects in lazy closures can run later or more often than a caller expects.</p>
-<p>A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.</p>
+<p>Task 4&#x27;s loop <code>for i in 0..&lt;slice.count { slice[i] }</code> traps immediately on <code>values[1...2]</code>, because index 0 is outside the slice. On a slice that happens to start at 0 the same loop works, but only by coincidence, so the safe rewrite uses <code>slice.indices</code>. For task 5, an empty slice such as <code>values[2..&lt;2]</code> must run zero iterations.</p>
+<p>Repair routine: <a href="../STUDY-GUIDE.md.html#building-a-regression-case">building a regression case</a>.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <ol>
 <li>Reproduce Example A (Use slice indices honestly) before changing anything, and confirm its observation: The slice starts at index 1 while traversal still produces two elements.</li>
@@ -275,9 +278,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>Before opening the explanation, check your task 3 attempt (Write a generic sum over Sequence where the element type is suitable) against each pitfall listed above, and add one input that would expose the tempting wrong rule.</li>
 </ol>
 <h3 id="self-check-and-next-step">Self-check and next step<a class="heading-anchor" href="#self-check-and-next-step" aria-label="Link to this section">#</a></h3>
-<p>Explain Sequence, Collection, Materialization without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.</p>
+<p>Explain why an <code>ArraySlice</code> keeps its parent&#x27;s indices instead of renumbering from 0. Say what work happens when a lazy chain is created and what happens when it is iterated twice. Choose between lazy and materialized processing for a one-pass import of a million rows and justify the memory and repeatability tradeoff.</p>
+<p>Then follow the general <a href="../STUDY-GUIDE.md.html#self-check-routine">self-check routine</a> and save your pad.</p>
 <h3 id="sources-and-execution-boundary">Sources and execution boundary<a class="heading-anchor" href="#sources-and-execution-boundary" aria-label="Link to this section">#</a></h3>
-<p><a href="https://docs.swift.org/swift-book/documentation/the-swift-programming-language/">Official language or framework documentation</a>. The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.</p>
+<p><a href="https://docs.swift.org/swift-book/documentation/the-swift-programming-language/">Documentation</a>: The standard library reference documents <code>ArraySlice</code>, the <code>Collection</code> and <code>Sequence</code> protocols, and <code>LazySequence</code>; Collection Types in the Swift book covers basic iteration.</p>
+<p>Provenance and limits: <a href="../STUDY-GUIDE.md.html#sources-and-execution-boundary">sources and execution boundary</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for swift-020: Collection protocols, laziness and algorithm costs.
 Read courses/swift/guides/swift-020.md and courses/swift/lessons/swift-020.swift. Prerequisites: swift-019.

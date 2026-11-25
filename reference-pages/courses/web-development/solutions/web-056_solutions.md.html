@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/web-development/solutions/web-056_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="web-056-explanatory-solutions">web-056: explanatory solutions<a class="heading-anchor" href="#web-056-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Open this after your own attempt. Each answer explains the lesson&#x27;s synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in <code>courses/web-development/guides/web-056.md</code>.</p>
+<p>Attempt each exercise before reading; the mechanism is in <code>courses/web-development/guides/web-056.md</code> (<a href="../STUDY-GUIDE.md.html#solutions">using these answers</a>).</p>
 <h3 id="exercise-1-draw-the-trust-boundary-around-actor-identity-and-form-values">Exercise 1: Draw the trust boundary around actor identity and form values.<a class="heading-anchor" href="#exercise-1-draw-the-trust-boundary-around-actor-identity-and-form-values" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> The adapter verifies identity; the application validates proposed domain values.</p>
 <p><strong>Approach:</strong> Mark actor id as trusted because the adapter verified it, and mark every form value as untrusted data that the core must validate.</p>
@@ -232,7 +232,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Plausible wrong approach:</strong> Calling the core deployable because the matrix passes fails because no HTTP request, session or real database was involved.</p>
 <p><strong>How to verify:</strong> Your list covers HTTP, sessions, CSRF, persistence, concurrency and accessibility, each with a planned check.</p>
 <h3 id="reference-comparison">Reference comparison<a class="heading-anchor" href="#reference-comparison" aria-label="Link to this section">#</a></h3>
-<p>Open <code>courses/web-development/solutions/web-056_solution.php</code> only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; server lifecycle, persistence, concurrency and security need their own integration evidence.</p></article>
+<p>The reference requires an invalid plan to throw, the table to keep one row after the rejection and another owner&#x27;s read to return nothing. That catches partial writes and cross-owner leaks. It does not cover HTTP or sessions, which the printed line states remain separate.</p>
+<p>Open <code>courses/web-development/solutions/web-056_solution.php</code> after saving your attempt (<a href="../STUDY-GUIDE.md.html#references">comparing with the reference</a>).</p></article>
   </main>
 </body>
 </html>

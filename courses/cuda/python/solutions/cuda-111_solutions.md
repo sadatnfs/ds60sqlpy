@@ -1,6 +1,6 @@
 # cuda-111: explained solutions
 
-These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.
+Compare with your [worksheet](../lessons/cuda-111.md) attempt.
 
 ## Exercise 1: Calculate arithmetic intensity
 
@@ -74,8 +74,16 @@ Relate observed resource use and timing to the rejected hypothesis.
 
 **How to verify.** Record registers per thread, achieved occupancy, DRAM bytes and time for both versions, then decide from all four.
 
+## Self-check answers
+
+1. **What does a low arithmetic intensity suggest?** The operation moves many bytes per arithmetic operation, so reducing memory traffic is a reasonable first hypothesis.
+
+2. **Why can a fused kernel be slower?** It can use more registers or shared memory per block, reducing active blocks and the device's ability to hide latency.
+
+3. **Why include a failed optimization in the case study?** Explaining why a hypothesis failed shows the reasoning and measurements behind the final choice.
+
 ## Reference observation
 
 Intensity 0.5 and hypothetical 8192 bytes removable traffic.
 
-The reference file is `courses/cuda/python/references/cuda-111_cpu.py`. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.
+Asserted by `courses/cuda/python/references/cuda-111_cpu.py`.

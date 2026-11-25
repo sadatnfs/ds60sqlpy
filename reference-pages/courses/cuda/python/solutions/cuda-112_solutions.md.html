@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cuda/python/solutions/cuda-112_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="cuda-112-explained-solutions">cuda-112: explained solutions<a class="heading-anchor" href="#cuda-112-explained-solutions" aria-label="Link to this section">#</a></h2>
-<p>These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.</p>
+<p>Compare with your <a href="../lessons/cuda-112.md.html">worksheet</a> attempt.</p>
 <h3 id="exercise-1-calculate-median-speedup">Exercise 1: Calculate median speedup<a class="heading-anchor" href="#exercise-1-calculate-median-speedup" aria-label="Link to this section">#</a></h3>
 <p>Divide baseline median by candidate median.</p>
 <p><strong>Approach.</strong> Compute the median speedup: baseline samples <code>[10, 11, 9]</code> have median 10 and candidate <code>[8, 8, 9]</code> has median 8, so the ratio is <code>10/8 = 1.25</code>.</p>
@@ -231,9 +231,19 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Why it is correct here.</strong> A checklist allows someone else to rerun the review and see what is still uncertain.</p>
 <p><strong>A plausible wrong approach.</strong> Leaving out the limits, such as only three samples, presents a fragile result as settled. A reader then cannot tell whether a follow-up run that disagrees reveals a regression or ordinary noise.</p>
 <p><strong>How to verify.</strong> Have another person or a clean environment follow the checklist and confirm it reproduces the medians. Any step that required undocumented knowledge to complete should be added to the checklist before the review is closed.</p>
+<h3 id="self-check-answers">Self-check answers<a class="heading-anchor" href="#self-check-answers" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>Why prefer the median of raw samples over the best time?</strong> The median resists outliers and the raw samples show variation, while the best time hides how often it occurs.</li>
+</ol>
+<ol start="2">
+<li><strong>Which costs should be reported separately?</strong> Kernel-only time, transfers, preprocessing, compilation and end-to-end latency.</li>
+</ol>
+<ol start="3">
+<li><strong>Does one device&#x27;s result rank architectures in general?</strong> No. It is a result from that device with that software and workload, not a universal ranking.</li>
+</ol>
 <h3 id="reference-observation">Reference observation<a class="heading-anchor" href="#reference-observation" aria-label="Link to this section">#</a></h3>
 <p>Synthetic median ratio 1.25; explicitly not a GPU benchmark.</p>
-<p>The reference file is <code>courses/cuda/python/references/cuda-112_cpu.py</code>. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.</p></article>
+<p>Asserted by <code>courses/cuda/python/references/cuda-112_cpu.py</code>.</p></article>
   </main>
 </body>
 </html>

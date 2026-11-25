@@ -198,20 +198,16 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"></span>
 <span class="source-line">  <span class="syntax-keyword">public</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">void</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span>String<span class="syntax-operator">[</span><span class="syntax-operator">]</span> args<span class="syntax-punctuation">)</span> <span class="syntax-keyword">throws</span> Exception <span class="syntax-punctuation">{</span></span>
 <span class="source-line">    <span class="syntax-comment">// Exercise 1: Use a FIFO queue: change one input</span></span>
-<span class="source-line">    <span class="syntax-comment">// Copy Example A into a scratch `Main.java` and change `queue.addLast(&quot;a&quot;);` to</span></span>
-<span class="source-line">    <span class="syntax-comment">// `queue.addLast(&quot;a!&quot;);`. Before running it with `java -ea Main`, predict which assertion</span></span>
-<span class="source-line">    <span class="syntax-comment">// fails and which value it now sees; then run it and restore the original line.</span></span>
-<span class="source-line">    <span class="syntax-comment">// Expected: The changed run fails with an `AssertionError` from the assertion on</span></span>
-<span class="source-line">    <span class="syntax-comment">// `fifo.equals(List.of(&quot;a&quot;, &quot;b&quot;, &quot;c&quot;))`. Restoring the original line brings back the worked</span></span>
-<span class="source-line">    <span class="syntax-comment">// observation: a, b, c order.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Change `queue.addLast(&quot;a&quot;);` to `queue.addLast(&quot;a!&quot;);` in Example A and predict which</span></span>
+<span class="source-line">    <span class="syntax-comment">// assertion fails and why.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Expected: The edited run fails with an `AssertionError` from the assertion on</span></span>
+<span class="source-line">    <span class="syntax-comment">// `fifo.equals(List.of(&quot;a&quot;, &quot;b&quot;, &quot;c&quot;))`.</span></span>
 <span class="source-line"></span>
 <span class="source-line">    <span class="syntax-comment">// Exercise 2: Use a LIFO stack: debug a regression</span></span>
-<span class="source-line">    <span class="syntax-comment">// A regression changed `stack.push(1);` to `stack.push(2);` in the code that Example B adds</span></span>
-<span class="source-line">    <span class="syntax-comment">// after Example A. Run Example B with that change, use the failing assertion to explain the</span></span>
-<span class="source-line">    <span class="syntax-comment">// defect and repair it without changing the assertion.</span></span>
-<span class="source-line">    <span class="syntax-comment">// Expected: Before the repair the run fails with an `AssertionError` from the assertion on</span></span>
-<span class="source-line">    <span class="syntax-comment">// `lifo.equals(List.of(3, 2, 1))`; after it the line reads `stack.push(1);` again and 3, 2,</span></span>
-<span class="source-line">    <span class="syntax-comment">// 1.</span></span>
+<span class="source-line">    <span class="syntax-comment">// A regression changed `stack.push(1);` to `stack.push(2);` in Example B&#x27;s new code. Repair</span></span>
+<span class="source-line">    <span class="syntax-comment">// it using the failing assertion.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Expected: The unrepaired run fails with an `AssertionError` from the assertion on</span></span>
+<span class="source-line">    <span class="syntax-comment">// `lifo.equals(List.of(3, 2, 1))`; the repaired line reads `stack.push(1);`.</span></span>
 <span class="source-line"></span>
 <span class="source-line">    <span class="syntax-comment">// Exercise 3: Poll a priority queue</span></span>
 <span class="source-line">    <span class="syntax-comment">// Insert 5, 1, 4, 2 and repeatedly poll.</span></span>

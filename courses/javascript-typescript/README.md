@@ -12,6 +12,8 @@ All **66 lessons** are authored, with standalone guides, two worked examples, si
 
 Start with [JavaScript, Node and the browser](guides/js-001.md). Predict the worked result, implement the tasks in a saved learner copy, then compare with the separate solution after an attempt.
 
+The [study guide](STUDY-GUIDE.md) explains the routine every lesson shares: running Node, TypeScript and browser lessons, saved copies and the success receipt, predictions, hints, diagnosing failures and the D3 browser preview. Each guide links to the part it needs.
+
 - 001-009: values, coercion, loops, closures, arrays, objects, Map/Set, Unicode and validation.
 - 010-018: real modules, generators, Promise scheduling, cancellation, algorithms, testing, files, HTTP and a bounded CLI.
 - 019-028: strict TypeScript, unions, readonly aliasing, generics, type operators, runtime schemas, actual NodeNext projects, classes, async results and typed algorithms.

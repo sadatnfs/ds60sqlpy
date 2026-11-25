@@ -43,6 +43,9 @@ YAML snippets describe a fragment unless a lesson calls them a complete file.
 Text transcripts are synthetic illustrations, not claims about your machine. Do
 not substitute a real password, token or private registry into an example.
 
+The [study guide](STUDY-GUIDE.md) collects the rules every lesson shares: host lab
+setup, exercise and safety rules, retrieval, cleanup, solutions and the AI tutor.
+
 ## Lesson route
 
 | Lesson | Topic | Stage |

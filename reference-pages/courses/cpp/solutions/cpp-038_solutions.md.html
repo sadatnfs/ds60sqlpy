@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cpp/solutions/cpp-038_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="cpp-038-explanations-and-reference-observations">cpp-038: explanations and reference observations<a class="heading-anchor" href="#cpp-038-explanations-and-reference-observations" aria-label="Link to this section">#</a></h2>
-<p>Attempt the learner tasks before opening this document. The executable reference checks the bounded normal and boundary examples; the six explanations below cover the deliberate changes and manual checks.</p>
+<p>The <a href="cpp-038_solution.cpp.html">executable reference</a> checks that <code>(0, 0)</code> is accepted, <code>(-1, 2)</code> is rejected by the nonnegative contract and the int maximum plus 0 is accepted. The explanations cover overflow guards and floating-point grouping. How to compare: <a href="../STUDY-GUIDE.md.html#compare-with-the-solutions">study guide</a>.</p>
 <h3 id="mechanism">Mechanism<a class="heading-anchor" href="#mechanism" aria-label="Link to this section">#</a></h3>
 <p>Integer overflow and floating-point rounding are different correctness problems. Signed overflow is undefined; floating values approximate many decimal fractions. A tolerance defines acceptable numerical error for a specific scale. Stable algorithms reduce accumulated error, but exact money and identity arithmetic should use exact representations whenever possible.</p>
 <h3 id="detailed-reasoning">Detailed reasoning<a class="heading-anchor" href="#detailed-reasoning" aria-label="Link to this section">#</a></h3>

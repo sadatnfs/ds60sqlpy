@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cuda/spark/solutions/cuda-128_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="cuda-128-explained-solutions">cuda-128: explained solutions<a class="heading-anchor" href="#cuda-128-explained-solutions" aria-label="Link to this section">#</a></h2>
-<p>These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.</p>
+<p>Compare with your <a href="../lessons/cuda-128.md.html">worksheet</a> attempt.</p>
 <h3 id="exercise-1-compute-end-to-end-tradeoff">Exercise 1: Compute end-to-end tradeoff<a class="heading-anchor" href="#exercise-1-compute-end-to-end-tradeoff" aria-label="Link to this section">#</a></h3>
 <p>Sum all changed costs.</p>
 <p><strong>Approach.</strong> Compute the end-to-end tradeoff by summing every changed cost: the GPU query saves 30 seconds of compute but adds 40 seconds of transfers and conversions, so the net is 10 seconds slower.</p>
@@ -231,9 +231,19 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Why it is correct here.</strong> The simplest qualified option minimizes operational risk. Listing missing evidence keeps the decision open to correction.</p>
 <p><strong>A plausible wrong approach.</strong> Recommending the most powerful technology by default ignores the measured tradeoff and the operational cost. It also skips stating missing evidence, so the decision cannot be corrected when new data arrives.</p>
 <p><strong>How to verify.</strong> Check that each statement in the recommendation cites a measurement or is labeled as an assumption.</p>
+<h3 id="self-check-answers">Self-check answers<a class="heading-anchor" href="#self-check-answers" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>Name three conditions that can make GPU Spark the wrong choice.</strong> Tiny data, unsupported expressions, expensive transfers, external I/O, severe skew or a memory-constrained device.</li>
+</ol>
+<ol start="2">
+<li><strong>How does a CPU fallback installation differ from plugin operator fallback?</strong> It is a separate ordinary Spark environment, while operator fallback happens inside a running plugin job.</li>
+</ol>
+<ol start="3">
+<li><strong>Why is a no-change outcome a valid result?</strong> A good decision identifies the smallest system that solves the problem, and that can be the current one.</li>
+</ol>
 <h3 id="reference-observation">Reference observation<a class="heading-anchor" href="#reference-observation" aria-label="Link to this section">#</a></h3>
 <p>GPU candidate adds 10 modeled seconds end to end.</p>
-<p>The reference file is <code>courses/cuda/spark/references/cuda-128_cpu.py</code>. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.</p></article>
+<p>Asserted by <code>courses/cuda/spark/references/cuda-128_cpu.py</code>.</p></article>
   </main>
 </body>
 </html>

@@ -32,11 +32,9 @@ Use a synthetic lost-update trace: two writers read 7, both compute 8, both repl
 
 ## How to use this lesson
 
-The classroom displays this guide and saves your worksheet, `courses/docker/lessons/docker-041.md`. Its Run button does not control your Docker engine. Docker engine access is powerful host access, so the classroom deliberately receives no engine socket. Work through the supplied examples without starting anything, then use the optional host lab only in your own disposable project. Reading a command, parsing YAML and actually running the project are different forms of evidence.
+The classroom saves `courses/docker/lessons/docker-041.md` and holds no engine socket ([host-lab setup](../STUDY-GUIDE.md#host-lab-setup)).
 
-Use Bash in Linux, macOS Terminal, or Ubuntu under WSL 2 on Windows. The supported engine runs Linux containers. The maintained fixture is `courses/docker/fixtures/compose-lab/`; its README explains copying it into a new ignored learner directory, checking the engine, building locally with visible logs, and using the fixed project name `ds60-docker-study`. The fixture uses port 18080 on host loopback. Stop if that project name or port belongs to unrelated work; choose a new project name consistently in your own copy. Never paste a command against a remote Docker context simply because it is currently selected.
-
-For Dockerfile examples, create a file named `Dockerfile` in a scratch project. YAML snippets describe a fragment unless explicitly called a complete file. Text transcripts are synthetic illustrations, not claims about your machine. Do not substitute a real password, token or private registry into a checked-in example. **How to use the lessons** in the [subject README](../README.md) collects these rules in one place.
+**Host lab.** Ask Compose for a second replica and read why it refuses: `docker compose -p ds60-docker-study up -d --scale app=2`. The second container is created but cannot start, and the error names the `127.0.0.1:18080` binding already held by the first, because a fixed host port can be bound by only one container. Run `docker compose -p ds60-docker-study ps -a` to see one running and one created container, then return to one replica with `docker compose -p ds60-docker-study up -d --scale app=1 --wait`, which removes the extra. Both would have mounted the same `study-data` volume, so trace on paper what two working replicas would do: each holds its own `LOCK`, each reads the same file, and each writes its own increment, which is the lost update from worked example 1.
 
 ## Worked example / walkthrough
 
@@ -67,7 +65,7 @@ retries -> idempotency or outcome reconciliation
 
 ## Six progressive exercises
 
-For each exercise, name the object involved and the phase of its lifetime before changing anything, then vary only the condition the task names. Exercises that ask you to predict, explain, compare or diagnose keep their answers in the solutions file; the others show the evidence to look for.
+Answer-type prompts keep their answers in the solutions file ([exercise rules](../STUDY-GUIDE.md#exercise-rules)).
 
 ### Exercise 1: Predict the lost-update result.
 
@@ -101,13 +99,19 @@ For each exercise, name the object involved and the phase of its lifetime before
 
 Scaling a service that keeps its state in local files. Relying on an in-process lock across containers. Publishing a fixed host port on a scaled service.
 
-Exercise 4 is this chapter's boundary case: Diagnose a fixed host-port collision. Read which replica holds the published host port and which replicas failed to start, then decide between a routing layer and distinct ports. Preserve the original failure and the exact changed field before retrying. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
+Exercise 4 is this chapter's boundary case: Diagnose a fixed host-port collision. Read which replica holds the published host port and which replicas failed to start, then decide between a routing layer and distinct ports.
+
+Even the fixture's careful write path hides a single-writer assumption: every writer stages its data in the same file name, `counter.next`, before `replace()` moves it into place. Two processes in separate containers sharing the volume can both write `counter.next`, after which the first `replace()` moves the other writer's bytes into place and the second fails with `FileNotFoundError` because the staging file is already gone. Its client sees the connection close without a response, alongside the lost updates. Atomic replacement is only as good as the uniqueness of its staging name and the exclusivity of its writer, so a scaled design needs unique temporary names and, more importantly, one owner or a transactional store.
+
+Never trade a safety control for a passing example ([safety rules](../STUDY-GUIDE.md#safety-rules)).
 
 ## Retrieval, transfer and next steps
 
-Close the explanations first. Name the requirement each of routing, shared data, sessions and retries adds when replicas increase. Then reconstruct worked example 2 (Separate scaling requirements) with one different value, predict what changes, and name which of replica, shared state, race condition and scaling the change touches.
+**Retrieval.** Name the requirement each of routing, shared data, sessions and retries adds when replicas increase.
 
-When a host session ends, run `docker compose -p ds60-docker-study down` from your fixture copy. It removes the project's containers and network but keeps named volumes; deleting a volume is a separate, deliberate reset described in the fixture README.
+**Transfer case.** A product owner wants three replicas of the study app behind a load balancer for a workshop of two hundred learners. What must change before that is safe, and what is the simplest correct alternative?
+
+Then run the [retrieval loop](../STUDY-GUIDE.md#retrieval-and-cleanup) and end any host session with its cleanup.
 
 ## Primary references
 

@@ -2,27 +2,18 @@
 
 int main(void) {
   /* Exercise 1: Use caller-owned output: predict an edited check
-     Copy worked example 1 into a scratch pad and change
-     `CHECK(copy_api("hello", out, sizeof out, &required) == API_OK);` to
-     `CHECK(copy_api("hello!", out, sizeof out, &required) == API_OK);` inside
-     its CHECK. Before running, predict whether the CHECK still holds and
-     explain why; then restore it. Expected: With `CHECK(copy_api("hello!", out,
-     sizeof out, &required) == API_OK);` the run stops with `Check failed` at
-     the CHECK on `required == 5 && strcmp(out, "hello") == 0`, because the "use
-     caller-owned output" case no longer shows that the output is complete and
-     required length is 5. Restoring `CHECK(copy_api("hello", out, sizeof out,
-     &required) == API_OK);` brings that observation back. */
+     In worked example 1, change `CHECK(copy_api("hello", out, sizeof out,
+     &required) == API_OK);` to `CHECK(copy_api("hello!", out, sizeof out,
+     &required) == API_OK);`. Predict whether the CHECK still holds and why,
+     then run and restore. Expected: `Check failed`: `CHECK(copy_api("hello!",
+     out, sizeof out, &required) == API_OK);` is false, although the output is
+     complete and required length is 5. */
 
   /* Exercise 2: Report insufficient capacity: debug a regression
-     A regression changed one token in worked example 2, the "report
-     insufficient capacity" case, so one line now reads `char out[4] = "old!";`.
-     Run the example with that line, use the failing CHECK to find why the
-     status is too-small and required length is 5 no longer holds and repair the
-     line without changing the CHECK. Expected: Before the repair the run stops
-     with `Check failed` at the CHECK on `required == 5 && strcmp(out, "old") ==
-     0`. Once the line reads `char out[4] = "old";` again, the "report
-     insufficient capacity" case again shows that the status is too-small and
-     required length is 5. */
+     Worked example 2 now has a line reading `char out[4] = "old!";`. Repair it
+     so that the status is too-small and required length is 5 again. Expected:
+     `Check failed` at `required == 5 && strcmp(out, "old") == 0` until the line
+     reads `char out[4] = "old";` again. */
 
   /* Exercise 3: Support a size query
      Call with no output buffer and capacity zero.

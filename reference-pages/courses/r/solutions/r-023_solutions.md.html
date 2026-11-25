@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/r/solutions/r-023_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="r-023-reference-reasoning">r-023: reference reasoning<a class="heading-anchor" href="#r-023-reference-reasoning" aria-label="Link to this section">#</a></h2>
-<p>Use the <a href="r-023_reference.R.html">complete reference</a> with the guide&#x27;s declared inputs and runtime. Every worked example is also a standalone script.</p>
+<p>Run the <a href="r-023_reference.R.html">complete reference</a> under the <a href="../STUDY-GUIDE.md.html#run-a-chapter">run rules</a>.</p>
 <h3 id="why-the-implementation-has-this-shape">Why the implementation has this shape<a class="heading-anchor" href="#why-the-implementation-has-this-shape" aria-label="Link to this section">#</a></h3>
 <p>The alias test establishes reference identity directly with identical, then tests observable mutation. The scalar clone and nested box tests isolate two different depths of copying. Validation tests check that rejection happens before mutation, rather than merely checking that some error occurs.</p>
 <p>Fresh counters within the fold function demonstrate one ownership policy for independent analytical tasks. The example makes no claim that default deep cloning duplicates every environment, file handle or external resource. Those need their own lifecycle and copying rules.</p>
@@ -248,7 +248,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Tempting mistake:</strong> Describing deep = TRUE as a full snapshot. A cache environment field would still be shared, and a change made through the clone would appear in the original.</p>
 <p><strong>Verify:</strong> For a class with a plain environment field env, <code>identical(obj$clone(deep = TRUE)$env, obj$env)</code> returns TRUE, showing that it is still shared.</p>
 <h3 id="what-the-checks-establish">What the checks establish<a class="heading-anchor" href="#what-the-checks-establish" aria-label="Link to this section">#</a></h3>
-<p>The reference makes 6 <code>stopifnot()</code> checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.</p></article>
+<p>The assertions confirm that a rejected increment raises the expected message, that <code>a</code> and <code>b</code> are the same object reading 5, that a clone advanced to 9 leaves <code>a</code> at 5, that a failed add leaves the state unchanged, that a shallow clone shares its inner counter while a deep clone advances separately to 6, and that per-fold counters produce 2, 5 and 1. They do not cover environments that are not R6 objects.</p>
+<p>The reference makes 6 <code>stopifnot()</code> checks; see <a href="../STUDY-GUIDE.md.html#what-a-passing-run-proves">what a passing run proves</a>.</p></article>
   </main>
 </body>
 </html>

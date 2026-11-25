@@ -4,8 +4,6 @@
 
 A timeline shows when the CPU submits work, when copies and kernels execute, and where synchronization or idle gaps occur. Begin with the application's critical path before optimizing an individual instruction. NVTX ranges can name phases such as upload, transform and download, but annotations must match real code boundaries. Nsight Systems collection needs an explicitly prepared environment and appropriate permissions. A captured or synthetic trace remains useful for reasoning on a CPU-only machine, provided its provenance is clear. A timeline suggests a hypothesis; a controlled change tests whether that hypothesis improves the desired metric.
 
-The separate [CPU reference](../references/cuda-032_cpu.py) checks the chapter's bounded model. It does not execute CUDA or establish GPU timing. Compare after attempting the worksheet or explicitly choosing to reveal solutions.
-
 ## Exercise 1
 
 A synthetic request contains upload 3 ms, kernel 2 ms, download 3 ms and host processing 2 ms, sequentially. Halving the kernel saves only 1 ms, changing total time from 10 to 9 ms. Eliminating an unnecessary round trip could offer a larger opportunity if semantics permit data to stay resident.
@@ -78,12 +76,17 @@ Precompute the next bounded input before the dependent launch or batch preparati
 
 **How to verify:** Check results match and compare the same timing scope with retained samples.
 
+## Self-check answers
+
+1. **In worked example 1, what saving would removing one 3 ms transfer give?** 3 of 10 ms, three times more than halving the kernel.
+2. **What does an idle gap on the GPU row usually point to?** Host preparation, synchronization or missing batching that leaves the device waiting.
+3. **Why must NVTX ranges match real code boundaries?** Misplaced ranges attribute time to the wrong phase and mislead the analysis.
+4. **Why can two overlapping bars fail to speed up the application?** The overlap may lie off the critical path, or the overlapped work may contend for the same resource.
+
 ## Numerical reference and its limits
 
-The complete CPU model is [here](../references/cuda-032_cpu.py). Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It does not claim CUDA execution, concurrency safety or a performance measurement.
+The [CPU reference](../references/cuda-032_cpu.py) reproduces worked example 1 and prints `{'synthetic_total_ms': 10, 'half_kernel_total_ms': 9.0}`.
 
 ## Transfer review
 
 Precompute the next bounded input before the dependent launch or batch preparation, preserving results, then compare the same timing scope and retained samples.
-
-A complete explanation must name its inputs, the unchanged mathematical contract, the changed boundary or resource condition, and the evidence still needed on actual hardware. Preserve a CPU baseline even after a GPU path becomes available.

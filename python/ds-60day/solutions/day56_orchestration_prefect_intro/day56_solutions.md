@@ -2,7 +2,7 @@
 
 # Day 56 Solutions: Workflow Orchestration with Prefect
 
-**Offline teaching data:** The [original synthetic fixtures](../../../fixtures/README.md) replace first-run sample-data downloads. Their values are not historical or observational evidence. Keep numerical conclusions scoped to the declared teaching input.
+**Offline teaching data:** the `passenger-outcomes` [synthetic fixture](../../../fixtures/README.md) is invented, so its numbers prove methods, not facts.
 
 
 We convert a small offline ETL job into a Prefect 3 flow, add retries and a local
@@ -162,9 +162,7 @@ Guidance
 
 ## Solution reasoning lens
 
-A strong solution is not merely code that produces one plausible
-output. It establishes a chain from input contract to operation to
-verification:
+Each decision below links an input contract to an operation and its evidence:
 
 1. **`@flow`:** creates the orchestration boundary and run-level parameters/state.
 2. **`@task(retries=..., retry_delay_seconds=...)`:** declares task-level retry policy; exception classification still matters.
@@ -181,29 +179,15 @@ verification:
 
 **Evidence of correctness:** Inject retryable/permanent failures, prove attempt counts and cleanup, repeat with identical inputs, change one key input, and inspect final task/flow states.
 
-When comparing your attempt with the reference, explain which of these
-decisions your code made explicitly. If the reference makes a different
-choice, compare the contracts and evidence before deciding that one
-version is universally better.
-
 <!-- END ADVANCED PYTHON CONCEPT ENRICHMENT -->
 
 ## Exercise-by-exercise reasoning map
-
-This map connects every learner prompt to a reasoning path. Read the
-explanation before copying code: the goal is to understand the assumptions,
-the evidence that validates the result, and the edge cases that can make an
-apparently correct implementation fail.
 
 ### Exercise 1: Original lesson practice
 
 **Prompt:** Add `test_size` and `random_state` parameters to the training flow.
 
 **How to reason about it:** Flow parameters such as test size and random state must reach the task and be logged with outputs. Defaults are part of the reproducibility contract, not hidden UI settings.
-
-Use the worked reference earlier in this file, then change one boundary
-condition and rerun the stated checks. A copied output is not evidence
-unless you can explain why that output follows from the inputs.
 
 **Verify:** Run the flow twice with two explicit test_size/random_state pairs, print parameter values, split row counts/hashes, and metrics, and assert a repeated identical pair reproduces the same split.
 
@@ -213,10 +197,6 @@ unless you can explain why that output follows from the inputs.
 
 **How to reason about it:** Separate train and evaluate tasks with small explicit results. Passing large in-memory objects can be acceptable locally but should trigger a documented artifact/reference design for distributed execution.
 
-Use the worked reference earlier in this file, then change one boundary
-condition and rerun the stated checks. A copied output is not evidence
-unless you can explain why that output follows from the inputs.
-
 **Verify:** Make train return a model/artifact identity and evaluate accept that explicit value; print task states and metric, and inject a train failure to prove evaluate does not run on missing output.
 
 ### Exercise 3: Original lesson practice
@@ -224,10 +204,6 @@ unless you can explain why that output follows from the inputs.
 **Prompt:** Explore the optional local Prefect UI and scheduling basics.
 
 **How to reason about it:** Prove direct local flow execution first. Prefect UI/deployment/scheduling is an optional local extension whose commands must match Prefect 3, and the core lesson must remain useful offline without a running server.
-
-Use the worked reference earlier in this file, then change one boundary
-condition and rerun the stated checks. A copied output is not evidence
-unless you can explain why that output follows from the inputs.
 
 **Verify:** Either print an explicit offline-skip result or start the local UI, record the local URL and one completed flow-run ID/state, then stop it cleanly; scheduling remains optional and must not require a cloud account.
 
@@ -243,10 +219,6 @@ deduplication key, and write a completion manifest last.
 
 Use retries for transient failures, not deterministic schema or programming
 errors. Classify the exception and preserve the original cause in task state.
-
-**Why this matters:** The result should survive a fresh-kernel rerun and
-a deliberately chosen boundary case. If it does not, revisit the
-assumption or data boundary rather than hiding the failure.
 
 **Verify:** Retry and idempotence; inject a failure after the first artifact write, then retry; assert exactly one final path/manifest exists, its hash matches a clean run, no partial file remains, and attempt count/state are recorded.
 
@@ -265,10 +237,6 @@ If a task reads “latest.csv” or a mutable service without a snapshot ID, a
 reliable cache key cannot be constructed from visible inputs. Fix the source
 contract or disable caching.
 
-**Why this matters:** The result should survive a fresh-kernel rerun and
-a deliberately chosen boundary case. If it does not, revisit the
-assumption or data boundary rather than hiding the failure.
-
 **Verify:** Cache-key design; print cache keys for identical inputs, changed data hash, changed code/config, changed relevant parameter, and log-only change; assert equality only for identical/log-only cases and inequality for semantic changes.
 
 ### Exercise 6: Failure observability
@@ -284,9 +252,5 @@ downstream success with empty data.
 Keep the core lesson's logging local. Optional Prefect server telemetry should
 be explicitly enabled, and no secret or credential should be printed during
 diagnosis.
-
-**Why this matters:** The result should survive a fresh-kernel rerun and
-a deliberately chosen boundary case. If it does not, revisit the
-assumption or data boundary rather than hiding the failure.
 
 **Verify:** Failure observability; capture a three-task failure run and assert every event contains run ID, task, safe input version, attempt, elapsed time, artifact ID, and failure category; raw row and secret sentinels must be absent and final state must identify the failed task.

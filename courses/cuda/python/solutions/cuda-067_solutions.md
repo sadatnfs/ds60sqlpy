@@ -1,6 +1,6 @@
 # cuda-067: explained solutions
 
-These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.
+Compare with your [worksheet](../lessons/cuda-067.md) attempt.
 
 ## Exercise 1: Count bytes for ten iterations
 
@@ -74,8 +74,16 @@ Tiny one-off arrays can favor CPU.
 
 **How to verify.** State the workload size and the transfer count, and compare modeled latency with an estimate of CPU work. The conclusion is valid when you can show that latency terms, not arithmetic, dominate the GPU total.
 
+## Self-check answers
+
+1. **In the model latency plus B divided by W, which term does batching reduce?** Only the fixed latency term, because it is paid once instead of once per copy. The bandwidth term depends on total bytes and is unchanged when the same payload is grouped.
+
+2. **Why is pinning every host array a poor default?** Pinned pages cannot be swapped out and consume host resources. Pin the buffers that feed overlapping copies, and keep their owners alive until each copy completes.
+
+3. **What must an end-to-end timer include in this chapter?** Preparation, the upload, the computation and the final download to host output. Excluding transfers hides exactly the difference between the round-trip and resident versions.
+
 ## Reference observation
 
 81920 versus 8192 modeled bytes; these are not measured timings.
 
-The reference file is `courses/cuda/python/references/cuda-067_cpu.py`. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.
+Asserted by `courses/cuda/python/references/cuda-067_cpu.py`.

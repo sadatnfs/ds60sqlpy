@@ -24,9 +24,11 @@ Joining observes completion and panic outcomes. Do not infer completion from a s
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles the saved pad as `main.rs` with pinned Rust 1.99.1, edition 2024, and the prepared Arrow 60 library. `assert!` and `assert_eq!` remain active in normal builds. The fixed pad accepts one source file without arbitrary arguments, interactive input, Cargo manifests or package installation. The main function returns `Result<(), Box<dyn std::error::Error>>` so later examples can propagate errors with `?`; the final `Ok(())` means this fixture completed successfully. Standard library and Arrow examples remain offline after image preparation. Multi-file Cargo and external ecosystem projects have separate explicit preparation workflows.
+Beyond the prelude, this lesson's programs use `std::thread`. A passing run prints `rust-027: passed`.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Pad setup and limits: [Run a lesson](../STUDY-GUIDE.md#run-a-lesson).
+
+Before you run anything, follow [Attempt a lesson](../STUDY-GUIDE.md#attempt-a-lesson).
 
 
 
@@ -34,7 +36,9 @@ Start with the answer-free learner artifact in your saved classroom pad. It deli
 
 std::thread::scope bounds child lifetimes. scope.spawn creates a scoped worker. join returns its result or panic information. Immutable borrowed inputs can be shared when their types satisfy the concurrency requirements.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+**Reading Example A (Borrow local input safely, code below).** `std::thread::scope` takes a closure that receives a `scope` value and does not return until every thread spawned through that value has finished. `scope.spawn(|| values.iter().sum::<i32>())` starts a worker running the inner closure. That closure is not marked `move`, so it captures `values` by shared reference, which is allowed only because the scope guarantees the worker ends before `values` could be dropped. `sum::<i32>()` uses turbofish syntax to name the result type, since `sum` can produce several types. `spawn` returns a `ScopedJoinHandle`; calling `join` waits for the worker and returns `Result<i32, _>`, where `Err` holds the panic payload if the worker panicked. `expect` turns that `Err` into a panic in the parent with a message. The outer closure ends with the `join` expression, so its value becomes `total`. After the scope returns, the borrow is over and `values.len()` is valid. Plain `std::thread::spawn` would reject the same borrowing closure, because an unscoped thread may outlive the function that created it.
+
+Method for tracing your own variants: [Trace a program](../STUDY-GUIDE.md#trace-a-program).
 
 ## Worked example / walkthrough
 
@@ -95,13 +99,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 6. **Transfer and justify.** Choose threads or sequential work using workload size and synchronization cost.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Record each task as in [Keep evidence for each task](../STUDY-GUIDE.md#keep-evidence-for-each-task).
 
 ## Common pitfalls and diagnosis
 
 Sleep is not a synchronization guarantee. A joined panic is a distinct failure that should not become a default successful result. More threads can increase overhead and resource pressure.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+To turn a pitfall into a test, see [Design a regression case](../STUDY-GUIDE.md#design-a-regression-case).
 
 ## Progressive hints
 
@@ -109,13 +113,23 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 2. Compare Example B (Return independent results) with Example A and name the first line whose behavior differs. Its observation is: The parent combines two completed results.
 3. Before opening the explanation, test your task 3 attempt against this lesson's main pitfall: Sleep is not a synchronization guarantee.
 
+Tempting approaches to rule out before you compare:
+
+- **Task 1.** Saying the thread owns `values` would require a `move` closure and would make `values.len()` after the scope fail with E0382.
+- **Task 2.** Computing the halves as `&values[..mid]` and `&values[mid - 1..]` double-counts one element and still looks plausible on small inputs.
+- **Task 5.** Writing `worker.join().unwrap_or(0)` turns a crashed worker into a plausible zero, exactly the default success the lesson warns about.
+
 ## Self-check and next step
 
-Explain Thread, Join, Scoped thread without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+Why may the thread spawned in Example A borrow `values` when `std::thread::spawn` would need `move` and an owned vector? When does the scope join its threads, and what happens to a panic in one of them? Why is Example B's total 14 no matter which thread finishes first?
+
+Then work through [Self-check and review](../STUDY-GUIDE.md#self-check-and-review).
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://doc.rust-lang.org/book/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+Read [the `std::thread::scope` documentation](https://doc.rust-lang.org/std/thread/fn.scope.html) for why scoped threads may borrow local data.
+
+What the classroom does and does not prove: [Sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

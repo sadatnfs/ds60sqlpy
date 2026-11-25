@@ -206,11 +206,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Wait cancellation:</strong> Stopping observation without proving work stopped.</p>
 <p><strong>Unknown result:</strong> An operation whose final effect has not yet been observed.</p>
 <h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>The Linux Docker classroom compiles your saved pad as <code>Program.cs</code> in its fixed .NET 10 project. C# 14 is the matching language generation. This route uses the prepared framework libraries; it does not accept arbitrary project files, NuGet packages, command arguments or interactive input. The explicit <code>Program.Main</code> entrypoint makes compilation and execution visible. <code>Check</code> throws on a false condition in every build configuration, unlike conditional debugging assertions.</p>
-<p>Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.</p>
+<p>Both examples cancel their token before starting, so no timing is involved. Example B&#x27;s wait ends with <code>TaskCanceledException</code>, which derives from <code>OperationCanceledException</code>, so the catch handles it. The <code>TaskCompletionSource</code> is created with <code>RunContinuationsAsynchronously</code>, so setting its result never runs awaiting code inline.</p>
+<p>Compile contract, starter stop and success marker: <a href="../STUDY-GUIDE.md.html#running-a-lesson">running a lesson</a>.</p>
 <h3 id="syntax-anatomy-and-execution-trace">Syntax anatomy and execution trace<a class="heading-anchor" href="#syntax-anatomy-and-execution-trace" aria-label="Link to this section">#</a></h3>
 <p><code>ThrowIfCancellationRequested</code> reports acknowledged cancellation. <code>WaitAsync(token)</code> cancels the wait without necessarily canceling the source task. TaskCompletionSource with RunContinuationsAsynchronously avoids executing arbitrary continuations inline inside a signal setter.</p>
-<p>Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.</p>
+<p>Each example ends with a trace; method: <a href="../STUDY-GUIDE.md.html#tracing-a-program">tracing a program</a>.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="example-a-observe-a-requested-cancellation">Example A: Observe a requested cancellation<a class="heading-anchor" href="#example-a-observe-a-requested-cancellation" aria-label="Link to this section">#</a></h4>
 <p>Calling Cancel changes request state; the explicit observation is what changes the operation control flow.</p>
@@ -253,6 +253,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The token check acknowledges cancellation.</p>
+<p><strong>Trace.</strong> <code>source</code> is created and immediately cancelled, which sets a flag on its token. Nothing stops on its own: cancellation is a request. <code>ThrowIfCancellationRequested</code> reads the flag, finds it set and throws <code>OperationCanceledException</code>. The catch sets <code>observed</code>. The operation changed course only at the point where it checked, so code before that check would already have run.</p>
 <h4 id="example-b-cancel-waiting-while-work-remains-live">Example B: Cancel waiting while work remains live<a class="heading-anchor" href="#example-b-cancel-waiting-while-work-remains-live" aria-label="Link to this section">#</a></h4>
 <p>This deterministic distinction prevents treating an interrupted observer as proof that an operation never happened.</p>
 <pre class="highlighted-code"><code class="language-csharp"><span class="syntax-keyword">using</span> System<span class="syntax-punctuation">;</span>
@@ -298,6 +299,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The wait cancels, then the original task later completes with 9.</p>
+<p><strong>Trace.</strong> <code>completion.Task</code> is pending. <code>WaitAsync(source.Token)</code> wraps it in a wait that can be cancelled; the token is already cancelled, so the wait throws and <code>cancelled</code> becomes true while the underlying task is still incomplete. <code>SetResult(9)</code> then completes the original, and awaiting it directly returns 9. Cancelling a wait did not cancel the work.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <ol>
 <li><strong>Predict and explain.</strong> Identify the request, observation and completion events.</li>
@@ -317,10 +319,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <ol start="6">
 <li><strong>Transfer and justify.</strong> Design an operation receipt distinguishing cancelled waiting, confirmed cancellation and unknown outcome.</li>
 </ol>
-<p>For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.</p>
+<p>Log each task in the <a href="../STUDY-GUIDE.md.html#recording-exercise-evidence">evidence table</a> before opening the explanation.</p>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
 <p>A catch for OperationCanceledException should match the intended cancellation policy. Cancelling a waiter does not dispose all resources owned by the operation. Retain and observe tasks that may still complete.</p>
-<p>A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.</p>
+<p>For task 5, <code>Task.FromResult(5).WaitAsync(cancelledToken)</code> returns 5: a task that already completed wins over a cancelled token. Task 4&#x27;s automatic replay after a timed-out wait is the dangerous wrong version, because the first write may still finish and the replay would apply it twice.</p>
+<p>Repair routine: <a href="../STUDY-GUIDE.md.html#building-a-regression-case">building a regression case</a>.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <ol>
 <li>Reproduce Example A (Observe a requested cancellation) before changing anything, and confirm its observation: The token check acknowledges cancellation.</li>
@@ -328,9 +331,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>Before opening the explanation, test your task 3 attempt against this lesson&#x27;s main pitfall: A catch for OperationCanceledException should match the intended cancellation policy.</li>
 </ol>
 <h3 id="self-check-and-next-step">Self-check and next step<a class="heading-anchor" href="#self-check-and-next-step" aria-label="Link to this section">#</a></h3>
-<p>Explain Cancellation token, Wait cancellation, Unknown result without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.</p>
+<p>Identify where Example B requests cancellation, where it observes it and where the work completes. Explain why <code>WaitAsync</code> cannot stop the operation it waits on. For task 6, describe the fields of a receipt that tells the caller whether work was confirmed cancelled or might still finish.</p>
+<p>Then follow the general <a href="../STUDY-GUIDE.md.html#self-check-routine">self-check routine</a> and save your pad.</p>
 <h3 id="sources-and-execution-boundary">Sources and execution boundary<a class="heading-anchor" href="#sources-and-execution-boundary" aria-label="Link to this section">#</a></h3>
-<p><a href="https://learn.microsoft.com/en-us/dotnet/standard/parallel-programming/task-cancellation">Official language or framework documentation</a>. The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.</p>
+<p><a href="https://learn.microsoft.com/en-us/dotnet/standard/parallel-programming/task-cancellation">Documentation</a>: The task cancellation article explains <code>CancellationTokenSource</code>, token checks and how cancelled tasks report <code>OperationCanceledException</code>.</p>
+<p>Provenance and limits: <a href="../STUDY-GUIDE.md.html#sources-and-execution-boundary">sources and execution boundary</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for csharp-030: Cooperative cancellation and bounded waiting.
 Read courses/csharp/guides/csharp-030.md and courses/csharp/lessons/csharp-030.cs. Prerequisites: csharp-029.

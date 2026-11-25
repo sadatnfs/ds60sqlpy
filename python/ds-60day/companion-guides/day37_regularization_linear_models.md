@@ -68,31 +68,7 @@ the final test set.
 
 ## How to run this lesson
 
-**Primary browser route:** run `./classroom` from the repository root and
-choose **Python and data science** on `/classroom`. Open this lesson in the shared workspace,
-read its capability notice, and use its supported coding or reading workflow.
-The [classroom guide](../../../docs/classroom-experience.md) explains saved work, runtimes and switching subjects.
-
-**Optional native notebook/editor route:** the instructions below describe
-separately prepared host tools. They are useful alternatives, not prerequisites
-for opening this lesson in the Docker classroom.
-
-1. Open the Day 37 learner notebook from this guide's **Next
-   step** section in VS Code or JupyterLab.
-2. Select the `Python (ds60sqlpy)` kernel. Start at the top and use
-   **Run All** only after making the written predictions; every added
-   worked example is bounded and offline after bootstrap.
-3. Keep experiments in new scratch cells. Do not edit the official
-   solution while attempting the numbered practice.
-4. Restart the kernel and run from the first cell before calling the
-   lesson complete. A clean run catches hidden state and stale
-   variables.
-
-Linux, macOS, or Ubuntu in Windows WSL 2:
-
-```bash
-.venv/bin/python -m jupyter lab
-```
+Open `python-37` in the classroom, or `python/ds-60day/notebooks/day37_regularization_linear_models.ipynb` on a host; the [Python study guide](../../STUDY-GUIDE.md) explains both.
 
 ## Concept deep dive: regularization strength, coefficient shrinkage, sparsity, and stability
 
@@ -117,10 +93,6 @@ irrelevant or causally unimportant.
 - **`model.coef_`:** contains coefficients in transformed feature space; inspect magnitude and stability alongside validation error.
 
 ### Focused example A: trace Ridge shrinkage as alpha grows
-
-Before running the example, predict the shape, type, or direction of the
-result. Write the prediction down so that a surprise becomes evidence
-rather than something to overlook.
 
 ```python
 import numpy as np
@@ -204,9 +176,6 @@ The separate solution also demonstrates Elastic Net as a useful extension.
 
 Connect regularization strength to coefficient geometry, validation, and feature scaling. Sparse or stable coefficients are model behaviors, not causal truths.
 
-Predict or plan before you run code. Use the hint only after an honest
-attempt, and record the evidence that would prove your result correct.
-
 3. **Prediction:** Predict the coefficient and training-error behavior of Ridge as alpha moves from nearly zero to an extremely large value. Identify what happens to an unpenalized intercept.
    **Progressive hint:** Larger alpha increases shrinkage and bias; most standard estimators exclude the intercept from the penalty.
 
@@ -263,8 +232,7 @@ not proof that a feature is irrelevant or causally unimportant.
 
 ## Ask an AI tutor about this lesson
 
-The lesson is complete without an AI assistant. If you want optional
-coaching, copy this prompt into the AI tutor while the repository root is open:
+The lesson is complete without AI. For optional coaching, copy this prompt with the repository root open:
 
 ```text
 Tutor me through `python-37` (Day 37: Regularization and Linear Models).

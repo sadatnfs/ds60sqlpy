@@ -196,7 +196,6 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <article class="document"><h2 id="cuda-031-explanatory-solutions">cuda-031: explanatory solutions<a class="heading-anchor" href="#cuda-031-explanatory-solutions" aria-label="Link to this section">#</a></h2>
 <h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
 <p>A host clock around an asynchronous launch measures submission unless a completion dependency is included. Device events record positions in a stream and can measure elapsed device work between those positions after completion. End-to-end host timing includes the transfers and synchronization the application actually requires. Warm-up separates one-time initialization or JIT work from repeated work, but cold start remains a real user concern and deserves its own measurement. Retain repeated samples and summarize a distribution. Profiling or sanitizer instrumentation changes execution, so do not mix instrumented and ordinary samples in one performance claim.</p>
-<p>The separate <a href="../references/cuda-031_cpu.py.html">CPU reference</a> checks the chapter&#x27;s bounded model. It does not execute CUDA or establish GPU timing. Compare after attempting the worksheet or explicitly choosing to reveal solutions.</p>
 <h3 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h3>
 <p>Suppose host submission takes 5 microseconds and the queued kernel completes 80 microseconds later. Reporting five as kernel duration measures the wrong interval. A correctly ordered event interval measures relevant device work; a completed host interval can measure the full request, including additional overhead.</p>
 <p><strong>Approach:</strong> Time device work with events recorded in the same stream around the kernel.</p>
@@ -233,11 +232,17 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Why it is correct:</strong> Each workload&#x27;s timing should match what a user must wait for.</p>
 <p><strong>A plausible wrong approach:</strong> Excluding transfers from request-response timing measures work the caller never sees alone.</p>
 <p><strong>How to verify:</strong> State each scope next to its number and confirm transfers are included where needed.</p>
+<h3 id="self-check-answers">Self-check answers<a class="heading-anchor" href="#self-check-answers" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>What must happen before reading an elapsed time between two events?</strong> The end event must complete, typically by synchronizing on it.</li>
+<li><strong>Why keep the 9.0 ms sample in worked example 2?</strong> It may reveal interference or cold behavior that real users would also see.</li>
+<li><strong>What does warm-up separate from repeated work?</strong> One-time costs such as context creation, module loading and JIT compilation.</li>
+</ol>
 <h3 id="numerical-reference-and-its-limits">Numerical reference and its limits<a class="heading-anchor" href="#numerical-reference-and-its-limits" aria-label="Link to this section">#</a></h3>
-<p>The complete CPU model is <a href="../references/cuda-031_cpu.py.html">here</a>. Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It also asserts an exercise answer that the guide&#x27;s model leaves for you to derive: <code>assert 12 / 4 == 3</code>. It does not claim CUDA execution, concurrency safety or a performance measurement.</p>
+<p>The <a href="../references/cuda-031_cpu.py.html">CPU reference</a> reproduces worked example 1 and prints <code>{&#x27;synthetic_samples_ms&#x27;: [1.0, 1.1, 1.0, 1.2, 9.0], &#x27;median_ms&#x27;: 1.1, &#x27;maximum_ms&#x27;: 9.0}</code>.</p>
+<p>It also asserts an exercise answer you derive yourself: <code>assert 12 / 4 == 3</code></p>
 <h3 id="transfer-review">Transfer review<a class="heading-anchor" href="#transfer-review" aria-label="Link to this section">#</a></h3>
-<p>Resident data can exclude repeated uploads by contract; request-response timing must include transfers needed to deliver the requested result.</p>
-<p>A complete explanation must name its inputs, the unchanged mathematical contract, the changed boundary or resource condition, and the evidence still needed on actual hardware. Preserve a CPU baseline even after a GPU path becomes available.</p></article>
+<p>Resident data can exclude repeated uploads by contract; request-response timing must include transfers needed to deliver the requested result.</p></article>
   </main>
 </body>
 </html>

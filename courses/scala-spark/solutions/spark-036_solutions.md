@@ -1,6 +1,8 @@
 # spark-036: Explained paired reference solutions
 
-Read the [guide](../guides/spark-036.md) and attempt one language first. The [Scala reference](spark-036_solution.scala) and [PySpark reference](spark-036_solution.py) are complete single-file programs with explicit local sessions and finally-based stop. Each compares with literal expectations; matching two implementations alone would not rule out a shared mistake.
+Attempt the [guide](../guides/spark-036.md) exercises first.
+
+References: [Scala](spark-036_solution.scala), [PySpark](spark-036_solution.py).
 
 ## Exercises and reasoning
 
@@ -8,7 +10,7 @@ Read the [guide](../guides/spark-036.md) and attempt one language first. The [Sc
 
 Validate the explicit bigint schema, nonnegative cents, positive IDs and at most 8 rows; return sorted id, cents newline records preserving multiplicity.
 
-**Expected:** Exact text 1,100 newline 2,200 newline, with a stable SHA256 after repartitioning.
+**Expected:** Exact text `1,100` newline `2,200` newline, with a stable SHA256 after repartitioning.
 
 ```scala
 def encodeBatch(frame: DataFrame): String = {
@@ -101,7 +103,7 @@ def recover_callback(spark, input_path, checkpoint, sink):
 
 The repeated batch ID is direct evidence that callback delivery can repeat. The sink key is stable across runs, so replay refers to the same logical work. A key based on runId would change after restart and defeat this protection. The application-defined namespace is also bound to its source/checkpoint/schema contract to reject accidental reuse for an unrelated query.
 
-**Verification evidence:** Assert attempt sequence 0,0, exact rows and corresponding identities.
+**Verification evidence:** Assert attempt sequence `0, 0`, exact rows and corresponding identities.
 
 ### Exercise 5: Expose a non-idempotent append counterexample
 
@@ -136,7 +138,7 @@ This intentionally unsafe local side effect is isolated from the real sink. Its 
 
 Reject different content under an existing batch key, then publish a new source file 3:300 and resume the real query.
 
-**Expected:** The conflicting key fails without replacing its receipt. Stream batch 1 adds one row, leaving IDs 1,2,3 and total 600 across two batch files.
+**Expected:** The conflicting key fails without replacing its receipt. Stream batch 1 adds one row, leaving IDs 1, 2, 3 and total 600 across two batch files.
 
 ```scala
 def rejectCollision(root: Path, text: String): Unit = {
@@ -159,10 +161,11 @@ def reject_collision(root, text):
 
 Idempotency is a content-aware identity rule, not unconditional suppression of anything with a repeated number. A collision signals incompatible reuse or corruption and must not silently overwrite the committed result. The subsequent real microbatch demonstrates that the sink can accept new logical work while maintaining replay safety for old work.
 
-**Verification evidence:** Assert collision rejection, old receipt equality, attempt sequence 0,0,1 and exact 3-row sink.
+**Verification evidence:** Assert collision rejection, old receipt equality, attempt sequence `0, 0, 1` and exact 3-row sink.
 
 ## Execution and interpretation
 
-Run the complete reference in its prepared fixed worker. Its first check (Define canonical bounded microbatch content) is built inside the program, so opening the lesson fetches nothing; it expects: Exact text `1,100` newline `2,200` newline, with a stable SHA256 after repartitioning. The final success line prints only after every reference assertion passes.
+The references must encode the batch as the lines `1,100` and `2,200`, get the same digest after `repartition(2)`, and reject a NULL amount. Publishing `manual-v1` batch 7 returns True once and then False with the file bytes unchanged. The failing stream raises `StreamingQueryException` whose message contains `injected_before_publication`, records attempts `[0]` and publishes nothing for `stream-v1`.
 
-Local plan, partition and resource evidence does not establish cluster-scale performance; session cleanup is explicit.
+Recovery on the same checkpoint records attempts `[0, 0]`, keeps the query ID, changes the run ID and publishes exactly `1,100` and `2,200`. An unkeyed append called twice leaves 4 lines while the committed batch still has 2. Finally, the same key with an extra `9,999` line is refused and the original bytes stay, and `batch-02.json` with `(3, 300)` brings the attempts to `[0, 0, 1]` and the rows to three. The success line is `spark-036: six PySpark reference contracts passed; Spark=` with the version. A rename on a local disk is atomic; object stores and remote file systems need their own publication guarantee.
+

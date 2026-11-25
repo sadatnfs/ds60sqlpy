@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/docker/solutions/docker-003_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="docker-003-explanatory-solutions">docker-003: explanatory solutions<a class="heading-anchor" href="#docker-003-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit reveal. These explain the supplied teaching fixtures; they are not engine results. The mechanism is explained in <code>courses/docker/guides/docker-003.md</code>.</p>
+<p>These answers explain teaching fixtures, not engine results; the mechanism is in <a href="../guides/docker-003.md.html">the guide</a>.</p>
 <h3 id="exercise-1-classify-app-server-py-in-the-fixture">Exercise 1: Classify /app/server.py in the fixture.<a class="heading-anchor" href="#exercise-1-classify-app-server-py-in-the-fixture" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> An image-provided application file.</p>
 <p><strong>Why:</strong> The Dockerfile COPY instruction places it into a build layer. Reading it from a container demonstrates that the image content is visible through the container filesystem view.</p>
@@ -238,7 +238,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>A plausible wrong approach:</strong> Putting everything into the volume keeps stale scratch files forever and widens what a backup or privacy review must cover, while the writable layer loses progress on recreate.</p>
 <p><strong>How to verify:</strong> Recreate the app service and check that /data/counter.json still exists and /tmp is empty, matching the retention rule you wrote for each.</p>
 <h3 id="check-your-transfer">Check your transfer<a class="heading-anchor" href="#check-your-transfer" aria-label="Link to this section">#</a></h3>
-<p>A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.</p></article>
+<p><code>restart</code> stops and starts the same container, so its writable layer, including <code>/app/uploads</code>, survives. Editing the service configuration makes <code>up -d</code> recreate the service: a new container ID with a fresh, empty writable layer on top of the image, so the uploads are not there. The fix is a named volume mounted at <code>/app/uploads</code>, ideally with a read-only root and a tmpfs for scratch. Record <code>docker compose ps -q app</code> before and after <code>up</code>; different IDs confirm recreation. Seeing the same ID with the files missing would disprove this explanation and point at the application deleting them.</p></article>
   </main>
 </body>
 </html>

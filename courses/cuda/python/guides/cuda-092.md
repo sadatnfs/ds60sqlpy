@@ -1,10 +1,17 @@
 # cuda-092: Profiling a complete training step
 
-**Route:** CUDA Python and machine learning. **Stage:** intermediate. **Prerequisites:** `cuda-071`, `cuda-088`, `cuda-089`. Allow several sessions when the hardware experiment is new; the chapter is not a deadline.
+**Route:** CUDA Python and machine learning. **Stage:** intermediate. **Prerequisites:** `cuda-071`, `cuda-088`, `cuda-089`.
 
-## What you will be able to explain
+Pacing, evidence labels and platform rules: [CUDA study guide](../../STUDY-GUIDE.md).
 
-By the end, you can **compute timeline wall time**, **name profiler overhead**, and **verify outside profiling** with evidence. Start with the two worked cases, then use the editable CPU model to make the quantities concrete.
+## Learning objectives
+
+- Compute timeline wall time.
+- Identify an overlap.
+- Find a forced synchronization.
+- Name profiler overhead.
+- Propose one targeted change.
+- Verify outside profiling.
 
 ## Mechanism and vocabulary
 
@@ -31,9 +38,13 @@ CPU preparation from 0 to 6 ms overlaps GPU work from 2 to 10 ms. The complete i
 
 A trace with repeated host scalar reads between kernels can reveal forced synchronization. Replacing per-step logging with bounded aggregated reporting changes the host dependency path.
 
-## Portable executable model
+## How to run the CPU model
 
-The **CPU reference model** variant runs this bounded worked example using `python-core`. It uses only the Python standard library, small synthetic values and no network. Its purpose is to expose the arithmetic or contract behind the chapter. The separate reference includes assertions for the stated observations.
+Edit the copy; the [reference](../references/cuda-092_cpu.py) adds assertions.
+
+```sh
+python courses/cuda/python/lessons/cuda-092_cpu.py
+```
 
 ```python
 events = [("prepare", 0, 6), ("gpu", 2, 10)]
@@ -53,8 +64,6 @@ print("CPU timeline analysis:", summed, wall)
 | `summed` | `14` |
 | `wall` | `10` |
 
-Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.
-
 ## Equal framework lanes
 
 ### PyTorch
@@ -65,77 +74,65 @@ Capture a bounded torch.profiler schedule with CPU and CUDA activities when avai
 
 Capture a short TensorFlow Profiler trace using the prepared external tooling. Use input-pipeline and device views together, then repeat without profiling overhead.
 
-Choose either lane first, then compare the other using identical mathematical inputs. Framework-specific shape, mode and optimizer rules must be checked separately. Both use offline synthetic examples; no model hub or dataset download is triggered.
+Lane rules: [framework labs](../../STUDY-GUIDE.md#python-gpu-and-framework-labs).
 
 ## Practice and transfer
+
+Record each attempt in the [worksheet](../lessons/cuda-092.md) before opening hints.
 
 ### Exercise 1: Compute timeline wall time
 
 **Trap to avoid:** Summing durations, `6 + 8 = 14` ms, double counts the 4 ms overlap and overstates the step.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 2: Identify an overlap
 
 **Trap to avoid:** Treating events on different rows of the trace as sequential hides the concurrency that is already happening. The step then looks like it needs a faster GPU when the existing overlap is already working.
-
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 3: Find a forced synchronization
 
 **Trap to avoid:** Blaming the gaps on slow kernels leads to optimizing compute while the host dependency stays. Faster kernels only make the GPU wait longer for the next enqueue.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 4: Name profiler overhead
 
 **Trap to avoid:** Quoting step times from a detailed profiler run as production numbers overstates the step time.
-
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 5: Propose one targeted change
 
 **Trap to avoid:** Applying several optimizations at once makes it impossible to tell which helped or which hurt. One change might help while another reintroduces a synchronization.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 6: Verify outside profiling
 
 **Trap to avoid:** Reporting the speedup measured under the profiler assumes overhead is equal in both versions. Removing host reads also removes instrumented events, so overhead itself changes.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ## Progressive hints
 
-Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.
+Hint *k* belongs to exercise *k*; open one at a time.
 
-1. Start from worked example 1 and mark the quantities needed for the task "Compute timeline wall time".
-2. Change one assumption in worked example 2 while preserving the declared contract: identify an overlap.
-3. Trace the CPU program's variables before adding hardware behavior: find a forced synchronization.
-4. Draw producers, consumers and the exact operation boundary for the task "Name profiler overhead".
-5. Separate what the small fixture establishes from what the real runtime must show: propose one targeted change.
-6. Write a counterexample to an overbroad claim before you verify outside profiling.
+1. Take the latest end time and subtract the earliest start time.
+2. List the time ranges where both the CPU and GPU intervals are active.
+3. Look for a host line that turns a device value into a Python number between kernels.
+4. Ask what recording shapes, stacks and memory adds to every event.
+5. Pick the single bottleneck the timeline suggests and change only that.
+6. Rerun without the profiler, synchronize before reading the clock and check the outputs still match.
 
-## Common mistakes and self-review
+## Common mistakes and self-check
 
-Confusing a correct tiny example with a general implementation is the central review risk. For this chapter, challenge the assumption in worked example 2, then ask whether your change preserves the mechanism described above. If you change dtype, layout, ordering, batch size or backend, update the acceptance contract rather than silently reusing the old observation. Explain an unexpected result before trying random configuration changes.
+A frequent mistake is adding up operator durations from a profiler table and calling the result step time. When CPU preparation and GPU kernels overlap, the sum exceeds wall time: 14 ms instead of 10 ms in worked example 1. Another mistake is trusting GPU utilization, since a busy device can be running redundant copies. Fix both by reading the timeline for the critical path, testing one hypothesis at a time and confirming with uninstrumented, synchronized timing.
 
-Keep a small evidence table with columns **claim**, **input**, **expected observation**, **actual observation** and **limit**. For the first claim use `Compute timeline wall time`. For the final claim use `Verify outside profiling`. An unperformed GPU or cluster experiment remains pending even when the CPU model is correct.
+**Evidence limit:** The reference computes a 14 ms event sum against a 10 ms interval from given timestamps. It does not capture a trace, so real overlap, synchronization points and profiler overhead must come from a bounded profile on the target system.
 
-## Platform and evidence contract
+1. Why can summed event durations exceed wall time?
+2. Why is high GPU utilization not proof of useful work?
+3. What context must be kept with a saved trace?
 
-The reading worksheet and CPU reference model work through the ordinary Linux Docker classroom on macOS, Linux and Windows using WSL 2. They do not require an NVIDIA GPU. Their results are labeled CPU models or semantic oracles, not simulated hardware performance.
-
-Real CUDA work needs supported NVIDIA hardware, a compatible host driver and an explicitly prepared GPU runtime. An Apple GPU does not execute CUDA kernels. PyTorch MPS on a supported native Mac, ROCm on supported AMD hardware, or other vendor backends can provide separate accelerator learning routes; they need their own package and operation qualification and are not CUDA evidence. The ordinary Linux Docker classroom does not expose native Mac MPS automatically.
-
-Do not download packages, models or data by opening this lesson. Do not attach an engine socket, ambient cluster credentials or an arbitrary remote endpoint. A CPU pass, imported package, successful compilation, real GPU result and measured performance are distinct observations. Record the actual backend, data shape/dtype, source revision, versions and pending checks. A saved completion marker records learning progress, not hardware certification.
+Answers: [self-check answers](../solutions/cuda-092_solutions.md#self-check-answers).
 
 ## Primary references
 
 - [PyTorch CUDA semantics](https://docs.pytorch.org/docs/2.9/notes/cuda.html)
 - [TensorFlow GPU guide](https://www.tensorflow.org/guide/gpu)
 
-Use the version-matched documentation of your prepared environment. These references describe interfaces and supported boundaries; the chapter's synthetic examples and CPU models are original teaching material.
+Full lists: [documentation and sources](../../STUDY-GUIDE.md#documentation-and-sources).
 
 ## Ask an AI tutor about this lesson
 

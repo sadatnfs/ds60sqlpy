@@ -4,8 +4,6 @@
 
 An application calls a runtime API or a higher-level library. User-space CUDA libraries then cooperate with the host NVIDIA driver to access a device. A container packages application code and user-space dependencies; it does not package a physical GPU or replace the host kernel driver. The toolkit includes tools such as the nvcc compiler. A framework wheel may bring compatible CUDA user-space components without a general-purpose CUDA compiler. Conversely, nvcc can exist on a machine where no GPU is visible. Each observation answers a different question: compilation, driver management access, framework device discovery, allocation and numerical execution are separate checks.
 
-The separate [CPU reference](../references/cuda-003_cpu.py) checks the chapter's bounded model. It does not execute CUDA or establish GPU timing. Compare after attempting the worksheet or explicitly choosing to reveal solutions.
-
 ## Exercise 1
 
 A shell reports `nvcc: command not found`, while an already installed framework executes a tensor operation on a GPU. This is possible because the framework can run precompiled kernels without the developer compiler. Building a new CUDA extension has a different dependency contract from running the existing tensor operator.
@@ -78,12 +76,16 @@ Use 'CUDA compilation available; GPU execution not verified'. Keep hardware, dri
 
 **How to verify:** The reference asserts compiler is true and kernel_validated is false; the label must keep those values distinguishable.
 
+## Self-check answers
+
+1. **Which layer must exist on the host and cannot be supplied by a container image?** The NVIDIA kernel driver, together with a physical GPU exposed to the container.
+2. **Why can a framework run GPU tensors on a machine where `nvcc` is missing?** Its wheel ships precompiled kernels and compatible user-space libraries, so no developer compiler is needed to execute them.
+3. **What label would you give a successful nvcc build on a machine with no GPU?** Build evidence only: the source compiled for a target, but nothing about runtime behavior was observed.
+
 ## Numerical reference and its limits
 
-The complete CPU model is [here](../references/cuda-003_cpu.py). Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It does not claim CUDA execution, concurrency safety or a performance measurement.
+The [CPU reference](../references/cuda-003_cpu.py) reproduces worked example 1 and prints `Compilation evidence only; no GPU execution evidence.`.
 
 ## Transfer review
 
 Use 'CUDA compilation available; GPU execution not verified'. Keep hardware, driver access and actual allocation/execution observations separate.
-
-A complete explanation must name its inputs, the unchanged mathematical contract, the changed boundary or resource condition, and the evidence still needed on actual hardware. Preserve a CPU baseline even after a GPU path becomes available.

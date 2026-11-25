@@ -42,5 +42,7 @@
       "wrong": "Running 2 million draws and reporting 0.3125 as settled. The simulation error shrinks to about 0.0003, while the error from assuming a fair coin stays the same.",
       "verify": "`sum(dbinom(3:4, 4, 0.55))` returns about 0.391, while the fair coin model returns 0.3125."
     }
-  ]
+  ],
+  "run_note": "The starter sets 20,000 repetitions and seed 41 and prints the count. Run it, then work out the exact probability before simulating: at least three heads in four fair flips is 5 out of 16, or 0.3125. Report the simulated estimate together with its Monte Carlo standard error, so the reader can judge whether the gap from 0.3125 is expected.",
+  "checks_note": "The assertions confirm that the exact value is 5/16, that the simulated estimate is within 0.02 of it, that quadrupling the repetitions halves the standard error, that probabilities of 0 and 1 give deterministic draws, and that the same seed reproduces the same draws. They do not show that the coin model fits any real process."
 }

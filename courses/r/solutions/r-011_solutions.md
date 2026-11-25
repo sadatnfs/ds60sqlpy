@@ -1,6 +1,6 @@
 # r-011: reference reasoning
 
-Use the [complete reference](r-011_reference.R) with the guide's declared inputs and runtime. Every worked example is also a standalone script.
+Run the [complete reference](r-011_reference.R) under the [run rules](../STUDY-GUIDE.md#run-a-chapter).
 
 ## Why the implementation has this shape
 
@@ -96,4 +96,6 @@ Equivalent ordinary cases do not remove the need to test missingness and boundar
 
 ## What the checks establish
 
-The reference makes 4 `stopifnot()` checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.
+The assertions confirm that the vectorized square returns 1 and 9 and keeps `numeric(0)` empty, that the positive-only loop sums 3 and 4 to 7, that `1:0` really counts down to `c(1L, 0L)`, which is why `seq_along()` is safer, that the bounded while loop stops after three steps, and that the loop agrees with `^2`. They do not test loops whose bodies append to vectors of unknown final length.
+
+The reference makes 4 `stopifnot()` checks; see [what a passing run proves](../STUDY-GUIDE.md#what-a-passing-run-proves).

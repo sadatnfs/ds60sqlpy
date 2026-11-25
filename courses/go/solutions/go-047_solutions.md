@@ -1,6 +1,6 @@
 # go-047: explained solutions
 
-These are comparison material after an attempt or explicit reveal. The executable reference implements all six cases in one `main.go`.
+Compare after an attempt ([using solutions](../STUDY-GUIDE.md#use-the-solutions)). `courses/go/solutions/go-047_solution.go` implements all six cases.
 
 ## Mechanism
 
@@ -10,7 +10,7 @@ Use a narrow interface at the application boundary and inject a fake with explic
 
 ## 1. Verify one successful API call: change one input
 
-Copy worked example 1 into a scratch pad and change `f := &FakeReader{Value: 3}` to `f := &FakeReader{Value: 4}`. Before running, predict which check fails and which value it now sees; then run it and restore the original line.
+Copy worked example 1, change `f := &FakeReader{Value: 3}` to `f := &FakeReader{Value: 4}` and predict the failure before running; then restore the line.
 
 The unchanged code is worked example 1:
 
@@ -20,13 +20,15 @@ v, err := readOnce(context.Background(), f)
 check(err == nil && v == 3 && f.Calls == 1, "success")
 ```
 
-**Expected:** The changed run panics with `success` because `err == nil && v == 3 && f.Calls == 1` no longer holds. Restoring the original line brings back the worked observation: the result is retained and exactly one call occurs.
+**Expected:** The edited run panics with `success` because `err == nil && v == 3 && f.Calls == 1` no longer holds.
+
+**Verify:** Restoring `f := &FakeReader{Value: 3}` makes the check pass again with the worked observation: the result is retained and exactly one call occurs.
 
 Call count is evidence about adapter behavior, while the returned value checks the consuming contract.
 
 ## 2. Preserve a forbidden error: diagnose an edited check
 
-A careless edit changed the check in worked example 2 so that it reads `check(errors.Is(err, ErrForbidden) && f.Calls != 1, "forbidden")`. Run worked example 2 with that line, explain why the edited check now fails for the same program state, and restore it.
+A careless edit rewrote the check in worked example 2 as `check(errors.Is(err, ErrForbidden) && f.Calls != 1, "forbidden")`. Explain the failure, then restore it.
 
 The unchanged code is worked example 2:
 
@@ -36,7 +38,9 @@ _, err := readOnce(context.Background(), f)
 check(errors.Is(err, ErrForbidden) && f.Calls == 1, "forbidden")
 ```
 
-**Expected:** Before the repair the program panics with `forbidden`; after it the line reads `check(errors.Is(err, ErrForbidden) && f.Calls == 1, "forbidden")` again and the exact cause is visible and only one call occurs.
+**Expected:** The defective run panics with `forbidden`; after restoring `check(errors.Is(err, ErrForbidden) && f.Calls == 1, "forbidden")`, the exact cause is visible and only one call occurs.
+
+**Verify:** The edited check fails with message `forbidden` for a state that `errors.Is(err, ErrForbidden) && f.Calls == 1` accepts.
 
 Authorization failure is not repaired by repeating the same request. Surface the required permission or configuration diagnosis.
 
@@ -54,6 +58,8 @@ check(errors.Is(err, context.Canceled) && f.Calls == 0, "cancel")
 
 **Expected:** No API call is made.
 
+**Verify:** Your solution must keep `errors.Is(err, context.Canceled) && f.Calls == 0` true. Control: changing `check(errors.Is(err, context.Canceled) && f.Calls == 0, "cancel")` to `check(errors.Is(err, context.Canceled) && f.Calls != 0, "cancel")` panics with message `cancel`; revert it.
+
 The test verifies absence of a side effect, not merely the final error text.
 
 ## 4. Distinguish returned zero from failure
@@ -67,6 +73,8 @@ check(err == nil && v == 0, "zero success")
 ```
 
 **Expected:** The zero is accepted with nil error.
+
+**Verify:** Your solution must keep `err == nil && v == 0` true. Control: changing `f := &FakeReader{Value: 0}` to `f := &FakeReader{Value: 1}` panics with message `zero success`; revert it.
 
 Result value and operation status are separate channels. A zero cannot stand in for every failure.
 
@@ -83,6 +91,8 @@ check(errors.Is(err, cause), "unknown cause")
 
 **Expected:** The cause remains inspectable.
 
+**Verify:** Your solution must keep `errors.Is(err, cause)` true. Control: an input that falsifies it fails with message `unknown cause`; revert it.
+
 Preserving the cause supports diagnosis. A read retry policy differs from replaying a mutation whose outcome is uncertain.
 
 ## 6. Transfer source-bound evidence
@@ -98,8 +108,10 @@ check(receipt["lesson"] == "go-047" && receipt["source"] == digest(source) && re
 
 **Expected:** The receipt matches the exact source and rejects the changed source.
 
+**Verify:** Your solution must keep `receipt["lesson"] == "go-047" && receipt["source"] == digest(source) && receipt["source"] != digest(source+" ")` true. Control: changing `receipt := map[string]string{"lesson": "go-047", "source": digest(source)}` to `receipt := map[string]string{"lesson": "go-48", "source": digest(source)}` panics with message `receipt identity`; revert it.
+
 Binding evidence to a digest of the exact bytes means a later edit cannot reuse an old result. This small check illustrates the binding; the classroom records actual source hashes separately.
 
 ## Transfer after comparison
 
-Return to your own pad and reproduce one check with a new input. Explain why the check rejects a plausible wrong implementation. Keep the distinction between a pure model, an in-process fake, and a real external system visible in your notes.
+Every controller you build after this should carry three test layers: pure decision tests like plan and finalAction, fake-client tests for error handling and call counts, and an integration run against an owned cluster or envtest. Tie each piece of evidence to the exact source revision it tested, so a passing result is never reused for changed code.

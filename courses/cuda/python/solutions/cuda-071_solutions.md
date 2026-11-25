@@ -1,6 +1,6 @@
 # cuda-071: explained solutions
 
-These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.
+Compare with your [worksheet](../lessons/cuda-071.md) attempt.
 
 ## Exercise 1: Identify the timing boundary
 
@@ -74,8 +74,16 @@ The supplied times are invented teaching observations.
 
 **How to verify.** The reference prints `CPU trace analysis`, which is the correct label. A real benchmark records host, device, versions and raw samples.
 
+## Self-check answers
+
+1. **Why can a first call be much slower than later ones?** It can include context creation, library initialization, compilation and allocator population. Those are real costs, but they belong in a cold-start report separate from steady-state samples.
+
+2. **What does the median hide that the maximum reveals?** Tail behavior. For `[10, 11, 10, 12, 100]` the median of 11 ms looks healthy while one request took 100 ms.
+
+3. **What makes two timings an equal-work comparison?** The same input data, dtype and transfer policy, completed outputs that agree within a stated tolerance, and the same synchronization boundary on both sides.
+
 ## Reference observation
 
 Median 11 ms and maximum 100 ms, from synthetic trace data.
 
-The reference file is `courses/cuda/python/references/cuda-071_cpu.py`. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.
+Asserted by `courses/cuda/python/references/cuda-071_cpu.py`.

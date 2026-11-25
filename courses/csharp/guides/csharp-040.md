@@ -24,9 +24,9 @@ Dependency injection is a construction technique, not a requirement to install a
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles your saved pad as `Program.cs` in its fixed .NET 10 project. C# 14 is the matching language generation. This route uses the prepared framework libraries; it does not accept arbitrary project files, NuGet packages, command arguments or interactive input. The explicit `Program.Main` entrypoint makes compilation and execution visible. `Check` throws on a false condition in every build configuration, unlike conditional debugging assertions.
+`IClock`, `FixedClock` and `StampService` are declared after `Main`; the service takes its clock through a primary constructor. No real clock adapter appears, because the lesson concerns dependency direction: the domain names the capability it needs, and the test supplies a fixed answer. `CultureInfo` comes from `System.Globalization`, already imported.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Compile contract, starter stop and success marker: [running a lesson](../STUDY-GUIDE.md#running-a-lesson).
 
 
 
@@ -34,7 +34,7 @@ Start with the answer-free learner artifact in your saved classroom pad. It deli
 
 A service constructor accepts an interface. A small in-memory implementation supports deterministic tests. A clock abstraction returns a fixed instant in tests while a real adapter would obtain current time.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+Each example ends with a trace; method: [tracing a program](../STUDY-GUIDE.md#tracing-a-program).
 
 ## Worked example / walkthrough
 
@@ -92,6 +92,8 @@ internal static class Program {
 ```
 
 **Observe:** The result uses the supplied instant.
+
+**Trace.** `FixedClock` wraps midnight on January 1, 2025, at offset zero. `Stamp("a")` first validates the identity, then formats `clock.Now` with the round-trip O format and appends a colon and the identity, producing 2025-01-01T00:00:00.0000000+00:00:a. The check reads only the leading date, which cannot vary between runs because no machine clock is consulted.
 
 ### Example B: Preserve a core validation rule
 
@@ -151,6 +153,8 @@ internal static class Program {
 
 **Observe:** A different clock does not bypass identity validation.
 
+**Trace.** The clock now returns `DateTimeOffset.UnixEpoch`, January 1, 1970, but `Stamp("")` never reaches it. `string.IsNullOrWhiteSpace` rejects the empty text and the method throws `ArgumentException` with the message identity required. A string of spaces fails the same test. Swapping clocks changed the data the service could see, not the rule it enforces.
+
 ## Exercises
 
 1. **Predict and explain.** Identify policy and mechanism in the service.
@@ -165,13 +169,15 @@ internal static class Program {
 
 6. **Transfer and justify.** Draw dependency direction for a command-line adapter, HTTP adapter and shared domain library.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Log each task in the [evidence table](../STUDY-GUIDE.md#recording-exercise-evidence) before opening the explanation.
 
 ## Common pitfalls and diagnosis
 
 A dependency container can conceal construction errors if overused. Do not inject mutable global services merely to rename global state. Keep core invariants in the core rather than duplicating them in every adapter.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+For task 4, a method that calls `DateTimeOffset.UtcNow` internally while accepting an `IClock` makes the test pass today and fail at midnight, so search for direct clock calls. For task 5, the instant 23:30 at offset minus five formats as 2024-12-31 even though the same moment is 04:30 on January 1 in UTC; decide which date the domain means.
+
+Repair routine: [building a regression case](../STUDY-GUIDE.md#building-a-regression-case).
 
 ## Progressive hints
 
@@ -181,11 +187,15 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 ## Self-check and next step
 
-Explain Domain core, Adapter, Dependency direction without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+Name the policy and the mechanism in `StampService`, and say which file would change if the stamp format changed. Explain why the second example needs no particular clock value. For task 6, draw the arrows between the command-line adapter, the HTTP adapter and the domain library, and confirm no arrow points out of the domain.
+
+Then follow the general [self-check routine](../STUDY-GUIDE.md#self-check-routine) and save your pad.
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://learn.microsoft.com/en-us/dotnet/csharp/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+[Documentation](https://learn.microsoft.com/en-us/dotnet/csharp/): The C# guide's articles on interfaces and primary constructors explain how the service receives its clock without depending on an implementation.
+
+Provenance and limits: [sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

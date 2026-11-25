@@ -1,6 +1,8 @@
 # c-040: explained solutions
 
-Compare after an attempt or explicit reveal. The complete executable reference, `c-040_solution.c`, implements all six cases, from the "use caller-owned output" case to the "transfer an empty payload" case, in one `main.c`.
+`c-040_solution.c` assembles the "use caller-owned output" case through the "transfer an empty payload" case in one `main.c`.
+
+Compare only after an attempt: [Compare and transfer](../STUDY-GUIDE.md#compare-and-transfer).
 
 ## Mechanism and assumptions
 
@@ -10,7 +12,7 @@ extern declares a function or object defined elsewhere; C++ callers use an exter
 
 ## Exercise 1: Use caller-owned output: predict an edited check
 
-Copy worked example 1 into a scratch pad and change `CHECK(copy_api("hello", out, sizeof out, &required) == API_OK);` to `CHECK(copy_api("hello!", out, sizeof out, &required) == API_OK);` inside its CHECK. Before running, predict whether the CHECK still holds and explain why; then restore it.
+In worked example 1, change `CHECK(copy_api("hello", out, sizeof out, &required) == API_OK);` to `CHECK(copy_api("hello!", out, sizeof out, &required) == API_OK);`. Predict whether the CHECK still holds and why, then run and restore.
 
 The unchanged code is worked example 1:
 
@@ -21,13 +23,15 @@ CHECK(copy_api("hello", out, sizeof out, &required) == API_OK);
 CHECK(required == 5 && strcmp(out, "hello") == 0);
 ```
 
-**Expected:** With `CHECK(copy_api("hello!", out, sizeof out, &required) == API_OK);` the run stops with `Check failed` at the CHECK on `required == 5 && strcmp(out, "hello") == 0`, because the "use caller-owned output" case no longer shows that the output is complete and required length is 5. Restoring `CHECK(copy_api("hello", out, sizeof out, &required) == API_OK);` brings that observation back.
+**Expected:** `Check failed`: `CHECK(copy_api("hello!", out, sizeof out, &required) == API_OK);` is false, although the output is complete and required length is 5.
+
+**Verify:** Explain which claim `CHECK(copy_api("hello!", out, sizeof out, &required) == API_OK);` makes that the state fails; restoring `CHECK(copy_api("hello", out, sizeof out, &required) == API_OK);` passes again.
 
 Caller-owned storage avoids requiring the foreign runtime to guess a deallocator.
 
 ## Exercise 2: Report insufficient capacity: debug a regression
 
-A regression changed one token in worked example 2, the "report insufficient capacity" case, so one line now reads `char out[4] = "old!";`. Run the example with that line, use the failing CHECK to find why the status is too-small and required length is 5 no longer holds and repair the line without changing the CHECK.
+Worked example 2 now has a line reading `char out[4] = "old!";`. Repair it so that the status is too-small and required length is 5 again.
 
 The unchanged code is worked example 2:
 
@@ -38,7 +42,9 @@ CHECK(copy_api("hello", out, sizeof out, &required) == API_TOO_SMALL);
 CHECK(required == 5 && strcmp(out, "old") == 0);
 ```
 
-**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `required == 5 && strcmp(out, "old") == 0`. Once the line reads `char out[4] = "old";` again, the "report insufficient capacity" case again shows that the status is too-small and required length is 5.
+**Expected:** `Check failed` at `required == 5 && strcmp(out, "old") == 0` until the line reads `char out[4] = "old";` again.
+
+**Verify:** Explain how `char out[4] = "old!";` changes the value `required == 5 && strcmp(out, "old") == 0` tests, using your failing and repaired runs.
 
 The API reports the required payload length and preserves output on failure. The caller must reserve one more byte for termination.
 
@@ -53,6 +59,8 @@ CHECK(copy_api("abc", NULL, 0, &required) == API_TOO_SMALL && required == 3);
 
 **Expected:** The required payload length is still reported.
 
+**Verify:** Keep a CHECK equivalent to `copy_api("abc", NULL, 0, &required) == API_TOO_SMALL && required == 3`. Control edit: `CHECK(copy_api("abc!", NULL, 0, &required) == API_TOO_SMALL && required == 3);` must fail; then restore it.
+
 A deliberate size-query mode is useful across language boundaries, but it must be specified rather than inferred from null behavior.
 
 ## Exercise 4: Reject a missing required-output pointer
@@ -66,6 +74,8 @@ CHECK(copy_api("abc", out, sizeof out, NULL) == API_INVALID);
 
 **Expected:** The API returns invalid.
 
+**Verify:** Keep a CHECK equivalent to `copy_api("abc", out, sizeof out, NULL) == API_INVALID`. Control edit: `CHECK(copy_api("abc", out, sizeof out, NULL) != API_INVALID);` must fail; then restore it.
+
 Validation precedes dereference. Every pointer parameter has an explicit role and null policy.
 
 ## Exercise 5: Keep fixed-width values exact
@@ -78,6 +88,8 @@ CHECK(identity_u32(value) == value);
 ```
 
 **Expected:** All 32 bits remain unchanged.
+
+**Verify:** Keep a CHECK equivalent to `identity_u32(value) == value`. Control edit: `CHECK(identity_u32(value) != value);` must fail; then restore it.
 
 A foreign declaration must use a compatible unsigned 32-bit representation, not assume that its default integer type matches.
 
@@ -94,8 +106,10 @@ CHECK(copy_api("", out, sizeof out, &required) == API_OK && required == 0 &&
 
 **Expected:** The API succeeds and stores a terminator.
 
+**Verify:** Keep a CHECK equivalent to `copy_api("", out, sizeof out, &required) == API_OK && required == 0 && out[0] == '\0'`. Control edit: `CHECK(copy_api("", out, sizeof out, &required) != API_OK && required == 0 &&` must fail; then restore it.
+
 The empty payload still requires one writable byte under this null-terminated ABI contract.
 
 ## After comparison
 
-Add a fresh distinguishing input for the "transfer an empty payload" case to your own c-040 source. Explain why every access in `copy_api` or `identity_u32` stays within a live object and each owned resource is released. An expected ABI failure belongs in the test contract; undefined behavior does not. Keep diagnostics and sanitizer evidence for the "report insufficient capacity" case apart from ordinary output: the fixture proves its stated ABI, calling convention and allocator boundary assumptions, not universal safety.
+Call `copy_api("hello", NULL, 0, &required)` as a size query and CHECK that it returns `API_TOO_SMALL` with `required == 5`. Then allocate `required + 1` bytes, call again and CHECK `API_OK` and the text. Explain why the caller, which allocated the buffer, must also free it under this ABI's allocator boundary.

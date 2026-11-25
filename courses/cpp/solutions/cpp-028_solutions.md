@@ -1,6 +1,6 @@
 # cpp-028: explanations and reference observations
 
-Attempt the learner tasks before opening this document. The executable reference checks the bounded normal and boundary examples; the six explanations below cover the deliberate changes and manual checks.
+The [executable reference](cpp-028_solution.cpp) runs a corpus of two good and two bad lines and checks that a parsed record keeps cents 250 after its temporary input string is gone. The explanations cover owned results and consumers of the public header. How to compare: [study guide](../STUDY-GUIDE.md#compare-with-the-solutions).
 
 ## Mechanism
 

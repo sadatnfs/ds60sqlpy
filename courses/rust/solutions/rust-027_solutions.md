@@ -1,6 +1,8 @@
 # rust-027: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [rust-027_solution.rs](rust-027_solution.rs). It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.
+Executable reference: [rust-027_solution.rs](rust-027_solution.rs), which runs both examples and the coded answers.
+
+Open this only after [an attempt](../STUDY-GUIDE.md#attempt-a-lesson).
 
 ## Why the two examples differ
 
@@ -26,7 +28,7 @@ Identify who owns input and each thread handle.
 
 Split an array into two borrowed halves and combine their totals.
 
-**Reference answer.** The same statements run as the `Task 2` block of the reference program; here they are wrapped in `main` as a complete file.
+**Reference answer**, wrapped in `main`; the reference runs it as its `Task 2` block.
 
 ```rust
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -56,7 +58,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 Build a scoped parallel computation returning values to the parent.
 
-**Reference answer.** The same statements run as the `Task 3` block of the reference program; here they are wrapped in `main` as a complete file.
+**Reference answer**, wrapped in `main`; the reference runs it as its `Task 3` block.
 
 ```rust
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -93,7 +95,7 @@ Diagnose dropping a handle and assuming the work finished.
 
 Test empty partitions and an intentional worker panic in a controlled external test.
 
-**Reference answer.** The same statements run as the `Task 5` block of the reference program; here they are wrapped in `main` as a complete file.
+**Reference answer**, wrapped in `main`; the reference runs it as its `Task 5` block.
 
 ```rust
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -129,7 +131,7 @@ Summing an empty slice is 0, so empty partitions need no special case. A worker 
 
 Choose threads or sequential work using workload size and synchronization cost.
 
-No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **Thread**, and state one limitation of your choice.
+**Judging criteria.** A strong answer measures before choosing. Spawning and joining a thread costs far more than adding a few integers, so Example B's two sums are faster done sequentially; threads pay only when each chunk is large and independent. Compare a sequential baseline with a scoped version over the same input at several sizes, count any lock or channel traffic as cost, and keep the combined result independent of finishing order. State one limitation: timings in a shared container are noisy, so repeat runs and report a range.
 
 ## Mechanism and diagnostic reasoning
 
@@ -143,4 +145,6 @@ Sleep is not a synchronization guarantee. A joined panic is a distinct failure t
 
 ## Review before continuing
 
-Run the reference and confirm that it prints `rust-027: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.
+Rebuild Example B (Return independent results) from a blank pad.
+
+Review routine: [Self-check and review](../STUDY-GUIDE.md#self-check-and-review).

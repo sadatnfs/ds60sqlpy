@@ -206,12 +206,12 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Coordinator:</strong> An object owning delegate or callback integration.</p>
 <p><strong>Feedback loop:</strong> An update triggering a callback that repeats the same update indefinitely.</p>
 <h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>The Linux Docker classroom compiles the saved pad as <code>main.swift</code> with Swift 6 language checking. An explicit <code>@main</code> type contains <code>static func main() async throws</code>; the fixed compiler uses <code>-parse-as-library -swift-version 6</code>. The examples use the standard library and portable Foundation. <code>precondition</code> makes a violated invariant fail the process. The fixed pad accepts one source file, without arbitrary command arguments, interactive input or dependency installation. SwiftUI, UIKit, Apple simulators and application signing belong to the separately prepared macOS/Xcode project labs, never the Linux pad.</p>
-<p>Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.</p>
+<p>The pad runs only the comparison kernel. <code>SelectableText.swift</code> imports UIKit or AppKit behind <code>canImport</code>, so task 3 compiles in the Apple project, not on Linux. Count assignments in your own tests as task 2 does, since redundant updates do not show up as wrong output.</p>
+<p>Compile contract, starter stop and success marker: <a href="../STUDY-GUIDE.md.html#running-a-lesson">running a lesson</a>.</p>
 <p>The complete <a href="../fixtures/JourneyApp/README.md.html">JourneyApp fixture</a> contains <code>SelectableText.swift</code> with real UIKit and AppKit representable implementations.</p>
 <h3 id="syntax-anatomy-and-execution-trace">Syntax anatomy and execution trace<a class="heading-anchor" href="#syntax-anatomy-and-execution-trace" aria-label="Link to this section">#</a></h3>
 <p>UIViewRepresentable uses makeUIView and updateUIView. NSViewRepresentable has corresponding AppKit methods. A Coordinator bridges delegate callbacks. Compile-time canImport guards select the appropriate platform source.</p>
-<p>Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.</p>
+<p>Each example ends with a trace; method: <a href="../STUDY-GUIDE.md.html#tracing-a-program">tracing a program</a>.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="example-a-avoid-redundant-imperative-updates">Example A: Avoid redundant imperative updates<a class="heading-anchor" href="#example-a-avoid-redundant-imperative-updates" aria-label="Link to this section">#</a></h4>
 <p>A value comparison can prevent unnecessary callback or layout churn at the bridge boundary.</p>
@@ -240,6 +240,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The same value is not assigned twice.</p>
+<p><strong>Trace.</strong> <code>bridge</code> starts with text old and zero assignments. The first <code>update(&quot;new&quot;)</code> finds the text differs, stores new and increments the count to 1. The second <code>update(&quot;new&quot;)</code> finds the text already equal and returns at the guard. The check confirms text new and one assignment. In a real <code>updateUIView</code>, skipping the equal case avoids resetting the selection or cursor on every SwiftUI update.</p>
 <h4 id="example-b-retain-user-changes-as-actions">Example B: Retain user changes as actions<a class="heading-anchor" href="#example-b-retain-user-changes-as-actions" aria-label="Link to this section">#</a></h4>
 <p>The actual platform delegate must route its edit through the same single-source policy.</p>
 <pre class="highlighted-code"><code class="language-swift"><span class="syntax-keyword">import</span> <span class="syntax-class">Foundation</span>
@@ -267,6 +268,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The portable kernel exposes a deliberate state transition.</p>
+<p><strong>Trace.</strong> This run begins at start with zero assignments. One update with edited changes the text and counts one assignment, and both checks confirm it. In the platform view, the user&#x27;s typing arrives through a delegate in the Coordinator, which writes to the binding; SwiftUI then calls the update method, and the guard sees the same text and does nothing. Both directions pass through one comparison.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <ol>
 <li><strong>Predict and explain.</strong> Identify the value-driven and imperative sides of the bridge.</li>
@@ -286,10 +288,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <ol start="6">
 <li><strong>Transfer and justify.</strong> Document coordinator ownership, delegate cleanup and platform-specific API availability.</li>
 </ol>
-<p>For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.</p>
+<p>Log each task in the <a href="../STUDY-GUIDE.md.html#recording-exercise-evidence">evidence table</a> before opening the explanation.</p>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
 <p>A canImport branch is not evidence that both platforms were tested. UIKit and AppKit lifecycles differ. Avoid retaining transient SwiftUI view values as permanent controller state.</p>
-<p>A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.</p>
+<p>Task 4&#x27;s loop comes from an update method that writes back to the binding unconditionally. The write triggers another update, which writes again, and the view never settles. The counterexample is a repeated-update test that expects the assignment count to stay at 1 after the second identical value. For task 5, empty text must still count as one change from a nonempty value.</p>
+<p>Repair routine: <a href="../STUDY-GUIDE.md.html#building-a-regression-case">building a regression case</a>.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <ol>
 <li>Reproduce Example A (Avoid redundant imperative updates) before changing anything, and confirm its observation: The same value is not assigned twice.</li>
@@ -297,9 +300,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>Before opening the explanation, check your task 3 attempt (Inspect and build SelectableText.swift in the Apple project) against each pitfall listed above, and add one input that would expose the tempting wrong rule.</li>
 </ol>
 <h3 id="self-check-and-next-step">Self-check and next step<a class="heading-anchor" href="#self-check-and-next-step" aria-label="Link to this section">#</a></h3>
-<p>Explain Representable adapter, Coordinator, Feedback loop without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.</p>
+<p>Name the two methods of <code>UIViewRepresentable</code> and say which one may run many times. Explain what the Coordinator owns and why delegate callbacks route through it. Describe how <code>canImport</code> lets one source file supply UIKit and AppKit implementations. Starting from start, predict the assignment count after updates with a, a, b and a.</p>
+<p>Then follow the general <a href="../STUDY-GUIDE.md.html#self-check-routine">self-check routine</a> and save your pad.</p>
 <h3 id="sources-and-execution-boundary">Sources and execution boundary<a class="heading-anchor" href="#sources-and-execution-boundary" aria-label="Link to this section">#</a></h3>
-<p><a href="https://developer.apple.com/documentation/swiftui/uiviewrepresentable">Official language or framework documentation</a>. The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.</p>
+<p><a href="https://developer.apple.com/documentation/swiftui/uiviewrepresentable">Documentation</a>: Apple&#x27;s SwiftUI documentation covers <code>UIViewRepresentable</code>, <code>NSViewRepresentable</code> and their coordinators; the language reference documents conditional compilation blocks.</p>
+<p>Provenance and limits: <a href="../STUDY-GUIDE.md.html#sources-and-execution-boundary">sources and execution boundary</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for swift-045: UIKit and AppKit integration boundaries.
 Read courses/swift/guides/swift-045.md and courses/swift/lessons/swift-045.swift. Prerequisites: swift-044.

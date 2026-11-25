@@ -196,7 +196,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <article class="document"><h2 id="r-047-decision-trees-complexity-and-held-out-decisions">r-047: Decision trees, complexity and held-out decisions<a class="heading-anchor" href="#r-047-decision-trees-complexity-and-held-out-decisions" aria-label="Link to this section">#</a></h2>
 <p><strong>Level:</strong> advanced. <strong>Direct prerequisites:</strong> <code>r-045</code></p>
 <h3 id="run-and-retain-your-work">Run and retain your work<a class="heading-anchor" href="#run-and-retain-your-work" aria-label="Link to this section">#</a></h3>
-<p>Open <code>r-047</code> in <code>/classroom</code> and use the prepared <code>r-statistics</code> profile. Each Run evaluates one <code>main.R</code> script in a fresh offline R process, so define every input in the script; an earlier Run leaves no variables behind. Work in the <a href="../lessons/r-047.R.html">starter</a>. The <a href="../solutions/r-047_reference.R.html">complete reference</a> ends by printing <code>r-047 reference checks passed</code>, and the <a href="../solutions/r-047_solutions.md.html">explained answers</a> are there for deliberate comparison after your own attempt. This chapter prints values only; when a chapter draws figures, the classroom keeps at most two figures per run. The <a href="../README.md.html">course overview</a> describes saved work, figure capture and the prepared package versions.</p>
+<p>The starter holds eight rows with x from 1 to 8, labeled low for the first four and high for the last four, and an empty results list. Run it and predict the split before fitting: any threshold between 4 and 5 separates the labels perfectly. Then fit the tree and compare its chosen split with yours, and ask what class it will assign to an x far beyond 8.</p>
+<p>Work in the <a href="../lessons/r-047.R.html">starter</a> under the <a href="../STUDY-GUIDE.md.html#run-a-chapter">run rules</a>.</p>
+<p>The <a href="../solutions/r-047_reference.R.html">complete reference</a> ends by printing <code>r-047 reference checks passed</code>.</p>
 <h3 id="outcome-and-mechanism">Outcome and mechanism<a class="heading-anchor" href="#outcome-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Fit a small rpart classifier and distinguish its partition, probability output, complexity policy and generalization limits.</p>
 <p>A decision tree partitions predictor space through a sequence of rules. A terminal leaf stores an outcome summary for the observations reaching that region. The resulting prediction is piecewise constant, which gives trees useful nonlinear behavior but also limits how they extrapolate beyond the observed range.</p>
@@ -280,7 +282,8 @@ small <span class="syntax-operator">&lt;-</span> rpart<span class="syntax-operat
 <li><a href="https://stat.ethz.ch/R-manual/R-devel/library/rpart/html/prune.rpart.html">R pruning</a></li>
 </ul>
 <h3 id="continue">Continue<a class="heading-anchor" href="#continue" aria-label="Link to this section">#</a></h3>
-<p>No later chapter lists <code>r-047</code> as a direct prerequisite; the <a href="../README.md.html">course map</a> lists every chapter with its prerequisites. For the modeling assumptions behind these examples, read the <a href="../../statistics-ml/README.md.html">statistics tutorial</a> alongside the R code.</p>
+<p>No later chapter lists <code>r-047</code> as a direct prerequisite; see the <a href="../README.md.html">course map</a>.</p>
+<p>Modeling assumptions behind these examples are in the <a href="../../statistics-ml/README.md.html">statistics tutorial</a>.</p>
 <h3 id="ask-an-ai-tutor">Ask an AI tutor<a class="heading-anchor" href="#ask-an-ai-tutor" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for r-047 (Decision trees, complexity and held-out decisions).
 Read the guide and my saved attempt. Explain the relevant R mechanism,

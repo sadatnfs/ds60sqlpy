@@ -4,18 +4,15 @@
 
 Intermediate; about 110 minutes, plus any optional hardware experiment. Direct prerequisites: `cuda-006`, `cuda-020`, `cuda-025`
 
-The order supports learning at your own pace. Reading and CPU reasoning remain
-available when NVIDIA hardware is absent. Advanced hardware features need their
-own capability checks and are not prerequisites for opening this chapter.
+Pacing, evidence labels and platform rules for every chapter are in the [CUDA study guide](../../STUDY-GUIDE.md).
 
 ## Learning objectives
 
 Document an accepted error policy and measure numerical differences under reviewed compiler options such as fast math.
 
-Work through *Floating point under optimization* with the concrete cases below. Finish with this evidence:
-a documented policy for accepted error and rejected non-finite output, plus measured differences under reviewed compiler configurations. Distinguish an algorithmic
-calculation, a compiled artifact and an actual device observation when explaining
-what your work establishes.
+**Scope:** Fused multiply-add, accumulation precision, fast-math tradeoffs, denormals, condition number, reproducibility and deterministic algorithms.
+
+**Evidence to produce:** A documented policy for accepted error and rejected non-finite output, plus measured differences under reviewed compiler configurations.
 
 ## Purpose, vocabulary and mental model
 
@@ -38,28 +35,17 @@ This is population variance for nonempty data. Centering reduces cancellation re
 
 ## How to run and study this lesson
 
-Use the saved reading worksheet in `/classroom`; the reading pad does not execute
-CUDA. For the bounded calculation, select **CPU model (Python)**, whose
-answer-free starter supplies the literal fixtures and task contract. The
-[CUDA C++ study workflow](../README.md) covers platforms, optional GPU
-compilation and evidence labels. In a prepared Python environment you can also
-run the separate [CPU reference](../references/cuda-029_cpu.py) from the
-repository root:
+Trace worked example 1 by hand, then run the [CPU reference](../references/cuda-029_cpu.py) from the repository root:
 
 ```sh
 python courses/cuda/cpp/references/cuda-029_cpu.py
 ```
 
-Its assertions check the stated numerical result or model invariant; console
-text is evidence of this CPU model only, not of CUDA execution.
-
 ## Worked example 1: trace the mechanism
 
 For \([100000001,100000002,100000003]\), center around the mean 100000002. Squared deviations are \([1,0,1]\), giving population variance \(\frac{2}{3}\). Computing two roughly \(10^{16}\) quantities and subtracting them risks losing that small answer in ordinary floating precision.
 
-The complete CPU model below intentionally models only the named arithmetic,
-layout, dependency or capability decision. It does not model GPU scheduling,
-caches, instruction timing or device memory visibility.
+**Why:** Centered squares are [1, 0, 1], small numbers whose average 2 / 3 is computed exactly enough.
 
 ```python
 import math
@@ -72,41 +58,37 @@ assert math.fsum((x - 2) ** 2 for x in [2, 2, 2]) == 0
 print({"mean": mean, "centered_population_variance": variance})
 ```
 
-**Expected observation:** Every assertion succeeds. A representative CPU output is:
+**Expected observation:** every assertion succeeds, and the CPU model prints:
 
 ```text
 {'mean': 100000002.0, 'centered_population_variance': 0.6666666666666666}
 ```
 
-Integers, shapes and ordering must match exactly; only assertions with an explicit
-tolerance accept small floating-point differences. A printed duration is a model
-output, not a measured GPU benchmark.
+**Check:** The reference asserts variance == 2 / 3 using math.fsum with the centered formula.
 
 ## Worked example 2: change a meaningful condition
 
 A dot product with very large and very small terms can differ under different association or FMA choices. Compare to a higher-precision reference and report absolute error, relative error when meaningful, and nonfinite values. Exact equality is appropriate only when the contract and arithmetic justify it.
 
-Before applying this example to your own program, write down which inputs are
-read, which result is produced, and the condition that makes the comparison
-valid. Keep the original case as a regression check when changing a boundary.
+**Why:** FMA and reassociation change rounding, so two valid results can differ in low bits.
+
+**Check:** Check every output is finite and the error is within a declared tolerance.
 
 ## Six progressive exercises
 
-Exercises 1 and 2 are guided reconstructions of the worked examples; exercises
-3-6 change an input, diagnose a defect, test a boundary and transfer the idea.
-For each one, keep the calculation, output, diagram or failure policy you
-produce so another reader can compare it with the worked cases. If the hint is
-not enough, reread the mechanism paragraph and the bounded CPU assertion.
-
 ### Exercise 1
 
-Predict and trace the first worked example before running its CPU reference. Write every intermediate quantity that leads to the stated result, including units or ownership where applicable.
+Reconstruct worked example 1 on paper before running its CPU reference. Subtract the mean 100000002 from each value before squaring, giving deviations -1, 0 and 1.
+
+**Trap to avoid:** Using E[x^2] minus E[x]^2 subtracts two numbers near 1e16 and loses the small difference in rounding.
 
 **Hint:** Start with the literal input and intermediate quantities in worked example 1.
 
 ### Exercise 2
 
-Reconstruct the second worked example without copying its conclusion. Identify the changed input or condition, show the resulting calculation or dependency, and explain why it differs from the first example.
+Rework worked example 2 without copying its conclusion. Compare the dot product with a higher-precision reference and report absolute and relative error.
+
+**Trap to avoid:** Demanding bitwise equality with a CPU loop rejects valid optimized results and passes nothing new.
 
 **Hint:** Identify exactly which condition changes in worked example 2.
 
@@ -114,11 +96,15 @@ Reconstruct the second worked example without copying its conclusion. Identify t
 
 Compute population variance of \([2,2,2]\).
 
+**Trap to avoid:** Dividing by the standard deviation next without a policy gives division by zero.
+
 **Hint:** Use the first worked example to establish the relevant quantities, then change only the requested input.
 
 ### Exercise 4
 
 A faster compiler mode changes a near-zero result. What decides acceptability?
+
+**Trap to avoid:** Accepting any new value because the mode is faster leaves the error unbounded.
 
 **Hint:** Locate the failed phase or violated dependency before proposing a repair.
 
@@ -126,35 +112,33 @@ A faster compiler mode changes a near-zero result. What decides acceptability?
 
 Why can relative error explode near zero?
 
+**Trap to avoid:** Reporting only relative error marks near-zero outputs as wildly wrong.
+
 **Hint:** Check what the algorithm is allowed to read, write or assume at this boundary.
 
 ### Exercise 6
 
 Choose a reduction policy for a scientific report.
 
+**Trap to avoid:** Switching to fast-math between baseline and candidate benchmarks mixes numerical and speed changes.
+
 **Hint:** State the output contract and which observations are needed in the new application.
 
 ## Common mistakes and diagnosis
 
-A tempting but incorrect claim in this chapter is: **a faster approximate operation is an interchangeable implementation for every application.**
-
-For the concrete failure exercise, a faster compiler mode changes a near-zero result. What decides acceptability?
-Preserve the original input and the stage where behavior diverged, and compare
-with the CPU model before changing hardware configuration.
+A tempting but incorrect claim: **A faster approximate operation is an interchangeable implementation for every application.** Fast-math and reassociation change rounding, special values and sometimes accuracy by large factors, as the cancellation in worked example 1 shows. Whether that is acceptable depends on an error budget for the application, so a faster mode must be measured against a higher-precision reference before it replaces the original.
 
 ## Self-check, retrieval and transfer
 
-Explain the first example without its code, then use the second example to state
-one assumption that matters. Complete Exercise 3 independently, use Exercise 4 to
-diagnose a plausible defect, check the boundary in Exercise 5, and retain the
-application contract from Exercise 6. Compare the [separate explanations](../solutions/cuda-029_solutions.md)
-only after your attempt or a deliberate reveal. A reading marker records your
-choice; it does not certify hardware qualification or expert mastery.
+1. Why does centering around the mean help in worked example 1?
+2. What does FMA change compared with a separate multiply and add?
+3. When is exact equality an appropriate test for floating point?
+
+Short answers are in the [separate explanations](../solutions/cuda-029_solutions.md#self-check-answers); compare only after an attempt.
 
 ## Primary references
 
-Check the documentation that matches your prepared toolkit before optional
-hardware execution.
+Use the documentation that matches your prepared toolkit.
 
 - [CUDA Programming Guide](https://docs.nvidia.com/cuda/cuda-programming-guide/)
 

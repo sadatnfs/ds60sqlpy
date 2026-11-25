@@ -1,6 +1,8 @@
 # c-012: explained solutions
 
-Compare after an attempt or explicit reveal. The complete executable reference, `c-012_solution.c`, implements all six cases, from the "read through a const view" case to the "transfer snapshot independence" case, in one `main.c`.
+`c-012_solution.c` assembles the "read through a const view" case through the "transfer snapshot independence" case in one `main.c`.
+
+Compare only after an attempt: [Compare and transfer](../STUDY-GUIDE.md#compare-and-transfer).
 
 ## Mechanism and assumptions
 
@@ -10,7 +12,7 @@ const int *p reads as a pointer to a const-qualified int. int *const p is a cons
 
 ## Exercise 1: Read through a const view: change one input
 
-Copy worked example 1, the "read through a const view" case, into a scratch pad and change `int value = 4;` to `int value = 5;`. Before running, predict which CHECK fails and which value it sees in place of the worked result (the read yields 4); then run it and restore the original line.
+In worked example 1, change `int value = 4;` to `int value = 5;`. Predict which value the CHECK on `*view == 4` sees, then run and restore.
 
 The unchanged code is worked example 1:
 
@@ -20,7 +22,7 @@ const int *view = &value;
 CHECK(*view == 4);
 ```
 
-**Expected:** With `int value = 5;` the run stops with `Check failed` at the CHECK on `*view == 4`, because the "read through a const view" case no longer shows that the read yields 4. Restoring `int value = 4;` brings that observation back.
+**Expected:** `Check failed` at `*view == 4`; restoring `int value = 4;` passes again.
 
 The view is read-only, but the underlying object was not defined const.
 
@@ -34,7 +36,7 @@ The view is read-only, but the underlying object was not defined const.
 
 ## Exercise 2: Observe another valid mutation: debug a regression
 
-A regression changed one token in worked example 2, the "observe another valid mutation" case, so one line now reads `value = 8;`. Run the example with that line, use the failing CHECK to find why the const view now reads 7 no longer holds and repair the line without changing the CHECK.
+Worked example 2 now has a line reading `value = 8;`. Repair it so that the const view now reads 7 again.
 
 The unchanged code is worked example 2:
 
@@ -45,7 +47,7 @@ value = 7;
 CHECK(*view == 7);
 ```
 
-**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `*view == 7`. Once the line reads `value = 7;` again, the "observe another valid mutation" case again shows that the const view now reads 7.
+**Expected:** `Check failed` at `*view == 7` until the line reads `value = 7;` again.
 
 Const access does not freeze a shared mutable object or create a snapshot.
 

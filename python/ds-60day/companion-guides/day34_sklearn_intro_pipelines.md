@@ -68,31 +68,7 @@ evaluation.
 
 ## How to run this lesson
 
-**Primary browser route:** run `./classroom` from the repository root and
-choose **Python and data science** on `/classroom`. Open this lesson in the shared workspace,
-read its capability notice, and use its supported coding or reading workflow.
-The [classroom guide](../../../docs/classroom-experience.md) explains saved work, runtimes and switching subjects.
-
-**Optional native notebook/editor route:** the instructions below describe
-separately prepared host tools. They are useful alternatives, not prerequisites
-for opening this lesson in the Docker classroom.
-
-1. Open the Day 34 learner notebook from this guide's **Next
-   step** section in VS Code or JupyterLab.
-2. Select the `Python (ds60sqlpy)` kernel. Start at the top and use
-   **Run All** only after making the written predictions; every added
-   worked example is bounded and offline after bootstrap.
-3. Keep experiments in new scratch cells. Do not edit the official
-   solution while attempting the numbered practice.
-4. Restart the kernel and run from the first cell before calling the
-   lesson complete. A clean run catches hidden state and stale
-   variables.
-
-Linux, macOS, or Ubuntu in Windows WSL 2:
-
-```bash
-.venv/bin/python -m jupyter lab
-```
+Open `python-34` in the classroom, or `python/ds-60day/notebooks/day34_sklearn_intro_pipelines.ipynb` on a host; the [Python study guide](../../STUDY-GUIDE.md) explains both.
 
 ## Concept deep dive: the scikit-learn estimator contract and leakage-safe pipelines
 
@@ -117,10 +93,6 @@ selection, or other learned state.
 - **`.predict(X_new)`:** uses already learned preprocessing and model state; it must not refit on new data.
 
 ### Focused example A: prove that the scaler learned only training data
-
-Before running the example, predict the shape, type, or direction of the
-result. Write the prediction down so that a surprise becomes evidence
-rather than something to overlook.
 
 ```python
 import numpy as np
@@ -207,9 +179,6 @@ assert transformed[0].sum() == 0
 
 Make preprocessing and estimation one fitted object. Data boundaries, feature names, and unknown-category behavior are part of the model contract.
 
-Predict or plan before you run code. Use the hint only after an honest
-attempt, and record the evidence that would prove your result correct.
-
 3. **Leakage prediction:** Predict how cross-validation scores can change when a scaler is fit on the complete dataset before `cross_val_score`, then explain why the code still runs without warning.
    **Progressive hint:** The globally fitted mean and scale contain information from each validation fold. A Pipeline refits them using only the fold's training rows.
 
@@ -267,8 +236,7 @@ right split, metric, or causal assumptions for you.
 
 ## Ask an AI tutor about this lesson
 
-The lesson is complete without an AI assistant. If you want optional
-coaching, copy this prompt into the AI tutor while the repository root is open:
+The lesson is complete without AI. For optional coaching, copy this prompt with the repository root open:
 
 ```text
 Tutor me through `python-34` (Day 34: scikit-learn Estimators and Pipelines).

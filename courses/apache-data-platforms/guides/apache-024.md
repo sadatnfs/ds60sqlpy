@@ -117,11 +117,11 @@ actual Python execution from the separately prepared Rust extension and explain
 which additional observation is required before either becomes a supported
 end-to-end language route.
 
-The [complete Ballista workshop](../projects/ballista/README.md) provides the maintained files, preparation, lifecycle and exact qualification boundaries for these cases.
+The `clients` action in the [Ballista workshop](../projects/ballista/README.md) repeats the read through the DataFrame API, selecting, sorting and limiting to three rows, so SQL and DataFrame calls can be compared on one cluster.
 
 ## Complete worked source
 
-This is a project-only command notebook. Read and edit it in the classroom; run its explicitly labeled commands from the copied owned Docker workshop. The classroom does not execute these service commands.
+The classroom does not execute these service commands. See the [workshop rules](../STUDY-GUIDE.md#workshop-notebooks).
 
 # Language and API boundaries
 
@@ -145,4 +145,4 @@ Do not substitute a local result when a scheduler request fails.
 
 - [Ballista Python interface](https://datafusion.apache.org/ballista/user-guide/python/quickstart.html)
 - [Ballista Rust client](https://datafusion.apache.org/ballista/user-guide/rust.html)
-- [Ballista54.1 crate](https://docs.rs/ballista/54.1.0/ballista/)
+- [Ballista 54.1 crate](https://docs.rs/ballista/54.1.0/ballista/)

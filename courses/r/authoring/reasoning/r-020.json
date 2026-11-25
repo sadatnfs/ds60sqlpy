@@ -42,5 +42,7 @@
       "wrong": "Reporting that the summary broke and attaching the full data. The reviewer cannot share or run it, and nothing says which call changed the shape.",
       "verify": "`dim(m[1, ])` returns NULL, while `dim(m[1, , drop = FALSE])` returns 1 3 in a fresh session."
     }
-  ]
+  ],
+  "run_note": "The starter holds values 10 and 20 with weights 1 and 3, and prints them as a list. Run it and work out the expected weighted mean by hand first: 10 times 1 plus 20 times 3 is 70, divided by a total weight of 4 gives 17.5. Write that number down before coding, so the regression check compares against independent arithmetic.",
+  "checks_note": "The checks pin the input contract (numeric, equal and nonzero lengths, finite values, nonnegative weights with a positive total), the 17.5 result, the same result after scaling weights to 5 and 15, rejection of mismatched lengths, zero total weight, empty inputs and a missing value, and a seeded simulation that repeats exactly within 0 and 1. They do not cover every invalid input a caller could construct."
 }

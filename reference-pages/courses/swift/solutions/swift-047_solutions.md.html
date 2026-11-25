@@ -194,7 +194,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/swift/solutions/swift-047_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="swift-047-explanation-and-comparison">swift-047: explanation and comparison<a class="heading-anchor" href="#swift-047-explanation-and-comparison" aria-label="Link to this section">#</a></h2>
-<p>Attempt the six guide tasks before opening this comparison. The executable reference is <a href="swift-047_solution.swift.html">swift-047_solution.swift</a>. It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.</p>
+<p>Reference program: <a href="swift-047_solution.swift.html">swift-047_solution.swift</a>, covering both examples and the executed answers.</p>
+<p>Attempt the tasks first; see <a href="../STUDY-GUIDE.md.html#comparing-with-the-explanation">comparing with the explanation</a>.</p>
 <h3 id="why-the-two-examples-differ">Why the two examples differ<a class="heading-anchor" href="#why-the-two-examples-differ" aria-label="Link to this section">#</a></h3>
 <p><strong>Keep portable policy independent:</strong> A portable core should not import a platform framework merely to format its basic domain outcome. The same domain summary works without a UI framework.</p>
 <p><strong>Declare a capability rather than guess:</strong> Capability descriptions should follow actual prepared runtime evidence. The Linux capability set does not invent SwiftUI support.</p>
@@ -242,7 +243,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Checking the declared capability set before acting turns a missing platform feature into a clear message rather than a crash or a Run button that does nothing.</p>
 <h4 id="task-6-transfer-and-justify">Task 6: Transfer and justify<a class="heading-anchor" href="#task-6-transfer-and-justify" aria-label="Link to this section">#</a></h4>
 <p>Create a platform support matrix listing compiled, executed and manually inspected surfaces separately.</p>
-<p>No single reference answer exists: several designs can satisfy this transfer task. Build yours from the task 3 answer above (Build JourneyCore on a prepared Linux Swift environment and separately build JourneyApp on macOS) and the mechanism described below, and state one limitation of your choice.</p>
+<p>No single answer exists; extend task 3 using the <a href="../STUDY-GUIDE.md.html#open-transfer-tasks">open transfer routine</a>.</p>
 <h3 id="solution-reasoning">Solution reasoning<a class="heading-anchor" href="#solution-reasoning" aria-label="Link to this section">#</a></h3>
 <p><strong>Approach.</strong> Example A writes <code>summary</code>, a formatter that needs no UI framework, and checks &quot;2/3 complete&quot;. Example B records the capabilities actually prepared on Linux as a set and checks that it contains the portable core but not SwiftUI. The tasks build JourneyCore on Linux and JourneyApp separately on macOS.</p>
 <p><strong>Why it is correct.</strong> <code>summary</code> uses only string interpolation from the standard library, so it compiles unchanged on Linux, macOS and iOS and returns &quot;2/3 complete&quot; for 2 and 3. The capability set holds only the two strings inserted, so <code>contains(&quot;swiftui-linux&quot;)</code> is false. That keeps the support matrix tied to what was actually built and run rather than to what the code appears to allow.</p>
@@ -254,7 +255,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>#if canImport selects compile-time framework availability. #available guards runtime API availability on Apple platforms. Package platform declarations and Xcode deployment settings are related project contracts.</p>
 <p>CanImport proves a module is available to the compiler, not that every API is available at the deployment target. Do not assume Foundation APIs have identical availability everywhere. Keep unsupported surfaces explicit.</p>
 <h3 id="review-before-continuing">Review before continuing<a class="heading-anchor" href="#review-before-continuing" aria-label="Link to this section">#</a></h3>
-<p>Run the reference and confirm that it prints <code>swift-047: passed</code>, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.</p></article>
+<p>Run the reference and confirm it prints <code>swift-047: passed</code>, then rerun the guide&#x27;s counterexample.</p></article>
   </main>
 </body>
 </html>

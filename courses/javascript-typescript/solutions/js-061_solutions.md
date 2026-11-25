@@ -1,6 +1,6 @@
 # js-061: explanatory solutions
 
-Compare after your own attempt or an explicit reveal. The separate .js reference is a complete offline browser program. These explanations discuss the six practice tasks; a visual resemblance alone is not a data or behavior check.
+Compare after your own attempt; the separate `.js` file is the complete reference program.
 
 ## Mechanism review
 
@@ -49,3 +49,7 @@ Identity validation prevents ambiguous link resolution. A visually plausible gra
 Drawing every possible edge can obscure structure. Explain the retained relationships and any information omitted. For hundreds of edges, keep only links above a weight threshold and say how many were dropped. Aggregating nodes by community, then drawing one edge per community pair, is another option. Either way the three-node reference shows the checks to keep: finite positions, resolved links and untouched source data.
 
 **Expected:** Filter or aggregate according to an analytical question.
+
+## After comparison
+
+Load a 20-node synthetic graph, validate its IDs and run a seeded simulation for a fixed number of ticks. Add a control that filters edges by weight, check that removed edges never leave dangling references, and report each node's degree in a table.

@@ -1,6 +1,6 @@
 # r-056: reference reasoning
 
-Use the [complete reference](r-056_reference.R) with the guide's declared inputs and runtime. Every worked example is also a standalone script.
+Run the [complete reference](r-056_reference.R) under the [run rules](../STUDY-GUIDE.md#run-a-chapter).
 
 ## Why the implementation has this shape
 
@@ -108,4 +108,6 @@ The display is diagnostic evidence, not a proof of normal independent errors or 
 
 ## What the checks establish
 
-The reference makes 4 `stopifnot()` checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.
+The checks confirm eight rows with unique ids and coefficients 1 and 2, a residual plot whose y values equal the model residuals, a normal Q-Q layer with eight points, and a fan-shaped fixture whose slope is still 2 while the absolute residuals grow perfectly with the fitted values. They show the plots draw the right numbers; eight residuals cannot prove normality or constant variance.
+
+The reference makes 4 `stopifnot()` checks; see [what a passing run proves](../STUDY-GUIDE.md#what-a-passing-run-proves).

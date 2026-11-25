@@ -464,19 +464,10 @@ seasonal_naive <span class="syntax-operator">=</span> train<span class="syntax-o
 <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">seasonal:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> mean_absolute_error<span class="syntax-punctuation">(</span>test<span class="syntax-punctuation">,</span> seasonal_naive<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <p>Every candidate must use this same 30-day horizon and metric. A more complex model earns its cost only if it improves the relevant evidence reliably.</p>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
-<p><strong>Default Docker classroom:</strong> open <code>python-50</code> for its guide, notebook and capability notice. The default Core does not include the <code>ml</code> extra, so the complete legacy notebook is unavailable there until that app environment is deliberately prepared. Pressing Run or choosing a notebook kernel does not install packages.</p>
-<p><strong>Prepared browser alternative:</strong> use the <a href="../reference-pages/courses/ml-engineering/guides/mle-002.md.html">ML engineering time boundaries course</a> in its declared runtime. Its supported examples have their own package and execution contract; this does not qualify every legacy optional extension.</p>
-<p><strong>Explicit legacy preparation:</strong> retain the contributor extras in <a href="../reference-pages/CONTRIBUTING.md.html">CONTRIBUTING</a> and add <code>ml</code> only when needed. See <a href="../reference-pages/docs/dependency-profiles.md.html">dependency profiles</a> and <a href="../reference-pages/docs/docker-profiles.md.html">Docker app package options</a> for deliberate preparation. A host notebook environment and a Docker app image are separate. Do not install packages inside a learner pad.</p>
+<p><strong>Default Docker classroom:</strong> ARIMA fitting in <code>python-50</code> relies on the <code>ml</code> extra, which the default Core does not include. Prepare <code>ml</code> with <a href="../reference-pages/CONTRIBUTING.md.html">CONTRIBUTING</a> for local forecasting experiments; a host notebook environment and a Docker app image are separate.</p>
+<p><strong>Prepared browser alternative:</strong> Forecasts leak when features use future knowledge, and the <a href="../reference-pages/courses/ml-engineering/guides/mle-002.md.html">event time and label maturity chapter</a> practices that boundary in a prepared runtime.</p>
 <p>The full starter needs pmdarima. The bounded seasonal-naive and lag examples use the prepared data packages only. The reference distinguishes rolling one-step evaluation from a forecast made at one fixed origin.</p>
-<p><strong>Optional native notebook/editor route:</strong> the instructions below describe separately prepared host tools. They are useful alternatives, not prerequisites for opening this lesson in the Docker classroom.</p>
-<ol>
-<li>Open the Day 50 learner notebook from this guide&#x27;s <strong>Next step</strong> section in VS Code or JupyterLab.</li>
-<li>Select the <code>Python (ds60sqlpy)</code> kernel. Start at the top and use <strong>Run All</strong> only after making the written predictions; the default data examples are offline once the declared packages are prepared. Optional services and model assets have separate requirements.</li>
-<li>Keep experiments in new scratch cells. Do not edit the official solution while attempting the numbered practice.</li>
-<li>Restart the kernel and run from the first cell before calling the lesson complete. A clean run catches hidden state and stale variables.</li>
-</ol>
-<p>Linux, macOS, or Ubuntu in Windows WSL 2:</p>
-<pre class="highlighted-code"><code class="language-bash">.venv/bin/python -m jupyter lab</code></pre>
+<p>The <a href="../reference-pages/python/STUDY-GUIDE.md.html">Python study guide</a> covers the notebook route and preparing optional extras.</p>
 <h4 id="guide--concept-deep-dive-forecast-horizons-temporal-backtesting-naive-baselines-and-leakage-safe-lags">Concept deep dive: forecast horizons, temporal backtesting, naive baselines, and leakage-safe lags<a class="heading-anchor" href="#guide--concept-deep-dive-forecast-horizons-temporal-backtesting-naive-baselines-and-leakage-safe-lags" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--the-mental-model">The mental model<a class="heading-anchor" href="#guide--the-mental-model" aria-label="Link to this section">#</a></h5>
 <p>Time-series prediction preserves order. A forecast made at an <strong>origin</strong> may use only information available by that origin and predicts a stated horizon. Random train/test splitting leaks future patterns and produces an evaluation that no real forecast can reproduce.</p>
@@ -488,7 +479,6 @@ seasonal_naive <span class="syntax-operator">=</span> train<span class="syntax-o
 <li><strong>rolling-origin loop:</strong> repeats fit/predict at increasing origins while keeping every target strictly in the future.</li>
 </ul>
 <h5 id="guide--focused-example-a-construct-a-seasonal-naive-forecast-on-matching-timestamps">Focused example A: construct a seasonal-naive forecast on matching timestamps<a class="heading-anchor" href="#guide--focused-example-a-construct-a-seasonal-naive-forecast-on-matching-timestamps" aria-label="Link to this section">#</a></h5>
-<p>Before running the example, predict the shape, type, or direction of the result. Write the prediction down so that a surprise becomes evidence rather than something to overlook.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> numpy <span class="syntax-keyword">as</span> np
 <span class="syntax-keyword">import</span> pandas <span class="syntax-keyword">as</span> pd
 <span class="syntax-keyword">from</span> sklearn.metrics <span class="syntax-keyword">import</span> mean_absolute_error
@@ -580,7 +570,6 @@ features <span class="syntax-operator">=</span> pd<span class="syntax-operator">
 <p>The reference solution extends the lesson with <code>TimeSeriesSplit</code>, shifted rolling features, and a seasonal-naive evaluation. It uses a different synthetic weekly series to reinforce the method rather than mirror the notebook.</p>
 <h5 id="guide--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#guide--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
 <p>Evaluate forecasts with forward-only information, multiple origins, meaningful baselines, and timestamp/data-quality checks before adding model complexity.</p>
-<p>Predict or plan before you run code. Use the hint only after an honest attempt, and record the evidence that would prove your result correct.</p>
 <ol start="4">
 <li><strong>Rolling-origin evaluation:</strong> Implement at least four expanding-window forecast origins with a fixed horizon. Compare seasonal-naive and one candidate model using per-origin and aggregate MAE. <strong>Progressive hint:</strong> At each origin, fit using timestamps at or before that origin and score only the next horizon. Preserve origin in the result table.</li>
 </ol>
@@ -647,7 +636,7 @@ features <span class="syntax-operator">=</span> pd<span class="syntax-operator">
 <li>Continue to <a href="python-51.html#guide">Day 51; Target Encoding</a>.</li>
 </ul>
 <h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
-<p>The lesson is complete without an AI assistant. If you want optional coaching, copy this prompt into the AI tutor while the repository root is open:</p>
+<p>The lesson is complete without AI. For optional coaching, copy this prompt with the repository root open:</p>
 <pre class="highlighted-code"><code class="language-text">Tutor me through `python-50` (Day 50: Time-Series Modeling and Forecast Evaluation).
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
@@ -1099,7 +1088,7 @@ plt<span class="syntax-operator">.</span>show<span class="syntax-punctuation">(<
 </ul>
 <hr>
 <h4 id="solution-1--solution-reasoning-lens">Solution reasoning lens<a class="heading-anchor" href="#solution-1--solution-reasoning-lens" aria-label="Link to this section">#</a></h4>
-<p>A strong solution is not merely code that produces one plausible output. It establishes a chain from input contract to operation to verification:</p>
+<p>Each decision below links an input contract to an operation and its evidence:</p>
 <ol>
 <li><strong><code>series.shift(lag)</code>:</strong> aligns a past value as a current-row feature; positive lags must precede any rolling summary.</li>
 <li><strong><code>train.iloc[:-horizon]</code> / <code>test.iloc[-horizon:]</code>:</strong> creates a simple chronological boundary with a declared horizon.</li>
@@ -1111,44 +1100,36 @@ plt<span class="syntax-operator">.</span>show<span class="syntax-punctuation">(<
 <p><strong>Trade-off:</strong> Longer training windows provide more data but may include stale regimes; shorter windows adapt faster with higher variance.</p>
 <p><strong>Edge case to test:</strong> Duplicate/missing timestamps, time zones, daylight-saving changes, insufficient seasonal history, and exogenous data publication delays need policies.</p>
 <p><strong>Evidence of correctness:</strong> Assert timestamp ordering/alignment and feature-source cutoffs, beat last/seasonal naive on identical origins, and report errors by origin plus uncertainty.</p>
-<p>When comparing your attempt with the reference, explain which of these decisions your code made explicitly. If the reference makes a different choice, compare the contracts and evidence before deciding that one version is universally better.</p>
 <h4 id="solution-1--exercise-by-exercise-reasoning-map">Exercise-by-exercise reasoning map<a class="heading-anchor" href="#solution-1--exercise-by-exercise-reasoning-map" aria-label="Link to this section">#</a></h4>
-<p>This map connects every learner prompt to a reasoning path. Read the explanation before copying code: the goal is to understand the assumptions, the evidence that validates the result, and the edge cases that can make an apparently correct implementation fail.</p>
 <h5 id="solution-1--exercise-1-original-lesson-practice">Exercise 1: Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Fit <code>auto_arima</code> with <code>m=7</code> and <code>m=30</code>; compare mean absolute error on the same test window.</p>
 <p><strong>How to reason about it:</strong> Compare seasonal periods on the identical training window and forecast horizon. Bound auto-ARIMA search, report runtime, and remember that the best period may change across forecast origins.</p>
-<p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
 <p><strong>Verify:</strong> Fit m=7 and m=30 using training observations only, forecast the identical timestamped test window, and print MAE plus errors by horizon for both; report convergence/skip status and selected seasonal period.</p>
 <h5 id="solution-1--exercise-2-original-lesson-practice">Exercise 2: Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-2-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Create last-value and 30-day seasonal-naive forecasts and compare them with ARIMA.</p>
 <p><strong>How to reason about it:</strong> Last-value and seasonal-naive forecasts are required baselines. Build them only from information available at each origin and align prediction indices exactly with the test targets.</p>
-<p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
 <p><strong>Verify:</strong> On the same forecast origins, print MAE for last-value, 30-day seasonal-naive, and ARIMA; assert each forecast at time t uses only observations before t and include a metric table keyed by model.</p>
 <h5 id="solution-1--exercise-3-original-lesson-practice">Exercise 3: Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-3-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Difference the training series and inspect autocorrelation without using test-period observations.</p>
 <p><strong>How to reason about it:</strong> Differencing and autocorrelation diagnostics use training data only. Inspect stationarity assumptions and avoid differencing mechanically without understanding what must be inverted for forecasts.</p>
-<p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
 <p><strong>Verify:</strong> Difference only the training series, print its length/NaN handling and selected autocorrelations with confidence bounds, and assert no test-period timestamp entered the transform or lag calculation.</p>
 <h5 id="solution-1--exercise-4-rolling-origin-evaluation">Exercise 4: Rolling-origin evaluation<a class="heading-anchor" href="#solution-1--exercise-4-rolling-origin-evaluation" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Implement at least four expanding-window forecast origins with a fixed horizon. Compare seasonal-naive and one candidate model using per-origin and aggregate MAE.</p>
 <p><strong>Reasoning before implementation:</strong> At each origin, fit using timestamps at or before that origin and score only the next horizon. Preserve origin in the result table.</p>
 <p>One holdout period can favor a model by chance or season. A tidy result table should contain model, origin, horizon step, actual, prediction, and absolute error. Aggregate by model and also inspect variation across origins.</p>
 <p>Never fit one candidate on the full series and slice its in-sample predictions for earlier origins. That uses future observations and invalidates the backtest.</p>
-<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
 <p><strong>Verify:</strong> Rolling-origin evaluation; print at least four forecast origins with train-end, horizon timestamps, seasonal-naive MAE, candidate MAE, and aggregate weighted MAE; assert every prediction uses data strictly before its origin.</p>
 <h5 id="solution-1--exercise-5-prediction-intervals">Exercise 5: Prediction intervals<a class="heading-anchor" href="#solution-1--exercise-5-prediction-intervals" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Produce forecast intervals and evaluate empirical coverage and width across rolling origins. Explain why a narrow interval is not useful when it misses too often.</p>
 <p><strong>Reasoning before implementation:</strong> For a nominal 90% interval, count actuals between lower and upper bounds and report support plus average width by horizon.</p>
 <p>Coverage and sharpness must be read together. A trivially wide interval can cover nearly everything, while an overconfident narrow interval misses often. Report coverage by horizon because uncertainty usually grows farther ahead.</p>
 <p>Model-based intervals rely on residual/distribution assumptions. Residual bootstrap or conformal methods offer alternatives, but still require forward-only calibration data and exchangeability assumptions.</p>
-<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
 <p><strong>Verify:</strong> Prediction intervals; print interval level, per-origin coverage indicator, aggregate empirical coverage, and mean width; compare at least two interval widths/levels and flag severe undercoverage.</p>
 <h5 id="solution-1--exercise-6-timestamp-data-quality-debugging">Exercise 6: Timestamp/data-quality debugging<a class="heading-anchor" href="#solution-1--exercise-6-timestamp-data-quality-debugging" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Validate a series containing duplicate timestamps, missing periods, an irregular interval, and a timezone transition before modeling.</p>
 <p><strong>Reasoning before implementation:</strong> Sort, assert monotonic unique timestamps, infer/declare frequency, and decide aggregation or imputation from domain meaning.</p>
 <p>Do not let a library silently reinterpret irregular observations as regular. Create an expected date range, compare it with observed timestamps, and report duplicates/missing periods. Aggregate duplicates only with a documented rule.</p>
 <p>Timezone-aware series should be normalized deliberately, often to UTC for storage while retaining local-calendar features separately. Imputation is a fitted or policy step and must not read future values in a forecasting evaluation.</p>
-<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
 <p><strong>Verify:</strong> Timestamp/data-quality debugging; produce a validation report listing duplicate timestamps, exact missing periods, irregular gaps, timezone/ambiguous transitions, frequency, and chosen repair; assert the cleaned index is unique, ordered, and regular before modeling.</p></div>
       </section>
 
@@ -1345,7 +1326,7 @@ plt<span class="syntax-operator">.</span>show<span class="syntax-punctuation">(<
 </ul>
 <hr>
 <h4 id="solution-2--cell-9--solution-reasoning-lens">Solution reasoning lens<a class="heading-anchor" href="#solution-2--cell-9--solution-reasoning-lens" aria-label="Link to this section">#</a></h4>
-<p>A strong solution is not merely code that produces one plausible output. It establishes a chain from input contract to operation to verification:</p>
+<p>Each decision below links an input contract to an operation and its evidence:</p>
 <ol>
 <li><strong><code>series.shift(lag)</code>:</strong> aligns a past value as a current-row feature; positive lags must precede any rolling summary.</li>
 <li><strong><code>train.iloc[:-horizon]</code> / <code>test.iloc[-horizon:]</code>:</strong> creates a simple chronological boundary with a declared horizon.</li>
@@ -1357,44 +1338,36 @@ plt<span class="syntax-operator">.</span>show<span class="syntax-punctuation">(<
 <p><strong>Trade-off:</strong> Longer training windows provide more data but may include stale regimes; shorter windows adapt faster with higher variance.</p>
 <p><strong>Edge case to test:</strong> Duplicate/missing timestamps, time zones, daylight-saving changes, insufficient seasonal history, and exogenous data publication delays need policies.</p>
 <p><strong>Evidence of correctness:</strong> Assert timestamp ordering/alignment and feature-source cutoffs, beat last/seasonal naive on identical origins, and report errors by origin plus uncertainty.</p>
-<p>When comparing your attempt with the reference, explain which of these decisions your code made explicitly. If the reference makes a different choice, compare the contracts and evidence before deciding that one version is universally better.</p>
 <h4 id="solution-2--cell-9--exercise-by-exercise-reasoning-map">Exercise-by-exercise reasoning map<a class="heading-anchor" href="#solution-2--cell-9--exercise-by-exercise-reasoning-map" aria-label="Link to this section">#</a></h4>
-<p>This map connects every learner prompt to a reasoning path. Read the explanation before copying code: the goal is to understand the assumptions, the evidence that validates the result, and the edge cases that can make an apparently correct implementation fail.</p>
 <h5 id="solution-2--cell-9--exercise-1-original-lesson-practice">Exercise 1: Original lesson practice<a class="heading-anchor" href="#solution-2--cell-9--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Fit <code>auto_arima</code> with <code>m=7</code> and <code>m=30</code>; compare mean absolute error on the same test window.</p>
 <p><strong>How to reason about it:</strong> Compare seasonal periods on the identical training window and forecast horizon. Bound auto-ARIMA search, report runtime, and remember that the best period may change across forecast origins.</p>
-<p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
 <p><strong>Verify:</strong> Fit m=7 and m=30 using training observations only, forecast the identical timestamped test window, and print MAE plus errors by horizon for both; report convergence/skip status and selected seasonal period.</p>
 <h5 id="solution-2--cell-9--exercise-2-original-lesson-practice">Exercise 2: Original lesson practice<a class="heading-anchor" href="#solution-2--cell-9--exercise-2-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Create last-value and 30-day seasonal-naive forecasts and compare them with ARIMA.</p>
 <p><strong>How to reason about it:</strong> Last-value and seasonal-naive forecasts are required baselines. Build them only from information available at each origin and align prediction indices exactly with the test targets.</p>
-<p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
 <p><strong>Verify:</strong> On the same forecast origins, print MAE for last-value, 30-day seasonal-naive, and ARIMA; assert each forecast at time t uses only observations before t and include a metric table keyed by model.</p>
 <h5 id="solution-2--cell-9--exercise-3-original-lesson-practice">Exercise 3: Original lesson practice<a class="heading-anchor" href="#solution-2--cell-9--exercise-3-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Difference the training series and inspect autocorrelation without using test-period observations.</p>
 <p><strong>How to reason about it:</strong> Differencing and autocorrelation diagnostics use training data only. Inspect stationarity assumptions and avoid differencing mechanically without understanding what must be inverted for forecasts.</p>
-<p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
 <p><strong>Verify:</strong> Difference only the training series, print its length/NaN handling and selected autocorrelations with confidence bounds, and assert no test-period timestamp entered the transform or lag calculation.</p>
 <h5 id="solution-2--cell-9--exercise-4-rolling-origin-evaluation">Exercise 4: Rolling-origin evaluation<a class="heading-anchor" href="#solution-2--cell-9--exercise-4-rolling-origin-evaluation" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Implement at least four expanding-window forecast origins with a fixed horizon. Compare seasonal-naive and one candidate model using per-origin and aggregate MAE.</p>
 <p><strong>Reasoning before implementation:</strong> At each origin, fit using timestamps at or before that origin and score only the next horizon. Preserve origin in the result table.</p>
 <p>One holdout period can favor a model by chance or season. A tidy result table should contain model, origin, horizon step, actual, prediction, and absolute error. Aggregate by model and also inspect variation across origins.</p>
 <p>Never fit one candidate on the full series and slice its in-sample predictions for earlier origins. That uses future observations and invalidates the backtest.</p>
-<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
 <p><strong>Verify:</strong> Rolling-origin evaluation; print at least four forecast origins with train-end, horizon timestamps, seasonal-naive MAE, candidate MAE, and aggregate weighted MAE; assert every prediction uses data strictly before its origin.</p>
 <h5 id="solution-2--cell-9--exercise-5-prediction-intervals">Exercise 5: Prediction intervals<a class="heading-anchor" href="#solution-2--cell-9--exercise-5-prediction-intervals" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Produce forecast intervals and evaluate empirical coverage and width across rolling origins. Explain why a narrow interval is not useful when it misses too often.</p>
 <p><strong>Reasoning before implementation:</strong> For a nominal 90% interval, count actuals between lower and upper bounds and report support plus average width by horizon.</p>
 <p>Coverage and sharpness must be read together. A trivially wide interval can cover nearly everything, while an overconfident narrow interval misses often. Report coverage by horizon because uncertainty usually grows farther ahead.</p>
 <p>Model-based intervals rely on residual/distribution assumptions. Residual bootstrap or conformal methods offer alternatives, but still require forward-only calibration data and exchangeability assumptions.</p>
-<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
 <p><strong>Verify:</strong> Prediction intervals; print interval level, per-origin coverage indicator, aggregate empirical coverage, and mean width; compare at least two interval widths/levels and flag severe undercoverage.</p>
 <h5 id="solution-2--cell-9--exercise-6-timestamp-data-quality-debugging">Exercise 6: Timestamp/data-quality debugging<a class="heading-anchor" href="#solution-2--cell-9--exercise-6-timestamp-data-quality-debugging" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Validate a series containing duplicate timestamps, missing periods, an irregular interval, and a timezone transition before modeling.</p>
 <p><strong>Reasoning before implementation:</strong> Sort, assert monotonic unique timestamps, infer/declare frequency, and decide aggregation or imputation from domain meaning.</p>
 <p>Do not let a library silently reinterpret irregular observations as regular. Create an expected date range, compare it with observed timestamps, and report duplicates/missing periods. Aggregate duplicates only with a documented rule.</p>
 <p>Timezone-aware series should be normalized deliberately, often to UTC for storage while retaining local-calendar features separately. Imputation is a fitted or policy step and must not read future values in a forecasting evaluation.</p>
-<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
 <p><strong>Verify:</strong> Timestamp/data-quality debugging; produce a validation report listing duplicate timestamps, exact missing periods, irregular gaps, timezone/ambiguous transitions, frequency, and chosen repair; assert the cleaned index is unique, ordered, and regular before modeling.</p></article></div>
       </section>
 

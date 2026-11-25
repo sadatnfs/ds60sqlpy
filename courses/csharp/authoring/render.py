@@ -18,6 +18,7 @@ if str(HERE) not in sys.path:
     sys.path.insert(0, str(HERE))
 
 from answers import ANSWERS  # noqa: E402
+from teaching import TEACHING  # noqa: E402
 from outcomes import MINUTES, OUTCOMES  # noqa: E402
 
 TASK_NAMES = (
@@ -165,8 +166,40 @@ def answer_text(number, task, spec, identity):
         3: f"No reference answer has been written for this task yet. It needs a project or platform outside the single-file pad, so record your own build and run evidence and judge it against the vocabulary entry **{spec['terms'][0][0]}** and the lesson notes.",
         4: f"No reference answer has been written for this task yet. The wrong assumptions to look for are this lesson's pitfalls: {spec['pitfalls']}",
         5: f"No reference answer has been written for this task yet. Write the expected value or documented rejection for each boundary before running it, and compare with the checks in Example A ({a[0]}) and Example B ({b[0]}).",
-        6: f"No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **{spec['terms'][0][0]}**, and state one limitation of your choice.",
+        6: "No single answer exists; extend task 3 using the [open transfer routine](../STUDY-GUIDE.md#open-transfer-tasks).",
     }[task]
+
+
+TEACHING_FIELDS = {
+    "run": 30,
+    "trace_a": 50,
+    "trace_b": 50,
+    "regression": 40,
+    "selfcheck": 40,
+    "docs": 12,
+}
+
+
+def teaching_text(number, identity, openings):
+    """Lesson-specific teaching prose, validated so no field becomes shared template text."""
+    entry = TEACHING.get(number)
+    if entry is None or set(entry) != set(TEACHING_FIELDS):
+        raise ValueError(f"{identity} needs teaching prose with exactly {sorted(TEACHING_FIELDS)}")
+    result = {}
+    for key, minimum in TEACHING_FIELDS.items():
+        text = " ".join(entry[key].split())
+        if len(text.split()) < minimum:
+            raise ValueError(f"{identity} teaching '{key}' needs at least {minimum} words")
+        if "\u2014" in text or "\u2013" in text:
+            raise ValueError(f"{identity} teaching '{key}' contains an em or en dash")
+        opening = " ".join(text.lower().split()[:6])
+        if opening in openings:
+            raise ValueError(
+                f"{identity} teaching '{key}' reuses the opening of {openings[opening]}"
+            )
+        openings[opening] = f"{identity} {key}"
+        result[key] = text
+    return result
 
 
 def write(path, value):
@@ -179,6 +212,7 @@ def write(path, value):
 def build():
     plan = []
     admitted = []
+    openings = {}
     for number, spec in enumerate(SPECS, 1):
         identity = f"{SUBJECT}-{number:03d}"
         level = "beginner" if number <= 16 else "intermediate" if number <= 32 else "advanced"
@@ -223,23 +257,13 @@ def build():
                 "verification_id": None,
             }
         )
-        run = (
-            "The Linux Docker classroom compiles your saved pad as `Program.cs` in its fixed .NET 10 project. "
-            "C# 14 is the matching language generation. This route uses the prepared framework libraries; "
-            "it does not accept arbitrary project files, NuGet packages, command arguments or interactive input. "
-            "The explicit `Program.Main` entrypoint makes compilation and execution visible. `Check` throws "
-            "on a false condition in every build configuration, unlike conditional debugging assertions."
-            if SUBJECT == "csharp"
-            else "The Linux Docker classroom compiles the saved pad as `main.swift` with Swift 6 language checking. "
-            "An explicit `@main` type contains `static func main() async throws`; the fixed compiler uses `-parse-as-library -swift-version 6`. The examples use the standard library and portable Foundation. `precondition` makes a violated "
-            "invariant fail the process. The fixed pad accepts one source file, without arbitrary command "
-            "arguments, interactive input or dependency installation. SwiftUI, UIKit, Apple simulators and "
-            "application signing belong to the separately prepared macOS/Xcode project labs, never the Linux pad."
-        )
+        teach = teaching_text(number, identity, openings)
         terms = "\n\n".join(f"**{term}:** {definition}" for term, definition in spec["terms"])
         examples = "\n\n".join(
-            f"### Example {label}: {example[0]}\n\n{example[3]}\n\n```{LANGUAGE}\n{program(spec, [example], identity).rstrip()}\n```\n\n**Observe:** {example[2]}"
-            for label, example in zip("AB", (spec["a"], spec["b"]), strict=True)
+            f"### Example {label}: {example[0]}\n\n{example[3]}\n\n```{LANGUAGE}\n{program(spec, [example], identity).rstrip()}\n```\n\n**Observe:** {example[2]}\n\n**Trace.** {trace}"
+            for label, example, trace in zip(
+                "AB", (spec["a"], spec["b"]), (teach["trace_a"], teach["trace_b"]), strict=True
+            )
         )
         exercises = "\n\n".join(
             f"{i}. **{name}.** {task}"
@@ -283,9 +307,9 @@ mechanism and all six task outcomes, not merely copying the success marker."""
 
 ## How to run this lesson
 
-{run}
+{teach["run"]}
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Compile contract, starter stop and success marker: [running a lesson](../STUDY-GUIDE.md#running-a-lesson).
 
 {spec["notes"]}
 
@@ -293,7 +317,7 @@ Start with the answer-free learner artifact in your saved classroom pad. It deli
 
 {spec["anatomy"]}
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+Each example ends with a trace; method: [tracing a program](../STUDY-GUIDE.md#tracing-a-program).
 
 ## Worked example / walkthrough
 
@@ -303,13 +327,15 @@ Read the operations in dependency order. Record which values exist before each l
 
 {exercises}
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Log each task in the [evidence table](../STUDY-GUIDE.md#recording-exercise-evidence) before opening the explanation.
 
 ## Common pitfalls and diagnosis
 
 {spec["pitfalls"]}
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+{teach["regression"]}
+
+Repair routine: [building a regression case](../STUDY-GUIDE.md#building-a-regression-case).
 
 ## Progressive hints
 
@@ -319,11 +345,15 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 ## Self-check and next step
 
-Explain {", ".join(term[0] for term in spec["terms"])} without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+{teach["selfcheck"]}
+
+Then follow the general [self-check routine](../STUDY-GUIDE.md#self-check-routine) and save your pad.
 
 ## Sources and execution boundary
 
-[Official language or framework documentation]({official}). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+[Documentation]({official}): {teach["docs"]}
+
+Provenance and limits: [sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 
@@ -351,7 +381,9 @@ Explain {", ".join(term[0] for term in spec["terms"])} without reading the defin
         )
         explanation = f"""# {identity}: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [{identity}_solution.{EXT}]({identity}_solution.{EXT}). It runs both worked examples{" and the reference answers below" if answered else ""}, and its assertions are always active under the prepared classroom compile settings.
+Reference program: [{identity}_solution.{EXT}]({identity}_solution.{EXT}), covering both examples{" and the executed answers" if answered else ""}.
+
+Attempt the tasks first; see [comparing with the explanation](../STUDY-GUIDE.md#comparing-with-the-explanation).
 
 ## Why the two examples differ
 
@@ -373,7 +405,7 @@ Attempt the six guide tasks before opening this comparison. The executable refer
 
 ## Review before continuing
 
-Run the reference and confirm that it prints `{identity}: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.
+Run the reference and confirm it prints `{identity}: passed`, then rerun the guide's counterexample.
 """
         write(BASE / "solutions" / f"{identity}_solutions.md", explanation)
     title = (

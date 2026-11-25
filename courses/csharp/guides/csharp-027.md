@@ -24,9 +24,9 @@ A duration measures elapsed time; a calendar rule such as next month follows cal
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles your saved pad as `Program.cs` in its fixed .NET 10 project. C# 14 is the matching language generation. This route uses the prepared framework libraries; it does not accept arbitrary project files, NuGet packages, command arguments or interactive input. The explicit `Program.Main` entrypoint makes compilation and execution visible. `Check` throws on a false condition in every build configuration, unlike conditional debugging assertions.
+Both examples pass `CultureInfo.InvariantCulture` and use ISO 8601 text with explicit offsets, so the results do not depend on the machine's time zone or language. Example B builds its timestamps from fixed numbers instead of reading the clock, which keeps every run identical.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Compile contract, starter stop and success marker: [running a lesson](../STUDY-GUIDE.md#running-a-lesson).
 
 
 
@@ -34,7 +34,7 @@ Start with the answer-free learner artifact in your saved classroom pad. It deli
 
 `DateTimeOffset.Parse` with an explicit round-trip string creates a known instant. `ToUniversalTime` changes its display offset while retaining the instant. Subtraction produces TimeSpan. InvariantCulture avoids environment-dependent machine-data parsing.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+Each example ends with a trace; method: [tracing a program](../STUDY-GUIDE.md#tracing-a-program).
 
 ## Worked example / walkthrough
 
@@ -82,6 +82,8 @@ internal static class Program {
 
 **Observe:** The values denote the same instant despite different offsets.
 
+**Trace.** Noon at +02:00 and 10:00 at Z (UTC) name the same moment, because subtracting two hours from noon gives 10:00 UTC. `DateTimeOffset` equality compares the UTC instants, so `a == b` is true. The offsets themselves differ, so the second check passes. `a.EqualsExact(b)` compares offsets too and returns false, and the local clock values, 12:00 and 10:00, differ.
+
 ### Example B: Measure a fixed duration
 
 A fixed fixture keeps evidence independent of the host clock and locale.
@@ -127,6 +129,8 @@ internal static class Program {
 
 **Observe:** The elapsed duration is 90 minutes and the timestamp round-trips.
 
+**Trace.** `start` is midnight on January 1, 2025, at offset zero. `AddMinutes(90)` returns a new value 90 minutes later; `DateTimeOffset` is immutable. Subtracting gives a `TimeSpan` whose `TotalMinutes` is 90. The round-trip O format writes the full precision and offset, and parsing that text recovers an equal instant, with no culture-specific separators involved.
+
 ## Exercises
 
 1. **Predict and explain.** Explain why the two offset timestamps compare equal.
@@ -141,13 +145,15 @@ internal static class Program {
 
 6. **Transfer and justify.** Design storage and display policies for appointments in a named time zone.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Log each task in the [evidence table](../STUDY-GUIDE.md#recording-exercise-evidence) before opening the explanation.
 
 ## Common pitfalls and diagnosis
 
 DateTime kind and unspecified local values can introduce ambiguity. Daylight-saving transitions can produce invalid or repeated local times. Use elapsed-time clocks for performance measurement, not wall-clock timestamps.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+For task 5, an interval from 23:30 to 00:15 the next day still subtracts to 45 minutes, because the values carry their dates. Reversing the operands yields a negative `TimeSpan` rather than an error, so an end-before-start rule must be checked explicitly. For task 2, moving one instant by a minute makes the equality false.
+
+Repair routine: [building a regression case](../STUDY-GUIDE.md#building-a-regression-case).
 
 ## Progressive hints
 
@@ -157,11 +163,15 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 ## Self-check and next step
 
-Explain Instant, Offset, Duration without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+Explain why `a == b` is true while `a.EqualsExact(b)` is false. State what `end - start` returns when end is earlier than start. For task 6, decide what you store for a recurring appointment in a named time zone and what you compute only when you display it.
+
+Then follow the general [self-check routine](../STUDY-GUIDE.md#self-check-routine) and save your pad.
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://learn.microsoft.com/en-us/dotnet/csharp/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+[Documentation](https://learn.microsoft.com/en-us/dotnet/csharp/): The .NET guide to dates and times compares `DateTime`, `DateTimeOffset` and `TimeZoneInfo` and explains round-trip formats.
+
+Provenance and limits: [sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

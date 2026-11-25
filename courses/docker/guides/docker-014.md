@@ -32,11 +32,9 @@ The request chain is host browser to published host loopback port to app listene
 
 ## How to use this lesson
 
-The classroom displays this guide and saves your worksheet, `courses/docker/lessons/docker-014.md`. Its Run button does not control your Docker engine. Docker engine access is powerful host access, so the classroom deliberately receives no engine socket. Work through the supplied examples without starting anything, then use the optional host lab only in your own disposable project. Reading a command, parsing YAML and actually running the project are different forms of evidence.
+The classroom saves `courses/docker/lessons/docker-014.md` and holds no engine socket ([host-lab setup](../STUDY-GUIDE.md#host-lab-setup)).
 
-Use Bash in Linux, macOS Terminal, or Ubuntu under WSL 2 on Windows. The supported engine runs Linux containers. The maintained fixture is `courses/docker/fixtures/compose-lab/`; its README explains copying it into a new ignored learner directory, checking the engine, building locally with visible logs, and using the fixed project name `ds60-docker-study`. The fixture uses port 18080 on host loopback. Stop if that project name or port belongs to unrelated work; choose a new project name consistently in your own copy. Never paste a command against a remote Docker context simply because it is currently selected.
-
-For Dockerfile examples, create a file named `Dockerfile` in a scratch project. YAML snippets describe a fragment unless explicitly called a complete file. Text transcripts are synthetic illustrations, not claims about your machine. Do not substitute a real password, token or private registry into a checked-in example. **How to use the lessons** in the [subject README](../README.md) collects these rules in one place.
+**Host lab.** Rehearse the capstone handoff on a second copy so your main counter stays intact. Copy the fixture to `.learning/docker-study-rehearsal` with the same guard used for the first copy, change only the host side of the port to `127.0.0.1:18081`, and use `-p ds60-docker-study-rehearsal` in every command. Run validation, build, `up -d --wait`, one root request on port 18081 and two increments, then a forced recreation and a second counter read. Read the rehearsal as a beginner would and mark each step where you relied on something not written down. When the rehearsal is finished, `docker compose -p ds60-docker-study-rehearsal down -v` removes its container, network and volume. That reset is deliberate because the volume belongs to a scratch project; the main project and its volume are untouched.
 
 ## Worked example / walkthrough
 
@@ -67,7 +65,7 @@ docker compose -p ds60-docker-study down
 
 ## Six progressive exercises
 
-For each exercise, name the object involved and the phase of its lifetime before changing anything, then vary only the condition the task names. Exercises that ask you to predict, explain, compare or diagnose keep their answers in the solutions file; the others show the evidence to look for.
+Answer-type prompts keep their answers in the solutions file ([exercise rules](../STUDY-GUIDE.md#exercise-rules)).
 
 ### Exercise 1: Predict every resource the project creates.
 
@@ -107,13 +105,19 @@ For each exercise, name the object involved and the phase of its lifetime before
 
 Editing the maintained fixture instead of a learner copy. Treating a successful build as proof that the app serves the right response. Removing the volume when only the container needed replacing.
 
-Exercise 4 is this chapter's boundary case: Introduce and repair one wrong host port in a scratch model. Its expected observation is: Explain the first failing network hop and restore the original mapping. Use it to avoid treating a successful command as proof of the wrong claim. Change only the host side of one published port in a scratch copy, record the first failing request, then restore the mapping and confirm the original request succeeds again. Preserve the original failure and the exact changed field before retrying. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
+Exercise 4 is this chapter's boundary case: Introduce and repair one wrong host port in a scratch model. Its expected observation is: Explain the first failing network hop and restore the original mapping. Change only the host side of one published port in a scratch copy, record the first failing request, then restore the mapping and confirm the original request succeeds again.
+
+A capstone trap is evidence that cannot fail. If the counter reads 0 before a recreation and 0 after it, the record is consistent with persistence and equally consistent with a fresh empty volume, so it proves nothing. Make the test able to fail: increment to a distinctive value such as 3 before replacing the container, and write down the exact JSON. The same rule applies to the message check. Change the message to a phrase that could not appear by accident, such as one containing today's date, so a stale container returning the default text is caught instead of being read as success.
+
+Never trade a safety control for a passing example ([safety rules](../STUDY-GUIDE.md#safety-rules)).
 
 ## Retrieval, transfer and next steps
 
-Close the explanations first. Recall the container IDs before and after recreation and what their difference proves about replacement. Then reconstruct worked example 2 (Prove replacement and stop cleanly) with one different value, predict what changes, and name which of image rebuild, container replacement, persistent data and evidence record the change touches.
+**Retrieval.** Recall the container IDs before and after recreation and what their difference proves about replacement.
 
-When a host session ends, run `docker compose -p ds60-docker-study down` from your fixture copy. It removes the project's containers and network but keeps named volumes; deleting a volume is a separate, deliberate reset described in the fixture README.
+**Transfer case.** A beginner follows your handoff, runs `docker compose -p ds60-docker-study up -d` without `--wait`, immediately requests `http://127.0.0.1:18080/`, and reports `connection refused`. What do you check first, and what result would point to a real fault?
+
+Then run the [retrieval loop](../STUDY-GUIDE.md#retrieval-and-cleanup) and end any host session with its cleanup.
 
 ## Primary references
 

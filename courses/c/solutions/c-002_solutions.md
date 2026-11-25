@@ -1,6 +1,8 @@
 # c-002: explained solutions
 
-Compare after an attempt or explicit reveal. The complete executable reference, `c-002_solution.c`, implements all six cases, from the "compare integer and floating division" case to the "transfer negative division" case, in one `main.c`.
+`c-002_solution.c` assembles the "compare integer and floating division" case through the "transfer negative division" case in one `main.c`.
+
+Compare only after an attempt: [Compare and transfer](../STUDY-GUIDE.md#compare-and-transfer).
 
 ## Mechanism and assumptions
 
@@ -10,7 +12,7 @@ sizeof reports a size in char units, and sizeof(char) is always one; CHAR_BIT gi
 
 ## Exercise 1: Compare integer and floating division: change one input
 
-Copy worked example 1, the "compare integer and floating division" case, into a scratch pad and change `int whole = 7 / 2;` to `int whole = 8 / 2;`. Before running, predict which CHECK fails and which value it sees in place of the worked result (the results are 3 and 3.5); then run it and restore the original line.
+In worked example 1, change `int whole = 7 / 2;` to `int whole = 8 / 2;`. Predict which value the CHECK on `whole == 3 && fraction == 3.5` sees, then run and restore.
 
 The unchanged code is worked example 1:
 
@@ -20,7 +22,7 @@ double fraction = 7 / 2.0;
 CHECK(whole == 3 && fraction == 3.5);
 ```
 
-**Expected:** With `int whole = 8 / 2;` the run stops with `Check failed` at the CHECK on `whole == 3 && fraction == 3.5`, because the "compare integer and floating division" case no longer shows that the results are 3 and 3.5. Restoring `int whole = 7 / 2;` brings that observation back.
+**Expected:** `Check failed` at `whole == 3 && fraction == 3.5`; restoring `int whole = 7 / 2;` passes again.
 
 Converting the already truncated integer result afterward cannot restore the missing fraction.
 
@@ -34,7 +36,7 @@ Converting the already truncated integer result afterward cannot restore the mis
 
 ## Exercise 2: Observe defined unsigned wrap: debug a regression
 
-A regression changed one token in worked example 2, the "observe defined unsigned wrap" case, so one line now reads `n -= 1U;`. Run the example with that line, use the failing CHECK to find why the result is zero no longer holds and repair the line without changing the CHECK.
+Worked example 2 now has a line reading `n -= 1U;`. Repair it so that the result is zero again.
 
 The unchanged code is worked example 2:
 
@@ -44,7 +46,7 @@ n += 1U;
 CHECK(n == 0U);
 ```
 
-**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `n == 0U`. Once the line reads `n += 1U;` again, the "observe defined unsigned wrap" case again shows that the result is zero.
+**Expected:** `Check failed` at `n == 0U` until the line reads `n += 1U;` again.
 
 This result is guaranteed for unsigned arithmetic. Repeating the experiment with INT_MAX would invoke undefined behavior and is not an acceptable runnable example.
 

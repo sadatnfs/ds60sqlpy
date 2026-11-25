@@ -206,11 +206,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Key:</strong> The identity used for lookup.</p>
 <p><strong>Set membership:</strong> Presence of an equivalent element without duplicates.</p>
 <h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>The Linux Docker classroom compiles the saved pad as <code>main.swift</code> with Swift 6 language checking. An explicit <code>@main</code> type contains <code>static func main() async throws</code>; the fixed compiler uses <code>-parse-as-library -swift-version 6</code>. The examples use the standard library and portable Foundation. <code>precondition</code> makes a violated invariant fail the process. The fixed pad accepts one source file, without arbitrary command arguments, interactive input or dependency installation. SwiftUI, UIKit, Apple simulators and application signing belong to the separately prepared macOS/Xcode project labs, never the Linux pad.</p>
-<p>Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.</p>
+<p>Dictionary and set iteration order is unspecified, so never print a dictionary directly as evidence; sort first, as Example B does with <code>sorted()</code>. Task 4 is a written diagnosis: <code>hashValue</code> uses a per-process random seed, so a value stored by one run will not match the next run of the same program.</p>
+<p>Compile contract, starter stop and success marker: <a href="../STUDY-GUIDE.md.html#running-a-lesson">running a lesson</a>.</p>
 <h3 id="syntax-anatomy-and-execution-trace">Syntax anatomy and execution trace<a class="heading-anchor" href="#syntax-anatomy-and-execution-trace" aria-label="Link to this section">#</a></h3>
 <p><code>[String: Int]</code> declares a dictionary. <code>counts[key, default: 0] += 1</code> inserts a default only for that mutation. Set.insert returns whether an element was newly inserted. sorted establishes presentation order.</p>
-<p>Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.</p>
+<p>Each example ends with a trace; method: <a href="../STUDY-GUIDE.md.html#tracing-a-program">tracing a program</a>.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="example-a-preserve-absence-and-zero">Example A: Preserve absence and zero<a class="heading-anchor" href="#example-a-preserve-absence-and-zero" aria-label="Link to this section">#</a></h4>
 <p>Optional lookup prevents missing information from being confused with a stored value.</p>
@@ -228,6 +228,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> Pear is present with zero and apple is absent.</p>
+<p><strong>Trace.</strong> <code>counts</code> has one entry, pear mapped to 0. The subscript lookup for pear returns <code>Int?</code>, here <code>Optional(0)</code>, and the check compares it with 0. The lookup for apple finds no key and returns nil. The two lookups share a type but mean different things: one says the store knows there are zero pears, the other says the store holds no information about apples. Supplying a default of 0 at lookup time would merge those two meanings.</p>
 <h4 id="example-b-deduplicate-and-order-deliberately">Example B: Deduplicate and order deliberately<a class="heading-anchor" href="#example-b-deduplicate-and-order-deliberately" aria-label="Link to this section">#</a></h4>
 <p>Set semantics establish uniqueness while sorting separately establishes order.</p>
 <pre class="highlighted-code"><code class="language-swift"><span class="syntax-keyword">import</span> <span class="syntax-class">Foundation</span>
@@ -245,6 +246,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> Duplicate red is not inserted and sorted output is deterministic.</p>
+<p><strong>Trace.</strong> <code>tags</code> starts with red. Inserting red again finds an equal element, leaves the set unchanged and returns a tuple whose <code>inserted</code> field is false. Inserting blue adds a new element and returns true. The set now holds two strings in an unspecified order, so the final check calls <code>sorted()</code>, which returns an <code>Array</code> in ascending order: blue, then red. Uniqueness comes from the set; the order comes only from the sort.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <ol>
 <li><strong>Predict and explain.</strong> Explain the optional result of each dictionary lookup.</li>
@@ -264,10 +266,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <ol start="6">
 <li><strong>Transfer and justify.</strong> Design a custom Hashable key using only stable identity fields.</li>
 </ol>
-<p>For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.</p>
+<p>Log each task in the <a href="../STUDY-GUIDE.md.html#recording-exercise-evidence">evidence table</a> before opening the explanation.</p>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
 <p>Hash collisions do not mean values are equal; equality resolves them. Dictionary order should not be treated as a report contract. A default subscript can insert values during mutation, so inspect side effects.</p>
-<p>A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.</p>
+<p>The default-value subscript in task 2 has a side effect worth pinning: incrementing <code>counts[key, default: 0]</code> inserts a missing key, while merely reading it does not. Compare <code>counts.count</code> before and after each form to see the difference. Include a missing key, a key present with zero and a duplicate tag in the boundary checks for task 5.</p>
+<p>Repair routine: <a href="../STUDY-GUIDE.md.html#building-a-regression-case">building a regression case</a>.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <ol>
 <li>Reproduce Example A (Preserve absence and zero) before changing anything, and confirm its observation: Pear is present with zero and apple is absent.</li>
@@ -275,9 +278,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>Before opening the explanation, check your task 3 attempt (Build a unique sorted list of accepted inventory names) against each pitfall listed above, and add one input that would expose the tempting wrong rule.</li>
 </ol>
 <h3 id="self-check-and-next-step">Self-check and next step<a class="heading-anchor" href="#self-check-and-next-step" aria-label="Link to this section">#</a></h3>
-<p>Explain Hashable, Key, Set membership without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.</p>
+<p>Explain why two different strings can share a hash value and how a set still keeps them apart. State the type returned by a plain dictionary subscript and by the default-value subscript. List the fields of a customer record you would hash for a key that must stay stable across app launches.</p>
+<p>Then follow the general <a href="../STUDY-GUIDE.md.html#self-check-routine">self-check routine</a> and save your pad.</p>
 <h3 id="sources-and-execution-boundary">Sources and execution boundary<a class="heading-anchor" href="#sources-and-execution-boundary" aria-label="Link to this section">#</a></h3>
-<p><a href="https://docs.swift.org/swift-book/documentation/the-swift-programming-language/">Official language or framework documentation</a>. The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.</p>
+<p><a href="https://docs.swift.org/swift-book/documentation/the-swift-programming-language/">Documentation</a>: Sets, set operations and dictionaries appear in the book&#x27;s Collection Types chapter; the standard library reference documents the Hashable protocol.</p>
+<p>Provenance and limits: <a href="../STUDY-GUIDE.md.html#sources-and-execution-boundary">sources and execution boundary</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for swift-010: Dictionaries, sets and stable hashing.
 Read courses/swift/guides/swift-010.md and courses/swift/lessons/swift-010.swift. Prerequisites: swift-009.

@@ -194,14 +194,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/apache-data-platforms/examples/apache-073.md</code></p>
     </header>
     <article class="document"><h2 id="atlas-apache-073-prepared-command-notebook">Atlas apache-073 prepared command notebook<a class="heading-anchor" href="#atlas-apache-073-prepared-command-notebook" aria-label="Link to this section">#</a></h2>
-<p>Copy the owned Atlas project and read PREPARATION.md. Default local server execution is omitted until a supported native Java 8 graph/index stack exists.</p>
+<p>In the copied Atlas project, <code>client.py</code> reads credentials only from the untracked environment file and refuses an endpoint URL carrying a user, password, path or query. <code>plan</code> needs no credentials at all.</p>
 <pre class="highlighted-code"><code class="language-bash">bash run.sh prepare
 bash run.sh plan</code></pre>
-<p>These actions validate a portable native Docker client and print original payloads without contacting a server. For an explicitly prepared owned fixture server with untracked credentials, deliberate apply and read-only check are:</p>
+<p>With fixture credentials for a prepared owned server, <code>check</code> also repeats one type lookup with a deliberately wrong password and expects 401 or 403:</p>
 <pre class="highlighted-code"><code class="language-bash">bash run.sh apply
 bash run.sh check</code></pre>
 <p>Check requires an actual 401 or 403 for a deliberately invalid fixture credential. A valid-principal authorization comparison and actual denied data-engine query remain independent tests.</p>
-<p>Prepared payloads are not actual Atlas observations. Never place credentials or Authorization headers in notebooks, source, command arguments or receipts.</p></article>
+<p>A rejected bad password shows that authentication works. It does not show what a valid but unprivileged user may do, and an Atlas metadata policy is not a data-engine denial.</p></article>
   </main>
 </body>
 </html>

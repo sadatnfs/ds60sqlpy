@@ -4,8 +4,6 @@
 
 Within-GPU asynchronous copy mechanisms can move tiles from global to shared storage while other work proceeds, subject to architecture, alignment and API requirements. These are different from host-to-device asynchronous transfers. A producer commits a stage, a consumer waits for its completion, and the stage cannot be overwritten until consumption finishes. Double buffering alternates two storage slots but does not remove these dependencies. Hardware-accelerated paths and fallback behavior must be checked for the exact toolchain and device. Correct tail loading and barrier participation remain essential even when the happy path overlaps efficiently.
 
-The separate [CPU reference](../references/cuda-056_cpu.py) checks the chapter's bounded model. It does not execute CUDA or establish GPU timing. Compare after attempting the worksheet or explicitly choosing to reveal solutions.
-
 ## Exercise 1
 
 For three tiles using two slots, tile 0 loads slot A and tile 1 loads slot B. Tile 2 may reuse A only after computation using tile 0 finishes. Copy completion permits reading; consumer completion permits reuse. Those are two different milestones.
@@ -78,12 +76,17 @@ First establish a correct synchronous baseline, then verify capability and measu
 
 **How to verify:** Compare correct outputs and measured times for both versions.
 
+## Self-check answers
+
+1. **List the lifetime states of one tile slot.** Free, loading after the copy is issued, ready after completion, consuming, then free again when the consumer finishes.
+2. **When may tile 2 reuse slot A in worked example 1?** Only after the computation using tile 0 has finished.
+3. **Is an address four bytes past a 16-byte aligned base valid for a 16-byte contract?** No; only offsets that are multiples of 16 keep that alignment.
+4. **How should a partial final tile be handled?** Guard loads by bounds or use a supported fallback, so no read passes the end of the input.
+
 ## Numerical reference and its limits
 
-The complete CPU model is [here](../references/cuda-056_cpu.py). Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It does not claim CUDA execution, concurrency safety or a performance measurement.
+The [CPU reference](../references/cuda-056_cpu.py) reproduces worked example 1 and prints `{'slot_lifetime': ['free', 'copying', 'ready', 'consuming', 'done', 'free'], 'offset_address_aligned_to_16': False}`.
 
 ## Transfer review
 
 First establish a correct synchronous baseline, then verify capability and measure whether hidden latency exceeds added synchronization/resource costs.
-
-A complete explanation must name its inputs, the unchanged mathematical contract, the changed boundary or resource condition, and the evidence still needed on actual hardware. Preserve a CPU baseline even after a GPU path becomes available.

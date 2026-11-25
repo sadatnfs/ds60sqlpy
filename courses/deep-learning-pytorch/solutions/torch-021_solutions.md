@@ -2,6 +2,8 @@
 
 Open these answers only after attempting Embeddings, padded sequences and recurrent models yourself. They reuse the guide's literal inputs, starting from Example A, Lookup and mark padding, so a discrepancy points at one step. The executable companion runs the assertions; this page explains why each one tests Padding index, Packed sequence, Final valid state. After a pass, choose a new input for exercise 6, Reject zero-length recurrent input, without looking.
 
+After comparing, follow the [review steps](../STUDY-GUIDE.md#after-the-solutions).
+
 ## Mechanism review
 
 A padded sequence contains real positions and artificial storage positions. Embedding lookup takes token IDs to feature vectors, but padding does not become an observation merely because it has a vector. PyTorch Embedding can use `padding_idx` to prevent gradient updates for that row, but a recurrent network still needs length or mask information to avoid processing padding as real time steps.
@@ -153,6 +155,3 @@ else:
 
 **Verify:** In a fresh process, the exercise checks confirm the invalid call raises `RuntimeError`.
 
-## Review after comparison
-
-Repeat exercise 4, Expose an unmasked recurrent tail, with one changed fixture value and predict the difference before running it. Keep your failing attempt at exercise 5, Average only valid token losses, beside the repaired result. A missing framework is not a failing assertion. These solutions use only local fixtures.

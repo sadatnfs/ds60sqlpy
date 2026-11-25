@@ -1,10 +1,17 @@
 # cuda-117: Nulls, decimals, timestamps and equality contracts
 
-**Route:** CUDA Python and machine learning / GPU Spark specialization. **Stage:** advanced. **Prerequisites:** `cuda-116`. Allow several sessions when the hardware experiment is new; the chapter is not a deadline.
+**Route:** CUDA Python and machine learning / GPU Spark specialization. **Stage:** advanced. **Prerequisites:** `cuda-116`.
 
-## What you will be able to explain
+Pacing, evidence labels and platform rules: [CUDA study guide](../../STUDY-GUIDE.md).
 
-By the end, you can **calculate both counts**, **name timestamp timezone**, and **design ordered result comparison** with evidence. Start with the two worked cases, then use the editable CPU model to make the quantities concrete.
+## Learning objectives
+
+- Calculate both counts.
+- Handle all-null aggregate.
+- Compare decimal values.
+- Name timestamp timezone.
+- Choose float tolerances.
+- Design ordered result comparison.
 
 ## Mechanism and vocabulary
 
@@ -25,15 +32,19 @@ Use explicit schemas and deterministic ordering for comparison. Floating aggrega
 
 ### Worked example 1
 
-COUNT (*) over [2, null,5] is 3 while COUNT (value) is 2. SUM (value) is 7 under skip-null semantics. The two counts answer different questions.
+COUNT(*) over [2, null, 5] is 3 while COUNT(value) is 2. SUM(value) is 7 under skip-null semantics. The two counts answer different questions.
 
 ### Worked example 2
 
 Decimal 1.10 plus 2.20 should preserve the chosen decimal contract. A binary floating approximation is not a substitute for testing a decimal expression.
 
-## Portable executable model
+## How to run the CPU model
 
-The **CPU reference model** variant runs this bounded worked example using `python-core`. It uses only the Python standard library, small synthetic values and no network. Its purpose is to expose the arithmetic or contract behind the chapter. The separate reference includes assertions for the stated observations.
+Edit the copy; the [reference](../references/cuda-117_cpu.py) adds assertions.
+
+```sh
+python courses/cuda/spark/lessons/cuda-117_cpu.py
+```
 
 ```python
 from decimal import Decimal
@@ -54,87 +65,68 @@ print("CPU SQL-semantics oracle: rows 3, nonnull 2, sum 7, decimal 3.30")
 |---|---|
 | `values` | `[2, None, 5]` |
 
-Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.
-
 ## Scala and PySpark parity lab
 
-Choose **Scala Spark on CPU** or **PySpark on CPU** to run the same bounded query in the ordinary Spark workers. Both use explicit schemas, local fixtures, at most two local threads, a disabled GPU SQL setting and a finally-block session stop. They assert the same expected result. These are CPU Spark observations, not GPU plugin qualification.
-
-For external GPU comparison, retain the same relational expressions and expected result but use a separately reviewed launcher and compatibility matrix. Do not change the classroom source into an arbitrary cluster connection.
+Both CPU variants assert one expected result. Read the [parity rules](../../STUDY-GUIDE.md#spark-parity-and-gpu-spark).
 
 ## Practice and transfer
+
+Record each attempt in the [worksheet](../lessons/cuda-117.md) before opening hints.
 
 ### Exercise 1: Calculate both counts
 
 **Trap to avoid:** Treating null as zero gives the same sum but makes `COUNT(value)` 3 and the average 7/3 instead of 3.5, which disagrees with Spark.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 2: Handle all-null aggregate
 
 **Trap to avoid:** Returning 0 for the sum of an all-null group makes a group with no data look like a group whose values cancel out.
-
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 3: Compare decimal values
 
 **Trap to avoid:** Using float64 for the same values gives `3.3000000000000003`, which fails an exact comparison and suggests a bug that exists only in the test.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 4: Name timestamp timezone
 
 **Trap to avoid:** Relying on the machine's default timezone gives results that depend on where the job runs. Executors and the driver may also disagree, producing values that differ between stages of one job.
-
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 5: Choose float tolerances
 
 **Trap to avoid:** Using exact equality for float sums fails on correct results, while using a very loose tolerance passes wrong ones.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 6: Design ordered result comparison
 
 **Trap to avoid:** Converting results to sets before comparing removes duplicates and hides a missing or extra row.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ## Progressive hints
 
-Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.
+Hint *k* belongs to exercise *k*; open one at a time.
 
-1. Start from worked example 1 and mark the quantities needed for the task "Calculate both counts".
-2. Change one assumption in worked example 2 while preserving the declared contract: handle all-null aggregate.
-3. Trace the CPU program's variables before adding hardware behavior: compare decimal values.
-4. Draw producers, consumers and the exact operation boundary for the task "Name timestamp timezone".
-5. Separate what the small fixture establishes from what the real runtime must show: choose float tolerances.
-6. Write a counterexample to an overbroad claim before you design ordered result comparison.
+1. Count all rows for one answer and only the rows where the value is present for the other.
+2. Look up what Spark SQL returns for a sum over values that are all null, then compare it with a Python sum starting at zero.
+3. Represent both operands as decimals with the declared scale and compare the result exactly.
+4. Set the session timezone explicitly and include values near a day or offset boundary.
+5. Base the tolerance on the dtype, the reduction algorithm and the magnitude of the values.
+6. Sort both result sets by stable keys before comparing, and keep duplicate rows instead of removing them.
 
-## Common mistakes and self-review
+## Common mistakes and self-check
 
-Confusing a correct tiny example with a general implementation is the central review risk. For this chapter, challenge the assumption in worked example 2, then ask whether your change preserves the mechanism described above. If you change dtype, layout, ordering, batch size or backend, update the acceptance contract rather than silently reusing the old observation. Explain an unexpected result before trying random configuration changes.
+A common mistake is comparing CPU and GPU results as if every column were a float array. Decimal and integer results usually need exact equality, an all-null sum is null rather than zero, and timestamps depend on the session timezone. Another is widening a tolerance until a semantic mismatch passes. Fix both by using explicit schemas, deterministic ordering and exact comparison for decimals, reserving justified tolerances for floating aggregates whose reduction order can change.
 
-Keep a small evidence table with columns **claim**, **input**, **expected observation**, **actual observation** and **limit**. For the first claim use `Calculate both counts`. For the final claim use `Design ordered result comparison`. An unperformed GPU or cluster experiment remains pending even when the CPU model is correct.
+**Misconception:** Results from CPU Spark and the GPU plugin can always be compared exactly. **Correction:** The plugin documents operations whose GPU results can differ from CPU Spark, such as floating aggregations whose order varies, and some of them are disabled by default for that reason. Read the compatibility notes for each operation in the query, compare decimals and integers exactly and compare floats with a justified tolerance.
 
-## Platform and evidence contract
+**Evidence limit:** The reference computes row count 3, non-null count 2, sum 7 and the exact decimal 3.30 in Python. It does not run Spark SQL, so null, overflow and timezone behavior must be confirmed against the selected Spark mode and plugin release.
 
-The reading worksheet and CPU reference model work through the ordinary Linux Docker classroom on macOS, Linux and Windows using WSL 2. They do not require an NVIDIA GPU. Their results are labeled CPU models or semantic oracles, not simulated hardware performance.
+1. How do COUNT(*) and COUNT(value) differ?
+2. Why can a binary float not stand in for a decimal test?
+3. Why name the timezone in a timestamp test?
 
-Real CUDA work needs supported NVIDIA hardware, a compatible host driver and an explicitly prepared GPU runtime. An Apple GPU does not execute CUDA kernels. PyTorch MPS on a supported native Mac, ROCm on supported AMD hardware, or other vendor backends can provide separate accelerator learning routes; they need their own package and operation qualification and are not CUDA evidence. The ordinary Linux Docker classroom does not expose native Mac MPS automatically.
-
-Do not download packages, models or data by opening this lesson. Do not attach an engine socket, ambient cluster credentials or an arbitrary remote endpoint. A CPU pass, imported package, successful compilation, real GPU result and measured performance are distinct observations. Record the actual backend, data shape/dtype, source revision, versions and pending checks. A saved completion marker records learning progress, not hardware certification.
-
-GPU Spark is a separate owned external workflow. The ordinary `spark-local-scala` and `spark-local-python` profiles are CPU Spark. Keep the GPU plugin disabled or absent for a CPU-only baseline. Per-operator CPU fallback inside a working GPU plugin environment is a different condition from having no compatible GPU. Never mount a host Docker socket or ambient kubeconfig into an ordinary lesson worker.
+Answers: [self-check answers](../solutions/cuda-117_solutions.md#self-check-answers).
 
 ## Primary references
 
-- [cuDF Spark plugin release and compatibility matrix](https://nvidia.github.io/cudf-spark/docs/download.html)
 - [Supported Spark operators and expression types](https://nvidia.github.io/cudf-spark/docs/supported_ops.html)
-- [GPU Spark tuning guide](https://docs.nvidia.com/cudf-spark/latest/tuning-guide.html)
-- [Apache Spark SQL performance tuning](https://spark.apache.org/docs/latest/sql-performance-tuning.html)
 
-Use the version-matched documentation of your prepared environment. These references describe interfaces and supported boundaries; the chapter's synthetic examples and CPU models are original teaching material.
+Full lists: [documentation and sources](../../STUDY-GUIDE.md#documentation-and-sources).
 
 ## Ask an AI tutor about this lesson
 

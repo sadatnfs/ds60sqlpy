@@ -1,8 +1,6 @@
 # dax-023: explained reference and practice reasoning
 
-This is an offline DAX editing lesson. No DAX compiler, semantic-model engine, Power BI account or network connection is required. Worked tables describe the named reference and model, not execution of your draft. Save, compare and export source; do not interpret a comparison or completion marker as a passed program run.
-
-The complete [reference source](dax-023_reference.dax) and [named model](../models/retail/model.json) belong together. The reference-results sidecar binds both exact files by SHA-256. Those hashes identify bytes; they do not certify DAX execution.
+Compare the reference's grouped NetPerUnit column with its pooled total. Verify that 19.2 and 91/12, weighted by 5 and 12 units, reproduce 11, and that the SUMX column is labeled as a different metric. Read it beside the [reference source](dax-023_reference.dax); the [study guide](../STUDY-GUIDE.md#answers-and-references) explains how the sidecar binds it to the model.
 
 ## Worked-case reconciliation
 

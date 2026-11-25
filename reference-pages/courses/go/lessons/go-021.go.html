@@ -198,11 +198,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"><span class="syntax-keyword">import</span> <span class="syntax-string">&quot;fmt&quot;</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">func</span> main<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span></span>
-<span class="source-line">	<span class="syntax-comment">// Exercise 1: Apply an explicit flag: change one input: Copy worked example 1 into a scratch pad and change `n, args, err := parseArgs([]string{&quot;-count=3&quot;})` to `n, args, err := parseArgs([]string{&quot;-count=4&quot;})`. Before running, predict which check fails and which value it now sees; then run it and restore the original line.</span></span>
-<span class="source-line">	<span class="syntax-comment">// Expected: The changed run panics with `flag` because `err == nil &amp;&amp; n == 3 &amp;&amp; len(args) == 0` no longer holds. Restoring the original line brings back the worked observation: the resulting count is 3.</span></span>
+<span class="source-line">	<span class="syntax-comment">// Exercise 1: Apply an explicit flag: change one input: Copy worked example 1, change `n, args, err := parseArgs([]string{&quot;-count=3&quot;})` to `n, args, err := parseArgs([]string{&quot;-count=4&quot;})` and predict the failure before running; then restore the line.</span></span>
+<span class="source-line">	<span class="syntax-comment">// Expected: The edited run panics with `flag` because `err == nil &amp;&amp; n == 3 &amp;&amp; len(args) == 0` no longer holds.</span></span>
 <span class="source-line"></span>
-<span class="source-line">	<span class="syntax-comment">// Exercise 2: Retain a default: diagnose an edited check: A careless edit changed the check in worked example 2 so that it reads `check(err != nil &amp;&amp; n == 1, &quot;default&quot;)`. Run worked example 2 with that line, explain why the edited check now fails for the same program state, and restore it.</span></span>
-<span class="source-line">	<span class="syntax-comment">// Expected: Before the repair the program panics with `default`; after it the line reads `check(err == nil &amp;&amp; n == 1, &quot;default&quot;)` again and the count remains 1.</span></span>
+<span class="source-line">	<span class="syntax-comment">// Exercise 2: Retain a default: diagnose an edited check: A careless edit rewrote the check in worked example 2 as `check(err != nil &amp;&amp; n == 1, &quot;default&quot;)`. Explain the failure, then restore it.</span></span>
+<span class="source-line">	<span class="syntax-comment">// Expected: The defective run panics with `default`; after restoring `check(err == nil &amp;&amp; n == 1, &quot;default&quot;)`, the count remains 1.</span></span>
 <span class="source-line"></span>
 <span class="source-line">	<span class="syntax-comment">// Exercise 3: Reject an unknown option: Parse -mystery=2.</span></span>
 <span class="source-line">	<span class="syntax-comment">// Expected: Parsing returns an error.</span></span>

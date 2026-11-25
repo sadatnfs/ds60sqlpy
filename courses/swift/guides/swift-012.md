@@ -24,9 +24,9 @@ Constructors should establish valid state, and operations should preserve it. Do
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles the saved pad as `main.swift` with Swift 6 language checking. An explicit `@main` type contains `static func main() async throws`; the fixed compiler uses `-parse-as-library -swift-version 6`. The examples use the standard library and portable Foundation. `precondition` makes a violated invariant fail the process. The fixed pad accepts one source file, without arbitrary command arguments, interactive input or dependency installation. SwiftUI, UIKit, Apple simulators and application signing belong to the separately prepared macOS/Xcode project labs, never the Linux pad.
+`Inventory` is declared in the helper section above `LessonMain`, and both examples share it. Because `stock` is `private(set)`, assigning to it from `LessonMain` fails to compile with a message that the setter is inaccessible; record that diagnostic as evidence that the setter is restricted, not missing.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Compile contract, starter stop and success marker: [running a lesson](../STUDY-GUIDE.md#running-a-lesson).
 
 
 
@@ -34,7 +34,7 @@ Start with the answer-free learner artifact in your saved classroom pad. It deli
 
 `struct Inventory` defines a value type. `private(set)` exposes reading but restricts assignment. A `mutating func` may update stored state. An initializer can reject invalid input with a throwing or failable contract in later chapters.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+Each example ends with a trace; method: [tracing a program](../STUDY-GUIDE.md#tracing-a-program).
 
 ## Worked example / walkthrough
 
@@ -71,6 +71,8 @@ struct LessonMain {
 
 **Observe:** Reserving from the copied inventory does not change the original.
 
+**Trace.** `first` is an `Inventory` with stock 5. `var second = first` copies the whole value, so `second` has its own stock of 5. `second.reserve(2)` passes both guard conditions, subtracts 2 and returns true; `second.stock` is now 3. `first.stock` is still 5, because no reference connects the two values. The last call, `first.reserve(0)`, shows that reserving nothing is allowed: it returns true and leaves the stock at 5.
+
 ### Example B: Reject without partial mutation
 
 Checking every rejection condition before subtraction preserves failure atomicity.
@@ -103,6 +105,8 @@ struct LessonMain {
 
 **Observe:** Rejected requests retain the previous valid stock.
 
+**Trace.** `inventory` starts with stock 3. `reserve(4)` fails `amount <= stock`, so the guard returns false before the subtraction runs. `reserve(-1)` fails `amount >= 0` and also returns false. The final check confirms the stock is still 3. Because every rejection path leaves before `stock -= amount`, a rejected call cannot leave the value half-updated, which is the failure-atomicity property this lesson is about.
+
 ## Exercises
 
 1. **Predict and explain.** Trace both inventory copies through reservation.
@@ -117,13 +121,15 @@ struct LessonMain {
 
 6. **Transfer and justify.** Choose a value model for an editable form and explain how cancel can restore an earlier snapshot.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Log each task in the [evidence table](../STUDY-GUIDE.md#recording-exercise-evidence) before opening the explanation.
 
 ## Common pitfalls and diagnosis
 
 A struct can contain shared class references. Private setters are useful only when methods enforce invariants. The public memberwise initializer in a small fixture is not a substitute for validating external state.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+Task 4's defect subtracts first and repairs afterward, for example subtracting and then adding the amount back when the stock goes negative. It appears to work until something between the two steps returns early. The counterexample inputs are an exact-stock request, which must succeed and leave 0, and the stock plus one, which must fail and leave the stock unchanged.
+
+Repair routine: [building a regression case](../STUDY-GUIDE.md#building-a-regression-case).
 
 ## Progressive hints
 
@@ -133,11 +139,15 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 ## Self-check and next step
 
-Explain Struct, Mutating method, Encapsulation without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+Explain why `reserve` must be `mutating` and what the compiler says if you call it on a `let` inventory. Describe a struct containing a class reference and what copying it shares. Explain how a value-type form model lets a cancel button restore the snapshot taken when editing began.
+
+Then follow the general [self-check routine](../STUDY-GUIDE.md#self-check-routine) and save your pad.
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://docs.swift.org/swift-book/documentation/the-swift-programming-language/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+[Documentation](https://docs.swift.org/swift-book/documentation/the-swift-programming-language/): The Swift book's Structures and Classes chapter explains value types, Methods covers mutating methods, and Access Control explains private setters.
+
+Provenance and limits: [sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

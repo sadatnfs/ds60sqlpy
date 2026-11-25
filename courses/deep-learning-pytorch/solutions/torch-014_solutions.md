@@ -2,6 +2,8 @@
 
 Open these answers only after attempting CrossEntropyLoss, multiclass and multilabel contracts yourself. They reuse the guide's literal inputs, starting from Example A, Calculate uniform multiclass loss, so a discrepancy points at one step. The executable companion runs the assertions; this page explains why each one tests Multiclass target, Multilabel target, Class axis. After a pass, choose a new input for exercise 6, Reject an out-of-vocabulary class, without looking.
 
+After comparing, follow the [review steps](../STUDY-GUIDE.md#after-the-solutions).
+
 ## Mechanism review
 
 Multiclass classification chooses exactly one outcome among mutually exclusive classes. Multilabel classification makes several independent binary decisions, so multiple labels can be present. A final layer with three outputs can serve either task; the target meaning determines the loss. PyTorch CrossEntropyLoss expects raw class logits and class-index targets by default. It includes log-softmax internally, so applying softmax first changes the intended calculation.
@@ -149,6 +151,3 @@ else:
 
 **Verify:** In a fresh process, the exercise checks confirm `F.cross_entropy(torch.zeros((1, 3)), torch.tensor([3]))` raises `(IndexError, RuntimeError)`.
 
-## Review after comparison
-
-Repeat exercise 4, Check class-axis normalization, with one changed fixture value and predict the difference before running it. Keep your failing attempt at exercise 5, Name the multilabel denominator, beside the repaired result. A missing framework is not a failing assertion. These solutions use only local fixtures.

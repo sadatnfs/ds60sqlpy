@@ -1,10 +1,17 @@
 # cuda-120: Memory pools, batch sizing and bounded spills
 
-**Route:** CUDA Python and machine learning / GPU Spark specialization. **Stage:** advanced. **Prerequisites:** `cuda-118`, `cuda-119`. Allow several sessions when the hardware experiment is new; the chapter is not a deadline.
+**Route:** CUDA Python and machine learning / GPU Spark specialization. **Stage:** advanced. **Prerequisites:** `cuda-118`, `cuda-119`.
 
-## What you will be able to explain
+Pacing, evidence labels and platform rules: [CUDA study guide](../../STUDY-GUIDE.md).
 
-By the end, you can **compute concurrent live memory**, **budget spill disk**, and **interpret successful but spilling execution** with evidence. Start with the two worked cases, then use the editable CPU model to make the quantities concrete.
+## Learning objectives
+
+- Compute concurrent live memory.
+- Lower concurrency.
+- Separate JVM and device pools.
+- Budget spill disk.
+- Design safe batch changes.
+- Interpret successful but spilling execution.
 
 ## Mechanism and vocabulary
 
@@ -31,9 +38,13 @@ Three active tasks each needing 2 GiB plus 1 GiB shared workspace require an ill
 
 A spill can allow completion while adding serialization and I/O cost. Comparing only kernel time misses the resulting end-to-end slowdown.
 
-## Portable executable model
+## How to run the CPU model
 
-The **CPU reference model** variant runs this bounded worked example using `python-core`. It uses only the Python standard library, small synthetic values and no network. Its purpose is to expose the arithmetic or contract behind the chapter. The separate reference includes assertions for the stated observations.
+Edit the copy; the [reference](../references/cuda-120_cpu.py) adds assertions.
+
+```sh
+python courses/cuda/spark/lessons/cuda-120_cpu.py
+```
 
 ```python
 per_task, shared, capacity = 2, 1, 8
@@ -55,81 +66,64 @@ print("CPU memory budget:", safe, "safe task counts in the model")
 | `capacity` | `8` |
 | `safe` | `[1, 2, 3]` |
 
-Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.
-
 ## Practice and transfer
+
+Record each attempt in the [worksheet](../lessons/cuda-120.md) before opening hints.
 
 ### Exercise 1: Compute concurrent live memory
 
 **Trap to avoid:** Counting the shared workspace once per task gives 10 GiB for three tasks and wrongly rejects a configuration that fits.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 2: Lower concurrency
 
 **Trap to avoid:** Raising batch size to finish faster increases per-task memory and makes the overflow worse. It may also push the job into heavier spilling, which slows the stage more than the larger batches speed it up.
-
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 3: Separate JVM and device pools
 
 **Trap to avoid:** Raising `spark.executor.memory` after a GPU memory error adds host memory and leaves the device budget unchanged.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 4: Budget spill disk
 
 **Trap to avoid:** Leaving spill on the default temporary directory of a small root volume risks filling it and affecting other processes.
-
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 5: Design safe batch changes
 
 **Trap to avoid:** Doubling the batch size without a memory budget can turn a working job into an out-of-memory failure. The failure may appear only on the largest partitions, so small test inputs can pass while production data fails.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 6: Interpret successful but spilling execution
 
 **Trap to avoid:** Comparing only kernel times between a spilling run and a non-spilling run misses the end-to-end slowdown.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ## Progressive hints
 
-Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.
+Hint *k* belongs to exercise *k*; open one at a time.
 
-1. Start from worked example 1 and mark the quantities needed for the task "Compute concurrent live memory".
-2. Change one assumption in worked example 2 while preserving the declared contract: lower concurrency.
-3. Trace the CPU program's variables before adding hardware behavior: separate JVM and device pools.
-4. Draw producers, consumers and the exact operation boundary for the task "Budget spill disk".
-5. Separate what the small fixture establishes from what the real runtime must show: design safe batch changes.
-6. Write a counterexample to an overbroad claim before you interpret successful but spilling execution.
+1. Add each active task's live set and the shared workspace once.
+2. Recompute the total with one task fewer and compare it with the budget.
+3. Ask whether shrinking the JVM heap frees anything on the GPU.
+4. Choose an explicit disposable path for spill files and set a capacity limit for it.
+5. Fix row and byte bounds for a batch before launching the run.
+6. Ask what a completed but spilling run proves and what it still needs reported.
 
-## Common mistakes and self-review
+## Common mistakes and self-check
 
-Confusing a correct tiny example with a general implementation is the central review risk. For this chapter, challenge the assumption in worked example 2, then ask whether your change preserves the mechanism described above. If you change dtype, layout, ordering, batch size or backend, update the acceptance contract rather than silently reusing the old observation. Explain an unexpected result before trying random configuration changes.
+A common mistake is tuning the JVM heap to fix GPU memory pressure. They are separate allocators, so reducing heap creates no VRAM. Another mistake is raising GPU task concurrency because each task fits alone; three tasks fit a modeled 8 GiB budget, but four need 9 GiB. A third is treating spill as failure or as free capacity. Fix these by budgeting device, pinned host, pageable host and spill disk separately and lowering concurrency when live demand exceeds the budget.
 
-Keep a small evidence table with columns **claim**, **input**, **expected observation**, **actual observation** and **limit**. For the first claim use `Compute concurrent live memory`. For the final claim use `Interpret successful but spilling execution`. An unperformed GPU or cluster experiment remains pending even when the CPU model is correct.
+**Misconception:** Pinned host memory is an unlimited fast staging area, so a larger pinned pool is always better. **Correction:** Pinned memory is page-locked host memory that the operating system cannot swap out, so a large pool takes RAM away from the JVM, Python workers and other processes on the host. It speeds transfers and spills to host memory, but it is a fixed budget like device memory. Size it in the same ledger as the heap, the device pool and spill disk, and change it in bounded steps.
 
-## Platform and evidence contract
+**Evidence limit:** The reference fits one to three tasks into an illustrative 8 GiB budget and rejects four. Real live sets, workspaces and spill thresholds depend on the query and the plugin release, so they must be observed on a prepared host with bounded data.
 
-The reading worksheet and CPU reference model work through the ordinary Linux Docker classroom on macOS, Linux and Windows using WSL 2. They do not require an NVIDIA GPU. Their results are labeled CPU models or semantic oracles, not simulated hardware performance.
+1. What does a spill do?
+2. Why is comparing only kernel time misleading when spills occur?
+3. Why must memory experiments use bounded data?
 
-Real CUDA work needs supported NVIDIA hardware, a compatible host driver and an explicitly prepared GPU runtime. An Apple GPU does not execute CUDA kernels. PyTorch MPS on a supported native Mac, ROCm on supported AMD hardware, or other vendor backends can provide separate accelerator learning routes; they need their own package and operation qualification and are not CUDA evidence. The ordinary Linux Docker classroom does not expose native Mac MPS automatically.
-
-Do not download packages, models or data by opening this lesson. Do not attach an engine socket, ambient cluster credentials or an arbitrary remote endpoint. A CPU pass, imported package, successful compilation, real GPU result and measured performance are distinct observations. Record the actual backend, data shape/dtype, source revision, versions and pending checks. A saved completion marker records learning progress, not hardware certification.
-
-GPU Spark is a separate owned external workflow. The ordinary `spark-local-scala` and `spark-local-python` profiles are CPU Spark. Keep the GPU plugin disabled or absent for a CPU-only baseline. Per-operator CPU fallback inside a working GPU plugin environment is a different condition from having no compatible GPU. Never mount a host Docker socket or ambient kubeconfig into an ordinary lesson worker.
+Answers: [self-check answers](../solutions/cuda-120_solutions.md#self-check-answers).
 
 ## Primary references
 
-- [cuDF Spark plugin release and compatibility matrix](https://nvidia.github.io/cudf-spark/docs/download.html)
-- [Supported Spark operators and expression types](https://nvidia.github.io/cudf-spark/docs/supported_ops.html)
 - [GPU Spark tuning guide](https://docs.nvidia.com/cudf-spark/latest/tuning-guide.html)
-- [Apache Spark SQL performance tuning](https://spark.apache.org/docs/latest/sql-performance-tuning.html)
 
-Use the version-matched documentation of your prepared environment. These references describe interfaces and supported boundaries; the chapter's synthetic examples and CPU models are original teaching material.
+Full lists: [documentation and sources](../../STUDY-GUIDE.md#documentation-and-sources).
 
 ## Ask an AI tutor about this lesson
 

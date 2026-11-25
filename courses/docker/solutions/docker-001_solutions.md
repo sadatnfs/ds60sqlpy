@@ -1,6 +1,6 @@
 # docker-001: explanatory solutions
 
-Compare after your own attempt or an explicit reveal. These explain the supplied teaching fixtures; they are not engine results. The mechanism is explained in `courses/docker/guides/docker-001.md`.
+These answers explain teaching fixtures, not engine results; the mechanism is in [the guide](../guides/docker-001.md).
 
 ## Exercise 1: Predict what remains after the short process exits.
 
@@ -88,4 +88,4 @@ Compare after your own attempt or an explicit reveal. These explain the supplied
 
 ## Check your transfer
 
-A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.
+There are two stopped containers, one image and two separate copies of `/tmp/n`, each in its own container's writable layer. The image is unchanged because writes never flow back into it. The removal fails with a conflict that names a container still using the image, because stopped containers keep a reference to the image they were created from. Remove the two containers first, by ID, and the image removal then succeeds. If `docker ps -a --filter ancestor=ds60-docker-study:local` showed only one container, or a fresh container from the image could read `/tmp/n`, this explanation would be wrong.

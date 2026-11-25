@@ -1,6 +1,8 @@
 # spark-007: Explained reference solutions
 
-Read the [guide](../guides/spark-007.md) and attempt the [learner source](../lessons/spark-007.scala) first. The [complete reference](spark-007_solution.scala) contains each implementation and its assertions. Values, identity, missingness and failure behavior are separate checks; compilation alone does not establish any of them.
+Attempt the [guide](../guides/spark-007.md) exercises first.
+
+Reference: [complete Scala program](spark-007_solution.scala).
 
 ## Exercises and reasoning
 
@@ -165,4 +167,7 @@ assert(paidTotal(Seq.empty) == (0L, 0L))
 
 ## Evidence and scope
 
-Run the complete reference using the same prepared profile as the learner source. Its assertions check normal values, malformed or boundary inputs and conservation where relevant. The final version line records the actual compiler/runtime family used. The reference is an executable explanation, not a hidden grading service or proof that a distributed Spark job would have the same performance characteristics.
+The reference tests each field parser on its valid and invalid tokens, then the composed parser on the declared error precedence: `a1|paid|100` becomes `Right(Record(a1, paid, 100))`, `a2|paid|` reports `invalid_amount`, a record with an empty ID and a malformed status reports `missing_id` first, and a line with only two fields reports `malformed_record`. The ledger assertion compares the exact accepted records and the exact `(position, raw, reason)` tuples for positions 3, 4 and 5, and confirms that accepted plus rejected equals six. The revenue check expects paid count 2 and total 100.
+
+The final lines report `spark-007: six reference contracts passed` and the Scala and Java versions used. That establishes the precedence and the ledger on this fixture; it does not show that the first error is the most useful one to a data owner, which is a policy choice you could reasonably change. In Spark, the same pattern becomes a reason column computed per row, with accepted and rejected rows written to separate outputs and their counts reconciled against the input count.
+

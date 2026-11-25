@@ -6,7 +6,16 @@ Intermediate, approximately 90 minutes. Direct prerequisites: `java-021`
 
 ## Learning objectives
 
-Run tasks with executors and futures that use bounded waits, cooperative cancellation and bounded queues. Along the way, explain future, timeout, backpressure using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. Exercises 1 and 2 start from the worked examples; the authored investigations begin with this task: Hold a task on a latch, wait with a short timeout, then release and obtain the result. The final exercise transfers the mechanism to enforce a bounded queue.
+Run tasks with executors and futures that use bounded waits, cooperative cancellation and bounded queues.
+
+The six exercises practice these steps:
+
+- Retrieve a bounded result.
+- Preserve task failure identity.
+- Separate wait timeout from task completion.
+- Cancel cooperatively.
+- Reject work after shutdown.
+- Enforce a bounded queue.
 
 ## Purpose and mental model
 
@@ -24,16 +33,9 @@ A fixed thread pool normally has an unbounded queue, which can retain more work 
 
 ## How to run this lesson
 
-Open the Docker classroom, choose the prepared Java 21 profile and save a learner pad. The pad is compiled as `Main.java` with `javac --release 21` and executed with `java -ea Main`. Assertions are enabled deliberately. A successful assertion has no output; a failed assertion throws `AssertionError` and the process should fail. Do not remove assertions to obtain a green result.
+Each exercise opens its own executor in try-with-resources and every `get` or latch wait carries a timeout, so a regression shows up as a failed check within seconds instead of a hung JVM. Exercise 2 has no recorded edit.
 
-For a prepared native JDK, copy a worked example into your own `Main.java` under ignored `.learning/expansion/java-022/`. From that directory run the same two commands on PowerShell, macOS or Linux:
-
-```text
-javac --release 21 Main.java
-java -ea Main
-```
-
-The public class name and source filename must agree. Each worked example below is a complete file. Example B includes the setup it needs from Example A, so it can be compiled by itself. The six exercise reference blocks form one complete program in the separate solution. Keep your original prediction, source and diagnostic text together. Most examples use prepared JDK libraries and tiny local fixtures; any additional dependency is specified in the lesson notes below. Any lesson-specific library or additional file is named explicitly; do not download packages from inside a learner program. Resource examples close their owned files, executors or loopback servers.
+Classroom and native JDK steps, the exercise controls and the hint routine are in the [Java study guide](../STUDY-GUIDE.md).
 
 
 
@@ -100,62 +102,62 @@ public class Main {
 
 ## Prediction before your attempt
 
-Read the source from the entry point and name each value before executing it. Identify which operations create new values, which mutate existing state and which can fail. Predict the first observable output or assertion result. For a compile-time failure, explain which source rule is violated before discussing runtime state: a program that did not compile never reached its main method. Keep normal, boundary and invalid inputs separate so each check has a clear purpose.
+Before running Example A, decide whether `future.get(2, SECONDS)` returns immediately or waits, and what it would throw if the task had not finished in time. For Example B, predict the exact exception type `get` throws when the callable throws `IllegalArgumentException`, and where the original exception ends up. Before Exercise 3, decide whether a `TimeoutException` from `get` stops the task or only stops the caller's wait.
 
 ## Exercises
 
-1. **Retrieve a bounded result: change one input.** Copy Example A into a scratch `Main.java` and change `var future = executor.submit(() -> 42);` to `var future = executor.submit(() -> 43);`. Before running it with `java -ea Main`, predict which assertion fails and which value it now sees; then run it and restore the original line.
-   **Expected:** The changed run fails with an `AssertionError` from the assertion on `value == 42`. Restoring the original line brings back the worked observation: result 42.
-   **Verify:** Compare your written prediction with the reported `AssertionError` and its stack-trace line, and name the value that made `value == 42` false. After restoring the line, the program completes without an `AssertionError` again.
+1. **Retrieve a bounded result: change one input.** Change `var future = executor.submit(() -> 42);` to `var future = executor.submit(() -> 43);` in Example A and predict which assertion fails and why.
+   **Expected:** The edited run fails with an `AssertionError` from the assertion on `value == 42`.
+   **Verify:** Name the value that makes `value == 42` false, then restore the line.
 
-2. **Preserve task failure identity: debug a regression.** Introduce one deliberate defect into a copy of Example B that makes the assertion on `observed` fail, then explain how the stack trace leads back to the faulty statement.
-   **Expected:** The defective copy fails the assertion on `observed`; the repaired copy reproduces the worked observation: executionException cause is IllegalArgumentException.
-   **Verify:** Keep the failing and the repaired runs and name the first statement whose value differs between them.
+2. **Preserve task failure identity: debug a regression.** Add one defect to Example B's new code that fails the assertion on `observed`, then repair it.
+   **Expected:** The defective copy fails its assertion and the repaired copy passes.
+   **Verify:** Name the first statement whose value differs between the failing and repaired runs.
 
 3. **Separate wait timeout from task completion.** Hold a task on a latch, wait with a short timeout, then release and obtain the result.
    **Expected:** TimeoutException first; later result 7.
-   **Verify:** Keep an assertion equivalent to `timedOut && value == 7`. As a control, change `return 7;` to `return 8;`: the run must fail with an `AssertionError` from the assertion on `timedOut && value == 7`. Restore the line before continuing.
+   **Verify:** Control: changing `return 7;` to `return 8;` must fail the assertion on `timedOut && value == 7`.
 
 4. **Cancel cooperatively.** Cancel a running latch-waiting task with interruption and observe its exit signal.
    **Expected:** Future cancelled and task catches interruption.
-   **Verify:** Keep an assertion equivalent to `finished && future.isCancelled()`. As a control, change `var exited = new java.util.concurrent.CountDownLatch(1);` to `var exited = new java.util.concurrent.CountDownLatch(2);`: the run must fail with an `AssertionError` from the assertion on `finished && future.isCancelled()`. Restore the line before continuing.
+   **Verify:** Control: changing `var exited = new java.util.concurrent.CountDownLatch(1);` to `var exited = new java.util.concurrent.CountDownLatch(2);` must fail the assertion on `finished && future.isCancelled()`.
 
 5. **Reject work after shutdown.** Shut down an idle executor and submit another task.
    **Expected:** RejectedExecutionException.
-   **Verify:** Keep an assertion equivalent to `rejected && terminated`. As a control, change `rejected = true;` to `rejected = false;`: the run must fail with an `AssertionError` from the assertion on `rejected && terminated`. Restore the line before continuing.
+   **Verify:** Control: changing `rejected = true;` to `rejected = false;` must fail the assertion on `rejected && terminated`.
 
 6. **Enforce a bounded queue.** Use one worker and one queue slot, hold the worker, fill the queue, then submit a third task.
    **Expected:** third submission rejected; admitted tasks finish after release.
-   **Verify:** Keep an assertion equivalent to `overloaded && first.get(2, java.util.concurrent.TimeUnit.SECONDS) == 1 && second.get(2, java.util.concurrent.TimeUnit.SECONDS) == 2`. As a control, change `1,` to `2,`: the run must fail with an `AssertionError` from the assertion on `overloaded && first.get(2, java.util.concurrent.TimeUnit.SECONDS) == 1 && second.get(2, java.util.concurrent.TimeUnit.SECONDS) == 2`. Restore the line before continuing.
+   **Verify:** Control: changing `1,` to `2,` must fail the assertion on `overloaded && first.get(2, java.util.concurrent.TimeUnit.SECONDS) == 1 && second.get(2, java.util.concurrent.TimeUnit.SECONDS) == 2`.
 
 ## Common pitfalls and diagnosis
 
-When a check fails, keep the smallest source file that still demonstrates the failure. Read the first relevant compiler diagnostic before editing several lines; later diagnostics can be consequences of the same missing delimiter or wrong type. For a runtime exception, identify the first frame belonging to your code and compare its input with the method contract. For an assertion failure, inspect the actual value and the independent expected value. A passing process exit is weaker than a checked invariant, and a checked invariant applies only under its stated assumptions.
+An unbounded `get()` turns a stuck task into a stuck caller, so give every wait a timeout and a plan for the unknown outcome. Catching `ExecutionException` and logging only its message loses the real failure; read `getCause()`. `cancel(true)` only sets the interrupt flag, so a task that swallows `InterruptedException` keeps running. `Executors.newFixedThreadPool` queues without limit, which hides overload until memory runs out. And forgetting to shut an executor down leaves non-daemon threads that keep the JVM alive.
 
-Do not replace a precise exception with a catch-all that returns a plausible default. That can hide an invalid input or an unfinished operation. If an example owns a resource, verify its lifetime on both the success and failure paths. If an operation is concurrent, use ordering primitives to establish the relationship you need; an observed timing coincidence is not a synchronization guarantee. The solution explanations identify the specific alternative that would break each exercise.
+General compiler, runtime and assertion triage: [diagnose a failure](../STUDY-GUIDE.md#diagnose-a-failure).
 
 ## Progressive hints
 
-Read one hint at a time and attempt the exercise again before reading the next. Keep a small table of input, expected value, actual value and exception type. Ask for one hint about the first incorrect assumption before requesting the entire reference implementation.
+Read one rung at a time, as described in [using hints](../STUDY-GUIDE.md#use-hints-one-at-a-time).
 
-- **Exercise 1:** First restate the expected observation: result 42. Then list the values read by `value == 42` and trace each one from its declaration. Finally, compute the asserted value with `var future = executor.submit(() -> 43);` in place before running.
-- **Exercise 2:** First restate the expected observation: executionException cause is IllegalArgumentException. Then list the values read by `observed` and trace each one from its declaration. Finally, name one input that would make `observed` false.
-- **Exercise 3:** First restate the expected observation: timeoutException first; later result 7. Then list the values read by `timedOut && value == 7` and trace each one from its declaration. Finally, predict the effect of changing `return 7;` to `return 8;` before running anything.
-- **Exercise 4:** First restate the expected observation: future cancelled and task catches interruption. Then list the values read by `finished && future.isCancelled()` and trace each one from its declaration. Finally, predict the effect of changing `var exited = new java.util.concurrent.CountDownLatch(1);` to `var exited = new java.util.concurrent.CountDownLatch(2);` before running anything.
-- **Exercise 5:** First restate the expected observation: rejectedExecutionException. Then list the values read by `rejected && terminated` and trace each one from its declaration. Finally, predict the effect of changing `rejected = true;` to `rejected = false;` before running anything.
-- **Exercise 6:** First restate the expected observation: third submission rejected; admitted tasks finish after release. Then list the values read by `overloaded && first.get(2, java.util.concurrent.TimeUnit.SECONDS) == 1 && second.get(2, java.util.concurrent.TimeUnit.SECONDS) == 2` and trace each one from its declaration. Finally, predict the effect of changing `1,` to `2,` before running anything.
+- **Exercise 1:** First note that the edit makes the callable return 43. Then follow the value through `future.get(2, SECONDS)`, which returns the task result unchanged. Finally, compare 43 with the 42 in the assertion and say why the executor and timeout were not at fault.
+- **Exercise 2:** First change `instanceof IllegalArgumentException` in the `catch` block to `instanceof IllegalStateException`. Then run it: `get` still throws `ExecutionException`, but `observed` is now false and `assert observed` fails. Finally, restore the type and explain why the test inspects `getCause()` rather than the `ExecutionException` wrapper.
+- **Exercise 3:** First submit a task that waits on a gate latch before returning 7. Then call `get` with a 20 millisecond timeout, record the `TimeoutException`, and release the gate in a `finally` block. Finally, call `get` again with a longer timeout and assert 7.
+- **Exercise 4:** First start a task that counts down `started`, waits forever on a fresh latch, and counts down `exited` in a `finally` block. Then wait for `started` and call `cancel(true)`. Finally, wait for `exited` and assert both it and `isCancelled()`.
+- **Exercise 5:** First create a single-thread executor and call `shutdown()`. Then submit another task inside a `try` block and catch `RejectedExecutionException`. Finally, assert that the executor reports termination and explain why creating a replacement pool silently would hide a lifecycle bug.
+- **Exercise 6:** First build a `ThreadPoolExecutor` with one worker, an `ArrayBlockingQueue` of capacity 1 and `AbortPolicy`. Then hold the first task on a latch, queue a second, and submit a third inside a `try` block. Finally, release the latch and assert that only the third was rejected.
 
 ## Self-check and retrieval
 
-Close the solution and explain Future, Timeout, Backpressure in your own words. Reconstruct one example from a blank `Main.java`, then add a new boundary input. Explain why the new case should pass or fail before compiling it. Identify a situation where this technique is appropriate and one where a different data structure, lifetime policy or abstraction would be clearer. This is a reasoning check, not a memorization test for an API spelling.
+From memory, explain what a `Future` represents before and after completion, how `ExecutionException` preserves a task failure, why a timeout on `get` does not cancel the task, and what a bounded `ThreadPoolExecutor` with `AbortPolicy` does when its single worker and single queue slot are both busy.
 
 ## Next step
 
-Preserve the saved pad and the six exercise observations. Continue to the next lesson only when you can explain the invariants without reading the answer. Later chapters reuse these contracts in larger programs, so keep a failing counterexample as well as a repaired result. A reference implementation demonstrates one valid design under the stated assumptions; it is not a universal design rule.
+Continue with `java-023`: Locks, atomics and concurrent collections. Keep your six observations; see [moving on](../STUDY-GUIDE.md#move-to-the-next-lesson).
 
 ## Sources and verification status
 
-[Official Java 21 API or language reference](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/ExecutorService.html), reviewed 2026-10-22. Examples and exercise fixtures are original course material. Use the [validation guide](../../../docs/validation.md) and CI artifacts for the exact revision and platform to inspect actual compile/run results. Authoring, parsing, compilation, execution and learner mastery are separate forms of evidence.
+[Official Java 21 API or language reference](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/concurrent/ExecutorService.html), reviewed 2026-10-22. Evidence levels: [sources and evidence](../STUDY-GUIDE.md#sources-and-evidence).
 
 ## Ask an AI tutor about this lesson
 

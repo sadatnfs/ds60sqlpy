@@ -118,31 +118,27 @@ The fields come from the integration receipt. A good dossier states both what pa
 
 ## Complete worked source
 
-This is a project-only command notebook. Read and edit it in the classroom; run its explicitly labeled commands from the copied owned Docker workshop. The classroom does not execute these service commands.
+The classroom does not execute these service commands. See the [workshop rules](../STUDY-GUIDE.md#workshop-notebooks).
 
 # Integration apache-088 complete worked notebook
 
 Assemble source/config hashes, actual image/platform identities, positive/negative results, exact resume/replacement, cleanup and explicit unsupported/prepared boundaries into one reviewable dossier. Select a coherent path rather than launching every product.
 
-## Receipt fields and independent oracle
+## What this dossier must hold
 
-- Source revision/hashes and exact declared input IDs, values, schema and time units.
-- Actual native platform, package/image identities and owned resource namespace.
-- Selected table snapshot/version, source positions or process/lineage identity as appropriate.
-- Positive result against an independent oracle and a typed negative observation.
-- Read-only retained-state comparison after the selected lifecycle transition.
-- Cleanup/evidence-storage result and any separate prepared or unavailable feature.
+- One named path and the reason it was chosen over the others.
+- The maintained source revision and hashes for every file the path runs.
+- The image ID and native platform that produced each observation.
+- The positive check, the typed negative check and their exact outputs.
+- Resume and replacement results, using the same read-only checker.
+- The cleanup list, naming only the experiment's containers, networks and volumes.
 
-For the common three-order fixture, require IDs 1/2/3 with amounts 4/9/7, total 20,
-east 11 and west 9. A later fourth west order of 2 changes the current total to 22 and west
-to 11 while an earlier pinned snapshot remains unchanged. Do not use this simple
-oracle to claim correctness for a different pipeline without defining its
-deduplication, correction and visibility semantics.
-
-Read the selected project README and qualification ledger before commands. The
-classroom does not execute Docker commands in this Markdown pad. Prepared
-configuration, unit policy fixtures, successful compilation and actual service
-acceptance remain different observations. Never include credentials or signed URLs.
+A reviewer should be able to rebuild every verdict in the dossier from its own
+fields. Check that every observation cites the image and platform it ran on, so
+an ARM64 run is never presented as AMD64 evidence. Check that each negative
+result names the expected failure before the observed one. Keep any feature that
+was only prepared, such as a combined streaming topology, in a separate list. The
+[shared receipt rules](../STUDY-GUIDE.md#evidence-receipts) cover naming and storage.
 
 ## Concrete source inspection
 
@@ -153,14 +149,15 @@ cat README.md
 cat batch_snapshot.py
 ```
 
-These inspections do not start or qualify a service. Execute only the chosen
-project's complete documented owned route and retain its actual receipt.
+The integration README separates three routes: the actual bounded batch dossier,
+a real service dossier through a qualified workshop, and prepared combined
+routes. Choose one before writing anything. `batch_snapshot.py` shows the receipt
+shape the batch route already writes, including the explicit false for direct
+connector acceptance, which is a good model for every unsupported claim.
 
 ## Primary references
 
-- [Iceberg reliability and table state](https://iceberg.apache.org/docs/latest/reliability/)
-- [Arrow data format](https://arrow.apache.org/docs/format/Columnar.html)
-- [Flink stateful stream processing](https://nightlies.apache.org/flink/flink-docs-release-2.3/docs/concepts/stateful-stream-processing/)
-- [Kafka delivery/transaction design](https://kafka.apache.org/44/design/design/)
-- [Atlas API and metadata boundaries](https://atlas.apache.org/api/v2/index.html)
-- [Delta Sharing protocol](https://github.com/delta-io/delta-sharing/blob/v1.4.1/PROTOCOL.md)
+- [Arrow Flight RPC protocol](https://arrow.apache.org/docs/format/Flight.html)
+- [Kafka transactions and log compaction](https://kafka.apache.org/44/design/design/)
+- [Cassandra replication guarantees](https://cassandra.apache.org/doc/5.0/cassandra/architecture/guarantees.html)
+- [Iceberg snapshot reliability](https://iceberg.apache.org/docs/latest/reliability/)

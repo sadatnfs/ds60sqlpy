@@ -1,6 +1,6 @@
 # js-044: explanatory solutions
 
-Compare after your own attempt or an explicit reveal. The separate .js reference is a complete offline browser program. These explanations discuss the six practice tasks; a visual resemblance alone is not a data or behavior check.
+Compare after your own attempt; the separate `.js` file is the complete reference program.
 
 ## Mechanism review
 
@@ -49,3 +49,7 @@ Geometry has a domain contract. Silent invalid attributes make a bad input look 
 The mechanism is about data-to-node relationships, not SVG alone. Preserve text safety when labels are external. Replace "circle" with "li" inside a ul and set .text(d => d). Using .html() with an external label would let markup in the label run as HTML; count li nodes after two updates to confirm reconciliation.
 
 **Expected:** Current records reconcile to current list items.
+
+## After comparison
+
+Reuse the join pattern for table rows whose data change on a timer that you stop after three updates. Check after each update that the row count equals the data length, and log how many nodes entered and exited on each call.

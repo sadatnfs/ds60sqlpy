@@ -2,7 +2,7 @@
 
 Define a model schema contract and verify both accepted and rejected changes.
 
-The executable reference contains the two complete worked cases with assertions. The changes below explain the independent practice and its limits.
+The reference enforces a contract on a table model with declared integer and bigint columns, builds a compatible version and then a version that casts `amount` to varchar. The rejected run leaves 42 in place for this DuckDB table; other adapters and materializations may fail differently. See [how these answers are laid out](../STUDY-GUIDE.md#answers-and-references).
 
 
 ## 1. Remove a declared column

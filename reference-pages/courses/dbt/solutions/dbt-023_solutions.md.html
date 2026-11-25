@@ -195,7 +195,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="dbt-023-explained-reference">dbt-023: explained reference<a class="heading-anchor" href="#dbt-023-explained-reference" aria-label="Link to this section">#</a></h2>
 <p>Measure database work with a correctness oracle and a clearly defined interval.</p>
-<p>The executable reference contains the two complete worked cases with assertions. The changes below explain the independent practice and its limits.</p>
+<p>The reference builds a ten-thousand-row table, queries ids under 1000 grouped by <code>id % 5</code>, compares every total with Python, takes three timings and reads <code>explain</code>. The median describes this machine and run only. The distinct rewrite fails the correctness oracle before speed matters. See <a href="../STUDY-GUIDE.md.html#answers-and-references">how these answers are laid out</a>.</p>
 <h3 id="1-change-measured-scope">1. Change measured scope<a class="heading-anchor" href="#1-change-measured-scope" aria-label="Link to this section">#</a></h3>
 <p>Keep fixture generation outside the intended interval or describe it explicitly. Comparing differently scoped timings is misleading.</p>
 <p><strong>Expected:</strong> The report states which interval each value covers.</p>

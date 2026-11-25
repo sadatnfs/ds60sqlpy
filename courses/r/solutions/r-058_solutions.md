@@ -1,6 +1,6 @@
 # r-058: reference reasoning
 
-Use the [complete reference](r-058_reference.R) with the guide's declared inputs and runtime. Every worked example is also a standalone script.
+Run the [complete reference](r-058_reference.R) under the [run rules](../STUDY-GUIDE.md#run-a-chapter).
 
 ## Why the implementation has this shape
 
@@ -108,4 +108,6 @@ Clicking, keyboard use, hover readability, resizing and assistive-technology beh
 
 ## What the checks establish
 
-The reference makes 5 `stopifnot()` checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.
+The checks confirm two traces carrying ids A1 and A2 and then B1 and B2 as custom data, a Group A button that sets visibility to TRUE and FALSE, an overall mean of 3.75 against a group A mean of 2.5, which is why a fixed global label is wrong in a filtered view, and a text summary that selects the two A rows. They do not test keyboard access or screen reader output.
+
+The reference makes 5 `stopifnot()` checks; see [what a passing run proves](../STUDY-GUIDE.md#what-a-passing-run-proves).

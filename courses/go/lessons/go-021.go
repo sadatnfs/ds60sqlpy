@@ -3,11 +3,11 @@ package main
 import "fmt"
 
 func main() {
-	// Exercise 1: Apply an explicit flag: change one input: Copy worked example 1 into a scratch pad and change `n, args, err := parseArgs([]string{"-count=3"})` to `n, args, err := parseArgs([]string{"-count=4"})`. Before running, predict which check fails and which value it now sees; then run it and restore the original line.
-	// Expected: The changed run panics with `flag` because `err == nil && n == 3 && len(args) == 0` no longer holds. Restoring the original line brings back the worked observation: the resulting count is 3.
+	// Exercise 1: Apply an explicit flag: change one input: Copy worked example 1, change `n, args, err := parseArgs([]string{"-count=3"})` to `n, args, err := parseArgs([]string{"-count=4"})` and predict the failure before running; then restore the line.
+	// Expected: The edited run panics with `flag` because `err == nil && n == 3 && len(args) == 0` no longer holds.
 
-	// Exercise 2: Retain a default: diagnose an edited check: A careless edit changed the check in worked example 2 so that it reads `check(err != nil && n == 1, "default")`. Run worked example 2 with that line, explain why the edited check now fails for the same program state, and restore it.
-	// Expected: Before the repair the program panics with `default`; after it the line reads `check(err == nil && n == 1, "default")` again and the count remains 1.
+	// Exercise 2: Retain a default: diagnose an edited check: A careless edit rewrote the check in worked example 2 as `check(err != nil && n == 1, "default")`. Explain the failure, then restore it.
+	// Expected: The defective run panics with `default`; after restoring `check(err == nil && n == 1, "default")`, the count remains 1.
 
 	// Exercise 3: Reject an unknown option: Parse -mystery=2.
 	// Expected: Parsing returns an error.

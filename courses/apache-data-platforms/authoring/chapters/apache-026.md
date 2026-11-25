@@ -74,4 +74,4 @@ execution model and the team can operate its dependencies. The two allocation
 and bounded-output cases provide concrete evidence to discuss that tradeoff
 without claiming that a tutorial benchmark proves production capacity.
 
-The [complete Ballista workshop](../../projects/ballista/README.md) provides the maintained files, preparation, lifecycle and exact qualification boundaries for these cases.
+The [Ballista workshop](../../projects/ballista/README.md) actions `one-slot` and `two-slots` restart the scheduler and executor with that many task slots, and `bounded-output` caps the returned rows at three and the payload at 2,048 bytes.

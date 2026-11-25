@@ -1,6 +1,6 @@
 # cuda-116: explained solutions
 
-These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.
+Compare with your [worksheet](../lessons/cuda-116.md) attempt.
 
 ## Exercise 1: Classify fallback versus unavailable device
 
@@ -74,8 +74,16 @@ List each reason and observed transition.
 
 **How to verify.** Generate the report from the executed plan and fallback log, and check each listed transition appears in the plan.
 
+## Self-check answers
+
+1. **What does support depend on in the plugin?** The operator, the expression, the data type and the configuration, so one aggregate can be supported for some types and not others.
+
+2. **Why can a mixed plan be slower than expected?** It may pay row to columnar conversions and device transfers repeatedly around unsupported parts.
+
+3. **How should CPU-only learners run Spark in this course?** Ordinary Spark with the GPU plugin disabled or absent.
+
 ## Reference observation
 
 CPU-only baseline and per-operator fallback are modeled separately.
 
-The reference file is `courses/cuda/spark/references/cuda-116_cpu.py`. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.
+Asserted by `courses/cuda/spark/references/cuda-116_cpu.py`.

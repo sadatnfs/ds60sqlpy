@@ -1,6 +1,6 @@
 # js-057: explanatory solutions
 
-Compare after your own attempt or an explicit reveal. The separate .js reference is a complete offline browser program. These explanations discuss the six practice tasks; a visual resemblance alone is not a data or behavior check.
+Compare after your own attempt; the separate `.js` file is the complete reference program.
 
 ## Mechanism review
 
@@ -49,3 +49,7 @@ The alternative should preserve the actual analytical action, not merely display
 Keep data filtering and rendering separate. This makes interactions testable without depending on exact pixel appearance. A second chart should read the same set of selected ids rather than run its own filter; verify both show "2,3,4" after one brush. Write the selection logic as a pure function from a range to ids so it can be unit tested without a browser.
 
 **Expected:** One shared selected-ID set drives both views.
+
+## After comparison
+
+Link a brush on a time axis to a bar chart of counts per category and a text list, and add a keyboard preset for the last seven days. Check that the bars, the list and the announced count describe the same selected IDs after every change.

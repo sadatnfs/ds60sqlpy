@@ -1,6 +1,6 @@
 # r-030: reference reasoning
 
-Use the [complete reference](r-030_reference.R) with the guide's declared inputs and runtime. Every worked example is also a standalone script.
+Run the [complete reference](r-030_reference.R) under the [run rules](../STUDY-GUIDE.md#run-a-chapter).
 
 ## Why the implementation has this shape
 
@@ -108,4 +108,6 @@ Export metric_batch and combine_batches; register S3method(summary,metric_batch)
 
 ## What the checks establish
 
-The reference makes 8 `stopifnot()` checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.
+The assertions confirm a summary of 3 rows, 2 observed, 1 missing and mean 4 in ms, an extended batch of 4 rows with mean 16/3, an all-missing batch with an NA mean, an empty batch with zero rows and an NA mean, an unchanged original after extension, a rejected forged or incompatible object, and a NAMESPACE that keeps the validator unexported. They do not establish any inference about the population behind these values.
+
+The reference makes 8 `stopifnot()` checks; see [what a passing run proves](../STUDY-GUIDE.md#what-a-passing-run-proves).

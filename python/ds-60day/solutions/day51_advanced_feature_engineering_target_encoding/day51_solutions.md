@@ -1,6 +1,6 @@
 # Day 51 Solutions: Target Encoding and Leakage-Safe Features
 
-**Offline teaching data:** The [original synthetic fixtures](../../../fixtures/README.md) replace first-run sample-data downloads. Their values are not historical or observational evidence. Keep numerical conclusions scoped to the declared teaching input.
+**Offline teaching data:** the `passenger-outcomes` [synthetic fixture](../../../fixtures/README.md) is invented, so its numbers prove methods, not facts.
 
 
 We implement K‑fold target encoding without leakage, feature hashing for high‑cardinality categories, and rolling group statistics in time order.
@@ -216,9 +216,7 @@ Explanation
 
 ## Solution reasoning lens
 
-A strong solution is not merely code that produces one plausible
-output. It establishes a chain from input contract to operation to
-verification:
+Each decision below links an input contract to an operation and its evidence:
 
 1. **`groupby(category)[target].agg(['mean', 'count'])`:** builds category evidence only from the allowed training subset.
 2. **`(count * mean + strength * prior) / (count + strength)`:** smooths low-support categories toward the training-wide prior.
@@ -235,29 +233,15 @@ verification:
 
 **Evidence of correctness:** Prove each training row is excluded from its map, compare against one-hot on identical folds, test unseen/missing categories, and report category support plus smoothing.
 
-When comparing your attempt with the reference, explain which of these
-decisions your code made explicitly. If the reference makes a different
-choice, compare the contracts and evidence before deciding that one
-version is universally better.
-
 <!-- END ADVANCED PYTHON CONCEPT ENRICHMENT -->
 
 ## Exercise-by-exercise reasoning map
-
-This map connects every learner prompt to a reasoning path. Read the
-explanation before copying code: the goal is to understand the assumptions,
-the evidence that validates the result, and the edge cases that can make an
-apparently correct implementation fail.
 
 ### Exercise 1: Original lesson practice
 
 **Prompt:** Add K-fold target encoding to a scikit-learn pipeline through a custom transformer or `FunctionTransformer`.
 
 **How to reason about it:** A target encoder needs distinct training and inference behavior. Training rows receive out-of-fold values; unseen rows receive a mapping fit on all allowed training rows, with index alignment tested explicitly.
-
-Use the worked reference earlier in this file, then change one boundary
-condition and rerun the stated checks. A copied output is not evidence
-unless you can explain why that output follows from the inputs.
 
 **Verify:** Produce one out-of-fold encoded value per training row, assert that row's target was excluded from its category statistic, and test missing/unseen categories through the fitted pipeline without NaN or leakage.
 
@@ -267,10 +251,6 @@ unless you can explain why that output follows from the inputs.
 
 **How to reason about it:** Smoothing blends category evidence with a global prior based on support. Test singleton, dominant, missing, and unseen categories and document the formula rather than treating library defaults as universal.
 
-Use the worked reference earlier in this file, then change one boundary
-condition and rerun the stated checks. A copied output is not evidence
-unless you can explain why that output follows from the inputs.
-
 **Verify:** Print global prior, smoothing formula, n_splits, category count/support, and encoded values for rare/common/unseen categories; compare at least three n_splits values on identical folds.
 
 ### Exercise 3: Original lesson practice
@@ -278,10 +258,6 @@ unless you can explain why that output follows from the inputs.
 **Prompt:** Compare ROC AUC with one-hot encoding across multiple seeded train/test splits.
 
 **How to reason about it:** Compare one-hot and target encoding on exactly paired splits and multiple seeds. Target encoding may help high-cardinality features but adds leakage risk and operational state that score alone does not capture.
-
-Use the worked reference earlier in this file, then change one boundary
-condition and rerun the stated checks. A copied output is not evidence
-unless you can explain why that output follows from the inputs.
 
 **Verify:** Over multiple declared seeded splits, print ROC-AUC pairs for target encoding and one-hot encoding plus mean/std/difference; keep all encoding fits inside each training fold.
 
@@ -300,10 +276,6 @@ After generating all training encodings, fit a separate full-training mapping
 for future validation/test/inference rows. Never replace the out-of-fold
 training column with that full mapping.
 
-**Why this matters:** The result should survive a fresh-kernel rerun and
-a deliberately chosen boundary case. If it does not, revisit the
-assumption or data boundary rather than hiding the failure.
-
 **Verify:** Out-of-fold invariant; on unique-per-row categories, assert full-data encoding equals each label while every out-of-fold value equals the training-fold prior; print row, fold, label, leaky value, and OOF value.
 
 ### Exercise 5: Unknown and missing categories
@@ -321,10 +293,6 @@ The singleton known category should be strongly shrunk toward the prior. Save
 normalization, mapping, support counts, prior, and smoothing parameters in the
 fitted transformer.
 
-**Why this matters:** The result should survive a fresh-kernel rerun and
-a deliberately chosen boundary case. If it does not, revisit the
-assumption or data boundary rather than hiding the failure.
-
 **Verify:** Unknown and missing categories; assert missing, unseen, one-observation-known, and well-supported-known fixtures return their separately documented prior/smoothed values without NaN; print support and mapping source for each.
 
 ### Exercise 6: Temporal leakage
@@ -341,9 +309,5 @@ known at prediction time.
 
 Evaluate with a forward time split and preserve label-availability delay;
 event time and label-arrival time may differ.
-
-**Why this matters:** The result should survive a fresh-kernel rerun and
-a deliberately chosen boundary case. If it does not, revisit the
-assumption or data boundary rather than hiding the failure.
 
 **Verify:** Temporal leakage; print each event timestamp, training cutoff, category support, and encoded value under expanding time; assert no source label timestamp is later than the row cutoff and compare with random-K-fold leakage.

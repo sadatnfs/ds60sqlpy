@@ -1,6 +1,8 @@
 # rust-006: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [rust-006_solution.rs](rust-006_solution.rs). It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.
+Executable reference: [rust-006_solution.rs](rust-006_solution.rs), which runs both examples and the coded answers.
+
+Open this only after [an attempt](../STUDY-GUIDE.md#attempt-a-lesson).
 
 ## Why the two examples differ
 
@@ -26,7 +28,7 @@ Write the accumulator before and after every iteration.
 
 Skip negative values while preserving a clear invariant.
 
-**Reference answer.** The same statements run as the `Task 2` block of the reference program; here they are wrapped in `main` as a complete file.
+**Reference answer**, wrapped in `main`; the reference runs it as its `Task 2` block.
 
 ```rust
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -62,7 +64,7 @@ The invariant is that after each iteration `total` equals the sum of the non-neg
 
 Implement a first-match search with Option output.
 
-**Reference answer.** The same statements run as the `Task 3` block of the reference program; here they are wrapped in `main` as a complete file.
+**Reference answer**, wrapped in `main`; the reference runs it as its `Task 3` block.
 
 ```rust
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -101,7 +103,7 @@ Diagnose an inclusive loop bound used as an array index.
 
 Test empty, singleton and repeated-match sequences.
 
-**Reference answer.** The same statements run as the `Task 5` block of the reference program; here they are wrapped in `main` as a complete file.
+**Reference answer**, wrapped in `main`; the reference runs it as its `Task 5` block.
 
 ```rust
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -130,7 +132,7 @@ Each sequence shape exercises a different stop: no iterations, a match on the on
 
 Design a bounded retry loop and state both its progress measure and its effect policy.
 
-No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **Invariant**, and state one limitation of your choice.
+**Judging criteria.** A strong design bounds attempts with a counter that rises toward a fixed maximum, such as `for attempt in 1..=max_attempts`, so termination never depends on the remote side. It states the effect policy: whether the operation is idempotent, which attempts may repeat a side effect, and what the caller receives after the last failure (an `Err` carrying the final cause, not a default). One limitation: an attempt count alone does not bound wall-clock time without a delay or deadline.
 
 ## Mechanism and diagnostic reasoning
 
@@ -144,4 +146,6 @@ An iterator can consume values or borrow them depending on its construction. A p
 
 ## Review before continuing
 
-Run the reference and confirm that it prints `rust-006: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.
+Rebuild Example B (Find the first position) from a blank pad.
+
+Review routine: [Self-check and review](../STUDY-GUIDE.md#self-check-and-review).

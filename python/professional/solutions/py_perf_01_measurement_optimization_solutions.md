@@ -58,9 +58,6 @@ The workflow preserves a correctness oracle and performance budget while using p
 
 ### Verification micro-example
 
-Run this small, deterministic case before adapting the reference to a
-larger system. It gives the reasoning above an executable anchor:
-
 ```python
 import statistics
 import timeit
@@ -81,31 +78,19 @@ assert report["min_seconds"] <= report["median_seconds"] <= report["max_seconds"
 
 **Expected observation:** Repeated timings vary; median and range reveal noise that one measurement hides.
 
-The reference implementation is one defensible contract, not a license
-to copy internal steps into every system. Preserve the observable
-guarantees and repeat the failure tests when adapting it.
-
 <!-- END PROFESSIONAL PYTHON CONCEPT ENRICHMENT -->
 
 ## Exercise-by-exercise reference
 
-Use this map after an honest attempt. The executable implementation remains
-[`py_perf_01_measurement_optimization_solution.py`](py_perf_01_measurement_optimization_solution.py); this section explains the
-contract, evidence, alternatives, and edge cases behind every numbered task.
+The runnable [`py_perf_01_measurement_optimization_solution.py`](py_perf_01_measurement_optimization_solution.py) implements every task below.
+
+**Principle behind every task:** Performance work begins with equivalent semantics and representative evidence, then addresses algorithm, memory, transfer, hotspot, cache, or native boundary in priority order.
+
+**Trap behind every task:** One fastest timing, a microbenchmark-only workload, invisible native memory, dtype overflow, process copies, or cache staleness can turn an optimization into a regression.
 
 ### Exercise 1: Define semantics before speed
 
 **Prompt recap:** For `[4, 1, 3, 2, 3, 4]`, the answer is `3`: the duplicate whose *second* occurrence appears first. Complete `first_duplicate_linear` with a set and prove equivalence for empty, unique, immediate, and competing duplicates.
-
-**Reference reasoning:** Performance work begins with equivalent semantics and representative evidence, then addresses algorithm, memory, transfer, hotspot, cache, or native boundary in priority order. The executable module and
-the focused discussion earlier in this file implement this original
-exercise. Verify every acceptance condition from the prompt with a
-normal case, a boundary case, and the documented failure behavior.
-
-**Common trap:** One fastest timing, a microbenchmark-only workload, invisible native memory, dtype overflow, process copies, or cache staleness can turn an optimization into a regression.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
 
 **Verify:** Define semantics before speed; assert first_duplicate_linear([4,1,3,2,3,4]) == 3, [] and unique input return None, [2,2] returns 2, and competing duplicates follow earliest second occurrence; compare all cases with the baseline oracle.
 
@@ -113,31 +98,11 @@ and which input would make the policy reject or choose a different path.
 
 **Prompt recap:** Choose a workload size large enough to rise above timer noise but small enough for quick study. Warm up separately, then collect at least five repeated batches with `timeit`. Record Python version, platform, input size, and plan. Do not assert “candidate < baseline” in the test suite. CI hosts, antivirus, power state, and schedulers make that flaky.
 
-**Reference reasoning:** Performance work begins with equivalent semantics and representative evidence, then addresses algorithm, memory, transfer, hotspot, cache, or native boundary in priority order. The executable module and
-the focused discussion earlier in this file implement this original
-exercise. Verify every acceptance condition from the prompt with a
-normal case, a boundary case, and the documented failure behavior.
-
-**Common trap:** One fastest timing, a microbenchmark-only workload, invisible native memory, dtype overflow, process copies, or cache staleness can turn an optimization into a regression.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
-
 **Verify:** Build a representative timing plan; choose a workload size large enough to rise above timer noise but small enough for quick study; record Python version, platform, input size, and plan; do not assert “candidate < baseline” in the test suite.
 
 ### Exercise 3: Ask cProfile a different question
 
 **Prompt recap:** Profile one complete representative call and sort by cumulative time. Locate the call path, not just the leaf with the largest self time. Reduce the workload if profiling overhead dominates, and do not compare profiled seconds directly with unprofiled `timeit` seconds.
-
-**Reference reasoning:** Performance work begins with equivalent semantics and representative evidence, then addresses algorithm, memory, transfer, hotspot, cache, or native boundary in priority order. The executable module and
-the focused discussion earlier in this file implement this original
-exercise. Verify every acceptance condition from the prompt with a
-normal case, a boundary case, and the documented failure behavior.
-
-**Common trap:** One fastest timing, a microbenchmark-only workload, invisible native memory, dtype overflow, process copies, or cache staleness can turn an optimization into a regression.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
 
 **Verify:** Ask cProfile a different question; profile one complete representative call and sort by cumulative time; locate the call path, not just the leaf with the largest self time; reduce the workload if profiling overhead dominates, and do not compare profiled seconds directly with unprofiled timeit seconds.
 
@@ -145,31 +110,11 @@ and which input would make the policy reject or choose a different path.
 
 **Prompt recap:** Compare materialized-list and generator sums with `tracemalloc`. Assert equal results and report bounds (`peak >= current >= 0`). Explain why `tracemalloc` may not see memory allocated inside every native library.
 
-**Reference reasoning:** Performance work begins with equivalent semantics and representative evidence, then addresses algorithm, memory, transfer, hotspot, cache, or native boundary in priority order. The executable module and
-the focused discussion earlier in this file implement this original
-exercise. Verify every acceptance condition from the prompt with a
-normal case, a boundary case, and the documented failure behavior.
-
-**Common trap:** One fastest timing, a microbenchmark-only workload, invisible native memory, dtype overflow, process copies, or cache staleness can turn an optimization into a regression.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
-
 **Verify:** Measure allocation pressure; compare materialized-list and generator sums with tracemalloc; assert equal results and report bounds (peak >= current >= 0); explain why tracemalloc may not see memory allocated inside every native library.
 
 ### Exercise 5: Compare optional vectorization
 
 **Prompt recap:** With NumPy installed, compare a Python loop with `np.square(array).sum()`. Include conversion from Python values when that conversion exists in the real workflow. Small input can favor the loop; already-resident large arrays can favor vectorized native work. Measure both representative cases.
-
-**Reference reasoning:** Performance work begins with equivalent semantics and representative evidence, then addresses algorithm, memory, transfer, hotspot, cache, or native boundary in priority order. The executable module and
-the focused discussion earlier in this file implement this original
-exercise. Verify every acceptance condition from the prompt with a
-normal case, a boundary case, and the documented failure behavior.
-
-**Common trap:** One fastest timing, a microbenchmark-only workload, invisible native memory, dtype overflow, process copies, or cache staleness can turn an optimization into a regression.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
 
 **Verify:** Compare optional vectorization; with NumPy installed, compare a Python loop with np.square(array).sum(); include conversion from Python values when that conversion exists in the real workflow; measure both representative cases.
 
@@ -177,31 +122,11 @@ and which input would make the policy reject or choose a different path.
 
 **Prompt recap:** Serialize a safe local JSON payload and measure its byte length. Complete `estimated_transfer_bytes`. Four workers each receiving two copies move eight payload equivalents before computation. Real process protocols may add framing, copies, or shared-memory complexity.
 
-**Reference reasoning:** Performance work begins with equivalent semantics and representative evidence, then addresses algorithm, memory, transfer, hotspot, cache, or native boundary in priority order. The executable module and
-the focused discussion earlier in this file implement this original
-exercise. Verify every acceptance condition from the prompt with a
-normal case, a boundary case, and the documented failure behavior.
-
-**Common trap:** One fastest timing, a microbenchmark-only workload, invisible native memory, dtype overflow, process copies, or cache staleness can turn an optimization into a regression.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
-
 **Verify:** Model process transfer; measure one JSON payload's encoded byte length and assert estimated_transfer_bytes(payload_bytes, workers=4, copies=2) equals 8 * payload_bytes; reject negative counts and state protocol overhead is excluded.
 
 ### Exercise 7: Evaluate caching
 
 **Prompt recap:** Use `cached_fibonacci.cache_info()` to observe hits. Then evaluate a real candidate by: - measured reuse, - entry count and bytes, - invalidation/freshness rules, - key cardinality, and - whether retained objects prevent memory release. Caching a low-reuse, high-cardinality result can make performance worse.
-
-**Reference reasoning:** Performance work begins with equivalent semantics and representative evidence, then addresses algorithm, memory, transfer, hotspot, cache, or native boundary in priority order. The executable module and
-the focused discussion earlier in this file implement this original
-exercise. Verify every acceptance condition from the prompt with a
-normal case, a boundary case, and the documented failure behavior.
-
-**Common trap:** One fastest timing, a microbenchmark-only workload, invisible native memory, dtype overflow, process copies, or cache staleness can turn an optimization into a regression.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
 
 **Verify:** Evaluate caching; use cached fibonacci.cache info() to observe hits; then evaluate a real candidate by: - measured reuse, - entry count and bytes, - invalidation/freshness rules, - key cardinality, and - whether retained objects prevent memory release; caching a low-reuse, high-cardinality result can make performance worse.
 
@@ -209,31 +134,11 @@ and which input would make the policy reject or choose a different path.
 
 **Prompt recap:** Use the policy to prefer an available algorithm improvement. If a measured hotspot remains, batch native calls and cap transfer. Survey Cython, Rust/PyO3, C/C++ extensions, and `ctypes`/`cffi`; record build wheels, ABI, ownership, error, and safety obligations before choosing one.
 
-**Reference reasoning:** Performance work begins with equivalent semantics and representative evidence, then addresses algorithm, memory, transfer, hotspot, cache, or native boundary in priority order. The executable module and
-the focused discussion earlier in this file implement this original
-exercise. Verify every acceptance condition from the prompt with a
-normal case, a boundary case, and the documented failure behavior.
-
-**Common trap:** One fastest timing, a microbenchmark-only workload, invisible native memory, dtype overflow, process copies, or cache staleness can turn an optimization into a regression.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
-
 **Verify:** Bound native/FFI work; use the policy to prefer an available algorithm improvement; if a measured hotspot remains, batch native calls and cap transfer; survey Cython, Rust/PyO3, C/C++ extensions, and ctypes/cffi; record build wheels, ABI, ownership, error, and safety obligations before choosing one.
 
 ### Exercise 9: Apply the evidence decision
 
 **Prompt recap:** Complete `choose_next_step` in priority order: 1. fix unequal behavior, 2. reduce peak memory beyond budget, 3. reduce transfer consuming at least 30 percent, 4. optimize a hotspot consuming at least 50 percent, or 5. keep the current implementation. Thresholds are a transparent lesson policy, not universal laws.
-
-**Reference reasoning:** Performance work begins with equivalent semantics and representative evidence, then addresses algorithm, memory, transfer, hotspot, cache, or native boundary in priority order. The executable module and
-the focused discussion earlier in this file implement this original
-exercise. Verify every acceptance condition from the prompt with a
-normal case, a boundary case, and the documented failure behavior.
-
-**Common trap:** One fastest timing, a microbenchmark-only workload, invisible native memory, dtype overflow, process copies, or cache staleness can turn an optimization into a regression.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
 
 **Verify:** Apply the evidence decision; table-test choose_next_step so unequal outputs select correctness, over-budget memory selects memory, transfer >=30% selects transfer, hotspot >=50% selects optimization, and the below-threshold case selects keep.
 
@@ -252,11 +157,6 @@ The evidence supports a local estimate, not a universal guarantee. A CI
 performance gate needs a separately reviewed stable runner and practical
 regression budget.
 
-**Common trap:** One fastest timing, a microbenchmark-only workload, invisible native memory, dtype overflow, process copies, or cache staleness can turn an optimization into a regression.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
-
 **Verify:** compare timing distributions; run interleaved repeated batches for baseline and candidate, report median, spread, paired ratios/differences, environment, and correctness; avoid a binary CI speed assertion.
 
 ### Exercise 11: diagnose warmup, GC, and environment noise
@@ -272,11 +172,6 @@ is diagnostic evidence only.
 
 Restart the interpreter when import/cache state matters. Do not discard
 outliers automatically, identify scheduler, I/O, thermal, or allocation causes.
-
-**Common trap:** One fastest timing, a microbenchmark-only workload, invisible native memory, dtype overflow, process copies, or cache staleness can turn an optimization into a regression.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
 
 **Verify:** diagnose warmup, GC, and environment noise; measure cold import/first call separately from steady state; repeat with garbage collection controlled, background load noted, and process affinity/power assumptions documented rather than hidden.
 
@@ -295,11 +190,6 @@ Measure representative distributions and choose based on both time and peak
 budget. Approximate probabilistic structures require an explicit false-positive
 contract and cannot silently replace exact output.
 
-**Common trap:** One fastest timing, a microbenchmark-only workload, invisible native memory, dtype overflow, process copies, or cache staleness can turn an optimization into a regression.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
-
 **Verify:** trade algorithm speed for memory; compare set-based first-duplicate search with a sorted/indexed alternative under a strict memory budget; preserve 'first second occurrence' semantics and report time/peak memory across unique-heavy and duplicate-early inputs.
 
 ### Exercise 13: test vectorized dtype boundaries
@@ -315,11 +205,6 @@ for floats, define acceptable numeric tolerance and finite behavior.
 
 Vectorization that returns a faster wrong number is a correctness failure and
 must route `choose_next_step` to fix correctness first.
-
-**Common trap:** One fastest timing, a microbenchmark-only workload, invisible native memory, dtype overflow, process copies, or cache staleness can turn an optimization into a regression.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
 
 **Verify:** test vectorized dtype boundaries; compare Python integer sum-of-squares with NumPy int32, int64, float, and object arrays near overflow; detect silent overflow and choose a validated dtype.
 
@@ -338,11 +223,6 @@ Shared memory reduces repeated transfer but adds lifecycle, synchronization,
 and crash-cleanup complexity. It is justified only when measured payload cost
 is material.
 
-**Common trap:** One fastest timing, a microbenchmark-only workload, invisible native memory, dtype overflow, process copies, or cache staleness can turn an optimization into a regression.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
-
 **Verify:** evaluate shared-memory process input; compare normal process serialization with read-only shared memory for one large numeric payload; include setup/copy, worker mapping, cleanup, spawn compatibility, and ownership failure cases.
 
 ### Exercise 15: separate I/O concurrency from CPU optimization
@@ -357,11 +237,6 @@ but add spawn and serialization. Tiny tasks often remain fastest sequentially.
 
 Report correctness, throughput, latency, peak concurrency, transfer, and
 cleanup. Do not generalize from one task label such as “data processing.”
-
-**Common trap:** One fastest timing, a microbenchmark-only workload, invisible native memory, dtype overflow, process copies, or cache staleness can turn an optimization into a regression.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
 
 **Verify:** separate I/O concurrency from CPU optimization; benchmark a local fake I/O wait and a pure-Python CPU loop under sequential, async/thread, and process designs; explain why each model helps one workload and may hurt another.
 
@@ -378,11 +253,6 @@ a deadline/cancellation policy.
 
 Single-flight prevents duplicate work but does not define freshness,
 eviction, distributed coordination, or whether stale data is acceptable.
-
-**Common trap:** One fastest timing, a microbenchmark-only workload, invisible native memory, dtype overflow, process copies, or cache staleness can turn an optimization into a regression.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
 
 **Verify:** prevent a cache stampede; model many callers missing one expensive cache key; add single-flight ownership, bounded wait, success publication, failure cleanup, and stale/retry policy with injected time.
 
@@ -401,11 +271,6 @@ Test empty, maximum bounded size, invalid layout, native failure, and repeated
 calls under sanitizers/native tooling where available. Packaging evidence is
 required for every supported target.
 
-**Common trap:** One fastest timing, a microbenchmark-only workload, invisible native memory, dtype overflow, process copies, or cache staleness can turn an optimization into a regression.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
-
 **Verify:** review an FFI ownership boundary; specify one batched native function: accepted buffer dtype/layout, length, ownership/lifetime, mutability, error mapping, GIL behavior, panic/exception containment, and platform wheel matrix.
 
 ### Exercise 18: design a continuous performance gate
@@ -422,10 +287,5 @@ then block.
 
 Never optimize solely to the benchmark. Periodically reconcile it with
 production/representative profiles and update through reviewed evidence.
-
-**Common trap:** One fastest timing, a microbenchmark-only workload, invisible native memory, dtype overflow, process copies, or cache staleness can turn an optimization into a regression.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
 
 **Verify:** design a continuous performance gate; define a stable local/CI benchmark artifact with workload version, correctness hash, environment, raw timings, peak memory, practical regression budget, comparison policy, and an investigation path instead of an immediate flaky fail.

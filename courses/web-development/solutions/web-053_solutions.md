@@ -1,6 +1,6 @@
 # web-053: explanatory solutions
 
-Open this after your own attempt. Each answer explains the lesson's synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in `courses/web-development/guides/web-053.md`.
+Attempt each exercise before reading; the mechanism is in `courses/web-development/guides/web-053.md` ([using these answers](../STUDY-GUIDE.md#solutions)).
 
 ## Exercise 1: Explain why knowing a record id is not sufficient permission.
 
@@ -76,4 +76,6 @@ Open this after your own attempt. Each answer explains the lesson's synthetic fi
 
 ## Reference comparison
 
-Open `courses/web-development/solutions/web-053_solution.php` only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; server lifecycle, persistence, concurrency and security need their own integration evidence.
+The reference requires owner 7 to read note 1, owner 8 to get null for it and a missing id to return null. That catches id-only lookups and leaks. It does not cover update or delete paths, so check that they apply the same owner scoping as reads.
+
+Open `courses/web-development/solutions/web-053_solution.php` after saving your attempt ([comparing with the reference](../STUDY-GUIDE.md#references)).

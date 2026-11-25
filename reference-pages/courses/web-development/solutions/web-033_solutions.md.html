@@ -194,11 +194,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/web-development/solutions/web-033_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="web-033-explanatory-solutions">web-033: explanatory solutions<a class="heading-anchor" href="#web-033-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Open this after your own attempt. Each answer explains the lesson&#x27;s synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in <code>courses/web-development/guides/web-033.md</code>.</p>
+<p>Attempt each exercise before reading; the mechanism is in <code>courses/web-development/guides/web-033.md</code> (<a href="../STUDY-GUIDE.md.html#solutions">using these answers</a>).</p>
 <h3 id="exercise-1-predict-125-cents-times-three-units">Exercise 1: Predict 125 cents times three units.<a class="heading-anchor" href="#exercise-1-predict-125-cents-times-three-units" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> The result is 375 cents.</p>
 <p><strong>Approach:</strong> Multiply the integer unit price in cents by the integer quantity, which keeps the whole calculation in exact integer arithmetic.</p>
-<p><strong>Why:</strong> 125 × 3 is 375 cents; keeping integer minor units avoids binary floating-point rounding.</p>
+<p><strong>Why:</strong> Three items at 125 cents each make 375 cents; keeping integer minor units avoids binary floating-point rounding.</p>
 <p><strong>Plausible wrong approach:</strong> Computing 1.25 times 3 as floats and then multiplying by 100 fails because float rounding can produce a value just under 375.</p>
 <p><strong>How to verify:</strong> <code>var_export($unitCents * $quantity)</code> prints 375 with no decimal point. Printing <code>get_debug_type</code> of the product shows int, confirming no float entered the calculation.</p>
 <h3 id="exercise-2-add-a-fixed-50-cent-fee-with-a-named-intermediate-value">Exercise 2: Add a fixed 50-cent fee with a named intermediate value.<a class="heading-anchor" href="#exercise-2-add-a-fixed-50-cent-fee-with-a-named-intermediate-value" aria-label="Link to this section">#</a></h3>
@@ -232,7 +232,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Plausible wrong approach:</strong> Assuming every currency uses two decimal places fails because some use zero or three, so a fixed 100 divisor is wrong.</p>
 <p><strong>How to verify:</strong> Your answer lists at least one currency scale other than two and explains which extra rule it needs.</p>
 <h3 id="reference-comparison">Reference comparison<a class="heading-anchor" href="#reference-comparison" aria-label="Link to this section">#</a></h3>
-<p>Open <code>courses/web-development/solutions/web-033_solution.php</code> only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; server lifecycle, persistence, concurrency and security need their own integration evidence.</p></article>
+<p>The reference requires 125 cents times three to equal 375 and requires a zero quantity to give 0, then formats the total with intdiv and a padded remainder. That catches float money and a zero bug. It does not test the fee, negative rejection or the upper bound, so add those checks yourself.</p>
+<p>Open <code>courses/web-development/solutions/web-033_solution.php</code> after saving your attempt (<a href="../STUDY-GUIDE.md.html#references">comparing with the reference</a>).</p></article>
   </main>
 </body>
 </html>

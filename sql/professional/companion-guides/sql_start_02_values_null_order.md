@@ -2,75 +2,27 @@
 
 ## How to run this lesson
 
-Start the Linux-container engine and run `./classroom` from the repository
-root. On Windows, use Ubuntu in WSL 2 or the thin
-`START_DOCKER_CLASSROOM.cmd` wrapper. Choose **PostgreSQL** on the shared
-`/classroom` home, then open **sql-start-02**. The
-[launcher guide](../../../docs/one-command-classroom.md) covers first preparation, strict resume and
-the saved project selection. No host Python or PostgreSQL installation is
-required for this browser route.
+Start **sql-start-02** from `./classroom` using the shared [run steps](../../STUDY-GUIDE.md#run-a-lesson-in-the-classroom).
 
-1. Read the prerequisite and fixture notes before running the file. Use only
-   the local disposable `advanced_sql_training` database.
-2. Choose **Whole SQL lesson (psql)** for the cataloged learner script. This
-   preserves the lesson's reviewed psql directives, relative includes and
-   transaction behavior. **SQL snippet** is appropriate for ordinary SQL
-   statements, but is not a replacement for an entire script's setup.
-3. The **Course database** panel above the code shows whether the course
-   training tables are loaded. Missing tables load automatically before your
-   first run (or choose **Load course tables**) and stay loaded for later
-   lessons. **Reset training data** restores the original rows only when your
-   own changes made results differ; it keeps your saved code and notes.
-4. Edit the learner copy in the classroom and save your prediction before
-   running. Its whole-script workspace is
-   `.learning/sql/sql-start-02/lesson/workspace/sql/professional/lessons/sql_start_02_values_null_order.sql`.
-   For browser work this path is inside the Docker learning volume, not a
-   newly created host folder beside your checkout. The checked-in source
-   remains the answer-free starting artifact.
-5. Run the whole script and inspect the full transcript. The runner uses
-   `psql -X -v ON_ERROR_STOP=1 -f`. SELECT output has columns, rows and a row
-   count; DDL/DML has command tags; intentional checks may produce NOTICE
-   messages. An unexpected ERROR or nonzero exit is a failure to diagnose,
-   even when an earlier query printed plausible values.
-6. Verify the lesson's expected grain, ordering, constraints and declared
-   transaction or cleanup outcome. Keep required ROLLBACK statements.
-   The warehouse sequence and other explicitly stateful exercises explain
-   when state is committed. Read saved output without rerunning it when
-   reviewing an earlier attempt.
+Choose **Whole SQL lesson (psql)**. No course tables are involved: the script
+guards the `advanced_sql_training` database, builds the five-row
+`start_shipments` temporary table, and rolls everything back at the end. Those
+five rows are chosen so that every NULL case in this lesson has a witness: ID 1
+has a known zero weight and an empty label, ID 2 is missing both values, IDs 3
+and 4 tie at weight 5, and ID 5 has a missing weight but the label `hold`. Save
+your attempts in
+`.learning/sql/sql-start-02/lesson/workspace/sql/professional/lessons/sql_start_02_values_null_order.sql`,
+above the final `ROLLBACK`. In psql, an empty label and a NULL label both print
+as blank space, so do not judge Exercise 5 by eye; project `label IS NULL` or
+`length(label)` next to it.
 
-If a relation is missing, inspect the lesson's required fixture and predecessor
-rather than guessing a new table definition. If authentication or runtime
-readiness fails, use `./classroom status` and the setup guide. Keep credentials
-out of SQL, notebooks, screenshots and committed files. Repair the first error
-before trusting partial output, and reveal separate solutions only when you
-want to compare after an attempt.
-
-### Optional contributor notebook route
-
-For notebook work, deliberately prepare the Linux/WSL contributor environment
-from [CONTRIBUTING.md](../../../CONTRIBUTING.md), including a compatible psql client and
-the notebook dependencies. Generate this lesson's private workspace through
-the maintained CLI:
-
-```sh
-uv run --no-sync python scripts/course.py sql notebook sql-start-02
-```
-
-Open the printed notebook path in that environment's JupyterLab. It uses the
-same catalog-derived learner-copy layout in that contributor checkout and
-executes the complete script through psql. Its host-side state is separate
-from the Docker browser's named volume. Follow
-[guided SQL notebooks](../../../docs/guided-sql-notebooks.md) for explicit local connection
-selection and kernel setup. Notebook generation does not execute SQL or
-authorize a reset.
+The optional notebook route starts with `uv run --no-sync python scripts/course.py sql notebook sql-start-02`; see the [study guide](../../STUDY-GUIDE.md#optional-contributor-notebook-route).
 
 ## Level and prerequisites
 
 - **Level:** foundation
 - **Direct catalog prerequisites:** [`sql-start-01`](sql_start_01_tables_and_grain.md)
 - **Artifacts:** [learner SQL](../lessons/sql_start_02_values_null_order.sql), [solution reasoning](../solutions/sql_start_02_values_null_order_solutions.md), [executable solution](../solutions/sql_start_02_values_null_order_solutions.sql).
-
-Direct prerequisites name the required boundary. The fixture setup is supplied; do not mistake its table-definition syntax for extra unstated prerequisite work.
 
 ## Learning objectives
 
@@ -142,7 +94,10 @@ weight must retain an unknown state unless a justified policy replaces it.
 
 ## Worked example / walkthrough
 
-Run these in the complete learner file so the temporary fixture and transaction are present. The fixture values are fixed; the examples never depend on the current clock. Predict each result before running it.
+Before running Example 1, write the `is_positive` value you expect for each of
+the five IDs. Most first predictions mark IDs 2 and 5 as false; psql shows them
+blank because the comparison is unknown, and Example 2 then shows where those
+same unknown weights land in a sorted report.
 
 ### Example 1: Inspect truth before filtering
 
@@ -182,7 +137,12 @@ The result contains all five shipments. Weights 5,5,0 precede unknowns, and iden
 
 ## Exercises
 
-Attempt these in order in the ignored working copy, before its final rollback. Write the output grain and a prediction before execution. Compare the actual identities and values with each contract. A query merely running is not sufficient evidence. Hints are optional and leave the answer construction to you.
+Exercises 1 to 5 use `start_shipments`; Exercise 6 brings its own old and new
+weights in a `VALUES` list with IDs 10 to 13. For Exercises 2 and 3, add up the
+rows that `weight > 0`, `NOT (weight > 0)` and `weight IS NULL` return; the
+three filters together should account for all five shipments, and if they do
+not, the missing IDs tell you which test is wrong. The contract lines are
+explained in the [study guide](../../STUDY-GUIDE.md#work-an-exercise).
 
 1. **Inspect missingness.**
 
@@ -250,7 +210,11 @@ Attempt these in order in the ignored working copy, before its final rollback. W
 - Does sorting unknown values last make them known or remove them?
 - When should a display fallback remain separate from a stored field?
 
-Keep your actual query and transcript. Explain one incorrect alternative and the exact fixture row that exposes it. A passing worked example does not prove an unattempted exercise. Revisit a failed prediction after taking a break, then answer the retrieval questions without looking at the code.
+For retrieval practice, predict the result of
+`SELECT count(*), count(weight), count(label) FROM start_shipments` without
+running it (5, 3 and 4, because `count(column)` skips NULL but counts empty
+text), then explain which shipments would move, and where, if Example 2 dropped
+`NULLS LAST`.
 
 ## Common pitfalls
 

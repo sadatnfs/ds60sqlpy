@@ -31,11 +31,9 @@ Before enabling automatic restart, verify the app’s initialization, bounded re
 
 ## How to use this lesson
 
-The classroom displays this guide and saves your worksheet, `courses/docker/lessons/docker-033.md`. Its Run button does not control your Docker engine. Docker engine access is powerful host access, so the classroom deliberately receives no engine socket. Work through the supplied examples without starting anything, then use the optional host lab only in your own disposable project. Reading a command, parsing YAML and actually running the project are different forms of evidence.
+The classroom saves `courses/docker/lessons/docker-033.md` and holds no engine socket ([host-lab setup](../STUDY-GUIDE.md#host-lab-setup)).
 
-Use Bash in Linux, macOS Terminal, or Ubuntu under WSL 2 on Windows. The supported engine runs Linux containers. The maintained fixture is `courses/docker/fixtures/compose-lab/`; its README explains copying it into a new ignored learner directory, checking the engine, building locally with visible logs, and using the fixed project name `ds60-docker-study`. The fixture uses port 18080 on host loopback. Stop if that project name or port belongs to unrelated work; choose a new project name consistently in your own copy. Never paste a command against a remote Docker context simply because it is currently selected.
-
-For Dockerfile examples, create a file named `Dockerfile` in a scratch project. YAML snippets describe a fragment unless explicitly called a complete file. Text transcripts are synthetic illustrations, not claims about your machine. Do not substitute a real password, token or private registry into a checked-in example. **How to use the lessons** in the [subject README](../README.md) collects these rules in one place.
+**Host lab.** Watch a bounded failure loop in a scratch container: `docker run -d --name ds60-restart-demo --restart on-failure:3 --pull never ds60-docker-study:local python -c "import sys; print('starting'); sys.exit(3)"`. Wait about ten seconds, then read `docker inspect --format '{{.RestartCount}} {{.State.Status}} {{.State.ExitCode}}' ds60-restart-demo`: three restarts, status `exited`, exit code 3. `docker logs ds60-restart-demo` shows `starting` four times, once per attempt, and nothing about the cause, because restarting never addressed it. The attempts come quickly at first and then slow down, because the engine doubles its delay before each restart, starting at 100 milliseconds; a longer loop backs off much further, so a quiet container may still be waiting. Remove it with `docker rm ds60-restart-demo`. Then check the fixture's own startup: note `/counter`, run `docker compose -p ds60-docker-study restart app`, and read `/counter` again. The value is unchanged, since `main()` only creates the data directory if needed and validates the stored file; nothing is written until a `POST /increment` arrives.
 
 ## Worked example / walkthrough
 
@@ -69,7 +67,7 @@ safe: inspect owned state -> validate version -> create only when absent -> serv
 
 ## Six progressive exercises
 
-For each exercise, name the object involved and the phase of its lifetime before changing anything, then vary only the condition the task names. Exercises that ask you to predict, explain, compare or diagnose keep their answers in the solutions file; the others show the evidence to look for.
+Answer-type prompts keep their answers in the solutions file ([exercise rules](../STUDY-GUIDE.md#exercise-rules)).
 
 ### Exercise 1: Predict a restart loop with invalid configuration.
 
@@ -103,13 +101,19 @@ For each exercise, name the object involved and the phase of its lifetime before
 
 Using a restart policy to hide a configuration error. Writing initialization that inserts data on every start. Assuming a timed-out write did not happen.
 
-Exercise 4 is this chapter's boundary case: Diagnose duplicate records after repeated startup. Count the seed records after each start and read the initializer to see whether it checks for existing state before writing. Preserve the original failure and the exact changed field before retrying. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
+Exercise 4 is this chapter's boundary case: Diagnose duplicate records after repeated startup. Count the seed records after each start and read the initializer to see whether it checks for existing state before writing.
+
+The policies `restart: always` and `restart: unless-stopped` behave alike until the engine itself restarts. A container you stopped by hand with `docker stop` stays stopped under both while the engine runs, but after an engine or Docker Desktop restart, `always` starts it again and `unless-stopped` leaves it alone. Learners who stop a misbehaving lab service and then reboot are surprised to find it running and writing again. Choose `unless-stopped` when an operator's manual stop should stick, keep the fixture's default of no policy for teaching runs, and after any engine restart check `docker ps` before assuming that what you stopped is still stopped.
+
+Never trade a safety control for a passing example ([safety rules](../STUDY-GUIDE.md#safety-rules)).
 
 ## Retrieval, transfer and next steps
 
-Close the explanations first. Rewrite the unsafe initializer as the safe sequence from memory. Then reconstruct worked example 2 (Trace an unsafe initializer) with one different value, predict what changes, and name which of restart policy, crash loop, idempotent startup and backoff the change touches.
+**Retrieval.** Rewrite the unsafe initializer as the safe sequence from memory.
 
-When a host session ends, run `docker compose -p ds60-docker-study down` from your fixture copy. It removes the project's containers and network but keeps named volumes; deleting a volume is a separate, deliberate reset described in the fixture README.
+**Transfer case.** A client's `POST /increment` timed out, the client retried, and the counter rose by two. Was the retry wrong, and how would you tell what the server actually did?
+
+Then run the [retrieval loop](../STUDY-GUIDE.md#retrieval-and-cleanup) and end any host session with its cleanup.
 
 ## Primary references
 

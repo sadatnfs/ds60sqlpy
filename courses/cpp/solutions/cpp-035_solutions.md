@@ -1,6 +1,6 @@
 # cpp-035: explanations and reference observations
 
-Attempt the learner tasks before opening this document. The executable reference checks the bounded normal and boundary examples; the six explanations below cover the deliberate changes and manual checks.
+The [executable reference](cpp-035_solution.cpp) checks `find` on an empty map. The explanations compare map lookups, insertion through `operator[]` and binary search on a sorted vector. How to compare: [study guide](../STUDY-GUIDE.md#compare-with-the-solutions).
 
 ## Mechanism
 

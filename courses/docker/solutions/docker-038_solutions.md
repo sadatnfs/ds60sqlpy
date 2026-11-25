@@ -1,6 +1,6 @@
 # docker-038: explanatory solutions
 
-Compare after your own attempt or an explicit reveal. These explain the supplied teaching fixtures; they are not engine results. The mechanism is explained in `courses/docker/guides/docker-038.md`.
+These answers explain teaching fixtures, not engine results; the mechanism is in [the guide](../guides/docker-038.md).
 
 ## Exercise 1: Classify disk usage by resource type.
 
@@ -88,4 +88,4 @@ Compare after your own attempt or an explicit reveal. These explain the supplied
 
 ## Check your transfer
 
-A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.
+Build cache is regenerable, so clearing it costs rebuild time rather than data, which makes it a reasonable target once the evidence packet exists. On a shared host it also slows other people's builds, so prefer a bounded command such as `docker builder prune --filter until=24h`, announce it, and record what was freed. Rerun `docker system df` to confirm the reclaimed space and check that the app is still healthy. If disk use barely drops, the pressure lies elsewhere, often in logs or volumes.

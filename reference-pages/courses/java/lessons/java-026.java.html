@@ -198,23 +198,17 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"></span>
 <span class="source-line">  <span class="syntax-keyword">public</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">void</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span>String<span class="syntax-operator">[</span><span class="syntax-operator">]</span> args<span class="syntax-punctuation">)</span> <span class="syntax-keyword">throws</span> Exception <span class="syntax-punctuation">{</span></span>
 <span class="source-line">    <span class="syntax-comment">// Exercise 1: Inspect a platform module: predict an edited check</span></span>
-<span class="source-line">    <span class="syntax-comment">// Copy Example A into a scratch `Main.java` and change `assert</span></span>
-<span class="source-line">    <span class="syntax-comment">// String.class.getPackageName().equals(&quot;java.lang&quot;);` to `assert</span></span>
-<span class="source-line">    <span class="syntax-comment">// String.class.getPackageName().equals(&quot;java.lang!&quot;);` inside its assertion. Before running</span></span>
-<span class="source-line">    <span class="syntax-comment">// it with `java -ea Main`, predict whether the assertion still holds and explain why; then</span></span>
-<span class="source-line">    <span class="syntax-comment">// restore it.</span></span>
-<span class="source-line">    <span class="syntax-comment">// Expected: The changed run fails with an `AssertionError` from the assertion on</span></span>
-<span class="source-line">    <span class="syntax-comment">// `String.class.getPackageName().equals(&quot;java.lang&quot;)`. Restoring the original line brings</span></span>
-<span class="source-line">    <span class="syntax-comment">// back the worked observation: module `java.base`; package `java.lang`.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Change Example A&#x27;s assertion to `assert</span></span>
+<span class="source-line">    <span class="syntax-comment">// String.class.getPackageName().equals(&quot;java.lang!&quot;);`, predict whether it holds, then run</span></span>
+<span class="source-line">    <span class="syntax-comment">// and restore it.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Expected: The edited run fails with an `AssertionError` from the assertion on</span></span>
+<span class="source-line">    <span class="syntax-comment">// `String.class.getPackageName().equals(&quot;java.lang&quot;)`.</span></span>
 <span class="source-line"></span>
 <span class="source-line">    <span class="syntax-comment">// Exercise 2: Inspect the classroom classpath context: diagnose an edited check</span></span>
-<span class="source-line">    <span class="syntax-comment">// A careless edit changed the assertion that Example B adds after Example A so that it reads</span></span>
-<span class="source-line">    <span class="syntax-comment">// `assert Main.class.getModule().isNamed();`. Run Example B with that line, explain why the</span></span>
-<span class="source-line">    <span class="syntax-comment">// edited assertion now fails for the same program state, and restore it.</span></span>
-<span class="source-line">    <span class="syntax-comment">// Expected: Before the repair the run fails with an `AssertionError` from the assertion on</span></span>
-<span class="source-line">    <span class="syntax-comment">// `!Main.class.getModule().isNamed()`; after it the line reads `assert</span></span>
-<span class="source-line">    <span class="syntax-comment">// !Main.class.getModule().isNamed();` again and main belongs to the unnamed module in the</span></span>
-<span class="source-line">    <span class="syntax-comment">// standard classpath launch.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Example B&#x27;s new assertion was edited to `assert Main.class.getModule().isNamed();`.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Explain why it fails for unchanged state and restore it.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Expected: The edited run fails with an `AssertionError` from the assertion on</span></span>
+<span class="source-line">    <span class="syntax-comment">// `!Main.class.getModule().isNamed()`; the restored assertion passes.</span></span>
 <span class="source-line"></span>
 <span class="source-line">    <span class="syntax-comment">// Exercise 3: Compile two real modules</span></span>
 <span class="source-line">    <span class="syntax-comment">// Create the owned greeting/application fixture and compile both with --module-source-path.</span></span>

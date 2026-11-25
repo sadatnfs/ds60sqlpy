@@ -1,6 +1,6 @@
 # js-050: explanatory solutions
 
-Compare after your own attempt or an explicit reveal. The separate .js reference is a complete offline browser program. These explanations discuss the six practice tasks; a visual resemblance alone is not a data or behavior check.
+Compare after your own attempt; the separate `.js` file is the complete reference program.
 
 ## Mechanism review
 
@@ -49,3 +49,7 @@ Opacity, jitter and bins solve different tasks. Do not hide the transformation f
 Selection, confounding and reverse causality can create patterns. Visualization supports inquiry, not automatic causal identification. In the fixture, y rises with x for A and B but C at x 3 has y 3. Describe association only; three points cannot rule out a confounder. Adding a regression line to three points would suggest more certainty than the data holds; report the three tuples in a table instead.
 
 **Expected:** Describe association and identify alternative explanations.
+
+## After comparison
+
+Add 200 synthetic points with heavy overlap and compare two strategies on the same data: transparency, and a count of points per grid cell. Record what each strategy hides and which one keeps the record count readable.

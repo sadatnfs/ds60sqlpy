@@ -206,11 +206,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>With expression:</strong> A copy with selected member changes.</p>
 <p><strong>Shallow copy:</strong> A copy that retains references to nested objects.</p>
 <h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>The Linux Docker classroom compiles your saved pad as <code>Program.cs</code> in its fixed .NET 10 project. C# 14 is the matching language generation. This route uses the prepared framework libraries; it does not accept arbitrary project files, NuGet packages, command arguments or interactive input. The explicit <code>Program.Main</code> entrypoint makes compilation and execution visible. <code>Check</code> throws on a false condition in every build configuration, unlike conditional debugging assertions.</p>
-<p>Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.</p>
+<p>Both record types are one-line declarations placed after <code>Main</code>. Run task 1 before reading the output, because the two checks in Example A ask different questions: <code>==</code> compares the generated value equality, while <code>ReferenceEquals</code> asks whether two variables name the same object.</p>
+<p>Compile contract, starter stop and success marker: <a href="../STUDY-GUIDE.md.html#running-a-lesson">running a lesson</a>.</p>
 <h3 id="syntax-anatomy-and-execution-trace">Syntax anatomy and execution trace<a class="heading-anchor" href="#syntax-anatomy-and-execution-trace" aria-label="Link to this section">#</a></h3>
 <p><code>record Person(string Name, int Age)</code> declares positional properties and value-based equality. <code>record struct</code> changes assignment semantics. <code>with { Age = 31 }</code> creates a changed copy. <code>==</code> on records follows generated value equality.</p>
-<p>Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.</p>
+<p>Each example ends with a trace; method: <a href="../STUDY-GUIDE.md.html#tracing-a-program">tracing a program</a>.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="example-a-equal-data-with-distinct-identities">Example A: Equal data with distinct identities<a class="heading-anchor" href="#example-a-equal-data-with-distinct-identities" aria-label="Link to this section">#</a></h4>
 <p>Value equality and reference identity answer different questions.</p>
@@ -253,6 +253,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-keyword">public</span> <span class="syntax-keyword">record</span> <span class="syntax-function">Basket</span><span class="syntax-punctuation">(</span>List<span class="syntax-operator">&lt;</span><span class="syntax-keyword">int</span><span class="syntax-operator">&gt;</span> Items<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> Equal records can be distinct objects; with preserves the previous age.</p>
+<p><strong>Trace.</strong> <code>first</code> and <code>second</code> are built from the same arguments, so the compiler-generated equality compares Name and Age and <code>==</code> returns true. They are still two allocations, so <code>ReferenceEquals</code> returns false. <code>first with { Age = 31 }</code> copies every property into a new record and then sets Age, so <code>first.Age</code> stays 30 while <code>older.Age</code> is 31.</p>
 <h4 id="example-b-notice-nested-shared-state">Example B: Notice nested shared state<a class="heading-anchor" href="#example-b-notice-nested-shared-state" aria-label="Link to this section">#</a></h4>
 <p>The record copy duplicates its field values, including the list reference. Generated copying is not a deep-clone promise.</p>
 <pre class="highlighted-code"><code class="language-csharp"><span class="syntax-keyword">using</span> System<span class="syntax-punctuation">;</span>
@@ -294,6 +295,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-keyword">public</span> <span class="syntax-keyword">record</span> <span class="syntax-function">Basket</span><span class="syntax-punctuation">(</span>List<span class="syntax-operator">&lt;</span><span class="syntax-keyword">int</span><span class="syntax-operator">&gt;</span> Items<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> Both records see the appended list item.</p>
+<p><strong>Trace.</strong> <code>first</code> holds a <code>Basket</code> whose Items property refers to a list containing 1. <code>first with { }</code> copies the property value, which is that list reference, into a new record. <code>second.Items.Add(2)</code> mutates the one shared list, so <code>first.Items.Count</code> becomes 2 and <code>ReferenceEquals(first.Items, second.Items)</code> is true. The <code>with</code> expression made a shallow copy.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <ol>
 <li><strong>Predict and explain.</strong> Predict record equality and reference equality separately.</li>
@@ -313,10 +315,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <ol start="6">
 <li><strong>Transfer and justify.</strong> Choose identity-based or data-based equality for an order and explain how updates affect collection membership.</li>
 </ol>
-<p>For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.</p>
+<p>Log each task in the <a href="../STUDY-GUIDE.md.html#recording-exercise-evidence">evidence table</a> before opening the explanation.</p>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
 <p>Record equality does not recursively compare arbitrary collection contents. A positional record can still contain mutable members. Avoid putting fields that change after insertion into a hash key contract.</p>
-<p>A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.</p>
+<p>For task 5, two baskets built from separate lists that each contain 1 compare unequal: the generated equality compares the Items references, not the list contents. For task 3, a <code>readonly record struct Coord(int X, int Y)</code> with value 1, 2 and a copy <code>with { X = 5 }</code> leaves the original at 1, 2, and its properties cannot be assigned afterward.</p>
+<p>Repair routine: <a href="../STUDY-GUIDE.md.html#building-a-regression-case">building a regression case</a>.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <ol>
 <li>Reproduce Example A (Equal data with distinct identities) before changing anything, and confirm its observation: Equal records can be distinct objects; with preserves the previous age.</li>
@@ -324,9 +327,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>Before opening the explanation, test your task 3 attempt against this lesson&#x27;s main pitfall: Record equality does not recursively compare arbitrary collection contents.</li>
 </ol>
 <h3 id="self-check-and-next-step">Self-check and next step<a class="heading-anchor" href="#self-check-and-next-step" aria-label="Link to this section">#</a></h3>
-<p>Explain Record, With expression, Shallow copy without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.</p>
+<p>Predict <code>==</code> and <code>ReferenceEquals</code> for two <code>Person</code> records holding the same name and age. Explain why <code>with</code> cannot isolate a nested list. For task 6, decide whether an order with a changing status should use identity or data equality while it sits in a <code>HashSet</code>, and justify the choice.</p>
+<p>Then follow the general <a href="../STUDY-GUIDE.md.html#self-check-routine">self-check routine</a> and save your pad.</p>
 <h3 id="sources-and-execution-boundary">Sources and execution boundary<a class="heading-anchor" href="#sources-and-execution-boundary" aria-label="Link to this section">#</a></h3>
-<p><a href="https://learn.microsoft.com/en-us/dotnet/csharp/">Official language or framework documentation</a>. The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.</p>
+<p><a href="https://learn.microsoft.com/en-us/dotnet/csharp/">Documentation</a>: The language reference article on records describes positional syntax, value equality, <code>with</code> expressions and record structs.</p>
+<p>Provenance and limits: <a href="../STUDY-GUIDE.md.html#sources-and-execution-boundary">sources and execution boundary</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for csharp-014: Records, structs and data equality.
 Read courses/csharp/guides/csharp-014.md and courses/csharp/lessons/csharp-014.cs. Prerequisites: csharp-013.

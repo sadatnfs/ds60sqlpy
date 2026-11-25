@@ -1,6 +1,6 @@
 # web-016: explanatory solutions
 
-Open this after your own attempt. Each answer explains the lesson's synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in `courses/web-development/guides/web-016.md`.
+Attempt each exercise before reading; the mechanism is in `courses/web-development/guides/web-016.md` ([using these answers](../STUDY-GUIDE.md#solutions)).
 
 ## Exercise 1: Explain why two 1fr tracks plus a gap are not two 50% widths plus a gap.
 
@@ -76,4 +76,6 @@ Open this after your own attempt. Each answer explains the lesson's synthetic fi
 
 ## Reference comparison
 
-Open `courses/web-development/solutions/web-016_solution.html` only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; its success message is not an accessibility audit or proof of responsive behavior at every size.
+The reference requires the cards container to compute to display grid, so it catches a missing grid rule or a selector that does not match. It does not count columns, test a narrow container or check that a long value leaves tracks balanced, so try the one card and seven card cases yourself.
+
+Open `courses/web-development/solutions/web-016_solution.html` after saving your attempt ([comparing with the reference](../STUDY-GUIDE.md#references)).

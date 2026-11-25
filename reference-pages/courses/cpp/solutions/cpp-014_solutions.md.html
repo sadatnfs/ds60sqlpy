@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cpp/solutions/cpp-014_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="cpp-014-explanations-and-reference-observations">cpp-014: explanations and reference observations<a class="heading-anchor" href="#cpp-014-explanations-and-reference-observations" aria-label="Link to this section">#</a></h2>
-<p>Attempt the learner tasks before opening this document. The executable reference checks the bounded normal and boundary examples; the six explanations below cover the deliberate changes and manual checks.</p>
+<p>The <a href="cpp-014_solution.cpp.html">executable reference</a> checks that the row <code>&quot;25x&quot;</code> changes the ledger to 2 accepted, 3 rejected and total 10. Its <code>main</code> also accepts <code>--input FILE</code>, exits 2 on a usage error and enforces a 100-row budget. The explanations cover the reviewer package for Exercise 6. How to compare: <a href="../STUDY-GUIDE.md.html#compare-with-the-solutions">study guide</a>.</p>
 <h3 id="mechanism">Mechanism<a class="heading-anchor" href="#mechanism" aria-label="Link to this section">#</a></h3>
 <p>An auditable CLI is a command-line program whose inputs, accepted values, rejected records and output can be reconciled. Parsing and business validation are separate steps. Integer cents avoid decimal rounding ambiguity. The ledger keeps every input accounted for instead of silently discarding bad text.</p>
 <h3 id="detailed-reasoning">Detailed reasoning<a class="heading-anchor" href="#detailed-reasoning" aria-label="Link to this section">#</a></h3>

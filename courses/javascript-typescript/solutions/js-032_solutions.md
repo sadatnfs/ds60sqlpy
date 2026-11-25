@@ -1,6 +1,6 @@
 # js-032: explanatory solutions
 
-Use these answers after an attempt or an explicit reveal. The reference uses the same literal fixtures as the guide and keeps the exercises in separate scopes. A successful run checks these examples; explaining a changed input is a separate learning goal.
+Open these after your own attempt; each exercise runs in its own scope in the reference.
 
 ## Mechanism review
 
@@ -26,7 +26,7 @@ Readable.from adapts an iterable. Transform receives chunks through transform(ch
 
 ## Exercise 1: Run an actual transform pipeline: change one input
 
-Task: Copy Example A into a scratch `main.mjs` and change `await pipeline(Readable.from(['ab', 'cd']), upper, sink);` to `await pipeline(Readable.from(['ab!', 'cd']), upper, sink);`. Before running it, predict which check fails and which value it now sees; then run it and restore the original line.
+Task: In a scratch copy of Example A, change `await pipeline(Readable.from(['ab', 'cd']), upper, sink);` to `await pipeline(Readable.from(['ab!', 'cd']), upper, sink);`. Which check fails, and what value does it see?
 
 The result is observed after pipeline resolves, so every stage has completed. A print before awaiting completion could report an incomplete collection.
 
@@ -50,13 +50,13 @@ assert.equal(output.join(''), 'ABCD');
 assert.equal(sink.writableFinished, true);
 ```
 
-**Expected:** The changed run fails with an `AssertionError` at `assert.equal(output.join(''), 'ABCD')`. Restoring `await pipeline(Readable.from(['ab', 'cd']), upper, sink);` brings back: ABCD after successful pipeline completion.
+**Expected:** The edited run fails with an `AssertionError` at `assert.equal(output.join(''), 'ABCD')`. Restoring `await pipeline(Readable.from(['ab', 'cd']), upper, sink);` brings back: ABCD after successful pipeline completion.
 
-**Verify:** Compare your written prediction with the reported `AssertionError`, including its actual and expected values, and name the value that made `assert.equal(output.join(''), 'ABCD')` fail. After restoring the line, the program prints its `{"checks":1,"status":"passed"}` receipt again.
+**Verify:** Compare the reported actual and expected values with your prediction, then restore `await pipeline(Readable.from(['ab', 'cd']), upper, sink);`.
 
 ## Exercise 2: Observe false write and drain without guessing timing: debug a regression
 
-Task: A regression changed one token in Example B, so one line now reads `highWaterMark: 3,`. Run Example B with that line, use the failing check to locate the defect and repair it without changing the check.
+Task: A regression made one Example B line read `highWaterMark: 3,`. Locate and repair it without editing the check.
 
 False means pause, not retry the same chunk. Retrying it would duplicate data because the original write was already accepted.
 
@@ -81,7 +81,7 @@ await finished(sink);
 
 **Expected:** Before the repair the run fails with an `AssertionError` at `assert.equal(sink.write(Buffer.from('ab')), false)`. Restoring `highWaterMark: 2,` brings back: write returns false; drain follows release; stream finishes.
 
-**Verify:** Keep the failing and the repaired runs. Explain why the changed token alters the value tested by `assert.equal(sink.write(Buffer.from('ab')), false)` for this input.
+**Verify:** Keep the failing and repaired runs and name the first value that differs between them.
 
 ## Exercise 3: Propagate a producer failure and destroy the sink
 
@@ -105,7 +105,7 @@ assert.equal(sink.destroyed, true);
 
 **Expected:** pipeline rejects with source failed; sink is destroyed.
 
-**Verify:** Keep a check equivalent to `assert.equal(sink.destroyed, true)`. As a control, change `assert.equal(sink.destroyed, true);` to `assert.equal(sink.destroyed, false);` inside it: the run must fail with an `AssertionError`, which shows the check can fail. Restore it.
+**Verify:** Keep `assert.equal(sink.destroyed, true)`. Control: editing it to `assert.equal(sink.destroyed, false);` must make the check fail; then restore it.
 
 ## Exercise 4: Reject an invalid object in a transform
 
@@ -132,7 +132,7 @@ await assert.rejects(pipeline(Readable.from([1, -1]), checked, sink), RangeError
 
 **Expected:** pipeline rejects with RangeError.
 
-**Verify:** Keep a check equivalent to `assert.rejects(pipeline(Readable.from([1, -1]), checked, sink), RangeError)`. As a control, change `objectMode: true,` to `objectMode: false,`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
+**Verify:** Keep `assert.rejects(pipeline(Readable.from([1, -1]), checked, sink), RangeError)`. Control: changing `objectMode: true,` to `objectMode: false,` must make that check fail; then restore it.
 
 ## Exercise 5: Measure an object-mode threshold in objects
 
@@ -160,7 +160,7 @@ await finished(sink);
 
 **Expected:** write false and writableLength 1, irrespective of payload string length.
 
-**Verify:** Keep a check equivalent to `assert.equal(sink.write({ payload: 'x'.repeat(1000) }), false)`. As a control, change `highWaterMark: 1,` to `highWaterMark: 2,`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
+**Verify:** Keep `assert.equal(sink.write({ payload: 'x'.repeat(1000) }), false)`. Control: changing `highWaterMark: 1,` to `highWaterMark: 2,` must make that check fail; then restore it.
 
 ## Exercise 6: Abort a generator and its awaited timer
 
@@ -198,8 +198,8 @@ assert.equal(closed, true);
 
 **Expected:** pipeline rejects with AbortError; generator finally runs.
 
-**Verify:** Keep a check equivalent to `assert.equal(closed, true)`. As a control, change `finally { closed = true; }` to `finally { closed = false; }`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
+**Verify:** Keep `assert.equal(closed, true)`. Control: changing `finally { closed = true; }` to `finally { closed = false; }` must make that check fail; then restore it.
 
 ## After comparison
 
-Return to your saved implementation and repeat a case with different values. Keep compiler diagnostics, process output and browser observations separate. Do not suppress a failing assertion or use a type assertion to declare an unvalidated value safe. Resource-owning examples must finish cleanup even when work fails. Describe each result with its actual host and fixture scope rather than as production acceptance.
+Fresh case: write a transform that splits text chunks into lines. Predict its output when one line straddles two chunks and when the last chunk lacks a newline, then add a flush step that emits the remainder. ([After comparing](../STUDY-GUIDE.md#after-comparing-with-the-solution).)

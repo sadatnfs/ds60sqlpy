@@ -36,5 +36,7 @@
       "wrong": "Deleting 100 as an outlier because it moves the mean. Nothing in these five numbers says whether 100 is an error or a real large observation.",
       "verify": "`all.equal(mean(tail), 21.6)` returns TRUE and `median(tail)` returns 2."
     }
-  ]
+  ],
+  "run_note": "The starter holds five values, 1, NA, 4, 6 and NA, and an empty results list. Run it and count by hand before summarizing: five rows, three observed, two missing, and an observed mean of 11/3. Report all four numbers together, because a mean printed without its observed count hides that two fifths of the rows contributed nothing.",
+  "checks_note": "The assertions confirm summaries that keep rows, observed and missing counts beside the mean, group summaries where A has one observed value with mean 1 and B has two with mean 5, a pooled mean of 11/3 that differs from the 11/5 produced by filling missing values with zero, an empty summary with an NA mean, and a skewed tail whose mean of 21.6 sits far from its median of 2. They do not decide whether missingness is random."
 }

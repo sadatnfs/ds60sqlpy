@@ -111,6 +111,7 @@ eligible_campaigns AS (
   FROM
     purchases p
     JOIN events e ON e.customer_id = p.customer_id
+      AND e.event_type <> 'purchase'
       AND e.event_time >= p.purchased_at - interval '7 days'
       AND e.event_time < p.purchased_at
 )

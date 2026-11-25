@@ -1,6 +1,6 @@
 # go-007: explained solutions
 
-These are comparison material after an attempt or explicit reveal. The executable reference implements all six cases in one `main.go`.
+Compare after an attempt ([using solutions](../STUDY-GUIDE.md#use-the-solutions)). `courses/go/solutions/go-007_solution.go` implements all six cases.
 
 ## Mechanism
 
@@ -10,7 +10,7 @@ len(text) counts bytes. []byte(text) and []rune(text) choose different element u
 
 ## 1. Count two units: change one input
 
-Copy worked example 1 into a scratch pad and change `text := "A🙂"` to `text := "A🙂!"`. Before running, predict which check fails and which value it now sees; then run it and restore the original line.
+Copy worked example 1, change `text := "A🙂"` to `text := "A🙂!"` and predict the failure before running; then restore the line.
 
 The unchanged code is worked example 1:
 
@@ -19,7 +19,9 @@ text := "A🙂"
 check(len(text) == 5 && utf8.RuneCountInString(text) == 2, "text units")
 ```
 
-**Expected:** The changed run panics with `text units` because `len(text) == 5 && utf8.RuneCountInString(text) == 2` no longer holds. Restoring the original line brings back the worked observation: there are 5 bytes and 2 runes.
+**Expected:** The edited run panics with `text units` because `len(text) == 5 && utf8.RuneCountInString(text) == 2` no longer holds.
+
+**Verify:** Restoring `text := "A🙂"` makes the check pass again with the worked observation: there are 5 bytes and 2 runes.
 
 The ASCII letter occupies one byte and this emoji occupies four. Neither count is a general grapheme-cluster algorithm.
 
@@ -33,7 +35,7 @@ The ASCII letter occupies one byte and this emoji occupies four. Neither count i
 
 ## 2. Edit a copied byte slice: debug a regression
 
-A regression changed one token in worked example 2, so one line now reads `data[1] = 'b'`. Run worked example 2 with that line, use the failure to locate the defect and repair it without changing the check.
+A one-token regression in worked example 2 makes a line read `data[1] = 'b'`. Repair it without changing the check.
 
 The unchanged code is worked example 2:
 
@@ -44,7 +46,9 @@ data[0] = 'b'
 check(original == "cat" && string(data) == "bat", "copy edit")
 ```
 
-**Expected:** Before the repair the program panics with `copy edit`; after it the line reads `data[0] = 'b'` again and the original is cat and the new string is bat.
+**Expected:** The defective run panics with `copy edit`; after restoring `data[0] = 'b'`, the original is cat and the new string is bat.
+
+**Verify:** The failing run shows message `copy edit`; after the repair `original == "cat" && string(data) == "bat"` holds again.
 
 The mutable byte slice provides an explicit editing boundary. This example uses ASCII so replacing one byte does not split a multibyte encoding.
 
@@ -67,6 +71,8 @@ check(!utf8.ValidString(text), "invalid encoding")
 
 **Expected:** UTF-8 validation returns false.
 
+**Verify:** Your solution must keep `!utf8.ValidString(text)` true. Control: changing `check(!utf8.ValidString(text), "invalid encoding")` to `check(utf8.ValidString(text), "invalid encoding")` panics with message `invalid encoding`; revert it.
+
 A string can exist without being valid UTF-8. Validation is a separate input contract, not an automatic property of the string type.
 
 **Approach.** Build a one-byte string from 0xff and ask `utf8.ValidString` about it, expecting false.
@@ -87,6 +93,8 @@ check(string(r[1:]) == "🙂", "rune slice")
 ```
 
 **Expected:** The resulting string is the intact emoji.
+
+**Verify:** Your solution must keep `string(r[1:]) == "🙂"` true. Control: changing `check(string(r[1:]) == "🙂", "rune slice")` to `check(string(r[2:]) == "🙂", "rune slice")` panics with message `rune slice`; revert it.
 
 The conversion makes code-point indexing explicit. Arbitrary byte slicing could instead cut through the emoji encoding.
 
@@ -109,6 +117,8 @@ check(utf8.RuneCountInString(text) == 2, "combining")
 
 **Expected:** There are 2 runes even though it can display as one character.
 
+**Verify:** Your solution must keep `utf8.RuneCountInString(text) == 2` true. Control: changing `text := "e\u0301"` to `text := "e\u0301!"` panics with message `combining`; revert it.
+
 A code point is not always a complete displayed character. Normalization and grapheme segmentation are distinct operations beyond this counting primitive.
 
 **Approach.** Count runes in `"e\u0301"`: the letter `e` plus U+0301 COMBINING ACUTE ACCENT, which is two code points even though it can display as one character.
@@ -129,6 +139,8 @@ check(label == "blue sky", "trim")
 ```
 
 **Expected:** The result is blue sky.
+
+**Verify:** Your solution must keep `label == "blue sky"` true. Control: changing `label := strings.TrimSpace(" \tblue sky\n")` to `label := strings.TrimSpace(" \tblue sky\n!")` panics with message `trim`; revert it.
 
 Trimming is a domain policy. It is appropriate for this display label, but could corrupt a field where leading spaces are meaningful.
 

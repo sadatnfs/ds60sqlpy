@@ -1,10 +1,17 @@
 # cuda-103: Multi-GPU training on one host
 
-**Route:** CUDA Python and machine learning. **Stage:** advanced. **Prerequisites:** `cuda-087`, `cuda-088`, `cuda-092`, `cuda-094`. Allow several sessions when the hardware experiment is new; the chapter is not a deadline.
+**Route:** CUDA Python and machine learning. **Stage:** advanced. **Prerequisites:** `cuda-087`, `cuda-088`, `cuda-092`, `cuda-094`.
 
-## What you will be able to explain
+Pacing, evidence labels and platform rules: [CUDA study guide](../../STUDY-GUIDE.md).
 
-By the end, you can **compute equal-replica average**, **check complete sample coverage**, and **compare framework distribution contracts** with evidence. Start with the two worked cases, then use the editable CPU model to make the quantities concrete.
+## Learning objectives
+
+- Compute equal-replica average.
+- Handle unequal counts.
+- Assign rank and device.
+- Check complete sample coverage.
+- Design collective failure handling.
+- Compare framework distribution contracts.
 
 ## Mechanism and vocabulary
 
@@ -32,9 +39,13 @@ Two equal-sized replicas with mean gradients 2 and 4 combine to 3. A single-devi
 
 With replica sample counts 3 and 1 and gradients 2 and 4, the global sample mean is 2.5, not 3. Normalization must match the intended data accounting.
 
-## Portable executable model
+## How to run the CPU model
 
-The **CPU reference model** variant runs this bounded worked example using `python-core`. It uses only the Python standard library, small synthetic values and no network. Its purpose is to expose the arithmetic or contract behind the chapter. The separate reference includes assertions for the stated observations.
+Edit the copy; the [reference](../references/cuda-103_cpu.py) adds assertions.
+
+```sh
+python courses/cuda/python/lessons/cuda-103_cpu.py
+```
 
 ```python
 counts, gradients = [3, 1], [2.0, 4.0]
@@ -54,8 +65,6 @@ print("CPU distributed-gradient oracle:", weighted)
 | `gradients` | `[2.0, 4.0]` |
 | `weighted` | `2.5` |
 
-Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.
-
 ## Equal framework lanes
 
 ### PyTorch
@@ -66,77 +75,65 @@ Use an explicitly owned one-process-per-device DDP job with appropriate collecti
 
 Use MirroredStrategy for an explicitly prepared multi-device host. In custom loops apply the distribution-aware loss normalization and compare the resulting update with a single-device reference.
 
-Choose either lane first, then compare the other using identical mathematical inputs. Framework-specific shape, mode and optimizer rules must be checked separately. Both use offline synthetic examples; no model hub or dataset download is triggered.
+Lane rules: [framework labs](../../STUDY-GUIDE.md#python-gpu-and-framework-labs).
 
 ## Practice and transfer
+
+Record each attempt in the [worksheet](../lessons/cuda-103.md) before opening hints.
 
 ### Exercise 1: Compute equal-replica average
 
 **Trap to avoid:** Summing gradients without dividing by world size gives 6, which effectively doubles the learning rate whenever another GPU is added, so changing the device count silently changes training dynamics.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 2: Handle unequal counts
 
 **Trap to avoid:** Relying on the default world-size average when the sampler gives the last rank a short batch introduces a small bias every epoch, which is hard to notice because loss still falls.
-
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 3: Assign rank and device
 
 **Trap to avoid:** Creating the model before setting the device places every replica on GPU 0, and the first out-of-memory error appears far from its cause.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 4: Check complete sample coverage
 
 **Trap to avoid:** Assuming coverage because each rank processed `len(dataset)/world_size` batches ignores padding and the `drop_last` setting.
-
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 5: Design collective failure handling
 
 **Trap to avoid:** Letting surviving ranks wait without a timeout keeps the devices occupied by a job that cannot finish, and nobody receives an error to act on.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 6: Compare framework distribution contracts
 
 **Trap to avoid:** Porting a training script between frameworks and assuming identical gradients because both are data-parallel skips the place where the semantics actually differ.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ## Progressive hints
 
-Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.
+Hint *k* belongs to exercise *k*; open one at a time.
 
-1. Start from worked example 1 and mark the quantities needed for the task "Compute equal-replica average".
-2. Change one assumption in worked example 2 while preserving the declared contract: handle unequal counts.
-3. Trace the CPU program's variables before adding hardware behavior: assign rank and device.
-4. Draw producers, consumers and the exact operation boundary for the task "Check complete sample coverage".
-5. Separate what the small fixture establishes from what the real runtime must show: design collective failure handling.
-6. Write a counterexample to an overbroad claim before you compare framework distribution contracts.
+1. With equal replica sizes, add the two mean gradients and divide by the replica count.
+2. Weight each replica's mean gradient by its example count, or state a documented equal-batch policy instead.
+3. Write which process owns which device, and how each process learns its rank.
+4. List the examples each rank received and check that every example appears exactly once.
+5. Ask what the healthy ranks do while one rank never joins a collective, and how long they should wait.
+6. Ask whether passing a PyTorch distributed test says anything about a TensorFlow strategy.
 
-## Common mistakes and self-review
+## Common mistakes and self-check
 
-Confusing a correct tiny example with a general implementation is the central review risk. For this chapter, challenge the assumption in worked example 2, then ask whether your change preserves the mechanism described above. If you change dtype, layout, ordering, batch size or backend, update the acceptance contract rather than silently reusing the old observation. Explain an unexpected result before trying random configuration changes.
+A common mistake is averaging replica gradients equally when replicas processed different numbers of examples. Counts 3 and 1 with gradients 2 and 4 give a global example mean of 2.5, not 3. Another is padding the last batch with repeated examples and counting them twice. Fix both by deciding the normalization from the intended data accounting, checking complete sample coverage and comparing against a single-device reference with the same effective batch.
 
-Keep a small evidence table with columns **claim**, **input**, **expected observation**, **actual observation** and **limit**. For the first claim use `Compute equal-replica average`. For the final claim use `Compare framework distribution contracts`. An unperformed GPU or cluster experiment remains pending even when the CPU model is correct.
+**Evidence limit:** The reference computes weighted means on the CPU, giving 3 for equal replicas and 2.5 for counts 3 and 1. It launches no processes, so NCCL behavior, GPU peer access and communication cost need a prepared multi-GPU host.
 
-## Platform and evidence contract
+1. What does data parallelism give each replica?
+2. Why does adding replicas change the optimization problem?
+3. What is the usual PyTorch arrangement for DistributedDataParallel?
 
-The reading worksheet and CPU reference model work through the ordinary Linux Docker classroom on macOS, Linux and Windows using WSL 2. They do not require an NVIDIA GPU. Their results are labeled CPU models or semantic oracles, not simulated hardware performance.
-
-Real CUDA work needs supported NVIDIA hardware, a compatible host driver and an explicitly prepared GPU runtime. An Apple GPU does not execute CUDA kernels. PyTorch MPS on a supported native Mac, ROCm on supported AMD hardware, or other vendor backends can provide separate accelerator learning routes; they need their own package and operation qualification and are not CUDA evidence. The ordinary Linux Docker classroom does not expose native Mac MPS automatically.
-
-Do not download packages, models or data by opening this lesson. Do not attach an engine socket, ambient cluster credentials or an arbitrary remote endpoint. A CPU pass, imported package, successful compilation, real GPU result and measured performance are distinct observations. Record the actual backend, data shape/dtype, source revision, versions and pending checks. A saved completion marker records learning progress, not hardware certification.
+Answers: [self-check answers](../solutions/cuda-103_solutions.md#self-check-answers).
 
 ## Primary references
 
 - [PyTorch CUDA semantics](https://docs.pytorch.org/docs/2.9/notes/cuda.html)
 - [TensorFlow GPU guide](https://www.tensorflow.org/guide/gpu)
 
-Use the version-matched documentation of your prepared environment. These references describe interfaces and supported boundaries; the chapter's synthetic examples and CPU models are original teaching material.
+Full lists: [documentation and sources](../../STUDY-GUIDE.md#documentation-and-sources).
 
 ## Ask an AI tutor about this lesson
 

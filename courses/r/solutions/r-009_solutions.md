@@ -1,6 +1,6 @@
 # r-009: reference reasoning
 
-Use the [complete reference](r-009_reference.R) with the guide's declared inputs and runtime. Every worked example is also a standalone script.
+Run the [complete reference](r-009_reference.R) under the [run rules](../STUDY-GUIDE.md#run-a-chapter).
 
 ## Why the implementation has this shape
 
@@ -96,4 +96,6 @@ A text ID can coerce numeric measurements to character and erase field structure
 
 ## What the checks establish
 
-The reference makes 6 `stopifnot()` checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.
+The assertions confirm that `record[1]` is still a list while `record[["values"]][[1]]` is the number 2, that `id` and `values` are present with the right types and `id` has length one, that the mean of `values` is 3, that a missing `note` field reads as NULL, and that `unlist()` on `id` and `values` coerces everything to character. They do not validate deeper nesting or fields added later.
+
+The reference makes 6 `stopifnot()` checks; see [what a passing run proves](../STUDY-GUIDE.md#what-a-passing-run-proves).

@@ -1,6 +1,6 @@
 # r-059: reference reasoning
 
-Use the [complete reference](r-059_reference.R) with the guide's declared inputs and runtime. Every worked example is also a standalone script.
+Run the [complete reference](r-059_reference.R) under the [run rules](../STUDY-GUIDE.md#run-a-chapter).
 
 ## Why the implementation has this shape
 
@@ -108,4 +108,6 @@ A direct trace specification can make IDs, controls and payloads easier to valid
 
 ## What the checks establish
 
-The reference makes 4 `stopifnot()` checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.
+The assertions confirm that every translated trace has equal numbers of x and y values, that the four translated pairs equal the original pairs, that adding a mean line yields at least three traces, and that four markers survive translation. A successful conversion call does not prove the legend, tooltip text or colours match the ggplot, which still needs visual review.
+
+The reference makes 4 `stopifnot()` checks; see [what a passing run proves](../STUDY-GUIDE.md#what-a-passing-run-proves).

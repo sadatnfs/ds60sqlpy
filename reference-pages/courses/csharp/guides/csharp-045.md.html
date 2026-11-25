@@ -206,11 +206,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>AOT:</strong> Ahead-of-time compilation before application execution.</p>
 <p><strong>ABI:</strong> The binary-level agreement between compiled components.</p>
 <h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>The Linux Docker classroom compiles your saved pad as <code>Program.cs</code> in its fixed .NET 10 project. C# 14 is the matching language generation. This route uses the prepared framework libraries; it does not accept arbitrary project files, NuGet packages, command arguments or interactive input. The explicit <code>Program.Main</code> entrypoint makes compilation and execution visible. <code>Check</code> throws on a false condition in every build configuration, unlike conditional debugging assertions.</p>
-<p>Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.</p>
+<p>The reflection calls hang off <code>System.Type</code>, so <code>typeof(Metric).GetProperty</code> needs no extra import. Native AOT is not used here: it is enabled with the <code>PublishAot</code> project property and a <code>dotnet publish</code> for a specific runtime identifier, and it needs a platform linker that the classroom pad does not provide.</p>
+<p>Compile contract, starter stop and success marker: <a href="../STUDY-GUIDE.md.html#running-a-lesson">running a lesson</a>.</p>
 <h3 id="syntax-anatomy-and-execution-trace">Syntax anatomy and execution trace<a class="heading-anchor" href="#syntax-anatomy-and-execution-trace" aria-label="Link to this section">#</a></h3>
 <p><code>typeof(T)</code> gets type metadata; GetProperty returns a possibly absent member. Typed access is checked at compile time. Native AOT uses a publish property and platform toolchain requirements rather than a magic source keyword.</p>
-<p>Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.</p>
+<p>Each example ends with a trace; method: <a href="../STUDY-GUIDE.md.html#tracing-a-program">tracing a program</a>.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="example-a-inspect-declared-metadata">Example A: Inspect declared metadata<a class="heading-anchor" href="#example-a-inspect-declared-metadata" aria-label="Link to this section">#</a></h4>
 <p>Runtime lookup needs an absence policy even when the programmer expects a member to exist.</p>
@@ -250,6 +250,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-keyword">public</span> <span class="syntax-keyword">record</span> <span class="syntax-function">Metric</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">int</span> Count<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The known property is an int and the missing property is absent.</p>
+<p><strong>Trace.</strong> <code>nameof(Metric.Count)</code> becomes the string Count at compile time, so a rename updates it. <code>GetProperty</code> searches the record&#x27;s public instance properties for that name and returns a <code>PropertyInfo</code> whose <code>PropertyType</code> is <code>int</code>. Searching for Missing returns null rather than throwing, and so does a lowercase count, because the default lookup is case-sensitive.</p>
 <h4 id="example-b-prefer-typed-access-for-a-fixed-contract">Example B: Prefer typed access for a fixed contract<a class="heading-anchor" href="#example-b-prefer-typed-access-for-a-fixed-contract" aria-label="Link to this section">#</a></h4>
 <p>A statically known relationship gives the compiler and deployment tools more information.</p>
 <pre class="highlighted-code"><code class="language-csharp"><span class="syntax-keyword">using</span> System<span class="syntax-punctuation">;</span>
@@ -287,6 +288,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-keyword">public</span> <span class="syntax-keyword">record</span> <span class="syntax-function">Metric</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">int</span> Count<span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The fixed projection needs no string-based member lookup.</p>
+<p><strong>Trace.</strong> <code>Metric(4)</code> stores 4 in <code>Count</code>. The lambda <code>value =&gt; value.Count</code> is compiled against the property directly, so the compiler verifies the member exists and returns an <code>int</code>. Calling it returns 4. No name string is looked up at run time, which also tells trimming and AOT tools exactly which member the program uses.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <ol>
 <li><strong>Predict and explain.</strong> Compare compile-time and runtime checking in the two examples.</li>
@@ -306,10 +308,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <ol start="6">
 <li><strong>Transfer and justify.</strong> Plan an external Native AOT experiment stating target architecture, native prerequisites and runtime checks.</li>
 </ol>
-<p>For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.</p>
+<p>Log each task in the <a href="../STUDY-GUIDE.md.html#recording-exercise-evidence">evidence table</a> before opening the explanation.</p>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
 <p>Publishing AOT does not guarantee a smaller or faster application for every workload. Never guess native memory ownership. A successful ordinary managed run does not qualify an AOT or interop path.</p>
-<p>A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.</p>
+<p>For task 4, code that finds members by strings read at run time can lose them when the trimmer removes unused metadata, and trim analysis warns during publish about calls it cannot analyze. For task 5, handle a null <code>PropertyInfo</code> explicitly, and compare <code>PropertyType</code> with the expected type before reading the value.</p>
+<p>Repair routine: <a href="../STUDY-GUIDE.md.html#building-a-regression-case">building a regression case</a>.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <ol>
 <li>Reproduce Example A (Inspect declared metadata) before changing anything, and confirm its observation: The known property is an int and the missing property is absent.</li>
@@ -317,9 +320,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>Before opening the explanation, test your task 3 attempt against this lesson&#x27;s main pitfall: Publishing AOT does not guarantee a smaller or faster application for every workload.</li>
 </ol>
 <h3 id="self-check-and-next-step">Self-check and next step<a class="heading-anchor" href="#self-check-and-next-step" aria-label="Link to this section">#</a></h3>
-<p>Explain Reflection, AOT, ABI without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.</p>
+<p>Mark which check in each example the compiler performs and which the runtime performs. Explain why <code>GetProperty</code> returning null is a normal outcome. For task 6, write the experiment plan: runtime identifier, the <code>PublishAot</code> property, the native toolchain needed, and the checks that compare the AOT binary with the managed build.</p>
+<p>Then follow the general <a href="../STUDY-GUIDE.md.html#self-check-routine">self-check routine</a> and save your pad.</p>
 <h3 id="sources-and-execution-boundary">Sources and execution boundary<a class="heading-anchor" href="#sources-and-execution-boundary" aria-label="Link to this section">#</a></h3>
-<p><a href="https://learn.microsoft.com/en-us/dotnet/core/deploying/native-aot/">Official language or framework documentation</a>. The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.</p>
+<p><a href="https://learn.microsoft.com/en-us/dotnet/core/deploying/native-aot/">Documentation</a>: The Native AOT deployment overview explains the publish property, platform prerequisites and the limits on reflection and dynamic code.</p>
+<p>Provenance and limits: <a href="../STUDY-GUIDE.md.html#sources-and-execution-boundary">sources and execution boundary</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for csharp-045: Reflection, native boundaries and AOT tradeoffs.
 Read courses/csharp/guides/csharp-045.md and courses/csharp/lessons/csharp-045.cs. Prerequisites: csharp-044.

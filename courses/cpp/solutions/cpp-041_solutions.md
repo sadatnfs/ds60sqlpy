@@ -1,6 +1,6 @@
 # cpp-041: explanations and reference observations
 
-Attempt the learner tasks before opening this document. The executable reference checks the bounded normal and boundary examples; the six explanations below cover the deliberate changes and manual checks.
+The [executable reference](cpp-041_solution.cpp) repeats the fixture check with a `0LL` initial value, so the total is accumulated as long long. The explanations cover release checks, evidence lines and rollback. How to compare: [study guide](../STUDY-GUIDE.md#compare-with-the-solutions).
 
 ## Mechanism
 

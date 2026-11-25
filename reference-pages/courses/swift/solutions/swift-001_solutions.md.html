@@ -194,7 +194,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/swift/solutions/swift-001_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="swift-001-explanation-and-comparison">swift-001: explanation and comparison<a class="heading-anchor" href="#swift-001-explanation-and-comparison" aria-label="Link to this section">#</a></h2>
-<p>Attempt the six guide tasks before opening this comparison. The executable reference is <a href="swift-001_solution.swift.html">swift-001_solution.swift</a>. It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.</p>
+<p>Reference program: <a href="swift-001_solution.swift.html">swift-001_solution.swift</a>, covering both examples and the executed answers.</p>
+<p>Attempt the tasks first; see <a href="../STUDY-GUIDE.md.html#comparing-with-the-explanation">comparing with the explanation</a>.</p>
 <h3 id="why-the-two-examples-differ">Why the two examples differ<a class="heading-anchor" href="#why-the-two-examples-differ" aria-label="Link to this section">#</a></h3>
 <p><strong>Check before printing:</strong> The check establishes a specific observation before the program claims completion. Hello, Swift appears before the lesson marker.</p>
 <p><strong>Compute an observable result:</strong> The second condition rejects the plausible mistake of adding dimensions instead of multiplying them. The computed seat count is 24.</p>
@@ -241,7 +242,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Zero is the identity edge of the multiplication and one shelf isolates the per-shelf amount, so the two cases catch a wrong operator that the three-shelf case alone could hide.</p>
 <h4 id="task-6-transfer-and-justify">Task 6: Transfer and justify<a class="heading-anchor" href="#task-6-transfer-and-justify" aria-label="Link to this section">#</a></h4>
 <p>Model a three-level capacity calculation and explain every intermediate value.</p>
-<p>No single reference answer exists: several designs can satisfy this transfer task. Build yours from the task 3 answer above (Compute the capacity of three shelves holding eight books each) and the mechanism described below, and state one limitation of your choice.</p>
+<p>No single answer exists; extend task 3 using the <a href="../STUDY-GUIDE.md.html#open-transfer-tasks">open transfer routine</a>.</p>
 <h3 id="solution-reasoning">Solution reasoning<a class="heading-anchor" href="#solution-reasoning" aria-label="Link to this section">#</a></h3>
 <p><strong>Approach.</strong> The reference places three independent scenarios inside one <code>@main</code> type: the greeting check, the rows-by-seats product and the task 3 shelf capacity. Each scenario computes a value, states the expected number with <code>precondition</code>, and only then lets control reach the final <code>print</code> of the lesson marker.</p>
 <p><strong>Why it is correct.</strong> The string &quot;Hello, Swift&quot; has five letters, a comma, a space and five more letters, so its count is 12. Four rows of six seats is 24, and three shelves of eight books is also 24. Because every check runs before the marker, the marker can only appear when all three numbers match.</p>
@@ -253,7 +254,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><code>@main</code> marks the entrypoint type. <code>struct LessonMain</code> names that type. <code>static func main() async throws</code> declares its entry method; async and throws are explained in later chapters. <code>let</code> binds a value that cannot be reassigned. <code>print</code> produces visible output.</p>
 <p>Do not delete a failed precondition to reach the marker. Preserve the first compiler diagnostic before interpreting later errors. The entrypoint wrapper is required by this classroom compile contract.</p>
 <h3 id="review-before-continuing">Review before continuing<a class="heading-anchor" href="#review-before-continuing" aria-label="Link to this section">#</a></h3>
-<p>Run the reference and confirm that it prints <code>swift-001: passed</code>, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.</p></article>
+<p>Run the reference and confirm it prints <code>swift-001: passed</code>, then rerun the guide&#x27;s counterexample.</p></article>
   </main>
 </body>
 </html>

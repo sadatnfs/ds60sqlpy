@@ -197,19 +197,17 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">export</span> <span class="syntax-punctuation">{</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-comment">// Exercise 1: Await and narrow a result: predict an edited check</span></span>
-<span class="source-line"><span class="syntax-comment">// Copy Example A into a scratch `main.mts` and change `assert.deepEqual(await</span></span>
-<span class="source-line"><span class="syntax-comment">// lookup(&#x27;missing&#x27;), { ok: false, error: &#x27;not_found&#x27; });` to `assert.deepEqual(await</span></span>
-<span class="source-line"><span class="syntax-comment">// lookup(&#x27;missing&#x27;), { ok: true, error: &#x27;not_found&#x27; });` inside its check. Before running</span></span>
-<span class="source-line"><span class="syntax-comment">// it, predict whether the check still passes and explain why; then restore it.</span></span>
-<span class="source-line"><span class="syntax-comment">// Expected: The changed run fails with an `AssertionError` at `assert.deepEqual(await</span></span>
+<span class="source-line"><span class="syntax-comment">// In a scratch copy of Example A, change `assert.deepEqual(await lookup(&#x27;missing&#x27;), { ok:</span></span>
+<span class="source-line"><span class="syntax-comment">// false, error: &#x27;not_found&#x27; });` to `assert.deepEqual(await lookup(&#x27;missing&#x27;), { ok: true,</span></span>
+<span class="source-line"><span class="syntax-comment">// error: &#x27;not_found&#x27; });` inside its check. Does the check still pass?</span></span>
+<span class="source-line"><span class="syntax-comment">// Expected: The edited run fails with an `AssertionError` at `assert.deepEqual(await</span></span>
 <span class="source-line"><span class="syntax-comment">// lookup(&#x27;missing&#x27;), { ok: true, error: &#x27;not_found&#x27; });`. Restoring `assert.deepEqual(await</span></span>
 <span class="source-line"><span class="syntax-comment">// lookup(&#x27;missing&#x27;), { ok: false, error: &#x27;not_found&#x27; });` brings back: known value 7; absent</span></span>
 <span class="source-line"><span class="syntax-comment">// error not_found.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">// Exercise 2: Show a failure result does not invoke catch: debug a regression</span></span>
-<span class="source-line"><span class="syntax-comment">// A regression changed one token in Example B, so one line now reads `let caught = 1;`. Run</span></span>
-<span class="source-line"><span class="syntax-comment">// Example B with that line, use the failing check to locate the defect and repair it without</span></span>
-<span class="source-line"><span class="syntax-comment">// changing the check.</span></span>
+<span class="source-line"><span class="syntax-comment">// A regression made one Example B line read `let caught = 1;`. Locate and repair it without</span></span>
+<span class="source-line"><span class="syntax-comment">// editing the check.</span></span>
 <span class="source-line"><span class="syntax-comment">// Expected: Before the repair the run fails with an `AssertionError` at</span></span>
 <span class="source-line"><span class="syntax-comment">// `assert.equal(caught, 0)`. Restoring `let caught = 0;` brings back: catch count 0; result</span></span>
 <span class="source-line"><span class="syntax-comment">// still not_found.</span></span>

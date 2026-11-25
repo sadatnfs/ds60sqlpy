@@ -1,20 +1,26 @@
 # spark-009: Packages, build inputs, and closure serialization
 
-Authored tutorial and practice content. The prepared Scala/JVM worker executes a bounded program; process success and understanding remain distinct. No source file installs a tool or downloads a dependency.
+Spark runs your function on executors, so the function and everything it refers to must be serializable and built for the same Scala binary as Spark. This lesson checks a build coordinate against the prepared `_2.13:4.3.0` family, limits the master to `local[2]`, and rewrites a closure that drags a nonserializable owner along.
 
 ## Level and prerequisites
 
-Beginner; approximately 75 minutes. Direct prerequisites: `spark-008`. The lesson uses Scala 2.13 syntax and the prepared JDK 17 worker. The [execution baseline](../execution-baseline.md) lists the exact Scala, JDK and Spark versions.
+Beginner; approximately 75 minutes. Direct prerequisites: `spark-008`. Pinned versions: [execution baseline](../execution-baseline.md).
 
 ## How to run this lesson
 
-Open `spark-009` in the classroom, select the Scala source, prepare the `scala-jvm` profile and run the saved pad. The worker stages the single source as `Main.scala` and invokes `object Main`. Read the terminal output and exact assertions. The [learner source](../lessons/spark-009.scala) runs two complete demonstrations; its six task functions remain explicit stubs until you implement them. Preserve your saved attempt. The [reference program](../solutions/spark-009_solution.scala) and [explained solutions](../solutions/spark-009_solutions.md) are separate and should be opened after an attempt or an explicit worked-comparison request. If the profile is unavailable, reading and saving remain available; opening this guide does not prepare a runtime.
+Shared run steps and profile rules: [study guide](../STUDY-GUIDE.md#run-a-language-lesson).
+
+Learner pad: [spark-009.scala](../lessons/spark-009.scala).
+
+Open the [explained solutions](../solutions/spark-009_solutions.md) after an attempt.
+
+The first worked example prints `org.apache.spark:spark-sql_2.13:4.3.0`, built from the binary version `2.13`; the `_2.13` suffix must match the Scala binary that compiles your code. The second prints `The closure needs the immutable numeric offset` after showing that `value => value + offset` captures only a `Long`. Nothing is downloaded: the coordinate is checked as text, not resolved.
 
 ## Learning objectives
 
 - Separate source code, compiled artifacts and dependency coordinates before distributing functions.
-- Explain the result of both worked examples before running them.
-- Implement the six contracts, inspect normal and boundary evidence, and explain a counterexample in your own words.
+- Explain why `Owner.bad` fails to serialize (it reads the field `factor`, so it captures the whole `Owner`) and why copying `factor` into a local value first fixes it.
+- Separate what the program reads back at runtime (`scala_actual`, `java_actual`) from what the build declares (`spark_target`), and say which of the three a learner can verify from one run.
 
 ## Vocabulary and concepts
 
@@ -132,11 +138,15 @@ If a closure fails serialization, inspect the owner object it captures rather th
 
 ## Self-check
 
-Without opening the reference, trace the listed boundary case through `artifactCoordinate`. Then explain why `versionReport` needs its declared invariant or input restriction. Name the exact assertion that would reject one tempting wrong implementation. Retain the observed values and explain how they support the lesson outcome: Separate source code, compiled artifacts and dependency coordinates before distributing functions.
+- What coordinate does `artifactCoordinate("spark-sql", "2.13", "4.3.0")` return, and why are binary `3`, binary `2.12` and version `4.2.0` outside the prepared target?
+- Why does `localMaster` reject `local[*]` and a `spark://` URL? What would each one change about where your code runs?
+- `captureValue(owner)` with factor 3 maps 7 to 21. Write the one-line change that turns a closure capturing `owner` into one capturing only the factor.
+- `serializedSize` returns a positive byte count for the safe closure. Why is a nonzero byte count alone weaker evidence than the round-trip check in Exercise 5?
+- `versionReport` returns `java_actual` 17 and a `scala_actual` that starts with `2.13.`. Which value comes from the running JVM, and which is only a declaration?
 
 ## Next step
 
-Continue to the next lesson only after you can explain the boundary behavior. The [course route](../README.md) shows authored material and runtime evidence separately.
+Go on to [spark-010: Laziness, iterators, and safe side effects](spark-010.md). Shipping a closure is one half of how Spark runs code; the other half is when it runs. The next lesson traces lazy iterators and shows why a side effect inside a transformation can run zero, one or several times.
 
 ## Primary sources and official APIs
 

@@ -194,9 +194,17 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cuda/python/guides/cuda-066.md</code></p>
     </header>
     <article class="document"><h2 id="cuda-066-shape-dtype-stride-and-layout-are-a-contract">cuda-066: Shape, dtype, stride and layout are a contract<a class="heading-anchor" href="#cuda-066-shape-dtype-stride-and-layout-are-a-contract" aria-label="Link to this section">#</a></h2>
-<p><strong>Route:</strong> CUDA Python and machine learning. <strong>Stage:</strong> beginner. <strong>Prerequisites:</strong> <code>cuda-065</code>. Allow several sessions when the hardware experiment is new; the chapter is not a deadline.</p>
-<h3 id="what-you-will-be-able-to-explain">What you will be able to explain<a class="heading-anchor" href="#what-you-will-be-able-to-explain" aria-label="Link to this section">#</a></h3>
-<p>By the end, you can <strong>calculate offset (1,1)</strong>, <strong>find the contiguous-only bug</strong>, and <strong>design layout contract tests</strong> with evidence. Start with the two worked cases, then use the editable CPU model to make the quantities concrete.</p>
+<p><strong>Route:</strong> CUDA Python and machine learning. <strong>Stage:</strong> beginner. <strong>Prerequisites:</strong> <code>cuda-065</code>.</p>
+<p>Pacing, evidence labels and platform rules: <a href="../../STUDY-GUIDE.md.html">CUDA study guide</a>.</p>
+<h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
+<ul>
+<li>Calculate offset (1,1).</li>
+<li>Change dtype to float64.</li>
+<li>Describe a transposed view.</li>
+<li>Find the contiguous-only bug.</li>
+<li>Specify negative-stride support.</li>
+<li>Design layout contract tests.</li>
+</ul>
 <h3 id="mechanism-and-vocabulary">Mechanism and vocabulary<a class="heading-anchor" href="#mechanism-and-vocabulary" aria-label="Link to this section">#</a></h3>
 <p>Shape describes logical coordinates; strides describe the byte displacement when one coordinate increases by one. A contiguous row-major matrix with three float32 columns has strides (12, 4). A slice selecting alternate columns changes the last stride without necessarily copying storage. Its shape alone cannot tell a raw kernel how to find the next element.</p>
 <p>An address is the allocation base plus view offset plus the sum of index times stride. Dtype determines interpretation and element width, not just a display label. A kernel accepting only contiguous float32 data should validate those conditions or explicitly pack a copy and account for it. Supporting arbitrary strides requires a different indexing contract. Never reinterpret float64 bytes as float32 because the element count happens to match.</p>
@@ -213,8 +221,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>For a 2 by 3 float32 array, coordinate (1, 2) is <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>1</mn><mo>×</mo><mn>12</mn><mo>+</mo><mn>2</mn><mo>×</mo><mn>4</mn><mo>=</mo><mn>20</mn></mrow><annotation encoding="application/x-tex">1\times12+2\times4=20</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">1</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">12</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">2</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">4</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">20</span></span></span></span> bytes from the base. The allocation occupies 24 bytes.</p>
 <h4 id="worked-example-2">Worked example 2<a class="heading-anchor" href="#worked-example-2" aria-label="Link to this section">#</a></h4>
 <p>A column slice choosing columns 0 and 2 has shape (2, 2), strides (12, 8) and a 16-byte logical payload. Its covered storage spans 24 bytes; logical bytes and storage span differ.</p>
-<h3 id="portable-executable-model">Portable executable model<a class="heading-anchor" href="#portable-executable-model" aria-label="Link to this section">#</a></h3>
-<p>The <strong>CPU reference model</strong> variant runs this bounded worked example using <code>python-core</code>. It uses only the Python standard library, small synthetic values and no network. Its purpose is to expose the arithmetic or contract behind the chapter. The separate reference includes assertions for the stated observations.</p>
+<h3 id="how-to-run-the-cpu-model">How to run the CPU model<a class="heading-anchor" href="#how-to-run-the-cpu-model" aria-label="Link to this section">#</a></h3>
+<p>Edit the copy; the <a href="../references/cuda-066_cpu.py.html">reference</a> adds assertions.</p>
+<pre class="highlighted-code"><code class="language-bash">python courses/cuda/python/lessons/cuda-066_cpu.py</code></pre>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">def</span> <span class="syntax-function">offset</span><span class="syntax-punctuation">(</span>indices<span class="syntax-punctuation">,</span> strides<span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
     <span class="syntax-keyword">return</span> <span class="syntax-builtin">sum</span><span class="syntax-punctuation">(</span>i <span class="syntax-operator">*</span> s <span class="syntax-keyword">for</span> i<span class="syntax-punctuation">,</span> s <span class="syntax-operator">in</span> <span class="syntax-builtin">zip</span><span class="syntax-punctuation">(</span>indices<span class="syntax-punctuation">,</span> strides<span class="syntax-punctuation">,</span> strict<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
 
@@ -224,9 +233,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="syntax-keyword">assert</span> offset<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">12</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">20</span>
 <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">CPU layout model:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> offset<span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-number">12</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">bytes</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected observation:</strong> All three views address byte offset 20.</p>
-<p>Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.</p>
 <h3 id="optional-nvidia-cuda-lab">Optional NVIDIA CUDA lab<a class="heading-anchor" href="#optional-nvidia-cuda-lab" aria-label="Link to this section">#</a></h3>
-<p>The <strong>CuPy on NVIDIA CUDA</strong> variant executes the actual operation with CuPy in the separately prepared <code>cuda-python</code> profile. It refuses a missing device instead of switching to CPU. Keep inputs bounded as supplied; inspect the device, synchronize and compare with the CPU reference. The profile must pass real host/device readiness checks. Successful syntax checking on a Mac is not GPU qualification.</p>
+<p><strong>CuPy on NVIDIA CUDA</strong> needs the <code>cuda-python</code> profile; <a href="../../STUDY-GUIDE.md.html#python-gpu-and-framework-labs">lab rules</a>.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-string">&quot;&quot;&quot;Optional NVIDIA CUDA lab. No CPU fallback or external dataset.&quot;&quot;&quot;</span>
 
 <span class="syntax-keyword">import</span> cupy <span class="syntax-keyword">as</span> cp
@@ -243,46 +251,43 @@ cp<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</
 cp<span class="syntax-operator">.</span>cuda<span class="syntax-operator">.</span>get_current_stream<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>synchronize<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span>
 <span class="syntax-builtin">print</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">CUDA layout:</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> view<span class="syntax-operator">.</span>shape<span class="syntax-punctuation">,</span> view<span class="syntax-operator">.</span>strides<span class="syntax-punctuation">,</span> cp<span class="syntax-operator">.</span>asnumpy<span class="syntax-punctuation">(</span>view<span class="syntax-punctuation">)</span><span class="syntax-operator">.</span>tolist<span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span></code></pre>
 <h3 id="practice-and-transfer">Practice and transfer<a class="heading-anchor" href="#practice-and-transfer" aria-label="Link to this section">#</a></h3>
+<p>Record each attempt in the <a href="../lessons/cuda-066.md.html">worksheet</a> before opening hints.</p>
 <h4 id="exercise-1-calculate-offset-1-1">Exercise 1: Calculate offset (1,1)<a class="heading-anchor" href="#exercise-1-calculate-offset-1-1" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Computing <code>1*3 + 1</code> and calling the answer 4 gives an element index, not a byte offset. Using the sliced view strides <code>(12, 8)</code> gives 20, which is the address of a different element in the original storage.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-2-change-dtype-to-float64">Exercise 2: Change dtype to float64<a class="heading-anchor" href="#exercise-2-change-dtype-to-float64" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Keeping strides <code>(12, 4)</code> and only relabeling the dtype reads half of each float64 as a float32. The element count matches, which is why the bug is easy to miss, but every value is garbage.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-3-describe-a-transposed-view">Exercise 3: Describe a transposed view<a class="heading-anchor" href="#exercise-3-describe-a-transposed-view" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Assuming the transpose is contiguous and indexing it with <code>row*2 + col</code> reads the original storage in the wrong order. A raw kernel given only the data pointer and new shape silently computes on the untransposed matrix.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-4-find-the-contiguous-only-bug">Exercise 4: Find the contiguous-only bug<a class="heading-anchor" href="#exercise-4-find-the-contiguous-only-bug" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Fixing it by calling a reshape on the slice can hide the bug: reshape may copy, so the kernel becomes correct but writes go to a temporary and the original view never changes.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-5-specify-negative-stride-support">Exercise 5: Specify negative-stride support<a class="heading-anchor" href="#exercise-5-specify-negative-stride-support" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Taking absolute values of strides makes indices non-negative and appears to work, but it reads the columns in the original order, so a reversed view returns unreversed data.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-6-design-layout-contract-tests">Exercise 6: Design layout contract tests<a class="heading-anchor" href="#exercise-6-design-layout-contract-tests" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Testing only random contiguous arrays of various sizes gives high coverage numbers but never exercises a non-unit stride, which is the exact contract this chapter is about.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
-<p>Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.</p>
+<p>Hint <em>k</em> belongs to exercise <em>k</em>; open one at a time.</p>
 <ol>
-<li>Start from worked example 1 and mark the quantities needed for the task &quot;Calculate offset (1,1)&quot;.</li>
-<li>Change one assumption in worked example 2 while preserving the declared contract: change dtype to float64.</li>
-<li>Trace the CPU program&#x27;s variables before adding hardware behavior: describe a transposed view.</li>
-<li>Draw producers, consumers and the exact operation boundary for the task &quot;Find the contiguous-only bug&quot;.</li>
-<li>Separate what the small fixture establishes from what the real runtime must show: specify negative-stride support.</li>
-<li>Write a counterexample to an overbroad claim before you design layout contract tests.</li>
+<li>Count how many float32 values precede (1,1) in row-major storage, then convert elements to bytes.</li>
+<li>Keep the shape <code>(2, 3)</code> fixed and recompute both strides with an 8-byte itemsize before touching any offset.</li>
+<li>Swap the axes and ask how far in bytes one step along each new axis moves through the original storage.</li>
+<li>Apply <code>row*width+col</code> to the column slice of worked example 2 and list which original columns it reads.</li>
+<li>Write the address formula with a negative last stride and check which integer type the index arithmetic must use.</li>
+<li>Pick one case per assumption: contiguity, the stride formula, launch bounds and dtype. Name what each case would catch.</li>
 </ol>
-<h3 id="common-mistakes-and-self-review">Common mistakes and self-review<a class="heading-anchor" href="#common-mistakes-and-self-review" aria-label="Link to this section">#</a></h3>
-<p>Confusing a correct tiny example with a general implementation is the central review risk. For this chapter, challenge the assumption in worked example 2, then ask whether your change preserves the mechanism described above. If you change dtype, layout, ordering, batch size or backend, update the acceptance contract rather than silently reusing the old observation. Explain an unexpected result before trying random configuration changes.</p>
-<p>Keep a small evidence table with columns <strong>claim</strong>, <strong>input</strong>, <strong>expected observation</strong>, <strong>actual observation</strong> and <strong>limit</strong>. For the first claim use <code>Calculate offset (1,1)</code>. For the final claim use <code>Design layout contract tests</code>. An unperformed GPU or cluster experiment remains pending even when the CPU model is correct.</p>
-<h3 id="platform-and-evidence-contract">Platform and evidence contract<a class="heading-anchor" href="#platform-and-evidence-contract" aria-label="Link to this section">#</a></h3>
-<p>The reading worksheet and CPU reference model work through the ordinary Linux Docker classroom on macOS, Linux and Windows using WSL 2. They do not require an NVIDIA GPU. Their results are labeled CPU models or semantic oracles, not simulated hardware performance.</p>
-<p>Real CUDA work needs supported NVIDIA hardware, a compatible host driver and an explicitly prepared GPU runtime. An Apple GPU does not execute CUDA kernels. PyTorch MPS on a supported native Mac, ROCm on supported AMD hardware, or other vendor backends can provide separate accelerator learning routes; they need their own package and operation qualification and are not CUDA evidence. The ordinary Linux Docker classroom does not expose native Mac MPS automatically.</p>
-<p>Do not download packages, models or data by opening this lesson. Do not attach an engine socket, ambient cluster credentials or an arbitrary remote endpoint. A CPU pass, imported package, successful compilation, real GPU result and measured performance are distinct observations. Record the actual backend, data shape/dtype, source revision, versions and pending checks. A saved completion marker records learning progress, not hardware certification.</p>
+<h3 id="common-mistakes-and-self-check">Common mistakes and self-check<a class="heading-anchor" href="#common-mistakes-and-self-check" aria-label="Link to this section">#</a></h3>
+<p>A frequent mistake is passing a sliced or transposed array to a kernel that assumes contiguous row-major data, so it computes <code>row*width+col</code> and silently reads the wrong elements. Worked example 2 shows the trap: the column slice has strides <code>(12, 8)</code>, not <code>(8, 4)</code>. Fix it by checking strides and dtype at the kernel boundary, then either rejecting the view, packing an explicit contiguous copy whose cost you report, or indexing with the real strides.</p>
+<p><strong>Evidence limit:</strong> The reference checks byte offsets for three views of one 2 by 3 float32 matrix. Offset arithmetic is exact here, but it does not test device alignment rules, memory coalescing or how a particular library decides to copy a non-contiguous view.</p>
+<ol>
+<li>What does a stride tell you that a shape does not?</li>
+<li>Why do logical bytes and storage span differ for the column slice?</li>
+<li>Why is reinterpreting float64 bytes as float32 wrong even when element counts match?</li>
+</ol>
+<p>Answers: <a href="../solutions/cuda-066_solutions.md.html#self-check-answers">self-check answers</a>.</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
 <ul>
 <li><a href="https://docs.cupy.dev/en/v13.6.0/">CuPy array and installation documentation</a></li>
 </ul>
-<p>Use the version-matched documentation of your prepared environment. These references describe interfaces and supported boundaries; the chapter&#x27;s synthetic examples and CPU models are original teaching material.</p>
+<p>Full lists: <a href="../../STUDY-GUIDE.md.html#documentation-and-sources">documentation and sources</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning skill for cuda-066: Shape, dtype, stride and layout are a contract.
 Read courses/cuda/python/guides/cuda-066.md and courses/cuda/python/lessons/cuda-066.md.

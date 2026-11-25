@@ -4,18 +4,15 @@
 
 Beginner; about 90 minutes, plus any optional hardware experiment. Direct prerequisites: `cuda-005`
 
-The order supports learning at your own pace. Reading and CPU reasoning remain
-available when NVIDIA hardware is absent. Advanced hardware features need their
-own capability checks and are not prerequisites for opening this chapter.
+Pacing, evidence labels and platform rules for every chapter are in the [CUDA study guide](../../STUDY-GUIDE.md).
 
 ## Learning objectives
 
 Write CPU reference tests for a pointer-and-size interface and explain the lifetime of each buffer.
 
-Work through *C++ essentials specifically needed at the GPU boundary* with the concrete cases below. Finish with this evidence:
-CPU reference tests and a lifetime explanation. Distinguish an algorithmic
-calculation, a compiled artifact and an actual device observation when explaining
-what your work establishes.
+**Scope:** Fixed-width types, references and pointers, `const`, contiguous containers, `size_t`, conversions, function parameters and compile-time versus runtime values.
+
+**Evidence to produce:** CPU reference tests and a lifetime explanation.
 
 ## Purpose, vocabulary and mental model
 
@@ -30,28 +27,17 @@ A pointer identifies storage; a size defines the range your function may use. Pa
 
 ## How to run and study this lesson
 
-Use the saved reading worksheet in `/classroom`; the reading pad does not execute
-CUDA. For the bounded calculation, select **CPU model (Python)**, whose
-answer-free starter supplies the literal fixtures and task contract. The
-[CUDA C++ study workflow](../README.md) covers platforms, optional GPU
-compilation and evidence labels. In a prepared Python environment you can also
-run the separate [CPU reference](../references/cuda-009_cpu.py) from the
-repository root:
+Trace worked example 1 by hand, then run the [CPU reference](../references/cuda-009_cpu.py) from the repository root:
 
 ```sh
 python courses/cuda/cpp/references/cuda-009_cpu.py
 ```
 
-Its assertions check the stated numerical result or model invariant; console
-text is evidence of this CPU model only, not of CUDA execution.
-
 ## Worked example 1: trace the mechanism
 
 A CPU affine transform accepts input, output, count, scale and bias. For input \([-1,0,2]\), scale 3 and bias 1, the result is \([-2,1,7]\). Reject mismatched ranges before indexing. If input and output overlap, either document in-place safety or reject that case; const alone does not answer it.
 
-The complete CPU model below intentionally models only the named arithmetic,
-layout, dependency or capability decision. It does not model GPU scheduling,
-caches, instruction timing or device memory visibility.
+**Why:** Each output depends only on its own input, so the map is correct for any order of evaluation.
 
 ```python
 values = [-1, 0, 2]
@@ -63,41 +49,37 @@ assert row_sums == [3, 7]
 print({"affine": result, "row_sums": row_sums})
 ```
 
-**Expected observation:** Every assertion succeeds. A representative CPU output is:
+**Expected observation:** every assertion succeeds, and the CPU model prints:
 
 ```text
 {'affine': [-2, 1, 7], 'row_sums': [3, 7]}
 ```
 
-Integers, shapes and ordering must match exactly; only assertions with an explicit
-tolerance accept small floating-point differences. A printed duration is a model
-output, not a measured GPU benchmark.
+**Check:** The reference asserts the result equals [-2, 1, 7]; add an aliased call and state its documented policy.
 
 ## Worked example 2: change a meaningful condition
 
 A function returning `vector<float>{1,2,3}.data()` returns a pointer to storage whose owner is destroyed at the end of the expression. The pointer value may still print, but dereferencing it is invalid. Return the owning vector, or pass caller-owned storage into the function. Keeping a numeric address does not keep an allocation alive.
 
-Before applying this example to your own program, write down which inputs are
-read, which result is produced, and the condition that makes the comparison
-valid. Keep the original case as a regression check when changing a boundary.
+**Why:** The temporary vector is destroyed at the end of the full expression, so its storage is released.
+
+**Check:** Build with address sanitizer on the host; the dangling read is reported as use after free.
 
 ## Six progressive exercises
 
-Exercises 1 and 2 are guided reconstructions of the worked examples; exercises
-3-6 change an input, diagnose a defect, test a boundary and transfer the idea.
-For each one, keep the calculation, output, diagram or failure policy you
-produce so another reader can compare it with the worked cases. If the hint is
-not enough, reread the mechanism paragraph and the bounded CPU assertion.
-
 ### Exercise 1
 
-Predict and trace the first worked example before running its CPU reference. Write every intermediate quantity that leads to the stated result, including units or ownership where applicable.
+Reconstruct worked example 1 on paper before running its CPU reference. Validate that input and output lengths match the count, then compute 3 * x + 1 for each of [-1, 0, 2].
+
+**Trap to avoid:** Assuming const on the input makes in-place calls safe ignores aliasing when output points to the same storage.
 
 **Hint:** Start with the literal input and intermediate quantities in worked example 1.
 
 ### Exercise 2
 
-Reconstruct the second worked example without copying its conclusion. Identify the changed input or condition, show the resulting calculation or dependency, and explain why it differs from the first example.
+Rework worked example 2 without copying its conclusion. Return the owning vector by value or accept caller storage, never a pointer into a temporary.
+
+**Trap to avoid:** Printing the pointer to prove it is valid fails because a numeric address says nothing about lifetime.
 
 **Hint:** Identify exactly which condition changes in worked example 2.
 
@@ -105,11 +87,15 @@ Reconstruct the second worked example without copying its conclusion. Identify t
 
 Describe a row-sum function's minimum buffer metadata for padded storage.
 
+**Trap to avoid:** Passing only rows and columns makes row 1 start at offset 2, reading the padding value 99.
+
 **Hint:** Use the first worked example to establish the relevant quantities, then change only the requested input.
 
 ### Exercise 4
 
 A vector grows after its data pointer was saved. What must be checked?
+
+**Trap to avoid:** Calling reserve once and then appending past that capacity still reallocates and invalidates the pointer.
 
 **Hint:** Locate the failed phase or violated dependency before proposing a repair.
 
@@ -117,35 +103,33 @@ A vector grows after its data pointer was saved. What must be checked?
 
 How should count zero be handled?
 
+**Trap to avoid:** Computing input + count - 1 as a last element pointer creates an invalid pointer before input.
+
 **Hint:** Check what the algorithm is allowed to read, write or assume at this boundary.
 
 ### Exercise 6
 
 Why should a host pointer not be reinterpreted as a device allocation?
 
+**Trap to avoid:** Casting a host float pointer to a device pointer type and launching causes an illegal address fault.
+
 **Hint:** State the output contract and which observations are needed in the new application.
 
 ## Common mistakes and diagnosis
 
-A tempting but incorrect claim in this chapter is: **copying a pointer copies the data, or a host container can be passed to device code unchanged.**
-
-For the concrete failure exercise, a vector grows after its data pointer was saved. What must be checked?
-Preserve the original input and the stage where behavior diverged, and compare
-with the CPU model before changing hardware configuration.
+A tempting but incorrect claim: **Copying a pointer copies the data, or a host container can be passed to device code unchanged.** A pointer copy duplicates an address, not the storage, so both copies see the same bytes and the same lifetime. Worked example 2 returns a pointer whose vector is already destroyed. Host containers also live in host memory, so device code needs an explicit device allocation and transfer.
 
 ## Self-check, retrieval and transfer
 
-Explain the first example without its code, then use the second example to state
-one assumption that matters. Complete Exercise 3 independently, use Exercise 4 to
-diagnose a plausible defect, check the boundary in Exercise 5, and retain the
-application contract from Exercise 6. Compare the [separate explanations](../solutions/cuda-009_solutions.md)
-only after your attempt or a deliberate reveal. A reading marker records your
-choice; it does not certify hardware qualification or expert mastery.
+1. What two values should travel together whenever a buffer crosses a function boundary?
+2. What does `const float*` guarantee and what does it not?
+3. Why is `size_t` preferred for element counts?
+
+Short answers are in the [separate explanations](../solutions/cuda-009_solutions.md#self-check-answers); compare only after an attempt.
 
 ## Primary references
 
-Check the documentation that matches your prepared toolkit before optional
-hardware execution.
+Use the documentation that matches your prepared toolkit.
 
 - [CUDA Programming Guide](https://docs.nvidia.com/cuda/cuda-programming-guide/)
 

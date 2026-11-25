@@ -195,6 +195,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="torch-029-explanatory-solutions">torch-029: explanatory solutions<a class="heading-anchor" href="#torch-029-explanatory-solutions" aria-label="Link to this section">#</a></h2>
 <p>Open these answers only after attempting Stable objectives, precision and mixed-precision boundaries yourself. They reuse the guide&#x27;s literal inputs, starting from Example A, Expose naive overflow, so a discrepancy points at one step. The executable companion runs the assertions; this page explains why each one tests Overflow, Log-sum-exp, Mixed precision. After a pass, choose a new input for exercise 6, Reject a nonfinite input contract, without looking.</p>
+<p>After comparing, follow the <a href="../STUDY-GUIDE.md.html#after-the-solutions">review steps</a>.</p>
 <h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
 <p>Numerical stability concerns how an equivalent mathematical expression behaves in a finite representation. Logits 1000, 999 define a valid two-class distribution, but directly exponentiating them overflows common floating-point types. Subtracting a shared maximum before softmax preserves the distribution. CrossEntropyLoss and logsumexp implement stable combined operations that avoid unnecessary probability round trips.</p>
 <p>Precision and range differ across float16, bfloat16, float32 and float64. Automatic mixed precision selects operation dtypes under a backend policy; gradient scaling addresses underflow in certain training paths. Those mechanisms require hardware-specific validation. This default CPU lesson checks stable objectives and dtype limits without claiming GPU speed or a qualified mixed-precision training configuration. A stable loss can still optimize the wrong labels or denominator, so numerical and semantic checks remain separate.</p>
@@ -301,9 +302,7 @@ np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</
 <span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span>
     <span class="syntax-keyword">raise</span> AssertionError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">NaN logits accepted</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> ValueError before loss evaluation.</p>
-<p><strong>Verify:</strong> In a fresh process, the exercise checks confirm <code>checked_loss(torch.tensor([[0.0, float(&#x27;nan&#x27;)]]), torch.tensor([0]))</code> raises <code>ValueError</code>.</p>
-<h3 id="review-after-comparison">Review after comparison<a class="heading-anchor" href="#review-after-comparison" aria-label="Link to this section">#</a></h3>
-<p>Repeat exercise 4, Inspect stable gradients, with one changed fixture value and predict the difference before running it. Keep your failing attempt at exercise 5, Compare dtype ranges explicitly, beside the repaired result. A missing framework is not a failing assertion. These solutions use only local fixtures.</p></article>
+<p><strong>Verify:</strong> In a fresh process, the exercise checks confirm <code>checked_loss(torch.tensor([[0.0, float(&#x27;nan&#x27;)]]), torch.tensor([0]))</code> raises <code>ValueError</code>.</p></article>
   </main>
 </body>
 </html>

@@ -1,6 +1,6 @@
 # java-030: explanatory solutions
 
-Open after an attempt or an explicit solution reveal. The executable reference runs the six exercise checks together as `Main.java`. The guide contains independent worked examples, while this file explains the choices and failure cases in the complete answer.
+Open this after an attempt; see [using the solutions](../STUDY-GUIDE.md#use-the-solutions).
 
 ## Mechanism review
 
@@ -22,7 +22,7 @@ Write a fixed magic int and version number before fields. Text is UTF-8 bytes pr
 
 ## Exercise 1: Round-trip version 2 data: change one input
 
-Task: Close Example A and rebuild it in a fresh `Main.java`, keeping the assertion on `decode(encoded).equals(record)`. Then propose one input change that would make that assertion fail and explain why before trying it.
+Task: Rebuild Example A from memory and propose one input change that makes the assertion on `decode(encoded).equals(record)` fail.
 
 The comparison includes both domain values and text identity. A successful byte write alone would not show that the reader agrees on encoding and field order.
 
@@ -34,13 +34,13 @@ byte[] encoded = encode(record, 2);
 assert decode(encoded).equals(record);
 ```
 
-**Expected:** Your rebuild reproduces the worked observation (equal domain record and exact Unicode note), and your proposed change makes the assertion on `decode(encoded).equals(record)` fail.
+**Expected:** The rebuild passes and the changed copy fails as predicted.
 
-**Verify:** Run the rebuild with `java -ea Main` first, then the changed copy, and keep both results. Name the value that makes `decode(encoded).equals(record)` false in the changed copy.
+**Verify:** Name the value that differs between your rebuild and the changed copy.
 
 ## Exercise 2: Apply a version 1 default: debug a regression
 
-Task: A regression changed one token in the code that Example B adds after Example A, so one line now reads `Account legacy = decode(encode(new Account("a1", 126, "ignored by v1"), 1));`. Run Example B with that line, use the failing assertion to locate the defect and repair it without changing the assertion.
+Task: A regression in Example B's new code makes one line read `Account legacy = decode(encode(new Account("a1", 126, "ignored by v1"), 1));`. Repair it using the failing assertion.
 
 The default is an explicit compatibility rule. It should not be inferred from an empty String or whatever value happened to initialize a field.
 
@@ -51,9 +51,9 @@ Account legacy = decode(encode(new Account("a1", 125, "ignored by v1"), 1));
 assert legacy.id().equals("a1") && legacy.cents() == 125 && legacy.note().equals("unlabelled");
 ```
 
-**Expected:** Before the repair the run fails with an `AssertionError` from the assertion on `legacy.id().equals("a1") && legacy.cents() == 125 && legacy.note().equals("unlabelled")`; after it the line reads `Account legacy = decode(encode(new Account("a1", 125, "ignored by v1"), 1));` again and decoded note unlabelled.
+**Expected:** The unrepaired run fails with an `AssertionError` from the assertion on `legacy.id().equals("a1") && legacy.cents() == 125 && legacy.note().equals("unlabelled")`; the repaired line reads `Account legacy = decode(encode(new Account("a1", 125, "ignored by v1"), 1));`.
 
-**Verify:** Keep the failing and the repaired runs. Explain why the changed token alters the value tested by `legacy.id().equals("a1") && legacy.cents() == 125 && legacy.note().equals("unlabelled")` for this input.
+**Verify:** Explain how the changed token alters the value that `legacy.id().equals("a1") && legacy.cents() == 125 && legacy.note().equals("unlabelled")` tests.
 
 ## Exercise 3: Reject an unknown version
 
@@ -76,7 +76,7 @@ assert rejected;
 
 **Expected:** IOException naming version.
 
-**Verify:** Keep an assertion equivalent to `rejected`. As a control, change `unknown[5] = 99;` to `unknown[6] = 99;`: the run must fail with an `AssertionError` from the assertion on `rejected`. Restore the line before continuing.
+**Verify:** Control: changing `unknown[5] = 99;` to `unknown[6] = 99;` must fail the assertion on `rejected`.
 
 ## Exercise 4: Detect truncation
 
@@ -96,7 +96,7 @@ assert truncated;
 
 **Expected:** IOException or EOFException before returning a record.
 
-**Verify:** Keep an assertion equivalent to `truncated`. As a control, change `truncated = true;` to `truncated = false;`: the run must fail with an `AssertionError` from the assertion on `truncated`. Restore the line before continuing.
+**Verify:** Control: changing `truncated = true;` to `truncated = false;` must fail the assertion on `truncated`.
 
 ## Exercise 5: Reject an oversized declared text length
 
@@ -118,7 +118,7 @@ assert bounded;
 
 **Expected:** IOException for length before allocating that size.
 
-**Verify:** Keep an assertion equivalent to `bounded`. As a control, change `bounded = expected.getMessage().contains("length");` to `bounded = expected.getMessage().contains("length!");`: the run must fail with an `AssertionError` from the assertion on `bounded`. Restore the line before continuing.
+**Verify:** Control: changing `bounded = expected.getMessage().contains("length");` to `bounded = expected.getMessage().contains("length!");` must fail the assertion on `bounded`.
 
 ## Exercise 6: Reject trailing data and invalid domain state
 
@@ -145,8 +145,10 @@ assert extra && negative;
 
 **Expected:** trailing payload IOException; negative balance IllegalArgumentException.
 
-**Verify:** Keep an assertion equivalent to `extra && negative`. As a control, change `byte[] trailing = Arrays.copyOf(encoded, encoded.length + 1);` to `byte[] trailing = Arrays.copyOf(encoded, encoded.length - 1);`: the run must fail with an `AssertionError` from the assertion on `extra && negative`. Restore the line before continuing.
+**Verify:** Control: changing `byte[] trailing = Arrays.copyOf(encoded, encoded.length + 1);` to `byte[] trailing = Arrays.copyOf(encoded, encoded.length - 1);` must fail the assertion on `extra && negative`.
 
 ## After comparing the answer
 
-Run the complete reference with assertions enabled, then return to your own implementation. Recreate one check with different values and explain its expected result before execution. A compiler error, an expected domain exception and an assertion failure represent different stages and should be reported separately. Preserve ownership boundaries when adapting file, network or concurrency examples. The reference never authorizes access to a shared service or deletion of learner state. Use a fresh tiny fixture when you need to distinguish two interpretations of an API contract.
+Add a version 3 to your copy that appends an `int` priority with a default of 0 for older versions; update both directions and keep the trailing-byte check.
+
+Run the complete reference with `java -ea Main` first; the [review routine](../STUDY-GUIDE.md#use-the-solutions) covers the rest.

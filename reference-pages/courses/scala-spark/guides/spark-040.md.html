@@ -196,7 +196,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <article class="document"><h2 id="spark-040-sql-bridge-jdbc-boundaries-and-data-handling">spark-040: SQL bridge, JDBC boundaries and data handling<a class="heading-anchor" href="#spark-040-sql-bridge-jdbc-boundaries-and-data-handling" aria-label="Link to this section">#</a></h2>
 <p>This architecture lesson uses fixed, sanitized reasoning fixtures. It does not connect to a cluster, open a database, install dependencies or perform a deployment.</p>
 <h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
-<p>Advanced; approximately 105 minutes. Direct prerequisite: <code>spark-039</code>. The prepared execution baseline elsewhere in this course is classic Spark 4.3.0, Scala binary 2.13 and JDK 17. This reading lesson distinguishes that actual local boundary from proposed remote designs.</p>
+<p>Advanced; approximately 105 minutes. Direct prerequisite: <code>spark-039</code>. The prepared execution baseline elsewhere in this course is classic Spark 4.3.0, Scala binary 2.13 and JDK 17. This reading lesson distinguishes that actual local boundary from proposed remote designs. For what a local run can and cannot show, see the <a href="../STUDY-GUIDE.md.html#three-kinds-of-evidence">study guide</a>.</p>
 <h3 id="how-to-use-this-lesson">How to use this lesson<a class="heading-anchor" href="#how-to-use-this-lesson" aria-label="Link to this section">#</a></h3>
 <p>Read the mechanisms and two worked examples, then complete the <a href="../lessons/spark-040.md.html">learner worksheet</a>. Write one evidence-backed response per task before opening the <a href="../solutions/spark-040_solutions.md.html">explained reference</a>. The classroom reading profile does not execute the schematic examples. No remote account or service is required.</p>
 <h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
@@ -247,7 +247,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 Illustrative partition 0: id &lt; 5 OR id IS NULL
 Illustrative partition 1: id &gt;= 5
 Configured lowerBound=0, upperBound=10, numPartitions=2</code></pre>
-<p>Partition 0 includes -10,0, NULL; partition 1 includes 5,10,99. All six source rows can be read. To select only [0, 10), the reviewed SQL must contain that population predicate and a deliberate NULL policy. This is a reasoning fixture, not an executed JDBC query.</p>
+<p>Partition 0 includes -10, 0 and NULL; partition 1 includes 5, 10 and 99. All six source rows can be read. To select only [0, 10), the reviewed SQL must contain that population predicate and a deliberate NULL policy. This is a reasoning fixture, not an executed JDBC query.</p>
 <h4 id="worked-example-2-map-an-exact-decimal-instant-and-missing-field">Worked example 2: Map an exact decimal, instant and missing field<a class="heading-anchor" href="#worked-example-2-map-an-exact-decimal-instant-and-missing-field" aria-label="Link to this section">#</a></h4>
 <pre class="highlighted-code"><code class="language-json"><span class="syntax-punctuation">{</span>
   <span class="syntax-tag">&quot;event_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">7</span><span class="syntax-punctuation">,</span>

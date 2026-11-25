@@ -1,6 +1,6 @@
 # r-045: reference reasoning
 
-Use the [complete reference](r-045_reference.R) with the guide's declared inputs and runtime. Every worked example is also a standalone script.
+Run the [complete reference](r-045_reference.R) under the [run rules](../STUDY-GUIDE.md#run-a-chapter).
 
 ## Why the implementation has this shape
 
@@ -108,4 +108,6 @@ The observation mean is 14/4=3.5; the equal-fold mean of 2 and 4 is 3.
 
 ## What the checks establish
 
-The reference makes 7 `stopifnot()` checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.
+The assertions confirm that the grouped split shares no group between training and testing while the alternating split shares all four, that leave-one-group-out folds cover 8 rows with essentially zero error for the exact rule y equals 1 plus 2x, that a training-only center of 1 differs from a leaked mean of 51, that every training day precedes every test day, and that a pooled ratio of 3.5 differs from the mean of ratios, 3. They do not cover nested tuning.
+
+The reference makes 7 `stopifnot()` checks; see [what a passing run proves](../STUDY-GUIDE.md#what-a-passing-run-proves).

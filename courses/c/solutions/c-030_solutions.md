@@ -1,6 +1,8 @@
 # c-030: explained solutions
 
-Compare after an attempt or explicit reveal. The complete executable reference, `c-030_solution.c`, implements all six cases, from the "guard a formerly unsafe index" case to the "transfer a newly discovered boundary" case, in one `main.c`.
+`c-030_solution.c` assembles the "guard a formerly unsafe index" case through the "transfer a newly discovered boundary" case in one `main.c`.
+
+Compare only after an attempt: [Compare and transfer](../STUDY-GUIDE.md#compare-and-transfer).
 
 ## Mechanism and assumptions
 
@@ -10,7 +12,7 @@ A prepared contributor build can add `-g -O1 -fsanitize=address,undefined -fno-o
 
 ## Exercise 1: Guard a formerly unsafe index: change one input
 
-Copy worked example 1, the "guard a formerly unsafe index" case, into a scratch pad and change `int values[] = {2, 4, 6}, out = 0;` to `int values[] = {2, 4, 7}, out = 0;`. Before running, predict which CHECK fails and which value it sees in place of the worked result (the value 6 is returned); then run it and restore the original line.
+In worked example 1, change `int values[] = {2, 4, 6}, out = 0;` to `int values[] = {2, 4, 7}, out = 0;`. Predict which value the CHECK on `at_index(values, 3, 2, &out) && out == 6` sees, then run and restore.
 
 The unchanged code is worked example 1:
 
@@ -19,13 +21,15 @@ int values[] = {2, 4, 6}, out = 0;
 CHECK(at_index(values, 3, 2, &out) && out == 6);
 ```
 
-**Expected:** With `int values[] = {2, 4, 7}, out = 0;` the run stops with `Check failed` at the CHECK on `at_index(values, 3, 2, &out) && out == 6`, because the "guard a formerly unsafe index" case no longer shows that the value 6 is returned. Restoring `int values[] = {2, 4, 6}, out = 0;` brings that observation back.
+**Expected:** `Check failed` at `at_index(values, 3, 2, &out) && out == 6`; restoring `int values[] = {2, 4, 6}, out = 0;` passes again.
+
+**Verify:** Name the value that made `at_index(values, 3, 2, &out) && out == 6` false, where worked example 1 showed that the value 6 is returned.
 
 The accessor proves the index is below length before reading.
 
 ## Exercise 2: Reject the one-past index: debug a regression
 
-A regression changed one token in worked example 2, the "reject the one-past index" case, so one line now reads `int values[] = {2, 4, 6}, out = 10;`. Run the example with that line, use the failing CHECK to find why the operation fails and output remains 9 no longer holds and repair the line without changing the CHECK.
+Worked example 2 now has a line reading `int values[] = {2, 4, 6}, out = 10;`. Repair it so that the operation fails and output remains 9 again.
 
 The unchanged code is worked example 2:
 
@@ -34,7 +38,9 @@ int values[] = {2, 4, 6}, out = 9;
 CHECK(!at_index(values, 3, 3, &out) && out == 9);
 ```
 
-**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `!at_index(values, 3, 3, &out) && out == 9`. Once the line reads `int values[] = {2, 4, 6}, out = 9;` again, the "reject the one-past index" case again shows that the operation fails and output remains 9.
+**Expected:** `Check failed` at `!at_index(values, 3, 3, &out) && out == 9` until the line reads `int values[] = {2, 4, 6}, out = 9;` again.
+
+**Verify:** Explain how `int values[] = {2, 4, 6}, out = 10;` changes the value `!at_index(values, 3, 3, &out) && out == 9` tests, using your failing and repaired runs.
 
 The regression preserves the boundary that an unchecked implementation would access illegally.
 
@@ -48,6 +54,8 @@ CHECK(!at_index(NULL, 0, 0, &out) && out == 9);
 ```
 
 **Expected:** No access occurs.
+
+**Verify:** Keep a CHECK equivalent to `!at_index(NULL, 0, 0, &out) && out == 9`. Control edit: changing `int out = 9;` to `int out = 10;` must fail it; then restore it.
 
 The function checks the pointer and bound instead of relying on a sanitizer to stop a bad access.
 
@@ -67,6 +75,8 @@ CHECK(p == NULL);
 
 **Expected:** The value is checked before release.
 
+**Verify:** Keep a CHECK equivalent to `*p == 7`. Control edit: changing `*p = 7;` to `*p = 8;` must fail it; then restore it.
+
 There is no post-free dereference in a production reference. A historical failing source belongs only in a clearly isolated diagnostic exercise.
 
 ## Exercise 5: Retain output capacity checks
@@ -80,6 +90,8 @@ CHECK(n >= 0 && (size_t)n < sizeof out && strcmp(out, "ready") == 0);
 ```
 
 **Expected:** The write fits completely.
+
+**Verify:** Keep a CHECK equivalent to `n >= 0 && (size_t)n < sizeof out && strcmp(out, "ready") == 0`. Control edit: changing `int n = snprintf(out, sizeof out, "%s", "ready");` to `int n = snprintf(out, sizeof out, "%s!", "ready");` must fail it; then restore it.
 
 The explicit return-value check remains useful even when instrumentation is enabled.
 
@@ -95,8 +107,10 @@ CHECK(!at_index(values, 1, 1, &out));
 
 **Expected:** Only zero is valid.
 
+**Verify:** Keep a CHECK equivalent to `at_index(values, 1, 0, &out) && out == 5`. Control edit: changing `int values[] = {5}, out = 0;` to `int values[] = {6}, out = 0;` must fail it; then restore it.
+
 A tiny case is easier to reason about and keep as a permanent regression than a large nondeterministic crash workload.
 
 ## After comparison
 
-Add a fresh distinguishing input for the "transfer a newly discovered boundary" case to your own c-030 source. Explain why every access in `at_index` stays within a live object and each owned resource is released. An expected instrumentation failure belongs in the test contract; undefined behavior does not. Keep diagnostics and sanitizer evidence for the "reject the one-past index" case apart from ordinary output: the fixture proves its stated instrumentation, regression fixture and diagnostic evidence assumptions, not universal safety.
+Add a regression for an index that no small test reaches: `at_index(values, 3, SIZE_MAX, &out)` must fail with `out` unchanged; CHECK it. Then explain why the equivalent-looking guard `i + 1 <= n` passes Exercises 1 and 2 but accepts this call, because `SIZE_MAX + 1` wraps to 0, and why a negative `int` index converted to `size_t` arrives as exactly this kind of huge value.

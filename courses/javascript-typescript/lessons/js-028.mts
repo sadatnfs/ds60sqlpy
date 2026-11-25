@@ -2,17 +2,14 @@
 
 export {};
 // Exercise 1: Find a shortest unweighted path: change one input
-// Close Example A and rebuild it in a fresh `main.mts`, keeping the check
-// `assert.deepEqual(shortestPath(graph, 'A', 'D'), ['A', 'B', 'D'])`. Then propose one input
-// change that would make that check fail and explain why before trying it.
-// Expected: Your rebuild reproduces the worked observation (A,B,D under the stated neighbor
-// order), and your proposed change makes the check `assert.deepEqual(shortestPath(graph,
-// 'A', 'D'), ['A', 'B', 'D'])` fail.
+// Rebuild Example A from memory, keeping the check `assert.deepEqual(shortestPath(graph,
+// 'A', 'D'), ['A', 'B', 'D'])`, then propose one input change that should make it fail.
+// Expected: The rebuild reproduces: A,B,D under the stated neighbor order. Your proposed
+// change makes `assert.deepEqual(shortestPath(graph, 'A', 'D'), ['A', 'B', 'D'])` fail.
 
 // Exercise 2: Beat greedy coin selection: diagnose an edited check
-// A careless edit changed a check in Example B so that it reads `assert.equal(minCoins([1,
-// 3, 4], 1), 0);`. Run Example B with that line, explain why the edited check now fails for
-// the same program state, and restore it.
+// Example B's check was edited to read `assert.equal(minCoins([1, 3, 4], 1), 0);`. Run it,
+// explain the failure and restore the original.
 // Expected: Before the repair the run fails with an `AssertionError` at
 // `assert.equal(minCoins([1, 3, 4], 1), 0);`. Restoring `assert.equal(minCoins([1, 3, 4],
 // 0), 0);` brings back: two coins; amount zero needs zero coins.

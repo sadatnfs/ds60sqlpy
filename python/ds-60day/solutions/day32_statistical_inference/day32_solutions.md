@@ -72,9 +72,7 @@ Pitfalls
 
 ## Solution reasoning lens
 
-A strong solution is not merely code that produces one plausible
-output. It establishes a chain from input contract to operation to
-verification:
+Each decision below links an input contract to an operation and its evidence:
 
 1. **`stats.ttest_1samp(sample, popmean)`:** compares a sample mean with a reference value using a t statistic and estimated standard error.
 2. **`stats.ttest_ind(a, b, equal_var=False)`:** runs Welch's two-sample test without assuming equal population variances.
@@ -91,29 +89,15 @@ verification:
 
 **Evidence of correctness:** Report the estimate, sample size, standard error or interval, exact hypothesis, assumptions, and a practical effect measure; independently recompute at least one statistic.
 
-When comparing your attempt with the reference, explain which of these
-decisions your code made explicitly. If the reference makes a different
-choice, compare the contracts and evidence before deciding that one
-version is universally better.
-
 <!-- END ADVANCED PYTHON CONCEPT ENRICHMENT -->
 
 ## Exercise-by-exercise reasoning map
-
-This map connects every learner prompt to a reasoning path. Read the
-explanation before copying code: the goal is to understand the assumptions,
-the evidence that validates the result, and the edge cases that can make an
-apparently correct implementation fail.
 
 ### Exercise 1: Original lesson practice
 
 **Prompt:** Draw groups from `Normal(0, 1)` and `Normal(0.3, 1)`, then test the difference in means with Welch's t-test.
 
 **How to reason about it:** Welch's t-test does not assume equal group variances, but it still assumes independent observations and reasonably stable means. Report sample sizes, the signed mean difference, a confidence interval, and the test result; significance alone does not describe importance.
-
-Use the worked reference earlier in this file, then change one boundary
-condition and rerun the stated checks. A copied output is not evidence
-unless you can explain why that output follows from the inputs.
 
 **Verify:** Record seed, both sample sizes, sample means/variances, Welch t statistic, degrees of freedom, and p-value; independently recompute the mean difference and state the exact null plus the decision at a declared alpha.
 
@@ -123,10 +107,6 @@ unless you can explain why that output follows from the inputs.
 
 **How to reason about it:** A chi-square test consumes counts, not raw category labels or percentages. Inspect expected cell counts and combine levels or choose an exact method when sparse cells make the asymptotic approximation weak.
 
-Use the worked reference earlier in this file, then change one boundary
-condition and rerun the stated checks. A copied output is not evidence
-unless you can explain why that output follows from the inputs.
-
 **Verify:** Print the observed and expected contingency tables, chi-square statistic, degrees of freedom, and p-value; assert observed and expected totals match and flag any expected cell below 5.
 
 ### Exercise 3: Original lesson practice
@@ -134,10 +114,6 @@ unless you can explain why that output follows from the inputs.
 **Prompt:** Compute 90% and 99% confidence intervals for the same mean and compare their widths.
 
 **How to reason about it:** For the same data and method, a 99% interval is wider than a 90% interval because it must cover the parameter under more repeated samples. The center should stay the same; only the critical value changes.
-
-Use the worked reference earlier in this file, then change one boundary
-condition and rerun the stated checks. A copied output is not evidence
-unless you can explain why that output follows from the inputs.
 
 **Verify:** From one unchanged sample, print its mean, standard error, and both interval endpoints; assert the 99% interval is wider than the 90% interval and both are centered on the same sample mean.
 
@@ -156,10 +132,6 @@ Simulate many datasets at both sizes with one seeded generator, but summarize
 the distribution of rejection rates rather than selecting a convenient run.
 Also verify that the observations are independent; duplicated customers would
 inflate the apparent sample size.
-
-**Why this matters:** The result should survive a fresh-kernel rerun and
-a deliberately chosen boundary case. If it does not, revisit the
-assumption or data boundary rather than hiding the failure.
 
 **Verify:** Prediction; with a seeded simulation at n=20 and n=200 per group, print standard error, interval width, power, and standardized effect; verify standard error/width shrink by about \(\sqrt{10}\), power rises, and the population effect size remains fixed.
 
@@ -203,10 +175,6 @@ This percentile interval is a useful teaching baseline. Strong skew, tiny
 samples, dependence, or clustered observations call for a more suitable
 resampling design or a BCa/analytic interval.
 
-**Why this matters:** The result should survive a fresh-kernel rerun and
-a deliberately chosen boundary case. If it does not, revisit the
-assumption or data boundary rather than hiding the failure.
-
 **Verify:** Implementation; with a declared seed and at least 5,000 resamples, print observed median difference and percentile endpoints; assert repeatability, resample count, and a ValueError for either empty group.
 
 ### Exercise 6: Multiple-comparison reasoning
@@ -224,9 +192,5 @@ powerful for exploratory discovery, but answers a different error question.
 Choose the hypothesis family and correction before inspecting results. Tests
 that were added after seeing the data should be labeled exploratory rather
 than quietly folded into the confirmatory analysis.
-
-**Why this matters:** The result should survive a fresh-kernel rerun and
-a deliberately chosen boundary case. If it does not, revisit the
-assumption or data boundary rather than hiding the failure.
 
 **Verify:** Multiple-comparison reasoning; show family-wise false-positive probability \(1-0.95^{20}\) (about 0.6415), Bonferroni per-test alpha 0.0025, and a sorted Benjamini-Hochberg decision table with original hypothesis order restored.

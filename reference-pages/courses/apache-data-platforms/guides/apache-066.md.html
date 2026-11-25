@@ -255,16 +255,16 @@ STORED <span class="syntax-keyword">AS</span> PARQUET <span class="syntax-keywor
 <p>Compare logical result, chosen engine, explain output, statistics freshness, actual counters and resource limits. Partition pruning, vectorized reading, partial aggregation and broadcast are distinct mechanisms with separate evidence. Do not infer all of them from one fast wall-clock observation or one familiar operator label.</p>
 <p><strong>Interview discussion: why can a correct Hive query become slow without changing its SQL?</strong> Input volume/distribution, partitions, statistics, engine settings or available resources can change. The aggregate case ties a plan to a finite oracle, while the join case separates physical execution choices from data-cardinality correctness.</p>
 <h3 id="complete-worked-source">Complete worked source<a class="heading-anchor" href="#complete-worked-source" aria-label="Link to this section">#</a></h3>
-<p>This is a project-only command notebook. Read and edit it in the classroom; run its explicitly labeled commands from the copied owned Docker workshop. The classroom does not execute these service commands.</p>
+<p>The classroom does not execute these service commands. See the <a href="../STUDY-GUIDE.md.html#workshop-notebooks">workshop rules</a>.</p>
 <h2 id="hive-apache-066-command-notebook">Hive apache-066 command notebook<a class="heading-anchor" href="#hive-apache-066-command-notebook" aria-label="Link to this section">#</a></h2>
-<p>Run from the copied owned Hive project, following its README. Native service acceptance is separately recorded in QUALIFICATION.md.</p>
+<p><code>explain.sql</code> is a plain SELECT over the fixture table, and <code>run.sh explain</code> sends it through the admin container of the copied Hive project. Save the full plan text, not a summary of it.</p>
 <pre class="highlighted-code"><code class="language-bash">cat explain.sql
 bash run.sh explain</code></pre>
 <p>Inspect actual partition and aggregate plan operators before claiming a specific engine optimization. Query result correctness and physical work are separate observations.</p>
-<p>The classroom does not execute these Docker commands. Retain source, schema, file identities, actual responses and failure scope in an independent receipt.</p>
+<p>The accepted Hive gate checked query answers and did not grade plan operators. A claim about partition pruning or aggregation needs the saved plan beside the matching row result.</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
 <ul>
-<li><a href="https://hive.apache.org/development/quickstart/">Hive4.2.1 preparation and components</a></li>
+<li><a href="https://hive.apache.org/development/quickstart/">Hive 4.2.1 preparation and components</a></li>
 <li><a href="https://hive.apache.org/docs/latest/language/languagemanual-ddl/">Hive DDL</a></li>
 <li><a href="https://hive.apache.org/docs/latest/admin/adminmanual-metastore-administration/">Hive Metastore administration</a></li>
 <li><a href="https://iceberg.apache.org/docs/latest/hive/">Hive/Iceberg integration</a></li>

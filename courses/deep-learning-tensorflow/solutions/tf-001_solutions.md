@@ -1,19 +1,6 @@
 # tf-001: worked solutions
 
-Open this reference after an attempt or an explicit reveal request. Preserve
-your own version beside it. The [learner guide](../guides/tf-001.md) contains
-the public fixture and its independent Expected/Verify contracts. These six
-sections correspond to the same six learner actions, rather than six answer
-steps for one task. A different implementation is acceptable when it preserves
-the stated input policy, observations and evidence boundary.
-
-The [executable reference](tf-001_solution.py) exposes a `verify()` helper for
-authors and later comparison. It uses only local literals and the declared
-Python/NumPy environment. An assertion failure should retain its actual input
-and smallest failing observation. A passing reference is evidence about these
-fixed cases; use a changed fixture and a closed-reference explanation before
-recommending progression. The reading worksheet remains a reading exercise,
-regardless of the optional arithmetic checker.
+Compare after an attempt with the [learner guide](../guides/tf-001.md). The worksheet stays a reading exercise; the [arithmetic checker](tf-001_solution.py) is optional ([comparison steps](../STUDY-GUIDE.md#after-the-solutions)).
 
 ## Exercise 1: Name the units and roles
 
@@ -65,9 +52,7 @@ Zero error shows that \(y=2\cdot x\) matches these seven published feature/targe
 
 ## Inspectable reference functions
 
-The core functions below make the input and reduction policies explicit. The
-separate executable file adds all six exercise checks. Do not replace a failed
-assertion with a flattering default value or remove the invalid-input case.
+`validate_split` rejects empty sets, duplicate or overlapping row IDs and a shared source group; `mse` refuses empty, unequal or nonfinite pairs.
 
 ```python
 from __future__ import annotations
@@ -107,9 +92,4 @@ def validate_split(train, holdout):
 
 Close the table and explain why a holdout is a decision policy. Then change the training targets to [1,3] and the evaluation target to [5]. Derive the fixed training-mean prediction and its single squared error without looking at the reference.
 
-After revealing this file, choose another fixture before treating the answer
-as independent retrieval evidence. Explain why the rejected case is invalid,
-not merely which exception class appeared. Alternative notation, array layout
-or a direct calculation is welcome when its domain meaning and denominator
-remain explicit. Keep implementation correctness separate from broad claims
-about unseen model quality, reliability or safety.
+Then follow the [after-solutions routine](../STUDY-GUIDE.md#after-the-solutions).

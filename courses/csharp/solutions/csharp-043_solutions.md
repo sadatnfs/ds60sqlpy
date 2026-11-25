@@ -1,6 +1,8 @@
 # csharp-043: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [csharp-043_solution.cs](csharp-043_solution.cs). It runs both worked examples, and its assertions are always active under the prepared classroom compile settings.
+Reference program: [csharp-043_solution.cs](csharp-043_solution.cs), covering both examples.
+
+Attempt the tasks first; see [comparing with the explanation](../STUDY-GUIDE.md#comparing-with-the-explanation).
 
 ## Why the two examples differ
 
@@ -88,7 +90,7 @@ Delete only the lab-owned output directories and verify a clean rebuild.
 
 Design a dependency update review including lock changes, license checks and runtime evidence.
 
-No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **Target framework**, and state one limitation of your choice.
+No single answer exists; extend task 3 using the [open transfer routine](../STUDY-GUIDE.md#open-transfer-tasks).
 
 ## Mechanism and diagnostic reasoning
 
@@ -102,4 +104,4 @@ An SDK version and target framework are related but different. A successful rest
 
 ## Review before continuing
 
-Run the reference and confirm that it prints `csharp-043: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.
+Run the reference and confirm it prints `csharp-043: passed`, then rerun the guide's counterexample.

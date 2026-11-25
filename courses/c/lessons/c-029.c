@@ -2,24 +2,15 @@
 
 int main(void) {
   /* Exercise 1: Copy a representation safely: predict an edited check
-     Copy worked example 1 into a scratch pad and change `CHECK(restored ==
-     original);` to `CHECK(restored != original);` inside its CHECK. Before
-     running, predict whether the CHECK still holds and explain why; then
-     restore it. Expected: With `CHECK(restored != original);` the run stops
-     with `Check failed` at the CHECK on `restored == original`, because the
-     "copy a representation safely" case no longer shows that the restored value
-     is 1.5. Restoring `CHECK(restored == original);` brings that observation
-     back. */
+     In worked example 1, change `CHECK(restored == original);` to
+     `CHECK(restored != original);`. Predict whether the CHECK still holds and
+     why, then run and restore. Expected: `Check failed`: `CHECK(restored !=
+     original);` is false, although the restored value is 1.5. */
 
   /* Exercise 2: Inspect bytes without type punning: debug a regression
-     A regression changed one token in worked example 2, the "inspect bytes
-     without type punning" case, so one line now reads `sum -= bytes[i];`. Run
-     the example with that line, use the failing CHECK to find why the bytes sum
-     to 7 whatever the byte order no longer holds and repair the line without
-     changing the CHECK. Expected: Before the repair the run stops with `Check
-     failed` at the CHECK on `sum == 7u`. Once the line reads `sum += bytes[i];`
-     again, the "inspect bytes without type punning" case again shows that the
-     bytes sum to 7 whatever the byte order. */
+     Worked example 2 now has a line reading `sum -= bytes[i];`. Repair it so
+     that the bytes sum to 7 whatever the byte order again. Expected: `Check
+     failed` at `sum == 7u` until the line reads `sum += bytes[i];` again. */
 
   /* Exercise 3: Handle overlapping moves
      Shift abc right by one within a buffer using memmove.

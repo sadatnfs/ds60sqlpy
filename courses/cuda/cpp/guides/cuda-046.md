@@ -4,18 +4,15 @@
 
 Advanced; about 130 minutes, plus any optional hardware experiment. Direct prerequisites: `cuda-018`, `cuda-029`, `cuda-039`
 
-The order supports learning at your own pace. Reading and CPU reasoning remain
-available when NVIDIA hardware is absent. Advanced hardware features need their
-own capability checks and are not prerequisites for opening this chapter.
+Pacing, evidence labels and platform rules for every chapter are in the [CUDA study guide](../../STUDY-GUIDE.md).
 
 ## Learning objectives
 
 Call cuBLAS GEMM with correct column-major shapes and leading dimensions and compare it fairly, including setup.
 
-Work through *cuBLAS and cuBLASLt without layout confusion* with the concrete cases below. Finish with this evidence:
-correct shapes/layouts and a fair comparison including setup where relevant. Distinguish an algorithmic
-calculation, a compiled artifact and an actual device observation when explaining
-what your work establishes.
+**Scope:** GEMM parameters, leading dimensions, transpose flags, handles, streams, accumulation types, batching, workspace and algorithm selection.
+
+**Evidence to produce:** Correct shapes/layouts and a fair comparison including setup where relevant.
 
 ## Purpose, vocabulary and mental model
 
@@ -39,28 +36,17 @@ Dimensions, layout and compute type must match the selected GEMM interface. The 
 
 ## How to run and study this lesson
 
-Use the saved reading worksheet in `/classroom`; the reading pad does not execute
-CUDA. For the bounded calculation, select **CPU model (Python)**, whose
-answer-free starter supplies the literal fixtures and task contract. The
-[CUDA C++ study workflow](../README.md) covers platforms, optional GPU
-compilation and evidence labels. In a prepared Python environment you can also
-run the separate [CPU reference](../references/cuda-046_cpu.py) from the
-repository root:
+Trace worked example 1 by hand, then run the [CPU reference](../references/cuda-046_cpu.py) from the repository root:
 
 ```sh
 python courses/cuda/cpp/references/cuda-046_cpu.py
 ```
 
-Its assertions check the stated numerical result or model invariant; console
-text is evidence of this CPU model only, not of CUDA execution.
-
 ## Worked example 1: trace the mechanism
 
 Use the rectangular A and B from cuda-018, whose product is \([[7,4],[16,13]]\). With \(\alpha=2\), \(\beta=3\) and initial C all ones, the result becomes \([[17,11],[35,29]]\). This catches implementations that ignore beta or assume the output is initially zero.
 
-The complete CPU model below intentionally models only the named arithmetic,
-layout, dependency or capability decision. It does not model GPU scheduling,
-caches, instruction timing or device memory visibility.
+**Why:** The product [[7, 4], [16, 13]] doubles to [[14, 8], [32, 26]], and adding 3 to every entry gives [[17, 11], [35, 29]].
 
 ```python
 product = [[7, 4], [16, 13]]
@@ -72,41 +58,37 @@ assert column_major == [1, 4, 2, 5, 3, 6]
 print({"scaled_GEMM": result, "column_major": column_major})
 ```
 
-**Expected observation:** Every assertion succeeds. A representative CPU output is:
+**Expected observation:** every assertion succeeds, and the CPU model prints:
 
 ```text
 {'scaled_GEMM': [[17, 11], [35, 29]], 'column_major': [1, 4, 2, 5, 3, 6]}
 ```
 
-Integers, shapes and ordering must match exactly; only assertions with an explicit
-tolerance accept small floating-point differences. A printed duration is a model
-output, not a measured GPU benchmark.
+**Check:** The reference asserts result == [[17, 11], [35, 29]]; on a GPU initialize C to ones explicitly before the call.
 
 ## Worked example 2: change a meaningful condition
 
 For column-major storage, a 2-by-3 matrix \([[1,2,3],[4,5,6]]\) is flattened \([1,4,2,5,3,6]\), with leading dimension two. Row-major flattening is \([1,2,3,4,5,6]\). Passing one while describing the other changes the interpretation rather than merely the speed.
 
-Before applying this example to your own program, write down which inputs are
-read, which result is produced, and the condition that makes the comparison
-valid. Keep the original case as a regression check when changing a boundary.
+**Why:** Column-major order stores each column contiguously, so the leading dimension equals the row count.
+
+**Check:** The reference asserts column_major == [1, 4, 2, 5, 3, 6]; compare a cuBLAS result against the host product for this matrix.
 
 ## Six progressive exercises
 
-Exercises 1 and 2 are guided reconstructions of the worked examples; exercises
-3-6 change an input, diagnose a defect, test a boundary and transfer the idea.
-For each one, keep the calculation, output, diagram or failure policy you
-produce so another reader can compare it with the worked cases. If the hint is
-not enough, reread the mechanism paragraph and the bounded CPU assertion.
-
 ### Exercise 1
 
-Predict and trace the first worked example before running its CPU reference. Write every intermediate quantity that leads to the stated result, including units or ownership where applicable.
+Reconstruct worked example 1 on paper before running its CPU reference. Compute alpha times A times B plus beta times C with alpha 2, beta 3 and C initialized to ones.
+
+**Trap to avoid:** Ignoring beta returns [[14, 8], [32, 26]], and assuming C starts at zero hides that mistake on a fresh buffer.
 
 **Hint:** Start with the literal input and intermediate quantities in worked example 1.
 
 ### Exercise 2
 
-Reconstruct the second worked example without copying its conclusion. Identify the changed input or condition, show the resulting calculation or dependency, and explain why it differs from the first example.
+Rework worked example 2 without copying its conclusion. Flatten the 2-by-3 matrix by columns to [1, 4, 2, 5, 3, 6] with leading dimension 2.
+
+**Trap to avoid:** Passing the row-major buffer [1, 2, 3, 4, 5, 6] while declaring column-major makes the library read a different 2-by-3 matrix with no error.
 
 **Hint:** Identify exactly which condition changes in worked example 2.
 
@@ -114,11 +96,15 @@ Reconstruct the second worked example without copying its conclusion. Identify t
 
 Compute the result when \(\alpha=0\) and \(\beta=2\) for initial C=\([[1,3],[2,4]]\).
 
+**Trap to avoid:** Skipping the call entirely when alpha is zero leaves C unscaled at [[1, 3], [2, 4]].
+
 **Hint:** Use the first worked example to establish the relevant quantities, then change only the requested input.
 
 ### Exercise 4
 
 Why is swapping dimensions until a test passes unsafe?
+
+**Trap to avoid:** Swapping m, n or transpose flags until a square test passes can leave the layout wrong in every other shape.
 
 **Hint:** Locate the failed phase or violated dependency before proposing a repair.
 
@@ -126,35 +112,33 @@ Why is swapping dimensions until a test passes unsafe?
 
 What should \(\beta=0\) mean mathematically?
 
+**Trap to avoid:** Leaving C uninitialized and assuming that is fine without checking the library contract may propagate NaN in some implementations.
+
 **Hint:** Check what the algorithm is allowed to read, write or assume at this boundary.
 
 ### Exercise 6
 
 Design a fair handwritten-versus-library comparison.
 
+**Trap to avoid:** Comparing a handwritten float kernel with a library double call compares different work.
+
 **Hint:** State the output contract and which observations are needed in the new application.
 
 ## Common mistakes and diagnosis
 
-A tempting but incorrect claim in this chapter is: **swapping dimensions until a test passes is an acceptable layout strategy. .**
-
-For the concrete failure exercise, why is swapping dimensions until a test passes unsafe?
-Preserve the original input and the stage where behavior diverged, and compare
-with the CPU model before changing hardware configuration.
+A tempting but incorrect claim: **Swapping dimensions until a test passes is an acceptable layout strategy.** Swapping dimensions until one test passes can coincide with a transposed or wrongly strided interpretation that fails on other shapes. Worked example 2 shows the same values flattened differently in column-major and row-major order. Write the layout, leading dimension and transpose flags for each operand first, then test rectangular shapes.
 
 ## Self-check, retrieval and transfer
 
-Explain the first example without its code, then use the second example to state
-one assumption that matters. Complete Exercise 3 independently, use Exercise 4 to
-diagnose a plausible defect, check the boundary in Exercise 5, and retain the
-application contract from Exercise 6. Compare the [separate explanations](../solutions/cuda-046_solutions.md)
-only after your attempt or a deliberate reveal. A reading marker records your
-choice; it does not certify hardware qualification or expert mastery.
+1. What is the leading dimension of a column-major 3-by-4 matrix without padding?
+2. Why does worked example 1 use beta equal to 3 with C initialized to ones?
+3. What should beta equal to 0 mean?
+
+Short answers are in the [separate explanations](../solutions/cuda-046_solutions.md#self-check-answers); compare only after an attempt.
 
 ## Primary references
 
-Check the documentation that matches your prepared toolkit before optional
-hardware execution.
+Use the documentation that matches your prepared toolkit.
 
 - [cuBLAS documentation](https://docs.nvidia.com/cuda/cublas/index.html)
 

@@ -194,13 +194,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/apache-data-platforms/examples/apache-076.md</code></p>
     </header>
     <article class="document"><h2 id="delta-sharing-apache-076-prepared-command-notebook">Delta Sharing apache-076 prepared command notebook<a class="heading-anchor" href="#delta-sharing-apache-076-prepared-command-notebook" aria-label="Link to this section">#</a></h2>
-<p>Copy the owned Delta Sharing project and follow PREPARATION.md. Delta Sharing belongs to Delta Lake/Linux Foundation. The offline preparation actions are:</p>
+<p>In the copied Delta Sharing project, <code>plan</code> prints the three expected rows that the later file reads must reproduce, without contacting any server:</p>
 <pre class="highlighted-code"><code class="language-bash">bash run.sh prepare
 bash run.sh plan</code></pre>
-<p>For a separately prepared actual owned reference server and untracked recipient profile, the bounded native Docker protocol client runs with:</p>
+<p>During <code>check</code> against your prepared server, every signed data URL must point at a host listed in <code>DS60_SHARING_DATA_HOSTS</code>, and the recipient token is never sent to that host:</p>
 <pre class="highlighted-code"><code class="language-bash">bash run.sh check</code></pre>
 <p>Check separates metadata from file retrieval, never forwards recipient Authorization to storage, and withholds signed URLs. Use a separately copied owned table for the missing-file negative experiment.</p>
-<p>The classroom Markdown pad does not start a service. Source configuration and unit policy fixtures are not actual reference-server receipts. Keep credentials and signed URL query strings out of all published source and evidence.</p></article>
+<p>A signed URL grants temporary storage access, so the receipt keeps only the data host and file sizes or hashes. A missing file belongs in its own copied table, never in the fixture.</p></article>
   </main>
 </body>
 </html>

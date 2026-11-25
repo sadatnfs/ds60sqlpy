@@ -3,23 +3,18 @@ public class Main {
 
   public static void main(String[] args) throws Exception {
     // Exercise 1: Read an admitted owned file: change one input
-    // Copy Example A into a scratch `Main.java` and change
-    // `java.nio.file.Files.writeString(root.resolve("input.txt"), "hello");` to
-    // `java.nio.file.Files.writeString(root.resolve("input.txt"), "hello!");`. Before running it
-    // with `java -ea Main`, predict which assertion fails and which value it now sees; then run
-    // it and restore the original line.
-    // Expected: The changed run fails with an `AssertionError` from the assertion on `new
+    // Change `java.nio.file.Files.writeString(root.resolve("input.txt"), "hello");` to
+    // `java.nio.file.Files.writeString(root.resolve("input.txt"), "hello!");` in Example A and
+    // predict which assertion fails and why.
+    // Expected: The edited run fails with an `AssertionError` from the assertion on `new
     // String(readBounded(root, "input.txt", 10),
-    // java.nio.charset.StandardCharsets.UTF_8).equals("hello")`. Restoring the original line
-    // brings back the worked observation: content hello.
+    // java.nio.charset.StandardCharsets.UTF_8).equals("hello")`.
 
     // Exercise 2: Reject lexical traversal and absolute paths: debug a regression
-    // A regression changed `rejected = true;` to `rejected = false;` in the code that Example B
-    // adds after Example A. Run Example B with that change, use the failing assertion to explain
-    // the defect and repair it without changing the assertion.
-    // Expected: Before the repair the run fails with an `AssertionError` from the assertion on
-    // `rejected`; after it the line reads `rejected = true;` again and securityException for
-    // both.
+    // A regression changed `rejected = true;` to `rejected = false;` in Example B's new code.
+    // Repair it using the failing assertion.
+    // Expected: The unrepaired run fails with an `AssertionError` from the assertion on
+    // `rejected`; the repaired line reads `rejected = true;`.
 
     // Exercise 3: Enforce the byte limit after reading a bounded amount
     // Write five bytes and request a four-byte maximum.

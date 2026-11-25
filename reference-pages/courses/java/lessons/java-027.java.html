@@ -198,24 +198,19 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"></span>
 <span class="source-line">  <span class="syntax-keyword">public</span> <span class="syntax-keyword">static</span> <span class="syntax-keyword">void</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span>String<span class="syntax-operator">[</span><span class="syntax-operator">]</span> args<span class="syntax-punctuation">)</span> <span class="syntax-keyword">throws</span> Exception <span class="syntax-punctuation">{</span></span>
 <span class="source-line">    <span class="syntax-comment">// Exercise 1: Compile a literal application: predict an edited check</span></span>
-<span class="source-line">    <span class="syntax-comment">// Copy Example A into a scratch `Main.java` and change `assert</span></span>
-<span class="source-line">    <span class="syntax-comment">// java.nio.file.Files.isRegularFile(fixture.classes.resolve(&quot;Hello.class&quot;));` to `assert</span></span>
-<span class="source-line">    <span class="syntax-comment">// java.nio.file.Files.isRegularFile(fixture.classes.resolve(&quot;Hello.class!&quot;));` inside its</span></span>
-<span class="source-line">    <span class="syntax-comment">// assertion. Before running it with `java -ea Main`, predict whether the assertion still</span></span>
-<span class="source-line">    <span class="syntax-comment">// holds and explain why; then restore it.</span></span>
-<span class="source-line">    <span class="syntax-comment">// Expected: The changed run fails with an `AssertionError` from the assertion on</span></span>
-<span class="source-line">    <span class="syntax-comment">// `java.nio.file.Files.isRegularFile(fixture.classes.resolve(&quot;Hello.class&quot;))`. Restoring the</span></span>
-<span class="source-line">    <span class="syntax-comment">// original line brings back the worked observation: compiler exit 0; Hello.class exists.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Change Example A&#x27;s assertion to `assert</span></span>
+<span class="source-line">    <span class="syntax-comment">// java.nio.file.Files.isRegularFile(fixture.classes.resolve(&quot;Hello.class!&quot;));`, predict</span></span>
+<span class="source-line">    <span class="syntax-comment">// whether it holds, then run and restore it.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Expected: The edited run fails with an `AssertionError` from the assertion on</span></span>
+<span class="source-line">    <span class="syntax-comment">// `java.nio.file.Files.isRegularFile(fixture.classes.resolve(&quot;Hello.class&quot;))`.</span></span>
 <span class="source-line"></span>
 <span class="source-line">    <span class="syntax-comment">// Exercise 2: Create a runnable archive: diagnose an edited check</span></span>
-<span class="source-line">    <span class="syntax-comment">// A careless edit changed the assertion that Example B adds after Example A so that it reads</span></span>
-<span class="source-line">    <span class="syntax-comment">// `assert archive.getManifest().getMainAttributes().getValue(&quot;Main-</span></span>
-<span class="source-line">    <span class="syntax-comment">// Class&quot;).equals(&quot;Hello!&quot;);`. Run Example B with that line, explain why the edited assertion</span></span>
-<span class="source-line">    <span class="syntax-comment">// now fails for the same program state, and restore it.</span></span>
-<span class="source-line">    <span class="syntax-comment">// Expected: Before the repair the run fails with an `AssertionError` from the assertion on</span></span>
-<span class="source-line">    <span class="syntax-comment">// `archive.getManifest().getMainAttributes().getValue(&quot;Main-Class&quot;).equals(&quot;Hello&quot;)`; after</span></span>
-<span class="source-line">    <span class="syntax-comment">// it the line reads `assert archive.getManifest().getMainAttributes().getValue(&quot;Main-</span></span>
-<span class="source-line">    <span class="syntax-comment">// Class&quot;).equals(&quot;Hello&quot;);` again and JAR exists and contains Hello.class.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Example B&#x27;s new assertion was edited to `assert</span></span>
+<span class="source-line">    <span class="syntax-comment">// archive.getManifest().getMainAttributes().getValue(&quot;Main-Class&quot;).equals(&quot;Hello!&quot;);`.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Explain why it fails for unchanged state and restore it.</span></span>
+<span class="source-line">    <span class="syntax-comment">// Expected: The edited run fails with an `AssertionError` from the assertion on</span></span>
+<span class="source-line">    <span class="syntax-comment">// `archive.getManifest().getMainAttributes().getValue(&quot;Main-Class&quot;).equals(&quot;Hello&quot;)`; the</span></span>
+<span class="source-line">    <span class="syntax-comment">// restored assertion passes.</span></span>
 <span class="source-line"></span>
 <span class="source-line">    <span class="syntax-comment">// Exercise 3: Compare two builds with fixed metadata</span></span>
 <span class="source-line">    <span class="syntax-comment">// Package the same classes twice with the same timestamp.</span></span>

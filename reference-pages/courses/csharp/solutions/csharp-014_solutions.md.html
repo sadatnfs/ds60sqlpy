@@ -194,7 +194,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/csharp/solutions/csharp-014_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="csharp-014-explanation-and-comparison">csharp-014: explanation and comparison<a class="heading-anchor" href="#csharp-014-explanation-and-comparison" aria-label="Link to this section">#</a></h2>
-<p>Attempt the six guide tasks before opening this comparison. The executable reference is <a href="csharp-014_solution.cs.html">csharp-014_solution.cs</a>. It runs both worked examples, and its assertions are always active under the prepared classroom compile settings.</p>
+<p>Reference program: <a href="csharp-014_solution.cs.html">csharp-014_solution.cs</a>, covering both examples.</p>
+<p>Attempt the tasks first; see <a href="../STUDY-GUIDE.md.html#comparing-with-the-explanation">comparing with the explanation</a>.</p>
 <h3 id="why-the-two-examples-differ">Why the two examples differ<a class="heading-anchor" href="#why-the-two-examples-differ" aria-label="Link to this section">#</a></h3>
 <p><strong>Equal data with distinct identities:</strong> Value equality and reference identity answer different questions. Equal records can be distinct objects; with preserves the previous age.</p>
 <p><strong>Notice nested shared state:</strong> The record copy duplicates its field values, including the list reference. Generated copying is not a deep-clone promise. Both records see the appended list item.</p>
@@ -241,7 +242,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><code>record Person(string Name, int Age)</code> declares positional properties and value-based equality. <code>record struct</code> changes assignment semantics. <code>with { Age = 31 }</code> creates a changed copy. <code>==</code> on records follows generated value equality.</p>
 <p>Record equality does not recursively compare arbitrary collection contents. A positional record can still contain mutable members. Avoid putting fields that change after insertion into a hash key contract.</p>
 <h3 id="review-before-continuing">Review before continuing<a class="heading-anchor" href="#review-before-continuing" aria-label="Link to this section">#</a></h3>
-<p>Run the reference and confirm that it prints <code>csharp-014: passed</code>, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.</p></article>
+<p>Run the reference and confirm it prints <code>csharp-014: passed</code>, then rerun the guide&#x27;s counterexample.</p></article>
   </main>
 </body>
 </html>

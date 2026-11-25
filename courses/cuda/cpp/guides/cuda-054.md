@@ -4,18 +4,15 @@
 
 Advanced; about 130 minutes, plus any optional hardware experiment. Direct prerequisites: `cuda-046`, `cuda-051`, `cuda-052`, `cuda-053`
 
-The order supports learning at your own pace. Reading and CPU reasoning remain
-available when NVIDIA hardware is absent. Advanced hardware features need their
-own capability checks and are not prerequisites for opening this chapter.
+Pacing, evidence labels and platform rules for every chapter are in the [CUDA study guide](../../STUDY-GUIDE.md).
 
 ## Learning objectives
 
 Implement tiled attention with online softmax that matches the reference and report memory use and supported masks.
 
-Work through *Attention and memory-aware algorithm design* with the concrete cases below. Finish with this evidence:
-agreement with the reference and a memory/time report that states supported shapes and masks. Distinguish an algorithmic
-calculation, a compiled artifact and an actual device observation when explaining
-what your work establishes.
+**Scope:** Queries, keys, values, score matrix size, stable softmax, tiling, online normalization and recomputation.
+
+**Evidence to produce:** Agreement with the reference and a memory/time report that states supported shapes and masks.
 
 ## Purpose, vocabulary and mental model
 
@@ -38,28 +35,17 @@ The mask M, softmax axis and scaling dimension d_k are part of the model contrac
 
 ## How to run and study this lesson
 
-Use the saved reading worksheet in `/classroom`; the reading pad does not execute
-CUDA. For the bounded calculation, select **CPU model (Python)**, whose
-answer-free starter supplies the literal fixtures and task contract. The
-[CUDA C++ study workflow](../README.md) covers platforms, optional GPU
-compilation and evidence labels. In a prepared Python environment you can also
-run the separate [CPU reference](../references/cuda-054_cpu.py) from the
-repository root:
+Trace worked example 1 by hand, then run the [CPU reference](../references/cuda-054_cpu.py) from the repository root:
 
 ```sh
 python courses/cuda/cpp/references/cuda-054_cpu.py
 ```
 
-Its assertions check the stated numerical result or model invariant; console
-text is evidence of this CPU model only, not of CUDA execution.
-
 ## Worked example 1: trace the mechanism
 
 With query \([1,0]\), keys \([[1,0],[0,1]]\) and values \([[2,0],[0,4]]\), unscaled scores are \([1,0]\). Softmax weights are approximately \([0.731059,0.268941]\), giving output \([1.462117,1.075766]\). A real scaled attention contract also divides scores by square root of key dimension.
 
-The complete CPU model below intentionally models only the named arithmetic,
-layout, dependency or capability decision. It does not model GPU scheduling,
-caches, instruction timing or device memory visibility.
+**Why:** Weights 0.731059 and 0.268941 scale [2, 0] and [0, 4] to give [1.462117, 1.075766].
 
 ```python
 import math
@@ -71,41 +57,37 @@ assert 4096 * 4096 * 4 == 64 * 1024 * 1024
 print({"unscaled_tiny_attention": out, "score_matrix_MiB": 64})
 ```
 
-**Expected observation:** Every assertion succeeds. A representative CPU output is:
+**Expected observation:** every assertion succeeds, and the CPU model prints:
 
 ```text
 {'unscaled_tiny_attention': [1.4621171572600098, 1.0757656854799804], 'score_matrix_MiB': 64}
 ```
 
-Integers, shapes and ordering must match exactly; only assertions with an explicit
-tolerance accept small floating-point differences. A printed duration is a model
-output, not a measured GPU benchmark.
+**Check:** The reference asserts the weights sum to one and prints the output pair.
 
 ## Worked example 2: change a meaningful condition
 
 For 4,096 tokens, a full score matrix has 16,777,216 elements per head and batch item. At four bytes each that is 64 MiB for scores alone. A tiled algorithm's advantage can come from avoiding traffic and storage, even if it recomputes some arithmetic.
 
-Before applying this example to your own program, write down which inputs are
-read, which result is produced, and the condition that makes the comparison
-valid. Keep the original case as a regression check when changing a boundary.
+**Why:** That is 16,777,216 scores, or 64 MiB, before any other buffer.
+
+**Check:** The reference asserts 4096 * 4096 * 4 == 64 * 1024 * 1024.
 
 ## Six progressive exercises
 
-Exercises 1 and 2 are guided reconstructions of the worked examples; exercises
-3-6 change an input, diagnose a defect, test a boundary and transfer the idea.
-For each one, keep the calculation, output, diagram or failure policy you
-produce so another reader can compare it with the worked cases. If the hint is
-not enough, reread the mechanism paragraph and the bounded CPU assertion.
-
 ### Exercise 1
 
-Predict and trace the first worked example before running its CPU reference. Write every intermediate quantity that leads to the stated result, including units or ownership where applicable.
+Reconstruct worked example 1 on paper before running its CPU reference. Score query [1, 0] against keys to get [1, 0], softmax, then weight the value rows.
+
+**Trap to avoid:** Skipping the 1 / sqrt(d) scaling by accident here matches the unscaled reference but breaks a scaled contract.
 
 **Hint:** Start with the literal input and intermediate quantities in worked example 1.
 
 ### Exercise 2
 
-Reconstruct the second worked example without copying its conclusion. Identify the changed input or condition, show the resulting calculation or dependency, and explain why it differs from the first example.
+Rework worked example 2 without copying its conclusion. Multiply 4,096 by 4,096 by 4 bytes for one head and batch item.
+
+**Trap to avoid:** Assuming a tiled kernel is faster only because of fewer FLOPs misses that it avoids this storage.
 
 **Hint:** Identify exactly which condition changes in worked example 2.
 
@@ -113,11 +95,15 @@ Reconstruct the second worked example without copying its conclusion. Identify t
 
 Apply a causal mask that leaves only the first key in the worked row.
 
+**Trap to avoid:** Setting the masked score to 0 instead of negative infinity keeps weight on it.
+
 **Hint:** Use the first worked example to establish the relevant quantities, then change only the requested input.
 
 ### Exercise 4
 
 Why must online accumulators rescale when the maximum increases?
+
+**Trap to avoid:** Adding new terms without rescaling mixes two reference points.
 
 **Hint:** Locate the failed phase or violated dependency before proposing a repair.
 
@@ -125,35 +111,33 @@ Why must online accumulators rescale when the maximum increases?
 
 What is the policy for a completely masked row?
 
+**Trap to avoid:** Letting the general path run leaves behavior undefined.
+
 **Hint:** Check what the algorithm is allowed to read, write or assume at this boundary.
 
 ### Exercise 6
 
 Design an attention benchmark contract.
 
+**Trap to avoid:** Comparing forward-only timing with a library's forward and backward is unfair.
+
 **Hint:** State the output contract and which observations are needed in the new application.
 
 ## Common mistakes and diagnosis
 
-A tempting but incorrect claim in this chapter is: **a short educational attention kernel is a production FlashAttention replacement or validates a complete Transformer.**
-
-For the concrete failure exercise, why must online accumulators rescale when the maximum increases?
-Preserve the original input and the stage where behavior diverged, and compare
-with the CPU model before changing hardware configuration.
+A tempting but incorrect claim: **A short educational attention kernel is a production FlashAttention replacement or validates a complete Transformer.** A short teaching kernel proves one small contract, not a production attention library or a working Transformer. Production versions handle scaling, masking, numerically stable online softmax, many shapes and dtypes, and backward passes. Claim only what your fixtures and reference cover.
 
 ## Self-check, retrieval and transfer
 
-Explain the first example without its code, then use the second example to state
-one assumption that matters. Complete Exercise 3 independently, use Exercise 4 to
-diagnose a plausible defect, check the boundary in Exercise 5, and retain the
-application contract from Exercise 6. Compare the [separate explanations](../solutions/cuda-054_solutions.md)
-only after your attempt or a deliberate reveal. A reading marker records your
-choice; it does not certify hardware qualification or expert mastery.
+1. With a causal mask that keeps only the first key, what output does worked example 1 give?
+2. How large is a 2,048 token score matrix at four bytes per element?
+3. Why must online accumulators rescale when the maximum increases?
+
+Short answers are in the [separate explanations](../solutions/cuda-054_solutions.md#self-check-answers); compare only after an attempt.
 
 ## Primary references
 
-Check the documentation that matches your prepared toolkit before optional
-hardware execution.
+Use the documentation that matches your prepared toolkit.
 
 - [CUDA Programming Guide](https://docs.nvidia.com/cuda/cuda-programming-guide/)
 

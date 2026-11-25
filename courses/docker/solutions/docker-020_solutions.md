@@ -1,6 +1,6 @@
 # docker-020: explanatory solutions
 
-Compare after your own attempt or an explicit reveal. These explain the supplied teaching fixtures; they are not engine results. The mechanism is explained in `courses/docker/guides/docker-020.md`.
+These answers explain teaching fixtures, not engine results; the mechanism is in [the guide](../guides/docker-020.md).
 
 ## Exercise 1: Predict whether matching usernames guarantee file access.
 
@@ -88,4 +88,4 @@ Compare after your own attempt or an explicit reveal. These explain the supplied
 
 ## Check your transfer
 
-A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.
+The image's `chown` only affects the image's own `/data` directory and the copy into a brand new, empty volume. This volume already held root-owned files, so it was mounted as is. Repair it deliberately with a one-off container that runs as root, mounts only that volume, and changes ownership of `/data` to 10001, after taking a backup; or restore the data into a fresh volume. Expect `ls -ln /data` to show 10001 and the increment to succeed. If ownership already showed 10001, look instead for a read-only mount of `/data`.

@@ -1,6 +1,6 @@
 # docker-011: explanatory solutions
 
-Compare after your own attempt or an explicit reveal. These explain the supplied teaching fixtures; they are not engine results. The mechanism is explained in `courses/docker/guides/docker-011.md`.
+These answers explain teaching fixtures, not engine results; the mechanism is in [the guide](../guides/docker-011.md).
 
 ## Exercise 1: Identify the project and service names.
 
@@ -88,4 +88,4 @@ Compare after your own attempt or an explicit reveal. These explain the supplied
 
 ## Check your transfer
 
-A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.
+Both copies used the same project name, so Compose treated them as one project. The second `up` reconciled the first learner's containers, and both copies shared the same named volume, which is why the counter changed. The second copy needs a distinct project name such as `ds60-docker-study-b` and a distinct loopback port such as 18081, used consistently in every command. After that, `docker compose ls` shows two projects and each label filter finds its own volume. One volume appearing under both project names would show the rename was incomplete.

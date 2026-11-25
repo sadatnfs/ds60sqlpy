@@ -1,14 +1,16 @@
 # spark-039: Explained paired reference solutions
 
-Read the [guide](../guides/spark-039.md) and attempt one language first. The [Scala reference](spark-039_solution.scala) and [PySpark reference](spark-039_solution.py) are complete single-file programs with explicit local sessions and finally-based stop. Each compares with literal expectations; matching two implementations alone would not rule out a shared mistake.
+Attempt the [guide](../guides/spark-039.md) exercises first.
+
+References: [Scala](spark-039_solution.scala), [PySpark](spark-039_solution.py).
 
 ## Exercises and reasoning
 
 ### Exercise 1: Validate the generated skewed fixture
 
-Require 20000 rows, IDs 0..19999,100 keys and total ID sum 199990000. Explain key 0 occurs 16040 times.
+Require 20000 rows, IDs 0..19999, 100 keys and total ID sum 199990000. Explain key 0 occurs 16040 times.
 
-**Expected:** Exact population tuple 20000,20000,100,199990000; key 0 count 16040, other keys 40.
+**Expected:** Exact population tuple `20000, 20000, 100, 199990000`; key 0 count 16040, other keys 40.
 
 ```scala
 def fixtureMetrics(source: DataFrame): Seq[Long] = {
@@ -28,7 +30,7 @@ def fixture_metrics(source):
 
 The source formula supplies an independent expected distribution before any configuration comparison. A hot key is deliberate, so the experiment can show why adding partitions does not divide one unsalted key arbitrarily. Schema and population are fixed; no external large table is collected.
 
-**Verification evidence:** Compare aggregate counts and the independent formula 16000+4000/100.
+**Verification evidence:** Compare aggregate counts and the independent formula 16000 + 4000/100.
 
 ### Exercise 2: Measure the two-partition configuration
 
@@ -150,6 +152,7 @@ The limit is a declared teaching workload budget, not a universal safe size for 
 
 ## Execution and interpretation
 
-Run the complete reference in its prepared fixed worker. Its first check (Validate the generated skewed fixture) is built inside the program, so opening the lesson fetches nothing; it expects: Exact population tuple `(20000, 20000, 100, 199990000)`; key 0 count 16040, other keys 40. The final success line prints only after every reference assertion passes.
+`fixture_metrics` must return `(20000, 20000, 100, 199990000)`: rows, distinct IDs, keys and the sum of IDs. With 2 partitions the measured run must persist exactly the 100 expected `(key, count)` pairs, bucket sizes that add up to 20,000, one or two Parquet files, at least one stage and a positive `dataSize`. With 4 partitions the rows must be identical and the file count between 1 and 4.
 
-Local plan, partition and resource evidence does not establish cluster-scale performance; session cleanup is explicit.
+`imbalance` must exceed 1 for both runs, and the program prints a dictionary per run with partitions, bucket rows, the work ratio, files, elapsed nanoseconds, `dataSize`, `shuffleBytesWritten`, `spillSize` and the stage IDs. `estimated_cost(2, 3600, 2, 30)` must equal 0.14 and a negative duration must raise `ValueError`. `within_budget` accepts `(20000, 4)` and rejects `(20001, 4)` and `(20000, 9)`, and afterwards the shuffle partition setting reads `"2"` again. The success line is `spark-039: six PySpark reference contracts passed; Spark=` plus the version. The prices are teaching constants, not a cloud rate card, and spill on a laptop says little about spill on a cluster.
+

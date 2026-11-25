@@ -95,9 +95,6 @@ Boundary parsing proves semantic types first; round-trip, plan, and cross-engine
 
 ### Verification micro-example
 
-Run this small, deterministic case before adapting the reference to a
-larger system. It gives the reasoning above an executable anchor:
-
 ```python
 import csv
 from pathlib import Path
@@ -112,31 +109,19 @@ assert set(types.values()) == {"str"}
 
 **Expected observation:** Dates, units, prices, and blanks all arrive as strings and must be interpreted by an explicit contract.
 
-The reference implementation is one defensible contract, not a license
-to copy internal steps into every system. Preserve the observable
-guarantees and repeat the failure tests when adapting it.
-
 <!-- END PROFESSIONAL PYTHON CONCEPT ENRICHMENT -->
 
 ## Exercise-by-exercise reference
 
-Use this map after an honest attempt. The executable implementation remains
-[`py_data_01_arrow_duckdb_solution.py`](py_data_01_arrow_duckdb_solution.py); this section explains the
-contract, evidence, alternatives, and edge cases behind every numbered task.
+The runnable [`py_data_01_arrow_duckdb_solution.py`](py_data_01_arrow_duckdb_solution.py) implements every task below.
+
+**Principle behind every task:** A columnar pipeline needs an explicit schema, null/decimal semantics, safe partitions, parameterized local queries, and cross-engine evidence.
+
+**Trap behind every task:** Schema inference, float money, unsafe partition text, tiny files, or engine-specific coercion can produce plausible aggregates whose underlying contract has changed.
 
 ### Exercise 1: define the CSV contract
 
 **Prompt recap:** Implement `parse_nullable_text` and `total_revenue`. Parse dates, integers, and prices in one place rather than scattering conversion across analysis code. Test blank notes and a malformed number. For real money, prefer `Decimal` or integer minor units. A binary `float` is used in the learner exercise only to keep its first step small.
-
-**Reference reasoning:** A columnar pipeline needs an explicit schema, null/decimal semantics, safe partitions, parameterized local queries, and cross-engine evidence. The executable module and
-the focused discussion earlier in this file implement this original
-exercise. Verify every acceptance condition from the prompt with a
-normal case, a boundary case, and the documented failure behavior.
-
-**Common trap:** Schema inference, float money, unsafe partition text, tiny files, or engine-specific coercion can produce plausible aggregates whose underlying contract has changed.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
 
 **Verify:** define the CSV contract; assert parse_nullable_text('') is None and nonblank text is preserved; on the six-row fixture, total_revenue must be 114.60, blank notes count to three, and a malformed numeric field raises ValueError naming the field.
 
@@ -144,31 +129,11 @@ and which input would make the policy reject or choose a different path.
 
 **Prompt recap:** Make a table in your notes: | Question | CSV | Parquet | | --- | --- | --- | | Can a text editor inspect it? | | | | Are types/nullability stored? | | | | Can a scan select columns efficiently? | | | | Does Python need an extra engine? | | | | Is append/stream exchange simple? | | | Choose a format for a five-row configuration export and for a repeated 50-million-row analytical scan. Explain each answer.
 
-**Reference reasoning:** A columnar pipeline needs an explicit schema, null/decimal semantics, safe partitions, parameterized local queries, and cross-engine evidence. The executable module and
-the focused discussion earlier in this file implement this original
-exercise. Verify every acceptance condition from the prompt with a
-normal case, a boundary case, and the documented failure behavior.
-
-**Common trap:** Schema inference, float money, unsafe partition text, tiny files, or engine-specific coercion can produce plausible aggregates whose underlying contract has changed.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
-
 **Verify:** compare storage contracts; complete every CSV/Parquet comparison-table cell, choose CSV for the five-row human-inspected configuration and Parquet for the repeated 50-million-row scan, and cite type/nullability, projection, engine, streaming, and inspection evidence for both choices.
 
 ### Exercise 3: build an Arrow schema
 
 **Prompt recap:** With PyArrow installed, define non-null integer, date, region, category, units, and decimal fields plus a nullable note. Create the table with this schema, write Parquet, read it, and assert: - schema equality, - six rows, and - three null notes. Do not infer the schema first and then claim it was guaranteed.
-
-**Reference reasoning:** A columnar pipeline needs an explicit schema, null/decimal semantics, safe partitions, parameterized local queries, and cross-engine evidence. The executable module and
-the focused discussion earlier in this file implement this original
-exercise. Verify every acceptance condition from the prompt with a
-normal case, a boundary case, and the documented failure behavior.
-
-**Common trap:** Schema inference, float money, unsafe partition text, tiny files, or engine-specific coercion can produce plausible aggregates whose underlying contract has changed.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
 
 **Verify:** build an Arrow schema; with PyArrow installed, define non-null integer, date, region, category, units, and decimal fields plus a nullable note; create the table with this schema, write Parquet, read it, and assert: - schema equality, - six rows, and - three null notes; do not infer the schema first and then claim it was guaranteed.
 
@@ -176,31 +141,11 @@ and which input would make the policy reject or choose a different path.
 
 **Prompt recap:** Implement `partition_directory`. Reject `../north`, slashes, empty strings, and unexpected case. Write one stable file per region at `region=<validated-value>/part-000.csv`. Partitioning every high-cardinality value can create millions of tiny files, so choose commonly filtered dimensions and plan file sizes.
 
-**Reference reasoning:** A columnar pipeline needs an explicit schema, null/decimal semantics, safe partitions, parameterized local queries, and cross-engine evidence. The executable module and
-the focused discussion earlier in this file implement this original
-exercise. Verify every acceptance condition from the prompt with a
-normal case, a boundary case, and the documented failure behavior.
-
-**Common trap:** Schema inference, float money, unsafe partition text, tiny files, or engine-specific coercion can produce plausible aggregates whose underlying contract has changed.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
-
 **Verify:** make partitions deliberate; assert north, south, and west map exactly to region=<value>/part-000.csv under the root; ../north, either slash, blank, and wrong-case values must raise ValueError before any file is written.
 
 ### Exercise 5: query Parquet with DuckDB
 
 **Prompt recap:** Use an in-memory connection and `read_parquet(?)`. Group revenue by region for rows with at least two units. Bind path and threshold values as parameters. Then run `EXPLAIN` on the same SQL. Find: - a Parquet scan, - a units filter, and - projected columns that exclude `note`. Record the plan from your installed DuckDB version. Plan formatting changes, so look for semantics rather than copying one exact rendering.
-
-**Reference reasoning:** A columnar pipeline needs an explicit schema, null/decimal semantics, safe partitions, parameterized local queries, and cross-engine evidence. The executable module and
-the focused discussion earlier in this file implement this original
-exercise. Verify every acceptance condition from the prompt with a
-normal case, a boundary case, and the documented failure behavior.
-
-**Common trap:** Schema inference, float money, unsafe partition text, tiny files, or engine-specific coercion can produce plausible aggregates whose underlying contract has changed.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
 
 **Verify:** query Parquet with DuckDB; assert the parameterized DuckDB result equals the fallback's sorted region/revenue rows; the EXPLAIN output must name a Parquet scan, units filter, and projected revenue/region/units columns while excluding note.
 
@@ -208,31 +153,11 @@ and which input would make the policy reject or choose a different path.
 
 **Prompt recap:** Pushdown does not mean every query reads zero irrelevant bytes. Row-group statistics, file organization, filter selectivity, expression support, and engine version matter. Write: 1. what the plan proves, 2. what it suggests may be skipped, and 3. what would require profiling or scan metrics to prove.
 
-**Reference reasoning:** A columnar pipeline needs an explicit schema, null/decimal semantics, safe partitions, parameterized local queries, and cross-engine evidence. The executable module and
-the focused discussion earlier in this file implement this original
-exercise. Verify every acceptance condition from the prompt with a
-normal case, a boundary case, and the documented failure behavior.
-
-**Common trap:** Schema inference, float money, unsafe partition text, tiny files, or engine-specific coercion can produce plausible aggregates whose underlying contract has changed.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
-
 **Verify:** explain pushdown honestly; write a three-row evidence table separating what EXPLAIN proves, what row-group statistics suggest, and what measured scanned rows/bytes must establish; include one selective and one nonselective filter result.
 
 ### Exercise 7: exercise the fallback
 
 **Prompt recap:** Run `summarize_with_csv_fallback` in an environment without PyArrow/DuckDB. If pandas exists, it uses typed `read_csv`; otherwise it uses the standard library. Confirm the same row count, null count, region set, and revenue across engines.
-
-**Reference reasoning:** A columnar pipeline needs an explicit schema, null/decimal semantics, safe partitions, parameterized local queries, and cross-engine evidence. The executable module and
-the focused discussion earlier in this file implement this original
-exercise. Verify every acceptance condition from the prompt with a
-normal case, a boundary case, and the documented failure behavior.
-
-**Common trap:** Schema inference, float money, unsafe partition text, tiny files, or engine-specific coercion can produce plausible aggregates whose underlying contract has changed.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
 
 **Verify:** exercise the fallback; force the no-PyArrow/no-DuckDB path and assert row count 6, null-note count 3, the same region set, and revenue 114.60; compare every value with the optional-engine result when that capability is installed.
 
@@ -250,11 +175,6 @@ change is rejected or transformed through a named migration with validation.
 Test both directions using explicit Arrow schemas; do not rely on whatever
 coercion the installed engine happens to perform.
 
-**Common trap:** Schema inference, float money, unsafe partition text, tiny files, or engine-specific coercion can produce plausible aggregates whose underlying contract has changed.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
-
 **Verify:** plan schema evolution; create version 2 of the sales schema with one nullable additive column and one proposed type change; define which readers remain compatible and write a migration/rejection policy.
 
 ### Exercise 9: control file and row-group size
@@ -271,11 +191,6 @@ planning overhead; overly large row groups reduce pruning granularity.
 Choose a target range based on actual storage/engine workload rather than a
 universal number. Clean the generated data under an ignored temporary path.
 
-**Common trap:** Schema inference, float money, unsafe partition text, tiny files, or engine-specific coercion can produce plausible aggregates whose underlying contract has changed.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
-
 **Verify:** control file and row-group size; generate a larger local deterministic dataset and compare many tiny Parquet files with fewer bounded files/row groups; record metadata count, scan planning, file sizes, and filtered query behavior.
 
 ### Exercise 10: validate a dataset before querying
@@ -291,11 +206,6 @@ fail before analytical SQL runs.
 
 The report includes dataset/version hash, file count, rows, and per-check
 status. A successful Parquet read is not a data-quality proof.
-
-**Common trap:** Schema inference, float money, unsafe partition text, tiny files, or engine-specific coercion can produce plausible aggregates whose underlying contract has changed.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
 
 **Verify:** validate a dataset before querying; build a local validation report for schema equality, required/null counts, unique row IDs, accepted regions, positive units, decimal range, date range, partition-to-column agreement, and total row count.
 
@@ -314,11 +224,6 @@ Sort and compare canonical output rows across engines, including decimal
 normalization and nulls. Matching totals alone can hide duplicated and dropped
 rows.
 
-**Common trap:** Schema inference, float money, unsafe partition text, tiny files, or engine-specific coercion can produce plausible aggregates whose underlying contract has changed.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
-
 **Verify:** reconcile a local analytical join; create a small region lookup fixture, join it to sales in DuckDB, and reproduce the result with standard-library or pandas logic; include an unknown region and duplicate lookup key.
 
 ### Exercise 12: find a non-pushdown filter
@@ -334,11 +239,6 @@ only what the plan shows, not bytes avoided.
 
 Never alter boundary behavior (nulls, overflow, rounding, timezone) merely to
 obtain a prettier plan.
-
-**Common trap:** Schema inference, float money, unsafe partition text, tiny files, or engine-specific coercion can produce plausible aggregates whose underlying contract has changed.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
 
 **Verify:** find a non-pushdown filter; print both plans and measured scan evidence for units >= 2 and the transformed predicate; if rewritten, assert the sorted result rows are identical and record whether filter/projection pushdown changed.
 
@@ -356,11 +256,6 @@ On failure, leave the previous version untouched and remove/review staging.
 Do not overwrite an existing immutable version. Hashes detect accidental
 change but do not prove source trust or data correctness.
 
-**Common trap:** Schema inference, float money, unsafe partition text, tiny files, or engine-specific coercion can produce plausible aggregates whose underlying contract has changed.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
-
 **Verify:** publish a dataset atomically; write partitioned output to a temporary version directory, validate it, create a manifest of relative paths, sizes, hashes, rows, and schema, then atomically update a local current-version pointer.
 
 ### Exercise 14: reconcile decimals and timestamps across engines
@@ -376,10 +271,5 @@ calendar fields separately. CSV needs explicit parsers for both contracts.
 Normalize query results into decimal strings/minor units and UTC ISO timestamps
 before cross-engine comparison. Reject naive/ambiguous timestamps rather than
 letting local machine timezone decide.
-
-**Common trap:** Schema inference, float money, unsafe partition text, tiny files, or engine-specific coercion can produce plausible aggregates whose underlying contract has changed.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
 
 **Verify:** reconcile decimals and timestamps across engines; add boundary decimal values and timezone-aware timestamps to a local round trip; compare CSV parsing, Arrow/Parquet, pandas, and DuckDB types and results with explicit normalization.

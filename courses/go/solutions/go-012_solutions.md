@@ -1,6 +1,6 @@
 # go-012: explained solutions
 
-These are comparison material after an attempt or explicit reveal. The executable reference implements all six cases in one `main.go`.
+Compare after an attempt ([using solutions](../STUDY-GUIDE.md#use-the-solutions)). `courses/go/solutions/go-012_solution.go` implements all six cases.
 
 ## Mechanism
 
@@ -10,7 +10,7 @@ defer cleanup() registers a call. defer func(){ ... }() registers a closure. A h
 
 ## 1. Trace cleanup order: predict an edited check
 
-Copy worked example 1 into a scratch pad and change `check(deferOrder() == "second,first", "defer order")` to `check(deferOrder() == "second,first!", "defer order")` inside its check. Before running, predict whether the check still passes and explain why; then restore it.
+Copy worked example 1, change `check(deferOrder() == "second,first", "defer order")` to `check(deferOrder() == "second,first!", "defer order")` inside its check and predict whether it still passes; then restore it.
 
 The unchanged code is worked example 1:
 
@@ -18,7 +18,9 @@ The unchanged code is worked example 1:
 check(deferOrder() == "second,first", "defer order")
 ```
 
-**Expected:** The changed run panics with `defer order` because the edited check no longer holds. Restoring the original line brings back the worked observation: the observed order is second then first.
+**Expected:** The edited check panics with `defer order` even though `deferOrder() == "second,first"` still holds.
+
+**Verify:** Restoring `check(deferOrder() == "second,first", "defer order")` makes the check pass again with the worked observation: the observed order is second then first.
 
 The last registered cleanup runs first. This naturally unwinds nested acquisitions in the opposite order from acquisition.
 
@@ -32,7 +34,7 @@ The last registered cleanup runs first. This naturally unwinds nested acquisitio
 
 ## 2. Compare captured arguments: diagnose an edited check
 
-A careless edit changed the check in worked example 2 so that it reads `check(deferArgument() != 1, "argument evaluation")`. Run worked example 2 with that line, explain why the edited check now fails for the same program state, and restore it.
+A careless edit rewrote the check in worked example 2 as `check(deferArgument() != 1, "argument evaluation")`. Explain the failure, then restore it.
 
 The unchanged code is worked example 2:
 
@@ -40,7 +42,9 @@ The unchanged code is worked example 2:
 check(deferArgument() == 1, "argument evaluation")
 ```
 
-**Expected:** Before the repair the program panics with `argument evaluation`; after it the line reads `check(deferArgument() == 1, "argument evaluation")` again and the deferred argument retains the earlier value 1.
+**Expected:** The defective run panics with `argument evaluation`; after restoring `check(deferArgument() == 1, "argument evaluation")`, the deferred argument retains the earlier value 1.
+
+**Verify:** The edited check fails with message `argument evaluation` for a state that `deferArgument() == 1` accepts.
 
 Call arguments are evaluated at registration. This differs from a closure that refers to x and reads it when the closure later runs.
 
@@ -62,6 +66,8 @@ check(deferClosure() == 2, "closure read")
 
 **Expected:** The closure observes 2.
 
+**Verify:** Your solution must keep `deferClosure() == 2` true. Control: changing `check(deferClosure() == 2, "closure read")` to `check(deferClosure() != 2, "closure read")` panics with message `closure read`; revert it.
+
 The closure refers to the variable. Whether this is useful or misleading depends on the intended observation time.
 
 **Approach.** Defer a closure with no parameters that reads `x`, then assign 2 before returning.
@@ -82,6 +88,8 @@ check(recoverKnown() == "broken", "recovered value")
 
 **Expected:** The helper reports broken explicitly.
 
+**Verify:** Your solution must keep `recoverKnown() == "broken"` true. Control: changing `check(recoverKnown() == "broken", "recovered value")` to `check(recoverKnown() != "broken", "recovered value")` panics with message `recovered value`; revert it.
+
 The recovery boundary converts this deliberate fixture into inspectable evidence. It does not justify swallowing arbitrary production panics.
 
 **Approach.** Install a deferred function that calls `recover()` and converts any recovered value to text with `fmt.Sprint`, then call `panic("broken")`.
@@ -101,6 +109,8 @@ check(cleanedAfterPanic(), "cleanup on panic")
 ```
 
 **Expected:** The cleanup marker is still set.
+
+**Verify:** Your solution must keep `cleanedAfterPanic()` true. Control: an input that falsifies it fails with message `cleanup on panic`; revert it.
 
 Stack unwinding runs deferred cleanup before the outer recovery returns. Resource-release logic must still be safe when work is incomplete.
 
@@ -125,6 +135,8 @@ check(count == 3, "iteration cleanup")
 ```
 
 **Expected:** All three markers are present after the loop.
+
+**Verify:** Your solution must keep `count == 3` true. Control: changing `for i := 0; i < 3; i++ {` to `for i := 0; i <= 3; i++ {` panics with message `iteration cleanup`; revert it.
 
 A helper creates a cleanup boundary per iteration. A defer in the outer loop's function would postpone all three releases until that outer function returned.
 

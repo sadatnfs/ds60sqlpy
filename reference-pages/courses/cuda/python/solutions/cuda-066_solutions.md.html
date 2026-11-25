@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cuda/python/solutions/cuda-066_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="cuda-066-explained-solutions">cuda-066: explained solutions<a class="heading-anchor" href="#cuda-066-explained-solutions" aria-label="Link to this section">#</a></h2>
-<p>These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.</p>
+<p>Compare with your <a href="../lessons/cuda-066.md.html">worksheet</a> attempt.</p>
 <h3 id="exercise-1-calculate-offset-1-1">Exercise 1: Calculate offset (1,1)<a class="heading-anchor" href="#exercise-1-calculate-offset-1-1" aria-label="Link to this section">#</a></h3>
 <p>Offset is 16 bytes in the original matrix.</p>
 <p><strong>Approach.</strong> Use the address formula with the original matrix strides <code>(12, 4)</code>: offset equals <code>1*12 + 1*4</code>. Row index 1 skips one 12-byte row, column index 1 skips one 4-byte float32.</p>
@@ -231,9 +231,19 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Why it is correct here.</strong> Each case breaks a different assumption. The slice breaks row times width indexing, the transpose breaks C-contiguity, the empty case tests the launch guard, and the float64 case tests dtype validation instead of byte reinterpretation.</p>
 <p><strong>A plausible wrong approach.</strong> Testing only random contiguous arrays of various sizes gives high coverage numbers but never exercises a non-unit stride, which is the exact contract this chapter is about.</p>
 <p><strong>How to verify.</strong> Each test compares the kernel or model output with a NumPy reference on the same view. The suite passes when all five cases agree, and the float64 case asserts a raised error or an explicit, counted conversion copy.</p>
+<h3 id="self-check-answers">Self-check answers<a class="heading-anchor" href="#self-check-answers" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>What does a stride tell you that a shape does not?</strong> The byte displacement for a one-step move along an axis. Two arrays with shape <code>(2, 2)</code> can address storage differently, as the column slice with strides <code>(12, 8)</code> shows.</li>
+</ol>
+<ol start="2">
+<li><strong>Why do logical bytes and storage span differ for the column slice?</strong> The slice holds four float32 values, 16 logical bytes, but they are scattered across the original 24-byte allocation because every other column is skipped.</li>
+</ol>
+<ol start="3">
+<li><strong>Why is reinterpreting float64 bytes as float32 wrong even when element counts match?</strong> Dtype decides both width and bit interpretation. Reading 8-byte doubles as 4-byte floats splits each value into two meaningless halves; a conversion must be an explicit cast.</li>
+</ol>
 <h3 id="reference-observation">Reference observation<a class="heading-anchor" href="#reference-observation" aria-label="Link to this section">#</a></h3>
 <p>All three views address byte offset 20.</p>
-<p>The reference file is <code>courses/cuda/python/references/cuda-066_cpu.py</code>. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.</p></article>
+<p>Asserted by <code>courses/cuda/python/references/cuda-066_cpu.py</code>.</p></article>
   </main>
 </body>
 </html>

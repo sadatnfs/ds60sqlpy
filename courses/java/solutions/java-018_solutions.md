@@ -1,6 +1,6 @@
 # java-018: explanatory solutions
 
-Open after an attempt or an explicit solution reveal. The executable reference runs the six exercise checks together as `Main.java`. The guide contains independent worked examples, while this file explains the choices and failure cases in the complete answer.
+Open this after an attempt; see [using the solutions](../STUDY-GUIDE.md#use-the-solutions).
 
 ## Mechanism review
 
@@ -18,7 +18,7 @@ A table-driven test stores inputs and expected outputs together, then runs the s
 
 ## Exercise 1: Use independent table cases: change one input
 
-Task: Copy Example A into a scratch `Main.java` and change `int[][] cases = { { -2, 0 }, { 0, 0 }, { 3, 3 }, { 9, 5 } };` to `int[][] cases = { { -2, 1 }, { 0, 0 }, { 3, 3 }, { 9, 5 } };`. Before running it with `java -ea Main`, predict which assertion fails and which value it now sees; then run it and restore the original line.
+Task: Change `int[][] cases = { { -2, 0 }, { 0, 0 }, { 3, 3 }, { 9, 5 } };` to `int[][] cases = { { -2, 1 }, { 0, 0 }, { 3, 3 }, { 9, 5 } };` in Example A and predict which assertion fails and why.
 
 The expected outputs are literal contract examples. They do not call clamp or duplicate its full branching logic to generate answers.
 
@@ -29,13 +29,13 @@ int[][] cases = { { -2, 0 }, { 0, 0 }, { 3, 3 }, { 9, 5 } };
 for (int[] row : cases) assert clamp(row[0], 0, 5) == row[1];
 ```
 
-**Expected:** The changed run fails with an `AssertionError` from the assertion on `clamp(row[0], 0, 5) == row[1]`. Restoring the original line brings back the worked observation: outputs 0, 0, 3, 5.
+**Expected:** The edited run fails with an `AssertionError` from the assertion on `clamp(row[0], 0, 5) == row[1]`.
 
-**Verify:** Compare your written prediction with the reported `AssertionError` and its stack-trace line, and name the value that made `clamp(row[0], 0, 5) == row[1]` false. After restoring the line, the program completes without an `AssertionError` again.
+**Verify:** Name the value that makes `clamp(row[0], 0, 5) == row[1]` false, then restore the line.
 
 ## Exercise 2: Check a boundary failure: debug a regression
 
-Task: Introduce one deliberate defect into the code that Example B adds after Example A and explain which observation exposes it, then repair it.
+Task: Add one defect to Example B's new code that changes its observation, then repair it.
 
 An invalid interval is different from a value outside a valid interval. The test ensures the implementation rejects the contract violation.
 
@@ -45,9 +45,9 @@ The unchanged code is the part that Example B adds:
 expect(IllegalArgumentException.class, () -> clamp(3, 5, 2));
 ```
 
-**Expected:** The defective copy changes the observation; the repaired copy reproduces the worked observation: exception observed.
+**Expected:** The defective copy fails its assertion and the repaired copy passes.
 
-**Verify:** Keep the failing and the repaired runs and name the first statement whose value differs between them.
+**Verify:** Name the first statement whose value differs between the failing and repaired runs.
 
 ## Exercise 3: Test an idempotence property
 
@@ -64,7 +64,7 @@ for (int value = -10; value <= 10; value++) {
 
 **Expected:** all 21 cases satisfy idempotence.
 
-**Verify:** Keep an assertion equivalent to `clamp(once, 0, 5) == once`. As a control, change `int once = clamp(value, 0, 5);` to `int once = clamp(value, 0, 6);`: the run must fail with an `AssertionError` from the assertion on `clamp(once, 0, 5) == once`. Restore the line before continuing.
+**Verify:** Control: changing `int once = clamp(value, 0, 5);` to `int once = clamp(value, 0, 6);` must fail the assertion on `clamp(once, 0, 5) == once`.
 
 ## Exercise 4: Detect a broken implementation
 
@@ -80,7 +80,7 @@ assert caught;
 
 **Expected:** at least one mismatch.
 
-**Verify:** Keep an assertion equivalent to `caught`. As a control, change `for (int[] row : cases) if (brokenClamp(row[0], 0, 5) != row[1]) caught = true;` to `for (int[] row : cases) if (brokenClamp(row[1], 0, 5) != row[1]) caught = true;`: the run must fail with an `AssertionError` from the assertion on `caught`. Restore the line before continuing.
+**Verify:** Control: changing `for (int[] row : cases) if (brokenClamp(row[0], 0, 5) != row[1]) caught = true;` to `for (int[] row : cases) if (brokenClamp(row[1], 0, 5) != row[1]) caught = true;` must fail the assertion on `caught`.
 
 ## Exercise 5: Verify the exception checker itself
 
@@ -100,7 +100,7 @@ assert checkerFailed;
 
 **Expected:** checker fails when no exception is thrown.
 
-**Verify:** Keep an assertion equivalent to `checkerFailed`. As a control, change `checkerFailed = true;` to `checkerFailed = false;`: the run must fail with an `AssertionError` from the assertion on `checkerFailed`. Restore the line before continuing.
+**Verify:** Control: changing `checkerFailed = true;` to `checkerFailed = false;` must fail the assertion on `checkerFailed`.
 
 ## Exercise 6: Test a fresh transfer property
 
@@ -119,8 +119,10 @@ for (int[] original : List.of(new int[0], new int[] { 4 }, new int[] { 1, 2, 3 }
 
 **Expected:** all originals restored; input arrays unchanged.
 
-**Verify:** Keep an assertion equivalent to `first[0] == original[original.length - 1]`. As a control, change `if (original.length > 1) assert first[0] == original[original.length - 1];` to `if (original.length > 1) assert first[1] == original[original.length - 1];` inside it: the run must fail with an `AssertionError`, which shows the assertion can fail. Restore it.
+**Verify:** Control: changing `if (original.length > 1) assert first[0] == original[original.length - 1];` to `if (original.length > 1) assert first[1] == original[original.length - 1];` inside the assertion must make it fail.
 
 ## After comparing the answer
 
-Run the complete reference with assertions enabled, then return to your own implementation. Recreate one check with different values and explain its expected result before execution. A compiler error, an expected domain exception and an assertion failure represent different stages and should be reported separately. Preserve ownership boundaries when adapting file, network or concurrency examples. The reference never authorizes access to a shared service or deletion of learner state. Use a fresh tiny fixture when you need to distinguish two interpretations of an API contract.
+Write one more mutant in your copy, for example a clamp that ignores the upper bound, and confirm that at least one row of the case table fails for it.
+
+Run the complete reference with `java -ea Main` first; the [review routine](../STUDY-GUIDE.md#use-the-solutions) covers the rest.

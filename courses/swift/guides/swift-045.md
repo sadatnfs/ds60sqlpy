@@ -24,9 +24,9 @@ A coordinator commonly owns delegate behavior. It must avoid feedback loops wher
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles the saved pad as `main.swift` with Swift 6 language checking. An explicit `@main` type contains `static func main() async throws`; the fixed compiler uses `-parse-as-library -swift-version 6`. The examples use the standard library and portable Foundation. `precondition` makes a violated invariant fail the process. The fixed pad accepts one source file, without arbitrary command arguments, interactive input or dependency installation. SwiftUI, UIKit, Apple simulators and application signing belong to the separately prepared macOS/Xcode project labs, never the Linux pad.
+The pad runs only the comparison kernel. `SelectableText.swift` imports UIKit or AppKit behind `canImport`, so task 3 compiles in the Apple project, not on Linux. Count assignments in your own tests as task 2 does, since redundant updates do not show up as wrong output.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Compile contract, starter stop and success marker: [running a lesson](../STUDY-GUIDE.md#running-a-lesson).
 
 The complete [JourneyApp fixture](../fixtures/JourneyApp/README.md) contains `SelectableText.swift` with real UIKit and AppKit representable implementations.
 
@@ -34,7 +34,7 @@ The complete [JourneyApp fixture](../fixtures/JourneyApp/README.md) contains `Se
 
 UIViewRepresentable uses makeUIView and updateUIView. NSViewRepresentable has corresponding AppKit methods. A Coordinator bridges delegate callbacks. Compile-time canImport guards select the appropriate platform source.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+Each example ends with a trace; method: [tracing a program](../STUDY-GUIDE.md#tracing-a-program).
 
 ## Worked example / walkthrough
 
@@ -71,6 +71,8 @@ struct LessonMain {
 
 **Observe:** The same value is not assigned twice.
 
+**Trace.** `bridge` starts with text old and zero assignments. The first `update("new")` finds the text differs, stores new and increments the count to 1. The second `update("new")` finds the text already equal and returns at the guard. The check confirms text new and one assignment. In a real `updateUIView`, skipping the equal case avoids resetting the selection or cursor on every SwiftUI update.
+
 ### Example B: Retain user changes as actions
 
 The actual platform delegate must route its edit through the same single-source policy.
@@ -104,6 +106,8 @@ struct LessonMain {
 
 **Observe:** The portable kernel exposes a deliberate state transition.
 
+**Trace.** This run begins at start with zero assignments. One update with edited changes the text and counts one assignment, and both checks confirm it. In the platform view, the user's typing arrives through a delegate in the Coordinator, which writes to the binding; SwiftUI then calls the update method, and the guard sees the same text and does nothing. Both directions pass through one comparison.
+
 ## Exercises
 
 1. **Predict and explain.** Identify the value-driven and imperative sides of the bridge.
@@ -118,13 +122,15 @@ struct LessonMain {
 
 6. **Transfer and justify.** Document coordinator ownership, delegate cleanup and platform-specific API availability.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Log each task in the [evidence table](../STUDY-GUIDE.md#recording-exercise-evidence) before opening the explanation.
 
 ## Common pitfalls and diagnosis
 
 A canImport branch is not evidence that both platforms were tested. UIKit and AppKit lifecycles differ. Avoid retaining transient SwiftUI view values as permanent controller state.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+Task 4's loop comes from an update method that writes back to the binding unconditionally. The write triggers another update, which writes again, and the view never settles. The counterexample is a repeated-update test that expects the assignment count to stay at 1 after the second identical value. For task 5, empty text must still count as one change from a nonempty value.
+
+Repair routine: [building a regression case](../STUDY-GUIDE.md#building-a-regression-case).
 
 ## Progressive hints
 
@@ -134,11 +140,15 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 ## Self-check and next step
 
-Explain Representable adapter, Coordinator, Feedback loop without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+Name the two methods of `UIViewRepresentable` and say which one may run many times. Explain what the Coordinator owns and why delegate callbacks route through it. Describe how `canImport` lets one source file supply UIKit and AppKit implementations. Starting from start, predict the assignment count after updates with a, a, b and a.
+
+Then follow the general [self-check routine](../STUDY-GUIDE.md#self-check-routine) and save your pad.
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://developer.apple.com/documentation/swiftui/uiviewrepresentable). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+[Documentation](https://developer.apple.com/documentation/swiftui/uiviewrepresentable): Apple's SwiftUI documentation covers `UIViewRepresentable`, `NSViewRepresentable` and their coordinators; the language reference documents conditional compilation blocks.
+
+Provenance and limits: [sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

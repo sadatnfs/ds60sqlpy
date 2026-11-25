@@ -1,6 +1,6 @@
 # java-023: explanatory solutions
 
-Open after an attempt or an explicit solution reveal. The executable reference runs the six exercise checks together as `Main.java`. The guide contains independent worked examples, while this file explains the choices and failure cases in the complete answer.
+Open this after an attempt; see [using the solutions](../STUDY-GUIDE.md#use-the-solutions).
 
 ## Mechanism review
 
@@ -20,7 +20,7 @@ Use synchronized around the entire read-modify-write. AtomicInteger.incrementAnd
 
 ## Exercise 1: Protect a compound counter: change one input
 
-Task: Copy Example A into a scratch `Main.java` and change `for (int i = 0; i < 1000; i++) counter.increment();` to `for (int i = 1; i < 1000; i++) counter.increment();`. Before running it with `java -ea Main`, predict which assertion fails and which value it now sees; then run it and restore the original line.
+Task: Change `for (int i = 0; i < 1000; i++) counter.increment();` to `for (int i = 1; i < 1000; i++) counter.increment();` in Example A and predict which assertion fails and why.
 
 The lock covers the complete increment. Synchronizing only a read or only a write would still permit lost updates.
 
@@ -34,13 +34,13 @@ runTwo(() -> {
 assert counter.value() == 2000;
 ```
 
-**Expected:** The changed run fails with an `AssertionError` from the assertion on `counter.value() == 2000`. Restoring the original line brings back the worked observation: counter 2000.
+**Expected:** The edited run fails with an `AssertionError` from the assertion on `counter.value() == 2000`.
 
-**Verify:** Compare your written prediction with the reported `AssertionError` and its stack-trace line, and name the value that made `counter.value() == 2000` false. After restoring the line, the program completes without an `AssertionError` again.
+**Verify:** Name the value that makes `counter.value() == 2000` false, then restore the line.
 
 ## Exercise 2: Use an atomic increment: debug a regression
 
-Task: A regression changed one token in the code that Example B adds after Example A, so one line now reads `for (int i = 0; i <= 1000; i++) atomic.incrementAndGet();`. Run Example B with that line, use the failing assertion to locate the defect and repair it without changing the assertion.
+Task: A regression in Example B's new code makes one line read `for (int i = 0; i <= 1000; i++) atomic.incrementAndGet();`. Repair it using the failing assertion.
 
 The atomic operation matches this simple counter contract. More complex multi-field invariants may still require a larger critical section.
 
@@ -54,9 +54,9 @@ runTwo(() -> {
 assert atomic.get() == 2000;
 ```
 
-**Expected:** Before the repair the run fails with an `AssertionError` from the assertion on `atomic.get() == 2000`; after it the line reads `for (int i = 0; i < 1000; i++) atomic.incrementAndGet();` again and value 2000.
+**Expected:** The unrepaired run fails with an `AssertionError` from the assertion on `atomic.get() == 2000`; the repaired line reads `for (int i = 0; i < 1000; i++) atomic.incrementAndGet();`.
 
-**Verify:** Keep the failing and the repaired runs. Explain why the changed token alters the value tested by `atomic.get() == 2000` for this input.
+**Verify:** Explain how the changed token alters the value that `atomic.get() == 2000` tests.
 
 ## Exercise 3: Inspect compare-and-set
 
@@ -73,7 +73,7 @@ assert firstSwap && !staleSwap && state.get() == 1;
 
 **Expected:** first true; second false; value 1.
 
-**Verify:** Keep an assertion equivalent to `firstSwap && !staleSwap && state.get() == 1`. As a control, change `boolean firstSwap = state.compareAndSet(0, 1);` to `boolean firstSwap = state.compareAndSet(1, 1);`: the run must fail with an `AssertionError` from the assertion on `firstSwap && !staleSwap && state.get() == 1`. Restore the line before continuing.
+**Verify:** Control: changing `boolean firstSwap = state.compareAndSet(0, 1);` to `boolean firstSwap = state.compareAndSet(1, 1);` must fail the assertion on `firstSwap && !staleSwap && state.get() == 1`.
 
 ## Exercise 4: Combine map updates atomically
 
@@ -91,7 +91,7 @@ assert counts.get("x") == 2000;
 
 **Expected:** stored count 2000.
 
-**Verify:** Keep an assertion equivalent to `counts.get("x") == 2000`. As a control, change `for (int i = 0; i < 1000; i++) counts.merge("x", 1, Integer::sum);` to `for (int i = 0; i <= 1000; i++) counts.merge("x", 1, Integer::sum);`: the run must fail with an `AssertionError` from the assertion on `counts.get("x") == 2000`. Restore the line before continuing.
+**Verify:** Control: changing `for (int i = 0; i < 1000; i++) counts.merge("x", 1, Integer::sum);` to `for (int i = 0; i <= 1000; i++) counts.merge("x", 1, Integer::sum);` must fail the assertion on `counts.get("x") == 2000`.
 
 ## Exercise 5: Bound lock contention
 
@@ -123,7 +123,7 @@ assert !lock.isLocked();
 
 **Expected:** worker returns false; lock released in finally.
 
-**Verify:** Keep an assertion equivalent to `!lock.isLocked()`. As a control, change `assert !lock.isLocked();` to `assert lock.isLocked();` inside it: the run must fail with an `AssertionError`, which shows the assertion can fail. Restore it.
+**Verify:** Control: changing `assert !lock.isLocked();` to `assert lock.isLocked();` inside the assertion must make it fail.
 
 ## Exercise 6: Use one global order for two locks
 
@@ -149,8 +149,10 @@ assert total[0] == 2000;
 
 **Expected:** 2000 increments and no blocked worker after bounded joins.
 
-**Verify:** Keep an assertion equivalent to `total[0] == 2000`. As a control, change `for (int i = 0; i < 1000; i++) {` to `for (int i = 0; i <= 1000; i++) {`: the run must fail with an `AssertionError` from the assertion on `total[0] == 2000`. Restore the line before continuing.
+**Verify:** Control: changing `for (int i = 0; i < 1000; i++) {` to `for (int i = 0; i <= 1000; i++) {` must fail the assertion on `total[0] == 2000`.
 
 ## After comparing the answer
 
-Run the complete reference with assertions enabled, then return to your own implementation. Recreate one check with different values and explain its expected result before execution. A compiler error, an expected domain exception and an assertion failure represent different stages and should be reported separately. Preserve ownership boundaries when adapting file, network or concurrency examples. The reference never authorizes access to a shared service or deletion of learner state. Use a fresh tiny fixture when you need to distinguish two interpretations of an API contract.
+Rewrite Exercise 4 in your copy as `get` followed by `put` on the same `ConcurrentHashMap` and run it a few times; a total below 2,000 shows the lost update that `merge` prevents.
+
+Run the complete reference with `java -ea Main` first; the [review routine](../STUDY-GUIDE.md#use-the-solutions) covers the rest.

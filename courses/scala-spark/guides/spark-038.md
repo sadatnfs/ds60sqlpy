@@ -1,22 +1,26 @@
 # spark-038: Observability: plans, progress, event logs and incidents
 
-Authored paired Scala/PySpark teaching content. The default fixtures are tiny, local and deterministic. Runtime acceptance, logical correctness and learner understanding remain separate evidence.
+When a streaming job is reported as slow or stuck, the first task is to collect evidence, not to change settings. This lesson reads the progress report of a deduplicating query, covering input rows, state rows, state memory and operators, then classifies three seeded incidents (a skewed task, growing state and a stalled source) and strips secrets from the evidence before it is shared.
 
 ## Level and prerequisites
 
-Advanced; approximately 105 minutes. Direct prerequisites: `spark-037`. The prepared baseline is Spark 4.3.0, Scala binary 2.13, JDK 17 and Python 3.12. Read the [execution baseline](../execution-baseline.md).
+Advanced; approximately 105 minutes. Direct prerequisites: `spark-037`. Pinned versions: [execution baseline](../execution-baseline.md).
 
 ## How to run this lesson
 
-Open `spark-038` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile, save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`;Python stages as `main.py` with a main guard. Each program creates its own `local[2]` session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.
+Shared run steps and profile rules: [study guide](../STUDY-GUIDE.md#run-a-paired-lesson).
 
-The [Scala learner](../lessons/spark-038.scala) and [PySpark learner](../lessons/spark-038.py) run two complete demonstrations and retain six explicit task stubs. Use the [explained solutions](../solutions/spark-038_solutions.md) only after an attempt or an explicit worked comparison; the [Scala reference](../solutions/spark-038_solution.scala) and [PySpark reference](../solutions/spark-038_solution.py) contain complete assertions. A bounded collect is used only for the declared tiny fixture; do not copy it onto an unbounded or large production table.
+Learner pads: [Scala](../lessons/spark-038.scala) and [PySpark](../lessons/spark-038.py).
+
+Open the [explained solutions](../solutions/spark-038_solutions.md) after an attempt.
+
+The first worked example runs `observe` on the fixture into `demo-checkpoint` and `demo-output` and requires 3 input rows, 2 state rows and the bag `1:100, 2:200`. The second computes the skew ratio for task times of 100, 100 and 10,000 milliseconds as the largest time divided by the median, which is exactly 100.
 
 ## Learning objectives
 
 - Turn a slow or stalled job report into a bounded evidence-based diagnosis.
-- State the input and output grain, schema, NULL policy and ordering before executing a transformation.
-- Compare each language implementation with independent literal expectations, not only with the other implementation.
+- Collect `numInputRows`, the state operator's `numRowsTotal` and `memoryUsedBytes`, the sink row count and the query and run IDs from `lastProgress`, and treat a missing or negative metric as unknown rather than zero.
+- Map each seeded symptom to the next check (skew to partition keys, state growth to the watermark and key growth, an idle input to source discovery) and keep only the allowlisted fields `stage_id`, `task_id`, `run_ms` and `input_records` in a shared report.
 
 ## Vocabulary and concepts
 
@@ -48,7 +52,7 @@ A separate empty AvailableNow run admits no source rows and terminates. That is 
 
 The skew fixture has task runtimes `[100, 100, 10000]` milliseconds in one stage. The max-to-median ratio is 100, but the observation alone does not establish the cause. One partition may contain a hot key, or the task may be slowed by storage or another resource. A reversible check is to inspect key/partition work distribution and compare the heavy task's input/shuffle work. Success means a changed plan or partition policy preserves the output oracle while reducing the documented imbalance, not merely hiding the slow task from the chart.
 
-The state fixture reports retained rows 10,100,1000 while the recorded watermark remains unchanged. This motivates checking event-time parsing, the watermark column, new-key rate and retention semantics. It is not proof of a memory leak. The success condition should name expected eviction or bounded key growth under a defined late-event policy, with exact output consequences reviewed.
+The state fixture reports retained rows 10, 100, 1000 while the recorded watermark remains unchanged. This motivates checking event-time parsing, the watermark column, new-key rate and retention semantics. It is not proof of a memory leak. The success condition should name expected eviction or bounded key growth under a defined late-event policy, with exact output consequences reviewed.
 
 The input fixture reports an active query, zero admitted rows and no advancing source offset. The next check is source discovery and upstream publication, including whether files are complete and eligible. Adding executors cannot create missing source data. A successful repair should show the intended bounded input admitted and the correct output, not just a higher processing-rate number.
 
@@ -64,7 +68,7 @@ The final packet connects actual input/state/output observations to their query 
 
 ## Supplied local fixture
 
-The complete source creates the owned local session described above, then constructs this explicit fixture. The worked examples below run in that same main function; there is no hidden notebook state.
+`batch-01.json` holds ID 1 twice with 100 cents and ID 2 once with 200, so the deduplicating query reads three rows but keeps two keys in state. Each `observe` call runs an `AvailableNow` Parquet append query and returns its measurements as a dictionary. The incident fixtures are plain data: the skew case has task times of 100, 100 and 10,000 ms, the state case retains 10, 100 and then 1,000 rows under a watermark that never moves, and the input case is an active query that reads zero rows and never advances its offset.
 
 ```scala prelude=../solutions/spark-038_solution.scala
 import org.apache.spark.sql.functions._
@@ -152,7 +156,7 @@ This synthetic task-duration ratio identifies a long tail. It does not prove the
 
 Run the supplied three-occurrence stream with ID deduplication and return a bounded observation record.
 
-**Expected result/shape:** Input count 3, state rows 2 and exact committed bag 1:100,2:200.
+**Expected result/shape:** Input count 3, state rows 2 and exact committed bag `1:100, 2:200`.
 
 **Verify:** Join the progress record with actual readback and inactive-query evidence.
 
@@ -214,11 +218,14 @@ Do not call zero input a compute bottleneck without checking source progress. Do
 
 ## Self-check
 
-Explain the contract of `capture` / `capture` without reading its solution. Then, from memory, state what Exercise 6 (Sanitize evidence with an allowlist) must produce: Exact four-field record, with fake token/password absent. Say which part of that result is evidence and what it still cannot show. Name the action in your trace that actually runs the plan.
+- The first run reads 3 rows but stores 2 state rows. Which row has no state entry of its own, and why is the input count still 3?
+- `known_metric` returns None for `-1` but 0 for `0`. Why must an unknown value never be reported as zero in an incident note?
+- After `batch-02.json`, input is 1 and state is 3 with the same query ID. What would a changed query ID suggest about the checkpoint?
+- A raw report contains `password` and `token` fields. Why keep an allowlist of four fields rather than deleting the names you already know are secret?
 
 ## Next step
 
-Use the [course route](../README.md) to continue. Paired-language agreement is useful only when both outputs also satisfy the independent fixture contract. A successful local run is not evidence of cluster performance or production recovery.
+Go on to [spark-039: Resource budgets, spill and cost tradeoffs](spark-039.md). This lesson diagnosed a query from its metrics; the next one measures the same keyed work at two partition counts and turns the numbers into a cost estimate inside a fixed budget.
 
 ## Primary sources and official APIs
 

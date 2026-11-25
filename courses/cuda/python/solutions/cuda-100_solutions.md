@@ -1,6 +1,6 @@
 # cuda-100: explained solutions
 
-These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.
+Compare with your [worksheet](../lessons/cuda-100.md) attempt.
 
 ## Exercise 1: Compute stable softmax
 
@@ -74,8 +74,16 @@ Inspect supported runtime evidence rather than guessing.
 
 **How to verify.** Restrict the allowed backends in a test and observe which configurations succeed, or inspect profiler kernel names.
 
+## Self-check answers
+
+1. **Why does attention create a quadratic intermediate?** The full score matrix has one entry per query and key pair, so its size grows with sequence length squared.
+
+2. **Does subtracting the row maximum change the softmax result?** No. It cancels in the normalization, but it keeps exponentials in range.
+
+3. **Does calling a scaled-dot-product attention API prove a fused kernel ran?** No. Backend selection depends on dtype, head size and mask, so it must be confirmed from runtime evidence.
+
 ## Reference observation
 
 Stable probabilities sum to 1; lower-triangular causal mask.
 
-The reference file is `courses/cuda/python/references/cuda-100_cpu.py`. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.
+Asserted by `courses/cuda/python/references/cuda-100_cpu.py`.

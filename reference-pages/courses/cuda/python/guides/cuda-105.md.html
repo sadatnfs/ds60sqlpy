@@ -194,9 +194,17 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cuda/python/guides/cuda-105.md</code></p>
     </header>
     <article class="document"><h2 id="cuda-105-distributed-training-beyond-one-host">cuda-105: Distributed training beyond one host<a class="heading-anchor" href="#cuda-105-distributed-training-beyond-one-host" aria-label="Link to this section">#</a></h2>
-<p><strong>Route:</strong> CUDA Python and machine learning. <strong>Stage:</strong> advanced. <strong>Prerequisites:</strong> <code>cuda-103</code>. Allow several sessions when the hardware experiment is new; the chapter is not a deadline.</p>
-<h3 id="what-you-will-be-able-to-explain">What you will be able to explain<a class="heading-anchor" href="#what-you-will-be-able-to-explain" aria-label="Link to this section">#</a></h3>
-<p>By the end, you can <strong>compute barrier time</strong>, <strong>define checkpoint consistency</strong>, and <strong>design owned-host cleanup</strong> with evidence. Start with the two worked cases, then use the editable CPU model to make the quantities concrete.</p>
+<p><strong>Route:</strong> CUDA Python and machine learning. <strong>Stage:</strong> advanced. <strong>Prerequisites:</strong> <code>cuda-103</code>.</p>
+<p>Pacing, evidence labels and platform rules: <a href="../../STUDY-GUIDE.md.html">CUDA study guide</a>.</p>
+<h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
+<ul>
+<li>Compute barrier time.</li>
+<li>Compare parallelism types.</li>
+<li>Diagnose a missing rank.</li>
+<li>Define checkpoint consistency.</li>
+<li>Budget communication.</li>
+<li>Design owned-host cleanup.</li>
+</ul>
 <h3 id="mechanism-and-vocabulary">Mechanism and vocabulary<a class="heading-anchor" href="#mechanism-and-vocabulary" aria-label="Link to this section">#</a></h3>
 <p>Across hosts, the network joins GPU compute and storage as a first-class resource. A rendezvous establishes participants; collectives require compatible ordering and membership. Data parallelism replicates parameters, tensor parallelism partitions operations, pipeline parallelism partitions layers, and state sharding distributes selected model or optimizer state. Their communication patterns differ.</p>
 <p>Stragglers delay synchronized steps. Worker failure requires a coordinated stop or a deliberately implemented recovery protocol; independently retrying one rank can hang the rest. Checkpoints need a consistent global boundary and data-position contract. This lesson uses diagrams and synthetic timelines by default. Actual multi-host work requires explicitly owned hosts, bounded access, suitable networking and separate PyTorch/TensorFlow qualification. Nothing in the browser creates a cluster.</p>
@@ -210,11 +218,12 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 </ul>
 <h3 id="worked-examples">Worked examples<a class="heading-anchor" href="#worked-examples" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1">Worked example 1<a class="heading-anchor" href="#worked-example-1" aria-label="Link to this section">#</a></h4>
-<p>Three ranks taking 10,12 and 30 ms before a barrier yield at least 30 ms compute-phase latency, even though their average is 17.3 ms.</p>
+<p>Three ranks taking 10, 12 and 30 ms before a barrier yield at least 30 ms compute-phase latency, even though their average is 17.3 ms.</p>
 <h4 id="worked-example-2">Worked example 2<a class="heading-anchor" href="#worked-example-2" aria-label="Link to this section">#</a></h4>
 <p>A checkpoint assembled from rank 0 at step 10 and rank 1 at step 11 is not a coherent global state unless a protocol explicitly reconciles that difference.</p>
-<h3 id="portable-executable-model">Portable executable model<a class="heading-anchor" href="#portable-executable-model" aria-label="Link to this section">#</a></h3>
-<p>The <strong>CPU reference model</strong> variant runs this bounded worked example using <code>python-core</code>. It uses only the Python standard library, small synthetic values and no network. Its purpose is to expose the arithmetic or contract behind the chapter. The separate reference includes assertions for the stated observations.</p>
+<h3 id="how-to-run-the-cpu-model">How to run the CPU model<a class="heading-anchor" href="#how-to-run-the-cpu-model" aria-label="Link to this section">#</a></h3>
+<p>Edit the copy; the <a href="../references/cuda-105_cpu.py.html">reference</a> adds assertions.</p>
+<pre class="highlighted-code"><code class="language-bash">python courses/cuda/python/lessons/cuda-105_cpu.py</code></pre>
 <pre class="highlighted-code"><code class="language-python">rank_ms <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-number">10</span><span class="syntax-punctuation">,</span> <span class="syntax-number">12</span><span class="syntax-punctuation">,</span> <span class="syntax-number">30</span><span class="syntax-punctuation">]</span>
 <span class="syntax-keyword">assert</span> <span class="syntax-builtin">max</span><span class="syntax-punctuation">(</span>rank_ms<span class="syntax-punctuation">)</span> <span class="syntax-operator">==</span> <span class="syntax-number">30</span>
 steps <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">rank0</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">10</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">rank1</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">11</span><span class="syntax-punctuation">}</span>
@@ -240,49 +249,46 @@ consistent <span class="syntax-operator">=</span> <span class="syntax-builtin">l
 <td><code>False</code></td>
 </tr>
 </tbody></table></div>
-<p>Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.</p>
 <h3 id="practice-and-transfer">Practice and transfer<a class="heading-anchor" href="#practice-and-transfer" aria-label="Link to this section">#</a></h3>
+<p>Record each attempt in the <a href="../lessons/cuda-105.md.html">worksheet</a> before opening hints.</p>
 <h4 id="exercise-1-compute-barrier-time">Exercise 1: Compute barrier time<a class="heading-anchor" href="#exercise-1-compute-barrier-time" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Reporting the average rank time predicts 17.3 ms and hides 13 ms of idle time per step, which makes adding ranks look more efficient than it is.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-2-compare-parallelism-types">Exercise 2: Compare parallelism types<a class="heading-anchor" href="#exercise-2-compare-parallelism-types" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Using data parallelism for a model that does not fit on one device fails immediately, because each replica needs all parameters, gradients and optimizer state.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-3-diagnose-a-missing-rank">Exercise 3: Diagnose a missing rank<a class="heading-anchor" href="#exercise-3-diagnose-a-missing-rank" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Restarting only the missing rank while the others wait in a collective fails, because the new process does not join the existing communicator state.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-4-define-checkpoint-consistency">Exercise 4: Define checkpoint consistency<a class="heading-anchor" href="#exercise-4-define-checkpoint-consistency" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Accepting each rank&#x27;s latest file independently produces mixed-step checkpoints whenever a failure occurs during saving.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-5-budget-communication">Exercise 5: Budget communication<a class="heading-anchor" href="#exercise-5-budget-communication" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Estimating communication from the parameter count without element size or frequency misses that float32 gradients are four bytes and some collectives run several times per step.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-6-design-owned-host-cleanup">Exercise 6: Design owned-host cleanup<a class="heading-anchor" href="#exercise-6-design-owned-host-cleanup" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Killing every GPU process on a host stops other users&#x27; jobs, while deleting the output directory loses valid checkpoints.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
-<p>Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.</p>
+<p>Hint <em>k</em> belongs to exercise <em>k</em>; open one at a time.</p>
 <ol>
-<li>Start from worked example 1 and mark the quantities needed for the task &quot;Compute barrier time&quot;.</li>
-<li>Change one assumption in worked example 2 while preserving the declared contract: compare parallelism types.</li>
-<li>Trace the CPU program&#x27;s variables before adding hardware behavior: diagnose a missing rank.</li>
-<li>Draw producers, consumers and the exact operation boundary for the task &quot;Define checkpoint consistency&quot;.</li>
-<li>Separate what the small fixture establishes from what the real runtime must show: budget communication.</li>
-<li>Write a counterexample to an overbroad claim before you design owned-host cleanup.</li>
+<li>Find the latest rank to reach the barrier; every rank waits until it arrives.</li>
+<li>For each strategy, ask what is copied to every rank and what is split, whether parameters, operations, layers or optimizer state.</li>
+<li>Ask what the remaining ranks do in a collective if one never arrives, and who stops the job.</li>
+<li>Ask which update step every rank&#x27;s saved state must share before the files form one checkpoint.</li>
+<li>For each collective, write the bytes exchanged and how often it runs per training step.</li>
+<li>List the resources your job created and release only those, leaving checkpoints in place.</li>
 </ol>
-<h3 id="common-mistakes-and-self-review">Common mistakes and self-review<a class="heading-anchor" href="#common-mistakes-and-self-review" aria-label="Link to this section">#</a></h3>
-<p>Confusing a correct tiny example with a general implementation is the central review risk. For this chapter, challenge the assumption in worked example 2, then ask whether your change preserves the mechanism described above. If you change dtype, layout, ordering, batch size or backend, update the acceptance contract rather than silently reusing the old observation. Explain an unexpected result before trying random configuration changes.</p>
-<p>Keep a small evidence table with columns <strong>claim</strong>, <strong>input</strong>, <strong>expected observation</strong>, <strong>actual observation</strong> and <strong>limit</strong>. For the first claim use <code>Compute barrier time</code>. For the final claim use <code>Design owned-host cleanup</code>. An unperformed GPU or cluster experiment remains pending even when the CPU model is correct.</p>
-<h3 id="platform-and-evidence-contract">Platform and evidence contract<a class="heading-anchor" href="#platform-and-evidence-contract" aria-label="Link to this section">#</a></h3>
-<p>The reading worksheet and CPU reference model work through the ordinary Linux Docker classroom on macOS, Linux and Windows using WSL 2. They do not require an NVIDIA GPU. Their results are labeled CPU models or semantic oracles, not simulated hardware performance.</p>
-<p>Real CUDA work needs supported NVIDIA hardware, a compatible host driver and an explicitly prepared GPU runtime. An Apple GPU does not execute CUDA kernels. PyTorch MPS on a supported native Mac, ROCm on supported AMD hardware, or other vendor backends can provide separate accelerator learning routes; they need their own package and operation qualification and are not CUDA evidence. The ordinary Linux Docker classroom does not expose native Mac MPS automatically.</p>
-<p>Do not download packages, models or data by opening this lesson. Do not attach an engine socket, ambient cluster credentials or an arbitrary remote endpoint. A CPU pass, imported package, successful compilation, real GPU result and measured performance are distinct observations. Record the actual backend, data shape/dtype, source revision, versions and pending checks. A saved completion marker records learning progress, not hardware certification.</p>
+<h3 id="common-mistakes-and-self-check">Common mistakes and self-check<a class="heading-anchor" href="#common-mistakes-and-self-check" aria-label="Link to this section">#</a></h3>
+<p>A common mistake is restarting one failed rank on its own. The surviving ranks are already waiting inside a collective, so the restarted rank joins a different step and the job hangs or silently diverges. Another mistake is building a checkpoint from rank files saved at different steps. Fix both by using bounded waits, stopping the whole owned job when a rank fails and recovering from a checkpoint taken at one documented global update boundary, with the data position recorded for every rank. Report the slowest rank, not the average, when reasoning about synchronized steps.</p>
+<p><strong>Misconception:</strong> Data, tensor and pipeline parallelism are interchangeable ways to add GPUs, so any of them will scale a model across hosts. <strong>Correction:</strong> Each partitions something different and communicates differently. Data parallelism replicates parameters and reduces gradients every step; tensor parallelism splits operations and exchanges activations inside layers, which needs fast links; pipeline parallelism splits layers and passes activations between stages, leaving idle bubbles unless microbatches fill them. Choose by model size, memory and the network between hosts, and model the communication before scaling out.</p>
+<p><strong>Evidence limit:</strong> The reference computes a 30 ms barrier time and rejects a mixed-step checkpoint from synthetic numbers. It contacts no hosts, so rendezvous, network bandwidth, straggler causes and recovery behavior need explicitly owned machines and separate qualification for each framework.</p>
+<ol>
+<li>Why does the slowest rank set a synchronized step&#x27;s time?</li>
+<li>How do tensor and pipeline parallelism differ?</li>
+<li>Why can a browser lesson not create a cluster?</li>
+</ol>
+<p>Answers: <a href="../solutions/cuda-105_solutions.md.html#self-check-answers">self-check answers</a>.</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
 <ul>
 <li><a href="https://docs.pytorch.org/docs/2.9/notes/cuda.html">PyTorch CUDA semantics</a></li>
 <li><a href="https://www.tensorflow.org/guide/gpu">TensorFlow GPU guide</a></li>
 </ul>
-<p>Use the version-matched documentation of your prepared environment. These references describe interfaces and supported boundaries; the chapter&#x27;s synthetic examples and CPU models are original teaching material.</p>
+<p>Full lists: <a href="../../STUDY-GUIDE.md.html#documentation-and-sources">documentation and sources</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning skill for cuda-105: Distributed training beyond one host.
 Read courses/cuda/python/guides/cuda-105.md and courses/cuda/python/lessons/cuda-105.md.

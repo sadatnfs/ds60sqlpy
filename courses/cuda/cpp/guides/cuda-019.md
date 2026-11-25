@@ -4,18 +4,15 @@
 
 Intermediate; about 110 minutes, plus any optional hardware experiment. Direct prerequisites: `cuda-018`, `cuda-017`
 
-The order supports learning at your own pace. Reading and CPU reasoning remain
-available when NVIDIA hardware is absent. Advanced hardware features need their
-own capability checks and are not prerequisites for opening this chapter.
+Pacing, evidence labels and platform rules for every chapter are in the [CUDA study guide](../../STUDY-GUIDE.md).
 
 ## Learning objectives
 
 Implement a tiled matrix multiplication and report a scoped timing comparison with a reasoned interpretation.
 
-Work through *Tiled matrix multiplication and reuse* with the concrete cases below. Finish with this evidence:
-correctness plus a measured, scoped comparison with a reasoned interpretation even if the tile loses on a small input. Distinguish an algorithmic
-calculation, a compiled artifact and an actual device observation when explaining
-what your work establishes.
+**Scope:** Tile loading, shared-memory reuse, synchronization between phases, tail predicates and resource costs.
+
+**Evidence to produce:** Correctness plus a measured, scoped comparison with a reasoned interpretation even if the tile loses on a small input.
 
 ## Purpose, vocabulary and mental model
 
@@ -30,24 +27,15 @@ Tiling loads small regions of A and B into shared memory and reuses each value a
 
 ## How to run and study this lesson
 
-Use the saved reading worksheet in `/classroom`; the reading pad does not execute
-CUDA. For the bounded calculation, select **CPU model (Python)**, whose
-answer-free starter supplies the literal fixtures and task contract. The
-[CUDA C++ study workflow](../README.md) covers platforms, optional GPU
-compilation and evidence labels. In a prepared Python environment you can also
-run the separate [CPU reference](../references/cuda-019_cpu.py) from the
-repository root:
+Trace worked example 1 by hand, then run the [CPU reference](../references/cuda-019_cpu.py) from the repository root:
 
 ```sh
 python courses/cuda/cpp/references/cuda-019_cpu.py
 ```
 
-Its assertions check the stated numerical result or model invariant; console
-text is evidence of this CPU model only, not of CUDA execution.
-
 ## CUDA C++ kernel listing
 
-The tiled kernel follows the phase structure above: cooperative loads with zero fill, a barrier before the tiles are read, and a second barrier before the next phase overwrites them. Out-of-range threads keep running so that they reach both barriers. Two 16-by-16 float tiles use 2 x 16 x 16 x 4 = 2048 bytes of shared memory per block. Read it as CUDA C++ source; the classroom reading pad does not compile or run it.
+The tiled kernel follows the phase structure above: cooperative loads with zero fill, a barrier before the tiles are read, and a second barrier before the next phase overwrites them. Out-of-range threads keep running so that they reach both barriers. Two 16-by-16 float tiles use 2 x 16 x 16 x 4 = 2048 bytes of shared memory per block.
 
 ```cpp
 constexpr int TILE = 16;
@@ -82,9 +70,7 @@ __global__ void tiled_matmul(const float *A, const float *B, float *C, int M,
 
 For a 2-by-2 output tile and \(\mathrm{k}=2\), the four outputs need eight products. Loading four A values and four B values allows reuse across outputs. The naive per-output scheme conceptually reads sixteen scalar operands; the tile loads eight. Cache behavior can change actual transactions.
 
-The complete CPU model below intentionally models only the named arithmetic,
-layout, dependency or capability decision. It does not model GPU scheduling,
-caches, instruction timing or device memory visibility.
+**Why:** Each loaded value serves two outputs, halving reads from sixteen to eight.
 
 ```python
 k, tile = 5, 2
@@ -93,41 +79,37 @@ assert phases == [(0, 2), (2, 4), (4, 5)]
 print({"phases": phases})
 ```
 
-**Expected observation:** Every assertion succeeds. A representative CPU output is:
+**Expected observation:** every assertion succeeds, and the CPU model prints:
 
 ```text
 {'phases': [(0, 2), (2, 4), (4, 5)]}
 ```
 
-Integers, shapes and ordering must match exactly; only assertions with an explicit
-tolerance accept small floating-point differences. A printed duration is a model
-output, not a measured GPU benchmark.
+**Check:** Enumerate operands per output and confirm each loaded value appears twice.
 
 ## Worked example 2: change a meaningful condition
 
 With \(\mathrm{k}=3\) and tile width two, the second phase contains one valid inner coordinate and one zero coordinate. Neutralizing invalid A and B entries preserves the sum. Synchronize after accumulation before the next cooperative load; otherwise a fast producer can overwrite data a slower thread still reads.
 
-Before applying this example to your own program, write down which inputs are
-read, which result is produced, and the condition that makes the comparison
-valid. Keep the original case as a regression check when changing a boundary.
+**Why:** Zero products leave the sum unchanged, and the second barrier protects the tile.
+
+**Check:** Compute a 2-by-3 times 3-by-2 product with tiles and compare to the naive result.
 
 ## Six progressive exercises
 
-Exercises 1 and 2 are guided reconstructions of the worked examples; exercises
-3-6 change an input, diagnose a defect, test a boundary and transfer the idea.
-For each one, keep the calculation, output, diagram or failure policy you
-produce so another reader can compare it with the worked cases. If the hint is
-not enough, reread the mechanism paragraph and the bounded CPU assertion.
-
 ### Exercise 1
 
-Predict and trace the first worked example before running its CPU reference. Write every intermediate quantity that leads to the stated result, including units or ownership where applicable.
+Reconstruct worked example 1 on paper before running its CPU reference. Count loads per tile: two A values per row times two rows, and the same for B.
+
+**Trap to avoid:** Assuming caches already provide that reuse makes the tile seem pointless without evidence.
 
 **Hint:** Start with the literal input and intermediate quantities in worked example 1.
 
 ### Exercise 2
 
-Reconstruct the second worked example without copying its conclusion. Identify the changed input or condition, show the resulting calculation or dependency, and explain why it differs from the first example.
+Rework worked example 2 without copying its conclusion. Split k = 3 into phases [0, 2) and [2, 3), padding the missing column with zeros.
+
+**Trap to avoid:** Skipping the post-accumulation barrier lets a fast thread overwrite data still being read.
 
 **Hint:** Identify exactly which condition changes in worked example 2.
 
@@ -135,11 +117,15 @@ Reconstruct the second worked example without copying its conclusion. Identify t
 
 Count phases for \(\mathrm{k}=5\) and tile width two.
 
+**Trap to avoid:** Using floor(5 / 2) = 2 phases drops the fifth product.
+
 **Hint:** Use the first worked example to establish the relevant quantities, then change only the requested input.
 
 ### Exercise 4
 
 Why is returning early for an out-of-range output thread dangerous?
+
+**Trap to avoid:** Returning early leaves tile slots unloaded and a barrier that some threads never reach.
 
 **Hint:** Locate the failed phase or violated dependency before proposing a repair.
 
@@ -147,35 +133,33 @@ Why is returning early for an out-of-range output thread dangerous?
 
 How much shared storage do two 16-by-16 float tiles use?
 
+**Trap to avoid:** Counting one tile gives 1,024 and underestimates the shared budget per block.
+
 **Hint:** Check what the algorithm is allowed to read, write or assume at this boundary.
 
 ### Exercise 6
 
 A tiled kernel loses on a tiny matrix. Is that a bug?
 
+**Trap to avoid:** Calling it a bug and disabling tiling for all sizes discards gains on large shapes.
+
 **Hint:** State the output contract and which observations are needed in the new application.
 
 ## Common mistakes and diagnosis
 
-A tempting but incorrect claim in this chapter is: **shared memory automatically makes a kernel faster.**
-
-For the concrete failure exercise, why is returning early for an out-of-range output thread dangerous?
-Preserve the original input and the stage where behavior diverged, and compare
-with the CPU model before changing hardware configuration.
+A tempting but incorrect claim: **Shared memory automatically makes a kernel faster.** Shared memory only helps when values are reused enough to repay loading and synchronizing. Tiling adds barriers and uses shared storage that can lower occupancy, and on tiny matrices the overhead dominates. Worked example 1 counts the saved reads; whether that saves time must still be measured.
 
 ## Self-check, retrieval and transfer
 
-Explain the first example without its code, then use the second example to state
-one assumption that matters. Complete Exercise 3 independently, use Exercise 4 to
-diagnose a plausible defect, check the boundary in Exercise 5, and retain the
-application contract from Exercise 6. Compare the [separate explanations](../solutions/cuda-019_solutions.md)
-only after your attempt or a deliberate reveal. A reading marker records your
-choice; it does not certify hardware qualification or expert mastery.
+1. How many phases does k equal 7 need with tile width 4?
+2. Why are invalid tile entries filled with zero?
+3. Why is a second barrier needed at the end of each phase?
+
+Short answers are in the [separate explanations](../solutions/cuda-019_solutions.md#self-check-answers); compare only after an attempt.
 
 ## Primary references
 
-Check the documentation that matches your prepared toolkit before optional
-hardware execution.
+Use the documentation that matches your prepared toolkit.
 
 - [CUDA Programming Guide](https://docs.nvidia.com/cuda/cuda-programming-guide/)
 

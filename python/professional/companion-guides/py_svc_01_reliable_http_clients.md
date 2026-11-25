@@ -111,34 +111,15 @@ Inspect the printed first log event. Its authorization value must be
 
 ## How to run this lesson
 
-**Primary browser route:** run `./classroom` from the repository root and
-choose **Python and data science** on `/classroom`. Open this lesson in the shared workspace,
-read its capability notice, and use its supported coding or reading workflow.
-The [classroom guide](../../../docs/classroom-experience.md) explains saved work, runtimes and switching subjects.
+The learner module feeds local response objects through a classifier and
+makes no network calls; `classify_status`, `method_can_retry` and
+`redact_headers` are the retry and redaction policies left to implement.
 
-**Optional contributor route:** use the prepared environment in
-[CONTRIBUTING](../../../CONTRIBUTING.md) on Linux, macOS or Windows through
-WSL 2. The commands below assume its packages are already installed. They are
-not prerequisites for opening this lesson in the Docker classroom. Local
-`.learning/` files and CLI progress belong to this checkout; they do not read or
-update the Docker classroom's named learning volume.
-
-Work from the repository root. First run the answer-free learner
-module named in this guide's original walkthrough. Read each TODO as a
-contract: record the input, returned value, raised exception, and side
-effect before implementing it. Then run the focused test command in
-**Self-check**. Keep exploratory changes in a copy or a new test; the
-checked-in solution remains a comparison artifact.
-
-Prepared POSIX/WSL contributor terminal:
+The [Python study guide](../../STUDY-GUIDE.md) covers the browser classroom and this prepared-checkout run:
 
 ```sh
 uv run --no-sync python python/professional/lessons/py_svc_01_reliable_http_clients.py
 ```
-
-The focused test command is shown in **Self-check** below. The learner
-module is intentionally answer-free, so `TODO` output is the expected
-starting state rather than a setup failure.
 
 ## Mechanism lab: two small examples before the full system
 
@@ -316,9 +297,9 @@ and redacted logs.
 
 ### Extended professional practice
 
-These exercises move from prediction and implementation through debugging,
-operational trade-offs, and review. Keep the default path deterministic and
-offline; optional connected behavior must remain explicit.
+The remaining tasks push the client policy into end-to-end timeout budgets,
+HTTP-date `Retry-After` values, a circuit breaker, a concurrency bound,
+streaming cleanup, credential injection and an adversarial transport suite.
 
 ### Exercise 8: allocate an end-to-end timeout budget
 
@@ -426,8 +407,7 @@ PYTHONDONTWRITEBYTECODE=1 uv run --no-sync python -m unittest python.professiona
 
 ## Ask an AI tutor about this lesson
 
-The lesson is complete without an AI assistant. If you want optional
-coaching, copy this prompt into the AI tutor while the repository root is open:
+This prompt is optional; the [study guide](../../STUDY-GUIDE.md) explains how to use a tutor.
 
 ```text
 Tutor me through `python-svc-01`: Reliable HTTP clients and external-service boundaries.

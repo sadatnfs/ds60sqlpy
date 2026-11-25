@@ -4,8 +4,6 @@
 
 Parallel random-number generation needs a reproducible mapping from logical samples to independent streams or subsequences. Giving every thread identical initial state can repeat the same draws and destroy effective sample size. A seed identifies an experiment, but the generator, stream partition and sample-count mapping are also part of it. Monte Carlo error is sampling uncertainty, distinct from floating-point error or a bug. Increasing independent sample count usually reduces standard error at a square-root rate. RNG initialization can be expensive, so report setup separately from sustained generation when evaluating performance.
 
-The separate [CPU reference](../references/cuda-050_cpu.py) checks the chapter's bounded model. It does not execute CUDA or establish GPU timing. Compare after attempting the worksheet or explicitly choosing to reveal solutions.
-
 ## Exercise 1
 
 Estimate the integral of x squared on \([0,1]\) by averaging squared uniform samples. The exact answer is one third. A fixed CPU seed produces a reproducible educational estimate; its closeness is not evidence about cuRAND or independent GPU streams. Keep a broad deterministic sanity check separate from statistical claims.
@@ -78,12 +76,16 @@ Record generator/version, seed, subsequence assignment, sample count, estimator,
 
 **How to verify:** Rerun from the receipt and confirm the same estimate.
 
+## Self-check answers
+
+1. **How much does standard error shrink with 100 times more independent samples?** By a factor of 10, the square root of 100.
+2. **What is the exact value targeted in worked example 1?** One third, the integral of x squared from 0 to 1.
+3. **What should a Monte Carlo receipt record besides the seed?** The generator, stream partition, sample count and the estimate with its standard error.
+
 ## Numerical reference and its limits
 
-The complete CPU model is [here](../references/cuda-050_cpu.py). Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It does not claim CUDA execution, concurrency safety or a performance measurement.
+The [CPU reference](../references/cuda-050_cpu.py) reproduces worked example 1 and prints `{'CPU_integral_estimate': 0.3322235056104499, 'exact_integral': 0.3333333333333333, 'duplicated_stream_unique_draws': 2}`.
 
 ## Transfer review
 
 Record generator/version, seed, subsequence assignment, sample count, estimator, uncertainty calculation and numeric precision.
-
-A complete explanation must name its inputs, the unchanged mathematical contract, the changed boundary or resource condition, and the evidence still needed on actual hardware. Preserve a CPU baseline even after a GPU path becomes available.

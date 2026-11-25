@@ -13,40 +13,25 @@ psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
   -f sql/professional/solutions/sql_repl_01_cdc_high_availability_solutions.sql
 ```
 
-`psql` prints each result/command tag in the terminal. Stop at the first
-unexpected `ERROR`; later output cannot repair an earlier failed invariant.
-Compare your own SQL, row grain, column names, row counts, `NULL` policy, and
-ordering with the explanation before comparing syntax.
+The solution builds its own `outbox_events`, `inbox` and `projection` tables
+with `deliver_event` and `mark_published` procedures rather than the lesson's
+batch consumer, so compare delivery rules and evidence rather than names.
 
-## Clause-by-clause reading map
+## Reading map for this lesson
 
-The lesson's main concepts are WAL, Physical replication, Logical replication, CDC, Transactional outbox, Inbox/idempotency key. Its worked-model focus is:
-The capability query reports WAL level and counts only; it does not print slot, publication, subscription, host, or query identities. Counts can still require monitoring privileges on managed services. Capability settings are evidence, not authorization to mutate them.
+The solutions fall into two groups:
 
-- Start at `FROM`/`JOIN` and state the intermediate row grain. Inspect join keys
-  before adding aggregates; a one-to-many join is allowed to multiply rows only
-  when the later contract accounts for it.
-- Apply `WHERE` to input rows, `GROUP BY` to form buckets, and `HAVING` to
-  completed groups. Window functions run over the surviving relation and
-  normally preserve its row count.
-- Read the `SELECT` list as the public result contract: keys establish grain,
-  measures state calculations, and aliases explain meaning. `ORDER BY` is the
-  only output-order guarantee; add a unique tie-breaker before `LIMIT`.
-- Trace every common table expression (CTE) as a temporary named relation.
-  Execute or inspect one stage at a time while debugging, but compare the final
-  result with an independent control rather than trusting stage names.
-- Keep SQL `NULL` as “missing/unknown/not applicable” until the metric contract
-  chooses another representation. Guard division with `NULLIF`; disclose
-  exclusions and distinguish zero from no row.
-- For DDL/DML, a command tag proves only that PostgreSQL accepted a statement.
-  Catalog checks, negative cases, row-count reconciliation, and the declared
-  transaction boundary prove behavior and cleanup.
+- Runnable delivery rules: an unpublished `E-v1` stays visible for retry after
+  a lost publisher acknowledgement (Exercise 1), a repeated `E-v3` call adds no
+  second inbox row (Exercise 2), and delivering `E-v3` before `E-v2` leaves the
+  projection at version 3 (Exercise 3).
+- Topology work written as plans, because one local database cannot replicate:
+  physical versus logical choices, a read-only slot inventory, failover,
+  publication scope, snapshot bootstrap, read-after-write, multi-writer
+  conflicts, DDL order and failback (Exercises 4 to 12).
 
-The exact final queries are not the only valid syntax. A join, subquery, CTE,
-window, or conditional aggregate can be an alternative when it preserves the
-same grain, `NULL` semantics, deterministic ordering, and safety. Prefer the
-form whose intermediate relations a reviewer can verify; optimize only after
-correctness is established with evidence.
+Another answer is acceptable when duplicates and reordering still cannot change
+the projection and no plan claims to have touched a real replica.
 
 Run:
 

@@ -2,6 +2,8 @@
 
 Open these answers only after attempting Profiling, torch.compile and honest performance measurement yourself. They reuse the guide's literal inputs, starting from Example A, Establish an eager oracle, so a discrepancy points at one step. The executable companion runs the assertions; this page explains why each one tests Graph capture, Backend, Warmup. After a pass, choose a new input for exercise 6, State the backend limitation, without looking.
 
+After comparing, follow the [review steps](../STUDY-GUIDE.md#after-the-solutions).
+
 ## Mechanism review
 
 Compilation and profiling answer different questions. torch.compile captures eligible Python/tensor computation and sends graphs to a selected backend. An eager graph backend can demonstrate capture and specialization without compiling optimized native kernels. That is useful in a bounded classroom image but is not an Inductor speedup claim. Input dtype, shape and Python control can affect graph reuse or graph breaks.
@@ -165,6 +167,3 @@ assert (
 
 **Verify:** In a fresh process, the exercise checks confirm `receipt['graph_capture_checked']`, `not receipt['optimizing_native_backend']` and `not receipt['gpu_benchmark']`.
 
-## Review after comparison
-
-Repeat exercise 4, Measure warmed calls honestly, with one changed fixture value and predict the difference before running it. Keep your failing attempt at exercise 5, Inspect actual CPU operations, beside the repaired result. A missing framework is not a failing assertion. These solutions use only local fixtures.

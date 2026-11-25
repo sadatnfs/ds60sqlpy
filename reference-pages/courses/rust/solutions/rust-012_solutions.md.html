@@ -194,7 +194,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/rust/solutions/rust-012_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="rust-012-explanation-and-comparison">rust-012: explanation and comparison<a class="heading-anchor" href="#rust-012-explanation-and-comparison" aria-label="Link to this section">#</a></h2>
-<p>Attempt the six guide tasks before opening this comparison. The executable reference is <a href="rust-012_solution.rs.html">rust-012_solution.rs</a>. It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.</p>
+<p>Executable reference: <a href="rust-012_solution.rs.html">rust-012_solution.rs</a>, which runs both examples and the coded answers.</p>
+<p>Open this only after <a href="../STUDY-GUIDE.md.html#attempt-a-lesson">an attempt</a>.</p>
 <h3 id="why-the-two-examples-differ">Why the two examples differ<a class="heading-anchor" href="#why-the-two-examples-differ" aria-label="Link to this section">#</a></h3>
 <p><strong>Reserve within an invariant:</strong> The method owns both the affordability check and the subtraction. A successful reservation leaves three units.</p>
 <p><strong>Reject without partial mutation:</strong> Validation occurs before changing state, preserving the prior valid value. Excess demand is rejected and zero is an allowed no-op.</p>
@@ -213,7 +214,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>How to verify.</strong> With <code>let mut inv = Inventory::new(u32::MAX - 1);</code>, assert <code>inv.restock(1)</code> and <code>inv.stock() == u32::MAX</code>, then <code>!inv.restock(1)</code> and that the stock is still <code>u32::MAX</code>.</p>
 <h4 id="task-3-independent-construction">Task 3: Independent construction<a class="heading-anchor" href="#task-3-independent-construction" aria-label="Link to this section">#</a></h4>
 <p>Create a bounded counter with private state and validated operations.</p>
-<p><strong>Reference answer.</strong> The same statements run as the <code>Task 3</code> block of the reference program; here they are wrapped in <code>main</code> as a complete file.</p>
+<p><strong>Reference answer</strong>, wrapped in <code>main</code>; the reference runs it as its <code>Task 3</code> block.</p>
 <pre class="highlighted-code"><code class="language-rust"><span class="syntax-keyword">fn</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">-&gt;</span> <span class="syntax-builtin">Result</span><span class="syntax-operator">&lt;</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">Box</span><span class="syntax-operator">&lt;</span><span class="syntax-keyword">dyn</span> std<span class="syntax-punctuation">::</span>error<span class="syntax-punctuation">::</span>Error<span class="syntax-operator">&gt;</span><span class="syntax-operator">&gt;</span> <span class="syntax-punctuation">{</span>
     <span class="syntax-keyword">struct</span> <span class="syntax-class">Counter</span> <span class="syntax-punctuation">{</span>
         value<span class="syntax-punctuation">:</span> <span class="syntax-keyword">u32</span><span class="syntax-punctuation">,</span>
@@ -265,7 +266,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><code>impl Inventory</code> contains associated functions and methods. <code>&amp;self</code> reads, <code>&amp;mut self</code> mutates, and <code>self</code> consumes. An associated constructor such as new can return Option or Result.</p>
 <p>Public writable fields can bypass invariants. Unsigned types prevent negative representation but do not prevent overflow. A method taking &amp;mut self is not automatically safe for unsynchronized sharing across threads.</p>
 <h3 id="review-before-continuing">Review before continuing<a class="heading-anchor" href="#review-before-continuing" aria-label="Link to this section">#</a></h3>
-<p>Run the reference and confirm that it prints <code>rust-012: passed</code>, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.</p></article>
+<p>Rebuild Example B (Reject without partial mutation) from a blank pad.</p>
+<p>Review routine: <a href="../STUDY-GUIDE.md.html#self-check-and-review">Self-check and review</a>.</p></article>
   </main>
 </body>
 </html>

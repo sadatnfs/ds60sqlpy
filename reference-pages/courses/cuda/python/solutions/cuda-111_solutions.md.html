@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cuda/python/solutions/cuda-111_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="cuda-111-explained-solutions">cuda-111: explained solutions<a class="heading-anchor" href="#cuda-111-explained-solutions" aria-label="Link to this section">#</a></h2>
-<p>These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.</p>
+<p>Compare with your <a href="../lessons/cuda-111.md.html">worksheet</a> attempt.</p>
 <h3 id="exercise-1-calculate-arithmetic-intensity">Exercise 1: Calculate arithmetic intensity<a class="heading-anchor" href="#exercise-1-calculate-arithmetic-intensity" aria-label="Link to this section">#</a></h3>
 <p>Divide operations by bytes.</p>
 <p><strong>Approach.</strong> Calculate arithmetic intensity: 4096 operations over 8192 bytes moved gives 0.5 operations per byte, as the reference asserts.</p>
@@ -231,9 +231,19 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Why it is correct here.</strong> Profiler evidence shows which resource changed. Fewer bytes with lower occupancy suggests latency hiding, not bandwidth, became the limit.</p>
 <p><strong>A plausible wrong approach.</strong> Reporting the fused version as an improvement because bytes fell ignores the measured timing. The bytes counter confirms the mechanism worked, but the goal was throughput, and that goal was not met for this shape.</p>
 <p><strong>How to verify.</strong> Record registers per thread, achieved occupancy, DRAM bytes and time for both versions, then decide from all four.</p>
+<h3 id="self-check-answers">Self-check answers<a class="heading-anchor" href="#self-check-answers" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>What does a low arithmetic intensity suggest?</strong> The operation moves many bytes per arithmetic operation, so reducing memory traffic is a reasonable first hypothesis.</li>
+</ol>
+<ol start="2">
+<li><strong>Why can a fused kernel be slower?</strong> It can use more registers or shared memory per block, reducing active blocks and the device&#x27;s ability to hide latency.</li>
+</ol>
+<ol start="3">
+<li><strong>Why include a failed optimization in the case study?</strong> Explaining why a hypothesis failed shows the reasoning and measurements behind the final choice.</li>
+</ol>
 <h3 id="reference-observation">Reference observation<a class="heading-anchor" href="#reference-observation" aria-label="Link to this section">#</a></h3>
 <p>Intensity 0.5 and hypothetical 8192 bytes removable traffic.</p>
-<p>The reference file is <code>courses/cuda/python/references/cuda-111_cpu.py</code>. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.</p></article>
+<p>Asserted by <code>courses/cuda/python/references/cuda-111_cpu.py</code>.</p></article>
   </main>
 </body>
 </html>

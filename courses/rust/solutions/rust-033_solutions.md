@@ -1,6 +1,8 @@
 # rust-033: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [rust-033_solution.rs](rust-033_solution.rs). It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.
+Executable reference: [rust-033_solution.rs](rust-033_solution.rs), which runs both examples and the coded answers.
+
+Open this only after [an attempt](../STUDY-GUIDE.md#attempt-a-lesson).
 
 ## Why the two examples differ
 
@@ -26,7 +28,7 @@ Separate future creation, polling and completion.
 
 Compose two immediately ready async values and poll the combined fixture.
 
-**Reference answer.** The same statements run as the `Task 2` block of the reference program; here they are wrapped in `main` as a complete file.
+**Reference answer**, wrapped in `main`; the reference runs it as its `Task 2` block.
 
 ```rust
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -71,7 +73,7 @@ Diagnose creating a future and expecting it to run without a consumer.
 
 Contrast Ready, Pending and dropping an uncompleted future.
 
-**Reference answer.** The same statements run as the `Task 5` block of the reference program; here they are wrapped in `main` as a complete file.
+**Reference answer**, wrapped in `main`; the reference runs it as its `Task 5` block.
 
 ```rust
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -114,7 +116,7 @@ Dropping a pending future cancels it at its current `.await`: the code after tha
 
 Plan a separately prepared Tokio service, naming runtime, cancellation, I/O and dependency requirements.
 
-No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **Future**, and state one limitation of your choice.
+**Judging criteria.** A strong plan names the runtime flavor, multi-threaded or current-thread, and where it is built; how cancellation reaches each task, for example a token checked at every `.await`, and what partial work survives; which I/O uses Tokio's async types instead of blocking `std` calls; and the exact crates and features to prepare, such as `tokio` with `rt-multi-thread`, `net` and `macros`, pinned in `Cargo.lock`. It lives in a separate Cargo project because the pad has no Tokio. State one limitation: a dropped future stops at its last `.await`, so earlier state changes need their own cleanup.
 
 ## Mechanism and diagnostic reasoning
 
@@ -128,4 +130,6 @@ Async is not automatically parallel. A no-op waker cannot drive real asynchronou
 
 ## Review before continuing
 
-Run the reference and confirm that it prints `rust-033: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.
+Rebuild Example B (Observe pending without spinning) from a blank pad.
+
+Review routine: [Self-check and review](../STUDY-GUIDE.md#self-check-and-review).

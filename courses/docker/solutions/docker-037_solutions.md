@@ -1,6 +1,6 @@
 # docker-037: explanatory solutions
 
-Compare after your own attempt or an explicit reveal. These explain the supplied teaching fixtures; they are not engine results. The mechanism is explained in `courses/docker/guides/docker-037.md`.
+These answers explain teaching fixtures, not engine results; the mechanism is in [the guide](../guides/docker-037.md).
 
 ## Exercise 1: Distinguish TLS and application authorization.
 
@@ -88,4 +88,4 @@ Compare after your own attempt or an explicit reveal. These explain the supplied
 
 ## Check your transfer
 
-A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.
+The warning comes from the TLS identity check between the browser and the proxy: the certificate the proxy presents does not list the DNS name users typed. The container port sits behind the proxy and plays no part in that check, so changing it fixes nothing and may break the upstream route. The fix is a certificate whose subject alternative names include that DNS name, installed on the proxy. `openssl s_client -connect` with `-servername` set to that name should show it; if the warning persists, users are reaching a different endpoint.

@@ -196,7 +196,6 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <article class="document"><h2 id="cuda-062-explanatory-solutions">cuda-062: explanatory solutions<a class="heading-anchor" href="#cuda-062-explanatory-solutions" aria-label="Link to this section">#</a></h2>
 <h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
 <p>Portability means defining what is supported and how unsupported situations behave. CUDA execution requires a supported NVIDIA device and host software path; a CPU-only classroom can still teach algorithms and validate CPU references. AMD, Intel and Apple GPU programming use different backends and APIs, not an automatic CUDA compatibility promise. Detect capability for the operation, not simply the operating-system name. Containers package user-space dependencies but share host driver and hardware constraints. MIG, MPS, device sharing and resets are operator-managed topics. A teaching worker must never silently reset a shared device or erase learner state to recover from a fault.</p>
-<p>The separate <a href="../references/cuda-062_cpu.py.html">CPU reference</a> checks the chapter&#x27;s bounded model. It does not execute CUDA or establish GPU timing. Compare after attempting the worksheet or explicitly choosing to reveal solutions.</p>
 <h3 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h3>
 <p>A dispatch policy offers CPU reference on every ordinary classroom and CUDA execution only after visibility, allocation and a small numerical probe succeed. It records which path actually ran. The same expected mathematical result does not make CPU output evidence of CUDA execution.</p>
 <p><strong>Approach:</strong> Offer the CPU reference everywhere, and enable CUDA only after device visibility, allocation and a small numerical probe all succeed.</p>
@@ -233,11 +232,16 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Why it is correct:</strong> Conceptual correspondence teaches ideas without claiming equivalence.</p>
 <p><strong>A plausible wrong approach:</strong> Presenting it as running CUDA kernels misleads learners.</p>
 <p><strong>How to verify:</strong> Check labels in output name the actual backend.</p>
+<h3 id="self-check-answers">Self-check answers<a class="heading-anchor" href="#self-check-answers" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>Why is an operating-system check insufficient for dispatch?</strong> Linux does not guarantee a visible device, a compatible driver or enough memory.</li>
+<li><strong>What should a device fault preserve?</strong> The original error, the learner&#x27;s source and the path that ran.</li>
+<li><strong>In worked example 1, when does the CUDA path run?</strong> Only after visibility, allocation and a small numerical probe succeed.</li>
+</ol>
 <h3 id="numerical-reference-and-its-limits">Numerical reference and its limits<a class="heading-anchor" href="#numerical-reference-and-its-limits" aria-label="Link to this section">#</a></h3>
-<p>The complete CPU model is <a href="../references/cuda-062_cpu.py.html">here</a>. Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It does not claim CUDA execution, concurrency safety or a performance measurement.</p>
+<p>The <a href="../references/cuda-062_cpu.py.html">CPU reference</a> reproduces worked example 1 and prints <code>{&#x27;selected_path&#x27;: &#x27;CPU_reference&#x27;, &#x27;CUDA_execution&#x27;: &#x27;unavailable&#x27;}</code>.</p>
 <h3 id="transfer-review">Transfer review<a class="heading-anchor" href="#transfer-review" aria-label="Link to this section">#</a></h3>
-<p>Keep its own API/runtime/capability labels and numerical oracle, teach conceptual correspondence, and do not present it as executing CUDA kernels.</p>
-<p>A complete explanation must name its inputs, the unchanged mathematical contract, the changed boundary or resource condition, and the evidence still needed on actual hardware. Preserve a CPU baseline even after a GPU path becomes available.</p></article>
+<p>Keep its own API/runtime/capability labels and numerical oracle, teach conceptual correspondence, and do not present it as executing CUDA kernels.</p></article>
   </main>
 </body>
 </html>

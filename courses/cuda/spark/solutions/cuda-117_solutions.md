@@ -1,6 +1,6 @@
 # cuda-117: explained solutions
 
-These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.
+Compare with your [worksheet](../lessons/cuda-117.md) attempt.
 
 ## Exercise 1: Calculate both counts
 
@@ -74,8 +74,16 @@ Sort by stable keys without erasing duplicate rows.
 
 **How to verify.** Compare sorted lists and also compare row counts. When duplicates are expected, compare per-key counts too, so a duplicated row and a missing row cannot cancel each other out.
 
+## Self-check answers
+
+1. **How do COUNT(*) and COUNT(value) differ?** COUNT(*) counts rows, including those whose value is null; COUNT(value) counts only non-null values.
+
+2. **Why can a binary float not stand in for a decimal test?** Values like 1.10 have no exact binary representation, so the float result cannot verify the decimal's precision and scale.
+
+3. **Why name the timezone in a timestamp test?** The same stored instant can format or compare differently under different session time zones.
+
 ## Reference observation
 
 Rows 3, non-null 2, sum 7 and exact decimal 3.30.
 
-The reference file is `courses/cuda/spark/references/cuda-117_cpu.py`. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.
+Asserted by `courses/cuda/spark/references/cuda-117_cpu.py`.

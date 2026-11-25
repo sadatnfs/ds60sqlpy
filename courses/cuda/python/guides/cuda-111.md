@@ -1,10 +1,17 @@
 # cuda-111: A profiler-guided kernel case study
 
-**Route:** CUDA Python and machine learning. **Stage:** advanced. **Prerequisites:** `cuda-079`, `cuda-085`, `cuda-092`. Allow several sessions when the hardware experiment is new; the chapter is not a deadline.
+**Route:** CUDA Python and machine learning. **Stage:** advanced. **Prerequisites:** `cuda-079`, `cuda-085`, `cuda-092`.
 
-## What you will be able to explain
+Pacing, evidence labels and platform rules: [CUDA study guide](../../STUDY-GUIDE.md).
 
-By the end, you can **calculate arithmetic intensity**, **design one controlled change**, and **explain a failed optimization** with evidence. Start with the two worked cases, then use the editable CPU model to make the quantities concrete.
+## Learning objectives
+
+- Calculate arithmetic intensity.
+- Count eliminated bytes.
+- Name a profiler counter.
+- Design one controlled change.
+- Test a boundary shape.
+- Explain a failed optimization.
 
 ## Mechanism and vocabulary
 
@@ -31,9 +38,13 @@ An operation performs 4096 arithmetic operations while moving 8192 bytes, giving
 
 Fusion removes one intermediate write and read but raises register use. The expected traffic saving is a hypothesis; actual throughput might worsen for some shapes.
 
-## Portable executable model
+## How to run the CPU model
 
-The **CPU reference model** variant runs this bounded worked example using `python-core`. It uses only the Python standard library, small synthetic values and no network. Its purpose is to expose the arithmetic or contract behind the chapter. The separate reference includes assertions for the stated observations.
+Edit the copy; the [reference](../references/cuda-111_cpu.py) adds assertions.
+
+```sh
+python courses/cuda/python/lessons/cuda-111_cpu.py
+```
 
 ```python
 operations, bytes_moved = 4096, 8192
@@ -56,77 +67,65 @@ print("CPU roofline inputs:", intensity, "operations/byte; removable traffic", s
 | `intermediate` | `4096` |
 | `saved` | `8192` |
 
-Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.
-
 ## Practice and transfer
+
+Record each attempt in the [worksheet](../lessons/cuda-111.md) before opening hints.
 
 ### Exercise 1: Calculate arithmetic intensity
 
 **Trap to avoid:** Dividing bytes by operations gives 2 and inverts the conclusion, suggesting the kernel is compute-heavy.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 2: Count eliminated bytes
 
 **Trap to avoid:** Counting only the avoided write gives 4096 bytes and underestimates the saving by half.
-
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 3: Name a profiler counter
 
 **Trap to avoid:** Using only total kernel time cannot separate fewer bytes from other effects. Time can also change because of clock variation or a different compiled instruction mix, so a timing-only comparison leaves the mechanism unknown.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 4: Design one controlled change
 
 **Trap to avoid:** Applying fusion and a new block size together leaves the source of a speedup ambiguous. If one change helps and the other hurts, the combined result may even show no difference and hide both effects.
-
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 5: Test a boundary shape
 
 **Trap to avoid:** Testing only 1024 elements misses an off-by-one bounds check that writes past the end on 1023.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 6: Explain a failed optimization
 
 **Trap to avoid:** Reporting the fused version as an improvement because bytes fell ignores the measured timing. The bytes counter confirms the mechanism worked, but the goal was throughput, and that goal was not met for this shape.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ## Progressive hints
 
-Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.
+Hint *k* belongs to exercise *k*; open one at a time.
 
-1. Start from worked example 1 and mark the quantities needed for the task "Calculate arithmetic intensity".
-2. Change one assumption in worked example 2 while preserving the declared contract: count eliminated bytes.
-3. Trace the CPU program's variables before adding hardware behavior: name a profiler counter.
-4. Draw producers, consumers and the exact operation boundary for the task "Design one controlled change".
-5. Separate what the small fixture establishes from what the real runtime must show: test a boundary shape.
-6. Write a counterexample to an overbroad claim before you explain a failed optimization.
+1. Divide the operation count by the bytes moved.
+2. Count the intermediate's bytes once for the write you avoid and once more for the read you avoid.
+3. Pick a counter that measures memory traffic or the stall reason your hypothesis predicts.
+4. Change one mechanism and keep the shapes, dtype, inputs and timing method identical.
+5. Use a size that is not a multiple of the tile or block, plus a very small case.
+6. Relate the measured resource use, such as registers or active blocks, to why the timing did not improve.
 
-## Common mistakes and self-review
+## Common mistakes and self-check
 
-Confusing a correct tiny example with a general implementation is the central review risk. For this chapter, challenge the assumption in worked example 2, then ask whether your change preserves the mechanism described above. If you change dtype, layout, ordering, batch size or backend, update the acceptance contract rather than silently reusing the old observation. Explain an unexpected result before trying random configuration changes.
+A common mistake is accepting a traffic model's prediction as a result. Fusion removes an intermediate write and read in the model, but extra register pressure or fewer active blocks can make it slower for some shapes. Another is changing several things at once, so no single cause can be credited. Fix both by changing one mechanism at a time against an unchanged library baseline, checking numerical results and boundary shapes after every change and keeping failed optimizations in the record with the evidence that rejected them.
 
-Keep a small evidence table with columns **claim**, **input**, **expected observation**, **actual observation** and **limit**. For the first claim use `Calculate arithmetic intensity`. For the final claim use `Explain a failed optimization`. An unperformed GPU or cluster experiment remains pending even when the CPU model is correct.
+**Misconception:** If the arithmetic intensity model says an operation is memory bound, reducing bytes will make it faster. **Correction:** The model is a hypothesis built from counted operations and bytes; real behavior also depends on caching, coalescing, occupancy and launch overhead, which the model ignores. Use the profiler to check achieved bandwidth and compute utilization for the target shape. If achieved bandwidth is already far below the device's capability, the bottleneck may be latency or the access pattern rather than total bytes, and cutting bytes alone may not help.
 
-## Platform and evidence contract
+**Evidence limit:** The reference computes an intensity of 0.5 operations per byte and 8192 removable bytes from a simplified model. Whether the kernel is really bandwidth or compute limited, and whether fusion helps, requires profiler counters on the target device and shape.
 
-The reading worksheet and CPU reference model work through the ordinary Linux Docker classroom on macOS, Linux and Windows using WSL 2. They do not require an NVIDIA GPU. Their results are labeled CPU models or semantic oracles, not simulated hardware performance.
+1. What does a low arithmetic intensity suggest?
+2. Why can a fused kernel be slower?
+3. Why include a failed optimization in the case study?
 
-Real CUDA work needs supported NVIDIA hardware, a compatible host driver and an explicitly prepared GPU runtime. An Apple GPU does not execute CUDA kernels. PyTorch MPS on a supported native Mac, ROCm on supported AMD hardware, or other vendor backends can provide separate accelerator learning routes; they need their own package and operation qualification and are not CUDA evidence. The ordinary Linux Docker classroom does not expose native Mac MPS automatically.
-
-Do not download packages, models or data by opening this lesson. Do not attach an engine socket, ambient cluster credentials or an arbitrary remote endpoint. A CPU pass, imported package, successful compilation, real GPU result and measured performance are distinct observations. Record the actual backend, data shape/dtype, source revision, versions and pending checks. A saved completion marker records learning progress, not hardware certification.
+Answers: [self-check answers](../solutions/cuda-111_solutions.md#self-check-answers).
 
 ## Primary references
 
 - [PyTorch CUDA semantics](https://docs.pytorch.org/docs/2.9/notes/cuda.html)
 - [TensorFlow GPU guide](https://www.tensorflow.org/guide/gpu)
 
-Use the version-matched documentation of your prepared environment. These references describe interfaces and supported boundaries; the chapter's synthetic examples and CPU models are original teaching material.
+Full lists: [documentation and sources](../../STUDY-GUIDE.md#documentation-and-sources).
 
 ## Ask an AI tutor about this lesson
 

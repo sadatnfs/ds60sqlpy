@@ -195,7 +195,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="dbt-025-explained-reference">dbt-025: explained reference<a class="heading-anchor" href="#dbt-025-explained-reference" aria-label="Link to this section">#</a></h2>
 <p>Recover a data product through explicit accepted versions and a tested pointer mechanism.</p>
-<p>The executable reference contains the two complete worked cases with assertions. The changes below explain the independent practice and its limits.</p>
+<p>The reference swaps a <code>published.current_product</code> view inside a DuckDB transaction and rolls it back, then fails a singular test on values above 50 while <code>accepted_release</code> keeps 42. It proves pointer rollback in one local database, not recovery across systems or after a commit. See <a href="../STUDY-GUIDE.md.html#answers-and-references">how these answers are laid out</a>.</p>
 <h3 id="1-inspect-both-states">1. Inspect both states<a class="heading-anchor" href="#1-inspect-both-states" aria-label="Link to this section">#</a></h3>
 <p>Record what changed and what remained accepted. This supports a targeted recovery instead of a broad destructive reset.</p>
 <p><strong>Expected:</strong> Their different values are explicit.</p>

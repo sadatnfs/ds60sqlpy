@@ -1,6 +1,6 @@
 # web-020: explanatory solutions
 
-Open this after your own attempt. Each answer explains the lesson's synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in `courses/web-development/guides/web-020.md`.
+Attempt each exercise before reading; the mechanism is in `courses/web-development/guides/web-020.md` ([using these answers](../STUDY-GUIDE.md#solutions)).
 
 ## Exercise 1: Identify the difference between a transition and keyframe animation.
 
@@ -76,4 +76,6 @@ Open this after your own attempt. Each answer explains the lesson's synthetic fi
 
 ## Reference comparison
 
-Open `courses/web-development/solutions/web-020_solution.html` only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; its success message is not an accessibility audit or proof of responsive behavior at every size.
+The reference checks that the card link still points to #notes, so it catches an interaction that replaced the destination with a script or animation. It does not test the transition, the reduced-motion rule or keyboard focus, so turn on the reduced-motion preference and compare the hover and focus states.
+
+Open `courses/web-development/solutions/web-020_solution.html` after saving your attempt ([comparing with the reference](../STUDY-GUIDE.md#references)).

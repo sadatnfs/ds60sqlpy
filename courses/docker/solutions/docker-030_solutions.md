@@ -1,6 +1,6 @@
 # docker-030: explanatory solutions
 
-Compare after your own attempt or an explicit reveal. These explain the supplied teaching fixtures; they are not engine results. The mechanism is explained in `courses/docker/guides/docker-030.md`.
+These answers explain teaching fixtures, not engine results; the mechanism is in [the guide](../guides/docker-030.md).
 
 ## Exercise 1: Separate vulnerability presence and exploitability.
 
@@ -88,4 +88,4 @@ Compare after your own attempt or an explicit reveal. These explain the supplied
 
 ## Check your transfer
 
-A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.
+Presence is established; reachability is weak, because `server.py` opens no TLS and the healthcheck uses HTTP. Since a base refresh is cheap and reversible here, a reasonable decision is to rebuild from a refreshed base, rerun the health, peer and counter checks, and record the old and new image IDs with the version printed by `ssl.OPENSSL_VERSION`. The record states the residual risk if no fixed version exists yet. If the rebuilt image still prints the old OpenSSL version, the refresh did not take effect and the finding stays open.

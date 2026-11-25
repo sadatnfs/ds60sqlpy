@@ -1,6 +1,6 @@
 # java-033: explanatory solutions
 
-Open after an attempt or an explicit solution reveal. The executable reference runs the six exercise checks together as `Main.java`. The guide contains independent worked examples, while this file explains the choices and failure cases in the complete answer.
+Open this after an attempt; see [using the solutions](../STUDY-GUIDE.md#use-the-solutions).
 
 ## Mechanism review
 
@@ -22,7 +22,7 @@ Resolve a relative path under a real root, normalize it, and reject absolute or 
 
 ## Exercise 1: Read an admitted owned file: change one input
 
-Task: Copy Example A into a scratch `Main.java` and change `java.nio.file.Files.writeString(root.resolve("input.txt"), "hello");` to `java.nio.file.Files.writeString(root.resolve("input.txt"), "hello!");`. Before running it with `java -ea Main`, predict which assertion fails and which value it now sees; then run it and restore the original line.
+Task: Change `java.nio.file.Files.writeString(root.resolve("input.txt"), "hello");` to `java.nio.file.Files.writeString(root.resolve("input.txt"), "hello!");` in Example A and predict which assertion fails and why.
 
 The helper reads actual local bytes under a bounded contract. The fixture root is owned by the lesson and contains no user data.
 
@@ -38,13 +38,13 @@ withRoot(root -> {
 });
 ```
 
-**Expected:** The changed run fails with an `AssertionError` from the assertion on `new String(readBounded(root, "input.txt", 10), java.nio.charset.StandardCharsets.UTF_8).equals("hello")`. Restoring the original line brings back the worked observation: content hello.
+**Expected:** The edited run fails with an `AssertionError` from the assertion on `new String(readBounded(root, "input.txt", 10), java.nio.charset.StandardCharsets.UTF_8).equals("hello")`.
 
-**Verify:** Compare your written prediction with the reported `AssertionError` and its stack-trace line, and name the value that made `new String(readBounded(root, "input.txt", 10), java.nio.charset.StandardCharsets.UTF_8).equals("hello")` false. After restoring the line, the program completes without an `AssertionError` again.
+**Verify:** Name the value that makes `new String(readBounded(root, "input.txt", 10), java.nio.charset.StandardCharsets.UTF_8).equals("hello")` false, then restore the line.
 
 ## Exercise 2: Reject lexical traversal and absolute paths: debug a regression
 
-Task: A regression changed `rejected = true;` to `rejected = false;` in the code that Example B adds after Example A. Run Example B with that change, use the failing assertion to explain the defect and repair it without changing the assertion.
+Task: A regression changed `rejected = true;` to `rejected = false;` in Example B's new code. Repair it using the failing assertion.
 
 A path's string appearance is not a permission decision. Normalization and relative-path validation make the simple boundary explicit.
 
@@ -64,9 +64,9 @@ withRoot(root -> {
 });
 ```
 
-**Expected:** Before the repair the run fails with an `AssertionError` from the assertion on `rejected`; after it the line reads `rejected = true;` again and securityException for both.
+**Expected:** The unrepaired run fails with an `AssertionError` from the assertion on `rejected`; the repaired line reads `rejected = true;`.
 
-**Verify:** Keep the failing and the repaired runs. Explain why the changed token alters the value tested by `rejected` for this input.
+**Verify:** Explain how the changed token alters the value that `rejected` tests.
 
 ## Exercise 3: Enforce the byte limit after reading a bounded amount
 
@@ -89,7 +89,7 @@ withRoot(root -> {
 
 **Expected:** IOException for oversized content.
 
-**Verify:** Keep an assertion equivalent to `rejected`. As a control, change `readBounded(root, "large.txt", 4);` to `readBounded(root, "large.txt", 5);`: the run must fail with an `AssertionError` from the assertion on `rejected`. Restore the line before continuing.
+**Verify:** Control: changing `readBounded(root, "large.txt", 4);` to `readBounded(root, "large.txt", 5);` must fail the assertion on `rejected`.
 
 ## Exercise 4: Reject symbolic-link access under the declared policy
 
@@ -124,7 +124,7 @@ withRoot(root -> {
 
 **Expected:** link rejected when platform supports creation; unsupported capability recorded explicitly.
 
-**Verify:** Keep an assertion equivalent to `rejected`. As a control, change `rejected = true;` to `rejected = false;`: the run must fail with an `AssertionError` from the assertion on `rejected`. Restore the line before continuing.
+**Verify:** Control: changing `rejected = true;` to `rejected = false;` must fail the assertion on `rejected`.
 
 ## Exercise 5: Keep operation names out of code execution
 
@@ -148,7 +148,7 @@ assert rejected;
 
 **Expected:** unknown operation IllegalArgumentException.
 
-**Verify:** Keep an assertion equivalent to `rejected`. As a control, change `if (!operations.containsKey("run_shell")) throw new IllegalArgumentException(` to `if (operations.containsKey("run_shell")) throw new IllegalArgumentException(`: the run must fail with an `AssertionError` from the assertion on `rejected`. Restore the line before continuing.
+**Verify:** Control: changing `if (!operations.containsKey("run_shell")) throw new IllegalArgumentException(` to `if (operations.containsKey("run_shell")) throw new IllegalArgumentException(` must fail the assertion on `rejected`.
 
 ## Exercise 6: Build a restricted diagnostic record
 
@@ -182,8 +182,10 @@ assert !safe.containsKey("token") && !safe.containsKey("source_text") && safe.si
 
 **Expected:** diagnostic excludes both sensitive fields.
 
-**Verify:** Keep an assertion equivalent to `!safe.containsKey("token") && !safe.containsKey("source_text") && safe.size() == 3` and confirm that `java -ea Main` completes. Then name an input that would make it fail and explain which value changes.
+**Verify:** Name an input that would make `!safe.containsKey("token") && !safe.containsKey("source_text") && safe.size() == 3` false and the value that changes.
 
 ## After comparing the answer
 
-Run the complete reference with assertions enabled, then return to your own implementation. Recreate one check with different values and explain its expected result before execution. A compiler error, an expected domain exception and an assertion failure represent different stages and should be reported separately. Preserve ownership boundaries when adapting file, network or concurrency examples. The reference never authorizes access to a shared service or deletion of learner state. Use a fresh tiny fixture when you need to distinguish two interpretations of an API contract.
+In your copy, add a second allowed operation `list_fixture` that returns the file names in the root, and confirm that `run_shell` is still rejected by the same lookup.
+
+Run the complete reference with `java -ea Main` first; the [review routine](../STUDY-GUIDE.md#use-the-solutions) covers the rest.

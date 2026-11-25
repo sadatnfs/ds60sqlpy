@@ -34,6 +34,7 @@ def test_dbt_complete_subject_contract() -> None:
     track = json.loads((BASE / "track.json").read_text())
     admission = json.loads((BASE / "lessons.json").read_text())
     assert track["id"] == admission["track_id"] == "dbt"
+    assert "## Case harness" in (BASE / "STUDY-GUIDE.md").read_text()
     assert [row["id"] for row in track["lessons"]] == [f"dbt-{n:03}" for n in range(1, 27)]
     assert {row["level"] for row in track["lessons"]} == {"beginner", "intermediate", "advanced"}
     variants = {}
@@ -47,6 +48,11 @@ def test_dbt_complete_subject_contract() -> None:
         assert all(f"### {n}. " in guide for n in range(1, 7))
         assert len(re.sub(r"```.*?```", "", guide, flags=re.S).split()) >= 600
         assert "\u2014" not in guide
+        assert "../STUDY-GUIDE.md#run-a-lesson" in guide
+        assert (
+            "../STUDY-GUIDE.md#answers-and-references"
+            in (ROOT / row["solution_paths"][1]).read_text()
+        )
         for variant in row.get("variants", []):
             assert variant["id"] == "sql-model"
             assert variant["runtime_profile"] == "dbt-duckdb"

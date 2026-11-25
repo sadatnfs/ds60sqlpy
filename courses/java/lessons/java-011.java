@@ -3,23 +3,17 @@ public class Main {
 
   public static void main(String[] args) throws Exception {
     // Exercise 1: Use immutable value keys: change one input
-    // Copy Example A into a scratch `Main.java` and change `Point a = new Point(0, 0),` to
-    // `Point a = new Point(1, 0),`. Before running it with `java -ea Main`, predict which
-    // assertion fails and which value it now sees; then run it and restore the original line.
-    // Expected: The changed run fails with an `AssertionError` from the assertion on
-    // `a.equals(b) && a.hashCode() == b.hashCode() && map.get(b).equals("origin")`. Restoring
-    // the original line brings back the worked observation: lookup with the other returns
-    // origin; hashes equal.
+    // Change `Point a = new Point(0, 0),` to `Point a = new Point(1, 0),` in Example A and
+    // predict which assertion fails and why.
+    // Expected: The edited run fails with an `AssertionError` from the assertion on `a.equals(b)
+    // && a.hashCode() == b.hashCode() && map.get(b).equals("origin")`.
 
     // Exercise 2: Sort with a tie-breaker: debug a regression
-    // A regression changed one token in the code that Example B adds after Example A, so one
-    // line now reads `List.of(new Person("b", 20), new Person("a", 21), new Person("c", 18))`.
-    // Run Example B with that line, use the failing assertion to locate the defect and repair it
-    // without changing the assertion.
-    // Expected: Before the repair the run fails with an `AssertionError` from the assertion on
-    // `people.stream().map(Person::id).toList().equals(List.of("c", "a", "b"))`; after it the
-    // line reads `List.of(new Person("b", 20), new Person("a", 20), new Person("c", 18))` again
-    // and IDs c, a, b.
+    // A regression in Example B's new code makes one line read `List.of(new Person("b", 20), new
+    // Person("a", 21), new Person("c", 18))`. Repair it using the failing assertion.
+    // Expected: The unrepaired run fails with an `AssertionError` from the assertion on
+    // `people.stream().map(Person::id).toList().equals(List.of("c", "a", "b"))`; the repaired
+    // line reads `List.of(new Person("b", 20), new Person("a", 20), new Person("c", 18))`.
 
     // Exercise 3: Expose comparator uniqueness
     // Insert two different people of age 20 into a TreeSet comparing age only.

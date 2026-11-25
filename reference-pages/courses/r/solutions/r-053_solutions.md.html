@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/r/solutions/r-053_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="r-053-reference-reasoning">r-053: reference reasoning<a class="heading-anchor" href="#r-053-reference-reasoning" aria-label="Link to this section">#</a></h2>
-<p>Use the <a href="r-053_reference.R.html">complete reference</a> with the guide&#x27;s declared inputs and runtime. Every worked example is also a standalone script.</p>
+<p>Run the <a href="r-053_reference.R.html">complete reference</a> under the <a href="../STUDY-GUIDE.md.html#run-a-chapter">run rules</a>.</p>
 <h3 id="why-the-implementation-has-this-shape">Why the implementation has this shape<a class="heading-anchor" href="#why-the-implementation-has-this-shape" aria-label="Link to this section">#</a></h3>
 <p>The reference tests both mapping and constant-setting behavior rather than checking only that a ggplot object exists. The summary layer has independent data and explicitly controlled inheritance, making its numerical role inspectable.</p>
 <p>Only two plots are printed. The built-data checks establish row/group/coordinate properties, while the actual classroom renderer must still be inspected for visual quality and delivery. No browser success is inferred from a bare Rscript pass.</p>
@@ -248,7 +248,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Tempting mistake:</strong> Treating the colourblind friendly pair #0072B2 and #D55E00 as proof of accessibility. The palette helps, but legend size, label text and contrast against the panel background can only be judged on the rendered figure.</p>
 <p><strong>Verify:</strong> A browser screenshot shows the legend keys, axis titles and black crosses legible at classroom size.</p>
 <h3 id="what-the-checks-establish">What the checks establish<a class="heading-anchor" href="#what-the-checks-establish" aria-label="Link to this section">#</a></h3>
-<p>The reference makes 4 <code>stopifnot()</code> checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.</p></article>
+<p>The assertions confirm that the mapped plot builds four points with two colours and two shapes, that a constant colour set outside <code>aes()</code> produces one colour, that a mean layer with its own data adds two points at 2 and 4 beside the four raw points, and that <code>aes(colour = &quot;group&quot;)</code> yields a single colour because it maps a literal string. They inspect built data, not the rendered image.</p>
+<p>The reference makes 4 <code>stopifnot()</code> checks; see <a href="../STUDY-GUIDE.md.html#what-a-passing-run-proves">what a passing run proves</a>.</p></article>
   </main>
 </body>
 </html>

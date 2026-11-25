@@ -405,20 +405,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 
         <div class="artifact-content"><h3 id="guide--day-31-explain-and-explain-analyze">Day 31: EXPLAIN and EXPLAIN ANALYZE<a class="heading-anchor" href="#guide--day-31-explain-and-explain-analyze" aria-label="Link to this section">#</a></h3>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
-<p>Start the Linux-container engine and run <code>./classroom</code> from the repository root. On Windows, use Ubuntu in WSL 2 or the thin <code>START_DOCKER_CLASSROOM.cmd</code> wrapper. Choose <strong>PostgreSQL</strong> on the shared <code>/classroom</code> home, then open <strong>sql-31</strong>. The <a href="../reference-pages/docs/one-command-classroom.md.html">launcher guide</a> covers first preparation, strict resume and the saved project selection. No host Python or PostgreSQL installation is required for this browser route.</p>
-<ol>
-<li>Read the prerequisite and fixture notes before running the file. Use only the local disposable <code>advanced_sql_training</code> database.</li>
-<li>Choose <strong>Whole SQL lesson (psql)</strong> for the cataloged learner script. This preserves the lesson&#x27;s reviewed psql directives, relative includes and transaction behavior. <strong>SQL snippet</strong> is appropriate for ordinary SQL statements, but is not a replacement for an entire script&#x27;s setup.</li>
-<li>The <strong>Course database</strong> panel above the code shows whether the course training tables are loaded. Missing tables load automatically before your first run (or choose <strong>Load course tables</strong>) and stay loaded for later lessons. <strong>Reset training data</strong> restores the original rows only when your own changes made results differ; it keeps your saved code and notes.</li>
-<li>Edit the learner copy in the classroom and save your prediction before running. Its whole-script workspace is <code>.learning/sql/sql-31/lesson/workspace/sql/postgres-60day/day31_explain_analyze.sql</code>. For browser work this path is inside the Docker learning volume, not a newly created host folder beside your checkout. The checked-in source remains the answer-free starting artifact.</li>
-<li>Run the whole script and inspect the full transcript. The runner uses <code>psql -X -v ON_ERROR_STOP=1 -f</code>. SELECT output has columns, rows and a row count; DDL/DML has command tags; intentional checks may produce NOTICE messages. An unexpected ERROR or nonzero exit is a failure to diagnose, even when an earlier query printed plausible values.</li>
-<li>Verify the lesson&#x27;s expected grain, ordering, constraints and declared transaction or cleanup outcome. Keep required ROLLBACK statements. The warehouse sequence and other explicitly stateful exercises explain when state is committed. Read saved output without rerunning it when reviewing an earlier attempt.</li>
-</ol>
-<p>If a relation is missing, inspect the lesson&#x27;s required fixture and predecessor rather than guessing a new table definition. If authentication or runtime readiness fails, use <code>./classroom status</code> and the setup guide. Keep credentials out of SQL, notebooks, screenshots and committed files. Repair the first error before trusting partial output, and reveal separate solutions only when you want to compare after an attempt.</p>
+<p>Open <strong>sql-31</strong> in <code>./classroom</code> and run <strong>Whole SQL lesson (psql)</strong> against <code>advanced_sql_training</code>. The file prints three plans and no business rows: two over <code>orders</code> alone and one that joins <code>orders</code>, <code>customers</code> and <code>order_items</code>. Only the second plan executes its query, and the whole file ends in <code>ROLLBACK</code>. Your editable copy is <code>.learning/sql/sql-31/lesson/workspace/sql/postgres-60day/day31_explain_analyze.sql</code>. The shared launch steps are in <a href="../reference-pages/sql/STUDY-GUIDE.md.html#run-a-lesson-in-the-classroom">Run a lesson in the classroom</a>.</p>
+<p>Plan text lines are long. Widen the transcript pane or scroll sideways before deciding that a <code>Filter:</code> or <code>Buffers:</code> line is missing.</p>
 <h5 id="guide--optional-contributor-notebook-route">Optional contributor notebook route<a class="heading-anchor" href="#guide--optional-contributor-notebook-route" aria-label="Link to this section">#</a></h5>
-<p>For notebook work, deliberately prepare the Linux/WSL contributor environment from <a href="../reference-pages/CONTRIBUTING.md.html">CONTRIBUTING.md</a>, including a compatible psql client and the notebook dependencies. Generate this lesson&#x27;s private workspace through the maintained CLI:</p>
+<p>A notebook keeps each plan in its own cell, which makes it easy to rerun one <code>EXPLAIN</code> after an <code>ANALYZE orders;</code> (<a href="../reference-pages/sql/STUDY-GUIDE.md.html#optional-contributor-notebook-route">notebook setup</a>):</p>
 <pre class="highlighted-code"><code class="language-bash">uv run --no-sync python scripts/course.py sql notebook sql-31</code></pre>
-<p>Open the printed notebook path in that environment&#x27;s JupyterLab. It uses the same catalog-derived learner-copy layout in that contributor checkout and executes the complete script through psql. Its host-side state is separate from the Docker browser&#x27;s named volume. Follow <a href="../reference-pages/docs/guided-sql-notebooks.md.html">guided SQL notebooks</a> for explicit local connection selection and kernel setup. Notebook generation does not execute SQL or authorize a reset.</p>
 <h4 id="guide--level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#guide--level-and-prerequisites" aria-label="Link to this section">#</a></h4>
 <ul>
 <li><strong>Level:</strong> Advanced</li>
@@ -426,11 +417,32 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li><strong>Artifacts:</strong> <a href="sql-31.html#learner">learner SQL</a> · <a href="sql-31.html#solution-1">solution reasoning</a> · <a href="sql-31.html#solution-2">executable solution</a></li>
 </ul>
 <h4 id="guide--a-beginner-s-mental-model-for-this-lesson">A beginner&#x27;s mental model for this lesson<a class="heading-anchor" href="#guide--a-beginner-s-mental-model-for-this-lesson" aria-label="Link to this section">#</a></h4>
-<p>A <strong>table</strong> stores facts in named columns. A <strong>row</strong> is one occurrence at the table&#x27;s declared grain. A query creates a temporary <strong>result set</strong>: rows printed on screen are not automatically stored. The key vocabulary for this lesson is Plan node, Cost estimate, Loop count. Its worked SQL reads or creates <code>orders</code>, <code>customers</code>, <code>order_items</code>.</p>
-<p>Before writing a query, complete this sentence: “One output row represents ___.” Joins can multiply rows, filters can remove them, grouping can collapse many rows into one, and window functions can add calculations while preserving row count. For a normal analytical <code>SELECT</code>, use this logical reading order: <code>FROM</code>/<code>JOIN</code> (including <code>ON</code>) → <code>WHERE</code> → <code>GROUP BY</code>/aggregates → <code>HAVING</code> → window calculations → <code>SELECT</code> → <code>ORDER BY</code> → <code>LIMIT</code>. PostgreSQL may execute a different physical plan while preserving those semantics.</p>
-<p>The worked walkthrough&#x27;s lesson-specific task is: Run the same safe filter first with <code>EXPLAIN</code> and then with <code>EXPLAIN (ANALYZE, BUFFERS)</code>. Start at the scan leaf, compare estimated rows with <code>actual rows × loops</code>, note rows removed by the filter, and only then read the parent <code>LIMIT</code> or aggregate node. The first runnable example has a concrete contract: Example 1 prints a plan tree, not business rows. Run the underlying <code>SELECT</code> separately and reconcile its <code>order_id</code> key set and row count over <code>orders</code>; then compare node estimates, actual rows × loops, buffers, and timing without requiring one fixed plan. Its final projection is <code>order_id</code>, and <code>total_amount</code>. Run the underlying query without <code>EXPLAIN</code> first; preserve its keys and row count, then compare estimates with actual rows × loops and read buffer/timing evidence without requiring one fixed node type.</p>
+<p><code>EXPLAIN</code> asks PostgreSQL how it would run a query; <code>EXPLAIN ANALYZE</code> runs the query and reports what happened. Each output line with <code>-&gt;</code> is a plan node, and indentation shows which node feeds which. Rows flow upward: the most indented scans produce rows, and every parent consumes its children.</p>
+<p>Three numbers on each node carry most of the meaning:</p>
+<div class="table-wrap"><table><thead><tr>
+<th>On the node</th>
+<th>What it tells you</th>
+<th>In the first plan of this lesson</th>
+</tr></thead><tbody>
+<tr>
+<td><code>cost=a..b</code></td>
+<td>planner units for first row and all rows</td>
+<td><code>0.00..119.53</code></td>
+</tr>
+<tr>
+<td><code>rows=</code> (estimate)</td>
+<td>how many rows the planner expects</td>
+<td><code>2410</code></td>
+</tr>
+<tr>
+<td><code>actual ... rows= loops=</code></td>
+<td>what really came out, per loop</td>
+<td>only with <code>ANALYZE</code></td>
+</tr>
+</tbody></table></div>
+<p>Costs are not milliseconds. They are relative units built from page reads and per-row CPU charges, useful only for comparing plans of the same query. In the first plan, 65 of the 119.53 units are the 65 pages of <code>orders</code>; the rest is per-row CPU for 4,362 rows and their filter checks.</p>
+<p>The trap to avoid is comparing a plan to a different query. Every comparison in this lesson keeps the <code>SELECT</code>, the tables and the data fixed and changes one thing: a predicate, <code>ANALYZE</code>, or <code>LIMIT</code>. When rows look wrong, run the same <code>SELECT</code> without <code>EXPLAIN</code> and count; the plan never replaces that check.</p>
 <h4 id="guide--two-worked-sql-examples">Two worked SQL examples<a class="heading-anchor" href="#guide--two-worked-sql-examples" aria-label="Link to this section">#</a></h4>
-<p>These worked excerpts come from <code>sql/postgres-60day/day31_explain_analyze.sql</code>. Use <strong>Whole SQL lesson (psql)</strong> in the unified classroom for the complete file, including its fixture and transaction context. The optional contributor notebook and prepared <code>psql</code> routes are described above.</p>
 <h5 id="guide--example-1">Example 1<a class="heading-anchor" href="#guide--example-1" aria-label="Link to this section">#</a></h5>
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">EXPLAIN</span>
 <span class="syntax-keyword">SELECT</span>
@@ -440,8 +452,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   orders o
 <span class="syntax-keyword">WHERE</span>
   o<span class="syntax-punctuation">.</span>total_amount <span class="syntax-operator">&gt;</span> <span class="syntax-number">500</span><span class="syntax-punctuation">;</span></code></pre>
-<p><strong>How to read it:</strong> Example 1 returns plan rows rather than business rows. The node tree is evidence about one execution strategy; it does not replace a correctness check on the underlying query.</p>
-<p><strong>Expected result/shape:</strong> Example 1 prints a plan tree, not business rows. Run the underlying <code>SELECT</code> separately and reconcile its <code>order_id</code> key set and row count over <code>orders</code>; then compare node estimates, actual rows × loops, buffers, and timing without requiring one fixed plan.</p>
+<p><strong>How to read it:</strong> One node, <code>Seq Scan on orders o</code>, with a <code>Filter: (total_amount &gt; &#x27;500&#x27;::numeric)</code> line beneath it. PostgreSQL has no index on <code>total_amount</code>, so reading all 65 pages is the only option. The query itself does not run, so the plan shows estimates and nothing else.</p>
+<p><strong>Expected result/shape:</strong> A two-line plan with an estimate of <code>rows=2410</code>. Running <code>SELECT COUNT(*) FROM orders WHERE total_amount &gt; 500</code> also returns 2,410 on a fresh load, so the statistics are accurate here. A very different estimate usually means <code>orders</code> has not been analyzed yet.</p>
 <h5 id="guide--example-2">Example 2<a class="heading-anchor" href="#guide--example-2" aria-label="Link to this section">#</a></h5>
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">EXPLAIN</span> <span class="syntax-keyword">ANALYZE</span>
 <span class="syntax-keyword">SELECT</span>
@@ -452,8 +464,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="syntax-keyword">WHERE</span>
   o<span class="syntax-punctuation">.</span>total_amount <span class="syntax-operator">&gt;</span> <span class="syntax-number">500</span>
 <span class="syntax-keyword">LIMIT</span> <span class="syntax-number">100</span><span class="syntax-punctuation">;</span></code></pre>
-<p><strong>How to read it:</strong> Example 2 returns plan rows rather than business rows. The node tree is evidence about one execution strategy; it does not replace a correctness check on the underlying query.</p>
-<p><strong>Expected result/shape:</strong> Example 2 prints a plan tree, not business rows. Run the underlying <code>SELECT</code> separately and reconcile its <code>order_id</code> key set and row count over <code>orders</code>; then compare node estimates, actual rows × loops, buffers, and timing without requiring one fixed plan.</p>
+<p><strong>How to read it:</strong> Now <code>Limit</code> sits above the scan, and <code>ANALYZE</code> adds an <code>actual</code> section to each node. The scan&#x27;s estimate still says 2,410 rows, but its actual count is only 100, because <code>Limit</code> stops asking for rows once it has enough.</p>
+<p><strong>Expected result/shape:</strong> About <code>actual ... rows=100</code> on both nodes and <code>Rows Removed by Filter: 83</code> on the scan: PostgreSQL read 183 orders, kept the first 100 that passed the filter, and stopped. The plan cost drops to about 4.96 for the same reason. Which 100 orders you get is not defined, because there is no <code>ORDER BY</code>.</p>
 <h4 id="guide--learning-objectives">Learning objectives<a class="heading-anchor" href="#guide--learning-objectives" aria-label="Link to this section">#</a></h4>
 <ul>
 <li>Read a plan tree from its leaf nodes through the final output.</li>
@@ -504,7 +516,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>The highest individual node time is not the whole story. Loops multiply work, and sort or aggregate nodes can spill when memory is insufficient.</li>
 </ul>
 <h4 id="guide--practice-map">Practice map<a class="heading-anchor" href="#guide--practice-map" aria-label="Link to this section">#</a></h4>
-<p>Use the numbered <strong>Exercises</strong> section above as the single authoritative practice contract. Its prompts, expected shapes, and verification checks map one-for-one to the learner SQL and both solution companions.</p>
+<p>The six numbered prompts above are the full practice set, and the solution walks through each one; the third plan in the learner file (the 90-day join) is a warm-up for the fourth.</p>
 <h4 id="guide--pitfalls-and-validation">Pitfalls and validation<a class="heading-anchor" href="#guide--pitfalls-and-validation" aria-label="Link to this section">#</a></h4>
 <ul>
 <li>Do not compare timings from different predicates or different result sets.</li>
@@ -516,7 +528,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Prompts 3-6 add prediction, construction, debugging, and an empty-result edge case. Read a plan from the most deeply indented node upward: scans produce rows, joins combine them, aggregates reduce their grain, and the root returns the final result. For each plan, record estimated versus actual rows before timing; a fast plan can still expose a serious cardinality error.</p>
 <p>Use a savepoint for the no-op <code>UPDATE</code> demonstration because <code>ANALYZE</code> executes the statement. A zero-row predicate is not itself evidence of stale statistics: compare the estimate, then distinguish a rare but modeled value from genuinely outdated table statistics.</p>
 <h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
-<p>An AI tutor is optional; the guide, learner SQL, PostgreSQL, and expected checks are enough to complete the lesson offline. If you want a patient tutor, copy this prompt after opening the repository in the AI tutor:</p>
+<p>If a plan confuses you, a tutor can walk through it one node at a time while you keep the actual row counts in front of you (<a href="../reference-pages/sql/STUDY-GUIDE.md.html#use-an-ai-tutor-optional">optional tutor notes</a>).</p>
 <pre class="highlighted-code"><code class="language-text">Tutor me through sql-31: Reading Plans with EXPLAIN and EXPLAIN ANALYZE.
 
 I have completed the direct catalog prerequisite: `sql-30`. Assume mastery only through those lessons; define and demonstrate every new concept patiently. Follow the checked-in `guide-ds60sqlpy-learning` tutoring skill and use these sources:
@@ -695,25 +707,14 @@ transfer task that I answer without looking back. Done when I can explain the ro
         <div class="solution-notice" role="note"><strong>Reference solution.</strong> Attempt the learner work and record your reasoning before comparing answers.</div>
         <div class="artifact-content"><h3 id="solution-1--day-31-solutions-explain-and-explain-analyze">Day 31: Solutions: <code>EXPLAIN</code> and <code>EXPLAIN ANALYZE</code><a class="heading-anchor" href="#solution-1--day-31-solutions-explain-and-explain-analyze" aria-label="Link to this section">#</a></h3>
 <h4 id="solution-1--how-to-study-and-run-this-solution">How to study and run this solution<a class="heading-anchor" href="#solution-1--how-to-study-and-run-this-solution" aria-label="Link to this section">#</a></h4>
-<p>Open this explanation only after making an honest attempt. The executable companion runs solely against the disposable <code>advanced_sql_training</code> database:</p>
-<pre class="highlighted-code"><code class="language-bash"><span class="syntax-comment"># Linux, macOS, or Windows through WSL 2, from the repository root</span>
-psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="syntax-number">1</span> -d advanced_sql_training <span class="syntax-string">\</span>
+<p>Each answer is a plan, so your numbers will differ slightly in timing and sometimes in estimates. Compare node types and row counts first, timings last. The general approach is in <a href="../reference-pages/sql/STUDY-GUIDE.md.html#read-a-solution">Read a solution</a>.</p>
+<pre class="highlighted-code"><code class="language-bash">psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="syntax-number">1</span> -d advanced_sql_training <span class="syntax-string">\</span>
   -f sql/postgres-60day/solutions/day31_solutions.sql</code></pre>
-<p><code>psql</code> prints each result/command tag in the terminal. Stop at the first unexpected <code>ERROR</code>; later output cannot repair an earlier failed invariant. Compare your own SQL, row grain, column names, row counts, <code>NULL</code> policy, and ordering with the explanation before comparing syntax.</p>
-<h4 id="solution-1--clause-by-clause-reading-map">Clause-by-clause reading map<a class="heading-anchor" href="#solution-1--clause-by-clause-reading-map" aria-label="Link to this section">#</a></h4>
-<p>The lesson&#x27;s main concepts are Plan node, Cost estimate, Loop count. Its worked-model focus is: Run the same safe filter first with <code>EXPLAIN</code> and then with <code>EXPLAIN (ANALYZE, BUFFERS)</code>. Start at the scan leaf, compare estimated rows with <code>actual rows × loops</code>, note rows removed by the filter, and only then read the parent <code>LIMIT</code> or aggregate node.</p>
-<ul>
-<li>Start at <code>FROM</code>/<code>JOIN</code> and state the intermediate row grain. Inspect join keys before adding aggregates; a one-to-many join is allowed to multiply rows only when the later contract accounts for it.</li>
-<li>Apply <code>WHERE</code> to input rows, <code>GROUP BY</code> to form buckets, and <code>HAVING</code> to completed groups. Window functions run over the surviving relation and normally preserve its row count.</li>
-<li>Read the <code>SELECT</code> list as the public result contract: keys establish grain, measures state calculations, and aliases explain meaning. <code>ORDER BY</code> is the only output-order guarantee; add a unique tie-breaker before <code>LIMIT</code>.</li>
-<li>Trace every common table expression (CTE) as a temporary named relation. Execute or inspect one stage at a time while debugging, but compare the final result with an independent control rather than trusting stage names.</li>
-<li>Keep SQL <code>NULL</code> as “missing/unknown/not applicable” until the metric contract chooses another representation. Guard division with <code>NULLIF</code>; disclose exclusions and distinguish zero from no row.</li>
-<li>For DDL/DML, a command tag proves only that PostgreSQL accepted a statement. Catalog checks, negative cases, row-count reconciliation, and the declared transaction boundary prove behavior and cleanup.</li>
-</ul>
-<p>The exact final queries are not the only valid syntax. A join, subquery, CTE, window, or conditional aggregate can be an alternative when it preserves the same grain, <code>NULL</code> semantics, deterministic ordering, and safety. Prefer the form whose intermediate relations a reviewer can verify; optimize only after correctness is established with evidence.</p>
-<p>Execution plans are observations, not fixed expected text. PostgreSQL may choose different nodes after a version change, data refresh, or statistics update. Compare estimates, actuals, buffers, and timing rather than memorizing one plan.</p>
+<h4 id="solution-1--how-these-answers-fit-together">How these answers fit together<a class="heading-anchor" href="#solution-1--how-these-answers-fit-together" aria-label="Link to this section">#</a></h4>
+<p>The first and third answers stay on <code>orders</code> and change only the predicate, so the scan node and its <code>shared hit=65</code> stay fixed while row counts move. The second plans one country revenue join twice, once without running it and once with <code>ANALYZE</code>. The fourth adds a country filter and <code>VERBOSE</code>. The fifth applies <code>ANALYZE</code> to an <code>UPDATE</code> inside a savepoint, because <code>ANALYZE</code> executes whatever it plans. The sixth asks for rows that do not exist and shows that the planner still estimates one.</p>
+<p>The learner file&#x27;s own third plan, the 90-day join, is a good model for the fourth answer. Under <code>ANALYZE</code> it shows <code>orders</code> filtered to about 807 recent rows, hashed, and probed by all 13,085 <code>order_items</code> rows, giving about 2,448 joined lines before a <code>HashAggregate</code> folds them into seven countries. The learner file is <a href="sql-31.html#learner">day31_explain_analyze.sql</a>.</p>
 <h4 id="solution-1--exercise-1-change-predicates-and-observe-selectivity">Exercise 1: Change predicates and observe selectivity<a class="heading-anchor" href="#solution-1--exercise-1-change-predicates-and-observe-selectivity" aria-label="Link to this section">#</a></h4>
-<p>These three queries ask for progressively smaller portions of <code>orders</code>.</p>
+<p>The two queries differ only in their <code>WHERE</code> clause: a three-year window that keeps most orders, and a seven-day window narrowed further by status and amount.</p>
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">SET</span> search_path <span class="syntax-keyword">TO</span> training<span class="syntax-punctuation">,</span> <span class="syntax-keyword">public</span><span class="syntax-punctuation">;</span>
 
 <span class="syntax-keyword">EXPLAIN</span> <span class="syntax-punctuation">(</span>
@@ -721,35 +722,24 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
   BUFFERS
 <span class="syntax-punctuation">)</span>
 <span class="syntax-keyword">SELECT</span>
-  order_id<span class="syntax-punctuation">,</span>
-  total_amount
+  <span class="syntax-operator">*</span>
 <span class="syntax-keyword">FROM</span>
-  orders<span class="syntax-punctuation">;</span>
+  orders
+<span class="syntax-keyword">WHERE</span>
+  order_date <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-keyword">CURRENT_TIMESTAMP</span> <span class="syntax-operator">-</span> <span class="syntax-builtin">interval</span> <span class="syntax-string">&#x27;3 years&#x27;</span><span class="syntax-punctuation">;</span>
 
 <span class="syntax-keyword">EXPLAIN</span> <span class="syntax-punctuation">(</span>
   <span class="syntax-keyword">ANALYZE</span><span class="syntax-punctuation">,</span>
   BUFFERS
 <span class="syntax-punctuation">)</span>
 <span class="syntax-keyword">SELECT</span>
-  order_id<span class="syntax-punctuation">,</span>
-  total_amount
+  <span class="syntax-operator">*</span>
 <span class="syntax-keyword">FROM</span>
   orders
 <span class="syntax-keyword">WHERE</span>
-  total_amount <span class="syntax-operator">&gt;</span> <span class="syntax-number">500</span><span class="syntax-punctuation">;</span>
-
-<span class="syntax-keyword">EXPLAIN</span> <span class="syntax-punctuation">(</span>
-  <span class="syntax-keyword">ANALYZE</span><span class="syntax-punctuation">,</span>
-  BUFFERS
-<span class="syntax-punctuation">)</span>
-<span class="syntax-keyword">SELECT</span>
-  order_id<span class="syntax-punctuation">,</span>
-  total_amount
-<span class="syntax-keyword">FROM</span>
-  orders
-<span class="syntax-keyword">WHERE</span>
-  total_amount <span class="syntax-operator">&gt;</span> <span class="syntax-number">500</span>
-  <span class="syntax-keyword">AND</span> order_date <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-keyword">CURRENT_TIMESTAMP</span> <span class="syntax-operator">-</span> <span class="syntax-builtin">interval</span> <span class="syntax-string">&#x27;30 days&#x27;</span><span class="syntax-punctuation">;</span></code></pre>
+  order_date <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-keyword">CURRENT_TIMESTAMP</span> <span class="syntax-operator">-</span> <span class="syntax-builtin">interval</span> <span class="syntax-string">&#x27;7 days&#x27;</span>
+  <span class="syntax-keyword">AND</span> status <span class="syntax-operator">=</span> <span class="syntax-string">&#x27;returned&#x27;</span>
+  <span class="syntax-keyword">AND</span> total_amount <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-number">1000</span><span class="syntax-punctuation">;</span></code></pre>
 <p>Compare <code>rows=</code> on each plan node and the top-level actual row count. A more selective predicate returns fewer rows, but it does not guarantee an index scan: the setup table is small and PostgreSQL can reasonably prefer a sequential scan.</p>
 <h5 id="solution-1--reasoning-and-verification">Reasoning and verification<a class="heading-anchor" href="#solution-1--reasoning-and-verification" aria-label="Link to this section">#</a></h5>
 <ul>
@@ -768,13 +758,10 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="syntax-keyword">EXPLAIN</span>
 <span class="syntax-keyword">SELECT</span>
   <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>country<span class="syntax-punctuation">,</span>
-  <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>oi<span class="syntax-punctuation">.</span>quantity<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> units
+  <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>o<span class="syntax-punctuation">.</span>total_amount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue
 <span class="syntax-keyword">FROM</span>
-  orders o
-  <span class="syntax-keyword">JOIN</span> customers <span class="syntax-keyword">c</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id <span class="syntax-operator">=</span> o<span class="syntax-punctuation">.</span>customer_id
-  <span class="syntax-keyword">JOIN</span> order_items oi <span class="syntax-keyword">ON</span> oi<span class="syntax-punctuation">.</span>order_id <span class="syntax-operator">=</span> o<span class="syntax-punctuation">.</span>order_id
-<span class="syntax-keyword">WHERE</span>
-  o<span class="syntax-punctuation">.</span>order_date <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-keyword">CURRENT_TIMESTAMP</span> <span class="syntax-operator">-</span> <span class="syntax-builtin">interval</span> <span class="syntax-string">&#x27;90 days&#x27;</span>
+  customers <span class="syntax-keyword">c</span>
+  <span class="syntax-keyword">JOIN</span> orders o <span class="syntax-keyword">ON</span> o<span class="syntax-punctuation">.</span>customer_id <span class="syntax-operator">=</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id
 <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span>
   <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>country<span class="syntax-punctuation">;</span>
 
@@ -784,13 +771,10 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <span class="syntax-punctuation">)</span>
 <span class="syntax-keyword">SELECT</span>
   <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>country<span class="syntax-punctuation">,</span>
-  <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>oi<span class="syntax-punctuation">.</span>quantity<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> units
+  <span class="syntax-keyword">SUM</span><span class="syntax-punctuation">(</span>o<span class="syntax-punctuation">.</span>total_amount<span class="syntax-punctuation">)</span> <span class="syntax-keyword">AS</span> revenue
 <span class="syntax-keyword">FROM</span>
-  orders o
-  <span class="syntax-keyword">JOIN</span> customers <span class="syntax-keyword">c</span> <span class="syntax-keyword">ON</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id <span class="syntax-operator">=</span> o<span class="syntax-punctuation">.</span>customer_id
-  <span class="syntax-keyword">JOIN</span> order_items oi <span class="syntax-keyword">ON</span> oi<span class="syntax-punctuation">.</span>order_id <span class="syntax-operator">=</span> o<span class="syntax-punctuation">.</span>order_id
-<span class="syntax-keyword">WHERE</span>
-  o<span class="syntax-punctuation">.</span>order_date <span class="syntax-operator">&gt;</span><span class="syntax-operator">=</span> <span class="syntax-keyword">CURRENT_TIMESTAMP</span> <span class="syntax-operator">-</span> <span class="syntax-builtin">interval</span> <span class="syntax-string">&#x27;90 days&#x27;</span>
+  customers <span class="syntax-keyword">c</span>
+  <span class="syntax-keyword">JOIN</span> orders o <span class="syntax-keyword">ON</span> o<span class="syntax-punctuation">.</span>customer_id <span class="syntax-operator">=</span> <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>customer_id
 <span class="syntax-keyword">GROUP</span> <span class="syntax-keyword">BY</span>
   <span class="syntax-keyword">c</span><span class="syntax-punctuation">.</span>country<span class="syntax-punctuation">;</span></code></pre>
 <p>For each node, compare estimated <code>rows</code> with <code>actual ... rows</code>. Large, repeatable discrepancies can indicate stale statistics or correlated columns that ordinary statistics do not model well.</p>
@@ -858,7 +842,14 @@ psql -X -v ON_ERROR_STOP<span class="syntax-operator">=</span><span class="synta
 <li><strong>Clause check:</strong> For sql-31 Exercise 6, the solution uses one <code>EXPLAIN (ANALYZE, BUFFERS) SELECT order_id FROM orders WHERE total_amount &lt; 0</code>.</li>
 <li><strong>Alternative/trade-off:</strong> For sql-31 Exercise 6, adding <code>CHECK (total_amount &gt;= 0)</code> would make negative totals impossible for future writes, but the planner still would not skip the scan, because <code>constraint_exclusion = partition</code> applies constraints only to partitions and inheritance children.</li>
 <li><strong>Edge case:</strong> A predicate that is rare rather than impossible, such as <code>total_amount &gt; 1400</code>, gets a small but nonzero estimate from the histogram and returns a few rows.</li>
-</ul></div>
+</ul>
+<h4 id="solution-1--final-self-check">Final self-check<a class="heading-anchor" href="#solution-1--final-self-check" aria-label="Link to this section">#</a></h4>
+<ol>
+<li>Why does the scan in the <code>LIMIT 100</code> plan report 100 actual rows when its estimate is 2,410, and what number would you use to judge the estimate?</li>
+<li>In the 90-day join, which table does PostgreSQL hash, and why is that the smaller input?</li>
+<li>A plan shows <code>rows=1</code> and <code>actual rows=0</code>. What two different situations could explain it, and which query tells them apart?</li>
+<li>Why is <code>EXPLAIN ANALYZE UPDATE ...</code> unsafe outside a transaction even when the <code>WHERE</code> clause seems harmless?</li>
+</ol></div>
       </section>
 
 

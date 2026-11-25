@@ -1,6 +1,8 @@
 # c-035: explained solutions
 
-Compare after an attempt or explicit reveal. The complete executable reference, `c-035_solution.c`, implements all six cases, from the "install and restore a handler" case to the "transfer a bounded shutdown model" case, in one `main.c`.
+`c-035_solution.c` assembles the "install and restore a handler" case through the "transfer a bounded shutdown model" case in one `main.c`.
+
+Compare only after an attempt: [Compare and transfer](../STUDY-GUIDE.md#compare-and-transfer).
 
 ## Mechanism and assumptions
 
@@ -10,7 +12,7 @@ signal installs a handler and returns the previous disposition or SIG_ERR. raise
 
 ## Exercise 1: Install and restore a handler: predict an edited check
 
-Copy worked example 1 into a scratch pad and change `CHECK(signal(SIGINT, previous) != SIG_ERR);` to `CHECK(signal(SIGINT, previous) == SIG_ERR);` inside its CHECK. Before running, predict whether the CHECK still holds and explain why; then restore it.
+In worked example 1, change `CHECK(signal(SIGINT, previous) != SIG_ERR);` to `CHECK(signal(SIGINT, previous) == SIG_ERR);`. Predict whether the CHECK still holds and why, then run and restore.
 
 The unchanged code is worked example 1:
 
@@ -20,13 +22,15 @@ CHECK(previous != SIG_ERR);
 CHECK(signal(SIGINT, previous) != SIG_ERR);
 ```
 
-**Expected:** With `CHECK(signal(SIGINT, previous) == SIG_ERR);` the run stops with `Check failed` at the CHECK on `signal(SIGINT, previous) != SIG_ERR`, because the "install and restore a handler" case no longer shows that both operations succeed. Restoring `CHECK(signal(SIGINT, previous) != SIG_ERR);` brings that observation back.
+**Expected:** `Check failed`: `CHECK(signal(SIGINT, previous) == SIG_ERR);` is false, although both operations succeed.
+
+**Verify:** Explain which claim `CHECK(signal(SIGINT, previous) == SIG_ERR);` makes that the state fails; restoring `CHECK(signal(SIGINT, previous) != SIG_ERR);` passes again.
 
 The fixture restores process state instead of leaving a changed signal policy for unrelated later work.
 
 ## Exercise 2: Record a raised notification: diagnose an edited check
 
-A careless edit changed the CHECK in worked example 2, the "record a raised notification" case, so that it reads `CHECK(signal(SIGINT, previous) == SIG_ERR);`. Run the example with that line, explain why the edited CHECK now fails even though the program state still means the signal flag becomes one, and restore it.
+Worked example 2's CHECK now reads `CHECK(signal(SIGINT, previous) == SIG_ERR);`. Explain why it fails although the signal flag becomes one, then restore it.
 
 The unchanged code is worked example 2:
 
@@ -39,7 +43,9 @@ CHECK(signal_seen == 1);
 CHECK(signal(SIGINT, previous) != SIG_ERR);
 ```
 
-**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `signal(SIGINT, previous) != SIG_ERR`. Once the line reads `CHECK(signal(SIGINT, previous) != SIG_ERR);` again, the "record a raised notification" case again shows that the signal flag becomes one.
+**Expected:** `Check failed` until the CHECK reads `CHECK(signal(SIGINT, previous) != SIG_ERR);` again, though the signal flag becomes one.
+
+**Verify:** Explain why `CHECK(signal(SIGINT, previous) == SIG_ERR);` rejects a state that `signal(SIGINT, previous) != SIG_ERR` accepts, using your failing and repaired runs.
 
 The handler only assigns a flag. The ordinary flow performs assertions and restoration after the handler returns.
 
@@ -60,6 +66,8 @@ signal_seen = 0;
 
 **Expected:** The decision is continue before the signal and stop after the handler records it.
 
+**Verify:** Keep a CHECK equivalent to `!stop_requested()`. Control edit: changing `signal_seen = 0;` to `signal_seen = 1;` must fail it; then restore it.
+
 The handler only records the event. Complex cleanup belongs to the caller of stop_requested, where ordinary library and ownership rules apply.
 
 ## Exercise 4: Handle no notification
@@ -75,6 +83,8 @@ CHECK(signal(SIGINT, previous) == lesson_handler);
 ```
 
 **Expected:** Installing a handler records no notification, and the restoring call returns the lesson handler.
+
+**Verify:** Keep a CHECK equivalent to `!stop_requested()`. Control edit: changing `signal_seen = 0;` to `signal_seen = 1;` must fail it; then restore it.
 
 Installing a handler does not deliver a signal. The value returned by the restoring call proves the handler was still installed, so no delivery had reset it.
 
@@ -96,6 +106,8 @@ signal_seen = 0;
 ```
 
 **Expected:** Both deliveries are handled. In the classroom worker the reinstalling call returns SIG_DFL, because glibc in -std=c17 mode reset the disposition after the first delivery.
+
+**Verify:** Keep a CHECK equivalent to `signal(SIGINT, previous) != SIG_ERR`. Control edit: `CHECK(signal(SIGINT, previous) == SIG_ERR);` must fail; then restore it.
 
 ISO C allows the reset, so code that relies on signal must reinstall the handler before the next delivery. Without the reinstall, the second raise in a System V build would terminate the process. The check accepts both results the standard permits, while the expected observation records what the classroom compiler does; sigaction removes the ambiguity.
 
@@ -119,8 +131,10 @@ signal_seen = 0;
 
 **Expected:** Admission stops and unfinished work remains visible.
 
+**Verify:** Keep a CHECK equivalent to `!accepting && active == 2`. Control edit: changing `int active = 2;` to `int active = 3;` must fail it; then restore it.
+
 A stop request does not mean in-flight operations completed. Drain or cancel them under a separate bounded policy.
 
 ## After comparison
 
-Add a fresh distinguishing input for the "transfer a bounded shutdown model" case to your own c-035 source. Explain why every access in `lesson_handler` or `stop_requested` stays within a live object and each owned resource is released. An expected signal handler failure belongs in the test contract; undefined behavior does not. Keep diagnostics and sanitizer evidence for the "record a raised notification" case apart from ordinary output: the fixture proves its stated signal handler, async-signal safety and sig_atomic_t assumptions, not universal safety.
+Install `lesson_handler` for `SIGTERM`, raise `SIGTERM` and predict `stop_requested()` first: the handler runs but records only `SIGINT`, so the flag stays 0. CHECK that, restore the previous `SIGTERM` disposition, then extend the handler to accept both numbers and CHECK that the flag is set. Explain why calling `printf` inside the handler would not be async-signal-safe, while assigning a `volatile sig_atomic_t` is.

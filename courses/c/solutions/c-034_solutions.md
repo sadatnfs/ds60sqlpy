@@ -1,6 +1,8 @@
 # c-034: explained solutions
 
-Compare after an attempt or explicit reveal. The complete executable reference, `c-034_solution.c`, implements all six cases, from the "transfer a small pipe payload" case to the "transfer a bounded record decoder" case, in one `main.c`.
+`c-034_solution.c` assembles the "transfer a small pipe payload" case through the "transfer a bounded record decoder" case in one `main.c`.
+
+Compare only after an attempt: [Compare and transfer](../STUDY-GUIDE.md#compare-and-transfer).
 
 ## Mechanism and assumptions
 
@@ -10,7 +12,7 @@ pipe fills two descriptors: index zero reads and index one writes. read and writ
 
 ## Exercise 1: Transfer a small pipe payload: predict an edited check
 
-Copy worked example 1 into a scratch pad and change `CHECK(close(fds[0]) == 0);` to `CHECK(close(fds[1]) == 0);` inside its CHECK. Before running, predict whether the CHECK still holds and explain why; then restore it.
+In worked example 1, change `CHECK(close(fds[0]) == 0);` to `CHECK(close(fds[1]) == 0);`. Predict whether the CHECK still holds and why, then run and restore.
 
 The unchanged code is worked example 1:
 
@@ -24,13 +26,15 @@ CHECK(read(fds[0], out, 3) == 3 && strcmp(out, "abc") == 0);
 CHECK(close(fds[0]) == 0);
 ```
 
-**Expected:** With `CHECK(close(fds[1]) == 0);` the run stops with `Check failed` at the CHECK on `close(fds[0]) == 0`, because the "transfer a small pipe payload" case no longer shows that three bytes arrive unchanged. Restoring `CHECK(close(fds[0]) == 0);` brings that observation back.
+**Expected:** `Check failed`: `CHECK(close(fds[1]) == 0);` is false, although three bytes arrive unchanged.
+
+**Verify:** Explain which claim `CHECK(close(fds[1]) == 0);` makes that the state fails; restoring `CHECK(close(fds[0]) == 0);` passes again.
 
 The tiny write is within the pipe atomic-write bound. General streams still require loops for partial operations.
 
 ## Exercise 2: Observe EOF after closure: diagnose an edited check
 
-A careless edit changed the CHECK in worked example 2, the "observe EOF after closure" case, so that it reads `CHECK(close(fds[1]) == 0);`. Run the example with that line, explain why the edited CHECK now fails even though the program state still means read returns zero, and restore it.
+Worked example 2's CHECK now reads `CHECK(close(fds[1]) == 0);`. Explain why it fails although read returns zero, then restore it.
 
 The unchanged code is worked example 2:
 
@@ -43,7 +47,9 @@ CHECK(read(fds[0], &byte, 1) == 0);
 CHECK(close(fds[0]) == 0);
 ```
 
-**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `close(fds[0]) == 0`. Once the line reads `CHECK(close(fds[0]) == 0);` again, the "observe EOF after closure" case again shows that read returns zero.
+**Expected:** `Check failed` until the CHECK reads `CHECK(close(fds[0]) == 0);` again, though read returns zero.
+
+**Verify:** Explain why `CHECK(close(fds[1]) == 0);` rejects a state that `close(fds[0]) == 0` accepts, using your failing and repaired runs.
 
 Zero is EOF for this positive-sized read, not an error. All writers are closed before waiting.
 
@@ -64,6 +70,8 @@ CHECK(close(fds[0]) == 0);
 
 **Expected:** The pieces are ab and cd.
 
+**Verify:** Keep a CHECK equivalent to `close(fds[0]) == 0`. Control edit: `CHECK(close(fds[1]) == 0);` must fail; then restore it.
+
 A stream does not preserve application record boundaries. The receiver chooses how many bytes to request.
 
 ## Exercise 4: Retain binary zeros
@@ -81,6 +89,8 @@ CHECK(close(fds[0]) == 0);
 ```
 
 **Expected:** All three bytes are preserved.
+
+**Verify:** Keep a CHECK equivalent to `close(fds[0]) == 0`. Control edit: `CHECK(close(fds[1]) == 0);` must fail; then restore it.
 
 POSIX reads report lengths and do not interpret null-terminated strings.
 
@@ -101,6 +111,8 @@ CHECK(close(fds[0]) == 0);
 
 **Expected:** EOF arrives after both references close.
 
+**Verify:** Keep a CHECK equivalent to `close(fds[0]) == 0`. Control edit: `CHECK(close(fds[1]) == 0);` must fail; then restore it.
+
 Closing only the original descriptor would leave another writer reference alive.
 
 ## Exercise 6: Transfer a bounded record decoder
@@ -120,8 +132,10 @@ CHECK(close(fds[0]) == 0);
 
 **Expected:** The tag is OK and one byte remains for the next read.
 
+**Verify:** Keep a CHECK equivalent to `close(fds[0]) == 0`. Control edit: `CHECK(close(fds[1]) == 0);` must fail; then restore it.
+
 The caller defines framing. Real protocol code must validate lengths and handle interruption or partial reads rather than assume every call fills its buffer.
 
 ## After comparison
 
-Add a fresh distinguishing input for the "transfer a bounded record decoder" case to your own c-034 source. Explain why every access in the case code inside `main` stays within a live object and each owned resource is released. An expected file descriptor failure belongs in the test contract; undefined behavior does not. Keep diagnostics and sanitizer evidence for the "observe EOF after closure" case apart from ordinary output: the fixture proves its stated file descriptor, pipe endpoint and descriptor ownership assumptions, not universal safety.
+Write `AB` and `CD` as two separate `write` calls to one pipe and close the write end. Then read with a four-byte buffer in a loop until `read` returns 0, and CHECK that the total is four bytes and the text is `ABCD`, without assuming how many reads it took. Explain why the loop must continue after a short count and stop only on 0 or an error.

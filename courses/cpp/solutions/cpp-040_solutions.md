@@ -1,6 +1,6 @@
 # cpp-040: explanations and reference observations
 
-Attempt the learner tasks before opening this document. The executable reference checks the bounded normal and boundary examples; the six explanations below cover the deliberate changes and manual checks.
+The [executable reference](cpp-040_solution.cpp) accepts `"0"` and a 16-character name and rejects the backslash in `a\b` and the uppercase `Upper`. The explanations cover allow-lists, length limits and the row budget in Exercise 6. How to compare: [study guide](../STUDY-GUIDE.md#compare-with-the-solutions).
 
 ## Mechanism
 

@@ -4,8 +4,6 @@
 
 Arithmetic intensity measures operations per byte of data movement under an explicitly stated memory model. A roofline estimate limits performance by the smaller of arithmetic capacity and bandwidth times intensity. It is an upper bound, not a timer. Vector addition reads two float32 values and writes one for one addition, giving roughly one operation per twelve useful bytes before cache and transaction effects. Matrix multiplication can reuse each loaded value many times; tiling increases reuse but consumes working storage. Launch cost, transfer cost, dependency stalls and imperfect access patterns can keep measured work far below either bound.
 
-The separate [CPU reference](../references/cuda-007_cpu.py) checks the chapter's bounded model. It does not execute CUDA or establish GPU timing. Compare after attempting the worksheet or explicitly choosing to reveal solutions.
-
 ## Exercise 1
 
 Assume hypothetical bandwidth of 600 GB/s, using decimal billions, and a 12-byte-per-element vector addition. The ideal useful-element throughput is 50 billion elements/s. One million elements require at least 20 microseconds at that bandwidth, excluding launch and host transfer. This is a thought experiment, not a claim about the learner's GPU.
@@ -78,12 +76,16 @@ Correctness first, then measured time, compiler resource usage and selected memo
 
 **How to verify:** Record compiler resource usage and timed samples for both variants on the same device and workload.
 
+## Self-check answers
+
+1. **What useful byte count does vector addition of n float32 elements move?** 12n bytes: two 4-byte reads and one 4-byte write per element.
+2. **At what intensity does the worked example 2 device switch from bandwidth bound to compute bound?** At 20 FLOP/byte, where 500 GB/s times intensity reaches 10 TFLOP/s.
+3. **Why must kernel time and end-to-end time be reported separately?** Transfers, launch overhead and host work can dominate the end-to-end figure even when the kernel is fast.
+
 ## Numerical reference and its limits
 
-The complete CPU model is [here](../references/cuda-007_cpu.py). Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It does not claim CUDA execution, concurrency safety or a performance measurement.
+The [CPU reference](../references/cuda-007_cpu.py) reproduces worked example 1 and prints `{'ideal_memory_seconds': 2e-05, 'roofline_flops_per_second': [1000000000000.0, 10000000000000.0]}`.
 
 ## Transfer review
 
 Correctness first, then measured time, compiler resource usage and selected memory/occupancy metrics on the same workload. Reduced estimated bytes alone is insufficient.
-
-A complete explanation must name its inputs, the unchanged mathematical contract, the changed boundary or resource condition, and the evidence still needed on actual hardware. Preserve a CPU baseline even after a GPU path becomes available.

@@ -1,6 +1,8 @@
 # rust-047: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [rust-047_solution.rs](rust-047_solution.rs). It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.
+Executable reference: [rust-047_solution.rs](rust-047_solution.rs), which runs both examples and the coded answers.
+
+Open this only after [an attempt](../STUDY-GUIDE.md#attempt-a-lesson).
 
 ## Why the two examples differ
 
@@ -26,7 +28,7 @@ State the assumptions making the bounded arithmetic property valid.
 
 Add a small exhaustive test for checked quantity addition.
 
-**Reference answer.** The same statements run as the `Task 2` block of the reference program; here they are wrapped in `main` as a complete file.
+**Reference answer**, wrapped in `main`; the reference runs it as its `Task 2` block.
 
 ```rust
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -56,7 +58,7 @@ The `u8` domain is small enough to enumerate completely, and the oracle adds in 
 
 Write a property checking an Arrow filter's output count against its Boolean mask.
 
-**Reference answer.** The same statements run as the `Task 3` block of the reference program; here they are wrapped in `main` as a complete file.
+**Reference answer**, wrapped in `main`; the reference runs it as its `Task 3` block.
 
 ```rust
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -92,7 +94,7 @@ Diagnose a sortedness test that never checks retained values.
 
 Preserve empty, duplicate and all-null regression fixtures.
 
-**Reference answer.** The same statements run as the `Task 5` block of the reference program; here they are wrapped in `main` as a complete file.
+**Reference answer**, wrapped in `main`; the reference runs it as its `Task 5` block.
 
 ```rust
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -125,7 +127,7 @@ Each fixture is stored with its name and expected result, so it keeps guarding a
 
 Design an external fuzzing and compile-fail plan with reproducible seeds, minimized failures and clear acceptance scope.
 
-No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **Property test**, and state one limitation of your choice.
+**Judging criteria.** A strong plan prepares a separate project with `cargo fuzz` for the parser or kernel under test and a compile-fail harness such as `trybuild` for guarantees enforced by types. Every fuzz run records its seed and corpus, each crash is minimized and saved as a permanent regression input, and each compile-fail case pins its expected error. The acceptance scope states what is covered, such as one function within a time budget, and what is not. State one limitation: fuzzing finds crashes and failed assertions, not wrong answers that no check rejects.
 
 ## Mechanism and diagnostic reasoning
 
@@ -139,4 +141,6 @@ A property can be too weak to distinguish incorrect implementations. Integer ove
 
 ## Review before continuing
 
-Run the reference and confirm that it prints `rust-047: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.
+Rebuild Example B (Check order and multiplicity separately) from a blank pad.
+
+Review routine: [Self-check and review](../STUDY-GUIDE.md#self-check-and-review).

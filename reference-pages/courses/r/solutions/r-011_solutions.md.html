@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/r/solutions/r-011_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="r-011-reference-reasoning">r-011: reference reasoning<a class="heading-anchor" href="#r-011-reference-reasoning" aria-label="Link to this section">#</a></h2>
-<p>Use the <a href="r-011_reference.R.html">complete reference</a> with the guide&#x27;s declared inputs and runtime. Every worked example is also a standalone script.</p>
+<p>Run the <a href="r-011_reference.R.html">complete reference</a> under the <a href="../STUDY-GUIDE.md.html#run-a-chapter">run rules</a>.</p>
 <h3 id="why-the-implementation-has-this-shape">Why the implementation has this shape<a class="heading-anchor" href="#why-the-implementation-has-this-shape" aria-label="Link to this section">#</a></h3>
 <p>The output length is established before iteration. seq_along also gives the intended zero iterations for empty input.</p>
 <p>Each iteration reduces the state and increments a bound. The final condition is checked separately from the iteration count.</p>
@@ -242,7 +242,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Tempting mistake:</strong> Comparing with <code>all(a == b)</code>. For c(1, NA) both forms give 1, NA, but <code>==</code> yields TRUE, NA and <code>all()</code> returns NA, so stopifnot fails on two equal results.</p>
 <p><strong>Verify:</strong> <code>identical(square(c(1, NA)), c(1, NA)^2)</code> returns TRUE.</p>
 <h3 id="what-the-checks-establish">What the checks establish<a class="heading-anchor" href="#what-the-checks-establish" aria-label="Link to this section">#</a></h3>
-<p>The reference makes 4 <code>stopifnot()</code> checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.</p></article>
+<p>The assertions confirm that the vectorized square returns 1 and 9 and keeps <code>numeric(0)</code> empty, that the positive-only loop sums 3 and 4 to 7, that <code>1:0</code> really counts down to <code>c(1L, 0L)</code>, which is why <code>seq_along()</code> is safer, that the bounded while loop stops after three steps, and that the loop agrees with <code>^2</code>. They do not test loops whose bodies append to vectors of unknown final length.</p>
+<p>The reference makes 4 <code>stopifnot()</code> checks; see <a href="../STUDY-GUIDE.md.html#what-a-passing-run-proves">what a passing run proves</a>.</p></article>
   </main>
 </body>
 </html>

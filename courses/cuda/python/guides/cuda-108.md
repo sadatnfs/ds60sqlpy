@@ -1,10 +1,17 @@
 # cuda-108: Accelerator-aware data science pipelines
 
-**Route:** CUDA Python and machine learning. **Stage:** advanced. **Prerequisites:** `cuda-068`, `cuda-081`, `cuda-085`. Allow several sessions when the hardware experiment is new; the chapter is not a deadline.
+**Route:** CUDA Python and machine learning. **Stage:** advanced. **Prerequisites:** `cuda-068`, `cuda-081`, `cuda-085`.
 
-## What you will be able to explain
+Pacing, evidence labels and platform rules: [CUDA study guide](../../STUDY-GUIDE.md).
 
-By the end, you can **compute grouped sums**, **preserve row identity**, and **distinguish cuDF from Spark acceleration** with evidence. Start with the two worked cases, then use the editable CPU model to make the quantities concrete.
+## Learning objectives
+
+- Compute grouped sums.
+- Distinguish null and zero.
+- Define category mapping.
+- Preserve row identity.
+- Count conversion bytes.
+- Distinguish cuDF from Spark acceleration.
 
 ## Mechanism and vocabulary
 
@@ -32,9 +39,13 @@ Rows [(A,2),(A, null),(B,5)] grouped by category have non-null sums A=2 and B=5 
 
 Encoding categories A->0, B->1 then seeing C requires an explicit unknown policy. Relearning category IDs independently in another partition can corrupt model features.
 
-## Portable executable model
+## How to run the CPU model
 
-The **CPU reference model** variant runs this bounded worked example using `python-core`. It uses only the Python standard library, small synthetic values and no network. Its purpose is to expose the arithmetic or contract behind the chapter. The separate reference includes assertions for the stated observations.
+Edit the copy; the [reference](../references/cuda-108_cpu.py) adds assertions.
+
+```sh
+python courses/cuda/python/lessons/cuda-108_cpu.py
+```
 
 ```python
 rows = [("A", 2), ("A", None), ("B", 5)]
@@ -61,77 +72,65 @@ print("CPU dataframe oracle:", totals, counts)
 | `key` | `'B'` |
 | `value` | `5` |
 
-Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.
-
 ## Practice and transfer
+
+Record each attempt in the [worksheet](../lessons/cuda-108.md) before opening hints.
 
 ### Exercise 1: Compute grouped sums
 
 **Trap to avoid:** Treating the null as an error and dropping group A entirely, or failing the whole aggregation, contradicts the stated skip-null rule.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 2: Distinguish null and zero
 
 **Trap to avoid:** Filling nulls with zero before aggregation silently changes averages and counts, which then disagree with reports computed by a SQL engine that skips nulls.
-
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 3: Define category mapping
 
 **Trap to avoid:** Fitting category codes independently in each partition assigns code 0 to whatever category appears first there, so the same code means different things to the model.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 4: Preserve row identity
 
 **Trap to avoid:** Matching rows by position after a join or a GPU to CPU conversion can attach predictions to the wrong records.
-
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 5: Count conversion bytes
 
 **Trap to avoid:** Counting only the numeric values misses null masks, string offsets and temporary converted copies.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 6: Distinguish cuDF from Spark acceleration
 
 **Trap to avoid:** Assuming a Spark job uses the GPU because cuDF is installed confuses a library with a plugin that needs its own configuration.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ## Progressive hints
 
-Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.
+Hint *k* belongs to exercise *k*; open one at a time.
 
-1. Start from worked example 1 and mark the quantities needed for the task "Compute grouped sums".
-2. Change one assumption in worked example 2 while preserving the declared contract: distinguish null and zero.
-3. Trace the CPU program's variables before adding hardware behavior: define category mapping.
-4. Draw producers, consumers and the exact operation boundary for the task "Preserve row identity".
-5. Separate what the small fixture establishes from what the real runtime must show: count conversion bytes.
-6. Write a counterexample to an overbroad claim before you distinguish cuDF from Spark acceleration.
+1. Group rows by category and add only the non-null values under the declared rule.
+2. Compare how a zero and a missing value affect a sum and a count.
+3. Fit the category-to-integer mapping on training data once, and decide where an unseen category goes.
+4. Carry a stable key column through every step, so each output row can be traced to its input.
+5. Add the value bytes, the validity masks and every host-device copy made during conversion.
+6. Ask which one schedules distributed work and which one runs dataframe operations in one process.
 
-## Common mistakes and self-review
+## Common mistakes and self-check
 
-Confusing a correct tiny example with a general implementation is the central review risk. For this chapter, challenge the assumption in worked example 2, then ask whether your change preserves the mechanism described above. If you change dtype, layout, ordering, batch size or backend, update the acceptance contract rather than silently reusing the old observation. Explain an unexpected result before trying random configuration changes.
+A common mistake is turning a missing value into zero or NaN without stating the rule. Zero changes sums and means, and a nullable integer column cannot hold NaN without a type change. Another is fitting category codes separately per partition, so the same category gets different features. Fix both by keeping validity masks, fitting encoders once on training data with an explicit unknown category and checking results against a CPU dataframe before measuring.
 
-Keep a small evidence table with columns **claim**, **input**, **expected observation**, **actual observation** and **limit**. For the first claim use `Compute grouped sums`. For the final claim use `Distinguish cuDF from Spark acceleration`. An unperformed GPU or cluster experiment remains pending even when the CPU model is correct.
+**Misconception:** Using cuDF in a single process is the same as running the Spark plugin, just without a cluster. **Correction:** cuDF is a dataframe library that executes operations directly in one process. The Spark plugin replaces supported physical operators inside Spark's scheduler, with Spark's planning, partitioning, shuffles and fallback rules. Results, supported operations and performance must be checked separately for each path against the same CPU dataframe oracle.
 
-## Platform and evidence contract
+**Evidence limit:** The reference computes sums A 2 and B 5 and a row count of 2 for A in Python. It does not run cuDF or the Spark plugin, so GPU null handling, conversion cost and supported operators need compatible NVIDIA execution.
 
-The reading worksheet and CPU reference model work through the ordinary Linux Docker classroom on macOS, Linux and Windows using WSL 2. They do not require an NVIDIA GPU. Their results are labeled CPU models or semantic oracles, not simulated hardware performance.
+1. How does cuDF differ from the Spark RAPIDS plugin?
+2. Why are counting rows and counting non-null values different?
+3. Why carry row identity through conversion to tensors?
 
-Real CUDA work needs supported NVIDIA hardware, a compatible host driver and an explicitly prepared GPU runtime. An Apple GPU does not execute CUDA kernels. PyTorch MPS on a supported native Mac, ROCm on supported AMD hardware, or other vendor backends can provide separate accelerator learning routes; they need their own package and operation qualification and are not CUDA evidence. The ordinary Linux Docker classroom does not expose native Mac MPS automatically.
-
-Do not download packages, models or data by opening this lesson. Do not attach an engine socket, ambient cluster credentials or an arbitrary remote endpoint. A CPU pass, imported package, successful compilation, real GPU result and measured performance are distinct observations. Record the actual backend, data shape/dtype, source revision, versions and pending checks. A saved completion marker records learning progress, not hardware certification.
+Answers: [self-check answers](../solutions/cuda-108_solutions.md#self-check-answers).
 
 ## Primary references
 
 - [PyTorch CUDA semantics](https://docs.pytorch.org/docs/2.9/notes/cuda.html)
 - [TensorFlow GPU guide](https://www.tensorflow.org/guide/gpu)
 
-Use the version-matched documentation of your prepared environment. These references describe interfaces and supported boundaries; the chapter's synthetic examples and CPU models are original teaching material.
+Full lists: [documentation and sources](../../STUDY-GUIDE.md#documentation-and-sources).
 
 ## Ask an AI tutor about this lesson
 

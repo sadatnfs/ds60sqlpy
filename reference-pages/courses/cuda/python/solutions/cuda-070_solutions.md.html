@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cuda/python/solutions/cuda-070_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="cuda-070-explained-solutions">cuda-070: explained solutions<a class="heading-anchor" href="#cuda-070-explained-solutions" aria-label="Link to this section">#</a></h2>
-<p>These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.</p>
+<p>Compare with your <a href="../lessons/cuda-070.md.html">worksheet</a> attempt.</p>
 <h3 id="exercise-1-compute-live-and-reserved-totals">Exercise 1: Compute live and reserved totals<a class="heading-anchor" href="#exercise-1-compute-live-and-reserved-totals" aria-label="Link to this section">#</a></h3>
 <p>Free pool blocks are reserved but not live.</p>
 <p><strong>Approach.</strong> Track two counters: reserved bytes held by the pool and live bytes owned by arrays. After the array is released, live drops to 0 and reserved stays at 1024.</p>
@@ -231,9 +231,19 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Why it is correct here.</strong> The pool in this chapter manages device memory. A container that limits RAM to 4 GB does not, in general, stop a process from reserving device memory.</p>
 <p><strong>A plausible wrong approach.</strong> Setting a container memory limit and expecting it to prevent device out-of-memory errors gives no protection. The device can still fill up.</p>
 <p><strong>How to verify.</strong> List which tool reports each: host RSS from the OS, device usage from the GPU driver or the library pool. A correct note names both separately.</p>
+<h3 id="self-check-answers">Self-check answers<a class="heading-anchor" href="#self-check-answers" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>What does a stable reserved total across repeated equal workloads usually mean?</strong> The pool is reusing its cached blocks. That is normal behavior, not a leak, as long as live bytes also return to the same level after each step.</li>
+</ol>
+<ol start="2">
+<li><strong>Which signal suggests retained tensors, outputs or graphs?</strong> Live allocations that grow after every step of an equal workload, like the list of results that reaches 4096 bytes after four steps.</li>
+</ol>
+<ol start="3">
+<li><strong>Why is clearing the cache not a repair for a workload whose live set exceeds memory?</strong> Cache clearing returns only free blocks to the driver. Arrays the model still needs remain live, so the required memory is unchanged.</li>
+</ol>
 <h3 id="reference-observation">Reference observation<a class="heading-anchor" href="#reference-observation" aria-label="Link to this section">#</a></h3>
 <p>Live 1024, reserved 1024, retained-output example 4096 bytes.</p>
-<p>The reference file is <code>courses/cuda/python/references/cuda-070_cpu.py</code>. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.</p></article>
+<p>Asserted by <code>courses/cuda/python/references/cuda-070_cpu.py</code>.</p></article>
   </main>
 </body>
 </html>

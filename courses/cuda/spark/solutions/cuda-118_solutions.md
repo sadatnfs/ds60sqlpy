@@ -1,6 +1,6 @@
 # cuda-118: explained solutions
 
-These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.
+Compare with your [worksheet](../lessons/cuda-118.md) attempt.
 
 ## Exercise 1: Count fixed-width payload
 
@@ -74,8 +74,16 @@ Compare schema row identity nulls and values.
 
 **How to verify.** Use a key column, compare schemas exactly, and compare null positions as well as values.
 
+## Self-check answers
+
+1. **Does using Arrow guarantee zero-copy GPU residency?** No. Arrow defines interoperable columnar formats; residency and copying depend on each process and device boundary.
+
+2. **Why can a larger batch raise spill risk?** It improves amortization but increases peak memory, which can push data to a slower tier.
+
+3. **What structures does a nullable string column need?** Offsets to mark string boundaries, character storage and a validity mask for nulls.
+
 ## Reference observation
 
 Fixed payload 8000 bytes, nine-row mask 2 bytes, string characters 7 bytes.
 
-The reference file is `courses/cuda/spark/references/cuda-118_cpu.py`. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.
+Asserted by `courses/cuda/spark/references/cuda-118_cpu.py`.

@@ -194,7 +194,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/csharp/solutions/csharp-026_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="csharp-026-explanation-and-comparison">csharp-026: explanation and comparison<a class="heading-anchor" href="#csharp-026-explanation-and-comparison" aria-label="Link to this section">#</a></h2>
-<p>Attempt the six guide tasks before opening this comparison. The executable reference is <a href="csharp-026_solution.cs.html">csharp-026_solution.cs</a>. It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.</p>
+<p>Reference program: <a href="csharp-026_solution.cs.html">csharp-026_solution.cs</a>, covering both examples and the executed answers.</p>
+<p>Attempt the tasks first; see <a href="../STUDY-GUIDE.md.html#comparing-with-the-explanation">comparing with the explanation</a>.</p>
 <h3 id="why-the-two-examples-differ">Why the two examples differ<a class="heading-anchor" href="#why-the-two-examples-differ" aria-label="Link to this section">#</a></h3>
 <p><strong>Round-trip a small transport record:</strong> Equality checks the modeled data rather than incidental property ordering in JSON text. The restored name and quantity match the original record.</p>
 <p><strong>Validate after structural decoding:</strong> Parsing answers whether the representation is understood. Validation answers whether the application may use it. Valid JSON can decode into a rejected domain value.</p>
@@ -275,14 +276,14 @@ Check<span class="syntax-punctuation">(</span>item <span class="syntax-operator"
 <p><strong>How to verify.</strong> Pass options with <code>UnmappedMemberHandling = JsonUnmappedMemberHandling.Disallow</code> for the extra-field case and confirm it now throws <code>JsonException</code>. Decide which policy the contract wants and keep a test for it.</p>
 <h4 id="task-6-transfer-and-justify">Task 6: Transfer and justify<a class="heading-anchor" href="#task-6-transfer-and-justify" aria-label="Link to this section">#</a></h4>
 <p>Design a migration from a renamed quantity field while retaining old saved records.</p>
-<p>No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry <strong>Serialization</strong>, and state one limitation of your choice.</p>
+<p>No single answer exists; extend task 3 using the <a href="../STUDY-GUIDE.md.html#open-transfer-tasks">open transfer routine</a>.</p>
 <h3 id="mechanism-and-diagnostic-reasoning">Mechanism and diagnostic reasoning<a class="heading-anchor" href="#mechanism-and-diagnostic-reasoning" aria-label="Link to this section">#</a></h3>
 <p>JSON provides a portable syntax for values, arrays and objects; it does not define the business schema. Deserializing into a type supplies a structural mapping, but required domain rules still need validation. A missing property can become a default value, and a syntactically valid object can still be meaningless for the application.</p>
 <p>Schema evolution requires deciding what happens when fields are added, removed or renamed. A version field and explicit migration can preserve meaning. Do not equate a successful deserialize call with a safe external object. Validate ranges and identities before admitting the object into domain logic, and avoid serializing internal secrets merely because a public property exists.</p>
 <p><code>JsonSerializer.Serialize</code> creates JSON text. <code>Deserialize&lt;T&gt;</code> maps it into T and can return null. Records provide compact transport shapes. Serialization options control naming and formatting but do not replace domain validation.</p>
 <p>JSON text equality is sensitive to formatting and property ordering. Structural decoding does not enforce every domain invariant. Keep public transport models separate from internal objects carrying credentials or resources.</p>
 <h3 id="review-before-continuing">Review before continuing<a class="heading-anchor" href="#review-before-continuing" aria-label="Link to this section">#</a></h3>
-<p>Run the reference and confirm that it prints <code>csharp-026: passed</code>, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.</p></article>
+<p>Run the reference and confirm it prints <code>csharp-026: passed</code>, then rerun the guide&#x27;s counterexample.</p></article>
   </main>
 </body>
 </html>

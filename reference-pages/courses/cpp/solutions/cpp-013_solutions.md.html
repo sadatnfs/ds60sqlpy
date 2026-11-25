@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cpp/solutions/cpp-013_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="cpp-013-explanations-and-reference-observations">cpp-013: explanations and reference observations<a class="heading-anchor" href="#cpp-013-explanations-and-reference-observations" aria-label="Link to this section">#</a></h2>
-<p>Attempt the learner tasks before opening this document. The executable reference checks the bounded normal and boundary examples; the six explanations below cover the deliberate changes and manual checks.</p>
+<p>The <a href="cpp-013_solution.cpp.html">executable reference</a> adds <code>twice(7) == 14</code> and <code>twice(-2) == -4</code> as further always-active checks. The explanations show which checks disappear under <code>NDEBUG</code> and how the broken version in Exercise 6 is caught. How to compare: <a href="../STUDY-GUIDE.md.html#compare-with-the-solutions">study guide</a>.</p>
 <h3 id="mechanism">Mechanism<a class="heading-anchor" href="#mechanism" aria-label="Link to this section">#</a></h3>
 <p>A warning is compiler feedback about suspicious code even when compilation succeeds. A test is an executable check against a contract. CTest runs registered processes and reports their statuses. The NDEBUG macro disables standard assert expressions, so a Release test that only uses assert can accidentally check nothing.</p>
 <h3 id="detailed-reasoning">Detailed reasoning<a class="heading-anchor" href="#detailed-reasoning" aria-label="Link to this section">#</a></h3>

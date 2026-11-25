@@ -4,8 +4,6 @@
 
 The discrete Fourier transform rewrites samples as frequency components with an explicit sign and normalization convention. An inverse transform must use the matching convention. cuFFT uses plans to prepare a transform shape/layout and may need workspace; plan creation is separate from execution. Multiplication in frequency space corresponds to circular convolution unless padding supplies enough length for the desired linear convolution. Real-to-complex storage has a special output shape and, for some in-place workflows, padding requirements. Define those layouts before moving data rather than treating all transforms as same-size arrays.
 
-The separate [CPU reference](../references/cuda-047_cpu.py) checks the chapter's bounded model. It does not execute CUDA or establish GPU timing. Compare after attempting the worksheet or explicitly choosing to reveal solutions.
-
 ## Exercise 1
 
 The four-sample signal \([0,1,0,-1]\) has energy at the positive and negative one-cycle frequency components. A direct CPU DFT gives approximately [0,-2i,0,2i]. Small real roundoff terms are expected. This is a tiny semantic reference, not a fast FFT implementation.
@@ -78,12 +76,16 @@ Separate plan creation from repeated execution, state batch/layout/precision, va
 
 **How to verify:** Validate spectra first, then record timing samples with transfers included as required.
 
+## Self-check answers
+
+1. **What length avoids wraparound when convolving lengths 4 and 3?** 6, which is 4 plus 3 minus 1.
+2. **A round trip returns N times the input. What is missing?** The 1/N normalization on the inverse transform.
+3. **Why is plan creation kept outside timing loops?** Planning is a one-time setup cost separate from executing transforms.
+
 ## Numerical reference and its limits
 
-The complete CPU model is [here](../references/cuda-047_cpu.py). Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It does not claim CUDA execution, concurrency safety or a performance measurement.
+The [CPU reference](../references/cuda-047_cpu.py) reproduces worked example 1 and prints `{'DFT': [0j, (2.4492935982947064e-16-2j), 2.449293598294706e-16j, (-7.347880794884119e-16+2j)], 'linear_convolution': [3, 10, 8]}`.
 
 ## Transfer review
 
 Separate plan creation from repeated execution, state batch/layout/precision, validate spectrum or convolution semantics and include required transfers.
-
-A complete explanation must name its inputs, the unchanged mathematical contract, the changed boundary or resource condition, and the evidence still needed on actual hardware. Preserve a CPU baseline even after a GPU path becomes available.

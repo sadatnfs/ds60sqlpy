@@ -13,40 +13,29 @@ psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
   -f sql/professional/solutions/sql_ext_01_extensions_spatial_vector_solutions.sql
 ```
 
-`psql` prints each result/command tag in the terminal. Stop at the first
-unexpected `ERROR`; later output cannot repair an earlier failed invariant.
-Compare your own SQL, row grain, column names, row counts, `NULL` policy, and
-ordering with the explanation before comparing syntax.
+The solution uses its own `items` table for case folding and a `checked_l2`
+function instead of `array_l2_distance`, and it still creates no extension, so
+compare boundaries and evidence rather than object names.
 
-## Clause-by-clause reading map
+## Reading map for this lesson
 
-The lesson's main concepts are Extension, Available/installed, Capability boundary, SRID, Geometry/geography, Embedding. Its worked-model focus is:
-`pg_available_extensions` answers whether the server installation exposes a control file and its default version. `installed_version` answers whether this database has created it. Neither proves the connected role may install/upgrade it, that replicas carry compatible binaries, or that an application was tested against that exact version.
+Read the solutions as two kinds of work:
 
-- Start at `FROM`/`JOIN` and state the intermediate row grain. Inspect join keys
-  before adding aggregates; a one-to-many join is allowed to multiply rows only
-  when the later contract accounts for it.
-- Apply `WHERE` to input rows, `GROUP BY` to form buckets, and `HAVING` to
-  completed groups. Window functions run over the surviving relation and
-  normally preserve its row count.
-- Read the `SELECT` list as the public result contract: keys establish grain,
-  measures state calculations, and aliases explain meaning. `ORDER BY` is the
-  only output-order guarantee; add a unique tie-breaker before `LIMIT`.
-- Trace every common table expression (CTE) as a temporary named relation.
-  Execute or inspect one stage at a time while debugging, but compare the final
-  result with an independent control rather than trusting stage names.
-- Keep SQL `NULL` as “missing/unknown/not applicable” until the metric contract
-  chooses another representation. Guard division with `NULLIF`; disclose
-  exclusions and distinguish zero from no row.
-- For DDL/DML, a command tag proves only that PostgreSQL accepted a statement.
-  Catalog checks, negative cases, row-count reconciliation, and the declared
-  transaction boundary prove behavior and cleanup.
+- Built-in evidence you can run: a normalized-name key with recorded
+  `normalization_checks` (Exercise 2), planar distance and a dimension-checked
+  `checked_l2` with negative controls for bad shapes (Exercises 3 and 4),
+  SHA-256 as integrity only (Exercise 5), a timestamped `remote_snapshot` in
+  place of FDW (Exercise 6) and the search operator comparison (Exercise 7).
+- Catalog inventories that change nothing: the capability matrix and lifecycle
+  inventory share one query path (Exercises 1 and 8), and collation drift is
+  detected before any reindex decision (Exercise 9).
+- Approved-elsewhere designs written as review records: PostGIS radius search,
+  pgvector metrics and recall, FDW operations, supply-chain review and an
+  upgrade rehearsal in a restored database (Exercises 10 to 14).
 
-The exact final queries are not the only valid syntax. A join, subquery, CTE,
-window, or conditional aggregate can be an alternative when it preserves the
-same grain, `NULL` semantics, deterministic ordering, and safety. Prefer the
-form whose intermediate relations a reviewer can verify; optimize only after
-correctness is established with evidence.
+Another answer is acceptable when it keeps the same boundary: no extension is
+created here, and a design that needs one names the approval and evidence it
+depends on.
 
 Run:
 

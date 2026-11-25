@@ -1,6 +1,8 @@
 # rust-035: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [rust-035_solution.rs](rust-035_solution.rs). It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.
+Executable reference: [rust-035_solution.rs](rust-035_solution.rs), which runs both examples and the coded answers.
+
+Open this only after [an attempt](../STUDY-GUIDE.md#attempt-a-lesson).
 
 ## Why the two examples differ
 
@@ -26,7 +28,7 @@ Separate inline handles from their owned allocations.
 
 Compare vector lengths after different reserve calls.
 
-**Reference answer.** The same statements run as the `Task 2` block of the reference program; here they are wrapped in `main` as a complete file.
+**Reference answer**, wrapped in `main`; the reference runs it as its `Task 2` block.
 
 ```rust
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -58,7 +60,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 Write a benchmark plan comparing repeated clone with borrowed processing.
 
-**Reference answer.** The same statements run as the `Task 3` block of the reference program; here they are wrapped in `main` as a complete file.
+**Reference answer**, wrapped in `main`; the reference runs it as its `Task 3` block.
 
 ```rust
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -94,7 +96,7 @@ Diagnose measuring size_of as total memory retained by nested objects.
 
 Test empty and large inputs with the same correctness oracle.
 
-**Reference answer.** The same statements run as the `Task 5` block of the reference program; here they are wrapped in `main` as a complete file.
+**Reference answer**, wrapped in `main`; the reference runs it as its `Task 5` block.
 
 ```rust
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -131,7 +133,7 @@ The same oracle judges every input size, so a faster version cannot win by chang
 
 Choose a layout for repeated column scans and explain locality, ownership and update tradeoffs.
 
-No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **Inline size**, and state one limitation of your choice.
+**Judging criteria.** A strong answer stores each scanned field in its own contiguous `Vec`, a structure of arrays, so a scan reads only the bytes it needs, instead of a `Vec` of row structs or of boxed rows. It states who owns the columns, how a row update must touch several vectors and keep their lengths equal, and what growth costs when a column's capacity is exceeded. It supports the choice with a measurement on the same data. State one limitation: inserting or updating whole rows becomes more awkward and error-prone than with one struct per row.
 
 ## Mechanism and diagnostic reasoning
 
@@ -145,4 +147,6 @@ Benchmarking different validation or ordering semantics is invalid. Size and ali
 
 ## Review before continuing
 
-Run the reference and confirm that it prints `rust-035: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.
+Rebuild Example B (Prepare capacity without inventing elements) from a blank pad.
+
+Review routine: [Self-check and review](../STUDY-GUIDE.md#self-check-and-review).

@@ -120,11 +120,11 @@ failure surfaces. The two cases execute a real scheduled query and an embedded
 control, preserving an independent correctness oracle while leaving performance
 and multi-host claims to their own experiments.
 
-The [complete Ballista workshop](../projects/ballista/README.md) provides the maintained files, preparation, lifecycle and exact qualification boundaries for these cases.
+To watch placement happen, run `start` and then `check` in the [Ballista workshop](../projects/ballista/README.md). `check` compares the distributed answer with an embedded DataFusion control over the same `orders.parquet`.
 
 ## Complete worked source
 
-This is a project-only command notebook. Read and edit it in the classroom; run its explicitly labeled commands from the copied owned Docker workshop. The classroom does not execute these service commands.
+The classroom does not execute these service commands. See the [workshop rules](../STUDY-GUIDE.md#workshop-notebooks).
 
 # Real Ballista entry point
 

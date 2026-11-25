@@ -4,8 +4,6 @@
 
 Matrix multiplication contracts a shared dimension: an m-by-k matrix A times a k-by-n matrix B produces an m-by-n matrix C. One simple CUDA thread owns one output coordinate and loops across k. Row-major A uses row*k+inner; row-major B uses inner*n+column. The output uses row*n+column. This deliberately simple kernel rereads data and serves as an understandable correctness baseline. Accumulation type and tolerance are part of its specification. Distinct entries and rectangular shapes reveal layout errors better than square all-ones inputs.
 
-The separate [CPU reference](../references/cuda-018_cpu.py) checks the chapter's bounded model. It does not execute CUDA or establish GPU timing. Compare after attempting the worksheet or explicitly choosing to reveal solutions.
-
 ## Exercise 1
 
 Multiply \([[1,2,3],[4,5,6]]\) by \([[1,2],[0,1],[2,0]]\). The output is \([[7,4],[16,13]]\). Entry (1,0) is \(4\times 1+5\times 0+6\times 2=16\). Explicitly name every dimension before translating the three scalar indices into flat offsets.
@@ -78,12 +76,16 @@ There are 12 products and associated accumulation operations, conventionally abo
 
 **How to verify:** Compute 2 * 2 * 3 * 2 = 24 and state whether initial adds are counted.
 
+## Self-check answers
+
+1. **Give the flat offset of A(1,2) when A is 2-by-3 row-major.** 1 times 3 plus 2, which is 5.
+2. **How many multiply-adds does an m-by-k times k-by-n product need?** m times n times k.
+3. **Why record the accumulation type with the test?** It sets how much rounding error is expected, which determines a fair tolerance.
+
 ## Numerical reference and its limits
 
-The complete CPU model is [here](../references/cuda-018_cpu.py). Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It does not claim CUDA execution, concurrency safety or a performance measurement.
+The [CPU reference](../references/cuda-018_cpu.py) reproduces worked example 1 and prints `[[7, 4], [16, 13]]`.
 
 ## Transfer review
 
 There are 12 products and associated accumulation operations, conventionally about 24 FLOPs. State whether initialization additions are counted.
-
-A complete explanation must name its inputs, the unchanged mathematical contract, the changed boundary or resource condition, and the evidence still needed on actual hardware. Preserve a CPU baseline even after a GPU path becomes available.

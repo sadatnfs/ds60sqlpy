@@ -195,19 +195,16 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><div class="preview-note" role="note"><strong>Readable preview.</strong> This page does not execute source code. Use the classroom for supported runnable lessons, or follow the lesson's external project instructions.</div><pre class="source-code language-javascript"><code><span class="source-line"><span class="syntax-comment">// Answer-free learner source. Save your own copy before editing.</span></span>
 <span class="source-line"><span class="syntax-comment">// Exercise 1: Build, verify and execute a fresh bundle: change one input</span></span>
-<span class="source-line"><span class="syntax-comment">// Copy Example A into a scratch `main.mjs` and change `const result = runBundle(directory,</span></span>
-<span class="source-line"><span class="syntax-comment">// [&#x27;--self-test&#x27;]);` to `const result = runBundle(directory, [&#x27;--self-test!&#x27;]);`. Before</span></span>
-<span class="source-line"><span class="syntax-comment">// running it, predict which check fails and which value it now sees; then run it and restore</span></span>
-<span class="source-line"><span class="syntax-comment">// the original line.</span></span>
-<span class="source-line"><span class="syntax-comment">// Expected: The changed run fails with an `AssertionError` at `assert.equal(result.status,</span></span>
-<span class="source-line"><span class="syntax-comment">// 0, result.stderr)`. Restoring `const result = runBundle(directory, [&#x27;--self-test&#x27;]);`</span></span>
-<span class="source-line"><span class="syntax-comment">// brings back: three checks passed; actual Node version reported.</span></span>
+<span class="source-line"><span class="syntax-comment">// In a scratch copy of Example A, change `const result = runBundle(directory, [&#x27;--self-</span></span>
+<span class="source-line"><span class="syntax-comment">// test&#x27;]);` to `const result = runBundle(directory, [&#x27;--self-test!&#x27;]);`. Which check fails,</span></span>
+<span class="source-line"><span class="syntax-comment">// and what value does it see?</span></span>
+<span class="source-line"><span class="syntax-comment">// Expected: The edited run fails with an `AssertionError` at `assert.equal(result.status, 0,</span></span>
+<span class="source-line"><span class="syntax-comment">// result.stderr)`. Restoring `const result = runBundle(directory, [&#x27;--self-test&#x27;]);` brings</span></span>
+<span class="source-line"><span class="syntax-comment">// back: three checks passed; actual Node version reported.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">// Exercise 2: Reject altered application bytes before execution: debug a regression</span></span>
-<span class="source-line"><span class="syntax-comment">// A regression changed one token in Example B, so one line now reads `await</span></span>
-<span class="source-line"><span class="syntax-comment">// appendFile(join(directory, &#x27;app.mjs!&#x27;), &#x27;\n// controlled tamper fixture\n&#x27;);`. Run Example</span></span>
-<span class="source-line"><span class="syntax-comment">// B with that line, use the failing check to locate the defect and repair it without</span></span>
-<span class="source-line"><span class="syntax-comment">// changing the check.</span></span>
+<span class="source-line"><span class="syntax-comment">// A regression made one Example B line read `await appendFile(join(directory, &#x27;app.mjs!&#x27;),</span></span>
+<span class="source-line"><span class="syntax-comment">// &#x27;\n// controlled tamper fixture\n&#x27;);`. Locate and repair it without editing the check.</span></span>
 <span class="source-line"><span class="syntax-comment">// Expected: Before the repair the run fails with an `AssertionError` at</span></span>
 <span class="source-line"><span class="syntax-comment">// `assert.rejects(verifyBundle(directory), /digest mismatch/u)`. Restoring `await</span></span>
 <span class="source-line"><span class="syntax-comment">// appendFile(join(directory, &#x27;app.mjs&#x27;), &#x27;\n// controlled tamper fixture\n&#x27;);` brings back:</span></span>

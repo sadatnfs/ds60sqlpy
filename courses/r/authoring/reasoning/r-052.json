@@ -36,5 +36,7 @@
       "wrong": "Ending the helper with dev.off to tidy up, which closes the caller's device, or never restoring mfrow, so the caller's next plot lands in half of the page.",
       "verify": "`identical(par(\"mfrow\"), before)` returns TRUE after draw."
     }
-  ]
+  ],
+  "run_note": "The starter holds two groups of four observations, A with 1 to 4 and B with 2, 3, 6 and 7, and an empty results list. Run it and compute the means, 2.5 and 4.5, and the squared standard errors, 5/12 and 17/12, by hand. A 95 percent t interval with three degrees of freedom is much wider than one standard error, so label each bar with exactly what it shows.",
+  "checks_note": "The checks confirm means of 2.5 and 4.5 with squared standard errors 5/12 and 17/12, interval half widths larger than one standard error, a restored `mfrow` layout after the helper returns, that the logarithm of zero is not finite, and that 1, 10 and 100 are equally spaced on a log10 axis. They do not show that the two groups differ, and they cannot check whether readers interpret the bars correctly."
 }

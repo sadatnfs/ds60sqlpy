@@ -206,11 +206,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Encoding:</strong> The rule converting text to bytes.</p>
 <p><strong>Owned temporary directory:</strong> A uniquely created area this operation may clean up.</p>
 <h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>The Linux Docker classroom compiles your saved pad as <code>Program.cs</code> in its fixed .NET 10 project. C# 14 is the matching language generation. This route uses the prepared framework libraries; it does not accept arbitrary project files, NuGet packages, command arguments or interactive input. The explicit <code>Program.Main</code> entrypoint makes compilation and execution visible. <code>Check</code> throws on a false condition in every build configuration, unlike conditional debugging assertions.</p>
-<p>Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.</p>
+<p>Example A creates a fresh directory under the system temporary folder with a random name and deletes it in <code>finally</code>, so repeated runs never collide or leave files behind. A relative path such as note.txt resolves against <code>Environment.CurrentDirectory</code>, the process working directory, not against the folder that holds Program.cs.</p>
+<p>Compile contract, starter stop and success marker: <a href="../STUDY-GUIDE.md.html#running-a-lesson">running a lesson</a>.</p>
 <h3 id="syntax-anatomy-and-execution-trace">Syntax anatomy and execution trace<a class="heading-anchor" href="#syntax-anatomy-and-execution-trace" aria-label="Link to this section">#</a></h3>
 <p><code>Path.Combine</code> constructs a platform path. <code>File.WriteAllText</code> encodes text; <code>ReadAllText</code> decodes it. A try/finally protects cleanup, while recursive removal is safe only for a directory this operation uniquely owns.</p>
-<p>Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.</p>
+<p>Each example ends with a trace; method: <a href="../STUDY-GUIDE.md.html#tracing-a-program">tracing a program</a>.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="example-a-round-trip-an-owned-text-file">Example A: Round-trip an owned text file<a class="heading-anchor" href="#example-a-round-trip-an-owned-text-file" aria-label="Link to this section">#</a></h4>
 <p>The random name prevents collisions while the observable content remains deterministic. <code>new UTF8Encoding(false)</code> writes UTF-8 without a byte order mark: <code>é</code> takes two bytes, so <code>café</code> is five bytes. <code>Encoding.UTF8</code> would prepend the three-byte BOM EF BB BF and make the file eight bytes long.</p>
@@ -257,6 +257,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The file holds exactly five bytes, the Unicode text round-trips and the owned directory is removed.</p>
+<p><strong>Trace.</strong> <code>root</code> combines the temporary folder with lesson- and a random hexadecimal suffix, and <code>CreateDirectory</code> makes it. <code>WriteAllText</code> encodes café with the no-BOM UTF-8 encoding: four ASCII-range bytes would be four, but é needs two, so the file holds five bytes. <code>ReadAllText</code> with the same encoding decodes café again. <code>finally</code> deletes the directory recursively, which is safe only because this run created it.</p>
 <h4 id="example-b-separate-logical-and-filesystem-names">Example B: Separate logical and filesystem names<a class="heading-anchor" href="#example-b-separate-logical-and-filesystem-names" aria-label="Link to this section">#</a></h4>
 <p>These lexical checks teach path structure; they are not a complete traversal or symlink security boundary.</p>
 <pre class="highlighted-code"><code class="language-csharp"><span class="syntax-keyword">using</span> System<span class="syntax-punctuation">;</span>
@@ -294,6 +295,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> A simple leaf name and a nested path are recognized as different shapes.</p>
+<p><strong>Trace.</strong> <code>Path.GetFileName(&quot;report.csv&quot;)</code> returns the whole string, because it has no directory part. For nested/report.csv the method returns only report.csv, which differs from the input, so the second check passes. <code>GetExtension</code> returns .csv including the dot. These calls inspect the text of a path; none of them touches the disk or checks that the file exists.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <ol>
 <li><strong>Predict and explain.</strong> Trace directory creation, write, read and cleanup ownership.</li>
@@ -313,10 +315,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <ol start="6">
 <li><strong>Transfer and justify.</strong> Explain what must change to make a persistent report update crash-recoverable.</li>
 </ol>
-<p>For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.</p>
+<p>Log each task in the <a href="../STUDY-GUIDE.md.html#recording-exercise-evidence">evidence table</a> before opening the explanation.</p>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
 <p>Path normalization alone does not solve symlink attacks or concurrent replacement. Do not delete arbitrary user-provided directories. Worker temporary files are not the durable learner progress store.</p>
-<p>A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.</p>
+<p>For task 4, remember that <code>Path.Combine(root, &quot;/etc/y&quot;)</code> returns /etc/y: a rooted second argument discards the first, so combining a base folder with user text is not containment. For task 5, writing empty text produces a zero-byte file, while <code>GetExtension</code> on a name with two dots, such as a.tar.gz, returns only .gz.</p>
+<p>Repair routine: <a href="../STUDY-GUIDE.md.html#building-a-regression-case">building a regression case</a>.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <ol>
 <li>Reproduce Example A (Round-trip an owned text file) before changing anything, and confirm its observation: The file holds exactly five bytes, the Unicode text round-trips and the owned directory is removed.</li>
@@ -324,9 +327,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>Before opening the explanation, test your task 3 attempt against this lesson&#x27;s main pitfall: Path normalization alone does not solve symlink attacks or concurrent replacement.</li>
 </ol>
 <h3 id="self-check-and-next-step">Self-check and next step<a class="heading-anchor" href="#self-check-and-next-step" aria-label="Link to this section">#</a></h3>
-<p>Explain Working directory, Encoding, Owned temporary directory without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.</p>
+<p>Predict the byte count of the file after writing café with <code>Encoding.UTF8</code> instead of the no-BOM encoding, and explain the difference. Say which directories your code may delete and why. For task 6, describe a write to a temporary file followed by a replace, and what a crash leaves behind at each step.</p>
+<p>Then follow the general <a href="../STUDY-GUIDE.md.html#self-check-routine">self-check routine</a> and save your pad.</p>
 <h3 id="sources-and-execution-boundary">Sources and execution boundary<a class="heading-anchor" href="#sources-and-execution-boundary" aria-label="Link to this section">#</a></h3>
-<p><a href="https://learn.microsoft.com/en-us/dotnet/csharp/">Official language or framework documentation</a>. The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.</p>
+<p><a href="https://learn.microsoft.com/en-us/dotnet/csharp/">Documentation</a>: The .NET file and stream I/O articles, along with the <code>Path</code> class reference, cover path composition, encodings and directory operations.</p>
+<p>Provenance and limits: <a href="../STUDY-GUIDE.md.html#sources-and-execution-boundary">sources and execution boundary</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for csharp-025: Files, paths and local data ownership.
 Read courses/csharp/guides/csharp-025.md and courses/csharp/lessons/csharp-025.cs. Prerequisites: csharp-024.

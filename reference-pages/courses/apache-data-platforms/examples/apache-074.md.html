@@ -194,14 +194,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/apache-data-platforms/examples/apache-074.md</code></p>
     </header>
     <article class="document"><h2 id="atlas-apache-074-prepared-command-notebook">Atlas apache-074 prepared command notebook<a class="heading-anchor" href="#atlas-apache-074-prepared-command-notebook" aria-label="Link to this section">#</a></h2>
-<p>Copy the owned Atlas project and read PREPARATION.md. Default local server execution is omitted until a supported native Java 8 graph/index stack exists.</p>
+<p>Run <code>plan</code> in the copied Atlas project and keep its output; the qualified names it prints are the keys you look up after each lifecycle change. Step 5 of PREPARATION.md gives the stop, resume and replacement order.</p>
 <pre class="highlighted-code"><code class="language-bash">bash run.sh prepare
 bash run.sh plan</code></pre>
-<p>These actions validate a portable native Docker client and print original payloads without contacting a server. For an explicitly prepared owned fixture server with untracked credentials, deliberate apply and read-only check are:</p>
+<p>Run <code>apply</code> once before any lifecycle change, then use <code>check</code> alone after each stop, resume or replacement on the prepared server:</p>
 <pre class="highlighted-code"><code class="language-bash">bash run.sh apply
 bash run.sh check</code></pre>
 <p>Record actual GUIDs/edges before lifecycle changes on the separately prepared server, then run check without apply. Search/index catch-up and graph/index restore require their own bounded observations.</p>
-<p>Prepared payloads are not actual Atlas observations. Never place credentials or Authorization headers in notebooks, source, command arguments or receipts.</p></article>
+<p>Matching GUIDs and edges after replacement show the graph store kept its state. Search can lag the graph, so index catch-up and a graph and index restore are separate bounded tests.</p></article>
   </main>
 </body>
 </html>

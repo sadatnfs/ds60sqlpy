@@ -2,96 +2,65 @@
 
 ## How to run this lesson
 
-Start the Linux-container engine and run `./classroom` from the repository
-root. On Windows, use Ubuntu in WSL 2 or the thin
-`START_DOCKER_CLASSROOM.cmd` wrapper. Choose **PostgreSQL** on the shared
-`/classroom` home, then open **sql-59**. The
-[launcher guide](../../../docs/one-command-classroom.md) covers first preparation, strict resume and
-the saved project selection. No host Python or PostgreSQL installation is
-required for this browser route.
-
-1. Read the prerequisite and fixture notes before running the file. Use only
-   the local disposable `advanced_sql_training` database.
-2. Choose **Whole SQL lesson (psql)** for the cataloged learner script. This
-   preserves the lesson's reviewed psql directives, relative includes and
-   transaction behavior. **SQL snippet** is appropriate for ordinary SQL
-   statements, but is not a replacement for an entire script's setup.
-3. The **Course database** panel above the code shows whether the course
-   training tables are loaded. Missing tables load automatically before your
-   first run (or choose **Load course tables**) and stay loaded for later
-   lessons. **Reset training data** restores the original rows only when your
-   own changes made results differ; it keeps your saved code and notes.
-4. Edit the learner copy in the classroom and save your prediction before
-   running. Its whole-script workspace is
-   `.learning/sql/sql-59/lesson/workspace/sql/postgres-60day/day59_final_capstone_part2.sql`.
-   For browser work this path is inside the Docker learning volume, not a
-   newly created host folder beside your checkout. The checked-in source
-   remains the answer-free starting artifact.
-5. Run the whole script and inspect the full transcript. The runner uses
-   `psql -X -v ON_ERROR_STOP=1 -f`. SELECT output has columns, rows and a row
-   count; DDL/DML has command tags; intentional checks may produce NOTICE
-   messages. An unexpected ERROR or nonzero exit is a failure to diagnose,
-   even when an earlier query printed plausible values.
-6. Verify the lesson's expected grain, ordering, constraints and declared
-   transaction or cleanup outcome. Keep required ROLLBACK statements.
-   The warehouse sequence and other explicitly stateful exercises explain
-   when state is committed. Read saved output without rerunning it when
-   reviewing an earlier attempt.
-
-If a relation is missing, inspect the lesson's required fixture and predecessor
-rather than guessing a new table definition. If authentication or runtime
-readiness fails, use `./classroom status` and the setup guide. Keep credentials
-out of SQL, notebooks, screenshots and committed files. Repair the first error
-before trusting partial output, and reveal separate solutions only when you
-want to compare after an attempt.
-
-### Optional contributor notebook route
-
-For notebook work, deliberately prepare the Linux/WSL contributor environment
-from [CONTRIBUTING.md](../../../CONTRIBUTING.md), including a compatible psql client and
-the notebook dependencies. Generate this lesson's private workspace through
-the maintained CLI:
-
-```sh
-uv run --no-sync python scripts/course.py sql notebook sql-59
-```
-
-Open the printed notebook path in that environment's JupyterLab. It uses the
-same catalog-derived learner-copy layout in that contributor checkout and
-executes the complete script through psql. Its host-side state is separate
-from the Docker browser's named volume. Follow
-[guided SQL notebooks](../../../docs/guided-sql-notebooks.md) for explicit local connection
-selection and kernel setup. Notebook generation does not execute SQL or
-authorize a reset.
+In `./classroom`, pick PostgreSQL, open **sql-59** and choose
+**Whole SQL lesson (psql)**; the snippet runner would skip the `BEGIN`, the
+three `CREATE INDEX IF NOT EXISTS` statements and the closing `ROLLBACK` that
+keep this capstone harmless. Your saved copy lives at
+`.learning/sql/sql-59/lesson/workspace/sql/postgres-60day/day59_final_capstone_part2.sql`
+inside the Docker learning volume. One run against `advanced_sql_training`
+prints six results in this order: the LTV table capped at 100 rows, the
+one-row funnel, 20 product pairs, the `EXPLAIN ANALYZE` plan for the top-50
+customer revenue query, the Finance budget table and the Marketing campaign
+table. `psql` stops at the first error, so a missing table shows up before
+any KPI looks plausible. The
+[study guide's launcher steps](../../STUDY-GUIDE.md#run-a-lesson-in-the-classroom)
+cover setup and reset, and contributors who prefer JupyterLab can follow the
+[notebook route](../../STUDY-GUIDE.md#optional-contributor-notebook-route).
 
 ## Level and prerequisites
 
 - **Level:** Advanced
-- **Prerequisites:** [Day 58; capstone ingestion and data quality](day58_final_capstone_part1.md)
+- **Prerequisites:** [Day 58; capstone ingestion and data quality](day58_final_capstone_part1.md) Day 58 loaded and validated the capstone inputs; today every KPI is built on those same `orders`, `order_items`, `events` and `budgets` rows, so a count you reconciled yesterday should still reconcile here.
 - **Artifacts:** [learner SQL](../day59_final_capstone_part2.sql) ·
   [solution reasoning](../solutions/day59_solutions.md) ·
   [executable solution](../solutions/day59_solutions.sql)
 
 ## A beginner's mental model for this lesson
 
-A **table** stores facts in named columns. A **row** is one occurrence at the
-table's declared grain. A query creates a temporary **result set**: rows printed
-on screen are not automatically stored. The key vocabulary for this lesson is KPI contract, Funnel denominator, Scale hypothesis. Its worked SQL reads or creates `orders`, `order_items`, `customers`, `events`, `products`.
+Day 59 asks one question four times, once each for leadership, Finance,
+Marketing and the platform team: what does one row of this table mean, and
+which total proves it is complete? The fixture answers with fixed anchors:
+500 customers, 438 of whom have ever ordered, 4,362 orders, 13,085 order
+lines and 20,000 events split evenly across five event types.
 
-Before writing a query, complete this sentence: “One output row represents
-___.” Joins can multiply rows, filters can remove them, grouping can collapse
-many rows into one, and window functions can add calculations while preserving
-row count. For a normal analytical `SELECT`, use this logical reading order:
-`FROM`/`JOIN` (including `ON`) → `WHERE` → `GROUP BY`/aggregates → `HAVING` →
-window calculations → `SELECT` → `ORDER BY` → `LIMIT`. PostgreSQL may execute a
-different physical plan while preserving those semantics.
+A **KPI contract** is the written promise behind a number: its name, formula,
+grain, population, window, exclusions and owner. The LTV query in Example 1
+shows why it matters. It starts from customers who have orders and joins them
+to their signup cohort, so on our run it produced 191 cohort/segment groups.
+The solution starts from all 500 customers instead and returns 192 groups,
+and in the October 2026 platinum cell the learner shows 1 customer averaging
+2,760.47 while the solution shows 2 customers averaging 1,380.24. Neither is
+wrong until a contract says whether a customer with no orders belongs in the
+average.
 
-The worked walkthrough's lesson-specific task is: Choose one KPI and write its contract before SQL. Build its lowest stable grain, add dimensions only after reconciliation, and return numerator/denominator beside any rate. Present the stakeholder table together with its control total and a limitation; repeat that evidence pattern for Finance and Marketing.
-The first runnable example has a concrete contract: Example 1 returns one grouped row per `customer_id`, `order_id`, and `order_date`, capped at 100 rows with columns `customer_id`, `order_id`, `order_value`, `order_date`, `first_order_month`, and `ltv` from `orders`, `order_items`, and `customers`. Compare the key set and row count with a simpler control over the same filter/window; inspect `NULL` versus zero/absent-row meaning and verify the final ordering/tie-breaker when present. Its final projection is `segment`, `cohort_month`, `avg_ltv`, and `customers`. Independently group `orders`, `order_items`, `order_values`, `customers`, and `ltv` by the shown grouping expressions and compare every displayed aggregate at that exact grain. For tied business values, inspect the final ordering expression and verify its last key makes the displayed order reproducible.
+A **funnel denominator** is the population each conversion rate divides by.
+In the ordered 90-day funnel on our run, 398 customers viewed, 340 then added
+to cart, 275 then checked out and 130 then ordered, so each step shrinks.
+Counting each event type on its own gives 398 page viewers but 399 cart
+adders, which is why independent reach is not a funnel.
+
+A **scale hypothesis** is a claim such as "monthly partitions on `orders`
+will speed this up at 100 million rows" that the 4,362-row fixture cannot
+prove. Write it down, name the plan you would expect and say what evidence
+would settle it. When a result surprises you, walk the query in
+[logical clause order](../../STUDY-GUIDE.md#reading-any-query-in-logical-order)
+and count rows after each CTE.
 
 ## Two worked SQL examples
 
-These worked excerpts come from `sql/postgres-60day/day59_final_capstone_part2.sql`. Use **Whole SQL lesson (psql)** in the unified classroom for the complete file, including its fixture and transaction context. The optional contributor notebook and prepared `psql` routes are described above.
+Both excerpts are the first two KPIs in `day59_final_capstone_part2.sql`:
+lifetime value by signup cohort and segment, then the ordered 90-day funnel.
+They run inside the script's transaction with no setup of their own.
 
 ### Example 1
 
@@ -145,9 +114,20 @@ ORDER BY
 LIMIT 100;
 ```
 
-**How to read it:** Example 1: Start with `orders`, `order_items`, and `customers` in `FROM`/`JOIN`; let `GROUP BY` collapse rows to its grouping keys. The final `SELECT` displays `segment`, `cohort_month`, `avg_ltv`, and `customers`. `ORDER BY` determines presentation order and the final `LIMIT 100` caps displayed rows. Before running, predict the row grain, row count, `NULL` positions, and first/last key; afterwards, compare each prediction with the transcript.
+**How to read it:** Three CTEs change the grain twice. `order_values` joins `orders` to
+`order_items` and sums discounted line values into one row per order.
+`ltv` collapses those to one row per customer and keeps the month of the
+first order, which the final query never displays. `cohort` reads every
+customer's signup month and segment. The final `JOIN` from `ltv` to `cohort`
+keeps only customers who have ordered, and the outer `GROUP BY` averages
+their LTV per (`segment`, `cohort_month`) before `LIMIT 100` keeps the newest
+cohorts.
 
-**Expected result/shape:** Example 1 returns one grouped row per `customer_id`, `order_id`, and `order_date`, capped at 100 rows with columns `customer_id`, `order_id`, `order_value`, `order_date`, `first_order_month`, and `ltv` from `orders`, `order_items`, and `customers`. Compare the key set and row count with a simpler control over the same filter/window; inspect `NULL` versus zero/absent-row meaning and verify the final ordering/tie-breaker when present.
+**Expected result/shape:** One row per (`segment`, `cohort_month`) with `avg_ltv` and `customers`,
+capped at 100 of the 191 groups on our run. The first row is gold in the
+October 2026 cohort: 2 customers averaging 8,296.32. Ties on `avg_ltv` within
+a month have no tie-breaker, so add `segment` to the `ORDER BY` before you
+compare two runs row by row.
 
 ### Example 2
 
@@ -273,54 +253,72 @@ and a limitation; repeat that evidence pattern for Finance and Marketing.
 Complete these in the [learner SQL](../day59_final_capstone_part2.sql):
 
 1. State every LTV CTE's grain and its grain transition.
-   **Inputs/evidence:** For sql-59 Exercise 1, read from the inline `VALUES` fixture. Build the answer toward `step_name`, `row_grain`, and `key_columns`; keep `step_name` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-59 Exercise 1, expected output: one row per `step_name`. The final columns are `step_name`, `row_grain`, and `key_columns`.
-   **Verify:** For sql-59 Exercise 1, reselect the returned keys directly from the source; require unique `step_name` where the expected grain is one row per key and confirm the projected `step_name`, `row_grain`, and `key_columns` against the inline `VALUES` fixture. Add one source row with a new `step_name`; verify the result gains exactly one row carrying that `step_name` value.
+   **Inputs/evidence:** For sql-59 Exercise 1, read the learner LTV query in section 1a (`order_values`, then `ltv`, then `cohort`, then the grouped `SELECT`) and record each aggregation step in an inline `VALUES` fixture with `step_name`, `row_grain`, and `key_columns`.
+   **Expected result/shape:** For sql-59 Exercise 1, expected output: 3 rows, one per `step_name`: `order_values` at one row per order keyed by `customer_id + order_id`, `customer_ltv` at one row per customer keyed by `customer_id`, and `cohort_segment_summary` at one row per cohort/segment keyed by `cohort_month + segment`. The final columns are `step_name`, `row_grain`, and `key_columns`.
+   **Verify:** For sql-59 Exercise 1, prove each grain claim by running the learner CTEs: `order_values` has 4,362 rows and 4,362 distinct `order_id` values but only 438 distinct `customer_id` values, `ltv` has 438 rows (the order-to-customer step, since 62 of the 500 customers never ordered), `cohort` has 500, and the summary has 191 (`segment`, `cohort_month`) groups whose `customers` add back to 438 before `LIMIT 100` trims the output.
+   **Data check:** The solution's grain map returns 3 rows: `order_values` at one row per order, `customer_ltv` at one row per customer and `cohort_segment_summary` at one row per cohort and segment. The learner's middle CTE is named `ltv`, so map your names to those three steps rather than copying the labels.
 2. Add funnel conversion rates and retain buyers without events.
    **Inputs/evidence:** For sql-59 Exercise 2, derive `viewed_at`, `added_at`, `checkout_at`, and `purchased_at` per customer over the same trailing-90-day window.
    **Expected result/shape:** For sql-59 Exercise 2, expected output: exactly one summary row with ordered stage counts, `buyers_without_view`, and three conversion rates whose denominators are the preceding ordered populations.
-   **Verify:** For sql-59 Exercise 2, require `added_at >= viewed_at`, `checkout_at >= added_at`, and `purchased_at >= checkout_at`. Prove `buyers <= checkouts <= adders <= viewers`; every nonzero stage rate must be between zero and one.
+   **Verify:** For sql-59 Exercise 2, confirm one row with 398 viewers, 340 adders, 275 checkouts, 130 buyers, `buyers_without_view` 29, and rates 0.8543, 0.8088, and 0.4727; the unordered reach counts for the same window (398 customers with a `page_view`, 399 with `add_to_cart`, 397 with `checkout`, 290 with an order) show why reach is not a funnel. In a rolled-back transaction give customer 45, who has no recent `page_view`, an `add_to_cart` 2 days ago and a `checkout` 1 day ago: every count stays the same. Add a `page_view` 3 days ago and the row becomes 399, 341, 276, and 130 with `buyers_without_view` 28, because the September order precedes the new checkout.
+   **Data check:** On our run the ordered counts were 398 viewers, 340 adders, 275 checkouts and 130 buyers, giving rates of 0.8543, 0.8088 and 0.4727, with 29 buyers who ordered in the window but never viewed a page. The 29 stay outside the funnel numerators.
 3. Reconcile order totals, line revenue, and payments before KPI selection.
-   **Inputs/evidence:** For sql-59 Exercise 3, read from `order_items`, `payments`, and `orders`. Build the answer toward `order_id`, `stored_order_total`, `line_revenue`, `paid_amount`, `header_minus_lines`, and `paid_minus_header`; keep `order_id` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-59 Exercise 3, expected output: at most 50 rows keyed by `order_id`. The final columns are `order_id`, `stored_order_total`, `line_revenue`, `paid_amount`, `header_minus_lines`, and `paid_minus_header`. The final order is `o.order_id`.
-   **Verify:** For sql-59 Exercise 3, assert no more than 50 rows, no duplicate `order_id`, and no adjacent pair that violates `o.order_id`. Rejoin the returned keys to `order_items`, `payments`, and `orders` to confirm `order_id`, `stored_order_total`, `line_revenue`, `paid_amount`, `header_minus_lines`, and `paid_minus_header` came from the same source rows. Run with 50 minus one and 50 plus one eligible rows; require the output cap of 50 while retaining `o.order_id`.
+   **Inputs/evidence:** For sql-59 Exercise 3, start from `orders` and `LEFT JOIN` two order-grain CTEs: `lines`, which sums `quantity * unit_price * (1 - discount)` from `order_items`, and `paid`, which sums `amount` from `payments`; derive `header_minus_lines` and `paid_minus_header` from the three amounts.
+   **Expected result/shape:** For sql-59 Exercise 3, expected output: exactly 50 rows, `order_id` 1 through 50 in order, one per order. The final columns are `order_id`, `stored_order_total`, `line_revenue`, `paid_amount`, `header_minus_lines`, and `paid_minus_header`; orders 5, 9, 14, 20, 25, 27, 32, 40, 45, and 49 show NULL `paid_amount` and `paid_minus_header`.
+   **Verify:** For sql-59 Exercise 3, confirm `lines` has 4,362 rows and `paid` has 3,489 rows built from 3,836 payment rows (347 orders have more than one payment), and that the absolute `header_minus_lines` never exceeds 0.0045 across all 4,362 orders. The ten NULL-payment orders are all `placed`. In a rolled-back transaction insert a second 10.00 payment for order 1 (header 240.20): the output stays at 50 rows, `paid` still has 3,489 rows, and order 1 shows `paid_amount` 250.20 and `paid_minus_header` 10.00.
+   **Data check:** Every order's stored total differs from its line sum by less than half a cent (2,855 of 4,362 differ at all, by at most 0.0045), while 873 orders, all `placed`, have no payment and 199 paid orders differ from their header. In the first 50 rows, 10 show an empty `paid_amount`.
 4. Add direct attribution and reconcile purchases.
    **Inputs/evidence:** For sql-59 Exercise 4, start from `orders` and choose at most one event whose `event_type` is in the declared marketing-touch whitelist (`page_view`, `add_to_cart`, `checkout`), whose campaign metadata is present, and whose timestamp is in the preceding seven-day half-open window.
-   **Expected result/shape:** For sql-59 Exercise 4, expected output: one row per `attribution_bucket`, with `purchases`; every order contributes to exactly one campaign bucket or `(direct)`. The final order is `purchases DESC, attribution_bucket`.
-   **Verify:** For sql-59 Exercise 4, assert that `SUM(purchases)` equals `COUNT(*)` from `orders`. Add a tagged non-touch event and prove the attribution result is unchanged; then add two qualifying touches for one order and prove the latest timestamp, with `event_id` as tie-breaker, wins exactly once.
+   **Expected result/shape:** For sql-59 Exercise 4, expected output: 6 rows, one per `attribution_bucket`: `(direct)` 2,895, `none` 310, `fall` 305, `spring` 288, `summer` 282, and `winter` 282, summing to 4,362 orders; `none` is a literal campaign value, not a missing one. The final order is `purchases DESC, attribution_bucket`.
+   **Verify:** For sql-59 Exercise 4, assert that `SUM(purchases)` equals the 4,362 rows of `orders`. Then in a rolled-back transaction use order 31 (customer 5, currently `(direct)`): a `support` event tagged `spring` 1 day before the order changes nothing; adding a `page_view` tagged `fall` 2 days before, a `page_view` tagged `summer` 1 day before, and a `checkout` tagged `winter` also 1 day before but inserted last moves order 31 to `winter`, giving `(direct)` 2,894 and `winter` 283, because the higher `event_id` breaks the timestamp tie.
+   **Data check:** The six buckets on our run were `(direct)` 2,895, `none` 310, `fall` 305, `spring` 288, `summer` 282 and `winter` 282, which add to 4,362. `none` is a literal campaign string in `metadata`, not a missing value, so it earns its own row next to `(direct)`.
 5. Compare customer/date and date/customer index orders.
-   **Inputs/evidence:** For sql-59 Exercise 5, run the underlying read-only query over `orders`, and `idx_orders_date_customer_day59_solution` before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison.
-   **Expected result/shape:** For sql-59 Exercise 5, expected output: one row per `customer_id`. The final columns are `customer_id`, and `revenue`.
-   **Verify:** For sql-59 Exercise 5, run the underlying query without `EXPLAIN` and preserve its `customer_id` rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.
+   **Inputs/evidence:** For sql-59 Exercise 5, run the 180-day `SUM(total_amount)` per `customer_id` over `orders` with only the customer-leading index, then create `idx_orders_date_customer_day59_solution` on `(order_date, customer_id) INCLUDE (total_amount)` and capture `EXPLAIN (ANALYZE, BUFFERS)` for the same query; check that `pg_class.relallvisible` equals `relpages` (65) for `orders` first, and run `VACUUM orders` if earlier practice writes lowered it.
+   **Expected result/shape:** For sql-59 Exercise 5, expected output: 410 rows, one per `customer_id`, from 1,538 orders in the window, with the same totals under both indexes. The final columns are `customer_id` and `revenue`.
+   **Verify:** For sql-59 Exercise 5, save the 410 rows before any index change and compare them afterward. With the customer-leading index alone the plan is a `Seq Scan` over 65 pages; with the date-leading index and a fully visible table it becomes an `Index Only Scan` with `Heap Fetches: 0` touching 11 buffers. A 1,500-day window returns 438 rows from a `Seq Scan` over all 4,362 orders, while `WHERE customer_id = 42 ORDER BY order_date` uses the customer-leading index for 7 rows.
+   **Data check:** The aggregate returns 410 customers for the 180-day window with either index. On our run the customer-leading index left the plan on a `Seq Scan` over all 65 pages, while the date-leading index produced an `Index Only Scan` reading 11 pages. A 1,500-day window returned all 438 buyers and went back to a `Seq Scan` even with both indexes present. If the plan stays on a `Seq Scan` with the date-leading index, compare `relallvisible` with `relpages` in `pg_class`: after earlier rolled-back writes we saw 34 of 65, and `VACUUM orders` brought back the `Index Only Scan`.
 6. Write a complete metric contract for one KPI.
-   **Inputs/evidence:** For sql-59 Exercise 6, read from the inline `VALUES` fixture. Build the answer toward `metric_name`, `grain`, `numerator`, `denominator`, `time_window`, `null_policy`, `exclusions`, and `owner`; keep `metric_name` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-59 Exercise 6, expected output: one row per `metric_name`. The final columns are `metric_name`, `grain`, `numerator`, `denominator`, `time_window`, `null_policy`, `exclusions`, and `owner`.
-   **Verify:** For sql-59 Exercise 6, reselect the returned keys directly from the source; require unique `metric_name` where the expected grain is one row per key and confirm the projected `metric_name`, `grain`, `numerator`, `denominator`, `time_window`, `null_policy`, `exclusions`, and `owner` against the inline `VALUES` fixture. Add one source row with a new `metric_name`; verify the result gains exactly one row carrying that `metric_name` value.
+   **Inputs/evidence:** For sql-59 Exercise 6, write one inline `VALUES` row for `viewer_to_buyer_rate` with `metric_name`, `grain`, `numerator`, `denominator`, `time_window`, `null_policy`, `exclusions`, and `owner`, describing the ordered funnel from the headline query.
+   **Expected result/shape:** For sql-59 Exercise 6, expected output: 1 row, `metric_name` `viewer_to_buyer_rate`. The final columns are `metric_name`, `grain`, `numerator`, `denominator`, `time_window`, `null_policy`, `exclusions`, and `owner`.
+   **Verify:** For sql-59 Exercise 6, rebuild the KPI from the text alone: the headline funnel gives 130 ordered buyers over 398 viewers, 0.3266, while the solution's numerator wording, "distinct customers with an order", would count 290 customers and give 0.7286, so the numerator text must name the ordered sequence. To test `null_policy`, move the window start to `CURRENT_TIMESTAMP + interval '1 day'` in the headline query: viewers become 0 and `viewer_to_buyer_rate` is NULL.
+   **Data check:** The solution publishes one row for `viewer_to_buyer_rate`. Compare its `numerator` text with the funnel SQL: the headline query counts the 130 ordered buyers, not the 290 customers with any order in the window, so the written contract must say which one it means.
 7. Publish product-pair support, confidence, and lift with a minimum count.
-   **Inputs/evidence:** For sql-59 Exercise 7, read from `order_items`. Build the answer toward `product_a`, `product_b`, `together`, `support`, `confidence_a_to_b`, and `lift`; keep `order_item_id` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-59 Exercise 7, expected output: at most 20 rows keyed by `order_item_id`. The final columns are `product_a`, `product_b`, `together`, `support`, `confidence_a_to_b`, and `lift`. The final order is `lift DESC, together DESC, product_a, product_b`.
-   **Verify:** For sql-59 Exercise 7, assert no more than 20 rows, no duplicate `order_item_id`, and no adjacent pair that violates `lift DESC, together DESC, product_a, product_b`. Rejoin the returned keys to `order_items` to confirm `product_a`, `product_b`, `together`, `support`, `confidence_a_to_b`, and `lift` came from the same source rows. Run with 20 minus one and 20 plus one eligible rows; require the output cap of 20 while retaining `lift DESC, together DESC, product_a, product_b`.
+   **Inputs/evidence:** For sql-59 Exercise 7, read `order_items` through four CTEs: `baskets` (distinct `order_id`, `product_id`), `totals` (4,362 baskets), `product_baskets` (basket count per product), and `pairs` (a self-join on `order_id` with `a.product_id < b.product_id`); build `together`, `support`, `confidence_a_to_b`, and `lift` from them.
+   **Expected result/shape:** For sql-59 Exercise 7, expected output: 20 rows, one per (`product_a`, `product_b`) pair. The final columns are `product_a`, `product_b`, `together`, `support`, `confidence_a_to_b`, and `lift`. The final order is `lift DESC, together DESC, product_a, product_b`, and the first four rows tie at lift 63.2174 with together 30: 14/45, 14/258, 31/62, and 31/275.
+   **Verify:** For sql-59 Exercise 7, confirm `pairs` has 770 rows with the rarest at 15 baskets, so `together >= 2` removes nothing here, and hand-check the top row: 30 × 4,362 / (45 × 46) = 63.2174, where product 14 is in 45 baskets and product 45 in 46. In a rolled-back transaction insert `(order_id, product_id, quantity, unit_price)` = `(238, 14, 1, 10.00)` into `order_items` (order 238 already holds product 14): `order_items` grows to 13,086 rows but `baskets` stays at 13,085 and pair 14/45 stays at 30, while a self-join on raw `order_items` would report 31.
+   **Data check:** The 4,362 baskets hold 770 distinct product pairs, and the rarest pair appears in 15 baskets, so `together >= 2` removes nothing on this fixture. The top row on our run was products 14 and 45: together 30, support 0.0069, confidence 0.6667 and lift 63.2174. Product 14 sits in 45 baskets.
 8. Assemble named cross-domain control totals for stakeholder sign-off.
    **Inputs/evidence:** For sql-59 Exercise 8, build a control-total result with `UNION ALL`: one labeled row each for the customer count, the order count, the stored order revenue, the line revenue, and the payment total, with every value cast to `numeric`.
    **Expected result/shape:** For sql-59 Exercise 8, expected output: 5 rows, one per `control_name`: `customers` 500, `line_revenue` 2355647.12, `orders` 4362, `payments` 1831900.81, and `stored_order_revenue` 2355646.89. The final columns are `control_name` and `observed_value`. The final order is `control_name`.
    **Verify:** For sql-59 Exercise 8, confirm that each `observed_value` equals its standalone query, for example `SELECT ROUND(SUM(amount), 2) FROM payments` for `payments`; `stored_order_revenue` is 0.23 lower than `line_revenue` because each order stores its own line total rounded to cents, so record that gap as a known difference rather than a defect.
+   **Data check:** Expect `customers` 500, `orders` 4,362, `stored_order_revenue` 2,355,646.89, `line_revenue` 2,355,647.12 and `payments` 1,831,900.81. The payment gap of about 523,746 is mostly the 873 unpaid orders, which is a status fact to record, not a rounding issue.
 
 Add a one-page metric dictionary and before/after evidence table.
 
 ## Common mistakes and how to recover
 
 - **Lesson-specific semantic mistake:** Do not skip this worked-model requirement: Choose one KPI and write its contract before SQL. Build its lowest stable grain, add dimensions only after reconciliation, and return numerator/denominator beside any rate. Present the stakeholder table together with its control total and a limitation; repeat that evidence pattern for Finance and Marketing.
-- **Unexpected row count:** display keys before aggregates, count rows after
-  each join/filter stage, and find the first stage whose grain differs from the
-  contract. Do not hide fanout with `DISTINCT`.
-- **Unexpected `NULL` or missing row:** decide whether the fact is unknown,
-  inapplicable, zero, or absent before using `COALESCE`; inspect outer-join
-  predicate placement and empty-input aggregate behavior.
-- **Unstable top/first/last output:** add `ORDER BY` with a unique final
-  tie-breaker before `LIMIT` or order-sensitive windows/aggregates.
-- **`psql` stops on an error:** fix the first error shown by
-  `ON_ERROR_STOP`, restore the declared transaction/setup state, and rerun the
-  complete file. A later successful statement does not validate a partial run.
+- **Summing non-additive campaign rows:** the learner Marketing table on our
+  run lists 47, 43, 42, 29 and 28 assisted customers, which add to 189, yet
+  only 149 distinct customers were assisted. One customer touched by two
+  campaigns appears in both rows. Report the distinct total separately.
+- **Treating `'none'` as missing:** `NULLIF(trim(...), '')` removes blank
+  campaign strings but keeps the literal value `none`, which then tops the
+  Marketing table with 47 customers. Decide in the contract whether `none`
+  means direct traffic.
+- **Picking a top 20 from a tie:** in the learner basket query 255 product
+  pairs share the maximum `together` of 32, and `ORDER BY together DESC
+  LIMIT 20` returns an arbitrary 20 of them. Add `product_a` and `product_b`
+  as tie-breakers or rank by lift with a minimum count.
+- **Assuming the learner indexes help:** `idx_orders_customer_date` leads
+  with `customer_id`, so the date-bounded top-50 query cannot use it for its
+  range filter; on our run the plan still read every page of `orders`.
+- **Reading the Finance year wrong:** both CTEs filter from
+  `date_trunc('year', now())`, so the table changes on 1 January. On our run
+  Payroll showed a budget of 8,752,000.00 against 4,564,618.75 actual.
+- For anything not listed, the
+  [recovery checklist](../../STUDY-GUIDE.md#recover-from-common-failures)
+  walks through first-error diagnosis.
 
 ## Self-check
 
@@ -379,9 +377,12 @@ reviewed migration.
 
 ## Ask an AI tutor about this lesson
 
-An AI tutor is optional; the guide, learner SQL, PostgreSQL, and expected checks are
-enough to complete the lesson offline. If you want a patient tutor, copy this
-prompt after opening the repository in the AI tutor:
+Use a tutor as a stakeholder who keeps asking "how do you know?" Share your
+KPI tables and control totals, then ask it to find one number you could not
+defend from a written contract. The checklist in
+[the tutor section](../../STUDY-GUIDE.md#use-an-ai-tutor-optional) lists what
+to share and what to keep private. Paste the prompt that follows once your
+numbers are in hand:
 
 ```text
 Tutor me through sql-59: Final Capstone, Part 2: Stakeholder Analytics.

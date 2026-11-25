@@ -1,6 +1,6 @@
 # js-005: explanatory solutions
 
-Use these answers after an attempt or an explicit reveal. The reference uses the same literal fixtures as the guide and keeps the exercises in separate scopes. A successful run checks these examples; explaining a changed input is a separate learning goal.
+Open these after your own attempt; each exercise runs in its own scope in the reference.
 
 ## Mechanism review
 
@@ -22,7 +22,7 @@ map receives value, index and array; avoid passing a callback that unintentional
 
 ## Exercise 1: Map and filter without changing input: change one input
 
-Task: Copy Example A into a scratch `main.mjs` and change `const original = [1, 2, 3, 4];` to `const original = [2, 2, 3, 4];`. Before running it, predict which check fails and which value it now sees; then run it and restore the original line.
+Task: In a scratch copy of Example A, change `const original = [1, 2, 3, 4];` to `const original = [2, 2, 3, 4];`. Which check fails, and what value does it see?
 
 The pipeline returns new arrays while retaining the original numeric fixture. Object-valued elements would need an additional ownership analysis.
 
@@ -35,13 +35,13 @@ assert.deepEqual(result, [6, 8]);
 assert.deepEqual(original, [1, 2, 3, 4]);
 ```
 
-**Expected:** The changed run fails with an `AssertionError` at `assert.deepEqual(original, [1, 2, 3, 4])`. Restoring `const original = [1, 2, 3, 4];` brings back: 6, 8; original array unchanged.
+**Expected:** The edited run fails with an `AssertionError` at `assert.deepEqual(original, [1, 2, 3, 4])`. Restoring `const original = [1, 2, 3, 4];` brings back: 6, 8; original array unchanged.
 
-**Verify:** Compare your written prediction with the reported `AssertionError`, including its actual and expected values, and name the value that made `assert.deepEqual(original, [1, 2, 3, 4])` fail. After restoring the line, the program prints its `{"checks":1,"status":"passed"}` receipt again.
+**Verify:** Compare the reported actual and expected values with your prediction, then restore `const original = [1, 2, 3, 4];`.
 
 ## Exercise 2: Supply a reduction identity: diagnose an edited check
 
-Task: A careless edit changed a check in Example B so that it reads `assert.equal([1, 2, 3].reduce((sum, value) => sum - value, 0), 6);`. Run Example B with that line, explain why the edited check now fails for the same program state, and restore it.
+Task: Example B's check was edited to read `assert.equal([1, 2, 3].reduce((sum, value) => sum - value, 0), 6);`. Run it, explain the failure and restore the original.
 
 The identity defines the empty case. Omitting it would make an empty array throw and change the callback's initial state.
 
@@ -60,7 +60,7 @@ assert.equal(
 
 **Expected:** Before the repair the run fails with an `AssertionError` at `assert.equal([1, 2, 3].reduce((sum, value) => sum - value, 0), 6);`. Restoring `assert.equal([1, 2, 3].reduce((sum, value) => sum + value, 0), 6);` brings back: 0 and 6.
 
-**Verify:** Keep the failing and the repaired runs. Explain why the edited check rejects the same program state that `assert.equal([1, 2, 3].reduce((sum, value) => sum + value, 0), 6)` accepts.
+**Verify:** Keep the failing and repaired runs and name the first value that differs between them.
 
 ## Exercise 3: Expose default sort coercion
 
@@ -78,7 +78,7 @@ assert.deepEqual(
 
 **Expected:** default 1, 10, 2; numeric 1, 2, 10.
 
-**Verify:** Keep a check equivalent to `assert.deepEqual([10, 2, 1].sort((a, b) => a - b), [1, 2, 10])`. As a control, change `[10, 2, 1].sort((a, b) => a - b),` to `[10, 2, 1].sort((a, b) => a + b),` inside it: the run must fail with an `AssertionError`, which shows the check can fail. Restore it.
+**Verify:** Keep `assert.deepEqual([10, 2, 1].sort((a, b) => a - b), [1, 2, 10])`. Control: editing it to `[10, 2, 1].sort((a, b) => a + b),` must make the check fail; then restore it.
 
 ## Exercise 4: Preserve an array while sorting
 
@@ -95,7 +95,7 @@ assert.deepEqual(original, [3, 1, 2]);
 
 **Expected:** sorted 1, 2, 3; original 3, 1, 2.
 
-**Verify:** Keep a check equivalent to `assert.deepEqual(sorted, [1, 2, 3])`. As a control, change `const sorted = original.toSorted((a, b) => a - b);` to `const sorted = original.toSorted((a, b) => a + b);`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
+**Verify:** Keep `assert.deepEqual(sorted, [1, 2, 3])`. Control: changing `const sorted = original.toSorted((a, b) => a - b);` to `const sorted = original.toSorted((a, b) => a + b);` must make that check fail; then restore it.
 
 ## Exercise 5: Expose a shallow copy alias
 
@@ -113,7 +113,7 @@ assert.notEqual(copy, original);
 
 **Expected:** original nested value also changes.
 
-**Verify:** Keep a check equivalent to `assert.equal(original[0].value, 9)`. As a control, change `copy[0].value = 9;` to `copy[0].value = 10;`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
+**Verify:** Keep `assert.equal(original[0].value, 9)`. Control: changing `copy[0].value = 9;` to `copy[0].value = 10;` must make that check fail; then restore it.
 
 ## Exercise 6: Copy records for a specific edit
 
@@ -131,8 +131,8 @@ assert.equal(copy[0].value, 9);
 
 **Expected:** edited record changes; original record stays 1.
 
-**Verify:** Keep a check equivalent to `assert.equal(copy[0].value, 9)`. As a control, change `copy[0].value = 9;` to `copy[0].value = 10;`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
+**Verify:** Keep `assert.equal(copy[0].value, 9)`. Control: changing `copy[0].value = 9;` to `copy[0].value = 10;` must make that check fail; then restore it.
 
 ## After comparison
 
-Return to your saved implementation and repeat a case with different values. Keep compiler diagnostics, process output and browser observations separate. Do not suppress a failing assertion or use a type assertion to declare an unvalidated value safe. Resource-owning examples must finish cleanup even when work fails. Describe each result with its actual host and fixture scope rather than as production acceptance.
+Fresh case: sort `{ name, score }` records by score descending and then by name, without changing the input. Include two equal scores and an empty array, and predict the order before running. ([After comparing](../STUDY-GUIDE.md#after-comparing-with-the-solution).)

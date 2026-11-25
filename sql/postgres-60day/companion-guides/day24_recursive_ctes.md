@@ -2,67 +2,24 @@
 
 ## How to run this lesson
 
-Start the Linux-container engine and run `./classroom` from the repository
-root. On Windows, use Ubuntu in WSL 2 or the thin
-`START_DOCKER_CLASSROOM.cmd` wrapper. Choose **PostgreSQL** on the shared
-`/classroom` home, then open **sql-24**. The
-[launcher guide](../../../docs/one-command-classroom.md) covers first preparation, strict resume and
-the saved project selection. No host Python or PostgreSQL installation is
-required for this browser route.
-
-1. Read the prerequisite and fixture notes before running the file. Use only
-   the local disposable `advanced_sql_training` database.
-2. Choose **Whole SQL lesson (psql)** for the cataloged learner script. This
-   preserves the lesson's reviewed psql directives, relative includes and
-   transaction behavior. **SQL snippet** is appropriate for ordinary SQL
-   statements, but is not a replacement for an entire script's setup.
-3. The **Course database** panel above the code shows whether the course
-   training tables are loaded. Missing tables load automatically before your
-   first run (or choose **Load course tables**) and stay loaded for later
-   lessons. **Reset training data** restores the original rows only when your
-   own changes made results differ; it keeps your saved code and notes.
-4. Edit the learner copy in the classroom and save your prediction before
-   running. Its whole-script workspace is
-   `.learning/sql/sql-24/lesson/workspace/sql/postgres-60day/day24_recursive_ctes.sql`.
-   For browser work this path is inside the Docker learning volume, not a
-   newly created host folder beside your checkout. The checked-in source
-   remains the answer-free starting artifact.
-5. Run the whole script and inspect the full transcript. The runner uses
-   `psql -X -v ON_ERROR_STOP=1 -f`. SELECT output has columns, rows and a row
-   count; DDL/DML has command tags; intentional checks may produce NOTICE
-   messages. An unexpected ERROR or nonzero exit is a failure to diagnose,
-   even when an earlier query printed plausible values.
-6. Verify the lesson's expected grain, ordering, constraints and declared
-   transaction or cleanup outcome. Keep required ROLLBACK statements.
-   The warehouse sequence and other explicitly stateful exercises explain
-   when state is committed. Read saved output without rerunning it when
-   reviewing an earlier attempt.
-
-If a relation is missing, inspect the lesson's required fixture and predecessor
-rather than guessing a new table definition. If authentication or runtime
-readiness fails, use `./classroom status` and the setup guide. Keep credentials
-out of SQL, notebooks, screenshots and committed files. Repair the first error
-before trusting partial output, and reveal separate solutions only when you
-want to compare after an attempt.
+This lesson runs from `./classroom`: select **sql-24** among the PostgreSQL
+lessons and use **Whole SQL lesson (psql)**. It executes your copy at
+`.learning/sql/sql-24/lesson/workspace/sql/postgres-60day/day24_recursive_ctes.sql`
+inside `advanced_sql_training`. Both statements are read-only recursive
+queries, one over `employees` and one that generates dates from nothing, and
+the file wraps them in `BEGIN`/`ROLLBACK`. A recursive query that never stops
+would make `psql` hang rather than fail, so if the transcript stalls, cancel
+it and look for a missing guard before anything else. More launcher detail is
+in [Run a lesson in the classroom](../../STUDY-GUIDE.md#run-a-lesson-in-the-classroom).
 
 ### Optional contributor notebook route
 
-For notebook work, deliberately prepare the Linux/WSL contributor environment
-from [CONTRIBUTING.md](../../../CONTRIBUTING.md), including a compatible psql client and
-the notebook dependencies. Generate this lesson's private workspace through
-the maintained CLI:
+In a notebook you can run the anchor member alone, then add the recursive
+member ([notebook setup](../../STUDY-GUIDE.md#optional-contributor-notebook-route)):
 
 ```sh
 uv run --no-sync python scripts/course.py sql notebook sql-24
 ```
-
-Open the printed notebook path in that environment's JupyterLab. It uses the
-same catalog-derived learner-copy layout in that contributor checkout and
-executes the complete script through psql. Its host-side state is separate
-from the Docker browser's named volume. Follow
-[guided SQL notebooks](../../../docs/guided-sql-notebooks.md) for explicit local connection
-selection and kernel setup. Notebook generation does not execute SQL or
-authorize a reset.
 
 ## Level and prerequisites
 
@@ -74,28 +31,36 @@ authorize a reset.
 
 ## A beginner's mental model for this lesson
 
-A **table** stores facts in named columns. A **row** is one occurrence at the
-table's declared grain. A query creates a temporary **result set**: rows printed
-on screen are not automatically stored. The key vocabulary for this lesson is Anchor member, Recursive member, Cycle guard. Its worked SQL reads or creates `employees`.
+`WITH RECURSIVE` builds a result in rounds. The **anchor member** (the query
+before `UNION ALL`) runs once and produces the first rows. The **recursive
+member** (the query after it) then runs again and again, each time reading
+only the rows the previous round added, until a round adds nothing. The final
+result is every round stacked together.
 
-Before writing a query, complete this sentence: “One output row represents
-___.” Joins can multiply rows, filters can remove them, grouping can collapse
-many rows into one, and window functions can add calculations while preserving
-row count. For a normal analytical `SELECT`, use this logical reading order:
-`FROM`/`JOIN` (including `ON`) → `WHERE` → `GROUP BY`/aggregates → `HAVING` →
-window calculations → `SELECT` → `ORDER BY` → `LIMIT`. PostgreSQL may execute a
-different physical plan while preserving those semantics.
+The course's org chart is small enough to trace by hand:
 
-The worked walkthrough's lesson-specific task is: Seed each direct manager/report edge with a path array containing both keys. Each recursive step joins the current report to its direct reports, increments depth, and rejects a key already present in the path. Inspect the maximum depth and path before trusting the hierarchy.
-Exercise 1 expects this result: one row per ancestor-descendant pair. Predict keys, row count, `NULL` behavior,
-and ordering before running. Afterwards, compare keys/counts/totals with an
-independent control. A blank string, SQL `NULL`, numeric zero, and a missing row
-are different facts; use `COALESCE` only after choosing which meaning the
-business question requires.
+- Round 1 (the anchor, `manager_id IS NULL`) returns six roots, employees 1 to
+  6, one per department.
+- Round 2 finds the people whose manager is a root: employee 8 reports to 1
+  and employee 7 reports to 2.
+- Round 3 finds the 92 employees (9 to 100) who report to employee 8.
+- Round 4 finds nobody who reports to anyone in round 3, so recursion stops.
+
+That gives 100 rows at depths 1, 2 and 3. The `path` array records the chain
+from the root, such as `{1,8,10}`, and doubles as a **cycle guard**: the
+recursive member refuses any employee already in the path, so even corrupted
+data where someone manages their own manager cannot loop forever.
+
+Recursion also works without a table. Example 2 starts from the first day of
+the current month and subtracts one month per round, while a counter `n`
+stops it after 12 rounds. Either a data limit (no more children) or an
+explicit counter must end every recursive query you write.
+
+Both members must produce the same column types. Example 2 casts
+`(m - interval '1 month')` back to `date`; without that cast PostgreSQL
+rejects the query because the recursive member would yield `timestamp`.
 
 ## Two worked SQL examples
-
-These worked excerpts come from `sql/postgres-60day/day24_recursive_ctes.sql`. Use **Whole SQL lesson (psql)** in the unified classroom for the complete file, including its fixture and transaction context. The optional contributor notebook and prepared `psql` routes are described above.
 
 ### Example 1
 
@@ -139,9 +104,18 @@ ORDER BY
 LIMIT 100;
 ```
 
-**How to read it:** Example 1: Start with `employees`, and `org` in `FROM`/`JOIN`; let `WHERE` remove nonqualifying rows; append branches with `UNION ALL` (duplicates are retained). The final `SELECT` displays `employee_id`, `full_name`, `manager_id`, `depth`, and `path`. `ORDER BY` determines presentation order and the final `LIMIT 100` caps displayed rows. Before running, predict the row grain, row count, `NULL` positions, and first/last key; afterwards, compare each prediction with the transcript.
+**How to read it:** The anchor selects the six roots with `depth` 1 and
+a one-element `path`. The recursive member joins `employees` to the previous
+round on `e.manager_id = o.employee_id`, adds 1 to `depth`, appends the new id
+with `||` and skips anyone already in `o.path`. The outer query sorts by
+depth, then by the text value of `full_name`, then by `employee_id`.
 
-**Expected result/shape:** Example 1 returns one row per `employee_id`, and `manager_id`, capped at 100 rows with columns `employee_id`, `full_name`, `manager_id`, `depth`, and `path` from `employees`, and `org`. Use a direct count or grouped aggregate over those same source relations as the control; check ordering only when this query has an `ORDER BY`, and inspect `NULL` only for columns this example can produce.
+**Expected result/shape:** Exactly 100 rows, one per employee, so the
+`LIMIT 100` cuts nothing. Rows 1 to 6 are the roots with `manager_id` blank
+and paths `{1}` to `{6}`; then Employee 7 with path `{2,7}` and Employee 8
+with `{1,8}`; then 92 depth-3 rows whose paths all start `{1,8,...}`. Because
+names sort as text, the depth-3 block begins Employee 10, Employee 100,
+Employee 11 rather than in numeric order.
 
 ### Example 2
 
@@ -168,9 +142,16 @@ ORDER BY
   month_start;
 ```
 
-**How to read it:** Example 2: Start with `months` in `FROM`/`JOIN`; let `WHERE` remove nonqualifying rows; append branches with `UNION ALL` (duplicates are retained). The final `SELECT` displays `month_start`, and `step`. `ORDER BY` determines presentation order. Before running, predict the row grain, row count, `NULL` positions, and first/last key; afterwards, compare each prediction with the transcript.
+**How to read it:** The anchor is a single row: the first of the
+current month as a `date`, with step `n` = 1. Each round subtracts one month
+and adds 1 to `n`, and `WHERE n < 12` stops the recursive member from
+producing a thirteenth row. There is no source table, so the counter is the
+only thing that ends the recursion.
 
-**Expected result/shape:** Example 2 returns one row per `month_start` with columns `month_start`, and `step` from `months`. Use a direct count or grouped aggregate over those same source relations as the control; check ordering only when this query has an `ORDER BY`, and inspect `NULL` only for columns this example can produce.
+**Expected result/shape:** 12 rows. Sorted by `month_start`, the
+earliest month comes first with `step` 12 and the current month is last with
+`step` 1. The dates depend on the day you run it, but they are always first
+days of consecutive months.
 
 ## Learning objectives
 
@@ -195,62 +176,73 @@ and path before trusting the hierarchy.
 - **Focus:** Build recursive CTEs from compatible anchor and recursive members, carrying depth/path evidence and an explicit termination or cycle rule.
 - **Assumptions:** Employee hierarchy roots have `manager_id IS NULL`; multiple roots are valid. Array paths use integer employee IDs.
 - **Failure to watch for:** `UNION ALL` without a cycle/termination guard can recurse indefinitely; `UNION` duplicate removal is not a substitute for a path rule.
-- **Review loop:** predict the row grain and NULL/order behavior, run the
-  query, inspect a bounded sample, and reconcile counts or totals before
-  accepting the result.
+- **Review loop:** run the anchor alone and count its rows (6 roots), then
+  add the recursive member and check the row count per depth (6, 2 and 92)
+  before adding ordering or aggregation.
 
 ## Exercises
 
 Build recursive CTEs from compatible anchor and recursive members, carrying depth/path evidence and an explicit termination or cycle rule.
 
-Attempt each prompt in a scratch SQL file before opening the solution.
-For every result, write its row grain and expected shape first.
+Before running Exercises 1, 5 and 6, sketch the three-level org chart
+from the mental model and count the rows each query should return. For
+Exercise 4, draw the four edges and list the paths the guard should allow;
+Exercises 2 and 3 should return 1 row and 12 rows.
 
 1. **Query writing:** List every manager's direct and indirect reports with depth and path.
    **Progressive hint:** Seed every direct edge, carry the original manager, and reject IDs already in the path.
-   **Inputs/evidence:** For sql-24 Exercise 1, read from `employees`, and `reports`. Build the answer toward `manager_id`, `report_id`, `depth`, and `path`; keep `manager_id` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-24 Exercise 1, expected output: One row per ancestor-descendant pair. The final columns are `manager_id`, `report_id`, `depth`, and `path`. The final order is `manager_id, depth, report_id`.
-   **Verify:** For sql-24 Exercise 1, project `manager_id` plus the raw source columns from `employees`, and `reports` at each join stage; record row count and distinct `manager_id`, then assert the final `manager_id`, `report_id`, `depth`, and `path` values match those staged rows without unintended fanout or loss. Add one source row with a new `manager_id`; verify the result gains exactly one row carrying that `manager_id` value.
+   **Inputs/evidence:** For sql-24 Exercise 1, read `employees` twice in the anchor, joining each report to its manager on `report.manager_id = manager.employee_id` (94 direct pairs), then join the recursive `reports` CTE back to `employees` on `report.manager_id = r.report_id`, appending to `path` and refusing any `employee_id` already in it.
+   **Expected result/shape:** For sql-24 Exercise 1, expected output: 186 rows, 94 at depth 1 and 92 at depth 2, for only three managers: employee 1 with 93 reports, employee 8 with 92, and employee 2 with 1. The final columns are `manager_id`, `report_id`, `depth`, and `path`. The final order is `manager_id, depth, report_id`.
+   **Verify:** For sql-24 Exercise 1, confirm the 94 depth-1 rows match `SELECT COUNT(*) FROM employees WHERE manager_id IS NOT NULL` and that all 92 depth-2 rows belong to manager 1 with a `path` starting `{1,8}`; then, inside `BEGIN ... ROLLBACK`, run `UPDATE employees SET manager_id = 9 WHERE employee_id = 1` to close the loop 1, 8, 9, 1 and confirm the query still finishes, now with 280 rows and a maximum depth of 3.
 2. **Query writing:** Generate integers 1 through 100 recursively and return their sum.
    **Progressive hint:** Anchor at 1 and stop producing rows after 100.
-   **Inputs/evidence:** For sql-24 Exercise 2, read from `numbers`. Compute `sum_1_to_100` with no outer `GROUP BY`; return exactly one aggregate row and label every expression.
-   **Expected result/shape:** For sql-24 Exercise 2, expected output: Exactly one row with 5050. The final columns are `sum_1_to_100`.
-   **Verify:** For sql-24 Exercise 2, evaluate each of `sum_1_to_100` in a separate control `SELECT` over `numbers`; require one final row and compare every value. Force the final predicate to match zero rows and record `sum_1_to_100`; distinguish `COUNT` zero from nullable `SUM` or `AVG` results.
+   **Inputs/evidence:** For sql-24 Exercise 2, no table is read: the recursive `numbers` CTE starts from `VALUES (1)` and adds `n + 1` while `n < 100`, and the outer query applies one `SUM` with no `GROUP BY`.
+   **Expected result/shape:** For sql-24 Exercise 2, expected output: exactly one row, `sum_1_to_100` = 5050. The final columns are `sum_1_to_100`.
+   **Verify:** For sql-24 Exercise 2, compare with the non-recursive control `SELECT SUM(n) FROM generate_series(1, 100) AS n`, which also returns 5050, and add `COUNT(*)` to see exactly 100 generated rows; then change the stop test to `n <= 100` and confirm the CTE produces 101 rows and a sum of 5151, the classic off-by-one in a recursive stop condition.
 3. **Query writing:** Generate the first day of the current and prior 11 months recursively.
    **Progressive hint:** Carry a counter as an explicit termination condition.
-   **Inputs/evidence:** For sql-24 Exercise 3, read from `months`. Build the answer toward `month_start`; keep `month_start` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-24 Exercise 3, expected output: Exactly 12 chronological month rows. The final columns are `month_start`. The final order is `month_start`.
-   **Verify:** For sql-24 Exercise 3, reselect the returned keys directly from the source; require unique `month_start` where the expected grain is one row per key and confirm the projected `month_start` against `months`. Tie two rows on `month_start` and give them different `month_start` values; verify `month_start` chooses a stable first/last row.
+   **Inputs/evidence:** For sql-24 Exercise 3, no table is read: the recursive `months` CTE starts at `date_trunc('month', CURRENT_DATE)::date` with `step` 1 and subtracts `INTERVAL '1 month'` while `step < 12`, so the result moves with the run date.
+   **Expected result/shape:** For sql-24 Exercise 3, expected output: exactly 12 rows, all on day 1 of a month, from 11 months before the current month up to the current month (2025-12-01 through 2026-11-01 when run in November 2026). The final columns are `month_start`. The final order is `month_start`.
+   **Verify:** For sql-24 Exercise 3, confirm `COUNT(*)` is 12, `COUNT(DISTINCT month_start)` is 12, `MAX(month_start)` equals `date_trunc('month', CURRENT_DATE)::date`, and no row fails `EXTRACT(DAY FROM month_start) = 1`; then start the same recursion from `DATE '2026-03-31'` without `date_trunc` and see the values drift to 2026-02-28 and 2026-01-28, which is why the anchor truncates first.
 4. **Prediction:** Traverse a local graph containing a cycle and prove a path-array guard terminates.
    **Progressive hint:** Reject a destination already present in the path before adding it.
-   **Inputs/evidence:** For sql-24 Exercise 4, read from `walk`, and `edges`. Build the answer toward `node`, and `path`; keep `node` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-24 Exercise 4, expected output: Finite paths starting from node 1; no repeated node inside a path. The final columns are `node`, and `path`. The final order is `array_length(path, 1), path`.
-   **Verify:** For sql-24 Exercise 4, project `node` plus the raw source columns from `walk`, and `edges` at each join stage; record row count and distinct `node`, then assert the final `node`, and `path` values match those staged rows without unintended fanout or loss. Add one source row with a new `node`; verify the result gains exactly one row carrying that `node` value.
+   **Inputs/evidence:** For sql-24 Exercise 4, no table is read: the `edges` CTE holds four `VALUES` pairs, (1, 2), (2, 3), (3, 1), and (2, 4), with the cycle 1, 2, 3, 1; the recursive `walk` CTE starts at `VALUES (1, ARRAY[1])` and follows edges while `NOT e.destination = ANY (w.path)`.
+   **Expected result/shape:** For sql-24 Exercise 4, expected output: exactly 4 rows, `{1}`, `{1,2}`, `{1,2,3}`, and `{1,2,4}`, with nodes 1, 2, 3, and 4; the edge from 3 back to 1 is never taken. The final columns are `node`, and `path`. The final order is `array_length(path, 1), path`.
+   **Verify:** For sql-24 Exercise 4, confirm no `path` repeats a node, for example `SELECT COUNT(*) FROM walk WHERE array_length(path, 1) <> (SELECT COUNT(DISTINCT x) FROM unnest(path) AS x)` returns 0; then replace the path guard with a depth cap `array_length(w.path, 1) < 5` and confirm two extra rows, `{1,2,3,1}` and `{1,2,3,1,2}`, revisit node 1, so only the `ANY (path)` guard makes the walk end on its own.
 5. **Debugging:** Walk upward from every employee to ancestors while preventing cycles.
    **Progressive hint:** The recursive step follows current manager ID to the manager row and appends it to path.
-   **Inputs/evidence:** For sql-24 Exercise 5, read from `employees`, and `ancestors`. Build the answer toward `origin_employee_id`, `ancestor_id`, and `depth`; keep `employee_id` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-24 Exercise 5, expected output: One row per employee-ancestor relation. The final columns are `origin_employee_id`, `ancestor_id`, and `depth`. The final order is `origin_employee_id, depth`.
-   **Verify:** For sql-24 Exercise 5, project `employee_id` plus the raw source columns from `employees`, and `ancestors` at each join stage; record row count and distinct `employee_id`, then assert the final `origin_employee_id`, `ancestor_id`, and `depth` values match those staged rows without unintended fanout or loss. Add one row for which `(ancestor_id IS NOT NULL)` is true and one for which it is false; verify only the matching `employee_id` value is returned.
+   **Inputs/evidence:** For sql-24 Exercise 5, read `employees`: the anchor takes the 94 rows with a non-NULL `manager_id`, and the recursive `ancestors` CTE joins `employees` as `manager` on `manager.employee_id = a.ancestor_id`, climbing while `manager.manager_id IS NOT NULL` and the manager is not already in `path`.
+   **Expected result/shape:** For sql-24 Exercise 5, expected output: 186 rows for 94 origin employees, 94 at depth 1 and 92 at depth 2; employee 9 has ancestor 8 at depth 1 and ancestor 1 at depth 2, while employee 8 has only ancestor 1. The final columns are `origin_employee_id`, `ancestor_id`, and `depth`. The final order is `origin_employee_id, depth`.
+   **Verify:** For sql-24 Exercise 5, confirm `COUNT(DISTINCT origin_employee_id)` is 94, matching `SELECT COUNT(*) FROM employees WHERE manager_id IS NOT NULL`, and that removing the outer `ancestor_id IS NOT NULL` filter leaves 186 rows; then, inside `BEGIN ... ROLLBACK`, set `manager_id = 9` for employee 1 and confirm the query returns 374 rows with a maximum depth of 4, and that employee 1 now lists ancestors 9, 8, and itself at depths 1, 2, and 3.
 6. **Extension:** Summarize employee count by hierarchy depth from all roots.
    **Progressive hint:** Build the guarded root traversal first, then aggregate only after depth is assigned.
-   **Inputs/evidence:** For sql-24 Exercise 6, read from `employees`, and `organization`. Build the answer toward `depth`, and `employee_count`; keep `depth` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-24 Exercise 6, expected output: One row per observed depth. The final columns are `depth`, and `employee_count`. The final order is `depth`.
-   **Verify:** For sql-24 Exercise 6, independently aggregate `employees`, and `organization` by `depth`; require one output row for every distinct `depth` tuple and compare `employee_count` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `employee_count` for the existing `depth` tuple and verify the new tuple appears exactly once.
+   **Inputs/evidence:** For sql-24 Exercise 6, read `employees`: the anchor of the recursive `organization` CTE takes the 6 roots with `manager_id IS NULL` at depth 0, the recursive step joins children on `child.manager_id = parent.employee_id`, and the outer query counts rows per `depth`.
+   **Expected result/shape:** For sql-24 Exercise 6, expected output: exactly 3 rows, depth 0 with 6 employees, depth 1 with 2, and depth 2 with 92. The final columns are `depth`, and `employee_count`. The final order is `depth`.
+   **Verify:** For sql-24 Exercise 6, confirm the counts add to 100, matching `SELECT COUNT(*) FROM employees`, and that the depth-1 count of 2 matches `SELECT COUNT(*) FROM employees WHERE manager_id IN (SELECT employee_id FROM employees WHERE manager_id IS NULL)`; then, inside `BEGIN ... ROLLBACK`, set `manager_id = 9` for employee 1 and confirm only 6 employees remain (5 at depth 0, 1 at depth 1), because the 94 people in the loop through employee 1 no longer hang from any root.
 
 ## Common mistakes and how to recover
 
-- **Lesson-specific semantic mistake:** `UNION ALL` without a cycle/termination guard can recurse indefinitely; `UNION` duplicate removal is not a substitute for a path rule.
-- **Unexpected row count:** display keys before aggregates, count rows after
-  each join/filter stage, and find the first stage whose grain differs from the
-  contract. Do not hide fanout with `DISTINCT`.
-- **Unexpected `NULL` or missing row:** decide whether the fact is unknown,
-  inapplicable, zero, or absent before using `COALESCE`; inspect outer-join
-  predicate placement and empty-input aggregate behavior.
-- **Unstable top/first/last output:** add `ORDER BY` with a unique final
-  tie-breaker before `LIMIT` or order-sensitive windows/aggregates.
-- **`psql` stops on an error:** fix the first error shown by
-  `ON_ERROR_STOP`, restore the declared transaction/setup state, and rerun the
-  complete file. A later successful statement does not validate a partial run.
+- **Leaving out the cycle guard.** Exercise 4's graph has the loop 1, 2, 3, 1.
+  Without `NOT e.destination = ANY (w.path)`, the walk keeps producing rows
+  such as `{1,2,3,1,2,3}` forever; with an outer `LIMIT 8` you can watch it
+  repeat, but without one `psql` never returns.
+- **Expecting `UNION` to stop a loop.** `UNION` removes duplicate rows, but a
+  row that carries a growing path is never a duplicate. It only stops
+  recursion when the row is just the node, and then you lose the path.
+- **Mismatched anchor and recursive types.** Dropping the `::date` cast in
+  Example 2 raises `recursive query "months" column 1 has type date in
+  non-recursive term but type timestamp without time zone overall`. Cast the
+  anchor or the recursive member so both agree.
+- **Starting from the wrong anchor.** An anchor of `manager_id IS NULL` walks
+  down from roots; an anchor of `manager_id IS NOT NULL` walks up from each
+  employee, as Exercise 5 does. Mixing the two directions in one query
+  produces pairs that are neither ancestors nor reports.
+- **Letting `NULL` managers into the result.** In Exercise 5, removing
+  `manager.manager_id IS NOT NULL` from the recursive member adds 94 rows with
+  a `NULL` ancestor (280 instead of 186) before the outer filter removes them.
+- General recovery steps, such as cancelling a run and rerunning the full
+  file, are in
+  [Recover from common failures](../../STUDY-GUIDE.md#recover-from-common-failures).
 
 ## Self-check
 
@@ -302,9 +294,10 @@ Further reading
 
 ## Ask an AI tutor about this lesson
 
-An AI tutor is optional; the guide, learner SQL, PostgreSQL, and expected checks are
-enough to complete the lesson offline. If you want a patient tutor, copy this
-prompt after opening the repository in the AI tutor:
+A tutor works well for tracing recursion round by round: ask it to
+stop after each round and let you predict the next rows. Keep it on the guide
+and learner file using the prompt below
+([optional tutor notes](../../STUDY-GUIDE.md#use-an-ai-tutor-optional)).
 
 ```text
 Tutor me through sql-24: Recursive CTEs for Hierarchies and Graphs.

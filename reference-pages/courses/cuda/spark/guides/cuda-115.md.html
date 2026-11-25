@@ -194,9 +194,17 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cuda/spark/guides/cuda-115.md</code></p>
     </header>
     <article class="document"><h2 id="cuda-115-from-catalyst-plans-to-actual-gpu-operators">cuda-115: From Catalyst plans to actual GPU operators<a class="heading-anchor" href="#cuda-115-from-catalyst-plans-to-actual-gpu-operators" aria-label="Link to this section">#</a></h2>
-<p><strong>Route:</strong> CUDA Python and machine learning / GPU Spark specialization. <strong>Stage:</strong> intermediate. <strong>Prerequisites:</strong> <code>cuda-113</code>, <code>cuda-114</code>. Allow several sessions when the hardware experiment is new; the chapter is not a deadline.</p>
-<h3 id="what-you-will-be-able-to-explain">What you will be able to explain<a class="heading-anchor" href="#what-you-will-be-able-to-explain" aria-label="Link to this section">#</a></h3>
-<p>By the end, you can <strong>draw logical versus physical plan</strong>, <strong>explain lazy evaluation</strong>, and <strong>choose operator metrics</strong> with evidence. Start with the two worked cases, then use the editable CPU model to make the quantities concrete.</p>
+<p><strong>Route:</strong> CUDA Python and machine learning / GPU Spark specialization. <strong>Stage:</strong> intermediate. <strong>Prerequisites:</strong> <code>cuda-113</code>, <code>cuda-114</code>.</p>
+<p>Pacing, evidence labels and platform rules: <a href="../../STUDY-GUIDE.md.html">CUDA study guide</a>.</p>
+<h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
+<ul>
+<li>Draw logical versus physical plan.</li>
+<li>Mark GPU candidate nodes.</li>
+<li>Locate transitions.</li>
+<li>Explain lazy evaluation.</li>
+<li>Compare initial and final AQE plan.</li>
+<li>Choose operator metrics.</li>
+</ul>
 <h3 id="mechanism-and-vocabulary">Mechanism and vocabulary<a class="heading-anchor" href="#mechanism-and-vocabulary" aria-label="Link to this section">#</a></h3>
 <p>Catalyst represents a query as logical operations, applies transformations and selects physical implementations. Explain output shows what Spark planned, while an executed SQL plan and metrics show what happened for an action. Adaptive Query Execution can change a physical plan using runtime statistics, so the initial plan may differ from the final executed plan.</p>
 <p>The plugin replaces supported physical operators with GPU-capable implementations and inserts transitions where needed. Use the release&#x27;s explain diagnostics to understand why an operation stayed on CPU. Seeing one GPU node does not establish that the entire job is accelerated. Conversely, a CPU metadata or coordination node can coexist with useful GPU computation. Interpret the plan by operation and stage, then compare measured completed work.</p>
@@ -217,8 +225,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>A synthetic plan Scan -&gt; Filter -&gt; Aggregate can contain a GPU filter and aggregate with a CPU-side source boundary. Count transfers and conversions rather than labeling the whole query GPU-only.</p>
 <h4 id="worked-example-2">Worked example 2<a class="heading-anchor" href="#worked-example-2" aria-label="Link to this section">#</a></h4>
 <p>A count action triggers execution; constructing a DataFrame alone is lazy. A plan printed before an action does not contain the same runtime evidence as the completed SQL execution view.</p>
-<h3 id="portable-executable-model">Portable executable model<a class="heading-anchor" href="#portable-executable-model" aria-label="Link to this section">#</a></h3>
-<p>The <strong>CPU reference model</strong> variant runs this bounded worked example using <code>python-core</code>. It uses only the Python standard library, small synthetic values and no network. Its purpose is to expose the arithmetic or contract behind the chapter. The separate reference includes assertions for the stated observations.</p>
+<h3 id="how-to-run-the-cpu-model">How to run the CPU model<a class="heading-anchor" href="#how-to-run-the-cpu-model" aria-label="Link to this section">#</a></h3>
+<p>Edit the copy; the <a href="../references/cuda-115_cpu.py.html">reference</a> adds assertions.</p>
+<pre class="highlighted-code"><code class="language-bash">python courses/cuda/spark/lessons/cuda-115_cpu.py</code></pre>
 <pre class="highlighted-code"><code class="language-python">plan <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">scan</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">CPU</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">filter</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">GPU</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">aggregate</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">GPU</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">collect</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">CPU</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span>
 transitions <span class="syntax-operator">=</span> <span class="syntax-builtin">sum</span><span class="syntax-punctuation">(</span>plan<span class="syntax-punctuation">[</span>i<span class="syntax-punctuation">]</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">!=</span> plan<span class="syntax-punctuation">[</span>i <span class="syntax-operator">-</span> <span class="syntax-number">1</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">]</span> <span class="syntax-keyword">for</span> i <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>plan<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span>
 <span class="syntax-keyword">assert</span> transitions <span class="syntax-operator">==</span> <span class="syntax-number">2</span>
@@ -235,52 +244,44 @@ transitions <span class="syntax-operator">=</span> <span class="syntax-builtin">
 <td><code>2</code></td>
 </tr>
 </tbody></table></div>
-<p>Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.</p>
 <h3 id="practice-and-transfer">Practice and transfer<a class="heading-anchor" href="#practice-and-transfer" aria-label="Link to this section">#</a></h3>
+<p>Record each attempt in the <a href="../lessons/cuda-115.md.html">worksheet</a> before opening hints.</p>
 <h4 id="exercise-1-draw-logical-versus-physical-plan">Exercise 1: Draw logical versus physical plan<a class="heading-anchor" href="#exercise-1-draw-logical-versus-physical-plan" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Reading device placement from the logical plan fails, because logical nodes carry no device information and the plugin acts only on the physical plan.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-2-mark-gpu-candidate-nodes">Exercise 2: Mark GPU candidate nodes<a class="heading-anchor" href="#exercise-2-mark-gpu-candidate-nodes" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Guessing GPU placement from operator type, for example assuming all aggregates run on the GPU, ignores expression-level fallback.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-3-locate-transitions">Exercise 3: Locate transitions<a class="heading-anchor" href="#exercise-3-locate-transitions" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Counting GPU nodes and ignoring transitions makes a plan with many short GPU sections look better than one long section.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-4-explain-lazy-evaluation">Exercise 4: Explain lazy evaluation<a class="heading-anchor" href="#exercise-4-explain-lazy-evaluation" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Timing the line that defines the DataFrame and reporting it as query time measures plan construction, which is nearly instant.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-5-compare-initial-and-final-aqe-plan">Exercise 5: Compare initial and final AQE plan<a class="heading-anchor" href="#exercise-5-compare-initial-and-final-aqe-plan" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Citing the pre-execution plan as the executed plan can report a join strategy that never ran.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-6-choose-operator-metrics">Exercise 6: Choose operator metrics<a class="heading-anchor" href="#exercise-6-choose-operator-metrics" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Reporting only total job time hides which operator dominates and whether spilling occurred.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
-<p>Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.</p>
+<p>Hint <em>k</em> belongs to exercise <em>k</em>; open one at a time.</p>
 <ol>
-<li>Start from worked example 1 and mark the quantities needed for the task &quot;Draw logical versus physical plan&quot;.</li>
-<li>Change one assumption in worked example 2 while preserving the declared contract: mark GPU candidate nodes.</li>
-<li>Trace the CPU program&#x27;s variables before adding hardware behavior: locate transitions.</li>
-<li>Draw producers, consumers and the exact operation boundary for the task &quot;Explain lazy evaluation&quot;.</li>
-<li>Separate what the small fixture establishes from what the real runtime must show: compare initial and final AQE plan.</li>
-<li>Write a counterexample to an overbroad claim before you choose operator metrics.</li>
+<li>Write the query&#x27;s intent as logical nodes, then write how each node would actually be executed.</li>
+<li>Find the operator names the selected plugin release uses for GPU nodes, instead of guessing from the query text.</li>
+<li>Mark every place where data moves between a CPU node and a GPU node.</li>
+<li>Ask which call in your code actually makes Spark run the job.</li>
+<li>Compare the plan printed before the action with the one shown in the completed SQL execution view.</li>
+<li>Choose metrics that together describe rows, batches, time, spill and device activity for each operator.</li>
 </ol>
-<h3 id="common-mistakes-and-self-review">Common mistakes and self-review<a class="heading-anchor" href="#common-mistakes-and-self-review" aria-label="Link to this section">#</a></h3>
-<p>Confusing a correct tiny example with a general implementation is the central review risk. For this chapter, challenge the assumption in worked example 2, then ask whether your change preserves the mechanism described above. If you change dtype, layout, ordering, batch size or backend, update the acceptance contract rather than silently reusing the old observation. Explain an unexpected result before trying random configuration changes.</p>
-<p>Keep a small evidence table with columns <strong>claim</strong>, <strong>input</strong>, <strong>expected observation</strong>, <strong>actual observation</strong> and <strong>limit</strong>. For the first claim use <code>Draw logical versus physical plan</code>. For the final claim use <code>Choose operator metrics</code>. An unperformed GPU or cluster experiment remains pending even when the CPU model is correct.</p>
-<h3 id="platform-and-evidence-contract">Platform and evidence contract<a class="heading-anchor" href="#platform-and-evidence-contract" aria-label="Link to this section">#</a></h3>
-<p>The reading worksheet and CPU reference model work through the ordinary Linux Docker classroom on macOS, Linux and Windows using WSL 2. They do not require an NVIDIA GPU. Their results are labeled CPU models or semantic oracles, not simulated hardware performance.</p>
-<p>Real CUDA work needs supported NVIDIA hardware, a compatible host driver and an explicitly prepared GPU runtime. An Apple GPU does not execute CUDA kernels. PyTorch MPS on a supported native Mac, ROCm on supported AMD hardware, or other vendor backends can provide separate accelerator learning routes; they need their own package and operation qualification and are not CUDA evidence. The ordinary Linux Docker classroom does not expose native Mac MPS automatically.</p>
-<p>Do not download packages, models or data by opening this lesson. Do not attach an engine socket, ambient cluster credentials or an arbitrary remote endpoint. A CPU pass, imported package, successful compilation, real GPU result and measured performance are distinct observations. Record the actual backend, data shape/dtype, source revision, versions and pending checks. A saved completion marker records learning progress, not hardware certification.</p>
-<p>GPU Spark is a separate owned external workflow. The ordinary <code>spark-local-scala</code> and <code>spark-local-python</code> profiles are CPU Spark. Keep the GPU plugin disabled or absent for a CPU-only baseline. Per-operator CPU fallback inside a working GPU plugin environment is a different condition from having no compatible GPU. Never mount a host Docker socket or ambient kubeconfig into an ordinary lesson worker.</p>
+<h3 id="common-mistakes-and-self-check">Common mistakes and self-check<a class="heading-anchor" href="#common-mistakes-and-self-check" aria-label="Link to this section">#</a></h3>
+<p>A common mistake is reading a plan printed before any action as evidence of what ran. Adaptive Query Execution can change the physical plan at run time, and nothing executes until an action such as count. Another is labeling a whole job GPU accelerated because one GPU node appears. Fix both by inspecting the final executed plan and its metrics after an action, operator by operator, and counting the transitions where data changes representation.</p>
+<p><strong>Evidence limit:</strong> The reference counts two GPU nodes and two backend transitions in a synthetic plan. It does not run Spark, so actual plugin operator names, AQE changes and metrics require an executed query on a prepared GPU environment.</p>
+<ol>
+<li>What is the difference between explain output and the executed SQL view?</li>
+<li>Can a CPU node coexist with useful GPU computation?</li>
+<li>Why count transitions in a mixed plan?</li>
+</ol>
+<p>Answers: <a href="../solutions/cuda-115_solutions.md.html#self-check-answers">self-check answers</a>.</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
 <ul>
-<li><a href="https://nvidia.github.io/cudf-spark/docs/download.html">cuDF Spark plugin release and compatibility matrix</a></li>
 <li><a href="https://nvidia.github.io/cudf-spark/docs/supported_ops.html">Supported Spark operators and expression types</a></li>
-<li><a href="https://docs.nvidia.com/cudf-spark/latest/tuning-guide.html">GPU Spark tuning guide</a></li>
-<li><a href="https://spark.apache.org/docs/latest/sql-performance-tuning.html">Apache Spark SQL performance tuning</a></li>
 </ul>
-<p>Use the version-matched documentation of your prepared environment. These references describe interfaces and supported boundaries; the chapter&#x27;s synthetic examples and CPU models are original teaching material.</p>
+<p>Full lists: <a href="../../STUDY-GUIDE.md.html#documentation-and-sources">documentation and sources</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning skill for cuda-115: From Catalyst plans to actual GPU operators.
 Read courses/cuda/spark/guides/cuda-115.md and courses/cuda/spark/lessons/cuda-115.md.

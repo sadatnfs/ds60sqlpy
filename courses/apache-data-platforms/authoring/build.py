@@ -219,6 +219,12 @@ def worked_examples(key: str, entries: Any) -> str:
     return "## Worked examples\n\n" + "\n\n".join(blocks) + "\n\n"
 
 
+def relocate_program(program: str) -> str:
+    """Rewrite authoring/programs study-guide links for the shallower generated copies."""
+
+    return program.replace("](../../STUDY-GUIDE.md", "](../STUDY-GUIDE.md")
+
+
 def outputs(*, admit: bool = False) -> dict[Path, str]:
     plan = json.loads((BASE / "authoring/chapter-map.json").read_text("utf-8"))["units"]
     if [unit["id"] for unit in plan] != [f"apache-{n:03d}" for n in range(1, 89)]:
@@ -253,19 +259,18 @@ def outputs(*, admit: bool = False) -> dict[Path, str]:
         # Sources live under authoring/chapters; generated guides are one level
         # shallower. Only this explicit course-project link prefix is relocated.
         prose = prose.replace("](../../projects/", "](../projects/")
+        program = relocate_program(program)
         prose = INCLUDE.sub(excerpt, prose)
         if "<!-- include:" in prose:
             raise ValueError(f"{key} has a malformed include marker")
         guide_path = f"courses/{BASE.name}/guides/{key}.md"
         source_path = f"courses/{BASE.name}/examples/{key}{suffix}"
+        # Shared run rules live once in STUDY-GUIDE.md; each guide keeps a short pointer.
         boundary = (
-            "This is a complete editable worked program for the declared prepared runtime. "
-            "It uses bounded local fixtures and does not install packages "
-            "or start distributed services."
+            "Run it as the [worked program rules](../STUDY-GUIDE.md#worked-programs) describe."
             if meta["language"] == "python"
-            else "This is a project-only command notebook. Read and edit it in the classroom; "
-            "run its explicitly labeled commands from the copied owned Docker workshop. "
-            "The classroom does not execute these service commands."
+            else "The classroom does not execute these service commands. "
+            "See the [workshop rules](../STUDY-GUIDE.md#workshop-notebooks)."
         )
         refs = "\n".join(f"- [{label}]({url})" for label, url in meta["sources"])
         complete = f"```python\n{program.rstrip()}\n```" if suffix == ".py" else program.rstrip()

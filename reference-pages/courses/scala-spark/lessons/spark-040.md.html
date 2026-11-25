@@ -201,7 +201,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 Illustrative partition 0: id &lt; 5 OR id IS NULL
 Illustrative partition 1: id &gt;= 5
 Configured lowerBound=0, upperBound=10, numPartitions=2</code></pre>
-<p>Partition 0 includes -10,0, NULL; partition 1 includes 5,10,99. All six source rows can be read. To select only [0, 10), the reviewed SQL must contain that population predicate and a deliberate NULL policy. This is a reasoning fixture, not an executed JDBC query.</p>
+<p>Partition 0 includes -10, 0 and NULL; partition 1 includes 5, 10 and 99. All six source rows can be read. To select only [0, 10), the reviewed SQL must contain that population predicate and a deliberate NULL policy. This is a reasoning fixture, not an executed JDBC query.</p>
 <h4 id="worked-example-2-map-an-exact-decimal-instant-and-missing-field">Worked example 2: Map an exact decimal, instant and missing field<a class="heading-anchor" href="#worked-example-2-map-an-exact-decimal-instant-and-missing-field" aria-label="Link to this section">#</a></h4>
 <pre class="highlighted-code"><code class="language-json"><span class="syntax-punctuation">{</span>
   <span class="syntax-tag">&quot;event_id&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">7</span><span class="syntax-punctuation">,</span>

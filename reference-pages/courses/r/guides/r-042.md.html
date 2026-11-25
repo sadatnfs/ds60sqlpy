@@ -196,7 +196,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <article class="document"><h2 id="r-042-estimation-standard-errors-and-resampling-targets">r-042: Estimation, standard errors and resampling targets<a class="heading-anchor" href="#r-042-estimation-standard-errors-and-resampling-targets" aria-label="Link to this section">#</a></h2>
 <p><strong>Level:</strong> intermediate. <strong>Direct prerequisites:</strong> <code>r-037</code>, <code>r-041</code></p>
 <h3 id="run-and-retain-your-work">Run and retain your work<a class="heading-anchor" href="#run-and-retain-your-work" aria-label="Link to this section">#</a></h3>
-<p>Open <code>r-042</code> in <code>/classroom</code> and use the prepared <code>r-statistics</code> profile. Each Run evaluates one <code>main.R</code> script in a fresh offline R process, so define every input in the script; an earlier Run leaves no variables behind. Work in the <a href="../lessons/r-042.R.html">starter</a>. The <a href="../solutions/r-042_reference.R.html">complete reference</a> ends by printing <code>r-042 reference checks passed</code>, and the <a href="../solutions/r-042_solutions.md.html">explained answers</a> are there for deliberate comparison after your own attempt. This chapter prints values only; when a chapter draws figures, the classroom keeps at most two figures per run. The <a href="../README.md.html">course overview</a> describes saved work, figure capture and the prepared package versions.</p>
+<p>The starter holds four values, 2, 4, 6 and 8, and an empty results list. Run it and compute the mean, 5, and the sample variance, 20/3, by hand before calling any function. The standard error of the mean is then the square root of 20/3 divided by 4, so its square is 5/3. Keep the sample standard deviation and the standard error as separately named results.</p>
+<p>Work in the <a href="../lessons/r-042.R.html">starter</a> under the <a href="../STUDY-GUIDE.md.html#run-a-chapter">run rules</a>.</p>
+<p>The <a href="../solutions/r-042_reference.R.html">complete reference</a> ends by printing <code>r-042 reference checks passed</code>.</p>
 <h3 id="outcome-and-mechanism">Outcome and mechanism<a class="heading-anchor" href="#outcome-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Calculate and interpret distinct uncertainty quantities while keeping the resampling population and assumptions explicit.</p>
 <p>An estimate is a statistic calculated from observed data. A standard error describes variation of an estimator under a sampling or resampling model. It is not the spread of the raw observations, and a small standard error does not repair a biased collection process.</p>
@@ -282,7 +284,20 @@ conditional_variance <span class="syntax-operator">&lt;-</span> <span class="syn
 <li><a href="https://stat.ethz.ch/R-manual/R-devel/library/stats/html/quantile.html">R quantiles</a></li>
 </ul>
 <h3 id="continue">Continue<a class="heading-anchor" href="#continue" aria-label="Link to this section">#</a></h3>
-<p>Chapters that list <code>r-042</code> as a direct prerequisite: <a href="r-043.md.html"><code>r-043</code></a>, <a href="r-052.md.html"><code>r-052</code></a>. For the modeling assumptions behind these examples, read the <a href="../../statistics-ml/README.md.html">statistics tutorial</a> alongside the R code.</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Next chapter</th>
+<th>Title</th>
+</tr></thead><tbody>
+<tr>
+<td><a href="r-043.md.html"><code>r-043</code></a></td>
+<td>Linear models, design matrices and diagnostic limits</td>
+</tr>
+<tr>
+<td><a href="r-052.md.html"><code>r-052</code></a></td>
+<td>Multiple panels, uncertainty and scale contracts</td>
+</tr>
+</tbody></table></div>
+<p>Modeling assumptions behind these examples are in the <a href="../../statistics-ml/README.md.html">statistics tutorial</a>.</p>
 <h3 id="ask-an-ai-tutor">Ask an AI tutor<a class="heading-anchor" href="#ask-an-ai-tutor" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for r-042 (Estimation, standard errors and resampling targets).
 Read the guide and my saved attempt. Explain the relevant R mechanism,

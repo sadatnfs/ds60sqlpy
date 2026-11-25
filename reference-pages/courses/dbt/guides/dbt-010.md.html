@@ -212,10 +212,10 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="syntax-and-data-contract">Syntax and data contract<a class="heading-anchor" href="#syntax-and-data-contract" aria-label="Link to this section">#</a></h3>
 <p>The modern YAML snapshot declares a relation, unique_key, strategy, check_cols and deletion policy. The example obtains the actual relation name from the generated manifest because custom schema naming can depend on the adapter/profile. dbt_valid_to is null for current versions under this contract. Query both all historical rows and the active subset.</p>
 <h3 id="run-the-lesson">Run the lesson<a class="heading-anchor" href="#run-the-lesson" aria-label="Link to this section">#</a></h3>
-<p>Open <code>dbt-010</code> in <code>/classroom</code>. Its starter <code>main.py</code> contains both worked cases, &quot;Observe an attribute change&quot; and &quot;Invalidate a deleted source entity&quot;, and prints the dictionary each case returns. The prepared <code>data-engineering</code> worker runs it in a fresh temporary directory. An <code>AssertionError</code> means that an observation differs from the case&#x27;s stated contract. Each case writes its dbt project and DuckDB database into its own temporary directory, runs real dbt commands through dbt&#x27;s Python entry point and removes the directory when it returns. No account, warehouse, network request or package download is involved. Save source and notes before switching lessons.</p>
+<p>Both snapshot cases should report three history rows. The active rows tell them apart: with the customer kept, <code>(1, west)</code> and <code>(2, south)</code> are both current; with customer 2 deleted and hard_deletes set to invalidate, only <code>(1, west)</code> remains current. See the <a href="../STUDY-GUIDE.md.html#run-a-lesson">run routine</a>.</p>
 <h3 id="worked-case-1-observe-an-attribute-change">Worked case 1: Observe an attribute change<a class="heading-anchor" href="#worked-case-1-observe-an-attribute-change" aria-label="Link to this section">#</a></h3>
 <p>The first case snapshots two customers, changes one region, and snapshots again. The history has three versions in total, with two current customers. The old region remains observable rather than being overwritten.</p>
-<p><strong>Project files.</strong> The case writes these files before its first dbt command. YAML is shown in conventional key order; dbt reads the same mappings.</p>
+<p><strong>Project files</strong>, written before the first dbt command:</p>
 <p><code>models/dummy.sql</code></p>
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">select</span> <span class="syntax-number">1</span> <span class="syntax-keyword">as</span> value</code></pre>
 <p><code>seeds/customers.csv</code></p>
@@ -234,7 +234,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <span class="syntax-tag">check_cols</span><span class="syntax-punctuation">:</span>
         <span class="syntax-punctuation">-</span> region
       <span class="syntax-tag">hard_deletes</span><span class="syntax-punctuation">:</span> invalidate</code></pre>
-<p><strong>Commands and changes, in order.</strong> Each <code>dbt</code> line is one <code>invoke(...)</code> call; the harness adds <code>--project-dir</code> and <code>--profiles-dir</code> for the temporary project.</p>
+<p><strong>Commands, in order.</strong> Each <code>dbt</code> line is one <code>invoke(...)</code> call.</p>
 <pre class="highlighted-code"><code class="language-bash">dbt seed
 dbt snapshot</code></pre>
 <p>The case then writes <code>seeds/customers.csv</code>:</p>
@@ -244,7 +244,7 @@ dbt snapshot</code></pre>
 <pre class="highlighted-code"><code class="language-bash">dbt seed
 dbt snapshot</code></pre>
 <p><strong>Expected evidence:</strong> There are 3 history rows; current regions are west and south.</p>
-<p>The program below shows only this case&#x27;s own functions. They call the shared helpers <code>project</code>, <code>invoke</code>, <code>rows</code> and <code>relation</code>, which write the files above, run dbt through <code>dbtRunner</code> and read the results; the helpers are explained in <a href="dbt-001.md.html">dbt-001</a> and appear in full at the top of this lesson&#x27;s <a href="../lessons/dbt-010.py.html">starter</a>.</p>
+<p>Helpers <code>project</code>, <code>invoke</code>, <code>rows</code> and <code>relation</code>: see the <a href="../STUDY-GUIDE.md.html#case-harness">case harness</a>.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> tempfile
 
 
@@ -291,7 +291,7 @@ dbt snapshot</code></pre>
     <span class="syntax-keyword">return</span> snapshot_case<span class="syntax-punctuation">(</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">)</span></code></pre>
 <h3 id="worked-case-2-invalidate-a-deleted-source-entity">Worked case 2: Invalidate a deleted source entity<a class="heading-anchor" href="#worked-case-2-invalidate-a-deleted-source-entity" aria-label="Link to this section">#</a></h3>
 <p>The second case changes one customer and removes the other. The explicit deletion policy closes the removed customer&#x27;s current version. It does not invent a new active customer or silently erase history.</p>
-<p><strong>Project files.</strong> The case writes these files before its first dbt command. YAML is shown in conventional key order; dbt reads the same mappings.</p>
+<p><strong>Project files</strong>, written before the first dbt command:</p>
 <p><code>models/dummy.sql</code></p>
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">select</span> <span class="syntax-number">1</span> <span class="syntax-keyword">as</span> value</code></pre>
 <p><code>seeds/customers.csv</code></p>
@@ -310,7 +310,7 @@ dbt snapshot</code></pre>
       <span class="syntax-tag">check_cols</span><span class="syntax-punctuation">:</span>
         <span class="syntax-punctuation">-</span> region
       <span class="syntax-tag">hard_deletes</span><span class="syntax-punctuation">:</span> invalidate</code></pre>
-<p><strong>Commands and changes, in order.</strong> Each <code>dbt</code> line is one <code>invoke(...)</code> call; the harness adds <code>--project-dir</code> and <code>--profiles-dir</code> for the temporary project.</p>
+<p><strong>Commands, in order.</strong> Each <code>dbt</code> line is one <code>invoke(...)</code> call.</p>
 <pre class="highlighted-code"><code class="language-bash">dbt seed
 dbt snapshot</code></pre>
 <p>The case then writes <code>seeds/customers.csv</code>:</p>
@@ -319,7 +319,7 @@ dbt snapshot</code></pre>
 <pre class="highlighted-code"><code class="language-bash">dbt seed
 dbt snapshot</code></pre>
 <p><strong>Expected evidence:</strong> History still has 3 rows, but only customer 1/west is current.</p>
-<p>The program below shows only this case&#x27;s own functions. They call the shared helpers <code>project</code>, <code>invoke</code>, <code>rows</code> and <code>relation</code>, which write the files above, run dbt through <code>dbtRunner</code> and read the results; the helpers are explained in <a href="dbt-001.md.html">dbt-001</a> and appear in full at the top of this lesson&#x27;s <a href="../lessons/dbt-010.py.html">starter</a>.</p>
+<p>Helpers <code>project</code>, <code>invoke</code>, <code>rows</code> and <code>relation</code>: see the <a href="../STUDY-GUIDE.md.html#case-harness">case harness</a>.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> tempfile
 
 
@@ -365,7 +365,7 @@ dbt snapshot</code></pre>
 <span class="syntax-keyword">def</span> <span class="syntax-function">example_two</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
     <span class="syntax-keyword">return</span> snapshot_case<span class="syntax-punctuation">(</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></code></pre>
 <h3 id="practice">Practice<a class="heading-anchor" href="#practice" aria-label="Link to this section">#</a></h3>
-<p>The starter contains both worked cases, so a task can change either one. Make each change in a saved copy, run it, and compare the printed result with the task&#x27;s check before opening the separate explained answers.</p>
+<p>Use the <a href="../STUDY-GUIDE.md.html#practice-routine">practice routine</a>.</p>
 <h4 id="1-inspect-a-closed-version">1. Inspect a closed version<a class="heading-anchor" href="#1-inspect-a-closed-version" aria-label="Link to this section">#</a></h4>
 <p>Query the old region and its validity endpoint.</p>
 <p><strong>Check:</strong> The changed version has a non-null dbt_valid_to.</p>
@@ -400,7 +400,7 @@ dbt snapshot</code></pre>
 <li><a href="https://github.com/duckdb/dbt-duckdb">dbt-duckdb repository README</a></li>
 </ul>
 <h3 id="tutor-guidance">Tutor guidance<a class="heading-anchor" href="#tutor-guidance" aria-label="Link to this section">#</a></h3>
-<p>Use the repository&#x27;s <code>$guide-ds60sqlpy-learning</code> skill (<code>.agents/skills/guide-ds60sqlpy-learning/SKILL.md</code>) for <code>dbt-010</code>. Inspect the learner&#x27;s own source and printed output first. Ask for an explanation of snapshot, SCD2, check strategy, validity interval and deletion in their own words, then give one focused hint at a time. Keep an assertion on this synthetic fixture separate from a claim about an external dataset or deployed service.</p></article>
+<p>Ask the learner what the snapshot observed, when, and what it could never have seen between runs. Then ask how invalidated deletes change the current view, and why a snapshot is not the same as a source system&#x27;s audit log. See the <a href="../STUDY-GUIDE.md.html#tutor-guidance">tutor routine</a>.</p></article>
   </main>
 </body>
 </html>

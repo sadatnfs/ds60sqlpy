@@ -10,31 +10,19 @@ Intermediate. Direct catalog prerequisites: `python-algo-02`. This lesson deepen
 
 ## Learning objectives
 
-By the end, explain the mechanism in your own words, implement each bounded contract, and use a counterexample to distinguish a correct result from a plausible mistake. The six exercises progress from inspection to transformation, edge handling and transfer.
+By the end, you can explain why the path with fewest edges and the path with lowest total weight are different questions, answer the first with breadth-first search and the second with Dijkstra's algorithm, and rebuild a route from parent links. You will also produce a deterministic topological order, detect a cycle, and keep the k largest values with a bounded heap.
 
 ## How to run this lesson
 
-**Primary browser route:** run `./classroom` from the repository root and
-choose **Python and data science** on `/classroom`. Open this lesson in the shared workspace,
-read its capability notice, and use its supported coding or reading workflow.
-The [classroom guide](../../../docs/classroom-experience.md) explains saved work, runtimes and switching subjects.
+The [learner script](../lessons/py_algo_03.py) needs only the standard library. Its worked graph sends `a` to `b` directly at cost 10 or through `c` at cost 2, so one hop is not the cheapest route; it then streams `[4.0, 1.0, 9.0, 3.0, 8.0]` through a three-entry heap and keeps `[9.0, 8.0, 4.0]`, with 4.0 at the heap root.
 
-**Optional contributor route:** use the prepared environment in
-[CONTRIBUTING](../../../CONTRIBUTING.md) on Linux, macOS or Windows through
-WSL 2. The commands below assume its packages are already installed. They are
-not prerequisites for opening this lesson in the Docker classroom. Local
-`.learning/` files and CLI progress belong to this checkout; they do not read or
-update the Docker classroom's named learning volume.
-
-Open the [learner script](../lessons/py_algo_03.py) in the prepared repository environment. In the Docker classroom, edit the saved learner pad; drafts, notes and results persist in the classroom learning volume. An ignored `.learning/` copy is a separate optional contributor workspace. Run from the repository root. The provided worked examples execute immediately; task functions intentionally raise `NotImplementedError` until you implement them. A successful example is not evidence that the six tasks are finished.
-
-Prepared POSIX/WSL contributor terminal:
+The [Python study guide](../../STUDY-GUIDE.md) covers the browser classroom and this prepared-checkout run:
 
 ```sh
 uv run --no-sync python python/professional/lessons/py_algo_03.py
 ```
 
-Dependencies: Python standard library. All fixtures are tiny and local. The terminal prints the worked results and stops without editing your files. Keep [explanatory solutions](../solutions/py_algo_03_solutions.md) and [runnable reference](../solutions/py_algo_03_solution.py) closed until an attempt or an explicit worked comparison.
+After your attempt, compare `dijkstra` with the [runnable reference](../solutions/py_algo_03_solution.py) on one point first: what it does when a popped heap entry carries a distance worse than the one already recorded. Then check your reasons for rejecting negative and Boolean weights in `validate_graph` against the [explanatory solutions](../solutions/py_algo_03_solutions.md).
 
 ## Vocabulary and mental model
 
@@ -124,11 +112,11 @@ If a weighted route has too high a cost, check whether a FIFO queue was used whe
 
 ## Self-check and retrieval
 
-Without copying code, explain which input property each function assumes, which observable result proves the normal case, and which counterexample would expose an incorrect implementation. Trace one boundary input by hand before running it. Keep the input and expected output beside your saved result so a reviewer can reproduce the evidence.
+Trace the worked graph by hand: `bfs_hops` from `a` gives `b` and `c` one hop each, while `dijkstra` gives `b` distance 2.0 with parent `c`, so `reconstruct_path` returns `['a', 'c', 'b']`. A route to an unreachable vertex must return `None`, and the same graph's `topological_order` must be `['a', 'c', 'b']` because `b` waits for both incoming edges.
 
 ## Next steps
 
-Use these mechanisms in the next deepening lesson or return to the original prerequisite examples and explain precisely which new failure cases you can now diagnose. Review the [professional track](../README.md) for related modules.
+Next, [dynamic programming, state design, and reconstructable decisions](py_algo_04.md) keeps the parent-link idea: a stored choice per state lets you rebuild the optimal plan, not just its score. The [professional track](../README.md) lists the other modules.
 
 ## Primary sources and official APIs
 

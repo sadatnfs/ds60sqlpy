@@ -1,6 +1,6 @@
 # web-019: explanatory solutions
 
-Open this after your own attempt. Each answer explains the lesson's synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in `courses/web-development/guides/web-019.md`.
+Attempt each exercise before reading; the mechanism is in `courses/web-development/guides/web-019.md` ([using these answers](../STUDY-GUIDE.md#solutions)).
 
 ## Exercise 1: Distinguish a condition selector from generated content.
 
@@ -76,4 +76,6 @@ Open this after your own attempt. Each answer explains the lesson's synthetic fi
 
 ## Reference comparison
 
-Open `courses/web-development/solutions/web-019_solution.html` only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; its success message is not an accessibility audit or proof of responsive behavior at every size.
+The reference counts checked inputs and requires exactly one, so it catches a starter whose initial selection changed. It does not test the visible checked style, focus-within feedback or keyboard operation, so tab through the reminders, toggle each with Space and compare what changes on screen.
+
+Open `courses/web-development/solutions/web-019_solution.html` after saving your attempt ([comparing with the reference](../STUDY-GUIDE.md#references)).

@@ -4,8 +4,6 @@
 
 PTX is a virtual instruction language, while SASS describes machine instructions for a particular GPU architecture. The driver or toolchain can translate PTX differently across targets and versions. A fat binary can contain native device images and PTX fallback according to a deliberate policy. JIT can introduce cold-start cost and compatibility constraints. Inspect compiler resource reports and generated code to test a hypothesis, such as unexpected local-memory traffic, before attempting inline assembly. Counting PTX instructions does not directly count executed hardware operations or predict runtime.
 
-The separate [CPU reference](../references/cuda-059_cpu.py) checks the chapter's bounded model. It does not execute CUDA or establish GPU timing. Compare after attempting the worksheet or explicitly choosing to reveal solutions.
-
 ## Exercise 1
 
 A high-level multiply-plus-add may become a fused instruction depending on types, options and target. If generated code changes, retain the numerical test because one rounding differs from two. A shorter instruction sequence is useful evidence only in combination with the workload's actual behavior.
@@ -78,12 +76,16 @@ Measure first load/JIT separately from warmed execution with source/target/drive
 
 **How to verify:** Run fresh processes repeatedly and compare first-run times.
 
+## Self-check answers
+
+1. **How do native image and PTX JIT compatibility differ?** A native image runs only on matching architectures; PTX can be compiled by the driver for newer ones at startup.
+2. **What should a cold-start experiment measure?** First launch time in a fresh process with and without a warm JIT cache, separate from steady state.
+3. **Why can removing spills in worked example 2 fail to speed things up?** Shorter live ranges may add recomputation that costs more than the saved local memory traffic.
+
 ## Numerical reference and its limits
 
-The complete CPU model is [here](../references/cuda-059_cpu.py). Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It does not claim CUDA execution, concurrency safety or a performance measurement.
+The [CPU reference](../references/cuda-059_cpu.py) reproduces worked example 1 and prints `{'source.cu': 'CUDA C++ source', 'kernel.ptx': 'virtual instructions', 'kernel.cubin': 'target machine code', 'main': 'host executable'}`.
 
 ## Transfer review
 
 Measure first load/JIT separately from warmed execution with source/target/driver identities and unchanged correctness fixtures.
-
-A complete explanation must name its inputs, the unchanged mathematical contract, the changed boundary or resource condition, and the evidence still needed on actual hardware. Preserve a CPU baseline even after a GPU path becomes available.

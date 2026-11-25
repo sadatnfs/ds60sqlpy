@@ -273,7 +273,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Inspect assigned partitions, current positions, committed offsets, source end offsets and retention bounds. Lag is an offset-distance signal with workload and record-size caveats; it is not automatically a wall-clock delay in seconds. Distinguish a stuck application from an idle partition and compare logs with actual progress rather than resetting offsets as the first response.</p>
 <p><strong>Interview discussion: when should a consumer commit?</strong> After the intended effect has succeeded under a defined idempotency or transaction contract, and only through the contiguous completed positions. These two actual reads show replay before commit and no replay after commit, while the text identifies the additional membership and concurrency behavior that this bounded manual-assignment probe has not qualified.</p>
 <h3 id="complete-worked-source">Complete worked source<a class="heading-anchor" href="#complete-worked-source" aria-label="Link to this section">#</a></h3>
-<p>This is a project-only command notebook. Read and edit it in the classroom; run its explicitly labeled commands from the copied owned Docker workshop. The classroom does not execute these service commands.</p>
+<p>The classroom does not execute these service commands. See the <a href="../STUDY-GUIDE.md.html#workshop-notebooks">workshop rules</a>.</p>
 <h2 id="replay-and-committed-next-offsets">Replay and committed next offsets<a class="heading-anchor" href="#replay-and-committed-next-offsets" aria-label="Link to this section">#</a></h2>
 <pre class="highlighted-code"><code class="language-bash">bash run.sh check
 bash run.sh check-consumers</code></pre>

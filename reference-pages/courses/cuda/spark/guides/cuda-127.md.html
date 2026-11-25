@@ -194,9 +194,17 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cuda/spark/guides/cuda-127.md</code></p>
     </header>
     <article class="document"><h2 id="cuda-127-capstone-the-same-analytical-pipeline-in-scala-and-pyspark">cuda-127: Capstone: the same analytical pipeline in Scala and PySpark<a class="heading-anchor" href="#cuda-127-capstone-the-same-analytical-pipeline-in-scala-and-pyspark" aria-label="Link to this section">#</a></h2>
-<p><strong>Route:</strong> CUDA Python and machine learning / GPU Spark specialization. <strong>Stage:</strong> advanced. <strong>Prerequisites:</strong> <code>cuda-117</code>, <code>cuda-121</code>, <code>cuda-123</code>, <code>cuda-124</code>. Allow several sessions when the hardware experiment is new; the chapter is not a deadline.</p>
-<h3 id="what-you-will-be-able-to-explain">What you will be able to explain<a class="heading-anchor" href="#what-you-will-be-able-to-explain" aria-label="Link to this section">#</a></h3>
-<p>By the end, you can <strong>derive expected revenue</strong>, <strong>test duplicate dimension keys</strong>, and <strong>prepare a balanced capstone report</strong> with evidence. Start with the two worked cases, then use the editable CPU model to make the quantities concrete.</p>
+<p><strong>Route:</strong> CUDA Python and machine learning / GPU Spark specialization. <strong>Stage:</strong> advanced. <strong>Prerequisites:</strong> <code>cuda-117</code>, <code>cuda-121</code>, <code>cuda-123</code>, <code>cuda-124</code>.</p>
+<p>Pacing, evidence labels and platform rules: <a href="../../STUDY-GUIDE.md.html">CUDA study guide</a>.</p>
+<h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
+<ul>
+<li>Derive expected revenue.</li>
+<li>Write Scala expressions.</li>
+<li>Write PySpark expressions.</li>
+<li>Test duplicate dimension keys.</li>
+<li>Capture executed GPU evidence.</li>
+<li>Prepare a balanced capstone report.</li>
+</ul>
 <h3 id="mechanism-and-vocabulary">Mechanism and vocabulary<a class="heading-anchor" href="#mechanism-and-vocabulary" aria-label="Link to this section">#</a></h3>
 <p>Build a bounded ETL pipeline with an explicit schema, null handling, a join, a derived column and a grouped metric. Provide Scala and PySpark implementations using equivalent declarative expressions. Use a CPU oracle for exact expected output, then run both ordinary Spark implementations. Only after semantic agreement should a separately prepared GPU Spark environment be compared.</p>
 <p>The GPU report includes exact compatibility matrix, initial and executed plans, unsupported-operation reasons, resource assignment, task concurrency, memory/spill observations and complete timing. Keep query text and input identity unchanged across backends unless a rewrite is separately named and revalidated. A result table alone does not prove the plugin accelerated any operator. A plan alone does not prove the final result is correct.</p>
@@ -218,8 +226,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Sales (A,2),(A,4),(B,3) joined to prices (A,10),(B,20) yield revenue A 60 and B 60. The fixture has deterministic exact integer output.</p>
 <h4 id="worked-example-2">Worked example 2<a class="heading-anchor" href="#worked-example-2" aria-label="Link to this section">#</a></h4>
 <p>Adding a duplicate A price row intentionally doubles A matches. A defensive uniqueness check should reject that input if the business contract requires one price per product.</p>
-<h3 id="portable-executable-model">Portable executable model<a class="heading-anchor" href="#portable-executable-model" aria-label="Link to this section">#</a></h3>
-<p>The <strong>CPU reference model</strong> variant runs this bounded worked example using <code>python-core</code>. It uses only the Python standard library, small synthetic values and no network. Its purpose is to expose the arithmetic or contract behind the chapter. The separate reference includes assertions for the stated observations.</p>
+<h3 id="how-to-run-the-cpu-model">How to run the CPU model<a class="heading-anchor" href="#how-to-run-the-cpu-model" aria-label="Link to this section">#</a></h3>
+<p>Edit the copy; the <a href="../references/cuda-127_cpu.py.html">reference</a> adds assertions.</p>
+<pre class="highlighted-code"><code class="language-bash">python courses/cuda/spark/lessons/cuda-127_cpu.py</code></pre>
 <pre class="highlighted-code"><code class="language-python">sales <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">A</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">A</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">B</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span>
 prices <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span><span class="syntax-string">&quot;</span><span class="syntax-string">A</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">10</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&quot;</span><span class="syntax-string">B</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">:</span> <span class="syntax-number">20</span><span class="syntax-punctuation">}</span>
 revenue <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span><span class="syntax-punctuation">}</span>
@@ -254,55 +263,46 @@ revenue <span class="syntax-operator">=</span> <span class="syntax-punctuation">
 <td><code>3</code></td>
 </tr>
 </tbody></table></div>
-<p>Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.</p>
 <h3 id="scala-and-pyspark-parity-lab">Scala and PySpark parity lab<a class="heading-anchor" href="#scala-and-pyspark-parity-lab" aria-label="Link to this section">#</a></h3>
-<p>Choose <strong>Scala Spark on CPU</strong> or <strong>PySpark on CPU</strong> to run the same bounded query in the ordinary Spark workers. Both use explicit schemas, local fixtures, at most two local threads, a disabled GPU SQL setting and a finally-block session stop. They assert the same expected result. These are CPU Spark observations, not GPU plugin qualification.</p>
-<p>For external GPU comparison, retain the same relational expressions and expected result but use a separately reviewed launcher and compatibility matrix. Do not change the classroom source into an arbitrary cluster connection.</p>
+<p>Both CPU variants assert one expected result. Read the <a href="../../STUDY-GUIDE.md.html#spark-parity-and-gpu-spark">parity rules</a>.</p>
 <h3 id="practice-and-transfer">Practice and transfer<a class="heading-anchor" href="#practice-and-transfer" aria-label="Link to this section">#</a></h3>
+<p>Record each attempt in the <a href="../lessons/cuda-127.md.html">worksheet</a> before opening hints.</p>
 <h4 id="exercise-1-derive-expected-revenue">Exercise 1: Derive expected revenue<a class="heading-anchor" href="#exercise-1-derive-expected-revenue" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Summing prices per product before multiplying, or multiplying the total quantity by the sum of all prices, mixes products and gives wrong totals such as 180 for A.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-2-write-scala-expressions">Exercise 2: Write Scala expressions<a class="heading-anchor" href="#exercise-2-write-scala-expressions" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Relying on schema inference from text files can type numbers as strings or doubles, changing join behavior or output types between runs.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-3-write-pyspark-expressions">Exercise 3: Write PySpark expressions<a class="heading-anchor" href="#exercise-3-write-pyspark-expressions" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Collecting rows into Python and summing in a loop changes where the work runs and stops being a Spark pipeline comparison.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-4-test-duplicate-dimension-keys">Exercise 4: Test duplicate dimension keys<a class="heading-anchor" href="#exercise-4-test-duplicate-dimension-keys" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Running the join without checking lets a duplicate price row double A to 120 with no error, which looks like a real sales increase.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-5-capture-executed-gpu-evidence">Exercise 5: Capture executed GPU evidence<a class="heading-anchor" href="#exercise-5-capture-executed-gpu-evidence" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Claiming GPU execution from a CPU-only environment, or from a configuration file alone, reports evidence that does not exist.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-6-prepare-a-balanced-capstone-report">Exercise 6: Prepare a balanced capstone report<a class="heading-anchor" href="#exercise-6-prepare-a-balanced-capstone-report" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Writing the report as if GPU acceleration was demonstrated when only CPU runs happened misleads anyone deciding on deployment.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
-<p>Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.</p>
+<p>Hint <em>k</em> belongs to exercise <em>k</em>; open one at a time.</p>
 <ol>
-<li>Start from worked example 1 and mark the quantities needed for the task &quot;Derive expected revenue&quot;.</li>
-<li>Change one assumption in worked example 2 while preserving the declared contract: write Scala expressions.</li>
-<li>Trace the CPU program&#x27;s variables before adding hardware behavior: write PySpark expressions.</li>
-<li>Draw producers, consumers and the exact operation boundary for the task &quot;Test duplicate dimension keys&quot;.</li>
-<li>Separate what the small fixture establishes from what the real runtime must show: capture executed GPU evidence.</li>
-<li>Write a counterexample to an overbroad claim before you prepare a balanced capstone report.</li>
+<li>Multiply each product&#x27;s quantities by its price, sum per product and check both totals.</li>
+<li>Read the input with an explicit schema, join on product, derive revenue and group by product in Scala.</li>
+<li>Apply the same operations in PySpark and sort the output so the two results can be compared row by row.</li>
+<li>Add a second price for product A and decide whether your contract rejects it or accepts the multiplied rows.</li>
+<li>List the plans, metrics and equality checks that must come from actual GPU hardware.</li>
+<li>Report the CPU results and the pending GPU limitations in separate sections.</li>
 </ol>
-<h3 id="common-mistakes-and-self-review">Common mistakes and self-review<a class="heading-anchor" href="#common-mistakes-and-self-review" aria-label="Link to this section">#</a></h3>
-<p>Confusing a correct tiny example with a general implementation is the central review risk. For this chapter, challenge the assumption in worked example 2, then ask whether your change preserves the mechanism described above. If you change dtype, layout, ordering, batch size or backend, update the acceptance contract rather than silently reusing the old observation. Explain an unexpected result before trying random configuration changes.</p>
-<p>Keep a small evidence table with columns <strong>claim</strong>, <strong>input</strong>, <strong>expected observation</strong>, <strong>actual observation</strong> and <strong>limit</strong>. For the first claim use <code>Derive expected revenue</code>. For the final claim use <code>Prepare a balanced capstone report</code>. An unperformed GPU or cluster experiment remains pending even when the CPU model is correct.</p>
-<h3 id="platform-and-evidence-contract">Platform and evidence contract<a class="heading-anchor" href="#platform-and-evidence-contract" aria-label="Link to this section">#</a></h3>
-<p>The reading worksheet and CPU reference model work through the ordinary Linux Docker classroom on macOS, Linux and Windows using WSL 2. They do not require an NVIDIA GPU. Their results are labeled CPU models or semantic oracles, not simulated hardware performance.</p>
-<p>Real CUDA work needs supported NVIDIA hardware, a compatible host driver and an explicitly prepared GPU runtime. An Apple GPU does not execute CUDA kernels. PyTorch MPS on a supported native Mac, ROCm on supported AMD hardware, or other vendor backends can provide separate accelerator learning routes; they need their own package and operation qualification and are not CUDA evidence. The ordinary Linux Docker classroom does not expose native Mac MPS automatically.</p>
-<p>Do not download packages, models or data by opening this lesson. Do not attach an engine socket, ambient cluster credentials or an arbitrary remote endpoint. A CPU pass, imported package, successful compilation, real GPU result and measured performance are distinct observations. Record the actual backend, data shape/dtype, source revision, versions and pending checks. A saved completion marker records learning progress, not hardware certification.</p>
-<p>GPU Spark is a separate owned external workflow. The ordinary <code>spark-local-scala</code> and <code>spark-local-python</code> profiles are CPU Spark. Keep the GPU plugin disabled or absent for a CPU-only baseline. Per-operator CPU fallback inside a working GPU plugin environment is a different condition from having no compatible GPU. Never mount a host Docker socket or ambient kubeconfig into an ordinary lesson worker.</p>
+<h3 id="common-mistakes-and-self-check">Common mistakes and self-check<a class="heading-anchor" href="#common-mistakes-and-self-check" aria-label="Link to this section">#</a></h3>
+<p>A common capstone mistake is treating a correct result table as proof of acceleration, or a GPU plan as proof of correctness. Each answers a different question. Another is letting a duplicate dimension key silently double revenue. Fix both by checking exact output against a CPU oracle, enforcing or explicitly accepting key uniqueness and keeping query text and inputs unchanged across backends while collecting plans and metrics separately.</p>
+<p><strong>Evidence limit:</strong> The reference produces sorted revenue <code>[(A, 60), (B, 60)]</code> with exact integers. It runs neither Spark implementation, so equivalent Scala and PySpark plans and any GPU evidence must come from executed jobs.</p>
+<ol>
+<li>Why run both ordinary Spark implementations before any GPU comparison?</li>
+<li>What does a GPU report need besides timing?</li>
+<li>When may the query text change across backends?</li>
+</ol>
+<p>Answers: <a href="../solutions/cuda-127_solutions.md.html#self-check-answers">self-check answers</a>.</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
 <ul>
-<li><a href="https://nvidia.github.io/cudf-spark/docs/download.html">cuDF Spark plugin release and compatibility matrix</a></li>
 <li><a href="https://nvidia.github.io/cudf-spark/docs/supported_ops.html">Supported Spark operators and expression types</a></li>
-<li><a href="https://docs.nvidia.com/cudf-spark/latest/tuning-guide.html">GPU Spark tuning guide</a></li>
-<li><a href="https://spark.apache.org/docs/latest/sql-performance-tuning.html">Apache Spark SQL performance tuning</a></li>
 </ul>
-<p>Use the version-matched documentation of your prepared environment. These references describe interfaces and supported boundaries; the chapter&#x27;s synthetic examples and CPU models are original teaching material.</p>
+<p>Full lists: <a href="../../STUDY-GUIDE.md.html#documentation-and-sources">documentation and sources</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning skill for cuda-127: Capstone: the same analytical pipeline in Scala and PySpark.
 Read courses/cuda/spark/guides/cuda-127.md and courses/cuda/spark/lessons/cuda-127.md.

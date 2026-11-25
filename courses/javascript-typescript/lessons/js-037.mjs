@@ -1,16 +1,14 @@
 // Answer-free learner source. Save your own copy before editing.
 // Exercise 1: Retry transient failures with deterministic full jitter: change one input
-// Copy Example A into a scratch `main.mjs` and change `let attempts = 0;` to `let attempts =
-// 1;`. Before running it, predict which check fails and which value it now sees; then run it
-// and restore the original line.
-// Expected: The changed run fails with an `AssertionError` at `assert.deepEqual(waits, [50,
+// In a scratch copy of Example A, change `let attempts = 0;` to `let attempts = 1;`. Which
+// check fails, and what value does it see?
+// Expected: The edited run fails with an `AssertionError` at `assert.deepEqual(waits, [50,
 // 100])`. Restoring `let attempts = 0;` brings back: three attempts; delays 50 and 100;
 // result ready.
 
 // Exercise 2: Stop on permanent failure and on exhausted attempts: diagnose an edited check
-// A careless edit changed a check in Example B so that it reads `async () => { transient -=
-// 1`. Run Example B with that line, explain why the edited check now fails for the same
-// program state, and restore it.
+// Example B's check was edited to read `async () => { transient -= 1`. Run it, explain the
+// failure and restore the original.
 // Expected: Before the repair the run fails with an `AssertionError` at `async () => {
 // transient -= 1`. Restoring `async () => { transient += 1` brings back: permanent attempted
 // once; transient attempted three times and still rejects.

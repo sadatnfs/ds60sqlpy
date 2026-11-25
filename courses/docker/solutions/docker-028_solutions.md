@@ -1,6 +1,6 @@
 # docker-028: explanatory solutions
 
-Compare after your own attempt or an explicit reveal. These explain the supplied teaching fixtures; they are not engine results. The mechanism is explained in `courses/docker/guides/docker-028.md`.
+These answers explain teaching fixtures, not engine results; the mechanism is in [the guide](../guides/docker-028.md).
 
 ## Exercise 1: Parse the components of an image reference.
 
@@ -88,4 +88,4 @@ Compare after your own attempt or an explicit reveal. These explain the supplied
 
 ## Check your transfer
 
-A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.
+Removing the first name only untags it; the image stays because the second reference still points at it, so `docker run --pull never registry.example.com/team/ds60-study:1.0` keeps working. A push would upload the image's layers and manifest to `registry.example.com` under `team/ds60-study`, creating a remote copy whose visibility depends on that registry's settings, and the push prints the digest that becomes the release identity. If `docker image rm` had printed `Deleted:` lines rather than only `Untagged:`, no other reference shared the image.

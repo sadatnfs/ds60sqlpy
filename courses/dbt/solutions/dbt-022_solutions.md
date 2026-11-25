@@ -2,7 +2,7 @@
 
 Diagnose failures using the layer that actually rejected the work.
 
-The executable reference contains the two complete worked cases with assertions. The changes below explain the independent practice and its limits.
+The reference compiles `bad.sql` successfully, then runs it and reads status error from run_results.json. Its second case multiplies a sum by 2, and a singular test comparing with 12 catches the wrong 24. The semantic error is caught only because the test states the expected quantity independently. See [how these answers are laid out](../STUDY-GUIDE.md#answers-and-references).
 
 
 ## 1. Classify the first failure

@@ -2,67 +2,28 @@
 
 ## How to run this lesson
 
-Start the Linux-container engine and run `./classroom` from the repository
-root. On Windows, use Ubuntu in WSL 2 or the thin
-`START_DOCKER_CLASSROOM.cmd` wrapper. Choose **PostgreSQL** on the shared
-`/classroom` home, then open **sql-32**. The
-[launcher guide](../../../docs/one-command-classroom.md) covers first preparation, strict resume and
-the saved project selection. No host Python or PostgreSQL installation is
-required for this browser route.
+Choose **sql-32** in `./classroom`, then **Whole SQL lesson (psql)**. The
+learner file creates three indexes inside one transaction, plans three
+filters with `EXPLAIN ANALYZE`, and ends with `ROLLBACK`, so no index
+outlives the run. That also means each run starts from a table with only its
+primary key and unique constraints. Work in
+`.learning/sql/sql-32/lesson/workspace/sql/postgres-60day/day32_index_fundamentals.sql`
+against `advanced_sql_training`. The shared launch steps are in
+[Run a lesson in the classroom](../../STUDY-GUIDE.md#run-a-lesson-in-the-classroom).
 
-1. Read the prerequisite and fixture notes before running the file. Use only
-   the local disposable `advanced_sql_training` database.
-2. Choose **Whole SQL lesson (psql)** for the cataloged learner script. This
-   preserves the lesson's reviewed psql directives, relative includes and
-   transaction behavior. **SQL snippet** is appropriate for ordinary SQL
-   statements, but is not a replacement for an entire script's setup.
-3. The **Course database** panel above the code shows whether the course
-   training tables are loaded. Missing tables load automatically before your
-   first run (or choose **Load course tables**) and stay loaded for later
-   lessons. **Reset training data** restores the original rows only when your
-   own changes made results differ; it keeps your saved code and notes.
-4. Edit the learner copy in the classroom and save your prediction before
-   running. Its whole-script workspace is
-   `.learning/sql/sql-32/lesson/workspace/sql/postgres-60day/day32_index_fundamentals.sql`.
-   For browser work this path is inside the Docker learning volume, not a
-   newly created host folder beside your checkout. The checked-in source
-   remains the answer-free starting artifact.
-5. Run the whole script and inspect the full transcript. The runner uses
-   `psql -X -v ON_ERROR_STOP=1 -f`. SELECT output has columns, rows and a row
-   count; DDL/DML has command tags; intentional checks may produce NOTICE
-   messages. An unexpected ERROR or nonzero exit is a failure to diagnose,
-   even when an earlier query printed plausible values.
-6. Verify the lesson's expected grain, ordering, constraints and declared
-   transaction or cleanup outcome. Keep required ROLLBACK statements.
-   The warehouse sequence and other explicitly stateful exercises explain
-   when state is committed. Read saved output without rerunning it when
-   reviewing an earlier attempt.
-
-If a relation is missing, inspect the lesson's required fixture and predecessor
-rather than guessing a new table definition. If authentication or runtime
-readiness fails, use `./classroom status` and the setup guide. Keep credentials
-out of SQL, notebooks, screenshots and committed files. Repair the first error
-before trusting partial output, and reveal separate solutions only when you
-want to compare after an attempt.
+If a `CREATE INDEX` fails with "relation already exists", an earlier
+experiment committed an index by mistake. Drop that index by name rather
+than renaming yours.
 
 ### Optional contributor notebook route
 
-For notebook work, deliberately prepare the Linux/WSL contributor environment
-from [CONTRIBUTING.md](../../../CONTRIBUTING.md), including a compatible psql client and
-the notebook dependencies. Generate this lesson's private workspace through
-the maintained CLI:
+In a notebook you can keep the transaction open across cells and plan the
+same filter before and after each `CREATE INDEX`
+([notebook setup](../../STUDY-GUIDE.md#optional-contributor-notebook-route)):
 
 ```sh
 uv run --no-sync python scripts/course.py sql notebook sql-32
 ```
-
-Open the printed notebook path in that environment's JupyterLab. It uses the
-same catalog-derived learner-copy layout in that contributor checkout and
-executes the complete script through psql. Its host-side state is separate
-from the Docker browser's named volume. Follow
-[guided SQL notebooks](../../../docs/guided-sql-notebooks.md) for explicit local connection
-selection and kernel setup. Notebook generation does not execute SQL or
-authorize a reset.
 
 ## Level and prerequisites
 
@@ -74,24 +35,29 @@ authorize a reset.
 
 ## A beginner's mental model for this lesson
 
-A **table** stores facts in named columns. A **row** is one occurrence at the
-table's declared grain. A query creates a temporary **result set**: rows printed
-on screen are not automatically stored. The key vocabulary for this lesson is Selectivity, Index scan, Index-only scan. Its worked SQL reads or creates `orders`, `customers`.
+A B-tree index is a sorted copy of one or more column values, each entry
+pointing at a row in the table (the heap). Looking up `country = 'US'` in
+the index is fast, but every match still needs a trip to the heap for the
+other columns. An index pays off when it lets PostgreSQL skip most pages of
+the table; when the matching rows are spread over every page anyway, a
+plain sequential scan is cheaper.
 
-Before writing a query, complete this sentence: “One output row represents
-___.” Joins can multiply rows, filters can remove them, grouping can collapse
-many rows into one, and window functions can add calculations while preserving
-row count. For a normal analytical `SELECT`, use this logical reading order:
-`FROM`/`JOIN` (including `ON`) → `WHERE` → `GROUP BY`/aggregates → `HAVING` →
-window calculations → `SELECT` → `ORDER BY` → `LIMIT`. PostgreSQL may execute a
-different physical plan while preserving those semantics.
+The tables in this lesson are small, and that makes the trade-off visible:
 
-The worked walkthrough's lesson-specific task is: Capture a category-filter plan before creating `products(category)`, create the index inside the rollback-only transaction, and rerun the identical query. Record the plan even if PostgreSQL keeps the sequential scan: the compact seed can make reading the table cheaper than traversing an index.
-The first runnable example has a concrete contract: Example 1 must print the expected DDL command tag for `idx_orders_total_amount`, and `orders`. Verify the object in `pg_catalog.pg_index`, and `pg_catalog.pg_indexes`, run one accepted behavior and one rejected boundary behavior, and confirm the lesson rollback/cleanup removes only course-owned state.
+| Table | Rows | Pages | Filter used here | Rows matched |
+|---|---|---|---|---|
+| `products` | 300 | 3 | `category = 'Electronics'` | 50 (1 in 6) |
+| `customers` | 500 | 9 | `country = 'US'` | 63 (1 in 8) |
+| `orders` | 4,362 | 65 | last 30 days | about 209 |
+| `payments` | 3,836 | 29 | last 180 days | about 1,340 |
+
+On a three-page table no index can save much, so `products` keeps its
+sequential scan. On `orders`, a 30-day window touches 16 of 65 pages through
+a bitmap scan, which is a real saving. PostgreSQL makes this choice from
+**selectivity**, the fraction of rows it expects a predicate to keep, and
+from the table's size. Your job is to read its choice, not to force it.
 
 ## Two worked SQL examples
-
-These worked excerpts come from `sql/postgres-60day/day32_index_fundamentals.sql`. Use **Whole SQL lesson (psql)** in the unified classroom for the complete file, including its fixture and transaction context. The optional contributor notebook and prepared `psql` routes are described above.
 
 ### Example 1
 
@@ -99,9 +65,17 @@ These worked excerpts come from `sql/postgres-60day/day32_index_fundamentals.sql
 CREATE INDEX idx_orders_total_amount ON orders (total_amount);
 ```
 
-**How to read it:** Example 1 is data definition language (DDL). `psql` prints a command tag when PostgreSQL accepts the definition; a later catalog or behavior check must prove that the intended rule exists.
+**How to read it:** `CREATE INDEX` builds a B-tree over
+`orders.total_amount` and prints `CREATE INDEX`. That tag proves only that
+the index exists. The learner file then plans `total_amount > 500 LIMIT
+100`, and the plan ignores the new index: 2,410 of 4,362 orders match, so
+the first 100 are found after reading about 183 rows from the heap.
 
-**Expected result/shape:** Example 1 must print the expected DDL command tag for `idx_orders_total_amount`, and `orders`. Verify the object in `pg_catalog.pg_index`, and `pg_catalog.pg_indexes`, run one accepted behavior and one rejected boundary behavior, and confirm the lesson rollback/cleanup removes only course-owned state.
+**Expected result/shape:** The command tag, then a `Limit` over a
+`Seq Scan on orders` with `Rows Removed by Filter: 83`. To see the index
+itself, query `pg_indexes WHERE indexname = 'idx_orders_total_amount'`
+before the `ROLLBACK`; it is about 112 kB, nearly twice the 65-page table
+footprint of each column it covers.
 
 ### Example 2
 
@@ -109,9 +83,17 @@ CREATE INDEX idx_orders_total_amount ON orders (total_amount);
 CREATE INDEX idx_orders_order_date ON orders (order_date);
 ```
 
-**How to read it:** Example 2 is data definition language (DDL). `psql` prints a command tag when PostgreSQL accepts the definition; a later catalog or behavior check must prove that the intended rule exists.
+**How to read it:** The second index is on `order_date`, and
+its filter, the last 30 days, keeps only about 209 orders. This time the
+planner uses the index: a `Bitmap Index Scan` collects matching row
+locations, and a `Bitmap Heap Scan` visits only the pages that hold
+them.
 
-**Expected result/shape:** Example 2 must print the expected DDL command tag for `idx_orders_order_date`, and `orders`. Verify the object in `pg_catalog.pg_index`, and `pg_catalog.pg_indexes`, run one accepted behavior and one rejected boundary behavior, and confirm the lesson rollback/cleanup removes only course-owned state.
+**Expected result/shape:** `Bitmap Heap Scan on orders` above
+`Bitmap Index Scan on idx_orders_order_date`, with an `Index Cond` on
+`order_date` and `Heap Blocks: exact=16`, about a quarter of the table. The
+third plan, `country = 'US'` on `customers`, also uses a bitmap scan but
+visits all 9 heap pages, so the index saves nothing there.
 
 ## Learning objectives
 
@@ -138,29 +120,29 @@ can make reading the table cheaper than traversing an index.
 Complete these in the [learner SQL](../day32_index_fundamentals.sql):
 
 1. Create and test an index on `products(category)`.
-   **Inputs/evidence:** For sql-32 Exercise 1, run the underlying read-only query over `products`, `training.idx_products_category_solution`, and `idx_products_category_solution` before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison.
-   **Expected result/shape:** For sql-32 Exercise 1, expected output: one row per `product_id`. The final columns are `product_id`, `name`, and `price`.
-   **Verify:** For sql-32 Exercise 1, run the underlying query without `EXPLAIN` and preserve its `product_id` rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.
+   **Inputs/evidence:** For sql-32 Exercise 1, read `products` (300 rows on 3 pages, six categories of 50), create `idx_products_category_solution` on `category`, and plan `SELECT product_id, name, price ... WHERE category = 'Electronics'` with `EXPLAIN (ANALYZE, BUFFERS)`.
+   **Expected result/shape:** For sql-32 Exercise 1, expected output: a `Seq Scan on products` plan with estimated and actual `rows=50`, `Rows Removed by Filter: 250`, and `Buffers: shared hit=3`; the index exists but is not chosen. The final columns are `product_id`, `name`, and `price`.
+   **Verify:** For sql-32 Exercise 1, confirm `SELECT COUNT(*) FROM products WHERE category = 'Electronics'` returns 50, the plan's actual rows, and that actual plus removed rows equal 300; then, in the same transaction, `SET LOCAL enable_seqscan = off` and confirm the plan becomes a `Bitmap Index Scan on idx_products_category_solution` with the same 50 rows, and that `category = 'Toys'` keeps the `Seq Scan` with 0 actual rows and 300 removed.
 2. Compare plans before and after dropping/recreating that index.
-   **Inputs/evidence:** For sql-32 Exercise 2, run the underlying read-only query over `products`, `training.idx_products_category_compare`, and `idx_products_category_compare` before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison.
-   **Expected result/shape:** For sql-32 Exercise 2, expected output: one row per `product_id`. The final columns are `product_id`.
-   **Verify:** For sql-32 Exercise 2, run the underlying query without `EXPLAIN` and preserve its `product_id` rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.
+   **Inputs/evidence:** For sql-32 Exercise 2, drop `idx_products_category_solution` with `DROP INDEX IF EXISTS`, plan `SELECT product_id, name, price FROM products WHERE category = 'Electronics'` with `EXPLAIN (ANALYZE, BUFFERS)`, re-create the index on `products (category)`, and plan the same query again.
+   **Expected result/shape:** For sql-32 Exercise 2, expected output: two plans that are both `Seq Scan on products` with 50 actual rows, `Rows Removed by Filter: 250`, and `Buffers: shared hit=3`; re-creating the index changes nothing on this 3-page table. The final columns are `product_id`, `name`, and `price`.
+   **Verify:** For sql-32 Exercise 2, confirm `SELECT COUNT(*) FROM pg_indexes WHERE indexname = 'idx_products_category_solution'` returns 0 after the `DROP` and 1 after the `CREATE`; then run the query once without `EXPLAIN` and confirm it returns the same 50 products as both plans, `product_id` 2 through 296.
 3. Predict the scan choice from category frequency, then measure it.
-   **Inputs/evidence:** For sql-32 Exercise 3, run the underlying read-only query over `products` before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison.
-   **Expected result/shape:** For sql-32 Exercise 3, expected output: one row per `category`. The final columns are `category`, and `products`. The final order is `products DESC, category`.
-   **Verify:** For sql-32 Exercise 3, run the underlying query without `EXPLAIN` and preserve its `category` rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.
+   **Inputs/evidence:** For sql-32 Exercise 3, read `products`, count rows per `category` with `GROUP BY category`, then plan `SELECT product_id FROM products WHERE category = 'Electronics'` while the category index from the previous answer still exists.
+   **Expected result/shape:** For sql-32 Exercise 3, expected output: exactly 6 frequency rows, `Apparel`, `Beauty`, `Books`, `Electronics`, `Home`, and `Sports`, each with 50 products and listed alphabetically because every count ties; the plan is a `Seq Scan` with 50 actual rows. The final columns are `category`, and `products`. The final order is `products DESC, category`.
+   **Verify:** For sql-32 Exercise 3, confirm the counts sum to 300 and that `pg_stats.most_common_freqs` for `products.category` shows 0.16666667 for all six values; then, inside `BEGIN ... ROLLBACK`, move 49 `Electronics` rows to `Home`, run `ANALYZE products`, and confirm the frequency query now starts with `Home` at 99 and ends with `Electronics` at 1, while the plan stays a `Seq Scan` with 1 actual row because 3 pages are still cheaper than an index probe.
 4. Index `payments(payment_date)` and test a half-open date range.
-   **Inputs/evidence:** For sql-32 Exercise 4, run the underlying read-only query over `payments`, and `idx_payments_date_solution` before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison.
-   **Expected result/shape:** For sql-32 Exercise 4, expected output: one row per `payment_id`. The final columns are `payment_id`, and `amount`.
-   **Verify:** For sql-32 Exercise 4, run the underlying query without `EXPLAIN` and preserve its `payment_id` rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.
+   **Inputs/evidence:** For sql-32 Exercise 4, read `payments` (3,836 rows on 29 pages), create `idx_payments_date_solution` on `payment_date`, and plan `SELECT payment_id, amount` for the half-open window `payment_date >= CURRENT_TIMESTAMP - interval '180 days' AND payment_date < CURRENT_TIMESTAMP`.
+   **Expected result/shape:** For sql-32 Exercise 4, expected output: a `Bitmap Heap Scan on payments` over a `Bitmap Index Scan on idx_payments_date_solution` with both bounds in the `Index Cond`, 1,340 actual rows on this load, and `Heap Blocks: exact=29`. The final columns are `payment_id`, and `amount`.
+   **Verify:** For sql-32 Exercise 4, confirm the same window counted without `EXPLAIN` matches the plan's actual rows (1,340 on this load), and that the two adjacent half-open windows of 180 to 90 days and 90 to 0 days ago add up to it (632 + 708); then on `VALUES (timestamp '2026-01-01 00:00:00')` confirm `BETWEEN` places that instant in both one-day windows that meet at midnight, while `>= start AND < end` places it only in the later one.
 5. Diagnose `lower(country)` and test a matching expression index.
-   **Inputs/evidence:** For sql-32 Exercise 5, run the underlying read-only query over `customers`, and `idx_customers_lower_country_solution` before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison.
-   **Expected result/shape:** For sql-32 Exercise 5, expected output: one row per `customer_id`. The final columns are `customer_id`.
-   **Verify:** For sql-32 Exercise 5, run the underlying query without `EXPLAIN` and preserve its `customer_id` rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.
+   **Inputs/evidence:** For sql-32 Exercise 5, read `customers` (500 rows, country codes stored in uppercase), create `idx_customers_lower_country_solution` on the expression `lower(country)`, and plan `SELECT customer_id FROM customers WHERE lower(country) = 'us'`.
+   **Expected result/shape:** For sql-32 Exercise 5, expected output: a `Bitmap Heap Scan on customers` over a `Bitmap Index Scan on idx_customers_lower_country_solution` with `Index Cond: (lower(country) = 'us'::text)`, an estimate of `rows=2`, and 63 actual rows. The final columns are `customer_id`.
+   **Verify:** For sql-32 Exercise 5, confirm `COUNT(*)` with `lower(country) = 'us'` and with `country = 'US'` both return 63; then, inside `BEGIN ... ROLLBACK`, show that a plain index on `customers (country)` alone leaves the plan as `Seq Scan on customers` with `Filter: (lower(country) = 'us'::text)`, and that running `ANALYZE customers` after creating the expression index raises its estimate from `rows=2` to `rows=63`.
 6. Prove that index order does not replace an explicit `ORDER BY`.
-   **Inputs/evidence:** For sql-32 Exercise 6, read from `customers`. Build the answer toward `customer_id`, and `country`; keep `customer_id` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-32 Exercise 6, expected output: at most 10 rows keyed by `customer_id`. The final columns are `customer_id`, and `country`. The final order is `country, customer_id`.
-   **Verify:** For sql-32 Exercise 6, assert no more than 10 rows, no duplicate `customer_id`, and no adjacent pair that violates `country, customer_id`. Rejoin the returned keys to `customers` to confirm `customer_id`, and `country` came from the same source rows. Run with 10 minus one and 10 plus one eligible rows; require the output cap of 10 while retaining `country, customer_id`.
+   **Inputs/evidence:** For sql-32 Exercise 6, read `customers` twice with `LIMIT 10`: once with no `ORDER BY`, as a control, and once with `ORDER BY country, customer_id`; no index is created for this answer.
+   **Expected result/shape:** For sql-32 Exercise 6, expected output: 10 rows from each query; the unordered control happens to return customers 1 to 10 cycling through `US`, `CA`, `GB`, `DE`, `FR`, `IN`, `AU`, and `BR`, while the ordered query returns the first ten of the 62 `AU` customers, ids 7, 15, 23, 31, 39, 47, 55, 63, 71, and 79. The final columns are `customer_id`, and `country`. The final order is `country, customer_id`.
+   **Verify:** For sql-32 Exercise 6, confirm the ordered ids match `SELECT customer_id FROM customers WHERE country = 'AU' ORDER BY customer_id LIMIT 10`; then, inside `BEGIN ... ROLLBACK`, run `UPDATE customers SET country = country WHERE customer_id = 1` and confirm the unordered control now returns ids 2 to 11 while the ordered query still returns 7 through 79.
 
 Compare selective and unselective predicates against the same indexed column.
 
@@ -207,9 +189,46 @@ mentioned only as a contrast; B-tree already handles the equality lookup on
 - `SELECT *` can make heap access necessary even when a filter uses an index.
 - On the compact seed, a sequential scan may correctly be cheaper.
 
+## What the three learner indexes cost and buy
+
+Before the `ROLLBACK`, measure the indexes with
+`pg_relation_size`. The two `orders` indexes are 114,688 bytes each, 14
+pages of 8 kB, beside a 65-page table. The `customers(country)` index is 2
+pages beside a 9-page table. Every `INSERT` into `orders` now writes three
+B-trees instead of one heap page and a primary key, and every `UPDATE` that
+changes an indexed column writes a new index entry as well.
+
+```sql
+SELECT
+  indexrelid::regclass AS index_name,
+  pg_relation_size(indexrelid) / 8192 AS pages
+FROM
+  pg_index
+WHERE
+  indexrelid::regclass::text LIKE 'idx_%';
+```
+
+The plans show what that cost buys. A bitmap scan works in two passes: the
+`Bitmap Index Scan` walks the B-tree and marks every page that holds a
+match, then the `Bitmap Heap Scan` reads those pages once each in physical
+order. `Recheck Cond` is printed because a bitmap can become lossy under
+memory pressure; with `Heap Blocks: exact=...` no recheck was needed.
+
+The two bitmap plans in the learner file differ in what they save. The 209
+recent orders sit on 16 of the 65 `orders` pages, so the index lets
+PostgreSQL skip three quarters of the table. The 63 US customers are
+`customer_id` 1, 9, 17 and so on, one in every eight rows, so they appear
+on all 9 `customers` pages. That plan reads the index and then the whole
+table, and a sequential scan would have cost about the same.
+`pg_stats.correlation` for `customers.country`
+is 0.12, close to zero: the physical order of rows says almost nothing
+about the country order.
+
 ## Practice map
 
-Use the numbered **Exercises** section above as the single authoritative practice contract. Its prompts, expected shapes, and verification checks map one-for-one to the learner SQL and both solution companions.
+The six numbered prompts above are the full practice set. Each solution
+answer names the plan it saw on the course seed; your node types may differ
+after a fresh `ANALYZE`, but the row counts should not.
 
 ## Pitfalls and validation
 
@@ -232,9 +251,9 @@ index's physical order never replaces `ORDER BY` in the SQL result contract.
 
 ## Ask an AI tutor about this lesson
 
-An AI tutor is optional; the guide, learner SQL, PostgreSQL, and expected checks are
-enough to complete the lesson offline. If you want a patient tutor, copy this
-prompt after opening the repository in the AI tutor:
+A tutor is useful here for one question: "why did the planner ignore my
+index?" Bring the plan and the row counts with you
+([optional tutor notes](../../STUDY-GUIDE.md#use-an-ai-tutor-optional)).
 
 ```text
 Tutor me through sql-32: B-Tree Index Fundamentals.

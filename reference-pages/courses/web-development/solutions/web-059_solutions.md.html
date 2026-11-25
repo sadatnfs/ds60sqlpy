@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/web-development/solutions/web-059_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="web-059-explanatory-solutions">web-059: explanatory solutions<a class="heading-anchor" href="#web-059-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Open this after your own attempt. Each answer explains the lesson&#x27;s synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in <code>courses/web-development/guides/web-059.md</code>.</p>
+<p>Attempt each exercise before reading; the mechanism is in <code>courses/web-development/guides/web-059.md</code> (<a href="../STUDY-GUIDE.md.html#solutions">using these answers</a>).</p>
 <h3 id="exercise-1-explain-why-php-fpm-is-not-interchangeable-with-the-development-http-server">Exercise 1: Explain why PHP-FPM is not interchangeable with the development HTTP server.<a class="heading-anchor" href="#exercise-1-explain-why-php-fpm-is-not-interchangeable-with-the-development-http-server" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> FPM manages FastCGI workers and needs an appropriate HTTP-facing integration.</p>
 <p><strong>Approach:</strong> Describe the development server as one process that answers HTTP directly, and FPM as a pool of workers that speak FastCGI to a web server in front.</p>
@@ -232,7 +232,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Plausible wrong approach:</strong> Publishing because the image built and the container started fails because neither step tests the application&#x27;s behavior.</p>
 <p><strong>How to verify:</strong> Your checklist names a result and a limit for each item, including anything not yet tested.</p>
 <h3 id="comparing-your-worksheet">Comparing your worksheet<a class="heading-anchor" href="#comparing-your-worksheet" aria-label="Link to this section">#</a></h3>
-<p>This lesson has no executable reference. Compare your worksheet with the answers above. The optional lab in <code>courses/web-development/fixtures/php-http-lab/</code> gives real request evidence only when you deliberately run it.</p></article>
+<p>Compare your release plan with the solution&#x27;s acceptance record and check that every claim names its evidence, such as a build log, a health check or a restore. Nothing in this lesson publishes or deploys, so mark any step you have not actually observed as planned rather than done.</p>
+<p>This lesson has no executable reference (<a href="../STUDY-GUIDE.md.html#worksheets">worksheet rules</a>).</p></article>
   </main>
 </body>
 </html>

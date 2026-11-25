@@ -1,6 +1,8 @@
 # spark-019: Explained paired reference solutions
 
-Read the [guide](../guides/spark-019.md) and attempt one language first. The [Scala reference](spark-019_solution.scala) and [PySpark reference](spark-019_solution.py) are complete single-file programs with explicit local sessions and finally-based stop. Each compares with literal expectations; matching two implementations alone would not rule out a shared mistake.
+Attempt the [guide](../guides/spark-019.md) exercises first.
+
+References: [Scala](spark-019_solution.scala), [PySpark](spark-019_solution.py).
 
 ## Exercises and reasoning
 
@@ -200,6 +202,7 @@ The previous identity proves which occurrence supplied the lagged field. Zero ga
 
 ## Execution and interpretation
 
-Run the complete reference in its prepared fixed worker. Its first check (Validate identities before defining a winner) is built inside the program, so opening the lesson fetches nothing; it expects: The eight-event fixture passes; adding another copy of event 1 fails. Missing-time event 7 is allowed. The final success line prints only after every reference assertion passes.
+The references validate the eight identities, then assert every rank `1:3, 2:2, 3:1, 4:3, 5:2, 6:1, 7:2, 8:1`, the winners `[3, 6, 8]` after several repartition counts and through SQL, the incomplete-order candidates `[2, 3, 5, 6, 8]`, both running totals for every event, and each `(previous_id, gap)` pair from the lag exercise. Adding a second copy of event 1 is expected to fail validation before any ranking.
 
-Local plan, partition and resource evidence does not establish cluster-scale performance; session cleanup is explicit.
+The output `spark-019: six PySpark reference contracts passed; Spark=` plus the version, or the Scala line, shows the policy produced stable winners on this fixture. It does not make the window cheap: every entity's rows are shuffled to one task, which matters once an entity holds millions of events.
+

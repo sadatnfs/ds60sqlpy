@@ -10,31 +10,19 @@ Intermediate. Direct catalog prerequisites: `python-numpy-02`. This lesson deepe
 
 ## Learning objectives
 
-By the end, explain the mechanism in your own words, implement each bounded contract, and use a counterexample to distinguish a correct result from a plausible mistake. The six exercises progress from inspection to transformation, edge handling and transfer.
+By the end, you can tell which indexing forms return views and which return copies, gather with repeated or negative integer positions, and accumulate repeated codes with `np.add.at` or `np.bincount` instead of buffered assignment. You will validate masks and index arrays strictly, break ranking ties by position, and invert a permutation to restore the original order.
 
 ## How to run this lesson
 
-**Primary browser route:** run `./classroom` from the repository root and
-choose **Python and data science** on `/classroom`. Open this lesson in the shared workspace,
-read its capability notice, and use its supported coding or reading workflow.
-The [classroom guide](../../../docs/classroom-experience.md) explains saved work, runtimes and switching subjects.
+The [learner script](../lessons/py_numpy_03.py) needs NumPy. Its worked examples gather positions `[3, 1, 1]` from `[10, 20, 30, 40]`, overwrite the copy without touching the source, and then add `[1, 2, 5]` at codes `[0, 0, 2]`: `np.add.at` keeps both contributions to bin 0 for `[3, 0, 5]`, while buffered `+=` keeps only the last.
 
-**Optional contributor route:** use the prepared environment in
-[CONTRIBUTING](../../../CONTRIBUTING.md) on Linux, macOS or Windows through
-WSL 2. The commands below assume its packages are already installed. They are
-not prerequisites for opening this lesson in the Docker classroom. Local
-`.learning/` files and CLI progress belong to this checkout; they do not read or
-update the Docker classroom's named learning volume.
-
-Open the [learner script](../lessons/py_numpy_03.py) in the prepared repository environment. In the Docker classroom, edit the saved learner pad; drafts, notes and results persist in the classroom learning volume. An ignored `.learning/` copy is a separate optional contributor workspace. Run from the repository root. The provided worked examples execute immediately; task functions intentionally raise `NotImplementedError` until you implement them. A successful example is not evidence that the six tasks are finished.
-
-Prepared POSIX/WSL contributor terminal:
+The [Python study guide](../../STUDY-GUIDE.md) covers the browser classroom and this prepared-checkout run:
 
 ```sh
 uv run --no-sync python python/professional/lessons/py_numpy_03.py
 ```
 
-Dependencies: NumPy. All fixtures are tiny and local. The terminal prints the worked results and stops without editing your files. Keep [explanatory solutions](../solutions/py_numpy_03_solutions.md) and [runnable reference](../solutions/py_numpy_03_solution.py) closed until an attempt or an explicit worked comparison.
+After your attempt, compare `sum_by_code` and `stable_top_indices` with the [runnable reference](../solutions/py_numpy_03_solution.py), paying attention to how repeated codes and tied scores are resolved. Use the [explanatory solutions](../solutions/py_numpy_03_solutions.md) to check why `gather_positions` rejects a Boolean array instead of treating it as positions 0 and 1.
 
 ## Vocabulary and mental model
 
@@ -123,11 +111,11 @@ If category totals are too small only when codes repeat, inspect a[index] += upd
 
 ## Self-check and retrieval
 
-Without copying code, explain which input property each function assumes, which observable result proves the normal case, and which counterexample would expose an incorrect implementation. Trace one boundary input by hand before running it. Keep the input and expected output beside your saved result so a reviewer can reproduce the evidence.
+Predict `stable_top_indices([5, 7, 5, 7], 3)` before running it: `[1, 3, 0]`, because each tie keeps the earlier position. Then confirm `inverse_permutation([2, 0, 1])` is `[1, 2, 0]` and that indexing the reordered records with it restores the original order. A `gather_positions` call with position 4 on a length-4 source must raise `ValueError`, while -1 returns the last value.
 
 ## Next steps
 
-Use these mechanisms in the next deepening lesson or return to the original prerequisite examples and explain precisely which new failure cases you can now diagnose. Review the [professional track](../README.md) for related modules.
+Next, [stable numerical computation and honest error bounds](py_numpy_04.md) asks whether the selected values are computed accurately, covering overflow, cancellation and ill-conditioned systems. The [professional track](../README.md) lists the other modules.
 
 ## Primary sources and official APIs
 

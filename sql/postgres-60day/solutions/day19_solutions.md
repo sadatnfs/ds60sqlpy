@@ -1,67 +1,23 @@
 # Day 19 solutions: Running Aggregates and Moving Windows
 
-
 <!-- beginner-solution-enrichment -->
 ## How to study and run this solution
 
-Open this explanation only after making an honest attempt. The executable
-companion runs solely against the disposable `advanced_sql_training` database:
+These six answers are all window sums or averages, and each comes with a number you can check by hand or against a plain aggregate. Attempt them first, then run:
 
 ```bash
-# Linux, macOS, or Windows through WSL 2, from the repository root
 psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
   -f sql/postgres-60day/solutions/day19_solutions.sql
 ```
 
-`psql` prints each result/command tag in the terminal. Stop at the first
-unexpected `ERROR`; later output cannot repair an earlier failed invariant.
-Compare your own SQL, row grain, column names, row counts, `NULL` policy, and
-ordering with the explanation before comparing syntax.
-
-## Clause-by-clause reading map
-
-The lesson's main concepts are Cumulative aggregate, Moving window, Observation. Its worked-model focus is:
-Aggregate orders to daily revenue, then apply `ROWS BETWEEN 6 PRECEDING AND CURRENT ROW`. This includes at most seven observed order dates, not automatically seven calendar days. Compare it with a date-spined input that includes zero-revenue days.
-
-- Start at `FROM`/`JOIN` and state the intermediate row grain. Inspect join keys
-  before adding aggregates; a one-to-many join is allowed to multiply rows only
-  when the later contract accounts for it.
-- Apply `WHERE` to input rows, `GROUP BY` to form buckets, and `HAVING` to
-  completed groups. Window functions run over the surviving relation and
-  normally preserve its row count.
-- Read the `SELECT` list as the public result contract: keys establish grain,
-  measures state calculations, and aliases explain meaning. `ORDER BY` is the
-  only output-order guarantee; add a unique tie-breaker before `LIMIT`.
-- Trace every common table expression (CTE) as a temporary named relation.
-  Execute or inspect one stage at a time while debugging, but compare the final
-  result with an independent control rather than trusting stage names.
-- Keep SQL `NULL` as “missing/unknown/not applicable” until the metric contract
-  chooses another representation. Guard division with `NULLIF`; disclose
-  exclusions and distinguish zero from no row.
-- For DDL/DML, a command tag proves only that PostgreSQL accepted a statement.
-  Catalog checks, negative cases, row-count reconciliation, and the declared
-  transaction boundary prove behavior and cleanup.
-
-The exact final queries are not the only valid syntax. A join, subquery, CTE,
-window, or conditional aggregate can be an alternative when it preserves the
-same grain, `NULL` semantics, deterministic ordering, and safety. Prefer the
-form whose intermediate relations a reviewer can verify; optimize only after
-correctness is established with evidence.
-
-These answers align one-for-one with [day19_running_aggregates.sql](../day19_running_aggregates.sql).
-Run only against the disposable `advanced_sql_training` database.
-The executable companion wraps every answer in `BEGIN`/`ROLLBACK`.
-The snippets below assume the lesson's
-`SET search_path TO training, public;` statement. Run the complete
-executable companion when you want a self-contained check.
+The file runs read-only queries inside `BEGIN`/`ROLLBACK` and prints, in order, 4,362 order rows, 4,362 order rows again, 4,362 rows of averages, a three-row demonstration, 10,000 expense rows and a single check row. The first five are long; pipe the output through `less` or add a `LIMIT` to your own copy while studying. Prompts match [the learner file](../day19_running_aggregates.sql), and the study guide's [solution reading notes](../../STUDY-GUIDE.md#read-a-solution) explain how to compare your version.
 
 ## Reading contract
 
 - **Focus:** Define cumulative and moving window frames explicitly so peers, boundaries, and partition resets match the business question.
 - **Assumptions:** Ordered money windows use exact numeric. `ROWS` counts physical ordered rows; `RANGE` groups peers with equal ordering values.
 - **Primary pitfall:** Relying on the default frame can include tied peers unexpectedly; a moving-row window is not automatically a moving-time window.
-- **Safety:** all writes are bounded and rollback-protected; read-only
-  queries still use deterministic ordering whenever row order is claimed.
+- **Safety:** read-only window queries wrapped in `BEGIN`/`ROLLBACK`; Exercise 4 builds its rows with `VALUES` and touches no table.
 
 ## Exercise 1: Query writing
 
@@ -71,11 +27,9 @@ executable companion when you want a self-contained check.
 
 **Clause-by-clause reading:**
 
-- `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
-- `FROM`: establishes the starting relation and therefore the initial row grain.
-- `OVER (...)`: computes an analytic value while preserving detail rows; partition, order, and frame define its peer set.
-- window frame: states exactly which rows or peers contribute to the current row's window result.
-- `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
+- `FROM orders AS o`: all 4,362 orders, no partition, so one running total across the whole table.
+- `SUM(o.total_amount) OVER (ORDER BY o.order_date, o.order_id ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW)`: every order up to and including this one.
+- `ORDER BY o.order_date, o.order_id`: prints rows in the same order the total accumulates.
 
 ```sql
 SELECT
@@ -92,19 +46,15 @@ ORDER BY
 
 **Expected shape:** One row per order with nondecreasing cumulative revenue.
 
-Check the result at the stated grain. An alternative formulation is
-valid only if it preserves the same NULL, ordering, time, money, and
-cardinality contract.
-
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-19 Exercise 1, read from `orders`. Build the answer toward `order_id`, `order_date`, `total_amount`, and `cumulative_revenue`; keep `order_id` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-19 Exercise 1, expected output: One row per order with nondecreasing cumulative revenue. The final columns are `order_id`, `order_date`, `total_amount`, and `cumulative_revenue`. The final order is `o.order_date, o.order_id`.
-- **Independent verification:** For sql-19 Exercise 1, choose one complete partition from `orders`; hand-calculate its first, middle, and final window values for `order_date`, `total_amount`, and `cumulative_revenue`, then verify output keys remain `order_id`. Test a one-row partition and a partition with at least three rows; verify the frame boundary and partition reset explicitly.
-- **Intermediate relation check:** For sql-19 Exercise 1, inspect one window partition before projecting; then check `o.order_date, o.order_id` before applying the row cap.
-- **Clause check:** For sql-19 Exercise 1, the solution actually uses `FROM`, window `OVER`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `orders`, preserve one row per `order_id`, and finish with `order_id`, `order_date`, `total_amount`, and `cumulative_revenue` ordered by `o.order_date, o.order_id`.
-- **Alternative/trade-off:** For sql-19 Exercise 1, the chosen form is justified by this lesson-specific rationale: Order by timestamp and unique ID; declare `ROWS ... CURRENT ROW`. Evaluate another form against the concrete expected result (One row per order with nondecreasing cumulative revenue) and the verification above.
-- **Edge case:** Test a one-row partition and a partition with at least three rows; verify the frame boundary and partition reset explicitly.
+- **Inputs/evidence:** For sql-19 Exercise 1, attach `SUM(o.total_amount) OVER (ORDER BY o.order_date, o.order_id ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW)` to each of the 4,362 `orders` rows, with no partition, so the total runs across the whole table.
+- **Expected result/shape:** For sql-19 Exercise 1, return 4,362 rows, one per order; the first is order 2230 at 216.84, the second, order 3739, brings the total to 1203.26, and the last, order 2258, ends at 2355646.89. The final columns are `order_id`, `order_date`, `total_amount`, and `cumulative_revenue`. The final order is `o.order_date, o.order_id`.
+- **Independent verification:** For sql-19 Exercise 1, confirm that the last `cumulative_revenue` equals `SELECT SUM(total_amount) FROM orders` (2355646.89) and that the values strictly increase, because the smallest `total_amount` is 20.74. Inside a rolled-back transaction, add a 100.00 order at order 2230's exact `order_date`; it sorts after order 2230 by `order_id` and must show 316.84, and order 3739 must move to 1303.26.
+- **What prints:** 4,362 rows. The first is order 2230 (2023-02-13, 216.84); after order 3739 the total is 1,203.26, which is February 2023's revenue. The last row shows 2,355,646.89.
+- **Never decreasing:** every `total_amount` is positive, so each value is at least as large as the one above. A dip would mean the output order and the window order disagree.
+- **Tie-breaker:** no two orders share an `order_date`, so `order_id` never decides here. It still belongs in the window, because one duplicate timestamp in a later load would make the order of those rows arbitrary.
+- **Spot check:** compare the row for any order with `SELECT SUM(total_amount) FROM orders WHERE (order_date, order_id) <= (that date, that id)`.
 
 ## Exercise 2: Query writing
 
@@ -114,12 +64,10 @@ cardinality contract.
 
 **Clause-by-clause reading:**
 
-- `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
-- `FROM`: establishes the starting relation and therefore the initial row grain.
-- `OVER (...)`: computes an analytic value while preserving detail rows; partition, order, and frame define its peer set.
-- `PARTITION BY`: restarts a window calculation independently for each partition key.
-- window frame: states exactly which rows or peers contribute to the current row's window result.
-- `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
+- `PARTITION BY o.customer_id`: the total restarts at zero for each of the 438 customers with orders.
+- `ORDER BY o.order_date, o.order_id` inside the window: oldest order first within each customer.
+- `ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW`: from the customer's first order to this one.
+- Outer `ORDER BY o.customer_id, o.order_date, o.order_id`: customers in turn, each in time order.
 
 ```sql
 SELECT
@@ -138,19 +86,15 @@ ORDER BY
 
 **Expected shape:** One row per order.
 
-Check the result at the stated grain. An alternative formulation is
-valid only if it preserves the same NULL, ordering, time, money, and
-cardinality contract.
-
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-19 Exercise 2, read from `orders`. Build the answer toward `order_id`, `customer_id`, `order_date`, `total_amount`, and `customer_cumulative_spend`; keep `order_id` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-19 Exercise 2, expected output: One row per order. The final columns are `order_id`, `customer_id`, `order_date`, `total_amount`, and `customer_cumulative_spend`. The final order is `o.customer_id, o.order_date, o.order_id`.
-- **Independent verification:** For sql-19 Exercise 2, choose one complete partition from `orders`; hand-calculate its first, middle, and final window values for `order_date`, `total_amount`, and `customer_cumulative_spend`, then verify output keys remain `order_id`. Test a one-row partition and a partition with at least three rows; verify the frame boundary and partition reset explicitly.
-- **Intermediate relation check:** For sql-19 Exercise 2, inspect one window partition before projecting; then check `o.customer_id, o.order_date, o.order_id` before applying the row cap.
-- **Clause check:** For sql-19 Exercise 2, the solution actually uses `FROM`, window `OVER`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `orders`, preserve one row per `order_id`, and finish with `order_id`, `customer_id`, `order_date`, `total_amount`, and `customer_cumulative_spend` ordered by `o.customer_id, o.order_date, o.order_id`.
-- **Alternative/trade-off:** For sql-19 Exercise 2, the chosen form is justified by this lesson-specific rationale: Partition by customer and reset the explicit row frame for every customer. Evaluate another form against the concrete expected result (One row per order) and the verification above.
-- **Edge case:** Test a one-row partition and a partition with at least three rows; verify the frame boundary and partition reset explicitly.
+- **Inputs/evidence:** For sql-19 Exercise 2, attach `SUM(o.total_amount)` partitioned by `o.customer_id` with the frame `ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW` to each of the 4,362 `orders` rows.
+- **Expected result/shape:** For sql-19 Exercise 2, return 4,362 rows, one per order; customer 1 runs 240.20, 658.14, 1259.87 and ends at 2521.63, then the total resets so customer 2's first order 6 shows 460.35 and its last order 11 shows 3616.32. The final columns are `order_id`, `customer_id`, `order_date`, `total_amount`, and `customer_cumulative_spend`. The final order is `o.customer_id, o.order_date, o.order_id`.
+- **Independent verification:** For sql-19 Exercise 2, confirm that each of the 438 customers' last value equals `SUM(total_amount)` from `orders` grouped by `customer_id`, and that those 438 values add up to 2355646.89. Inside a rolled-back transaction, add one 100.00 order for customer 8, who has none; that one-row partition must show 100.00.
+- **What prints:** 4,362 rows. Customer 1's five rows run 240.20, 658.14, 1,259.87, 2,415.79 and 2,521.63, and customer 2's first row starts again at its own first order.
+- **Reset check:** the first row of every customer should equal that order's `total_amount`. Counting the rows where it does not should give 0.
+- **Count to compare:** the last value per customer should equal `SUM(total_amount)` grouped by `customer_id`. Customer 12, one of those with 16 orders, ends at 9,244.27.
+- **Missing customers:** the 62 Brazilian customers have no orders, so no rows appear for them. A `LEFT JOIN` from `customers` would be needed to list them with no spend.
 
 ## Exercise 3: Query writing
 
@@ -160,12 +104,9 @@ cardinality contract.
 
 **Clause-by-clause reading:**
 
-- `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
-- `FROM`: establishes the starting relation and therefore the initial row grain.
-- `OVER (...)`: computes an analytic value while preserving detail rows; partition, order, and frame define its peer set.
-- `PARTITION BY`: restarts a window calculation independently for each partition key.
-- window frame: states exactly which rows or peers contribute to the current row's window result.
-- `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
+- `AVG(o.total_amount) OVER (... ROWS BETWEEN 6 PRECEDING AND CURRENT ROW)`: the current order and up to six before it, within one customer.
+- `PARTITION BY o.customer_id`: the window never reaches into another customer's orders.
+- `ROUND(..., 2)`: two decimals for display only.
 
 ```sql
 SELECT
@@ -183,19 +124,15 @@ ORDER BY
 
 **Expected shape:** One row per order with up to seven observations in its frame.
 
-Check the result at the stated grain. An alternative formulation is
-valid only if it preserves the same NULL, ordering, time, money, and
-cardinality contract.
-
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-19 Exercise 3, read from `orders`. Build the answer toward `order_id`, `customer_id`, `order_date`, and `trailing_7_order_average`; keep `order_id` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-19 Exercise 3, expected output: One row per order with up to seven observations in its frame. The final columns are `order_id`, `customer_id`, `order_date`, and `trailing_7_order_average`. The final order is `o.customer_id, o.order_date, o.order_id`.
-- **Independent verification:** For sql-19 Exercise 3, choose one complete partition from `orders`; hand-calculate its first, middle, and final window values for `order_date`, and `trailing_7_order_average`, then verify output keys remain `order_id`. Test a one-row partition and a partition with at least three rows; verify the frame boundary and partition reset explicitly.
-- **Intermediate relation check:** For sql-19 Exercise 3, inspect one window partition before projecting; then check `o.customer_id, o.order_date, o.order_id` before applying the row cap.
-- **Clause check:** For sql-19 Exercise 3, the solution actually uses `FROM`, window `OVER`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `orders`, preserve one row per `order_id`, and finish with `order_id`, `customer_id`, `order_date`, and `trailing_7_order_average` ordered by `o.customer_id, o.order_date, o.order_id`.
-- **Alternative/trade-off:** For sql-19 Exercise 3, the chosen form is justified by this lesson-specific rationale: A seven-row frame is based on observations, not seven calendar days. Evaluate another form against the concrete expected result (One row per order with up to seven observations in its frame) and the verification above.
-- **Edge case:** Test a one-row partition and a partition with at least three rows; verify the frame boundary and partition reset explicitly.
+- **Inputs/evidence:** For sql-19 Exercise 3, attach `ROUND(AVG(o.total_amount) OVER (PARTITION BY o.customer_id ORDER BY o.order_date, o.order_id ROWS BETWEEN 6 PRECEDING AND CURRENT ROW), 2)` to each of the 4,362 `orders` rows.
+- **Expected result/shape:** For sql-19 Exercise 3, return 4,362 rows, one per order; customer 1 starts at 240.20, 329.07, and 419.96, and 1,836 rows average a full seven-order frame while the earlier rows of each customer average fewer orders. The final columns are `order_id`, `customer_id`, `order_date`, and `trailing_7_order_average`. The final order is `o.customer_id, o.order_date, o.order_id`.
+- **Independent verification:** For sql-19 Exercise 3, count the frame rows with `COUNT(*)` over the same window: 438 rows each have frames of 1, 2, 3, and 4 rows, 404 have 5, 370 have 6, and 1,836 have 7. Hand-check customer 7's eighth order, order 53: its 420.91 must equal the average of orders 47 to 53 (2946.37 / 7), with order 46 out of the frame.
+- **What prints:** 4,362 rows. Customer 1's averages are 240.20, 329.07, 419.96, 603.95 and 504.33; the fifth row averages all five orders because there are no more.
+- **Short frames:** only the seventh and later orders of a customer average a full seven. That is 1,836 rows from the 336 customers with at least seven orders; the other 2,526 rows average fewer.
+- **Finding the frame size:** add `COUNT(*) OVER` with the same window to show how many orders each average used. Without it, a two-order average looks just as trustworthy as a seven-order one.
+- **Orders, not days:** a customer's seven orders can span months. The frame counts orders regardless of the gaps between them.
 
 ## Exercise 4: Prediction
 
@@ -205,12 +142,9 @@ cardinality contract.
 
 **Clause-by-clause reading:**
 
-- `VALUES`: constructs a small relation explicitly, which makes examples and expected cardinality inspectable.
-- `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
-- `FROM`: establishes the starting relation and therefore the initial row grain.
-- `OVER (...)`: computes an analytic value while preserving detail rows; partition, order, and frame define its peer set.
-- window frame: states exactly which rows or peers contribute to the current row's window result.
-- `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
+- `VALUES (1, 1, 10), (2, 1, 20), (3, 2, 5)`: three rows; the first two tie on `sort_value`.
+- `rows_sum`: `ROWS` frame ordered by `sort_value, row_id`, so one physical row at a time.
+- `range_sum`: `RANGE` frame ordered by `sort_value` only, so tied rows enter together.
 
 ```sql
 SELECT
@@ -229,19 +163,15 @@ ORDER BY
 
 **Expected shape:** Three rows making the peer difference visible.
 
-Check the result at the stated grain. An alternative formulation is
-valid only if it preserves the same NULL, ordering, time, money, and
-cardinality contract.
-
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-19 Exercise 4, read from the inline `VALUES` fixture. Build the answer toward `row_id`, `sort_value`, `amount`, `rows_sum`, and `range_sum`; keep `row_id` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-19 Exercise 4, expected output: Three rows making the peer difference visible. The final columns are `row_id`, `sort_value`, `amount`, `rows_sum`, and `range_sum`. The final order is `row_id`.
+- **Inputs/evidence:** For sql-19 Exercise 4, use the three-row `VALUES` fixture `(1, 1, 10), (2, 1, 20), (3, 2, 5)` as (`row_id`, `sort_value`, `amount`), and compare a `ROWS` running sum ordered by `sort_value, row_id` with a `RANGE` running sum ordered by `sort_value` alone.
+- **Expected result/shape:** For sql-19 Exercise 4, return three rows, one per `row_id`, where `rows_sum` reads 10, 30, 35 and `range_sum` reads 30, 30, 35, because rows 1 and 2 are peers at `sort_value` 1. The final columns are `row_id`, `sort_value`, `amount`, `rows_sum`, and `range_sum`. The final order is `row_id`.
 - **Independent verification:** For sql-19 Exercise 4, hand-calculate all three peer rows from the inline fixture: `rows_sum` must be `(10, 30, 35)` while `range_sum` must be `(30, 30, 35)` in `row_id` order. Require three unique `row_id` values and explain why the two rows tied at `sort_value = 1` advance separately under `ROWS` but together under `RANGE`.
-- **Intermediate relation check:** For sql-19 Exercise 4, inspect one window partition before projecting; then check `row_id` before applying the row cap.
-- **Clause check:** For sql-19 Exercise 4, the solution actually uses `FROM`, window `OVER`, `SELECT`, and `ORDER BY`. Read only those operations: begin at the inline `VALUES` fixture, preserve one row per `row_id`, and finish with `row_id`, `sort_value`, `amount`, `rows_sum`, and `range_sum` ordered by `row_id`.
-- **Alternative/trade-off:** For sql-19 Exercise 4, the chosen form is justified by this lesson-specific rationale: `RANGE` includes ordering peers together; `ROWS` advances one physical row at a time. Evaluate another form against the concrete expected result (Three rows making the peer difference visible) and the verification above.
-- **Edge case:** Test a one-row partition and a partition with at least three rows; verify the frame boundary and partition reset explicitly.
+- **What prints:** `rows_sum` is 10, 30, 35 and `range_sum` is 30, 30, 35. Row 1's `RANGE` total already includes row 2's 20 because both have `sort_value` 1.
+- **Where they agree:** row 3 has no peer, so both frames reach 35 there.
+- **The default frame:** `SUM(amount) OVER (ORDER BY sort_value)` with no frame clause returns the `range_sum` column, because `RANGE` is the default.
+- **Real data:** on `expenses`, 13 or 14 rows share each category and date, so this difference would appear on almost every row of Exercise 5.
 
 ## Exercise 5: Debugging
 
@@ -251,13 +181,9 @@ cardinality contract.
 
 **Clause-by-clause reading:**
 
-- `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
-- `FROM`: establishes the starting relation and therefore the initial row grain.
-- `OVER (...)`: computes an analytic value while preserving detail rows; partition, order, and frame define its peer set.
-- `PARTITION BY`: restarts a window calculation independently for each partition key.
-- window frame: states exactly which rows or peers contribute to the current row's window result.
-- time normalization: makes reporting boundaries explicit; UTC is applied before deriving calendar buckets where required.
-- `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
+- `PARTITION BY e.category, date_trunc('month', e.expense_date)`: a new total for each category in each month, 125 partitions in all.
+- `ORDER BY e.expense_date, e.expense_id`: date first, then ID to separate same-day expenses.
+- `ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW`: one row at a time, so same-day expenses do not share a value.
 
 ```sql
 SELECT
@@ -277,19 +203,16 @@ ORDER BY
 
 **Expected shape:** One row per expense.
 
-Check the result at the stated grain. An alternative formulation is
-valid only if it preserves the same NULL, ordering, time, money, and
-cardinality contract.
-
 ### Reasoning and verification
 
-- **Inputs/evidence:** For sql-19 Exercise 5, read from `expenses`. Build the answer toward `expense_id`, `category`, `expense_date`, `amount`, and `category_month_running_expense`; keep `expense_id` visible whenever the result has row-level grain.
-- **Expected result/shape:** For sql-19 Exercise 5, expected output: One row per expense. The final columns are `expense_id`, `category`, `expense_date`, `amount`, and `category_month_running_expense`. The final order is `e.category, e.expense_date, e.expense_id`.
-- **Independent verification:** For sql-19 Exercise 5, choose one complete partition from `expenses`; hand-calculate its first, middle, and final window values for `amount`, then verify output keys remain `expense_id`. Test a one-row partition and a partition with at least three rows; verify the frame boundary and partition reset explicitly.
-- **Intermediate relation check:** For sql-19 Exercise 5, inspect one window partition before projecting; then check `e.category, e.expense_date, e.expense_id` before applying the row cap.
-- **Clause check:** For sql-19 Exercise 5, the solution actually uses `FROM`, window `OVER`, `SELECT`, and `ORDER BY`. Read only those operations: begin at `expenses`, preserve one row per `expense_id`, and finish with `expense_id`, `category`, `expense_date`, `amount`, and `category_month_running_expense` ordered by `e.category, e.expense_date, e.expense_id`.
-- **Alternative/trade-off:** For sql-19 Exercise 5, the chosen form is justified by this lesson-specific rationale: Partition by both reset keys and order by date plus expense ID. Evaluate another form against the concrete expected result (One row per expense) and the verification above.
-- **Edge case:** Test a one-row partition and a partition with at least three rows; verify the frame boundary and partition reset explicitly.
+- **Inputs/evidence:** For sql-19 Exercise 5, attach a running `SUM(e.amount)` partitioned by `e.category, date_trunc('month', e.expense_date)` and ordered by `e.expense_date, e.expense_id` to each of the 10,000 `expenses` rows, which form 125 category-month partitions of 13 to 96 rows.
+- **Expected result/shape:** For sql-19 Exercise 5, return 10,000 rows, one per expense; on a fixture loaded on 2026-11-25, `COGS` starts with expense 461 at 7700.69 on 2024-11-26, its 14-row November 2024 partition ends at 72384.36, and the total resets on 2024-12-01 so expense 576 shows its own 9339.04. The final columns are `expense_id`, `category`, `expense_date`, `amount`, and `category_month_running_expense`. The final order is `e.category, e.expense_date, e.expense_id`.
+- **Independent verification:** For sql-19 Exercise 5, confirm that the last row of each of the 125 partitions matches `SELECT category, date_trunc('month', expense_date), SUM(amount) FROM expenses GROUP BY 1, 2` and that those values add up to 50483850.00, and that every partition's first row equals its own `amount`. Inside a rolled-back transaction, add a 500.00 `COGS` expense dated 2027-01-15; it forms a one-row partition and must show 500.00.
+- **What prints:** 10,000 rows, five categories of 2,000 expenses each. COGS opens with 14 expenses on 2024-11-26 that end at 72,384.36; the next row, expense 576 on 2024-12-01, restarts at 9,339.04.
+- **Seeing the bug:** partition by `category` only and expense 576 shows 81,723.40, November's total plus its own amount.
+- **Second bug:** drop `expense_id` and the `ROWS` clause, and all 14 rows on 2024-11-26 show 72,384.36 at once.
+- **Count to compare:** the last row of each category and month should equal `SUM(amount)` grouped by category and month. December 2024 COGS ends at 473,494.55.
+- **Short first month:** there are 125 partitions, 5 categories times 25 months. The data starts on 2024-11-26, so COGS November 2024 holds only 14 expenses while December 2024 holds 95. A partition that small is a quick one to add up by hand.
 
 ## Exercise 6: Extension
 
@@ -299,15 +222,10 @@ cardinality contract.
 
 **Clause-by-clause reading:**
 
-- `WITH`: names an intermediate relation so its grain can be checked before later joins or aggregation.
-- `SELECT`: defines the output columns at the query's final grain; aliases document the meaning of derived values.
-- `FROM`: establishes the starting relation and therefore the initial row grain.
-- `JOIN ... ON`: combines relations and may multiply rows; the match predicate and each input's grain must agree.
-- `GROUP BY`: collapses input rows to the listed key grain; every non-aggregated selected value must belong to that grain.
-- `OVER (...)`: computes an analytic value while preserving detail rows; partition, order, and frame define its peer set.
-- window frame: states exactly which rows or peers contribute to the current row's window result.
-- `ORDER BY`: defines presentation or ranking order; a unique final key makes tied values deterministic.
-- `LIMIT`: is applied after ordering and is meaningful only when the query first defines which rows come first.
+- `running`: the Exercise 1 cumulative column for every order.
+- `final_running`: the last order in time order, `LIMIT 1`, which holds the total of everything.
+- `CROSS JOIN orders` with `GROUP BY fr.cumulative_revenue`: pairs that one value with an independent `SUM` over all orders.
+- `difference`: the two totals subtracted.
 
 ```sql
 WITH running AS (
@@ -342,24 +260,20 @@ GROUP BY
 
 **Expected shape:** One row with zero difference.
 
-Check the result at the stated grain. An alternative formulation is
-valid only if it preserves the same NULL, ordering, time, money, and
-cardinality contract.
-
 ### Reasoning and verification
 
 - **Inputs/evidence:** For sql-19 Exercise 6, read from `orders`; compute `SUM(total_amount) OVER (ORDER BY order_date, order_id ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW)` in the CTE `running`, keep the cumulative value of the last order, and compare it with an ordinary `SUM(total_amount)`.
-- **Expected result/shape:** For sql-19 Exercise 6, expected output: One row with zero difference. The final columns are `final_cumulative`, `aggregate_total`, and `difference`.
+- **Expected result/shape:** For sql-19 Exercise 6, return one row: `final_cumulative` 2355646.89, `aggregate_total` 2355646.89, and `difference` 0.00. The final columns are `final_cumulative`, `aggregate_total`, and `difference`.
 - **Independent verification:** For sql-19 Exercise 6, confirm one row where `final_cumulative` and `aggregate_total` are both 2355646.89 and `difference` is 0.00; `running` must keep all 4362 orders, and its last row by `order_date DESC, order_id DESC` must carry the full total.
-- **Intermediate relation check:** For sql-19 Exercise 6, check that `running` returns 4362 rows and that its last row by `order_date DESC, order_id DESC` holds the largest cumulative value.
-- **Clause check:** For sql-19 Exercise 6, the solution actually uses `WITH`, `FROM`, `JOIN ... ON`, `GROUP BY`, window `OVER`, `SELECT`, `ORDER BY`, and `LIMIT`. Read only those operations: begin at `orders`, preserve exactly one summary row, and finish with `final_cumulative`, `aggregate_total`, and `difference`.
-- **Alternative/trade-off:** For sql-19 Exercise 6, the chosen form is justified by this lesson-specific rationale: Select the last ordered cumulative value and compare it with an independent aggregate. Evaluate another form against the concrete expected result (One row with zero difference) and the verification above.
-- **Edge case:** Without the `order_id` tiebreaker, orders that share a timestamp would have no defined order, so the row picked as last might not be the window's last row and its cumulative value could fall short of the total.
+- **What prints:** one row: 2,355,646.89, 2,355,646.89 and a difference of 0.00.
+- **What zero proves:** the window saw every order exactly once. A frame that skipped rows, or a partition that reset by mistake, would leave a gap.
+- **Picking the last row:** `ORDER BY r.order_date DESC, r.order_id DESC LIMIT 1` must use the same keys as the window. Picking the row with the largest `order_id` instead would return a value from the middle of the series.
+- **Exact arithmetic:** `total_amount` is `numeric`, so no rounding error can creep in and the difference is exactly zero, not merely small.
 
 ## Final self-check
 
-- Can you explain the logical grain before and after every aggregation?
-- Are missing values preserved or converted only by an explicit rule?
-- Does every ordered result have a deterministic final tie-breaker?
-- Are money and time assumptions visible beside the calculation?
-- Does the complete executable solution finish with `ROLLBACK`?
+- Why does Example 1 never show customers 8 and 16?
+- How many orders feed customer 1's moving average on their third order?
+- In Exercise 4, why does `range_sum` read 30 on row 1?
+- Which value would expense 576 show if the partition ignored the month?
+- What would a nonzero `difference` in Exercise 6 tell you?

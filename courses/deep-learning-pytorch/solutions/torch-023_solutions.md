@@ -2,6 +2,8 @@
 
 Open these answers only after attempting Debugging custom loops, accumulation and clipping yourself. They reuse the guide's literal inputs, starting from Example A, Expose detachment, so a discrepancy points at one step. The executable companion runs the assertions; this page explains why each one tests Disconnected loss, Gradient clipping, Update trace. After a pass, choose a new input for exercise 6, Recompute post-update loss, without looking.
 
+After comparing, follow the [review steps](../STUDY-GUIDE.md#after-the-solutions).
+
 ## Mechanism review
 
 A custom training loop can fail by disconnecting the graph, forgetting an update, reusing old gradients or applying an incorrect reduction. Debug the first small state transition before adding epochs and logging infrastructure. A gradient of None means no stored derivative was produced for that parameter; a zero tensor may be a valid derivative. Clearing with set_to_none preserves that diagnostic distinction.
@@ -159,6 +161,3 @@ assert 0 <= after < 56 / 675
 
 **Verify:** In a fresh process, the exercise checks confirm `0 <= after < 56 / 675`.
 
-## Review after comparison
-
-Repeat exercise 4, Apply the clipped update, with one changed fixture value and predict the difference before running it. Keep your failing attempt at exercise 5, Reject nonfinite gradient norms, beside the repaired result. A missing framework is not a failing assertion. These solutions use only local fixtures.

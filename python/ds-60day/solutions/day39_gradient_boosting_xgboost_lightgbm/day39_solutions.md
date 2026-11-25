@@ -142,9 +142,7 @@ Takeaways
 
 ## Solution reasoning lens
 
-A strong solution is not merely code that produces one plausible
-output. It establishes a chain from input contract to operation to
-verification:
+Each decision below links an input contract to an operation and its evidence:
 
 1. **`n_estimators`:** sets the maximum boosting rounds; it interacts strongly with learning rate.
 2. **`learning_rate`:** shrinks each new tree, often requiring more rounds for similar fit.
@@ -161,29 +159,15 @@ verification:
 
 **Evidence of correctness:** Use identical splits/metrics, record train and validation curves, best iteration and compute budget, and confirm the final test was never used for stopping.
 
-When comparing your attempt with the reference, explain which of these
-decisions your code made explicitly. If the reference makes a different
-choice, compare the contracts and evidence before deciding that one
-version is universally better.
-
 <!-- END ADVANCED PYTHON CONCEPT ENRICHMENT -->
 
 ## Exercise-by-exercise reasoning map
-
-This map connects every learner prompt to a reasoning path. Read the
-explanation before copying code: the goal is to understand the assumptions,
-the evidence that validates the result, and the edge cases that can make an
-apparently correct implementation fail.
 
 ### Exercise 1: Original lesson practice
 
 **Prompt:** Tune `learning_rate` and `n_estimators` with a simple loop.
 
 **How to reason about it:** Learning rate and estimator count interact: smaller steps usually need more trees. Use identical data boundaries, record runtime, and examine validation curves rather than selecting from training loss.
-
-Use the worked reference earlier in this file, then change one boundary
-condition and rerun the stated checks. A copied output is not evidence
-unless you can explain why that output follows from the inputs.
 
 **Verify:** Evaluate every (learning_rate, n_estimators) pair on one frozen training/validation split and scorer; print the complete score table, selected pair, fit count, and validation metric without consulting final-test labels.
 
@@ -192,10 +176,6 @@ unless you can explain why that output follows from the inputs.
 **Prompt:** Compare XGBoost with LightGBM if the `ml` dependency group is installed.
 
 **How to reason about it:** XGBoost and LightGBM have related but non-identical parameters and tree growth strategies. Match the split, metric, seed, and approximate capacity; label the comparison optional when dependencies are unavailable.
-
-Use the worked reference earlier in this file, then change one boundary
-condition and rerun the stated checks. A copied output is not evidence
-unless you can explain why that output follows from the inputs.
 
 **Verify:** First print an explicit installed/skipped capability result for XGBoost and LightGBM; when both run, use identical rows, splits, metric, seed, and search budget and report validation score, best iteration, and elapsed time for each.
 
@@ -213,10 +193,6 @@ For limited data, perform early stopping inside outer validation folds or use
 a fixed iteration count selected during development. Calling the test set
 “eval_set” does not change its statistical role.
 
-**Why this matters:** The result should survive a fresh-kernel rerun and
-a deliberately chosen boundary case. If it does not, revisit the
-assumption or data boundary rather than hiding the failure.
-
 **Verify:** Early-stopping design; record disjoint train/early-stop-validation/final-test index hashes, best iteration selected without test labels, and one final-test score computed only after stopping is frozen.
 
 ### Exercise 4: Calibration check
@@ -232,10 +208,6 @@ against observed event rates and include bin support.
 If calibration is needed, wrap the selected estimator with
 `CalibratedClassifierCV` using folds or a held-out calibration set. Evaluate
 the calibrated result on data used for neither fitting nor calibration.
-
-**Why this matters:** The result should survive a fresh-kernel rerun and
-a deliberately chosen boundary case. If it does not, revisit the
-assumption or data boundary rather than hiding the failure.
 
 **Verify:** Calibration check; print ROC AUC, log loss, Brier score, and reliability-bin counts/mean prediction/event rate; include a constructed overconfident score transform that preserves ranking/AUC but worsens probability calibration.
 
@@ -254,10 +226,6 @@ This makes the notebook reproducible on a USB/offline machine without
 pretending all implementations ran. Match random seeds and evaluation data,
 but document parameters that do not map exactly between libraries.
 
-**Why this matters:** The result should survive a fresh-kernel rerun and
-a deliberately chosen boundary case. If it does not, revisit the
-assumption or data boundary rather than hiding the failure.
-
 **Verify:** Portable backend contract; return a result row per backend with name, installed/skipped status, version, seed, fit time, and metric; assert the offline scikit-learn row always exists and missing optional imports never trigger downloads.
 
 ### Exercise 6: Overfitting diagnosis
@@ -273,9 +241,5 @@ adding row or feature subsampling, or collecting better data may also help.
 Do not inspect the final test curve iteration by iteration. That would turn the
 test set into another tuning set. Preserve both curves and selected iteration
 as training evidence.
-
-**Why this matters:** The result should survive a fresh-kernel rerun and
-a deliberately chosen boundary case. If it does not, revisit the
-assumption or data boundary rather than hiding the failure.
 
 **Verify:** Overfitting diagnosis; save train/validation loss by iteration, print the minimum-validation-loss iteration, and assert the diagnosed overfit region begins where validation rises while training continues falling.

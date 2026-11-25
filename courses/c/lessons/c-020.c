@@ -2,23 +2,16 @@
 
 int main(void) {
   /* Exercise 1: Invoke through a function pointer: predict an edited check
-     Copy worked example 1 into a scratch pad and change `CHECK(transform(4) ==
-     8);` to `CHECK(transform(5) == 8);` inside its CHECK. Before running,
-     predict whether the CHECK still holds and explain why; then restore it.
-     Expected: With `CHECK(transform(5) == 8);` the run stops with `Check
-     failed` at the CHECK on `transform(4) == 8`, because the "invoke through a
-     function pointer" case no longer shows that the result is 8. Restoring
-     `CHECK(transform(4) == 8);` brings that observation back. */
+     In worked example 1, change `CHECK(transform(4) == 8);` to
+     `CHECK(transform(5) == 8);`. Predict whether the CHECK still holds and why,
+     then run and restore. Expected: `Check failed`: `CHECK(transform(5) == 8);`
+     is false, although the result is 8. */
 
   /* Exercise 2: Sort integers safely: debug a regression
-     A regression changed one token in worked example 2, the "sort integers
-     safely" case, so one line now reads `int values[] = {4, 1, 2};`. Run the
-     example with that line, use the failing CHECK to find why the order becomes
-     1, 2, 3 no longer holds and repair the line without changing the CHECK.
-     Expected: Before the repair the run stops with `Check failed` at the CHECK
-     on `values[0] == 1 && values[1] == 2 && values[2] == 3`. Once the line
-     reads `int values[] = {3, 1, 2};` again, the "sort integers safely" case
-     again shows that the order becomes 1, 2, 3. */
+     Worked example 2 now has a line reading `int values[] = {4, 1, 2};`. Repair
+     it so that the order becomes 1, 2, 3 again. Expected: `Check failed` at
+     `values[0] == 1 && values[1] == 2 && values[2] == 3` until the line reads
+     `int values[] = {3, 1, 2};` again. */
 
   /* Exercise 3: Compare extreme values
      Compare INT_MIN and INT_MAX.

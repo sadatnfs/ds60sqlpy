@@ -206,11 +206,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Pool:</strong> A reusable store of resources.</p>
 <p><strong>Logical length:</strong> The meaningful region distinct from physical capacity.</p>
 <h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>The Linux Docker classroom compiles your saved pad as <code>Program.cs</code> in its fixed .NET 10 project. C# 14 is the matching language generation. This route uses the prepared framework libraries; it does not accept arbitrary project files, NuGet packages, command arguments or interactive input. The explicit <code>Program.Main</code> entrypoint makes compilation and execution visible. <code>Check</code> throws on a false condition in every build configuration, unlike conditional debugging assertions.</p>
-<p>Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.</p>
+<p><code>ArrayPool&lt;int&gt;.Shared</code> comes from <code>System.Buffers</code>, which the worked examples import. In this runtime, <code>Rent(3)</code> returned an array of length 16 and <code>Rent(17)</code> returned 32, but only the minimum length is promised, so the example sums a span of exactly three elements rather than the whole array.</p>
+<p>Compile contract, starter stop and success marker: <a href="../STUDY-GUIDE.md.html#running-a-lesson">running a lesson</a>.</p>
 <h3 id="syntax-anatomy-and-execution-trace">Syntax anatomy and execution trace<a class="heading-anchor" href="#syntax-anatomy-and-execution-trace" aria-label="Link to this section">#</a></h3>
 <p><code>ArrayPool&lt;T&gt;.Shared.Rent(n)</code> grants temporary use of at least n elements. <code>Return</code> ends ownership. A try/finally protects return on failure; never expose a view after return.</p>
-<p>Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.</p>
+<p>Each example ends with a trace; method: <a href="../STUDY-GUIDE.md.html#tracing-a-program">tracing a program</a>.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="example-a-use-only-admitted-buffer-contents">Example A: Use only admitted buffer contents<a class="heading-anchor" href="#example-a-use-only-admitted-buffer-contents" aria-label="Link to this section">#</a></h4>
 <p>The pool guarantees minimum capacity, not exact size or zeroed contents.</p>
@@ -254,6 +254,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> Only three initialized elements contribute to the total.</p>
+<p><strong>Trace.</strong> <code>Rent(3)</code> hands out an array with at least three elements, possibly reused and possibly holding old values. The code writes 2, 3 and 4 into the first three slots, views exactly that range and sums it to 9. The second check asserts only the minimum length. <code>finally</code> returns the array with <code>clearArray: true</code>, so the next renter sees zeros.</p>
 <h4 id="example-b-release-retained-references-deliberately">Example B: Release retained references deliberately<a class="heading-anchor" href="#example-b-release-retained-references-deliberately" aria-label="Link to this section">#</a></h4>
 <p>The test checks controllable ownership, avoiding a flaky assumption about when garbage collection occurs.</p>
 <pre class="highlighted-code"><code class="language-csharp"><span class="syntax-keyword">using</span> System<span class="syntax-punctuation">;</span>
@@ -290,6 +291,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> Clearing removes the application references without promising collection timing.</p>
+<p><strong>Trace.</strong> <code>retained</code> holds two 32-byte arrays, so the application keeps both alive. <code>Clear()</code> removes the references and Count becomes 0. The check makes no claim about when the garbage collector reclaims the arrays: once nothing refers to them they become eligible, and the timing belongs to the runtime, not to this program.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <ol>
 <li><strong>Predict and explain.</strong> Separate logical length from rented array length.</li>
@@ -309,10 +311,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <ol start="6">
 <li><strong>Transfer and justify.</strong> Decide whether pooling is justified using allocation measurements and a stated lifetime contract.</li>
 </ol>
-<p>For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.</p>
+<p>Log each task in the <a href="../STUDY-GUIDE.md.html#recording-exercise-evidence">evidence table</a> before opening the explanation.</p>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
 <p>Never assert that a weak reference must disappear immediately after a collection request. Returning a buffer while asynchronous work still uses it causes data corruption. Pooling is not inherently a performance win.</p>
-<p>A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.</p>
+<p>For task 4, summing the whole rented array instead of the initialized span reads whatever earlier renters left in slots 3 through 15. Returning the same array twice lets the pool hand it to two renters at once, which corrupts both silently. For task 5, the <code>finally</code> block must return the buffer even when the computation throws.</p>
+<p>Repair routine: <a href="../STUDY-GUIDE.md.html#building-a-regression-case">building a regression case</a>.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <ol>
 <li>Reproduce Example A (Use only admitted buffer contents) before changing anything, and confirm its observation: Only three initialized elements contribute to the total.</li>
@@ -320,9 +323,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>Before opening the explanation, test your task 3 attempt against this lesson&#x27;s main pitfall: Never assert that a weak reference must disappear immediately after a collection request.</li>
 </ol>
 <h3 id="self-check-and-next-step">Self-check and next step<a class="heading-anchor" href="#self-check-and-next-step" aria-label="Link to this section">#</a></h3>
-<p>Explain Reachability, Pool, Logical length without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.</p>
+<p>State the logical length and the rented length in Example A, and which one your code may rely on. Explain why the example avoids asserting that memory has been collected. For task 6, name the allocation measurement that would justify pooling and the lifetime rule each borrower must follow.</p>
+<p>Then follow the general <a href="../STUDY-GUIDE.md.html#self-check-routine">self-check routine</a> and save your pad.</p>
 <h3 id="sources-and-execution-boundary">Sources and execution boundary<a class="heading-anchor" href="#sources-and-execution-boundary" aria-label="Link to this section">#</a></h3>
-<p><a href="https://learn.microsoft.com/en-us/dotnet/csharp/">Official language or framework documentation</a>. The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.</p>
+<p><a href="https://learn.microsoft.com/en-us/dotnet/csharp/">Documentation</a>: The .NET garbage collection fundamentals and the <code>ArrayPool&lt;T&gt;</code> reference describe generations, reachability and buffer renting.</p>
+<p>Provenance and limits: <a href="../STUDY-GUIDE.md.html#sources-and-execution-boundary">sources and execution boundary</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for csharp-036: Garbage collection, pooling and retained memory.
 Read courses/csharp/guides/csharp-036.md and courses/csharp/lessons/csharp-036.cs. Prerequisites: csharp-035.

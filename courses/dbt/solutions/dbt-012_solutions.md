@@ -2,7 +2,7 @@
 
 Manage a semantic model change with explicit consumer versioning.
 
-The executable reference contains the two complete worked cases with assertions. The changes below explain the independent practice and its limits.
+The reference declares `latest_version: 2` with versions defined in `customer_value_v1` and `customer_value_v2`, queries a pinned and a latest consumer, and computes net as gross 100 minus returns 20. It proves how versioned refs route, not that consumers were told about the semantic change. See [how these answers are laid out](../STUDY-GUIDE.md#answers-and-references).
 
 
 ## 1. Pin a consumer

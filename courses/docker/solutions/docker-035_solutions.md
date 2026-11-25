@@ -1,6 +1,6 @@
 # docker-035: explanatory solutions
 
-Compare after your own attempt or an explicit reveal. These explain the supplied teaching fixtures; they are not engine results. The mechanism is explained in `courses/docker/guides/docker-035.md`.
+These answers explain teaching fixtures, not engine results; the mechanism is in [the guide](../guides/docker-035.md).
 
 ## Exercise 1: Compare total image size and incremental transfer.
 
@@ -88,4 +88,4 @@ Compare after your own attempt or an explicit reveal. These explain the supplied
 
 ## Check your transfer
 
-A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.
+Measure the transfer a target host would actually need, given which base layers it already holds, and readiness with the same `--wait` method, since a new base shares nothing cached. Alpine uses musl rather than glibc, so rerun the health, host and peer requests, an increment, and the export and restore commands, and check that any later HTTPS client still finds a CA bundle. Accept only a measured gain with identical behavior. If readiness time does not move, the healthcheck interval, not image size, was the limit.

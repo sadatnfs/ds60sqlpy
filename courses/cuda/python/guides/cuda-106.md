@@ -1,10 +1,17 @@
 # cuda-106: A modern tile-based kernel DSL
 
-**Route:** CUDA Python and machine learning. **Stage:** advanced. **Prerequisites:** `cuda-074`, `cuda-076`, `cuda-079`, `cuda-085`. Allow several sessions when the hardware experiment is new; the chapter is not a deadline.
+**Route:** CUDA Python and machine learning. **Stage:** advanced. **Prerequisites:** `cuda-074`, `cuda-076`, `cuda-079`, `cuda-085`.
 
-## What you will be able to explain
+Pacing, evidence labels and platform rules: [CUDA study guide](../../STUDY-GUIDE.md).
 
-By the end, you can **create tile boundaries**, **state compiler requirements**, and **explain a resource tradeoff** with evidence. Start with the two worked cases, then use the editable CPU model to make the quantities concrete.
+## Learning objectives
+
+- Create tile boundaries.
+- Mask a final tile.
+- Compare thread and tile abstractions.
+- State compiler requirements.
+- Design a library comparison.
+- Explain a resource tradeoff.
 
 ## Mechanism and vocabulary
 
@@ -31,9 +38,13 @@ A vector of 10 elements partitioned into tiles of 4 has tiles [0..3],[4..7],[8,9
 
 Changing tile size may improve reuse while increasing register pressure. The direction of the performance change must come from device evidence, not tile size alone.
 
-## Portable executable model
+## How to run the CPU model
 
-The **CPU reference model** variant runs this bounded worked example using `python-core`. It uses only the Python standard library, small synthetic values and no network. Its purpose is to expose the arithmetic or contract behind the chapter. The separate reference includes assertions for the stated observations.
+Edit the copy; the [reference](../references/cuda-106_cpu.py) adds assertions.
+
+```sh
+python courses/cuda/python/lessons/cuda-106_cpu.py
+```
 
 ```python
 n, tile = 10, 4
@@ -53,77 +64,65 @@ print("CPU tile model:", blocks)
 | `tile` | `4` |
 | `blocks` | `[[0, 1, 2, 3], [4, 5, 6, 7], [8, 9]]` |
 
-Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.
-
 ## Practice and transfer
+
+Record each attempt in the [worksheet](../lessons/cuda-106.md) before opening hints.
 
 ### Exercise 1: Create tile boundaries
 
 **Trap to avoid:** Using closed intervals `[start, start + tile]` makes adjacent tiles share an element, so index 4 is processed twice and a sum reduction double counts it.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 2: Mask a final tile
 
 **Trap to avoid:** Masking only the store still issues out-of-bounds loads, which can fault or read unrelated memory, and an unmasked reduction then includes garbage values.
-
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 3: Compare thread and tile abstractions
 
 **Trap to avoid:** Assuming a tile kernel behaves like a thread kernel with the same block size misreads the model, since a tile program instance is not a single thread.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 4: State compiler requirements
 
 **Trap to avoid:** Writing that the kernel requires a recent version gives no way to reproduce the build.
-
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 5: Design a library comparison
 
 **Trap to avoid:** Timing the DSL kernel once against a warmed library call reports the DSL as much slower purely because of compilation.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 6: Explain a resource tradeoff
 
 **Trap to avoid:** Concluding that larger tiles are always faster because they reuse more data predicts a direction that only device evidence can establish.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ## Progressive hints
 
-Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.
+Hint *k* belongs to exercise *k*; open one at a time.
 
-1. Start from worked example 1 and mark the quantities needed for the task "Create tile boundaries".
-2. Change one assumption in worked example 2 while preserving the declared contract: mask a final tile.
-3. Trace the CPU program's variables before adding hardware behavior: compare thread and tile abstractions.
-4. Draw producers, consumers and the exact operation boundary for the task "State compiler requirements".
-5. Separate what the small fixture establishes from what the real runtime must show: design a library comparison.
-6. Write a counterexample to an overbroad claim before you explain a resource tradeoff.
+1. Start each tile at a multiple of the tile size and end it before the next start or at the vector length.
+2. In the last tile, compute which lane offsets fall beyond the length and guard both their loads and their stores.
+3. Ask which decisions the programmer writes in a thread-level kernel that a tile compiler makes instead.
+4. Record the DSL release, the compiler and the device architectures that release supports.
+5. Use the same shape, dtype and timing boundary for the library call, the thread reference and the tile kernel.
+6. Ask what a larger tile keeps live per program and what that does to how many programs can run together.
 
-## Common mistakes and self-review
+## Common mistakes and self-check
 
-Confusing a correct tiny example with a general implementation is the central review risk. For this chapter, challenge the assumption in worked example 2, then ask whether your change preserves the mechanism described above. If you change dtype, layout, ordering, batch size or backend, update the acceptance contract rather than silently reusing the old observation. Explain an unexpected result before trying random configuration changes.
+A common mistake is masking the final tile's loads but not its stores, or the reverse, so the two invalid lanes of the third tile read or write past the vector. Another is assuming a larger tile is faster because it improves reuse; it can raise register pressure and lower concurrency. Fix both by applying one mask to every boundary load and store, and by letting measurements on a supported device, not tile size alone, decide the direction of a performance change.
 
-Keep a small evidence table with columns **claim**, **input**, **expected observation**, **actual observation** and **limit**. For the first claim use `Create tile boundaries`. For the final claim use `Explain a resource tradeoff`. An unperformed GPU or cluster experiment remains pending even when the CPU model is correct.
+**Misconception:** A tile language makes memory layout someone else's problem because the compiler chooses the instructions. **Correction:** The compiler distributes work inside a tile, but the program still decides tile shapes, the order of loads and how data is laid out in memory. A strided or misaligned layout can still waste bandwidth, so compare against a library and the thread-level reference on the same operation.
 
-## Platform and evidence contract
+**Evidence limit:** The reference partitions 10 elements into three tiles, each element covered once. It does not compile Triton or a CUDA tile kernel, so masking in generated code, supported operations and performance need a prepared DSL release on a compatible device.
 
-The reading worksheet and CPU reference model work through the ordinary Linux Docker classroom on macOS, Linux and Windows using WSL 2. They do not require an NVIDIA GPU. Their results are labeled CPU models or semantic oracles, not simulated hardware performance.
+1. What does a tile-level language change for the programmer?
+2. Why use half-open tile intervals?
+3. Does opening this lesson give the Python worker a DSL compiler?
 
-Real CUDA work needs supported NVIDIA hardware, a compatible host driver and an explicitly prepared GPU runtime. An Apple GPU does not execute CUDA kernels. PyTorch MPS on a supported native Mac, ROCm on supported AMD hardware, or other vendor backends can provide separate accelerator learning routes; they need their own package and operation qualification and are not CUDA evidence. The ordinary Linux Docker classroom does not expose native Mac MPS automatically.
-
-Do not download packages, models or data by opening this lesson. Do not attach an engine socket, ambient cluster credentials or an arbitrary remote endpoint. A CPU pass, imported package, successful compilation, real GPU result and measured performance are distinct observations. Record the actual backend, data shape/dtype, source revision, versions and pending checks. A saved completion marker records learning progress, not hardware certification.
+Answers: [self-check answers](../solutions/cuda-106_solutions.md#self-check-answers).
 
 ## Primary references
 
 - [PyTorch CUDA semantics](https://docs.pytorch.org/docs/2.9/notes/cuda.html)
 - [TensorFlow GPU guide](https://www.tensorflow.org/guide/gpu)
 
-Use the version-matched documentation of your prepared environment. These references describe interfaces and supported boundaries; the chapter's synthetic examples and CPU models are original teaching material.
+Full lists: [documentation and sources](../../STUDY-GUIDE.md#documentation-and-sources).
 
 ## Ask an AI tutor about this lesson
 

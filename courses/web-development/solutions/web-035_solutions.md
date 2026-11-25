@@ -1,6 +1,6 @@
 # web-035: explanatory solutions
 
-Open this after your own attempt. Each answer explains the lesson's synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in `courses/web-development/guides/web-035.md`.
+Attempt each exercise before reading; the mechanism is in `courses/web-development/guides/web-035.md` ([using these answers](../STUDY-GUIDE.md#solutions)).
 
 ## Exercise 1: Explain how a list differs from a keyed record.
 
@@ -76,4 +76,6 @@ Open this after your own attempt. Each answer explains the lesson's synthetic fi
 
 ## Reference comparison
 
-Open `courses/web-development/solutions/web-035_solution.php` only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; server lifecycle, persistence, concurrency and security need their own integration evidence.
+The reference requires one visible row that is a list, two untouched originals, the right record from array_find and correct array_any and array_all answers. That catches key leaks and mutation. It does not test a missing required field or the empty result, so add those cases yourself.
+
+Open `courses/web-development/solutions/web-035_solution.php` after saving your attempt ([comparing with the reference](../STUDY-GUIDE.md#references)).

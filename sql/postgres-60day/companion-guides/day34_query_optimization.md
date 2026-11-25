@@ -2,67 +2,26 @@
 
 ## How to run this lesson
 
-Start the Linux-container engine and run `./classroom` from the repository
-root. On Windows, use Ubuntu in WSL 2 or the thin
-`START_DOCKER_CLASSROOM.cmd` wrapper. Choose **PostgreSQL** on the shared
-`/classroom` home, then open **sql-34**. The
-[launcher guide](../../../docs/one-command-classroom.md) covers first preparation, strict resume and
-the saved project selection. No host Python or PostgreSQL installation is
-required for this browser route.
+Open `./classroom`, select **sql-34** and run **Whole SQL lesson (psql)**.
+The learner file runs one grouped report, one `EXPLAIN ANALYZE` and one
+plain `EXPLAIN`, then rolls back. Edit your copy at
+`.learning/sql/sql-34/lesson/workspace/sql/postgres-60day/day34_query_optimization.sql`;
+it runs against `advanced_sql_training`. Launch details are in
+[Run a lesson in the classroom](../../STUDY-GUIDE.md#run-a-lesson-in-the-classroom).
 
-1. Read the prerequisite and fixture notes before running the file. Use only
-   the local disposable `advanced_sql_training` database.
-2. Choose **Whole SQL lesson (psql)** for the cataloged learner script. This
-   preserves the lesson's reviewed psql directives, relative includes and
-   transaction behavior. **SQL snippet** is appropriate for ordinary SQL
-   statements, but is not a replacement for an entire script's setup.
-3. The **Course database** panel above the code shows whether the course
-   training tables are loaded. Missing tables load automatically before your
-   first run (or choose **Load course tables**) and stay loaded for later
-   lessons. **Reset training data** restores the original rows only when your
-   own changes made results differ; it keeps your saved code and notes.
-4. Edit the learner copy in the classroom and save your prediction before
-   running. Its whole-script workspace is
-   `.learning/sql/sql-34/lesson/workspace/sql/postgres-60day/day34_query_optimization.sql`.
-   For browser work this path is inside the Docker learning volume, not a
-   newly created host folder beside your checkout. The checked-in source
-   remains the answer-free starting artifact.
-5. Run the whole script and inspect the full transcript. The runner uses
-   `psql -X -v ON_ERROR_STOP=1 -f`. SELECT output has columns, rows and a row
-   count; DDL/DML has command tags; intentional checks may produce NOTICE
-   messages. An unexpected ERROR or nonzero exit is a failure to diagnose,
-   even when an earlier query printed plausible values.
-6. Verify the lesson's expected grain, ordering, constraints and declared
-   transaction or cleanup outcome. Keep required ROLLBACK statements.
-   The warehouse sequence and other explicitly stateful exercises explain
-   when state is committed. Read saved output without rerunning it when
-   reviewing an earlier attempt.
-
-If a relation is missing, inspect the lesson's required fixture and predecessor
-rather than guessing a new table definition. If authentication or runtime
-readiness fails, use `./classroom status` and the setup guide. Keep credentials
-out of SQL, notebooks, screenshots and committed files. Repair the first error
-before trusting partial output, and reveal separate solutions only when you
-want to compare after an attempt.
+Every rewrite in this lesson is judged in two steps: first prove the new
+query returns the same rows as the old one, then compare plans. Keep the
+original query's output open in a second tab so the comparison is quick.
 
 ### Optional contributor notebook route
 
-For notebook work, deliberately prepare the Linux/WSL contributor environment
-from [CONTRIBUTING.md](../../../CONTRIBUTING.md), including a compatible psql client and
-the notebook dependencies. Generate this lesson's private workspace through
-the maintained CLI:
+A notebook makes the side-by-side comparison of an original and a rewritten
+query easier to keep
+([notebook setup](../../STUDY-GUIDE.md#optional-contributor-notebook-route)):
 
 ```sh
 uv run --no-sync python scripts/course.py sql notebook sql-34
 ```
-
-Open the printed notebook path in that environment's JupyterLab. It uses the
-same catalog-derived learner-copy layout in that contributor checkout and
-executes the complete script through psql. Its host-side state is separate
-from the Docker browser's named volume. Follow
-[guided SQL notebooks](../../../docs/guided-sql-notebooks.md) for explicit local connection
-selection and kernel setup. Notebook generation does not execute SQL or
-authorize a reset.
 
 ## Level and prerequisites
 
@@ -74,24 +33,27 @@ authorize a reset.
 
 ## A beginner's mental model for this lesson
 
-A **table** stores facts in named columns. A **row** is one occurrence at the
-table's declared grain. A query creates a temporary **result set**: rows printed
-on screen are not automatically stored. The key vocabulary for this lesson is Baseline, Predicate pushdown, Semantic equivalence. Its worked SQL reads or creates `orders`, `customers`, `order_items`, `products`.
+Optimizing a query means removing work while the answer stays identical.
+Both halves need evidence. The plan shows the work: rows read, rows thrown
+away, loops repeated. A result comparison shows the answer did not change.
+A rewrite that is faster but returns different rows is a different query.
 
-Before writing a query, complete this sentence: “One output row represents
-___.” Joins can multiply rows, filters can remove them, grouping can collapse
-many rows into one, and window functions can add calculations while preserving
-row count. For a normal analytical `SELECT`, use this logical reading order:
-`FROM`/`JOIN` (including `ON`) → `WHERE` → `GROUP BY`/aggregates → `HAVING` →
-window calculations → `SELECT` → `ORDER BY` → `LIMIT`. PostgreSQL may execute a
-different physical plan while preserving those semantics.
+The course seed makes the trade-offs concrete. A correlated subquery that
+counts orders for each of the 500 customers runs its inner scan 500 times,
+reading all 4,362 orders each time and discarding 4,353 of them. Grouping
+`orders` once by `customer_id` produces 438 counts in one pass, and a
+`LEFT JOIN` back to `customers` restores the 62 customers with no orders as
+zeros. Those 62 are every customer in Brazil, so a rewrite that used an
+inner join would silently drop a whole country from the report.
 
-The worked walkthrough's lesson-specific task is: Capture a baseline and control totals, replace a repeated scalar aggregate with one grouped relation, and join it back. Recheck keys and totals before comparing plans; a faster query that silently drops zero-order customers is not an optimization of the same requirement.
-The first runnable example has a concrete contract: Example 1 returns one grouped row per `order_id`, `customer_id`, and `country` with columns `order_id`, `customer_id`, and `country` from `orders`, and `customers`. Compare the key set and row count with a simpler control over the same filter/window; inspect `NULL` versus zero/absent-row meaning and verify the final ordering/tie-breaker when present. Its final projection is `country`. Independently group `orders`, `filtered_orders`, and `customers` by the shown grouping expressions and compare every displayed aggregate at that exact grain. For tied business values, inspect the final ordering expression and verify its last key makes the displayed order reproducible.
+The learner file's third statement shows the same idea at a larger scale.
+It sums `order_items.quantity` by product category for paid, shipped and
+delivered orders. The plan filters `orders` to an estimated 2,617 rows
+before joining, so only items of those orders reach the six-row
+`HashAggregate`. The filter was written in `WHERE`, but the planner decided
+where it runs.
 
 ## Two worked SQL examples
-
-These worked excerpts come from `sql/postgres-60day/day34_query_optimization.sql`. Use **Whole SQL lesson (psql)** in the unified classroom for the complete file, including its fixture and transaction context. The optional contributor notebook and prepared `psql` routes are described above.
 
 ### Example 1
 
@@ -117,9 +79,16 @@ ORDER BY
   COUNT(*) DESC;
 ```
 
-**How to read it:** Example 1: Start with `orders`, and `customers` in `FROM`/`JOIN`; let `WHERE` remove nonqualifying rows; let `GROUP BY` collapse rows to its grouping keys. The final `SELECT` displays `country`. `ORDER BY` determines presentation order. Before running, predict the row grain, row count, `NULL` positions, and first/last key; afterwards, compare each prediction with the transcript.
+**How to read it:** The CTE keeps orders from the last 30 days,
+and the outer query counts them by customer country. PostgreSQL inlines
+this CTE: the plan shows a `Seq Scan on orders` with the date filter
+directly under a `Hash Join`, with no separate CTE step.
 
-**Expected result/shape:** Example 1 returns one grouped row per `order_id`, `customer_id`, and `country` with columns `order_id`, `customer_id`, and `country` from `orders`, and `customers`. Compare the key set and row count with a simpler control over the same filter/window; inspect `NULL` versus zero/absent-row meaning and verify the final ordering/tie-breaker when present.
+**Expected result/shape:** Seven rows, one per country, from
+CA with 39 orders down to FR with 24; the counts add up to 209 recent
+orders. Brazil is absent because its customers have never ordered. GB and
+DE tie at 28, and `ORDER BY COUNT(*) DESC` has no second key, so those two
+rows may appear in either order.
 
 ### Example 2
 
@@ -134,9 +103,15 @@ WHERE
   o.order_date >= now() - interval '7 days';
 ```
 
-**How to read it:** Example 2 returns plan rows rather than business rows. The node tree is evidence about one execution strategy; it does not replace a correctness check on the underlying query.
+**How to read it:** `EXPLAIN ANALYZE` runs the seven-day
+query and reports the plan with actual counts. It selects only
+`order_id` and `customer_id`, so each output row is narrow, but the table
+still has to be read in full: there is no index on `order_date`.
 
-**Expected result/shape:** Example 2 prints a plan tree, not business rows. Run the underlying `SELECT` separately and reconcile its `order_id`, and `customer_id` key set and row count over `orders`; then compare node estimates, actual rows × loops, buffers, and timing without requiring one fixed plan.
+**Expected result/shape:** A single `Seq Scan on orders`
+node with an estimate of 23 rows and an actual count of 17, and `Rows
+Removed by Filter: 4345`. Narrowing the projection did not reduce the
+pages read; only an index or a smaller table could.
 
 ## Learning objectives
 
@@ -162,29 +137,29 @@ optimization of the same requirement.
 Complete these in the [learner SQL](../day34_query_optimization.sql):
 
 1. Replace a scalar/correlated subquery with a join and compare plans.
-   **Inputs/evidence:** For sql-34 Exercise 1, run the underlying read-only query over `orders`, `order_items`, and `products` before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison.
-   **Expected result/shape:** For sql-34 Exercise 1, expected output: one row per `order_id`. The final columns are `order_id`, and `order_date`.
-   **Verify:** For sql-34 Exercise 1, run the underlying query without `EXPLAIN` and preserve its `order_id` rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.
+   **Inputs/evidence:** For sql-34 Exercise 1, read `orders`, `order_items`, and `products` (50 `Electronics` products) and plan two forms of 'orders with an Electronics line' with `EXPLAIN (ANALYZE, BUFFERS)`: an `EXISTS` subquery and a `SELECT DISTINCT` join through `order_items` and `products`.
+   **Expected result/shape:** For sql-34 Exercise 1, expected output: both forms return 2,187 orders, one per `order_id`; the `EXISTS` plan is a `Hash Semi Join`, and the join plan is a `Hash Join` under a `HashAggregate` for the `DISTINCT`. The final columns are `order_id`, and `order_date`.
+   **Verify:** For sql-34 Exercise 1, confirm both forms return 2,187 rows without `EXPLAIN` and that the join without `DISTINCT` also returns 2,187, because no order has two Electronics lines; then, inside `BEGIN ... ROLLBACK`, insert a second Electronics line (product 116) into order 5 and confirm the plain join grows to 2,188 rows while the `EXISTS` and `DISTINCT` forms stay at 2,187.
 2. Limit rows early without changing the result.
-   **Inputs/evidence:** For sql-34 Exercise 2, run the underlying read-only query over `orders`, `customers`, and `top_orders` before collecting its plan. Keep seed rows, parameters, settings, and statistics fixed for each comparison.
-   **Expected result/shape:** For sql-34 Exercise 2, expected output: at most 100 rows keyed by `order_id`. The final columns are `order_id`, `order_date`, and `country`. The final order is `t.order_date DESC, t.order_id DESC`.
-   **Verify:** For sql-34 Exercise 2, run the underlying query without `EXPLAIN` and preserve its `order_id` rows. Then read scan inputs, estimated versus actual rows × loops, filter losses, buffers, and the root node; a different node type is not itself a failure. Compare one selective and one broad parameter while seed rows, settings, and statistics remain unchanged.
+   **Inputs/evidence:** For sql-34 Exercise 2, read `orders` (4,362 rows) and `customers`, and plan two forms of the latest 100 orders with country: a join followed by `ORDER BY ... LIMIT 100`, and a `top_orders` CTE `AS MATERIALIZED` that limits `orders` to 100 rows before joining `customers`.
+   **Expected result/shape:** For sql-34 Exercise 2, expected output: exactly 100 rows from each form on this load, newest first, starting with order 2258 and ending with order 2269; the plain plan joins all 4,362 orders before a `top-N heapsort`, while the CTE plan joins only the 100 kept orders. The final columns are `order_id`, `order_date`, and `country`. The final order is `t.order_date DESC, t.order_id DESC`.
+   **Verify:** For sql-34 Exercise 2, confirm the plain query `EXCEPT` the CTE query returns no rows, and that the 100 rows have 100 distinct `order_id` values; then, inside `BEGIN ... ROLLBACK`, move order 2258 to `order_date = '2000-01-01'` and confirm the CTE form now starts with order 745 and ends with order 910, the former 101st row.
 3. Predict `MATERIALIZED` versus `NOT MATERIALIZED` planner freedom.
    **Inputs/evidence:** For sql-34 Exercise 3, run `EXPLAIN` on the same recent-orders count twice, once with `WITH recent AS MATERIALIZED (...)` and once with `AS NOT MATERIALIZED`, where `recent` keeps orders from the last 30 days and is joined to `customers`.
    **Expected result/shape:** For sql-34 Exercise 3, expected output: two plans. The `MATERIALIZED` plan computes `CTE recent` separately and reads it through a `CTE Scan on recent`; the `NOT MATERIALIZED` plan folds the date filter into a `Seq Scan on orders` under the join. Both queries return the same count.
    **Verify:** For sql-34 Exercise 3, run both queries without `EXPLAIN` and confirm that they return the same `count`; then confirm that only the `MATERIALIZED` plan contains a `CTE recent` node, and treat the estimated costs as plan evidence, not as a universal speed ranking.
 4. Pre-aggregate items at order grain and verify totals.
-   **Inputs/evidence:** For sql-34 Exercise 4, read from `order_items`, `orders`, and `customers`. Build the answer toward `country`, and `units`; keep `country` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-34 Exercise 4, expected output: one row per order before customer/country joins. The final columns are `country`, and `units`. The final order is `c.country`.
-   **Verify:** For sql-34 Exercise 4, independently aggregate `order_items`, `orders`, and `customers` by `country`; require one output row for every distinct `country` tuple and compare `units` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `units` for the existing `country` tuple and verify the new tuple appears exactly once.
+   **Inputs/evidence:** For sql-34 Exercise 4, read `order_items` (13,085 lines, 39,257 units), sum `quantity` per order in the `item_totals` CTE (4,362 rows), then join `orders` and `customers` and group by `country`.
+   **Expected result/shape:** For sql-34 Exercise 4, expected output: exactly 7 country rows, from IN with 5,479 units to FR with 5,711, with AU 5,529, CA 5,683, DE 5,687, GB 5,558, and US 5,610; BR is absent because its customers have no orders. The final columns are `country`, and `units`. The final order is `c.country`.
+   **Verify:** For sql-34 Exercise 4, confirm the seven `units` add up to 39,257, the result of `SELECT SUM(quantity) FROM order_items`, and that summing `oi.quantity` straight through the three-way join gives the same seven rows; then, inside `BEGIN ... ROLLBACK`, insert a 3-unit line into order 1 (a US customer) and confirm only US changes, from 5,610 to 5,613.
 5. Repair payment/item fanout.
-   **Inputs/evidence:** For sql-34 Exercise 5, read from `payments`, `order_items`, and `orders`. Build the answer toward `order_id`, `paid_amount`, and `line_revenue`; keep `order_id` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-34 Exercise 5, expected output: at most 20 rows keyed by `order_id`. The final columns are `order_id`, `paid_amount`, and `line_revenue`. The final order is `o.order_id`.
-   **Verify:** For sql-34 Exercise 5, assert no more than 20 rows, no duplicate `order_id`, and no adjacent pair that violates `o.order_id`. Rejoin the returned keys to `payments`, `order_items`, and `orders` to confirm `order_id`, `paid_amount`, and `line_revenue` came from the same source rows. Run with 20 minus one and 20 plus one eligible rows; require the output cap of 20 while retaining `o.order_id`.
+   **Inputs/evidence:** For sql-34 Exercise 5, read `payments` (3,836 rows) into `paid`, one `SUM(amount)` per order, and `order_items` into `sold`, one discounted line revenue per order, then `LEFT JOIN` both to `orders` and keep the first 20 orders.
+   **Expected result/shape:** For sql-34 Exercise 5, expected output: exactly 20 rows, orders 1 to 20; orders 5, 9, 14, and 20 have no payment and show `NULL` `paid_amount`, order 10 shows its two payments as 143.43, and order 17 shows 172.16 paid against 344.3105 of line revenue. The final columns are `order_id`, `paid_amount`, and `line_revenue`. The final order is `o.order_id`.
+   **Verify:** For sql-34 Exercise 5, confirm order 4 shows 1155.92 paid and 1155.9185 of revenue, while joining `payments` and `order_items` directly to `orders` inflates its `paid_amount` five times, to 5,779.60, because it has five item lines; then, inside `BEGIN ... ROLLBACK`, insert a second 240.20 payment for order 1 and confirm its `paid_amount` doubles to 480.40 while `line_revenue` stays 240.2000.
 6. Replace nullable `NOT IN` logic with `NOT EXISTS`.
-   **Inputs/evidence:** For sql-34 Exercise 6, read from `customers`, and `orders`. Build the answer toward `customer_id`; keep `customer_id` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-34 Exercise 6, expected output: one row per `customer_id`. The final columns are `customer_id`. The final order is `c.customer_id`.
-   **Verify:** For sql-34 Exercise 6, run an anti-check that counts rows where NOT ((NOT EXISTS ( SELECT 1 FROM orders o WHERE o.customer_id = c.customer_id ))); require unique `customer_id` where the expected grain is one row per key and confirm the projected `customer_id` against `customers`, and `orders`. Repeat with `NULL` in `customer_id` and state whether the row is kept, rejected, or classified.
+   **Inputs/evidence:** For sql-34 Exercise 6, read `customers` (500 rows) and test each `customer_id` against `orders` (438 distinct customers) with a correlated `NOT EXISTS`.
+   **Expected result/shape:** For sql-34 Exercise 6, expected output: exactly 62 rows, customers 8, 16, 24, and every eighth id up to 496, all of them in `BR`. The final columns are `customer_id`. The final order is `c.customer_id`.
+   **Verify:** For sql-34 Exercise 6, confirm 500 customers minus 438 distinct ordering customers equals the 62 returned rows; then append a `NULL` to the inner list with `UNION ALL SELECT NULL` and confirm `customer_id NOT IN (...)` now returns 0 rows while `NOT EXISTS` over the same list still returns 62.
 
 Change one thing per experiment and reconcile results before timing.
 
@@ -225,9 +200,28 @@ shape that the optimizer can transform.
 4. Reconcile keys, counts, and totals.
 5. Compare plans under the same data and predicate.
 
+## Two rewrites measured on the seed
+
+The table compares the two forms of the first two answers. Both forms of
+a pair return the same rows.
+
+| Rewrite | Original plan | Rewritten plan |
+|---|---|---|
+| Orders with an Electronics line | `EXISTS` becomes a `Hash Semi Join`, 165 buffers, about 1.5 ms | `DISTINCT` join adds a `HashAggregate` over 2,187 rows, 165 buffers, about 1.8 ms |
+| Latest 100 orders with country | join all 4,362 orders, then top-N sort, 80 buffers | sort orders alone, then 100 key lookups, 224 buffers |
+
+Neither rewrite wins on this seed. PostgreSQL already turns `EXISTS` into
+a semi-join, so the join form reads the same 165 buffers and only adds the
+`HashAggregate` its `DISTINCT` needs. The second rewrite removes join work
+but adds 53 index probes into `customers`, so it touches more buffers and
+is not faster. That is still a useful result: it shows why each rewrite
+has to be measured.
+
 ## Practice map
 
-Use the numbered **Exercises** section above as the single authoritative practice contract. Its prompts, expected shapes, and verification checks map one-for-one to the learner SQL and both solution companions.
+Each prompt above has a semantic check as well as a plan check. Run the
+check first: if the rewrite returns different rows, its plan does not
+matter yet.
 
 ## Pitfalls and validation
 
@@ -251,9 +245,10 @@ to order grain before combining them. Use `NOT EXISTS` for a NULL-safe anti-join
 
 ## Ask an AI tutor about this lesson
 
-An AI tutor is optional; the guide, learner SQL, PostgreSQL, and expected checks are
-enough to complete the lesson offline. If you want a patient tutor, copy this
-prompt after opening the repository in the AI tutor:
+A tutor can quiz you on whether two queries are equivalent. Paste an
+original and a rewrite and ask it to find the input row that would make
+them disagree
+([optional tutor notes](../../STUDY-GUIDE.md#use-an-ai-tutor-optional)).
 
 ```text
 Tutor me through sql-34: Query Optimization Techniques.

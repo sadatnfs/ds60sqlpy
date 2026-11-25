@@ -194,7 +194,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/swift/solutions/swift-030_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="swift-030-explanation-and-comparison">swift-030: explanation and comparison<a class="heading-anchor" href="#swift-030-explanation-and-comparison" aria-label="Link to this section">#</a></h2>
-<p>Attempt the six guide tasks before opening this comparison. The executable reference is <a href="swift-030_solution.swift.html">swift-030_solution.swift</a>. It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.</p>
+<p>Reference program: <a href="swift-030_solution.swift.html">swift-030_solution.swift</a>, covering both examples and the executed answers.</p>
+<p>Attempt the tasks first; see <a href="../STUDY-GUIDE.md.html#comparing-with-the-explanation">comparing with the explanation</a>.</p>
 <h3 id="why-the-two-examples-differ">Why the two examples differ<a class="heading-anchor" href="#why-the-two-examples-differ" aria-label="Link to this section">#</a></h3>
 <p><strong>Cancel before observing a check:</strong> The loop observes cancellation state rather than guessing a scheduling delay. The task acknowledges cancellation and its completion is awaited.</p>
 <p><strong>Cancellation need not prevent a result:</strong> A cancellation request alone is not proof that an operation failed to execute. This task still returns 9 because its body does not check cancellation.</p>
@@ -277,7 +278,7 @@ finished<span class="syntax-punctuation">.</span>cancel<span class="syntax-punct
 <p>addTaskUnlessCancelled refuses work once the group is cancelled; a completed task&#x27;s result is fixed, so a late cancel has nothing to stop.</p>
 <h4 id="task-6-transfer-and-justify">Task 6: Transfer and justify<a class="heading-anchor" href="#task-6-transfer-and-justify" aria-label="Link to this section">#</a></h4>
 <p>Design a receipt distinguishing success, confirmed cancellation and unknown outcome.</p>
-<p>No single reference answer exists: several designs can satisfy this transfer task. Build yours from the task 3 answer above (Write a bounded processing loop with cleanup on cancellation) and the mechanism described below, and state one limitation of your choice.</p>
+<p>No single answer exists; extend task 3 using the <a href="../STUDY-GUIDE.md.html#open-transfer-tasks">open transfer routine</a>.</p>
 <h3 id="solution-reasoning">Solution reasoning<a class="heading-anchor" href="#solution-reasoning" aria-label="Link to this section">#</a></h3>
 <p><strong>Approach.</strong> Example A starts a task that yields in a loop until <code>Task.isCancelled</code> becomes true and then confirms with <code>Task.checkCancellation()</code>. The parent cancels and awaits the result. Example B cancels a task whose body returns 9 without checking cancellation. The task 3 answer processes items in a loop with cleanup that runs on cancellation.</p>
 <p><strong>Why it is correct.</strong> Cancellation in Swift is a flag the task must observe. In Example A the loop sees the flag, <code>checkCancellation</code> throws <code>CancellationError</code>, and the task returns true, so <code>acknowledged</code> holds. In Example B the body never checks, so it still returns 9. In task 3, when cancellation is seen before the fourth item, items 1 to 3 are done and cleanup still runs.</p>
@@ -289,7 +290,7 @@ finished<span class="syntax-punctuation">.</span>cancel<span class="syntax-punct
 <p>Task.isCancelled inspects state and Task.checkCancellation throws CancellationError. A task handle can be cancelled and then awaited to observe its actual completion. Cancellation handlers require careful sendable state ownership.</p>
 <p>Polling cancellation in a tight CPU loop without yielding can waste resources. A cancellation handler must not race unsafely with the operation. Preserve result identity when deciding whether replay is safe.</p>
 <h3 id="review-before-continuing">Review before continuing<a class="heading-anchor" href="#review-before-continuing" aria-label="Link to this section">#</a></h3>
-<p>Run the reference and confirm that it prints <code>swift-030: passed</code>, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.</p></article>
+<p>Run the reference and confirm it prints <code>swift-030: passed</code>, then rerun the guide&#x27;s counterexample.</p></article>
   </main>
 </body>
 </html>

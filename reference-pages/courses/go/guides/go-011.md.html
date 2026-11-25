@@ -209,9 +209,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="syntax-anatomy-and-reasoning">Syntax anatomy and reasoning<a class="heading-anchor" href="#syntax-anatomy-and-reasoning" aria-label="Link to this section">#</a></h3>
 <p>errors.New constructs an error value. fmt.Errorf(&quot;read: %w&quot;, err) wraps an existing cause. errors.Is follows supported wrapping relationships to compare a sentinel; errors.As finds an error assignable to a target type. Return nil for a successful error result, not an interface containing a typed nil pointer. Avoid logging and returning the same error at every layer because repeated messages can obscure the causal chain.</p>
 <h3 id="run-this-lesson">Run this lesson<a class="heading-anchor" href="#run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>Choose Go in the unified Docker classroom. Save your own pad before experimenting. The prepared worker stages it as <code>main.go</code>, compiles it, and executes the resulting program with bounded time and output. The pad is one source file. It does not supply interactive input, arbitrary command-line arguments, package installation, Kubernetes credentials or a host Docker socket. Every ordinary reference here uses the standard library, synthetic local data and explicit checks. A failed <code>check</code> panics and produces a nonzero process result; do not remove it to make the run appear successful.</p>
-<p>The explanatory solution snippets belong inside <code>func main()</code> unless they declare a helper. <code>check</code> is a tiny teaching helper that panics when a condition is false. The separate reference supplies required imports and helpers and implements all six cases. Use that complete source only after an attempt or an explicit reveal. For an independently prepared Go project, the equivalent local build is <code>go build -o lesson main.go</code>, followed by <code>./lesson</code>; use Linux or WSL 2 for that optional workflow. Compiling proves syntax and type consistency, while the executed checks establish the stated example contracts.</p>
-<p>Each worked example below is a complete Go file. Copy one whole block into your saved pad and run it. Example 2 includes the first case as well as the second, so its setup is complete. Its supporting declarations may be reused in later investigations. The separate reference implements all six cases.</p>
+<p>Run each worked example as one complete file in your saved pad (<a href="../STUDY-GUIDE.md.html#run-a-lesson">run steps</a>).</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1-preserve-a-cause">Worked example 1: Preserve a cause<a class="heading-anchor" href="#worked-example-1-preserve-a-cause" aria-label="Link to this section">#</a></h4>
 <p>Wrap ErrMissing with a record-reading context.</p>
@@ -285,77 +283,79 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Observe:</strong> Their identities differ.</p>
 <p>A matching message does not establish the same error contract. Use an exported sentinel or typed error only when callers should rely on that distinction.</p>
 <h3 id="predict-before-running">Predict before running<a class="heading-anchor" href="#predict-before-running" aria-label="Link to this section">#</a></h3>
-<p>For each example, write the input values, the state that can change, and the expected observation. Explain which result would disprove your current interpretation. For concurrency, predict a guaranteed relationship rather than an arbitrary scheduling order. For an error case, identify whether it is rejected at compilation or returned during execution.</p>
+<p>Predict whether errors.Is can find ErrMissing through a message built with <code>%w</code>, and through one built with <code>%v</code>. Predict whether two <code>errors.New</code> values with identical text are equal. For <code>strconv.Atoi</code> on 4x, predict the concrete error type before inspecting it, and for <code>errors.Join</code>, predict how many causes remain discoverable.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-preserve-a-cause-change-one-input">Exercise 1: Preserve a cause: change one input<a class="heading-anchor" href="#exercise-1-preserve-a-cause-change-one-input" aria-label="Link to this section">#</a></h4>
-<p>Copy worked example 1 into a scratch pad and change <code>err := fmt.Errorf(&quot;read record: %w&quot;, ErrMissing)</code> to <code>err := fmt.Errorf(&quot;read record: %v&quot;, ErrMissing)</code>. Before running, predict which check fails and which value it now sees; then run it and restore the original line.</p>
-<p><strong>Expected:</strong> The changed run panics with <code>wrapped cause</code> because <code>errors.Is(err, ErrMissing)</code> no longer holds. Restoring the original line brings back the worked observation: errors.Is still recognizes ErrMissing.</p>
-<p><strong>Verify:</strong> Compare your written prediction with the panic message <code>wrapped cause</code> and name the value that made <code>errors.Is(err, ErrMissing)</code> false. After restoring the input, the program must print its success line again.</p>
+<p>Copy worked example 1, change <code>err := fmt.Errorf(&quot;read record: %w&quot;, ErrMissing)</code> to <code>err := fmt.Errorf(&quot;read record: %v&quot;, ErrMissing)</code> and predict the failure before running; then restore the line.</p>
+<p><strong>Expected:</strong> The edited run panics with <code>wrapped cause</code> because <code>errors.Is(err, ErrMissing)</code> no longer holds.</p>
+<p><strong>Verify:</strong> Restoring <code>err := fmt.Errorf(&quot;read record: %w&quot;, ErrMissing)</code> makes the check pass again with the worked observation: errors.Is still recognizes ErrMissing.</p>
 <h4 id="exercise-2-reject-text-equality-diagnose-an-edited-check">Exercise 2: Reject text equality: diagnose an edited check<a class="heading-anchor" href="#exercise-2-reject-text-equality-diagnose-an-edited-check" aria-label="Link to this section">#</a></h4>
-<p>A careless edit changed the check in worked example 2 so that it reads <code>check(errors.Is(a, b), &quot;identity not text&quot;)</code>. Run worked example 2 with that line, explain why the edited check now fails for the same program state, and restore it.</p>
-<p><strong>Expected:</strong> Before the repair the program panics with <code>identity not text</code>; after it the line reads <code>check(!errors.Is(a, b), &quot;identity not text&quot;)</code> again and their identities differ.</p>
-<p><strong>Verify:</strong> Keep the failing and the repaired runs. Explain why the edited check rejects the same program state that <code>!errors.Is(a, b)</code> accepts.</p>
+<p>A careless edit rewrote the check in worked example 2 as <code>check(errors.Is(a, b), &quot;identity not text&quot;)</code>. Explain the failure, then restore it.</p>
+<p><strong>Expected:</strong> The defective run panics with <code>identity not text</code>; after restoring <code>check(!errors.Is(a, b), &quot;identity not text&quot;)</code>, their identities differ.</p>
+<p><strong>Verify:</strong> The edited check fails with message <code>identity not text</code> for a state that <code>!errors.Is(a, b)</code> accepts.</p>
 <h4 id="exercise-3-inspect-a-typed-boundary">Exercise 3: Inspect a typed boundary<a class="heading-anchor" href="#exercise-3-inspect-a-typed-boundary" aria-label="Link to this section">#</a></h4>
 <p>Return a LimitError carrying an allowed maximum and inspect it with errors.As.</p>
 <p><strong>Expected:</strong> The extracted limit is 3.</p>
-<p><strong>Verify:</strong> Keep a check equivalent to <code>errors.As(err, &amp;limit) &amp;&amp; limit.Max == 3</code>. As a control, change <code>err := fmt.Errorf(&quot;request: %w&quot;, &amp;LimitError{Max: 3})</code> to <code>err := fmt.Errorf(&quot;request: %v&quot;, &amp;LimitError{Max: 3})</code>: the run must panic with <code>typed error</code>. Restore the line before continuing.</p>
+<p><strong>Verify:</strong> Your solution must keep <code>errors.As(err, &amp;limit) &amp;&amp; limit.Max == 3</code> true. Control: changing <code>err := fmt.Errorf(&quot;request: %w&quot;, &amp;LimitError{Max: 3})</code> to <code>err := fmt.Errorf(&quot;request: %v&quot;, &amp;LimitError{Max: 3})</code> panics with message <code>typed error</code>; revert it.</p>
 <h4 id="exercise-4-handle-successful-parsing">Exercise 4: Handle successful parsing<a class="heading-anchor" href="#exercise-4-handle-successful-parsing" aria-label="Link to this section">#</a></h4>
 <p>Parse valid integer text and check error before value use.</p>
 <p><strong>Expected:</strong> The result is 42 and the error is nil.</p>
-<p><strong>Verify:</strong> Keep a check equivalent to <code>err == nil &amp;&amp; v == 42</code>. As a control, change <code>v, err := strconv.Atoi(&quot;42&quot;)</code> to <code>v, err := strconv.Atoi(&quot;43&quot;)</code>: the run must panic with <code>valid parse</code>. Restore the line before continuing.</p>
+<p><strong>Verify:</strong> Your solution must keep <code>err == nil &amp;&amp; v == 42</code> true. Control: changing <code>v, err := strconv.Atoi(&quot;42&quot;)</code> to <code>v, err := strconv.Atoi(&quot;43&quot;)</code> panics with message <code>valid parse</code>; revert it.</p>
 <h4 id="exercise-5-classify-invalid-parsing">Exercise 5: Classify invalid parsing<a class="heading-anchor" href="#exercise-5-classify-invalid-parsing" aria-label="Link to this section">#</a></h4>
 <p>Parse malformed integer text and inspect its NumError.</p>
 <p><strong>Expected:</strong> The typed parse error is present.</p>
-<p><strong>Verify:</strong> Keep a check equivalent to <code>errors.As(err, &amp;number)</code> and confirm the success line. Then name an input that would make it fail and the panic message (<code>parse error</code>) you would expect.</p>
+<p><strong>Verify:</strong> Your solution must keep <code>errors.As(err, &amp;number)</code> true. Control: an input that falsifies it fails with message <code>parse error</code>; revert it.</p>
 <h4 id="exercise-6-transfer-joined-failures">Exercise 6: Transfer joined failures<a class="heading-anchor" href="#exercise-6-transfer-joined-failures" aria-label="Link to this section">#</a></h4>
 <p>Join missing and permission errors and inspect both causes.</p>
 <p><strong>Expected:</strong> Both sentinels remain discoverable.</p>
-<p><strong>Verify:</strong> Keep a check equivalent to <code>errors.Is(err, ErrMissing) &amp;&amp; errors.Is(err, ErrDenied)</code> and confirm the success line. Then name an input that would make it fail and the panic message (<code>joined errors</code>) you would expect.</p>
-<p>Implement these in the answer-free learner source. Keep one independent check per claim. A task can require tracing, construction, a changed input or a deliberate safe failure. Do not run a data race, corrupt memory or contact a shared cluster merely to demonstrate why it would be wrong.</p>
+<p><strong>Verify:</strong> Your solution must keep <code>errors.Is(err, ErrMissing) &amp;&amp; errors.Is(err, ErrDenied)</code> true. Control: an input that falsifies it fails with message <code>joined errors</code>; revert it.</p>
+<p>Work in the answer-free learner source, <code>courses/go/lessons/go-011.go</code> (<a href="../STUDY-GUIDE.md.html#work-an-exercise">exercise contract</a>).</p>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
-<p>Read a compiler error from the first location in your source, then fix one cause at a time. Unused imports and variables are errors in Go; add an import when its use exists, rather than copying a large unused import list. A panic from <code>check</code> identifies a violated example contract. Compare the actual value with the expected value and inspect the state transition that produced it. A returned <code>error</code> is a value that the caller must handle; an ignored error can make later output look plausible while the original operation failed.</p>
-<p>The lesson-specific explanations in the two examples identify the important counterexamples. Extend that reasoning to every investigation: explain why a plausible alternative would fail, and preserve a tiny input that distinguishes it. Treat empty data, missing values and cancellation as domain cases with explicit policies. In concurrent work, replace sleeps used as synchronization with channels, mutexes or an explicit ownership protocol.</p>
+<p>Comparing <code>err.Error()</code> with a string, or formatting a cause with <code>%v</code> instead of <code>%w</code>, are the habits this lesson replaces. Both tie the code to presentation text, and <code>%v</code> also breaks the chain so errors.Is and errors.As stop working. Another mistake is passing a non-pointer target to errors.As; it needs a pointer to the variable that should receive the match.</p>
+<p>General compiler, panic and error diagnosis is in the <a href="../STUDY-GUIDE.md.html#diagnose-a-failure">study guide</a>.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <h4 id="hint-for-investigation-1-preserve-a-cause-change-one-input">Hint for investigation 1: Preserve a cause: change one input<a class="heading-anchor" href="#hint-for-investigation-1-preserve-a-cause-change-one-input" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: errors.Is still recognizes ErrMissing.</li>
-<li>The check <code>errors.Is(err, ErrMissing)</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Compute the checked value with <code>err := fmt.Errorf(&quot;read record: %v&quot;, ErrMissing)</code> in place before running, then compare it with the value <code>errors.Is(err, ErrMissing)</code> expects.</li>
+<li><code>%w</code> records the wrapped error for inspection. What does errors.Is walk through to find ErrMissing?</li>
+<li><code>%v</code> formats ErrMissing as text but does not wrap it, so errors.Is finds no cause and the check panics. Only <code>%w</code> adds the cause to the chain.</li>
 </ol>
 <h4 id="hint-for-investigation-2-reject-text-equality-diagnose-an-edited-check">Hint for investigation 2: Reject text equality: diagnose an edited check<a class="heading-anchor" href="#hint-for-investigation-2-reject-text-equality-diagnose-an-edited-check" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: Their identities differ.</li>
-<li>The check <code>!errors.Is(a, b)</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Compare <code>check(errors.Is(a, b), &quot;identity not text&quot;)</code> with the same line in worked example 2 and state the claim each version makes.</li>
+<li>errors.New returns a distinct value on each call. Does identical text make two errors the same?</li>
+<li>a and b are distinct values with the same text, so <code>errors.Is(a,b)</code> is false and the edited check panics. The original negated it because identity, not wording, is the contract.</li>
 </ol>
 <h4 id="hint-for-investigation-3-inspect-a-typed-boundary">Hint for investigation 3: Inspect a typed boundary<a class="heading-anchor" href="#hint-for-investigation-3-inspect-a-typed-boundary" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The extracted limit is 3.</li>
-<li>The check <code>errors.As(err, &amp;limit) &amp;&amp; limit.Max == 3</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Predict the effect of changing <code>err := fmt.Errorf(&quot;request: %w&quot;, &amp;LimitError{Max: 3})</code> to <code>err := fmt.Errorf(&quot;request: %v&quot;, &amp;LimitError{Max: 3})</code> before running anything. If the prediction is hard, trace that line again with the original input.</li>
+<li>errors.As needs a pointer to a variable of the target type. What does that variable receive on a match?</li>
+<li>The type carries structured information without parsing presentation text.</li>
 </ol>
 <h4 id="hint-for-investigation-4-handle-successful-parsing">Hint for investigation 4: Handle successful parsing<a class="heading-anchor" href="#hint-for-investigation-4-handle-successful-parsing" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The result is 42 and the error is nil.</li>
-<li>The check <code>err == nil &amp;&amp; v == 42</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Predict the effect of changing <code>v, err := strconv.Atoi(&quot;42&quot;)</code> to <code>v, err := strconv.Atoi(&quot;43&quot;)</code> before running anything. If the prediction is hard, trace that line again with the original input.</li>
+<li>Check the error before using the value. What does Atoi return for well-formed decimal text?</li>
+<li>The success branch establishes that the returned value is usable.</li>
 </ol>
 <h4 id="hint-for-investigation-5-classify-invalid-parsing">Hint for investigation 5: Classify invalid parsing<a class="heading-anchor" href="#hint-for-investigation-5-classify-invalid-parsing" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The typed parse error is present.</li>
-<li>The check <code>errors.As(err, &amp;number)</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Name one input that would make <code>errors.As(err, &amp;number)</code> false. A check that no input can falsify is not evidence.</li>
+<li>Atoi reports malformed text with a typed error. Which strconv type is it?</li>
+<li>Typed inspection supports a specific response to invalid input.</li>
 </ol>
 <h4 id="hint-for-investigation-6-transfer-joined-failures">Hint for investigation 6: Transfer joined failures<a class="heading-anchor" href="#hint-for-investigation-6-transfer-joined-failures" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: Both sentinels remain discoverable.</li>
-<li>The check <code>errors.Is(err, ErrMissing) &amp;&amp; errors.Is(err, ErrDenied)</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Name one input that would make <code>errors.Is(err, ErrMissing) &amp;&amp; errors.Is(err, ErrDenied)</code> false. A check that no input can falsify is not evidence.</li>
+<li>errors.Join keeps every non-nil error. Can errors.Is still find each sentinel separately?</li>
+<li>Multiple failures can matter during cleanup or validation.</li>
 </ol>
 <h3 id="self-check-and-retrieval">Self-check and retrieval<a class="heading-anchor" href="#self-check-and-retrieval" aria-label="Link to this section">#</a></h3>
-<p>Close the reference. Rebuild one normal case and one boundary case from a blank pad. Explain the role of sentinel error without using its name in the definition. Then change the domain while keeping the same invariant. Record the new input, your prediction and the observed output. If your program passes only because its input is hard-coded, explain which part would need a reusable function in a larger project.</p>
+<p>From a blank pad, write a loadConfig function that wraps an exported ErrNotFound sentinel with a file name, and a caller that uses errors.Is to fall back to a default. Check the default path and a wrapped unrelated error that must not trigger it. Then explain why the file name belongs in the wrapper and not in the sentinel.</p>
+<p>The general <a href="../STUDY-GUIDE.md.html#self-check-and-retrieval">retrieval routine</a> still applies.</p>
 <h3 id="next-step-and-sources">Next step and sources<a class="heading-anchor" href="#next-step-and-sources" aria-label="Link to this section">#</a></h3>
-<p><a href="https://pkg.go.dev/errors">Primary language or library documentation</a>, reviewed 2026-10-23. The teaching explanations and synthetic fixtures are original. Continue with the next lesson when you can explain the six observations and diagnose a changed case without copying its answer.</p>
+<p>Source: <a href="https://pkg.go.dev/errors"><code>errors</code> package documentation</a>, reviewed 2026-10-23.</p>
+<p>Next: go-012, Defer, cleanup and deliberate panic boundaries (<a href="../STUDY-GUIDE.md.html#when-to-move-on">criteria</a>).</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for go-011: Errors as values and preserving causal context.
 Read courses/go/guides/go-011.md and my saved attempt based on courses/go/lessons/go-011.go.

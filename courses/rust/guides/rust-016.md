@@ -24,9 +24,11 @@ The fixture uses in-memory text and a sorted map so it remains deterministic and
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles the saved pad as `main.rs` with pinned Rust 1.99.1, edition 2024, and the prepared Arrow 60 library. `assert!` and `assert_eq!` remain active in normal builds. The fixed pad accepts one source file without arbitrary arguments, interactive input, Cargo manifests or package installation. The main function returns `Result<(), Box<dyn std::error::Error>>` so later examples can propagate errors with `?`; the final `Ok(())` means this fixture completed successfully. Standard library and Arrow examples remain offline after image preparation. Multi-file Cargo and external ecosystem projects have separate explicit preparation workflows.
+Beyond the prelude, this lesson's programs use `std::collections`. A passing run prints `rust-016: passed`.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Pad setup and limits: [Run a lesson](../STUDY-GUIDE.md#run-a-lesson).
+
+Before you run anything, follow [Attempt a lesson](../STUDY-GUIDE.md#attempt-a-lesson).
 
 
 
@@ -34,7 +36,9 @@ Start with the answer-free learner artifact in your saved classroom pad. It deli
 
 split_once separates a simple two-field fixture. A second comma is rejected by integer parsing. BTreeMap entry gives one owned update point for a key. checked_add preserves overflow as a rejected record.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+**Reading Example A (Aggregate repeated valid items, code below).** `import_rows` returns a tuple: a `BTreeMap` of totals keyed by name and a count of rejected lines. Each line passes through guards. `let Some((name, quantity)) = line.split_once(',') else { ... }` binds both halves only when a comma exists; otherwise the `else` block must leave the iteration, here with `continue` after counting the rejection. The parse, the empty-name check and `checked_add` follow the same shape, so every way to fail has a counted exit. `*totals.get(name).unwrap_or(&0)` reads a previous total or a borrowed zero, and `insert` stores the new sum under an owned copy of the name made by `to_owned`.
+
+Method for tracing your own variants: [Trace a program](../STUDY-GUIDE.md#trace-a-program).
 
 ## Worked example / walkthrough
 
@@ -142,13 +146,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 6. **Transfer and justify.** Design a structured import result retaining safe per-record failure categories.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Record each task as in [Keep evidence for each task](../STUDY-GUIDE.md#keep-evidence-for-each-task).
 
 ## Common pitfalls and diagnosis
 
 This is a deliberately simple comma-separated fixture, not a complete CSV parser with quoting. Do not advertise split_once as general CSV support. The later Arrow CSV chapter uses an actual parser.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+To turn a pitfall into a test, see [Design a regression case](../STUDY-GUIDE.md#design-a-regression-case).
 
 ## Progressive hints
 
@@ -156,13 +160,25 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 2. Compare Example B (Retain valid zero and rejection counts) with Example A and name the first line whose behavior differs. Its observation is: A valid zero remains present while three malformed records are excluded.
 3. Before opening the explanation, test your task 3 attempt against this lesson's main pitfall: This is a deliberately simple comma-separated fixture, not a complete CSV parser with quoting.
 
+Tempting approaches to rule out before you compare:
+
+- **Task 1.** Predicting that `apple` appears with 0, or that `-1` lowers a total, misreads the parse step. `"-1".parse::<u32>()` is an error, so the apple record never reaches the map at all.
+- **Task 2.** Predicting 1 assumes the map keeps the last record per key. That is what a simplified loop writing `totals.insert(name.to_owned(), quantity)` would do, discarding the earlier 6.
+- **Task 3.** Collecting into a `HashMap` instead makes iteration order depend on a randomly seeded hasher, so the report can come out as `pear: 2` before `apple: 3` and the exact-string assertion fails on some runs but not others.
+- **Task 5.** Using `line.split(',')` and taking the first two pieces would accept `"pear,2,3"` as pear 2, silently dropping the third field instead of rejecting a record the fixture format does not allow.
+- **Task 6.** Collecting `format!("bad line: {line}")` strings copies untrusted input into the report and forces callers to parse messages to count categories.
+
 ## Self-check and next step
 
-Explain Admission, Aggregation, Deterministic report without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+For the input in Example A, write each record's admission decision and the running per-item totals. Why does the report use `BTreeMap` rather than `HashMap`? Why must a valid zero quantity appear in the report while a malformed record only increases the rejected count?
+
+Then work through [Self-check and review](../STUDY-GUIDE.md#self-check-and-review).
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://doc.rust-lang.org/book/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+Read [the `BTreeMap` documentation](https://doc.rust-lang.org/std/collections/struct.BTreeMap.html) for ordered iteration and the `entry` API.
+
+What the classroom does and does not prove: [Sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/r/solutions/r-037_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="r-037-reference-reasoning">r-037: reference reasoning<a class="heading-anchor" href="#r-037-reference-reasoning" aria-label="Link to this section">#</a></h2>
-<p>Use the <a href="r-037_reference.R.html">complete reference</a> with the guide&#x27;s declared inputs and runtime. Every worked example is also a standalone script.</p>
+<p>Run the <a href="r-037_reference.R.html">complete reference</a> under the <a href="../STUDY-GUIDE.md.html#run-a-chapter">run rules</a>.</p>
 <h3 id="why-the-implementation-has-this-shape">Why the implementation has this shape<a class="heading-anchor" href="#why-the-implementation-has-this-shape" aria-label="Link to this section">#</a></h3>
 <p>There are four ways to obtain exactly three heads and one way to obtain four, among sixteen equally likely sequences. The simulation approximates that model probability.</p>
 <p>Quadrupling independent repetitions halves this standard error. It does not imply that a biased real-world model becomes correct.</p>
@@ -242,7 +242,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Tempting mistake:</strong> Running 2 million draws and reporting 0.3125 as settled. The simulation error shrinks to about 0.0003, while the error from assuming a fair coin stays the same.</p>
 <p><strong>Verify:</strong> <code>sum(dbinom(3:4, 4, 0.55))</code> returns about 0.391, while the fair coin model returns 0.3125.</p>
 <h3 id="what-the-checks-establish">What the checks establish<a class="heading-anchor" href="#what-the-checks-establish" aria-label="Link to this section">#</a></h3>
-<p>The reference makes 5 <code>stopifnot()</code> checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.</p></article>
+<p>The assertions confirm that the exact value is 5/16, that the simulated estimate is within 0.02 of it, that quadrupling the repetitions halves the standard error, that probabilities of 0 and 1 give deterministic draws, and that the same seed reproduces the same draws. They do not show that the coin model fits any real process.</p>
+<p>The reference makes 5 <code>stopifnot()</code> checks; see <a href="../STUDY-GUIDE.md.html#what-a-passing-run-proves">what a passing run proves</a>.</p></article>
   </main>
 </body>
 </html>

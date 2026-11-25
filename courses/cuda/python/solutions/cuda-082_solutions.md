@@ -1,6 +1,6 @@
 # cuda-082: explained solutions
 
-These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.
+Compare with your [worksheet](../lessons/cuda-082.md) attempt.
 
 ## Exercise 1: Draw the dependency graph
 
@@ -74,8 +74,16 @@ Global waits accidentally add dependencies absent from the intended program.
 
 **How to verify.** Remove global waits one at a time in a test and keep only explicit events. Outputs must stay correct.
 
+## Self-check answers
+
+1. **What does an event record?** A point in one stream. Another stream can wait on it, adding a dependency without necessarily blocking the host.
+
+2. **Why is a correct pointer not enough for interop?** The write may still be in flight, or the storage may be recycled before the consumer finishes. Readiness and lifetime are separate from the address.
+
+3. **Why test with a non-default stream?** Default-stream execution can serialize work and hide missing dependencies that appear once operations run on independent streams.
+
 ## Reference observation
 
 Valid dependency order accepted; premature download rejected.
 
-The reference file is `courses/cuda/python/references/cuda-082_cpu.py`. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.
+Asserted by `courses/cuda/python/references/cuda-082_cpu.py`.

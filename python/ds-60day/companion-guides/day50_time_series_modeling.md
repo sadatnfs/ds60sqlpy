@@ -74,33 +74,13 @@ model earns its cost only if it improves the relevant evidence reliably.
 
 ## How to run this lesson
 
-**Default Docker classroom:** open `python-50` for its guide, notebook and capability notice. The default Core does not include the `ml` extra, so the complete legacy notebook is unavailable there until that app environment is deliberately prepared. Pressing Run or choosing a notebook kernel does not install packages.
+**Default Docker classroom:** ARIMA fitting in `python-50` relies on the `ml` extra, which the default Core does not include. Prepare `ml` with [CONTRIBUTING](../../../CONTRIBUTING.md) for local forecasting experiments; a host notebook environment and a Docker app image are separate.
 
-**Prepared browser alternative:** use the [ML engineering time boundaries course](../../../courses/ml-engineering/guides/mle-002.md) in its declared runtime. Its supported examples have their own package and execution contract; this does not qualify every legacy optional extension.
-
-**Explicit legacy preparation:** retain the contributor extras in [CONTRIBUTING](../../../CONTRIBUTING.md) and add `ml` only when needed. See [dependency profiles](../../../docs/dependency-profiles.md) and [Docker app package options](../../../docs/docker-profiles.md) for deliberate preparation. A host notebook environment and a Docker app image are separate. Do not install packages inside a learner pad.
+**Prepared browser alternative:** Forecasts leak when features use future knowledge, and the [event time and label maturity chapter](../../../courses/ml-engineering/guides/mle-002.md) practices that boundary in a prepared runtime.
 
 The full starter needs pmdarima. The bounded seasonal-naive and lag examples use the prepared data packages only. The reference distinguishes rolling one-step evaluation from a forecast made at one fixed origin.
 
-**Optional native notebook/editor route:** the instructions below describe
-separately prepared host tools. They are useful alternatives, not prerequisites
-for opening this lesson in the Docker classroom.
-
-1. Open the Day 50 learner notebook from this guide's **Next
-   step** section in VS Code or JupyterLab.
-2. Select the `Python (ds60sqlpy)` kernel. Start at the top and use
-   **Run All** only after making the written predictions; the default data examples are offline once the declared packages are prepared. Optional services and model assets have separate requirements.
-3. Keep experiments in new scratch cells. Do not edit the official
-   solution while attempting the numbered practice.
-4. Restart the kernel and run from the first cell before calling the
-   lesson complete. A clean run catches hidden state and stale
-   variables.
-
-Linux, macOS, or Ubuntu in Windows WSL 2:
-
-```bash
-.venv/bin/python -m jupyter lab
-```
+The [Python study guide](../../STUDY-GUIDE.md) covers the notebook route and preparing optional extras.
 
 ## Concept deep dive: forecast horizons, temporal backtesting, naive baselines, and leakage-safe lags
 
@@ -123,10 +103,6 @@ realistic forecast origins and reports performance across time regimes.
 - **rolling-origin loop:** repeats fit/predict at increasing origins while keeping every target strictly in the future.
 
 ### Focused example A: construct a seasonal-naive forecast on matching timestamps
-
-Before running the example, predict the shape, type, or direction of the
-result. Write the prediction down so that a surprise becomes evidence
-rather than something to overlook.
 
 ```python
 import numpy as np
@@ -226,9 +202,6 @@ synthetic weekly series to reinforce the method rather than mirror the notebook.
 
 Evaluate forecasts with forward-only information, multiple origins, meaningful baselines, and timestamp/data-quality checks before adding model complexity.
 
-Predict or plan before you run code. Use the hint only after an honest
-attempt, and record the evidence that would prove your result correct.
-
 4. **Rolling-origin evaluation:** Implement at least four expanding-window forecast origins with a fixed horizon. Compare seasonal-naive and one candidate model using per-origin and aggregate MAE.
    **Progressive hint:** At each origin, fit using timestamps at or before that origin and score only the next horizon. Preserve origin in the result table.
 
@@ -282,8 +255,7 @@ backtested evidence, operational latency, and maintainability.
 
 ## Ask an AI tutor about this lesson
 
-The lesson is complete without an AI assistant. If you want optional
-coaching, copy this prompt into the AI tutor while the repository root is open:
+The lesson is complete without AI. For optional coaching, copy this prompt with the repository root open:
 
 ```text
 Tutor me through `python-50` (Day 50: Time-Series Modeling and Forecast Evaluation).

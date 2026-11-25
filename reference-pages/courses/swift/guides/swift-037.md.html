@@ -206,11 +206,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Wrapped value:</strong> The value exposed through the decorated property.</p>
 <p><strong>Projection:</strong> Additional wrapper-related information exposed separately.</p>
 <h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>The Linux Docker classroom compiles the saved pad as <code>main.swift</code> with Swift 6 language checking. An explicit <code>@main</code> type contains <code>static func main() async throws</code>; the fixed compiler uses <code>-parse-as-library -swift-version 6</code>. The examples use the standard library and portable Foundation. <code>precondition</code> makes a violated invariant fail the process. The fixed pad accepts one source file, without arbitrary command arguments, interactive input or dependency installation. SwiftUI, UIKit, Apple simulators and application signing belong to the separately prepared macOS/Xcode project labs, never the Linux pad.</p>
-<p>Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.</p>
+<p>Both examples repeat the <code>Clamped</code> wrapper and the <code>Control</code> struct above <code>LessonMain</code>. The projection is read-only because <code>projectedValue</code> has only a getter: assigning to <code>control.$level</code> fails to compile with a message that <code>$level</code> is immutable. Task 4 asks for a written argument rather than code.</p>
+<p>Compile contract, starter stop and success marker: <a href="../STUDY-GUIDE.md.html#running-a-lesson">running a lesson</a>.</p>
 <h3 id="syntax-anatomy-and-execution-trace">Syntax anatomy and execution trace<a class="heading-anchor" href="#syntax-anatomy-and-execution-trace" aria-label="Link to this section">#</a></h3>
 <p><code>@propertyWrapper</code> marks a wrapper type. wrappedValue supplies get/set behavior. <code>@Clamped var level</code> applies it. A projectedValue is read through <code>$level</code> when declared.</p>
-<p>Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.</p>
+<p>Each example ends with a trace; method: <a href="../STUDY-GUIDE.md.html#tracing-a-program">tracing a program</a>.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="example-a-apply-a-bounded-display-policy">Example A: Apply a bounded display policy<a class="heading-anchor" href="#example-a-apply-a-bounded-display-policy" aria-label="Link to this section">#</a></h4>
 <p>The wrapper enforces a deliberate display range at every assignment.</p>
@@ -245,6 +245,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> Assignments are clamped into zero through ten.</p>
+<p><strong>Trace.</strong> <code>Control()</code> runs the wrapper&#x27;s <code>init(wrappedValue: 0, 0...10)</code>, because the default value 0 becomes <code>wrappedValue</code> and <code>(0...10)</code> supplies the second argument. The initializer clamps 0 into range and stores it. Assigning 12 calls the <code>wrappedValue</code> setter, which computes the maximum of 12 and 0, then the minimum of that and 10, and stores 10. Assigning -2 gives the maximum of -2 and 0, which is 0, and the minimum with 10 leaves 0.</p>
 <h4 id="example-b-retain-valid-interior-values">Example B: Retain valid interior values<a class="heading-anchor" href="#example-b-retain-valid-interior-values" aria-label="Link to this section">#</a></h4>
 <p>The projected information explains the policy without exposing mutable internal storage.</p>
 <pre class="highlighted-code"><code class="language-swift"><span class="syntax-keyword">import</span> <span class="syntax-class">Foundation</span>
@@ -277,6 +278,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> A valid interior value is unchanged and the projection exposes the range.</p>
+<p><strong>Trace.</strong> Assigning 4 passes through the same setter: the maximum of 4 and 0 is 4 and the minimum of 4 and 10 is 4, so an interior value is stored unchanged. Reading <code>control.$level</code> calls the <code>projectedValue</code> getter, which returns the range 0...10. The projection lets callers inspect the policy, but it exposes neither the private stored <code>value</code> nor a way to change the range after construction.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <ol>
 <li><strong>Predict and explain.</strong> Trace initialization and both setter calls.</li>
@@ -296,10 +298,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <ol start="6">
 <li><strong>Transfer and justify.</strong> Choose a wrapper or explicit validation method based on whether assignment can fail meaningfully.</li>
 </ol>
-<p>For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.</p>
+<p>Log each task in the <a href="../STUDY-GUIDE.md.html#recording-exercise-evidence">evidence table</a> before opening the explanation.</p>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
 <p>A wrapper is not a substitute for validating external input. Hidden side effects make ordinary-looking assignment hard to reason about. Document projection and mutation semantics.</p>
-<p>A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.</p>
+<p>The initializer clamps too, which matters for the memberwise path: <code>Control(level: 15)</code> stores 10, not 15. A wrapper that clamped only in the setter would let that out-of-range value in. Task 5&#x27;s set is -1, 0, 10 and 11. For task 4, a payment of 120 against a limit of 100 must be rejected with an error, since silently charging 100 hides the problem from the user.</p>
+<p>Repair routine: <a href="../STUDY-GUIDE.md.html#building-a-regression-case">building a regression case</a>.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <ol>
 <li>Reproduce Example A (Apply a bounded display policy) before changing anything, and confirm its observation: Assignments are clamped into zero through ten.</li>
@@ -307,9 +310,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>Before opening the explanation, check your task 3 attempt (Create a wrapper with an explicit normalization policy for a local display field) against each pitfall listed above, and add one input that would expose the tempting wrong rule.</li>
 </ol>
 <h3 id="self-check-and-next-step">Self-check and next step<a class="heading-anchor" href="#self-check-and-next-step" aria-label="Link to this section">#</a></h3>
-<p>Explain Property wrapper, Wrapped value, Projection without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.</p>
+<p>Explain which wrapper initializer runs for <code>@Clamped(0...10) var level = 0</code> and how each argument is supplied. State what <code>$level</code> returns and why it cannot be assigned. Give one field where silent clamping is a sensible display policy and one where it would mislead.</p>
+<p>Then follow the general <a href="../STUDY-GUIDE.md.html#self-check-routine">self-check routine</a> and save your pad.</p>
 <h3 id="sources-and-execution-boundary">Sources and execution boundary<a class="heading-anchor" href="#sources-and-execution-boundary" aria-label="Link to this section">#</a></h3>
-<p><a href="https://docs.swift.org/swift-book/documentation/the-swift-programming-language/">Official language or framework documentation</a>. The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.</p>
+<p><a href="https://docs.swift.org/swift-book/documentation/the-swift-programming-language/">Documentation</a>: Property wrappers, wrapped values, projected values and their initializers are covered in the second half of the Properties chapter.</p>
+<p>Provenance and limits: <a href="../STUDY-GUIDE.md.html#sources-and-execution-boundary">sources and execution boundary</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for swift-037: Property wrappers and reusable access policy.
 Read courses/swift/guides/swift-037.md and courses/swift/lessons/swift-037.swift. Prerequisites: swift-036.

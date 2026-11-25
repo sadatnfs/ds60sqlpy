@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import re
 import runpy
 from pathlib import Path
 from typing import Any
@@ -368,11 +369,12 @@ def test_compose_tmpfs_entries_remain_complete_absolute_mount_specs(workshop: st
 
 def test_every_developed_unit_has_exact_source_and_explicit_execution_boundary() -> None:
     """A reading notebook must never silently acquire an executable pad profile."""
+    relocate = runpy.run_path(str(BASE / "authoring/build.py"))["relocate_program"]
     for metadata in sorted((BASE / "authoring/units").glob("apache-*.json")):
         key = metadata.stem
         meta = json.loads(metadata.read_text())
         suffix = ".py" if meta["language"] == "python" else ".md"
-        source = (BASE / "authoring/programs" / (key + suffix)).read_text()
+        source = relocate((BASE / "authoring/programs" / (key + suffix)).read_text())
         guide = (BASE / "guides" / (key + ".md")).read_text()
         assert (BASE / "examples" / (key + suffix)).read_text() == source
         assert source.rstrip() in guide
@@ -677,3 +679,18 @@ def test_transaction_visibility_cannot_use_the_compacted_history_exception(
     assert namespace["transaction_identity"](baseline) == baseline
     with pytest.raises(ValueError, match="not a compacted-history"):
         namespace["transaction_identity"](baseline | changed)
+
+
+def test_guides_link_shared_study_guide_sections_that_exist() -> None:
+    study = (BASE / "STUDY-GUIDE.md").read_text()
+    anchors = {
+        re.sub(r"[^a-z0-9 -]", "", line[3:].strip().lower()).replace(" ", "-")
+        for line in study.splitlines()
+        if line.startswith("## ")
+    }
+    linked = set()
+    for path in sorted((BASE / "guides").glob("apache-*.md")):
+        for anchor in re.findall(r"\.\./STUDY-GUIDE\.md#([a-z0-9-]+)", path.read_text()):
+            assert anchor in anchors, (path.name, anchor)
+            linked.add(path.name)
+    assert len(linked) == 88

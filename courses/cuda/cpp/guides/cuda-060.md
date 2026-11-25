@@ -4,18 +4,15 @@
 
 Advanced; about 130 minutes, plus any optional hardware experiment. Direct prerequisites: `cuda-028`, `cuda-039`, `cuda-040`, `cuda-044`
 
-The order supports learning at your own pace. Reading and CPU reasoning remain
-available when NVIDIA hardware is absent. Advanced hardware features need their
-own capability checks and are not prerequisites for opening this chapter.
+Pacing, evidence labels and platform rules for every chapter are in the [CUDA study guide](../../STUDY-GUIDE.md).
 
 ## Learning objectives
 
 Verify a multi-GPU all-reduce result, record the observed topology and interpret strong or weak scaling.
 
-Work through *Multiple GPUs, topology and collective communication* with the concrete cases below. Finish with this evidence:
-correct combined result, observed topology, collective completion and strong/weak scaling interpretation where meaningful. Distinguish an algorithmic
-calculation, a compiled artifact and an actual device observation when explaining
-what your work establishes.
+**Scope:** Device selection, separate contexts/address spaces, peer access, PCIe/NVLink topology, decomposition, halo exchange, collectives and failure propagation.
+
+**Evidence to produce:** Correct combined result, observed topology, collective completion and strong/weak scaling interpretation where meaningful.
 
 ## Purpose, vocabulary and mental model
 
@@ -39,28 +36,17 @@ Strong-scaling efficiency E uses speedup S for fixed total work on p devices wit
 
 ## How to run and study this lesson
 
-Use the saved reading worksheet in `/classroom`; the reading pad does not execute
-CUDA. For the bounded calculation, select **CPU model (Python)**, whose
-answer-free starter supplies the literal fixtures and task contract. The
-[CUDA C++ study workflow](../README.md) covers platforms, optional GPU
-compilation and evidence labels. In a prepared Python environment you can also
-run the separate [CPU reference](../references/cuda-060_cpu.py) from the
-repository root:
+Trace worked example 1 by hand, then run the [CPU reference](../references/cuda-060_cpu.py) from the repository root:
 
 ```sh
 python courses/cuda/cpp/references/cuda-060_cpu.py
 ```
 
-Its assertions check the stated numerical result or model invariant; console
-text is evidence of this CPU model only, not of CUDA execution.
-
 ## Worked example 1: trace the mechanism
 
 Split \([1,2,3,4,5]\) across two devices as \([1,2,3]\) and \([4,5]\). Local sums are six and nine; a combined sum is fifteen. A gather gives the final result to one destination, whereas all-reduce gives fifteen to both participants. A CPU partition model demonstrates semantics only.
 
-The complete CPU model below intentionally models only the named arithmetic,
-layout, dependency or capability decision. It does not model GPU scheduling,
-caches, instruction timing or device memory visibility.
+**Why:** Local sums 6 and 9 add to 15, and all-reduce delivers 15 to both devices.
 
 ```python
 values = [1, 2, 3, 4, 5]
@@ -70,41 +56,37 @@ assert partials == [6, 9] and all_reduce_model == [15, 15]
 print({"CPU_collective_model": all_reduce_model, "multi_GPU_executed": False})
 ```
 
-**Expected observation:** Every assertion succeeds. A representative CPU output is:
+**Expected observation:** every assertion succeeds, and the CPU model prints:
 
 ```text
 {'CPU_collective_model': [15, 15], 'multi_GPU_executed': False}
 ```
 
-Integers, shapes and ordering must match exactly; only assertions with an explicit
-tolerance accept small floating-point differences. A printed duration is a model
-output, not a measured GPU benchmark.
+**Check:** The reference asserts partials == [6, 9] and all_reduce_model == [15, 15], and prints multi_GPU_executed False.
 
 ## Worked example 2: change a meaningful condition
 
 For a radius-one stencil split into left and right partitions, each side needs its neighbor's boundary value before updating edge cells. Exchange halos and establish completion before reading them. Copying only the interior or assuming all device pointers share one pool breaks the contract.
 
-Before applying this example to your own program, write down which inputs are
-read, which result is produced, and the condition that makes the comparison
-valid. Keep the original case as a regression check when changing a boundary.
+**Why:** A radius-one stencil at the partition edge needs the neighbor's adjacent value.
+
+**Check:** Compare the split result against a single-array stencil on the same input.
 
 ## Six progressive exercises
 
-Exercises 1 and 2 are guided reconstructions of the worked examples; exercises
-3-6 change an input, diagnose a defect, test a boundary and transfer the idea.
-For each one, keep the calculation, output, diagram or failure policy you
-produce so another reader can compare it with the worked cases. If the hint is
-not enough, reread the mechanism paragraph and the bounded CPU assertion.
-
 ### Exercise 1
 
-Predict and trace the first worked example before running its CPU reference. Write every intermediate quantity that leads to the stated result, including units or ownership where applicable.
+Reconstruct worked example 1 on paper before running its CPU reference. Split [1, 2, 3, 4, 5] into [1, 2, 3] and [4, 5], sum each locally, then combine.
+
+**Trap to avoid:** Using a gather when every device needs the total leaves the second device without the result.
 
 **Hint:** Start with the literal input and intermediate quantities in worked example 1.
 
 ### Exercise 2
 
-Reconstruct the second worked example without copying its conclusion. Identify the changed input or condition, show the resulting calculation or dependency, and explain why it differs from the first example.
+Rework worked example 2 without copying its conclusion. Exchange one boundary value each way before updating edge cells, and wait for the exchange to complete.
+
+**Trap to avoid:** Updating edges before halos arrive uses stale or missing neighbor values.
 
 **Hint:** Identify exactly which condition changes in worked example 2.
 
@@ -112,11 +94,15 @@ Reconstruct the second worked example without copying its conclusion. Identify t
 
 Compute strong-scaling efficiency for speedup 1.6 on two GPUs.
 
+**Trap to avoid:** Comparing runs with different problem sizes makes the ratio meaningless for strong scaling.
+
 **Hint:** Use the first worked example to establish the relevant quantities, then change only the requested input.
 
 ### Exercise 4
 
 Rank zero calls all-reduce while rank one calls broadcast first. Diagnose it.
+
+**Trap to avoid:** Adding sleeps does not fix mismatched collectives and can still hang.
 
 **Hint:** Locate the failed phase or violated dependency before proposing a repair.
 
@@ -124,35 +110,33 @@ Rank zero calls all-reduce while rank one calls broadcast first. Diagnose it.
 
 What can one GPU prove about two-device peer access?
 
+**Trap to avoid:** Claiming peer behavior from one GPU reports evidence that was never collected.
+
 **Hint:** Check what the algorithm is allowed to read, write or assume at this boundary.
 
 ### Exercise 6
 
 Define weak versus strong scaling.
 
+**Trap to avoid:** Reporting weak-scaling results as strong-scaling speedup overstates gains.
+
 **Hint:** State the output contract and which observations are needed in the new application.
 
 ## Common mistakes and diagnosis
 
-A tempting but incorrect claim in this chapter is: **two GPUs share memory automatically or multi-GPU execution proves multi-node readiness. , .**
-
-For the concrete failure exercise, rank zero calls all-reduce while rank one calls broadcast first. Diagnose it.
-Preserve the original input and the stage where behavior diverged, and compare
-with the CPU model before changing hardware configuration.
+A tempting but incorrect claim: **Two GPUs share memory automatically or multi-GPU execution proves multi-node readiness.** Each GPU has its own memory and context, and peer access must be supported and enabled per pair. Multi-node work adds networking, process launch and failure handling that a single machine never tests. State which topology was actually used for every claim.
 
 ## Self-check, retrieval and transfer
 
-Explain the first example without its code, then use the second example to state
-one assumption that matters. Complete Exercise 3 independently, use Exercise 4 to
-diagnose a plausible defect, check the boundary in Exercise 5, and retain the
-application contract from Exercise 6. Compare the [separate explanations](../solutions/cuda-060_solutions.md)
-only after your attempt or a deliberate reveal. A reading marker records your
-choice; it does not certify hardware qualification or expert mastery.
+1. What is strong-scaling efficiency for speedup 1.6 on two GPUs?
+2. Rank zero calls all-reduce while rank one calls broadcast. What happens?
+3. What does all-reduce give in worked example 1 that a gather does not?
+
+Short answers are in the [separate explanations](../solutions/cuda-060_solutions.md#self-check-answers); compare only after an attempt.
 
 ## Primary references
 
-Check the documentation that matches your prepared toolkit before optional
-hardware execution.
+Use the documentation that matches your prepared toolkit.
 
 - [Multi-GPU programming](https://docs.nvidia.com/cuda/cuda-programming-guide/03-advanced/multi-gpu-systems.html)
 - [NCCL](https://docs.nvidia.com/deeplearning/nccl/user-guide/docs/index.html)

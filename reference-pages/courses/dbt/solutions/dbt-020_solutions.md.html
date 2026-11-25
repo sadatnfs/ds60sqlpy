@@ -195,7 +195,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="dbt-020-explained-reference">dbt-020: explained reference<a class="heading-anchor" href="#dbt-020-explained-reference" aria-label="Link to this section">#</a></h2>
 <p>Use deferral with an explicit upstream-state contract.</p>
-<p>The executable reference contains the two complete worked cases with assertions. The changes below explain the independent practice and its limits.</p>
+<p>The reference saves a prod manifest, runs a dev child with <code>--defer --state</code>, and checks that compiled SQL names <code>&quot;prod&quot;.&quot;base&quot;</code>. The second case shows that an existing dev relation wins unless <code>--favor-state</code> is set. It proves which parent was read, not that production was correct. See <a href="../STUDY-GUIDE.md.html#answers-and-references">how these answers are laid out</a>.</p>
 <h3 id="1-inspect-the-chosen-parent">1. Inspect the chosen parent<a class="heading-anchor" href="#1-inspect-the-chosen-parent" aria-label="Link to this section">#</a></h3>
 <p>The compiled SQL and actual value together reveal which parent was used. Retain both when validating a CI recipe.</p>
 <p><strong>Expected:</strong> It matches the intended source environment.</p>

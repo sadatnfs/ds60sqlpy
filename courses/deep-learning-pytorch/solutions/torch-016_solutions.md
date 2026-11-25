@@ -2,6 +2,8 @@
 
 Open these answers only after attempting Initialization, nonlinearities and gradient diagnostics yourself. They reuse the guide's literal inputs, starting from Example A, Construct XOR by hand, so a discrepancy points at one step. The executable companion runs the assertions; this page explains why each one tests Nonlinearity, Initialization, Capacity. After a pass, choose a new input for exercise 6, Transfer to continuous inputs, without looking.
 
+After comparing, follow the [review steps](../STUDY-GUIDE.md#after-the-solutions).
+
 ## Mechanism review
 
 Nonlinearity changes which functions a network can represent. Stacking linear layers without activations still produces one affine map. XOR assigns opposite labels to diagonally opposite corners of a square, so there is no linear threshold separating all four cases. Two rectified differences h1=max(x1-x2, 0), h2=max(x2-x1, 0) produce the exact binary pattern when added. This manual construction distinguishes representational capacity from whether an optimizer happens to find it.
@@ -149,6 +151,3 @@ torch.testing.assert_close(F.relu(points @ w).sum(1), torch.tensor([0.6, 0.6]), 
 
 **Verify:** In a fresh process, the exercise checks confirm `F.relu(points @ w).sum(1)` matches `torch.tensor([0.6, 0.6])` within 1e-06.
 
-## Review after comparison
-
-Repeat exercise 4, Inspect activation gradients, with one changed fixture value and predict the difference before running it. Keep your failing attempt at exercise 5, Expose identical-unit symmetry, beside the repaired result. A missing framework is not a failing assertion. These solutions use only local fixtures.

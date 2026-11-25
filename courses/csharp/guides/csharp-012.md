@@ -24,9 +24,9 @@ A class can deliberately encapsulate mutation behind operations that preserve in
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles your saved pad as `Program.cs` in its fixed .NET 10 project. C# 14 is the matching language generation. This route uses the prepared framework libraries; it does not accept arbitrary project files, NuGet packages, command arguments or interactive input. The explicit `Program.Main` entrypoint makes compilation and execution visible. `Check` throws on a false condition in every build configuration, unlike conditional debugging assertions.
+`Point` and `Counter` are helper types declared after `Main`, and both examples use them. Example A assigns the public field `X` directly; a struct with mutable public fields appears here only to make copying visible, not as a recommended design.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Compile contract, starter stop and success marker: [running a lesson](../STUDY-GUIDE.md#running-a-lesson).
 
 
 
@@ -34,7 +34,7 @@ Start with the answer-free learner artifact in your saved classroom pad. It deli
 
 `struct` introduces a value type; `class` introduces a reference type. Assignment has the same spelling for both, so inspect the declared type. `ReferenceEquals` asks whether references identify the same object, not whether their properties happen to match.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+Each example ends with a trace; method: [tracing a program](../STUDY-GUIDE.md#tracing-a-program).
 
 ## Worked example / walkthrough
 
@@ -92,6 +92,8 @@ internal static class Program {
 
 **Observe:** Changing the copied point leaves the original X at 2.
 
+**Trace.** `new Point(2, 3)` creates a value whose fields hold 2 and 3. `var second = first;` copies both fields into a separate value. Setting `second.X = 9` changes only that copy. The check reads `first.X` as 2 and `second.X` as 9: two variables, two independent sets of fields. No heap object is shared between them.
+
 ### Example B: Share an object identity
 
 Passing or assigning a reference by value does not clone the referenced object.
@@ -147,6 +149,8 @@ internal static class Program {
 
 **Observe:** Both references observe the same counter increment.
 
+**Trace.** `new Counter()` allocates one object whose `Value` is 0, and `first` stores a reference to it. `second = first` copies the reference, not the object. `second.Value++` reads 0 and writes 1 into the shared object, so `first.Value` also reads 1. `ReferenceEquals` returns true because both variables identify the same instance.
+
 ## Exercises
 
 1. **Predict and explain.** Draw the values and references after each assignment.
@@ -161,13 +165,15 @@ internal static class Program {
 
 6. **Transfer and justify.** Design a data boundary that prevents callers from mutating an internal collection.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Log each task in the [evidence table](../STUDY-GUIDE.md#recording-exercise-evidence) before opening the explanation.
 
 ## Common pitfalls and diagnosis
 
 A struct containing a reference copies that reference, so value semantics do not imply a recursive deep copy. Equality and identity are separate questions. Avoid reasoning about correctness from presumed stack placement.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+For task 5, give `Point` a `List<int>` field: copying the struct copies the list reference, so an item added through one copy appears in the other. For task 2, two separate `Counter` objects with `Value` 1 are not `ReferenceEquals`, and because Counter does not override equality, `==` also compares references and returns false.
+
+Repair routine: [building a regression case](../STUDY-GUIDE.md#building-a-regression-case).
 
 ## Progressive hints
 
@@ -177,11 +183,15 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 ## Self-check and next step
 
-Explain Value semantics, Reference semantics, Ownership without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+Draw boxes for `first` and `second` after each assignment in both examples and mark which ones share storage. Explain why equal property values do not imply the same object. For task 6, describe how your type hands out its internal list so that a caller cannot add to it.
+
+Then follow the general [self-check routine](../STUDY-GUIDE.md#self-check-routine) and save your pad.
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://learn.microsoft.com/en-us/dotnet/csharp/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+[Documentation](https://learn.microsoft.com/en-us/dotnet/csharp/): The reference articles on value types, reference types and equality comparisons separate copying, identity and equality.
+
+Provenance and limits: [sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

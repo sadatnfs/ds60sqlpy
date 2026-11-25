@@ -1,6 +1,6 @@
 # go-044: explained solutions
 
-These are comparison material after an attempt or explicit reveal. The executable reference implements all six cases in one `main.go`.
+Compare after an attempt ([using solutions](../STUDY-GUIDE.md#use-the-solutions)). `courses/go/solutions/go-044_solution.go` implements all six cases.
 
 ## Mechanism
 
@@ -10,7 +10,7 @@ Rules name API resource plurals such as pods, and subresources such as deploymen
 
 ## 1. Admit a required read: change one input
 
-Copy worked example 1 into a scratch pad and change `rule := Rule{Namespace: "lesson", Resource: "pods", Verbs: []string{"get", "list", "watch"}}` to `rule := Rule{Namespace: "lesson!", Resource: "pods", Verbs: []string{"get", "list", "watch"}}`. Before running, predict which check fails and which value it now sees; then run it and restore the original line.
+Copy worked example 1, change `rule := Rule{Namespace: "lesson", Resource: "pods", Verbs: []string{"get", "list", "watch"}}` to `rule := Rule{Namespace: "lesson!", Resource: "pods", Verbs: []string{"get", "list", "watch"}}` and predict the failure before running; then restore the line.
 
 The unchanged code is worked example 1:
 
@@ -19,13 +19,15 @@ rule := Rule{Namespace: "lesson", Resource: "pods", Verbs: []string{"get", "list
 check(allowed(rule, "lesson", "pods", "get"), "read")
 ```
 
-**Expected:** The changed run panics with `read` because `allowed(rule, "lesson", "pods", "get")` no longer holds. Restoring the original line brings back the worked observation: the request is admitted by the local rule model.
+**Expected:** The edited run panics with `read` because `allowed(rule, "lesson", "pods", "get")` no longer holds.
+
+**Verify:** Restoring `rule := Rule{Namespace: "lesson", Resource: "pods", Verbs: []string{"get", "list", "watch"}}` makes the check pass again with the worked observation: the request is admitted by the local rule model.
 
 The rule expresses resource and namespace scope in addition to the verb. Matching only one component would overgrant access.
 
 ## 2. Reject an unneeded mutation: diagnose an edited check
 
-A careless edit changed the check in worked example 2 so that it reads `check(allowed(rule, "lesson", "pods", "delete"), "mutation")`. Run worked example 2 with that line, explain why the edited check now fails for the same program state, and restore it.
+A careless edit rewrote the check in worked example 2 as `check(allowed(rule, "lesson", "pods", "delete"), "mutation")`. Explain the failure, then restore it.
 
 The unchanged code is worked example 2:
 
@@ -34,7 +36,9 @@ rule := Rule{Namespace: "lesson", Resource: "pods", Verbs: []string{"get"}}
 check(!allowed(rule, "lesson", "pods", "delete"), "mutation")
 ```
 
-**Expected:** Before the repair the program panics with `mutation`; after it the line reads `check(!allowed(rule, "lesson", "pods", "delete"), "mutation")` again and the request is rejected.
+**Expected:** The defective run panics with `mutation`; after restoring `check(!allowed(rule, "lesson", "pods", "delete"), "mutation")`, the request is rejected.
+
+**Verify:** The edited check fails with message `mutation` for a state that `!allowed(rule, "lesson", "pods", "delete")` accepts.
 
 A read-oriented controller should not inherit deletion authority merely for convenience.
 
@@ -49,6 +53,8 @@ check(!allowed(rule, "other", "pods", "get"), "namespace")
 
 **Expected:** The local model rejects it.
 
+**Verify:** Your solution must keep `!allowed(rule, "other", "pods", "get")` true. Control: changing `check(!allowed(rule, "other", "pods", "get"), "namespace")` to `check(allowed(rule, "other", "pods", "get"), "namespace")` panics with message `namespace`; revert it.
+
 Namespace boundaries should be explicit. A ClusterRoleBinding can widen scope and therefore deserves separate review.
 
 ## 4. Separate resource and subresource
@@ -61,6 +67,8 @@ check(allowed(rule, "lesson", "deployments/status", "update") && !allowed(rule, 
 ```
 
 **Expected:** The whole-object update is rejected.
+
+**Verify:** Your solution must keep `allowed(rule, "lesson", "deployments/status", "update") && !allowed(rule, "lesson", "deployments", "update")` true. Control: changing `rule := Rule{Namespace: "lesson", Resource: "deployments/status", Verbs: []string{"update"}}` to `rule := Rule{Namespace: "lesson!", Resource: "deployments/status", Verbs: []string{"update"}}` panics with message `subresource`; revert it.
 
 Status reporting and desired-state mutation are different authorities. The controller should request only what its design needs.
 
@@ -75,6 +83,8 @@ check(!allowed(rule, "lesson", "secrets", "get"), "secret boundary")
 
 **Expected:** Secret read access is rejected.
 
+**Verify:** Your solution must keep `!allowed(rule, "lesson", "secrets", "get")` true. Control: changing `check(!allowed(rule, "lesson", "secrets", "get"), "secret boundary")` to `check(allowed(rule, "lesson", "secrets", "get"), "secret boundary")` panics with message `secret boundary`; revert it.
+
 Read-only does not mean harmless. Confidential configuration can be exposed without any mutation.
 
 ## 6. Transfer verb distinction
@@ -88,8 +98,10 @@ check(allowed(rule, "lesson", "pods", "list") && !allowed(rule, "lesson", "pods"
 
 **Expected:** Only list is admitted.
 
+**Verify:** Your solution must keep `allowed(rule, "lesson", "pods", "list") && !allowed(rule, "lesson", "pods", "watch")` true. Control: changing `rule := Rule{Namespace: "lesson", Resource: "pods", Verbs: []string{"list"}}` to `rule := Rule{Namespace: "lesson!", Resource: "pods", Verbs: []string{"list"}}` panics with message `verbs`; revert it.
+
 A list request and a long-lived watch have separate permission checks. Controller installation documentation should name both when needed.
 
 ## Transfer after comparison
 
-Return to your own pad and reproduce one check with a new input. Explain why the check rejects a plausible wrong implementation. Keep the distinction between a pure model, an in-process fake, and a real external system visible in your notes.
+When a client-go call returns forbidden, read the error: it names the user, verb, resource and namespace, which maps directly onto a missing rule. Use kubectl auth can-i with --as to test a ServiceAccount before deploying. Review RBAC in the same pull request as the code that needs it, so authority grows only with a stated reason.

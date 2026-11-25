@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/web-development/solutions/web-016_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="web-016-explanatory-solutions">web-016: explanatory solutions<a class="heading-anchor" href="#web-016-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Open this after your own attempt. Each answer explains the lesson&#x27;s synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in <code>courses/web-development/guides/web-016.md</code>.</p>
+<p>Attempt each exercise before reading; the mechanism is in <code>courses/web-development/guides/web-016.md</code> (<a href="../STUDY-GUIDE.md.html#solutions">using these answers</a>).</p>
 <h3 id="exercise-1-explain-why-two-1fr-tracks-plus-a-gap-are-not-two-50-widths-plus-a-gap">Exercise 1: Explain why two 1fr tracks plus a gap are not two 50% widths plus a gap.<a class="heading-anchor" href="#exercise-1-explain-why-two-1fr-tracks-plus-a-gap-are-not-two-50-widths-plus-a-gap" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Fractional tracks divide the remaining space after the gap.</p>
 <p><strong>Approach:</strong> Subtract the gap from the container width first, then divide the remaining space by the total number of fr units.</p>
@@ -232,7 +232,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Plausible wrong approach:</strong> Treating the keywords as synonyms fails because with few items <code>auto-fill</code> keeps empty tracks and the card stays narrow.</p>
 <p><strong>How to verify:</strong> With one card, <code>auto-fit</code> stretches it across the row, while <code>auto-fill</code> keeps it at one track width.</p>
 <h3 id="reference-comparison">Reference comparison<a class="heading-anchor" href="#reference-comparison" aria-label="Link to this section">#</a></h3>
-<p>Open <code>courses/web-development/solutions/web-016_solution.html</code> only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; its success message is not an accessibility audit or proof of responsive behavior at every size.</p></article>
+<p>The reference requires the cards container to compute to display grid, so it catches a missing grid rule or a selector that does not match. It does not count columns, test a narrow container or check that a long value leaves tracks balanced, so try the one card and seven card cases yourself.</p>
+<p>Open <code>courses/web-development/solutions/web-016_solution.html</code> after saving your attempt (<a href="../STUDY-GUIDE.md.html#references">comparing with the reference</a>).</p></article>
   </main>
 </body>
 </html>

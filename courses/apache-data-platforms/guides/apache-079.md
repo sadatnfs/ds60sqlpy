@@ -121,20 +121,18 @@ From server-config.example.yaml, historyShared true lets recipients request olde
 
 ## Complete worked source
 
-This is a project-only command notebook. Read and edit it in the classroom; run its explicitly labeled commands from the copied owned Docker workshop. The classroom does not execute these service commands.
+The classroom does not execute these service commands. See the [workshop rules](../STUDY-GUIDE.md#workshop-notebooks).
 
 # Delta Sharing apache-079 prepared command notebook
 
-Copy the owned Delta Sharing project and follow PREPARATION.md. Delta Sharing
-belongs to Delta Lake/Linux Foundation. The offline preparation actions are:
+In the copied Delta Sharing project, `plan` prints `basic Parquet/minReaderVersion1` as the supported protocol before any network call. That string is the whole compatibility promise of this client:
 
 ```bash
 bash run.sh prepare
 bash run.sh plan
 ```
 
-For a separately prepared actual owned reference server and untracked recipient
-profile, the bounded native Docker protocol client runs with:
+On a prepared reference server, `check` refuses any reader version other than 1, partitioned files and deletion vector entries before it materializes a single row:
 
 ```bash
 bash run.sh check
@@ -142,9 +140,7 @@ bash run.sh check
 
 The portable client rejects unsupported protocol/features before data reads. Advanced CDF/Delta/deletion-vector behavior is omitted until a supported native client and real server exchange are qualified.
 
-The classroom Markdown pad does not start a service. Source configuration and
-unit policy fixtures are not actual reference-server receipts. Keep credentials
-and signed URL query strings out of all published source and evidence.
+Change data feed, deletion vectors and Delta format responses stay outside this client. For those tables a refusal is the correct result, not a failure to work around.
 
 ## Primary references
 

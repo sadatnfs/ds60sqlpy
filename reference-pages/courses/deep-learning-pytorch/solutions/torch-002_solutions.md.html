@@ -195,6 +195,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="torch-002-explanatory-solutions">torch-002: explanatory solutions<a class="heading-anchor" href="#torch-002-explanatory-solutions" aria-label="Link to this section">#</a></h2>
 <p>Open these answers only after attempting Tensors, devices, dtypes, strides and views yourself. They reuse the guide&#x27;s literal inputs, starting from Example A, Inspect shape and stride, so a discrepancy points at one step. The executable companion runs the assertions; this page explains why each one tests Stride, View, Device. After a pass, choose a new input for exercise 6, Reject incompatible arithmetic, without looking.</p>
+<p>After comparing, follow the <a href="../STUDY-GUIDE.md.html#after-the-solutions">review steps</a>.</p>
 <h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
 <p>A PyTorch tensor has values plus metadata: shape, dtype, device, strides and gradient-tracking state. Shape tells you the number of elements along each axis; strides describe how an index moves through storage. A view can share storage with another tensor, so mutation through one reference may change the other. clone creates independent storage. Transpose changes the interpretation of axes and often produces a noncontiguous view. reshape may return a view or a copy, so code should not infer ownership solely from its name.</p>
 <p>Device and dtype are part of a computation contract. This course uses CPU explicitly, with float64 for hand-derived numerical checks and float32 for small neural modules unless stated otherwise. Broadcasting aligns trailing dimensions and can silently create pairwise results. A vector of shape (3, ) subtracted from a column (3, 1) produces (3, 3), not three paired residuals.</p>
@@ -291,9 +292,7 @@ column <span class="syntax-operator">=</span> v<span class="syntax-punctuation">
 <span class="syntax-keyword">else</span><span class="syntax-punctuation">:</span>
     <span class="syntax-keyword">raise</span> AssertionError<span class="syntax-punctuation">(</span><span class="syntax-string">&quot;</span><span class="syntax-string">incompatible shapes accepted</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">)</span></code></pre>
 <p><strong>Expected:</strong> RuntimeError for incompatible trailing dimensions.</p>
-<p><strong>Verify:</strong> In a fresh process, the exercise checks confirm <code>torch.zeros((2, 3)) + torch.zeros(4)</code> raises <code>RuntimeError</code>.</p>
-<h3 id="review-after-comparison">Review after comparison<a class="heading-anchor" href="#review-after-comparison" aria-label="Link to this section">#</a></h3>
-<p>Repeat exercise 4, Trace a transposed layout, with one changed fixture value and predict the difference before running it. Keep your failing attempt at exercise 5, Detect a pairing broadcast, beside the repaired result. A missing framework is not a failing assertion. These solutions use only local fixtures.</p></article>
+<p><strong>Verify:</strong> In a fresh process, the exercise checks confirm <code>torch.zeros((2, 3)) + torch.zeros(4)</code> raises <code>RuntimeError</code>.</p></article>
   </main>
 </body>
 </html>

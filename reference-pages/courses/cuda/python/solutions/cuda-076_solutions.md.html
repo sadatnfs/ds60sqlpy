@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cuda/python/solutions/cuda-076_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="cuda-076-explained-solutions">cuda-076: explained solutions<a class="heading-anchor" href="#cuda-076-explained-solutions" aria-label="Link to this section">#</a></h2>
-<p>These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.</p>
+<p>Compare with your <a href="../lessons/cuda-076.md.html">worksheet</a> attempt.</p>
 <h3 id="exercise-1-choose-a-sum-identity">Exercise 1: Choose a sum identity<a class="heading-anchor" href="#exercise-1-choose-a-sum-identity" aria-label="Link to this section">#</a></h3>
 <p>Use zero.</p>
 <p><strong>Approach.</strong> Pad inactive lanes of a sum reduction with 0, the additive identity. The reference stores <code>[2, 4, 6, 0]</code> in a four-lane tile and the block sum is 12.</p>
@@ -231,9 +231,19 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Why it is correct here.</strong> This input needs two blocks, one of them almost empty. It exercises the padded lanes, the barrier participation of three inactive lanes, and the combination of two block partials.</p>
 <p><strong>A plausible wrong approach.</strong> Testing only with <code>n = 4</code> or <code>n = 8</code> makes every block full. Bugs in padding or early returns never execute, so the test passes against broken code.</p>
 <p><strong>How to verify.</strong> Write the expected partials explicitly, <code>[10, 5]</code>, and the total 15 before running. A mismatch in the second partial points directly to tail handling.</p>
+<h3 id="self-check-answers">Self-check answers<a class="heading-anchor" href="#self-check-answers" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>What makes a barrier a collective obligation?</strong> Every thread of the block that participates must reach a compatible synchronization point. A thread that returns early can leave the others waiting.</li>
+</ol>
+<ol start="2">
+<li><strong>Why is the identity value algorithm-specific?</strong> Zero is neutral for a sum but not for a minimum, and a weighted average also needs a count. The pad must leave that algorithm&#x27;s answer unchanged.</li>
+</ol>
+<ol start="3">
+<li><strong>Can shared memory pass data between two blocks?</strong> No. It is local to one block. Cross-block cooperation needs a separate stage, such as writing partials to global memory and combining them in another launch.</li>
+</ol>
 <h3 id="reference-observation">Reference observation<a class="heading-anchor" href="#reference-observation" aria-label="Link to this section">#</a></h3>
 <p>All four modeled lanes participate; padded sum is 12.</p>
-<p>The reference file is <code>courses/cuda/python/references/cuda-076_cpu.py</code>. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.</p></article>
+<p>Asserted by <code>courses/cuda/python/references/cuda-076_cpu.py</code>.</p></article>
   </main>
 </body>
 </html>

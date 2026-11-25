@@ -1,6 +1,6 @@
 # cuda-109: explained solutions
 
-These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.
+Compare with your [worksheet](../lessons/cuda-109.md) attempt.
 
 ## Exercise 1: Define the shape envelope
 
@@ -74,8 +74,16 @@ Evaluate the same held-out examples and metrics.
 
 **How to verify.** Report both accuracies on the same examples and accept only if the drop is within the declared tolerance.
 
+## Self-check answers
+
+1. **Why is one successful shape weak evidence for an engine?** Implementations are chosen per shape, precision and hardware, so other shapes in the contract can fail or behave differently.
+
+2. **Why keep calibration data separate from evaluation data?** Calibrating on evaluation examples tunes the engine to them and makes reported quality optimistic.
+
+3. **Can an engine cache be copied to another machine safely?** Not by assumption. It can depend on the hardware, toolkit and runtime versions, so record them and rebuild or requalify when they differ.
+
 ## Reference observation
 
 Declared shape envelope enforced.
 
-The reference file is `courses/cuda/python/references/cuda-109_cpu.py`. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.
+Asserted by `courses/cuda/python/references/cuda-109_cpu.py`.

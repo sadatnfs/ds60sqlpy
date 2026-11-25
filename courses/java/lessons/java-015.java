@@ -3,23 +3,17 @@ public class Main {
 
   public static void main(String[] args) throws Exception {
     // Exercise 1: Preserve an instant across zones: predict an edited check
-    // Copy Example A into a scratch `Main.java` and change
-    // `ny.toLocalDate().equals(java.time.LocalDate.of(2023, 12, 31));` to
-    // `ny.toLocalDate().equals(java.time.LocalDate.of(2024, 12, 31));` inside its assertion.
-    // Before running it with `java -ea Main`, predict whether the assertion still holds and
-    // explain why; then restore it.
-    // Expected: The changed run fails with an `AssertionError` from the assertion on
+    // Change Example A's assertion to `ny.toLocalDate().equals(java.time.LocalDate.of(2024, 12,
+    // 31));`, predict whether it holds, then run and restore it.
+    // Expected: The edited run fails with an `AssertionError` from the assertion on
     // `utc.toInstant().equals(ny.toInstant()) &&
-    // ny.toLocalDate().equals(java.time.LocalDate.of(2023, 12, 31))`. Restoring the original
-    // line brings back the worked observation: same instant; New York local date 2023-12-31.
+    // ny.toLocalDate().equals(java.time.LocalDate.of(2023, 12, 31))`.
 
     // Exercise 2: Compare calendar and elapsed days: debug a regression
-    // A regression changed one token in the code that Example B adds after Example A, so one
-    // line now reads `13,`. Run Example B with that line, use the failing assertion to locate
-    // the defect and repair it without changing the assertion.
-    // Expected: Before the repair the run fails with an `AssertionError` from the assertion on
-    // `nextDay.getHour() == 12 && next24.getHour() == 13`; after it the line reads `12,` again
-    // and calendar next noon is 23 elapsed hours later; 24 hours reaches 13:00.
+    // A regression in Example B's new code makes one line read `13,`. Repair it using the
+    // failing assertion.
+    // Expected: The unrepaired run fails with an `AssertionError` from the assertion on
+    // `nextDay.getHour() == 12 && next24.getHour() == 13`; the repaired line reads `12,`.
 
     // Exercise 3: Detect a nonexistent local time
     // Ask for valid offsets at 2024-03-10 02:30 in New York.

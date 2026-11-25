@@ -195,6 +195,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="torch-034-explanatory-solutions">torch-034: explanatory solutions<a class="heading-anchor" href="#torch-034-explanatory-solutions" aria-label="Link to this section">#</a></h2>
 <p>Open these answers only after attempting Robustness, privacy and evidence beyond a score yourself. They reuse the guide&#x27;s literal inputs, starting from Example A, Count group errors, so a discrepancy points at one step. The executable companion runs the assertions; this page explains why each one tests Subgroup denominator, Robustness condition, Finite safety evidence. After a pass, choose a new input for exercise 6, Write a bounded card, without looking.</p>
+<p>After comparing, follow the <a href="../STUDY-GUIDE.md.html#after-the-solutions">review steps</a>.</p>
 <h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
 <p>A reliability report should preserve the conditions and denominators behind a score. Group A with zero errors in one case does not provide the same evidence as zero errors in hundreds of independent cases. Duplicate records can improve an apparent rate without testing new conditions. Perturbation tests need a label policy: crossing a legitimate decision boundary may change the correct target rather than reveal a robustness failure.</p>
 <p>Privacy and safety claims require their own mechanisms and evidence. A synthetic fixture containing no personal data does not establish differential privacy. A finite set of successful adversarial checks does not prove all future inputs are safe. This chapter uses Torch tensors for error accounting and controlled perturbations, then writes a bounded model-card record with untested conditions and failure severity.</p>
@@ -274,9 +275,7 @@ np<span class="syntax-operator">.</span>testing<span class="syntax-operator">.</
 <span class="syntax-punctuation">}</span>
 <span class="syntax-keyword">assert</span> card<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">unique_units</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span> <span class="syntax-operator">==</span> <span class="syntax-number">3</span> <span class="syntax-operator">and</span> <span class="syntax-operator">not</span> card<span class="syntax-punctuation">[</span><span class="syntax-string">&quot;</span><span class="syntax-string">differential_privacy_established</span><span class="syntax-string">&quot;</span><span class="syntax-punctuation">]</span></code></pre>
 <p><strong>Expected:</strong> card explicitly has no privacy guarantee.</p>
-<p><strong>Verify:</strong> In a fresh process, the exercise checks confirm <code>card[&#x27;unique_units&#x27;] == 3</code> and <code>not card[&#x27;differential_privacy_established&#x27;]</code>.</p>
-<h3 id="review-after-comparison">Review after comparison<a class="heading-anchor" href="#review-after-comparison" aria-label="Link to this section">#</a></h3>
-<p>Repeat exercise 4, Keep severe failures visible, with one changed fixture value and predict the difference before running it. Keep your failing attempt at exercise 5, Represent an untested group, beside the repaired result. A missing framework is not a failing assertion. These solutions use only local fixtures.</p></article>
+<p><strong>Verify:</strong> In a fresh process, the exercise checks confirm <code>card[&#x27;unique_units&#x27;] == 3</code> and <code>not card[&#x27;differential_privacy_established&#x27;]</code>.</p></article>
   </main>
 </body>
 </html>

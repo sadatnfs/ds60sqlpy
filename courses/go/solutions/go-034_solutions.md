@@ -1,6 +1,6 @@
 # go-034: explained solutions
 
-These are comparison material after an attempt or explicit reveal. The executable reference implements all six cases in one `main.go`.
+Compare after an attempt ([using solutions](../STUDY-GUIDE.md#use-the-solutions)). `courses/go/solutions/go-034_solution.go` implements all six cases.
 
 ## Mechanism
 
@@ -10,7 +10,7 @@ runtime.GOOS and GOARCH describe the running binary target. Build configuration 
 
 ## 1. Inspect the current target: predict an edited check
 
-Copy worked example 1 into a scratch pad and change `check(runtime.GOOS != "" && runtime.GOARCH != "", "target")` to `check(runtime.GOOS == "" && runtime.GOARCH != "", "target")` inside its check. Before running, predict whether the check still passes and explain why; then restore it.
+Copy worked example 1, change `check(runtime.GOOS != "" && runtime.GOARCH != "", "target")` to `check(runtime.GOOS == "" && runtime.GOARCH != "", "target")` inside its check and predict whether it still passes; then restore it.
 
 The unchanged code is worked example 1:
 
@@ -18,13 +18,15 @@ The unchanged code is worked example 1:
 check(runtime.GOOS != "" && runtime.GOARCH != "", "target")
 ```
 
-**Expected:** The changed run panics with `target` because the edited check no longer holds. Restoring the original line brings back the worked observation: both identifiers are nonempty.
+**Expected:** The edited check panics with `target` even though `runtime.GOOS != "" && runtime.GOARCH != ""` still holds.
+
+**Verify:** Restoring `check(runtime.GOOS != "" && runtime.GOARCH != "", "target")` makes the check pass again with the worked observation: both identifiers are nonempty.
 
 The values describe this executed binary. They do not establish compatibility with another platform.
 
 ## 2. Validate the running deployment tuple: debug a regression
 
-A regression changed one token in worked example 2, so one line now reads `allowed := map[string]bool{"linux/amd64": true, "linux/arm65": true}`. Run worked example 2 with that line, use the failure to locate the defect and repair it without changing the check.
+A one-token regression in worked example 2 makes a line read `allowed := map[string]bool{"linux/amd64": true, "linux/arm65": true}`. Repair it without changing the check.
 
 The unchanged code is worked example 2:
 
@@ -34,7 +36,9 @@ target := runtime.GOOS + "/" + runtime.GOARCH
 check(allowed[target], "running target")
 ```
 
-**Expected:** Before the repair the program panics with `running target`; after it the line reads `allowed := map[string]bool{"linux/amd64": true, "linux/arm64": true}` again and the running Linux tuple is admitted.
+**Expected:** The defective run panics with `running target`; after restoring `allowed := map[string]bool{"linux/amd64": true, "linux/arm64": true}`, the running Linux tuple is admitted.
+
+**Verify:** The failing run shows message `running target`; after the repair `allowed[target]` holds again.
 
 A declared target set is a configuration contract, and the classroom worker is a Linux container on amd64 or arm64, so its own tuple must be in the set. Each additional image architecture still needs its own build and execution evidence.
 
@@ -49,6 +53,8 @@ check(!supported("plan9", "386") && !supported("linux", "") && supported("linux"
 ```
 
 **Expected:** Both unsupported tuples are rejected while linux/arm64 is admitted.
+
+**Verify:** Your solution must keep `!supported("plan9", "386") && !supported("linux", "") && supported("linux", "arm64")` true. Control: changing `allowed := map[string]bool{"linux/amd64": true, "linux/arm64": true}` to `allowed := map[string]bool{"linux/amd64": true, "linux/arm65": true}` panics with message `unsupported`; revert it.
 
 Explicit rejection is clearer than silently choosing an incompatible artifact. The admitted control proves the lookup is not simply rejecting everything.
 
@@ -66,6 +72,8 @@ check(!s.Accepting && s.Active == 0, "stopped")
 ```
 
 **Expected:** The third task is refused once draining begins, and the service stops only after both tasks finish.
+
+**Verify:** Your solution must keep `!s.Admit() && s.Active == 2` true. Control: changing `s := ServiceState{Accepting: true, Active: 2}` to `s := ServiceState{Accepting: true, Active: 3}` panics with message `drain start`; revert it.
 
 Stopping admission and completing in-flight work are different steps. A single stopped flag cannot explain partial shutdown.
 
@@ -86,6 +94,8 @@ check(s.Active == 1, "unfinished work")
 
 **Expected:** One of the two tasks remains unfinished and visible.
 
+**Verify:** Your solution must keep `s.Active == 1` true. Control: changing `for i := 0; i < budget; i++ {` to `for i := 0; i <= budget; i++ {` panics with message `unfinished work`; revert it.
+
 A timeout must not manufacture completion. Real services should retain or report recoverable work according to their delivery guarantees.
 
 ## 6. Transfer deterministic version metadata
@@ -99,8 +109,10 @@ check(label == "lesson/1.0 revision=abc123", "version")
 
 **Expected:** The result is lesson/1.0 revision=abc123.
 
+**Verify:** Your solution must keep `label == "lesson/1.0 revision=abc123"` true. Control: changing `label := fmt.Sprintf("%s/%s revision=%s", "lesson", "1.0", "abc123")` to `label := fmt.Sprintf("%s/%s revision=%s", "lesson", "2.0", "abc123")` panics with message `version`; revert it.
+
 Version metadata connects an artifact with source provenance. It should not contain a developer host path or private identity.
 
 ## Transfer after comparison
 
-Return to your own pad and reproduce one check with a new input. Explain why the check rejects a plausible wrong implementation. Keep the distinction between a pure model, an in-process fake, and a real external system visible in your notes.
+A Kubernetes Pod receives SIGTERM, then a grace period, then SIGKILL. Map this lesson onto it: stop accepting, let readiness fail so traffic moves elsewhere, finish in-flight work within the budget and log what was abandoned. Build images for the cluster's architecture, and embed a version and revision so a running Pod can report which build it is.

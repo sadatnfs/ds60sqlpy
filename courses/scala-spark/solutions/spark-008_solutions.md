@@ -1,6 +1,8 @@
 # spark-008: Explained reference solutions
 
-Read the [guide](../guides/spark-008.md) and attempt the [learner source](../lessons/spark-008.scala) first. The [complete reference](spark-008_solution.scala) contains each implementation and its assertions. Values, identity, missingness and failure behavior are separate checks; compilation alone does not establish any of them.
+Attempt the [guide](../guides/spark-008.md) exercises first.
+
+Reference: [complete Scala program](spark-008_solution.scala).
 
 ## Exercises and reasoning
 
@@ -153,4 +155,7 @@ assert(!filterContract(_ => throw new IllegalStateException("broken")))
 
 ## Evidence and scope
 
-Run the complete reference using the same prepared profile as the learner source. Its assertions check normal values, malformed or boundary inputs and conservation where relevant. The final version line records the actual compiler/runtime family used. The reference is an executable explanation, not a hidden grading service or proof that a distributed Spark job would have the same performance characteristics.
+The reference applies each helper to inputs that should pass and inputs that should fail: bag equality on reordered and on shortened sequences, `exactSum` on `(100, -25, 0, 100)` with result 175 and on both `Long` overflow directions, promotion at `Int.MaxValue`, `Int.MinValue` and 0, and the tolerance policy on the large, tiny and NaN cases. The decisive check is the oracle test: the correct nonnegative filter passes, while the strict positive filter, the nonnegative-then-distinct filter and a throwing candidate each fail `filterContract`.
+
+`spark-008: six reference contracts passed` prints only after all of those checks, followed by the runtime versions. Passing means each helper distinguished the specific counterexamples written here. It cannot prove a helper rejects every wrong implementation, since a finite fixture only covers the mistakes someone thought of. That is why the lesson adds a counterexample for each mechanism (a lost duplicate, an overflow, a misplaced zero) rather than relying on one larger random input.
+

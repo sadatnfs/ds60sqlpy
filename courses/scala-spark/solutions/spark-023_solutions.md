@@ -1,6 +1,8 @@
 # spark-023: Explained paired reference solutions
 
-Read the [guide](../guides/spark-023.md) and attempt one language first. The [Scala reference](spark-023_solution.scala) and [PySpark reference](spark-023_solution.py) are complete single-file programs with explicit local sessions and finally-based stop. Each compares with literal expectations; matching two implementations alone would not rule out a shared mistake.
+Attempt the [guide](../guides/spark-023.md) exercises first.
+
+References: [Scala](spark-023_solution.scala), [PySpark](spark-023_solution.py).
 
 ## Exercises and reasoning
 
@@ -163,6 +165,7 @@ The gate turns a casual hint into a declared finite input contract. Limit-plus-o
 
 ## Execution and interpretation
 
-Run the complete reference in its prepared fixed worker. Its first check (Inspect statistics and the automatic threshold separately) is built inside the program, so opening the lesson fetches nothing; it expects: A positive finite estimate below 10485760 bytes, threshold 10485760 and actual row count 20. The estimate is not a peak-memory measurement. The final success line prints only after every reference assertion passes.
+Before any strategy comparison, the references check `0 < estimate < 10485760` for the dimension and print the estimated bytes, the threshold, the actual row count and the version. The automatic join must produce the metrics `(20000, 20000, 79997, 839916)`, meaning rows, distinct fact IDs, amount total and weighted total, and its plan must contain a join. The shuffled comparison must show no `BroadcastHashJoin` with AQE off; the hinted plan must show both `BroadcastHashJoin` and `BroadcastExchange` and match the ordinary result in both `exceptAll` directions; and the hinted full outer join must avoid `BroadcastHashJoin` while keeping the same metrics.
 
-Local plan, partition and resource evidence does not establish cluster-scale performance; session cleanup is explicit.
+The last exercise is a policy check rather than a plan check: the 20-row dimension passes, while a copy with key 0 duplicated or a 101-row candidate raises `ValueError`. The PySpark run then prints `spark-023: six PySpark reference contracts passed; Spark=` and the version; Scala prints the equivalent. Passing shows that the hint changed the plan and not the answer on this fixture; whether broadcasting is faster on a real cluster is a separate measurement.
+

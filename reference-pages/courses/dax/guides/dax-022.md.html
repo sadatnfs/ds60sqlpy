@@ -194,10 +194,10 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/dax/guides/dax-022.md</code></p>
     </header>
     <article class="document"><h2 id="dax-022-variables-inside-and-outside-an-iterator">dax-022: Variables inside and outside an iterator<a class="heading-anchor" href="#dax-022-variables-inside-and-outside-an-iterator" aria-label="Link to this section">#</a></h2>
-<p><strong>Stage 4: Filters, iterators and nonadditive totals.</strong> Level: intermediate. Read the mechanisms, trace the worked cases and retain your own draft. <strong>Direct prerequisites:</strong> <code>dax-012</code>, <code>dax-021</code></p>
+<p><strong>Stage 4: Filters, iterators and nonadditive totals.</strong> Level: intermediate. <strong>Direct prerequisites:</strong> <code>dax-012</code>, <code>dax-021</code></p>
 <h3 id="how-to-use-this-offline-lesson">How to use this offline lesson<a class="heading-anchor" href="#how-to-use-this-offline-lesson" aria-label="Link to this section">#</a></h3>
-<p>This is an offline DAX editing lesson. No DAX compiler, semantic-model engine, Power BI account or network connection is required. Worked tables describe the named reference and model, not execution of your draft. Save, compare and export source; do not interpret a comparison or completion marker as a passed program run.</p>
-<p>Open the <a href="../lessons/dax-022.dax.html">starter</a>. Compare the <a href="../solutions/dax-022_reference.dax.html">named reference</a> and <a href="../solutions/dax-022_solutions.md.html">reasoning</a> when ready. The <a href="../models/retail/model.json.html">model specification</a> identifies every fixture table, column type, key and relationship. The <a href="../models/README.md.html">fixture handbook</a> displays the original data and explains each table grain.</p>
+<p>The starter binds one value outside an iterator and leaves a second column for a value evaluated inside it. Predict both for the four Product rows with no filter, and write which products the outside value was actually computed for. The <a href="../STUDY-GUIDE.md.html#offline-study-boundary">offline study boundary</a> explains what a worked table can show.</p>
+<p>Files: <a href="../lessons/dax-022.dax.html">starter</a>, <a href="../solutions/dax-022_reference.dax.html">reference</a> and <a href="../solutions/dax-022_solutions.md.html">reasoning</a>.</p>
 <h3 id="the-question-and-the-mechanism">The question and the mechanism<a class="heading-anchor" href="#the-question-and-the-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Locate a variable&#x27;s binding context and avoid repeating one total for every member.</p>
 <p>A variable outside an iterator can hold one scalar for the entire iterator. A variable declared in the iterator&#x27;s expression can be bound separately for each row. The difference is easy to miss when both variables are named Revenue. Use names that expose whether the value is a global total, an incoming-context total or a current-member result.</p>
@@ -207,14 +207,13 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>The first named variable is outside SUMX; the second is declared after the iterator&#x27;s table argument, inside its scalar expression. RETURN ends that inner variable block. This is a scope distinction, not a mutable assignment updated by each loop iteration.</p>
 <p>Concepts to explain in your own words: <strong>variable scope</strong>, <strong>iterator body</strong>, <strong>implicit transition</strong>, <strong>shared scalar</strong>.</p>
 <h3 id="model-and-context-contract">Model and context contract<a class="heading-anchor" href="#model-and-context-contract" aria-label="Link to this section">#</a></h3>
-<p>The ordinary star follows Product → Sales, Customer → Sales and Date → Sales through OrderDate. The ShipDate relationship is inactive unless a case explicitly activates it. Filters flow from the one side to the many side. Additional analytical tables have only the relationships declared in their named model; a similar column name does not create a relationship.</p>
+<p>Product has four rows, including the Bag with no sales, and the cases iterate all of them. Under a Paper filter only the Notebook and the Pen remain, worth 67 and 24 USD, so the incoming total is 91. See the <a href="../models/retail/model.json.html">model specification</a> and the <a href="../STUDY-GUIDE.md.html#the-retail-star">shared star rules</a>.</p>
 <pre class="highlighted-code"><code class="language-text">Product (one)  --&gt; Sales (many) &lt;-- Customer (one)
                        ^
                        | active OrderDate
                     Date (one)
                        | inactive ShipDate
                        +------&gt; Sales</code></pre>
-<p>All amounts in ordinary Sales are USD after the line discount, before tax and returns. The Date fixture is complete for 2024 and 2025; a short result table is a selected slice, not the whole calendar. JSON <code>null</code> in the worked-results sidecar means DAX BLANK, not the text &quot;null&quot;.</p>
 <h3 id="worked-cases">Worked cases<a class="heading-anchor" href="#worked-cases" aria-label="Link to this section">#</a></h3>
 <p>The following query-local declarations are shared by these cases. They do not create persisted measures in this classroom.</p>
 <pre class="highlighted-code"><code class="language-dax"><span class="syntax-keyword">DEFINE</span>
@@ -263,8 +262,10 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 </tbody></table></div>
 <p>Context is not simply filtered versus unfiltered. The exact point at which a scalar is bound determines which filtered total gets repeated.</p>
 <p>Hand-derived for the named reference and fixture. Editing a draft does not recalculate this table.</p>
+<h3 id="a-misconception-to-test">A misconception to test<a class="heading-anchor" href="#a-misconception-to-test" aria-label="Link to this section">#</a></h3>
+<p>Because both variables are called something like revenue, it is easy to believe that moving the VAR above SUMX is only a readability refactor. The fixture shows otherwise. Bound outside, the variable holds 187 once, and SUMX adds that same number for each of four products, giving 748. Even the Bag contributes 187, although it sold nothing, because its own revenue was never evaluated. Bound inside the iterator body, the variable receives each product&#x27;s value in turn, 67, 24, 96 and BLANK, which sum to 187. Move a variable out only when its value is meant to be invariant across rows.</p>
 <h3 id="practice-prediction-construction-and-diagnosis">Practice: prediction, construction and diagnosis<a class="heading-anchor" href="#practice-prediction-construction-and-diagnosis" aria-label="Link to this section">#</a></h3>
-<p>Retain your formula or written reasoning, the stated context, contributing rows or values, and a conclusion with its unit. These notes are your own study record; they do not show that a formula ran.</p>
+<p>Record each answer as the <a href="../STUDY-GUIDE.md.html#practice-routine">practice routine</a> describes.</p>
 <h4 id="exercise-1-predict">Exercise 1: Predict<a class="heading-anchor" href="#exercise-1-predict" aria-label="Link to this section">#</a></h4>
 <p>Predict the shared-scalar sum under Home.</p>
 <h4 id="exercise-2-change-one-condition">Exercise 2: Change one condition<a class="heading-anchor" href="#exercise-2-change-one-condition" aria-label="Link to this section">#</a></h4>
@@ -287,14 +288,14 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>Distinguish an invariant target from per-member weights.</li>
 </ol>
 <h3 id="self-check-and-next-step">Self-check and next step<a class="heading-anchor" href="#self-check-and-next-step" aria-label="Link to this section">#</a></h3>
-<p>Explain one changed result without quoting the formula alone. Identify which rows, filters, relationship or evaluation scope changed, then construct a counterexample to a plausible wrong interpretation. Keep your draft separate from the supplied reference. A small correct derivation does not certify performance, model security or broad expertise.</p>
+<p>Predict both sums under a Home filter, then under a filter on Paper and Travel together. Explain why one of those tests exposes the bug and the other hides it. The <a href="../STUDY-GUIDE.md.html#self-check-routine">self-check routine</a> applies too.</p>
 <p>Continue to <a href="dax-023.md.html">dax-023</a> when its prerequisites make sense, or revisit this stage from the <a href="../README.md.html">course map</a>.</p>
 <h3 id="official-references-and-evidence-limits">Official references and evidence limits<a class="heading-anchor" href="#official-references-and-evidence-limits" aria-label="Link to this section">#</a></h3>
 <ul>
 <li><a href="https://learn.microsoft.com/en-us/dax/var-dax">DAX keyword: VAR</a></li>
 <li><a href="https://learn.microsoft.com/en-us/dax/sumx-function-dax">DAX function: SUMX</a></li>
 </ul>
-<p>Documentation was reviewed for this original course on 2026-10-25. Version-sensitive features have explicit notes. Source/model checks and independent fixture arithmetic are not a DAX parser, compiler, semantic engine, real RLS test or performance measurement.</p>
+<p>Review date and evidence limits: <a href="../STUDY-GUIDE.md.html#references-and-evidence-limits">study guide</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for dax-022. Read its guide and the named model.
 Review my draft and prediction. Ask me to enumerate the relevant rows and context.

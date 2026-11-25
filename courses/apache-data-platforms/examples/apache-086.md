@@ -2,25 +2,22 @@
 
 Select one already qualified owned workshop. Compare exact resume and retained-state replacement using read-only identity actions. Break one configuration only in a separate disposable copy and retain its typed failure.
 
-## Receipt fields and independent oracle
+## What this game day receipt must hold
 
-- Source revision/hashes and exact declared input IDs, values, schema and time units.
-- Actual native platform, package/image identities and owned resource namespace.
-- Selected table snapshot/version, source positions or process/lineage identity as appropriate.
-- Positive result against an independent oracle and a typed negative observation.
-- Read-only retained-state comparison after the selected lifecycle transition.
-- Cleanup/evidence-storage result and any separate prepared or unavailable feature.
+- The selected workshop, its source hash and the image ID it ran.
+- Container IDs before stop, after resume and after down/start replacement.
+- The read-only check result at each boundary, run without any initialize step.
+- The single configuration change made in the disposable copy, as a diff.
+- The first typed diagnostic the broken copy produced.
+- The restored check result and confirmation that the learner's volume was untouched.
 
-For the common three-order fixture, require IDs 1/2/3 with amounts 4/9/7, total 20,
-east 11 and west 9. A later fourth west order of 2 changes the current total to 22 and west
-to 11 while an earlier pinned snapshot remains unchanged. Do not use this simple
-oracle to claim correctness for a different pipeline without defining its
-deduplication, correction and visibility semantics.
-
-Read the selected project README and qualification ledger before commands. The
-classroom does not execute Docker commands in this Markdown pad. Prepared
-configuration, unit policy fixtures, successful compilation and actual service
-acceptance remain different observations. Never include credentials or signed URLs.
+Container IDs carry most of this oracle. After resume they must match the IDs
+taken before stop. After down/start they must differ while the semantic check
+still passes over the same volume. For Cassandra, that check compares host UUID,
+replication settings and the exact order rows. For Kafka retention, it compares
+end offsets and the latest value per key. Equal IDs after replacement mean down
+never ran. The [shared receipt rules](../STUDY-GUIDE.md#evidence-receipts)
+cover naming and storage.
 
 ## Concrete source inspection
 
@@ -31,5 +28,8 @@ cat ../cassandra/README.md
 cat ../streaming/QUALIFICATION.md
 ```
 
-These inspections do not start or qualify a service. Execute only the chosen
-project's complete documented owned route and retain its actual receipt.
+The Cassandra README's lifecycle block runs `stop`, `resume`, `check`, then
+`down`, `start` and `check`. Down removes owned containers and the network but
+keeps the data volume. The Kafka qualification ledger records end offset 3 and
+latest-key state preserved across repeat, resume and replacement, with physical
+compaction not demonstrated. Use those recorded facts as the expected values.

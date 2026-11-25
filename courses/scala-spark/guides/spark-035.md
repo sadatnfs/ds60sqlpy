@@ -1,22 +1,26 @@
 # spark-035: Checkpoints, restart and delivery guarantees
 
-Authored paired Scala/PySpark teaching content. The default fixtures are tiny, local and deterministic. Runtime acceptance, logical correctness and learner understanding remain separate evidence.
+A checkpoint records which input files a query has already read, so a restart continues where it stopped instead of starting over. This lesson runs one Parquet append query three times against the same checkpoint and once against a brand new one, and shows what the checkpoint protects and what it does not: a business duplicate that arrives in a later file still reaches the sink twice.
 
 ## Level and prerequisites
 
-Advanced; approximately 120 minutes. Direct prerequisites: `spark-034`. The prepared baseline is Spark 4.3.0, Scala binary 2.13, JDK 17 and Python 3.12. Read the [execution baseline](../execution-baseline.md).
+Advanced; approximately 120 minutes. Direct prerequisites: `spark-034`. Pinned versions: [execution baseline](../execution-baseline.md).
 
 ## How to run this lesson
 
-Open `spark-035` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile, save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`;Python stages as `main.py` with a main guard. Each program creates its own `local[2]` session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.
+Shared run steps and profile rules: [study guide](../STUDY-GUIDE.md#run-a-paired-lesson).
 
-The [Scala learner](../lessons/spark-035.scala) and [PySpark learner](../lessons/spark-035.py) run two complete demonstrations and retain six explicit task stubs. Use the [explained solutions](../solutions/spark-035_solutions.md) only after an attempt or an explicit worked comparison; the [Scala reference](../solutions/spark-035_solution.scala) and [PySpark reference](../solutions/spark-035_solution.py) contain complete assertions. A bounded collect is used only for the declared tiny fixture; do not copy it onto an unbounded or large production table.
+Learner pads: [Scala](../lessons/spark-035.scala) and [PySpark](../lessons/spark-035.py).
+
+Open the [explained solutions](../solutions/spark-035_solutions.md) after an attempt.
+
+The first worked example publishes `batch-01.json` into a `demo-input` folder, runs the query into `demo-checkpoint` and `demo-output`, and requires 2 input rows with the bag `1:100, 2:200`. The second publishes `batch-02.json` into the same folder and reruns on the same checkpoint: only the 2 new rows are read, yet the bag grows to four rows because `2:200` is present in both files.
 
 ## Learning objectives
 
 - Explain how source offsets, state, checkpoints and sink behavior jointly determine recovery semantics.
-- State the input and output grain, schema, NULL policy and ordering before executing a transformation.
-- Compare each language implementation with independent literal expectations, not only with the other implementation.
+- Run an `AvailableNow` file stream into a Parquet append sink, restart it on the same checkpoint with a new file and then with no new file, and show that the query ID stays fixed while the run ID changes and the input count goes 2, 2 and then 0.
+- Separate source progress from sink deduplication: explain why the repeated `2:200` is stored twice, rebuild the output from scratch with a fresh checkpoint and output folder, and summarize the sink as the ledger `(4, 3, 800)`.
 
 ## Vocabulary and concepts
 
@@ -58,7 +62,7 @@ The complete guarantee ledger names source immutability, checkpoint compatibilit
 
 ## Supplied local fixture
 
-The complete source creates the owned local session described above, then constructs this explicit fixture. The worked examples below run in that same main function; there is no hidden notebook state.
+Everything lives under a fresh `spark-035-` scratch folder in the working directory, with separate `input`, `checkpoint` and `output` paths and a five-second stop timeout for streaming queries. The reader uses an explicit `id`/`cents` schema, `FAILFAST` and one file per trigger, and each run waits at most 45 seconds before raising `TimeoutError`. `batch-01.json` holds IDs 1 and 2 with 100 and 200 cents. The canonical bag check rejects a schema change, more than 8 rows, NULL values, IDs below 1 and negative cents.
 
 ```scala prelude=../solutions/spark-035_solution.scala
 import org.apache.spark.sql.functions._
@@ -190,7 +194,7 @@ The repeated business ID is retained because it arrived in a new source file. Of
 
 Read a static copy of the two-row schema fixture and require bigint id/cents, known nonnull values and at most 8 rows. Return its canonical ordered bag without removing duplicates.
 
-**Expected result/shape:** The first bag is 1:100,2:200. A NULL identity or cents value is rejected.
+**Expected result/shape:** The first bag is `1:100, 2:200`. A NULL identity or cents value is rejected.
 
 **Verify:** Compare the exact two-row bag and reject an explicit null-id DataFrame.
 
@@ -200,7 +204,7 @@ Read a static copy of the two-row schema fixture and require bigint id/cents, kn
 
 Execute the AvailableNow Parquet query with its owned checkpoint/output and retain query ID, run ID, input count and batch IDs.
 
-**Expected result/shape:** Two input rows and exactly 1:100,2:200 in the committed sink.
+**Expected result/shape:** Two input rows and exactly `1:100, 2:200` in the committed sink.
 
 **Verify:** Assert the progress input count is 2, query is terminated, and readback bag is exact.
 
@@ -210,7 +214,7 @@ Execute the AvailableNow Parquet query with its owned checkpoint/output and reta
 
 Publish a second file with 2:200 and 3:300, then restart the compatible query with the same checkpoint and sink.
 
-**Expected result/shape:** Only 2 new input rows are processed. The sink bag is 1:100,2:200,2:200,3:300. Query ID persists and run ID changes.
+**Expected result/shape:** Only 2 new input rows are processed. The sink bag is `1:100, 2:200, 2:200, 3:300`. Query ID persists and run ID changes.
 
 **Verify:** Compare both identities, progress count and all 4 output occurrences.
 
@@ -240,7 +244,7 @@ Start from a new checkpoint only when the output namespace is also new. Replay t
 
 Return output row count, distinct business IDs and total cents, then explain why source recovery is not business-ID deduplication or a universal exactly-once guarantee.
 
-**Expected result/shape:** 4 occurrences,3 distinct IDs, total 800.
+**Expected result/shape:** 4 occurrences, 3 distinct IDs, total 800.
 
 **Verify:** Compare all three independent values and preserve the duplicate occurrence.
 
@@ -252,11 +256,14 @@ Do not reuse an old output with a new checkpoint without an idempotency plan. Do
 
 ## Self-check
 
-Explain the contract of `validatedBag` / `validated_bag` without reading its solution. Then, from memory, state what Exercise 6 (Write a guarantee ledger from exact counts) must produce: 4 occurrences, 3 distinct IDs, total 800. Say which part of that result is evidence and what it still cannot show. Name the action in your trace that actually runs the plan.
+- The second run reads only `batch-02.json`. Which part of the checkpoint remembers that `batch-01.json` was already processed, and what would happen if you deleted the checkpoint but kept the output?
+- `2:200` appears twice in the sink after the restart. Is that a replay by Spark or a second delivery in the data, and which component would have to change to store it once?
+- The empty resume reports 0 input rows and keeps the same query ID. Why is a zero-row run still useful evidence, and what would a changed query ID tell you?
+- `separate_replay` refuses a checkpoint or output folder that already exists. What mistake does that refusal prevent, and why must the original output keep its rows?
 
 ## Next step
 
-Use the [course route](../README.md) to continue. Paired-language agreement is useful only when both outputs also satisfy the independent fixture contract. A successful local run is not evidence of cluster performance or production recovery.
+Go on to [spark-036: foreachBatch, idempotent sinks and failure injection](spark-036.md). Here the Parquet sink stored the duplicate `2:200` exactly as delivered; the next lesson builds a sink that recognizes a repeated batch and refuses to publish it a second time.
 
 ## Primary sources and official APIs
 

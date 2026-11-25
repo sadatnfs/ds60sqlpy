@@ -1,10 +1,17 @@
 # cuda-098: Backward is part of the operator
 
-**Route:** CUDA Python and machine learning. **Stage:** advanced. **Prerequisites:** `cuda-097`. Allow several sessions when the hardware experiment is new; the chapter is not a deadline.
+**Route:** CUDA Python and machine learning. **Stage:** advanced. **Prerequisites:** `cuda-097`.
 
-## What you will be able to explain
+Pacing, evidence labels and platform rules: [CUDA study guide](../../STUDY-GUIDE.md).
 
-By the end, you can **derive the input VJP**, **explain a failed kink gradcheck**, and **compare each framework reference** with evidence. Start with the two worked cases, then use the editable CPU model to make the quantities concrete.
+## Learning objectives
+
+- Derive the input VJP.
+- Derive bias gradient.
+- Run finite differences away from a kink.
+- Explain a failed kink gradcheck.
+- Specify higher-order support.
+- Compare each framework reference.
 
 ## Mechanism and vocabulary
 
@@ -46,9 +53,13 @@ At x=2 with \(a=2,b=1\), y=5 and derivative \(dy/dx=2\). A central finite differ
 
 At \(x=-0.5\), the preactivation is zero. A central difference straddles the kink and need not equal the framework-selected subgradient, so test the documented boundary separately.
 
-## Portable executable model
+## How to run the CPU model
 
-The **CPU reference model** variant runs this bounded worked example using `python-core`. It uses only the Python standard library, small synthetic values and no network. Its purpose is to expose the arithmetic or contract behind the chapter. The separate reference includes assertions for the stated observations.
+Edit the copy; the [reference](../references/cuda-098_cpu.py) adds assertions.
+
+```sh
+python courses/cuda/python/lessons/cuda-098_cpu.py
+```
 
 ```python
 def f(x):
@@ -78,8 +89,6 @@ print("CPU gradient oracle:", numeric, bias_grad)
 | `mask` | `[0, 1]` |
 | `bias_grad` | `3` |
 
-Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.
-
 ## Equal framework lanes
 
 ### PyTorch
@@ -90,83 +99,69 @@ Register a mathematically correct backward and test vector-Jacobian products wit
 
 Use the supported registered-gradient or custom_gradient mechanism. Compare GradientTape results with a native reference and finite differences, including documented nondifferentiable boundaries.
 
-Choose either lane first, then compare the other using identical mathematical inputs. Framework-specific shape, mode and optimizer rules must be checked separately. Both use offline synthetic examples; no model hub or dataset download is triggered.
+Lane rules: [framework labs](../../STUDY-GUIDE.md#python-gpu-and-framework-labs).
 
 ## Executable framework practice
 
-The variant chooser offers **PyTorch on CPU**, **TensorFlow on CPU**, and separate **NVIDIA CUDA** versions. CPU versions force CPU placement. CUDA versions require the named GPU profile and refuse to silently fall back. Each complete program uses the same tiny deterministic objective, bounded tensors and local synthetic data. Read its source before running; a framework pass establishes only that variant and environment.
-
-The checkpoint demonstration is in-memory. It teaches what state must be saved; it does not export a durable model artifact or preserve an in-flight device context. Advanced custom-op, distributed and engine-building projects remain separately prepared external workflows.
+Run the **PyTorch** and **TensorFlow** variants on CPU first; [lab rules](../../STUDY-GUIDE.md#python-gpu-and-framework-labs).
 
 ## Practice and transfer
+
+Record each attempt in the [worksheet](../lessons/cuda-098.md) before opening hints.
 
 ### Exercise 1: Derive the input VJP
 
 **Trap to avoid:** Using the output `y` instead of a mask, `upstream * a * y`, scales gradients by activation values and is wrong for every positive input not equal to 1.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 2: Derive bias gradient
 
 **Trap to avoid:** Returning the upstream sum without masking gives 4, including a contribution from a position where the ReLU blocked gradient.
-
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 3: Run finite differences away from a kink
 
 **Trap to avoid:** Running the check in float32 with a tiny epsilon loses precision to cancellation and fails even when the analytic gradient is right.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 4: Explain a failed kink gradcheck
 
 **Trap to avoid:** Changing the backward to return 1 at the kink so the check passes chooses a convention for the test's sake.
-
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 5: Specify higher-order support
 
 **Trap to avoid:** Assuming double backward works because first-order gradcheck passed leads to silent zero second derivatives.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 6: Compare each framework reference
 
 **Trap to avoid:** Comparing PyTorch's custom op with TensorFlow's custom op only checks they agree with each other.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ## Progressive hints
 
-Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.
+Hint *k* belongs to exercise *k*; open one at a time.
 
-1. Start from worked example 1 and mark the quantities needed for the task "Derive the input VJP".
-2. Change one assumption in worked example 2 while preserving the declared contract: derive bias gradient.
-3. Trace the CPU program's variables before adding hardware behavior: run finite differences away from a kink.
-4. Draw producers, consumers and the exact operation boundary for the task "Explain a failed kink gradcheck".
-5. Separate what the small fixture establishes from what the real runtime must show: specify higher-order support.
-6. Write a counterexample to an overbroad claim before you compare each framework reference.
+1. Multiply the upstream gradient by `a` wherever the preactivation is positive, and use the boundary rule elsewhere.
+2. The bias is shared by every element, so collect each element's masked upstream contribution into one number.
+3. Perturb `x` by the same small step in both directions and divide the difference by twice the step.
+4. Evaluate the preactivation at the failing point and ask whether the derivative is unique there.
+5. Ask what a first-order check says about differentiating the gradient itself.
+6. Compare forward results first, then compare backward results separately against each framework's native expression.
 
-## Common mistakes and self-review
+## Common mistakes and self-check
 
-Confusing a correct tiny example with a general implementation is the central review risk. For this chapter, challenge the assumption in worked example 2, then ask whether your change preserves the mechanism described above. If you change dtype, layout, ordering, batch size or backend, update the acceptance contract rather than silently reusing the old observation. Explain an unexpected result before trying random configuration changes.
+A common mistake is returning the gradient of a shared parameter with the shape of the input. The bias gradient is a sum of masked upstream values, a scalar here, not an elementwise array. Another mistake is running finite differences at the ReLU kink and treating the mismatch as a bug. Fix both by deriving each vector-Jacobian product by hand, reducing over elements for shared parameters and testing points away from the kink separately from the documented boundary behavior.
 
-Keep a small evidence table with columns **claim**, **input**, **expected observation**, **actual observation** and **limit**. For the first claim use `Derive the input VJP`. For the final claim use `Compare each framework reference`. An unperformed GPU or cluster experiment remains pending even when the CPU model is correct.
+**Evidence limit:** The reference checks a finite-difference derivative near 2 and a bias VJP of 3 in double precision. It does not register a gradient in PyTorch or TensorFlow, so integration, higher-order gradients and unusual layouts remain untested.
 
-## Platform and evidence contract
+1. What does a backward function compute?
+2. Why can a central difference disagree at the kink?
+3. What do framework registration checks validate?
 
-The reading worksheet and CPU reference model work through the ordinary Linux Docker classroom on macOS, Linux and Windows using WSL 2. They do not require an NVIDIA GPU. Their results are labeled CPU models or semantic oracles, not simulated hardware performance.
-
-Real CUDA work needs supported NVIDIA hardware, a compatible host driver and an explicitly prepared GPU runtime. An Apple GPU does not execute CUDA kernels. PyTorch MPS on a supported native Mac, ROCm on supported AMD hardware, or other vendor backends can provide separate accelerator learning routes; they need their own package and operation qualification and are not CUDA evidence. The ordinary Linux Docker classroom does not expose native Mac MPS automatically.
-
-Do not download packages, models or data by opening this lesson. Do not attach an engine socket, ambient cluster credentials or an arbitrary remote endpoint. A CPU pass, imported package, successful compilation, real GPU result and measured performance are distinct observations. Record the actual backend, data shape/dtype, source revision, versions and pending checks. A saved completion marker records learning progress, not hardware certification.
+Answers: [self-check answers](../solutions/cuda-098_solutions.md#self-check-answers).
 
 ## Primary references
 
 - [PyTorch CUDA semantics](https://docs.pytorch.org/docs/2.9/notes/cuda.html)
 - [TensorFlow GPU guide](https://www.tensorflow.org/guide/gpu)
 
-Use the version-matched documentation of your prepared environment. These references describe interfaces and supported boundaries; the chapter's synthetic examples and CPU models are original teaching material.
+Full lists: [documentation and sources](../../STUDY-GUIDE.md#documentation-and-sources).
 
 ## Ask an AI tutor about this lesson
 

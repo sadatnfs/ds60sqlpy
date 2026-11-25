@@ -42,5 +42,7 @@
       "wrong": "Claiming that a component explaining 90 or 100 percent of input variance will predict a target well. A target could depend entirely on the 10 percent direction, and only a held out evaluation of that target can show it.",
       "verify": "`sum(pc$sdev^2 / sum(pc$sdev^2))` returns 1 within 1e-12, and the printed shares show 0.9 and 0.1."
     }
-  ]
+  ],
+  "run_note": "The starter holds two perfectly correlated columns, short with -2, -1, 1 and 2 and long with ten times those values, and an empty results list. Run it and predict which column dominates the first component without scaling: long, because its variance is one hundred times larger. Then decide whether centering only or full scaling matches the question before calling `prcomp()`.",
+  "checks_note": "The checks confirm that the unscaled first loading on long has magnitude 10 over the square root of 101, that scaling gives both loadings magnitude one over the square root of 2, that scores times the transposed rotation rebuild the preprocessed data, including after flipping a loading and its scores together, that a constant column cannot be scaled, that a manual projection matches `predict()` on new rows, and that variance shares sum to 1. They do not assign meaning to a component."
 }

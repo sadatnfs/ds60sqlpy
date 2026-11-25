@@ -206,11 +206,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Accumulator:</strong> State summarizing the values seen so far.</p>
 <p><strong>Termination:</strong> An argument that repetition eventually stops.</p>
 <h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>The Linux Docker classroom compiles your saved pad as <code>Program.cs</code> in its fixed .NET 10 project. C# 14 is the matching language generation. This route uses the prepared framework libraries; it does not accept arbitrary project files, NuGet packages, command arguments or interactive input. The explicit <code>Program.Main</code> entrypoint makes compilation and execution visible. <code>Check</code> throws on a false condition in every build configuration, unlike conditional debugging assertions.</p>
-<p>Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.</p>
+<p>Example A calls LINQ&#x27;s <code>Sum()</code> on an empty array; the classroom&#x27;s implicit usings already import <code>System.Linq</code>. Task 4&#x27;s off-by-one loop compiles and fails only at runtime with <code>IndexOutOfRangeException</code>, which tells you the bad index came from the loop condition rather than from the data.</p>
+<p>Compile contract, starter stop and success marker: <a href="../STUDY-GUIDE.md.html#running-a-lesson">running a lesson</a>.</p>
 <h3 id="syntax-anatomy-and-execution-trace">Syntax anatomy and execution trace<a class="heading-anchor" href="#syntax-anatomy-and-execution-trace" aria-label="Link to this section">#</a></h3>
 <p><code>for (initial; condition; update)</code> initializes once, checks before each body, and updates after each body. For an array of Length n, valid indices are zero through n minus one. <code>break</code> exits the loop; <code>continue</code> skips the remainder of one iteration.</p>
-<p>Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.</p>
+<p>Each example ends with a trace; method: <a href="../STUDY-GUIDE.md.html#tracing-a-program">tracing a program</a>.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="example-a-sum-with-a-maintained-invariant">Example A: Sum with a maintained invariant<a class="heading-anchor" href="#example-a-sum-with-a-maintained-invariant" aria-label="Link to this section">#</a></h4>
 <p>Before each iteration, sum equals the sum of values already visited. Zero is the identity that makes the invariant true initially.</p>
@@ -250,6 +250,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The sum is 12 and the empty sum is zero.</p>
+<p><strong>Trace.</strong> Before the loop, <code>sum</code> is 0, the total of no values. The first iteration adds 2, so sum is 2, the total of the one value visited. The second adds 4 for 6, and the third adds 6 for 12. After every step the invariant holds: sum equals the total of the values visited so far. <code>Array.Empty&lt;int&gt;().Sum()</code> returns 0, the same starting value.</p>
 <h4 id="example-b-locate-the-first-match">Example B: Locate the first match<a class="heading-anchor" href="#example-b-locate-the-first-match" aria-label="Link to this section">#</a></h4>
 <p>Stopping at the first match is part of the contract. Without break, the same loop could return the last match.</p>
 <pre class="highlighted-code"><code class="language-csharp"><span class="syntax-keyword">using</span> System<span class="syntax-punctuation">;</span>
@@ -292,6 +293,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The first 8 is at index 1; 9 is absent.</p>
+<p><strong>Trace.</strong> <code>found</code> starts at -1, meaning not yet found. At index 0 the value 3 does not match. At index 1 the value is 8, so <code>found</code> becomes 1 and <code>break</code> leaves the loop at once; index 2 is never examined. Without <code>break</code>, the loop would continue to index 2 and overwrite found with 2, the last match. <code>Array.Exists</code> confirms that 9 is absent.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <ol>
 <li><strong>Predict and explain.</strong> Write the accumulator value before and after every iteration in Example A.</li>
@@ -311,10 +313,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <ol start="6">
 <li><strong>Transfer and justify.</strong> Design a bounded retry loop and explain both its invariant and its stopping argument.</li>
 </ol>
-<p>For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.</p>
+<p>Log each task in the <a href="../STUDY-GUIDE.md.html#recording-exercise-evidence">evidence table</a> before opening the explanation.</p>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
 <p>Loop indices count from zero while lengths count elements. A sentinel such as -1 must be checked before indexing. Mutating a collection during enumeration can invalidate the traversal contract.</p>
-<p>A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.</p>
+<p>For task 4, the one-element array <code>{ 5 }</code> is the smallest counterexample: with <code>i &lt;= values.Length</code> the loop runs for 0 and then for 1, and the second access throws <code>IndexOutOfRangeException</code>. For task 5, the input <code>{ 8, 8 }</code> separates first match from last match, and an empty array checks that -1 comes back without any element access.</p>
+<p>Repair routine: <a href="../STUDY-GUIDE.md.html#building-a-regression-case">building a regression case</a>.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <ol>
 <li>Reproduce Example A (Sum with a maintained invariant) before changing anything, and confirm its observation: The sum is 12 and the empty sum is zero.</li>
@@ -322,9 +325,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>Before opening the explanation, test your task 3 attempt against this lesson&#x27;s main pitfall: Loop indices count from zero while lengths count elements.</li>
 </ol>
 <h3 id="self-check-and-next-step">Self-check and next step<a class="heading-anchor" href="#self-check-and-next-step" aria-label="Link to this section">#</a></h3>
-<p>Explain Invariant, Accumulator, Termination without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.</p>
+<p>Write the value of <code>sum</code> before and after each iteration of Example A, then state the invariant in one sentence. Explain what <code>found</code> means when the loop ends holding -1. For task 6&#x27;s bounded retry loop, name the quantity that decreases on every attempt and the condition that stops the loop.</p>
+<p>Then follow the general <a href="../STUDY-GUIDE.md.html#self-check-routine">self-check routine</a> and save your pad.</p>
 <h3 id="sources-and-execution-boundary">Sources and execution boundary<a class="heading-anchor" href="#sources-and-execution-boundary" aria-label="Link to this section">#</a></h3>
-<p><a href="https://learn.microsoft.com/en-us/dotnet/csharp/">Official language or framework documentation</a>. The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.</p>
+<p><a href="https://learn.microsoft.com/en-us/dotnet/csharp/">Documentation</a>: The reference describes <code>for</code>, <code>foreach</code>, <code>break</code> and <code>continue</code> in its iteration statements and jump statements articles.</p>
+<p>Provenance and limits: <a href="../STUDY-GUIDE.md.html#sources-and-execution-boundary">sources and execution boundary</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for csharp-006: Loops, invariants and termination.
 Read courses/csharp/guides/csharp-006.md and courses/csharp/lessons/csharp-006.cs. Prerequisites: csharp-005.

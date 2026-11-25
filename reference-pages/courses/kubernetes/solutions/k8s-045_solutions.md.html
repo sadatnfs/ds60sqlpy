@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/kubernetes/solutions/k8s-045_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="k8s-045-explanatory-solutions">k8s-045: explanatory solutions<a class="heading-anchor" href="#k8s-045-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit reveal. These explanations describe the synthetic topology and stated API contracts. They are not fabricated runtime receipts.</p>
+<p>Attempt each exercise first, then compare (<a href="../STUDY-GUIDE.md.html#solutions-and-the-ai-tutor">study guide</a>).</p>
 <h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
 <p>Containers in the same Pod share a network namespace. They can communicate through localhost and share the Pod’s port space. Containers in different Pods normally have different network namespaces and Pod addresses. This makes a Pod a unit of co-location and shared networking rather than merely a label grouping unrelated containers.</p>
 <p>Loopback always refers to the caller’s network namespace. A sidecar in the same Pod can reach an application bound to 127.0.0.1:8080. A different Pod cannot reach that listener through the first Pod’s loopback address. To accept traffic on the Pod interface, the application generally listens on an appropriate non-loopback address, often 0.0.0.0 for IPv4.</p>

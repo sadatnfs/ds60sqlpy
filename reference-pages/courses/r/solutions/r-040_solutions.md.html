@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/r/solutions/r-040_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="r-040-reference-reasoning">r-040: reference reasoning<a class="heading-anchor" href="#r-040-reference-reasoning" aria-label="Link to this section">#</a></h2>
-<p>Use the <a href="r-040_reference.R.html">complete reference</a> with the guide&#x27;s declared inputs and runtime. Every worked example is also a standalone script.</p>
+<p>Run the <a href="r-040_reference.R.html">complete reference</a> under the <a href="../STUDY-GUIDE.md.html#run-a-chapter">run rules</a>.</p>
 <h3 id="why-the-implementation-has-this-shape">Why the implementation has this shape<a class="heading-anchor" href="#why-the-implementation-has-this-shape" aria-label="Link to this section">#</a></h3>
 <p>The unknown measurement is excluded under a finite-nonnegative policy, while every admitted segment has exactly one dimension match.</p>
 <p>Alpha has one admitted record and Beta has two. The final observation mean uses all three rather than equal weighting of the two group means.</p>
@@ -242,7 +242,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Tempting mistake:</strong> Writing that Beta customers spend three times as much as Alpha. That rests on 1 and 2 records, and the missing amount may not be missing at random.</p>
 <p><strong>Verify:</strong> Every number in the handoff matches a value that result shows: the two report rows, input 4, admitted 3, rejected 1 and overall about 23.33.</p>
 <h3 id="what-the-checks-establish">What the checks establish<a class="heading-anchor" href="#what-the-checks-establish" aria-label="Link to this section">#</a></h3>
-<p>The reference makes 12 <code>stopifnot()</code> checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.</p></article>
+<p>The assertions confirm types, required columns and unique keys, a complete lookup, group counts and totals that reconcile with the admitted rows, 3 admitted and 1 rejected with overall mean 70/3, a changed input giving 25, rejection of invalid or wrongly typed input, and an empty input that returns an NA overall mean with the <code>label</code>, <code>count</code>, <code>total</code> and <code>mean</code> columns. They do not prove the conclusion generalizes beyond these records.</p>
+<p>The reference makes 12 <code>stopifnot()</code> checks; see <a href="../STUDY-GUIDE.md.html#what-a-passing-run-proves">what a passing run proves</a>.</p></article>
   </main>
 </body>
 </html>

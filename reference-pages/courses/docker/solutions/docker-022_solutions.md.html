@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/docker/solutions/docker-022_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="docker-022-explanatory-solutions">docker-022: explanatory solutions<a class="heading-anchor" href="#docker-022-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit reveal. These explain the supplied teaching fixtures; they are not engine results. The mechanism is explained in <code>courses/docker/guides/docker-022.md</code>.</p>
+<p>These answers explain teaching fixtures, not engine results; the mechanism is in <a href="../guides/docker-022.md.html">the guide</a>.</p>
 <h3 id="exercise-1-compare-a-cpu-limit-with-dedicated-hardware">Exercise 1: Compare a CPU limit with dedicated hardware.<a class="heading-anchor" href="#exercise-1-compare-a-cpu-limit-with-dedicated-hardware" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> A quota constrains time; it does not grant exclusive cores.</p>
 <p><strong>Why:</strong> Shared scheduling and host contention remain. State the actual control rather than translating it into an unsupported performance guarantee.</p>
@@ -238,7 +238,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>A plausible wrong approach:</strong> Running an unbounded fork bomb to find the limit risks the whole host; pids_limit 64 helps but is not a reason to try.</p>
 <p><strong>How to verify:</strong> The test stops at its timeout or named condition, and docker compose ps shows only the owned container affected.</p>
 <h3 id="check-your-transfer">Check your transfer<a class="heading-anchor" href="#check-your-transfer" aria-label="Link to this section">#</a></h3>
-<p>A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.</p></article>
+<p>The PID limit counts tasks in the container&#x27;s cgroup, and every thread is a task, so 64 threads across all processes exhausts it even though each thread needs little memory or CPU. Confirm by reading <code>/sys/fs/cgroup/pids.current</code> and <code>pids.max</code> inside the container during load, or the PIDS column of <code>docker stats</code>, which should sit at the limit. The fix is a bounded worker pool, or a deliberately raised limit with a stated reason. If the count stayed well below 64 during the failures, the limit is not the cause and memory mapping limits deserve a look.</p></article>
   </main>
 </body>
 </html>

@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/kubernetes/solutions/k8s-063_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="k8s-063-explanatory-solutions">k8s-063: explanatory solutions<a class="heading-anchor" href="#k8s-063-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit reveal. These explanations describe the synthetic topology and stated API contracts. They are not fabricated runtime receipts.</p>
+<p>Attempt each exercise first, then compare (<a href="../STUDY-GUIDE.md.html#solutions-and-the-ai-tutor">study guide</a>).</p>
 <h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
 <p>Observability uses system outputs to reason about internal behavior. Events describe notable Kubernetes lifecycle observations. Logs record application or component messages. Metrics summarize numeric measurements over time. Traces connect spans of a request across components. Each signal has different retention, sampling and interpretation limits.</p>
 <p>A metric’s labels define its dimensions. High-cardinality labels such as every raw user ID or request token can create operational cost and privacy risk. Aggregation can hide a failing subgroup, while excessive detail can overwhelm the system. Choose dimensions that support the diagnostic question.</p>

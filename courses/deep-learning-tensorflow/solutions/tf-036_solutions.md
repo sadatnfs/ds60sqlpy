@@ -1,6 +1,6 @@
 # tf-036: explanatory solutions
 
-Open these answers for Capstone: release a small, reproducible model after your own attempt at Example A, Build a literal model bundle, or after an explicit reveal. Each answer reuses the guide's literal inputs, so a mismatch points to one step. The companion script runs the assertions; this page explains why they test Release gate, Lineage, Rollback artifact. After matching exercise 6, Retain a rollback decision, invent a new input without looking here.
+Open these answers after an attempt; they reuse the guide's inputs ([comparison steps](../STUDY-GUIDE.md#after-the-solutions)).
 
 ## Mechanism review
 
@@ -124,6 +124,3 @@ assert record["decision"] == "no-go" and record["previous"] == "v1" and record["
 
 **Verify:** In a fresh process, the exercise checks confirm `record['decision'] == 'no-go'`, `record['previous'] == 'v1'` and `record['holdout_count'] == 2`.
 
-## Review after comparison
-
-Change one fixture value in exercise 4, Block incompatible schemas, and predict the new result before running it. Keep the failing version of exercise 5, Make the decision fail closed, next to its repair. A missing framework is an environment record, not a failed assertion. No solution downloads data, calls an online model, deploys a service or changes a database.

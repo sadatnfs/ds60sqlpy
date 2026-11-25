@@ -195,7 +195,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     </header>
     <article class="document"><h2 id="k8s-030-operators-and-reconciliation-contracts">k8s-030: Operators and reconciliation contracts<a class="heading-anchor" href="#k8s-030-operators-and-reconciliation-contracts" aria-label="Link to this section">#</a></h2>
 <h3 id="level-and-prerequisites">Level and prerequisites<a class="heading-anchor" href="#level-and-prerequisites" aria-label="Link to this section">#</a></h3>
-<p>Advanced; about 135 minutes plus review. Direct prerequisites: <code>k8s-006</code>, <code>k8s-029</code>. The chapter separates desired configuration, API acceptance, controller observation and application evidence.</p>
+<p>Advanced; about 135 minutes plus review. Direct prerequisites: <code>k8s-006</code>, <code>k8s-029</code>.</p>
 <h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
 <p>Explain an operator&#x27;s idempotent reconcile loop and status conditions without assuming Go knowledge.</p>
 <h3 id="vocabulary-and-concepts">Vocabulary and concepts<a class="heading-anchor" href="#vocabulary-and-concepts" aria-label="Link to this section">#</a></h3>
@@ -226,18 +226,21 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>A child called hello exists with controller owner p2 while the current parent UID is p1. The decision is refuse, even if replicas match. Separately, a deleting p1 with finalizers [lesson.cleanup, other.cleanup] may remove lesson.cleanup only after its own cleanup succeeds.</p>
 <p><strong>Expected:</strong> Foreign ownership blocks mutation. Successful own cleanup leaves other.cleanup intact.</p>
 <h3 id="inspect-the-specific-owned-object">Inspect the specific owned object<a class="heading-anchor" href="#inspect-the-specific-owned-object" aria-label="Link to this section">#</a></h3>
-<p>Only after the chapter&#x27;s host capability is provisioned and its resources remain present, use the explicit receipt fields described in <a href="../host-labs.md.html">host-labs.md</a>. A completed one-shot browser Run has already cleaned its objects. The following read does not provision the missing capability and does not justify changing credentials after a Forbidden result.</p>
+<p>Read only while this lesson&#x27;s objects still exist (<a href="../STUDY-GUIDE.md.html#owned-live-reads">owned live reads</a>).</p>
 <p>Bash on Linux, macOS or Ubuntu under WSL 2:</p>
 <pre class="highlighted-code"><code class="language-bash">: <span class="syntax-string">&quot;</span><span class="syntax-string">${</span>LAB_KUBECONFIG<span class="syntax-punctuation">:</span><span class="syntax-punctuation">?Use the owned receipt path</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span>
 : <span class="syntax-string">&quot;</span><span class="syntax-string">${</span>LAB_CONTEXT<span class="syntax-punctuation">:</span><span class="syntax-punctuation">?Use the owned receipt context</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span>
 : <span class="syntax-string">&quot;</span><span class="syntax-string">${</span>LAB_NAMESPACE<span class="syntax-punctuation">:</span><span class="syntax-punctuation">?Use the owned receipt namespace</span><span class="syntax-string">}</span><span class="syntax-string">&quot;</span>
 kubectl --kubeconfig <span class="syntax-string">&quot;</span>$LAB_KUBECONFIG<span class="syntax-string">&quot;</span> --context <span class="syntax-string">&quot;</span>$LAB_CONTEXT<span class="syntax-string">&quot;</span> --namespace <span class="syntax-string">&quot;</span>$LAB_NAMESPACE<span class="syntax-string">&quot;</span> get lessonreports hello-report -o json</code></pre>
-<p>Windows uses the same Bash commands inside WSL 2. The lab adapter refuses native Windows credential handling, so do not run kubectl against the receipt from PowerShell. From PowerShell, only open your WSL 2 distribution (the name reported by <code>wsl.exe --list --verbose</code>), change to your checkout with its Linux path, then run the Bash block above unchanged:</p>
+<p>From PowerShell, only open WSL 2 and run the Bash block there (<a href="../STUDY-GUIDE.md.html#owned-live-reads">why</a>):</p>
 <pre class="highlighted-code"><code class="language-powershell">wsl<span class="syntax-punctuation">.</span>exe <span class="syntax-punctuation">-</span>-distribution Ubuntu</code></pre>
-<p>Retain only the fields needed by this chapter&#x27;s prediction. A NotFound result may be expected after one-shot cleanup; a Forbidden result may identify a deliberately absent advanced capability. Neither result authorizes an ambient-context fallback.</p>
+<p>Read <code>metadata.finalizers</code> and <code>status.observedGeneration</code> on hello-report, then the child&#x27;s ownerReferences. lesson.cleanup should leave after its child is cleaned while other.cleanup stays; a child owned by a foreign UID is refused, not adopted.</p>
 <h3 id="run-and-bounded-evidence">Run and bounded evidence<a class="heading-anchor" href="#run-and-bounded-evidence" aria-label="Link to this section">#</a></h3>
-<p>The app artifact is a reading worksheet, <code>courses/kubernetes/lessons/k8s-030.md</code>. The current browser adapter does not provide the full <strong>preloaded namespaced controller with reviewed child, status and finalizer contracts</strong> operation. Use the synthetic fixture and offline check first. Live work follows <a href="../host-labs.md.html">the scoped host-lab guide</a> only when the named capability and owned target have been provisioned. A worksheet or static check is never a cluster execution receipt.</p>
-<p>The <a href="../solutions/k8s-030_solution.json.html">manifest example</a> is separate from the learner artifact. The <a href="../solutions/k8s-030_checks.py.html">offline reference check</a> evaluates explicitly synthetic facts and makes no API calls. Run it locally with <code>python courses/kubernetes/solutions/k8s-030_checks.py</code> after comparing your attempt. The <a href="../fixtures/k8s-030-cases.json.html">case ledger</a> is immutable teaching input.</p>
+<p>This worksheet, <code>courses/kubernetes/lessons/k8s-030.md</code>, does not provide the full <strong>preloaded namespaced controller with reviewed child, status and finalizer contracts</strong> operation. Only the preloaded controller on a host lease reconciles hello-report into a child, writes status and honors finalizers, so duplicate events, collisions and deletion can be watched rather than replayed.</p>
+<p>Live reads need a provisioned, owned target (<a href="../host-labs.md.html">host-lab guide</a>).</p>
+<p>The <a href="../solutions/k8s-030_checks.py.html">offline reference check</a> makes no API calls; run it after your attempt:</p>
+<pre class="highlighted-code"><code class="language-bash">python courses/kubernetes/solutions/k8s-030_checks.py</code></pre>
+<p>Compare it with the <a href="../solutions/k8s-030_solution.json.html">manifest example</a> and <a href="../fixtures/k8s-030-cases.json.html">case ledger</a>.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-build-the-state-table">Exercise 1: Build the state table<a class="heading-anchor" href="#exercise-1-build-the-state-table" aria-label="Link to this section">#</a></h4>
 <p>Classify absent, owned-equal, owned-different and foreign child states.</p>
@@ -270,12 +273,12 @@ kubectl --kubeconfig <span class="syntax-string">&quot;</span>$LAB_KUBECONFIG<sp
 <p><strong>Verify:</strong> Read the finalizer list after both outcomes; at most one entry may change, and only after a successful cleanup.</p>
 <p><strong>Progressive hints:</strong> A finalizer is a responsibility, not clutter.</p>
 <h3 id="self-check">Self-check<a class="heading-anchor" href="#self-check" aria-label="Link to this section">#</a></h3>
-<p>Explain the mechanism behind the first example, then distinguish it from this boundary case: Foreign ownership blocks mutation. Successful own cleanup leaves other.cleanup intact. State which observations are synthetic and which, if any, were read from your owned runtime.</p>
+<p>The controller received the same create event three times. Why is the correct trace create, no-op, no-op, and what would a second child reveal about the reconcile logic?</p>
 <h3 id="common-pitfalls">Common pitfalls<a class="heading-anchor" href="#common-pitfalls" aria-label="Link to this section">#</a></h3>
 <p>A status field supplied by the learner or copied from a synthetic trace is not a live controller observation. A child Ready condition with an old observed generation is insufficient for a changed message. Compare parent generation, intended child fields, owned identities and application output.</p>
 <p>Do not debug a stuck finalizer by indiscriminately clearing metadata.finalizers. Identify the responsible controller, its cleanup contract and the missing evidence. If the required controller is not provisioned, label the live activity unavailable rather than impersonating it with a sequence of manual creates.</p>
 <h3 id="retrieval-and-transfer">Retrieval and transfer<a class="heading-anchor" href="#retrieval-and-transfer" aria-label="Link to this section">#</a></h3>
-<p>Close the answer and reconstruct the reasoning for Exercise 6 (Complete a finalizer obligation). Name the exact source and observed identity you would require before claiming the changed case succeeded.</p>
+<p>Rebuild the Exercise 1 state table from memory. Then explain what happens to finalizers when cleanup fails and why other.cleanup must remain.</p>
 <h3 id="next-step">Next step<a class="heading-anchor" href="#next-step" aria-label="Link to this section">#</a></h3>
 <p>Continue to <code>k8s-031</code> after preserving the six evidence records.</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>

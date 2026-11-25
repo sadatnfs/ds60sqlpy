@@ -1,6 +1,8 @@
 # rust-032: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [rust-032_solution.rs](rust-032_solution.rs). It runs both worked examples, and its assertions are always active under the prepared classroom compile settings.
+Executable reference: [rust-032_solution.rs](rust-032_solution.rs), which runs both examples.
+
+Open this only after [an attempt](../STUDY-GUIDE.md#attempt-a-lesson).
 
 ## Why the two examples differ
 
@@ -94,4 +96,6 @@ A multi-file Cargo project is not accepted by the single-file pad. Keep generate
 
 ## Review before continuing
 
-Run the reference and confirm that it prints `rust-032: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.
+Rebuild Example B (Retain rejected input evidence) from a blank pad.
+
+Review routine: [Self-check and review](../STUDY-GUIDE.md#self-check-and-review).

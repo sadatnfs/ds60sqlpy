@@ -42,5 +42,7 @@
       "wrong": "A closure that increments a counter with `<<-` to label runs. Rerunning a pipeline in the same session gives different labels than a fresh session, so results cannot be reproduced.",
       "verify": "Calling `fixed(3)` before and after `rate <- 5` returns 6 both times."
     }
-  ]
+  ],
+  "run_note": "The starter defines only `threshold` as 10 at the top level and prints it. Run it once, then build a factory that receives the threshold as an argument instead of reading the global. Change the global to 50 after construction and run again: a correct closure keeps the value it captured, while a function that reads the global silently changes behavior.",
+  "checks_note": "The assertions confirm that the factory validates a finite numeric scalar, that `make_multiplier(4)(2)` is 8, that two closures built with different factors return 10 and 15 for the same input, that the captured predicate still accepts 20, that a lazy argument is evaluated when first used so `lazy(3)` gives 15, and that invalid configuration is rejected. They pin capture-time behavior only for these inputs; they cannot detect a closure in your own code that still reads a mutable global you forgot about, or a promise that a later change to a default argument would alter."
 }

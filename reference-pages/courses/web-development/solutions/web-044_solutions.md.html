@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/web-development/solutions/web-044_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="web-044-explanatory-solutions">web-044: explanatory solutions<a class="heading-anchor" href="#web-044-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Open this after your own attempt. Each answer explains the lesson&#x27;s synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in <code>courses/web-development/guides/web-044.md</code>.</p>
+<p>Attempt each exercise before reading; the mechanism is in <code>courses/web-development/guides/web-044.md</code> (<a href="../STUDY-GUIDE.md.html#solutions">using these answers</a>).</p>
 <h3 id="exercise-1-classify-a-pure-function-check-and-a-real-database-transaction-check">Exercise 1: Classify a pure-function check and a real database transaction check.<a class="heading-anchor" href="#exercise-1-classify-a-pure-function-check-and-a-real-database-transaction-check" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> The first is unit evidence; the second is integration evidence.</p>
 <p><strong>Approach:</strong> Ask what each check needs: the pure function needs only inputs and outputs, while the transaction check needs a real database and its rules.</p>
@@ -232,7 +232,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Plausible wrong approach:</strong> Calling the code bug free because the reference passes fails because untested inputs and environments may still break it.</p>
 <p><strong>How to verify:</strong> Your answer lists at least two behaviors the current tests never exercise. Each listed behavior is paired with the kind of test that would cover it.</p>
 <h3 id="reference-comparison">Reference comparison<a class="heading-anchor" href="#reference-comparison" aria-label="Link to this section">#</a></h3>
-<p>Open <code>courses/web-development/solutions/web-044_solution.php</code> only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; server lifecycle, persistence, concurrency and security need their own integration evidence.</p></article>
+<p>The reference runs three valid values through boundedMinutes, requires -1 and 121 to throw InvalidArgumentException and prints a count. That catches off-by-one bounds and a missing guard. It does not show your empty-input case or a planted bug, so run your own table against a broken copy too.</p>
+<p>Open <code>courses/web-development/solutions/web-044_solution.php</code> after saving your attempt (<a href="../STUDY-GUIDE.md.html#references">comparing with the reference</a>).</p></article>
   </main>
 </body>
 </html>

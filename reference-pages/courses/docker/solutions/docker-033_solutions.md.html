@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/docker/solutions/docker-033_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="docker-033-explanatory-solutions">docker-033: explanatory solutions<a class="heading-anchor" href="#docker-033-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit reveal. These explain the supplied teaching fixtures; they are not engine results. The mechanism is explained in <code>courses/docker/guides/docker-033.md</code>.</p>
+<p>These answers explain teaching fixtures, not engine results; the mechanism is in <a href="../guides/docker-033.md.html">the guide</a>.</p>
 <h3 id="exercise-1-predict-a-restart-loop-with-invalid-configuration">Exercise 1: Predict a restart loop with invalid configuration.<a class="heading-anchor" href="#exercise-1-predict-a-restart-loop-with-invalid-configuration" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> The same failure can repeat without fixing its cause.</p>
 <p><strong>Why:</strong> Automatic restarts can mitigate transient failures but cannot make a malformed required value valid. Preserve the earliest useful error.</p>
@@ -238,7 +238,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>A plausible wrong approach:</strong> Checking that the container shows Up says nothing about whether the counter is still right.</p>
 <p><strong>How to verify:</strong> The valid case keeps its value across restarts; the invalid case logs a ValueError and the file is left unchanged for recovery.</p>
 <h3 id="check-your-transfer">Check your transfer<a class="heading-anchor" href="#check-your-transfer" aria-label="Link to this section">#</a></h3>
-<p>A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.</p></article>
+<p>The first request probably committed before the client gave up, because the fixture replaces the file and only then responds, and <code>/increment</code> is not idempotent, so the retry added a second increment. <code>docker compose -p ds60-docker-study logs app</code> shows one line per handled request; two <code>POST /increment</code> lines with status 200 confirm it. A safer client reads <code>/counter</code> before retrying, or the protocol carries an idempotency key the server records. If the log shows a single POST, the extra increment came from another caller.</p></article>
   </main>
 </body>
 </html>

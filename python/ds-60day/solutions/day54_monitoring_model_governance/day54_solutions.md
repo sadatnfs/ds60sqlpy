@@ -82,9 +82,7 @@ Worked reference for Exercise 3: Approval flow
 
 ## Solution reasoning lens
 
-A strong solution is not merely code that produces one plausible
-output. It establishes a chain from input contract to operation to
-verification:
+Each decision below links an input contract to an operation and its evidence:
 
 1. **fixed reference bins:** keep comparison semantics stable; recomputing bins on current data changes the question.
 2. **`(actual - expected) * log(actual / expected)`:** accumulates PSI contributions after a declared zero-count smoothing policy.
@@ -101,29 +99,15 @@ verification:
 
 **Evidence of correctness:** Freeze reference/bins and recompute PSI, report counts/windows/slices/label coverage, connect alerts to owners/actions, and rehearse rollback with artifact evidence.
 
-When comparing your attempt with the reference, explain which of these
-decisions your code made explicitly. If the reference makes a different
-choice, compare the contracts and evidence before deciding that one
-version is universally better.
-
 <!-- END ADVANCED PYTHON CONCEPT ENRICHMENT -->
 
 ## Exercise-by-exercise reasoning map
-
-This map connects every learner prompt to a reasoning path. Read the
-explanation before copying code: the goal is to understand the assumptions,
-the evidence that validates the result, and the edge cases that can make an
-apparently correct implementation fail.
 
 ### Exercise 1: Original lesson practice
 
 **Prompt:** Compute PSI for multiple features or score windows over time.
 
 **How to reason about it:** Freeze reference bins, include support, and test no shift plus controlled mean/variance shifts. PSI depends on binning and is a heuristic signal, not proof of performance degradation.
-
-Use the worked reference earlier in this file, then change one boundary
-condition and rerun the stated checks. A copied output is not evidence
-unless you can explain why that output follows from the inputs.
 
 **Verify:** For each named feature/window, print reference/current counts, fixed bin edges, PSI contributions, and total; assert bins/reference remain frozen and independently recompute one total within 1e-12.
 
@@ -133,10 +117,6 @@ unless you can explain why that output follows from the inputs.
 
 **How to reason about it:** A weekly dashboard should retain model/data version, score volume, label coverage, AUC uncertainty, PSI, and missingness. Mark delayed labels rather than inventing or forward-filling performance.
 
-Use the worked reference earlier in this file, then change one boundary
-condition and rerun the stated checks. A copied output is not evidence
-unless you can explain why that output follows from the inputs.
-
 **Verify:** Save a dashboard with weekly AUC and PSI on labeled separate axes, and print the underlying week/support/AUC/PSI table; mark missing-label weeks rather than silently treating them as zero.
 
 ### Exercise 3: Original lesson practice
@@ -144,10 +124,6 @@ unless you can explain why that output follows from the inputs.
 **Prompt:** Draft a governance policy covering roles, approvals, alerts, and rollback.
 
 **How to reason about it:** Every governance threshold needs an owner, evidence source, review clock, action, escalation, and recovery test. Separate automated alerts from human approval for promotion/rollback.
-
-Use the worked reference earlier in this file, then change one boundary
-condition and rerun the stated checks. A copied output is not evidence
-unless you can explain why that output follows from the inputs.
 
 **Verify:** Produce a policy table naming model owner, approver, metric/window/threshold, minimum support, alert route, investigation SLA, rollback trigger, artifact ID, and audit evidence; walk one breached alert through named owners and actions.
 
@@ -166,10 +142,6 @@ Late or selectively missing labels can bias results. Compare coverage across
 slices and investigate the label process rather than treating unlabeled rows
 as negatives.
 
-**Why this matters:** The result should survive a fresh-kernel rerun and
-a deliberately chosen boundary case. If it does not, revisit the
-assumption or data boundary rather than hiding the failure.
-
 **Verify:** Label-delay analysis; print prediction week, label-available date, immediate-health metrics/support, and matured-cohort AUC/support; assert immature weeks show unavailable performance rather than zero or forward-filled values.
 
 ### Exercise 5: Alert hysteresis
@@ -186,10 +158,6 @@ hard safety constraint fails.
 Thresholds are policy, not universal PSI constants. Validate them on historical
 incidents and false-alarm cost, assign ownership, and version changes.
 
-**Why this matters:** The result should survive a fresh-kernel rerun and
-a deliberately chosen boundary case. If it does not, revisit the
-assumption or data boundary rather than hiding the failure.
-
 **Verify:** Alert hysteresis; feed a declared metric sequence around warning/critical thresholds, print alert state by window, and assert persistence opens an alert while the lower recovery threshold prevents one-window flapping.
 
 ### Exercise 6: Rollback drill
@@ -205,9 +173,5 @@ monitoring recovery.
 
 Keep version B and incident evidence for investigation; do not overwrite or
 delete the failed artifact as part of the emergency path.
-
-**Why this matters:** The result should survive a fresh-kernel rerun and
-a deliberately chosen boundary case. If it does not, revisit the
-assumption or data boundary rather than hiding the failure.
 
 **Verify:** Rollback drill; record version-B trigger, authorized actor, verified version-A hash, traffic switch, health/predict smoke results, communication timestamp, and final state; inject a bad rollback artifact and assert the switch stops.

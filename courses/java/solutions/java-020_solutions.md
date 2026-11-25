@@ -1,6 +1,6 @@
 # java-020: explanatory solutions
 
-Open after an attempt or an explicit solution reveal. The executable reference runs the six exercise checks together as `Main.java`. The guide contains independent worked examples, while this file explains the choices and failure cases in the complete answer.
+Open this after an attempt; see [using the solutions](../STUDY-GUIDE.md#use-the-solutions).
 
 ## Mechanism review
 
@@ -18,7 +18,7 @@ A lower-bound search returns the first index whose value is at least the target,
 
 ## Exercise 1: Find the first duplicate boundary: change one input
 
-Task: Copy Example A into a scratch `Main.java` and change `int[] sorted = { 1, 2, 2, 5 };` to `int[] sorted = { 2, 2, 2, 5 };`. Before running it with `java -ea Main`, predict which assertion fails and which value it now sees; then run it and restore the original line.
+Task: Change `int[] sorted = { 1, 2, 2, 5 };` to `int[] sorted = { 2, 2, 2, 5 };` in Example A and predict which assertion fails and why.
 
 Returning the first qualifying position gives a precise duplicate policy. An arbitrary matching index would satisfy a different search contract.
 
@@ -29,13 +29,13 @@ int[] sorted = { 1, 2, 2, 5 };
 assert lowerBound(sorted, 2) == 1 && lowerBound(sorted, 6) == 4;
 ```
 
-**Expected:** The changed run fails with an `AssertionError` from the assertion on `lowerBound(sorted, 2) == 1 && lowerBound(sorted, 6) == 4`. Restoring the original line brings back the worked observation: indices 1 and 4.
+**Expected:** The edited run fails with an `AssertionError` from the assertion on `lowerBound(sorted, 2) == 1 && lowerBound(sorted, 6) == 4`.
 
-**Verify:** Compare your written prediction with the reported `AssertionError` and its stack-trace line, and name the value that made `lowerBound(sorted, 2) == 1 && lowerBound(sorted, 6) == 4` false. After restoring the line, the program completes without an `AssertionError` again.
+**Verify:** Name the value that makes `lowerBound(sorted, 2) == 1 && lowerBound(sorted, 6) == 4` false, then restore the line.
 
 ## Exercise 2: Handle empty and outside searches: diagnose an edited check
 
-Task: A careless edit changed the assertion that Example B adds after Example A so that it reads `assert lowerBound(new int[1], 7) == 0;`. Run Example B with that line, explain why the edited assertion now fails for the same program state, and restore it.
+Task: Example B's new assertion was edited to `assert lowerBound(new int[1], 7) == 0;`. Explain why it fails for unchanged state and restore it.
 
 The half-open interval starts empty for an empty input. The result is an insertion position, not necessarily the index of an existing match.
 
@@ -46,9 +46,9 @@ assert lowerBound(new int[0], 7) == 0;
 assert lowerBound(sorted, 0) == 0;
 ```
 
-**Expected:** Before the repair the run fails with an `AssertionError` from the assertion on `lowerBound(new int[0], 7) == 0`; after it the line reads `assert lowerBound(new int[0], 7) == 0;` again and both return 0.
+**Expected:** The edited run fails with an `AssertionError` from the assertion on `lowerBound(new int[0], 7) == 0`; the restored assertion passes.
 
-**Verify:** Keep the failing and the repaired runs. Explain why the edited assertion rejects the same program state that `lowerBound(new int[0], 7) == 0` accepts.
+**Verify:** Explain why the edited assertion rejects the state that `lowerBound(new int[0], 7) == 0` accepts.
 
 ## Exercise 3: Preserve stable ties
 
@@ -66,7 +66,7 @@ assert items.stream().map(Item::id).toList().equals(List.of("b", "a", "c"));
 
 **Expected:** IDs b, a, c.
 
-**Verify:** Keep an assertion equivalent to `items.stream().map(Item::id).toList().equals(List.of("b", "a", "c"))`. As a control, change `List.of(new Item("a", 2), new Item("b", 1), new Item("c", 2))` to `List.of(new Item("a", 3), new Item("b", 1), new Item("c", 2))`: the run must fail with an `AssertionError` from the assertion on `items.stream().map(Item::id).toList().equals(List.of("b", "a", "c"))`. Restore the line before continuing.
+**Verify:** Control: changing `List.of(new Item("a", 2), new Item("b", 1), new Item("c", 2))` to `List.of(new Item("a", 3), new Item("b", 1), new Item("c", 2))` must fail the assertion on `items.stream().map(Item::id).toList().equals(List.of("b", "a", "c"))`.
 
 ## Exercise 4: Solve a greedy counterexample
 
@@ -80,7 +80,7 @@ assert minimumCoins(6, new int[] { 1, 3, 4 }) == 2;
 
 **Expected:** 2 coins, using 3+3 rather than 4+1+1.
 
-**Verify:** Keep an assertion equivalent to `minimumCoins(6, new int[] { 1, 3, 4 }) == 2`. As a control, change `assert minimumCoins(6, new int[] { 1, 3, 4 }) == 2;` to `assert minimumCoins(6, new int[] { 1, 4, 4 }) == 2;` inside it: the run must fail with an `AssertionError`, which shows the assertion can fail. Restore it.
+**Verify:** Control: changing `assert minimumCoins(6, new int[] { 1, 3, 4 }) == 2;` to `assert minimumCoins(6, new int[] { 1, 4, 4 }) == 2;` inside the assertion must make it fail.
 
 ## Exercise 5: Represent an unreachable amount
 
@@ -95,7 +95,7 @@ assert minimumCoins(0, new int[] { 2, 5 }) == 0;
 
 **Expected:** -1 for unreachable amount 3; 0 for amount 0.
 
-**Verify:** Keep an assertion equivalent to `minimumCoins(0, new int[] { 2, 5 }) == 0`. As a control, change `assert minimumCoins(0, new int[] { 2, 5 }) == 0;` to `assert minimumCoins(1, new int[] { 2, 5 }) == 0;` inside it: the run must fail with an `AssertionError`, which shows the assertion can fail. Restore it.
+**Verify:** Control: changing `assert minimumCoins(0, new int[] { 2, 5 }) == 0;` to `assert minimumCoins(1, new int[] { 2, 5 }) == 0;` inside the assertion must make it fail.
 
 ## Exercise 6: Reject invalid recurrence inputs
 
@@ -121,8 +121,10 @@ assert negative && zeroCoin;
 
 **Expected:** IllegalArgumentException for both.
 
-**Verify:** Keep an assertion equivalent to `negative && zeroCoin`. As a control, change `minimumCoins(3, new int[] { 0, 1 });` to `minimumCoins(3, new int[] { 1, 1 });`: the run must fail with an `AssertionError` from the assertion on `negative && zeroCoin`. Restore the line before continuing.
+**Verify:** Control: changing `minimumCoins(3, new int[] { 0, 1 });` to `minimumCoins(3, new int[] { 1, 1 });` must fail the assertion on `negative && zeroCoin`.
 
 ## After comparing the answer
 
-Run the complete reference with assertions enabled, then return to your own implementation. Recreate one check with different values and explain its expected result before execution. A compiler error, an expected domain exception and an assertion failure represent different stages and should be reported separately. Preserve ownership boundaries when adapting file, network or concurrency examples. The reference never authorizes access to a shared service or deletion of learner state. Use a fresh tiny fixture when you need to distinguish two interpretations of an API contract.
+Add a helper `upperBound` to your copy and confirm that `upperBound - lowerBound` counts the two 2s in the sorted fixture.
+
+Run the complete reference with `java -ea Main` first; the [review routine](../STUDY-GUIDE.md#use-the-solutions) covers the rest.

@@ -4,8 +4,6 @@
 
 Storage spaces describe accessibility and lifetime as well as likely performance. Global allocations can hold data used by many kernels. Shared memory belongs to a block and lasts for that block's execution. Registers hold thread-local values, but a large local array or register pressure can place values in local memory backed by device memory. Constant storage is useful for certain read-only patterns, especially broadcast-like access, but it is not an automatic speedup for arbitrary divergent addresses. A compiler resource report helps explain implementation choices; source variable scope alone does not prove where every value resides.
 
-The separate [CPU reference](../references/cuda-016_cpu.py) checks the chapter's bounded model. It does not execute CUDA or establish GPU timing. Compare after attempting the worksheet or explicitly choosing to reveal solutions.
-
 ## Exercise 1
 
 In a three-tap filter, the input and output images live in global allocations. A thread's running sum is a scalar candidate for a register. A cooperatively loaded tile belongs in shared memory. Three common coefficients may use read-only or constant storage. These are choices to validate, not declarations that force a faster program.
@@ -78,12 +76,16 @@ Compare whether neighboring lanes read the same entries or divergent entries, ac
 
 **How to verify:** Measure both variants on inputs with uniform and divergent indices.
 
+## Self-check answers
+
+1. **Which storage would you choose for three filter coefficients that every thread reads?** Constant or read-only storage, because all threads read the same few values.
+2. **When does shared memory's content disappear?** When the block that owns it finishes executing.
+3. **Why can a per-thread array of 1,024 floats hurt occupancy?** It needs 4 KB per thread, which spills to local memory and inflates per-thread resources.
+
 ## Numerical reference and its limits
 
-The complete CPU model is [here](../references/cuda-016_cpu.py). Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It does not claim CUDA execution, concurrency safety or a performance measurement.
+The [CPU reference](../references/cuda-016_cpu.py) reproduces worked example 1 and prints `{'logical_temporary_bytes': 524288, 'storage_roles': {'image': 'global', 'cooperative_tile': 'shared', 'sum': 'thread local'}}`.
 
 ## Transfer review
 
 Compare whether neighboring lanes read the same entries or divergent entries, access frequency and update needs; measure against a suitable read-only/global alternative.
-
-A complete explanation must name its inputs, the unchanged mathematical contract, the changed boundary or resource condition, and the evidence still needed on actual hardware. Preserve a CPU baseline even after a GPU path becomes available.

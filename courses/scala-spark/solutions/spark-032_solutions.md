@@ -1,6 +1,8 @@
 # spark-032: Explained paired reference solutions
 
-Read the [guide](../guides/spark-032.md) and attempt one language first. The [Scala reference](spark-032_solution.scala) and [PySpark reference](spark-032_solution.py) are complete single-file programs with explicit local sessions and finally-based stop. Each compares with literal expectations; matching two implementations alone would not rule out a shared mistake.
+Attempt the [guide](../guides/spark-032.md) exercises first.
+
+References: [Scala](spark-032_solution.scala), [PySpark](spark-032_solution.py).
 
 ## Exercises and reasoning
 
@@ -216,6 +218,7 @@ The negative cases validate actual engine eligibility rather than relying only o
 
 ## Execution and interpretation
 
-Run the complete reference in its prepared fixed worker. Its first check (Define watermark placement and window state) is built inside the program, so opening the lesson fetches nothing; it expects: A streaming aggregate with window, team, records, total. The watermark is attached to the same event-time column used by the window. The final success line prints only after every reference assertion passes.
+The planned relation must be streaming with columns `window`, `team`, `records` and `total`. Phase 1 must read 2 input rows and report at least one watermark no later than 00:00. After phase 2 the sink must hold only `(00:00, A, 3, 35)` and a watermark of at least 00:07 must appear. Phase 3 must read 2 rows, drop exactly 1 by watermark and leave the sink unchanged. After phase 4 the sink must be `(00:00, A, 3, 35)`, `(00:10, A, 1, 30)` and `(00:10, B, 1, 7)`, the event ledger must be `(7, 1, 5)`, and some watermark must reach 00:25.
 
-Local plan, partition and resource evidence does not establish cluster-scale performance; session cleanup is explicit.
+The last check tries two invalid queries, update mode into a file sink and an append aggregate with no watermark, and both must raise `AnalysisException` while no query is left running and the valid sink is unchanged. The program prints `phase1_watermarks=` and `phase3_dropped_by_watermark=`, then `spark-032: six PySpark reference contracts passed; Spark=` with the version; Scala prints its own line. These receipts describe this fixture's event times; a watermark is not a wall-clock deadline, and other data would move it differently.
+

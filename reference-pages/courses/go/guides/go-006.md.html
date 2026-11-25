@@ -209,9 +209,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="syntax-anatomy-and-reasoning">Syntax anatomy and reasoning<a class="heading-anchor" href="#syntax-anatomy-and-reasoning" aria-label="Link to this section">#</a></h3>
 <p>map[string]int declares string keys and integer values. value, ok := counts[key] distinguishes absence from zero. make initializes writable map storage. delete removes a key and is harmless if the key is absent. range gives key/value pairs in an unspecified order. Use sort.Strings on extracted keys before producing ordered output.</p>
 <h3 id="run-this-lesson">Run this lesson<a class="heading-anchor" href="#run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>Choose Go in the unified Docker classroom. Save your own pad before experimenting. The prepared worker stages it as <code>main.go</code>, compiles it, and executes the resulting program with bounded time and output. The pad is one source file. It does not supply interactive input, arbitrary command-line arguments, package installation, Kubernetes credentials or a host Docker socket. Every ordinary reference here uses the standard library, synthetic local data and explicit checks. A failed <code>check</code> panics and produces a nonzero process result; do not remove it to make the run appear successful.</p>
-<p>The explanatory solution snippets belong inside <code>func main()</code> unless they declare a helper. <code>check</code> is a tiny teaching helper that panics when a condition is false. The separate reference supplies required imports and helpers and implements all six cases. Use that complete source only after an attempt or an explicit reveal. For an independently prepared Go project, the equivalent local build is <code>go build -o lesson main.go</code>, followed by <code>./lesson</code>; use Linux or WSL 2 for that optional workflow. Compiling proves syntax and type consistency, while the executed checks establish the stated example contracts.</p>
-<p>Each worked example below is a complete Go file. Copy one whole block into your saved pad and run it. Example 2 includes the first case as well as the second, so its setup is complete. Its supporting declarations may be reused in later investigations. The separate reference implements all six cases.</p>
+<p>Run each worked example as one complete file in your saved pad (<a href="../STUDY-GUIDE.md.html#run-a-lesson">run steps</a>).</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1-distinguish-zero-from-missing">Worked example 1: Distinguish zero from missing<a class="heading-anchor" href="#worked-example-1-distinguish-zero-from-missing" aria-label="Link to this section">#</a></h4>
 <p>Read present key zero and absent key missing with comma-ok.</p>
@@ -275,77 +273,79 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Observe:</strong> red has count 2 and blue has count 1.</p>
 <p>Missing counts start at the zero value, which is useful here because zero is the correct additive identity.</p>
 <h3 id="predict-before-running">Predict before running<a class="heading-anchor" href="#predict-before-running" aria-label="Link to this section">#</a></h3>
-<p>For each example, write the input values, the state that can change, and the expected observation. Explain which result would disprove your current interpretation. For concurrency, predict a guaranteed relationship rather than an arbitrary scheduling order. For an error case, identify whether it is rejected at compilation or returned during execution.</p>
+<p>Predict the two-value result of reading a present key whose value is 0 and of reading an absent key. For the frequency table, predict the count of a key before its first increment. For the sorted report, decide whether ranging over the map alone could ever be a reliable order test, and predict what deleting an absent key does.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <h4 id="exercise-1-distinguish-zero-from-missing-change-one-input">Exercise 1: Distinguish zero from missing: change one input<a class="heading-anchor" href="#exercise-1-distinguish-zero-from-missing-change-one-input" aria-label="Link to this section">#</a></h4>
-<p>Copy worked example 1 into a scratch pad and change <code>m := map[string]int{&quot;zero&quot;: 0}</code> to <code>m := map[string]int{&quot;zero&quot;: 1}</code>. Before running, predict which check fails and which value it now sees; then run it and restore the original line.</p>
-<p><strong>Expected:</strong> The changed run panics with <code>presence</code> because <code>a == b &amp;&amp; okA &amp;&amp; !okB</code> no longer holds. Restoring the original line brings back the worked observation: both values are 0, but only zero is present.</p>
-<p><strong>Verify:</strong> Compare your written prediction with the panic message <code>presence</code> and name the value that made <code>a == b &amp;&amp; okA &amp;&amp; !okB</code> false. After restoring the input, the program must print its success line again.</p>
+<p>Copy worked example 1, change <code>m := map[string]int{&quot;zero&quot;: 0}</code> to <code>m := map[string]int{&quot;zero&quot;: 1}</code> and predict the failure before running; then restore the line.</p>
+<p><strong>Expected:</strong> The edited run panics with <code>presence</code> because <code>a == b &amp;&amp; okA &amp;&amp; !okB</code> no longer holds.</p>
+<p><strong>Verify:</strong> Restoring <code>m := map[string]int{&quot;zero&quot;: 0}</code> makes the check pass again with the worked observation: both values are 0, but only zero is present.</p>
 <h4 id="exercise-2-build-a-frequency-table-debug-a-regression">Exercise 2: Build a frequency table: debug a regression<a class="heading-anchor" href="#exercise-2-build-a-frequency-table-debug-a-regression" aria-label="Link to this section">#</a></h4>
-<p>A regression changed one token in worked example 2, so one line now reads <code>for _, v := range []string{&quot;red!&quot;, &quot;blue&quot;, &quot;red&quot;} {</code>. Run worked example 2 with that line, use the failure to locate the defect and repair it without changing the check.</p>
-<p><strong>Expected:</strong> Before the repair the program panics with <code>counts</code>; after it the line reads <code>for _, v := range []string{&quot;red&quot;, &quot;blue&quot;, &quot;red&quot;} {</code> again and red has count 2 and blue has count 1.</p>
-<p><strong>Verify:</strong> Keep the failing and the repaired runs. Explain why the changed token alters the value tested by <code>m[&quot;red&quot;] == 2 &amp;&amp; m[&quot;blue&quot;] == 1</code> for this input.</p>
+<p>A one-token regression in worked example 2 makes a line read <code>for _, v := range []string{&quot;red!&quot;, &quot;blue&quot;, &quot;red&quot;} {</code>. Repair it without changing the check.</p>
+<p><strong>Expected:</strong> The defective run panics with <code>counts</code>; after restoring <code>for _, v := range []string{&quot;red&quot;, &quot;blue&quot;, &quot;red&quot;} {</code>, red has count 2 and blue has count 1.</p>
+<p><strong>Verify:</strong> The failing run shows message <code>counts</code>; after the repair <code>m[&quot;red&quot;] == 2 &amp;&amp; m[&quot;blue&quot;] == 1</code> holds again.</p>
 <h4 id="exercise-3-sort-report-keys">Exercise 3: Sort report keys<a class="heading-anchor" href="#exercise-3-sort-report-keys" aria-label="Link to this section">#</a></h4>
 <p>Extract keys beta and alpha and sort them.</p>
 <p><strong>Expected:</strong> The first output key is alpha.</p>
-<p><strong>Verify:</strong> Keep a check equivalent to <code>keys[0] == &quot;alpha&quot; &amp;&amp; keys[1] == &quot;beta&quot;</code>. As a control, change <code>check(keys[0] == &quot;alpha&quot; &amp;&amp; keys[1] == &quot;beta&quot;, &quot;sorted keys&quot;)</code> to <code>check(keys[1] == &quot;alpha&quot; &amp;&amp; keys[1] == &quot;beta&quot;, &quot;sorted keys&quot;)</code> inside that check: it must panic with <code>sorted keys</code>, which shows the check can fail. Restore it.</p>
+<p><strong>Verify:</strong> Your solution must keep <code>keys[0] == &quot;alpha&quot; &amp;&amp; keys[1] == &quot;beta&quot;</code> true. Control: changing <code>check(keys[0] == &quot;alpha&quot; &amp;&amp; keys[1] == &quot;beta&quot;, &quot;sorted keys&quot;)</code> to <code>check(keys[1] == &quot;alpha&quot; &amp;&amp; keys[1] == &quot;beta&quot;, &quot;sorted keys&quot;)</code> panics with message <code>sorted keys</code>; revert it.</p>
 <h4 id="exercise-4-observe-assigned-map-aliasing">Exercise 4: Observe assigned map aliasing<a class="heading-anchor" href="#exercise-4-observe-assigned-map-aliasing" aria-label="Link to this section">#</a></h4>
 <p>Assign a map to another variable and update through the second.</p>
 <p><strong>Expected:</strong> Both names observe the changed entry.</p>
-<p><strong>Verify:</strong> Keep a check equivalent to <code>a[&quot;x&quot;] == 2</code>. As a control, change <code>b[&quot;x&quot;] = 2</code> to <code>b[&quot;x&quot;] = 3</code>: the run must panic with <code>map alias</code>. Restore the line before continuing.</p>
+<p><strong>Verify:</strong> Your solution must keep <code>a[&quot;x&quot;] == 2</code> true. Control: changing <code>b[&quot;x&quot;] = 2</code> to <code>b[&quot;x&quot;] = 3</code> panics with message <code>map alias</code>; revert it.</p>
 <h4 id="exercise-5-remove-an-absent-key-safely">Exercise 5: Remove an absent key safely<a class="heading-anchor" href="#exercise-5-remove-an-absent-key-safely" aria-label="Link to this section">#</a></h4>
 <p>Delete a missing key and then an existing key.</p>
 <p><strong>Expected:</strong> The map ends empty without a failure.</p>
-<p><strong>Verify:</strong> Keep a check equivalent to <code>len(m) == 0</code>. As a control, change <code>m := map[string]int{&quot;x&quot;: 1}</code> to <code>m := map[string]int{&quot;x!&quot;: 1}</code>: the run must panic with <code>delete</code>. Restore the line before continuing.</p>
+<p><strong>Verify:</strong> Your solution must keep <code>len(m) == 0</code> true. Control: changing <code>m := map[string]int{&quot;x&quot;: 1}</code> to <code>m := map[string]int{&quot;x!&quot;: 1}</code> panics with message <code>delete</code>; revert it.</p>
 <h4 id="exercise-6-transfer-nil-read-behavior">Exercise 6: Transfer nil read behavior<a class="heading-anchor" href="#exercise-6-transfer-nil-read-behavior" aria-label="Link to this section">#</a></h4>
 <p>Read a missing key from a nil map.</p>
 <p><strong>Expected:</strong> The value is 0 and presence is false.</p>
-<p><strong>Verify:</strong> Keep a check equivalent to <code>v == 0 &amp;&amp; !ok</code>. As a control, change <code>check(v == 0 &amp;&amp; !ok, &quot;nil read&quot;)</code> to <code>check(v != 0 &amp;&amp; !ok, &quot;nil read&quot;)</code> inside that check: it must panic with <code>nil read</code>, which shows the check can fail. Restore it.</p>
-<p>Implement these in the answer-free learner source. Keep one independent check per claim. A task can require tracing, construction, a changed input or a deliberate safe failure. Do not run a data race, corrupt memory or contact a shared cluster merely to demonstrate why it would be wrong.</p>
+<p><strong>Verify:</strong> Your solution must keep <code>v == 0 &amp;&amp; !ok</code> true. Control: changing <code>check(v == 0 &amp;&amp; !ok, &quot;nil read&quot;)</code> to <code>check(v != 0 &amp;&amp; !ok, &quot;nil read&quot;)</code> panics with message <code>nil read</code>; revert it.</p>
+<p>Work in the answer-free learner source, <code>courses/go/lessons/go-006.go</code> (<a href="../STUDY-GUIDE.md.html#work-an-exercise">exercise contract</a>).</p>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
-<p>Read a compiler error from the first location in your source, then fix one cause at a time. Unused imports and variables are errors in Go; add an import when its use exists, rather than copying a large unused import list. A panic from <code>check</code> identifies a violated example contract. Compare the actual value with the expected value and inspect the state transition that produced it. A returned <code>error</code> is a value that the caller must handle; an ignored error can make later output look plausible while the original operation failed.</p>
-<p>The lesson-specific explanations in the two examples identify the important counterexamples. Extend that reasoning to every investigation: explain why a plausible alternative would fail, and preserve a tiny input that distinguishes it. Treat empty data, missing values and cancellation as domain cases with explicit policies. In concurrent work, replace sleeps used as synchronization with channels, mutexes or an explicit ownership protocol.</p>
+<p>Using <code>m[k] == 0</code> to mean absent is the classic map bug: it confuses a stored zero with a missing key, so use comma-ok when presence matters. The second trap is a report or test that passes because the map happened to iterate in one order; Go randomizes iteration deliberately, so sort the keys. Finally, assigning into a nil map panics, so initialize it with make or a literal first.</p>
+<p>General compiler, panic and error diagnosis is in the <a href="../STUDY-GUIDE.md.html#diagnose-a-failure">study guide</a>.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <h4 id="hint-for-investigation-1-distinguish-zero-from-missing-change-one-input">Hint for investigation 1: Distinguish zero from missing: change one input<a class="heading-anchor" href="#hint-for-investigation-1-distinguish-zero-from-missing-change-one-input" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: Both values are 0, but only zero is present.</li>
-<li>The check <code>a == b &amp;&amp; okA &amp;&amp; !okB</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Compute the checked value with <code>m := map[string]int{&quot;zero&quot;: 1}</code> in place before running, then compare it with the value <code>a == b &amp;&amp; okA &amp;&amp; !okB</code> expects.</li>
+<li>An absent key returns the zero value. Which second return value distinguishes it from a stored 0?</li>
+<li>With the stored value 1, <code>a</code> is 1 while the absent read <code>b</code> is 0, so <code>a==b</code> fails. Presence is unchanged; the zero-value coincidence the check relies on is gone.</li>
 </ol>
 <h4 id="hint-for-investigation-2-build-a-frequency-table-debug-a-regression">Hint for investigation 2: Build a frequency table: debug a regression<a class="heading-anchor" href="#hint-for-investigation-2-build-a-frequency-table-debug-a-regression" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: red has count 2 and blue has count 1.</li>
-<li>The check <code>m[&quot;red&quot;] == 2 &amp;&amp; m[&quot;blue&quot;] == 1</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Compare <code>for _, v := range []string{&quot;red!&quot;, &quot;blue&quot;, &quot;red&quot;} {</code> with the same line in worked example 2 and state the claim each version makes.</li>
+<li><code>m[v]++</code> on a missing key starts from the zero value. Why is that correct for counting?</li>
+<li>The first word is now red!, a different key, so red is counted once. The counting logic is fine; the input no longer repeats a word.</li>
 </ol>
 <h4 id="hint-for-investigation-3-sort-report-keys">Hint for investigation 3: Sort report keys<a class="heading-anchor" href="#hint-for-investigation-3-sort-report-keys" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The first output key is alpha.</li>
-<li>The check <code>keys[0] == &quot;alpha&quot; &amp;&amp; keys[1] == &quot;beta&quot;</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Name one input that would make <code>keys[0] == &quot;alpha&quot; &amp;&amp; keys[1] == &quot;beta&quot;</code> false. A check that no input can falsify is not evidence.</li>
+<li>Map iteration order is unspecified. Which step turns the collected keys into a reproducible order?</li>
+<li>Sorting makes the presentation contract explicit.</li>
 </ol>
 <h4 id="hint-for-investigation-4-observe-assigned-map-aliasing">Hint for investigation 4: Observe assigned map aliasing<a class="heading-anchor" href="#hint-for-investigation-4-observe-assigned-map-aliasing" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: Both names observe the changed entry.</li>
-<li>The check <code>a[&quot;x&quot;] == 2</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Predict the effect of changing <code>b[&quot;x&quot;] = 2</code> to <code>b[&quot;x&quot;] = 3</code> before running anything. If the prediction is hard, trace that line again with the original input.</li>
+<li>A map variable refers to shared storage. Does <code>b := a</code> copy the entries?</li>
+<li>The assignment does not recursively clone map entries.</li>
 </ol>
 <h4 id="hint-for-investigation-5-remove-an-absent-key-safely">Hint for investigation 5: Remove an absent key safely<a class="heading-anchor" href="#hint-for-investigation-5-remove-an-absent-key-safely" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The map ends empty without a failure.</li>
-<li>The check <code>len(m) == 0</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Predict the effect of changing <code>m := map[string]int{&quot;x&quot;: 1}</code> to <code>m := map[string]int{&quot;x!&quot;: 1}</code> before running anything. If the prediction is hard, trace that line again with the original input.</li>
+<li>delete on a missing key is defined behavior. What does the map hold after both deletions?</li>
+<li>Idempotent deletion is helpful for cleanup: repeating the same intent does not introduce a new error for an already absent entry.</li>
 </ol>
 <h4 id="hint-for-investigation-6-transfer-nil-read-behavior">Hint for investigation 6: Transfer nil read behavior<a class="heading-anchor" href="#hint-for-investigation-6-transfer-nil-read-behavior" aria-label="Link to this section">#</a></h4>
 <ol>
 <li>Restate the expected observation: The value is 0 and presence is false.</li>
-<li>The check <code>v == 0 &amp;&amp; !ok</code> decides this case. List the values it reads and trace each one back to the input before changing code.</li>
-<li>Name one input that would make <code>v == 0 &amp;&amp; !ok</code> false. A check that no input can falsify is not evidence.</li>
+<li>A nil map has no storage. Is reading from it allowed, and what does comma-ok report?</li>
+<li>This safe read does not mean a nil map is writable.</li>
 </ol>
 <h3 id="self-check-and-retrieval">Self-check and retrieval<a class="heading-anchor" href="#self-check-and-retrieval" aria-label="Link to this section">#</a></h3>
-<p>Close the reference. Rebuild one normal case and one boundary case from a blank pad. Explain the role of key without using its name in the definition. Then change the domain while keeping the same invariant. Record the new input, your prediction and the observed output. If your program passes only because its input is hard-coded, explain which part would need a reusable function in a larger project.</p>
+<p>Without the reference, count word lengths in go, map, key and nil, then print each length with its count in ascending order of length. Check one count and the order. Then look up a length that never occurred and show with comma-ok that it is absent rather than stored as zero.</p>
+<p>The general <a href="../STUDY-GUIDE.md.html#self-check-and-retrieval">retrieval routine</a> still applies.</p>
 <h3 id="next-step-and-sources">Next step and sources<a class="heading-anchor" href="#next-step-and-sources" aria-label="Link to this section">#</a></h3>
-<p><a href="https://go.dev/ref/spec">Primary language or library documentation</a>, reviewed 2026-10-23. The teaching explanations and synthetic fixtures are original. Continue with the next lesson when you can explain the six observations and diagnose a changed case without copying its answer.</p>
+<p>Source: <a href="https://go.dev/ref/spec">The Go Programming Language Specification</a>, reviewed 2026-10-23.</p>
+<p>Next: go-007, Strings, bytes, runes and Unicode boundaries (<a href="../STUDY-GUIDE.md.html#when-to-move-on">criteria</a>).</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for go-006: Maps, presence and deterministic ordering.
 Read courses/go/guides/go-006.md and my saved attempt based on courses/go/lessons/go-006.go.

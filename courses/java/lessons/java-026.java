@@ -3,23 +3,17 @@ public class Main {
 
   public static void main(String[] args) throws Exception {
     // Exercise 1: Inspect a platform module: predict an edited check
-    // Copy Example A into a scratch `Main.java` and change `assert
-    // String.class.getPackageName().equals("java.lang");` to `assert
-    // String.class.getPackageName().equals("java.lang!");` inside its assertion. Before running
-    // it with `java -ea Main`, predict whether the assertion still holds and explain why; then
-    // restore it.
-    // Expected: The changed run fails with an `AssertionError` from the assertion on
-    // `String.class.getPackageName().equals("java.lang")`. Restoring the original line brings
-    // back the worked observation: module `java.base`; package `java.lang`.
+    // Change Example A's assertion to `assert
+    // String.class.getPackageName().equals("java.lang!");`, predict whether it holds, then run
+    // and restore it.
+    // Expected: The edited run fails with an `AssertionError` from the assertion on
+    // `String.class.getPackageName().equals("java.lang")`.
 
     // Exercise 2: Inspect the classroom classpath context: diagnose an edited check
-    // A careless edit changed the assertion that Example B adds after Example A so that it reads
-    // `assert Main.class.getModule().isNamed();`. Run Example B with that line, explain why the
-    // edited assertion now fails for the same program state, and restore it.
-    // Expected: Before the repair the run fails with an `AssertionError` from the assertion on
-    // `!Main.class.getModule().isNamed()`; after it the line reads `assert
-    // !Main.class.getModule().isNamed();` again and main belongs to the unnamed module in the
-    // standard classpath launch.
+    // Example B's new assertion was edited to `assert Main.class.getModule().isNamed();`.
+    // Explain why it fails for unchanged state and restore it.
+    // Expected: The edited run fails with an `AssertionError` from the assertion on
+    // `!Main.class.getModule().isNamed()`; the restored assertion passes.
 
     // Exercise 3: Compile two real modules
     // Create the owned greeting/application fixture and compile both with --module-source-path.

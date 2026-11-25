@@ -1,6 +1,6 @@
 # cuda-101: explained solutions
 
-These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.
+Compare with your [worksheet](../lessons/cuda-101.md) attempt.
 
 ## Exercise 1: Count low-rank parameters
 
@@ -74,8 +74,16 @@ Keep validation separate from fitting and tuning.
 
 **How to verify.** Assert there is no overlap between training and evaluation example IDs, then report both metrics.
 
+## Self-check answers
+
+1. **How does a low-rank update reduce trainable parameters?** It factors the update into two thin matrices whose total size is rank times the sum of the dimensions.
+
+2. **Does freezing the base remove its memory cost?** No. It removes gradients and optimizer updates for it, but the weights still occupy storage and activations can still be needed.
+
+3. **Why build a tiny transformer with synthetic tokens first?** It allows bounded, offline experiments that check training mechanics without downloading a large model.
+
 ## Reference observation
 
 Base 1,048,576 and adapter 16,384 parameters.
 
-The reference file is `courses/cuda/python/references/cuda-101_cpu.py`. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.
+Asserted by `courses/cuda/python/references/cuda-101_cpu.py`.

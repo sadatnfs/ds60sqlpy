@@ -1,6 +1,6 @@
 # js-014: explanatory solutions
 
-Use these answers after an attempt or an explicit reveal. The reference uses the same literal fixtures as the guide and keeps the exercises in separate scopes. A successful run checks these examples; explaining a changed input is a separate learning goal.
+Open these after your own attempt; each exercise runs in its own scope in the reference.
 
 ## Mechanism review
 
@@ -24,7 +24,7 @@ lowerBound returns an insertion position from 0 through length, including length
 
 ## Exercise 1: Trace lower bound with duplicates: predict an edited check
 
-Task: Copy Example A into a scratch `main.mjs` and change `assert.equal(lowerBound([1, 4, 4, 8], 4, trace), 1);` to `assert.equal(lowerBound([1, 4, 4, 8], 5, trace), 1);` inside its check. Before running it, predict whether the check still passes and explain why; then restore it.
+Task: In a scratch copy of Example A, change `assert.equal(lowerBound([1, 4, 4, 8], 4, trace), 1);` to `assert.equal(lowerBound([1, 4, 4, 8], 5, trace), 1);` inside its check. Does the check still pass?
 
 The equality branch moves high leftward rather than returning an arbitrary match. That is why lower bound finds the first duplicate and remains useful for insertion and range queries.
 
@@ -40,13 +40,13 @@ assert.deepEqual(trace, [
 ]);
 ```
 
-**Expected:** The changed run fails with an `AssertionError` at `assert.equal(lowerBound([1, 4, 4, 8], 5, trace), 1);`. Restoring `assert.equal(lowerBound([1, 4, 4, 8], 4, trace), 1);` brings back: index 1; intervals shrink to the first duplicate.
+**Expected:** The edited run fails with an `AssertionError` at `assert.equal(lowerBound([1, 4, 4, 8], 5, trace), 1);`. Restoring `assert.equal(lowerBound([1, 4, 4, 8], 4, trace), 1);` brings back: index 1; intervals shrink to the first duplicate.
 
-**Verify:** Compare your written prediction with the reported `AssertionError`, including its actual and expected values, and explain why the edited check rejects the values that `assert.equal(lowerBound([1, 4, 4, 8], 4, trace), 1)` accepts. After restoring the line, the program prints its `{"checks":1,"status":"passed"}` receipt again.
+**Verify:** Compare the reported actual and expected values with your prediction, then restore `assert.equal(lowerBound([1, 4, 4, 8], 4, trace), 1);`.
 
 ## Exercise 2: Use a heap for repeated minimum extraction: debug a regression
 
-Task: A regression changed one token in Example B, so one line now reads `for (const value of [6, 1, 3, 1]) heap.push(value);`. Run Example B with that line, use the failing check to locate the defect and repair it without changing the check.
+Task: A regression made one Example B line read `for (const value of [6, 1, 3, 1]) heap.push(value);`. Locate and repair it without editing the check.
 
 The heap maintains only the order needed at its root, not a fully sorted array. Equal priorities remain valid, but this numeric heap does not promise stable ordering among associated records.
 
@@ -61,7 +61,7 @@ assert.equal(heap.pop(), undefined);
 
 **Expected:** Before the repair the run fails with an `AssertionError` at `assert.deepEqual([heap.pop(), heap.pop(), heap.pop(), heap.pop()], [1, 1, 3, 5])`. Restoring `for (const value of [5, 1, 3, 1]) heap.push(value);` brings back: pops 1,1,3,5, then undefined.
 
-**Verify:** Keep the failing and the repaired runs. Explain why the changed token alters the value tested by `assert.deepEqual([heap.pop(), heap.pop(), heap.pop(), heap.pop()], [1, 1, 3, 5])` for this input.
+**Verify:** Keep the failing and repaired runs and name the first value that differs between them.
 
 ## Exercise 3: Cover empty and outside search boundaries
 
@@ -77,7 +77,7 @@ assert.equal(lowerBound([2, 4, 6], 9), 3);
 
 **Expected:** positions 0,0,3.
 
-**Verify:** Keep a check equivalent to `assert.equal(lowerBound([], 4), 0)`. As a control, change `assert.equal(lowerBound([], 4), 0);` to `assert.equal(lowerBound([], 4), 1);` inside it: the run must fail with an `AssertionError`, which shows the check can fail. Restore it.
+**Verify:** Keep `assert.equal(lowerBound([], 4), 0)`. Control: editing it to `assert.equal(lowerBound([], 4), 1);` must make the check fail; then restore it.
 
 ## Exercise 4: Measure comparisons without a timing claim
 
@@ -95,7 +95,7 @@ assert.equal(values.includes(1001), false);
 
 **Expected:** insertion position 501 with no more than 11 comparisons.
 
-**Verify:** Keep a check equivalent to `assert.equal(values.includes(1001), false)`. As a control, change `assert.equal(values.includes(1001), false);` to `assert.equal(values.includes(1002), false);` inside it: the run must fail with an `AssertionError`, which shows the check can fail. Restore it.
+**Verify:** Keep `assert.equal(values.includes(1001), false)`. Control: editing it to `assert.equal(values.includes(1002), false);` must make the check fail; then restore it.
 
 ## Exercise 5: Reject duplicate index keys
 
@@ -114,7 +114,7 @@ assert.throws(() => uniqueIndex([{ id: 'A' }, { id: 'A' }]), /duplicate/u);
 
 **Expected:** valid lookup returns 7; duplicate id throws.
 
-**Verify:** Keep a check equivalent to `assert.throws(() => uniqueIndex([{ id: 'A' }, { id: 'A' }]), /duplicate/u)`. As a control, change `assert.throws(() => uniqueIndex([{ id: 'A' }, { id: 'A' }]), /duplicate/u);` to `assert.throws(() => uniqueIndex([{ id: 'A!' }, { id: 'A' }]), /duplicate/u);` inside it: the run must fail with an `AssertionError`, which shows the check can fail. Restore it.
+**Verify:** Keep `assert.throws(() => uniqueIndex([{ id: 'A' }, { id: 'A' }]), /duplicate/u)`. Control: editing it to `assert.throws(() => uniqueIndex([{ id: 'A!' }, { id: 'A' }]), /duplicate/u);` must make the check fail; then restore it.
 
 ## Exercise 6: Check the heap invariant after every update
 
@@ -135,8 +135,8 @@ assert.throws(() => heap.push(NaN), TypeError);
 
 **Expected:** all invariants hold; invalid value throws.
 
-**Verify:** Keep a check equivalent to `assert.ok(heap.values[Math.floor((index - 1) / 2)] <= heap.values[index])`. As a control, change `for (let index = 1; index < heap.values.length; index += 1) {` to `for (let index = 1; index <= heap.values.length; index += 1) {`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
+**Verify:** Keep `assert.ok(heap.values[Math.floor((index - 1) / 2)] <= heap.values[index])`. Control: changing `for (let index = 1; index < heap.values.length; index += 1) {` to `for (let index = 1; index <= heap.values.length; index += 1) {` must make that check fail; then restore it.
 
 ## After comparison
 
-Return to your saved implementation and repeat a case with different values. Keep compiler diagnostics, process output and browser observations separate. Do not suppress a failing assertion or use a type assertion to declare an unvalidated value safe. Resource-owning examples must finish cleanup even when work fails. Describe each result with its actual host and fixture scope rather than as production acceptance.
+Fresh case: write `upperBound`, which returns the position after the last 4 in `[1, 4, 4, 8]`. Predict index 3, use `upperBound - lowerBound` to count the duplicates, and test it with an absent target. ([After comparing](../STUDY-GUIDE.md#after-comparing-with-the-solution).)

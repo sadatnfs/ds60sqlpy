@@ -31,11 +31,9 @@ For diagnosis, first identify whether a file came from the image, the writable l
 
 ## How to use this lesson
 
-The classroom displays this guide and saves your worksheet, `courses/docker/lessons/docker-003.md`. Its Run button does not control your Docker engine. Docker engine access is powerful host access, so the classroom deliberately receives no engine socket. Work through the supplied examples without starting anything, then use the optional host lab only in your own disposable project. Reading a command, parsing YAML and actually running the project are different forms of evidence.
+The classroom saves `courses/docker/lessons/docker-003.md` and holds no engine socket ([host-lab setup](../STUDY-GUIDE.md#host-lab-setup)).
 
-Use Bash in Linux, macOS Terminal, or Ubuntu under WSL 2 on Windows. The supported engine runs Linux containers. The maintained fixture is `courses/docker/fixtures/compose-lab/`; its README explains copying it into a new ignored learner directory, checking the engine, building locally with visible logs, and using the fixed project name `ds60-docker-study`. The fixture uses port 18080 on host loopback. Stop if that project name or port belongs to unrelated work; choose a new project name consistently in your own copy. Never paste a command against a remote Docker context simply because it is currently selected.
-
-For Dockerfile examples, create a file named `Dockerfile` in a scratch project. YAML snippets describe a fragment unless explicitly called a complete file. Text transcripts are synthetic illustrations, not claims about your machine. Do not substitute a real password, token or private registry into a checked-in example. **How to use the lessons** in the [subject README](../README.md) collects these rules in one place.
+**Host lab.** Use a named throwaway container to see the writable layer directly: `docker run --name ds60-layer-demo --pull never ds60-docker-study:local python -c "open('/tmp/w.txt','w').write('1')"`. Then `docker diff ds60-layer-demo` lists `A /tmp/w.txt`, an addition recorded only in that container's layer. Remove it with `docker rm ds60-layer-demo` and the change is gone while the image is untouched. Next, start the fixture project and run `docker compose -p ds60-docker-study exec app sh -c 'echo note > /tmp/note; touch /app/x'`. The `/tmp` write succeeds because Compose mounts a tmpfs there, and `touch` fails because the root filesystem is read-only. After `docker compose -p ds60-docker-study restart app` the note is gone, since a tmpfs lives in memory and is cleared when the container stops, while `/counter` still reports the value kept in the `/data` volume.
 
 ## Worked example / walkthrough
 
@@ -61,7 +59,7 @@ docker run --rm --pull never --read-only ds60-docker-study:local python -c "from
 
 ## Six progressive exercises
 
-For each exercise, name the object involved and the phase of its lifetime before changing anything, then vary only the condition the task names. Exercises that ask you to predict, explain, compare or diagnose keep their answers in the solutions file; the others show the evidence to look for.
+Answer-type prompts keep their answers in the solutions file ([exercise rules](../STUDY-GUIDE.md#exercise-rules)).
 
 ### Exercise 1: Classify /app/server.py in the fixture.
 
@@ -93,13 +91,19 @@ For each exercise, name the object involved and the phase of its lifetime before
 
 Writing important data to the container's writable layer and losing it when Compose recreates the service. Expecting a file created in one container to appear in another without a shared mount. Removing `read_only` instead of adding a tmpfs for scratch files.
 
-Exercise 4 is this chapter's boundary case: Diagnose a missing file after compose up recreates a service. Record the container ID from `docker compose ps -q app` before and after `up`, then note which path the missing file was written to, so the evidence separates recreation from a bad write. Preserve the original failure and the exact changed field before retrying. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
+Exercise 4 is this chapter's boundary case: Diagnose a missing file after compose up recreates a service. Record the container ID from `docker compose ps -q app` before and after `up`, then note which path the missing file was written to, so the evidence separates recreation from a bad write.
+
+A tempting rescue after losing a file is `docker commit`, which turns a container's writable layer into a new image. It does preserve the file, but it also bakes in whatever else the layer holds: scratch output, caches, perhaps a credential typed during debugging. The result has no Dockerfile recipe, so nobody can rebuild or review it, and data in volumes is not included at all. The correction is to separate the two kinds of change: application code changes go into the Dockerfile and a rebuild, while data that must survive recreation goes into a named volume mounted at a known path.
+
+Never trade a safety control for a passing example ([safety rules](../STUDY-GUIDE.md#safety-rules)).
 
 ## Retrieval, transfer and next steps
 
-Close the explanations first. Predict whether a file written to `/tmp` in the container survives `restart`, `up --force-recreate` and an image rebuild. Then reconstruct worked example 2 (Try a write on a read-only root) with one different value, predict what changes, and name which of image layers, writable layer, container lifetime and read-only root filesystem the change touches.
+**Retrieval.** Predict whether a file written to `/tmp` in the container survives `restart`, `up --force-recreate` and an image rebuild.
 
-When a host session ends, run `docker compose -p ds60-docker-study down` from your fixture copy. It removes the project's containers and network but keeps named volumes; deleting a volume is a separate, deliberate reset described in the fixture README.
+**Transfer case.** A service writes uploads to `/app/uploads` with no volume and no `read_only`. Yesterday the uploads survived `docker compose restart`. Today, after editing an environment value and running `docker compose up -d`, they are gone. Explain both observations and propose one change.
+
+Then run the [retrieval loop](../STUDY-GUIDE.md#retrieval-and-cleanup) and end any host session with its cleanup.
 
 ## Primary references
 

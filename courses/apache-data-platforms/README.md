@@ -36,6 +36,9 @@ in the prepared data-platforms-python image. Distributed/service chapters open
 editable Markdown command notebooks. The classroom does not execute Docker
 commands from those pads and does not mount an engine socket into workers.
 
+The [study guide](STUDY-GUIDE.md) collects the run rules for worked programs and
+workshop notebooks, the evidence receipt fields and the shared order fixture.
+
 Each project is copied into a learner-owned work directory and has explicit
 preparation/lifecycle boundaries. Read its qualification file before asserting
 that a feature ran. Component acceptance does not establish an unexecuted combined

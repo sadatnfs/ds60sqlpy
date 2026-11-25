@@ -4,54 +4,42 @@
 <!-- beginner-solution-enrichment -->
 ## How to study and run this solution
 
-Open this explanation only after making an honest attempt. The executable
-companion runs solely against the disposable `advanced_sql_training` database:
+Attempt the six prompts against your own copy first; the comparison is
+only useful once you have predicted which partitions each plan touches.
+Then run the executable answer, which builds `solution_events`, works all
+six exercises in one transaction and ends with `ROLLBACK`
+([reading solutions](../../STUDY-GUIDE.md#read-a-solution)):
 
 ```bash
-# Linux, macOS, or Windows through WSL 2, from the repository root
 psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
   -f sql/postgres-60day/solutions/day37_solutions.sql
 ```
 
-`psql` prints each result/command tag in the terminal. Stop at the first
-unexpected `ERROR`; later output cannot repair an earlier failed invariant.
-Compare your own SQL, row grain, column names, row counts, `NULL` policy, and
-ordering with the explanation before comparing syntax.
+Every plan prints as a `QUERY PLAN` column, and the evidence is which
+child names appear. Timings and buffer counts change from run to run, but
+the scan list and the `actual ... rows=` values stay fixed because the
+load is deterministic.
 
-## Clause-by-clause reading map
+## How these answers fit together
 
-The lesson's main concepts are Partition bound, Partition pruning, Sharding. Its worked-model focus is:
-Map the January and February bounds on a timeline, then plan a January-15-to-February-15 query. Both partitions are required. Change the range to a January-only half-open interval and inspect `EXPLAIN` to prove February is pruned rather than assuming it.
+The [learner script](../day37_partitioning_sharding.sql) proved pruning on
+two months. These answers repeat that on four months and then probe the
+edges: an index on the parent that fans out to every child, a row dated
+June that no named partition covers, and a row placed exactly on the
+February 1 line.
 
-- Start at `FROM`/`JOIN` and state the intermediate row grain. Inspect join keys
-  before adding aggregates; a one-to-many join is allowed to multiply rows only
-  when the later contract accounts for it.
-- Apply `WHERE` to input rows, `GROUP BY` to form buckets, and `HAVING` to
-  completed groups. Window functions run over the surviving relation and
-  normally preserve its row count.
-- Read the `SELECT` list as the public result contract: keys establish grain,
-  measures state calculations, and aliases explain meaning. `ORDER BY` is the
-  only output-order guarantee; add a unique tie-breaker before `LIMIT`.
-- Trace every common table expression (CTE) as a temporary named relation.
-  Execute or inspect one stage at a time while debugging, but compare the final
-  result with an independent control rather than trusting stage names.
-- Keep SQL `NULL` as “missing/unknown/not applicable” until the metric contract
-  chooses another representation. Guard division with `NULLIF`; disclose
-  exclusions and distinguish zero from no row.
-- For DDL/DML, a command tag proves only that PostgreSQL accepted a statement.
-  Catalog checks, negative cases, row-count reconciliation, and the declared
-  transaction boundary prove behavior and cleanup.
+The 5,000-row load is uneven on purpose. Row `n` lands
+`(n * 47) % 172800` minutes after New Year, and once `n * 47` passes the
+120-day mark the offsets restart at January 1. The final row counts by
+`tableoid::regclass` are 1,899 for January, 1,233 for February (1,232 from
+the load plus the boundary row), 950 for March, 919 for April and 1 for
+the DEFAULT partition. Each child keeps its own `(customer_id,
+event_time)` index, which is why the customer 42 lookup in March reads a
+single small index and returns two rows.
 
-The exact final queries are not the only valid syntax. A join, subquery, CTE,
-window, or conditional aggregate can be an alternative when it preserves the
-same grain, `NULL` semantics, deterministic ordering, and safety. Prefer the
-form whose intermediate relations a reviewer can verify; optimize only after
-correctness is established with evidence.
-
-PostgreSQL partitioning divides one logical table into physical child tables.
-The optimizer can prune children whose bounds cannot satisfy a query predicate.
-“Sharding” across servers is a separate architectural concern and is not
-implemented by this single-database exercise.
+All of this is single-database partitioning. Sharding would place these
+children on different servers, where a cross-month count becomes a
+distributed query; nothing here sets that up.
 
 ## Exercise 1: Add a partition and test pruning
 

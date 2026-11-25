@@ -6,7 +6,16 @@ Intermediate, approximately 90 minutes. Direct prerequisites: `java-012`
 
 ## Learning objectives
 
-Use lambdas and functional interfaces, compose functions in the intended order, and avoid mutable captured state. Along the way, explain functional interface, capture, pure transformation using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. Exercises 1 and 2 start from the worked examples; the authored investigations begin with this task: Compose add 1 and multiply 2 using andThen and compose on 3. The final exercise transfers the mechanism to use a named function for a contract.
+Use lambdas and functional interfaces, compose functions in the intended order, and avoid mutable captured state.
+
+The six exercises practice these steps:
+
+- Use a predicate.
+- Compose transformations.
+- Distinguish composition order.
+- Capture a stable threshold.
+- Expose mutable captured state.
+- Use a named function for a contract.
 
 ## Purpose and mental model
 
@@ -22,16 +31,9 @@ A lambda supplies the behavior of a functional interface, an interface with one 
 
 ## How to run this lesson
 
-Open the Docker classroom, choose the prepared Java 21 profile and save a learner pad. The pad is compiled as `Main.java` with `javac --release 21` and executed with `java -ea Main`. Assertions are enabled deliberately. A successful assertion has no output; a failed assertion throws `AssertionError` and the process should fail. Do not remove assertions to obtain a green result.
+Every lambda here targets a standard interface from `java.util.function`, such as `Predicate`, `Function` or `Consumer`, and `parsePositive` is a named helper declared beside `main`.
 
-For a prepared native JDK, copy a worked example into your own `Main.java` under ignored `.learning/expansion/java-013/`. From that directory run the same two commands on PowerShell, macOS or Linux:
-
-```text
-javac --release 21 Main.java
-java -ea Main
-```
-
-The public class name and source filename must agree. Each worked example below is a complete file. Example B includes the setup it needs from Example A, so it can be compiled by itself. The six exercise reference blocks form one complete program in the separate solution. Keep your original prediction, source and diagnostic text together. Most examples use prepared JDK libraries and tiny local fixtures; any additional dependency is specified in the lesson notes below. Any lesson-specific library or additional file is named explicitly; do not download packages from inside a learner program. Resource examples close their owned files, executors or loopback servers.
+Classroom and native JDK steps, the exercise controls and the hint routine are in the [Java study guide](../STUDY-GUIDE.md).
 
 
 
@@ -101,62 +103,62 @@ public class Main {
 
 ## Prediction before your attempt
 
-Read the source from the entry point and name each value before executing it. Identify which operations create new values, which mutate existing state and which can fail. Predict the first observable output or assertion result. For a compile-time failure, explain which source rule is violated before discussing runtime state: a program that did not compile never reached its main method. Keep normal, boundary and invalid inputs separate so each check has a clear purpose.
+Before running Example A, write `positive.test` for 3, 0 and -1 and say why 0 is the case worth checking. For Example B, predict the result of stripping and then uppercasing " red ", and what reversing the order would change for this input (nothing here, but `andThen` and `compose` differ in general). Before Exercise 3, compute `addOne.andThen(twice).apply(3)` and `addOne.compose(twice).apply(3)` by hand.
 
 ## Exercises
 
-1. **Use a predicate: predict an edited check.** Copy Example A into a scratch `Main.java` and change `assert positive.test(3) && !positive.test(0) && !positive.test(-1);` to `assert positive.test(3) && !positive.test(1) && !positive.test(-1);` inside its assertion. Before running it with `java -ea Main`, predict whether the assertion still holds and explain why; then restore it.
-   **Expected:** The changed run fails with an `AssertionError` from the assertion on `positive.test(3) && !positive.test(0) && !positive.test(-1)`. Restoring the original line brings back the worked observation: true, false, false.
-   **Verify:** Compare your written prediction with the reported `AssertionError` and its stack-trace line, and explain why the edited condition is false for the values that satisfy `positive.test(3) && !positive.test(0) && !positive.test(-1)`. After restoring the line, the program completes without an `AssertionError` again.
+1. **Use a predicate: predict an edited check.** Change Example A's assertion to `assert positive.test(3) && !positive.test(1) && !positive.test(-1);`, predict whether it holds, then run and restore it.
+   **Expected:** The edited run fails with an `AssertionError` from the assertion on `positive.test(3) && !positive.test(0) && !positive.test(-1)`.
+   **Verify:** Explain why the edited assertion is false for the values that satisfy `positive.test(3) && !positive.test(0) && !positive.test(-1)`.
 
-2. **Compose transformations: diagnose an edited check.** A careless edit changed the assertion that Example B adds after Example A so that it reads `assert strip.andThen(upper).apply(" red !").equals("RED");`. Run Example B with that line, explain why the edited assertion now fails for the same program state, and restore it.
-   **Expected:** Before the repair the run fails with an `AssertionError` from the assertion on `strip.andThen(upper).apply(" red ").equals("RED")`; after it the line reads `assert strip.andThen(upper).apply(" red ").equals("RED");` again and input space red space becomes RED.
-   **Verify:** Keep the failing and the repaired runs. Explain why the edited assertion rejects the same program state that `strip.andThen(upper).apply(" red ").equals("RED")` accepts.
+2. **Compose transformations: diagnose an edited check.** Example B's new assertion was edited to `assert strip.andThen(upper).apply(" red !").equals("RED");`. Explain why it fails for unchanged state and restore it.
+   **Expected:** The edited run fails with an `AssertionError` from the assertion on `strip.andThen(upper).apply(" red ").equals("RED")`; the restored assertion passes.
+   **Verify:** Explain why the edited assertion rejects the state that `strip.andThen(upper).apply(" red ").equals("RED")` accepts.
 
 3. **Distinguish composition order.** Compose add 1 and multiply 2 using andThen and compose on 3.
    **Expected:** andThen gives 8; compose 7.
-   **Verify:** Keep an assertion equivalent to `addOne.compose(twice).apply(3) == 7`. As a control, change `assert addOne.compose(twice).apply(3) == 7;` to `assert addOne.compose(twice).apply(4) == 7;` inside it: the run must fail with an `AssertionError`, which shows the assertion can fail. Restore it.
+   **Verify:** Control: changing `assert addOne.compose(twice).apply(3) == 7;` to `assert addOne.compose(twice).apply(4) == 7;` inside the assertion must make it fail.
 
 4. **Capture a stable threshold.** Capture local threshold 10 in a predicate and test 9, 10, 11.
    **Expected:** false, true, true under>=.
-   **Verify:** Keep an assertion equivalent to `!enough.test(9) && enough.test(10) && enough.test(11)`. As a control, change `java.util.function.Predicate<Integer> enough = value -> value >= threshold;` to `java.util.function.Predicate<Integer> enough = value -> value > threshold;`: the run must fail with an `AssertionError` from the assertion on `!enough.test(9) && enough.test(10) && enough.test(11)`. Restore the line before continuing.
+   **Verify:** Control: changing `java.util.function.Predicate<Integer> enough = value -> value >= threshold;` to `java.util.function.Predicate<Integer> enough = value -> value > threshold;` must fail the assertion on `!enough.test(9) && enough.test(10) && enough.test(11)`.
 
 5. **Expose mutable captured state.** Capture a list in a Consumer and append two values.
    **Expected:** captured list becomes a, b.
-   **Verify:** Keep an assertion equivalent to `captured.equals(List.of("a", "b"))`. As a control, change `append.accept("a");` to `append.accept("a!");`: the run must fail with an `AssertionError` from the assertion on `captured.equals(List.of("a", "b"))`. Restore the line before continuing.
+   **Verify:** Control: changing `append.accept("a");` to `append.accept("a!");` must fail the assertion on `captured.equals(List.of("a", "b"))`.
 
 6. **Use a named function for a contract.** Pass a method reference to a parser that rejects blank input and parses a positive integer.
    **Expected:** 7 accepted; blank rejected.
-   **Verify:** Keep an assertion equivalent to `blank`. As a control, change `blank = true;` to `blank = false;`: the run must fail with an `AssertionError` from the assertion on `blank`. Restore the line before continuing.
+   **Verify:** Control: changing `blank = true;` to `blank = false;` must fail the assertion on `blank`.
 
 ## Common pitfalls and diagnosis
 
-When a check fails, keep the smallest source file that still demonstrates the failure. Read the first relevant compiler diagnostic before editing several lines; later diagnostics can be consequences of the same missing delimiter or wrong type. For a runtime exception, identify the first frame belonging to your code and compare its input with the method contract. For an assertion failure, inspect the actual value and the independent expected value. A passing process exit is weaker than a checked invariant, and a checked invariant applies only under its stated assumptions.
+Reading `f.compose(g)` as "f then g" is the classic error; it applies `g` first. Capture rules also confuse people: a lambda may use a local variable only if it is never reassigned, so `threshold++` after the lambda is a compile error, while adding to a captured list compiles and mutates shared state. That makes a `Consumer` that appends to a list unsafe in a parallel stream. Finally, a long lambda that hides validation is harder to test than a named method reference such as `Main::parsePositive`.
 
-Do not replace a precise exception with a catch-all that returns a plausible default. That can hide an invalid input or an unfinished operation. If an example owns a resource, verify its lifetime on both the success and failure paths. If an operation is concurrent, use ordering primitives to establish the relationship you need; an observed timing coincidence is not a synchronization guarantee. The solution explanations identify the specific alternative that would break each exercise.
+General compiler, runtime and assertion triage: [diagnose a failure](../STUDY-GUIDE.md#diagnose-a-failure).
 
 ## Progressive hints
 
-Read one hint at a time and attempt the exercise again before reading the next. Keep a small table of input, expected value, actual value and exception type. Ask for one hint about the first incorrect assumption before requesting the entire reference implementation.
+Read one rung at a time, as described in [using hints](../STUDY-GUIDE.md#use-hints-one-at-a-time).
 
-- **Exercise 1:** First restate the expected observation: true, false, false. Then list the values read by `positive.test(3) && !positive.test(0) && !positive.test(-1)` and trace each one from its declaration. Finally, compute the asserted value with `assert positive.test(3) && !positive.test(1) && !positive.test(-1);` in place before running.
-- **Exercise 2:** First restate the expected observation: input space red space becomes RED. Then list the values read by `strip.andThen(upper).apply(" red ").equals("RED")` and trace each one from its declaration. Finally, compare `assert strip.andThen(upper).apply(" red !").equals("RED");` with the same line in Example B and state the claim each version makes.
-- **Exercise 3:** First restate the expected observation: andThen gives 8; compose 7. Then list the values read by `addOne.compose(twice).apply(3) == 7` and trace each one from its declaration. Finally, name one input that would make `addOne.compose(twice).apply(3) == 7` false.
-- **Exercise 4:** First restate the expected observation: false, true, true under>=. Then list the values read by `!enough.test(9) && enough.test(10) && enough.test(11)` and trace each one from its declaration. Finally, predict the effect of changing `java.util.function.Predicate<Integer> enough = value -> value >= threshold;` to `java.util.function.Predicate<Integer> enough = value -> value > threshold;` before running anything.
-- **Exercise 5:** First restate the expected observation: captured list becomes a, b. Then list the values read by `captured.equals(List.of("a", "b"))` and trace each one from its declaration. Finally, predict the effect of changing `append.accept("a");` to `append.accept("a!");` before running anything.
-- **Exercise 6:** First restate the expected observation: 7 accepted; blank rejected. Then list the values read by `blank` and trace each one from its declaration. Finally, predict the effect of changing `blank = true;` to `blank = false;` before running anything.
+- **Exercise 1:** First evaluate `positive.test(1)` from the edited assertion. Then apply the `!` in front of it and see what the middle conjunct becomes. Finally, explain why the original assertion tested 0 rather than another positive number.
+- **Exercise 2:** First apply `strip` and then `upper` to the edited input " red !". Then compare the result with "RED". Finally, note that the composition order is unchanged, so the input is what breaks the check.
+- **Exercise 3:** First compute `addOne.andThen(twice).apply(3)` by applying `addOne` first. Then compute `addOne.compose(twice).apply(3)` by applying `twice` first. Finally, assert 8 and 7 and explain why the two results differ.
+- **Exercise 4:** First store 10 in a local variable that is never reassigned and capture it in a `Predicate` that uses `>=`. Then test 9, 10 and 11. Finally, explain why the boundary value 10 decides between `>` and `>=`.
+- **Exercise 5:** First create an `ArrayList` and a `Consumer<String>` that appends to it. Then accept "a" and then "b". Finally, compare the list with a, b and explain why the lambda still has a side effect even though its captured reference never changes.
+- **Exercise 6:** First pass `Main::parsePositive` where a `Function<String, Integer>` is expected and apply it to "7". Then apply it to a blank string inside a `try` block and catch `IllegalArgumentException`. Finally, explain why the method reference keeps the validation rules in one named, testable place.
 
 ## Self-check and retrieval
 
-Close the solution and explain Functional interface, Capture, Pure transformation in your own words. Reconstruct one example from a blank `Main.java`, then add a new boundary input. Explain why the new case should pass or fail before compiling it. Identify a situation where this technique is appropriate and one where a different data structure, lifetime policy or abstraction would be clearer. This is a reasoning check, not a memorization test for an API spelling.
+From memory, define a functional interface and name its abstract method for `Predicate`, `Function` and `Consumer`. Explain the order in which `andThen` and `compose` apply their functions, what effectively final means, and why capturing a list does not make the list immutable.
 
 ## Next step
 
-Preserve the saved pad and the six exercise observations. Continue to the next lesson only when you can explain the invariants without reading the answer. Later chapters reuse these contracts in larger programs, so keep a failing counterexample as well as a repaired result. A reference implementation demonstrates one valid design under the stated assumptions; it is not a universal design rule.
+Continue with `java-014`: Streams and collectors. Keep your six observations; see [moving on](../STUDY-GUIDE.md#move-to-the-next-lesson).
 
 ## Sources and verification status
 
-[Official Java 21 API or language reference](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html), reviewed 2026-10-22. Examples and exercise fixtures are original course material. Use the [validation guide](../../../docs/validation.md) and CI artifacts for the exact revision and platform to inspect actual compile/run results. Authoring, parsing, compilation, execution and learner mastery are separate forms of evidence.
+[Official Java 21 API or language reference](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/package-summary.html), reviewed 2026-10-22. Evidence levels: [sources and evidence](../STUDY-GUIDE.md#sources-and-evidence).
 
 ## Ask an AI tutor about this lesson
 

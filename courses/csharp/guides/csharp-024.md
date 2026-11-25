@@ -24,9 +24,9 @@ Ownership is a contract between caller and callee. If a function receives a stre
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles your saved pad as `Program.cs` in its fixed .NET 10 project. C# 14 is the matching language generation. This route uses the prepared framework libraries; it does not accept arbitrary project files, NuGet packages, command arguments or interactive input. The explicit `Program.Main` entrypoint makes compilation and execution visible. `Check` throws on a false condition in every build configuration, unlike conditional debugging assertions.
+`Probe` records disposal in its `Closed` property, which is how both examples observe cleanup without real files. For task 4, a method that returns a `MemoryStream` from inside `using var` hands back a disposed stream: the first `ReadByte` call throws `ObjectDisposedException`, cannot access a closed stream.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Compile contract, starter stop and success marker: [running a lesson](../STUDY-GUIDE.md#running-a-lesson).
 
 
 
@@ -34,7 +34,7 @@ Start with the answer-free learner artifact in your saved classroom pad. It deli
 
 `using (var resource = ...) { ... }` scopes lifetime. `using var resource = ...` disposes at the end of the containing scope. `await using` supports IAsyncDisposable when cleanup itself is asynchronous.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+Each example ends with a trace; method: [tracing a program](../STUDY-GUIDE.md#tracing-a-program).
 
 ## Worked example / walkthrough
 
@@ -83,6 +83,8 @@ internal static class Program {
 ```
 
 **Observe:** The resource is open inside and closed afterward.
+
+**Trace.** `resource` is created outside the `using` statement, so the variable outlives the block. Inside the block, `Closed` is still false and the first check passes. Leaving the block calls `Dispose`, which sets Closed to true, and the second check confirms it. The scope boundary, not the garbage collector, decided when cleanup happened.
 
 ### Example B: Dispose after failure
 
@@ -133,6 +135,8 @@ internal static class Program {
 
 **Observe:** The controlled exception still triggers cleanup.
 
+**Trace.** Inside the `using` block, an `InvalidOperationException` is thrown. Before control reaches the outer catch, the compiler-generated `finally` calls `Dispose` on the probe. The catch swallows the expected exception, and the check finds Closed true. Cleanup ran on the failure path as well as on the normal one, with no manual `Dispose` call.
+
 ## Exercises
 
 1. **Predict and explain.** Trace the point at which Dispose runs in each example.
@@ -147,13 +151,15 @@ internal static class Program {
 
 6. **Transfer and justify.** Document ownership and leave-open behavior for a parser that wraps a stream reader.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Log each task in the [evidence table](../STUDY-GUIDE.md#recording-exercise-evidence) before opening the explanation.
 
 ## Common pitfalls and diagnosis
 
 Dispose does not automatically make an object safe for concurrent callers. Never rely on finalizer timing for a lock or file release. Releasing a borrowed resource violates its caller ownership.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+For task 2, two nested `using` statements dispose in reverse order: inner first, then outer, so an object is never cleaned up before the one that depends on it. For task 3, a helper that reads a caller-owned stream must not dispose it; when it wraps a `StreamReader`, pass `leaveOpen: true` so the reader leaves the stream open.
+
+Repair routine: [building a regression case](../STUDY-GUIDE.md#building-a-regression-case).
 
 ## Progressive hints
 
@@ -163,11 +169,15 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 ## Self-check and next step
 
-Explain Resource owner, IDisposable, Scope without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+State exactly when `Dispose` runs in each example and what triggers it. Predict the disposal order for outer and inner probes. For task 6, document who owns the stream given to your parser, whether the parser closes it, and what a caller may do with it afterward.
+
+Then follow the general [self-check routine](../STUDY-GUIDE.md#self-check-routine) and save your pad.
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://learn.microsoft.com/en-us/dotnet/csharp/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+[Documentation](https://learn.microsoft.com/en-us/dotnet/csharp/): The `using` statement article and the guide to implementing a `Dispose` method describe scoped cleanup and `IAsyncDisposable`.
+
+Provenance and limits: [sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

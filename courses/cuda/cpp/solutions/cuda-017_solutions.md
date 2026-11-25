@@ -4,8 +4,6 @@
 
 Shared memory lets threads in one block communicate through a common scratch array. Communication requires ordering: a consumer must not read a location until its producer has written it. `__syncthreads()` is a block barrier with memory-ordering effects for participating threads. Put bounds predicates around loads and stores while keeping the required barrier participation uniform. Invalid tail lanes can load a neutral value and still reach the barrier. A barrier does not coordinate ordinary independent blocks, and a memory fence does not force other threads to arrive at the same program point.
 
-The separate [CPU reference](../references/cuda-017_cpu.py) checks the chapter's bounded model. It does not execute CUDA or establish GPU timing. Compare after attempting the worksheet or explicitly choosing to reveal solutions.
-
 ## Exercise 1
 
 Four threads load \([3,6,9,12]\) into a shared tile, synchronize, then thread t reads tile[3-t]. The reversed output is \([12,9,6,3]\). Without the barrier, a consumer could read before another thread loads its value. An apparent success on one execution is not a synchronization proof.
@@ -78,12 +76,16 @@ Name owners for interior and halo loads, synchronize before consumption, define 
 
 **How to verify:** Compare tile results with a host stencil, including edges with the defined boundary.
 
+## Self-check answers
+
+1. **In worked example 1, which thread produces the value read by thread 0?** Thread 3, which loaded 12 into tile[3].
+2. **Why must tail lanes still reach the barrier?** A block barrier expects every thread of the block; skipping it is undefined and can hang.
+3. **What neutral value suits a max operation in a padded tile?** The lowest representable value, such as negative infinity for floats.
+
 ## Numerical reference and its limits
 
-The complete CPU model is [here](../references/cuda-017_cpu.py). Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It does not claim CUDA execution, concurrency safety or a performance measurement.
+The [CPU reference](../references/cuda-017_cpu.py) reproduces worked example 1 and prints `{'reversal': [12, 9, 6, 3], 'neutralized_tail_sum': 18}`.
 
 ## Transfer review
 
 Name owners for interior and halo loads, synchronize before consumption, define boundary values and keep output separate from input.
-
-A complete explanation must name its inputs, the unchanged mathematical contract, the changed boundary or resource condition, and the evidence still needed on actual hardware. Preserve a CPU baseline even after a GPU path becomes available.

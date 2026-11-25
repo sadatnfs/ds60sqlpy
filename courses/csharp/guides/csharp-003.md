@@ -24,9 +24,9 @@ Use `decimal` when a decimal representation matches the domain, such as many mon
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles your saved pad as `Program.cs` in its fixed .NET 10 project. C# 14 is the matching language generation. This route uses the prepared framework libraries; it does not accept arbitrary project files, NuGet packages, command arguments or interactive input. The explicit `Program.Main` entrypoint makes compilation and execution visible. `Check` throws on a false condition in every build configuration, unlike conditional debugging assertions.
+Example A triggers an `OverflowException` on purpose and catches it, so a successful run has still exercised the failure path. Remove `checked` and nothing is thrown: the default unchecked context wraps `int.MaxValue + 1` to -2147483648, and the check then reports overflow must be visible.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Compile contract, starter stop and success marker: [running a lesson](../STUDY-GUIDE.md#running-a-lesson).
 
 
 
@@ -34,7 +34,7 @@ Start with the answer-free learner artifact in your saved classroom pad. It deli
 
 `checked(expression)` asks for integral overflow detection in that expression. The `m` suffix selects decimal, while `0.1` defaults to double. `Math.Round(amount, 2, MidpointRounding.ToEven)` records both precision and tie policy.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+Each example ends with a trace; method: [tracing a program](../STUDY-GUIDE.md#tracing-a-program).
 
 ## Worked example / walkthrough
 
@@ -85,6 +85,8 @@ internal static class Program {
 
 **Observe:** The maximum int plus one is rejected; 100 plus 20 is accepted.
 
+**Trace.** `large` holds `int.MaxValue`, which is 2147483647. Inside `checked(...)`, adding 1 has no int representation, so the runtime throws `OverflowException` instead of wrapping. The catch block sets `overflowed` to true and the first check passes. Writing the literal `checked(int.MaxValue + 1)` fails to compile with CS0220, because the compiler evaluates constant expressions; the variable delays the overflow to runtime.
+
 ### Example B: Preserve decimal intent
 
 A rounding difference can be a policy disagreement rather than a compiler defect. Write the expected rule before the implementation.
@@ -129,6 +131,8 @@ internal static class Program {
 
 **Observe:** Two valid midpoint policies produce 2.34 and 2.35.
 
+**Trace.** `0.1m + 0.2m` adds two decimal values stored as base-ten digits, so the sum is exactly 0.3m and the equality holds. `Math.Round(2.345m, 2, MidpointRounding.ToEven)` sees the trailing 5 as an exact tie and moves to the even neighbor, 2.34. The same tie under `AwayFromZero` gives 2.35. Both are legitimate policies, which is why the call must name one.
+
 ## Exercises
 
 1. **Predict and explain.** Predict which arithmetic operation throws and explain the representation boundary.
@@ -143,13 +147,15 @@ internal static class Program {
 
 6. **Transfer and justify.** Design a quantity and currency contract that states overflow, rounding and invalid-input behavior.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Log each task in the [evidence table](../STUDY-GUIDE.md#recording-exercise-evidence) before opening the explanation.
 
 ## Common pitfalls and diagnosis
 
 `checked` does not turn floating-point arithmetic into exact decimal arithmetic. Rounding before aggregation can produce a different total than rounding afterward. Never use an unexplained tolerance to hide a unit mismatch.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+For task 5, use 2.3449m, 2.345m and 2.3451m: under `ToEven` they round to 2.34, 2.34 and 2.35, so only the exact midpoint reveals the policy. For task 4, `(decimal)(0.1 + 0.2)` prints 0.3 here because the conversion keeps about 15 significant digits, so the approximation can hide. Parse money text with `decimal.Parse` from the start.
+
+Repair routine: [building a regression case](../STUDY-GUIDE.md#building-a-regression-case).
 
 ## Progressive hints
 
@@ -159,11 +165,15 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 ## Self-check and next step
 
-Explain Overflow, Decimal, Rounding policy without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+Explain why `checked(large + 1)` throws while `large + 1` alone does not. Round 2.345m and 2.355m to two places under both midpoint policies and give all four results. Describe one invoice where rounding each line item first gives a different total from rounding only the final sum.
+
+Then follow the general [self-check routine](../STUDY-GUIDE.md#self-check-routine) and save your pad.
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://learn.microsoft.com/en-us/dotnet/csharp/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+[Documentation](https://learn.microsoft.com/en-us/dotnet/csharp/): The reference pages for the `checked` and `unchecked` statements and for floating-point numeric types explain overflow contexts and decimal precision.
+
+Provenance and limits: [sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

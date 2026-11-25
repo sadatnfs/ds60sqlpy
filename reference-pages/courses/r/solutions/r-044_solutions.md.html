@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/r/solutions/r-044_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="r-044-reference-reasoning">r-044: reference reasoning<a class="heading-anchor" href="#r-044-reference-reasoning" aria-label="Link to this section">#</a></h2>
-<p>Use the <a href="r-044_reference.R.html">complete reference</a> with the guide&#x27;s declared inputs and runtime. Every worked example is also a standalone script.</p>
+<p>Run the <a href="r-044_reference.R.html">complete reference</a> under the <a href="../STUDY-GUIDE.md.html#run-a-chapter">run rules</a>.</p>
 <h3 id="why-the-implementation-has-this-shape">Why the implementation has this shape<a class="heading-anchor" href="#why-the-implementation-has-this-shape" aria-label="Link to this section">#</a></h3>
 <p>The two-column response retains successes and failures as trial counts. The exact fixture probabilities make link-scale and odds calculations independently checkable. Brier score and classification accuracy evaluate different properties of those same predictions.</p>
 <p>The separation example is diagnosed from the geometry of its inputs rather than forcing an unstable fit and presenting a huge coefficient as a valid estimate. The held-out frequency comparison uses new outcomes and remains a descriptive calibration check with its count visible. It does not infer population calibration from two bins.</p>
@@ -248,7 +248,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Tempting mistake:</strong> Comparing the predictions with the training rates 0.2 and 0.6, which shows zero gaps because the model fit those rates. Averaging the signed gaps is a second error: -0.1 and 0.2 average to 0.05, which hides that one group is overpredicted and the other underpredicted.</p>
 <p><strong>Verify:</strong> The largest gap between <code>gaps</code> and c(-0.1, 0.2) returns a value below 1e-8, and <code>mean(abs(gaps))</code> returns 0.15.</p>
 <h3 id="what-the-checks-establish">What the checks establish<a class="heading-anchor" href="#what-the-checks-establish" aria-label="Link to this section">#</a></h3>
-<p>The reference makes 6 <code>stopifnot()</code> checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.</p></article>
+<p>The checks confirm fitted probabilities of 0.2 and 0.6, agreement between <code>plogis()</code> of the link predictions and those probabilities, an odds ratio of 6 beside a risk ratio of 3, a trial-weighted Brier score of 0.2 over 20 trials, a perfectly separated example where every negative x fails and every positive x succeeds, and calibration gaps of -0.1 and 0.2 with mean absolute gap 0.15. They do not test calibration on new data.</p>
+<p>The reference makes 6 <code>stopifnot()</code> checks; see <a href="../STUDY-GUIDE.md.html#what-a-passing-run-proves">what a passing run proves</a>.</p></article>
   </main>
 </body>
 </html>

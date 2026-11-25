@@ -1,6 +1,6 @@
 # cuda-104: explained solutions
 
-These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.
+Compare with your [worksheet](../lessons/cuda-104.md) attempt.
 
 ## Exercise 1: Write three constraints
 
@@ -74,8 +74,16 @@ Pending GPU validation must remain visible.
 
 **How to verify.** Include a section listing each unmeasured quantity and the hardware run that would measure it, and check that no unmeasured value is labeled as measured.
 
+## Self-check answers
+
+1. **Why must quality be part of acceptance?** A candidate that meets latency but drops held-out accuracy below the threshold fails the task it was built for.
+
+2. **Which bottlenecks can an optimization target?** Input preparation, transfer, arithmetic, memory traffic or communication, as shown by measurement.
+
+3. **What can CPU-only work honestly deliver?** A working model and a decision report, with GPU execution and deployment qualification explicitly left open.
+
 ## Reference observation
 
 Only candidate A satisfies all three constraints.
 
-The reference file is `courses/cuda/python/references/cuda-104_cpu.py`. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.
+Asserted by `courses/cuda/python/references/cuda-104_cpu.py`.

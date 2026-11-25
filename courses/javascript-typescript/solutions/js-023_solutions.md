@@ -1,6 +1,6 @@
 # js-023: explanatory solutions
 
-Use these answers after an attempt or an explicit reveal. The reference uses the same literal fixtures as the guide and keeps the exercises in separate scopes. A successful run checks these examples; explaining a changed input is a separate learning goal.
+Open these after your own attempt; each exercise runs in its own scope in the reference.
 
 ## Mechanism review
 
@@ -24,7 +24,7 @@ A mapped type uses [K in keyof T] to visit each property key. A modifier such as
 
 ## Exercise 1: Map a record into field flags: change one input
 
-Task: Copy Example A into a scratch `main.mts` and change `const flags: Flags<Row> = { id: true, count: false };` to `const flags: Flags<Row> = { id: false, count: false };`. Before running it, predict which check fails and which value it now sees; then run it and restore the original line.
+Task: In a scratch copy of Example A, change `const flags: Flags<Row> = { id: true, count: false };` to `const flags: Flags<Row> = { id: false, count: false };`. Which check fails, and what value does it see?
 
 The mapped type follows the source keys, so adding a field to Row creates a new required flag. The actual object still needs to be constructed by ordinary code.
 
@@ -43,13 +43,13 @@ function negativeTypeCheck(): void {
 void negativeTypeCheck;
 ```
 
-**Expected:** The changed run fails with an `AssertionError` at `assert.deepEqual(flags, { id: true, count: false })`. Restoring `const flags: Flags<Row> = { id: true, count: false };` brings back: id true and count false; a missing flag is a compile error.
+**Expected:** The edited run fails with an `AssertionError` at `assert.deepEqual(flags, { id: true, count: false })`. Restoring `const flags: Flags<Row> = { id: true, count: false };` brings back: id true and count false; a missing flag is a compile error.
 
-**Verify:** Compare your written prediction with the reported `AssertionError`, including its actual and expected values, and name the value that made `assert.deepEqual(flags, { id: true, count: false })` fail. After restoring the line, the program prints its `{"checks":1,"status":"passed"}` receipt again.
+**Verify:** Compare the reported actual and expected values with your prediction, then restore `const flags: Flags<Row> = { id: true, count: false };`.
 
 ## Exercise 2: Prove Omit does not remove runtime secrets: debug a regression
 
-Task: A regression changed one token in Example B, so one line now reads `const full: RecordWithSecret = { id: 'A!', secret: 'fixture-only' };`. Run Example B with that line, use the failing check to locate the defect and repair it without changing the check.
+Task: A regression made one Example B line read `const full: RecordWithSecret = { id: 'A!', secret: 'fixture-only' };`. Locate and repair it without editing the check.
 
 Type erasure makes this a concrete data-exposure risk. The public object must be constructed with an explicit field allowlist before serialization.
 
@@ -67,7 +67,7 @@ assert.equal(JSON.stringify(publicRecord), '{"id":"A"}');
 
 **Expected:** Before the repair the run fails with an `AssertionError` at `assert.equal(JSON.stringify(publicRecord), '{"id":"A"}')`. Restoring `const full: RecordWithSecret = { id: 'A', secret: 'fixture-only' };` brings back: typed view still has secret at runtime; explicit projection does not.
 
-**Verify:** Keep the failing and the repaired runs. Explain why the changed token alters the value tested by `assert.equal(JSON.stringify(publicRecord), '{"id":"A"}')` for this input.
+**Verify:** Keep the failing and repaired runs and name the first value that differs between them.
 
 ## Exercise 3: Compare distributed and whole-union array types
 
@@ -90,7 +90,7 @@ void negativeTypeCheck;
 
 **Expected:** whole-union array accepts mixed values; distributed array rejects them.
 
-**Verify:** Keep a check equivalent to `assert.deepEqual(mixed, ['A', 2])`. As a control, change `const mixed: Whole<string | number> = ['A', 2];` to `const mixed: Whole<string | number> = ['A', 3];`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
+**Verify:** Keep `assert.deepEqual(mixed, ['A', 2])`. Control: changing `const mixed: Whole<string | number> = ['A', 2];` to `const mixed: Whole<string | number> = ['A', 3];` must make that check fail; then restore it.
 
 ## Exercise 4: Infer an array element type
 
@@ -112,7 +112,7 @@ void negativeTypeCheck;
 
 **Expected:** element type permits number 7 and rejects text.
 
-**Verify:** Keep a check equivalent to `assert.equal(value, 7)`. As a control, change `const value: ElementOf<readonly number[]> = 7;` to `const value: ElementOf<readonly number[]> = 8;`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
+**Verify:** Keep `assert.equal(value, 7)`. Control: changing `const value: ElementOf<readonly number[]> = 7;` to `const value: ElementOf<readonly number[]> = 8;` must make that check fail; then restore it.
 
 ## Exercise 5: Derive an asynchronous result type without executing it
 
@@ -131,7 +131,7 @@ assert.deepEqual(await load(), expected);
 
 **Expected:** declared resolved shape and actual result both have count 3.
 
-**Verify:** Keep a check equivalent to `assert.deepEqual(await load(), expected)`. As a control, change `return { count: 3 };` to `return { count: 4 };`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
+**Verify:** Keep `assert.deepEqual(await load(), expected)`. Control: changing `return { count: 3 };` to `return { count: 4 };` must make that check fail; then restore it.
 
 ## Exercise 6: Check a configuration with satisfies
 
@@ -158,8 +158,8 @@ void negativeTypeCheck;
 
 **Expected:** valid table remains usable; misspelled literal key is a compiler error.
 
-**Verify:** Keep a check equivalent to `assert.equal(labels.success, 'Ready')`. As a control, change `const labels = { success: 'Ready', failure: 'Retry' } satisfies Record<` to `const labels = { success: 'Ready!', failure: 'Retry' } satisfies Record<`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
+**Verify:** Keep `assert.equal(labels.success, 'Ready')`. Control: changing `const labels = { success: 'Ready', failure: 'Retry' } satisfies Record<` to `const labels = { success: 'Ready!', failure: 'Retry' } satisfies Record<` must make that check fail; then restore it.
 
 ## After comparison
 
-Return to your saved implementation and repeat a case with different values. Keep compiler diagnostics, process output and browser observations separate. Do not suppress a failing assertion or use a type assertion to declare an unvalidated value safe. Resource-owning examples must finish cleanup even when work fails. Describe each result with its actual host and fixture scope rather than as production acceptance.
+Fresh case: derive a `Nullable<T>` mapped type that allows `null` on every field of `{ id: string; count: number }`. Then write a projection function that actually removes a `token` field at run time, and test both. ([After comparing](../STUDY-GUIDE.md#after-comparing-with-the-solution).)

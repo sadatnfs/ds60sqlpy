@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/javascript-typescript/solutions/js-048_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="js-048-explanatory-solutions">js-048: explanatory solutions<a class="heading-anchor" href="#js-048-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit reveal. The separate .js reference is a complete offline browser program. These explanations discuss the six practice tasks; a visual resemblance alone is not a data or behavior check.</p>
+<p>Compare after your own attempt; the separate <code>.js</code> file is the complete reference program.</p>
 <h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
 <p>CSV is a text format whose cells do not automatically have the domain types your analysis needs. Parsing a file into rows and interpreting strings as numbers or dates are separate steps. Empty strings, malformed values and duplicate IDs require explicit policies before visual encoding.</p>
 <p>A missing measurement is not necessarily zero. Replacing absence with zero can distort averages, totals and visual trends. Reject invalid rows with a reason, retain a count of excluded rows, and make the policy visible to the chart reader. Trimming text and checking finite numeric values are small but important boundary operations.</p>
@@ -218,7 +218,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Expected:</strong> Its absence or missing state is documented rather than called zero.</p>
 <h3 id="exercise-6-transfer-the-pipeline-to-a-rate-metric">Exercise 6: Transfer the pipeline to a rate metric.<a class="heading-anchor" href="#exercise-6-transfer-the-pipeline-to-a-rate-metric" aria-label="Link to this section">#</a></h3>
 <p>Averaging percentages can differ from a ratio of sums. Choose the aggregation that matches the question. For rates, sum numerators and denominators per group before dividing; averaging per-row percentages weights a 1-visit row like a 100-visit row.</p>
-<p><strong>Expected:</strong> Validate numerator and denominator at a defined grain before division.</p></article>
+<p><strong>Expected:</strong> Validate numerator and denominator at a defined grain before division.</p>
+<h3 id="after-comparison">After comparison<a class="heading-anchor" href="#after-comparison" aria-label="Link to this section">#</a></h3>
+<p>Point the same pipeline at a second inline CSV with a date column and a rate built from two numeric columns. Validate numerator and denominator separately, count rejections by reason and aggregate by week before charting. Record which rejected rows would have changed the result.</p></article>
   </main>
 </body>
 </html>

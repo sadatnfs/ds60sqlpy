@@ -269,7 +269,7 @@ bash run.sh backpressure
 bash run.sh readback</code></pre>
 <p>The backpressure route polls the REST job details and keeps the accumulated-backpressured-time value reported for the pressure-payload-producer vertex. The route fails when no positive value appears, because a sleep inside SlowConsumer is only a cause, while the metric is the observation. In the readback, look for the metric rows together with the output population; a large backpressured time with a complete output means the job was slowed but correct, and a missing row means the window ended before Flink sampled the task.</p>
 <h3 id="complete-worked-source">Complete worked source<a class="heading-anchor" href="#complete-worked-source" aria-label="Link to this section">#</a></h3>
-<p>This is a project-only command notebook. Read and edit it in the classroom; run its explicitly labeled commands from the copied owned Docker workshop. The classroom does not execute these service commands.</p>
+<p>The classroom does not execute these service commands. See the <a href="../STUDY-GUIDE.md.html#workshop-notebooks">workshop rules</a>.</p>
 <h2 id="bounded-pressure-observation-and-compatible-capacity-changes">Bounded pressure observation and compatible capacity changes<a class="heading-anchor" href="#bounded-pressure-observation-and-compatible-capacity-changes" aria-label="Link to this section">#</a></h2>
 <pre class="highlighted-code"><code class="language-bash">bash run.sh backpressure
 bash run.sh readback</code></pre>

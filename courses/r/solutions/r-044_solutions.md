@@ -1,6 +1,6 @@
 # r-044: reference reasoning
 
-Use the [complete reference](r-044_reference.R) with the guide's declared inputs and runtime. Every worked example is also a standalone script.
+Run the [complete reference](r-044_reference.R) under the [run rules](../STUDY-GUIDE.md#run-a-chapter).
 
 ## Why the implementation has this shape
 
@@ -108,4 +108,6 @@ The observed-minus-predicted gaps are -0.1 and 0.2. Their weighted absolute gap 
 
 ## What the checks establish
 
-The reference makes 6 `stopifnot()` checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.
+The checks confirm fitted probabilities of 0.2 and 0.6, agreement between `plogis()` of the link predictions and those probabilities, an odds ratio of 6 beside a risk ratio of 3, a trial-weighted Brier score of 0.2 over 20 trials, a perfectly separated example where every negative x fails and every positive x succeeds, and calibration gaps of -0.1 and 0.2 with mean absolute gap 0.15. They do not test calibration on new data.
+
+The reference makes 6 `stopifnot()` checks; see [what a passing run proves](../STUDY-GUIDE.md#what-a-passing-run-proves).

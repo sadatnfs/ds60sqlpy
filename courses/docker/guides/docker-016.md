@@ -32,11 +32,9 @@ The following Python example demonstrates stage selection with a text artifact; 
 
 ## How to use this lesson
 
-The classroom displays this guide and saves your worksheet, `courses/docker/lessons/docker-016.md`. Its Run button does not control your Docker engine. Docker engine access is powerful host access, so the classroom deliberately receives no engine socket. Work through the supplied examples without starting anything, then use the optional host lab only in your own disposable project. Reading a command, parsing YAML and actually running the project are different forms of evidence.
+The classroom saves `courses/docker/lessons/docker-016.md` and holds no engine socket ([host-lab setup](../STUDY-GUIDE.md#host-lab-setup)).
 
-Use Bash in Linux, macOS Terminal, or Ubuntu under WSL 2 on Windows. The supported engine runs Linux containers. The maintained fixture is `courses/docker/fixtures/compose-lab/`; its README explains copying it into a new ignored learner directory, checking the engine, building locally with visible logs, and using the fixed project name `ds60-docker-study`. The fixture uses port 18080 on host loopback. Stop if that project name or port belongs to unrelated work; choose a new project name consistently in your own copy. Never paste a command against a remote Docker context simply because it is currently selected.
-
-For Dockerfile examples, create a file named `Dockerfile` in a scratch project. YAML snippets describe a fragment unless explicitly called a complete file. Text transcripts are synthetic illustrations, not claims about your machine. Do not substitute a real password, token or private registry into a checked-in example. **How to use the lessons** in the [subject README](../README.md) collects these rules in one place.
+**Host lab.** Save worked example 1 as a Dockerfile in a scratch directory and build it twice: once normally as `ds60-stage-final` and once with `--target build` as `ds60-stage-build`. Run both with `ls /out /app`. The build-stage image has `/out/message.txt` and no `/app/message.txt`; the final image has the reverse, which shows that only the named file crossed the stage boundary. Then run the final image with no command override and confirm that it prints `prepared`. Compare `docker image ls ds60-stage-*`: the sizes are close because both stages start from the same base, a useful reminder that multi-stage builds shrink images only when the build stage carries tools the final stage leaves out. Remove both tags when you finish.
 
 ## Worked example / walkthrough
 
@@ -67,7 +65,7 @@ final: copy program + runtime dependencies -> start -> acceptance request
 
 ## Six progressive exercises
 
-For each exercise, name the object involved and the phase of its lifetime before changing anything, then vary only the condition the task names. Exercises that ask you to predict, explain, compare or diagnose keep their answers in the solutions file; the others show the evidence to look for.
+Answer-type prompts keep their answers in the solutions file ([exercise rules](../STUDY-GUIDE.md#exercise-rules)).
 
 ### Exercise 1: Locate the filesystem used by COPY --from.
 
@@ -103,13 +101,19 @@ For each exercise, name the object involved and the phase of its lifetime before
 
 Testing only in the builder stage and shipping a runtime that lacks a library. Building the wrong `--target`. Assuming a small image is automatically patched and unprivileged.
 
-Exercise 4 is this chapter's boundary case: Diagnose an accidentally shipped debug target. Read the `--target` flag and the final stage name in the build command, then list the shipped image's files to see which stage produced it. Preserve the original failure and the exact changed field before retrying. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
+Exercise 4 is this chapter's boundary case: Diagnose an accidentally shipped debug target. Read the `--target` flag and the final stage name in the build command, then list the shipped image's files to see which stage produced it.
+
+A maintenance trap is naming stages by number. `COPY --from=0` refers to the first stage in the file, so when someone later inserts a new stage at the top, for example to fetch test data, the same line silently copies from a different stage. Sometimes the build fails because the path is missing, and sometimes it succeeds with the wrong file. Name every stage with `AS` and copy by name, as in `COPY --from=build`, so reordering cannot change which filesystem is read. Name external images explicitly too, rather than relying on a stage that happens to start from them.
+
+Never trade a safety control for a passing example ([safety rules](../STUDY-GUIDE.md#safety-rules)).
 
 ## Retrieval, transfer and next steps
 
-Close the explanations first. List what the final stage copies from the builder and what it deliberately leaves behind. Then reconstruct worked example 2 (Distinguish builder and final tests) with one different value, predict what changes, and name which of multi-stage build, build stage, COPY --from, runtime image and --target the change touches.
+**Retrieval.** List what the final stage copies from the builder and what it deliberately leaves behind.
 
-When a host session ends, run `docker compose -p ds60-docker-study down` from your fixture copy. It removes the project's containers and network but keeps named volumes; deleting a volume is a separate, deliberate reset described in the fixture README.
+**Transfer case.** A program is compiled in a `golang` build stage and copied into a `scratch` final image. Running the final image fails with `no such file or directory` for the program, even though `docker export` shows the file is present. What is missing?
+
+Then run the [retrieval loop](../STUDY-GUIDE.md#retrieval-and-cleanup) and end any host session with its cleanup.
 
 ## Primary references
 

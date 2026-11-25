@@ -217,9 +217,7 @@ Line‑by‑line
 
 ## Solution reasoning lens
 
-A strong solution is not merely code that produces one plausible
-output. It establishes a chain from input contract to operation to
-verification:
+Each decision below links an input contract to an operation and its evidence:
 
 1. **`DataLoader(dataset, batch_size=..., shuffle=...)`:** yields bounded feature/target batches and controls training order.
 2. **`model(features)`:** returns logits shaped `(batch, classes)` for multiclass classification.
@@ -236,29 +234,15 @@ verification:
 
 **Evidence of correctness:** Overfit a tiny batch, assert logits/label contracts, show dropout mode behavior, use no-grad validation, aggregate loss by example, and reload a portable checkpoint.
 
-When comparing your attempt with the reference, explain which of these
-decisions your code made explicitly. If the reference makes a different
-choice, compare the contracts and evidence before deciding that one
-version is universally better.
-
 <!-- END ADVANCED PYTHON CONCEPT ENRICHMENT -->
 
 ## Exercise-by-exercise reasoning map
-
-This map connects every learner prompt to a reasoning path. Read the
-explanation before copying code: the goal is to understand the assumptions,
-the evidence that validates the result, and the edge cases that can make an
-apparently correct implementation fail.
 
 ### Exercise 1: Original lesson practice
 
 **Prompt:** Add dropout to the MLP and compare results.
 
 **How to reason about it:** Dropout is active only in training mode and its effect is noisy. Compare seeded runs or validation curves, and place it deliberately after an activation rather than assuming one final score proves benefit.
-
-Use the worked reference earlier in this file, then change one boundary
-condition and rerun the stated checks. A copied output is not evidence
-unless you can explain why that output follows from the inputs.
 
 **Verify:** From identical initial weights and split, print train/eval metrics for dropout=0 and the chosen dropout rate; assert repeated eval-mode predictions are equal while train-mode outputs can differ.
 
@@ -267,10 +251,6 @@ unless you can explain why that output follows from the inputs.
 **Prompt:** Implement a small minibatch training loop with `DataLoader`.
 
 **How to reason about it:** A minibatch loop keeps zero-grad, forward, loss, backward, and step inside the batch iteration. Shuffle training only, use float features and class-index long targets, and aggregate epoch metrics by support.
-
-Use the worked reference earlier in this file, then change one boundary
-condition and rerun the stated checks. A copied output is not evidence
-unless you can explain why that output follows from the inputs.
 
 **Verify:** For a fixed toy dataset, assert each DataLoader batch shape/dtype, account for every example once per epoch, print sample-weighted epoch loss, and show at least one parameter tensor changes after optimizer.step().
 
@@ -291,10 +271,6 @@ def validate_classification_batch(features, targets, logits, class_count):
 One-hot targets require a different explicit contract. Avoid `squeeze()`
 without a dimension because a batch of size one can lose its batch axis.
 
-**Why this matters:** The result should survive a fresh-kernel rerun and
-a deliberately chosen boundary case. If it does not, revisit the
-assumption or data boundary rather than hiding the failure.
-
 **Verify:** Shape and dtype contract; assert features are floating shape (batch,input_features), targets are long shape (batch,), and logits are floating shape (batch,num_classes); include one wrong-dtype and one wrong-width fixture that raise clear errors.
 
 ### Exercise 4: Validation implementation
@@ -310,10 +286,6 @@ total, and raise for an empty loader.
 `torch.inference_mode()` is an even stronger evaluation context when its
 restrictions fit. Keep all returned values as plain Python numbers so the
 history does not retain tensors or device memory.
-
-**Why this matters:** The result should survive a fresh-kernel rerun and
-a deliberately chosen boundary case. If it does not, revisit the
-assumption or data boundary rather than hiding the failure.
 
 **Verify:** Validation implementation; call evaluation from both prior train and eval modes; assert returned loss/accuracy use all sample counts, outputs carry no grad graph, parameters have no new gradients, and the original mode is restored.
 
@@ -332,10 +304,6 @@ Exact reproducibility can vary across devices and algorithms. Record device,
 PyTorch version, deterministic settings, and seed; also test that conclusions
 hold across more than one seed.
 
-**Why this matters:** The result should survive a fresh-kernel rerun and
-a deliberately chosen boundary case. If it does not, revisit the
-assumption or data boundary rather than hiding the failure.
-
 **Verify:** DataLoader reproducibility; with identical torch.Generator seeds, assert two num_workers=0 loaders emit identical sample-ID order; with worker processes, record worker seeding/persistent-worker settings and rerun the equality check.
 
 ### Exercise 6: Portable checkpoint
@@ -351,9 +319,5 @@ then set the intended mode explicitly.
 Checkpoint files are still loaded through PyTorch serialization and should be
 treated as trusted artifacts. Save RNG state as well when exact mid-run resume
 is a requirement.
-
-**Why this matters:** The result should survive a fresh-kernel rerun and
-a deliberately chosen boundary case. If it does not, revisit the
-assumption or data boundary rather than hiding the failure.
 
 **Verify:** Portable checkpoint; save state dicts, epoch, metric history, config, and RNG/seed metadata; load with map_location='cpu', assert fixed-fixture prediction parity, then resume one step and increment epoch/history.

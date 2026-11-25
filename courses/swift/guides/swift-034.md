@@ -24,9 +24,9 @@ AsyncStream bridges callback-style production into this model. Its buffering pol
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles the saved pad as `main.swift` with Swift 6 language checking. An explicit `@main` type contains `static func main() async throws`; the fixed compiler uses `-parse-as-library -swift-version 6`. The examples use the standard library and portable Foundation. `precondition` makes a violated invariant fail the process. The fixed pad accepts one source file, without arbitrary command arguments, interactive input or dependency installation. SwiftUI, UIKit, Apple simulators and application signing belong to the separately prepared macOS/Xcode project labs, never the Linux pad.
+Both streams finish before consumption starts, so their output is deterministic. Remove `continuation.finish()` from Example A and the `for await` loop waits forever after the last value, so the marker never prints; that is task 4's defect, and you will need to stop the run yourself. Task 2 swaps the buffering policy.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Compile contract, starter stop and success marker: [running a lesson](../STUDY-GUIDE.md#running-a-lesson).
 
 
 
@@ -34,7 +34,7 @@ Start with the answer-free learner artifact in your saved classroom pad. It deli
 
 AsyncStream constructs a stream and exposes a continuation. yield admits an element according to the buffer policy; finish ends production. for await consumes until completion.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+Each example ends with a trace; method: [tracing a program](../STUDY-GUIDE.md#tracing-a-program).
 
 ## Worked example / walkthrough
 
@@ -65,6 +65,8 @@ struct LessonMain {
 
 **Observe:** The finite stream totals 5 and terminates.
 
+**Trace.** The `AsyncStream` initializer runs its closure immediately with a continuation. The closure yields 2 and 3 into the stream's buffer and then calls `finish()`, which marks the end. The consumer's `for await` loop receives 2, adding it to give 2, then 3, giving 5, and then sees the finish and exits. Without the finish, the loop would keep waiting for a value that never arrives, because the stream cannot tell a slow producer from a completed one.
+
 ### Example B: Make drop behavior observable
 
 Because production finishes before consumption starts here, the buffer outcome is deterministic.
@@ -92,6 +94,8 @@ struct LessonMain {
 
 **Observe:** The newest-one policy retains 2 and drops the older buffered value.
 
+**Trace.** The policy `.bufferingNewest(1)` keeps at most one unconsumed value and discards the older one when a newer value arrives. Yielding 1 fills the buffer. Yielding 2 finds it full, drops 1 and stores 2. `finish()` ends the stream. The consumer then reads only 2, and the check compares against `[2]`. With `.bufferingOldest(1)`, the buffer would keep 1 and reject 2, so the result would be `[1]`.
+
 ## Exercises
 
 1. **Predict and explain.** Trace production, buffering and completion.
@@ -106,13 +110,15 @@ struct LessonMain {
 
 6. **Transfer and justify.** Choose lossless backpressure or deliberate dropping for a real event source and explain cleanup on cancellation.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Log each task in the [evidence table](../STUDY-GUIDE.md#recording-exercise-evidence) before opening the explanation.
 
 ## Common pitfalls and diagnosis
 
 AsyncStream buffering is not automatically backpressure. Ignoring dropped values can silently lose work. A continuation retained forever can keep resources alive after consumers stop.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+A buffering-policy bug only shows when production outruns consumption. The counterexample for task 5 yields three values into a one-slot buffer before consuming: newest keeps the last, oldest keeps the first, and unbounded keeps all three. Zero events with an immediate finish must produce an empty array and end the loop at once.
+
+Repair routine: [building a regression case](../STUDY-GUIDE.md#building-a-regression-case).
 
 ## Progressive hints
 
@@ -122,11 +128,15 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 ## Self-check and next step
 
-Explain AsyncSequence, Buffer policy, Termination without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+Explain who owns the continuation and who must call `finish()`. Say what the default buffering policy is and when it can grow without bound. Choose dropping or lossless delivery for sensor readings and for payment events, and explain what the consumer loses in each case.
+
+Then follow the general [self-check routine](../STUDY-GUIDE.md#self-check-routine) and save your pad.
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://docs.swift.org/swift-book/documentation/the-swift-programming-language/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+[Documentation](https://docs.swift.org/swift-book/documentation/the-swift-programming-language/): The standard library reference documents `AsyncStream`, its `Continuation` and buffering policies; the Swift book's Concurrency chapter covers asynchronous sequences.
+
+Provenance and limits: [sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

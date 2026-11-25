@@ -63,31 +63,7 @@ condition number and can amplify error.
 
 ## How to run this lesson
 
-**Primary browser route:** run `./classroom` from the repository root and
-choose **Python and data science** on `/classroom`. Open this lesson in the shared workspace,
-read its capability notice, and use its supported coding or reading workflow.
-The [classroom guide](../../../docs/classroom-experience.md) explains saved work, runtimes and switching subjects.
-
-**Optional native notebook/editor route:** the instructions below describe
-separately prepared host tools. They are useful alternatives, not prerequisites
-for opening this lesson in the Docker classroom.
-
-1. Open the Day 33 learner notebook from this guide's **Next
-   step** section in VS Code or JupyterLab.
-2. Select the `Python (ds60sqlpy)` kernel. Start at the top and use
-   **Run All** only after making the written predictions; every added
-   worked example is bounded and offline after bootstrap.
-3. Keep experiments in new scratch cells. Do not edit the official
-   solution while attempting the numbered practice.
-4. Restart the kernel and run from the first cell before calling the
-   lesson complete. A clean run catches hidden state and stale
-   variables.
-
-Linux, macOS, or Ubuntu in Windows WSL 2:
-
-```bash
-.venv/bin/python -m jupyter lab
-```
+Open `python-33` in the classroom, or `python/ds-60day/notebooks/day33_linear_algebra_matrices.ipynb` on a host; the [Python study guide](../../STUDY-GUIDE.md) explains both.
 
 ## Concept deep dive: matrix shapes, linear transformations, rank, and stable least squares
 
@@ -112,10 +88,6 @@ why rank and condition number belong in the diagnostic story.
 - **`np.linalg.lstsq(X, y, rcond=None)`:** solves least squares directly and reports rank without explicitly forming an unstable inverse.
 
 ### Focused example A: trace a matrix product by shape and by hand
-
-Before running the example, predict the shape, type, or direction of the
-result. Write the prediction down so that a surprise becomes evidence
-rather than something to overlook.
 
 ```python
 import numpy as np
@@ -203,9 +175,6 @@ print(
 
 Treat shapes, rank, and conditioning as part of every matrix contract. Prefer stable solvers to symbolic formulas that require an explicit inverse.
 
-Predict or plan before you run code. Use the hint only after an honest
-attempt, and record the evidence that would prove your result correct.
-
 4. **Shape tracing:** For X with shape (120, 8), beta with shape (8,), and y with shape (120,), trace the shapes of X.T, X.T @ X, X @ beta, and residuals. Then explain what changes if beta is shaped (8, 1).
    **Progressive hint:** Write shapes beside every operand before multiplying. A column vector preserves a trailing dimension that can trigger broadcasting.
 
@@ -259,8 +228,7 @@ diagnostics and hyperparameters.
 
 ## Ask an AI tutor about this lesson
 
-The lesson is complete without an AI assistant. If you want optional
-coaching, copy this prompt into the AI tutor while the repository root is open:
+The lesson is complete without AI. For optional coaching, copy this prompt with the repository root open:
 
 ```text
 Tutor me through `python-33` (Day 33: Linear Algebra and Matrices).

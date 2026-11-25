@@ -196,7 +196,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <article class="document"><h2 id="r-031-transform-records-with-explicit-selection-and-ordering">r-031: Transform records with explicit selection and ordering<a class="heading-anchor" href="#r-031-transform-records-with-explicit-selection-and-ordering" aria-label="Link to this section">#</a></h2>
 <p><strong>Level:</strong> intermediate. <strong>Direct prerequisites:</strong> <code>r-010</code>, <code>r-020</code></p>
 <h3 id="run-and-retain-your-work">Run and retain your work<a class="heading-anchor" href="#run-and-retain-your-work" aria-label="Link to this section">#</a></h3>
-<p>Open <code>r-031</code> in <code>/classroom</code> and use the prepared <code>r-statistics</code> profile. Each Run evaluates one <code>main.R</code> script in a fresh offline R process, so define every input in the script; an earlier Run leaves no variables behind. Work in the <a href="../lessons/r-031.R.html">starter</a>. The <a href="../solutions/r-031_reference.R.html">complete reference</a> ends by printing <code>r-031 reference checks passed</code>, and the <a href="../solutions/r-031_solutions.md.html">explained answers</a> are there for deliberate comparison after your own attempt. This chapter prints values only; when a chapter draws figures, the classroom keeps at most two figures per run. The <a href="../README.md.html">course overview</a> describes saved work, figure capture and the prepared package versions.</p>
+<p>The starter prints three order lines, L3, L1 and L2, with quantities 2, 1 and NA, prices 5, 8 and 4 and discounts 1, 0 and 0. Run it and compute net values by hand before transforming: L3 gives 2 times 5 minus 1, which is 9, L1 gives 8, and L2 cannot be computed. Decide whether L2 is excluded or reported before writing any filter.</p>
+<p>Work in the <a href="../lessons/r-031.R.html">starter</a> under the <a href="../STUDY-GUIDE.md.html#run-a-chapter">run rules</a>.</p>
+<p>The <a href="../solutions/r-031_reference.R.html">complete reference</a> ends by printing <code>r-031 reference checks passed</code>.</p>
 <h3 id="outcome-and-mechanism">Outcome and mechanism<a class="heading-anchor" href="#outcome-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Build an auditable table transformation whose row population, units and key alignment remain inspectable.</p>
 <p>A data pipeline is easier to reason about when each stage has one observable purpose. Start with a typed input table and an explicit row grain. Validate its key, derive any needed fields, apply a documented eligibility mask, then choose an output order and schema. Keep the original input available so a reviewer can reconstruct each exclusion and transformation.</p>
@@ -295,14 +297,34 @@ right_net <span class="syntax-operator">&lt;-</span> right<span class="syntax-op
 <li>Order becomes part of the computation rather than presentation only.</li>
 </ol>
 <h3 id="reference-review">Reference review<a class="heading-anchor" href="#reference-review" aria-label="Link to this section">#</a></h3>
-<p>The reference applies the reasoning explained under the worked examples above; the <a href="../solutions/r-031_solutions.md.html">explained answers</a> add an answer for each exercise.</p>
+<p>The reference reuses the worked examples&#x27; reasoning; <a href="../solutions/r-031_solutions.md.html">explained answers</a> cover each exercise.</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
 <ul>
 <li><a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/order.html">R ordering</a></li>
 <li><a href="https://stat.ethz.ch/R-manual/R-devel/library/base/html/Extract.data.frame.html">R data-frame extraction</a></li>
 </ul>
 <h3 id="continue">Continue<a class="heading-anchor" href="#continue" aria-label="Link to this section">#</a></h3>
-<p>Chapters that list <code>r-031</code> as a direct prerequisite: <a href="r-032.md.html"><code>r-032</code></a>, <a href="r-033.md.html"><code>r-033</code></a>, <a href="r-035.md.html"><code>r-035</code></a>, <a href="r-040.md.html"><code>r-040</code></a>.</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Next chapter</th>
+<th>Title</th>
+</tr></thead><tbody>
+<tr>
+<td><a href="r-032.md.html"><code>r-032</code></a></td>
+<td>Grouped summaries and sufficient aggregation state</td>
+</tr>
+<tr>
+<td><a href="r-033.md.html"><code>r-033</code></a></td>
+<td>Joins, key uniqueness and unmatched records</td>
+</tr>
+<tr>
+<td><a href="r-035.md.html"><code>r-035</code></a></td>
+<td>Validate ingestion and preserve rejected-record evidence</td>
+</tr>
+<tr>
+<td><a href="r-040.md.html"><code>r-040</code></a></td>
+<td>An auditable analytical pipeline capstone</td>
+</tr>
+</tbody></table></div>
 <h3 id="ask-an-ai-tutor">Ask an AI tutor<a class="heading-anchor" href="#ask-an-ai-tutor" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for r-031 (Transform records with explicit selection and ordering).
 Read the guide and my saved attempt. Explain the relevant R mechanism,

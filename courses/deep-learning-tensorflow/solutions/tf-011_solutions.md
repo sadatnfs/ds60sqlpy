@@ -1,6 +1,6 @@
 # tf-011: explanatory solutions
 
-Open these answers for Keras models and explicit training contracts after your own attempt at Example A, Construct a scalar model, or after an explicit reveal. Each answer reuses the guide's literal inputs, so a mismatch points to one step. The companion script runs the assertions; this page explains why they test Dense, Compile, Training call. After matching exercise 6, Compare the scalar oracle, invent a new input without looking here.
+Open these answers after an attempt; they reuse the guide's inputs ([comparison steps](../STUDY-GUIDE.md#after-the-solutions)).
 
 ## Mechanism review
 
@@ -132,6 +132,3 @@ np.testing.assert_allclose(-0.1 * grad, 28 / 15, atol=1e-6, rtol=0)
 
 **Verify:** In a fresh process, the exercise checks confirm `grad` matches `-56 / 3` within 1e-6 and `-0.1 * grad` matches `28 / 15` within 1e-6.
 
-## Review after comparison
-
-Change one fixture value in exercise 4, Evaluation leaves weights alone, and predict the new result before running it. Keep the failing version of exercise 5, Show the extra intercept, next to its repair. A missing framework is an environment record, not a failed assertion. No solution downloads data, calls an online model, deploys a service or changes a database.

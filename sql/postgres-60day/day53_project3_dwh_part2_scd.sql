@@ -253,8 +253,8 @@ FROM
 --    creates no new version.
 --    Inputs: For sql-53 Exercise 5, compare the current `dim_customer` row to `desired_customer_state`, which is copied from the same `staged_customer_change` used by Exercise 2.
 --    Expected result/shape: For sql-53 Exercise 5, expected output: exactly one aggregate row, `unchanged_rows_that_would_version = 0`.
---    Verify: For sql-53 Exercise 5, rerun the nullable-safe attribute comparison against `desired_customer_state`; the result must report zero differences. Then alter one staged attribute and require a result of exactly one difference before applying any close/insert statements.
---    Hint ladder, rung 1: Prove both desired and current relations are unique on `customer_id`, then compare with `IS DISTINCT FROM`.
+--    Verify: For sql-53 Exercise 5, confirm that `staged_customer_change` holds one row (customer 1, `Customer 1`, US, `gold`) and that customer 1's current `dim_customer` row carries the same three values, so the count is 0. Then, after a savepoint, run `UPDATE staged_customer_change SET segment = 'silver'` and rerun the comparison: it reports 1 before any close or insert runs; roll back to the savepoint.
+--    Hint ladder, rung 1: For sql-53 Exercise 5, check that `desired_customer_state` and the current `dim_customer` rows each have one row per `customer_id`, then compare `full_name`, `country`, and `segment` with `IS DISTINCT FROM`, which treats two NULLs as equal.
 -- 6. Edge case: define a same-day change policy using timestamptz boundaries or
 --    source sequence numbers, and explain the tradeoff.
 --    Inputs: For sql-53 Exercise 6, model two same-day versions with half-open `tstzrange` values, `[2026-01-15 09:00+00, 2026-01-15 12:00+00)` and `[2026-01-15 12:00+00, infinity)`, instead of inclusive date ranges.

@@ -1,6 +1,6 @@
 # r-022: reference reasoning
 
-Use the [complete reference](r-022_reference.R) with the guide's declared inputs and runtime. Every worked example is also a standalone script.
+Run the [complete reference](r-022_reference.R) under the [run rules](../STUDY-GUIDE.md#run-a-chapter).
 
 ## Why the implementation has this shape
 
@@ -108,4 +108,6 @@ A dedicated conversion function checks the original unit, multiplies values by 1
 
 ## What the checks establish
 
-The reference makes 3 `stopifnot()` checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.
+The assertions confirm that invalid construction fails with the expected diagnostic, that combining 1 and 3 ms with 5 ms gives values 1, 3 and 5 in ms, and that converting 2 seconds yields 2000 ms while the original seconds object still holds 2 s. They do not prove that every method signature validates units, only the combinations exercised here.
+
+The reference makes 3 `stopifnot()` checks; see [what a passing run proves](../STUDY-GUIDE.md#what-a-passing-run-proves).

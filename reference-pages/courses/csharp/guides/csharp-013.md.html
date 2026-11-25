@@ -206,11 +206,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Encapsulation:</strong> Hiding representation behind controlled operations.</p>
 <p><strong>Failure atomicity:</strong> A failed operation leaves the prior valid state intact.</p>
 <h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>The Linux Docker classroom compiles your saved pad as <code>Program.cs</code> in its fixed .NET 10 project. C# 14 is the matching language generation. This route uses the prepared framework libraries; it does not accept arbitrary project files, NuGet packages, command arguments or interactive input. The explicit <code>Program.Main</code> entrypoint makes compilation and execution visible. <code>Check</code> throws on a false condition in every build configuration, unlike conditional debugging assertions.</p>
-<p>Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.</p>
+<p><code>Wallet</code> is declared after <code>Main</code> as a sealed helper class, and both examples construct their own instance, so neither one sees the other&#x27;s balance. Example B&#x27;s negative spend throws <code>ArgumentOutOfRangeException</code>, which the example catches; a passing run has therefore exercised the rejection path.</p>
+<p>Compile contract, starter stop and success marker: <a href="../STUDY-GUIDE.md.html#running-a-lesson">running a lesson</a>.</p>
 <h3 id="syntax-anatomy-and-execution-trace">Syntax anatomy and execution trace<a class="heading-anchor" href="#syntax-anatomy-and-execution-trace" aria-label="Link to this section">#</a></h3>
 <p>A constructor has the class name and no return type. <code>private set</code> permits mutation inside the class. <code>sealed</code> prevents inheritance when extension is not part of the design. Guard clauses reject invalid inputs before state changes.</p>
-<p>Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.</p>
+<p>Each example ends with a trace; method: <a href="../STUDY-GUIDE.md.html#tracing-a-program">tracing a program</a>.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="example-a-preserve-a-nonnegative-balance">Example A: Preserve a nonnegative balance<a class="heading-anchor" href="#example-a-preserve-a-nonnegative-balance" aria-label="Link to this section">#</a></h4>
 <p>Validate affordability before subtraction so rejected requests cannot corrupt state.</p>
@@ -265,6 +265,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> Spending 4 succeeds; spending 7 afterward fails without changing 6.</p>
+<p><strong>Trace.</strong> The constructor checks that 10 is not negative and stores it in <code>Balance</code>. <code>TrySpend(4)</code> passes the negative-amount guard, sees that 4 does not exceed 10, subtracts and returns true, leaving 6. <code>TrySpend(7)</code> finds that 7 exceeds 6 and returns false before the subtraction line, so Balance still reads 6. The order of the checks protects the state.</p>
 <h4 id="example-b-reject-malformed-operations">Example B: Reject malformed operations<a class="heading-anchor" href="#example-b-reject-malformed-operations" aria-label="Link to this section">#</a></h4>
 <p>These are separate boundary policies. Both preserve the invariant, but they communicate different meanings to the caller.</p>
 <pre class="highlighted-code"><code class="language-csharp"><span class="syntax-keyword">using</span> System<span class="syntax-punctuation">;</span>
@@ -323,6 +324,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> Negative spending is rejected and zero is an accepted no-op.</p>
+<p><strong>Trace.</strong> The wallet starts with 5. <code>TrySpend(-1)</code> hits the first guard and throws before any comparison or subtraction, so the catch sets <code>rejected</code> while Balance remains 5. <code>TrySpend(0)</code> passes the guard, 0 does not exceed 5, and subtracting zero leaves 5, so the call returns true. A malformed request throws; a legal request that changes nothing succeeds.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <ol>
 <li><strong>Predict and explain.</strong> Trace the wallet state through successful and rejected spending.</li>
@@ -342,10 +344,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <ol start="6">
 <li><strong>Transfer and justify.</strong> Explain whether a shared wallet needs synchronization when several tasks may spend concurrently.</li>
 </ol>
-<p>For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.</p>
+<p>Log each task in the <a href="../STUDY-GUIDE.md.html#recording-exercise-evidence">evidence table</a> before opening the explanation.</p>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
 <p>Private fields alone do not establish a correct contract. A partially mutated object after failure can poison later operations. This class is intentionally single-threaded; encapsulation does not itself provide synchronization.</p>
-<p>A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.</p>
+<p>For task 4, move <code>Balance -= amount</code> above the affordability test: <code>TrySpend(7)</code> on a balance of 6 then returns false but leaves -1 behind, which is exactly the corruption the guard order prevents. For task 5, spending exactly the balance must succeed and leave 0, because the test is <code>amount &gt; Balance</code>, not <code>&gt;=</code>.</p>
+<p>Repair routine: <a href="../STUDY-GUIDE.md.html#building-a-regression-case">building a regression case</a>.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <ol>
 <li>Reproduce Example A (Preserve a nonnegative balance) before changing anything, and confirm its observation: Spending 4 succeeds; spending 7 afterward fails without changing 6.</li>
@@ -353,9 +356,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>Before opening the explanation, test your task 3 attempt against this lesson&#x27;s main pitfall: Private fields alone do not establish a correct contract.</li>
 </ol>
 <h3 id="self-check-and-next-step">Self-check and next step<a class="heading-anchor" href="#self-check-and-next-step" aria-label="Link to this section">#</a></h3>
-<p>Explain Invariant, Encapsulation, Failure atomicity without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.</p>
+<p>Explain why <code>private set</code> alone does not guarantee a nonnegative balance. For a wallet holding 3, predict the return value and the final balance for spends of 3, 4, 0 and -2. For task 6, describe what can go wrong when two tasks pass the affordability check before either one subtracts.</p>
+<p>Then follow the general <a href="../STUDY-GUIDE.md.html#self-check-routine">self-check routine</a> and save your pad.</p>
 <h3 id="sources-and-execution-boundary">Sources and execution boundary<a class="heading-anchor" href="#sources-and-execution-boundary" aria-label="Link to this section">#</a></h3>
-<p><a href="https://learn.microsoft.com/en-us/dotnet/csharp/">Official language or framework documentation</a>. The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.</p>
+<p><a href="https://learn.microsoft.com/en-us/dotnet/csharp/">Documentation</a>: The C# programming guide&#x27;s pages on classes, constructors and access modifiers explain how a type controls who may change its state.</p>
+<p>Provenance and limits: <a href="../STUDY-GUIDE.md.html#sources-and-execution-boundary">sources and execution boundary</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for csharp-013: Classes, constructors and encapsulated invariants.
 Read courses/csharp/guides/csharp-013.md and courses/csharp/lessons/csharp-013.cs. Prerequisites: csharp-012.

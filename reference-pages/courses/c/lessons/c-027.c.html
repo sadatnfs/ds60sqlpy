@@ -197,27 +197,18 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">int</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">void</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span></span>
 <span class="source-line">  <span class="syntax-comment">/* Exercise 1: Exercise successful allocation: predict an edited check</span></span>
-<span class="source-line"><span class="syntax-comment">     Copy worked example 1 into a scratch pad and change</span></span>
-<span class="source-line"><span class="syntax-comment">     `CHECK(copy_with_allocator(&quot;abc&quot;, &amp;out, controlled_alloc));` to</span></span>
-<span class="source-line"><span class="syntax-comment">     `CHECK(copy_with_allocator(&quot;abc!&quot;, &amp;out, controlled_alloc));` inside its</span></span>
-<span class="source-line"><span class="syntax-comment">     CHECK. Before running, predict whether the CHECK still holds and explain</span></span>
-<span class="source-line"><span class="syntax-comment">     why; then restore it. Expected: With `CHECK(copy_with_allocator(&quot;abc!&quot;,</span></span>
-<span class="source-line"><span class="syntax-comment">     &amp;out, controlled_alloc));` the run stops with `Check failed` at the CHECK</span></span>
-<span class="source-line"><span class="syntax-comment">     on `strcmp(out, &quot;abc&quot;) == 0`, because the &quot;exercise successful allocation&quot;</span></span>
-<span class="source-line"><span class="syntax-comment">     case no longer shows that the output owns an equal string. Restoring</span></span>
-<span class="source-line"><span class="syntax-comment">     `CHECK(copy_with_allocator(&quot;abc&quot;, &amp;out, controlled_alloc));` brings that</span></span>
-<span class="source-line"><span class="syntax-comment">     observation back. */</span></span>
+<span class="source-line"><span class="syntax-comment">     In worked example 1, change `CHECK(copy_with_allocator(&quot;abc&quot;, &amp;out,</span></span>
+<span class="source-line"><span class="syntax-comment">     controlled_alloc));` to `CHECK(copy_with_allocator(&quot;abc!&quot;, &amp;out,</span></span>
+<span class="source-line"><span class="syntax-comment">     controlled_alloc));`. Predict whether the CHECK still holds and why, then</span></span>
+<span class="source-line"><span class="syntax-comment">     run and restore. Expected: `Check failed`:</span></span>
+<span class="source-line"><span class="syntax-comment">     `CHECK(copy_with_allocator(&quot;abc!&quot;, &amp;out, controlled_alloc));` is false,</span></span>
+<span class="source-line"><span class="syntax-comment">     although the output owns an equal string. */</span></span>
 <span class="source-line"></span>
 <span class="source-line">  <span class="syntax-comment">/* Exercise 2: Inject allocation failure: debug a regression</span></span>
-<span class="source-line"><span class="syntax-comment">     A regression changed `fail_allocation = true;` to `fail_allocation =</span></span>
-<span class="source-line"><span class="syntax-comment">     false;` in worked example 2, the &quot;inject allocation failure&quot; case. Run the</span></span>
-<span class="source-line"><span class="syntax-comment">     example with that change, use the failing CHECK to explain why the copy</span></span>
-<span class="source-line"><span class="syntax-comment">     fails and output remains NULL no longer holds and repair it without</span></span>
-<span class="source-line"><span class="syntax-comment">     changing the CHECK. Expected: Before the repair the run stops with `Check</span></span>
-<span class="source-line"><span class="syntax-comment">     failed` at the CHECK on `!copy_with_allocator(&quot;abc&quot;, &amp;out,</span></span>
-<span class="source-line"><span class="syntax-comment">     controlled_alloc)`. Once the line reads `fail_allocation = true;` again,</span></span>
-<span class="source-line"><span class="syntax-comment">     the &quot;inject allocation failure&quot; case again shows that the copy fails and</span></span>
-<span class="source-line"><span class="syntax-comment">     output remains NULL. */</span></span>
+<span class="source-line"><span class="syntax-comment">     In worked example 2, `fail_allocation = true;` now reads `fail_allocation =</span></span>
+<span class="source-line"><span class="syntax-comment">     false;`. Repair it so that the copy fails and output remains NULL again.</span></span>
+<span class="source-line"><span class="syntax-comment">     Expected: `Check failed` at `!copy_with_allocator(&quot;abc&quot;, &amp;out,</span></span>
+<span class="source-line"><span class="syntax-comment">     controlled_alloc)` until the line reads `fail_allocation = true;` again. */</span></span>
 <span class="source-line"></span>
 <span class="source-line">  <span class="syntax-comment">/* Exercise 3: Preserve an existing output pointer</span></span>
 <span class="source-line"><span class="syntax-comment">     Fail allocation while output points to a separate valid buffer.</span></span>

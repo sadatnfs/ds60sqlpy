@@ -1,10 +1,17 @@
 # cuda-115: From Catalyst plans to actual GPU operators
 
-**Route:** CUDA Python and machine learning / GPU Spark specialization. **Stage:** intermediate. **Prerequisites:** `cuda-113`, `cuda-114`. Allow several sessions when the hardware experiment is new; the chapter is not a deadline.
+**Route:** CUDA Python and machine learning / GPU Spark specialization. **Stage:** intermediate. **Prerequisites:** `cuda-113`, `cuda-114`.
 
-## What you will be able to explain
+Pacing, evidence labels and platform rules: [CUDA study guide](../../STUDY-GUIDE.md).
 
-By the end, you can **draw logical versus physical plan**, **explain lazy evaluation**, and **choose operator metrics** with evidence. Start with the two worked cases, then use the editable CPU model to make the quantities concrete.
+## Learning objectives
+
+- Draw logical versus physical plan.
+- Mark GPU candidate nodes.
+- Locate transitions.
+- Explain lazy evaluation.
+- Compare initial and final AQE plan.
+- Choose operator metrics.
 
 ## Mechanism and vocabulary
 
@@ -40,9 +47,13 @@ A synthetic plan Scan -> Filter -> Aggregate can contain a GPU filter and aggreg
 
 A count action triggers execution; constructing a DataFrame alone is lazy. A plan printed before an action does not contain the same runtime evidence as the completed SQL execution view.
 
-## Portable executable model
+## How to run the CPU model
 
-The **CPU reference model** variant runs this bounded worked example using `python-core`. It uses only the Python standard library, small synthetic values and no network. Its purpose is to expose the arithmetic or contract behind the chapter. The separate reference includes assertions for the stated observations.
+Edit the copy; the [reference](../references/cuda-115_cpu.py) adds assertions.
+
+```sh
+python courses/cuda/spark/lessons/cuda-115_cpu.py
+```
 
 ```python
 plan = [("scan", "CPU"), ("filter", "GPU"), ("aggregate", "GPU"), ("collect", "CPU")]
@@ -60,81 +71,62 @@ print("Synthetic plan worksheet:", transitions, "CPU/GPU transitions")
 |---|---|
 | `transitions` | `2` |
 
-Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.
-
 ## Practice and transfer
+
+Record each attempt in the [worksheet](../lessons/cuda-115.md) before opening hints.
 
 ### Exercise 1: Draw logical versus physical plan
 
 **Trap to avoid:** Reading device placement from the logical plan fails, because logical nodes carry no device information and the plugin acts only on the physical plan.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 2: Mark GPU candidate nodes
 
 **Trap to avoid:** Guessing GPU placement from operator type, for example assuming all aggregates run on the GPU, ignores expression-level fallback.
-
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 3: Locate transitions
 
 **Trap to avoid:** Counting GPU nodes and ignoring transitions makes a plan with many short GPU sections look better than one long section.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 4: Explain lazy evaluation
 
 **Trap to avoid:** Timing the line that defines the DataFrame and reporting it as query time measures plan construction, which is nearly instant.
-
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 5: Compare initial and final AQE plan
 
 **Trap to avoid:** Citing the pre-execution plan as the executed plan can report a join strategy that never ran.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 6: Choose operator metrics
 
 **Trap to avoid:** Reporting only total job time hides which operator dominates and whether spilling occurred.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ## Progressive hints
 
-Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.
+Hint *k* belongs to exercise *k*; open one at a time.
 
-1. Start from worked example 1 and mark the quantities needed for the task "Draw logical versus physical plan".
-2. Change one assumption in worked example 2 while preserving the declared contract: mark GPU candidate nodes.
-3. Trace the CPU program's variables before adding hardware behavior: locate transitions.
-4. Draw producers, consumers and the exact operation boundary for the task "Explain lazy evaluation".
-5. Separate what the small fixture establishes from what the real runtime must show: compare initial and final AQE plan.
-6. Write a counterexample to an overbroad claim before you choose operator metrics.
+1. Write the query's intent as logical nodes, then write how each node would actually be executed.
+2. Find the operator names the selected plugin release uses for GPU nodes, instead of guessing from the query text.
+3. Mark every place where data moves between a CPU node and a GPU node.
+4. Ask which call in your code actually makes Spark run the job.
+5. Compare the plan printed before the action with the one shown in the completed SQL execution view.
+6. Choose metrics that together describe rows, batches, time, spill and device activity for each operator.
 
-## Common mistakes and self-review
+## Common mistakes and self-check
 
-Confusing a correct tiny example with a general implementation is the central review risk. For this chapter, challenge the assumption in worked example 2, then ask whether your change preserves the mechanism described above. If you change dtype, layout, ordering, batch size or backend, update the acceptance contract rather than silently reusing the old observation. Explain an unexpected result before trying random configuration changes.
+A common mistake is reading a plan printed before any action as evidence of what ran. Adaptive Query Execution can change the physical plan at run time, and nothing executes until an action such as count. Another is labeling a whole job GPU accelerated because one GPU node appears. Fix both by inspecting the final executed plan and its metrics after an action, operator by operator, and counting the transitions where data changes representation.
 
-Keep a small evidence table with columns **claim**, **input**, **expected observation**, **actual observation** and **limit**. For the first claim use `Draw logical versus physical plan`. For the final claim use `Choose operator metrics`. An unperformed GPU or cluster experiment remains pending even when the CPU model is correct.
+**Evidence limit:** The reference counts two GPU nodes and two backend transitions in a synthetic plan. It does not run Spark, so actual plugin operator names, AQE changes and metrics require an executed query on a prepared GPU environment.
 
-## Platform and evidence contract
+1. What is the difference between explain output and the executed SQL view?
+2. Can a CPU node coexist with useful GPU computation?
+3. Why count transitions in a mixed plan?
 
-The reading worksheet and CPU reference model work through the ordinary Linux Docker classroom on macOS, Linux and Windows using WSL 2. They do not require an NVIDIA GPU. Their results are labeled CPU models or semantic oracles, not simulated hardware performance.
-
-Real CUDA work needs supported NVIDIA hardware, a compatible host driver and an explicitly prepared GPU runtime. An Apple GPU does not execute CUDA kernels. PyTorch MPS on a supported native Mac, ROCm on supported AMD hardware, or other vendor backends can provide separate accelerator learning routes; they need their own package and operation qualification and are not CUDA evidence. The ordinary Linux Docker classroom does not expose native Mac MPS automatically.
-
-Do not download packages, models or data by opening this lesson. Do not attach an engine socket, ambient cluster credentials or an arbitrary remote endpoint. A CPU pass, imported package, successful compilation, real GPU result and measured performance are distinct observations. Record the actual backend, data shape/dtype, source revision, versions and pending checks. A saved completion marker records learning progress, not hardware certification.
-
-GPU Spark is a separate owned external workflow. The ordinary `spark-local-scala` and `spark-local-python` profiles are CPU Spark. Keep the GPU plugin disabled or absent for a CPU-only baseline. Per-operator CPU fallback inside a working GPU plugin environment is a different condition from having no compatible GPU. Never mount a host Docker socket or ambient kubeconfig into an ordinary lesson worker.
+Answers: [self-check answers](../solutions/cuda-115_solutions.md#self-check-answers).
 
 ## Primary references
 
-- [cuDF Spark plugin release and compatibility matrix](https://nvidia.github.io/cudf-spark/docs/download.html)
 - [Supported Spark operators and expression types](https://nvidia.github.io/cudf-spark/docs/supported_ops.html)
-- [GPU Spark tuning guide](https://docs.nvidia.com/cudf-spark/latest/tuning-guide.html)
-- [Apache Spark SQL performance tuning](https://spark.apache.org/docs/latest/sql-performance-tuning.html)
 
-Use the version-matched documentation of your prepared environment. These references describe interfaces and supported boundaries; the chapter's synthetic examples and CPU models are original teaching material.
+Full lists: [documentation and sources](../../STUDY-GUIDE.md#documentation-and-sources).
 
 ## Ask an AI tutor about this lesson
 

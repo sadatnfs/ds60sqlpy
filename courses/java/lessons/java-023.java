@@ -3,22 +3,17 @@ public class Main {
 
   public static void main(String[] args) throws Exception {
     // Exercise 1: Protect a compound counter: change one input
-    // Copy Example A into a scratch `Main.java` and change `for (int i = 0; i < 1000; i++)
-    // counter.increment();` to `for (int i = 1; i < 1000; i++) counter.increment();`. Before
-    // running it with `java -ea Main`, predict which assertion fails and which value it now
-    // sees; then run it and restore the original line.
-    // Expected: The changed run fails with an `AssertionError` from the assertion on
-    // `counter.value() == 2000`. Restoring the original line brings back the worked observation:
-    // counter 2000.
+    // Change `for (int i = 0; i < 1000; i++) counter.increment();` to `for (int i = 1; i < 1000;
+    // i++) counter.increment();` in Example A and predict which assertion fails and why.
+    // Expected: The edited run fails with an `AssertionError` from the assertion on
+    // `counter.value() == 2000`.
 
     // Exercise 2: Use an atomic increment: debug a regression
-    // A regression changed one token in the code that Example B adds after Example A, so one
-    // line now reads `for (int i = 0; i <= 1000; i++) atomic.incrementAndGet();`. Run Example B
-    // with that line, use the failing assertion to locate the defect and repair it without
-    // changing the assertion.
-    // Expected: Before the repair the run fails with an `AssertionError` from the assertion on
-    // `atomic.get() == 2000`; after it the line reads `for (int i = 0; i < 1000; i++)
-    // atomic.incrementAndGet();` again and value 2000.
+    // A regression in Example B's new code makes one line read `for (int i = 0; i <= 1000; i++)
+    // atomic.incrementAndGet();`. Repair it using the failing assertion.
+    // Expected: The unrepaired run fails with an `AssertionError` from the assertion on
+    // `atomic.get() == 2000`; the repaired line reads `for (int i = 0; i < 1000; i++)
+    // atomic.incrementAndGet();`.
 
     // Exercise 3: Inspect compare-and-set
     // Change 0 to 1 with CAS, then retry expecting 0.

@@ -194,9 +194,17 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cuda/python/guides/cuda-089.md</code></p>
     </header>
     <article class="document"><h2 id="cuda-089-allocations-and-out-of-memory-reasoning">cuda-089: Allocations and out-of-memory reasoning<a class="heading-anchor" href="#cuda-089-allocations-and-out-of-memory-reasoning" aria-label="Link to this section">#</a></h2>
-<p><strong>Route:</strong> CUDA Python and machine learning. <strong>Stage:</strong> intermediate. <strong>Prerequisites:</strong> <code>cuda-070</code>, <code>cuda-087</code>. Allow several sessions when the hardware experiment is new; the chapter is not a deadline.</p>
-<h3 id="what-you-will-be-able-to-explain">What you will be able to explain<a class="heading-anchor" href="#what-you-will-be-able-to-explain" aria-label="Link to this section">#</a></h3>
-<p>By the end, you can <strong>build a parameter ledger</strong>, <strong>diagnose a retained graph</strong>, and <strong>design a safe batch-size experiment</strong> with evidence. Start with the two worked cases, then use the editable CPU model to make the quantities concrete.</p>
+<p><strong>Route:</strong> CUDA Python and machine learning. <strong>Stage:</strong> intermediate. <strong>Prerequisites:</strong> <code>cuda-070</code>, <code>cuda-087</code>.</p>
+<p>Pacing, evidence labels and platform rules: <a href="../../STUDY-GUIDE.md.html">CUDA study guide</a>.</p>
+<h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
+<ul>
+<li>Build a parameter ledger.</li>
+<li>Add activation bytes.</li>
+<li>Separate reserve and live usage.</li>
+<li>Diagnose a retained graph.</li>
+<li>Explain memory growth.</li>
+<li>Design a safe batch-size experiment.</li>
+</ul>
 <h3 id="mechanism-and-vocabulary">Mechanism and vocabulary<a class="heading-anchor" href="#mechanism-and-vocabulary" aria-label="Link to this section">#</a></h3>
 <p>Training memory contains parameters, gradients, optimizer state, saved activations, temporary workspaces and allocator reserve. These terms respond differently to batch size and precision. Adam commonly maintains two moment tensors, while mixed-precision implementations may retain additional master state. Count the actual implementation instead of applying one universal bytes-per-parameter rule.</p>
 <p>PyTorch distinguishes allocated and reserved memory and can retain autograd graphs when losses or outputs remain attached. TensorFlow memory growth changes reservation behavior but does not make an oversized live workload fit. Both require bounded experiments with the same model and controlled batch changes. Host container limits do not generally impose a per-process GPU-memory quota. Avoid intentional OOM on shared devices and use supplied failure traces instead.</p>
@@ -212,8 +220,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>For 1000 float32 parameters, parameters, gradients and two moment arrays total 16000 bytes before activations and workspaces. This is an illustrative ledger, not a full framework prediction.</p>
 <h4 id="worked-example-2">Worked example 2<a class="heading-anchor" href="#worked-example-2" aria-label="Link to this section">#</a></h4>
 <p>Doubling batch size can approximately double saved activation payload while leaving parameter count unchanged. Retaining every step loss tensor can grow a graph independently of batch size.</p>
-<h3 id="portable-executable-model">Portable executable model<a class="heading-anchor" href="#portable-executable-model" aria-label="Link to this section">#</a></h3>
-<p>The <strong>CPU reference model</strong> variant runs this bounded worked example using <code>python-core</code>. It uses only the Python standard library, small synthetic values and no network. Its purpose is to expose the arithmetic or contract behind the chapter. The separate reference includes assertions for the stated observations.</p>
+<h3 id="how-to-run-the-cpu-model">How to run the CPU model<a class="heading-anchor" href="#how-to-run-the-cpu-model" aria-label="Link to this section">#</a></h3>
+<p>Edit the copy; the <a href="../references/cuda-089_cpu.py.html">reference</a> adds assertions.</p>
+<pre class="highlighted-code"><code class="language-bash">python courses/cuda/python/lessons/cuda-089_cpu.py</code></pre>
 <pre class="highlighted-code"><code class="language-python">params <span class="syntax-operator">=</span> <span class="syntax-number">1000</span>
 state_bytes <span class="syntax-operator">=</span> params <span class="syntax-operator">*</span> <span class="syntax-number">4</span> <span class="syntax-operator">*</span> <span class="syntax-number">4</span>
 activations <span class="syntax-operator">=</span> <span class="syntax-number">8</span> <span class="syntax-operator">*</span> <span class="syntax-number">128</span> <span class="syntax-operator">*</span> <span class="syntax-number">4</span>
@@ -239,58 +248,54 @@ activations <span class="syntax-operator">=</span> <span class="syntax-number">8
 <td><code>4096</code></td>
 </tr>
 </tbody></table></div>
-<p>Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.</p>
 <h3 id="equal-framework-lanes">Equal framework lanes<a class="heading-anchor" href="#equal-framework-lanes" aria-label="Link to this section">#</a></h3>
 <h4 id="pytorch">PyTorch<a class="heading-anchor" href="#pytorch" aria-label="Link to this section">#</a></h4>
 <p>Distinguish memory_allocated from memory_reserved. Retained tensors and attached loss histories keep graph storage live; scalar summaries should be detached deliberately.</p>
 <h4 id="tensorflow">TensorFlow<a class="heading-anchor" href="#tensorflow" aria-label="Link to this section">#</a></h4>
 <p>Configure memory growth before device initialization when using it. Inspect current/peak allocator observations where supported and separate reservation policy from the required live tensors.</p>
-<p>Choose either lane first, then compare the other using identical mathematical inputs. Framework-specific shape, mode and optimizer rules must be checked separately. Both use offline synthetic examples; no model hub or dataset download is triggered.</p>
+<p>Lane rules: <a href="../../STUDY-GUIDE.md.html#python-gpu-and-framework-labs">framework labs</a>.</p>
 <h3 id="executable-framework-practice">Executable framework practice<a class="heading-anchor" href="#executable-framework-practice" aria-label="Link to this section">#</a></h3>
-<p>The variant chooser offers <strong>PyTorch on CPU</strong>, <strong>TensorFlow on CPU</strong>, and separate <strong>NVIDIA CUDA</strong> versions. CPU versions force CPU placement. CUDA versions require the named GPU profile and refuse to silently fall back. Each complete program uses the same tiny deterministic objective, bounded tensors and local synthetic data. Read its source before running; a framework pass establishes only that variant and environment.</p>
-<p>The checkpoint demonstration is in-memory. It teaches what state must be saved; it does not export a durable model artifact or preserve an in-flight device context. Advanced custom-op, distributed and engine-building projects remain separately prepared external workflows.</p>
+<p>Run the <strong>PyTorch</strong> and <strong>TensorFlow</strong> variants on CPU first; <a href="../../STUDY-GUIDE.md.html#python-gpu-and-framework-labs">lab rules</a>.</p>
 <h3 id="practice-and-transfer">Practice and transfer<a class="heading-anchor" href="#practice-and-transfer" aria-label="Link to this section">#</a></h3>
+<p>Record each attempt in the <a href="../lessons/cuda-089.md.html">worksheet</a> before opening hints.</p>
 <h4 id="exercise-1-build-a-parameter-ledger">Exercise 1: Build a parameter ledger<a class="heading-anchor" href="#exercise-1-build-a-parameter-ledger" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Counting parameters only, 4000 bytes, underestimates training memory by four times for this optimizer.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-2-add-activation-bytes">Exercise 2: Add activation bytes<a class="heading-anchor" href="#exercise-2-add-activation-bytes" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Ignoring activations because they are temporary misses that they live from forward until backward, which is when memory peaks.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-3-separate-reserve-and-live-usage">Exercise 3: Separate reserve and live usage<a class="heading-anchor" href="#exercise-3-separate-reserve-and-live-usage" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Reading the reserved number in a monitoring tool and concluding tensors are leaking confuses cache with live usage. Tools such as <code>nvidia-smi</code> report the reserved total, so they show this inflated number.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-4-diagnose-a-retained-graph">Exercise 4: Diagnose a retained graph<a class="heading-anchor" href="#exercise-4-diagnose-a-retained-graph" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Blaming a fixed-size growth per step on fragmentation or the allocator leads to tuning allocator settings that do not fix the reference leak.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-5-explain-memory-growth">Exercise 5: Explain memory growth<a class="heading-anchor" href="#exercise-5-explain-memory-growth" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Turning growth on to fix an out-of-memory error treats a policy as a capacity increase.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-6-design-a-safe-batch-size-experiment">Exercise 6: Design a safe batch-size experiment<a class="heading-anchor" href="#exercise-6-design-a-safe-batch-size-experiment" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Doubling until the program crashes uses an out-of-memory error as the measurement and can disrupt other users.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
-<p>Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.</p>
+<p>Hint <em>k</em> belongs to exercise <em>k</em>; open one at a time.</p>
 <ol>
-<li>Start from worked example 1 and mark the quantities needed for the task &quot;Build a parameter ledger&quot;.</li>
-<li>Change one assumption in worked example 2 while preserving the declared contract: add activation bytes.</li>
-<li>Trace the CPU program&#x27;s variables before adding hardware behavior: separate reserve and live usage.</li>
-<li>Draw producers, consumers and the exact operation boundary for the task &quot;Diagnose a retained graph&quot;.</li>
-<li>Separate what the small fixture establishes from what the real runtime must show: explain memory growth.</li>
-<li>Write a counterexample to an overbroad claim before you design a safe batch-size experiment.</li>
+<li>Count every array the optimizer keeps per parameter and multiply by the dtype&#x27;s bytes.</li>
+<li>Multiply batch size, saved elements per example and itemsize.</li>
+<li>Ask which number includes storage the allocator holds for reuse but no live tensor uses.</li>
+<li>Look for a loss or output kept in a list across steps that still carries its graph.</li>
+<li>Ask whether changing how memory is reserved changes how many bytes the step needs live.</li>
+<li>Fix small upper bounds before running and decide when you will stop without exhausting the device.</li>
 </ol>
-<h3 id="common-mistakes-and-self-review">Common mistakes and self-review<a class="heading-anchor" href="#common-mistakes-and-self-review" aria-label="Link to this section">#</a></h3>
-<p>Confusing a correct tiny example with a general implementation is the central review risk. For this chapter, challenge the assumption in worked example 2, then ask whether your change preserves the mechanism described above. If you change dtype, layout, ordering, batch size or backend, update the acceptance contract rather than silently reusing the old observation. Explain an unexpected result before trying random configuration changes.</p>
-<p>Keep a small evidence table with columns <strong>claim</strong>, <strong>input</strong>, <strong>expected observation</strong>, <strong>actual observation</strong> and <strong>limit</strong>. For the first claim use <code>Build a parameter ledger</code>. For the final claim use <code>Design a safe batch-size experiment</code>. An unperformed GPU or cluster experiment remains pending even when the CPU model is correct.</p>
-<h3 id="platform-and-evidence-contract">Platform and evidence contract<a class="heading-anchor" href="#platform-and-evidence-contract" aria-label="Link to this section">#</a></h3>
-<p>The reading worksheet and CPU reference model work through the ordinary Linux Docker classroom on macOS, Linux and Windows using WSL 2. They do not require an NVIDIA GPU. Their results are labeled CPU models or semantic oracles, not simulated hardware performance.</p>
-<p>Real CUDA work needs supported NVIDIA hardware, a compatible host driver and an explicitly prepared GPU runtime. An Apple GPU does not execute CUDA kernels. PyTorch MPS on a supported native Mac, ROCm on supported AMD hardware, or other vendor backends can provide separate accelerator learning routes; they need their own package and operation qualification and are not CUDA evidence. The ordinary Linux Docker classroom does not expose native Mac MPS automatically.</p>
-<p>Do not download packages, models or data by opening this lesson. Do not attach an engine socket, ambient cluster credentials or an arbitrary remote endpoint. A CPU pass, imported package, successful compilation, real GPU result and measured performance are distinct observations. Record the actual backend, data shape/dtype, source revision, versions and pending checks. A saved completion marker records learning progress, not hardware certification.</p>
+<h3 id="common-mistakes-and-self-check">Common mistakes and self-check<a class="heading-anchor" href="#common-mistakes-and-self-check" aria-label="Link to this section">#</a></h3>
+<p>A common mistake is applying a universal bytes-per-parameter rule and ignoring activations, workspaces and allocator reserve. Another is keeping every step&#x27;s loss tensor in a list, which retains autograd graphs and grows memory regardless of batch size. A third is reading reserved memory as live usage. Fix these by building a ledger from the actual arrays and dtypes, storing detached scalar summaries and comparing allocated with reserved memory in small, bounded batch experiments.</p>
+<p><strong>Misconception:</strong> Turning on TensorFlow memory growth or clearing an allocator cache will make an oversized workload fit. <strong>Correction:</strong> Memory growth only changes when TensorFlow reserves device memory, and clearing a cache releases memory that is reserved but unused. Neither shrinks the live set of parameters, gradients, optimizer state and activations. If the live set exceeds the device, reduce the batch size or precision, or change the model.</p>
+<p><strong>Evidence limit:</strong> The reference totals 16000 bytes of optimizer state and 4096 activation bytes for an illustrative ledger. Real usage also includes workspaces, allocator reserve and framework internals, so it does not predict an out-of-memory threshold on a device.</p>
+<ol>
+<li>Why does Adam need more memory than plain SGD?</li>
+<li>What does TensorFlow memory growth change?</li>
+<li>Does a container memory limit cap GPU memory?</li>
+</ol>
+<p>Answers: <a href="../solutions/cuda-089_solutions.md.html#self-check-answers">self-check answers</a>.</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
 <ul>
 <li><a href="https://docs.pytorch.org/docs/2.9/notes/cuda.html">PyTorch CUDA semantics</a></li>
 <li><a href="https://www.tensorflow.org/guide/gpu">TensorFlow GPU guide</a></li>
 </ul>
-<p>Use the version-matched documentation of your prepared environment. These references describe interfaces and supported boundaries; the chapter&#x27;s synthetic examples and CPU models are original teaching material.</p>
+<p>Full lists: <a href="../../STUDY-GUIDE.md.html#documentation-and-sources">documentation and sources</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning skill for cuda-089: Allocations and out-of-memory reasoning.
 Read courses/cuda/python/guides/cuda-089.md and courses/cuda/python/lessons/cuda-089.md.

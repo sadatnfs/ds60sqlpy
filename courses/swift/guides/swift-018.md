@@ -24,9 +24,9 @@ Constraints expose the capabilities an algorithm needs. Comparable permits order
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles the saved pad as `main.swift` with Swift 6 language checking. An explicit `@main` type contains `static func main() async throws`; the fixed compiler uses `-parse-as-library -swift-version 6`. The examples use the standard library and portable Foundation. `precondition` makes a violated invariant fail the process. The fixed pad accepts one source file, without arbitrary command arguments, interactive input or dependency installation. SwiftUI, UIKit, Apple simulators and application signing belong to the separately prepared macOS/Xcode project labs, never the Linux pad.
+Every call to `larger` lets the compiler infer `T`, so task 1 is done on paper before running anything. Task 4 adds a method call on an unconstrained `T`; the compiler rejects it with a message that the value has no such member, and that message belongs in your evidence table.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Compile contract, starter stop and success marker: [running a lesson](../STUDY-GUIDE.md#running-a-lesson).
 
 
 
@@ -34,7 +34,7 @@ Start with the answer-free learner artifact in your saved classroom pad. It deli
 
 `func larger<T: Comparable>` introduces a constrained type parameter. The return type T preserves the input relationship. Generic structs use the same parameter syntax.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+Each example ends with a trace; method: [tracing a program](../STUDY-GUIDE.md#tracing-a-program).
 
 ## Worked example / walkthrough
 
@@ -66,6 +66,8 @@ struct LessonMain {
 
 **Observe:** One implementation preserves Int and String results.
 
+**Trace.** In `larger(3, 8)`, both arguments are `Int`, so `T` is inferred as `Int`. The body compares 3 with 8, finds `3 >= 8` false and returns the right argument, 8. In `larger("apple", "pear")`, `T` is `String`, and the comparison is lexicographic: apple sorts before pear, so pear is returned. One function body serves both types because `Comparable` guarantees that `>=` exists. When the arguments are equal, the `>=` test is true and the left argument is returned, which matters only when equal values can be told apart.
+
 ### Example B: Preserve container element type
 
 The relationship is encoded in the type rather than a runtime convention.
@@ -95,6 +97,8 @@ struct LessonMain {
 
 **Observe:** Swapping retains the same concrete element type.
 
+**Trace.** `Pair(first: "left", second: "right")` infers `T` as `String`. `swapped()` constructs a new `Pair<T>` with the fields exchanged, so the result is a `Pair<String>` holding right and left. The original `pair` is a `let` and is not modified; the method returns a fresh value. Because the return type mentions the same `T`, the compiler knows `swapped.first` is a `String` without a cast, which is the relationship this example is about.
+
 ## Exercises
 
 1. **Predict and explain.** Identify inferred generic types at every call.
@@ -109,13 +113,15 @@ struct LessonMain {
 
 6. **Transfer and justify.** Choose generic or existential abstraction for an API that must preserve concrete result type.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Log each task in the [evidence table](../STUDY-GUIDE.md#recording-exercise-evidence) before opening the explanation.
 
 ## Common pitfalls and diagnosis
 
 Any discards useful type information. Excessively broad constraints make reuse harder. A generic algorithm still needs domain-specific failure and ordering policies.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+Tie behavior is the counterexample for task 5: `larger` returns the left argument for equal inputs, so a version written with `>` instead of `>=` returns the right one. With plain integers both answers print the same value. Use a type whose equal values remain distinguishable, such as a struct compared only by score but carrying a name, and check which name comes back.
+
+Repair routine: [building a regression case](../STUDY-GUIDE.md#building-a-regression-case).
 
 ## Progressive hints
 
@@ -125,11 +131,15 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 ## Self-check and next step
 
-Explain Generic parameter, Constraint, Type relationship without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+State what the constraint `T: Comparable` allows inside `larger` and what it forbids. Explain why `larger(3, 2.5)` infers `Double` for `T`, while passing an `Int` variable and a `Double` variable fails to compile. Describe one API that should return a generic `T` rather than `any Comparable`, and the reason.
+
+Then follow the general [self-check routine](../STUDY-GUIDE.md#self-check-routine) and save your pad.
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://docs.swift.org/swift-book/documentation/the-swift-programming-language/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+[Documentation](https://docs.swift.org/swift-book/documentation/the-swift-programming-language/): The Generics chapter of the Swift book covers generic functions, generic types, type constraints and type inference at call sites.
+
+Provenance and limits: [sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

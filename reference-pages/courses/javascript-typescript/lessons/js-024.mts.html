@@ -197,18 +197,16 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">export</span> <span class="syntax-punctuation">{</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-comment">// Exercise 1: Validate and copy a complete order: change one input</span></span>
-<span class="source-line"><span class="syntax-comment">// Copy Example A into a scratch `main.mts` and change `{ sku: &#x27;X&#x27;, quantity: 2 },` to `{</span></span>
-<span class="source-line"><span class="syntax-comment">// sku: &#x27;X&#x27;, quantity: 3 },`. Before running it, predict which check fails and which value it</span></span>
-<span class="source-line"><span class="syntax-comment">// now sees; then run it and restore the original line.</span></span>
-<span class="source-line"><span class="syntax-comment">// Expected: The changed run fails with an `AssertionError` at</span></span>
+<span class="source-line"><span class="syntax-comment">// In a scratch copy of Example A, change `{ sku: &#x27;X&#x27;, quantity: 2 },` to `{ sku: &#x27;X&#x27;,</span></span>
+<span class="source-line"><span class="syntax-comment">// quantity: 3 },`. Which check fails, and what value does it see?</span></span>
+<span class="source-line"><span class="syntax-comment">// Expected: The edited run fails with an `AssertionError` at</span></span>
 <span class="source-line"><span class="syntax-comment">// `assert.equal(result.value.items.reduce((sum, item) =&gt; sum + item.quantity, 0), 5)`.</span></span>
 <span class="source-line"><span class="syntax-comment">// Restoring `{ sku: &#x27;X&#x27;, quantity: 2 },` brings back: success with total quantity 5;</span></span>
 <span class="source-line"><span class="syntax-comment">// independent copied item records.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">// Exercise 2: Report a nested domain failure precisely: debug a regression</span></span>
-<span class="source-line"><span class="syntax-comment">// A regression changed one token in Example B, so one line now reads `{ sku: &#x27;Y&#x27;, quantity:</span></span>
-<span class="source-line"><span class="syntax-comment">// 1 },`. Run Example B with that line, use the failing check to locate the defect and repair</span></span>
-<span class="source-line"><span class="syntax-comment">// it without changing the check.</span></span>
+<span class="source-line"><span class="syntax-comment">// A regression made one Example B line read `{ sku: &#x27;Y&#x27;, quantity: 1 },`. Locate and repair</span></span>
+<span class="source-line"><span class="syntax-comment">// it without editing the check.</span></span>
 <span class="source-line"><span class="syntax-comment">// Expected: Before the repair the run fails with an `AssertionError` at</span></span>
 <span class="source-line"><span class="syntax-comment">// `assert.equal(result.ok, false)`. Restoring `{ sku: &#x27;Y&#x27;, quantity: 0 },` brings back:</span></span>
 <span class="source-line"><span class="syntax-comment">// failure code schema and path `items[1].quantity`.</span></span>

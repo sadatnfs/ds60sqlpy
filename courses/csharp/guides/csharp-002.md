@@ -24,9 +24,9 @@ A type describes the values an expression may hold and the operations available 
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles your saved pad as `Program.cs` in its fixed .NET 10 project. C# 14 is the matching language generation. This route uses the prepared framework libraries; it does not accept arbitrary project files, NuGet packages, command arguments or interactive input. The explicit `Program.Main` entrypoint makes compilation and execution visible. `Check` throws on a false condition in every build configuration, unlike conditional debugging assertions.
+Both examples compile cleanly, so this lesson's surprises are runtime values rather than diagnostics. Task 1's third expression, `(double)(7/2)`, is worth running: it prints 3, not 3.5, because the cast happens after integer division has already discarded the half.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Compile contract, starter stop and success marker: [running a lesson](../STUDY-GUIDE.md#running-a-lesson).
 
 
 
@@ -34,7 +34,7 @@ Start with the answer-free learner artifact in your saved classroom pad. It deli
 
 `int count = 7` declares and initializes. `var inferred = 7` also produces an int. `(double)count` converts before an operator uses the value. `int.TryParse(text, out int parsed)` returns success separately from the output value; a failed parse must not silently mean a real zero.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+Each example ends with a trace; method: [tracing a program](../STUDY-GUIDE.md#tracing-a-program).
 
 ## Worked example / walkthrough
 
@@ -80,6 +80,8 @@ internal static class Program {
 
 **Observe:** The integer result is 3 and the floating result is 3.5.
 
+**Trace.** The literals 7 and 2 are both `int`, so `7 / 2` is integer division: the result 3 is stored in `whole` and the remainder is discarded. In the second line the cast binds tighter than division, so `(double)7` produces 7.0 first, and division between a double and an int converts the int, giving 3.5. The operand types chose the operation, not the variable on the left.
+
 ### Example B: Parse an external representation
 
 The success flag carries information that a default integer cannot. Validation belongs where text becomes a typed value.
@@ -122,6 +124,8 @@ internal static class Program {
 
 **Observe:** 42 parses successfully; words fail without an exception.
 
+**Trace.** `int.TryParse("42", out int value)` reads the text, succeeds, writes 42 into `value` and returns true, which is stored in `accepted`. The second call receives forty-two spelled in words, fails, writes 0 into the discarded output and returns false. Neither call throws. The checks read the Boolean first, because the 0 written on failure is a placeholder rather than a parsed quantity.
+
 ## Exercises
 
 1. **Predict and explain.** Predict the type and value of 7/2, 7/2.0 and (double)(7/2).
@@ -136,13 +140,15 @@ internal static class Program {
 
 6. **Transfer and justify.** Design an input boundary for a percentage and document its accepted textual and numeric ranges.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Log each task in the [evidence table](../STUDY-GUIDE.md#recording-exercise-evidence) before opening the explanation.
 
 ## Common pitfalls and diagnosis
 
 An inferred type is still static. A cast is not a validation policy. `TryParse` alone accepts negative integers, so domain rules such as nonnegative quantities need a second condition.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+For task 3, `TryParse` returns true for -5, for `+5` and even for ` 42 ` with surrounding spaces, so a quantity validator needs a separate `parsed >= 0` condition. Text such as 3000000000 lies outside the int range and simply returns false. For task 4, the counterexample is 7 and 2: converting after division gives 3, while converting before gives 3.5.
+
+Repair routine: [building a regression case](../STUDY-GUIDE.md#building-a-regression-case).
 
 ## Progressive hints
 
@@ -152,11 +158,15 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 ## Self-check and next step
 
-Explain Static type, Conversion, Try pattern without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+State the type and value of `7 / 2.0` and of `(double)(7 / 2)`. Explain why `int.TryParse` returns a Boolean instead of returning 0 for bad text. List the inputs your quantity validator accepts and rejects, including empty text and a leading plus sign, and name the rule that rejects each one.
+
+Then follow the general [self-check routine](../STUDY-GUIDE.md#self-check-routine) and save your pad.
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://learn.microsoft.com/en-us/dotnet/csharp/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+[Documentation](https://learn.microsoft.com/en-us/dotnet/csharp/): The language reference covers integral numeric types, explicit conversions and the arithmetic operators, including integer division.
+
+Provenance and limits: [sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

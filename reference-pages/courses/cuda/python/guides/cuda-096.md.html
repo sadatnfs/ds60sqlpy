@@ -194,9 +194,17 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cuda/python/guides/cuda-096.md</code></p>
     </header>
     <article class="document"><h2 id="cuda-096-capstone-a-trustworthy-gpu-model-report">cuda-096: Capstone: a trustworthy GPU model report<a class="heading-anchor" href="#cuda-096-capstone-a-trustworthy-gpu-model-report" aria-label="Link to this section">#</a></h2>
-<p><strong>Route:</strong> CUDA Python and machine learning. <strong>Stage:</strong> intermediate. <strong>Prerequisites:</strong> <code>cuda-088</code>, <code>cuda-089</code>, <code>cuda-090</code>, <code>cuda-092</code>, <code>cuda-094</code>, <code>cuda-095</code>. Allow several sessions when the hardware experiment is new; the chapter is not a deadline.</p>
-<h3 id="what-you-will-be-able-to-explain">What you will be able to explain<a class="heading-anchor" href="#what-you-will-be-able-to-explain" aria-label="Link to this section">#</a></h3>
-<p>By the end, you can <strong>compute the validation metric</strong>, <strong>design a restart comparison</strong>, and <strong>state pending hardware evidence</strong> with evidence. Start with the two worked cases, then use the editable CPU model to make the quantities concrete.</p>
+<p><strong>Route:</strong> CUDA Python and machine learning. <strong>Stage:</strong> intermediate. <strong>Prerequisites:</strong> <code>cuda-088</code>, <code>cuda-089</code>, <code>cuda-090</code>, <code>cuda-092</code>, <code>cuda-094</code>, <code>cuda-095</code>.</p>
+<p>Pacing, evidence labels and platform rules: <a href="../../STUDY-GUIDE.md.html">CUDA study guide</a>.</p>
+<h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
+<ul>
+<li>Compute the validation metric.</li>
+<li>Write the sample ledger.</li>
+<li>Define a memory budget.</li>
+<li>Design a restart comparison.</li>
+<li>Choose one optimization.</li>
+<li>State pending hardware evidence.</li>
+</ul>
 <h3 id="mechanism-and-vocabulary">Mechanism and vocabulary<a class="heading-anchor" href="#mechanism-and-vocabulary" aria-label="Link to this section">#</a></h3>
 <p>Train a tiny offline regressor or classifier using either complete framework lane. Define a held-out split before tuning. Preserve the CPU baseline, the training objective and the total number of examples. A report should separate numerical agreement, learning quality, device placement, throughput, memory and restart behavior. An optimization that drops hard examples or changes effective batch size needs a new experiment label.</p>
 <p>Use a small bounded search over one variable at a time. Retain a failed hypothesis and explain what evidence rejected it. Save the software/hardware ledger, source revision, seeds, split, timing boundary and checkpoint test. CPU-only learners can complete the mathematical and reporting sections now, while GPU timings and placement remain pending. A capstone completion marker records learning work, not a production certification.</p>
@@ -212,8 +220,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Predictions [1,2,3] against targets [1,3,2] have MSE 2/3. Record this validation metric separately from the training loss.</p>
 <h4 id="worked-example-2">Worked example 2<a class="heading-anchor" href="#worked-example-2" aria-label="Link to this section">#</a></h4>
 <p>A candidate that runs twice as fast but evaluates only half the held-out examples cannot use the original metric denominator. Compare the same examples and preserve sample accounting.</p>
-<h3 id="portable-executable-model">Portable executable model<a class="heading-anchor" href="#portable-executable-model" aria-label="Link to this section">#</a></h3>
-<p>The <strong>CPU reference model</strong> variant runs this bounded worked example using <code>python-core</code>. It uses only the Python standard library, small synthetic values and no network. Its purpose is to expose the arithmetic or contract behind the chapter. The separate reference includes assertions for the stated observations.</p>
+<h3 id="how-to-run-the-cpu-model">How to run the CPU model<a class="heading-anchor" href="#how-to-run-the-cpu-model" aria-label="Link to this section">#</a></h3>
+<p>Edit the copy; the <a href="../references/cuda-096_cpu.py.html">reference</a> adds assertions.</p>
+<pre class="highlighted-code"><code class="language-bash">python courses/cuda/python/lessons/cuda-096_cpu.py</code></pre>
 <pre class="highlighted-code"><code class="language-python">predictions<span class="syntax-punctuation">,</span> targets <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">]</span>
 mse <span class="syntax-operator">=</span> <span class="syntax-builtin">sum</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">(</span>p <span class="syntax-operator">-</span> t<span class="syntax-punctuation">)</span> <span class="syntax-operator">*</span><span class="syntax-operator">*</span> <span class="syntax-number">2</span> <span class="syntax-keyword">for</span> p<span class="syntax-punctuation">,</span> t <span class="syntax-operator">in</span> <span class="syntax-builtin">zip</span><span class="syntax-punctuation">(</span>predictions<span class="syntax-punctuation">,</span> targets<span class="syntax-punctuation">,</span> strict<span class="syntax-operator">=</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">/</span> <span class="syntax-builtin">len</span><span class="syntax-punctuation">(</span>targets<span class="syntax-punctuation">)</span>
 <span class="syntax-keyword">assert</span> <span class="syntax-builtin">abs</span><span class="syntax-punctuation">(</span>mse <span class="syntax-operator">-</span> <span class="syntax-number">2</span> <span class="syntax-operator">/</span> <span class="syntax-number">3</span><span class="syntax-punctuation">)</span> <span class="syntax-operator">&lt;</span> <span class="syntax-number">1e-12</span>
@@ -239,55 +248,51 @@ report <span class="syntax-operator">=</span> <span class="syntax-punctuation">{
 <td><code>0.6666666666666666</code></td>
 </tr>
 </tbody></table></div>
-<p>Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.</p>
 <h3 id="equal-framework-lanes">Equal framework lanes<a class="heading-anchor" href="#equal-framework-lanes" aria-label="Link to this section">#</a></h3>
 <h4 id="pytorch">PyTorch<a class="heading-anchor" href="#pytorch" aria-label="Link to this section">#</a></h4>
 <p>Submit the PyTorch state and data ledger, reference loss/gradient tests, complete timing, memory observations and restart evidence. GPU-only claims need the CUDA variant on real hardware.</p>
 <h4 id="tensorflow">TensorFlow<a class="heading-anchor" href="#tensorflow" aria-label="Link to this section">#</a></h4>
 <p>Submit the TensorFlow variable/optimizer and input-pipeline ledger with equally complete numerical, timing, memory and restart evidence. One framework&#x27;s successful run does not qualify the other.</p>
-<p>Choose either lane first, then compare the other using identical mathematical inputs. Framework-specific shape, mode and optimizer rules must be checked separately. Both use offline synthetic examples; no model hub or dataset download is triggered.</p>
+<p>Lane rules: <a href="../../STUDY-GUIDE.md.html#python-gpu-and-framework-labs">framework labs</a>.</p>
 <h3 id="practice-and-transfer">Practice and transfer<a class="heading-anchor" href="#practice-and-transfer" aria-label="Link to this section">#</a></h3>
+<p>Record each attempt in the <a href="../lessons/cuda-096.md.html">worksheet</a> before opening hints.</p>
 <h4 id="exercise-1-compute-the-validation-metric">Exercise 1: Compute the validation metric<a class="heading-anchor" href="#exercise-1-compute-the-validation-metric" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Reporting the training loss in place of the validation metric mixes data used for fitting with data held out for evaluation.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-2-write-the-sample-ledger">Exercise 2: Write the sample ledger<a class="heading-anchor" href="#exercise-2-write-the-sample-ledger" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Accepting a candidate that is twice as fast but evaluates only half the held-out examples compares different metrics.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-3-define-a-memory-budget">Exercise 3: Define a memory budget<a class="heading-anchor" href="#exercise-3-define-a-memory-budget" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Giving a single total from a monitoring tool mixes reserved and live memory. It also hides which component to shrink when the budget is exceeded, such as switching optimizers or lowering the batch.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-4-design-a-restart-comparison">Exercise 4: Design a restart comparison<a class="heading-anchor" href="#exercise-4-design-a-restart-comparison" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Testing only that the checkpoint loads without errors says nothing about continuation. A checkpoint missing momentum or sampler position loads cleanly and still diverges on the next step.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-5-choose-one-optimization">Exercise 5: Choose one optimization<a class="heading-anchor" href="#exercise-5-choose-one-optimization" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Applying a popular optimization without measuring may target a stage that is not the bottleneck. Mixed precision, for example, does little when the GPU sits idle waiting for host input.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-6-state-pending-hardware-evidence">Exercise 6: State pending hardware evidence<a class="heading-anchor" href="#exercise-6-state-pending-hardware-evidence" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Leaving out the verification field lets readers assume the GPU path was tested. A later reader cannot then distinguish a validated deployment from a desk check.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
-<p>Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.</p>
+<p>Hint <em>k</em> belongs to exercise <em>k</em>; open one at a time.</p>
 <ol>
-<li>Start from worked example 1 and mark the quantities needed for the task &quot;Compute the validation metric&quot;.</li>
-<li>Change one assumption in worked example 2 while preserving the declared contract: write the sample ledger.</li>
-<li>Trace the CPU program&#x27;s variables before adding hardware behavior: define a memory budget.</li>
-<li>Draw producers, consumers and the exact operation boundary for the task &quot;Design a restart comparison&quot;.</li>
-<li>Separate what the small fixture establishes from what the real runtime must show: choose one optimization.</li>
-<li>Write a counterexample to an overbroad claim before you state pending hardware evidence.</li>
+<li>Square the error for each prediction and target pair, then average.</li>
+<li>Count examples assigned to training and validation and how many each step consumed.</li>
+<li>List weights, optimizer state, activations and allocator reserve as separate entries.</li>
+<li>Compare an uninterrupted run with one that stops, restores and continues over the same steps.</li>
+<li>Choose the change that targets the bottleneck your measurements identified, and only that one.</li>
+<li>Write which results came from the CPU and which GPU checks have not run yet.</li>
 </ol>
-<h3 id="common-mistakes-and-self-review">Common mistakes and self-review<a class="heading-anchor" href="#common-mistakes-and-self-review" aria-label="Link to this section">#</a></h3>
-<p>Confusing a correct tiny example with a general implementation is the central review risk. For this chapter, challenge the assumption in worked example 2, then ask whether your change preserves the mechanism described above. If you change dtype, layout, ordering, batch size or backend, update the acceptance contract rather than silently reusing the old observation. Explain an unexpected result before trying random configuration changes.</p>
-<p>Keep a small evidence table with columns <strong>claim</strong>, <strong>input</strong>, <strong>expected observation</strong>, <strong>actual observation</strong> and <strong>limit</strong>. For the first claim use <code>Compute the validation metric</code>. For the final claim use <code>State pending hardware evidence</code>. An unperformed GPU or cluster experiment remains pending even when the CPU model is correct.</p>
-<h3 id="platform-and-evidence-contract">Platform and evidence contract<a class="heading-anchor" href="#platform-and-evidence-contract" aria-label="Link to this section">#</a></h3>
-<p>The reading worksheet and CPU reference model work through the ordinary Linux Docker classroom on macOS, Linux and Windows using WSL 2. They do not require an NVIDIA GPU. Their results are labeled CPU models or semantic oracles, not simulated hardware performance.</p>
-<p>Real CUDA work needs supported NVIDIA hardware, a compatible host driver and an explicitly prepared GPU runtime. An Apple GPU does not execute CUDA kernels. PyTorch MPS on a supported native Mac, ROCm on supported AMD hardware, or other vendor backends can provide separate accelerator learning routes; they need their own package and operation qualification and are not CUDA evidence. The ordinary Linux Docker classroom does not expose native Mac MPS automatically.</p>
-<p>Do not download packages, models or data by opening this lesson. Do not attach an engine socket, ambient cluster credentials or an arbitrary remote endpoint. A CPU pass, imported package, successful compilation, real GPU result and measured performance are distinct observations. Record the actual backend, data shape/dtype, source revision, versions and pending checks. A saved completion marker records learning progress, not hardware certification.</p>
+<h3 id="common-mistakes-and-self-check">Common mistakes and self-check<a class="heading-anchor" href="#common-mistakes-and-self-check" aria-label="Link to this section">#</a></h3>
+<p>A common capstone mistake is reporting a faster candidate that quietly evaluates fewer held-out examples or changes the effective batch size. Its metric is no longer comparable with the baseline. Another mistake is merging CPU results and pending GPU evidence into one claim. Fix both by preserving the split and sample accounting, labeling any change in objective or examples as a new experiment, and marking CPU verification and GPU verification as separate fields in the report.</p>
+<p><strong>Evidence limit:</strong> The reference checks three examples with MSE 2/3 and records GPU verification as false. It shows the report structure, not learning quality, device placement or throughput, which require running a framework lane on a supported device.</p>
+<ol>
+<li>Why define the held-out split before tuning?</li>
+<li>Why keep a failed hypothesis in the report?</li>
+<li>What does a capstone completion marker certify?</li>
+</ol>
+<p>Answers: <a href="../solutions/cuda-096_solutions.md.html#self-check-answers">self-check answers</a>.</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
 <ul>
 <li><a href="https://docs.pytorch.org/docs/2.9/notes/cuda.html">PyTorch CUDA semantics</a></li>
 <li><a href="https://www.tensorflow.org/guide/gpu">TensorFlow GPU guide</a></li>
 </ul>
-<p>Use the version-matched documentation of your prepared environment. These references describe interfaces and supported boundaries; the chapter&#x27;s synthetic examples and CPU models are original teaching material.</p>
+<p>Full lists: <a href="../../STUDY-GUIDE.md.html#documentation-and-sources">documentation and sources</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning skill for cuda-096: Capstone: a trustworthy GPU model report.
 Read courses/cuda/python/guides/cuda-096.md and courses/cuda/python/lessons/cuda-096.md.

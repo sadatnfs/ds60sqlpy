@@ -32,11 +32,9 @@ A useful hardening test has two halves: intended behavior still works, and an un
 
 ## How to use this lesson
 
-The classroom displays this guide and saves your worksheet, `courses/docker/lessons/docker-023.md`. Its Run button does not control your Docker engine. Docker engine access is powerful host access, so the classroom deliberately receives no engine socket. Work through the supplied examples without starting anything, then use the optional host lab only in your own disposable project. Reading a command, parsing YAML and actually running the project are different forms of evidence.
+The classroom saves `courses/docker/lessons/docker-023.md` and holds no engine socket ([host-lab setup](../STUDY-GUIDE.md#host-lab-setup)).
 
-Use Bash in Linux, macOS Terminal, or Ubuntu under WSL 2 on Windows. The supported engine runs Linux containers. The maintained fixture is `courses/docker/fixtures/compose-lab/`; its README explains copying it into a new ignored learner directory, checking the engine, building locally with visible logs, and using the fixed project name `ds60-docker-study`. The fixture uses port 18080 on host loopback. Stop if that project name or port belongs to unrelated work; choose a new project name consistently in your own copy. Never paste a command against a remote Docker context simply because it is currently selected.
-
-For Dockerfile examples, create a file named `Dockerfile` in a scratch project. YAML snippets describe a fragment unless explicitly called a complete file. Text transcripts are synthetic illustrations, not claims about your machine. Do not substitute a real password, token or private registry into a checked-in example. **How to use the lessons** in the [subject README](../README.md) collects these rules in one place.
+**Host lab.** Read the effective security state of the running app rather than the YAML: `docker compose -p ds60-docker-study exec app grep -E 'CapEff|NoNewPrivs' /proc/self/status` should show `CapEff` as all zeros and `NoNewPrivs` as 1. For comparison, run a throwaway container as root without the fixture settings, `docker run --rm --pull never --user 0 ds60-docker-study:local grep CapEff /proc/self/status`, and note the nonzero default set. Then add `--cap-drop ALL` and try `python -c "import os; os.chown('/app/server.py', 1, 1)"`: even root is refused, because changing ownership needs `CAP_CHOWN`. Finish with `docker inspect` on the app container and read `HostConfig.CapDrop`, `ReadonlyRootfs` and `SecurityOpt`. Nothing here changes the project.
 
 ## Worked example / walkthrough
 
@@ -68,7 +66,7 @@ negative: writing /app/unexpected.txt fails
 
 ## Six progressive exercises
 
-For each exercise, name the object involved and the phase of its lifetime before changing anything, then vary only the condition the task names. Exercises that ask you to predict, explain, compare or diagnose keep their answers in the solutions file; the others show the evidence to look for.
+Answer-type prompts keep their answers in the solutions file ([exercise rules](../STUDY-GUIDE.md#exercise-rules)).
 
 ### Exercise 1: Map each hardening setting to its mechanism.
 
@@ -104,13 +102,19 @@ For each exercise, name the object involved and the phase of its lifetime before
 
 Adding capabilities or `--privileged` until an error disappears. Removing `read_only` instead of mounting the one path the app must write. Calling the container secure because it runs as non-root.
 
-Exercise 4 is this chapter's boundary case: Diagnose an app that needs an undocumented cache directory. Read the application's error for the exact path it tried to write, then decide whether that cache is temporary, durable or avoidable before choosing a mount. Preserve the original failure and the exact changed field before retrying. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
+Exercise 4 is this chapter's boundary case: Diagnose an app that needs an undocumented cache directory. Read the application's error for the exact path it tried to write, then decide whether that cache is temporary, durable or avoidable before choosing a mount.
+
+A review trap is checking hardening only in the Compose file. The file describes what Compose asks for, but the running container is what matters, and run-time flags can change it: a `docker run` of the same image with `--user 0` or `--cap-add`, or a later override file, can undo a setting the reviewed YAML still shows. Verify the live container with `docker inspect`, reading `HostConfig.CapDrop`, `HostConfig.ReadonlyRootfs` and `HostConfig.SecurityOpt`, and confirm from inside with `/proc/self/status`, so the evidence describes the process you are actually trusting.
+
+Never trade a safety control for a passing example ([safety rules](../STUDY-GUIDE.md#safety-rules)).
 
 ## Retrieval, transfer and next steps
 
-Close the explanations first. Name the positive and negative acceptance checks and what each would show if the root filesystem were writable. Then reconstruct worked example 2 (Separate positive and negative acceptance) with one different value, predict what changes, and name which of Linux capabilities, cap_drop, read-only filesystem, no-new-privileges and least privilege the change touches.
+**Retrieval.** Name the positive and negative acceptance checks and what each would show if the root filesystem were writable.
 
-When a host session ends, run `docker compose -p ds60-docker-study down` from your fixture copy. It removes the project's containers and network but keeps named volumes; deleting a volume is a separate, deliberate reset described in the fixture README.
+**Transfer case.** A vendor image's documentation says it needs `CAP_NET_ADMIN` for networking. Your deployment only serves HTTP on 8080 behind a published port. How do you decide whether to grant the capability, and what evidence do you collect?
+
+Then run the [retrieval loop](../STUDY-GUIDE.md#retrieval-and-cleanup) and end any host session with its cleanup.
 
 ## Primary references
 

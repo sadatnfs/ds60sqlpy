@@ -1,22 +1,26 @@
 # spark-034: Stream-stream joins and bounded state
 
-Authored paired Scala/PySpark teaching content. The default fixtures are tiny, local and deterministic. Runtime acceptance, logical correctness and learner understanding remain separate evidence.
+Three impressions and four clicks test a stream-stream join. A click counts only when its key matches and it lands in the ten minutes after the impression, so `c1` and `c2` match while `c3` (exactly ten minutes late) and `c4` (an unknown key) do not. The unmatched impression `i2` appears in the outer join only after both watermarks move.
 
 ## Level and prerequisites
 
-Advanced; approximately 120 minutes. Direct prerequisites: `spark-033`. The prepared baseline is Spark 4.3.0, Scala binary 2.13, JDK 17 and Python 3.12. Read the [execution baseline](../execution-baseline.md).
+Advanced; approximately 120 minutes. Direct prerequisites: `spark-033`. Pinned versions: [execution baseline](../execution-baseline.md).
 
 ## How to run this lesson
 
-Open `spark-034` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile, save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`; Python stages as `main.py` with a main guard. Each program creates its own `local[2]` session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.
+Shared run steps and profile rules: [study guide](../STUDY-GUIDE.md#run-a-paired-lesson).
 
-The [Scala learner](../lessons/spark-034.scala) and [PySpark learner](../lessons/spark-034.py) run two complete demonstrations and retain six explicit task stubs. Use the [explained solutions](../solutions/spark-034_solutions.md) only after an attempt or an explicit worked comparison; the [Scala reference](../solutions/spark-034_solution.scala) and [PySpark reference](../solutions/spark-034_solution.py) contain complete assertions. A bounded collect is used only for the declared tiny fixture; do not copy it onto an unbounded or large production table.
+Learner pads: [Scala](../lessons/spark-034.scala) and [PySpark](../lessons/spark-034.py).
+
+Open the [explained solutions](../solutions/spark-034_solutions.md) after an attempt.
+
+The first worked example checks the half-open interval for an impression at minute 0 and prints `Minute 3 matches; minute 10 is outside the half-open window`. The second joins the literal impressions and clicks in plain code and prints `Independent business pair oracle=` with `[('i1', 'c1'), ('i3', 'c2')]`, the pairs both Spark joins must reproduce.
 
 ## Learning objectives
 
 - Express a time-bounded streaming join and explain which unmatched rows can be finalized.
-- State the input and output grain, schema, NULL policy and ordering before executing a transformation.
-- Compare each language implementation with independent literal expectations, not only with the other implementation.
+- Put five-minute watermarks on both inputs with the `min` multiple-watermark policy, and join on key equality plus the half-open interval from `impression_time` up to ten minutes later.
+- Show that the left outer sink holds only the two matches until advancer rows on both sides push the watermark to at least 00:25, at which point `(i2, NULL)` is emitted, and show that an outer join with no time bound raises `AnalysisException`.
 
 ## Vocabulary and concepts
 
@@ -54,7 +58,7 @@ Every file is fully staged before atomic arrival, each query is awaited with a d
 
 ## Supplied local fixture
 
-The complete source creates the owned local session described above, then constructs this explicit fixture. The worked examples below run in that same main function; there is no hidden notebook state.
+Impressions are `i1` (key A, 00:00), `i2` (B, 00:00) and `i3` (C, 00:05). Clicks are `c1` (A, 00:03), `c2` (C, 00:10), `c3` (A, 00:10) and `c4` (Z, 00:04). Each side is a separate input folder read one file per batch with `FAILFAST`, and the session sets `spark.sql.streaming.multipleWatermarkPolicy` to `min`. Later, an advancer row at 00:30 is added to each side.
 
 ```scala
 import org.apache.spark.sql.functions._
@@ -223,11 +227,14 @@ Do not infer unmatched outer output from temporary source silence. Keep key equa
 
 ## Self-check
 
-Explain the contract of `inputs` / `inputs` without reading its solution. Then, from memory, state what Exercise 6 (Reject an outer join without an event-time bound) must produce: `AnalysisException` because this design lacks the required bounded match/finalization condition. The valid inner/outer sinks remain unchanged and no query is active. Say which part of that result is evidence and what it still cannot show. Name the action in your trace that actually runs the plan.
+- `c3` has the same key as `i1` and arrives at 00:10. Which part of the join condition rejects it, and what would change if the upper bound were inclusive?
+- Why does the outer sink not contain `(i2, NULL)` after the first run, even though `i2` has no matching click in the data?
+- The session uses the `min` policy for two watermarks. Why is that the safe choice when one input could run ahead of the other?
+- The unbounded outer join is rejected at query start. What state would Spark have to keep forever if it allowed that join?
 
 ## Next step
 
-Use the [course route](../README.md) to continue. Paired-language agreement is useful only when both outputs also satisfy the independent fixture contract. A successful local run is not evidence of cluster performance or production recovery.
+Go on to [spark-035: Checkpoints, restart and delivery guarantees](spark-035.md). Every query so far started, finished and stopped cleanly; the next lesson stops one on purpose and restarts it from its checkpoint to see what is replayed and what is not.
 
 ## Primary sources and official APIs
 

@@ -1,6 +1,6 @@
 # r-028: reference reasoning
 
-Use the [complete reference](r-028_reference.R) with the guide's declared inputs and runtime. Every worked example is also a standalone script.
+Run the [complete reference](r-028_reference.R) under the [run rules](../STUDY-GUIDE.md#run-a-chapter).
 
 ## Why the implementation has this shape
 
@@ -108,4 +108,6 @@ on.exit stops workers during ordinary unwinding; the prepared supervisor separat
 
 ## What the checks establish
 
-The reference makes 6 `stopifnot()` checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.
+The assertions confirm that a bad task produces the expected diagnostic, that the parallel results are identical to the serial ones, that the squared sums are 14, 77 and 8 with a count of 3 for the first task, that per-task random streams reproduce exactly across scheduling orders, and that different tasks still draw different values. They cannot prove cleanup after an external kill.
+
+The reference makes 6 `stopifnot()` checks; see [what a passing run proves](../STUDY-GUIDE.md#what-a-passing-run-proves).

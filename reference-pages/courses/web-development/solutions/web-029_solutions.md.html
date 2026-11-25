@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/web-development/solutions/web-029_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="web-029-explanatory-solutions">web-029: explanatory solutions<a class="heading-anchor" href="#web-029-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Open this after your own attempt. Each answer explains the lesson&#x27;s synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in <code>courses/web-development/guides/web-029.md</code>.</p>
+<p>Attempt each exercise before reading; the mechanism is in <code>courses/web-development/guides/web-029.md</code> (<a href="../STUDY-GUIDE.md.html#solutions">using these answers</a>).</p>
 <h3 id="exercise-1-compare-origins-for-the-same-host-on-two-different-ports">Exercise 1: Compare origins for the same host on two different ports.<a class="heading-anchor" href="#exercise-1-compare-origins-for-the-same-host-on-two-different-ports" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> Different ports form different origins even when the host matches.</p>
 <p><strong>Approach:</strong> Compare the scheme, host and port of both URLs; an origin is the exact triple, so any difference makes them distinct.</p>
@@ -232,7 +232,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Plausible wrong approach:</strong> Relying on CSP alone fails because a policy that allows inline script would still run injected handlers.</p>
 <p><strong>How to verify:</strong> Your table names a separate failure each control prevents, with no control repeated for two rows.</p>
 <h3 id="reference-comparison">Reference comparison<a class="heading-anchor" href="#reference-comparison" aria-label="Link to this section">#</a></h3>
-<p>Open <code>courses/web-development/solutions/web-029_solution.html</code> only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; its success message is not an accessibility audit or proof of responsive behavior at every size.</p></article>
+<p>The reference requires the untrusted pre to have no child elements and the document to contain no img elements, so it catches the string being parsed as markup. It does not test the URL policy text, CSP headers or sandbox limits, so read your URL decision and explain which schemes it rejects.</p>
+<p>Open <code>courses/web-development/solutions/web-029_solution.html</code> after saving your attempt (<a href="../STUDY-GUIDE.md.html#references">comparing with the reference</a>).</p></article>
   </main>
 </body>
 </html>

@@ -1,6 +1,6 @@
 # cuda-105: explained solutions
 
-These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.
+Compare with your [worksheet](../lessons/cuda-105.md) attempt.
 
 ## Exercise 1: Compute barrier time
 
@@ -74,8 +74,16 @@ Terminate only declared job resources and preserve checkpoints.
 
 **How to verify.** List the recorded process IDs before cleanup and confirm afterward that only those exited and checkpoints remain.
 
+## Self-check answers
+
+1. **Why does the slowest rank set a synchronized step's time?** Every rank must reach the barrier or collective before any can continue, so the 30 ms rank sets the time even though the average is 17.3 ms.
+
+2. **How do tensor and pipeline parallelism differ?** Tensor parallelism splits individual operations across devices; pipeline parallelism assigns different layers to different devices.
+
+3. **Why can a browser lesson not create a cluster?** Multi-host training needs owned hosts, network access and prepared software, none of which a lesson page provides.
+
 ## Reference observation
 
 Barrier 30 ms; mixed-step checkpoint rejected.
 
-The reference file is `courses/cuda/python/references/cuda-105_cpu.py`. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.
+Asserted by `courses/cuda/python/references/cuda-105_cpu.py`.

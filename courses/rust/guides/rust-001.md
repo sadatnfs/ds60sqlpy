@@ -24,9 +24,11 @@ The classroom supplies a pinned compiler and Arrow library inside Linux Docker. 
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles the saved pad as `main.rs` with pinned Rust 1.99.1, edition 2024, and the prepared Arrow 60 library. `assert!` and `assert_eq!` remain active in normal builds. The fixed pad accepts one source file without arbitrary arguments, interactive input, Cargo manifests or package installation. The main function returns `Result<(), Box<dyn std::error::Error>>` so later examples can propagate errors with `?`; the final `Ok(())` means this fixture completed successfully. Standard library and Arrow examples remain offline after image preparation. Multi-file Cargo and external ecosystem projects have separate explicit preparation workflows.
+This lesson's programs need only the prelude and their own helpers. A passing run prints `rust-001: passed`.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Pad setup and limits: [Run a lesson](../STUDY-GUIDE.md#run-a-lesson).
+
+Before you run anything, follow [Attempt a lesson](../STUDY-GUIDE.md#attempt-a-lesson).
 
 
 
@@ -34,7 +36,9 @@ Start with the answer-free learner artifact in your saved classroom pad. It deli
 
 `fn main` declares the entry function. `let` introduces a binding. `println!` is a macro, indicated by the exclamation mark. `assert_eq!` compares actual and expected values and panics on disagreement. A semicolon turns an expression into a statement whose value is discarded.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+**Reading Example A (Check a greeting, code below).** `main` returns `Result<(), Box<dyn std::error::Error>>`, so `?` can be used inside it, and the inner `{ }` block keeps Example A's names from leaking into later code. `let greeting = "Hello, Rust";` binds a string literal of type `&'static str`, a borrowed view of text stored in the compiled binary, so nothing is allocated at run time. The trailing `!` marks `assert_eq!` and `println!` as macros, expanded into ordinary code before type checking. `assert_eq!` panics and prints both sides when they differ. In `println!("{greeting}")` the braces capture the variable by name, and the macro writes a newline after it. `Ok(())` at the end reports success to the runtime.
+
+Method for tracing your own variants: [Trace a program](../STUDY-GUIDE.md#trace-a-program).
 
 ## Worked example / walkthrough
 
@@ -90,13 +94,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 6. **Transfer and justify.** Model a three-level capacity calculation and explain every intermediate value.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Record each task as in [Keep evidence for each task](../STUDY-GUIDE.md#keep-evidence-for-each-task).
 
 ## Common pitfalls and diagnosis
 
 A compiler success does not establish business correctness. Do not replace a failing assertion with a success print. The Result-returning main wrapper is scaffolding for later error propagation; its full meaning is taught in the error chapters.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+To turn a pitfall into a test, see [Design a regression case](../STUDY-GUIDE.md#design-a-regression-case).
 
 ## Progressive hints
 
@@ -104,13 +108,25 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 2. Compare Example B (Calculate instead of copying output) with Example A and name the first line whose behavior differs. Its observation is: The calculated capacity is 24, while addition would give 10.
 3. Before opening the explanation, test your task 3 attempt against this lesson's main pitfall: A compiler success does not establish business correctness.
 
+Tempting approaches to rule out before you compare:
+
+- **Task 1.** Predicting a confirmation line after each assertion, or the value 24 in the output, treats a check as a print. Predicting the marker first ignores that its `println!` is the final statement before `Ok(())`.
+- **Task 2.** Writing `let expected = greeting; assert_eq!(greeting, expected);` compares the binding with itself. It passes for `"Hi, Feris"` or any other text, so the check can never reject a mistake.
+- **Task 3.** Writing `let capacity = 24;` and asserting 24 copies the answer instead of computing it, so the check would still pass if the operator were wrong. Writing `shelves + books_per_shelf` instead gives 11, which this assertion does reject.
+- **Task 5.** Using addition, `shelves + books_per_shelf`, claims an empty bookcase holds 8 books and a single shelf holds 9. Testing only the three-shelf case would catch that too, but would not show that an empty bookcase is handled.
+- **Task 6.** Skipping a level, for example `floors * shelves_per_room * books_per_shelf`, multiplies floors by a per-room figure and yields 64. Writing the whole product as one literal expression hides which level was dropped.
+
 ## Self-check and next step
 
-Explain Compiler, Macro, Panic without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+Before running Example B, say what `assert_eq!` would report if the capacity used `+` instead of `*`, and why the lesson marker would then never print. A missing brace, a failed assertion and a wrong but unchecked value fail at different stages: which stage stops each one, and which can a printed marker never rule out?
+
+Then work through [Self-check and review](../STUDY-GUIDE.md#self-check-and-review).
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://doc.rust-lang.org/book/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+Read [The Rust Book, 1.2 Hello, World!](https://doc.rust-lang.org/book/ch01-02-hello-world.html) for how `rustc` turns one source file into an executable.
+
+What the classroom does and does not prove: [Sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

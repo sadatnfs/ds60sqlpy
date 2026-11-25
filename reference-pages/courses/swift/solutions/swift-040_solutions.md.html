@@ -194,7 +194,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/swift/solutions/swift-040_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="swift-040-explanation-and-comparison">swift-040: explanation and comparison<a class="heading-anchor" href="#swift-040-explanation-and-comparison" aria-label="Link to this section">#</a></h2>
-<p>Attempt the six guide tasks before opening this comparison. The executable reference is <a href="swift-040_solution.swift.html">swift-040_solution.swift</a>. It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.</p>
+<p>Reference program: <a href="swift-040_solution.swift.html">swift-040_solution.swift</a>, covering both examples and the executed answers.</p>
+<p>Attempt the tasks first; see <a href="../STUDY-GUIDE.md.html#comparing-with-the-explanation">comparing with the explanation</a>.</p>
 <h3 id="why-the-two-examples-differ">Why the two examples differ<a class="heading-anchor" href="#why-the-two-examples-differ" aria-label="Link to this section">#</a></h3>
 <p><strong>Derive presentation from one state:</strong> Derived presentation avoids a second label field that can become stale. The label follows the stored completion state.</p>
 <p><strong>A state change updates its derived view:</strong> The transition has one source of truth and independent fields remain unchanged. Changing completion changes the derived label while retaining the title.</p>
@@ -263,7 +264,7 @@ cancelled<span class="syntax-punctuation">.</span>title <span class="syntax-punc
 <p>This portable kernel mirrors ItemEditor&#x27;s draft contract: edits stay in a draft until an explicit save. The real return to the list must still be checked in JourneyApp on an Apple destination.</p>
 <h4 id="task-6-transfer-and-justify">Task 6: Transfer and justify<a class="heading-anchor" href="#task-6-transfer-and-justify" aria-label="Link to this section">#</a></h4>
 <p>Decide whether a piece of state belongs to the view, model or domain core and justify its lifetime.</p>
-<p>No single reference answer exists: several designs can satisfy this transfer task. Build yours from the task 3 answer above (Run JourneyApp and edit a title through its real binding) and the mechanism described below, and state one limitation of your choice.</p>
+<p>No single answer exists; extend task 3 using the <a href="../STUDY-GUIDE.md.html#open-transfer-tasks">open transfer routine</a>.</p>
 <h3 id="solution-reasoning">Solution reasoning<a class="heading-anchor" href="#solution-reasoning" aria-label="Link to this section">#</a></h3>
 <p><strong>Approach.</strong> <code>FormState</code> stores <code>title</code> and <code>completed</code> and derives <code>buttonLabel</code> as a computed property. Example A reads the label for an incomplete item; Example B sets <code>completed</code> to true and rereads it. In JourneyApp the same rule appears as a SwiftUI view reading one model through a binding.</p>
 <p><strong>Why it is correct.</strong> <code>buttonLabel</code> has no storage of its own, so every read evaluates <code>completed ? &quot;Mark incomplete&quot; : &quot;Mark complete&quot;</code> from the current flag. False gives &quot;Mark complete&quot;; after the assignment true gives &quot;Mark incomplete&quot;. The title is a separate stored field the assignment did not touch, so it is still &quot;Read&quot;. With one source of truth there is no second label field to fall out of date.</p>
@@ -275,7 +276,7 @@ cancelled<span class="syntax-punctuation">.</span>title <span class="syntax-punc
 <p>In the external app, @State retains the model reference, @Observable tracks relevant property access, and @Bindable creates bindings to editable model properties. The Linux kernel models the same single-source rule without importing SwiftUI.</p>
 <p>A binding is not a cloned value. Recreating a model in a transient view computation can discard edits. UI disablement does not replace domain validation.</p>
 <h3 id="review-before-continuing">Review before continuing<a class="heading-anchor" href="#review-before-continuing" aria-label="Link to this section">#</a></h3>
-<p>Run the reference and confirm that it prints <code>swift-040: passed</code>, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.</p></article>
+<p>Run the reference and confirm it prints <code>swift-040: passed</code>, then rerun the guide&#x27;s counterexample.</p></article>
   </main>
 </body>
 </html>

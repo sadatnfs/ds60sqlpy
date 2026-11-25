@@ -1,6 +1,6 @@
 # js-003: explanatory solutions
 
-Use these answers after an attempt or an explicit reveal. The reference uses the same literal fixtures as the guide and keeps the exercises in separate scopes. A successful run checks these examples; explaining a changed input is a separate learning goal.
+Open these after your own attempt; each exercise runs in its own scope in the reference.
 
 ## Mechanism review
 
@@ -22,7 +22,7 @@ Use if for a branch, for...of for values, and indexed for when positions matter.
 
 ## Exercise 1: Compare false and truthy containers: predict an edited check
 
-Task: Copy Example A into a scratch `main.mjs` and change `assert.deepEqual([Boolean(0), Boolean(''), Boolean([]), Boolean({})], [false, false, true, true]);` to `assert.deepEqual([Boolean(1), Boolean(''), Boolean([]), Boolean({})], [false, false, true, true]);` inside its check. Before running it, predict whether the check still passes and explain why; then restore it.
+Task: In a scratch copy of Example A, change `assert.deepEqual([Boolean(0), Boolean(''), Boolean([]), Boolean({})], [false, false, true, true]);` to `assert.deepEqual([Boolean(1), Boolean(''), Boolean([]), Boolean({})], [false, false, true, true]);` inside its check. Does the check still pass?
 
 An empty collection is still an object. Testing if(array) does not establish that it contains any elements.
 
@@ -32,13 +32,13 @@ The unchanged code is the exercise block of Example A:
 assert.deepEqual([Boolean(0), Boolean(''), Boolean([]), Boolean({})], [false, false, true, true]);
 ```
 
-**Expected:** The changed run fails with an `AssertionError` at `assert.deepEqual([Boolean(1), Boolean(''), Boolean([]), Boolean({})], [false, false, true, true]);`. Restoring `assert.deepEqual([Boolean(0), Boolean(''), Boolean([]), Boolean({})], [false, false, true, true]);` brings back: false, false, true, true.
+**Expected:** The edited run fails with an `AssertionError` at `assert.deepEqual([Boolean(1), Boolean(''), Boolean([]), Boolean({})], [false, false, true, true]);`. Restoring `assert.deepEqual([Boolean(0), Boolean(''), Boolean([]), Boolean({})], [false, false, true, true]);` brings back: false, false, true, true.
 
-**Verify:** Compare your written prediction with the reported `AssertionError`, including its actual and expected values, and explain why the edited check rejects the values that `assert.deepEqual([Boolean(0), Boolean(''), Boolean([]), Boolean({})], [false, false, true, true])` accepts. After restoring the line, the program prints its `{"checks":1,"status":"passed"}` receipt again.
+**Verify:** Compare the reported actual and expected values with your prediction, then restore `assert.deepEqual([Boolean(0), Boolean(''), Boolean([]), Boolean({})], [false, false, true, true]);`.
 
 ## Exercise 2: Preserve a valid zero with nullish fallback: diagnose an edited check
 
-Task: A careless edit changed a check in Example B so that it reads `assert.equal(null ?? 11, 10);`. Run Example B with that line, explain why the edited check now fails for the same program state, and restore it.
+Task: Example B's check was edited to read `assert.equal(null ?? 11, 10);`. Run it, explain the failure and restore the original.
 
 The operators encode different absence policies. A valid zero count should not silently become a default because it is falsy.
 
@@ -52,7 +52,7 @@ assert.equal(null ?? 10, 10);
 
 **Expected:** Before the repair the run fails with an `AssertionError` at `assert.equal(null ?? 11, 10);`. Restoring `assert.equal(null ?? 10, 10);` brings back: 10, 0, 10.
 
-**Verify:** Keep the failing and the repaired runs. Explain why the edited check rejects the same program state that `assert.equal(null ?? 10, 10)` accepts.
+**Verify:** Keep the failing and repaired runs and name the first value that differs between them.
 
 ## Exercise 3: Trace a prefix sum
 
@@ -72,7 +72,7 @@ assert.deepEqual(prefixes, [2, 6, 12]);
 
 **Expected:** prefixes 2, 6, 12.
 
-**Verify:** Keep a check equivalent to `assert.deepEqual(prefixes, [2, 6, 12])`. As a control, change `sum += value;` to `sum -= value;`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
+**Verify:** Keep `assert.deepEqual(prefixes, [2, 6, 12])`. Control: changing `sum += value;` to `sum -= value;` must make that check fail; then restore it.
 
 ## Exercise 4: Handle an empty collection
 
@@ -93,7 +93,7 @@ assert.equal(iterations, 0);
 
 **Expected:** sum 0 and iterations 0.
 
-**Verify:** Keep a check equivalent to `assert.equal(iterations, 0)`. As a control, change `let iterations = 0;` to `let iterations = 1;`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
+**Verify:** Keep `assert.equal(iterations, 0)`. Control: changing `let iterations = 0;` to `let iterations = 1;` must make that check fail; then restore it.
 
 ## Exercise 5: Stop at the first match
 
@@ -115,7 +115,7 @@ assert.equal(found, 1);
 
 **Expected:** index 1.
 
-**Verify:** Keep a check equivalent to `assert.equal(found, 1)`. As a control, change `if (values[index] === 8) {` to `if (values[index] !== 8) {`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
+**Verify:** Keep `assert.equal(found, 1)`. Control: changing `if (values[index] === 8) {` to `if (values[index] !== 8) {` must make that check fail; then restore it.
 
 ## Exercise 6: Make a wrong boundary observable
 
@@ -132,8 +132,8 @@ assert.deepEqual(observed, [7, undefined]);
 
 **Expected:** extra undefined element exposes the off-by-one.
 
-**Verify:** Keep a check equivalent to `assert.deepEqual(observed, [7, undefined])`. As a control, change `for (let index = 0; index <= values.length; index += 1) observed.push(values[index]);` to `for (let index = 0; index < values.length; index += 1) observed.push(values[index]);`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
+**Verify:** Keep `assert.deepEqual(observed, [7, undefined])`. Control: changing `for (let index = 0; index <= values.length; index += 1) observed.push(values[index]);` to `for (let index = 0; index < values.length; index += 1) observed.push(values[index]);` must make that check fail; then restore it.
 
 ## After comparison
 
-Return to your saved implementation and repeat a case with different values. Keep compiler diagnostics, process output and browser observations separate. Do not suppress a failing assertion or use a type assertion to declare an unvalidated value safe. Resource-owning examples must finish cleanup even when work fails. Describe each result with its actual host and fixture scope rather than as production acceptance.
+Fresh case: a settings object holds `retries: 0` and `label: ''`. Write defaults so that a missing `retries` becomes 3 while the explicit 0 survives, then search for a value that never occurs and decide what your loop returns. ([After comparing](../STUDY-GUIDE.md#after-comparing-with-the-solution).)

@@ -24,9 +24,9 @@ The classroom stages one main.swift file and compiles it in Swift 6 mode. An exp
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles the saved pad as `main.swift` with Swift 6 language checking. An explicit `@main` type contains `static func main() async throws`; the fixed compiler uses `-parse-as-library -swift-version 6`. The examples use the standard library and portable Foundation. `precondition` makes a violated invariant fail the process. The fixed pad accepts one source file, without arbitrary command arguments, interactive input or dependency installation. SwiftUI, UIKit, Apple simulators and application signing belong to the separately prepared macOS/Xcode project labs, never the Linux pad.
+Paste Example A first. It is the smallest complete program in the track, and a missing brace or a statement placed outside `LessonMain` produces a compile diagnostic rather than a runtime failure. Tasks 1 to 3 fit in one pad; task 4 deliberately breaks the brace structure, so save a working copy before you try it.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Compile contract, starter stop and success marker: [running a lesson](../STUDY-GUIDE.md#running-a-lesson).
 
 
 
@@ -34,7 +34,7 @@ Start with the answer-free learner artifact in your saved classroom pad. It deli
 
 `@main` marks the entrypoint type. `struct LessonMain` names that type. `static func main() async throws` declares its entry method; async and throws are explained in later chapters. `let` binds a value that cannot be reassigned. `print` produces visible output.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+Each example ends with a trace; method: [tracing a program](../STUDY-GUIDE.md#tracing-a-program).
 
 ## Worked example / walkthrough
 
@@ -60,6 +60,8 @@ struct LessonMain {
 
 **Observe:** Hello, Swift appears before the lesson marker.
 
+**Trace.** Before `main` runs, nothing exists. The first `let` binds `greeting` to a string of 12 Characters: five letters, the comma, the space and five more letters. The `precondition` evaluates `greeting.count == 12`, finds it true and does nothing visible. Only then does `print` write `Hello, Swift`. Change the literal to `Hello, Swift!` and the check sees 13, the process stops with a precondition failure, and the print never happens. That ordering is why the greeting appears only when its count has been verified.
+
 ### Example B: Compute an observable result
 
 The second condition rejects the plausible mistake of adding dimensions instead of multiplying them.
@@ -84,6 +86,8 @@ struct LessonMain {
 
 **Observe:** The computed seat count is 24.
 
+**Trace.** `rows` is 4 and `seatsPerRow` is 6, both inferred as `Int` from their literals. The multiplication produces 24 and binds it to `seats`. The first check confirms the product. The second compares 24 with `rows + seatsPerRow`, which is 10, so the inequality holds. It exists to document the plausible slip of typing `+` for `*`: with addition, `seats` would be 10 and the first check would already stop the program. Neither line prints anything; this example's only visible output would be the final marker.
+
 ## Exercises
 
 1. **Predict and explain.** Predict the greeting count before execution.
@@ -98,13 +102,15 @@ struct LessonMain {
 
 6. **Transfer and justify.** Model a three-level capacity calculation and explain every intermediate value.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Log each task in the [evidence table](../STUDY-GUIDE.md#recording-exercise-evidence) before opening the explanation.
 
 ## Common pitfalls and diagnosis
 
 Do not delete a failed precondition to reach the marker. Preserve the first compiler diagnostic before interpreting later errors. The entrypoint wrapper is required by this classroom compile contract.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+The tempting wrong belief in this lesson is that a program which compiles has done its job. A one-character counterexample settles it: compute shelf capacity with `+` instead of `*` and the program still compiles and runs, and only a check on the expected 24 stops it. For task 5, zero shelves should give 0 and one shelf should give 8; the addition bug gives 8 and 9, so both boundaries expose it.
+
+Repair routine: [building a regression case](../STUDY-GUIDE.md#building-a-regression-case).
 
 ## Progressive hints
 
@@ -114,11 +120,15 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 ## Self-check and next step
 
-Explain Source, Entrypoint, Precondition without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+Without looking, write the lines that make a valid entry point for this classroom and say which one the compiler needs because of `-parse-as-library`. Explain why `let` suits every binding in Example B, what `precondition` does when its condition is false, and why the marker must be the last statement in `main`.
+
+Then follow the general [self-check routine](../STUDY-GUIDE.md#self-check-routine) and save your pad.
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://docs.swift.org/swift-book/documentation/the-swift-programming-language/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+[Documentation](https://docs.swift.org/swift-book/documentation/the-swift-programming-language/): The Swift book chapter The Basics covers constants, type inference and printing, and the Attributes reference page documents `@main`.
+
+Provenance and limits: [sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

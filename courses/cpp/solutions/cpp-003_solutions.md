@@ -1,6 +1,6 @@
 # cpp-003: explanatory solutions
 
-Compare after an attempt or an explicit reveal. The [guide](../guides/cpp-003.md) defines the learner contract. An authored reference is not a platform acceptance receipt.
+Compare after an attempt or an explicit reveal. The [executable reference](cpp-003_solution.cpp) checks the integer and floating quotients and the signed count validation; the explanations show where each conversion happens. The [guide](../guides/cpp-003.md) defines the learner contract. How to compare: [study guide](../STUDY-GUIDE.md#compare-with-the-solutions).
 
 ## Vocabulary and concepts
 

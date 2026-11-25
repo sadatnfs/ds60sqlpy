@@ -194,9 +194,17 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cuda/python/guides/cuda-080.md</code></p>
     </header>
     <article class="document"><h2 id="cuda-080-a-simulator-is-a-debugging-tool">cuda-080: A simulator is a debugging tool<a class="heading-anchor" href="#cuda-080-a-simulator-is-a-debugging-tool" aria-label="Link to this section">#</a></h2>
-<p><strong>Route:</strong> CUDA Python and machine learning. <strong>Stage:</strong> intermediate. <strong>Prerequisites:</strong> <code>cuda-073</code>, <code>cuda-074</code>. Allow several sessions when the hardware experiment is new; the chapter is not a deadline.</p>
-<h3 id="what-you-will-be-able-to-explain">What you will be able to explain<a class="heading-anchor" href="#what-you-will-be-able-to-explain" aria-label="Link to this section">#</a></h3>
-<p>By the end, you can <strong>classify a CPU result</strong>, <strong>design the validation ladder</strong>, and <strong>write an honest evidence label</strong> with evidence. Start with the two worked cases, then use the editable CPU model to make the quantities concrete.</p>
+<p><strong>Route:</strong> CUDA Python and machine learning. <strong>Stage:</strong> intermediate. <strong>Prerequisites:</strong> <code>cuda-073</code>, <code>cuda-074</code>.</p>
+<p>Pacing, evidence labels and platform rules: <a href="../../STUDY-GUIDE.md.html">CUDA study guide</a>.</p>
+<h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
+<ul>
+<li>Classify a CPU result.</li>
+<li>Construct a race hidden by serialization.</li>
+<li>Name an unsupported feature.</li>
+<li>Design the validation ladder.</li>
+<li>Choose a tiny debugging input.</li>
+<li>Write an honest evidence label.</li>
+</ul>
 <h3 id="mechanism-and-vocabulary">Mechanism and vocabulary<a class="heading-anchor" href="#mechanism-and-vocabulary" aria-label="Link to this section">#</a></h3>
 <p>A simulator reproduces selected semantics to help inspect indexing and values without requiring the actual device. It usually does not reproduce warp scheduling, memory transactions, concurrent timing, occupancy or all synchronization defects. A serialized execution can hide a race that real concurrent threads expose. Passing a simulator therefore belongs to a different evidence category from passing hardware execution.</p>
 <p>Keep a validation ladder: mathematical reference, CPU mapping model, compiler acceptance, real-device output, diagnostic tooling and repeated stress cases. The simulator is useful early in that ladder, especially for small inputs you can inspect by hand. Do not generate invented GPU names, bandwidth or throughput from simulator output. If a feature is unsupported by the chosen simulator, state that instead of changing the algorithm silently.</p>
@@ -212,8 +220,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>A CPU loop visiting all valid indices proves the intended index formula covers the array. It does not prove the GPU compiler generated a correct program for the target architecture.</p>
 <h4 id="worked-example-2">Worked example 2<a class="heading-anchor" href="#worked-example-2" aria-label="Link to this section">#</a></h4>
 <p>A shared counter incremented serially yields the expected count even when the corresponding parallel code lacks an atomic operation. The serial result hides the race.</p>
-<h3 id="portable-executable-model">Portable executable model<a class="heading-anchor" href="#portable-executable-model" aria-label="Link to this section">#</a></h3>
-<p>The <strong>CPU reference model</strong> variant runs this bounded worked example using <code>python-core</code>. It uses only the Python standard library, small synthetic values and no network. Its purpose is to expose the arithmetic or contract behind the chapter. The separate reference includes assertions for the stated observations.</p>
+<h3 id="how-to-run-the-cpu-model">How to run the CPU model<a class="heading-anchor" href="#how-to-run-the-cpu-model" aria-label="Link to this section">#</a></h3>
+<p>Edit the copy; the <a href="../references/cuda-080_cpu.py.html">reference</a> adds assertions.</p>
+<pre class="highlighted-code"><code class="language-bash">python courses/cuda/python/lessons/cuda-080_cpu.py</code></pre>
 <pre class="highlighted-code"><code class="language-python">serial_counter <span class="syntax-operator">=</span> <span class="syntax-number">0</span>
 <span class="syntax-keyword">for</span> _ <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span><span class="syntax-number">2</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
     serial_counter <span class="syntax-operator">+</span><span class="syntax-operator">=</span> <span class="syntax-number">1</span>
@@ -240,49 +249,45 @@ lost_update <span class="syntax-operator">=</span> <span class="syntax-builtin">
 <td><code>1</code></td>
 </tr>
 </tbody></table></div>
-<p>Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.</p>
 <h3 id="practice-and-transfer">Practice and transfer<a class="heading-anchor" href="#practice-and-transfer" aria-label="Link to this section">#</a></h3>
+<p>Record each attempt in the <a href="../lessons/cuda-080.md.html">worksheet</a> before opening hints.</p>
 <h4 id="exercise-1-classify-a-cpu-result">Exercise 1: Classify a CPU result<a class="heading-anchor" href="#exercise-1-classify-a-cpu-result" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Calling the result GPU verified because the same Python source was used assumes the compiled device code behaves like the interpreter.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-2-construct-a-race-hidden-by-serialization">Exercise 2: Construct a race hidden by serialization<a class="heading-anchor" href="#exercise-2-construct-a-race-hidden-by-serialization" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Concluding the kernel needs no atomics because the simulator printed the right count treats a serial schedule as representative of every parallel schedule.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-3-name-an-unsupported-feature">Exercise 3: Name an unsupported feature<a class="heading-anchor" href="#exercise-3-name-an-unsupported-feature" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Assuming anything that runs in the simulator runs identically on hardware ignores that the simulator interprets kernels in Python.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-4-design-the-validation-ladder">Exercise 4: Design the validation ladder<a class="heading-anchor" href="#exercise-4-design-the-validation-ladder" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Collapsing the ladder into a single pass/fail end-to-end test hides where a failure came from.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-5-choose-a-tiny-debugging-input">Exercise 5: Choose a tiny debugging input<a class="heading-anchor" href="#exercise-5-choose-a-tiny-debugging-input" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Debugging with a million random elements makes a single wrong index hard to find. A size that is a multiple of the block hides tail bugs.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-6-write-an-honest-evidence-label">Exercise 6: Write an honest evidence label<a class="heading-anchor" href="#exercise-6-write-an-honest-evidence-label" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Writing only verified or tests pass gives no executor and invites the reader to assume GPU coverage.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
-<p>Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.</p>
+<p>Hint <em>k</em> belongs to exercise <em>k</em>; open one at a time.</p>
 <ol>
-<li>Start from worked example 1 and mark the quantities needed for the task &quot;Classify a CPU result&quot;.</li>
-<li>Change one assumption in worked example 2 while preserving the declared contract: construct a race hidden by serialization.</li>
-<li>Trace the CPU program&#x27;s variables before adding hardware behavior: name an unsupported feature.</li>
-<li>Draw producers, consumers and the exact operation boundary for the task &quot;Design the validation ladder&quot;.</li>
-<li>Separate what the small fixture establishes from what the real runtime must show: choose a tiny debugging input.</li>
-<li>Write a counterexample to an overbroad claim before you write an honest evidence label.</li>
+<li>Name the processor that executed the loop and pick the evidence label that matches it.</li>
+<li>Let two simulated threads both read count 0 before either writes, and record the final value.</li>
+<li>Look up the pinned simulator&#x27;s documented support before assuming a feature behaves as it would on hardware.</li>
+<li>Order the stages from mathematical reference to stress cases, and say what each stage adds that the earlier one could not.</li>
+<li>Choose an input length that is not a multiple of the block size but is still small enough to trace by hand.</li>
+<li>Write a label that names what ran and what remains pending, without any device name, bandwidth or throughput.</li>
 </ol>
-<h3 id="common-mistakes-and-self-review">Common mistakes and self-review<a class="heading-anchor" href="#common-mistakes-and-self-review" aria-label="Link to this section">#</a></h3>
-<p>Confusing a correct tiny example with a general implementation is the central review risk. For this chapter, challenge the assumption in worked example 2, then ask whether your change preserves the mechanism described above. If you change dtype, layout, ordering, batch size or backend, update the acceptance contract rather than silently reusing the old observation. Explain an unexpected result before trying random configuration changes.</p>
-<p>Keep a small evidence table with columns <strong>claim</strong>, <strong>input</strong>, <strong>expected observation</strong>, <strong>actual observation</strong> and <strong>limit</strong>. For the first claim use <code>Classify a CPU result</code>. For the final claim use <code>Write an honest evidence label</code>. An unperformed GPU or cluster experiment remains pending even when the CPU model is correct.</p>
-<h3 id="platform-and-evidence-contract">Platform and evidence contract<a class="heading-anchor" href="#platform-and-evidence-contract" aria-label="Link to this section">#</a></h3>
-<p>The reading worksheet and CPU reference model work through the ordinary Linux Docker classroom on macOS, Linux and Windows using WSL 2. They do not require an NVIDIA GPU. Their results are labeled CPU models or semantic oracles, not simulated hardware performance.</p>
-<p>Real CUDA work needs supported NVIDIA hardware, a compatible host driver and an explicitly prepared GPU runtime. An Apple GPU does not execute CUDA kernels. PyTorch MPS on a supported native Mac, ROCm on supported AMD hardware, or other vendor backends can provide separate accelerator learning routes; they need their own package and operation qualification and are not CUDA evidence. The ordinary Linux Docker classroom does not expose native Mac MPS automatically.</p>
-<p>Do not download packages, models or data by opening this lesson. Do not attach an engine socket, ambient cluster credentials or an arbitrary remote endpoint. A CPU pass, imported package, successful compilation, real GPU result and measured performance are distinct observations. Record the actual backend, data shape/dtype, source revision, versions and pending checks. A saved completion marker records learning progress, not hardware certification.</p>
+<h3 id="common-mistakes-and-self-check">Common mistakes and self-check<a class="heading-anchor" href="#common-mistakes-and-self-check" aria-label="Link to this section">#</a></h3>
+<p>The central mistake is treating a passing simulator run as GPU correctness. A simulator usually serializes threads, so a shared counter incremented without an atomic still reaches 2, while real concurrent threads can lose an update and report 1. Another mistake is quietly rewriting the algorithm when a feature is unsupported by the simulator. Fix both by keeping the validation ladder stages separate, labeling simulator output as such, and recording unsupported features instead of working around them.</p>
+<p><strong>Misconception:</strong> If the simulator and the CPU reference agree, the kernel only needs a quick hardware run to measure its speed. <strong>Correction:</strong> Agreement on the early rungs of the validation ladder says nothing about concurrency, memory transactions or compiler output for the target architecture. Real-device output must be checked for correctness, not just timed, and repeated stress runs with varied sizes are needed because a race can pass many times before it fails. Memory and race checking tools belong on the ladder as well.</p>
+<p><strong>Evidence limit:</strong> The reference contrasts a serial count of 2 with a possible lost-update count of 1 by construction. It does not run a simulator or a GPU, so it cannot show which races your actual simulator hides or exposes.</p>
+<ol>
+<li>Name three behaviors a simulator usually does not reproduce.</li>
+<li>Why can a serialized run hide a race?</li>
+<li>Where does the simulator belong in the validation ladder?</li>
+</ol>
+<p>Answers: <a href="../solutions/cuda-080_solutions.md.html#self-check-answers">self-check answers</a>.</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
 <ul>
-<li><a href="https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/intro-to-cuda-python.html">NVIDIA CUDA Python introduction</a></li>
 <li><a href="https://github.com/NVIDIA/numba-cuda">Maintained numba-cuda project</a></li>
 </ul>
-<p>Use the version-matched documentation of your prepared environment. These references describe interfaces and supported boundaries; the chapter&#x27;s synthetic examples and CPU models are original teaching material.</p>
+<p>Full lists: <a href="../../STUDY-GUIDE.md.html#documentation-and-sources">documentation and sources</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning skill for cuda-080: A simulator is a debugging tool.
 Read courses/cuda/python/guides/cuda-080.md and courses/cuda/python/lessons/cuda-080.md.

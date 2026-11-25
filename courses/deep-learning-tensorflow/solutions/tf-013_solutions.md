@@ -1,6 +1,6 @@
 # tf-013: explanatory solutions
 
-Open these answers for Binary logits, probabilities and thresholds after your own attempt at Example A, Convert scores, or after an explicit reveal. Each answer reuses the guide's literal inputs, so a mismatch points to one step. The companion script runs the assertions; this page explains why they test Logit, Threshold, Binary cross entropy. After matching exercise 6, Count decisions separately, invent a new input without looking here.
+Open these answers after an attempt; they reuse the guide's inputs ([comparison steps](../STUDY-GUIDE.md#after-the-solutions)).
 
 ## Mechanism review
 
@@ -113,6 +113,3 @@ assert np.count_nonzero((p >= 0.8) != labels) == 1
 
 **Verify:** In a fresh process, the exercise checks confirm `np.count_nonzero((p >= 0.5) != labels) == 0` and `np.count_nonzero((p >= 0.8) != labels) == 1`.
 
-## Review after comparison
-
-Change one fixture value in exercise 4, Expose a convention mismatch, and predict the new result before running it. Keep the failing version of exercise 5, Stress large scores, next to its repair. A missing framework is an environment record, not a failed assertion. No solution downloads data, calls an online model, deploys a service or changes a database.

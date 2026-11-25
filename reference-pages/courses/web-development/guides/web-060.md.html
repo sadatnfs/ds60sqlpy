@@ -211,7 +211,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="syntax-anatomy-and-mechanism">Syntax anatomy and mechanism<a class="heading-anchor" href="#syntax-anatomy-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Create an acceptance matrix with normal, invalid, cross-session, restart and accessibility cases. Keep unit checks for pure functions, integration checks for HTTP and storage, and actual browser observations for focus and layout. Connect to the JavaScript and D3 path when adding data visualization, to SQL when expanding relational modeling, and to Docker and Kubernetes when studying delivery. Each extension needs evidence for its new boundary.</p>
 <h3 id="classroom-execution-and-offline-inputs">Classroom execution and offline inputs<a class="heading-anchor" href="#classroom-execution-and-offline-inputs" aria-label="Link to this section">#</a></h3>
-<p>This lesson is a design worksheet saved as <code>courses/web-development/lessons/web-060.md</code>. The classroom does not start a server, install packages or control Docker, so a command here is a proposal until you deliberately run it in your own disposable project. The optional lab is <code>courses/web-development/fixtures/php-http-lab/</code>; read its README before preparing it and never expose it to the internet. <strong>How to run lessons</strong> in the <a href="../README.md.html">subject README</a> describes this boundary.</p>
+<p>The worksheet asks you to define one learner journey with a finish condition, map each input and output to its validation or encoding boundary and plan a learner-owned extension of the local lab with a controlled invalid request and a restore rehearsal.</p>
+<p><code>courses/web-development/lessons/web-060.md</code> is a design worksheet; its commands are proposals (<a href="../STUDY-GUIDE.md.html#worksheets">worksheet rules</a>).</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1-a-journey-acceptance-case">Worked example 1: A journey acceptance case<a class="heading-anchor" href="#worked-example-1-a-journey-acceptance-case" aria-label="Link to this section">#</a></h4>
 <p>The case spans multiple layers without confusing them.</p>
@@ -241,7 +242,7 @@ Not yet qualified: production TLS, account recovery, multiple replicas, public a
     <span class="syntax-punctuation">-</span> multiple replicas</code></pre>
 <p>Review A makes two broad claims and gives the reader no way to check either. Works on which inputs, and secure against what? Review B names each observation in a form someone else can repeat, and it lists what was not tested so a reader does not assume it. Review B is also more useful for planning, because the not yet qualified list becomes the next set of tasks. Shorter is not the problem with review A; unsupported is.</p>
 <h3 id="six-progressive-exercises">Six progressive exercises<a class="heading-anchor" href="#six-progressive-exercises" aria-label="Link to this section">#</a></h3>
-<p>Exercises that ask you to predict, explain, compare or diagnose keep their answers in the solutions file. The others show the evidence to look for.</p>
+<p>Exercise 2 keep their expected answers in the solutions file.</p>
 <h4 id="exercise-1-define-one-small-learner-journey-and-its-finish-condition">Exercise 1: Define one small learner journey and its finish condition.<a class="heading-anchor" href="#exercise-1-define-one-small-learner-journey-and-its-finish-condition" aria-label="Link to this section">#</a></h4>
 <p><strong>Expected evidence:</strong> The journey ends with an observable saved plan and a clear way to recover from invalid input.</p>
 <p><strong>Progressive hint:</strong> State one goal a learner completes and what they see when it is done.</p>
@@ -261,10 +262,11 @@ Not yet qualified: production TLS, account recovery, multiple replicas, public a
 <p><strong>Progressive hint:</strong> Write each claim next to the evidence that supports it, and list what was not tested.</p>
 <h3 id="debugging-and-common-mistakes">Debugging and common mistakes<a class="heading-anchor" href="#debugging-and-common-mistakes" aria-label="Link to this section">#</a></h3>
 <p>Do not let a polished interface hide an unfinished trust boundary. Avoid copying a reference without explaining its limitations. Expert practice means selecting evidence and handling tradeoffs, not merely finishing every chapter or using a popular framework.</p>
-<p>A plausible plan or one successful request can hide an untested failure path. Record each request, response and stored state, and repeat the original failing case after every change.</p>
+<p>When the review starts to read like a success banner, return to the threat model and find the boundary you have not tested yet. When an invalid request fails differently than predicted, keep the transcript and the exact input, because that mismatch is the most useful evidence in the capstone.</p>
+<p>The shared <a href="../STUDY-GUIDE.md.html#debugging-markdown">debugging routine</a> covers what to record before each repair.</p>
 <h3 id="retrieval-transfer-and-next-steps">Retrieval, transfer and next steps<a class="heading-anchor" href="#retrieval-transfer-and-next-steps" aria-label="Link to this section">#</a></h3>
-<p>Close the worked answers and explain capstone, threat model and acceptance matrix without using the terms as their own definitions. Rebuild worked example 1 (A journey acceptance case) from a blank worksheet, then try one new value, one empty or missing case and one unusual boundary. State which result would disprove your explanation.</p>
-<p>If you can reproduce the output but cannot explain why it happens, revisit <code>web-059</code>. A saved completion marker records your own progress; it is not a certification.</p>
+<p>Without notes, walk through your journey from opening the page to reading the saved plan in a new session, naming the trust boundary at each step. Then explain what the observed journey qualifies, such as local session ownership, and what it does not, such as verified identity or production readiness.</p>
+<p>Revisit <code>web-059</code> when an output is predictable but unexplained (<a href="../STUDY-GUIDE.md.html#review-loop">review loop</a>).</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
 <ul>
 <li><a href="https://developer.mozilla.org/en-US/curriculum/core/">MDN curriculum</a></li>

@@ -3,20 +3,16 @@ public class Main {
 
   public static void main(String[] args) throws Exception {
     // Exercise 1: Call a pure calculation: predict an edited check
-    // Copy Example A into a scratch `Main.java` and change `assert doubleValue(0) == 0;` to
-    // `assert doubleValue(1) == 0;` inside its assertion. Before running it with `java -ea
-    // Main`, predict whether the assertion still holds and explain why; then restore it.
-    // Expected: The changed run fails with an `AssertionError` from the assertion on
-    // `doubleValue(0) == 0`. Restoring the original line brings back the worked observation: 14
-    // and 0.
+    // Change Example A's assertion to `assert doubleValue(1) == 0;`, predict whether it holds,
+    // then run and restore it.
+    // Expected: The edited run fails with an `AssertionError` from the assertion on
+    // `doubleValue(0) == 0`.
 
     // Exercise 2: Validate a precondition: debug a regression
-    // A regression changed one token in the code that Example B adds after Example A, so one
-    // line now reads `positiveArea(1, 4);`. Run Example B with that line, use the failing
-    // assertion to locate the defect and repair it without changing the assertion.
-    // Expected: Before the repair the run fails with an `AssertionError` from the assertion on
-    // `badArea`; after it the line reads `positiveArea(0, 4);` again and 3 by 4 gives 12; zero
-    // width throws IllegalArgumentException.
+    // A regression in Example B's new code makes one line read `positiveArea(1, 4);`. Repair it
+    // using the failing assertion.
+    // Expected: The unrepaired run fails with an `AssertionError` from the assertion on
+    // `badArea`; the repaired line reads `positiveArea(0, 4);`.
 
     // Exercise 3: Observe copied primitive values
     // Pass int 5 to a helper that reassigns its local parameter to 99.

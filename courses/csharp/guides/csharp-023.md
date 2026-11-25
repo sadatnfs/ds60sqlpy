@@ -24,9 +24,9 @@ A normal absence can be represented without an exception when it is expected. A 
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles your saved pad as `Program.cs` in its fixed .NET 10 project. C# 14 is the matching language generation. This route uses the prepared framework libraries; it does not accept arbitrary project files, NuGet packages, command arguments or interactive input. The explicit `Program.Main` entrypoint makes compilation and execution visible. `Check` throws on a false condition in every build configuration, unlike conditional debugging assertions.
+`ParseCount` uses `CultureInfo.InvariantCulture`, which the worked examples import through `System.Globalization`, so the digits are read the same way on every machine. Text with digits too large for an int, such as 99999999999, throws `OverflowException` instead of `FormatException`, a third category for task 5.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Compile contract, starter stop and success marker: [running a lesson](../STUDY-GUIDE.md#running-a-lesson).
 
 
 
@@ -34,7 +34,7 @@ Start with the answer-free learner artifact in your saved classroom pad. It deli
 
 `try` encloses an operation; typed catch selects a failure category; finally runs cleanup when control leaves the protected region. `throw;` rethrows the current exception. A catch filter with `when` narrows recovery policy.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+Each example ends with a trace; method: [tracing a program](../STUDY-GUIDE.md#tracing-a-program).
 
 ## Worked example / walkthrough
 
@@ -89,6 +89,8 @@ internal static class Program {
 
 **Observe:** Malformed numeric text is caught as a format error.
 
+**Trace.** `ParseCount("oops")` calls `int.Parse`, which throws `FormatException` because the text has no digits. The range check never runs. The catch filters on `FormatException` and sets `format` to true. `ParseCount("3")` parses 3, passes the range check and returns it, so both halves of the condition hold. A null argument would throw `ArgumentNullException`, which this catch deliberately does not handle.
+
 ### Example B: Retain an inner cause
 
 A public description can add context without erasing the lower-level failure category.
@@ -138,6 +140,8 @@ internal static class Program {
 
 **Observe:** The outer domain failure still contains the I/O cause.
 
+**Trace.** The inner `try` throws an `IOException`. Its catch block wraps that exception as the inner exception of a new `InvalidOperationException` with the message import failed, and throws the wrapper. The outer catch stores it. `observed?.InnerException is IOException` is true, so the original cause survives inside the domain-level failure for anyone reading the logs.
+
 ## Exercises
 
 1. **Predict and explain.** Identify which failure category each catch handles.
@@ -152,13 +156,15 @@ internal static class Program {
 
 6. **Transfer and justify.** Decide which layer owns user-facing error translation and which details should remain private diagnostics.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Log each task in the [evidence table](../STUDY-GUIDE.md#recording-exercise-evidence) before opening the explanation.
 
 ## Common pitfalls and diagnosis
 
 A catch-all that returns a default can turn data loss into apparent success. Throwing the caught variable instead of using bare throw changes stack-trace behavior. Cleanup should not accidentally replace the original failure.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+For task 2, `ParseCount("-1")` parses successfully and then throws `ArgumentOutOfRangeException`, so it must not land in the `FormatException` catch. Task 4's catch-all returning an empty report hides real failures; rethrow with a bare `throw;` when you cannot handle an exception, because `throw ex;` resets its stack trace.
+
+Repair routine: [building a regression case](../STUDY-GUIDE.md#building-a-regression-case).
 
 ## Progressive hints
 
@@ -168,11 +174,15 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 ## Self-check and next step
 
-Explain Exception, Stack trace, Translation without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+Name the exception type `ParseCount` throws for oops, for -1, for 99999999999 and for empty text. Explain what the inner exception keeps that the outer message does not. For task 6, decide which layer turns exceptions into user messages and which details stay in logs.
+
+Then follow the general [self-check routine](../STUDY-GUIDE.md#self-check-routine) and save your pad.
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://learn.microsoft.com/en-us/dotnet/csharp/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+[Documentation](https://learn.microsoft.com/en-us/dotnet/csharp/): The C# guide's exception handling articles describe `try`, `catch`, `finally`, exception filters and `InnerException`.
+
+Provenance and limits: [sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

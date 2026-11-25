@@ -1,6 +1,8 @@
 # rust-044: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [rust-044_solution.rs](rust-044_solution.rs). It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.
+Executable reference: [rust-044_solution.rs](rust-044_solution.rs), which runs both examples and the coded answers.
+
+Open this only after [an attempt](../STUDY-GUIDE.md#attempt-a-lesson).
 
 ## Why the two examples differ
 
@@ -26,7 +28,7 @@ Explain coefficient, scale and represented amount separately.
 
 Add a negative decimal coefficient and retain its scale.
 
-**Reference answer.** The same statements run as the `Task 2` block of the reference program; here they are wrapped in `main` as a complete file.
+**Reference answer**, wrapped in `main`; the reference runs it as its `Task 2` block.
 
 ```rust
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -54,7 +56,7 @@ The sign belongs to the coefficient and the scale applies to every value in the 
 
 Create a schema documenting measurement units and timestamp precision.
 
-**Reference answer.** The same statements run as the `Task 3` block of the reference program; here they are wrapped in `main` as a complete file.
+**Reference answer**, wrapped in `main`; the reference runs it as its `Task 3` block.
 
 ```rust
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -93,7 +95,7 @@ Diagnose reading milliseconds as seconds or losing decimal scale.
 
 Test null decimal/timestamp values and a schema mismatch.
 
-**Reference answer.** The same statements run as the `Task 5` block of the reference program; here they are wrapped in `main` as a complete file.
+**Reference answer**, wrapped in `main`; the reference runs it as its `Task 5` block.
 
 ```rust
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -137,7 +139,7 @@ Nulls in decimal and timestamp columns are validity, exactly as in integer colum
 
 Plan a separately prepared Rust-to-PyArrow IPC round trip that checks schema, nulls, decimal scale and timestamp units in both languages.
 
-No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **Decimal scale**, and state one limitation of your choice.
+**Judging criteria.** A strong plan prepares a separate Cargo project and a Python environment with a pinned `pyarrow`, writes an IPC stream from Rust with a nullable column, a `Decimal128(10, 2)` column and a millisecond UTC timestamp column, and reads it in Python. Both sides assert the same schema, the same null positions, the decimal value 1.25 rather than 125, and the timestamp unit and zone; Python then writes the batch back for Rust to check again. State one limitation: converting to pandas applies its own rules, so checks must run on Arrow objects.
 
 ## Mechanism and diagnostic reasoning
 
@@ -151,4 +153,6 @@ An integer cast is not a timestamp-unit conversion. Time-zone metadata is not a 
 
 ## Review before continuing
 
-Run the reference and confirm that it prints `rust-044: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.
+Rebuild Example B (Keep timestamp units explicit) from a blank pad.
+
+Review routine: [Self-check and review](../STUDY-GUIDE.md#self-check-and-review).

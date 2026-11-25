@@ -36,5 +36,7 @@
       "wrong": "Concluding from points near the line that the errors are normal and independent and that the model is valid for prediction or causal claims. Dependence and misspecification do not show up in a Q-Q plot.",
       "verify": "`sum(z$residual)` and `sum(z$residual * d$x)` both return 0 within rounding error, which shows the constraint."
     }
-  ]
+  ],
+  "run_note": "The starter holds eight ids with x from 0 to 7 and an empty results list; the response follows the authored rule 1 plus 2x. Run it, fit the model and keep each id with its fitted value and residual in one table before plotting. A residual plot must draw the model's own residual vector, so build it from that table rather than recomputing values separately.",
+  "checks_note": "The checks confirm eight rows with unique ids and coefficients 1 and 2, a residual plot whose y values equal the model residuals, a normal Q-Q layer with eight points, and a fan-shaped fixture whose slope is still 2 while the absolute residuals grow perfectly with the fitted values. They show the plots draw the right numbers; eight residuals cannot prove normality or constant variance."
 }

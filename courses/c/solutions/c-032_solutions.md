@@ -1,6 +1,8 @@
 # c-032: explained solutions
 
-Compare after an attempt or explicit reveal. The complete executable reference, `c-032_solution.c`, implements all six cases, from the "swap integer objects" case to the "transfer a typed structure copy" case, in one `main.c`.
+`c-032_solution.c` assembles the "swap integer objects" case through the "transfer a typed structure copy" case in one `main.c`.
+
+Compare only after an attempt: [Compare and transfer](../STUDY-GUIDE.md#compare-and-transfer).
 
 ## Mechanism and assumptions
 
@@ -10,7 +12,7 @@ void * can hold object pointers and convert back to an appropriate object pointe
 
 ## Exercise 1: Swap integer objects: change one input
 
-Copy worked example 1, the "swap integer objects" case, into a scratch pad and change `int a = 2, b = 7;` to `int a = 3, b = 7;`. Before running, predict which CHECK fails and which value it sees in place of the worked result (the values become 7 and 2); then run it and restore the original line.
+In worked example 1, change `int a = 2, b = 7;` to `int a = 3, b = 7;`. Predict which value the CHECK on `a == 7 && b == 2` sees, then run and restore.
 
 The unchanged code is worked example 1:
 
@@ -20,13 +22,15 @@ swap_bytes(&a, &b, sizeof a);
 CHECK(a == 7 && b == 2);
 ```
 
-**Expected:** With `int a = 3, b = 7;` the run stops with `Check failed` at the CHECK on `a == 7 && b == 2`, because the "swap integer objects" case no longer shows that the values become 7 and 2. Restoring `int a = 2, b = 7;` brings that observation back.
+**Expected:** `Check failed` at `a == 7 && b == 2`; restoring `int a = 2, b = 7;` passes again.
+
+**Verify:** Name the value that made `a == 7 && b == 2` false, where worked example 1 showed that the values become 7 and 2.
 
 The size comes from the actual object rather than a guessed platform width.
 
 ## Exercise 2: Swap fixed byte arrays: debug a regression
 
-A regression changed one token in worked example 2, the "swap fixed byte arrays" case, so one line now reads `unsigned char a[] = {2, 2, 3}, b[] = {4, 5, 6};`. Run the example with that line, use the failing CHECK to find why their byte contents exchange exactly no longer holds and repair the line without changing the CHECK.
+Worked example 2 now has a line reading `unsigned char a[] = {2, 2, 3}, b[] = {4, 5, 6};`. Repair it so that their byte contents exchange exactly again.
 
 The unchanged code is worked example 2:
 
@@ -36,7 +40,9 @@ swap_bytes(a, b, sizeof a);
 CHECK(a[0] == 4 && a[2] == 6 && b[0] == 1 && b[2] == 3);
 ```
 
-**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `a[0] == 4 && a[2] == 6 && b[0] == 1 && b[2] == 3`. Once the line reads `unsigned char a[] = {1, 2, 3}, b[] = {4, 5, 6};` again, the "swap fixed byte arrays" case again shows that their byte contents exchange exactly.
+**Expected:** `Check failed` at `a[0] == 4 && a[2] == 6 && b[0] == 1 && b[2] == 3` until the line reads `unsigned char a[] = {1, 2, 3}, b[] = {4, 5, 6};` again.
+
+**Verify:** Explain how `unsigned char a[] = {2, 2, 3}, b[] = {4, 5, 6};` changes the value `a[0] == 4 && a[2] == 6 && b[0] == 1 && b[2] == 3` tests, using your failing and repaired runs.
 
 The operation changes representation bytes without interpreting them as another type.
 
@@ -51,6 +57,8 @@ CHECK(a == 2 && b == 7);
 ```
 
 **Expected:** Both objects remain unchanged.
+
+**Verify:** Keep a CHECK equivalent to `a == 2 && b == 7`. Control edit: changing `int a = 2, b = 7;` to `int a = 3, b = 7;` must fail it; then restore it.
 
 The loop performs no accesses. This fixture uses valid pointers rather than assuming every generic API accepts NULL for zero length.
 
@@ -67,6 +75,8 @@ CHECK(a == 2 && b == 7);
 
 **Expected:** The original values return.
 
+**Verify:** Keep a CHECK equivalent to `a == 2 && b == 7`. Control edit: changing `int a = 2, b = 7;` to `int a = 3, b = 7;` must fail it; then restore it.
+
 This property complements the exact one-swap result; by itself it would also accept a no-op implementation.
 
 ## Exercise 5: Read bytes through a generic input
@@ -79,6 +89,8 @@ CHECK(count_nonzero(data, sizeof data) == 3);
 ```
 
 **Expected:** The count is 3.
+
+**Verify:** Keep a CHECK equivalent to `count_nonzero(data, sizeof data) == 3`. Control edit: changing `unsigned char data[] = {1, 0, 2, 3};` to `unsigned char data[] = {1, 1, 2, 3};` must fail it; then restore it.
 
 The semantic unit is explicitly a byte, so no typed alignment assumption is needed.
 
@@ -94,8 +106,10 @@ CHECK(b.x == 2 && b.y == 3);
 
 **Expected:** Both semantic fields match.
 
+**Verify:** Keep a CHECK equivalent to `b.x == 2 && b.y == 3`. Control edit: changing `struct Pair a = {2, 3}, b = {0, 0};` to `struct Pair a = {3, 3}, b = {0, 0};` must fail it; then restore it.
+
 The destination is a real object of the same type. Semantic verification checks fields rather than unspecified padding bytes.
 
 ## After comparison
 
-Add a fresh distinguishing input for the "transfer a typed structure copy" case to your own c-032 source. Explain why every access in `swap_bytes` or `count_nonzero` stays within a live object and each owned resource is released. An expected type erasure failure belongs in the test contract; undefined behavior does not. Keep diagnostics and sanitizer evidence for the "swap fixed byte arrays" case apart from ordinary output: the fixture proves its stated type erasure, element size and typed wrapper assumptions, not universal safety.
+Swap two `double` values with `swap_bytes(&a, &b, sizeof a)` and CHECK both results. Then explain why passing `sizeof(int)` for the same call would exchange only the first bytes of each object and leave two mixed values that the compiler cannot flag. Finally sketch `swap_double(double *a, double *b)` and explain how a typed wrapper removes the size choice from the caller.

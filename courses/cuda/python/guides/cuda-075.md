@@ -1,10 +1,17 @@
 # cuda-075: Two-dimensional indexing and images
 
-**Route:** CUDA Python and machine learning. **Stage:** intermediate. **Prerequisites:** `cuda-066`, `cuda-074`. Allow several sessions when the hardware experiment is new; the chapter is not a deadline.
+**Route:** CUDA Python and machine learning. **Stage:** intermediate. **Prerequisites:** `cuda-066`, `cuda-074`.
 
-## What you will be able to explain
+Pacing, evidence labels and platform rules: [CUDA study guide](../../STUDY-GUIDE.md).
 
-By the end, you can **trace a rectangular tile**, **find in-place stencil contamination**, and **explain row and column tail guards** with evidence. Start with the two worked cases, then use the editable CPU model to make the quantities concrete.
+## Learning objectives
+
+- Trace a rectangular tile.
+- Calculate flat offsets.
+- Change clamp to zero padding.
+- Find in-place stencil contamination.
+- Test width one.
+- Explain row and column tail guards.
 
 ## Mechanism and vocabulary
 
@@ -31,9 +38,13 @@ For a 2 by 3 image, row 1 column 2 maps to flat offset 5. Swapping row and colum
 
 A horizontal three-point average with clamped borders maps [3,6,9] to [4,6,8]. Zero padding would produce [3,6,5], a different documented operation.
 
-## Portable executable model
+## How to run the CPU model
 
-The **CPU reference model** variant runs this bounded worked example using `python-core`. It uses only the Python standard library, small synthetic values and no network. Its purpose is to expose the arithmetic or contract behind the chapter. The separate reference includes assertions for the stated observations.
+Edit the copy; the [reference](../references/cuda-075_cpu.py) adds assertions.
+
+```sh
+python courses/cuda/python/lessons/cuda-075_cpu.py
+```
 
 ```python
 values = [3, 6, 9]
@@ -55,77 +66,62 @@ print("CPU image reference:", clamped)
 | `values` | `[3, 6, 9]` |
 | `clamped` | `[4.0, 6.0, 8.0]` |
 
-Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.
-
 ## Practice and transfer
+
+Record each attempt in the [worksheet](../lessons/cuda-075.md) before opening hints.
 
 ### Exercise 1: Trace a rectangular tile
 
 **Trap to avoid:** Writing pairs directly from a single flattened thread number tempts the reader to assign `x` to rows, because rows are listed first in mathematics. The tile then covers three rows and two columns, a transposed shape.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 2: Calculate flat offsets
 
 **Trap to avoid:** Using `column * width + row` swaps the roles. For row 1 column 2 it gives `2*3 + 1 = 7`, which lies past the six-element allocation, so a kernel would read or write out of bounds.
-
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 3: Change clamp to zero padding
 
 **Trap to avoid:** Calling both versions a three-point average and comparing only the interior value 6 hides the change. Tests that skip the edges will pass for either padding and miss a semantic regression.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 4: Find in-place stencil contamination
 
 **Trap to avoid:** Assuming each thread writes only its own element and therefore cannot interfere ignores that neighbors read that element. Ownership of writes is not the same as ownership of reads.
-
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 5: Test width one
 
 **Trap to avoid:** Assuming width is always at least 3 and reading `values[i-1]` and `values[i+1]` directly fails: `values[-1]` silently returns the last element in Python, and `values[1]` raises IndexError. A device version reads out of bounds.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 6: Explain row and column tail guards
 
 **Trap to avoid:** Guarding only the flat offset with `offset < height*width` lets a thread with column 3 and row 0 in a width-3 image pass, because its offset 3 is valid. It then writes into row 1, column 0, corrupting another pixel.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ## Progressive hints
 
-Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.
+Hint *k* belongs to exercise *k*; open one at a time.
 
-1. Start from worked example 1 and mark the quantities needed for the task "Trace a rectangular tile".
-2. Change one assumption in worked example 2 while preserving the declared contract: calculate flat offsets.
-3. Trace the CPU program's variables before adding hardware behavior: change clamp to zero padding.
-4. Draw producers, consumers and the exact operation boundary for the task "Find in-place stencil contamination".
-5. Separate what the small fixture establishes from what the real runtime must show: test width one.
-6. Write a counterexample to an overbroad claim before you explain row and column tail guards.
+1. Pick a small rectangular tile and list its row indices and column indices as two separate ranges.
+2. Use the row-major formula with the image width, then check the largest offset against the allocation size.
+3. Recompute each border element of `[3,6,9]` with a zero outside the image instead of a repeated edge value.
+4. Update the output in place from left to right and note which neighbor value the second element reads.
+5. With a single column, ask which value clamping supplies for both the left and right neighbors.
+6. Choose an image whose height and width have different tails and test each coordinate's guard separately.
 
-## Common mistakes and self-review
+## Common mistakes and self-check
 
-Confusing a correct tiny example with a general implementation is the central review risk. For this chapter, challenge the assumption in worked example 2, then ask whether your change preserves the mechanism described above. If you change dtype, layout, ordering, batch size or backend, update the acceptance contract rather than silently reusing the old observation. Explain an unexpected result before trying random configuration changes.
+A frequent mistake is writing a stencil's output into its own input. After the first pixel is updated, its neighbor reads the new value instead of the original, so the result depends on thread order. A second mistake is guarding only one coordinate, or using one bound for both, which lets threads in a non-square tail write outside the image. Fix both by reading from an immutable input, writing to a separate output and checking row and column against their own limits.
 
-Keep a small evidence table with columns **claim**, **input**, **expected observation**, **actual observation** and **limit**. For the first claim use `Trace a rectangular tile`. For the final claim use `Explain row and column tail guards`. An unperformed GPU or cluster experiment remains pending even when the CPU model is correct.
+**Evidence limit:** The CPU loop reproduces the clamped average `[4, 6, 8]` with visible coordinates. Its run time says nothing about coalescing, tile shape or GPU throughput, and it cannot show races that only appear when threads run concurrently.
 
-## Platform and evidence contract
+1. Why must the boundary policy be stated as part of correctness?
+2. What is the flat offset of row 1, column 2 in a row-major 2 by 3 image?
+3. Why does a rectangular launch need two independent guards?
 
-The reading worksheet and CPU reference model work through the ordinary Linux Docker classroom on macOS, Linux and Windows using WSL 2. They do not require an NVIDIA GPU. Their results are labeled CPU models or semantic oracles, not simulated hardware performance.
-
-Real CUDA work needs supported NVIDIA hardware, a compatible host driver and an explicitly prepared GPU runtime. An Apple GPU does not execute CUDA kernels. PyTorch MPS on a supported native Mac, ROCm on supported AMD hardware, or other vendor backends can provide separate accelerator learning routes; they need their own package and operation qualification and are not CUDA evidence. The ordinary Linux Docker classroom does not expose native Mac MPS automatically.
-
-Do not download packages, models or data by opening this lesson. Do not attach an engine socket, ambient cluster credentials or an arbitrary remote endpoint. A CPU pass, imported package, successful compilation, real GPU result and measured performance are distinct observations. Record the actual backend, data shape/dtype, source revision, versions and pending checks. A saved completion marker records learning progress, not hardware certification.
+Answers: [self-check answers](../solutions/cuda-075_solutions.md#self-check-answers).
 
 ## Primary references
 
 - [NVIDIA CUDA Python introduction](https://docs.nvidia.com/cuda/cuda-programming-guide/02-basics/intro-to-cuda-python.html)
-- [Maintained numba-cuda project](https://github.com/NVIDIA/numba-cuda)
 
-Use the version-matched documentation of your prepared environment. These references describe interfaces and supported boundaries; the chapter's synthetic examples and CPU models are original teaching material.
+Full lists: [documentation and sources](../../STUDY-GUIDE.md#documentation-and-sources).
 
 ## Ask an AI tutor about this lesson
 

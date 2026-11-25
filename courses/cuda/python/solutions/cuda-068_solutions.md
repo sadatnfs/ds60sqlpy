@@ -1,6 +1,6 @@
 # cuda-068: explained solutions
 
-These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.
+Compare with your [worksheet](../lessons/cuda-068.md) attempt.
 
 ## Exercise 1: Compute centered columns
 
@@ -74,8 +74,16 @@ Use supported array operations before owning a kernel.
 
 **How to verify.** Keep the library result for `[[1,3],[3,7]]` and the distance 25 as fixed test cases. Any later kernel must reproduce `[[-1,-2],[1,2]]` and 25 under a stated tolerance before its speed is discussed.
 
+## Self-check answers
+
+1. **How does broadcasting subtract column means without building a repeated matrix?** A dimension of size one is extended logically, so the length-2 mean vector is reused for every row. No full repeated copy is materialized.
+
+2. **What property of the centered result checks the computation?** Every centered column sums to zero, as `[-1, 1]` and `[-2, 2]` do here.
+
+3. **Why is a mature library baseline also a performance competitor?** A custom kernel must match the library's correctness and beat its speed. If the library already optimizes the operation, the custom kernel adds maintenance and testing work with no gain.
+
 ## Reference observation
 
 Centered columns and distance 25.
 
-The reference file is `courses/cuda/python/references/cuda-068_cpu.py`. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.
+Asserted by `courses/cuda/python/references/cuda-068_cpu.py`.

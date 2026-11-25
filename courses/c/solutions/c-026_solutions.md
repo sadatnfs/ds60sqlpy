@@ -1,6 +1,8 @@
 # c-026: explained solutions
 
-Compare after an attempt or explicit reveal. The complete executable reference, `c-026_solution.c`, implements all six cases, from the "append two fragments" case to the "transfer a delimiter protocol" case, in one `main.c`.
+`c-026_solution.c` assembles the "append two fragments" case through the "transfer a delimiter protocol" case in one `main.c`.
+
+Compare only after an attempt: [Compare and transfer](../STUDY-GUIDE.md#compare-and-transfer).
 
 ## Mechanism and assumptions
 
@@ -10,7 +12,7 @@ The builder owns a fixed character array and a length. append_text obtains the s
 
 ## Exercise 1: Append two fragments: predict an edited check
 
-Copy worked example 1 into a scratch pad and change `CHECK(append_text(&b, "red") && append_text(&b, " sky"));` to `CHECK(append_text(&b, "red!") && append_text(&b, " sky"));` inside its CHECK. Before running, predict whether the CHECK still holds and explain why; then restore it.
+In worked example 1, change `CHECK(append_text(&b, "red") && append_text(&b, " sky"));` to `CHECK(append_text(&b, "red!") && append_text(&b, " sky"));`. Predict whether the CHECK still holds and why, then run and restore.
 
 The unchanged code is worked example 1:
 
@@ -20,13 +22,15 @@ CHECK(append_text(&b, "red") && append_text(&b, " sky"));
 CHECK(b.len == 7 && strcmp(b.data, "red sky") == 0);
 ```
 
-**Expected:** With `CHECK(append_text(&b, "red!") && append_text(&b, " sky"));` the run stops with `Check failed` at the CHECK on `b.len == 7 && strcmp(b.data, "red sky") == 0`, because the "append two fragments" case no longer shows that the result is red sky with length 7. Restoring `CHECK(append_text(&b, "red") && append_text(&b, " sky"));` brings that observation back.
+**Expected:** `Check failed`: `CHECK(append_text(&b, "red!") && append_text(&b, " sky"));` is false, although the result is red sky with length 7.
+
+**Verify:** Explain which claim `CHECK(append_text(&b, "red!") && append_text(&b, " sky"));` makes that the state fails; restoring `CHECK(append_text(&b, "red") && append_text(&b, " sky"));` passes again.
 
 The stored length avoids rescanning previous content before every append.
 
 ## Exercise 2: Append empty text: diagnose an edited check
 
-A careless edit changed the CHECK in worked example 2, the "append empty text" case, so that it reads `CHECK(append_text(&b, "abc!") && append_text(&b, ""));`. Run the example with that line, explain why the edited CHECK now fails even though the program state still means length and content remain unchanged, and restore it.
+Worked example 2's CHECK now reads `CHECK(append_text(&b, "abc!") && append_text(&b, ""));`. Explain why it fails although length and content remain unchanged, then restore it.
 
 The unchanged code is worked example 2:
 
@@ -36,7 +40,9 @@ CHECK(append_text(&b, "abc") && append_text(&b, ""));
 CHECK(b.len == 3 && strcmp(b.data, "abc") == 0);
 ```
 
-**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `b.len == 3 && strcmp(b.data, "abc") == 0`. Once the line reads `CHECK(append_text(&b, "abc") && append_text(&b, ""));` again, the "append empty text" case again shows that length and content remain unchanged.
+**Expected:** `Check failed` until the CHECK reads `CHECK(append_text(&b, "abc") && append_text(&b, ""));` again, though length and content remain unchanged.
+
+**Verify:** Explain why `CHECK(append_text(&b, "abc!") && append_text(&b, ""));` rejects a state that `b.len == 3 && strcmp(b.data, "abc") == 0` accepts, using your failing and repaired runs.
 
 The empty append is a successful no-op, not an error or a new terminator-free state.
 
@@ -51,6 +57,8 @@ CHECK(b.len == 15 && b.data[15] == '\0');
 ```
 
 **Expected:** The complete payload fits and remains terminated.
+
+**Verify:** Keep a CHECK equivalent to `append_text(&b, "123456789012345")`. Control edit: `CHECK(append_text(&b, "123456789012345!"));` must fail; then restore it.
 
 The final storage byte belongs to the terminator. Payload capacity is one less than total capacity.
 
@@ -67,6 +75,8 @@ CHECK(b.len == 15 && strcmp(b.data, "123456789012345") == 0);
 
 **Expected:** The append fails without changing prior content.
 
+**Verify:** Keep a CHECK equivalent to `b.len == 15 && strcmp(b.data, "123456789012345") == 0`. Control edit: `CHECK(append_text(&b, "123456789012346"));` must fail; then restore it.
+
 The bound is checked before copying, preserving a valid complete previous result.
 
 ## Exercise 5: Reject an oversized first fragment
@@ -80,6 +90,8 @@ CHECK(b.len == 0 && b.data[0] == '\0');
 ```
 
 **Expected:** The builder remains an empty valid string.
+
+**Verify:** Keep a CHECK equivalent to `b.len == 0 && b.data[0] == '\0'`. Control edit: changing `struct Builder b = {0};` to `struct Builder b = {1};` must fail it; then restore it.
 
 A failed first append should not leave a misleading truncated result.
 
@@ -96,8 +108,10 @@ CHECK(strcmp(b.data, "a,b,c") == 0);
 
 **Expected:** The exact result is a,b,c.
 
+**Verify:** Keep a CHECK equivalent to `strcmp(b.data, "a,b,c") == 0`. Control edit: `CHECK(append_text(&b, "a!") && append_text(&b, ",") && append_text(&b, "b") &&` must fail; then restore it.
+
 This is a fixed synthetic delimiter example. General CSV output needs quoting rules, not simple separator insertion.
 
 ## After comparison
 
-Add a fresh distinguishing input for the "transfer a delimiter protocol" case to your own c-026 source. Explain why every access in `append_text` stays within a live object and each owned resource is released. An expected builder invariant failure belongs in the test contract; undefined behavior does not. Keep diagnostics and sanitizer evidence for the "append empty text" case apart from ordinary output: the fixture proves its stated builder invariant, failure-atomic append and overlap contract assumptions, not universal safety.
+Append the ten characters `abcdefghij`, then try to append `klmnop`. The builder holds 15 payload characters, so the six-character append must fail and leave exactly `abcdefghij` with its terminator; CHECK both. Then append `klmno` and CHECK that the exact-capacity result is accepted. Explain why copying `klmno` before discovering that `p` does not fit would break failure atomicity.

@@ -3,11 +3,11 @@ package main
 import "fmt"
 
 func main() {
-	// Exercise 1: Admit a required read: change one input: Copy worked example 1 into a scratch pad and change `rule := Rule{Namespace: "lesson", Resource: "pods", Verbs: []string{"get", "list", "watch"}}` to `rule := Rule{Namespace: "lesson!", Resource: "pods", Verbs: []string{"get", "list", "watch"}}`. Before running, predict which check fails and which value it now sees; then run it and restore the original line.
-	// Expected: The changed run panics with `read` because `allowed(rule, "lesson", "pods", "get")` no longer holds. Restoring the original line brings back the worked observation: the request is admitted by the local rule model.
+	// Exercise 1: Admit a required read: change one input: Copy worked example 1, change `rule := Rule{Namespace: "lesson", Resource: "pods", Verbs: []string{"get", "list", "watch"}}` to `rule := Rule{Namespace: "lesson!", Resource: "pods", Verbs: []string{"get", "list", "watch"}}` and predict the failure before running; then restore the line.
+	// Expected: The edited run panics with `read` because `allowed(rule, "lesson", "pods", "get")` no longer holds.
 
-	// Exercise 2: Reject an unneeded mutation: diagnose an edited check: A careless edit changed the check in worked example 2 so that it reads `check(allowed(rule, "lesson", "pods", "delete"), "mutation")`. Run worked example 2 with that line, explain why the edited check now fails for the same program state, and restore it.
-	// Expected: Before the repair the program panics with `mutation`; after it the line reads `check(!allowed(rule, "lesson", "pods", "delete"), "mutation")` again and the request is rejected.
+	// Exercise 2: Reject an unneeded mutation: diagnose an edited check: A careless edit rewrote the check in worked example 2 as `check(allowed(rule, "lesson", "pods", "delete"), "mutation")`. Explain the failure, then restore it.
+	// Expected: The defective run panics with `mutation`; after restoring `check(!allowed(rule, "lesson", "pods", "delete"), "mutation")`, the request is rejected.
 
 	// Exercise 3: Reject cross-namespace access: Use the lesson rule against another namespace.
 	// Expected: The local model rejects it.

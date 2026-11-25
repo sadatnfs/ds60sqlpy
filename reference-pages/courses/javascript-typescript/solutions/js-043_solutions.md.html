@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/javascript-typescript/solutions/js-043_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="js-043-explanatory-solutions">js-043: explanatory solutions<a class="heading-anchor" href="#js-043-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit reveal. The separate .js reference is a complete offline browser program. These explanations discuss the six practice tasks; a visual resemblance alone is not a data or behavior check.</p>
+<p>Compare after your own attempt; the separate <code>.js</code> file is the complete reference program.</p>
 <h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
 <p>D3 is a collection of JavaScript tools for transforming data and connecting it to visual output. It does not choose a correct chart or statistical question for you. A visual encoding maps a data property to a perceptual property such as position, length, area or color. Begin by naming the quantity and units before choosing a mark.</p>
 <p>SVG is a document tree of vector shapes. A rectangle has x and y coordinates, width and height. In the usual SVG coordinate system x increases to the right and y increases downward. A viewBox describes the internal coordinate system; CSS controls how that system fits the available display area. A shape can be present in the DOM while lying outside the visible viewBox.</p>
@@ -218,7 +218,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Expected:</strong> A zero-length bar with a visible category/value label.</p>
 <h3 id="exercise-6-explain-why-position-and-length-suit-count-comparison">Exercise 6: Explain why position and length suit count comparison.<a class="heading-anchor" href="#exercise-6-explain-why-position-and-length-suit-count-comparison" aria-label="Link to this section">#</a></h3>
 <p>Choose the encoding to match the task. Area and decorative shapes can make a simple comparison harder. All three bars start at x 100, so their right edges can be compared directly. Mapping counts to circle radius would make C&#x27;s area 16 times A&#x27;s for a 4 to 1 count ratio.</p>
-<p><strong>Expected:</strong> A common baseline supports meaningful magnitude comparison.</p></article>
+<p><strong>Expected:</strong> A common baseline supports meaningful magnitude comparison.</p>
+<h3 id="after-comparison">After comparison<a class="heading-anchor" href="#after-comparison" aria-label="Link to this section">#</a></h3>
+<p>Extend the reference to five categories read from an array of objects. Compute the multiplier from the largest count so the longest bar fills 560 units, and keep every label inside the <code>viewBox</code>. Check that doubling all counts leaves the drawn widths unchanged, and explain why.</p></article>
   </main>
 </body>
 </html>

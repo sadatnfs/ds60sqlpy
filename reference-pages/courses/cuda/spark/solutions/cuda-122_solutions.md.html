@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cuda/spark/solutions/cuda-122_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="cuda-122-explained-solutions">cuda-122: explained solutions<a class="heading-anchor" href="#cuda-122-explained-solutions" aria-label="Link to this section">#</a></h2>
-<p>These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.</p>
+<p>Compare with your <a href="../lessons/cuda-122.md.html">worksheet</a> attempt.</p>
 <h3 id="exercise-1-compute-transfer-lower-bound">Exercise 1: Compute transfer lower bound<a class="heading-anchor" href="#exercise-1-compute-transfer-lower-bound" aria-label="Link to this section">#</a></h3>
 <p>Bytes divided by effective bandwidth.</p>
 <p><strong>Approach.</strong> Compute the transfer lower bound as bytes over effective bandwidth: 10 GiB at 1 GiB/s takes at least 10 seconds before serialization, connection setup or retries.</p>
@@ -231,9 +231,19 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Why it is correct here.</strong> Same data and partitioning make byte counts comparable, and equal outputs confirm the change preserved results.</p>
 <p><strong>A plausible wrong approach.</strong> Comparing configurations on different data sizes confounds the transport effect with payload size. Different partition counts also change the number of shuffle blocks, which affects per-block overhead independently of bandwidth.</p>
 <p><strong>How to verify.</strong> Assert outputs are equal, then report bytes and stage times side by side. Repeat each configuration at least three times and keep every sample, since network contention varies between runs.</p>
+<h3 id="self-check-answers">Self-check answers<a class="heading-anchor" href="#self-check-answers" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>What costs make up a shuffle?</strong> Serialization or columnar handling, buffering, transport, disk and downstream processing.</li>
+</ol>
+<ol start="2">
+<li><strong>When is pre-aggregation a valid rewrite?</strong> When combining partial results first gives the same final answer, which fails for nonassociative or stateful operations.</li>
+</ol>
+<ol start="3">
+<li><strong>Why should a lesson pad not change cluster settings?</strong> Network services and cluster-wide settings affect other users and require owned, authorized environments.</li>
+</ol>
 <h3 id="reference-observation">Reference observation<a class="heading-anchor" href="#reference-observation" aria-label="Link to this section">#</a></h3>
-<p>Ten-second payload lower bound;50 ms kernel saving is below 1 percent of it.</p>
-<p>The reference file is <code>courses/cuda/spark/references/cuda-122_cpu.py</code>. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.</p></article>
+<p>Ten-second payload lower bound; 50 ms kernel saving is below 1 percent of it.</p>
+<p>Asserted by <code>courses/cuda/spark/references/cuda-122_cpu.py</code>.</p></article>
   </main>
 </body>
 </html>

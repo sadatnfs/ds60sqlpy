@@ -1,6 +1,6 @@
 # cuda-127: explained solutions
 
-These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.
+Compare with your [worksheet](../lessons/cuda-127.md) attempt.
 
 ## Exercise 1: Derive expected revenue
 
@@ -74,8 +74,16 @@ Include CPU functionality and pending GPU limitations separately.
 
 **How to verify.** Check each claim in the report against a recorded run, and list every item that still requires hardware.
 
+## Self-check answers
+
+1. **Why run both ordinary Spark implementations before any GPU comparison?** Semantic agreement must be established first, so later differences point to the backend rather than the query.
+
+2. **What does a GPU report need besides timing?** The compatibility matrix, initial and executed plans, unsupported reasons, resource assignment, concurrency and memory observations.
+
+3. **When may the query text change across backends?** Only as a separately named rewrite that is revalidated against the oracle.
+
 ## Reference observation
 
 Sorted revenue [(A,60),(B,60)].
 
-The reference file is `courses/cuda/spark/references/cuda-127_cpu.py`. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.
+Asserted by `courses/cuda/spark/references/cuda-127_cpu.py`.

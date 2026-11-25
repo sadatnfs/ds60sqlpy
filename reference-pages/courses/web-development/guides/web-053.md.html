@@ -212,7 +212,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="syntax-anatomy-and-mechanism">Syntax anatomy and mechanism<a class="heading-anchor" href="#syntax-anatomy-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p>The reference receives a trusted synthetic actor id as a separate parameter from the requested record id. A query includes both record id and owner id as bound values. The fake actor is a test fixture, not a login implementation. A real adapter must obtain it from a verified session or credential and must not copy it from a form field.</p>
 <h3 id="classroom-execution-and-offline-inputs">Classroom execution and offline inputs<a class="heading-anchor" href="#classroom-execution-and-offline-inputs" aria-label="Link to this section">#</a></h3>
-<p>Choose the <strong>PHP CLI</strong> worker and work in <code>courses/web-development/lessons/web-053.php</code>, which runs as <code>main.php</code> in a bounded Linux process with PDO SQLite. Every input is a small synthetic value, and CLI runs are fresh processes, not persistent HTTP requests. Save your attempt before comparing it with <code>courses/web-development/solutions/web-053_solution.php</code>. <strong>How to run lessons</strong> in the <a href="../README.md.html">subject README</a> lists what the pad does not provide.</p>
+<p>The worked examples scope a read by owner and keep the trusted actor separate from the requested id. You build loadOwnedNote, which takes the actor from a trusted parameter and the note id from input and returns null for anything the actor does not own.</p>
+<p>Run <code>courses/web-development/lessons/web-053.php</code> with <strong>PHP CLI</strong>: synthetic inputs, not persistent HTTP requests (<a href="../STUDY-GUIDE.md.html#php-cli">why</a>).</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="worked-example-1-scope-a-read">Worked example 1: Scope a read<a class="heading-anchor" href="#worked-example-1-scope-a-read" aria-label="Link to this section">#</a></h4>
 <p>The owner comes from trusted server identity context.</p>
@@ -241,7 +242,7 @@ $stmt = $db-&gt;prepare(
 $stmt-&gt;execute([&#x27;id&#x27; =&gt; 11, &#x27;actor_id&#x27; =&gt; 7]);</code></pre>
 <p>Both statements are prepared and immune to injection, yet the first returns actor 8&#x27;s title to actor 7. Prepared statements protect query structure, not access policy. The second statement includes the trusted actor id in the predicate, so the database returns no row for a note owned by someone else. The application then answers as if the note does not exist, which avoids confirming that id 11 belongs to another account.</p>
 <h3 id="six-progressive-exercises">Six progressive exercises<a class="heading-anchor" href="#six-progressive-exercises" aria-label="Link to this section">#</a></h3>
-<p>Exercises that ask you to predict, explain, compare or diagnose keep their answers in the solutions file. The others show the evidence to look for.</p>
+<p>Exercises 1, 4 and 6 keep their expected answers in the solutions file.</p>
 <h4 id="exercise-1-explain-why-knowing-a-record-id-is-not-sufficient-permission">Exercise 1: Explain why knowing a record id is not sufficient permission.<a class="heading-anchor" href="#exercise-1-explain-why-knowing-a-record-id-is-not-sufficient-permission" aria-label="Link to this section">#</a></h4>
 <p><strong>Progressive hint:</strong> Imagine changing the id in the URL to another number.</p>
 <h4 id="exercise-2-add-owner-scoping-to-a-prepared-read-query">Exercise 2: Add owner scoping to a prepared read query.<a class="heading-anchor" href="#exercise-2-add-owner-scoping-to-a-prepared-read-query" aria-label="Link to this section">#</a></h4>
@@ -259,10 +260,11 @@ $stmt-&gt;execute([&#x27;id&#x27; =&gt; 11, &#x27;actor_id&#x27; =&gt; 7]);</cod
 <p><strong>Progressive hint:</strong> Send the edit request directly without the button.</p>
 <h3 id="debugging-and-common-mistakes">Debugging and common mistakes<a class="heading-anchor" href="#debugging-and-common-mistakes" aria-label="Link to this section">#</a></h3>
 <p>Do not confuse an unpredictable id with an authorization check. Avoid logging sensitive returned data during denied requests. Ensure update and delete paths have the same ownership discipline as reads.</p>
-<p>Keep the failing source, its input and the exact output, then repair one cause at a time. PHP can produce correct-looking text while missing an invalid-input branch, so rerun the empty, wrong-type and boundary cases after every fix.</p>
+<p>When another actor&#x27;s note is returned, the query filters by id alone; add owner_id to the WHERE clause as a bound parameter. When owner_id comes from the submitted form, the client chose its own identity, so take it from the trusted session value instead.</p>
+<p>The shared <a href="../STUDY-GUIDE.md.html#debugging-php">debugging routine</a> covers what to record before each repair.</p>
 <h3 id="retrieval-transfer-and-next-steps">Retrieval, transfer and next steps<a class="heading-anchor" href="#retrieval-transfer-and-next-steps" aria-label="Link to this section">#</a></h3>
-<p>Close the worked answers and explain authorization, ownership and least privilege without using the terms as their own definitions. Rebuild worked example 1 (Scope a read) from a blank pad, then try one new value, one empty or missing case and one unusual boundary. State which result would disprove your explanation.</p>
-<p>If you can reproduce the output but cannot explain why it happens, revisit <code>web-052</code>. A saved completion marker records your own progress; it is not a certification.</p>
+<p>From memory, explain why knowing or guessing a record id grants no permission. Then predict loadOwnedNote for the owner, another actor and a missing id, explain why the denied and missing cases should look the same to the caller and why hiding an edit button does nothing to protect the update path.</p>
+<p>Revisit <code>web-052</code> when an output is predictable but unexplained (<a href="../STUDY-GUIDE.md.html#review-loop">review loop</a>).</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
 <ul>
 <li><a href="https://www.php.net/manual/en/pdo.prepare.php">PDO preparation</a></li>

@@ -1,6 +1,6 @@
 # r-037: reference reasoning
 
-Use the [complete reference](r-037_reference.R) with the guide's declared inputs and runtime. Every worked example is also a standalone script.
+Run the [complete reference](r-037_reference.R) under the [run rules](../STUDY-GUIDE.md#run-a-chapter).
 
 ## Why the implementation has this shape
 
@@ -96,4 +96,6 @@ Increasing B reduces simulation noise but does not remove misspecification or ob
 
 ## What the checks establish
 
-The reference makes 5 `stopifnot()` checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.
+The assertions confirm that the exact value is 5/16, that the simulated estimate is within 0.02 of it, that quadrupling the repetitions halves the standard error, that probabilities of 0 and 1 give deterministic draws, and that the same seed reproduces the same draws. They do not show that the coin model fits any real process.
+
+The reference makes 5 `stopifnot()` checks; see [what a passing run proves](../STUDY-GUIDE.md#what-a-passing-run-proves).

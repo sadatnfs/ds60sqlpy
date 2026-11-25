@@ -206,12 +206,12 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Regression:</strong> A test retaining evidence of a repaired defect.</p>
 <p><strong>Property:</strong> A relationship expected across a family of inputs.</p>
 <h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>The Linux Docker classroom compiles the saved pad as <code>main.swift</code> with Swift 6 language checking. An explicit <code>@main</code> type contains <code>static func main() async throws</code>; the fixed compiler uses <code>-parse-as-library -swift-version 6</code>. The examples use the standard library and portable Foundation. <code>precondition</code> makes a violated invariant fail the process. The fixed pad accepts one source file, without arbitrary command arguments, interactive input or dependency installation. SwiftUI, UIKit, Apple simulators and application signing belong to the separately prepared macOS/Xcode project labs, never the Linux pad.</p>
-<p>Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.</p>
+<p>The pad examples need no fixture, but task 3 adds a test to the copied JourneyCore package and is run with <code>swift test</code> there. Task 2 adds <code>Int.min</code>, the one value whose negation does not fit in <code>Int</code>. Writing <code>-Int.min</code> literally is rejected at compile time as an overflow, and negating a variable that holds it traps at runtime, so the clamp must avoid negation entirely.</p>
+<p>Compile contract, starter stop and success marker: <a href="../STUDY-GUIDE.md.html#running-a-lesson">running a lesson</a>.</p>
 <p>Run the checked-in package tests using the commands in <a href="../fixtures/JourneyCore/README.md.html">JourneyCore</a>. Apple UI tests are a separate later lab.</p>
 <h3 id="syntax-anatomy-and-execution-trace">Syntax anatomy and execution trace<a class="heading-anchor" href="#syntax-anatomy-and-execution-trace" aria-label="Link to this section">#</a></h3>
 <p>Table-driven checks separate input fixtures from execution. XCTest test methods use XCTAssertEqual and XCTAssertThrowsError in the package. Async tests should await owned work rather than sleep and guess.</p>
-<p>Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.</p>
+<p>Each example ends with a trace; method: <a href="../STUDY-GUIDE.md.html#tracing-a-program">tracing a program</a>.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="example-a-check-independently-derived-cases">Example A: Check independently derived cases<a class="heading-anchor" href="#example-a-check-independently-derived-cases" aria-label="Link to this section">#</a></h4>
 <p>Literal expected results are derived from the domain rule rather than a duplicated implementation.</p>
@@ -228,6 +228,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> Normal and boundary values satisfy the clamp contract.</p>
+<p><strong>Trace.</strong> Each tuple in <code>cases</code> pairs an input with an expected output written from the rule, not computed by calling the function under test. The loop destructures each pair. For -2 the clamp returns 0, for 0 it returns 0 and for 3 it returns 3, and each result is compared with its literal. The three cases cover a value below the boundary, the boundary itself and a value above it, which is the smallest set that pins this contract.</p>
 <h4 id="example-b-catch-a-plausible-wrong-boundary">Example B: Catch a plausible wrong boundary<a class="heading-anchor" href="#example-b-catch-a-plausible-wrong-boundary" aria-label="Link to this section">#</a></h4>
 <p>A property adds evidence while the boundary example remains decisive.</p>
 <pre class="highlighted-code"><code class="language-swift"><span class="syntax-keyword">import</span> <span class="syntax-class">Foundation</span>
@@ -244,6 +245,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The zero case catches the wrong default and clamping is idempotent.</p>
+<p><strong>Trace.</strong> <code>wrong</code> returns 1 for any value at or below 0, a plausible slip when someone confuses at least zero with at least one. At input 0 it returns 1 while the clamp returns 0, so the first check proves the fixture can tell them apart. The second check states a property: clamping -4 gives 0, and clamping that 0 again still gives 0. Properties like idempotence add evidence, but only the boundary case catches this particular wrong rule.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <ol>
 <li><strong>Predict and explain.</strong> Name a wrong implementation rejected by each fixture.</li>
@@ -263,10 +265,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <ol start="6">
 <li><strong>Transfer and justify.</strong> Create a verification plan distinguishing unit, package, UI and device evidence.</li>
 </ol>
-<p>For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.</p>
+<p>Log each task in the <a href="../STUDY-GUIDE.md.html#recording-exercise-evidence">evidence table</a> before opening the explanation.</p>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
 <p>Random tests need reproducible seeds and an oracle. A test that catches its own precondition failure is not valid verification. Avoid narrow elapsed-time assertions on shared machines.</p>
-<p>A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.</p>
+<p>Task 4&#x27;s useless test compares <code>clamp(x)</code> with <code>clamp(x)</code>. It passes for every implementation, including <code>wrong</code>, so it cannot fail and proves nothing. The repair replaces one side with an independently derived literal. Run the suite against a deliberately broken clamp: a meaningful test fails, a tautological one stays green. Keep that broken version in a scratch copy, never in the package.</p>
+<p>Repair routine: <a href="../STUDY-GUIDE.md.html#building-a-regression-case">building a regression case</a>.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <ol>
 <li>Reproduce Example A (Check independently derived cases) before changing anything, and confirm its observation: Normal and boundary values satisfy the clamp contract.</li>
@@ -274,9 +277,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>Before opening the explanation, check your task 3 attempt (Add a real JourneyCore test that rejects a blank item title) against each pitfall listed above, and add one input that would expose the tempting wrong rule.</li>
 </ol>
 <h3 id="self-check-and-next-step">Self-check and next step<a class="heading-anchor" href="#self-check-and-next-step" aria-label="Link to this section">#</a></h3>
-<p>Explain Oracle, Regression, Property without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.</p>
+<p>For each of the three fixtures in Example A, name one wrong implementation it rejects that the other two accept. Explain why an expected value should come from the rule rather than from running the code. Separate what a passing <code>swift test</code> proves from what still needs UI or device evidence.</p>
+<p>Then follow the general <a href="../STUDY-GUIDE.md.html#self-check-routine">self-check routine</a> and save your pad.</p>
 <h3 id="sources-and-execution-boundary">Sources and execution boundary<a class="heading-anchor" href="#sources-and-execution-boundary" aria-label="Link to this section">#</a></h3>
-<p><a href="https://docs.swift.org/swift-book/documentation/the-swift-programming-language/">Official language or framework documentation</a>. The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.</p>
+<p><a href="https://docs.swift.org/swift-book/documentation/the-swift-programming-language/">Documentation</a>: The XCTest documentation describes test cases and assertions, and the Swift Package Manager documentation explains test targets and <code>swift test</code>.</p>
+<p>Provenance and limits: <a href="../STUDY-GUIDE.md.html#sources-and-execution-boundary">sources and execution boundary</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for swift-027: Testing behavior with the prepared package.
 Read courses/swift/guides/swift-027.md and courses/swift/lessons/swift-027.swift. Prerequisites: swift-026.

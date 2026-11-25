@@ -1,6 +1,6 @@
 # go-008: explained solutions
 
-These are comparison material after an attempt or explicit reveal. The executable reference implements all six cases in one `main.go`.
+Compare after an attempt ([using solutions](../STUDY-GUIDE.md#use-the-solutions)). `courses/go/solutions/go-008_solution.go` implements all six cases.
 
 ## Mechanism
 
@@ -10,7 +10,7 @@ type Point struct { X, Y int } creates a named type with fields. Point{X:2,Y:3} 
 
 ## 1. Model a coordinate: change one input
 
-Copy worked example 1 into a scratch pad and change `p := Point{X: 2, Y: 3}` to `p := Point{X: 3, Y: 3}`. Before running, predict which check fails and which value it now sees; then run it and restore the original line.
+Copy worked example 1, change `p := Point{X: 2, Y: 3}` to `p := Point{X: 3, Y: 3}` and predict the failure before running; then restore the line.
 
 The unchanged code is worked example 1:
 
@@ -19,13 +19,15 @@ p := Point{X: 2, Y: 3}
 check(p.X+p.Y == 5, "point")
 ```
 
-**Expected:** The changed run panics with `point` because `p.X+p.Y == 5` no longer holds. Restoring the original line brings back the worked observation: the distance is 5.
+**Expected:** The edited run panics with `point` because `p.X+p.Y == 5` no longer holds.
+
+**Verify:** Restoring `p := Point{X: 2, Y: 3}` makes the check pass again with the worked observation: the distance is 5.
 
 Named fields document the coordinate meaning. This tiny case assumes nonnegative coordinates; a general distance function needs absolute values.
 
 ## 2. Observe scalar copy: debug a regression
 
-A regression changed one token in worked example 2, so one line now reads `a := Point{X: 3, Y: 3}`. Run worked example 2 with that line, use the failure to locate the defect and repair it without changing the check.
+A one-token regression in worked example 2 makes a line read `a := Point{X: 3, Y: 3}`. Repair it without changing the check.
 
 The unchanged code is worked example 2:
 
@@ -36,7 +38,9 @@ b.X = 9
 check(a.X == 2 && b.X == 9, "struct copy")
 ```
 
-**Expected:** Before the repair the program panics with `struct copy`; after it the line reads `a := Point{X: 2, Y: 3}` again and the original X remains 2.
+**Expected:** The defective run panics with `struct copy`; after restoring `a := Point{X: 2, Y: 3}`, the original X remains 2.
+
+**Verify:** The failing run shows message `struct copy`; after the repair `a.X == 2 && b.X == 9` holds again.
 
 Both fields contain scalar values, so assignment produces independent field storage.
 
@@ -53,6 +57,8 @@ check(a.Items[0] == 9, "shallow field")
 
 **Expected:** The original batch observes the mutation.
 
+**Verify:** Your solution must keep `a.Items[0] == 9` true. Control: changing `b.Items[0] = 9` to `b.Items[1] = 9` panics with message `shallow field`; revert it.
+
 The copied slice descriptor still points to the same backing array. A struct wrapper does not change the ownership semantics of its fields.
 
 ## 4. Inspect zero state
@@ -66,6 +72,8 @@ check(p == (Point{X: 0, Y: 0}), "struct zero")
 
 **Expected:** Both coordinates are 0.
 
+**Verify:** Your solution must keep `p == (Point{X: 0, Y: 0})` true. Control: changing `check(p == (Point{X: 0, Y: 0}), "struct zero")` to `check(p == (Point{X: 1, Y: 0}), "struct zero")` panics with message `struct zero`; revert it.
+
 Field zero values compose into a deterministic struct zero value. Whether that represents a meaningful domain object is a separate contract.
 
 ## 5. Use a comparable key
@@ -78,6 +86,8 @@ check(m[Point{}] == "origin", "struct key")
 ```
 
 **Expected:** The equal coordinate finds origin.
+
+**Verify:** Your solution must keep `m[Point{}] == "origin"` true. Control: changing `m := map[Point]string{{X: 0, Y: 0}: "origin"}` to `m := map[Point]string{{X: 1, Y: 0}: "origin"}` panics with message `struct key`; revert it.
 
 Equality compares corresponding fields. Replacing a field with a slice would make this struct noncomparable and the map key invalid at compilation.
 
@@ -94,8 +104,10 @@ check(err == nil && item.Name == "sample", "valid item")
 
 **Expected:** The empty name is rejected; the valid name is retained.
 
+**Verify:** Your solution must keep `err == nil && item.Name == "sample"` true. Control: changing `item, err := newItem("sample")` to `item, err := newItem("sample!")` panics with message `valid item`; revert it.
+
 Validation at construction reduces invalid states, but exported fields still allow later assignment. A stricter API would keep invariant-bearing fields unexported.
 
 ## Transfer after comparison
 
-Return to your own pad and reproduce one check with a new input. Explain why the check rejects a plausible wrong implementation. Keep the distinction between a pure model, an in-process fake, and a real external system visible in your notes.
+A struct makes the domain visible, but ownership and validity remain separate decisions. Copying is shallow, a zero value may or may not be meaningful, and exported fields allow later invalid assignments. When later lessons decode JSON into structs or model Kubernetes objects, ask which fields share storage after a copy, which zero values are valid and which invariants must be enforced at construction.

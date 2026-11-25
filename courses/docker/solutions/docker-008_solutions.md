@@ -1,6 +1,6 @@
 # docker-008: explanatory solutions
 
-Compare after your own attempt or an explicit reveal. These explain the supplied teaching fixtures; they are not engine results. The mechanism is explained in `courses/docker/guides/docker-008.md`.
+These answers explain teaching fixtures, not engine results; the mechanism is in [the guide](../guides/docker-008.md).
 
 ## Exercise 1: Distinguish Compose interpolation from container environment.
 
@@ -88,4 +88,4 @@ Compare after your own attempt or an explicit reveal. These explain the supplied
 
 ## Check your transfer
 
-A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.
+In the first run, arguments after the image name replace CMD, so the container runs `python server.py --port 9090`; the entrypoint stays. In the second, `--entrypoint python` replaces the entrypoint, and setting the entrypoint also resets the default CMD, so the container runs `python -V` and prints a version instead of starting the server. `docker inspect` on each container shows the effective `Path` and `Args`. If the second container started the server, the entrypoint override was not applied, perhaps because it was placed after the image name, where it becomes an argument instead.

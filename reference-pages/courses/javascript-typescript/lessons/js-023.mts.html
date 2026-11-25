@@ -197,18 +197,16 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">export</span> <span class="syntax-punctuation">{</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-comment">// Exercise 1: Map a record into field flags: change one input</span></span>
-<span class="source-line"><span class="syntax-comment">// Copy Example A into a scratch `main.mts` and change `const flags: Flags&lt;Row&gt; = { id: true,</span></span>
-<span class="source-line"><span class="syntax-comment">// count: false };` to `const flags: Flags&lt;Row&gt; = { id: false, count: false };`. Before</span></span>
-<span class="source-line"><span class="syntax-comment">// running it, predict which check fails and which value it now sees; then run it and restore</span></span>
-<span class="source-line"><span class="syntax-comment">// the original line.</span></span>
-<span class="source-line"><span class="syntax-comment">// Expected: The changed run fails with an `AssertionError` at `assert.deepEqual(flags, { id:</span></span>
+<span class="source-line"><span class="syntax-comment">// In a scratch copy of Example A, change `const flags: Flags&lt;Row&gt; = { id: true, count: false</span></span>
+<span class="source-line"><span class="syntax-comment">// };` to `const flags: Flags&lt;Row&gt; = { id: false, count: false };`. Which check fails, and</span></span>
+<span class="source-line"><span class="syntax-comment">// what value does it see?</span></span>
+<span class="source-line"><span class="syntax-comment">// Expected: The edited run fails with an `AssertionError` at `assert.deepEqual(flags, { id:</span></span>
 <span class="source-line"><span class="syntax-comment">// true, count: false })`. Restoring `const flags: Flags&lt;Row&gt; = { id: true, count: false };`</span></span>
 <span class="source-line"><span class="syntax-comment">// brings back: id true and count false; a missing flag is a compile error.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">// Exercise 2: Prove Omit does not remove runtime secrets: debug a regression</span></span>
-<span class="source-line"><span class="syntax-comment">// A regression changed one token in Example B, so one line now reads `const full:</span></span>
-<span class="source-line"><span class="syntax-comment">// RecordWithSecret = { id: &#x27;A!&#x27;, secret: &#x27;fixture-only&#x27; };`. Run Example B with that line,</span></span>
-<span class="source-line"><span class="syntax-comment">// use the failing check to locate the defect and repair it without changing the check.</span></span>
+<span class="source-line"><span class="syntax-comment">// A regression made one Example B line read `const full: RecordWithSecret = { id: &#x27;A!&#x27;,</span></span>
+<span class="source-line"><span class="syntax-comment">// secret: &#x27;fixture-only&#x27; };`. Locate and repair it without editing the check.</span></span>
 <span class="source-line"><span class="syntax-comment">// Expected: Before the repair the run fails with an `AssertionError` at</span></span>
 <span class="source-line"><span class="syntax-comment">// `assert.equal(JSON.stringify(publicRecord), &#x27;{&quot;id&quot;:&quot;A&quot;}&#x27;)`. Restoring `const full:</span></span>
 <span class="source-line"><span class="syntax-comment">// RecordWithSecret = { id: &#x27;A&#x27;, secret: &#x27;fixture-only&#x27; };` brings back: typed view still has</span></span>

@@ -251,7 +251,7 @@ canonical <span class="syntax-operator">=</span> json<span class="syntax-operato
 <pre class="highlighted-code"><code class="language-text">20b72396464bd58e</code></pre>
 <p>The digest prefix is stable for this exact source and changes if any value, key or row changes, so two responses can be compared for source identity without shipping the data. Sorting keys and fixing separators matters: the default JSON separators or a different key order would produce a different hash for the same facts. Include the full digest in real responses; the prefix here only keeps the output short.</p>
 <h3 id="complete-worked-source">Complete worked source<a class="heading-anchor" href="#complete-worked-source" aria-label="Link to this section">#</a></h3>
-<p>This is a complete editable worked program for the declared prepared runtime. It uses bounded local fixtures and does not install packages or start distributed services.</p>
+<p>Run it as the <a href="../STUDY-GUIDE.md.html#worked-programs">worked program rules</a> describe.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> hashlib
 <span class="syntax-keyword">import</span> json
 

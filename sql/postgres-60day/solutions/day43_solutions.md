@@ -13,40 +13,37 @@ psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training \
   -f sql/postgres-60day/solutions/day43_solutions.sql
 ```
 
-`psql` prints each result/command tag in the terminal. Stop at the first
-unexpected `ERROR`; later output cannot repair an earlier failed invariant.
-Compare your own SQL, row grain, column names, row counts, `NULL` policy, and
-ordering with the explanation before comparing syntax.
+In our container `psql` printed `BEGIN`, `SET`, a CSV header and 63 data
+lines, `SELECT 63` for the stage, `UPDATE 1`, `INSERT 0 63`, a `staged_rows`
+value of 63, the one-row manifest, 63 deduplicated rows, an empty comparison
+and `ROLLBACK`. That last empty result is the success signal: after the merge,
+no staged value differs from `customers`. Your manifest timestamp will differ.
+The [solution reading notes](../../STUDY-GUIDE.md#read-a-solution) describe how
+to compare your attempt.
 
 ## Clause-by-clause reading map
 
-The lesson's main concepts are Logical backup, Staging table, Idempotent merge. Its worked-model focus is:
-Use `\copy (SELECT ... WHERE ...) TO ...` from a path owned by the learner, import into a staging table, and compare count, keys, types, and sample rows. Only then merge inside `BEGIN`/`ROLLBACK` with an explicit email conflict policy.
+The whole file is one transaction. Read each query in
+[logical order](../../STUDY-GUIDE.md#reading-any-query-in-logical-order) and
+note what row each step carries:
 
-- Start at `FROM`/`JOIN` and state the intermediate row grain. Inspect join keys
-  before adding aggregates; a one-to-many join is allowed to multiply rows only
-  when the later contract accounts for it.
-- Apply `WHERE` to input rows, `GROUP BY` to form buckets, and `HAVING` to
-  completed groups. Window functions run over the surviving relation and
-  normally preserve its row count.
-- Read the `SELECT` list as the public result contract: keys establish grain,
-  measures state calculations, and aliases explain meaning. `ORDER BY` is the
-  only output-order guarantee; add a unique tie-breaker before `LIMIT`.
-- Trace every common table expression (CTE) as a temporary named relation.
-  Execute or inspect one stage at a time while debugging, but compare the final
-  result with an independent control rather than trusting stage names.
-- Keep SQL `NULL` as “missing/unknown/not applicable” until the metric contract
-  chooses another representation. Guard division with `NULLIF`; disclose
-  exclusions and distinguish zero from no row.
-- For DDL/DML, a command tag proves only that PostgreSQL accepted a statement.
-  Catalog checks, negative cases, row-count reconciliation, and the declared
-  transaction boundary prove behavior and cleanup.
+- The export is `COPY (query) TO STDOUT WITH (FORMAT csv, HEADER true)`. Its
+  inner `SELECT` filters `customers` to the 63 US rows and orders them by
+  `customer_id`; `COPY` formats that result for the client.
+- `CREATE TEMP TABLE customers_restore_stage AS SELECT ...` stands in for the
+  later `\copy ... FROM` import. It keeps six columns and drops
+  `customer_id`, so `email` is the only key left to match on.
+- `UPDATE` marks `customer1@example.com` as changed, giving the merge one real
+  difference to restore.
+- `INSERT ... SELECT ... ON CONFLICT (email) DO UPDATE` sets `full_name`,
+  `country`, `segment` and `attributes` from `EXCLUDED`, the proposed row. It
+  leaves `created_at` alone, so a restore does not rewrite signup dates.
+- Four reads follow: a stage count, a one-row manifest over `customers`, the
+  `staged_duplicates` CTE that ranks each normalized email, and the
+  `IS DISTINCT FROM` comparison of the stage with `customers`.
 
-The exact final queries are not the only valid syntax. A join, subquery, CTE,
-window, or conditional aggregate can be an alternative when it preserves the
-same grain, `NULL` semantics, deterministic ordering, and safety. Prefer the
-form whose intermediate relations a reviewer can verify; optimize only after
-correctness is established with evidence.
+`ROLLBACK` then undoes the stage and the merge; only the consumed sequence
+numbers remain.
 
 This day distinguishes client-side export from database recovery logic. The
 answer uses `COPY ... TO STDOUT` so it works through the current connection and
@@ -181,7 +178,7 @@ data unchanged.
 
 - **Inputs/evidence:** For sql-43 Exercise 2, mark one staged row as changed (`full_name || ' [restored]'` for `customer1@example.com`), then load `customers_restore_stage` into `customers` with `INSERT ... SELECT ... ON CONFLICT (email) DO UPDATE` inside the lesson transaction.
 - **Expected result/shape:** For sql-43 Exercise 2, expected output: `UPDATE 1` for the staged change, then `INSERT 0 63`, because all 63 staged emails already exist and each conflicting row is updated; the `staged_rows` check returns 63, and `customers` still has 500 rows.
-- **Independent verification:** For sql-43 Exercise 2, confirm that `SELECT full_name FROM customers WHERE email = 'customer1@example.com'` returns `Customer 1 [restored]` and `SELECT COUNT(*) FROM customers` returns 500 inside the transaction; rerun the same upsert and confirm that the row count and values do not change, which is the idempotency evidence.
+- **Independent verification:** For sql-43 Exercise 2, confirm that `SELECT full_name FROM customers WHERE email = 'customer1@example.com'` returns `Customer 1 [restored]` and `SELECT COUNT(*) FROM customers` returns 500 inside the transaction; rerun the same upsert and confirm it again reports `INSERT 0 63` with 500 rows and unchanged values, which is the idempotency evidence for the data, while `customers_customer_id_seq` still advances by 63 per run because each proposed row evaluates the `customer_id` default before the conflict is found.
 - **Intermediate relation check:** For sql-43 Exercise 2, `SELECT COUNT(*) FROM customers_restore_stage s JOIN customers c USING (email)` returns 63 before the load, which predicts that every staged row will update rather than insert.
 - **Clause check:** For sql-43 Exercise 2, the solution uses one `UPDATE customers_restore_stage ...` and one `INSERT INTO customers (...) SELECT ... FROM customers_restore_stage ON CONFLICT (email) DO UPDATE SET ... = EXCLUDED....`.
 - **Alternative/trade-off:** For sql-43 Exercise 2, `MERGE INTO customers USING customers_restore_stage ON ... WHEN MATCHED THEN UPDATE WHEN NOT MATCHED THEN INSERT` expresses the same restore and can also handle deletions, but it does not use `ON CONFLICT`'s arbiter index.
@@ -208,7 +205,7 @@ workflow.
 
 - **Inputs/evidence:** For sql-43 Exercise 3, compare server-side `COPY customers TO '/var/lib/postgresql/customers.csv'` with psql's `\copy customers TO 'customers.csv'`, using the course role's privileges and the classroom layout as evidence.
 - **Expected result/shape:** For sql-43 Exercise 3, expected output: a short written answer: `COPY ... TO 'file'` runs in the database server process and writes on the server's file system, which needs superuser or `pg_write_server_files`; `\copy` streams the rows to the `psql` client, which writes the file. In the classroom, `psql` runs in a Linux container, so `\copy` writes into the learning volume, not onto your desktop.
-- **Independent verification:** For sql-43 Exercise 3, run the server-side `COPY customers TO '/var/lib/postgresql/customers.csv'` as the course role and confirm that it fails with SQLSTATE `42501` (`permission denied to COPY to a file`), while `COPY (SELECT 1) TO STDOUT` succeeds, because any role may copy to the client stream.
+- **Independent verification:** For sql-43 Exercise 3, run the server-side `COPY customers TO '/var/lib/postgresql/customers.csv'` as the course role (a non-superuser without `pg_write_server_files`) and confirm that it fails with SQLSTATE `42501` (`permission denied to COPY to a file`), while `COPY (SELECT 1) TO STDOUT` succeeds, because any role may copy to the client stream; a superuser session may be allowed to write the file, so it is not valid evidence.
 - **Intermediate relation check:** For sql-43 Exercise 3, `SELECT pg_has_role(current_user, 'pg_write_server_files', 'MEMBER')` returns `false` for the course role, which predicts the permission error.
 - **Clause check:** For sql-43 Exercise 3, the evidence is the same `COPY` statement aimed at a server path and at `STDOUT`; the answer itself is written prose.
 - **Alternative/trade-off:** For sql-43 Exercise 3, granting `pg_write_server_files` would let the server write files, but it gives a role access to the server's file system; `\copy` keeps the file on the client side without that privilege.

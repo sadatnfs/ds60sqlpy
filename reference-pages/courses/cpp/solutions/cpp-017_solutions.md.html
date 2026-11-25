@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cpp/solutions/cpp-017_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="cpp-017-explanations-and-reference-observations">cpp-017: explanations and reference observations<a class="heading-anchor" href="#cpp-017-explanations-and-reference-observations" aria-label="Link to this section">#</a></h2>
-<p>Attempt the learner tasks before opening this document. The executable reference checks the bounded normal and boundary examples; the six explanations below cover the deliberate changes and manual checks.</p>
+<p>The <a href="cpp-017_solution.cpp.html">executable reference</a> adds <code>bounded</code>, which accepts 100 and reports <code>too_large</code> for 101, alongside the pad&#x27;s negative case. The explanations show how each error keeps its own reason inside the variant. How to compare: <a href="../STUDY-GUIDE.md.html#compare-with-the-solutions">study guide</a>.</p>
 <h3 id="mechanism">Mechanism<a class="heading-anchor" href="#mechanism" aria-label="Link to this section">#</a></h3>
 <p>optional represents either one value or absence. variant represents one of several named alternatives, useful for distinguishing error reasons. An exception transfers control to a matching catch boundary. Choose errors-as-values for expected input rejection and exceptions for exceptional failures that callers cannot usefully ignore.</p>
 <h3 id="detailed-reasoning">Detailed reasoning<a class="heading-anchor" href="#detailed-reasoning" aria-label="Link to this section">#</a></h3>

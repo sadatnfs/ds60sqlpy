@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cuda/python/solutions/cuda-101_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="cuda-101-explained-solutions">cuda-101: explained solutions<a class="heading-anchor" href="#cuda-101-explained-solutions" aria-label="Link to this section">#</a></h2>
-<p>These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.</p>
+<p>Compare with your <a href="../lessons/cuda-101.md.html">worksheet</a> attempt.</p>
 <h3 id="exercise-1-count-low-rank-parameters">Exercise 1: Count low-rank parameters<a class="heading-anchor" href="#exercise-1-count-low-rank-parameters" aria-label="Link to this section">#</a></h3>
 <p>Rank times sum of dimensions.</p>
 <p><strong>Approach.</strong> Count low-rank adapter parameters as rank times the sum of dimensions: <code>8*(1024 + 1024) = 16384</code> for a 1024 by 1024 weight.</p>
@@ -231,9 +231,19 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Why it is correct here.</strong> Fine-tuning can overfit small datasets quickly. Separate evaluation measures generalization.</p>
 <p><strong>A plausible wrong approach.</strong> Reporting the training loss as model quality overstates performance. Choosing the rank or learning rate by repeatedly looking at the evaluation set leaks it into tuning in the same way.</p>
 <p><strong>How to verify.</strong> Assert there is no overlap between training and evaluation example IDs, then report both metrics.</p>
+<h3 id="self-check-answers">Self-check answers<a class="heading-anchor" href="#self-check-answers" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>How does a low-rank update reduce trainable parameters?</strong> It factors the update into two thin matrices whose total size is rank times the sum of the dimensions.</li>
+</ol>
+<ol start="2">
+<li><strong>Does freezing the base remove its memory cost?</strong> No. It removes gradients and optimizer updates for it, but the weights still occupy storage and activations can still be needed.</li>
+</ol>
+<ol start="3">
+<li><strong>Why build a tiny transformer with synthetic tokens first?</strong> It allows bounded, offline experiments that check training mechanics without downloading a large model.</li>
+</ol>
 <h3 id="reference-observation">Reference observation<a class="heading-anchor" href="#reference-observation" aria-label="Link to this section">#</a></h3>
 <p>Base 1,048,576 and adapter 16,384 parameters.</p>
-<p>The reference file is <code>courses/cuda/python/references/cuda-101_cpu.py</code>. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.</p></article>
+<p>Asserted by <code>courses/cuda/python/references/cuda-101_cpu.py</code>.</p></article>
   </main>
 </body>
 </html>

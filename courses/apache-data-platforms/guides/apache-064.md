@@ -132,12 +132,11 @@ From explain.sql, this should return east 11 and west 9. The EXPLAIN version of 
 
 ## Complete worked source
 
-This is a project-only command notebook. Read and edit it in the classroom; run its explicitly labeled commands from the copied owned Docker workshop. The classroom does not execute these service commands.
+The classroom does not execute these service commands. See the [workshop rules](../STUDY-GUIDE.md#workshop-notebooks).
 
 # Hive apache-064 command notebook
 
-Run from the copied owned Hive project, following its README. Native service
-acceptance is separately recorded in QUALIFICATION.md.
+`initialize.hql` is the DDL that maps `ds60.orders` onto `file:/warehouse/orders` with partition key `day`, and `fixture.py` writes the Parquet rows that DDL expects. Read both in the copied Hive project before the two checks.
 
 ```bash
 cat initialize.hql
@@ -148,12 +147,11 @@ bash run.sh metadata
 
 Use separately named copied-owned tables for wrong-type and wrong-location experiments. Record the actual reader response; an empty location and an incompatible schema are different conditions.
 
-The classroom does not execute these Docker commands. Retain source, schema,
-file identities, actual responses and failure scope in an independent receipt.
+The accepted Hive gate covered one correct table. A wrong column type or a wrong location is your own experiment, and each needs its own table name, DDL and recorded diagnostic so nobody mistakes it for the reference result.
 
 ## Primary references
 
-- [Hive4.2.1 preparation and components](https://hive.apache.org/development/quickstart/)
+- [Hive 4.2.1 preparation and components](https://hive.apache.org/development/quickstart/)
 - [Hive DDL](https://hive.apache.org/docs/latest/language/languagemanual-ddl/)
 - [Hive Metastore administration](https://hive.apache.org/docs/latest/admin/adminmanual-metastore-administration/)
 - [Hive/Iceberg integration](https://iceberg.apache.org/docs/latest/hive/)

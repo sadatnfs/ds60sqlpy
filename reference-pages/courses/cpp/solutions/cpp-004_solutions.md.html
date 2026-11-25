@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cpp/solutions/cpp-004_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="cpp-004-explanations-and-reference-observations">cpp-004: explanations and reference observations<a class="heading-anchor" href="#cpp-004-explanations-and-reference-observations" aria-label="Link to this section">#</a></h2>
-<p>Attempt the learner tasks before opening this document. The executable reference checks the bounded normal and boundary examples; the six explanations below cover the deliberate changes and manual checks.</p>
+<p>Beyond the pad&#x27;s sums, the <a href="cpp-004_solution.cpp.html">executable reference</a> runs a counting loop from 1 to 4 that must total 10 and checks the Exercise 6 window: readings in [0, 5] from <code>[-1, 0, 4, 5, 6]</code> total 9. The threshold change, the reset repair and the empty-boundary test are explained below with their Verify steps. How to compare: <a href="../STUDY-GUIDE.md.html#compare-with-the-solutions">study guide</a>.</p>
 <h3 id="mechanism">Mechanism<a class="heading-anchor" href="#mechanism" aria-label="Link to this section">#</a></h3>
 <p>A branch chooses one path using a Boolean condition. A loop repeats a body while its condition holds. An invariant is a fact that remains true before and after each iteration. A boundary is an input where a decision changes, such as zero for a nonnegative reading. Tracing the index, current value and running total makes hidden state visible.</p>
 <h3 id="detailed-reasoning">Detailed reasoning<a class="heading-anchor" href="#detailed-reasoning" aria-label="Link to this section">#</a></h3>

@@ -206,12 +206,12 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Target:</strong> A compilation and dependency unit.</p>
 <p><strong>Module:</strong> A namespace and visibility boundary produced by compilation.</p>
 <h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>The Linux Docker classroom compiles the saved pad as <code>main.swift</code> with Swift 6 language checking. An explicit <code>@main</code> type contains <code>static func main() async throws</code>; the fixed compiler uses <code>-parse-as-library -swift-version 6</code>. The examples use the standard library and portable Foundation. <code>precondition</code> makes a violated invariant fail the process. The fixed pad accepts one source file, without arbitrary command arguments, interactive input or dependency installation. SwiftUI, UIKit, Apple simulators and application signing belong to the separately prepared macOS/Xcode project labs, never the Linux pad.</p>
-<p>Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.</p>
+<p>Tasks 2 to 5 run in the separate JourneyCore package lab rather than the pad, so copy the fixture into your own ignored workspace first and keep its build products inside that copy. The two pad examples here show the split between a pure calculation and its presentation; paste them first to confirm the idea before building the package.</p>
+<p>Compile contract, starter stop and success marker: <a href="../STUDY-GUIDE.md.html#running-a-lesson">running a lesson</a>.</p>
 <p>Use the complete <a href="../fixtures/JourneyCore/README.md.html">JourneyCore project</a>. It contains real Package.swift, source and test files and no external package dependencies.</p>
 <h3 id="syntax-anatomy-and-execution-trace">Syntax anatomy and execution trace<a class="heading-anchor" href="#syntax-anatomy-and-execution-trace" aria-label="Link to this section">#</a></h3>
 <p>Package.swift declares a tools-version header and target graph. import exposes another module public API. Internal is the usual default access level, while public members define cross-module contracts.</p>
-<p>Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.</p>
+<p>Each example ends with a trace; method: <a href="../STUDY-GUIDE.md.html#tracing-a-program">tracing a program</a>.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="example-a-keep-a-pure-core-function">Example A: Keep a pure core function<a class="heading-anchor" href="#example-a-keep-a-pure-core-function" aria-label="Link to this section">#</a></h4>
 <p>A portable contract can be shared by an executable, tests and a later app adapter.</p>
@@ -229,6 +229,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The pure kernel is suitable for a reusable library.</p>
+<p><strong>Trace.</strong> <code>total</code> is declared inside <code>main</code> and depends only on its argument. <code>[2, 3].reduce(0, +)</code> starts at 0, adds 2 and then 3, and returns 5. The empty array returns the initial 0 without calling <code>+</code>. Because the function reads no global state and performs no input or output, the same call returns the same value in a test target, a command-line executable or an app, which is what makes it a good candidate for a reusable library module.</p>
 <h4 id="example-b-separate-presentation-from-calculation">Example B: Separate presentation from calculation<a class="heading-anchor" href="#example-b-separate-presentation-from-calculation" aria-label="Link to this section">#</a></h4>
 <p>Moving this function into another target requires a deliberate public interface rather than copying implementation text.</p>
 <pre class="highlighted-code"><code class="language-swift"><span class="syntax-keyword">import</span> <span class="syntax-class">Foundation</span>
@@ -244,6 +245,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> Presentation is independently testable.</p>
+<p><strong>Trace.</strong> <code>render</code> takes an already computed total and builds the string total=5 through interpolation. It performs no arithmetic, so a wrong total cannot be hidden inside formatting code, and a formatting change cannot alter the number. The check compares the exact string. In the package lab the same split appears as a library target for the calculation and an executable target for printing, and moving <code>render</code> between targets would require marking what it uses as <code>public</code>.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <ol>
 <li><strong>Predict and explain.</strong> Identify the core and presentation responsibilities.</li>
@@ -263,10 +265,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <ol start="6">
 <li><strong>Transfer and justify.</strong> Add a new target only when it creates a useful dependency boundary and document that direction.</li>
 </ol>
-<p>For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.</p>
+<p>Log each task in the <a href="../STUDY-GUIDE.md.html#recording-exercise-evidence">evidence table</a> before opening the explanation.</p>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
 <p>A manifest is not executed by the classroom source pad. Do not assume adding a dependency is offline. Public API choices become compatibility obligations.</p>
-<p>A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.</p>
+<p>Task 4&#x27;s failure appears only across a module boundary: inside one file every declaration is visible, so the pad cannot reproduce it. In the package, call a JourneyCore function declared without an access modifier from the demo executable. For a top-level function the compiler reports that it cannot find the name in scope; for a method on a public type it says the method is inaccessible due to its <code>internal</code> protection level. Adding <code>public</code> to that declaration, and only that one, fixes it.</p>
+<p>Repair routine: <a href="../STUDY-GUIDE.md.html#building-a-regression-case">building a regression case</a>.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <ol>
 <li>Reproduce Example A (Keep a pure core function) before changing anything, and confirm its observation: The pure kernel is suitable for a reusable library.</li>
@@ -274,9 +277,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>Before opening the explanation, check your task 3 attempt (Run swift test and the journey-demo executable) against each pitfall listed above, and add one input that would expose the tempting wrong rule.</li>
 </ol>
 <h3 id="self-check-and-next-step">Self-check and next step<a class="heading-anchor" href="#self-check-and-next-step" aria-label="Link to this section">#</a></h3>
-<p>Explain Package, Target, Module without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.</p>
+<p>Name the three kinds of target in JourneyCore and which one may depend on which. Explain the difference between <code>internal</code> and <code>public</code> and why <code>internal</code> is the default. Say what <code>swift package clean</code> removes and what it never touches, and why the build directory belongs inside the copied package.</p>
+<p>Then follow the general <a href="../STUDY-GUIDE.md.html#self-check-routine">self-check routine</a> and save your pad.</p>
 <h3 id="sources-and-execution-boundary">Sources and execution boundary<a class="heading-anchor" href="#sources-and-execution-boundary" aria-label="Link to this section">#</a></h3>
-<p><a href="https://www.swift.org/documentation/package-manager/">Official language or framework documentation</a>. The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.</p>
+<p><a href="https://www.swift.org/documentation/package-manager/">Documentation</a>: The Swift Package Manager documentation on swift.org explains package manifests, targets and products; the Swift book&#x27;s Access Control chapter covers modules.</p>
+<p>Provenance and limits: <a href="../STUDY-GUIDE.md.html#sources-and-execution-boundary">sources and execution boundary</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for swift-026: Swift packages and module boundaries.
 Read courses/swift/guides/swift-026.md and courses/swift/lessons/swift-026.swift. Prerequisites: swift-025.

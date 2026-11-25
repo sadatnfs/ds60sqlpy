@@ -194,9 +194,17 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cuda/python/guides/cuda-106.md</code></p>
     </header>
     <article class="document"><h2 id="cuda-106-a-modern-tile-based-kernel-dsl">cuda-106: A modern tile-based kernel DSL<a class="heading-anchor" href="#cuda-106-a-modern-tile-based-kernel-dsl" aria-label="Link to this section">#</a></h2>
-<p><strong>Route:</strong> CUDA Python and machine learning. <strong>Stage:</strong> advanced. <strong>Prerequisites:</strong> <code>cuda-074</code>, <code>cuda-076</code>, <code>cuda-079</code>, <code>cuda-085</code>. Allow several sessions when the hardware experiment is new; the chapter is not a deadline.</p>
-<h3 id="what-you-will-be-able-to-explain">What you will be able to explain<a class="heading-anchor" href="#what-you-will-be-able-to-explain" aria-label="Link to this section">#</a></h3>
-<p>By the end, you can <strong>create tile boundaries</strong>, <strong>state compiler requirements</strong>, and <strong>explain a resource tradeoff</strong> with evidence. Start with the two worked cases, then use the editable CPU model to make the quantities concrete.</p>
+<p><strong>Route:</strong> CUDA Python and machine learning. <strong>Stage:</strong> advanced. <strong>Prerequisites:</strong> <code>cuda-074</code>, <code>cuda-076</code>, <code>cuda-079</code>, <code>cuda-085</code>.</p>
+<p>Pacing, evidence labels and platform rules: <a href="../../STUDY-GUIDE.md.html">CUDA study guide</a>.</p>
+<h3 id="learning-objectives">Learning objectives<a class="heading-anchor" href="#learning-objectives" aria-label="Link to this section">#</a></h3>
+<ul>
+<li>Create tile boundaries.</li>
+<li>Mask a final tile.</li>
+<li>Compare thread and tile abstractions.</li>
+<li>State compiler requirements.</li>
+<li>Design a library comparison.</li>
+<li>Explain a resource tradeoff.</li>
+</ul>
 <h3 id="mechanism-and-vocabulary">Mechanism and vocabulary<a class="heading-anchor" href="#mechanism-and-vocabulary" aria-label="Link to this section">#</a></h3>
 <p>A thread-level model assigns scalar work to individual threads. A tile-level language describes a block of data and lets a compiler choose lower-level distribution and instructions. The abstraction can simplify matrix and reduction kernels, but layout, memory traffic, masks and numerical behavior still matter. Different DSL releases support different devices and operations.</p>
 <p>Use a selected prepared Triton or CUDA tile implementation only after recording its compiler and architecture requirements. Compare the same mathematical operation against a library and the earlier thread-level reference. A masked tile must protect every invalid load and store at the boundary. This elective includes a CPU tiling model; the ordinary Python worker does not acquire a DSL compiler or GPU merely by opening the guide.</p>
@@ -212,8 +220,9 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>A vector of 10 elements partitioned into tiles of 4 has tiles [0..3],[4..7],[8,9]. The last tile has two valid lanes and two masked lanes.</p>
 <h4 id="worked-example-2">Worked example 2<a class="heading-anchor" href="#worked-example-2" aria-label="Link to this section">#</a></h4>
 <p>Changing tile size may improve reuse while increasing register pressure. The direction of the performance change must come from device evidence, not tile size alone.</p>
-<h3 id="portable-executable-model">Portable executable model<a class="heading-anchor" href="#portable-executable-model" aria-label="Link to this section">#</a></h3>
-<p>The <strong>CPU reference model</strong> variant runs this bounded worked example using <code>python-core</code>. It uses only the Python standard library, small synthetic values and no network. Its purpose is to expose the arithmetic or contract behind the chapter. The separate reference includes assertions for the stated observations.</p>
+<h3 id="how-to-run-the-cpu-model">How to run the CPU model<a class="heading-anchor" href="#how-to-run-the-cpu-model" aria-label="Link to this section">#</a></h3>
+<p>Edit the copy; the <a href="../references/cuda-106_cpu.py.html">reference</a> adds assertions.</p>
+<pre class="highlighted-code"><code class="language-bash">python courses/cuda/python/lessons/cuda-106_cpu.py</code></pre>
 <pre class="highlighted-code"><code class="language-python">n<span class="syntax-punctuation">,</span> tile <span class="syntax-operator">=</span> <span class="syntax-number">10</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span>
 blocks <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span><span class="syntax-builtin">list</span><span class="syntax-punctuation">(</span><span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span>start<span class="syntax-punctuation">,</span> <span class="syntax-builtin">min</span><span class="syntax-punctuation">(</span>start <span class="syntax-operator">+</span> tile<span class="syntax-punctuation">,</span> n<span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">)</span> <span class="syntax-keyword">for</span> start <span class="syntax-operator">in</span> <span class="syntax-builtin">range</span><span class="syntax-punctuation">(</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> n<span class="syntax-punctuation">,</span> tile<span class="syntax-punctuation">)</span><span class="syntax-punctuation">]</span>
 <span class="syntax-keyword">assert</span> blocks <span class="syntax-operator">==</span> <span class="syntax-punctuation">[</span><span class="syntax-punctuation">[</span><span class="syntax-number">0</span><span class="syntax-punctuation">,</span> <span class="syntax-number">1</span><span class="syntax-punctuation">,</span> <span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">3</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">4</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">,</span> <span class="syntax-number">6</span><span class="syntax-punctuation">,</span> <span class="syntax-number">7</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">8</span><span class="syntax-punctuation">,</span> <span class="syntax-number">9</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">]</span>
@@ -238,49 +247,46 @@ blocks <span class="syntax-operator">=</span> <span class="syntax-punctuation">[
 <td><code>[[0, 1, 2, 3], [4, 5, 6, 7], [8, 9]]</code></td>
 </tr>
 </tbody></table></div>
-<p>Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.</p>
 <h3 id="practice-and-transfer">Practice and transfer<a class="heading-anchor" href="#practice-and-transfer" aria-label="Link to this section">#</a></h3>
+<p>Record each attempt in the <a href="../lessons/cuda-106.md.html">worksheet</a> before opening hints.</p>
 <h4 id="exercise-1-create-tile-boundaries">Exercise 1: Create tile boundaries<a class="heading-anchor" href="#exercise-1-create-tile-boundaries" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Using closed intervals <code>[start, start + tile]</code> makes adjacent tiles share an element, so index 4 is processed twice and a sum reduction double counts it.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-2-mask-a-final-tile">Exercise 2: Mask a final tile<a class="heading-anchor" href="#exercise-2-mask-a-final-tile" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Masking only the store still issues out-of-bounds loads, which can fault or read unrelated memory, and an unmasked reduction then includes garbage values.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-3-compare-thread-and-tile-abstractions">Exercise 3: Compare thread and tile abstractions<a class="heading-anchor" href="#exercise-3-compare-thread-and-tile-abstractions" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Assuming a tile kernel behaves like a thread kernel with the same block size misreads the model, since a tile program instance is not a single thread.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-4-state-compiler-requirements">Exercise 4: State compiler requirements<a class="heading-anchor" href="#exercise-4-state-compiler-requirements" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Writing that the kernel requires a recent version gives no way to reproduce the build.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-5-design-a-library-comparison">Exercise 5: Design a library comparison<a class="heading-anchor" href="#exercise-5-design-a-library-comparison" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Timing the DSL kernel once against a warmed library call reports the DSL as much slower purely because of compilation.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h4 id="exercise-6-explain-a-resource-tradeoff">Exercise 6: Explain a resource tradeoff<a class="heading-anchor" href="#exercise-6-explain-a-resource-tradeoff" aria-label="Link to this section">#</a></h4>
 <p><strong>Trap to avoid:</strong> Concluding that larger tiles are always faster because they reuse more data predicts a direction that only device evidence can establish.</p>
-<p>Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
-<p>Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.</p>
+<p>Hint <em>k</em> belongs to exercise <em>k</em>; open one at a time.</p>
 <ol>
-<li>Start from worked example 1 and mark the quantities needed for the task &quot;Create tile boundaries&quot;.</li>
-<li>Change one assumption in worked example 2 while preserving the declared contract: mask a final tile.</li>
-<li>Trace the CPU program&#x27;s variables before adding hardware behavior: compare thread and tile abstractions.</li>
-<li>Draw producers, consumers and the exact operation boundary for the task &quot;State compiler requirements&quot;.</li>
-<li>Separate what the small fixture establishes from what the real runtime must show: design a library comparison.</li>
-<li>Write a counterexample to an overbroad claim before you explain a resource tradeoff.</li>
+<li>Start each tile at a multiple of the tile size and end it before the next start or at the vector length.</li>
+<li>In the last tile, compute which lane offsets fall beyond the length and guard both their loads and their stores.</li>
+<li>Ask which decisions the programmer writes in a thread-level kernel that a tile compiler makes instead.</li>
+<li>Record the DSL release, the compiler and the device architectures that release supports.</li>
+<li>Use the same shape, dtype and timing boundary for the library call, the thread reference and the tile kernel.</li>
+<li>Ask what a larger tile keeps live per program and what that does to how many programs can run together.</li>
 </ol>
-<h3 id="common-mistakes-and-self-review">Common mistakes and self-review<a class="heading-anchor" href="#common-mistakes-and-self-review" aria-label="Link to this section">#</a></h3>
-<p>Confusing a correct tiny example with a general implementation is the central review risk. For this chapter, challenge the assumption in worked example 2, then ask whether your change preserves the mechanism described above. If you change dtype, layout, ordering, batch size or backend, update the acceptance contract rather than silently reusing the old observation. Explain an unexpected result before trying random configuration changes.</p>
-<p>Keep a small evidence table with columns <strong>claim</strong>, <strong>input</strong>, <strong>expected observation</strong>, <strong>actual observation</strong> and <strong>limit</strong>. For the first claim use <code>Create tile boundaries</code>. For the final claim use <code>Explain a resource tradeoff</code>. An unperformed GPU or cluster experiment remains pending even when the CPU model is correct.</p>
-<h3 id="platform-and-evidence-contract">Platform and evidence contract<a class="heading-anchor" href="#platform-and-evidence-contract" aria-label="Link to this section">#</a></h3>
-<p>The reading worksheet and CPU reference model work through the ordinary Linux Docker classroom on macOS, Linux and Windows using WSL 2. They do not require an NVIDIA GPU. Their results are labeled CPU models or semantic oracles, not simulated hardware performance.</p>
-<p>Real CUDA work needs supported NVIDIA hardware, a compatible host driver and an explicitly prepared GPU runtime. An Apple GPU does not execute CUDA kernels. PyTorch MPS on a supported native Mac, ROCm on supported AMD hardware, or other vendor backends can provide separate accelerator learning routes; they need their own package and operation qualification and are not CUDA evidence. The ordinary Linux Docker classroom does not expose native Mac MPS automatically.</p>
-<p>Do not download packages, models or data by opening this lesson. Do not attach an engine socket, ambient cluster credentials or an arbitrary remote endpoint. A CPU pass, imported package, successful compilation, real GPU result and measured performance are distinct observations. Record the actual backend, data shape/dtype, source revision, versions and pending checks. A saved completion marker records learning progress, not hardware certification.</p>
+<h3 id="common-mistakes-and-self-check">Common mistakes and self-check<a class="heading-anchor" href="#common-mistakes-and-self-check" aria-label="Link to this section">#</a></h3>
+<p>A common mistake is masking the final tile&#x27;s loads but not its stores, or the reverse, so the two invalid lanes of the third tile read or write past the vector. Another is assuming a larger tile is faster because it improves reuse; it can raise register pressure and lower concurrency. Fix both by applying one mask to every boundary load and store, and by letting measurements on a supported device, not tile size alone, decide the direction of a performance change.</p>
+<p><strong>Misconception:</strong> A tile language makes memory layout someone else&#x27;s problem because the compiler chooses the instructions. <strong>Correction:</strong> The compiler distributes work inside a tile, but the program still decides tile shapes, the order of loads and how data is laid out in memory. A strided or misaligned layout can still waste bandwidth, so compare against a library and the thread-level reference on the same operation.</p>
+<p><strong>Evidence limit:</strong> The reference partitions 10 elements into three tiles, each element covered once. It does not compile Triton or a CUDA tile kernel, so masking in generated code, supported operations and performance need a prepared DSL release on a compatible device.</p>
+<ol>
+<li>What does a tile-level language change for the programmer?</li>
+<li>Why use half-open tile intervals?</li>
+<li>Does opening this lesson give the Python worker a DSL compiler?</li>
+</ol>
+<p>Answers: <a href="../solutions/cuda-106_solutions.md.html#self-check-answers">self-check answers</a>.</p>
 <h3 id="primary-references">Primary references<a class="heading-anchor" href="#primary-references" aria-label="Link to this section">#</a></h3>
 <ul>
 <li><a href="https://docs.pytorch.org/docs/2.9/notes/cuda.html">PyTorch CUDA semantics</a></li>
 <li><a href="https://www.tensorflow.org/guide/gpu">TensorFlow GPU guide</a></li>
 </ul>
-<p>Use the version-matched documentation of your prepared environment. These references describe interfaces and supported boundaries; the chapter&#x27;s synthetic examples and CPU models are original teaching material.</p>
+<p>Full lists: <a href="../../STUDY-GUIDE.md.html#documentation-and-sources">documentation and sources</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use the checked-in $guide-ds60sqlpy-learning skill for cuda-106: A modern tile-based kernel DSL.
 Read courses/cuda/python/guides/cuda-106.md and courses/cuda/python/lessons/cuda-106.md.

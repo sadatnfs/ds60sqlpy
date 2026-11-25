@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/kubernetes/solutions/k8s-062_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="k8s-062-explanatory-solutions">k8s-062: explanatory solutions<a class="heading-anchor" href="#k8s-062-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit reveal. These explanations describe the synthetic topology and stated API contracts. They are not fabricated runtime receipts.</p>
+<p>Attempt each exercise first, then compare (<a href="../STUDY-GUIDE.md.html#solutions-and-the-ai-tutor">study guide</a>).</p>
 <h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
 <p>Startup, readiness and liveness probes answer different questions. A startup probe can allow an application time to initialize before other probe behavior begins. Readiness indicates whether the Pod should receive ordinary new traffic. Liveness asks whether restarting the container is an appropriate recovery action.</p>
 <p>A dependency outage is not always a reason to restart every client. If a liveness check fails whenever a database is briefly unavailable, the system can create a restart storm without repairing the database. Probe design should reflect the application’s recovery capabilities and failure modes.</p>

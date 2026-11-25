@@ -197,25 +197,16 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">int</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">void</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span></span>
 <span class="source-line">  <span class="syntax-comment">/* Exercise 1: Relate indexing and arithmetic: change one input</span></span>
-<span class="source-line"><span class="syntax-comment">     Copy worked example 1, the &quot;relate indexing and arithmetic&quot; case, into a</span></span>
-<span class="source-line"><span class="syntax-comment">     scratch pad and change `int values[] = {2, 4, 6};` to `int values[] = {2,</span></span>
-<span class="source-line"><span class="syntax-comment">     5, 6};`. Before running, predict which CHECK fails and which value it sees</span></span>
-<span class="source-line"><span class="syntax-comment">     in place of the worked result (both yield 4); then run it and restore the</span></span>
-<span class="source-line"><span class="syntax-comment">     original line. Expected: With `int values[] = {2, 5, 6};` the run stops</span></span>
-<span class="source-line"><span class="syntax-comment">     with `Check failed` at the CHECK on `values[1] == *(values + 1) &amp;&amp; *(values</span></span>
-<span class="source-line"><span class="syntax-comment">     + 1) == 4`, because the &quot;relate indexing and arithmetic&quot; case no longer</span></span>
-<span class="source-line"><span class="syntax-comment">     shows that both yield 4. Restoring `int values[] = {2, 4, 6};` brings that</span></span>
-<span class="source-line"><span class="syntax-comment">     observation back. */</span></span>
+<span class="source-line"><span class="syntax-comment">     In worked example 1, change `int values[] = {2, 4, 6};` to `int values[] =</span></span>
+<span class="source-line"><span class="syntax-comment">     {2, 5, 6};`. Predict which value the CHECK on `values[1] == *(values + 1)</span></span>
+<span class="source-line"><span class="syntax-comment">     &amp;&amp; *(values + 1) == 4` sees, then run and restore. Expected: `Check failed`</span></span>
+<span class="source-line"><span class="syntax-comment">     at `values[1] == *(values + 1) &amp;&amp; *(values + 1) == 4`; restoring `int</span></span>
+<span class="source-line"><span class="syntax-comment">     values[] = {2, 4, 6};` passes again. */</span></span>
 <span class="source-line"></span>
 <span class="source-line">  <span class="syntax-comment">/* Exercise 2: Measure an array interval: debug a regression</span></span>
-<span class="source-line"><span class="syntax-comment">     A regression changed one token in worked example 2, the &quot;measure an array</span></span>
-<span class="source-line"><span class="syntax-comment">     interval&quot; case, so one line now reads `int *end = values - 3;`. Run the</span></span>
-<span class="source-line"><span class="syntax-comment">     example with that line, use the failing CHECK to find why the difference is</span></span>
-<span class="source-line"><span class="syntax-comment">     3 elements no longer holds and repair the line without changing the CHECK.</span></span>
-<span class="source-line"><span class="syntax-comment">     Expected: Before the repair the run stops with `Check failed` at the CHECK</span></span>
-<span class="source-line"><span class="syntax-comment">     on `n == 3`. Once the line reads `int *end = values + 3;` again, the</span></span>
-<span class="source-line"><span class="syntax-comment">     &quot;measure an array interval&quot; case again shows that the difference is 3</span></span>
-<span class="source-line"><span class="syntax-comment">     elements. */</span></span>
+<span class="source-line"><span class="syntax-comment">     Worked example 2 now has a line reading `int *end = values - 3;`. Repair it</span></span>
+<span class="source-line"><span class="syntax-comment">     so that the difference is 3 elements again. Expected: `Check failed` at `n</span></span>
+<span class="source-line"><span class="syntax-comment">     == 3` until the line reads `int *end = values + 3;` again. */</span></span>
 <span class="source-line"></span>
 <span class="source-line">  <span class="syntax-comment">/* Exercise 3: Traverse before the boundary</span></span>
 <span class="source-line"><span class="syntax-comment">     Sum through a begin/end pointer loop.</span></span>

@@ -1,6 +1,8 @@
 # swift-046: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [swift-046_solution.swift](swift-046_solution.swift). It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.
+Reference program: [swift-046_solution.swift](swift-046_solution.swift), covering both examples and the executed answers.
+
+Attempt the tasks first; see [comparing with the explanation](../STUDY-GUIDE.md#comparing-with-the-explanation).
 
 ## Why the two examples differ
 
@@ -84,7 +86,7 @@ This portable model follows PlanStore's policy. The same three launches still ne
 
 Prepare a release note listing platform, SDK, destination, test results and remaining device/signing limitations.
 
-No single reference answer exists: several designs can satisfy this transfer task. Build yours from the task 3 answer above (Generate JourneyApp, list destinations and run its provided test scheme on an available simulator or macOS destination) and the mechanism described below, and state one limitation of your choice.
+No single answer exists; extend task 3 using the [open transfer routine](../STUDY-GUIDE.md#open-transfer-tasks).
 
 ## Solution reasoning
 
@@ -108,4 +110,4 @@ Never commit a personal development team, certificate or provisioning profile. A
 
 ## Review before continuing
 
-Run the reference and confirm that it prints `swift-046: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.
+Run the reference and confirm it prints `swift-046: passed`, then rerun the guide's counterexample.

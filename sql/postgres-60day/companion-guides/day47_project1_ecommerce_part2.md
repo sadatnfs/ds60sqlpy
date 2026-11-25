@@ -2,96 +2,49 @@
 
 ## How to run this lesson
 
-Start the Linux-container engine and run `./classroom` from the repository
-root. On Windows, use Ubuntu in WSL 2 or the thin
-`START_DOCKER_CLASSROOM.cmd` wrapper. Choose **PostgreSQL** on the shared
-`/classroom` home, then open **sql-47**. The
-[launcher guide](../../../docs/one-command-classroom.md) covers first preparation, strict resume and
-the saved project selection. No host Python or PostgreSQL installation is
-required for this browser route.
-
-1. Read the prerequisite and fixture notes before running the file. Use only
-   the local disposable `advanced_sql_training` database.
-2. Choose **Whole SQL lesson (psql)** for the cataloged learner script. This
-   preserves the lesson's reviewed psql directives, relative includes and
-   transaction behavior. **SQL snippet** is appropriate for ordinary SQL
-   statements, but is not a replacement for an entire script's setup.
-3. The **Course database** panel above the code shows whether the course
-   training tables are loaded. Missing tables load automatically before your
-   first run (or choose **Load course tables**) and stay loaded for later
-   lessons. **Reset training data** restores the original rows only when your
-   own changes made results differ; it keeps your saved code and notes.
-4. Edit the learner copy in the classroom and save your prediction before
-   running. Its whole-script workspace is
-   `.learning/sql/sql-47/lesson/workspace/sql/postgres-60day/day47_project1_ecommerce_part2.sql`.
-   For browser work this path is inside the Docker learning volume, not a
-   newly created host folder beside your checkout. The checked-in source
-   remains the answer-free starting artifact.
-5. Run the whole script and inspect the full transcript. The runner uses
-   `psql -X -v ON_ERROR_STOP=1 -f`. SELECT output has columns, rows and a row
-   count; DDL/DML has command tags; intentional checks may produce NOTICE
-   messages. An unexpected ERROR or nonzero exit is a failure to diagnose,
-   even when an earlier query printed plausible values.
-6. Verify the lesson's expected grain, ordering, constraints and declared
-   transaction or cleanup outcome. Keep required ROLLBACK statements.
-   The warehouse sequence and other explicitly stateful exercises explain
-   when state is committed. Read saved output without rerunning it when
-   reviewing an earlier attempt.
-
-If a relation is missing, inspect the lesson's required fixture and predecessor
-rather than guessing a new table definition. If authentication or runtime
-readiness fails, use `./classroom status` and the setup guide. Keep credentials
-out of SQL, notebooks, screenshots and committed files. Repair the first error
-before trusting partial output, and reveal separate solutions only when you
-want to compare after an attempt.
-
-### Optional contributor notebook route
-
-For notebook work, deliberately prepare the Linux/WSL contributor environment
-from [CONTRIBUTING.md](../../../CONTRIBUTING.md), including a compatible psql client and
-the notebook dependencies. Generate this lesson's private workspace through
-the maintained CLI:
-
-```sh
-uv run --no-sync python scripts/course.py sql notebook sql-47
-```
-
-Open the printed notebook path in that environment's JupyterLab. It uses the
-same catalog-derived learner-copy layout in that contributor checkout and
-executes the complete script through psql. Its host-side state is separate
-from the Docker browser's named volume. Follow
-[guided SQL notebooks](../../../docs/guided-sql-notebooks.md) for explicit local connection
-selection and kernel setup. Notebook generation does not execute SQL or
-authorize a reset.
+Open **sql-47** from `./classroom` (PostgreSQL), pick **Whole SQL lesson
+(psql)** and work in
+`.learning/sql/sql-47/lesson/workspace/sql/postgres-60day/day47_project1_ecommerce_part2.sql`.
+It reads `customers` and `orders` in `advanced_sql_training` inside a
+`BEGIN` ... `ROLLBACK` block. A clean `psql` run prints the active-customer
+counts by cohort and month offset, then an `EXPLAIN` plan for the same query,
+then your exercise results. Signup months and order months are generated
+relative to the day the fixture was loaded, so the newest cohort and its
+counts move as time passes; the shape of the answer does not. The
+[study guide](../../STUDY-GUIDE.md#run-a-lesson-in-the-classroom) has the
+launcher and recovery steps, and the notebook path is in its
+[notebook section](../../STUDY-GUIDE.md#optional-contributor-notebook-route).
 
 ## Level and prerequisites
 
 - **Level:** Advanced
-- **Prerequisites:** [Day 46; LTV and cohorts](day46_project1_ecommerce_part1.md)
+- **Prerequisites:** [Day 46; LTV and cohorts](day46_project1_ecommerce_part1.md) Day 46 built signup cohorts and summed their revenue; today the same cohorts are measured in customers instead of money.
 - **Artifacts:** [learner SQL](../day47_project1_ecommerce_part2.sql) ·
   [solution reasoning](../solutions/day47_solutions.md) ·
   [executable solution](../solutions/day47_solutions.sql)
 
 ## A beginner's mental model for this lesson
 
-A **table** stores facts in named columns. A **row** is one occurrence at the
-table's declared grain. A query creates a temporary **result set**: rows printed
-on screen are not automatically stored. The key vocabulary for this lesson is Cohort size, Active customer, Retention curve. Its worked SQL reads or creates `orders`, `customers`.
+Retention asks what share of a cohort came back in a later month. That needs
+two numbers from two different grains. The denominator is cohort size: every
+customer who signed up in that month, from `customers` alone, whether or not
+they ever ordered. The numerator is active customers: distinct people with at
+least one order in the month being measured. The 4,362 orders collapse to
+3,912 (customer, order month) pairs, because a customer with two orders in a
+month is still one returning customer.
 
-Before writing a query, complete this sentence: “One output row represents
-___.” Joins can multiply rows, filters can remove them, grouping can collapse
-many rows into one, and window functions can add calculations while preserving
-row count. For a normal analytical `SELECT`, use this logical reading order:
-`FROM`/`JOIN` (including `ON`) → `WHERE` → `GROUP BY`/aggregates → `HAVING` →
-window calculations → `SELECT` → `ORDER BY` → `LIMIT`. PostgreSQL may execute a
-different physical plan while preserving those semantics.
-
-The worked walkthrough's lesson-specific task is: Deduplicate activity to `(customer_id, order_month)`, count active customers per cohort/offset, and join to cohort size calculated from all customers. Cast before division and build a cohort/offset spine when missing periods must appear as explicit zeros.
-The first runnable example has a concrete contract: Example 1 returns one grouped row per `customer_id`, `order_month`, and `cohort_month` with columns `customer_id`, `order_month`, `cohort_month`, `month_offset`, and `active_customers` from `orders`, `customers`, and `age`. Compare the key set and row count with a simpler control over the same filter/window; inspect `NULL` versus zero/absent-row meaning and verify the final ordering/tie-breaker when present. Its final projection is `cohort_month`, `month_offset`, and `active_customers`. Independently group `orders`, `customers`, `age`, `orders_m`, and `cohorts` by the shown grouping expressions and compare every displayed aggregate at that exact grain. For tied business values, inspect the final ordering expression and verify its last key makes the displayed order reproducible.
+The month offset is the gap between the signup month and the order month,
+built from `age()` as years times 12 plus months, so offset 0 is the signup
+month and offset 12 is a year later. Offsets have three possible states: a
+row with active customers, a row with zero active customers, and a missing
+row. The learner query only produces the first. A month with no buyers simply
+has no row, and a month that has not happened yet has no row either. The
+exercises separate those cases. Read each CTE in
+[logical clause order](../../STUDY-GUIDE.md#reading-any-query-in-logical-order).
 
 ## Two worked SQL examples
 
-These worked excerpts come from `sql/postgres-60day/day47_project1_ecommerce_part2.sql`. Use **Whole SQL lesson (psql)** in the unified classroom for the complete file, including its fixture and transaction context. The optional contributor notebook and prepared `psql` routes are described above.
+Both excerpts run inside the learner transaction; the second prints a plan.
 
 ### Example 1
 
@@ -139,9 +92,15 @@ ORDER BY
   month_offset;
 ```
 
-**How to read it:** Example 1: Start with `orders`, `customers`, and `age` in `FROM`/`JOIN`; let `WHERE` remove nonqualifying rows; let `GROUP BY` collapse rows to its grouping keys. The final `SELECT` displays `cohort_month`, `month_offset`, and `active_customers`. `ORDER BY` determines presentation order. Before running, predict the row grain, row count, `NULL` positions, and first/last key; afterwards, compare each prediction with the transcript.
+**How to read it:** `orders_m` groups orders to one row per (customer, order month). `cohorts`
+gives each customer a signup month. `retention` joins the two, computes the
+offset and counts distinct customers per (cohort month, order month). The
+outer query keeps offsets 0 to 12.
 
-**Expected result/shape:** Example 1 returns one grouped row per `customer_id`, `order_month`, and `cohort_month` with columns `customer_id`, `order_month`, `cohort_month`, `month_offset`, and `active_customers` from `orders`, `customers`, and `age`. Compare the key set and row count with a simpler control over the same filter/window; inspect `NULL` versus zero/absent-row meaning and verify the final ordering/tie-breaker when present.
+**Expected result/shape:** One row per (cohort month, offset) that had at least one buyer, about 487 on
+a fresh load, newest cohort first. The newest cohort has only offsets 0 and 1
+because later months have not arrived. There is no rate yet and no cohort
+size, so the counts cannot be compared across cohorts of different sizes.
 
 ### Example 2
 
@@ -190,9 +149,14 @@ EXPLAIN (
       month_offset;
 ```
 
-**How to read it:** Example 2 is executed by `psql` as part of the complete lesson. Expected notices are evidence; an unexpected error stops the script.
+**How to read it:** `EXPLAIN (COSTS OFF)` plans the same statement without running it, so no
+counts appear.
 
-**Expected result/shape:** Example 2 prints a plan tree, not business rows. Run the underlying `SELECT` separately and reconcile its `customer_id`, `order_month`, and `cohort_month` key set and row count over `orders`, `customers`, and `age`; then compare node estimates, actual rows × loops, buffers, and timing without requiring one fixed plan.
+**Expected result/shape:** A plan tree, read from the bottom up: a `HashAggregate` over `orders` builds
+the customer-month rows, a `Hash Join` with `customers` applies the 0 to 12
+offset test as a join filter (the planner pushed the outer `WHERE` down), then
+a `GroupAggregate` counts customers and a final `Sort` orders the output. Run
+the plain query to see the counts.
 
 ## Learning objectives
 
@@ -221,43 +185,50 @@ Complete these in the [learner SQL](../day47_project1_ecommerce_part2.sql):
    **Inputs/evidence:** For sql-47 Exercise 1, start from the lesson's cohort query over `customers` and `orders`: keep the `cohort_sizes` CTE (one row per signup `cohort_month`) and divide `active_customers` by `cohort_size` as `numeric` to produce `retention_rate`, rounded to 4 places.
    **Expected result/shape:** For sql-47 Exercise 1, expected output: one row per `cohort_month` and `month_offset` for the latest six cohorts, with every `retention_rate` between 0 and 1. The final columns are `cohort_month`, `month_offset`, `cohort_size`, `active_customers`, and `retention_rate`.
    **Verify:** For sql-47 Exercise 1, for one `cohort_month`, recount its customers with `SELECT COUNT(*) FROM customers WHERE date_trunc('month', created_at)::date = <that month>` and compare the result with `cohort_size`; then confirm that `retention_rate = ROUND(active_customers::numeric / cohort_size, 4)` and `active_customers <= cohort_size` on every row.
+   **Data check:** Expect 27 rows for the six newest cohorts, because each cohort has only as many offsets as months have passed (2 for the newest, 7 for the sixth). Cohort sizes are 9 to 12 customers, so one returning customer moves a rate by about 0.1; the newest cohort shows 8 of 9, 0.8889, at offsets 0 and 1.
 2. Return the latest six cohort curves in tidy form.
-   **Inputs/evidence:** For sql-47 Exercise 2, read from `customers`, and `orders`. Build the answer toward `cohort_month`, `month_offset`, `cohort_size`, `active_customers`, and `retention_rate`; keep `cohort_month` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-47 Exercise 2, expected output: one row per `cohort_month`. The final columns are `cohort_month`, `month_offset`, `cohort_size`, `active_customers`, and `retention_rate`. The final order is `cohort_month DESC, month_offset`.
-   **Verify:** For sql-47 Exercise 2, project `cohort_month` plus the raw source columns from `customers`, and `orders` at each join stage; record row count and distinct `cohort_month`, then assert the final `cohort_month`, `month_offset`, `cohort_size`, `active_customers`, and `retention_rate` values match those staged rows without unintended fanout or loss. Tie two rows on `cohort_month DESC` and give them different `month_offset` values; verify `cohort_month DESC, month_offset` chooses a stable first/last row.
+   **Inputs/evidence:** For sql-47 Exercise 2, reuse the Exercise 1 query and keep only cohorts listed in `latest_six`, the six newest `cohort_month` values from `cohort_sizes`; the charting itself happens outside SQL, with `cohort_month` as the series, `month_offset` on the x axis, and `retention_rate` on the y axis.
+   **Expected result/shape:** For sql-47 Exercise 2, expected output: one row per (`cohort_month`, `month_offset`) pair for the six newest cohorts, ordered by `cohort_month DESC`, then `month_offset`, with columns `cohort_month`, `month_offset`, `cohort_size`, `active_customers`, and `retention_rate`; 27 rows on our load, because each cohort has only as many offsets as months have passed (2 for the newest, 7 for the sixth).
+   **Verify:** For sql-47 Exercise 2, confirm 6 distinct `cohort_month` values, a unique (`cohort_month`, `month_offset`) pair on every row, one `cohort_size` per cohort, and `active_customers <= cohort_size` everywhere; then recount one point directly, such as the newest cohort at offset 1, with `COUNT(DISTINCT o.customer_id)` over orders in the next calendar month from customers created in that cohort month, and compare it with `active_customers` (8 of 9 on our load).
+   **Data check:** Every row should satisfy `active_customers <= cohort_size`, and each cohort should carry the same `cohort_size` on all of its rows. Some offset 1 rates are higher than offset 0 rates; customers who sign up late in a month often place their first order the next month.
 3. Compare signup-month and first-order-month cohort anchors.
-   **Inputs/evidence:** For sql-47 Exercise 3, read from `customers`, and `orders`. Build the answer toward `customer_id`, `signup_cohort`, and `first_order_cohort`; keep `customer_id` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-47 Exercise 3, expected output: one row per `customer_id`. The final columns are `customer_id`, `signup_cohort`, and `first_order_cohort`. The final order is `c.customer_id`.
-   **Verify:** For sql-47 Exercise 3, independently aggregate `customers`, and `orders` by `customer_id`; require one output row for every distinct `customer_id` tuple and compare `first_order_cohort` tuple by tuple. Use one key absent from `orders`; then tie two candidates on `c.customer_id` and verify `c.customer_id` selects the same row on every run.
+   **Inputs/evidence:** For sql-47 Exercise 3, `LEFT JOIN orders` to `customers`, group by `c.customer_id` and the signup month, and report `date_trunc('month', c.created_at)` as `signup_cohort` beside `date_trunc('month', MIN(o.order_date))` as `first_order_cohort`.
+   **Expected result/shape:** For sql-47 Exercise 3, expected output: 500 rows, one per `customer_id`, with columns `customer_id`, `signup_cohort`, and `first_order_cohort`, ordered by `customer_id`; `first_order_cohort` is `NULL` for the 62 customers without orders.
+   **Verify:** For sql-47 Exercise 3, count the rows where the two anchors match (39), where the first order comes in a later month (399), and where `first_order_cohort` is `NULL` (62), and confirm they add up to 500; check customer 2, who signed up in 2026-09 but first ordered in 2026-10 on our load, and confirm the largest gap is 10 months, which is how far a curve shifts when it switches anchors.
+   **Data check:** Expect 500 rows. On the course data 39 customers first order in their signup month, 399 first order later (up to 10 months later) and 62 have `first_order_cohort` `NULL` because they never ordered. The two anchors define different cohorts, so state which one a curve uses.
 4. Build a complete cohort/offset spine.
-   **Inputs/evidence:** For sql-47 Exercise 4, read from `customers`, and `orders`. Build the answer toward `cohort_month`, `month_offset`, `cohort_size`, and `active_customers`; keep `cohort_month` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-47 Exercise 4, expected output: one row per `cohort_month`. The final columns are `cohort_month`, `month_offset`, `cohort_size`, and `active_customers`. The final order is `s.cohort_month DESC, x.month_offset`.
-   **Verify:** For sql-47 Exercise 4, project `cohort_month` plus the raw source columns from `customers`, and `orders` at each join stage; record row count and distinct `cohort_month`, then assert the final `cohort_month`, `month_offset`, `cohort_size`, and `active_customers` values match those staged rows without unintended fanout or loss. Add one source row with a new `cohort_month`; verify the result gains exactly one row carrying that `cohort_month` value.
+   **Inputs/evidence:** For sql-47 Exercise 4, `CROSS JOIN` the 48 signup cohorts in `sizes` with `generate_series(0, 12)` in `offsets`, then `LEFT JOIN` the `activity` counts (distinct ordering customers by cohort and month offset) on both `cohort_month` and `month_offset`, using `COALESCE(..., 0)` for missing activity.
+   **Expected result/shape:** For sql-47 Exercise 4, expected output: 624 rows, one per (`cohort_month`, `month_offset`) pair for 48 cohorts times 13 offsets, with columns `cohort_month`, `month_offset`, `cohort_size`, and `active_customers`, ordered by `cohort_month DESC`, then `month_offset`.
+   **Verify:** For sql-47 Exercise 4, confirm that every cohort has exactly 13 rows with offsets 0 to 12 and that `cohort_size` summed over one offset is 500; count the zero rows (137 on our load) and compare them with the latest order month: 66 are offsets after it, which cannot be observed yet, and 71 are observed months with no orders. Then remove the `LEFT JOIN` and use an inner join, and confirm that every zero row disappears.
+   **Data check:** Expect 48 cohorts times 13 offsets, 624 rows. Recent cohorts show 0 at high offsets; most of those zeros are months that have not happened yet, not months when everyone left, which is the problem Exercise 6 addresses.
 5. Prevent negative offsets from inconsistent chronology.
-   **Inputs/evidence:** For sql-47 Exercise 5, read from `customers`, and `orders`. Build the answer toward `customer_id`, `created_at`, and `first_order_at`; keep `customer_id`, and `created_at` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-47 Exercise 5, expected output: one row per `customer_id`, and `created_at`. The final columns are `customer_id`, `created_at`, and `first_order_at`. The final order is `c.customer_id`.
-   **Verify:** For sql-47 Exercise 5, independently aggregate `customers`, and `orders` by `customer_id`, and `created_at`; require one output row for every distinct `customer_id`, and `created_at` tuple and compare `first_order_at` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `first_order_at` for the existing `customer_id`, and `created_at` tuple and verify the new tuple appears exactly once.
+   **Inputs/evidence:** For sql-47 Exercise 5, join `customers` to `orders`, group by `customer_id` and `created_at`, and keep customers whose `MIN(o.order_date)` is earlier than `c.created_at`, which would produce a negative `month_offset`.
+   **Expected result/shape:** For sql-47 Exercise 5, expected output: one row per `customer_id` whose first order precedes signup, with columns `customer_id`, `created_at`, and `first_order_at`, ordered by `customer_id`; on the course data this returns 0 rows, which is the passing answer.
+   **Verify:** For sql-47 Exercise 5, confirm the empty result independently: the smallest gap between signup and first order over the 438 ordering customers is just over 2 days. Then, in a transaction, set customer 1's earliest order to `created_at - interval '1 day'`, rerun the query, confirm it returns exactly that customer with `first_order_at` one day before `created_at`, and `ROLLBACK`.
+   **Data check:** On the course data the query returns 0 rows: every first order is at least two days after signup. An empty result here is the passing answer. To see the check fire, update one order date before its customer's `created_at` inside a transaction and roll back.
 6. Distinguish observed zero retention from future, unobservable offsets.
-   **Inputs/evidence:** For sql-47 Exercise 6, read from `orders`, and `sample`. Build the answer toward `order_id`, `customer_id`, `order_date`, `status`, and `total_amount`; keep `order_id` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-47 Exercise 6, expected output: one row per `order_id`. The final columns are `order_id`, `customer_id`, `order_date`, `status`, and `total_amount`.
-   **Verify:** For sql-47 Exercise 6, project `order_id` plus the raw source columns from `orders`, and `sample` at each join stage; record row count and distinct `order_id`, then assert the final `order_id`, `customer_id`, `order_date`, `status`, and `total_amount` values match those staged rows without unintended fanout or loss. Add one source row with a new `order_id`; verify the result gains exactly one row carrying that `order_id` value.
+   **Inputs/evidence:** For sql-47 Exercise 6, take the latest observed month as `date_trunc('month', MAX(order_date))` from `orders`, build a `sample` of (`cohort_month`, `month_offset`) pairs with `VALUES` for the current month at offsets 0 and 6, and flag each pair observable when `cohort_month + make_interval(months => month_offset)` is on or before that month.
+   **Expected result/shape:** For sql-47 Exercise 6, expected output: 2 rows, one per sample pair, with columns `cohort_month`, `month_offset`, and `is_observable`; offset 0 is `true` and offset 6 is `false` when the latest order month is the current month, as it is on a fresh load. A rate for an unobservable offset should then be `NULL`, never 0.
+   **Verify:** For sql-47 Exercise 6, confirm the latest observed month from `orders` (2026-11 on our load) and check both flags by hand; then apply the same test to the 624-row spine from Exercise 4 and confirm 66 rows are not observable, all currently shown as 0, while the 71 observed zeros stay real zeros. On an older load where `CURRENT_DATE` is past the last order month, offset 0 also becomes `false`.
+   **Data check:** The solution returns two sample rows, not order rows: the current month at offset 0 is observable and at offset 6 is not, compared with the latest order month in `orders`. A rate for an unobservable offset should be `NULL`, never 0.
 
 Retain numerator and denominator beside every rate.
 
 ## Common mistakes and how to recover
 
-- **Lesson-specific semantic mistake:** A missing offset row and a present zero-rate row are different. Build a cohort-by-offset spine when a complete matrix is required.
-- **Unexpected row count:** display keys before aggregates, count rows after
-  each join/filter stage, and find the first stage whose grain differs from the
-  contract. Do not hide fanout with `DISTINCT`.
-- **Unexpected `NULL` or missing row:** decide whether the fact is unknown,
-  inapplicable, zero, or absent before using `COALESCE`; inspect outer-join
-  predicate placement and empty-input aggregate behavior.
-- **Unstable top/first/last output:** add `ORDER BY` with a unique final
-  tie-breaker before `LIMIT` or order-sensitive windows/aggregates.
-- **`psql` stops on an error:** fix the first error shown by
-  `ON_ERROR_STOP`, restore the declared transaction/setup state, and rerun the
-  complete file. A later successful statement does not validate a partial run.
+- **Lesson-specific semantic mistake:** A missing offset row and a present
+  zero-rate row are different. Build a cohort-by-offset spine when a complete
+  matrix is required. Exercise 4's 624-row grid shows the zeros the learner
+  query leaves out.
+- **Rates of exactly 0 or 1 everywhere:** integer division. Cast
+  `active_customers::numeric` before dividing by `cohort_size`.
+- **Rates above 1:** orders were counted instead of customers, or the
+  denominator came from customers who ordered. Rebuild `cohort_size` from
+  `customers` alone.
+- **Offsets that reset to 0 after a year:** the month part of `age()` was used
+  without the year part.
+- Other recovery steps are in the
+  [study guide](../../STUDY-GUIDE.md#recover-from-common-failures).
 
 ## Self-check
 
@@ -287,7 +258,10 @@ event/capstone work and is not a Day 47 deliverable.
 
 ## Practice map
 
-Use the numbered **Exercises** section above as the single authoritative practice contract. Its prompts, expected shapes, and verification checks map one-for-one to the learner SQL and both solution companions.
+Exercises 1 and 2 turn counts into rates and a six-cohort chart table, Exercise 3 compares two ways to define a cohort, Exercise 4 fills the grid
+with explicit zeros, and Exercises 5 and 6 guard against impossible and not
+yet observable offsets. The learner SQL carries the same numbered contract
+word for word.
 
 ## Grain and denominator
 
@@ -308,9 +282,10 @@ Use the numbered **Exercises** section above as the single authoritative practic
 
 ## Ask an AI tutor about this lesson
 
-An AI tutor is optional; the guide, learner SQL, PostgreSQL, and expected checks are
-enough to complete the lesson offline. If you want a patient tutor, copy this
-prompt after opening the repository in the AI tutor:
+A tutor can help you explain why a rate rises from offset 0 to offset 1, but
+the cohort sizes and counts must be your own. If you want one, paste this
+prompt and see the
+[study guide's tutor notes](../../STUDY-GUIDE.md#use-an-ai-tutor-optional):
 
 ```text
 Tutor me through sql-47: E-Commerce Project, Part 2: Cohort Retention.

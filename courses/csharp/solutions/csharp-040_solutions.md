@@ -1,6 +1,8 @@
 # csharp-040: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [csharp-040_solution.cs](csharp-040_solution.cs). It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.
+Reference program: [csharp-040_solution.cs](csharp-040_solution.cs), covering both examples and the executed answers.
+
+Attempt the tasks first; see [comparing with the explanation](../STUDY-GUIDE.md#comparing-with-the-explanation).
 
 ## Why the two examples differ
 
@@ -128,7 +130,7 @@ A fixed clock lets the test stand exactly on the boundary. One added second cros
 
 Draw dependency direction for a command-line adapter, HTTP adapter and shared domain library.
 
-No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **Domain core**, and state one limitation of your choice.
+No single answer exists; extend task 3 using the [open transfer routine](../STUDY-GUIDE.md#open-transfer-tasks).
 
 ## Mechanism and diagnostic reasoning
 
@@ -142,4 +144,4 @@ A dependency container can conceal construction errors if overused. Do not injec
 
 ## Review before continuing
 
-Run the reference and confirm that it prints `csharp-040: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.
+Run the reference and confirm it prints `csharp-040: passed`, then rerun the guide's counterexample.

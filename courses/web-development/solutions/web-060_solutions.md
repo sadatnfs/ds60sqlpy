@@ -1,6 +1,6 @@
 # web-060: explanatory solutions
 
-Open this after your own attempt. Each answer explains the lesson's synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in `courses/web-development/guides/web-060.md`.
+Attempt each exercise before reading; the mechanism is in `courses/web-development/guides/web-060.md` ([using these answers](../STUDY-GUIDE.md#solutions)).
 
 ## Exercise 1: Define one small learner journey and its finish condition.
 
@@ -76,4 +76,6 @@ Open this after your own attempt. Each answer explains the lesson's synthetic fi
 
 ## Comparing your worksheet
 
-This lesson has no executable reference. Compare your worksheet with the answers above. The optional lab in `courses/web-development/fixtures/php-http-lab/` gives real request evidence only when you deliberately run it.
+Compare your release-readiness review with the solution's structure: journey, boundaries, evidence, limits and next actions. If you ran the optional lab, attach the invalid request transcript and the stop, resume and restore results; claims without that evidence belong under limits.
+
+This lesson has no executable reference ([worksheet rules](../STUDY-GUIDE.md#worksheets)).

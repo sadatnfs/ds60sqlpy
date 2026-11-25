@@ -211,10 +211,10 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="syntax-and-data-contract">Syntax and data contract<a class="heading-anchor" href="#syntax-and-data-contract" aria-label="Link to this section">#</a></h3>
 <p>Check result.success and the relevant run_results statuses before writing the accepted output. Keep the candidate relation separate from the consumer-facing artifact. A publication receipt should identify the data, schema, source version and checks that justified acceptance. A stale successful artifact must not qualify a new candidate.</p>
 <h3 id="run-the-lesson">Run the lesson<a class="heading-anchor" href="#run-the-lesson" aria-label="Link to this section">#</a></h3>
-<p>Open <code>dbt-015</code> in <code>/classroom</code>. Its starter <code>main.py</code> contains both worked cases, &quot;Publish an accepted candidate&quot; and &quot;Keep a failed candidate out of the accepted boundary&quot;, and prints the dictionary each case returns. The prepared <code>data-engineering</code> worker runs it in a fresh temporary directory. An <code>AssertionError</code> means that an observation differs from the case&#x27;s stated contract. Each case writes its dbt project and DuckDB database into its own temporary directory, runs real dbt commands through dbt&#x27;s Python entry point and removes the directory when it returns. No account, warehouse, network request or package download is involved. Save source and notes before switching lessons.</p>
+<p>In both cases <code>ready</code> materializes two rows. The difference is publication: the clean seed writes <code>published.json</code>, while the duplicate id makes the unique test fail and leaves no published file, even though the candidate relation exists. See the <a href="../STUDY-GUIDE.md.html#run-a-lesson">run routine</a>.</p>
 <h3 id="worked-case-1-publish-an-accepted-candidate">Worked case 1: Publish an accepted candidate<a class="heading-anchor" href="#worked-case-1-publish-an-accepted-candidate" aria-label="Link to this section">#</a></h3>
 <p>The valid two-row fixture passes both key conditions and produces a JSON artifact. The program confirms that the artifact exists only after successful evidence is available.</p>
-<p><strong>Project files.</strong> The case writes these files before its first dbt command. YAML is shown in conventional key order; dbt reads the same mappings.</p>
+<p><strong>Project files</strong>, written before the first dbt command:</p>
 <p><code>models/ready.sql</code></p>
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">select</span> <span class="syntax-operator">*</span> <span class="syntax-keyword">from</span> {{ <span class="syntax-keyword">ref</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;events&#x27;</span><span class="syntax-punctuation">)</span> }}</code></pre>
 <p><code>seeds/events.csv</code></p>
@@ -230,10 +230,10 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
         <span class="syntax-tag">data_tests</span><span class="syntax-punctuation">:</span>
           <span class="syntax-punctuation">-</span> unique
           <span class="syntax-punctuation">-</span> not_null</code></pre>
-<p><strong>Commands and changes, in order.</strong> Each <code>dbt</code> line is one <code>invoke(...)</code> call; the harness adds <code>--project-dir</code> and <code>--profiles-dir</code> for the temporary project.</p>
+<p><strong>Commands, in order.</strong> Each <code>dbt</code> line is one <code>invoke(...)</code> call.</p>
 <pre class="highlighted-code"><code class="language-bash">dbt build</code></pre>
 <p><strong>Expected evidence:</strong> Two candidate rows are present and publication is true.</p>
-<p>The program below shows only this case&#x27;s own functions. They call the shared helpers <code>project</code>, <code>invoke</code>, <code>rows</code> and <code>artifact</code>, which write the files above, run dbt through <code>dbtRunner</code> and read the results; the helpers are explained in <a href="dbt-001.md.html">dbt-001</a> and appear in full at the top of this lesson&#x27;s <a href="../lessons/dbt-015.py.html">starter</a>.</p>
+<p>Helpers <code>project</code>, <code>invoke</code>, <code>rows</code> and <code>artifact</code>: see the <a href="../STUDY-GUIDE.md.html#case-harness">case harness</a>.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> json
 <span class="syntax-keyword">import</span> tempfile
 
@@ -269,7 +269,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <span class="syntax-keyword">return</span> publication_case<span class="syntax-punctuation">(</span><span class="syntax-keyword">False</span><span class="syntax-punctuation">)</span></code></pre>
 <h3 id="worked-case-2-keep-a-failed-candidate-out-of-the-accepted-boundary">Worked case 2: Keep a failed candidate out of the accepted boundary<a class="heading-anchor" href="#worked-case-2-keep-a-failed-candidate-out-of-the-accepted-boundary" aria-label="Link to this section">#</a></h3>
 <p>The duplicate-key fixture causes a failed test. The database relation still exists, but the publication step is skipped. This is the intended failure policy, not a missing output bug.</p>
-<p><strong>Project files.</strong> The case writes these files before its first dbt command. YAML is shown in conventional key order; dbt reads the same mappings.</p>
+<p><strong>Project files</strong>, written before the first dbt command:</p>
 <p><code>models/ready.sql</code></p>
 <pre class="highlighted-code"><code class="language-sql"><span class="syntax-keyword">select</span> <span class="syntax-operator">*</span> <span class="syntax-keyword">from</span> {{ <span class="syntax-keyword">ref</span><span class="syntax-punctuation">(</span><span class="syntax-string">&#x27;events&#x27;</span><span class="syntax-punctuation">)</span> }}</code></pre>
 <p><code>seeds/events.csv</code></p>
@@ -285,10 +285,10 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
         <span class="syntax-tag">data_tests</span><span class="syntax-punctuation">:</span>
           <span class="syntax-punctuation">-</span> unique
           <span class="syntax-punctuation">-</span> not_null</code></pre>
-<p><strong>Commands and changes, in order.</strong> Each <code>dbt</code> line is one <code>invoke(...)</code> call; the harness adds <code>--project-dir</code> and <code>--profiles-dir</code> for the temporary project.</p>
+<p><strong>Commands, in order.</strong> Each <code>dbt</code> line is one <code>invoke(...)</code> call.</p>
 <pre class="highlighted-code"><code class="language-bash">dbt build # expected to fail</code></pre>
 <p><strong>Expected evidence:</strong> Two candidate rows exist, but publication is false.</p>
-<p>The program below shows only this case&#x27;s own functions. They call the shared helpers <code>project</code>, <code>invoke</code>, <code>rows</code> and <code>artifact</code>, which write the files above, run dbt through <code>dbtRunner</code> and read the results; the helpers are explained in <a href="dbt-001.md.html">dbt-001</a> and appear in full at the top of this lesson&#x27;s <a href="../lessons/dbt-015.py.html">starter</a>.</p>
+<p>Helpers <code>project</code>, <code>invoke</code>, <code>rows</code> and <code>artifact</code>: see the <a href="../STUDY-GUIDE.md.html#case-harness">case harness</a>.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> json
 <span class="syntax-keyword">import</span> tempfile
 
@@ -323,7 +323,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="syntax-keyword">def</span> <span class="syntax-function">example_two</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">:</span>
     <span class="syntax-keyword">return</span> publication_case<span class="syntax-punctuation">(</span><span class="syntax-keyword">True</span><span class="syntax-punctuation">)</span></code></pre>
 <h3 id="practice">Practice<a class="heading-anchor" href="#practice" aria-label="Link to this section">#</a></h3>
-<p>The starter contains both worked cases, so a task can change either one. Make each change in a saved copy, run it, and compare the printed result with the task&#x27;s check before opening the separate explained answers.</p>
+<p>Use the <a href="../STUDY-GUIDE.md.html#practice-routine">practice routine</a>.</p>
 <h4 id="1-change-the-failure-condition">1. Change the failure condition<a class="heading-anchor" href="#1-change-the-failure-condition" aria-label="Link to this section">#</a></h4>
 <p>Add a domain test that rejects negative amounts.</p>
 <p><strong>Check:</strong> The candidate can be blocked by a meaningful semantic failure.</p>
@@ -358,7 +358,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li><a href="https://github.com/duckdb/dbt-duckdb">dbt-duckdb repository README</a></li>
 </ul>
 <h3 id="tutor-guidance">Tutor guidance<a class="heading-anchor" href="#tutor-guidance" aria-label="Link to this section">#</a></h3>
-<p>Use the repository&#x27;s <code>$guide-ds60sqlpy-learning</code> skill (<code>.agents/skills/guide-ds60sqlpy-learning/SKILL.md</code>) for <code>dbt-015</code>. Inspect the learner&#x27;s own source and printed output first. Ask for an explanation of publication, test outcome, accepted artifact, failure state and consumer boundary in their own words, then give one focused hint at a time. Keep an assertion on this synthetic fixture separate from a claim about an external dataset or deployed service.</p></article>
+<p>Ask the learner to separate three states: computed, tested and published. Then ask what a consumer reading the candidate table directly would see after a failed test, and how they would make the published location the only supported one. See the <a href="../STUDY-GUIDE.md.html#tutor-guidance">tutor routine</a>.</p></article>
   </main>
 </body>
 </html>

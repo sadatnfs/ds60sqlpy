@@ -9,8 +9,8 @@ for fixed model names, parameter order and request/response semantics.
 
 Prepare the classroom's native R statistics image first. Supply its exact local
 image tag or immutable image ID as `R_BASE_IMAGE`; do not substitute a different
-R/Matrix ABI. The dependency installer requires R4.6.1, Matrix1.7.6 and Rcpp1.1.2,
-then verifies measured SHA256 pins for RcppEigen0.3.4.0.2 and TMB1.9.25. Downloads
+R/Matrix ABI. The dependency installer requires R 4.6.1, Matrix 1.7.6 and Rcpp 1.1.2,
+then verifies measured SHA256 pins for RcppEigen 0.3.4.0.2 and TMB 1.9.25. Downloads
 occur only during build. Model evaluation is offline.
 
 ```bash
@@ -61,9 +61,9 @@ this project or compile a downloaded model from an unreviewed tutorial.
 
 `python/bridge.py` contains a lazy, scoped rpy2 regression bridge with explicit
 schema, finite-value and row-identity checks. It requires a separately prepared
-Python3.12 environment linked to this R shared library. The separately qualified
-combined runtime uses NumPy2.2.6, pandas2.2.3, rpy2 meta3.6.9, rpy2-rinterface3.6.7
-and rpy2-robjects3.6.6. The R-only image recipe above does not claim that dependency
+Python 3.12 environment linked to this R shared library. The separately qualified
+combined runtime uses NumPy 2.2.6, pandas 2.2.3, rpy2 meta 3.6.9, rpy2-rinterface 3.6.7
+and rpy2-robjects 3.6.6. The R-only image recipe above does not claim that dependency
 stage is present. Do not install Python packages during a learner run.
 
 The release coordinator can prepare and qualify this additional environment with

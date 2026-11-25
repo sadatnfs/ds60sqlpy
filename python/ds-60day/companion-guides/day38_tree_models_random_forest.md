@@ -61,31 +61,7 @@ separate test estimate.
 
 ## How to run this lesson
 
-**Primary browser route:** run `./classroom` from the repository root and
-choose **Python and data science** on `/classroom`. Open this lesson in the shared workspace,
-read its capability notice, and use its supported coding or reading workflow.
-The [classroom guide](../../../docs/classroom-experience.md) explains saved work, runtimes and switching subjects.
-
-**Optional native notebook/editor route:** the instructions below describe
-separately prepared host tools. They are useful alternatives, not prerequisites
-for opening this lesson in the Docker classroom.
-
-1. Open the Day 38 learner notebook from this guide's **Next
-   step** section in VS Code or JupyterLab.
-2. Select the `Python (ds60sqlpy)` kernel. Start at the top and use
-   **Run All** only after making the written predictions; every added
-   worked example is bounded and offline after bootstrap.
-3. Keep experiments in new scratch cells. Do not edit the official
-   solution while attempting the numbered practice.
-4. Restart the kernel and run from the first cell before calling the
-   lesson complete. A clean run catches hidden state and stale
-   variables.
-
-Linux, macOS, or Ubuntu in Windows WSL 2:
-
-```bash
-.venv/bin/python -m jupyter lab
-```
+Open `python-38` in the classroom, or `python/ds-60day/notebooks/day38_tree_models_random_forest.ipynb` on a host; the [Python study guide](../../STUDY-GUIDE.md) explains both.
 
 ## Concept deep dive: tree splits, ensemble variance reduction, and held-out importance
 
@@ -109,10 +85,6 @@ association is broken. Neither establishes causality.
 - **`permutation_importance(model, X_valid, y_valid, ...)`:** measures held-out score change under repeated feature shuffles.
 
 ### Focused example A: make the depth-versus-generalization gap visible
-
-Before running the example, predict the shape, type, or direction of the
-result. Write the prediction down so that a surprise becomes evidence
-rather than something to overlook.
 
 ```python
 from sklearn.datasets import load_breast_cancer
@@ -214,9 +186,6 @@ responds to every change in predicted probability.
 
 Diagnose tree capacity with train/validation evidence and inspect importance with methods that respect held-out data, correlation, and class costs.
 
-Predict or plan before you run code. Use the hint only after an honest
-attempt, and record the evidence that would prove your result correct.
-
 3. **Pruning implementation:** Use a decision tree's cost-complexity pruning path to evaluate candidate `ccp_alpha` values with cross-validation. Freeze the chosen value before final holdout evaluation.
    **Progressive hint:** The path is derived from training data. Treat alpha selection as a hyperparameter search inside the development boundary.
 
@@ -274,8 +243,7 @@ alone.
 
 ## Ask an AI tutor about this lesson
 
-The lesson is complete without an AI assistant. If you want optional
-coaching, copy this prompt into the AI tutor while the repository root is open:
+The lesson is complete without AI. For optional coaching, copy this prompt with the repository root open:
 
 ```text
 Tutor me through `python-38` (Day 38: Decision Trees and Random Forests).

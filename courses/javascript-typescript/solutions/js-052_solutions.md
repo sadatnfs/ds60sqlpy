@@ -1,6 +1,6 @@
 # js-052: explanatory solutions
 
-Compare after your own attempt or an explicit reveal. The separate .js reference is a complete offline browser program. These explanations discuss the six practice tasks; a visual resemblance alone is not a data or behavior check.
+Compare after your own attempt; the separate `.js` file is the complete reference program.
 
 ## Mechanism review
 
@@ -49,3 +49,7 @@ They are not interchangeable error bars. Name the population quantity and method
 Visual overlap alone is not a complete hypothesis test. Explain the actual comparison procedure separately. Two intervals that overlap can still correspond to a significant difference; plot the estimated difference with its own interval and a zero line.
 
 **Expected:** Show estimates, interval method, units and a meaningful zero reference.
+
+## After comparison
+
+Compute a bootstrap interval for the median of a small synthetic sample using a seeded generator such as `d3.randomLcg`, and draw it beside the box plot. Label which mark shows spread and which shows uncertainty, and record the seed and resample count.

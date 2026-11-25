@@ -1,6 +1,6 @@
 # cpp-006: explanations and reference observations
 
-Attempt the learner tasks before opening this document. The executable reference checks the bounded normal and boundary examples; the six explanations below cover the deliberate changes and manual checks.
+The [executable reference](cpp-006_solution.cpp) classifies `{"12", "12x", "", "0"}` into two accepted and two rejected strings and confirms that the strict parser rejects `" 42 "`. The explanations show where `std::from_chars` stops on each input and how a separate trim policy would change Exercise 6. How to compare: [study guide](../STUDY-GUIDE.md#compare-with-the-solutions).
 
 ## Mechanism
 

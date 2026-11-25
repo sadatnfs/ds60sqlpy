@@ -241,7 +241,7 @@ sliced <span class="syntax-operator">=</span> values<span class="syntax-operator
 True</code></pre>
 <p>The slice reports offset 1 and length 2 and points at the same payload address as the parent, so slicing copied nothing. That is efficient, but it also means a tiny slice can keep a large parent buffer alive in memory. When memory use stays high after filtering a big batch down to a few rows, check for retained slices and copy them with take or concat if the parent should be released.</p>
 <h3 id="complete-worked-source">Complete worked source<a class="heading-anchor" href="#complete-worked-source" aria-label="Link to this section">#</a></h3>
-<p>This is a complete editable worked program for the declared prepared runtime. It uses bounded local fixtures and does not install packages or start distributed services.</p>
+<p>Run it as the <a href="../STUDY-GUIDE.md.html#worked-programs">worked program rules</a> describe.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">import</span> gc
 
 <span class="syntax-keyword">import</span> pyarrow <span class="syntax-keyword">as</span> pa

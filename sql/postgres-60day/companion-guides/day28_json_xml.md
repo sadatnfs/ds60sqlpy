@@ -2,67 +2,24 @@
 
 ## How to run this lesson
 
-Start the Linux-container engine and run `./classroom` from the repository
-root. On Windows, use Ubuntu in WSL 2 or the thin
-`START_DOCKER_CLASSROOM.cmd` wrapper. Choose **PostgreSQL** on the shared
-`/classroom` home, then open **sql-28**. The
-[launcher guide](../../../docs/one-command-classroom.md) covers first preparation, strict resume and
-the saved project selection. No host Python or PostgreSQL installation is
-required for this browser route.
-
-1. Read the prerequisite and fixture notes before running the file. Use only
-   the local disposable `advanced_sql_training` database.
-2. Choose **Whole SQL lesson (psql)** for the cataloged learner script. This
-   preserves the lesson's reviewed psql directives, relative includes and
-   transaction behavior. **SQL snippet** is appropriate for ordinary SQL
-   statements, but is not a replacement for an entire script's setup.
-3. The **Course database** panel above the code shows whether the course
-   training tables are loaded. Missing tables load automatically before your
-   first run (or choose **Load course tables**) and stay loaded for later
-   lessons. **Reset training data** restores the original rows only when your
-   own changes made results differ; it keeps your saved code and notes.
-4. Edit the learner copy in the classroom and save your prediction before
-   running. Its whole-script workspace is
-   `.learning/sql/sql-28/lesson/workspace/sql/postgres-60day/day28_json_xml.sql`.
-   For browser work this path is inside the Docker learning volume, not a
-   newly created host folder beside your checkout. The checked-in source
-   remains the answer-free starting artifact.
-5. Run the whole script and inspect the full transcript. The runner uses
-   `psql -X -v ON_ERROR_STOP=1 -f`. SELECT output has columns, rows and a row
-   count; DDL/DML has command tags; intentional checks may produce NOTICE
-   messages. An unexpected ERROR or nonzero exit is a failure to diagnose,
-   even when an earlier query printed plausible values.
-6. Verify the lesson's expected grain, ordering, constraints and declared
-   transaction or cleanup outcome. Keep required ROLLBACK statements.
-   The warehouse sequence and other explicitly stateful exercises explain
-   when state is committed. Read saved output without rerunning it when
-   reviewing an earlier attempt.
-
-If a relation is missing, inspect the lesson's required fixture and predecessor
-rather than guessing a new table definition. If authentication or runtime
-readiness fails, use `./classroom status` and the setup guide. Keep credentials
-out of SQL, notebooks, screenshots and committed files. Repair the first error
-before trusting partial output, and reveal separate solutions only when you
-want to compare after an attempt.
+In `./classroom`, pick **sql-28** and run **Whole SQL lesson (psql)**. The
+file it runs,
+`.learning/sql/sql-28/lesson/workspace/sql/postgres-60day/day28_json_xml.sql`,
+only reads `events`, `customers` and `xml_docs` in `advanced_sql_training`
+and ends with `ROLLBACK`. Example 1 prints 50 rows; widen your terminal so
+the JSON columns do not wrap. See
+[Run a lesson in the classroom](../../STUDY-GUIDE.md#run-a-lesson-in-the-classroom)
+for the steps every lesson shares.
 
 ### Optional contributor notebook route
 
-For notebook work, deliberately prepare the Linux/WSL contributor environment
-from [CONTRIBUTING.md](../../../CONTRIBUTING.md), including a compatible psql client and
-the notebook dependencies. Generate this lesson's private workspace through
-the maintained CLI:
+A notebook shows `jsonb` and `xml` values as plain strings, which makes
+comparing `->` with `->>` easy
+([notebook setup](../../STUDY-GUIDE.md#optional-contributor-notebook-route)):
 
 ```sh
 uv run --no-sync python scripts/course.py sql notebook sql-28
 ```
-
-Open the printed notebook path in that environment's JupyterLab. It uses the
-same catalog-derived learner-copy layout in that contributor checkout and
-executes the complete script through psql. Its host-side state is separate
-from the Docker browser's named volume. Follow
-[guided SQL notebooks](../../../docs/guided-sql-notebooks.md) for explicit local connection
-selection and kernel setup. Notebook generation does not execute SQL or
-authorize a reset.
 
 ## Level and prerequisites
 
@@ -74,28 +31,30 @@ authorize a reset.
 
 ## A beginner's mental model for this lesson
 
-A **table** stores facts in named columns. A **row** is one occurrence at the
-table's declared grain. A query creates a temporary **result set**: rows printed
-on screen are not automatically stored. The key vocabulary for this lesson is JSONB, Containment, Path extraction. Its worked SQL reads or creates `events`, `xml_docs`.
+Two columns in this database hold documents instead of plain values:
+`events.metadata` is `jsonb` and `xml_docs.payload` is `xml`. SQL cannot see
+inside them until you extract a value, and every extraction answers three
+questions:
 
-Before writing a query, complete this sentence: “One output row represents
-___.” Joins can multiply rows, filters can remove them, grouping can collapse
-many rows into one, and window functions can add calculations while preserving
-row count. For a normal analytical `SELECT`, use this logical reading order:
-`FROM`/`JOIN` (including `ON`) → `WHERE` → `GROUP BY`/aggregates → `HAVING` →
-window calculations → `SELECT` → `ORDER BY` → `LIMIT`. PostgreSQL may execute a
-different physical plan while preserving those semantics.
+1. **Which path?** `metadata ->> 'device'` follows one key. In XML,
+   `xpath('/order/status', payload)` follows an element path.
+2. **What type comes back?** `->` returns `jsonb`, `->>` returns `text`, and
+   `xpath` returns an array of `xml`. You usually need `[1]` and one or two
+   casts before you have a number or a plain string.
+3. **What if it is missing?** A missing JSON key gives `NULL`. A missing XML
+   element gives an empty array, or an empty string when you use
+   `string(...)`. A value that exists but has the wrong format makes a cast
+   fail.
 
-The worked walkthrough's lesson-specific task is: Extract `metadata->>'campaign'` as text, keep the raw JSONB beside it, and group missing values separately. For XML, extract the first XPath result, validate its text form, cast to integer, and left-join orders so malformed or unmatched documents remain visible.
-Exercise 1 expects this result: one row per customer. Predict keys, row count, `NULL` behavior,
-and ordering before running. Afterwards, compare keys/counts/totals with an
-independent control. A blank string, SQL `NULL`, numeric zero, and a missing row
-are different facts; use `COALESCE` only after choosing which meaning the
-business question requires.
+The fixture is very regular, which makes these rules easy to check. All
+20,000 events have the same three keys, `path`, `device` and `campaign`, and
+each campaign value covers 4,000 events. Each of the 500 customers has an
+`attributes` object with `channel` and `referrer`, and each of the 1,000 XML
+documents is a small `<order>` with an `<id>` and a `<status>`. Real data is
+rarely this tidy, so the answers still guard against missing keys and bad
+values.
 
 ## Two worked SQL examples
-
-These worked excerpts come from `sql/postgres-60day/day28_json_xml.sql`. Use **Whole SQL lesson (psql)** in the unified classroom for the complete file, including its fixture and transaction context. The optional contributor notebook and prepared `psql` routes are described above.
 
 ### Example 1
 
@@ -113,9 +72,15 @@ ORDER BY
 LIMIT 50;
 ```
 
-**How to read it:** Example 1: Start with `events` in `FROM`/`JOIN`. The final `SELECT` displays `event_id`, `event_type`, `path`, `device`, and `campaign`. `ORDER BY` determines presentation order and the final `LIMIT 50` caps displayed rows. Before running, predict the row grain, row count, `NULL` positions, and first/last key; afterwards, compare each prediction with the transcript.
+**How to read it:** Each `->>` pulls one key out of `metadata` as
+text, so `path`, `device` and `campaign` are ordinary text columns.
+`ORDER BY event_id DESC LIMIT 50` keeps the newest 50 events by id; the
+`event_type` column is a real table column, not part of the JSON.
 
-**Expected result/shape:** Example 1 returns one row per `event_id`, capped at 50 rows with columns `event_id`, `event_type`, `path`, `device`, and `campaign` from `events`. Use a direct count or grouped aggregate over those same source relations as the control; check ordering only when this query has an `ORDER BY`, and inspect `NULL` only for columns this example can produce.
+**Expected result/shape:** 50 rows from event 20000 down to 19951.
+The first is a `support` event with `/help`, `web` and `none`; the next is a
+`purchase` with `/cart`, `android` and `winter`. No cell is `NULL`, because
+every event has all three keys.
 
 ### Example 2
 
@@ -134,9 +99,14 @@ ORDER BY
   device NULLS LAST;
 ```
 
-**How to read it:** Example 2: Start with `events` in `FROM`/`JOIN`; let `WHERE` remove nonqualifying rows; let `GROUP BY` collapse rows to its grouping keys. The final `SELECT` displays `device`, and `cnt`. `ORDER BY` determines presentation order. Before running, predict the row grain, row count, `NULL` positions, and first/last key; afterwards, compare each prediction with the transcript.
+**How to read it:** The `WHERE` compares extracted text, so only
+events whose campaign is exactly `spring` or `summer` remain. Grouping by the
+`device` alias then counts those events per device; `cnt DESC` puts the
+largest group first and `device` breaks ties.
 
-**Expected result/shape:** Example 2 returns one grouped row per `device` with columns `device`, and `cnt` from `events`. Use a direct count or grouped aggregate over those same source relations as the control; check ordering only when this query has an `ORDER BY`, and inspect `NULL` only for columns this example can produce.
+**Expected result/shape:** Three rows that add to 8,000, the two
+campaigns at 4,000 each: `android` 2,667, `web` 2,667 and `ios` 2,666.
+`android` comes before `web` only because of the alphabetical tie-break.
 
 ## Learning objectives
 
@@ -163,27 +133,29 @@ documents remain visible.
 - **Focus:** Query JSONB and XML with explicit path, type, missing-key, and safe-cast behavior instead of assuming semi-structured data is schema-free.
 - **Assumptions:** JSON text extraction with `->>` returns text or NULL. XML XPath results are arrays. Course metadata keys are small and deterministic.
 - **Failure to watch for:** Casting missing or malformed JSON text directly raises; broad JSON containment or regex extraction needs validation and appropriate indexing evidence.
-- **Review loop:** predict the row grain and NULL/order behavior, run the
-  query, inspect a bounded sample, and reconcile counts or totals before
-  accepting the result.
+- **Review loop:** before trusting an extraction, list the keys that
+  actually occur with `SELECT DISTINCT jsonb_object_keys(...)` and count how
+  many rows have each one.
 
 ## Exercises
 
 Query JSONB and XML with explicit path, type, missing-key, and safe-cast behavior instead of assuming semi-structured data is schema-free.
 
-Attempt each prompt in a scratch SQL file before opening the solution.
-For every result, write its row grain and expected shape first.
+For each answer, write down the operator you will use and the
+type it returns before you run it: `->>` gives text, `@>` and `?` give
+booleans, `xpath` gives an array. The last answer is the only one where a
+cast can fail, so plan its guard first.
 
 1. **Query writing:** Extract customer acquisition channel and referrer from JSONB attributes.
    **Progressive hint:** `->>` returns text and naturally yields NULL for a missing key.
-   **Inputs/evidence:** For sql-28 Exercise 1, read from `customers`. Build the answer toward `customer_id`, `channel`, and `referrer`; keep `customer_id` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-28 Exercise 1, expected output: One row per customer. The final columns are `customer_id`, `channel`, and `referrer`. The final order is `c.customer_id`.
-   **Verify:** For sql-28 Exercise 1, reselect the returned keys directly from the source; require unique `customer_id` where the expected grain is one row per key and confirm the projected `customer_id`, `channel`, and `referrer` against `customers`. Add one source row with a new `customer_id`; verify the result gains exactly one row carrying that `customer_id` value.
+   **Inputs/evidence:** For sql-28 Exercise 1, read the 500 rows of `customers` and pull two text values out of the `attributes` JSONB column with `->>`: `attributes ->> 'channel'` and `attributes ->> 'referrer'`.
+   **Expected result/shape:** For sql-28 Exercise 1, expected output: exactly 500 rows, one per customer, with no NULL in either extracted column; `channel` splits into 167 `mobile`, 166 `store`, and 167 `web`, and `referrer` into 125 each of `ad`, `direct`, `email`, and `seo`. The final columns are `customer_id`, `channel`, and `referrer`. The final order is `c.customer_id`.
+   **Verify:** For sql-28 Exercise 1, confirm 500 rows and that customer 1 shows `web` and `seo`, matching `SELECT attributes FROM customers WHERE customer_id = 1`; then compare `'{"channel": "web"}'::jsonb ->> 'referrer'`, which returns NULL for the missing key, with `-> 'channel'`, which returns the JSONB value `"web"` with its quotes instead of plain text.
 2. **Query writing:** Find mobile-channel customers using JSONB containment.
    **Progressive hint:** `@>` tests whether the left JSONB contains the declared object.
-   **Inputs/evidence:** For sql-28 Exercise 2, read from `customers`. Build the answer toward `customer_id`, `full_name`, and `attributes`; keep `customer_id` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-28 Exercise 2, expected output: Customer rows whose channel is mobile. The final columns are `customer_id`, `full_name`, and `attributes`. The final order is `c.customer_id`.
-   **Verify:** For sql-28 Exercise 2, run an anti-check that counts rows where NOT ((c.attributes @> '{"channel": "mobile"}'::jsonb)); require unique `customer_id` where the expected grain is one row per key and confirm the projected `customer_id`, `full_name`, and `attributes` against `customers`. Add one row for which `(c.attributes @> '{"channel": "mobile"}'::jsonb)` is true and one for which it is false; verify only the matching `customer_id` value is returned.
+   **Inputs/evidence:** For sql-28 Exercise 2, read `customers` and keep the rows whose `attributes` JSONB contains the pair `{"channel": "mobile"}`, tested with the containment operator `@>`.
+   **Expected result/shape:** For sql-28 Exercise 2, expected output: exactly 167 rows, customer IDs 2 through 500, each with `attributes ->> 'channel'` equal to `mobile`. The final columns are `customer_id`, `full_name`, and `attributes`. The final order is `c.customer_id`.
+   **Verify:** For sql-28 Exercise 2, confirm that the text filter `WHERE attributes ->> 'channel' = 'mobile'` also returns 167 rows and that `WHERE NOT attributes @> '{"channel": "mobile"}'` returns the other 333; then check that containment is exact: `'{"channel": "Mobile"}'` matches 0 customers, and `'{"channel": ["mobile", "web"]}'::jsonb @> '{"channel": "mobile"}'` returns false because an array does not contain a bare string.
 3. **Query writing:** Count event rows with missing device metadata separately from present values.
    **Progressive hint:** Use `?` to test key existence rather than comparing extracted text to NULL.
    **Inputs/evidence:** For sql-28 Exercise 3, read from `events` and count rows whose `metadata` contains the key `device` (`metadata ? 'device'`), rows without that key, and all rows.
@@ -191,14 +163,14 @@ For every result, write its row grain and expected shape first.
    **Verify:** For sql-28 Exercise 3, confirm one row with `has_device_key` 20000, `missing_device_key` 0, and `all_events` 20000; then test `VALUES ('{"device": null}'::jsonb), ('{}'::jsonb)`: `?` returns true and false, while `->> 'device' IS NULL` is true for both, so only `?` separates a present JSON null from a missing key.
 4. **Prediction:** Aggregate event-type counts into a JSONB object per customer and predict key ordering expectations.
    **Progressive hint:** JSON objects are mappings; do not treat key order as a semantic contract.
-   **Inputs/evidence:** For sql-28 Exercise 4, read from `events`. Build the answer toward `customer_id`, and `counts_by_type`; keep `customer_id` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-28 Exercise 4, expected output: One row per customer with events. The final columns are `customer_id`, and `counts_by_type`. The final order is `customer_id`.
-   **Verify:** For sql-28 Exercise 4, independently aggregate `events` by `customer_id`; require one output row for every distinct `customer_id` tuple and compare `counts_by_type` tuple by tuple. Add one row to an existing group and one row for a new group; recompute `counts_by_type` for the existing `customer_id` tuple and verify the new tuple appears exactly once.
+   **Inputs/evidence:** For sql-28 Exercise 4, read the 20000 `events` rows, count them per `customer_id` and `event_type` in `event_counts`, then fold each customer's counts into one JSONB object with `jsonb_object_agg(event_type, event_count ORDER BY event_type)`.
+   **Expected result/shape:** For sql-28 Exercise 4, expected output: exactly 500 rows, and in this seed all 500 objects are the same, `{"support": 8, "checkout": 8, "purchase": 8, "page_view": 8, "add_to_cart": 8}`, because every customer has 8 events of each of the 5 types; JSONB stores shorter keys first, so the `ORDER BY` does not fix the printed key order. The final columns are `customer_id`, and `counts_by_type`. The final order is `customer_id`.
+   **Verify:** For sql-28 Exercise 4, confirm every object has 5 keys and that summing `jsonb_each_text` values over all rows gives 20000, the `events` row count; then, inside `BEGIN ... ROLLBACK`, insert `(1, 'refund')` and `(NULL, 'page_view')` into `events (customer_id, event_type)` and confirm 501 rows: customer 1 gains `"refund": 1`, and a NULL `customer_id` row appears holding `{"page_view": 1}`.
 5. **Debugging:** Extract order ID and status text from XML documents without assuming XPath returns a scalar.
    **Progressive hint:** Index the XML array returned by `xpath`, cast through text, and strip element markup with `string(...)` XPath.
-   **Inputs/evidence:** For sql-28 Exercise 5, read from `xml_docs`. Build the answer toward `doc_id`, `order_id`, and `order_status`; keep `doc_id` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-28 Exercise 5, expected output: One row per XML document. The final columns are `doc_id`, `order_id`, and `order_status`. The final order is `xd.doc_id`.
-   **Verify:** For sql-28 Exercise 5, reselect the returned keys directly from the source; require unique `doc_id` where the expected grain is one row per key and confirm the projected `doc_id`, `order_id`, and `order_status` against `xml_docs`. Add one source row with a new `doc_id`; verify the result gains exactly one row carrying that `doc_id` value.
+   **Inputs/evidence:** For sql-28 Exercise 5, read the 1000 rows of `xml_docs`, take the first element of `xpath('string(/order/id)', payload)` and of `xpath('string(/order/status)', payload)`, and cast the XML results through `text` to `integer` and `text`.
+   **Expected result/shape:** For sql-28 Exercise 5, expected output: exactly 1000 rows, where `order_id` equals `doc_id` in every row and `order_status` splits into 199 `delivered`, 201 `paid`, 202 `placed`, 199 `returned`, and 199 `shipped`. The final columns are `doc_id`, `order_id`, and `order_status`. The final order is `xd.doc_id`.
+   **Verify:** For sql-28 Exercise 5, confirm that joining the result to `orders` on `order_id` matches all 1000 rows with `o.status = order_status`; then show why the subscript matters: `xpath('/order/id/text()', payload)::text::integer` fails with `invalid input syntax for type integer: "{1}"`, and `string(/order/missing)` returns an empty string, so its integer cast fails with `invalid input syntax for type integer: ""`.
 6. **Extension:** Safely cast a numeric JSON text field from sample payloads, returning NULL for missing or malformed values.
    **Progressive hint:** Validate extracted text with a numeric regex before casting.
    **Inputs/evidence:** For sql-28 Exercise 6, read three sample documents from the inline `payloads` relation: `{"amount": "12.50"}`, `{"amount": "bad"}`, and `{}`, and cast `payload ->> 'amount'` to `numeric` only when the text passes the numeric pattern.
@@ -207,18 +179,24 @@ For every result, write its row grain and expected shape first.
 
 ## Common mistakes and how to recover
 
-- **Lesson-specific semantic mistake:** Casting missing or malformed JSON text directly raises; broad JSON containment or regex extraction needs validation and appropriate indexing evidence.
-- **Unexpected row count:** display keys before aggregates, count rows after
-  each join/filter stage, and find the first stage whose grain differs from the
-  contract. Do not hide fanout with `DISTINCT`.
-- **Unexpected `NULL` or missing row:** decide whether the fact is unknown,
-  inapplicable, zero, or absent before using `COALESCE`; inspect outer-join
-  predicate placement and empty-input aggregate behavior.
-- **Unstable top/first/last output:** add `ORDER BY` with a unique final
-  tie-breaker before `LIMIT` or order-sensitive windows/aggregates.
-- **`psql` stops on an error:** fix the first error shown by
-  `ON_ERROR_STOP`, restore the declared transaction/setup state, and rerun the
-  complete file. A later successful statement does not validate a partial run.
+- **Casting extracted text without a check.** `('{"amount": "bad"}'::jsonb
+  ->> 'amount')::numeric` fails with
+  `invalid input syntax for type numeric: "bad"`, and one bad row stops the
+  whole query. Test the text first, as the last answer does.
+- **Using `->` where you need `->>`.** `metadata -> 'device'` returns
+  `"web"` as `jsonb`, with quotes; comparing it to the text `'web'` will not
+  work. Use `->>` to compare with text.
+- **Treating `IS NULL` as "key missing".** For `'{"device": null}'`,
+  `? 'device'` is true but `->> 'device'` is `NULL`. Use `?` when the
+  question is whether the key exists.
+- **Casting a raw XPath element.** `(xpath('/order/id', payload))[1]::text`
+  is `<id>1</id>`, so casting it to `integer` fails. Wrap the path in
+  `string(...)` or select `text()` to get the bare value.
+- **Matching case that is not there.** `@> '{"channel": "Mobile"}'` finds
+  no customers, because JSON comparison is case-sensitive and the data uses
+  `mobile`.
+- More recovery steps are in
+  [Recover from common failures](../../STUDY-GUIDE.md#recover-from-common-failures).
 
 ## Self-check
 
@@ -274,9 +252,9 @@ Further reading
 
 ## Ask an AI tutor about this lesson
 
-An AI tutor is optional; the guide, learner SQL, PostgreSQL, and expected checks are
-enough to complete the lesson offline. If you want a patient tutor, copy this
-prompt after opening the repository in the AI tutor:
+A tutor can write malformed JSON or XML for you to test your guards
+against, which this tidy fixture never provides
+([optional tutor notes](../../STUDY-GUIDE.md#use-an-ai-tutor-optional)).
 
 ```text
 Tutor me through sql-28: JSONB and XML in PostgreSQL.

@@ -1,6 +1,8 @@
 # rust-031: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [rust-031_solution.rs](rust-031_solution.rs). It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.
+Executable reference: [rust-031_solution.rs](rust-031_solution.rs), which runs both examples and the coded answers.
+
+Open this only after [an attempt](../STUDY-GUIDE.md#attempt-a-lesson).
 
 ## Why the two examples differ
 
@@ -26,7 +28,7 @@ Draw the owning edges of the recursive list.
 
 Add another node and predict its total.
 
-**Reference answer.** The same statements run as the `Task 2` block of the reference program; here they are wrapped in `main` as a complete file. It uses `Node` from the lesson's helpers, defined in the reference program.
+**Reference answer**, wrapped in `main`; the reference runs it as its `Task 2` block. Helpers used: `Node`.
 
 ```rust
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -53,7 +55,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 Model a parent-child relationship with a weak back-reference.
 
-**Reference answer.** The same statements run as the `Task 3` block of the reference program; here they are wrapped in `main` as a complete file.
+**Reference answer**, wrapped in `main`; the reference runs it as its `Task 3` block.
 
 ```rust
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -104,7 +106,7 @@ Diagnose an Rc cycle that keeps both objects alive.
 
 Test an empty list and upgrading a dead weak reference.
 
-**Reference answer.** The same statements run as the `Task 5` block of the reference program; here they are wrapped in `main` as a complete file. It uses `Node` from the lesson's helpers, defined in the reference program.
+**Reference answer**, wrapped in `main`; the reference runs it as its `Task 5` block. Helpers used: `Node`.
 
 ```rust
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -135,7 +137,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 Choose Box, Rc or Arc for unique, local-shared and cross-thread ownership scenarios.
 
-No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **Box**, and state one limitation of your choice.
+**Judging criteria.** Judge the answer scenario by scenario. A value with one owner, such as the next link of Example A's recursive `Node`, belongs in a `Box`. A value shared by several owners on one thread needs `Rc`, with `Weak` for back links so the count can reach zero. A value shared across threads needs `Arc`, plus a `Mutex` or atomics if it changes. A strong answer justifies each choice by naming who drops the value last. State one limitation: `Arc` pays atomic counter updates even when no other thread is contending.
 
 ## Mechanism and diagnostic reasoning
 
@@ -149,4 +151,6 @@ Memory safety does not guarantee absence of leaks. Deep recursive drops can have
 
 ## Review before continuing
 
-Run the reference and confirm that it prints `rust-031: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.
+Rebuild Example B (Observe a weak target disappearing) from a blank pad.
+
+Review routine: [Self-check and review](../STUDY-GUIDE.md#self-check-and-review).

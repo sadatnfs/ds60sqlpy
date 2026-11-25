@@ -125,9 +125,7 @@ Guidance
 
 ## Solution reasoning lens
 
-A strong solution is not merely code that produces one plausible
-output. It establishes a chain from input contract to operation to
-verification:
+Each decision below links an input contract to an operation and its evidence:
 
 1. **lazy expression:** describes tasks and dependencies; inspect partitions/graph before execution.
 2. **`.compute()`:** executes the graph and materializes the result in local memory.
@@ -144,29 +142,15 @@ verification:
 
 **Evidence of correctness:** Reconcile results with pandas/standard library, inspect graph and partition sizes, measure repeated runs, bound memory/final output, and prove reducers are associative.
 
-When comparing your attempt with the reference, explain which of these
-decisions your code made explicitly. If the reference makes a different
-choice, compare the contracts and evidence before deciding that one
-version is universally better.
-
 <!-- END ADVANCED PYTHON CONCEPT ENRICHMENT -->
 
 ## Exercise-by-exercise reasoning map
-
-This map connects every learner prompt to a reasoning path. Read the
-explanation before copying code: the goal is to understand the assumptions,
-the evidence that validates the result, and the edge cases that can make an
-apparently correct implementation fail.
 
 ### Exercise 1: Original lesson practice
 
 **Prompt:** Read a large local CSV with Dask and compute groupby aggregations.
 
 **How to reason about it:** Generate or use a local CSV, begin small, and compare Dask aggregation with pandas before scaling. Dask expressions are lazy until `compute`, so measure materialization separately.
-
-Use the worked reference earlier in this file, then change one boundary
-condition and rerun the stated checks. A copied output is not evidence
-unless you can explain why that output follows from the inputs.
 
 **Verify:** Generate/read a named local CSV, print Dask partition count and groupby result, and assert keys/values match pandas within 1e-10 after deterministic sorting.
 
@@ -176,10 +160,6 @@ unless you can explain why that output follows from the inputs.
 
 **How to reason about it:** Persist is beneficial only for reused intermediates and consumes memory. Time a first materialization plus repeated downstream actions, then close distributed clients and release references.
 
-Use the worked reference earlier in this file, then change one boundary
-condition and rerun the stated checks. A copied output is not evidence
-unless you can explain why that output follows from the inputs.
-
 **Verify:** Record at least three uncached and persisted repeated timings for the same aggregation, Dask graph/partition sizes, and result equality; close the local client and avoid claiming a speedup from one run.
 
 ### Exercise 3: Original lesson practice
@@ -187,10 +167,6 @@ unless you can explain why that output follows from the inputs.
 **Prompt:** Implement the same reduction with `pandas.read_csv(..., chunksize=...)` and compare memory and elapsed time.
 
 **How to reason about it:** Chunked pandas should carry partial sums and counts rather than concatenate all chunks. Verify the final reduction against an in-memory result and handle missing/group-key semantics consistently.
-
-Use the worked reference earlier in this file, then change one boundary
-condition and rerun the stated checks. A copied output is not evidence
-unless you can explain why that output follows from the inputs.
 
 **Verify:** For identical CSV and aggregation, print pandas-chunked and Dask results, elapsed-time samples, and measured peak memory; assert sorted numeric outputs match within 1e-10.
 
@@ -208,10 +184,6 @@ may reread and redo work unless data or intermediates are cached/persisted.
 Keep output bounded; computing a small aggregation is different from calling
 `compute()` on the full large DataFrame.
 
-**Why this matters:** The result should survive a fresh-kernel rerun and
-a deliberately chosen boundary case. If it does not, revisit the
-assumption or data boundary rather than hiding the failure.
-
 **Verify:** Task-graph tracing; print task counts/graph keys for two separate aggregations and one combined dask.compute call; assert all numeric results match and report shared-prefix work without promising scheduler-specific task elimination.
 
 ### Exercise 5: Partition-skew diagnosis
@@ -228,10 +200,6 @@ not split one indivisible group operation automatically.
 If the output is tiny, pre-aggregate within input partitions before the
 shuffle. Preserve exactness and test the salted/two-stage result against pandas.
 
-**Why this matters:** The result should survive a fresh-kernel rerun and
-a deliberately chosen boundary case. If it does not, revisit the
-assumption or data boundary rather than hiding the failure.
-
 **Verify:** Partition-skew diagnosis; print rows/bytes per partition, max-to-median skew ratio, dominant-key support, and repeated groupby timings before/after the chosen mitigation; assert outputs remain equal.
 
 ### Exercise 6: Reducer correctness
@@ -247,9 +215,5 @@ operation (within floating-point tolerance). Welford/Chan formulas combine
 Test one chunk, one-row chunks, uneven chunks, large-offset values, and an
 empty input policy. This same reasoning underlies correct distributed custom
 aggregations; averaging partition means is wrong when partition sizes differ.
-
-**Why this matters:** The result should survive a fresh-kernel rerun and
-a deliberately chosen boundary case. If it does not, revisit the
-assumption or data boundary rather than hiding the failure.
 
 **Verify:** Reducer correctness; test the mergeable state on empty, singleton, unequal, and reordered chunks; print count/mean/variance and assert agreement with NumPy within 1e-12 for every partitioning.

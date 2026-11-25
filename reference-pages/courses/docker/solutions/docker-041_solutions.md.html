@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/docker/solutions/docker-041_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="docker-041-explanatory-solutions">docker-041: explanatory solutions<a class="heading-anchor" href="#docker-041-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit reveal. These explain the supplied teaching fixtures; they are not engine results. The mechanism is explained in <code>courses/docker/guides/docker-041.md</code>.</p>
+<p>These answers explain teaching fixtures, not engine results; the mechanism is in <a href="../guides/docker-041.md.html">the guide</a>.</p>
 <h3 id="exercise-1-predict-the-lost-update-result">Exercise 1: Predict the lost-update result.<a class="heading-anchor" href="#exercise-1-predict-the-lost-update-result" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> The final value can be 8 after two attempted increments.</p>
 <p><strong>Why:</strong> Both writers used the same old value. Atomic file visibility prevents partial bytes but not stale computations.</p>
@@ -238,7 +238,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>A plausible wrong approach:</strong> Raising the replica count to show scalability adds more writers to the race.</p>
 <p><strong>How to verify:</strong> Concurrent increments match the request count, and a timed-out request is checked rather than retried blindly.</p>
 <h3 id="check-your-transfer">Check your transfer<a class="heading-anchor" href="#check-your-transfer" aria-label="Link to this section">#</a></h3>
-<p>A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.</p></article>
+<p>Three replicas need a routing layer instead of the fixed host port, and the counter needs a shared store with transactions, such as a database that increments in one statement, because file replacement and an in-process lock cannot serialize writers in different containers. The simplest correct alternative is one replica with an explicit single writer, measured first: a standard-library server answering small JSON requests may well carry two hundred learners. A load test showing that one replica saturates is the evidence that would justify the larger design.</p></article>
   </main>
 </body>
 </html>

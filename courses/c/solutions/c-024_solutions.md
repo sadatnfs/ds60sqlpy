@@ -1,6 +1,8 @@
 # c-024: explained solutions
 
-Compare after an attempt or explicit reveal. The complete executable reference, `c-024_solution.c`, implements all six cases, from the "find an interior boundary" case to the "transfer an exact membership check" case, in one `main.c`.
+`c-024_solution.c` assembles the "find an interior boundary" case through the "transfer an exact membership check" case in one `main.c`.
+
+Compare only after an attempt: [Compare and transfer](../STUDY-GUIDE.md#compare-and-transfer).
 
 ## Mechanism and assumptions
 
@@ -10,7 +12,7 @@ Maintain an interval [low, high) containing the answer. Compute middle as low+(h
 
 ## Exercise 1: Find an interior boundary: change one input
 
-Copy worked example 1, the "find an interior boundary" case, into a scratch pad and change `int values[] = {2, 4, 6, 8};` to `int values[] = {2, 5, 6, 8};`. Before running, predict which CHECK fails and which value it sees in place of the worked result (the lower-bound index is 2); then run it and restore the original line.
+In worked example 1, change `int values[] = {2, 4, 6, 8};` to `int values[] = {2, 5, 6, 8};`. Predict which value the CHECK on `lower_bound(values, 4, 5) == 2` sees, then run and restore.
 
 The unchanged code is worked example 1:
 
@@ -19,7 +21,7 @@ int values[] = {2, 4, 6, 8};
 CHECK(lower_bound(values, 4, 5) == 2);
 ```
 
-**Expected:** With `int values[] = {2, 5, 6, 8};` the run stops with `Check failed` at the CHECK on `lower_bound(values, 4, 5) == 2`, because the "find an interior boundary" case no longer shows that the lower-bound index is 2. Restoring `int values[] = {2, 4, 6, 8};` brings that observation back.
+**Expected:** `Check failed` at `lower_bound(values, 4, 5) == 2`; restoring `int values[] = {2, 4, 6, 8};` passes again.
 
 The result is an insertion position, not a claim that 5 exists.
 
@@ -33,7 +35,7 @@ The result is an insertion position, not a claim that 5 exists.
 
 ## Exercise 2: Find the first duplicate: diagnose an edited check
 
-A careless edit changed the CHECK in worked example 2, the "find the first duplicate" case, so that it reads `CHECK(lower_bound(values, 4, 4) == 1);`. Run the example with that line, explain why the edited CHECK now fails even though the program state still means the index is the first 3 at position 1, and restore it.
+Worked example 2's CHECK now reads `CHECK(lower_bound(values, 4, 4) == 1);`. Explain why it fails although the index is the first 3 at position 1, then restore it.
 
 The unchanged code is worked example 2:
 
@@ -42,7 +44,7 @@ int values[] = {1, 3, 3, 5};
 CHECK(lower_bound(values, 4, 3) == 1);
 ```
 
-**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `lower_bound(values, 4, 3) == 1`. Once the line reads `CHECK(lower_bound(values, 4, 3) == 1);` again, the "find the first duplicate" case again shows that the index is the first 3 at position 1.
+**Expected:** `Check failed` until the CHECK reads `CHECK(lower_bound(values, 4, 3) == 1);` again, though the index is the first 3 at position 1.
 
 The high=middle branch keeps earlier equal values in the candidate interval.
 

@@ -36,5 +36,7 @@
       "wrong": "Preferring the bootstrap interval because it is narrower, or claiming either has 95 percent coverage. With 4 values, the percentile method is known to be too narrow, and one fixture cannot check coverage.",
       "verify": "The printed list shows `t_mean_interval` near 0.89 and 9.11 and `exact_empirical_percentile` at 3 and 7."
     }
-  ]
+  ],
+  "run_note": "The starter holds four values, 2, 4, 6 and 8, and an empty results list. Run it and compute the mean, 5, and the sample variance, 20/3, by hand before calling any function. The standard error of the mean is then the square root of 20/3 divided by 4, so its square is 5/3. Keep the sample standard deviation and the standard error as separately named results.",
+  "checks_note": "The checks confirm a mean of 5 with squared standard error 5/3, a shift by 3 that moves the mean but not the standard error, all 256 bootstrap resamples averaging exactly 5 with variance 5/4, the relationship between the standard deviation and the standard error, rejection of a single observation, and t and percentile intervals that both contain 5. They do not show that either interval has its nominal coverage for such a small sample."
 }

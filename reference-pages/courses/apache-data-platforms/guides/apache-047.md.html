@@ -259,7 +259,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>Name the key, state descriptor, operator UID, timer clock and cleanup policy. Inspect whether a missing timer is waiting for watermark progress or whether it was deleted by a later record. Treat state retention and timer retention together: clearing one without the other can create stale callbacks or unbounded state. A snapshot of one tiny state fixture does not prove every serializer migration.</p>
 <p><strong>Interview discussion: why store the active timer timestamp in managed state?</strong> It lets the operator replace or recognize the currently intended deadline for that key and recover the same policy with its state. These two cases exercise actual per-key totals, deadline replacement, watermark-triggered callbacks and cleanup, exposing errors that a single final aggregate would miss.</p>
 <h3 id="complete-worked-source">Complete worked source<a class="heading-anchor" href="#complete-worked-source" aria-label="Link to this section">#</a></h3>
-<p>This is a project-only command notebook. Read and edit it in the classroom; run its explicitly labeled commands from the copied owned Docker workshop. The classroom does not execute these service commands.</p>
+<p>The classroom does not execute these service commands. See the <a href="../STUDY-GUIDE.md.html#workshop-notebooks">workshop rules</a>.</p>
 <h2 id="managed-keyed-state-and-actual-event-time-timers">Managed keyed state and actual event-time timers<a class="heading-anchor" href="#managed-keyed-state-and-actual-event-time-timers" aria-label="Link to this section">#</a></h2>
 <pre class="highlighted-code"><code class="language-bash">bash run.sh state
 bash run.sh readback</code></pre>

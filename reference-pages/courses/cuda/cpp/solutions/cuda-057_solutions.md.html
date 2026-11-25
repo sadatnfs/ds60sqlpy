@@ -196,7 +196,6 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <article class="document"><h2 id="cuda-057-explanatory-solutions">cuda-057: explanatory solutions<a class="heading-anchor" href="#cuda-057-explanatory-solutions" aria-label="Link to this section">#</a></h2>
 <h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
 <p>Thread-block clusters and tensor memory accelerator mechanisms expand cooperation and data movement on supported newer architectures. Distributed shared memory changes which participating blocks can access certain shared regions, but introduces cluster lifetime and synchronization requirements. TMA transfers use descriptors and completion protocols; they are not ordinary memcpy calls with a new name. Different instructions can require architecture-specific targets beyond a broad compute-capability family. Maintain a feature table for the exact operation, compiler and GPU, and retain a portable fallback. Learning the ownership diagram is useful without executing architecture-specific code.</p>
-<p>The separate <a href="../references/cuda-057_cpu.py.html">CPU reference</a> checks the chapter&#x27;s bounded model. It does not execute CUDA or establish GPU timing. Compare after attempting the worksheet or explicitly choosing to reveal solutions.</p>
 <h3 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h3>
 <p>A cluster-assisted histogram can combine partial bins across cooperating blocks before global output. Before a remote shared-memory read, the producing block&#x27;s storage must be initialized and remain alive through the required cluster synchronization. A block exiting early can invalidate the assumed lifetime.</p>
 <p><strong>Approach:</strong> Each block writes partial histogram bins to its shared memory, the cluster synchronizes, then blocks read remote bins and merge them before one global write.</p>
@@ -233,11 +232,16 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Why it is correct:</strong> Callers then get identical validated counts whichever path dispatch chooses.</p>
 <p><strong>A plausible wrong approach:</strong> Letting the fallback use different bin boundaries makes outputs differ silently between devices.</p>
 <p><strong>How to verify:</strong> Run both paths on the same input where supported and compare every bin.</p>
+<h3 id="self-check-answers">Self-check answers<a class="heading-anchor" href="#self-check-answers" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>Name four fields of a capability record.</strong> Device and compute capability, toolkit and driver versions, the feature probed and the probe result.</li>
+<li><strong>What should an unavailable cluster feature do to reading progress?</strong> Nothing; the lesson remains complete, and only the optional lab stays unqualified.</li>
+<li><strong>When may a block read another block&#x27;s distributed shared memory?</strong> After the producer initialized it, within the required cluster synchronization, while that block is still alive.</li>
+</ol>
 <h3 id="numerical-reference-and-its-limits">Numerical reference and its limits<a class="heading-anchor" href="#numerical-reference-and-its-limits" aria-label="Link to this section">#</a></h3>
-<p>The complete CPU model is <a href="../references/cuda-057_cpu.py.html">here</a>. Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It does not claim CUDA execution, concurrency safety or a performance measurement.</p>
+<p>The <a href="../references/cuda-057_cpu.py.html">CPU reference</a> reproduces worked example 1 and prints <code>{&#x27;selected_implementation&#x27;: &#x27;baseline&#x27;, &#x27;specialized_execution_verified&#x27;: False}</code>.</p>
 <h3 id="transfer-review">Transfer review<a class="heading-anchor" href="#transfer-review" aria-label="Link to this section">#</a></h3>
-<p>Preserve input/bin/output semantics and return the same validated counts, while recording which implementation ran and comparing performance only within supported conditions.</p>
-<p>A complete explanation must name its inputs, the unchanged mathematical contract, the changed boundary or resource condition, and the evidence still needed on actual hardware. Preserve a CPU baseline even after a GPU path becomes available.</p></article>
+<p>Preserve input/bin/output semantics and return the same validated counts, while recording which implementation ran and comparing performance only within supported conditions.</p></article>
   </main>
 </body>
 </html>

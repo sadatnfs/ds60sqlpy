@@ -1,6 +1,8 @@
 # rust-022: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [rust-022_solution.rs](rust-022_solution.rs). It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.
+Executable reference: [rust-022_solution.rs](rust-022_solution.rs), which runs both examples and the coded answers.
+
+Open this only after [an attempt](../STUDY-GUIDE.md#attempt-a-lesson).
 
 ## Why the two examples differ
 
@@ -26,7 +28,7 @@ Match each failure to its domain variant.
 
 Add a maximum-quantity category.
 
-**Reference answer.** The same statements run as the `Task 2` block of the reference program; here they are wrapped in `main` as a complete file. It uses `validated` from the lesson's helpers, defined in the reference program.
+**Reference answer**, wrapped in `main`; the reference runs it as its `Task 2` block. Helpers used: `validated`.
 
 ```rust
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -78,7 +80,7 @@ The new category wraps the existing one rather than editing it, and `impl From<I
 
 Define a custom error for an importer with syntax and storage boundaries.
 
-**Reference answer.** The same statements run as the `Task 3` block of the reference program; here they are wrapped in `main` as a complete file.
+**Reference answer**, wrapped in `main`; the reference runs it as its `Task 3` block.
 
 ```rust
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -134,7 +136,7 @@ Diagnose branching on a translated message string.
 
 Test zero, malformed and out-of-range text.
 
-**Reference answer.** The same statements run as the `Task 5` block of the reference program; here they are wrapped in `main` as a complete file. It uses `validated` from the lesson's helpers, defined in the reference program.
+**Reference answer**, wrapped in `main`; the reference runs it as its `Task 5` block. Helpers used: `validated`.
 
 ```rust
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -169,7 +171,7 @@ Zero sits on the accepted side of `value < 0`. Out-of-range text never becomes a
 
 Choose which layer translates an internal error into a public response and what context it may expose.
 
-No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **Error enum**, and state one limitation of your choice.
+**Judging criteria.** A strong design keeps detailed variants such as `InputError::Malformed` inside the domain and translates them once, at the outermost layer that knows the audience, such as an HTTP handler or the binary's `main`. That layer maps each variant to a public category and a safe message, logs the full cause chain with a correlation identity, and never echoes raw input, paths or library error text. State one limitation: the translation point must change whenever a variant is added, which an exhaustive `match` makes visible.
 
 ## Mechanism and diagnostic reasoning
 
@@ -183,4 +185,6 @@ A generic string loses structured recovery information. Unwrap belongs only wher
 
 ## Review before continuing
 
-Run the reference and confirm that it prints `rust-022: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.
+Rebuild Example B (Render a safe message) from a blank pad.
+
+Review routine: [Self-check and review](../STUDY-GUIDE.md#self-check-and-review).

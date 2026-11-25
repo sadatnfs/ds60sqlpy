@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cuda/python/solutions/cuda-104_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="cuda-104-explained-solutions">cuda-104: explained solutions<a class="heading-anchor" href="#cuda-104-explained-solutions" aria-label="Link to this section">#</a></h2>
-<p>These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.</p>
+<p>Compare with your <a href="../lessons/cuda-104.md.html">worksheet</a> attempt.</p>
 <h3 id="exercise-1-write-three-constraints">Exercise 1: Write three constraints<a class="heading-anchor" href="#exercise-1-write-three-constraints" aria-label="Link to this section">#</a></h3>
 <p>Use measurable limits with units.</p>
 <p><strong>Approach.</strong> Write three measurable constraints with units, such as peak memory at most 8 GiB, p95 latency at most 20 ms and held-out accuracy at least 0.9.</p>
@@ -231,9 +231,19 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Why it is correct here.</strong> A decision record must show which numbers were measured and which were assumed. Hiding gaps makes an unverified choice look final.</p>
 <p><strong>A plausible wrong approach.</strong> Presenting fixture numbers such as 18 ms as measured performance claims evidence that does not exist.</p>
 <p><strong>How to verify.</strong> Include a section listing each unmeasured quantity and the hardware run that would measure it, and check that no unmeasured value is labeled as measured.</p>
+<h3 id="self-check-answers">Self-check answers<a class="heading-anchor" href="#self-check-answers" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>Why must quality be part of acceptance?</strong> A candidate that meets latency but drops held-out accuracy below the threshold fails the task it was built for.</li>
+</ol>
+<ol start="2">
+<li><strong>Which bottlenecks can an optimization target?</strong> Input preparation, transfer, arithmetic, memory traffic or communication, as shown by measurement.</li>
+</ol>
+<ol start="3">
+<li><strong>What can CPU-only work honestly deliver?</strong> A working model and a decision report, with GPU execution and deployment qualification explicitly left open.</li>
+</ol>
 <h3 id="reference-observation">Reference observation<a class="heading-anchor" href="#reference-observation" aria-label="Link to this section">#</a></h3>
 <p>Only candidate A satisfies all three constraints.</p>
-<p>The reference file is <code>courses/cuda/python/references/cuda-104_cpu.py</code>. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.</p></article>
+<p>Asserted by <code>courses/cuda/python/references/cuda-104_cpu.py</code>.</p></article>
   </main>
 </body>
 </html>

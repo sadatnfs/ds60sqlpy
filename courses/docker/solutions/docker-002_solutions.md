@@ -1,6 +1,6 @@
 # docker-002: explanatory solutions
 
-Compare after your own attempt or an explicit reveal. These explain the supplied teaching fixtures; they are not engine results. The mechanism is explained in `courses/docker/guides/docker-002.md`.
+These answers explain teaching fixtures, not engine results; the mechanism is in [the guide](../guides/docker-002.md).
 
 ## Exercise 1: Predict whether docker --version proves readiness.
 
@@ -88,4 +88,4 @@ Compare after your own attempt or an explicit reveal. These explain the supplied
 
 ## Check your transfer
 
-A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.
+They should switch to the Ubuntu terminal under WSL 2 before running any lab command. The guard is Bash syntax, and the labs assume Linux paths and Bash quoting. The successful `docker info` only proves the Windows client reached some engine; it says nothing about whether the shell can run the lab commands. In Ubuntu, the expected result is that `docker info --format '{{.OSType}}'` prints `linux` and the guard runs. If `docker context show` inside Ubuntu names a different endpoint from the one recorded earlier, that observation disproves the assumption that both shells talk to the same engine, and it must be reconciled first.

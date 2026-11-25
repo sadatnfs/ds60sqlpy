@@ -196,7 +196,6 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <article class="document"><h2 id="cuda-014-explanatory-solutions">cuda-014: explanatory solutions<a class="heading-anchor" href="#cuda-014-explanatory-solutions" aria-label="Link to this section">#</a></h2>
 <h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
 <p>A one-dimensional launch gives a thread the starting index blockIdx.x<em>blockDim.x+threadIdx.x. A grid-stride loop advances that index by blockDim.x</em>gridDim.x until it reaches n. Every nonnegative index has one remainder modulo the positive stride, so exactly one starting thread owns it. Cast to a sufficiently wide integer before multiplying dimensions; widening after an overflow is too late. Ceiling division supplies enough threads for one-element mapping, but a grid-stride loop also allows a bounded grid to cover a much larger input. A bounds test is required even when most demonstration sizes divide evenly.</p>
-<p>The separate <a href="../references/cuda-014_cpu.py.html">CPU reference</a> checks the chapter&#x27;s bounded model. It does not execute CUDA or establish GPU timing. Compare after attempting the worksheet or explicitly choosing to reveal solutions.</p>
 <h3 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h3>
 <p>Use two blocks of four threads for <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi mathvariant="normal">n</mi><mo>=</mo><mn>19</mn></mrow><annotation encoding="application/x-tex">\mathrm{n}=19</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="katex-base"><span class="katex-strut" style="height:0.4306em;"></span><span class="mord mathrm">n</span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="katex-base"><span class="katex-strut" style="height:0.6444em;"></span><span class="mord">19</span></span></span></span>. Thread 0 owns indices 0,8,16; thread 1 owns 1,9,17; thread 2 owns 2,10,18; thread 3 owns 3,11. Every element has exactly one owner. This ownership trace is CPU reasoning, not a simulator of warp scheduling or GPU timing.</p>
 <p><strong>Approach:</strong> Set stride to the total thread count 2 * 4 = 8 and list i, i + 8, i + 16 below 19 for each thread.</p>
@@ -233,11 +232,16 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Why it is correct:</strong> Both limits matter: the chunk buffer has its own capacity and the destination has its own length.</p>
 <p><strong>A plausible wrong approach:</strong> Adding the offset first and checking only the global bound can overrun a shorter final chunk.</p>
 <p><strong>How to verify:</strong> Test a final chunk shorter than the rest and confirm no write past its local capacity.</p>
+<h3 id="self-check-answers">Self-check answers<a class="heading-anchor" href="#self-check-answers" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>In worked example 1, why does thread 3 own only two indices?</strong> Its next index, 19, equals n, so the loop stops after 3 and 11.</li>
+<li><strong>Why cast to a wide integer before multiplying block index by block size?</strong> The product can overflow a 32-bit int for large grids, and widening after the overflow cannot recover the lost value.</li>
+<li><strong>What does a grid-stride loop give you that a one-element mapping does not?</strong> Correct coverage of any n with a fixed grid size, so the launch need not grow with the input.</li>
+</ol>
 <h3 id="numerical-reference-and-its-limits">Numerical reference and its limits<a class="heading-anchor" href="#numerical-reference-and-its-limits" aria-label="Link to this section">#</a></h3>
-<p>The complete CPU model is <a href="../references/cuda-014_cpu.py.html">here</a>. Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It does not claim CUDA execution, concurrency safety or a performance measurement.</p>
+<p>The <a href="../references/cuda-014_cpu.py.html">CPU reference</a> reproduces worked example 1 and prints <code>{&#x27;thread_0&#x27;: [0, 8, 16], &#x27;all_elements_written_once&#x27;: True}</code>.</p>
 <h3 id="transfer-review">Transfer review<a class="heading-anchor" href="#transfer-review" aria-label="Link to this section">#</a></h3>
-<p>Compute a local bounded index first, then add a validated chunk offset. Preserve both local capacity and global destination bounds.</p>
-<p>A complete explanation must name its inputs, the unchanged mathematical contract, the changed boundary or resource condition, and the evidence still needed on actual hardware. Preserve a CPU baseline even after a GPU path becomes available.</p></article>
+<p>Compute a local bounded index first, then add a validated chunk offset. Preserve both local capacity and global destination bounds.</p></article>
   </main>
 </body>
 </html>

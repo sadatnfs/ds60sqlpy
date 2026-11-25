@@ -194,11 +194,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/apache-data-platforms/examples/apache-067.md</code></p>
     </header>
     <article class="document"><h2 id="hive-apache-067-command-notebook">Hive apache-067 command notebook<a class="heading-anchor" href="#hive-apache-067-command-notebook" aria-label="Link to this section">#</a></h2>
-<p>Run from the copied owned Hive project, following its README. Native service acceptance is separately recorded in QUALIFICATION.md.</p>
+<p>Both files are read-only here. <code>iceberg.hql</code> creates <code>ds60.orders_iceberg</code> at <code>file:///warehouse/orders_iceberg</code> and inserts the three orders, while <code>conf/hive-site.xml</code> shows the catalog settings that statement would depend on in the copied Hive project.</p>
 <pre class="highlighted-code"><code class="language-bash">cat iceberg.hql
 cat conf/hive-site.xml</code></pre>
 <p>This is a prepared Iceberg extension, not an executed default reference. Prepare and test the exact bundled Hive integration, metadata/snapshot identity and second reader before asserting cross-engine compatibility.</p>
-<p>The classroom does not execute these Docker commands. Retain source, schema, file identities, actual responses and failure scope in an independent receipt.</p></article>
+<p>QUALIFICATION.md lists Iceberg integration among the Hive extensions that the default Parquet and Thrift path does not qualify. Its receipt needs the metadata file, the snapshot ID and a second engine reading that same snapshot.</p></article>
   </main>
 </body>
 </html>

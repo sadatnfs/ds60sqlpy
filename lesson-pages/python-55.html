@@ -461,16 +461,7 @@ curl -X POST http://127.0.0.1:8000/predict <span class="syntax-string">\</span>
   -H <span class="syntax-string">&#x27;Content-Type: application/json&#x27;</span> <span class="syntax-string">\</span>
   -d <span class="syntax-string">&#x27;{&quot;features&quot;:[5.1,3.5,1.4,0.2]}&#x27;</span></code></pre>
 <h4 id="guide--how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#guide--how-to-run-this-lesson" aria-label="Link to this section">#</a></h4>
-<p><strong>Primary browser route:</strong> run <code>./classroom</code> from the repository root and choose <strong>Python and data science</strong> on <code>/classroom</code>. Open this lesson in the shared workspace, read its capability notice, and use its supported coding or reading workflow. The <a href="../reference-pages/docs/classroom-experience.md.html">classroom guide</a> explains saved work, runtimes and switching subjects.</p>
-<p><strong>Optional native notebook/editor route:</strong> the instructions below describe separately prepared host tools. They are useful alternatives, not prerequisites for opening this lesson in the Docker classroom.</p>
-<ol>
-<li>Open the Day 55 learner notebook from this guide&#x27;s <strong>Next step</strong> section in VS Code or JupyterLab.</li>
-<li>Select the <code>Python (ds60sqlpy)</code> kernel. Start at the top and use <strong>Run All</strong> only after making the written predictions; every added worked example is bounded and offline after bootstrap.</li>
-<li>Keep experiments in new scratch cells. Do not edit the official solution while attempting the numbered practice.</li>
-<li>Restart the kernel and run from the first cell before calling the lesson complete. A clean run catches hidden state and stale variables.</li>
-</ol>
-<p>Linux, macOS, or Ubuntu in Windows WSL 2:</p>
-<pre class="highlighted-code"><code class="language-bash">.venv/bin/python -m jupyter lab</code></pre>
+<p>Open <code>python-55</code> in the classroom, or <code>python/ds-60day/notebooks/day55_apis_containerization_docker.ipynb</code> on a host; the <a href="../reference-pages/python/STUDY-GUIDE.md.html">Python study guide</a> explains both.</p>
 <h4 id="guide--concept-deep-dive-container-build-boundaries-minimal-images-and-health-semantics">Concept deep dive: container build boundaries, minimal images, and health semantics<a class="heading-anchor" href="#guide--concept-deep-dive-container-build-boundaries-minimal-images-and-health-semantics" aria-label="Link to this section">#</a></h4>
 <h5 id="guide--the-mental-model">The mental model<a class="heading-anchor" href="#guide--the-mental-model" aria-label="Link to this section">#</a></h5>
 <p>A container image is a versioned filesystem plus process configuration; a container is one running process created from that image. Docker builds layers from a <strong>build context</strong>, so <code>.dockerignore</code> controls what can be sent to the builder. Multi-stage or ordered builds copy only the runtime artifacts needed after dependency installation.</p>
@@ -482,7 +473,6 @@ curl -X POST http://127.0.0.1:8000/predict <span class="syntax-string">\</span>
 <li><strong><code>CMD</code> / <code>HEALTHCHECK</code>:</strong> define the main process and probe command without replacing service-level readiness policy.</li>
 </ul>
 <h5 id="guide--focused-example-a-audit-build-context-inclusion-before-docker-runs">Focused example A: audit build-context inclusion before Docker runs<a class="heading-anchor" href="#guide--focused-example-a-audit-build-context-inclusion-before-docker-runs" aria-label="Link to this section">#</a></h5>
-<p>Before running the example, predict the shape, type, or direction of the result. Write the prediction down so that a surprise becomes evidence rather than something to overlook.</p>
 <pre class="highlighted-code"><code class="language-python"><span class="syntax-keyword">from</span> fnmatch <span class="syntax-keyword">import</span> fnmatch
 
 files <span class="syntax-operator">=</span> <span class="syntax-punctuation">[</span>
@@ -575,7 +565,6 @@ during_dependency_outage <span class="syntax-operator">=</span> probe<span class
 </ol>
 <h5 id="guide--additional-mastery-practice">Additional mastery practice<a class="heading-anchor" href="#guide--additional-mastery-practice" aria-label="Link to this section">#</a></h5>
 <p>Containerize a minimal, testable service without embedding secrets or privileged assumptions. Build, readiness, and runtime health have distinct contracts.</p>
-<p>Predict or plan before you run code. Use the hint only after an honest attempt, and record the evidence that would prove your result correct.</p>
 <ol start="4">
 <li><strong>Layer and secret audit:</strong> Create a <code>.dockerignore</code>, inspect image history, and prove that <code>.env</code>, Git metadata, notebooks, caches, and local artifacts are absent. <strong>Progressive hint:</strong> The build context is the first boundary. Deleting a secret in a later layer does not remove it from earlier layers.</li>
 </ol>
@@ -637,7 +626,7 @@ during_dependency_outage <span class="syntax-operator">=</span> probe<span class
 <li>Continue to <a href="python-56.html#guide">Day 56; Prefect</a>.</li>
 </ul>
 <h4 id="guide--ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#guide--ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h4>
-<p>The lesson is complete without an AI assistant. If you want optional coaching, copy this prompt into the AI tutor while the repository root is open:</p>
+<p>The lesson is complete without AI. For optional coaching, copy this prompt with the repository root open:</p>
 <pre class="highlighted-code"><code class="language-text">Tutor me through `python-55` (Day 55: Containerizing a FastAPI Service).
 
 Follow the repository tutoring skill `guide-ds60sqlpy-learning`.
@@ -982,7 +971,7 @@ docker run -p <span class="syntax-number">8000</span>:8000 ds-fastapi:latest</co
 </ul>
 <hr>
 <h4 id="solution-1--solution-reasoning-lens">Solution reasoning lens<a class="heading-anchor" href="#solution-1--solution-reasoning-lens" aria-label="Link to this section">#</a></h4>
-<p>A strong solution is not merely code that produces one plausible output. It establishes a chain from input contract to operation to verification:</p>
+<p>Each decision below links an input contract to an operation and its evidence:</p>
 <ol>
 <li><strong><code>FROM</code> / pinned base:</strong> establishes operating-system and Python dependencies; pin and scan rather than trusting <code>latest</code>.</li>
 <li><strong><code>COPY</code> and <code>.dockerignore</code>:</strong> define which local files enter the build context and image layers.</li>
@@ -994,44 +983,36 @@ docker run -p <span class="syntax-number">8000</span>:8000 ds-fastapi:latest</co
 <p><strong>Trade-off:</strong> Smaller images reduce attack surface and transfer time, while aggressive minimization can make debugging and native dependencies harder.</p>
 <p><strong>Edge case to test:</strong> Architecture mismatch, missing system libraries, read-only filesystem, signal handling, corrupt model artifact, and absent Docker daemon require checks.</p>
 <p><strong>Evidence of correctness:</strong> Inspect context and image history, scan dependencies, run as non-root, test valid/invalid requests and signals, distinguish health/readiness, and rebuild deterministically.</p>
-<p>When comparing your attempt with the reference, explain which of these decisions your code made explicitly. If the reference makes a different choice, compare the contracts and evidence before deciding that one version is universally better.</p>
 <h4 id="solution-1--exercise-by-exercise-reasoning-map">Exercise-by-exercise reasoning map<a class="heading-anchor" href="#solution-1--exercise-by-exercise-reasoning-map" aria-label="Link to this section">#</a></h4>
-<p>This map connects every learner prompt to a reasoning path. Read the explanation before copying code: the goal is to understand the assumptions, the evidence that validates the result, and the edge cases that can make an apparently correct implementation fail.</p>
 <h5 id="solution-1--exercise-1-original-lesson-practice">Exercise 1: Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Create a slim dependency file containing only direct API runtime needs.</p>
 <p><strong>How to reason about it:</strong> Trace direct imports from the service and serialized pipeline, install only runtime needs, and rebuild from a clean context. Keep development notebooks, tests, datasets, and credentials out of the image.</p>
-<p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
 <p><strong>Verify:</strong> Build the image from a direct-runtime-only dependency file, print resolved package versions and image size, and run the health/predict smoke tests; prove test/notebook-only packages are absent.</p>
 <h5 id="solution-1--exercise-2-original-lesson-practice">Exercise 2: Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-2-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Add <code>GET /health</code> returning <code>{&quot;status&quot;: &quot;ok&quot;}</code>.</p>
 <p><strong>How to reason about it:</strong> A liveness endpoint is cheap and local; a readiness endpoint verifies the artifact/schema is loaded. Test both and use a standard-library probe when a slim image does not contain curl.</p>
-<p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
 <p><strong>Verify:</strong> With TestClient and the running container, assert GET /health returns status 200 and exactly {&#x27;status&#x27;: &#x27;ok&#x27;}; distinguish liveness from readiness by testing a missing/tampered model artifact.</p>
 <h5 id="solution-1--exercise-3-original-lesson-practice">Exercise 3: Original lesson practice<a class="heading-anchor" href="#solution-1--exercise-3-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Optionally push the image to a registry if you intentionally use a connected account.</p>
 <p><strong>How to reason about it:</strong> Registry upload is optional and networked. Use the registry&#x27;s credential flow, a non-secret versioned tag/digest, image scanning, and never place tokens in Dockerfile instructions or build arguments.</p>
-<p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
 <p><strong>Verify:</strong> Keep this optional and connected: either record a skipped result, or name the registry/repository/tag/digest, show authenticated push exit code 0, pull by digest, and rerun health/predict without exposing credentials.</p>
 <h5 id="solution-1--exercise-4-layer-and-secret-audit">Exercise 4: Layer and secret audit<a class="heading-anchor" href="#solution-1--exercise-4-layer-and-secret-audit" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Create a <code>.dockerignore</code>, inspect image history, and prove that <code>.env</code>, Git metadata, notebooks, caches, and local artifacts are absent.</p>
 <p><strong>Reasoning before implementation:</strong> The build context is the first boundary. Deleting a secret in a later layer does not remove it from earlier layers.</p>
 <p>Allow only the service source, locked dependency metadata, and approved model artifact into the context. Use runtime secret injection for connected extensions; the portable lesson should require no credential.</p>
 <p>Inspect final files as a non-root user and scan both source and image. If a secret ever entered a built/pushed layer, rotate it, removing the file from the latest layer is not sufficient.</p>
-<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
 <p><strong>Verify:</strong> Layer and secret audit; build/save the image, inspect history and archive file list, and assert sentinel .env, .git, notebook, cache, and artifacts paths/content are absent while required application files remain.</p>
 <h5 id="solution-1--exercise-5-least-privilege-runtime">Exercise 5: Least-privilege runtime<a class="heading-anchor" href="#solution-1--exercise-5-least-privilege-runtime" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Run the service as a non-root user with a read-only filesystem and an explicit writable temporary directory. Diagnose any write assumptions.</p>
 <p><strong>Reasoning before implementation:</strong> Create the user in the image, set ownership only where needed, and write transient files under an intentionally mounted/temp path.</p>
 <p>The model artifact and application code should be read-only at runtime. Logging should go to stdout/stderr rather than a mutable file beside source. If a framework requires a cache, configure a bounded writable temp directory and document its lifecycle.</p>
 <p>Bind to an unprivileged port such as 8000. Dropping root reduces impact but does not replace dependency updates, network policy, or input validation.</p>
-<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
 <p><strong>Verify:</strong> Least-privilege runtime; inside the container, print UID/GID and filesystem mount policy; assert UID is nonzero, writes outside the declared temp path fail, temp writes succeed, and health/predict still return expected statuses.</p>
 <h5 id="solution-1--exercise-6-health-semantics">Exercise 6: Health semantics<a class="heading-anchor" href="#solution-1--exercise-6-health-semantics" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Implement separate <code>/live</code> and <code>/ready</code> checks and a startup failure when the model manifest is incompatible. Test all three states.</p>
 <p><strong>Reasoning before implementation:</strong> Liveness answers whether the process can respond; readiness answers whether it can safely serve the declared model contract.</p>
 <p><code>/live</code> should avoid dependency fan-out that could cause restart loops. <code>/ready</code> can require successful artifact load, schema validation, and critical local resources. A malformed artifact should fail startup or keep readiness false, not return an “ok” response with later prediction failures.</p>
 <p>Tests should simulate absent and mismatched artifacts without requiring Docker or a network, then add one container smoke test for the packaged path.</p>
-<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
 <p><strong>Verify:</strong> Health semantics; assert /live is 200 while the process runs, /ready is 200 only after a compatible artifact loads, and tampered/missing manifests produce non-ready or startup failure with a sanitized message.</p></div>
       </section>
 
@@ -1153,7 +1134,7 @@ docker run -p <span class="syntax-number">8000</span>:8000 ds-fastapi:latest</co
 </ul>
 <hr>
 <h4 id="solution-2--cell-5--solution-reasoning-lens">Solution reasoning lens<a class="heading-anchor" href="#solution-2--cell-5--solution-reasoning-lens" aria-label="Link to this section">#</a></h4>
-<p>A strong solution is not merely code that produces one plausible output. It establishes a chain from input contract to operation to verification:</p>
+<p>Each decision below links an input contract to an operation and its evidence:</p>
 <ol>
 <li><strong><code>FROM</code> / pinned base:</strong> establishes operating-system and Python dependencies; pin and scan rather than trusting <code>latest</code>.</li>
 <li><strong><code>COPY</code> and <code>.dockerignore</code>:</strong> define which local files enter the build context and image layers.</li>
@@ -1165,45 +1146,37 @@ docker run -p <span class="syntax-number">8000</span>:8000 ds-fastapi:latest</co
 <p><strong>Trade-off:</strong> Smaller images reduce attack surface and transfer time, while aggressive minimization can make debugging and native dependencies harder.</p>
 <p><strong>Edge case to test:</strong> Architecture mismatch, missing system libraries, read-only filesystem, signal handling, corrupt model artifact, and absent Docker daemon require checks.</p>
 <p><strong>Evidence of correctness:</strong> Inspect context and image history, scan dependencies, run as non-root, test valid/invalid requests and signals, distinguish health/readiness, and rebuild deterministically.</p>
-<p>When comparing your attempt with the reference, explain which of these decisions your code made explicitly. If the reference makes a different choice, compare the contracts and evidence before deciding that one version is universally better.</p>
 <h4 id="solution-2--cell-5--exercise-by-exercise-reasoning-map">Exercise-by-exercise reasoning map<a class="heading-anchor" href="#solution-2--cell-5--exercise-by-exercise-reasoning-map" aria-label="Link to this section">#</a></h4>
-<p>This map connects every learner prompt to a reasoning path. Read the explanation before copying code: the goal is to understand the assumptions, the evidence that validates the result, and the edge cases that can make an apparently correct implementation fail.</p>
 <h5 id="solution-2--cell-5--exercise-1-original-lesson-practice">Exercise 1: Original lesson practice<a class="heading-anchor" href="#solution-2--cell-5--exercise-1-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Create a slim dependency file containing only direct API runtime needs.</p>
 <p><strong>How to reason about it:</strong> Trace direct imports from the service and serialized pipeline, install only runtime needs, and rebuild from a clean context. Keep development notebooks, tests, datasets, and credentials out of the image.</p>
-<p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
 <p><strong>Verify:</strong> Build the image from a direct-runtime-only dependency file, print resolved package versions and image size, and run the health/predict smoke tests; prove test/notebook-only packages are absent.</p>
 <h5 id="solution-2--cell-5--exercise-2-original-lesson-practice">Exercise 2: Original lesson practice<a class="heading-anchor" href="#solution-2--cell-5--exercise-2-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Add <code>GET /health</code> returning <code>{&quot;status&quot;: &quot;ok&quot;}</code>.</p>
 <p><strong>How to reason about it:</strong> A liveness endpoint is cheap and local; a readiness endpoint verifies the artifact/schema is loaded. Test both and use a standard-library probe when a slim image does not contain curl.</p>
-<p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
 <p><strong>Verify:</strong> With TestClient and the running container, assert GET /health returns status 200 and exactly {&#x27;status&#x27;: &#x27;ok&#x27;}; distinguish liveness from readiness by testing a missing/tampered model artifact.</p>
 <h5 id="solution-2--cell-5--exercise-3-original-lesson-practice">Exercise 3: Original lesson practice<a class="heading-anchor" href="#solution-2--cell-5--exercise-3-original-lesson-practice" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Optionally push the image to a registry if you intentionally use a connected account.</p>
 <p><strong>How to reason about it:</strong> Registry upload is optional and networked. Use the registry&#x27;s credential flow, a non-secret versioned tag/digest, image scanning, and never place tokens in Dockerfile instructions or build arguments.</p>
-<p>Use the worked reference earlier in this file, then change one boundary condition and rerun the stated checks. A copied output is not evidence unless you can explain why that output follows from the inputs.</p>
 <p><strong>Verify:</strong> Keep this optional and connected: either record a skipped result, or name the registry/repository/tag/digest, show authenticated push exit code 0, pull by digest, and rerun health/predict without exposing credentials.</p>
 <h5 id="solution-2--cell-5--exercise-4-layer-and-secret-audit">Exercise 4: Layer and secret audit<a class="heading-anchor" href="#solution-2--cell-5--exercise-4-layer-and-secret-audit" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Create a <code>.dockerignore</code>, inspect image history, and prove that <code>.env</code>, Git metadata, notebooks, caches, and local artifacts are absent.</p>
 <p><strong>Reasoning before implementation:</strong> The build context is the first boundary. Deleting a secret in a later layer does not remove it from earlier layers.</p>
 <p>Allow only the service source, locked dependency metadata, and approved model artifact into the context. Use runtime secret injection for connected extensions; the portable lesson should require no credential.</p>
-<p>Inspect final files as a non-root user and scan both source and image. If a secret ever entered a built/pushed layer, rotate it; removing the file from the latest layer is not sufficient.</p>
-<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
-<p><strong>Verify:</strong> Layer and secret audit: build/save the image, inspect history and archive file list, and assert sentinel .env, .git, notebook, cache, and artifacts paths/content are absent while required application files remain.</p>
+<p>Inspect final files as a non-root user and scan both source and image. If a secret ever entered a built/pushed layer, rotate it, removing the file from the latest layer is not sufficient.</p>
+<p><strong>Verify:</strong> Layer and secret audit; build/save the image, inspect history and archive file list, and assert sentinel .env, .git, notebook, cache, and artifacts paths/content are absent while required application files remain.</p>
 <h5 id="solution-2--cell-5--exercise-5-least-privilege-runtime">Exercise 5: Least-privilege runtime<a class="heading-anchor" href="#solution-2--cell-5--exercise-5-least-privilege-runtime" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Run the service as a non-root user with a read-only filesystem and an explicit writable temporary directory. Diagnose any write assumptions.</p>
 <p><strong>Reasoning before implementation:</strong> Create the user in the image, set ownership only where needed, and write transient files under an intentionally mounted/temp path.</p>
 <p>The model artifact and application code should be read-only at runtime. Logging should go to stdout/stderr rather than a mutable file beside source. If a framework requires a cache, configure a bounded writable temp directory and document its lifecycle.</p>
 <p>Bind to an unprivileged port such as 8000. Dropping root reduces impact but does not replace dependency updates, network policy, or input validation.</p>
-<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
-<p><strong>Verify:</strong> Least-privilege runtime: inside the container, print UID/GID and filesystem mount policy; assert UID is nonzero, writes outside the declared temp path fail, temp writes succeed, and health/predict still return expected statuses.</p>
+<p><strong>Verify:</strong> Least-privilege runtime; inside the container, print UID/GID and filesystem mount policy; assert UID is nonzero, writes outside the declared temp path fail, temp writes succeed, and health/predict still return expected statuses.</p>
 <h5 id="solution-2--cell-5--exercise-6-health-semantics">Exercise 6: Health semantics<a class="heading-anchor" href="#solution-2--cell-5--exercise-6-health-semantics" aria-label="Link to this section">#</a></h5>
 <p><strong>Prompt:</strong> Implement separate <code>/live</code> and <code>/ready</code> checks and a startup failure when the model manifest is incompatible. Test all three states.</p>
 <p><strong>Reasoning before implementation:</strong> Liveness answers whether the process can respond; readiness answers whether it can safely serve the declared model contract.</p>
 <p><code>/live</code> should avoid dependency fan-out that could cause restart loops. <code>/ready</code> can require successful artifact load, schema validation, and critical local resources. A malformed artifact should fail startup or keep readiness false, not return an “ok” response with later prediction failures.</p>
 <p>Tests should simulate absent and mismatched artifacts without requiring Docker or a network, then add one container smoke test for the packaged path.</p>
-<p><strong>Why this matters:</strong> The result should survive a fresh-kernel rerun and a deliberately chosen boundary case. If it does not, revisit the assumption or data boundary rather than hiding the failure.</p>
-<p><strong>Verify:</strong> Health semantics: assert /live is 200 while the process runs, /ready is 200 only after a compatible artifact loads, and tampered/missing manifests produce non-ready or startup failure with a sanitized message.</p></article></div>
+<p><strong>Verify:</strong> Health semantics; assert /live is 200 while the process runs, /ready is 200 only after a compatible artifact loads, and tampered/missing manifests produce non-ready or startup failure with a sanitized message.</p></article></div>
       </section>
 
 

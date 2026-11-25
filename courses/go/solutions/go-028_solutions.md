@@ -1,6 +1,6 @@
 # go-028: explained solutions
 
-These are comparison material after an attempt or explicit reveal. The executable reference implements all six cases in one `main.go`.
+Compare after an attempt ([using solutions](../STUDY-GUIDE.md#use-the-solutions)). `courses/go/solutions/go-028_solution.go` implements all six cases.
 
 ## Mechanism
 
@@ -10,7 +10,7 @@ A jobs channel carries indexed tasks. Start a bounded number of workers, feed jo
 
 ## 1. Preserve input order: change one input
 
-Copy worked example 1 into a scratch pad and change `v, err := parallelSquares([]int{3, 1, 2}, 2)` to `v, err := parallelSquares([]int{4, 1, 2}, 2)`. Before running, predict which check fails and which value it now sees; then run it and restore the original line.
+Copy worked example 1, change `v, err := parallelSquares([]int{3, 1, 2}, 2)` to `v, err := parallelSquares([]int{4, 1, 2}, 2)` and predict the failure before running; then restore the line.
 
 The unchanged code is worked example 1:
 
@@ -19,7 +19,9 @@ v, err := parallelSquares([]int{3, 1, 2}, 2)
 check(err == nil && len(v) == 3 && v[0] == 9 && v[1] == 1 && v[2] == 4, "order")
 ```
 
-**Expected:** The changed run panics with `order` because `err == nil && len(v) == 3 && v[0] == 9 && v[1] == 1 && v[2] == 4` no longer holds. Restoring the original line brings back the worked observation: the result is 9, 1, 4.
+**Expected:** The edited run panics with `order` because `err == nil && len(v) == 3 && v[0] == 9 && v[1] == 1 && v[2] == 4` no longer holds.
+
+**Verify:** Restoring `v, err := parallelSquares([]int{3, 1, 2}, 2)` makes the check pass again with the worked observation: the result is 9, 1, 4.
 
 Indices restore presentation order. Channel arrival order is not the input-order contract.
 
@@ -33,7 +35,7 @@ Indices restore presentation order. Channel arrival order is not the input-order
 
 ## 2. Handle empty input: diagnose an edited check
 
-A careless edit changed the check in worked example 2 so that it reads `check(err != nil && len(v) == 0, "empty")`. Run worked example 2 with that line, explain why the edited check now fails for the same program state, and restore it.
+A careless edit rewrote the check in worked example 2 as `check(err != nil && len(v) == 0, "empty")`. Explain the failure, then restore it.
 
 The unchanged code is worked example 2:
 
@@ -42,7 +44,9 @@ v, err := parallelSquares(nil, 2)
 check(err == nil && len(v) == 0, "empty")
 ```
 
-**Expected:** Before the repair the program panics with `empty`; after it the line reads `check(err == nil && len(v) == 0, "empty")` again and it returns an empty result and terminates.
+**Expected:** The defective run panics with `empty`; after restoring `check(err == nil && len(v) == 0, "empty")`, it returns an empty result and terminates.
+
+**Verify:** The edited check fails with message `empty` for a state that `err == nil && len(v) == 0` accepts.
 
 Every channel reaches its owned closure point even when no jobs exist.
 
@@ -64,6 +68,8 @@ check(err != nil, "zero workers")
 ```
 
 **Expected:** The call returns an error immediately.
+
+**Verify:** Your solution must keep `err != nil` true. Control: changing `_, err := parallelSquares([]int{1}, 0)` to `_, err := parallelSquares([]int{1}, 1)` panics with message `zero workers`; revert it.
 
 Validation before goroutine creation prevents a deadlock instead of attempting to recover from it.
 
@@ -87,6 +93,8 @@ check(e1 == nil && e2 == nil && slices.Equal(a, b), "same semantics")
 
 **Expected:** Both produce the same sequence.
 
+**Verify:** Your solution must keep `e1 == nil && e2 == nil && slices.Equal(a, b)` true. Control: changing `a, e1 := parallelSquares([]int{1, 2, 3}, 1)` to `a, e1 := parallelSquares([]int{2, 2, 3}, 1)` panics with message `same semantics`; revert it.
+
 Scheduling changes while the calculation contract stays fixed. Timing claims require separate measurements.
 
 **Approach.** Run the same input with one worker and with three, then compare the slices element by element with `slices.Equal`.
@@ -108,6 +116,8 @@ check(err == nil && len(v) == 3 && v[2] == 4, "duplicates")
 
 **Expected:** All three results are retained.
 
+**Verify:** Your solution must keep `err == nil && len(v) == 3 && v[2] == 4` true. Control: changing `v, err := parallelSquares([]int{2, 2, 2}, 2)` to `v, err := parallelSquares([]int{2, 2, 3}, 2)` panics with message `duplicates`; revert it.
+
 Positional task identity avoids accidentally deduplicating legitimate repeated work.
 
 **Approach.** Treat each position as its own task: indexes 0, 1 and 2 each carry the value 2 and each write 4 into their own slot.
@@ -128,6 +138,8 @@ check(err == nil && len(v) == 1 && v[0] == 25, "idle workers")
 ```
 
 **Expected:** One result equals 25 and all workers exit.
+
+**Verify:** Your solution must keep `err == nil && len(v) == 1 && v[0] == 25` true. Control: changing `v, err := parallelSquares([]int{5}, 4)` to `v, err := parallelSquares([]int{6}, 4)` panics with message `idle workers`; revert it.
 
 Idle workers stop when input closes. Excess capacity still has an operational cost even when termination is correct.
 

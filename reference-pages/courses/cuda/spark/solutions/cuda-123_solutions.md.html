@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cuda/spark/solutions/cuda-123_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="cuda-123-explained-solutions">cuda-123: explained solutions<a class="heading-anchor" href="#cuda-123-explained-solutions" aria-label="Link to this section">#</a></h2>
-<p>These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.</p>
+<p>Compare with your <a href="../lessons/cuda-123.md.html">worksheet</a> attempt.</p>
 <h3 id="exercise-1-calculate-partition-averages">Exercise 1: Calculate partition averages<a class="heading-anchor" href="#exercise-1-calculate-partition-averages" aria-label="Link to this section">#</a></h3>
 <p>Divide rows by partitions.</p>
 <p><strong>Approach.</strong> Calculate partition averages: one million rows over 100 partitions averages 10000 rows, and over 10 partitions averages 100000.</p>
@@ -231,9 +231,19 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Why it is correct here.</strong> Estimates guide which experiments to run, while observations support claims. Keeping them separate prevents treating predictions as results.</p>
 <p><strong>A plausible wrong approach.</strong> Writing an estimated 3 times speedup into a report as achieved presents unverified data as fact. Readers then plan hardware purchases or migrations around a number nobody measured.</p>
 <p><strong>How to verify.</strong> Mark each speedup in the report as estimated or observed, and for observed values cite the run. If an observation disagrees with the estimate, keep both and note which model assumption failed.</p>
+<h3 id="self-check-answers">Self-check answers<a class="heading-anchor" href="#self-check-answers" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>What can Adaptive Query Execution change at run time?</strong> It can coalesce partitions, switch join strategy and split skewed partitions based on runtime statistics.</li>
+</ol>
+<ol start="2">
+<li><strong>Is there a best partition count for all workloads?</strong> No. Partition count trades task overhead against memory per task and concurrency, which depend on data and device.</li>
+</ol>
+<ol start="3">
+<li><strong>Why keep semantic fixtures separate from performance datasets?</strong> Tiny fixtures are ideal for exact correctness checks but their timings are dominated by startup, not by the work.</li>
+</ol>
 <h3 id="reference-observation">Reference observation<a class="heading-anchor" href="#reference-observation" aria-label="Link to this section">#</a></h3>
 <p>Partition averages 10000 and 100000; unmatched cache states rejected.</p>
-<p>The reference file is <code>courses/cuda/spark/references/cuda-123_cpu.py</code>. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.</p></article>
+<p>Asserted by <code>courses/cuda/spark/references/cuda-123_cpu.py</code>.</p></article>
   </main>
 </body>
 </html>

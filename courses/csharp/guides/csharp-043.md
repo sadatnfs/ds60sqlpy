@@ -24,9 +24,9 @@ The classroom builds a fixed net10.0 project without arbitrary packages. Externa
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles your saved pad as `Program.cs` in its fixed .NET 10 project. C# 14 is the matching language generation. This route uses the prepared framework libraries; it does not accept arbitrary project files, NuGet packages, command arguments or interactive input. The explicit `Program.Main` entrypoint makes compilation and execution visible. `Check` throws on a false condition in every build configuration, unlike conditional debugging assertions.
+The pad checks only what a running program can report about itself. The project work happens in DomainLab, linked below, which needs a prepared .NET 10 SDK and runs `dotnet restore`, `dotnet build --no-restore` and `dotnet run --no-build` as separate steps. Nothing in the pad can prove that a restore or publish works.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Compile contract, starter stop and success marker: [running a lesson](../STUDY-GUIDE.md#running-a-lesson).
 
 Use [DomainLab](../fixtures/DomainLab/README.md) for the complete multi-project workflow. It has no third-party package dependencies.
 
@@ -34,7 +34,7 @@ Use [DomainLab](../fixtures/DomainLab/README.md) for the complete multi-project 
 
 `TargetFramework` selects net10.0. Nullable and ImplicitUsings are compile policies. `dotnet restore`, `dotnet build --no-restore`, `dotnet run --no-build` and `dotnet publish` have distinct responsibilities.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+Each example ends with a trace; method: [tracing a program](../STUDY-GUIDE.md#tracing-a-program).
 
 ## Worked example / walkthrough
 
@@ -79,6 +79,8 @@ internal static class Program {
 
 **Observe:** The running framework generation is compatible with the declared classroom target.
 
+**Trace.** `Environment.Version` reports the runtime executing the program; in the classroom worker it was 10.0.15, so `Major` is 10 and the first check passes. `typeof(List<int>).Assembly.GetName().Name` returns System.Private.CoreLib, the core library that holds `List<T>`. The check only asserts that a name exists, because the exact assembly layout is an implementation detail that can change.
+
 ### Example B: Read the compiled target framework
 
 Both values come from the build and the runtime rather than from a hand-written table, so the checks fail if the project targets another framework. A real multi-project fixture is still required to qualify restore and publish behavior.
@@ -120,6 +122,8 @@ internal static class Program {
 
 **Observe:** The compiled program reports .NETCoreApp,Version=v10.0, the framework its project targeted, and runs on a .NET 10 runtime.
 
+**Trace.** `AppContext.TargetFrameworkName` comes from the compiled program, and the course project produced .NETCoreApp,Version=v10.0 because its project file says net10.0. `Environment.Version.Major` comes from the runtime, which is a separate fact: a later patch runtime keeps Major at 10. Changing the target in the project file would break the first check at run time.
+
 ## Exercises
 
 1. **Predict and explain.** Explain the distinct purpose of restore, build, run and publish.
@@ -134,13 +138,15 @@ internal static class Program {
 
 6. **Transfer and justify.** Design a dependency update review including lock changes, license checks and runtime evidence.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Log each task in the [evidence table](../STUDY-GUIDE.md#recording-exercise-evidence) before opening the explanation.
 
 ## Common pitfalls and diagnosis
 
 An SDK version and target framework are related but different. A successful restore is not a successful build. Do not present self-contained deployment as architecture-independent.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+For task 4, an API introduced in a newer framework fails to compile under an older `TargetFramework`, with an error saying the member or type cannot be found, even when the installed SDK is newer; read the project file before blaming the code. For task 5, delete only the bin and obj folders inside the lab, then rebuild and confirm restore runs again.
+
+Repair routine: [building a regression case](../STUDY-GUIDE.md#building-a-regression-case).
 
 ## Progressive hints
 
@@ -150,11 +156,15 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 ## Self-check and next step
 
-Explain Target framework, Restore, Publish without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+Say which command first downloads packages, which compiles, and which writes a deployable folder. Distinguish the SDK version from the target framework in your own build output. For task 6, list what a dependency update review records: the version diff, the license, the release notes, and a test run on the new version.
+
+Then follow the general [self-check routine](../STUDY-GUIDE.md#self-check-routine) and save your pad.
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://learn.microsoft.com/en-us/dotnet/csharp/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+[Documentation](https://learn.microsoft.com/en-us/dotnet/csharp/): The .NET project SDK and `dotnet` CLI articles describe target frameworks, restore, build, run and publish.
+
+Provenance and limits: [sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

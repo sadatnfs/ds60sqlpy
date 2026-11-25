@@ -1,6 +1,6 @@
 # cuda-087: explained solutions
 
-These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.
+Compare with your [worksheet](../lessons/cuda-087.md) attempt.
 
 ## Exercise 1: Derive the scalar gradient
 
@@ -74,8 +74,16 @@ Time only after output and gradient agreement.
 
 **How to verify.** Store correctness results next to each timing, and reject any timing whose correctness check is missing or failed.
 
+## Self-check answers
+
+1. **Why derive the gradient by hand before trusting autograd?** A hand derivation gives an independent expected value, so a wrong loss, shape or placement shows up as a mismatch instead of a plausible number.
+
+2. **How do PyTorch and TensorFlow differ in placement idiom?** PyTorch moves tensors and modules to a device explicitly. TensorFlow relies on device scopes, placement rules and tracked variables.
+
+3. **What does a correct one-step update establish?** Bounded correct behavior for that step. It says nothing about model quality or GPU performance.
+
 ## Reference observation
 
-Loss 10, gradient-10, new weight 1.
+Loss 10, gradient -10, new weight 1.
 
-The reference file is `courses/cuda/python/references/cuda-087_cpu.py`. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.
+Asserted by `courses/cuda/python/references/cuda-087_cpu.py`.

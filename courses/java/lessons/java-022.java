@@ -3,18 +3,15 @@ public class Main {
 
   public static void main(String[] args) throws Exception {
     // Exercise 1: Retrieve a bounded result: change one input
-    // Copy Example A into a scratch `Main.java` and change `var future = executor.submit(() ->
-    // 42);` to `var future = executor.submit(() -> 43);`. Before running it with `java -ea
-    // Main`, predict which assertion fails and which value it now sees; then run it and restore
-    // the original line.
-    // Expected: The changed run fails with an `AssertionError` from the assertion on `value ==
-    // 42`. Restoring the original line brings back the worked observation: result 42.
+    // Change `var future = executor.submit(() -> 42);` to `var future = executor.submit(() ->
+    // 43);` in Example A and predict which assertion fails and why.
+    // Expected: The edited run fails with an `AssertionError` from the assertion on `value ==
+    // 42`.
 
     // Exercise 2: Preserve task failure identity: debug a regression
-    // Introduce one deliberate defect into a copy of Example B that makes the assertion on
-    // `observed` fail, then explain how the stack trace leads back to the faulty statement.
-    // Expected: The defective copy fails the assertion on `observed`; the repaired copy
-    // reproduces the worked observation: executionException cause is IllegalArgumentException.
+    // Add one defect to Example B's new code that fails the assertion on `observed`, then repair
+    // it.
+    // Expected: The defective copy fails its assertion and the repaired copy passes.
 
     // Exercise 3: Separate wait timeout from task completion
     // Hold a task on a latch, wait with a short timeout, then release and obtain the result.

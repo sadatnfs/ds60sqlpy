@@ -1,22 +1,26 @@
 # spark-022: Shuffles, stages, tasks and aggregation cost
 
-Authored paired Scala/PySpark teaching content. The default fixtures are tiny, local and deterministic. Runtime acceptance, logical correctness and learner understanding remain separate evidence.
+A grouped count over 20,000 rows and 1,000 keys is one line of code, but Spark has to bring all twenty copies of each key from four input partitions to one place. This lesson runs that aggregate with two and then five reducers, reads the exchange metrics and task counts after the action, and keeps measured evidence apart from arithmetic estimates.
 
 ## Level and prerequisites
 
-Intermediate; approximately 90 minutes. Direct prerequisites: `spark-021`. The prepared baseline is Spark 4.3.0, Scala binary 2.13, JDK 17 and Python 3.12. Read the [execution baseline](../execution-baseline.md).
+Intermediate; approximately 90 minutes. Direct prerequisites: `spark-021`. Pinned versions: [execution baseline](../execution-baseline.md).
 
 ## How to run this lesson
 
-Open `spark-022` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile, save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`; Python stages as `main.py` with a main guard. Each program creates its own `local[2]` session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.
+Shared run steps and profile rules: [study guide](../STUDY-GUIDE.md#run-a-paired-lesson).
 
-The [Scala learner](../lessons/spark-022.scala) and [PySpark learner](../lessons/spark-022.py) run two complete demonstrations and retain six explicit task stubs. Use the [explained solutions](../solutions/spark-022_solutions.md) only after an attempt or an explicit worked comparison; the [Scala reference](../solutions/spark-022_solution.scala) and [PySpark reference](../solutions/spark-022_solution.py) contain complete assertions. A bounded collect is used only for the declared tiny fixture; do not copy it onto an unbounded or large production table.
+Learner pads: [Scala](../lessons/spark-022.scala) and [PySpark](../lessons/spark-022.py).
+
+Open the [explained solutions](../solutions/spark-022_solutions.md) after an attempt.
+
+The first worked example checks the input and prints `Input: 20000 rows, 1000 keys, 4 partitions, local[2]`. The second does arithmetic only: with four mappers and 1,000 keys, partial aggregation can leave at most four times 1,000, or 4,000, partial groups, far fewer than the 20,000 input rows. Its line `Local partial aggregation can reduce occurrences before redistribution; this is a model` says so without pretending that anything was measured.
 
 ## Learning objectives
 
 - Explain why a wide transformation moves data and distinguish partition count from row count.
-- State the input and output grain, schema, NULL policy and ordering before executing a transformation.
-- Compare each language implementation with independent literal expectations, not only with the other implementation.
+- Run the same grouped count with 2 and with 5 shuffle partitions, confirm that both return 1,000 rows of `(key, 20)`, and read `numPartitions` and `dataSize` from the exchange only after the action has finished.
+- Tag each run with a job group such as `ds60-spark-022-p2`, find a stage whose task count equals the reducer count, and label the per-mapper and per-reducer numbers from the work model as a model rather than a measurement.
 
 ## Vocabulary and concepts
 
@@ -32,7 +36,7 @@ The [Scala learner](../lessons/spark-022.scala) and [PySpark learner](../lessons
 
 - **Internal exchange metric:** A version-specific measurement from the actual executed Spark exchange operator; its units and API stability must be stated explicitly.
 
-The fixture generates 20000 rows across four input partitions and assigns key=id modulo 1000. Every key occurs 20 times. Grouping by key must bring contributions from different input partitions together, because each input partition contains occurrences of every key. The result has 1000 rows, not 20000 tasks or 1000 necessarily occupied input partitions. These are different quantities and the first task establishes them independently.
+The fixture generates 20000 rows across four input partitions and assigns key = id modulo 1000. Every key occurs 20 times. Grouping by key must bring contributions from different input partitions together, because each input partition contains occurrences of every key. The result has 1000 rows, not 20000 tasks or 1000 necessarily occupied input partitions. These are different quantities and the first task establishes them independently.
 
 Spark can compute partial counts within an input partition before shuffling. In this fixture each of four input partitions sees 1000 keys, so an ideal local count aggregation can reduce 5000 source rows to 1000 partial counts per mapper. At most 4000 such partial key counts need meet downstream for this particular arrangement. A high-cardinality aggregation with nearly every key unique would get much less reduction. The arithmetic model explains a possible mechanism; actual executed metrics remain separate observations.
 
@@ -52,7 +56,7 @@ A production comparison would keep logical inputs and outputs fixed, record vers
 
 ## Supplied local fixture
 
-The complete source creates the owned local session described above, then constructs this explicit fixture. The worked examples below run in that same main function; there is no hidden notebook state.
+`spark.range(0, 20000, 1, 4)` gives four input partitions of 5,000 rows each, and `key = id % 1000` gives every key exactly 20 occurrences spread across those partitions. The program saves the original `spark.sql.shuffle.partitions` value before the exercises change it and restores it at the end, so code that runs later in the same session does not inherit 2 or 5 by accident.
 
 ```scala
 import org.apache.spark.sql.functions._
@@ -118,7 +122,7 @@ Compute input row count, distinct key count and total id sum. Confirm the key fo
 
 Require 1..16 shuffle partitions, set that configuration in the owned session and return key, n from groupBy/count. Execute the two-partition case under the supplied unique job group.
 
-**Expected result/shape:** Sorted output [`(0, 20)`, ...,`(999, 20)`], with total counts 20000 and an Exchange in the executed plan.
+**Expected result/shape:** Sorted output [`(0, 20)`, ..., `(999, 20)`], with total counts 20000 and an Exchange in the executed plan.
 
 **Verify:** Assert every key/count pair and the plan Exchange marker. Reject an out-of-budget partition request.
 
@@ -128,7 +132,7 @@ Require 1..16 shuffle partitions, set that configuration in the owned session an
 
 Traverse the executed classic Spark plan, collecting each Exchange metric map. Use the version-pinned internal diagnostic API only for evidence after collection.
 
-**Expected result/shape:** One exchange map for this aggregate, with numPartitions 2 and dataSize>0. Record other available metrics without inventing units or missing values.
+**Expected result/shape:** One exchange map for this aggregate, with numPartitions 2 and dataSize > 0. Record other available metrics without inventing units or missing values.
 
 **Verify:** Assert one observed exchange, its partition metric and positive serialized data size; print the complete available map.
 
@@ -156,9 +160,9 @@ Run the same source aggregation with 5 shuffle partitions under its own job grou
 
 ### Exercise 6: Separate a workload model from measured evidence
 
-For the declared 20000-row,1000-key, four-mapper fixture, return source_rows_per_mapper, partial_group_upper and average_output_groups_per_reducer for a positive reducer count. Label them as arithmetic estimates and print version/configuration beside the actual metrics.
+For the declared 20000-row, 1000-key, four-mapper fixture, return source_rows_per_mapper, partial_group_upper and average_output_groups_per_reducer for a positive reducer count. Label them as arithmetic estimates and print version/configuration beside the actual metrics.
 
-**Expected result/shape:** For reducers 2:5000,4000,500. For reducers 5:5000,4000,200. These values do not assert actual balanced hash buckets or network bytes.
+**Expected result/shape:** For 2 reducers: (5000, 4000, 500). For 5 reducers: (5000, 4000, 200). These values do not assert actual balanced hash buckets or network bytes.
 
 **Verify:** Assert the two model tuples and print Spark 4.3.0, AQE false, `local[2]` with the distinct p2/p5 observations.
 
@@ -170,11 +174,14 @@ Do not equate 20000 input rows with 20000 tasks or 1000 output groups with 1000 
 
 ## Self-check
 
-Explain the contract of `sourceMetrics` / `source_metrics` without reading its solution. Then, from memory, state what Exercise 6 (Separate a workload model from measured evidence) must produce: For 2 reducers: `5000, 4000, 500`. For 5 reducers: `5000, 4000, 200`. These values do not assert actual balanced hash buckets or network bytes. Say which part of that result is evidence and what it still cannot show. Name the action in your trace that actually runs the plan.
+- Both runs return the same 1,000 rows. Name two numbers in the evidence that change between the 2-reducer and 5-reducer runs, and one number that must not change.
+- Why must exchange metrics be read after `collect` rather than right after `groupBy`? What would the metric map contain if you read it too early?
+- The stage check requires every task count to be nonnegative and at least one stage with exactly 2 tasks. Why not require the total number of stages to equal a fixed value?
+- The model for 5 reducers returns `(5000, 4000, 200)`. Explain each number, and say which of them could differ from what the reducers actually received.
 
 ## Next step
 
-Use the [course route](../README.md) to continue. Paired-language agreement is useful only when both outputs also satisfy the independent fixture contract. A successful local run is not evidence of cluster performance or production recovery.
+Go on to [spark-023: Broadcast joins, statistics and strategy evidence](spark-023.md). Here the shuffle was unavoidable; the next lesson shows a join that can skip it by copying a small table to every task, and asks what evidence justifies that choice.
 
 ## Primary sources and official APIs
 

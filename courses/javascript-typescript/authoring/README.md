@@ -69,6 +69,24 @@ have no Node runtime, so their practice is phrased as browser observations.
 Rendering never executes code and stops with a clear message if an exercise
 changed after its record was made.
 
+## Shared routine and lesson guidance
+
+The routine every lesson shares lives once in
+[the study guide](../STUDY-GUIDE.md): running Node, TypeScript and browser
+lessons, saved copies and the success receipt, predicting, using hints,
+diagnosing a failure, sources, the D3 browser preview and completion marker,
+D3 debugging checkpoints, accessibility review, statistical meaning and
+retrieval practice. Guides link to its anchors instead of repeating it, so
+rename an anchor only together with both renderers.
+
+`guidance.py` supplies the paragraphs that differ between lessons. `GUIDANCE`
+gives js-001 to js-042 a prediction trap, a characteristic pitfall, a retrieval
+question and a fresh transfer case; `D3_GUIDANCE` gives js-043 to js-066 a
+debugging path, an accessibility note, the statistical meaning, a retrieval
+task and a transfer case shown after comparison. Every numeric claim in these
+entries must match the lesson's own examples or a checked library behavior. Do
+not add generic text that could apply to any lesson; put it in the study guide.
+
 ## Shared maintenance gates
 
 Use [CONTRIBUTING](../../../CONTRIBUTING.md) for the prepared environment and

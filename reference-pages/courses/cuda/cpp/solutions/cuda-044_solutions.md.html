@@ -196,7 +196,6 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <article class="document"><h2 id="cuda-044-explanatory-solutions">cuda-044: explanatory solutions<a class="heading-anchor" href="#cuda-044-explanatory-solutions" aria-label="Link to this section">#</a></h2>
 <h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
 <p>A streaming compute service needs bounded ownership and backpressure before it needs more streams. Backpressure means producers stop or reject work when the system cannot safely accept another item. A slot moves through states such as free, filling, computing, copying and consumed. Reuse is allowed only after the final consumer completes. Cancellation stops admission and cleans up according to actual completion state; it does not magically cancel every submitted device instruction. This capstone is a bounded local pipeline, not a new network server inside the classroom worker.</p>
-<p>The separate <a href="../references/cuda-044_cpu.py.html">CPU reference</a> checks the chapter&#x27;s bounded model. It does not execute CUDA or establish GPU timing. Compare after attempting the worksheet or explicitly choosing to reveal solutions.</p>
 <h3 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h3>
 <p>With capacity two, submit chunks A and B. Chunk C waits until a slot becomes free. If A finishes compute but its output is still downloading, A&#x27;s slot is not yet free. A correct queue can process arbitrary many chunks with constant bounded storage by reusing only completed slots.</p>
 <p><strong>Approach:</strong> Admit chunks A and B into two slots, and hold C until a slot reaches the free state.</p>
@@ -233,11 +232,16 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Why it is correct:</strong> These properties make the service correct before any timing matters.</p>
 <p><strong>A plausible wrong approach:</strong> Accepting the capstone on throughput alone skips the failures users would notice.</p>
 <p><strong>How to verify:</strong> Run long and short chunk streams and assert each property.</p>
+<h3 id="self-check-answers">Self-check answers<a class="heading-anchor" href="#self-check-answers" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>When is a slot free in worked example 1?</strong> Only after its output download and final consumer complete, not when compute ends.</li>
+<li><strong>What does backpressure do?</strong> It makes producers wait or reject work when no slot can safely accept another item.</li>
+<li><strong>What must cancellation do before freeing device buffers?</strong> Stop admission and wait for in-flight work that still uses them to complete.</li>
+</ol>
 <h3 id="numerical-reference-and-its-limits">Numerical reference and its limits<a class="heading-anchor" href="#numerical-reference-and-its-limits" aria-label="Link to this section">#</a></h3>
-<p>The complete CPU model is <a href="../references/cuda-044_cpu.py.html">here</a>. Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It does not claim CUDA execution, concurrency safety or a performance measurement.</p>
+<p>The <a href="../references/cuda-044_cpu.py.html">CPU reference</a> reproduces worked example 1 and prints <code>{&#x27;reference_results&#x27;: [[2, 4], [6], [], [8, 10]], &#x27;slot_lifecycle&#x27;: [&#x27;free&#x27;, &#x27;filling&#x27;, &#x27;computing&#x27;, &#x27;copying&#x27;, &#x27;consumed&#x27;, &#x27;free&#x27;]}</code>.</p>
 <h3 id="transfer-review">Transfer review<a class="heading-anchor" href="#transfer-review" aria-label="Link to this section">#</a></h3>
-<p>Every input chunk has exactly one matching output, no early slot reuse, bounded memory, correct tails, cancellation diagnostics and a baseline comparison.</p>
-<p>A complete explanation must name its inputs, the unchanged mathematical contract, the changed boundary or resource condition, and the evidence still needed on actual hardware. Preserve a CPU baseline even after a GPU path becomes available.</p></article>
+<p>Every input chunk has exactly one matching output, no early slot reuse, bounded memory, correct tails, cancellation diagnostics and a baseline comparison.</p></article>
   </main>
 </body>
 </html>

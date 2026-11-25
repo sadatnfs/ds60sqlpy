@@ -196,7 +196,6 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <article class="document"><h2 id="cuda-061-explanatory-solutions">cuda-061: explanatory solutions<a class="heading-anchor" href="#cuda-061-explanatory-solutions" aria-label="Link to this section">#</a></h2>
 <h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
 <p>A maintainable CUDA project separates interfaces, host orchestration and device implementation without hiding ownership. Host .cpp files compile as ordinary C++; .cu files contain CUDA compilation units; headers declare shared interfaces. Calls across device translation units can require separable compilation and device linking. CMake targets should state languages, dependencies and architecture policy explicitly. A project directory cannot be pasted into a single-source coding pad. Keep external project commands in an owned scratch directory with clear source and build paths, and validate both a clean build and actual execution on supported hardware.</p>
-<p>The separate <a href="../references/cuda-061_cpu.py.html">CPU reference</a> checks the chapter&#x27;s bounded model. It does not execute CUDA or establish GPU timing. Compare after attempting the worksheet or explicitly choosing to reveal solutions.</p>
 <h3 id="exercise-1">Exercise 1<a class="heading-anchor" href="#exercise-1" aria-label="Link to this section">#</a></h3>
 <p>A three-file design has include/transform.hpp declaring a host launch function, src/transform.cu defining its kernel and launch wrapper, and src/main.cpp building fixtures and validating output. The caller sees an ordinary host interface, while the implementation owns its CUDA dependencies.</p>
 <p><strong>Approach:</strong> Declare the host launch function in include/transform.hpp, define kernel and launcher in src/transform.cu, and validate fixtures in src/main.cpp.</p>
@@ -233,11 +232,16 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Why it is correct:</strong> Each runs in different environments with different requirements.</p>
 <p><strong>A plausible wrong approach:</strong> Combining them means a missing GPU fails every test.</p>
 <p><strong>How to verify:</strong> Run on a CPU-only machine and confirm device tests report unavailable.</p>
+<h3 id="self-check-answers">Self-check answers<a class="heading-anchor" href="#self-check-answers" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>What are typical source and build directories for a clean project?</strong> The repository root holds sources, and a separate build directory such as build holds generated files.</li>
+<li><strong>Why should architecture targets not come from lesson metadata argv?</strong> They are a build policy, so they belong in the project&#x27;s CMake settings.</li>
+<li><strong>What does a successful CMake configure prove?</strong> That the toolchain was found and the project parsed, not that it compiles, links or runs correctly.</li>
+</ol>
 <h3 id="numerical-reference-and-its-limits">Numerical reference and its limits<a class="heading-anchor" href="#numerical-reference-and-its-limits" aria-label="Link to this section">#</a></h3>
-<p>The complete CPU model is <a href="../references/cuda-061_cpu.py.html">here</a>. Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It does not claim CUDA execution, concurrency safety or a performance measurement.</p>
+<p>The <a href="../references/cuda-061_cpu.py.html">CPU reference</a> reproduces worked example 1 and prints <code>{&#x27;include/transform.hpp&#x27;: &#x27;host interface&#x27;, &#x27;src/transform.cu&#x27;: &#x27;kernel and launcher&#x27;, &#x27;src/main.cpp&#x27;: &#x27;fixture and validation&#x27;, &#x27;build/&#x27;: &#x27;generated artifacts&#x27;}</code>.</p>
 <h3 id="transfer-review">Transfer review<a class="heading-anchor" href="#transfer-review" aria-label="Link to this section">#</a></h3>
-<p>Keep CPU reference/unit tests, CUDA compile checks and actual device numerical/sanitizer tests distinct with explicit unavailable reasons.</p>
-<p>A complete explanation must name its inputs, the unchanged mathematical contract, the changed boundary or resource condition, and the evidence still needed on actual hardware. Preserve a CPU baseline even after a GPU path becomes available.</p></article>
+<p>Keep CPU reference/unit tests, CUDA compile checks and actual device numerical/sanitizer tests distinct with explicit unavailable reasons.</p></article>
   </main>
 </body>
 </html>

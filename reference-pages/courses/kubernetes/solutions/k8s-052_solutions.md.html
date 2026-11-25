@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/kubernetes/solutions/k8s-052_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="k8s-052-explanatory-solutions">k8s-052: explanatory solutions<a class="heading-anchor" href="#k8s-052-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit reveal. These explanations describe the synthetic topology and stated API contracts. They are not fabricated runtime receipts.</p>
+<p>Attempt each exercise first, then compare (<a href="../STUDY-GUIDE.md.html#solutions-and-the-ai-tutor">study guide</a>).</p>
 <h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
 <p>A load balancer distributes traffic among eligible destinations. A Kubernetes Service of type LoadBalancer asks an integrated implementation to provision or configure an external entrypoint. The API object is a request; a controller and supporting infrastructure must exist to fulfill it.</p>
 <p>In a cloud, the controller may create provider resources, addresses, listeners and health checks. A local cluster may have no such integration and leave the external address pending. Local load-balancer implementations have their own routing and address-allocation requirements. The course does not install one or incur cloud resources automatically.</p>

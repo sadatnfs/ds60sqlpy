@@ -24,9 +24,9 @@ A with expression constructs a copy with selected changes. That copy is shallow 
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles your saved pad as `Program.cs` in its fixed .NET 10 project. C# 14 is the matching language generation. This route uses the prepared framework libraries; it does not accept arbitrary project files, NuGet packages, command arguments or interactive input. The explicit `Program.Main` entrypoint makes compilation and execution visible. `Check` throws on a false condition in every build configuration, unlike conditional debugging assertions.
+Both record types are one-line declarations placed after `Main`. Run task 1 before reading the output, because the two checks in Example A ask different questions: `==` compares the generated value equality, while `ReferenceEquals` asks whether two variables name the same object.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Compile contract, starter stop and success marker: [running a lesson](../STUDY-GUIDE.md#running-a-lesson).
 
 
 
@@ -34,7 +34,7 @@ Start with the answer-free learner artifact in your saved classroom pad. It deli
 
 `record Person(string Name, int Age)` declares positional properties and value-based equality. `record struct` changes assignment semantics. `with { Age = 31 }` creates a changed copy. `==` on records follows generated value equality.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+Each example ends with a trace; method: [tracing a program](../STUDY-GUIDE.md#tracing-a-program).
 
 ## Worked example / walkthrough
 
@@ -85,6 +85,8 @@ internal static class Program {
 
 **Observe:** Equal records can be distinct objects; with preserves the previous age.
 
+**Trace.** `first` and `second` are built from the same arguments, so the compiler-generated equality compares Name and Age and `==` returns true. They are still two allocations, so `ReferenceEquals` returns false. `first with { Age = 31 }` copies every property into a new record and then sets Age, so `first.Age` stays 30 while `older.Age` is 31.
+
 ### Example B: Notice nested shared state
 
 The record copy duplicates its field values, including the list reference. Generated copying is not a deep-clone promise.
@@ -132,6 +134,8 @@ internal static class Program {
 
 **Observe:** Both records see the appended list item.
 
+**Trace.** `first` holds a `Basket` whose Items property refers to a list containing 1. `first with { }` copies the property value, which is that list reference, into a new record. `second.Items.Add(2)` mutates the one shared list, so `first.Items.Count` becomes 2 and `ReferenceEquals(first.Items, second.Items)` is true. The `with` expression made a shallow copy.
+
 ## Exercises
 
 1. **Predict and explain.** Predict record equality and reference equality separately.
@@ -146,13 +150,15 @@ internal static class Program {
 
 6. **Transfer and justify.** Choose identity-based or data-based equality for an order and explain how updates affect collection membership.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Log each task in the [evidence table](../STUDY-GUIDE.md#recording-exercise-evidence) before opening the explanation.
 
 ## Common pitfalls and diagnosis
 
 Record equality does not recursively compare arbitrary collection contents. A positional record can still contain mutable members. Avoid putting fields that change after insertion into a hash key contract.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+For task 5, two baskets built from separate lists that each contain 1 compare unequal: the generated equality compares the Items references, not the list contents. For task 3, a `readonly record struct Coord(int X, int Y)` with value 1, 2 and a copy `with { X = 5 }` leaves the original at 1, 2, and its properties cannot be assigned afterward.
+
+Repair routine: [building a regression case](../STUDY-GUIDE.md#building-a-regression-case).
 
 ## Progressive hints
 
@@ -162,11 +168,15 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 ## Self-check and next step
 
-Explain Record, With expression, Shallow copy without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+Predict `==` and `ReferenceEquals` for two `Person` records holding the same name and age. Explain why `with` cannot isolate a nested list. For task 6, decide whether an order with a changing status should use identity or data equality while it sits in a `HashSet`, and justify the choice.
+
+Then follow the general [self-check routine](../STUDY-GUIDE.md#self-check-routine) and save your pad.
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://learn.microsoft.com/en-us/dotnet/csharp/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+[Documentation](https://learn.microsoft.com/en-us/dotnet/csharp/): The language reference article on records describes positional syntax, value equality, `with` expressions and record structs.
+
+Provenance and limits: [sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

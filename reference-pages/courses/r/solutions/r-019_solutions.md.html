@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/r/solutions/r-019_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="r-019-reference-reasoning">r-019: reference reasoning<a class="heading-anchor" href="#r-019-reference-reasoning" aria-label="Link to this section">#</a></h2>
-<p>Use the <a href="r-019_reference.R.html">complete reference</a> with the guide&#x27;s declared inputs and runtime. Every worked example is also a standalone script.</p>
+<p>Run the <a href="r-019_reference.R.html">complete reference</a> under the <a href="../STUDY-GUIDE.md.html#run-a-chapter">run rules</a>.</p>
 <h3 id="why-the-implementation-has-this-shape">Why the implementation has this shape<a class="heading-anchor" href="#why-the-implementation-has-this-shape" aria-label="Link to this section">#</a></h3>
 <p>The ID remains character, and the empty missing marker is a deliberate part of this synthetic CSV contract.</p>
 <p>The JSON contract contains a scalar ID and an array of values. The RDS round trip additionally retains factor levels, including the unused level.</p>
@@ -242,7 +242,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Tempting mistake:</strong> Copying a path printed by an earlier run into a later script. That file is gone, so the read fails, or it finds an unrelated file if paths happen to be reused.</p>
 <p><strong>Verify:</strong> <code>file.exists(path)</code> returns FALSE after <code>unlink(path)</code>, and <code>tempdir()</code> shows a different directory in a new session.</p>
 <h3 id="what-the-checks-establish">What the checks establish<a class="heading-anchor" href="#what-the-checks-establish" aria-label="Link to this section">#</a></h3>
-<p>The reference makes 3 <code>stopifnot()</code> checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.</p></article>
+<p>The assertions confirm that the CSV round trip with declared classes is identical to the original, including names and the NA amount, that <code>readRDS()</code> returns exactly the saved object before <code>unlink()</code> removes it, and that a JSON array read back as a list keeps 2 as its first element. They do not prove that other programs will read these files the same way.</p>
+<p>The reference makes 3 <code>stopifnot()</code> checks; see <a href="../STUDY-GUIDE.md.html#what-a-passing-run-proves">what a passing run proves</a>.</p></article>
   </main>
 </body>
 </html>

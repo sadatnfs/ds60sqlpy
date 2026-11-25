@@ -32,11 +32,9 @@ The course does not push images. For an optional local experiment, build one sel
 
 ## How to use this lesson
 
-The classroom displays this guide and saves your worksheet, `courses/docker/lessons/docker-017.md`. Its Run button does not control your Docker engine. Docker engine access is powerful host access, so the classroom deliberately receives no engine socket. Work through the supplied examples without starting anything, then use the optional host lab only in your own disposable project. Reading a command, parsing YAML and actually running the project are different forms of evidence.
+The classroom saves `courses/docker/lessons/docker-017.md` and holds no engine socket ([host-lab setup](../STUDY-GUIDE.md#host-lab-setup)).
 
-Use Bash in Linux, macOS Terminal, or Ubuntu under WSL 2 on Windows. The supported engine runs Linux containers. The maintained fixture is `courses/docker/fixtures/compose-lab/`; its README explains copying it into a new ignored learner directory, checking the engine, building locally with visible logs, and using the fixed project name `ds60-docker-study`. The fixture uses port 18080 on host loopback. Stop if that project name or port belongs to unrelated work; choose a new project name consistently in your own copy. Never paste a command against a remote Docker context simply because it is currently selected.
-
-For Dockerfile examples, create a file named `Dockerfile` in a scratch project. YAML snippets describe a fragment unless explicitly called a complete file. Text transcripts are synthetic illustrations, not claims about your machine. Do not substitute a real password, token or private registry into a checked-in example. **How to use the lessons** in the [subject README](../README.md) collects these rules in one place.
+**Host lab.** Record three platform facts before building anything: `uname -m` on the host, `docker info --format '{{.Architecture}}'` for the engine, and `docker image inspect ds60-docker-study:local --format '{{.Os}}/{{.Architecture}}'` for the fixture image. On most machines all three agree. If you have emulation available, build worked example 1 for the other architecture under its own tag and run `docker run --rm --pull never --platform linux/arm64 ds60-docker-study:arm64 python -c "import platform; print(platform.machine())"`, adjusting the platform to the one your host is not. The program reports the foreign machine type while the host stays unchanged. Without emulation the same run fails with `exec format error`. Remove the extra tag afterwards with `docker image rm`.
 
 ## Worked example / walkthrough
 
@@ -65,7 +63,7 @@ image index
 
 ## Six progressive exercises
 
-For each exercise, name the object involved and the phase of its lifetime before changing anything, then vary only the condition the task names. Exercises that ask you to predict, explain, compare or diagnose keep their answers in the solutions file; the others show the evidence to look for.
+Answer-type prompts keep their answers in the solutions file ([exercise rules](../STUDY-GUIDE.md#exercise-rules)).
 
 ### Exercise 1: Predict whether Linux implies amd64.
 
@@ -99,13 +97,19 @@ For each exercise, name the object involved and the phase of its lifetime before
 
 Assuming Linux means amd64. Treating an emulated run as proof of native performance. Loading a multi-platform index into an image store that holds one platform.
 
-Exercise 4 is this chapter's boundary case: Diagnose exec format error. Compare the image platform with the host architecture and check the executable's format before reading any application code. Preserve the original failure and the exact changed field before retrying. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
+Exercise 4 is this chapter's boundary case: Diagnose exec format error. Compare the image platform with the host architecture and check the executable's format before reading any application code.
+
+A practical trap is reusing the native tag for a foreign build. If `docker buildx build --platform linux/arm64 --load -t ds60-docker-study:local .` runs on an amd64 host, the arm64 image replaces the native one under the same name. The next `docker compose up` then starts the foreign image under emulation, which may work but runs slowly, or fails with an exec format error when no emulator is installed. The cause looks like an application fault because nothing in the Compose file changed. Give each platform build its own tag, as worked example 1 does, and inspect the platform of the image a service actually uses.
+
+Never trade a safety control for a passing example ([safety rules](../STUDY-GUIDE.md#safety-rules)).
 
 ## Retrieval, transfer and next steps
 
-Close the explanations first. Name the image index entry the engine selects on an arm64 host and the error a mismatched binary produces. Then reconstruct worked example 2 (Read the index model) with one different value, predict what changes, and name which of CPU architecture, image index, --platform, emulation and cross-compilation the change touches.
+**Retrieval.** Name the image index entry the engine selects on an arm64 host and the error a mismatched binary produces.
 
-When a host session ends, run `docker compose -p ds60-docker-study down` from your fixture copy. It removes the project's containers and network but keeps named volumes; deleting a volume is a separate, deliberate reset described in the fixture README.
+**Transfer case.** CI on amd64 publishes an image only for `linux/amd64`, and it includes a Python package with native wheels. A teammate on an arm64 laptop pulls it. Describe what happens with and without emulation, and what the publishing team should change.
+
+Then run the [retrieval loop](../STUDY-GUIDE.md#retrieval-and-cleanup) and end any host session with its cleanup.
 
 ## Primary references
 

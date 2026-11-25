@@ -197,18 +197,15 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">export</span> <span class="syntax-punctuation">{</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-comment">// Exercise 1: Maintain balance through methods: change one input</span></span>
-<span class="source-line"><span class="syntax-comment">// Copy Example A into a scratch `main.mts` and change `const wallet = new Wallet(100);` to</span></span>
-<span class="source-line"><span class="syntax-comment">// `const wallet = new Wallet(101);`. Before running it, predict which check fails and which</span></span>
-<span class="source-line"><span class="syntax-comment">// value it now sees; then run it and restore the original line.</span></span>
-<span class="source-line"><span class="syntax-comment">// Expected: The changed run fails with an `AssertionError` at `assert.equal(wallet.cents,</span></span>
+<span class="source-line"><span class="syntax-comment">// In a scratch copy of Example A, change `const wallet = new Wallet(100);` to `const wallet</span></span>
+<span class="source-line"><span class="syntax-comment">// = new Wallet(101);`. Which check fails, and what value does it see?</span></span>
+<span class="source-line"><span class="syntax-comment">// Expected: The edited run fails with an `AssertionError` at `assert.equal(wallet.cents,</span></span>
 <span class="source-line"><span class="syntax-comment">// 120)`. Restoring `const wallet = new Wallet(100);` brings back: balance 120; no enumerable</span></span>
 <span class="source-line"><span class="syntax-comment">// balance field.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">// Exercise 2: Inject a deterministic clock: debug a regression</span></span>
-<span class="source-line"><span class="syntax-comment">// A regression changed one token in Example B, so one line now reads `const service = new</span></span>
-<span class="source-line"><span class="syntax-comment">// ReceiptService({ now: () =&gt; new Date(&#x27;2027-01-01T00:00:00.000Z&#x27;) });`. Run Example B with</span></span>
-<span class="source-line"><span class="syntax-comment">// that line, use the failing check to locate the defect and repair it without changing the</span></span>
-<span class="source-line"><span class="syntax-comment">// check.</span></span>
+<span class="source-line"><span class="syntax-comment">// A regression made one Example B line read `const service = new ReceiptService({ now: () =&gt;</span></span>
+<span class="source-line"><span class="syntax-comment">// new Date(&#x27;2027-01-01T00:00:00.000Z&#x27;) });`. Locate and repair it without editing the check.</span></span>
 <span class="source-line"><span class="syntax-comment">// Expected: Before the repair the run fails with an `AssertionError` at</span></span>
 <span class="source-line"><span class="syntax-comment">// `assert.deepEqual(service.create(&#x27;A&#x27;), { id: &#x27;A&#x27;, createdAt: &#x27;2026-01-01T00:00:00.000Z&#x27;</span></span>
 <span class="source-line"><span class="syntax-comment">// })`. Restoring `const service = new ReceiptService({ now: () =&gt; new</span></span>

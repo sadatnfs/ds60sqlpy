@@ -1,6 +1,6 @@
 # docker-031: explanatory solutions
 
-Compare after your own attempt or an explicit reveal. These explain the supplied teaching fixtures; they are not engine results. The mechanism is explained in `courses/docker/guides/docker-031.md`.
+These answers explain teaching fixtures, not engine results; the mechanism is in [the guide](../guides/docker-031.md).
 
 ## Exercise 1: Predict what a unit test cannot prove about packaging.
 
@@ -88,4 +88,4 @@ Compare after your own attempt or an explicit reveal. These explain the supplied
 
 ## Check your transfer
 
-A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.
+Only the source hashes. The receipt's image identity names the amd64 image, while arm64 nodes resolve the index to a different platform manifest with its own digest, which no recorded check ran against. Either run the same named checks on an arm64 runner and record that digest, or state in the receipt that it covers linux/amd64 only. `docker buildx imagetools inspect` on the published reference lists each platform's digest; if it shows only linux/amd64, the arm64 nodes cannot pull a native image at all.

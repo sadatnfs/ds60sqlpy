@@ -3,19 +3,17 @@ public class Main {
 
   public static void main(String[] args) throws Exception {
     // Exercise 1: Filter and sum: change one input
-    // Copy Example A into a scratch `Main.java` and change `int total = List.of(1, 2, 3, 4)` to
-    // `int total = List.of(2, 2, 3, 4)`. Before running it with `java -ea Main`, predict which
-    // assertion fails and which value it now sees; then run it and restore the original line.
-    // Expected: The changed run fails with an `AssertionError` from the assertion on `total ==
-    // 20`. Restoring the original line brings back the worked observation: 20.
+    // Change `int total = List.of(1, 2, 3, 4)` to `int total = List.of(2, 2, 3, 4)` in Example A
+    // and predict which assertion fails and why.
+    // Expected: The edited run fails with an `AssertionError` from the assertion on `total ==
+    // 20`.
 
     // Exercise 2: Observe laziness with an explicit terminal: debug a regression
-    // A regression changed one token in the code that Example B adds after Example A, so one
-    // line now reads `return value + 2;`. Run Example B with that line, use the failing
-    // assertion to locate the defect and repair it without changing the assertion.
-    // Expected: Before the repair the run fails with an `AssertionError` from the assertion on
-    // `pipeline.toList().equals(List.of(2, 4, 6)) && calls.get() == 3`; after it the line reads
-    // `return value * 2;` again and counter 0 before terminal and 3 after.
+    // A regression in Example B's new code makes one line read `return value + 2;`. Repair it
+    // using the failing assertion.
+    // Expected: The unrepaired run fails with an `AssertionError` from the assertion on
+    // `pipeline.toList().equals(List.of(2, 4, 6)) && calls.get() == 3`; the repaired line reads
+    // `return value * 2;`.
 
     // Exercise 3: Group with a collector
     // Count red, blue, red with groupingBy and counting.

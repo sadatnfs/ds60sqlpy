@@ -1,6 +1,6 @@
 # web-050: explanatory solutions
 
-Open this after your own attempt. Each answer explains the lesson's synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in `courses/web-development/guides/web-050.md`.
+Attempt each exercise before reading; the mechanism is in `courses/web-development/guides/web-050.md` ([using these answers](../STUDY-GUIDE.md#solutions)).
 
 ## Exercise 1: Explain hashing versus reversible encryption for passwords.
 
@@ -76,4 +76,6 @@ Open this after your own attempt. Each answer explains the lesson's synthetic fi
 
 ## Reference comparison
 
-Open `courses/web-development/solutions/web-050_solution.php` only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; server lifecycle, persistence, concurrency and security need their own integration evidence.
+The reference requires an Argon2id hash prefix, accepts the correct phrase, rejects a different one and confirms current parameters need no rehash, then shows a legacy bcrypt hash verifying but needing an upgrade. It does not test login rate limits, so list them separately.
+
+Open `courses/web-development/solutions/web-050_solution.php` after saving your attempt ([comparing with the reference](../STUDY-GUIDE.md#references)).

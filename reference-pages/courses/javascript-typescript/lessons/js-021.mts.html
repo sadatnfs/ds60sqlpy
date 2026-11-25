@@ -197,17 +197,15 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">export</span> <span class="syntax-punctuation">{</span><span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span></span>
 <span class="source-line"><span class="syntax-comment">// Exercise 1: Use structural compatibility: change one input</span></span>
-<span class="source-line"><span class="syntax-comment">// Copy Example A into a scratch `main.mts` and change `const wider = { id: &#x27;A&#x27;, count: 2 };`</span></span>
-<span class="source-line"><span class="syntax-comment">// to `const wider = { id: &#x27;A&#x27;, count: 3 };`. Before running it, predict which check fails</span></span>
-<span class="source-line"><span class="syntax-comment">// and which value it now sees; then run it and restore the original line.</span></span>
-<span class="source-line"><span class="syntax-comment">// Expected: The changed run fails with an `AssertionError` at `assert.equal(wider.count,</span></span>
-<span class="source-line"><span class="syntax-comment">// 2)`. Restoring `const wider = { id: &#x27;A&#x27;, count: 2 };` brings back: label A; original count</span></span>
+<span class="source-line"><span class="syntax-comment">// In a scratch copy of Example A, change `const wider = { id: &#x27;A&#x27;, count: 2 };` to `const</span></span>
+<span class="source-line"><span class="syntax-comment">// wider = { id: &#x27;A&#x27;, count: 3 };`. Which check fails, and what value does it see?</span></span>
+<span class="source-line"><span class="syntax-comment">// Expected: The edited run fails with an `AssertionError` at `assert.equal(wider.count, 2)`.</span></span>
+<span class="source-line"><span class="syntax-comment">// Restoring `const wider = { id: &#x27;A&#x27;, count: 2 };` brings back: label A; original count</span></span>
 <span class="source-line"><span class="syntax-comment">// remains 2.</span></span>
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-comment">// Exercise 2: Observe mutation through an alias: debug a regression</span></span>
-<span class="source-line"><span class="syntax-comment">// A regression changed one token in Example B, so one line now reads `mutable.count = 5;`.</span></span>
-<span class="source-line"><span class="syntax-comment">// Run Example B with that line, use the failing check to locate the defect and repair it</span></span>
-<span class="source-line"><span class="syntax-comment">// without changing the check.</span></span>
+<span class="source-line"><span class="syntax-comment">// A regression made one Example B line read `mutable.count = 5;`. Locate and repair it</span></span>
+<span class="source-line"><span class="syntax-comment">// without editing the check.</span></span>
 <span class="source-line"><span class="syntax-comment">// Expected: Before the repair the run fails with an `AssertionError` at</span></span>
 <span class="source-line"><span class="syntax-comment">// `assert.equal(view.count, 4)`. Restoring `mutable.count = 4;` brings back: readonly view</span></span>
 <span class="source-line"><span class="syntax-comment">// observes count changing from 1 to 4.</span></span>

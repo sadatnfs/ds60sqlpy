@@ -1,10 +1,17 @@
 # cuda-119: GPU resources, executor ownership and task concurrency
 
-**Route:** CUDA Python and machine learning / GPU Spark specialization. **Stage:** advanced. **Prerequisites:** `cuda-114`, `cuda-115`. Allow several sessions when the hardware experiment is new; the chapter is not a deadline.
+**Route:** CUDA Python and machine learning / GPU Spark specialization. **Stage:** advanced. **Prerequisites:** `cuda-114`, `cuda-115`.
 
-## What you will be able to explain
+Pacing, evidence labels and platform rules: [CUDA study guide](../../STUDY-GUIDE.md).
 
-By the end, you can **compute resource-share slots**, **verify device addresses**, and **describe oversubscription failure** with evidence. Start with the two worked cases, then use the editable CPU model to make the quantities concrete.
+## Learning objectives
+
+- Compute resource-share slots.
+- Compare CPU and GPU limits.
+- Explain VRAM nonpartitioning.
+- Verify device addresses.
+- Design a concurrency experiment.
+- Describe oversubscription failure.
 
 ## Mechanism and vocabulary
 
@@ -40,9 +47,13 @@ With an executor assigned one GPU and tasks requesting 0.25 GPU, resource accoun
 
 A plugin concurrency limit of two can restrict active GPU work even when Spark has four runnable task slots. The two controls answer different scheduling questions.
 
-## Portable executable model
+## How to run the CPU model
 
-The **CPU reference model** variant runs this bounded worked example using `python-core`. It uses only the Python standard library, small synthetic values and no network. Its purpose is to expose the arithmetic or contract behind the chapter. The separate reference includes assertions for the stated observations.
+Edit the copy; the [reference](../references/cuda-119_cpu.py) adds assertions.
+
+```sh
+python courses/cuda/spark/lessons/cuda-119_cpu.py
+```
 
 ```python
 from fractions import Fraction
@@ -68,81 +79,62 @@ print("CPU resource model:", slots, "scheduled shares;", active, "GPU-active bou
 | `plugin_limit` | `2` |
 | `active` | `2` |
 
-Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.
-
 ## Practice and transfer
+
+Record each attempt in the [worksheet](../lessons/cuda-119.md) before opening hints.
 
 ### Exercise 1: Compute resource-share slots
 
 **Trap to avoid:** Reading 0.25 as a quarter of the device's memory reserved for each task treats an admission count as a hardware partition, which Spark does not create.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 2: Compare CPU and GPU limits
 
 **Trap to avoid:** Tuning only the GPU amount and expecting four concurrent GPU tasks ignores the plugin limit, and the extra tasks hold CPU slots while waiting.
-
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 3: Explain VRAM nonpartitioning
 
 **Trap to avoid:** Planning each task to have a quarter of device memory leads to out-of-memory errors when tasks use more than that share.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 4: Verify device addresses
 
 **Trap to avoid:** Assuming the default device assignment is correct on multi-GPU hosts risks oversubscribing one device.
-
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 5: Design a concurrency experiment
 
 **Trap to avoid:** Changing concurrency and partition count together makes it impossible to tell which caused the change.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 6: Describe oversubscription failure
 
 **Trap to avoid:** Concluding from a successful small test that a concurrency setting is safe misses failures that appear with real data volumes.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ## Progressive hints
 
-Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.
+Hint *k* belongs to exercise *k*; open one at a time.
 
-1. Start from worked example 1 and mark the quantities needed for the task "Compute resource-share slots".
-2. Change one assumption in worked example 2 while preserving the declared contract: compare CPU and GPU limits.
-3. Trace the CPU program's variables before adding hardware behavior: explain VRAM nonpartitioning.
-4. Draw producers, consumers and the exact operation boundary for the task "Verify device addresses".
-5. Separate what the small fixture establishes from what the real runtime must show: design a concurrency experiment.
-6. Write a counterexample to an overbroad claim before you describe oversubscription failure.
+1. Divide one assigned GPU by the per-task resource amount.
+2. Find every limit that applies, such as CPU task slots, resource shares and plugin admission, and take the smallest.
+3. Ask whether the scheduler reserves any memory on the device when it admits a task with a fractional amount.
+4. Inspect which GPU addresses discovery reported and which ones each executor was assigned.
+5. Change one concurrency setting and keep the query, partitions and data fixed.
+6. Describe what happens to live batches and memory when too many tasks use the GPU at once.
 
-## Common mistakes and self-review
+## Common mistakes and self-check
 
-Confusing a correct tiny example with a general implementation is the central review risk. For this chapter, challenge the assumption in worked example 2, then ask whether your change preserves the mechanism described above. If you change dtype, layout, ordering, batch size or backend, update the acceptance contract rather than silently reusing the old observation. Explain an unexpected result before trying random configuration changes.
+A common mistake is reading a fractional GPU request such as 0.25 as a quarter of the device's memory. It is only a scheduling share; four admitted tasks still compete for the same VRAM. Another is assuming Spark's runnable task slots decide GPU concurrency, when the plugin's admission limit can be lower. Fix both by recording every resource control, verifying assigned device addresses and changing one concurrency setting at a time while observing throughput and memory.
 
-Keep a small evidence table with columns **claim**, **input**, **expected observation**, **actual observation** and **limit**. For the first claim use `Compute resource-share slots`. For the final claim use `Describe oversubscription failure`. An unperformed GPU or cluster experiment remains pending even when the CPU model is correct.
+**Evidence limit:** The reference computes four scheduling shares with a two-task admission bound. It does not run discovery or tasks, so actual assignment, memory pressure and throughput require a prepared GPU Spark cluster.
 
-## Platform and evidence contract
+1. Which controls limit GPU task concurrency?
+2. Why can raising concurrency fail without any syntax error?
+3. What should resource discovery evidence show?
 
-The reading worksheet and CPU reference model work through the ordinary Linux Docker classroom on macOS, Linux and Windows using WSL 2. They do not require an NVIDIA GPU. Their results are labeled CPU models or semantic oracles, not simulated hardware performance.
-
-Real CUDA work needs supported NVIDIA hardware, a compatible host driver and an explicitly prepared GPU runtime. An Apple GPU does not execute CUDA kernels. PyTorch MPS on a supported native Mac, ROCm on supported AMD hardware, or other vendor backends can provide separate accelerator learning routes; they need their own package and operation qualification and are not CUDA evidence. The ordinary Linux Docker classroom does not expose native Mac MPS automatically.
-
-Do not download packages, models or data by opening this lesson. Do not attach an engine socket, ambient cluster credentials or an arbitrary remote endpoint. A CPU pass, imported package, successful compilation, real GPU result and measured performance are distinct observations. Record the actual backend, data shape/dtype, source revision, versions and pending checks. A saved completion marker records learning progress, not hardware certification.
-
-GPU Spark is a separate owned external workflow. The ordinary `spark-local-scala` and `spark-local-python` profiles are CPU Spark. Keep the GPU plugin disabled or absent for a CPU-only baseline. Per-operator CPU fallback inside a working GPU plugin environment is a different condition from having no compatible GPU. Never mount a host Docker socket or ambient kubeconfig into an ordinary lesson worker.
+Answers: [self-check answers](../solutions/cuda-119_solutions.md#self-check-answers).
 
 ## Primary references
 
-- [cuDF Spark plugin release and compatibility matrix](https://nvidia.github.io/cudf-spark/docs/download.html)
-- [Supported Spark operators and expression types](https://nvidia.github.io/cudf-spark/docs/supported_ops.html)
 - [GPU Spark tuning guide](https://docs.nvidia.com/cudf-spark/latest/tuning-guide.html)
-- [Apache Spark SQL performance tuning](https://spark.apache.org/docs/latest/sql-performance-tuning.html)
 
-Use the version-matched documentation of your prepared environment. These references describe interfaces and supported boundaries; the chapter's synthetic examples and CPU models are original teaching material.
+Full lists: [documentation and sources](../../STUDY-GUIDE.md#documentation-and-sources).
 
 ## Ask an AI tutor about this lesson
 

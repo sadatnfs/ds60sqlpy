@@ -1,6 +1,6 @@
 # r-041: reference reasoning
 
-Use the [complete reference](r-041_reference.R) with the guide's declared inputs and runtime. Every worked example is also a standalone script.
+Run the [complete reference](r-041_reference.R) under the [run rules](../STUDY-GUIDE.md#run-a-chapter).
 
 ## Why the implementation has this shape
 
@@ -110,4 +110,6 @@ Mean becomes 21.6 and median 2. The difference describes sensitivity to the tail
 
 ## What the checks establish
 
-The reference makes 8 `stopifnot()` checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.
+The assertions confirm summaries that keep rows, observed and missing counts beside the mean, group summaries where A has one observed value with mean 1 and B has two with mean 5, a pooled mean of 11/3 that differs from the 11/5 produced by filling missing values with zero, an empty summary with an NA mean, and a skewed tail whose mean of 21.6 sits far from its median of 2. They do not decide whether missingness is random.
+
+The reference makes 8 `stopifnot()` checks; see [what a passing run proves](../STUDY-GUIDE.md#what-a-passing-run-proves).

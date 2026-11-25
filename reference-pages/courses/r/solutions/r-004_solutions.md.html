@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/r/solutions/r-004_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="r-004-reference-reasoning">r-004: reference reasoning<a class="heading-anchor" href="#r-004-reference-reasoning" aria-label="Link to this section">#</a></h2>
-<p>Use the <a href="r-004_reference.R.html">complete reference</a> with the guide&#x27;s declared inputs and runtime. Every worked example is also a standalone script.</p>
+<p>Run the <a href="r-004_reference.R.html">complete reference</a> under the <a href="../STUDY-GUIDE.md.html#run-a-chapter">run rules</a>.</p>
 <h3 id="why-the-implementation-has-this-shape">Why the implementation has this shape<a class="heading-anchor" href="#why-the-implementation-has-this-shape" aria-label="Link to this section">#</a></h3>
 <p>The mask explicitly excludes missing amounts and separately tests the threshold. Unknown values are counted, not interpreted as measured failures.</p>
 <p>The first condition prevents an invalid extraction from an empty vector. The truth-table checks explain when uncertainty does and does not affect the combined answer.</p>
@@ -242,7 +242,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Tempting mistake:</strong> Quoting the <code>na.rm = TRUE</code> result as &quot;every amount is at least 5&quot;. The third amount was never measured, so that sentence claims more than the data shows.</p>
 <p><strong>Verify:</strong> The reference checks <code>is.na(all(c(TRUE, NA)))</code> and <code>isTRUE(all(c(TRUE, NA), na.rm = TRUE))</code>; <code>sum(is.na(amount))</code> reports the 1 unknown to cite alongside.</p>
 <h3 id="what-the-checks-establish">What the checks establish<a class="heading-anchor" href="#what-the-checks-establish" aria-label="Link to this section">#</a></h3>
-<p>The reference makes 6 <code>stopifnot()</code> checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.</p></article>
+<p>The assertions pin three-valued logic directly: <code>TRUE &amp; NA</code> is NA while <code>FALSE &amp; NA</code> is FALSE, a mask built with <code>!is.na()</code> keeps only the known 20 at or above 15, the inclusive mask selects 12 and 20, <code>&amp;&amp;</code> short-circuits safely on an empty vector, and <code>all()</code> returns NA unless <code>na.rm = TRUE</code>. They do not show that dropping unknown amounts is the right policy for a real report.</p>
+<p>The reference makes 6 <code>stopifnot()</code> checks; see <a href="../STUDY-GUIDE.md.html#what-a-passing-run-proves">what a passing run proves</a>.</p></article>
   </main>
 </body>
 </html>

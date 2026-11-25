@@ -1,19 +1,6 @@
 # tf-004: worked solutions
 
-Open this reference after an attempt or an explicit reveal request. Preserve
-your own version beside it. The [learner guide](../guides/tf-004.md) contains
-the public fixture and its independent Expected/Verify contracts. These six
-sections correspond to the same six learner actions, rather than six answer
-steps for one task. A different implementation is acceptable when it preserves
-the stated input policy, observations and evidence boundary.
-
-The [executable reference](tf-004_solution.py) exposes a `verify()` helper for
-authors and later comparison. It uses only local literals and the declared
-Python/NumPy environment. An assertion failure should retain its actual input
-and smallest failing observation. A passing reference is evidence about these
-fixed cases; use a changed fixture and a closed-reference explanation before
-recommending progression. The reading worksheet remains a reading exercise,
-regardless of the optional arithmetic checker.
+Compare after an attempt with the [learner guide](../guides/tf-004.md) ([comparison steps](../STUDY-GUIDE.md#after-the-solutions)).
 
 ## Exercise 1: Trace squared units
 
@@ -65,9 +52,7 @@ The four observed squared residuals are [4,0,0,0], whose mean is 1. The two grou
 
 ## Inspectable reference functions
 
-The core functions below make the input and reduction policies explicit. The
-separate executable file adds all six exercise checks. Do not replace a failed
-assertion with a flattering default value or remove the invalid-input case.
+`reduce_squared` selects masked records before averaging, so the denominator is the accepted count; it refuses empty input, an all-false or nonboolean mask and unknown reductions. The [executable reference](tf-004_solution.py) adds all six exercise checks.
 
 ```python
 from __future__ import annotations
@@ -95,9 +80,4 @@ def reduce_squared(residuals, reduction="mean", mask=None):
 
 Without the helper, derive the mean squared loss of residuals [3,0] and its value after duplicating both records. Then explain how an all-false mask differs from two accepted zero residuals.
 
-After revealing this file, choose another fixture before treating the answer
-as independent retrieval evidence. Explain why the rejected case is invalid,
-not merely which exception class appeared. Alternative notation, array layout
-or a direct calculation is welcome when its domain meaning and denominator
-remain explicit. Keep implementation correctness separate from broad claims
-about unseen model quality, reliability or safety.
+Then follow the [after-solutions routine](../STUDY-GUIDE.md#after-the-solutions).

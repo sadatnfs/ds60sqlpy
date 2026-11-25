@@ -1,6 +1,8 @@
 # swift-018: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [swift-018_solution.swift](swift-018_solution.swift). It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.
+Reference program: [swift-018_solution.swift](swift-018_solution.swift), covering both examples and the executed answers.
+
+Attempt the tasks first; see [comparing with the explanation](../STUDY-GUIDE.md#comparing-with-the-explanation).
 
 ## Why the two examples differ
 
@@ -109,7 +111,7 @@ left >= right is true on a tie, so larger documents and returns its first argume
 
 Choose generic or existential abstraction for an API that must preserve concrete result type.
 
-No single reference answer exists: several designs can satisfy this transfer task. Build yours from the task 3 answer above (Create a generic immutable triple with a rotation operation) and the mechanism described below, and state one limitation of your choice.
+No single answer exists; extend task 3 using the [open transfer routine](../STUDY-GUIDE.md#open-transfer-tasks).
 
 ## Solution reasoning
 
@@ -133,4 +135,4 @@ Any discards useful type information. Excessively broad constraints make reuse h
 
 ## Review before continuing
 
-Run the reference and confirm that it prints `swift-018: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.
+Run the reference and confirm it prints `swift-018: passed`, then rerun the guide's counterexample.

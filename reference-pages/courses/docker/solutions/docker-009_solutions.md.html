@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/docker/solutions/docker-009_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="docker-009-explanatory-solutions">docker-009: explanatory solutions<a class="heading-anchor" href="#docker-009-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit reveal. These explain the supplied teaching fixtures; they are not engine results. The mechanism is explained in <code>courses/docker/guides/docker-009.md</code>.</p>
+<p>These answers explain teaching fixtures, not engine results; the mechanism is in <a href="../guides/docker-009.md.html">the guide</a>.</p>
 <h3 id="exercise-1-label-every-component-of-the-mapping">Exercise 1: Label every component of the mapping.<a class="heading-anchor" href="#exercise-1-label-every-component-of-the-mapping" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected evidence:</strong> Host loopback, host port 18080 and container port 8080.</p>
 <p><strong>Why:</strong> The three values occupy different positions. Reversing the ports can create a listening mapping that still points at the wrong internal endpoint.</p>
@@ -238,7 +238,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>A plausible wrong approach:</strong> Publishing the database on 0.0.0.0 to make debugging easy exposes it to anyone who can reach the host on that port.</p>
 <p><strong>How to verify:</strong> docker compose ps shows a port column only for the web service, and the web service still reaches the internal one by name.</p>
 <h3 id="check-your-transfer">Check your transfer<a class="heading-anchor" href="#check-your-transfer" aria-label="Link to this section">#</a></h3>
-<p>A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.</p></article>
+<p>It should use <code>http://app:8080/</code>. Inside the second container, <code>localhost</code> is that container&#x27;s own loopback interface, and port 18080 exists only as a mapping on the host, so nothing listens there. Compose puts both services on a project network where the service name <code>app</code> resolves to the app container, and the app listens on its container port 8080. The expected result is the same JSON the browser receives. If <code>app:8080</code> also failed while the host URL worked, the services would likely be on different networks, which <code>docker network inspect</code> would show.</p></article>
   </main>
 </body>
 </html>

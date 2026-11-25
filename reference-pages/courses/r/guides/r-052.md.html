@@ -196,7 +196,10 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
     <article class="document"><h2 id="r-052-multiple-panels-uncertainty-and-scale-contracts">r-052: Multiple panels, uncertainty and scale contracts<a class="heading-anchor" href="#r-052-multiple-panels-uncertainty-and-scale-contracts" aria-label="Link to this section">#</a></h2>
 <p><strong>Level:</strong> advanced. <strong>Direct prerequisites:</strong> <code>r-051</code>, <code>r-042</code></p>
 <h3 id="run-and-retain-your-work">Run and retain your work<a class="heading-anchor" href="#run-and-retain-your-work" aria-label="Link to this section">#</a></h3>
-<p>Open <code>r-052</code> in <code>/classroom</code> and use the prepared <code>r-statistics</code> profile. Each Run evaluates one <code>main.R</code> script in a fresh offline R process, so define every input in the script; an earlier Run leaves no variables behind. Work in the <a href="../lessons/r-052.R.html">starter</a>. The <a href="../solutions/r-052_reference.R.html">complete reference</a> ends by printing <code>r-052 reference checks passed</code>, and the <a href="../solutions/r-052_solutions.md.html">explained answers</a> are there for deliberate comparison after your own attempt. This chapter draws figures: base plots are captured as PNG, ggplot2 and Plotly objects must be printed explicitly, and the classroom keeps at most two figures per run. The <a href="../README.md.html">course overview</a> describes saved work, figure capture and the prepared package versions.</p>
+<p>The starter holds two groups of four observations, A with 1 to 4 and B with 2, 3, 6 and 7, and an empty results list. Run it and compute the means, 2.5 and 4.5, and the squared standard errors, 5/12 and 17/12, by hand. A 95 percent t interval with three degrees of freedom is much wider than one standard error, so label each bar with exactly what it shows.</p>
+<p>Work in the <a href="../lessons/r-052.R.html">starter</a> under the <a href="../STUDY-GUIDE.md.html#run-a-chapter">run rules</a>.</p>
+<p>The <a href="../solutions/r-052_reference.R.html">complete reference</a> ends by printing <code>r-052 reference checks passed</code>.</p>
+<p>This chapter draws figures; read <a href="../STUDY-GUIDE.md.html#figures">figure capture</a> before printing them.</p>
 <h3 id="outcome-and-mechanism">Outcome and mechanism<a class="heading-anchor" href="#outcome-and-mechanism" aria-label="Link to this section">#</a></h3>
 <p>Build a compact uncertainty display whose panels, interval target and axis choices support a valid comparison.</p>
 <p>A statistical graphic should identify the quantity represented by each mark. A raw observation, a fitted mean and an uncertainty interval are different objects. Placing them in adjacent panels can help a reader see both the underlying measurements and the summary, provided their scales and labels remain explicit.</p>
@@ -289,7 +292,15 @@ draw <span class="syntax-operator">&lt;-</span> <span class="syntax-keyword">fun
 <li><a href="https://stat.ethz.ch/R-manual/R-devel/library/stats/html/TDist.html">R t distribution</a></li>
 </ul>
 <h3 id="continue">Continue<a class="heading-anchor" href="#continue" aria-label="Link to this section">#</a></h3>
-<p>Chapters that list <code>r-052</code> as a direct prerequisite: <a href="r-053.md.html"><code>r-053</code></a>.</p>
+<div class="table-wrap"><table><thead><tr>
+<th>Next chapter</th>
+<th>Title</th>
+</tr></thead><tbody>
+<tr>
+<td><a href="r-053.md.html"><code>r-053</code></a></td>
+<td>ggplot2 data mappings and layers</td>
+</tr>
+</tbody></table></div>
 <h3 id="ask-an-ai-tutor">Ask an AI tutor<a class="heading-anchor" href="#ask-an-ai-tutor" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for r-052 (Multiple panels, uncertainty and scale contracts).
 Read the guide and my saved attempt. Explain the relevant R mechanism,

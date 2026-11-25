@@ -6,7 +6,16 @@ Beginner, approximately 90 minutes. Direct prerequisites: `java-006`
 
 ## Learning objectives
 
-Encapsulate state in a class whose methods reject invalid input and leave the object unchanged on failure. Along the way, explain instance, encapsulation, invariant using a concrete program. Trace the normal execution, identify its boundary assumptions and make a failure case observable. Exercises 1 and 2 start from the worked examples; the authored investigations begin with this task: Attempt to withdraw 111 from balance 110. The final exercise transfers the mechanism to protect against overflow.
+Encapsulate state in a class whose methods reject invalid input and leave the object unchanged on failure.
+
+The six exercises practice these steps:
+
+- Create independent accounts.
+- Withdraw within the contract.
+- Reject overdraft atomically.
+- Reject negative input.
+- Reject invalid construction.
+- Protect against overflow.
 
 ## Purpose and mental model
 
@@ -22,16 +31,9 @@ An object combines state with operations that preserve its rules. Encapsulation 
 
 ## How to run this lesson
 
-Open the Docker classroom, choose the prepared Java 21 profile and save a learner pad. The pad is compiled as `Main.java` with `javac --release 21` and executed with `java -ea Main`. Assertions are enabled deliberately. A successful assertion has no output; a failed assertion throws `AssertionError` and the process should fail. Do not remove assertions to obtain a green result.
+The `Account` class is declared inside `Main`, so every example still compiles as one `Main.java`; the overdraft, negative deposit, invalid start and overflow checks throw on purpose and catch the exception.
 
-For a prepared native JDK, copy a worked example into your own `Main.java` under ignored `.learning/expansion/java-007/`. From that directory run the same two commands on PowerShell, macOS or Linux:
-
-```text
-javac --release 21 Main.java
-java -ea Main
-```
-
-The public class name and source filename must agree. Each worked example below is a complete file. Example B includes the setup it needs from Example A, so it can be compiled by itself. The six exercise reference blocks form one complete program in the separate solution. Keep your original prediction, source and diagnostic text together. Most examples use prepared JDK libraries and tiny local fixtures; any additional dependency is specified in the lesson notes below. Any lesson-specific library or additional file is named explicitly; do not download packages from inside a learner program. Resource examples close their owned files, executors or loopback servers.
+Classroom and native JDK steps, the exercise controls and the hint routine are in the [Java study guide](../STUDY-GUIDE.md).
 
 
 
@@ -134,62 +136,62 @@ public class Main {
 
 ## Prediction before your attempt
 
-Read the source from the entry point and name each value before executing it. Identify which operations create new values, which mutate existing state and which can fail. Predict the first observable output or assertion result. For a compile-time failure, explain which source rule is violated before discussing runtime state: a program that did not compile never reached its main method. Keep normal, boundary and invalid inputs separate so each check has a clear purpose.
+Before running Example A, decide whether two accounts that both start at 100 cents share any state, and write both balances after depositing 50 into the first. For Example B, predict the balance after withdrawing 40 and which method performs the subtraction. Before Exercise 3, predict whether a rejected withdrawal of 111 can change the balance, given that validation runs before the field is assigned.
 
 ## Exercises
 
-1. **Create independent accounts: change one input.** Copy Example A into a scratch `Main.java` and change `Account first = new Account(100);` to `Account first = new Account(101);`. Before running it with `java -ea Main`, predict which assertion fails and which value it now sees; then run it and restore the original line.
-   **Expected:** The changed run fails with an `AssertionError` from the assertion on `first.balance() == 150 && second.balance() == 100`. Restoring the original line brings back the worked observation: balances 150 and 100.
-   **Verify:** Compare your written prediction with the reported `AssertionError` and its stack-trace line, and name the value that made `first.balance() == 150 && second.balance() == 100` false. After restoring the line, the program completes without an `AssertionError` again.
+1. **Create independent accounts: change one input.** Change `Account first = new Account(100);` to `Account first = new Account(101);` in Example A and predict which assertion fails and why.
+   **Expected:** The edited run fails with an `AssertionError` from the assertion on `first.balance() == 150 && second.balance() == 100`.
+   **Verify:** Name the value that makes `first.balance() == 150 && second.balance() == 100` false, then restore the line.
 
-2. **Withdraw within the contract: debug a regression.** A regression changed one token in the code that Example B adds after Example A, so one line now reads `first.withdraw(41);`. Run Example B with that line, use the failing assertion to locate the defect and repair it without changing the assertion.
-   **Expected:** Before the repair the run fails with an `AssertionError` from the assertion on `first.balance() == 110`; after it the line reads `first.withdraw(40);` again and balance 110.
-   **Verify:** Keep the failing and the repaired runs. Explain why the changed token alters the value tested by `first.balance() == 110` for this input.
+2. **Withdraw within the contract: debug a regression.** A regression in Example B's new code makes one line read `first.withdraw(41);`. Repair it using the failing assertion.
+   **Expected:** The unrepaired run fails with an `AssertionError` from the assertion on `first.balance() == 110`; the repaired line reads `first.withdraw(40);`.
+   **Verify:** Explain how the changed token alters the value that `first.balance() == 110` tests.
 
 3. **Reject overdraft atomically.** Attempt to withdraw 111 from balance 110.
    **Expected:** IllegalArgumentException; balance still 110.
-   **Verify:** Keep an assertion equivalent to `overdraft && first.balance() == 110`. As a control, change `overdraft = true;` to `overdraft = false;`: the run must fail with an `AssertionError` from the assertion on `overdraft && first.balance() == 110`. Restore the line before continuing.
+   **Verify:** Control: changing `overdraft = true;` to `overdraft = false;` must fail the assertion on `overdraft && first.balance() == 110`.
 
 4. **Reject negative input.** Attempt a deposit of -1.
    **Expected:** IllegalArgumentException; balance unchanged.
-   **Verify:** Keep an assertion equivalent to `negative && first.balance() == 110`. As a control, change `negative = true;` to `negative = false;`: the run must fail with an `AssertionError` from the assertion on `negative && first.balance() == 110`. Restore the line before continuing.
+   **Verify:** Control: changing `negative = true;` to `negative = false;` must fail the assertion on `negative && first.balance() == 110`.
 
 5. **Reject invalid construction.** Construct an account with -1 cents.
    **Expected:** constructor throws IllegalArgumentException.
-   **Verify:** Keep an assertion equivalent to `invalidStart`. As a control, change `invalidStart = true;` to `invalidStart = false;`: the run must fail with an `AssertionError` from the assertion on `invalidStart`. Restore the line before continuing.
+   **Verify:** Control: changing `invalidStart = true;` to `invalidStart = false;` must fail the assertion on `invalidStart`.
 
 6. **Protect against overflow.** Create an account at Integer.MAX_VALUE and deposit 1.
    **Expected:** ArithmeticException; original maximum balance preserved.
-   **Verify:** Keep an assertion equivalent to `overflow && full.balance() == Integer.MAX_VALUE`. As a control, change `overflow = true;` to `overflow = false;`: the run must fail with an `AssertionError` from the assertion on `overflow && full.balance() == Integer.MAX_VALUE`. Restore the line before continuing.
+   **Verify:** Control: changing `overflow = true;` to `overflow = false;` must fail the assertion on `overflow && full.balance() == Integer.MAX_VALUE`.
 
 ## Common pitfalls and diagnosis
 
-When a check fails, keep the smallest source file that still demonstrates the failure. Read the first relevant compiler diagnostic before editing several lines; later diagnostics can be consequences of the same missing delimiter or wrong type. For a runtime exception, identify the first frame belonging to your code and compare its input with the method contract. For an assertion failure, inspect the actual value and the independent expected value. A passing process exit is weaker than a checked invariant, and a checked invariant applies only under its stated assumptions.
+The typical encapsulation bug is mutating first and validating second: `balance -= amount; if (balance < 0) throw ...` leaves the account negative after the exception. Validate, then assign once. Another mistake is a public setter for `balance`, which lets callers skip every rule. And `balance + amount` on an `int` can wrap silently near `Integer.MAX_VALUE`; `Math.addExact` throws before the field changes, so the old valid balance survives.
 
-Do not replace a precise exception with a catch-all that returns a plausible default. That can hide an invalid input or an unfinished operation. If an example owns a resource, verify its lifetime on both the success and failure paths. If an operation is concurrent, use ordering primitives to establish the relationship you need; an observed timing coincidence is not a synchronization guarantee. The solution explanations identify the specific alternative that would break each exercise.
+General compiler, runtime and assertion triage: [diagnose a failure](../STUDY-GUIDE.md#diagnose-a-failure).
 
 ## Progressive hints
 
-Read one hint at a time and attempt the exercise again before reading the next. Keep a small table of input, expected value, actual value and exception type. Ask for one hint about the first incorrect assumption before requesting the entire reference implementation.
+Read one rung at a time, as described in [using hints](../STUDY-GUIDE.md#use-hints-one-at-a-time).
 
-- **Exercise 1:** First restate the expected observation: balances 150 and 100. Then list the values read by `first.balance() == 150 && second.balance() == 100` and trace each one from its declaration. Finally, compute the asserted value with `Account first = new Account(101);` in place before running.
-- **Exercise 2:** First restate the expected observation: balance 110. Then list the values read by `first.balance() == 110` and trace each one from its declaration. Finally, compare `first.withdraw(41);` with the same line in Example B and state the claim each version makes.
-- **Exercise 3:** First restate the expected observation: illegalArgumentException; balance still 110. Then list the values read by `overdraft && first.balance() == 110` and trace each one from its declaration. Finally, predict the effect of changing `overdraft = true;` to `overdraft = false;` before running anything.
-- **Exercise 4:** First restate the expected observation: illegalArgumentException; balance unchanged. Then list the values read by `negative && first.balance() == 110` and trace each one from its declaration. Finally, predict the effect of changing `negative = true;` to `negative = false;` before running anything.
-- **Exercise 5:** First restate the expected observation: constructor throws IllegalArgumentException. Then list the values read by `invalidStart` and trace each one from its declaration. Finally, predict the effect of changing `invalidStart = true;` to `invalidStart = false;` before running anything.
-- **Exercise 6:** First restate the expected observation: arithmeticException; original maximum balance preserved. Then list the values read by `overflow && full.balance() == Integer.MAX_VALUE` and trace each one from its declaration. Finally, predict the effect of changing `overflow = true;` to `overflow = false;` before running anything.
+- **Exercise 1:** First compute the first account's balance after the edit: 101 plus the deposit of 50. Then compare it with the 150 the assertion expects, while the second account still reports 100. Finally, explain which half of the condition fails and why the second account is unaffected.
+- **Exercise 2:** First compute 150 minus 41. Then compare the result with the 110 in the assertion. Finally, notice that the withdrawal was still accepted, because 41 cents is within the balance, so the failure is in the amount and not in validation.
+- **Exercise 3:** First call `withdraw(111)` on the account holding 110 inside a `try` block. Then catch `IllegalArgumentException` and set a flag. Finally, assert both the flag and the unchanged balance, which passes only if validation ran before the subtraction.
+- **Exercise 4:** First call `deposit(-1)` inside a `try` block and catch `IllegalArgumentException`. Then read the balance after the `catch`. Finally, explain why treating a negative deposit as a withdrawal would blur two operations with different rules.
+- **Exercise 5:** First call the constructor with -1 inside a `try` block. Then catch `IllegalArgumentException` and record it. Finally, explain why the check belongs in the constructor rather than in a later repair method.
+- **Exercise 6:** First create an account holding `Integer.MAX_VALUE` and deposit 1 inside a `try` block. Then catch the `ArithmeticException` that the exact addition throws. Finally, assert that the balance still equals `Integer.MAX_VALUE`, which proves the failed sum never reached the field.
 
 ## Self-check and retrieval
 
-Close the solution and explain Instance, Encapsulation, Invariant in your own words. Reconstruct one example from a blank `Main.java`, then add a new boundary input. Explain why the new case should pass or fail before compiling it. Identify a situation where this technique is appropriate and one where a different data structure, lifetime policy or abstraction would be clearer. This is a reasoning check, not a memorization test for an API spelling.
+Without the guide, state the invariant of `Account` and name each operation that could break it: construction, deposit, withdrawal and overflow. For each, explain how the reference rejects the input and why the balance is unchanged after the rejection.
 
 ## Next step
 
-Preserve the saved pad and the six exercise observations. Continue to the next lesson only when you can explain the invariants without reading the answer. Later chapters reuse these contracts in larger programs, so keep a failing counterexample as well as a repaired result. A reference implementation demonstrates one valid design under the stated assumptions; it is not a universal design rule.
+Continue with `java-008`: Constructors, records and invariants. Keep your six observations; see [moving on](../STUDY-GUIDE.md#move-to-the-next-lesson).
 
 ## Sources and verification status
 
-[Official Java 21 API or language reference](https://docs.oracle.com/en/java/javase/21/docs/api/index.html), reviewed 2026-10-22. Examples and exercise fixtures are original course material. Use the [validation guide](../../../docs/validation.md) and CI artifacts for the exact revision and platform to inspect actual compile/run results. Authoring, parsing, compilation, execution and learner mastery are separate forms of evidence.
+[Official Java 21 API or language reference](https://docs.oracle.com/en/java/javase/21/docs/api/index.html), reviewed 2026-10-22. Evidence levels: [sources and evidence](../STUDY-GUIDE.md#sources-and-evidence).
 
 ## Ask an AI tutor about this lesson
 

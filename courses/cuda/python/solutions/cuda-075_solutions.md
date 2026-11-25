@@ -1,6 +1,6 @@
 # cuda-075: explained solutions
 
-These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.
+Compare with your [worksheet](../lessons/cuda-075.md) attempt.
 
 ## Exercise 1: Trace a rectangular tile
 
@@ -74,8 +74,16 @@ Both coordinates need their own upper bound.
 
 **How to verify.** Use a 5 by 5 image with 4 by 4 blocks so both tails exist. Count the threads that pass the guard: it must be exactly 25, and the set of offsets must be 0 to 24 with no duplicates.
 
+## Self-check answers
+
+1. **Why must the boundary policy be stated as part of correctness?** Clamp, zero padding, reflect and valid-only output give different answers at the edges; `[3,6,9]` becomes `[4,6,8]` with clamping but `[3,6,5]` with zero padding.
+
+2. **What is the flat offset of row 1, column 2 in a row-major 2 by 3 image?** `1 * 3 + 2 = 5`. Swapping row and column would compute a different address that can fall outside the allocation.
+
+3. **Why does a rectangular launch need two independent guards?** Height and width can each leave a different partial tail, so a thread may be valid in one coordinate and out of range in the other.
+
 ## Reference observation
 
 Clamped horizontal average [4, 6, 8].
 
-The reference file is `courses/cuda/python/references/cuda-075_cpu.py`. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.
+Asserted by `courses/cuda/python/references/cuda-075_cpu.py`.

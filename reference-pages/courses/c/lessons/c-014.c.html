@@ -197,25 +197,17 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">int</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">void</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span></span>
 <span class="source-line">  <span class="syntax-comment">/* Exercise 1: Parse a complete integer: predict an edited check</span></span>
-<span class="source-line"><span class="syntax-comment">     Copy worked example 1 into a scratch pad and change `CHECK(parse_int(&quot;42&quot;,</span></span>
-<span class="source-line"><span class="syntax-comment">     &amp;out) &amp;&amp; out == 42);` to `CHECK(parse_int(&quot;43&quot;, &amp;out) &amp;&amp; out == 42);`</span></span>
-<span class="source-line"><span class="syntax-comment">     inside its CHECK. Before running, predict whether the CHECK still holds and</span></span>
-<span class="source-line"><span class="syntax-comment">     explain why; then restore it. Expected: With `CHECK(parse_int(&quot;43&quot;, &amp;out)</span></span>
-<span class="source-line"><span class="syntax-comment">     &amp;&amp; out == 42);` the run stops with `Check failed` at the CHECK on</span></span>
-<span class="source-line"><span class="syntax-comment">     `parse_int(&quot;42&quot;, &amp;out) &amp;&amp; out == 42`, because the &quot;parse a complete</span></span>
-<span class="source-line"><span class="syntax-comment">     integer&quot; case no longer shows that success is true and output is 42.</span></span>
-<span class="source-line"><span class="syntax-comment">     Restoring `CHECK(parse_int(&quot;42&quot;, &amp;out) &amp;&amp; out == 42);` brings that</span></span>
-<span class="source-line"><span class="syntax-comment">     observation back. */</span></span>
+<span class="source-line"><span class="syntax-comment">     In worked example 1, change `CHECK(parse_int(&quot;42&quot;, &amp;out) &amp;&amp; out == 42);` to</span></span>
+<span class="source-line"><span class="syntax-comment">     `CHECK(parse_int(&quot;43&quot;, &amp;out) &amp;&amp; out == 42);`. Predict whether the CHECK</span></span>
+<span class="source-line"><span class="syntax-comment">     still holds and why, then run and restore. Expected: `Check failed`:</span></span>
+<span class="source-line"><span class="syntax-comment">     `CHECK(parse_int(&quot;43&quot;, &amp;out) &amp;&amp; out == 42);` is false, although success is</span></span>
+<span class="source-line"><span class="syntax-comment">     true and output is 42. */</span></span>
 <span class="source-line"></span>
 <span class="source-line">  <span class="syntax-comment">/* Exercise 2: Reject trailing garbage: debug a regression</span></span>
-<span class="source-line"><span class="syntax-comment">     A regression changed one token in worked example 2, the &quot;reject trailing</span></span>
-<span class="source-line"><span class="syntax-comment">     garbage&quot; case, so one line now reads `int out = 8;`. Run the example with</span></span>
-<span class="source-line"><span class="syntax-comment">     that line, use the failing CHECK to find why the call fails and output</span></span>
-<span class="source-line"><span class="syntax-comment">     remains 7 no longer holds and repair the line without changing the CHECK.</span></span>
-<span class="source-line"><span class="syntax-comment">     Expected: Before the repair the run stops with `Check failed` at the CHECK</span></span>
-<span class="source-line"><span class="syntax-comment">     on `!parse_int(&quot;42x&quot;, &amp;out) &amp;&amp; out == 7`. Once the line reads `int out =</span></span>
-<span class="source-line"><span class="syntax-comment">     7;` again, the &quot;reject trailing garbage&quot; case again shows that the call</span></span>
-<span class="source-line"><span class="syntax-comment">     fails and output remains 7. */</span></span>
+<span class="source-line"><span class="syntax-comment">     Worked example 2 now has a line reading `int out = 8;`. Repair it so that</span></span>
+<span class="source-line"><span class="syntax-comment">     the call fails and output remains 7 again. Expected: `Check failed` at</span></span>
+<span class="source-line"><span class="syntax-comment">     `!parse_int(&quot;42x&quot;, &amp;out) &amp;&amp; out == 7` until the line reads `int out = 7;`</span></span>
+<span class="source-line"><span class="syntax-comment">     again. */</span></span>
 <span class="source-line"></span>
 <span class="source-line">  <span class="syntax-comment">/* Exercise 3: Reject empty input</span></span>
 <span class="source-line"><span class="syntax-comment">     Parse an empty string.</span></span>

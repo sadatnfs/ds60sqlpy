@@ -197,27 +197,17 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">int</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">void</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span></span>
 <span class="source-line">  <span class="syntax-comment">/* Exercise 1: Join one calculation: change one input</span></span>
-<span class="source-line"><span class="syntax-comment">     Copy worked example 1, the &quot;join one calculation&quot; case, into a scratch pad</span></span>
-<span class="source-line"><span class="syntax-comment">     and change `struct Work work = {.input = 7, .output = 0};` to `struct Work</span></span>
-<span class="source-line"><span class="syntax-comment">     work = {.input = 8, .output = 0};`. Before running, predict which CHECK</span></span>
-<span class="source-line"><span class="syntax-comment">     fails and which value it sees in place of the worked result (the retained</span></span>
-<span class="source-line"><span class="syntax-comment">     result is 49); then run it and restore the original line. Expected: With</span></span>
-<span class="source-line"><span class="syntax-comment">     `struct Work work = {.input = 8, .output = 0};` the run stops with `Check</span></span>
-<span class="source-line"><span class="syntax-comment">     failed` at the CHECK on `work.output == 49`, because the &quot;join one</span></span>
-<span class="source-line"><span class="syntax-comment">     calculation&quot; case no longer shows that the retained result is 49. Restoring</span></span>
-<span class="source-line"><span class="syntax-comment">     `struct Work work = {.input = 7, .output = 0};` brings that observation</span></span>
-<span class="source-line"><span class="syntax-comment">     back. */</span></span>
+<span class="source-line"><span class="syntax-comment">     In worked example 1, change `struct Work work = {.input = 7, .output = 0};`</span></span>
+<span class="source-line"><span class="syntax-comment">     to `struct Work work = {.input = 8, .output = 0};`. Predict which value the</span></span>
+<span class="source-line"><span class="syntax-comment">     CHECK on `work.output == 49` sees, then run and restore. Expected: `Check</span></span>
+<span class="source-line"><span class="syntax-comment">     failed` at `work.output == 49`; restoring `struct Work work = {.input = 7,</span></span>
+<span class="source-line"><span class="syntax-comment">     .output = 0};` passes again. */</span></span>
 <span class="source-line"></span>
 <span class="source-line">  <span class="syntax-comment">/* Exercise 2: Keep separate arguments: debug a regression</span></span>
-<span class="source-line"><span class="syntax-comment">     A regression changed one token in worked example 2, the &quot;keep separate</span></span>
-<span class="source-line"><span class="syntax-comment">     arguments&quot; case, so one line now reads `struct Work work[2] = {{3, 0}, {3,</span></span>
-<span class="source-line"><span class="syntax-comment">     0}};`. Run the example with that line, use the failing CHECK to find why</span></span>
-<span class="source-line"><span class="syntax-comment">     their independent outputs are 4 and 9 no longer holds and repair the line</span></span>
-<span class="source-line"><span class="syntax-comment">     without changing the CHECK. Expected: Before the repair the run stops with</span></span>
-<span class="source-line"><span class="syntax-comment">     `Check failed` at the CHECK on `work[0].output == 4 &amp;&amp; work[1].output ==</span></span>
-<span class="source-line"><span class="syntax-comment">     9`. Once the line reads `struct Work work[2] = {{2, 0}, {3, 0}};` again,</span></span>
-<span class="source-line"><span class="syntax-comment">     the &quot;keep separate arguments&quot; case again shows that their independent</span></span>
-<span class="source-line"><span class="syntax-comment">     outputs are 4 and 9. */</span></span>
+<span class="source-line"><span class="syntax-comment">     Worked example 2 now has a line reading `struct Work work[2] = {{3, 0}, {3,</span></span>
+<span class="source-line"><span class="syntax-comment">     0}};`. Repair it so that their independent outputs are 4 and 9 again.</span></span>
+<span class="source-line"><span class="syntax-comment">     Expected: `Check failed` at `work[0].output == 4 &amp;&amp; work[1].output == 9`</span></span>
+<span class="source-line"><span class="syntax-comment">     until the line reads `struct Work work[2] = {{2, 0}, {3, 0}};` again. */</span></span>
 <span class="source-line"></span>
 <span class="source-line">  <span class="syntax-comment">/* Exercise 3: Retrieve a stable pointer result</span></span>
 <span class="source-line"><span class="syntax-comment">     Have the worker return its caller-owned argument pointer.</span></span>

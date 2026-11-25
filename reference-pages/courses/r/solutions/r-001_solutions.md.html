@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/r/solutions/r-001_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="r-001-reference-reasoning">r-001: reference reasoning<a class="heading-anchor" href="#r-001-reference-reasoning" aria-label="Link to this section">#</a></h2>
-<p>Use the <a href="r-001_reference.R.html">complete reference</a> with the guide&#x27;s declared inputs and runtime. Every worked example is also a standalone script.</p>
+<p>Run the <a href="r-001_reference.R.html">complete reference</a> under the <a href="../STUDY-GUIDE.md.html#run-a-chapter">run rules</a>.</p>
 <h3 id="why-the-implementation-has-this-shape">Why the implementation has this shape<a class="heading-anchor" href="#why-the-implementation-has-this-shape" aria-label="Link to this section">#</a></h3>
 <p>Both inputs are present in the script. The printed 18 is the computed total, while stopifnot states the expected arithmetic result.</p>
 <p>total contains the earlier result. Changing quantity does not convert total into a spreadsheet formula that reevaluates itself.</p>
@@ -242,7 +242,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Tempting mistake:</strong> Treating a saved file, or output left over from an earlier run, as proof the current source works. If you change unit_price after your last run, the old printed 18 describes code that no longer exists in the pad.</p>
 <p><strong>Verify:</strong> Change one input, save without running and confirm no new output appears. Then run and confirm <code>r-001 reference checks passed</code> prints only when all five assertions hold.</p>
 <h3 id="what-the-checks-establish">What the checks establish<a class="heading-anchor" href="#what-the-checks-establish" aria-label="Link to this section">#</a></h3>
-<p>The reference makes 5 <code>stopifnot()</code> checks on its small synthetic inputs. A passing run establishes those assertions in the reported environment. It does not prove correctness for every input, statistical validity for an unrelated population, or compatibility with untested package versions.</p></article>
+<p>Five assertions pin arithmetic you can also do by hand: 4 * 7 is 28, the first total is 30, subtotal plus fee is 23, the stale <code>total</code> stays 30 after <code>quantity</code> is rebound so the new product is 48, and a measured zero quantity gives a zero line total. They do not tell you whether your printed labels match the values or whether you ran the file after your last edit.</p>
+<p>The reference makes 5 <code>stopifnot()</code> checks; see <a href="../STUDY-GUIDE.md.html#what-a-passing-run-proves">what a passing run proves</a>.</p></article>
   </main>
 </body>
 </html>

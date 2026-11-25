@@ -1,6 +1,6 @@
 # web-017: explanatory solutions
 
-Open this after your own attempt. Each answer explains the lesson's synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in `courses/web-development/guides/web-017.md`.
+Attempt each exercise before reading; the mechanism is in `courses/web-development/guides/web-017.md` ([using these answers](../STUDY-GUIDE.md#solutions)).
 
 ## Exercise 1: Predict the base layout below the breakpoint.
 
@@ -76,4 +76,6 @@ Open this after your own attempt. Each answer explains the lesson's synthetic fi
 
 ## Reference comparison
 
-Open `courses/web-development/solutions/web-017_solution.html` only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; its success message is not an accessibility audit or proof of responsive behavior at every size.
+The reference only checks that a meta element named viewport exists, which catches the classic missing tag. It does not read its content, test your breakpoint, or check that sections stack below it, so compare the layout at a phone width, at your breakpoint and with text enlarged.
+
+Open `courses/web-development/solutions/web-017_solution.html` after saving your attempt ([comparing with the reference](../STUDY-GUIDE.md#references)).

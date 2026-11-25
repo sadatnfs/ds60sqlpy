@@ -1,6 +1,6 @@
 # java-006: explanatory solutions
 
-Open after an attempt or an explicit solution reveal. The executable reference runs the six exercise checks together as `Main.java`. The guide contains independent worked examples, while this file explains the choices and failure cases in the complete answer.
+Open this after an attempt; see [using the solutions](../STUDY-GUIDE.md#use-the-solutions).
 
 ## Mechanism review
 
@@ -18,7 +18,7 @@ List.of creates a fixed unmodifiable list; new ArrayList<>(...) creates a mutabl
 
 ## Exercise 1: Retain sequence multiplicity: change one input
 
-Task: Copy Example A into a scratch `Main.java` and change `List<String> colors = new ArrayList<>(List.of("red", "blue", "red"));` to `List<String> colors = new ArrayList<>(List.of("red!", "blue", "red"));`. Before running it with `java -ea Main`, predict which assertion fails and which value it now sees; then run it and restore the original line.
+Task: Change `List<String> colors = new ArrayList<>(List.of("red", "blue", "red"));` to `List<String> colors = new ArrayList<>(List.of("red!", "blue", "red"));` in Example A and predict which assertion fails and why.
 
 A list records positions and repeated observations. Removing duplicates would change the meaning if each entry represents an event.
 
@@ -30,13 +30,13 @@ colors.add("green");
 assert colors.size() == 4 && Collections.frequency(colors, "red") == 2;
 ```
 
-**Expected:** The changed run fails with an `AssertionError` from the assertion on `colors.size() == 4 && Collections.frequency(colors, "red") == 2`. Restoring the original line brings back the worked observation: size 4; red appears twice.
+**Expected:** The edited run fails with an `AssertionError` from the assertion on `colors.size() == 4 && Collections.frequency(colors, "red") == 2`.
 
-**Verify:** Compare your written prediction with the reported `AssertionError` and its stack-trace line, and name the value that made `colors.size() == 4 && Collections.frequency(colors, "red") == 2` false. After restoring the line, the program completes without an `AssertionError` again.
+**Verify:** Name the value that makes `colors.size() == 4 && Collections.frequency(colors, "red") == 2` false, then restore the line.
 
 ## Exercise 2: Count with a map: debug a regression
 
-Task: A regression changed one token in the code that Example B adds after Example A, so one line now reads `for (String color : colors) counts.merge(color, 2, Integer::sum);`. Run Example B with that line, use the failing assertion to locate the defect and repair it without changing the assertion.
+Task: A regression in Example B's new code makes one line read `for (String color : colors) counts.merge(color, 2, Integer::sum);`. Repair it using the failing assertion.
 
 The merge function defines how repeated keys combine. Replacing put on every iteration would retain only the final contribution 1.
 
@@ -48,9 +48,9 @@ for (String color : colors) counts.merge(color, 1, Integer::sum);
 assert counts.equals(Map.of("red", 2, "blue", 1, "green", 1));
 ```
 
-**Expected:** Before the repair the run fails with an `AssertionError` from the assertion on `counts.equals(Map.of("red", 2, "blue", 1, "green", 1))`; after it the line reads `for (String color : colors) counts.merge(color, 1, Integer::sum);` again and red 2, blue 1, green 1.
+**Expected:** The unrepaired run fails with an `AssertionError` from the assertion on `counts.equals(Map.of("red", 2, "blue", 1, "green", 1))`; the repaired line reads `for (String color : colors) counts.merge(color, 1, Integer::sum);`.
 
-**Verify:** Keep the failing and the repaired runs. Explain why the changed token alters the value tested by `counts.equals(Map.of("red", 2, "blue", 1, "green", 1))` for this input.
+**Verify:** Explain how the changed token alters the value that `counts.equals(Map.of("red", 2, "blue", 1, "green", 1))` tests.
 
 ## Exercise 3: Inspect set insertion
 
@@ -67,7 +67,7 @@ assert firstAdded && !secondAdded && unique.size() == 1;
 
 **Expected:** first true, second false, size 1.
 
-**Verify:** Keep an assertion equivalent to `firstAdded && !secondAdded && unique.size() == 1`. As a control, change `boolean firstAdded = unique.add("red");` to `boolean firstAdded = unique.add("red!");`: the run must fail with an `AssertionError` from the assertion on `firstAdded && !secondAdded && unique.size() == 1`. Restore the line before continuing.
+**Verify:** Control: changing `boolean firstAdded = unique.add("red");` to `boolean firstAdded = unique.add("red!");` must fail the assertion on `firstAdded && !secondAdded && unique.size() == 1`.
 
 ## Exercise 4: Create deterministic output order
 
@@ -83,7 +83,7 @@ assert keys.equals(List.of("blue", "green", "red"));
 
 **Expected:** blue, green, red.
 
-**Verify:** Keep an assertion equivalent to `keys.equals(List.of("blue", "green", "red"))`. As a control, change `assert keys.equals(List.of("blue", "green", "red"));` to `assert keys.equals(List.of("blue!", "green", "red"));` inside it: the run must fail with an `AssertionError`, which shows the assertion can fail. Restore it.
+**Verify:** Control: changing `assert keys.equals(List.of("blue", "green", "red"));` to `assert keys.equals(List.of("blue!", "green", "red"));` inside the assertion must make it fail.
 
 ## Exercise 5: Distinguish lookup from insertion
 
@@ -99,7 +99,7 @@ assert absent == 0 && counts.size() == before && !counts.containsKey("missing");
 
 **Expected:** value 0; map still size 3.
 
-**Verify:** Keep an assertion equivalent to `absent == 0 && counts.size() == before && !counts.containsKey("missing")`. As a control, change `int absent = counts.getOrDefault("missing", 0);` to `int absent = counts.getOrDefault("missing", 1);`: the run must fail with an `AssertionError` from the assertion on `absent == 0 && counts.size() == before && !counts.containsKey("missing")`. Restore the line before continuing.
+**Verify:** Control: changing `int absent = counts.getOrDefault("missing", 0);` to `int absent = counts.getOrDefault("missing", 1);` must fail the assertion on `absent == 0 && counts.size() == before && !counts.containsKey("missing")`.
 
 ## Exercise 6: Respect unmodifiable fixtures
 
@@ -119,8 +119,10 @@ assert fixed;
 
 **Expected:** UnsupportedOperationException.
 
-**Verify:** Keep an assertion equivalent to `fixed`. As a control, change `fixed = true;` to `fixed = false;`: the run must fail with an `AssertionError` from the assertion on `fixed`. Restore the line before continuing.
+**Verify:** Control: changing `fixed = true;` to `fixed = false;` must fail the assertion on `fixed`.
 
 ## After comparing the answer
 
-Run the complete reference with assertions enabled, then return to your own implementation. Recreate one check with different values and explain its expected result before execution. A compiler error, an expected domain exception and an assertion failure represent different stages and should be reported separately. Preserve ownership boundaries when adapting file, network or concurrency examples. The reference never authorizes access to a shared service or deletion of learner state. Use a fresh tiny fixture when you need to distinguish two interpretations of an API contract.
+Replace the sorted key list in your copy with a `TreeMap` built from the counts and confirm that it iterates blue, green, red without a separate sort.
+
+Run the complete reference with `java -ea Main` first; the [review routine](../STUDY-GUIDE.md#use-the-solutions) covers the rest.

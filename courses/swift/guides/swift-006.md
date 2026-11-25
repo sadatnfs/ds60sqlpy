@@ -24,9 +24,9 @@ Range boundaries remain a source of mistakes. A closed range includes both ends;
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles the saved pad as `main.swift` with Swift 6 language checking. An explicit `@main` type contains `static func main() async throws`; the fixed compiler uses `-parse-as-library -swift-version 6`. The examples use the standard library and portable Foundation. `precondition` makes a violated invariant fail the process. The fixed pad accepts one source file, without arbitrary command arguments, interactive input or dependency installation. SwiftUI, UIKit, Apple simulators and application signing belong to the separately prepared macOS/Xcode project labs, never the Linux pad.
+Both examples declare their function inside `main`, so a copied function can be moved out to file scope without changing its behavior. Task 2 moves the pass boundary to 70, which changes two adjacent checks at once. Task 4 needs a deliberately wrong range, and that program still compiles, so only a boundary check will reveal it.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Compile contract, starter stop and success marker: [running a lesson](../STUDY-GUIDE.md#running-a-lesson).
 
 
 
@@ -34,7 +34,7 @@ Start with the answer-free learner artifact in your saved classroom pad. It deli
 
 `if` requires a Bool. `switch` matches cases without implicit fallthrough. `0..<10` excludes ten; `0...10` includes it. A where clause narrows a matched case.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+Each example ends with a trace; method: [tracing a program](../STUDY-GUIDE.md#tracing-a-program).
 
 ## Worked example / walkthrough
 
@@ -66,6 +66,8 @@ struct LessonMain {
 
 **Observe:** 59 retries, 60 passes and 101 is invalid.
 
+**Trace.** `classify(59)` reaches the `switch`, tests 59 against `0..<60`, which covers 0 through 59, and returns retry. `classify(60)` misses the first range because its half-open upper bound excludes 60, then matches `60...100`, whose closed bound includes both ends. `classify(101)` matches neither range and falls to `default`, which returns invalid. Swift tries cases from top to bottom, stops at the first match and never falls through implicitly, so each score returns exactly one label.
+
 ### Example B: Use a guard for a required value
 
 The unwrapped binding is available after the guard because every failing path has returned.
@@ -91,6 +93,8 @@ struct LessonMain {
 
 **Observe:** The early exit excludes missing and empty values before the valid path.
 
+**Trace.** `describe(nil)` reaches the guard, where optional binding fails and the else branch returns missing. `describe("")` binds successfully, but the second condition `!text.isEmpty` is false, so it also leaves through the else branch. `describe("x")` passes both conditions. After the guard, `text` is a non-optional `String` for the rest of the function, and the return builds value:x. The shorthand `guard let text` rebinds the same name, so the unwrapped value keeps its original name.
+
 ## Exercises
 
 1. **Predict and explain.** Predict each threshold case before running.
@@ -105,13 +109,15 @@ struct LessonMain {
 
 6. **Transfer and justify.** Replace a broad default in an enum switch with explicit cases and explain the maintenance benefit.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Log each task in the [evidence table](../STUDY-GUIDE.md#recording-exercise-evidence) before opening the explanation.
 
 ## Common pitfalls and diagnosis
 
 A default can hide future cases. Guard must actually exit on failure. Avoid treating every invalid value as the normal else category without a stated policy.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+The counterexample for task 4's range defect is the boundary value itself. If the retry case is written as `0...60`, scores 0 to 59 still behave and only 60 changes, returning retry instead of pass. That is why task 5 asks for both ends of the valid domain plus one value beyond each: checking -1, 0, 59, 60, 100 and 101 pins every edge.
+
+Repair routine: [building a regression case](../STUDY-GUIDE.md#building-a-regression-case).
 
 ## Progressive hints
 
@@ -121,11 +127,15 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 
 ## Self-check and next step
 
-Explain Exhaustiveness, Closed range, Half-open range without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+Write a `switch` over an enum with three cases and no default, then add a fourth case and describe what the compiler reports. Explain `0..<10` versus `0...10` with the one value that distinguishes them. Say why the guard in Example B must return, throw or otherwise leave in its else branch.
+
+Then follow the general [self-check routine](../STUDY-GUIDE.md#self-check-routine) and save your pad.
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://docs.swift.org/swift-book/documentation/the-swift-programming-language/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+[Documentation](https://docs.swift.org/swift-book/documentation/the-swift-programming-language/): The Control Flow chapter of the Swift book explains conditional statements, switch, interval matching, where clauses and early exit with guard.
+
+Provenance and limits: [sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

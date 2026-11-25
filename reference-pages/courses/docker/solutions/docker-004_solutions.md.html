@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/docker/solutions/docker-004_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="docker-004-explanatory-solutions">docker-004: explanatory solutions<a class="heading-anchor" href="#docker-004-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit reveal. These explain the supplied teaching fixtures; they are not engine results. The mechanism is explained in <code>courses/docker/guides/docker-004.md</code>.</p>
+<p>These answers explain teaching fixtures, not engine results; the mechanism is in <a href="../guides/docker-004.md.html">the guide</a>.</p>
 <h3 id="exercise-1-predict-what-happens-when-the-main-process-exits">Exercise 1: Predict what happens when the main process exits.<a class="heading-anchor" href="#exercise-1-predict-what-happens-when-the-main-process-exits" aria-label="Link to this section">#</a></h3>
 <p><strong>Expected answer:</strong> The container enters an exited state.</p>
 <p><strong>Why:</strong> A container is not a VM with an independent background boot lifecycle. Its main process lifecycle drives the container state even if a script attempted to background work.</p>
@@ -238,7 +238,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>A plausible wrong approach:</strong> Checking only for exit code 0 passes even if the counter file was truncated, because the process can exit cleanly after a bad write.</p>
 <p><strong>How to verify:</strong> After stop and start, GET /counter returns the last acknowledged value with schema_version 1, and the app logs show no invalid counter state error.</p>
 <h3 id="check-your-transfer">Check your transfer<a class="heading-anchor" href="#check-your-transfer" aria-label="Link to this section">#</a></h3>
-<p>A useful answer names the exact object, the phase when a setting takes effect, the expected normal result and an observation that would disprove it. A production system additionally needs ownership, lifecycle, data recovery and operational review.</p></article>
+<p>The shell started by <code>sh -c</code> is PID 1 and receives SIGTERM, but the worker never gets it, so the engine waits the full 30-second grace period and then kills everything with SIGKILL, which is the 137. Change the command to exec form, <code>[&quot;python&quot;, &quot;worker.py&quot;]</code>, or end the shell command with <code>exec</code>, and make sure the worker handles SIGTERM by finishing its current item. The expected result is a stop in a few seconds with exit code 0. If the stop still took exactly 30 seconds after that change, the worker itself would be ignoring SIGTERM, which disproves the shell explanation.</p></article>
   </main>
 </body>
 </html>

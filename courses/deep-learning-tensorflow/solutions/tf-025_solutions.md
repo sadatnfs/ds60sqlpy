@@ -1,6 +1,6 @@
 # tf-025: explanatory solutions
 
-Open these answers for Embedding objectives and negative examples after your own attempt at Example A, Compare similarity measures, or after an explicit reveal. Each answer reuses the guide's literal inputs, so a mismatch points to one step. The companion script runs the assertions; this page explains why they test Positive pair, Negative pair, Cosine similarity. After matching exercise 6, Reject undefined cosine, invent a new input without looking here.
+Open these answers after an attempt; they reuse the guide's inputs ([comparison steps](../STUDY-GUIDE.md#after-the-solutions)).
 
 ## Mechanism review
 
@@ -132,6 +132,3 @@ else:
 
 **Verify:** In a fresh process, the exercise checks confirm `cosine([0, 0], [1, 1])` raises `ValueError`.
 
-## Review after comparison
-
-Change one fixture value in exercise 4, Detect a false negative, and predict the new result before running it. Keep the failing version of exercise 5, Observe temperature, next to its repair. A missing framework is an environment record, not a failed assertion. No solution downloads data, calls an online model, deploys a service or changes a database.

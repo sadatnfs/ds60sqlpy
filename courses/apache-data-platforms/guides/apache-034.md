@@ -137,7 +137,7 @@ In an owned workshop, the check prints a JSON line with committed_records 3, unc
 
 ## Complete worked source
 
-This is a project-only command notebook. Read and edit it in the classroom; run its explicitly labeled commands from the copied owned Docker workshop. The classroom does not execute these service commands.
+The classroom does not execute these service commands. See the [workshop rules](../STUDY-GUIDE.md#workshop-notebooks).
 
 # Actual acknowledged writes and distinct application calls
 

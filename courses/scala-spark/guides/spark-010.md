@@ -1,20 +1,26 @@
 # spark-010: Laziness, iterators, and safe side effects
 
-Authored tutorial and practice content. The prepared Scala/JVM worker executes a bounded program; process success and understanding remain distinct. No source file installs a tool or downloads a dependency.
+An `Iterator` does no work until something pulls from it, and it can be read only once. This lesson traces exactly when a lazy filter and map run, separates a one-shot iterator from a factory that builds a fresh one, and shows how a retried side effect turns 150 logical cents into 500 counted cents.
 
 ## Level and prerequisites
 
-Beginner; approximately 75 minutes. Direct prerequisites: `spark-009`. The lesson uses Scala 2.13 syntax and the prepared JDK 17 worker. The [execution baseline](../execution-baseline.md) lists the exact Scala, JDK and Spark versions.
+Beginner; approximately 75 minutes. Direct prerequisites: `spark-009`. Pinned versions: [execution baseline](../execution-baseline.md).
 
 ## How to run this lesson
 
-Open `spark-010` in the classroom, select the Scala source, prepare the `scala-jvm` profile and run the saved pad. The worker stages the single source as `Main.scala` and invokes `object Main`. Read the terminal output and exact assertions. The [learner source](../lessons/spark-010.scala) runs two complete demonstrations; its six task functions remain explicit stubs until you implement them. Preserve your saved attempt. The [reference program](../solutions/spark-010_solution.scala) and [explained solutions](../solutions/spark-010_solutions.md) are separate and should be opened after an attempt or an explicit worked-comparison request. If the profile is unavailable, reading and saving remain available; opening this guide does not prepare a runtime.
+Shared run steps and profile rules: [study guide](../STUDY-GUIDE.md#run-a-language-lesson).
+
+Learner pad: [spark-010.scala](../lessons/spark-010.scala).
+
+Open the [explained solutions](../solutions/spark-010_solutions.md) after an attempt.
+
+The pad prints `visits=3 after complete consumption`. The assertions above that line show `visits == 0` right after building the mapped iterator, 1 after one `next()`, and 3 after `toVector`; a second `toVector` returns an empty vector because the iterator is spent. The second example prints `A factory creates a new traversal each time`: calling `fresh()` twice gives `Vector(4, 8)` both times because each call builds a new iterator from the unchanged source.
 
 ## Learning objectives
 
 - Predict when local lazy transformations run and explain why retryable distributed work must not hide side effects.
-- Explain the result of both worked examples before running them.
-- Implement the six contracts, inspect normal and boundary evidence, and explain a counterexample in your own words.
+- Predict the trace `filter:1, filter:2, map:2` when one value is taken from a lazy pipeline over 1, 2, 3, 4, and predict what consuming the rest appends.
+- Separate repeated delivery from logical identity: two attempts over records `a, b, a` give a naive total of 500 but a logical total of 150, and the same ID with two different amounts is rejected.
 
 ## Vocabulary and concepts
 
@@ -137,11 +143,15 @@ If a trace appears before consumption, find an eager collection operation or sid
 
 ## Self-check
 
-Without opening the reference, trace the listed boundary case through `strictPipeline`. Then explain why `boundedTake` needs its declared invariant or input restriction. Name the exact assertion that would reject one tempting wrong implementation. Retain the observed values and explain how they support the lesson outcome: Predict when local lazy transformations run and explain why retryable distributed work must not hide side effects.
+- `strictPipeline(Seq(1, 2, 3, 4))` returns `Seq(4, 8)`. When does each `filter` and `map` call happen for a `Seq`, and how does that differ for the iterator in Exercise 2?
+- Write the full trace after taking one value and then consuming the rest of `tracedIterator(Seq(1, 2, 3, 4), trace)`.
+- Why does `consumeTwice` on a fresh iterator over 1, 2, 3 return `(Vector(1, 2, 3), Vector())`? What does that predict for a Spark job that reruns a lineage built on a one-shot source?
+- In `retryTotals`, why is the naive total 500 for two attempts over `(a, 100)`, `(b, 50)`, `(a, 100)`, while the logical total is 150? Why must `a` with 100 and `a` with 101 be rejected?
+- `boundedTake(Iterator.from(1), 3)` leaves 4 as the next value. Why is a declared limit necessary before reading from an unbounded source, and why is a limit above 1000 rejected?
 
 ## Next step
 
-Continue to the next lesson only after you can explain the boundary behavior. The [course route](../README.md) shows authored material and runtime evidence separately.
+Go on to [spark-012: SparkSession, explicit schemas, and bounded actions](spark-012.md); [spark-011](spark-011.md) is the bridge for learners arriving from Python and covers ground you already have. Spark DataFrames are lazy in the same way as these iterators, and spark-012 shows which call is the action that finally runs the plan.
 
 ## Primary sources and official APIs
 

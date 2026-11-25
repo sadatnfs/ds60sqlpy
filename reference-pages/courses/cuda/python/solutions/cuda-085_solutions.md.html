@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cuda/python/solutions/cuda-085_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="cuda-085-explained-solutions">cuda-085: explained solutions<a class="heading-anchor" href="#cuda-085-explained-solutions" aria-label="Link to this section">#</a></h2>
-<p>These answers explain the six practice tasks. CPU reference programs are mathematical or semantic checks, not proof of CUDA execution.</p>
+<p>Compare with your <a href="../lessons/cuda-085.md.html">worksheet</a> attempt.</p>
 <h3 id="exercise-1-compute-complete-latency">Exercise 1: Compute complete latency<a class="heading-anchor" href="#exercise-1-compute-complete-latency" aria-label="Link to this section">#</a></h3>
 <p>Include packing and transfer.</p>
 <p><strong>Approach.</strong> Add every component of latency: the library path is 8 ms of kernels plus 2 ms of transfer, 10 ms; the custom path is 6 + 2 + 3 ms of packing, 11 ms.</p>
@@ -231,9 +231,19 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>Why it is correct here.</strong> The modeled custom path loses 1 ms end to end and adds obligations, so nothing justifies the switch.</p>
 <p><strong>A plausible wrong approach.</strong> Choosing the custom kernel because its compute portion, 6 ms against 8 ms, is faster ignores the stated total and the packing step that the custom path requires.</p>
 <p><strong>How to verify.</strong> Include the totals, sizes, contract and the owner list in the decision record, so a later reviewer can repeat the decision if packing is removed or the library changes.</p>
+<h3 id="self-check-answers">Self-check answers<a class="heading-anchor" href="#self-check-answers" aria-label="Link to this section">#</a></h3>
+<ol>
+<li><strong>When can a custom kernel be justified over a library call?</strong> When it delivers a measured end-to-end benefit, such as fusing launches or handling an unusual layout, that survives correctness checks and outweighs its maintenance cost.</li>
+</ol>
+<ol start="2">
+<li><strong>Why include tiny inputs in the comparison?</strong> At tiny sizes launch overhead and first-call compilation dominate, so a fused or custom kernel that wins on large inputs can lose there.</li>
+</ol>
+<ol start="3">
+<li><strong>What is an educational kernel&#x27;s honest success claim?</strong> It is learning evidence that the student understands the mechanism. It is not evidence of a production improvement unless measurements show one.</li>
+</ol>
 <h3 id="reference-observation">Reference observation<a class="heading-anchor" href="#reference-observation" aria-label="Link to this section">#</a></h3>
 <p>Library 10 and custom 11 modeled milliseconds.</p>
-<p>The reference file is <code>courses/cuda/python/references/cuda-085_cpu.py</code>. It includes deterministic assertions. These assertions establish the supplied bounded CPU example; hardware execution and architecture-specific performance remain separate checks.</p></article>
+<p>Asserted by <code>courses/cuda/python/references/cuda-085_cpu.py</code>.</p></article>
   </main>
 </body>
 </html>

@@ -1,6 +1,8 @@
 # rust-040: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [rust-040_solution.rs](rust-040_solution.rs). It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.
+Executable reference: [rust-040_solution.rs](rust-040_solution.rs), which runs both examples and the coded answers.
+
+Open this only after [an attempt](../STUDY-GUIDE.md#attempt-a-lesson).
 
 ## Why the two examples differ
 
@@ -26,7 +28,7 @@ Predict row count and order for both operations.
 
 Change one mask value and independently derive the result.
 
-**Reference answer.** The same statements run as the `Task 2` block of the reference program; here they are wrapped in `main` as a complete file.
+**Reference answer**, wrapped in `main`; the reference runs it as its `Task 2` block.
 
 ```rust
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -60,7 +62,7 @@ The independent derivation zips the values with the same decisions and keeps the
 
 Filter every column of a batch consistently under one row mask.
 
-**Reference answer.** The same statements run as the `Task 3` block of the reference program; here they are wrapped in `main` as a complete file.
+**Reference answer**, wrapped in `main`; the reference runs it as its `Task 3` block.
 
 ```rust
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -99,7 +101,7 @@ Diagnose filtering one column while leaving others unfiltered.
 
 Test empty selection, all-selected rows and checked invalid indices.
 
-**Reference answer.** The same statements run as the `Task 5` block of the reference program; here they are wrapped in `main` as a complete file.
+**Reference answer**, wrapped in `main`; the reference runs it as its `Task 5` block.
 
 ```rust
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -139,7 +141,7 @@ Empty selection is a valid result with the same type, not a failure. With `check
 
 Choose filter or take for a sampling procedure and explain duplicate-row consequences.
 
-No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **Kernel**, and state one limitation of your choice.
+**Judging criteria.** A strong answer matches the kernel to the sampling method. Sampling without replacement maps to `filter` with a boolean mask, or to `take` with distinct indices, and each row appears at most once. Sampling with replacement, as in a bootstrap, needs `take` with repeated indices, as Example B's [6, 2, 6] shows, and every later count and sum then weights duplicated rows more heavily. The answer states that consequence and how the report labels it. State one limitation: indices from an untrusted source must be range-checked first.
 
 ## Mechanism and diagnostic reasoning
 
@@ -153,4 +155,6 @@ Downcast failure is possible in generic code. A mask and array must have compati
 
 ## Review before continuing
 
-Run the reference and confirm that it prints `rust-040: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.
+Rebuild Example B (Reorder and repeat with take) from a blank pad.
+
+Review routine: [Self-check and review](../STUDY-GUIDE.md#self-check-and-review).

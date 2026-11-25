@@ -194,7 +194,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/rust/solutions/rust-005_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="rust-005-explanation-and-comparison">rust-005: explanation and comparison<a class="heading-anchor" href="#rust-005-explanation-and-comparison" aria-label="Link to this section">#</a></h2>
-<p>Attempt the six guide tasks before opening this comparison. The executable reference is <a href="rust-005_solution.rs.html">rust-005_solution.rs</a>. It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.</p>
+<p>Executable reference: <a href="rust-005_solution.rs.html">rust-005_solution.rs</a>, which runs both examples and the coded answers.</p>
+<p>Open this only after <a href="../STUDY-GUIDE.md.html#attempt-a-lesson">an attempt</a>.</p>
 <h3 id="why-the-two-examples-differ">Why the two examples differ<a class="heading-anchor" href="#why-the-two-examples-differ" aria-label="Link to this section">#</a></h3>
 <p><strong>Choose a value with if:</strong> Both branches return the same kind of value, so the result has one static type. The branch expression supplies one immutable label.</p>
 <p><strong>Classify explicit boundaries:</strong> A tiny boundary fixture rejects an off-by-one policy error. The transition at sixty and the invalid upper range are distinct.</p>
@@ -213,7 +214,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>How to verify.</strong> Add <code>assert_eq!(classify(65), &quot;retry&quot;);</code>. On the half-edited version it panics with <code>left: &quot;invalid&quot;</code> and <code>right: &quot;retry&quot;</code>; with both arms changed, all checks pass.</p>
 <h4 id="task-3-independent-construction">Task 3: Independent construction<a class="heading-anchor" href="#task-3-independent-construction" aria-label="Link to this section">#</a></h4>
 <p>Write a negative, zero and positive classifier.</p>
-<p><strong>Reference answer.</strong> The same statements run as the <code>Task 3</code> block of the reference program; here they are wrapped in <code>main</code> as a complete file.</p>
+<p><strong>Reference answer</strong>, wrapped in <code>main</code>; the reference runs it as its <code>Task 3</code> block.</p>
 <pre class="highlighted-code"><code class="language-rust"><span class="syntax-keyword">fn</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">-&gt;</span> <span class="syntax-builtin">Result</span><span class="syntax-operator">&lt;</span><span class="syntax-punctuation">(</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-builtin">Box</span><span class="syntax-operator">&lt;</span><span class="syntax-keyword">dyn</span> std<span class="syntax-punctuation">::</span>error<span class="syntax-punctuation">::</span>Error<span class="syntax-operator">&gt;</span><span class="syntax-operator">&gt;</span> <span class="syntax-punctuation">{</span>
     <span class="syntax-keyword">fn</span> <span class="syntax-function">classify</span><span class="syntax-punctuation">(</span>value<span class="syntax-punctuation">:</span> <span class="syntax-keyword">i32</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">-&gt;</span> <span class="syntax-keyword">&amp;</span><span class="syntax-operator">&#x27;</span><span class="syntax-builtin">static</span> <span class="syntax-keyword">str</span> <span class="syntax-punctuation">{</span>
         <span class="syntax-keyword">match</span> value <span class="syntax-punctuation">{</span>
@@ -255,7 +256,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><code>let label = if condition { &quot;yes&quot; } else { &quot;no&quot; };</code> uses a branch result. The final expression in a block has no semicolon when it supplies the value. <code>0..=59</code> is an inclusive pattern range.</p>
 <p>A semicolon can change a block value. Match arm order matters when patterns overlap. A wildcard that hides an unhandled domain state weakens maintenance feedback.</p>
 <h3 id="review-before-continuing">Review before continuing<a class="heading-anchor" href="#review-before-continuing" aria-label="Link to this section">#</a></h3>
-<p>Run the reference and confirm that it prints <code>rust-005: passed</code>, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.</p></article>
+<p>Rebuild Example B (Classify explicit boundaries) from a blank pad.</p>
+<p>Review routine: <a href="../STUDY-GUIDE.md.html#self-check-and-review">Self-check and review</a>.</p></article>
   </main>
 </body>
 </html>

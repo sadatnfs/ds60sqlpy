@@ -2,67 +2,13 @@
 
 ## How to run this lesson
 
-Start the Linux-container engine and run `./classroom` from the repository
-root. On Windows, use Ubuntu in WSL 2 or the thin
-`START_DOCKER_CLASSROOM.cmd` wrapper. Choose **PostgreSQL** on the shared
-`/classroom` home, then open **sql-01**. The
-[launcher guide](../../../docs/one-command-classroom.md) covers first preparation, strict resume and
-the saved project selection. No host Python or PostgreSQL installation is
-required for this browser route.
+Open **sql-01** on the PostgreSQL side of `./classroom` and pick **Whole SQL lesson (psql)**, which feeds the entire file to `psql` against the disposable `advanced_sql_training` database. The script opens with `BEGIN`, points `search_path` at the `training` schema, and runs three read-only queries: the newest US and CA customers, products over 50 ranked by `price - cost`, and a pattern filter on `email` and `full_name` that prints 50 customers. Your six exercises sit below those queries as comments, and the file ends with `ROLLBACK`, so nothing you try here changes the course tables.
 
-1. Read the prerequisite and fixture notes before running the file. Use only
-   the local disposable `advanced_sql_training` database.
-2. Choose **Whole SQL lesson (psql)** for the cataloged learner script. This
-   preserves the lesson's reviewed psql directives, relative includes and
-   transaction behavior. **SQL snippet** is appropriate for ordinary SQL
-   statements, but is not a replacement for an entire script's setup.
-3. The **Course database** panel above the code shows whether the course
-   training tables are loaded. Missing tables load automatically before your
-   first run (or choose **Load course tables**) and stay loaded for later
-   lessons. **Reset training data** restores the original rows only when your
-   own changes made results differ; it keeps your saved code and notes.
-4. Edit the learner copy in the classroom and save your prediction before
-   running. Its whole-script workspace is
-   `.learning/sql/sql-01/lesson/workspace/sql/postgres-60day/day01_select_where_orderby.sql`.
-   For browser work this path is inside the Docker learning volume, not a
-   newly created host folder beside your checkout. The checked-in source
-   remains the answer-free starting artifact.
-5. Run the whole script and inspect the full transcript. The runner uses
-   `psql -X -v ON_ERROR_STOP=1 -f`. SELECT output has columns, rows and a row
-   count; DDL/DML has command tags; intentional checks may produce NOTICE
-   messages. An unexpected ERROR or nonzero exit is a failure to diagnose,
-   even when an earlier query printed plausible values.
-6. Verify the lesson's expected grain, ordering, constraints and declared
-   transaction or cleanup outcome. Keep required ROLLBACK statements.
-   The warehouse sequence and other explicitly stateful exercises explain
-   when state is committed. Read saved output without rerunning it when
-   reviewing an earlier attempt.
+Edit your saved copy at
+`.learning/sql/sql-01/lesson/workspace/sql/postgres-60day/day01_select_where_orderby.sql`.
+It lives in the classroom's Docker volume, while the checked-in file stays answer-free. When one of your exercise queries has a typo, `ON_ERROR_STOP` halts the run at that statement and nothing after it prints, so repair the first error before reading anything below it.
 
-If a relation is missing, inspect the lesson's required fixture and predecessor
-rather than guessing a new table definition. If authentication or runtime
-readiness fails, use `./classroom status` and the setup guide. Keep credentials
-out of SQL, notebooks, screenshots and committed files. Repair the first error
-before trusting partial output, and reveal separate solutions only when you
-want to compare after an attempt.
-
-### Optional contributor notebook route
-
-For notebook work, deliberately prepare the Linux/WSL contributor environment
-from [CONTRIBUTING.md](../../../CONTRIBUTING.md), including a compatible psql client and
-the notebook dependencies. Generate this lesson's private workspace through
-the maintained CLI:
-
-```sh
-uv run --no-sync python scripts/course.py sql notebook sql-01
-```
-
-Open the printed notebook path in that environment's JupyterLab. It uses the
-same catalog-derived learner-copy layout in that contributor checkout and
-executes the complete script through psql. Its host-side state is separate
-from the Docker browser's named volume. Follow
-[guided SQL notebooks](../../../docs/guided-sql-notebooks.md) for explicit local connection
-selection and kernel setup. Notebook generation does not execute SQL or
-authorize a reset.
+The shared study guide covers [classroom steps, table loading and resets](../../STUDY-GUIDE.md#run-a-lesson-in-the-classroom) and the [contributor notebook route](../../STUDY-GUIDE.md#optional-contributor-notebook-route).
 
 ## Level and prerequisites
 
@@ -104,8 +50,6 @@ worked queries only read data.
 
 ## Two worked SQL examples
 
-These worked excerpts come from `sql/postgres-60day/day01_select_where_orderby.sql`. Use **Whole SQL lesson (psql)** in the unified classroom for the complete file, including its fixture and transaction context. The optional contributor notebook and prepared `psql` routes are described above.
-
 ### Example 1
 
 ```sql
@@ -125,9 +69,9 @@ ORDER BY
 LIMIT 10;
 ```
 
-**How to read it:** Example 1: Start with `customers` in `FROM`/`JOIN`; let `WHERE` remove nonqualifying rows. The final `SELECT` displays `customer_id`, `full_name`, `country`, and `created_at`. `ORDER BY` determines presentation order and the final `LIMIT 10` caps displayed rows. Before running, predict the row grain, row count, `NULL` positions, and first/last key; afterwards, compare each prediction with the transcript.
+**How to read it:** `WHERE country IN ('US', 'CA')` keeps 126 of the 500 customers (63 from each country) before any sorting happens. `ORDER BY created_at DESC` then lines those 126 rows up newest first, and `LIMIT 10` keeps the top ten. The `customer_id DESC` key never decides anything on this fixture, because no two customers share a `created_at` value, but it guarantees the same ten rows if a later load ever produces a tie.
 
-**Expected result/shape:** Example 1 returns one row per `customer_id`, and `country`, capped at 10 rows with columns `customer_id`, `full_name`, `country`, and `created_at` from `customers`. Use a direct count or grouped aggregate over those same source relations as the control; check ordering only when this query has an `ORDER BY`, and inspect `NULL` only for columns this example can produce.
+**Expected result/shape:** Ten rows, one per customer, with every `country` equal to US or CA. On a fresh load the list starts with customer 258 (CA) and then customer 1 (US), and the dates fall as you read down. To confirm that the cap, not the filter, set the row count, run `SELECT count(*) FROM customers WHERE country IN ('US', 'CA')` and expect 126.
 
 ### Example 2
 
@@ -150,9 +94,9 @@ ORDER BY
 LIMIT 15;
 ```
 
-**How to read it:** Example 2: Start with `products` in `FROM`/`JOIN`; let `WHERE` remove nonqualifying rows. The final `SELECT` displays `product_id`, `name`, `price`, `cost`, and `gross_margin`. `ORDER BY` determines presentation order and the final `LIMIT 15` caps displayed rows. Before running, predict the row grain, row count, `NULL` positions, and first/last key; afterwards, compare each prediction with the transcript.
+**How to read it:** `gross_margin` is computed for each row from `price - cost`, and because `ORDER BY` is evaluated after `SELECT`, it may sort by that alias. `WHERE price > 50` runs earlier, on the stored column, which is why the filter could not mention `gross_margin`. Of the 300 products, 192 pass the price filter. `price DESC` and then `product_id` settle any margin ties.
 
-**Expected result/shape:** Example 2 returns one row per `product_id`, capped at 15 rows with columns `product_id`, `name`, `price`, `cost`, and `gross_margin` from `products`. Use a direct count or grouped aggregate over those same source relations as the control; check ordering only when this query has an `ORDER BY`, and inspect `NULL` only for columns this example can produce.
+**Expected result/shape:** Fifteen product rows with five columns. Product 280 leads with a margin of 73.84 (price 113.60, cost 39.76), followed by 277 at 71.99 and 274 at 70.17; the remaining rows come from products in the 230 to 299 range. Recompute one row by hand: `price - cost` for product 280 must equal its printed `gross_margin`.
 
 ## Learning objectives
 
@@ -188,39 +132,36 @@ with equal timestamps no longer have a guaranteed relative order.
 
 Build a result deliberately from projection, filtering, deterministic ordering, and a bounded row count.
 
-Attempt each prompt in a scratch SQL file before opening the solution.
-For every result, write its row grain and expected shape first.
-
 1. **Query writing:** List the 20 newest orders with customer ID and total amount.
    **Progressive hint:** Sort by `order_date DESC` and add `order_id DESC` as a unique tie-breaker before applying `LIMIT`.
-   **Inputs/evidence:** For sql-01 Exercise 1, read from `orders`. Build the answer toward `order_id`, `customer_id`, `total_amount`, and `order_date`; keep `order_id` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-01 Exercise 1, expected output: At most 20 rows; one row per order, newest first. The final columns are `order_id`, `customer_id`, `total_amount`, and `order_date`. The final order is `o.order_date DESC, o.order_id DESC`.
-   **Verify:** For sql-01 Exercise 1, assert the result has at most 20 rows, no duplicate `order_id`, and no adjacent pair out of `(order_date DESC, order_id DESC)` order. Check that each projected `customer_id`, `total_amount`, and `order_date` matches the same `orders.order_id` source row. Give two rows the same `o.order_date DESC` value and different `o.order_id DESC` values; verify `o.order_date DESC, o.order_id DESC` produces the intended rank and display order.
+   **Inputs/evidence:** For sql-01 Exercise 1, read the 4,362 `orders` rows, one per `order_id`; `order_date` is `NOT NULL` and holds 4,362 distinct timestamps, so `order_id` only breaks future ties. Project `order_id`, `customer_id`, `total_amount`, and `order_date`.
+   **Expected result/shape:** For sql-01 Exercise 1, return exactly 20 rows, one per order, newest first; on a freshly loaded fixture the list starts with order 2258 and ends with order 743. The final columns are `order_id`, `customer_id`, `total_amount`, and `order_date`. The final order is `o.order_date DESC, o.order_id DESC`.
+   **Verify:** For sql-01 Exercise 1, confirm 20 rows and 20 distinct `order_id` values, then compare them with `SELECT order_id FROM orders ORDER BY order_date DESC, order_id DESC LIMIT 20`. Inside a rolled-back transaction, copy order 2258's `order_date` onto order 1; the first rows must become 2258, 1, 745, showing the higher ID wins the tie.
 2. **Query writing:** Find the 10 most expensive products created in the last 90 days.
    **Progressive hint:** Filter the timestamp directly, then sort by price and a stable product key.
-   **Inputs/evidence:** For sql-01 Exercise 2, read from `products`. Build the answer toward `product_id`, `name`, `price`, and `created_at`; keep `product_id` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-01 Exercise 2, expected output: At most 10 product rows; every row is in the 90-day window. The final columns are `product_id`, `name`, `price`, and `created_at`. The final order is `p.price DESC, p.product_id`.
-   **Verify:** For sql-01 Exercise 2, assert no more than 10 rows, no duplicate `product_id`, and no adjacent pair that violates `p.price DESC, p.product_id`. Rejoin the returned keys to `products` to confirm `product_id`, `name`, `price`, and `created_at` came from the same source rows. Tie two rows on `p.price DESC` and give them different `p.product_id` values; verify `p.price DESC, p.product_id` chooses a stable first/last row.
+   **Inputs/evidence:** For sql-01 Exercise 2, read `products` (300 rows, 300 distinct prices); 25 of them have `created_at` inside the last 90 days, priced from 112.12 to 121.00. Project `product_id`, `name`, `price`, and `created_at`.
+   **Expected result/shape:** For sql-01 Exercise 2, return exactly 10 of those 25 recent products, highest price first: product 300 at 121.00 down to product 291 at 117.67. The final columns are `product_id`, `name`, `price`, and `created_at`. The final order is `p.price DESC, p.product_id`.
+   **Verify:** For sql-01 Exercise 2, confirm `SELECT COUNT(*) FROM products WHERE created_at >= CURRENT_TIMESTAMP - INTERVAL '90 days'` returns 25 and that every returned `created_at` passes that test. Inside a rolled-back transaction, set product 299's price to 121.00; the first two rows must then be 299 and 300, because `product_id` ascending breaks the price tie.
 3. **Query writing:** Show customers from GB or DE created in the last year, newest first.
    **Progressive hint:** Use `IN` for the country set, combine the time condition with `AND`, and break timestamp ties.
-   **Inputs/evidence:** For sql-01 Exercise 3, read from `customers`. Build the answer toward `customer_id`, `full_name`, `country`, and `created_at`; keep `customer_id` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-01 Exercise 3, expected output: Only GB/DE customers from the declared window. The final columns are `customer_id`, `full_name`, `country`, and `created_at`. The final order is `c.created_at DESC, c.customer_id`.
-   **Verify:** For sql-01 Exercise 3, run an anti-check that counts rows where NOT ((c.country IN ('GB', 'DE') AND c.created_at >= CURRENT_TIMESTAMP - INTERVAL '1 year')); require unique `customer_id` where the expected grain is one row per key and confirm the projected `customer_id`, `full_name`, `country`, and `created_at` against `customers`. Give two rows the same `c.created_at DESC` value and different `c.customer_id` values; verify `c.created_at DESC, c.customer_id` produces the intended rank and display order.
+   **Inputs/evidence:** For sql-01 Exercise 3, read `customers` (500 rows); 119 were created in the last year, of which 15 are `GB` and 14 are `DE`. Project `customer_id`, `full_name`, `country`, and `created_at`.
+   **Expected result/shape:** For sql-01 Exercise 3, return 29 rows on a freshly loaded fixture, all `GB` or `DE` and all created within one year, newest first starting with customer 172. The final columns are `customer_id`, `full_name`, `country`, and `created_at`. The final order is `c.created_at DESC, c.customer_id`.
+   **Verify:** For sql-01 Exercise 3, group the one-year window by `country` and confirm `GB` 15 plus `DE` 14 equals the 29 returned rows; grouping the output by `country` must show only those two values. The 29 rows carry 29 distinct `created_at` values, so `customer_id` only matters if a tie is added.
 4. **Prediction:** Predict which rows survive `email = NULL`, then write a query that counts missing and present emails correctly.
    **Progressive hint:** Comparisons with `NULL` are unknown; use `IS NULL` and `IS NOT NULL`.
-   **Inputs/evidence:** For sql-01 Exercise 4, read from `customers`. Build the answer toward `missing_email_count`, `present_email_count`, and `customer_count`; keep `customer_id` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-01 Exercise 4, expected output: Exactly one summary row with counts whose sum equals all customers. The final columns are `missing_email_count`, `present_email_count`, and `customer_count`.
-   **Verify:** For sql-01 Exercise 4, assert exactly one row. Independently run `SELECT COUNT(*) FROM customers`; verify `missing_email_count + present_email_count = customer_count` and that `customer_count` equals the independent count. Repeat with `NULL` in `email` and state whether the row is kept, rejected, or classified.
+   **Inputs/evidence:** For sql-01 Exercise 4, read all 500 `customers` rows; `email` is nullable but currently filled on every row. The query returns counts only, so no customer key appears.
+   **Expected result/shape:** For sql-01 Exercise 4, return exactly one row: `missing_email_count` 0, `present_email_count` 500, `customer_count` 500. The final columns are `missing_email_count`, `present_email_count`, and `customer_count`.
+   **Verify:** For sql-01 Exercise 4, confirm 0 + 500 equals `customer_count` and matches `SELECT COUNT(*) FROM customers`. Inside a rolled-back transaction, set customer 1's `email` to `NULL` and rerun; the counts must become 1, 499, and 500, proving `COUNT(email)` skips the `NULL` while `COUNT(*)` keeps the row.
 5. **Debugging:** Repair a top-price query that uses `LIMIT 10` without `ORDER BY` and explain why the original is nondeterministic.
    **Progressive hint:** Define the business ranking first; use a unique final key for tied prices.
-   **Inputs/evidence:** For sql-01 Exercise 5, read from `products`. Build the answer toward `product_id`, `name`, and `price`; keep `product_id` visible whenever the result has row-level grain.
-   **Expected result/shape:** For sql-01 Exercise 5, expected output: At most 10 rows, highest prices first, stable across repeated runs on unchanged data. The final columns are `product_id`, `name`, and `price`. The final order is `p.price DESC, p.product_id`.
-   **Verify:** For sql-01 Exercise 5, assert no more than 10 rows, no duplicate `product_id`, and no adjacent pair that violates `p.price DESC, p.product_id`. Rejoin the returned keys to `products` to confirm `product_id`, `name`, and `price` came from the same source rows. Give two rows the same `p.price DESC` value and different `p.product_id` values; verify `p.price DESC, p.product_id` produces the intended rank and display order.
+   **Inputs/evidence:** For sql-01 Exercise 5, read all 300 `products` rows; every price is distinct, from product 1 up to product 300 at 121.00. Project `product_id`, `name`, and `price`.
+   **Expected result/shape:** For sql-01 Exercise 5, return exactly 10 rows, products 300 down to 291 with prices 121.00 down to 117.67, identical on every rerun. The final columns are `product_id`, `name`, and `price`. The final order is `p.price DESC, p.product_id`.
+   **Verify:** For sql-01 Exercise 5, confirm 10 distinct `product_id` values and that `SELECT COUNT(DISTINCT price) FROM products` returns 300, so the current fixture has no price tie. Inside a rolled-back transaction, set product 299's price to 121.00; the top three must read 299, 300, 298 on every run.
 6. **Extension:** Return the second page of 10 newest orders using the same deterministic order, LIMIT 10 and OFFSET 10.
    **Progressive hint:** Sort by order_date DESC and order_id DESC; skip the first ten ordered rows and keep the next ten.
-   **Inputs/evidence:** For sql-01 Exercise 6, read from `orders` at one row per `order_id` and compare pages only on an unchanged fixture.
-   **Expected result/shape:** For sql-01 Exercise 6, return at most 10 rows equal to positions 11 through 20 of the unchanged ordered input, one row per `order_id`. The final columns are `order_id`, `customer_id`, `total_amount`, and `order_date`. The final order is `o.order_date DESC, o.order_id DESC`.
-   **Verify:** For sql-01 Exercise 6, display the first 20 ordered IDs and compare the page with positions 11 through 20. Assert at most 10 unique `order_id` values, no overlap with page one, and projected values matching those source IDs.
+   **Inputs/evidence:** For sql-01 Exercise 6, read the 4,362 `orders` rows at one row per `order_id`, sorted by the Exercise 1 key, and compare pages only on an unchanged fixture.
+   **Expected result/shape:** For sql-01 Exercise 6, return 10 rows equal to positions 11 through 20 of the ordered input, one row per `order_id`; on a freshly loaded fixture the page runs from order 1500 to order 743. The final columns are `order_id`, `customer_id`, `total_amount`, and `order_date`. The final order is `o.order_date DESC, o.order_id DESC`.
+   **Verify:** For sql-01 Exercise 6, list the first 20 ordered IDs (2258 through 743) and confirm the page equals the last 10 of them, from 1500 to 743, with no ID shared with page one (2258 through 3014).
 
 `OFFSET 10` skips the first ten rows after ordering; `LIMIT 10` bounds the
 remaining result to ten rows. Keeping the same unique sort key is essential.
@@ -229,18 +170,13 @@ If rows change between requests, offset pages can shift. The later
 
 ## Common mistakes and how to recover
 
-- **Lesson-specific semantic mistake:** Never use `= NULL`, depend on implicit row order, or apply `LIMIT` without first defining which rows are first.
-- **Unexpected row count:** display keys before aggregates, count rows after
-  each join/filter stage, and find the first stage whose grain differs from the
-  contract. Do not hide fanout with `DISTINCT`.
-- **Unexpected `NULL` or missing row:** decide whether the fact is unknown,
-  inapplicable, zero, or absent before using `COALESCE`; inspect outer-join
-  predicate placement and empty-input aggregate behavior.
-- **Unstable top/first/last output:** add `ORDER BY` with a unique final
-  tie-breaker before `LIMIT` or order-sensitive windows/aggregates.
-- **`psql` stops on an error:** fix the first error shown by
-  `ON_ERROR_STOP`, restore the declared transaction/setup state, and rerun the
-  complete file. A later successful statement does not validate a partial run.
+- **Writing `email = NULL`:** the comparison is unknown for every row, so the naive filter in Exercise 4 returns zero customers even though it reads sensibly. Use `email IS NULL`. All 500 fixture customers have an email, so the correct missing count is also 0; set one email to NULL inside the transaction to see the two forms disagree.
+- **`LIMIT` without `ORDER BY`:** Exercise 5 starts from this bug. PostgreSQL returns whichever ten rows its plan produces first, which on a freshly loaded table is usually insertion order, so the output looks plausible until an update or a different plan reshuffles it.
+- **Sorting the newest orders by `order_id`:** order IDs were assigned customer by customer, so the highest ID is not the latest order. Sort by `order_date` and use the ID only to break ties.
+- **Changing the sort between pages:** Exercise 6 must reuse the exact `ORDER BY` of page one. A page sorted by `order_date DESC` alone could repeat or skip an order whenever two timestamps tie.
+- **`LIKE` where you meant `ILIKE`:** names are stored as `Customer N`, so `full_name LIKE 'customer %1_'` matches nothing. The worked script uses `ILIKE` for exactly this reason.
+
+For transcript errors and missing tables, see [recovering from common failures](../../STUDY-GUIDE.md#recover-from-common-failures).
 
 ## Self-check
 
@@ -295,9 +231,7 @@ Further reading
 
 ## Ask an AI tutor about this lesson
 
-An AI tutor is optional; the guide, learner SQL, PostgreSQL, and expected checks are
-enough to complete the lesson offline. If you want a patient tutor, copy this
-prompt after opening the repository in the AI tutor:
+The lesson is complete without a tutor. If you want one, paste the prompt below and ask it to quiz you on why the margin query can sort by `gross_margin` but cannot filter on it. The [tutor notes](../../STUDY-GUIDE.md#use-an-ai-tutor-optional) explain how it keeps `solutions/` closed until you ask.
 
 ```text
 Tutor me through sql-01: SELECT, WHERE, ORDER BY, and LIMIT.

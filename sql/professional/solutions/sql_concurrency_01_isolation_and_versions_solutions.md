@@ -1,22 +1,23 @@
 # SQL-CONCURRENCY-01: solution reasoning
 
-Use this after an honest attempt at the [guide](../companion-guides/sql_concurrency_01_isolation_and_versions.md)
-and [learner script](../lessons/sql_concurrency_01_isolation_and_versions.sql). The separate
-[executable solution](sql_concurrency_01_isolation_and_versions_solutions.sql) runs all six answers and independent
-fail-fast checks with `psql -X -v ON_ERROR_STOP=1 -d advanced_sql_training -f sql/professional/solutions/sql_concurrency_01_isolation_and_versions_solutions.sql`.
-It uses only temporary fixtures, starts a transaction, and ends in rollback.
-It must exit 0 with no contract failures. Each answer has a savepoint so an
-experiment cannot silently change a later exercise's starting conditions.
-The assertion helper treats false and unknown as failures, rather than allowing
-a NULL assertion to pass accidentally. Keep the original fixture unchanged
-when comparing your work so the stated identities remain a reliable oracle.
+Open this after attempting the
+[guide](../companion-guides/sql_concurrency_01_isolation_and_versions.md) and
+your [learner
+script](../lessons/sql_concurrency_01_isolation_and_versions.sql). The
+[executable solution](sql_concurrency_01_isolation_and_versions_solutions.sql)
+rebuilds the two `concurrency_stock` rows, runs each exercise in its own
+savepoint, and copies the `RETURNING` rows or affected-row counts into
+`solution_answer_N` (Exercise 4 also records a `model_trace` of the two
+callers). `pg_temp.assert_true` then checks the stock values and versions
+before the savepoint is rolled back. Run it as the [study
+guide](../../STUDY-GUIDE.md#read-a-solution) shows, with
+`-f sql/professional/solutions/sql_concurrency_01_isolation_and_versions_solutions.sql`.
 
-The code below is the answer for each numbered prompt, followed by its
-reasoning. Inspect the first discrepancy in your own transcript before reading
-a different answer. A solution is one defensible implementation of this contract;
-an alternative is valid if its identities, values, missingness, ordering, and
-transaction behavior match. Tests constrain the actual returned relation,
-rather than assuming a familiar-looking query must be right.
+Your own guarded update is equally correct if it refuses the same calls and
+leaves A and B at the same values and versions. The parts that cannot be
+dropped are the version predicate, the capacity predicate and the version
+increment; a query that omits one of them can still pass Exercise 1 and then
+silently allow the stale write in Exercise 4.
 
 ## Exercise solutions
 
@@ -70,7 +71,7 @@ Version 99 does not match the current row, so no mutation occurs. This is intent
 
 **Expected result/shape:** For sql-concurrency-01 Exercise 2, Zero returned rows with columns sku, available, version. A remains available 5 and version 1; SQL execution itself succeeds with UPDATE 0.
 
-**Verify:** For sql-concurrency-01 Exercise 2, Require zero RETURNING rows and unchanged A state available=5,version=1. Removing the version condition would discard the requested stale-write protection.
+**Verify:** For sql-concurrency-01 Exercise 2, Require zero RETURNING rows and unchanged A state with `available` 5 and `version` 1. Removing the version condition would discard the requested stale-write protection.
 
 ## Exercise 3: Reject insufficient capacity independently
 
@@ -96,7 +97,7 @@ The version precondition is satisfied, but available >= 2 is false for B's one u
 
 **Expected result/shape:** For sql-concurrency-01 Exercise 3, Zero returned rows, columns sku, available, version. B remains (B,1,1), proving the capacity condition can fail even with a current version.
 
-**Verify:** For sql-concurrency-01 Exercise 3, Require zero RETURNING rows and unchanged B state available=1,version=1. The current version and failed capacity distinguish this outcome from the stale-version case.
+**Verify:** For sql-concurrency-01 Exercise 3, Require zero RETURNING rows and unchanged B state with `available` 1 and `version` 1. The current version and failed capacity distinguish this outcome from the stale-version case.
 
 ## Exercise 4: Model two callers sharing an old version
 
@@ -209,4 +210,11 @@ Replenishment changes the state just as reservation does, so it must advance the
 
 ## Cleanup and evidence boundary
 
-The final rollback removes every temporary table, helper function, index, and modeled change. Running this file twice starts from the same fixture and should produce the same logical evidence. No extension, external dataset, current timestamp, or administrator capability is required. For the optional two-session concurrency lab, use its separate explicit cleanup because that fixture is deliberately committed; the default script never prepares that shared state. A static content check can validate contracts and file structure, while only a live PostgreSQL transcript validates SQL execution. Retain that distinction when reporting completion.
+Each `ROLLBACK TO SAVEPOINT` discards that exercise's answer table (and,
+in Exercise 4, the `model_trace` table), and the closing `ROLLBACK` drops
+`concurrency_stock` and the assertion helper, so a second run again starts from
+`(A,5,1)` and `(B,1,1)`. This file never touches the committed
+`sql_concurrency_live` schema; if you ran the optional two-session lab, that
+schema still needs `sql/professional/fixtures/concurrency/cleanup.sql`. A clean
+run here proves the guarded-update logic in one session. It does not show what
+a second session sees; only a recorded two-terminal transcript does that.

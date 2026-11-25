@@ -1,6 +1,6 @@
 # js-062: explanatory solutions
 
-Compare after your own attempt or an explicit reveal. The separate .js reference is a complete offline browser program. These explanations discuss the six practice tasks; a visual resemblance alone is not a data or behavior check.
+Compare after your own attempt; the separate `.js` file is the complete reference program.
 
 ## Mechanism review
 
@@ -49,3 +49,7 @@ Choose the property relevant to the task and state the tradeoff. A familiar proj
 The map must be reproducible and legally distributable. Offline packaging needs deliberate acquisition and attribution, not a hidden runtime download. Record the boundary file's license, date and id field, bundle it with the lesson rather than fetching at runtime, and test that every feature id matches the data.
 
 **Expected:** Source/license, date, stable IDs, topology and projection checks.
+
+## After comparison
+
+Replace the synthetic points with two small polygons, one near the equator and one near 60 degrees north, and draw them with Mercator and with `geoEqualEarth`. Compare their drawn areas in both projections and explain which suits an area comparison.

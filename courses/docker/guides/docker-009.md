@@ -32,11 +32,9 @@ Troubleshoot in layers: application listen address, process state, container por
 
 ## How to use this lesson
 
-The classroom displays this guide and saves your worksheet, `courses/docker/lessons/docker-009.md`. Its Run button does not control your Docker engine. Docker engine access is powerful host access, so the classroom deliberately receives no engine socket. Work through the supplied examples without starting anything, then use the optional host lab only in your own disposable project. Reading a command, parsing YAML and actually running the project are different forms of evidence.
+The classroom saves `courses/docker/lessons/docker-009.md` and holds no engine socket ([host-lab setup](../STUDY-GUIDE.md#host-lab-setup)).
 
-Use Bash in Linux, macOS Terminal, or Ubuntu under WSL 2 on Windows. The supported engine runs Linux containers. The maintained fixture is `courses/docker/fixtures/compose-lab/`; its README explains copying it into a new ignored learner directory, checking the engine, building locally with visible logs, and using the fixed project name `ds60-docker-study`. The fixture uses port 18080 on host loopback. Stop if that project name or port belongs to unrelated work; choose a new project name consistently in your own copy. Never paste a command against a remote Docker context simply because it is currently selected.
-
-For Dockerfile examples, create a file named `Dockerfile` in a scratch project. YAML snippets describe a fragment unless explicitly called a complete file. Text transcripts are synthetic illustrations, not claims about your machine. Do not substitute a real password, token or private registry into a checked-in example. **How to use the lessons** in the [subject README](../README.md) collects these rules in one place.
+**Host lab.** With the project running, request `http://127.0.0.1:18080/` from the host and then run `docker compose -p ds60-docker-study port app 8080`, which should print `127.0.0.1:18080`. Next, try the same URL from inside the app container: `docker compose -p ds60-docker-study exec app python -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:18080/', timeout=2)"`. It fails, because inside the container 127.0.0.1 is the container's own loopback, where nothing listens on 18080. Change the URL to port 8080 and it succeeds. Then run the tools-profile client from the fixture README, which reaches `app:8080` by name. Three requests, three scopes. Nothing new is created except the short-lived client container, which `--rm` removes.
 
 ## Worked example / walkthrough
 
@@ -64,7 +62,7 @@ Peer container -> DNS name app -> container address:8080
 
 ## Six progressive exercises
 
-For each exercise, name the object involved and the phase of its lifetime before changing anything, then vary only the condition the task names. Exercises that ask you to predict, explain, compare or diagnose keep their answers in the solutions file; the others show the evidence to look for.
+Answer-type prompts keep their answers in the solutions file ([exercise rules](../STUDY-GUIDE.md#exercise-rules)).
 
 ### Exercise 1: Label every component of the mapping.
 
@@ -96,13 +94,19 @@ For each exercise, name the object involved and the phase of its lifetime before
 
 Binding the server to 127.0.0.1 inside the container, so the published port cannot reach it. Publishing on all host interfaces when loopback is enough. Using `localhost` in one container to reach another.
 
-Exercise 4 is this chapter's boundary case: Diagnose a server bound to container 127.0.0.1 only. Check which address the server binds inside the container, `127.0.0.1` or `0.0.0.0`, before editing the published mapping or the browser URL. Preserve the original failure and the exact changed field before retrying. Do not make a container privileged, mount the engine socket, disable all checks or delete every volume to make an example succeed.
+Exercise 4 is this chapter's boundary case: Diagnose a server bound to container 127.0.0.1 only. Check which address the server binds inside the container, `127.0.0.1` or `0.0.0.0`, before editing the published mapping or the browser URL.
+
+Learners on Linux sometimes assume a host firewall such as `ufw` protects a published port. The engine installs its own packet-filtering rules for published ports, and depending on the setup those rules can take effect before the host firewall's own chains, so `ports: - "8080:8080"` can be reachable from the network even when the firewall appears to deny 8080. The reliable control is the bind address in the mapping: publish to `127.0.0.1` when only the host needs access, as the fixture does, and check with `docker compose port` or `ss -ltn` on the host which address is actually listening.
+
+Never trade a safety control for a passing example ([safety rules](../STUDY-GUIDE.md#safety-rules)).
 
 ## Retrieval, transfer and next steps
 
-Close the explanations first. Trace a host request to `127.0.0.1:18080` and a peer request to `app:8080` without looking at the diagram. Then reconstruct worked example 2 (Compare two destinations) with one different value, predict what changes, and name which of port publishing, loopback address, bind address, host port and container port the change touches.
+**Retrieval.** Trace a host request to `127.0.0.1:18080` and a peer request to `app:8080` without looking at the diagram.
 
-When a host session ends, run `docker compose -p ds60-docker-study down` from your fixture copy. It removes the project's containers and network but keeps named volumes; deleting a volume is a separate, deliberate reset described in the fixture README.
+**Transfer case.** A second service in the same project needs to call the app, and a teammate configures it with `http://localhost:18080/`. It fails. Give the URL it should use, and explain why the host's URL does not work from there.
+
+Then run the [retrieval loop](../STUDY-GUIDE.md#retrieval-and-cleanup) and end any host session with its cleanup.
 
 ## Primary references
 

@@ -206,11 +206,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><strong>CancellationError:</strong> The error signaling acknowledged task cancellation.</p>
 <p><strong>Operation outcome:</strong> The actual result or effect, distinct from observer interest.</p>
 <h3 id="how-to-run-this-lesson">How to run this lesson<a class="heading-anchor" href="#how-to-run-this-lesson" aria-label="Link to this section">#</a></h3>
-<p>The Linux Docker classroom compiles the saved pad as <code>main.swift</code> with Swift 6 language checking. An explicit <code>@main</code> type contains <code>static func main() async throws</code>; the fixed compiler uses <code>-parse-as-library -swift-version 6</code>. The examples use the standard library and portable Foundation. <code>precondition</code> makes a violated invariant fail the process. The fixed pad accepts one source file, without arbitrary command arguments, interactive input or dependency installation. SwiftUI, UIKit, Apple simulators and application signing belong to the separately prepared macOS/Xcode project labs, never the Linux pad.</p>
-<p>Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.</p>
+<p>Example A&#x27;s task loops until it observes cancellation, so if the <code>task.cancel()</code> line is removed the program never finishes; run that experiment only with a timeout in mind. Example B is deterministic because its body ignores cancellation. Task 4 is about a remote write whose result is unknown, so describe it in prose rather than code.</p>
+<p>Compile contract, starter stop and success marker: <a href="../STUDY-GUIDE.md.html#running-a-lesson">running a lesson</a>.</p>
 <h3 id="syntax-anatomy-and-execution-trace">Syntax anatomy and execution trace<a class="heading-anchor" href="#syntax-anatomy-and-execution-trace" aria-label="Link to this section">#</a></h3>
 <p>Task.isCancelled inspects state and Task.checkCancellation throws CancellationError. A task handle can be cancelled and then awaited to observe its actual completion. Cancellation handlers require careful sendable state ownership.</p>
-<p>Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.</p>
+<p>Each example ends with a trace; method: <a href="../STUDY-GUIDE.md.html#tracing-a-program">tracing a program</a>.</p>
 <h3 id="worked-example-walkthrough">Worked example / walkthrough<a class="heading-anchor" href="#worked-example-walkthrough" aria-label="Link to this section">#</a></h3>
 <h4 id="example-a-cancel-before-observing-a-check">Example A: Cancel before observing a check<a class="heading-anchor" href="#example-a-cancel-before-observing-a-check" aria-label="Link to this section">#</a></h4>
 <p>The loop observes cancellation state rather than guessing a scheduling delay.</p>
@@ -235,6 +235,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> The task acknowledges cancellation and its completion is awaited.</p>
+<p><strong>Trace.</strong> <code>Task { ... }</code> starts unstructured work whose body loops while <code>Task.isCancelled</code> is false, yielding on each pass. The parent immediately calls <code>task.cancel()</code>, which sets the flag; it does not stop the task. Whenever the body next checks, the loop ends. <code>Task.checkCancellation()</code> then throws <code>CancellationError</code>, the matching catch returns true, and <code>await task.value</code> delivers that acknowledgment to the parent, whose check passes. Cancellation here is cooperative: the task decided how to respond.</p>
 <h4 id="example-b-cancellation-need-not-prevent-a-result">Example B: Cancellation need not prevent a result<a class="heading-anchor" href="#example-b-cancellation-need-not-prevent-a-result" aria-label="Link to this section">#</a></h4>
 <p>A cancellation request alone is not proof that an operation failed to execute.</p>
 <pre class="highlighted-code"><code class="language-swift"><span class="syntax-keyword">import</span> <span class="syntax-class">Foundation</span>
@@ -252,6 +253,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
   <span class="syntax-punctuation">}</span>
 <span class="syntax-punctuation">}</span></code></pre>
 <p><strong>Observe:</strong> This task still returns 9 because its body does not check cancellation.</p>
+<p><strong>Trace.</strong> This task&#x27;s body returns 9 and never checks cancellation. The parent cancels it, perhaps before the body even starts, but the flag only matters to code that reads it. The body runs anyway and returns 9, and <code>await task.value</code> delivers 9. So the effect of a cancellation request on a given operation can be anything from immediate acknowledgment to no effect at all, depending on what the operation checks.</p>
 <h3 id="exercises">Exercises<a class="heading-anchor" href="#exercises" aria-label="Link to this section">#</a></h3>
 <ol>
 <li><strong>Predict and explain.</strong> Separate cancellation request from acknowledged completion.</li>
@@ -271,10 +273,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <ol start="6">
 <li><strong>Transfer and justify.</strong> Design a receipt distinguishing success, confirmed cancellation and unknown outcome.</li>
 </ol>
-<p>For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.</p>
+<p>Log each task in the <a href="../STUDY-GUIDE.md.html#recording-exercise-evidence">evidence table</a> before opening the explanation.</p>
 <h3 id="common-pitfalls-and-diagnosis">Common pitfalls and diagnosis<a class="heading-anchor" href="#common-pitfalls-and-diagnosis" aria-label="Link to this section">#</a></h3>
 <p>Polling cancellation in a tight CPU loop without yielding can waste resources. A cancellation handler must not race unsafely with the operation. Preserve result identity when deciding whether replay is safe.</p>
-<p>A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.</p>
+<p>Task 4&#x27;s mistake is resending a payment because the caller stopped waiting. A cancelled waiter does not tell you whether the server applied the first write. The counterexample is a write that was applied and whose reply was lost: a blind retry applies it twice. A receipt with a stable operation identity, as in swift-032, makes the retry safe to check rather than repeat.</p>
+<p>Repair routine: <a href="../STUDY-GUIDE.md.html#building-a-regression-case">building a regression case</a>.</p>
 <h3 id="progressive-hints">Progressive hints<a class="heading-anchor" href="#progressive-hints" aria-label="Link to this section">#</a></h3>
 <ol>
 <li>Reproduce Example A (Cancel before observing a check) before changing anything, and confirm its observation: The task acknowledges cancellation and its completion is awaited.</li>
@@ -282,9 +285,11 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <li>Before opening the explanation, check your task 3 attempt (Write a bounded processing loop with cleanup on cancellation) against each pitfall listed above, and add one input that would expose the tempting wrong rule.</li>
 </ol>
 <h3 id="self-check-and-next-step">Self-check and next step<a class="heading-anchor" href="#self-check-and-next-step" aria-label="Link to this section">#</a></h3>
-<p>Explain Cooperative cancellation, CancellationError, Operation outcome without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.</p>
+<p>Explain the difference between requesting cancellation and observing it. Name two ways a task body can notice cancellation. For task 5, predict the result when a task is cancelled after it has already returned a value. List the three states an operation receipt needs and why unknown must be one of them.</p>
+<p>Then follow the general <a href="../STUDY-GUIDE.md.html#self-check-routine">self-check routine</a> and save your pad.</p>
 <h3 id="sources-and-execution-boundary">Sources and execution boundary<a class="heading-anchor" href="#sources-and-execution-boundary" aria-label="Link to this section">#</a></h3>
-<p><a href="https://docs.swift.org/swift-book/documentation/the-swift-programming-language/">Official language or framework documentation</a>. The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.</p>
+<p><a href="https://docs.swift.org/swift-book/documentation/the-swift-programming-language/">Documentation</a>: Cooperative cancellation is explained in the book&#x27;s Concurrency chapter; the standard library documents <code>Task.isCancelled</code>, <code>checkCancellation()</code> and <code>CancellationError</code>.</p>
+<p>Provenance and limits: <a href="../STUDY-GUIDE.md.html#sources-and-execution-boundary">sources and execution boundary</a>.</p>
 <h3 id="ask-an-ai-tutor-about-this-lesson">Ask an AI tutor about this lesson<a class="heading-anchor" href="#ask-an-ai-tutor-about-this-lesson" aria-label="Link to this section">#</a></h3>
 <pre class="highlighted-code"><code class="language-text">Use $guide-ds60sqlpy-learning for swift-030: Cancellation and cleanup in asynchronous work.
 Read courses/swift/guides/swift-030.md and courses/swift/lessons/swift-030.swift. Prerequisites: swift-029.

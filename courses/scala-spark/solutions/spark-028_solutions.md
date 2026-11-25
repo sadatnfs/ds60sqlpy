@@ -1,6 +1,8 @@
 # spark-028: Explained paired reference solutions
 
-Read the [guide](../guides/spark-028.md) and attempt one language first. The [Scala reference](spark-028_solution.scala) and [PySpark reference](spark-028_solution.py) are complete single-file programs with explicit local sessions and finally-based stop. Each compares with literal expectations; matching two implementations alone would not rule out a shared mistake.
+Attempt the [guide](../guides/spark-028.md) exercises first.
+
+References: [Scala](spark-028_solution.scala), [PySpark](spark-028_solution.py).
 
 ## Exercises and reasoning
 
@@ -89,7 +91,7 @@ def baseline_product(facts, dimension):
 
 The per-key oracle checks more than the grand total. It detects a wrong factor mapping or shifted group population that could be obscured by compensating totals. Known counts expose the NULL measurement population, and the full accepted-identity count verifies one product row per accepted fact under the reviewed dimension contract.
 
-**Verification evidence:** Assert all five summary tuples and aggregate metrics 2000,2000,1800,7196,17913.
+**Verification evidence:** Assert all five summary tuples and aggregate metrics 2000, 2000, 1800, 7196 and 17913.
 
 ### Exercise 4: Compare a bounded broadcast strategy with the same business contract
 
@@ -174,6 +176,7 @@ The rollback boundary is deliberately narrower than the business-data contract. 
 
 ## Execution and interpretation
 
-Run the complete reference in its prepared fixed worker. Its first check (Classify facts and reconcile the whole source population) is built inside the program, so opening the lesson fetches nothing; it expects: Accepted 2000, rejected 2 with source 2001 `missing_identity` and 2002 `negative_amount`. Accepted unique fact IDs 2000 and known amounts 1800. The final success line prints only after every reference assertion passes.
+The references first reconcile classification: rejected sources `(2001, missing_identity)` and `(2002, negative_amount)`, 2,000 accepted plus 2 rejected equals 2,002, and the accepted facts have 2,000 distinct IDs with 1,800 known amounts. The reviewed dimension must be `(k, k + 2)` for keys 0 to 5, and adding a second approved key-0 row must raise `ValueError`. The baseline must reproduce the expected metrics and the five per-key tuples from `(0, 1600, 1440, 5755, 11510)` to `(4, 100, 80, 321, 1926)`. The broadcast candidate must match those metrics, equal the baseline as a bag and show `BroadcastHashJoin`.
 
-Local plan, partition and resource evidence does not establish cluster-scale performance; session cleanup is explicit.
+The receipt must read version 4.3.0, master `local[2]`, AQE `false` and automatic broadcast `-1`; key frequencies must be 1,600 for key 0 and 100 for keys 1 to 4; and both strategies must report exchange metrics. The program prints that receipt with both plans and then checks rollback: with the switch off, the product has no `BroadcastHashJoin` and still matches as a bag, and with it on, the product matches the baseline. It ends with `spark-028: six PySpark reference contracts passed; Spark=` and the version, or Scala's line. Agreement on one skewed fixture is correctness evidence; it is not a benchmark.
+

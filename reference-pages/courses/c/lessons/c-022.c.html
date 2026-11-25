@@ -197,24 +197,17 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <span class="source-line"></span>
 <span class="source-line"><span class="syntax-keyword">int</span> <span class="syntax-function">main</span><span class="syntax-punctuation">(</span><span class="syntax-keyword">void</span><span class="syntax-punctuation">)</span> <span class="syntax-punctuation">{</span></span>
 <span class="source-line">  <span class="syntax-comment">/* Exercise 1: Preserve FIFO order: predict an edited check</span></span>
-<span class="source-line"><span class="syntax-comment">     Copy worked example 1 into a scratch pad and change `CHECK(enqueue(&amp;q, 2)</span></span>
-<span class="source-line"><span class="syntax-comment">     &amp;&amp; enqueue(&amp;q, 5));` to `CHECK(enqueue(&amp;q, 2) &amp;&amp; enqueue(&amp;q, 6));` inside</span></span>
-<span class="source-line"><span class="syntax-comment">     its CHECK. Before running, predict whether the CHECK still holds and</span></span>
-<span class="source-line"><span class="syntax-comment">     explain why; then restore it. Expected: With `CHECK(enqueue(&amp;q, 2) &amp;&amp;</span></span>
-<span class="source-line"><span class="syntax-comment">     enqueue(&amp;q, 6));` the run stops with `Check failed` at the CHECK on</span></span>
-<span class="source-line"><span class="syntax-comment">     `dequeue(&amp;q, &amp;out) &amp;&amp; out == 5`, because the &quot;preserve FIFO order&quot; case no</span></span>
-<span class="source-line"><span class="syntax-comment">     longer shows that the values arrive as 2 then 5. Restoring</span></span>
-<span class="source-line"><span class="syntax-comment">     `CHECK(enqueue(&amp;q, 2) &amp;&amp; enqueue(&amp;q, 5));` brings that observation back. */</span></span>
+<span class="source-line"><span class="syntax-comment">     In worked example 1, change `CHECK(enqueue(&amp;q, 2) &amp;&amp; enqueue(&amp;q, 5));` to</span></span>
+<span class="source-line"><span class="syntax-comment">     `CHECK(enqueue(&amp;q, 2) &amp;&amp; enqueue(&amp;q, 6));`. Predict whether the CHECK still</span></span>
+<span class="source-line"><span class="syntax-comment">     holds and why, then run and restore. Expected: `Check failed`:</span></span>
+<span class="source-line"><span class="syntax-comment">     `CHECK(enqueue(&amp;q, 2) &amp;&amp; enqueue(&amp;q, 6));` is false, although the values</span></span>
+<span class="source-line"><span class="syntax-comment">     arrive as 2 then 5. */</span></span>
 <span class="source-line"></span>
 <span class="source-line">  <span class="syntax-comment">/* Exercise 2: Reject an empty read: debug a regression</span></span>
-<span class="source-line"><span class="syntax-comment">     A regression changed one token in worked example 2, the &quot;reject an empty</span></span>
-<span class="source-line"><span class="syntax-comment">     read&quot; case, so one line now reads `int out = 10;`. Run the example with</span></span>
-<span class="source-line"><span class="syntax-comment">     that line, use the failing CHECK to find why the operation fails and output</span></span>
-<span class="source-line"><span class="syntax-comment">     stays 9 no longer holds and repair the line without changing the CHECK.</span></span>
-<span class="source-line"><span class="syntax-comment">     Expected: Before the repair the run stops with `Check failed` at the CHECK</span></span>
-<span class="source-line"><span class="syntax-comment">     on `!dequeue(&amp;q, &amp;out) &amp;&amp; out == 9 &amp;&amp; q.count == 0`. Once the line reads</span></span>
-<span class="source-line"><span class="syntax-comment">     `int out = 9;` again, the &quot;reject an empty read&quot; case again shows that the</span></span>
-<span class="source-line"><span class="syntax-comment">     operation fails and output stays 9. */</span></span>
+<span class="source-line"><span class="syntax-comment">     Worked example 2 now has a line reading `int out = 10;`. Repair it so that</span></span>
+<span class="source-line"><span class="syntax-comment">     the operation fails and output stays 9 again. Expected: `Check failed` at</span></span>
+<span class="source-line"><span class="syntax-comment">     `!dequeue(&amp;q, &amp;out) &amp;&amp; out == 9 &amp;&amp; q.count == 0` until the line reads `int</span></span>
+<span class="source-line"><span class="syntax-comment">     out = 9;` again. */</span></span>
 <span class="source-line"></span>
 <span class="source-line">  <span class="syntax-comment">/* Exercise 3: Reject a full write</span></span>
 <span class="source-line"><span class="syntax-comment">     Fill four slots and attempt a fifth insertion.</span></span>

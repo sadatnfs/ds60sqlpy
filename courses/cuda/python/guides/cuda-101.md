@@ -1,10 +1,17 @@
 # cuda-101: LLM training, fine-tuning and GPU memory
 
-**Route:** CUDA Python and machine learning. **Stage:** advanced. **Prerequisites:** `cuda-094`, `cuda-099`, `cuda-100`. Allow several sessions when the hardware experiment is new; the chapter is not a deadline.
+**Route:** CUDA Python and machine learning. **Stage:** advanced. **Prerequisites:** `cuda-094`, `cuda-099`, `cuda-100`.
 
-## What you will be able to explain
+Pacing, evidence labels and platform rules: [CUDA study guide](../../STUDY-GUIDE.md).
 
-By the end, you can **count low-rank parameters**, **compare sequence-length budgets**, and **define held-out evaluation** with evidence. Start with the two worked cases, then use the editable CPU model to make the quantities concrete.
+## Learning objectives
+
+- Count low-rank parameters.
+- Include base storage.
+- Inspect optimizer membership.
+- Compare sequence-length budgets.
+- Design tiny offline training.
+- Define held-out evaluation.
 
 ## Mechanism and vocabulary
 
@@ -35,15 +42,19 @@ A complete adaptation study defines the target task, training examples, held-out
 
 ### Worked example 1
 
-A 1024 by 1024 matrix has 1,048,576 parameters. A rank 8 update uses\(8(1024+1024)=16{,}384\) trainable parameters while the original matrix remains present.
+A 1024 by 1024 matrix has 1,048,576 parameters. A rank 8 update uses \(8(1024+1024)=16{,}384\) trainable parameters while the original matrix remains present.
 
 ### Worked example 2
 
 Freezing the base matrix removes its gradient and optimizer-update requirement under the chosen implementation, but downstream training can still need intermediate activations.
 
-## Portable executable model
+## How to run the CPU model
 
-The **CPU reference model** variant runs this bounded worked example using `python-core`. It uses only the Python standard library, small synthetic values and no network. Its purpose is to expose the arithmetic or contract behind the chapter. The separate reference includes assertions for the stated observations.
+Edit the copy; the [reference](../references/cuda-101_cpu.py) adds assertions.
+
+```sh
+python courses/cuda/python/lessons/cuda-101_cpu.py
+```
 
 ```python
 rows, cols, rank = 1024, 1024, 8
@@ -66,8 +77,6 @@ print("CPU adapter ledger:", base, adapter, "parameters")
 | `base` | `1048576` |
 | `adapter` | `16384` |
 
-Treat printed timing values as synthetic whenever the program says model, fixture or trace. They are not measurements of your GPU. Before editing, predict the output; after editing, compare your observation with the exact contract that changed.
-
 ## Equal framework lanes
 
 ### PyTorch
@@ -78,83 +87,69 @@ Freeze base parameters explicitly and construct the optimizer from intended trai
 
 Set base variables nontrainable, track adapter variables and pass the intended gradient-variable pairs to the optimizer. Report all resident variables as well as trainable counts.
 
-Choose either lane first, then compare the other using identical mathematical inputs. Framework-specific shape, mode and optimizer rules must be checked separately. Both use offline synthetic examples; no model hub or dataset download is triggered.
+Lane rules: [framework labs](../../STUDY-GUIDE.md#python-gpu-and-framework-labs).
 
 ## Executable framework practice
 
-The variant chooser offers **PyTorch on CPU**, **TensorFlow on CPU**, and separate **NVIDIA CUDA** versions. CPU versions force CPU placement. CUDA versions require the named GPU profile and refuse to silently fall back. Each complete program uses the same tiny deterministic objective, bounded tensors and local synthetic data. Read its source before running; a framework pass establishes only that variant and environment.
-
-The checkpoint demonstration is in-memory. It teaches what state must be saved; it does not export a durable model artifact or preserve an in-flight device context. Advanced custom-op, distributed and engine-building projects remain separately prepared external workflows.
+Run the **PyTorch** and **TensorFlow** variants on CPU first; [lab rules](../../STUDY-GUIDE.md#python-gpu-and-framework-labs).
 
 ## Practice and transfer
+
+Record each attempt in the [worksheet](../lessons/cuda-101.md) before opening hints.
 
 ### Exercise 1: Count low-rank parameters
 
 **Trap to avoid:** Computing rank times the product of dimensions, `8*1024*1024`, gives eight times the original matrix. That figure would make the adapter larger than the weight it adapts, which should immediately signal an error.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 2: Include base storage
 
 **Trap to avoid:** Budgeting memory from adapter parameters alone underestimates by the full base model. For this matrix the adapter is about 1.6 percent of the total, so the omitted base dominates the real footprint.
-
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 3: Inspect optimizer membership
 
 **Trap to avoid:** Assuming freezing alone excludes parameters from the optimizer can waste memory. Some optimizers skip parameters whose `.grad` is None, but weight decay or other per-parameter bookkeeping may still allocate state, so membership should be explicit rather than implied.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 4: Compare sequence-length budgets
 
 **Trap to avoid:** Assuming adapters make long-sequence fine-tuning cheap confuses parameter savings with activation savings. Gradients must still flow back through the frozen layers to reach adapters in earlier layers, so those activations are kept during the forward pass.
-
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
 
 ### Exercise 5: Design tiny offline training
 
 **Trap to avoid:** Using a full public model and dataset for a first test risks long downloads and exhausting memory. A failure in that setting is also harder to localize, because data, model size and wiring all vary at once.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ### Exercise 6: Define held-out evaluation
 
 **Trap to avoid:** Reporting the training loss as model quality overstates performance. Choosing the rank or learning rate by repeatedly looking at the evaluation set leaks it into tuning in the same way.
 
-Show the intermediate values or the boundary that rules this route out, then record your answer in the worksheet.
-
 ## Progressive hints
 
-Use one hint at a time. The separate solution explains each answer after you have recorded an attempt.
+Hint *k* belongs to exercise *k*; open one at a time.
 
-1. Start from worked example 1 and mark the quantities needed for the task "Count low-rank parameters".
-2. Change one assumption in worked example 2 while preserving the declared contract: include base storage.
-3. Trace the CPU program's variables before adding hardware behavior: inspect optimizer membership.
-4. Draw producers, consumers and the exact operation boundary for the task "Compare sequence-length budgets".
-5. Separate what the small fixture establishes from what the real runtime must show: design tiny offline training.
-6. Write a counterexample to an overbroad claim before you define held-out evaluation.
+1. Multiply the rank by the sum of the matrix's two dimensions.
+2. Add the frozen base matrix to the adapter parameters when estimating storage.
+3. List the tensors the optimizer holds and compare that list with the ones you meant to train.
+4. Ask how attention intermediates and caches grow when sequence length doubles.
+5. Generate synthetic tokens locally and bound the number of steps before training anything.
+6. Set aside validation data before fitting and keep it out of tuning decisions.
 
-## Common mistakes and self-review
+## Common mistakes and self-check
 
-Confusing a correct tiny example with a general implementation is the central review risk. For this chapter, challenge the assumption in worked example 2, then ask whether your change preserves the mechanism described above. If you change dtype, layout, ordering, batch size or backend, update the acceptance contract rather than silently reusing the old observation. Explain an unexpected result before trying random configuration changes.
+A common mistake is assuming a parameter-efficient method uses little memory. A rank 8 adapter on a 1024 by 1024 matrix trains 16,384 parameters, but the 1,048,576 base parameters stay in memory and activations still flow through them. Another mistake is building the optimizer over all parameters, which adds state for frozen weights. Fix both by counting the variables and optimizer state each framework actually holds and comparing methods on the same held-out synthetic task.
 
-Keep a small evidence table with columns **claim**, **input**, **expected observation**, **actual observation** and **limit**. For the first claim use `Count low-rank parameters`. For the final claim use `Define held-out evaluation`. An unperformed GPU or cluster experiment remains pending even when the CPU model is correct.
+**Evidence limit:** The reference counts 1,048,576 base and 16,384 adapter parameters. It trains no model, so real memory, quality and runtime differences between full and adapter fine-tuning need the framework lanes on a bounded synthetic task.
 
-## Platform and evidence contract
+1. How does a low-rank update reduce trainable parameters?
+2. Does freezing the base remove its memory cost?
+3. Why build a tiny transformer with synthetic tokens first?
 
-The reading worksheet and CPU reference model work through the ordinary Linux Docker classroom on macOS, Linux and Windows using WSL 2. They do not require an NVIDIA GPU. Their results are labeled CPU models or semantic oracles, not simulated hardware performance.
-
-Real CUDA work needs supported NVIDIA hardware, a compatible host driver and an explicitly prepared GPU runtime. An Apple GPU does not execute CUDA kernels. PyTorch MPS on a supported native Mac, ROCm on supported AMD hardware, or other vendor backends can provide separate accelerator learning routes; they need their own package and operation qualification and are not CUDA evidence. The ordinary Linux Docker classroom does not expose native Mac MPS automatically.
-
-Do not download packages, models or data by opening this lesson. Do not attach an engine socket, ambient cluster credentials or an arbitrary remote endpoint. A CPU pass, imported package, successful compilation, real GPU result and measured performance are distinct observations. Record the actual backend, data shape/dtype, source revision, versions and pending checks. A saved completion marker records learning progress, not hardware certification.
+Answers: [self-check answers](../solutions/cuda-101_solutions.md#self-check-answers).
 
 ## Primary references
 
 - [PyTorch CUDA semantics](https://docs.pytorch.org/docs/2.9/notes/cuda.html)
 - [TensorFlow GPU guide](https://www.tensorflow.org/guide/gpu)
 
-Use the version-matched documentation of your prepared environment. These references describe interfaces and supported boundaries; the chapter's synthetic examples and CPU models are original teaching material.
+Full lists: [documentation and sources](../../STUDY-GUIDE.md#documentation-and-sources).
 
 ## Ask an AI tutor about this lesson
 

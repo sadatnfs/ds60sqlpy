@@ -1,6 +1,6 @@
 # go-041: explained solutions
 
-These are comparison material after an attempt or explicit reveal. The executable reference implements all six cases in one `main.go`.
+Compare after an attempt ([using solutions](../STUDY-GUIDE.md#use-the-solutions)). `courses/go/solutions/go-041_solution.go` implements all six cases.
 
 ## Mechanism
 
@@ -10,7 +10,7 @@ The prepared project uses clientcmd loading rules with one explicit kubeconfig p
 
 ## 1. Accept explicit secure configuration: predict an edited check
 
-Copy worked example 1 into a scratch pad and change `check(validateTarget("https://cluster.invalid:6443", "lesson", "owned-lesson") == nil, "target")` to `check(validateTarget("https://cluster.invalid:6443!", "lesson", "owned-lesson") == nil, "target")` inside its check. Before running, predict whether the check still passes and explain why; then restore it.
+Copy worked example 1, change `check(validateTarget("https://cluster.invalid:6443", "lesson", "owned-lesson") == nil, "target")` to `check(validateTarget("https://cluster.invalid:6443!", "lesson", "owned-lesson") == nil, "target")` inside its check and predict whether it still passes; then restore it.
 
 The unchanged code is worked example 1:
 
@@ -18,13 +18,15 @@ The unchanged code is worked example 1:
 check(validateTarget("https://cluster.invalid:6443", "lesson", "owned-lesson") == nil, "target")
 ```
 
-**Expected:** The changed run panics with `target` because the edited check no longer holds. Restoring the original line brings back the worked observation: the configuration is accepted.
+**Expected:** The edited check panics with `target` even though `validateTarget("https://cluster.invalid:6443", "lesson", "owned-lesson") == nil` still holds.
+
+**Verify:** Restoring `check(validateTarget("https://cluster.invalid:6443", "lesson", "owned-lesson") == nil, "target")` makes the check pass again with the worked observation: the configuration is accepted.
 
 The hostname is a nonresolving fixture and no request is sent. Real target ownership requires stronger runtime evidence than these syntax checks.
 
 ## 2. Reject insecure transport: diagnose an edited check
 
-A careless edit changed the check in worked example 2 so that it reads `check(validateTarget("http://cluster.invalid", "lesson", "owned-lesson") == nil, "TLS")`. Run worked example 2 with that line, explain why the edited check now fails for the same program state, and restore it.
+A careless edit rewrote the check in worked example 2 as `check(validateTarget("http://cluster.invalid", "lesson", "owned-lesson") == nil, "TLS")`. Explain the failure, then restore it.
 
 The unchanged code is worked example 2:
 
@@ -32,7 +34,9 @@ The unchanged code is worked example 2:
 check(validateTarget("http://cluster.invalid", "lesson", "owned-lesson") != nil, "TLS")
 ```
 
-**Expected:** Before the repair the program panics with `TLS`; after it the line reads `check(validateTarget("http://cluster.invalid", "lesson", "owned-lesson") != nil, "TLS")` again and the configuration is rejected.
+**Expected:** The defective run panics with `TLS`; after restoring `check(validateTarget("http://cluster.invalid", "lesson", "owned-lesson") != nil, "TLS")`, the configuration is rejected.
+
+**Verify:** The edited check fails with message `TLS` for a state that `validateTarget("http://cluster.invalid", "lesson", "owned-lesson") != nil` accepts.
 
 TLS policy protects transport identity. Disabling certificate verification is not a reasonable response to a configuration error.
 
@@ -46,6 +50,8 @@ check(validateTarget("https://cluster.invalid", "lesson", "") != nil, "explicit 
 
 **Expected:** Validation rejects the configuration.
 
+**Verify:** Your solution must keep `validateTarget("https://cluster.invalid", "lesson", "") != nil` true. Control: changing `check(validateTarget("https://cluster.invalid", "lesson", "") != nil, "explicit context")` to `check(validateTarget("https://cluster.invalid", "lesson", "") == nil, "explicit context")` panics with message `explicit context`; revert it.
+
 An explicit context prevents silently inheriting whichever cluster happens to be current in a developer configuration.
 
 ## 4. Constrain a namespace
@@ -57,6 +63,8 @@ check(validateTarget("https://cluster.invalid", "lesson/other", "owned") != nil,
 ```
 
 **Expected:** Validation rejects it.
+
+**Verify:** Your solution must keep `validateTarget("https://cluster.invalid", "lesson/other", "owned") != nil` true. Control: changing `check(validateTarget("https://cluster.invalid", "lesson/other", "owned") != nil, "namespace")` to `check(validateTarget("https://cluster.invalid", "lesson/other", "owned") == nil, "namespace")` panics with message `namespace`; revert it.
 
 This small validator is deliberately conservative. Real Kubernetes names have a documented grammar and should use the appropriate library validation.
 
@@ -71,6 +79,8 @@ check(err == nil && req.Method == "GET" && req.URL.Path == "/api/v1/namespaces/l
 
 **Expected:** The method and URL path are correct.
 
+**Verify:** Your solution must keep `err == nil && req.Method == "GET" && req.URL.Path == "/api/v1/namespaces/lesson/pods"` true. Control: changing `https://cluster.invalid/api/v1/namespaces/lesson/pods?limit=20` to `https://cluster.invalid/api/v2/namespaces/lesson/pods?limit=20` panics with message `request`; revert it.
+
 Constructing a request proves neither authentication nor authorization nor API availability. It is useful local boundary evidence only.
 
 ## 6. Transfer userinfo rejection
@@ -84,8 +94,10 @@ check(validateTarget(target.String(), "lesson", "owned") != nil, "userinfo")
 
 **Expected:** The embedded credential form is rejected.
 
+**Verify:** Your solution must keep `validateTarget(target.String(), "lesson", "owned") != nil` true. Control: changing `check(validateTarget(target.String(), "lesson", "owned") != nil, "userinfo")` to `check(validateTarget(target.String(), "lesson", "owned") == nil, "userinfo")` panics with message `userinfo`; revert it.
+
 Credentials should not be hidden in endpoint strings that might be logged. The real client handles credentials through an explicit reviewed configuration path.
 
 ## Transfer after comparison
 
-Return to your own pad and reproduce one check with a new input. Explain why the check rejects a plausible wrong implementation. Keep the distinction between a pure model, an in-process fake, and a real external system visible in your notes.
+Every later lesson that touches a cluster starts from configuration like this. In real tools, build the rest.Config from an explicitly named kubeconfig context, print the target before mutating anything and refuse to run when the context is unset. Apply the same discipline to cloud SDKs and database connection strings: authority should never come from an ambient default.

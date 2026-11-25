@@ -2,7 +2,7 @@
 
 Build and inspect a local dbt project through its real adapter.
 
-The executable reference contains the two complete worked cases with assertions. The changes below explain the independent practice and its limits.
+The reference parses and builds the one-model project, then checks the manifest node `model.classroom.answer`, the stored row 42 and the run result status. Its second case proves only that compilation renders SQL without creating a relation; it says nothing about adapters other than the local DuckDB one. See [how these answers are laid out](../STUDY-GUIDE.md#answers-and-references).
 
 
 ## 1. Locate the project

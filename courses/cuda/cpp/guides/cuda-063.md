@@ -4,18 +4,15 @@
 
 Advanced; about 130 minutes, plus any optional hardware experiment. Direct prerequisites: `cuda-038`, `cuda-039`, `cuda-040`, `cuda-044`
 
-The order supports learning at your own pace. Reading and CPU reasoning remain
-available when NVIDIA hardware is absent. Advanced hardware features need their
-own capability checks and are not prerequisites for opening this chapter.
+Pacing, evidence labels and platform rules for every chapter are in the [CUDA study guide](../../STUDY-GUIDE.md).
 
 ## Learning objectives
 
 Deliver a measured scientific application with a CPU baseline, adversarial tests, profiling artifacts and a reproducible benchmark.
 
-Work through *Capstone: a measured scientific or data application* with the concrete cases below. Finish with this evidence:
-CPU baseline, adversarial tests, sanitizer results where applicable, profiling artifacts, reproducible benchmark, failure behavior and a report stating when CPU is preferable. Distinguish an algorithmic
-calculation, a compiled artifact and an actual device observation when explaining
-what your work establishes.
+**Scope:** Requirements, numerical specification, correctness oracle, resource budget, profile-guided optimization and communication of tradeoffs.
+
+**Evidence to produce:** CPU baseline, adversarial tests, sanitizer results where applicable, profiling artifacts, reproducible benchmark, failure behavior and a report stating when CPU is preferable.
 
 ## Purpose, vocabulary and mental model
 
@@ -30,28 +27,17 @@ An independent numerical project begins with a bounded question, not a performan
 
 ## How to run and study this lesson
 
-Use the saved reading worksheet in `/classroom`; the reading pad does not execute
-CUDA. For the bounded calculation, select **CPU model (Python)**, whose
-answer-free starter supplies the literal fixtures and task contract. The
-[CUDA C++ study workflow](../README.md) covers platforms, optional GPU
-compilation and evidence labels. In a prepared Python environment you can also
-run the separate [CPU reference](../references/cuda-063_cpu.py) from the
-repository root:
+Trace worked example 1 by hand, then run the [CPU reference](../references/cuda-063_cpu.py) from the repository root:
 
 ```sh
 python courses/cuda/cpp/references/cuda-063_cpu.py
 ```
 
-Its assertions check the stated numerical result or model invariant; console
-text is evidence of this CPU model only, not of CUDA execution.
-
 ## Worked example 1: trace the mechanism
 
 Project A filters a synthetic signal with a fixed-zero stencil, computes an energy sum and returns both transformed values and the scalar. For \([2,4,8]\), the stencil reference is \([2,\frac{14}{3},4]\). The energy is the sum of squares, \(\frac{376}{9}\). Explicitly define whether energy is computed before or after filtering.
 
-The complete CPU model below intentionally models only the named arithmetic,
-layout, dependency or capability decision. It does not model GPU scheduling,
-caches, instruction timing or device memory visibility.
+**Why:** The middle value averages 2, 4 and 8 to 14/3, and edges average with zero, giving energy 376/9.
 
 ```python
 from fractions import Fraction
@@ -62,41 +48,37 @@ assert energy == Fraction(376, 9)
 print({"exact_filtered": [str(x) for x in filtered], "post_filter_energy": str(energy)})
 ```
 
-**Expected observation:** Every assertion succeeds. A representative CPU output is:
+**Expected observation:** every assertion succeeds, and the CPU model prints:
 
 ```text
 {'exact_filtered': ['2', '14/3', '4'], 'post_filter_energy': '376/9'}
 ```
 
-Integers, shapes and ordering must match exactly; only assertions with an explicit
-tolerance accept small floating-point differences. A printed duration is a model
-output, not a measured GPU benchmark.
+**Check:** The reference asserts energy == Fraction(376, 9) and prints the exact filtered values.
 
 ## Worked example 2: change a meaningful condition
 
 Project B aggregates graph neighbors using CSR then normalizes nonempty rows. It includes isolated nodes, duplicate-edge policy and skewed row lengths. The project can choose a library sparse multiply or a custom kernel, but must compare identical semantics and include conversion costs when the graph arrives in another format.
 
-Before applying this example to your own program, write down which inputs are
-read, which result is produced, and the condition that makes the comparison
-valid. Keep the original case as a regression check when changing a boundary.
+**Why:** Isolated nodes have no neighbors, so skipping their normalization avoids dividing by zero.
+
+**Check:** Include isolated nodes, duplicates and skewed rows, and compare against a host reference.
 
 ## Six progressive exercises
 
-Exercises 1 and 2 are guided reconstructions of the worked examples; exercises
-3-6 change an input, diagnose a defect, test a boundary and transfer the idea.
-For each one, keep the calculation, output, diagram or failure policy you
-produce so another reader can compare it with the worked cases. If the hint is
-not enough, reread the mechanism paragraph and the bounded CPU assertion.
-
 ### Exercise 1
 
-Predict and trace the first worked example before running its CPU reference. Write every intermediate quantity that leads to the stated result, including units or ownership where applicable.
+Reconstruct worked example 1 on paper before running its CPU reference. Apply the fixed-zero stencil to [2, 4, 8], then square and sum the filtered values with exact fractions.
+
+**Trap to avoid:** Computing energy on the unfiltered signal returns 84, a different quantity than the contract asks for.
 
 **Hint:** Start with the literal input and intermediate quantities in worked example 1.
 
 ### Exercise 2
 
-Reconstruct the second worked example without copying its conclusion. Identify the changed input or condition, show the resulting calculation or dependency, and explain why it differs from the first example.
+Rework worked example 2 without copying its conclusion. Build CSR from edges, aggregate neighbors, then normalize only rows with nonzero degree.
+
+**Trap to avoid:** Normalizing every row divides isolated rows by zero and spreads NaN.
 
 **Hint:** Identify exactly which condition changes in worked example 2.
 
@@ -104,11 +86,15 @@ Reconstruct the second worked example without copying its conclusion. Identify t
 
 Write a minimal acceptance contract for Project A.
 
+**Trap to avoid:** Checking only the energy scalar lets filter errors cancel and pass.
+
 **Hint:** Use the first worked example to establish the relevant quantities, then change only the requested input.
 
 ### Exercise 4
 
 A project claims a speedup but omits graph conversion. Diagnose it.
+
+**Trap to avoid:** Timing only the kernel overstates speedup.
 
 **Hint:** Locate the failed phase or violated dependency before proposing a repair.
 
@@ -116,35 +102,33 @@ A project claims a speedup but omits graph conversion. Diagnose it.
 
 Give three adversarial fixtures.
 
+**Trap to avoid:** Testing only typical sizes misses failures at edges.
+
 **Hint:** Check what the algorithm is allowed to read, write or assume at this boundary.
 
 ### Exercise 6
 
 Decide whether the GPU earns deployment.
 
+**Trap to avoid:** Deploying because the kernel is faster ignores total cost.
+
 **Hint:** State the output contract and which observations are needed in the new application.
 
 ## Common mistakes and diagnosis
 
-A tempting but incorrect claim in this chapter is: **a performance demo without documented assumptions is a deliverable someone else can maintain.**
-
-For the concrete failure exercise, a project claims a speedup but omits graph conversion. Diagnose it.
-Preserve the original input and the stage where behavior diverged, and compare
-with the CPU model before changing hardware configuration.
+A tempting but incorrect claim: **A performance demo without documented assumptions is a deliverable someone else can maintain.** A demo without its assumptions cannot be rerun, checked or extended by anyone else. A deliverable states its input contract, precision, resource budget, failure behavior and reference, and keeps source, generators, commands and raw measurements. Report end-to-end time, including conversions such as building CSR, beside kernel time. For Project A the reference is concrete: input [2,4,8] gives stencil output [2, 14/3, 4] and energy 376/9, so any GPU path must match both.
 
 ## Self-check, retrieval and transfer
 
-Explain the first example without its code, then use the second example to state
-one assumption that matters. Complete Exercise 3 independently, use Exercise 4 to
-diagnose a plausible defect, check the boundary in Exercise 5, and retain the
-application contract from Exercise 6. Compare the [separate explanations](../solutions/cuda-063_solutions.md)
-only after your attempt or a deliberate reveal. A reading marker records your
-choice; it does not certify hardware qualification or expert mastery.
+1. What energy does Project A give for the stencil output [2, 14/3, 4]?
+2. A speedup claim omits graph conversion. Why does that matter?
+3. Name three adversarial fixtures for Project B.
+
+Short answers are in the [separate explanations](../solutions/cuda-063_solutions.md#self-check-answers); compare only after an attempt.
 
 ## Primary references
 
-Check the documentation that matches your prepared toolkit before optional
-hardware execution.
+Use the documentation that matches your prepared toolkit.
 
 - [CUDA Programming Guide](https://docs.nvidia.com/cuda/cuda-programming-guide/)
 

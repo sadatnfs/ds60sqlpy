@@ -42,5 +42,7 @@
       "wrong": "Relying on a plain JOIN, which is an inner join in SQL. It drops C exactly as merge did, and the total check is the only signal.",
       "verify": "A query that groups the dimension by product with `HAVING COUNT(*) > 1` returns zero rows, and the joined amount total returns 60."
     }
-  ]
+  ],
+  "run_note": "The starter prints facts for products B, A and C with amounts 10, 20 and 30, and a dimension that describes only A as Paper and B as Home. Run it and notice that C has no dimension row. A plain merge would drop or blank that row silently, so your guard must report unmatched keys before any total is computed.",
+  "checks_note": "The assertions confirm that the dimension key is present and unique, that every fact found a match, that a fully matched lookup returns categories Home, Paper and Home while the amount total stays 60, that both an unmatched key and a duplicated dimension key are detected, and that an empty join keeps the `product`, `amount` and `category` columns. They do not test many-to-many joins."
 }

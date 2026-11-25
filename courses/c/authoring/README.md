@@ -79,6 +79,16 @@ references must pass the same sanitized build first. Edits to real computation
 are preferred over edits to a CHECK's own comparison. Rendering never executes
 code and stops with a clear message if a case changed after its record was made.
 
+`transfer.py` holds the authored, lesson-specific prose that used to be
+templated: `PITFALLS` gives every lesson its own common-mistake paragraph, and
+`TRANSFER` gives each lesson without reasoning notes its own transfer task
+(reasoning lessons keep theirs in their notes). Each entry names that lesson's
+real helpers and cases, so check it against the reference `main.c` when a case
+changes. Shared operating steps (running a lesson, the always-on `CHECK`, the
+exercise routine, diagnosis order and the execution boundary) live once in
+[`../STUDY-GUIDE.md`](../STUDY-GUIDE.md); guides and solutions link to its
+sections instead of repeating them.
+
 ## Shared maintenance gates
 
 Use [CONTRIBUTING](../../../CONTRIBUTING.md) for the prepared environment and

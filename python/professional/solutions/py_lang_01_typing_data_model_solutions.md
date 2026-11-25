@@ -52,9 +52,6 @@ The solution aligns each static promise with explicit runtime behavior and imple
 
 ### Verification micro-example
 
-Run this small, deterministic case before adapting the reference to a
-larger system. It gives the reasoning above an executable anchor:
-
 ```python
 from typing import Protocol
 
@@ -79,31 +76,19 @@ assert label(PlainRecord("ada")) == "ADA"
 
 **Expected observation:** `PlainRecord` never inherits from `Named`; static structural matching uses its available member.
 
-The reference implementation is one defensible contract, not a license
-to copy internal steps into every system. Preserve the observable
-guarantees and repeat the failure tests when adapting it.
-
 <!-- END PROFESSIONAL PYTHON CONCEPT ENRICHMENT -->
 
 ## Exercise-by-exercise reference
 
-Use this map after an honest attempt. The executable implementation remains
-[`py_lang_01_typing_data_model_solution.py`](py_lang_01_typing_data_model_solution.py); this section explains the
-contract, evidence, alternatives, and edge cases behind every numbered task.
+The runnable [`py_lang_01_typing_data_model_solution.py`](py_lang_01_typing_data_model_solution.py) implements every task below.
+
+**Principle behind every task:** Static types describe public contracts while Python's runtime data model still governs iteration, descriptors, context management, equality, and class creation.
+
+**Trap behind every task:** A type annotation is not runtime validation, and clever metaclass/mixin/descriptor machinery can obscure ownership, variance, or method-resolution behavior.
 
 ### Exercise 1: Complete and type the overloaded parser
 
 **Prompt recap:** Implement the three promised return behaviors. Reject boolean text other than `true` and `false`. In VS Code, inspect the inferred types of `parse_scalar("12", "int")` and `parse_scalar("true", "bool")`. A variable typed as arbitrary `str` needs a broader overload or prior narrowing; overloads do not inspect future runtime text.
-
-**Reference reasoning:** Static types describe public contracts while Python's runtime data model still governs iteration, descriptors, context management, equality, and class creation. The executable module and
-the focused discussion earlier in this file implement this original
-exercise. Verify every acceptance condition from the prompt with a
-normal case, a boundary case, and the documented failure behavior.
-
-**Common trap:** A type annotation is not runtime validation, and clever metaclass/mixin/descriptor machinery can obscure ownership, variance, or method-resolution behavior.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
 
 **Verify:** Complete and type the overloaded parser; assert parse_scalar('12','int') returns int 12, parse_scalar('true','bool') returns bool True, and the float case has its declared type; invalid Boolean text raises ValueError and mypy reveals the two Literal-call result types without errors.
 
@@ -111,31 +96,11 @@ and which input would make the policy reject or choose a different path.
 
 **Prompt recap:** Complete `Batches.__next__`. Return tuples, advance the offset, and raise `StopIteration` only after exhaustion. Test empty input and a final partial batch.
 
-**Reference reasoning:** Static types describe public contracts while Python's runtime data model still governs iteration, descriptors, context management, equality, and class creation. The executable module and
-the focused discussion earlier in this file implement this original
-exercise. Verify every acceptance condition from the prompt with a
-normal case, a boundary case, and the documented failure behavior.
-
-**Common trap:** A type annotation is not runtime validation, and clever metaclass/mixin/descriptor machinery can obscure ownership, variance, or method-resolution behavior.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
-
 **Verify:** Implement the iterator protocol; assert list(Batches([],2)) == [] and list(Batches([1,2,3],2)) == [(1,2),(3,)]; after exhaustion, another next() must raise StopIteration without changing the stored offset.
 
 ### Exercise 3: Reason about variance
 
 **Prompt recap:** Assign `SequenceReader[str]` to `Reader[object]`; this is safe because callers only read. Explain why a mutable repository of strings cannot be treated as a repository of objects: a caller might store an integer into it.
-
-**Reference reasoning:** Static types describe public contracts while Python's runtime data model still governs iteration, descriptors, context management, equality, and class creation. The executable module and
-the focused discussion earlier in this file implement this original
-exercise. Verify every acceptance condition from the prompt with a
-normal case, a boundary case, and the documented failure behavior.
-
-**Common trap:** A type annotation is not runtime validation, and clever metaclass/mixin/descriptor machinery can obscure ownership, variance, or method-resolution behavior.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
 
 **Verify:** Reason about variance; save a mypy transcript where SequenceReader[str] is accepted as Reader[object] and a mutable string repository is rejected as a mutable object repository; include the concrete unsafe integer-write counterexample.
 
@@ -143,31 +108,11 @@ and which input would make the policy reject or choose a different path.
 
 **Prompt recap:** Add a third event with a unique literal `kind`. Update `describe_event` and let the checker identify unhandled or invalid fields. Add runtime validation at the JSON boundary; TypedDict alone does not validate decoded data.
 
-**Reference reasoning:** Static types describe public contracts while Python's runtime data model still governs iteration, descriptors, context management, equality, and class creation. The executable module and
-the focused discussion earlier in this file implement this original
-exercise. Verify every acceptance condition from the prompt with a
-normal case, a boundary case, and the documented failure behavior.
-
-**Common trap:** A type annotation is not runtime validation, and clever metaclass/mixin/descriptor machinery can obscure ownership, variance, or method-resolution behavior.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
-
 **Verify:** Model events with TypedDict; mypy must reject one missing/invalid field and accept all three literal-kind events after exhaustive dispatch; runtime validation returns immutable domain data for valid JSON and a named error for an unknown kind.
 
 ### Exercise 5: Exercise context-manager failure
 
 **Prompt recap:** Append inside `Transaction`, then raise. Verify the target remains unchanged and the exception propagates. Returning true from `__exit__` would suppress it; this implementation deliberately returns false.
-
-**Reference reasoning:** Static types describe public contracts while Python's runtime data model still governs iteration, descriptors, context management, equality, and class creation. The executable module and
-the focused discussion earlier in this file implement this original
-exercise. Verify every acceptance condition from the prompt with a
-normal case, a boundary case, and the documented failure behavior.
-
-**Common trap:** A type annotation is not runtime validation, and clever metaclass/mixin/descriptor machinery can obscure ownership, variance, or method-resolution behavior.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
 
 **Verify:** Exercise context-manager failure; start with target ['before'], append inside Transaction, and raise a sentinel RuntimeError; assert the target remains ['before'] and the same exception object/message reaches the caller.
 
@@ -175,47 +120,17 @@ and which input would make the policy reject or choose a different path.
 
 **Prompt recap:** Compare `Customer.name` with `Customer("Ada").name`. Explain why the descriptor returns itself for class access. Corrupt the private field deliberately and observe the runtime type guard.
 
-**Reference reasoning:** Static types describe public contracts while Python's runtime data model still governs iteration, descriptors, context management, equality, and class creation. The executable module and
-the focused discussion earlier in this file implement this original
-exercise. Verify every acceptance condition from the prompt with a
-normal case, a boundary case, and the documented failure behavior.
-
-**Common trap:** A type annotation is not runtime validation, and clever metaclass/mixin/descriptor machinery can obscure ownership, variance, or method-resolution behavior.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
-
 **Verify:** Trace descriptor lookup; assert Customer.name returns the descriptor object, Customer('Ada').name returns 'Ada', and corrupting the private storage with a non-string makes instance access raise the declared TypeError.
 
 ### Exercise 7: Draw the MRO
 
 **Prompt recap:** Print `ApiRecord.__mro__`. Predict the label before calling it. Every mixin uses cooperative `super()`; directly naming a parent would skip or duplicate work.
 
-**Reference reasoning:** Static types describe public contracts while Python's runtime data model still governs iteration, descriptors, context management, equality, and class creation. The executable module and
-the focused discussion earlier in this file implement this original
-exercise. Verify every acceptance condition from the prompt with a
-normal case, a boundary case, and the documented failure behavior.
-
-**Common trap:** A type annotation is not runtime validation, and clever metaclass/mixin/descriptor machinery can obscure ownership, variance, or method-resolution behavior.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
-
 **Verify:** Draw the MRO; record the predicted label and ApiRecord.__mro__ before invocation, then assert the observed label matches and every expected mixin/class appears once in MRO order.
 
 ### Exercise 8: Bound metaclass use
 
 **Prompt recap:** Add a second `Handler` with `__init_subclass__`. Survey how a metaclass could enforce the same rule, then state why the hook is preferable here. Use a metaclass only when class-creation behavior cannot be expressed by descriptors, decorators, or subclass hooks.
-
-**Reference reasoning:** Static types describe public contracts while Python's runtime data model still governs iteration, descriptors, context management, equality, and class creation. The executable module and
-the focused discussion earlier in this file implement this original
-exercise. Verify every acceptance condition from the prompt with a
-normal case, a boundary case, and the documented failure behavior.
-
-**Common trap:** A type annotation is not runtime validation, and clever metaclass/mixin/descriptor machinery can obscure ownership, variance, or method-resolution behavior.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
 
 **Verify:** Bound metaclass use; add a second Handler with init subclass; survey how a metaclass could enforce the same rule, then state why the hook is preferable here; use a metaclass only when class-creation behavior cannot be expressed by descriptors, decorators, or subclass hooks.
 
@@ -233,11 +148,6 @@ mis-typed example under a checker-only fixture.
 Avoid `runtime_checkable` unless runtime `isinstance` is truly required; it
 checks attribute presence, not full generic signatures or semantic behavior.
 
-**Common trap:** A type annotation is not runtime validation, and clever metaclass/mixin/descriptor machinery can obscure ownership, variance, or method-resolution behavior.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
-
 **Verify:** design a structural Protocol; run mypy positive cases for JSON/text Serializer implementations and one negative implementation with the wrong return type; the consumer must work without inheritance and the negative fixture must fail at the protocol boundary.
 
 ### Exercise 10: preserve signatures with ParamSpec
@@ -254,11 +164,6 @@ it never receives arguments that may contain secrets.
 Use an injected monotonic clock for deterministic tests. Mypy should reveal the
 same signature and return type at decorated call sites.
 
-**Common trap:** A type annotation is not runtime validation, and clever metaclass/mixin/descriptor machinery can obscure ownership, variance, or method-resolution behavior.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
-
 **Verify:** preserve signatures with ParamSpec; mypy must preserve the wrapped positional/keyword signature and return type; injected fake clock/sink tests assert one duration record, functools.wraps metadata, return-value parity, and unchanged exception propagation.
 
 ### Exercise 11: narrow decoded data safely
@@ -274,11 +179,6 @@ Downstream code then narrows statically while the boundary remains honest.
 For richer errors, a parser returning a validated dataclass or raising a typed
 exception is often better than a Boolean guard. TypedDict alone performs no
 runtime validation.
-
-**Common trap:** A type annotation is not runtime validation, and clever metaclass/mixin/descriptor machinery can obscure ownership, variance, or method-resolution behavior.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
 
 **Verify:** narrow decoded data safely; assert the TypeGuard accepts exactly the required-key/type fixture and rejects missing, extra, wrong-type, and bool-in-an-int-field fixtures; inside the accepted branch mypy must narrow to the TypedDict.
 
@@ -297,11 +197,6 @@ Do not use frozen as a security boundary: contained mutable objects can still
 change. Validate fields in `__post_init__` with `object.__setattr__` only for
 carefully documented normalization.
 
-**Common trap:** A type annotation is not runtime validation, and clever metaclass/mixin/descriptor machinery can obscure ownership, variance, or method-resolution behavior.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
-
 **Verify:** choose frozen, slots, and hash semantics; print equality/hash behavior for mutable, frozen, slotted, and unsafe_hash variants; assert only a value whose equality fields cannot mutate remains a retrievable dictionary key after attempted mutation.
 
 ### Exercise 13: implement cooperative equality
@@ -317,11 +212,6 @@ return `NotImplemented`. If exact type identity is required, check
 
 Test both operand orders, an unrelated object, and subclass behavior. Avoid
 raising merely because comparison is unsupported.
-
-**Common trap:** A type annotation is not runtime validation, and clever metaclass/mixin/descriptor machinery can obscure ownership, variance, or method-resolution behavior.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
 
 **Verify:** implement cooperative equality; assert equal values have equal hashes, unequal values compare false, direct __eq__ with an unrelated type returns NotImplemented, and one reflected-comparison fixture demonstrates why returning False immediately differs.
 
@@ -339,11 +229,6 @@ typed boundary error carrying no raw sensitive payload.
 Exhaustive `assert_never` helps the checker find an unhandled trusted union
 variant, but it cannot replace validation of arbitrary decoded JSON.
 
-**Common trap:** A type annotation is not runtime validation, and clever metaclass/mixin/descriptor machinery can obscure ownership, variance, or method-resolution behavior.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
-
 **Verify:** evolve a typed serialization boundary; parse one old and one new payload into the expected immutable objects; assert the optional field default, round-trip version/kind, and named unknown-version and unknown-kind errors.
 
 ### Exercise 15: trace weak references and caches
@@ -359,11 +244,6 @@ the entry may disappear. A normal dict retains the object.
 
 Never base correctness on immediate garbage collection. Explicit lifecycle or
 bounded LRU/TTL policy is preferable for resources and deterministic eviction.
-
-**Common trap:** A type annotation is not runtime validation, and clever metaclass/mixin/descriptor machinery can obscure ownership, variance, or method-resolution behavior.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
 
 **Verify:** trace weak references and caches; after dropping the only strong reference, assert the normal cache still owns its value while WeakValueDictionary may lose it after collection; test a slotted class with and without weak-reference support.
 
@@ -381,10 +261,5 @@ return to arbitrary Sequence can break callers that append.
 Use checker fixtures representing downstream calls, runtime tests, and a
 documented migration window. Type-checker compatibility and runtime semantics
 must both be preserved.
-
-**Common trap:** A type annotation is not runtime validation, and clever metaclass/mixin/descriptor machinery can obscure ownership, variance, or method-resolution behavior.
-
-**Self-check:** State what the result proves, what assumption it relies on,
-and which input would make the policy reject or choose a different path.
 
 **Verify:** review typing compatibility; save mypy caller fixtures showing the Sequence[str]-to-list[str] parameter narrowing breaks a valid tuple caller and analyze the return change separately; test the compatibility wrapper and its deprecation warning.

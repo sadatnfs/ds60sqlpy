@@ -24,9 +24,11 @@ The checked-in InventoryLab is a real Cargo package using only the standard libr
 
 ## How to run this lesson
 
-The Linux Docker classroom compiles the saved pad as `main.rs` with pinned Rust 1.99.1, edition 2024, and the prepared Arrow 60 library. `assert!` and `assert_eq!` remain active in normal builds. The fixed pad accepts one source file without arbitrary arguments, interactive input, Cargo manifests or package installation. The main function returns `Result<(), Box<dyn std::error::Error>>` so later examples can propagate errors with `?`; the final `Ok(())` means this fixture completed successfully. Standard library and Arrow examples remain offline after image preparation. Multi-file Cargo and external ecosystem projects have separate explicit preparation workflows.
+Beyond the prelude, this lesson's programs use `std::collections`. A passing run prints `rust-032: passed`.
 
-Start with the answer-free learner artifact in your saved classroom pad. It deliberately reports that the task remains unfinished. Replace its stop with your implementation. The worked programs below are independently complete: copy one at a time into a separate exploratory pad if useful. The reference combines both scenarios and their checked boundary observations. Successful checks are silent; the final lesson marker appears only after they complete. A marker is execution evidence for these fixtures, not an automatic assessment of your understanding.
+Pad setup and limits: [Run a lesson](../STUDY-GUIDE.md#run-a-lesson).
+
+Before you run anything, follow [Attempt a lesson](../STUDY-GUIDE.md#attempt-a-lesson).
 
 Use the actual [InventoryLab](../fixtures/InventoryLab/README.md) for a library, executable and integration-test workflow. It requires no third-party crates.
 
@@ -34,7 +36,9 @@ Use the actual [InventoryLab](../fixtures/InventoryLab/README.md) for a library,
 
 A BTreeMap result preserves sorted identity. A report record carries accepted totals and rejected count. Integration tests use the library public API, which catches accidental exposure or missing exports.
 
-Read the operations in dependency order. Record which values exist before each line, which expression produces a new value, and which operation changes shared state. When the compiler rejects source, no later runtime observation exists. When a check fails during execution, preserve the first incorrect value and the smallest input that produced it. These two situations need different repairs.
+**Reading Example A (Create a stable report, code below).** `summarize<'a>` ties the returned map's keys to the input rows: the map stores `&'a str` names borrowed from the caller's slice instead of allocating copies. The loop pattern `for &(name, value) in rows` destructures each borrowed tuple, copying the `&str` and the `i32` out of it. The guard rejects empty names and negative values with `continue`. `*totals.get(name).unwrap_or(&0)` reads an existing total or a borrowed zero, and `checked_add` rejects a sum that would overflow `i32` instead of wrapping. In Example A, `report.0` reads the first element of the returned tuple, the map.
+
+Method for tracing your own variants: [Trace a program](../STUDY-GUIDE.md#trace-a-program).
 
 ## Worked example / walkthrough
 
@@ -124,13 +128,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 6. **Transfer and justify.** Design a second adapter that reuses the same validated library without copying its implementation.
 
-For each task, keep a short evidence table: input or initial state, prediction, observed value or diagnostic, and the rule that explains it. The guided examples establish mechanisms; the independent and transfer tasks require your own representation and explanation. The separate explanation gives an executed reference answer where one has been written and says plainly where none exists yet. Open it only after your own attempt, then close it and reconstruct one boundary case.
+Record each task as in [Keep evidence for each task](../STUDY-GUIDE.md#keep-evidence-for-each-task).
 
 ## Common pitfalls and diagnosis
 
 A multi-file Cargo project is not accepted by the single-file pad. Keep generated target output out of source packaging. A dependency-free project still needs the prepared compiler and standard library.
 
-A useful regression case distinguishes the intended rule from the tempting wrong rule. Check both the original example and the smallest counterexample after a repair. Do not convert an error into a plausible default unless the contract explicitly assigns that meaning. Keep resource cleanup and failure propagation visible whenever the example owns a file, task or other resource.
+To turn a pitfall into a test, see [Design a regression case](../STUDY-GUIDE.md#design-a-regression-case).
 
 ## Progressive hints
 
@@ -138,13 +142,25 @@ A useful regression case distinguishes the intended rule from the tempting wrong
 2. Compare Example B (Retain rejected input evidence) with Example A and name the first line whose behavior differs. Its observation is: Two invalid rows are counted and a valid zero remains present.
 3. Before opening the explanation, test your task 3 attempt against this lesson's main pitfall: A multi-file Cargo project is not accepted by the single-file pad.
 
+Tempting approaches to rule out before you compare:
+
+- **Task 1.** Moving the overflow check into row validation, for example rejecting values near `i32::MAX`, cannot work: `("b", i32::MAX)` is a valid row on its own and only overflows after an earlier `("b", 1)`.
+- **Task 2.** Changing `summarize` to return the rendered `String` breaks every existing caller: `report.0.get("b")` in Example A then fails with E0609, no field `0` on type `String`.
+- **Task 3.** Pasting `src/lib.rs` and `src/main.rs` into the pad fails: the pad compiles one `main.rs`, so `inventory_lab::summarize` names a crate that does not exist there and rustc reports E0433, failed to resolve.
+- **Task 5.** Expecting the overflow row to wrap to `i32::MIN`, or to replace the total with 1, assumes plain addition or a replace policy. `checked_add` refuses the sum, so the map keeps the last valid total.
+- **Task 6.** Copying `summarize` into the new binary to tweak its output creates a second validator that drifts: a later fix to the library's overflow handling would not reach the copy.
+
 ## Self-check and next step
 
-Explain Library crate, Adapter, Integration test without reading the definitions. Reconstruct a small example from a blank file and choose an input not used in this chapter. State one cost or limitation of the technique. Save the working pad and your reasoning before moving to the next lesson; later chapters build on these contracts.
+What does `summarize` return for Example A, and why are its keys ordered? In Example B, why do the empty name and the negative value only raise the rejected count while `b` keeps a valid zero? Which conversion must a second adapter perform before calling `summarize`, so that it reuses the library rather than copying it?
+
+Then work through [Self-check and review](../STUDY-GUIDE.md#self-check-and-review).
 
 ## Sources and execution boundary
 
-[Official language or framework documentation](https://doc.rust-lang.org/book/). The prose, small fixtures and task designs in this chapter are original. Documentation links provide additional API detail, not a dependency fetched by the classroom. Reading a guide, compiling a reference, running its assertions and completing an external project are distinct achievements.
+Read [The Rust Book, 11.3 Test Organization](https://doc.rust-lang.org/book/ch11-03-test-organization.html) for unit tests versus integration tests against a library.
+
+What the classroom does and does not prove: [Sources and execution boundary](../STUDY-GUIDE.md#sources-and-execution-boundary).
 
 ## Ask an AI tutor about this lesson
 

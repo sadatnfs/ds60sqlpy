@@ -4,8 +4,6 @@
 
 A streaming compute service needs bounded ownership and backpressure before it needs more streams. Backpressure means producers stop or reject work when the system cannot safely accept another item. A slot moves through states such as free, filling, computing, copying and consumed. Reuse is allowed only after the final consumer completes. Cancellation stops admission and cleans up according to actual completion state; it does not magically cancel every submitted device instruction. This capstone is a bounded local pipeline, not a new network server inside the classroom worker.
 
-The separate [CPU reference](../references/cuda-044_cpu.py) checks the chapter's bounded model. It does not execute CUDA or establish GPU timing. Compare after attempting the worksheet or explicitly choosing to reveal solutions.
-
 ## Exercise 1
 
 With capacity two, submit chunks A and B. Chunk C waits until a slot becomes free. If A finishes compute but its output is still downloading, A's slot is not yet free. A correct queue can process arbitrary many chunks with constant bounded storage by reusing only completed slots.
@@ -78,12 +76,16 @@ Every input chunk has exactly one matching output, no early slot reuse, bounded 
 
 **How to verify:** Run long and short chunk streams and assert each property.
 
+## Self-check answers
+
+1. **When is a slot free in worked example 1?** Only after its output download and final consumer complete, not when compute ends.
+2. **What does backpressure do?** It makes producers wait or reject work when no slot can safely accept another item.
+3. **What must cancellation do before freeing device buffers?** Stop admission and wait for in-flight work that still uses them to complete.
+
 ## Numerical reference and its limits
 
-The complete CPU model is [here](../references/cuda-044_cpu.py). Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It does not claim CUDA execution, concurrency safety or a performance measurement.
+The [CPU reference](../references/cuda-044_cpu.py) reproduces worked example 1 and prints `{'reference_results': [[2, 4], [6], [], [8, 10]], 'slot_lifecycle': ['free', 'filling', 'computing', 'copying', 'consumed', 'free']}`.
 
 ## Transfer review
 
 Every input chunk has exactly one matching output, no early slot reuse, bounded memory, correct tails, cancellation diagnostics and a baseline comparison.
-
-A complete explanation must name its inputs, the unchanged mathematical contract, the changed boundary or resource condition, and the evidence still needed on actual hardware. Preserve a CPU baseline even after a GPU path becomes available.

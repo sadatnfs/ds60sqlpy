@@ -4,8 +4,6 @@
 
 A stream-ordered allocator treats allocation and free as operations with ordering relationships. It can reuse pooled storage efficiently, but the program must still ensure that every access occurs after allocation and before the relevant free/reuse. Cross-stream consumers require explicit dependencies. Memory returned to a pool can remain reserved for reuse, so reported device memory need not immediately drop to zero. Distinguish live application allocations from reserved pool storage. Pool behavior and support are runtime capabilities, not assumptions justified by a function name in documentation.
 
-The separate [CPU reference](../references/cuda-041_cpu.py) checks the chapter's bounded model. It does not execute CUDA or establish GPU timing. Compare after attempting the worksheet or explicitly choosing to reveal solutions.
-
 ## Exercise 1
 
 Stream A allocates X, writes X and records ready. Stream B waits, reads X and records done. Before A frees X, A waits for done. This closes both the producer-to-consumer edge and the consumer-to-reuse edge. The first event alone is insufficient for lifetime safety.
@@ -78,12 +76,16 @@ Compare a bounded reuse pool with repeated allocation, record live versus reserv
 
 **How to verify:** Record live and reserved bytes and timings for both, with identical outputs.
 
+## Self-check answers
+
+1. **Which two edges make the cross-stream allocation in worked example 1 safe?** Producer to consumer through the ready event, and consumer to free through the done event.
+2. **Why is freeing right after enqueuing work in another stream unsafe?** The free is ordered only in its own stream, so the other stream may still read the buffer.
+3. **What does a stream-ordered free promise?** The memory becomes reusable after prior work in that stream completes, not immediately.
+
 ## Numerical reference and its limits
 
-The complete CPU model is [here](../references/cuda-041_cpu.py). Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It does not claim CUDA execution, concurrency safety or a performance measurement.
+The [CPU reference](../references/cuda-041_cpu.py) reproduces worked example 1 and prints `{'lifetime_order': ['allocate_A', 'write_A', 'ready', 'wait_ready_B', 'read_B', 'done', 'wait_done_A', 'free_A'], 'reserved_MiB': 64, 'live_MiB': 0}`.
 
 ## Transfer review
 
 Compare a bounded reuse pool with repeated allocation, record live versus reserved bytes and retain identical correctness and completion contracts.
-
-A complete explanation must name its inputs, the unchanged mathematical contract, the changed boundary or resource condition, and the evidence still needed on actual hardware. Preserve a CPU baseline even after a GPU path becomes available.

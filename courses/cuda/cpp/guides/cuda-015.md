@@ -4,18 +4,15 @@
 
 Beginner; about 90 minutes, plus any optional hardware experiment. Direct prerequisites: `cuda-005`, `cuda-014`
 
-The order supports learning at your own pace. Reading and CPU reasoning remain
-available when NVIDIA hardware is absent. Advanced hardware features need their
-own capability checks and are not prerequisites for opening this chapter.
+Pacing, evidence labels and platform rules for every chapter are in the [CUDA study guide](../../STUDY-GUIDE.md).
 
 ## Learning objectives
 
 Compute correct results on non-square images while preserving padding and stating the edge policy.
 
-Work through *Two-dimensional indexing and image kernels* with the concrete cases below. Finish with this evidence:
-correct non-square results, preserved padding and explicit edge behavior. Distinguish an algorithmic
-calculation, a compiled artifact and an actual device observation when explaining
-what your work establishes.
+**Scope:** `dim3`, row/column mapping, leading dimensions, rectangular shapes, pitches and boundary policy.
+
+**Evidence to produce:** Correct non-square results, preserved padding and explicit edge behavior.
 
 ## Purpose, vocabulary and mental model
 
@@ -30,24 +27,15 @@ A dim3 value holds three dimensions, though an image often uses only x and y. Ma
 
 ## How to run and study this lesson
 
-Use the saved reading worksheet in `/classroom`; the reading pad does not execute
-CUDA. For the bounded calculation, select **CPU model (Python)**, whose
-answer-free starter supplies the literal fixtures and task contract. The
-[CUDA C++ study workflow](../README.md) covers platforms, optional GPU
-compilation and evidence labels. In a prepared Python environment you can also
-run the separate [CPU reference](../references/cuda-015_cpu.py) from the
-repository root:
+Trace worked example 1 by hand, then run the [CPU reference](../references/cuda-015_cpu.py) from the repository root:
 
 ```sh
 python courses/cuda/cpp/references/cuda-015_cpu.py
 ```
 
-Its assertions check the stated numerical result or model invariant; console
-text is evidence of this CPU model only, not of CUDA execution.
-
 ## CUDA C++ kernel listing
 
-The kernel below is an excerpt from the chapter's complete [GPU reference](../references/cuda-015_gpu.cu). The full program adds device discovery, checked allocation and launch, completion checks and host validation. Read it as CUDA C++ source; the classroom reading pad does not compile or run it.
+An excerpt from the chapter's complete [GPU reference](../references/cuda-015_gpu.cu); the reading pad does not compile it.
 
 ```cpp
 __global__ void brighten(int *image, std::size_t width, std::size_t height,
@@ -65,9 +53,7 @@ __global__ void brighten(int *image, std::size_t width, std::size_t height,
 
 Take a width-3, height-2 image stored as \([1,2,3,99,4,5,6,99]\) with stride four. Add ten to each real pixel. The expected storage is \([11,12,13,99,14,15,16,99]\). Both padding sentinels stay 99. Coordinate (1,2) means row one, column two, stored at index six.
 
-The complete CPU model below intentionally models only the named arithmetic,
-layout, dependency or capability decision. It does not model GPU scheduling,
-caches, instruction timing or device memory visibility.
+**Why:** Stride four skips the padding slot in each row, so indices 3 and 7 are never touched.
 
 ```python
 width, height, stride = 3, 2, 4
@@ -79,58 +65,44 @@ assert image == [11, 12, 13, 99, 14, 15, 16, 99]
 print(image)
 ```
 
-**Expected observation:** Every assertion succeeds. A representative CPU output is:
+**Expected observation:** every assertion succeeds, and the CPU model prints:
 
 ```text
 [11, 12, 13, 99, 14, 15, 16, 99]
 ```
 
-Integers, shapes and ordering must match exactly; only assertions with an explicit
-tolerance accept small floating-point differences. A printed duration is a model
-output, not a measured GPU benchmark.
+**Check:** The reference asserts the image equals [11, 12, 13, 99, 14, 15, 16, 99].
 
 ## Worked example 2: change a meaningful condition
 
 A 4-by-2 thread block covers a 3-by-2 image with two unused x positions, one in each row. If the image becomes 2-by-3, grid height must also grow. Checking only the flattened offset can accidentally accept a logically invalid column that lands in the next row.
 
-Before applying this example to your own program, write down which inputs are
-read, which result is produced, and the condition that makes the comparison
-valid. Keep the original case as a regression check when changing a boundary.
+**Why:** Per-axis checks reject column 3 even though offset 3 lies inside the padded allocation.
+
+**Check:** Swap the image to 2-by-3 and confirm grid height increases and every pixel is covered.
 
 ## Optional CUDA C++ laboratory
 
-A complete [GPU reference](../references/cuda-015_gpu.cu) and separate
-[GPU learner source](../lessons/cuda-015_gpu.cu) accompany this chapter.
-They are standalone files with bounded fixtures, checked runtime calls and host
-validation. The learner source intentionally reports incomplete implementation
-until you add the chapter's algorithm and assertions. It must never return a
-fake GPU success on a CPU machine. Follow the [manual GPU workflow](../README.md)
-for exact compilation and execution paths. If the classroom offers the optional
-CUDA C++ variant, its capability notice must confirm actual runtime readiness.
+- [GPU learner source](../lessons/cuda-015_gpu.cu)
+- [GPU reference](../references/cuda-015_gpu.cu)
 
-The reference contains an explicit no-device failure, launch and completion
-checks, and returned-value validation. Source review and CPU reference checks do
-not qualify this .cu file on your hardware. Preserve compilation, actual device
-execution and sanitizer evidence separately. Exercise 4 is a reasoning diagnosis;
-do not deliberately launch a hanging kernel or reset a shared GPU to reproduce it.
+Read the [laboratory rules](../../STUDY-GUIDE.md#optional-native-cuda-laboratories) before compiling.
 
 ## Six progressive exercises
 
-Exercises 1 and 2 are guided reconstructions of the worked examples; exercises
-3-6 change an input, diagnose a defect, test a boundary and transfer the idea.
-For each one, keep the calculation, output, diagram or failure policy you
-produce so another reader can compare it with the worked cases. If the hint is
-not enough, reread the mechanism paragraph and the bounded CPU assertion.
-
 ### Exercise 1
 
-Predict and trace the first worked example before running its CPU reference. Write every intermediate quantity that leads to the stated result, including units or ownership where applicable.
+Reconstruct worked example 1 on paper before running its CPU reference. For each row and column add ten at row * 4 + col, leaving column 3 alone.
+
+**Trap to avoid:** Looping over all eight storage slots adds ten to the 99 sentinels too.
 
 **Hint:** Start with the literal input and intermediate quantities in worked example 1.
 
 ### Exercise 2
 
-Reconstruct the second worked example without copying its conclusion. Identify the changed input or condition, show the resulting calculation or dependency, and explain why it differs from the first example.
+Rework worked example 2 without copying its conclusion. Predicate x < width and y < height separately before forming any flat offset.
+
+**Trap to avoid:** Checking only offset < stride * height accepts x = 3, which writes the padding slot.
 
 **Hint:** Identify exactly which condition changes in worked example 2.
 
@@ -138,11 +110,15 @@ Reconstruct the second worked example without copying its conclusion. Identify t
 
 Find grid dimensions for width 17, height 9 and blocks 8-by-4.
 
+**Trap to avoid:** Using floor division gives 2 by 2 and misses column 16 and row 8.
+
 **Hint:** Use the first worked example to establish the relevant quantities, then change only the requested input.
 
 ### Exercise 4
 
 Why can flattening before coordinate checks corrupt padding?
+
+**Trap to avoid:** Relying on the allocation size as the bound treats padding as valid pixels.
 
 **Hint:** Locate the failed phase or violated dependency before proposing a repair.
 
@@ -150,35 +126,33 @@ Why can flattening before coordinate checks corrupt padding?
 
 Specify behavior for width zero.
 
+**Trap to avoid:** Launching ceil(0 / 8) = 0 blocks in x yields an invalid configuration error.
+
 **Hint:** Check what the algorithm is allowed to read, write or assume at this boundary.
 
 ### Exercise 6
 
 Adapt the transform to RGB interleaved pixels.
 
+**Trap to avoid:** Treating stride as pixels when it counts elements misplaces every row after the first.
+
 **Hint:** State the output contract and which observations are needed in the new application.
 
 ## Common mistakes and diagnosis
 
-A tempting but incorrect claim in this chapter is: **swapping grid axes only changes performance rather than which elements are touched.**
-
-For the concrete failure exercise, why can flattening before coordinate checks corrupt padding?
-Preserve the original input and the stage where behavior diverged, and compare
-with the CPU model before changing hardware configuration.
+A tempting but incorrect claim: **Swapping grid axes only changes performance rather than which elements are touched.** Axis choice decides which coordinate each thread computes, so swapping x and y on a rectangular image touches different pixels. Worked example 2 shows a 3-by-2 image becoming 2-by-3: unless grid height grows and both coordinates are checked, some rows are skipped or padding is overwritten.
 
 ## Self-check, retrieval and transfer
 
-Explain the first example without its code, then use the second example to state
-one assumption that matters. Complete Exercise 3 independently, use Exercise 4 to
-diagnose a plausible defect, check the boundary in Exercise 5, and retain the
-application contract from Exercise 6. Compare the [separate explanations](../solutions/cuda-015_solutions.md)
-only after your attempt or a deliberate reveal. A reading marker records your
-choice; it does not certify hardware qualification or expert mastery.
+1. For a width-3 image with stride 4, where is pixel (row 1, column 0) stored?
+2. Why must a kernel check row and column separately rather than the flattened offset?
+3. What should happen to padding sentinels after the transform?
+
+Short answers are in the [separate explanations](../solutions/cuda-015_solutions.md#self-check-answers); compare only after an attempt.
 
 ## Primary references
 
-Check the documentation that matches your prepared toolkit before optional
-hardware execution.
+Use the documentation that matches your prepared toolkit.
 
 - [CUDA Programming Guide](https://docs.nvidia.com/cuda/cuda-programming-guide/)
 

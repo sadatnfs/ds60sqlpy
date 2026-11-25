@@ -2,6 +2,8 @@
 
 Open these answers only after attempting Datasets, held-out families and leakage controls yourself. They reuse the guide's literal inputs, starting from Example A, Inspect a literal Dataset, so a discrepancy points at one step. The executable companion runs the assertions; this page explains why each one tests Map-style Dataset, Subset, Split unit. After a pass, choose a new input for exercise 6, Apply the frozen transform, without looking.
 
+After comparing, follow the [review steps](../STUDY-GUIDE.md#after-the-solutions).
+
 ## Mechanism review
 
 A Dataset is an interface for retrieving observations, not a guarantee that the experiment is leakage-free. Related records need a shared split unit, such as account or source document. Subset selects indices from a dataset, but choosing those indices is a statistical-design responsibility. Fit preprocessing only on the training subset and freeze it before transforming validation or holdout records. A validation-only extreme should not change a training mean.
@@ -147,6 +149,3 @@ torch.testing.assert_close(
 
 **Verify:** In a fresh process, the exercise checks confirm `centered` matches `torch.tensor([16.0, 18.0, 26.0, 28.0], dtype=torch.float64)` exactly.
 
-## Review after comparison
-
-Repeat exercise 4, Perturb only assessment values, with one changed fixture value and predict the difference before running it. Keep your failing attempt at exercise 5, Expose row-level leakage, beside the repaired result. A missing framework is not a failing assertion. These solutions use only local fixtures.

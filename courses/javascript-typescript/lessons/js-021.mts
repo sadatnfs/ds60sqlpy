@@ -2,17 +2,15 @@
 
 export {};
 // Exercise 1: Use structural compatibility: change one input
-// Copy Example A into a scratch `main.mts` and change `const wider = { id: 'A', count: 2 };`
-// to `const wider = { id: 'A', count: 3 };`. Before running it, predict which check fails
-// and which value it now sees; then run it and restore the original line.
-// Expected: The changed run fails with an `AssertionError` at `assert.equal(wider.count,
-// 2)`. Restoring `const wider = { id: 'A', count: 2 };` brings back: label A; original count
+// In a scratch copy of Example A, change `const wider = { id: 'A', count: 2 };` to `const
+// wider = { id: 'A', count: 3 };`. Which check fails, and what value does it see?
+// Expected: The edited run fails with an `AssertionError` at `assert.equal(wider.count, 2)`.
+// Restoring `const wider = { id: 'A', count: 2 };` brings back: label A; original count
 // remains 2.
 
 // Exercise 2: Observe mutation through an alias: debug a regression
-// A regression changed one token in Example B, so one line now reads `mutable.count = 5;`.
-// Run Example B with that line, use the failing check to locate the defect and repair it
-// without changing the check.
+// A regression made one Example B line read `mutable.count = 5;`. Locate and repair it
+// without editing the check.
 // Expected: Before the repair the run fails with an `AssertionError` at
 // `assert.equal(view.count, 4)`. Restoring `mutable.count = 4;` brings back: readonly view
 // observes count changing from 1 to 4.

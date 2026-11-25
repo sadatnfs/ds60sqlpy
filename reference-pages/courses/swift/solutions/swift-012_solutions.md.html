@@ -194,7 +194,8 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/swift/solutions/swift-012_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="swift-012-explanation-and-comparison">swift-012: explanation and comparison<a class="heading-anchor" href="#swift-012-explanation-and-comparison" aria-label="Link to this section">#</a></h2>
-<p>Attempt the six guide tasks before opening this comparison. The executable reference is <a href="swift-012_solution.swift.html">swift-012_solution.swift</a>. It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.</p>
+<p>Reference program: <a href="swift-012_solution.swift.html">swift-012_solution.swift</a>, covering both examples and the executed answers.</p>
+<p>Attempt the tasks first; see <a href="../STUDY-GUIDE.md.html#comparing-with-the-explanation">comparing with the explanation</a>.</p>
 <h3 id="why-the-two-examples-differ">Why the two examples differ<a class="heading-anchor" href="#why-the-two-examples-differ" aria-label="Link to this section">#</a></h3>
 <p><strong>Keep copied value state independent:</strong> The struct contains value state and its mutation is explicit. Reserving from the copied inventory does not change the original.</p>
 <p><strong>Reject without partial mutation:</strong> Checking every rejection condition before subtraction preserves failure atomicity. Rejected requests retain the previous valid stock.</p>
@@ -263,7 +264,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p>amount &lt;= stock admits the exact-stock case, and amount &gt;= 0 admits zero, so the only refusal is the request that exceeds the stock.</p>
 <h4 id="task-6-transfer-and-justify">Task 6: Transfer and justify<a class="heading-anchor" href="#task-6-transfer-and-justify" aria-label="Link to this section">#</a></h4>
 <p>Choose a value model for an editable form and explain how cancel can restore an earlier snapshot.</p>
-<p>No single reference answer exists: several designs can satisfy this transfer task. Build yours from the task 3 answer above (Build a bounded counter with private mutation) and the mechanism described below, and state one limitation of your choice.</p>
+<p>No single answer exists; extend task 3 using the <a href="../STUDY-GUIDE.md.html#open-transfer-tasks">open transfer routine</a>.</p>
 <h3 id="solution-reasoning">Solution reasoning<a class="heading-anchor" href="#solution-reasoning" aria-label="Link to this section">#</a></h3>
 <p><strong>Approach.</strong> Example A copies an <code>Inventory</code> struct and reserves 2 units from the copy. Example B asks for 4 units from stock 3 and for -1 units, both of which must be refused. The <code>reserve</code> method checks both conditions in one guard before subtracting. The task 3 answer builds a bounded counter whose mutation is private.</p>
 <p><strong>Why it is correct.</strong> Struct assignment copies <code>stock</code>, so the copy drops to 3 while the original keeps 5. In Example B the guard rejects 4 because it exceeds 3 and rejects -1 because it is negative, returning false before any subtraction, so stock stays 3. Reserving 0 is allowed and leaves stock at 5. In task 3 the third increment is refused at the limit 2.</p>
@@ -275,7 +276,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <p><code>struct Inventory</code> defines a value type. <code>private(set)</code> exposes reading but restricts assignment. A <code>mutating func</code> may update stored state. An initializer can reject invalid input with a throwing or failable contract in later chapters.</p>
 <p>A struct can contain shared class references. Private setters are useful only when methods enforce invariants. The public memberwise initializer in a small fixture is not a substitute for validating external state.</p>
 <h3 id="review-before-continuing">Review before continuing<a class="heading-anchor" href="#review-before-continuing" aria-label="Link to this section">#</a></h3>
-<p>Run the reference and confirm that it prints <code>swift-012: passed</code>, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.</p></article>
+<p>Run the reference and confirm it prints <code>swift-012: passed</code>, then rerun the guide&#x27;s counterexample.</p></article>
   </main>
 </body>
 </html>

@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/cpp/solutions/cpp-011_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="cpp-011-explanations-and-reference-observations">cpp-011: explanations and reference observations<a class="heading-anchor" href="#cpp-011-explanations-and-reference-observations" aria-label="Link to this section">#</a></h2>
-<p>Attempt the learner tasks before opening this document. The executable reference checks the bounded normal and boundary examples; the six explanations below cover the deliberate changes and manual checks.</p>
+<p>The <a href="cpp-011_solution.cpp.html">executable reference</a> writes <code>cpp-011-owned-example.txt</code>, closes it, reopens and reads it back, then removes it, so the round trip leaves nothing behind. The explanations cover relative paths, the working directory and closing a stream before reading it again. How to compare: <a href="../STUDY-GUIDE.md.html#compare-with-the-solutions">study guide</a>.</p>
 <h3 id="mechanism">Mechanism<a class="heading-anchor" href="#mechanism" aria-label="Link to this section">#</a></h3>
 <p>A stream is an interface that moves characters between a program and a source or destination. RAII ties resource cleanup to scope exit. EOF means there is no more input, while a bad I/O state means a device operation failed. The loop must ask whether a read succeeded before using the buffer.</p>
 <h3 id="detailed-reasoning">Detailed reasoning<a class="heading-anchor" href="#detailed-reasoning" aria-label="Link to this section">#</a></h3>

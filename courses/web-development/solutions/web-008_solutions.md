@@ -1,6 +1,6 @@
 # web-008: explanatory solutions
 
-Open this after your own attempt. Each answer explains the lesson's synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in `courses/web-development/guides/web-008.md`.
+Attempt each exercise before reading; the mechanism is in `courses/web-development/guides/web-008.md` ([using these answers](../STUDY-GUIDE.md#solutions)).
 
 ## Exercise 1: Predict the different roles of id and name.
 
@@ -76,4 +76,6 @@ Open this after your own attempt. Each answer explains the lesson's synthetic fi
 
 ## Reference comparison
 
-Open `courses/web-development/solutions/web-008_solution.html` only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; its success message is not an accessibility audit or proof of responsive behavior at every size.
+The reference checks that the input with id topic has exactly one associated label. It catches a broken for and id pair on that one control, but it does not inspect the goal field's missing name, the textarea or the fieldset, so compare which values your form would submit against the expected answer.
+
+Open `courses/web-development/solutions/web-008_solution.html` after saving your attempt ([comparing with the reference](../STUDY-GUIDE.md#references)).

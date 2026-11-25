@@ -1,6 +1,6 @@
 # js-022: explanatory solutions
 
-Use these answers after an attempt or an explicit reveal. The reference uses the same literal fixtures as the guide and keeps the exercises in separate scopes. A successful run checks these examples; explaining a changed input is a separate learning goal.
+Open these after your own attempt; each exercise runs in its own scope in the reference.
 
 ## Mechanism review
 
@@ -24,7 +24,7 @@ Declare type parameters in angle brackets on the function. T names a caller-sele
 
 ## Exercise 1: Preserve identity type and object identity: change one input
 
-Task: Copy Example A into a scratch `main.mts` and change `const value: number = identity(7);` to `const value: number = identity(8);`. Before running it, predict which check fails and which value it now sees; then run it and restore the original line.
+Task: In a scratch copy of Example A, change `const value: number = identity(7);` to `const value: number = identity(8);`. Which check fails, and what value does it see?
 
 The generic relationship preserves static information without copying data. Runtime identity is still a separate observation checked by the assertion.
 
@@ -43,13 +43,13 @@ function negativeTypeCheck(): void {
 void negativeTypeCheck;
 ```
 
-**Expected:** The changed run fails with an `AssertionError` at `assert.equal(value, 7)`. Restoring `const value: number = identity(7);` brings back: number remains 7; object is the same reference.
+**Expected:** The edited run fails with an `AssertionError` at `assert.equal(value, 7)`. Restoring `const value: number = identity(7);` brings back: number remains 7; object is the same reference.
 
-**Verify:** Compare your written prediction with the reported `AssertionError`, including its actual and expected values, and name the value that made `assert.equal(value, 7)` fail. After restoring the line, the program prints its `{"checks":1,"status":"passed"}` receipt again.
+**Verify:** Compare the reported actual and expected values with your prediction, then restore `const value: number = identity(7);`.
 
 ## Exercise 2: Connect a key to its exact result type: debug a regression
 
-Task: A regression changed one token in Example B, so one line now reads `const row = { id: 'A', count: 3 };`. Run Example B with that line, use the failing check to locate the defect and repair it without changing the check.
+Task: A regression made one Example B line read `const row = { id: 'A', count: 3 };`. Locate and repair it without editing the check.
 
 Returning a broad string|number union would lose the connection between the selected key and its payload. T[K] preserves that correlation.
 
@@ -70,7 +70,7 @@ void negativeTypeCheck;
 
 **Expected:** Before the repair the run fails with an `AssertionError` at `assert.equal(count, 2)`. Restoring `const row = { id: 'A', count: 2 };` brings back: id is string A; count is number 2.
 
-**Verify:** Keep the failing and the repaired runs. Explain why the changed token alters the value tested by `assert.equal(count, 2)` for this input.
+**Verify:** Keep the failing and repaired runs and name the first value that differs between them.
 
 ## Exercise 3: Expose absence in a generic first function
 
@@ -91,7 +91,7 @@ void negativeTypeCheck;
 
 **Expected:** 4 and undefined.
 
-**Verify:** Keep a check equivalent to `assert.equal(first([4, 5]), 4)`. As a control, change `assert.equal(first([4, 5]), 4);` to `assert.equal(first([5, 5]), 4);` inside it: the run must fail with an `AssertionError`, which shows the check can fail. Restore it.
+**Verify:** Keep `assert.equal(first([4, 5]), 4)`. Control: editing it to `assert.equal(first([5, 5]), 4);` must make the check fail; then restore it.
 
 ## Exercise 4: Use only the constrained length property
 
@@ -111,7 +111,7 @@ void negativeTypeCheck;
 
 **Expected:** lengths 3 and 2.
 
-**Verify:** Keep a check equivalent to `assert.equal(measuredLength('abc'), 3)`. As a control, change `assert.equal(measuredLength('abc'), 3);` to `assert.equal(measuredLength('abc!'), 3);` inside it: the run must fail with an `AssertionError`, which shows the check can fail. Restore it.
+**Verify:** Keep `assert.equal(measuredLength('abc'), 3)`. Control: editing it to `assert.equal(measuredLength('abc!'), 3);` must make the check fail; then restore it.
 
 ## Exercise 5: Transform while preserving output element type
 
@@ -128,7 +128,7 @@ assert.deepEqual(values, [2, 4]);
 
 **Expected:** string array `['item:2', 'item:4']`; input unchanged.
 
-**Verify:** Keep a check equivalent to `assert.deepEqual(labels, ['item:2', 'item:4'])`. As a control, change `const values = [2, 4];` to `const values = [3, 4];`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
+**Verify:** Keep `assert.deepEqual(labels, ['item:2', 'item:4'])`. Control: changing `const values = [2, 4];` to `const values = [3, 4];` must make that check fail; then restore it.
 
 ## Exercise 6: Avoid pretending a constraint is the exact caller type
 
@@ -148,8 +148,8 @@ assert.equal(measuredLength({ length: 5, id: 'A' }), 5);
 
 **Expected:** expected compile error for returning a fabricated length-only object.
 
-**Verify:** Keep a check equivalent to `assert.equal(measuredLength({ length: 5, id: 'A' }), 5)`. As a control, change `assert.equal(measuredLength({ length: 5, id: 'A' }), 5);` to `assert.equal(measuredLength({ length: 6, id: 'A' }), 5);` inside it: the run must fail with an `AssertionError`, which shows the check can fail. Restore it.
+**Verify:** Keep `assert.equal(measuredLength({ length: 5, id: 'A' }), 5)`. Control: editing it to `assert.equal(measuredLength({ length: 6, id: 'A' }), 5);` must make the check fail; then restore it.
 
 ## After comparison
 
-Return to your saved implementation and repeat a case with different values. Keep compiler diagnostics, process output and browser observations separate. Do not suppress a failing assertion or use a type assertion to declare an unvalidated value safe. Resource-owning examples must finish cleanup even when work fails. Describe each result with its actual host and fixture scope rather than as production acceptance.
+Fresh case: write `pluck<T, K extends keyof T>(items: readonly T[], key: K): T[K][]`. Predict its type for records with `id: string` and `count: number`, and confirm that a misspelled key is a compile error. ([After comparing](../STUDY-GUIDE.md#after-comparing-with-the-solution).)

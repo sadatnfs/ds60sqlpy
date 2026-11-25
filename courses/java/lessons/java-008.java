@@ -3,22 +3,17 @@ public class Main {
 
   public static void main(String[] args) throws Exception {
     // Exercise 1: Normalize at construction: change one input
-    // Copy Example A into a scratch `Main.java` and change `Order order = new Order(" A ",
-    // List.of("x"));` to `Order order = new Order(" A !", List.of("x"));`. Before running it
-    // with `java -ea Main`, predict which assertion fails and which value it now sees; then run
-    // it and restore the original line.
-    // Expected: The changed run fails with an `AssertionError` from the assertion on
-    // `order.id().equals("A") && order.items().equals(List.of("x"))`. Restoring the original
-    // line brings back the worked observation: ID A and items[x].
+    // Change `Order order = new Order(" A ", List.of("x"));` to `Order order = new Order(" A !",
+    // List.of("x"));` in Example A and predict which assertion fails and why.
+    // Expected: The edited run fails with an `AssertionError` from the assertion on
+    // `order.id().equals("A") && order.items().equals(List.of("x"))`.
 
     // Exercise 2: Copy caller-owned collections: debug a regression
-    // A regression changed one token in the code that Example B adds after Example A, so one
-    // line now reads `List<String> supplied = new ArrayList<>(List.of("x!"));`. Run Example B
-    // with that line, use the failing assertion to locate the defect and repair it without
-    // changing the assertion.
-    // Expected: Before the repair the run fails with an `AssertionError` from the assertion on
-    // `copied.items().equals(List.of("x"))`; after it the line reads `List<String> supplied =
-    // new ArrayList<>(List.of("x"));` again and record retains its original single item.
+    // A regression in Example B's new code makes one line read `List<String> supplied = new
+    // ArrayList<>(List.of("x!"));`. Repair it using the failing assertion.
+    // Expected: The unrepaired run fails with an `AssertionError` from the assertion on
+    // `copied.items().equals(List.of("x"))`; the repaired line reads `List<String> supplied =
+    // new ArrayList<>(List.of("x"));`.
 
     // Exercise 3: Use value equality
     // Construct another Order with normalized A and item x.

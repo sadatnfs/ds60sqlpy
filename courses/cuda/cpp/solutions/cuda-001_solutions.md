@@ -4,8 +4,6 @@
 
 A CPU is optimized to make progress on a comparatively small number of complicated instruction streams. A GPU spends more of its resources on throughput across many pieces of work. This is a design distinction, not a rule that the GPU wins. A dependency means that one result must exist before another calculation can start. Pixel brightness updates have independent destinations; a running account balance has a dependency between successive balances. There can still be a parallel prefix algorithm for that balance, but changing the algorithm is real work. Include loading data, launching kernels and returning results when deciding whether acceleration helps a person waiting for an answer.
 
-The separate [CPU reference](../references/cuda-001_cpu.py) checks the chapter's bounded model. It does not execute CUDA or establish GPU timing. Compare after attempting the worksheet or explicitly choosing to reveal solutions.
-
 ## Exercise 1
 
 Suppose an application spends 20 seconds parsing and 80 seconds transforming pixels. An imagined GPU makes the transform ten times faster and adds 4 seconds of transfers. The new time is \(20 + 8 + 4 = 32\) seconds, so the application speedup is 3.125. The tenfold kernel improvement is not the application improvement. Even an infinitely fast transform leaves 24 seconds under these assumptions.
@@ -78,12 +76,18 @@ CUDA does not remove network waiting or dependency ordering. First change the re
 
 **How to verify:** Profile wall time per request on the host and confirm network wait, not local arithmetic, accounts for nearly all of it.
 
+## Self-check answers
+
+1. **If parsing in worked example 1 grew to 40 seconds while the transform stayed 80 seconds, what would cap the speedup?** The serial 40 seconds plus transfers. Even an infinitely fast transform leaves at least 44 seconds, so the speedup is under 120/44, about 2.7.
+2. **Why does batching 1,000 tiny requests change the verdict of worked example 2?** The 30 microseconds of submission and transfer overhead is paid once for the batch instead of per request, so the arithmetic finally dominates.
+3. **Name one workload in your own projects that has a dependency chain.** Any answer where each step needs the previous result, such as a cumulative balance, a recurrence or a sequence of dependent network calls.
+
 ## Numerical reference and its limits
 
-The complete CPU model is [here](../references/cuda-001_cpu.py). Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It also asserts an exercise answer that the guide's model leaves for you to derive: `assert 100 / 40 == 2.5`. It does not claim CUDA execution, concurrency safety or a performance measurement.
+The [CPU reference](../references/cuda-001_cpu.py) reproduces worked example 1 and prints `{'CPU_seconds': 100, 'modeled_GPU_seconds': 32.0, 'speedup': 3.125}`.
+
+It also asserts an exercise answer you derive yourself: `assert 100 / 40 == 2.5`
 
 ## Transfer review
 
 CUDA does not remove network waiting or dependency ordering. First change the request architecture or batch independent work; do not infer a compute bottleneck.
-
-A complete explanation must name its inputs, the unchanged mathematical contract, the changed boundary or resource condition, and the evidence still needed on actual hardware. Preserve a CPU baseline even after a GPU path becomes available.

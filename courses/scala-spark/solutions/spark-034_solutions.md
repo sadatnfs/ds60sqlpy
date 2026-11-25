@@ -1,6 +1,8 @@
 # spark-034: Explained paired reference solutions
 
-Read the [guide](../guides/spark-034.md) and attempt one language first. The [Scala reference](spark-034_solution.scala) and [PySpark reference](spark-034_solution.py) are complete single-file programs with explicit local sessions and finally-based stop. Each compares with literal expectations; matching two implementations alone would not rule out a shared mistake.
+Attempt the [guide](../guides/spark-034.md) exercises first.
+
+References: [Scala](spark-034_solution.scala), [PySpark](spark-034_solution.py).
 
 ## Exercises and reasoning
 
@@ -276,6 +278,7 @@ The negative control distinguishes an event-time retention declaration from an a
 
 ## Execution and interpretation
 
-Run the complete reference in its prepared fixed worker. Its first check (Declare both streaming schemas and watermark policies) is built inside the program, so opening the lesson fetches nothing; it expects: Both relations are streaming; the minimum multiple-watermark policy is explicit and no query runs merely from construction. The final success line prints only after every reference assertion passes.
+The two inputs must be streaming with timestamp event columns, the multiple-watermark policy must read `min`, and no query may run while the plan is built. The planned join must keep `impression_id`, `click_id`, `impression_time` and `click_time`, and an unsupported kind such as `cross` must raise `ValueError`. The first inner and outer runs must each read 7 input rows, and both sinks must then equal `(i1, c1)` and `(i3, c2)`.
 
-Local plan, partition and resource evidence does not establish cluster-scale performance; session cleanup is explicit.
+After the advancers are published, the inner sink stays at two pairs while the outer sink becomes `(i1, c1)`, `(i2, None)` and `(i3, c2)`; the outer run must read 2 rows, report positive state removal and show a watermark of at least 00:25. The unbounded outer join must fail with `AnalysisException`, leaving the valid sinks unchanged and no query running. The program prints `outer_finalization_progress=`, then `spark-034: six PySpark reference contracts passed; Spark=` with the version, or Scala's version of that line. The delayed NULL row reflects watermark progress in this fixture, not a fixed wall-clock delay.
+

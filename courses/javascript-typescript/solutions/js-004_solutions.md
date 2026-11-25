@@ -1,6 +1,6 @@
 # js-004: explanatory solutions
 
-Use these answers after an attempt or an explicit reveal. The reference uses the same literal fixtures as the guide and keeps the exercises in separate scopes. A successful run checks these examples; explaining a changed input is a separate learning goal.
+Open these after your own attempt; each exercise runs in its own scope in the reference.
 
 ## Mechanism review
 
@@ -22,7 +22,7 @@ A function declaration introduces a named callable; an arrow expression creates 
 
 ## Exercise 1: Call a pure function: predict an edited check
 
-Task: Copy Example A into a scratch `main.mjs` and change `assert.equal(add(-1, 1), 0);` to `assert.equal(add(-2, 1), 0);` inside its check. Before running it, predict whether the check still passes and explain why; then restore it.
+Task: In a scratch copy of Example A, change `assert.equal(add(-1, 1), 0);` to `assert.equal(add(-2, 1), 0);` inside its check. Does the check still pass?
 
 The function depends only on its arguments and changes no external state. Boundary examples can be tested independently.
 
@@ -36,13 +36,13 @@ assert.equal(add(2, 3), 5);
 assert.equal(add(-1, 1), 0);
 ```
 
-**Expected:** The changed run fails with an `AssertionError` at `assert.equal(add(-2, 1), 0);`. Restoring `assert.equal(add(-1, 1), 0);` brings back: 5 and 0.
+**Expected:** The edited run fails with an `AssertionError` at `assert.equal(add(-2, 1), 0);`. Restoring `assert.equal(add(-1, 1), 0);` brings back: 5 and 0.
 
-**Verify:** Compare your written prediction with the reported `AssertionError`, including its actual and expected values, and explain why the edited check rejects the values that `assert.equal(add(-1, 1), 0)` accepts. After restoring the line, the program prints its `{"checks":1,"status":"passed"}` receipt again.
+**Verify:** Compare the reported actual and expected values with your prediction, then restore `assert.equal(add(-1, 1), 0);`.
 
 ## Exercise 2: Build independent closures: diagnose an edited check
 
-Task: A careless edit changed a check in Example B so that it reads `assert.equal(second(), 2);`. Run Example B with that line, explain why the edited check now fails for the same program state, and restore it.
+Task: Example B's check was edited to read `assert.equal(second(), 2);`. Run it, explain the failure and restore the original.
 
 Each factory call creates a separate captured binding. Equal initial values do not imply shared counter state.
 
@@ -58,7 +58,7 @@ assert.equal(second(), 1);
 
 **Expected:** Before the repair the run fails with an `AssertionError` at `assert.equal(second(), 2);`. Restoring `assert.equal(second(), 1);` brings back: first 1, 2; second 1.
 
-**Verify:** Keep the failing and the repaired runs. Explain why the edited check rejects the same program state that `assert.equal(second(), 1)` accepts.
+**Verify:** Keep the failing and repaired runs and name the first value that differs between them.
 
 ## Exercise 3: Compare let and var loop capture
 
@@ -83,7 +83,7 @@ assert.deepEqual(
 
 **Expected:** let returns 0, 1, 2; var returns 3, 3, 3.
 
-**Verify:** Keep a check equivalent to `assert.deepEqual(shared.map((fn) => fn()), [3, 3, 3])`. As a control, change `for (var index = 0; index < 3; index += 1) shared.push(() => index);` to `for (var index = 0; index <= 3; index += 1) shared.push(() => index);`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
+**Verify:** Keep `assert.deepEqual(shared.map((fn) => fn()), [3, 3, 3])`. Control: changing `for (var index = 0; index < 3; index += 1) shared.push(() => index);` to `for (var index = 0; index <= 3; index += 1) shared.push(() => index);` must make that check fail; then restore it.
 
 ## Exercise 4: Distinguish undefined from null defaults
 
@@ -102,7 +102,7 @@ assert.equal(label(null), null);
 
 **Expected:** default used for the first two; null preserved.
 
-**Verify:** Keep a check equivalent to `assert.equal(label(), 'guest')`. As a control, change `function label(value = 'guest') {` to `function label(value = 'guest!') {`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
+**Verify:** Keep `assert.equal(label(), 'guest')`. Control: changing `function label(value = 'guest') {` to `function label(value = 'guest!') {` must make that check fail; then restore it.
 
 ## Exercise 5: Observe an ordinary receiver
 
@@ -123,7 +123,7 @@ assert.equal(item.read.call({ value: 9 }), 9);
 
 **Expected:** 4 and 9.
 
-**Verify:** Keep a check equivalent to `assert.equal(item.read.call({ value: 9 }), 9)`. As a control, change `assert.equal(item.read.call({ value: 9 }), 9);` to `assert.equal(item.read.call({ value: 10 }), 9);` inside it: the run must fail with an `AssertionError`, which shows the check can fail. Restore it.
+**Verify:** Keep `assert.equal(item.read.call({ value: 9 }), 9)`. Control: editing it to `assert.equal(item.read.call({ value: 10 }), 9);` must make the check fail; then restore it.
 
 ## Exercise 6: Reject an invalid factory configuration
 
@@ -140,8 +140,8 @@ assert.deepEqual([next(), next()], [2, 4]);
 
 **Expected:** TypeError for 0 and 1.5; step 2 yields 2, 4.
 
-**Verify:** Keep a check equivalent to `assert.deepEqual([next(), next()], [2, 4])`. As a control, change `const next = counter(2);` to `const next = counter(3);`: the run must fail with an `AssertionError` at that check. Restore the line before continuing.
+**Verify:** Keep `assert.deepEqual([next(), next()], [2, 4])`. Control: changing `const next = counter(2);` to `const next = counter(3);` must make that check fail; then restore it.
 
 ## After comparison
 
-Return to your saved implementation and repeat a case with different values. Keep compiler diagnostics, process output and browser observations separate. Do not suppress a failing assertion or use a type assertion to declare an unvalidated value safe. Resource-owning examples must finish cleanup even when work fails. Describe each result with its actual host and fixture scope rather than as production acceptance.
+Fresh case: build `makeLimiter(max)` returning a function that allows only `max` calls. Predict what call `max + 1` does, and show that two limiters with different limits keep independent counts. ([After comparing](../STUDY-GUIDE.md#after-comparing-with-the-solution).)

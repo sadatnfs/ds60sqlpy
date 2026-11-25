@@ -4,8 +4,6 @@
 
 CUDA Core Compute Libraries bring maintained building blocks such as Thrust algorithms, CUB primitives and CUDA-oriented standard-library facilities. Their abstractions do not remove ownership, stream or temporary-storage obligations. Prefer a tested library primitive when it matches semantics, and keep a handwritten version as a learning baseline or for a demonstrated special requirement. Some primitive interfaces separate workspace-size queries from execution; read the pinned interface rather than guessing. Iterator adapters can avoid materializing intermediate arrays, but they must preserve valid lifetimes and access patterns.
 
-The separate [CPU reference](../references/cuda-045_cpu.py) checks the chapter's bounded model. It does not execute CUDA or establish GPU timing. Compare after attempting the worksheet or explicitly choosing to reveal solutions.
-
 ## Exercise 1
 
 Transform \([1,2,3,4]\) by squaring and sum, obtaining 30. A fused transform-reduce can avoid a separate \([1,4,9,16]\) allocation when its interface supports the desired operation. The mathematical result is the same; the memory and scheduling behavior differ.
@@ -78,12 +76,16 @@ A measured unmet contract or fusion opportunity after correctness and library ba
 
 **How to verify:** Show the library result, the unmet requirement and correct custom output.
 
+## Self-check answers
+
+1. **Why can transform-reduce use less memory than transform followed by reduce?** It fuses the steps and avoids storing the intermediate squared array.
+2. **What is the sum of squares of an empty input?** Zero, the identity of addition.
+3. **Why is a library stream argument a correctness choice?** Work on the wrong stream is not ordered with the producers and consumers of its data.
+
 ## Numerical reference and its limits
 
-The complete CPU model is [here](../references/cuda-045_cpu.py). Its assertions check the exact small model shown in the guide, including its explicit tolerance where present. It does not claim CUDA execution, concurrency safety or a performance measurement.
+The [CPU reference](../references/cuda-045_cpu.py) reproduces worked example 1 and prints `{'transform_reduce_reference': 30, 'stable_selection': [5, 5]}`.
 
 ## Transfer review
 
 A measured unmet contract or fusion opportunity after correctness and library baseline comparison, not merely a desire to avoid reading library documentation.
-
-A complete explanation must name its inputs, the unchanged mathematical contract, the changed boundary or resource condition, and the evidence still needed on actual hardware. Preserve a CPU baseline even after a GPU path becomes available.

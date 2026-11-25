@@ -1,6 +1,8 @@
 # c-003: explained solutions
 
-Compare after an attempt or explicit reveal. The complete executable reference, `c-003_solution.c`, implements all six cases, from the "group before calculating" case to the "transfer integer promotion" case, in one `main.c`.
+`c-003_solution.c` assembles the "group before calculating" case through the "transfer integer promotion" case in one `main.c`.
+
+Compare only after an attempt: [Compare and transfer](../STUDY-GUIDE.md#compare-and-transfer).
 
 ## Mechanism and assumptions
 
@@ -10,7 +12,7 @@ An expression can compute a value and sometimes change state. C does not guarant
 
 ## Exercise 1: Group before calculating: predict an edited check
 
-Copy worked example 1 into a scratch pad and change `CHECK((2 + 3) * 4 == 20);` to `CHECK((3 + 3) * 4 == 20);` inside its CHECK. Before running, predict whether the CHECK still holds and explain why; then restore it.
+In worked example 1, change `CHECK((2 + 3) * 4 == 20);` to `CHECK((3 + 3) * 4 == 20);`. Predict whether the CHECK still holds and why, then run and restore.
 
 The unchanged code is worked example 1:
 
@@ -19,13 +21,15 @@ CHECK(2 + 3 * 4 == 14);
 CHECK((2 + 3) * 4 == 20);
 ```
 
-**Expected:** With `CHECK((3 + 3) * 4 == 20);` the run stops with `Check failed` at the CHECK on `(2 + 3) * 4 == 20`, because the "group before calculating" case no longer shows that the values are 14 and 20. Restoring `CHECK((2 + 3) * 4 == 20);` brings that observation back.
+**Expected:** `Check failed`: `CHECK((3 + 3) * 4 == 20);` is false, although the values are 14 and 20.
+
+**Verify:** Explain which claim `CHECK((3 + 3) * 4 == 20);` makes that the state fails; restoring `CHECK((2 + 3) * 4 == 20);` passes again.
 
 Parentheses alter grouping. This example has no side effects, so it does not depend on evaluation order.
 
 ## Exercise 2: Use a short-circuit guard: debug a regression
 
-A regression changed one token in worked example 2, the "use a short-circuit guard" case, so one line now reads `bool found = length >= 0 && values[0] == 7;`. Run the example with that line, use the failing CHECK to find why the access is skipped and the condition is false no longer holds and repair the line without changing the CHECK.
+Worked example 2 now has a line reading `bool found = length >= 0 && values[0] == 7;`. Repair it so that the access is skipped and the condition is false again.
 
 The unchanged code is worked example 2:
 
@@ -36,7 +40,9 @@ bool found = length > 0 && values[0] == 7;
 CHECK(!found);
 ```
 
-**Expected:** Before the repair the run stops with `Check failed` at the CHECK on `!found`. Once the line reads `bool found = length > 0 && values[0] == 7;` again, the "use a short-circuit guard" case again shows that the access is skipped and the condition is false.
+**Expected:** `Check failed` at `!found` until the line reads `bool found = length > 0 && values[0] == 7;` again.
+
+**Verify:** Explain how `bool found = length >= 0 && values[0] == 7;` changes the value `!found` tests, using your failing and repaired runs.
 
 The right operand is evaluated only when the left is true. A guard must precede the operation it protects.
 
@@ -53,6 +59,8 @@ CHECK(x == 2 && result == 4);
 
 **Expected:** x is 2 and the result is 4.
 
+**Verify:** Keep a CHECK equivalent to `x == 2 && result == 4`. Control edit: changing `x += 1;` to `x -= 1;` must fail it; then restore it.
+
 Separate statements avoid unsequenced read/write hazards and make the intended state transition visible.
 
 ## Exercise 4: Expose signed-unsigned conversion
@@ -67,6 +75,8 @@ CHECK(!((unsigned int)negative < positive));
 
 **Expected:** The comparison -1 < 1U is false on this int/unsigned-int pair.
 
+**Verify:** Keep a CHECK equivalent to `!((unsigned int)negative < positive)`. Control edit: `CHECK(((unsigned int)negative < positive));` must fail; then restore it.
+
 The explicit cast displays the same unsigned conversion that the mixed comparison would perform implicitly. The negative value becomes large rather than remaining mathematically negative; the cast also keeps this reference warning-clean.
 
 ## Exercise 5: Choose one conditional branch
@@ -80,6 +90,8 @@ CHECK(value == 7);
 ```
 
 **Expected:** Only the chosen branch is evaluated and result is 7.
+
+**Verify:** Keep a CHECK equivalent to `value == 7`. Control edit: changing `int value = true ? 7 : 10 / zero;` to `int value = true ? 8 : 10 / zero;` must fail it; then restore it.
 
 The unchosen operand of ?: is not evaluated. This safe fixture demonstrates the rule without executing the invalid division.
 
@@ -96,8 +108,10 @@ CHECK(sum == 300 && stored == 44);
 
 **Expected:** The promoted int sum is 300; the stored unsigned char is 44.
 
+**Verify:** Keep a CHECK equivalent to `sum == 300 && stored == 44`. Control edit: changing `int sum = a + b;` to `int sum = a - b;` must fail it; then restore it.
+
 Operands narrower than int, such as unsigned char, are promoted to int before arithmetic, so a + b is the int 300 rather than a value that wraps at 256. Converting the result back to unsigned char reduces it modulo 256, giving 44. The same rule turns a uint16_t product such as 65535 * 65535 into a signed int multiplication that overflows on common 32-bit int targets; widen first with (uint32_t)x * x.
 
 ## After comparison
 
-Add a fresh distinguishing input for the "transfer integer promotion" case to your own c-003 source. Explain why every access in the case code inside `main` stays within a live object and each owned resource is released. An expected precedence failure belongs in the test contract; undefined behavior does not. Keep diagnostics and sanitizer evidence for the "use a short-circuit guard" case apart from ordinary output: the fixture proves its stated precedence, sequencing, integer promotion and usual arithmetic conversions assumptions, not universal safety.
+Predict `-1 < (unsigned char)1` before running it. The `unsigned char` operand is promoted to `int`, so the comparison is signed and true, unlike Exercise 4, where `-1` meets an `unsigned int` and converts to `UINT_MAX`. CHECK both results in one block, then name which rule decided each one: integer promotion or the usual arithmetic conversions. Finally explain why `(unsigned char)(250 + 10)` stores 4 while `250 + 10` is the `int` 260.

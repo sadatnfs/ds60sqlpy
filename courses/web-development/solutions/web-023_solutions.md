@@ -1,6 +1,6 @@
 # web-023: explanatory solutions
 
-Open this after your own attempt. Each answer explains the lesson's synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in `courses/web-development/guides/web-023.md`.
+Attempt each exercise before reading; the mechanism is in `courses/web-development/guides/web-023.md` ([using these answers](../STUDY-GUIDE.md#solutions)).
 
 ## Exercise 1: Identify content that must survive when scripts fail.
 
@@ -76,4 +76,6 @@ Open this after your own attempt. Each answer explains the lesson's synthetic fi
 
 ## Reference comparison
 
-Open `courses/web-development/solutions/web-023_solution.html` only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; its success message is not an accessibility audit or proof of responsive behavior at every size.
+The reference checks that an h1 exists inside the article, so it catches a printable page that has lost its title. It does not open print preview, check that navigation is hidden in print or test the feature query fallback, so inspect several pages of print preview yourself and compare what remains.
+
+Open `courses/web-development/solutions/web-023_solution.html` after saving your attempt ([comparing with the reference](../STUDY-GUIDE.md#references)).

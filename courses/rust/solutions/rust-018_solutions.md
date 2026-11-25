@@ -1,6 +1,8 @@
 # rust-018: explanation and comparison
 
-Attempt the six guide tasks before opening this comparison. The executable reference is [rust-018_solution.rs](rust-018_solution.rs). It runs both worked examples and the reference answers below, and its assertions are always active under the prepared classroom compile settings.
+Executable reference: [rust-018_solution.rs](rust-018_solution.rs), which runs both examples and the coded answers.
+
+Open this only after [an attempt](../STUDY-GUIDE.md#attempt-a-lesson).
 
 ## Why the two examples differ
 
@@ -26,7 +28,7 @@ Identify each inferred type and required bound.
 
 Use larger with a custom ordered value type.
 
-**Reference answer.** The same statements run as the `Task 2` block of the reference program; here they are wrapped in `main` as a complete file. It uses `larger` from the lesson's helpers, defined in the reference program.
+**Reference answer**, wrapped in `main`; the reference runs it as its `Task 2` block. Helpers used: `larger`.
 
 ```rust
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -64,7 +66,7 @@ Deriving `Ord` compares fields in declaration order, so `major` decides first an
 
 Create a generic pair that swaps owned elements.
 
-**Reference answer.** The same statements run as the `Task 3` block of the reference program; here they are wrapped in `main` as a complete file.
+**Reference answer**, wrapped in `main`; the reference runs it as its `Task 3` block.
 
 ```rust
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -111,7 +113,7 @@ Diagnose calling an unavailable method on an unconstrained T.
 
 State tie behavior and test equal values.
 
-**Reference answer.** The same statements run as the `Task 5` block of the reference program; here they are wrapped in `main` as a complete file. It uses `larger` from the lesson's helpers, defined in the reference program.
+**Reference answer**, wrapped in `main`; the reference runs it as its `Task 5` block. Helpers used: `larger`.
 
 ```rust
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -170,7 +172,7 @@ The policy is that ties return `left`, because the body tests `left >= right`. E
 
 Choose a generic parameter or associated type for a producer relationship and explain who selects it.
 
-No single reference answer exists: several designs can satisfy this transfer task. Justify yours against the mechanism described below and the vocabulary entry **Generic parameter**, and state one limitation of your choice.
+**Judging criteria.** Decide who chooses the produced type. If each producer yields exactly one kind of item, as an iterator yields its `Item`, use an associated type: the implementation selects it once, and callers write `P: Producer` without naming it again. If one producer can sensibly yield several types and the caller picks, use a generic parameter such as `Producer<T>`, accepting that a type may then implement the trait many times and that calls may need annotations. A strong answer names the selector in one sentence and shows a call site under each choice. State one limitation: switching forms later breaks every implementation.
 
 ## Mechanism and diagnostic reasoning
 
@@ -184,4 +186,6 @@ Generic code still has ownership and failure contracts. Deriving Ord chooses a f
 
 ## Review before continuing
 
-Run the reference and confirm that it prints `rust-018: passed`, then reconstruct one boundary case from memory and explain which check would reject a plausible wrong implementation. External project steps need their own build and platform evidence; a passing portable reference does not establish them.
+Rebuild Example B (Use an associated iterator item) from a blank pad.
+
+Review routine: [Self-check and review](../STUDY-GUIDE.md#self-check-and-review).

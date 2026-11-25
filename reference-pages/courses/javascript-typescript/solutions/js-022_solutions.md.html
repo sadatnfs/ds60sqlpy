@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/javascript-typescript/solutions/js-022_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="js-022-explanatory-solutions">js-022: explanatory solutions<a class="heading-anchor" href="#js-022-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Use these answers after an attempt or an explicit reveal. The reference uses the same literal fixtures as the guide and keeps the exercises in separate scopes. A successful run checks these examples; explaining a changed input is a separate learning goal.</p>
+<p>Open these after your own attempt; each exercise runs in its own scope in the reference.</p>
 <h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
 <p>Generics express a relationship between types across a reusable operation. An identity function returning any loses information about the relationship between input and output. A generic identity function returns the same type T supplied by its caller. The parameter is not a runtime argument or a request to create a new specialized JavaScript function for every type; it is a compile-time relation checked against one implementation.</p>
 <p>A constraint gives the implementation only the operations known to exist. T extends {length: number} permits reading length, but does not permit replacing the input with an arbitrary object containing length and claiming it is still the caller&#x27;s exact T. The caller may have supplied an array, a string or a richer record with additional invariants.</p>
@@ -206,7 +206,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
 <h3 id="reading-the-implementation">Reading the implementation<a class="heading-anchor" href="#reading-the-implementation" aria-label="Link to this section">#</a></h3>
 <p>Declare type parameters in angle brackets on the function. T names a caller-selected type; extends constrains its allowed structure. K extends keyof T restricts a key to known properties, and T[K] gives the corresponding value type. A generic function returning the first element should expose T | undefined for an empty input even when the project&#x27;s indexed-access checking is less strict. Runtime control flow must implement the same absence policy.</p>
 <h3 id="exercise-1-preserve-identity-type-and-object-identity-change-one-input">Exercise 1: Preserve identity type and object identity: change one input<a class="heading-anchor" href="#exercise-1-preserve-identity-type-and-object-identity-change-one-input" aria-label="Link to this section">#</a></h3>
-<p>Task: Copy Example A into a scratch <code>main.mts</code> and change <code>const value: number = identity(7);</code> to <code>const value: number = identity(8);</code>. Before running it, predict which check fails and which value it now sees; then run it and restore the original line.</p>
+<p>Task: In a scratch copy of Example A, change <code>const value: number = identity(7);</code> to <code>const value: number = identity(8);</code>. Which check fails, and what value does it see?</p>
 <p>The generic relationship preserves static information without copying data. Runtime identity is still a separate observation checked by the assertion.</p>
 <p>The unchanged code is the exercise block of Example A:</p>
 <pre class="highlighted-code"><code class="language-typescript"><span class="syntax-keyword">const</span> value<span class="syntax-operator">:</span> <span class="syntax-keyword">number</span> <span class="syntax-operator">=</span> identity<span class="syntax-punctuation">(</span><span class="syntax-number">7</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
@@ -219,10 +219,10 @@ assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuat
   <span class="syntax-operator">void</span> text<span class="syntax-punctuation">;</span>
 <span class="syntax-punctuation">}</span>
 <span class="syntax-operator">void</span> negativeTypeCheck<span class="syntax-punctuation">;</span></code></pre>
-<p><strong>Expected:</strong> The changed run fails with an <code>AssertionError</code> at <code>assert.equal(value, 7)</code>. Restoring <code>const value: number = identity(7);</code> brings back: number remains 7; object is the same reference.</p>
-<p><strong>Verify:</strong> Compare your written prediction with the reported <code>AssertionError</code>, including its actual and expected values, and name the value that made <code>assert.equal(value, 7)</code> fail. After restoring the line, the program prints its <code>{&quot;checks&quot;:1,&quot;status&quot;:&quot;passed&quot;}</code> receipt again.</p>
+<p><strong>Expected:</strong> The edited run fails with an <code>AssertionError</code> at <code>assert.equal(value, 7)</code>. Restoring <code>const value: number = identity(7);</code> brings back: number remains 7; object is the same reference.</p>
+<p><strong>Verify:</strong> Compare the reported actual and expected values with your prediction, then restore <code>const value: number = identity(7);</code>.</p>
 <h3 id="exercise-2-connect-a-key-to-its-exact-result-type-debug-a-regression">Exercise 2: Connect a key to its exact result type: debug a regression<a class="heading-anchor" href="#exercise-2-connect-a-key-to-its-exact-result-type-debug-a-regression" aria-label="Link to this section">#</a></h3>
-<p>Task: A regression changed one token in Example B, so one line now reads <code>const row = { id: &#x27;A&#x27;, count: 3 };</code>. Run Example B with that line, use the failing check to locate the defect and repair it without changing the check.</p>
+<p>Task: A regression made one Example B line read <code>const row = { id: &#x27;A&#x27;, count: 3 };</code>. Locate and repair it without editing the check.</p>
 <p>Returning a broad string|number union would lose the connection between the selected key and its payload. T[K] preserves that correlation.</p>
 <p>The unchanged code is the exercise block of Example B:</p>
 <pre class="highlighted-code"><code class="language-typescript"><span class="syntax-keyword">const</span> row <span class="syntax-operator">=</span> <span class="syntax-punctuation">{</span> id<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;A&#x27;</span><span class="syntax-punctuation">,</span> count<span class="syntax-operator">:</span> <span class="syntax-keyword">2</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">;</span>
@@ -236,7 +236,7 @@ assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuat
 <span class="syntax-punctuation">}</span>
 <span class="syntax-operator">void</span> negativeTypeCheck<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> Before the repair the run fails with an <code>AssertionError</code> at <code>assert.equal(count, 2)</code>. Restoring <code>const row = { id: &#x27;A&#x27;, count: 2 };</code> brings back: id is string A; count is number 2.</p>
-<p><strong>Verify:</strong> Keep the failing and the repaired runs. Explain why the changed token alters the value tested by <code>assert.equal(count, 2)</code> for this input.</p>
+<p><strong>Verify:</strong> Keep the failing and repaired runs and name the first value that differs between them.</p>
 <h3 id="exercise-3-expose-absence-in-a-generic-first-function">Exercise 3: Expose absence in a generic first function<a class="heading-anchor" href="#exercise-3-expose-absence-in-a-generic-first-function" aria-label="Link to this section">#</a></h3>
 <p>Task: Read the first item from a nonempty and an empty readonly array.</p>
 <p>The signature deliberately includes undefined. Depending on an unchecked array access that happens to compile would misrepresent the empty-input behavior.</p>
@@ -249,7 +249,7 @@ assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuat
 <span class="syntax-punctuation">}</span>
 <span class="syntax-operator">void</span> negativeTypeCheck<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> 4 and undefined.</p>
-<p><strong>Verify:</strong> Keep a check equivalent to <code>assert.equal(first([4, 5]), 4)</code>. As a control, change <code>assert.equal(first([4, 5]), 4);</code> to <code>assert.equal(first([5, 5]), 4);</code> inside it: the run must fail with an <code>AssertionError</code>, which shows the check can fail. Restore it.</p>
+<p><strong>Verify:</strong> Keep <code>assert.equal(first([4, 5]), 4)</code>. Control: editing it to <code>assert.equal(first([5, 5]), 4);</code> must make the check fail; then restore it.</p>
 <h3 id="exercise-4-use-only-the-constrained-length-property">Exercise 4: Use only the constrained length property<a class="heading-anchor" href="#exercise-4-use-only-the-constrained-length-property" aria-label="Link to this section">#</a></h3>
 <p>Task: Apply a length operation to a string and an array; reject a number at compile time.</p>
 <p>A constraint permits one shared capability across otherwise different types. It does not assert that the values have the same domain meaning or interchangeable methods.</p>
@@ -261,7 +261,7 @@ assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuat
 <span class="syntax-punctuation">}</span>
 <span class="syntax-operator">void</span> negativeTypeCheck<span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> lengths 3 and 2.</p>
-<p><strong>Verify:</strong> Keep a check equivalent to <code>assert.equal(measuredLength(&#x27;abc&#x27;), 3)</code>. As a control, change <code>assert.equal(measuredLength(&#x27;abc&#x27;), 3);</code> to <code>assert.equal(measuredLength(&#x27;abc!&#x27;), 3);</code> inside it: the run must fail with an <code>AssertionError</code>, which shows the check can fail. Restore it.</p>
+<p><strong>Verify:</strong> Keep <code>assert.equal(measuredLength(&#x27;abc&#x27;), 3)</code>. Control: editing it to <code>assert.equal(measuredLength(&#x27;abc!&#x27;), 3);</code> must make the check fail; then restore it.</p>
 <h3 id="exercise-5-transform-while-preserving-output-element-type">Exercise 5: Transform while preserving output element type<a class="heading-anchor" href="#exercise-5-transform-while-preserving-output-element-type" aria-label="Link to this section">#</a></h3>
 <p>Task: Map numbers to labels through a generic map function.</p>
 <p>Two type parameters represent the input element and output element. The callback supplies the actual transformation, and the resulting array type follows it.</p>
@@ -270,7 +270,7 @@ assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuat
 assert<span class="syntax-punctuation">.</span>deepEqual<span class="syntax-punctuation">(</span>labels<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-string">&#x27;item:2&#x27;</span><span class="syntax-punctuation">,</span> <span class="syntax-string">&#x27;item:4&#x27;</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span>
 assert<span class="syntax-punctuation">.</span>deepEqual<span class="syntax-punctuation">(</span>values<span class="syntax-punctuation">,</span> <span class="syntax-punctuation">[</span><span class="syntax-number">2</span><span class="syntax-punctuation">,</span> <span class="syntax-number">4</span><span class="syntax-punctuation">]</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> string array <code>[&#x27;item:2&#x27;, &#x27;item:4&#x27;]</code>; input unchanged.</p>
-<p><strong>Verify:</strong> Keep a check equivalent to <code>assert.deepEqual(labels, [&#x27;item:2&#x27;, &#x27;item:4&#x27;])</code>. As a control, change <code>const values = [2, 4];</code> to <code>const values = [3, 4];</code>: the run must fail with an <code>AssertionError</code> at that check. Restore the line before continuing.</p>
+<p><strong>Verify:</strong> Keep <code>assert.deepEqual(labels, [&#x27;item:2&#x27;, &#x27;item:4&#x27;])</code>. Control: changing <code>const values = [2, 4];</code> to <code>const values = [3, 4];</code> must make that check fail; then restore it.</p>
 <h3 id="exercise-6-avoid-pretending-a-constraint-is-the-exact-caller-type">Exercise 6: Avoid pretending a constraint is the exact caller type<a class="heading-anchor" href="#exercise-6-avoid-pretending-a-constraint-is-the-exact-caller-type" aria-label="Link to this section">#</a></h3>
 <p>Task: Show that a replacement object cannot be returned as arbitrary T even if it meets the constraint.</p>
 <p>A constraint is a lower bound on required capabilities, not the full identity of every allowed type. Fabricating a minimal object could discard fields the caller was promised.</p>
@@ -282,9 +282,9 @@ assert<span class="syntax-punctuation">.</span>deepEqual<span class="syntax-punc
 <span class="syntax-operator">void</span> negativeTypeCheck<span class="syntax-punctuation">;</span>
 assert<span class="syntax-punctuation">.</span>equal<span class="syntax-punctuation">(</span>measuredLength<span class="syntax-punctuation">(</span><span class="syntax-punctuation">{</span> length<span class="syntax-operator">:</span> <span class="syntax-keyword">5</span><span class="syntax-punctuation">,</span> id<span class="syntax-operator">:</span> <span class="syntax-string">&#x27;A&#x27;</span> <span class="syntax-punctuation">}</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">,</span> <span class="syntax-number">5</span><span class="syntax-punctuation">)</span><span class="syntax-punctuation">;</span></code></pre>
 <p><strong>Expected:</strong> expected compile error for returning a fabricated length-only object.</p>
-<p><strong>Verify:</strong> Keep a check equivalent to <code>assert.equal(measuredLength({ length: 5, id: &#x27;A&#x27; }), 5)</code>. As a control, change <code>assert.equal(measuredLength({ length: 5, id: &#x27;A&#x27; }), 5);</code> to <code>assert.equal(measuredLength({ length: 6, id: &#x27;A&#x27; }), 5);</code> inside it: the run must fail with an <code>AssertionError</code>, which shows the check can fail. Restore it.</p>
+<p><strong>Verify:</strong> Keep <code>assert.equal(measuredLength({ length: 5, id: &#x27;A&#x27; }), 5)</code>. Control: editing it to <code>assert.equal(measuredLength({ length: 6, id: &#x27;A&#x27; }), 5);</code> must make the check fail; then restore it.</p>
 <h3 id="after-comparison">After comparison<a class="heading-anchor" href="#after-comparison" aria-label="Link to this section">#</a></h3>
-<p>Return to your saved implementation and repeat a case with different values. Keep compiler diagnostics, process output and browser observations separate. Do not suppress a failing assertion or use a type assertion to declare an unvalidated value safe. Resource-owning examples must finish cleanup even when work fails. Describe each result with its actual host and fixture scope rather than as production acceptance.</p></article>
+<p>Fresh case: write <code>pluck&lt;T, K extends keyof T&gt;(items: readonly T[], key: K): T[K][]</code>. Predict its type for records with <code>id: string</code> and <code>count: number</code>, and confirm that a misspelled key is a compile error. (<a href="../STUDY-GUIDE.md.html#after-comparing-with-the-solution">After comparing</a>.)</p></article>
   </main>
 </body>
 </html>

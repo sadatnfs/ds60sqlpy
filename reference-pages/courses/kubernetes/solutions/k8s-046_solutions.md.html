@@ -194,7 +194,7 @@ code.math-source { white-space: pre-wrap; overflow-wrap: anywhere; }
       <p class="source-path">Generated from <code>courses/kubernetes/solutions/k8s-046_solutions.md</code></p>
     </header>
     <article class="document"><h2 id="k8s-046-explanatory-solutions">k8s-046: explanatory solutions<a class="heading-anchor" href="#k8s-046-explanatory-solutions" aria-label="Link to this section">#</a></h2>
-<p>Compare after your own attempt or an explicit reveal. These explanations describe the synthetic topology and stated API contracts. They are not fabricated runtime receipts.</p>
+<p>Attempt each exercise first, then compare (<a href="../STUDY-GUIDE.md.html#solutions-and-the-ai-tutor">study guide</a>).</p>
 <h3 id="mechanism-review">Mechanism review<a class="heading-anchor" href="#mechanism-review" aria-label="Link to this section">#</a></h3>
 <p>The Container Network Interface, or CNI, is a plugin interface used in container networking. In Kubernetes, the chosen network implementation prepares Pod interfaces and connectivity according to cluster configuration. CNI is an interface and ecosystem, not one universal packet-forwarding algorithm.</p>
 <p>Cross-node Pod traffic can use routed networks, encapsulation overlays or other implementation-specific mechanisms. An overlay wraps an inner packet in an outer packet so the underlying network can transport it between nodes. Encapsulation consumes header space, affecting the maximum transmission unit, or MTU, available to the inner traffic.</p>

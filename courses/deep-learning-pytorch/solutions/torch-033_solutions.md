@@ -2,6 +2,8 @@
 
 Open these answers only after attempting Inference mode, model contracts and bounded batching yourself. They reuse the guide's literal inputs, starting from Example A, Predict a valid batch, so a discrepancy points at one step. The executable companion runs the assertions; this page explains why each one tests Inference mode, Input contract, Batch independence. After a pass, choose a new input for exercise 6, Preserve caller data, without looking.
 
+After comparing, follow the [review steps](../STUDY-GUIDE.md#after-the-solutions).
+
 ## Mechanism review
 
 Inference is a bounded function with an input and output contract. A model may accept many tensors that are syntactically legal but semantically wrong: missing batch axes, wrong feature order, unexpected dtype, nonfinite values or an oversized request. Validate these conditions before forward computation. Batching should preserve each record's prediction for a stateless model in the declared evaluation mode.
@@ -156,6 +158,3 @@ assert torch.equal(x, saved)
 
 **Verify:** In a fresh process, the exercise checks confirm `torch.equal(x, saved)`.
 
-## Review after comparison
-
-Repeat exercise 4, Reject shape and dtype ambiguity, with one changed fixture value and predict the difference before running it. Keep your failing attempt at exercise 5, Reject nonfinite values, beside the repaired result. A missing framework is not a failing assertion. These solutions use only local fixtures.

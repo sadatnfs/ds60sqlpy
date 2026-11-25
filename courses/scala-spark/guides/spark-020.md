@@ -1,22 +1,26 @@
 # spark-020: Partitions, repartition, coalesce and output order
 
-Authored paired Scala/PySpark teaching content. The default fixtures are tiny, local and deterministic. Runtime acceptance, logical correctness and learner understanding remain separate evidence.
+Twenty-four generated rows move through `repartition`, `coalesce` and `sortWithinPartitions` while their content stays fixed. The skill is to separate what changed (how rows are split across tasks) from what must not change (which rows exist and what they sum to), and to know that only a final `orderBy` with a full tie-breaker promises a display order.
 
 ## Level and prerequisites
 
-Intermediate; approximately 90 minutes. Direct prerequisites: `spark-019`. The prepared baseline is Spark 4.3.0, Scala binary 2.13, JDK 17 and Python 3.12. Read the [execution baseline](../execution-baseline.md).
+Intermediate; approximately 90 minutes. Direct prerequisites: `spark-019`. Pinned versions: [execution baseline](../execution-baseline.md).
 
 ## How to run this lesson
 
-Open `spark-020` in the classroom and choose the Scala or PySpark implementation you understand. Prepare only its fixed `spark-local-scala` or `spark-local-python` profile, save your pad and run the complete source. Scala stages as `Main.scala` with `object Main`; Python stages as `main.py` with a main guard. Each program creates its own `local[2]` session, disables the UI, binds the driver to loopback and stops the session in finally. No external dataset, package download, JDBC connection or cloud service is requested.
+Shared run steps and profile rules: [study guide](../STUDY-GUIDE.md#run-a-paired-lesson).
 
-The [Scala learner](../lessons/spark-020.scala) and [PySpark learner](../lessons/spark-020.py) run two complete demonstrations and retain six explicit task stubs. Use the [explained solutions](../solutions/spark-020_solutions.md) only after an attempt or an explicit worked comparison; the [Scala reference](../solutions/spark-020_solution.scala) and [PySpark reference](../solutions/spark-020_solution.py) contain complete assertions. A bounded collect is used only for the declared tiny fixture; do not copy it onto an unbounded or large production table.
+Learner pads: [Scala](../lessons/spark-020.scala) and [PySpark](../lessons/spark-020.py).
+
+Open the [explained solutions](../solutions/spark-020_solutions.md) after an attempt.
+
+The first worked example builds the 24 rows with `range` over four partitions, confirms 24 rows, 4 partitions and 4 keys, and prints `24 rows,4 key values,4 initial execution partitions`. The second calls `repartition(6)`, confirms six partitions and still 24 rows, and prints `Repartition changes layout while preserving the row population`.
 
 ## Learning objectives
 
 - Separate logical rows, physical partitions and a presentation order.
-- State the input and output grain, schema, NULL policy and ordering before executing a transformation.
-- Compare each language implementation with independent literal expectations, not only with the other implementation.
+- Check content independently of layout with the metrics `(24, 24, 276, 2760)` for rows, distinct IDs, ID total and value total, and confirm they hold after every redistribution.
+- Explain why `coalesce(2)` reduces four partitions to two but `coalesce(6)` leaves four, and why `sortWithinPartitions` sorts each partition without ordering the whole result.
 
 ## Vocabulary and concepts
 
@@ -48,7 +52,7 @@ Canonical collection is intentionally limited to 24 rows. Production correctness
 
 ## Supplied local fixture
 
-The complete source creates the owned local session described above, then constructs this explicit fixture. The worked examples below run in that same main function; there is no hidden notebook state.
+The data is generated, not typed: IDs 0 to 23 in four initial partitions, `key` equal to the ID modulo 4 and `value` equal to ten times the ID. The fixture asserts that adaptive query execution is off, because AQE could otherwise merge shuffle partitions and make the partition counts in Exercises 2 and 3 differ from run to run.
 
 ```scala
 import org.apache.spark.sql.functions._
@@ -171,11 +175,14 @@ Do not equate partitions with executors, worker threads, business groups or outp
 
 ## Self-check
 
-Explain the contract of `canonical` / `canonical` without reading its solution. Then, from memory, state what Exercise 6 (Create a globally ordered bounded preview) must produce: IDs `[3, 7, 11, 15, 19]`, all with key 3, and values `[30, 70, 110, 150, 190]`. The sixth key 3 row is outside the limit. Say which part of that result is evidence and what it still cannot show. Name the action in your trace that actually runs the plan.
+- After `repartition(6, col("key"))`, each key sits in exactly one partition. Why might two different keys still share a partition, and why is that acceptable?
+- `coalesce(6)` on a four-partition frame still has four partitions. What would you call instead if you really needed six, and what does it cost?
+- The partition ledger may list fewer occupied partitions than the total. Why is an empty partition not an error?
+- Exercise 6 returns IDs 3, 7, 11, 15 and 19. Which two calls make that answer deterministic, and what goes wrong if you use `limit` before `orderBy`?
 
 ## Next step
 
-Use the [course route](../README.md) to continue. Paired-language agreement is useful only when both outputs also satisfy the independent fixture contract. A successful local run is not evidence of cluster performance or production recovery.
+Go on to [spark-021: Read logical and physical plans](spark-021.md). You have watched partitions change from the outside; next you read the plan Spark builds and find where those exchanges and sorts actually appear.
 
 ## Primary sources and official APIs
 

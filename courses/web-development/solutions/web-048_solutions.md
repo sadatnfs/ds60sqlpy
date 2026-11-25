@@ -1,6 +1,6 @@
 # web-048: explanatory solutions
 
-Open this after your own attempt. Each answer explains the lesson's synthetic fixtures; it does not show that your work or a deployment passed. The mechanism is explained in `courses/web-development/guides/web-048.md`.
+Attempt each exercise before reading; the mechanism is in `courses/web-development/guides/web-048.md` ([using these answers](../STUDY-GUIDE.md#solutions)).
 
 ## Exercise 1: Explain which data is in the browser and which is on the server.
 
@@ -76,4 +76,6 @@ Open this after your own attempt. Each answer explains the lesson's synthetic fi
 
 ## Reference comparison
 
-Open `courses/web-development/solutions/web-048_solution.php` only after saving your attempt, and compare decisions rather than identifiers. A different implementation is acceptable when it shows the same behavior and rejects the same invalid cases. The reference checks only its named synthetic cases; server lifecycle, persistence, concurrency and security need their own integration evidence.
+The reference requires activity at 2800 to succeed, 2801 to expire and a backward clock at 999 to be rejected, then states that no HTTP session was created. That catches an off-by-one timeout. It does not set cookies or start a session, so describe the HTTP test that would.
+
+Open `courses/web-development/solutions/web-048_solution.php` after saving your attempt ([comparing with the reference](../STUDY-GUIDE.md#references)).

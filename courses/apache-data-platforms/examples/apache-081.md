@@ -2,25 +2,20 @@
 
 Run the actual bounded PyIceberg/Arrow/DataFusion program in the prepared Python profile. Retain old/new snapshot and materialization identities. A Spark read is a separately prepared connector/export path.
 
-## Receipt fields and independent oracle
+## What this batch receipt must hold
 
-- Source revision/hashes and exact declared input IDs, values, schema and time units.
-- Actual native platform, package/image identities and owned resource namespace.
-- Selected table snapshot/version, source positions or process/lineage identity as appropriate.
-- Positive result against an independent oracle and a typed negative observation.
-- Read-only retained-state comparison after the selected lifecycle transition.
-- Cleanup/evidence-storage result and any separate prepared or unavailable feature.
+- The two Iceberg snapshot IDs, in commit order, from the local SQL catalog.
+- The Arrow schema string that DataFusion registered, including the integer amount type.
+- Original rows 1/2/3 and current rows 1/2/3/4, saved as primitive values.
+- Original totals east 11 and west 9, and current totals east 11 and west 11.
+- A fresh catalog readback and the rejected wrong logical catalog name.
+- An explicit false for direct Spark or Iceberg/DataFusion connector acceptance.
 
-For the common three-order fixture, require IDs 1/2/3 with amounts 4/9/7, total 20,
-east 11 and west 9. A later fourth west order of 2 changes the current total to 22 and west
-to 11 while an earlier pinned snapshot remains unchanged. Do not use this simple
-oracle to claim correctness for a different pipeline without defining its
-deduplication, correction and visibility semantics.
-
-Read the selected project README and qualification ledger before commands. The
-classroom does not execute Docker commands in this Markdown pad. Prepared
-configuration, unit policy fixtures, successful compilation and actual service
-acceptance remain different observations. Never include credentials or signed URLs.
+The receipt is a dossier only when those fields agree with each other. If the
+second snapshot ID equals the first, the correction never committed and the
+west 11 total came from somewhere else. If the pinned scan returns four rows,
+the program read current state instead of the selected snapshot. The
+[shared receipt rules](../STUDY-GUIDE.md#evidence-receipts) cover naming and storage.
 
 ## Concrete source inspection
 
@@ -33,5 +28,8 @@ cat batch_snapshot.py
 cat README.md
 ```
 
-These inspections do not start or qualify a service. Execute only the chosen
-project's complete documented owned route and retain its actual receipt.
+In `batch_snapshot.py`, find `BASE_ROWS` and `EXTRA` first; they are the whole
+input contract. Then find where `expected_old` is written by hand rather than
+computed by the same query. That separation is what makes the regional totals an
+independent check. `run.sh batch batch-1` refuses an existing output directory,
+so a second experiment needs a new name such as `batch-2`.
